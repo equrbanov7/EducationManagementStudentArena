@@ -172,40 +172,45 @@ def test_enrollment_deny_all_without_tenant(two_org_enrollments):
     assert GroupElectiveChoice.objects.count() == 0
 
 
-# ── Gradebook-layer RLS isolation (U3) ───────────────────────────────────────
+# ── Electronic-journal RLS isolation (U3) ────────────────────────────────────
 
 
 @pytest.fixture()
-def two_org_gradebooks(two_org_enrollments):
-    """Add an assessment scheme + component + score to each org's enrollment."""
+def two_org_journals(two_org_enrollments):
+    """Add an assessment scheme + a lesson + a lesson mark to each org."""
+    import datetime
+
     from apps.registrar import gradebook
-    from apps.registrar.models import ComponentScore, CourseOffering, Enrollment
+    from apps.registrar.models import CourseOffering, Enrollment
 
     org_a, org_b = two_org_enrollments
     for org in (org_a, org_b):
         offering = CourseOffering.objects.get(organization=org)
-        scheme = gradebook.ensure_assessment_scheme(offering=offering)
+        gradebook.ensure_assessment_scheme(offering=offering)
+        lesson = gradebook.create_lesson(offering=offering, date=datetime.date(2024, 10, 1))
         enrollment = Enrollment.objects.get(organization=org)
-        component = scheme.components.first()
-        ComponentScore.objects.create(organization=org, enrollment=enrollment, component=component, score=7)
+        gradebook.save_marks(
+            offering=offering,
+            entries=[{"lesson_id": lesson.id, "enrollment_id": enrollment.id, "status": "absent"}],
+        )
     return org_a, org_b
 
 
-def test_gradebook_isolation(two_org_gradebooks):
-    from apps.registrar.models import AssessmentScheme, ComponentScore, GradeComponent
+def test_journal_isolation(two_org_journals):
+    from apps.registrar.models import AssessmentScheme, Lesson, LessonMark
 
-    org_a, _org_b = two_org_gradebooks
+    org_a, _org_b = two_org_journals
     _enable_rls_for_tenant(org_a.pk)
     assert AssessmentScheme.objects.count() == 1
-    assert ComponentScore.objects.count() == 1
-    # Every visible component belongs to tenant A.
-    assert set(GradeComponent.objects.values_list("organization_id", flat=True)) == {org_a.pk}
+    assert Lesson.objects.count() == 1
+    assert LessonMark.objects.count() == 1
+    assert set(LessonMark.objects.values_list("organization_id", flat=True)) == {org_a.pk}
 
 
-def test_gradebook_deny_all_without_tenant(two_org_gradebooks):
-    from apps.registrar.models import AssessmentScheme, ComponentScore, GradeComponent
+def test_journal_deny_all_without_tenant(two_org_journals):
+    from apps.registrar.models import AssessmentScheme, Lesson, LessonMark
 
     _enable_rls_for_tenant("")
     assert AssessmentScheme.objects.count() == 0
-    assert GradeComponent.objects.count() == 0
-    assert ComponentScore.objects.count() == 0
+    assert Lesson.objects.count() == 0
+    assert LessonMark.objects.count() == 0

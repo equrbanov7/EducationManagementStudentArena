@@ -1,17 +1,22 @@
-"""Tests for the electronic journal / gradebook services (U3) + course bridge (W1)."""
+"""Tests for the electronic journal (lesson/attendance) services (U3) + course bridge."""
 
+import datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
 from apps.registrar import gradebook, services
 from apps.registrar.models import (
-    ComponentScore,
+    AttendanceStatus,
     Curriculum,
     CurriculumSubject,
     Enrollment,
+    Lesson,
+    LessonKind,
+    LessonMark,
     Program,
     StudentAcademicRecord,
     Subject,
@@ -22,7 +27,7 @@ from core.rls import bypass_rls
 User = get_user_model()
 
 
-class GradebookTest(TestCase):
+class JournalServiceTest(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user("gb_owner", "gb_owner@qku.edu.az", "pw")
         with bypass_rls():
@@ -55,9 +60,9 @@ class GradebookTest(TestCase):
             self.curriculum = Curriculum.objects.create(
                 organization=self.org, program=self.program, admission_year=2024
             )
-            self.math = Subject.objects.create(organization=self.org, code="MATH101", name="Riyaziyyat")
+            self.subject = Subject.objects.create(organization=self.org, code="CS101", name="Proqramlaşdırma")
             CurriculumSubject.objects.create(
-                organization=self.org, curriculum=self.curriculum, subject=self.math, semester_number=1
+                organization=self.org, curriculum=self.curriculum, subject=self.subject, semester_number=1
             )
             self.teacher = User.objects.create_user("gb_teacher", "gb_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("gb_student", "gb_student@qku.edu.az", "pw")
@@ -70,139 +75,163 @@ class GradebookTest(TestCase):
                 admission_year=2024,
             )
             services.enroll_mandatory_subjects(record=self.record, period=self.period, semester_number=1)
-            self.offering = self.record.student.enrollments.get().offering
-            self.offering.lesson_hours = 60
+            self.offering = self.student.enrollments.get().offering
+            self.offering.lesson_hours = 20  # → allowed absence = 5h (25%)
             self.offering.instructor = self.teacher
             self.offering.save(update_fields=["lesson_hours", "instructor"])
             self.enrollment = self.offering.enrollments.get()
 
-    # ── scheme + letters ────────────────────────────────────────────────────
-    def test_default_scheme_sums_to_100_with_one_exam(self):
+    def _lesson(self, kind=LessonKind.LECTURE, day=1, hours=2):
+        return gradebook.create_lesson(
+            offering=self.offering, date=datetime.date(2024, 10, day), kind=kind, hours=hours, created_by=self.teacher
+        )
+
+    # ── scheme + lesson types ────────────────────────────────────────────────
+    def test_scheme_default_entry_max(self):
         with bypass_rls():
             scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            comps = list(scheme.components.all())
-            self.assertEqual(sum(c.max_score for c in comps), 100)
-            self.assertEqual(sum(1 for c in comps if c.is_final_exam), 1)
-            # Idempotent — re-running does not duplicate.
-            gradebook.ensure_assessment_scheme(offering=self.offering)
-            self.assertEqual(scheme.components.count(), len(comps))
+            self.assertEqual(scheme.entry_score_max, 50)
 
-    def test_score_to_letter_bands(self):
-        self.assertEqual(gradebook.score_to_letter(95)[0], "A")
-        self.assertEqual(gradebook.score_to_letter(85)[0], "B")
-        self.assertEqual(gradebook.score_to_letter(51)[0], "E")
-        self.assertEqual(gradebook.score_to_letter(40)[0], "F")
-
-    # ── computation ──────────────────────────────────────────────────────────
-    def test_pass_and_fail_and_exam_threshold(self):
+    def test_lecture_has_no_score_seminar_has(self):
         with bypass_rls():
-            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            comps = {c.kind: c for c in scheme.components.all()}
-            exam = comps["final_exam"]
-            # Full semester (40/50) + strong exam (40/50) → 80 total, passes.
-            cells = {
-                (self.enrollment.id, comps["seminar"].id): 10,
-                (self.enrollment.id, comps["lab"].id): 10,
-                (self.enrollment.id, comps["independent"].id): 10,
-                (self.enrollment.id, comps["colloquium"].id): 10,
-                (self.enrollment.id, exam.id): 40,
-            }
-            gradebook.save_journal_scores(offering=self.offering, cell_values=cells, by_user=self.teacher)
-            journal = gradebook.get_offering_journal(offering=self.offering)
-            res = journal["rows"][0]["result"]
-            self.assertEqual(res["total"], Decimal("80"))
-            self.assertEqual(res["exam_score"], Decimal("40"))
-            self.assertEqual(res["letter"], "C")
-            self.assertTrue(res["passed"])
+            self.assertFalse(gradebook.lesson_allows_score(self._lesson(kind=LessonKind.LECTURE)))
+            self.assertTrue(gradebook.lesson_allows_score(self._lesson(kind=LessonKind.SEMINAR, day=2)))
+            self.assertTrue(gradebook.lesson_allows_score(self._lesson(kind=LessonKind.LAB, day=3)))
 
-    def test_fails_when_exam_below_min_threshold(self):
+    # ── marks: attendance, score, lecture-score-ignored ──────────────────────
+    def test_save_marks_records_attendance_and_seminar_score(self):
         with bypass_rls():
-            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            comps = {c.kind: c for c in scheme.components.all()}
-            # Great semester (50) but exam 10 (< min 17) → total 60 but fails on exam.
-            cells = {
-                (self.enrollment.id, comps["seminar"].id): 10,
-                (self.enrollment.id, comps["lab"].id): 10,
-                (self.enrollment.id, comps["independent"].id): 10,
-                (self.enrollment.id, comps["colloquium"].id): 20,
-                (self.enrollment.id, comps["final_exam"].id): 10,
-            }
-            gradebook.save_journal_scores(offering=self.offering, cell_values=cells, by_user=self.teacher)
-            res = gradebook.get_offering_journal(offering=self.offering)["rows"][0]["result"]
-            self.assertEqual(res["total"], Decimal("60"))
-            self.assertFalse(res["exam_ok"])
-            self.assertFalse(res["passed"])
-
-    def test_barred_by_absence_blocks_pass(self):
-        with bypass_rls():
-            gradebook.ensure_assessment_scheme(offering=self.offering)
-            # Over 25% of 60h = 15h.
-            self.enrollment.absence_hours = 20
-            self.enrollment.save(update_fields=["absence_hours"])
-            res = gradebook.get_offering_journal(offering=self.offering)["rows"][0]["result"]
-            self.assertTrue(res["barred"])
-            self.assertFalse(res["passed"])
-
-    # ── save: clamp + injection guard + publish lock ─────────────────────────
-    def test_scores_are_clamped_to_component_max(self):
-        with bypass_rls():
-            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            seminar = scheme.components.get(kind="seminar")  # max 10
-            gradebook.save_journal_scores(
-                offering=self.offering, cell_values={(self.enrollment.id, seminar.id): 999}, by_user=self.teacher
+            seminar = self._lesson(kind=LessonKind.SEMINAR, day=2)
+            gradebook.save_marks(
+                offering=self.offering,
+                entries=[
+                    {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 9}
+                ],
+                by_user=self.teacher,
             )
-            score = ComponentScore.objects.get(enrollment=self.enrollment, component=seminar)
-            self.assertEqual(score.score, Decimal("10"))
+            mark = LessonMark.objects.get(lesson=seminar, enrollment=self.enrollment)
+            self.assertEqual(mark.status, AttendanceStatus.PRESENT)
+            self.assertEqual(mark.score, Decimal("9"))
 
-    def test_foreign_component_is_ignored(self):
+    def test_lecture_score_is_ignored(self):
+        with bypass_rls():
+            lecture = self._lesson(kind=LessonKind.LECTURE, day=1)
+            gradebook.save_marks(
+                offering=self.offering,
+                entries=[
+                    {"lesson_id": lecture.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 9}
+                ],
+                by_user=self.teacher,
+            )
+            self.assertIsNone(LessonMark.objects.get(lesson=lecture, enrollment=self.enrollment).score)
+
+    # ── absence → barred + denormalised recompute ────────────────────────────
+    def test_absence_accumulates_and_bars_over_limit(self):
+        with bypass_rls():
+            # allowed = 20h × 25% = 5h; 3 absences × 2h = 6h > 5 → barred.
+            for day in (1, 2, 3):
+                lesson = self._lesson(day=day)
+                gradebook.save_marks(
+                    offering=self.offering,
+                    entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                    by_user=self.teacher,
+                )
+            self.enrollment.refresh_from_db()
+            self.assertEqual(self.enrollment.absence_hours, 6)  # recomputed from marks
+            row = gradebook.get_offering_journal(offering=self.offering)["rows"][0]
+            self.assertEqual(row["absence_hours"], 6)
+            self.assertTrue(row["barred"])
+
+    def test_entry_score_accumulates_and_caps(self):
         with bypass_rls():
             gradebook.ensure_assessment_scheme(offering=self.offering)
-            # A component from a different offering must not be writable here.
+            for day in (2, 3, 4):
+                seminar = self._lesson(kind=LessonKind.SEMINAR, day=day)
+                gradebook.save_marks(
+                    offering=self.offering,
+                    entries=[
+                        {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}
+                    ],
+                    by_user=self.teacher,
+                )
+            row = gradebook.get_offering_journal(offering=self.offering)["rows"][0]
+            self.assertEqual(row["entry_score"], Decimal("30"))  # 3 × 10, under the 50 cap
+
+    # ── injection guard + publish lock + edit window ─────────────────────────
+    def test_foreign_lesson_is_ignored(self):
+        with bypass_rls():
             other_subject = Subject.objects.create(organization=self.org, code="PHYS", name="Fizika")
             other_offering = services.get_or_create_offering(
                 organization=self.org, subject=other_subject, period=self.period, group=self.group
             )
-            other_scheme = gradebook.ensure_assessment_scheme(offering=other_offering)
-            foreign = other_scheme.components.first()
-            written = gradebook.save_journal_scores(
-                offering=self.offering, cell_values={(self.enrollment.id, foreign.id): 5}, by_user=self.teacher
+            foreign = gradebook.create_lesson(offering=other_offering, date=datetime.date(2024, 10, 1))
+            written = gradebook.save_marks(
+                offering=self.offering,
+                entries=[{"lesson_id": foreign.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                by_user=self.teacher,
             )
             self.assertEqual(written, 0)
-            self.assertFalse(ComponentScore.objects.filter(component=foreign).exists())
 
-    def test_published_scheme_blocks_edits(self):
+    def test_published_scheme_blocks_marks(self):
         with bypass_rls():
             scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            seminar = scheme.components.get(kind="seminar")
+            lesson = self._lesson()
             scheme.is_published = True
             scheme.save(update_fields=["is_published"])
-            written = gradebook.save_journal_scores(
-                offering=self.offering, cell_values={(self.enrollment.id, seminar.id): 5}, by_user=self.teacher
+            written = gradebook.save_marks(
+                offering=self.offering,
+                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                by_user=self.teacher,
             )
             self.assertEqual(written, 0)
 
-    def test_absence_hours_saved_via_journal(self):
+    def test_mark_locks_after_edit_window(self):
         with bypass_rls():
-            gradebook.ensure_assessment_scheme(offering=self.offering)
-            gradebook.save_journal_scores(
-                offering=self.offering, cell_values={}, absence_values={self.enrollment.id: 8}, by_user=self.teacher
+            lesson = self._lesson()
+            gradebook.save_marks(
+                offering=self.offering,
+                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present"}],
+                by_user=self.teacher,
             )
-            self.enrollment.refresh_from_db()
-            self.assertEqual(self.enrollment.absence_hours, 8)
+            mark = LessonMark.objects.get(lesson=lesson, enrollment=self.enrollment)
+            # Age the mark past the edit window.
+            LessonMark.objects.filter(pk=mark.pk).update(created_at=timezone.now() - datetime.timedelta(days=2))
+            mark.refresh_from_db()
+            self.assertFalse(gradebook.can_edit_mark(mark))
+            gradebook.save_marks(
+                offering=self.offering,
+                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                by_user=self.teacher,
+            )
+            mark.refresh_from_db()
+            self.assertEqual(mark.status, AttendanceStatus.PRESENT)  # unchanged — locked
+
+    def test_lesson_date_edit_window(self):
+        with bypass_rls():
+            lesson = self._lesson(day=1)
+            self.assertTrue(gradebook.update_lesson_date(lesson=lesson, date=datetime.date(2024, 10, 5)))
+            Lesson.objects.filter(pk=lesson.pk).update(created_at=timezone.now() - datetime.timedelta(minutes=10))
+            lesson.refresh_from_db()
+            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=datetime.date(2024, 10, 9)))
+            lesson.refresh_from_db()
+            self.assertEqual(lesson.date, datetime.date(2024, 10, 5))  # unchanged — window closed
 
     # ── student view ─────────────────────────────────────────────────────────
-    def test_student_grade_summary_shape(self):
+    def test_student_journal_summary_shape(self):
         with bypass_rls():
-            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            seminar = scheme.components.get(kind="seminar")
-            gradebook.save_journal_scores(
-                offering=self.offering, cell_values={(self.enrollment.id, seminar.id): 9}, by_user=self.teacher
+            seminar = self._lesson(kind=LessonKind.SEMINAR, day=2)
+            gradebook.save_marks(
+                offering=self.offering,
+                entries=[
+                    {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 7}
+                ],
+                by_user=self.teacher,
             )
-            data = gradebook.get_student_grade_summary(record=self.record, period=self.period, semester_number=1)
+            data = gradebook.get_student_journal_summary(record=self.record, period=self.period, semester_number=1)
             self.assertEqual(len(data["subjects"]), 1)
-            row = data["subjects"][0]
-            self.assertIsNotNone(row["result"])
-            self.assertEqual(row["result"]["total"], Decimal("9"))
+            journal = data["subjects"][0]["journal"]
+            self.assertEqual(journal["entry_score"], Decimal("7"))
+            self.assertEqual(journal["lessons_held"], 1)
 
 
 class CourseBridgeTest(TestCase):
@@ -246,7 +275,6 @@ class CourseBridgeTest(TestCase):
             self.assertEqual(course.owner_id, self.teacher.id)
             offering.refresh_from_db()
             self.assertEqual(offering.course_id, course.id)
-            # Idempotent.
             self.assertEqual(services.ensure_offering_course(offering=offering).id, course.id)
 
     def test_sync_offering_course_members(self):

@@ -1,6 +1,6 @@
-"""View-level tests for the teacher electronic journal (W3): access + save."""
+"""View-level tests for the teacher electronic journal (U3): access + lesson + marks."""
 
-from decimal import Decimal
+import datetime
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import gradebook, services
-from apps.registrar.models import ComponentScore, Enrollment, Subject
+from apps.registrar.models import AttendanceStatus, Enrollment, Lesson, LessonKind, LessonMark, Subject
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -44,9 +44,13 @@ class JournalViewTest(TestCase):
             cls.teacher = User.objects.create_user("jv_teacher", "jv_teacher@qku.edu.az", "pw")
             cls.other_teacher = User.objects.create_user("jv_other", "jv_other@qku.edu.az", "pw")
             cls.student = User.objects.create_user("jv_student", "jv_student@qku.edu.az", "pw")
-            for user, role in ((cls.teacher, "teacher"), (cls.other_teacher, "teacher")):
+            for user in (cls.teacher, cls.other_teacher):
                 Membership.objects.create(
-                    user=user, organization=cls.org, role=cls.org.roles.get(name=role), is_primary=True, is_active=True
+                    user=user,
+                    organization=cls.org,
+                    role=cls.org.roles.get(name="teacher"),
+                    is_primary=True,
+                    is_active=True,
                 )
             cls.offering = services.get_or_create_offering(
                 organization=cls.org, subject=cls.subject, period=cls.period, group=cls.group
@@ -55,7 +59,6 @@ class JournalViewTest(TestCase):
             cls.offering.lesson_hours = 60
             cls.offering.save(update_fields=["instructor", "lesson_hours"])
             cls.enrollment = Enrollment.objects.create(organization=cls.org, student=cls.student, offering=cls.offering)
-            cls.scheme = gradebook.ensure_assessment_scheme(offering=cls.offering)
 
     def _client(self, user):
         client = Client()
@@ -70,11 +73,10 @@ class JournalViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "CS101")
 
-    def test_journal_detail_renders_roster(self):
+    def test_journal_detail_renders(self):
         resp = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "jv_student")
-        self.assertContains(resp, "Yekun imtahan")
 
     def test_non_instructor_cannot_access(self):
         resp = self._client(self.other_teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
@@ -85,36 +87,44 @@ class JournalViewTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
 
-    def test_post_saves_scores_and_absence(self):
-        seminar = self.scheme.components.get(kind="seminar")
-        exam = self.scheme.components.get(kind="final_exam")
+    def test_add_lesson(self):
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "add_lesson", "lesson_date": "2024-10-01", "lesson_kind": "seminar", "lesson_hours": "2"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            lesson = Lesson.objects.get(offering=self.offering)
+            self.assertEqual(lesson.kind, LessonKind.SEMINAR)
+
+    def test_save_marks_records_attendance_and_score(self):
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+            )
         client = self._client(self.teacher)
         resp = client.post(
             reverse("registrar:journal_detail", args=[self.offering.id]),
             {
-                f"score__{self.enrollment.id}__{seminar.id}": "9",
-                f"score__{self.enrollment.id}__{exam.id}": "45",
-                f"absence__{self.enrollment.id}": "4",
+                f"cell__{lesson.id}__{self.enrollment.id}": "1",
+                f"absent__{lesson.id}__{self.enrollment.id}": "on",
+                f"score__{lesson.id}__{self.enrollment.id}": "",
             },
         )
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():
-            self.assertEqual(
-                ComponentScore.objects.get(enrollment=self.enrollment, component=seminar).score, Decimal("9")
-            )
-            self.assertEqual(
-                ComponentScore.objects.get(enrollment=self.enrollment, component=exam).score, Decimal("45")
-            )
-            self.enrollment.refresh_from_db()
-            self.assertEqual(self.enrollment.absence_hours, 4)
+            mark = LessonMark.objects.get(lesson=lesson, enrollment=self.enrollment)
+            self.assertEqual(mark.status, AttendanceStatus.ABSENT)
 
-    def test_other_teacher_cannot_post_scores(self):
-        seminar = self.scheme.components.get(kind="seminar")
+    def test_other_teacher_cannot_post(self):
+        with bypass_rls():
+            lesson = gradebook.create_lesson(offering=self.offering, date=datetime.date(2024, 10, 1))
         client = self._client(self.other_teacher)
         resp = client.post(
             reverse("registrar:journal_detail", args=[self.offering.id]),
-            {f"score__{self.enrollment.id}__{seminar.id}": "5"},
+            {f"cell__{lesson.id}__{self.enrollment.id}": "1", f"absent__{lesson.id}__{self.enrollment.id}": "on"},
         )
         self.assertEqual(resp.status_code, 404)
         with bypass_rls():
-            self.assertFalse(ComponentScore.objects.filter(enrollment=self.enrollment, component=seminar).exists())
+            self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())

@@ -109,7 +109,7 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
             self.assertEqual(decisions, {"EL-WEB", "EL-AI"})
 
     def test_seeds_journal_data(self):
-        from apps.registrar.models import AssessmentScheme, ComponentScore, CourseOffering
+        from apps.registrar.models import AssessmentScheme, CourseOffering, Enrollment, Lesson, LessonMark
 
         self._seed()
         with bypass_rls():
@@ -121,5 +121,11 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
                 self.assertIsNotNone(offering.instructor_id, f"{offering} missing instructor")
                 self.assertIsNotNone(offering.course_id, f"{offering} missing linked course")
             self.assertEqual(AssessmentScheme.objects.filter(organization=org).count(), offerings.count())
-            # Enrolled (non-completed) students have component scores.
-            self.assertGreater(ComponentScore.objects.filter(organization=org).count(), 0)
+            # Lessons + attendance/score marks were recorded.
+            self.assertGreater(Lesson.objects.filter(organization=org).count(), 0)
+            self.assertGreater(LessonMark.objects.filter(organization=org).count(), 0)
+            # The always-absent AZ student is barred (absence recomputed over the limit).
+            az1 = Enrollment.objects.get(
+                organization=org, offering__subject__code="CS101", student__username="wcu_student_az1"
+            )
+            self.assertGreater(az1.absence_hours, 15)
