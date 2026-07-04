@@ -22,6 +22,28 @@
     color: var(--ems-primary-500);
 }
 
+/* Rəsmi transkript PDF yükləmə düyməsi (U9) */
+.transcript-pdf-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 13px;
+    border-radius: 8px;
+    background: var(--ems-primary-600);
+    color: #fff;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+.transcript-pdf-link:hover {
+    background: var(--ems-primary-700);
+    color: #fff;
+}
+.transcript-pdf-link i {
+    font-size: 0.9rem;
+}
+
 .profile-section--transcript .transcript-empty {
     padding: 2.5rem 1rem;
     text-align: center;

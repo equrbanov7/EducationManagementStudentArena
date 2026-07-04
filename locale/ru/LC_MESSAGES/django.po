@@ -891,9 +891,6 @@ msgstr "Роль"
 msgid "Hamısı"
 msgstr "Все"
 
-msgid "Status"
-msgstr "Статус"
-
 msgid "Yayımlanmış"
 msgstr "Yayımlanmış"
 
@@ -1619,9 +1616,6 @@ msgstr "Bu rola icazəni daha aşağı rollara paylamaq hüququ ver."
 
 msgid "Dəyərləndirilmiş nəticələr ("
 msgstr "Dəyərləndirilmiş nəticələr ("
-
-msgid "Tələbə"
-msgstr "Студент"
 
 msgid "Tapşırıq"
 msgstr "Tapşırıq"
@@ -5604,9 +5598,6 @@ msgstr ""
 
 msgid "İmtahan, müəllif və ya kurs axtar"
 msgstr "Поиск по названию экзамена"
-
-msgid "İmtahan"
-msgstr "Экзамен"
 
 msgid "Başlama"
 msgstr "Başlama"
@@ -27472,6 +27463,118 @@ msgstr "Поиск"
 msgctxt "search"
 msgid "Axtar (⌘K)"
 msgstr "Поиск (⌘K)"
+
+msgctxt "profile.transcript"
+msgid "Rəsmi transkripti PDF olaraq yüklə"
+msgstr "Скачать официальную выписку в PDF"
+
+msgctxt "profile.transcript"
+msgid "PDF yüklə"
+msgstr "Скачать PDF"
+
+msgctxt "registrar.console"
+msgid "Transkript PDF"
+msgstr "Выписка PDF"
+
+msgctxt "registrar.pdf"
+msgid "AKADEMİK TRANSKRİPT"
+msgstr "АКАДЕМИЧЕСКАЯ ВЫПИСКА"
+
+msgctxt "registrar.pdf"
+msgid "Akademik transkript"
+msgstr "Академическая выписка"
+
+msgctxt "registrar.pdf"
+msgid "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır."
+msgstr "Документ сформирован системой и действителен в электронном виде."
+
+msgctxt "registrar.pdf"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "registrar.pdf"
+msgid "İxtisas (proqram)"
+msgstr "Специальность (программа)"
+
+msgctxt "registrar.pdf"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "registrar.pdf"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "registrar.pdf"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "registrar.pdf"
+msgid "Kod"
+msgstr "Код"
+
+msgctxt "registrar.pdf"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "registrar.pdf"
+msgid "Kredit"
+msgstr "Кредит"
+
+msgctxt "registrar.pdf"
+msgid "Giriş"
+msgstr "Текущий"
+
+msgctxt "registrar.pdf"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "registrar.pdf"
+msgid "Yekun"
+msgstr "Итог"
+
+msgctxt "registrar.pdf"
+msgid "Hərf"
+msgstr "Оценка"
+
+msgctxt "registrar.pdf"
+msgid "Nəticə"
+msgstr "Результат"
+
+msgctxt "registrar.pdf"
+msgid "Keçdi"
+msgstr "Сдано"
+
+msgctxt "registrar.pdf"
+msgid "Kəsildi"
+msgstr "Не сдано"
+
+msgctxt "registrar.pdf"
+msgid "Davam edir"
+msgstr "В процессе"
+
+msgctxt "registrar.pdf"
+msgid "GPA %(gpa)s · %(earned)s kredit"
+msgstr "GPA %(gpa)s · %(earned)s кредитов"
+
+msgctxt "registrar.pdf"
+msgid "YEKUN"
+msgstr "ИТОГО"
+
+msgctxt "registrar.pdf"
+msgid "Kumulyativ GPA"
+msgstr "Кумулятивный GPA"
+
+msgctxt "registrar.pdf"
+msgid "Toplanmış kredit"
+msgstr "Набранные кредиты"
+
+msgctxt "registrar.pdf"
+msgid "GPA-a daxil kredit"
+msgstr "Кредиты в GPA"
+
+msgctxt "registrar.pdf"
+msgid "Məzuniyyət yükü (ECTS)"
+msgstr "Выпускная нагрузка (ECTS)"
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"

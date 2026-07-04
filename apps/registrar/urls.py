@@ -2,13 +2,14 @@
 
 from django.urls import path
 
-from . import console_views, views
+from . import console_views, pdf_views, views
 
 app_name = "registrar"
 
 urlpatterns = [
     path("", views.journal_list, name="journal_list"),
     path("tesdiqler/", views.approvals_inbox, name="approvals_inbox"),
+    path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("cedvel/", views.schedule_view, name="schedule"),
     path("cedvel/slot/<uuid:slot_id>/sil/", views.schedule_slot_delete, name="schedule_slot_delete"),
     # Registrar console (K3) — literal prefixes, must precede the uuid catch-all.
@@ -28,5 +29,6 @@ urlpatterns = [
     path("idareetme/telebe/yeni/", console_views.student_record_form_view, name="student_record_create"),
     path("idareetme/telebe/<uuid:pk>/", console_views.student_record_form_view, name="student_record_edit"),
     path("idareetme/telebe/<uuid:pk>/kocur/", console_views.student_transfer_view, name="student_transfer"),
+    path("idareetme/telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]

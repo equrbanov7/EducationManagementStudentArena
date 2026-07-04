@@ -203,7 +203,7 @@ Notion (empty states), Canvas (gradebook keyboard nav).
 
 | Funksiya | Qərar | Səbəb / fayda / risk |
 |---|---|---|
-| **Sertifikat / Transkript PDF** | **QUR (Orta)** | Rəsmi transkript/arayış PDF-i universitet üçün vacibdir. Fayda: rəsmi sənəd. Risk: şablon/imza. |
+| **Sertifikat / Transkript PDF** | ✅ **İCRA OLUNDU (U9 — transkript)** | `apps/registrar/transcript_pdf.py` (PyMuPDF, yeni asılılıq YOX) + `pdf_views.py`. Vendorlanmış DejaVu Sans (`static/fonts/`) AZ hərfləri üçün; font subsetting ilə ~90KB. İki endpoint: tələbə özü (`/jurnal/transkript.pdf`) + registrar konsolu (`.../telebe/<pk>/transkript.pdf`, RBAC). Hər buraxılış audit-ə yazılır. i18n `registrar.pdf` konteksti (msgid toqquşmasından qorunma). Testlər: `test_transcript_pdf.py` (7 test). Qalan: sertifikat/arayış şablonları + rəqəmsal imza (gələcək). |
 | **Qlobal axtarış (⌘K)** | ✅ **İCRA OLUNDU (U8)** | `accounts:global_search` JSON endpoint + command-palette overlay (`static/js/global_search.js`, `_global_search.html`). Rol/tenant-aware qruplar: **Naviqasiya** (hamı), **Jurnallarım** (müəllim), **Fənlər/Tələbələr** (yalnız registrar-səlahiyyətli — məxfilik: adi tələbə tələbələri sadalaya bilməz). ⌘K/Ctrl+K + navbar düyməsi, ox-naviqasiyası, a11y (dialog/listbox/option). Testlər: `test_global_search.py` (7 test). Sadə DB `icontains` axtarışı (indeksləmə sonra optimallaşdırıla bilər). |
 | **Akademik təqvim** | **BİRLƏŞDİR (Orta)** | Cədvəl+period üzərində sessiya/qeydiyyat pəncərəsi. Yeni ağır model yox. |
 | **Analitika/Hesabat paneli** | **QUR (Orta)** | Dekan üçün fakültə/kafedra kəsimləri (keçid %, orta GPA, davamiyyət). |
