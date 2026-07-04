@@ -8,9 +8,20 @@ active request; the helper only reads the requesting student's own record.
 
 from __future__ import annotations
 
-from apps.organizations.models import AcademicPeriod
+from django.apps import apps as django_apps
+
 from apps.registrar import services
 from apps.registrar.models import StudentAcademicRecord
+
+# ``AcademicPeriod`` lives in the organizations module. Registrar already
+# references organizations models only via string FKs (no Python import), which
+# keeps the module-dependency graph acyclic (organizations → registrar via the
+# seed command, but not back). We resolve it through the app registry to keep
+# that property instead of a static ``from apps.organizations`` import.
+
+
+def _academic_period_model():
+    return django_apps.get_model("organizations", "AcademicPeriod")
 
 
 def _empty_section() -> dict:
@@ -58,6 +69,7 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
     section["has_record"] = True
     section["record"] = record
 
+    AcademicPeriod = _academic_period_model()
     period = (
         AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
         or AcademicPeriod.objects.filter(organization=organization).order_by("-start_date").first()
