@@ -242,6 +242,19 @@
         </li>
         {% endif %}
 
+        {% if "my-transcript" in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=my-transcript"
+               data-section="my-transcript"
+               data-title="{% trans 'my_transcript' context 'profile.section' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-transcript' %}active{% endif %}">
+                <i class="fas fa-scroll sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "my_transcript" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        {% endif %}
+
         {% if can_view_student_assignments %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_assigned" context "profile.sidebar" %}</span></li>
         {% endif %}

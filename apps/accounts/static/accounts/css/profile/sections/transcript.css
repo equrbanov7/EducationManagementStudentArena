@@ -1,0 +1,259 @@
+/* Student cabinet — "Transkript" (my-transcript) section (U5).
+   Credit-weighted GPA transcript: cumulative GPA card + per-semester tables.
+   Uses shared --ems-* design tokens (no hard-coded colors). Grade colour chips
+   (.grade-A … .grade-F) are shared with my_subjects.css. */
+
+.profile-section--transcript .transcript-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.profile-section--transcript .transcript-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+}
+
+.profile-section--transcript .transcript-meta-item i {
+    color: var(--ems-primary-500);
+}
+
+.profile-section--transcript .transcript-empty {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+
+.profile-section--transcript .transcript-empty i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--ems-neutral-400);
+}
+
+/* ── Cumulative GPA card ──────────────────────────────────────────────── */
+.transcript-gpa-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 1rem 0 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 16px;
+    background: var(--ems-primary-100);
+}
+
+.transcript-gpa-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 120px;
+}
+
+.transcript-gpa-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ems-primary-700);
+}
+
+.transcript-gpa-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-600);
+    margin-top: 0.35rem;
+}
+
+.transcript-gpa-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-left: auto;
+}
+
+.transcript-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.transcript-stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+}
+
+.transcript-stat-label {
+    font-size: 0.75rem;
+    color: var(--ems-neutral-500);
+    margin-top: 0.2rem;
+}
+
+/* ── Semester block ───────────────────────────────────────────────────── */
+.transcript-semester {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--ems-neutral-0);
+}
+
+.transcript-semester-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.transcript-semester-title {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.transcript-semester-title i {
+    color: var(--ems-primary-500);
+}
+
+.transcript-semester-year {
+    font-weight: 500;
+    color: var(--ems-neutral-500);
+    font-size: 0.85rem;
+}
+
+.transcript-semester-figures {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.transcript-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    font-size: 0.8rem;
+    color: var(--ems-neutral-700);
+}
+
+/* ── Semester table ───────────────────────────────────────────────────── */
+.transcript-table-wrap {
+    overflow-x: auto;
+}
+
+.transcript-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.transcript-table thead th {
+    padding: 0.55rem 0.6rem;
+    text-align: center;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-500);
+    border-bottom: 1px solid var(--ems-neutral-200);
+    white-space: nowrap;
+}
+
+.transcript-table tbody td {
+    padding: 0.55rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.transcript-table .ta-left {
+    text-align: left;
+}
+
+.transcript-subject-code {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+}
+
+.transcript-subject-name {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+}
+
+.transcript-letter {
+    display: inline-block;
+    min-width: 1.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.transcript-row--fail td {
+    background: var(--ems-danger-100);
+}
+
+.transcript-row--pass td {
+    background: transparent;
+}
+
+.transcript-status {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.transcript-status.is-pass {
+    background: var(--ems-success-100);
+    color: var(--ems-success-600);
+}
+
+.transcript-status.is-fail,
+.transcript-status.is-barred {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+.transcript-status.is-progress {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.transcript-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.transcript-note i {
+    color: var(--ems-primary-400);
+}
+
+@media (max-width: 640px) {
+    .transcript-gpa-stats {
+        margin-left: 0;
+        width: 100%;
+        justify-content: space-between;
+    }
+}

@@ -24,6 +24,46 @@ def _academic_period_model():
     return django_apps.get_model("organizations", "AcademicPeriod")
 
 
+def _empty_transcript() -> dict:
+    from decimal import Decimal
+
+    return {
+        "has_record": False,
+        "record": None,
+        "semesters": [],
+        "cumulative_gpa": Decimal("0.00"),
+        "total_credits_earned": 0,
+        "total_credits_gpa": 0,
+        "quality_points": Decimal("0.00"),
+        "ects_total": 0,
+    }
+
+
+def build_student_transcript_context(request, *, organization) -> dict:
+    """Context for the student "Transkript" cabinet section (U5).
+
+    Aggregates the requesting student's enrollments across all semesters into a
+    credit-weighted GPA transcript (see :func:`transcript.build_student_transcript`).
+    Degrades to a friendly empty state when the student has no academic record or
+    no enrollments yet. Tenant/RLS scoping is inherited from the active request.
+    """
+    if organization is None or not getattr(request.user, "is_authenticated", False):
+        return {"student_transcript_section": _empty_transcript()}
+
+    record = (
+        StudentAcademicRecord.objects.filter(organization=organization, student=request.user)
+        .select_related("program")
+        .first()
+    )
+    program = record.program if record else None
+
+    from apps.registrar import transcript as transcript_service
+
+    data = transcript_service.build_student_transcript(student=request.user, organization=organization, program=program)
+    data["record"] = record
+    return {"student_transcript_section": data}
+
+
 def _empty_section() -> dict:
     return {
         "has_record": False,

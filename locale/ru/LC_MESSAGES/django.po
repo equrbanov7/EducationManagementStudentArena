@@ -26722,6 +26722,94 @@ msgstr ""
 msgid "Try [blue]'{command_path} {help_option}'[/] for help."
 msgstr ""
 
+msgctxt "profile.transcript"
+msgid "Transkript"
+msgstr "Транскрипт"
+
+msgctxt "profile.transcript"
+msgid "Hələ transkript üçün yekunlaşmış fənn qeydiyyatı yoxdur."
+msgstr "Пока нет завершённых записей по предметам для транскрипта."
+
+msgctxt "profile.transcript"
+msgid "Kumulyativ GPA"
+msgstr "Кумулятивный GPA"
+
+msgctxt "profile.transcript"
+msgid "Toplanmış kredit"
+msgstr "Набранные кредиты"
+
+msgctxt "profile.transcript"
+msgid "Məzuniyyət yükü (ECTS)"
+msgstr "Нагрузка для выпуска (ECTS)"
+
+msgctxt "profile.transcript"
+msgid "GPA-a daxil kredit"
+msgstr "Кредиты в GPA"
+
+msgctxt "profile.transcript"
+msgid "kredit"
+msgstr "кредитов"
+
+msgctxt "profile.transcript"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "profile.transcript"
+msgid "Kredit"
+msgstr "Кредит"
+
+msgctxt "profile.transcript"
+msgid "Giriş"
+msgstr "Вход"
+
+msgctxt "profile.transcript"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "profile.transcript"
+msgid "Yekun"
+msgstr "Итог"
+
+msgctxt "profile.transcript"
+msgid "Hərf"
+msgstr "Буква"
+
+msgctxt "profile.transcript"
+msgid "Nəticə"
+msgstr "Результат"
+
+msgctxt "profile.transcript"
+msgid "Kəsilir"
+msgstr "Не допущен"
+
+msgctxt "profile.transcript"
+msgid "Keçdi"
+msgstr "Сдал"
+
+msgctxt "profile.transcript"
+msgid "Kəsildi"
+msgstr "Не сдал"
+
+msgctxt "profile.transcript"
+msgid "Davam edir"
+msgstr "В процессе"
+
+msgctxt "profile.transcript"
+msgid ""
+"GPA kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ "
+"qiymətlənməyən fənlər sonra əlavə olunur."
+msgstr ""
+"GPA рассчитывается с учётом кредитов: сданные и несданные предметы "
+"учитываются; ещё не оценённые добавляются позже."
+
+msgctxt "profile.section"
+msgid "my_transcript"
+msgstr "Транскрипт"
+
+msgctxt "profile.sidebar"
+msgid "my_transcript"
+msgstr "Транскрипт"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

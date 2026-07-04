@@ -1,0 +1,119 @@
+{% load i18n %}
+{% with sec=student_transcript_section %}
+<section class="profile-section-panel profile-section--transcript {% if active_section == 'my-transcript' %}is-active{% endif %}"
+         data-profile-section-panel="my-transcript"
+         data-source-url="{{ profile_base_url }}?section=my-transcript">
+    <div class="section-card">
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-scroll text-teal"></i>
+                    <span>{% trans "Transkript" context "profile.transcript" %}</span>
+                </div>
+            </div>
+            {% if sec.record %}
+            <div class="transcript-meta">
+                <span class="transcript-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.name }}</span>
+                {% if sec.record.group %}<span class="transcript-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if not sec.has_record %}
+        <div class="transcript-empty">
+            <i class="fas fa-folder-open"></i>
+            <p>{% trans "Hələ transkript üçün yekunlaşmış fənn qeydiyyatı yoxdur." context "profile.transcript" %}</p>
+        </div>
+        {% else %}
+
+        <div class="transcript-gpa-card">
+            <div class="transcript-gpa-main">
+                <span class="transcript-gpa-value">{{ sec.cumulative_gpa|floatformat:2 }}</span>
+                <span class="transcript-gpa-label">{% trans "Kumulyativ GPA" context "profile.transcript" %}</span>
+            </div>
+            <div class="transcript-gpa-stats">
+                <div class="transcript-stat">
+                    <span class="transcript-stat-value">{{ sec.total_credits_earned }}</span>
+                    <span class="transcript-stat-label">{% trans "Toplanmış kredit" context "profile.transcript" %}</span>
+                </div>
+                {% if sec.ects_total %}
+                <div class="transcript-stat">
+                    <span class="transcript-stat-value">{{ sec.ects_total }}</span>
+                    <span class="transcript-stat-label">{% trans "Məzuniyyət yükü (ECTS)" context "profile.transcript" %}</span>
+                </div>
+                {% endif %}
+                <div class="transcript-stat">
+                    <span class="transcript-stat-value">{{ sec.total_credits_gpa }}</span>
+                    <span class="transcript-stat-label">{% trans "GPA-a daxil kredit" context "profile.transcript" %}</span>
+                </div>
+            </div>
+        </div>
+
+        {% for sem in sec.semesters %}
+        <div class="transcript-semester">
+            <div class="transcript-semester-head">
+                <h5 class="transcript-semester-title">
+                    <i class="fas fa-calendar-alt"></i> {{ sem.period.name }} <span class="transcript-semester-year">{{ sem.period.academic_year }}</span>
+                </h5>
+                <div class="transcript-semester-figures">
+                    <span class="transcript-chip"><strong>GPA</strong> {{ sem.gpa|floatformat:2 }}</span>
+                    <span class="transcript-chip">{{ sem.credits_earned }} / {{ sem.credits_gpa }} {% trans "kredit" context "profile.transcript" %}</span>
+                </div>
+            </div>
+            <div class="transcript-table-wrap">
+                <table class="transcript-table">
+                    <thead>
+                        <tr>
+                            <th class="ta-left">{% trans "Fənn" context "profile.transcript" %}</th>
+                            <th>{% trans "Kredit" context "profile.transcript" %}</th>
+                            <th>{% trans "Giriş" context "profile.transcript" %}</th>
+                            <th>{% trans "İmtahan" context "profile.transcript" %}</th>
+                            <th>{% trans "Yekun" context "profile.transcript" %}</th>
+                            <th>{% trans "Hərf" context "profile.transcript" %}</th>
+                            <th>{% trans "Nəticə" context "profile.transcript" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in sem.rows %}
+                        <tr class="{% if row.result.failed %}transcript-row--fail{% elif row.result.passed %}transcript-row--pass{% endif %}">
+                            <td class="ta-left">
+                                <span class="transcript-subject-code">{{ row.subject.code }}</span>
+                                <span class="transcript-subject-name">{{ row.subject.name }}</span>
+                            </td>
+                            <td>{{ row.credit }}</td>
+                            <td>{{ row.result.entry_score|floatformat:'-2' }}</td>
+                            <td>{% if row.result.graded %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                            <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}</td>
+                            <td>
+                                {% if row.in_gpa %}
+                                <span class="grade-{{ row.result.letter }} transcript-letter">{{ row.result.letter }}</span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>
+                                {% if row.result.barred %}
+                                <span class="transcript-status is-barred">{% trans "Kəsilir" context "profile.transcript" %}</span>
+                                {% elif row.result.passed %}
+                                <span class="transcript-status is-pass">{% trans "Keçdi" context "profile.transcript" %}</span>
+                                {% elif row.result.failed %}
+                                <span class="transcript-status is-fail">{% trans "Kəsildi" context "profile.transcript" %}</span>
+                                {% else %}
+                                <span class="transcript-status is-progress">{% trans "Davam edir" context "profile.transcript" %}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+
+        <p class="transcript-note">
+            <i class="fas fa-info-circle"></i>
+            {% trans "GPA kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ qiymətlənməyən fənlər sonra əlavə olunur." context "profile.transcript" %}
+        </p>
+
+        {% endif %}
+    </div>
+</section>
+{% endwith %}
