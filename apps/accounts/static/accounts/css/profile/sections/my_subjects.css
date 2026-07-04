@@ -356,3 +356,5 @@
     color: var(--ems-neutral-500);
 }
 .grade-comp strong { color: var(--ems-neutral-800); }
+
+.subject-grade-label { font-size: 0.72rem; color: var(--ems-neutral-500); }

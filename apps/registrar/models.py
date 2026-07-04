@@ -12,8 +12,6 @@ layer is additive — it does not touch the existing exam/LMS core.
 
 from __future__ import annotations
 
-from decimal import Decimal
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import pgettext_lazy
@@ -350,43 +348,43 @@ class GroupElectiveChoice(UUIDModel, TimeStampedModel):
         return f"{self.group_id} · {self.elective_group} → {self.chosen_subject.code}"
 
 
-# ── Elektron jurnal / qiymətləndirmə (U3) ────────────────────────────────────
+# ── Elektron jurnal (davamiyyət/qiymət jurnalı, U3 — UNEC modeli) ─────────────
 #
-# AZ Boloniya modeli: semestr fəaliyyəti (max 50) + yekun imtahan (max 50) = 100.
-# Semestr komponentləri fənnə görə fərqlənir (seminar / laboratoriya / sərbəst
-# iş / kollokvium) — ona görə hər ``CourseOffering`` üçün tenant-konfiqurasiya
-# olunan ``AssessmentScheme`` + komponent sətirləri saxlanır. Müəllim hər tələbə
-# üçün komponent balı daxil edir; yekun bal, hərf və keçid servis qatında
-# hesablanır (``apps/registrar/gradebook.py``). Qayıb saatı ayrıca
-# ``Enrollment.absence_hours``-da (imtahana buraxılma qaydası).
+# Elektron jurnal komponent-cəm DEYİL: müəllim hər dərs günü tələbələrin
+# iştirak/qayıbını (iə/qb), seminar/lab dərslərində isə balını yazır. Sistem
+# keçirilən dərsləri, qayıb saatını və "giriş balı"nı (seminar/lab ballarının
+# cəmi) AVTOMATİK hesablayır. Mühazirədə yalnız iə/qb; seminarda bal da yazılır.
+# Yekun imtahan burada YOXDUR — bu jurnal yalnız semestr fəaliyyətidir.
+# Kilid qaydaları servis qatında (``apps/registrar/gradebook.py``): dərs tarixi
+# yaranışdan sonra qısa müddət, iştirak/bal isə 1 gün sonra dəyişilə bilməz.
 
 
-class ComponentKind(models.TextChoices):
-    SEMINAR = "seminar", pgettext_lazy("registrar.component_kind", "Seminar")
-    LAB = "lab", pgettext_lazy("registrar.component_kind", "Laboratory")
-    INDEPENDENT = "independent", pgettext_lazy("registrar.component_kind", "Independent work")
-    COLLOQUIUM = "colloquium", pgettext_lazy("registrar.component_kind", "Colloquium")
-    ATTENDANCE = "attendance", pgettext_lazy("registrar.component_kind", "Attendance")
-    FINAL_EXAM = "final_exam", pgettext_lazy("registrar.component_kind", "Final exam")
-    OTHER = "other", pgettext_lazy("registrar.component_kind", "Other")
+class LessonKind(models.TextChoices):
+    LECTURE = "lecture", pgettext_lazy("registrar.lesson_kind", "Lecture")  # yalnız iə/qb
+    SEMINAR = "seminar", pgettext_lazy("registrar.lesson_kind", "Seminar")  # iə/qb + bal
+    LAB = "lab", pgettext_lazy("registrar.lesson_kind", "Laboratory")  # iə/qb + bal
+
+
+class AttendanceStatus(models.TextChoices):
+    PRESENT = "present", pgettext_lazy("registrar.attendance", "Present")  # iştirak (iə)
+    ABSENT = "absent", pgettext_lazy("registrar.attendance", "Absent")  # qayıb (qb)
 
 
 class AssessmentScheme(UUIDModel, TimeStampedModel):
-    """Per-offering assessment rule set (Bologna, tenant/offering-configurable).
+    """Per-offering journal config (tenant/offering-configurable).
 
-    The sum of the scheme's ``GradeComponent.max_score`` is normally 100
-    (≈50 semester activity + 50 final exam). ``is_published`` locks the journal
-    so grades can no longer be edited (finalisation)."""
+    The electronic journal accumulates the semester "entry score" (giriş balı,
+    max ``entry_score_max`` ≈ 50) from seminar/lab lesson scores; the final exam
+    is entered elsewhere. ``is_published`` finalises/locks the journal."""
 
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="assessment_schemes"
     )
     offering = models.OneToOneField(CourseOffering, on_delete=models.CASCADE, related_name="assessment_scheme")
-    pass_threshold = models.PositiveSmallIntegerField(default=51, help_text="Keçid üçün minimum ümumi bal (adətən 51).")
-    min_final_exam_score = models.PositiveSmallIntegerField(
-        default=17, help_text="Yekun imtahandan keçid üçün minimum bal (kəsilmə qaydası)."
+    entry_score_max = models.PositiveSmallIntegerField(
+        default=50, help_text="Semestr 'giriş balı' tavanı (Boloniya ≈50; qalan 50 yekun imtahan)."
     )
-    is_published = models.BooleanField(default=False, help_text="Yekunlaşdırılıb — bal redaktəsi bağlıdır.")
+    is_published = models.BooleanField(default=False, help_text="Yekunlaşdırılıb — jurnal redaktəsi bağlıdır.")
 
     objects = models.Manager()
 
@@ -398,41 +396,51 @@ class AssessmentScheme(UUIDModel, TimeStampedModel):
         return f"scheme<{self.offering_id}>"
 
 
-class GradeComponent(UUIDModel, TimeStampedModel, OrderedModel):
-    """One weighted column of a scheme (seminar / lab / independent / exam …)."""
+class Lesson(UUIDModel, TimeStampedModel):
+    """One held session (dərs) on a date — a journal column.
 
-    organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="grade_components"
-    )
-    scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE, related_name="components")
-    name = models.CharField(max_length=100, help_text="Komponentin adı (məs. Seminar, Sərbəst iş).")
-    kind = models.CharField(max_length=16, choices=ComponentKind.choices, default=ComponentKind.SEMINAR)
-    max_score = models.PositiveSmallIntegerField(default=10, help_text="Bu komponentin maksimum balı (çəkisi).")
-    is_final_exam = models.BooleanField(
-        default=False, help_text="Yekun imtahan komponenti (minimum-hədd qaydası buna tətbiq olunur)."
+    ``kind`` decides what the teacher records: LECTURE → attendance only;
+    SEMINAR/LAB → attendance + a score. Ordering by date gives the running
+    sequence (neçənci dərs). The lesson date is editable only within a short
+    window after creation (enforced in the service layer)."""
+
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="lessons")
+    offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="lessons")
+    date = models.DateField(help_text="Dərsin keçirildiyi tarix.")
+    kind = models.CharField(max_length=16, choices=LessonKind.choices, default=LessonKind.LECTURE)
+    topic = models.CharField(max_length=255, blank=True, help_text="Mövzu (opsional).")
+    hours = models.PositiveSmallIntegerField(default=2, help_text="Bu dərsin akademik saatı (qayıb hesabı üçün).")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
 
     objects = models.Manager()
 
     class Meta:
-        ordering = ["order", "id"]
-        verbose_name = pgettext_lazy("registrar.model.component.meta", "grade component")
-        verbose_name_plural = pgettext_lazy("registrar.model.component.meta", "grade components")
+        ordering = ["date", "created_at"]
+        verbose_name = pgettext_lazy("registrar.model.lesson.meta", "lesson")
+        verbose_name_plural = pgettext_lazy("registrar.model.lesson.meta", "lessons")
+        indexes = [models.Index(fields=["organization", "offering", "date"])]
 
     def __str__(self):
-        return f"{self.name} ({self.max_score})"
+        return f"{self.offering_id} · {self.date} ({self.kind})"
 
 
-class ComponentScore(UUIDModel, TimeStampedModel):
-    """A student's score for one grade component (the journal cell)."""
+class LessonMark(UUIDModel, TimeStampedModel):
+    """One student's record for one lesson (the journal cell): attendance + score.
+
+    ``status`` is the attendance (present/absent = iə/qb); ``score`` is filled
+    only for seminar/lab lessons. Editable for a limited window after entry
+    (see the service layer) — no back-dated tampering."""
 
     organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="component_scores"
+        "organizations.Organization", on_delete=models.CASCADE, related_name="lesson_marks"
     )
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="component_scores")
-    component = models.ForeignKey(GradeComponent, on_delete=models.CASCADE, related_name="scores")
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="marks")
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="lesson_marks")
+    status = models.CharField(max_length=12, choices=AttendanceStatus.choices, default=AttendanceStatus.PRESENT)
     score = models.DecimalField(
-        max_digits=6, decimal_places=2, default=Decimal("0"), help_text="Daxil edilmiş bal (0 .. max_score)."
+        max_digits=5, decimal_places=2, null=True, blank=True, help_text="Seminar/lab balı (opsional)."
     )
     entered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -441,12 +449,12 @@ class ComponentScore(UUIDModel, TimeStampedModel):
     objects = models.Manager()
 
     class Meta:
-        verbose_name = pgettext_lazy("registrar.model.score.meta", "component score")
-        verbose_name_plural = pgettext_lazy("registrar.model.score.meta", "component scores")
+        verbose_name = pgettext_lazy("registrar.model.mark.meta", "lesson mark")
+        verbose_name_plural = pgettext_lazy("registrar.model.mark.meta", "lesson marks")
         constraints = [
-            models.UniqueConstraint(fields=["enrollment", "component"], name="uniq_enrollment_component_score"),
+            models.UniqueConstraint(fields=["lesson", "enrollment"], name="uniq_lesson_enrollment_mark"),
         ]
         indexes = [models.Index(fields=["organization", "enrollment"])]
 
     def __str__(self):
-        return f"{self.enrollment_id} · {self.component_id} = {self.score}"
+        return f"{self.lesson_id} · {self.enrollment_id} = {self.status}"

@@ -1,11 +1,11 @@
-"""Elektron jurnal — müəllim üzü (U3, W3).
+"""Elektron jurnal — müəllim üzü (U3, UNEC modeli).
 
-Müəllim öz tədris etdiyi offering-lərin siyahısını görür, birini seçib roster
-grid-ində komponent ballarını + qayıb saatını daxil edir. Təhlükəsizlik:
-``@login_required`` + hər offering üçün ``_can_edit_journal`` (müəllim / org
-sahibi / superuser) + tenant-izolyasiya RLS (middleware org konteksti) → başqa
-müəllimin/təşkilatın jurnalına giriş yoxdur (IDOR qorunması). Bal daxiletmə
-servis qatında (``gradebook.save_journal_scores``) yenidən yoxlanır və klamplanır.
+Müəllim öz tədris etdiyi offering-lərin siyahısını görür, birini seçib dərs
+(``Lesson``) əlavə edir və hər tələbə üçün iştirak/qayıb (iə/qb), seminarda isə
+bal yazır. Təhlükəsizlik: ``@login_required`` + hər offering üçün
+``_can_edit_journal`` (müəllim / org sahibi / superuser) + tenant-izolyasiya RLS
+→ başqa müəllimin/təşkilatın jurnalına giriş yoxdur (IDOR qorunması). Kilid və
+klamp servis qatında (``gradebook.save_marks``) yenidən tətbiq olunur.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from . import gradebook
-from .models import CourseOffering
+from .models import AttendanceStatus, CourseOffering, LessonKind
 
 
 def _can_edit_journal(user, offering) -> bool:
@@ -49,7 +49,7 @@ def journal_list(request):
 
 @login_required
 def journal_detail(request, offering_id):
-    """Roster grid for one offering: view (GET) + save scores/absence (POST)."""
+    """Lesson-by-lesson journal for one offering: view (GET) + edit (POST)."""
     offering = get_object_or_404(
         CourseOffering.objects.select_related("subject", "period", "group", "organization"),
         pk=offering_id,
@@ -58,7 +58,10 @@ def journal_detail(request, offering_id):
         raise Http404  # do not leak existence to unauthorised users
 
     if request.method == "POST":
-        return _handle_journal_save(request, offering)
+        action = request.POST.get("action")
+        if action == "add_lesson":
+            return _handle_add_lesson(request, offering)
+        return _handle_save_marks(request, offering)
 
     journal = gradebook.get_offering_journal(offering=offering)
     return render(
@@ -68,36 +71,61 @@ def journal_detail(request, offering_id):
             "offering": offering,
             "journal": journal,
             "can_edit": not journal["scheme"].is_published,
+            "lesson_kinds": LessonKind.choices,
             "active_main_nav": "journal",
         },
     )
 
 
-def _handle_journal_save(request, offering):
-    """Parse the grid POST into cell/absence maps and delegate to the service."""
-    scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    if scheme.is_published:
-        messages.warning(request, _("Jurnal yekunlaşdırılıb — bal redaktəsi bağlıdır."))
+def _handle_add_lesson(request, offering):
+    """Create a new lesson column (date + type + optional topic/hours)."""
+    if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
+        messages.warning(request, _("Jurnal yekunlaşdırılıb — dərs əlavə etmək olmaz."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
-    cell_values: dict = {}
-    absence_values: dict = {}
-    for key, raw in request.POST.items():
-        if key.startswith("score__"):
-            # score__<enrollment_id>__<component_id>
-            _prefix, enrollment_id, component_id = key.split("__", 2)
-            if raw.strip() != "":
-                cell_values[(enrollment_id, component_id)] = raw
-        elif key.startswith("absence__"):
-            _prefix, enrollment_id = key.split("__", 1)
-            if raw.strip() != "":
-                absence_values[enrollment_id] = raw
+    date = request.POST.get("lesson_date") or None
+    kind = request.POST.get("lesson_kind")
+    if kind not in dict(LessonKind.choices):
+        kind = LessonKind.LECTURE
+    if not date:
+        messages.error(request, _("Dərs tarixi tələb olunur."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
-    written = gradebook.save_journal_scores(
+    hours_raw = (request.POST.get("lesson_hours") or "").strip()
+    hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
+    gradebook.create_lesson(
         offering=offering,
-        cell_values=cell_values,
-        absence_values=absence_values,
-        by_user=request.user,
+        date=date,
+        kind=kind,
+        topic=(request.POST.get("lesson_topic") or "").strip(),
+        hours=hours,
+        created_by=request.user,
     )
-    messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s bal xanası).") % {"n": written})
+    messages.success(request, _("Dərs əlavə edildi."))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+
+def _handle_save_marks(request, offering):
+    """Parse editable grid cells (hidden ``cell__L__E`` markers) → save_marks."""
+    entries = []
+    for key in request.POST:
+        if not key.startswith("cell__"):
+            continue
+        # cell__<lesson_id>__<enrollment_id>
+        parts = key.split("__", 2)
+        if len(parts) != 3:
+            continue
+        _prefix, lesson_id, enrollment_id = parts
+        absent = f"absent__{lesson_id}__{enrollment_id}" in request.POST
+        entries.append(
+            {
+                "lesson_id": lesson_id,
+                "enrollment_id": enrollment_id,
+                "status": AttendanceStatus.ABSENT if absent else AttendanceStatus.PRESENT,
+                "score": request.POST.get(f"score__{lesson_id}__{enrollment_id}"),
+            }
+        )
+
+    written = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user)
+    messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))

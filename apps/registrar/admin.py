@@ -2,13 +2,13 @@ from django.contrib import admin
 
 from .models import (
     AssessmentScheme,
-    ComponentScore,
     CourseOffering,
     Curriculum,
     CurriculumSubject,
     Enrollment,
-    GradeComponent,
     GroupElectiveChoice,
+    Lesson,
+    LessonMark,
     Program,
     StudentAcademicRecord,
     Subject,
@@ -75,22 +75,25 @@ class GroupElectiveChoiceAdmin(admin.ModelAdmin):
     autocomplete_fields = ("group", "period", "chosen_subject", "decided_by")
 
 
-class GradeComponentInline(admin.TabularInline):
-    model = GradeComponent
-    extra = 0
-    fields = ("name", "kind", "max_score", "is_final_exam", "order")
-
-
 @admin.register(AssessmentScheme)
 class AssessmentSchemeAdmin(admin.ModelAdmin):
-    list_display = ("offering", "pass_threshold", "min_final_exam_score", "is_published", "organization")
+    list_display = ("offering", "entry_score_max", "is_published", "organization")
     list_filter = ("is_published",)
     autocomplete_fields = ("offering",)
-    inlines = (GradeComponentInline,)
 
 
-@admin.register(ComponentScore)
-class ComponentScoreAdmin(admin.ModelAdmin):
-    list_display = ("enrollment", "component", "score", "entered_by", "organization")
-    search_fields = ("enrollment__student__username", "component__name")
-    raw_id_fields = ("enrollment", "component", "entered_by")
+@admin.register(Lesson)
+class LessonAdmin(admin.ModelAdmin):
+    list_display = ("offering", "date", "kind", "topic", "hours", "organization")
+    list_filter = ("kind",)
+    search_fields = ("offering__subject__code", "topic")
+    raw_id_fields = ("offering", "created_by")
+    date_hierarchy = "date"
+
+
+@admin.register(LessonMark)
+class LessonMarkAdmin(admin.ModelAdmin):
+    list_display = ("lesson", "enrollment", "status", "score", "entered_by", "organization")
+    list_filter = ("status",)
+    search_fields = ("enrollment__student__username",)
+    raw_id_fields = ("lesson", "enrollment", "entered_by")

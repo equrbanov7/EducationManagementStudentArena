@@ -83,23 +83,18 @@
                     {% endif %}
                     {% endwith %}
                 </div>
-                {% if row.grade %}
+                {% if row.journal %}
                 <div class="subject-grade">
                     <div class="subject-grade-head">
-                        <span class="subject-grade-total">{{ row.grade.total|floatformat:'-2' }}<span class="subject-grade-max">/100</span></span>
-                        <span class="subject-grade-letter grade-{{ row.grade.letter }}">{{ row.grade.letter }}</span>
-                        {% if row.grade.barred %}
-                        <span class="subject-grade-status is-barred">{% trans "Buraxılmır" context "profile.subjects" %}</span>
-                        {% elif row.grade.passed %}
-                        <span class="subject-grade-status is-pass">{% trans "Keçir" context "profile.subjects" %}</span>
-                        {% else %}
-                        <span class="subject-grade-status is-fail">{% trans "Kəsilir" context "profile.subjects" %}</span>
+                        <span class="subject-grade-total">{{ row.journal.entry_score|floatformat:'-2' }}<span class="subject-grade-max">/{{ row.journal.entry_score_max }}</span></span>
+                        <span class="subject-grade-label">{% trans "giriş balı" context "profile.subjects" %}</span>
+                        {% if row.journal.barred %}
+                        <span class="subject-grade-status is-barred">{% trans "Kəsilir" context "profile.subjects" %}</span>
                         {% endif %}
                     </div>
                     <div class="subject-grade-components">
-                        {% for cell in row.grade.rows %}
-                        <span class="grade-comp">{{ cell.component.name }}: <strong>{{ cell.score|floatformat:'-2' }}</strong>/{{ cell.component.max_score }}</span>
-                        {% endfor %}
+                        <span class="grade-comp">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ row.journal.lessons_held }}</strong></span>
+                        <span class="grade-comp">{% trans "Qayıb" context "profile.subjects" %}: <strong>{{ row.journal.absence_hours }}</strong> {% trans "saat" context "profile.subjects" %} / {{ row.journal.allowed_absence|floatformat:0 }}</span>
                     </div>
                 </div>
                 {% endif %}

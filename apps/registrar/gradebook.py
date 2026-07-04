@@ -1,65 +1,47 @@
-"""Elektron jurnal (electronic journal) — assessment/grade services (U3).
+"""Elektron jurnal (davamiyyət/qiymət jurnalı) — services (U3, UNEC modeli).
 
-AZ Boloniya modeli: hər ``CourseOffering`` üçün tenant-konfiqurasiya olunan
-``AssessmentScheme`` + çəkili komponentlər (seminar / laboratoriya / sərbəst iş /
-kollokvium / yekun imtahan; adətən 50 semestr + 50 imtahan = 100). Müəllim hər
-tələbə üçün komponent balı (``ComponentScore``) daxil edir; ümumi bal, hərf,
-GPA nöqtəsi və keçid/imtahana-buraxılma burada hesablanır — bal xanalarından
-başqa heç nə denormallaşdırılmır.
+Müəllim hər dərs (``Lesson``) günü tələbələrin iştirak/qayıbını (iə/qb), seminar
+və laboratoriya dərslərində isə balını (``LessonMark``) yazır — mühazirədə yalnız
+iə/qb. Sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı (seminar/lab
+ballarının cəmi) AVTOMATİK hesablayır. Yekun imtahan burada yoxdur.
 
-Qayıb (qb) saatı ayrıca ``Enrollment.absence_hours``-dadır; imtahana buraxılma
-qaydası ``services.get_exam_eligibility`` ilə (proqramın ``absence_limit_percent``
-faizi). Kəsilmə: ümumi bal < ``pass_threshold`` VƏ YA imtahan balı
-< ``min_final_exam_score`` VƏ YA qayıb limiti keçilib.
+Kilid qaydaları (geriyə-dönük dəyişiklik olmasın):
+* dərs tarixi yaranışdan sonra yalnız qısa müddət (``DATE_EDIT_WINDOW``) dəyişilir;
+* iştirak/bal xanası yazıldıqdan ``MARK_EDIT_WINDOW`` sonra kilidlənir.
+
+Status (görünüş): qayıb saatı proqramın ``absence_limit_percent``-i × fənnin tam
+saatını keçirsə → tələbə "kəsilir" (imtahana buraxılmır, sətir qırmızı); limitə
+yaxınlaşırsa → xəbərdarlıq (sətir bozarır).
 """
 
 from __future__ import annotations
 
+from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.utils import timezone
 
 from apps.registrar import services
 from apps.registrar.models import (
     AssessmentScheme,
-    ComponentKind,
-    ComponentScore,
+    AttendanceStatus,
     Enrollment,
-    GradeComponent,
+    Lesson,
+    LessonKind,
+    LessonMark,
     StudentAcademicRecord,
 )
 
-# Default AZ Boloniya sxemi: 50 semestr fəaliyyəti + 50 yekun imtahan = 100.
-# (name, kind, max_score, is_final_exam) — offering başına tenant redaktə edir.
-DEFAULT_COMPONENTS = (
-    ("Seminar", ComponentKind.SEMINAR, 10, False),
-    ("Laboratoriya", ComponentKind.LAB, 10, False),
-    ("Sərbəst iş", ComponentKind.INDEPENDENT, 10, False),
-    ("Kollokvium", ComponentKind.COLLOQUIUM, 20, False),
-    ("Yekun imtahan", ComponentKind.FINAL_EXAM, 50, True),
-)
+# Redaktə pəncərələri.
+DATE_EDIT_WINDOW = timedelta(minutes=5)  # dərs tarixi yaranışdan sonra
+MARK_EDIT_WINDOW = timedelta(days=1)  # iştirak/bal yazıldıqdan sonra
 
-# 100-ballıq ümumi bal → hərf + GPA nöqtəsi (AZ Boloniya default; sonradan
-# tenant-konfiqurasiya oluna bilər). Yüksəkdən aşağıya yoxlanır.
-_LETTER_BANDS = (
-    (91, "A", Decimal("4.00")),
-    (81, "B", Decimal("3.50")),
-    (71, "C", Decimal("3.00")),
-    (61, "D", Decimal("2.50")),
-    (51, "E", Decimal("2.00")),
-    (0, "F", Decimal("0.00")),
-)
-
+DEFAULT_LESSON_HOURS = 2
 _DEFAULT_ABSENCE_LIMIT = 25
+_WARN_RATIO = Decimal("0.75")  # limitin bu payına çatanda xəbərdarlıq (bozarır)
 
-
-def score_to_letter(total) -> tuple[str, Decimal]:
-    """Map a 0..100 total to (letter, gpa_point)."""
-    value = Decimal(str(total or 0))
-    for threshold, letter, gpa in _LETTER_BANDS:
-        if value >= threshold:
-            return letter, gpa
-    return "F", Decimal("0.00")
+SCORE_LESSON_KINDS = frozenset({LessonKind.SEMINAR, LessonKind.LAB})
 
 
 def _to_decimal(raw) -> Decimal:
@@ -69,37 +51,31 @@ def _to_decimal(raw) -> Decimal:
         return Decimal("0")
 
 
-def _clamp_score(raw, max_score) -> Decimal:
-    """Clamp *raw* into [0, max_score] (defensive: never trust client input)."""
-    value = _to_decimal(raw)
-    ceiling = Decimal(int(max_score))
-    if value < 0:
-        return Decimal("0")
-    if value > ceiling:
-        return ceiling
-    return value
-
-
-@transaction.atomic
-def ensure_assessment_scheme(*, offering, blueprint=None):
-    """Idempotently create the offering's scheme + its default components."""
+def ensure_assessment_scheme(*, offering):
+    """Idempotently return the offering's journal config."""
     scheme, _created = AssessmentScheme.objects.get_or_create(organization=offering.organization, offering=offering)
-    if not scheme.components.exists():
-        for order, (name, kind, max_score, is_exam) in enumerate(blueprint or DEFAULT_COMPONENTS):
-            GradeComponent.objects.create(
-                organization=offering.organization,
-                scheme=scheme,
-                name=name,
-                kind=kind,
-                max_score=max_score,
-                is_final_exam=is_exam,
-                order=order,
-            )
     return scheme
 
 
-def absence_limit_for_offering(offering) -> int:
-    """Resolve the absence-limit % from the section's program (default 25%)."""
+def lesson_allows_score(lesson) -> bool:
+    """Only seminar / lab lessons carry a score; lectures are attendance-only."""
+    return lesson.kind in SCORE_LESSON_KINDS
+
+
+def can_edit_lesson_date(lesson, *, now=None) -> bool:
+    now = now or timezone.now()
+    return (now - lesson.created_at) <= DATE_EDIT_WINDOW
+
+
+def can_edit_mark(mark, *, now=None) -> bool:
+    """A missing mark is always writable; an existing one only within the window."""
+    if mark is None:
+        return True
+    now = now or timezone.now()
+    return (now - mark.created_at) <= MARK_EDIT_WINDOW
+
+
+def absence_limit_percent_for(offering) -> int:
     record = (
         StudentAcademicRecord.objects.filter(organization=offering.organization, group=offering.group)
         .select_related("program")
@@ -110,162 +86,214 @@ def absence_limit_for_offering(offering) -> int:
     return _DEFAULT_ABSENCE_LIMIT
 
 
-def compute_enrollment_result(*, enrollment, scheme, components, scores_by_component, absence_limit_percent):
-    """Pure computation for one enrollment (no queries — caller prefetches).
+# ── Lesson (dərs) CRUD ───────────────────────────────────────────────────────
 
-    Returns component rows + total/semester/exam scores, letter, GPA, and the
-    pass / absence-barred / exam-threshold flags."""
-    total = Decimal("0")
-    exam_score = Decimal("0")
-    max_total = 0
-    rows = []
-    for comp in components:
-        score = _clamp_score(scores_by_component.get(comp.id, 0), comp.max_score)
-        total += score
-        max_total += comp.max_score
-        if comp.is_final_exam:
-            exam_score += score
-        rows.append({"component": comp, "score": score})
 
-    semester_total = total - exam_score
-    letter, gpa = score_to_letter(total)
-    eligibility = services.get_exam_eligibility(enrollment=enrollment, limit_percent=absence_limit_percent)
-    barred = eligibility["barred"]
-    exam_ok = exam_score >= scheme.min_final_exam_score
-    passed = (not barred) and total >= scheme.pass_threshold and exam_ok
-    return {
-        "rows": rows,
-        "total": total,
-        "semester_total": semester_total,
-        "exam_score": exam_score,
-        "max_total": max_total,
-        "letter": letter,
-        "gpa": gpa,
-        "passed": passed,
-        "barred": barred,
-        "exam_ok": exam_ok,
-        "eligibility": eligibility,
-        "pass_threshold": scheme.pass_threshold,
-        "min_final_exam_score": scheme.min_final_exam_score,
-        "is_published": scheme.is_published,
-    }
+@transaction.atomic
+def create_lesson(*, offering, date, kind=LessonKind.LECTURE, topic="", hours=None, created_by=None):
+    """Add a held session (a new journal column)."""
+    ensure_assessment_scheme(offering=offering)
+    return Lesson.objects.create(
+        organization=offering.organization,
+        offering=offering,
+        date=date,
+        kind=kind,
+        topic=topic or "",
+        hours=hours or DEFAULT_LESSON_HOURS,
+        created_by=created_by,
+    )
+
+
+@transaction.atomic
+def update_lesson_date(*, lesson, date) -> bool:
+    """Fix a wrong lesson date — only within the short post-creation window."""
+    if not can_edit_lesson_date(lesson):
+        return False
+    lesson.date = date
+    lesson.save(update_fields=["date"])
+    return True
+
+
+# ── Mark (iştirak/bal) yazma ─────────────────────────────────────────────────
+
+
+@transaction.atomic
+def save_marks(*, offering, entries, by_user=None):
+    """Persist attendance/score cells for an offering (bulk, from the grid).
+
+    ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
+    Each cell is validated against the offering's own lessons/enrollments
+    (cross-offering/tenant injection rejected), honours the per-mark edit window
+    (locked cells are skipped) and the lesson type (lecture cells never store a
+    score). Blocked entirely when the scheme is published. Returns cells written.
+    """
+    scheme = ensure_assessment_scheme(offering=offering)
+    if scheme.is_published:
+        return 0
+
+    lessons = {str(latt.id): latt for latt in offering.lessons.all()}
+    enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
+    existing = {(m.lesson_id, m.enrollment_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+
+    written = 0
+    touched = set()
+    now = timezone.now()
+    for entry in entries or []:
+        lesson = lessons.get(str(entry.get("lesson_id")))
+        enrollment = enrollments.get(str(entry.get("enrollment_id")))
+        if lesson is None or enrollment is None:
+            continue
+        mark = existing.get((lesson.id, enrollment.id))
+        if not can_edit_mark(mark, now=now):
+            continue  # locked — no back-dated tampering
+
+        status = entry.get("status")
+        if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
+            status = AttendanceStatus.PRESENT
+        score = None
+        if lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
+            score = max(Decimal("0"), _to_decimal(entry.get("score")))
+
+        if mark is None:
+            mark = LessonMark(organization=offering.organization, lesson=lesson, enrollment=enrollment)
+        mark.status = status
+        mark.score = score
+        mark.entered_by = by_user
+        mark.save()
+        touched.add(enrollment)
+        written += 1
+
+    # Keep the denormalised Enrollment.absence_hours (used by the "Fənlərim"
+    # exam-eligibility badge) in sync with the journal — the single source of truth.
+    for enrollment in touched:
+        recompute_absence_hours(enrollment=enrollment)
+
+    return written
+
+
+def recompute_absence_hours(*, enrollment):
+    """Recompute Enrollment.absence_hours from the student's lesson marks (qb)."""
+    hours = sum(
+        m.lesson.hours
+        for m in LessonMark.objects.filter(enrollment=enrollment, status=AttendanceStatus.ABSENT).select_related(
+            "lesson"
+        )
+    )
+    if enrollment.absence_hours != hours:
+        enrollment.absence_hours = hours
+        enrollment.save(update_fields=["absence_hours"])
+    return hours
+
+
+# ── Jurnal görünüşü (müəllim grid) ───────────────────────────────────────────
+
+
+def _allowed_absence_hours(offering, lessons):
+    total_hours = offering.lesson_hours or sum(latt.hours for latt in lessons)
+    return Decimal(total_hours) * Decimal(absence_limit_percent_for(offering)) / Decimal(100)
 
 
 def get_offering_journal(*, offering):
-    """Full journal for the teacher grid: scheme + components + per-student rows.
+    """Full journal grid: lessons (columns) × enrolled students (rows) + summary.
 
-    One prefetch of scores + one absence-limit lookup; no per-student N+1."""
+    One pass over the marks (no per-cell query). Each row carries the running
+    absence hours, the accumulated entry score (giriş balı, capped) and the
+    barred / warning status used to grey or redden the row."""
     scheme = ensure_assessment_scheme(offering=offering)
-    components = list(scheme.components.all())
+    lessons = list(offering.lessons.all())
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
         .select_related("student")
         .order_by("student__last_name", "student__username")
     )
-    scores = ComponentScore.objects.filter(enrollment__in=enrollments)
-    by_enrollment: dict = {}
-    for score in scores:
-        by_enrollment.setdefault(score.enrollment_id, {})[score.component_id] = score.score
-    absence_limit = absence_limit_for_offering(offering)
+    mark_map = {(m.enrollment_id, m.lesson_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+
+    now = timezone.now()
+    allowed_absence = _allowed_absence_hours(offering, lessons)
+    warn_at = allowed_absence * _WARN_RATIO
 
     rows = []
     for enrollment in enrollments:
-        result = compute_enrollment_result(
-            enrollment=enrollment,
-            scheme=scheme,
-            components=components,
-            scores_by_component=by_enrollment.get(enrollment.id, {}),
-            absence_limit_percent=absence_limit,
+        cells = []
+        absence_hours = 0
+        entry_score = Decimal("0")
+        for lesson in lessons:
+            mark = mark_map.get((enrollment.id, lesson.id))
+            if mark is not None and mark.status == AttendanceStatus.ABSENT:
+                absence_hours += lesson.hours
+            if mark is not None and mark.score is not None:
+                entry_score += mark.score
+            cells.append(
+                {
+                    "lesson": lesson,
+                    "mark": mark,
+                    "allows_score": lesson_allows_score(lesson),
+                    "locked": mark is not None and not can_edit_mark(mark, now=now),
+                }
+            )
+        entry_score = min(entry_score, Decimal(scheme.entry_score_max))
+        barred = allowed_absence > 0 and Decimal(absence_hours) > allowed_absence
+        warning = (not barred) and allowed_absence > 0 and Decimal(absence_hours) >= warn_at
+        rows.append(
+            {
+                "enrollment": enrollment,
+                "student": enrollment.student,
+                "cells": cells,
+                "absence_hours": absence_hours,
+                "entry_score": entry_score,
+                "barred": barred,
+                "warning": warning,
+            }
         )
-        rows.append({"enrollment": enrollment, "student": enrollment.student, "result": result})
 
     return {
         "offering": offering,
         "scheme": scheme,
-        "components": components,
+        "lessons": lessons,
         "rows": rows,
-        "absence_limit_percent": absence_limit,
+        "limit_percent": absence_limit_percent_for(offering),
+        "allowed_absence": allowed_absence,
+        "entry_score_max": scheme.entry_score_max,
     }
 
 
-def get_student_grade_summary(*, record, period, semester_number):
-    """Per-subject grade breakdown for the student "Qiymətlərim" view.
+# ── Tələbə görünüşü ("Qiymətlərim") ──────────────────────────────────────────
 
-    Reuses the student's semester plan (enrollments) and computes each subject's
-    component scores + total/letter using its offering scheme (only schemes that
-    already exist — no auto-creation on the student path)."""
+
+def get_student_journal_summary(*, record, period, semester_number):
+    """Per-subject entry score + attendance for the student view.
+
+    Computes each enrolled subject's absence hours and accumulated entry score
+    from this student's own lesson marks (only their row — never the roster)."""
     plan = services.get_student_semester_plan(record=record, period=period, semester_number=semester_number)
-    absence_limit = record.program.absence_limit_percent if record.program else _DEFAULT_ABSENCE_LIMIT
+    limit_percent = record.program.absence_limit_percent if record.program else _DEFAULT_ABSENCE_LIMIT
     subjects = []
     for enrollment in plan["enrollments"]:
         offering = enrollment.offering
+        marks = list(LessonMark.objects.filter(enrollment=enrollment).select_related("lesson"))
+        absence_hours = sum(m.lesson.hours for m in marks if m.status == AttendanceStatus.ABSENT)
+        entry_score = sum((m.score for m in marks if m.score is not None), Decimal("0"))
         scheme = getattr(offering, "assessment_scheme", None)
-        result = None
-        if scheme is not None:
-            components = list(scheme.components.all())
-            scores_by_component = {
-                s.component_id: s.score for s in ComponentScore.objects.filter(enrollment=enrollment)
-            }
-            result = compute_enrollment_result(
-                enrollment=enrollment,
-                scheme=scheme,
-                components=components,
-                scores_by_component=scores_by_component,
-                absence_limit_percent=absence_limit,
-            )
+        cap = scheme.entry_score_max if scheme else 50
+        entry_score = min(entry_score, Decimal(cap))
+        lessons_held = offering.lessons.count()
+        total_hours = offering.lesson_hours or 0
+        allowed = Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
+        barred = allowed > 0 and Decimal(absence_hours) > allowed
         subjects.append(
             {
                 "enrollment": enrollment,
                 "subject": offering.subject,
                 "ects": offering.subject.ects,
                 "kind": enrollment.kind,
-                "result": result,
+                "journal": {
+                    "lessons_held": lessons_held,
+                    "absence_hours": absence_hours,
+                    "allowed_absence": allowed,
+                    "entry_score": entry_score,
+                    "entry_score_max": cap,
+                    "barred": barred,
+                },
             }
         )
     return {"subjects": subjects}
-
-
-@transaction.atomic
-def save_journal_scores(*, offering, cell_values, absence_values=None, by_user=None):
-    """Persist teacher-entered scores + absence hours for an offering (bulk).
-
-    ``cell_values``: {(enrollment_id, component_id): raw_score}.
-    ``absence_values``: {enrollment_id: raw_hours}. Values are validated against
-    the offering's own scheme/enrollments (cross-offering/tenant injection is
-    rejected) and clamped. Returns the number of score cells written.
-
-    Blocked when the scheme is published (finalised)."""
-    scheme = getattr(offering, "assessment_scheme", None)
-    if scheme is None:
-        scheme = ensure_assessment_scheme(offering=offering)
-    if scheme.is_published:
-        return 0
-
-    # Key by ``str(id)`` so UUID objects and form-posted UUID strings both match.
-    valid_components = {str(c.id): c for c in scheme.components.all()}
-    valid_enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
-
-    written = 0
-    for (enrollment_id, component_id), raw in (cell_values or {}).items():
-        component = valid_components.get(str(component_id))
-        enrollment = valid_enrollments.get(str(enrollment_id))
-        if component is None or enrollment is None:
-            continue  # ignore anything not belonging to this offering
-        score = _clamp_score(raw, component.max_score)
-        ComponentScore.objects.update_or_create(
-            organization=offering.organization,
-            enrollment=enrollment,
-            component=component,
-            defaults={"score": score, "entered_by": by_user},
-        )
-        written += 1
-
-    for enrollment_id, raw_hours in (absence_values or {}).items():
-        enrollment = valid_enrollments.get(str(enrollment_id))
-        if enrollment is None:
-            continue
-        hours = _to_decimal(raw_hours)
-        enrollment.absence_hours = max(0, int(hours))
-        enrollment.save(update_fields=["absence_hours"])
-
-    return written

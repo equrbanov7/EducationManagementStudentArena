@@ -1,9 +1,9 @@
-/* Elektron jurnal (electronic journal) — teacher roster grid + offering list.
-   Flat, institutional, design-token driven (var(--ems-*)); horizontal scroll on
-   the grid so wide component sets stay usable on small screens. */
+/* Elektron jurnal (davamiyyət/qiymət jurnalı) — UNEC-formatı cədvəl.
+   Sol tərəfdə tələbələr (sticky), sütunlar dərs tarixləri. Limitə çatan sətir
+   bozarır (warning), kəsilən sətir qırmızı (barred). Token-əsaslı (--ems-*). */
 
 .journal-page {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 1.5rem 1rem 3rem;
 }
@@ -17,13 +17,8 @@
     color: var(--ems-neutral-900);
     margin: 0 0 0.35rem;
 }
-
 .journal-title i { color: var(--ems-primary-600); }
-
-.journal-subtitle {
-    color: var(--ems-neutral-500);
-    margin: 0 0 1.5rem;
-}
+.journal-subtitle { color: var(--ems-neutral-500); margin: 0 0 1.5rem; }
 
 /* ── Offering list ────────────────────────────────────────────────────────── */
 .journal-offerings {
@@ -31,7 +26,6 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
 }
-
 .journal-offering-card {
     display: flex;
     align-items: center;
@@ -43,12 +37,7 @@
     text-decoration: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-
-.journal-offering-card:hover {
-    border-color: var(--ems-primary-200);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
-}
-
+.journal-offering-card:hover { border-color: var(--ems-primary-200); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06); }
 .journal-offering-code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8rem;
@@ -59,17 +48,9 @@
     border-radius: 8px;
     white-space: nowrap;
 }
-
 .journal-offering-body { flex: 1; min-width: 0; }
 .journal-offering-name { font-weight: 600; color: var(--ems-neutral-900); }
-.journal-offering-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    font-size: 0.82rem;
-    color: var(--ems-neutral-500);
-    margin-top: 2px;
-}
+.journal-offering-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.82rem; color: var(--ems-neutral-500); margin-top: 2px; }
 .journal-offering-go { color: var(--ems-neutral-400); }
 
 /* ── Detail head ──────────────────────────────────────────────────────────── */
@@ -83,7 +64,6 @@
     margin-bottom: 0.75rem;
 }
 .journal-back:hover { text-decoration: underline; }
-
 .journal-detail-meta {
     display: flex;
     flex-wrap: wrap;
@@ -104,9 +84,48 @@
     border-radius: 999px;
 }
 .journal-badge--locked { background: var(--ems-neutral-200); color: var(--ems-neutral-700); }
-.journal-badge--pass { background: var(--ems-success-100); color: var(--ems-success-600); }
-.journal-badge--fail { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.journal-badge--ok { background: var(--ems-success-100); color: var(--ems-success-600); }
+.journal-badge--warn { background: var(--ems-warning-100); color: var(--ems-warning-800); }
 .journal-badge--barred { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+
+/* ── Add-lesson bar ───────────────────────────────────────────────────────── */
+.journal-add-lesson {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-50);
+}
+.add-lesson-title { font-weight: 600; color: var(--ems-neutral-700); font-size: 0.9rem; }
+.add-lesson-title i { color: var(--ems-primary-600); }
+.journal-add-lesson input[type="date"],
+.journal-add-lesson input[type="text"],
+.journal-add-lesson input[type="number"],
+.journal-add-lesson select {
+    padding: 8px 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+.journal-add-lesson input[type="text"] { flex: 1; min-width: 140px; }
+.journal-add-lesson input[type="number"] { width: 64px; }
+.add-lesson-btn {
+    padding: 8px 16px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.add-lesson-btn:hover { background: var(--ems-primary-700); }
 
 /* ── Grid ─────────────────────────────────────────────────────────────────── */
 .journal-grid-wrap {
@@ -115,21 +134,14 @@
     border-radius: 12px;
     background: var(--ems-neutral-0);
 }
-
-.journal-grid {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-}
-
-.journal-grid th,
-.journal-grid td {
-    padding: 8px 10px;
+.journal-grid { border-collapse: collapse; font-size: 0.82rem; }
+.journal-grid th, .journal-grid td {
+    padding: 6px 8px;
     border-bottom: 1px solid var(--ems-neutral-100);
+    border-right: 1px solid var(--ems-neutral-100);
     text-align: center;
     white-space: nowrap;
 }
-
 .journal-grid thead th {
     background: var(--ems-neutral-50);
     color: var(--ems-neutral-700);
@@ -138,58 +150,80 @@
     top: 0;
     z-index: 1;
 }
-
 .journal-grid .col-student {
     text-align: left;
     position: sticky;
     left: 0;
     background: var(--ems-neutral-0);
     z-index: 2;
-    min-width: 160px;
+    min-width: 150px;
 }
 .journal-grid thead .col-student { z-index: 3; background: var(--ems-neutral-50); }
 .student-name { font-weight: 500; color: var(--ems-neutral-900); }
 
-.col-max { color: var(--ems-neutral-400); font-weight: 400; font-size: 0.78rem; }
-.col-exam { background: var(--ems-primary-50); }
+/* Lesson column header */
+.col-lesson { min-width: 52px; line-height: 1.2; }
+.lesson-seq { display: block; font-size: 0.68rem; color: var(--ems-neutral-400); }
+.lesson-date { display: block; font-weight: 600; color: var(--ems-neutral-800); }
+.lesson-kind-badge {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: 4px;
+}
+.lesson-lecture .lesson-kind-badge { background: var(--ems-neutral-200); color: var(--ems-neutral-700); }
+.lesson-seminar .lesson-kind-badge { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.lesson-lab .lesson-kind-badge { background: var(--ems-emerald-100); color: var(--ems-success-600); }
 
-.journal-score,
-.journal-absence {
-    width: 58px;
-    padding: 5px 6px;
+/* Cell */
+.jcell { min-width: 52px; }
+.jcell.is-absent { background: var(--ems-danger-100); }
+.jcell.is-locked { background: var(--ems-neutral-50); }
+.att-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    font-size: 0.68rem;
+    color: var(--ems-neutral-500);
+    user-select: none;
+}
+.att-qb { font-weight: 600; }
+.cell-score {
+    display: block;
+    width: 44px;
+    margin: 3px auto 0;
+    padding: 3px 4px;
     text-align: center;
     border: 1px solid var(--ems-neutral-300);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    background: var(--ems-neutral-0);
-    color: var(--ems-neutral-900);
-}
-.journal-score:focus,
-.journal-absence:focus {
-    outline: none;
-    border-color: var(--ems-primary-600);
-    box-shadow: 0 0 0 3px var(--ems-primary-100);
-}
-.journal-score.is-invalid { border-color: var(--ems-danger-500); box-shadow: 0 0 0 3px var(--ems-danger-100); }
-.journal-score-ro { color: var(--ems-neutral-700); }
-
-.cell-total { font-weight: 600; color: var(--ems-neutral-900); }
-.cell-letter {
-    font-weight: 700;
-    padding: 2px 8px;
     border-radius: 6px;
+    font-size: 0.78rem;
+    background: var(--ems-neutral-0);
 }
-.grade-A, .grade-B { background: var(--ems-success-100); color: var(--ems-success-600); }
-.grade-C, .grade-D { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.grade-E { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-.grade-F { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.cell-score:focus { outline: none; border-color: var(--ems-primary-600); box-shadow: 0 0 0 2px var(--ems-primary-100); }
+.att-ro { font-weight: 600; }
+.att-ro--absent { color: var(--ems-danger-strong); }
+.att-ro--present { color: var(--ems-success-600); }
+.att-ro--empty { color: var(--ems-neutral-300); }
+.score-ro { display: block; font-size: 0.72rem; color: var(--ems-neutral-600); }
+
+/* Summary columns */
+.col-abs, .col-entry, .col-status { background: var(--ems-neutral-50); }
+.cell-abs { font-weight: 600; color: var(--ems-neutral-700); }
+.cell-abs.is-over { color: var(--ems-danger-strong); }
+.cell-entry { font-weight: 700; color: var(--ems-primary-700); }
+
+/* Row states */
+.journal-row.row-warning td { background: var(--ems-neutral-100); }
+.journal-row.row-warning .col-student { background: var(--ems-neutral-100); }
+.journal-row.row-barred td { background: var(--ems-danger-100); }
+.journal-row.row-barred .col-student { background: var(--ems-danger-100); }
+.journal-row.row-barred .student-name { color: var(--ems-danger-strong); }
 
 /* ── Actions / empty ──────────────────────────────────────────────────────── */
-.journal-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
+.journal-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 .journal-save-btn {
     display: inline-flex;
     align-items: center;
@@ -202,14 +236,9 @@
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.15s ease;
 }
 .journal-save-btn:hover { background: var(--ems-primary-700); }
 
-.journal-empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--ems-neutral-500);
-}
-.journal-empty i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
-.journal-empty p { margin: 0; }
+.journal-empty, .journal-hint { text-align: center; padding: 3rem 1rem; color: var(--ems-neutral-500); }
+.journal-empty i, .journal-hint i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
+.journal-empty p, .journal-hint p { margin: 0; }

@@ -336,37 +336,35 @@ class Command(BaseCommand):
             enrollment.status = Enrollment.Status.COMPLETED
             enrollment.save(update_fields=["status"])
 
-        # Push an enrolled AZ student's CS101 over the 25%-of-60h limit (=15h)
-        # so the cabinet's "imtahana buraxılmır" (barred) state is demonstrable.
-        barred = (
-            Enrollment.objects.filter(
-                organization=org,
-                offering__subject__code="CS101",
-                student__username="wcu_student_az1",
-            )
-            .exclude(absence_hours__gt=15)
-            .first()
-        )
-        if barred:
-            barred.absence_hours = 20
-            barred.save(update_fields=["absence_hours"])
-
+        # The absence-barred demo is produced by the journal itself (wcu_student_az1
+        # is marked absent in every session — see _seed_journal), which recomputes
+        # Enrollment.absence_hours; no manual override needed here.
         self._seed_journal(org)
 
     def _seed_journal(self, org):
-        """Wire offerings to their LMS course + seed assessment schemes/scores.
+        """Wire offerings to their LMS course + seed the electronic journal.
 
-        So the electronic journal (müəllim) and student "Qiymətlərim" have real
-        data: every offering gets the demo teacher as instructor, a linked Course
-        (subject → fənn içi) with members synced, an AssessmentScheme, and demo
-        component scores for its enrolled students (one strong, one failing exam).
-        """
+        Every offering gets the demo teacher as instructor, a linked Course
+        (subject → fənn içi) with members synced, and a set of held lessons
+        (mühazirə + seminar) with attendance (iə/qb) and seminar scores — so the
+        müəllim journal and student "Qiymətlərim" have real data. One AZ student
+        is marked absent enough to exceed the 25% limit (barred → row red)."""
+        import datetime
+
         teacher = User.objects.filter(username="wcu_teacher").first()
-        # Deterministic demo scores per component kind (seminar 8 / lab 8 /
-        # independent 8 / colloquium 16 / exam 38 → 78, C, passes).
-        good = {"seminar": 8, "lab": 8, "independent": 8, "colloquium": 16, "final_exam": 38}
-        # A weak profile: fails the final-exam minimum (exam 10 < 17).
-        weak = {"seminar": 6, "lab": 5, "independent": 6, "colloquium": 12, "final_exam": 10}
+        # 8 sessions (2h each): a mix of lectures (attendance only) and seminars
+        # (attendance + score). Dates walk back from a fixed demo baseline.
+        base = datetime.date(2024, 10, 1)
+        plan = [
+            ("lecture", 0),
+            ("seminar", 3),
+            ("lecture", 7),
+            ("seminar", 10),
+            ("lecture", 14),
+            ("seminar", 17),
+            ("lecture", 21),
+            ("seminar", 24),
+        ]
 
         offerings = CourseOffering.objects.filter(organization=org).select_related("subject", "group", "period")
         for offering in offerings:
@@ -375,18 +373,31 @@ class Command(BaseCommand):
                 offering.save(update_fields=["instructor"])
             registrar_services.ensure_offering_course(offering=offering)
             registrar_services.sync_offering_course_members(offering=offering)
-            scheme = registrar_gradebook.ensure_assessment_scheme(offering=offering)
-            components = {c.kind: c for c in scheme.components.all()}
+            registrar_gradebook.ensure_assessment_scheme(offering=offering)
+            if offering.lessons.exists():
+                continue  # idempotent — do not duplicate lessons on re-run
 
-            cell_values = {}
-            for enrollment in offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student"):
-                profile = weak if enrollment.student.username == "wcu_student_az2" else good
-                for kind, value in profile.items():
-                    component = components.get(kind)
-                    if component is not None:
-                        cell_values[(enrollment.id, component.id)] = value
-            if cell_values:
-                registrar_gradebook.save_journal_scores(offering=offering, cell_values=cell_values, by_user=teacher)
+            enrollments = list(offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student"))
+            for kind, day_offset in plan:
+                lesson = registrar_gradebook.create_lesson(
+                    offering=offering,
+                    date=base + datetime.timedelta(days=day_offset),
+                    kind=kind,
+                    created_by=teacher,
+                )
+                entries = []
+                for enrollment in enrollments:
+                    # wcu_student_az1 misses every session → exceeds the limit.
+                    absent = enrollment.student.username == "wcu_student_az1"
+                    entries.append(
+                        {
+                            "lesson_id": lesson.id,
+                            "enrollment_id": enrollment.id,
+                            "status": "absent" if absent else "present",
+                            "score": None if kind == "lecture" or absent else 8,
+                        }
+                    )
+                registrar_gradebook.save_marks(offering=offering, entries=entries, by_user=teacher)
 
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile
