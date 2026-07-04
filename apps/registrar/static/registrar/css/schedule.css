@@ -1,0 +1,140 @@
+/* Dərs cədvəli (timetable) — həftəlik gün-kartları. Token-əsaslı (--ems-*). */
+
+.schedule-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+.schedule-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    margin: 0 0 0.4rem;
+}
+.schedule-title i { color: var(--ems-primary-600); }
+
+.schedule-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+    margin-bottom: 1.25rem;
+}
+.schedule-meta i { color: var(--ems-primary-500); margin-right: 3px; }
+.schedule-role-badge {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+/* Add-slot bar */
+.schedule-add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-50);
+}
+.schedule-add-title { font-weight: 600; color: var(--ems-neutral-700); font-size: 0.9rem; }
+.schedule-add-title i { color: var(--ems-primary-600); }
+.schedule-add select,
+.schedule-add input {
+    padding: 8px 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+.schedule-add input[type="text"] { width: 110px; }
+.schedule-add-btn {
+    padding: 8px 16px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.schedule-add-btn:hover { background: var(--ems-primary-700); }
+
+/* Weekly grid — day cards */
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+.schedule-day {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+    overflow: hidden;
+}
+.schedule-day-label {
+    padding: 8px 12px;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-100);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-700);
+    text-align: center;
+}
+.schedule-slots { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.schedule-slot {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    border-left: 3px solid var(--ems-primary-500);
+}
+.slot-time { font-size: 0.78rem; font-weight: 700; color: var(--ems-primary-700); }
+.slot-subject { font-size: 0.82rem; font-weight: 600; color: var(--ems-neutral-900); line-height: 1.25; }
+.slot-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    font-size: 0.72rem;
+    color: var(--ems-neutral-500);
+}
+.slot-detail i { margin-right: 2px; }
+.slot-week {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+    padding: 0 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.slot-del { position: absolute; top: 4px; right: 4px; }
+.slot-del button {
+    background: transparent;
+    border: none;
+    color: var(--ems-neutral-400);
+    cursor: pointer;
+    font-size: 0.72rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    line-height: 1;
+}
+.slot-del button:hover { color: var(--ems-danger-strong); background: var(--ems-danger-100); }
+
+.schedule-day-empty { padding: 1.25rem; text-align: center; color: var(--ems-neutral-300); }
+
+.schedule-empty { text-align: center; padding: 3rem 1rem; color: var(--ems-neutral-500); }
+.schedule-empty i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
+.schedule-empty p { margin: 0; }

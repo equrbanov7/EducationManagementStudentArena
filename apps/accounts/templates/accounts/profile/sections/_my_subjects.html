@@ -11,6 +11,9 @@
                     <span>{% trans "Fənlərim" context "profile.subjects" %}</span>
                 </div>
             </div>
+            <a class="my-subjects-schedule-link" href="{% url 'registrar:schedule' %}">
+                <i class="fas fa-calendar-week"></i> {% trans "Dərs cədvəli" context "profile.subjects" %}
+            </a>
             {% if sec.record %}
             <div class="my-subjects-meta">
                 <span class="my-subjects-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.name }}</span>

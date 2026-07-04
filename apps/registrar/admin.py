@@ -10,6 +10,7 @@ from .models import (
     Lesson,
     LessonMark,
     Program,
+    ScheduleSlot,
     StudentAcademicRecord,
     Subject,
 )
@@ -97,3 +98,11 @@ class LessonMarkAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     search_fields = ("enrollment__student__username",)
     raw_id_fields = ("lesson", "enrollment", "entered_by")
+
+
+@admin.register(ScheduleSlot)
+class ScheduleSlotAdmin(admin.ModelAdmin):
+    list_display = ("offering", "weekday", "start_time", "end_time", "room", "week_type", "organization")
+    list_filter = ("weekday", "week_type")
+    search_fields = ("offering__subject__code", "room")
+    raw_id_fields = ("offering", "created_by")

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Dərs cədvəli" context "registrar.schedule" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260704-1">
+{% endblock %}
+
+{% block content %}
+<div class="schedule-page">
+    <div class="schedule-head">
+        <h1 class="schedule-title"><i class="fas fa-calendar-week"></i> {% trans "Dərs cədvəli" context "registrar.schedule" %}</h1>
+        {% if has_context %}
+        <div class="schedule-meta">
+            <span><i class="fas fa-user"></i> {{ owner_label }}</span>
+            {% if period %}<span><i class="fas fa-calendar-alt"></i> {{ period.name }}</span>{% endif %}
+            <span class="schedule-role-badge">{% if role == 'student' %}{% trans "Qrup cədvəli" context "registrar.schedule" %}{% else %}{% trans "Müəllim cədvəli" context "registrar.schedule" %}{% endif %}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    {% include "accounts/profile/_messages.html" %}
+
+    {% if not has_context %}
+    <div class="schedule-empty"><i class="fas fa-info-circle"></i><p>{% trans "Aktiv təşkilat konteksti yoxdur." context "registrar.schedule" %}</p></div>
+    {% else %}
+
+    {% if teacher_offerings %}
+    <form method="post" class="schedule-add">
+        {% csrf_token %}
+        <span class="schedule-add-title"><i class="fas fa-plus-circle"></i> {% trans "Slot əlavə et" context "registrar.schedule" %}</span>
+        <select name="offering_id" required aria-label="{% trans 'Fənn' context 'registrar.schedule' %}">
+            {% for off in teacher_offerings %}<option value="{{ off.id }}">{{ off.subject.code }}{% if off.group %} · {{ off.group.name }}{% endif %}</option>{% endfor %}
+        </select>
+        <select name="weekday" aria-label="{% trans 'Gün' context 'registrar.schedule' %}">
+            {% for num, label in weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
+        </select>
+        <input type="time" name="start_time" required aria-label="{% trans 'Başlama' context 'registrar.schedule' %}">
+        <input type="time" name="end_time" required aria-label="{% trans 'Bitmə' context 'registrar.schedule' %}">
+        <input type="text" name="room" placeholder="{% trans 'Otaq' context 'registrar.schedule' %}" maxlength="64">
+        <select name="week_type" aria-label="{% trans 'Həftə' context 'registrar.schedule' %}">
+            {% for value, label in week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="schedule-add-btn">{% trans "Əlavə et" context "registrar.schedule" %}</button>
+    </form>
+    {% endif %}
+
+    <div class="schedule-grid">
+        {% for day in week_grid %}
+        <div class="schedule-day">
+            <div class="schedule-day-label">{{ day.label }}</div>
+            {% if day.slots %}
+            <ul class="schedule-slots">
+                {% for slot in day.slots %}
+                <li class="schedule-slot slot-{{ slot.offering.subject.code|slugify }}">
+                    <div class="slot-time">{{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}</div>
+                    <div class="slot-body">
+                        <div class="slot-subject">{{ slot.offering.subject.code }} — {{ slot.offering.subject.name }}</div>
+                        <div class="slot-detail">
+                            {% if slot.room %}<span><i class="fas fa-door-open"></i> {{ slot.room }}</span>{% endif %}
+                            {% if role == 'student' and slot.offering.instructor %}<span><i class="fas fa-chalkboard-teacher"></i> {{ slot.offering.instructor.get_full_name|default:slot.offering.instructor.username }}</span>{% endif %}
+                            {% if role == 'teacher' and slot.offering.group %}<span><i class="fas fa-users"></i> {{ slot.offering.group.name }}</span>{% endif %}
+                            {% if slot.week_type != 'all' %}<span class="slot-week">{{ slot.get_week_type_display }}</span>{% endif %}
+                        </div>
+                    </div>
+                    {% if teacher_offerings %}
+                    <form method="post" action="{% url 'registrar:schedule_slot_delete' slot.id %}" class="slot-del" onsubmit="return confirm('{% trans "Slotu silmək?" context "registrar.schedule" %}');">
+                        {% csrf_token %}
+                        <button type="submit" aria-label="{% trans 'Sil' context 'registrar.schedule' %}"><i class="fas fa-times"></i></button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="schedule-day-empty">—</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

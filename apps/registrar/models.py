@@ -458,3 +458,45 @@ class LessonMark(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.lesson_id} · {self.enrollment_id} = {self.status}"
+
+
+# ── Dərs cədvəli (timetable, U4) ─────────────────────────────────────────────
+#
+# Həftəlik təkrarlanan dərs slotu: fənn (offering) + həftənin günü + vaxt +
+# auditoriya. Qrup və müəllim offering-dən gəlir. Konflikt yoxlaması (eyni qrup /
+# müəllim / otaq × gün+vaxt üst-üstə düşməsin) servis qatındadır. Görünüş rol-
+# aware: tələbə öz qrupunun, müəllim öz slotlarının cədvəlini görür.
+
+
+class WeekType(models.TextChoices):
+    ALL = "all", pgettext_lazy("registrar.week_type", "Every week")
+    ODD = "odd", pgettext_lazy("registrar.week_type", "Odd weeks")  # üst həftə
+    EVEN = "even", pgettext_lazy("registrar.week_type", "Even weeks")  # alt həftə
+
+
+class ScheduleSlot(UUIDModel, TimeStampedModel):
+    """One weekly recurring class slot (a timetable row)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="schedule_slots"
+    )
+    offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="schedule_slots")
+    weekday = models.PositiveSmallIntegerField(help_text="Həftənin günü (1=Bazar ertəsi … 7=Bazar).")
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    room = models.CharField(max_length=64, blank=True, help_text="Auditoriya (opsional).")
+    week_type = models.CharField(max_length=8, choices=WeekType.choices, default=WeekType.ALL)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["weekday", "start_time"]
+        verbose_name = pgettext_lazy("registrar.model.slot.meta", "schedule slot")
+        verbose_name_plural = pgettext_lazy("registrar.model.slot.meta", "schedule slots")
+        indexes = [models.Index(fields=["organization", "offering", "weekday"])]
+
+    def __str__(self):
+        return f"{self.offering_id} · gün {self.weekday} {self.start_time}-{self.end_time}"
