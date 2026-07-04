@@ -281,4 +281,15 @@ class _Stage4Mixin:
             from apps.registrar.public import build_student_transcript_context
 
             self.context.update(build_student_transcript_context(self.request, organization=self.active_organization))
+        # U12 — registrar kabineti bölmələri (SPA panel): yalnız aktiv bölmə üçün
+        # qurulur (lazy) ki, hər profil açılışında lazımsız sorğular işləməsin.
+        _registrar_sections = {"my-schedule", "academic-calendar", "my-journal", "grade-approvals", "analytics"}
+        if self.active_section in _registrar_sections and self.active_section in self.allowed_sections:
+            from apps.registrar.public import build_profile_registrar_section
+
+            self.context.update(
+                build_profile_registrar_section(
+                    self.request, organization=self.active_organization, section=self.active_section
+                )
+            )
         return render(self.request, "accounts/profile.html", self.context)

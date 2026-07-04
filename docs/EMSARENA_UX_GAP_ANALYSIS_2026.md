@@ -184,9 +184,19 @@ istifadə); idxal ehtiyatlı (validasiya + preview).
 |---|---|---|---|
 | Qlobal naviqasiya (IA) | Sidebar bölmələri çoxdur | Universitet rejimində rol-aware, qruplaşdırılmış sidebar; "Akademik / İdarəetmə / İmtahan" bölgüsü | Yüksək |
 | **Qlobal axtarış** (⌘K) | Yoxdur | Command-palette (tələbə/fənn/offering/imtahan) — Linear/Notion pattern | Yüksək |
-| Cədvəllər (data table) | Fərqli səhifələrdə fərqli | Vahid **DataTable** komponenti: sort/filter/paginate/sütun-seçim/CSV | Yüksək |
+| Cədvəllər (data table) | ✅ **İCRA OLUNDU (U12)** | Vahid `static/js/ems_table.js` + `ems_components.css`: `data-ems-table` ilə opt-in sort (klik/klaviatura, aria-sort) + `data-ems-table-filter` sürətli axtarış. Analitika cədvəllərinə tətbiq edilib; qalan siyahılar mərhələli köçürülür. Profil panel swap-larından sonra avtomatik reinit (EMSProfileReinitHooks). | — |
 | Filtrlər | Ad-hoc | Vahid filter-bar (chip + saxlanan filtrlər) | Orta |
-| Boş/xəta/yüklənmə vəziyyətləri | Qismən (skeleton var) | Vahid **EmptyState / ErrorState / Skeleton** komponentləri hər siyahıda | Orta |
+| Boş/xəta/yüklənmə vəziyyətləri | ✅ **QİSMƏN İCRA (U12)** | Vahid `templates/partials/_empty_state.html` + `.ems-empty` stilləri (ikon/başlıq/ipucu parametrli). Yeni registrar səhifələri istifadəyə hazırdır; köhnə boş-vəziyyətlər mərhələli köçürülür. | — |
+
+> ✅ **U12 — Profil shell inteqrasiyası.** Bütün yeni registrar səhifələri (dərs cədvəli, akademik
+> təqvim, elektron jurnal siyahısı, qiymət təsdiqləri, analitika) artıq profil kabinetinin İÇİNDƏ
+> bölmə kimi açılır: sidebar itmir, sağ panel AJAX-la dəyişir (mövcud section-fragment framework-ü),
+> URL `?section=` ilə sinxron qalır (geri düyməsi işləyir). Sidebar-da yeni **"Universitet"** qrupu.
+> Tam səhifə yalnız nadir istisnalar üçündür (jurnal detalı — redaktə səthi, registrar konsolu —
+> form-ağır admin). Paylaşılan content partial-lar (`registrar/partials/_*_content.html`) +
+> `page_contexts.py` sayəsində kod dublikasiyası yoxdur; kontekstlər YALNIZ aktiv bölmə üçün
+> qurulur (lazy — performans). Cədvəl slot formaları `next` ilə shell-ə qayıdır.
+> Testlər: `apps/accounts/tests/test_registrar_sections.py` (9).
 | Təsdiq dialoqları | `confirm()` (native) | Token-əsaslı modal `ConfirmDialog` (destruktiv aksiyalar üçün) | Orta |
 | Dark mode | Qismən (token var) | `--ems-*` token-ləri ilə tam dark rejim auditi | Orta |
 | Əlçatanlıq (a11y) | Qismən | Klaviatura naviqasiyası, ARIA, focus-ring auditi; WCAG AA | Yüksək |

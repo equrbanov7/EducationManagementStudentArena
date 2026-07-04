@@ -49,6 +49,12 @@ def build_section_titles() -> dict:
         "my-results": pgettext_lazy("profile.section", "my_results"),
         "my-subjects": pgettext_lazy("profile.section", "my_subjects"),
         "my-transcript": pgettext_lazy("profile.section", "my_transcript"),
+        # U12 — registrar kabinet bölmələri
+        "my-schedule": pgettext_lazy("profile.sidebar", "Dərs cədvəli"),
+        "academic-calendar": pgettext_lazy("profile.sidebar", "Akademik təqvim"),
+        "my-journal": pgettext_lazy("profile.sidebar", "Elektron jurnal"),
+        "grade-approvals": pgettext_lazy("profile.sidebar", "Qiymət təsdiqləri"),
+        "analytics": pgettext_lazy("profile.sidebar", "Akademik analitika"),
         "pending-answers": pgettext_lazy("accounts.pending_answers", "section_title"),
         "groups": pgettext_lazy("profile.section", "groups"),
         "pending-post-approvals": "Postların idarəetməsi",

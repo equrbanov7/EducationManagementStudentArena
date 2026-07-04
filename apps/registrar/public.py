@@ -64,6 +64,32 @@ def build_student_transcript_context(request, *, organization) -> dict:
     return {"student_transcript_section": data}
 
 
+def build_profile_registrar_section(request, *, organization, section: str) -> dict:
+    """Context for the registrar cabinet sections rendered INSIDE the profile
+    shell (U12): schedule, academic calendar, teacher journal list, grade
+    approvals and analytics. Access is already gated by ``allowed_sections``
+    (rbac) + the AJAX-safe section whitelist; data scoping stays in the
+    registrar service layer (RLS/tenant).
+
+    Built lazily — only for the ACTIVE section (performance: no wasted queries)."""
+    from apps.registrar import page_contexts
+
+    if section in ("my-schedule", "academic-calendar", "grade-approvals", "analytics") and organization is None:
+        return {"has_context": False}
+
+    if section == "my-schedule":
+        return page_contexts.schedule_context(request, organization, embedded=True)
+    if section == "academic-calendar":
+        return page_contexts.calendar_context(organization)
+    if section == "my-journal":
+        return page_contexts.journal_list_context(request.user)
+    if section == "grade-approvals":
+        return page_contexts.approvals_context(request.user, organization)
+    if section == "analytics":
+        return page_contexts.analytics_context(request, organization, embedded=True)
+    return {}
+
+
 def _empty_section() -> dict:
     return {
         "has_record": False,

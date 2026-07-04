@@ -279,3 +279,19 @@
         justify-content: space-between;
     }
 }
+
+/* ── U12: registrar bölmələri profil panelində (embed normalizasiyası) ────── */
+/* Standalone səhifə konteynerlərinin öz max-width/padding-i panel içində
+   ikiqat boşluq yaradır — sıfırlanır; panel eni profile-main-ə uyğunlaşır. */
+.profile-section--registrar-embed .journal-page,
+.profile-section--registrar-embed .schedule-page {
+    max-width: none;
+    margin: 0;
+    padding: 0 0 1rem;
+}
+/* Panel başlığını profil header-i göstərir — səhifə h1-i dublikat olur. */
+.profile-section--registrar-embed .schedule-title,
+.profile-section--registrar-embed .journal-title,
+.profile-section--registrar-embed .journal-subtitle {
+    display: none;
+}

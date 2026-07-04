@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}U12 — registrar kabinet bölməsi: paylaşılan content partial-ı profil
+shell-inin sağ panelində göstərir (sidebar itmir). Kontekst: apps.registrar.public.
+build_profile_registrar_section (yalnız aktiv bölmə üçün qurulur — lazy).{% endcomment %}
+<section class="profile-section-panel profile-section--grade-approvals profile-section--registrar-embed {% if active_section == 'grade-approvals' %}is-active{% endif %}"
+         data-profile-section-panel="grade-approvals"
+         data-source-url="{{ profile_base_url }}?section=grade-approvals">
+    {% include "registrar/partials/_approvals_content.html" %}
+</section>

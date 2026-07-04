@@ -1,0 +1,58 @@
+/* Vahid UX komponentləri (U12): EmptyState + DataTable. WCU tokens only. */
+
+/* ── EmptyState ───────────────────────────────────────────────────────────── */
+.ems-empty {
+    padding: 2.4rem 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+.ems-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-400);
+    font-size: 1.4rem;
+    margin-bottom: 0.7rem;
+}
+.ems-empty-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+}
+.ems-empty-hint {
+    margin: 0.3rem 0 0;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-500);
+}
+
+/* ── DataTable (sort + quick filter) ─────────────────────────────────────── */
+.ems-th-sortable { cursor: pointer; user-select: none; position: relative; }
+.ems-th-sortable:hover { color: var(--ems-primary-700); }
+.ems-th-sortable::after {
+    content: "⇅";
+    font-size: 0.65rem;
+    margin-left: 4px;
+    opacity: 0.45;
+}
+.ems-th-sortable[aria-sort="ascending"]::after { content: "↑"; opacity: 1; color: var(--ems-primary-600); }
+.ems-th-sortable[aria-sort="descending"]::after { content: "↓"; opacity: 1; color: var(--ems-primary-600); }
+
+.ems-table-filter { margin: 0 0 0.6rem; display: flex; justify-content: flex-end; }
+.ems-table-filter-input {
+    padding: 6px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.83rem;
+    min-width: 220px;
+    color: var(--ems-neutral-800);
+}
+.ems-table-filter-input:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}

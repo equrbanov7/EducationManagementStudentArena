@@ -23166,15 +23166,15 @@ msgstr "Öğretmen"
 
 msgctxt "registrar.degree"
 msgid "Master"
-msgstr ""
+msgstr "Yüksek lisans"
 
 msgctxt "registrar.degree"
 msgid "PhD"
-msgstr ""
+msgstr "Doktora"
 
 msgctxt "registrar.model.program.meta"
 msgid "program"
-msgstr ""
+msgstr "program"
 
 #, fuzzy
 #| msgctxt "exams.model.attempt.choice.status"
@@ -23199,19 +23199,19 @@ msgstr "Aboneliğe hoş geldiniz! [Blog Adınız]"
 
 msgctxt "registrar.model.curriculum.meta"
 msgid "curriculum"
-msgstr ""
+msgstr "müfredat"
 
 msgctxt "registrar.model.curriculum.meta"
 msgid "curricula"
-msgstr ""
+msgstr "müfredatlar"
 
 msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subject"
-msgstr ""
+msgstr "müfredat dersi"
 
 msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subjects"
-msgstr ""
+msgstr "müfredat dersleri"
 
 #, fuzzy
 #| msgctxt "organizations.unit_type"
@@ -23229,19 +23229,19 @@ msgstr "Aktif"
 
 msgctxt "registrar.enrollment_kind"
 msgid "Retake"
-msgstr ""
+msgstr "Tekrar"
 
 msgctxt "registrar.model.student_record.meta"
 msgid "student academic record"
-msgstr ""
+msgstr "öğrenci akademik kaydı"
 
 msgctxt "registrar.model.student_record.meta"
 msgid "student academic records"
-msgstr ""
+msgstr "öğrenci akademik kayıtları"
 
 msgctxt "registrar.model.offering.meta"
 msgid "course offering"
-msgstr ""
+msgstr "ders açılışı"
 
 #, fuzzy
 #| msgctxt "accounts.teacher_dashboard"
@@ -23252,7 +23252,7 @@ msgstr "Courses"
 
 msgctxt "registrar.enrollment_status"
 msgid "Enrolled"
-msgstr ""
+msgstr "Kayıtlı"
 
 #, fuzzy
 #| msgctxt "exams.template.exam_live_monitor"
@@ -23270,7 +23270,7 @@ msgstr "Kendi profilinize geri döndünüz."
 
 msgctxt "registrar.model.enrollment.meta"
 msgid "enrollment"
-msgstr ""
+msgstr "ders kaydı"
 
 #, fuzzy
 #| msgctxt "blog.post_detail_page"
@@ -23281,11 +23281,11 @@ msgstr "Henüz yorum yok. İlk yorumu siz yazın."
 
 msgctxt "registrar.model.group_elective.meta"
 msgid "group elective choice"
-msgstr ""
+msgstr "grup seçmeli kararı"
 
 msgctxt "registrar.model.group_elective.meta"
 msgid "group elective choices"
-msgstr ""
+msgstr "grup seçmeli kararları"
 
 msgctxt "registrar.lesson_kind"
 msgid "Lecture"
@@ -27658,6 +27658,18 @@ msgstr "Akademik takvim"
 
 msgid "Akademik təqvim"
 msgstr "Akademik takvim"
+
+msgctxt "profile.sidebar"
+msgid "Universitet"
+msgstr "Üniversite"
+
+msgctxt "profile.sidebar"
+msgid "Dərs cədvəli"
+msgstr "Ders programı"
+
+msgctxt "profile.sidebar"
+msgid "Elektron jurnal"
+msgstr "Elektronik jurnal"
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"

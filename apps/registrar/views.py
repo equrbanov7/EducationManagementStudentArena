@@ -20,12 +20,10 @@ from django.utils.translation import gettext as _
 from . import approval, finals, grade_audit, gradebook, schedule
 from .models import (
     ApprovalStatus,
-    AssessmentScheme,
     AttendanceStatus,
     CourseOffering,
     LessonKind,
     ScheduleSlot,
-    StudentAcademicRecord,
     WeekType,
 )
 
@@ -55,16 +53,11 @@ def _can_edit_journal(user, offering) -> bool:
 @login_required
 def journal_list(request):
     """The teacher's own offerings — entry points into each journal."""
-    offerings = (
-        CourseOffering.objects.filter(instructor=request.user, is_active=True)
-        .select_related("subject", "period", "group")
-        .order_by("-period__start_date", "subject__code")
-    )
-    return render(
-        request,
-        "registrar/journal_list.html",
-        {"offerings": offerings, "active_main_nav": "journal"},
-    )
+    from apps.registrar import page_contexts
+
+    context = page_contexts.journal_list_context(request.user)
+    context["active_main_nav"] = "journal"
+    return render(request, "registrar/journal_list.html", context)
 
 
 @login_required
@@ -164,32 +157,17 @@ def _handle_return(request, offering):
 @login_required
 def approvals_inbox(request):
     """Chair/dean inbox: journals awaiting the current user's approval step."""
+    from apps.registrar import page_contexts
+
     organization = getattr(request, "organization", None)
     if organization is None:
         return render(request, "registrar/approvals_inbox.html", {"has_context": False, "active_main_nav": "approvals"})
 
-    statuses = []
-    if approval.can_chair_approve(request.user, organization):
-        statuses.append(ApprovalStatus.SUBMITTED)
-    if approval.can_dean_approve(request.user, organization):
-        statuses.append(ApprovalStatus.CHAIR_APPROVED)
-    if not statuses:
+    context = page_contexts.approvals_context(request.user, organization)
+    if not context["is_approver"]:
         raise Http404  # not an approver in this org
-
-    schemes = (
-        AssessmentScheme.objects.filter(organization=organization, approval_status__in=statuses)
-        .select_related("offering__subject", "offering__group", "offering__period", "offering__instructor")
-        .order_by("offering__subject__code")
-    )
-    return render(
-        request,
-        "registrar/approvals_inbox.html",
-        {
-            "has_context": True,
-            "schemes": schemes,
-            "active_main_nav": "approvals",
-        },
-    )
+    context["active_main_nav"] = "approvals"
+    return render(request, "registrar/approvals_inbox.html", context)
 
 
 def _handle_save_components(request, offering):
@@ -312,77 +290,33 @@ def schedule_view(request):
     """Role-aware weekly timetable: student → group schedule, teacher → own slots.
 
     Teachers/org-owners may add slots for the offerings they teach (conflicts are
-    rejected in the service). Tenant scoping comes from the active-org RLS context."""
+    rejected in the service). Tenant scoping comes from the active-org RLS context.
+    Context building is shared with the profile cabinet section (page_contexts)."""
+    from apps.registrar import page_contexts
+
     organization = getattr(request, "organization", None)
     if organization is None:
         return render(request, "registrar/schedule.html", {"has_context": False, "active_main_nav": "schedule"})
 
-    period = _current_period(organization)
-
     if request.method == "POST":
-        return _handle_add_slot(request, organization, period)
+        return _handle_add_slot(request, organization, _current_period(organization))
 
-    try:
-        week_offset = max(-8, min(16, int(request.GET.get("w") or 0)))
-    except (TypeError, ValueError):
-        week_offset = 0
-    week_context = schedule.build_week_context(period, offset=week_offset)
+    context = page_contexts.schedule_context(request, organization)
+    context["active_main_nav"] = "schedule"
+    return render(request, "registrar/schedule.html", context)
 
-    record = (
-        StudentAcademicRecord.objects.filter(organization=organization, student=request.user)
-        .select_related("group")
-        .first()
-    )
-    teacher_offerings = []
-    exam_author = None
-    course_ids = []
-    if record and record.group and period:
-        role = "student"
-        owner_label = record.group.name
-        slots = schedule.get_group_schedule(organization=organization, group=record.group, period=period)
-        course_ids = list(
-            CourseOffering.objects.filter(organization=organization, group=record.group, period=period).values_list(
-                "course_id", flat=True
-            )
-        )
-    else:
-        role = "teacher"
-        owner_label = request.user.get_full_name() or request.user.username
-        exam_author = request.user
-        if period:
-            slots = schedule.get_teacher_schedule(organization=organization, teacher=request.user, period=period)
-            teacher_offerings = list(
-                CourseOffering.objects.filter(
-                    organization=organization, instructor=request.user, period=period, is_active=True
-                ).select_related("subject", "group")
-            )
-            course_ids = [off.course_id for off in teacher_offerings]
-        else:
-            slots = []
 
-    exams_by_day = schedule.get_week_exams(
-        organization=organization,
-        course_ids=course_ids,
-        monday=week_context["monday"],
-        author=exam_author,
-    )
+def _redirect_after_schedule(request):
+    """Redirect back to the caller: the profile shell (`next`, same-host only)
+    or the standalone schedule page. Keeps the sidebar context after slot POSTs."""
+    from django.utils.http import url_has_allowed_host_and_scheme
 
-    return render(
-        request,
-        "registrar/schedule.html",
-        {
-            "has_context": True,
-            "role": role,
-            "owner_label": owner_label,
-            "period": period,
-            "week": week_context,
-            "week_days": schedule.build_week_view(slots, week_context=week_context, exams_by_day=exams_by_day),
-            "teacher_offerings": teacher_offerings,
-            "weekdays": schedule.WEEKDAYS,
-            "week_types": WeekType.choices,
-            "active_main_nav": "schedule",
-        },
-    )
+    nxt = request.POST.get("next") or ""
+    if nxt and url_has_allowed_host_and_scheme(
+        nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(nxt)
+    return redirect(reverse("registrar:schedule"))
 
 
 def _handle_add_slot(request, organization, period):
@@ -407,7 +341,7 @@ def _handle_add_slot(request, organization, period):
         week_type = WeekType.ALL
     if not (1 <= weekday <= 7) or start_time is None or end_time is None or start_time >= end_time:
         messages.error(request, _("Gün və düzgün başlama/bitmə vaxtı tələb olunur."))
-        return redirect(reverse("registrar:schedule"))
+        return _redirect_after_schedule(request)
 
     try:
         schedule.create_slot(
@@ -427,7 +361,7 @@ def _handle_add_slot(request, organization, period):
             _("Konflikt: bu vaxt %(subject)s ilə üst-üstə düşür (qrup/müəllim/otaq).")
             % {"subject": clash.offering.subject.code},
         )
-    return redirect(reverse("registrar:schedule"))
+    return _redirect_after_schedule(request)
 
 
 @login_required
@@ -437,7 +371,7 @@ def schedule_slot_delete(request, slot_id):
     if request.method == "POST" and _can_edit_journal(request.user, slot.offering):
         slot.delete()
         messages.success(request, _("Slot silindi."))
-    return redirect(reverse("registrar:schedule"))
+    return _redirect_after_schedule(request)
 
 
 # ── Akademik təqvim (U11) ────────────────────────────────────────────────────
@@ -450,30 +384,15 @@ def calendar_view(request):
     Read-only and open to every authenticated member of the active organization
     (students plan around these dates as much as staff). Window editing lives in
     the AcademicPeriod admin — tenant-configurable, per the variable-structure rule."""
-    from django.apps import apps as django_apps
-    from django.utils import timezone
+    from apps.registrar import page_contexts
 
     organization = getattr(request, "organization", None)
     if organization is None:
         return render(request, "registrar/calendar.html", {"has_context": False, "active_main_nav": "calendar"})
 
-    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    today = timezone.localdate()
-    periods = []
-    for period in AcademicPeriod.objects.filter(organization=organization).order_by("-start_date"):
-        periods.append(
-            {
-                "period": period,
-                "is_running": period.start_date <= today <= period.end_date,
-                "registration_state": period.registration_state,
-                "exam_session_state": period.exam_session_state,
-            }
-        )
-    return render(
-        request,
-        "registrar/calendar.html",
-        {"has_context": True, "periods": periods, "today": today, "active_main_nav": "calendar"},
-    )
+    context = page_contexts.calendar_context(organization)
+    context["active_main_nav"] = "calendar"
+    return render(request, "registrar/calendar.html", context)
 
 
 # The registrar console (K3) views live in ``apps.registrar.console_views`` to
