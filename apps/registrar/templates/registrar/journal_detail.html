@@ -115,6 +115,72 @@
         <p>{% trans "Hələ dərs əlavə edilməyib. Yuxarıdan dərs əlavə edin — sonra iştirak/qayıb və bal yazın." context "registrar.journal" %}</p>
     </div>
     {% endif %}
+
+    {# ── Yekun / Nəticə (final grade + resit) ────────────────────────────── #}
+    <h2 class="journal-finals-title"><i class="fas fa-award"></i> {% trans "Yekun nəticə" context "registrar.finals" %}</h2>
+    <form method="post" class="journal-finals-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_finals">
+        <div class="journal-grid-wrap">
+            <table class="journal-grid finals-grid">
+                <thead>
+                    <tr>
+                        <th class="col-student">{% trans "Tələbə" context "registrar.journal" %}</th>
+                        <th>{% trans "Giriş balı" context "registrar.journal" %}</th>
+                        <th>{% trans "Yekun imtahan" context "registrar.finals" %}</th>
+                        <th>{% trans "Ümumi" context "registrar.finals" %}</th>
+                        <th>{% trans "Hərf" context "registrar.journal" %}</th>
+                        <th>{% trans "Nəticə" context "registrar.finals" %}</th>
+                        <th>{% trans "Təkrar imtahan" context "registrar.finals" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in finals.rows %}
+                    {% with r=row.result %}
+                    <tr class="journal-row {% if r.failed %}row-barred{% endif %}">
+                        <td class="col-student"><span class="student-name">{{ row.student.get_full_name|default:row.student.username }}</span></td>
+                        <td>{{ r.entry_score|floatformat:'-2' }}<span class="col-max">/{{ finals.scheme.entry_score_max }}</span></td>
+                        <td>
+                            {% if can_edit %}
+                            <input type="number" class="cell-score" min="0" max="{{ r.exam_score_max }}" step="0.5"
+                                   name="exam__{{ row.enrollment.id }}" value="{% if r.exam_score is not None %}{{ r.exam_score|floatformat:'-2' }}{% endif %}"
+                                   placeholder="{% trans 'bal' context 'registrar.journal' %}">
+                            {% else %}{{ r.exam_score|default_if_none:"—" }}{% endif %}
+                        </td>
+                        <td class="cell-total">{% if r.graded %}{{ r.total|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                        <td>{% if r.graded %}<span class="cell-letter grade-{{ r.letter }}">{{ r.letter }}</span>{% else %}—{% endif %}</td>
+                        <td>
+                            {% if r.barred %}<span class="journal-badge journal-badge--barred">{% trans "Kəsilir (qayıb)" context "registrar.finals" %}</span>
+                            {% elif r.passed %}<span class="journal-badge journal-badge--ok">{% trans "Keçdi" context "registrar.finals" %}</span>
+                            {% elif r.failed %}<span class="journal-badge journal-badge--barred">{% trans "Kəsildi" context "registrar.finals" %}</span>
+                            {% else %}<span class="journal-badge journal-badge--warn">{% trans "Qiymətlənməyib" context "registrar.finals" %}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if r.resit %}
+                                {% if can_edit %}
+                                <input type="number" class="cell-score" min="0" max="{{ r.exam_score_max }}" step="0.5"
+                                       name="resit__{{ row.enrollment.id }}" value="{% if r.resit.resit_score is not None %}{{ r.resit.resit_score|floatformat:'-2' }}{% endif %}"
+                                       placeholder="{% trans 'təkrar bal' context 'registrar.finals' %}">
+                                {% else %}{{ r.resit.resit_score|default_if_none:"—" }}{% endif %}
+                                <span class="resit-badge">{{ r.resit.get_status_display }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if can_edit %}
+        <div class="journal-actions">
+            <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Nəticələri saxla" context "registrar.finals" %}</button>
+            <button type="submit" name="action" value="publish" class="journal-publish-btn"
+                    onclick="return confirm('{% trans "Jurnalı yekunlaşdırmaq? Sonra redaktə bağlanır." context "registrar.finals" %}');">
+                <i class="fas fa-lock"></i> {% trans "Yekunlaşdır" context "registrar.finals" %}
+            </button>
+        </div>
+        {% endif %}
+    </form>
     {% else %}
     <div class="journal-empty">
         <i class="fas fa-user-slash"></i>

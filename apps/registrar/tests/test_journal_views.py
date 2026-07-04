@@ -128,3 +128,37 @@ class JournalViewTest(TestCase):
         self.assertEqual(resp.status_code, 404)
         with bypass_rls():
             self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
+
+
+class JournalFinalsViewTest(JournalViewTest):
+    """Final-exam + publish actions on the journal page (U3+)."""
+
+    def test_save_finals_records_exam_score(self):
+        from apps.registrar.models import FinalGrade
+
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            fg = FinalGrade.objects.get(enrollment=self.enrollment)
+            self.assertEqual(str(fg.exam_score), "42.00")
+
+    def test_publish_locks_journal(self):
+        client = self._client(self.teacher)
+        resp = client.post(reverse("registrar:journal_detail", args=[self.offering.id]), {"action": "publish"})
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            from apps.registrar.models import AssessmentScheme
+
+            self.assertTrue(AssessmentScheme.objects.get(offering=self.offering).is_published)
+
+    def test_non_instructor_cannot_save_finals(self):
+        client = self._client(self.other_teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
+        )
+        self.assertEqual(resp.status_code, 404)

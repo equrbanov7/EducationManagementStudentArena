@@ -141,3 +141,13 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
                 ScheduleSlot.objects.filter(organization=org).count(),
                 CourseOffering.objects.filter(organization=org).count(),
             )
+
+    def test_seeds_finals_and_resit(self):
+        from apps.registrar.models import FinalGrade, ResitRecord
+
+        self._seed()
+        with bypass_rls():
+            org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
+            # Final-exam scores + at least one resit (the barred/failing AZ students).
+            self.assertGreater(FinalGrade.objects.filter(organization=org).count(), 0)
+            self.assertGreater(ResitRecord.objects.filter(organization=org).count(), 0)

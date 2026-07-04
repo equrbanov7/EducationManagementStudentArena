@@ -24,6 +24,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
+from apps.registrar import finals as registrar_finals
 from apps.registrar import gradebook as registrar_gradebook
 from apps.registrar import schedule as registrar_schedule
 from apps.registrar import services as registrar_services
@@ -399,6 +400,17 @@ class Command(BaseCommand):
                         }
                     )
                 registrar_gradebook.save_marks(offering=offering, entries=entries, by_user=teacher)
+
+            # Yekun imtahan + təkrar imtahan demo: barred AZ student → resit
+            # (absence); az2 → low exam (fails → resit); others → pass.
+            for enrollment in enrollments:
+                uname = enrollment.student.username
+                if uname == "wcu_student_az1":
+                    registrar_finals.evaluate_resit(enrollment=enrollment, by_user=teacher)
+                else:
+                    registrar_finals.set_exam_score(
+                        enrollment=enrollment, score=10 if uname == "wcu_student_az2" else 40, by_user=teacher
+                    )
 
         self._seed_schedule(org)
 

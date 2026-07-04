@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import gradebook, schedule
+from . import finals, gradebook, schedule
 from .models import AttendanceStatus, CourseOffering, LessonKind, ScheduleSlot, StudentAcademicRecord, WeekType
 
 
@@ -72,6 +72,12 @@ def journal_detail(request, offering_id):
         action = request.POST.get("action")
         if action == "add_lesson":
             return _handle_add_lesson(request, offering)
+        if action == "save_finals":
+            return _handle_save_finals(request, offering)
+        if action == "publish":
+            finals.publish_offering(offering=offering, by_user=request.user)
+            messages.success(request, _("Jurnal yekunlaşdırıldı."))
+            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
         return _handle_save_marks(request, offering)
 
     journal = gradebook.get_offering_journal(offering=offering)
@@ -81,11 +87,32 @@ def journal_detail(request, offering_id):
         {
             "offering": offering,
             "journal": journal,
+            "finals": finals.get_offering_results(offering=offering),
             "can_edit": not journal["scheme"].is_published,
             "lesson_kinds": LessonKind.choices,
             "active_main_nav": "journal",
         },
     )
+
+
+def _handle_save_finals(request, offering):
+    """Persist final-exam + resit scores per student (exam__<enr> / resit__<enr>)."""
+    if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
+        messages.warning(request, _("Jurnal yekunlaşdırılıb — nəticə redaktəsi bağlıdır."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+    enrollments = {str(e.id): e for e in offering.enrollments.all()}
+    for key, raw in request.POST.items():
+        if key.startswith("exam__"):
+            enrollment = enrollments.get(key[len("exam__") :])
+            if enrollment is not None:
+                finals.set_exam_score(enrollment=enrollment, score=raw, by_user=request.user)
+        elif key.startswith("resit__"):
+            enrollment = enrollments.get(key[len("resit__") :])
+            if enrollment is not None and raw.strip() != "":
+                finals.set_resit_score(enrollment=enrollment, score=raw, by_user=request.user)
+    messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
 def _handle_add_lesson(request, offering):

@@ -369,3 +369,29 @@
     text-decoration: none;
 }
 .my-subjects-schedule-link:hover { text-decoration: underline; }
+
+/* ── Final result + resit (U3+) ───────────────────────────────────────────── */
+.subject-final {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px dashed var(--ems-neutral-200);
+    font-size: 0.8rem;
+}
+.subject-final-total { color: var(--ems-neutral-700); }
+.subject-final-total strong { color: var(--ems-neutral-900); }
+.subject-final-letter { font-weight: 700; padding: 1px 7px; border-radius: 5px; }
+.subject-resit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
