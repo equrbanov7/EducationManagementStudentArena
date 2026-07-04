@@ -27182,6 +27182,38 @@ msgctxt "registrar.console"
 msgid "Akademik status"
 msgstr "Академический статус"
 
+msgctxt "registrar.console"
+msgid "Yeni qrup"
+msgstr "Новая группа"
+
+msgctxt "registrar.console"
+msgid "Səbəb (opsional)"
+msgstr "Причина (необязательно)"
+
+msgctxt "registrar.console"
+msgid "Qrup köçürmə"
+msgstr "Перевод группы"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı"
+msgstr "Назначение студента"
+
+msgctxt "registrar.console"
+msgid "Hazırkı qrup"
+msgstr "Текущая группа"
+
+msgctxt "registrar.console"
+msgid ""
+"Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə"
+" bölmənin davamiyyəti sıfırlanır."
+msgstr ""
+"Перевод переносит групповые предметы текущего семестра в секции новой "
+"группы; посещаемость старой секции сбрасывается."
+
+msgctxt "registrar.console"
+msgid "Başqa qrupa köçür"
+msgstr "Перевести в другую группу"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

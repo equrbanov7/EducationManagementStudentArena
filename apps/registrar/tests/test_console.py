@@ -346,6 +346,28 @@ class RegistrarConsoleTest(TestCase):
                 ).exists()
             )
 
+    def test_transfer_student_to_new_group(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+            record = StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=self.student,
+                program=self.program,
+                curriculum=curriculum,
+                group=self.group,
+                admission_year=2024,
+            )
+            group2 = OrgUnit.objects.create(organization=self.org, name="G2", slug="rc-g2", unit_type=OrgUnitType.GROUP)
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:student_transfer", args=[record.id]),
+            {"new_group": str(group2.id), "reason": "köçürmə testi"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            record.refresh_from_db()
+            self.assertEqual(record.group_id, group2.id)
+
     def test_change_status_syncs_is_active(self):
         with bypass_rls():
             curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)

@@ -239,3 +239,16 @@
 .status-badge--academic_leave { background: var(--ems-warning-100); color: var(--ems-warning-800); }
 .status-badge--expelled { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
 .status-badge--graduated { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+
+.console-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-600);
+    background: var(--ems-neutral-50);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+}
+.console-note i { color: var(--ems-primary-500); margin-top: 2px; }

@@ -332,3 +332,26 @@ class StudentRecordForm(_OrgScopedModelForm):
                     pgettext_lazy("registrar.console", "Bu tələbə həmin ixtisasa artıq təyin olunub.")
                 )
         return cleaned
+
+
+class StudentTransferForm(forms.Form):
+    """Move a student to another group (U6.1). Scoped to the org's groups."""
+
+    new_group = forms.ModelChoiceField(queryset=None, label=pgettext_lazy("registrar.console", "Yeni qrup"))
+    reason = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2}),
+        label=pgettext_lazy("registrar.console", "Səbəb (opsional)"),
+    )
+
+    def __init__(self, *args, organization=None, current_group=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        org_unit = django_apps.get_model("organizations", "OrgUnit")
+        qs = (
+            org_unit.objects.filter(organization=organization, unit_type="group")
+            if organization
+            else org_unit.objects.none()
+        )
+        if current_group is not None:
+            qs = qs.exclude(pk=current_group.pk)
+        self.fields["new_group"].queryset = qs.order_by("name")

@@ -27123,6 +27123,38 @@ msgctxt "registrar.console"
 msgid "Akademik status"
 msgstr "Akademik status"
 
+msgctxt "registrar.console"
+msgid "Yeni qrup"
+msgstr "Yeni qrup"
+
+msgctxt "registrar.console"
+msgid "Səbəb (opsional)"
+msgstr "Səbəb (opsional)"
+
+msgctxt "registrar.console"
+msgid "Qrup köçürmə"
+msgstr "Qrup köçürmə"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı"
+msgstr "Tələbə təyinatı"
+
+msgctxt "registrar.console"
+msgid "Hazırkı qrup"
+msgstr "Hazırkı qrup"
+
+msgctxt "registrar.console"
+msgid ""
+"Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə"
+" bölmənin davamiyyəti sıfırlanır."
+msgstr ""
+"Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə"
+" bölmənin davamiyyəti sıfırlanır."
+
+msgctxt "registrar.console"
+msgid "Başqa qrupa köçür"
+msgstr "Başqa qrupa köçür"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"
