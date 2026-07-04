@@ -27276,6 +27276,38 @@ msgstr "Dean approval granted — grades are now official."
 msgid "Jurnal düzəliş üçün geri qaytarıldı."
 msgstr "The journal was returned for revision."
 
+msgctxt "registrar.audit"
+msgid "Qiymət dəyişikliyi tarixçəsi"
+msgstr "Grade change history"
+
+msgctxt "registrar.audit"
+msgid "kim, nə vaxt, köhnə → yeni"
+msgstr "who, when, old → new"
+
+msgctxt "registrar.audit"
+msgid "Sistem"
+msgstr "System"
+
+msgctxt "registrar.audit"
+msgid "dəyişiklik"
+msgstr "change(s)"
+
+msgctxt "registrar.audit"
+msgid "Davamiyyət/bal"
+msgstr "Attendance/score"
+
+msgctxt "registrar.audit"
+msgid "Komponent balı"
+msgstr "Component score"
+
+msgctxt "registrar.audit"
+msgid "Yekun imtahan"
+msgstr "Final exam"
+
+msgctxt "registrar.audit"
+msgid "Təkrar imtahan"
+msgstr "Resit exam"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

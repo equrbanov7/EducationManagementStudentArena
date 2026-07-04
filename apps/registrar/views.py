@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import approval, finals, gradebook, schedule
+from . import approval, finals, grade_audit, gradebook, schedule
 from .models import (
     ApprovalStatus,
     AssessmentScheme,
@@ -129,6 +129,7 @@ def journal_detail(request, offering_id):
             "component_grid": gradebook.get_component_grid(offering=offering),
             "can_edit": can_edit_perm and not appr["is_locked"],
             "approval": appr,
+            "grade_history": grade_audit.get_grade_history(offering=offering),
             "lesson_kinds": LessonKind.choices,
             "active_main_nav": "journal",
         },

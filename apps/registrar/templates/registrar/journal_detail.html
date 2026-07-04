@@ -4,7 +4,7 @@
 {% block title %}{{ offering.subject.name }} — {% trans "Jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260705-2">
 {% endblock %}
 
 {% block content %}
@@ -307,6 +307,44 @@
         </div>
         {% endif %}
     </form>
+
+    {# ── Qiymət dəyişikliyi tarixçəsi (grade-change audit trail, U7.3) ────── #}
+    {% if grade_history %}
+    <h2 class="journal-finals-title"><i class="fas fa-history"></i> {% trans "Qiymət dəyişikliyi tarixçəsi" context "registrar.audit" %}
+        <span class="journal-components-hint">{% trans "kim, nə vaxt, köhnə → yeni" context "registrar.audit" %}</span>
+    </h2>
+    <div class="grade-history">
+        {% for entry in grade_history %}
+        <div class="grade-history-item">
+            <div class="grade-history-head">
+                <span class="grade-history-kind grade-history-kind--{{ entry.kind }}">
+                    {% if entry.kind == 'mark' %}{% trans "Davamiyyət/bal" context "registrar.audit" %}
+                    {% elif entry.kind == 'component' %}{% trans "Komponent balı" context "registrar.audit" %}
+                    {% elif entry.kind == 'final' %}{% trans "Yekun imtahan" context "registrar.audit" %}
+                    {% elif entry.kind == 'resit' %}{% trans "Təkrar imtahan" context "registrar.audit" %}
+                    {% else %}{{ entry.kind_label }}{% endif %}
+                </span>
+                <span class="grade-history-meta">
+                    <i class="fas fa-user"></i> {% if entry.user %}{{ entry.user.get_full_name|default:entry.user.username }}{% else %}{% trans "Sistem" context "registrar.audit" %}{% endif %}
+                    · <i class="fas fa-clock"></i> {{ entry.when|date:"d.m.Y H:i" }}
+                    · <span class="grade-history-count">{{ entry.count }} {% trans "dəyişiklik" context "registrar.audit" %}</span>
+                </span>
+            </div>
+            <ul class="grade-history-changes">
+                {% for ch in entry.changes %}
+                <li>
+                    <span class="gh-student">{{ ch.student }}</span>
+                    <span class="gh-item">{{ ch.item }}</span>
+                    <span class="gh-old">{{ ch.old }}</span>
+                    <i class="fas fa-arrow-right gh-arrow"></i>
+                    <span class="gh-new">{{ ch.new }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% else %}
     <div class="journal-empty">
         <i class="fas fa-user-slash"></i>

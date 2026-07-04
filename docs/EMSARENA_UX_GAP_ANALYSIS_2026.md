@@ -150,6 +150,14 @@ UNEC *dekanlıq təsdiqi*.
 > kafedra/dekan üçün **"Qiymət təsdiqləri"** inbox-u (`/jurnal/tesdiqler/`). Testlər: `test_approval.py`
 > (15 test). Növbəti (#3): qiymət dəyişikliyi audit izi (artıq qismən `audit`-ə yazılır).
 
+> ✅ **İCRA OLUNDU (U7.3) — qiymət dəyişikliyi audit izi.** `apps/registrar/grade_audit.py`:
+> `save_marks / save_component_scores / set_exam_score / set_resit_score` funksiyaları hər real
+> dəyişiklikdə (**köhnə ≠ yeni**) mövcud `audit.AuditLog`-a (``changes``/``new_values`` JSON) **kim /
+> nə vaxt / köhnə → yeni** yazır — save əməliyyatı başına BİR aqreqat qeyd (dəyişməyən xanalar sıfır
+> qeyd). `resource_type=registrar.grade.*`, `resource_id=offering`. Jurnal səhifəsində **"Qiymət
+> dəyişikliyi tarixçəsi"** paneli (köhnə=qırmızı üstüxətli → yeni=yaşıl). Testlər: `test_grade_audit.py`
+> (6 test). Bununla §110-dakı "hər bal dəyişikliyinin versiyası izlənmir" boşluğu bağlanır.
+
 **Yüksək #3 — Bal dəyişiklik tarixçəsi (audit trail).** `LessonMarkHistory` və ya `GradeChangeLog`
 (mark, old, new, by, reason, at). Enterprise auditor tələbi + apellyasiya sübutu. Onsuz da `audit`
 app var → ora yazmaq kifayətdir (yeni cədvəl minimuma endirilir).
