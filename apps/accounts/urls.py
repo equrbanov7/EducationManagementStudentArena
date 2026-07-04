@@ -53,6 +53,8 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("dashboard/student/", views.student_dashboard, name="student_dashboard"),
     path("dashboard/teacher/", views.teacher_dashboard, name="teacher_dashboard"),
+    # Global search (⌘K command palette) — role/tenant-aware JSON.
+    path("search/", views.global_search, name="global_search"),
     # Profile
     path("profile/", views.user_profile, name="profile"),
     path("profile/statistics/export-csv/", views.statistics_export_csv, name="statistics_export_csv"),

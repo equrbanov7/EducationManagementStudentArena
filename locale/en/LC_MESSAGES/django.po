@@ -27308,6 +27308,76 @@ msgctxt "registrar.audit"
 msgid "Təkrar imtahan"
 msgstr "Resit exam"
 
+msgid "Profil"
+msgstr "Profile"
+
+msgid "Elektron jurnal"
+msgstr "Electronic journal"
+
+msgid "Dərs cədvəli"
+msgstr "Class schedule"
+
+msgid "Bildirişlər"
+msgstr "Notifications"
+
+msgid "Qiymət təsdiqləri"
+msgstr "Grade approvals"
+
+msgid "Registrar (kataloq)"
+msgstr "Registrar (catalogue)"
+
+msgid "Naviqasiya"
+msgstr "Navigation"
+
+msgid "Jurnallarım"
+msgstr "My journals"
+
+msgid "Fənlər"
+msgstr "Subjects"
+
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "search"
+msgid "Qlobal axtarış"
+msgstr "Global search"
+
+msgctxt "search"
+msgid "Fənn, tələbə, jurnal, səhifə axtar…"
+msgstr "Search subjects, students, journals, pages…"
+
+msgctxt "search"
+msgid "Axtarış sorğusu"
+msgstr "Search query"
+
+msgctxt "search"
+msgid "Axtarış nəticələri"
+msgstr "Search results"
+
+msgctxt "search"
+msgid "Nəticə tapılmadı"
+msgstr "No results found"
+
+msgctxt "search"
+msgid "naviqasiya"
+msgstr "navigate"
+
+msgctxt "search"
+msgid "seç"
+msgstr "select"
+
+msgctxt "search"
+msgid "bağla"
+msgstr "close"
+
+msgctxt "search"
+msgid "Axtar"
+msgstr "Search"
+
+msgctxt "search"
+msgid "Axtar (⌘K)"
+msgstr "Search (⌘K)"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

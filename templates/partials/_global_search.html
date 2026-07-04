@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}
+    Global ⌘K search overlay (U8). Opened via ⌘K / Ctrl+K or the navbar search
+    button ([data-global-search-open]). Role/tenant-aware results come from
+    accounts:global_search. Behaviour + a11y in static/js/global_search.js.
+    No inline JS/CSS (CSP-safe).
+{% endcomment %}
+<div class="gsearch" data-global-search data-search-url="{% url 'accounts:global_search' %}" hidden>
+    <div class="gsearch__backdrop" data-global-search-close></div>
+    <div class="gsearch__panel" role="dialog" aria-modal="true"
+         aria-label="{% trans 'Qlobal axtarış' context 'search' %}">
+        <div class="gsearch__input-wrap">
+            <i class="fas fa-magnifying-glass gsearch__input-icon" aria-hidden="true"></i>
+            <input type="text" class="gsearch__input" data-global-search-input
+                   placeholder="{% trans 'Fənn, tələbə, jurnal, səhifə axtar…' context 'search' %}"
+                   autocomplete="off" spellcheck="false" role="combobox"
+                   aria-expanded="true" aria-controls="gsearch-results" aria-autocomplete="list"
+                   aria-label="{% trans 'Axtarış sorğusu' context 'search' %}">
+            <kbd class="gsearch__esc">esc</kbd>
+        </div>
+        <div class="gsearch__results" id="gsearch-results" data-global-search-results role="listbox"
+             aria-label="{% trans 'Axtarış nəticələri' context 'search' %}"></div>
+        <div class="gsearch__empty" data-global-search-empty hidden>
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            <p>{% trans 'Nəticə tapılmadı' context 'search' %}</p>
+        </div>
+        <div class="gsearch__footer">
+            <span><kbd>↑</kbd><kbd>↓</kbd> {% trans 'naviqasiya' context 'search' %}</span>
+            <span><kbd>↵</kbd> {% trans 'seç' context 'search' %}</span>
+            <span><kbd>esc</kbd> {% trans 'bağla' context 'search' %}</span>
+        </div>
+    </div>
+</div>

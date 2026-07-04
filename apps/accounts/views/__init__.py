@@ -89,6 +89,9 @@ from .roles import (
     role_assignment,
 )
 
+# Global search (⌘K command palette)
+from .search import global_search
+
 # Superadmin views
 from .superadmin import (
     superadmin_ai_settings,
@@ -121,6 +124,8 @@ __all__ = [
     "view_as_search",
     "view_as_start",
     "view_as_stop",
+    # Global search (⌘K)
+    "global_search",
     # Dashboard
     "dashboard",
     "cabinet_entry",
