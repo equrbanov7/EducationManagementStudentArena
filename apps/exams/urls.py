@@ -74,6 +74,11 @@ urlpatterns = [
         views.teacher_remove_student_from_group,
         name="teacher_remove_student_from_group",
     ),
+    path(
+        "groups/<int:group_id>/students/<int:student_id>/add/",
+        views.teacher_add_student_to_group,
+        name="teacher_add_student_to_group",
+    ),
     # ==========================
     # SLUG - Teacher Attempts (spesifik)
     # ==========================

@@ -233,6 +233,31 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertContains(response, reverse("exams:teacher_update_group", args=[0]))
         self.assertContains(response, reverse("exams:teacher_delete_group", args=[group.id]))
 
+    def test_add_single_student_to_group(self):
+        # U6.2 — manual add (resit / transfer student) via the single-add endpoint.
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="Add Group")
+        self._login_as(self.teacher)
+        self._set_active_org(self.org_a)
+        resp = self.client.post(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_a.id]))
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(group.students.filter(id=self.student_a.id).exists())
+
+    def test_add_student_rejects_cross_tenant(self):
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="XT Add Group")
+        self._login_as(self.teacher)
+        self._set_active_org(self.org_a)
+        # student_b belongs to org_b → not addable to an org_a group.
+        resp = self.client.post(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_b.id]))
+        self.assertEqual(resp.status_code, 404)
+        self.assertFalse(group.students.filter(id=self.student_b.id).exists())
+
+    def test_add_student_requires_post(self):
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="GET Add Group")
+        self._login_as(self.teacher)
+        self._set_active_org(self.org_a)
+        resp = self.client.get(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_a.id]))
+        self.assertEqual(resp.status_code, 405)
+
     def test_student_cannot_access_group_management_routes(self):
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="Protected Group")
         group.students.add(self.student_a)

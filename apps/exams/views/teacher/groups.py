@@ -293,6 +293,45 @@ def teacher_remove_student_from_group(request, group_id, student_id):
 
 
 @login_required
+@require_POST
+def teacher_add_student_to_group(request, group_id, student_id):
+    """Add a single org student to a group (e.g. resit / transfer student) — U6.2.
+
+    Symmetric to ``teacher_remove_student_from_group``: instead of re-submitting
+    the whole multi-select, a manager adds one student. The student must be a
+    STUDENT/LEAD_STUDENT of the active organization (validated via the scoped
+    queryset) so an arbitrary user id cannot be injected."""
+    _ensure_group_manager(request.user)
+    organization = _get_required_organization(request)
+    if organization is None:
+        return redirect("accounts:profile")
+
+    from apps.audit.public import log_action
+    from apps.organizations.public import organization_role_user_queryset
+    from core.constants import AuditAction
+
+    group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
+    candidates = organization_role_user_queryset(organization, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
+    student = get_object_or_404(candidates, id=student_id)
+    group.students.add(student)
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=group,
+        new_values={"added_student_id": student_id},
+        reason="student_added_to_group",
+        request=request,
+    )
+    messages.success(request, pgettext_lazy("exams.view.groups.message", "student_added_to_group"))
+    next_url = _resolve_next_url(request)
+    if next_url:
+        return redirect(next_url)
+    return redirect("exams:teacher_group_list")
+
+
+@login_required
 def create_student_group(request):
     _ensure_group_manager(request.user)
     organization = _get_required_organization(request)
