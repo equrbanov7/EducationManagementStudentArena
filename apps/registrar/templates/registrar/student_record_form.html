@@ -17,6 +17,7 @@
         <p class="console-sub">{% trans "Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin məcburi fənlərinə avtomatik yazır." context "registrar.console" %}</p>
         {% if instance %}
         <a class="console-inline-link" href="{% url 'registrar:student_transfer' instance.id %}"><i class="fas fa-exchange-alt"></i> {% trans "Başqa qrupa köçür" context "registrar.console" %}</a>
+        <a class="console-inline-link" href="{% url 'registrar:student_transcript_pdf' instance.id %}"><i class="fas fa-file-pdf"></i> {% trans "Transkript PDF" context "registrar.console" %}</a>
         {% endif %}
     </div>
     {% include "accounts/profile/_messages.html" %}

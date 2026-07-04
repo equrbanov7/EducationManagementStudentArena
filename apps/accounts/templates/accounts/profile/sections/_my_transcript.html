@@ -11,6 +11,12 @@
                     <span>{% trans "Transkript" context "profile.transcript" %}</span>
                 </div>
             </div>
+            {% if sec.has_record %}
+            <a class="transcript-pdf-link" href="{% url 'registrar:my_transcript_pdf' %}"
+               title="{% trans 'Rəsmi transkripti PDF olaraq yüklə' context 'profile.transcript' %}">
+                <i class="fas fa-file-pdf"></i> {% trans "PDF yüklə" context "profile.transcript" %}
+            </a>
+            {% endif %}
             {% if sec.record %}
             <div class="transcript-meta">
                 <span class="transcript-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.name }}</span>
