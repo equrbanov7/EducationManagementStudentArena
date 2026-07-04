@@ -27403,6 +27403,76 @@ msgctxt "registrar.audit"
 msgid "Təkrar imtahan"
 msgstr "Пересдача"
 
+msgid "Profil"
+msgstr "Профиль"
+
+msgid "Elektron jurnal"
+msgstr "Электронный журнал"
+
+msgid "Dərs cədvəli"
+msgstr "Расписание"
+
+msgid "Bildirişlər"
+msgstr "Уведомления"
+
+msgid "Qiymət təsdiqləri"
+msgstr "Утверждения оценок"
+
+msgid "Registrar (kataloq)"
+msgstr "Регистратор (каталог)"
+
+msgid "Naviqasiya"
+msgstr "Навигация"
+
+msgid "Jurnallarım"
+msgstr "Мои журналы"
+
+msgid "Fənlər"
+msgstr "Предметы"
+
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "search"
+msgid "Qlobal axtarış"
+msgstr "Глобальный поиск"
+
+msgctxt "search"
+msgid "Fənn, tələbə, jurnal, səhifə axtar…"
+msgstr "Поиск предметов, студентов, журналов, страниц…"
+
+msgctxt "search"
+msgid "Axtarış sorğusu"
+msgstr "Поисковый запрос"
+
+msgctxt "search"
+msgid "Axtarış nəticələri"
+msgstr "Результаты поиска"
+
+msgctxt "search"
+msgid "Nəticə tapılmadı"
+msgstr "Ничего не найдено"
+
+msgctxt "search"
+msgid "naviqasiya"
+msgstr "навигация"
+
+msgctxt "search"
+msgid "seç"
+msgstr "выбрать"
+
+msgctxt "search"
+msgid "bağla"
+msgstr "закрыть"
+
+msgctxt "search"
+msgid "Axtar"
+msgstr "Поиск"
+
+msgctxt "search"
+msgid "Axtar (⌘K)"
+msgstr "Поиск (⌘K)"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

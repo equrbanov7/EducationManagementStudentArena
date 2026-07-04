@@ -41,6 +41,9 @@
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=20260618-1">
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
+    {% if request.user.is_authenticated %}
+    <link rel="stylesheet" href="{% static 'css/global_search.css' %}?v=20260705-1">
+    {% endif %}
 
     {% comment %} {# Courses app CSS köçürüldü: yalnız courses səhifələrində
        `apps/courses/templates/courses/partials/_courses_assets_css.html`
@@ -103,6 +106,9 @@
     {% include "partials/_footer.html" %}
     {% endif %}
 
+    {# Global ⌘K search overlay (authenticated users only) #}
+    {% if request.user.is_authenticated %}{% include "partials/_global_search.html" %}{% endif %}
+
     {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
     {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}
 
@@ -126,6 +132,9 @@
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260603-warning-click"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260604-modalskip"></script>
+    {% if request.user.is_authenticated %}
+    <script src="{% static 'js/global_search.js' %}?v=20260705-1"></script>
+    {% endif %}
     {% if view_as.can_use and not view_as.active %}
     <script src="{% static 'js/view_as.js' %}?v=20260618-3"></script>
     {% endif %}

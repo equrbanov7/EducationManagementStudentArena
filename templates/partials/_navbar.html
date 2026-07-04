@@ -94,6 +94,15 @@
             {# --- Right-side actions --- #}
             <div class="blog-header__auth">
 
+                {% if request.user.is_authenticated %}
+                {# Global ⌘K search trigger — opens the command palette overlay. #}
+                <button type="button" class="blog-header__search" data-global-search-open
+                        aria-label="{% trans 'Axtar' context 'search' %}" title="{% trans 'Axtar (⌘K)' context 'search' %}">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    <span class="blog-header__search-hint"><kbd>⌘</kbd><kbd>K</kbd></span>
+                </button>
+                {% endif %}
+
                 {% if request.user.is_teacher_or_above %}
                 {# Quick-create dropdown (teachers and above only) #}
                 <div class="blog-header__create">

@@ -27303,6 +27303,76 @@ msgctxt "registrar.audit"
 msgid "Təkrar imtahan"
 msgstr "Bütünleme sınavı"
 
+msgid "Profil"
+msgstr "Profil"
+
+msgid "Elektron jurnal"
+msgstr "Elektronik jurnal"
+
+msgid "Dərs cədvəli"
+msgstr "Ders programı"
+
+msgid "Bildirişlər"
+msgstr "Bildirimler"
+
+msgid "Qiymət təsdiqləri"
+msgstr "Not onayları"
+
+msgid "Registrar (kataloq)"
+msgstr "Kayıt (katalog)"
+
+msgid "Naviqasiya"
+msgstr "Gezinme"
+
+msgid "Jurnallarım"
+msgstr "Jurnallarım"
+
+msgid "Fənlər"
+msgstr "Dersler"
+
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgctxt "search"
+msgid "Qlobal axtarış"
+msgstr "Genel arama"
+
+msgctxt "search"
+msgid "Fənn, tələbə, jurnal, səhifə axtar…"
+msgstr "Ders, öğrenci, jurnal, sayfa ara…"
+
+msgctxt "search"
+msgid "Axtarış sorğusu"
+msgstr "Arama sorgusu"
+
+msgctxt "search"
+msgid "Axtarış nəticələri"
+msgstr "Arama sonuçları"
+
+msgctxt "search"
+msgid "Nəticə tapılmadı"
+msgstr "Sonuç bulunamadı"
+
+msgctxt "search"
+msgid "naviqasiya"
+msgstr "gezinme"
+
+msgctxt "search"
+msgid "seç"
+msgstr "seç"
+
+msgctxt "search"
+msgid "bağla"
+msgstr "kapat"
+
+msgctxt "search"
+msgid "Axtar"
+msgstr "Ara"
+
+msgctxt "search"
+msgid "Axtar (⌘K)"
+msgstr "Ara (⌘K)"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"
