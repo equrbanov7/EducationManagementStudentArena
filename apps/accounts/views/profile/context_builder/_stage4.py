@@ -277,4 +277,8 @@ class _Stage4Mixin:
             from apps.registrar.public import build_student_subjects_context
 
             self.context.update(build_student_subjects_context(self.request, organization=self.active_organization))
+        if self.active_section == "my-transcript" and "my-transcript" in self.allowed_sections:
+            from apps.registrar.public import build_student_transcript_context
+
+            self.context.update(build_student_transcript_context(self.request, organization=self.active_organization))
         return render(self.request, "accounts/profile.html", self.context)

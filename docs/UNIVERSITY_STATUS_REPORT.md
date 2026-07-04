@@ -29,9 +29,13 @@ Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl
 - ✅ **U3+ Yekun qiymət + təkrar imtahan** — `FinalGrade` + `ResitRecord`;
   giriş balı + imtahan → hərf/keçdi-kəsildi; kəsilən → resit hüququ; jurnal
   finalizasiyası (publish + audit). Müəllim "Yekun nəticə" grid + tələbə nəticə.
+- ✅ **U5 Transkript + GPA** — `transcript.build_student_transcript`: semestr-bə-
+  semestr fənn/bal/kredit cədvəli + **kredit-çəkili** kumulyativ GPA; tələbə
+  kabinetində "Transkript" bölməsi (GPA kartı + toplanmış kredit). Model əlavəsi
+  yox — mövcud yekun qiymət üzərində oxu.
 
-**Qalan (yenilənmiş prioritet):** K3 registrar provisioning UI · U5 transkript/GPA
-(semestrlərarası; yekun qiymət indi var) · U6 köçürmə/əlavə/təmizlik ·
+**Qalan (yenilənmiş prioritet):** K3 registrar provisioning UI · U5+ status
+state-machine (akademik məzuniyyət/xaric/məzun) · U6 köçürmə/əlavə/təmizlik ·
 (ən sonda: jurnal dizayn/polish).
 
 ---
