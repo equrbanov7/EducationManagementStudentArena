@@ -68,6 +68,8 @@ class ProfileRole:
         "lab_assistant": {ASSISTANT_TEACHER, "lab_assistant"},
         "exam_center": {"exam_center"},
         "tutor": {"tutor"},
+        # Proqram koordinatoru tyutor-ekvivalentdir (eyni akademik kurasiya işi).
+        "program_coordinator": {"program_coordinator", "tutor"},
     }
 
     # Yüksək level-ə baxmayaraq avtomatik org_admin aliası ALMAMALI rollar.

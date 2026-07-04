@@ -50,6 +50,7 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
                 "assistant",
                 "lab_assistant",
                 "tutor",
+                "program_coordinator",
                 "lead_student",
                 "student",
             }:
@@ -72,5 +73,5 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
         with bypass_rls():
             org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
             self.assertEqual(OrgUnit.objects.filter(organization=org).count(), 4)
-            # 14 seeded role users → one primary membership each.
-            self.assertEqual(Membership.objects.filter(organization=org).count(), 14)
+            # 15 seeded role users → one primary membership each.
+            self.assertEqual(Membership.objects.filter(organization=org).count(), 15)

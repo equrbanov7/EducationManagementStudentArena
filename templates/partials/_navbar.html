@@ -21,10 +21,10 @@
             <a href="{% if university_mode and request.user.is_authenticated %}{% url 'accounts:profile' %}{% else %}{{ home_url }}{% endif %}"
                class="blog-header__logo" aria-label="{{ site_brand_name }}">
                 {% if university_mode %}
-                <img src="{% static 'brand/qku-logo-horizontal.svg' %}"
+                <img src="{% static 'brand/wcu-logo-horizontal.svg' %}"
                      alt="{{ site_brand_name }}"
                      class="blog-header__logo-img"
-                     width="200" height="46"
+                     width="220" height="44"
                      loading="eager"
                      decoding="async">
                 {% else %}

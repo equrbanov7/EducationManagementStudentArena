@@ -259,8 +259,8 @@ FinalGrade < pass_threshold  VƏ YA  exam_score < min_exam_score
 
 | Faza | Əhatə | Risk | Demo-dan əvvəl? |
 |------|-------|------|-----------------|
-| **U0** (bitdi) | Rollar, unit iyerarxiya, provisioning, ilk-giriş, seed | — | ✔ |
-| **U1** | Registrar nüvəsi: `AcademicYear`, `Semester`, `Program`, `Subject`, `Curriculum`, `CurriculumSubject` (P3-2 §5.1-5.2) | orta (migration) | sonra |
+| **U0** (bitdi) | Rollar, unit iyerarxiya, provisioning, ilk-giriş, seed, program koordinatoru | — | ✔ |
+| **U1** (bitdi) | Registrar nüvəsi: `apps/registrar` — `Program`, `Subject`, `Curriculum`, `CurriculumSubject` (+RLS izolyasiya, semestr üçün `AcademicPeriod` reuse) | orta (migration) | ✔ |
 | **U2** | `CourseOffering` + `Enrollment` + tələbə akademik axını (§2) | orta | sonra |
 | **U3** | `AssessmentScheme` + `GradeComponent` + elektron jurnal (§3) + 25%/resit (§5) | orta-yüksək | sonra |
 | **U4** | Dərs cədvəli `ScheduleSlot` (§4) | aşağı-orta | sonra |
