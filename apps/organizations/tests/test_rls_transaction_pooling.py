@@ -84,6 +84,19 @@ def two_org_units():
     )
     unit_a = OrgUnit.objects.create(organization=org_a, name="Tenant A Unit", slug="tenant-a-unit", unit_type="faculty")
     unit_b = OrgUnit.objects.create(organization=org_b, name="Tenant B Unit", slug="tenant-b-unit", unit_type="faculty")
+
+    # Org creation above runs during FIXTURE setup, where the per-test
+    # @override_settings(RLS_TRANSACTION_SCOPED=True) is not yet active (the
+    # decorator only wraps the test body). So the create_default_roles signal's
+    # rls_worker_atomic() is a no-op and set_rls_tenant() writes
+    # app.current_org_id at SESSION scope, polluting the shared connection
+    # baseline. Reset the secure default here so that the transaction-scoped
+    # SET LOCAL performed inside each test reverts to "" (no tenant) on commit.
+    # In production the flag is a stable setting, so the signal always runs
+    # transaction-scoped and this pollution cannot occur.
+    _set_setting("app.bypass_rls", "on", local=False)
+    _set_setting("app.current_org_id", "", local=False)
+    _set_setting("app.current_user_id", "", local=False)
     return org_a, org_b, unit_a, unit_b
 
 
@@ -252,10 +265,11 @@ def test_bypass_in_worker_atomic_does_not_persist(two_org_units):
 
     org_a, org_b, _unit_a, _unit_b = two_org_units
 
-    # 1) Bypass açıq — bütün OrgUnit-ləri görsün.
+    # 1) Bypass açıq — bütün OrgUnit-ləri görsün. `bypass_rls()` arqumentsizdir;
+    # atomik blok daxilində olduğu üçün SET LOCAL avtomatik seçilir (in_atomic).
     with rls_worker_atomic():
         _enable_rls_for_transaction()
-        with bypass_rls(local=True):
+        with bypass_rls():
             all_names = set(OrgUnit.objects.values_list("name", flat=True))
     assert {"Tenant A Unit", "Tenant B Unit"}.issubset(all_names)
 
