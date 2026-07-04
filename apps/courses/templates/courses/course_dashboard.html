@@ -8,6 +8,8 @@
 {% block extraCss %}
     {% include "courses/partials/_courses_assets_css.html" %}
     <link rel="stylesheet" href="{% static 'courses/css/course_dashboard_redesign.css' %}?v=20260630-2">
+    <link rel="stylesheet" href="{% static 'courses/css/topic_accordion.css' %}">
+    <link rel="stylesheet" href="{% static 'courses/css/member_form_modal.css' %}">
     {% if is_student %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}">
     {% endif %}

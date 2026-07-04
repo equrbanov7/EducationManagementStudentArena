@@ -1,0 +1,94 @@
+/* EMSArena — my courses page (inline-CSS extraction 2026-07-04) */
+.my-courses-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
+.course-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
+.course-card { 
+  border:1px solid #e5e7eb; 
+  border-radius:16px; 
+  overflow:hidden; 
+  background:#fff; 
+  box-shadow: 0 6px 18px rgba(15,23,42,.06);
+  transition: all 0.3s ease;
+}
+.course-card:hover {
+  box-shadow: 0 12px 32px rgba(15,23,42,.12);
+  transform: translateY(-4px);
+}
+.course-cover { 
+  height: 160px; 
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  overflow:hidden;
+  position: relative;
+}
+.course-cover img { width:100%; height:100%; object-fit:cover; }
+.course-cover .no-cover {
+  color: rgba(255,255,255,0.9);
+  font-size: 48px;
+}
+.course-body { padding:16px; }
+.course-title { 
+  font-size:20px; 
+  font-weight:700; 
+  margin:0 0 8px;
+  color: #0f172a;
+  line-height: 1.3;
+}
+.course-desc { 
+  color:#64748b; 
+  font-size:14px; 
+  min-height: 42px; 
+  margin:0 0 12px;
+  line-height: 1.5;
+}
+.course-meta { 
+  display:flex; 
+  gap:8px; 
+  flex-wrap:wrap; 
+  margin-bottom: 16px;
+}
+.pill { 
+  background:#f1f5f9; 
+  border:1px solid #e2e8f0; 
+  padding:6px 12px; 
+  border-radius:999px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+.pill i { font-size: 11px; opacity: 0.7; }
+
+/* ✅ BUTTON STYLES */
+.btn-dashboard { 
+  display: block;
+  width: 100%;
+  border-radius: 12px; 
+  padding:12px 16px; 
+  font-weight:700; 
+  border:0; 
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color:#fff;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.btn-dashboard:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+  color: #fff;
+}
+
+.empty { 
+  text-align:center; 
+  padding:80px 20px; 
+  background: #f8fafc;
+  border-radius: 16px;
+  margin-top: 20px;
+}
+.empty-icon {
+  font-size: 64px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
