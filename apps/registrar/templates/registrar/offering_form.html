@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% if instance %}{% trans "Fənn açılışı redaktəsi" context "registrar.console" %}{% else %}{% trans "Yeni fənn açılışı" context "registrar.console" %}{% endif %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
+{% endblock %}
+
+{% block content %}
+<div class="console-page console-page--form">
+    <div class="console-head">
+        <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
+        <h1 class="console-title"><i class="fas fa-chalkboard"></i>
+            {% if instance %}{{ instance.subject.code }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni fənn açılışı" context "registrar.console" %}{% endif %}
+        </h1>
+        <p class="console-sub">{% trans "Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron jurnalı dərhal hazır olur." context "registrar.console" %}</p>
+    </div>
+    {% include "accounts/profile/_messages.html" %}
+    <div class="console-card">
+        {% include "registrar/_console_form.html" %}
+    </div>
+</div>
+{% endblock %}

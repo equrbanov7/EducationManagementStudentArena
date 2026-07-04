@@ -93,6 +93,39 @@
             <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Hələ tədris planı yoxdur." context "registrar.console" %}</p></div>
             {% endif %}
         </section>
+
+        <section class="console-panel console-panel--wide">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title">
+                    <i class="fas fa-chalkboard"></i> {% trans "Semestr fənləri (açılışlar)" context "registrar.console" %}
+                    {% if current_period %}<span class="console-panel-note">· {{ current_period.name }}</span>{% endif %}
+                </h2>
+                {% if current_period %}
+                <a class="console-add-btn" href="{% url 'registrar:offering_create' %}"><i class="fas fa-plus"></i> {% trans "Fənn aç" context "registrar.console" %}</a>
+                {% endif %}
+            </div>
+            {% if not current_period %}
+            <div class="console-empty"><i class="fas fa-calendar-times"></i><p>{% trans "Aktiv semestr (dövr) yoxdur." context "registrar.console" %}</p></div>
+            {% elif offerings %}
+            <ul class="console-list">
+                {% for offering in offerings %}
+                <li class="console-item {% if not offering.is_active %}is-inactive{% endif %}">
+                    <a class="console-item-main" href="{% url 'registrar:offering_edit' offering.id %}">
+                        <span class="console-item-code">{{ offering.subject.code }}</span>
+                        <span class="console-item-name">{{ offering.subject.name }}</span>
+                    </a>
+                    <div class="console-item-meta">
+                        {% if offering.group %}<span><i class="fas fa-users"></i> {{ offering.group.name }}</span>{% endif %}
+                        {% if offering.instructor %}<span><i class="fas fa-chalkboard-teacher"></i> {{ offering.instructor.get_full_name|default:offering.instructor.username }}</span>{% else %}<span class="console-badge-off">{% trans "müəllim yox" context "registrar.console" %}</span>{% endif %}
+                        {% if offering.lesson_hours %}<span>{{ offering.lesson_hours }} {% trans "saat" context "registrar.console" %}</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Bu semestrdə hələ fənn açılışı yoxdur." context "registrar.console" %}</p></div>
+            {% endif %}
+        </section>
     </div>
 </div>
 {% endblock %}
