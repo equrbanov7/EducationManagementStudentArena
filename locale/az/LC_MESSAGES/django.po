@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-04 14:50+0400\n"
+"POT-Creation-Date: 2026-07-04 15:35+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31419,29 +31419,29 @@ msgctxt "projects.views.message"
 msgid "grade_given"
 msgstr "Qiymət uğurla verildi."
 
-#: apps/registrar/models.py:22
+#: apps/registrar/models.py:23
 #, fuzzy
 #| msgid "Teacher"
 msgctxt "registrar.degree"
 msgid "Bachelor"
 msgstr "Müəllim"
 
-#: apps/registrar/models.py:23
+#: apps/registrar/models.py:24
 msgctxt "registrar.degree"
 msgid "Master"
 msgstr ""
 
-#: apps/registrar/models.py:24
+#: apps/registrar/models.py:25
 msgctxt "registrar.degree"
 msgid "PhD"
 msgstr ""
 
-#: apps/registrar/models.py:53
+#: apps/registrar/models.py:54
 msgctxt "registrar.model.program.meta"
 msgid "program"
 msgstr ""
 
-#: apps/registrar/models.py:54
+#: apps/registrar/models.py:55
 #, fuzzy
 #| msgctxt "exams.model.attempt.choice.status"
 #| msgid "in_progress"
@@ -31449,7 +31449,7 @@ msgctxt "registrar.model.program.meta"
 msgid "programs"
 msgstr "Yoxlanılır"
 
-#: apps/registrar/models.py:79
+#: apps/registrar/models.py:80
 #, fuzzy
 #| msgctxt "blog.subscribe.email"
 #| msgid "subject"
@@ -31457,7 +31457,7 @@ msgctxt "registrar.model.subject.meta"
 msgid "subject"
 msgstr "Abunəliyə xoş gəlmisiniz! [Sənin Blog Adın]"
 
-#: apps/registrar/models.py:80
+#: apps/registrar/models.py:81
 #, fuzzy
 #| msgctxt "blog.subscribe.email"
 #| msgid "subject"
@@ -31465,24 +31465,112 @@ msgctxt "registrar.model.subject.meta"
 msgid "subjects"
 msgstr "Abunəliyə xoş gəlmisiniz! [Sənin Blog Adın]"
 
-#: apps/registrar/models.py:107
+#: apps/registrar/models.py:108
 msgctxt "registrar.model.curriculum.meta"
 msgid "curriculum"
 msgstr ""
 
-#: apps/registrar/models.py:108
+#: apps/registrar/models.py:109
 msgctxt "registrar.model.curriculum.meta"
 msgid "curricula"
 msgstr ""
 
-#: apps/registrar/models.py:143
+#: apps/registrar/models.py:144
 msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subject"
 msgstr ""
 
-#: apps/registrar/models.py:144
+#: apps/registrar/models.py:145
 msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subjects"
+msgstr ""
+
+#: apps/registrar/models.py:167
+#, fuzzy
+#| msgctxt "organizations.unit_type"
+#| msgid "laboratory"
+msgctxt "registrar.enrollment_kind"
+msgid "Mandatory"
+msgstr "Laboratoriya"
+
+#: apps/registrar/models.py:168
+#, fuzzy
+#| msgctxt "staff.management"
+#| msgid "Active"
+msgctxt "registrar.enrollment_kind"
+msgid "Elective"
+msgstr "Aktiv"
+
+#: apps/registrar/models.py:169
+msgctxt "registrar.enrollment_kind"
+msgid "Retake"
+msgstr ""
+
+#: apps/registrar/models.py:197
+msgctxt "registrar.model.student_record.meta"
+msgid "student academic record"
+msgstr ""
+
+#: apps/registrar/models.py:198
+msgctxt "registrar.model.student_record.meta"
+msgid "student academic records"
+msgstr ""
+
+#: apps/registrar/models.py:241
+msgctxt "registrar.model.offering.meta"
+msgid "course offering"
+msgstr ""
+
+#: apps/registrar/models.py:242
+#, fuzzy
+#| msgctxt "accounts.teacher_dashboard"
+#| msgid "courses"
+msgctxt "registrar.model.offering.meta"
+msgid "course offerings"
+msgstr "Courses"
+
+#: apps/registrar/models.py:258
+msgctxt "registrar.enrollment_status"
+msgid "Enrolled"
+msgstr ""
+
+#: apps/registrar/models.py:259
+#, fuzzy
+#| msgctxt "exams.template.exam_live_monitor"
+#| msgid "stat_completed"
+msgctxt "registrar.enrollment_status"
+msgid "Completed"
+msgstr "Tamamlanmış sessiya"
+
+#: apps/registrar/models.py:260
+#, fuzzy
+#| msgctxt "accounts.view_as"
+#| msgid "stopped"
+msgctxt "registrar.enrollment_status"
+msgid "Dropped"
+msgstr "Öz profilinizə qayıtdınız."
+
+#: apps/registrar/models.py:275
+msgctxt "registrar.model.enrollment.meta"
+msgid "enrollment"
+msgstr ""
+
+#: apps/registrar/models.py:276
+#, fuzzy
+#| msgctxt "blog.post_detail_page"
+#| msgid "no_comments"
+msgctxt "registrar.model.enrollment.meta"
+msgid "enrollments"
+msgstr "Hələ şərh yoxdur. İlk şərh yazan sən ol."
+
+#: apps/registrar/models.py:316
+msgctxt "registrar.model.group_elective.meta"
+msgid "group elective choice"
+msgstr ""
+
+#: apps/registrar/models.py:317
+msgctxt "registrar.model.group_elective.meta"
+msgid "group elective choices"
 msgstr ""
 
 #: apps/task_submission_core/review.py:192

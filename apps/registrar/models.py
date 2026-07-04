@@ -12,6 +12,7 @@ layer is additive — it does not touch the existing exam/LMS core.
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
@@ -157,3 +158,169 @@ class CurriculumSubject(UUIDModel, TimeStampedModel, OrderedModel):
     def __str__(self):
         kind = "seçmə" if self.is_elective else "məcburi"
         return f"{self.subject.code} · sem {self.semester_number} · {kind}"
+
+
+# ── Enrollment layer (U2): student record, offerings, enrollments, group choice ──
+
+
+class EnrollmentKind(models.TextChoices):
+    MANDATORY = "mandatory", pgettext_lazy("registrar.enrollment_kind", "Mandatory")
+    ELECTIVE = "elective", pgettext_lazy("registrar.enrollment_kind", "Elective")
+    RETAKE = "retake", pgettext_lazy("registrar.enrollment_kind", "Retake")
+
+
+class StudentAcademicRecord(UUIDModel, TimeStampedModel):
+    """A student's academic profile within a program: which curriculum + group
+    they belong to. Drives the mandatory/elective enrollment flow (roadmap §2)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="student_records"
+    )
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academic_records")
+    program = models.ForeignKey(Program, on_delete=models.PROTECT, related_name="student_records")
+    curriculum = models.ForeignKey(Curriculum, on_delete=models.PROTECT, related_name="student_records")
+    group = models.ForeignKey(
+        "organizations.OrgUnit",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="student_records",
+        help_text="Tələbənin qrupu (bölmə/sektor OrgUnit: group).",
+    )
+    admission_year = models.PositiveIntegerField()
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.student_record.meta", "student academic record")
+        verbose_name_plural = pgettext_lazy("registrar.model.student_record.meta", "student academic records")
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "student", "program"], name="uniq_student_program"),
+        ]
+        indexes = [models.Index(fields=["organization", "group"])]
+
+    def __str__(self):
+        return f"{self.student_id} · {self.program.code}"
+
+
+class CourseOffering(UUIDModel, TimeStampedModel):
+    """A subject taught in a specific semester for a specific group (a section).
+
+    Optionally links to the LMS ``courses.Course`` so the subject's content
+    (topics/resources) is the existing course dashboard (roadmap §2.2)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="course_offerings"
+    )
+    subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name="offerings")
+    period = models.ForeignKey("organizations.AcademicPeriod", on_delete=models.PROTECT, related_name="offerings")
+    group = models.ForeignKey(
+        "organizations.OrgUnit",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="course_offerings",
+        help_text="Bu bölmənin/qrupun dərsi (boşdursa — bütün ixtisas üçün).",
+    )
+    course = models.ForeignKey(
+        "courses.Course",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="offerings",
+        help_text="LMS kursu (fənn içi = mövzular/resurslar) — opsional.",
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.offering.meta", "course offering")
+        verbose_name_plural = pgettext_lazy("registrar.model.offering.meta", "course offerings")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "subject", "period", "group"], name="uniq_offering_subject_period_group"
+            ),
+        ]
+        indexes = [models.Index(fields=["organization", "period"])]
+
+    def __str__(self):
+        return f"{self.subject.code} @ {self.period_id}"
+
+
+class Enrollment(UUIDModel, TimeStampedModel):
+    """A student's enrollment in one course offering (mandatory / elective / retake)."""
+
+    class Status(models.TextChoices):
+        ENROLLED = "enrolled", pgettext_lazy("registrar.enrollment_status", "Enrolled")
+        COMPLETED = "completed", pgettext_lazy("registrar.enrollment_status", "Completed")
+        DROPPED = "dropped", pgettext_lazy("registrar.enrollment_status", "Dropped")
+
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="enrollments")
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="enrollments",
+    )
+    offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="enrollments")
+    kind = models.CharField(max_length=16, choices=EnrollmentKind.choices, default=EnrollmentKind.MANDATORY)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.ENROLLED, db_index=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.enrollment.meta", "enrollment")
+        verbose_name_plural = pgettext_lazy("registrar.model.enrollment.meta", "enrollments")
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "student", "offering"], name="uniq_student_offering"),
+        ]
+        indexes = [
+            models.Index(fields=["organization", "student"]),
+            models.Index(fields=["offering", "status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.student_id} → {self.offering_id} ({self.kind})"
+
+
+class GroupElectiveChoice(UUIDModel, TimeStampedModel):
+    """A GROUP's decision for one elective block in one semester.
+
+    In the AZ university model the elective is chosen at group level: once the
+    group's choice is recorded, every group member is enrolled in the chosen
+    subject (roadmap §2.5). Enforced one-choice-per (group, period, block)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="group_elective_choices"
+    )
+    group = models.ForeignKey("organizations.OrgUnit", on_delete=models.CASCADE, related_name="group_elective_choices")
+    period = models.ForeignKey(
+        "organizations.AcademicPeriod", on_delete=models.PROTECT, related_name="group_elective_choices"
+    )
+    elective_group = models.CharField(max_length=50, help_text="CurriculumSubject.elective_group blok adı.")
+    chosen_subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name="group_elective_choices")
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="group_elective_decisions",
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.group_elective.meta", "group elective choice")
+        verbose_name_plural = pgettext_lazy("registrar.model.group_elective.meta", "group elective choices")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "group", "period", "elective_group"],
+                name="uniq_group_elective_block",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.group_id} · {self.elective_group} → {self.chosen_subject.code}"

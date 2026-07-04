@@ -14,7 +14,7 @@ import pytest
 
 from apps.organizations.models import Organization
 from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
-from core.constants import OrganizationType
+from core.constants import OrganizationType, OrgUnitType
 
 User = get_user_model()
 
@@ -111,3 +111,62 @@ def test_missing_tenant_context_denies_all(two_org_curricula):
     assert Program.objects.count() == 0
     assert Subject.objects.count() == 0
     assert CurriculumSubject.objects.count() == 0
+
+
+# ── Enrollment-layer RLS isolation (U2) ──────────────────────────────────────
+
+
+@pytest.fixture()
+def two_org_enrollments(two_org_curricula):
+    """Add a student record + offering + enrollment to each org's data."""
+    from apps.organizations.models import AcademicPeriod, OrgUnit
+    from apps.registrar.models import CourseOffering, Curriculum, Enrollment, StudentAcademicRecord, Subject
+
+    org_a, org_b = two_org_curricula
+    for org, code in ((org_a, "A"), (org_b, "B")):
+        subject = Subject.objects.get(organization=org, code=f"S-{code}")
+        curriculum = Curriculum.objects.get(organization=org)
+        group = OrgUnit.objects.create(
+            organization=org, name=f"G-{code}", slug=f"g-{code.lower()}", unit_type=OrgUnitType.GROUP
+        )
+        period = AcademicPeriod.objects.create(
+            organization=org,
+            name=f"P-{code}",
+            period_type="semester",
+            academic_year="2024/2025",
+            start_date="2024-09-01",
+            end_date="2025-01-31",
+        )
+        student = User.objects.create_user(f"enr_{code}", f"enr_{code}@x.test", "pw")
+        StudentAcademicRecord.objects.create(
+            organization=org,
+            student=student,
+            program=curriculum.program,
+            curriculum=curriculum,
+            group=group,
+            admission_year=2024,
+        )
+        offering = CourseOffering.objects.create(organization=org, subject=subject, period=period, group=group)
+        Enrollment.objects.create(organization=org, student=student, offering=offering)
+    return org_a, org_b
+
+
+def test_student_record_and_enrollment_isolation(two_org_enrollments):
+    from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
+
+    org_a, _org_b = two_org_enrollments
+    _enable_rls_for_tenant(org_a.pk)
+    assert StudentAcademicRecord.objects.count() == 1
+    assert CourseOffering.objects.count() == 1
+    assert Enrollment.objects.count() == 1
+    # The only visible enrollment belongs to tenant A's student.
+    assert Enrollment.objects.get().student.username == "enr_A"
+
+
+def test_enrollment_deny_all_without_tenant(two_org_enrollments):
+    from apps.registrar.models import Enrollment, GroupElectiveChoice, StudentAcademicRecord
+
+    _enable_rls_for_tenant("")
+    assert StudentAcademicRecord.objects.count() == 0
+    assert Enrollment.objects.count() == 0
+    assert GroupElectiveChoice.objects.count() == 0
