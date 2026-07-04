@@ -183,6 +183,23 @@ DEFAULT_ROLES = {
             "description": "Tutor providing academic guidance to student groups within their unit",
         },
         {
+            # Proqram koordinatoru — ixtisas/proqram üzrə akademik kurasiya.
+            # İşi əsasən tyutorla eynidir (öz alt-ağacındakı tələbə/kurs/imtahan
+            # cədvəli və qrup statistikasını görür); imtahan yaratmır, qiymət
+            # vermir, üzv idarə etmir. RBAC-də tyutorla eyni səviyyədə davranır.
+            "name": "program_coordinator",
+            "display_name": "Program Coordinator",
+            "level": 45,
+            "scope_type": RoleScopeType.UNIT,
+            "permissions": [
+                "member.view",
+                "course.view",
+                "exam.view",
+                "analytics.view_unit",
+            ],
+            "description": "Program coordinator curating a specialty/program (tutor-equivalent scope)",
+        },
+        {
             # Baş tələbə — adi tələbə + öz qrupuna aid məhdud üzv siyahısı
             # və qrup səviyyəli statistika.
             "name": "lead_student",

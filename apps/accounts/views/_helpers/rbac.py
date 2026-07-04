@@ -175,8 +175,10 @@ def _role_capabilities(user, profile):
     is_exam_center = _user_has_any_role(user, {"exam_center"})
     is_lead_student = _user_has_any_role(user, {ProfileRole.LEAD_STUDENT})
     # Tyutor — qrup kurasiyası: öz unit alt-ağacındakı tələbə/kurs/statistika
-    # görünüşü; imtahan-qiymətləndirmə-üzv idarəetməsi yoxdur.
-    is_tutor = _user_has_any_role(user, {"tutor"})
+    # görünüşü; imtahan-qiymətləndirmə-üzv idarəetməsi yoxdur. Proqram
+    # koordinatoru eyni işi görür (tyutor-ekvivalent) — hər ikisi is_tutor ilə.
+    is_program_coordinator = _user_has_any_role(user, {"program_coordinator"})
+    is_tutor = _user_has_any_role(user, {"tutor"}) or is_program_coordinator
     # Dekan / kafedra müdürü — unit-scoped idarəetmə rolları.
     # (chair_head/section_head adları department_head-ə normallaşdırılır.)
     is_dean = _user_has_any_role(user, {"dean", "vice_dean"})
@@ -381,6 +383,7 @@ def _role_capabilities(user, profile):
         "is_exam_center": is_exam_center,
         "is_lead_student": is_lead_student,
         "is_tutor": is_tutor,
+        "is_program_coordinator": is_program_coordinator,
         "is_dean": is_dean,
         "is_department_head": is_department_head,
         "is_unit_manager": is_unit_manager,

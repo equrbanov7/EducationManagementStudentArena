@@ -55,6 +55,7 @@ class Command(BaseCommand):
         ("wcu_assistant", "assistant", ProfileRole.ASSISTANT_TEACHER, None),
         ("wcu_lab_assistant", "lab_assistant", ProfileRole.ASSISTANT_TEACHER, None),
         ("wcu_tutor", "tutor", ProfileRole.MEMBER, "group"),
+        ("wcu_program_coordinator", "program_coordinator", ProfileRole.MEMBER, "specialty"),
         ("wcu_lead_student", "lead_student", ProfileRole.LEAD_STUDENT, "group"),
         ("wcu_student1", "student", ProfileRole.STUDENT, "group"),
         ("wcu_student2", "student", ProfileRole.STUDENT, "group"),

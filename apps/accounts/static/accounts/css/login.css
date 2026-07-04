@@ -331,3 +331,14 @@
 .input-visibility-toggle[data-visible="true"] .visibility-icon-hide {
     display: inline;
 }
+
+/* WCU brand logo above the auth card heading (J1/K1) */
+.auth-brand {
+    display: block;
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+.auth-brand-logo {
+    max-width: 240px;
+    height: auto;
+}

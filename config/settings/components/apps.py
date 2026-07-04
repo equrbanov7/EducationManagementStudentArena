@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "apps.projects",
     "apps.labs",
     "apps.organizations.apps.OrganizationsConfig",
+    "apps.registrar.apps.RegistrarConfig",
     "apps.audit.apps.AuditConfig",
     "apps.ai_assistant.apps.AIAssistantConfig",
     "daphne",

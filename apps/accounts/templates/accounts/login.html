@@ -1,15 +1,19 @@
 {% extends "base_auth.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "title" context "accounts.login" %} | EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.login" %} | {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
 {% endblock %}
- 
+
 {% block content %}
 <div class="auth-page-wrapper"> {# auth-page -> auth-page-wrapper #}
     <div class="auth-card">
+        <a href="{% url 'accounts:login' %}" class="auth-brand" aria-label="{{ site_brand_name }}">
+            <img src="{% static 'brand/wcu-logo-horizontal.svg' %}" alt="{{ site_brand_name }}"
+                 class="auth-brand-logo" width="240" height="48" loading="eager" decoding="async">
+        </a>
         <h1 class="auth-heading">{% trans "heading" context "accounts.login" %}</h1> {# auth-title -> auth-heading #}
         <p class="auth-subheading">{% trans "subheading" context "accounts.login" %}</p> {# auth-subtitle -> auth-subheading #}
 
