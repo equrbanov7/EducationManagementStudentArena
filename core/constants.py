@@ -189,6 +189,7 @@ class OrgUnitType:
     DEANERY = "deanery"
     CHAIR = "chair"
     DEPARTMENT = "department"
+    SPECIALTY = "specialty"  # ixtisas — kafedra altında akademik proqram
     LAB = "lab"
     INSTITUTE = "institute"
     CENTER = "center"
@@ -216,6 +217,7 @@ class OrgUnitType:
         (DEANERY, pgettext_lazy("organizations.unit_type", "deanery")),
         (CHAIR, pgettext_lazy("organizations.unit_type", "chair")),
         (DEPARTMENT, pgettext_lazy("organizations.unit_type", "department")),
+        (SPECIALTY, pgettext_lazy("organizations.unit_type", "specialty")),
         (LAB, pgettext_lazy("organizations.unit_type", "laboratory")),
         (INSTITUTE, pgettext_lazy("organizations.unit_type", "institute")),
         (CENTER, pgettext_lazy("organizations.unit_type", "center")),

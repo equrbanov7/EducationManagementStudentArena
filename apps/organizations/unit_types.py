@@ -15,6 +15,10 @@ UNIT_TYPES_BY_ORG = {
         (OrgUnitType.DEANERY, pgettext_lazy("organizations.unit_type", "deanery")),
         (OrgUnitType.CHAIR, pgettext_lazy("organizations.unit_type", "chair")),
         (OrgUnitType.DEPARTMENT, pgettext_lazy("organizations.unit_type", "department")),
+        # İxtisas (specialty) → kafedra altında akademik proqram; tələbə qrupları
+        # ixtisasa bağlanır (Fakültə → Kafedra → İxtisas → Qrup iyerarxiyası).
+        (OrgUnitType.SPECIALTY, pgettext_lazy("organizations.unit_type", "specialty")),
+        (OrgUnitType.GROUP, pgettext_lazy("organizations.unit_type", "group")),
         (OrgUnitType.LAB, pgettext_lazy("organizations.unit_type", "laboratory")),
         (OrgUnitType.INSTITUTE, pgettext_lazy("organizations.unit_type", "institute")),
         (OrgUnitType.CENTER, pgettext_lazy("organizations.unit_type", "center")),
