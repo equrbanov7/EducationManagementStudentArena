@@ -161,6 +161,61 @@ class SuspendedOrganizationMiddleware:
         return self.get_response(request)
 
 
+class FirstLoginPasswordMiddleware:
+    """Force administration-provisioned users through the first-login flow.
+
+    E-university accounts are created by the administration; on first login the
+    user must verify their email (OTP) and set their own password. Until
+    ``profile.password_change_required`` is cleared, every request from that user
+    is redirected to ``accounts:set_initial_password`` — except a small exempt
+    set (the set-password view itself, logout, static/media, admin, language
+    switch, health) so the user is never trapped in a loop and can always leave.
+    """
+
+    #: Path prefixes that must remain reachable during the first-login lock.
+    EXEMPT_PREFIXES = (
+        "/static/",
+        "/media/",
+        "/admin/",
+        "/i18n/",
+        "/health",
+        "/__debug__/",
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if (
+            user is not None
+            and user.is_authenticated
+            and not user.is_superuser
+            and self._requires_first_login(user)
+            and not self._is_exempt(request)
+        ):
+            return redirect("accounts:set_initial_password")
+        return self.get_response(request)
+
+    @staticmethod
+    def _requires_first_login(user):
+        profile = getattr(user, "profile", None)
+        return bool(profile is not None and getattr(profile, "password_change_required", False))
+
+    def _is_exempt(self, request):
+        path = request.path
+        if any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
+            return True
+        try:
+            exempt_paths = {
+                reverse("accounts:set_initial_password"),
+                reverse("accounts:logout"),
+            }
+        except Exception:  # noqa: BLE001 — URLconf not ready (e.g. during startup)
+            return True
+        return path in exempt_paths
+
+
 class ViewAsMiddleware:
     """
     "View as" (istifadəçi profilinə baxış) middleware-i.
