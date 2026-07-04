@@ -181,3 +181,47 @@
 .console-save-btn:hover { background: var(--ems-primary-700); }
 .console-cancel-link { color: var(--ems-neutral-600); font-size: 0.85rem; text-decoration: none; }
 .console-cancel-link:hover { text-decoration: underline; }
+
+/* ── Tədris planı (curriculum) ────────────────────────────────────────── */
+.console-panel--wide { grid-column: 1 / -1; }
+.console-grid--plan { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
+.console-inline-link { color: var(--ems-primary-600); text-decoration: none; margin-left: 8px; font-size: 0.82rem; }
+.console-inline-link:hover { text-decoration: underline; }
+
+.plan-semester { border-bottom: 1px solid var(--ems-neutral-100); }
+.plan-semester:last-child { border-bottom: none; }
+.plan-semester-head {
+    padding: 0.5rem 1rem;
+    background: var(--ems-neutral-50);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-600);
+}
+.plan-tag {
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+.plan-tag--mandatory { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.plan-tag--elective { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.plan-row-del button {
+    background: transparent;
+    border: none;
+    color: var(--ems-neutral-400);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    line-height: 1;
+}
+.plan-row-del button:hover { color: var(--ems-danger-strong); background: var(--ems-danger-100); }
+
+.console-card--flush { border: none; border-radius: 0; padding: 1rem; }
+.console-panel--form .console-panel-head { border-bottom: 1px solid var(--ems-neutral-100); }
+
+@media (max-width: 720px) {
+    .console-grid--plan { grid-template-columns: 1fr; }
+}

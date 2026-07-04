@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ curriculum.program.code }} · {{ curriculum.admission_year }} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
+{% endblock %}
+
+{% block content %}
+<div class="console-page">
+    <div class="console-head">
+        <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
+        <h1 class="console-title"><i class="fas fa-clipboard-list"></i> {{ curriculum.name|default:curriculum.program.name }}</h1>
+        <p class="console-sub">
+            {{ curriculum.program.code }} · {% trans "Qəbul ili" context "registrar.console" %} {{ curriculum.admission_year }}
+            · {{ total_rows }} {% trans "fənn" context "registrar.console" %}
+            <a class="console-inline-link" href="{% url 'registrar:curriculum_edit' curriculum.id %}"><i class="fas fa-pen"></i> {% trans "redaktə" context "registrar.console" %}</a>
+        </p>
+    </div>
+
+    {% include "accounts/profile/_messages.html" %}
+
+    <div class="console-grid console-grid--plan">
+        <section class="console-panel">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-list-ol"></i> {% trans "Plan sətirləri (semestr üzrə)" context "registrar.console" %}</h2>
+            </div>
+            {% if semester_groups %}
+            {% for group in semester_groups %}
+            <div class="plan-semester">
+                <div class="plan-semester-head">{% trans "Semestr" context "registrar.console" %} {{ group.semester }}</div>
+                <ul class="console-list">
+                    {% for row in group.rows %}
+                    <li class="console-item">
+                        <div class="console-item-main">
+                            <span class="console-item-code">{{ row.subject.code }}</span>
+                            <span class="console-item-name">{{ row.subject.name }}</span>
+                        </div>
+                        <div class="console-item-meta">
+                            {% if row.is_elective %}
+                            <span class="plan-tag plan-tag--elective">{% trans "seçmə" context "registrar.console" %}{% if row.elective_group %} · {{ row.elective_group }}{% endif %}</span>
+                            {% else %}
+                            <span class="plan-tag plan-tag--mandatory">{% trans "məcburi" context "registrar.console" %}</span>
+                            {% endif %}
+                            <span>{{ row.subject.ects }} {% trans "ECTS" context "registrar.console" %}</span>
+                            <form method="post" action="{% url 'registrar:curriculum_subject_delete' row.id %}" class="plan-row-del" onsubmit="return confirm('{% trans "Bu sətri silmək?" context "registrar.console" %}');">
+                                {% csrf_token %}
+                                <button type="submit" aria-label="{% trans 'Sil' context 'registrar.console' %}"><i class="fas fa-times"></i></button>
+                            </form>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Bu planda hələ fənn yoxdur." context "registrar.console" %}</p></div>
+            {% endif %}
+        </section>
+
+        <section class="console-panel console-panel--form">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-plus-circle"></i> {% trans "Plana fənn əlavə et" context "registrar.console" %}</h2>
+            </div>
+            <div class="console-card console-card--flush">
+                {% include "registrar/_console_form.html" %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

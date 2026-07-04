@@ -26903,6 +26903,94 @@ msgctxt "profile.sidebar"
 msgid "Registrar (kataloq)"
 msgstr "Registrar (kataloq)"
 
+msgctxt "registrar.console"
+msgid "Tədris planları"
+msgstr "Tədris planları"
+
+msgctxt "registrar.console"
+msgid "Yeni plan"
+msgstr "Yeni plan"
+
+msgctxt "registrar.console"
+msgid "fənn"
+msgstr "fənn"
+
+msgctxt "registrar.console"
+msgid "Hələ tədris planı yoxdur."
+msgstr "Hələ tədris planı yoxdur."
+
+msgctxt "registrar.console"
+msgid "İxtisas (proqram)"
+msgstr "İxtisas (proqram)"
+
+msgctxt "registrar.console"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "registrar.console"
+msgid "Ad (opsional)"
+msgstr "Ad (opsional)"
+
+msgctxt "registrar.console"
+msgid "Bu proqram + qəbul ili üçün tədris planı artıq var."
+msgstr "Bu proqram + qəbul ili üçün tədris planı artıq var."
+
+msgctxt "registrar.console"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "registrar.console"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "registrar.console"
+msgid "Seçmə fənn"
+msgstr "Seçmə fənn"
+
+msgctxt "registrar.console"
+msgid "Seçmə blok adı"
+msgstr "Seçmə blok adı"
+
+msgctxt "registrar.console"
+msgid "Seçim sayı"
+msgstr "Seçim sayı"
+
+msgctxt "registrar.console"
+msgid "Bu fənn həmin semestrdə plana artıq əlavə olunub."
+msgstr "Bu fənn həmin semestrdə plana artıq əlavə olunub."
+
+msgctxt "registrar.console"
+msgid "Plan redaktəsi"
+msgstr "Plan redaktəsi"
+
+msgctxt "registrar.console"
+msgid "Yeni tədris planı"
+msgstr "Yeni tədris planı"
+
+msgctxt "registrar.console"
+msgid "Plan sətirləri (semestr üzrə)"
+msgstr "Plan sətirləri (semestr üzrə)"
+
+msgctxt "registrar.console"
+msgid "Plana fənn əlavə et"
+msgstr "Plana fənn əlavə et"
+
+msgctxt "registrar.console"
+msgid "seçmə"
+msgstr "seçmə"
+
+msgctxt "registrar.console"
+msgid "məcburi"
+msgstr "məcburi"
+
+msgctxt "registrar.console"
+msgid "Bu sətri silmək?"
+msgstr "Bu sətri silmək?"
+
+msgctxt "registrar.console"
+msgid "Bu planda hələ fənn yoxdur."
+msgstr "Bu planda hələ fənn yoxdur."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

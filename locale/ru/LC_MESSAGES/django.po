@@ -26962,6 +26962,94 @@ msgctxt "profile.sidebar"
 msgid "Registrar (kataloq)"
 msgstr "Реестр (каталог)"
 
+msgctxt "registrar.console"
+msgid "Tədris planları"
+msgstr "Учебные планы"
+
+msgctxt "registrar.console"
+msgid "Yeni plan"
+msgstr "Новый план"
+
+msgctxt "registrar.console"
+msgid "fənn"
+msgstr "предметов"
+
+msgctxt "registrar.console"
+msgid "Hələ tədris planı yoxdur."
+msgstr "Пока нет учебных планов."
+
+msgctxt "registrar.console"
+msgid "İxtisas (proqram)"
+msgstr "Программа"
+
+msgctxt "registrar.console"
+msgid "Qəbul ili"
+msgstr "Год приёма"
+
+msgctxt "registrar.console"
+msgid "Ad (opsional)"
+msgstr "Название (необязательно)"
+
+msgctxt "registrar.console"
+msgid "Bu proqram + qəbul ili üçün tədris planı artıq var."
+msgstr "Учебный план для этой программы и года приёма уже существует."
+
+msgctxt "registrar.console"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "registrar.console"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "registrar.console"
+msgid "Seçmə fənn"
+msgstr "Выборный"
+
+msgctxt "registrar.console"
+msgid "Seçmə blok adı"
+msgstr "Название блока выбора"
+
+msgctxt "registrar.console"
+msgid "Seçim sayı"
+msgstr "Число выборов"
+
+msgctxt "registrar.console"
+msgid "Bu fənn həmin semestrdə plana artıq əlavə olunub."
+msgstr "Этот предмет уже добавлен в план на этот семестр."
+
+msgctxt "registrar.console"
+msgid "Plan redaktəsi"
+msgstr "Редактировать план"
+
+msgctxt "registrar.console"
+msgid "Yeni tədris planı"
+msgstr "Новый учебный план"
+
+msgctxt "registrar.console"
+msgid "Plan sətirləri (semestr üzrə)"
+msgstr "Строки плана (по семестрам)"
+
+msgctxt "registrar.console"
+msgid "Plana fənn əlavə et"
+msgstr "Добавить предмет в план"
+
+msgctxt "registrar.console"
+msgid "seçmə"
+msgstr "выборный"
+
+msgctxt "registrar.console"
+msgid "məcburi"
+msgstr "обязательный"
+
+msgctxt "registrar.console"
+msgid "Bu sətri silmək?"
+msgstr "Удалить эту строку?"
+
+msgctxt "registrar.console"
+msgid "Bu planda hələ fənn yoxdur."
+msgstr "В этом плане пока нет предметов."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

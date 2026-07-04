@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import Membership, Organization
-from apps.registrar.models import Program, Subject
+from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
 from core.constants import OrganizationType
 from core.rls import bypass_rls
 
@@ -137,4 +137,70 @@ class RegistrarConsoleTest(TestCase):
         # Owner of org1 (active org = org1) cannot reach org2's program → 404.
         client = self._client(self.owner)
         resp = client.get(reverse("registrar:program_edit", args=[self.other_program.id]))
+        self.assertEqual(resp.status_code, 404)
+
+    # ── curriculum (study plan) ─────────────────────────────────────────────
+    def test_create_curriculum_redirects_to_detail(self):
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:curriculum_create"),
+            {"program": str(self.program.id), "admission_year": "2025", "name": "", "is_active": "on"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            curriculum = Curriculum.objects.get(organization=self.org, program=self.program, admission_year=2025)
+        self.assertIn(str(curriculum.id), resp.url)
+
+    def test_duplicate_curriculum_shows_error(self):
+        with bypass_rls():
+            Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:curriculum_create"),
+            {"program": str(self.program.id), "admission_year": "2024", "name": "", "is_active": "on"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "artıq var")
+
+    def test_add_plan_row_and_delete(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+        client = self._client(self.owner)
+        # Add a mandatory subject to semester 1.
+        resp = client.post(
+            reverse("registrar:curriculum_detail", args=[curriculum.id]),
+            {"subject": str(self.subject.id), "semester_number": "1", "required_choices": "1"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            row = CurriculumSubject.objects.get(curriculum=curriculum, subject=self.subject)
+        # Delete it.
+        resp = client.post(reverse("registrar:curriculum_subject_delete", args=[row.id]))
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            self.assertFalse(CurriculumSubject.objects.filter(pk=row.id).exists())
+
+    def test_duplicate_plan_row_shows_error(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+            CurriculumSubject.objects.create(
+                organization=self.org, curriculum=curriculum, subject=self.subject, semester_number=1
+            )
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:curriculum_detail", args=[curriculum.id]),
+            {"subject": str(self.subject.id), "semester_number": "1", "required_choices": "1"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "artıq əlavə olunub")
+        with bypass_rls():
+            self.assertEqual(CurriculumSubject.objects.filter(curriculum=curriculum, subject=self.subject).count(), 1)
+
+    def test_cannot_open_other_tenant_curriculum(self):
+        with bypass_rls():
+            other = Curriculum.objects.create(
+                organization=self.other_org, program=self.other_program, admission_year=2024
+            )
+        client = self._client(self.owner)
+        resp = client.get(reverse("registrar:curriculum_detail", args=[other.id]))
         self.assertEqual(resp.status_code, 404)

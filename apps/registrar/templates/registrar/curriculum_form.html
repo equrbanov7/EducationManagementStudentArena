@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% if instance %}{% trans "Fənn redaktəsi" context "registrar.console" %}{% else %}{% trans "Yeni fənn" context "registrar.console" %}{% endif %} - {{ site_brand_name }}{% endblock %}
+{% block title %}{% if instance %}{% trans "Plan redaktəsi" context "registrar.console" %}{% else %}{% trans "Yeni tədris planı" context "registrar.console" %}{% endif %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
@@ -11,8 +11,8 @@
 <div class="console-page console-page--form">
     <div class="console-head">
         <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
-        <h1 class="console-title"><i class="fas fa-book"></i>
-            {% if instance %}{{ instance.code }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni fənn" context "registrar.console" %}{% endif %}
+        <h1 class="console-title"><i class="fas fa-clipboard-list"></i>
+            {% if instance %}{{ instance.program.code }} · {{ instance.admission_year }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni tədris planı" context "registrar.console" %}{% endif %}
         </h1>
     </div>
     {% include "accounts/profile/_messages.html" %}
