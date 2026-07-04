@@ -434,6 +434,53 @@ class Command(BaseCommand):
             except registrar_schedule.ScheduleConflict:
                 pass
 
+        self._seed_exam(org)
+
+    def _seed_exam(self, org):
+        """One demo exam THIS week so the timetable shows the "imtahan on that day"
+        integration. Dated relative to today (Wednesday of the current week) and
+        linked to the AZ group's CS101 course, so the AZ students see it on the
+        schedule. Idempotent (matched by title). Resolved via the app registry so
+        the organizations module keeps no static import of exams (no dep cycle)."""
+        import datetime
+
+        from django.apps import apps as django_apps
+        from django.utils import timezone
+
+        Exam = django_apps.get_model("exams", "Exam")
+        title = "CS101 aralıq imtahanı (demo)"
+        if Exam.objects.filter(organization=org, title=title).exists():
+            return
+
+        offering = (
+            CourseOffering.objects.filter(
+                organization=org,
+                subject__code="CS101",
+                course__isnull=False,
+                enrollments__student__username="wcu_student_az1",
+            )
+            .select_related("course", "instructor")
+            .first()
+        )
+        if offering is None or offering.instructor is None:
+            return
+
+        today = timezone.localdate()
+        wednesday = today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(days=2)
+        start = timezone.make_aware(datetime.datetime.combine(wednesday, datetime.time(10, 0)))
+        Exam.objects.create(
+            organization=org,
+            author=offering.instructor,
+            course=offering.course,
+            title=title,
+            exam_type="written",
+            exam_type_extended="midterm",
+            start_datetime=start,
+            end_datetime=start + datetime.timedelta(hours=1, minutes=30),
+            total_duration_minutes=90,
+            is_active=True,
+        )
+
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile
         profile.organization = org

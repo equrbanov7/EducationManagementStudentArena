@@ -118,3 +118,73 @@ class ScheduleServiceTest(TestCase):
             grid = schedule.build_week_grid(group_slots)
             monday = next(d for d in grid if d["weekday"] == 1)
             self.assertEqual(len(monday["slots"]), 1)
+
+    # ── Konkret həftə: tarixlər + üst/alt həftə + imtahanlar ──────────────────
+    def test_week_parity_anchored_to_period_start(self):
+        # 2024-09-01 is a Sunday → its week's Monday is 2024-08-26 (week 1 = odd/üst).
+        first_monday = datetime.date(2024, 8, 26)
+        self.assertEqual(schedule.week_parity(self.period, first_monday), WeekType.ODD)
+        self.assertEqual(schedule.week_parity(self.period, first_monday + datetime.timedelta(weeks=1)), WeekType.EVEN)
+        self.assertEqual(schedule.week_parity(self.period, first_monday + datetime.timedelta(weeks=2)), WeekType.ODD)
+
+    def test_build_week_context_shape(self):
+        ctx = schedule.build_week_context(self.period, offset=0)
+        self.assertTrue(ctx["is_current"])
+        self.assertEqual(ctx["monday"].weekday(), 0)  # Monday
+        self.assertEqual((ctx["sunday"] - ctx["monday"]).days, 6)
+        self.assertIn(ctx["parity"], {WeekType.ODD, WeekType.EVEN})
+        self.assertEqual(len(ctx["dates"]), 6)  # Mon–Sat teaching days
+
+    def test_build_week_view_marks_off_week_slots(self):
+        with bypass_rls():
+            schedule.create_slot(offering=self.off1, weekday=1, start_time=T9, end_time=T1030, week_type=WeekType.ODD)
+            slots = schedule.get_group_schedule(organization=self.org, group=self.group, period=self.period)
+        ctx = schedule.build_week_context(self.period, offset=0)
+        days = schedule.build_week_view(slots, week_context=ctx)
+        monday = next(d for d in days if d["weekday"] == 1)
+        self.assertEqual(len(monday["slots"]), 1)
+        # The odd-week slot applies only when the current week is odd.
+        self.assertEqual(monday["slots"][0]["this_week"], ctx["parity"] == WeekType.ODD)
+
+    def test_get_week_exams_groups_by_weekday(self):
+        from django.utils import timezone
+
+        from apps.exams.models import Exam
+
+        monday = schedule._week_monday(0)
+        wednesday = monday + datetime.timedelta(days=2)
+        start = timezone.make_aware(datetime.datetime.combine(wednesday, datetime.time(10, 0)))
+        with bypass_rls():
+            exam = Exam.objects.create(
+                organization=self.org,
+                author=self.teacher,
+                title="Aralıq imtahan",
+                exam_type="written",
+                start_datetime=start,
+                end_datetime=start + datetime.timedelta(hours=1),
+                is_active=True,
+            )
+            by_day = schedule.get_week_exams(organization=self.org, course_ids=[], author=self.teacher, monday=monday)
+        self.assertIn(3, by_day)  # Wednesday
+        self.assertEqual(by_day[3][0]["exam"].id, exam.id)
+
+    def test_get_week_exams_excludes_other_weeks(self):
+        from django.utils import timezone
+
+        from apps.exams.models import Exam
+
+        monday = schedule._week_monday(0)
+        next_week_wed = monday + datetime.timedelta(days=9)
+        start = timezone.make_aware(datetime.datetime.combine(next_week_wed, datetime.time(10, 0)))
+        with bypass_rls():
+            Exam.objects.create(
+                organization=self.org,
+                author=self.teacher,
+                title="Gələn həftə imtahanı",
+                exam_type="written",
+                start_datetime=start,
+                end_datetime=start + datetime.timedelta(hours=1),
+                is_active=True,
+            )
+            by_day = schedule.get_week_exams(organization=self.org, course_ids=[], author=self.teacher, monday=monday)
+        self.assertEqual(by_day, {})
