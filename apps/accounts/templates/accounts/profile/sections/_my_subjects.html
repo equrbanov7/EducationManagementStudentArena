@@ -83,6 +83,26 @@
                     {% endif %}
                     {% endwith %}
                 </div>
+                {% if row.grade %}
+                <div class="subject-grade">
+                    <div class="subject-grade-head">
+                        <span class="subject-grade-total">{{ row.grade.total|floatformat:'-2' }}<span class="subject-grade-max">/100</span></span>
+                        <span class="subject-grade-letter grade-{{ row.grade.letter }}">{{ row.grade.letter }}</span>
+                        {% if row.grade.barred %}
+                        <span class="subject-grade-status is-barred">{% trans "Buraxılmır" context "profile.subjects" %}</span>
+                        {% elif row.grade.passed %}
+                        <span class="subject-grade-status is-pass">{% trans "Keçir" context "profile.subjects" %}</span>
+                        {% else %}
+                        <span class="subject-grade-status is-fail">{% trans "Kəsilir" context "profile.subjects" %}</span>
+                        {% endif %}
+                    </div>
+                    <div class="subject-grade-components">
+                        {% for cell in row.grade.rows %}
+                        <span class="grade-comp">{{ cell.component.name }}: <strong>{{ cell.score|floatformat:'-2' }}</strong>/{{ cell.component.max_score }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
                 <footer class="subject-card-foot">
                     {% if row.eligibility.barred %}
                     <span class="exam-status exam-status--barred"><i class="fas fa-ban"></i> {% trans "İmtahana buraxılmır (qayıb həddi keçilib)" context "profile.subjects" %}</span>

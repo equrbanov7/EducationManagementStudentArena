@@ -28,6 +28,10 @@
                 <i class="fas fa-tasks"></i>
                 <span>{% trans "grading_queue" context "accounts.teacher_dashboard" %}</span>
             </a>
+            <a href="{% url 'registrar:journal_list' %}" class="sidebar-nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>{% trans "Elektron jurnal" context "registrar.journal" %}</span>
+            </a>
             <a href="#" class="sidebar-nav-item">
                 <i class="fas fa-file-alt"></i>
                 <span>{% trans "exams" context "accounts.teacher_dashboard" %}</span>

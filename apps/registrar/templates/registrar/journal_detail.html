@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ offering.subject.name }} — {% trans "Jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260704-1">
+{% endblock %}
+
+{% block content %}
+<div class="journal-page">
+    <div class="journal-detail-head">
+        <a class="journal-back" href="{% url 'registrar:journal_list' %}"><i class="fas fa-arrow-left"></i> {% trans "Jurnallar" context "registrar.journal" %}</a>
+        <h1 class="journal-title">{{ offering.subject.code }} — {{ offering.subject.name }}</h1>
+        <div class="journal-detail-meta">
+            {% if offering.group %}<span><i class="fas fa-users"></i> {{ offering.group.name }}</span>{% endif %}
+            {% if offering.period %}<span><i class="fas fa-calendar-alt"></i> {{ offering.period.name }}</span>{% endif %}
+            <span><i class="fas fa-percentage"></i> {% trans "Keçid" context "registrar.journal" %}: {{ journal.scheme.pass_threshold }}</span>
+            <span><i class="fas fa-file-signature"></i> {% trans "Min. imtahan" context "registrar.journal" %}: {{ journal.scheme.min_final_exam_score }}</span>
+            <span><i class="fas fa-user-clock"></i> {% trans "Qayıb limiti" context "registrar.journal" %}: {{ journal.absence_limit_percent }}%</span>
+            {% if journal.scheme.is_published %}<span class="journal-badge journal-badge--locked"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
+        </div>
+    </div>
+
+    {% include "accounts/profile/_messages.html" %}
+
+    {% if journal.rows %}
+    <form method="post" class="journal-form">
+        {% csrf_token %}
+        <div class="journal-grid-wrap">
+            <table class="journal-grid" data-pass="{{ journal.scheme.pass_threshold }}" data-minexam="{{ journal.scheme.min_final_exam_score }}">
+                <thead>
+                    <tr>
+                        <th class="col-student">{% trans "Tələbə" context "registrar.journal" %}</th>
+                        {% for comp in journal.components %}
+                        <th class="col-comp {% if comp.is_final_exam %}col-exam{% endif %}">
+                            {{ comp.name }}<span class="col-max">/{{ comp.max_score }}</span>
+                        </th>
+                        {% endfor %}
+                        <th class="col-abs">{% trans "Qayıb (saat)" context "registrar.journal" %}</th>
+                        <th class="col-total">{% trans "Yekun" context "registrar.journal" %}</th>
+                        <th class="col-letter">{% trans "Hərf" context "registrar.journal" %}</th>
+                        <th class="col-status">{% trans "Status" context "registrar.journal" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in journal.rows %}
+                    <tr class="journal-row" data-enrollment="{{ row.enrollment.id }}">
+                        <td class="col-student">
+                            <span class="student-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                        </td>
+                        {% for cell in row.result.rows %}
+                        <td class="col-comp {% if cell.component.is_final_exam %}col-exam{% endif %}">
+                            {% if can_edit %}
+                            <input type="number" min="0" max="{{ cell.component.max_score }}" step="0.5"
+                                   class="journal-score" data-max="{{ cell.component.max_score }}"
+                                   {% if cell.component.is_final_exam %}data-exam="1"{% endif %}
+                                   name="score__{{ row.enrollment.id }}__{{ cell.component.id }}"
+                                   value="{{ cell.score|floatformat:'-2' }}">
+                            {% else %}
+                            <span class="journal-score-ro">{{ cell.score|floatformat:'-2' }}</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="col-abs">
+                            {% if can_edit %}
+                            <input type="number" min="0" step="1" class="journal-absence"
+                                   name="absence__{{ row.enrollment.id }}" value="{{ row.enrollment.absence_hours }}">
+                            {% else %}
+                            <span class="journal-score-ro">{{ row.enrollment.absence_hours }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="col-total"><span class="cell-total">{{ row.result.total|floatformat:'-2' }}</span></td>
+                        <td class="col-letter"><span class="cell-letter grade-{{ row.result.letter }}">{{ row.result.letter }}</span></td>
+                        <td class="col-status">
+                            {% if row.result.barred %}
+                            <span class="journal-badge journal-badge--barred cell-status"><i class="fas fa-ban"></i> {% trans "Buraxılmır" context "registrar.journal" %}</span>
+                            {% elif row.result.passed %}
+                            <span class="journal-badge journal-badge--pass cell-status"><i class="fas fa-check"></i> {% trans "Keçir" context "registrar.journal" %}</span>
+                            {% else %}
+                            <span class="journal-badge journal-badge--fail cell-status"><i class="fas fa-times"></i> {% trans "Kəsilir" context "registrar.journal" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if can_edit %}
+        <div class="journal-actions">
+            <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>
+        </div>
+        {% endif %}
+    </form>
+    {% else %}
+    <div class="journal-empty">
+        <i class="fas fa-user-slash"></i>
+        <p>{% trans "Bu fənnə hələ tələbə qeydiyyatı yoxdur." context "registrar.journal" %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'registrar/js/journal.js' %}?v=20260704-1"></script>
+{% endblock %}

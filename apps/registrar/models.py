@@ -12,6 +12,8 @@ layer is additive — it does not touch the existing exam/LMS core.
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import pgettext_lazy
@@ -240,6 +242,14 @@ class CourseOffering(UUIDModel, TimeStampedModel):
         related_name="offerings",
         help_text="LMS kursu (fənn içi = mövzular/resurslar) — opsional.",
     )
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="taught_offerings",
+        help_text="Fənni tədris edən müəllim (elektron jurnal sahibi).",
+    )
     lesson_hours = models.PositiveSmallIntegerField(
         default=0, help_text="Semestrdə fənnin tam dərs (kontakt) saatı — qayıb limiti üçün baza."
     )
@@ -338,3 +348,105 @@ class GroupElectiveChoice(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.group_id} · {self.elective_group} → {self.chosen_subject.code}"
+
+
+# ── Elektron jurnal / qiymətləndirmə (U3) ────────────────────────────────────
+#
+# AZ Boloniya modeli: semestr fəaliyyəti (max 50) + yekun imtahan (max 50) = 100.
+# Semestr komponentləri fənnə görə fərqlənir (seminar / laboratoriya / sərbəst
+# iş / kollokvium) — ona görə hər ``CourseOffering`` üçün tenant-konfiqurasiya
+# olunan ``AssessmentScheme`` + komponent sətirləri saxlanır. Müəllim hər tələbə
+# üçün komponent balı daxil edir; yekun bal, hərf və keçid servis qatında
+# hesablanır (``apps/registrar/gradebook.py``). Qayıb saatı ayrıca
+# ``Enrollment.absence_hours``-da (imtahana buraxılma qaydası).
+
+
+class ComponentKind(models.TextChoices):
+    SEMINAR = "seminar", pgettext_lazy("registrar.component_kind", "Seminar")
+    LAB = "lab", pgettext_lazy("registrar.component_kind", "Laboratory")
+    INDEPENDENT = "independent", pgettext_lazy("registrar.component_kind", "Independent work")
+    COLLOQUIUM = "colloquium", pgettext_lazy("registrar.component_kind", "Colloquium")
+    ATTENDANCE = "attendance", pgettext_lazy("registrar.component_kind", "Attendance")
+    FINAL_EXAM = "final_exam", pgettext_lazy("registrar.component_kind", "Final exam")
+    OTHER = "other", pgettext_lazy("registrar.component_kind", "Other")
+
+
+class AssessmentScheme(UUIDModel, TimeStampedModel):
+    """Per-offering assessment rule set (Bologna, tenant/offering-configurable).
+
+    The sum of the scheme's ``GradeComponent.max_score`` is normally 100
+    (≈50 semester activity + 50 final exam). ``is_published`` locks the journal
+    so grades can no longer be edited (finalisation)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="assessment_schemes"
+    )
+    offering = models.OneToOneField(CourseOffering, on_delete=models.CASCADE, related_name="assessment_scheme")
+    pass_threshold = models.PositiveSmallIntegerField(default=51, help_text="Keçid üçün minimum ümumi bal (adətən 51).")
+    min_final_exam_score = models.PositiveSmallIntegerField(
+        default=17, help_text="Yekun imtahandan keçid üçün minimum bal (kəsilmə qaydası)."
+    )
+    is_published = models.BooleanField(default=False, help_text="Yekunlaşdırılıb — bal redaktəsi bağlıdır.")
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.scheme.meta", "assessment scheme")
+        verbose_name_plural = pgettext_lazy("registrar.model.scheme.meta", "assessment schemes")
+
+    def __str__(self):
+        return f"scheme<{self.offering_id}>"
+
+
+class GradeComponent(UUIDModel, TimeStampedModel, OrderedModel):
+    """One weighted column of a scheme (seminar / lab / independent / exam …)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="grade_components"
+    )
+    scheme = models.ForeignKey(AssessmentScheme, on_delete=models.CASCADE, related_name="components")
+    name = models.CharField(max_length=100, help_text="Komponentin adı (məs. Seminar, Sərbəst iş).")
+    kind = models.CharField(max_length=16, choices=ComponentKind.choices, default=ComponentKind.SEMINAR)
+    max_score = models.PositiveSmallIntegerField(default=10, help_text="Bu komponentin maksimum balı (çəkisi).")
+    is_final_exam = models.BooleanField(
+        default=False, help_text="Yekun imtahan komponenti (minimum-hədd qaydası buna tətbiq olunur)."
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = pgettext_lazy("registrar.model.component.meta", "grade component")
+        verbose_name_plural = pgettext_lazy("registrar.model.component.meta", "grade components")
+
+    def __str__(self):
+        return f"{self.name} ({self.max_score})"
+
+
+class ComponentScore(UUIDModel, TimeStampedModel):
+    """A student's score for one grade component (the journal cell)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="component_scores"
+    )
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="component_scores")
+    component = models.ForeignKey(GradeComponent, on_delete=models.CASCADE, related_name="scores")
+    score = models.DecimalField(
+        max_digits=6, decimal_places=2, default=Decimal("0"), help_text="Daxil edilmiş bal (0 .. max_score)."
+    )
+    entered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.score.meta", "component score")
+        verbose_name_plural = pgettext_lazy("registrar.model.score.meta", "component scores")
+        constraints = [
+            models.UniqueConstraint(fields=["enrollment", "component"], name="uniq_enrollment_component_score"),
+        ]
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"{self.enrollment_id} · {self.component_id} = {self.score}"

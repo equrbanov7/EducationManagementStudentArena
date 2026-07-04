@@ -24,6 +24,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
+from apps.registrar import gradebook as registrar_gradebook
 from apps.registrar import services as registrar_services
 from apps.registrar.models import (
     CourseOffering,
@@ -349,6 +350,43 @@ class Command(BaseCommand):
         if barred:
             barred.absence_hours = 20
             barred.save(update_fields=["absence_hours"])
+
+        self._seed_journal(org)
+
+    def _seed_journal(self, org):
+        """Wire offerings to their LMS course + seed assessment schemes/scores.
+
+        So the electronic journal (müəllim) and student "Qiymətlərim" have real
+        data: every offering gets the demo teacher as instructor, a linked Course
+        (subject → fənn içi) with members synced, an AssessmentScheme, and demo
+        component scores for its enrolled students (one strong, one failing exam).
+        """
+        teacher = User.objects.filter(username="wcu_teacher").first()
+        # Deterministic demo scores per component kind (seminar 8 / lab 8 /
+        # independent 8 / colloquium 16 / exam 38 → 78, C, passes).
+        good = {"seminar": 8, "lab": 8, "independent": 8, "colloquium": 16, "final_exam": 38}
+        # A weak profile: fails the final-exam minimum (exam 10 < 17).
+        weak = {"seminar": 6, "lab": 5, "independent": 6, "colloquium": 12, "final_exam": 10}
+
+        offerings = CourseOffering.objects.filter(organization=org).select_related("subject", "group", "period")
+        for offering in offerings:
+            if teacher and offering.instructor_id is None:
+                offering.instructor = teacher
+                offering.save(update_fields=["instructor"])
+            registrar_services.ensure_offering_course(offering=offering)
+            registrar_services.sync_offering_course_members(offering=offering)
+            scheme = registrar_gradebook.ensure_assessment_scheme(offering=offering)
+            components = {c.kind: c for c in scheme.components.all()}
+
+            cell_values = {}
+            for enrollment in offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student"):
+                profile = weak if enrollment.student.username == "wcu_student_az2" else good
+                for kind, value in profile.items():
+                    component = components.get(kind)
+                    if component is not None:
+                        cell_values[(enrollment.id, component.id)] = value
+            if cell_values:
+                registrar_gradebook.save_journal_scores(offering=offering, cell_values=cell_values, by_user=teacher)
 
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile

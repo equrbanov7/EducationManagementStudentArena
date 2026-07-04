@@ -107,3 +107,19 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
                 for c in GroupElectiveChoice.objects.filter(organization=org).select_related("chosen_subject")
             }
             self.assertEqual(decisions, {"EL-WEB", "EL-AI"})
+
+    def test_seeds_journal_data(self):
+        from apps.registrar.models import AssessmentScheme, ComponentScore, CourseOffering
+
+        self._seed()
+        with bypass_rls():
+            org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
+            offerings = CourseOffering.objects.filter(organization=org)
+            # Every offering has the demo teacher, a linked Course, and a scheme.
+            self.assertTrue(offerings.exists())
+            for offering in offerings:
+                self.assertIsNotNone(offering.instructor_id, f"{offering} missing instructor")
+                self.assertIsNotNone(offering.course_id, f"{offering} missing linked course")
+            self.assertEqual(AssessmentScheme.objects.filter(organization=org).count(), offerings.count())
+            # Enrolled (non-completed) students have component scores.
+            self.assertGreater(ComponentScore.objects.filter(organization=org).count(), 0)
