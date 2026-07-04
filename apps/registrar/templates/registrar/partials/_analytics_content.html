@@ -1,0 +1,148 @@
+{% load static i18n %}
+<div class="journal-page">
+    <div class="journal-head analytics-head">
+        <div>
+            <h1 class="journal-title">
+                <i class="fas fa-chart-line"></i> {% trans "Akademik analitika" context "registrar.analytics" %}
+            </h1>
+            <p class="journal-subtitle">{% trans "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət." context "registrar.analytics" %}</p>
+        </div>
+        {% if periods %}
+        <form method="get" class="analytics-period-form">
+            {% if analytics_embedded %}<input type="hidden" name="section" value="analytics">{% endif %}
+            <label class="analytics-period-label" for="analytics-period">{% trans "Semestr" context "registrar.analytics" %}</label>
+            <select id="analytics-period" name="period" class="analytics-period-select" data-autosubmit>
+                {% for p in periods %}
+                <option value="{{ p.id }}" {% if analytics.period and p.id == analytics.period.id %}selected{% endif %}>{{ p.name }} · {{ p.academic_year }}</option>
+                {% endfor %}
+            </select>
+            <noscript><button type="submit" class="journal-save-btn">{% trans "Göstər" context "registrar.analytics" %}</button></noscript>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if not analytics.has_data %}
+    <div class="journal-empty">
+        <i class="fas fa-chart-area"></i>
+        <p>{% trans "Bu semestr üçün hələ qiymətləndirmə datası yoxdur." context "registrar.analytics" %}</p>
+    </div>
+    {% else %}
+    {% with t=analytics.totals %}
+
+    {# ── Ümumi göstəricilər ────────────────────────────────────────────── #}
+    <div class="analytics-cards">
+        <div class="analytics-card">
+            <span class="analytics-card-value">{{ t.students }}</span>
+            <span class="analytics-card-label"><i class="fas fa-user-graduate"></i> {% trans "Tələbə" context "registrar.analytics" %}</span>
+        </div>
+        <div class="analytics-card">
+            <span class="analytics-card-value">{{ t.enrollments }}</span>
+            <span class="analytics-card-label"><i class="fas fa-book-open"></i> {% trans "Fənn qeydiyyatı" context "registrar.analytics" %}</span>
+        </div>
+        <div class="analytics-card analytics-card--pass">
+            <span class="analytics-card-value">{{ t.pass_rate }}%</span>
+            <span class="analytics-card-label"><i class="fas fa-check-circle"></i> {% trans "Keçid faizi" context "registrar.analytics" %}</span>
+            <span class="analytics-card-hint">{{ t.passed }} / {{ t.definite }} {% trans "yekunlaşmış" context "registrar.analytics" %}</span>
+        </div>
+        <div class="analytics-card analytics-card--gpa">
+            <span class="analytics-card-value">{{ t.avg_gpa }}</span>
+            <span class="analytics-card-label"><i class="fas fa-award"></i> {% trans "Orta GPA (kredit-çəkili)" context "registrar.analytics" %}</span>
+        </div>
+        <div class="analytics-card {% if t.absence_rate > 15 %}analytics-card--warn{% endif %}">
+            <span class="analytics-card-value">{{ t.absence_rate }}%</span>
+            <span class="analytics-card-label"><i class="fas fa-user-clock"></i> {% trans "Qayıb faizi" context "registrar.analytics" %}</span>
+            <span class="analytics-card-hint">{{ t.barred }} {% trans "tələbə kəsilmə həddində" context "registrar.analytics" %}</span>
+        </div>
+    </div>
+
+    {# ── Proqramlar üzrə ───────────────────────────────────────────────── #}
+    {% if analytics.programs %}
+    <h2 class="journal-finals-title"><i class="fas fa-graduation-cap"></i> {% trans "Proqramlar üzrə" context "registrar.analytics" %}</h2>
+    <div class="journal-grid-wrap">
+        <table class="journal-grid analytics-table" data-ems-table data-ems-table-filter>
+            <thead>
+                <tr>
+                    <th class="ta-left">{% trans "Proqram" context "registrar.analytics" %}</th>
+                    <th>{% trans "Tələbə" context "registrar.analytics" %}</th>
+                    <th>{% trans "Qeydiyyat" context "registrar.analytics" %}</th>
+                    <th>{% trans "Keçid" context "registrar.analytics" %} %</th>
+                    <th>{% trans "Orta GPA" context "registrar.analytics" %}</th>
+                    <th>{% trans "Orta yekun bal" context "registrar.analytics" %}</th>
+                    <th>{% trans "Qayıb" context "registrar.analytics" %} %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in analytics.programs %}
+                <tr>
+                    <td class="ta-left"><span class="analytics-code">{{ row.sublabel }}</span> {{ row.label }}</td>
+                    <td>{{ row.students }}</td>
+                    <td>{{ row.enrollments }}</td>
+                    <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
+                    <td>{% if row.gpa_credits %}{{ row.avg_gpa }}{% else %}{{ row.avg_gpa }}{% endif %}</td>
+                    <td>{% if row.graded %}{{ row.avg_total }}{% else %}—{% endif %}</td>
+                    <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {# ── Qruplar üzrə ──────────────────────────────────────────────────── #}
+    {% if analytics.groups %}
+    <h2 class="journal-finals-title"><i class="fas fa-users"></i> {% trans "Qruplar üzrə" context "registrar.analytics" %}</h2>
+    <div class="journal-grid-wrap">
+        <table class="journal-grid analytics-table" data-ems-table data-ems-table-filter>
+            <thead>
+                <tr>
+                    <th class="ta-left">{% trans "Qrup" context "registrar.analytics" %}</th>
+                    <th>{% trans "Tələbə" context "registrar.analytics" %}</th>
+                    <th>{% trans "Keçid" context "registrar.analytics" %} %</th>
+                    <th>{% trans "Orta GPA" context "registrar.analytics" %}</th>
+                    <th>{% trans "Qayıb" context "registrar.analytics" %} %</th>
+                    <th>{% trans "Kəsilmə həddində" context "registrar.analytics" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in analytics.groups %}
+                <tr>
+                    <td class="ta-left">{{ row.label }}</td>
+                    <td>{{ row.students }}</td>
+                    <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
+                    <td>{{ row.avg_gpa }}</td>
+                    <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
+                    <td>{% if row.barred %}<span class="journal-badge journal-badge--barred">{{ row.barred }}</span>{% else %}<span class="journal-badge journal-badge--ok">0</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {# ── Risk fənləri ──────────────────────────────────────────────────── #}
+    {% if analytics.at_risk %}
+    <h2 class="journal-finals-title"><i class="fas fa-triangle-exclamation"></i> {% trans "Diqqət tələb edən fənlər" context "registrar.analytics" %}
+        <span class="journal-components-hint">{% trans "kəsilmə faizi ən yüksək fənn açılışları" context "registrar.analytics" %}</span>
+    </h2>
+    <div class="analytics-risk-list">
+        {% for row in analytics.at_risk %}
+        <div class="analytics-risk-item">
+            <div class="analytics-risk-main">
+                <span class="analytics-code">{{ row.sublabel }}</span>
+                <span class="analytics-risk-name">{{ row.label }}</span>
+            </div>
+            <div class="analytics-risk-figures">
+                <span class="analytics-risk-fail">{{ row.fail_rate }}% {% trans "kəsilmə" context "registrar.analytics" %}</span>
+                <span class="analytics-risk-meta">{{ row.failed }} / {{ row.definite }} · {% trans "orta bal" context "registrar.analytics" %} {{ row.avg_total }}</span>
+            </div>
+            <div class="analytics-risk-bar"><div class="analytics-risk-fill" data-width="{{ row.fail_rate }}"></div></div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% endwith %}
+    {% endif %}
+</div>
+<script src="{% static 'registrar/js/analytics.js' %}?v=20260705-1"></script>
+

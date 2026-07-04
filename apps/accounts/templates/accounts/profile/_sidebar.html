@@ -259,6 +259,8 @@
         </li>
         {% endif %}
 
+        {% include "accounts/profile/_sidebar_university.html" %}
+
         {% if can_view_student_assignments %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_assigned" context "profile.sidebar" %}</span></li>
         {% endif %}
@@ -416,22 +418,8 @@
             </a>
         </li>
         {% endif %}
-        {% if role_capabilities.can_approve_grades %}
-        <li class="sidebar-menu-item">
-            <a href="{% url 'registrar:approvals_inbox' %}"
-               class="sidebar-menu-link {% if active_main_nav == 'approvals' %}active{% endif %}">
-                <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Qiymət təsdiqləri" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        <li class="sidebar-menu-item">
-            <a href="{% url 'registrar:analytics' %}"
-               class="sidebar-menu-link {% if active_main_nav == 'analytics' %}active{% endif %}">
-                <i class="fas fa-chart-line sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Akademik analitika" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
+        {# "Qiymət təsdiqləri" + "Akademik analitika" U12-də yuxarıdakı "Universitet"
+           qrupuna SPA-bölmə kimi köçürüldü (grade-approvals / analytics section-ları). #}
         {% if 'org-faculties' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=org-faculties"

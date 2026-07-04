@@ -94,6 +94,12 @@ SECTION_PARTIALS: dict[str, str] = {
     "org-members": "accounts/profile/sections/_org_members.html",
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
+    # U12 — registrar kabinet bölmələri (profil shell-inin içində)
+    "my-schedule": "accounts/profile/sections/_my_schedule.html",
+    "academic-calendar": "accounts/profile/sections/_academic_calendar.html",
+    "my-journal": "accounts/profile/sections/_my_journal.html",
+    "grade-approvals": "accounts/profile/sections/_grade_approvals.html",
+    "analytics": "accounts/profile/sections/_analytics.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -126,6 +132,13 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-members",
         "org-roles",
         "audit-log",
+        # U12 — registrar kabinet bölmələri (read-mostly; formlar registrar
+        # endpoint-lərinə POST edir və `next` ilə shell-ə qayıdır).
+        "my-schedule",
+        "academic-calendar",
+        "my-journal",
+        "grade-approvals",
+        "analytics",
     }
 )
 

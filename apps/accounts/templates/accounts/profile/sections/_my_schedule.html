@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}U12 — registrar kabinet bölməsi: paylaşılan content partial-ı profil
+shell-inin sağ panelində göstərir (sidebar itmir). Kontekst: apps.registrar.public.
+build_profile_registrar_section (yalnız aktiv bölmə üçün qurulur — lazy).{% endcomment %}
+<section class="profile-section-panel profile-section--my-schedule profile-section--registrar-embed {% if active_section == 'my-schedule' %}is-active{% endif %}"
+         data-profile-section-panel="my-schedule"
+         data-source-url="{{ profile_base_url }}?section=my-schedule">
+    {% include "registrar/partials/_schedule_content.html" %}
+</section>

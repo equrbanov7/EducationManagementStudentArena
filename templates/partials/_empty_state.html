@@ -1,0 +1,12 @@
+{% comment %}
+Vahid EmptyState komponenti (U12) — bütün "boş siyahı" vəziyyətləri üçün.
+İstifadə:
+    {% include "partials/_empty_state.html" with empty_icon="fa-folder-open" empty_title=_("...") empty_hint=_("...") %}
+Parametrlər: empty_icon (fa-* class, default fa-folder-open), empty_title (məcburi),
+empty_hint (opsional ikinci sətir), empty_extra_class (opsional).
+{% endcomment %}
+<div class="ems-empty {{ empty_extra_class|default:'' }}" role="status">
+    <span class="ems-empty-icon"><i class="fas {{ empty_icon|default:'fa-folder-open' }}" aria-hidden="true"></i></span>
+    <p class="ems-empty-title">{{ empty_title }}</p>
+    {% if empty_hint %}<p class="ems-empty-hint">{{ empty_hint }}</p>{% endif %}
+</div>

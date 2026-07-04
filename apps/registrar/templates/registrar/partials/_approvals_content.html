@@ -1,0 +1,39 @@
+{% load static i18n %}
+<div class="journal-page">
+    <div class="journal-head">
+        <h1 class="journal-title">
+            <i class="fas fa-clipboard-check"></i> {% trans "Qiymət təsdiqləri" context "registrar.approval" %}
+        </h1>
+        <p class="journal-subtitle">{% trans "Təsdiqinizi gözləyən elektron jurnallar (kafedra / dekanlıq)." context "registrar.approval" %}</p>
+    </div>
+
+    {% if not has_context %}
+    <div class="journal-empty">
+        <i class="fas fa-folder-open"></i>
+        <p>{% trans "Aktiv təşkilat konteksti yoxdur." context "registrar.approval" %}</p>
+    </div>
+    {% elif schemes %}
+    <div class="journal-offerings">
+        {% for scheme in schemes %}
+        <a class="journal-offering-card" href="{% url 'registrar:journal_detail' scheme.offering.id %}">
+            <div class="journal-offering-code">{{ scheme.offering.subject.code }}</div>
+            <div class="journal-offering-body">
+                <div class="journal-offering-name">{{ scheme.offering.subject.name }}</div>
+                <div class="journal-offering-meta">
+                    {% if scheme.offering.group %}<span><i class="fas fa-users"></i> {{ scheme.offering.group.name }}</span>{% endif %}
+                    {% if scheme.offering.period %}<span><i class="fas fa-calendar-alt"></i> {{ scheme.offering.period.name }}</span>{% endif %}
+                    {% if scheme.offering.instructor %}<span><i class="fas fa-chalkboard-teacher"></i> {{ scheme.offering.instructor.get_full_name|default:scheme.offering.instructor.username }}</span>{% endif %}
+                </div>
+            </div>
+            <span class="approval-badge approval-badge--{{ scheme.approval_status }}">{{ scheme.get_approval_status_display }}</span>
+            <div class="journal-offering-go"><i class="fas fa-arrow-right"></i></div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="journal-empty">
+        <i class="fas fa-check-circle"></i>
+        <p>{% trans "Təsdiqinizi gözləyən jurnal yoxdur." context "registrar.approval" %}</p>
+    </div>
+    {% endif %}
+</div>

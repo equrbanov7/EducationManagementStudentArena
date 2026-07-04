@@ -329,6 +329,18 @@ def _role_capabilities(user, profile):
     if can_approve_posts:
         allowed_sections.add("pending-post-approvals")
 
+    # Universitet kabineti (U12): registrar səhifələri profil shell-inin İÇİNDƏ
+    # bölmə kimi açılır (sidebar itmir — SPA panel). Faktiki data-icazə yenə də
+    # registrar servis qatındadır; bunlar görünürlük + fragment gating üçündür.
+    from django.conf import settings as _u12_settings
+
+    if getattr(_u12_settings, "UNIVERSITY_MODE", True) and (has_active_org_context or is_superadmin):
+        allowed_sections.update({"my-schedule", "academic-calendar"})
+        if is_teacher or is_org_admin or is_superadmin:
+            allowed_sections.add("my-journal")
+        if is_superadmin or is_org_admin or is_unit_manager:
+            allowed_sections.update({"grade-approvals", "analytics"})
+
     # İmtahan sistemi redizaynı (Faza 5) — yeni modulların sidebar görünürlüyü.
     # Faktiki icazə yoxlaması yenə də view səviyyəsində (appeals.services.permissions,
     # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.

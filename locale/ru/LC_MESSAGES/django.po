@@ -23211,15 +23211,15 @@ msgstr "Преподаватель"
 
 msgctxt "registrar.degree"
 msgid "Master"
-msgstr ""
+msgstr "Магистратура"
 
 msgctxt "registrar.degree"
 msgid "PhD"
-msgstr ""
+msgstr "Докторантура"
 
 msgctxt "registrar.model.program.meta"
 msgid "program"
-msgstr ""
+msgstr "программа"
 
 #, fuzzy
 #| msgctxt "exams.model.attempt.choice.status"
@@ -23244,19 +23244,19 @@ msgstr "Добро пожаловать в подписку! [Название �
 
 msgctxt "registrar.model.curriculum.meta"
 msgid "curriculum"
-msgstr ""
+msgstr "учебный план"
 
 msgctxt "registrar.model.curriculum.meta"
 msgid "curricula"
-msgstr ""
+msgstr "учебные планы"
 
 msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subject"
-msgstr ""
+msgstr "предмет учебного плана"
 
 msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subjects"
-msgstr ""
+msgstr "предметы учебного плана"
 
 #, fuzzy
 #| msgctxt "organizations.unit_type"
@@ -23274,19 +23274,19 @@ msgstr "Активен"
 
 msgctxt "registrar.enrollment_kind"
 msgid "Retake"
-msgstr ""
+msgstr "Пересдача"
 
 msgctxt "registrar.model.student_record.meta"
 msgid "student academic record"
-msgstr ""
+msgstr "академическая запись студента"
 
 msgctxt "registrar.model.student_record.meta"
 msgid "student academic records"
-msgstr ""
+msgstr "академические записи студентов"
 
 msgctxt "registrar.model.offering.meta"
 msgid "course offering"
-msgstr ""
+msgstr "открытие предмета"
 
 #, fuzzy
 #| msgctxt "accounts.teacher_dashboard"
@@ -23297,7 +23297,7 @@ msgstr "Courses"
 
 msgctxt "registrar.enrollment_status"
 msgid "Enrolled"
-msgstr ""
+msgstr "Зачислен"
 
 #, fuzzy
 #| msgctxt "exams.template.exam_live_monitor"
@@ -23315,7 +23315,7 @@ msgstr "Вы вернулись в свой профиль."
 
 msgctxt "registrar.model.enrollment.meta"
 msgid "enrollment"
-msgstr ""
+msgstr "запись на предмет"
 
 #, fuzzy
 #| msgctxt "blog.post_detail_page"
@@ -23326,11 +23326,11 @@ msgstr "Комментариев пока нет. Оставьте первый 
 
 msgctxt "registrar.model.group_elective.meta"
 msgid "group elective choice"
-msgstr ""
+msgstr "выбор группы (электив)"
 
 msgctxt "registrar.model.group_elective.meta"
 msgid "group elective choices"
-msgstr ""
+msgstr "выборы групп (элективы)"
 
 msgctxt "registrar.lesson_kind"
 msgid "Lecture"
@@ -27757,6 +27757,18 @@ msgstr "Академический календарь"
 
 msgid "Akademik təqvim"
 msgstr "Академический календарь"
+
+msgctxt "profile.sidebar"
+msgid "Universitet"
+msgstr "Университет"
+
+msgctxt "profile.sidebar"
+msgid "Dərs cədvəli"
+msgstr "Расписание"
+
+msgctxt "profile.sidebar"
+msgid "Elektron jurnal"
+msgstr "Электронный журнал"
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
