@@ -17,18 +17,31 @@
     <div class="blog-header__container">
         <nav class="blog-header__nav" aria-label="{% trans 'main_nav_aria' context 'nav' %}">
 
-            {# --- Logo (own brand asset) --- #}
-            <a href="{{ home_url }}" class="blog-header__logo" aria-label="{% trans 'EMSArena ana səhifə' %}">
+            {# --- Logo (brand asset; white-labelled per deployment) --- #}
+            <a href="{% if university_mode and request.user.is_authenticated %}{% url 'accounts:profile' %}{% else %}{{ home_url }}{% endif %}"
+               class="blog-header__logo" aria-label="{{ site_brand_name }}">
+                {% if university_mode %}
+                <img src="{% static 'brand/qku-logo-horizontal.svg' %}"
+                     alt="{{ site_brand_name }}"
+                     class="blog-header__logo-img"
+                     width="200" height="46"
+                     loading="eager"
+                     decoding="async">
+                {% else %}
                 <img src="{% static 'brand/logo-horizontal.png' %}"
-                     alt="EMSArena"
+                     alt="{{ site_brand_name }}"
                      class="blog-header__logo-img"
                      width="160" height="44"
                      loading="eager"
                      decoding="async">
+                {% endif %}
             </a>
 
             {# --- Desktop primary navigation --- #}
+            {# UNIVERSITY_MODE hides the public marketing nav (home/about/contact/ #}
+            {# exams/live-join) so the header is a clean cabinet portal. #}
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
+                {% if not university_mode %}
                 <li class="blog-header__nav-item">
                     <a href="{{ home_url }}"
                        {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
@@ -75,6 +88,7 @@
                     </a>
                 </li>
                 {% endif %}
+                {% endif %}{# /not university_mode #}
             </ul>
 
             {# --- Right-side actions --- #}

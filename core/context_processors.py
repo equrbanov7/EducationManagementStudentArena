@@ -25,12 +25,20 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.templatetags.static import static
+from django.utils.translation import pgettext, pgettext_lazy
+
+# Registered as a literal so makemessages extracts the default brand name into
+# the "brand" context; the runtime pgettext(...) below then resolves the active
+# translation for the configured SITE_BRAND_NAME (az/en/ru/tr).
+_DEFAULT_BRAND_TRANSLATABLE = pgettext_lazy("brand", "Qərbi Kaspi Universiteti")
 
 # Canonical public origin, e.g. "https://emsarena.com" (no trailing slash).
 SITE_ORIGIN = getattr(settings, "SITE_URL", "https://emsarena.com").rstrip("/")
 
-# Brand / organization constants reused across structured data.
-ORG_NAME = "EMSArena"
+# Brand / organization name reused across structured data + page titles.
+# White-labelled per deployment via settings.SITE_BRAND_NAME (default: the
+# Western Caspian University). Kept as a module attribute for backwards compat.
+ORG_NAME = getattr(settings, "SITE_BRAND_NAME", "Qərbi Kaspi Universiteti")
 ORG_DESCRIPTION_AZ = (
     "EMSArena universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün "
     "LMS, onlayn imtahan, elektron jurnal, qiymətləndirmə və analitika "
@@ -166,4 +174,12 @@ def feature_flags(request):
         # e-university provisioning: public self-signup is off by default, so the
         # login page hides the "register now" link unless a deployment re-opens it.
         "public_signup_enabled": bool(getattr(settings, "PUBLIC_SIGNUP_ENABLED", False)),
+        # White-label brand + university (cabinet-only) mode for templates.
+        # The brand name is run through pgettext so the same deployment shows the
+        # university's name in the active language (az/en/ru/tr) when a
+        # translation for the configured SITE_BRAND_NAME exists in the catalog;
+        # otherwise it falls back to the configured (canonical) value.
+        "site_brand_name": pgettext("brand", getattr(settings, "SITE_BRAND_NAME", "Qərbi Kaspi Universiteti")),
+        "site_brand_short": getattr(settings, "SITE_BRAND_SHORT", "QKU"),
+        "university_mode": bool(getattr(settings, "UNIVERSITY_MODE", True)),
     }

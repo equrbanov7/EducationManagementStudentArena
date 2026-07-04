@@ -9,7 +9,7 @@
     Title precedence: a child template's title block wins; otherwise
     a view-supplied `seo_title`; otherwise the default brand title.
     {% endcomment %}
-    {% trans "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" as default_seo_title %}
+    {% blocktrans asvar default_seo_title with brand=site_brand_name %}{{ brand }} – Təhsil İdarəetmə və Onlayn İmtahan Platforması{% endblocktrans %}
     <title>{% block title %}{% firstof seo_title default_seo_title %}{% endblock %}</title>
 
     {% comment %}
@@ -98,8 +98,10 @@
         {% block content %}{% endblock %}
     </main>
 
-    {# Footer partial #}
+    {# Footer partial — hidden in UNIVERSITY_MODE (marketing surface) #}
+    {% if not university_mode %}
     {% include "partials/_footer.html" %}
+    {% endif %}
 
     {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
     {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}

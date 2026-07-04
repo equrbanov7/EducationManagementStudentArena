@@ -169,6 +169,12 @@ SITE_URL = "http://testserver"
 # covered by tests that opt in via @override_settings(PUBLIC_SIGNUP_ENABLED=False).
 PUBLIC_SIGNUP_ENABLED = True
 
+# Keep the public marketing surfaces reachable in tests so the existing
+# home/about/contact/nav tests exercise them. Production defaults to
+# UNIVERSITY_MODE=True (login → cabinet only); the mode-specific behaviour is
+# covered by tests that opt in via @override_settings(UNIVERSITY_MODE=True).
+UNIVERSITY_MODE = False
+
 # Celery — run tasks synchronously (eagerly) in tests so that no broker
 # connection is required.  Email tasks will use the console backend above.
 CELERY_TASK_ALWAYS_EAGER = True

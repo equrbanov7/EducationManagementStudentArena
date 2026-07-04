@@ -2,10 +2,11 @@
 import re
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -42,6 +43,14 @@ def _parse_home_page_number(raw_value):
 
 
 def home(request):
+    # UNIVERSITY_MODE turns the platform into a login → cabinet portal (like
+    # UNEC's kabinet): the public marketing/blog home is deactivated. Send
+    # authenticated users to their cabinet and anonymous visitors to login.
+    if getattr(settings, "UNIVERSITY_MODE", False):
+        if request.user.is_authenticated:
+            return redirect("accounts:profile")
+        return redirect("accounts:login")
+
     query = _normalize_home_search_query(request.GET.get("q"))
     category_slug = _normalize_home_category_slug(request.GET.get("category"))
     selected_category = None

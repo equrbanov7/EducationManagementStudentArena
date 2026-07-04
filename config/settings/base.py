@@ -78,3 +78,20 @@ for _component_name in _COMPONENTS:
     exec(  # noqa: S102 — daxili, versiyalanmış settings faylları; xarici input deyil
         compile(_component_path.read_text(encoding="utf-8"), str(_component_path), "exec")
     )
+
+# ---------------------------------------------------------------------------
+# Branding & deployment mode (e-university)
+# ---------------------------------------------------------------------------
+# The platform is white-labelled per deployment. Default brand is the Western
+# Caspian University; override with SITE_BRAND_NAME. Templates show a translated
+# brand string, while this value is the canonical name used in SEO/structured
+# data and page titles.
+SITE_BRAND_NAME = os.getenv("SITE_BRAND_NAME", "Qərbi Kaspi Universiteti")
+SITE_BRAND_SHORT = os.getenv("SITE_BRAND_SHORT", "QKU")
+
+# UNIVERSITY_MODE hides the public marketing surfaces (home/blog/about/contact
+# and the top-nav exam/create shortcuts) so that, like UNEC's EDUMAN / kabinet,
+# the platform is a login → personal-cabinet portal rather than a marketing
+# site. The pages/routes still exist (deactivated), so this can be flipped off
+# to restore the full marketing UI.
+UNIVERSITY_MODE = _env_bool_setting("UNIVERSITY_MODE", True)
