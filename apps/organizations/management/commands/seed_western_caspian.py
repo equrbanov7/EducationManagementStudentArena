@@ -41,9 +41,14 @@ class Command(BaseCommand):
     FACULTY_NAME = "Mühəndislik və Tətbiqi Elmlər fakültəsi"
     CHAIR_NAME = "Kompüter elmləri kafedrası"
     SPECIALTY_NAME = "Kompüter elmləri (ixtisas)"
-    GROUP_NAME = "KE-101"
+    # A specialty can carry groups in more than one language SECTOR (bölmə):
+    # Azerbaijani + English here. Sector structure varies per university, so it
+    # is encoded in the group name rather than a hardcoded enum.
+    GROUP_AZ_NAME = "KE-101 (Azərbaycan bölməsi)"
+    GROUP_EN_NAME = "KE-101E (İngilis bölməsi)"
 
-    # (username, role_name, ProfileRole, scope) — scope: None | "faculty" | "chair" | "group"
+    # (username, role_name, ProfileRole, scope) —
+    # scope: None | "faculty" | "chair" | "specialty" | "group_az" | "group_en"
     ROLE_USERS = [
         ("wcu_rector", "rector", ProfileRole.ORG_ADMIN, None),
         ("wcu_vice_rector", "vice_rector", ProfileRole.ORG_ADMIN, None),
@@ -51,15 +56,19 @@ class Command(BaseCommand):
         ("wcu_hr", "hr", ProfileRole.HR, None),
         ("wcu_dean", "dean", ProfileRole.ORG_ADMIN, "faculty"),
         ("wcu_department_head", "chair_head", ProfileRole.ORG_ADMIN, "chair"),
+        ("wcu_program_coordinator", "program_coordinator", ProfileRole.MEMBER, "specialty"),
         ("wcu_teacher", "teacher", ProfileRole.TEACHER, None),
         ("wcu_assistant", "assistant", ProfileRole.ASSISTANT_TEACHER, None),
         ("wcu_lab_assistant", "lab_assistant", ProfileRole.ASSISTANT_TEACHER, None),
-        ("wcu_tutor", "tutor", ProfileRole.MEMBER, "group"),
-        ("wcu_program_coordinator", "program_coordinator", ProfileRole.MEMBER, "specialty"),
-        ("wcu_lead_student", "lead_student", ProfileRole.LEAD_STUDENT, "group"),
-        ("wcu_student1", "student", ProfileRole.STUDENT, "group"),
-        ("wcu_student2", "student", ProfileRole.STUDENT, "group"),
-        ("wcu_student3", "student", ProfileRole.STUDENT, "group"),
+        # Azərbaycan bölməsi (AZ sector) — tutor + lead + 2 students.
+        ("wcu_tutor", "tutor", ProfileRole.MEMBER, "group_az"),
+        ("wcu_lead_student_az", "lead_student", ProfileRole.LEAD_STUDENT, "group_az"),
+        ("wcu_student_az1", "student", ProfileRole.STUDENT, "group_az"),
+        ("wcu_student_az2", "student", ProfileRole.STUDENT, "group_az"),
+        # İngilis bölməsi (EN sector) — lead + 2 students.
+        ("wcu_lead_student_en", "lead_student", ProfileRole.LEAD_STUDENT, "group_en"),
+        ("wcu_student_en1", "student", ProfileRole.STUDENT, "group_en"),
+        ("wcu_student_en2", "student", ProfileRole.STUDENT, "group_en"),
     ]
 
     def add_arguments(self, parser):
@@ -68,6 +77,11 @@ class Command(BaseCommand):
             "--no-first-login-flow",
             action="store_true",
             help="Do not flag seeded users for the first-login password/email step.",
+        )
+        parser.add_argument(
+            "--with-superadmin",
+            action="store_true",
+            help="Also create a platform superadmin test user (wcu_superadmin, is_superuser).",
         )
 
     def handle(self, *args, **options):
@@ -110,16 +124,29 @@ class Command(BaseCommand):
                 )
                 created += 1
 
+            superadmin_note = ""
+            if options.get("with_superadmin"):
+                self._ensure_user(
+                    username="wcu_superadmin",
+                    password=password,
+                    email="superadmin@qku.edu.az",
+                    first_name="Super",
+                    last_name="Admin",
+                    flag_first_login=False,
+                    is_superuser=True,
+                )
+                superadmin_note = " + platform superadmin (wcu_superadmin)"
+
         self.stdout.write(
             self.style.SUCCESS(
-                f"✅ Qərbi Kaspi Universiteti seeded: org='{org.slug}', {created} role users, "
-                f"{len(units)} academic units. Shared password set as provided."
+                f"✅ Qərbi Kaspi Universiteti seeded: org='{org.slug}', {created} role users{superadmin_note}, "
+                f"{len(units)} academic units (AZ + EN sectors). Shared password set as provided."
             )
         )
 
     # ── helpers ────────────────────────────────────────────────────────────
 
-    def _ensure_user(self, *, username, password, email, first_name, last_name, flag_first_login):
+    def _ensure_user(self, *, username, password, email, first_name, last_name, flag_first_login, is_superuser=False):
         user, _ = User.objects.get_or_create(
             username=username,
             defaults={"email": email, "first_name": first_name, "last_name": last_name, "is_active": True},
@@ -128,6 +155,9 @@ class Command(BaseCommand):
         user.first_name = first_name
         user.last_name = last_name
         user.is_active = True
+        if is_superuser:
+            user.is_superuser = True
+            user.is_staff = True
         user.set_password(password)
         user.save()
         # Flag the first-login password/email step when that flow is enabled
@@ -182,8 +212,17 @@ class Command(BaseCommand):
         faculty = self._ensure_unit(org=org, unit_type=OrgUnitType.FACULTY, name=self.FACULTY_NAME)
         chair = self._ensure_unit(org=org, unit_type=OrgUnitType.CHAIR, name=self.CHAIR_NAME, parent=faculty)
         specialty = self._ensure_unit(org=org, unit_type=OrgUnitType.SPECIALTY, name=self.SPECIALTY_NAME, parent=chair)
-        group = self._ensure_unit(org=org, unit_type=OrgUnitType.GROUP, name=self.GROUP_NAME, parent=specialty)
-        return {"faculty": faculty, "chair": chair, "specialty": specialty, "group": group}
+        # Two language sectors under the same specialty (AZ + EN). Structure is
+        # tenant-configurable — other universities may use different sectors.
+        group_az = self._ensure_unit(org=org, unit_type=OrgUnitType.GROUP, name=self.GROUP_AZ_NAME, parent=specialty)
+        group_en = self._ensure_unit(org=org, unit_type=OrgUnitType.GROUP, name=self.GROUP_EN_NAME, parent=specialty)
+        return {
+            "faculty": faculty,
+            "chair": chair,
+            "specialty": specialty,
+            "group_az": group_az,
+            "group_en": group_en,
+        }
 
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile
@@ -194,7 +233,8 @@ class Command(BaseCommand):
         if profile_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
             profile.student_university_name = org.name
             profile.student_specialization = self.SPECIALTY_NAME
-            profile.student_group_number = self.GROUP_NAME
+            group_unit = units.get(scope_key)
+            profile.student_group_number = group_unit.name if group_unit else ""
         profile.save()
         return profile
 
