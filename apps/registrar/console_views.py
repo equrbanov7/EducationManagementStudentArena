@@ -20,12 +20,14 @@ from django.utils.translation import gettext as _
 
 from . import gradebook, services
 from . import status as academic_status
+from . import transfer as group_transfer
 from .forms import (
     CurriculumForm,
     CurriculumSubjectForm,
     OfferingForm,
     ProgramForm,
     StudentRecordForm,
+    StudentTransferForm,
     SubjectForm,
 )
 from .models import (
@@ -312,4 +314,42 @@ def student_record_form_view(request, pk=None):
         request,
         "registrar/student_record_form.html",
         {"form": form, "instance": instance, "active_main_nav": "registrar_console"},
+    )
+
+
+@login_required
+def student_transfer_view(request, pk):
+    """Transfer a student to another group (U6.1) — re-points current-period enrollments."""
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404
+    record = get_object_or_404(
+        StudentAcademicRecord.objects.select_related("student", "program", "group"),
+        pk=pk,
+        organization=organization,
+    )
+
+    if request.method == "POST":
+        form = StudentTransferForm(request.POST, organization=organization, current_group=record.group)
+        if form.is_valid():
+            period = _current_period(organization)
+            result = group_transfer.transfer_student_group(
+                record=record,
+                new_group=form.cleaned_data["new_group"],
+                period=period,
+                by_user=request.user,
+                reason=form.cleaned_data.get("reason", ""),
+            )
+            messages.success(
+                request,
+                _("Tələbə köçürüldü (%(n)s fənn yeni qrupa keçirildi).") % {"n": result["created"]},
+            )
+            return redirect(reverse("registrar:console"))
+    else:
+        form = StudentTransferForm(organization=organization, current_group=record.group)
+
+    return render(
+        request,
+        "registrar/student_transfer_form.html",
+        {"form": form, "record": record, "active_main_nav": "registrar_console"},
     )

@@ -27087,6 +27087,38 @@ msgctxt "registrar.console"
 msgid "Akademik status"
 msgstr "Academic status"
 
+msgctxt "registrar.console"
+msgid "Yeni qrup"
+msgstr "New group"
+
+msgctxt "registrar.console"
+msgid "Səbəb (opsional)"
+msgstr "Reason (optional)"
+
+msgctxt "registrar.console"
+msgid "Qrup köçürmə"
+msgstr "Group transfer"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı"
+msgstr "Student assignment"
+
+msgctxt "registrar.console"
+msgid "Hazırkı qrup"
+msgstr "Current group"
+
+msgctxt "registrar.console"
+msgid ""
+"Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə"
+" bölmənin davamiyyəti sıfırlanır."
+msgstr ""
+"The transfer moves this semester's group subjects to the new group's "
+"sections; the old section's attendance is reset."
+
+msgctxt "registrar.console"
+msgid "Başqa qrupa köçür"
+msgstr "Transfer to another group"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Qrup köçürmə" context "registrar.console" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
+{% endblock %}
+
+{% block content %}
+<div class="console-page console-page--form">
+    <div class="console-head">
+        <a class="console-back" href="{% url 'registrar:student_record_edit' record.id %}"><i class="fas fa-arrow-left"></i> {% trans "Tələbə təyinatı" context "registrar.console" %}</a>
+        <h1 class="console-title"><i class="fas fa-exchange-alt"></i> {% trans "Qrup köçürmə" context "registrar.console" %}</h1>
+        <p class="console-sub">
+            {{ record.student.get_full_name|default:record.student.username }} ·
+            {% trans "Hazırkı qrup" context "registrar.console" %}: <strong>{{ record.group.name|default:"—" }}</strong>
+        </p>
+    </div>
+    {% include "accounts/profile/_messages.html" %}
+    <div class="console-card">
+        <p class="console-note"><i class="fas fa-info-circle"></i> {% trans "Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə bölmənin davamiyyəti sıfırlanır." context "registrar.console" %}</p>
+        {% include "registrar/_console_form.html" %}
+    </div>
+</div>
+{% endblock %}

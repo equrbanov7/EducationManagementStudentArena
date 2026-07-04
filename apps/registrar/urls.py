@@ -26,5 +26,6 @@ urlpatterns = [
     path("idareetme/fenn-acilisi/<uuid:pk>/", console_views.offering_form_view, name="offering_edit"),
     path("idareetme/telebe/yeni/", console_views.student_record_form_view, name="student_record_create"),
     path("idareetme/telebe/<uuid:pk>/", console_views.student_record_form_view, name="student_record_edit"),
+    path("idareetme/telebe/<uuid:pk>/kocur/", console_views.student_transfer_view, name="student_transfer"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]
