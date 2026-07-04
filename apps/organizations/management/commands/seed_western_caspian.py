@@ -376,33 +376,32 @@ class Command(BaseCommand):
             registrar_services.ensure_offering_course(offering=offering)
             registrar_services.sync_offering_course_members(offering=offering)
             registrar_gradebook.ensure_assessment_scheme(offering=offering)
-            if offering.lessons.exists():
-                continue  # idempotent — do not duplicate lessons on re-run
-
             enrollments = list(offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student"))
-            for kind, day_offset in plan:
-                lesson = registrar_gradebook.create_lesson(
-                    offering=offering,
-                    date=base + datetime.timedelta(days=day_offset),
-                    kind=kind,
-                    created_by=teacher,
-                )
-                entries = []
-                for enrollment in enrollments:
-                    # wcu_student_az1 misses every session → exceeds the limit.
-                    absent = enrollment.student.username == "wcu_student_az1"
-                    entries.append(
-                        {
-                            "lesson_id": lesson.id,
-                            "enrollment_id": enrollment.id,
-                            "status": "absent" if absent else "present",
-                            "score": None if kind == "lecture" or absent else 8,
-                        }
-                    )
-                registrar_gradebook.save_marks(offering=offering, entries=entries, by_user=teacher)
 
-            # Yekun imtahan + təkrar imtahan demo: barred AZ student → resit
-            # (absence); az2 → low exam (fails → resit); others → pass.
+            if not offering.lessons.exists():  # idempotent — do not duplicate lessons
+                for kind, day_offset in plan:
+                    lesson = registrar_gradebook.create_lesson(
+                        offering=offering,
+                        date=base + datetime.timedelta(days=day_offset),
+                        kind=kind,
+                        created_by=teacher,
+                    )
+                    entries = []
+                    for enrollment in enrollments:
+                        # wcu_student_az1 misses every session → exceeds the limit.
+                        absent = enrollment.student.username == "wcu_student_az1"
+                        entries.append(
+                            {
+                                "lesson_id": lesson.id,
+                                "enrollment_id": enrollment.id,
+                                "status": "absent" if absent else "present",
+                                "score": None if kind == "lecture" or absent else 8,
+                            }
+                        )
+                    registrar_gradebook.save_marks(offering=offering, entries=entries, by_user=teacher)
+
+            # Yekun imtahan + təkrar imtahan demo (idempotent): barred AZ student
+            # → resit (absence); az2 → low exam (fails → resit); others → pass.
             for enrollment in enrollments:
                 uname = enrollment.student.username
                 if uname == "wcu_student_az1":
