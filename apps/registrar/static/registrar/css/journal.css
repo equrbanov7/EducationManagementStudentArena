@@ -438,3 +438,58 @@
     color: var(--ems-neutral-600);
 }
 .approval-locked-note i { color: var(--ems-neutral-500); margin-right: 0.3rem; }
+
+/* ── Grade-change history (audit trail, U7.3) ─────────────────────────────── */
+.grade-history { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+.grade-history-item {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    background: var(--ems-neutral-50);
+}
+.grade-history-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+.grade-history-kind {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+.grade-history-kind--final,
+.grade-history-kind--resit { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.grade-history-meta { font-size: 0.78rem; color: var(--ems-neutral-600); }
+.grade-history-meta i { color: var(--ems-neutral-500); margin: 0 1px 0 3px; }
+.grade-history-count { font-weight: 600; color: var(--ems-neutral-700); }
+.grade-history-changes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.grade-history-changes li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    padding: 0.15rem 0;
+}
+.gh-student { font-weight: 600; color: var(--ems-neutral-800); min-width: 160px; }
+.gh-item { color: var(--ems-neutral-600); flex: 1; }
+.gh-old {
+    color: var(--ems-danger-strong);
+    text-decoration: line-through;
+    background: var(--ems-danger-100);
+    padding: 1px 7px;
+    border-radius: 6px;
+}
+.gh-new {
+    color: var(--ems-success-600);
+    font-weight: 600;
+    background: var(--ems-success-100);
+    padding: 1px 7px;
+    border-radius: 6px;
+}
+.gh-arrow { color: var(--ems-neutral-400); font-size: 0.7rem; }

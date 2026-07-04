@@ -27310,6 +27310,38 @@ msgstr "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
 msgid "Jurnal düzəliş üçün geri qaytarıldı."
 msgstr "Jurnal düzəliş üçün geri qaytarıldı."
 
+msgctxt "registrar.audit"
+msgid "Qiymət dəyişikliyi tarixçəsi"
+msgstr "Qiymət dəyişikliyi tarixçəsi"
+
+msgctxt "registrar.audit"
+msgid "kim, nə vaxt, köhnə → yeni"
+msgstr "kim, nə vaxt, köhnə → yeni"
+
+msgctxt "registrar.audit"
+msgid "Sistem"
+msgstr "Sistem"
+
+msgctxt "registrar.audit"
+msgid "dəyişiklik"
+msgstr "dəyişiklik"
+
+msgctxt "registrar.audit"
+msgid "Davamiyyət/bal"
+msgstr "Davamiyyət/bal"
+
+msgctxt "registrar.audit"
+msgid "Komponent balı"
+msgstr "Komponent balı"
+
+msgctxt "registrar.audit"
+msgid "Yekun imtahan"
+msgstr "Yekun imtahan"
+
+msgctxt "registrar.audit"
+msgid "Təkrar imtahan"
+msgstr "Təkrar imtahan"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

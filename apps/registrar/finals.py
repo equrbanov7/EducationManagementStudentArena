@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 
-from apps.registrar import gradebook, services
+from apps.registrar import grade_audit, gradebook, services
 from apps.registrar.models import FinalGrade, ResitReason, ResitRecord, ResitStatus
 
 # 0..100 ümumi bal → hərf + GPA nöqtəsi (AZ Boloniya default).
@@ -162,9 +162,25 @@ def set_exam_score(*, enrollment, score, by_user=None):
     final_grade, _created = FinalGrade.objects.get_or_create(
         organization=enrollment.organization, enrollment=enrollment
     )
-    final_grade.exam_score = _clamp(score, exam_score_max(scheme)) if score not in (None, "") else None
+    old_score = final_grade.exam_score
+    new_score = _clamp(score, exam_score_max(scheme)) if score not in (None, "") else None
+    final_grade.exam_score = new_score
     final_grade.entered_by = by_user
     final_grade.save()
+    if old_score != new_score:
+        grade_audit.log_grade_changes(
+            offering=enrollment.offering,
+            by_user=by_user,
+            kind="final",
+            changes=[
+                {
+                    "student": grade_audit.student_label(enrollment),
+                    "item": "Yekun imtahan",
+                    "old": grade_audit.score_repr(old_score),
+                    "new": grade_audit.score_repr(new_score),
+                }
+            ],
+        )
     evaluate_resit(enrollment=enrollment, by_user=by_user)
     return final_grade
 
@@ -178,10 +194,25 @@ def set_resit_score(*, enrollment, score, by_user=None):
     resit = enrollment.resit_records.first()
     if resit is None:
         return None  # not eligible for a resit
+    old_score = resit.resit_score
     resit.resit_score = _clamp(score, exam_score_max(scheme)) if score not in (None, "") else None
     resit.status = ResitStatus.COMPLETED if resit.resit_score is not None else ResitStatus.ELIGIBLE
     resit.decided_by = by_user
     resit.save()
+    if old_score != resit.resit_score:
+        grade_audit.log_grade_changes(
+            offering=enrollment.offering,
+            by_user=by_user,
+            kind="resit",
+            changes=[
+                {
+                    "student": grade_audit.student_label(enrollment),
+                    "item": "Təkrar imtahan",
+                    "old": grade_audit.score_repr(old_score),
+                    "new": grade_audit.score_repr(resit.resit_score),
+                }
+            ],
+        )
     return resit
 
 

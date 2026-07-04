@@ -27371,6 +27371,38 @@ msgstr "Одобрение декана выдано — оценки стали
 msgid "Jurnal düzəliş üçün geri qaytarıldı."
 msgstr "Журнал возвращён на доработку."
 
+msgctxt "registrar.audit"
+msgid "Qiymət dəyişikliyi tarixçəsi"
+msgstr "История изменения оценок"
+
+msgctxt "registrar.audit"
+msgid "kim, nə vaxt, köhnə → yeni"
+msgstr "кто, когда, старое → новое"
+
+msgctxt "registrar.audit"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "registrar.audit"
+msgid "dəyişiklik"
+msgstr "изм."
+
+msgctxt "registrar.audit"
+msgid "Davamiyyət/bal"
+msgstr "Посещаемость/балл"
+
+msgctxt "registrar.audit"
+msgid "Komponent balı"
+msgstr "Балл компонента"
+
+msgctxt "registrar.audit"
+msgid "Yekun imtahan"
+msgstr "Итоговый экзамен"
+
+msgctxt "registrar.audit"
+msgid "Təkrar imtahan"
+msgstr "Пересдача"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

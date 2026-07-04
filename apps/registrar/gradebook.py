@@ -22,7 +22,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import transaction
 from django.utils import timezone
 
-from apps.registrar import services
+from apps.registrar import grade_audit, services
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -148,6 +148,7 @@ def save_marks(*, offering, entries, by_user=None):
 
     written = 0
     touched = set()
+    audit_changes = []
     now = timezone.now()
     for entry in entries or []:
         lesson = lessons.get(str(entry.get("lesson_id")))
@@ -165,12 +166,23 @@ def save_marks(*, offering, entries, by_user=None):
         if lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
             score = max(Decimal("0"), _to_decimal(entry.get("score")))
 
+        old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
         if mark is None:
             mark = LessonMark(organization=offering.organization, lesson=lesson, enrollment=enrollment)
+        new = _mark_repr(status, score)
         mark.status = status
         mark.score = score
         mark.entered_by = by_user
         mark.save()
+        if old != new:
+            audit_changes.append(
+                {
+                    "student": grade_audit.student_label(enrollment),
+                    "item": f"{lesson.date} · {lesson.get_kind_display()}",
+                    "old": old or "—",
+                    "new": new,
+                }
+            )
         touched.add(enrollment)
         written += 1
 
@@ -179,7 +191,14 @@ def save_marks(*, offering, entries, by_user=None):
     for enrollment in touched:
         recompute_absence_hours(enrollment=enrollment)
 
+    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="mark", changes=audit_changes)
     return written
+
+
+def _mark_repr(status, score) -> str:
+    """Compact attendance+score label for the audit trail (e.g. ``qb`` / ``iə 8``)."""
+    att = "qb" if status == AttendanceStatus.ABSENT else "iə"
+    return f"{att} {grade_audit.score_repr(score)}" if score is not None else att
 
 
 def recompute_absence_hours(*, enrollment):
@@ -390,14 +409,19 @@ def save_component_scores(*, offering, entries, by_user=None):
     valid_components = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
     valid_enrollments = {str(e.id): e for e in offering.enrollments.all()}
     written = 0
+    audit_changes = []
     for entry in entries:
         component = valid_components.get(str(entry.get("component_id")))
         enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
         if component is None or enrollment is None:
             continue
+        existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
+        old_score = existing.score if existing else None
         raw = entry.get("score")
         if raw in (None, ""):
-            ComponentScore.objects.filter(component=component, enrollment=enrollment).delete()
+            if existing is not None:
+                existing.delete()
+                audit_changes.append(_component_change(component, enrollment, old_score, None))
             continue
         score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
         ComponentScore.objects.update_or_create(
@@ -406,8 +430,20 @@ def save_component_scores(*, offering, entries, by_user=None):
             enrollment=enrollment,
             defaults={"score": score, "entered_by": by_user},
         )
+        if old_score != score:
+            audit_changes.append(_component_change(component, enrollment, old_score, score))
         written += 1
+    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="component", changes=audit_changes)
     return written
+
+
+def _component_change(component, enrollment, old_score, new_score):
+    return {
+        "student": grade_audit.student_label(enrollment),
+        "item": component.name,
+        "old": grade_audit.score_repr(old_score),
+        "new": grade_audit.score_repr(new_score),
+    }
 
 
 def get_component_grid(offering):
