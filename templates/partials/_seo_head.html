@@ -99,7 +99,7 @@ signal Google reads.
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "EMSArena",
+  "name": "{{ seo.site_name|escapejs }}",
   "url": "{{ seo.site_origin }}/",
   "logo": "{{ seo.logo_url }}",
   "description": "{{ seo.description|escapejs }}"{% if seo.social_profiles %},
@@ -110,8 +110,8 @@ signal Google reads.
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "EMSArena",
-  "alternateName": "EMSArena LMS",
+  "name": "{{ seo.site_name|escapejs }}",
+  "alternateName": "{{ seo.site_name|escapejs }}",
   "url": "{{ seo.site_origin }}/",
   "inLanguage": "{{ seo.lang }}"
 }
@@ -120,7 +120,7 @@ signal Google reads.
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "EMSArena",
+  "name": "{{ seo.site_name|escapejs }}",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web",
   "url": "{{ seo.site_origin }}/",

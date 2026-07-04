@@ -39,6 +39,7 @@ from .auth import (
 from .dashboard import (
     assigned_courses,
     assigned_exams,
+    cabinet_entry,
     dashboard,
     grading_queue,
     my_result_detail,
@@ -122,6 +123,7 @@ __all__ = [
     "view_as_stop",
     # Dashboard
     "dashboard",
+    "cabinet_entry",
     "teacher_dashboard",
     "student_dashboard",
     "grading_queue",

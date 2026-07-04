@@ -64,10 +64,41 @@ dəyişir** — bölmə adları, sayı və iyerarxiya dərinliyi hər tenant ü�
 ola bilər (bax `docs/UNIVERSITY_SYSTEM_ROADMAP.md`). Ona görə bölmə qrup adında
 kodlanır, sərt-kod enum deyil — model tenant-konfiqurasiya əsaslıdır.
 
+## Lokal giriş (login "girmir" problemi)
+
+Default provisioning axını hər istifadəçiyə **ilk-giriş OTP** (email təsdiqi +
+parol qurma) tələb edir. **Lokal mühitdə `EMAIL_BACKEND` konsoldur** — OTP kodu
+real e-poçtla getmir, terminala yazılır; ona görə default seed-lə birbaşa giriş
+"girmir". Demo/test üçün **`--no-first-login-flow`** işlədin: bu, istifadəçilərin
+`password_change_required` bayrağını təmizləyir və onlar birbaşa `--password`
+dəyəri ilə daxil olurlar. Real SMTP (Brevo) konfiqurasiya olunmuş mühitdə OTP
+axını normal işləyir.
+
+Dev-də user-lər **PostgreSQL** (`emsarena_db`, `localhost:5432`) bazasında
+yaradılır — həmin baza dev serverin işlətdiyi bazadır, ona görə seed-dən sonra
+birbaşa login mümkündür.
+
+## Kabinet marşrutu (bir login → rol-aware)
+
+Bütün rollar **tək login ekranından** (`/accounts/login/`) daxil olur. Girişdən
+sonra istifadəçi **`/kabinet/`** (canonical entry) üzərindən roluna görə
+yönləndirilir:
+
+- **Tədris heyəti** (müəllim / assistent / laborant) → müəllim kabineti
+  (`/accounts/dashboard/teacher/`).
+- **Tələbə və bütün digər rollar** (dekan, kafedra müdürü, HR, imtahan mərkəzi,
+  proqram koordinatoru, rektor, prorektor…) → **vahid rol-aware kabinet**
+  (`/accounts/profile/`), hər rol öz bölmələrini görür.
+
+Marşrutlaşdırma `apps/accounts/views/dashboard/dispatch.py::resolve_cabinet_url`
+tərəfindən aparılır; `LOGIN_REDIRECT_URL = /accounts/kabinet/`.
+
 ## Test axını nümunəsi
 
 1. Seed-i qur (`--no-first-login-flow` ilə test rahatlığı üçün).
-2. `wcu_dean` ilə gir → dekan kabineti (fakültə scope).
-3. `wcu_student_az1` ilə gir → tələbə kabineti (AZ bölməsi qrupu).
-4. `wcu_program_coordinator` ilə gir → tyutor-ekvivalent görünüş (ixtisas scope).
-5. `--with-superadmin` işlətmisinizsə `wcu_superadmin` ilə `/admin/`-ə gir.
+2. `wcu_dean` ilə gir → `/kabinet/` → dekan kabineti (fakültə scope).
+3. `wcu_student_az1` ilə gir → `/kabinet/` → tələbə kabineti (AZ bölməsi qrupu,
+   "Fənlərim" bölməsində kredit + qayıb statusu).
+4. `wcu_teacher` ilə gir → `/kabinet/` → müəllim kabineti.
+5. `wcu_program_coordinator` ilə gir → tyutor-ekvivalent görünüş (ixtisas scope).
+6. `--with-superadmin` işlətmisinizsə `wcu_superadmin` ilə `/admin/`-ə gir.

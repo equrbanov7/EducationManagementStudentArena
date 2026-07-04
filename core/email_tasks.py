@@ -37,12 +37,15 @@ logger = logging.getLogger(__name__)
 
 
 def _otp_subject_for_purpose(purpose: str) -> str:
+    # Brand-driven so OTP emails carry the configured institution name
+    # (Qərbi Kaspi Universiteti) instead of a hard-coded product name.
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
     return {
-        "signup": "EMSArena email təsdiqi",
-        "login": "EMSArena giriş OTP kodu",
-        "password_reset": "EMSArena şifrə sıfırlama OTP kodu",
-        "admin_login": "EMSArena admin giriş OTP kodu",
-    }.get(purpose, "EMSArena OTP kodu")
+        "signup": f"{brand} email təsdiqi",
+        "login": f"{brand} giriş OTP kodu",
+        "password_reset": f"{brand} şifrə sıfırlama OTP kodu",
+        "admin_login": f"{brand} admin giriş OTP kodu",
+    }.get(purpose, f"{brand} OTP kodu")
 
 
 def _otp_headline_for_purpose(purpose: str) -> str:

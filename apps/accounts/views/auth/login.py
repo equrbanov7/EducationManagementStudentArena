@@ -33,14 +33,23 @@ class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = CustomLoginForm
     redirect_authenticated_user = True
-    # SEO: the login page is indexable (it carries brand keywords) but
-    # ranks low. These values flow into the shared head partial.
-    extra_context = {
-        "seo_title": "Daxil ol | EMSArena",
-        "seo_description": (
-            "EMSArena hesabınıza daxil olun və təhsil, imtahan, kurs və " "idarəetmə panelindən istifadə edin."
-        ),
-    }
+
+    def get_context_data(self, **kwargs):
+        """Inject brand-aware SEO metadata (no hard-coded product name).
+
+        The login page is indexable and carries brand keywords; the title/
+        description are built from the configured ``SITE_BRAND_NAME`` so the
+        rebrand (Qərbi Kaspi Universiteti) flows through automatically.
+        """
+        context = super().get_context_data(**kwargs)
+        brand = getattr(settings, "SITE_BRAND_NAME", "")
+        context.setdefault("seo_title", f"Daxil ol | {brand}".strip(" |"))
+        context.setdefault(
+            "seo_description",
+            f"{brand} hesabınıza daxil olun və kabinet, imtahan, kurs və "
+            "idarəetmə bölmələrindən istifadə edin.".strip(),
+        )
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
@@ -52,6 +61,13 @@ class CustomLoginView(LoginView):
             self.request.GET.get(self.redirect_field_name),
         )
         return _sanitize_auth_redirect_target(self.request, redirect_to)
+
+    # No ``get_success_url`` override: with no safe ``next``, login falls back to
+    # ``LOGIN_REDIRECT_URL`` = the canonical ``/kabinet/`` entry, which then
+    # role-routes on that follow-up request (where the org role context is bound)
+    # — teaching staff → teacher cabinet, everyone else → the unified profile
+    # cabinet. Resolving the role here (mid-login-POST) is unreliable because the
+    # active-organization context is bound for the *previously anonymous* request.
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()

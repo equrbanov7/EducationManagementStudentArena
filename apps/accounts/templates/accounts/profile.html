@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260621-section-ui">

@@ -27,11 +27,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Login / logout settings
 LOGIN_URL = "/accounts/login/"
-# E-university cabinet: authenticated users land on their profile (the role-aware
-# cabinet with courses/exams/journal/schedule sections) instead of the public
-# marketing home. A `?next=` target still takes priority; an invalid/malicious
-# `next` falls back here (a safe internal URL). Override with LOGIN_REDIRECT_URL.
-LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/accounts/profile/")
+# E-university cabinet: one login → the canonical `/kabinet/` entry, which
+# role-routes each user (teaching staff → teacher cabinet, students + all other
+# roles → the unified role-aware profile cabinet). Routing happens on this
+# follow-up request, where the active-organization role context is bound. A
+# `?next=` target still takes priority; an invalid/malicious `next` falls back
+# here (a safe internal URL). Override with LOGIN_REDIRECT_URL.
+LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/accounts/kabinet/")
 LOGOUT_REDIRECT_URL = "/"
 
 # ---------------------------------------------------------------------------
