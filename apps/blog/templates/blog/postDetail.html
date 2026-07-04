@@ -97,9 +97,9 @@
             {% if not request.user.is_authenticated %}
                 <p class="comment-auth-message">
                     {% trans "auth_prompt_prefix" context "blog.post_detail_page" %}
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}">{% trans "auth_login_link" context "blog.post_detail_page" %}</a>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}">{% trans "auth_login_link" context "blog.post_detail_page" %}</a>{% if public_signup_enabled %}
                     {% trans "auth_prompt_middle" context "blog.post_detail_page" %}
-                    <a href="{% url 'accounts:register' %}">{% trans "auth_register_link" context "blog.post_detail_page" %}</a>{% trans "auth_prompt_suffix" context "blog.post_detail_page" %}
+                    <a href="{% url 'accounts:register' %}">{% trans "auth_register_link" context "blog.post_detail_page" %}</a>{% endif %}{% trans "auth_prompt_suffix" context "blog.post_detail_page" %}
                 </p>
             {% else %}
                 <form method="post" class="comment-form">

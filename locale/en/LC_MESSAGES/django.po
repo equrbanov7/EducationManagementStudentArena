@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: EMSArena\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-04 03:54+0400\n"
+"POT-Creation-Date: 2026-07-04 05:01+0400\n"
 "PO-Revision-Date: 2026-02-22 23:58+0400\n"
 "Last-Translator: Codex <noreply@example.com>\n"
 "Language-Team: English\n"
@@ -774,21 +774,6 @@ msgctxt "accounts.grading_queue_page"
 msgid "loading"
 msgstr "Loading"
 
-#: apps/accounts/templates/accounts/grading_queue.html:224
-msgctxt "accounts.grading_queue_page"
-msgid "toast_success"
-msgstr "Grading completed successfully!"
-
-#: apps/accounts/templates/accounts/grading_queue.html:225
-msgctxt "accounts.grading_queue_page"
-msgid "toast_error_generic"
-msgstr "Something went wrong!"
-
-#: apps/accounts/templates/accounts/grading_queue.html:226
-msgctxt "accounts.grading_queue_page"
-msgid "toast_error_prefix"
-msgstr "Error"
-
 #: apps/accounts/templates/accounts/login.html:4
 msgctxt "accounts.login"
 msgid "title"
@@ -814,15 +799,24 @@ msgctxt "accounts.login"
 msgid "submit"
 msgstr "Sign in"
 
-#: apps/accounts/templates/accounts/login.html:72
+#: apps/accounts/templates/accounts/login.html:73
 msgctxt "accounts.login"
 msgid "no_account"
 msgstr "Don't have an account?"
 
-#: apps/accounts/templates/accounts/login.html:72
+#: apps/accounts/templates/accounts/login.html:73
 msgctxt "accounts.login"
 msgid "register_now"
 msgstr "Create one"
+
+#: apps/accounts/templates/accounts/login.html:77
+msgctxt "accounts.login"
+msgid ""
+"Hesabınız yoxdur? Giriş məlumatları üçün təşkilatınızın administratoru ilə "
+"əlaqə saxlayın."
+msgstr ""
+"No account? Contact your organization's administrator for your login "
+"credentials."
 
 #: apps/accounts/templates/accounts/my_result_detail.html:3
 msgctxt "accounts.my_result_detail_page"
@@ -1077,7 +1071,7 @@ msgstr "All"
 #: apps/exams/templates/exams/teacher/exam_language_manager.html:44
 #: apps/trial_exams/admin.py:69 apps/trial_exams/admin.py:113
 #: apps/trial_exams/models.py:91
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:88
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:40
 msgid "Status"
 msgstr "Status"
 
@@ -1199,8 +1193,8 @@ msgstr "Silinmə səbəbi (məcburi)"
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:295
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:327
 #: apps/accounts/templates/accounts/superadmin_post_management.html:148
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:132
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:127
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:86
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:79
 msgid "Ləğv et"
 msgstr "Cancel"
 
@@ -1234,6 +1228,21 @@ msgstr "Clear selected"
 msgctxt "profile.checkbox_select"
 msgid "selected_count"
 msgstr "Selected count"
+
+#: apps/accounts/templates/accounts/partials/_grading_queue_js.html:5
+msgctxt "accounts.grading_queue_page"
+msgid "toast_success"
+msgstr "Grading completed successfully!"
+
+#: apps/accounts/templates/accounts/partials/_grading_queue_js.html:6
+msgctxt "accounts.grading_queue_page"
+msgid "toast_error_generic"
+msgstr "Something went wrong!"
+
+#: apps/accounts/templates/accounts/partials/_grading_queue_js.html:7
+msgctxt "accounts.grading_queue_page"
+msgid "toast_error_prefix"
+msgstr "Error"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:2
 msgctxt "profile.groups"
@@ -4873,14 +4882,14 @@ msgid "save_grade"
 msgstr "Save grade"
 
 #: apps/accounts/templates/accounts/pending_review_detail.html:279
-#: apps/assignments/templates/assignments/review_submissions.html:362
-#: apps/projects/templates/projects/review_submissions.html:363
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:18
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:22
 msgid "Qiymətləndirməni təsdiqləyin"
 msgstr "Confirm delivery"
 
 #: apps/accounts/templates/accounts/pending_review_detail.html:280
-#: apps/assignments/templates/assignments/review_submissions.html:363
-#: apps/projects/templates/projects/review_submissions.html:364
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:19
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:23
 msgid "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
 msgstr "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
 
@@ -9041,79 +9050,88 @@ msgstr "User \"%(username)s\" has been permanently deleted."
 msgid "unknown_action"
 msgstr "Unknown action."
 
-#: apps/accounts/views/auth/register.py:72
-#: apps/accounts/views/auth/register.py:322
+#: apps/accounts/views/auth/register.py:65
+msgctxt "accounts.auth.message"
+msgid ""
+"Hesablar universitet administrasiyası tərəfindən yaradılır. Giriş "
+"məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın."
+msgstr ""
+"Accounts are created by the university administration. Please contact your "
+"organization's administrator for your login credentials."
+
+#: apps/accounts/views/auth/register.py:97
+#: apps/accounts/views/auth/register.py:349
 msgctxt "accounts.auth.message"
 msgid "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin."
 msgstr "You've reached today's request limit. Try again tomorrow."
 
-#: apps/accounts/views/auth/register.py:92
+#: apps/accounts/views/auth/register.py:117
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
 msgstr ""
 "Failed to send the registration email.Registration failed: we could not send "
 "the verification email. Please check your email address and try again."
 
-#: apps/accounts/views/auth/register.py:112
+#: apps/accounts/views/auth/register.py:137
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
 msgstr ""
 "Registration completed, you can log in now.Registration completed. Verify "
 "the email code to activate your account."
 
-#: apps/accounts/views/auth/register.py:114
-#: apps/accounts/views/auth/register.py:337
+#: apps/accounts/views/auth/register.py:139
+#: apps/accounts/views/auth/register.py:364
 msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "A new verification code has been sent."
 
-#: apps/accounts/views/auth/register.py:134
+#: apps/accounts/views/auth/register.py:161
 msgctxt "accounts.auth.message"
 msgid "verification_email_not_found_register_again"
 msgstr "Verification email not found register again"
 
-#: apps/accounts/views/auth/register.py:144
-#: apps/accounts/views/auth/register.py:270
+#: apps/accounts/views/auth/register.py:171
+#: apps/accounts/views/auth/register.py:297
 msgctxt "accounts.auth.message"
 msgid "user_not_found"
 msgstr "User not found"
 
-#: apps/accounts/views/auth/register.py:176
+#: apps/accounts/views/auth/register.py:203
 msgctxt "accounts.auth.message"
 msgid "code_invalid_or_expired"
 msgstr "Code invalid or expired"
 
-#: apps/accounts/views/auth/register.py:197
+#: apps/accounts/views/auth/register.py:224
 msgctxt "accounts.auth.message"
 msgid ""
 "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin."
 msgstr ""
 "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin."
 
-#: apps/accounts/views/auth/register.py:210
-#: apps/accounts/views/auth/register.py:246
+#: apps/accounts/views/auth/register.py:237
 #: apps/accounts/views/auth/register.py:273
+#: apps/accounts/views/auth/register.py:300
 msgctxt "accounts.auth.message"
 msgid "email_verified_you_can_login_now"
 msgstr "Email verified you can login now"
 
-#: apps/accounts/views/auth/register.py:255
+#: apps/accounts/views/auth/register.py:282
 msgctxt "accounts.auth.message"
 msgid "link_invalid_or_expired"
 msgstr "Link invalid or expired"
 
-#: apps/accounts/views/auth/register.py:264
+#: apps/accounts/views/auth/register.py:291
 msgctxt "accounts.auth.message"
 msgid "email_not_found"
 msgstr "Email not found"
 
-#: apps/accounts/views/auth/register.py:302
+#: apps/accounts/views/auth/register.py:329
 #, python-brace-format
 msgctxt "accounts.auth.message"
 msgid "Yeni OTP kodu üçün {seconds} saniyə gözləyin."
 msgstr "Yeni OTP kodu üçün {seconds} saniyə gözləyin."
 
-#: apps/accounts/views/auth/register.py:351
+#: apps/accounts/views/auth/register.py:378
 msgctxt "accounts.auth.message"
 msgid "logout_success"
 msgstr "Logout success"
@@ -9319,7 +9337,7 @@ msgstr "Your {role} request for {org} was sent and is awaiting approval."
 
 #: apps/accounts/views/profile/_sections/labels.py:65
 #: apps/accounts/views/profile/context_builder/_stage4.py:28
-#: templates/partials/_navbar.html:36 templates/partials/_navbar.html:290
+#: templates/partials/_navbar.html:36 templates/partials/_navbar.html:292
 msgctxt "nav"
 msgid "home"
 msgstr "Home"
@@ -11268,105 +11286,105 @@ msgctxt "assignment.section"
 msgid "empty_generic"
 msgstr "Empty generic"
 
-#: apps/assignments/templates/assignments/detail.html:131
+#: apps/assignments/templates/assignments/detail.html:25
 msgctxt "assignment.legacy.detail"
 msgid "label_duration"
 msgstr "Duration"
 
-#: apps/assignments/templates/assignments/detail.html:136
+#: apps/assignments/templates/assignments/detail.html:30
 msgctxt "assignment.legacy.detail"
 msgid "status_deadline_passed"
 msgstr "Time has passed"
 
-#: apps/assignments/templates/assignments/detail.html:145
+#: apps/assignments/templates/assignments/detail.html:39
 msgctxt "assignment.legacy.detail"
 msgid "label_attempts"
 msgstr "Attempts"
 
-#: apps/assignments/templates/assignments/detail.html:157
+#: apps/assignments/templates/assignments/detail.html:51
 msgctxt "assignment.legacy.detail"
 msgid "draft_answer_title"
 msgstr "Answer (draft)"
 
-#: apps/assignments/templates/assignments/detail.html:164
+#: apps/assignments/templates/assignments/detail.html:58
 msgctxt "assignment.legacy.detail"
 msgid "label_answer_required"
 msgstr "Answer *"
 
-#: apps/assignments/templates/assignments/detail.html:165
+#: apps/assignments/templates/assignments/detail.html:59
 msgid "Cavabınızı buraya yazın..."
 msgstr "Write your message..."
 
-#: apps/assignments/templates/assignments/detail.html:169
+#: apps/assignments/templates/assignments/detail.html:63
 msgctxt "assignment.legacy.detail"
 msgid "label_files"
 msgstr "Files"
 
-#: apps/assignments/templates/assignments/detail.html:171
+#: apps/assignments/templates/assignments/detail.html:65
 msgctxt "assignment.legacy.detail"
 msgid "files_help"
 msgstr "You can select multiple files (PDF, DOC, IMG, etc.)"
 
-#: apps/assignments/templates/assignments/detail.html:176
+#: apps/assignments/templates/assignments/detail.html:70
 msgctxt "assignment.legacy.detail"
 msgid "send"
 msgstr "Send"
 
-#: apps/assignments/templates/assignments/detail.html:184
+#: apps/assignments/templates/assignments/detail.html:78
 msgctxt "assignment.legacy.detail"
 msgid "start_new_attempt_info"
 msgstr "Fill out the form to start a new attempt"
 
-#: apps/assignments/templates/assignments/detail.html:189
+#: apps/assignments/templates/assignments/detail.html:83
 msgctxt "assignment.legacy.detail"
 msgid "attempt_limit_exceeded"
 msgstr "You have exceeded the number of attempts"
 
-#: apps/assignments/templates/assignments/detail.html:199
+#: apps/assignments/templates/assignments/detail.html:93
 msgctxt "assignment.legacy.detail"
 msgid "current_score"
 msgstr "Your current score"
 
-#: apps/assignments/templates/assignments/detail.html:207
+#: apps/assignments/templates/assignments/detail.html:101
 msgid "Əla nəticə!"
 msgstr "Əla nəticə!"
 
-#: apps/assignments/templates/assignments/detail.html:212
+#: apps/assignments/templates/assignments/detail.html:106
 msgctxt "assignment.legacy.detail"
 msgid "waiting"
 msgstr "Awaiting..."
 
-#: apps/assignments/templates/assignments/detail.html:220
+#: apps/assignments/templates/assignments/detail.html:114
 msgctxt "assignment.legacy.detail"
 msgid "previous_answers_title"
 msgstr "Previous answers"
 
-#: apps/assignments/templates/assignments/detail.html:228
+#: apps/assignments/templates/assignments/detail.html:122
 msgctxt "assignment.legacy.detail"
 msgid "attempt_label"
 msgstr "Attempt"
 
-#: apps/assignments/templates/assignments/detail.html:246
+#: apps/assignments/templates/assignments/detail.html:140
 #, python-format
 msgid "Nəticə: %(score)s/%(max_score)s"
 msgstr "Nəticə: %(score)s/%(max_score)s"
 
-#: apps/assignments/templates/assignments/detail.html:253
+#: apps/assignments/templates/assignments/detail.html:147
 msgctxt "assignment.legacy.detail"
 msgid "feedback_label"
 msgstr "Opinion"
 
-#: apps/assignments/templates/assignments/detail.html:278
+#: apps/assignments/templates/assignments/detail.html:172
 #: apps/trial_exams/templates/trial_exams/trial_exam_request.html:198
 msgid "Göndərilir..."
 msgstr "Sending..."
 
-#: apps/assignments/templates/assignments/detail.html:296
+#: apps/assignments/templates/assignments/detail.html:190
 msgctxt "assignment.legacy.detail"
 msgid "error_prefix"
 msgstr "Error"
 
-#: apps/assignments/templates/assignments/detail.html:302
+#: apps/assignments/templates/assignments/detail.html:196
 msgid "Xəta baş verdi. Zəhmət olmasa bir daha yoxlayın."
 msgstr "Something went wrong. Please try again."
 
@@ -11901,6 +11919,72 @@ msgctxt "assignment.legacy.edit_form"
 msgid "save"
 msgstr "Save"
 
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:6
+msgctxt "assignment.review_submissions"
+msgid "no_text"
+msgstr "No text"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:7
+#: apps/assignments/templates/assignments/review_submissions.html:302
+msgctxt "assignment.review_submissions"
+msgid "download"
+msgstr "Download"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:8
+msgctxt "assignment.review_submissions"
+msgid "submitting"
+msgstr "Submitting..."
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:9
+msgctxt "assignment.review_submissions"
+msgid "error_prefix"
+msgstr "Error"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:10
+msgctxt "assignment.review_submissions"
+msgid "unknown_error"
+msgstr "Unknown error"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:11
+msgctxt "assignment.review_submissions"
+msgid "server_error"
+msgstr "Server error"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:12
+#: apps/assignments/templates/assignments/review_submissions.html:335
+msgctxt "assignment.review_submissions"
+msgid "grade_submit"
+msgstr "Save grade"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:13
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:17
+msgid "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
+msgstr "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:14
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:18
+msgid ""
+"Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
+"görünəcək."
+msgstr ""
+"Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
+"görünəcək."
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:15
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:19
+msgid "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
+msgstr "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:16
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:20
+msgid "Yoxla və yadda saxla"
+msgstr "Save"
+
+#: apps/assignments/templates/assignments/partials/_review_submissions_js.html:17
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:21
+msgid "Yenidən yoxla və yadda saxla"
+msgstr "Save decisions"
+
 #: apps/assignments/templates/assignments/review.html:5
 msgctxt "assignment.legacy.review"
 msgid "page_title_suffix"
@@ -12141,12 +12225,6 @@ msgctxt "assignment.review_submissions"
 msgid "file"
 msgstr "File"
 
-#: apps/assignments/templates/assignments/review_submissions.html:302
-#: apps/assignments/templates/assignments/review_submissions.html:351
-msgctxt "assignment.review_submissions"
-msgid "download"
-msgstr "Download"
-
 #: apps/assignments/templates/assignments/review_submissions.html:314
 msgctxt "assignment.review_submissions"
 msgid "grade"
@@ -12166,66 +12244,6 @@ msgstr "Feedback"
 msgctxt "assignment.review_submissions"
 msgid "feedback_placeholder"
 msgstr "Write feedback for the student..."
-
-#: apps/assignments/templates/assignments/review_submissions.html:335
-#: apps/assignments/templates/assignments/review_submissions.html:356
-msgctxt "assignment.review_submissions"
-msgid "grade_submit"
-msgstr "Save grade"
-
-#: apps/assignments/templates/assignments/review_submissions.html:350
-msgctxt "assignment.review_submissions"
-msgid "no_text"
-msgstr "No text"
-
-#: apps/assignments/templates/assignments/review_submissions.html:352
-msgctxt "assignment.review_submissions"
-msgid "submitting"
-msgstr "Submitting..."
-
-#: apps/assignments/templates/assignments/review_submissions.html:353
-msgctxt "assignment.review_submissions"
-msgid "error_prefix"
-msgstr "Error"
-
-#: apps/assignments/templates/assignments/review_submissions.html:354
-msgctxt "assignment.review_submissions"
-msgid "unknown_error"
-msgstr "Unknown error"
-
-#: apps/assignments/templates/assignments/review_submissions.html:355
-msgctxt "assignment.review_submissions"
-msgid "server_error"
-msgstr "Server error"
-
-#: apps/assignments/templates/assignments/review_submissions.html:357
-#: apps/projects/templates/projects/review_submissions.html:358
-msgid "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
-msgstr "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
-
-#: apps/assignments/templates/assignments/review_submissions.html:358
-#: apps/projects/templates/projects/review_submissions.html:359
-msgid ""
-"Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
-"görünəcək."
-msgstr ""
-"Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
-"görünəcək."
-
-#: apps/assignments/templates/assignments/review_submissions.html:359
-#: apps/projects/templates/projects/review_submissions.html:360
-msgid "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
-msgstr "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
-
-#: apps/assignments/templates/assignments/review_submissions.html:360
-#: apps/projects/templates/projects/review_submissions.html:361
-msgid "Yoxla və yadda saxla"
-msgstr "Save"
-
-#: apps/assignments/templates/assignments/review_submissions.html:361
-#: apps/projects/templates/projects/review_submissions.html:362
-msgid "Yenidən yoxla və yadda saxla"
-msgstr "Save decisions"
 
 #: apps/assignments/views/student/endpoints.py:63
 #: apps/assignments/views/student/endpoints.py:112
@@ -12576,47 +12594,52 @@ msgstr ""
 "universities, schools, training centres and teachers. Courses, exams, "
 "assessment, audit and AI assistant in one place."
 
-#: apps/blog/templates/blog/about.html:30
+#: apps/blog/templates/blog/about.html:31
 msgid "Pulsuz başla"
 msgstr "Start free"
 
-#: apps/blog/templates/blog/about.html:34
+#: apps/blog/templates/blog/about.html:36
+#: apps/blog/templates/blog/about.html:182 templates/partials/_footer.html:62
+msgid "Daxil ol"
+msgstr "Sign in"
+
+#: apps/blog/templates/blog/about.html:41
 msgid "Bizimlə əlaqə"
 msgstr "Contact us"
 
-#: apps/blog/templates/blog/about.html:40
+#: apps/blog/templates/blog/about.html:47
 msgid "EMSArena loqo"
 msgstr "EMSArena logo"
 
-#: apps/blog/templates/blog/about.html:47
+#: apps/blog/templates/blog/about.html:54
 msgid "EMSArena platform xüsusiyyətləri"
 msgstr "EMSArena platform features"
 
-#: apps/blog/templates/blog/about.html:50
+#: apps/blog/templates/blog/about.html:57
 msgid "Dəstəklənən dil"
 msgstr "Supported languages"
 
-#: apps/blog/templates/blog/about.html:54
+#: apps/blog/templates/blog/about.html:61
 msgid "İmtahan növü"
 msgstr "Exam types"
 
-#: apps/blog/templates/blog/about.html:58
+#: apps/blog/templates/blog/about.html:65
 msgid "Platform əlçatanlığı"
 msgstr "Platform availability"
 
-#: apps/blog/templates/blog/about.html:62
+#: apps/blog/templates/blog/about.html:69
 msgid "Tenant izolyasiyası"
 msgstr "Tenant isolation"
 
-#: apps/blog/templates/blog/about.html:68
+#: apps/blog/templates/blog/about.html:75
 msgid "Missiya və Vizyon"
 msgstr "Mission and vision"
 
-#: apps/blog/templates/blog/about.html:71
+#: apps/blog/templates/blog/about.html:78
 msgid "Missiyamız"
 msgstr "Our mission"
 
-#: apps/blog/templates/blog/about.html:73
+#: apps/blog/templates/blog/about.html:80
 msgid ""
 "Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı "
 "əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən "
@@ -12626,11 +12649,11 @@ msgstr ""
 "teacher-student interaction. Simplify teaching with one reliable and "
 "scalable platform."
 
-#: apps/blog/templates/blog/about.html:78
+#: apps/blog/templates/blog/about.html:85
 msgid "Vizyonumuz"
 msgstr "Our vision"
 
-#: apps/blog/templates/blog/about.html:80
+#: apps/blog/templates/blog/about.html:87
 msgid ""
 "Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması "
 "olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün "
@@ -12640,11 +12663,11 @@ msgstr ""
 "region: AI-assisted, multi-tenant, secure and suitable for organizations of "
 "every size."
 
-#: apps/blog/templates/blog/about.html:87
+#: apps/blog/templates/blog/about.html:94
 msgid "Platformanın imkanları"
 msgstr "Platform capabilities"
 
-#: apps/blog/templates/blog/about.html:89
+#: apps/blog/templates/blog/about.html:96
 msgid ""
 "Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım "
 "olan hər şey."
@@ -12652,11 +12675,11 @@ msgstr ""
 "Everything you need from courses to exams, assessment and analytics in one "
 "subscription."
 
-#: apps/blog/templates/blog/about.html:95
+#: apps/blog/templates/blog/about.html:102
 msgid "Kurs və qruplar"
 msgstr "Courses and groups"
 
-#: apps/blog/templates/blog/about.html:96
+#: apps/blog/templates/blog/about.html:103
 msgid ""
 "Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün "
 "sadə, tələbə üçün aydın."
@@ -12664,11 +12687,11 @@ msgstr ""
 "Topics, lessons, materials and group management in one place. Simple for "
 "teachers, clear for students."
 
-#: apps/blog/templates/blog/about.html:101
+#: apps/blog/templates/blog/about.html:108
 msgid "Multi-tenant memarlıq"
 msgstr "Multi-tenant architecture"
 
-#: apps/blog/templates/blog/about.html:102
+#: apps/blog/templates/blog/about.html:109
 msgid ""
 "Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə "
 "qarışmır, RBAC ciddi tətbiq olunur."
@@ -12676,11 +12699,11 @@ msgstr ""
 "Every organization gets a fully isolated workspace. Data never mixes, and "
 "RBAC is enforced strictly."
 
-#: apps/blog/templates/blog/about.html:107
+#: apps/blog/templates/blog/about.html:114
 msgid "Rol-əsaslı icazələr"
 msgstr "Role-based permissions"
 
-#: apps/blog/templates/blog/about.html:108
+#: apps/blog/templates/blog/about.html:115
 msgid ""
 "Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs "
 "yalnız ona icazə verilən məlumatı görür."
@@ -12688,11 +12711,11 @@ msgstr ""
 "Superadmin, organization owner, teacher, student and staff roles: everyone "
 "sees only the data they are allowed to access."
 
-#: apps/blog/templates/blog/about.html:113
+#: apps/blog/templates/blog/about.html:120
 msgid "İmtahanlar və qiymətləndirmə"
 msgstr "Exams and assessment"
 
-#: apps/blog/templates/blog/about.html:114
+#: apps/blog/templates/blog/about.html:121
 msgid ""
 "Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, "
 "analitika və anti-cheat parametrləri."
@@ -12700,11 +12723,11 @@ msgstr ""
 "Test, written, practical and live exams with automatic grading, analytics "
 "and anti-cheat settings."
 
-#: apps/blog/templates/blog/about.html:119
+#: apps/blog/templates/blog/about.html:126
 msgid "Audit və təhlükəsizlik"
 msgstr "Audit and security"
 
-#: apps/blog/templates/blog/about.html:120
+#: apps/blog/templates/blog/about.html:127
 msgid ""
 "Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və "
 "CSP siyasətləri ilə qorunan."
@@ -12712,11 +12735,11 @@ msgstr ""
 "Every critical action is written to the audit log and protected with "
 "internal security tests and CSP policies."
 
-#: apps/blog/templates/blog/about.html:125
+#: apps/blog/templates/blog/about.html:132
 msgid "AI köməkçi"
 msgstr "AI assistant"
 
-#: apps/blog/templates/blog/about.html:126
+#: apps/blog/templates/blog/about.html:133
 msgid ""
 "İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya "
 "kömək edən ağıllı assistent."
@@ -12724,11 +12747,11 @@ msgstr ""
 "A smart assistant that answers questions and helps navigation within the "
 "user's permissions."
 
-#: apps/blog/templates/blog/about.html:134
+#: apps/blog/templates/blog/about.html:141
 msgid "Komanda"
 msgstr "Team"
 
-#: apps/blog/templates/blog/about.html:137
+#: apps/blog/templates/blog/about.html:144
 msgid ""
 "EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü "
 "dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
@@ -12736,11 +12759,11 @@ msgstr ""
 "EMSArena is built by experienced engineers and educators. User-centered "
 "design and reliable technology are our main priorities."
 
-#: apps/blog/templates/blog/about.html:144
+#: apps/blog/templates/blog/about.html:151
 msgid "Founder · Full-stack Engineer"
 msgstr "Founder · Full-stack Engineer"
 
-#: apps/blog/templates/blog/about.html:145
+#: apps/blog/templates/blog/about.html:152
 msgid ""
 "EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan "
 "sistemlər sahəsində mütəxəssis."
@@ -12748,30 +12771,30 @@ msgstr ""
 "The lead architect and core engineer of EMSArena, specializing in Django, "
 "React and shared systems."
 
-#: apps/blog/templates/blog/about.html:149
+#: apps/blog/templates/blog/about.html:156
 msgid "Mühəndislik komandası"
 msgstr "Engineering team"
 
-#: apps/blog/templates/blog/about.html:150
+#: apps/blog/templates/blog/about.html:157
 msgid "Backend · Frontend · DevOps"
 msgstr "Backend · Frontend · DevOps"
 
-#: apps/blog/templates/blog/about.html:151
+#: apps/blog/templates/blog/about.html:158
 msgid ""
 "Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli "
 "mühəndislər."
 msgstr ""
 "Experienced engineers focused on performance, reliability and security."
 
-#: apps/blog/templates/blog/about.html:155
+#: apps/blog/templates/blog/about.html:162
 msgid "Pedaqoji məsləhətçilər"
 msgstr "Education advisors"
 
-#: apps/blog/templates/blog/about.html:156
+#: apps/blog/templates/blog/about.html:163
 msgid "Təhsil eksperti · Metodoloq"
 msgstr "Education expert · Methodologist"
 
-#: apps/blog/templates/blog/about.html:157
+#: apps/blog/templates/blog/about.html:164
 msgid ""
 "Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji "
 "düzgünlüyünü təmin edirlər."
@@ -12779,19 +12802,19 @@ msgstr ""
 "Specialists with teaching and university experience ensure the platform's "
 "pedagogical quality."
 
-#: apps/blog/templates/blog/about.html:164
+#: apps/blog/templates/blog/about.html:171
 msgid "Təhsilinizi növbəti səviyyəyə qaldıraq"
 msgstr "Let's take your education to the next level"
 
-#: apps/blog/templates/blog/about.html:165
+#: apps/blog/templates/blog/about.html:172
 msgid "Bir abunəlikdə kurs, imtahan, audit və AI — hamısı bir yerdə."
 msgstr "Courses, exams, audit and AI in one subscription and one place."
 
-#: apps/blog/templates/blog/about.html:169
+#: apps/blog/templates/blog/about.html:177
 msgid "Pulsuz qeydiyyat"
 msgstr "Sign up free"
 
-#: apps/blog/templates/blog/about.html:173
+#: apps/blog/templates/blog/about.html:187
 msgid "Demo tələb et"
 msgstr "Request a demo"
 
@@ -12920,12 +12943,12 @@ msgctxt "blog.login_page"
 msgid "submit"
 msgstr "Login"
 
-#: apps/blog/templates/blog/login.html:51
+#: apps/blog/templates/blog/login.html:52
 msgctxt "blog.login_page"
 msgid "no_account"
 msgstr "Don't have an account?"
 
-#: apps/blog/templates/blog/login.html:52
+#: apps/blog/templates/blog/login.html:53
 msgctxt "blog.login_page"
 msgid "register_now"
 msgstr "Register"
@@ -13586,9 +13609,9 @@ msgid "invalid_email"
 msgstr "Please enter a valid email address."
 
 #: apps/contact/admin.py:53
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:153
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:107
 #: apps/trial_exams/admin.py:53
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:146
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:98
 msgid "Göndərən"
 msgstr "Sender"
 
@@ -13613,26 +13636,26 @@ msgid "✓ Cavablandı"
 msgstr "✓ Replied"
 
 #: apps/contact/admin.py:115 apps/contact/models.py:40
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:76
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:145
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:30
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:99
 #: apps/trial_exams/models.py:61
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:78
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:140
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:30
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:92
 msgid "Göndərilir"
 msgstr "Sending"
 
 #: apps/contact/admin.py:121 apps/contact/models.py:42
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:78
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:147
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:32
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:101
 #: apps/trial_exams/models.py:63
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:80
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:142
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:32
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:94
 msgid "Göndərilmədi"
 msgstr "Not sent"
 
 #: apps/contact/admin.py:127 apps/contact/models.py:43
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:80
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:149
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:34
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:103
 #: apps/trial_exams/models.py:64
 msgid "Qeyd edildi"
 msgstr "Recorded"
@@ -13654,7 +13677,7 @@ msgid "Yenidən cəhd et"
 msgstr "Try again"
 
 #: apps/contact/admin.py:168
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:102
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:56
 msgid "Göndərişi təsdiqlə"
 msgstr "Confirm delivery"
 
@@ -13749,42 +13772,42 @@ msgid "support@emsarena.com"
 msgstr "support@emsarena.com"
 
 #: apps/contact/models.py:41
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:143
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:97
 #: apps/trial_exams/models.py:62
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:138
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:90
 msgid "Göndərildi"
 msgstr "Sent"
 
 #: apps/contact/models.py:46 apps/contact/templates/contact/contact.html:116
 #: apps/contact/templates/contact/email/contact_notification.html:26
 #: apps/trial_exams/models.py:78
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:84
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:36
 #: apps/trial_exams/templates/trial_exams/email/trial_notification.html:26
 #: apps/trial_exams/templates/trial_exams/trial_exam_request.html:124
 msgid "Ad Soyad"
 msgstr "Full name"
 
 #: apps/contact/models.py:47
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:85
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:39
 #: apps/contact/templates/contact/contact.html:36
 #: apps/contact/templates/contact/contact.html:123
 #: apps/contact/templates/contact/email/contact_notification.html:30
 #: apps/trial_exams/models.py:79
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:85
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:37
 #: apps/trial_exams/templates/trial_exams/email/trial_notification.html:30
 #: apps/trial_exams/templates/trial_exams/trial_exam_request.html:131
 msgid "Email"
 msgstr "Email"
 
 #: apps/contact/models.py:48
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:87
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:41
 #: apps/contact/templates/contact/contact.html:133
 #: apps/contact/templates/contact/email/contact_notification.html:35
 msgid "Telefon"
 msgstr "Phone"
 
 #: apps/contact/models.py:50
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:89
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:43
 #: apps/contact/templates/contact/contact.html:140
 #: apps/contact/templates/contact/email/contact_notification.html:40
 msgid "Mövzu"
@@ -13855,51 +13878,51 @@ msgstr "Re: [EMSArena] %(subject)s"
 msgid "Django site admin"
 msgstr "Django site admin"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:59
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:61
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:13
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:13
 msgid "Home"
 msgstr "Home"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:63
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:65
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:17
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:17
 msgid "Cavablandır"
 msgstr "Reply"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:72
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:26
 msgid "Müştəri mesajı"
 msgstr "Customer message"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:74
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:28
 #, python-format
 msgid "✓ Artıq cavablandı: %(sent_at)s"
 msgstr "✓ Artıq cavablandı: %(sent_at)s"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:84
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:38
 msgid "Ad"
 msgstr "Name"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:90
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:155
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:44
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:109
 #: apps/contact/templates/contact/email/contact_notification.html:44
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:87
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:148
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:39
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:100
 #: apps/trial_exams/templates/trial_exams/email/trial_notification.html:48
 msgid "Tarix"
 msgstr "Date"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:98
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:52
 msgid "Yenidən cavab göndər"
 msgstr "Send reply again"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:100
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:54
 msgid "Yenidən göndər"
 msgstr "Send again"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:104
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:58
 msgid "Cavab yaz və göndər"
 msgstr "Write and send reply"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:116
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:70
 msgid ""
 "Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa "
 "qayıdacaq."
@@ -13907,17 +13930,17 @@ msgstr ""
 "The customer will see that the reply came from this address. Their response "
 "will return to this inbox."
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:129
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:83
 msgid "Cavabı göndər"
 msgstr "Send reply"
 
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:141
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:136
+#: apps/contact/templates/admin/contact/contactmessage/reply.html:95
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:88
 msgid "Son cavab cəhdi"
 msgstr "Last reply attempt"
 
 #: apps/contact/templates/contact/contact.html:18 apps/contact/views.py:57
-#: templates/partials/_footer.html:50 templates/partials/_footer.html:73
+#: templates/partials/_footer.html:50 templates/partials/_footer.html:75
 msgid "Əlaqə"
 msgstr "Contact"
 
@@ -13963,7 +13986,7 @@ msgid "Yeni mesaj göndər"
 msgstr "Send another message"
 
 #: apps/contact/templates/contact/contact.html:93
-#: templates/partials/_footer.html:100
+#: templates/partials/_footer.html:102
 msgid "Bizə yazın"
 msgstr "Send us a message"
 
@@ -14229,100 +14252,100 @@ msgid "organization_required"
 msgstr "Organization selection is required."
 
 #: apps/courses/templates/courses/course_dashboard.html:6
-#: apps/courses/templates/courses/course_dashboard.html:43
+#: apps/courses/templates/courses/course_dashboard.html:45
 msgctxt "courses.dashboard"
 msgid "page_suffix_dashboard"
 msgstr "Dashboard"
 
-#: apps/courses/templates/courses/course_dashboard.html:35
-#: apps/courses/templates/courses/course_dashboard.html:191
+#: apps/courses/templates/courses/course_dashboard.html:37
+#: apps/courses/templates/courses/course_dashboard.html:193
 msgctxt "courses.dashboard"
 msgid "action_back_profile"
 msgstr "Back to profile"
 
-#: apps/courses/templates/courses/course_dashboard.html:55
+#: apps/courses/templates/courses/course_dashboard.html:57
 msgctxt "courses.dashboard"
 msgid "ai_generate"
 msgstr "Generate with AI"
 
-#: apps/courses/templates/courses/course_dashboard.html:123
+#: apps/courses/templates/courses/course_dashboard.html:125
 msgctxt "courses.dashboard"
 msgid "label_teacher"
 msgstr "Teacher"
 
-#: apps/courses/templates/courses/course_dashboard.html:127
+#: apps/courses/templates/courses/course_dashboard.html:129
 msgctxt "courses.dashboard"
 msgid "label_created"
 msgstr "Created"
 
-#: apps/courses/templates/courses/course_dashboard.html:141
+#: apps/courses/templates/courses/course_dashboard.html:143
 msgctxt "courses.dashboard"
 msgid "label_course_visibility"
 msgstr "Course visibility"
 
-#: apps/courses/templates/courses/course_dashboard.html:144
+#: apps/courses/templates/courses/course_dashboard.html:146
 msgctxt "courses.dashboard"
 msgid "status_draft"
 msgstr "Draft"
 
-#: apps/courses/templates/courses/course_dashboard.html:148
+#: apps/courses/templates/courses/course_dashboard.html:150
 msgctxt "courses.dashboard"
 msgid "status_published"
 msgstr "Released"
 
-#: apps/courses/templates/courses/course_dashboard.html:157
+#: apps/courses/templates/courses/course_dashboard.html:159
 msgctxt "courses.dashboard"
 msgid "message_published_visible_students"
 msgstr "This course is published and visible to students."
 
-#: apps/courses/templates/courses/course_dashboard.html:162
+#: apps/courses/templates/courses/course_dashboard.html:164
 msgctxt "courses.dashboard"
 msgid "message_draft_hidden_students"
 msgstr "This course is in draft mode and is not visible to students."
 
-#: apps/courses/templates/courses/course_dashboard.html:169
+#: apps/courses/templates/courses/course_dashboard.html:171
 msgctxt "courses.dashboard"
 msgid "stat_topics"
 msgstr "Subject"
 
-#: apps/courses/templates/courses/course_dashboard.html:171
+#: apps/courses/templates/courses/course_dashboard.html:173
 msgctxt "courses.dashboard"
 msgid "stat_members"
 msgstr "Member"
 
-#: apps/courses/templates/courses/course_dashboard.html:179
+#: apps/courses/templates/courses/course_dashboard.html:181
 msgctxt "courses.dashboard"
 msgid "action_edit"
 msgstr "Edit"
 
-#: apps/courses/templates/courses/course_dashboard.html:183
+#: apps/courses/templates/courses/course_dashboard.html:185
 #: apps/courses/templates/courses/partials/_action_confirm_modal.html:9
 #: apps/courses/templates/courses/partials/_action_confirm_modal.html:25
 msgctxt "courses.dashboard"
 msgid "action_delete"
 msgstr "Delete"
 
-#: apps/courses/templates/courses/course_dashboard.html:203
+#: apps/courses/templates/courses/course_dashboard.html:205
 msgctxt "courses.dashboard"
 msgid "ai_build_title"
 msgstr "Build course with AI"
 
-#: apps/courses/templates/courses/course_dashboard.html:208
+#: apps/courses/templates/courses/course_dashboard.html:210
 msgctxt "courses.dashboard"
 msgid "ai_build_sub"
 msgstr "Get syllabus, resource and task ideas from the assistant."
 
-#: apps/courses/templates/courses/course_dashboard.html:241
+#: apps/courses/templates/courses/course_dashboard.html:243
 msgctxt "courses.dashboard"
 msgid "confirm_delete_course"
 msgstr "Did you want to delete this course?"
 
-#: apps/courses/templates/courses/course_dashboard.html:242
+#: apps/courses/templates/courses/course_dashboard.html:244
 msgctxt "courses.dashboard"
 msgid "confirm_delete_member_suffix"
 msgstr "do you want to delete?"
 
-#: apps/courses/templates/courses/course_dashboard.html:243
+#: apps/courses/templates/courses/course_dashboard.html:245
 msgctxt "courses.dashboard"
 msgid "generic_error"
 msgstr "Error"
@@ -14332,57 +14355,57 @@ msgctxt "courses.members_page"
 msgid "page_suffix_members"
 msgstr "Members"
 
-#: apps/courses/templates/courses/course_members.html:23
+#: apps/courses/templates/courses/course_members.html:24
 msgctxt "courses.members_page"
 msgid "back_dashboard"
 msgstr "Dashboard"
 
-#: apps/courses/templates/courses/course_members.html:26
+#: apps/courses/templates/courses/course_members.html:27
 msgctxt "courses.members_page"
 msgid "title_members"
 msgstr "Members"
 
-#: apps/courses/templates/courses/course_members.html:34
+#: apps/courses/templates/courses/course_members.html:35
 msgctxt "courses.members_page"
 msgid "add_student"
 msgstr "Add Student"
 
-#: apps/courses/templates/courses/course_members.html:37
+#: apps/courses/templates/courses/course_members.html:38
 msgctxt "courses.members_page"
 msgid "add_group"
 msgstr "Add Group"
 
-#: apps/courses/templates/courses/course_members.html:46
+#: apps/courses/templates/courses/course_members.html:47
 msgctxt "courses.members_page"
 msgid "section_teacher"
 msgstr "Teacher"
 
-#: apps/courses/templates/courses/course_members.html:57
+#: apps/courses/templates/courses/course_members.html:58
 msgctxt "courses.members_page"
 msgid "badge_course_owner"
 msgstr "Course Owner"
 
-#: apps/courses/templates/courses/course_members.html:66
+#: apps/courses/templates/courses/course_members.html:67
 msgctxt "courses.members_page"
 msgid "section_students"
 msgstr "Students"
 
-#: apps/courses/templates/courses/course_members.html:67
+#: apps/courses/templates/courses/course_members.html:68
 msgctxt "courses.members_page"
 msgid "count_people_suffix"
 msgstr "person"
 
-#: apps/courses/templates/courses/course_members.html:78
+#: apps/courses/templates/courses/course_members.html:79
 msgctxt "courses.members_page"
 msgid "label_group"
 msgstr "Group"
 
-#: apps/courses/templates/courses/course_members.html:80
+#: apps/courses/templates/courses/course_members.html:81
 msgctxt "courses.members_page"
 msgid "grouped_unassigned_students"
 msgstr "Students without groups"
 
-#: apps/courses/templates/courses/course_members.html:88
+#: apps/courses/templates/courses/course_members.html:89
 #, python-format
 msgctxt "courses.members_page"
 msgid ""
@@ -14392,12 +14415,12 @@ msgstr ""
 "Do you want to delete this group?\\n\\nAll students in %(group_name)s group "
 "will be removed from the course!"
 
-#: apps/courses/templates/courses/course_members.html:92
+#: apps/courses/templates/courses/course_members.html:93
 msgctxt "courses.members_page"
 msgid "delete_group"
 msgstr "Delete Group"
 
-#: apps/courses/templates/courses/course_members.html:125
+#: apps/courses/templates/courses/course_members.html:126
 msgctxt "courses.members_page"
 msgid "no_students_added_yet"
 msgstr "No students have been added to the course yet."
@@ -14462,91 +14485,91 @@ msgctxt "courses.edit_page"
 msgid "page_suffix_edit"
 msgstr "Editing"
 
-#: apps/courses/templates/courses/edit_course.html:313
+#: apps/courses/templates/courses/edit_course.html:22
 msgctxt "courses.edit_page"
 msgid "header_edit_course"
 msgstr "Edit Course"
 
-#: apps/courses/templates/courses/edit_course.html:323
+#: apps/courses/templates/courses/edit_course.html:32
 msgctxt "courses.edit_page"
 msgid "field_course_name"
 msgstr "Course Name"
 
-#: apps/courses/templates/courses/edit_course.html:335
+#: apps/courses/templates/courses/edit_course.html:44
 msgctxt "courses.edit_page"
 msgid "field_course_description"
 msgstr "Course Description"
 
-#: apps/courses/templates/courses/edit_course.html:347
+#: apps/courses/templates/courses/edit_course.html:56
 msgctxt "courses.edit_page"
 msgid "field_course_cover"
 msgstr "Course Image (Cover Image)"
 
-#: apps/courses/templates/courses/edit_course.html:355
+#: apps/courses/templates/courses/edit_course.html:64
 msgctxt "courses.edit_page"
 msgid "alt_current_cover"
 msgstr "Available cover"
 
-#: apps/courses/templates/courses/edit_course.html:356
+#: apps/courses/templates/courses/edit_course.html:65
 msgctxt "courses.edit_page"
 msgid "label_current_image"
 msgstr "Available Image"
 
-#: apps/courses/templates/courses/edit_course.html:362
+#: apps/courses/templates/courses/edit_course.html:71
 msgctxt "courses.edit_page"
 msgid "alt_new_preview"
 msgstr "New preview"
 
-#: apps/courses/templates/courses/edit_course.html:363
+#: apps/courses/templates/courses/edit_course.html:72
 msgctxt "courses.edit_page"
 msgid "label_new_selection"
 msgstr "New Choice"
 
-#: apps/courses/templates/courses/edit_course.html:370
+#: apps/courses/templates/courses/edit_course.html:79
 msgctxt "courses.edit_page"
 msgid "action_click_change_image"
 msgstr "Click to change image"
 
-#: apps/courses/templates/courses/edit_course.html:384
+#: apps/courses/templates/courses/edit_course.html:93
 msgctxt "courses.edit_page"
 msgid "field_course_status"
 msgstr "Course Status"
 
-#: apps/courses/templates/courses/edit_course.html:389
+#: apps/courses/templates/courses/edit_course.html:98
 msgctxt "courses.edit_page"
 msgid "help_status_visibility"
 msgstr "Status determines whether the course is visible to students."
 
-#: apps/courses/templates/courses/edit_course.html:396
+#: apps/courses/templates/courses/edit_course.html:105
 msgctxt "courses.edit_page"
 msgid "action_cancel_back"
 msgstr "Cancel and Go Back"
 
-#: apps/courses/templates/courses/edit_course.html:399
+#: apps/courses/templates/courses/edit_course.html:108
 msgctxt "courses.edit_page"
 msgid "action_save_changes"
 msgstr "Save Changes"
 
-#: apps/courses/templates/courses/edit_course.html:408
+#: apps/courses/templates/courses/edit_course.html:117
 msgctxt "courses.edit_page"
 msgid "info_title"
 msgstr "Useful Information"
 
-#: apps/courses/templates/courses/edit_course.html:411
+#: apps/courses/templates/courses/edit_course.html:120
 msgctxt "courses.edit_page"
 msgid "info_item_instant_update"
 msgstr ""
 "Instant Update: Changes you make to the course name and description will be "
 "updated for students as soon as they are saved."
 
-#: apps/courses/templates/courses/edit_course.html:412
+#: apps/courses/templates/courses/edit_course.html:121
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
 "Status Importance: You can easily work on the course by saving it in \"Draft"
 "\" mode. Don't forget to \"Publish\" when ready."
 
-#: apps/courses/templates/courses/edit_course.html:413
+#: apps/courses/templates/courses/edit_course.html:122
 msgctxt "courses.edit_page"
 msgid "info_item_cover_size"
 msgstr ""
@@ -14554,64 +14577,64 @@ msgstr ""
 "horizontal (landscape) images."
 
 #: apps/courses/templates/courses/my_courses.html:5
-#: apps/courses/templates/courses/my_courses.html:112
+#: apps/courses/templates/courses/my_courses.html:18
 msgctxt "courses.my_courses"
 msgid "page_title"
 msgstr "My courses"
 
-#: apps/courses/templates/courses/my_courses.html:113
+#: apps/courses/templates/courses/my_courses.html:19
 msgctxt "courses.my_courses"
 msgid "page_subtitle"
 msgstr "All the courses you've created appear here."
 
-#: apps/courses/templates/courses/my_courses.html:120
+#: apps/courses/templates/courses/my_courses.html:26
 msgctxt "courses.my_courses"
 msgid "action_new_course"
 msgstr "New Course"
 
-#: apps/courses/templates/courses/my_courses.html:146
+#: apps/courses/templates/courses/my_courses.html:52
 msgctxt "courses.my_courses"
 msgid "description_missing"
 msgstr "No description added."
 
-#: apps/courses/templates/courses/my_courses.html:155
+#: apps/courses/templates/courses/my_courses.html:61
 msgctxt "courses.my_courses"
 msgid "suffix_topics"
 msgstr "topic"
 
-#: apps/courses/templates/courses/my_courses.html:158
+#: apps/courses/templates/courses/my_courses.html:64
 msgctxt "courses.my_courses"
 msgid "suffix_students"
 msgstr "student"
 
-#: apps/courses/templates/courses/my_courses.html:164
+#: apps/courses/templates/courses/my_courses.html:70
 msgctxt "courses.my_courses"
 msgid "action_go_dashboard"
 msgstr "Go to Dashboard"
 
-#: apps/courses/templates/courses/my_courses.html:178
+#: apps/courses/templates/courses/my_courses.html:84
 msgctxt "courses.my_courses"
 msgid "pagination_previous"
 msgstr "First"
 
-#: apps/courses/templates/courses/my_courses.html:190
+#: apps/courses/templates/courses/my_courses.html:96
 msgctxt "courses.my_courses"
 msgid "pagination_next"
 msgstr "Then"
 
-#: apps/courses/templates/courses/my_courses.html:205
+#: apps/courses/templates/courses/my_courses.html:111
 msgctxt "courses.my_courses"
 msgid "empty_title"
 msgstr "You have not created a course yet"
 
-#: apps/courses/templates/courses/my_courses.html:208
+#: apps/courses/templates/courses/my_courses.html:114
 msgctxt "courses.my_courses"
 msgid "empty_description"
 msgstr ""
 "Create your first course and add topics, freelance work, lab work in the "
 "dashboard."
 
-#: apps/courses/templates/courses/my_courses.html:214
+#: apps/courses/templates/courses/my_courses.html:120
 msgctxt "courses.my_courses"
 msgid "action_create_first_course"
 msgstr "Create a New Course"
@@ -14808,140 +14831,140 @@ msgctxt "courses.partial.member_accordion"
 msgid "error_network"
 msgstr "Network error."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:101
+#: apps/courses/templates/courses/partials/_member_form_modal.html:10
 msgctxt "courses.partial.member_modal"
 msgid "student_modal_title"
 msgstr "Add Student"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:114
+#: apps/courses/templates/courses/partials/_member_form_modal.html:23
 msgctxt "courses.partial.member_modal"
 msgid "field_group_name_optional"
 msgstr "Group Name (optional)"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:120
+#: apps/courses/templates/courses/partials/_member_form_modal.html:29
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_group_name"
 msgstr "Eg: 940, 950, 842A1..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:124
+#: apps/courses/templates/courses/partials/_member_form_modal.html:33
 msgctxt "courses.partial.member_modal"
 msgid "label_students"
 msgstr "Students"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:129
+#: apps/courses/templates/courses/partials/_member_form_modal.html:38
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_search_students"
 msgstr "Search student (name, username)..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:150
+#: apps/courses/templates/courses/partials/_member_form_modal.html:59
 msgctxt "courses.partial.member_modal"
 msgid "empty_user_not_found"
 msgstr "User not found."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:155
-#: apps/courses/templates/courses/partials/_member_form_modal.html:226
+#: apps/courses/templates/courses/partials/_member_form_modal.html:64
+#: apps/courses/templates/courses/partials/_member_form_modal.html:135
 msgctxt "courses.partial.member_modal"
 msgid "selected_count"
 msgstr "Selected"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:161
-#: apps/courses/templates/courses/partials/_member_form_modal.html:236
+#: apps/courses/templates/courses/partials/_member_form_modal.html:70
+#: apps/courses/templates/courses/partials/_member_form_modal.html:145
 msgctxt "courses.partial.member_modal"
 msgid "loading"
 msgstr "Loading..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:163
+#: apps/courses/templates/courses/partials/_member_form_modal.html:72
 msgctxt "courses.partial.member_modal"
 msgid "students_adding"
 msgstr "Adding students..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:169
-#: apps/courses/templates/courses/partials/_member_form_modal.html:244
+#: apps/courses/templates/courses/partials/_member_form_modal.html:78
+#: apps/courses/templates/courses/partials/_member_form_modal.html:153
 msgctxt "courses.partial.member_modal"
 msgid "action_cancel"
 msgstr "Cancel it"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:172
+#: apps/courses/templates/courses/partials/_member_form_modal.html:81
 msgctxt "courses.partial.member_modal"
 msgid "action_add"
 msgstr "Add"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:185
+#: apps/courses/templates/courses/partials/_member_form_modal.html:94
 msgctxt "courses.partial.member_modal"
 msgid "group_modal_title"
 msgstr "Add Group"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:198
+#: apps/courses/templates/courses/partials/_member_form_modal.html:107
 msgctxt "courses.partial.member_modal"
 msgid "label_groups"
 msgstr "Groups"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:203
+#: apps/courses/templates/courses/partials/_member_form_modal.html:112
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_search_groups"
 msgstr "Search group..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:221
+#: apps/courses/templates/courses/partials/_member_form_modal.html:130
 msgctxt "courses.partial.member_modal"
 msgid "empty_group_not_found"
 msgstr "Group not found."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:231
+#: apps/courses/templates/courses/partials/_member_form_modal.html:140
 msgctxt "courses.partial.member_modal"
 msgid "groups_info_text"
 msgstr "All students in the selected groups will be added to the course."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:238
+#: apps/courses/templates/courses/partials/_member_form_modal.html:147
 msgctxt "courses.partial.member_modal"
 msgid "groups_adding"
 msgstr "Adding groups..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:247
+#: apps/courses/templates/courses/partials/_member_form_modal.html:156
 msgctxt "courses.partial.member_modal"
 msgid "action_add_groups"
 msgstr "Add Groups"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:257
+#: apps/courses/templates/courses/partials/_member_form_modal.html:166
 msgctxt "courses.partial.member_modal"
 msgid "msg_min_one_student"
 msgstr "Select at least one student!"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:258
+#: apps/courses/templates/courses/partials/_member_form_modal.html:167
 msgctxt "courses.partial.member_modal"
 msgid "msg_min_one_group"
 msgstr "Choose at least one group!"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:259
+#: apps/courses/templates/courses/partials/_member_form_modal.html:168
 msgctxt "courses.partial.member_modal"
 msgid "msg_adding"
 msgstr "Adding..."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:260
+#: apps/courses/templates/courses/partials/_member_form_modal.html:169
 msgctxt "courses.partial.member_modal"
 msgid "msg_error_prefix"
 msgstr "Error:"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:261
+#: apps/courses/templates/courses/partials/_member_form_modal.html:170
 msgctxt "courses.partial.member_modal"
 msgid "msg_unknown_error"
 msgstr "Unknown error"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:262
+#: apps/courses/templates/courses/partials/_member_form_modal.html:171
 msgctxt "courses.partial.member_modal"
 msgid "msg_server_error"
 msgstr "A server error has occurred."
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:263
+#: apps/courses/templates/courses/partials/_member_form_modal.html:172
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_member_confirm_suffix"
 msgstr "Do you want to remove the student from the course?"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:264
+#: apps/courses/templates/courses/partials/_member_form_modal.html:173
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_failed_prefix"
 msgstr "Not deleted:"
 
-#: apps/courses/templates/courses/partials/_member_form_modal.html:265
+#: apps/courses/templates/courses/partials/_member_form_modal.html:174
 msgctxt "courses.partial.member_modal"
 msgid "msg_error"
 msgstr "Error"
@@ -15153,19 +15176,19 @@ msgctxt "courses.partial.topic_accordion"
 msgid "action_add_first_topic"
 msgstr "Add your first topic"
 
-#: apps/courses/templates/courses/partials/_topic_accordion.html:363
+#: apps/courses/templates/courses/partials/_topic_accordion.html:183
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_topic"
 msgstr ""
 "Did you want to delete this topic?\\n\\nAll resources related to the topic "
 "will also be deleted!"
 
-#: apps/courses/templates/courses/partials/_topic_accordion.html:382
+#: apps/courses/templates/courses/partials/_topic_accordion.html:202
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_resource"
 msgstr "Did you want to delete this resource?"
 
-#: apps/courses/templates/courses/partials/_topic_accordion.html:401
+#: apps/courses/templates/courses/partials/_topic_accordion.html:221
 msgid "resourceFormModal tapılmadı!"
 msgstr "Text field was not found."
 
@@ -23147,132 +23170,132 @@ msgctxt "exams.template.supervision_detail"
 msgid "page_title"
 msgstr "Supervision Detail"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:99
+#: apps/exams/templates/exams/teacher/supervision_detail.html:14
 msgctxt "exams.template.supervision_detail"
 msgid "breadcrumb_monitor"
 msgstr "Exam Supervision"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:102
+#: apps/exams/templates/exams/teacher/supervision_detail.html:17
 msgctxt "exams.template.supervision_detail"
 msgid "heading"
 msgstr "Supervision Detail"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:107
+#: apps/exams/templates/exams/teacher/supervision_detail.html:22
 msgctxt "exams.template.supervision_detail"
 msgid "label_student"
 msgstr "Student"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:111
+#: apps/exams/templates/exams/teacher/supervision_detail.html:26
 msgctxt "exams.template.supervision_detail"
 msgid "label_exam"
 msgstr "Exam"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:115
+#: apps/exams/templates/exams/teacher/supervision_detail.html:30
 msgctxt "exams.template.supervision_detail"
 msgid "label_supervision_status"
 msgstr "Supervision Status"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:123
+#: apps/exams/templates/exams/teacher/supervision_detail.html:38
 msgctxt "exams.template.supervision_detail"
 msgid "label_violation_count"
 msgstr "Violation Count"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:130
+#: apps/exams/templates/exams/teacher/supervision_detail.html:45
 msgctxt "exams.template.supervision_detail"
 msgid "label_exam_status"
 msgstr "Exam Status"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:134
+#: apps/exams/templates/exams/teacher/supervision_detail.html:49
 msgctxt "exams.template.supervision_detail"
 msgid "label_extra_chances"
 msgstr "Extra Chances"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:141
+#: apps/exams/templates/exams/teacher/supervision_detail.html:56
 msgctxt "exams.template.supervision_detail"
 msgid "label_teacher_actions"
 msgstr "Teacher actions"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:144
-#: apps/exams/templates/exams/teacher/supervision_detail.html:145
+#: apps/exams/templates/exams/teacher/supervision_detail.html:59
+#: apps/exams/templates/exams/teacher/supervision_detail.html:60
 msgctxt "exams.template.supervision_detail"
 msgid "action_terminated"
 msgstr "Terminated"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:149
-#: apps/exams/templates/exams/teacher/supervision_detail.html:244
+#: apps/exams/templates/exams/teacher/supervision_detail.html:64
+#: apps/exams/templates/exams/teacher/supervision_detail.html:159
 msgctxt "exams.template.supervision_detail"
 msgid "action_resume"
 msgstr "Resume Exam"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:152
-#: apps/exams/templates/exams/teacher/supervision_detail.html:245
+#: apps/exams/templates/exams/teacher/supervision_detail.html:67
+#: apps/exams/templates/exams/teacher/supervision_detail.html:160
 msgctxt "exams.template.supervision_detail"
 msgid "action_grant_chance"
 msgstr "Grant Extra Chance"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:158
-#: apps/exams/templates/exams/teacher/supervision_detail.html:246
+#: apps/exams/templates/exams/teacher/supervision_detail.html:73
+#: apps/exams/templates/exams/teacher/supervision_detail.html:161
 msgctxt "exams.template.supervision_detail"
 msgid "action_stop"
 msgstr "Stop"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:162
+#: apps/exams/templates/exams/teacher/supervision_detail.html:77
 msgctxt "exams.template.supervision_detail"
 msgid "action_back"
 msgstr "Back"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:167
+#: apps/exams/templates/exams/teacher/supervision_detail.html:82
 msgctxt "exams.template.supervision_detail"
 msgid "heading_timeline"
 msgstr "Incident Timeline"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:193
+#: apps/exams/templates/exams/teacher/supervision_detail.html:108
 msgctxt "exams.template.supervision_detail"
 msgid "label_teacher_action"
 msgstr "Teacher action"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:199
+#: apps/exams/templates/exams/teacher/supervision_detail.html:114
 msgctxt "exams.template.supervision_detail"
 msgid "empty_no_incidents"
 msgstr "No incidents have been recorded."
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:229
+#: apps/exams/templates/exams/teacher/supervision_detail.html:144
 msgctxt "exams.template.supervision_detail"
 msgid "action_cancel"
 msgstr "Cancel"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:237
+#: apps/exams/templates/exams/teacher/supervision_detail.html:152
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_resume"
 msgstr "Do you want to resume this student's exam?"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:238
+#: apps/exams/templates/exams/teacher/supervision_detail.html:153
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_grant_chance"
 msgstr ""
 "Do you want to grant this student an extra chance and allow them to continue?"
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:239
+#: apps/exams/templates/exams/teacher/supervision_detail.html:154
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_stop"
 msgstr "Do you want to stop this student's exam? The exam will be submitted."
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:240
+#: apps/exams/templates/exams/teacher/supervision_detail.html:155
 msgctxt "exams.template.supervision_detail"
 msgid "action_success"
 msgstr "Operation completed successfully."
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:241
+#: apps/exams/templates/exams/teacher/supervision_detail.html:156
 msgctxt "exams.template.supervision_detail"
 msgid "action_error_prefix"
 msgstr "Error: "
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:242
+#: apps/exams/templates/exams/teacher/supervision_detail.html:157
 msgctxt "exams.template.supervision_detail"
 msgid "connection_error"
 msgstr "Connection error."
 
-#: apps/exams/templates/exams/teacher/supervision_detail.html:243
+#: apps/exams/templates/exams/teacher/supervision_detail.html:158
 msgctxt "exams.template.supervision_detail"
 msgid "stop_success"
 msgstr "Exam has been stopped."
@@ -27967,42 +27990,42 @@ msgid "ai_error"
 msgstr "Failed to generate AI summary. Please try again."
 
 #: apps/live_exam/templates/liveExam/teacher_live_results.html:4
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:45
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:16
 msgctxt "liveExam.template.results"
 msgid "page_title"
 msgstr "Live Exam Results"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:46
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:17
 msgctxt "liveExam.template.results"
 msgid "page_subtitle"
 msgstr "all completed live sessions"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:61
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:32
 msgctxt "liveExam.template.results"
 msgid "card_participants"
 msgstr "Participants"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:65
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:36
 msgctxt "liveExam.template.results"
 msgid "card_answer_count"
 msgstr "Answers"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:69
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:40
 msgctxt "liveExam.template.results"
 msgid "card_correct_answers"
 msgstr "Correct Answers"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:73
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:44
 msgctxt "liveExam.template.results"
 msgid "card_avg_score"
 msgstr "Avg. Score"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:78
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:49
 msgctxt "liveExam.template.results"
 msgid "action_view_detailed_stats"
 msgstr "Detailed Statistics"
 
-#: apps/live_exam/templates/liveExam/teacher_live_results.html:86
+#: apps/live_exam/templates/liveExam/teacher_live_results.html:57
 msgctxt "liveExam.template.results"
 msgid "empty_no_sessions"
 msgstr "No live sessions have been completed for this exam yet."
@@ -29820,6 +29843,41 @@ msgctxt "projects.modals.js"
 msgid "delete_confirm"
 msgstr "Are you sure you want to delete?"
 
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:10
+msgctxt "projects.review.js"
+msgid "no_content"
+msgstr "(No text)"
+
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:11
+msgctxt "projects.review.js"
+msgid "download"
+msgstr "Download"
+
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:12
+msgctxt "projects.review.js"
+msgid "sending"
+msgstr "Submitting..."
+
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:13
+msgctxt "projects.review.js"
+msgid "error_prefix"
+msgstr "Error: "
+
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:14
+msgctxt "projects.review.js"
+msgid "unknown_error"
+msgstr "Unknown error"
+
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:15
+msgctxt "projects.review.js"
+msgid "server_error"
+msgstr "Server error"
+
+#: apps/projects/templates/projects/partials/_review_submissions_js.html:16
+msgctxt "projects.review.js"
+msgid "grade_button"
+msgstr "Save grade"
+
 #: apps/projects/templates/projects/project_detail.html:31
 msgctxt "projects.detail"
 msgid "back"
@@ -30220,41 +30278,6 @@ msgctxt "projects.review"
 msgid "grade_button"
 msgstr "Save grade"
 
-#: apps/projects/templates/projects/review_submissions.html:351
-msgctxt "projects.review.js"
-msgid "no_content"
-msgstr "(No text)"
-
-#: apps/projects/templates/projects/review_submissions.html:352
-msgctxt "projects.review.js"
-msgid "download"
-msgstr "Download"
-
-#: apps/projects/templates/projects/review_submissions.html:353
-msgctxt "projects.review.js"
-msgid "sending"
-msgstr "Submitting..."
-
-#: apps/projects/templates/projects/review_submissions.html:354
-msgctxt "projects.review.js"
-msgid "error_prefix"
-msgstr "Error: "
-
-#: apps/projects/templates/projects/review_submissions.html:355
-msgctxt "projects.review.js"
-msgid "unknown_error"
-msgstr "Unknown error"
-
-#: apps/projects/templates/projects/review_submissions.html:356
-msgctxt "projects.review.js"
-msgid "server_error"
-msgstr "Server error"
-
-#: apps/projects/templates/projects/review_submissions.html:357
-msgctxt "projects.review.js"
-msgid "grade_button"
-msgstr "Save grade"
-
 #: apps/projects/views/student/endpoints.py:63
 #: apps/projects/views/student/endpoints.py:178
 msgctxt "projects.views.message"
@@ -30406,7 +30429,7 @@ msgid "İstifadəçi"
 msgstr "User"
 
 #: apps/trial_exams/models.py:80
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:86
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:38
 #: apps/trial_exams/templates/trial_exams/email/trial_notification.html:34
 #: apps/trial_exams/templates/trial_exams/trial_exam_request.html:140
 msgid "Fənnin adı"
@@ -30423,7 +30446,7 @@ msgid "Orijinal fayl adı"
 msgstr "Original file name"
 
 #: apps/trial_exams/models.py:132
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:74
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:26
 #: apps/trial_exams/templates/trial_exams/trial_exam_request.html:100
 msgid "Sınaq imtahanı sorğusu"
 msgstr "Trial exam request"
@@ -30452,27 +30475,27 @@ msgstr "%(name)s sent a question file for “%(subject)s”."
 msgid "EMSArena — Sınaq imtahanınız hazırdır: %(subject)s"
 msgstr "EMSArena — Your trial exam is ready: %(subject)s"
 
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:76
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:28
 msgid "Cavablandı"
 msgstr "Replied"
 
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:94
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:46
 msgid "Suallar PDF"
 msgstr "Questions PDF"
 
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:102
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:54
 msgid "Suallar əlavə olundu — tələbəyə təsdiq göndər"
 msgstr "Questions added — send confirmation to the student"
 
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:104
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:56
 msgid "Göndərdikdə sorğu “sistemə əlavə olundu” statusuna keçəcək."
 msgstr "Sending it will mark the request as “added to the system”."
 
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:114
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:66
 msgid "Tələbə bu ünvandan təsdiq gəldiyini görəcək."
 msgstr "The student will see the confirmation comes from this address."
 
-#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:125
+#: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:77
 msgid "Təsdiqi göndər"
 msgstr "Send confirmation"
 
@@ -31110,107 +31133,107 @@ msgctxt "organizations.dashboard"
 msgid "page_title"
 msgstr "Dashboard"
 
-#: templates/organizations/dashboard.html:199
-#: templates/organizations/settings.html:136
+#: templates/organizations/dashboard.html:16
+#: templates/organizations/settings.html:15
 msgctxt "organizations.nav"
 msgid "dashboard"
 msgstr "Dashboard"
 
-#: templates/organizations/dashboard.html:200
-#: templates/organizations/settings.html:137
+#: templates/organizations/dashboard.html:17
+#: templates/organizations/settings.html:16
 msgctxt "organizations.nav"
 msgid "structure"
 msgstr "Structure"
 
-#: templates/organizations/dashboard.html:201
-#: templates/organizations/settings.html:138
+#: templates/organizations/dashboard.html:18
+#: templates/organizations/settings.html:17
 msgctxt "organizations.nav"
 msgid "members"
 msgstr "Members"
 
-#: templates/organizations/dashboard.html:202
-#: templates/organizations/settings.html:139
+#: templates/organizations/dashboard.html:19
+#: templates/organizations/settings.html:18
 msgctxt "organizations.nav"
 msgid "roles"
 msgstr "Roles"
 
-#: templates/organizations/dashboard.html:203
-#: templates/organizations/settings.html:140
+#: templates/organizations/dashboard.html:20
+#: templates/organizations/settings.html:19
 msgctxt "organizations.nav"
 msgid "settings"
 msgstr "Settings"
 
-#: templates/organizations/dashboard.html:204
+#: templates/organizations/dashboard.html:21
 msgctxt "organizations.nav"
 msgid "switch_org"
 msgstr "Switch Org"
 
-#: templates/organizations/dashboard.html:210
+#: templates/organizations/dashboard.html:27
 msgctxt "organizations.dashboard"
 msgid "heading"
 msgstr "Dashboard"
 
-#: templates/organizations/dashboard.html:215
+#: templates/organizations/dashboard.html:32
 msgctxt "organizations.dashboard"
 msgid "stat_total_members"
 msgstr "Total Members"
 
-#: templates/organizations/dashboard.html:219
+#: templates/organizations/dashboard.html:36
 msgctxt "organizations.dashboard"
 msgid "stat_total_units"
 msgstr "Organizational Units"
 
-#: templates/organizations/dashboard.html:223
+#: templates/organizations/dashboard.html:40
 msgctxt "organizations.dashboard"
 msgid "stat_total_roles"
 msgstr "Active Roles"
 
-#: templates/organizations/dashboard.html:230
+#: templates/organizations/dashboard.html:47
 msgctxt "organizations.dashboard"
 msgid "quick_actions"
 msgstr "Quick Actions"
 
-#: templates/organizations/dashboard.html:234
+#: templates/organizations/dashboard.html:51
 msgctxt "organizations.dashboard"
 msgid "action_invite_members"
 msgstr "Invite Members"
 
-#: templates/organizations/dashboard.html:239
+#: templates/organizations/dashboard.html:56
 msgctxt "organizations.dashboard"
 msgid "action_manage_structure"
 msgstr "Manage Structure"
 
-#: templates/organizations/dashboard.html:244
+#: templates/organizations/dashboard.html:61
 msgctxt "organizations.dashboard"
 msgid "action_view_roles"
 msgstr "View Roles"
 
-#: templates/organizations/dashboard.html:251
+#: templates/organizations/dashboard.html:68
 msgctxt "organizations.dashboard"
 msgid "recent_activity"
 msgstr "Recent Activity"
 
-#: templates/organizations/dashboard.html:260
+#: templates/organizations/dashboard.html:77
 msgctxt "organizations.dashboard"
 msgid "system_user"
 msgstr "System"
 
-#: templates/organizations/dashboard.html:268
+#: templates/organizations/dashboard.html:85
 msgctxt "organizations.dashboard"
 msgid "ago"
 msgstr "ago"
 
-#: templates/organizations/dashboard.html:274
+#: templates/organizations/dashboard.html:91
 msgctxt "organizations.dashboard"
 msgid "no_recent_activity"
 msgstr "No recent activity"
 
-#: templates/organizations/dashboard.html:281
+#: templates/organizations/dashboard.html:98
 msgctxt "organizations.dashboard"
 msgid "your_roles"
 msgstr "Your Roles in This Organization"
 
-#: templates/organizations/dashboard.html:295
+#: templates/organizations/dashboard.html:112
 msgctxt "organizations.dashboard"
 msgid "no_roles_assigned"
 msgstr "No roles assigned"
@@ -31714,37 +31737,37 @@ msgctxt "organizations.select"
 msgid "page_title"
 msgstr "Select Organization"
 
-#: templates/organizations/select_organization.html:178
+#: templates/organizations/select_organization.html:12
 msgctxt "organizations.select"
 msgid "heading"
 msgstr "Select Organization"
 
-#: templates/organizations/select_organization.html:179
+#: templates/organizations/select_organization.html:13
 msgctxt "organizations.select"
 msgid "subtitle"
 msgstr "Choose an organization to continue"
 
-#: templates/organizations/select_organization.html:201
+#: templates/organizations/select_organization.html:35
 msgctxt "organizations.select"
 msgid "current_badge"
 msgstr "CURRENT"
 
-#: templates/organizations/select_organization.html:208
+#: templates/organizations/select_organization.html:42
 msgctxt "organizations.select"
 msgid "your_roles_label"
 msgstr "Your roles:"
 
-#: templates/organizations/select_organization.html:219
+#: templates/organizations/select_organization.html:53
 msgctxt "organizations.select"
 msgid "empty_title"
 msgstr "No Organizations"
 
-#: templates/organizations/select_organization.html:220
+#: templates/organizations/select_organization.html:54
 msgctxt "organizations.select"
 msgid "empty_subtitle"
 msgstr "You are not a member of any organization yet."
 
-#: templates/organizations/select_organization.html:221
+#: templates/organizations/select_organization.html:55
 msgctxt "organizations.select"
 msgid "empty_help"
 msgstr "Contact your administrator to get access."
@@ -31754,57 +31777,57 @@ msgctxt "organizations.settings"
 msgid "page_title"
 msgstr "Settings"
 
-#: templates/organizations/settings.html:146
+#: templates/organizations/settings.html:25
 msgctxt "organizations.settings"
 msgid "heading"
 msgstr "Organization Settings"
 
-#: templates/organizations/settings.html:163
+#: templates/organizations/settings.html:42
 msgctxt "organizations.settings"
 msgid "organization_name"
 msgstr "Organization Name"
 
-#: templates/organizations/settings.html:165
+#: templates/organizations/settings.html:44
 msgctxt "organizations.settings"
 msgid "organization_name_help"
 msgstr "Contact support to change organization name"
 
-#: templates/organizations/settings.html:169
+#: templates/organizations/settings.html:48
 msgctxt "organizations.settings"
 msgid "organization_type"
 msgstr "Organization Type"
 
-#: templates/organizations/settings.html:174
+#: templates/organizations/settings.html:53
 msgctxt "organizations.settings"
 msgid "description"
 msgstr "Description"
 
-#: templates/organizations/settings.html:179
+#: templates/organizations/settings.html:58
 msgctxt "organizations.settings"
 msgid "email"
 msgstr "Email"
 
-#: templates/organizations/settings.html:184
+#: templates/organizations/settings.html:63
 msgctxt "organizations.settings"
 msgid "phone"
 msgstr "Phone"
 
-#: templates/organizations/settings.html:189
+#: templates/organizations/settings.html:68
 msgctxt "organizations.settings"
 msgid "address"
 msgstr "Address"
 
-#: templates/organizations/settings.html:194
+#: templates/organizations/settings.html:73
 msgctxt "organizations.settings"
 msgid "website"
 msgstr "Website"
 
-#: templates/organizations/settings.html:199
+#: templates/organizations/settings.html:78
 msgctxt "organizations.settings"
 msgid "owner"
 msgstr "Owner"
 
-#: templates/organizations/settings.html:204
+#: templates/organizations/settings.html:83
 msgctxt "organizations.settings"
 msgid "save_button"
 msgstr "Save Settings"
@@ -31917,35 +31940,31 @@ msgstr "Resources"
 msgid "Profilim"
 msgstr "My profile"
 
-#: templates/partials/_footer.html:62
-msgid "Daxil ol"
-msgstr "Sign in"
-
-#: templates/partials/_footer.html:63
+#: templates/partials/_footer.html:64
 msgid "Qeydiyyat"
 msgstr "Sign up"
 
-#: templates/partials/_footer.html:65
+#: templates/partials/_footer.html:67
 msgid "Texnologiya"
 msgstr "Technology"
 
-#: templates/partials/_footer.html:66
+#: templates/partials/_footer.html:68
 msgid "Təhsil"
 msgstr "Education"
 
-#: templates/partials/_footer.html:67
+#: templates/partials/_footer.html:69
 msgid "Sayt xəritəsi"
 msgstr "Sitemap"
 
-#: templates/partials/_footer.html:95
+#: templates/partials/_footer.html:97
 msgid "Bakı, Azərbaycan"
 msgstr "Bakı, Azərbaycan"
 
-#: templates/partials/_footer.html:108
+#: templates/partials/_footer.html:110
 msgid "Bütün hüquqlar qorunur."
 msgstr "All rights reserved."
 
-#: templates/partials/_footer.html:111
+#: templates/partials/_footer.html:113
 msgid "Hazırladı"
 msgstr "Built by"
 
@@ -31988,23 +32007,23 @@ msgctxt "nav"
 msgid "main_nav_aria"
 msgstr "Main navigation"
 
-#: templates/partials/_navbar.html:43 templates/partials/_navbar.html:298
+#: templates/partials/_navbar.html:43 templates/partials/_navbar.html:300
 msgctxt "nav"
 msgid "about"
 msgstr "About"
 
-#: templates/partials/_navbar.html:50 templates/partials/_navbar.html:306
+#: templates/partials/_navbar.html:50 templates/partials/_navbar.html:308
 msgctxt "nav"
 msgid "contact"
 msgstr "Contact"
 
-#: templates/partials/_navbar.html:58 templates/partials/_navbar.html:315
+#: templates/partials/_navbar.html:58 templates/partials/_navbar.html:317
 msgctxt "nav"
 msgid "exams"
 msgstr "Exams"
 
 #: templates/partials/_navbar.html:75 templates/partials/_navbar.html:135
-#: templates/partials/_navbar.html:344
+#: templates/partials/_navbar.html:346
 msgctxt "nav"
 msgid "live_exam"
 msgstr "Live exam"
@@ -32014,7 +32033,7 @@ msgctxt "nav"
 msgid "create"
 msgstr "Create"
 
-#: templates/partials/_navbar.html:102 templates/partials/_navbar.html:327
+#: templates/partials/_navbar.html:102 templates/partials/_navbar.html:329
 msgctxt "nav"
 msgid "create_live_exam"
 msgstr "Create live exam"
@@ -32025,7 +32044,7 @@ msgid "create_live_exam_desc"
 msgstr "Start a live exam for students instantly"
 
 #: templates/partials/_navbar.html:111 templates/partials/_navbar.html:144
-#: templates/partials/_navbar.html:335
+#: templates/partials/_navbar.html:337
 msgctxt "nav"
 msgid "trial_exam_request"
 msgstr "Trial exam request"
@@ -32045,42 +32064,42 @@ msgctxt "nav"
 msgid "join_live_exam_desc"
 msgstr "Enter a live exam with a PIN"
 
-#: templates/partials/_navbar.html:217 templates/partials/_navbar.html:366
+#: templates/partials/_navbar.html:217 templates/partials/_navbar.html:368
 msgctxt "nav"
 msgid "my_profile"
 msgstr "My profile"
 
-#: templates/partials/_navbar.html:222 templates/partials/_navbar.html:374
+#: templates/partials/_navbar.html:222 templates/partials/_navbar.html:376
 msgctxt "nav"
 msgid "notifications"
 msgstr "Notifications"
 
-#: templates/partials/_navbar.html:235 templates/partials/_navbar.html:384
+#: templates/partials/_navbar.html:235 templates/partials/_navbar.html:386
 msgctxt "nav"
 msgid "logout"
 msgstr "Logout"
 
-#: templates/partials/_navbar.html:243 templates/partials/_navbar.html:393
+#: templates/partials/_navbar.html:243 templates/partials/_navbar.html:395
 msgctxt "nav"
 msgid "login"
 msgstr "Login"
 
-#: templates/partials/_navbar.html:246 templates/partials/_navbar.html:398
+#: templates/partials/_navbar.html:247 templates/partials/_navbar.html:401
 msgctxt "nav"
 msgid "signup"
 msgstr "Sign up"
 
-#: templates/partials/_navbar.html:251
+#: templates/partials/_navbar.html:253
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Open or close menu"
 
-#: templates/partials/_navbar.html:263
+#: templates/partials/_navbar.html:265
 msgctxt "nav"
 msgid "mobile_nav_aria"
 msgstr "Mobile navigation"
 
-#: templates/partials/_navbar.html:353
+#: templates/partials/_navbar.html:355
 msgctxt "nav"
 msgid "trial_exam"
 msgstr "Trial exam"

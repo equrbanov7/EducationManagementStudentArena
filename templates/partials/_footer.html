@@ -60,7 +60,9 @@
                         <li><a href="{% url 'accounts:profile' %}" class="ems-footer__link">{% trans "Profilim" %}</a></li>
                     {% else %}
                         <li><a href="{% url 'accounts:login' %}" class="ems-footer__link">{% trans "Daxil ol" %}</a></li>
+                        {% if public_signup_enabled %}
                         <li><a href="{% url 'accounts:register' %}" class="ems-footer__link">{% trans "Qeydiyyat" %}</a></li>
+                        {% endif %}
                     {% endif %}
                     <li><a href="{{ home_url }}?category=technology" class="ems-footer__link">{% trans "Texnologiya" %}</a></li>
                     <li><a href="{{ home_url }}?category=education" class="ems-footer__link">{% trans "Təhsil" %}</a></li>

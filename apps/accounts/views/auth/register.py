@@ -46,8 +46,33 @@ from .constants import (
 )
 
 
+def _public_signup_enabled() -> bool:
+    """Whether the public self-registration route is open.
+
+    Default OFF (e-university provisioning model — accounts are created by the
+    university administration; see docs/ACCOUNT_PROVISIONING.md). Controlled by
+    ``settings.PUBLIC_SIGNUP_ENABLED`` (env: ``PUBLIC_SIGNUP_ENABLED``).
+    """
+    return bool(getattr(settings, "PUBLIC_SIGNUP_ENABLED", False))
+
+
+def _signup_disabled_redirect(request):
+    """Send the visitor to login with a clear "ask your administrator" notice."""
+    messages.info(
+        request,
+        pgettext(
+            "accounts.auth.message",
+            "Hesablar universitet administrasiyası tərəfindən yaradılır. "
+            "Giriş məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın.",
+        ),
+    )
+    return redirect("accounts:login")
+
+
 def register_view(request):
     """Start registration by caching the payload and sending a signup OTP."""
+    if not _public_signup_enabled():
+        return _signup_disabled_redirect(request)
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -129,6 +154,8 @@ def register_view(request):
 
 def verify_code_view(request):
     """Verify email using OTP code."""
+    if not _public_signup_enabled():
+        return _signup_disabled_redirect(request)
     email = request.session.get("pending_verify_email")
     if not email:
         messages.error(request, pgettext_lazy("accounts.auth.message", "verification_email_not_found_register_again"))

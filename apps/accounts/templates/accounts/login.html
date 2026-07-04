@@ -67,9 +67,15 @@
             <button type="submit" class="auth-submit-btn">{% trans "submit" context "accounts.login" %}</button> {# auth-btn -> auth-submit-btn #}
         </form>
 
+        {% if public_signup_enabled %}
         <p class="auth-footer-text">
             {% trans "no_account" context "accounts.login" %} <a href="{% url 'accounts:register' %}">{% trans "register_now" context "accounts.login" %}</a>
         </p>
+        {% else %}
+        <p class="auth-footer-text">
+            {% trans "Hesabınız yoxdur? Giriş məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın." context "accounts.login" %}
+        </p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -47,10 +47,12 @@
             <button type="submit" class="auth-submit-btn">{% trans "submit" context "blog.login_page" %}</button>
         </form>
 
+        {% if public_signup_enabled %}
         <p class="auth-footer-text">
             {% trans "no_account" context "blog.login_page" %}
-            <a href="{% url 'register' %}">{% trans "register_now" context "blog.login_page" %}</a>
+            <a href="{% url 'accounts:register' %}">{% trans "register_now" context "blog.login_page" %}</a>
         </p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
