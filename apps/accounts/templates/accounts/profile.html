@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260607-profile-link">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260607-profile-link">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260704-1">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260612-modal">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260612-modal">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260612-modal">
@@ -29,7 +30,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -84,6 +85,8 @@
                 {% include "accounts/profile/sections/_assigned_courses.html" %}
             {% elif active_section == "my-results" %}
                 {% include "accounts/profile/sections/_my_results.html" %}
+            {% elif active_section == "my-subjects" %}
+                {% include "accounts/profile/sections/_my_subjects.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}

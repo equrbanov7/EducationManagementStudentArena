@@ -273,4 +273,8 @@ class _Stage4Mixin:
                         self.request, list_action=reverse("accounts:profile"), section="manage-appeals"
                     )
                 )
+        if self.active_section == "my-subjects" and "my-subjects" in self.allowed_sections:
+            from apps.registrar.public import build_student_subjects_context
+
+            self.context.update(build_student_subjects_context(self.request, organization=self.active_organization))
         return render(self.request, "accounts/profile.html", self.context)

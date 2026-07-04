@@ -262,6 +262,7 @@ FinalGrade < pass_threshold  VƏ YA  exam_score < min_exam_score
 | **U0** (bitdi) | Rollar, unit iyerarxiya, provisioning, ilk-giriş, seed, program koordinatoru | — | ✔ |
 | **U1** (bitdi) | Registrar nüvəsi: `apps/registrar` — `Program`, `Subject`, `Curriculum`, `CurriculumSubject` (+RLS izolyasiya, semestr üçün `AcademicPeriod` reuse) | orta (migration) | ✔ |
 | **U2** (bitdi) | `StudentAcademicRecord` + `CourseOffering` + `Enrollment` + `GroupElectiveChoice` + servis qatı (məcburi auto-enroll + **qrup-əsaslı seçmə**) + RLS + seed demo datası (§2, §2.5) | orta | ✔ |
+| **U2-UI** (bitdi) | **Boloniya ECTS krediti** (`Program.ects_total`, `Subject.ects`) + **qayıb/imtahan limiti** (`Program.absence_limit_percent`, `CourseOffering.lesson_hours`, `Enrollment.absence_hours`) → `get_credit_summary`/`get_exam_eligibility`/`get_student_cabinet_data` servisləri + tələbə **"Fənlərim" kabinet bölməsi** (kredit tərəqqi barı + qayıb/"imtahana buraxılmır" badge + seçmə blokları) — `apps/registrar/public.py`, `_my_subjects.html`, 4-dil i18n | orta | ✔ |
 | **U3** | `AssessmentScheme` + `GradeComponent` + elektron jurnal (§3) + 25%/resit (§5) | orta-yüksək | sonra |
 | **U4** | Dərs cədvəli `ScheduleSlot` (§4) | aşağı-orta | sonra |
 | **U5** | Transkript + GPA + status state-machine (P3-2 §6-8) | yüksək | sonra |

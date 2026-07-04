@@ -1,0 +1,305 @@
+/* Student cabinet — "Fənlərim" (my-subjects) section.
+   Bologna ECTS credit progress + per-subject absence/exam eligibility + group
+   elective blocks. Uses shared --ems-* design tokens (no hard-coded colors). */
+
+.profile-section--my-subjects .my-subjects-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.profile-section--my-subjects .my-subjects-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+}
+
+.profile-section--my-subjects .my-subjects-meta-item i {
+    color: var(--ems-primary-500);
+}
+
+/* ── Credit progress card ─────────────────────────────────────────────── */
+.credit-progress-card {
+    margin: 1rem 0 1.5rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    background: var(--ems-neutral-0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.credit-progress-card.is-complete {
+    border-color: var(--ems-success-600);
+    background: var(--ems-success-100);
+}
+
+.credit-progress-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.credit-progress-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+.credit-progress-title i {
+    color: var(--ems-warning-600);
+}
+
+.credit-progress-figures {
+    font-size: 0.95rem;
+    color: var(--ems-neutral-700);
+}
+
+.credit-progress-figures strong {
+    font-size: 1.25rem;
+    color: var(--ems-primary-600);
+}
+
+.credit-progress-bar {
+    height: 12px;
+    border-radius: 999px;
+    background: var(--ems-neutral-200);
+    overflow: hidden;
+}
+
+.credit-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-700));
+    transition: width 0.4s ease;
+    min-width: 2px;
+}
+
+.is-complete .credit-progress-fill {
+    background: linear-gradient(90deg, var(--ems-success-600), var(--ems-success-strong));
+}
+
+.credit-progress-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.credit-chip {
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.credit-chip--earned { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.credit-chip--progress { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.credit-chip--remaining { background: var(--ems-neutral-100); color: var(--ems-neutral-600); }
+.credit-chip--ok { background: var(--ems-success-100); color: var(--ems-success-600); }
+
+/* ── Subject cards grid ───────────────────────────────────────────────── */
+.my-subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.subject-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.subject-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-color: var(--ems-primary-200);
+}
+
+.subject-card--barred {
+    border-color: var(--ems-danger-200);
+    background: var(--ems-danger-100);
+}
+
+.subject-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subject-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+}
+
+.subject-kind {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.subject-kind--mandatory { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.subject-kind--elective { background: var(--ems-emerald-100); color: var(--ems-success-600); }
+.subject-kind--retake { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+
+.subject-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    line-height: 1.3;
+}
+
+.subject-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.85rem;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-600);
+}
+
+.subject-ects i { color: var(--ems-warning-600); }
+
+.subject-absence {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.subject-absence.is-barred { color: var(--ems-danger-strong); font-weight: 600; }
+
+.subject-card-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--ems-neutral-200);
+}
+
+.exam-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.exam-status--ok { color: var(--ems-success-600); }
+.exam-status--barred { color: var(--ems-danger-strong); }
+
+.subject-content-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+}
+
+.subject-content-link:hover { text-decoration: underline; }
+
+/* ── Elective blocks ──────────────────────────────────────────────────── */
+.elective-blocks {
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+.elective-blocks-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.85rem;
+    font-size: 0.95rem;
+    color: var(--ems-neutral-800);
+}
+
+.elective-block {
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+}
+
+.elective-block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.elective-block-name { font-weight: 700; color: var(--ems-neutral-800); }
+.elective-block-req { font-size: 0.78rem; color: var(--ems-neutral-500); }
+
+.elective-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.elective-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.82rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    border: 1px solid transparent;
+}
+
+.elective-option.is-chosen {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    border-color: var(--ems-primary-200);
+    font-weight: 600;
+}
+
+.elective-option.is-chosen i { color: var(--ems-success-600); }
+
+.elective-block-note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-600);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ── Empty states ─────────────────────────────────────────────────────── */
+.my-subjects-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--ems-neutral-500);
+}
+
+.my-subjects-empty i {
+    font-size: 2rem;
+    margin-bottom: 0.6rem;
+    color: var(--ems-neutral-400);
+}
+
+.my-subjects-empty p { margin: 0; }

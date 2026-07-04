@@ -25,7 +25,15 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
 from apps.registrar import services as registrar_services
-from apps.registrar.models import Curriculum, CurriculumSubject, Program, StudentAcademicRecord, Subject
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    CurriculumSubject,
+    Enrollment,
+    Program,
+    StudentAcademicRecord,
+    Subject,
+)
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
@@ -307,6 +315,40 @@ class Command(BaseCommand):
                     subject=subjects[subject_code],
                     decided_by=decided_by,
                 )
+
+        self._seed_demo_progress(org)
+
+    def _seed_demo_progress(self, org):
+        """Give the demo enrollments contact hours + some progress/absence data.
+
+        So the student cabinet shows a real Bologna credit bar and the
+        absence (qayıb) limit is exercisable: every offering gets 60 lesson
+        hours, one mandatory subject is marked COMPLETED (earned credits), and
+        one student is pushed over the 25% absence limit (barred from the exam).
+        """
+        CourseOffering.objects.filter(organization=org, lesson_hours=0).update(lesson_hours=60)
+
+        # One completed mandatory subject per student → earned ECTS on the bar.
+        for enrollment in Enrollment.objects.filter(
+            organization=org, offering__subject__code="MATH101", status=Enrollment.Status.ENROLLED
+        ):
+            enrollment.status = Enrollment.Status.COMPLETED
+            enrollment.save(update_fields=["status"])
+
+        # Push an enrolled AZ student's CS101 over the 25%-of-60h limit (=15h)
+        # so the cabinet's "imtahana buraxılmır" (barred) state is demonstrable.
+        barred = (
+            Enrollment.objects.filter(
+                organization=org,
+                offering__subject__code="CS101",
+                student__username="wcu_student_az1",
+            )
+            .exclude(absence_hours__gt=15)
+            .first()
+        )
+        if barred:
+            barred.absence_hours = 20
+            barred.save(update_fields=["absence_hours"])
 
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile

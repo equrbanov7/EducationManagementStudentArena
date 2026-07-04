@@ -140,3 +140,81 @@ def get_student_semester_plan(*, record, period, semester_number):
     }
 
     return {"enrollments": enrollments, "elective_blocks": blocks, "group_decisions": decisions}
+
+
+# ── Bologna credits + absence (qayıb) eligibility (U2-UI) ────────────────────
+
+
+def get_credit_summary(*, record):
+    """Bologna ECTS graduation progress for a student's program.
+
+    Earned = ECTS of COMPLETED enrollments; in-progress = ECTS of currently
+    ENROLLED ones; required = ``program.ects_total``. ``can_graduate`` is True
+    once earned ≥ required (mandatory-pass checks live in the grading layer, U3)."""
+    completed = Enrollment.objects.filter(
+        organization=record.organization, student=record.student, status=Enrollment.Status.COMPLETED
+    ).select_related("offering__subject")
+    active = Enrollment.objects.filter(
+        organization=record.organization, student=record.student, status=Enrollment.Status.ENROLLED
+    ).select_related("offering__subject")
+    earned = sum(e.offering.subject.ects for e in completed)
+    in_progress = sum(e.offering.subject.ects for e in active)
+    required = record.program.ects_total or 0
+    remaining = max(0, required - earned)
+    percent = round(earned / required * 100, 1) if required else 0.0
+    return {
+        "earned": earned,
+        "in_progress": in_progress,
+        "required": required,
+        "remaining": remaining,
+        "percent": percent,
+        "can_graduate": required > 0 and earned >= required,
+    }
+
+
+def get_exam_eligibility(*, enrollment, limit_percent):
+    """Absence (qayıb) rule: a student is barred from the subject's exam when
+    unexcused absence hours exceed ``limit_percent`` of the lesson hours.
+
+    ``limit_percent`` comes from the student's program
+    (``Program.absence_limit_percent``); it is tenant/program-configurable."""
+    lesson_hours = enrollment.offering.lesson_hours or 0
+    allowed_hours = lesson_hours * limit_percent / 100.0
+    barred = lesson_hours > 0 and enrollment.absence_hours > allowed_hours
+    return {
+        "barred": barred,
+        "absence_hours": enrollment.absence_hours,
+        "lesson_hours": lesson_hours,
+        "allowed_hours": allowed_hours,
+        "limit_percent": limit_percent,
+    }
+
+
+def get_student_cabinet_data(*, record, period, semester_number):
+    """Everything the student "Fənlərim" cabinet section renders.
+
+    Combines the semester plan (enrollments + open elective blocks + group
+    decisions) with per-subject credits + absence eligibility and the overall
+    Bologna credit progress."""
+    plan = get_student_semester_plan(record=record, period=period, semester_number=semester_number)
+    limit_percent = record.program.absence_limit_percent
+    subjects = []
+    for enrollment in plan["enrollments"]:
+        subject = enrollment.offering.subject
+        eligibility = get_exam_eligibility(enrollment=enrollment, limit_percent=limit_percent)
+        subjects.append(
+            {
+                "enrollment": enrollment,
+                "subject": subject,
+                "ects": subject.ects,
+                "kind": enrollment.kind,
+                "course": enrollment.offering.course,
+                "eligibility": eligibility,
+            }
+        )
+    return {
+        "subjects": subjects,
+        "elective_blocks": plan["elective_blocks"],
+        "group_decisions": plan["group_decisions"],
+        "credit_summary": get_credit_summary(record=record),
+    }

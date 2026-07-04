@@ -229,6 +229,19 @@
         </li>
         {% endif %}
 
+        {% if "my-subjects" in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=my-subjects"
+               data-section="my-subjects"
+               data-title="{% trans 'my_subjects' context 'profile.section' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-subjects' %}active{% endif %}">
+                <i class="fas fa-book-open sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "my_subjects" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        {% endif %}
+
         {% if can_view_student_assignments %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_assigned" context "profile.sidebar" %}</span></li>
         {% endif %}
