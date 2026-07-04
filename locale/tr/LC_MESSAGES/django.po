@@ -27588,6 +27588,77 @@ msgctxt "registrar.analytics"
 msgid "Qayıb"
 msgstr "Devamsızlık"
 
+msgctxt "registrar.calendar"
+msgid "Akademik təqvim"
+msgstr "Akademik takvim"
+
+msgctxt "registrar.calendar"
+msgid "Semestrlər, qeydiyyat pəncərələri və imtahan sessiyaları."
+msgstr "Dönemler, kayıt pencereleri ve sınav oturumları."
+
+msgctxt "registrar.calendar"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktif kuruluş bağlamı yok."
+
+msgctxt "registrar.calendar"
+msgid "Hələ akademik dövr müəyyən edilməyib."
+msgstr "Henüz akademik dönem tanımlanmadı."
+
+msgctxt "registrar.calendar"
+msgid "Cari semestr"
+msgstr "Mevcut dönem"
+
+msgctxt "registrar.calendar"
+msgid "Davam edir"
+msgstr "Devam ediyor"
+
+msgctxt "registrar.calendar"
+msgid "Tədris dövrü"
+msgstr "Öğretim dönemi"
+
+msgctxt "registrar.calendar"
+msgid "Qeydiyyat / seçmə fənn pəncərəsi"
+msgstr "Kayıt / seçmeli ders penceresi"
+
+msgctxt "registrar.calendar"
+msgid "İmtahan sessiyası"
+msgstr "Sınav oturumu"
+
+msgctxt "registrar.calendar"
+msgid "Açıqdır"
+msgstr "Açık"
+
+msgctxt "registrar.calendar"
+msgid "Qarşıdadır"
+msgstr "Yaklaşıyor"
+
+msgctxt "registrar.calendar"
+msgid "Bağlanıb"
+msgstr "Kapandı"
+
+msgctxt "registrar.calendar"
+msgid "Bitib"
+msgstr "Bitti"
+
+msgctxt "registrar.calendar"
+msgid "Müəyyən edilməyib"
+msgstr "Tanımlanmadı"
+
+msgctxt "registrar.calendar"
+msgid "Bu gün"
+msgstr "Bugün"
+
+msgctxt "registrar.calendar"
+msgid "Pəncərə tarixləri universitet administrasiyası tərəfindən tənzimlənir."
+msgstr "Pencere tarihleri üniversite yönetimi tarafından düzenlenir."
+
+msgctxt "registrar.schedule"
+msgid "Akademik təqvim"
+msgstr "Akademik takvim"
+
+msgid "Akademik təqvim"
+msgstr "Akademik takvim"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

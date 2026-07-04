@@ -1,0 +1,101 @@
+/* Akademik təqvim (U11) — semestr + pəncərə timeline. WCU tokens only. */
+
+.acal-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+}
+.acal-period {
+    background: #fff;
+    border: 1px solid var(--ems-neutral-200);
+    border-left: 4px solid var(--ems-neutral-300);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+}
+.acal-period--running { border-left-color: var(--ems-primary-500); }
+
+.acal-period-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+.acal-period-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    margin: 0;
+}
+.acal-period-year {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+    margin-left: 4px;
+}
+.acal-period-chips { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; }
+.acal-badge--running { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+
+.acal-windows {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.7rem;
+}
+.acal-window {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+}
+.acal-window.is-open {
+    border-color: var(--ems-success-600);
+    background: var(--ems-success-100);
+}
+.acal-window-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+.acal-window-icon--reg { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.acal-window-icon--exam { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.acal-window-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.acal-window-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-500);
+}
+.acal-window-dates { font-size: 0.88rem; font-weight: 600; color: var(--ems-neutral-800); }
+.acal-window-dates--unset { color: var(--ems-neutral-400); font-weight: 500; }
+.acal-state {
+    display: inline-flex;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    margin-top: 2px;
+}
+.acal-state--open { background: var(--ems-success-600); color: #fff; }
+.acal-state--upcoming { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.acal-state--closed { background: var(--ems-neutral-200); color: var(--ems-neutral-600); }
+
+.acal-note {
+    margin: 1rem 0 0;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+}
+.acal-note i { color: var(--ems-primary-500); margin-right: 4px; }

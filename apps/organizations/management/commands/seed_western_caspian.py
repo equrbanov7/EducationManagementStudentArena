@@ -290,6 +290,11 @@ class Command(BaseCommand):
                 "academic_year": "2024/2025",
                 "start_date": "2024-09-01",
                 "end_date": "2025-01-31",
+                # Akademik təqvim pəncərələri (U11) — demo dəyərlər.
+                "registration_start": "2024-08-15",
+                "registration_end": "2024-09-10",
+                "exam_session_start": "2025-01-06",
+                "exam_session_end": "2025-01-31",
                 "is_current": True,
             },
         )

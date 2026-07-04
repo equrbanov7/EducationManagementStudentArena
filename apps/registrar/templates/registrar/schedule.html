@@ -16,6 +16,9 @@
             <span><i class="fas fa-user"></i> {{ owner_label }}</span>
             {% if period %}<span><i class="fas fa-calendar-alt"></i> {{ period.name }}</span>{% endif %}
             <span class="schedule-role-badge">{% if role == 'student' %}{% trans "Qrup cədvəli" context "registrar.schedule" %}{% else %}{% trans "Müəllim cədvəli" context "registrar.schedule" %}{% endif %}</span>
+            <a class="schedule-calendar-link" href="{% url 'registrar:calendar' %}">
+                <i class="fas fa-calendar-days"></i> {% trans "Akademik təqvim" context "registrar.schedule" %}
+            </a>
         </div>
         {% endif %}
     </div>

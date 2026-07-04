@@ -210,6 +210,10 @@ class AcademicPeriodAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
             },
         ),
         ("Dates", {"fields": ["start_date", "end_date"]}),
+        (
+            "Academic calendar windows",
+            {"fields": ["registration_start", "registration_end", "exam_session_start", "exam_session_end"]},
+        ),
         ("Status", {"fields": ["is_current", "is_active"]}),
         ("Metadata", {"fields": ["id", "created_at", "updated_at"]}),
     ]

@@ -27592,6 +27592,77 @@ msgctxt "registrar.analytics"
 msgid "Qayıb"
 msgstr "Absence"
 
+msgctxt "registrar.calendar"
+msgid "Akademik təqvim"
+msgstr "Academic calendar"
+
+msgctxt "registrar.calendar"
+msgid "Semestrlər, qeydiyyat pəncərələri və imtahan sessiyaları."
+msgstr "Semesters, registration windows and exam sessions."
+
+msgctxt "registrar.calendar"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "No active organization context."
+
+msgctxt "registrar.calendar"
+msgid "Hələ akademik dövr müəyyən edilməyib."
+msgstr "No academic periods defined yet."
+
+msgctxt "registrar.calendar"
+msgid "Cari semestr"
+msgstr "Current semester"
+
+msgctxt "registrar.calendar"
+msgid "Davam edir"
+msgstr "In progress"
+
+msgctxt "registrar.calendar"
+msgid "Tədris dövrü"
+msgstr "Term dates"
+
+msgctxt "registrar.calendar"
+msgid "Qeydiyyat / seçmə fənn pəncərəsi"
+msgstr "Registration / elective window"
+
+msgctxt "registrar.calendar"
+msgid "İmtahan sessiyası"
+msgstr "Exam session"
+
+msgctxt "registrar.calendar"
+msgid "Açıqdır"
+msgstr "Open"
+
+msgctxt "registrar.calendar"
+msgid "Qarşıdadır"
+msgstr "Upcoming"
+
+msgctxt "registrar.calendar"
+msgid "Bağlanıb"
+msgstr "Closed"
+
+msgctxt "registrar.calendar"
+msgid "Bitib"
+msgstr "Finished"
+
+msgctxt "registrar.calendar"
+msgid "Müəyyən edilməyib"
+msgstr "Not configured"
+
+msgctxt "registrar.calendar"
+msgid "Bu gün"
+msgstr "Today"
+
+msgctxt "registrar.calendar"
+msgid "Pəncərə tarixləri universitet administrasiyası tərəfindən tənzimlənir."
+msgstr "Window dates are managed by the university administration."
+
+msgctxt "registrar.schedule"
+msgid "Akademik təqvim"
+msgstr "Academic calendar"
+
+msgid "Akademik təqvim"
+msgstr "Academic calendar"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

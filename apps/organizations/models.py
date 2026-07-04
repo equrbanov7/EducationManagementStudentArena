@@ -368,6 +368,12 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
     academic_year = models.CharField(max_length=20)
     start_date = models.DateField()
     end_date = models.DateField()
+    # Akademik təqvim pəncərələri (U11) — hamısı opsionaldır (tenant-konfiqurasiyalı):
+    # qeydiyyat (seçmə fənn) pəncərəsi + yekun imtahan sessiyası.
+    registration_start = models.DateField(null=True, blank=True)
+    registration_end = models.DateField(null=True, blank=True)
+    exam_session_start = models.DateField(null=True, blank=True)
+    exam_session_end = models.DateField(null=True, blank=True)
     is_current = models.BooleanField(default=False, db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
 
@@ -416,6 +422,29 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
                             period_name=period.name
                         )
                     )
+
+    # ── Akademik təqvim pəncərələri (U11) ────────────────────────────────────
+    @staticmethod
+    def _window_state(start, end):
+        """``open`` / ``upcoming`` / ``closed`` — or ``None`` when unconfigured."""
+        if start is None or end is None:
+            return None
+        from django.utils import timezone
+
+        today = timezone.localdate()
+        if today < start:
+            return "upcoming"
+        if today > end:
+            return "closed"
+        return "open"
+
+    @property
+    def registration_state(self):
+        return self._window_state(self.registration_start, self.registration_end)
+
+    @property
+    def exam_session_state(self):
+        return self._window_state(self.exam_session_start, self.exam_session_end)
 
 
 class Role(UUIDModel, TimeStampedModel):

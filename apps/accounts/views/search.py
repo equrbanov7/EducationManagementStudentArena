@@ -33,6 +33,7 @@ def _nav_targets(caps):
         (_("Profil"), "fa-user", reverse("accounts:profile"), "profil dashboard kabinet profile"),
         (_("Elektron jurnal"), "fa-book-open", reverse("registrar:journal_list"), "jurnal journal qiymət davamiyyət"),
         (_("Dərs cədvəli"), "fa-calendar-week", reverse("registrar:schedule"), "cədvəl schedule dərs vaxt"),
+        (_("Akademik təqvim"), "fa-calendar-days", reverse("registrar:calendar"), "təqvim calendar sessiya qeydiyyat"),
         (_("İmtahanlar"), "fa-clipboard-check", reverse("exams:student_exam_list"), "imtahan exam test"),
         (
             _("Bildirişlər"),
