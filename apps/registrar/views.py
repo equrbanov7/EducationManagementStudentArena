@@ -17,8 +17,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import finals, gradebook, schedule
-from .forms import CurriculumForm, CurriculumSubjectForm, ProgramForm, SubjectForm
+from . import finals, gradebook, schedule, services
+from .forms import CurriculumForm, CurriculumSubjectForm, OfferingForm, ProgramForm, SubjectForm
 from .models import (
     AttendanceStatus,
     CourseOffering,
@@ -354,6 +354,15 @@ def registrar_console(request):
     if not _can_manage_registrar(request.user, organization):
         raise Http404  # do not leak the console to unauthorised users
 
+    period = _current_period(organization)
+    offerings = []
+    if period is not None:
+        offerings = list(
+            CourseOffering.objects.filter(organization=organization, period=period)
+            .select_related("subject", "group", "instructor")
+            .order_by("subject__code")
+        )
+
     return render(
         request,
         "registrar/console.html",
@@ -365,6 +374,8 @@ def registrar_console(request):
                 .select_related("program")
                 .order_by("-admission_year", "program__name")
             ),
+            "offerings": offerings,
+            "current_period": period,
             "active_main_nav": "registrar_console",
         },
     )
@@ -506,3 +517,35 @@ def curriculum_subject_delete(request, pk):
         messages.success(request, _("Plan sətri silindi."))
         return redirect(reverse("registrar:curriculum_detail", args=[curriculum_id]))
     raise Http404
+
+
+@login_required
+def offering_form_view(request, pk=None):
+    """Open (or edit) a semester offering: subject × period × group + instructor.
+
+    On save the linked LMS course + journal scheme are ensured so the teacher's
+    electronic journal is immediately usable."""
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404
+
+    instance = get_object_or_404(CourseOffering, pk=pk, organization=organization) if pk else None
+    if request.method == "POST":
+        form = OfferingForm(request.POST, instance=instance, organization=organization)
+        if form.is_valid():
+            offering = form.save(commit=False)
+            offering.organization = organization
+            offering.save()
+            # Make the offering immediately teachable: link a course + journal scheme.
+            services.ensure_offering_course(offering=offering)
+            gradebook.ensure_assessment_scheme(offering=offering)
+            messages.success(request, _("Semestr fənni (offering) yadda saxlanıldı."))
+            return redirect(reverse("registrar:console"))
+    else:
+        form = OfferingForm(instance=instance, organization=organization)
+
+    return render(
+        request,
+        "registrar/offering_form.html",
+        {"form": form, "instance": instance, "active_main_nav": "registrar_console"},
+    )

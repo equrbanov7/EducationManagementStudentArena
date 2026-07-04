@@ -26955,6 +26955,66 @@ msgctxt "registrar.console"
 msgid "Bu planda hələ fənn yoxdur."
 msgstr "No subjects in this plan yet."
 
+msgctxt "registrar.console"
+msgid "Semestr fənləri (açılışlar)"
+msgstr "Semester offerings"
+
+msgctxt "registrar.console"
+msgid "Fənn aç"
+msgstr "Open a subject"
+
+msgctxt "registrar.console"
+msgid "Aktiv semestr (dövr) yoxdur."
+msgstr "No active semester (period)."
+
+msgctxt "registrar.console"
+msgid "müəllim yox"
+msgstr "no instructor"
+
+msgctxt "registrar.console"
+msgid "saat"
+msgstr "hours"
+
+msgctxt "registrar.console"
+msgid "Bu semestrdə hələ fənn açılışı yoxdur."
+msgstr "No offerings this semester yet."
+
+msgctxt "registrar.console"
+msgid "Semestr (dövr)"
+msgstr "Semester (period)"
+
+msgctxt "registrar.console"
+msgid "Qrup (opsional)"
+msgstr "Group (optional)"
+
+msgctxt "registrar.console"
+msgid "Müəllim (opsional)"
+msgstr "Instructor (optional)"
+
+msgctxt "registrar.console"
+msgid "Kontakt saatı"
+msgstr "Contact hours"
+
+msgctxt "registrar.console"
+msgid "Bu fənn + semestr + qrup üçün fənn açılışı artıq var."
+msgstr "An offering for this subject + semester + group already exists."
+
+msgctxt "registrar.console"
+msgid "Fənn açılışı redaktəsi"
+msgstr "Edit offering"
+
+msgctxt "registrar.console"
+msgid "Yeni fənn açılışı"
+msgstr "New offering"
+
+msgctxt "registrar.console"
+msgid ""
+"Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron "
+"jurnalı dərhal hazır olur."
+msgstr ""
+"Opens a subject for a semester + group and assigns an instructor; the "
+"teacher's e-journal is ready at once."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

@@ -4,9 +4,9 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.organizations.models import Membership, Organization
-from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
-from core.constants import OrganizationType
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
+from apps.registrar.models import CourseOffering, Curriculum, CurriculumSubject, Program, Subject
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
 User = get_user_model()
@@ -33,6 +33,26 @@ class RegistrarConsoleTest(TestCase):
                 )
             cls.program = Program.objects.create(organization=cls.org, code="CS", name="Kompüter elmləri")
             cls.subject = Subject.objects.create(organization=cls.org, code="CS101", name="Proqramlaşdırma")
+            cls.period = AcademicPeriod.objects.create(
+                organization=cls.org,
+                name="2024/2025 Payız",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2024/2025",
+                start_date="2024-09-01",
+                end_date="2025-01-31",
+                is_current=True,
+            )
+            cls.group = OrgUnit.objects.create(
+                organization=cls.org, name="G1", slug="rc-g1", unit_type=OrgUnitType.GROUP
+            )
+            cls.teacher = User.objects.create_user("rc_teacher", "rc_teacher@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
 
             # A second tenant to prove cross-tenant edits are blocked.
             cls.other_owner = User.objects.create_user("rc_owner2", "rc_owner2@qku.edu.az", "pw")
@@ -203,4 +223,62 @@ class RegistrarConsoleTest(TestCase):
             )
         client = self._client(self.owner)
         resp = client.get(reverse("registrar:curriculum_detail", args=[other.id]))
+        self.assertEqual(resp.status_code, 404)
+
+    # ── offering (semestr fənni) ────────────────────────────────────────────
+    def test_create_offering_links_course_and_scheme(self):
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:offering_create"),
+            {
+                "subject": str(self.subject.id),
+                "period": str(self.period.id),
+                "group": str(self.group.id),
+                "instructor": str(self.teacher.id),
+                "lesson_hours": "60",
+                "is_active": "on",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, subject=self.subject, period=self.period)
+            self.assertEqual(offering.instructor_id, self.teacher.id)
+            self.assertIsNotNone(offering.course_id, "offering should be linked to an LMS course")
+            self.assertTrue(hasattr(offering, "assessment_scheme"))
+
+    def test_duplicate_offering_shows_error(self):
+        with bypass_rls():
+            CourseOffering.objects.create(
+                organization=self.org, subject=self.subject, period=self.period, group=self.group
+            )
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:offering_create"),
+            {
+                "subject": str(self.subject.id),
+                "period": str(self.period.id),
+                "group": str(self.group.id),
+                "lesson_hours": "0",
+                "is_active": "on",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "artıq var")
+
+    def test_cannot_edit_other_tenant_offering(self):
+        with bypass_rls():
+            other_subject = Subject.objects.create(organization=self.other_org, code="X1", name="X")
+            other_period = AcademicPeriod.objects.create(
+                organization=self.other_org,
+                name="P",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2024/2025",
+                start_date="2024-09-01",
+                end_date="2025-01-31",
+            )
+            other_offering = CourseOffering.objects.create(
+                organization=self.other_org, subject=other_subject, period=other_period
+            )
+        client = self._client(self.owner)
+        resp = client.get(reverse("registrar:offering_edit", args=[other_offering.id]))
         self.assertEqual(resp.status_code, 404)

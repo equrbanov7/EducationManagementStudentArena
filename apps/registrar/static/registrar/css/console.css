@@ -225,3 +225,5 @@
 @media (max-width: 720px) {
     .console-grid--plan { grid-template-columns: 1fr; }
 }
+
+.console-panel-note { font-weight: 500; font-size: 0.8rem; color: var(--ems-neutral-500); }

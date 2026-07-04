@@ -13,7 +13,7 @@ from django import forms
 from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
+from apps.registrar.models import CourseOffering, Curriculum, CurriculumSubject, Program, Subject
 
 
 class _OrgScopedModelForm(forms.ModelForm):
@@ -168,5 +168,76 @@ class CurriculumSubjectForm(forms.ModelForm):
             if exists:
                 raise forms.ValidationError(
                     pgettext_lazy("registrar.console", "Bu fənn həmin semestrdə plana artıq əlavə olunub.")
+                )
+        return cleaned
+
+
+class OfferingForm(_OrgScopedModelForm):
+    """Open a subject for a semester + group, with an instructor (semestr fənni)."""
+
+    class Meta:
+        model = CourseOffering
+        fields = ["subject", "period", "group", "instructor", "lesson_hours", "is_active"]
+        labels = {
+            "subject": pgettext_lazy("registrar.console", "Fənn"),
+            "period": pgettext_lazy("registrar.console", "Semestr (dövr)"),
+            "group": pgettext_lazy("registrar.console", "Qrup (opsional)"),
+            "instructor": pgettext_lazy("registrar.console", "Müəllim (opsional)"),
+            "lesson_hours": pgettext_lazy("registrar.console", "Kontakt saatı"),
+            "is_active": pgettext_lazy("registrar.console", "Aktiv"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        org = self.organization
+        academic_period = django_apps.get_model("organizations", "AcademicPeriod")
+        org_unit = django_apps.get_model("organizations", "OrgUnit")
+        from django.contrib.auth import get_user_model
+
+        user_model = get_user_model()
+
+        self.fields["subject"].queryset = (
+            Subject.objects.filter(organization=org, is_active=True).order_by("code") if org else Subject.objects.none()
+        )
+        self.fields["period"].queryset = (
+            academic_period.objects.filter(organization=org).order_by("-start_date")
+            if org
+            else academic_period.objects.none()
+        )
+        group_field = self.fields["group"]
+        group_field.required = False
+        group_field.queryset = (
+            org_unit.objects.filter(organization=org, unit_type="group").order_by("name")
+            if org
+            else org_unit.objects.none()
+        )
+        instructor_field = self.fields["instructor"]
+        instructor_field.required = False
+        instructor_field.queryset = (
+            user_model.objects.filter(
+                memberships__organization=org,
+                memberships__role__name__in=["teacher", "assistant_teacher"],
+                memberships__is_active=True,
+            )
+            .distinct()
+            .order_by("username")
+            if org
+            else user_model.objects.none()
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        subject = cleaned.get("subject")
+        period = cleaned.get("period")
+        group = cleaned.get("group")
+        if subject and period:
+            qs = CourseOffering.objects.filter(
+                organization=self.organization, subject=subject, period=period, group=group
+            )
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError(
+                    pgettext_lazy("registrar.console", "Bu fənn + semestr + qrup üçün fənn açılışı artıq var.")
                 )
         return cleaned

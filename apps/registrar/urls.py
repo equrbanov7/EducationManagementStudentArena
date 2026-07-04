@@ -20,5 +20,7 @@ urlpatterns = [
     path("idareetme/plan/<uuid:pk>/redakte/", views.curriculum_form_view, name="curriculum_edit"),
     path("idareetme/plan/<uuid:pk>/", views.curriculum_detail, name="curriculum_detail"),
     path("idareetme/plan/setir/<uuid:pk>/sil/", views.curriculum_subject_delete, name="curriculum_subject_delete"),
+    path("idareetme/fenn-acilisi/yeni/", views.offering_form_view, name="offering_create"),
+    path("idareetme/fenn-acilisi/<uuid:pk>/", views.offering_form_view, name="offering_edit"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]

@@ -26991,6 +26991,66 @@ msgctxt "registrar.console"
 msgid "Bu planda hələ fənn yoxdur."
 msgstr "Bu planda hələ fənn yoxdur."
 
+msgctxt "registrar.console"
+msgid "Semestr fənləri (açılışlar)"
+msgstr "Semestr fənləri (açılışlar)"
+
+msgctxt "registrar.console"
+msgid "Fənn aç"
+msgstr "Fənn aç"
+
+msgctxt "registrar.console"
+msgid "Aktiv semestr (dövr) yoxdur."
+msgstr "Aktiv semestr (dövr) yoxdur."
+
+msgctxt "registrar.console"
+msgid "müəllim yox"
+msgstr "müəllim yox"
+
+msgctxt "registrar.console"
+msgid "saat"
+msgstr "saat"
+
+msgctxt "registrar.console"
+msgid "Bu semestrdə hələ fənn açılışı yoxdur."
+msgstr "Bu semestrdə hələ fənn açılışı yoxdur."
+
+msgctxt "registrar.console"
+msgid "Semestr (dövr)"
+msgstr "Semestr (dövr)"
+
+msgctxt "registrar.console"
+msgid "Qrup (opsional)"
+msgstr "Qrup (opsional)"
+
+msgctxt "registrar.console"
+msgid "Müəllim (opsional)"
+msgstr "Müəllim (opsional)"
+
+msgctxt "registrar.console"
+msgid "Kontakt saatı"
+msgstr "Kontakt saatı"
+
+msgctxt "registrar.console"
+msgid "Bu fənn + semestr + qrup üçün fənn açılışı artıq var."
+msgstr "Bu fənn + semestr + qrup üçün fənn açılışı artıq var."
+
+msgctxt "registrar.console"
+msgid "Fənn açılışı redaktəsi"
+msgstr "Fənn açılışı redaktəsi"
+
+msgctxt "registrar.console"
+msgid "Yeni fənn açılışı"
+msgstr "Yeni fənn açılışı"
+
+msgctxt "registrar.console"
+msgid ""
+"Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron "
+"jurnalı dərhal hazır olur."
+msgstr ""
+"Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron "
+"jurnalı dərhal hazır olur."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

@@ -27050,6 +27050,66 @@ msgctxt "registrar.console"
 msgid "Bu planda hələ fənn yoxdur."
 msgstr "В этом плане пока нет предметов."
 
+msgctxt "registrar.console"
+msgid "Semestr fənləri (açılışlar)"
+msgstr "Курсы семестра"
+
+msgctxt "registrar.console"
+msgid "Fənn aç"
+msgstr "Открыть предмет"
+
+msgctxt "registrar.console"
+msgid "Aktiv semestr (dövr) yoxdur."
+msgstr "Нет активного семестра (периода)."
+
+msgctxt "registrar.console"
+msgid "müəllim yox"
+msgstr "нет преподавателя"
+
+msgctxt "registrar.console"
+msgid "saat"
+msgstr "часов"
+
+msgctxt "registrar.console"
+msgid "Bu semestrdə hələ fənn açılışı yoxdur."
+msgstr "В этом семестре пока нет курсов."
+
+msgctxt "registrar.console"
+msgid "Semestr (dövr)"
+msgstr "Семестр (период)"
+
+msgctxt "registrar.console"
+msgid "Qrup (opsional)"
+msgstr "Группа (необязательно)"
+
+msgctxt "registrar.console"
+msgid "Müəllim (opsional)"
+msgstr "Преподаватель (необязательно)"
+
+msgctxt "registrar.console"
+msgid "Kontakt saatı"
+msgstr "Контактные часы"
+
+msgctxt "registrar.console"
+msgid "Bu fənn + semestr + qrup üçün fənn açılışı artıq var."
+msgstr "Курс для этого предмета + семестра + группы уже существует."
+
+msgctxt "registrar.console"
+msgid "Fənn açılışı redaktəsi"
+msgstr "Редактировать курс"
+
+msgctxt "registrar.console"
+msgid "Yeni fənn açılışı"
+msgstr "Новый курс"
+
+msgctxt "registrar.console"
+msgid ""
+"Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron "
+"jurnalı dərhal hazır olur."
+msgstr ""
+"Открывает предмет для семестра + группы и назначает преподавателя; "
+"электронный журнал сразу готов."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
