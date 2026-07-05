@@ -351,7 +351,8 @@ msgstr "You are in view-only mode — this action is not allowed."
 
 msgctxt "accounts.view_as"
 msgid "action_blocked_sensitive"
-msgstr "For security reasons this action is blocked on another user's profile."
+msgstr ""
+"For security reasons this action is blocked on another user's profile."
 
 msgctxt "accounts.assigned_courses_page"
 msgid "title"
@@ -438,12 +439,20 @@ msgid "exam_start_failed"
 msgstr "The exam could not be started."
 
 #, python-format
-msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı 6 rəqəmli OTP kodundan istifadə edin."
-msgstr "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı 6 rəqəmli OTP kodundan istifadə edin."
+msgid ""
+"Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı 6 rəqəmli OTP "
+"kodundan istifadə edin."
+msgstr ""
+"Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı 6 rəqəmli OTP "
+"kodundan istifadə edin."
 
 #, python-format
-msgid "Kod <strong>%(minutes)s dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın."
-msgstr "Kod <strong>%(minutes)s dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın."
+msgid ""
+"Kod <strong>%(minutes)s dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz "
+"etməmisinizsə, bu emaili nəzərə almayın."
+msgstr ""
+"Kod <strong>%(minutes)s dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz "
+"etməmisinizsə, bu emaili nəzərə almayın."
 
 msgid "Yeni post yayımlandı"
 msgstr "New trial exam"
@@ -451,8 +460,12 @@ msgstr "New trial exam"
 msgid "EMSArena blogunda yeni bir post yayımlandı:"
 msgstr "EMSArena blogunda yeni bir post yayımlandı:"
 
-msgid "Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun."
-msgstr "Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun."
+msgid ""
+"Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək "
+"üçün sayta daxil olun."
+msgstr ""
+"Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək "
+"üçün sayta daxil olun."
 
 msgid "Email təsdiqi"
 msgstr "Confirm deletion"
@@ -464,8 +477,12 @@ msgid "Emaili təsdiqlə"
 msgstr "Confirm deletion"
 
 #, python-format
-msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı addımlardan birini istifadə edin."
-msgstr "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı addımlardan birini istifadə edin."
+msgid ""
+"Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı addımlardan "
+"birini istifadə edin."
+msgstr ""
+"Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı addımlardan "
+"birini istifadə edin."
 
 #, python-format
 msgid "Link və OTP kodu <strong>%(minutes)s dəqiqə</strong> etibarlıdır."
@@ -482,8 +499,12 @@ msgid "Xoş gəlmisiniz"
 msgstr "Xoş gəldiniz!"
 
 msgctxt "accounts.first_login"
-msgid "İlk giriş üçün email ünvanınızı təsdiqləyin və öz parolunuzu təyin edin. Bu email parol bərpası üçün də istifadə olunacaq."
-msgstr "For your first login, confirm your email address and set your own password. This email will also be used for password recovery."
+msgid ""
+"İlk giriş üçün email ünvanınızı təsdiqləyin və öz parolunuzu təyin edin. Bu "
+"email parol bərpası üçün də istifadə olunacaq."
+msgstr ""
+"For your first login, confirm your email address and set your own password. "
+"This email will also be used for password recovery."
 
 #, fuzzy
 #| msgid "IP ünvan"
@@ -493,7 +514,7 @@ msgstr "IP address"
 
 msgctxt "accounts.first_login"
 msgid "ad.soyad@qku.edu.az"
-msgstr ""
+msgstr "ad.soyad@qku.edu.az"
 
 #, fuzzy
 #| msgid "Təsdiqi göndər"
@@ -687,8 +708,12 @@ msgid "register_now"
 msgstr "Create one"
 
 msgctxt "accounts.login"
-msgid "Hesabınız yoxdur? Giriş məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın."
-msgstr "No account? Contact your organization's administrator for your login credentials."
+msgid ""
+"Hesabınız yoxdur? Giriş məlumatları üçün təşkilatınızın administratoru ilə "
+"əlaqə saxlayın."
+msgstr ""
+"No account? Contact your organization's administrator for your login "
+"credentials."
 
 msgctxt "accounts.my_result_detail_page"
 msgid "title"
@@ -1249,8 +1274,12 @@ msgstr "Close"
 msgid "istifadəçinin profil rollarını idarə edir."
 msgstr "istifadəçinin profil rollarını idarə edir."
 
-msgid "Burada birdən çox rol seçilə bilər (checkbox), yəni multi-role modeli işləyir."
-msgstr "Burada birdən çox rol seçilə bilər (checkbox), yəni multi-role modeli işləyir."
+msgid ""
+"Burada birdən çox rol seçilə bilər (checkbox), yəni multi-role modeli "
+"işləyir."
+msgstr ""
+"Burada birdən çox rol seçilə bilər (checkbox), yəni multi-role modeli "
+"işləyir."
 
 msgid "ən yüksək səviyyəli profil roludur və əsas rol kimi göstərilir."
 msgstr "ən yüksək səviyyəli profil roludur və əsas rol kimi göstərilir."
@@ -1379,8 +1408,10 @@ msgctxt "profile.pending_review"
 msgid "list_title"
 msgstr "List title"
 
-msgid "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
-msgstr "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
+msgid ""
+"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
+msgstr ""
+"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
 
 msgid "Nəzarətçi atıb"
 msgstr "Nəzarətçi atıb"
@@ -1567,8 +1598,10 @@ msgstr "Permissions"
 msgid "Əlavə et"
 msgstr "Əlavə et"
 
-msgid "Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
-msgstr "Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
+msgid ""
+"Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
+msgstr ""
+"Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
 
 msgid "Delegasiyanı al"
 msgstr "Review appeal"
@@ -1695,8 +1728,10 @@ msgstr "Send confirmation"
 msgid "təşkilat üzvlüyünün rolunu dəyişir."
 msgstr "təşkilat üzvlüyünün rolunu dəyişir."
 
-msgid "Bu rol səviyyəyə bağlıdır və təşkilat daxilində səlahiyyətləri müəyyən edir."
-msgstr "Bu rol səviyyəyə bağlıdır və təşkilat daxilində səlahiyyətləri müəyyən edir."
+msgid ""
+"Bu rol səviyyəyə bağlıdır və təşkilat daxilində səlahiyyətləri müəyyən edir."
+msgstr ""
+"Bu rol səviyyəyə bağlıdır və təşkilat daxilində səlahiyyətləri müəyyən edir."
 
 msgid "badge-i həmin üzvlük üçün əsas (ən yüksək səviyyə) rolu göstərir."
 msgstr "badge-i həmin üzvlük üçün əsas (ən yüksək səviyyə) rolu göstərir."
@@ -1711,18 +1746,30 @@ msgstr "Staff Management"
 
 #, python-format
 msgctxt "staff.management"
-msgid "Manage students in %(organization_name)s. You can accept requests and send invitations."
-msgstr "Manage students in %(organization_name)s. You can accept requests and send invitations."
+msgid ""
+"Manage students in %(organization_name)s. You can accept requests and send "
+"invitations."
+msgstr ""
+"Manage students in %(organization_name)s. You can accept requests and send "
+"invitations."
 
 #, python-format
 msgctxt "staff.management"
-msgid "Manage student invitations in %(organization_name)s. You can send and withdraw invites."
-msgstr "Manage student invitations in %(organization_name)s. You can send and withdraw invites."
+msgid ""
+"Manage student invitations in %(organization_name)s. You can send and "
+"withdraw invites."
+msgstr ""
+"Manage student invitations in %(organization_name)s. You can send and "
+"withdraw invites."
 
 #, python-format
 msgctxt "staff.management"
-msgid "Manage students in %(organization_name)s. You can review requests and active memberships."
-msgstr "Manage students in %(organization_name)s. You can review requests and active memberships."
+msgid ""
+"Manage students in %(organization_name)s. You can review requests and active"
+" memberships."
+msgstr ""
+"Manage students in %(organization_name)s. You can review requests and active"
+" memberships."
 
 #, python-format
 msgctxt "staff.management"
@@ -1734,8 +1781,12 @@ msgid "Choose which group you want to view in superadmin mode."
 msgstr "Choose which group you want to view in superadmin mode."
 
 msgctxt "staff.management"
-msgid "If nothing is selected, all sections stay open and panels are shown according to the filters you choose."
-msgstr "If nothing is selected, all sections stay open and panels are shown according to the filters you choose."
+msgid ""
+"If nothing is selected, all sections stay open and panels are shown "
+"according to the filters you choose."
+msgstr ""
+"If nothing is selected, all sections stay open and panels are shown "
+"according to the filters you choose."
 
 msgctxt "staff.management"
 msgid "Superadmin view"
@@ -1826,8 +1877,12 @@ msgid "Remove from organization"
 msgstr "Teachers in organization"
 
 msgctxt "staff.management"
-msgid "Please confirm that you want to remove the following user from the organization."
-msgstr "Please confirm that you want to remove the following user from the organization."
+msgid ""
+"Please confirm that you want to remove the following user from the "
+"organization."
+msgstr ""
+"Please confirm that you want to remove the following user from the "
+"organization."
 
 msgctxt "staff.management"
 msgid "Name"
@@ -1858,8 +1913,12 @@ msgid "Add to organization"
 msgstr "Organization"
 
 msgctxt "staff.management"
-msgid "Please confirm that you want to add the selected user(s) to the organization."
-msgstr "Please confirm that you want to add the selected user(s) to the organization."
+msgid ""
+"Please confirm that you want to add the selected user(s) to the "
+"organization."
+msgstr ""
+"Please confirm that you want to add the selected user(s) to the "
+"organization."
 
 msgctxt "membership_request.role"
 msgid "Student"
@@ -1900,18 +1959,32 @@ msgstr "Join organization as %(role_label)s"
 
 #, python-format
 msgctxt "profile.join_org"
-msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
-msgstr "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgid ""
+"Search current organizations, choose one, and send a short message to join "
+"as %(role_label)s."
+msgstr ""
+"Search current organizations, choose one, and send a short message to join "
+"as %(role_label)s."
 
 #, python-format
 msgctxt "profile.join_org"
-msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
-msgstr "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgid ""
+"You are currently connected to <strong>%(organization_name)s</strong>. After"
+" leaving, you can submit a new request from this section or accept any "
+"pending invites."
+msgstr ""
+"You are currently connected to <strong>%(organization_name)s</strong>. After"
+" leaving, you can submit a new request from this section or accept any "
+"pending invites."
 
 #, python-format
 msgctxt "profile.join_org"
-msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
-msgstr "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgid ""
+"You currently have <strong>%(count)s</strong> organization requests awaiting"
+" approval."
+msgstr ""
+"You currently have <strong>%(count)s</strong> organization requests awaiting"
+" approval."
 
 msgctxt "profile.notifications"
 msgid "message"
@@ -1923,8 +1996,12 @@ msgstr "Cancel"
 
 #, python-format
 msgctxt "profile.join_org"
-msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
-msgstr "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgid ""
+"You have <strong>%(count)s</strong> organization invites. You can join from "
+"those invites as %(role_label)s."
+msgstr ""
+"You have <strong>%(count)s</strong> organization invites. You can join from "
+"those invites as %(role_label)s."
 
 msgctxt "profile.join_org"
 msgid "invited_by"
@@ -2027,7 +2104,8 @@ msgstr "AI features enabled"
 
 msgctxt "superadmin.ai_settings"
 msgid "hint_enabled"
-msgstr "When disabled, all AI features (summaries, grading) will be turned off."
+msgstr ""
+"When disabled, all AI features (summaries, grading) will be turned off."
 
 msgctxt "superadmin.ai_settings"
 msgid "section_rate_limit"
@@ -2107,7 +2185,11 @@ msgstr "Organization features"
 
 msgctxt "accounts.superadmin_org_features"
 msgid "intro"
-msgstr "Here you can enable or disable review-visibility features for each organization. When enabled, the teacher can see the student's name even before the anonymous window ends, while the grade-editing window stays the same."
+msgstr ""
+"Here you can enable or disable review-visibility features for each "
+"organization. When enabled, the teacher can see the student's name even "
+"before the anonymous window ends, while the grade-editing window stays the "
+"same."
 
 msgctxt "accounts.superadmin_org_features"
 msgid "flags_title"
@@ -2344,8 +2426,12 @@ msgstr "Restore"
 msgid "Hesabı sil"
 msgstr "Delete bank"
 
-msgid "data-modal-description=\"Bu hesab silinmiş istifadəçilər siyahısına keçiriləcək və sonradan bərpa etmək mümkün olacaq.\""
-msgstr "data-modal-description=\"Bu hesab silinmiş istifadəçilər siyahısına keçiriləcək və sonradan bərpa etmək mümkün olacaq.\""
+msgid ""
+"data-modal-description=\"Bu hesab silinmiş istifadəçilər siyahısına "
+"keçiriləcək və sonradan bərpa etmək mümkün olacaq.\""
+msgstr ""
+"data-modal-description=\"Bu hesab silinmiş istifadəçilər siyahısına "
+"keçiriləcək və sonradan bərpa etmək mümkün olacaq.\""
 
 msgctxt "superadmin.users"
 msgid "hard_delete"
@@ -2354,8 +2440,12 @@ msgstr "Permanently Delete"
 msgid "Hesabı tam sil"
 msgstr "Hesabı tam sil"
 
-msgid "data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və ona bağlı qeydlər birdəfəlik silinə bilər.\""
-msgstr "data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və ona bağlı qeydlər birdəfəlik silinə bilər.\""
+msgid ""
+"data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və"
+" ona bağlı qeydlər birdəfəlik silinə bilər.\""
+msgstr ""
+"data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və"
+" ona bağlı qeydlər birdəfəlik silinə bilər.\""
 
 msgid "Məhdud"
 msgstr "Məhdud"
@@ -2363,8 +2453,12 @@ msgstr "Məhdud"
 msgid "Seçilmiş filterlərə uyğun istifadəçi tapılmadı."
 msgstr "Text field was not found."
 
-msgid "<strong id=\"superadminUserDeleteName\"></strong> üçün seçilən əməliyyat tətbiq ediləcək."
-msgstr "<strong id=\"superadminUserDeleteName\"></strong> üçün seçilən əməliyyat tətbiq ediləcək."
+msgid ""
+"<strong id=\"superadminUserDeleteName\"></strong> üçün seçilən əməliyyat "
+"tətbiq ediləcək."
+msgstr ""
+"<strong id=\"superadminUserDeleteName\"></strong> üçün seçilən əməliyyat "
+"tətbiq ediləcək."
 
 msgid "Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq."
 msgstr "Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq."
@@ -2427,7 +2521,9 @@ msgstr "A license identifier is required."
 
 msgctxt "accounts.register"
 msgid "org_pending_approval_notice"
-msgstr "Your organization registration is pending superadmin approval. You will be notified once it is reviewed."
+msgstr ""
+"Your organization registration is pending superadmin approval. You will be "
+"notified once it is reviewed."
 
 msgctxt "accounts.register"
 msgid "continue"
@@ -2448,8 +2544,12 @@ msgstr "Search institution..."
 msgid "Seçimi təmizlə"
 msgstr "Confirm deletion"
 
-msgid "Davam etmək üçün siyahıdan təşkilat seçin və ya “Heç bir təşkilata aid deyiləm” seçimini edin."
-msgstr "Davam etmək üçün siyahıdan təşkilat seçin və ya “Heç bir təşkilata aid deyiləm” seçimini edin."
+msgid ""
+"Davam etmək üçün siyahıdan təşkilat seçin və ya “Heç bir təşkilata aid "
+"deyiləm” seçimini edin."
+msgstr ""
+"Davam etmək üçün siyahıdan təşkilat seçin və ya “Heç bir təşkilata aid "
+"deyiləm” seçimini edin."
 
 msgctxt "accounts.register"
 msgid "personal_info"
@@ -2478,7 +2578,9 @@ msgstr "Staff information"
 # Added for updated register searchable select and org-role copy
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
-msgstr "For this organization type, role will be set to organization admin automatically."
+msgstr ""
+"For this organization type, role will be set to organization admin "
+"automatically."
 
 msgctxt "accounts.register"
 msgid "privacy_card_title"
@@ -2486,7 +2588,9 @@ msgstr "Privacy and data processing"
 
 msgctxt "accounts.register"
 msgid "privacy_card_description"
-msgstr "Before creating your account, review how EMSArena uses personal data during registration and learning activity."
+msgstr ""
+"Before creating your account, review how EMSArena uses personal data during "
+"registration and learning activity."
 
 msgctxt "accounts.register"
 msgid "privacy_open_button"
@@ -2494,7 +2598,9 @@ msgstr "Open Privacy Policy"
 
 msgctxt "accounts.register"
 msgid "privacy_accept_hint"
-msgstr "Open the full text in the modal window, review it, and then complete your signup."
+msgstr ""
+"Open the full text in the modal window, review it, and then complete your "
+"signup."
 
 msgctxt "accounts.register"
 msgid "submit"
@@ -2951,7 +3057,9 @@ msgstr "Teacher / Staff requests"
 
 msgctxt "accounts.student_org"
 msgid "ts_requests_desc"
-msgstr "In this section you can view, approve or reject requests from users who signed up as a teacher or staff member and selected this organization."
+msgstr ""
+"In this section you can view, approve or reject requests from users who "
+"signed up as a teacher or staff member and selected this organization."
 
 msgctxt "accounts.student_org"
 msgid "ts_search_ph"
@@ -3027,7 +3135,8 @@ msgstr "Remove from organization"
 
 msgctxt "accounts.student_org"
 msgid "remove_lead"
-msgstr "Confirm that you want to remove the following user from the organization."
+msgstr ""
+"Confirm that you want to remove the following user from the organization."
 
 msgctxt "accounts.student_org"
 msgid "field_name"
@@ -3071,7 +3180,10 @@ msgstr "Students not linked to an organization"
 
 msgctxt "accounts.student_org"
 msgid "unassigned_desc"
-msgstr "Send invitations to students who signed up without selecting an organization. They join the organization after accepting the invitation in their account."
+msgstr ""
+"Send invitations to students who signed up without selecting an "
+"organization. They join the organization after accepting the invitation in "
+"their account."
 
 msgctxt "accounts.student_org"
 msgid "unassigned_search_ph"
@@ -3163,7 +3275,10 @@ msgstr "Students pending approval"
 
 msgctxt "accounts.student_org"
 msgid "pending_desc"
-msgstr "Here you can add students who selected this organization at sign-up, individually or all at once. Requests of those already accepted by another organization will appear as \"Closed\"."
+msgstr ""
+"Here you can add students who selected this organization at sign-up, "
+"individually or all at once. Requests of those already accepted by another "
+"organization will appear as \"Closed\"."
 
 msgctxt "accounts.student_org"
 msgid "pending_search_ph"
@@ -3199,7 +3314,9 @@ msgstr "Sent invitations"
 
 msgctxt "accounts.student_org"
 msgid "sent_invites_desc"
-msgstr "You can revoke invitations that have not been accepted yet, individually or in bulk."
+msgstr ""
+"You can revoke invitations that have not been accepted yet, individually or "
+"in bulk."
 
 msgctxt "accounts.student_org"
 msgid "sent_invite_search_ph"
@@ -3235,8 +3352,12 @@ msgstr "Forgot password?"
 
 #, python-format
 msgctxt "accounts.password_reset_page"
-msgid "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
-msgstr "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
+msgid ""
+"We will send a 6-digit OTP code to your email. Enter it on the next screen "
+"to set a new password. The code is valid for %(minutes)s minutes."
+msgstr ""
+"We will send a 6-digit OTP code to your email. Enter it on the next screen "
+"to set a new password. The code is valid for %(minutes)s minutes."
 
 msgctxt "accounts.password_reset_page"
 msgid "submit"
@@ -3256,7 +3377,9 @@ msgstr "Password changed successfully!"
 
 msgctxt "accounts.password_reset_complete_page"
 msgid "subheading"
-msgstr "Your account security has been restored. You can now log in with your new password."
+msgstr ""
+"Your account security has been restored. You can now log in with your new "
+"password."
 
 msgctxt "accounts.password_reset_complete_page"
 msgid "login_now"
@@ -3294,7 +3417,9 @@ msgstr "Invalid link"
 
 msgctxt "accounts.password_reset_confirm_page"
 msgid "subheading_invalid"
-msgstr "This link has already been used or expired. For security reasons links are one-time only."
+msgstr ""
+"This link has already been used or expired. For security reasons links are "
+"one-time only."
 
 msgctxt "accounts.password_reset_confirm_page"
 msgid "retry"
@@ -3310,7 +3435,8 @@ msgstr "OTP code sent!"
 
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
-msgstr "If this email exists in our system, we sent a password reset OTP code."
+msgstr ""
+"If this email exists in our system, we sent a password reset OTP code."
 
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_2"
@@ -3342,8 +3468,12 @@ msgstr "Şifrə sıfırlama sorğusu"
 msgid ", hesabınız üçün şifrə yeniləmə sorğusu alındı."
 msgstr ", hesabınız üçün şifrə yeniləmə sorğusu alındı."
 
-msgid "Aşağıdakı düymə ilə səhifəni aça və ya saytda açıq olan şifrə bərpa səhifəsində OTP kodunu daxil edə bilərsiniz."
-msgstr "Aşağıdakı düymə ilə səhifəni aça və ya saytda açıq olan şifrə bərpa səhifəsində OTP kodunu daxil edə bilərsiniz."
+msgid ""
+"Aşağıdakı düymə ilə səhifəni aça və ya saytda açıq olan şifrə bərpa "
+"səhifəsində OTP kodunu daxil edə bilərsiniz."
+msgstr ""
+"Aşağıdakı düymə ilə səhifəni aça və ya saytda açıq olan şifrə bərpa "
+"səhifəsində OTP kodunu daxil edə bilərsiniz."
 
 msgid "Şifrəni yenilə"
 msgstr "Şifrəni yenilə"
@@ -3435,7 +3565,9 @@ msgstr "Light Supervision Mode"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_light_desc"
-msgstr "Minimal restrictions. Students take the exam more freely, only tab switching is tracked."
+msgstr ""
+"Minimal restrictions. Students take the exam more freely, only tab switching"
+" is tracked."
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_light_f1"
@@ -3459,7 +3591,9 @@ msgstr "Medium Supervision Mode"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_medium_desc"
-msgstr "Balanced supervision. Core protection measures active, with teacher oversight."
+msgstr ""
+"Balanced supervision. Core protection measures active, with teacher "
+"oversight."
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_medium_f1"
@@ -3487,7 +3621,8 @@ msgstr "Strict Supervision Mode"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_strict_desc"
-msgstr "Highest level supervision. All protection measures active, no second chance."
+msgstr ""
+"Highest level supervision. All protection measures active, no second chance."
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_strict_f1"
@@ -3567,8 +3702,12 @@ msgstr "Send confirmation"
 msgid "Təşkilatınız hələ superadmin tərəfindən təsdiqlənməyib."
 msgstr "Təşkilatınız hələ superadmin tərəfindən təsdiqlənməyib."
 
-msgid "Təsdiq alınana qədər sistemdən yalnız baxış rejimində istifadə edə bilərsiniz — əməliyyat funksiyaları aktiv deyil."
-msgstr "Təsdiq alınana qədər sistemdən yalnız baxış rejimində istifadə edə bilərsiniz — əməliyyat funksiyaları aktiv deyil."
+msgid ""
+"Təsdiq alınana qədər sistemdən yalnız baxış rejimində istifadə edə "
+"bilərsiniz — əməliyyat funksiyaları aktiv deyil."
+msgstr ""
+"Təsdiq alınana qədər sistemdən yalnız baxış rejimində istifadə edə "
+"bilərsiniz — əməliyyat funksiyaları aktiv deyil."
 
 msgctxt "profile.sidebar"
 msgid "toggle_close"
@@ -4090,8 +4229,12 @@ msgstr "Empty description"
 msgid "Yeni kateqoriya və ya alt kateqoriya yarat"
 msgstr "Yeni kateqoriya və ya alt kateqoriya yarat"
 
-msgid "4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent seçilərsə alt kateqoriya yaradılır."
-msgstr "4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent seçilərsə alt kateqoriya yaradılır."
+msgid ""
+"4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent "
+"seçilərsə alt kateqoriya yaradılır."
+msgstr ""
+"4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent "
+"seçilərsə alt kateqoriya yaradılır."
 
 msgid "Kateqoriyaları idarə et"
 msgstr "Search questions"
@@ -4100,8 +4243,10 @@ msgctxt "profile.shortcut"
 msgid "create_post_description"
 msgstr "Create post description"
 
-msgid "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
-msgstr "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
+msgid ""
+"Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
+msgstr ""
+"Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
 
 msgctxt "profile.posts"
 msgid "label_title"
@@ -4133,8 +4278,12 @@ msgstr "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).
 msgid "Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək."
 msgstr "Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək."
 
-msgid "“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır."
-msgstr "“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır."
+msgid ""
+"“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra "
+"paylaşılır."
+msgstr ""
+"“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra "
+"paylaşılır."
 
 msgctxt "profile.posts"
 msgid "publish_article"
@@ -4150,7 +4299,9 @@ msgstr "Confirm Account Deletion"
 
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_message"
-msgstr "Are you sure you want to delete your account? Enter your password to confirm this action."
+msgstr ""
+"Are you sure you want to delete your account? Enter your password to confirm"
+" this action."
 
 msgctxt "profile.delete_account"
 msgid "delete_account_password_label"
@@ -4267,7 +4418,8 @@ msgstr "Enter your department"
 
 msgctxt "profile.edit"
 msgid "edit_profile_type_change_warning"
-msgstr "Changing the organization type may affect your courses and permissions."
+msgstr ""
+"Changing the organization type may affect your courses and permissions."
 
 msgctxt "profile.edit"
 msgid "about"
@@ -4290,8 +4442,12 @@ msgid "Apellyasiyaların idarəsi"
 msgstr "Appeal management"
 
 msgctxt "appeals.template"
-msgid "Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün detal səhifəsinə keçin."
-msgstr "Filter requests by status, exam, reason type, and date; open the detail page to decide."
+msgid ""
+"Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün "
+"detal səhifəsinə keçin."
+msgstr ""
+"Filter requests by status, exam, reason type, and date; open the detail page"
+" to decide."
 
 msgctxt "appeals.template"
 msgid "Apellyasiyaya bax"
@@ -4310,8 +4466,12 @@ msgid "Apellyasiya tarixçəsi"
 msgstr "Appeal history"
 
 msgctxt "appeals.template"
-msgid "Göndərdiyiniz müraciətlərin statusunu, müəllim cavabını və bal dəyişikliklərini buradan izləyin."
-msgstr "Track the status, teacher response, and score changes for your submitted appeals here."
+msgid ""
+"Göndərdiyiniz müraciətlərin statusunu, müəllim cavabını və bal "
+"dəyişikliklərini buradan izləyin."
+msgstr ""
+"Track the status, teacher response, and score changes for your submitted "
+"appeals here."
 
 msgctxt "appeals.template"
 msgid "Apellyasiya detalı"
@@ -4445,8 +4605,12 @@ msgid "Dərs cədvəli"
 msgstr "Timetable"
 
 msgctxt "profile.subjects"
-msgid "Sizə hələ akademik qeyd (ixtisas/qrup) təyin olunmayıb. Zəhmət olmasa dekanlıq/registrar ilə əlaqə saxlayın."
-msgstr "You do not have an academic record (specialty/group) assigned yet. Please contact the dean's office / registrar."
+msgid ""
+"Sizə hələ akademik qeyd (ixtisas/qrup) təyin olunmayıb. Zəhmət olmasa "
+"dekanlıq/registrar ilə əlaqə saxlayın."
+msgstr ""
+"You do not have an academic record (specialty/group) assigned yet. Please "
+"contact the dean's office / registrar."
 
 msgctxt "profile.subjects"
 msgid "Boloniya kredit tərəqqisi (ECTS)"
@@ -4575,8 +4739,12 @@ msgstr "The group has not made a choice for this block yet."
 
 #, python-format
 msgctxt "profile.notifications"
-msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
-msgstr "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgid ""
+"Your %(role_label)s request has been sent to %(organization_name)s and is "
+"currently awaiting a response."
+msgstr ""
+"Your %(role_label)s request has been sent to %(organization_name)s and is "
+"currently awaiting a response."
 
 msgctxt "profile.notifications"
 msgid "cancel"
@@ -4684,8 +4852,12 @@ msgctxt "profile.notifications"
 msgid "close"
 msgstr "Close"
 
-msgid "Bu bildirişi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz."
-msgstr "Bu bildirişi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz."
+msgid ""
+"Bu bildirişi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla "
+"bilməz."
+msgstr ""
+"Bu bildirişi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla "
+"bilməz."
 
 msgctxt "profile.notifications"
 msgid "notification"
@@ -4695,8 +4867,12 @@ msgctxt "profile.notifications"
 msgid "go_to_link"
 msgstr "Go to link"
 
-msgid "Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz."
-msgstr "Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz."
+msgid ""
+"Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri"
+" qaytarıla bilməz."
+msgstr ""
+"Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri"
+" qaytarıla bilməz."
 
 msgid "Postların idarəetməsi ("
 msgstr "Education management platform"
@@ -4908,7 +5084,8 @@ msgstr "No correction required."
 msgid "Müəllim \"düzəliş tələb olunur\" seçib, amma əlavə mətn yazmayıb."
 msgstr "Müəllim \"düzəliş tələb olunur\" seçib, amma əlavə mətn yazmayıb."
 
-msgid "Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək."
+msgid ""
+"Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək."
 msgstr "Confirmation to be sent to the student. Shown as plain text."
 
 msgid "Bu post üçün hələ feedback paylaşılmayıb."
@@ -4947,8 +5124,12 @@ msgid "üzv"
 msgstr "üzv"
 
 #, python-format
-msgid "<strong>%(org_name)s</strong> üçün %(role)s müraciətiniz göndərilib və hazırda təsdiq gözləyir."
-msgstr "<strong>%(org_name)s</strong> üçün %(role)s müraciətiniz göndərilib və hazırda təsdiq gözləyir."
+msgid ""
+"<strong>%(org_name)s</strong> üçün %(role)s müraciətiniz göndərilib və "
+"hazırda təsdiq gözləyir."
+msgstr ""
+"<strong>%(org_name)s</strong> üçün %(role)s müraciətiniz göndərilib və "
+"hazırda təsdiq gözləyir."
 
 msgid "Mesajınız:"
 msgstr "Reply to your message"
@@ -5039,8 +5220,10 @@ msgstr "Delete Account"
 msgid "Yeni şəkil seçin"
 msgstr "Yeni şəkil seçin"
 
-msgid "Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP."
-msgstr "Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP."
+msgid ""
+"Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP."
+msgstr ""
+"Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP."
 
 msgid "Şəkli yenilə"
 msgstr "Şəkli yenilə"
@@ -5087,14 +5270,19 @@ msgstr "Pending reviews"
 msgid "Təşkilat dəvətləri"
 msgstr "Təşkilat dəvətləri"
 
-msgid "Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə bilərsiniz."
-msgstr "Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə bilərsiniz."
+msgid ""
+"Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə "
+"bilərsiniz."
+msgstr ""
+"Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə "
+"bilərsiniz."
 
 msgid "Dəvət edən:"
 msgstr "Dəvət edən:"
 
 msgid "Əvvəlcə mövcud təşkilatdan çıxın"
-msgstr "Leave your current organization first, then accept the new invitation."
+msgstr ""
+"Leave your current organization first, then accept the new invitation."
 
 msgid "Qəbul et"
 msgstr "Accept"
@@ -5104,7 +5292,9 @@ msgstr "Bütün qoşulma və dəvət bölməsini aç"
 
 msgctxt "profile.publish_notification"
 msgid "description"
-msgstr "Fill out the form below to send a notification to your selected target group. Recipients will see it in the notifications section of their profile."
+msgstr ""
+"Fill out the form below to send a notification to your selected target "
+"group. Recipients will see it in the notifications section of their profile."
 
 msgctxt "profile.publish_notification"
 msgid "target_group_label"
@@ -5194,8 +5384,12 @@ msgctxt "profile.statistics"
 msgid "ai_analysis"
 msgstr "AI Analysis"
 
-msgid "Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik tövsiyələri bir yerdə göstər."
-msgstr "Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik tövsiyələri bir yerdə göstər."
+msgid ""
+"Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik "
+"tövsiyələri bir yerdə göstər."
+msgstr ""
+"Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik "
+"tövsiyələri bir yerdə göstər."
 
 msgctxt "profile.statistics"
 msgid "btn_csv_export"
@@ -5387,8 +5581,12 @@ msgctxt "profile.statistics"
 msgid "ai_remaining"
 msgstr "Remaining requests"
 
-msgid "Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış)."
-msgstr "Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış)."
+msgid ""
+"Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları "
+"göstərir (oxu-only baxış)."
+msgstr ""
+"Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları "
+"göstərir (oxu-only baxış)."
 
 msgid "İmtahan, müəllif və ya kurs axtar"
 msgstr "Search by exam name"
@@ -5405,8 +5603,12 @@ msgstr "Pagination"
 msgid "Axtarışa uyğun imtahan tapılmadı."
 msgstr "Text field was not found."
 
-msgid "Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) təyin edilməyib."
-msgstr "Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) təyin edilməyib."
+msgid ""
+"Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) "
+"təyin edilməyib."
+msgstr ""
+"Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) "
+"təyin edilməyib."
 
 msgctxt "exams.dashboard"
 msgid "delete_modal_title"
@@ -5422,7 +5624,9 @@ msgstr "Are you sure you want to delete this exam?"
 
 msgctxt "exams.dashboard"
 msgid "delete_modal_warn"
-msgstr "This action cannot be undone. All attempts and results for this exam will also be deleted."
+msgstr ""
+"This action cannot be undone. All attempts and results for this exam will "
+"also be deleted."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_cancel"
@@ -5625,8 +5829,12 @@ msgstr "Superadmin inbox"
 msgid "Customer contact inbox"
 msgstr "Customer contact inbox"
 
-msgid "Review public contact form messages and reply from the official EMSArena mailboxes."
-msgstr "Review public contact form messages and reply from the official EMSArena mailboxes."
+msgid ""
+"Review public contact form messages and reply from the official EMSArena "
+"mailboxes."
+msgstr ""
+"Review public contact form messages and reply from the official EMSArena "
+"mailboxes."
 
 msgid "Back to inbox"
 msgstr "Back to inbox"
@@ -5833,8 +6041,10 @@ msgstr "AI Settings"
 msgid "Açıq profil"
 msgstr "Açıq profil"
 
-msgid "Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
-msgstr "Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
+msgid ""
+"Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
+msgstr ""
+"Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
 
 msgid "Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir."
 msgstr "Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir."
@@ -5862,8 +6072,12 @@ msgstr "Reset"
 msgid "Paylaşımlar"
 msgstr "Reviewed"
 
-msgid "Search və pagination yalnız bu istifadəçinin published postları üzərində işləyir."
-msgstr "Search və pagination yalnız bu istifadəçinin published postları üzərində işləyir."
+msgid ""
+"Search və pagination yalnız bu istifadəçinin published postları üzərində "
+"işləyir."
+msgstr ""
+"Search və pagination yalnız bu istifadəçinin published postları üzərində "
+"işləyir."
 
 msgid "Oxumağa davam et"
 msgstr "Oxumağa davam et"
@@ -5930,7 +6144,10 @@ msgstr "Privacy Policy"
 
 msgctxt "accounts.register"
 msgid "privacy_modal_intro"
-msgstr "This policy explains how your information is processed when you create an account, join an organization, and use courses, exams, labs, assignments, and live session features inside EMSArena."
+msgstr ""
+"This policy explains how your information is processed when you create an "
+"account, join an organization, and use courses, exams, labs, assignments, "
+"and live session features inside EMSArena."
 
 msgctxt "accounts.register"
 msgid "privacy_close"
@@ -5942,7 +6159,10 @@ msgstr "Short and clear summary"
 
 msgctxt "accounts.register"
 msgid "privacy_modal_summary"
-msgstr "Your data is used to create your account, keep sign-in secure, manage organization membership, and run the platform's teaching features. Your data is not sold and is only shared when necessary to provide the service."
+msgstr ""
+"Your data is used to create your account, keep sign-in secure, manage "
+"organization membership, and run the platform's teaching features. Your data"
+" is not sold and is only shared when necessary to provide the service."
 
 msgctxt "accounts.register"
 msgid "privacy_section_data_title"
@@ -5950,7 +6170,11 @@ msgstr "What we collect"
 
 msgctxt "accounts.register"
 msgid "privacy_section_data_body"
-msgstr "During signup we collect your username, first name, last name, email, country, selected account type, and organization details. As you use the platform, operational records related to courses, exams, labs, assignments, results, and membership activity may also be generated."
+msgstr ""
+"During signup we collect your username, first name, last name, email, "
+"country, selected account type, and organization details. As you use the "
+"platform, operational records related to courses, exams, labs, assignments, "
+"results, and membership activity may also be generated."
 
 msgctxt "accounts.register"
 msgid "privacy_section_use_title"
@@ -5958,7 +6182,10 @@ msgstr "How we use it"
 
 msgctxt "accounts.register"
 msgid "privacy_section_use_body"
-msgstr "This data is used to create your account, send email OTP verification, manage workspace and organization access, run course and exam flows, show results, and support auditing and security controls."
+msgstr ""
+"This data is used to create your account, send email OTP verification, "
+"manage workspace and organization access, run course and exam flows, show "
+"results, and support auditing and security controls."
 
 msgctxt "accounts.register"
 msgid "privacy_section_access_title"
@@ -5966,7 +6193,10 @@ msgstr "Visibility inside organizations"
 
 msgctxt "accounts.register"
 msgid "privacy_section_access_body"
-msgstr "If you join a school, university, or course center, authorized admins and teachers in that organization may see your basic profile details, membership status, and learning activity relevant to your role."
+msgstr ""
+"If you join a school, university, or course center, authorized admins and "
+"teachers in that organization may see your basic profile details, membership"
+" status, and learning activity relevant to your role."
 
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_title"
@@ -5974,7 +6204,11 @@ msgstr "Who data is shared with"
 
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_body"
-msgstr "Your information is not sold. It may be shared only with authorized managers in the organization you select, technical providers that support services such as email verification or hosting, and relevant parties when required by law."
+msgstr ""
+"Your information is not sold. It may be shared only with authorized managers"
+" in the organization you select, technical providers that support services "
+"such as email verification or hosting, and relevant parties when required by"
+" law."
 
 msgctxt "accounts.register"
 msgid "privacy_section_retention_title"
@@ -5982,7 +6216,11 @@ msgstr "Retention and security"
 
 msgctxt "accounts.register"
 msgid "privacy_section_retention_body"
-msgstr "Information is retained for as long as it is needed to operate the service, support audits, and investigate disputes. Sensitive flows such as OTP verification are short-lived, and technical and organizational security measures are applied across the system."
+msgstr ""
+"Information is retained for as long as it is needed to operate the service, "
+"support audits, and investigate disputes. Sensitive flows such as OTP "
+"verification are short-lived, and technical and organizational security "
+"measures are applied across the system."
 
 msgctxt "accounts.register"
 msgid "privacy_section_rights_title"
@@ -5990,7 +6228,10 @@ msgstr "Your rights"
 
 msgctxt "accounts.register"
 msgid "privacy_section_rights_body"
-msgstr "You can update your profile details, change your organization choices, and request clarification or deletion related to your account data. You can contact the platform administrator to exercise these rights."
+msgstr ""
+"You can update your profile details, change your organization choices, and "
+"request clarification or deletion related to your account data. You can "
+"contact the platform administrator to exercise these rights."
 
 msgctxt "accounts.register"
 msgid "privacy_accept_from_modal"
@@ -6007,11 +6248,15 @@ msgstr "Sign in"
 # Added for auth/signup localization updates
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
-msgstr "For individual account, role will be set to organization admin automatically."
+msgstr ""
+"For individual account, role will be set to organization admin "
+"automatically."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
-msgstr "After email verification, you will join the selected organization as a student."
+msgstr ""
+"After email verification, you will join the selected organization as a "
+"student."
 
 msgctxt "accounts.form.register.choice"
 msgid "organization_empty"
@@ -6466,7 +6711,8 @@ msgid "delete_account_password_incorrect"
 msgstr "Incorrect password. Please enter the correct password."
 
 msgid "delete_account_last_admin"
-msgstr "You are the only admin of your organization. You cannot delete your account."
+msgstr ""
+"You are the only admin of your organization. You cannot delete your account."
 
 msgid "delete_account_error"
 msgstr "An error occurred while deleting the account. Please try again."
@@ -6524,20 +6770,29 @@ msgid "unknown_action"
 msgstr "Unknown action."
 
 msgctxt "accounts.auth.message"
-msgid "Hesablar universitet administrasiyası tərəfindən yaradılır. Giriş məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın."
-msgstr "Accounts are created by the university administration. Please contact your organization's administrator for your login credentials."
+msgid ""
+"Hesablar universitet administrasiyası tərəfindən yaradılır. Giriş "
+"məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın."
+msgstr ""
+"Accounts are created by the university administration. Please contact your "
+"organization's administrator for your login credentials."
 
 msgctxt "accounts.auth.message"
-msgid "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin."
+msgid ""
+"Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin."
 msgstr "You've reached today's request limit. Try again tomorrow."
 
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
-msgstr "Failed to send the registration email.Registration failed: we could not send the verification email. Please check your email address and try again."
+msgstr ""
+"Failed to send the registration email.Registration failed: we could not send"
+" the verification email. Please check your email address and try again."
 
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Registration completed, you can log in now.Registration completed. Verify the email code to activate your account."
+msgstr ""
+"Registration completed, you can log in now.Registration completed. Verify "
+"the email code to activate your account."
 
 msgctxt "accounts.auth.message"
 msgid "new_code_sent"
@@ -6556,8 +6811,10 @@ msgid "code_invalid_or_expired"
 msgstr "Code invalid or expired"
 
 msgctxt "accounts.auth.message"
-msgid "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin."
-msgstr "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin."
+msgid ""
+"OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin."
+msgstr ""
+"OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin."
 
 msgctxt "accounts.auth.message"
 msgid "email_verified_you_can_login_now"
@@ -6590,8 +6847,10 @@ msgstr "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizl�
 
 #, python-brace-format
 msgctxt "accounts.my_results.message"
-msgid "Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək."
-msgstr "Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək."
+msgid ""
+"Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək."
+msgstr ""
+"Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək."
 
 msgctxt "accounts.my_result_detail.type"
 msgid "course"
@@ -6628,8 +6887,10 @@ msgstr "Bal 0 və {max} aralığında olmalıdır."
 
 #, python-brace-format
 msgctxt "accounts.review.message"
-msgid "Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
-msgstr "Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
+msgid ""
+"Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
+msgstr ""
+"Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
 
 msgctxt "accounts.grading_queue.message"
 msgid "teacher_only"
@@ -6641,7 +6902,8 @@ msgstr "The organization is currently inactive."
 
 msgctxt "accounts.org.message"
 msgid "Əvvəlcə mövcud təşkilatdan çıxın, sonra yeni dəvəti qəbul edin."
-msgstr "Leave your current organization first, then accept the new invitation."
+msgstr ""
+"Leave your current organization first, then accept the new invitation."
 
 msgctxt "accounts.org.message"
 msgid "Təşkilatda uyğun üzvlük rolu tapılmadı."
@@ -6671,7 +6933,8 @@ msgstr "You are not currently linked to an organization."
 
 msgctxt "accounts.org.message"
 msgid "Bu əməliyyat yalnız tələbə, müəllim və staff hesabları üçün aktivdir."
-msgstr "This action is only available for student, teacher, and staff accounts."
+msgstr ""
+"This action is only available for student, teacher, and staff accounts."
 
 #, python-brace-format
 msgctxt "accounts.org.message"
@@ -6689,11 +6952,14 @@ msgstr "The request for {org} was canceled."
 
 msgctxt "accounts.org.message"
 msgid "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir."
-msgstr "This section is only available for student, teacher, and staff accounts."
+msgstr ""
+"This section is only available for student, teacher, and staff accounts."
 
 msgctxt "accounts.org.message"
 msgid "Hazırda təşkilata bağlısınız. Yeni müraciət üçün əvvəlcə çıxış edin."
-msgstr "You are currently linked to an organization. Leave first before submitting a new request."
+msgstr ""
+"You are currently linked to an organization. Leave first before submitting a"
+" new request."
 
 msgctxt "accounts.org.message"
 msgid "Müraciət üçün bir təşkilat seçin."
@@ -6704,8 +6970,11 @@ msgid "Seçilən təşkilat tapılmadı və ya aktiv deyil."
 msgstr "The selected organization was not found or is not active."
 
 msgctxt "accounts.org.message"
-msgid "Bu təşkilatdan sizə artıq dəvət göndərilib. Profildə qəbul edə bilərsiniz."
-msgstr "This organization has already sent you an invitation. You can accept it from your profile."
+msgid ""
+"Bu təşkilatdan sizə artıq dəvət göndərilib. Profildə qəbul edə bilərsiniz."
+msgstr ""
+"This organization has already sent you an invitation. You can accept it from"
+" your profile."
 
 #, python-brace-format
 msgctxt "accounts.org.message"
@@ -6725,8 +6994,14 @@ msgctxt "profile.section"
 msgid "change_password"
 msgstr "Change password"
 
-msgid "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
-msgstr "Hello! Based on the questions you sent, your trial exam has been created in EMSArena. Log in to your account and take it for free and without limits from the “Exams” section. Good luck!"
+msgid ""
+"Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində "
+"yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və"
+" limitsiz şəkildə verə bilərsiniz. Uğurlar!"
+msgstr ""
+"Hello! Based on the questions you sent, your trial exam has been created in "
+"EMSArena. Log in to your account and take it for free and without limits "
+"from the “Exams” section. Good luck!"
 
 #, python-format
 msgid "Sınaq imtahanı: %(subject)s"
@@ -6812,11 +7087,15 @@ msgstr "You do not have permission to view this user's profile."
 
 msgctxt "accounts.view_as"
 msgid "started_readonly"
-msgstr "You are viewing %(name)s's profile. View-only mode — you cannot make changes."
+msgstr ""
+"You are viewing %(name)s's profile. View-only mode — you cannot make "
+"changes."
 
 msgctxt "accounts.view_as"
 msgid "started_full"
-msgstr "You are viewing %(name)s's profile in full-control mode. All actions are written to the audit log."
+msgstr ""
+"You are viewing %(name)s's profile in full-control mode. All actions are "
+"written to the audit log."
 
 msgctxt "accounts.view_as"
 msgid "stopped"
@@ -6943,8 +7222,12 @@ msgstr "Təşkilatınız təsdiqləndi: {org}"
 
 #, python-brace-format
 msgctxt "accounts.superadmin_orgs.notification"
-msgid "\"{org}\" təşkilatı superadmin tərəfindən təsdiqləndi. İndi bütün funksiyalardan istifadə edə bilərsiniz."
-msgstr "\"{org}\" təşkilatı superadmin tərəfindən təsdiqləndi. İndi bütün funksiyalardan istifadə edə bilərsiniz."
+msgid ""
+"\"{org}\" təşkilatı superadmin tərəfindən təsdiqləndi. İndi bütün "
+"funksiyalardan istifadə edə bilərsiniz."
+msgstr ""
+"\"{org}\" təşkilatı superadmin tərəfindən təsdiqləndi. İndi bütün "
+"funksiyalardan istifadə edə bilərsiniz."
 
 #, python-brace-format
 msgctxt "accounts.superadmin_orgs.notification"
@@ -6969,7 +7252,8 @@ msgstr "Yeni təşkilat müraciəti: {org}"
 #, python-brace-format
 msgctxt "accounts.superadmin_orgs.notification"
 msgid "\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
-msgstr "\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
+msgstr ""
+"\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
 
 msgctxt "accounts.superadmin_orgs.message"
 msgid "Bu təşkilat artıq gözləmə vəziyyətində deyil."
@@ -7008,8 +7292,10 @@ msgstr "\"%(organization_name)s\" üçün %(feature)s anonimliyi söndürüldü.
 
 #, python-format
 msgctxt "accounts.superadmin_orgs.message"
-msgid "\"%(organization_name)s\" üçün %(feature)s anonimliyi yenidən aktiv edildi."
-msgstr "\"%(organization_name)s\" üçün %(feature)s anonimliyi yenidən aktiv edildi."
+msgid ""
+"\"%(organization_name)s\" üçün %(feature)s anonimliyi yenidən aktiv edildi."
+msgstr ""
+"\"%(organization_name)s\" üçün %(feature)s anonimliyi yenidən aktiv edildi."
 
 msgctxt "accounts.superadmin_orgs.message"
 msgid "unknown_action"
@@ -7020,8 +7306,12 @@ msgid "ai_settings_saved"
 msgstr "AI settings saved successfully."
 
 msgctxt "ai_assistant.limit_exceeded"
-msgid "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin."
-msgstr "You have reached the hourly AI request limit. Please try again a little later."
+msgid ""
+"Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd "
+"edin."
+msgstr ""
+"You have reached the hourly AI request limit. Please try again a little "
+"later."
 
 msgctxt "ai_assistant.error"
 msgid "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
@@ -7270,7 +7560,8 @@ msgstr "Appeal"
 #, python-brace-format
 msgctxt "appeals.notification"
 msgid "{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya göndərdi."
-msgstr "{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya göndərdi."
+msgstr ""
+"{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya göndərdi."
 
 msgctxt "appeals.notification"
 msgid "Apellyasiyanıza baxıldı"
@@ -7430,7 +7721,9 @@ msgid "Hələ apellyasiya yoxdur"
 msgstr "No appeals yet"
 
 msgctxt "appeals.template"
-msgid "Nəticə səhifəsindən apellyasiya göndərdikdən sonra müraciətləriniz burada görünəcək."
+msgid ""
+"Nəticə səhifəsindən apellyasiya göndərdikdən sonra müraciətləriniz burada "
+"görünəcək."
 msgstr "After you file an appeal from the result page, it will appear here."
 
 msgctxt "appeals.template"
@@ -7564,8 +7857,12 @@ msgstr "The question is selected automatically as soon as you start typing"
 
 #, python-format
 msgctxt "appeals.template"
-msgid "Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən azı %(min)s simvol izah yazın."
-msgstr "Select the questions you want to appeal, choose a reason type, and write at least %(min)s characters."
+msgid ""
+"Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən "
+"azı %(min)s simvol izah yazın."
+msgstr ""
+"Select the questions you want to appeal, choose a reason type, and write at "
+"least %(min)s characters."
 
 msgctxt "appeals.template"
 msgid "Sualları axtar"
@@ -8715,8 +9012,12 @@ msgstr "Save grade"
 msgid "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
 msgstr "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
 
-msgid "Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra görünəcək."
-msgstr "Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra görünəcək."
+msgid ""
+"Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
+"görünəcək."
+msgstr ""
+"Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
+"görünəcək."
 
 msgid "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
 msgstr "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
@@ -9093,8 +9394,10 @@ msgid "Silinəcək kateqoriya tapılmadı."
 msgstr "No active request was found to cancel."
 
 msgctxt "blog.category.message"
-msgid "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur."
-msgstr "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur."
+msgid ""
+"Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur."
+msgstr ""
+"Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur."
 
 #, python-brace-format
 msgctxt "blog.category.message"
@@ -9150,8 +9453,10 @@ msgstr "Postunuz təsdiqləndi: {title}"
 
 #, python-brace-format
 msgctxt "blog.notification"
-msgid "\"{title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı."
-msgstr "\"{title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı."
+msgid ""
+"\"{title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı."
+msgstr ""
+"\"{title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı."
 
 #, python-brace-format
 msgctxt "blog.notification"
@@ -9174,8 +9479,14 @@ msgstr "Meet EMSArena"
 msgid "təhsilin yeni nəsil arenası"
 msgstr "the new arena for education"
 
-msgid "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi."
-msgstr "A modern education management, LMS and online exam platform for universities, schools, training centres and teachers. Courses, exams, assessment, audit and AI assistant in one place."
+msgid ""
+"Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil "
+"idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, "
+"imtahanlar, qiymətləndirmə, audit və AI köməkçi."
+msgstr ""
+"A modern education management, LMS and online exam platform for "
+"universities, schools, training centres and teachers. Courses, exams, "
+"assessment, audit and AI assistant in one place."
 
 msgid "Pulsuz başla"
 msgstr "Start free"
@@ -9210,68 +9521,116 @@ msgstr "Mission and vision"
 msgid "Missiyamız"
 msgstr "Our mission"
 
-msgid "Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən platforma ilə tədrisi sadələşdirmək."
-msgstr "Free educational institutions from bureaucracy and help them focus on teacher-student interaction. Simplify teaching with one reliable and scalable platform."
+msgid ""
+"Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı "
+"əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən "
+"platforma ilə tədrisi sadələşdirmək."
+msgstr ""
+"Free educational institutions from bureaucracy and help them focus on "
+"teacher-student interaction. Simplify teaching with one reliable and "
+"scalable platform."
 
 msgid "Vizyonumuz"
 msgstr "Our vision"
 
-msgid "Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün uyğun."
-msgstr "To become the preferred education technology platform in Azerbaijan and the region: AI-assisted, multi-tenant, secure and suitable for organizations of every size."
+msgid ""
+"Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması "
+"olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün "
+"uyğun."
+msgstr ""
+"To become the preferred education technology platform in Azerbaijan and the "
+"region: AI-assisted, multi-tenant, secure and suitable for organizations of "
+"every size."
 
 msgid "Platformanın imkanları"
 msgstr "Platform capabilities"
 
-msgid "Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım olan hər şey."
-msgstr "Everything you need from courses to exams, assessment and analytics in one subscription."
+msgid ""
+"Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım "
+"olan hər şey."
+msgstr ""
+"Everything you need from courses to exams, assessment and analytics in one "
+"subscription."
 
 msgid "Kurs və qruplar"
 msgstr "Courses and groups"
 
-msgid "Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün sadə, tələbə üçün aydın."
-msgstr "Topics, lessons, materials and group management in one place. Simple for teachers, clear for students."
+msgid ""
+"Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün "
+"sadə, tələbə üçün aydın."
+msgstr ""
+"Topics, lessons, materials and group management in one place. Simple for "
+"teachers, clear for students."
 
 msgid "Multi-tenant memarlıq"
 msgstr "Multi-tenant architecture"
 
-msgid "Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə qarışmır, RBAC ciddi tətbiq olunur."
-msgstr "Every organization gets a fully isolated workspace. Data never mixes, and RBAC is enforced strictly."
+msgid ""
+"Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə "
+"qarışmır, RBAC ciddi tətbiq olunur."
+msgstr ""
+"Every organization gets a fully isolated workspace. Data never mixes, and "
+"RBAC is enforced strictly."
 
 msgid "Rol-əsaslı icazələr"
 msgstr "Role-based permissions"
 
-msgid "Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs yalnız ona icazə verilən məlumatı görür."
-msgstr "Superadmin, organization owner, teacher, student and staff roles: everyone sees only the data they are allowed to access."
+msgid ""
+"Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs "
+"yalnız ona icazə verilən məlumatı görür."
+msgstr ""
+"Superadmin, organization owner, teacher, student and staff roles: everyone "
+"sees only the data they are allowed to access."
 
 msgid "İmtahanlar və qiymətləndirmə"
 msgstr "Exams and assessment"
 
-msgid "Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, analitika və anti-cheat parametrləri."
-msgstr "Test, written, practical and live exams with automatic grading, analytics and anti-cheat settings."
+msgid ""
+"Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, "
+"analitika və anti-cheat parametrləri."
+msgstr ""
+"Test, written, practical and live exams with automatic grading, analytics "
+"and anti-cheat settings."
 
 msgid "Audit və təhlükəsizlik"
 msgstr "Audit and security"
 
-msgid "Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və CSP siyasətləri ilə qorunan."
-msgstr "Every critical action is written to the audit log and protected with internal security tests and CSP policies."
+msgid ""
+"Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və "
+"CSP siyasətləri ilə qorunan."
+msgstr ""
+"Every critical action is written to the audit log and protected with "
+"internal security tests and CSP policies."
 
 msgid "AI köməkçi"
 msgstr "AI assistant"
 
-msgid "İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya kömək edən ağıllı assistent."
-msgstr "A smart assistant that answers questions and helps navigation within the user's permissions."
+msgid ""
+"İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya "
+"kömək edən ağıllı assistent."
+msgstr ""
+"A smart assistant that answers questions and helps navigation within the "
+"user's permissions."
 
 msgid "Komanda"
 msgstr "Team"
 
-msgid "EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
-msgstr "EMSArena is built by experienced engineers and educators. User-centered design and reliable technology are our main priorities."
+msgid ""
+"EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü "
+"dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
+msgstr ""
+"EMSArena is built by experienced engineers and educators. User-centered "
+"design and reliable technology are our main priorities."
 
 msgid "Founder · Full-stack Engineer"
 msgstr "Founder · Full-stack Engineer"
 
-msgid "EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan sistemlər sahəsində mütəxəssis."
-msgstr "The lead architect and core engineer of EMSArena, specializing in Django, React and shared systems."
+msgid ""
+"EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan "
+"sistemlər sahəsində mütəxəssis."
+msgstr ""
+"The lead architect and core engineer of EMSArena, specializing in Django, "
+"React and shared systems."
 
 msgid "Mühəndislik komandası"
 msgstr "Engineering team"
@@ -9279,8 +9638,11 @@ msgstr "Engineering team"
 msgid "Backend · Frontend · DevOps"
 msgstr "Backend · Frontend · DevOps"
 
-msgid "Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli mühəndislər."
-msgstr "Experienced engineers focused on performance, reliability and security."
+msgid ""
+"Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli "
+"mühəndislər."
+msgstr ""
+"Experienced engineers focused on performance, reliability and security."
 
 msgid "Pedaqoji məsləhətçilər"
 msgstr "Education advisors"
@@ -9288,8 +9650,12 @@ msgstr "Education advisors"
 msgid "Təhsil eksperti · Metodoloq"
 msgstr "Education expert · Methodologist"
 
-msgid "Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji düzgünlüyünü təmin edirlər."
-msgstr "Specialists with teaching and university experience ensure the platform's pedagogical quality."
+msgid ""
+"Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji"
+" düzgünlüyünü təmin edirlər."
+msgstr ""
+"Specialists with teaching and university experience ensure the platform's "
+"pedagogical quality."
 
 msgid "Təhsilinizi növbəti səviyyəyə qaldıraq"
 msgstr "Let's take your education to the next level"
@@ -9487,7 +9853,9 @@ msgstr "Be the first to know updates!"
 
 msgctxt "blog.subscribe_page"
 msgid "lead"
-msgstr "Weekly technology highlights, programming lessons, and exclusive articles delivered to your inbox."
+msgstr ""
+"Weekly technology highlights, programming lessons, and exclusive articles "
+"delivered to your inbox."
 
 msgctxt "blog.subscribe_page"
 msgid "benefit_1"
@@ -9519,7 +9887,8 @@ msgstr "Technology World"
 
 msgctxt "blog.technology_page"
 msgid "subtitle"
-msgstr "Latest analyses on AI, programming, new gadgets, and the digital world."
+msgstr ""
+"Latest analyses on AI, programming, new gadgets, and the digital world."
 
 msgctxt "blog.technology_page"
 msgid "read_more"
@@ -9815,13 +10184,21 @@ msgstr "Postunuz deaktiv edildi: {title}"
 
 #, python-brace-format
 msgctxt "blog.notification"
-msgid "\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
-msgstr "\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
+msgid ""
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib"
+" — düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
+msgstr ""
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib"
+" — düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
 
 #, python-brace-format
 msgctxt "blog.moderation.message"
-msgid "\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə düzəliş edib yenidən göndərə bilər."
-msgstr "\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə düzəliş edib yenidən göndərə bilər."
+msgid ""
+"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə"
+" düzəliş edib yenidən göndərə bilər."
+msgstr ""
+"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə"
+" düzəliş edib yenidən göndərə bilər."
 
 #, python-brace-format
 msgctxt "blog.post.message"
@@ -9879,8 +10256,12 @@ msgstr "Your new comment was added, rating was not changed."
 msgid "Haqqımızda – EMSArena"
 msgstr "About us – EMSArena"
 
-msgid "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
-msgstr "EMSArena is an education management, LMS and online exam platform. Learn about our team, mission and platform capabilities."
+msgid ""
+"EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız,"
+" missiyamız və platformanın imkanları haqqında məlumat."
+msgstr ""
+"EMSArena is an education management, LMS and online exam platform. Learn "
+"about our team, mission and platform capabilities."
 
 msgid "Ana səhifə"
 msgstr "Home"
@@ -9894,7 +10275,9 @@ msgstr "Welcome to subscription! [Your Blog Name]"
 
 msgctxt "blog.subscribe.email"
 msgid "plain_text_body"
-msgstr "Hello, {email}! You have successfully subscribed to our blog. Stay tuned for the latest updates."
+msgstr ""
+"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for"
+" the latest updates."
 
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
@@ -9960,8 +10343,12 @@ msgstr "Mark as handled"
 msgid "Hansı maildən cavab göndərilsin"
 msgstr "Which mailbox should send the reply"
 
-msgid "Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq görünəcək."
-msgstr "The reply that will be sent to the customer. Markdown is not supported; it will appear as plain text."
+msgid ""
+"Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq "
+"görünəcək."
+msgstr ""
+"The reply that will be sent to the customer. Markdown is not supported; it "
+"will appear as plain text."
 
 #, python-format
 msgid "Cavablandır: %(name)s"
@@ -9979,7 +10366,8 @@ msgstr "Name must be at least 2 characters."
 msgid "Ad daxilində link ola bilməz."
 msgstr "The name cannot contain a link."
 
-msgid "Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
+msgid ""
+"Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
 msgstr "Phone number can contain only digits and +, -, (, ) symbols."
 
 msgid "Mesaj ən azı 10 simvol olmalıdır."
@@ -10105,8 +10493,12 @@ msgstr "Send again"
 msgid "Cavab yaz və göndər"
 msgstr "Write and send reply"
 
-msgid "Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa qayıdacaq."
-msgstr "The customer will see that the reply came from this address. Their response will return to this inbox."
+msgid ""
+"Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa "
+"qayıdacaq."
+msgstr ""
+"The customer will see that the reply came from this address. Their response "
+"will return to this inbox."
 
 msgid "Cavabı göndər"
 msgstr "Send reply"
@@ -10120,8 +10512,13 @@ msgstr "Contact"
 msgid "Bizimlə əlaqə saxlayın"
 msgstr "Get in touch with us"
 
-msgid "Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində cavab veririk."
-msgstr "Use the form below or any of the direct channels for questions, suggestions and partnership requests. We respond within 24 hours."
+msgid ""
+"Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı "
+"formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində "
+"cavab veririk."
+msgstr ""
+"Use the form below or any of the direct channels for questions, suggestions "
+"and partnership requests. We respond within 24 hours."
 
 msgid "info – ümumi, support – texniki dəstək"
 msgstr "info – general, support – technical"
@@ -10162,32 +10559,56 @@ msgstr "Frequently asked questions"
 msgid "EMSArena hansı təşkilatlar üçün uyğundur?"
 msgstr "Which organizations is EMSArena suitable for?"
 
-msgid "Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər təşkilat öz məkanını idarə edir."
-msgstr "It is suitable for universities, schools, training centers, corporate training departments and individual teachers. With the multi-tenant structure, each organization manages its own workspace."
+msgid ""
+"Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və "
+"fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər "
+"təşkilat öz məkanını idarə edir."
+msgstr ""
+"It is suitable for universities, schools, training centers, corporate "
+"training departments and individual teachers. With the multi-tenant "
+"structure, each organization manages its own workspace."
 
 msgid "Demo və ya pulsuz sınaq müddəti var?"
 msgstr "Is there a demo or free trial?"
 
-msgid "Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz. Formada 'Satış / Demo' mövzusunu seçin."
-msgstr "Yes. Contact our sales team to arrange a free demo. Select 'Sales / Demo' as the subject in the form."
+msgid ""
+"Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz."
+" Formada 'Satış / Demo' mövzusunu seçin."
+msgstr ""
+"Yes. Contact our sales team to arrange a free demo. Select 'Sales / Demo' as"
+" the subject in the form."
 
 msgid "Texniki dəstək necə alınır?"
 msgstr "How do I get technical support?"
 
-msgid "Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
-msgstr "Existing customers can open a ticket from inside their account. New visitors can write through the form by selecting 'Technical support'."
+msgid ""
+"Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma "
+"vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
+msgstr ""
+"Existing customers can open a ticket from inside their account. New visitors"
+" can write through the form by selecting 'Technical support'."
 
 msgid "Məlumatlarım təhlükəsizdir?"
 msgstr "Is my data secure?"
 
-msgid "Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
-msgstr "Yes. Data is strongly protected through multi-tenant isolation, role-based access control (RBAC), encrypted storage and audit logs."
+msgid ""
+"Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli "
+"saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
+msgstr ""
+"Yes. Data is strongly protected through multi-tenant isolation, role-based "
+"access control (RBAC), encrypted storage and audit logs."
 
 msgid "AI köməkçi necə işləyir?"
 msgstr "How does the AI assistant work?"
 
-msgid "AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında suallar verə bilər."
-msgstr "The AI assistant sees only data you are allowed to access. A student can ask about their courses, a teacher about their groups, and an admin about their organization."
+msgid ""
+"AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz "
+"kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında "
+"suallar verə bilər."
+msgstr ""
+"The AI assistant sees only data you are allowed to access. A student can ask"
+" about their courses, a teacher about their groups, and an admin about their"
+" organization."
 
 msgid "EMSArena – Yeni əlaqə mesajı"
 msgstr "EMSArena – New contact message"
@@ -10195,8 +10616,12 @@ msgstr "EMSArena – New contact message"
 msgid "Yeni əlaqə mesajı"
 msgstr "New contact message"
 
-msgid "EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz."
-msgstr "A new message was submitted from the EMSArena contact form. The message has been saved and can be viewed from the admin panel."
+msgid ""
+"EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj "
+"saxlanılıb və admin panelindən baxa bilərsiniz."
+msgstr ""
+"A new message was submitted from the EMSArena contact form. The message has "
+"been saved and can be viewed from the admin panel."
 
 msgid "Admin paneldə cavablandır"
 msgstr "Reply in admin panel"
@@ -10204,8 +10629,14 @@ msgstr "Reply in admin panel"
 msgid "Mesaj detalları"
 msgstr "Message details"
 
-msgid "Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək."
-msgstr "The reply will go to the customer from <strong>info@</strong> or <strong>support@emsarena.com</strong>; your personal Gmail will not be visible."
+msgid ""
+"Cavab müştəriyə <strong>info@</strong> və ya "
+"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
+"görünməyəcək."
+msgstr ""
+"The reply will go to the customer from <strong>info@</strong> or "
+"<strong>support@emsarena.com</strong>; your personal Gmail will not be "
+"visible."
 
 msgid "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin."
 msgstr "Go to the EMSArena admin panel to reply to this message."
@@ -10222,14 +10653,19 @@ msgstr "Reply to your message"
 msgid "Salam"
 msgstr "Hello"
 
-msgid "EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz."
-msgstr "Thank you for your message on the EMSArena website. You can find our reply below."
+msgid ""
+"EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa "
+"bilərsiniz."
+msgstr ""
+"Thank you for your message on the EMSArena website. You can find our reply "
+"below."
 
 msgid "Sizin orijinal mesajınız:"
 msgstr "Your original message:"
 
 msgid "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək."
-msgstr "You can reply directly to this message. It will come back to our team."
+msgstr ""
+"You can reply directly to this message. It will come back to our team."
 
 msgid "Təhsil idarəetmə platforması"
 msgstr "Education management platform"
@@ -10237,14 +10673,21 @@ msgstr "Education management platform"
 msgid "Əlaqə – EMSArena"
 msgstr "Contact – EMSArena"
 
-msgid "EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
-msgstr "Contact EMSArena. Write to us with your questions, suggestions and partnership requests."
+msgid ""
+"EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq "
+"istəkləriniz üçün bizə yazın."
+msgstr ""
+"Contact EMSArena. Write to us with your questions, suggestions and "
+"partnership requests."
 
 msgid "Çox sayda mesaj göndərilib. Zəhmət olmasa bir az gözləyin."
 msgstr "Too many messages have been sent. Please wait a little."
 
-msgid "Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
-msgstr "Too many messages have been sent from this email address. Try again tomorrow."
+msgid ""
+"Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
+msgstr ""
+"Too many messages have been sent from this email address. Try again "
+"tomorrow."
 
 msgid "Mesajınızı qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
 msgstr "We could not accept your message. Please try again later."
@@ -10434,8 +10877,12 @@ msgstr "Students without groups"
 
 #, python-format
 msgctxt "courses.members_page"
-msgid "Do you want to delete this group?\\n\\nAll students in %(group_name)s group will be removed from the course!"
-msgstr "Do you want to delete this group?\\n\\nAll students in %(group_name)s group will be removed from the course!"
+msgid ""
+"Do you want to delete this group?\\n\\nAll students in %(group_name)s group "
+"will be removed from the course!"
+msgstr ""
+"Do you want to delete this group?\\n\\nAll students in %(group_name)s group "
+"will be removed from the course!"
 
 msgctxt "courses.members_page"
 msgid "delete_group"
@@ -10459,7 +10906,9 @@ msgstr "My courses"
 
 msgctxt "courses.create_page"
 msgid "subtitle_create"
-msgstr "Enter a name, description and cover for your course. You'll add topics and resources later from the dashboard."
+msgstr ""
+"Enter a name, description and cover for your course. You'll add topics and "
+"resources later from the dashboard."
 
 msgctxt "courses.create_page"
 msgid "action_create_course"
@@ -10471,7 +10920,8 @@ msgstr "After Creating a Course"
 
 msgctxt "courses.create_page"
 msgid "after_create_item_1"
-msgstr "After the course is created, you are redirected to the dashboard page."
+msgstr ""
+"After the course is created, you are redirected to the dashboard page."
 
 msgctxt "courses.create_page"
 msgid "after_create_item_2"
@@ -10547,15 +10997,21 @@ msgstr "Useful Information"
 
 msgctxt "courses.edit_page"
 msgid "info_item_instant_update"
-msgstr "Instant Update: Changes you make to the course name and description will be updated for students as soon as they are saved."
+msgstr ""
+"Instant Update: Changes you make to the course name and description will be "
+"updated for students as soon as they are saved."
 
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
-msgstr "Status Importance: You can easily work on the course by saving it in \"Draft\" mode. Don't forget to \"Publish\" when ready."
+msgstr ""
+"Status Importance: You can easily work on the course by saving it in "
+"\"Draft\" mode. Don't forget to \"Publish\" when ready."
 
 msgctxt "courses.edit_page"
 msgid "info_item_cover_size"
-msgstr "Image Size: For the best view, it is recommended that you use high quality, horizontal (landscape) images."
+msgstr ""
+"Image Size: For the best view, it is recommended that you use high quality, "
+"horizontal (landscape) images."
 
 msgctxt "courses.my_courses"
 msgid "page_title"
@@ -10599,7 +11055,9 @@ msgstr "You have not created a course yet"
 
 msgctxt "courses.my_courses"
 msgid "empty_description"
-msgstr "Create your first course and add topics, freelance work, lab work in the dashboard."
+msgstr ""
+"Create your first course and add topics, freelance work, lab work in the "
+"dashboard."
 
 msgctxt "courses.my_courses"
 msgid "action_create_first_course"
@@ -10666,7 +11124,9 @@ msgstr "Remove image"
 
 msgctxt "courses.create_page"
 msgid "help_created_as_draft"
-msgstr "The course is first created as a draft. You can publish it from the dashboard afterwards."
+msgstr ""
+"The course is first created as a draft. You can publish it from the "
+"dashboard afterwards."
 
 msgctxt "courses.common.js"
 msgid "errors_label"
@@ -11027,7 +11487,9 @@ msgstr "Add your first topic"
 
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_topic"
-msgstr "Did you want to delete this topic?\\n\\nAll resources related to the topic will also be deleted!"
+msgstr ""
+"Did you want to delete this topic?\\n\\nAll resources related to the topic "
+"will also be deleted!"
 
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_resource"
@@ -11278,7 +11740,8 @@ msgstr "Group name was not found."
 
 msgctxt "courses.view.message"
 msgid "group_removed_from_course"
-msgstr "✅ Student {count} from \"{group_name}\" group was expelled from the course."
+msgstr ""
+"✅ Student {count} from \"{group_name}\" group was expelled from the course."
 
 msgctxt "courses.view.message"
 msgid "resource_added"
@@ -11482,7 +11945,9 @@ msgstr "Enter fullscreen and continue"
 
 msgctxt "exams.model.attempt.field"
 msgid "supervision_locked_at"
-msgstr "Your exam has been suspended. Please wait until the teacher makes a decision."
+msgstr ""
+"Your exam has been suspended. Please wait until the teacher makes a "
+"decision."
 
 msgctxt "exams.model.attempt.field"
 msgid "supervision_manual_lock"
@@ -11730,7 +12195,8 @@ msgstr "Status determines whether the course is visible to students."
 
 msgctxt "exams.model.coding_test_case.field"
 msgid "point_value"
-msgstr "When disabled, all AI features (summaries, grading) will be turned off."
+msgstr ""
+"When disabled, all AI features (summaries, grading) will be turned off."
 
 msgctxt "exams.model.coding_test_case.field"
 msgid "order"
@@ -12010,11 +12476,15 @@ msgstr "Number of random questions shown per attempt."
 
 msgctxt "exams.model.exam.field"
 msgid "fair_question_distribution_enabled"
-msgstr "For small groups, exact scores are shown; for larger groups, scores are grouped into intervals."
+msgstr ""
+"For small groups, exact scores are shown; for larger groups, scores are "
+"grouped into intervals."
 
 msgctxt "exams.model.exam.help"
 msgid "fair_question_distribution_enabled"
-msgstr "For small groups, exact scores are shown; for larger groups, scores are grouped into intervals."
+msgstr ""
+"For small groups, exact scores are shown; for larger groups, scores are "
+"grouped into intervals."
 
 msgctxt "exams.model.exam.field"
 msgid "ai_difficulty_balance_enabled"
@@ -12638,11 +13108,13 @@ msgstr "Exam"
 
 msgctxt "supervision.config.field"
 msgid "enabled"
-msgstr "When disabled, all AI features (summaries, grading) will be turned off."
+msgstr ""
+"When disabled, all AI features (summaries, grading) will be turned off."
 
 msgctxt "supervision.config.help"
 msgid "enabled"
-msgstr "When disabled, all AI features (summaries, grading) will be turned off."
+msgstr ""
+"When disabled, all AI features (summaries, grading) will be turned off."
 
 msgctxt "supervision.config.field"
 msgid "template"
@@ -13167,15 +13639,25 @@ msgstr "Maximum attempts per user"
 
 msgctxt "exams.form.exam.help"
 msgid "random_question_count"
-msgstr "For test exams only. Default is 10. Enter 0 to use all active questions in random order."
+msgstr ""
+"For test exams only. Default is 10. Enter 0 to use all active questions in "
+"random order."
 
 msgctxt "exams.form.exam.help"
-msgid "Eyni sualın çox tələbəyə düşməməsi və blokların mümkün qədər növbəli paylanması üçün."
-msgstr "Eyni sualın çox tələbəyə düşməməsi və blokların mümkün qədər növbəli paylanması üçün."
+msgid ""
+"Eyni sualın çox tələbəyə düşməməsi və blokların mümkün qədər növbəli "
+"paylanması üçün."
+msgstr ""
+"Eyni sualın çox tələbəyə düşməməsi və blokların mümkün qədər növbəli "
+"paylanması üçün."
 
 msgctxt "exams.form.exam.help"
-msgid "AI sual çətinliyini yoxlayır və hər tələbəyə oxşar ağırlıqda sual dəsti verməyə çalışır."
-msgstr "AI sual çətinliyini yoxlayır və hər tələbəyə oxşar ağırlıqda sual dəsti verməyə çalışır."
+msgid ""
+"AI sual çətinliyini yoxlayır və hər tələbəyə oxşar ağırlıqda sual dəsti "
+"verməyə çalışır."
+msgstr ""
+"AI sual çətinliyini yoxlayır və hər tələbəyə oxşar ağırlıqda sual dəsti "
+"verməyə çalışır."
 
 msgctxt "exams.form.exam.placeholder"
 msgid "exam_type_extended_none"
@@ -13378,8 +13860,12 @@ msgid "max_attempts_reached"
 msgstr "You can attempt this exam at most {max_attempts} times."
 
 msgctxt "exams.service.attempt.message"
-msgid "Server hazırda çox imtahan start sorğusu emal edir. Bir neçə saniyə sonra yenidən yoxlayın."
-msgstr "Server hazırda çox imtahan start sorğusu emal edir. Bir neçə saniyə sonra yenidən yoxlayın."
+msgid ""
+"Server hazırda çox imtahan start sorğusu emal edir. Bir neçə saniyə sonra "
+"yenidən yoxlayın."
+msgstr ""
+"Server hazırda çox imtahan start sorğusu emal edir. Bir neçə saniyə sonra "
+"yenidən yoxlayın."
 
 msgctxt "exams.service.attempt.message"
 msgid "exam_started"
@@ -13423,11 +13909,15 @@ msgstr "Appeal-corrected"
 
 msgctxt "exams.service.parsing.error"
 msgid "file_docx_not_allowed"
-msgstr "Word (.docx/.doc) files are not accepted for security reasons. Upload questions as PDF, TXT or image (PNG/JPG) files."
+msgstr ""
+"Word (.docx/.doc) files are not accepted for security reasons. Upload "
+"questions as PDF, TXT or image (PNG/JPG) files."
 
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr "This file type is not accepted for security reasons. Upload only PDF, TXT or image (PNG/JPG) files."
+msgstr ""
+"This file type is not accepted for security reasons. Upload only PDF, TXT or"
+" image (PNG/JPG) files."
 
 msgctxt "exams.service.parsing.error"
 msgid "file_signature_mismatch"
@@ -13435,7 +13925,10 @@ msgstr "The active tenant is not compatible with your organization."
 
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr "This PDF contains only scanned images with no text layer, and OCR could not extract any text (Tesseract/aze may be missing on the server or the scan quality is low). Please upload a text-based PDF."
+msgstr ""
+"This PDF contains only scanned images with no text layer, and OCR could not "
+"extract any text (Tesseract/aze may be missing on the server or the scan "
+"quality is low). Please upload a text-based PDF."
 
 msgctxt "exams.service.parsing.error"
 msgid "pdf_dependency_missing"
@@ -13447,7 +13940,8 @@ msgstr "Correct"
 
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_encrypted"
-msgstr "Encrypted PDFs are not supported. Remove the password and upload again."
+msgstr ""
+"Encrypted PDFs are not supported. Remove the password and upload again."
 
 msgctxt "exams.service.parsing.error"
 msgid "unsupported_file_type"
@@ -13462,8 +13956,12 @@ msgid "file_pdf_active_content"
 msgstr "Content"
 
 msgctxt "exams.export"
-msgid "Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. Bu faylı redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
-msgstr "Note: correct answers are marked with an * at the beginning of the option. You can edit this file and import it again with bulk upload."
+msgid ""
+"Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. Bu faylı"
+" redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
+msgstr ""
+"Note: correct answers are marked with an * at the beginning of the option. "
+"You can edit this file and import it again with bulk upload."
 
 msgctxt "exams.dashboard.status"
 msgid "label_active"
@@ -13669,7 +14167,8 @@ msgstr "You can file an appeal about this result"
 
 msgctxt "exams.template.student_exam_result"
 msgid "appeal_center_desc_closed"
-msgstr "The window for new appeals is closed, but you can review previous appeals."
+msgstr ""
+"The window for new appeals is closed, but you can review previous appeals."
 
 msgctxt "exams.template.student_exam_result"
 msgid "action_create_appeal"
@@ -13919,7 +14418,9 @@ msgstr "Join the live exam — one PIN, everyone at once."
 
 msgctxt "exams.template.student_exam_list"
 msgid "live_banner_desc"
-msgstr "Enter the PIN shown on the teacher's screen, pick your name and compete in real time. Results and the leaderboard appear instantly."
+msgstr ""
+"Enter the PIN shown on the teacher's screen, pick your name and compete in "
+"real time. Results and the leaderboard appear instantly."
 
 msgctxt "exams.template.student_exam_list"
 msgid "live_chip_fast"
@@ -13947,7 +14448,9 @@ msgstr "Join"
 
 msgctxt "exams.template.student_exam_list"
 msgid "live_pin_hint"
-msgstr "Enter the PIN exactly as shown on screen. You'll pick a name in the next step."
+msgstr ""
+"Enter the PIN exactly as shown on screen. You'll pick a name in the next "
+"step."
 
 msgctxt "exams.template.student_exam_list"
 msgid "placeholder_search_exam_or_teacher"
@@ -14043,7 +14546,9 @@ msgstr "Join with PIN"
 
 msgctxt "exams.template.student_exam_list"
 msgid "live_card_pin_modal_desc"
-msgstr "To join this live exam from the card, enter the PIN shown on the teacher's screen."
+msgstr ""
+"To join this live exam from the card, enter the PIN shown on the teacher's "
+"screen."
 
 msgctxt "exams.template.student_exam_list"
 msgid "live_card_pin_modal_exam"
@@ -14250,8 +14755,11 @@ msgid "Program input"
 msgstr "Program input"
 
 msgctxt "exams.template.coding_exam"
-msgid "One value per line. Each line is consumed by input(), Scanner, cin, or stdin in order."
-msgstr "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgid ""
+"One value per line. Each line is consumed by input(), Scanner, cin, or stdin"
+" in order."
+msgstr ""
+"Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
 
 msgctxt "exams.template.coding_exam"
 msgid "Run the code to see errors here."
@@ -14411,8 +14919,10 @@ msgstr "Program finished with no output."
 
 #, python-brace-format
 msgctxt "exams.template.coding_exam"
-msgid "Program expects {count} input value(s). Provide them above before running."
-msgstr "Program expects {count} input value(s). Provide them above before running."
+msgid ""
+"Program expects {count} input value(s). Provide them above before running."
+msgstr ""
+"Program expects {count} input value(s). Provide them above before running."
 
 #, python-brace-format
 msgctxt "exams.template.coding_exam"
@@ -14451,7 +14961,9 @@ msgstr "Supervision Mode Active"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_desc"
-msgstr "This exam is conducted in <strong>supervision mode</strong>. The following rules apply:"
+msgstr ""
+"This exam is conducted in <strong>supervision mode</strong>. The following "
+"rules apply:"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_fullscreen"
@@ -14459,7 +14971,9 @@ msgstr "Fullscreen mode is required"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_fullscreen_unavailable"
-msgstr "Fullscreen is not supported by this device browser; available supervision controls will stay active."
+msgstr ""
+"Fullscreen is not supported by this device browser; available supervision "
+"controls will stay active."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
@@ -14519,7 +15033,9 @@ msgstr "You have reached the maximum violation limit."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_wait"
-msgstr "Your exam has been suspended. Please wait until the teacher makes a decision."
+msgstr ""
+"Your exam has been suspended. Please wait until the teacher makes a "
+"decision."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
@@ -14540,7 +15056,9 @@ msgstr "⚠️ Warning!"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
-msgstr "You have reached 75% of the violation limit! Only {remaining} violation(s) left. Please be more careful!"
+msgstr ""
+"You have reached 75% of the violation limit! Only {remaining} violation(s) "
+"left. Please be more careful!"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_resume_title"
@@ -14629,7 +15147,9 @@ msgstr "0 = show all questions"
 
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Enter how many active questions students should see. Use 0 to show all questions."
+msgstr ""
+"Enter how many active questions students should see. Use 0 to show all "
+"questions."
 
 msgid "Sualların dili"
 msgstr "Search questions"
@@ -14659,15 +15179,21 @@ msgstr "Enable paint answers for this section"
 
 msgctxt "exams.template.create_question_bank"
 msgid "help_block_enable_paint"
-msgstr "This sets paint as the default for questions in this section. If you disable paint on a specific question later, it will stay hidden for that question."
+msgstr ""
+"This sets paint as the default for questions in this section. If you disable"
+" paint on a specific question later, it will stay hidden for that question."
 
 msgctxt "exams.template.ai_question_bank"
 msgid "AI ilə bu blok üçün sual yarat"
 msgstr "Create questions for this block with AI"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq."
-msgstr "Questions will be prepared from a lecture file or prompt and added to this block's text field."
+msgid ""
+"Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn "
+"sahəsinə əlavə olunacaq."
+msgstr ""
+"Questions will be prepared from a lecture file or prompt and added to this "
+"block's text field."
 
 msgctxt "exams.template.ai_question_bank"
 msgid "Prompt / mövzu"
@@ -14743,7 +15269,9 @@ msgstr ""
 
 msgctxt "exams.template.create_question_bank"
 msgid "help_question_formats"
-msgstr "Start each question on a new line. Supported numbering formats: 1. Question text or 1) Question text."
+msgstr ""
+"Start each question on a new line. Supported numbering formats: 1. Question "
+"text or 1) Question text."
 
 msgctxt "exams.template.create_question_bank"
 msgid "block_default"
@@ -14771,7 +15299,9 @@ msgstr "Confirm deletion"
 
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
-msgstr "This section and its questions will be removed from the bank. Do you want to continue?"
+msgstr ""
+"This section and its questions will be removed from the bank. Do you want to"
+" continue?"
 
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_no_cancel"
@@ -14836,7 +15366,9 @@ msgstr "Placeholder search teacher"
 #, python-format
 msgctxt "exams.template.create_student_group"
 msgid "help_multi_teacher_limit_with_count %(max_multi_teachers)s"
-msgstr "Roles above teacher can assign up to %(max_multi_teachers)s teachers to one group."
+msgstr ""
+"Roles above teacher can assign up to %(max_multi_teachers)s teachers to one "
+"group."
 
 msgctxt "exams.template.create_student_group"
 msgid "action_back_to_groups"
@@ -14903,8 +15435,14 @@ msgstr "Education management platform"
 msgid "Dil variantları"
 msgstr "Options"
 
-msgid "Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir."
-msgstr "Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir."
+msgid ""
+"Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. "
+"Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin "
+"dilin sualları yüklənir."
+msgstr ""
+"Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. "
+"Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin "
+"dilin sualları yüklənir."
 
 msgid "Mövcud dillər"
 msgstr "Current password"
@@ -14950,7 +15488,8 @@ msgstr "Live tracking"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "header_subtitle"
-msgstr "Live monitoring of the exam process — observation only, no intervention."
+msgstr ""
+"Live monitoring of the exam process — observation only, no intervention."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "poll_auto_refresh"
@@ -15226,7 +15765,9 @@ msgstr "Remove from exam"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_msg"
-msgstr "Do you want to permanently stop this student's exam? It will be submitted immediately and cannot be reversed."
+msgstr ""
+"Do you want to permanently stop this student's exam? It will be submitted "
+"immediately and cannot be reversed."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_btn"
@@ -15238,7 +15779,9 @@ msgstr "Temporarily block"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_msg"
-msgstr "The student's screen will be locked. The exam will not be submitted — you can resume later."
+msgstr ""
+"The student's screen will be locked. The exam will not be submitted — you "
+"can resume later."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_btn"
@@ -15250,7 +15793,9 @@ msgstr "Resume"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_msg"
-msgstr "Do you want to allow the student to continue their exam? An extra chance will be granted."
+msgstr ""
+"Do you want to allow the student to continue their exam? An extra chance "
+"will be granted."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_btn"
@@ -15354,7 +15899,8 @@ msgstr "Practical"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_manual_msg"
-msgstr "Allow the student to continue the exam? The violation count will not change."
+msgstr ""
+"Allow the student to continue the exam? The violation count will not change."
 
 msgctxt "exams.partial.exam_section"
 msgid "section_exams"
@@ -15462,7 +16008,9 @@ msgstr "Preparing export"
 
 msgctxt "exams.template.export_waiting"
 msgid "export_preparing_body"
-msgstr "The download will start automatically once the file is ready. Keep this page open."
+msgstr ""
+"The download will start automatically once the file is ready. Keep this page"
+" open."
 
 msgctxt "exams.template.export_waiting"
 msgid "export_back_link"
@@ -15529,11 +16077,17 @@ msgid "AI ilə test sualı yarat"
 msgstr "Create test questions with AI"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək."
-msgstr "Upload a lecture file or type the topic as a prompt. AI will convert the result to this page's test format."
+msgid ""
+"Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu "
+"səhifənin test formatına çevirəcək."
+msgstr ""
+"Upload a lecture file or type the topic as a prompt. AI will convert the "
+"result to this page's test format."
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat"
+msgid ""
+"Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları "
+"yarat"
 msgstr "Example: create applied-level test questions about Python functions"
 
 msgid "Sual formatı"
@@ -15562,8 +16116,12 @@ msgctxt "exams.template.test_question_bank"
 msgid "upload_or_drag_here"
 msgstr "or drag it here"
 
-msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
-msgstr "Word (.docx) files are not accepted for security reasons — use PDF or TXT instead."
+msgid ""
+"Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT"
+" istifadə edin."
+msgstr ""
+"Word (.docx) files are not accepted for security reasons — use PDF or TXT "
+"instead."
 
 msgctxt "exams.template.test_question_bank"
 msgid "Necə yazmalı olduğunu bilmirsən?"
@@ -15638,17 +16196,66 @@ msgstr "hər sual nömrə ilə başlayır"
 msgid "Variant lazım deyil — yalnız sual mətni"
 msgstr "Variant lazım deyil — yalnız sual mətni"
 
-msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
-msgstr "Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly deal with?&#10;A) Data analysis and decision making&#10;B) Computer repair&#10;C) Game development&#10;D) Setting up the internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ Build and deployment process&#10;• Customer support&#10;• Design process"
+msgid ""
+"Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
+"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
+"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
+"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
+"yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) "
+"Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) "
+"Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz "
+"cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ "
+"Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn "
+"prosesini"
+msgstr ""
+"Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly "
+"deal with?&#10;A) Data analysis and decision making&#10;B) Computer "
+"repair&#10;C) Game development&#10;D) Setting up the "
+"internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly "
+"used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing "
+"music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the "
+"end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup "
+"language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: "
+"B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct "
+"answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ "
+"Build and deployment process&#10;• Customer support&#10;• Design process"
 
-msgid "1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin."
-msgstr "1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin."
+msgid ""
+"1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı "
+"fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin."
+msgstr ""
+"1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı "
+"fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin."
 
-msgid "1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın."
-msgstr "1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın."
+msgid ""
+"1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı "
+"fərqi yazın."
+msgstr ""
+"1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı "
+"fərqi yazın."
 
-msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):&#10;3. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
-msgstr "Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly deal with?&#10;A) Data analysis and decision making&#10;B) Computer repair&#10;C) Game development&#10;D) Setting up the internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ Build and deployment process&#10;• Customer support&#10;• Design process"
+msgid ""
+"Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
+"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
+"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
+"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
+"yığılması&#10;&#10;Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):&#10;3. "
+"CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və "
+"yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
+msgstr ""
+"Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly "
+"deal with?&#10;A) Data analysis and decision making&#10;B) Computer "
+"repair&#10;C) Game development&#10;D) Setting up the "
+"internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly "
+"used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing "
+"music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the "
+"end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup "
+"language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: "
+"B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct "
+"answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ "
+"Build and deployment process&#10;• Customer support&#10;• Design process"
 
 msgctxt "exams.template.test_question_bank"
 msgid "Testdə diqqət edilməli pattern aşkarlandı"
@@ -15796,8 +16403,10 @@ msgid "Practical Coding Exam"
 msgstr "Practical exam"
 
 msgctxt "exams.template.create_exam_modal_form"
-msgid "Configure the coding task, starter code, test cases, and execution controls."
-msgstr "Configure the coding task, starter code, test cases, and execution controls."
+msgid ""
+"Configure the coding task, starter code, test cases, and execution controls."
+msgstr ""
+"Configure the coding task, starter code, test cases, and execution controls."
 
 msgctxt "exams.wizard"
 msgid "unsaved_title"
@@ -15865,7 +16474,9 @@ msgstr "Exam basics"
 
 msgctxt "exams.wizard"
 msgid "step_basics_desc"
-msgstr "Give the exam a name and choose its type. This is what students see on the exam card."
+msgstr ""
+"Give the exam a name and choose its type. This is what students see on the "
+"exam card."
 
 msgctxt "exams.wizard"
 msgid "type_desc_test"
@@ -15889,7 +16500,9 @@ msgstr "Timing and questions"
 
 msgctxt "exams.wizard"
 msgid "step_timing_desc"
-msgstr "Set when the exam runs, its duration and how many questions each student gets."
+msgstr ""
+"Set when the exam runs, its duration and how many questions each student "
+"gets."
 
 msgctxt "exams.wizard"
 msgid "code_generate"
@@ -15917,7 +16530,8 @@ msgstr "Control whether the exam is visible to students and who can enter."
 
 msgctxt "exams.wizard"
 msgid "desc_is_active"
-msgstr "When on, students see the exam in the list. If off, it is kept as a draft."
+msgstr ""
+"When on, students see the exam in the list. If off, it is kept as a draft."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "is_public"
@@ -15933,7 +16547,9 @@ msgstr "Enable Paint answers for written exams"
 
 msgctxt "exams.wizard"
 msgid "desc_paint"
-msgstr "In written exams, students can draw their answer (schemes, formulas, diagrams)."
+msgstr ""
+"In written exams, students can draw their answer (schemes, formulas, "
+"diagrams)."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights"
@@ -15941,7 +16557,9 @@ msgstr "Access settings"
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
-msgstr "If this exam is open to everyone, group and individual selections below are ignored. For restricted access, select groups and/or students."
+msgstr ""
+"If this exam is open to everyone, group and individual selections below are "
+"ignored. For restricted access, select groups and/or students."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "allowed_groups"
@@ -15969,7 +16587,9 @@ msgstr "Exam proctoring"
 
 msgctxt "exams.wizard"
 msgid "step_proctor_desc"
-msgstr "Anti-cheating measures. This step is optional — if off, the exam runs in normal mode."
+msgstr ""
+"Anti-cheating measures. This step is optional — if off, the exam runs in "
+"normal mode."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_enable_label"
@@ -16077,7 +16697,9 @@ msgstr "Proctoring is not available for this exam."
 
 msgctxt "exams.wizard"
 msgid "tip_live_after_create"
-msgstr "After creating the exam, open its detail page to start a live (Kahoot-style) exam."
+msgstr ""
+"After creating the exam, open its detail page to start a live (Kahoot-style)"
+" exam."
 
 msgctxt "exams.wizard"
 msgid "nav_back"
@@ -16097,7 +16719,9 @@ msgstr "Create Exam"
 
 msgctxt "exams.template.create_question_bank"
 msgid "alert_duplicate_block_name"
-msgstr "Warning: A section named '{block_name}' already exists. Please choose a different name."
+msgstr ""
+"Warning: A section named '{block_name}' already exists. Please choose a "
+"different name."
 
 #, python-brace-format
 msgctxt "exams.template.ai_question_bank"
@@ -16159,8 +16783,10 @@ msgctxt "exams.template.teacher_exam_detail"
 msgid "action_delete"
 msgstr "Delete"
 
-msgid "Təkrar istifadə oluna bilən sual kitabxanaları — imtahanlardan asılı deyil."
-msgstr "Təkrar istifadə oluna bilən sual kitabxanaları — imtahanlardan asılı deyil."
+msgid ""
+"Təkrar istifadə oluna bilən sual kitabxanaları — imtahanlardan asılı deyil."
+msgstr ""
+"Təkrar istifadə oluna bilən sual kitabxanaları — imtahanlardan asılı deyil."
 
 msgid "Yeni sual bankı yarat"
 msgstr "Yeni sual bankı yarat"
@@ -16311,7 +16937,9 @@ msgstr "Media attachment (optional)"
 
 msgctxt "exams.template.add_exam_question"
 msgid "media_help_text"
-msgstr "The field on the left is for an image, and the field on the right is for a video. Leave both empty if you do not need them."
+msgstr ""
+"The field on the left is for an image, and the field on the right is for a "
+"video. Leave both empty if you do not need them."
 
 msgctxt "exams.template.add_exam_question"
 msgid "label_current_image"
@@ -16347,7 +16975,9 @@ msgstr "Enable drawing answer"
 
 msgctxt "exams.template.add_exam_question"
 msgid "help_enable_paint_answer"
-msgstr "For this question, the student will be able to answer with a drawing as well as text."
+msgstr ""
+"For this question, the student will be able to answer with a drawing as well"
+" as text."
 
 msgctxt "exams.template.add_exam_question"
 msgid "label_paint_current_state"
@@ -16387,7 +17017,8 @@ msgstr "The question will be added to the selected block."
 
 msgctxt "exams.template.add_exam_question"
 msgid "help_time_limit_seconds"
-msgstr "For example: 60 seconds. If left empty, the exam default time will be used."
+msgstr ""
+"For example: 60 seconds. If left empty, the exam default time will be used."
 
 msgctxt "exams.template.add_exam_question"
 msgid "heading_options"
@@ -16534,8 +17165,12 @@ msgid "Bu dildəki bütün sualları sil"
 msgstr "Delete all questions in this language"
 
 msgctxt "exams.template.teacher_questions_bank"
-msgid "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin."
-msgstr "All languages are shown. Select a language above to see that language's status (duplicates, warnings)."
+msgid ""
+"Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) "
+"görmək üçün yuxarıdan dil seçin."
+msgstr ""
+"All languages are shown. Select a language above to see that language's "
+"status (duplicates, warnings)."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "action_select_all_page"
@@ -16930,15 +17565,20 @@ msgstr "Delete by language"
 #, python-brace-format
 msgctxt "exams.template.teacher_questions_bank"
 msgid "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"
-msgstr "The {count} questions in the selected language will be permanently deleted. Continue?"
+msgstr ""
+"The {count} questions in the selected language will be permanently deleted. "
+"Continue?"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "Bankı sil"
 msgstr "Delete bank"
 
 msgctxt "exams.template.teacher_questions_bank"
-msgid "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
-msgstr "The entire question bank and all questions inside it will be permanently deleted. Continue?"
+msgid ""
+"Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
+msgstr ""
+"The entire question bank and all questions inside it will be permanently "
+"deleted. Continue?"
 
 msgctxt "exams.template.questions_i_can_see"
 msgid "page_title"
@@ -17042,7 +17682,9 @@ msgstr "Do you want to resume this student's exam?"
 
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_grant_chance"
-msgstr "Do you want to grant this student an extra chance and allow them to continue?"
+msgstr ""
+"Do you want to grant this student an extra chance and allow them to "
+"continue?"
 
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_stop"
@@ -17212,12 +17854,22 @@ msgstr "İmtahanı yaradan müəllim:"
 msgid "Nəzarətçi tərəfindən dayandırılıb"
 msgstr "Nəzarətçi tərəfindən dayandırılıb"
 
-msgid "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb."
-msgstr "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb."
+msgid ""
+"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə "
+"dayandırılıb."
+msgstr ""
+"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə "
+"dayandırılıb."
 
 #, python-format
-msgid "Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan avtomatik tamamlanıb. Qeyd olunan %(count)s pozuntu aşkarlanıb — nəticələr bu kontekstdə qiymətləndirilməlidir."
-msgstr "Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan avtomatik tamamlanıb. Qeyd olunan %(count)s pozuntu aşkarlanıb — nəticələr bu kontekstdə qiymətləndirilməlidir."
+msgid ""
+"Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün "
+"imtahan avtomatik tamamlanıb. Qeyd olunan %(count)s pozuntu aşkarlanıb — "
+"nəticələr bu kontekstdə qiymətləndirilməlidir."
+msgstr ""
+"Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün "
+"imtahan avtomatik tamamlanıb. Qeyd olunan %(count)s pozuntu aşkarlanıb — "
+"nəticələr bu kontekstdə qiymətləndirilməlidir."
 
 msgid "Başlayıb"
 msgstr "Başlayıb"
@@ -17226,8 +17878,12 @@ msgid "Ümumi müddət"
 msgstr "General note"
 
 #, python-format
-msgid "Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown=\"%(identity_window_seconds_left)s\">--:--:--</span>"
-msgstr "Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown=\"%(identity_window_seconds_left)s\">--:--:--</span>"
+msgid ""
+"Tələbə adı anonim qalır. Qalan vaxt: <span data-review-"
+"countdown=\"%(identity_window_seconds_left)s\">--:--:--</span>"
+msgstr ""
+"Tələbə adı anonim qalır. Qalan vaxt: <span data-review-"
+"countdown=\"%(identity_window_seconds_left)s\">--:--:--</span>"
 
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_question"
@@ -17505,7 +18161,9 @@ msgstr "This exam already has an active session"
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "live_resume_modal_body"
-msgstr "If the previous tab was closed, you can return to that session. Starting a new session will automatically finish the old active session."
+msgstr ""
+"If the previous tab was closed, you can return to that session. Starting a "
+"new session will automatically finish the old active session."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "live_resume_modal_pin"
@@ -17890,7 +18548,9 @@ msgstr "Score Distribution"
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_score_distribution_hint"
-msgstr "For small groups, exact scores are shown; for larger groups, scores are grouped into intervals."
+msgstr ""
+"For small groups, exact scores are shown; for larger groups, scores are "
+"grouped into intervals."
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_group_avg_score"
@@ -17978,7 +18638,9 @@ msgstr "Generate Summary"
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_initial_message"
-msgstr "Click the button above to generate an AI-powered summary. The analysis will reflect the currently applied filters."
+msgstr ""
+"Click the button above to generate an AI-powered summary. The analysis will "
+"reflect the currently applied filters."
 
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
@@ -18189,8 +18851,11 @@ msgstr "Delete question bank"
 
 #, python-brace-format
 msgctxt "exams.template.teacher_questions_bank"
-msgid "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
-msgstr "The entire question bank and its {count} questions will be permanently deleted. Continue?"
+msgid ""
+"Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr ""
+"The entire question bank and its {count} questions will be permanently "
+"deleted. Continue?"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "page_title_attempt_detail"
@@ -18287,7 +18952,8 @@ msgstr "This answer is fully correct."
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "message_answer_wrong"
-msgstr "If this email exists in our system, we sent password reset instructions."
+msgstr ""
+"If this email exists in our system, we sent password reset instructions."
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_student_answer"
@@ -18466,8 +19132,12 @@ msgid "available_exams"
 msgstr "Available exams"
 
 msgctxt "exams.view.student.result.message"
-msgid "Result is not available yet. It will appear after the teacher review window closes."
-msgstr "Result is not available yet. It will appear after the teacher review window closes."
+msgid ""
+"Result is not available yet. It will appear after the teacher review window "
+"closes."
+msgstr ""
+"Result is not available yet. It will appear after the teacher review window "
+"closes."
 
 msgctxt "exams.template.take_exam"
 msgid "autosave_saving"
@@ -18677,7 +19347,9 @@ msgstr "AI question generation failed."
 
 msgctxt "exams.view.question_bank.message"
 msgid "duplicate_block_name_request"
-msgstr "A section named '{block_name}' already exists in this exam. Please choose a different name."
+msgstr ""
+"A section named '{block_name}' already exists in this exam. Please choose a "
+"different name."
 
 msgctxt "exams.view.question_bank.message"
 msgid "block_name_exists_db"
@@ -18786,8 +19458,12 @@ msgstr "{count} sual imtahana əlavə olundu."
 
 #, python-brace-format
 msgctxt "exams.view.bank.message"
-msgid "{count} sual “{block}” blokuna əlavə olundu. İstəsəniz redaktorda onları ayrı bölmələrə bölə bilərsiniz."
-msgstr "{count} sual “{block}” blokuna əlavə olundu. İstəsəniz redaktorda onları ayrı bölmələrə bölə bilərsiniz."
+msgid ""
+"{count} sual “{block}” blokuna əlavə olundu. İstəsəniz redaktorda onları "
+"ayrı bölmələrə bölə bilərsiniz."
+msgstr ""
+"{count} sual “{block}” blokuna əlavə olundu. İstəsəniz redaktorda onları "
+"ayrı bölmələrə bölə bilərsiniz."
 
 #, python-brace-format
 msgctxt "exams.view.bank.message"
@@ -18953,8 +19629,12 @@ msgctxt "labs.template.grade_submission"
 msgid "action_back"
 msgstr "Back"
 
-msgid "Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal və rəy dəyişdirilə bilməz."
-msgstr "Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal və rəy dəyişdirilə bilməz."
+msgid ""
+"Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal "
+"və rəy dəyişdirilə bilməz."
+msgstr ""
+"Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal "
+"və rəy dəyişdirilə bilməz."
 
 msgctxt "labs.template.grade_submission"
 msgid "heading_student_answers"
@@ -19031,7 +19711,9 @@ msgstr "You have already submitted this lab!"
 
 #, python-format
 msgctxt "labs.template.lab_detail"
-msgid "label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
+msgid ""
+"label_submission_info %(submitted_at)s · %(attempt_count)s / "
+"%(max_attempts)s"
 msgstr "%(submitted_at)s · Attempt: %(attempt_count)s / %(max_attempts)s"
 
 msgid "Nəticə:"
@@ -20728,7 +21410,9 @@ msgstr "Score Distribution"
 
 msgctxt "liveExam.template.session_detail"
 msgid "chart_score_distribution_hint"
-msgstr "Small sessions show exact scores, while larger sessions group participants into score ranges."
+msgstr ""
+"Small sessions show exact scores, while larger sessions group participants "
+"into score ranges."
 
 msgctxt "liveExam.template.session_detail"
 msgid "heading_participant_results"
@@ -20962,7 +21646,9 @@ msgstr "Question count must be greater than 0."
 
 msgctxt "live_exam.view.message"
 msgid "question_count_exceeds_total"
-msgstr "There are only {total_in_exam} questions in this exam. {desired} cannot be selected."
+msgstr ""
+"There are only {total_in_exam} questions in this exam. {desired} cannot be "
+"selected."
 
 msgctxt "live_exam.view.message"
 msgid "invalid_state_for_next"
@@ -21244,8 +21930,12 @@ msgstr "Organization request is under review: {organization}"
 
 #, python-brace-format
 msgctxt "notifications.event"
-msgid "\"{organization}\" has been created and is currently awaiting superadmin approval. Management sections will become active after approval."
-msgstr "\"{organization}\" has been created and is currently awaiting superadmin approval. Management sections will become active after approval."
+msgid ""
+"\"{organization}\" has been created and is currently awaiting superadmin "
+"approval. Management sections will become active after approval."
+msgstr ""
+"\"{organization}\" has been created and is currently awaiting superadmin "
+"approval. Management sections will become active after approval."
 
 #, python-brace-format
 msgctxt "notifications.event"
@@ -21258,8 +21948,12 @@ msgstr "Open request and respond"
 
 #, python-brace-format
 msgctxt "notifications.event"
-msgid "{organization} organization: a response was added to your {role_label} request."
-msgstr "{organization} organization: a response was added to your {role_label} request."
+msgid ""
+"{organization} organization: a response was added to your {role_label} "
+"request."
+msgstr ""
+"{organization} organization: a response was added to your {role_label} "
+"request."
 
 #, python-brace-format
 msgctxt "notifications.event"
@@ -21273,8 +21967,12 @@ msgstr "{organization} organization: your {role_label} request was rejected."
 
 #, python-brace-format
 msgctxt "notifications.event"
-msgid "{organization} organization: your {role_label} request was closed automatically."
-msgstr "{organization} organization: your {role_label} request was closed automatically."
+msgid ""
+"{organization} organization: your {role_label} request was closed "
+"automatically."
+msgstr ""
+"{organization} organization: your {role_label} request was closed "
+"automatically."
 
 #, python-brace-format
 msgctxt "notifications.event"
@@ -21283,8 +21981,12 @@ msgstr "Note: {note}"
 
 #, python-brace-format
 msgctxt "notifications.event"
-msgid "You were removed from {organization}. You can submit a new request from the \"Join organization\" section in your profile."
-msgstr "You were removed from {organization}. You can submit a new request from the \"Join organization\" section in your profile."
+msgid ""
+"You were removed from {organization}. You can submit a new request from the "
+"\"Join organization\" section in your profile."
+msgstr ""
+"You were removed from {organization}. You can submit a new request from the "
+"\"Join organization\" section in your profile."
 
 #, python-brace-format
 msgctxt "notifications.event"
@@ -21310,8 +22012,12 @@ msgstr "Member"
 
 #, python-brace-format
 msgctxt "notifications.event"
-msgid "{organization} sent you an invitation as {role_label}. You can accept the invitation from the \"Join organization\" section in your profile."
-msgstr "{organization} sent you an invitation as {role_label}. You can accept the invitation from the \"Join organization\" section in your profile."
+msgid ""
+"{organization} sent you an invitation as {role_label}. You can accept the "
+"invitation from the \"Join organization\" section in your profile."
+msgstr ""
+"{organization} sent you an invitation as {role_label}. You can accept the "
+"invitation from the \"Join organization\" section in your profile."
 
 #, python-brace-format
 msgctxt "notifications.event"
@@ -22814,8 +23520,12 @@ msgid "Yadda saxla"
 msgstr "Save"
 
 msgctxt "registrar.journal"
-msgid "Hələ dərs əlavə edilməyib. Yuxarıdan dərs əlavə edin — sonra iştirak/qayıb və bal yazın."
-msgstr "No lessons added yet. Add a lesson above — then record attendance/absence and scores."
+msgid ""
+"Hələ dərs əlavə edilməyib. Yuxarıdan dərs əlavə edin — sonra iştirak/qayıb "
+"və bal yazın."
+msgstr ""
+"No lessons added yet. Add a lesson above — then record attendance/absence "
+"and scores."
 
 #| msgid "%(count)s nəticə"
 msgctxt "registrar.finals"
@@ -23031,7 +23741,9 @@ msgid "Tələbəyə göndəriləcək təsdiq. Sadə mətn olaraq görünəcək."
 msgstr "Confirmation to be sent to the student. Shown as plain text."
 
 msgid "Təsdiq göndərilir və sorğu “sistemə əlavə olundu” kimi işarələndi."
-msgstr "The confirmation is being sent and the request was marked as “added to the system”."
+msgstr ""
+"The confirmation is being sent and the request was marked as “added to the "
+"system”."
 
 msgid "Tələbəyə cavab"
 msgstr "Reply to student"
@@ -23108,8 +23820,12 @@ msgstr "Send confirmation"
 msgid "EMSArena – Yeni sınaq imtahanı sorğusu"
 msgstr "EMSArena – New trial exam request"
 
-msgid "Tələbə pulsuz sınaq imtahanı üçün sual faylı göndərdi. Fayl saxlanıldı və admin panelindən baxa bilərsiniz."
-msgstr "A student sent a question file for a free trial exam. The file has been saved and you can review it in the admin panel."
+msgid ""
+"Tələbə pulsuz sınaq imtahanı üçün sual faylı göndərdi. Fayl saxlanıldı və "
+"admin panelindən baxa bilərsiniz."
+msgstr ""
+"A student sent a question file for a free trial exam. The file has been "
+"saved and you can review it in the admin panel."
 
 msgid "Fayl"
 msgstr "File"
@@ -23135,8 +23851,12 @@ msgstr "The questions you sent have been added to the system"
 msgid "Aşağıdakı məlumatı oxuyun."
 msgstr "Please read the details below."
 
-msgid "İmtahan tamamilə pulsuz və limitsizdir — istədiyiniz qədər təkrar verə bilərsiniz."
-msgstr "The exam is completely free and unlimited — retake it as many times as you want."
+msgid ""
+"İmtahan tamamilə pulsuz və limitsizdir — istədiyiniz qədər təkrar verə "
+"bilərsiniz."
+msgstr ""
+"The exam is completely free and unlimited — retake it as many times as you "
+"want."
 
 msgid "Hesabınıza daxil olub “İmtahanlar” bölməsindən başlaya bilərsiniz."
 msgstr "Log in to your account and start from the “Exams” section."
@@ -23147,8 +23867,14 @@ msgstr "Free · Unlimited"
 msgid "Özün üçün sınaq imtahanı yarat"
 msgstr "Create a trial exam for yourself"
 
-msgid "Suallarını PDF formatında yüklə — komandamız onları gün ərzində sistemə əlavə etsin. Sonra istədiyin qədər təkrar həll et. Tamamilə pulsuz və limitsiz."
-msgstr "Upload your questions as a PDF — our team will add them to the system during the day. Then practice as many times as you like. Completely free and unlimited."
+msgid ""
+"Suallarını PDF formatında yüklə — komandamız onları gün ərzində sistemə "
+"əlavə etsin. Sonra istədiyin qədər təkrar həll et. Tamamilə pulsuz və "
+"limitsiz."
+msgstr ""
+"Upload your questions as a PDF — our team will add them to the system during"
+" the day. Then practice as many times as you like. Completely free and "
+"unlimited."
 
 msgid "Pulsuz"
 msgstr "Free"
@@ -23183,8 +23909,11 @@ msgstr "The questions will be added during the day, you'll get an email."
 msgid "Sorğun qəbul edildi!"
 msgstr "Your request has been received!"
 
-msgid "Suallar gün ərzində sistemə əlavə olunacaq. Hazır olduqda email ilə xəbər verəcəyik."
-msgstr "The questions will be added during the day. We'll email you when it's ready."
+msgid ""
+"Suallar gün ərzində sistemə əlavə olunacaq. Hazır olduqda email ilə xəbər "
+"verəcəyik."
+msgstr ""
+"The questions will be added during the day. We'll email you when it's ready."
 
 msgid "Yeni sınaq imtahanı"
 msgstr "New trial exam"
@@ -23210,8 +23939,12 @@ msgstr "Open file"
 msgid "könüllü"
 msgstr "optional"
 
-msgid "Submit etdikdən sonra suallar gün ərzində sistemə əlavə olunacaq və email ilə xəbər verəcəyik."
-msgstr "After you submit, the questions will be added to the system during the day and we'll notify you by email."
+msgid ""
+"Submit etdikdən sonra suallar gün ərzində sistemə əlavə olunacaq və email "
+"ilə xəbər verəcəyik."
+msgstr ""
+"After you submit, the questions will be added to the system during the day "
+"and we'll notify you by email."
 
 msgid "Sorğunu göndər"
 msgstr "Send request"
@@ -23219,8 +23952,12 @@ msgstr "Send request"
 msgid "Sınaq imtahanı – EMSArena"
 msgstr "Trial exam – EMSArena"
 
-msgid "Pulsuz və limitsiz sınaq imtahanı yarat: suallarını PDF formatında yüklə, komandamız gün ərzində sistemə əlavə etsin."
-msgstr "Create a free, unlimited trial exam: upload your questions as a PDF and our team will add them to the system during the day."
+msgid ""
+"Pulsuz və limitsiz sınaq imtahanı yarat: suallarını PDF formatında yüklə, "
+"komandamız gün ərzində sistemə əlavə etsin."
+msgstr ""
+"Create a free, unlimited trial exam: upload your questions as a PDF and our "
+"team will add them to the system during the day."
 
 msgid "Çox sayda sorğu göndərilib. Zəhmət olmasa bir az gözləyin."
 msgstr "Too many requests sent. Please wait a moment."
@@ -23232,7 +23969,8 @@ msgid "Sorğunuzu qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
 msgstr "We couldn't accept your request. Please try again later."
 
 msgid "Sorğunuz qəbul edildi! Suallar gün ərzində sistemə əlavə olunacaq."
-msgstr "Your request has been received! The questions will be added during the day."
+msgstr ""
+"Your request has been received! The questions will be added during the day."
 
 msgid "Too many login attempts. Please try again later."
 msgstr "Too many login attempts. Please try again later."
@@ -23259,7 +23997,8 @@ msgstr "Western Caspian University"
 
 msgctxt "core.middleware.request_queue.message"
 msgid "Server is busy processing previous requests. Please try again shortly."
-msgstr "Server is busy processing previous requests. Please try again shortly."
+msgstr ""
+"Server is busy processing previous requests. Please try again shortly."
 
 msgctxt "core.permission.error"
 msgid "An active organization is required."
@@ -23352,7 +24091,9 @@ msgstr "Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin
 
 msgctxt "admin.verify_otp"
 msgid "description"
-msgstr "Access to the admin panel is granted only after OTP verification. Enter the 6-digit code sent to your email address."
+msgstr ""
+"Access to the admin panel is granted only after OTP verification. Enter the "
+"6-digit code sent to your email address."
 
 #, python-format
 msgctxt "admin.verify_otp"
@@ -23395,8 +24136,12 @@ msgstr "EMSArena | Xoş gəldiniz"
 msgid "Xoş gəldiniz!"
 msgstr "Xoş gəldiniz!"
 
-msgid "EMSArena blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və xəbərlərdən ilk siz xəbərdar olacaqsınız."
-msgstr "EMSArena blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və xəbərlərdən ilk siz xəbərdar olacaqsınız."
+msgid ""
+"EMSArena blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və "
+"xəbərlərdən ilk siz xəbərdar olacaqsınız."
+msgstr ""
+"EMSArena blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və "
+"xəbərlərdən ilk siz xəbərdar olacaqsınız."
 
 msgid "Abunəliyinizi istənilən vaxt ləğv edə bilərsiniz."
 msgstr "Abunəliyinizi istənilən vaxt ləğv edə bilərsiniz."
@@ -23410,8 +24155,12 @@ msgstr "Sorğu xətası"
 msgid "Yanlış sorğu göndərildi"
 msgstr "Your message has been sent!"
 
-msgid "Sorğu emal olunmadı. Daxil etdiyiniz məlumatlardan biri düzgün formatda olmaya bilər"
-msgstr "Sorğu emal olunmadı. Daxil etdiyiniz məlumatlardan biri düzgün formatda olmaya bilər"
+msgid ""
+"Sorğu emal olunmadı. Daxil etdiyiniz məlumatlardan biri düzgün formatda "
+"olmaya bilər"
+msgstr ""
+"Sorğu emal olunmadı. Daxil etdiyiniz məlumatlardan biri düzgün formatda "
+"olmaya bilər"
 
 msgid "və ya keçid artıq etibarsızdır."
 msgstr "və ya keçid artıq etibarsızdır."
@@ -23428,8 +24177,12 @@ msgstr "Back to result"
 msgid "Əvvəlki səhifəyə dön"
 msgstr "Əvvəlki səhifəyə dön"
 
-msgid "Problem davam etsə, son əməliyyatı yenidən edin və ya administratorla əlaqə saxlayın."
-msgstr "Problem davam etsə, son əməliyyatı yenidən edin və ya administratorla əlaqə saxlayın."
+msgid ""
+"Problem davam etsə, son əməliyyatı yenidən edin və ya administratorla əlaqə "
+"saxlayın."
+msgstr ""
+"Problem davam etsə, son əməliyyatı yenidən edin və ya administratorla əlaqə "
+"saxlayın."
 
 msgid "Sorğuda gözlənilən format və ya tələb olunan məlumat uyğun gəlmədi."
 msgstr "Sorğuda gözlənilən format və ya tələb olunan məlumat uyğun gəlmədi."
@@ -23446,8 +24199,12 @@ msgstr "You do not have access to this area."
 msgid "Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur."
 msgstr "Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur."
 
-msgid "Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin."
-msgstr "Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin."
+msgid ""
+"Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora "
+"müraciət edin."
+msgstr ""
+"Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora "
+"müraciət edin."
 
 msgid "Hesabınızı yenidən yoxlayın"
 msgstr "Write your message..."
@@ -23473,14 +24230,20 @@ msgstr "Axtardığınız səhifə burada deyil"
 msgid "Keçid dəyişmiş, silinmiş və ya yanlış daxil edilmiş ola bilər."
 msgstr "Keçid dəyişmiş, silinmiş və ya yanlış daxil edilmiş ola bilər."
 
-msgid "Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
-msgstr "Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
+msgid ""
+"Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
+msgstr ""
+"Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
 
 msgid "URL-ni yenidən yoxlayın"
 msgstr "Change the filters and try again."
 
-msgid "Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni yoxlayın."
-msgstr "Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni yoxlayın."
+msgid ""
+"Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni"
+" yoxlayın."
+msgstr ""
+"Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni"
+" yoxlayın."
 
 msgid "İstənilən resurs serverdə tapılmadı və ya artıq əlçatan deyil."
 msgstr "İstənilən resurs serverdə tapılmadı və ya artıq əlçatan deyil."
@@ -23494,8 +24257,12 @@ msgstr "Reply email error"
 msgid "Sistem gözlənilməz xətaya düşdü"
 msgstr "Sistem gözlənilməz xətaya düşdü"
 
-msgid "Bu problem adətən müvəqqəti olur. Bir az sonra yenidən cəhd edə və ya əvvəlki səhifəyə qayıdaraq"
-msgstr "Bu problem adətən müvəqqəti olur. Bir az sonra yenidən cəhd edə və ya əvvəlki səhifəyə qayıdaraq"
+msgid ""
+"Bu problem adətən müvəqqəti olur. Bir az sonra yenidən cəhd edə və ya "
+"əvvəlki səhifəyə qayıdaraq"
+msgstr ""
+"Bu problem adətən müvəqqəti olur. Bir az sonra yenidən cəhd edə və ya "
+"əvvəlki səhifəyə qayıdaraq"
 
 msgid "əməliyyatı təkrarlaya bilərsiniz."
 msgstr "əməliyyatı təkrarlaya bilərsiniz."
@@ -23509,8 +24276,12 @@ msgstr "Sistem hazırda cavab verə bilmir"
 msgid "Geri qayıt və yenidən cəhd et"
 msgstr "Try again"
 
-msgid "Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha tez tapa bilək."
-msgstr "Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha tez tapa bilək."
+msgid ""
+"Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha "
+"tez tapa bilək."
+msgstr ""
+"Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha "
+"tez tapa bilək."
 
 msgid "Server sorğunu tamamlayarkən daxili xəta ilə qarşılaşdı."
 msgstr "Server sorğunu tamamlayarkən daxili xəta ilə qarşılaşdı."
@@ -23524,8 +24295,12 @@ msgid "The security token has expired"
 msgstr "The security token has expired"
 
 msgctxt "core.errors.csrf"
-msgid "This form went stale because the page stayed open for a long time or was restored from the browser cache. Don't worry — nothing was lost."
-msgstr "This form went stale because the page stayed open for a long time or was restored from the browser cache. Don't worry — nothing was lost."
+msgid ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
+msgstr ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
 
 msgctxt "core.errors.csrf"
 msgid "You will be redirected to a fresh page in a few seconds."
@@ -23642,8 +24417,12 @@ msgstr "Members"
 msgid "Aktiv təşkilat tapılmadı."
 msgstr "Text field was not found."
 
-msgid "Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar ayrıca səhifədə idarə olunur."
-msgstr "Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar ayrıca səhifədə idarə olunur."
+msgid ""
+"Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar "
+"ayrıca səhifədə idarə olunur."
+msgstr ""
+"Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar "
+"ayrıca səhifədə idarə olunur."
 
 msgid "Fakültə statistikası"
 msgstr "Fakültə statistikası"
@@ -23737,8 +24516,12 @@ msgstr "Təyin et"
 msgid "Fakültəni sil"
 msgstr "Fakültəni sil"
 
-msgid "<strong data-org-field=\"unit_name\"></strong> fakültəsini silmək istədiyinizə əminsiniz?"
-msgstr "<strong data-org-field=\"unit_name\"></strong> fakültəsini silmək istədiyinizə əminsiniz?"
+msgid ""
+"<strong data-org-field=\"unit_name\"></strong> fakültəsini silmək "
+"istədiyinizə əminsiniz?"
+msgstr ""
+"<strong data-org-field=\"unit_name\"></strong> fakültəsini silmək "
+"istədiyinizə əminsiniz?"
 
 msgid "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 msgstr "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
@@ -23746,8 +24529,10 @@ msgstr "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 msgid "Kafedralar"
 msgstr "Kafedralar"
 
-msgid "Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
-msgstr "Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
+msgid ""
+"Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
+msgstr ""
+"Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
 
 msgid "Kafedraya müdir və müəllimlər təyin edin."
 msgstr "Kafedraya müdir və müəllimlər təyin edin."
@@ -23841,8 +24626,10 @@ msgstr "Built by"
 msgid "təyinatsız"
 msgstr "təyinatsız"
 
-msgid "Başqa kafedrada olan müəllim seçilərsə, təyinatı bu kafedraya köçürüləcək."
-msgstr "Başqa kafedrada olan müəllim seçilərsə, təyinatı bu kafedraya köçürüləcək."
+msgid ""
+"Başqa kafedrada olan müəllim seçilərsə, təyinatı bu kafedraya köçürüləcək."
+msgstr ""
+"Başqa kafedrada olan müəllim seçilərsə, təyinatı bu kafedraya köçürüləcək."
 
 msgid "Təşkilatda aktiv müəllim üzvü tapılmadı."
 msgstr "No suitable membership role was found in the organization."
@@ -23850,8 +24637,12 @@ msgstr "No suitable membership role was found in the organization."
 msgid "Kafedranı sil"
 msgstr "Delete bank"
 
-msgid "<strong data-org-field=\"unit_name\"></strong> kafedrasını silmək istədiyinizə əminsiniz?"
-msgstr "<strong data-org-field=\"unit_name\"></strong> kafedrasını silmək istədiyinizə əminsiniz?"
+msgid ""
+"<strong data-org-field=\"unit_name\"></strong> kafedrasını silmək "
+"istədiyinizə əminsiniz?"
+msgstr ""
+"<strong data-org-field=\"unit_name\"></strong> kafedrasını silmək "
+"istədiyinizə əminsiniz?"
 
 msgid "Aktiv üzv təyinatı olan kafedra silinə bilməz."
 msgstr "Aktiv üzv təyinatı olan kafedra silinə bilməz."
@@ -23929,8 +24720,12 @@ msgstr "No roles found"
 msgid "Fakültə və kafedralar"
 msgstr "Fakültə və kafedralar"
 
-msgid "Fakültələr və kafedralar ayrı idarə olunur. Kafedra yaradarkən aid olduğu fakültə seçilir."
-msgstr "Fakültələr və kafedralar ayrı idarə olunur. Kafedra yaradarkən aid olduğu fakültə seçilir."
+msgid ""
+"Fakültələr və kafedralar ayrı idarə olunur. Kafedra yaradarkən aid olduğu "
+"fakültə seçilir."
+msgstr ""
+"Fakültələr və kafedralar ayrı idarə olunur. Kafedra yaradarkən aid olduğu "
+"fakültə seçilir."
 
 msgid "Struktur statistikası"
 msgstr "Struktur statistikası"
@@ -23938,14 +24733,20 @@ msgstr "Struktur statistikası"
 msgid "Root struktur"
 msgstr "Structure"
 
-msgid "Fakültə yaratmaq üçün bütün təşkilat scope-u və `unit.create` icazəsi lazımdır."
-msgstr "Fakültə yaratmaq üçün bütün təşkilat scope-u və `unit.create` icazəsi lazımdır."
+msgid ""
+"Fakültə yaratmaq üçün bütün təşkilat scope-u və `unit.create` icazəsi "
+"lazımdır."
+msgstr ""
+"Fakültə yaratmaq üçün bütün təşkilat scope-u və `unit.create` icazəsi "
+"lazımdır."
 
 msgid "Fakültəyə bağlı"
 msgstr "Fakültəyə bağlı"
 
-msgid "Kafedra yaratmaq üçün görünən fakültə və `unit.create` icazəsi lazımdır."
-msgstr "Kafedra yaratmaq üçün görünən fakültə və `unit.create` icazəsi lazımdır."
+msgid ""
+"Kafedra yaratmaq üçün görünən fakültə və `unit.create` icazəsi lazımdır."
+msgstr ""
+"Kafedra yaratmaq üçün görünən fakültə və `unit.create` icazəsi lazımdır."
 
 msgid "Hələ fakültə yaradılmayıb."
 msgstr "Hələ fakültə yaradılmayıb."
@@ -24062,8 +24863,12 @@ msgid "yüklənir..."
 msgstr "loading..."
 
 msgctxt "ai_assistant.greeting"
-msgid "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
-msgstr "Hello! I am EMSArena AI. I am ready to answer your questions. How can I help?"
+msgid ""
+"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
+" bilərəm?"
+msgstr ""
+"Hello! I am EMSArena AI. I am ready to answer your questions. How can I "
+"help?"
 
 msgctxt "ai_assistant.error"
 msgid "AI sorğu limiti hazırda aktiv deyil."
@@ -24100,8 +24905,12 @@ msgstr "Send"
 msgid "EMSArena ana səhifə"
 msgstr "Home"
 
-msgid "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli."
-msgstr "Education management and online exam platform. A modern LMS for universities, schools and training centres."
+msgid ""
+"Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və"
+" kurs mərkəzləri üçün modern LMS həlli."
+msgstr ""
+"Education management and online exam platform. A modern LMS for "
+"universities, schools and training centres."
 
 msgid "Sosial şəbəkələr"
 msgstr "Social networks"
@@ -24273,7 +25082,9 @@ msgstr "In this mode you can only view — no changes are possible."
 
 msgctxt "accounts.view_as"
 msgid "full_warning"
-msgstr "In this mode you can perform any action on behalf of the user. Every action is written to the audit log."
+msgstr ""
+"In this mode you can perform any action on behalf of the user. Every action "
+"is written to the audit log."
 
 msgctxt "accounts.view_as"
 msgid "exit_view_full"
@@ -24290,15 +25101,15 @@ msgstr "Name"
 
 #, python-brace-format
 msgid "{editor}: Editing failed"
-msgstr ""
+msgstr "{editor}: Editing failed"
 
 #, python-brace-format
 msgid "{editor}: Editing failed: {e}"
-msgstr ""
+msgstr "{editor}: Editing failed: {e}"
 
 #, python-brace-format
 msgid "Windows error: {error}"
-msgstr ""
+msgstr "Windows error: {error}"
 
 #, fuzzy
 #| msgctxt "blog.post.message"
@@ -24315,14 +25126,15 @@ msgstr "optional"
 #, python-brace-format
 msgid "Got unexpected extra argument ({args})"
 msgid_plural "Got unexpected extra arguments ({args})"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Got unexpected extra argument ({args})"
+msgstr[1] "Got unexpected extra arguments ({args})"
 
 msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
 msgstr ""
+"DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
 
 msgid "Aborted!"
-msgstr ""
+msgstr "Aborted!"
 
 #, fuzzy
 #| msgid "Komanda"
@@ -24330,37 +25142,43 @@ msgid "Commands"
 msgstr "Team"
 
 msgid "Missing command."
-msgstr ""
+msgstr "Missing command."
 
 msgid "Value must be an iterable."
-msgstr ""
+msgstr "Value must be an iterable."
 
 #, python-brace-format
 msgid "Takes {nargs} values but 1 was given."
 msgid_plural "Takes {nargs} values but {len} were given."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Takes {nargs} values but 1 was given."
+msgstr[1] "Takes {nargs} values but {len} were given."
 
-msgid "DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
+msgid ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
 msgstr ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
 
 #, python-brace-format
 msgid "Name '{name}' defined twice"
-msgstr ""
+msgstr "Name '{name}' defined twice"
 
 msgid "Boolean option {decl!r} cannot use the same flag for true/false."
-msgstr ""
+msgstr "Boolean option {decl!r} cannot use the same flag for true/false."
 
 msgid "Could not determine name for option with declarations {decls!r}"
-msgstr ""
+msgstr "Could not determine name for option with declarations {decls!r}"
 
 #, python-brace-format
-msgid "No options defined but a name was passed ({name}). Did you mean to declare an argument instead? Did you mean to pass '--{name}'?"
+msgid ""
+"No options defined but a name was passed ({name}). Did you mean to declare "
+"an argument instead? Did you mean to pass '--{name}'?"
 msgstr ""
+"No options defined but a name was passed ({name}). Did you mean to declare "
+"an argument instead? Did you mean to pass '--{name}'?"
 
 #, python-brace-format
 msgid "env var: {var}"
-msgstr ""
+msgstr "env var: {var}"
 
 #, fuzzy, python-brace-format
 #| msgid "Default format"
@@ -24368,33 +25186,35 @@ msgid "default: {default}"
 msgstr "Default format"
 
 msgid "(dynamic)"
-msgstr ""
+msgstr "(dynamic)"
 
 #, python-brace-format
-msgid "Arguments take exactly one parameter declaration, got {length}: {decls}."
+msgid ""
+"Arguments take exactly one parameter declaration, got {length}: {decls}."
 msgstr ""
+"Arguments take exactly one parameter declaration, got {length}: {decls}."
 
 msgid "Do you want to continue?"
-msgstr ""
+msgstr "Do you want to continue?"
 
 msgid "Confirm the action without prompting."
-msgstr ""
+msgstr "Confirm the action without prompting."
 
 #, python-format
 msgid "%(prog)s, version %(version)s"
-msgstr ""
+msgstr "%(prog)s, version %(version)s"
 
 msgid "Show the version and exit."
-msgstr ""
+msgstr "Show the version and exit."
 
 msgid "Show this message and exit."
-msgstr ""
+msgstr "Show this message and exit."
 
 #, python-brace-format
 msgid "Did you mean {possibility}?"
 msgid_plural "(Did you mean one of: {possibilities}?)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Did you mean {possibility}?"
+msgstr[1] "(Did you mean one of: {possibilities}?)"
 
 #, fuzzy, python-brace-format
 #| msgctxt "exams.model.coding_submission.field"
@@ -24404,15 +25224,15 @@ msgstr "Message"
 
 #, python-brace-format
 msgid "Try '{command} {option}' for help."
-msgstr ""
+msgstr "Try '{command} {option}' for help."
 
 #, python-brace-format
 msgid "Invalid value: {message}"
-msgstr ""
+msgstr "Invalid value: {message}"
 
 #, python-brace-format
 msgid "Invalid value for {param_hint}: {message}"
-msgstr ""
+msgstr "Invalid value for {param_hint}: {message}"
 
 #, fuzzy
 #| msgid "Assignment"
@@ -24426,21 +25246,21 @@ msgid "Missing option"
 msgstr "Option {option} was not found."
 
 msgid "Missing parameter"
-msgstr ""
+msgstr "Missing parameter"
 
 #, python-brace-format
 msgid "Missing {param_type}"
-msgstr ""
+msgstr "Missing {param_type}"
 
 #, python-brace-format
 msgid "Missing parameter: {param_name}"
-msgstr ""
+msgstr "Missing parameter: {param_name}"
 
 msgid "No such option {name!r}."
-msgstr ""
+msgstr "No such option {name!r}."
 
 msgid "No such command {name!r}."
-msgstr ""
+msgstr "No such command {name!r}."
 
 #, fuzzy
 #| msgctxt "assignment.detail"
@@ -24449,7 +25269,7 @@ msgid "unknown error"
 msgstr "Unknown error"
 
 msgid "Could not open file {filename!r}: {message}"
-msgstr ""
+msgstr "Could not open file {filename!r}: {message}"
 
 #, fuzzy
 #| msgctxt "profile.notifications"
@@ -24459,24 +25279,24 @@ msgstr "Message"
 
 #, python-brace-format
 msgid "Invalid start character for option ({option})"
-msgstr ""
+msgstr "Invalid start character for option ({option})"
 
 msgid "Argument {name!r} takes {nargs} values."
-msgstr ""
+msgstr "Argument {name!r} takes {nargs} values."
 
 msgid "Option {name!r} does not take a value."
-msgstr ""
+msgstr "Option {name!r} does not take a value."
 
 msgid "Option {name!r} requires an argument."
 msgid_plural "Option {name!r} requires {nargs} arguments."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Option {name!r} requires an argument."
+msgstr[1] "Option {name!r} requires {nargs} arguments."
 
 msgid "Shell completion is not supported for Bash versions older than 4.4."
-msgstr ""
+msgstr "Shell completion is not supported for Bash versions older than 4.4."
 
 msgid "Couldn't detect Bash version, shell completion is not supported."
-msgstr ""
+msgstr "Couldn't detect Bash version, shell completion is not supported."
 
 #, fuzzy
 #| msgid "Send confirmation"
@@ -24484,7 +25304,7 @@ msgid "Repeat for confirmation"
 msgstr "Open notifications"
 
 msgid "Error: The two entered values do not match."
-msgstr ""
+msgstr "Error: The two entered values do not match."
 
 #, fuzzy
 #| msgctxt "exams.template.coding_exam"
@@ -24493,43 +25313,45 @@ msgid "Error: invalid input"
 msgstr "Program input"
 
 msgid "Unknown color {colour!r}"
-msgstr ""
+msgstr "Unknown color {colour!r}"
 
 msgid "Press any key to continue..."
-msgstr ""
+msgstr "Press any key to continue..."
 
 #, python-brace-format
 msgid ""
 "Choose from:\n"
 "\t{choices}"
 msgstr ""
+"Choose from:\n"
+"\t{choices}"
 
 msgid "{value!r} is not {choice}."
 msgid_plural "{value!r} is not one of {choices}."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{value!r} is not {choice}."
+msgstr[1] "{value!r} is not one of {choices}."
 
 #, python-brace-format
 msgid "Choice({choices})"
-msgstr ""
+msgstr "Choice({choices})"
 
 msgid "{value!r} does not match the format {format}."
 msgid_plural "{value!r} does not match the formats {formats}."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{value!r} does not match the format {format}."
+msgstr[1] "{value!r} does not match the formats {formats}."
 
 msgid "{value!r} is not a valid {number_type}."
-msgstr ""
+msgstr "{value!r} is not a valid {number_type}."
 
 #, python-brace-format
 msgid "{value} is not in the range {range}."
-msgstr ""
+msgstr "{value} is not in the range {range}."
 
 msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-msgstr ""
+msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
 
 msgid "{value!r} is not a valid UUID."
-msgstr ""
+msgstr "{value!r} is not a valid UUID."
 
 #, fuzzy
 #| msgctxt "assignment.my_submissions"
@@ -24544,35 +25366,35 @@ msgid "directory"
 msgstr "Directorate"
 
 msgid "path"
-msgstr ""
+msgstr "path"
 
 msgid "{name} {filename!r} does not exist."
-msgstr ""
+msgstr "{name} {filename!r} does not exist."
 
 msgid "{name} {filename!r} is a file."
-msgstr ""
+msgstr "{name} {filename!r} is a file."
 
 msgid "{name} {filename!r} is a directory."
-msgstr ""
+msgstr "{name} {filename!r} is a directory."
 
 msgid "{name} {filename!r} is not readable."
-msgstr ""
+msgstr "{name} {filename!r} is not readable."
 
 msgid "{name} {filename!r} is not writable."
-msgstr ""
+msgstr "{name} {filename!r} is not writable."
 
 msgid "{name} {filename!r} is not executable."
-msgstr ""
+msgstr "{name} {filename!r} is not executable."
 
 #, python-brace-format
 msgid "{len_type} values are required, but {len_value} was given."
 msgid_plural "{len_type} values are required, but {len_value} were given."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{len_type} values are required, but {len_value} was given."
+msgstr[1] "{len_type} values are required, but {len_value} were given."
 
 #, python-brace-format
 msgid "Unknown standard stream '{name}'"
-msgstr ""
+msgstr "Unknown standard stream '{name}'"
 
 #, fuzzy
 #| msgctxt "staff.management"
@@ -24581,7 +25403,7 @@ msgid "Messages"
 msgstr "Message"
 
 msgid "Site Maps"
-msgstr ""
+msgstr "Site Maps"
 
 #, fuzzy
 #| msgctxt "exams.template.coding_exam"
@@ -24598,114 +25420,148 @@ msgstr "Education"
 #. Translators: String used to replace omitted page numbers in elided page
 #. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
 msgid "…"
-msgstr ""
+msgstr "…"
 
 msgid "That page number is not an integer"
-msgstr ""
+msgstr "That page number is not an integer"
 
 msgid "That page number is less than 1"
-msgstr ""
+msgstr "That page number is less than 1"
 
 msgid "That page contains no results"
-msgstr ""
+msgstr "That page contains no results"
 
 msgid "Enter a valid value."
-msgstr ""
+msgstr "Enter a valid value."
 
 msgid "Enter a valid domain name."
-msgstr ""
+msgstr "Enter a valid domain name."
 
 msgid "Enter a valid URL."
-msgstr ""
+msgstr "Enter a valid URL."
 
 msgid "Enter a valid integer."
-msgstr ""
+msgstr "Enter a valid integer."
 
 msgid "Enter a valid email address."
-msgstr ""
+msgstr "Enter a valid email address."
 
 #. Translators: "letters" means latin letters: a-z and A-Z.
-msgid "Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
 msgstr ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
 
-msgid "Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or hyphens."
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or"
+" hyphens."
 msgstr ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or"
+" hyphens."
 
 #, python-format
 msgid "Enter a valid %(protocol)s address."
-msgstr ""
+msgstr "Enter a valid %(protocol)s address."
 
 msgid "IPv4"
-msgstr ""
+msgstr "IPv4"
 
 msgid "IPv6"
-msgstr ""
+msgstr "IPv6"
 
 msgid "IPv4 or IPv6"
-msgstr ""
+msgstr "IPv4 or IPv6"
 
 msgid "Enter only digits separated by commas."
-msgstr ""
+msgstr "Enter only digits separated by commas."
 
 #, python-format
 msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-msgstr ""
+msgstr "Ensure this value is %(limit_value)s (it is %(show_value)s)."
 
 #, python-format
 msgid "Ensure this value is less than or equal to %(limit_value)s."
-msgstr ""
+msgstr "Ensure this value is less than or equal to %(limit_value)s."
 
 #, python-format
 msgid "Ensure this value is greater than or equal to %(limit_value)s."
-msgstr ""
+msgstr "Ensure this value is greater than or equal to %(limit_value)s."
 
 #, python-format
 msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr "Ensure this value is a multiple of step size %(limit_value)s."
+
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
 msgstr ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
 
 #, python-format
-msgid "Ensure this value is a multiple of step size %(limit_value)s, starting from %(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
-msgstr ""
-
-#, python-format
-msgid "Ensure this value has at least %(limit_value)d character (it has %(show_value)d)."
-msgid_plural "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
 msgstr[0] ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
 msgstr[1] ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
 
 #, python-format
-msgid "Ensure this value has at most %(limit_value)d character (it has %(show_value)d)."
-msgid_plural "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
 msgstr[0] ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
 msgstr[1] ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
 
 msgid "Enter a number."
-msgstr ""
+msgstr "Enter a number."
 
 #, python-format
 msgid "Ensure that there are no more than %(max)s digit in total."
 msgid_plural "Ensure that there are no more than %(max)s digits in total."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Ensure that there are no more than %(max)s digit in total."
+msgstr[1] "Ensure that there are no more than %(max)s digits in total."
 
 #, python-format
 msgid "Ensure that there are no more than %(max)s decimal place."
 msgid_plural "Ensure that there are no more than %(max)s decimal places."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Ensure that there are no more than %(max)s decimal place."
+msgstr[1] "Ensure that there are no more than %(max)s decimal places."
 
 #, python-format
-msgid "Ensure that there are no more than %(max)s digit before the decimal point."
-msgid_plural "Ensure that there are no more than %(max)s digits before the decimal point."
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
 msgstr[0] ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
 msgstr[1] ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
 
 #, python-format
-msgid "File extension “%(extension)s” is not allowed. Allowed extensions are: %(allowed_extensions)s."
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
 msgstr ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
 
 msgid "Null characters are not allowed."
-msgstr ""
+msgstr "Null characters are not allowed."
 
 #, fuzzy
 #| msgctxt "assignment.modals"
@@ -24715,50 +25571,52 @@ msgstr "Add"
 
 #, python-format
 msgid "%(model_name)s with this %(field_labels)s already exists."
-msgstr ""
+msgstr "%(model_name)s with this %(field_labels)s already exists."
 
 #, python-format
 msgid "Constraint “%(name)s” is violated."
-msgstr ""
+msgstr "Constraint “%(name)s” is violated."
 
 #, python-format
 msgid "Value %(value)r is not a valid choice."
-msgstr ""
+msgstr "Value %(value)r is not a valid choice."
 
 msgid "This field cannot be null."
-msgstr ""
+msgstr "This field cannot be null."
 
 msgid "This field cannot be blank."
-msgstr ""
+msgstr "This field cannot be blank."
 
 #, python-format
 msgid "%(model_name)s with this %(field_label)s already exists."
-msgstr ""
+msgstr "%(model_name)s with this %(field_label)s already exists."
 
 #. Translators: The 'lookup_type' is one of 'date', 'year' or
 #. 'month'. Eg: "Title must be unique for pub_date year"
 #, python-format
-msgid "%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
 msgstr ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
 
 #, python-format
 msgid "Field of type: %(field_type)s"
-msgstr ""
+msgstr "Field of type: %(field_type)s"
 
 #, python-format
 msgid "“%(value)s” value must be either True or False."
-msgstr ""
+msgstr "“%(value)s” value must be either True or False."
 
 #, python-format
 msgid "“%(value)s” value must be either True, False, or None."
-msgstr ""
+msgstr "“%(value)s” value must be either True, False, or None."
 
 msgid "Boolean (Either True or False)"
-msgstr ""
+msgstr "Boolean (Either True or False)"
 
 #, python-format
 msgid "String (up to %(max_length)s)"
-msgstr ""
+msgstr "String (up to %(max_length)s)"
 
 #, fuzzy
 #| msgctxt "exams.dashboard"
@@ -24767,40 +25625,60 @@ msgid "String (unlimited)"
 msgstr "Unlimited"
 
 msgid "Comma-separated integers"
-msgstr ""
+msgstr "Comma-separated integers"
 
 #, python-format
-msgid "“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD format."
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
 msgstr ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
 
 #, python-format
-msgid "“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid date."
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
 msgstr ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
 
 msgid "Date (without time)"
-msgstr ""
+msgstr "Date (without time)"
 
 #, python-format
-msgid "“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format."
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
 msgstr ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
 
 #, python-format
-msgid "“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
 msgstr ""
+"“%(value)s” value has the correct format (YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
 
 msgid "Date (with time)"
-msgstr ""
+msgstr "Date (with time)"
 
 #, python-format
 msgid "“%(value)s” value must be a decimal number."
-msgstr ""
+msgstr "“%(value)s” value must be a decimal number."
 
 msgid "Decimal number"
-msgstr ""
+msgstr "Decimal number"
 
 #, python-format
-msgid "“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[.uuuuuu] format."
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
 msgstr ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
 
 #, fuzzy
 #| msgctxt "assignment.legacy.item"
@@ -24822,7 +25700,7 @@ msgstr "File name"
 
 #, python-format
 msgid "“%(value)s” value must be a float."
-msgstr ""
+msgstr "“%(value)s” value must be a float."
 
 #, fuzzy
 #| msgctxt "exams.template.supervision_detail"
@@ -24832,16 +25710,16 @@ msgstr "Violation"
 
 #, python-format
 msgid "“%(value)s” value must be an integer."
-msgstr ""
+msgstr "“%(value)s” value must be an integer."
 
 msgid "Integer"
-msgstr ""
+msgstr "Integer"
 
 msgid "Big (8 byte) integer"
-msgstr ""
+msgstr "Big (8 byte) integer"
 
 msgid "Small integer"
-msgstr ""
+msgstr "Small integer"
 
 #, fuzzy
 #| msgctxt "organizations.settings"
@@ -24857,47 +25735,55 @@ msgstr "Address"
 
 #, python-format
 msgid "“%(value)s” value must be either None, True or False."
-msgstr ""
+msgstr "“%(value)s” value must be either None, True or False."
 
 msgid "Boolean (Either True, False or None)"
-msgstr ""
+msgstr "Boolean (Either True, False or None)"
 
 msgid "Positive big integer"
-msgstr ""
+msgstr "Positive big integer"
 
 msgid "Positive integer"
-msgstr ""
+msgstr "Positive integer"
 
 msgid "Positive small integer"
-msgstr ""
+msgstr "Positive small integer"
 
 #, python-format
 msgid "Slug (up to %(max_length)s)"
-msgstr ""
+msgstr "Slug (up to %(max_length)s)"
 
 msgid "Text"
-msgstr ""
+msgstr "Text"
 
 #, python-format
-msgid "“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] format."
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
 msgstr ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
 
 #, python-format
-msgid "“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an invalid time."
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
 msgstr ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
 
 msgid "Time"
-msgstr ""
+msgstr "Time"
 
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 msgid "Raw binary data"
-msgstr ""
+msgstr "Raw binary data"
 
 #, python-format
 msgid "“%(value)s” is not a valid UUID."
-msgstr ""
+msgstr "“%(value)s” is not a valid UUID."
 
 #, fuzzy
 #| msgctxt "accounts.register.js"
@@ -24918,37 +25804,37 @@ msgid "Image"
 msgstr "Question image (optional)"
 
 msgid "A JSON object"
-msgstr ""
+msgstr "A JSON object"
 
 msgid "Value must be valid JSON."
-msgstr ""
+msgstr "Value must be valid JSON."
 
 #, python-format
 msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
-msgstr ""
+msgstr "%(model)s instance with %(field)s %(value)r is not a valid choice."
 
 msgid "Foreign Key (type determined by related field)"
-msgstr ""
+msgstr "Foreign Key (type determined by related field)"
 
 msgid "One-to-one relationship"
-msgstr ""
+msgstr "One-to-one relationship"
 
 #, python-format
 msgid "%(from)s-%(to)s relationship"
-msgstr ""
+msgstr "%(from)s-%(to)s relationship"
 
 #, python-format
 msgid "%(from)s-%(to)s relationships"
-msgstr ""
+msgstr "%(from)s-%(to)s relationships"
 
 msgid "Many-to-many relationship"
-msgstr ""
+msgstr "Many-to-many relationship"
 
 #. Translators: If found as last label character, these punctuation
 #. characters will prevent the default label_suffix to be appended to the
 #. label
 msgid ":?.!"
-msgstr ""
+msgstr ":?.!"
 
 #, fuzzy
 #| msgctxt "exams.view.extract_job.error"
@@ -24957,16 +25843,16 @@ msgid "This field is required."
 msgstr "File is required."
 
 msgid "Enter a whole number."
-msgstr ""
+msgstr "Enter a whole number."
 
 msgid "Enter a valid date."
-msgstr ""
+msgstr "Enter a valid date."
 
 msgid "Enter a valid time."
-msgstr ""
+msgstr "Enter a valid time."
 
 msgid "Enter a valid date/time."
-msgstr ""
+msgstr "Enter a valid date/time."
 
 #, fuzzy
 #| msgctxt "live_exam.view.message"
@@ -24976,10 +25862,10 @@ msgstr "Select a valid reaction."
 
 #, python-brace-format
 msgid "The number of days must be between {min_days} and {max_days}."
-msgstr ""
+msgstr "The number of days must be between {min_days} and {max_days}."
 
 msgid "No file was submitted. Check the encoding type on the form."
-msgstr ""
+msgstr "No file was submitted. Check the encoding type on the form."
 
 #, fuzzy
 #| msgctxt "exams.template.teacher_exam_results"
@@ -24988,53 +25874,65 @@ msgid "No file was submitted."
 msgstr "Submitted"
 
 msgid "The submitted file is empty."
-msgstr ""
+msgstr "The submitted file is empty."
 
 #, python-format
-msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
-msgid_plural "Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgid ""
+"Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
 msgstr[0] ""
+"Ensure this filename has at most %(max)d character (it has %(length)d)."
 msgstr[1] ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
 
 msgid "Please either submit a file or check the clear checkbox, not both."
-msgstr ""
+msgstr "Please either submit a file or check the clear checkbox, not both."
 
-msgid "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
 msgstr ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
 
 #, python-format
 msgid "Select a valid choice. %(value)s is not one of the available choices."
-msgstr ""
+msgstr "Select a valid choice. %(value)s is not one of the available choices."
 
 msgid "Enter a list of values."
-msgstr ""
+msgstr "Enter a list of values."
 
 msgid "Enter a complete value."
-msgstr ""
+msgstr "Enter a complete value."
 
 msgid "Enter a valid UUID."
-msgstr ""
+msgstr "Enter a valid UUID."
 
 msgid "Enter a valid JSON."
-msgstr ""
+msgstr "Enter a valid JSON."
 
 #. Translators: This is the default suffix added to form field labels
 msgid ":"
-msgstr ""
+msgstr ":"
 
 #, python-format
 msgid "(Hidden field %(name)s) %(error)s"
-msgstr ""
+msgstr "(Hidden field %(name)s) %(error)s"
 
 #, python-format
-msgid "ManagementForm data is missing or has been tampered with. Missing fields: %(field_names)s. You may need to file a bug report if the issue persists."
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
 msgstr ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
 
 #, python-format
 msgid "Please submit at most %(num)d form."
 msgid_plural "Please submit at most %(num)d forms."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Please submit at most %(num)d form."
+msgstr[1] "Please submit at most %(num)d forms."
 
 #, fuzzy, python-format
 #| msgctxt "staff.management"
@@ -25052,32 +25950,43 @@ msgstr "Order"
 
 #, python-format
 msgid "Please correct the duplicate data for %(field)s."
-msgstr ""
+msgstr "Please correct the duplicate data for %(field)s."
 
 #, python-format
 msgid "Please correct the duplicate data for %(field)s, which must be unique."
 msgstr ""
+"Please correct the duplicate data for %(field)s, which must be unique."
 
 #, python-format
-msgid "Please correct the duplicate data for %(field_name)s which must be unique for the %(lookup)s in %(date_field)s."
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
 msgstr ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
 
 msgid "Please correct the duplicate values below."
-msgstr ""
+msgstr "Please correct the duplicate values below."
 
 msgid "The inline value did not match the parent instance."
-msgstr ""
+msgstr "The inline value did not match the parent instance."
 
-msgid "Select a valid choice. That choice is not one of the available choices."
+msgid ""
+"Select a valid choice. That choice is not one of the available choices."
 msgstr ""
+"Select a valid choice. That choice is not one of the available choices."
 
 #, python-format
 msgid "“%(pk)s” is not a valid value."
-msgstr ""
+msgstr "“%(pk)s” is not a valid value."
 
 #, python-format
-msgid "%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it may be ambiguous or it may not exist."
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
 msgstr ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
 
 #, fuzzy
 #| msgctxt "exams.template.coding_exam"
@@ -25092,58 +26001,58 @@ msgid "Currently"
 msgstr "Current"
 
 msgid "Change"
-msgstr ""
+msgstr "Change"
 
 msgid "Unknown"
-msgstr ""
+msgstr "Unknown"
 
 msgid "Yes"
-msgstr ""
+msgstr "Yes"
 
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Translators: Please do not add spaces around commas.
 msgid "yes,no,maybe"
-msgstr ""
+msgstr "yes,no,maybe"
 
 #, python-format
 msgid "%(size)d byte"
 msgid_plural "%(size)d bytes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(size)d byte"
+msgstr[1] "%(size)d bytes"
 
 #, python-format
 msgid "%s KB"
-msgstr ""
+msgstr "%s KB"
 
 #, python-format
 msgid "%s MB"
-msgstr ""
+msgstr "%s MB"
 
 #, python-format
 msgid "%s GB"
-msgstr ""
+msgstr "%s GB"
 
 #, python-format
 msgid "%s TB"
-msgstr ""
+msgstr "%s TB"
 
 #, python-format
 msgid "%s PB"
-msgstr ""
+msgstr "%s PB"
 
 msgid "p.m."
-msgstr ""
+msgstr "p.m."
 
 msgid "a.m."
-msgstr ""
+msgstr "a.m."
 
 msgid "PM"
-msgstr ""
+msgstr "PM"
 
 msgid "AM"
-msgstr ""
+msgstr "AM"
 
 #, fuzzy
 #| msgctxt "supervision.config.choice.template"
@@ -25152,43 +26061,43 @@ msgid "midnight"
 msgstr "Weight"
 
 msgid "noon"
-msgstr ""
+msgstr "noon"
 
 msgid "Monday"
-msgstr ""
+msgstr "Monday"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Tuesday"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Wednesday"
 
 msgid "Thursday"
-msgstr ""
+msgstr "Thursday"
 
 msgid "Friday"
-msgstr ""
+msgstr "Friday"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Saturday"
 
 msgid "Sunday"
-msgstr ""
+msgstr "Sunday"
 
 msgid "Mon"
-msgstr ""
+msgstr "Mon"
 
 msgid "Tue"
-msgstr ""
+msgstr "Tue"
 
 msgid "Wed"
-msgstr ""
+msgstr "Wed"
 
 msgid "Thu"
-msgstr ""
+msgstr "Thu"
 
 msgid "Fri"
-msgstr ""
+msgstr "Fri"
 
 #, fuzzy
 #| msgid "Status"
@@ -25207,7 +26116,7 @@ msgid "January"
 msgstr "manual"
 
 msgid "February"
-msgstr ""
+msgstr "February"
 
 #, fuzzy
 #| msgctxt "accounts.my_results_page"
@@ -25216,19 +26125,19 @@ msgid "March"
 msgstr "Search"
 
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgid "May"
-msgstr ""
+msgstr "May"
 
 msgid "June"
-msgstr ""
+msgstr "June"
 
 msgid "July"
-msgstr ""
+msgstr "July"
 
 msgid "August"
-msgstr ""
+msgstr "August"
 
 #, fuzzy
 #| msgctxt "courses.partial.member_accordion"
@@ -25237,7 +26146,7 @@ msgid "September"
 msgstr "No member added yet."
 
 msgid "October"
-msgstr ""
+msgstr "October"
 
 #, fuzzy
 #| msgctxt "membership_request.role"
@@ -25252,22 +26161,22 @@ msgid "December"
 msgstr "Member"
 
 msgid "jan"
-msgstr ""
+msgstr "jan"
 
 msgid "feb"
-msgstr ""
+msgstr "feb"
 
 msgid "mar"
-msgstr ""
+msgstr "mar"
 
 msgid "apr"
-msgstr ""
+msgstr "apr"
 
 msgid "may"
-msgstr ""
+msgstr "may"
 
 msgid "jun"
-msgstr ""
+msgstr "jun"
 
 #, fuzzy
 #| msgctxt "courses.form.resource.placeholder"
@@ -25281,7 +26190,7 @@ msgid "aug"
 msgstr "ago"
 
 msgid "sep"
-msgstr ""
+msgstr "sep"
 
 #, fuzzy
 #| msgctxt "blog.email.welcome_email"
@@ -25290,18 +26199,18 @@ msgid "oct"
 msgstr "Visit blog"
 
 msgid "nov"
-msgstr ""
+msgstr "nov"
 
 msgid "dec"
-msgstr ""
+msgstr "dec"
 
 msgctxt "abbrev. month"
 msgid "Jan."
-msgstr ""
+msgstr "Jan."
 
 msgctxt "abbrev. month"
 msgid "Feb."
-msgstr ""
+msgstr "Feb."
 
 #, fuzzy
 #| msgctxt "accounts.my_results_page"
@@ -25312,39 +26221,39 @@ msgstr "Search"
 
 msgctxt "abbrev. month"
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgctxt "abbrev. month"
 msgid "May"
-msgstr ""
+msgstr "May"
 
 msgctxt "abbrev. month"
 msgid "June"
-msgstr ""
+msgstr "June"
 
 msgctxt "abbrev. month"
 msgid "July"
-msgstr ""
+msgstr "July"
 
 msgctxt "abbrev. month"
 msgid "Aug."
-msgstr ""
+msgstr "Aug."
 
 msgctxt "abbrev. month"
 msgid "Sept."
-msgstr ""
+msgstr "Sept."
 
 msgctxt "abbrev. month"
 msgid "Oct."
-msgstr ""
+msgstr "Oct."
 
 msgctxt "abbrev. month"
 msgid "Nov."
-msgstr ""
+msgstr "Nov."
 
 msgctxt "abbrev. month"
 msgid "Dec."
-msgstr ""
+msgstr "Dec."
 
 #, fuzzy
 #| msgctxt "exams.model.question.choice.difficulty_source"
@@ -25355,7 +26264,7 @@ msgstr "manual"
 
 msgctxt "alt. month"
 msgid "February"
-msgstr ""
+msgstr "February"
 
 #, fuzzy
 #| msgctxt "accounts.my_results_page"
@@ -25366,23 +26275,23 @@ msgstr "Search"
 
 msgctxt "alt. month"
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgctxt "alt. month"
 msgid "May"
-msgstr ""
+msgstr "May"
 
 msgctxt "alt. month"
 msgid "June"
-msgstr ""
+msgstr "June"
 
 msgctxt "alt. month"
 msgid "July"
-msgstr ""
+msgstr "July"
 
 msgctxt "alt. month"
 msgid "August"
-msgstr ""
+msgstr "August"
 
 #, fuzzy
 #| msgctxt "courses.partial.member_accordion"
@@ -25393,7 +26302,7 @@ msgstr "No member added yet."
 
 msgctxt "alt. month"
 msgid "October"
-msgstr ""
+msgstr "October"
 
 #, fuzzy
 #| msgctxt "membership_request.role"
@@ -25410,55 +26319,55 @@ msgid "December"
 msgstr "Member"
 
 msgid "This is not a valid IPv6 address."
-msgstr ""
+msgstr "This is not a valid IPv6 address."
 
 #, python-format
 msgctxt "String to return when truncating text"
 msgid "%(truncated_text)s…"
-msgstr ""
+msgstr "%(truncated_text)s…"
 
 msgid "or"
-msgstr ""
+msgstr "or"
 
 #. Translators: This string is used as a separator between list elements
 msgid ", "
-msgstr ""
+msgstr ", "
 
 #, python-format
 msgid "%(num)d year"
 msgid_plural "%(num)d years"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d year"
+msgstr[1] "%(num)d years"
 
 #, python-format
 msgid "%(num)d month"
 msgid_plural "%(num)d months"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d month"
+msgstr[1] "%(num)d months"
 
 #, python-format
 msgid "%(num)d week"
 msgid_plural "%(num)d weeks"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d week"
+msgstr[1] "%(num)d weeks"
 
 #, python-format
 msgid "%(num)d day"
 msgid_plural "%(num)d days"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d day"
+msgstr[1] "%(num)d days"
 
 #, python-format
 msgid "%(num)d hour"
 msgid_plural "%(num)d hours"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d hour"
+msgstr[1] "%(num)d hours"
 
 #, python-format
 msgid "%(num)d minute"
 msgid_plural "%(num)d minutes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d minute"
+msgstr[1] "%(num)d minutes"
 
 #, fuzzy
 #| msgctxt "exams.model.coding_test_case.choice.visibility"
@@ -25467,40 +26376,74 @@ msgid "Forbidden"
 msgstr "Hidden"
 
 msgid "CSRF verification failed. Request aborted."
-msgstr ""
+msgstr "CSRF verification failed. Request aborted."
 
-msgid "You are seeing this message because this HTTPS site requires a “Referer header” to be sent by your web browser, but none was sent. This header is required for security reasons, to ensure that your browser is not being hijacked by third parties."
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
 msgstr ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
 
-msgid "If you have configured your browser to disable “Referer” headers, please re-enable them, at least for this site, or for HTTPS connections, or for “same-origin” requests."
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
 msgstr ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
 
-msgid "If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or including the “Referrer-Policy: no-referrer” header, please remove them. The CSRF protection requires the “Referer” header to do strict referer checking. If you’re concerned about privacy, use alternatives like <a rel=\"noreferrer\" …> for links to third-party sites."
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or"
+" including the “Referrer-Policy: no-referrer” header, please remove them. "
+"The CSRF protection requires the “Referer” header to do strict referer "
+"checking. If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
 msgstr ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or"
+" including the “Referrer-Policy: no-referrer” header, please remove them. "
+"The CSRF protection requires the “Referer” header to do strict referer "
+"checking. If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
 
-msgid "You are seeing this message because this site requires a CSRF cookie when submitting forms. This cookie is required for security reasons, to ensure that your browser is not being hijacked by third parties."
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
 msgstr ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
 
-msgid "If you have configured your browser to disable cookies, please re-enable them, at least for this site, or for “same-origin” requests."
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
 msgstr ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
 
 msgid "More information is available with DEBUG=True."
-msgstr ""
+msgstr "More information is available with DEBUG=True."
 
 msgid "No year specified"
-msgstr ""
+msgstr "No year specified"
 
 msgid "Date out of range"
-msgstr ""
+msgstr "Date out of range"
 
 msgid "No month specified"
-msgstr ""
+msgstr "No month specified"
 
 msgid "No day specified"
-msgstr ""
+msgstr "No day specified"
 
 msgid "No week specified"
-msgstr ""
+msgstr "No week specified"
 
 #, fuzzy, python-format
 #| msgctxt "assignment.model.meta"
@@ -25509,73 +26452,89 @@ msgid "No %(verbose_name_plural)s available"
 msgstr "Verbose name plural"
 
 #, python-format
-msgid "Future %(verbose_name_plural)s not available because %(class_name)s.allow_future is False."
+msgid ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
 msgstr ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
 
 #, python-format
 msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
-msgstr ""
+msgstr "Invalid date string “%(datestr)s” given format “%(format)s”"
 
 #, python-format
 msgid "No %(verbose_name)s found matching the query"
-msgstr ""
+msgstr "No %(verbose_name)s found matching the query"
 
 msgid "Page is not “last”, nor can it be converted to an int."
-msgstr ""
+msgstr "Page is not “last”, nor can it be converted to an int."
 
 #, python-format
 msgid "Invalid page (%(page_number)s): %(message)s"
-msgstr ""
+msgstr "Invalid page (%(page_number)s): %(message)s"
 
 #, python-format
 msgid "Empty list and “%(class_name)s.allow_empty” is False."
-msgstr ""
+msgstr "Empty list and “%(class_name)s.allow_empty” is False."
 
 msgid "Directory indexes are not allowed here."
-msgstr ""
+msgstr "Directory indexes are not allowed here."
 
 #, python-format
 msgid "“%(path)s” does not exist"
-msgstr ""
+msgstr "“%(path)s” does not exist"
 
 #, python-format
 msgid "Index of %(directory)s"
-msgstr ""
+msgstr "Index of %(directory)s"
 
 msgid "The install worked successfully! Congratulations!"
-msgstr ""
+msgstr "The install worked successfully! Congratulations!"
 
 #, python-format
-msgid "View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
 msgstr ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
 
 #, python-format
-msgid "You are seeing this page because <a href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not configured any URLs."
+msgid ""
+"You are seeing this page because <a "
+"href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" "
+"target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file "
+"and you have not configured any URLs."
 msgstr ""
+"You are seeing this page because <a "
+"href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" "
+"target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file "
+"and you have not configured any URLs."
 
 msgid "Django Documentation"
-msgstr ""
+msgstr "Django Documentation"
 
 msgid "Topics, references, &amp; how-to’s"
-msgstr ""
+msgstr "Topics, references, &amp; how-to’s"
 
 msgid "Tutorial: A Polling App"
-msgstr ""
+msgstr "Tutorial: A Polling App"
 
 msgid "Get started with Django"
-msgstr ""
+msgstr "Get started with Django"
 
 msgid "Django Community"
-msgstr ""
+msgstr "Django Community"
 
 msgid "Connect, get help, or contribute"
-msgstr ""
+msgstr "Connect, get help, or contribute"
 
 #, python-format
 msgid "0 of %(count)d selected"
 msgid_plural "of %(count)d selected"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "0 of %(count)d selected"
+msgstr[1] "of %(count)d selected"
 
 #, fuzzy, python-format
 #| msgctxt "courses.view.message"
@@ -25598,7 +26557,7 @@ msgid "Search In"
 msgstr "Search"
 
 msgid "Haystack"
-msgstr ""
+msgstr "Haystack"
 
 #, fuzzy
 #| msgctxt "staff.management"
@@ -25607,10 +26566,10 @@ msgid "Search Queries"
 msgstr "Search teacher invites..."
 
 msgid "Query"
-msgstr ""
+msgstr "Query"
 
 msgid "Backend Alias"
-msgstr ""
+msgstr "Backend Alias"
 
 #, fuzzy
 #| msgctxt "assignment.notification.choice.type"
@@ -25619,50 +26578,60 @@ msgid "Timeline"
 msgstr "Deadline"
 
 msgid "Kwargs"
-msgstr ""
+msgstr "Kwargs"
 
 #, python-format
 msgid "Content purported to be compressed with %s but failed to decompress."
-msgstr ""
+msgstr "Content purported to be compressed with %s but failed to decompress."
 
 #, python-format
 msgid "Unsupported value for qop: %s."
-msgstr ""
+msgstr "Unsupported value for qop: %s."
 
 #, python-format
 msgid "Unsupported value for algorithm: %s."
-msgstr ""
+msgstr "Unsupported value for algorithm: %s."
 
 msgid "The challenge doesn't contain a server nonce, or this one is empty."
-msgstr ""
+msgstr "The challenge doesn't contain a server nonce, or this one is empty."
 
 #, python-format
 msgid "Unsupported value for pw-algorithm: %s."
-msgstr ""
+msgstr "Unsupported value for pw-algorithm: %s."
 
 msgid "Redirected but the response is missing a Location: header."
-msgstr ""
+msgstr "Redirected but the response is missing a Location: header."
 
 msgid "show this help message and exit"
-msgstr ""
+msgstr "show this help message and exit"
 
 #, python-format
 msgid "Attempting to connect to qpid with SASL mechanism %s"
-msgstr ""
+msgstr "Attempting to connect to qpid with SASL mechanism %s"
 
 #, python-format
 msgid "Connected to qpid with SASL mechanism %s"
-msgstr ""
+msgstr "Connected to qpid with SASL mechanism %s"
 
 #, python-format
 msgid "Unable to connect to qpid with SASL mechanism %s"
-msgstr ""
+msgstr "Unable to connect to qpid with SASL mechanism %s"
 
-msgid "A short code to identify the type of this package. For example: gem for a Rubygem, docker for a container, pypi for a Python Wheel or Egg, maven for a Maven Jar, deb for a Debian package, etc."
+msgid ""
+"A short code to identify the type of this package. For example: gem for a "
+"Rubygem, docker for a container, pypi for a Python Wheel or Egg, maven for a"
+" Maven Jar, deb for a Debian package, etc."
 msgstr ""
+"A short code to identify the type of this package. For example: gem for a "
+"Rubygem, docker for a container, pypi for a Python Wheel or Egg, maven for a"
+" Maven Jar, deb for a Debian package, etc."
 
-msgid "Package name prefix, such as Maven groupid, Docker image owner, GitHub user or organization, etc."
+msgid ""
+"Package name prefix, such as Maven groupid, Docker image owner, GitHub user "
+"or organization, etc."
 msgstr ""
+"Package name prefix, such as Maven groupid, Docker image owner, GitHub user "
+"or organization, etc."
 
 #, fuzzy
 #| msgctxt "core.errors.csrf"
@@ -25676,15 +26645,19 @@ msgstr "Refresh the page"
 msgid "Version of the package."
 msgstr "Refresh the page"
 
-msgid "Extra qualifying data for a package such as the name of an OS, architecture, distro, etc."
+msgid ""
+"Extra qualifying data for a package such as the name of an OS, architecture,"
+" distro, etc."
 msgstr ""
+"Extra qualifying data for a package such as the name of an OS, architecture,"
+" distro, etc."
 
 msgid "Extra subpath within a package, relative to the package root."
-msgstr ""
+msgstr "Extra subpath within a package, relative to the package root."
 
 #, python-brace-format
 msgid "Value too long for field \"{field_name}\"."
-msgstr ""
+msgstr "Value too long for field \"{field_name}\"."
 
 #, fuzzy
 #| msgctxt "exams.form.group.error"
@@ -25698,7 +26671,7 @@ msgid "Arguments"
 msgstr "Assignment"
 
 msgid "(deprecated) "
-msgstr ""
+msgstr "(deprecated) "
 
 #, fuzzy
 #| msgctxt "profile.category_management"
@@ -25707,7 +26680,7 @@ msgid "[default: {}]"
 msgstr "Default"
 
 msgid "[env var: {}]"
-msgstr ""
+msgstr "[env var: {}]"
 
 #, fuzzy
 #| msgctxt "exams.form.group.error"
@@ -25722,11 +26695,11 @@ msgid "Error"
 msgstr "Errors"
 
 msgid "Aborted."
-msgstr ""
+msgstr "Aborted."
 
 #, python-brace-format
 msgid "Try [blue]'{command_path} {help_option}'[/] for help."
-msgstr ""
+msgstr "Try [blue]'{command_path} {help_option}'[/] for help."
 
 msgctxt "profile.transcript"
 msgid "Transkript"
@@ -25801,8 +26774,12 @@ msgid "Davam edir"
 msgstr "In progress"
 
 msgctxt "profile.transcript"
-msgid "GPA kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ qiymətlənməyən fənlər sonra əlavə olunur."
-msgstr "The GPA is credit-weighted: passed and failed courses count; not-yet-graded courses are added later."
+msgid ""
+"GPA kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ "
+"qiymətlənməyən fənlər sonra əlavə olunur."
+msgstr ""
+"The GPA is credit-weighted: passed and failed courses count; not-yet-graded "
+"courses are added later."
 
 msgctxt "profile.section"
 msgid "my_transcript"
@@ -26105,8 +27082,12 @@ msgid "Yeni fənn açılışı"
 msgstr "New offering"
 
 msgctxt "registrar.console"
-msgid "Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron jurnalı dərhal hazır olur."
-msgstr "Opens a subject for a semester + group and assigns an instructor; the teacher's e-journal is ready at once."
+msgid ""
+"Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron "
+"jurnalı dərhal hazır olur."
+msgstr ""
+"Opens a subject for a semester + group and assigns an instructor; the "
+"teacher's e-journal is ready at once."
 
 msgctxt "registrar.console"
 msgid "Tələbə təyinatları"
@@ -26153,8 +27134,12 @@ msgid "Tələbə təyinatı redaktəsi"
 msgstr "Edit student assignment"
 
 msgctxt "registrar.console"
-msgid "Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin məcburi fənlərinə avtomatik yazır."
-msgstr "Assigns a student to a program/curriculum/group; optionally auto-enrolls them in the current semester's mandatory subjects."
+msgid ""
+"Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
+"məcburi fənlərinə avtomatik yazır."
+msgstr ""
+"Assigns a student to a program/curriculum/group; optionally auto-enrolls "
+"them in the current semester's mandatory subjects."
 
 msgctxt "registrar.academic_status"
 msgid "Enrolled"
@@ -26197,8 +27182,12 @@ msgid "Hazırkı qrup"
 msgstr "Current group"
 
 msgctxt "registrar.console"
-msgid "Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə bölmənin davamiyyəti sıfırlanır."
-msgstr "The transfer moves this semester's group subjects to the new group's sections; the old section's attendance is reset."
+msgid ""
+"Köçürmə cari semestrin qrup fənlərini yeni qrupun bölmələrinə keçirir; köhnə"
+" bölmənin davamiyyəti sıfırlanır."
+msgstr ""
+"The transfer moves this semester's group subjects to the new group's "
+"sections; the old section's attendance is reset."
 
 msgctxt "registrar.console"
 msgid "Başqa qrupa köçür"
@@ -26214,7 +27203,8 @@ msgstr "Assessment components"
 
 msgctxt "registrar.journal"
 msgid "opsional — giriş balını seminar/kollokvium/SDF üzrə çəkili hesablayır"
-msgstr "optional — computes the entry score weighted across seminar/colloquium/SIW"
+msgstr ""
+"optional — computes the entry score weighted across seminar/colloquium/SIW"
 
 msgctxt "registrar.journal"
 msgid "Ad"
@@ -26290,8 +27280,11 @@ msgid "Geri qaytarılma səbəbi"
 msgstr "Return reason"
 
 msgctxt "registrar.approval"
-msgid "Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
-msgstr "Submit the journal for approval? Editing is temporarily locked after submission."
+msgid ""
+"Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
+msgstr ""
+"Submit the journal for approval? Editing is temporarily locked after "
+"submission."
 
 msgctxt "registrar.approval"
 msgid "Təsdiqə göndər"
@@ -26302,8 +27295,12 @@ msgid "Kafedra təsdiqi"
 msgstr "Chair approval"
 
 msgctxt "registrar.approval"
-msgid "Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. Davam edilsin?"
-msgstr "Dean approval makes the grades official and locks the journal permanently. Continue?"
+msgid ""
+"Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. "
+"Davam edilsin?"
+msgstr ""
+"Dean approval makes the grades official and locks the journal permanently. "
+"Continue?"
 
 msgctxt "registrar.approval"
 msgid "Dekan təsdiqi"
@@ -26990,8 +27987,10 @@ msgid "meyar"
 msgstr "criteria"
 
 msgctxt "registrar.rubric"
-msgid "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
-msgstr "No rubrics yet — create one to grade components criterion by criterion."
+msgid ""
+"Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
+msgstr ""
+"No rubrics yet — create one to grade components criterion by criterion."
 
 msgctxt "registrar.rubric"
 msgid "Rubrik adı"
@@ -27006,8 +28005,12 @@ msgid "Meyarlar — hər sətirdə"
 msgstr "Criteria — one per line as"
 
 msgctxt "registrar.rubric"
-msgid "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)."
-msgstr "The sum of criterion points is written to the component score (limited by the component cap)."
+msgid ""
+"Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə "
+"məhdudlaşır)."
+msgstr ""
+"The sum of criterion points is written to the component score (limited by "
+"the component cap)."
 
 msgctxt "registrar.journal"
 msgid "Rubrik"
