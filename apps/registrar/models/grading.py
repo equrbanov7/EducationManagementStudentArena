@@ -238,6 +238,17 @@ class FinalGrade(UUIDModel, TimeStampedModel):
     exam_score = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True, help_text="Yekun imtahan balı (≈max 50)."
     )
+    # U15 — bonus/cərimə: müsbət (əlavə fəallıq) və ya mənfi (gecikmə cəriməsi)
+    # düzəliş; ümumi bal 0..100 aralığında clamp olunur (finals.compute_final_result).
+    bonus = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        help_text="Bonus (+) / cərimə (−) düzəlişi — ümumi bala əlavə olunur.",
+    )
+    comment = models.CharField(
+        max_length=500, blank=True, help_text="Müəllimin yekun rəyi — tələbəyə görünür (opsional)."
+    )
     is_published = models.BooleanField(default=False, help_text="Nəticə rəsmiləşdirilib.")
     entered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"

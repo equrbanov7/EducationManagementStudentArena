@@ -215,6 +215,7 @@ def _handle_save_finals(request, offering):
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
+    extras: dict = {}
     for key, raw in request.POST.items():
         if key.startswith("exam__"):
             enrollment = enrollments.get(key[len("exam__") :])
@@ -224,6 +225,23 @@ def _handle_save_finals(request, offering):
             enrollment = enrollments.get(key[len("resit__") :])
             if enrollment is not None and raw.strip() != "":
                 finals.set_resit_score(enrollment=enrollment, score=raw, by_user=request.user)
+        elif key.startswith("bonus__"):
+            enrollment = enrollments.get(key[len("bonus__") :])
+            if enrollment is not None:
+                extras.setdefault(enrollment.id, {"enrollment": enrollment})["bonus"] = raw or "0"
+        elif key.startswith("fcomment__"):
+            enrollment = enrollments.get(key[len("fcomment__") :])
+            if enrollment is not None:
+                extras.setdefault(enrollment.id, {"enrollment": enrollment})["comment"] = raw
+    # Bonus/cərimə + rəy (U15) — bal daxil edilməsindən SONRA yazılır ki,
+    # evaluate_resit yekun vəziyyəti bonuslu total ilə görsün.
+    for data in extras.values():
+        finals.set_final_extras(
+            enrollment=data["enrollment"],
+            bonus=data.get("bonus"),
+            comment=data.get("comment"),
+            by_user=request.user,
+        )
     messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 

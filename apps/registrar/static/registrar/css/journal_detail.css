@@ -189,3 +189,22 @@
     text-decoration: none;
 }
 .jd-export-link:hover { background: var(--ems-success-100); color: var(--ems-success-strong); }
+
+/* ── Bonus + rəy sütunları (U15) ─────────────────────────────────────────── */
+.jd-bonus-input { width: 64px; }
+.jd-comment-cell { min-width: 180px; }
+.jd-comment-input {
+    width: 100%;
+    min-width: 170px;
+    padding: 5px 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-800);
+}
+.jd-comment-input:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+.jd-comment-ro { font-size: 0.78rem; color: var(--ems-neutral-600); font-style: italic; }

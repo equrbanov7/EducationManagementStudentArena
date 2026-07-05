@@ -83,8 +83,10 @@ def compute_final_result(*, enrollment, scheme=None):
     eligibility = services.get_exam_eligibility(enrollment=enrollment, limit_percent=limit_percent)
     barred = eligibility["barred"] and not resit_done  # a completed resit lifts the bar
 
+    bonus = final_grade.bonus if final_grade is not None else Decimal("0")
     graded = effective_exam is not None
-    total = entry_score + (effective_exam or Decimal("0"))
+    total = entry_score + (effective_exam or Decimal("0")) + bonus
+    total = max(Decimal("0"), min(Decimal("100"), total))  # bonus/cərimə clamp (U15)
     letter, gpa = score_to_letter(total)
     exam_ok = graded and effective_exam >= scheme.min_final_exam_score
     passed = graded and not barred and total >= scheme.pass_threshold and exam_ok
@@ -109,6 +111,8 @@ def compute_final_result(*, enrollment, scheme=None):
         "min_final_exam_score": scheme.min_final_exam_score,
         "exam_score_max": exam_score_max(scheme),
         "is_published": scheme.is_published,
+        "bonus": bonus,
+        "comment": final_grade.comment if final_grade is not None else "",
     }
 
 
@@ -214,6 +218,52 @@ def set_resit_score(*, enrollment, score, by_user=None):
             ],
         )
     return resit
+
+
+_BONUS_LIMIT = Decimal("20")
+
+
+@transaction.atomic
+def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
+    """Bonus/cərimə (±%(limit)s) və yekun rəyi yaz (U15).
+
+    Bonus bal düzəlişidir → dəyişikliyi qiymət audit izinə yazılır; rəy bal
+    deyil, audit olunmur. Jurnal kilidlidirsə heç nə yazılmır.""" % {"limit": _BONUS_LIMIT}
+    if gradebook.journal_is_locked(enrollment.offering):
+        return None
+    final_grade, _created = FinalGrade.objects.get_or_create(
+        organization=enrollment.organization, enrollment=enrollment
+    )
+    changed_fields = []
+    if bonus is not None:
+        value = _to_decimal(bonus)
+        value = max(-_BONUS_LIMIT, min(_BONUS_LIMIT, value))
+        if value != final_grade.bonus:
+            grade_audit.log_grade_changes(
+                offering=enrollment.offering,
+                by_user=by_user,
+                kind="final",
+                changes=[
+                    {
+                        "student": grade_audit.student_label(enrollment),
+                        "item": "Bonus/cərimə",
+                        "old": grade_audit.score_repr(final_grade.bonus),
+                        "new": grade_audit.score_repr(value),
+                    }
+                ],
+            )
+            final_grade.bonus = value
+            changed_fields.append("bonus")
+    if comment is not None:
+        cleaned = comment.strip()[:500]
+        if cleaned != final_grade.comment:
+            final_grade.comment = cleaned
+            changed_fields.append("comment")
+    if changed_fields:
+        final_grade.entered_by = by_user
+        final_grade.save(update_fields=changed_fields + ["entered_by", "updated_at"])
+        evaluate_resit(enrollment=enrollment, by_user=by_user)
+    return final_grade
 
 
 def _audit_publish(offering, by_user):
