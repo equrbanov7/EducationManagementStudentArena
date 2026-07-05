@@ -49,6 +49,15 @@ EXAM_PDF_OCR_MAX_PAGES = _env_int_setting("EXAM_PDF_OCR_MAX_PAGES", 40, minimum=
 EXAM_PDF_OCR_HIGHLIGHT = _env_bool_setting("EXAM_PDF_OCR_HIGHLIGHT", True)
 EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO = _env_float_setting("EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10, minimum=0.0)
 
+# --- Final imtahan mərkəzi (/exams/final/) giriş siyahısı --------------------
+# Vergüllə ayrılmış IP və ya CIDR (məs. "10.0.0.5,192.168.10.0/24").
+# BOŞ siyahı = hamıya açıq (hazırkı rejim). Doldurulanda yalnız bu
+# ünvanlardan gələn sorğular final səhifəsinə girə bilir.
+# QEYD: MAC ünvanı HTTP səviyyəsində serverə çatmır (yalnız lokal şəbəkə
+# kadrlarında mövcuddur) — MAC-əsaslı məhdudiyyət gələcəkdə imtahan zalı
+# şlüzü/agenti vasitəsilə tətbiq oluna bilər; server tərəfi IP/CIDR yoxlayır.
+FINAL_EXAM_ALLOWED_IPS = [item.strip() for item in os.getenv("FINAL_EXAM_ALLOWED_IPS", "").split(",") if item.strip()]
+
 
 # Request queueing for mutating HTTP calls. This protects every app view from
 # duplicate/bursty writes by serialising unsafe methods per user/session and by

@@ -13931,6 +13931,14 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "Bu sualda düzgün cavab işarəsi tapılmadı — müvəqqəti olaraq A seçildi. Düzgün cavabı mütləq yoxlayıb təyin edin."
 
+msgctxt "exams.view.student.list.title"
+msgid "final_exams"
+msgstr "Final imtahanları"
+
+msgctxt "exams.view.final_center.permission"
+msgid "final_center_ip_not_allowed"
+msgstr "Bu səhifəyə yalnız imtahan mərkəzinin icazə verdiyi kompüterlərdən daxil olmaq mümkündür."
+
 msgctxt "exams.service.access.permission"
 msgid "final_exam_questions_exam_center_only"
 msgstr "Final imtahanının suallarını yalnız imtahan mərkəzi idarə edə bilər."
