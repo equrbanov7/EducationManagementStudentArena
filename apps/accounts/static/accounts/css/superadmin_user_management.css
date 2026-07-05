@@ -353,3 +353,27 @@
     color: var(--ems-primary-700);
 }
 .cabinet-module-btn:hover { border-color: var(--ems-primary-500); }
+
+/* ── U17: Hərf qiyməti şkalası redaktoru (superadmin org-features paneli) ── */
+.letter-bands-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+}
+.letter-bands-input {
+    flex: 1 1 260px;
+    min-width: 220px;
+    font-size: 0.8rem;
+    font-family: var(--ems-font-mono, monospace);
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+}
+.letter-bands-input:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}

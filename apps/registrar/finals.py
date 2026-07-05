@@ -14,26 +14,13 @@ from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 
-from apps.registrar import grade_audit, gradebook, services
+from apps.registrar import grade_audit, gradebook, grading_scale, services
 from apps.registrar.models import FinalGrade, ResitReason, ResitRecord, ResitStatus
 
-# 0..100 ümumi bal → hərf + GPA nöqtəsi (AZ Boloniya default).
-_LETTER_BANDS = (
-    (91, "A", Decimal("4.00")),
-    (81, "B", Decimal("3.50")),
-    (71, "C", Decimal("3.00")),
-    (61, "D", Decimal("2.50")),
-    (51, "E", Decimal("2.00")),
-    (0, "F", Decimal("0.00")),
-)
 
-
-def score_to_letter(total) -> tuple[str, Decimal]:
-    value = Decimal(str(total or 0))
-    for threshold, letter, gpa in _LETTER_BANDS:
-        if value >= threshold:
-            return letter, gpa
-    return "F", Decimal("0.00")
+def score_to_letter(total, organization=None) -> tuple[str, Decimal]:
+    """0..100 ümumi bal → hərf + GPA — tenant şkalası (U17, ``grading_scale``)."""
+    return grading_scale.score_to_letter(total, organization)
 
 
 def _to_decimal(raw) -> Decimal:
@@ -62,14 +49,18 @@ def exam_score_max(scheme) -> int:
     return max(0, 100 - scheme.entry_score_max)
 
 
-def compute_final_result(*, enrollment, scheme=None):
+def compute_final_result(*, enrollment, scheme=None, organization=None):
     """Full result for one enrollment: entry + exam → total → letter → pass/fail.
 
     A completed resit supersedes the original exam score and lifts the absence
-    bar. Until an exam (or resit) score exists the result is "not graded yet"."""
+    bar. Until an exam (or resit) score exists the result is "not graded yet".
+    ``organization`` feeds the tenant letter-band scale (U17); when omitted it
+    is resolved from the scheme (FK-cached per instance)."""
     scheme = scheme or getattr(enrollment.offering, "assessment_scheme", None)
     if scheme is None:
         scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
+    if organization is None:
+        organization = scheme.organization
 
     entry_score = entry_score_for(enrollment, scheme.entry_score_max)
     # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
@@ -87,7 +78,7 @@ def compute_final_result(*, enrollment, scheme=None):
     graded = effective_exam is not None
     total = entry_score + (effective_exam or Decimal("0")) + bonus
     total = max(Decimal("0"), min(Decimal("100"), total))  # bonus/cərimə clamp (U15)
-    letter, gpa = score_to_letter(total)
+    letter, gpa = score_to_letter(total, organization)
     exam_ok = graded and effective_exam >= scheme.min_final_exam_score
     passed = graded and not barred and total >= scheme.pass_threshold and exam_ok
     # Failed once we can judge it: barred (no exam needed) or graded-but-not-passed.

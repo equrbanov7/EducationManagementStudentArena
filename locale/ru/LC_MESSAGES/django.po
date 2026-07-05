@@ -26949,6 +26949,42 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "\"%(organization_name)s\" üçün \"%(module)s\" modulu gizlədildi."
 msgstr "Модуль «%(module)s» скрыт для «%(organization_name)s»."
 
+msgctxt "accounts.superadmin_org_features"
+msgid "Hərf qiyməti şkalası"
+msgstr "Шкала буквенных оценок"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "format: hədd:hərf:gpa (azalan, sonuncu hədd 0)"
+msgstr "формат: порог:буква:gpa (по убыванию, последний порог 0)"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "fərdi şkala"
+msgstr "своя шкала"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Default şkalaya qaytar"
+msgstr "Вернуть шкалу по умолчанию"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Default"
+msgstr "По умолчанию"
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "Hərf şkalası qəbul edilmədi: %(error)s"
+msgstr "Шкала оценок не принята: %(error)s"
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası yeniləndi."
+msgstr "Шкала буквенных оценок обновлена для «%(organization_name)s»."
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası default-a qaytarıldı."
+msgstr "Шкала буквенных оценок сброшена к значению по умолчанию для «%(organization_name)s»."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

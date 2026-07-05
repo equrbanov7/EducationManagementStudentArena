@@ -26900,6 +26900,42 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "\"%(organization_name)s\" üçün \"%(module)s\" modulu gizlədildi."
 msgstr "\"%(organization_name)s\" üçün \"%(module)s\" modulu gizlədildi."
 
+msgctxt "accounts.superadmin_org_features"
+msgid "Hərf qiyməti şkalası"
+msgstr "Hərf qiyməti şkalası"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "format: hədd:hərf:gpa (azalan, sonuncu hədd 0)"
+msgstr "format: hədd:hərf:gpa (azalan, sonuncu hədd 0)"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "fərdi şkala"
+msgstr "fərdi şkala"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Default şkalaya qaytar"
+msgstr "Default şkalaya qaytar"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Default"
+msgstr "Default"
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "Hərf şkalası qəbul edilmədi: %(error)s"
+msgstr "Hərf şkalası qəbul edilmədi: %(error)s"
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası yeniləndi."
+msgstr "\"%(organization_name)s\" üçün hərf qiyməti şkalası yeniləndi."
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası default-a qaytarıldı."
+msgstr "\"%(organization_name)s\" üçün hərf qiyməti şkalası default-a qaytarıldı."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"
