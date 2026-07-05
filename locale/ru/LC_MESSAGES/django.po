@@ -26997,6 +26997,93 @@ msgctxt "registrar.schedule"
 msgid "Google/Apple Calendar üçün .ics faylı"
 msgstr "Файл .ics для Google/Apple Calendar"
 
+msgctxt "registrar.rubric"
+msgid "Rubrik qiymətləndirməsi"
+msgstr "Оценивание по рубрике"
+
+msgctxt "registrar.rubric"
+msgid "Meyar cəmi"
+msgstr "Сумма критериев"
+
+msgctxt "registrar.rubric"
+msgid "Komponent tavanı"
+msgstr "Потолок компонента"
+
+msgctxt "registrar.rubric"
+msgid "Cəmi"
+msgstr "Итого"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik ballarını saxla"
+msgstr "Сохранить баллы рубрики"
+
+msgctxt "registrar.rubric"
+msgid "Cəm avtomatik komponent balına yazılır."
+msgstr "Сумма автоматически записывается в балл компонента."
+
+msgctxt "registrar.rubric"
+msgid "Rubriklər"
+msgstr "Рубрики"
+
+msgctxt "registrar.rubric"
+msgid "Yeni rubrik"
+msgstr "Новая рубрика"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik redaktəsi"
+msgstr "Редактирование рубрики"
+
+msgctxt "registrar.rubric"
+msgid "meyar"
+msgstr "критериев"
+
+msgctxt "registrar.rubric"
+msgid "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
+msgstr "Рубрик пока нет — создайте, чтобы оценивать компоненты по критериям."
+
+msgctxt "registrar.rubric"
+msgid "Rubrik adı"
+msgstr "Название рубрики"
+
+msgctxt "registrar.rubric"
+msgid "Təsvir (opsional)"
+msgstr "Описание (необязательно)"
+
+msgctxt "registrar.rubric"
+msgid "Meyarlar — hər sətirdə"
+msgstr "Критерии — по одному в строке в формате"
+
+msgctxt "registrar.rubric"
+msgid "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)."
+msgstr "Сумма баллов критериев записывается в балл компонента (ограничена потолком компонента)."
+
+msgctxt "registrar.journal"
+msgid "Rubrik"
+msgstr "Рубрика"
+
+msgctxt "registrar.journal"
+msgid "Rubriksiz"
+msgstr "Без рубрики"
+
+msgctxt "registrar.journal"
+msgid "Meyarlarla qiymətləndir"
+msgstr "Оценить по критериям"
+
+msgid "Bu komponentə rubrik qoşulmayıb."
+msgstr "К этому компоненту не привязана рубрика."
+
+msgid "Rubrik balları yadda saxlanıldı."
+msgstr "Баллы рубрики сохранены."
+
+msgid "Rubrik yadda saxlanıldı."
+msgstr "Рубрика сохранена."
+
+msgid "Bu adla rubrik artıq mövcuddur."
+msgstr "Рубрика с таким названием уже существует."
+
+msgid "Tələbə yoxdur"
+msgstr "Студентов нет"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

@@ -26948,6 +26948,93 @@ msgctxt "registrar.schedule"
 msgid "Google/Apple Calendar üçün .ics faylı"
 msgstr "Google/Apple Calendar üçün .ics faylı"
 
+msgctxt "registrar.rubric"
+msgid "Rubrik qiymətləndirməsi"
+msgstr "Rubrik qiymətləndirməsi"
+
+msgctxt "registrar.rubric"
+msgid "Meyar cəmi"
+msgstr "Meyar cəmi"
+
+msgctxt "registrar.rubric"
+msgid "Komponent tavanı"
+msgstr "Komponent tavanı"
+
+msgctxt "registrar.rubric"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik ballarını saxla"
+msgstr "Rubrik ballarını saxla"
+
+msgctxt "registrar.rubric"
+msgid "Cəm avtomatik komponent balına yazılır."
+msgstr "Cəm avtomatik komponent balına yazılır."
+
+msgctxt "registrar.rubric"
+msgid "Rubriklər"
+msgstr "Rubriklər"
+
+msgctxt "registrar.rubric"
+msgid "Yeni rubrik"
+msgstr "Yeni rubrik"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik redaktəsi"
+msgstr "Rubrik redaktəsi"
+
+msgctxt "registrar.rubric"
+msgid "meyar"
+msgstr "meyar"
+
+msgctxt "registrar.rubric"
+msgid "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
+msgstr "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
+
+msgctxt "registrar.rubric"
+msgid "Rubrik adı"
+msgstr "Rubrik adı"
+
+msgctxt "registrar.rubric"
+msgid "Təsvir (opsional)"
+msgstr "Təsvir (opsional)"
+
+msgctxt "registrar.rubric"
+msgid "Meyarlar — hər sətirdə"
+msgstr "Meyarlar — hər sətirdə"
+
+msgctxt "registrar.rubric"
+msgid "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)."
+msgstr "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)."
+
+msgctxt "registrar.journal"
+msgid "Rubrik"
+msgstr "Rubrik"
+
+msgctxt "registrar.journal"
+msgid "Rubriksiz"
+msgstr "Rubriksiz"
+
+msgctxt "registrar.journal"
+msgid "Meyarlarla qiymətləndir"
+msgstr "Meyarlarla qiymətləndir"
+
+msgid "Bu komponentə rubrik qoşulmayıb."
+msgstr "Bu komponentə rubrik qoşulmayıb."
+
+msgid "Rubrik balları yadda saxlanıldı."
+msgstr "Rubrik balları yadda saxlanıldı."
+
+msgid "Rubrik yadda saxlanıldı."
+msgstr "Rubrik yadda saxlanıldı."
+
+msgid "Bu adla rubrik artıq mövcuddur."
+msgstr "Bu adla rubrik artıq mövcuddur."
+
+msgid "Tələbə yoxdur"
+msgstr "Tələbə yoxdur"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

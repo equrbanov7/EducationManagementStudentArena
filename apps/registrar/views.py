@@ -120,10 +120,69 @@ def journal_detail(request, offering_id):
             "journal": journal,
             "finals": finals.get_offering_results(offering=offering),
             "component_grid": gradebook.get_component_grid(offering=offering),
+            "org_rubrics": _org_rubrics(offering.organization),
             "can_edit": can_edit_perm and not appr["is_locked"],
             "approval": appr,
             "grade_history": grade_audit.get_grade_history(offering=offering),
             "lesson_kinds": LessonKind.choices,
+            "active_main_nav": "journal",
+        },
+    )
+
+
+def _org_rubrics(organization):
+    """Aktiv rubrik şablonları (komponent formasındakı select üçün, U22)."""
+    from apps.registrar.models import Rubric
+
+    return list(Rubric.objects.filter(organization=organization, is_active=True).order_by("name"))
+
+
+@login_required
+def rubric_grade_view(request, offering_id, component_id):
+    """Meyar-meyar (rubrik) qiymətləndirmə səhifəsi (U22).
+
+    Giriş jurnal detalı ilə eynidir; cədvəl = tələbələr (sətir) × meyarlar
+    (sütun). Yazılan meyar cəmi komponent balına köçürülür (kilid + audit
+    servis qatında)."""
+    from apps.registrar import rubrics as rubrics_service
+    from apps.registrar.models import AssessmentComponent
+
+    offering = get_object_or_404(
+        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
+        pk=offering_id,
+    )
+    if not _can_edit_journal(request.user, offering):
+        raise Http404
+    component = get_object_or_404(AssessmentComponent, pk=component_id, offering=offering)
+    grid = rubrics_service.get_rubric_grid(component)
+    if grid is None:
+        messages.warning(request, _("Bu komponentə rubrik qoşulmayıb."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "#tab-components")
+
+    if request.method == "POST":
+        entries = []
+        for key, raw in request.POST.items():
+            if not key.startswith("rpoints__"):
+                continue
+            parts = key.split("__")
+            if len(parts) != 3:
+                continue
+            _prefix, criterion_id, enrollment_id = parts
+            entries.append({"criterion_id": criterion_id, "enrollment_id": enrollment_id, "points": raw})
+        written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
+        if written or entries:
+            messages.success(request, _("Rubrik balları yadda saxlanıldı."))
+        return redirect(reverse("registrar:rubric_grade", args=[offering.pk, component.pk]))
+
+    appr = approval.approval_context(offering=offering, user=request.user)
+    return render(
+        request,
+        "registrar/rubric_grade.html",
+        {
+            "offering": offering,
+            "component": component,
+            "grid": grid,
+            "can_edit": not appr["is_locked"],
             "active_main_nav": "journal",
         },
     )
@@ -184,6 +243,7 @@ def _handle_save_components(request, offering):
                 "id": request.POST.get(f"comp_id__{index}") or None,
                 "name": request.POST.get(f"comp_name__{index}"),
                 "max_score": request.POST.get(f"comp_max__{index}"),
+                "rubric_id": request.POST.get(f"comp_rubric__{index}") or None,
             }
         )
         index += 1

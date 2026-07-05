@@ -365,11 +365,14 @@ def get_components(offering):
 def save_components(*, offering, definitions, by_user=None):
     """Upsert/delete an offering's assessment components from ``definitions``.
 
-    ``definitions`` = list of ``{"id"?, "name", "max_score"}``. Rows with an id
-    not present are deleted. Blocked once the journal is locked."""
+    ``definitions`` = list of ``{"id"?, "name", "max_score", "rubric_id"?}``.
+    Rows with an id not present are deleted. Blocked once the journal is locked."""
     if journal_is_locked(offering):
         return get_components(offering)
 
+    from apps.registrar.models import Rubric
+
+    org_rubrics = {str(r.id): r for r in Rubric.objects.filter(organization=offering.organization, is_active=True)}
     existing = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
     existing_by_name = {c.name.strip().lower(): c for c in existing.values()}
     seen: set = set()
@@ -380,16 +383,23 @@ def save_components(*, offering, definitions, by_user=None):
         max_score = max(1, min(100, int(_to_decimal(defn.get("max_score")))))
         # Match by explicit id, else by (case-insensitive) name so a re-save
         # without ids upserts instead of colliding with the unique (offering, name).
+        rubric = org_rubrics.get(str(defn.get("rubric_id") or ""))  # U22: meyar şablonu (opsional)
         component = existing.get(str(defn.get("id") or "")) or existing_by_name.get(name.lower())
         if component is not None and str(component.id) not in seen:
             component.name = name
             component.max_score = max_score
             component.order = order
-            component.save(update_fields=["name", "max_score", "order"])
+            component.rubric = rubric
+            component.save(update_fields=["name", "max_score", "order", "rubric"])
             seen.add(str(component.id))
         elif component is None:
             created = AssessmentComponent.objects.create(
-                organization=offering.organization, offering=offering, name=name, max_score=max_score, order=order
+                organization=offering.organization,
+                offering=offering,
+                name=name,
+                max_score=max_score,
+                order=order,
+                rubric=rubric,
             )
             seen.add(str(created.id))
     # Drop components the teacher removed from the form.

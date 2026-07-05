@@ -26949,6 +26949,93 @@ msgctxt "registrar.schedule"
 msgid "Google/Apple Calendar üçün .ics faylı"
 msgstr "Google/Apple Calendar için .ics dosyası"
 
+msgid "Bu komponentə rubrik qoşulmayıb."
+msgstr "Bu bileşene rubrik eklenmemiş."
+
+msgid "Rubrik balları yadda saxlanıldı."
+msgstr "Rubrik puanları kaydedildi."
+
+msgid "Rubrik yadda saxlanıldı."
+msgstr "Rubrik kaydedildi."
+
+msgid "Bu adla rubrik artıq mövcuddur."
+msgstr "Bu adla bir rubrik zaten var."
+
+msgid "Tələbə yoxdur"
+msgstr "Öğrenci yok"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik qiymətləndirməsi"
+msgstr "Rubrik değerlendirmesi"
+
+msgctxt "registrar.rubric"
+msgid "Meyar cəmi"
+msgstr "Ölçüt toplamı"
+
+msgctxt "registrar.rubric"
+msgid "Komponent tavanı"
+msgstr "Bileşen tavanı"
+
+msgctxt "registrar.rubric"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik ballarını saxla"
+msgstr "Rubrik puanlarını kaydet"
+
+msgctxt "registrar.rubric"
+msgid "Cəm avtomatik komponent balına yazılır."
+msgstr "Toplam otomatik olarak bileşen puanına yazılır."
+
+msgctxt "registrar.rubric"
+msgid "Rubriklər"
+msgstr "Rubrikler"
+
+msgctxt "registrar.rubric"
+msgid "Yeni rubrik"
+msgstr "Yeni rubrik"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik redaktəsi"
+msgstr "Rubrik düzenleme"
+
+msgctxt "registrar.rubric"
+msgid "meyar"
+msgstr "ölçüt"
+
+msgctxt "registrar.rubric"
+msgid "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
+msgstr "Henüz rubrik yok — bileşenleri ölçüt ölçüt değerlendirmek için oluşturun."
+
+msgctxt "registrar.rubric"
+msgid "Rubrik adı"
+msgstr "Rubrik adı"
+
+msgctxt "registrar.rubric"
+msgid "Təsvir (opsional)"
+msgstr "Açıklama (isteğe bağlı)"
+
+msgctxt "registrar.rubric"
+msgid "Meyarlar — hər sətirdə"
+msgstr "Ölçütler — her satırda"
+
+msgctxt "registrar.rubric"
+msgid "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)."
+msgstr "Ölçüt puanlarının toplamı bileşen puanına yazılır (bileşen tavanıyla sınırlıdır)."
+
+msgctxt "registrar.journal"
+msgid "Rubrik"
+msgstr "Rubrik"
+
+msgctxt "registrar.journal"
+msgid "Rubriksiz"
+msgstr "Rubriksiz"
+
+msgctxt "registrar.journal"
+msgid "Meyarlarla qiymətləndir"
+msgstr "Ölçütlerle değerlendir"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

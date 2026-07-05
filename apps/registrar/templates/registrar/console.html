@@ -69,6 +69,30 @@
             {% endif %}
         </section>
 
+        <section class="console-panel" id="rubrics">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-list-check"></i> {% trans "Rubriklər" context "registrar.rubric" %}</h2>
+                <a class="console-add-btn" href="{% url 'registrar:rubric_create' %}"><i class="fas fa-plus"></i> {% trans "Yeni rubrik" context "registrar.rubric" %}</a>
+            </div>
+            {% if rubrics %}
+            <ul class="console-list">
+                {% for rubric in rubrics %}
+                <li class="console-item {% if not rubric.is_active %}is-inactive{% endif %}">
+                    <a class="console-item-main" href="{% url 'registrar:rubric_edit' rubric.id %}">
+                        <span class="console-item-name">{{ rubric.name }}</span>
+                    </a>
+                    <div class="console-item-meta">
+                        <span>{{ rubric.criteria.all|length }} {% trans "meyar" context "registrar.rubric" %}</span>
+                        {% if rubric.description %}<span>{{ rubric.description|truncatechars:60 }}</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="console-empty"><i class="fas fa-list-check"></i><p>{% trans "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın." context "registrar.rubric" %}</p></div>
+            {% endif %}
+        </section>
+
         <section class="console-panel console-panel--wide">
             <div class="console-panel-head">
                 <h2 class="console-panel-title"><i class="fas fa-clipboard-list"></i> {% trans "Tədris planları" context "registrar.console" %}</h2>

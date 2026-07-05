@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -35,6 +36,7 @@ from .models import (
     Curriculum,
     CurriculumSubject,
     Program,
+    Rubric,
     StudentAcademicRecord,
     Subject,
 )
@@ -91,6 +93,7 @@ def registrar_console(request):
                 .order_by("-admission_year", "program__name")
             ),
             "offerings": offerings,
+            "rubrics": (Rubric.objects.filter(organization=organization).prefetch_related("criteria").order_by("name")),
             "student_records": (
                 StudentAcademicRecord.objects.filter(organization=organization)
                 .select_related("student", "program", "group")
@@ -352,4 +355,53 @@ def student_transfer_view(request, pk):
         request,
         "registrar/student_transfer_form.html",
         {"form": form, "record": record, "active_main_nav": "registrar_console"},
+    )
+
+
+@login_required
+def rubric_form_view(request, pk=None):
+    """Rubrik şablonu yarat/redaktə et (U22) — meyarlar 'ad:bal' sətirləri ilə.
+
+    Hərf-bandı redaktoru ilə eyni mətn-format yanaşması: formset əvəzinə hər
+    sətir bir meyardır; servis qatı validasiya edir və mövcud meyar ballarını
+    (ad dəyişməyəndə) qoruyaraq upsert edir."""
+    from apps.registrar import rubrics as rubrics_service
+
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404
+
+    instance = get_object_or_404(Rubric, pk=pk, organization=organization) if pk else None
+    form_values = {
+        "name": instance.name if instance else "",
+        "description": instance.description if instance else "",
+        "criteria_text": rubrics_service.criteria_text(instance) if instance else "",
+    }
+    if request.method == "POST":
+        form_values = {
+            "name": request.POST.get("name") or "",
+            "description": request.POST.get("description") or "",
+            "criteria_text": request.POST.get("criteria_text") or "",
+        }
+        try:
+            criteria = rubrics_service.parse_criteria_text(form_values["criteria_text"])
+            rubrics_service.save_rubric(
+                organization=organization,
+                name=form_values["name"],
+                description=form_values["description"],
+                criteria=criteria,
+                rubric=instance,
+            )
+        except ValueError as exc:
+            messages.error(request, str(exc))
+        except IntegrityError:
+            messages.error(request, _("Bu adla rubrik artıq mövcuddur."))
+        else:
+            messages.success(request, _("Rubrik yadda saxlanıldı."))
+            return redirect(reverse("registrar:console") + "#rubrics")
+
+    return render(
+        request,
+        "registrar/rubric_form.html",
+        {"instance": instance, "form_values": form_values, "active_main_nav": "console"},
     )

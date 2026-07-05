@@ -6,6 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260705-2">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
 {% endblock %}
 
 {% block content %}
@@ -226,6 +227,17 @@
                     <input type="hidden" name="comp_id__{{ forloop.counter0 }}" value="{{ c.id }}">
                     <input type="text" name="comp_name__{{ forloop.counter0 }}" value="{{ c.name }}" maxlength="100" placeholder="{% trans 'Ad' context 'registrar.journal' %}">
                     <input type="number" name="comp_max__{{ forloop.counter0 }}" value="{{ c.max_score }}" min="1" max="100" step="1" aria-label="max">
+                    <select name="comp_rubric__{{ forloop.counter0 }}" class="journal-comp-rubric" aria-label="{% trans 'Rubrik' context 'registrar.journal' %}">
+                        <option value="">{% trans "Rubriksiz" context "registrar.journal" %}</option>
+                        {% for r in org_rubrics %}
+                        <option value="{{ r.id }}" {% if c.rubric_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if c.rubric_id %}
+                    <a class="journal-rubric-link" href="{% url 'registrar:rubric_grade' offering.id c.id %}">
+                        <i class="fas fa-list-check"></i> {% trans "Meyarlarla qiymətləndir" context "registrar.journal" %}
+                    </a>
+                    {% endif %}
                 </div>
                 {% endfor %}
                 {# İki boş sətir — yeni komponent əlavə etmək üçün. #}
@@ -234,6 +246,10 @@
                     <input type="hidden" name="comp_id__{{ component_grid.components|length|add:forloop.counter0 }}" value="">
                     <input type="text" name="comp_name__{{ component_grid.components|length|add:forloop.counter0 }}" maxlength="100" placeholder="{% trans 'Yeni komponent (məs. Kollokvium 1)' context 'registrar.journal' %}">
                     <input type="number" name="comp_max__{{ component_grid.components|length|add:forloop.counter0 }}" min="1" max="100" step="1" placeholder="max" aria-label="max">
+                    <select name="comp_rubric__{{ component_grid.components|length|add:forloop.counter0 }}" class="journal-comp-rubric" aria-label="{% trans 'Rubrik' context 'registrar.journal' %}">
+                        <option value="">{% trans "Rubriksiz" context "registrar.journal" %}</option>
+                        {% for r in org_rubrics %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+                    </select>
                 </div>
                 {% endfor %}
             </div>
