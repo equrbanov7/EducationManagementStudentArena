@@ -26901,6 +26901,42 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "\"%(organization_name)s\" üçün \"%(module)s\" modulu gizlədildi."
 msgstr "\"%(organization_name)s\" için \"%(module)s\" modülü gizlendi."
 
+msgctxt "accounts.superadmin_org_features"
+msgid "Hərf qiyməti şkalası"
+msgstr "Harf notu ölçeği"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "format: hədd:hərf:gpa (azalan, sonuncu hədd 0)"
+msgstr "biçim: eşik:harf:gpa (azalan, son eşik 0)"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "fərdi şkala"
+msgstr "özel ölçek"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Default şkalaya qaytar"
+msgstr "Varsayılan ölçeğe döndür"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "Default"
+msgstr "Varsayılan"
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "Hərf şkalası qəbul edilmədi: %(error)s"
+msgstr "Harf ölçeği kabul edilmedi: %(error)s"
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası yeniləndi."
+msgstr "\"%(organization_name)s\" için harf notu ölçeği güncellendi."
+
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası default-a qaytarıldı."
+msgstr "\"%(organization_name)s\" için harf notu ölçeği varsayılana döndürüldü."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

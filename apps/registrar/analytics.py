@@ -143,7 +143,7 @@ def _evaluate(enrollment, maps):
     graded = effective is not None
     total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))
     total = max(Decimal("0"), min(Decimal("100"), total))  # compute_final_result güzgüsü (U15)
-    letter, gpa = finals.score_to_letter(total)
+    letter, gpa = finals.score_to_letter(total, maps.get("organization"))
     exam_ok = graded and effective >= min_exam
     passed = graded and not barred and total >= pass_threshold and exam_ok
     failed = barred or (graded and not passed)
@@ -259,6 +259,7 @@ def build_period_analytics(*, organization, period) -> dict:
         "exams": _exam_map(enrollment_ids),
         "resits": _resit_map(enrollment_ids),
         "records": _record_map(organization, student_ids),
+        "organization": organization,  # U17: tenant hərf şkalası
     }
 
     overall = _Bucket("overall", "")

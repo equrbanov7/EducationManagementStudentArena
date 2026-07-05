@@ -252,6 +252,32 @@ def superadmin_organizations(request):
                     '"%(organization_name)s" üçün "%(module)s" modulu gizlədildi.',
                 )
             messages.success(request, module_msg % {"organization_name": organization.name, "module": module_label})
+        elif action == "set_letter_bands":
+            # U17 — tenant hərf qiyməti şkalası (hədd:hərf:gpa siyahısı).
+            from apps.registrar import grading_scale
+
+            try:
+                bands = grading_scale.parse_bands_text(request.POST.get("letter_bands") or "")
+                grading_scale.set_bands(organization, bands)
+            except ValueError as exc:
+                bands_err = pgettext_lazy("accounts.superadmin_orgs.message", "Hərf şkalası qəbul edilmədi: %(error)s")
+                messages.error(request, bands_err % {"error": exc})
+                return redirect(next_url)
+            bands_ok = pgettext_lazy(
+                "accounts.superadmin_orgs.message",
+                '"%(organization_name)s" üçün hərf qiyməti şkalası yeniləndi.',
+            )
+            messages.success(request, bands_ok % {"organization_name": organization.name})
+        elif action == "reset_letter_bands":
+            # U17 — şkalanı AZ Boloniya default-una qaytar.
+            from apps.registrar import grading_scale
+
+            grading_scale.reset_bands(organization)
+            bands_reset = pgettext_lazy(
+                "accounts.superadmin_orgs.message",
+                '"%(organization_name)s" üçün hərf qiyməti şkalası default-a qaytarıldı.',
+            )
+            messages.success(request, bands_reset % {"organization_name": organization.name})
         elif action in {"set_written_exam_identity_reveal", "set_review_identity_reveal"}:
             feature_name = (request.POST.get("feature_name") or "").strip() or "written_exam"
             feature_config = REVIEW_VISIBILITY_FEATURES.get(feature_name)

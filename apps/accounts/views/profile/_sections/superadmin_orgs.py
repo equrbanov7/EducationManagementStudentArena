@@ -41,9 +41,13 @@ def build_superadmin_orgs_sections(
             superadmin_feature_org_page
         )
         from apps.organizations.cabinet_modules import module_items as _cabinet_module_items
+        from apps.registrar.grading_scale import bands_text as _bands_text
+        from apps.registrar.grading_scale import is_custom as _bands_is_custom
 
         for organization in superadmin_org_features_page.object_list:
             organization.cabinet_module_items = _cabinet_module_items(organization)
+            organization.letter_bands_text = _bands_text(organization)  # U17
+            organization.letter_bands_is_custom = _bands_is_custom(organization)
             organization.review_feature_items = [
                 {
                     "key": feature_name,

@@ -36,9 +36,9 @@ def _grade_point(result) -> Decimal:
     return Decimal(str(result.get("gpa") or "0"))
 
 
-def _build_row(enrollment):
+def _build_row(enrollment, organization=None):
     offering = enrollment.offering
-    result = finals.compute_final_result(enrollment=enrollment)
+    result = finals.compute_final_result(enrollment=enrollment, organization=organization)
     credit = _credit_for(offering)
     # Definite outcome → contributes to GPA; still-open course is excluded.
     in_gpa = bool(result["passed"] or result["failed"])
@@ -93,7 +93,7 @@ def build_student_transcript(*, student, organization, program=None):
             "ects_total": int(getattr(program, "ects_total", 0) or 0) if program else 0,
         }
 
-    rows = [_build_row(e) for e in enrollments]
+    rows = [_build_row(e, organization) for e in enrollments]
 
     # Group into semesters, preserving the chronological (period) order.
     semesters: list[dict] = []

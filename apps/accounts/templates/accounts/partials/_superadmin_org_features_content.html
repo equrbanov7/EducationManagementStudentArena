@@ -99,6 +99,34 @@
                                 {% endfor %}
                             </div>
                         </div>
+
+                        {# ── U17: Hərf qiyməti şkalası (tenant bantları) ──── #}
+                        <div class="letter-bands mt-3">
+                            <div class="fw-bold small mb-2">
+                                <i class="fas fa-ruler-horizontal"></i> {% trans "Hərf qiyməti şkalası" context "accounts.superadmin_org_features" %}
+                                <span class="text-muted">— {% trans "format: hədd:hərf:gpa (azalan, sonuncu hədd 0)" context "accounts.superadmin_org_features" %}</span>
+                                {% if organization.letter_bands_is_custom %}
+                                <span class="role-badge role-warning">{% trans "fərdi şkala" context "accounts.superadmin_org_features" %}</span>
+                                {% endif %}
+                            </div>
+                            <form method="post" action="{% url 'accounts:superadmin_organizations' %}" class="letter-bands-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="organization_id" value="{{ organization.id }}">
+                                <input type="text" name="letter_bands" class="letter-bands-input"
+                                       value="{{ organization.letter_bands_text }}"
+                                       aria-label="{% trans 'Hərf qiyməti şkalası' context 'accounts.superadmin_org_features' %}">
+                                <button type="submit" name="action" value="set_letter_bands" class="cabinet-module-btn">
+                                    <i class="fas fa-save"></i>
+                                    <span>{% trans "Yadda saxla" context "accounts.superadmin_org_features" %}</span>
+                                </button>
+                                <button type="submit" name="action" value="reset_letter_bands" class="cabinet-module-btn"
+                                        title="{% trans 'Default şkalaya qaytar' context 'accounts.superadmin_org_features' %}">
+                                    <i class="fas fa-rotate-left"></i>
+                                    <span>{% trans "Default" context "accounts.superadmin_org_features" %}</span>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
