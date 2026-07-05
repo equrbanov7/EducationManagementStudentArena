@@ -324,3 +324,32 @@
         white-space: nowrap;
     }
 }
+
+/* ── U16: Kabinet modul toggles (superadmin org-features paneli) ──────────── */
+.cabinet-modules-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+.cabinet-module-item { margin: 0; }
+.cabinet-module-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+    transition: all 0.12s ease;
+}
+.cabinet-module-btn i { font-size: 0.95rem; }
+.cabinet-module-item.is-on .cabinet-module-btn {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+.cabinet-module-btn:hover { border-color: var(--ems-primary-500); }

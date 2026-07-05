@@ -1225,6 +1225,10 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
+        # U16: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(organization, "posts", True)
         _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
         _login_with_org(self.client, self.user, organization)
@@ -1728,6 +1732,10 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
+        # U16: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(organization, "posts", True)
         _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
 
         _login_with_org(self.client, self.user, organization)
@@ -3505,6 +3513,10 @@ class ProfileViewTest(TestCase):
             is_active=True,
         )
 
+        # U16: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(org_a, "posts", True)
         _assign_user_to_org(org_admin, org_a, ProfileRole.ORG_ADMIN, membership_role_name="director")
         _assign_user_to_org(teacher_a, org_a, ProfileRole.TEACHER)
         _assign_user_to_org(teacher_b, org_b, ProfileRole.TEACHER)

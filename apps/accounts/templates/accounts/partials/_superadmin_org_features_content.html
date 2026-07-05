@@ -72,6 +72,33 @@
                             </div>
                             {% endfor %}
                         </div>
+
+                        {# ── U16: Kabinet modul görünürlüyü (aç/bağla) ────── #}
+                        <div class="cabinet-modules mt-3">
+                            <div class="fw-bold small mb-2">
+                                <i class="fas fa-toggle-on"></i> {% trans "Kabinet modulları" context "accounts.superadmin_org_features" %}
+                                <span class="text-muted">— {% trans "bağlı modul heç bir istifadəçiyə görünmür (superadmin istisna)" context "accounts.superadmin_org_features" %}</span>
+                            </div>
+                            <div class="cabinet-modules-grid">
+                                {% for module in organization.cabinet_module_items %}
+                                <form method="post"
+                                      action="{% url 'accounts:superadmin_organizations' %}"
+                                      class="cabinet-module-item {% if module.enabled %}is-on{% endif %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ post_next_url }}">
+                                    <input type="hidden" name="organization_id" value="{{ organization.id }}">
+                                    <input type="hidden" name="module_key" value="{{ module.key }}">
+                                    <input type="hidden" name="enabled" value="{% if module.enabled %}0{% else %}1{% endif %}">
+                                    <button type="submit" name="action" value="set_cabinet_module"
+                                            class="cabinet-module-btn"
+                                            title="{% if module.enabled %}{% trans 'Modulu gizlət' context 'accounts.superadmin_org_features' %}{% else %}{% trans 'Modulu aktiv et' context 'accounts.superadmin_org_features' %}{% endif %}">
+                                        <i class="fas {% if module.enabled %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+                                        <span>{{ module.label }}</span>
+                                    </button>
+                                </form>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
