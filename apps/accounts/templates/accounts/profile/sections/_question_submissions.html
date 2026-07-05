@@ -1,23 +1,20 @@
-{% load i18n %}
+{% load static i18n %}
 {% comment %}
-Profil bölməsi: Sual göndərişləri.
+Profil bölməsi: Sual göndərişləri ("sualları idarə et" dizayn dili).
 Müəllim — öz göndərişləri + yeni göndəriş; İmtahan mərkəzi — qutu (inbox).
 
 QEYD: kök element mütləq profile-section-panel + data-profile-section-panel
-olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/göstərir
-(bunsuz bölmə başqa bölməyə keçəndə ekranda ilişib qalır).
+olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/göstərir.
 {% endcomment %}
 
 <section class="profile-section-panel profile-section--question-submissions {% if active_section == 'question-submissions' %}is-active{% endif %}"
          data-profile-section-panel="question-submissions">
+<link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260706-2">
 <div class="qsub-section">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div>
             <h1 class="h4 mb-1">
                 <i class="fas fa-paper-plane me-2"></i>{% trans "Sual göndərişləri" %}
-                {% if question_submissions_pending_count %}
-                <span class="badge bg-danger">{{ question_submissions_pending_count }}</span>
-                {% endif %}
             </h1>
             <p class="text-muted mb-0">
                 {% if question_submissions_is_reviewer %}
@@ -29,14 +26,46 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
         </div>
         <div class="d-flex gap-2">
             {% if question_submissions_is_reviewer %}
-            <a href="{{ question_submissions_inbox_url }}" class="btn btn-primary btn-sm">
+            <a href="{{ question_submissions_inbox_url }}" class="qsubd-btn qsubd-btn--primary js-profile-section-link-skip">
                 <i class="fas fa-inbox"></i> {% trans "Qutunu aç" %}
             </a>
             {% else %}
-            <a href="{{ question_submissions_create_url }}" class="btn btn-primary btn-sm">
+            <a href="{{ question_submissions_create_url }}" class="qsubd-btn qsubd-btn--primary js-profile-section-link-skip">
                 <i class="fas fa-plus"></i> {% trans "Yeni göndəriş" %}
             </a>
             {% endif %}
+        </div>
+    </div>
+
+    {# ── Statistika kartları ── #}
+    <div class="qsubs-stats">
+        <div class="qsubs-stat">
+            <div class="qsubs-stat__icon qsubs-stat__icon--blue"><i class="fas fa-paper-plane"></i></div>
+            <div>
+                <span class="qsubs-stat__label">{% trans "Ümumi göndəriş" %}</span>
+                <span class="qsubs-stat__value">{{ question_submissions_total_count }}</span>
+            </div>
+        </div>
+        <div class="qsubs-stat">
+            <div class="qsubs-stat__icon qsubs-stat__icon--amber"><i class="fas fa-hourglass-half"></i></div>
+            <div>
+                <span class="qsubs-stat__label">{% trans "Baxılır" %}</span>
+                <span class="qsubs-stat__value">{{ question_submissions_pending_count }}</span>
+            </div>
+        </div>
+        <div class="qsubs-stat">
+            <div class="qsubs-stat__icon qsubs-stat__icon--green"><i class="fas fa-check"></i></div>
+            <div>
+                <span class="qsubs-stat__label">{% trans "Qəbul edilmiş" %}</span>
+                <span class="qsubs-stat__value">{{ question_submissions_accepted_count }}</span>
+            </div>
+        </div>
+        <div class="qsubs-stat">
+            <div class="qsubs-stat__icon qsubs-stat__icon--red"><i class="fas fa-rotate-left"></i></div>
+            <div>
+                <span class="qsubs-stat__label">{% if question_submissions_is_reviewer %}{% trans "Rədd edilmiş" %}{% else %}{% trans "Düzəliş gözləyən" %}{% endif %}</span>
+                <span class="qsubs-stat__value">{{ question_submissions_rejected_count }}</span>
+            </div>
         </div>
     </div>
 
@@ -51,39 +80,38 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
     {% endif %}
 
     {% if question_submissions_items %}
-    <div class="list-group">
+    <div class="qsubs-list">
         {% for s in question_submissions_items %}
         <a href="{% if question_submissions_is_reviewer %}{% url 'exams:question_submission_review' s.id %}{% else %}{% url 'exams:question_submission_detail' s.id %}{% endif %}"
-           class="list-group-item list-group-item-action js-profile-section-link-skip">
-            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                <div>
-                    <strong>{{ s.title }}</strong>
-                    <div class="text-muted small">
-                        {% if question_submissions_is_reviewer %}{{ s.teacher.get_full_name|default:s.teacher.username }} · {% endif %}
-                        <i class="fas fa-book"></i> {{ s.subject }} · <i class="fas fa-users"></i> {{ s.group_label }} ·
-                        {{ s.created_at|date:"d.m.Y H:i" }}
-                        {% if s.resubmission_count %} · ×{{ s.resubmission_count }}{% endif %}
-                    </div>
+           class="qsubs-item qsubs-item--{{ s.status }} js-profile-section-link-skip">
+            <div class="qsubs-item__main">
+                <p class="qsubs-item__title">{{ s.title }}</p>
+                <div class="qsubs-item__meta">
+                    {% if question_submissions_is_reviewer %}<span><i class="fas fa-user"></i>{{ s.teacher.get_full_name|default:s.teacher.username }}</span>{% endif %}
+                    <span><i class="fas fa-book"></i>{{ s.subject }}</span>
+                    <span><i class="fas fa-users"></i>{{ s.group_label }}</span>
+                    <span><i class="far fa-clock"></i>{{ s.created_at|date:"d.m.Y H:i" }}</span>
+                    {% if s.resubmission_count %}<span><i class="fas fa-rotate-right"></i>×{{ s.resubmission_count }}</span>{% endif %}
                 </div>
-                <div class="d-flex gap-2 align-items-center">
-                    <span class="badge bg-primary">{{ s.question_count }} {% trans "sual" %}</span>
-                    {% if s.error_count %}<span class="badge bg-danger">{{ s.error_count }}</span>{% endif %}
-                    {% if s.warning_count %}<span class="badge bg-warning text-dark">{{ s.warning_count }}</span>{% endif %}
-                    {% if s.status == "pending" %}
-                        <span class="badge bg-info">{% trans "Baxılır" %}</span>
-                    {% elif s.status == "accepted" %}
-                        <span class="badge bg-success">{% trans "Qəbul" %}</span>
-                    {% else %}
-                        <span class="badge bg-danger">{% if question_submissions_is_reviewer %}{% trans "Rədd" %}{% else %}{% trans "Geri qaytarılıb — düzəliş gözlənilir" %}{% endif %}</span>
-                    {% endif %}
-                </div>
+            </div>
+            <div class="qsubs-item__badges">
+                <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{{ s.question_count }} {% trans "sual" %}</span>
+                {% if s.error_count %}<span class="qsubs-pill qsubs-pill--error"><i class="fas fa-circle-xmark"></i>{{ s.error_count }}</span>{% endif %}
+                {% if s.warning_count %}<span class="qsubs-pill qsubs-pill--warning"><i class="fas fa-triangle-exclamation"></i>{{ s.warning_count }}</span>{% endif %}
+                {% if s.status == "pending" %}
+                    <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-hourglass-half"></i>{% trans "Baxılır" %}</span>
+                {% elif s.status == "accepted" %}
+                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-check"></i>{% trans "Qəbul" %}</span>
+                {% else %}
+                    <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-rotate-left"></i>{% if question_submissions_is_reviewer %}{% trans "Rədd" %}{% else %}{% trans "Geri qaytarılıb — düzəliş gözlənilir" %}{% endif %}</span>
+                {% endif %}
             </div>
         </a>
         {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-light border text-center py-5">
-        <i class="far fa-paper-plane fa-2x d-block mb-2 text-muted"></i>
+    <div class="qsubs-empty">
+        <i class="far fa-paper-plane"></i>
         {% if question_submissions_is_reviewer %}
             {% trans "Hələ heç bir sual göndərişi yoxdur." %}
         {% else %}

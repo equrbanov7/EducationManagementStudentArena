@@ -1,124 +1,151 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{{ submission.title }} — {% trans "Sual göndərişi" %}{% endblock %}
 
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260706-2">
+{% endblock %}
+
 {% block content %}
-<div class="container py-4" style="max-width: 900px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0"><i class="fas fa-file-lines me-2"></i>{{ submission.title }}</h1>
-        <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> {% trans "Geri" %}</a>
+<div class="container py-4" style="max-width: 980px;">
+    <div class="qsubd-header">
+        <h1><i class="fas fa-file-lines"></i> {{ submission.title }}</h1>
+        <a href="{{ back_url }}" class="qsubd-back"><i class="fas fa-arrow-left"></i> {% trans "Göndərişlərə qayıt" %}</a>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+    {# ── Status + məlumat kartı ── #}
+    <div class="qsubs-item qsubs-item--{{ submission.status }}" style="cursor:default;">
+        <div class="qsubs-item__main">
+            <div class="qsubs-item__meta">
+                <span><i class="fas fa-book"></i>{{ submission.subject }}</span>
+                <span><i class="fas fa-users"></i>{{ submission.group_label }}</span>
+                <span><i class="fas fa-globe"></i>{{ submission.get_language_display }}</span>
+                <span><i class="far fa-clock"></i>{{ submission.created_at|date:"d.m.Y H:i" }}</span>
+                {% if submission.resubmission_count %}<span><i class="fas fa-rotate-right"></i>×{{ submission.resubmission_count }}</span>{% endif %}
+            </div>
+        </div>
+        <div class="qsubs-item__badges">
+            <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{{ submission.question_count }} {% trans "sual" %}</span>
+            {% if submission.error_count %}<span class="qsubs-pill qsubs-pill--error"><i class="fas fa-circle-xmark"></i>{{ submission.error_count }}</span>{% endif %}
+            {% if submission.warning_count %}<span class="qsubs-pill qsubs-pill--warning"><i class="fas fa-triangle-exclamation"></i>{{ submission.warning_count }}</span>{% endif %}
             {% if submission.status == "pending" %}
-                <span class="badge bg-info fs-6"><i class="fas fa-hourglass-half"></i> {% trans "Baxılır" %}</span>
+                <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-hourglass-half"></i>{% trans "Baxılır" %}</span>
             {% elif submission.status == "accepted" %}
-                <span class="badge bg-success fs-6"><i class="fas fa-check"></i> {% trans "Qəbul edildi" %}</span>
+                <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-check"></i>{% trans "Qəbul edildi" %}</span>
+                {% if submission.accepted_bank %}
+                <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="qsubs-pill qsubs-pill--accepted" style="text-decoration:none;">
+                    <i class="fas fa-layer-group"></i>{{ submission.accepted_bank.name }}
+                </a>
+                {% endif %}
             {% else %}
-                <span class="badge bg-danger fs-6"><i class="fas fa-xmark"></i> {% trans "Rədd edildi" %}</span>
-            {% endif %}
-            <span class="text-muted"><i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}</span>
-            <span class="text-muted">{% trans "Dil" %}: {{ submission.get_language_display }}</span>
-            <span class="text-muted"><i class="fas fa-book"></i> {{ submission.subject }}</span>
-            <span class="text-muted"><i class="fas fa-users"></i> {{ submission.group_label }}</span>
-            {% if submission.resubmission_count %}
-            <span class="text-muted">{% trans "Yenidən göndərmə" %}: {{ submission.resubmission_count }}</span>
-            {% endif %}
-            {% if submission.accepted_bank %}
-            <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="badge bg-success-subtle text-success text-decoration-none fs-6">
-                <i class="fas fa-layer-group"></i> {{ submission.accepted_bank.name }}
-            </a>
+                <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-rotate-left"></i>{% trans "Geri qaytarılıb — düzəliş gözlənilir" %}</span>
             {% endif %}
         </div>
-        {% if submission.teacher_note %}
-        <div class="card-footer">
-            <strong><i class="fas fa-comment-dots"></i> {% trans "Qeydiniz" %}:</strong>
-            <div class="text-muted">{{ submission.teacher_note|linebreaksbr }}</div>
-        </div>
-        {% endif %}
-        {% if submission.reviewer_note %}
-        <div class="card-footer">
-            <strong>{% trans "İmtahan mərkəzinin qeydi" %}:</strong>
-            <div class="text-muted">{{ submission.reviewer_note|linebreaksbr }}</div>
-        </div>
-        {% endif %}
     </div>
 
-    {% if can_edit %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <strong>{% if submission.status == "rejected" %}{% trans "Düzəlt və yenidən göndər" %}{% else %}{% trans "Düzəliş et" %}{% endif %}</strong>
-        </div>
-        <form method="post">
-            {% csrf_token %}
-            <div class="card-body d-flex flex-column gap-3">
-                <div>
-                    <label class="form-label" for="qsubTitle">{% trans "Mövzu / fənn başlığı" %}</label>
-                    <input type="text" class="form-control" id="qsubTitle" name="title" maxlength="200" required
-                           value="{{ form_state.title }}">
-                </div>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label" for="qsubSubject">{% trans "Fənn" %} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="qsubSubject" name="subject" maxlength="200" required
-                           value="{{ form_state.subject }}" placeholder="{% trans 'məs. İnformatika' %}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="qsubGroup">{% trans "Qrup" %} <span class="text-danger">*</span></label>
-                    {% if teacher_groups %}
-                    <select class="form-select" id="qsubGroup" name="group_id">
-                        <option value="">{% trans "— Qrupu seçin və ya aşağıya yazın —" %}</option>
-                        {% for g in teacher_groups %}
-                        <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <input type="text" class="form-control mt-2" name="group_label" maxlength="200"
-                           value="{{ form_state.group_label }}" placeholder="{% trans 'və ya qrupun adını yazın (məs. 875i)' %}">
-                    {% else %}
-                    <input type="text" class="form-control" id="qsubGroup" name="group_label" maxlength="200" required
-                           value="{{ form_state.group_label }}" placeholder="{% trans 'məs. 875i' %}">
-                    {% endif %}
-                </div>
-            </div>
+    <div class="mt-3"></div>
 
-                <div>
-                    <label class="form-label" for="qsubLanguage">{% trans "Sualların dili" %}</label>
-                    <select class="form-select" id="qsubLanguage" name="language">
-                        {% for code, label in language_choices %}
-                        <option value="{{ code }}" {% if form_state.language == code %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label class="form-label" for="qsubNote">{% trans "İmtahan mərkəzinə qeyd (opsional)" %}</label>
-                    <textarea class="form-control" id="qsubNote" name="teacher_note" rows="2" maxlength="2000">{{ form_state.teacher_note }}</textarea>
-                </div>
-                <div>
-                    <label class="form-label" for="qsubRawText">{% trans "Suallar" %}</label>
-                    <textarea class="form-control font-monospace" id="qsubRawText" name="raw_text" rows="14" required>{{ form_state.raw_text }}</textarea>
-                </div>
-            </div>
-            <div class="card-footer d-flex gap-2 justify-content-end">
-                <button type="submit" name="action" value="preview" class="btn btn-outline-primary">
-                    <i class="fas fa-magnifying-glass"></i> {% trans "Yoxla (preview)" %}
-                </button>
-                <button type="submit" name="action" value="resubmit" class="btn btn-primary">
-                    <i class="fas fa-paper-plane"></i> {% trans "Yenidən göndər" %}
-                </button>
-            </div>
-        </form>
+    {% if submission.teacher_note %}
+    <div class="qsubd-note qsubd-note--teacher">
+        <div class="qsubd-note__icon"><i class="fas fa-comment-dots"></i></div>
+        <div>
+            <div class="qsubd-note__label">{% trans "Qeydiniz" %}</div>
+            <div class="qsubd-note__text">{{ submission.teacher_note|linebreaksbr }}</div>
+        </div>
     </div>
     {% endif %}
 
-    {% if preview_parsed %}
-    <div class="mb-4">
-        <h2 class="h5">{% trans "Yoxlama nəticəsi" %}</h2>
-        {% include "exams/teacher/partials/_question_submission_preview.html" with questions=preview_parsed counts=preview_counts %}
+    {% if submission.reviewer_note %}
+    <div class="qsubd-note qsubd-note--reviewer">
+        <div class="qsubd-note__icon"><i class="fas fa-clipboard-check"></i></div>
+        <div>
+            <div class="qsubd-note__label">{% trans "İmtahan mərkəzinin qeydi" %}</div>
+            <div class="qsubd-note__text">{{ submission.reviewer_note|linebreaksbr }}</div>
+        </div>
     </div>
+    {% endif %}
+
+    {# ── Düzəliş / yenidən göndərmə ── #}
+    {% if can_edit %}
+    <h2 class="qsubd-section-title">
+        <i class="fas fa-pen-to-square"></i>
+        {% if submission.status == "rejected" %}{% trans "Düzəlt və yenidən göndər" %}{% else %}{% trans "Düzəliş et" %}{% endif %}
+    </h2>
+    <form method="post" class="qsubm-card">
+        {% csrf_token %}
+        <div class="qsubm-grid">
+            <div class="qsubm-field qsubm-field--title">
+                <label for="qsubTitle">{% trans "Başlıq" %} <span class="qsubm-req">*</span></label>
+                <div class="qsubm-input-wrap">
+                    <i class="fas fa-heading"></i>
+                    <input type="text" id="qsubTitle" name="title" maxlength="200" required value="{{ form_state.title }}">
+                </div>
+            </div>
+            <div class="qsubm-field">
+                <label for="qsubSubject">{% trans "Fənn" %} <span class="qsubm-req">*</span></label>
+                <div class="qsubm-input-wrap">
+                    <i class="fas fa-book"></i>
+                    <input type="text" id="qsubSubject" name="subject" maxlength="200" required value="{{ form_state.subject }}">
+                </div>
+            </div>
+            <div class="qsubm-field">
+                <label for="qsubGroup">{% trans "Qrup" %} <span class="qsubm-req">*</span></label>
+                {% if teacher_groups %}
+                <div class="qsubm-group-row">
+                    <div class="qsubm-input-wrap qsubm-input-wrap--select">
+                        <i class="fas fa-users"></i>
+                        <select id="qsubGroup" name="group_id">
+                            <option value="">{% trans "Qrupu seçin…" %}</option>
+                            {% for g in teacher_groups %}
+                            <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <span class="qsubm-group-or">{% trans "və ya" %}</span>
+                    <div class="qsubm-input-wrap">
+                        <i class="fas fa-pen"></i>
+                        <input type="text" name="group_label" maxlength="200" value="{{ form_state.group_label }}" placeholder="{% trans 'adını yazın (875i)' %}">
+                    </div>
+                </div>
+                {% else %}
+                <div class="qsubm-input-wrap">
+                    <i class="fas fa-users"></i>
+                    <input type="text" id="qsubGroup" name="group_label" maxlength="200" required value="{{ form_state.group_label }}">
+                </div>
+                {% endif %}
+            </div>
+            <div class="qsubm-field qsubm-field--note">
+                <label for="qsubNote">{% trans "İmtahan mərkəzinə qeyd" %} <span class="qsubm-optional">{% trans "(opsional)" %}</span></label>
+                <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
+                    <i class="fas fa-comment-dots"></i>
+                    <textarea id="qsubNote" name="teacher_note" rows="2" maxlength="2000">{{ form_state.teacher_note }}</textarea>
+                </div>
+            </div>
+            <div class="qsubm-field qsubm-field--note">
+                <label for="qsubRawText">{% trans "Suallar" %} <span class="qsubm-req">*</span></label>
+                <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
+                    <i class="fas fa-code"></i>
+                    <textarea id="qsubRawText" name="raw_text" rows="14" required class="font-monospace">{{ form_state.raw_text }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="qsubd-actions">
+            <button type="submit" name="action" value="preview" class="qsubd-btn qsubd-btn--ghost">
+                <i class="fas fa-magnifying-glass"></i> {% trans "Yoxla (preview)" %}
+            </button>
+            <button type="submit" name="action" value="resubmit" class="qsubd-btn qsubd-btn--primary">
+                <i class="fas fa-paper-plane"></i> {% trans "Yenidən göndər" %}
+            </button>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if preview_parsed %}
+    <h2 class="qsubd-section-title"><i class="fas fa-magnifying-glass"></i> {% trans "Yoxlama nəticəsi" %}</h2>
+    {% include "exams/teacher/partials/_question_submission_preview.html" with questions=preview_parsed counts=preview_counts %}
     {% else %}
-    <h2 class="h5">{% trans "Göndərilmiş suallar" %}</h2>
+    <h2 class="qsubd-section-title"><i class="fas fa-list-check"></i> {% trans "Göndərilmiş suallar" %}</h2>
     {% include "exams/teacher/partials/_question_submission_preview.html" with questions=parsed_questions counts=None %}
     {% endif %}
 </div>
