@@ -91,3 +91,91 @@ class CalendarTest(TestCase):
         resp = Client().get(reverse("registrar:calendar"))
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
+
+
+class RegistrationWindowEnforcementTest(TestCase):
+    """U14 — seçmə-fənn qərarı yalnız qeydiyyat pəncərəsi açıq olanda (staff override var)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
+        from core.constants import OrgUnitType
+
+        cls.owner = User.objects.create_user("rw_owner", "rw_owner@qku.edu.az", "pw")
+        with bypass_rls():
+            cls.org = Organization.objects.create(
+                name="RW Univ",
+                slug="rw-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=cls.owner,
+                status="active",
+                is_active=True,
+            )
+            from apps.organizations.models import OrgUnit
+
+            cls.group = OrgUnit.objects.create(
+                organization=cls.org, name="G1", slug="rw-g1", unit_type=OrgUnitType.GROUP
+            )
+            today = timezone.localdate()
+            cls.period = AcademicPeriod.objects.create(
+                organization=cls.org,
+                name="RW semestr",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2026/2027",
+                start_date=today - datetime.timedelta(days=10),
+                end_date=today + datetime.timedelta(days=100),
+                registration_start=today - datetime.timedelta(days=30),
+                registration_end=today - datetime.timedelta(days=5),  # BAĞLANIB
+            )
+            cls.program = Program.objects.create(organization=cls.org, code="RW", name="RW proqram")
+            cls.curriculum = Curriculum.objects.create(organization=cls.org, program=cls.program, admission_year=2026)
+            cls.subject = Subject.objects.create(organization=cls.org, code="RW101", name="Seçmə fənn")
+            CurriculumSubject.objects.create(
+                organization=cls.org,
+                curriculum=cls.curriculum,
+                subject=cls.subject,
+                semester_number=1,
+                is_elective=True,
+                elective_group="Blok A",
+            )
+
+    def _choose(self, **kwargs):
+        from apps.registrar import services
+
+        return services.choose_group_elective(
+            organization=self.org,
+            group=self.group,
+            curriculum=self.curriculum,
+            period=self.period,
+            elective_group="Blok A",
+            subject=self.subject,
+            **kwargs,
+        )
+
+    def test_closed_window_blocks_choice(self):
+        from apps.registrar.services import RegistrationWindowClosed
+
+        with bypass_rls():
+            with self.assertRaises(RegistrationWindowClosed):
+                self._choose()
+
+    def test_staff_override_bypasses_window(self):
+        with bypass_rls():
+            choice, _count = self._choose(enforce_window=False)
+            self.assertEqual(choice.chosen_subject_id, self.subject.id)
+
+    def test_open_window_allows_choice(self):
+        today = timezone.localdate()
+        with bypass_rls():
+            self.period.registration_end = today + datetime.timedelta(days=5)
+            self.period.save(update_fields=["registration_end"])
+            choice, _count = self._choose()
+            self.assertEqual(choice.chosen_subject_id, self.subject.id)
+
+    def test_unconfigured_window_allows_choice(self):
+        with bypass_rls():
+            self.period.registration_start = None
+            self.period.registration_end = None
+            self.period.save(update_fields=["registration_start", "registration_end"])
+            choice, _count = self._choose()
+            self.assertEqual(choice.chosen_subject_id, self.subject.id)

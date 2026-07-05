@@ -27703,6 +27703,10 @@ msgctxt "registrar.journal"
 msgid "Qrup"
 msgstr "Grup"
 
+msgctxt "registrar.journal"
+msgid "Jurnalı Excel (xlsx) olaraq yüklə"
+msgstr "Jurnalı Excel (xlsx) olarak indir"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

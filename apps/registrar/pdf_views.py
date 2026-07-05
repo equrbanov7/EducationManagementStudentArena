@@ -74,6 +74,60 @@ def my_transcript_pdf(request):
 
 
 @login_required
+def journal_xlsx(request, offering_id):
+    """Jurnalın xlsx ixracı (U14): davamiyyət+ballar vərəqi + yekun vərəqi.
+
+    Giriş jurnal detalı ilə eynidir: müəllim/org sahibi/superuser; kafedra/dekan
+    yalnız təsdiqə göndərilmiş jurnalı görə bilər (DRAFT sızdırılmır)."""
+    from apps.registrar import approval, finals, gradebook, journal_export
+    from apps.registrar.models import ApprovalStatus, CourseOffering
+    from apps.registrar.views import _can_edit_journal
+
+    offering = get_object_or_404(
+        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
+        pk=offering_id,
+    )
+    appr = approval.approval_context(offering=offering, user=request.user)
+    can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
+        request.user, offering.organization
+    )
+    if not _can_edit_journal(request.user, offering) and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
+        raise Http404
+
+    payload = journal_export.build_journal_workbook(
+        offering=offering,
+        journal=gradebook.get_offering_journal(offering=offering),
+        finals=finals.get_offering_results(offering=offering),
+    )
+    filename = f"jurnal-{offering.subject.code}.xlsx"
+    response = HttpResponse(payload, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    _audit_export(offering, request.user)
+    return response
+
+
+def _audit_export(offering, by_user):
+    """Best-effort audit entry for a journal export (never blocks the download)."""
+    try:
+        from django.apps import apps as django_apps
+
+        from core.constants import AuditAction
+
+        AuditLog = django_apps.get_model("audit", "AuditLog")
+        AuditLog.objects.create(
+            user=by_user if getattr(by_user, "pk", None) else None,
+            organization=offering.organization,
+            action=AuditAction.UPDATE,
+            resource_type="registrar.journal_export",
+            resource_id=str(offering.pk),
+            resource_repr=f"{offering.subject.code} jurnalı — xlsx ixracı",
+            reason="Elektron jurnal xlsx olaraq ixrac edildi.",
+        )
+    except Exception:  # noqa: BLE001 — audit must never block the download
+        pass
+
+
+@login_required
 def student_transcript_pdf(request, pk):
     """Registrar console: any student's transcript as PDF (staff only)."""
     organization = getattr(request, "organization", None)
