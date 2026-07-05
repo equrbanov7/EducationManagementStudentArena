@@ -60,6 +60,9 @@
 
 <body>
 
+    {# A11y (U18): klaviatura istifadəçisi üçün ilk fokuslana bilən element #}
+    <a href="#main-content" class="skip-link">{% trans "Əsas məzmuna keç" context "a11y" %}</a>
+
     {% comment %}
     Top-of-page route progress bar — animated by static/js/route_loading.js.
     Sits outside the navbar so it overlays at the very top even when the
@@ -98,7 +101,7 @@
     {% endif %}
 
     {# MAIN CONTENT #}
-    <main>
+    <main id="main-content">
         {% block content %}{% endblock %}
     </main>
 

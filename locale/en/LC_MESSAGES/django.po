@@ -26937,6 +26937,10 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası default-a qaytarıldı."
 msgstr "Letter grade scale reset to default for \"%(organization_name)s\"."
 
+msgctxt "a11y"
+msgid "Əsas məzmuna keç"
+msgstr "Skip to main content"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

@@ -200,6 +200,12 @@
             ctx.sidebarSectionLinks.forEach(function (link) {
                 var isMatch = link.getAttribute("data-section") === section;
                 link.classList.toggle("active", isMatch);
+                // A11y (U18): aktiv bölmə screen-reader-ə "cari səhifə" kimi bildirilir.
+                if (isMatch) {
+                    link.setAttribute("aria-current", "page");
+                } else {
+                    link.removeAttribute("aria-current");
+                }
                 if (isMatch && ctx.sectionTitle) {
                     ctx.sectionTitle.textContent = link.getAttribute("data-title") || ctx.defaultSectionTitle;
                 }
@@ -332,6 +338,13 @@
         ctx.syncAllSidebarMenuGroupLayouts = syncAllSidebarMenuGroupLayouts;
         ctx.initSidebarAccordionMenu = initSidebarAccordionMenu;
         ctx.updateSidebarActiveState = updateSidebarActiveState;
+
+        // A11y (U18): server-render olunan ilkin aktiv linkə aria-current ver.
+        if (ctx.sidebar) {
+            ctx.sidebar.querySelectorAll(".js-profile-section-link.active").forEach(function (link) {
+                link.setAttribute("aria-current", "page");
+            });
+        }
         ctx.ensureModalRoot = ensureModalRoot;
         ctx.openCreatePostModal = openCreatePostModal;
         ctx.initDebouncedSearchForms = initDebouncedSearchForms;

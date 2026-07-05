@@ -26985,6 +26985,10 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "\"%(organization_name)s\" üçün hərf qiyməti şkalası default-a qaytarıldı."
 msgstr "Шкала буквенных оценок сброшена к значению по умолчанию для «%(organization_name)s»."
 
+msgctxt "a11y"
+msgid "Əsas məzmuna keç"
+msgstr "Перейти к основному содержимому"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
