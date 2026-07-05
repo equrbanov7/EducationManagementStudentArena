@@ -21,6 +21,8 @@
             {% endif %}
             <span class="text-muted"><i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}</span>
             <span class="text-muted">{% trans "Dil" %}: {{ submission.get_language_display }}</span>
+            <span class="text-muted"><i class="fas fa-book"></i> {{ submission.subject }}</span>
+            <span class="text-muted"><i class="fas fa-users"></i> {{ submission.group_label }}</span>
             {% if submission.resubmission_count %}
             <span class="text-muted">{% trans "Yenidən göndərmə" %}: {{ submission.resubmission_count }}</span>
             {% endif %}
@@ -51,6 +53,30 @@
                     <input type="text" class="form-control" id="qsubTitle" name="title" maxlength="200" required
                            value="{{ form_state.title }}">
                 </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="qsubSubject">{% trans "Fənn" %} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="qsubSubject" name="subject" maxlength="200" required
+                           value="{{ form_state.subject }}" placeholder="{% trans 'məs. İnformatika' %}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="qsubGroup">{% trans "Qrup" %} <span class="text-danger">*</span></label>
+                    {% if teacher_groups %}
+                    <select class="form-select" id="qsubGroup" name="group_id">
+                        <option value="">{% trans "— Qrupu seçin və ya aşağıya yazın —" %}</option>
+                        {% for g in teacher_groups %}
+                        <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" class="form-control mt-2" name="group_label" maxlength="200"
+                           value="{{ form_state.group_label }}" placeholder="{% trans 'və ya qrupun adını yazın (məs. 875i)' %}">
+                    {% else %}
+                    <input type="text" class="form-control" id="qsubGroup" name="group_label" maxlength="200" required
+                           value="{{ form_state.group_label }}" placeholder="{% trans 'məs. 875i' %}">
+                    {% endif %}
+                </div>
+            </div>
+
                 <div>
                     <label class="form-label" for="qsubLanguage">{% trans "Sualların dili" %}</label>
                     <select class="form-select" id="qsubLanguage" name="language">

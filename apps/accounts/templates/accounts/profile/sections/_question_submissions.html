@@ -34,6 +34,16 @@ Müəllim — öz göndərişləri + yeni göndəriş; İmtahan mərkəzi — qu
         </div>
     </div>
 
+    {% if question_submissions_rejected_count and not question_submissions_is_reviewer %}
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+        <i class="fas fa-rotate-left"></i>
+        <div>
+            <strong>{% trans "İmtahan mərkəzi" %} {{ question_submissions_rejected_count }} {% trans "göndərişi geri qaytarıb." %}</strong>
+            {% trans "Qeydə baxın, düzəldin və yenidən göndərin." %}
+        </div>
+    </div>
+    {% endif %}
+
     {% if question_submissions_items %}
     <div class="list-group">
         {% for s in question_submissions_items %}
@@ -44,6 +54,7 @@ Müəllim — öz göndərişləri + yeni göndəriş; İmtahan mərkəzi — qu
                     <strong>{{ s.title }}</strong>
                     <div class="text-muted small">
                         {% if question_submissions_is_reviewer %}{{ s.teacher.get_full_name|default:s.teacher.username }} · {% endif %}
+                        <i class="fas fa-book"></i> {{ s.subject }} · <i class="fas fa-users"></i> {{ s.group_label }} ·
                         {{ s.created_at|date:"d.m.Y H:i" }}
                         {% if s.resubmission_count %} · ×{{ s.resubmission_count }}{% endif %}
                     </div>
@@ -57,7 +68,7 @@ Müəllim — öz göndərişləri + yeni göndəriş; İmtahan mərkəzi — qu
                     {% elif s.status == "accepted" %}
                         <span class="badge bg-success">{% trans "Qəbul" %}</span>
                     {% else %}
-                        <span class="badge bg-danger">{% trans "Rədd" %}</span>
+                        <span class="badge bg-danger">{% if question_submissions_is_reviewer %}{% trans "Rədd" %}{% else %}{% trans "Geri qaytarılıb — düzəliş gözlənilir" %}{% endif %}</span>
                     {% endif %}
                 </div>
             </div>

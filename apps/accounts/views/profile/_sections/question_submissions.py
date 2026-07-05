@@ -12,6 +12,7 @@ def _inactive_defaults() -> dict:
         "question_submissions_items": [],
         "question_submissions_is_reviewer": False,
         "question_submissions_pending_count": 0,
+        "question_submissions_rejected_count": 0,
         "question_submissions_create_url": "",
         "question_submissions_inbox_url": "",
     }
@@ -40,6 +41,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         pending_count = QuestionSubmission.objects.filter(
             organization=organization, status=QuestionSubmission.STATUS_PENDING
         ).count()
+        rejected_count = 0
     else:
         items = list(
             QuestionSubmission.objects.filter(organization=organization, teacher=request.user)
@@ -47,11 +49,16 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
             .order_by("-created_at")[:30]
         )
         pending_count = sum(1 for item in items if item.status == QuestionSubmission.STATUS_PENDING)
+        # Müəllim üçün əsas siqnal: mərkəz GERİ QAYTARIB — düzəliş gözlənilir.
+        rejected_count = QuestionSubmission.objects.filter(
+            organization=organization, teacher=request.user, status=QuestionSubmission.STATUS_REJECTED
+        ).count()
 
     return {
         "question_submissions_items": items,
         "question_submissions_is_reviewer": is_reviewer,
         "question_submissions_pending_count": pending_count,
+        "question_submissions_rejected_count": rejected_count,
         "question_submissions_create_url": reverse("exams:question_submission_create"),
         "question_submissions_inbox_url": reverse("exams:question_submission_inbox"),
     }
