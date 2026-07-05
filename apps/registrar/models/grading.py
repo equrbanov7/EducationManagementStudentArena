@@ -167,6 +167,59 @@ class LessonMark(UUIDModel, TimeStampedModel):
 # olunmayıbsa, jurnal əvvəlki dərs-cəm məntiqi ilə işləyir (geriyə-uyğun).
 
 
+class Rubric(UUIDModel, TimeStampedModel):
+    """Təkrar istifadə olunan qiymətləndirmə rubriki (U22) — org-səviyyəli şablon.
+
+    Meyar dəsti (:class:`RubricCriterion`) komponentə qoşulur; müəllim tələbəni
+    meyar-meyar qiymətləndirir, meyar ballarının cəmi komponent balına yazılır
+    (komponentin ``max_score``-u ilə clamp). Şablon olduğu üçün eyni rubrik
+    bir neçə fənnin komponentlərində paylaşıla bilir."""
+
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="rubrics")
+    name = models.CharField(max_length=150, help_text="Rubrik adı (məs. Layihə təqdimatı).")
+    description = models.CharField(max_length=300, blank=True, default="")
+    is_active = models.BooleanField(default=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = pgettext_lazy("registrar.model.rubric.meta", "rubric")
+        verbose_name_plural = pgettext_lazy("registrar.model.rubric.meta", "rubrics")
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "name"], name="uniq_rubric_org_name"),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class RubricCriterion(UUIDModel, TimeStampedModel):
+    """Rubrikin bir meyarı: ad + maksimum bal (sıralı)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="rubric_criteria"
+    )
+    rubric = models.ForeignKey(Rubric, on_delete=models.CASCADE, related_name="criteria")
+    name = models.CharField(max_length=150)
+    max_points = models.PositiveSmallIntegerField(default=5, help_text="Bu meyar üzrə maksimum bal.")
+    order = models.PositiveSmallIntegerField(default=0)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = pgettext_lazy("registrar.model.rubric_criterion.meta", "rubric criterion")
+        verbose_name_plural = pgettext_lazy("registrar.model.rubric_criterion.meta", "rubric criteria")
+        constraints = [
+            models.UniqueConstraint(fields=["rubric", "name"], name="uniq_criterion_rubric_name"),
+        ]
+        indexes = [models.Index(fields=["organization", "rubric"])]
+
+    def __str__(self):
+        return f"{self.name} ({self.max_points})"
+
+
 class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
     """One weighted entry-score component of an offering (seminar / kollokvium /
     SDF / layihə). ``max_score`` is its contribution ceiling; the components'
@@ -178,6 +231,14 @@ class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="assessment_components")
     name = models.CharField(max_length=100, help_text="Komponent adı (məs. Seminar, Kollokvium 1, SDF, Layihə).")
     max_score = models.PositiveSmallIntegerField(default=10, help_text="Bu komponentin giriş balına maksimum töhfəsi.")
+    rubric = models.ForeignKey(
+        Rubric,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="components",
+        help_text="Qoşulubsa, bu komponent meyar-meyar (rubrik ilə) qiymətləndirilir (U22).",
+    )
 
     objects = models.Manager()
 
@@ -219,6 +280,33 @@ class ComponentScore(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.component_id} · {self.enrollment_id} = {self.score}"
+
+
+class CriterionScore(UUIDModel, TimeStampedModel):
+    """Bir tələbənin bir rubrik meyarı üzrə balı (U22)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="criterion_scores"
+    )
+    criterion = models.ForeignKey(RubricCriterion, on_delete=models.CASCADE, related_name="scores")
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="criterion_scores")
+    points = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    entered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.criterion_score.meta", "criterion score")
+        verbose_name_plural = pgettext_lazy("registrar.model.criterion_score.meta", "criterion scores")
+        constraints = [
+            models.UniqueConstraint(fields=["criterion", "enrollment"], name="uniq_criterion_enrollment_score"),
+        ]
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"{self.criterion_id} · {self.enrollment_id} = {self.points}"
 
 
 # ── Yekun qiymət + təkrar imtahan (U3+, kəsilmə/resit qaydası) ────────────────

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% if instance %}{% trans "Rubrik redaktəsi" context "registrar.rubric" %}{% else %}{% trans "Yeni rubrik" context "registrar.rubric" %}{% endif %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
+{% endblock %}
+
+{% block content %}
+<div class="console-page console-page--form">
+    <div class="console-head">
+        <a class="console-back" href="{% url 'registrar:console' %}#rubrics"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
+        <h1 class="console-title"><i class="fas fa-list-check"></i>
+            {% if instance %}{{ instance.name }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni rubrik" context "registrar.rubric" %}{% endif %}
+        </h1>
+    </div>
+    {% include "accounts/profile/_messages.html" %}
+    <div class="console-card">
+        <form method="post" class="console-form">
+            {% csrf_token %}
+            <div class="console-field">
+                <label for="rubric-name">{% trans "Rubrik adı" context "registrar.rubric" %}</label>
+                <input type="text" id="rubric-name" name="name" maxlength="150" required value="{{ form_values.name }}">
+            </div>
+            <div class="console-field">
+                <label for="rubric-description">{% trans "Təsvir (opsional)" context "registrar.rubric" %}</label>
+                <input type="text" id="rubric-description" name="description" maxlength="300" value="{{ form_values.description }}">
+            </div>
+            <div class="console-field">
+                <label for="rubric-criteria">{% trans "Meyarlar — hər sətirdə" context "registrar.rubric" %} <code>ad:bal</code></label>
+                <textarea id="rubric-criteria" name="criteria_text" rows="6" required
+                          placeholder="Məzmun:4&#10;Təqdimat:3&#10;Suallara cavab:3">{{ form_values.criteria_text }}</textarea>
+                <small class="console-field-help">{% trans "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)." context "registrar.rubric" %}</small>
+            </div>
+            <div class="console-form-actions">
+                <button type="submit" class="console-save-btn">{% trans "Yadda saxla" context "registrar.console" %}</button>
+                <a class="console-cancel-link" href="{% url 'registrar:console' %}#rubrics">{% trans "Ləğv et" context "registrar.console" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

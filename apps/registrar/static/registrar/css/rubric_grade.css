@@ -1,0 +1,52 @@
+/* Rubrik qiymətləndirmə səhifəsi (U22) — jurnal detal stilinin üstünə. */
+
+.rubric-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ems-neutral-500);
+    font-size: 0.9rem;
+    margin-top: 0.35rem;
+}
+.rubric-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.rubric-grid .rubric-points-input { width: 74px; }
+.rubric-points-ro { color: var(--ems-neutral-600); }
+.rubric-total-col {
+    background: var(--ems-primary-50);
+    font-weight: 700;
+    color: var(--ems-primary-700);
+    text-align: center;
+}
+.rubric-save-hint { color: var(--ems-neutral-500); font-size: 0.85rem; }
+
+/* Komponentlər tabındakı rubrik seçimi + link (journal_detail) */
+.journal-comp-rubric {
+    max-width: 220px;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
+}
+.journal-rubric-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.journal-rubric-link:hover { color: var(--ems-primary-700); text-decoration: underline; }

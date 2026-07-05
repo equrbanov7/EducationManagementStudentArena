@@ -26949,6 +26949,93 @@ msgctxt "registrar.schedule"
 msgid "Google/Apple Calendar üçün .ics faylı"
 msgstr ".ics file for Google/Apple Calendar"
 
+msgctxt "registrar.rubric"
+msgid "Rubrik qiymətləndirməsi"
+msgstr "Rubric grading"
+
+msgctxt "registrar.rubric"
+msgid "Meyar cəmi"
+msgstr "Criteria total"
+
+msgctxt "registrar.rubric"
+msgid "Komponent tavanı"
+msgstr "Component cap"
+
+msgctxt "registrar.rubric"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik ballarını saxla"
+msgstr "Save rubric points"
+
+msgctxt "registrar.rubric"
+msgid "Cəm avtomatik komponent balına yazılır."
+msgstr "The total is written to the component score automatically."
+
+msgctxt "registrar.rubric"
+msgid "Rubriklər"
+msgstr "Rubrics"
+
+msgctxt "registrar.rubric"
+msgid "Yeni rubrik"
+msgstr "New rubric"
+
+msgctxt "registrar.rubric"
+msgid "Rubrik redaktəsi"
+msgstr "Edit rubric"
+
+msgctxt "registrar.rubric"
+msgid "meyar"
+msgstr "criteria"
+
+msgctxt "registrar.rubric"
+msgid "Hələ rubrik yoxdur — komponentləri meyar-meyar qiymətləndirmək üçün yaradın."
+msgstr "No rubrics yet — create one to grade components criterion by criterion."
+
+msgctxt "registrar.rubric"
+msgid "Rubrik adı"
+msgstr "Rubric name"
+
+msgctxt "registrar.rubric"
+msgid "Təsvir (opsional)"
+msgstr "Description (optional)"
+
+msgctxt "registrar.rubric"
+msgid "Meyarlar — hər sətirdə"
+msgstr "Criteria — one per line as"
+
+msgctxt "registrar.rubric"
+msgid "Meyar ballarının cəmi komponent balına yazılır (komponent tavanı ilə məhdudlaşır)."
+msgstr "The sum of criterion points is written to the component score (limited by the component cap)."
+
+msgctxt "registrar.journal"
+msgid "Rubrik"
+msgstr "Rubric"
+
+msgctxt "registrar.journal"
+msgid "Rubriksiz"
+msgstr "No rubric"
+
+msgctxt "registrar.journal"
+msgid "Meyarlarla qiymətləndir"
+msgstr "Grade by criteria"
+
+msgid "Bu komponentə rubrik qoşulmayıb."
+msgstr "This component has no rubric attached."
+
+msgid "Rubrik balları yadda saxlanıldı."
+msgstr "Rubric points saved."
+
+msgid "Rubrik yadda saxlanıldı."
+msgstr "Rubric saved."
+
+msgid "Bu adla rubrik artıq mövcuddur."
+msgstr "A rubric with this name already exists."
+
+msgid "Tələbə yoxdur"
+msgstr "No students"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

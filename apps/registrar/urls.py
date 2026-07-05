@@ -29,10 +29,13 @@ urlpatterns = [
     ),
     path("idareetme/fenn-acilisi/yeni/", console_views.offering_form_view, name="offering_create"),
     path("idareetme/fenn-acilisi/<uuid:pk>/", console_views.offering_form_view, name="offering_edit"),
+    path("idareetme/rubrik/yeni/", console_views.rubric_form_view, name="rubric_create"),
+    path("idareetme/rubrik/<uuid:pk>/", console_views.rubric_form_view, name="rubric_edit"),
     path("idareetme/telebe/yeni/", console_views.student_record_form_view, name="student_record_create"),
     path("idareetme/telebe/<uuid:pk>/", console_views.student_record_form_view, name="student_record_edit"),
     path("idareetme/telebe/<uuid:pk>/kocur/", console_views.student_transfer_view, name="student_transfer"),
     path("idareetme/telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
+    path("<uuid:offering_id>/rubrik/<uuid:component_id>/", views.rubric_grade_view, name="rubric_grade"),
     path("<uuid:offering_id>/export.xlsx", pdf_views.journal_xlsx, name="journal_xlsx"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]

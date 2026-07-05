@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ component.name }} — {% trans "Rubrik qiymətləndirməsi" context "registrar.rubric" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260705-2">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
+{% endblock %}
+
+{% block content %}
+<div class="journal-page jd-page rubric-page">
+    <div class="jd-head">
+        <div class="jd-head-top">
+            <a class="journal-back" href="{% url 'registrar:journal_detail' offering.id %}#tab-components">
+                <i class="fas fa-arrow-left"></i> {{ offering.subject.code }} — {% trans "Jurnal" context "registrar.journal" %}
+            </a>
+            {% if not can_edit %}
+            <span class="journal-badge journal-badge--locked"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>
+            {% endif %}
+        </div>
+        <h1 class="jd-title">
+            <i class="fas fa-list-check"></i>
+            {{ component.name }} — {{ grid.rubric.name }}
+        </h1>
+        <div class="rubric-meta">
+            {% if grid.rubric.description %}<span>{{ grid.rubric.description }}</span>{% endif %}
+            <span class="rubric-meta-chip">
+                {% trans "Meyar cəmi" context "registrar.rubric" %}: {{ grid.criteria_max_total }}
+                · {% trans "Komponent tavanı" context "registrar.rubric" %}: {{ component.max_score }}
+            </span>
+        </div>
+    </div>
+
+    {% include "accounts/profile/_messages.html" %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="journal-grid-wrap jd-grid-wrap">
+            <table class="journal-grid jd-grid rubric-grid">
+                <thead>
+                    <tr>
+                        <th class="col-student jd-sticky-col">{% trans "Tələbə" context "registrar.journal" %}</th>
+                        {% for criterion in grid.criteria %}
+                        <th>{{ criterion.name }}<span class="th-max">/{{ criterion.max_points }}</span></th>
+                        {% endfor %}
+                        <th class="rubric-total-col">{% trans "Cəmi" context "registrar.rubric" %}<span class="th-max">/{{ component.max_score }}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in grid.rows %}
+                    <tr class="journal-row">
+                        <td class="col-student jd-sticky-col">{{ row.student.get_full_name|default:row.student.username }}</td>
+                        {% for cell in row.cells %}
+                        <td>
+                            {% if can_edit %}
+                            <input type="number" class="cell-score rubric-points-input"
+                                   name="rpoints__{{ cell.criterion.id }}__{{ row.enrollment.id }}"
+                                   value="{{ cell.points|default_if_none:'' }}"
+                                   min="0" max="{{ cell.criterion.max_points }}" step="0.5"
+                                   aria-label="{{ row.student.get_full_name|default:row.student.username }} — {{ cell.criterion.name }}">
+                            {% else %}
+                            <span class="rubric-points-ro">{{ cell.points|default_if_none:"—" }}</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="rubric-total-col">{{ row.total|default_if_none:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="{{ grid.criteria|length|add:2 }}">{% include "partials/_empty_state.html" with icon="fa-user-graduate" title=_("Tələbə yoxdur") %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if can_edit %}
+        <div class="jd-save-bar">
+            <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Rubrik ballarını saxla" context "registrar.rubric" %}</button>
+            <span class="rubric-save-hint">{% trans "Cəm avtomatik komponent balına yazılır." context "registrar.rubric" %}</span>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

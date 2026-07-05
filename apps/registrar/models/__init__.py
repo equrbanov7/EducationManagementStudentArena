@@ -26,6 +26,7 @@ from .grading import (
     AssessmentScheme,
     AttendanceStatus,
     ComponentScore,
+    CriterionScore,
     FinalGrade,
     Lesson,
     LessonKind,
@@ -33,6 +34,8 @@ from .grading import (
     ResitReason,
     ResitRecord,
     ResitStatus,
+    Rubric,
+    RubricCriterion,
 )
 
 __all__ = [
@@ -42,6 +45,7 @@ __all__ = [
     "AssessmentScheme",
     "AttendanceStatus",
     "ComponentScore",
+    "CriterionScore",
     "CourseOffering",
     "Curriculum",
     "CurriculumSubject",
@@ -57,6 +61,8 @@ __all__ = [
     "ResitReason",
     "ResitRecord",
     "ResitStatus",
+    "Rubric",
+    "RubricCriterion",
     "ScheduleSlot",
     "StudentAcademicRecord",
     "Subject",
