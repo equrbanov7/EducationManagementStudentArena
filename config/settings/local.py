@@ -257,7 +257,13 @@ if USE_REDIS:
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": REDIS_CACHE_URL,
     }
-    CELERY_BROKER_URL = _redis_url_with_db(REDIS_URL, 2)
+    # DEV-ONLY broker DB: docker-compose.prod.yml redis-i host 127.0.0.1:6379-a
+    # proxy edir və prod celery worker DB 2-də dinləyir. Dev DB 2-yə yazsa,
+    # job-ları PROD KONTEYNERİN worker-i götürür və faylları /app/media-da
+    # axtarıb partlayır. Ayrı DB → dev job-larını worker götürmür və view-dakı
+    # pickup-watchdog (JOB_WORKER_PICKUP_TIMEOUT) onları inline icra edir.
+    _dev_celery_db = int(os.getenv("DEV_CELERY_BROKER_DB", "12"))
+    CELERY_BROKER_URL = _redis_url_with_db(REDIS_URL, _dev_celery_db)
     CELERY_RESULT_BACKEND = CELERY_BROKER_URL
     CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", False)
     CELERY_TASK_EAGER_PROPAGATES = _env_bool("CELERY_TASK_EAGER_PROPAGATES", False)
