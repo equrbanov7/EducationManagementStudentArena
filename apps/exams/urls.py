@@ -10,6 +10,8 @@ urlpatterns = [
     # STUDENT - Exam Lists (sabit)
     # ==========================
     path("available/", views.student_exam_list, name="student_exam_list"),
+    # Final imtahan mərkəzi — yalnız final kateqoriyalı imtahanlar.
+    path("final/", views.final_exam_list, name="final_exam_list"),
     path("assigned/", views.assigned_student_exam_list, name="assigned_exam_list"),
     path("my-history/", views.student_exam_history, name="student_exam_history"),
     path("code-check/", views.exam_code_check, name="exam_code_check"),

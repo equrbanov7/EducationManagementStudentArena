@@ -13909,6 +13909,14 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "Bu soruda doğru cevap işareti bulunamadı — varsayılan olarak A seçildi. Doğru cevabı kontrol edip belirleyin."
 
+msgctxt "exams.view.student.list.title"
+msgid "final_exams"
+msgstr "Final sınavları"
+
+msgctxt "exams.view.final_center.permission"
+msgid "final_center_ip_not_allowed"
+msgstr "Bu sayfaya yalnızca sınav merkezinin izin verdiği bilgisayarlardan erişilebilir."
+
 msgctxt "exams.service.access.permission"
 msgid "final_exam_questions_exam_center_only"
 msgstr "Final sınavının sorularını yalnızca sınav merkezi yönetebilir."

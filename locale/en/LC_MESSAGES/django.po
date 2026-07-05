@@ -13903,6 +13903,14 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "No correct answer marker was found for this question — option A was assigned by default. Review and set the correct answer."
 
+msgctxt "exams.view.student.list.title"
+msgid "final_exams"
+msgstr "Final exams"
+
+msgctxt "exams.view.final_center.permission"
+msgid "final_center_ip_not_allowed"
+msgstr "This page can only be accessed from computers authorised by the exam center."
+
 msgctxt "exams.service.access.permission"
 msgid "final_exam_questions_exam_center_only"
 msgstr "Only the exam center can manage the questions of a final exam."

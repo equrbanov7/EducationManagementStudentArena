@@ -13937,6 +13937,14 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "Для этого вопроса не найдена отметка правильного ответа — по умолчанию выбран вариант A. Проверьте и укажите правильный ответ."
 
+msgctxt "exams.view.student.list.title"
+msgid "final_exams"
+msgstr "Финальные экзамены"
+
+msgctxt "exams.view.final_center.permission"
+msgid "final_center_ip_not_allowed"
+msgstr "Эта страница доступна только с компьютеров, разрешённых экзаменационным центром."
+
 msgctxt "exams.service.access.permission"
 msgid "final_exam_questions_exam_center_only"
 msgstr "Управлять вопросами финального экзамена может только экзаменационный центр."
