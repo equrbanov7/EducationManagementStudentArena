@@ -6,7 +6,12 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, get_live_active_states, get_live_session_model
+from apps.exams.constants import (
+    ATTEMPT_FINISHED_STATUSES,
+    DEFAULT_EXAM_LANGUAGE,
+    get_live_active_states,
+    get_live_session_model,
+)
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.language_variants import available_language_options
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -38,8 +43,8 @@ DEFAULT_SORT = SORT_SOON
 EXAMS_PER_PAGE = 9
 
 # attempts_left_for() ilə eyni status dəsti — limit hesabına yalnız
-# tamamlanmış cəhdlər daxildir.
-FINISHED_ATTEMPT_STATUSES = ("submitted", "expired", "graded")
+# tamamlanmış cəhdlər daxildir (tək mənbə: apps.exams.constants).
+FINISHED_ATTEMPT_STATUSES = ATTEMPT_FINISHED_STATUSES
 
 
 def _user_finished_attempt_count_sq(user):

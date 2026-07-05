@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.navigation import append_return_to as _append_return_to
 from apps.exams.navigation import current_return_to
@@ -182,7 +183,7 @@ def get_active_attempt_for_user(exam, user):
 
 
 def get_finished_attempts_for_user(exam, user):
-    return exam.attempts.filter(user=user, status__in=["submitted", "expired", "graded"]).order_by("-started_at")
+    return exam.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).order_by("-started_at")
 
 
 def can_user_start_new_attempt(exam, user):

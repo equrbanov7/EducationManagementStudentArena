@@ -5,7 +5,8 @@
 (function () {
     "use strict";
 
-    var TOAST_SELECTOR = ".toast-container [data-auto-hide], .toast-container .alert[data-auto-hide]";
+    var TOAST_SELECTOR =
+        ".toast-container [data-auto-hide], .toast-container .alert[data-auto-hide], [data-toast-item][data-auto-hide]";
 
     function dismissToast(messageEl) {
         if (!messageEl || !messageEl.parentNode || messageEl.dataset.dismissing === "1") {
@@ -34,7 +35,7 @@
 
             var hideTime = parseInt(messageEl.dataset.autoHide, 10);
             if (!Number.isFinite(hideTime) || hideTime <= 0) {
-                hideTime = 5000;
+                hideTime = 3000;
             }
 
             window.setTimeout(function () {

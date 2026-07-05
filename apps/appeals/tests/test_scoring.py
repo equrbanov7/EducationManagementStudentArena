@@ -143,6 +143,22 @@ class WrittenExamScoringTests(_Base):
         self.answer.refresh_from_db()
         self.assertEqual(self.answer.teacher_score, 0)
 
+    def test_accept_with_zero_awarded_points_syncs_attempt_score(self):
+        """Regressiya: yekun bal 0 olanda attempt.teacher_score köhnə (stale)
+        dəyərdə qalmamalıdır — cavablardan yenidən hesablanmış 0 yazılmalıdır."""
+        self.attempt.teacher_score = 7  # köhnə/stale ümumi bal
+        self.attempt.save(update_fields=["teacher_score"])
+
+        appeal = self._appeal(self.attempt)
+        item = self._item(appeal, self.question, self.answer)
+
+        accept_appeal_item(item, reviewer=self.teacher, response_text="0 bal", awarded_points=0)
+
+        self.answer.refresh_from_db()
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.answer.teacher_score, 0)
+        self.assertEqual(self.attempt.teacher_score, 0)
+
 
 class AppealStatusAggregationTests(_Base):
     def setUp(self):

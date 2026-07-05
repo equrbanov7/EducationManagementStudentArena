@@ -7,6 +7,7 @@ from django.utils.text import slugify
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.constants import (
+    ATTEMPT_FINISHED_STATUSES,
     EXAM_STATUS_ACTIVE,
     EXAM_STATUS_ARCHIVED,
     EXAM_STATUS_DRAFT,
@@ -290,7 +291,7 @@ class Exam(ExamAccessPolicyMixin, models.Model):
             return None
 
         self._expire_stale_attempts_for(user)
-        used = self.attempts.filter(user=user, status__in=["submitted", "expired", "graded"]).count()
+        used = self.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).count()
         left = self.max_attempts_per_user - used
         return max(left, 0)
 

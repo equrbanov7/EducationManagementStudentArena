@@ -47,8 +47,10 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(template_name="accounts/password_reset_complete.html"),
         name="password_reset_complete",
     ),
-    # Cabinet — single canonical, role-aware entry (one login → role routing).
+    # Cabinet entries — canonical role-aware entry plus visible audience aliases.
     path("kabinet/", views.cabinet_entry, name="cabinet"),
+    path("kabinet/telebe/", views.student_cabinet_entry, name="student_cabinet"),
+    path("kabinet/muellim/", views.staff_cabinet_entry, name="staff_cabinet"),
     # Dashboards
     path("dashboard/", views.dashboard, name="dashboard"),
     path("dashboard/student/", views.student_dashboard, name="student_dashboard"),

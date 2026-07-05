@@ -16,7 +16,7 @@ Modules:
   ``review_results``, ``review_result_detail``
 """
 
-from .dispatch import cabinet_entry, dashboard, resolve_cabinet_url
+from .dispatch import cabinet_entry, dashboard, resolve_cabinet_url, staff_cabinet_entry, student_cabinet_entry
 from .results import my_result_detail
 from .review import (
     pending_review,
@@ -36,6 +36,8 @@ from .teacher import grading_queue, teacher_dashboard
 __all__ = [
     "dashboard",
     "cabinet_entry",
+    "student_cabinet_entry",
+    "staff_cabinet_entry",
     "resolve_cabinet_url",
     "teacher_dashboard",
     "student_dashboard",

@@ -279,7 +279,11 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
                 answer.save(update_fields=["teacher_score", "updated_at"])
         new_score = calculate_attempt_score(attempt)
         delta = new_score - previous_score
-        attempt.teacher_score = int(new_score) if new_score and new_score > 0 else attempt.teacher_score
+        # Revert yolu ilə eyni qayda: hər hansı cavabda bal varsa yekun bal
+        # yenidən hesablanmış dəyərdir (0 daxil olmaqla) — əks halda None.
+        # Əvvəlki "if new_score > 0" şərti 0 balda köhnə dəyəri saxlayırdı.
+        any_score = attempt.answers.filter(teacher_score__isnull=False).exists()
+        attempt.teacher_score = int(new_score) if any_score else None
         attempt.save(update_fields=["teacher_score"])
 
     if existing:

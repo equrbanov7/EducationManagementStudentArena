@@ -47,6 +47,15 @@ ANSWERLINE_RE = re.compile(
 )
 
 # ===========================================================================
+# Attempt statusları
+# ---------------------------------------------------------------------------
+# Bitmiş attempt statusları — TƏK MƏNBƏ. Əvvəllər filterlərdə mövcud olmayan
+# fantom "graded" statusu da sadalanırdı (ExamAttempt.STATUS_CHOICES-də heç
+# vaxt olmayıb, heç bir kod yazmır); bütün istifadə yerləri bu sabitə bağlandı.
+# ===========================================================================
+ATTEMPT_FINISHED_STATUSES = ("submitted", "expired")
+
+# ===========================================================================
 # Müəllim paneli — imtahan "həyat dövrü" (lifecycle) statusları
 # ---------------------------------------------------------------------------
 # Hesablanmış status (DB-də saxlanmır, `Exam.lifecycle_status` ilə törədilir).

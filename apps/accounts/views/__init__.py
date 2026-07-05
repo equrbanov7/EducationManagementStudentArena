@@ -49,6 +49,8 @@ from .dashboard import (
     pending_review_detail,
     review_result_detail,
     review_results,
+    staff_cabinet_entry,
+    student_cabinet_entry,
     student_dashboard,
     teacher_dashboard,
 )
@@ -129,6 +131,8 @@ __all__ = [
     # Dashboard
     "dashboard",
     "cabinet_entry",
+    "student_cabinet_entry",
+    "staff_cabinet_entry",
     "teacher_dashboard",
     "student_dashboard",
     "grading_queue",

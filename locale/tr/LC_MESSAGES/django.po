@@ -13906,6 +13906,10 @@ msgid "correct_missing"
 msgstr "Doğru olarak işaretlenen {option} seçeneği yok."
 
 msgctxt "exams.service.parsing.warning"
+msgid "correct_defaulted"
+msgstr "Bu soruda doğru cevap işareti bulunamadı — varsayılan olarak A seçildi. Doğru cevabı kontrol edip belirleyin."
+
+msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr "Doğru"
 

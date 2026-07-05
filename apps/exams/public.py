@@ -8,6 +8,7 @@ django_apps.get_model istifadə edin.
 """
 
 from apps.exams.constants import (  # noqa: F401
+    ATTEMPT_FINISHED_STATUSES,
     DEFAULT_EXAM_LANGUAGE,
     EXAM_LANGUAGE_CHOICES,
     get_live_active_states,
@@ -53,6 +54,7 @@ from apps.exams.views.shared.tenant import (  # noqa: F401
 )
 
 __all__ = [
+    "ATTEMPT_FINISHED_STATUSES",
     "DEFAULT_EXAM_LANGUAGE",
     "StudentGroupForm",
     "get_ai_rate_limit",

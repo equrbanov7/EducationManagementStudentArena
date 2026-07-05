@@ -8,7 +8,7 @@ loading...).  Only Bootstrap core CSS, main.css and per-page assets load here.
 Notes:
  - Block names match base.html (title/extraHead/extraCss/content/extraJs) so
    templates can switch between the two bases without changes.
- - Messages render as static dismissible-free alerts: no toast JS needed.
+ - Messages render as lightweight alerts and auto-hide after 3 seconds.
  - The inline script below fixes the bfcache stale-CSRF-token problem: when
    the browser restores the page from back/forward cache, the form still
    holds the OLD csrfmiddlewaretoken while a new CSRF cookie may already be
@@ -55,11 +55,13 @@ Notes:
 
 <body class="auth-body">
 
-    {# Django messages — simple static alerts (no toast/auto-hide JS on auth pages) #}
+    {# Django messages — lightweight alerts, auto-hidden by static/js/toast.js. #}
     {% if messages %}
         <div class="container mt-3" role="status">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+                <div class="alert alert-{{ message.tags|default:'info' }} mb-2"
+                     data-auto-hide="3000"
+                     data-toast-item>{{ message }}</div>
             {% endfor %}
         </div>
     {% endif %}
@@ -68,6 +70,7 @@ Notes:
         {% block content %}{% endblock %}
     </main>
 
+    <script src="{% static 'js/toast.js' %}?v=20260705-1"></script>
     {% block extraJs %}{% endblock %}
 </body>
 </html>

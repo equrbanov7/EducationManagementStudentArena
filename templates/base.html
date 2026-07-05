@@ -82,7 +82,7 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags|default:'info' }} app-toast app-toast--{{ message.tags|default:'info' }} fade show"
                      role="alert"
-                     data-auto-hide="5000"
+                     data-auto-hide="3000"
                      data-toast-item>
                     <span class="app-toast__icon" aria-hidden="true">
                         <i class="fas {% if message.tags == 'success' %}fa-check{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-info{% endif %}"></i>

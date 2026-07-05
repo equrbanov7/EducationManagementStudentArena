@@ -80,6 +80,19 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
             # 17 seeded role users → one primary membership each.
             self.assertEqual(Membership.objects.filter(organization=org).count(), 17)
 
+    def test_no_first_login_flow_clears_existing_first_login_lock(self):
+        self._seed()
+        user = User.objects.get(username="wcu_student_az1")
+        self.assertTrue(user.profile.password_change_required)
+        self.assertFalse(user.profile.email_verified)
+
+        self._seed(no_first_login_flow=True)
+        user.refresh_from_db()
+        user.profile.refresh_from_db()
+        self.assertFalse(user.profile.password_change_required)
+        self.assertTrue(user.profile.email_verified)
+        self.assertTrue(user.check_password(self.PASSWORD))
+
     def test_without_superadmin_flag_no_superuser_created(self):
         self._seed()
         self.assertFalse(User.objects.filter(username="wcu_superadmin").exists())

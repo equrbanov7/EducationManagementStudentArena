@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt
 from apps.exams.services.attempts import (
@@ -253,7 +254,7 @@ def _previous_attempts_for_context(request, exam, attempt):
             ExamAttempt.objects.filter(
                 exam=exam,
                 user=request.user,
-                status__in=["submitted", "graded", "expired"],
+                status__in=ATTEMPT_FINISHED_STATUSES,
             )
             .exclude(id=attempt.id)
             .select_related("exam")
