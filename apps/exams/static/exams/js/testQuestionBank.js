@@ -85,6 +85,41 @@ document.addEventListener("DOMContentLoaded", function () {
       if (results) results.remove();
     }
   
+    // ====== Inline xəta banneri (alert() əvəzi) ======
+    function showWorkbenchError(message) {
+      const host =
+        document.querySelector(".main-card") || document.querySelector(".bulk-page-wrapper") || document.body;
+      let banner = document.getElementById("wbErrorBanner");
+      if (!banner) {
+        banner = document.createElement("div");
+        banner.id = "wbErrorBanner";
+        banner.setAttribute("role", "alert");
+        banner.style.cssText =
+          "display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:12px 14px;" +
+          "border:1px solid #fecaca;background:#fef2f2;color:#991b1b;border-radius:12px;font-size:.9rem;";
+        const icon = document.createElement("i");
+        icon.className = "fas fa-triangle-exclamation";
+        icon.style.cssText = "margin-top:2px;";
+        const text = document.createElement("span");
+        text.dataset.wbErrorText = "1";
+        text.style.cssText = "flex:1 1 auto;";
+        const close = document.createElement("button");
+        close.type = "button";
+        close.innerHTML = "&times;";
+        close.setAttribute("aria-label", gettext("Bağla"));
+        close.style.cssText =
+          "border:0;background:transparent;color:#991b1b;font-size:1.1rem;line-height:1;cursor:pointer;";
+        close.addEventListener("click", function () { banner.remove(); });
+        banner.appendChild(icon);
+        banner.appendChild(text);
+        banner.appendChild(close);
+        host.parentNode.insertBefore(banner, host);
+      }
+      banner.querySelector("[data-wb-error-text]").textContent = message;
+      banner.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    window.showWorkbenchError = showWorkbenchError;
+
     // ====== ✅ CLEAR button ======
     const clearBtn = document.getElementById("clearBtn");
     if (clearBtn) {
@@ -368,13 +403,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const f = input.files[0];
       const ext = (f.name.split(".").pop() || "").toLowerCase();
       if (FORBIDDEN_EXT.includes(ext)) {
-        alert(gettext("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / .png / .jpg yükləyin."));
+        showWorkbenchError(gettext("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / .png / .jpg yükləyin."));
         input.value = "";
         clearFileState();
         return false;
       }
       if (f.size > MAX_FILE_BYTES) {
-        alert(gettext("Fayl ölçüsü 45MB-dan böyükdür."));
+        showWorkbenchError(gettext("Fayl ölçüsü 45MB-dan böyükdür."));
         input.value = "";
         clearFileState();
         return false;
@@ -519,7 +554,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 submitter.innerHTML = submitter.dataset.defaultLabel;
                 submitter.disabled = false;
               }
-              window.alert(error.message || gettext("Fayldan mətn çıxarıla bilmədi."));
+              (window.showWorkbenchError || window.alert)(
+                error.message || gettext("Fayldan mətn çıxarıla bilmədi.")
+              );
             });
           return;
         }

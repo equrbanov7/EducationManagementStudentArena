@@ -19,26 +19,74 @@
 {% block extraJs %}
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
 <script nonce="{{ request.csp_nonce }}">
-    // Meta sahələri (başlıq/fənn/qrup/qeyd) form= ilə saveForm-a bağlıdır;
-    // preview (birinci forma) POST olunanda da itməsinlər deyə dəyərləri
-    // hidden input kimi preview formuna köçürürük.
+    // 1) Meta sahələri (başlıq/fənn/qrup/qeyd) form= ilə saveForm-a bağlıdır;
+    //    preview (birinci forma) POST olunanda da itməsinlər deyə dəyərləri
+    //    hidden input kimi preview formuna köçürürük.
+    // 2) «Təmizlə» səhifəni GET-ə yenidən yükləyir — meta dəyərləri
+    //    localStorage-da saxlanır və boş sahələrə bərpa olunur ki, müəllim
+    //    başlıq/fənn/qrupu yenidən yazmağa məcbur olmasın.
     (function () {
-        var previewForm = document.querySelector(".split-layout");
-        if (!previewForm) return;
-        previewForm.addEventListener("submit", function () {
-            document.querySelectorAll("[data-qsub-meta]").forEach(function (field) {
-                if (!field.name) return;
-                var hidden = previewForm.querySelector('input[type="hidden"][data-qsub-meta-mirror="' + field.name + '"]');
-                if (!hidden) {
-                    hidden = document.createElement("input");
-                    hidden.type = "hidden";
-                    hidden.name = field.name;
-                    hidden.setAttribute("data-qsub-meta-mirror", field.name);
-                    previewForm.appendChild(hidden);
-                }
-                hidden.value = field.value;
-            });
+        var STORAGE_KEY = "qsub_meta_v1";
+
+        function metaFields() {
+            return Array.prototype.slice.call(document.querySelectorAll("[data-qsub-meta]"));
+        }
+
+        function saveMeta() {
+            try {
+                var data = {};
+                metaFields().forEach(function (field) {
+                    if (field.name) data[field.name] = field.value;
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) { /* storage bağlıdırsa sadəcə ötür */ }
+        }
+
+        function restoreMeta() {
+            try {
+                var data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+                if (!data) return;
+                metaFields().forEach(function (field) {
+                    // Server render etdiyi dəyər üstündür — yalnız boşları doldur.
+                    if (field.name && !field.value && data[field.name]) {
+                        field.value = data[field.name];
+                    }
+                });
+            } catch (e) { /* korlanmış dəyər — ötür */ }
+        }
+
+        restoreMeta();
+        metaFields().forEach(function (field) {
+            field.addEventListener("input", saveMeta);
+            field.addEventListener("change", saveMeta);
         });
+
+        var previewForm = document.querySelector(".split-layout");
+        if (previewForm) {
+            previewForm.addEventListener("submit", function () {
+                saveMeta();
+                metaFields().forEach(function (field) {
+                    if (!field.name) return;
+                    var hidden = previewForm.querySelector('input[type="hidden"][data-qsub-meta-mirror="' + field.name + '"]');
+                    if (!hidden) {
+                        hidden = document.createElement("input");
+                        hidden.type = "hidden";
+                        hidden.name = field.name;
+                        hidden.setAttribute("data-qsub-meta-mirror", field.name);
+                        previewForm.appendChild(hidden);
+                    }
+                    hidden.value = field.value;
+                });
+            });
+        }
+
+        // Göndəriş uğurla yola düşəndə (saveForm submit) saxlanmış meta təmizlənir.
+        var saveForm = document.getElementById("saveForm");
+        if (saveForm) {
+            saveForm.addEventListener("submit", function () {
+                try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ötür */ }
+            });
+        }
     })();
 </script>
 {% endblock %}

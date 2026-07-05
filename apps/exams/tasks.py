@@ -106,9 +106,20 @@ def run_text_extraction_job(job_id):
                     meta["math_token"] = token
             except Exception:
                 logger.warning("run_text_extraction_job: job %s math stash alınmadı", job_id)
-    except Exception as exc:  # istifadəçiyə göstəriləcək səbəb
-        logger.info("run_text_extraction_job: job %s xəta ilə bitdi: %s", job_id, exc)
+    except ValueError as exc:
+        # extract_text_from_upload-un lokalizə olunmuş, istifadəçiyə uyğun xətaları.
+        logger.info("run_text_extraction_job: job %s istifadəçi xətası: %s", job_id, exc)
         status, text_value, error_value = TextExtractionJob.STATUS_FAILED, "", str(exc)
+    except Exception:
+        # Texniki xəta (yol/kod/infra) — istifadəçi RAW mesajı görməməlidir.
+        logger.exception("run_text_extraction_job: job %s texniki xəta", job_id)
+        from django.utils.translation import pgettext
+
+        status, text_value = TextExtractionJob.STATUS_FAILED, ""
+        error_value = pgettext(
+            "exams.task.extract.error",
+            "Fayl emal edilərkən texniki xəta baş verdi. Yenidən cəhd edin — problem davam edərsə inzibatçıya bildirin.",
+        )
 
     with rls_worker_atomic(), bypass_rls():
         job.refresh_from_db()
@@ -182,9 +193,18 @@ def run_ai_generation_job(job_id):
                 extracted = extract_text_from_upload(wrapped)
             existing = (payload.get("source_text") or "").strip()
             payload["source_text"] = "\n\n".join(part for part in [existing, extracted] if part.strip())
-        except Exception as exc:
+        except ValueError as exc:
             status = TextExtractionJob.STATUS_FAILED
             error_value = str(exc)
+        except Exception:
+            logger.exception("run_ai_generation_job: job %s fayl-çıxarma texniki xətası", job_id)
+            from django.utils.translation import pgettext
+
+            status = TextExtractionJob.STATUS_FAILED
+            error_value = pgettext(
+                "exams.task.extract.error",
+                "Fayl emal edilərkən texniki xəta baş verdi. Yenidən cəhd edin — problem davam edərsə inzibatçıya bildirin.",
+            )
 
     # 2) Generasiya (fasad-rezolyusiya — patch nöqtəsi sabit qalsın).
     if status == TextExtractionJob.STATUS_SUCCESS:
