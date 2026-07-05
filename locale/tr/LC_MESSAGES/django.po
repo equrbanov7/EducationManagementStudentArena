@@ -26941,6 +26941,14 @@ msgctxt "a11y"
 msgid "Əsas məzmuna keç"
 msgstr "Ana içeriğe atla"
 
+msgctxt "registrar.schedule"
+msgid "Kalendara əlavə et"
+msgstr "Takvime ekle"
+
+msgctxt "registrar.schedule"
+msgid "Google/Apple Calendar üçün .ics faylı"
+msgstr "Google/Apple Calendar için .ics dosyası"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

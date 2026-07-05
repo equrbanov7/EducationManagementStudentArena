@@ -10,6 +10,12 @@
             <a class="schedule-calendar-link" href="{% url 'registrar:calendar' %}">
                 <i class="fas fa-calendar-days"></i> {% trans "Akademik təqvim" context "registrar.schedule" %}
             </a>
+            {% if period %}
+            <a class="schedule-ics-link" href="{% url 'registrar:schedule_ics' %}"
+               title="{% trans 'Google/Apple Calendar üçün .ics faylı' context 'registrar.schedule' %}">
+                <i class="fas fa-calendar-plus"></i> {% trans "Kalendara əlavə et" context "registrar.schedule" %}
+            </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>

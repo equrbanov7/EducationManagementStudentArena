@@ -140,3 +140,37 @@ def student_transcript_pdf(request, pk):
     response = _render_response(organization=organization, student=record.student, record=record)
     _audit_issue(organization, record, request.user)
     return response
+
+
+@login_required
+def schedule_ics(request):
+    """Rol-aware dərs cədvəlinin iCal exportu (U19).
+
+    Tələbə → qrup cədvəli; digərləri → öz tədris slotları. Yalnız istifadəçinin
+    onsuz da gördüyü slotlar ixrac edilir — əlavə icazə səthi açılmır."""
+    from apps.registrar import ical, schedule
+    from apps.registrar.page_contexts import _current_period
+
+    organization = getattr(request, "organization", None)
+    if organization is None:
+        raise Http404
+    period = _current_period(organization)
+    record = (
+        StudentAcademicRecord.objects.filter(organization=organization, student=request.user)
+        .select_related("group")
+        .first()
+    )
+    if record and record.group and period:
+        slots = schedule.get_group_schedule(organization=organization, group=record.group, period=period)
+        calendar_name = record.group.name
+    elif period:
+        slots = schedule.get_teacher_schedule(organization=organization, teacher=request.user, period=period)
+        calendar_name = request.user.get_full_name() or request.user.username
+    else:
+        slots, calendar_name = [], organization.name
+    payload = ical.build_schedule_ics(
+        slots=slots, period=period, calendar_name=f"{calendar_name} — {organization.name}"
+    )
+    response = HttpResponse(payload, content_type="text/calendar; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="ders-cedveli.ics"'
+    return response
