@@ -395,3 +395,27 @@
     padding: 2px 8px;
     border-radius: 999px;
 }
+
+/* ── U13: jurnal mini-panelində tərəqqi barları ────────────────────────────── */
+.subject-grade-bar,
+.subject-absence-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    overflow: hidden;
+    margin: 0.4rem 0 0.5rem;
+}
+.subject-grade-fill {
+    height: 100%;
+    max-width: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-700));
+}
+.subject-absence-bar { height: 4px; margin-top: 0.35rem; }
+.subject-absence-fill {
+    height: 100%;
+    max-width: 100%;
+    border-radius: 999px;
+    background: var(--ems-warning-500);
+}
+.subject-absence-fill.is-over { background: var(--ems-danger-strong); }
