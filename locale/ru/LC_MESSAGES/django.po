@@ -13934,6 +13934,10 @@ msgid "correct_missing"
 msgstr "Отмеченный правильным вариант {option} отсутствует."
 
 msgctxt "exams.service.parsing.warning"
+msgid "correct_defaulted"
+msgstr "Для этого вопроса не найдена отметка правильного ответа — по умолчанию выбран вариант A. Проверьте и укажите правильный ответ."
+
+msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr "Верно"
 

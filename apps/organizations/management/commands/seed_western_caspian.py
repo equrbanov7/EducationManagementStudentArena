@@ -183,8 +183,8 @@ class Command(BaseCommand):
         profile = getattr(user, "profile", None)
         if profile is not None:
             updated = []
-            if flag_first_login and hasattr(profile, "password_change_required"):
-                profile.password_change_required = True
+            if hasattr(profile, "password_change_required"):
+                profile.password_change_required = flag_first_login
                 updated.append("password_change_required")
             if hasattr(profile, "email_verified"):
                 profile.email_verified = not flag_first_login

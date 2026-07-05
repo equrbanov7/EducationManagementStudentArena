@@ -1434,6 +1434,24 @@ class ExamParsingServicesTest(TestCase):
         self.assertEqual(parsed[0]["options"]["B"], "Build və yerləşdirmə prosesini")
         self.assertEqual(len(parsed[0]["options"]), 5)
 
+    # ---- Düzgün cavab işarəsi tapılmayanda default "A" xəbərdarlığı -------------
+
+    def test_parse_bulk_mcq_defaulted_correct_emits_error_warning(self):
+        raw = "1. Paytaxt hansıdır?\n" "A) Bakı\n" "B) Gəncə\n" "C) Sumqayıt\n" "D) Şəki\n" "E) Lənkəran\n"
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["correct"], ["A"])
+        defaulted = [w for w in parsed[0]["warnings"] if w["type"] == "correct_defaulted"]
+        self.assertEqual(len(defaulted), 1)
+        self.assertEqual(defaulted[0]["severity"], "error")
+
+    def test_parse_bulk_mcq_marked_correct_has_no_defaulted_warning(self):
+        raw = "1. Paytaxt hansıdır?\n" "*A) Bakı\n" "B) Gəncə\n" "C) Sumqayıt\n" "D) Şəki\n" "E) Lənkəran\n"
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["correct"], ["A"])
+        self.assertEqual([w for w in parsed[0]["warnings"] if w["type"] == "correct_defaulted"], [])
+
     def test_parse_bulk_mcq_bare_question_number_line_merged(self):
         raw = (
             "350.\n"

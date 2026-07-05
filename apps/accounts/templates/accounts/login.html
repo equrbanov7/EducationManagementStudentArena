@@ -4,18 +4,44 @@
 {% block title %}{% trans "title" context "accounts.login" %} | {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
 {% endblock %}
 
 {% block content %}
+{% get_current_language as CURRENT_LANGUAGE %}
 <div class="auth-page-wrapper"> {# auth-page -> auth-page-wrapper #}
     <div class="auth-card">
+        <form action="{% url 'set_language' %}" method="post" class="auth-language-form" data-auth-language-form>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <span class="auth-language-label">{% trans "Dil" context "accounts.login.language" %}</span>
+            <span class="auth-language-control bootstrap-single-select">
+                <select id="auth-language-select"
+                        name="language"
+                        class="form-select bootstrap-single-select__native auth-language-select"
+                        data-bootstrap-select
+                        data-auth-language-select
+                        aria-label="{% trans 'Dil seçimi' context 'accounts.login.language' %}">
+                    {% for language_code, language_name in LANGUAGES %}
+                        <option value="{{ language_code }}"{% if language_code == CURRENT_LANGUAGE %} selected{% endif %}>
+                            {{ language_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </span>
+        </form>
+
         <a href="{% url 'accounts:login' %}" class="auth-brand" aria-label="{{ site_brand_name }}">
             <img src="{% static 'brand/wcu-logo-horizontal.svg' %}" alt="{{ site_brand_name }}"
                  class="auth-brand-logo" width="240" height="43" loading="eager" decoding="async">
         </a>
         <h1 class="auth-heading">{% trans "heading" context "accounts.login" %}</h1> {# auth-title -> auth-heading #}
         <p class="auth-subheading">{% trans "subheading" context "accounts.login" %}</p> {# auth-subtitle -> auth-subheading #}
+
+        {% if login_portal_message %}
+            <p class="auth-route-note auth-route-note--{{ login_audience }}">{{ login_portal_message }}</p>
+        {% endif %}
 
         {% if form.non_field_errors %}
             <div class="auth-global-errors"> {# auth-errors -> auth-global-errors #}
@@ -85,5 +111,37 @@
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/bootstrap_select.js' %}?v=20260705-1"></script>
+<script nonce="{{ request.csp_nonce }}">
+    (function () {
+        "use strict";
+        var form = document.querySelector("[data-auth-language-form]");
+        if (!form) {
+            return;
+        }
+        var select = form.querySelector("[data-auth-language-select]");
+        var nextInput = form.querySelector('input[name="next"]');
+        if (!select) {
+            return;
+        }
+
+        function currentRelativeUrl() {
+            try {
+                var url = new URL(window.location.href);
+                return url.pathname + url.search + url.hash;
+            } catch (err) {
+                return window.location.pathname + window.location.search + window.location.hash;
+            }
+        }
+
+        select.addEventListener("change", function () {
+            if (nextInput) {
+                nextInput.value = currentRelativeUrl();
+            }
+            form.submit();
+        });
+    })();
+</script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {% endblock %}

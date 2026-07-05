@@ -38,6 +38,69 @@
     border-radius: 16px 16px 0 0;
 }
 
+/* --- Language switcher --- */
+.auth-language-form {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: -12px 0 18px;
+    color: var(--ems-neutral-600);
+    font-size: 0.82rem;
+}
+
+.auth-language-label {
+    margin: 0;
+    font-weight: 600;
+}
+
+.auth-language-control {
+    width: 138px;
+    min-width: 138px;
+}
+
+.auth-language-select {
+    width: 100%;
+}
+
+.auth-language-control .bootstrap-single-select__toggle {
+    min-height: 36px;
+    padding: 0.38rem 0.62rem;
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+    font-size: 0.84rem;
+    font-weight: 700;
+    box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
+}
+
+.auth-language-control .bootstrap-single-select__menu {
+    min-width: 180px;
+    right: 0;
+    left: auto;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.auth-language-control .bootstrap-single-select__option {
+    padding: 0.55rem 0.68rem;
+    border-radius: 9px;
+    font-size: 0.88rem;
+}
+
+.auth-language-control .bootstrap-single-select__caret i {
+    display: none;
+}
+
+.auth-language-control .bootstrap-single-select__caret::before {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+}
+
 /* --- Brand logo --- */
 .auth-brand {
     display: block;
@@ -63,6 +126,20 @@
     font-size: 0.95rem;
     line-height: 1.5;
     margin: 0 0 28px;
+}
+
+/* --- Cabinet audience note --- */
+.auth-route-note {
+    margin: -12px 0 18px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-primary-100);
+    border-left: 3px solid var(--ems-primary-600);
+    border-radius: 8px;
+    background: var(--ems-primary-50);
+    color: var(--ems-neutral-800);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    text-align: left;
 }
 
 /* --- Global (non-field) errors --- */
@@ -252,5 +329,11 @@
 
     .auth-heading {
         font-size: 1.35rem;
+    }
+
+    .auth-language-form {
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: -8px;
     }
 }

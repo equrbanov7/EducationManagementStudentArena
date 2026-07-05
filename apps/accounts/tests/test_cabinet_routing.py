@@ -2,8 +2,7 @@
 
 Covers:
 * ``resolve_cabinet_url`` — the role → cabinet-URL resolver;
-* ``/kabinet/`` (``cabinet_entry``) — teaching staff → teacher cabinet,
-  everyone else → the unified profile cabinet, login required;
+* ``/kabinet/`` (``cabinet_entry``) — every role → unified profile cabinet;
 * ``LOGIN_REDIRECT_URL`` points at the canonical cabinet entry;
 * end-to-end login → cabinet routing through the profile view;
 * login page renders the configured brand (not the old product name);
@@ -53,9 +52,9 @@ class ResolveCabinetUrlTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user("res_u", "res_u@qku.edu.az", "pw")
 
-    def test_teacher_capabilities_route_to_teacher_cabinet(self):
+    def test_teacher_capabilities_route_to_unified_cabinet(self):
         url = resolve_cabinet_url(self.user, capabilities={"is_teacher": True})
-        self.assertEqual(url, reverse("accounts:teacher_dashboard"))
+        self.assertEqual(url, reverse("accounts:profile"))
 
     def test_non_teacher_capabilities_route_to_unified_cabinet(self):
         url = resolve_cabinet_url(self.user, capabilities={"is_teacher": False})
@@ -82,14 +81,44 @@ class CabinetEntryTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
 
-    def test_teacher_routed_to_teacher_cabinet(self):
+    def test_student_cabinet_alias_requires_login_with_student_next(self):
+        resp = Client().get(reverse("accounts:student_cabinet"))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/accounts/login/", resp.url)
+        self.assertIn(reverse("accounts:student_cabinet"), resp.url)
+
+    def test_staff_cabinet_alias_requires_login_with_staff_next(self):
+        resp = Client().get(reverse("accounts:staff_cabinet"))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/accounts/login/", resp.url)
+        self.assertIn(reverse("accounts:staff_cabinet"), resp.url)
+
+    def test_student_cabinet_alias_routes_to_profile_after_login(self):
+        student = User.objects.create_user("cab_student_alias", "cab_student_alias@qku.edu.az", "pw")
+        _assign_user_to_org(student, self.org, ProfileRole.STUDENT, membership_role_name="student")
+        client = Client()
+        _login_with_org(client, student, self.org)
+        resp = client.get(reverse("accounts:student_cabinet"))
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, reverse("accounts:profile"))
+
+    def test_staff_cabinet_alias_routes_teacher_to_profile(self):
+        teacher = User.objects.create_user("cab_teacher_alias", "cab_teacher_alias@qku.edu.az", "pw")
+        _assign_user_to_org(teacher, self.org, ProfileRole.TEACHER, membership_role_name="teacher")
+        client = Client()
+        _login_with_org(client, teacher, self.org)
+        resp = client.get(reverse("accounts:staff_cabinet"))
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, reverse("accounts:profile"))
+
+    def test_teacher_routed_to_unified_cabinet(self):
         teacher = User.objects.create_user("cab_teacher", "cab_teacher@qku.edu.az", "pw")
         _assign_user_to_org(teacher, self.org, ProfileRole.TEACHER, membership_role_name="teacher")
         client = Client()
         _login_with_org(client, teacher, self.org)
         resp = client.get(reverse("accounts:cabinet"))
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, reverse("accounts:teacher_dashboard"))
+        self.assertEqual(resp.url, reverse("accounts:profile"))
 
     def test_student_routed_to_unified_cabinet(self):
         student = User.objects.create_user("cab_student", "cab_student@qku.edu.az", "pw")
@@ -109,7 +138,7 @@ class LoginRedirectContractTest(TestCase):
 
         self.assertEqual(settings.LOGIN_REDIRECT_URL, reverse("accounts:cabinet"))
 
-    def test_login_then_follow_routes_teacher_to_teacher_cabinet(self):
+    def test_login_then_follow_routes_teacher_to_profile_cabinet(self):
         owner = User.objects.create_user("lr_owner", "lr_owner@qku.edu.az", "pw")
         org = Organization.objects.create(
             name="LR Univ",
@@ -131,8 +160,8 @@ class LoginRedirectContractTest(TestCase):
             follow=True,
         )
         self.assertEqual(resp.status_code, 200)
-        # login → /kabinet/ → teacher cabinet.
-        self.assertEqual(resp.request["PATH_INFO"], reverse("accounts:teacher_dashboard"))
+        # login → /kabinet/ → unified profile cabinet.
+        self.assertEqual(resp.request["PATH_INFO"], reverse("accounts:profile"))
 
 
 @override_settings(UNIVERSITY_MODE=True, SITE_BRAND_NAME="Qərbi Kaspi Universiteti")
@@ -145,6 +174,38 @@ class LoginBrandingTest(TestCase):
         html = resp.content.decode()
         self.assertIn("Qərbi Kaspi Universiteti", html)
         self.assertNotIn("<title>Daxil ol | EMSArena", html)
+
+    def test_login_page_shows_buttonless_language_switcher_without_cabinet_urls(self):
+        resp = Client().get(reverse("accounts:login"))
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertIn('action="/i18n/setlang/"', html)
+        self.assertIn('name="language"', html)
+        self.assertIn("data-bootstrap-select", html)
+        self.assertIn("data-auth-language-select", html)
+        self.assertNotIn("Tətbiq et", html)
+        self.assertNotIn(reverse("accounts:student_cabinet"), html)
+        self.assertNotIn(reverse("accounts:staff_cabinet"), html)
+
+    def test_student_cabinet_next_shows_student_message(self):
+        resp = Client().get(reverse("accounts:login"), {"next": reverse("accounts:student_cabinet")})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Tələbə kabinetinə daxil olmaq üçün")
+
+    def test_staff_cabinet_next_shows_staff_message(self):
+        resp = Client().get(reverse("accounts:login"), {"next": reverse("accounts:staff_cabinet")})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Müəllim və əməkdaş kabinetinə daxil olmaq üçün")
+
+    def test_logout_message_auto_hides_on_auth_pages(self):
+        user = User.objects.create_user("logout_auto", "logout_auto@qku.edu.az", "StrongPass123!")
+        client = Client()
+        client.force_login(user)
+        resp = client.post(reverse("accounts:logout"), follow=True)
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertIn('data-auto-hide="3000"', html)
+        self.assertEqual(resp.request["PATH_INFO"], reverse("accounts:login"))
 
     def test_otp_subject_uses_brand(self):
         subject = _otp_subject_for_purpose("login")

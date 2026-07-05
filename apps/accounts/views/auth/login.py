@@ -1,8 +1,11 @@
 """accounts auth view paketi — login."""
 
+from urllib.parse import urlsplit
+
 from django.conf import settings
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
+from django.utils.translation import pgettext
 from django.views.generic.edit import FormView
 
 from apps.accounts.models import EmailOTP
@@ -26,6 +29,14 @@ from .constants import (
     logger,
 )
 
+LOGIN_AUDIENCE_STUDENT = "student"
+LOGIN_AUDIENCE_STAFF = "staff"
+
+
+def _normalized_path(value):
+    path = urlsplit(str(value or "")).path or "/"
+    return f"{path.rstrip('/')}/"
+
 
 class CustomLoginView(LoginView):
     """Login view with custom form and suspended-organization checks."""
@@ -43,13 +54,52 @@ class CustomLoginView(LoginView):
         """
         context = super().get_context_data(**kwargs)
         brand = getattr(settings, "SITE_BRAND_NAME", "")
+        next_url = context.get(self.redirect_field_name, "")
+        student_cabinet_url = reverse("accounts:student_cabinet")
+        staff_cabinet_url = reverse("accounts:staff_cabinet")
+        audience = self._resolve_login_audience(next_url, student_cabinet_url, staff_cabinet_url)
         context.setdefault("seo_title", f"Daxil ol | {brand}".strip(" |"))
         context.setdefault(
             "seo_description",
             f"{brand} hesabınıza daxil olun və kabinet, imtahan, kurs və "
             "idarəetmə bölmələrindən istifadə edin.".strip(),
         )
+        context.update(
+            {
+                "login_audience": audience,
+                "login_portal_message": self._audience_message(audience),
+            }
+        )
         return context
+
+    def _resolve_login_audience(self, next_url, student_cabinet_url, staff_cabinet_url):
+        next_path = _normalized_path(next_url)
+        student_paths = {
+            _normalized_path(student_cabinet_url),
+            _normalized_path(reverse("accounts:student_dashboard")),
+        }
+        staff_paths = {
+            _normalized_path(staff_cabinet_url),
+            _normalized_path(reverse("accounts:teacher_dashboard")),
+            _normalized_path(reverse("accounts:cabinet")),
+            _normalized_path(reverse("accounts:dashboard")),
+        }
+        if next_path in student_paths:
+            return LOGIN_AUDIENCE_STUDENT
+        if next_path in staff_paths:
+            return LOGIN_AUDIENCE_STAFF
+        return LOGIN_AUDIENCE_STAFF
+
+    def _audience_message(self, audience):
+        if audience == LOGIN_AUDIENCE_STUDENT:
+            return pgettext(
+                "accounts.login.audience",
+                "Tələbə kabinetinə daxil olmaq üçün universitet hesabınızla giriş edin.",
+            )
+        return pgettext(
+            "accounts.login.audience",
+            "Müəllim və əməkdaş kabinetinə daxil olmaq üçün universitet hesabınızla giriş edin.",
+        )
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)

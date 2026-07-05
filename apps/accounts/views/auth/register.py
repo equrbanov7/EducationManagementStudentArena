@@ -366,7 +366,7 @@ def resend_code_view(request):
 
 
 def logout_view(request):
-    """Logout user and redirect to home.
+    """Logout user and redirect to the login page.
 
     Only POST requests are accepted to prevent cross-site forced-logout attacks
     (e.g. an attacker embedding ``<img src="/accounts/logout/">`` on another page).
@@ -376,4 +376,4 @@ def logout_view(request):
         return HttpResponseNotAllowed(["POST"])
     logout(request)
     messages.success(request, pgettext_lazy("accounts.auth.message", "logout_success"))
-    return redirect("home")
+    return redirect("accounts:login")

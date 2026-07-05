@@ -2,9 +2,8 @@
 Characterization tests for the ``dashboard.py`` + ``_dashboard_helpers.py``
 refactor (P1.2 + P1.3).
 
-These tests pin the CURRENT entry-point behavior of the dashboard views before
-both files are split into packages: authentication gates, role-based redirects
-and the teacher-only permission gate.
+These tests pin the CURRENT entry-point behavior of the dashboard views:
+authentication gates, legacy redirects and the teacher-only grading gate.
 
 Deep behavior of the views and the ``_collect_*`` selectors is already covered
 by ``test_profile_views.py`` (AssignedItemsViewTest, MyResultsViewTest,
@@ -86,7 +85,7 @@ class DashboardHelpersPublicApiTest(TestCase):
 
 
 class DashboardDispatchTest(TestCase):
-    """Pin the dashboard() role-based redirect."""
+    """Pin the dashboard() legacy redirect."""
 
     def setUp(self):
         self.client = Client()
@@ -96,21 +95,21 @@ class DashboardDispatchTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
 
-    def test_dashboard_redirects_student_to_student_dashboard(self):
+    def test_dashboard_redirects_student_to_profile_cabinet(self):
         student = User.objects.create_user(username="dash_student", email="ds@example.com", password="pw12345678")
         student.profile.role = ProfileRole.STUDENT
         student.profile.save(update_fields=["role", "updated_at"])
         self.client.force_login(student)
         resp = self.client.get(reverse("accounts:dashboard"))
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, reverse("accounts:student_dashboard"))
+        self.assertEqual(resp.url, reverse("accounts:profile"))
 
-    def test_dashboard_redirects_teacher_to_teacher_dashboard(self):
+    def test_dashboard_redirects_teacher_to_profile_cabinet(self):
         admin = User.objects.create_superuser(username="dash_teacher", email="dt@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:dashboard"))
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, reverse("accounts:teacher_dashboard"))
+        self.assertEqual(resp.url, reverse("accounts:profile"))
 
 
 class TeacherDashboardTest(TestCase):
@@ -124,20 +123,21 @@ class TeacherDashboardTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
 
-    def test_non_teacher_redirected_home(self):
+    def test_non_teacher_redirected_to_profile(self):
         student = User.objects.create_user(username="td_student", email="tds@example.com", password="pw12345678")
         student.profile.role = ProfileRole.STUDENT
         student.profile.save(update_fields=["role", "updated_at"])
         self.client.force_login(student)
         resp = self.client.get(reverse("accounts:teacher_dashboard"))
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, reverse("home"))
+        self.assertEqual(resp.url, reverse("accounts:profile"))
 
-    def test_teacher_renders_200(self):
+    def test_teacher_dashboard_redirects_to_profile(self):
         admin = User.objects.create_superuser(username="td_teacher", email="tdt@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:teacher_dashboard"))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, reverse("accounts:profile"))
 
 
 class StudentDashboardTest(TestCase):

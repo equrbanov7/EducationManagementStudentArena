@@ -84,11 +84,11 @@ Bütün rollar **tək login ekranından** (`/accounts/login/`) daxil olur. Giri�
 sonra istifadəçi **`/kabinet/`** (canonical entry) üzərindən roluna görə
 yönləndirilir:
 
-- **Tədris heyəti** (müəllim / assistent / laborant) → müəllim kabineti
-  (`/accounts/dashboard/teacher/`).
-- **Tələbə və bütün digər rollar** (dekan, kafedra müdürü, HR, imtahan mərkəzi,
-  proqram koordinatoru, rektor, prorektor…) → **vahid rol-aware kabinet**
-  (`/accounts/profile/`), hər rol öz bölmələrini görür.
+- **Bütün rollar** (müəllim, assistent, laborant, tələbə, dekan, kafedra
+  müdürü, HR, imtahan mərkəzi, proqram koordinatoru, rektor, prorektor…) →
+  **vahid rol-aware kabinet** (`/accounts/profile/`), hər rol öz bölmələrini
+  görür. Köhnə `/accounts/dashboard/teacher/` URL-i də bu profil kabinetinə
+  yönləndirilir ki, iki fərqli kabinet dizaynı görünməsin.
 
 Marşrutlaşdırma `apps/accounts/views/dashboard/dispatch.py::resolve_cabinet_url`
 tərəfindən aparılır; `LOGIN_REDIRECT_URL = /accounts/kabinet/`.
@@ -99,6 +99,6 @@ tərəfindən aparılır; `LOGIN_REDIRECT_URL = /accounts/kabinet/`.
 2. `wcu_dean` ilə gir → `/kabinet/` → dekan kabineti (fakültə scope).
 3. `wcu_student_az1` ilə gir → `/kabinet/` → tələbə kabineti (AZ bölməsi qrupu,
    "Fənlərim" bölməsində kredit + qayıb statusu).
-4. `wcu_teacher` ilə gir → `/kabinet/` → müəllim kabineti.
+4. `wcu_teacher` ilə gir → `/kabinet/` → profil kabineti (müəllim bölmələri).
 5. `wcu_program_coordinator` ilə gir → tyutor-ekvivalent görünüş (ixtisas scope).
 6. `--with-superadmin` işlətmisinizsə `wcu_superadmin` ilə `/admin/`-ə gir.

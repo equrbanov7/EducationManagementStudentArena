@@ -13900,6 +13900,10 @@ msgid "correct_missing"
 msgstr "Marked correct option {option} does not exist."
 
 msgctxt "exams.service.parsing.warning"
+msgid "correct_defaulted"
+msgstr "No correct answer marker was found for this question — option A was assigned by default. Review and set the correct answer."
+
+msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr "Correct"
 

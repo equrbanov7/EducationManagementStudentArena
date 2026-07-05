@@ -49,7 +49,16 @@ def _finish_question(current: dict | None) -> dict | None:
         current["correct"] = current["_answerline_correct"]
 
     if not current["correct"]:
+        # Mətn içində düzgün cavab işarəsi tapılmadı — "A" yalnız texniki
+        # default-dur, real cavab açarı deyil. Müəllim workbench-də mütləq
+        # görsün deyə ERROR severity ilə xəbərdarlıq qoyulur.
         current["correct"] = ["A"]
+        _add_warning(
+            current,
+            "correct_defaulted",
+            pgettext("exams.service.parsing.warning", "correct_defaulted"),
+            severity=SEVERITY_ERROR,
+        )
 
     current["answer_mode"] = "multiple" if len(current["correct"]) > 1 else "single"
     current.pop("_answerline_correct", None)

@@ -7,9 +7,11 @@ from datetime import timedelta
 from django.utils import timezone
 
 from apps.appeals.constants import APPEAL_WINDOW_DAYS
+from apps.exams.public import ATTEMPT_FINISHED_STATUSES
 
-# Apellyasiyaya icazə verilən attempt statusları (bitmiş cəhdlər).
-APPEAL_ELIGIBLE_ATTEMPT_STATUSES = frozenset({"submitted", "expired", "graded"})
+# Apellyasiyaya icazə verilən attempt statusları (bitmiş cəhdlər) — exams
+# fasadındakı tək mənbədən törədilir.
+APPEAL_ELIGIBLE_ATTEMPT_STATUSES = frozenset(ATTEMPT_FINISHED_STATUSES)
 
 
 def _finished_at(attempt):

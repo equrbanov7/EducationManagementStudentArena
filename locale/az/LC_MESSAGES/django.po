@@ -13928,6 +13928,10 @@ msgid "correct_missing"
 msgstr "Düz cavab kimi işarələnən {option} variantı yoxdur."
 
 msgctxt "exams.service.parsing.warning"
+msgid "correct_defaulted"
+msgstr "Bu sualda düzgün cavab işarəsi tapılmadı — müvəqqəti olaraq A seçildi. Düzgün cavabı mütləq yoxlayıb təyin edin."
+
+msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr ""
 "Düz cavab digər variantlardan xeyli uzundur — tələbə üçün gözəgörünən ipucu "

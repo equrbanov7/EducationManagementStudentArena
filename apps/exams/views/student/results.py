@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -96,7 +97,7 @@ def exam_result(request, slug, attempt_id):
         ExamAttempt.objects.filter(
             user=request.user,
             exam=exam,
-            status__in=["submitted", "graded", "expired"],
+            status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .exclude(id=attempt.id)
         .order_by("-started_at")
@@ -208,7 +209,7 @@ def student_exam_history(request):
         ExamAttempt.objects.filter(
             user=request.user,
             exam__in=active_tenant_exams,
-            status__in=["submitted", "graded", "expired"],
+            status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .select_related("exam")
         .prefetch_related("answers__question__options", "answers__selected_options")
