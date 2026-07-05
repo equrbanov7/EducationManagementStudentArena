@@ -1,15 +1,19 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Sual göndərişləri" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
 
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260706-2">
+{% endblock %}
+
 {% block content %}
 <div class="container py-4" style="max-width: 1000px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0"><i class="fas fa-inbox me-2"></i>{% trans "Sual göndərişləri" %}
-            {% if pending_count %}<span class="badge bg-danger">{{ pending_count }}</span>{% endif %}
+    <div class="qsubd-header">
+        <h1><i class="fas fa-inbox"></i> {% trans "Sual göndərişləri" %}
+            {% if pending_count %}<span class="qsubs-pill qsubs-pill--rejected">{{ pending_count }}</span>{% endif %}
         </h1>
-        <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> {% trans "Geri" %}</a>
+        <a href="{{ back_url }}" class="qsubd-back"><i class="fas fa-arrow-left"></i> {% trans "Geri" %}</a>
     </div>
 
     <div class="btn-group mb-3" role="group">
@@ -20,36 +24,37 @@
     </div>
 
     {% if submissions %}
-    <div class="list-group">
+    <div class="qsubs-list">
         {% for s in submissions %}
-        <a href="{% url 'exams:question_submission_review' s.id %}" class="list-group-item list-group-item-action">
-            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                <div>
-                    <strong>{{ s.title }}</strong>
-                    <div class="text-muted small">
-                        {{ s.teacher.get_full_name|default:s.teacher.username }} · <i class="fas fa-book"></i> {{ s.subject }} · <i class="fas fa-users"></i> {{ s.group_label }} · {{ s.created_at|date:"d.m.Y H:i" }}
-                        {% if s.resubmission_count %} · {% trans "yenidən göndərilib" %} ×{{ s.resubmission_count }}{% endif %}
-                    </div>
+        <a href="{% url 'exams:question_submission_review' s.id %}" class="qsubs-item qsubs-item--{{ s.status }}">
+            <div class="qsubs-item__main">
+                <p class="qsubs-item__title">{{ s.title }}</p>
+                <div class="qsubs-item__meta">
+                    <span><i class="fas fa-user"></i>{{ s.teacher.get_full_name|default:s.teacher.username }}</span>
+                    <span><i class="fas fa-book"></i>{{ s.subject }}</span>
+                    <span><i class="fas fa-users"></i>{{ s.group_label }}</span>
+                    <span><i class="far fa-clock"></i>{{ s.created_at|date:"d.m.Y H:i" }}</span>
+                    {% if s.resubmission_count %}<span><i class="fas fa-rotate-right"></i>×{{ s.resubmission_count }}</span>{% endif %}
                 </div>
-                <div class="d-flex gap-2 align-items-center">
-                    <span class="badge bg-primary">{{ s.question_count }} {% trans "sual" %}</span>
-                    {% if s.error_count %}<span class="badge bg-danger">{{ s.error_count }} {% trans "xəta" %}</span>{% endif %}
-                    {% if s.warning_count %}<span class="badge bg-warning text-dark">{{ s.warning_count }} {% trans "xəbərdarlıq" %}</span>{% endif %}
-                    {% if s.status == "pending" %}
-                        <span class="badge bg-info">{% trans "Baxılır" %}</span>
-                    {% elif s.status == "accepted" %}
-                        <span class="badge bg-success">{% trans "Qəbul" %}</span>
-                    {% else %}
-                        <span class="badge bg-danger">{% trans "Rədd" %}</span>
-                    {% endif %}
-                </div>
+            </div>
+            <div class="qsubs-item__badges">
+                <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{{ s.question_count }} {% trans "sual" %}</span>
+                {% if s.error_count %}<span class="qsubs-pill qsubs-pill--error"><i class="fas fa-circle-xmark"></i>{{ s.error_count }}</span>{% endif %}
+                {% if s.warning_count %}<span class="qsubs-pill qsubs-pill--warning"><i class="fas fa-triangle-exclamation"></i>{{ s.warning_count }}</span>{% endif %}
+                {% if s.status == "pending" %}
+                    <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-hourglass-half"></i>{% trans "Baxılır" %}</span>
+                {% elif s.status == "accepted" %}
+                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-check"></i>{% trans "Qəbul" %}</span>
+                {% else %}
+                    <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-rotate-left"></i>{% trans "Rədd" %}</span>
+                {% endif %}
             </div>
         </a>
         {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-light border text-center py-5">
-        <i class="far fa-folder-open fa-2x d-block mb-2 text-muted"></i>
+    <div class="qsubs-empty">
+        <i class="far fa-folder-open"></i>
         {% trans "Bu statusda göndəriş yoxdur." %}
     </div>
     {% endif %}

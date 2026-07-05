@@ -89,10 +89,19 @@ def _resolve_group(form_state, groups):
     return None, form_state.get("group_label") or ""
 
 
+def annotate_preview_flags(questions):
+    """Önizləmə partialı üçün hər suala has_error/has_warning bayraqları qoyur."""
+    for question in questions or []:
+        severities = {(w.get("severity") or "warning") for w in (question.get("warnings") or [])}
+        question["has_error"] = "error" in severities
+        question["has_warning"] = bool(severities - {"error"})
+    return questions
+
+
 def _preview_context(raw_text):
     """Preview üçün parse nəticəsi + say xülasəsi (müəllim və mərkəz eyni şeyi görür)."""
     parsed, counts = analyze_submission_text(raw_text)
-    return {"preview_parsed": parsed, "preview_counts": counts}
+    return {"preview_parsed": annotate_preview_flags(parsed), "preview_counts": counts}
 
 
 # ---------------------------------------------------------------------------
@@ -325,7 +334,7 @@ def question_submission_detail(request, submission_id):
 def _detail_context(submission, *, can_edit, is_reviewer):
     return {
         "submission": submission,
-        "parsed_questions": submission.parsed_snapshot or [],
+        "parsed_questions": annotate_preview_flags(list(submission.parsed_snapshot or [])),
         "can_edit": can_edit,
         "is_reviewer": is_reviewer,
         "language_choices": EXAM_LANGUAGE_CHOICES,
@@ -396,7 +405,7 @@ def question_submission_review(request, submission_id):
         "exams/teacher/question_submission_review.html",
         {
             "submission": submission,
-            "parsed_questions": submission.parsed_snapshot or [],
+            "parsed_questions": annotate_preview_flags(list(submission.parsed_snapshot or [])),
             "banks": banks,
             "back_url": reverse("exams:question_submission_inbox"),
         },

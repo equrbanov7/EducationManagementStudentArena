@@ -1,49 +1,75 @@
 {% load i18n %}
 {% comment %}
-Parse olunmuş sualların + xəbərdarlıqların ortaq görünüşü.
-Kontekst: questions (parsed snapshot/preview siyahısı), counts (opsional).
-Müəllim preview-da və mərkəz baxışında EYNİ partial istifadə olunur ki,
-hər iki tərəf eyni mənzərəni görsün.
+Parse olunmuş sualların + xəbərdarlıqların ortaq görünüşü (workbench q-card
+dizayn dili). Müəllim detalında və mərkəz baxışında EYNİ partial istifadə
+olunur ki, hər iki tərəf eyni mənzərəni görsün.
+Kontekst: questions (annotate_preview_flags ilə has_error/has_warning
+bayraqlı snapshot siyahısı), counts (opsional say xülasəsi).
+Stil: exams/css/question_submission.css (qsubp-* / qsubs-stats).
 {% endcomment %}
 
 {% if counts %}
-<div class="qsub-summary d-flex gap-3 flex-wrap mb-3">
-    <span class="badge bg-primary fs-6">{% trans "Sual" %}: {{ counts.questions }}</span>
-    <span class="badge {% if counts.errors %}bg-danger{% else %}bg-secondary{% endif %} fs-6">{% trans "Xəta" %}: {{ counts.errors }}</span>
-    <span class="badge {% if counts.warnings %}bg-warning text-dark{% else %}bg-secondary{% endif %} fs-6">{% trans "Xəbərdarlıq" %}: {{ counts.warnings }}</span>
+<div class="qsubs-stats">
+    <div class="qsubs-stat">
+        <div class="qsubs-stat__icon qsubs-stat__icon--blue"><i class="fas fa-list-check"></i></div>
+        <div>
+            <span class="qsubs-stat__label">{% trans "Sual" %}</span>
+            <span class="qsubs-stat__value">{{ counts.questions }}</span>
+        </div>
+    </div>
+    <div class="qsubs-stat">
+        <div class="qsubs-stat__icon qsubs-stat__icon--red"><i class="fas fa-circle-xmark"></i></div>
+        <div>
+            <span class="qsubs-stat__label">{% trans "Xəta" %}</span>
+            <span class="qsubs-stat__value">{{ counts.errors }}</span>
+        </div>
+    </div>
+    <div class="qsubs-stat">
+        <div class="qsubs-stat__icon qsubs-stat__icon--amber"><i class="fas fa-triangle-exclamation"></i></div>
+        <div>
+            <span class="qsubs-stat__label">{% trans "Xəbərdarlıq" %}</span>
+            <span class="qsubs-stat__value">{{ counts.warnings }}</span>
+        </div>
+    </div>
 </div>
 {% endif %}
 
-<ol class="qsub-question-list list-unstyled d-flex flex-column gap-3">
+<ol class="qsubp-list">
     {% for q in questions %}
-    <li class="card">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-                <strong>{{ forloop.counter }}. {{ q.text }}</strong>
-                {% if q.warnings %}
-                <span class="badge bg-warning text-dark">{{ q.warnings|length }}</span>
-                {% endif %}
+    <li class="qsubp-card{% if q.has_error %} qsubp-card--error{% elif q.has_warning %} qsubp-card--warn{% endif %}">
+        <div class="qsubp-card__head">
+            <span class="qsubp-card__num">#{{ forloop.counter }}</span>
+            <span class="qsubp-card__text">{{ q.text }}</span>
+        </div>
+
+        {% if q.options %}
+        <div class="qsubp-options">
+            {% for label, opt_text in q.options.items %}
+            <div class="qsubp-opt {% if label in q.correct %}qsubp-opt--correct{% endif %}">
+                <span class="qsubp-opt__label">{{ label }}</span>
+                <span>{{ opt_text }}</span>
             </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-            <ul class="list-unstyled mt-2 mb-0">
-                {% for label, opt_text in q.options.items %}
-                <li class="{% if label in q.correct %}text-success fw-semibold{% endif %}">
-                    {% if label in q.correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle text-muted"></i>{% endif %}
-                    {{ label }}) {{ opt_text }}
-                </li>
-                {% endfor %}
-            </ul>
-
-            {% if q.warnings %}
-            <div class="mt-2 d-flex flex-column gap-1">
+        {% if q.warnings %}
+        <details class="qsubp-warnings" {% if q.has_error %}data-severity="error" open{% endif %}>
+            <summary>
+                <i class="fas fa-list-check"></i>
+                {% trans "Xəbərdarlıqlar" %}
+                <span>({{ q.warnings|length }})</span>
+            </summary>
+            <div class="qsubp-warnings__body">
                 {% for w in q.warnings %}
-                <div class="alert py-1 px-2 mb-0 {% if w.severity == 'error' %}alert-danger{% elif w.severity == 'info' %}alert-info{% else %}alert-warning{% endif %}">
-                    <small>{{ w.msg }}</small>
+                <div class="qsubp-wmsg qsubp-wmsg--{{ w.severity|default:'warning' }}">
+                    {% if w.severity == 'error' %}<i class="fas fa-circle-xmark"></i>{% elif w.severity == 'info' %}<i class="fas fa-circle-info"></i>{% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
+                    <span>{{ w.msg }}</span>
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
-        </div>
+        </details>
+        {% endif %}
     </li>
     {% endfor %}
 </ol>
