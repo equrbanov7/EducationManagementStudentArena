@@ -18,6 +18,11 @@ from django.views.decorators.http import require_POST
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.models import QuestionBank, QuestionSubmission, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
+from apps.exams.services.bulk_workbench import (
+    analyze_mcq_bulk,
+    parse_points_payload,
+    parse_selected_indices,
+)
 from apps.exams.services.question_submission import (
     accept_submission,
     analyze_submission_text,
@@ -90,57 +95,156 @@ def _preview_context(raw_text):
 
 
 # ---------------------------------------------------------------------------
-# Müəllim: yeni göndəriş
+# Müəllim: yeni göndəriş (toplu sual workbench dizaynı ilə)
 # ---------------------------------------------------------------------------
 @login_required
 def question_submission_create(request):
+    """
+    Yeni göndəriş — sual bankı "toplu əlavə" workbench-i ilə EYNİ UI:
+    fayl yüklə (PDF/TXT/PNG/JPG), redaktor, AI generasiya, önizləmə + xəta/
+    xəbərdarlıq kartları, sual seçimi. Fərq: sonda "İmtahan mərkəzinə göndər".
+    """
     _ensure_teacher(request.user)
     organization = _require_organization(request)
-
     groups = list(_teacher_groups(request, organization))
-    context = {
-        "language_choices": EXAM_LANGUAGE_CHOICES,
-        "teacher_groups": groups,
-        "form_state": {"title": "", "subject": "", "group_id": "", "group_label": "", "language": "az", "raw_text": ""},
-        "back_url": _profile_section_url("question-submissions"),
-    }
+
+    raw_text = ""
+    parsed = []
+    selected = set()
+    from apps.exams.views.teacher.question_library._shared import _empty_analysis
+
+    analysis = _empty_analysis()
+    form_state = {"title": "", "subject": "", "group_id": "", "group_label": "", "language": "az", "raw_text": ""}
 
     if request.method == "POST":
-        action = (request.POST.get("action") or "").strip()
+        action = (request.POST.get("action") or "preview").strip()
         form_state = _form_state(request)
-        context["form_state"] = form_state
 
-        if action == "preview":
-            try:
-                context.update(_preview_context(form_state["raw_text"]))
-            except ValidationError as exc:
-                messages.error(request, exc.messages[0])
-        elif action == "submit":
-            student_group, group_label = _resolve_group(form_state, groups)
-            try:
-                submission = submit_question_set(
-                    teacher=request.user,
-                    organization=organization,
-                    title=form_state["title"],
-                    subject=form_state["subject"],
-                    student_group=student_group,
-                    group_label=group_label,
-                    language=form_state["language"],
-                    raw_text=form_state["raw_text"],
-                )
-            except ValidationError as exc:
-                messages.error(request, exc.messages[0])
-            else:
-                messages.success(
-                    request,
-                    pgettext(
-                        "exams.view.question_submission.message",
-                        "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual).",
-                    ).format(count=submission.question_count),
-                )
-                return redirect("exams:question_submission_detail", submission_id=submission.id)
+        if action in ("preview", "save"):
+            raw_text = form_state["raw_text"]
+            uploaded = request.FILES.get("upload_file")
+            if uploaded:
+                from apps.exams.services.parsing import extract_text_from_upload
 
+                try:
+                    raw_text = extract_text_from_upload(uploaded)
+                    form_state["raw_text"] = raw_text
+                except Exception as exc:  # noqa: BLE001
+                    messages.error(
+                        request,
+                        pgettext("exams.view.question_submission.message", "Fayl oxunmadı: {error}").format(error=exc),
+                    )
+
+            analysis = analyze_mcq_bulk(raw_text)
+            parsed = analysis["parsed"]
+
+            selected_from_request = parse_selected_indices(request.POST)
+            selected = set(range(1, len(parsed) + 1)) if selected_from_request is None else selected_from_request
+
+            if action == "save":
+                points_payload = parse_points_payload(request.POST)
+                chosen = []
+                for index, question in enumerate(parsed, start=1):
+                    if index not in selected:
+                        continue
+                    raw_points = str(points_payload.get(str(index)) or "").strip()
+                    if raw_points.isdigit() and int(raw_points) > 0:
+                        question["points"] = int(raw_points)
+                    chosen.append(question)
+
+                student_group, group_label = _resolve_group(form_state, groups)
+                try:
+                    submission = submit_question_set(
+                        teacher=request.user,
+                        organization=organization,
+                        title=form_state["title"],
+                        subject=form_state["subject"],
+                        student_group=student_group,
+                        group_label=group_label,
+                        language=form_state["language"],
+                        raw_text=raw_text,
+                        parsed=chosen,
+                    )
+                except ValidationError as exc:
+                    messages.error(request, exc.messages[0])
+                else:
+                    messages.success(
+                        request,
+                        pgettext(
+                            "exams.view.question_submission.message",
+                            "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual).",
+                        ).format(count=submission.question_count),
+                    )
+                    return redirect("exams:question_submission_detail", submission_id=submission.id)
+
+    context = {
+        "exam": None,
+        "raw_text": raw_text,
+        "parsed": parsed,
+        "selected": selected,
+        "category_counts": analysis["category_counts"],
+        "warning_count": analysis["warning_count"],
+        "duplicate_count": analysis["duplicate_count"],
+        "error_count": analysis["error_count"],
+        "test_level_warnings": analysis["test_level_warnings"],
+        "rq_value": "",
+        "dp_value": "1",
+        "math_token": "",
+        # Meta sahələri (workbench-dən kənar kart)
+        "teacher_groups": groups,
+        "form_state": form_state,
+        # Workbench konteksti
+        "wb_workbench_key": "question-submission",
+        "wb_title": pgettext("exams.template.question_submission", "İmtahan mərkəzinə sual göndər"),
+        "wb_subtitle": pgettext(
+            "exams.template.question_submission",
+            "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin.",
+        ),
+        "wb_back_url": _profile_section_url("question-submissions"),
+        "wb_back_label": pgettext("exams.template.question_submission", "Göndərişlərə qayıt"),
+        "wb_show_settings": False,
+        "wb_ai_url": reverse("exams:ai_generate_submission_questions"),
+        "wb_ai_context": "test",
+        "wb_show_language": True,
+        "wb_languages": EXAM_LANGUAGE_CHOICES,
+        "wb_selected_language": form_state["language"],
+        "wb_show_format": False,
+        "wb_format": "test",
+        "wb_show_report": False,
+        "wb_templates": [],
+        "wb_save_label": pgettext("exams.template.question_submission", "İmtahan mərkəzinə göndər"),
+    }
     return render(request, "exams/teacher/question_submission_form.html", context)
+
+
+@login_required
+@require_POST
+def ai_generate_submission_questions(request):
+    """Göndəriş workbench-inin AI kartı — bank/imtahan AI axını ilə eyni mexanizm."""
+    _ensure_teacher(request.user)
+    _require_organization(request)
+
+    from apps.exams.views.teacher.extract_jobs import start_ai_generation_job
+
+    payload = {
+        "exam_title": pgettext("exams.view.question_submission.ai", "Sual göndərişi"),
+        "exam_type": "test",
+        "prompt_text": request.POST.get("prompt", ""),
+        "source_text": (request.POST.get("source_text") or "").strip(),
+        "question_count": request.POST.get("question_count") or 5,
+        "difficulty": request.POST.get("difficulty") or "medium",
+        "block_name": "",
+        "language_code": request.LANGUAGE_CODE,
+        "user_id": request.user.pk,
+    }
+    return start_ai_generation_job(
+        request,
+        payload=payload,
+        uploaded=request.FILES.get("source_file") or request.FILES.get("ai_source_file"),
+        service_error_message=pgettext(
+            "exams.view.question_submission.ai", "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -344,6 +448,7 @@ def question_submission_decide(request, submission_id):
 
 
 __all__ = [
+    "ai_generate_submission_questions",
     "question_submission_create",
     "question_submission_decide",
     "question_submission_detail",

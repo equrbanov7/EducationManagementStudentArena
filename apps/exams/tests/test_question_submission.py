@@ -189,7 +189,7 @@ class SubmissionViewTests(_Base):
         response = client.post(
             reverse("exams:question_submission_create"),
             {
-                "action": "submit",
+                "action": "save",
                 "title": "View testi",
                 "subject": "Riyaziyyat",
                 "group_label": "842A1",
@@ -211,7 +211,9 @@ class SubmissionViewTests(_Base):
             {"action": "preview", "title": "Preview", "language": "az", "raw_text": TEXT_WITH_PROBLEM},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Yoxlama nəticəsi")
+        # Workbench preview: sual kartları + göndərmə formu render olunur.
+        self.assertContains(response, 'id="saveForm"')
+        self.assertContains(response, "q-card")
         self.assertEqual(QuestionSubmission.objects.count(), 0)
 
     def test_inbox_requires_exam_center(self):
@@ -277,7 +279,7 @@ class SubmissionViewTests(_Base):
         client.post(
             reverse("exams:question_submission_create"),
             {
-                "action": "submit",
+                "action": "save",
                 "title": "Dropdown testi",
                 "subject": "Fizika",
                 "group_id": str(group.id),
@@ -290,12 +292,33 @@ class SubmissionViewTests(_Base):
         self.assertEqual(submission.student_group, group)
         self.assertEqual(submission.group_label, "Dropdown qrupu")
 
+    def test_view_save_respects_selection_and_points(self):
+        client = self._client_for(self.teacher)
+        client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "save",
+                "title": "Seçim testi",
+                "subject": "İnformatika",
+                "group_label": "875i",
+                "language": "az",
+                "raw_text": VALID_TEXT,
+                "selected": ["2"],
+                "selected_indices": "2",
+                "points_payload": '{"2": "5"}',
+            },
+        )
+        submission = QuestionSubmission.objects.get(title="Seçim testi")
+        self.assertEqual(submission.question_count, 1)
+        self.assertEqual(submission.parsed_snapshot[0]["correct"], ["B"])
+        self.assertEqual(submission.parsed_snapshot[0].get("points"), 5)
+
     def test_view_submit_requires_group(self):
         client = self._client_for(self.teacher)
         response = client.post(
             reverse("exams:question_submission_create"),
             {
-                "action": "submit",
+                "action": "save",
                 "title": "Qrupsuz",
                 "subject": "Fizika",
                 "group_id": "",
