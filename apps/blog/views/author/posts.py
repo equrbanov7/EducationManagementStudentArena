@@ -32,8 +32,8 @@ from ..shared.module_gate import posts_module_required
 logger = logging.getLogger(__name__)
 
 
-@posts_module_required
 @login_required
+@posts_module_required
 def create_post(request):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
@@ -136,9 +136,9 @@ def create_post(request):
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
 
 
-@posts_module_required
 @login_required
 @require_POST
+@posts_module_required
 def post_edit_ajax(request, pk):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
