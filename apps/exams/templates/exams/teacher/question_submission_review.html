@@ -33,6 +33,12 @@
                 <span class="badge bg-danger">{% trans "Rədd edilib" %}</span>
             {% endif %}
         </div>
+        {% if submission.teacher_note %}
+        <div class="card-footer">
+            <strong><i class="fas fa-comment-dots"></i> {% trans "Müəllimin qeydi" %}:</strong>
+            <div class="text-muted">{{ submission.teacher_note|linebreaksbr }}</div>
+        </div>
+        {% endif %}
         {% if submission.reviewer_note %}
         <div class="card-footer text-muted">{{ submission.reviewer_note|linebreaksbr }}</div>
         {% endif %}

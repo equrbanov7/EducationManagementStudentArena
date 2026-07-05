@@ -99,7 +99,17 @@ def _apply_snapshot(submission, raw_text, *, parsed=None):
 # ---------------------------------------------------------------------------
 @transaction.atomic
 def submit_question_set(
-    *, teacher, organization, title, subject, group_label, language, raw_text, student_group=None, parsed=None
+    *,
+    teacher,
+    organization,
+    title,
+    subject,
+    group_label,
+    language,
+    raw_text,
+    student_group=None,
+    parsed=None,
+    teacher_note="",
 ):
     """Yeni göndəriş yaradır (pending) və mərkəz üzvlərinə bildiriş göndərir."""
     title = (title or "").strip()
@@ -124,6 +134,7 @@ def submit_question_set(
         student_group=student_group,
         group_label=group_label,
         language=language,
+        teacher_note=(teacher_note or "").strip(),
     )
     _apply_snapshot(submission, raw_text, parsed=parsed)
     submission.save()
@@ -142,6 +153,7 @@ def resubmit_question_set(
     raw_text=None,
     student_group=...,
     parsed=None,
+    teacher_note=None,
 ):
     """
     Müəllim pending/rejected göndərişi düzəldib yenidən göndərir: snapshot
@@ -161,6 +173,8 @@ def resubmit_question_set(
         submission.group_label = group_label.strip()
     if student_group is not ...:
         submission.student_group = student_group
+    if teacher_note is not None:
+        submission.teacher_note = teacher_note.strip()
     if language:
         submission.language = language
     _apply_snapshot(submission, raw_text if raw_text is not None else submission.raw_text, parsed=parsed)

@@ -313,6 +313,28 @@ class SubmissionViewTests(_Base):
         self.assertEqual(submission.parsed_snapshot[0]["correct"], ["B"])
         self.assertEqual(submission.parsed_snapshot[0].get("points"), 5)
 
+    def test_view_save_carries_teacher_note(self):
+        client = self._client_for(self.teacher)
+        client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "save",
+                "title": "Qeydli göndəriş",
+                "subject": "İnformatika",
+                "group_label": "875i",
+                "teacher_note": "5-8-ci suallar mühazirə 3-ə aiddir.",
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        submission = QuestionSubmission.objects.get(title="Qeydli göndəriş")
+        self.assertEqual(submission.teacher_note, "5-8-ci suallar mühazirə 3-ə aiddir.")
+        # Mərkəz baxış səhifəsində qeydi görür.
+        response = self._client_for(self.exam_center).get(
+            reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
+        )
+        self.assertContains(response, "mühazirə 3-ə aiddir")
+
     def test_view_submit_requires_group(self):
         client = self._client_for(self.teacher)
         response = client.post(

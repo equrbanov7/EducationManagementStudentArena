@@ -9,100 +9,19 @@
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260607-drawer">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260607-drawer">
-    <style>
-        /* Göndəriş meta kartı — workbench stat-kart dili ilə eyni ailə */
-        .qsub-meta-card {
-            background: var(--card-bg, #fff);
-            border: 1px solid rgba(15, 23, 42, .08);
-            border-radius: 16px;
-            padding: 20px 24px;
-            margin: 0 0 20px;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
-        }
-        .qsub-meta-card__head {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-        }
-        .qsub-meta-card__icon {
-            width: 38px; height: 38px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            background: #eef2ff; color: #4338ca; font-size: 16px;
-        }
-        .qsub-meta-card__head h2 { font-size: 1rem; font-weight: 700; margin: 0; }
-        .qsub-meta-card__head p { margin: 0; font-size: .82rem; color: #64748b; }
-        .qsub-meta-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;
-        }
-        .qsub-meta-field label {
-            display: block; font-size: .78rem; font-weight: 600; color: #475569;
-            margin-bottom: 6px; text-transform: uppercase; letter-spacing: .03em;
-        }
-        .qsub-meta-field label .req { color: #dc2626; }
-        .qsub-meta-field input, .qsub-meta-field select {
-            width: 100%; border: 1px solid #e2e8f0; border-radius: 10px;
-            padding: 10px 12px; font-size: .9rem; background: #f8fafc;
-        }
-        .qsub-meta-field input:focus, .qsub-meta-field select:focus {
-            outline: none; border-color: #6366f1; background: #fff;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
-        }
-        .qsub-meta-field .hint { font-size: .75rem; color: #94a3b8; margin-top: 4px; }
-    </style>
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260706-1">
 {% endblock %}
 
 {% block content %}
-<div class="bulk-page-wrapper" style="padding-bottom:0;">
-    {# ── Göndəriş məlumatları (fənn/qrup/başlıq) — save formuna form= ilə bağlıdır ── #}
-    <div class="qsub-meta-card" id="qsubMetaCard">
-        <div class="qsub-meta-card__head">
-            <div class="qsub-meta-card__icon"><i class="fas fa-paper-plane"></i></div>
-            <div>
-                <h2>{% trans "Göndəriş məlumatları" %}</h2>
-                <p>{% trans "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək — fənn və qrup mütləqdir." %}</p>
-            </div>
-        </div>
-        <div class="qsub-meta-grid">
-            <div class="qsub-meta-field">
-                <label for="qsubTitle">{% trans "Başlıq" %} <span class="req">*</span></label>
-                <input type="text" id="qsubTitle" name="title" maxlength="200" required
-                       form="saveForm" data-qsub-meta
-                       value="{{ form_state.title }}" placeholder="{% trans 'məs. İnformatika — Final sual toplusu' %}">
-            </div>
-            <div class="qsub-meta-field">
-                <label for="qsubSubject">{% trans "Fənn" %} <span class="req">*</span></label>
-                <input type="text" id="qsubSubject" name="subject" maxlength="200" required
-                       form="saveForm" data-qsub-meta
-                       value="{{ form_state.subject }}" placeholder="{% trans 'məs. İnformatika' %}">
-            </div>
-            <div class="qsub-meta-field">
-                <label for="qsubGroup">{% trans "Qrup" %} <span class="req">*</span></label>
-                {% if teacher_groups %}
-                <select id="qsubGroup" name="group_id" form="saveForm" data-qsub-meta>
-                    <option value="">{% trans "— Qrupu seçin və ya yanına yazın —" %}</option>
-                    {% for g in teacher_groups %}
-                    <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
-                    {% endfor %}
-                </select>
-                <input type="text" name="group_label" maxlength="200" form="saveForm" data-qsub-meta
-                       value="{{ form_state.group_label }}" placeholder="{% trans 'və ya qrup adını yazın (məs. 875i)' %}"
-                       style="margin-top:8px;">
-                {% else %}
-                <input type="text" id="qsubGroup" name="group_label" maxlength="200" form="saveForm" data-qsub-meta
-                       value="{{ form_state.group_label }}" placeholder="{% trans 'məs. 875i' %}">
-                <div class="hint">{% trans "Qrupunuz sistemdə yoxdursa adını sərbəst yazın." %}</div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-{% include "exams/teacher/partials/_bulk_question_workbench.html" %}
+{% include "exams/teacher/partials/_bulk_question_workbench.html" with wb_meta_include="exams/teacher/partials/_question_submission_meta.html" %}
 {% endblock %}
 
 {% block extraJs %}
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
 <script nonce="{{ request.csp_nonce }}">
-    // Meta sahələri saveForm-a form= ilə bağlıdır; preview (birinci forma) POST
-    // olunanda da itməsinlər deyə dəyərləri hidden input kimi kopyalayırıq.
+    // Meta sahələri (başlıq/fənn/qrup/qeyd) form= ilə saveForm-a bağlıdır;
+    // preview (birinci forma) POST olunanda da itməsinlər deyə dəyərləri
+    // hidden input kimi preview formuna köçürürük.
     (function () {
         var previewForm = document.querySelector(".split-layout");
         if (!previewForm) return;

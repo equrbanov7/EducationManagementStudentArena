@@ -1,0 +1,82 @@
+{% load i18n %}
+{% comment %}
+Göndəriş məlumatları kartı — workbench header-dən dərhal sonra render olunur
+(wb_meta_include hook-u ilə). Sahələr form= atributu ilə saveForm-a bağlıdır;
+preview formuna dəyərləri səhifədəki kiçik script köçürür (data-qsub-meta).
+Stil: exams/css/question_submission.css (CSP inline-style-ə icazə vermir).
+{% endcomment %}
+
+<section class="qsubm-card" aria-labelledby="qsubmHeading">
+    <div class="qsubm-card__head">
+        <div class="qsubm-card__icon"><i class="fas fa-paper-plane"></i></div>
+        <div class="qsubm-card__titles">
+            <h2 id="qsubmHeading">{% trans "Göndəriş məlumatları" %}</h2>
+            <p>{% trans "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək." %}</p>
+        </div>
+        <span class="qsubm-card__badge"><i class="fas fa-asterisk"></i> {% trans "Fənn və qrup mütləqdir" %}</span>
+    </div>
+
+    <div class="qsubm-grid">
+        <div class="qsubm-field qsubm-field--title">
+            <label for="qsubTitle">{% trans "Başlıq" %} <span class="qsubm-req">*</span></label>
+            <div class="qsubm-input-wrap">
+                <i class="fas fa-heading"></i>
+                <input type="text" id="qsubTitle" name="title" maxlength="200" required
+                       form="saveForm" data-qsub-meta
+                       value="{{ form_state.title }}" placeholder="{% trans 'məs. İnformatika — Final sual toplusu' %}">
+            </div>
+        </div>
+
+        <div class="qsubm-field">
+            <label for="qsubSubject">{% trans "Fənn" %} <span class="qsubm-req">*</span></label>
+            <div class="qsubm-input-wrap">
+                <i class="fas fa-book"></i>
+                <input type="text" id="qsubSubject" name="subject" maxlength="200" required
+                       form="saveForm" data-qsub-meta
+                       value="{{ form_state.subject }}" placeholder="{% trans 'məs. İnformatika' %}">
+            </div>
+        </div>
+
+        <div class="qsubm-field">
+            <label for="qsubGroup">{% trans "Qrup" %} <span class="qsubm-req">*</span></label>
+            {% if teacher_groups %}
+            <div class="qsubm-group-row">
+                <div class="qsubm-input-wrap qsubm-input-wrap--select">
+                    <i class="fas fa-users"></i>
+                    <select id="qsubGroup" name="group_id" form="saveForm" data-qsub-meta>
+                        <option value="">{% trans "Qrupu seçin…" %}</option>
+                        {% for g in teacher_groups %}
+                        <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <span class="qsubm-group-or">{% trans "və ya" %}</span>
+                <div class="qsubm-input-wrap">
+                    <i class="fas fa-pen"></i>
+                    <input type="text" name="group_label" maxlength="200" form="saveForm" data-qsub-meta
+                           value="{{ form_state.group_label }}" placeholder="{% trans 'adını yazın (875i)' %}">
+                </div>
+            </div>
+            <span class="qsubm-hint">{% trans "Siyahıda yoxdursa qrupun adını sərbəst yazın." %}</span>
+            {% else %}
+            <div class="qsubm-input-wrap">
+                <i class="fas fa-users"></i>
+                <input type="text" id="qsubGroup" name="group_label" maxlength="200" required
+                       form="saveForm" data-qsub-meta
+                       value="{{ form_state.group_label }}" placeholder="{% trans 'məs. 875i' %}">
+            </div>
+            <span class="qsubm-hint">{% trans "Qrupunuz sistemdə yoxdursa adını sərbəst yazın." %}</span>
+            {% endif %}
+        </div>
+
+        <div class="qsubm-field qsubm-field--note">
+            <label for="qsubNote">{% trans "İmtahan mərkəzinə qeyd" %} <span class="qsubm-optional">{% trans "(opsional)" %}</span></label>
+            <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
+                <i class="fas fa-comment-dots"></i>
+                <textarea id="qsubNote" name="teacher_note" rows="2" maxlength="2000"
+                          form="saveForm" data-qsub-meta
+                          placeholder="{% trans 'məs. 5–8-ci suallar mühazirə 3-ə aiddir; final üçün nəzərdə tutulub…' %}">{{ form_state.teacher_note }}</textarea>
+            </div>
+        </div>
+    </div>
+</section>

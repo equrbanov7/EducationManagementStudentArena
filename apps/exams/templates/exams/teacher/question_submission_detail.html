@@ -32,6 +32,12 @@
             </a>
             {% endif %}
         </div>
+        {% if submission.teacher_note %}
+        <div class="card-footer">
+            <strong><i class="fas fa-comment-dots"></i> {% trans "Qeydiniz" %}:</strong>
+            <div class="text-muted">{{ submission.teacher_note|linebreaksbr }}</div>
+        </div>
+        {% endif %}
         {% if submission.reviewer_note %}
         <div class="card-footer">
             <strong>{% trans "İmtahan mərkəzinin qeydi" %}:</strong>
@@ -84,6 +90,10 @@
                         <option value="{{ code }}" {% if form_state.language == code %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                <div>
+                    <label class="form-label" for="qsubNote">{% trans "İmtahan mərkəzinə qeyd (opsional)" %}</label>
+                    <textarea class="form-control" id="qsubNote" name="teacher_note" rows="2" maxlength="2000">{{ form_state.teacher_note }}</textarea>
                 </div>
                 <div>
                     <label class="form-label" for="qsubRawText">{% trans "Suallar" %}</label>

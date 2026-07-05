@@ -1,0 +1,186 @@
+/* ============================================================================
+   Sual göndərişi — "Göndəriş məlumatları" meta kartı
+   Workbench (test_question_bank) vizual dili ilə eyni ailə: yumşaq kölgə,
+   16px radius, kiçik uppercase etiketlər, ikonlu inputlar.
+   QEYD: CSP inline <style>-ə icazə vermir — stillər bu statik faylda olmalıdır.
+   ========================================================================== */
+
+.qsubm-card {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -18px rgba(15, 23, 42, 0.18);
+    padding: 22px 26px;
+    margin: 0 0 22px;
+}
+
+/* ── Başlıq zolağı ── */
+.qsubm-card__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.qsubm-card__icon {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    color: #fff;
+    background: linear-gradient(135deg, #4f6ef7, #7c3aed);
+    box-shadow: 0 6px 14px -6px rgba(79, 110, 247, 0.55);
+}
+
+.qsubm-card__titles h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.qsubm-card__titles p {
+    margin: 2px 0 0;
+    font-size: 0.83rem;
+    color: #64748b;
+}
+
+.qsubm-card__badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #9a3412;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 999px;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.qsubm-card__badge i { font-size: 0.6rem; }
+
+/* ── Sahə şəbəkəsi ── */
+.qsubm-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 14px 16px;
+}
+
+.qsubm-field { grid-column: span 4; min-width: 0; }
+.qsubm-field--title { grid-column: span 4; }
+.qsubm-field--note { grid-column: 1 / -1; }
+
+@media (max-width: 1100px) {
+    .qsubm-field, .qsubm-field--title { grid-column: 1 / -1; }
+}
+
+.qsubm-field > label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 7px;
+}
+
+.qsubm-req { color: #dc2626; }
+
+.qsubm-optional {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+/* ── İkonlu input sarğısı ── */
+.qsubm-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.qsubm-input-wrap > i {
+    position: absolute;
+    left: 13px;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.qsubm-input-wrap input,
+.qsubm-input-wrap select,
+.qsubm-input-wrap textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 11px 14px 11px 38px;
+    font-size: 0.92rem;
+    color: #0f172a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    appearance: none;
+}
+
+.qsubm-input-wrap select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+    padding-right: 34px;
+}
+
+.qsubm-input-wrap input::placeholder,
+.qsubm-input-wrap textarea::placeholder { color: #a8b3c4; }
+
+.qsubm-input-wrap input:focus,
+.qsubm-input-wrap select:focus,
+.qsubm-input-wrap textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.qsubm-input-wrap--textarea > i { top: 14px; }
+.qsubm-input-wrap--textarea textarea { resize: vertical; min-height: 58px; }
+
+/* ── Qrup: seçim + "və ya" + sərbəst ad ── */
+.qsubm-group-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qsubm-group-row .qsubm-input-wrap { flex: 1 1 0; min-width: 0; }
+
+.qsubm-group-or {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+    .qsubm-group-row { flex-direction: column; align-items: stretch; }
+    .qsubm-group-or { text-align: center; }
+}
+
+.qsubm-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
