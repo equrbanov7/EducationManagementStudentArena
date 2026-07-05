@@ -46,7 +46,7 @@ def home(request):
     # UNIVERSITY_MODE turns the platform into a login → cabinet portal (like
     # UNEC's kabinet): the public marketing/blog home is deactivated. Send
     # authenticated users to their cabinet and anonymous visitors to login.
-    if getattr(settings, "UNIVERSITY_MODE", False):
+    if getattr(settings, "UNIVERSITY_MODE", True):
         if request.user.is_authenticated:
             return redirect("accounts:profile")
         return redirect("accounts:login")
