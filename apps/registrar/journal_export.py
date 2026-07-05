@@ -100,8 +100,10 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         _("İmtahan"),
         _("Yekun"),
         _("Hərf"),
+        pgettext("registrar.finals", "Bonus"),
         _("Nəticə"),
         pgettext("registrar.finals", "Təkrar imtahan"),
+        pgettext("registrar.finals", "Rəy"),
     ]
     ws2.append(head2)
     for col in range(1, len(head2) + 1):
@@ -126,12 +128,14 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
                 float(result["exam_score"]) if result["exam_score"] is not None else "",
                 float(result["total"]) if result["graded"] else "",
                 result["letter"] if result["graded"] else "",
+                float(result["bonus"]) if result["bonus"] else "",
                 str(outcome),
                 float(resit.resit_score) if resit is not None and resit.resit_score is not None else "",
+                result.get("comment", ""),
             ]
         )
         if result["barred"] or result["failed"]:
-            ws2.cell(row=ws2.max_row, column=6).font = barred_font
+            ws2.cell(row=ws2.max_row, column=7).font = barred_font
 
     ws2.column_dimensions["A"].width = 30
     for col in range(2, len(head2) + 1):

@@ -127,7 +127,13 @@
                         {% if row.final.resit %}
                         <span class="subject-resit"><i class="fas fa-redo"></i> {% trans "Təkrar imtahan hüququ" context "profile.subjects" %}{% if row.final.resit.resit_score is not None %}: {{ row.final.resit.resit_score|floatformat:'-2' }}{% endif %}</span>
                         {% endif %}
+                        {% if row.final.bonus %}
+                        <span class="subject-bonus {% if row.final.bonus < 0 %}is-penalty{% endif %}"><i class="fas fa-plus-minus"></i> {% trans "Bonus" context "profile.subjects" %}: {{ row.final.bonus|floatformat:'-2' }}</span>
+                        {% endif %}
                     </div>
+                    {% if row.final.comment %}
+                    <p class="subject-final-comment"><i class="fas fa-comment-dots"></i> {{ row.final.comment }}</p>
+                    {% endif %}
                     {% endif %}
                 </div>
                 {% endif %}

@@ -300,8 +300,10 @@
                             <th>{% trans "Yekun imtahan" context "registrar.finals" %}</th>
                             <th>{% trans "Ümumi" context "registrar.finals" %}</th>
                             <th>{% trans "Hərf" context "registrar.journal" %}</th>
+                            <th>{% trans "Bonus" context "registrar.finals" %}</th>
                             <th>{% trans "Nəticə" context "registrar.finals" %}</th>
                             <th>{% trans "Təkrar imtahan" context "registrar.finals" %}</th>
+                            <th>{% trans "Rəy" context "registrar.finals" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -320,6 +322,13 @@
                             <td class="cell-total">{% if r.graded %}{{ r.total|floatformat:'-2' }}{% else %}—{% endif %}</td>
                             <td>{% if r.graded %}<span class="cell-letter grade-{{ r.letter }}">{{ r.letter }}</span>{% else %}—{% endif %}</td>
                             <td>
+                                {% if can_edit %}
+                                <input type="number" class="cell-score jd-bonus-input" min="-20" max="20" step="0.5"
+                                       name="bonus__{{ row.enrollment.id }}" value="{% if r.bonus %}{{ r.bonus|floatformat:'-2' }}{% endif %}"
+                                       placeholder="±" title="{% trans 'Bonus (+) / cərimə (−)' context 'registrar.finals' %}">
+                                {% elif r.bonus %}{{ r.bonus|floatformat:'-2' }}{% else %}—{% endif %}
+                            </td>
+                            <td>
                                 {% if r.barred %}<span class="journal-badge journal-badge--barred">{% trans "Kəsilir (qayıb)" context "registrar.finals" %}</span>
                                 {% elif r.passed %}<span class="journal-badge journal-badge--ok">{% trans "Keçdi" context "registrar.finals" %}</span>
                                 {% elif r.failed %}<span class="journal-badge journal-badge--barred">{% trans "Kəsildi" context "registrar.finals" %}</span>
@@ -334,6 +343,13 @@
                                     {% else %}{{ r.resit.resit_score|default_if_none:"—" }}{% endif %}
                                     <span class="resit-badge">{{ r.resit.get_status_display }}</span>
                                 {% else %}—{% endif %}
+                            </td>
+                            <td class="jd-comment-cell">
+                                {% if can_edit %}
+                                <input type="text" class="jd-comment-input" maxlength="500"
+                                       name="fcomment__{{ row.enrollment.id }}" value="{{ r.comment }}"
+                                       placeholder="{% trans 'Rəy (opsional)' context 'registrar.finals' %}">
+                                {% elif r.comment %}<span class="jd-comment-ro" title="{{ r.comment }}">{{ r.comment|truncatechars:40 }}</span>{% else %}—{% endif %}
                             </td>
                         </tr>
                         {% endwith %}

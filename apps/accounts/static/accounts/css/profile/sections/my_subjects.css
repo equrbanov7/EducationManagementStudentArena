@@ -419,3 +419,24 @@
     background: var(--ems-warning-500);
 }
 .subject-absence-fill.is-over { background: var(--ems-danger-strong); }
+
+/* ── U15: bonus çipi + müəllim rəyi ────────────────────────────────────────── */
+.subject-bonus {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--ems-success-100);
+    color: var(--ems-success-600);
+}
+.subject-bonus.is-penalty { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.subject-final-comment {
+    margin: 0.35rem 0 0;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--ems-neutral-600);
+}
+.subject-final-comment i { color: var(--ems-primary-400); margin-right: 3px; }

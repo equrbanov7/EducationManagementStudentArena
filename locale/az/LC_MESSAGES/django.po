@@ -27740,6 +27740,26 @@ msgctxt "registrar.journal"
 msgid "Jurnalı Excel (xlsx) olaraq yüklə"
 msgstr "Jurnalı Excel (xlsx) olaraq yüklə"
 
+msgctxt "registrar.finals"
+msgid "Bonus"
+msgstr "Bonus"
+
+msgctxt "registrar.finals"
+msgid "Rəy"
+msgstr "Rəy"
+
+msgctxt "registrar.finals"
+msgid "Rəy (opsional)"
+msgstr "Rəy (opsional)"
+
+msgctxt "registrar.finals"
+msgid "Bonus (+) / cərimə (−)"
+msgstr "Bonus (+) / cərimə (−)"
+
+msgctxt "profile.subjects"
+msgid "Bonus"
+msgstr "Bonus"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

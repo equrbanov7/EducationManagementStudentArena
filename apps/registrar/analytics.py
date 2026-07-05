@@ -87,10 +87,11 @@ def _lesson_sum_map(enrollment_ids):
 
 
 def _exam_map(enrollment_ids):
+    """enrollment_id → (exam_score, bonus) — bir sorğuda hər ikisi (U15)."""
     return {
-        e_id: score
-        for e_id, score in FinalGrade.objects.filter(enrollment_id__in=enrollment_ids).values_list(
-            "enrollment_id", "exam_score"
+        e_id: (score, bonus)
+        for e_id, score, bonus in FinalGrade.objects.filter(enrollment_id__in=enrollment_ids).values_list(
+            "enrollment_id", "exam_score", "bonus"
         )
     }
 
@@ -129,7 +130,7 @@ def _evaluate(enrollment, maps):
         raw_entry = maps["lesson_sums"].get(enrollment.id, Decimal("0"))
     entry = min(raw_entry, Decimal(entry_max))
 
-    exam = maps["exams"].get(enrollment.id)
+    exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
     resit = maps["resits"].get(enrollment.id)
     resit_done = resit is not None
     effective = resit if resit_done else exam
@@ -140,7 +141,8 @@ def _evaluate(enrollment, maps):
     barred = lesson_hours > 0 and enrollment.absence_hours > lesson_hours * limit / 100.0 and not resit_done
 
     graded = effective is not None
-    total = entry + (effective or Decimal("0"))
+    total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))
+    total = max(Decimal("0"), min(Decimal("100"), total))  # compute_final_result güzgüsü (U15)
     letter, gpa = finals.score_to_letter(total)
     exam_ok = graded and effective >= min_exam
     passed = graded and not barred and total >= pass_threshold and exam_ok

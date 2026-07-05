@@ -110,6 +110,8 @@ class _AnalyticsBase(TestCase):
             # student2: no exam → in progress.
             finals.set_exam_score(enrollment=cls.enrollments["an_student0"], score=45, by_user=cls.teacher)
             finals.set_exam_score(enrollment=cls.enrollments["an_student1"], score=20, by_user=cls.teacher)
+            # U15: bonus da analitika güzgüsündən keçməlidir (85 + 5 = 90 → hələ B/keçir).
+            finals.set_final_extras(enrollment=cls.enrollments["an_student0"], bonus="5", by_user=cls.teacher)
 
 
 class AnalyticsServiceTest(_AnalyticsBase):
