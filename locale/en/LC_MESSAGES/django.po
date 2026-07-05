@@ -13903,6 +13903,18 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "No correct answer marker was found for this question — option A was assigned by default. Review and set the correct answer."
 
+msgctxt "exams.service.access.permission"
+msgid "final_exam_questions_exam_center_only"
+msgstr "Only the exam center can manage the questions of a final exam."
+
+msgctxt "exams.service.access.permission"
+msgid "question_bank_create_exam_center_only"
+msgstr "Only the exam center can create question banks."
+
+msgctxt "exams.form.exam.error"
+msgid "final_exam_category_exam_center_only"
+msgstr "Only the exam center can create final-category exams."
+
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr "Correct"

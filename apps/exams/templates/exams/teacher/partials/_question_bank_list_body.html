@@ -24,7 +24,8 @@ Kontekst:
         </div>
     </div>
 
-    {# ── Yeni bank yarat ── #}
+    {# ── Yeni bank yarat (yalnız imtahan mərkəzi) ── #}
+    {% if qbl_can_create %}
     <div class="qb-create-card">
         <div class="qb-create-card__head">
             <div class="qb-create-card__icon"><i class="fas fa-layer-group"></i></div>
@@ -90,6 +91,7 @@ Kontekst:
             </div>
         </form>
     </div>
+    {% endif %}
 
     {# ── Axtarış ── #}
     <form method="get" class="qb-banklist-search js-profile-section-link-skip">

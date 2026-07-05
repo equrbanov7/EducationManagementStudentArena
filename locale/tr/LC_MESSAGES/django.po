@@ -13909,6 +13909,18 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "Bu soruda doğru cevap işareti bulunamadı — varsayılan olarak A seçildi. Doğru cevabı kontrol edip belirleyin."
 
+msgctxt "exams.service.access.permission"
+msgid "final_exam_questions_exam_center_only"
+msgstr "Final sınavının sorularını yalnızca sınav merkezi yönetebilir."
+
+msgctxt "exams.service.access.permission"
+msgid "question_bank_create_exam_center_only"
+msgstr "Soru bankasını yalnızca sınav merkezi oluşturabilir."
+
+msgctxt "exams.form.exam.error"
+msgid "final_exam_category_exam_center_only"
+msgstr "Final kategorisinde sınavı yalnızca sınav merkezi oluşturabilir."
+
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr "Doğru"

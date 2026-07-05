@@ -1,4 +1,4 @@
 <section class="profile-section-panel profile-section--question-bank {% if active_section == 'question-bank' %}is-active{% endif %}"
          data-profile-section-panel="question-bank">
-    {% include "exams/teacher/partials/_question_bank_list_body.html" with banks=question_bank_banks page_obj=question_bank_page_obj search_query=question_bank_search_query language_choices=question_bank_language_choices default_type_choices=question_bank_default_type_choices qbl_create_next=question_bank_create_next_url qbl_section="question-bank" qbl_pagination_query=question_bank_pagination_query qbl_back_url=question_bank_back_url %}
+    {% include "exams/teacher/partials/_question_bank_list_body.html" with banks=question_bank_banks page_obj=question_bank_page_obj search_query=question_bank_search_query language_choices=question_bank_language_choices default_type_choices=question_bank_default_type_choices qbl_create_next=question_bank_create_next_url qbl_section="question-bank" qbl_pagination_query=question_bank_pagination_query qbl_back_url=question_bank_back_url qbl_can_create=question_bank_can_create %}
 </section>

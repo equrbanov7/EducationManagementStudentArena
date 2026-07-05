@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
     exam_question_fp_map,
@@ -88,6 +88,7 @@ def _language_workbench_context(exam, variant_rows, selected_language):
 def exam_language_manager(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     is_test_exam = exam.exam_type == "test"
 
     # ── Workbench vəziyyəti ──

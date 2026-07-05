@@ -20,6 +20,7 @@
         {% endif %}
     </div>
 
+    {% if can_manage_exam_questions %}
     <div class="question-actions">
         <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
            class="action-btn outline-btn-sm js-open-question-form-modal"
@@ -36,5 +37,6 @@
             <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
         </a>
     </div>
+    {% endif %}
 </li>
 {% endfor %}

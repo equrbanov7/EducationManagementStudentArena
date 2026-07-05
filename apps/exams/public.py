@@ -24,6 +24,10 @@ from apps.exams.forms import (  # noqa: F401
     StudentGroupForm,
 )
 from apps.exams.services.access_policy import (  # noqa: F401
+    can_create_question_bank,
+    can_manage_exam_questions,
+    can_manage_final_exam_content,
+    is_exam_center_user,
     is_teacher_user,
 )
 from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit  # noqa: F401
@@ -63,6 +67,10 @@ __all__ = [
     "available_language_options",
     "build_teacher_exam_dashboard",
     "calculate_attempt_score",
+    "can_create_question_bank",
+    "can_manage_exam_questions",
+    "can_manage_final_exam_content",
+    "is_exam_center_user",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",
     "get_ai_config",
