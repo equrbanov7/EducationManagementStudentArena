@@ -2,7 +2,6 @@
   "_comment": "Avtomatik yaradılır: python scripts/check_module_size.py --update. SOFT_CAP=600. Buradakı fayllar grandfathered-dir (cari ölçüdə dondurulub) və yalnız kiçilə bilər. Yeni böyük fayl əlavə etmək üçün əvvəlcə onu bölün.",
   "soft_cap": 600,
   "budgets": {
-    "apps/registrar/models.py": 688,
     "static/css/ai_assistant.css": 635,
     "static/css/navbar.css": 983
   }
