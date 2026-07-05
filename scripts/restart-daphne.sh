@@ -36,6 +36,14 @@ if [[ -n "$(lsof -tnP -iTCP:$PORT -sTCP:LISTEN 2>/dev/null || true)" ]]; then
     exit 1
 fi
 
+# Tətbiq olunmamış migrasiya varsa avtomatik tətbiq et — əks halda yeni kod
+# köhnə sxemlə 500 verir (2026-07-06: teacher_note sütunu halı).
+echo "→ Migrasiyalar yoxlanılır..."
+if ! ./venv/bin/python manage.py migrate --check >/dev/null 2>&1; then
+    echo "  tətbiq olunmamış migrasiya tapıldı — migrate işlədilir..."
+    ./venv/bin/python manage.py migrate 2>&1 | tail -3
+fi
+
 echo "→ Daphne başladılır (log: $LOG_FILE)..."
 screen -dmS emsarena-daphne zsh -lc "cd '$PROJECT_DIR' && exec env DJANGO_SETTINGS_MODULE=config.settings.local ./venv/bin/daphne -b 0.0.0.0 -p $PORT config.asgi:application >> '$LOG_FILE' 2>&1"
 
