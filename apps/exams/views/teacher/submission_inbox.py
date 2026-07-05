@@ -58,6 +58,7 @@ def _form_state(request):
         "subject": (request.POST.get("subject") or "").strip(),
         "group_id": (request.POST.get("group_id") or "").strip(),
         "group_label": (request.POST.get("group_label") or "").strip(),
+        "teacher_note": (request.POST.get("teacher_note") or "").strip(),
         "language": _normalize_language(request.POST.get("language")),
         "raw_text": request.POST.get("raw_text") or "",
     }
@@ -114,7 +115,15 @@ def question_submission_create(request):
     from apps.exams.views.teacher.question_library._shared import _empty_analysis
 
     analysis = _empty_analysis()
-    form_state = {"title": "", "subject": "", "group_id": "", "group_label": "", "language": "az", "raw_text": ""}
+    form_state = {
+        "title": "",
+        "subject": "",
+        "group_id": "",
+        "group_label": "",
+        "teacher_note": "",
+        "language": "az",
+        "raw_text": "",
+    }
 
     if request.method == "POST":
         action = (request.POST.get("action") or "preview").strip()
@@ -164,6 +173,7 @@ def question_submission_create(request):
                         language=form_state["language"],
                         raw_text=raw_text,
                         parsed=chosen,
+                        teacher_note=form_state["teacher_note"],
                     )
                 except ValidationError as exc:
                     messages.error(request, exc.messages[0])
@@ -292,6 +302,7 @@ def question_submission_detail(request, submission_id):
                     group_label=group_label,
                     language=form_state["language"],
                     raw_text=form_state["raw_text"],
+                    teacher_note=form_state["teacher_note"],
                 )
             except ValidationError as exc:
                 messages.error(request, exc.messages[0])
@@ -323,6 +334,7 @@ def _detail_context(submission, *, can_edit, is_reviewer):
             "subject": submission.subject,
             "group_id": str(submission.student_group_id or ""),
             "group_label": submission.group_label,
+            "teacher_note": submission.teacher_note,
             "language": submission.language,
             "raw_text": submission.raw_text,
         },

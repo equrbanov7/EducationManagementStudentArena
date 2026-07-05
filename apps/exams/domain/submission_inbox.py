@@ -84,6 +84,12 @@ class QuestionSubmission(models.Model):
     raw_text = models.TextField(
         verbose_name=pgettext_lazy("exams.model.question_submission.field", "raw_text"),
     )
+    # Müəllimin imtahan mərkəzinə əlavə qeydi/mesajı (opsional).
+    teacher_note = models.TextField(
+        blank=True,
+        default="",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "teacher_note"),
+    )
     # Göndəriş anındakı parse nəticəsi: [{q_no, text, options, correct,
     # answer_mode, warnings: [{type, msg, severity}]}, ...]
     parsed_snapshot = models.JSONField(default=list, blank=True)

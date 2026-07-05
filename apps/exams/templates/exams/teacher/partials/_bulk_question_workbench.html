@@ -133,6 +133,10 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
     </header>
     {% endif %}
 
+    {# ── Opsional meta kartı (məs. sual göndərişi: fənn/qrup/qeyd) ────────── #}
+    {# Çağıran şablon wb_meta_include ötürərsə header-dən sonra render olunur. #}
+    {% if wb_meta_include %}{% include wb_meta_include %}{% endif %}
+
     {# ───────────────────────────── AI KARTI ─────────────────────────────── #}
     {% if wb_ai_url %}
     <section class="ai-bank-card"
