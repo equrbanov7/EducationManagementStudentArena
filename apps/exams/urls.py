@@ -31,6 +31,11 @@ urlpatterns = [
     path("export-jobs/<uuid:job_id>/download/", views.export_job_download, name="export_job_download"),
     # Müəllim → İmtahan mərkəzi sual göndərişi (elektron axın)
     path("question-submissions/new/", views.question_submission_create, name="question_submission_create"),
+    path(
+        "question-submissions/ai-generate/",
+        views.ai_generate_submission_questions,
+        name="ai_generate_submission_questions",
+    ),
     path("question-submissions/inbox/", views.question_submission_inbox, name="question_submission_inbox"),
     path(
         "question-submissions/<int:submission_id>/",

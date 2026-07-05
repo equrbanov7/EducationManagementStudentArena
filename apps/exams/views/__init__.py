@@ -76,6 +76,7 @@ from .teacher.results import (
 )
 from .teacher.statistics import teacher_exam_statistics
 from .teacher.submission_inbox import (
+    ai_generate_submission_questions,
     question_submission_create,
     question_submission_decide,
     question_submission_detail,
@@ -148,6 +149,7 @@ __all__ = [
     "exam_language_manager",
     # Teacher - Question bank library + picker
     "question_bank_list",
+    "ai_generate_submission_questions",
     "question_submission_create",
     "question_submission_decide",
     "question_submission_detail",

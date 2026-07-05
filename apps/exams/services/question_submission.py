@@ -48,17 +48,49 @@ def analyze_submission_text(raw_text):
     return parsed, counts
 
 
-def _apply_snapshot(submission, raw_text):
-    parsed, counts = analyze_submission_text(raw_text)
+_SNAPSHOT_KEYS = ("q_no", "text", "options", "correct", "answer_mode", "warnings", "points")
+
+
+def clean_snapshot_entries(parsed):
+    """
+    Workbench analizindən gələn sualları snapshot üçün təmizləyir: UI-yə xas
+    ``meta`` annotasiyaları atılır, yalnız JSON-sabit açarlar saxlanır.
+    """
+    cleaned = []
+    for question in parsed or []:
+        entry = {key: question.get(key) for key in _SNAPSHOT_KEYS if question.get(key) is not None}
+        entry.setdefault("warnings", question.get("warnings") or [])
+        cleaned.append(entry)
+    return cleaned
+
+
+def _snapshot_counts(parsed):
+    error_count = 0
+    warning_count = 0
+    for question in parsed:
+        for warning in question.get("warnings") or []:
+            if (warning.get("severity") or "warning") == "error":
+                error_count += 1
+            else:
+                warning_count += 1
+    return error_count, warning_count
+
+
+def _apply_snapshot(submission, raw_text, *, parsed=None):
+    """``parsed`` verilərsə (workbench-də seçilmiş alt-çoxluq) yenidən parse edilmir."""
+    if parsed is None:
+        parsed, _counts = analyze_submission_text(raw_text)
+    parsed = clean_snapshot_entries(parsed)
     if not parsed:
         raise ValidationError(
             pgettext("exams.service.question_submission.error", "Mətndən heç bir sual çıxarıla bilmədi.")
         )
+    error_count, warning_count = _snapshot_counts(parsed)
     submission.raw_text = raw_text
     submission.parsed_snapshot = parsed
-    submission.question_count = counts["questions"]
-    submission.error_count = counts["errors"]
-    submission.warning_count = counts["warnings"]
+    submission.question_count = len(parsed)
+    submission.error_count = error_count
+    submission.warning_count = warning_count
     return submission
 
 
@@ -66,7 +98,9 @@ def _apply_snapshot(submission, raw_text):
 # Müəllim tərəfi
 # ---------------------------------------------------------------------------
 @transaction.atomic
-def submit_question_set(*, teacher, organization, title, subject, group_label, language, raw_text, student_group=None):
+def submit_question_set(
+    *, teacher, organization, title, subject, group_label, language, raw_text, student_group=None, parsed=None
+):
     """Yeni göndəriş yaradır (pending) və mərkəz üzvlərinə bildiriş göndərir."""
     title = (title or "").strip()
     if not title:
@@ -91,7 +125,7 @@ def submit_question_set(*, teacher, organization, title, subject, group_label, l
         group_label=group_label,
         language=language,
     )
-    _apply_snapshot(submission, raw_text)
+    _apply_snapshot(submission, raw_text, parsed=parsed)
     submission.save()
     _notify_exam_center_new_submission(submission, resubmitted=False)
     return submission
@@ -99,7 +133,15 @@ def submit_question_set(*, teacher, organization, title, subject, group_label, l
 
 @transaction.atomic
 def resubmit_question_set(
-    submission, *, title=None, subject=None, group_label=None, language=None, raw_text=None, student_group=...
+    submission,
+    *,
+    title=None,
+    subject=None,
+    group_label=None,
+    language=None,
+    raw_text=None,
+    student_group=...,
+    parsed=None,
 ):
     """
     Müəllim pending/rejected göndərişi düzəldib yenidən göndərir: snapshot
@@ -121,7 +163,7 @@ def resubmit_question_set(
         submission.student_group = student_group
     if language:
         submission.language = language
-    _apply_snapshot(submission, raw_text if raw_text is not None else submission.raw_text)
+    _apply_snapshot(submission, raw_text if raw_text is not None else submission.raw_text, parsed=parsed)
 
     submission.status = QuestionSubmission.STATUS_PENDING
     if was_rejected:
@@ -176,13 +218,16 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
     from apps.exams.views.teacher.question_library._shared import _save_bank_questions
 
     parsed = list(submission.parsed_snapshot or [])
+    # Müəllimin workbench-də təyin etdiyi ballar snapshot-da saxlanır — banka
+    # eyni ballarla yazılır (boş/qeyri-müəyyən → 1).
+    points_payload = {str(index): str(question.get("points") or "") for index, question in enumerate(parsed, start=1)}
     created_count = _save_bank_questions(
         bank=bank,
         parsed=parsed,
         selected=set(range(1, len(parsed) + 1)),
         language=submission.language,
         q_format="test",
-        points_payload={},
+        points_payload=points_payload,
         created_by=reviewer,
     )
     if created_count == 0:
@@ -301,6 +346,7 @@ def _notify_teacher_decision(submission):
 __all__ = [
     "accept_submission",
     "analyze_submission_text",
+    "clean_snapshot_entries",
     "ensure_can_review_submission",
     "reject_submission",
     "resubmit_question_set",
