@@ -30,6 +30,7 @@ from ..._helpers import (
 from .._sections.exams import build_my_exams_context
 from .._sections.groups import build_groups_context
 from .._sections.question_bank import build_question_bank_context
+from .._sections.question_submissions import build_question_submissions_context
 from .._sections.unit_exams import build_unit_exams_context
 from ..contact_inbox import handle_contact_reply_post
 from ..post_handler import handle_profile_post
@@ -157,6 +158,9 @@ class _Stage1Mixin:
         self.unit_exams_total_count = self._unit_exams_ctx["unit_exams_total_count"]
         self.unit_exams_pagination_query = self._unit_exams_ctx["unit_exams_pagination_query"]
         self._qb_ctx = build_question_bank_context(
+            self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
+        )
+        self._qsub_ctx = build_question_submissions_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
         self.question_bank_banks = self._qb_ctx["question_bank_banks"]

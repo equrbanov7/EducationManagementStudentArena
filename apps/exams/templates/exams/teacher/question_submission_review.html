@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ submission.title }} — {% trans "Göndərişə baxış" %}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0"><i class="fas fa-clipboard-check me-2"></i>{{ submission.title }}</h1>
+        <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> {% trans "Qutuya qayıt" %}</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+            <span><i class="fas fa-user"></i> {{ submission.teacher.get_full_name|default:submission.teacher.username }}</span>
+            <span class="text-muted"><i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}</span>
+            <span class="text-muted">{% trans "Dil" %}: {{ submission.get_language_display }}</span>
+            <span class="badge bg-primary">{{ submission.question_count }} {% trans "sual" %}</span>
+            {% if submission.error_count %}<span class="badge bg-danger">{{ submission.error_count }} {% trans "xəta" %}</span>{% endif %}
+            {% if submission.warning_count %}<span class="badge bg-warning text-dark">{{ submission.warning_count }} {% trans "xəbərdarlıq" %}</span>{% endif %}
+            {% if submission.status == "pending" %}
+                <span class="badge bg-info">{% trans "Baxılır" %}</span>
+            {% elif submission.status == "accepted" %}
+                <span class="badge bg-success">{% trans "Qəbul edilib" %}</span>
+                {% if submission.accepted_bank %}
+                <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="badge bg-success-subtle text-success text-decoration-none">
+                    <i class="fas fa-layer-group"></i> {{ submission.accepted_bank.name }}
+                </a>
+                {% endif %}
+            {% else %}
+                <span class="badge bg-danger">{% trans "Rədd edilib" %}</span>
+            {% endif %}
+        </div>
+        {% if submission.reviewer_note %}
+        <div class="card-footer text-muted">{{ submission.reviewer_note|linebreaksbr }}</div>
+        {% endif %}
+    </div>
+
+    {% if submission.is_pending %}
+    <div class="card mb-4">
+        <div class="card-header"><strong>{% trans "Qərar" %}</strong></div>
+        <form method="post" action="{% url 'exams:question_submission_decide' submission.id %}">
+            {% csrf_token %}
+            <div class="card-body d-flex flex-column gap-3">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="qsubBank">{% trans "Mövcud banka əlavə et" %}</label>
+                        <select class="form-select" id="qsubBank" name="bank_id">
+                            <option value="">{% trans "— Yeni bank yaradılsın —" %}</option>
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}">{{ bank.name }}{% if bank.subject %} ({{ bank.subject }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="qsubNewBank">{% trans "Yeni bankın adı (boşdursa başlıq götürülür)" %}</label>
+                        <input type="text" class="form-control" id="qsubNewBank" name="new_bank_name" maxlength="200"
+                               placeholder="{{ submission.title }}">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" for="qsubNote">{% trans "Qeyd (rədd üçün mütləqdir — müəllim bunu görəcək)" %}</label>
+                    <textarea class="form-control" id="qsubNote" name="note" rows="3"
+                              placeholder="{% trans 'məs. 3-cü sualda düzgün cavab işarələnməyib...' %}"></textarea>
+                </div>
+            </div>
+            <div class="card-footer d-flex gap-2 justify-content-end">
+                <button type="submit" name="decision" value="reject" class="btn btn-outline-danger">
+                    <i class="fas fa-xmark"></i> {% trans "Rədd et" %}
+                </button>
+                <button type="submit" name="decision" value="accept" class="btn btn-success">
+                    <i class="fas fa-check"></i> {% trans "Qəbul et və banka əlavə et" %}
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <h2 class="h5">{% trans "Suallar və xəbərdarlıqlar" %}</h2>
+    {% include "exams/teacher/partials/_question_submission_preview.html" with questions=parsed_questions counts=None %}
+</div>
+{% endblock %}

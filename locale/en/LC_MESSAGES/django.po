@@ -13919,6 +13919,10 @@ msgctxt "exams.service.access.permission"
 msgid "question_bank_create_exam_center_only"
 msgstr "Only the exam center can create question banks."
 
+msgctxt "exams.service.access.permission"
+msgid "question_submission_review_exam_center_only"
+msgstr "Only the exam center can review question submissions."
+
 msgctxt "exams.form.exam.error"
 msgid "final_exam_category_exam_center_only"
 msgstr "Only the exam center can create final-category exams."

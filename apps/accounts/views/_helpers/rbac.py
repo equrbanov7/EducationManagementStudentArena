@@ -402,6 +402,11 @@ def _role_capabilities(user, profile):
     if can_use_question_bank:
         allowed_sections.add("question-bank")
 
+    # "Sual göndərişləri" — müəllim imtahan mərkəzinə sual göndərir, mərkəz
+    # qutuda baxır. Hər iki tərəf eyni bölmə açarını görür (məzmun rola görə).
+    if is_teacher or is_exam_center or is_superadmin:
+        allowed_sections.add("question-submissions")
+
     # "Apellyasiyalarım" — tələbə (və ya org-a bağlı olmayan istifadəçi) öz
     # apellyasiyalarını dashboard daxilində (sağ content, AJAX) görür.
     if can_view_my_appeals:

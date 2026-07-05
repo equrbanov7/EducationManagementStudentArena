@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sual göndərişləri" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1000px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0"><i class="fas fa-inbox me-2"></i>{% trans "Sual göndərişləri" %}
+            {% if pending_count %}<span class="badge bg-danger">{{ pending_count }}</span>{% endif %}
+        </h1>
+        <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> {% trans "Geri" %}</a>
+    </div>
+
+    <div class="btn-group mb-3" role="group">
+        <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-primary{% else %}btn-outline-primary{% endif %}">{% trans "Baxılmalı" %}</a>
+        <a href="?status=accepted" class="btn btn-sm {% if status_filter == 'accepted' %}btn-primary{% else %}btn-outline-primary{% endif %}">{% trans "Qəbul edilmiş" %}</a>
+        <a href="?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}btn-primary{% else %}btn-outline-primary{% endif %}">{% trans "Rədd edilmiş" %}</a>
+        <a href="?status=all" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">{% trans "Hamısı" %}</a>
+    </div>
+
+    {% if submissions %}
+    <div class="list-group">
+        {% for s in submissions %}
+        <a href="{% url 'exams:question_submission_review' s.id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <div>
+                    <strong>{{ s.title }}</strong>
+                    <div class="text-muted small">
+                        {{ s.teacher.get_full_name|default:s.teacher.username }} · {{ s.created_at|date:"d.m.Y H:i" }}
+                        {% if s.resubmission_count %} · {% trans "yenidən göndərilib" %} ×{{ s.resubmission_count }}{% endif %}
+                    </div>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-primary">{{ s.question_count }} {% trans "sual" %}</span>
+                    {% if s.error_count %}<span class="badge bg-danger">{{ s.error_count }} {% trans "xəta" %}</span>{% endif %}
+                    {% if s.warning_count %}<span class="badge bg-warning text-dark">{{ s.warning_count }} {% trans "xəbərdarlıq" %}</span>{% endif %}
+                    {% if s.status == "pending" %}
+                        <span class="badge bg-info">{% trans "Baxılır" %}</span>
+                    {% elif s.status == "accepted" %}
+                        <span class="badge bg-success">{% trans "Qəbul" %}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{% trans "Rədd" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light border text-center py-5">
+        <i class="far fa-folder-open fa-2x d-block mb-2 text-muted"></i>
+        {% trans "Bu statusda göndəriş yoxdur." %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

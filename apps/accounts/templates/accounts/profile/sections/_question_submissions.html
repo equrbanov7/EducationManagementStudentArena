@@ -1,0 +1,77 @@
+{% load i18n %}
+{% comment %}
+Profil bölməsi: Sual göndərişləri.
+Müəllim — öz göndərişləri + yeni göndəriş; İmtahan mərkəzi — qutu (inbox).
+{% endcomment %}
+
+<div class="qsub-section">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">
+                <i class="fas fa-paper-plane me-2"></i>{% trans "Sual göndərişləri" %}
+                {% if question_submissions_pending_count %}
+                <span class="badge bg-danger">{{ question_submissions_pending_count }}</span>
+                {% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if question_submissions_is_reviewer %}
+                    {% trans "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın." %}
+                {% else %}
+                    {% trans "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin." %}
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if question_submissions_is_reviewer %}
+            <a href="{{ question_submissions_inbox_url }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-inbox"></i> {% trans "Qutunu aç" %}
+            </a>
+            {% else %}
+            <a href="{{ question_submissions_create_url }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> {% trans "Yeni göndəriş" %}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if question_submissions_items %}
+    <div class="list-group">
+        {% for s in question_submissions_items %}
+        <a href="{% if question_submissions_is_reviewer %}{% url 'exams:question_submission_review' s.id %}{% else %}{% url 'exams:question_submission_detail' s.id %}{% endif %}"
+           class="list-group-item list-group-item-action js-profile-section-link-skip">
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <div>
+                    <strong>{{ s.title }}</strong>
+                    <div class="text-muted small">
+                        {% if question_submissions_is_reviewer %}{{ s.teacher.get_full_name|default:s.teacher.username }} · {% endif %}
+                        {{ s.created_at|date:"d.m.Y H:i" }}
+                        {% if s.resubmission_count %} · ×{{ s.resubmission_count }}{% endif %}
+                    </div>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-primary">{{ s.question_count }} {% trans "sual" %}</span>
+                    {% if s.error_count %}<span class="badge bg-danger">{{ s.error_count }}</span>{% endif %}
+                    {% if s.warning_count %}<span class="badge bg-warning text-dark">{{ s.warning_count }}</span>{% endif %}
+                    {% if s.status == "pending" %}
+                        <span class="badge bg-info">{% trans "Baxılır" %}</span>
+                    {% elif s.status == "accepted" %}
+                        <span class="badge bg-success">{% trans "Qəbul" %}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{% trans "Rədd" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light border text-center py-5">
+        <i class="far fa-paper-plane fa-2x d-block mb-2 text-muted"></i>
+        {% if question_submissions_is_reviewer %}
+            {% trans "Hələ heç bir sual göndərişi yoxdur." %}
+        {% else %}
+            {% trans "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın." %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

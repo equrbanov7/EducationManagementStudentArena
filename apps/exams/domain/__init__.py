@@ -18,6 +18,7 @@ from .question_bank import (
     question_media_path,
     validate_video_size,
 )
+from .submission_inbox import QuestionSubmission
 
 __all__ = [
     "BankQuestion",
@@ -32,6 +33,7 @@ __all__ = [
     "ProctoringLog",
     "QuestionBank",
     "QuestionBlock",
+    "QuestionSubmission",
     "StudentGroup",
     "bank_option_media_path",
     "bank_question_media_path",

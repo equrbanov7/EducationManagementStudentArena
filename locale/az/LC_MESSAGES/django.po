@@ -13947,6 +13947,10 @@ msgctxt "exams.service.access.permission"
 msgid "question_bank_create_exam_center_only"
 msgstr "Sual bankını yalnız imtahan mərkəzi yarada bilər."
 
+msgctxt "exams.service.access.permission"
+msgid "question_submission_review_exam_center_only"
+msgstr "Sual göndərişlərinə yalnız imtahan mərkəzi baxa bilər."
+
 msgctxt "exams.form.exam.error"
 msgid "final_exam_category_exam_center_only"
 msgstr "Final kateqoriyalı imtahanı yalnız imtahan mərkəzi yarada bilər."
