@@ -75,15 +75,36 @@ def enroll_mandatory_subjects(*, record, period, semester_number):
     return created
 
 
+class RegistrationWindowClosed(Exception):
+    """Seçmə-fənn qərarı qeydiyyat pəncərəsindən kənarda cəhd edildi (U14).
+
+    ``AcademicPeriod.registration_start/end`` müəyyən edilibsə və bugünkü tarix
+    pəncərədən kənardadırsa qaldırılır. Registrar/inzibati axınlar
+    ``enforce_window=False`` ilə keçə bilər (staff override)."""
+
+
 @transaction.atomic
-def choose_group_elective(*, organization, group, curriculum, period, elective_group, subject, decided_by=None):
+def choose_group_elective(
+    *, organization, group, curriculum, period, elective_group, subject, decided_by=None, enforce_window=True
+):
     """Record a group's elective-block decision and enroll EVERY group member.
 
     In the AZ model the elective is a group decision: once chosen, all active
     students of the group are enrolled in the chosen subject. Returns
     ``(choice, enrolled_count)``. Idempotent — changing the choice re-points the
     record; already-enrolled members are not duplicated.
-    """
+
+    Akademik təqvim (U11/U14): period qeydiyyat pəncərəsi konfiqurasiya edibsə,
+    qərar yalnız pəncərə AÇIQ olanda verilə bilər (staff ``enforce_window=False``
+    ilə keçə bilər)."""
+    if enforce_window:
+        state = getattr(period, "registration_state", None)
+        if state is not None and state != "open":
+            raise RegistrationWindowClosed(
+                f"Qeydiyyat pəncərəsi {'hələ açılmayıb' if state == 'upcoming' else 'bağlanıb'}: "
+                f"{period.registration_start} — {period.registration_end}"
+            )
+
     choice, _ = GroupElectiveChoice.objects.update_or_create(
         organization=organization,
         group=group,

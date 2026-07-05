@@ -173,3 +173,19 @@
     .jd-kbd-hint { display: none; }
     .jd-grid-wrap { max-height: none; }
 }
+
+/* ── Excel ixrac linki (U14) ─────────────────────────────────────────────── */
+.jd-export-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-success-600);
+    color: var(--ems-success-600);
+    text-decoration: none;
+}
+.jd-export-link:hover { background: var(--ems-success-100); color: var(--ems-success-strong); }

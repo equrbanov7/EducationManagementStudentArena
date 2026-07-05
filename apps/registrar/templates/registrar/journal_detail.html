@@ -14,6 +14,10 @@
     <div class="jd-head">
         <div class="jd-head-top">
             <a class="journal-back" href="{% url 'registrar:journal_list' %}"><i class="fas fa-arrow-left"></i> {% trans "Jurnallar" context "registrar.journal" %}</a>
+            <a class="jd-export-link" href="{% url 'registrar:journal_xlsx' offering.id %}"
+               title="{% trans 'Jurnalı Excel (xlsx) olaraq yüklə' context 'registrar.journal' %}">
+                <i class="fas fa-file-excel"></i> Excel
+            </a>
             {% if journal.scheme.is_published %}
             <span class="journal-badge journal-badge--locked"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>
             {% endif %}

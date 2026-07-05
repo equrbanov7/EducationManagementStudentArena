@@ -322,6 +322,7 @@ class Command(BaseCommand):
                     elective_group="SB1",
                     subject=subjects[subject_code],
                     decided_by=decided_by,
+                    enforce_window=False,  # seed: tarixi demo period üçün pəncərə keçilir
                 )
 
         self._seed_demo_progress(org)

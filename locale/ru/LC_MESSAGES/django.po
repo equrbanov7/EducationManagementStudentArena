@@ -27802,6 +27802,10 @@ msgctxt "registrar.journal"
 msgid "Qrup"
 msgstr "Группа"
 
+msgctxt "registrar.journal"
+msgid "Jurnalı Excel (xlsx) olaraq yüklə"
+msgstr "Скачать журнал в Excel (xlsx)"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
