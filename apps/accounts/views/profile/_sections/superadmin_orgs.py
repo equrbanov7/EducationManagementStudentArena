@@ -40,7 +40,10 @@ def build_superadmin_orgs_sections(
         superadmin_org_features_page = Paginator(superadmin_organizations_queryset, 12).get_page(
             superadmin_feature_org_page
         )
+        from apps.organizations.cabinet_modules import module_items as _cabinet_module_items
+
         for organization in superadmin_org_features_page.object_list:
+            organization.cabinet_module_items = _cabinet_module_items(organization)
             organization.review_feature_items = [
                 {
                     "key": feature_name,

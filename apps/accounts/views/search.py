@@ -28,27 +28,36 @@ MIN_ENTITY_QUERY = 2
 
 
 def _nav_targets(caps):
-    """Static, role-aware quick-jump destinations (title + fa icon + keywords)."""
-    targets = [
-        (_("Profil"), "fa-user", reverse("accounts:profile"), "profil dashboard kabinet profile"),
-        (_("Elektron jurnal"), "fa-book-open", reverse("registrar:journal_list"), "jurnal journal qiymət davamiyyət"),
-        (_("Dərs cədvəli"), "fa-calendar-week", reverse("registrar:schedule"), "cədvəl schedule dərs vaxt"),
-        (_("Akademik təqvim"), "fa-calendar-days", reverse("registrar:calendar"), "təqvim calendar sessiya qeydiyyat"),
-        (_("İmtahanlar"), "fa-clipboard-check", reverse("exams:student_exam_list"), "imtahan exam test"),
-        (
-            _("Bildirişlər"),
-            "fa-bell",
-            reverse("accounts:profile") + "?section=notifications",
-            "bildiriş notification xəbər",
-        ),
+    """Rol-aware sürətli keçidlər — HAMISI profil shell-inin İÇİNƏ açılır (U16).
+
+    "Bir səhifə, bir URL": nəticəyə klik sidebar-ı itirmir — `?section=` shell
+    naviqasiyasıdır. Bölmə siyahısı ``allowed_sections``-a bağlıdır, ona görə
+    superadminin söndürdüyü modullar axtarışdan da avtomatik itir. Yeganə tam
+    səhifə istisnası: registrar konsolu (form-ağır admin səthi)."""
+    profile_url = reverse("accounts:profile")
+
+    def shell(section):
+        return f"{profile_url}?section={section}"
+
+    allowed = caps.get("allowed_sections", set())
+    candidates = [
+        ("profile-info", _("Profil"), "fa-user", "profil dashboard kabinet profile"),
+        ("my-subjects", _("Fənlərim"), "fa-book-open", "fənn subject kredit qayıb"),
+        ("my-transcript", _("Transkript"), "fa-scroll", "transkript transcript gpa"),
+        ("my-journal", _("Elektron jurnal"), "fa-book-open", "jurnal journal qiymət davamiyyət"),
+        ("my-schedule", _("Dərs cədvəli"), "fa-calendar-week", "cədvəl schedule dərs vaxt"),
+        ("academic-calendar", _("Akademik təqvim"), "fa-calendar-days", "təqvim calendar sessiya qeydiyyat"),
+        ("grade-approvals", _("Qiymət təsdiqləri"), "fa-clipboard-check", "təsdiq approval"),
+        ("analytics", _("Akademik analitika"), "fa-chart-line", "analitika statistika gpa keçid"),
+        ("my-exams", _("İmtahanlarım"), "fa-clipboard-check", "imtahan exam test"),
+        ("assigned-exams", _("İmtahanlar"), "fa-clipboard-check", "imtahan exam test"),
+        ("notifications", _("Bildirişlər"), "fa-bell", "bildiriş notification xəbər"),
     ]
-    if caps.get("can_approve_grades"):
-        targets.append(
-            (_("Qiymət təsdiqləri"), "fa-clipboard-check", reverse("registrar:approvals_inbox"), "təsdiq approval")
-        )
-        targets.append(
-            (_("Akademik analitika"), "fa-chart-line", reverse("registrar:analytics"), "analitika statistika gpa keçid")
-        )
+    targets = [
+        (title, icon, shell(section), keywords)
+        for section, title, icon, keywords in candidates
+        if section == "profile-info" or section in allowed
+    ]
     if caps.get("can_manage_registrar"):
         targets.append(
             (_("Registrar (kataloq)"), "fa-sitemap", reverse("registrar:console"), "registrar program fənn kataloq")

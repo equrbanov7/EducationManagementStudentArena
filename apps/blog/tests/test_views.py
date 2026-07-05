@@ -110,6 +110,10 @@ class BlogRoleAccessTest(TestCase):
             org_type=OrganizationType.COURSE_CENTER,
             owner=self.teacher,
         )
+        # U16: postlar susmaya görə bağlıdır — bloq testləri modulu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(self.organization, "posts", True)
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 

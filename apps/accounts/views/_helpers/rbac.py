@@ -341,6 +341,14 @@ def _role_capabilities(user, profile):
         if is_superadmin or is_org_admin or is_unit_manager:
             allowed_sections.update({"grade-approvals", "analytics"})
 
+    # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
+    # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API
+    # eyni yerdən bağlanır). Superadmin HƏMİŞƏ hamısını görür.
+    if not is_superadmin and active_organization is not None:
+        from apps.organizations.cabinet_modules import disabled_sections as _disabled_cabinet_sections
+
+        allowed_sections -= _disabled_cabinet_sections(active_organization)
+
     # İmtahan sistemi redizaynı (Faza 5) — yeni modulların sidebar görünürlüyü.
     # Faktiki icazə yoxlaması yenə də view səviyyəsində (appeals.services.permissions,
     # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.

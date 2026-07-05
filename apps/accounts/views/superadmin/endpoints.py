@@ -227,6 +227,31 @@ def superadmin_organizations(request):
                 pgettext_lazy("accounts.superadmin_orgs.message", "organization_unsuspended")
                 % {"organization_name": organization.name},
             )
+        elif action == "set_cabinet_module":
+            # U16 — kabinet modul görünürlüyü (superadmin aç/bağla paneli).
+            from apps.organizations.cabinet_modules import CABINET_MODULES, set_module_enabled
+
+            module_key = (request.POST.get("module_key") or "").strip()
+            if module_key not in CABINET_MODULES:
+                messages.error(
+                    request,
+                    pgettext_lazy("accounts.superadmin_orgs.message", "Naməlum kabinet modulu seçildi."),
+                )
+                return redirect(next_url)
+            module_enabled = request.POST.get("enabled") == "1"
+            set_module_enabled(organization, module_key, module_enabled)
+            module_label = CABINET_MODULES[module_key]["label"]
+            if module_enabled:
+                module_msg = pgettext_lazy(
+                    "accounts.superadmin_orgs.message",
+                    '"%(organization_name)s" üçün "%(module)s" modulu aktiv edildi.',
+                )
+            else:
+                module_msg = pgettext_lazy(
+                    "accounts.superadmin_orgs.message",
+                    '"%(organization_name)s" üçün "%(module)s" modulu gizlədildi.',
+                )
+            messages.success(request, module_msg % {"organization_name": organization.name, "module": module_label})
         elif action in {"set_written_exam_identity_reveal", "set_review_identity_reveal"}:
             feature_name = (request.POST.get("feature_name") or "").strip() or "written_exam"
             feature_config = REVIEW_VISIBILITY_FEATURES.get(feature_name)

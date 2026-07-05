@@ -3,7 +3,7 @@
 import json
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -15,6 +15,7 @@ from core.rls import bypass_rls
 User = get_user_model()
 
 
+@override_settings(UNIVERSITY_MODE=True)
 class GlobalSearchTest(TestCase):
     @classmethod
     def setUpTestData(cls):
