@@ -98,6 +98,12 @@ class CabinetModulesTest(TestCase):
             client = self._client(user)
             self.assertEqual(client.get(reverse("create_post")).status_code, 404)
 
+    def test_anonymous_redirected_to_login_not_404(self):
+        # Anonim istifadəçi login-ə yönlənir (auth qapısı modul qapısından əvvəl).
+        resp = Client().get(reverse("create_post"))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("login", resp["Location"])
+
     def test_blog_urls_open_after_enabling(self):
         with bypass_rls():
             cabinet_modules.set_module_enabled(self.org, "posts", True)

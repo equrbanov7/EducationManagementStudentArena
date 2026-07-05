@@ -21,9 +21,9 @@ from ..shared.module_gate import posts_module_required
 logger = logging.getLogger(__name__)
 
 
-@posts_module_required
 @login_required
 @require_POST
+@posts_module_required
 def review_post(request, post_id):
     post = get_object_or_404(Post.objects.select_related("author"), pk=post_id, requires_approval=True)
 
@@ -100,9 +100,9 @@ def review_post(request, post_id):
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)
 
 
-@posts_module_required
 @login_required
 @require_POST
+@posts_module_required
 def delete_post(request, post_id):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
@@ -126,9 +126,9 @@ def delete_post(request, post_id):
 # 3. MÜƏLLIM MODERASIYA: sil, deaktiv et, və ya yenidən aktiv et
 
 
-@posts_module_required
 @login_required
 @require_POST
+@posts_module_required
 def teacher_moderate_post(request, post_id):
     """
     Müəllim tərəfindən post moderasiyası.
