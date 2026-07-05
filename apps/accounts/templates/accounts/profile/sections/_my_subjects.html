@@ -95,10 +95,21 @@
                         <span class="subject-grade-status is-barred">{% trans "Kəsilir" context "profile.subjects" %}</span>
                         {% endif %}
                     </div>
+                    {# U13 — giriş balı tərəqqi barı (kredit-barı ilə eyni pattern) #}
+                    <div class="subject-grade-bar" role="progressbar"
+                         aria-valuenow="{{ row.journal.entry_score|floatformat:0 }}" aria-valuemin="0" aria-valuemax="{{ row.journal.entry_score_max }}">
+                        <div class="subject-grade-fill" style="width: {% widthratio row.journal.entry_score row.journal.entry_score_max 100 %}%;"></div>
+                    </div>
                     <div class="subject-grade-components">
                         <span class="grade-comp">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ row.journal.lessons_held }}</strong></span>
                         <span class="grade-comp">{% trans "Qayıb" context "profile.subjects" %}: <strong>{{ row.journal.absence_hours }}</strong> {% trans "saat" context "profile.subjects" %} / {{ row.journal.allowed_absence|floatformat:0 }}</span>
                     </div>
+                    {% if row.journal.allowed_absence %}
+                    <div class="subject-absence-bar" role="progressbar"
+                         aria-valuenow="{{ row.journal.absence_hours }}" aria-valuemin="0" aria-valuemax="{{ row.journal.allowed_absence|floatformat:0 }}">
+                        <div class="subject-absence-fill {% if row.journal.barred %}is-over{% elif row.eligibility.barred %}is-over{% endif %}" style="width: {% widthratio row.journal.absence_hours row.journal.allowed_absence 100 %}%;"></div>
+                    </div>
+                    {% endif %}
                     {% if row.components %}
                     <div class="subject-components">
                         {% for comp in row.components %}

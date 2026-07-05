@@ -197,6 +197,16 @@ istifadə); idxal ehtiyatlı (validasiya + preview).
 > `page_contexts.py` sayəsində kod dublikasiyası yoxdur; kontekstlər YALNIZ aktiv bölmə üçün
 > qurulur (lazy — performans). Cədvəl slot formaları `next` ilə shell-ə qayıdır.
 > Testlər: `apps/accounts/tests/test_registrar_sections.py` (9).
+
+> ✅ **U13 — Elektron jurnal redizaynı (istifadəçinin "ən sona" saxladığı bənd).**
+> Müəllim jurnalı tab-lı iş sahəsinə çevrildi: **Davamiyyət və ballar / Komponentlər / Yekun
+> nəticə / Tarixçə** (tab seçimi sessionStorage-də offering üzrə yadda qalır, URL hash override).
+> Excel-vari grid: **sticky tələbə sütunu + sticky başlıq**, ↑/↓/←/→ ilə xanalar arası klaviatura
+> keçidi (`journal_detail.js`), fokus halqası, sticky "Yadda saxla" paneli, stat-çipli başlıq.
+> Tələbə modulunda ("Fənlərim") giriş balı + qayıb **tərəqqi barları**. BÜTÜN form adları/action-lar
+> toxunulmaz qaldı — 673 accounts+registrar testi dəyişikliksiz yaşıl. Qeyd: Figma yenə oxunmadı
+> (auth-qapalı canvas + Chrome extension oflayn) — istifadəçinin təsdiqi ilə best-practice + göy
+> tonlarla icra olundu; screenshot gələrsə uyğunlaşdırılacaq.
 | Təsdiq dialoqları | `confirm()` (native) | Token-əsaslı modal `ConfirmDialog` (destruktiv aksiyalar üçün) | Orta |
 | Dark mode | Qismən (token var) | `--ems-*` token-ləri ilə tam dark rejim auditi | Orta |
 | Əlçatanlıq (a11y) | Qismən | Klaviatura naviqasiyası, ARIA, focus-ring auditi; WCAG AA | Yüksək |

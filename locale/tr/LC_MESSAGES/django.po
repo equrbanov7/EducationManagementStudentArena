@@ -27671,6 +27671,38 @@ msgctxt "profile.sidebar"
 msgid "Elektron jurnal"
 msgstr "Elektronik jurnal"
 
+msgctxt "registrar.journal"
+msgid "Davamiyyət və ballar"
+msgstr "Devam ve puanlar"
+
+msgctxt "registrar.journal"
+msgid "Komponentlər"
+msgstr "Bileşenler"
+
+msgctxt "registrar.journal"
+msgid "Tarixçə"
+msgstr "Geçmiş"
+
+msgctxt "registrar.journal"
+msgid "Jurnal bölmələri"
+msgstr "Jurnal bölümleri"
+
+msgctxt "registrar.journal"
+msgid "xanalar arası keçid"
+msgstr "hücreler arası geçiş"
+
+msgctxt "registrar.journal"
+msgid "Hələ dərs əlavə edilməyib"
+msgstr "Henüz ders eklenmedi"
+
+msgctxt "registrar.journal"
+msgid "Komponent müəyyən edilməyib"
+msgstr "Bileşen tanımlanmadı"
+
+msgctxt "registrar.journal"
+msgid "Qrup"
+msgstr "Grup"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

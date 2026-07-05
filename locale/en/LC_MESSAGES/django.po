@@ -27675,6 +27675,38 @@ msgctxt "profile.sidebar"
 msgid "Elektron jurnal"
 msgstr "Electronic journal"
 
+msgctxt "registrar.journal"
+msgid "Davamiyyət və ballar"
+msgstr "Attendance & scores"
+
+msgctxt "registrar.journal"
+msgid "Komponentlər"
+msgstr "Components"
+
+msgctxt "registrar.journal"
+msgid "Tarixçə"
+msgstr "History"
+
+msgctxt "registrar.journal"
+msgid "Jurnal bölmələri"
+msgstr "Journal sections"
+
+msgctxt "registrar.journal"
+msgid "xanalar arası keçid"
+msgstr "move between cells"
+
+msgctxt "registrar.journal"
+msgid "Hələ dərs əlavə edilməyib"
+msgstr "No lessons added yet"
+
+msgctxt "registrar.journal"
+msgid "Komponent müəyyən edilməyib"
+msgstr "No components defined"
+
+msgctxt "registrar.journal"
+msgid "Qrup"
+msgstr "Group"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"
