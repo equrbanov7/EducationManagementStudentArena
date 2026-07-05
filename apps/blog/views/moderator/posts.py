@@ -16,10 +16,12 @@ from django.views.decorators.http import require_POST
 from ...models import Post, PostApprovalLog
 from ...services import can_user_moderate_post, can_user_review_post
 from ..shared._helpers import _can_manage_blog_content
+from ..shared.module_gate import posts_module_required
 
 logger = logging.getLogger(__name__)
 
 
+@posts_module_required
 @login_required
 @require_POST
 def review_post(request, post_id):
@@ -98,6 +100,7 @@ def review_post(request, post_id):
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)
 
 
+@posts_module_required
 @login_required
 @require_POST
 def delete_post(request, post_id):
@@ -123,6 +126,7 @@ def delete_post(request, post_id):
 # 3. MÜƏLLIM MODERASIYA: sil, deaktiv et, və ya yenidən aktiv et
 
 
+@posts_module_required
 @login_required
 @require_POST
 def teacher_moderate_post(request, post_id):

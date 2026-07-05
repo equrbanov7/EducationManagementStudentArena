@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from ...models import Category, Post
+
+from ..shared.module_gate import posts_module_required
 from ...selectors import filter_posts_by_category_scope, get_popular_topics, get_sidebar_categories
 
 _PAGE_NUMBER_RE = re.compile(r"^[0-9]+$")
@@ -58,6 +60,7 @@ def render_category_page(request, category, *, template_name="blog/category_deta
     return render(request, template_name, context)
 
 
+@posts_module_required
 def category_detail(request, slug):
     category = get_object_or_404(Category.objects.select_related("parent"), slug=slug)
     return render_category_page(request, category)

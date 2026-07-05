@@ -9,6 +9,8 @@ from django.utils.translation import pgettext
 
 from ...forms import CommentForm
 from ...models import Comment, Post
+
+from ..shared.module_gate import posts_module_required
 from ...services import can_user_review_post
 
 VIEWED_POSTS_SESSION_KEY = "blog_viewed_post_ids"
@@ -29,6 +31,7 @@ def _record_post_view(request, post):
     request.session.modified = True
 
 
+@posts_module_required
 def post_detail(request, slug):
     """
     Bir postun detal səhifəsi + şərhlər və rating forması.

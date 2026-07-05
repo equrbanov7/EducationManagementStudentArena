@@ -70,8 +70,15 @@ class CabinetModulesTest(TestCase):
         self.assertNotIn('data-section="posts"', page)
         self.assertNotIn('data-section="create-post"', page)
 
-    def test_superadmin_still_sees_posts(self):
-        page = self._client(self.superadmin).get(reverse("accounts:profile")).content.decode()
+    def test_superadmin_also_hidden_until_enabled(self):
+        # U20: superadmin istisna deyil — modul bağlıykən o da görmür;
+        # panel toggle-dan açandan sonra görünür.
+        client = self._client(self.superadmin)
+        page = client.get(reverse("accounts:profile")).content.decode()
+        self.assertNotIn('data-section="posts"', page)
+        with bypass_rls():
+            cabinet_modules.set_module_enabled(self.org, "posts", True)
+        page = client.get(reverse("accounts:profile")).content.decode()
         self.assertIn('data-section="posts"', page)
 
     def test_disabled_module_removes_sidebar_and_fragment(self):
@@ -83,9 +90,33 @@ class CabinetModulesTest(TestCase):
         self.assertNotIn('data-section="my-journal"', page)
         fragment = client.get(reverse("accounts:profile_section_fragment", kwargs={"section": "my-journal"}))
         self.assertEqual(fragment.status_code, 403)
-        # Superadmin yenə görür.
-        supage = self._client(self.superadmin).get(reverse("accounts:profile")).content.decode()
-        self.assertIn('data-section="my-journal"', supage)
+
+    # ── URL-səviyyəli qapı (U20) ─────────────────────────────────────────────
+    def test_blog_urls_404_when_module_disabled(self):
+        # Birbaşa URL yazılsa belə girilmir — superadmin daxil hamı üçün.
+        for user in (self.teacher, self.superadmin):
+            client = self._client(user)
+            self.assertEqual(client.get(reverse("create_post")).status_code, 404)
+
+    def test_blog_urls_open_after_enabling(self):
+        with bypass_rls():
+            cabinet_modules.set_module_enabled(self.org, "posts", True)
+        resp = self._client(self.teacher).get(reverse("create_post"))
+        self.assertIn(resp.status_code, (200, 302))
+
+    def test_post_detail_404_when_module_disabled(self):
+        from apps.blog.models import Post
+
+        with bypass_rls():
+            post = Post.objects.create(
+                author=self.teacher,
+                title="Gizli post",
+                content="məzmun",
+                requires_approval=False,
+                approval_status=Post.ApprovalStatus.APPROVED,
+            )
+        resp = self._client(self.student).get(reverse("article_detail", kwargs={"slug": post.slug}))
+        self.assertEqual(resp.status_code, 404)
 
     def test_disabled_module_hidden_from_search_nav(self):
         import json

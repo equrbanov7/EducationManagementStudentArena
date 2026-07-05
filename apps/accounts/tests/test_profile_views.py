@@ -872,7 +872,20 @@ class ProfileViewTest(TestCase):
             ]
         )
 
-        self.client.login(username="testuser", password="testpass123")
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        posts_org = Organization.objects.create(
+            name="Posts Enabled Org nonprofile",
+            slug="posts-enabled-nonprofile",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        # U20: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        set_module_enabled(posts_org, "posts", True)
+        _assign_user_to_org(self.user, posts_org, ProfileRole.STUDENT)
+        _login_with_org(self.client, self.user, posts_org)
         response = self.client.post(
             reverse("accounts:profile") + "?section=posts",
             data={"title": "Post title", "content": "Post content"},
@@ -2657,7 +2670,19 @@ class ProfileViewTest(TestCase):
             password="adminpass123",
         )
 
-        self.client.force_login(superuser)
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        posts_org = Organization.objects.create(
+            name="Posts Enabled Org catpos",
+            slug="posts-enabled-catpos",
+            org_type=OrganizationType.SCHOOL,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        # U20: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        set_module_enabled(posts_org, "posts", True)
+        _login_with_org(self.client, superuser, posts_org)
         response = self.client.get(reverse("accounts:profile"))
 
         self.assertEqual(response.status_code, 200)
@@ -2678,7 +2703,19 @@ class ProfileViewTest(TestCase):
             password="adminpass123",
         )
 
-        self.client.force_login(superuser)
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        posts_org = Organization.objects.create(
+            name="Posts Enabled Org inlinecp",
+            slug="posts-enabled-inlinecp",
+            org_type=OrganizationType.SCHOOL,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        # U20: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        set_module_enabled(posts_org, "posts", True)
+        _login_with_org(self.client, superuser, posts_org)
 
         response = self.client.get(reverse("accounts:profile") + "?section=create-post")
 
@@ -3318,7 +3355,11 @@ class ProfileViewTest(TestCase):
             is_published=False,
         )
 
-        self.client.force_login(superadmin)
+        # U20: postlar susmaya görə bağlıdır — aktiv org üçün modulu aç.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(org_a, "posts", True)
+        _login_with_org(self.client, superadmin, org_a)
         org_response = self.client.get(
             reverse("accounts:profile"),
             {
@@ -3386,7 +3427,11 @@ class ProfileViewTest(TestCase):
                 is_published=False,
             )
 
-        self.client.force_login(superadmin)
+        # U20: postlar susmaya görə bağlıdır — aktiv org üçün modulu aç.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(organization, "posts", True)
+        _login_with_org(self.client, superadmin, organization)
         response = self.client.get(
             reverse("accounts:profile"),
             {
@@ -3431,6 +3476,10 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
+        # U20: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(organization, "posts", True)
         _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
 
         personal_profile = personal_author.profile

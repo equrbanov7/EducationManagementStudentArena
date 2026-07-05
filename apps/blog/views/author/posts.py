@@ -27,10 +27,12 @@ from ...services import (
     resolve_post_category_selection,
 )
 from ..shared._helpers import _can_manage_blog_content
+from ..shared.module_gate import posts_module_required
 
 logger = logging.getLogger(__name__)
 
 
+@posts_module_required
 @login_required
 def create_post(request):
     if not _can_manage_blog_content(request.user):
@@ -134,6 +136,7 @@ def create_post(request):
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
 
 
+@posts_module_required
 @login_required
 @require_POST
 def post_edit_ajax(request, pk):
