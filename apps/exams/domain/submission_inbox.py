@@ -52,6 +52,29 @@ class QuestionSubmission(models.Model):
         verbose_name=pgettext_lazy("exams.model.question_submission.field", "title"),
         help_text=pgettext_lazy("exams.model.question_submission.help", "title"),
     )
+    # Hansı fənn üçündür — mərkəz bankları fənn üzrə qruplaşdırır.
+    # Boş olmaması servis qatında (submit/resubmit) tələb olunur.
+    subject = models.CharField(
+        max_length=200,
+        default="",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "subject"),
+    )
+    # Hansı qrup üçündür. FK müəllimin seçdiyi qrupdursa dolur; qrup siyahıda
+    # yoxdursa sərbəst mətn `group_label`-də saxlanır (akademik struktur
+    # universitetdən-universitetə dəyişir — sərt FK məcburiyyəti qoymuruq).
+    student_group = models.ForeignKey(
+        "exams.StudentGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="question_submissions",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "student_group"),
+    )
+    group_label = models.CharField(
+        max_length=200,
+        default="",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "group_label"),
+    )
     language = models.CharField(
         max_length=10,
         choices=EXAM_LANGUAGE_CHOICES,

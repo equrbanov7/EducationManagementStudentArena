@@ -16,7 +16,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
-from apps.exams.models import QuestionBank, QuestionSubmission
+from apps.exams.models import QuestionBank, QuestionSubmission, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
 from apps.exams.services.question_submission import (
     accept_submission,
@@ -50,9 +50,37 @@ def _normalize_language(raw_value):
 def _form_state(request):
     return {
         "title": (request.POST.get("title") or "").strip(),
+        "subject": (request.POST.get("subject") or "").strip(),
+        "group_id": (request.POST.get("group_id") or "").strip(),
+        "group_label": (request.POST.get("group_label") or "").strip(),
         "language": _normalize_language(request.POST.get("language")),
         "raw_text": request.POST.get("raw_text") or "",
     }
+
+
+def _teacher_groups(request, organization):
+    """Müəllimin bu təşkilatdakı qrupları (dropdown üçün)."""
+    from django.db.models import Q
+
+    return (
+        StudentGroup.objects.filter(organization=organization)
+        .filter(Q(teacher=request.user) | Q(teachers=request.user))
+        .distinct()
+        .order_by("name")
+    )
+
+
+def _resolve_group(form_state, groups):
+    """
+    Formadan qrupu həll edir: seçilmiş FK-dırsa (student_group, adı) qaytarır,
+    seçilməyibsə sərbəst mətn etiketi. Heç biri yoxdursa ("", "") qayıdır.
+    """
+    group_id = form_state.get("group_id") or ""
+    if group_id.isdigit():
+        group = next((g for g in groups if str(g.id) == group_id), None)
+        if group is not None:
+            return group, group.name
+    return None, form_state.get("group_label") or ""
 
 
 def _preview_context(raw_text):
@@ -69,9 +97,11 @@ def question_submission_create(request):
     _ensure_teacher(request.user)
     organization = _require_organization(request)
 
+    groups = list(_teacher_groups(request, organization))
     context = {
         "language_choices": EXAM_LANGUAGE_CHOICES,
-        "form_state": {"title": "", "language": "az", "raw_text": ""},
+        "teacher_groups": groups,
+        "form_state": {"title": "", "subject": "", "group_id": "", "group_label": "", "language": "az", "raw_text": ""},
         "back_url": _profile_section_url("question-submissions"),
     }
 
@@ -86,11 +116,15 @@ def question_submission_create(request):
             except ValidationError as exc:
                 messages.error(request, exc.messages[0])
         elif action == "submit":
+            student_group, group_label = _resolve_group(form_state, groups)
             try:
                 submission = submit_question_set(
                     teacher=request.user,
                     organization=organization,
                     title=form_state["title"],
+                    subject=form_state["subject"],
+                    student_group=student_group,
+                    group_label=group_label,
                     language=form_state["language"],
                     raw_text=form_state["raw_text"],
                 )
@@ -134,6 +168,7 @@ def question_submission_detail(request, submission_id):
 
         if action == "preview":
             context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
+            context["teacher_groups"] = list(_teacher_groups(request, organization))
             context["form_state"] = form_state
             try:
                 context.update(_preview_context(form_state["raw_text"]))
@@ -142,10 +177,15 @@ def question_submission_detail(request, submission_id):
             return render(request, "exams/teacher/question_submission_detail.html", context)
 
         if action == "resubmit":
+            groups = list(_teacher_groups(request, organization))
+            student_group, group_label = _resolve_group(form_state, groups)
             try:
                 submission = resubmit_question_set(
                     submission,
                     title=form_state["title"],
+                    subject=form_state["subject"],
+                    student_group=student_group,
+                    group_label=group_label,
                     language=form_state["language"],
                     raw_text=form_state["raw_text"],
                 )
@@ -161,11 +201,10 @@ def question_submission_detail(request, submission_id):
                 )
             return redirect("exams:question_submission_detail", submission_id=submission.id)
 
-    return render(
-        request,
-        "exams/teacher/question_submission_detail.html",
-        _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer),
-    )
+    context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
+    if can_edit:
+        context["teacher_groups"] = list(_teacher_groups(request, organization))
+    return render(request, "exams/teacher/question_submission_detail.html", context)
 
 
 def _detail_context(submission, *, can_edit, is_reviewer):
@@ -177,6 +216,9 @@ def _detail_context(submission, *, can_edit, is_reviewer):
         "language_choices": EXAM_LANGUAGE_CHOICES,
         "form_state": {
             "title": submission.title,
+            "subject": submission.subject,
+            "group_id": str(submission.student_group_id or ""),
+            "group_label": submission.group_label,
             "language": submission.language,
             "raw_text": submission.raw_text,
         },

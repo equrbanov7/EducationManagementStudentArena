@@ -74,14 +74,18 @@ class _Base(TestCase):
         session.save()
         return client
 
-    def _submission(self, raw_text=VALID_TEXT, title="İnformatika finalı"):
-        return submit_question_set(
-            teacher=self.teacher,
-            organization=self.org,
-            title=title,
-            language="az",
-            raw_text=raw_text,
-        )
+    def _submission(self, raw_text=VALID_TEXT, title="İnformatika finalı", **overrides):
+        kwargs = {
+            "teacher": self.teacher,
+            "organization": self.org,
+            "title": title,
+            "subject": "İnformatika",
+            "group_label": "875i",
+            "language": "az",
+            "raw_text": raw_text,
+        }
+        kwargs.update(overrides)
+        return submit_question_set(**kwargs)
 
 
 class SubmissionServiceTests(_Base):
@@ -106,6 +110,22 @@ class SubmissionServiceTests(_Base):
     def test_submit_rejects_empty_text(self):
         with self.assertRaises(ValidationError):
             self._submission(raw_text="qısa")
+
+    def test_submit_requires_subject(self):
+        with self.assertRaises(ValidationError):
+            self._submission(subject="")
+
+    def test_submit_requires_group(self):
+        with self.assertRaises(ValidationError):
+            self._submission(group_label="")
+
+    def test_submit_with_student_group_fk(self):
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-qrup")
+        submission = self._submission(student_group=group, group_label=group.name)
+        self.assertEqual(submission.student_group, group)
+        self.assertEqual(submission.group_label, "875i-qrup")
 
     def test_accept_creates_new_bank_with_questions(self):
         submission = self._submission()
@@ -168,12 +188,21 @@ class SubmissionViewTests(_Base):
         client = self._client_for(self.teacher)
         response = client.post(
             reverse("exams:question_submission_create"),
-            {"action": "submit", "title": "View testi", "language": "az", "raw_text": VALID_TEXT},
+            {
+                "action": "submit",
+                "title": "View testi",
+                "subject": "Riyaziyyat",
+                "group_label": "842A1",
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
         )
         self.assertEqual(response.status_code, 302)
         submission = QuestionSubmission.objects.get(title="View testi")
         self.assertEqual(submission.teacher, self.teacher)
         self.assertEqual(submission.question_count, 2)
+        self.assertEqual(submission.subject, "Riyaziyyat")
+        self.assertEqual(submission.group_label, "842A1")
 
     def test_preview_shows_warnings_without_creating(self):
         client = self._client_for(self.teacher)
@@ -240,6 +269,45 @@ class SubmissionViewTests(_Base):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_view_submit_with_group_dropdown(self):
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="Dropdown qrupu")
+        client = self._client_for(self.teacher)
+        client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "submit",
+                "title": "Dropdown testi",
+                "subject": "Fizika",
+                "group_id": str(group.id),
+                "group_label": "",
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        submission = QuestionSubmission.objects.get(title="Dropdown testi")
+        self.assertEqual(submission.student_group, group)
+        self.assertEqual(submission.group_label, "Dropdown qrupu")
+
+    def test_view_submit_requires_group(self):
+        client = self._client_for(self.teacher)
+        response = client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "submit",
+                "title": "Qrupsuz",
+                "subject": "Fizika",
+                "group_id": "",
+                "group_label": "",
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        # Xəta mesajı ilə forma yenidən göstərilir, göndəriş yaranmır.
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(QuestionSubmission.objects.filter(title="Qrupsuz").exists())
+
 
 class ProfileSectionTests(_Base):
     def test_teacher_sees_dashboard_section(self):
@@ -256,6 +324,14 @@ class ProfileSectionTests(_Base):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Qutunu aç")
         self.assertContains(response, "Bölmə testi")
+
+    def test_teacher_sees_rejected_alert(self):
+        submission = self._submission(title="Geri qaytarılan")
+        reject_submission(submission, reviewer=self.exam_center, note="Düzəldin.")
+        client = self._client_for(self.teacher)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
+        self.assertContains(response, "göndərişi geri qaytarıb")
+        self.assertContains(response, "Geri qaytarılıb — düzəliş gözlənilir")
 
     def test_student_does_not_get_section(self):
         student = User.objects.create_user("qs_student", "qs_student@test.az", PASSWORD)

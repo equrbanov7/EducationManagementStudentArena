@@ -66,11 +66,19 @@ def _apply_snapshot(submission, raw_text):
 # Müəllim tərəfi
 # ---------------------------------------------------------------------------
 @transaction.atomic
-def submit_question_set(*, teacher, organization, title, language, raw_text):
+def submit_question_set(*, teacher, organization, title, subject, group_label, language, raw_text, student_group=None):
     """Yeni göndəriş yaradır (pending) və mərkəz üzvlərinə bildiriş göndərir."""
     title = (title or "").strip()
     if not title:
         raise ValidationError(pgettext("exams.service.question_submission.error", "Mövzu/başlıq boş ola bilməz."))
+    subject = (subject or "").strip()
+    if not subject:
+        raise ValidationError(pgettext("exams.service.question_submission.error", "Fənn qeyd olunmalıdır."))
+    group_label = (group_label or "").strip()
+    if not group_label:
+        raise ValidationError(
+            pgettext("exams.service.question_submission.error", "Hansı qrup üçün olduğu qeyd olunmalıdır.")
+        )
     if len((raw_text or "").strip()) < MIN_RAW_TEXT_LENGTH:
         raise ValidationError(pgettext("exams.service.question_submission.error", "Sual mətni çox qısadır."))
 
@@ -78,6 +86,9 @@ def submit_question_set(*, teacher, organization, title, language, raw_text):
         teacher=teacher,
         organization=organization,
         title=title,
+        subject=subject,
+        student_group=student_group,
+        group_label=group_label,
         language=language,
     )
     _apply_snapshot(submission, raw_text)
@@ -87,7 +98,9 @@ def submit_question_set(*, teacher, organization, title, language, raw_text):
 
 
 @transaction.atomic
-def resubmit_question_set(submission, *, title=None, language=None, raw_text=None):
+def resubmit_question_set(
+    submission, *, title=None, subject=None, group_label=None, language=None, raw_text=None, student_group=...
+):
     """
     Müəllim pending/rejected göndərişi düzəldib yenidən göndərir: snapshot
     yenilənir, status yenidən ``pending`` olur, köhnə qərar sahələri təmizlənir.
@@ -100,6 +113,12 @@ def resubmit_question_set(submission, *, title=None, language=None, raw_text=Non
     was_rejected = submission.status == QuestionSubmission.STATUS_REJECTED
     if title is not None and title.strip():
         submission.title = title.strip()
+    if subject is not None and subject.strip():
+        submission.subject = subject.strip()
+    if group_label is not None and group_label.strip():
+        submission.group_label = group_label.strip()
+    if student_group is not ...:
+        submission.student_group = student_group
     if language:
         submission.language = language
     _apply_snapshot(submission, raw_text if raw_text is not None else submission.raw_text)
@@ -144,7 +163,7 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
         bank_name = (new_bank_name or "").strip() or submission.title
         bank = QuestionBank.objects.create(
             name=bank_name,
-            subject=submission.title,
+            subject=submission.subject or submission.title,
             language=submission.language,
             default_question_type="test",
             organization=submission.organization,
@@ -222,12 +241,12 @@ def _notify_exam_center_new_submission(submission, *, resubmitted):
         if resubmitted:
             message = pgettext(
                 "exams.notification.question_submission",
-                '{teacher} "{title}" sual göndərişini düzəldib yenidən göndərdi ({count} sual).',
+                '{teacher} "{title}" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual).',
             )
         else:
             message = pgettext(
                 "exams.notification.question_submission",
-                '{teacher} "{title}" adlı yeni sual göndərişi etdi ({count} sual).',
+                '{teacher} "{title}" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual).',
             )
         link = reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
         for member in _exam_center_members(submission.organization):
@@ -237,7 +256,11 @@ def _notify_exam_center_new_submission(submission, *, resubmitted):
                 recipient=member,
                 title=pgettext("exams.notification.question_submission", "Yeni sual göndərişi"),
                 message=message.format(
-                    teacher=teacher_display, title=submission.title, count=submission.question_count
+                    teacher=teacher_display,
+                    title=submission.title,
+                    subject=submission.subject,
+                    group=submission.group_label,
+                    count=submission.question_count,
                 ),
                 link=link,
                 notification_type="exam",

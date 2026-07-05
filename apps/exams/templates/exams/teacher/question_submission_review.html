@@ -15,6 +15,8 @@
             <span><i class="fas fa-user"></i> {{ submission.teacher.get_full_name|default:submission.teacher.username }}</span>
             <span class="text-muted"><i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}</span>
             <span class="text-muted">{% trans "Dil" %}: {{ submission.get_language_display }}</span>
+            <span class="badge bg-secondary-subtle text-dark border"><i class="fas fa-book"></i> {{ submission.subject }}</span>
+            <span class="badge bg-secondary-subtle text-dark border"><i class="fas fa-users"></i> {{ submission.group_label }}</span>
             <span class="badge bg-primary">{{ submission.question_count }} {% trans "sual" %}</span>
             {% if submission.error_count %}<span class="badge bg-danger">{{ submission.error_count }} {% trans "xəta" %}</span>{% endif %}
             {% if submission.warning_count %}<span class="badge bg-warning text-dark">{{ submission.warning_count }} {% trans "xəbərdarlıq" %}</span>{% endif %}

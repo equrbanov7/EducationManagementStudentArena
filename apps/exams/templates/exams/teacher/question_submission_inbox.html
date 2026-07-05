@@ -27,7 +27,7 @@
                 <div>
                     <strong>{{ s.title }}</strong>
                     <div class="text-muted small">
-                        {{ s.teacher.get_full_name|default:s.teacher.username }} · {{ s.created_at|date:"d.m.Y H:i" }}
+                        {{ s.teacher.get_full_name|default:s.teacher.username }} · <i class="fas fa-book"></i> {{ s.subject }} · <i class="fas fa-users"></i> {{ s.group_label }} · {{ s.created_at|date:"d.m.Y H:i" }}
                         {% if s.resubmission_count %} · {% trans "yenidən göndərilib" %} ×{{ s.resubmission_count }}{% endif %}
                     </div>
                 </div>
