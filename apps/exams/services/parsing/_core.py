@@ -22,6 +22,18 @@ from .extraction import (
 
 logger = logging.getLogger(__name__)
 
+# PDF mətn qatında END_QUESTION çox vaxt sonuncu variantın SONUNA yapışır
+# ("...işləyir. END_QUESTION"). END_QUESTION_RE yalnız müstəqil sətri tanıyır,
+# ona görə markerlər əvvəlcə ayrıca sətrə çıxarılmalıdır — əks halda bloklar
+# heç vaxt bağlanmır və sənədin böyük hissəsi bir "sual"a yapışıb itir.
+_INLINE_END_QUESTION_RE = re.compile(r"[ \t]*\bEND_QUESTION\b[ \t]*", re.IGNORECASE)
+
+
+def _isolate_end_question_markers(raw_text: str) -> str:
+    if "END_QUESTION" not in raw_text.upper():
+        return raw_text
+    return _INLINE_END_QUESTION_RE.sub("\nEND_QUESTION\n", raw_text)
+
 
 def _new_question(q_no: str, text: str) -> dict:
     return {
@@ -260,6 +272,9 @@ def _parse_end_question_blocks(raw_text: str) -> list[dict]:
             questions.append(parsed)
         block = []
 
+    def _block_has_option(current_block):
+        return any(OPTION_RE.match(entry) for entry in current_block)
+
     for raw in raw_text.splitlines():
         line = raw.strip()
         if not line:
@@ -267,6 +282,11 @@ def _parse_end_question_blocks(raw_text: str) -> list[dict]:
         if END_QUESTION_RE.match(line):
             flush_block()
             continue
+        # END_QUESTION unudulmuş sual: variantlardan SONRA yeni "N." sual
+        # sətri gəlirsə bu, faktiki yeni blokdur — əvvəlkini bağlayırıq ki,
+        # iki sual bir-birinə yapışıb itməsin.
+        if block and _block_has_option(block) and QUESTION_RE.match(line) and not OPTION_RE.match(line):
+            flush_block()
         block.append(line)
 
     flush_block()
@@ -401,6 +421,7 @@ def parse_bulk_mcq(raw_text: str):
     # Ön-emal: kiril etiketləri (rus tərcümələri), tək qalmış sual nömrələri
     # və bullet/√ markerləri parserin tanıdığı "A) / *B)" formasına salınır.
     raw_text = _normalize_cyrillic_option_labels(raw_text or "")
+    raw_text = _isolate_end_question_markers(raw_text)
     raw_text = _merge_bare_question_numbers(raw_text)
     raw_text = _convert_marker_options(raw_text)
 

@@ -1434,6 +1434,54 @@ class ExamParsingServicesTest(TestCase):
         self.assertEqual(parsed[0]["options"]["B"], "Build və yerləşdirmə prosesini")
         self.assertEqual(len(parsed[0]["options"]), 5)
 
+    # ---- END_QUESTION marker variasiyaları (real PDF-lərdən) --------------------
+
+    def test_parse_bulk_mcq_inline_end_question_marker(self):
+        """PDF mətn qatında END_QUESTION sonuncu varianta yapışır — ayrılmalıdır."""
+        raw = (
+            "1. Birinci sual hansıdır?\n"
+            "*A) Bir\n"
+            "B) İki\n"
+            "C) Üç\n"
+            "D) Dörd\n"
+            "E) Beş END_QUESTION\n"
+            "2. İkinci sual hansıdır?\n"
+            "A) Alma\n"
+            "*B) Armud\n"
+            "C) Gilas\n"
+            "D) Üzüm\n"
+            "E) Nar END_QUESTION\n"
+        )
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 2)
+        self.assertEqual(parsed[0]["correct"], ["A"])
+        self.assertEqual(parsed[0]["options"]["E"], "Beş")
+        self.assertEqual(parsed[1]["correct"], ["B"])
+        self.assertEqual(parsed[1]["options"]["E"], "Nar")
+
+    def test_parse_bulk_mcq_missing_end_question_marker_between_questions(self):
+        """Marker unudulmuş sual yeni "N." sətri ilə gizli sərhəddən ayrılır."""
+        raw = (
+            "1. Birinci sual hansıdır?\n"
+            "*A) Bir\n"
+            "B) İki\n"
+            "C) Üç\n"
+            "D) Dörd\n"
+            "E) Beş\n"
+            "2. Marker yoxdur, amma yeni sualdır?\n"
+            "A) Alma\n"
+            "*B) Armud\n"
+            "C) Gilas\n"
+            "D) Üzüm\n"
+            "E) Nar\n"
+            "END_QUESTION\n"
+        )
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 2)
+        self.assertEqual(parsed[0]["text"], "Birinci sual hansıdır?")
+        self.assertEqual(parsed[1]["text"], "Marker yoxdur, amma yeni sualdır?")
+        self.assertEqual(parsed[1]["correct"], ["B"])
+
     # ---- Düzgün cavab işarəsi tapılmayanda default "A" xəbərdarlığı -------------
 
     def test_parse_bulk_mcq_defaulted_correct_emits_error_warning(self):
