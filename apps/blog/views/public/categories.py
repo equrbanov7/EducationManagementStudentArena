@@ -7,9 +7,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from ...models import Category, Post
-
-from ..shared.module_gate import posts_module_required
 from ...selectors import filter_posts_by_category_scope, get_popular_topics, get_sidebar_categories
+from ..shared.module_gate import posts_module_required
 
 _PAGE_NUMBER_RE = re.compile(r"^[0-9]+$")
 

@@ -9,9 +9,8 @@ from django.utils.translation import pgettext
 
 from ...forms import CommentForm
 from ...models import Comment, Post
-
-from ..shared.module_gate import posts_module_required
 from ...services import can_user_review_post
+from ..shared.module_gate import posts_module_required
 
 VIEWED_POSTS_SESSION_KEY = "blog_viewed_post_ids"
 
