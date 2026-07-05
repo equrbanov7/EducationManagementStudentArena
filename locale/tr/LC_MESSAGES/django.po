@@ -13925,6 +13925,10 @@ msgctxt "exams.service.access.permission"
 msgid "question_bank_create_exam_center_only"
 msgstr "Soru bankasını yalnızca sınav merkezi oluşturabilir."
 
+msgctxt "exams.service.access.permission"
+msgid "question_submission_review_exam_center_only"
+msgstr "Soru gönderimlerini yalnızca sınav merkezi inceleyebilir."
+
 msgctxt "exams.form.exam.error"
 msgid "final_exam_category_exam_center_only"
 msgstr "Final kategorisinde sınavı yalnızca sınav merkezi oluşturabilir."

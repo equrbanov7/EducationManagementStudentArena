@@ -1,0 +1,49 @@
+{% load i18n %}
+{% comment %}
+Parse olunmuş sualların + xəbərdarlıqların ortaq görünüşü.
+Kontekst: questions (parsed snapshot/preview siyahısı), counts (opsional).
+Müəllim preview-da və mərkəz baxışında EYNİ partial istifadə olunur ki,
+hər iki tərəf eyni mənzərəni görsün.
+{% endcomment %}
+
+{% if counts %}
+<div class="qsub-summary d-flex gap-3 flex-wrap mb-3">
+    <span class="badge bg-primary fs-6">{% trans "Sual" %}: {{ counts.questions }}</span>
+    <span class="badge {% if counts.errors %}bg-danger{% else %}bg-secondary{% endif %} fs-6">{% trans "Xəta" %}: {{ counts.errors }}</span>
+    <span class="badge {% if counts.warnings %}bg-warning text-dark{% else %}bg-secondary{% endif %} fs-6">{% trans "Xəbərdarlıq" %}: {{ counts.warnings }}</span>
+</div>
+{% endif %}
+
+<ol class="qsub-question-list list-unstyled d-flex flex-column gap-3">
+    {% for q in questions %}
+    <li class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <strong>{{ forloop.counter }}. {{ q.text }}</strong>
+                {% if q.warnings %}
+                <span class="badge bg-warning text-dark">{{ q.warnings|length }}</span>
+                {% endif %}
+            </div>
+
+            <ul class="list-unstyled mt-2 mb-0">
+                {% for label, opt_text in q.options.items %}
+                <li class="{% if label in q.correct %}text-success fw-semibold{% endif %}">
+                    {% if label in q.correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle text-muted"></i>{% endif %}
+                    {{ label }}) {{ opt_text }}
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% if q.warnings %}
+            <div class="mt-2 d-flex flex-column gap-1">
+                {% for w in q.warnings %}
+                <div class="alert py-1 px-2 mb-0 {% if w.severity == 'error' %}alert-danger{% elif w.severity == 'info' %}alert-info{% else %}alert-warning{% endif %}">
+                    <small>{{ w.msg }}</small>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </li>
+    {% endfor %}
+</ol>

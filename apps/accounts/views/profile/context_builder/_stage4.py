@@ -72,6 +72,7 @@ class _Stage4Mixin:
             "question_bank_back_url": self.question_bank_back_url,
             "question_bank_language_choices": self.question_bank_language_choices,
             "question_bank_default_type_choices": self.question_bank_default_type_choices,
+            **self._qsub_ctx,
             "unit_exams_page_obj": self.unit_exams_page_obj,
             "unit_exams_search_query": self.unit_exams_search_query,
             "unit_exams_total_count": self.unit_exams_total_count,

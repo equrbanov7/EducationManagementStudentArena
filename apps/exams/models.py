@@ -25,6 +25,7 @@ from apps.exams.domain.question_bank import (
     question_media_path,
     validate_video_size,
 )
+from apps.exams.domain.submission_inbox import QuestionSubmission
 from apps.exams.domain.supervision import ExamSupervisionConfig, SupervisionIncident
 
 __all__ = [
@@ -48,6 +49,7 @@ __all__ = [
     "ProctoringLog",
     "QuestionBank",
     "QuestionBlock",
+    "QuestionSubmission",
     "StudentGroup",
     "SupervisionIncident",
     "bank_option_media_path",

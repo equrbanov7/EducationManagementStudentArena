@@ -13953,6 +13953,10 @@ msgctxt "exams.service.access.permission"
 msgid "question_bank_create_exam_center_only"
 msgstr "Создавать банки вопросов может только экзаменационный центр."
 
+msgctxt "exams.service.access.permission"
+msgid "question_submission_review_exam_center_only"
+msgstr "Просматривать присланные вопросы может только экзаменационный центр."
+
 msgctxt "exams.form.exam.error"
 msgid "final_exam_category_exam_center_only"
 msgstr "Создавать экзамены категории «финал» может только экзаменационный центр."

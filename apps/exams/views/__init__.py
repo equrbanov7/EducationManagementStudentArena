@@ -75,6 +75,13 @@ from .teacher.results import (
     teacher_view_attempt,
 )
 from .teacher.statistics import teacher_exam_statistics
+from .teacher.submission_inbox import (
+    question_submission_create,
+    question_submission_decide,
+    question_submission_detail,
+    question_submission_inbox,
+    question_submission_review,
+)
 from .teacher.supervision import (
     attempt_live_snapshot_api,
     exam_live_monitor,
@@ -141,6 +148,11 @@ __all__ = [
     "exam_language_manager",
     # Teacher - Question bank library + picker
     "question_bank_list",
+    "question_submission_create",
+    "question_submission_decide",
+    "question_submission_detail",
+    "question_submission_inbox",
+    "question_submission_review",
     "question_bank_detail",
     "question_bank_update",
     "question_bank_delete",

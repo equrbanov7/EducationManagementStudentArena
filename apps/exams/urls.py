@@ -29,6 +29,24 @@ urlpatterns = [
     path("import/extract-jobs/<uuid:job_id>/", views.text_extraction_status, name="text_extraction_status"),
     path("export-jobs/<uuid:job_id>/waiting/", views.export_job_waiting, name="export_job_waiting"),
     path("export-jobs/<uuid:job_id>/download/", views.export_job_download, name="export_job_download"),
+    # Müəllim → İmtahan mərkəzi sual göndərişi (elektron axın)
+    path("question-submissions/new/", views.question_submission_create, name="question_submission_create"),
+    path("question-submissions/inbox/", views.question_submission_inbox, name="question_submission_inbox"),
+    path(
+        "question-submissions/<int:submission_id>/",
+        views.question_submission_detail,
+        name="question_submission_detail",
+    ),
+    path(
+        "question-submissions/<int:submission_id>/review/",
+        views.question_submission_review,
+        name="question_submission_review",
+    ),
+    path(
+        "question-submissions/<int:submission_id>/decide/",
+        views.question_submission_decide,
+        name="question_submission_decide",
+    ),
     path("question-bank/", views.question_bank_list, name="question_bank_list"),
     path("question-bank/<int:bank_id>/", views.question_bank_detail, name="question_bank_detail"),
     path("question-bank/<int:bank_id>/update/", views.question_bank_update, name="question_bank_update"),

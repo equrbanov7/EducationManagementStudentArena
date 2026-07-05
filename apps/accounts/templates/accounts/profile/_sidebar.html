@@ -203,6 +203,19 @@
         </li>
         {% endif %}
 
+        {% if 'question-submissions' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=question-submissions"
+               data-section="question-submissions"
+               data-title="{% trans 'Sual göndərişləri' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-submissions' %}active{% endif %}">
+                <i class="fas fa-paper-plane sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans 'Sual göndərişləri' %}</span>
+            </a>
+        </li>
+        {% endif %}
+
         {% if 'my-courses' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-courses"
