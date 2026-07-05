@@ -206,6 +206,10 @@ class PersonalWorkspaceSuperadminReviewTest(TestCase):
             is_active=True,
         )
         self.category = Category.objects.create(name="Personal Review", slug="personal-review")
+        # U20: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(self.personal_org, "posts", True)
 
     def test_personal_workspace_user_requires_superadmin_approval(self):
         self.assertTrue(author_requires_post_approval(self.user))

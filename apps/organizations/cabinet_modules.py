@@ -121,6 +121,19 @@ def disabled_sections(organization) -> set:
     return hidden
 
 
+def default_disabled_sections() -> set:
+    """Aktiv təşkilat konteksti olmayan sessiyalar üçün gizli bölmələr.
+
+    Modul görünürlüyü org-səviyyəlidir; org yoxdursa modulun DEFAULT-u tətbiq
+    olunur — default-u False olan modullar (postlar) org-suz superadmin
+    sessiyasında da görünmür (U20)."""
+    hidden: set = set()
+    for config in CABINET_MODULES.values():
+        if not config["default"]:
+            hidden.update(config["sections"])
+    return hidden
+
+
 def module_items(organization) -> list:
     """Panel üçün sıralı siyahı: {key, label, enabled}."""
     return [

@@ -230,6 +230,10 @@ class BlogModerationIsolationTest(TestCase):
             status="active",
             is_active=True,
         )
+        # U20: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
+        from apps.organizations.cabinet_modules import set_module_enabled
+
+        set_module_enabled(organization, "posts", True)
         Membership.objects.create(
             user=org_admin,
             organization=organization,

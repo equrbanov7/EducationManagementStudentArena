@@ -343,11 +343,19 @@ def _role_capabilities(user, profile):
 
     # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
     # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API
-    # eyni yerdən bağlanır). Superadmin HƏMİŞƏ hamısını görür.
-    if not is_superadmin and active_organization is not None:
+    # eyni yerdən bağlanır).
+    # U20: superadmin İSTİSNA DEYİL — bağlı modul heç kimə görünmür ("URL ilə
+    # yazılsa da girməsin"). Superadmin modulu org-features panelindən açır;
+    # panel bölməsi cabinet modullarına daxil deyil, ona görə kilidlənmə yoxdur.
+    if active_organization is not None:
         from apps.organizations.cabinet_modules import disabled_sections as _disabled_cabinet_sections
 
         allowed_sections -= _disabled_cabinet_sections(active_organization)
+    else:
+        # Org konteksti yoxdursa modul DEFAULT-ları tətbiq olunur (postlar → gizli).
+        from apps.organizations.cabinet_modules import default_disabled_sections as _default_disabled_sections
+
+        allowed_sections -= _default_disabled_sections()
 
     # İmtahan sistemi redizaynı (Faza 5) — yeni modulların sidebar görünürlüyü.
     # Faktiki icazə yoxlaması yenə də view səviyyəsində (appeals.services.permissions,
