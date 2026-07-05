@@ -13931,6 +13931,18 @@ msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
 msgstr "Bu sualda düzgün cavab işarəsi tapılmadı — müvəqqəti olaraq A seçildi. Düzgün cavabı mütləq yoxlayıb təyin edin."
 
+msgctxt "exams.service.access.permission"
+msgid "final_exam_questions_exam_center_only"
+msgstr "Final imtahanının suallarını yalnız imtahan mərkəzi idarə edə bilər."
+
+msgctxt "exams.service.access.permission"
+msgid "question_bank_create_exam_center_only"
+msgstr "Sual bankını yalnız imtahan mərkəzi yarada bilər."
+
+msgctxt "exams.form.exam.error"
+msgid "final_exam_category_exam_center_only"
+msgstr "Final kateqoriyalı imtahanı yalnız imtahan mərkəzi yarada bilər."
+
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
 msgstr ""

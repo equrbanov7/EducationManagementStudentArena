@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.bulk_workbench import analyze_mcq_bulk, exam_question_fp_map
 from apps.exams.services.import_media import attach_math_images, clear_stash, stash_math_images
 from apps.exams.services.language_variants import ensure_default_variant
@@ -94,6 +94,7 @@ def exam_questions_word_export(request, slug):
 def test_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     navigation_from_section, navigation_return_to, navigation_query = _resolve_question_bank_navigation(request)
 
     # yalnız test imtahanı üçün

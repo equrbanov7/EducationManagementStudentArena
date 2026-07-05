@@ -48,8 +48,58 @@ def _ensure_teacher(user):
     raise PermissionDenied(pgettext("exams.service.attempt.permission", "teachers_only_page"))
 
 
+# ---------------------------------------------------------------------------
+# İmtahan mərkəzi siyasəti
+# ---------------------------------------------------------------------------
+# Universitet qaydası: FINAL imtahanın sual məzmununu (yükləmə, redaktə, bank
+# qoşma, AI generasiya) yalnız "imtahan mərkəzi" rolu idarə edir; sual bankları
+# da yalnız imtahan mərkəzi tərəfindən yaradılır. Müəllim quiz/midterm və
+# kateqoriyasız imtahanların məzmununu idarə etməkdə sərbəstdir.
+FINAL_EXAM_CATEGORY = "final"
+
+
+def is_exam_center_user(user):
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return True
+    return bool(getattr(user, "is_exam_center", False))
+
+
+def can_manage_final_exam_content(user):
+    return is_exam_center_user(user)
+
+
+def can_manage_exam_questions(user, exam):
+    """Bu istifadəçi verilmiş imtahanın sual məzmununa toxuna bilərmi?"""
+    if getattr(exam, "exam_type_extended", None) == FINAL_EXAM_CATEGORY:
+        return can_manage_final_exam_content(user)
+    return True
+
+
+def ensure_can_manage_exam_questions(user, exam):
+    if can_manage_exam_questions(user, exam):
+        return
+    raise PermissionDenied(pgettext("exams.service.access.permission", "final_exam_questions_exam_center_only"))
+
+
+def can_create_question_bank(user):
+    return is_exam_center_user(user)
+
+
+def ensure_can_create_question_bank(user):
+    if can_create_question_bank(user):
+        return
+    raise PermissionDenied(pgettext("exams.service.access.permission", "question_bank_create_exam_center_only"))
+
+
 __all__ = [
+    "FINAL_EXAM_CATEGORY",
     "_ensure_teacher",
+    "can_create_question_bank",
+    "can_manage_exam_questions",
+    "can_manage_final_exam_content",
     "can_user_access_exam",
+    "ensure_can_create_question_bank",
+    "ensure_can_manage_exam_questions",
+    "is_exam_center_user",
     "is_teacher_user",
 ]

@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.question_bank_attach import (
     accessible_banks,
     attach_bank_questions_to_exam,
@@ -31,6 +31,7 @@ from ._shared import (
 def exam_bank_picker(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     organization = get_request_organization(request)
     is_modal = _is_modal_request(request)
     compatible_type = _exam_compatible_question_type(exam)

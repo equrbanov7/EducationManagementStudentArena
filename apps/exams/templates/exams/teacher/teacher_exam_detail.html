@@ -98,6 +98,7 @@
             {# --- İmtahan Hərəkətləri: İkon-Kart Şəbəkəsi --- #}
             <section class="exam-actions-section">
                 <div class="action-card-grid">
+                    {% if can_manage_exam_questions %}
                     {# Sual əlavə et #}
                     <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                        class="action-card action-card--blue js-open-question-form-modal"
@@ -132,6 +133,7 @@
                             </span>
                             <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                         </a>
+                    {% endif %}
                     {% endif %}
 
                     {# Sual bankı #}
@@ -268,10 +270,12 @@
 	                    <div class="empty-state-questions">
 	                        <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
                         <p>{% trans "empty_no_questions" context "exams.template.teacher_exam_detail" %}</p>
+                        {% if can_manage_exam_questions %}
                         <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                            class="action-btn primary-btn-sm js-open-question-form-modal"
                            data-question-modal-mode="create"
                            data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</a>
+                        {% endif %}
                     </div>
                 {% endif %}
             </section>

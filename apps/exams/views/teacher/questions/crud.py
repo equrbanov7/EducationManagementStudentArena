@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
@@ -37,6 +37,7 @@ def add_exam_question(request, slug):
     """
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     blocks, created_default_block = _question_form_blocks(exam)
     is_modal_request = _is_question_modal_request(request)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
@@ -162,6 +163,7 @@ def edit_exam_question(request, slug, question_id):
     """
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
     is_modal_request = _is_question_modal_request(request)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
@@ -274,6 +276,7 @@ def delete_exam_question(request, slug, question_id):
     """
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 

@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
 from apps.exams.models import QuestionBlock
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
 from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
@@ -32,6 +32,7 @@ from ._helpers import (
 def ai_generate_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
 
     if exam.exam_type not in {"test", "written", "coding"}:
         return JsonResponse(
@@ -76,6 +77,7 @@ def ai_generate_question_bank(request, slug):
 def create_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     navigation_from_section, navigation_return_to, navigation_query = _resolve_question_bank_navigation(request)
 
     # Mövcud blokları gətiririk ki, ekranda görsənsin
@@ -118,6 +120,7 @@ def create_question_bank(request, slug):
 def process_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":

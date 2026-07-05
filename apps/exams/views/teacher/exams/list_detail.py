@@ -14,7 +14,7 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.constants import get_live_active_states, get_live_session_model
 from apps.exams.forms import ExamForm
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
 from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization, request_has_active_organization_context
@@ -301,6 +301,7 @@ def teacher_exam_detail(request, slug):
             "active_live_session": active_live_session,
             "active_live_continue_url": active_live_continue_url,
             "active_live_new_url": active_live_new_url,
+            "can_manage_exam_questions": can_manage_exam_questions(request.user, exam),
         },
     )
 
@@ -325,6 +326,7 @@ def teacher_exam_detail_questions_page(request, slug):
             "exam": exam,
             "questions": question_page["questions"],
             "exam_navigation_query": nav_query,
+            "can_manage_exam_questions": can_manage_exam_questions(request.user, exam),
         },
         request=request,
     )

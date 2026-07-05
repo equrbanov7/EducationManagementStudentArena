@@ -14,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.models import ExamQuestion
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.bank_analysis import analyze_question_bank
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
@@ -40,6 +40,9 @@ def teacher_questions_bank(request, slug):
     allowed_flags = {"has-error", "has-warning", "has-dup", "has-structure", "has-balance", "is-clean"}
 
     if request.method == "POST":
+        # Mutasiyalar (sil/aktivləşdir/deaktivləşdir) sual məzmunudur — final
+        # imtahanda yalnız imtahan mərkəzi. GET (baxış) açıq qalır.
+        ensure_can_manage_exam_questions(request.user, exam)
         action = (request.POST.get("bulk_action") or "").strip().lower()
 
         if action == "delete_all":

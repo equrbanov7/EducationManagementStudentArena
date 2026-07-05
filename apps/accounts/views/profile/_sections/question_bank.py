@@ -17,6 +17,7 @@ def _inactive_defaults() -> dict:
         "question_bank_back_url": _append_query_params(reverse("accounts:profile"), section="question-bank"),
         "question_bank_language_choices": [],
         "question_bank_default_type_choices": [],
+        "question_bank_can_create": False,
     }
 
 
@@ -27,7 +28,7 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
         return _inactive_defaults()
 
     from apps.exams.models import QuestionBank
-    from apps.exams.public import EXAM_LANGUAGE_CHOICES, accessible_banks
+    from apps.exams.public import EXAM_LANGUAGE_CHOICES, accessible_banks, can_create_question_bank
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)
@@ -53,4 +54,6 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
         ),
         "question_bank_language_choices": EXAM_LANGUAGE_CHOICES,
         "question_bank_default_type_choices": QuestionBank.DEFAULT_QUESTION_TYPE_CHOICES,
+        # Bank yaratma yalnız imtahan mərkəzinə açıqdır — düymə/forma buna görə gizlənir.
+        "question_bank_can_create": can_create_question_bank(request.user),
     }

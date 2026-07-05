@@ -12,7 +12,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.models import QuestionBank
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_create_question_bank
 from apps.exams.services.bank_analysis import analyze_bank_questions
 from apps.exams.services.question_bank_attach import accessible_banks
 from core.tenancy import get_request_organization
@@ -31,6 +31,9 @@ def question_bank_list(request):
     profile_bank_url = f"{reverse('accounts:profile')}?section=question-bank"
 
     if request.method == "POST" and (request.POST.get("action") == "create_bank"):
+        # Sual bankını yalnız imtahan mərkəzi yarada bilər (müəllim mövcud
+        # banklardan istifadə edə bilər, amma yenisini aça bilməz).
+        ensure_can_create_question_bank(request.user)
         name = (request.POST.get("name") or "").strip()
         if not name:
             messages.error(request, pgettext("exams.view.bank.message", "Bank adı boş ola bilməz."))
