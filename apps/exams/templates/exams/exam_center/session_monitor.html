@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ session.exam.title }} @ {{ session.room.name }} — {% trans "Canlı monitor" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page"
+     id="fxc-monitor-root"
+     data-ws-path="{{ ws_path }}"
+     data-snapshot-url="{% url 'exams:exam_center_session_snapshot' session_id=session.pk %}"
+     data-start-url="{% url 'exams:exam_center_session_start' session_id=session.pk %}"
+     data-end-url="{% url 'exams:exam_center_session_end' session_id=session.pk %}"
+     data-remove-url-template="{% url 'exams:exam_center_ticket_remove' session_id=session.pk ticket_id=0 %}"
+     data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=session.pk ticket_id=0 %}"
+     data-can-manage="{% if can_manage %}1{% else %}0{% endif %}">
+
+  {% csrf_token %}
+
+  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.exam.title %}
+
+  <header class="fxc-head">
+    <div>
+      <span class="fxc-pill fxc-pill--state-{{ session.state }}" id="fxc-state-pill" data-state="{{ session.state }}">
+        {{ session.get_state_display }}
+      </span>
+      <span class="fxc-conn" id="fxc-ws-state" data-state="connecting">{% trans "Qoşulur…" %}</span>
+      <h1>{{ session.exam.title }}</h1>
+      <p class="fxc-sub">
+        <i class="fas fa-door-open"></i> {{ session.room.name }} ({{ session.room.code }})
+        · <i class="far fa-clock"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}
+        · <span id="fxc-server-time" aria-label="{% trans 'Server vaxtı' %}"></span>
+      </p>
+    </div>
+    <div class="fxc-head-actions">
+      {# Bu zalda başqa canlı imtahanlar da varsa — zal aqreqasiya monitoruna keçid. #}
+      <a href="{% url 'exams:exam_center_room_monitor' room_id=session.room_id %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-tower-observation"></i> {% trans "Zal nəzarəti (bütün imtahanlar)" %}
+      </a>
+      <a href="{% url 'exams:exam_center_session_detail' session_id=session.pk %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-list-check"></i> {% trans "Detal" %}
+      </a>
+      {% if session.state == "prepared" %}
+      <form method="post" action="{% url 'exams:exam_center_session_open_entry' session_id=session.pk %}" class="fxc-inline-form">
+        {% csrf_token %}
+        <button type="submit" class="fxc-btn fxc-btn-primary">
+          <i class="fas fa-door-open"></i> {% trans "Girişi aç" %}
+        </button>
+      </form>
+      {% endif %}
+      <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-btn" hidden>
+        <i class="fas fa-play"></i> {% trans "İmtahanı başlat" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-end-btn" hidden>
+        <i class="fas fa-stop"></i> {% trans "Oturumu bitir" %}
+      </button>
+    </div>
+  </header>
+
+  <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Oturum statistikası' %}">
+    {# JS doldurur — açarlar: total, connected, waiting, ready, active, completed, removed, absent, offline #}
+  </section>
+
+  <div class="fxc-toolbar">
+    <div class="fxc-viewtoggle" role="tablist" aria-label="{% trans 'Görünüş' %}">
+      <button type="button" class="fxc-viewtoggle-btn is-active" data-view="map" role="tab" aria-selected="true">
+        <i class="fas fa-table-cells"></i> {% trans "Kompüterlər" %}
+      </button>
+      <button type="button" class="fxc-viewtoggle-btn" data-view="table" role="tab" aria-selected="false">
+        <i class="fas fa-list"></i> {% trans "Cədvəl" %}
+      </button>
+    </div>
+    <input type="search" id="fxc-filter" class="fxc-input"
+           placeholder="{% trans 'Tələbə adı və ya istifadəçi adı üzrə süz…' %}"
+           aria-label="{% trans 'Tələbə axtarışı' %}">
+    <select id="fxc-status-filter" class="fxc-input fxc-input--select" aria-label="{% trans 'Status filtri' %}">
+      <option value="">{% trans "Bütün statuslar" %}</option>
+      <option value="assigned">{% trans "Təyin olunub" %}</option>
+      <option value="waiting">{% trans "Gözləyir" %}</option>
+      <option value="ready">{% trans "Hazır" %}</option>
+      <option value="active">{% trans "İmtahanda" %}</option>
+      <option value="completed">{% trans "Bitirib" %}</option>
+      <option value="removed">{% trans "Çıxarılıb" %}</option>
+      <option value="absent">{% trans "Gəlməyib" %}</option>
+    </select>
+  </div>
+
+  {# ── Kompüter xəritəsi (nömrələr = kompüter/yer nömrələri) ── #}
+  <section class="fxc-map-panel" id="fxc-map-view">
+    <div class="fxc-map-legend" aria-hidden="false">
+      <span><i class="fxc-sw fxc-sw--active"></i> {% trans "İmtahanda" %}</span>
+      <span><i class="fxc-sw fxc-sw--ready"></i> {% trans "Hazır" %}</span>
+      <span><i class="fxc-sw fxc-sw--waiting"></i> {% trans "Gözləyir" %}</span>
+      <span><i class="fxc-sw fxc-sw--warn"></i> {% trans "Pozuntu" %}</span>
+      <span><i class="fxc-sw fxc-sw--completed"></i> {% trans "Bitirib" %}</span>
+      <span><i class="fxc-sw fxc-sw--removed"></i> {% trans "Çıxarılıb" %}</span>
+      <span><i class="fxc-sw fxc-sw--idle"></i> {% trans "Oflayn / gəlməyib" %}</span>
+    </div>
+    <div class="fxc-computer-map" id="fxc-computer-map" aria-live="polite"></div>
+    <p class="fxc-map-hint">
+      <i class="fas fa-hand-pointer" aria-hidden="true"></i>
+      {% trans "Kompüterin üzərinə klik edərək tələbənin hazırda nə etdiyini görün." %}
+    </p>
+  </section>
+
+  <div class="fxc-table-wrap" id="fxc-table-view" hidden>
+    <table class="fxc-table fxc-table--monitor" aria-live="polite">
+      <thead>
+        <tr>
+          <th class="fxc-num">{% trans "Yer" %}</th>
+          <th>{% trans "Tələbə" %}</th>
+          <th>{% trans "Bağlantı" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="fxc-num">{% trans "Qalan vaxt" %}</th>
+          <th>{% trans "Son aktivlik" %}</th>
+          <th class="fxc-num" title="{% trans 'Yenidən qoşulma sayı' %}"><i class="fas fa-rotate"></i></th>
+          <th>{% trans "Xəbərdarlıq" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="fxc-student-rows">
+        <tr><td colspan="9" class="fxc-muted fxc-center">{% trans "Yüklənir…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# ── Start təsdiq modalı ─────────────────────────────────────────── #}
+<div class="fxc-modal" id="fxc-start-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fxc-start-modal-title">
+  <div class="fxc-modal-card">
+    <h2 id="fxc-start-modal-title"><i class="fas fa-play"></i> {% trans "İmtahanı başlat" %}</h2>
+    <p class="fxc-modal-warn">
+      <i class="fas fa-triangle-exclamation"></i>
+      {% trans "Bu əməliyyat otaqdakı BÜTÜN gözləyən tələbələr üçün imtahanı eyni anda başladır." %}
+    </p>
+    <dl class="fxc-modal-facts" id="fxc-start-facts">
+      <div><dt>{% trans "İmtahan" %}</dt><dd>{{ session.exam.title }}</dd></div>
+      <div><dt>{% trans "Zal" %}</dt><dd>{{ session.room.name }}</dd></div>
+      <div><dt>{% trans "Təyin olunmuş" %}</dt><dd data-fact="total">—</dd></div>
+      <div><dt>{% trans "Qoşulu" %}</dt><dd data-fact="connected">—</dd></div>
+      <div><dt>{% trans "Hazır" %}</dt><dd data-fact="ready">—</dd></div>
+      <div><dt>{% trans "Oflayn" %}</dt><dd data-fact="offline">—</dd></div>
+      <div><dt>{% trans "Planlaşdırılan başlanğıc" %}</dt><dd>{{ session.scheduled_start|date:"d.m.Y H:i" }}</dd></div>
+      <div><dt>{% trans "Server vaxtı" %}</dt><dd data-fact="server_now">—</dd></div>
+    </dl>
+    {% if can_manage %}
+    <label class="fxc-check" id="fxc-override-wrap" hidden>
+      <input type="checkbox" id="fxc-override-check">
+      <span>{% trans "Vaxt pəncərəsindən kənar başlatmanı təsdiqləyirəm (override audit-ə yazılır)" %}</span>
+    </label>
+    {% endif %}
+    <p class="fxc-modal-error" id="fxc-start-error" hidden></p>
+    <div class="fxc-actions">
+      <button type="button" class="fxc-btn fxc-btn-ghost" data-close-modal>{% trans "İmtina" %}</button>
+      <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-confirm">
+        <i class="fas fa-play"></i> {% trans "Bəli, başlat" %}
+      </button>
+    </div>
+  </div>
+</div>
+
+{# ── End təsdiq modalı ───────────────────────────────────────────── #}
+<div class="fxc-modal" id="fxc-end-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fxc-end-modal-title">
+  <div class="fxc-modal-card">
+    <h2 id="fxc-end-modal-title"><i class="fas fa-stop"></i> {% trans "Oturumu bitir" %}</h2>
+    <p class="fxc-modal-warn fxc-modal-warn--danger">
+      <i class="fas fa-triangle-exclamation"></i>
+      {% trans "Aktiv cəhdlər avtomatik təhvil veriləcək. Bu əməliyyat geri qaytarıla bilməz." %}
+    </p>
+    <dl class="fxc-modal-facts" id="fxc-end-facts">
+      <div><dt>{% trans "İmtahanda" %}</dt><dd data-fact="active">—</dd></div>
+      <div><dt>{% trans "Bitirib" %}</dt><dd data-fact="completed">—</dd></div>
+      <div><dt>{% trans "Oflayn" %}</dt><dd data-fact="offline">—</dd></div>
+      <div><dt>{% trans "Gözləyir / hazır" %}</dt><dd data-fact="waiting_ready">—</dd></div>
+    </dl>
+    <p class="fxc-modal-error" id="fxc-end-error" hidden></p>
+    <div class="fxc-actions">
+      <button type="button" class="fxc-btn fxc-btn-ghost" data-close-modal>{% trans "İmtina" %}</button>
+      <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-end-confirm">
+        <i class="fas fa-stop"></i> {% trans "Bəli, bitir" %}
+      </button>
+    </div>
+  </div>
+</div>
+
+{# ── Tələbə çıxarma modalı ───────────────────────────────────────── #}
+<div class="fxc-modal" id="fxc-remove-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fxc-remove-modal-title">
+  <div class="fxc-modal-card">
+    <h2 id="fxc-remove-modal-title"><i class="fas fa-user-slash"></i> {% trans "Tələbə üzrə əməliyyat" %}</h2>
+    <p class="fxc-modal-student" id="fxc-remove-student">—</p>
+    <div class="fxc-field">
+      <label for="fxc-remove-action">{% trans "Əməliyyat növü" %}</label>
+      <select id="fxc-remove-action" class="fxc-input fxc-input--select">
+        <option value="suspended">{% trans "Müvəqqəti dayandır (ekran kilidlənir, davam etdirilə bilər)" %}</option>
+        <option value="removed">{% trans "İmtahandan çıxar (cəhd təhvil verilir)" %}</option>
+        <option value="technical">{% trans "Texniki fasilə kimi qeyd et (çıxarılır, qeyd texniki)" %}</option>
+      </select>
+    </div>
+    <div class="fxc-field">
+      <label for="fxc-remove-reason">{% trans "Səbəb (məcburi)" %}</label>
+      <textarea id="fxc-remove-reason" class="fxc-input" rows="3"
+                placeholder="{% trans 'Əməliyyatın səbəbini qeyd edin…' %}"></textarea>
+    </div>
+    <label class="fxc-check" id="fxc-reentry-wrap">
+      <input type="checkbox" id="fxc-remove-reentry">
+      <span>{% trans "Yenidən girişə icazə ver (PIN qüvvədə qalır)" %}</span>
+    </label>
+    <p class="fxc-modal-warn">
+      <i class="fas fa-triangle-exclamation"></i>
+      {% trans "Əməliyyat audit jurnalına yazılır və tələbəyə dərhal bildirilir." %}
+    </p>
+    <p class="fxc-modal-error" id="fxc-remove-error" hidden></p>
+    <div class="fxc-actions">
+      <button type="button" class="fxc-btn fxc-btn-ghost" data-close-modal>{% trans "İmtina" %}</button>
+      <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-remove-confirm">
+        <i class="fas fa-user-slash"></i> {% trans "Təsdiqlə" %}
+      </button>
+    </div>
+  </div>
+</div>
+
+{# ── Tələbə canlı görüntü modalı (paylaşılan komponent) ── #}
+{% include "exams/exam_center/_snapshot_modal.html" %}
+
+{{ snapshot|json_script:"fxc-initial-snapshot" }}
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}" defer></script>
+    <script src="{% static 'exams/js/final_center/room_monitor.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Final hesabatları" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page">
+  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% trans "Hesabatlar" as cur_label %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
+  <header class="fxc-head">
+    <div>
+      <h1><i class="fas fa-chart-column"></i> {% trans "Final imtahan hesabatları" %}</h1>
+      <p class="fxc-sub">{% trans "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri" %}</p>
+    </div>
+    <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
+      <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
+    </a>
+  </header>
+
+  <nav class="fxc-tabs" aria-label="{% trans 'Hesabat növü' %}">
+    <a href="?tab=sessions" class="fxc-tab {% if tab == 'sessions' %}is-active{% endif %}">{% trans "Oturumlar" %}</a>
+    <a href="?tab=tickets" class="fxc-tab {% if tab == 'tickets' %}is-active{% endif %}">{% trans "Tələbə iştirakı" %}</a>
+  </nav>
+
+  <form method="get" class="fxc-card fxc-filterbar">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <div class="fxc-form-grid fxc-form-grid--filters">
+      {% if tab == "sessions" %}
+      <div class="fxc-field">
+        <label for="fxc-f-state">{% trans "Vəziyyət" %}</label>
+        <select id="fxc-f-state" name="state" class="fxc-input fxc-input--select">
+          <option value="">{% trans "Hamısı" %}</option>
+          <option value="prepared" {% if params.state == "prepared" %}selected{% endif %}>{% trans "Hazırlanır" %}</option>
+          <option value="entry_open" {% if params.state == "entry_open" %}selected{% endif %}>{% trans "Giriş açıq" %}</option>
+          <option value="active" {% if params.state == "active" %}selected{% endif %}>{% trans "Aktiv" %}</option>
+          <option value="ended" {% if params.state == "ended" %}selected{% endif %}>{% trans "Bitmiş" %}</option>
+          <option value="cancelled" {% if params.state == "cancelled" %}selected{% endif %}>{% trans "Ləğv edilmiş" %}</option>
+        </select>
+      </div>
+      {% else %}
+      <div class="fxc-field">
+        <label for="fxc-f-status">{% trans "Bilet statusu" %}</label>
+        <select id="fxc-f-status" name="status" class="fxc-input fxc-input--select">
+          <option value="">{% trans "Hamısı" %}</option>
+          <option value="assigned" {% if params.status == "assigned" %}selected{% endif %}>{% trans "Təyin olunub" %}</option>
+          <option value="waiting" {% if params.status == "waiting" %}selected{% endif %}>{% trans "Gözləyir" %}</option>
+          <option value="ready" {% if params.status == "ready" %}selected{% endif %}>{% trans "Hazır" %}</option>
+          <option value="active" {% if params.status == "active" %}selected{% endif %}>{% trans "İmtahanda" %}</option>
+          <option value="completed" {% if params.status == "completed" %}selected{% endif %}>{% trans "Bitirib" %}</option>
+          <option value="removed" {% if params.status == "removed" %}selected{% endif %}>{% trans "Çıxarılıb" %}</option>
+          <option value="absent" {% if params.status == "absent" %}selected{% endif %}>{% trans "Gəlməyib" %}</option>
+        </select>
+      </div>
+      {% endif %}
+      <div class="fxc-field">
+        <label for="fxc-f-room">{% trans "Zal" %}</label>
+        <select id="fxc-f-room" name="room" class="fxc-input fxc-input--select">
+          <option value="">{% trans "Hamısı" %}</option>
+          {% for room in rooms %}
+          <option value="{{ room.pk }}" {% if params.room == room.pk|stringformat:"s" %}selected{% endif %}>{{ room.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="fxc-field">
+        <label for="fxc-f-from">{% trans "Tarixdən" %}</label>
+        <input type="date" id="fxc-f-from" name="date_from" value="{{ params.date_from }}" class="fxc-input">
+      </div>
+      <div class="fxc-field">
+        <label for="fxc-f-to">{% trans "Tarixə" %}</label>
+        <input type="date" id="fxc-f-to" name="date_to" value="{{ params.date_to }}" class="fxc-input">
+      </div>
+      <div class="fxc-field">
+        <label for="fxc-f-q">{% trans "Axtarış" %}</label>
+        <input type="search" id="fxc-f-q" name="q" value="{{ params.q }}" class="fxc-input"
+               placeholder="{% if tab == 'sessions' %}{% trans 'imtahan / zal' %}{% else %}{% trans 'tələbə' %}{% endif %}">
+      </div>
+    </div>
+    <div class="fxc-actions">
+      <button type="submit" class="fxc-btn fxc-btn-primary"><i class="fas fa-filter"></i> {% trans "Filtrlə" %}</button>
+      <button type="submit" name="export" value="csv" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-file-csv"></i> {% trans "CSV export" %}
+      </button>
+    </div>
+  </form>
+
+  {% if page_obj.object_list %}
+  <div class="fxc-table-wrap">
+    {% if tab == "sessions" %}
+    <table class="fxc-table">
+      <thead>
+        <tr>
+          <th>{% trans "İmtahan" %}</th>
+          <th>{% trans "Zal" %}</th>
+          <th>{% trans "Plan" %}</th>
+          <th>{% trans "Faktiki" %}</th>
+          <th>{% trans "Nəzarətçi" %}</th>
+          <th class="fxc-num">{% trans "Tələbə" %}</th>
+          <th class="fxc-num">{% trans "Bitirib" %}</th>
+          <th class="fxc-num">{% trans "Çıxarılıb" %}</th>
+          <th class="fxc-num">{% trans "Gəlməyib" %}</th>
+          <th>{% trans "Vəziyyət" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in page_obj %}
+        <tr>
+          <td class="fxc-strong">
+            <a href="{% url 'exams:exam_center_session_detail' session_id=s.pk %}">{{ s.exam.title }}</a>
+          </td>
+          <td>{{ s.room.name }}</td>
+          <td>{{ s.scheduled_start|date:"d.m.Y H:i" }}</td>
+          <td>
+            {% if s.started_at %}{{ s.started_at|time:"H:i" }}{% else %}—{% endif %}
+            – {% if s.ended_at %}{{ s.ended_at|time:"H:i" }}{% else %}—{% endif %}
+          </td>
+          <td>{% if s.invigilator %}{{ s.invigilator.get_full_name|default:s.invigilator.username }}{% else %}—{% endif %}</td>
+          <td class="fxc-num">{{ s.ticket_total }}</td>
+          <td class="fxc-num">{{ s.ticket_completed }}</td>
+          <td class="fxc-num">{{ s.ticket_removed }}</td>
+          <td class="fxc-num">{{ s.ticket_absent }}</td>
+          <td><span class="fxc-pill fxc-pill--state-{{ s.state }}">{{ s.get_state_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <table class="fxc-table">
+      <thead>
+        <tr>
+          <th>{% trans "Tələbə" %}</th>
+          <th>{% trans "İmtahan" %}</th>
+          <th>{% trans "Zal" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th>{% trans "Dil" %}</th>
+          <th>{% trans "Giriş" %}</th>
+          <th>{% trans "Başlayıb" %}</th>
+          <th>{% trans "Bitirib" %}</th>
+          <th>{% trans "Çıxarılma səbəbi" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in page_obj %}
+        <tr>
+          <td class="fxc-strong">{{ t.student.get_full_name|default:t.student.username }}
+            <span class="fxc-muted">({{ t.student.username }})</span></td>
+          <td>{{ t.exam.title }}</td>
+          <td>{{ t.session.room.name }}</td>
+          <td><span class="fxc-pill fxc-pill--t-{{ t.status }}">{{ t.get_status_display }}</span></td>
+          <td>{{ t.language|default:"—" }}</td>
+          <td>{% if t.entry_validated_at %}{{ t.entry_validated_at|date:"d.m H:i" }}{% else %}—{% endif %}</td>
+          <td>{% if t.started_at %}{{ t.started_at|time:"H:i" }}{% else %}—{% endif %}</td>
+          <td>{% if t.completed_at %}{{ t.completed_at|time:"H:i" }}{% else %}—{% endif %}</td>
+          <td class="fxc-reason">{{ t.removal_reason|truncatechars:60|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+  {% include "partials/_pagination.html" with page_obj=page_obj %}
+  {% else %}
+  <div class="fxc-empty">
+    <i class="far fa-chart-bar"></i>
+    <p>{% trans "Bu filtrlərə uyğun qeyd tapılmadı." %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

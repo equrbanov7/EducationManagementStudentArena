@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Yeni oturum" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page fxc-page--narrow">
+  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% trans "Yeni oturum" as cur_label %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
+  <header class="fxc-head">
+    <div>
+      <h1><i class="fas fa-calendar-plus"></i> {% trans "Yeni imtahan oturumu" %}</h1>
+      <p class="fxc-sub">{% trans "Final imtahanını zala, vaxta və nəzarətçiyə bağlayın" %}</p>
+    </div>
+    <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
+      <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
+    </a>
+  </header>
+
+  <form method="post" class="fxc-card fxc-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="fxc-alert fxc-alert-error" role="alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="fxc-field">
+      <label for="{{ form.exam.id_for_label }}">{% trans "Final imtahanı" %} *</label>
+      {{ form.exam }}
+      {{ form.exam.errors }}
+    </div>
+
+    <div class="fxc-form-grid">
+      <div class="fxc-field">
+        <label for="{{ form.room.id_for_label }}">{% trans "Zal" %} *</label>
+        {{ form.room }}
+        {{ form.room.errors }}
+      </div>
+      <div class="fxc-field">
+        <label for="{{ form.invigilator.id_for_label }}">{% trans "Nəzarətçi" %}</label>
+        {{ form.invigilator }}
+        {{ form.invigilator.errors }}
+      </div>
+      <div class="fxc-field">
+        <label for="{{ form.scheduled_start.id_for_label }}">{% trans "Başlama vaxtı" %} *</label>
+        {{ form.scheduled_start }}
+        {{ form.scheduled_start.errors }}
+      </div>
+      <div class="fxc-field">
+        <label for="{{ form.scheduled_end.id_for_label }}">{% trans "Bitmə vaxtı" %} *</label>
+        {{ form.scheduled_end }}
+        {{ form.scheduled_end.errors }}
+      </div>
+    </div>
+
+    <div class="fxc-field">
+      <label for="{{ form.staff.id_for_label }}">{% trans "Dəstək heyəti" %}</label>
+      {{ form.staff }}
+      {{ form.staff.errors }}
+      <p class="fxc-hint">{% trans "Heyət üzvləri oturumu monitorinq edə bilir; idarəetmə imtahan mərkəzində qalır." %}</p>
+    </div>
+
+    <div class="fxc-field">
+      <label for="{{ form.notes.id_for_label }}">{% trans "Qeydlər" %}</label>
+      {{ form.notes }}
+      {{ form.notes.errors }}
+    </div>
+
+    <div class="fxc-actions">
+      <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">{% trans "İmtina" %}</a>
+      <button type="submit" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-check"></i> {% trans "Oturumu yarat" %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

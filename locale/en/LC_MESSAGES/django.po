@@ -1616,7 +1616,7 @@ msgid "Tapşırıq"
 msgstr "Tapşırıq"
 
 msgid "Növ"
-msgstr "Subject"
+msgstr "Type"
 
 msgid "Müəllim"
 msgstr "Müəllim"
@@ -4010,7 +4010,7 @@ msgstr "Title"
 
 msgctxt "profile.assigned_tasks"
 msgid "tab_all"
-msgstr "Tab all"
+msgstr "All"
 
 msgctxt "profile.assigned_tasks"
 msgid "tab_exams"
@@ -4022,7 +4022,7 @@ msgstr "Free work"
 
 msgctxt "profile.assigned_tasks"
 msgid "tab_labs"
-msgstr "Tab labs"
+msgstr "Labs"
 
 msgctxt "profile.assigned_tasks"
 msgid "tab_independent"
@@ -4059,16 +4059,16 @@ msgid "empty_description"
 msgstr "Empty description"
 
 msgid "İmtahan məlumatı"
-msgstr "Exams"
+msgstr "Exam information"
 
 msgid "Müddət"
-msgstr "Müddət"
+msgstr "Duration"
 
 msgid "Başlama vaxtı"
-msgstr "Report time"
+msgstr "Start time"
 
 msgid "Son təhvil vaxtı"
-msgstr "Son təhvil vaxtı"
+msgstr "Deadline"
 
 msgid "Giriş kodu"
 msgstr "Giriş kodu"
@@ -4077,7 +4077,7 @@ msgid "6 rəqəmli kod"
 msgstr "6 rəqəmli kod"
 
 msgid "İmtahana başla"
-msgstr "Exams"
+msgstr "Start exam"
 
 msgctxt "profile.category_management"
 msgid "eyebrow"
@@ -24475,10 +24475,10 @@ msgid "Yeni fakültə"
 msgstr "New password"
 
 msgid "Fakültə"
-msgstr "Fakültə"
+msgstr "Faculty"
 
 msgid "Kod"
-msgstr "Team"
+msgstr "Code"
 
 msgid "Kafedra"
 msgstr "Kafedra"

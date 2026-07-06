@@ -3,14 +3,14 @@ Apellyasiya icazə məntiqi — mərkəzi RBAC üzərində.
 
 - create:  student yalnız ÖZ bitmiş attempt-i üçün, pəncərə açıqdırsa,
            ``appeal.create`` icazəsi ilə.
-- respond: məsul müəllim (imtahan müəllifi) ``appeal.respond`` ilə, və ya
-           ``appeal.decide`` icazəli yuxarı rol.
-- decide:  ``appeal.decide`` icazəli rol (yekun qərar/override).
+- respond/decide: apellyasiyalar mərkəzləşdirilmiş qaydada imtahan mərkəzi
+           tərəfindən idarə olunur.
 
 Bütün hallarda tenant uyğunluğu yoxlanılır (superadmin istisna).
 """
 
-from apps.appeals.constants import PERM_APPEAL_CREATE, PERM_APPEAL_DECIDE, PERM_APPEAL_RESPOND
+from apps.appeals.constants import PERM_APPEAL_CREATE
+from apps.exams.public import is_exam_center_user
 from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import get_request_organization
 
@@ -22,11 +22,6 @@ def _same_tenant(request, appeal):
         return True
     organization = get_request_organization(request)
     return organization is not None and appeal.organization_id == organization.id
-
-
-def _is_exam_author(request, appeal):
-    user = getattr(request, "user", None)
-    return bool(user and getattr(appeal.exam, "author_id", None) == getattr(user, "id", None))
 
 
 def can_create_appeal(request, attempt, *, at_time=None):
@@ -41,23 +36,17 @@ def can_create_appeal(request, attempt, *, at_time=None):
 
 
 def can_review_appeal(request, appeal):
-    """Apellyasiyaya baxıb item-lərə cavab verə bilərmi (respond)."""
+    """Apellyasiyaya baxıb item-lərə cavab verə bilərmi (imtahan mərkəzi)."""
     if not _same_tenant(request, appeal):
         return False
-    if is_superadmin_user(getattr(request, "user", None)):
-        return True
-    if _is_exam_author(request, appeal) and request_has_permission(request, PERM_APPEAL_RESPOND):
-        return True
-    return request_has_permission(request, PERM_APPEAL_DECIDE)
+    return is_exam_center_user(getattr(request, "user", None))
 
 
 def can_decide_appeal(request, appeal):
-    """Yekun status qərarı / override verə bilərmi (decide)."""
+    """Yekun status qərarı / override verə bilərmi (imtahan mərkəzi)."""
     if not _same_tenant(request, appeal):
         return False
-    if is_superadmin_user(getattr(request, "user", None)):
-        return True
-    return request_has_permission(request, PERM_APPEAL_DECIDE)
+    return is_exam_center_user(getattr(request, "user", None))
 
 
 __all__ = [

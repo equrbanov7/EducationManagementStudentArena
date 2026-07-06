@@ -19,8 +19,13 @@
         var assignedExamCodeSlug = document.getElementById("assignedExamCodeSlug");
         var assignedExamAccessCodeInput = document.getElementById("assignedExamAccessCodeInput");
         var assignedExamCodeError = document.getElementById("assignedExamCodeError");
+        var assignedExamFinalBlock = document.getElementById("assignedExamFinalBlock");
+        var assignedExamFinalPin = document.getElementById("assignedExamFinalPin");
+        var assignedExamFinalPinHint = document.getElementById("assignedExamFinalPinHint");
         var assignedExamModalStartUrl = "";
         var assignedExamModalRequiresCode = false;
+        var assignedExamModalIsFinal = false;
+        var assignedExamModalFinalEntryUrl = "";
         var assignedExamCodeSubmitInFlight = false;
 
         function setAssignedExamCodeError(message) {
@@ -46,6 +51,50 @@
             assignedExamCodeSlug = document.getElementById("assignedExamCodeSlug");
             assignedExamAccessCodeInput = document.getElementById("assignedExamAccessCodeInput");
             assignedExamCodeError = document.getElementById("assignedExamCodeError");
+            assignedExamFinalBlock = document.getElementById("assignedExamFinalBlock");
+            assignedExamFinalPin = document.getElementById("assignedExamFinalPin");
+            assignedExamFinalPinHint = document.getElementById("assignedExamFinalPinHint");
+        }
+
+        function applyFinalExamModalState(trigger) {
+            // Final imtahanı: PIN + xəbərdarlıq göstərilir, giriş kodu gizlədilir,
+            // başlat düyməsi "İmtahan girişinə keç"ə çevrilir (kabinetdən başlamır).
+            var hasTicket = trigger.getAttribute("data-final-has-ticket") === "1";
+            var pin = trigger.getAttribute("data-final-pin") || "";
+            var entryOpen = trigger.getAttribute("data-final-entry-open") === "1";
+            assignedExamModalFinalEntryUrl = trigger.getAttribute("data-final-entry-url") || "";
+
+            if (assignedExamFinalBlock) {
+                assignedExamFinalBlock.hidden = false;
+            }
+            if (assignedExamCodeForm) {
+                assignedExamCodeForm.classList.add("is-hidden");
+            }
+            if (assignedExamFinalPin && assignedExamFinalPinHint) {
+                if (!hasTicket) {
+                    assignedExamFinalPin.textContent = "—";
+                    assignedExamFinalPinHint.textContent = gettext(
+                        "İmtahan mərkəzi hələ sizə bilet təyin etməyib."
+                    );
+                } else if (pin) {
+                    assignedExamFinalPin.textContent = pin;
+                    assignedExamFinalPinHint.textContent = gettext(
+                        "Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə edin."
+                    );
+                } else {
+                    assignedExamFinalPin.textContent = "•  •  •  •";
+                    assignedExamFinalPinHint.textContent = gettext(
+                        "PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə edilir."
+                    );
+                }
+            }
+            if (assignedExamInfoStartBtn) {
+                assignedExamInfoStartBtn.textContent = gettext("İmtahan girişinə keç");
+                assignedExamInfoStartBtn.disabled = !entryOpen || !assignedExamModalFinalEntryUrl;
+                assignedExamInfoStartBtn.title = entryOpen
+                    ? ""
+                    : gettext("İmtahan hələ başlamayıb — təyin olunmuş vaxtda yenidən yoxlayın.");
+            }
         }
 
         function openAssignedExamInfoModal(trigger) {
@@ -57,6 +106,7 @@
 
             assignedExamModalStartUrl = trigger.getAttribute("data-start-url") || "";
             assignedExamModalRequiresCode = trigger.getAttribute("data-requires-code") === "1";
+            assignedExamModalIsFinal = trigger.getAttribute("data-is-final") === "1";
 
             if (assignedExamInfoExamName) {
                 assignedExamInfoExamName.textContent = trigger.getAttribute("data-exam-title") || "";
@@ -81,18 +131,27 @@
             if (assignedExamCodeSlug) {
                 assignedExamCodeSlug.value = trigger.getAttribute("data-exam-slug") || "";
             }
-            if (assignedExamCodeForm) {
-                assignedExamCodeForm.classList.toggle("is-hidden", !assignedExamModalRequiresCode);
-            }
             if (assignedExamAccessCodeInput) {
                 assignedExamAccessCodeInput.value = "";
             }
             setAssignedExamCodeError("");
-            if (assignedExamInfoStartBtn) {
-                assignedExamInfoStartBtn.textContent = assignedExamModalRequiresCode
-                    ? gettext("Kodu təsdiqlə və başla")
-                    : gettext("İmtahana başla");
-                assignedExamInfoStartBtn.disabled = false;
+            if (assignedExamFinalBlock) {
+                assignedExamFinalBlock.hidden = true;
+            }
+
+            if (assignedExamModalIsFinal) {
+                applyFinalExamModalState(trigger);
+            } else {
+                if (assignedExamCodeForm) {
+                    assignedExamCodeForm.classList.toggle("is-hidden", !assignedExamModalRequiresCode);
+                }
+                if (assignedExamInfoStartBtn) {
+                    assignedExamInfoStartBtn.textContent = assignedExamModalRequiresCode
+                        ? gettext("Kodu təsdiqlə və başla")
+                        : gettext("İmtahana başla");
+                    assignedExamInfoStartBtn.disabled = false;
+                    assignedExamInfoStartBtn.title = "";
+                }
             }
             assignedExamCodeSubmitInFlight = false;
 
@@ -214,6 +273,13 @@
 
         document.addEventListener("click", function (event) {
             if (!event.target.closest || !event.target.closest("#assignedExamInfoStartBtn")) {
+                return;
+            }
+            // Final imtahanı kabinetdən BAŞLADILMIR — yalnız PIN giriş səhifəsinə yönləndirilir.
+            if (assignedExamModalIsFinal) {
+                if (assignedExamModalFinalEntryUrl) {
+                    window.location.href = assignedExamModalFinalEntryUrl;
+                }
                 return;
             }
             if (assignedExamModalRequiresCode) {

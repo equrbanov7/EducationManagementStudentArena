@@ -12,8 +12,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.translation import pgettext
 
+from apps.exams.public import is_exam_center_user
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
-from core.permissions import is_superadmin_user, request_has_permission
+from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization
 
 from ...constants import (
@@ -23,8 +24,6 @@ from ...constants import (
     APPEAL_STATUS_VALUES,
     APPEAL_TYPE_CHOICES,
     APPEAL_TYPE_VALUES,
-    PERM_APPEAL_DECIDE,
-    PERM_APPEAL_RESPOND,
 )
 from ...models import Appeal
 from ...services import (
@@ -38,12 +37,7 @@ from ..shared._helpers import _marked_question_map
 
 
 def _can_open_appeal_management(request):
-    user = getattr(request, "user", None)
-    return bool(
-        is_superadmin_user(user)
-        or request_has_permission(request, PERM_APPEAL_DECIDE)
-        or request_has_permission(request, PERM_APPEAL_RESPOND)
-    )
+    return is_exam_center_user(getattr(request, "user", None))
 
 
 def build_manage_appeals_context(request, *, list_action, section=""):
@@ -58,7 +52,7 @@ def build_manage_appeals_context(request, *, list_action, section=""):
     """
     user = request.user
     organization = get_request_organization(request)
-    can_decide = is_superadmin_user(user) or request_has_permission(request, PERM_APPEAL_DECIDE)
+    can_decide = is_exam_center_user(user)
 
     appeals = Appeal.objects.select_related("exam", "attempt", "student", "reviewed_by").prefetch_related("items")
 
@@ -67,10 +61,7 @@ def build_manage_appeals_context(request, *, list_action, section=""):
     elif not is_superadmin_user(user):
         appeals = appeals.none()
 
-    # Scope: decide/superadmin → təşkilatın bütün apellyasiyaları;
-    # yalnız respond → yalnız öz imtahanlarının apellyasiyaları.
-    if not can_decide:
-        appeals = appeals.filter(exam__author=user)
+    # Scope: imtahan mərkəzi/superadmin → təşkilatın bütün apellyasiyaları.
 
     # ── Filtrlər (status istisna — status sayğacları üçün) ──
     exam_slug = (request.GET.get("exam") or "").strip()

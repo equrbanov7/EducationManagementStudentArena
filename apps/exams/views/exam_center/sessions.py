@@ -1,0 +1,264 @@
+"""exam_center paketi — oturum idarəsi (siyahı / yaratma / detal / təyinat)."""
+
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.shortcuts import redirect, render
+from django.utils.translation import pgettext
+from django.views.decorators.http import require_http_methods, require_POST
+
+from apps.exams.forms import AssignStudentsForm, ExamRoomSessionForm
+from apps.exams.services.final_center import (
+    RoomSessionStateError,
+    TicketStateError,
+    assign_students,
+    readmit_student,
+    regenerate_pin,
+    session_list_annotations,
+    set_seat,
+    validate_session_plan,
+)
+from core.audit import log_action
+from core.constants import AuditAction
+
+from ._shared import (
+    center_org_or_403,
+    get_center_session_or_404,
+    get_session_ticket_or_404,
+    supervisor_org_or_403,
+    visible_sessions_qs,
+)
+
+User = get_user_model()
+
+
+def _staff_queryset(organization):
+    """Nəzarətçi/heyət seçimi: org-un tələbə olmayan aktiv üzvləri."""
+    return (
+        User.objects.filter(memberships__organization=organization, memberships__is_active=True)
+        .exclude(profile__role="student")
+        .distinct()
+        .order_by("first_name", "last_name", "username")
+    )
+
+
+@login_required
+def exam_center_session_list(request):
+    organization = supervisor_org_or_403(request)
+    sessions = session_list_annotations(visible_sessions_qs(request, organization)).order_by("-scheduled_start", "-id")
+    state = (request.GET.get("state") or "").strip()
+    if state:
+        sessions = sessions.filter(state=state)
+
+    from apps.exams.services.final_center import can_manage_final_center
+
+    page_obj = Paginator(sessions, 20).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "exams/exam_center/session_list.html",
+        {
+            "page_obj": page_obj,
+            "active_state": state,
+            "organization": organization,
+            # İmtahan mərkəzi zal/oturum/hesabatı idarə edir; nəzarətçi yalnız
+            # monitor edir — idarə düymələri gizlədilir ki, 403 alınmasın.
+            "can_manage": can_manage_final_center(request.user),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def exam_center_session_create(request):
+    organization = center_org_or_403(request)
+    form = ExamRoomSessionForm(
+        request.POST or None,
+        organization=organization,
+        staff_queryset=_staff_queryset(organization),
+    )
+    if request.method == "POST" and form.is_valid():
+        session = form.save(commit=False)
+        try:
+            validate_session_plan(
+                room=session.room,
+                exam=session.exam,
+                scheduled_start=session.scheduled_start,
+                scheduled_end=session.scheduled_end,
+            )
+        except RoomSessionStateError as exc:
+            form.add_error(None, str(exc))
+        else:
+            session.organization = organization
+            session.created_by = request.user
+            session.save()
+            form.save_m2m()
+            log_action(
+                AuditAction.CREATE,
+                user=request.user,
+                organization=organization,
+                obj=session,
+                reason="final_session_created",
+                request=request,
+                resource_type="exam_room_session",
+                resource_id=str(session.pk),
+            )
+            messages.success(request, pgettext("exams.final_center.message", "Oturum yaradıldı."))
+            return redirect("exams:exam_center_session_detail", session_id=session.pk)
+    return render(
+        request,
+        "exams/exam_center/session_form.html",
+        {"form": form, "organization": organization},
+    )
+
+
+@login_required
+def exam_center_session_detail(request, session_id):
+    """
+    Oturum detalı: bilet siyahısı, təyinat forması, PIN statusu.
+    Nəzarətçi/heyət də görə bilir; idarə düymələri template-də icazəyə görə
+    gizlədilir, POST endpoint-ləri isə backend-də ayrıca qorunur.
+    """
+    organization, session = get_center_session_or_404(request, session_id, for_supervision=True)
+    tickets = session.tickets.select_related("student", "attempt").order_by("seat_number", "id")
+
+    from apps.exams.services.final_center import can_manage_final_center
+
+    assign_form = AssignStudentsForm(organization=organization)
+    return render(
+        request,
+        "exams/exam_center/session_detail.html",
+        {
+            "session": session,
+            "tickets": tickets,
+            "assign_form": assign_form,
+            "organization": organization,
+            "can_manage": can_manage_final_center(request.user),
+        },
+    )
+
+
+@login_required
+@require_POST
+def exam_center_session_assign_students(request, session_id):
+    organization, session = get_center_session_or_404(request, session_id)
+    form = AssignStudentsForm(request.POST, organization=organization)
+    if not form.is_valid():
+        for error in form.non_field_errors():
+            messages.error(request, error)
+        return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+    students = []
+    group = form.cleaned_data.get("group")
+    if group is not None:
+        students.extend(group.students.filter(is_active=True))
+    usernames = form.username_list()
+    if usernames:
+        students.extend(
+            User.objects.filter(
+                username__in=usernames,
+                memberships__organization=organization,
+                memberships__is_active=True,
+            ).distinct()
+        )
+    unique_students = list({student.pk: student for student in students}.values())
+
+    try:
+        created, skipped = assign_students(session, unique_students, request.user, request=request)
+    except TicketStateError as exc:
+        messages.error(request, str(exc))
+        return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+    if created:
+        messages.success(
+            request,
+            pgettext("exams.final_center.message", "{count} tələbə oturuma təyin edildi və PIN-lər yaradıldı.").format(
+                count=len(created)
+            ),
+        )
+    if skipped:
+        messages.warning(
+            request,
+            pgettext(
+                "exams.final_center.message", "{count} tələbə ötürüldü (artıq təyinatlı və ya vaxt toqquşması)."
+            ).format(count=len(skipped)),
+        )
+    return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+
+@login_required
+@require_POST
+def exam_center_ticket_pin(request, session_id, ticket_id):
+    """
+    PIN-i yenidən yaradır və XAM dəyəri BİR DƏFƏ göstərir (session flash).
+    Baxış audit-ə yazılır; PIN URL/log-larda görünmür.
+    """
+    organization, session = get_center_session_or_404(request, session_id)
+    ticket = get_session_ticket_or_404(session, ticket_id)
+    try:
+        raw_pin = regenerate_pin(ticket, request.user, request=request)
+    except TicketStateError as exc:
+        messages.error(request, str(exc))
+        return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+    log_action(
+        AuditAction.VIEW,
+        user=request.user,
+        organization=organization,
+        obj=ticket,
+        reason="final_pin_viewed_by_staff",
+        request=request,
+        resource_type="final_exam_ticket",
+        resource_id=str(ticket.pk),
+    )
+    messages.success(
+        request,
+        pgettext(
+            "exams.final_center.message", "{student} üçün yeni PIN: {pin} — bu dəyər yalnız bir dəfə göstərilir."
+        ).format(student=ticket.student.get_full_name() or ticket.student.username, pin=raw_pin),
+    )
+    return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+
+@login_required
+@require_POST
+def exam_center_ticket_seat(request, session_id, ticket_id):
+    _organization, session = get_center_session_or_404(request, session_id)
+    ticket = get_session_ticket_or_404(session, ticket_id)
+    raw_seat = (request.POST.get("seat_number") or "").strip()
+    seat = int(raw_seat) if raw_seat.isdigit() else None
+    from django.db import IntegrityError
+
+    try:
+        set_seat(ticket, seat, request.user, request=request)
+    except IntegrityError:
+        messages.error(request, pgettext("exams.final_center.message", "Bu yer nömrəsi artıq başqa tələbəyə verilib."))
+    return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+
+@login_required
+@require_POST
+def exam_center_ticket_readmit(request, session_id, ticket_id):
+    _organization, session = get_center_session_or_404(request, session_id)
+    ticket = get_session_ticket_or_404(session, ticket_id)
+    if readmit_student(ticket, request.user, request=request):
+        messages.success(
+            request, pgettext("exams.final_center.message", "Tələbə yenidən buraxıldı və yeni PIN yaradıldı.")
+        )
+    else:
+        messages.error(
+            request,
+            pgettext("exams.final_center.message", "Yenidən buraxma mümkün olmadı (bilet çıxarılmış statusda deyil)."),
+        )
+    return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+
+__all__ = [
+    "exam_center_session_assign_students",
+    "exam_center_session_create",
+    "exam_center_session_detail",
+    "exam_center_session_list",
+    "exam_center_ticket_pin",
+    "exam_center_ticket_readmit",
+    "exam_center_ticket_seat",
+]

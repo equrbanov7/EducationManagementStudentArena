@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ room.name }} — {% trans "Zal nəzarəti" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page"
+     id="fxc-room-root"
+     data-snapshot-url="{% url 'exams:exam_center_room_snapshot' room_id=room.pk %}"
+     data-start-all-url="{% url 'exams:exam_center_room_start_all' room_id=room.pk %}"
+     data-open-all-url="{% url 'exams:exam_center_room_open_all' room_id=room.pk %}"
+     data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=0 ticket_id=0 %}"
+     data-heartbeat-seconds="{{ heartbeat_seconds }}">
+
+  {% csrf_token %}
+  {% url 'exams:exam_center_room_list' as rooms_url %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=rooms_url current_label=room.name %}
+
+  <header class="fxc-head">
+    <div>
+      <span class="fxc-conn" id="fxc-room-ws" data-state="online">{% trans "Canlı" %}</span>
+      <h1><i class="fas fa-tower-observation"></i> {{ room.name }} <code>{{ room.code }}</code></h1>
+      <p class="fxc-sub" id="fxc-room-sessions">
+        {% trans "Zaldakı canlı imtahanlar" %}
+      </p>
+    </div>
+    <div class="fxc-head-actions">
+      <button type="button" class="fxc-btn fxc-btn-primary" id="fxc-open-all-btn" hidden>
+        <i class="fas fa-door-open"></i> {% trans "Hamısında girişi aç" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-all-btn" hidden>
+        <i class="fas fa-play"></i> {% trans "Zalda hamısını başlat" %}
+      </button>
+    </div>
+  </header>
+
+  <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Zal statistikası' %}"></section>
+
+  <div class="fxc-toolbar">
+    <input type="search" id="fxc-filter" class="fxc-input"
+           placeholder="{% trans 'Tələbə / fənn üzrə süz…' %}" aria-label="{% trans 'Axtarış' %}">
+    <select id="fxc-exam-filter" class="fxc-input fxc-input--select" aria-label="{% trans 'İmtahan filtri' %}">
+      <option value="">{% trans "Bütün imtahanlar" %}</option>
+    </select>
+    <select id="fxc-status-filter" class="fxc-input fxc-input--select" aria-label="{% trans 'Status filtri' %}">
+      <option value="">{% trans "Bütün statuslar" %}</option>
+      <option value="waiting">{% trans "Gözləyir" %}</option>
+      <option value="ready">{% trans "Hazır" %}</option>
+      <option value="active">{% trans "İmtahanda" %}</option>
+      <option value="completed">{% trans "Bitirib" %}</option>
+      <option value="removed">{% trans "Çıxarılıb" %}</option>
+    </select>
+  </div>
+
+  <section class="fxc-map-panel">
+    <div class="fxc-map-legend">
+      <span><i class="fxc-sw fxc-sw--active"></i> {% trans "İmtahanda" %}</span>
+      <span><i class="fxc-sw fxc-sw--ready"></i> {% trans "Hazır" %}</span>
+      <span><i class="fxc-sw fxc-sw--waiting"></i> {% trans "Gözləyir" %}</span>
+      <span><i class="fxc-sw fxc-sw--warn"></i> {% trans "Pozuntu" %}</span>
+      <span><i class="fxc-sw fxc-sw--completed"></i> {% trans "Bitirib" %}</span>
+      <span><i class="fxc-sw fxc-sw--removed"></i> {% trans "Çıxarılıb" %}</span>
+      <span><i class="fxc-sw fxc-sw--idle"></i> {% trans "Oflayn / gəlməyib" %}</span>
+    </div>
+    <div class="fxc-computer-map" id="fxc-computer-map" aria-live="polite"></div>
+    <p class="fxc-map-hint">
+      <i class="fas fa-hand-pointer" aria-hidden="true"></i>
+      {% trans "Kompüterin üzərinə klik edərək tələbənin hansı fənndə olduğunu və nə etdiyini görün." %}
+    </p>
+  </section>
+</div>
+
+{# Tələbə canlı görüntü modalı — session_monitor ilə eyni komponent #}
+{% include "exams/exam_center/_snapshot_modal.html" %}
+
+{{ snapshot|json_script:"fxc-initial-room-snapshot" }}
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}" defer></script>
+    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ session.exam.title }} @ {{ session.room.name }} — {% trans "Oturum detalı" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page">
+  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.exam.title %}
+  <header class="fxc-head">
+    <div>
+      <span class="fxc-pill fxc-pill--state-{{ session.state }}">{{ session.get_state_display }}</span>
+      <h1>{{ session.exam.title }}</h1>
+      <p class="fxc-sub">
+        <i class="fas fa-door-open"></i> {{ session.room.name }} ({{ session.room.code }})
+        · <i class="far fa-clock"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}
+        {% if session.invigilator %}
+        · <i class="fas fa-user-shield"></i> {{ session.invigilator.get_full_name|default:session.invigilator.username }}
+        {% endif %}
+      </p>
+    </div>
+    <div class="fxc-head-actions">
+      <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
+      </a>
+      <a href="{% url 'exams:exam_center_session_monitor' session_id=session.pk %}" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-tower-observation"></i> {% trans "Canlı monitor" %}
+      </a>
+    </div>
+  </header>
+
+  {% if can_manage and not session.is_finished %}
+  <section class="fxc-card fxc-assign" aria-labelledby="fxc-assign-title">
+    <h2 id="fxc-assign-title"><i class="fas fa-user-plus"></i> {% trans "Tələbə təyin et" %}</h2>
+    <form method="post" action="{% url 'exams:exam_center_session_assign_students' session_id=session.pk %}" class="fxc-form">
+      {% csrf_token %}
+      <div class="fxc-form-grid">
+        <div class="fxc-field">
+          <label for="{{ assign_form.group.id_for_label }}">{{ assign_form.group.label }}</label>
+          {{ assign_form.group }}
+        </div>
+        <div class="fxc-field">
+          <label for="{{ assign_form.usernames.id_for_label }}">{{ assign_form.usernames.label }}</label>
+          {{ assign_form.usernames }}
+          <p class="fxc-hint">{{ assign_form.usernames.help_text }}</p>
+        </div>
+      </div>
+      <div class="fxc-actions">
+        <button type="submit" class="fxc-btn fxc-btn-primary">
+          <i class="fas fa-user-plus"></i> {% trans "Təyin et və PIN yarat" %}
+        </button>
+      </div>
+    </form>
+    <p class="fxc-hint">
+      <i class="fas fa-shield-halved"></i>
+      {% trans "PIN-lər təhlükəsiz saxlanır: yeni PIN yalnız yaradılma anında bir dəfə göstərilir." %}
+    </p>
+  </section>
+  {% endif %}
+
+  <section aria-labelledby="fxc-tickets-title">
+    <h2 id="fxc-tickets-title" class="fxc-section-title">
+      <i class="fas fa-ticket"></i> {% trans "Biletlər" %} ({{ tickets|length }})
+    </h2>
+    {% if tickets %}
+    <div class="fxc-table-wrap">
+      <table class="fxc-table">
+        <thead>
+          <tr>
+            <th>{% trans "Tələbə" %}</th>
+            <th class="fxc-num">{% trans "Yer" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "PIN" %}</th>
+            <th>{% trans "Dil" %}</th>
+            <th>{% trans "Giriş" %}</th>
+            {% if can_manage %}<th></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+          <tr>
+            <td class="fxc-strong">
+              {{ t.student.get_full_name|default:t.student.username }}
+              <span class="fxc-muted">({{ t.student.username }})</span>
+            </td>
+            <td class="fxc-num">
+              {% if can_manage and not session.is_finished %}
+              <form method="post" action="{% url 'exams:exam_center_ticket_seat' session_id=session.pk ticket_id=t.pk %}" class="fxc-inline-form">
+                {% csrf_token %}
+                <input type="number" name="seat_number" value="{{ t.seat_number|default_if_none:'' }}" min="1"
+                       class="fxc-input fxc-input--seat" aria-label="{% trans 'Yer nömrəsi' %}">
+                <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost" title="{% trans 'Yeri yadda saxla' %}">
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              {% else %}
+              {{ t.seat_number|default:"—" }}
+              {% endif %}
+            </td>
+            <td><span class="fxc-pill fxc-pill--t-{{ t.status }}">{{ t.get_status_display }}</span></td>
+            <td>
+              {% if t.pin_revoked_at %}
+                <span class="fxc-pill fxc-pill--muted">{% trans "Ləğv edilib" %}</span>
+              {% elif t.pin_hash %}
+                <span class="fxc-pill fxc-pill--ok">{% trans "Verilib" %}</span>
+                {% if t.is_pin_locked %}<span class="fxc-pill fxc-pill--warn">{% trans "Kilidli" %}</span>{% endif %}
+              {% else %}
+                <span class="fxc-pill fxc-pill--muted">—</span>
+              {% endif %}
+            </td>
+            <td>{{ t.language|default:"—" }}</td>
+            <td>
+              {% if t.entry_validated_at %}{{ t.entry_validated_at|date:"H:i" }}{% else %}<span class="fxc-muted">—</span>{% endif %}
+            </td>
+            {% if can_manage %}
+            <td class="fxc-row-actions">
+              {% if t.status == "removed" %}
+              <form method="post" action="{% url 'exams:exam_center_ticket_readmit' session_id=session.pk ticket_id=t.pk %}" class="fxc-inline-form">
+                {% csrf_token %}
+                <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
+                  <i class="fas fa-rotate-left"></i> {% trans "Yenidən burax" %}
+                </button>
+              </form>
+              {% elif not session.is_finished %}
+              <form method="post" action="{% url 'exams:exam_center_ticket_pin' session_id=session.pk ticket_id=t.pk %}" class="fxc-inline-form"
+                    data-confirm="{% trans 'Köhnə PIN etibarsız olacaq. Yeni PIN yaradılsın?' %}">
+                {% csrf_token %}
+                <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
+                  <i class="fas fa-key"></i> {% trans "Yeni PIN" %}
+                </button>
+              </form>
+              {% endif %}
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="fxc-empty">
+      <i class="far fa-user"></i>
+      <p>{% trans "Bu oturuma hələ tələbə təyin olunmayıb." %}</p>
+    </div>
+    {% endif %}
+  </section>
+
+  {% if can_manage and not session.is_finished and session.state != "active" %}
+  <section class="fxc-danger-zone">
+    <form method="post" action="{% url 'exams:exam_center_session_cancel' session_id=session.pk %}"
+          class="fxc-inline-form" data-confirm="{% trans 'Oturum ləğv olunacaq və bütün PIN-lər etibarsızlaşacaq. Davam edilsin?' %}">
+      {% csrf_token %}
+      <input type="hidden" name="reason" value="manual_cancel">
+      <button type="submit" class="fxc-btn fxc-btn-danger-ghost">
+        <i class="fas fa-ban"></i> {% trans "Oturumu ləğv et" %}
+      </button>
+    </form>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/final_center/confirm_forms.js' %}" defer></script>
+{% endblock %}

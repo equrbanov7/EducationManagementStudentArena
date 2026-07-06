@@ -3,10 +3,43 @@
 # ═══════════════════════════════════════════════════════════════
 # SHARED VIEWS (bütün user-lər üçün ortaq)
 # ═══════════════════════════════════════════════════════════════
+from .exam_center import (
+    exam_center_reports,
+    exam_center_room_create,
+    exam_center_room_list,
+    exam_center_room_monitor,
+    exam_center_room_open_all,
+    exam_center_room_snapshot,
+    exam_center_room_start_all,
+    exam_center_room_update,
+    exam_center_session_assign_students,
+    exam_center_session_cancel,
+    exam_center_session_create,
+    exam_center_session_detail,
+    exam_center_session_end,
+    exam_center_session_list,
+    exam_center_session_monitor,
+    exam_center_session_open_entry,
+    exam_center_session_snapshot,
+    exam_center_session_start,
+    exam_center_ticket_pin,
+    exam_center_ticket_readmit,
+    exam_center_ticket_remove,
+    exam_center_ticket_resume,
+    exam_center_ticket_seat,
+    exam_center_ticket_snapshot,
+)
 from .shared.access import exam_code_check
 from .student.attempts import start_exam, take_exam
 from .student.coding import coding_autosave, coding_run, coding_submission_download, coding_submit
-from .student.lists import assigned_student_exam_list, final_exam_list, student_exam_list
+from .student.final_center import (
+    final_exam_begin,
+    final_exam_cancel,
+    final_exam_entry,
+    final_exam_waiting,
+    final_ticket_state,
+)
+from .student.lists import assigned_student_exam_list, student_exam_list
 
 # ═══════════════════════════════════════════════════════════════
 # STUDENT VIEWS
@@ -189,6 +222,36 @@ __all__ = [
     "coding_submit",
     # Student - Lists
     "assigned_student_exam_list",
-    "final_exam_list",
     "student_exam_list",
+    # Student - Final imtahan axını
+    "final_exam_begin",
+    "final_exam_cancel",
+    "final_exam_entry",
+    "final_exam_waiting",
+    "final_ticket_state",
+    # Exam Center - zallar / oturumlar / monitor / hesabat
+    "exam_center_reports",
+    "exam_center_room_create",
+    "exam_center_room_list",
+    "exam_center_room_monitor",
+    "exam_center_room_open_all",
+    "exam_center_room_snapshot",
+    "exam_center_room_start_all",
+    "exam_center_room_update",
+    "exam_center_session_assign_students",
+    "exam_center_session_cancel",
+    "exam_center_session_create",
+    "exam_center_session_detail",
+    "exam_center_session_end",
+    "exam_center_session_list",
+    "exam_center_session_monitor",
+    "exam_center_session_open_entry",
+    "exam_center_session_snapshot",
+    "exam_center_session_start",
+    "exam_center_ticket_pin",
+    "exam_center_ticket_readmit",
+    "exam_center_ticket_remove",
+    "exam_center_ticket_resume",
+    "exam_center_ticket_seat",
+    "exam_center_ticket_snapshot",
 ]

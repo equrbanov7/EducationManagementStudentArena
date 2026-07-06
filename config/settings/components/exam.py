@@ -58,6 +58,28 @@ EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO = _env_float_setting("EXAM_PDF_OCR_HIGHLIGHT_MI
 # şlüzü/agenti vasitəsilə tətbiq oluna bilər; server tərəfi IP/CIDR yoxlayır.
 FINAL_EXAM_ALLOWED_IPS = [item.strip() for item in os.getenv("FINAL_EXAM_ALLOWED_IPS", "").split(",") if item.strip()]
 
+# --- Final imtahan PIN siyasəti ----------------------------------------------
+# Hər tələbəyə imtahan üçün fərdi, kriptoqrafik təsadüfi PIN verilir.
+# Saxlanma: salted hash (doğrulama) + Fernet şifrəli nüsxə (icazəli göstərmə);
+# oturum bitdikdə şifrəli nüsxə silinir. Xam PIN log/URL-lərə düşmür.
+FINAL_EXAM_PIN_LENGTH = _env_int_setting("FINAL_EXAM_PIN_LENGTH", 8, minimum=6)
+# PIN oturumun planlaşdırılan sonundan neçə dəqiqə sonra avtomatik keçərsizləşir.
+FINAL_EXAM_PIN_EXPIRY_GRACE_MINUTES = _env_int_setting("FINAL_EXAM_PIN_EXPIRY_GRACE_MINUTES", 120, minimum=0)
+# Ardıcıl yanlış PIN cəhdlərindən sonra biletin müvəqqəti kilidi.
+FINAL_EXAM_PIN_MAX_FAILURES = _env_int_setting("FINAL_EXAM_PIN_MAX_FAILURES", 5, minimum=3)
+FINAL_EXAM_PIN_LOCK_MINUTES = _env_int_setting("FINAL_EXAM_PIN_LOCK_MINUTES", 10, minimum=1)
+# Giriş səhifəsi üçün IP-əsaslı rate limit (cəhd / dəqiqə).
+FINAL_EXAM_ENTRY_RATE_PER_MINUTE = _env_int_setting("FINAL_EXAM_ENTRY_RATE_PER_MINUTE", 10, minimum=3)
+# Tələbə panelində PIN imtahan başlamazdan neçə dəqiqə əvvəl görünür.
+FINAL_EXAM_PIN_VISIBILITY_MINUTES = _env_int_setting("FINAL_EXAM_PIN_VISIBILITY_MINUTES", 120, minimum=0)
+# Final imtahan xatırlatma bildirişlərinin göndərildiyi eşiklər (gün, vergüllə).
+# Hər eşik üçün bir dəfə (dublikat reminder_stage ilə əngəllənir).
+FINAL_EXAM_REMINDER_DAYS = tuple(
+    int(v.strip())
+    for v in os.getenv("FINAL_EXAM_REMINDER_DAYS", "3,1").split(",")
+    if v.strip().isdigit() and int(v.strip()) > 0
+)
+
 
 # Request queueing for mutating HTTP calls. This protects every app view from
 # duplicate/bursty writes by serialising unsafe methods per user/session and by

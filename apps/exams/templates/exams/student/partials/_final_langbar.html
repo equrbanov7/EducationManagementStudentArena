@@ -1,0 +1,17 @@
+{% load i18n %}
+{# İmtahan zalı rejimində interfeys dili seçici (chrome gizlidir, ona görə ayrıca). #}
+{% get_current_language as CURRENT_LANGUAGE %}
+{% with cur=CURRENT_LANGUAGE|slice:":2"|lower %}
+<div class="fexc-langbar" role="group" aria-label="{% trans 'İnterfeys dili' context 'exams.template.final_entry' %}">
+  <span class="fexc-langbar-icon" aria-hidden="true"><i class="fas fa-globe"></i></span>
+  {% for code, label in fexc_ui_languages %}
+  <form method="post" action="{% url 'set_language' %}" class="fexc-langbar-form">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <input type="hidden" name="language" value="{{ code }}">
+    <button type="submit" class="fexc-langbar-pill {% if cur == code %}is-active{% endif %}"
+            {% if cur == code %}aria-current="true"{% endif %}>{{ label }}</button>
+  </form>
+  {% endfor %}
+</div>
+{% endwith %}

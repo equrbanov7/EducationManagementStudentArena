@@ -224,6 +224,12 @@ class ExamFormFinalCategoryTests(_Base):
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["exam_type_extended"], "final")
 
+    def test_exam_center_can_open_create_exam_modal(self):
+        response = self._client_for(self.exam_center).get(reverse("exams:create_exam") + "?modal=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="exam_type_extended"', html=False)
+        self.assertContains(response, 'value="final"', html=False)
+
     def test_teacher_can_select_quiz_and_midterm(self):
         for category in ("quiz", "midterm"):
             form = ExamForm(self._form_data(exam_type_extended=category), user=self.teacher, organization=self.org)

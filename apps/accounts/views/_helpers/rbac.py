@@ -187,12 +187,20 @@ def _role_capabilities(user, profile):
     user_level = 999 if is_superadmin else (user._highest_role_level() if hasattr(user, "_highest_role_level") else 0)
 
     can_manage_org = is_superadmin or is_org_admin
+    # Final imtahan mərkəzi naviqasiyası: imtahan mərkəzi rolu HƏMİŞƏ, digər
+    # istifadəçilər (məs. müəllim-nəzarətçi) yalnız təyin olunmuş oturumu varsa.
+    # Yüngül .exists() sorğusu; icazə view/consumer qatında yenidən yoxlanır.
+    can_access_final_center = is_exam_center or is_superadmin
+    if not can_access_final_center and (is_teacher or is_tutor or is_unit_manager):
+        from apps.exams.public import user_supervises_final_sessions
+
+        can_access_final_center = user_supervises_final_sessions(user)
     # Registrar console (K3): who may manage the academic catalogue (programs /
     # subjects). Org-admin (rector/vice-rector/owner) + dekan/kafedra müdürü.
     # The actual authorisation is re-checked in registrar.views (defence in depth);
     # this flag only drives nav visibility.
     can_manage_registrar = is_superadmin or is_org_admin or is_unit_manager
-    can_view_owned_learning = is_superadmin or is_teacher or is_org_admin
+    can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
     can_manage_blog = getattr(user, "is_authenticated", False)
@@ -361,7 +369,7 @@ def _role_capabilities(user, profile):
     # Faktiki icazə yoxlaması yenə də view səviyyəsində (appeals.services.permissions,
     # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.
     can_use_question_bank = is_superadmin or is_teacher or is_org_admin or is_exam_center
-    can_manage_appeals = is_superadmin or is_teacher or is_org_admin or is_exam_center
+    can_manage_appeals = is_superadmin or is_exam_center
     can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
 
     # Universitet strukturu (fakültə/kafedra) idarəetmə linkləri:
@@ -412,9 +420,8 @@ def _role_capabilities(user, profile):
     if can_view_my_appeals:
         allowed_sections.add("my-appeals")
 
-    # "Apellyasiyalar" (idarəetmə) — müəllim/org-admin/superadmin dashboard
-    # daxilində (sağ content, AJAX) idarə edir. Faktiki data scope-u və qərar
-    # icazəsi view səviyyəsində (appeals.views) yenidən yoxlanılır.
+    # "Apellyasiyalar" (idarəetmə) — bütün müraciətlər imtahan mərkəzinə düşür.
+    # Faktiki data scope-u və qərar icazəsi view səviyyəsində yenidən yoxlanılır.
     if can_manage_appeals:
         allowed_sections.add("manage-appeals")
 
@@ -438,6 +445,7 @@ def _role_capabilities(user, profile):
         "can_view_my_appeals": can_view_my_appeals,
         "can_manage_org": can_manage_org,
         "can_manage_registrar": can_manage_registrar,
+        "can_access_final_center": can_access_final_center,
         # Grade-approval chain (U7.2): chairs/deans/admins review submitted journals.
         "can_approve_grades": is_superadmin or is_org_admin or is_unit_manager,
         "can_view_owned_learning": can_view_owned_learning,

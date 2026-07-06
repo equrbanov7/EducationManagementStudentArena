@@ -48,9 +48,16 @@ class UniversityDefaultRolesTest(TestCase):
     def test_exam_center_role_has_exam_but_not_member_manage(self):
         role = self.org.roles.get(name="exam_center")
         self.assertIn("exam.*", role.permissions)
+        self.assertIn("appeal.respond", role.permissions)
+        self.assertIn("appeal.decide", role.permissions)
         self.assertNotIn("member.invite", role.permissions)
         self.assertNotIn("member.remove", role.permissions)
         self.assertNotIn("role.assign", role.permissions)
+
+    def test_teacher_role_does_not_receive_appeal_decision_permissions(self):
+        role = self.org.roles.get(name="teacher")
+        self.assertNotIn("appeal.respond", role.permissions)
+        self.assertNotIn("appeal.decide", role.permissions)
 
     def test_hr_role_has_member_manage_but_not_exams(self):
         role = self.org.roles.get(name="hr")

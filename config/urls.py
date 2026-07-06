@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import include, path, re_path, reverse_lazy
 from django.views.i18n import JavaScriptCatalog
 
@@ -23,6 +24,18 @@ from core.views import handler500 as handler500  # noqa: F401
 from core.views import health_check, metrics_view, ping, test_error
 
 admin.site.site_url = reverse_lazy("home")
+
+
+def legacy_exmas_redirect(request, path=""):
+    suffix = path.strip("/")
+    target = "/exams/"
+    if suffix:
+        target = f"/exams/{suffix}/"
+    query_string = request.META.get("QUERY_STRING")
+    if query_string:
+        target = f"{target}?{query_string}"
+    return redirect(target)
+
 
 # Allow the admin URL to be relocated away from the default /admin/ path via
 # the ADMIN_URL_PREFIX setting (e.g. set to "manage/" in production to avoid
@@ -65,6 +78,8 @@ urlpatterns = [
     # registrar — elektron jurnal (müəllim üzü)
     path("jurnal/", include(("apps.registrar.urls", "registrar"), namespace="registrar")),
     # exams
+    re_path(r"^exmas/?$", legacy_exmas_redirect, name="legacy_exmas_redirect"),
+    re_path(r"^exmas/(?P<path>.*)$", legacy_exmas_redirect, name="legacy_exmas_path_redirect"),
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
     # appeals (imtahan apellyasiyaları)
     path("appeals/", include(("apps.appeals.urls", "appeals"), namespace="appeals")),

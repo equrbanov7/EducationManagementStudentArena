@@ -37,6 +37,10 @@ from apps.exams.services.ai_summary import (  # noqa: F401
 from apps.exams.services.grading import (  # noqa: F401
     calculate_attempt_score,
 )
+from apps.exams.services.final_center import (  # noqa: F401
+    student_final_exam_context,
+    user_supervises_final_sessions,
+)
 from apps.exams.services.language_variants import (  # noqa: F401
     available_language_options,
 )
@@ -79,6 +83,8 @@ __all__ = [
     "is_teacher_user",
     "resolve_exam_attempt_name_visibility",
     "resolve_exam_attempt_review_window_seconds",
+    "student_final_exam_context",
     "tenant_scoped_exams",
+    "user_supervises_final_sessions",
     "without_disabled_practical_exams",
 ]

@@ -152,6 +152,10 @@
 
 .appeal-embedded .appeal-sticky-actions {
     position: static;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: auto;
     margin-top: 16px;
     padding: 0;
     border: 0;
@@ -215,7 +219,10 @@
 
 .appeal-modal .appeal-sticky-actions {
     position: sticky;
+    left: auto;
     bottom: 0;
+    transform: none;
+    width: auto;
     z-index: 2;
     margin-top: 16px;
     padding: 12px 14px;
@@ -517,4 +524,3 @@
 .appeal-locked-note i {
     color: var(--ems-neutral-400);
 }
-

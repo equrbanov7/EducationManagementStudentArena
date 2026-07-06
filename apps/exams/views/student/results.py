@@ -1,12 +1,15 @@
 import json
+from datetime import timedelta
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
@@ -22,6 +25,29 @@ from ._helpers import (
     ensure_student_exam_tenant_context,
     safe_same_origin_redirect_path,
 )
+
+FINAL_RESULT_REVIEW_SECONDS = 5 * 60
+
+
+def _is_final_exam(exam):
+    return getattr(exam, "exam_type_extended", "") == "final"
+
+
+def _final_login_url():
+    return f"{reverse('accounts:login')}?{urlencode({'next': reverse('exams:final_exam_entry')})}"
+
+
+def _final_result_timeout_url(request):
+    separator = "&" if request.GET.urlencode() else "?"
+    return f"{request.get_full_path()}{separator}final_timeout=1"
+
+
+def _final_result_remaining_seconds(attempt):
+    finished_at = getattr(attempt, "finished_at", None)
+    if not finished_at:
+        return FINAL_RESULT_REVIEW_SECONDS
+    expires_at = finished_at + timedelta(seconds=FINAL_RESULT_REVIEW_SECONDS)
+    return max(0, int((expires_at - timezone.now()).total_seconds()))
 
 
 def _default_exam_back_url(exam):
@@ -76,6 +102,18 @@ def exam_result(request, slug, attempt_id):
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
     return_to = current_return_to(request)
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
+    is_final_exam_result = _is_final_exam(exam)
+    final_result_remaining_seconds = None
+    final_result_timeout_url = ""
+
+    if is_final_exam_result:
+        final_result_remaining_seconds = _final_result_remaining_seconds(attempt)
+        final_result_timeout_url = _final_result_timeout_url(request)
+        if request.GET.get("final_timeout") == "1" or final_result_remaining_seconds <= 0:
+            logout(request)
+            return redirect(_final_login_url())
+        back_url = reverse("exams:final_exam_entry")
+        history_url = ""
 
     attempt = annotate_attempt_result_visibility([attempt])[0]
     if not attempt.can_view_result:
@@ -182,13 +220,16 @@ def exam_result(request, slug, attempt_id):
             "coding_submissions_by_qid": coding_submissions_by_qid,
             "history_url": history_url,
             "back_url": back_url,
+            "is_final_exam_result": is_final_exam_result,
+            "final_result_remaining_seconds": final_result_remaining_seconds,
+            "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,
             "previous_attempts_count": len(previous_attempts) + 1,
             "can_appeal": can_appeal,
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
             # Tələbə apellyasiyalarını ayrıca səhifə yox, dashboard bölməsində görür.
-            "my_appeals_url": reverse("accounts:profile") + "?section=my-appeals",
+            "my_appeals_url": "" if is_final_exam_result else reverse("accounts:profile") + "?section=my-appeals",
             "effective_score_info": effective_score_info,
             "appeal_bonus_points": appeal_bonus_points,
             "appeal_corrected_qids": appeal_corrected_qids,

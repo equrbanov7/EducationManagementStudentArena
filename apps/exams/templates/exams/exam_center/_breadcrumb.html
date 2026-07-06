@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}İmtahan mərkəzi səhifələri üçün ortaq yol (breadcrumb) + geri düyməsi.
+Kök (İmtahan Nəzarət Sistemi) = zallar hub-ı.
+Parametrlər: back_url, parent_label, parent_url, current_label, root_current.
+root_current=True olduqda kök səhifənin özüdür (geri düyməsi yox, kök = cari).{% endcomment %}
+<nav class="fxc-breadcrumb" aria-label="{% trans 'Naviqasiya' %}">
+  {% if back_url and not root_current %}
+  <a href="{{ back_url }}" class="fxc-breadcrumb-back">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" %}
+  </a>
+  {% endif %}
+  <ol class="fxc-breadcrumb-trail">
+    <li>
+      {% if root_current %}
+      <span aria-current="page"><i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "İmtahan Nəzarət Sistemi" %}</span>
+      {% else %}
+      <a href="{% url 'exams:exam_center_room_list' %}"><i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "İmtahan Nəzarət Sistemi" %}</a>
+      {% endif %}
+    </li>
+    {% if parent_label %}
+    <li aria-hidden="true" class="fxc-breadcrumb-sep">/</li>
+    <li>{% if parent_url %}<a href="{{ parent_url }}">{{ parent_label }}</a>{% else %}<span>{{ parent_label }}</span>{% endif %}</li>
+    {% endif %}
+    {% if current_label %}
+    <li aria-hidden="true" class="fxc-breadcrumb-sep">/</li>
+    <li><span aria-current="page">{{ current_label }}</span></li>
+    {% endif %}
+  </ol>
+</nav>

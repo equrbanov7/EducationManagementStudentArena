@@ -53,4 +53,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.expire_stale_resumed_attempts",
         "schedule": 60.0,  # seconds
     },
+    # Final imtahanı yaxınlaşan tələbələrə xatırlatma bildirişi (saatda bir).
+    # Dublikat FinalExamTicket.reminder_stage ilə əngəllənir, ona görə saatlıq
+    # işləmə spam yaratmır.
+    "exams-notify-upcoming-final-exams": {
+        "task": "exams.notify_upcoming_final_exams",
+        "schedule": 3600.0,  # seconds
+    },
 }

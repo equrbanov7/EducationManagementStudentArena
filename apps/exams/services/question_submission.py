@@ -36,14 +36,7 @@ def analyze_submission_text(raw_text):
     from apps.exams.services.parsing import parse_bulk_mcq
 
     parsed = parse_bulk_mcq(raw_text or "")
-    error_count = 0
-    warning_count = 0
-    for question in parsed:
-        for warning in question.get("warnings") or []:
-            if (warning.get("severity") or "warning") == "error":
-                error_count += 1
-            else:
-                warning_count += 1
+    error_count, warning_count = _snapshot_counts(parsed)
     counts = {"questions": len(parsed), "errors": error_count, "warnings": warning_count}
     return parsed, counts
 
@@ -65,14 +58,20 @@ def clean_snapshot_entries(parsed):
 
 
 def _snapshot_counts(parsed):
+    """
+    SUAL-səviyyəli saylar: "Xətalı" = ən azı bir ERROR xəbərdarlığı olan sual
+    sayı; "Xəbərdarlıq" = error olmayan xəbərdarlığı olan sual sayı. Sual
+    idarəetmə səhifəsi ilə eyni semantika (491 sualda "509 xəta" çaşqınlığı
+    yaranmasın).
+    """
     error_count = 0
     warning_count = 0
     for question in parsed:
-        for warning in question.get("warnings") or []:
-            if (warning.get("severity") or "warning") == "error":
-                error_count += 1
-            else:
-                warning_count += 1
+        severities = {(w.get("severity") or "warning") for w in (question.get("warnings") or [])}
+        if "error" in severities:
+            error_count += 1
+        if severities - {"error"}:
+            warning_count += 1
     return error_count, warning_count
 
 

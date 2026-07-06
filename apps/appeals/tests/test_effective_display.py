@@ -2,7 +2,7 @@
 Apellyasiya bonusunun bütün görünüş səthlərində əks olunması (end-to-end):
 - attach_test_result_summaries (tələbə tarixçəsi / əvvəlki cəhdlər),
 - appeal_bonus_map + apply_bonus_to_test_result helper-ləri,
-- bildirişlər: yeni apellyasiya → müəllimə, qərar → tələbəyə.
+- bildirişlər: yeni apellyasiya → imtahan mərkəzinə, qərar → tələbəyə.
 """
 
 from decimal import Decimal
@@ -10,6 +10,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
+from apps.accounts.models import ProfileRole
 from apps.appeals.constants import APPEAL_TYPE_WRONG_ANSWER_KEY
 from apps.appeals.models import Appeal, AppealItem
 from apps.appeals.services import (
@@ -22,7 +23,7 @@ from apps.appeals.services import (
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.notifications.models import InAppNotification
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -32,8 +33,21 @@ class EffectiveDisplayTests(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("ed_teacher", "ed_t@example.com", "pw")
         self.student = User.objects.create_user("ed_student", "ed_s@example.com", "pw")
+        self.exam_center = User.objects.create_user("ed_exam_center", "ed_ec@example.com", "pw")
         self.org = Organization.objects.create(
             name="ED Org", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
+        )
+        profile = self.exam_center.profile
+        profile.organization = self.org
+        profile.organization_type = self.org.org_type
+        profile.role = ProfileRole.MEMBER
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        Membership.objects.create(
+            user=self.exam_center,
+            organization=self.org,
+            role=self.org.roles.get(name="exam_center"),
+            is_primary=True,
+            is_active=True,
         )
         self.exam = Exam.objects.create(
             title="ED Test", author=self.teacher, organization=self.org, exam_type="test", is_active=True
@@ -90,7 +104,7 @@ class EffectiveDisplayTests(TestCase):
         self.assertEqual(attempts[0].test_result.score, Decimal("0"))
 
     def test_notifications_on_create_and_resolve(self):
-        # Yeni apellyasiya → imtahan müəllifinə bildiriş.
+        # Yeni apellyasiya → imtahan mərkəzinə bildiriş.
         appeal = create_appeal(
             attempt=self.attempt,
             student=self.student,
@@ -102,9 +116,10 @@ class EffectiveDisplayTests(TestCase):
                 }
             ],
         )
-        teacher_notes = InAppNotification.objects.filter(recipient=self.teacher)
-        self.assertEqual(teacher_notes.count(), 1)
-        self.assertIn("apellyasiya", teacher_notes.first().title.lower())
+        self.assertEqual(InAppNotification.objects.filter(recipient=self.teacher).count(), 0)
+        exam_center_notes = InAppNotification.objects.filter(recipient=self.exam_center)
+        self.assertEqual(exam_center_notes.count(), 1)
+        self.assertIn("apellyasiya", exam_center_notes.first().title.lower())
 
         # Qərar → tələbəyə bildiriş (yalnız bir dəfə — idempotent keçid).
         item = appeal.items.first()
