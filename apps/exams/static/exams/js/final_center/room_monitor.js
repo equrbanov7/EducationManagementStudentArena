@@ -58,8 +58,8 @@
         active: "İmtahanda", completed: "Bitirib", removed: "Çıxarılıb", absent: "Gəlməyib"
     };
     var STAT_CARDS = [
-        ["total", "Təyin olunmuş"], ["connected", "Qoşulu"], ["waiting", "Gözləyir"],
-        ["ready", "Hazır"], ["active", "İmtahanda"], ["completed", "Bitirib"],
+        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"], ["connected", "Qoşulu"],
+        ["waiting", "Gözləyir"], ["ready", "Hazır"], ["active", "İmtahanda"], ["completed", "Bitirib"],
         ["offline", "Oflayn"], ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
     ];
 
@@ -317,8 +317,17 @@
         [startError, endError, removeError].forEach(function (el) { if (el) el.hidden = true; });
     }
 
+    // Escape → açıq modalı bağla.
+    document.addEventListener("keydown", function (evt) {
+        if (evt.key === "Escape") closeModals();
+    });
+
     document.addEventListener("click", function (evt) {
-        if (evt.target.closest("[data-close-modal]")) closeModals();
+        // Bağla düyməsi VƏ ya modalın kənarına (backdrop) klik → bağla.
+        if (evt.target.closest("[data-close-modal]") ||
+            (evt.target.classList && evt.target.classList.contains("fxc-modal"))) {
+            closeModals();
+        }
         var removeBtn = evt.target.closest("[data-remove-ticket]");
         if (removeBtn) {
             removeTicketId = removeBtn.dataset.removeTicket;

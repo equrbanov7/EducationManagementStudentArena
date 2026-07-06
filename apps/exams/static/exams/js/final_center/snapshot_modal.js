@@ -12,10 +12,15 @@
 
     var snapshotTpl = modal.dataset.snapshotUrlTemplate; // .../sessions/0/tickets/0/snapshot/
     var resumeTpl = modal.dataset.resumeUrlTemplate;
+    var reentryTpl = modal.dataset.reentryUrlTemplate;
     var removeTpl = modal.dataset.removeUrlTemplate;
 
     var current = { sessionId: null, ticketId: null };
     var onChange = null; // monitor bunu təyin edir — əməliyyatdan sonra snapshot yeniləmək üçün
+    // Canlı "çiyni üzərindən" izləmə. Sistem yükünü azaltmaq üçün avtomatik
+    // yenilənmə 30 saniyədədir; "Yenilə" düyməsi isə dərhal yeniləyir.
+    var POLL_MS = 30000;
+    var pollTimer = null;
 
     function esc(t) {
         var d = document.createElement("div");
@@ -41,26 +46,50 @@
         el.hidden = !msg;
     }
 
+    function hideReentryPin() {
+        var el = document.getElementById("fxc-reentry-pin");
+        if (el) el.hidden = true;
+    }
+
     function open(sessionId, ticketId) {
         current.sessionId = sessionId;
         current.ticketId = ticketId;
         modal.hidden = false;
         setError("");
-        load();
+        hideReentryPin(); // əvvəlki tələbənin PIN-i qalmasın
+        load(false);
+        startPolling();
     }
 
     function close() {
         modal.hidden = true;
+        stopPolling();
     }
 
-    function load() {
+    function startPolling() {
+        stopPolling();
+        pollTimer = window.setInterval(function () { load(true); }, POLL_MS);
+    }
+
+    function stopPolling() {
+        if (pollTimer) { window.clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    // silent=true → arxa-fon poll: "Yüklənir…" göstərmir və scroll mövqeyini saxlayır.
+    function load(silent) {
         var body = document.getElementById("fxc-snapshot-body");
-        if (body) body.innerHTML = '<p class="fxc-muted fxc-center">Yüklənir…</p>';
+        if (body && !silent) body.innerHTML = '<p class="fxc-muted fxc-center">Yüklənir…</p>';
+        var keepScroll = body ? body.scrollTop : 0;
         fetch(fillUrl(snapshotTpl, current.sessionId, current.ticketId), { credentials: "same-origin" })
             .then(function (r) { return r.json(); })
-            .then(render)
+            .then(function (d) {
+                render(d);
+                if (silent && body) body.scrollTop = keepScroll;
+                // Cəhd bitibsə və ya hələ başlamayıbsa canlı poll-a ehtiyac yoxdur.
+                if (d.is_finished || !d.has_attempt) stopPolling();
+            })
             .catch(function () {
-                if (body) body.innerHTML = '<p class="fxc-modal-error">Məlumat yüklənmədi.</p>';
+                if (body && !silent) body.innerHTML = '<p class="fxc-modal-error">Məlumat yüklənmədi.</p>';
             });
     }
 
@@ -90,12 +119,14 @@
         }
 
         // Nəzarətçi əməliyyatları yalnız aktiv (bitməmiş) cəhd üçün.
+        var isLive = d.has_attempt && !d.is_finished;
         if (actionsEl) {
-            var showActions = d.has_attempt && !d.is_finished;
-            actionsEl.hidden = !showActions;
+            actionsEl.hidden = !isLive;
             var resumeBtn = actionsEl.querySelector('[data-snap-action="resume"]');
             if (resumeBtn) resumeBtn.hidden = !(d.supervision_status === "locked");
         }
+        var liveEl = document.getElementById("fxc-snapshot-live");
+        if (liveEl) liveEl.hidden = !isLive;
 
         if (!body) return;
         if (!d.has_attempt) {
@@ -157,13 +188,18 @@
     }
 
     modal.addEventListener("click", function (evt) {
-        if (evt.target.closest("[data-close-snapshot]")) { close(); return; }
+        // Bağla düyməsi VƏ ya modalın kənarına (backdrop) klik → bağla.
+        if (evt.target.closest("[data-close-snapshot]") || evt.target === modal) { close(); return; }
         var actBtn = evt.target.closest("[data-snap-action]");
         if (!actBtn) return;
         var action = actBtn.dataset.snapAction;
         if (action === "resume") {
             postAction(fillUrl(resumeTpl, current.sessionId, current.ticketId), "")
                 .then(afterAction).catch(netErr);
+        } else if (action === "reentry") {
+            if (!window.confirm("Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam edəcək.")) return;
+            postAction(fillUrl(reentryTpl, current.sessionId, current.ticketId), "")
+                .then(afterReentry).catch(netErr);
         } else if (action === "suspend") {
             var reason = window.prompt("Dayandırma səbəbi:");
             if (!reason) return;
@@ -179,17 +215,32 @@
 
     function afterAction(result) {
         if (result.ok && result.data.success !== false) {
-            load();
+            load(false);
+            startPolling();
             if (typeof onChange === "function") onChange();
         } else {
             setError((result.data && result.data.error) || "Əməliyyat mümkün olmadı.");
         }
     }
 
+    // Yenidən giriş: yeni PIN-i modalда BİR DƏFƏ göstər (nəzarətçi tələbəyə deyir).
+    function afterReentry(result) {
+        if (result.ok && result.data.success !== false && result.data.pin) {
+            setError("");
+            var box = document.getElementById("fxc-reentry-pin");
+            var val = document.getElementById("fxc-reentry-pin-value");
+            if (val) val.textContent = result.data.pin;
+            if (box) box.hidden = false;
+            if (typeof onChange === "function") onChange();
+        } else {
+            setError((result.data && result.data.error) || "Yenidən giriş mümkün olmadı.");
+        }
+    }
+
     function netErr() { setError("Şəbəkə xətası — yenidən cəhd edin."); }
 
     var refreshBtn = document.getElementById("fxc-snapshot-refresh");
-    if (refreshBtn) refreshBtn.addEventListener("click", load);
+    if (refreshBtn) refreshBtn.addEventListener("click", function () { load(false); startPolling(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
 
     window.FXCSnapshot = {

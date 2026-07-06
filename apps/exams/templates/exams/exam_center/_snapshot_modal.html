@@ -4,17 +4,26 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
 <div class="fxc-modal" id="fxc-snapshot-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fxc-snapshot-title"
      data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=0 ticket_id=0 %}"
      data-resume-url-template="{% url 'exams:exam_center_ticket_resume' session_id=0 ticket_id=0 %}"
+     data-reentry-url-template="{% url 'exams:exam_center_ticket_reentry' session_id=0 ticket_id=0 %}"
      data-remove-url-template="{% url 'exams:exam_center_ticket_remove' session_id=0 ticket_id=0 %}">
   <div class="fxc-modal-card fxc-snapshot-card">
     <button type="button" class="fxc-snapshot-close" data-close-snapshot aria-label="{% trans 'Bağla' %}">
       <i class="fas fa-times"></i>
     </button>
-    <h2 id="fxc-snapshot-title"><i class="fas fa-desktop"></i> <span id="fxc-snapshot-name">—</span></h2>
+    <h2 id="fxc-snapshot-title">
+      <i class="fas fa-desktop"></i> <span id="fxc-snapshot-name">—</span>
+      <span class="fxc-snapshot-live" id="fxc-snapshot-live" hidden>
+        <span class="fxc-live-pulse" aria-hidden="true"></span> {% trans "Canlı izləmə" %}
+      </span>
+    </h2>
     <p class="fxc-snapshot-subject" id="fxc-snapshot-subject"></p>
     <div class="fxc-snapshot-meta" id="fxc-snapshot-meta"></div>
     <div class="fxc-snapshot-actions" id="fxc-snapshot-actions" hidden>
       <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-snap-action="resume" hidden>
         <i class="fas fa-play"></i> {% trans "Bərpa et" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-primary" data-snap-action="reentry">
+        <i class="fas fa-key"></i> {% trans "Yenidən giriş ver" %}
       </button>
       <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-snap-action="suspend">
         <i class="fas fa-pause"></i> {% trans "Dayandır" %}
@@ -22,6 +31,17 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
       <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-snap-action="remove">
         <i class="fas fa-user-slash"></i> {% trans "İmtahandan çıxar" %}
       </button>
+    </div>
+    {# Yenidən giriş PIN-i — yalnız bir dəfə göstərilir #}
+    <div class="fxc-reentry-pin" id="fxc-reentry-pin" hidden>
+      <div class="fxc-reentry-pin-row">
+        <i class="fas fa-key" aria-hidden="true"></i>
+        <span>{% trans "Yeni giriş PIN-i:" %}</span>
+        <strong id="fxc-reentry-pin-value">—</strong>
+      </div>
+      <p class="fxc-reentry-pin-hint">
+        {% trans "Bu PIN-i tələbəyə deyin — /exams/final/ səhifəsindən daxil olub imtahana OLDUĞU YERDƏN davam edəcək. Yalnız bir dəfə göstərilir." %}
+      </p>
     </div>
     <p class="fxc-modal-error" id="fxc-snapshot-error" hidden></p>
     <div class="fxc-snapshot-body" id="fxc-snapshot-body">

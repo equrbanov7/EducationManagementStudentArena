@@ -23,7 +23,10 @@
 
   <header class="fxc-head">
     <div>
-      <span class="fxc-conn" id="fxc-room-ws" data-state="online">{% trans "Canlı" %}</span>
+      <span class="fxc-headline-row">
+        <span class="fxc-conn" id="fxc-room-ws" data-state="online">{% trans "Canlı" %}</span>
+        <span class="fxc-updated" id="fxc-room-updated"></span>
+      </span>
       <h1><i class="fas fa-tower-observation"></i> {{ room.name }} <code>{{ room.code }}</code></h1>
       <p class="fxc-sub" id="fxc-room-sessions">
         {% trans "Zaldakı canlı imtahanlar" %}
@@ -57,31 +60,47 @@
     </select>
   </div>
 
-  <section class="fxc-map-panel">
-    <div class="fxc-map-legend">
-      <span><i class="fxc-sw fxc-sw--active"></i> {% trans "İmtahanda" %}</span>
-      <span><i class="fxc-sw fxc-sw--ready"></i> {% trans "Hazır" %}</span>
-      <span><i class="fxc-sw fxc-sw--waiting"></i> {% trans "Gözləyir" %}</span>
-      <span><i class="fxc-sw fxc-sw--warn"></i> {% trans "Pozuntu" %}</span>
-      <span><i class="fxc-sw fxc-sw--completed"></i> {% trans "Bitirib" %}</span>
-      <span><i class="fxc-sw fxc-sw--removed"></i> {% trans "Çıxarılıb" %}</span>
-      <span><i class="fxc-sw fxc-sw--idle"></i> {% trans "Oflayn / gəlməyib" %}</span>
-    </div>
-    <div class="fxc-computer-map" id="fxc-computer-map" aria-live="polite"></div>
-    <p class="fxc-map-hint">
-      <i class="fas fa-hand-pointer" aria-hidden="true"></i>
-      {% trans "Kompüterin üzərinə klik edərək tələbənin hansı fənndə olduğunu və nə etdiyini görün." %}
-    </p>
-  </section>
+  <div class="fxc-monitor-cols">
+    <section class="fxc-map-panel">
+      <div class="fxc-map-legend">
+        <span><i class="fxc-sw fxc-sw--active"></i> {% trans "İmtahanda" %}</span>
+        <span><i class="fxc-sw fxc-sw--ready"></i> {% trans "Hazır" %}</span>
+        <span><i class="fxc-sw fxc-sw--waiting"></i> {% trans "Gözləyir" %}</span>
+        <span><i class="fxc-sw fxc-sw--warn"></i> {% trans "Pozuntu" %}</span>
+        <span><i class="fxc-sw fxc-sw--completed"></i> {% trans "Bitirib" %}</span>
+        <span><i class="fxc-sw fxc-sw--removed"></i> {% trans "Çıxarılıb" %}</span>
+        <span><i class="fxc-sw fxc-sw--idle"></i> {% trans "Oflayn / gəlməyib" %}</span>
+      </div>
+      <div class="fxc-computer-map" id="fxc-computer-map" aria-live="polite"></div>
+      <p class="fxc-map-hint">
+        <i class="fas fa-hand-pointer" aria-hidden="true"></i>
+        {% trans "Kompüterin üzərinə klik edərək tələbənin hansı fənndə olduğunu və nə etdiyini görün." %}
+      </p>
+    </section>
+
+    {# ── Qayda pozanlar paneli (canlı, sağ tərəf) ── #}
+    <aside class="fxc-violations-panel" id="fxc-violations-panel" aria-label="{% trans 'Qayda pozanlar' %}">
+      <h3 class="fxc-violations-title">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        {% trans "Qayda pozanlar" %}
+        <span class="fxc-vio-badge" id="fxc-vio-count">0</span>
+      </h3>
+      <div class="fxc-violations-list" id="fxc-violations-list"></div>
+    </aside>
+  </div>
 </div>
 
 {# Tələbə canlı görüntü modalı — session_monitor ilə eyni komponent #}
 {% include "exams/exam_center/_snapshot_modal.html" %}
+{# Standart təsdiq modalı (window.confirm əvəzinə) #}
+{% include "exams/exam_center/_confirm_modal.html" %}
 
 {{ snapshot|json_script:"fxc-initial-room-snapshot" }}
+{{ monitor_labels|json_script:"fxc-monitor-i18n" }}
 {% endblock %}
 
 {% block extraJs %}
+    <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/room_aggregate.js' %}" defer></script>
 {% endblock %}

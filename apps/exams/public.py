@@ -34,12 +34,12 @@ from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit 
 from apps.exams.services.ai_summary import (  # noqa: F401
     generate_exam_statistics_summary,
 )
-from apps.exams.services.grading import (  # noqa: F401
-    calculate_attempt_score,
-)
 from apps.exams.services.final_center import (  # noqa: F401
     student_final_exam_context,
     user_supervises_final_sessions,
+)
+from apps.exams.services.grading import (  # noqa: F401
+    calculate_attempt_score,
 )
 from apps.exams.services.language_variants import (  # noqa: F401
     available_language_options,

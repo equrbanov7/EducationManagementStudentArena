@@ -89,12 +89,14 @@
                 }
             }
             if (assignedExamInfoStartBtn) {
-                assignedExamInfoStartBtn.textContent = gettext("İmtahan girişinə keç");
-                assignedExamInfoStartBtn.disabled = !entryOpen || !assignedExamModalFinalEntryUrl;
-                assignedExamInfoStartBtn.title = entryOpen
-                    ? ""
-                    : gettext("İmtahan hələ başlamayıb — təyin olunmuş vaxtda yenidən yoxlayın.");
+                // Final imtahanı kabinetdən başladılmır/keçilmir — düymə tamam gizlədilir.
+                // Tələbə yalnız PIN + xəbərdarlığı görür; imtahana ayrıca /exams/final/
+                // giriş səhifəsindən istifadəçi adı + PIN ilə daxil olur.
+                assignedExamInfoStartBtn.hidden = true;
             }
+            // Yalnız məlumat modalı olduğu üçün "Ləğv et" → "Bağla".
+            var finalCancelBtn = document.getElementById("assignedExamInfoCancelBtn");
+            if (finalCancelBtn) finalCancelBtn.textContent = gettext("Bağla");
         }
 
         function openAssignedExamInfoModal(trigger) {
@@ -146,12 +148,17 @@
                     assignedExamCodeForm.classList.toggle("is-hidden", !assignedExamModalRequiresCode);
                 }
                 if (assignedExamInfoStartBtn) {
+                    // Adi imtahan: düymə görünür (final rejimindən sonra bərpa olunur).
+                    assignedExamInfoStartBtn.hidden = false;
                     assignedExamInfoStartBtn.textContent = assignedExamModalRequiresCode
                         ? gettext("Kodu təsdiqlə və başla")
                         : gettext("İmtahana başla");
                     assignedExamInfoStartBtn.disabled = false;
                     assignedExamInfoStartBtn.title = "";
                 }
+                // "Bağla" → "Ləğv et" (final rejimindən sonra bərpa).
+                var cancelBtn = document.getElementById("assignedExamInfoCancelBtn");
+                if (cancelBtn) cancelBtn.textContent = gettext("Ləğv et");
             }
             assignedExamCodeSubmitInFlight = false;
 

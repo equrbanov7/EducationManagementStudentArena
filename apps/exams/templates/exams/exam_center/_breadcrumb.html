@@ -4,7 +4,7 @@ Kök (İmtahan Nəzarət Sistemi) = zallar hub-ı.
 Parametrlər: back_url, parent_label, parent_url, current_label, root_current.
 root_current=True olduqda kök səhifənin özüdür (geri düyməsi yox, kök = cari).{% endcomment %}
 <nav class="fxc-breadcrumb" aria-label="{% trans 'Naviqasiya' %}">
-  {% if back_url and not root_current %}
+  {% if back_url %}
   <a href="{{ back_url }}" class="fxc-breadcrumb-back">
     <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" %}
   </a>

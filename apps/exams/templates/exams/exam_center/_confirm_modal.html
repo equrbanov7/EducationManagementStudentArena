@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}Standart təsdiq modalı — brauzerin window.confirm-i əvəzinə.
+İşlətmə: window.FXCConfirm.open({title, message, confirmText, confirmClass, onConfirm}).
+onConfirm(state, ui) — state.override; ui.showError/showOverride/setLoading/close.{% endcomment %}
+<div class="fxc-modal" id="fxc-confirm-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fxc-confirm-title">
+  <div class="fxc-modal-card fxc-confirm-card">
+    <h2 id="fxc-confirm-title">
+      <i class="fas fa-circle-question" aria-hidden="true"></i>
+      <span id="fxc-confirm-title-text"></span>
+    </h2>
+    <p class="fxc-confirm-message" id="fxc-confirm-message"></p>
+    <label class="fxc-check" id="fxc-confirm-override-wrap" hidden>
+      <input type="checkbox" id="fxc-confirm-override">
+      <span id="fxc-confirm-override-label"></span>
+    </label>
+    <p class="fxc-modal-error" id="fxc-confirm-error" hidden></p>
+    <div class="fxc-actions">
+      <button type="button" class="fxc-btn fxc-btn-ghost" data-confirm-cancel>{% trans "İmtina" %}</button>
+      <button type="button" class="fxc-btn fxc-btn-primary" id="fxc-confirm-ok">{% trans "Təsdiqlə" %}</button>
+    </div>
+  </div>
+</div>

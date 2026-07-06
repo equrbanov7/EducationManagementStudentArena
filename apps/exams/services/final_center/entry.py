@@ -20,6 +20,7 @@ from django.utils import timezone
 from apps.exams.domain.final_center import (
     ROOM_SESSION_STATE_ACTIVE,
     ROOM_SESSION_STATE_ENTRY_OPEN,
+    TICKET_STATUS_ACTIVE,
     TICKET_STATUS_ASSIGNED,
     TICKET_STATUS_READY,
     TICKET_STATUS_WAITING,
@@ -74,12 +75,23 @@ def _candidate_ticket(user):
     """
     İstifadəçinin girişə uyğun bileti: oturumu giriş üçün açıq/aktiv olan,
     yekunlaşmamış bilet. Ən yaxın oturum seçilir.
+
+    ``ACTIVE`` status da daxildir — YENİDƏN GİRİŞ üçün (brauzer çöküb/internet
+    gedib/kompüter dəyişib). Amma bu YALNIZ nəzarətçi PIN-i yenidən verəndə
+    işləyir: adi aktiv tələbənin PIN-i başlanğıcda ləğv olunur (``has_valid_pin``
+    False) → ``verify_ticket_pin`` rədd edir. Yəni PIN hələ də birdəfəlikdir;
+    yalnız nəzarətçinin yeni verdiyi PIN ilə olduğu yerdən davam etmək olur.
     """
     now = timezone.now()
     return (
         FinalExamTicket.objects.filter(
             student=user,
-            status__in=(TICKET_STATUS_ASSIGNED, TICKET_STATUS_WAITING, TICKET_STATUS_READY),
+            status__in=(
+                TICKET_STATUS_ASSIGNED,
+                TICKET_STATUS_WAITING,
+                TICKET_STATUS_READY,
+                TICKET_STATUS_ACTIVE,
+            ),
             session__state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE),
         )
         .filter(Q(pin_expires_at__isnull=True) | Q(pin_expires_at__gt=now))

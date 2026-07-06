@@ -13901,7 +13901,9 @@ msgstr "Marked correct option {option} does not exist."
 
 msgctxt "exams.service.parsing.warning"
 msgid "correct_defaulted"
-msgstr "No correct answer marker was found for this question — option A was assigned by default. Review and set the correct answer."
+msgstr ""
+"No correct answer marker was found for this question — option A was assigned"
+" by default. Review and set the correct answer."
 
 msgctxt "exams.view.student.list.title"
 msgid "final_exams"
@@ -13909,7 +13911,8 @@ msgstr "Final exams"
 
 msgctxt "exams.view.final_center.permission"
 msgid "final_center_ip_not_allowed"
-msgstr "This page can only be accessed from computers authorised by the exam center."
+msgstr ""
+"This page can only be accessed from computers authorised by the exam center."
 
 msgctxt "exams.service.access.permission"
 msgid "final_exam_questions_exam_center_only"
@@ -15479,10 +15482,10 @@ msgid "Dil"
 msgstr "Language"
 
 msgid "Aktiv"
-msgstr "Aktiv"
+msgstr "Active"
 
 msgid "Deaktiv"
-msgstr "Deaktiv"
+msgstr "Inactive"
 
 msgid "Deaktiv et"
 msgstr "Yes, deactivate"
@@ -16062,7 +16065,7 @@ msgid "Seçilmişləri yadda saxla"
 msgstr "Seçilmişləri yadda saxla"
 
 msgid "Geri"
-msgstr "Geri"
+msgstr "Back"
 
 msgctxt "exams.template.test_question_bank"
 msgid "label_question_count"
@@ -16782,7 +16785,7 @@ msgid "sual tapıldı"
 msgstr "sual tapıldı"
 
 msgid "Təmizlə"
-msgstr "Təmizlə"
+msgstr "Clear"
 
 msgid "Sualı seç"
 msgstr "Select a question"
@@ -28066,6 +28069,539 @@ msgstr "A rubric with this name already exists."
 
 msgid "Tələbə yoxdur"
 msgstr "No students"
+
+# ── Final imtahan mərkəzi — tələbə səhifələri (avtomatik əlavə) ──
+msgctxt "exams.template.final_entry"
+msgid "Final imtahan girişi"
+msgstr "Final exam login"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adınızı və şəxsi imtahan PIN-inizi daxil edin"
+msgstr "Enter your username and personal exam PIN"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adı"
+msgstr "Username"
+
+msgctxt "exams.template.final_entry"
+msgid "tələbə istifadəçi adı"
+msgstr "student username"
+
+msgctxt "exams.template.final_entry"
+msgid "İmtahan PIN-i"
+msgstr "Exam PIN"
+
+msgctxt "exams.template.final_entry"
+msgid "PIN yalnız sizə aiddir və yalnız bir imtahana keçərlidir."
+msgstr "The PIN belongs only to you and is valid for a single exam."
+
+msgctxt "exams.template.final_entry"
+msgid "İmtahana daxil ol"
+msgstr "Enter the exam"
+
+msgctxt "exams.template.final_entry"
+msgid "Giriş cəhdləri qeydə alınır. PIN-inizi heç kimlə bölüşməyin."
+msgstr "Login attempts are logged. Do not share your PIN with anyone."
+
+msgctxt "exams.template.final_entry"
+msgid "İnterfeys dili"
+msgstr "Interface language"
+
+msgctxt "exams.template.final_gate"
+msgid "Final imtahanı"
+msgstr "Final exam"
+
+msgctxt "exams.template.final_gate"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "exams.template.final_gate"
+msgid "Vaxt"
+msgstr "Time"
+
+msgctxt "exams.template.final_gate"
+msgid "Müddət"
+msgstr "Duration"
+
+msgctxt "exams.template.final_gate"
+msgid "dəqiqə"
+msgstr "minutes"
+
+msgctxt "exams.template.final_gate"
+msgid "Zal"
+msgstr "Hall"
+
+msgctxt "exams.template.final_gate"
+msgid "Yer"
+msgstr "Seat"
+
+msgctxt "exams.template.final_gate"
+msgid "Nəzarətçi"
+msgstr "Invigilator"
+
+msgctxt "exams.template.final_gate"
+msgid "İmtahan qaydaları"
+msgstr "Exam rules"
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan zamanı səhifəni tərk etmək, tab dəyişmək və pəncərəni kiçiltmək "
+"qadağandır."
+msgstr ""
+"Leaving the page, switching tabs, or minimizing the window during the exam "
+"is prohibited."
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İcazə verilməyən vəsaitlərdən (telefon, konspekt, digər cihazlar) istifadə "
+"qadağandır."
+msgstr ""
+"Using unauthorized materials (phone, notes, other devices) is prohibited."
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan prosesi real vaxt rejimində monitorinq olunur və bütün hərəkətlər "
+"qeydə alınır."
+msgstr "The exam is monitored in real time and all actions are logged."
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan tam ekran rejimində keçirilir; rejimdən çıxış pozuntu sayıla bilər."
+msgstr ""
+"The exam runs in full-screen mode; exiting it may count as a violation."
+
+msgctxt "exams.template.final_gate"
+msgid "Qayda pozuntusu halında nəzarətçi sizi imtahandan çıxara bilər."
+msgstr ""
+"In case of a rule violation, the invigilator may remove you from the exam."
+
+msgctxt "exams.template.final_gate"
+msgid "İmtahan dilini seçin"
+msgstr "Choose the exam language"
+
+msgctxt "exams.template.final_gate"
+msgid "Dil seçimi imtahan başladıqdan sonra dəyişdirilə bilməz."
+msgstr "The language choice cannot be changed after the exam starts."
+
+msgctxt "exams.template.final_gate"
+msgid "İmtahan dili"
+msgstr "Exam language"
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan qaydaları ilə tanış oldum və onlara əməl edəcəyimi təsdiqləyirəm."
+msgstr "I have read the exam rules and confirm that I will follow them."
+
+msgctxt "exams.template.final_gate"
+msgid "Geri"
+msgstr "Back"
+
+msgctxt "exams.template.final_gate"
+msgid "Davam et"
+msgstr "Continue"
+
+msgctxt "exams.template.final_waiting"
+msgid "Gözləmə otağı"
+msgstr "Waiting room"
+
+msgctxt "exams.template.final_waiting"
+msgid "Yer"
+msgstr "Seat"
+
+msgctxt "exams.template.final_waiting"
+msgid "Nəzarətçinin imtahanı başlatması gözlənilir…"
+msgstr "Waiting for the invigilator to start the exam…"
+
+msgctxt "exams.template.final_waiting"
+msgid "Seçdiyiniz imtahan dili"
+msgstr "Your selected exam language"
+
+msgctxt "exams.template.final_waiting"
+msgid "Server bağlantısı"
+msgstr "Server connection"
+
+msgctxt "exams.template.final_waiting"
+msgid "Qoşulur…"
+msgstr "Connecting…"
+
+msgctxt "exams.template.final_waiting"
+msgid "Hazırlıq yoxlamaları"
+msgstr "Readiness checks"
+
+msgctxt "exams.template.final_waiting"
+msgid "İmtahana başla"
+msgstr "Start the exam"
+
+msgctxt "exams.template.final_waiting"
+msgid ""
+"Gözləmə otağından çıxmaq istədiyinizə əminsiniz? İmtahan cəhdiniz "
+"yanmayacaq."
+msgstr ""
+"Are you sure you want to leave the waiting room? Your exam attempt will not "
+"be lost."
+
+msgctxt "exams.template.final_waiting"
+msgid "İmtina et və çıx"
+msgstr "Cancel and exit"
+
+msgctxt "exams.template.final_waiting"
+msgid ""
+"Texniki problem yaranarsa, əlinizi qaldıraraq zal nəzarətçisinə müraciət "
+"edin."
+msgstr ""
+"If a technical problem occurs, raise your hand and contact the hall "
+"invigilator."
+
+msgctxt "exams.final_center.entry"
+msgid "Çox sayda cəhd — bir dəqiqə sonra yenidən yoxlayın."
+msgstr "Too many attempts — try again in a minute."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"Təhlükəsizlik səbəbindən giriş müvəqqəti kilidlənib. Nəzarətçiyə müraciət "
+"edin."
+msgstr ""
+"Access is temporarily locked for security reasons. Contact the invigilator."
+
+msgctxt "exams.final_center.entry"
+msgid "Məlumatlar yanlışdır və ya aktiv final imtahanınız yoxdur."
+msgstr "The details are incorrect or you have no active final exam."
+
+msgctxt "exams.final_center.entry"
+msgid "Oturum hazırda giriş üçün açıq deyil."
+msgstr "The session is not currently open for entry."
+
+msgctxt "exams.final_center.gate"
+msgid "Davam etmək üçün imtahan qaydalarını təsdiqləyin."
+msgstr "Confirm the exam rules to continue."
+
+msgid "İmtahan Nəzarət Sistemi"
+msgstr "Exam Supervision System"
+
+msgid "İmtahan zalları"
+msgstr "Exam halls"
+
+msgid "Zalı seçin — canlı imtahanları izləyin və idarə edin"
+msgstr "Select a hall — monitor and manage live exams"
+
+msgid "Sizə təyin olunmuş zallar — daxil olub canlı nəzarəti başladın"
+msgstr "Halls assigned to you — enter and start live supervision"
+
+msgid "Oturumlar"
+msgstr "Sessions"
+
+msgid "Hesabatlar"
+msgstr "Reports"
+
+msgid "Yeni zal"
+msgstr "New hall"
+
+msgid "Zal adı, kodu və ya bina üzrə axtar…"
+msgstr "Search by hall name, code or building…"
+
+msgid "Zal axtarışı"
+msgstr "Hall search"
+
+msgid "Status filtri"
+msgstr "Status filter"
+
+msgid "Bütün zallar"
+msgstr "All halls"
+
+msgid "Canlı zallar"
+msgstr "Live halls"
+
+msgid "Boş zallar"
+msgstr "Idle halls"
+
+msgid "Deaktiv zallar"
+msgstr "Inactive halls"
+
+msgid "canlı"
+msgstr "live"
+
+msgid "yer"
+msgstr "seats"
+
+msgid "kompüter"
+msgstr "computers"
+
+msgid "oturum"
+msgstr "sessions"
+
+msgid "Tutum"
+msgstr "Capacity"
+
+msgid "Kompüter"
+msgstr "Computers"
+
+msgid "Ümumi oturum"
+msgstr "Total sessions"
+
+msgid "Zalda canlı imtahanlar:"
+msgstr "Live exams in the hall:"
+
+msgid "Hazırda canlı imtahan yoxdur"
+msgstr "No live exams right now"
+
+msgid "Zalı izlə"
+msgstr "Monitor hall"
+
+msgid "Redaktə"
+msgstr "Edit"
+
+msgid "Axtarışa uyğun zal tapılmadı."
+msgstr "No halls match your search."
+
+msgid "Hələ zal yaradılmayıb."
+msgstr "No halls created yet."
+
+msgid "İlk zalı yarat"
+msgstr "Create the first hall"
+
+msgid "Sizə hələ zal təyin edilməyib."
+msgstr "No halls assigned to you yet."
+
+msgid "Zal nəzarəti"
+msgstr "Hall supervision"
+
+msgid "Canlı"
+msgstr "Live"
+
+msgid "Zaldakı canlı imtahanlar"
+msgstr "Live exams in the hall"
+
+msgid "Hamısında girişi aç"
+msgstr "Open entry for all"
+
+msgid "Zalda hamısını başlat"
+msgstr "Start all in the hall"
+
+msgid "Zal statistikası"
+msgstr "Hall statistics"
+
+msgid "Tələbə / fənn üzrə süz…"
+msgstr "Filter by student / subject…"
+
+msgid "İmtahan filtri"
+msgstr "Exam filter"
+
+msgid "Bütün imtahanlar"
+msgstr "All exams"
+
+msgid "Hazır"
+msgstr "Ready"
+
+msgid "İmtahanda"
+msgstr "In exam"
+
+msgid "Bitirib"
+msgstr "Finished"
+
+msgid "Çıxarılıb"
+msgstr "Removed"
+
+msgid "Pozuntu"
+msgstr "Violation"
+
+msgid "Oflayn / gəlməyib"
+msgstr "Offline / absent"
+
+msgid ""
+"Kompüterin üzərinə klik edərək tələbənin hansı fənndə olduğunu və nə "
+"etdiyini görün."
+msgstr ""
+"Click a computer to see which subject the student is in and what they are "
+"doing."
+
+msgid "Təyin olunmuş"
+msgstr "Assigned"
+
+msgid "Qoşulu"
+msgstr "Connected"
+
+msgid "Oflayn"
+msgstr "Offline"
+
+msgid "Gəlməyib"
+msgstr "Absent"
+
+msgid "Təyin olunub"
+msgstr "Assigned"
+
+msgid "Zalda canlı imtahan yoxdur."
+msgstr "No live exams in the hall."
+
+msgid "Nəticə yoxdur"
+msgstr "No results"
+
+msgid "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"
+msgstr "Start all ready exams in the hall at once?"
+
+msgid "Qayda pozanlar"
+msgstr "Rule violators"
+
+msgid "Blokla"
+msgstr "Block"
+
+msgid "Şans ver"
+msgstr "Give a chance"
+
+msgid "Qayda pozan yoxdur"
+msgstr "No rule violators"
+
+msgid "pozuntu"
+msgstr "violations"
+
+msgid "Dayandırılıb"
+msgstr "Suspended"
+
+msgid "Bloklama səbəbi:"
+msgstr "Reason for blocking:"
+
+msgid "Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"
+msgstr "Grant the student an extra chance and resume the exam?"
+
+msgid "Canlı izləmə"
+msgstr "Live tracking"
+
+msgid "Bağlantı kəsildi"
+msgstr "Connection lost"
+
+msgid "Yeniləndi"
+msgstr "Updated"
+
+msgid "İmtahanı başlat"
+msgstr "Start the exam"
+
+msgid "Başlat"
+msgstr "Start"
+
+msgid "Başlatmaq mümkün olmadı."
+msgstr "Could not start."
+
+msgid "Vaxt pəncərəsindən asılı olmayaraq məcburi başlat"
+msgstr "Force start regardless of the time window"
+
+msgid "İmtahan verib"
+msgstr "Took the exam"
+
+msgid "Yenidən giriş ver"
+msgstr "Grant re-entry"
+
+msgid "Yeni giriş PIN-i:"
+msgstr "New entry PIN:"
+
+msgid ""
+"Bu PIN-i tələbəyə deyin — /exams/final/ səhifəsindən daxil olub imtahana "
+"OLDUĞU YERDƏN davam edəcək. Yalnız bir dəfə göstərilir."
+msgstr ""
+"Tell this PIN to the student — they will sign in at /exams/final/ and "
+"continue the exam FROM WHERE THEY LEFT OFF. Shown only once."
+
+msgctxt "exams.final_center.message"
+msgid "Yenidən giriş yalnız imtahanda olan tələbəyə verilir."
+msgstr "Re-entry can only be granted to a student who is taking the exam."
+
+msgctxt "exams.final_center.message"
+msgid "İmtahan artıq bitib."
+msgstr "The exam has already ended."
+
+msgid "PIN yaradıldı və tələbəyə təyin edildi"
+msgstr "PIN created and assigned to the student"
+
+msgid "PIN yenidən yaradıldı"
+msgstr "PIN regenerated"
+
+msgid "PIN nəzarətçiyə göstərildi"
+msgstr "PIN shown to the invigilator"
+
+msgid "Yenidən giriş PIN-i verildi"
+msgstr "Re-entry PIN issued"
+
+msgid "Tələbə PIN ilə daxil oldu"
+msgstr "Student signed in with the PIN"
+
+msgid "Kompüter / yer dəyişdirildi"
+msgstr "Computer / seat changed"
+
+msgid "Tələbə müvəqqəti dayandırıldı"
+msgstr "Student temporarily suspended"
+
+msgid "Tələbə imtahandan çıxarıldı"
+msgstr "Student removed from the exam"
+
+msgid "Tələbə yenidən buraxıldı"
+msgstr "Student re-admitted"
+
+msgid "Oturum yaradıldı"
+msgstr "Session created"
+
+msgid "Giriş açıldı — tələbələr PIN ilə daxil ola bilər"
+msgstr "Entry opened — students can sign in with a PIN"
+
+msgid "İmtahan başladıldı"
+msgstr "Exam started"
+
+msgid "Oturum avtomatik bitirildi"
+msgstr "Session ended automatically"
+
+msgid "Kompüter %(old)s → %(new)s"
+msgstr "Computer %(old)s → %(new)s"
+
+msgid "bərpa anında %(answered)s/%(total)s cavab yazmışdı"
+msgstr "had answered %(answered)s/%(total)s at re-entry"
+
+msgid "kompüter %(seat)s"
+msgstr "computer %(seat)s"
+
+msgid "Pozuntu sayı: %(n)s"
+msgstr "Violations: %(n)s"
+
+msgid "Oturum tarixçəsi"
+msgstr "Session history"
+
+msgid "Tarixçə xülasəsi"
+msgstr "History summary"
+
+msgid "Girişlər"
+msgstr "Entries"
+
+msgid "PIN əməliyyatı"
+msgstr "PIN operations"
+
+msgid "Yenidən giriş"
+msgstr "Re-entries"
+
+msgid "Kompüter dəyişmə"
+msgstr "Computer changes"
+
+msgid "Ümumi hadisə"
+msgstr "Total events"
+
+msgid "Tələbə adı üzrə süz…"
+msgstr "Filter by student name…"
+
+msgid "Tələbə üzrə axtarış"
+msgstr "Search by student"
+
+msgid "komp."
+msgstr "comp."
+
+msgid "icra:"
+msgstr "by:"
+
+msgid "Axtarışa uyğun qeyd yoxdur."
+msgstr "No records match your search."
+
+msgid "Hələ əməliyyat qeydi yoxdur."
+msgstr "No operations recorded yet."
+
+msgid "Tarixçə"
+msgstr "History"
+
+msgid "Tarixçəyə baxış üçün icazəniz yoxdur."
+msgstr "You do not have permission to view the history."
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"

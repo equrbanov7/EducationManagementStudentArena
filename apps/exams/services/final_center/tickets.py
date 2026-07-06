@@ -307,6 +307,9 @@ def begin_attempt_for_ticket(ticket):
             TICKET_STATUS_ACTIVE,
             extra_updates={"attempt": attempt, "started_at": timezone.now()},
         )
+        # İmtahan BAŞLADI → PIN birdəfəlikdir: dərhal ləğv olunur ki, eyni PIN
+        # təkrar giriş üçün işə yaramasın (status filtrindən əlavə HARD zəmanət).
+        revoke_ticket_pin(ticket)
     if not attempt.answers.exists():
         generate_random_questions_for_attempt(attempt)
 
