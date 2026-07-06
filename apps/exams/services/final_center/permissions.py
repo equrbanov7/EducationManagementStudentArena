@@ -86,6 +86,34 @@ def can_supervise_session_ws(user, session) -> bool:
     return can_supervise_session(user, session)
 
 
+def can_view_final_history(user, organization) -> bool:
+    """
+    Final imtahan TARİXÇƏSİNƏ kim baxa bilər — yuxarı səviyyələr:
+
+    * imtahan mərkəzi rəhbəri (``exam_center``),
+    * superadmin,
+    * təşkilat sahibi / admini (rektor / prorektor səviyyəsi).
+
+    Nəzarətçi/müəllim tarixçəni GÖRMÜR (yalnız canlı monitor).
+    """
+    if can_manage_final_center(user):
+        return True
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    if organization is not None and getattr(organization, "owner_id", None) == getattr(user, "id", None):
+        return True
+    from core.roles import ProfileRole
+
+    profile = getattr(user, "profile", None)
+    return profile is not None and getattr(profile, "role", None) in (ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER)
+
+
+def ensure_can_view_final_history(user, organization) -> None:
+    if can_view_final_history(user, organization):
+        return
+    raise PermissionDenied(pgettext("exams.final_center.permission", "Tarixçəyə baxış üçün icazəniz yoxdur."))
+
+
 def user_supervises_final_sessions(user) -> bool:
     """
     Bu istifadəçi (nəzarətçi/heyət kimi) ən azı bir ləğv olunmamış final
@@ -103,8 +131,10 @@ __all__ = [
     "can_manage_final_center",
     "can_supervise_session",
     "can_supervise_session_ws",
+    "can_view_final_history",
     "ensure_can_manage_final_center",
     "ensure_can_supervise_session",
+    "ensure_can_view_final_history",
     "ensure_ticket_owner",
     "sessions_visible_to",
     "supervised_sessions_q",

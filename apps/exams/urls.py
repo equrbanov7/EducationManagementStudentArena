@@ -40,6 +40,11 @@ urlpatterns = [
     path("center/sessions/create/", views.exam_center_session_create, name="exam_center_session_create"),
     path("center/sessions/<int:session_id>/", views.exam_center_session_detail, name="exam_center_session_detail"),
     path(
+        "center/sessions/<int:session_id>/history/",
+        views.exam_center_session_history,
+        name="exam_center_session_history",
+    ),
+    path(
         "center/sessions/<int:session_id>/assign/",
         views.exam_center_session_assign_students,
         name="exam_center_session_assign_students",
@@ -63,6 +68,11 @@ urlpatterns = [
         "center/sessions/<int:session_id>/tickets/<int:ticket_id>/resume/",
         views.exam_center_ticket_resume,
         name="exam_center_ticket_resume",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/reentry/",
+        views.exam_center_ticket_reentry,
+        name="exam_center_ticket_reentry",
     ),
     path(
         "center/sessions/<int:session_id>/open-entry/",

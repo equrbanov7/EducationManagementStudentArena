@@ -1270,7 +1270,8 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("create_post"))
         self.assertContains(response, reverse("accounts:my_results"))
         self.assertContains(response, reverse("accounts:pending_answers"))
-        self.assertContains(response, reverse("accounts:student_organization_request"))
+        # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
+        self.assertNotContains(response, reverse("accounts:student_organization_request"))
         self.assertContains(response, reverse("accounts:profile") + "?section=notifications")
 
     def test_student_with_pending_join_request_can_open_profile_without_active_org(self):
@@ -1671,7 +1672,8 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:pending_review"))
         self.assertNotContains(response, reverse("accounts:superadmin_organizations"))
         self.assertNotContains(response, reverse("accounts:student_organization_management"))
-        self.assertContains(response, reverse("accounts:student_organization_request"))
+        # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
+        self.assertNotContains(response, reverse("accounts:student_organization_request"))
         self.assertContains(response, reverse("accounts:student_leave_organization"))
 
     def test_profile_restores_org_context_for_teacher_course_modal(self):
@@ -1720,39 +1722,10 @@ class ProfileViewTest(TestCase):
         self.assertEqual(modal_response.status_code, 200)
         self.assertContains(modal_response, 'id="createCourseModalForm"', html=False)
 
-    def test_teacher_without_org_sees_join_request_navigation(self):
-        teacher_user = User.objects.create_user(
-            username="teacher_join_nav",
-            email="teacher_join_nav@example.com",
-            password="testpass123",
-        )
-        teacher_profile = teacher_user.profile
-        teacher_profile.organization = None
-        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
-        teacher_profile.role = ProfileRole.TEACHER
-        teacher_profile.requested_organization = None
-        teacher_profile.requested_organization_name = ""
-        teacher_profile.requested_organization_message = ""
-        teacher_profile.save(
-            update_fields=[
-                "organization",
-                "organization_type",
-                "role",
-                "requested_organization",
-                "requested_organization_name",
-                "requested_organization_message",
-                "updated_at",
-            ]
-        )
-
-        self.client.force_login(teacher_user)
-        response = self.client.get(reverse("accounts:profile"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, f"{reverse('accounts:profile')}?section=student-organization-request")
-        self.assertContains(response, "Təşkilata qoşul")
-
-    def test_join_request_navigation_stays_under_general_sidebar_group(self):
+    def test_join_request_navigation_hidden_from_sidebar(self):
+        # "Təşkilata qoşul" sidebar bəndi GİZLƏDİLİB — istifadəçilər sistemə yalnız
+        # admin tərəfindən əlavə olunur (self-join yoxdur). Org-lu istifadəçi üçün
+        # yoxlanır ki, profil-info-dakı dəvət CTA-sı ilə qarışmasın.
         owner = User.objects.create_user(
             username="general_nav_owner",
             email="general_nav_owner@example.com",
@@ -1765,22 +1738,14 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
-        # U16: postlar susmaya görə bağlıdır — bu test posts modulunu aktiv edir.
-        from apps.organizations.cabinet_modules import set_module_enabled
-
-        set_module_enabled(organization, "posts", True)
         _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
 
         _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
 
         self.assertEqual(response.status_code, 200)
-        content = response.content.decode("utf-8")
-        notifications_link = content.index(f'{reverse("accounts:profile")}?section=notifications')
-        join_link = content.index("?section=student-organization-request")
-        posts_link = content.index(f'{reverse("accounts:profile")}?section=posts')
-        self.assertLess(notifications_link, join_link)
-        self.assertLess(join_link, posts_link)
+        self.assertNotContains(response, f"{reverse('accounts:profile')}?section=student-organization-request")
+        self.assertNotContains(response, reverse("accounts:student_organization_request"))
 
     def test_profile_info_shows_pending_organization_invites_for_student_without_selected_org(self):
         owner = User.objects.create_user(
@@ -1920,7 +1885,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("exams:teacher_group_list"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
-        self.assertContains(response, reverse("accounts:student_organization_request"))
+        # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
+        self.assertNotContains(response, reverse("accounts:student_organization_request"))
         self.assertContains(response, reverse("accounts:student_leave_organization"))
 
     def test_groups_section_supports_search_detail_and_student_pagination(self):

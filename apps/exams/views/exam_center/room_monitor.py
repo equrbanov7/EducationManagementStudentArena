@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 from apps.exams.models import ExamRoom
 from apps.exams.services.final_center import (
     HEARTBEAT_INTERVAL_SECONDS,
+    RoomSessionStateError,
     can_manage_final_center,
     can_supervise_session,
     open_entry,
@@ -41,6 +42,63 @@ def _get_room_and_sessions(request, room_id):
     return organization, room, sessions
 
 
+def _monitor_labels():
+    """JS-də render olunan etiketlərin TƏRCÜMƏLƏRİ (server-side gettext).
+
+    Şablonun ``{% trans %}`` sətirləri ilə eyni mənbədən gəlir ki, kompüter
+    xəritəsi/statistika legend ilə eyni dildə və uyğun olsun (JS-də sabit AZ
+    mətn qalmasın — bax "dil problemi").
+    """
+    from django.utils.translation import gettext as _
+
+    return {
+        "stat": {
+            "total": _("Təyin olunmuş"),
+            "participated": _("İmtahan verib"),
+            "connected": _("Qoşulu"),
+            "waiting": _("Gözləyir"),
+            "ready": _("Hazır"),
+            "active": _("İmtahanda"),
+            "completed": _("Bitirib"),
+            "offline": _("Oflayn"),
+            "removed": _("Çıxarılıb"),
+            "absent": _("Gəlməyib"),
+        },
+        "status": {
+            "assigned": _("Təyin olunub"),
+            "waiting": _("Gözləyir"),
+            "ready": _("Hazır"),
+            "active": _("İmtahanda"),
+            "completed": _("Bitirib"),
+            "removed": _("Çıxarılıb"),
+            "absent": _("Gəlməyib"),
+        },
+        "noLiveExams": _("Zalda canlı imtahan yoxdur."),
+        "noResults": _("Nəticə yoxdur"),
+        "allExams": _("Bütün imtahanlar"),
+        "confirmStartAll": _("Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"),
+        "live": _("Canlı"),
+        "disconnected": _("Bağlantı kəsildi"),
+        "updatedAt": _("Yeniləndi"),
+        "start": {
+            "title": _("İmtahanı başlat"),
+            "confirm": _("Başlat"),
+            "failed": _("Başlatmaq mümkün olmadı."),
+            "override": _("Vaxt pəncərəsindən asılı olmayaraq məcburi başlat"),
+        },
+        "violations": {
+            "view": _("Bax"),
+            "block": _("Blokla"),
+            "grantChance": _("Şans ver"),
+            "empty": _("Qayda pozan yoxdur"),
+            "word": _("pozuntu"),
+            "locked": _("Dayandırılıb"),
+            "blockReason": _("Bloklama səbəbi:"),
+            "confirmGrant": _("Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"),
+        },
+    }
+
+
 @login_required
 def exam_center_room_monitor(request, room_id):
     """Zal monitoru — bütün canlı oturumların birləşmiş görüntüsü."""
@@ -54,6 +112,7 @@ def exam_center_room_monitor(request, room_id):
             "snapshot": snapshot,
             "heartbeat_seconds": HEARTBEAT_INTERVAL_SECONDS,
             "can_manage": can_manage_final_center(request.user),
+            "monitor_labels": _monitor_labels(),
         },
     )
 
@@ -74,13 +133,24 @@ def exam_center_room_start_all(request, room_id):
     varsa hamısı eyni anda başlayır. Hər oturum idempotent şəkildə işlənir.
     """
     _organization, room, sessions = _get_room_and_sessions(request, room_id)
+    # Override yalnız imtahan mərkəzi üçün (vaxt pəncərəsindən kənar məcburi start).
+    override = request.POST.get("override") == "1" and can_manage_final_center(request.user)
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
     started = 0
+    last_error = ""
     for session in sessions:
         if session.state == "entry_open":
-            if start_room(session, request.user, request=request):
-                started += 1
-    if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        return JsonResponse({"success": True, "started": started})
+            try:
+                if start_room(session, request.user, request=request, override=override):
+                    started += 1
+            except RoomSessionStateError as exc:
+                # Vaxt pəncərəsi (tez/gec) — 500 vermə, mesaj göstər.
+                last_error = str(exc)
+    if is_ajax:
+        payload = {"success": started > 0, "started": started, "can_override": can_manage_final_center(request.user)}
+        if last_error and not started:
+            payload["error"] = last_error
+        return JsonResponse(payload, status=200 if started or not last_error else 409)
     if started:
         messages.success(
             request,
@@ -88,6 +158,8 @@ def exam_center_room_start_all(request, room_id):
                 count=started
             ),
         )
+    elif last_error:
+        messages.error(request, last_error)
     else:
         messages.warning(request, pgettext("exams.final_center.message", "Başladılacaq hazır oturum tapılmadı."))
     return redirect("exams:exam_center_room_monitor", room_id=room.pk)

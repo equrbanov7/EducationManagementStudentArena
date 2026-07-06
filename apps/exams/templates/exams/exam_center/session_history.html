@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Oturum tarixçəsi" %} — {{ session.exam.title }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/history.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page">
+  {% url 'exams:exam_center_session_detail' session_id=session.pk as detail_url %}
+  {% trans "Tarixçə" as hist_label %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=detail_url current_label=hist_label %}
+
+  <header class="fxc-head">
+    <div>
+      <h1><i class="fas fa-clock-rotate-left"></i> {% trans "Oturum tarixçəsi" %}</h1>
+      <p class="fxc-sub">
+        {{ session.exam.title }} · <i class="fas fa-door-open"></i> {{ session.room.name }} <code>{{ session.room.code }}</code>
+      </p>
+    </div>
+  </header>
+
+  <section class="fxc-stats" aria-label="{% trans 'Tarixçə xülasəsi' %}">
+    <div class="fxc-stat fxc-stat--connected"><div class="fxc-stat-value">{{ summary.entries }}</div><div class="fxc-stat-label">{% trans "Girişlər" %}</div></div>
+    <div class="fxc-stat"><div class="fxc-stat-value">{{ summary.pins }}</div><div class="fxc-stat-label">{% trans "PIN əməliyyatı" %}</div></div>
+    <div class="fxc-stat fxc-stat--participated"><div class="fxc-stat-value">{{ summary.reentries }}</div><div class="fxc-stat-label">{% trans "Yenidən giriş" %}</div></div>
+    <div class="fxc-stat"><div class="fxc-stat-value">{{ summary.seat_moves }}</div><div class="fxc-stat-label">{% trans "Kompüter dəyişmə" %}</div></div>
+    <div class="fxc-stat fxc-stat--removed"><div class="fxc-stat-value">{{ summary.incidents }}</div><div class="fxc-stat-label">{% trans "Pozuntu" %}</div></div>
+    <div class="fxc-stat"><div class="fxc-stat-value">{{ summary.total }}</div><div class="fxc-stat-label">{% trans "Ümumi hadisə" %}</div></div>
+  </section>
+
+  <div class="fxc-toolbar">
+    <input type="search" id="fxc-hist-filter" class="fxc-input fxc-input--grow"
+           placeholder="{% trans 'Tələbə adı üzrə süz…' %}" aria-label="{% trans 'Tələbə üzrə axtarış' %}">
+  </div>
+
+  {% if events %}
+  <ol class="fxc-timeline" id="fxc-timeline">
+    {% for e in events %}
+    <li class="fxc-tl-item fxc-tl-item--{{ e.tone }}" data-student="{{ e.student|default:''|lower }}">
+      <span class="fxc-tl-icon"><i class="fas {{ e.icon }}" aria-hidden="true"></i></span>
+      <div class="fxc-tl-body">
+        <div class="fxc-tl-top">
+          <span class="fxc-tl-title">{{ e.title }}</span>
+          {% if e.student %}
+          <span class="fxc-tl-student">
+            <i class="fas fa-user" aria-hidden="true"></i> {{ e.student }}{% if e.seat %} · {% trans "komp." %} {{ e.seat }}{% endif %}
+          </span>
+          {% endif %}
+        </div>
+        {% if e.detail %}<p class="fxc-tl-detail">{{ e.detail }}</p>{% endif %}
+        <div class="fxc-tl-meta">
+          <time>{{ e.time|date:"d.m.Y H:i:s" }}</time>
+          <span>· {% trans "icra:" %} {{ e.actor }}</span>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="fxc-tl-empty" id="fxc-hist-noresult" hidden>{% trans "Axtarışa uyğun qeyd yoxdur." %}</p>
+  {% else %}
+  <div class="fxc-empty">
+    <i class="far fa-clock"></i>
+    <p>{% trans "Hələ əməliyyat qeydi yoxdur." %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/final_center/history_filter.js' %}" defer></script>
+{% endblock %}

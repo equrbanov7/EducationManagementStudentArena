@@ -19,10 +19,13 @@ from apps.exams.services.final_center import (
     cancel_session,
     end_room,
     open_entry,
+    regenerate_pin,
     remove_student,
     session_monitor_snapshot,
     start_room,
 )
+from core.audit import log_action
+from core.constants import AuditAction
 
 from ._shared import get_center_session_or_404, get_session_ticket_or_404
 
@@ -91,7 +94,8 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
 def exam_center_ticket_resume(request, session_id, ticket_id):
     """
     Dayandırılmış (locked) tələbənin imtahanını bərpa edir — mövcud supervision
-    ``teacher_resume_attempt`` xidmətini təkrar işlədir.
+    ``teacher_resume_attempt`` xidmətini təkrar işlədir. ``grant_extra_chance=1``
+    verilibsə tələbəyə əlavə şans verilir (pozuntu sayğacı bir vahid azalır).
     """
     from apps.exams.services.supervision import teacher_resume_attempt
 
@@ -101,11 +105,80 @@ def exam_center_ticket_resume(request, session_id, ticket_id):
         return JsonResponse(
             {"success": False, "error": pgettext("exams.final_center.message", "Aktiv cəhd yoxdur.")}, status=400
         )
+    grant_extra_chance = request.POST.get("grant_extra_chance") == "1"
     try:
-        teacher_resume_attempt(ticket.attempt, request.user)
+        teacher_resume_attempt(ticket.attempt, request.user, grant_extra_chance=grant_extra_chance)
     except ValueError as exc:
         return JsonResponse({"success": False, "error": str(exc)}, status=409)
     return JsonResponse({"success": True})
+
+
+@login_required
+@require_POST
+def exam_center_ticket_reentry(request, session_id, ticket_id):
+    """
+    YENİDƏN GİRİŞ (best practice: proktorlu bərpa). Bağlantısı kəsilmiş / brauzeri
+    çökmüş / kompüteri dəyişmiş tələbəyə YENİ PIN verir — tələbə ``/exams/final/``
+    -dan həmin PIN ilə daxil olub imtahana OLDUĞU YERDƏN davam edir. Cəhd toxunulmur
+    (cavablar autosave-dədir); kilidlidirsə əvvəlcə açılır. Xam PIN BİR DƏFƏ qaytarılır
+    (nəzarətçi şifahi/əl ilə tələbəyə çatdırır) və audit-ə yazılır — PIN log-a düşmür.
+    """
+    from apps.exams.domain.final_center import TICKET_STATUS_ACTIVE
+
+    organization, session = get_center_session_or_404(request, session_id, for_supervision=True)
+    ticket = get_session_ticket_or_404(session, ticket_id)
+    if ticket.status != TICKET_STATUS_ACTIVE or not ticket.attempt_id:
+        return JsonResponse(
+            {
+                "success": False,
+                "error": pgettext(
+                    "exams.final_center.message", "Yenidən giriş yalnız imtahanda olan tələbəyə verilir."
+                ),
+            },
+            status=400,
+        )
+    if ticket.attempt.is_finished:
+        return JsonResponse(
+            {"success": False, "error": pgettext("exams.final_center.message", "İmtahan artıq bitib.")},
+            status=400,
+        )
+    # Kilidlidirsə əvvəlcə aç ki, yenidən daxil olanda davam edə bilsin.
+    if ticket.attempt.supervision_status == "locked":
+        from apps.exams.services.supervision import teacher_resume_attempt
+
+        try:
+            teacher_resume_attempt(ticket.attempt, request.user)
+        except ValueError:
+            pass
+    # Bərpa anındakı irəliləyiş + kompüter (tarixçə üçün): tələbə PIN alanda nə
+    # qədər yazmışdı və hansı kompüterdə idi — audit-ə yazılır.
+    from apps.exams.services.supervision import get_attempt_live_snapshot
+
+    snap = get_attempt_live_snapshot(ticket.attempt)
+    progress = {
+        "seat": ticket.seat_number,
+        "answered": snap.get("answered"),
+        "total": snap.get("total_questions"),
+    }
+    try:
+        raw_pin = regenerate_pin(ticket, request.user, request=request)
+    except TicketStateError as exc:
+        return JsonResponse({"success": False, "error": str(exc)}, status=409)
+
+    log_action(
+        AuditAction.VIEW,
+        user=request.user,
+        organization=organization,
+        obj=ticket,
+        reason="final_reentry_pin_issued",
+        request=request,
+        resource_type="final_exam_ticket",
+        resource_id=str(ticket.pk),
+        changes={"reentry": progress},
+    )
+    return JsonResponse(
+        {"success": True, "pin": raw_pin, "student_name": ticket.student.get_full_name() or ticket.student.username}
+    )
 
 
 @login_required
@@ -236,6 +309,7 @@ __all__ = [
     "exam_center_session_open_entry",
     "exam_center_session_snapshot",
     "exam_center_session_start",
+    "exam_center_ticket_reentry",
     "exam_center_ticket_remove",
     "exam_center_ticket_resume",
     "exam_center_ticket_snapshot",

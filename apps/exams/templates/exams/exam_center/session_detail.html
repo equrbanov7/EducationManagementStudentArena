@@ -27,6 +27,11 @@
       <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
         <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
       </a>
+      {% if can_view_history %}
+      <a href="{% url 'exams:exam_center_session_history' session_id=session.pk %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-clock-rotate-left"></i> {% trans "Tarixçə" %}
+      </a>
+      {% endif %}
       <a href="{% url 'exams:exam_center_session_monitor' session_id=session.pk %}" class="fxc-btn fxc-btn-primary">
         <i class="fas fa-tower-observation"></i> {% trans "Canlı monitor" %}
       </a>

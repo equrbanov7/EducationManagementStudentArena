@@ -24,6 +24,7 @@ from .events import (
     students_group,
     ticket_group,
 )
+from .history import session_history
 from .monitor import (
     room_live_sessions,
     room_monitor_snapshot,
@@ -34,8 +35,10 @@ from .permissions import (
     can_manage_final_center,
     can_supervise_session,
     can_supervise_session_ws,
+    can_view_final_history,
     ensure_can_manage_final_center,
     ensure_can_supervise_session,
+    ensure_can_view_final_history,
     ensure_ticket_owner,
     sessions_visible_to,
     supervised_sessions_q,
@@ -102,6 +105,7 @@ __all__ = [
     "can_manage_final_center",
     "can_supervise_session",
     "can_supervise_session_ws",
+    "can_view_final_history",
     "cancel_session",
     "clear_entry_session",
     "connected_count",

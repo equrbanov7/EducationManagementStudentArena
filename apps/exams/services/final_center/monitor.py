@@ -22,6 +22,38 @@ from .presence import presence_map
 from .sessions import maybe_auto_end
 from .tickets import sync_ticket_completion
 
+# Bitmiş tələbənin nəticəsi kompüter xəritəsində maks bu qədər saniyə görünür,
+# sonra hücrə boşalır (yeni tələbə üçün). Seat yeni aktiv tələbə ilə tutulubsa
+# köhnə nəticə DƏRHAL düşür.
+FINAL_RESULT_VISIBLE_SECONDS = 180
+
+
+def _visible_grid_tickets(tickets):
+    """
+    Kompüter xəritəsi (grid) üçün GÖRÜNƏN biletləri süzür — sayğaclara TOXUNMUR
+    (sayğaclar bütün biletlərdən hesablanır, bu yalnız görüntü qatıdır):
+
+    * bitmiş (``completed``) bilet nəticəsi maks ``FINAL_RESULT_VISIBLE_SECONDS``
+      görünür, sonra xəritədən düşür;
+    * həmin seat-i (fiziki kompüteri) yeni aktiv/gözləyən tələbə tutubsa, köhnə
+      bitmiş bilet dərhal gizlənir ki, xəritədə yeni tələbə görünsün.
+    """
+    now = timezone.now()
+    occupied_seats = {
+        t.seat_number
+        for t in tickets
+        if t.seat_number is not None and t.status in (TICKET_STATUS_WAITING, TICKET_STATUS_READY, TICKET_STATUS_ACTIVE)
+    }
+    visible = []
+    for ticket in tickets:
+        if ticket.status == TICKET_STATUS_COMPLETED:
+            if ticket.seat_number is not None and ticket.seat_number in occupied_seats:
+                continue
+            if ticket.completed_at and (now - ticket.completed_at).total_seconds() > FINAL_RESULT_VISIBLE_SECONDS:
+                continue
+        visible.append(ticket)
+    return visible
+
 
 def _ticket_row(ticket, presence, exam_title=None):
     """Yalnız əməliyyat üçün lazım olan kompakt sahələr — cavablar/ballar YOX.
@@ -87,6 +119,8 @@ def session_monitor_snapshot(session):
         0,
         counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"],
     )
+    # İmtahan verib (iştirak edən) = cəhdə başlamış hər kəs (aktiv + bitirmiş).
+    counts["participated"] = counts["active"] + counts["completed"]
 
     return {
         "session_id": session.pk,
@@ -100,7 +134,7 @@ def session_monitor_snapshot(session):
         "ended_at": session.ended_at.isoformat() if session.ended_at else None,
         "server_now": timezone.now().isoformat(),
         "counts": counts,
-        "students": [_ticket_row(t, presence) for t in tickets],
+        "students": [_ticket_row(t, presence) for t in _visible_grid_tickets(tickets)],
     }
 
 
@@ -166,6 +200,7 @@ def room_monitor_snapshot(room):
         if ticket.status in counts:
             counts[ticket.status] += 1
     counts["offline"] = max(0, counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"])
+    counts["participated"] = counts["active"] + counts["completed"]
 
     return {
         "room_id": room.pk,
@@ -184,7 +219,7 @@ def room_monitor_snapshot(room):
             }
             for s in sessions
         ],
-        "students": [_ticket_row(t, presence, exam_title=t.session.exam.title) for t in tickets],
+        "students": [_ticket_row(t, presence, exam_title=t.session.exam.title) for t in _visible_grid_tickets(tickets)],
     }
 
 

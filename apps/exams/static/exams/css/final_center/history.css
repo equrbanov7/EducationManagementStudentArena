@@ -1,0 +1,92 @@
+/* İmtahan Nəzarət Sistemi — oturum tarixçəsi (timeline). fxc- prefiksi. */
+
+.fxc-timeline {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    position: relative;
+}
+
+.fxc-timeline::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: #E2E8F0;
+}
+
+.fxc-tl-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding: 0 0 16px 0;
+}
+
+.fxc-tl-icon {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #EEF2FF;
+    color: #1E40AF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    z-index: 1;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #E2E8F0;
+}
+
+.fxc-tl-item--success .fxc-tl-icon { background: #DCFCE7; color: #15803D; }
+.fxc-tl-item--warn .fxc-tl-icon { background: #FEF3C7; color: #92400E; }
+.fxc-tl-item--danger .fxc-tl-icon { background: #FEE2E2; color: #B91C1C; }
+
+.fxc-tl-body {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 11px 14px;
+}
+
+.fxc-tl-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fxc-tl-title { font-weight: 700; color: #0F172A; font-size: .92rem; }
+
+.fxc-tl-student {
+    font-size: .8rem;
+    color: #1E40AF;
+    background: #EEF2FF;
+    border-radius: 999px;
+    padding: 2px 10px;
+    white-space: nowrap;
+}
+
+.fxc-tl-detail { margin: 6px 0 0; font-size: .85rem; color: #475569; }
+
+.fxc-tl-meta {
+    margin-top: 6px;
+    font-size: .76rem;
+    color: #94A3B8;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.fxc-tl-empty { text-align: center; color: #94A3B8; padding: 24px 0; }
+
+@media (max-width: 560px) {
+    .fxc-timeline::before { left: 15px; }
+    .fxc-tl-icon { width: 32px; height: 32px; }
+}

@@ -9,7 +9,8 @@
 
 {% block content %}
 <div class="container py-4 fxc-page">
-  {% include "exams/exam_center/_breadcrumb.html" with root_current=True %}
+  {% url 'accounts:profile' as profile_url %}
+  {% include "exams/exam_center/_breadcrumb.html" with root_current=True back_url=profile_url %}
 
   <header class="fxc-head">
     <div>
@@ -35,11 +36,20 @@
   </header>
 
   <form method="get" class="fxc-toolbar" role="search">
-    <input type="search" name="q" value="{{ search_query }}" class="fxc-input"
+    <input type="search" name="q" value="{{ search_query }}" class="fxc-input fxc-input--grow"
            placeholder="{% trans 'Zal adı, kodu və ya bina üzrə axtar…' %}"
            aria-label="{% trans 'Zal axtarışı' %}">
+    <select name="status" class="fxc-input fxc-input--select" aria-label="{% trans 'Status filtri' %}"
+            onchange="this.form.submit()">
+      <option value="">{% trans "Bütün zallar" %}</option>
+      <option value="live" {% if active_status == 'live' %}selected{% endif %}>{% trans "Canlı zallar" %}</option>
+      <option value="idle" {% if active_status == 'idle' %}selected{% endif %}>{% trans "Boş zallar" %}</option>
+      {% if can_manage %}
+      <option value="inactive" {% if active_status == 'inactive' %}selected{% endif %}>{% trans "Deaktiv zallar" %}</option>
+      {% endif %}
+    </select>
     <button type="submit" class="fxc-btn fxc-btn-ghost"><i class="fas fa-search"></i> {% trans "Axtar" %}</button>
-    {% if search_query %}
+    {% if search_query or active_status %}
     <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
       <i class="fas fa-xmark"></i> {% trans "Təmizlə" %}
     </a>

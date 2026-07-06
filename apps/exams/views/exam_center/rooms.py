@@ -65,6 +65,15 @@ def exam_center_room_list(request):
     if query:
         rooms = rooms.filter(Q(name__icontains=query) | Q(code__icontains=query) | Q(building__icontains=query))
 
+    # Status filtri: canlı (giriş açıq/aktiv oturumu var) / boş / deaktiv.
+    status = (request.GET.get("status") or "").strip()
+    if status == "live":
+        rooms = rooms.filter(live_session_count__gt=0)
+    elif status == "idle":
+        rooms = rooms.filter(live_session_count=0, is_active=True)
+    elif status == "inactive":
+        rooms = rooms.filter(is_active=False)
+
     page_obj = Paginator(rooms, 20).get_page(request.GET.get("page"))
     return render(
         request,
@@ -72,6 +81,7 @@ def exam_center_room_list(request):
         {
             "page_obj": page_obj,
             "search_query": query,
+            "active_status": status,
             "organization": organization,
             "can_manage": can_manage,
         },

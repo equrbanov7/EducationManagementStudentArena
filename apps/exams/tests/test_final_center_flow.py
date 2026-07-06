@@ -355,6 +355,51 @@ class RoomLifecycleTests(_FlowBase):
         # Təkrar begin eyni attempt-i qaytarır (dublikat yaranmır).
         self.assertEqual(begin_attempt_for_ticket(self.ticket).pk, attempt.pk)
 
+    def test_pin_is_revoked_and_reentry_blocked_after_begin(self):
+        # İmtahan başladıqdan sonra PIN birdəfəlikdir — təkrar giriş bloklanır.
+        enter_waiting(self.ticket, language="")
+        start_room(self.session, self.invigilator)
+        self.session.refresh_from_db()
+        begin_attempt_for_ticket(self.ticket)
+        self.ticket.refresh_from_db()
+        self.assertIsNotNone(self.ticket.pin_revoked_at)
+        self.assertFalse(self.ticket.has_valid_pin)
+        # Eyni PIN ilə təkrar giriş cəhdi → daxil olmur.
+        fresh = Client()
+        fresh.post(reverse("exams:final_exam_entry"), {"username": self.student.username, "pin": self.raw_pin})
+        self.assertNotIn("_auth_user_id", fresh.session)
+
+    def test_invigilator_reentry_issues_new_pin_and_resumes_same_attempt(self):
+        # Brauzer çökmə / bağlantı kəsilməsi bərpası: nəzarətçi yeni PIN verir,
+        # tələbə həmin PIN ilə daxil olub EYNİ cəhdə (olduğu yerə) davam edir.
+        enter_waiting(self.ticket, language="")
+        start_room(self.session, self.invigilator)
+        self.session.refresh_from_db()
+        attempt = begin_attempt_for_ticket(self.ticket)
+        self.ticket.refresh_from_db()
+        self.assertFalse(self.ticket.has_valid_pin)  # başlanğıcda PIN ölüb
+
+        client = self._client_for(self.invigilator)
+        resp = client.post(reverse("exams:exam_center_ticket_reentry", args=[self.session.pk, self.ticket.pk]))
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data["success"])
+        new_pin = data["pin"]
+
+        self.ticket.refresh_from_db()
+        self.assertTrue(self.ticket.has_valid_pin)  # yeni PIN etibarlı
+        self.assertEqual(self.ticket.status, TICKET_STATUS_ACTIVE)  # status dəyişmir
+        self.assertEqual(self.ticket.attempt_id, attempt.pk)  # cəhd qorunur
+
+        # Tələbə YENİ PIN ilə daxil olur → aktiv cəhdə (take_exam) yönlənir.
+        student_client = Client()
+        r1 = student_client.post(reverse("exams:final_exam_entry"), {"username": self.student.username, "pin": new_pin})
+        self.assertEqual(r1.status_code, 302)
+        self.assertEqual(int(student_client.session["_auth_user_id"]), self.student.pk)
+        r2 = student_client.get(reverse("exams:final_exam_entry"))
+        self.assertEqual(r2.status_code, 302)
+        self.assertIn(f"/attempt/{attempt.pk}/", r2["Location"])
+
     def test_begin_endpoint_via_http(self):
         client, _ = self._entry_client()
         client.post(reverse("exams:final_exam_entry"), {"action": "confirm", "accept_rules": "1", "language": ""})
@@ -549,6 +594,23 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertContains(response, "Zal A")
         self.assertContains(response, "Zal B")
 
+    def test_history_access_control(self):
+        # Nəzarətçi (müəllim) tarixçəni GÖRMÜR; imtahan mərkəzi rəhbəri GÖRÜR.
+        url = reverse("exams:exam_center_session_history", args=[self.session.pk])
+        self.assertEqual(self._client_for(self.invigilator).get(url).status_code, 403)
+        self.assertEqual(self._client_for(self.center).get(url).status_code, 200)
+
+    def test_session_history_records_operations(self):
+        from apps.exams.services.final_center import session_history, set_seat
+
+        set_seat(self.ticket, 7, self.center)  # final_seat_changed audit
+        events = session_history(self.session)
+        codes = {e["code"] for e in events}
+        self.assertIn("final_room_entry_opened", codes)  # setUp open_entry
+        self.assertIn("final_seat_changed", codes)
+        seat_ev = next(e for e in events if e["code"] == "final_seat_changed")
+        self.assertIn("→", seat_ev["detail"])  # köhnə → yeni kompüter
+
     def test_ticket_snapshot_no_attempt(self):
         client = self._client_for(self.invigilator)
         response = client.get(reverse("exams:exam_center_ticket_snapshot", args=[self.session.pk, self.ticket.pk]))
@@ -604,6 +666,106 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertEqual(len(snap["sessions"]), 2)
         self.assertEqual(snap["counts"]["total"], 2)
         self.assertEqual({row["exam_title"] for row in snap["students"]}, {"FCF Final", "FCF Final 2"})
+
+    def test_completed_result_hidden_after_timeout_but_counted(self):
+        from apps.exams.services.final_center import room_monitor_snapshot
+        from apps.exams.services.final_center.monitor import FINAL_RESULT_VISIBLE_SECONDS
+
+        self.ticket.status = TICKET_STATUS_COMPLETED
+        self.ticket.seat_number = 5
+        self.ticket.completed_at = timezone.now() - timedelta(seconds=FINAL_RESULT_VISIBLE_SECONDS + 60)
+        self.ticket.save(update_fields=["status", "seat_number", "completed_at"])
+        snap = room_monitor_snapshot(self.room)
+        # Sayğac saxlanır, amma köhnə nəticə xəritədən (grid) düşür.
+        self.assertEqual(snap["counts"]["completed"], 1)
+        self.assertNotIn(self.ticket.pk, [r["ticket_id"] for r in snap["students"]])
+
+    def test_recent_completed_result_still_visible(self):
+        from apps.exams.services.final_center import room_monitor_snapshot
+
+        self.ticket.status = TICKET_STATUS_COMPLETED
+        self.ticket.seat_number = 5
+        self.ticket.completed_at = timezone.now() - timedelta(seconds=10)
+        self.ticket.save(update_fields=["status", "seat_number", "completed_at"])
+        snap = room_monitor_snapshot(self.room)
+        self.assertIn(self.ticket.pk, [r["ticket_id"] for r in snap["students"]])
+
+    def test_seat_reuse_hides_old_completed_immediately(self):
+        from apps.exams.services.final_center import room_monitor_snapshot
+
+        # Köhnə bitmiş bilet seat 7-də (təzə bitib); başqa oturumda EYNI seat-də
+        # yeni aktiv tələbə → köhnə nəticə dərhal gizlənir, yeni tələbə görünür.
+        self.ticket.status = TICKET_STATUS_COMPLETED
+        self.ticket.seat_number = 7
+        self.ticket.completed_at = timezone.now()
+        self.ticket.save(update_fields=["status", "seat_number", "completed_at"])
+        exam2 = Exam.objects.create(
+            title="FCF Final 2",
+            author=self.center,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="final",
+            is_active=True,
+            random_question_count=1,
+        )
+        session2 = ExamRoomSession.objects.create(
+            organization=self.org,
+            exam=exam2,
+            room=self.room,
+            invigilator=self.invigilator,
+            scheduled_start=timezone.now() + timedelta(minutes=5),
+            scheduled_end=timezone.now() + timedelta(hours=2),
+        )
+        open_entry(session2, self.center)
+        new_ticket = FinalExamTicket.objects.create(
+            organization=self.org,
+            session=session2,
+            exam=exam2,
+            student=self.student2,
+            status=TICKET_STATUS_ACTIVE,
+            seat_number=7,
+        )
+        snap = room_monitor_snapshot(self.room)
+        ids = [r["ticket_id"] for r in snap["students"]]
+        self.assertIn(new_ticket.pk, ids)
+        self.assertNotIn(self.ticket.pk, ids)
+
+    def test_room_start_all_time_window_error_is_graceful(self):
+        # Vaxt pəncərəsindən kənar (çox tez) oturum → 500 YOX, 409 + xəta mesajı.
+        self.session.scheduled_start = timezone.now() + timedelta(hours=1)
+        self.session.save(update_fields=["scheduled_start"])
+        client = self._client_for(self.invigilator)
+        response = client.post(
+            reverse("exams:exam_center_room_start_all", args=[self.room.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 409)
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertIn("error", data)
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.state, "entry_open")
+
+    def test_ticket_resume_with_extra_chance_flag(self):
+        from apps.exams.models import SupervisionIncident
+        from apps.exams.services.supervision import teacher_lock_attempt
+
+        enter_waiting(self.ticket, language="")
+        start_room(self.session, self.invigilator)
+        self.session.refresh_from_db()
+        attempt = begin_attempt_for_ticket(self.ticket)
+        teacher_lock_attempt(attempt, self.invigilator)
+        client = self._client_for(self.invigilator)
+        response = client.post(
+            reverse("exams:exam_center_ticket_resume", args=[self.session.pk, self.ticket.pk]),
+            {"grant_extra_chance": "1"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        # grant_extra_chance bayrağı ötürülür → "teacher_granted_chance" hadisəsi.
+        self.assertTrue(
+            SupervisionIncident.objects.filter(attempt=attempt, event_type="teacher_granted_chance").exists()
+        )
 
     def test_room_start_all_starts_every_live_session(self):
         exam2 = Exam.objects.create(

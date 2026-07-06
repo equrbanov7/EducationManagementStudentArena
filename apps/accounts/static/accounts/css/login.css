@@ -19,7 +19,7 @@
     background: var(--ems-neutral-0);
     max-width: 420px;
     width: 100%;
-    padding: 40px 40px 32px;
+    padding: 52px 40px 32px;
     border-radius: 16px;
     border: 1px solid var(--ems-neutral-200);
     box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
@@ -38,15 +38,20 @@
     border-radius: 16px 16px 0 0;
 }
 
-/* --- Language switcher --- */
+/* --- Language switcher (kartın sağ-yuxarı küncündə, axından KƏNAR — logonu/
+   başlığı sürüşdürmür, layout dəyişmir) --- */
 .auth-language-form {
+    position: absolute;
+    top: 12px;
+    right: 14px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
-    margin: -12px 0 18px;
+    gap: 6px;
+    margin: 0;
+    z-index: 3;
     color: var(--ems-neutral-600);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
 }
 
 .auth-language-label {
@@ -55,8 +60,8 @@
 }
 
 .auth-language-control {
-    width: 138px;
-    min-width: 138px;
+    width: 118px;
+    min-width: 118px;
 }
 
 .auth-language-select {
@@ -228,15 +233,17 @@
     color: var(--ems-primary-600);
 }
 
-.input-visibility-toggle .visibility-icon-hide {
+/* Default (parol GİZLİ, yazılır) → xətli göz (slash) görünür. */
+.input-visibility-toggle .visibility-icon-show {
+    display: none;
+}
+
+/* Parol GÖRÜNƏNDƏ → adi göz (xətt yox). */
+.input-visibility-toggle[data-visible="true"] .visibility-icon-hide {
     display: none;
 }
 
 .input-visibility-toggle[data-visible="true"] .visibility-icon-show {
-    display: none;
-}
-
-.input-visibility-toggle[data-visible="true"] .visibility-icon-hide {
     display: inline;
 }
 
@@ -323,7 +330,7 @@
     }
 
     .auth-card {
-        padding: 32px 22px 26px;
+        padding: 46px 22px 26px;
         border-radius: 14px;
     }
 
@@ -332,8 +339,12 @@
     }
 
     .auth-language-form {
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: -8px;
+        top: 10px;
+        right: 12px;
+        gap: 4px;
+    }
+
+    .auth-language-label {
+        display: none; /* dar ekranda yalnız seçim qutusu qalır */
     }
 }

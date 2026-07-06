@@ -159,8 +159,13 @@ def final_exam_entry(request):
         if action == "confirm":
             return _handle_confirm(request)
         if action == "back":
+            # Modaldan geri qayıdanda istifadəçi adını saxla ki, login formasında
+            # yenidən yazılmasın (PIN TƏHLÜKƏSİZLİK səbəbindən saxlanmır).
+            kept_username = request.user.username if request.user.is_authenticated else ""
             clear_entry_session(request)
             logout(request)
+            if kept_username:
+                request.session["final_entry_username"] = kept_username
             return redirect("exams:final_exam_entry")
         return _handle_login(request)
 
@@ -171,7 +176,7 @@ def final_exam_entry(request):
     if entry_ticket_id(request):
         # Sessiyada qalıq id var, amma bilet tapılmadı — təmizlə.
         clear_entry_session(request)
-    return _render_login(request)
+    return _render_login(request, username=request.session.pop("final_entry_username", ""))
 
 
 def _handle_login(request):
