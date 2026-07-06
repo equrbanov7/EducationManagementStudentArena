@@ -1,0 +1,568 @@
+/* İmtahan mərkəzi — zal/oturum/hesabat səhifələri (fxc- prefiksi).
+   Dizayn tokenləri qb səhifələri ilə uyğundur. */
+
+/* ── Breadcrumb / geri naviqasiyası ── */
+.fxc-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.fxc-breadcrumb-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .84rem;
+    font-weight: 700;
+    color: #2C5BFF;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+}
+
+.fxc-breadcrumb-back:hover { background: #E0E7FF; color: #1E40AF; }
+
+.fxc-breadcrumb-trail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .84rem;
+    flex-wrap: wrap;
+}
+
+.fxc-breadcrumb-trail a { color: #64748B; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.fxc-breadcrumb-trail a:hover { color: #2C5BFF; }
+.fxc-breadcrumb-trail span[aria-current] { color: #0F172A; font-weight: 700; }
+.fxc-breadcrumb-sep { color: #CBD5E1; }
+
+.fxc-page h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 6px 0 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fxc-page h1 i { color: #2C5BFF; }
+
+.fxc-page--narrow { max-width: 760px; }
+
+.fxc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.fxc-head-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.fxc-sub {
+    color: #64748B;
+    font-size: .9rem;
+    margin: 2px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.fxc-section-title {
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 22px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fxc-section-title i { color: #BE3455; }
+
+/* ── Düymələr ── */
+.fxc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: .9rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s, border-color .15s;
+    white-space: nowrap;
+}
+
+.fxc-btn-sm { padding: 5px 10px; font-size: .8rem; border-radius: 8px; }
+
+.fxc-btn-primary { background: #2C5BFF; color: #fff; }
+.fxc-btn-primary:hover { background: #1E44D9; color: #fff; }
+
+.fxc-btn-success { background: #16A34A; color: #fff; }
+.fxc-btn-success:hover { background: #15803D; color: #fff; }
+
+.fxc-btn-danger { background: #DC2626; color: #fff; }
+.fxc-btn-danger:hover { background: #B91C1C; color: #fff; }
+
+.fxc-btn-ghost { background: #fff; border-color: #CBD5E1; color: #475569; }
+.fxc-btn-ghost:hover { border-color: #94A3B8; color: #0F172A; }
+
+.fxc-btn-danger-ghost { background: #fff; border-color: #FECACA; color: #B91C1C; }
+.fxc-btn-danger-ghost:hover { background: #FEF2F2; }
+
+.fxc-btn:focus-visible { outline: 3px solid rgba(44, 91, 255, .35); outline-offset: 2px; }
+.fxc-btn[disabled] { opacity: .55; cursor: not-allowed; }
+
+/* ── Toolbar / tabs ── */
+.fxc-toolbar {
+    display: flex;
+    gap: 10px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+}
+
+.fxc-input {
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    padding: 9px 13px;
+    font-size: .92rem;
+    color: #0F172A;
+    background: #fff;
+    min-width: 220px;
+}
+
+.fxc-input:focus {
+    outline: none;
+    border-color: #2C5BFF;
+    box-shadow: 0 0 0 3px rgba(44, 91, 255, .15);
+}
+
+.fxc-input--select { min-width: 170px; }
+.fxc-input--seat { min-width: 64px; width: 64px; padding: 5px 8px; }
+
+.fxc-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 8px;
+}
+
+.fxc-tab {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #475569;
+    text-decoration: none;
+    background: #F1F4F9;
+}
+
+.fxc-tab:hover { color: #0F172A; }
+.fxc-tab.is-active { background: #2C5BFF; color: #fff; }
+
+/* ── Oturum kartları (yeni siyahı dizaynı) ── */
+.fxc-session-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.fxc-session-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.fxc-session-card:hover {
+    border-color: #C7D2FE;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .06);
+}
+
+.fxc-session-card--active {
+    border-color: #86EFAC;
+    background: linear-gradient(0deg, rgba(22, 163, 74, .03), rgba(22, 163, 74, .03)), #fff;
+}
+
+.fxc-session-card--entry_open { border-color: #93C5FD; }
+
+.fxc-session-card-main { min-width: 0; flex: 1; }
+
+.fxc-session-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.fxc-session-time {
+    font-size: .82rem;
+    color: #64748B;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.fxc-session-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 8px;
+}
+
+.fxc-session-meta {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: .86rem;
+    color: #475569;
+}
+
+.fxc-session-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.fxc-session-meta i { color: #94A3B8; }
+.fxc-session-meta code {
+    background: #F1F4F9;
+    color: #475569;
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-size: .78rem;
+}
+
+.fxc-live-count { color: #15803D; }
+
+.fxc-session-card-actions {
+    display: flex;
+    gap: 8px;
+    flex: none;
+}
+
+.fxc-live-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #16A34A;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, .5);
+    animation: fxc-live-pulse 1.6s infinite;
+}
+
+@keyframes fxc-live-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, .5); }
+    70% { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fxc-live-pulse { animation: none; }
+}
+
+@media (max-width: 700px) {
+    .fxc-session-card { flex-direction: column; align-items: stretch; }
+    .fxc-session-card-actions .fxc-btn { flex: 1; justify-content: center; }
+}
+
+/* ── Zal kartları + imtahan (fənn) çipləri (İmtahan Nəzarət Sistemi girişi).
+   center.css-də saxlanır (ayrıca fayl DEYİL) ki, zal siyahısı yalnız bu həmişə
+   yüklənən stil-vərəqindən asılı olsun — keş/back naviqasiyada stilsiz qalmasın. */
+.fxc-room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+
+.fxc-room-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 18px 20px;
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+}
+
+.fxc-room-card:hover { border-color: #C7D2FE; box-shadow: 0 8px 24px rgba(15, 23, 42, .07); transform: translateY(-2px); }
+.fxc-room-card--live { border-color: #FBCFE0; background: linear-gradient(0deg, rgba(190, 52, 85, .025), rgba(190, 52, 85, .025)), #fff; }
+.fxc-room-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.fxc-room-card-titles { min-width: 0; }
+.fxc-room-name { font-size: 1.08rem; font-weight: 800; color: #0F172A; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.fxc-room-name i { color: #2C5BFF; }
+.fxc-room-code { font-size: .82rem; color: #64748B; }
+.fxc-room-code code { background: #F1F4F9; color: #475569; border-radius: 5px; padding: 1px 6px; font-size: .78rem; }
+
+.fxc-room-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: .84rem;
+    color: #475569;
+    padding: 10px 0;
+    border-top: 1px solid #F1F4F9;
+    border-bottom: 1px solid #F1F4F9;
+}
+
+.fxc-room-stats span { display: inline-flex; align-items: center; gap: 6px; }
+.fxc-room-stats i { color: #94A3B8; }
+.fxc-room-exams { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 26px; }
+.fxc-room-exams-label { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #94A3B8; margin-right: 2px; }
+.fxc-room-exams-empty { font-size: .82rem; color: #94A3B8; display: inline-flex; align-items: center; gap: 6px; }
+.fxc-room-card-actions { display: flex; gap: 8px; margin-top: 2px; }
+.fxc-room-card-actions .fxc-btn { flex: 1; justify-content: center; }
+
+.fxc-room-exam-chip {
+    display: inline-block;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #EEF2FF;
+    color: #1E40AF;
+    margin: 2px 2px 2px 0;
+}
+
+.fxc-room-exam-chip--active { background: #DCFCE7; color: #15803D; }
+.fxc-room-exam-chip--entry_open { background: #E0F2FE; color: #075985; }
+
+@media (max-width: 560px) { .fxc-room-grid { grid-template-columns: 1fr; } }
+
+/* ── Cədvəl ── */
+.fxc-table-wrap {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    overflow-x: auto;
+}
+
+.fxc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+
+.fxc-table th {
+    text-align: left;
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #94A3B8;
+    padding: 12px 14px;
+    border-bottom: 1px solid #E2E8F0;
+    white-space: nowrap;
+}
+
+.fxc-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #F1F4F9;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.fxc-table tbody tr:last-child td { border-bottom: none; }
+.fxc-table tbody tr:hover { background: #F8FAFC; }
+
+.fxc-num { text-align: right; font-variant-numeric: tabular-nums; }
+.fxc-table .fxc-num { text-align: right; }
+.fxc-strong { font-weight: 700; color: #0F172A; }
+.fxc-muted { color: #94A3B8; font-weight: 400; }
+.fxc-center { text-align: center; padding: 26px 0; }
+.fxc-row-actions { text-align: right; white-space: nowrap; }
+.fxc-row-actions .fxc-inline-form { display: inline-flex; }
+.fxc-reason { max-width: 260px; }
+
+/* ── Pill-lər ── */
+.fxc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #F1F4F9;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.fxc-pill--ok { background: #DCFCE7; color: #15803D; }
+.fxc-pill--warn { background: #FEF3C7; color: #92400E; }
+.fxc-pill--live { background: #FCE7EE; color: #9F1239; }
+.fxc-pill--muted { background: #F1F4F9; color: #94A3B8; }
+
+.fxc-pill--state-prepared { background: #F1F4F9; color: #475569; }
+.fxc-pill--state-entry_open { background: #E0F2FE; color: #075985; }
+.fxc-pill--state-active { background: #DCFCE7; color: #15803D; }
+.fxc-pill--state-ended { background: #EEF2FF; color: #1E40AF; }
+.fxc-pill--state-cancelled { background: #FEE2E2; color: #991B1B; }
+
+.fxc-pill--t-assigned { background: #EEF2FF; color: #1E40AF; }
+.fxc-pill--t-waiting { background: #E0F2FE; color: #075985; }
+.fxc-pill--t-ready { background: #CFFAFE; color: #155E63; }
+.fxc-pill--t-active { background: #DCFCE7; color: #15803D; }
+.fxc-pill--t-completed { background: #F1F4F9; color: #475569; }
+.fxc-pill--t-removed { background: #FEE2E2; color: #991B1B; }
+.fxc-pill--t-absent { background: #FEF3C7; color: #92400E; }
+
+/* ── Kart / forma ── */
+.fxc-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+}
+
+.fxc-card h2 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fxc-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.fxc-form-grid--filters { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
+.fxc-field { margin-bottom: 12px; }
+
+.fxc-field label {
+    display: block;
+    font-weight: 700;
+    font-size: .84rem;
+    color: #334155;
+    margin-bottom: 5px;
+}
+
+.fxc-field input,
+.fxc-field select,
+.fxc-field textarea {
+    width: 100%;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    padding: 9px 13px;
+    font-size: .92rem;
+    color: #0F172A;
+    background: #fff;
+}
+
+.fxc-field input:focus,
+.fxc-field select:focus,
+.fxc-field textarea:focus {
+    outline: none;
+    border-color: #2C5BFF;
+    box-shadow: 0 0 0 3px rgba(44, 91, 255, .15);
+}
+
+.fxc-field .errorlist {
+    margin: 5px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #B91C1C;
+    font-size: .8rem;
+}
+
+.fxc-check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: .9rem;
+    color: #334155;
+    margin: 10px 0 16px;
+    cursor: pointer;
+}
+
+.fxc-check input { margin-top: 3px; accent-color: #2C5BFF; }
+
+.fxc-hint { font-size: .8rem; color: #94A3B8; margin: 6px 0 0; }
+
+.fxc-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.fxc-alert {
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: .9rem;
+    margin-bottom: 14px;
+}
+
+.fxc-alert-error { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+
+.fxc-empty {
+    text-align: center;
+    color: #94A3B8;
+    padding: 46px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.fxc-empty i { font-size: 34px; }
+
+.fxc-danger-zone {
+    margin-top: 26px;
+    padding-top: 16px;
+    border-top: 1px dashed #FECACA;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ── Bağlantı göstəricisi ── */
+.fxc-conn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .8rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.fxc-conn::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #F59E0B;
+    display: inline-block;
+}
+
+.fxc-conn[data-state="online"]::before { background: #16A34A; }
+.fxc-conn[data-state="offline"]::before { background: #DC2626; }
+
+@media (max-width: 640px) {
+    .fxc-head { flex-direction: column; }
+    .fxc-actions { justify-content: stretch; }
+    .fxc-actions .fxc-btn { flex: 1; justify-content: center; }
+}

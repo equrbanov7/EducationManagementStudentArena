@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ exam.title }} — {% trans "Gözləmə otağı" context "exams.template.final_waiting" %}{% endblock %}
+
+{% block route_progress %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block view_as_banner %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block global_search %}{% endblock %}
+{% block global_search_js %}{% endblock %}
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="fexc-shell">
+  <main class="fexc-card fexc-waiting"
+        id="fexc-waiting-root"
+        data-ws-path="{{ ws_path }}"
+        data-state-url="{{ state_url }}"
+        data-begin-url="{{ begin_url }}"
+        data-heartbeat-seconds="{{ heartbeat_seconds }}"
+        data-session-active="{% if session_already_active %}1{% else %}0{% endif %}"
+        aria-labelledby="fexc-wait-title">
+
+    <header class="fexc-gate-head">
+      <span class="fexc-kicker">{% trans "Gözləmə otağı" context "exams.template.final_waiting" %}</span>
+      <h1 id="fexc-wait-title" class="fexc-title">{{ exam.title }}</h1>
+      <p class="fexc-sub">
+        {{ room.name }}{% if room.building %} · {{ room.building }}{% endif %}
+        {% if ticket.seat_number %}
+        <span class="fexc-dot" aria-hidden="true"></span>
+        {% trans "Yer" context "exams.template.final_waiting" %} {{ ticket.seat_number }}
+        {% endif %}
+        {% if ticket.language %}
+        <span class="fexc-dot" aria-hidden="true"></span>
+        {{ ticket.get_language_display }}
+        {% endif %}
+      </p>
+    </header>
+
+    <div class="fexc-wait-visual" aria-hidden="true">
+      <div class="fexc-pulse-ring"><i class="fas fa-hourglass-half"></i></div>
+    </div>
+
+    <p class="fexc-wait-message" id="fexc-wait-message" role="status" aria-live="polite">
+      {% trans "Nəzarətçinin imtahanı başlatması gözlənilir…" context "exams.template.final_waiting" %}
+    </p>
+
+    {% if ticket.language %}
+    <div class="fexc-lang-banner" role="note">
+      <i class="fas fa-language" aria-hidden="true"></i>
+      <span>
+        {% trans "Seçdiyiniz imtahan dili" context "exams.template.final_waiting" %}:
+        <b>{{ ticket.get_language_display }}</b>
+      </span>
+    </div>
+    {% endif %}
+
+    <dl class="fexc-wait-status">
+      <div>
+        <dt>{% trans "Server bağlantısı" context "exams.template.final_waiting" %}</dt>
+        <dd><span class="fexc-conn" id="fexc-conn-state" data-state="connecting">
+          {% trans "Qoşulur…" context "exams.template.final_waiting" %}</span></dd>
+      </div>
+      <div>
+        <dt>{% trans "Hazırlıq yoxlamaları" context "exams.template.final_waiting" %}</dt>
+        <dd id="fexc-check-count">0</dd>
+      </div>
+    </dl>
+
+    <button type="button" class="fexc-btn fexc-btn-primary fexc-btn-block fexc-manual-start" id="fexc-manual-start" hidden>
+      <i class="fas fa-play" aria-hidden="true"></i>
+      {% trans "İmtahana başla" context "exams.template.final_waiting" %}
+    </button>
+
+    <form method="post" action="{{ cancel_url }}" class="fexc-cancel-form"
+          data-confirm="{% trans 'Gözləmə otağından çıxmaq istədiyinizə əminsiniz? İmtahan cəhdiniz yanmayacaq.' context 'exams.template.final_waiting' %}">
+      {% csrf_token %}
+      <button type="submit" class="fexc-btn fexc-btn-ghost">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        {% trans "İmtina et və çıx" context "exams.template.final_waiting" %}
+      </button>
+    </form>
+
+    <p class="fexc-footnote">
+      <i class="fas fa-headset" aria-hidden="true"></i>
+      {% trans "Texniki problem yaranarsa, əlinizi qaldıraraq zal nəzarətçisinə müraciət edin." context "exams.template.final_waiting" %}
+    </p>
+  </main>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/final_center/waiting_room.js' %}" defer></script>
+{% endblock %}

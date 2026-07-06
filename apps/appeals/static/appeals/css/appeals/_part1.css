@@ -370,9 +370,11 @@
     font-size: 2rem;
 }
 
+.appeal-create-form {
+    padding-bottom: 112px;
+}
+
 .appeal-sticky-actions {
-    /* Sticky → scroll boyu aşağıda üzür, sonuncu sualın altında dayanır və
-       footer-in üstünə düşmür. */
     position: sticky;
     bottom: 16px;
     z-index: 1030;
@@ -393,6 +395,19 @@
     width: min(1180px, 100%);
     margin: 0 auto;
     flex-wrap: wrap;
+}
+
+.appeal-create-form > .appeal-sticky-actions {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(980px, calc(100vw - 32px));
+    margin-top: 0;
+}
+
+.appeal-answer-review--create {
+    margin: 12px 0 0;
 }
 
 .appeal-table-card {

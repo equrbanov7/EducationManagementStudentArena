@@ -4,6 +4,12 @@
 
 {% block title %}{{ exam.title }} - {% trans "title_exam" context "exams.template.take_exam" %}{% endblock %}
 
+{% block route_progress %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
+{% block navbar %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
+{% block view_as_banner %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
+{% block footer %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
+{% block global_search %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
+{% block global_search_js %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
 {% block ai_assistant %}{% endblock %}
 {% block ai_assistant_js %}{% endblock %}
 

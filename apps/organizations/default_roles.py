@@ -464,9 +464,8 @@ DEFAULT_ROLES = {
 # ---------------------------------------------------------------------------
 # Apellyasiya icazələrinin avtomatik əlavəsi
 #
-# Tək mənbədən qayda: imtahanı idarə edən rollar (exam.create/edit/host/manage
-# və ya exam.*) apellyasiyalara cavab verə/qərar verə bilər (respond + decide);
-# yalnız imtahana baxan rollar (exam.view) apellyasiya yarada bilər (create).
+# Tək mənbədən qayda: apellyasiya qərarı mərkəzləşdirilib və yalnız
+# "exam_center" roluna verilir; imtahanı görən rollar apellyasiya yarada bilər.
 # "*" rolları onsuz da hər şeyi əhatə edir. Bu qayda mövcud rollar üçün
 # organizations data migration-da da eyni cür tətbiq olunur.
 # ---------------------------------------------------------------------------
@@ -482,7 +481,7 @@ def _augment_with_appeal_permissions(roles_by_type):
             manages_exams = any(perm in perms for perm in _EXAM_MANAGEMENT_PERMS)
             views_exams = "exam.view" in perms or "exam.*" in perms
             to_add = []
-            if manages_exams:
+            if role.get("name") == "exam_center" and manages_exams:
                 to_add = ["appeal.create", "appeal.respond", "appeal.decide"]
             elif views_exams:
                 to_add = ["appeal.create"]

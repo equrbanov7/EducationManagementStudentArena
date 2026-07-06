@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Final imtahan girişi" context "exams.template.final_entry" %}{% endblock %}
+
+{% block route_progress %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block view_as_banner %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block global_search %}{% endblock %}
+{% block global_search_js %}{% endblock %}
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="fexc-shell">
+  {% include "exams/student/partials/_final_langbar.html" %}
+  <main class="fexc-card fexc-entry" aria-labelledby="fexc-entry-title">
+    <div class="fexc-brand">
+      <span class="fexc-brand-badge"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span>
+      <div>
+        <h1 id="fexc-entry-title" class="fexc-title">{% trans "Final imtahan girişi" context "exams.template.final_entry" %}</h1>
+        <p class="fexc-sub">{% trans "İstifadəçi adınızı və şəxsi imtahan PIN-inizi daxil edin" context "exams.template.final_entry" %}</p>
+      </div>
+    </div>
+
+    {% if error_message %}
+    <div class="fexc-alert fexc-alert-error" role="alert">
+      <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+      <span>{{ error_message }}</span>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'exams:final_exam_entry' %}" class="fexc-form" autocomplete="off">
+      {% csrf_token %}
+      <div class="fexc-field">
+        <label for="fexc-username">{% trans "İstifadəçi adı" context "exams.template.final_entry" %}</label>
+        <input type="text" id="fexc-username" name="username" required
+               value="{{ username_value }}"
+               autocomplete="username" autocapitalize="none" spellcheck="false"
+               placeholder="{% trans 'tələbə istifadəçi adı' context 'exams.template.final_entry' %}">
+      </div>
+      <div class="fexc-field">
+        <label for="fexc-pin">{% trans "İmtahan PIN-i" context "exams.template.final_entry" %}</label>
+        <input type="password" id="fexc-pin" name="pin" required
+               inputmode="numeric" autocomplete="one-time-code" maxlength="12"
+               placeholder="{% trans '••••••••' context 'exams.template.final_entry' %}">
+        <p class="fexc-hint">{% trans "PIN yalnız sizə aiddir və yalnız bir imtahana keçərlidir." context "exams.template.final_entry" %}</p>
+      </div>
+      <button type="submit" class="fexc-btn fexc-btn-primary fexc-btn-block">
+        <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+        {% trans "İmtahana daxil ol" context "exams.template.final_entry" %}
+      </button>
+    </form>
+
+    <p class="fexc-footnote">
+      <i class="fas fa-shield-halved" aria-hidden="true"></i>
+      {% trans "Giriş cəhdləri qeydə alınır. PIN-inizi heç kimlə bölüşməyin." context "exams.template.final_entry" %}
+    </p>
+  </main>
+</div>
+
+{# ── İmtahan-öncəsi məlumat + qaydalar MODALI (PIN yoxlamasından sonra açılır) ── #}
+{% if show_gate_modal %}
+<div class="fexc-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="fexc-modal-title">
+  <div class="fexc-modal-panel fexc-gate">
+    <header class="fexc-gate-head">
+      <span class="fexc-kicker">{% trans "Final imtahanı" context "exams.template.final_gate" %}</span>
+      <h2 id="fexc-modal-title" class="fexc-title">{{ exam.title }}</h2>
+      <p class="fexc-sub">
+        {{ ticket.student.get_full_name|default:ticket.student.username }}
+        <span class="fexc-dot" aria-hidden="true"></span>
+        {{ ticket.student.username }}
+      </p>
+    </header>
+
+    {% if modal_error %}
+    <div class="fexc-alert fexc-alert-error" role="alert">
+      <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+      <span>{{ modal_error }}</span>
+    </div>
+    {% endif %}
+
+    <dl class="fexc-meta">
+      <div>
+        <dt>{% trans "Tarix" context "exams.template.final_gate" %}</dt>
+        <dd>{{ session.scheduled_start|date:"d.m.Y" }}</dd>
+      </div>
+      <div>
+        <dt>{% trans "Vaxt" context "exams.template.final_gate" %}</dt>
+        <dd>{{ session.scheduled_start|time:"H:i" }} – {{ session.scheduled_end|time:"H:i" }}</dd>
+      </div>
+      {% if exam.total_duration_minutes %}
+      <div>
+        <dt>{% trans "Müddət" context "exams.template.final_gate" %}</dt>
+        <dd>{{ exam.total_duration_minutes }} {% trans "dəqiqə" context "exams.template.final_gate" %}</dd>
+      </div>
+      {% endif %}
+      <div>
+        <dt>{% trans "Zal" context "exams.template.final_gate" %}</dt>
+        <dd>{{ room.name }}{% if room.building %} · {{ room.building }}{% endif %}</dd>
+      </div>
+      {% if ticket.seat_number %}
+      <div>
+        <dt>{% trans "Yer" context "exams.template.final_gate" %}</dt>
+        <dd>{{ ticket.seat_number }}</dd>
+      </div>
+      {% endif %}
+      {% if session.invigilator %}
+      <div>
+        <dt>{% trans "Nəzarətçi" context "exams.template.final_gate" %}</dt>
+        <dd>{{ session.invigilator.get_full_name|default:session.invigilator.username }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+
+    <section class="fexc-rules" aria-labelledby="fexc-rules-title">
+      <h3 id="fexc-rules-title">{% trans "İmtahan qaydaları" context "exams.template.final_gate" %}</h3>
+      <ul>
+        <li>{% trans "İmtahan zamanı səhifəni tərk etmək, tab dəyişmək və pəncərəni kiçiltmək qadağandır." context "exams.template.final_gate" %}</li>
+        <li>{% trans "İcazə verilməyən vəsaitlərdən (telefon, konspekt, digər cihazlar) istifadə qadağandır." context "exams.template.final_gate" %}</li>
+        <li>{% trans "İmtahan prosesi real vaxt rejimində monitorinq olunur və bütün hərəkətlər qeydə alınır." context "exams.template.final_gate" %}</li>
+        <li>{% trans "İmtahan tam ekran rejimində keçirilir; rejimdən çıxış pozuntu sayıla bilər." context "exams.template.final_gate" %}</li>
+        <li>{% trans "Qayda pozuntusu halında nəzarətçi sizi imtahandan çıxara bilər." context "exams.template.final_gate" %}</li>
+      </ul>
+      {% if exam.description %}
+      <p class="fexc-rules-extra">{{ exam.description|linebreaksbr }}</p>
+      {% endif %}
+    </section>
+
+    <form method="post" class="fexc-form" action="{% url 'exams:final_exam_entry' %}">
+      {% csrf_token %}
+
+      {% if language_options|length > 1 %}
+      <fieldset class="fexc-langs">
+        <legend>{% trans "İmtahan dilini seçin" context "exams.template.final_gate" %}</legend>
+        <div class="fexc-lang-grid" role="radiogroup">
+          {% for option in language_options %}
+          <label class="fexc-lang-option">
+            <input type="radio" name="language" value="{{ option.language }}" required
+                   {% if ticket.language == option.language %}checked{% endif %}>
+            <span>{{ option.label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <p class="fexc-hint">{% trans "Dil seçimi imtahan başladıqdan sonra dəyişdirilə bilməz." context "exams.template.final_gate" %}</p>
+      </fieldset>
+      {% elif language_options %}
+      <input type="hidden" name="language" value="{{ language_options.0.language }}">
+      <p class="fexc-hint">
+        {% trans "İmtahan dili" context "exams.template.final_gate" %}: <b>{{ language_options.0.label }}</b>
+      </p>
+      {% endif %}
+
+      <label class="fexc-confirm">
+        <input type="checkbox" name="accept_rules" value="1" required>
+        <span>{% trans "İmtahan qaydaları ilə tanış oldum və onlara əməl edəcəyimi təsdiqləyirəm." context "exams.template.final_gate" %}</span>
+      </label>
+
+      <div class="fexc-actions">
+        <button type="submit" name="action" value="back" class="fexc-btn fexc-btn-ghost" formnovalidate>
+          {% trans "Geri" context "exams.template.final_gate" %}
+        </button>
+        <button type="submit" name="action" value="confirm" class="fexc-btn fexc-btn-primary">
+          {% trans "Davam et" context "exams.template.final_gate" %}
+          <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

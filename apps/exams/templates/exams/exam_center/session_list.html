@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "İmtahan oturumları" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page">
+  {% url 'exams:exam_center_room_list' as rooms_url %}
+  {% trans "Oturumlar" as sessions_label %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=rooms_url current_label=sessions_label %}
+  <header class="fxc-head">
+    <div>
+      <h1><i class="fas fa-calendar-days"></i> {% trans "İmtahan oturumları" %}</h1>
+      <p class="fxc-sub">
+        {% if can_manage %}
+          {% trans "Final imtahanlarının zal üzrə oturumları və canlı nəzarət" %}
+        {% else %}
+          {% trans "Sizə təyin olunmuş oturumlar — canlı otaq nəzarəti" %}
+        {% endif %}
+      </p>
+    </div>
+    <div class="fxc-head-actions">
+      {% if can_manage %}
+      <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-door-open"></i> {% trans "Zallar" %}
+      </a>
+      <a href="{% url 'exams:exam_center_reports' %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-chart-column"></i> {% trans "Hesabatlar" %}
+      </a>
+      <a href="{% url 'exams:exam_center_session_create' %}" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-plus"></i> {% trans "Yeni oturum" %}
+      </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <nav class="fxc-tabs" aria-label="{% trans 'Status filtri' %}">
+    <a href="?" class="fxc-tab {% if not active_state %}is-active{% endif %}">{% trans "Hamısı" %}</a>
+    <a href="?state=entry_open" class="fxc-tab {% if active_state == 'entry_open' %}is-active{% endif %}">{% trans "Giriş açıq" %}</a>
+    <a href="?state=active" class="fxc-tab {% if active_state == 'active' %}is-active{% endif %}">{% trans "Aktiv" %}</a>
+    <a href="?state=prepared" class="fxc-tab {% if active_state == 'prepared' %}is-active{% endif %}">{% trans "Hazırlanır" %}</a>
+    <a href="?state=ended" class="fxc-tab {% if active_state == 'ended' %}is-active{% endif %}">{% trans "Bitmiş" %}</a>
+    <a href="?state=cancelled" class="fxc-tab {% if active_state == 'cancelled' %}is-active{% endif %}">{% trans "Ləğv edilmiş" %}</a>
+  </nav>
+
+  {% if page_obj.object_list %}
+  <div class="fxc-session-grid">
+    {% for s in page_obj %}
+    <article class="fxc-session-card fxc-session-card--{{ s.state }}">
+      <div class="fxc-session-card-main">
+        <div class="fxc-session-card-top">
+          <span class="fxc-pill fxc-pill--state-{{ s.state }}">
+            {% if s.state == 'active' %}<span class="fxc-live-pulse" aria-hidden="true"></span>{% endif %}
+            {{ s.get_state_display }}
+          </span>
+          <span class="fxc-session-time">
+            <i class="far fa-clock"></i>
+            {{ s.scheduled_start|date:"d.m.Y H:i" }} – {{ s.scheduled_end|time:"H:i" }}
+          </span>
+        </div>
+        <h2 class="fxc-session-title">{{ s.exam.title }}</h2>
+        <div class="fxc-session-meta">
+          <span><i class="fas fa-door-open"></i> {{ s.room.name }} <code>{{ s.room.code }}</code></span>
+          <span><i class="fas fa-user-shield"></i>
+            {% if s.invigilator %}{{ s.invigilator.get_full_name|default:s.invigilator.username }}{% else %}{% trans "Təyin edilməyib" %}{% endif %}
+          </span>
+          <span><i class="fas fa-users"></i>
+            {{ s.ticket_total }} {% trans "tələbə" %}{% if s.ticket_active %} · <b class="fxc-live-count">{{ s.ticket_active }} {% trans "imtahanda" %}</b>{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="fxc-session-card-actions">
+        <a href="{% url 'exams:exam_center_session_detail' session_id=s.pk %}" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
+          <i class="fas fa-list-check"></i> {% trans "Detal" %}
+        </a>
+        <a href="{% url 'exams:exam_center_session_monitor' session_id=s.pk %}" class="fxc-btn fxc-btn-sm fxc-btn-primary">
+          <i class="fas fa-tower-observation"></i> {% trans "Canlı nəzarət" %}
+        </a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% include "partials/_pagination.html" with page_obj=page_obj %}
+  {% else %}
+  <div class="fxc-empty">
+    <i class="far fa-calendar"></i>
+    <p>
+      {% if can_manage %}{% trans "Bu filtrdə oturum yoxdur." %}
+      {% else %}{% trans "Sizə hələ oturum təyin edilməyib." %}{% endif %}
+    </p>
+    {% if can_manage %}
+    <a href="{% url 'exams:exam_center_session_create' %}" class="fxc-btn fxc-btn-primary">
+      <i class="fas fa-plus"></i> {% trans "İlk oturumu yarat" %}
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

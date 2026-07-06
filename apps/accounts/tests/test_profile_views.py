@@ -1000,6 +1000,26 @@ class ProfileViewTest(TestCase):
         expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
         self.assertContains(response, f"return_to={expected_return_to}")
 
+    def test_exam_center_profile_my_exams_renders_create_action(self):
+        organization = Organization.objects.create(
+            name="Exam Center Profile Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="exam_center")
+        _login_with_org(self.client, self.user, organization)
+
+        response = self.client.get(reverse("accounts:profile") + "?section=my-exams")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("my-exams", response.context["allowed_sections"])
+        self.assertTrue(response.context["can_view_owned_learning"])
+        self.assertContains(response, 'data-profile-section-panel="my-exams"')
+        self.assertContains(response, 'class="tx-btn tx-btn--primary js-open-exam-form-modal"', html=False)
+        self.assertContains(response, f'data-exam-modal-url="{reverse("exams:create_exam")}"')
+
     def test_profile_my_exams_filters_practical_separately_from_written(self):
         from apps.exams.models import Exam
 

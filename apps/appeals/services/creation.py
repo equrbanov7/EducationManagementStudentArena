@@ -102,23 +102,46 @@ def create_appeal(*, attempt, student, items, org_unit=None):
             for item in cleaned
         ]
     )
-    _notify_teacher_new_appeal(appeal, item_count=len(cleaned))
+    _notify_exam_center_new_appeal(appeal, item_count=len(cleaned))
     return appeal
 
 
-def _notify_teacher_new_appeal(appeal, *, item_count):
-    """İmtahan müəllifinə yeni apellyasiya barədə in-app bildiriş. Xəta flow-u pozmur."""
+def _exam_center_recipients(appeal):
+    """Apellyasiyanın təşkilatındakı aktiv imtahan mərkəzi istifadəçiləri."""
+    if not appeal.organization_id:
+        return []
+
+    from django.apps import apps as django_apps
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    memberships = (
+        Membership.objects.select_related("user", "role")
+        .filter(
+            organization_id=appeal.organization_id,
+            is_active=True,
+            role__name="exam_center",
+            role__is_active=True,
+            user__is_active=True,
+        )
+        .exclude(user_id=appeal.student_id)
+        .order_by("user_id")
+    )
+    return [membership.user for membership in memberships]
+
+
+def _notify_exam_center_new_appeal(appeal, *, item_count):
+    """İmtahan mərkəzinə yeni apellyasiya barədə in-app bildiriş. Xəta flow-u pozmur."""
     try:
         from django.urls import reverse
 
-        from apps.notifications.public import create_notification
+        from apps.notifications.public import create_notification_for_users
 
-        teacher = appeal.exam.author
-        if teacher is None or teacher.pk == appeal.student_id:
+        recipients = _exam_center_recipients(appeal)
+        if not recipients:
             return
         student_display = appeal.student.get_full_name() or appeal.student.username
-        create_notification(
-            recipient=teacher,
+        create_notification_for_users(
+            recipients=recipients,
             title=pgettext("appeals.notification", "Yeni apellyasiya"),
             message=pgettext(
                 "appeals.notification",

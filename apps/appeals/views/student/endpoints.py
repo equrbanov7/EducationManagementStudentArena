@@ -22,6 +22,10 @@ def _result_url(exam, attempt):
     return reverse("exams:exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
 
 
+def _is_final_exam(exam):
+    return getattr(exam, "exam_type_extended", "") == "final"
+
+
 def _parse_items_from_post(request, delivered_question_ids):
     """
     POST-dan apellyasiya item-lərini çıxarır.
@@ -80,8 +84,13 @@ def appeal_create(request, attempt_id):
                 request,
                 pgettext("appeals.view.message", "Apellyasiyanız qeydə alındı."),
             )
+            if _is_final_exam(exam):
+                return redirect(_result_url(exam, attempt))
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
             return redirect(reverse("accounts:profile") + "?section=my-appeals")
+
+    for answer in delivered_answers:
+        answer.has_selection = bool(list(answer.selected_options.all()))
 
     marked_map = _marked_question_map(attempt)
     has_marked = any(marked_map.get(answer.question_id) for answer in delivered_answers)
@@ -96,6 +105,7 @@ def appeal_create(request, attempt_id):
         "result_url": _result_url(exam, attempt),
         "marked_question_by_qid": marked_map,
         "has_marked": has_marked,
+        "is_final_exam": _is_final_exam(exam),
     }
     return render(request, "appeals/student/appeal_create.html", context)
 

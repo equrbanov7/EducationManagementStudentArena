@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "İmtahan zalları" %} — {% trans "İmtahan Nəzarət Sistemi" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page">
+  {% include "exams/exam_center/_breadcrumb.html" with root_current=True %}
+
+  <header class="fxc-head">
+    <div>
+      <h1><i class="fas fa-tower-observation"></i> {% trans "İmtahan zalları" %}</h1>
+      <p class="fxc-sub">
+        {% if can_manage %}{% trans "Zalı seçin — canlı imtahanları izləyin və idarə edin" %}
+        {% else %}{% trans "Sizə təyin olunmuş zallar — daxil olub canlı nəzarəti başladın" %}{% endif %}
+      </p>
+    </div>
+    <div class="fxc-head-actions">
+      {% if can_manage %}
+      <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-calendar-days"></i> {% trans "Oturumlar" %}
+      </a>
+      <a href="{% url 'exams:exam_center_reports' %}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-chart-column"></i> {% trans "Hesabatlar" %}
+      </a>
+      <a href="{% url 'exams:exam_center_room_create' %}" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-plus"></i> {% trans "Yeni zal" %}
+      </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <form method="get" class="fxc-toolbar" role="search">
+    <input type="search" name="q" value="{{ search_query }}" class="fxc-input"
+           placeholder="{% trans 'Zal adı, kodu və ya bina üzrə axtar…' %}"
+           aria-label="{% trans 'Zal axtarışı' %}">
+    <button type="submit" class="fxc-btn fxc-btn-ghost"><i class="fas fa-search"></i> {% trans "Axtar" %}</button>
+    {% if search_query %}
+    <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
+      <i class="fas fa-xmark"></i> {% trans "Təmizlə" %}
+    </a>
+    {% endif %}
+  </form>
+
+  {% if page_obj.object_list %}
+  <div class="fxc-room-grid">
+    {% for room in page_obj %}
+    <article class="fxc-room-card{% if room.live_session_count %} fxc-room-card--live{% endif %}">
+      <div class="fxc-room-card-head">
+        <div class="fxc-room-card-titles">
+          <h2 class="fxc-room-name"><i class="fas fa-door-open"></i> {{ room.name }}</h2>
+          <span class="fxc-room-code"><code>{{ room.code }}</code>{% if room.building %} · {{ room.building }}{% if room.floor %} / {{ room.floor }}{% endif %}{% endif %}</span>
+        </div>
+        {% if room.live_session_count %}
+          <span class="fxc-pill fxc-pill--live"><span class="fxc-live-pulse" aria-hidden="true"></span> {{ room.live_session_count }} {% trans "canlı" %}</span>
+        {% elif room.is_active %}
+          <span class="fxc-pill fxc-pill--ok">{% trans "Aktiv" %}</span>
+        {% else %}
+          <span class="fxc-pill fxc-pill--muted">{% trans "Deaktiv" %}</span>
+        {% endif %}
+      </div>
+
+      <div class="fxc-room-stats">
+        <span title="{% trans 'Tutum' %}"><i class="fas fa-chair"></i> {{ room.capacity }} {% trans "yer" %}</span>
+        <span title="{% trans 'Kompüter' %}"><i class="fas fa-desktop"></i> {{ room.computer_count }} {% trans "kompüter" %}</span>
+        <span title="{% trans 'Ümumi oturum' %}"><i class="fas fa-calendar-days"></i> {{ room.session_count }} {% trans "oturum" %}</span>
+      </div>
+
+      <div class="fxc-room-exams">
+        {% if room.live_sessions %}
+          <span class="fxc-room-exams-label">{% trans "Zalda canlı imtahanlar:" %}</span>
+          {% for s in room.live_sessions %}
+            <span class="fxc-room-exam-chip fxc-room-exam-chip--{{ s.state }}">{{ s.exam.title }}</span>
+          {% endfor %}
+        {% else %}
+          <span class="fxc-room-exams-empty"><i class="far fa-clock"></i> {% trans "Hazırda canlı imtahan yoxdur" %}</span>
+        {% endif %}
+      </div>
+
+      <div class="fxc-room-card-actions">
+        {% if room.live_session_count %}
+        <a href="{% url 'exams:exam_center_room_monitor' room_id=room.pk %}" class="fxc-btn fxc-btn-sm fxc-btn-primary">
+          <i class="fas fa-tower-observation"></i> {% trans "Zalı izlə" %}
+        </a>
+        {% elif not can_manage %}
+        <span class="fxc-btn fxc-btn-sm fxc-btn-ghost" aria-disabled="true" style="pointer-events:none;opacity:.6;">
+          <i class="fas fa-hourglass-half"></i> {% trans "Gözləyir" %}
+        </span>
+        {% endif %}
+        {% if can_manage %}
+        <a href="{% url 'exams:exam_center_room_update' room_id=room.pk %}" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
+          <i class="fas fa-pen"></i> {% trans "Redaktə" %}
+        </a>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% include "partials/_pagination.html" with page_obj=page_obj %}
+  {% else %}
+  <div class="fxc-empty">
+    <i class="far fa-folder-open"></i>
+    {% if search_query %}
+    <p>{% trans "Axtarışa uyğun zal tapılmadı." %}</p>
+    <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost"><i class="fas fa-xmark"></i> {% trans "Axtarışı təmizlə" %}</a>
+    {% elif can_manage %}
+    <p>{% trans "Hələ zal yaradılmayıb." %}</p>
+    <a href="{% url 'exams:exam_center_room_create' %}" class="fxc-btn fxc-btn-primary">
+      <i class="fas fa-plus"></i> {% trans "İlk zalı yarat" %}
+    </a>
+    {% else %}
+    <p>{% trans "Sizə hələ zal təyin edilməyib." %}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -5,6 +5,7 @@ Exam domain model slices.
 from .access_policy import StudentGroup
 from .attempts import ExamAnswer, ExamAnswerFile, ExamAttempt, ProctoringLog
 from .exam_definition import Exam, QuestionBlock
+from .final_center import ExamRoom, ExamRoomSession, FinalExamTicket
 from .language import ExamLanguageVariant
 from .question_bank import (
     BankQuestion,
@@ -30,6 +31,9 @@ __all__ = [
     "ExamLanguageVariant",
     "ExamQuestion",
     "ExamQuestionOption",
+    "ExamRoom",
+    "ExamRoomSession",
+    "FinalExamTicket",
     "ProctoringLog",
     "QuestionBank",
     "QuestionBlock",

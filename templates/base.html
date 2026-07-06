@@ -68,13 +68,13 @@
     Sits outside the navbar so it overlays at the very top even when the
     header has its own shadow.
     {% endcomment %}
-    <div class="route-progress" role="presentation"></div>
+    {% block route_progress %}<div class="route-progress" role="presentation"></div>{% endblock %}
 
     {# Navbar partial #}
-    {% include "partials/_navbar.html" %}
+    {% block navbar %}{% include "partials/_navbar.html" %}{% endblock %}
 
     {# "View as" — başqa istifadəçinin profilinə baxış banneri/çərçivəsi #}
-    {% include "partials/_view_as_banner.html" %}
+    {% block view_as_banner %}{% include "partials/_view_as_banner.html" %}{% endblock %}
 
     {# Django messages - Toast şəklində, sağ üstdə (navbar-dan aşağı) #}
     {% if messages %}
@@ -106,12 +106,16 @@
     </main>
 
     {# Footer partial — hidden in UNIVERSITY_MODE (marketing surface) #}
-    {% if not university_mode %}
-    {% include "partials/_footer.html" %}
-    {% endif %}
+    {% block footer %}
+        {% if not university_mode %}
+        {% include "partials/_footer.html" %}
+        {% endif %}
+    {% endblock %}
 
     {# Global ⌘K search overlay (authenticated users only) #}
-    {% if request.user.is_authenticated %}{% include "partials/_global_search.html" %}{% endif %}
+    {% block global_search %}
+        {% if request.user.is_authenticated %}{% include "partials/_global_search.html" %}{% endif %}
+    {% endblock %}
 
     {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
     {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}
@@ -137,9 +141,11 @@
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260603-warning-click"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260604-modalskip"></script>
-    {% if request.user.is_authenticated %}
-    <script src="{% static 'js/global_search.js' %}?v=20260705-1"></script>
-    {% endif %}
+    {% block global_search_js %}
+        {% if request.user.is_authenticated %}
+        <script src="{% static 'js/global_search.js' %}?v=20260705-1"></script>
+        {% endif %}
+    {% endblock %}
     {% if view_as.can_use and not view_as.active %}
     <script src="{% static 'js/view_as.js' %}?v=20260618-3"></script>
     {% endif %}

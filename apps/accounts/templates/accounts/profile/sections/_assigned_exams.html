@@ -95,7 +95,13 @@
                             data-exam-end="{% if item.exam_end_at %}{{ item.exam_end_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
                             data-exam-duration="{% if item.exam_total_duration_minutes %}{% blocktrans with minutes=item.exam_total_duration_minutes %}{{ minutes }} dəqiqə{% endblocktrans %}{% else %}{% trans 'Məhdudiyyət yoxdur' %}{% endif %}"
                             data-exam-note="{% if item.description %}{{ item.description|striptags|escape }}{% else %}{% endif %}"
-                            data-requires-code="{% if item.exam_requires_code %}1{% else %}0{% endif %}">
+                            data-requires-code="{% if item.exam_requires_code %}1{% else %}0{% endif %}"
+                            data-is-final="{% if item.is_final %}1{% else %}0{% endif %}"
+                            data-final-has-ticket="{% if item.final_has_ticket %}1{% else %}0{% endif %}"
+                            data-final-pin="{{ item.final_pin|default:'' }}"
+                            data-final-room="{{ item.final_room|default:'' }}"
+                            data-final-entry-open="{% if item.final_entry_open %}1{% else %}0{% endif %}"
+                            data-final-entry-url="{{ item.final_entry_url|default:'' }}">
                         <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
                         <i class="fas fa-arrow-right icon-arrow"></i>
                     </button>
@@ -153,9 +159,22 @@
             </div>
         </div>
 
+        {% comment %}Final imtahanı: PIN + xəbərdarlıq (yalnız final biletlərdə görünür).{% endcomment %}
+        <div class="assigned-exam-final-block" id="assignedExamFinalBlock" hidden>
+            <div class="assigned-exam-final-pin-wrap">
+                <span class="label">{% trans 'İmtahan PIN-i' %}</span>
+                <div class="assigned-exam-final-pin" id="assignedExamFinalPin">—</div>
+                <p class="assigned-exam-final-pin-hint" id="assignedExamFinalPinHint"></p>
+            </div>
+            <div class="assigned-exam-final-notice">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span>{% trans 'Bu, final imtahanıdır. İmtahan yalnız təyin olunmuş vaxt aralığında, imtahan giriş səhifəsindən istifadəçi adı və PIN ilə verilir. Kabinetdən birbaşa başlamaq mümkün deyil.' %}</span>
+            </div>
+        </div>
+
         <div class="assigned-exam-info-note-wrap">
-            <div class="label">Qeyd</div>
-            <p id="assignedExamInfoNote">Qeyd yoxdur.</p>
+            <div class="label">{% trans 'Qeyd' %}</div>
+            <p id="assignedExamInfoNote">{% trans 'Qeyd yoxdur.' %}</p>
         </div>
 
         <form method="post" action="{% url 'exams:exam_code_check' %}" id="assignedExamCodeForm" class="assigned-exam-code-form is-hidden">

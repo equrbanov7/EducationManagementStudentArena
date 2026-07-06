@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count, Exists, F, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
@@ -14,7 +13,6 @@ from apps.exams.constants import (
     get_live_session_model,
 )
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.services.exam_center_gate import final_exam_access_allowed
 from apps.exams.services.language_variants import available_language_options
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.tenancy import get_request_organization
@@ -454,49 +452,4 @@ def student_exam_list(request):
         base_queryset=base_queryset,
         page_title=pgettext_lazy("exams.view.student.list.title", "available_exams"),
         current_url_name="student_exam_list",
-    )
-
-
-@login_required
-def final_exam_list(request):
-    """
-    Final imtahan mərkəzi səhifəsi (/exams/final/) — YALNIZ final kateqoriyalı
-    imtahanlar görünür.
-
-    Giriş: hazırda hər kəsə açıqdır. ``FINAL_EXAM_ALLOWED_IPS`` (env)
-    doldurulanda yalnız icazəli IP/CIDR-lərdən (imtahan zalı) giriş mümkün
-    olur — bax: apps.exams.services.exam_center_gate.
-    """
-    if not final_exam_access_allowed(request):
-        raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
-
-    ensure_student_exam_tenant_context(request)
-    user = request.user
-    now = timezone.now()
-
-    base_queryset = tenant_scoped_exams(
-        request,
-        Exam.objects.filter(is_active=True, exam_type_extended="final")
-        .filter(
-            Q(is_public=True)
-            | Q(allowed_users=user)
-            | Q(allowed_groups__students=user)
-            | Q(
-                course__memberships__user=user,
-                course__memberships__role="student",
-                course__status="published",
-            )
-            | Q(author=user)
-        )
-        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))
-        .distinct(),
-    )
-
-    return _render_exam_list(
-        request,
-        base_queryset=base_queryset,
-        page_title=pgettext_lazy("exams.view.student.list.title", "final_exams"),
-        current_url_name="final_exam_list",
-        # Tək kateqoriyalı səhifədir — tip tabları göstərilmir.
-        show_type_tabs=False,
     )

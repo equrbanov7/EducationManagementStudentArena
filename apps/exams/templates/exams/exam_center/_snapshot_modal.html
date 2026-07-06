@@ -1,0 +1,37 @@
+{% load i18n %}
+{% comment %}Tələbə canlı görüntü modalı ("çiyni üzərindən") — session və room
+monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_modal.js-dədir.{% endcomment %}
+<div class="fxc-modal" id="fxc-snapshot-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fxc-snapshot-title"
+     data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=0 ticket_id=0 %}"
+     data-resume-url-template="{% url 'exams:exam_center_ticket_resume' session_id=0 ticket_id=0 %}"
+     data-remove-url-template="{% url 'exams:exam_center_ticket_remove' session_id=0 ticket_id=0 %}">
+  <div class="fxc-modal-card fxc-snapshot-card">
+    <button type="button" class="fxc-snapshot-close" data-close-snapshot aria-label="{% trans 'Bağla' %}">
+      <i class="fas fa-times"></i>
+    </button>
+    <h2 id="fxc-snapshot-title"><i class="fas fa-desktop"></i> <span id="fxc-snapshot-name">—</span></h2>
+    <p class="fxc-snapshot-subject" id="fxc-snapshot-subject"></p>
+    <div class="fxc-snapshot-meta" id="fxc-snapshot-meta"></div>
+    <div class="fxc-snapshot-actions" id="fxc-snapshot-actions" hidden>
+      <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-snap-action="resume" hidden>
+        <i class="fas fa-play"></i> {% trans "Bərpa et" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-snap-action="suspend">
+        <i class="fas fa-pause"></i> {% trans "Dayandır" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-snap-action="remove">
+        <i class="fas fa-user-slash"></i> {% trans "İmtahandan çıxar" %}
+      </button>
+    </div>
+    <p class="fxc-modal-error" id="fxc-snapshot-error" hidden></p>
+    <div class="fxc-snapshot-body" id="fxc-snapshot-body">
+      <p class="fxc-muted fxc-center">{% trans "Yüklənir…" %}</p>
+    </div>
+    <div class="fxc-actions">
+      <button type="button" class="fxc-btn fxc-btn-ghost" id="fxc-snapshot-refresh">
+        <i class="fas fa-rotate"></i> {% trans "Yenilə" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-primary" data-close-snapshot>{% trans "Bağla" %}</button>
+    </div>
+  </div>
+</div>

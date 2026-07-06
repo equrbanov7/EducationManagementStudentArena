@@ -359,6 +359,69 @@
     font-weight: 700;
 }
 
+/* ── Final imtahan bloku (PIN + xəbərdarlıq) ── */
+.assigned-exam-final-block {
+    margin-top: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.assigned-exam-final-block[hidden] {
+    display: none;
+}
+
+.assigned-exam-final-pin-wrap {
+    background: #FCE7EE;
+    border: 1px solid #F8BBD0;
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    text-align: center;
+}
+
+.assigned-exam-final-pin-wrap .label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9F1239;
+    margin-bottom: 0.35rem;
+}
+
+.assigned-exam-final-pin {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #9F1239;
+    font-variant-numeric: tabular-nums;
+}
+
+.assigned-exam-final-pin-hint {
+    margin: 0.4rem 0 0;
+    font-size: 0.8rem;
+    color: #9F1239;
+    opacity: 0.85;
+}
+
+.assigned-exam-final-notice {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.86rem;
+    color: #1E40AF;
+    line-height: 1.4;
+}
+
+.assigned-exam-final-notice i {
+    margin-top: 0.15rem;
+    flex: none;
+}
+
 .assigned-exam-info-note-wrap {
     margin-top: 0.8rem;
     background: var(--ems-neutral-50);

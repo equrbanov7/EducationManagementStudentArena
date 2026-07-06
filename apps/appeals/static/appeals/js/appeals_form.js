@@ -47,6 +47,11 @@
         var countEl = form.querySelector("[data-appeal-selected-count]");
         var emptyHint = form.querySelector("[data-appeal-empty-hint]");
         var submitAttempted = false;
+        var searchScope = form.closest(".appeal-shell")
+            || form.closest(".appeal-embedded")
+            || form.parentElement
+            || document;
+        var selectMarkedBtn = searchScope.querySelector("[data-appeal-select-marked]");
 
         function cardParts(card) {
             return {
@@ -144,6 +149,32 @@
             return cards.filter(isActive);
         }
 
+        function markedCards() {
+            return cards.filter(function (card) {
+                return card.getAttribute("data-appeal-marked") === "1";
+            });
+        }
+
+        function updateMarkedButtonState() {
+            if (!selectMarkedBtn) { return; }
+            var marked = markedCards();
+            var allMarkedSelected = marked.length > 0 && marked.every(isActive);
+            var labelEl = selectMarkedBtn.querySelector("[data-appeal-select-marked-label]");
+            var iconEl = selectMarkedBtn.querySelector("i");
+            var selectLabel = selectMarkedBtn.getAttribute("data-label-select") || gettext("İşarələnmişləri seç");
+            var clearLabel = selectMarkedBtn.getAttribute("data-label-clear") || gettext("İşarələnmişləri ləğv et");
+
+            if (labelEl) {
+                labelEl.textContent = allMarkedSelected ? clearLabel : selectLabel;
+            }
+            if (iconEl) {
+                iconEl.className = allMarkedSelected ? "fas fa-times me-1" : "fas fa-bookmark me-1";
+            }
+            selectMarkedBtn.setAttribute("aria-pressed", allMarkedSelected ? "true" : "false");
+            selectMarkedBtn.classList.toggle("btn-warning", allMarkedSelected);
+            selectMarkedBtn.classList.toggle("btn-outline-warning", !allMarkedSelected);
+        }
+
         function formIsValid() {
             var act = activeCards();
             if (act.length === 0) { return false; }
@@ -168,6 +199,7 @@
             if (submitAttempted) {
                 activeCards().forEach(function (c) { showCardError(c, true); });
             }
+            updateMarkedButtonState();
         }
 
         cards.forEach(function (card) {
@@ -203,20 +235,19 @@
             setActive(card, !!preActive, false);
         });
 
-        // "İşarələnmiş sualları seç" sürətli əməliyyatı.
-        var selectMarkedBtn = form.querySelector("[data-appeal-select-marked]");
+        // "İşarələnmiş sualları seç/ləğv et" sürətli əməliyyatı.
         if (selectMarkedBtn) {
             selectMarkedBtn.addEventListener("click", function () {
-                cards.forEach(function (card) {
-                    if (card.getAttribute("data-appeal-marked") === "1") {
-                        setActive(card, true, false);
-                    }
+                var marked = markedCards();
+                var shouldClear = marked.length > 0 && marked.every(isActive);
+                marked.forEach(function (card) {
+                    setActive(card, !shouldClear, false);
                 });
             });
         }
 
         // Sual axtarışı (client-side filtr).
-        var searchInput = form.querySelector("[data-appeal-search]");
+        var searchInput = searchScope.querySelector("[data-appeal-search]");
         if (searchInput) {
             searchInput.addEventListener("input", function () {
                 var q = searchInput.value.trim().toLowerCase();

@@ -24,9 +24,11 @@
             <a href="{{ result_url }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i>{% trans "Nəticəyə qayıt" context "appeals.template" %}
             </a>
+            {% if not is_final_exam %}
             <a href="{% url 'accounts:profile' %}?section=my-appeals" class="btn btn-outline-primary">
                 <i class="fas fa-list-ul me-2"></i>{% trans "Apellyasiyalarım" context "appeals.template" %}
             </a>
+            {% endif %}
         </div>
     </header>
 
@@ -66,8 +68,14 @@
                    placeholder="{% trans 'Sualları axtar' context 'appeals.template' %}" aria-label="{% trans 'Sualları axtar' context 'appeals.template' %}">
         </div>
         {% if has_marked %}
-        <button type="button" class="btn btn-outline-warning btn-sm" data-appeal-select-marked>
-            <i class="fas fa-bookmark me-1"></i>{% trans "İşarələnmişləri seç" context "appeals.template" %}
+        <button type="button"
+                class="btn btn-outline-warning btn-sm"
+                data-appeal-select-marked
+                data-label-select="{% trans 'İşarələnmişləri seç' context 'appeals.template' %}"
+                data-label-clear="{% trans 'İşarələnmişləri ləğv et' context 'appeals.template' %}"
+                aria-pressed="false">
+            <i class="fas fa-bookmark me-1" aria-hidden="true"></i>
+            <span data-appeal-select-marked-label>{% trans "İşarələnmişləri seç" context "appeals.template" %}</span>
         </button>
         {% endif %}
     </div>
@@ -90,7 +98,7 @@
             <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}"
                      data-appeal-card
                      data-appeal-marked="{% if is_marked %}1{% else %}0{% endif %}"
-                     data-appeal-text="{{ q.text|striptags }}">
+                     data-appeal-text="{{ q.text|striptags }} {{ answer.text_answer|default_if_none:''|striptags }} {{ q.correct_answer|default_if_none:''|striptags }}">
                 <div class="appeal-question-card__top">
                     <div class="appeal-question-card__main">
                         <p class="appeal-question-title">
@@ -113,6 +121,46 @@
                             {% trans "Apellyasiya et" context "appeals.template" %}
                         </label>
                     </div>
+                </div>
+
+                <div class="appeal-answer-review appeal-answer-review--create">
+                    {% if exam.exam_type == "test" %}
+                    <div class="appeal-answer-review__label">{% trans "Variantlar" context "appeals.template" %}</div>
+                    <ul class="appeal-options">
+                        {% for opt in q.options.all %}
+                        <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt in answer.selected_options.all and not opt.is_correct %} is-wrong{% endif %}">
+                            <span class="appeal-option__icon">
+                                {% if opt.is_correct %}
+                                <i class="fas fa-check-circle"></i>
+                                {% elif opt in answer.selected_options.all %}
+                                <i class="fas fa-times-circle"></i>
+                                {% else %}
+                                <i class="far fa-circle"></i>
+                                {% endif %}
+                            </span>
+                            <span class="appeal-option__text">{% if opt.label %}<b>{{ opt.label }}.</b> {% endif %}{{ opt.text }}</span>
+                            <span class="appeal-option__tags">
+                                {% if opt in answer.selected_options.all %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
+                                {% if opt.is_correct %}<span class="appeal-option__tag appeal-option__tag--correct">{% trans "Düzgün cavab" context "appeals.template" %}</span>{% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% if not answer.has_selection %}
+                    <div class="appeal-answer-review__empty">{% trans "Cavab seçilməyib" context "appeals.template" %}</div>
+                    {% endif %}
+                    {% else %}
+                    <div class="appeal-answer-review__label">{% trans "Tələbənin cavabı" context "appeals.template" %}</div>
+                    {% if answer.text_answer %}
+                    <div class="appeal-answer-review__text">{{ answer.text_answer|linebreaksbr }}</div>
+                    {% else %}
+                    <div class="appeal-answer-review__empty">{% trans "Cavab yazılmayıb" context "appeals.template" %}</div>
+                    {% endif %}
+                    {% if q.correct_answer %}
+                    <div class="appeal-answer-review__label mt-3">{% trans "Düzgün cavab" context "appeals.template" %}</div>
+                    <div class="appeal-answer-review__text">{{ q.correct_answer|linebreaksbr }}</div>
+                    {% endif %}
+                    {% endif %}
                 </div>
 
                 <div class="appeal-q-body" data-appeal-body>
@@ -184,5 +232,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260608-1"></script>
+<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260706-marked-toggle"></script>
 {% endblock %}

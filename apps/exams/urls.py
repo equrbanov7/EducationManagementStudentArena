@@ -10,11 +10,93 @@ urlpatterns = [
     # STUDENT - Exam Lists (sabit)
     # ==========================
     path("available/", views.student_exam_list, name="student_exam_list"),
-    # Final imtahan mərkəzi — yalnız final kateqoriyalı imtahanlar.
-    path("final/", views.final_exam_list, name="final_exam_list"),
+    # Final imtahan mərkəzi — ayrıca PIN giriş səhifəsi (imtahan siyahısı YOX).
+    # PIN yoxlamasından sonra HƏMİN səhifədə imtahan-öncəsi məlumat/qaydalar
+    # modalı açılır → təsdiq → gözləmə otağı → nəzarətçi start-ı → attempt.
+    path("final/", views.final_exam_entry, name="final_exam_entry"),
+    path("final/waiting/<int:ticket_id>/", views.final_exam_waiting, name="final_exam_waiting"),
+    path("final/waiting/<int:ticket_id>/cancel/", views.final_exam_cancel, name="final_exam_cancel"),
+    path("final/waiting/<int:ticket_id>/begin/", views.final_exam_begin, name="final_exam_begin"),
+    path("final/waiting/<int:ticket_id>/state/", views.final_ticket_state, name="final_ticket_state"),
     path("assigned/", views.assigned_student_exam_list, name="assigned_exam_list"),
     path("my-history/", views.student_exam_history, name="student_exam_history"),
     path("code-check/", views.exam_code_check, name="exam_code_check"),
+    # ==========================
+    # EXAM CENTER - Zallar / Oturumlar / Monitor / Hesabat (sabit)
+    # ==========================
+    path("center/rooms/", views.exam_center_room_list, name="exam_center_room_list"),
+    path("center/rooms/create/", views.exam_center_room_create, name="exam_center_room_create"),
+    path("center/rooms/<int:room_id>/edit/", views.exam_center_room_update, name="exam_center_room_update"),
+    # Zal səviyyəli aqreqasiya monitoru (bütün canlı oturumlar birlikdə).
+    path("center/rooms/<int:room_id>/monitor/", views.exam_center_room_monitor, name="exam_center_room_monitor"),
+    path(
+        "center/rooms/<int:room_id>/api/snapshot/",
+        views.exam_center_room_snapshot,
+        name="exam_center_room_snapshot",
+    ),
+    path("center/rooms/<int:room_id>/start-all/", views.exam_center_room_start_all, name="exam_center_room_start_all"),
+    path("center/rooms/<int:room_id>/open-all/", views.exam_center_room_open_all, name="exam_center_room_open_all"),
+    path("center/sessions/", views.exam_center_session_list, name="exam_center_session_list"),
+    path("center/sessions/create/", views.exam_center_session_create, name="exam_center_session_create"),
+    path("center/sessions/<int:session_id>/", views.exam_center_session_detail, name="exam_center_session_detail"),
+    path(
+        "center/sessions/<int:session_id>/assign/",
+        views.exam_center_session_assign_students,
+        name="exam_center_session_assign_students",
+    ),
+    path(
+        "center/sessions/<int:session_id>/monitor/",
+        views.exam_center_session_monitor,
+        name="exam_center_session_monitor",
+    ),
+    path(
+        "center/sessions/<int:session_id>/api/snapshot/",
+        views.exam_center_session_snapshot,
+        name="exam_center_session_snapshot",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/snapshot/",
+        views.exam_center_ticket_snapshot,
+        name="exam_center_ticket_snapshot",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/resume/",
+        views.exam_center_ticket_resume,
+        name="exam_center_ticket_resume",
+    ),
+    path(
+        "center/sessions/<int:session_id>/open-entry/",
+        views.exam_center_session_open_entry,
+        name="exam_center_session_open_entry",
+    ),
+    path("center/sessions/<int:session_id>/start/", views.exam_center_session_start, name="exam_center_session_start"),
+    path("center/sessions/<int:session_id>/end/", views.exam_center_session_end, name="exam_center_session_end"),
+    path(
+        "center/sessions/<int:session_id>/cancel/",
+        views.exam_center_session_cancel,
+        name="exam_center_session_cancel",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/remove/",
+        views.exam_center_ticket_remove,
+        name="exam_center_ticket_remove",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/pin/",
+        views.exam_center_ticket_pin,
+        name="exam_center_ticket_pin",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/seat/",
+        views.exam_center_ticket_seat,
+        name="exam_center_ticket_seat",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/readmit/",
+        views.exam_center_ticket_readmit,
+        name="exam_center_ticket_readmit",
+    ),
+    path("center/reports/", views.exam_center_reports, name="exam_center_reports"),
     # ==========================
     # TEACHER - Exams CRUD (sabit)
     # ==========================

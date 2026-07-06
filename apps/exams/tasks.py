@@ -41,6 +41,26 @@ def expire_stale_resumed_attempts():
     return expired
 
 
+@shared_task(name="exams.notify_upcoming_final_exams")
+def notify_upcoming_final_exams():
+    """
+    Final oturumu yaxınlaşan tələbələrə xatırlatma bildirişi göndərir
+    ("gəl imtahanı ver"). Dublikat ``reminder_stage`` ilə əngəllənir; global
+    sweep bütün təşkilatları gəzir, hər bildiriş biletin öz org-u altındadır.
+
+    Qaytarır: göndərilən bildiriş sayı.
+    """
+    from apps.exams.services.final_center import notify_upcoming_final_exams as _run
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    with rls_worker_atomic(), bypass_rls():
+        sent = _run()
+    if sent:
+        logger.info("notify_upcoming_final_exams: sent %d reminder(s)", sent)
+    return sent
+
+
 @shared_task(
     name="exams.run_text_extraction_job",
     time_limit=900,

@@ -10,7 +10,10 @@ from .models import (
     ExamAttempt,
     ExamQuestion,
     ExamQuestionOption,
+    ExamRoom,
+    ExamRoomSession,
     ExamSupervisionConfig,
+    FinalExamTicket,
     ProctoringLog,
     QuestionBank,
     StudentGroup,
@@ -225,3 +228,37 @@ class SupervisionIncidentAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related("student", "exam", "attempt")
+
+
+# --- Final imtahan mərkəzi ---
+
+
+@admin.register(ExamRoom)
+class ExamRoomAdmin(admin.ModelAdmin):
+    list_display = ("name", "code", "organization", "building", "capacity", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("name", "code", "building")
+
+
+@admin.register(ExamRoomSession)
+class ExamRoomSessionAdmin(admin.ModelAdmin):
+    list_display = ("exam", "room", "state", "scheduled_start", "scheduled_end", "invigilator")
+    list_filter = ("state",)
+    search_fields = ("exam__title", "room__name")
+    readonly_fields = ("started_at", "started_by", "ended_at", "ended_by", "start_connected_count")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("exam", "room", "invigilator")
+
+
+@admin.register(FinalExamTicket)
+class FinalExamTicketAdmin(admin.ModelAdmin):
+    list_display = ("student", "exam", "session", "status", "seat_number", "language")
+    list_filter = ("status", "language")
+    search_fields = ("student__username", "exam__title")
+    # PIN sahələri (hash/şifrə) admin formasında da göstərilmir.
+    exclude = ("pin_hash", "pin_cipher")
+    readonly_fields = ("pin_issued_at", "pin_expires_at", "pin_revoked_at", "pin_failed_attempts")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("student", "exam", "session", "session__room")

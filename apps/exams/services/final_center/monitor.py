@@ -1,0 +1,210 @@
+"""final_center paketi — nəzarətçi monitoru üçün kompakt snapshot.
+
+Tək sorğu + presence cache oxunuşu ilə qurulur (N+1 yoxdur). Snapshot həm
+ilkin səhifə render-i, həm WS-siz fallback polling üçün eyni formatda
+istifadə olunur ki, iki mənbə heç vaxt ayrılmasın.
+"""
+
+from django.db.models import Count, Q
+from django.utils import timezone
+
+from apps.exams.domain.final_center import (
+    TICKET_STATUS_ABSENT,
+    TICKET_STATUS_ACTIVE,
+    TICKET_STATUS_ASSIGNED,
+    TICKET_STATUS_COMPLETED,
+    TICKET_STATUS_READY,
+    TICKET_STATUS_REMOVED,
+    TICKET_STATUS_WAITING,
+)
+
+from .presence import presence_map
+from .sessions import maybe_auto_end
+from .tickets import sync_ticket_completion
+
+
+def _ticket_row(ticket, presence, exam_title=None):
+    """Yalnız əməliyyat üçün lazım olan kompakt sahələr — cavablar/ballar YOX.
+    ``exam_title`` zal-səviyyəli aqreqasiyada fənn/imtahan adını əlavə edir."""
+    attempt = ticket.attempt
+    remaining_seconds = None
+    if attempt and not attempt.is_finished and attempt.deadline_at:
+        remaining_seconds = max(0, int((attempt.deadline_at - timezone.now()).total_seconds()))
+    return {
+        "ticket_id": ticket.pk,
+        "student_id": ticket.student_id,
+        "name": ticket.student.get_full_name() or ticket.student.username,
+        "username": ticket.student.username,
+        "seat": ticket.seat_number,
+        "status": ticket.status,
+        "language": ticket.language,
+        "connected": ticket.pk in presence,
+        "pin_issued": bool(ticket.pin_hash and not ticket.pin_revoked_at),
+        "pin_locked": ticket.is_pin_locked,
+        "reconnect_count": ticket.reconnect_count,
+        "last_seen_at": ticket.last_seen_at.isoformat() if ticket.last_seen_at else None,
+        "started_at": ticket.started_at.isoformat() if ticket.started_at else None,
+        "completed_at": ticket.completed_at.isoformat() if ticket.completed_at else None,
+        "remaining_seconds": remaining_seconds,
+        "supervision_status": attempt.supervision_status if attempt else None,
+        "violation_count": attempt.supervision_violation_count if attempt else 0,
+        "removal_action": ticket.removal_action,
+        "session_id": ticket.session_id,
+        "exam_title": exam_title,
+    }
+
+
+def session_monitor_snapshot(session):
+    """Oturumun canlı vəziyyəti: sayğaclar + tələbə sətirləri (kompakt)."""
+    # Rəsmi server deadline-ı lazily tətbiq olunur.
+    maybe_auto_end(session)
+
+    tickets = list(
+        session.tickets.select_related("student", "attempt").order_by("seat_number", "student__first_name", "id")
+    )
+    # Attempt bitmiş, bilet hələ "active" qalmış sətirləri sinxonlaşdır (lazy).
+    for ticket in tickets:
+        if ticket.status == TICKET_STATUS_ACTIVE and ticket.attempt_id:
+            sync_ticket_completion(ticket)
+
+    presence = presence_map(session.pk, [t.pk for t in tickets])
+
+    counts = {
+        "assigned": 0,
+        "waiting": 0,
+        "ready": 0,
+        "active": 0,
+        "completed": 0,
+        "removed": 0,
+        "absent": 0,
+        "connected": len(presence),
+        "total": len(tickets),
+    }
+    for ticket in tickets:
+        if ticket.status in counts:
+            counts[ticket.status] += 1
+    counts["offline"] = max(
+        0,
+        counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"],
+    )
+
+    return {
+        "session_id": session.pk,
+        "state": session.state,
+        "exam_title": session.exam.title,
+        "room_name": session.room.name,
+        "room_capacity": session.room.capacity,
+        "scheduled_start": session.scheduled_start.isoformat(),
+        "scheduled_end": session.scheduled_end.isoformat(),
+        "started_at": session.started_at.isoformat() if session.started_at else None,
+        "ended_at": session.ended_at.isoformat() if session.ended_at else None,
+        "server_now": timezone.now().isoformat(),
+        "counts": counts,
+        "students": [_ticket_row(t, presence) for t in tickets],
+    }
+
+
+def room_live_sessions(room):
+    """Zalda canlı (giriş açıq / aktiv) oturumlar — fənn üzrə sıralı."""
+    from apps.exams.domain.final_center import ROOM_SESSION_STATE_ACTIVE, ROOM_SESSION_STATE_ENTRY_OPEN
+    from apps.exams.models import ExamRoomSession
+
+    sessions = list(
+        ExamRoomSession.objects.filter(room=room, state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE))
+        .select_related("exam")
+        .order_by("scheduled_start", "id")
+    )
+    # Rəsmi deadline-ı lazily tətbiq et, sonra hələ canlı qalanları saxla.
+    for session in sessions:
+        maybe_auto_end(session)
+    return [s for s in sessions if s.state in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)]
+
+
+def room_monitor_snapshot(room):
+    """
+    Zal-səviyyəli aqreqasiya: zaldakı BÜTÜN canlı oturumların (imtahanların)
+    tələbələrini birləşdirir. Hər sətir fənn/imtahan adı ilə etiketlənir;
+    nəzarətçi bir zalda neçə imtahan varsa hamısını bir ekranda görür.
+    """
+    from collections import defaultdict
+
+    from apps.exams.models import FinalExamTicket
+
+    sessions = room_live_sessions(room)
+    session_ids = [s.pk for s in sessions]
+
+    tickets = list(
+        FinalExamTicket.objects.filter(session_id__in=session_ids)
+        .select_related("student", "attempt", "session", "session__exam")
+        .order_by("session__exam__title", "seat_number", "id")
+    )
+    for ticket in tickets:
+        if ticket.status == TICKET_STATUS_ACTIVE and ticket.attempt_id:
+            sync_ticket_completion(ticket)
+
+    # Presence hər oturum üçün ayrıca cache açarındadır; bilet id-ləri qlobal
+    # unikaldır, ona görə birləşdirilə bilər.
+    by_session = defaultdict(list)
+    for ticket in tickets:
+        by_session[ticket.session_id].append(ticket.pk)
+    presence = {}
+    for sid, ids in by_session.items():
+        presence.update(presence_map(sid, ids))
+
+    counts = {
+        "assigned": 0,
+        "waiting": 0,
+        "ready": 0,
+        "active": 0,
+        "completed": 0,
+        "removed": 0,
+        "absent": 0,
+        "connected": len(presence),
+        "total": len(tickets),
+    }
+    for ticket in tickets:
+        if ticket.status in counts:
+            counts[ticket.status] += 1
+    counts["offline"] = max(0, counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"])
+
+    return {
+        "room_id": room.pk,
+        "room_name": room.name,
+        "room_code": room.code,
+        "server_now": timezone.now().isoformat(),
+        "counts": counts,
+        "sessions": [
+            {
+                "session_id": s.pk,
+                "exam_title": s.exam.title,
+                "state": s.state,
+                "scheduled_start": s.scheduled_start.isoformat(),
+                "scheduled_end": s.scheduled_end.isoformat(),
+                "started_at": s.started_at.isoformat() if s.started_at else None,
+            }
+            for s in sessions
+        ],
+        "students": [_ticket_row(t, presence, exam_title=t.session.exam.title) for t in tickets],
+    }
+
+
+def session_list_annotations(queryset):
+    """Oturum siyahısı üçün sayğac annotasiyaları (tək sorğu, N+1 yox)."""
+    return queryset.annotate(
+        ticket_total=Count("tickets", distinct=True),
+        ticket_waiting=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_WAITING), distinct=True),
+        ticket_ready=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_READY), distinct=True),
+        ticket_active=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_ACTIVE), distinct=True),
+        ticket_completed=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_COMPLETED), distinct=True),
+        ticket_removed=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_REMOVED), distinct=True),
+        ticket_absent=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_ABSENT), distinct=True),
+        ticket_assigned=Count("tickets", filter=Q(tickets__status=TICKET_STATUS_ASSIGNED), distinct=True),
+    )
+
+
+__all__ = [
+    "room_live_sessions",
+    "room_monitor_snapshot",
+    "session_list_annotations",
+    "session_monitor_snapshot",
+]

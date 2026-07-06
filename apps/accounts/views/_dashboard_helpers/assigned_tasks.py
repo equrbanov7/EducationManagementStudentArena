@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from apps.assignments.models import Assignment
 from apps.courses.models import CourseMembership
+from apps.exams.public import student_final_exam_context
 from apps.labs.models import Lab
 from apps.projects.models import Project
 
@@ -108,12 +109,51 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             ):
                 continue
 
-            if exam.start_datetime and now < exam.start_datetime:
+            is_final = getattr(exam, "exam_type_extended", None) == "final"
+            final_ctx = student_final_exam_context(user, exam) if is_final else {}
+
+            # Final imtahanları KABİNETDƏN başladılmır — vaxt aralığı oturumla
+            # təyin olunur; state final biletin oturum vaxtına görə hesablanır.
+            if is_final:
+                window_start = final_ctx.get("window_start")
+                window_end = final_ctx.get("window_end")
+                if window_start and now < window_start:
+                    state = "upcoming"
+                elif window_end and now > window_end:
+                    state = "closed"
+                else:
+                    state = "open"
+            elif exam.start_datetime and now < exam.start_datetime:
                 state = "upcoming"
             elif exam.end_datetime and now > exam.end_datetime:
                 state = "closed"
             else:
                 state = "open"
+
+            extra = {
+                "exam_slug": exam.slug,
+                "exam_type_display": exam.get_exam_type_display(),
+                "exam_total_duration_minutes": exam.total_duration_minutes,
+                "exam_start_at": exam.start_datetime,
+                "exam_end_at": exam.end_datetime,
+                "exam_requires_code": bool(exam.access_code),
+                "is_final": is_final,
+            }
+            if is_final:
+                extra.update(
+                    {
+                        # Final biletin oturum məlumatı (vaxt aralığı mərkəz tərəfindən təyin olunur).
+                        "final_has_ticket": final_ctx.get("has_ticket", False),
+                        "final_pin": final_ctx.get("pin"),
+                        "final_room": final_ctx.get("room_name"),
+                        "final_entry_open": final_ctx.get("entry_open", False),
+                        "final_status": final_ctx.get("status"),
+                        "final_entry_url": reverse("exams:final_exam_entry"),
+                        # Modal/aralıq göstərişi üçün oturum vaxtları (exam tarixlərini əvəz edir).
+                        "exam_start_at": final_ctx.get("window_start") or exam.start_datetime,
+                        "exam_end_at": final_ctx.get("window_end") or exam.end_datetime,
+                    }
+                )
 
             append_item(
                 category="exams",
@@ -125,18 +165,11 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                     from_section="assigned-exams",
                     assigned_type=filter_type,
                 ),
-                assigned_at=exam.start_datetime or exam.created_at,
-                deadline=exam.end_datetime,
+                assigned_at=(final_ctx.get("window_start") if is_final else exam.start_datetime) or exam.created_at,
+                deadline=final_ctx.get("window_end") if is_final else exam.end_datetime,
                 state=state,
                 description=exam.description,
-                extra={
-                    "exam_slug": exam.slug,
-                    "exam_type_display": exam.get_exam_type_display(),
-                    "exam_total_duration_minutes": exam.total_duration_minutes,
-                    "exam_start_at": exam.start_datetime,
-                    "exam_end_at": exam.end_datetime,
-                    "exam_requires_code": bool(exam.access_code),
-                },
+                extra=extra,
             )
 
     assignments_qs = (

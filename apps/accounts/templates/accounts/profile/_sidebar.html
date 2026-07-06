@@ -179,15 +179,25 @@
                 {% if my_exams_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_exams_count">{{ my_exams_count }}</span>{% endif %}
             </a>
         </li>
-        {% if exam_supervision_enabled %}
-            <li class="sidebar-menu-item">
-                <a href="{% url 'exams:supervision_monitor' %}"
-                   class="sidebar-menu-link">
-                    <i class="fas fa-shield-alt sidebar-menu-icon c3-1"></i>
-                    <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarəti' %}</span>
-                </a>
-            </li>
+        {% comment %}
+        Köhnə "İmtahan Nəzarəti" (supervision_monitor) linki gizlədildi —
+        yeni "İmtahan Nəzarət Sistemi" (final imtahan mərkəzi) onu əvəz edir.
+        {% endcomment %}
         {% endif %}
+
+        {% comment %}
+        İmtahan Nəzarət Sistemi — zallar/oturumlar + canlı otaq nəzarəti.
+        İmtahan mərkəzi HƏMİŞƏ, müəllim-nəzarətçi yalnız təyin olunmuş oturumu
+        olduqda görür (bax role_capabilities.can_access_final_center).
+        {% endcomment %}
+        {% if role_capabilities.can_access_final_center %}
+        <li class="sidebar-menu-item">
+            <a href="{% url 'exams:exam_center_room_list' %}"
+               class="sidebar-menu-link">
+                <i class="fas fa-tower-observation sidebar-menu-icon c3-1"></i>
+                <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
+            </a>
+        </li>
         {% endif %}
 
         {% if 'question-bank' in allowed_sections %}

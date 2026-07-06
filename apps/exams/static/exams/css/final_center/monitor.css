@@ -1,0 +1,412 @@
+/* Canlı otaq monitoru — stat kartları və modallar. */
+
+.fxc-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+    margin: 6px 0 16px;
+}
+
+.fxc-stat {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: center;
+}
+
+.fxc-stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0F172A;
+    font-variant-numeric: tabular-nums;
+}
+
+.fxc-stat-label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #94A3B8;
+    margin-top: 2px;
+}
+
+.fxc-stat--connected .fxc-stat-value { color: #15803D; }
+.fxc-stat--active .fxc-stat-value { color: #2C5BFF; }
+.fxc-stat--offline .fxc-stat-value { color: #B45309; }
+.fxc-stat--removed .fxc-stat-value { color: #B91C1C; }
+
+/* ── Modallar ── */
+.fxc-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: 16px;
+}
+
+.fxc-modal[hidden] { display: none; }
+
+.fxc-modal-card {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 520px;
+    width: 100%;
+    padding: 24px 26px;
+    box-shadow: 0 24px 64px rgba(15, 23, 42, .25);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.fxc-modal-card h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fxc-modal-warn {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: .88rem;
+    margin-bottom: 14px;
+}
+
+.fxc-modal-warn--danger {
+    background: #FEF2F2;
+    border-color: #FECACA;
+    color: #991B1B;
+}
+
+.fxc-modal-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 0 0 14px;
+    padding: 14px;
+    background: #F8FAFC;
+    border: 1px solid #EEF2F7;
+    border-radius: 12px;
+}
+
+.fxc-modal-facts dt {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #94A3B8;
+    margin-bottom: 2px;
+}
+
+.fxc-modal-facts dd {
+    margin: 0;
+    font-weight: 700;
+    color: #0F172A;
+    font-variant-numeric: tabular-nums;
+}
+
+.fxc-modal-student {
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 12px;
+}
+
+.fxc-modal-error {
+    color: #B91C1C;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: .85rem;
+    margin: 0 0 12px;
+}
+
+.fxc-table--monitor td { padding-top: 9px; padding-bottom: 9px; }
+
+/* ── Görünüş keçidi (kompüter xəritəsi ⇄ cədvəl) ── */
+.fxc-viewtoggle {
+    display: inline-flex;
+    background: #F1F4F9;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.fxc-viewtoggle-btn {
+    border: none;
+    background: transparent;
+    color: #64748B;
+    font-size: .85rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .15s, color .15s;
+}
+
+.fxc-viewtoggle-btn:hover { color: #0F172A; }
+.fxc-viewtoggle-btn.is-active { background: #fff; color: #2C5BFF; box-shadow: 0 1px 3px rgba(15, 23, 42, .1); }
+
+/* ── Kompüter xəritəsi ── */
+.fxc-map-panel {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 16px 18px;
+}
+
+.fxc-map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 14px;
+    font-size: .78rem;
+    color: #64748B;
+}
+
+.fxc-map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.fxc-sw {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    display: inline-block;
+    border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.fxc-sw--active { background: #DCFCE7; border-color: #86EFAC; }
+.fxc-sw--ready { background: #CFFAFE; border-color: #67E8F9; }
+.fxc-sw--waiting { background: #E0F2FE; border-color: #7DD3FC; }
+.fxc-sw--warn { background: #FEF3C7; border-color: #FCD34D; }
+.fxc-sw--completed { background: #EEF2FF; border-color: #C7D2FE; }
+.fxc-sw--removed { background: #FEE2E2; border-color: #FCA5A5; }
+.fxc-sw--idle { background: #F1F4F9; border-color: #E2E8F0; }
+
+.fxc-computer-map {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    gap: 10px;
+}
+
+.fxc-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    border: 1.5px solid #E2E8F0;
+    background: #F8FAFC;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: transform .1s, box-shadow .15s, border-color .15s;
+}
+
+.fxc-cell:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 23, 42, .12); }
+.fxc-cell:focus-visible { outline: 3px solid rgba(44, 91, 255, .35); outline-offset: 2px; }
+
+.fxc-cell-num { font-size: 1.1rem; font-weight: 800; color: #0F172A; font-variant-numeric: tabular-nums; }
+.fxc-cell-ini { font-size: .68rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
+
+.fxc-cell--active { background: #DCFCE7; border-color: #4ADE80; }
+.fxc-cell--active .fxc-cell-num { color: #15803D; }
+.fxc-cell--ready { background: #CFFAFE; border-color: #22D3EE; }
+.fxc-cell--waiting { background: #E0F2FE; border-color: #38BDF8; }
+.fxc-cell--warn { background: #FEF3C7; border-color: #F59E0B; }
+.fxc-cell--warn .fxc-cell-num { color: #92400E; }
+.fxc-cell--completed { background: #EEF2FF; border-color: #C7D2FE; }
+.fxc-cell--removed { background: #FEE2E2; border-color: #F87171; }
+.fxc-cell--removed .fxc-cell-num { color: #B91C1C; }
+.fxc-cell--idle { background: #F8FAFC; border-color: #E2E8F0; }
+.fxc-cell--idle .fxc-cell-num { color: #94A3B8; }
+
+.fxc-cell-vio {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #DC2626;
+    color: #fff;
+    font-size: .64rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fxc-cell-conn {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16A34A;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+.fxc-map-hint {
+    margin: 14px 0 0;
+    font-size: .8rem;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* ── Canlı görüntü ("çiyni üzərindən") modalı ── */
+.fxc-snapshot-card { max-width: 620px; position: relative; }
+
+.fxc-snapshot-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 9px;
+    background: #F1F4F9;
+    color: #64748B;
+    cursor: pointer;
+}
+
+.fxc-snapshot-close:hover { background: #E2E8F0; color: #0F172A; }
+
+.fxc-snapshot-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    font-size: .84rem;
+    color: #475569;
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #EEF2F7;
+}
+
+.fxc-snapshot-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.fxc-snapshot-meta i { color: #94A3B8; }
+
+.fxc-snapshot-body { max-height: 52vh; overflow-y: auto; }
+
+.fxc-snapshot-empty {
+    text-align: center;
+    color: #94A3B8;
+    padding: 34px 0;
+}
+
+.fxc-snapshot-empty i { font-size: 30px; display: block; margin-bottom: 10px; }
+
+.fxc-snapshot-answers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.fxc-snap-q {
+    border: 1px solid #EEF2F7;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: #F8FAFC;
+}
+
+.fxc-snap-q--answered { border-color: #BBF7D0; background: #F0FDF4; }
+
+.fxc-snap-q-head { display: flex; align-items: center; gap: 9px; }
+
+.fxc-snap-q-no {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: #E2E8F0;
+    color: #475569;
+    font-size: .78rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fxc-snap-q--answered .fxc-snap-q-no { background: #16A34A; color: #fff; }
+.fxc-snap-q-text { flex: 1; font-size: .88rem; color: #0F172A; font-weight: 600; }
+.fxc-snap-ok { color: #16A34A; }
+.fxc-snap-none { color: #CBD5E1; }
+.fxc-snap-q-ans {
+    margin: 8px 0 0 33px;
+    font-size: .85rem;
+    color: #334155;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 7px 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ── Snapshot: fənn, əməliyyatlar, variantlar ── */
+.fxc-snapshot-subject {
+    margin: -6px 0 12px;
+    font-size: .92rem;
+    font-weight: 700;
+    color: #2C5BFF;
+}
+
+.fxc-snapshot-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #EEF2F7;
+}
+
+.fxc-snap-opts { margin: 8px 0 0 33px; display: flex; flex-direction: column; gap: 4px; }
+
+.fxc-snap-opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .84rem;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.fxc-snap-opt-lbl {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #F1F4F9;
+    color: #64748B;
+    font-weight: 800;
+    font-size: .74rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fxc-snap-opt-txt { flex: 1; }
+.fxc-snap-opt i { color: #2C5BFF; }
+
+.fxc-snap-opt.selected { border-color: #93C5FD; background: #EFF6FF; color: #1E40AF; }
+.fxc-snap-opt.selected .fxc-snap-opt-lbl { background: #2C5BFF; color: #fff; }
+.fxc-snap-opt.correct .fxc-snap-opt-lbl { box-shadow: 0 0 0 2px #86EFAC; }
