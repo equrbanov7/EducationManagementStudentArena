@@ -1,6 +1,7 @@
 .git/
 .github/
 .claude/
+actions-runner/
 .venv/
 venv/
 __pycache__/

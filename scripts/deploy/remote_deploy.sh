@@ -15,6 +15,15 @@ COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 APP_REPLICAS="${APP_REPLICAS:-1}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-1}"
 
+# Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
+# files owned by a different user (e.g. a previous root deploy) and failed with
+# "Permission denied" when the CI runner (github-runner) re-ran the deploy.
+DEPLOY_TMP="$(mktemp -d 2>/dev/null || mktemp -d -t emsarena-deploy)"
+trap 'rm -rf "$DEPLOY_TMP"' EXIT
+PING_JSON="${DEPLOY_TMP}/ping.json"
+HEALTH_JSON="${DEPLOY_TMP}/health.json"
+COMPOSE_CONFIG="${DEPLOY_TMP}/compose-config.yml"
+
 if ! [[ "$APP_REPLICAS" =~ ^[0-9]+$ ]] || [ "$APP_REPLICAS" -lt 1 ]; then
   echo "APP_REPLICAS must be a positive integer." >&2
   exit 1
@@ -106,13 +115,13 @@ legacy_deploy() {
   $SUDO systemctl restart "$SERVICE_NAME"
   $SUDO systemctl is-active --quiet "$SERVICE_NAME"
 
-  wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "/tmp/emsarena-ping.json" || {
+  wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "$PING_JSON" || {
     $SUDO systemctl status "$SERVICE_NAME" --no-pager || true
     journalctl -u "$SERVICE_NAME" -n 200 --no-pager || true
     exit 1
   }
 
-  wait_for_http "${APP_BASE_URL}${HEALTH_PATH}" "200 207" "/tmp/emsarena-health.json" || {
+  wait_for_http "${APP_BASE_URL}${HEALTH_PATH}" "200 207" "$HEALTH_JSON" || {
     $SUDO systemctl status "$SERVICE_NAME" --no-pager || true
     journalctl -u "$SERVICE_NAME" -n 200 --no-pager || true
     exit 1
@@ -217,7 +226,7 @@ docker_deploy() {
   ensure_origin_cert
   repair_cloudflare_docker_user_firewall
 
-  docker compose -f "$COMPOSE_FILE" config >/tmp/emsarena-compose-config.yml
+  docker compose -f "$COMPOSE_FILE" config >"$COMPOSE_CONFIG"
   docker compose -f "$COMPOSE_FILE" build
   docker compose -f "$COMPOSE_FILE" up -d postgres redis pgbouncer
   docker compose -f "$COMPOSE_FILE" run --rm -e RUN_RELEASE_ON_START=false app /app/docker/release.sh
@@ -253,13 +262,13 @@ docker_deploy() {
 
   refresh_nginx_upstream
 
-  wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "/tmp/emsarena-ping.json" || {
+  wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "$PING_JSON" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true
     docker compose -f "$COMPOSE_FILE" logs --tail=200 app nginx >&2 || true
     exit 1
   }
 
-  wait_for_http "${APP_BASE_URL}${HEALTH_PATH}" "200 207" "/tmp/emsarena-health.json" || {
+  wait_for_http "${APP_BASE_URL}${HEALTH_PATH}" "200 207" "$HEALTH_JSON" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true
     docker compose -f "$COMPOSE_FILE" logs --tail=200 app nginx >&2 || true
     exit 1
