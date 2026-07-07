@@ -1,4 +1,4 @@
-name: 🚢 Deploy to Linode (reusable)
+name: 🚢 Deploy to production server (reusable)
 
 on:
   workflow_call:
@@ -54,7 +54,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: 🚢 Deploy to Linode
+    name: 🚢 Deploy to production server
     runs-on: ubuntu-latest
     environment: production
     permissions:
