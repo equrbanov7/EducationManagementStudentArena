@@ -159,7 +159,7 @@ black .
 isort --check --profile black .
 black --check . 
  
-------------
+-------------
 
 # Running i18 file
 python manage.py makemessages -a -i 'venv/*' -i '.venv/*' -i 'staticfiles/*' -i 'htmlcov/*' -i 'output/*' -i 'node_modules/*' -i 'media/*' -i 'logs/*' -i 'backups/*' -i 'static/vendor/*'
