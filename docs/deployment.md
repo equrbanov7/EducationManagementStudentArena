@@ -246,11 +246,16 @@ and `python manage.py collectstatic --noinput` before starting Daphne, so
 database migrations and Docker-managed static assets stay current on every
 restart.
 
-## 5.1 Automatic CI deploy — REMOVED (2026-07-02)
+## 5.1 Automatic CI deploy (restored 2026-07-07)
 
-The former GitHub Actions deploy workflow (`_deploy-linode.yml`, targeting a
-Linode host) has been deleted because the Linode server is no longer used.
-Deployments are now performed manually on the target server:
+On every push to `main` the CI pipeline (after `ci-success`) auto-deploys to the
+production server via the reusable workflow `.github/workflows/_deploy.yml`
+(`deploy-production` job in `ci.yml`). The deploy target host is set through the
+job `with:` inputs (`ssh-host`, `ssh-username`, `healthcheck-host`) and the
+`SSH_PRIVATE_KEY`/`SSH_PASSWORD` repository secrets — it is host-agnostic, so
+update those inputs when the server changes (no vendor lock-in).
+
+A manual deploy on the server is still possible:
 
 ```bash
 cd /opt/emsarena/app        # server-side checkout / rsync destination
@@ -281,7 +286,7 @@ set it up once. The live app environment file should remain at:
 The SSH sync step excludes runtime data such as `.env`, `media/`, and
 `docker/nginx/certs/`, so user uploads, Cloudflare origin certificates, and
 server-side secrets are preserved across deployments without requiring Git
-access from the Linode host.
+access from the production host.
 
 ### Zero-downtime update checklist
 

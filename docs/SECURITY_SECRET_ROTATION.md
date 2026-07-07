@@ -44,9 +44,10 @@ Köhnə açarlar git tarixində qalıb — onlar **revoke (ləğv)** olunmalıd�
 
 ### 2. Production-da yeni secret-ləri tətbiq et
 
-Production serverində (`/opt/emsarena/app/.env`) eyni yeni dəyərləri yaz. CI/CD
-QEYD (2026-07-02): CI-dən avtomatik deploy (`_deploy-linode.yml`) silinib —
-sirlər birbaşa serverdəki `.env` faylında yenilənir.
+Production serverində (`/opt/emsarena/app/.env`) eyni yeni dəyərləri yaz. QEYD
+(2026-07-07): CI-dən avtomatik deploy (`_deploy.yml`) main-ə push-da işləyir;
+`SSH_PRIVATE_KEY`/`SSH_PASSWORD` (və istəyə görə `ENV_OVERRIDES`) repo secret-lərini
+də yenilə. Runtime sirlər serverdəki `.env` faylında saxlanılır.
 
 **Vacib:** `POSTGRES_PASSWORD` dəyişdikdə mövcud PostgreSQL istifadəçisinin
 parolu da DB-də yenilənməlidir:
