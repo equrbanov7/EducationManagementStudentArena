@@ -187,13 +187,13 @@ class LoginBrandingTest(TestCase):
         self.assertNotIn(reverse("accounts:student_cabinet"), html)
         self.assertNotIn(reverse("accounts:staff_cabinet"), html)
 
-    def test_student_cabinet_next_shows_student_message(self):
-        resp = Client().get(reverse("accounts:login"), {"next": reverse("accounts:student_cabinet")})
+    def test_student_login_shows_student_message(self):
+        resp = Client().get(reverse("accounts:student_login"))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Tələbə kabinetinə daxil olmaq üçün")
 
-    def test_staff_cabinet_next_shows_staff_message(self):
-        resp = Client().get(reverse("accounts:login"), {"next": reverse("accounts:staff_cabinet")})
+    def test_staff_login_shows_staff_message(self):
+        resp = Client().get(reverse("accounts:staff_login"))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Müəllim və əməkdaş kabinetinə daxil olmaq üçün")
 
@@ -211,3 +211,77 @@ class LoginBrandingTest(TestCase):
         subject = _otp_subject_for_purpose("login")
         self.assertIn("Qərbi Kaspi Universiteti", subject)
         self.assertNotIn("EMSArena", subject)
+
+
+class LoginPortalGateTest(TestCase):
+    """Generic /login/ is a chooser; the two portals are role-gated."""
+
+    @classmethod
+    def setUpTestData(cls):
+        owner = User.objects.create_user("portal_owner", "portal_owner@qku.edu.az", "pw")
+        cls.org = Organization.objects.create(
+            name="Portal Univ",
+            slug="portal-univ",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        cls.student = User.objects.create_user("portal_student", "portal_student@qku.edu.az", "StrongPass123!")
+        _assign_user_to_org(cls.student, cls.org, ProfileRole.STUDENT, membership_role_name="student")
+        cls.teacher = User.objects.create_user("portal_teacher", "portal_teacher@qku.edu.az", "StrongPass123!")
+        _assign_user_to_org(cls.teacher, cls.org, ProfileRole.TEACHER, membership_role_name="teacher")
+
+    def test_generic_login_is_portal_chooser(self):
+        resp = Client().get(reverse("accounts:login"))
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertIn(reverse("accounts:student_login"), html)
+        self.assertIn(reverse("accounts:staff_login"), html)
+        # Chooser is not a login form itself.
+        self.assertNotIn('name="password"', html)
+
+    def test_generic_login_preserves_next_into_portals(self):
+        target = reverse("accounts:staff_cabinet")
+        resp = Client().get(reverse("accounts:login"), {"next": target})
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertIn("next=", html)
+
+    def test_student_cannot_login_via_staff_portal(self):
+        client = Client()
+        resp = client.post(
+            reverse("accounts:staff_login"),
+            {"username": "portal_student", "password": "StrongPass123!"},
+        )
+        self.assertEqual(resp.status_code, 200)  # re-rendered, not redirected
+        self.assertNotIn("_auth_user_id", client.session)
+        self.assertContains(resp, "müəllim və əməkdaşlar üçündür")
+
+    def test_teacher_cannot_login_via_student_portal(self):
+        client = Client()
+        resp = client.post(
+            reverse("accounts:student_login"),
+            {"username": "portal_teacher", "password": "StrongPass123!"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn("_auth_user_id", client.session)
+        self.assertContains(resp, "yalnız tələbələr üçündür")
+
+    def test_student_can_login_via_student_portal(self):
+        client = Client()
+        resp = client.post(
+            reverse("accounts:student_login"),
+            {"username": "portal_student", "password": "StrongPass123!"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("_auth_user_id", client.session)
+
+    def test_staff_can_login_via_staff_portal(self):
+        client = Client()
+        resp = client.post(
+            reverse("accounts:staff_login"),
+            {"username": "portal_teacher", "password": "StrongPass123!"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("_auth_user_id", client.session)

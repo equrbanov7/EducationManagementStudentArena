@@ -20,10 +20,22 @@ urlpatterns = [
     path("resend-otp/", views.resend_otp_api_view, name="resend_otp_api"),
     # First-login: provisioned users set their own password + verify email.
     path("set-password/", views.set_initial_password_view, name="set_initial_password"),
+    # Login: generic /login/ artıq PORTAL SEÇİMİ (tələbə vs müəllim/əməkdaş);
+    # əsl login formaları ayrı, ROL-QAPILI URL-lərdədir.
     path(
         "login/",
-        views.CustomLoginView.as_view(),
+        views.login_portal,
         name="login",
+    ),
+    path(
+        "login/muellim/",
+        views.CustomLoginView.as_view(audience="staff"),
+        name="staff_login",
+    ),
+    path(
+        "login/telebe/",
+        views.CustomLoginView.as_view(audience="student"),
+        name="student_login",
     ),
     path("logout/", views.logout_view, name="logout"),
     # Password reset

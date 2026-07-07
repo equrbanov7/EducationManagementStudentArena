@@ -107,7 +107,9 @@ class LoginViewTest(TestCase):
     def test_login_preserves_safe_local_next_parameter(self):
         safe_next = reverse("accounts:profile")
 
-        get_response = self.client.get(self.login_url, {"next": safe_next})
+        # The login FORM (with the hidden ``next``) now lives at the role-specific
+        # portal URLs; ``/accounts/login/`` itself is the portal chooser.
+        get_response = self.client.get(reverse("accounts:staff_login"), {"next": safe_next})
         self.assertEqual(get_response.status_code, 200)
         self.assertContains(get_response, f'name="next" value="{safe_next}"', html=False)
 

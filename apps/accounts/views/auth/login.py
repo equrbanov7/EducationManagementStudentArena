@@ -1,14 +1,15 @@
 """accounts auth view paketi — login."""
 
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
 from django.conf import settings
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext
 from django.views.generic.edit import FormView
 
-from apps.accounts.models import EmailOTP
+from apps.accounts.models import EmailOTP, ProfileRole
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
@@ -32,6 +33,61 @@ from .constants import (
 LOGIN_AUDIENCE_STUDENT = "student"
 LOGIN_AUDIENCE_STAFF = "staff"
 
+# Portal siniflənməsi: tələbə rolları vs əməkdaş (level >= moderator).
+# Tələbə (10) / lead_student (aşağı) yalnız TƏLƏBƏ portalına; müəllim (50),
+# imtahan mərkəzi (85), admin, owner və s. ƏMƏKDAŞ portalına düşür.
+STUDENT_PORTAL_ROLE_NAMES = {"student", "lead_student"}
+STAFF_PORTAL_MIN_LEVEL = 40
+
+
+def classify_user_portal(user):
+    """Autentifikasiya olunmuş istifadəçini "student"/"staff" portalına ayırır.
+
+    KONTEKST-AZAD: aktiv-təşkilat konteksti login POST-unda hələ bağlanmadığı üçün
+    üzvlüklər birbaşa (RLS bypass ilə) oxunur — yalnız istifadəçinin ÖZ üzvlükləri.
+    Qayda: hər hansı ƏMƏKDAŞ-səviyyəli rol (>= moderator) → staff; yalnız tələbə
+    rolları → student; rol yoxdursa / yalnız "member" → staff ("digərləri").
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return None
+    if getattr(user, "is_superuser", False):
+        return LOGIN_AUDIENCE_STAFF
+    profile = getattr(user, "profile", None)
+    if getattr(profile, "role", None) == ProfileRole.SUPERADMIN:
+        return LOGIN_AUDIENCE_STAFF
+
+    role_pairs = []
+    try:
+        from apps.organizations.services import get_active_memberships
+        from core.rls import bypass_rls
+
+        with bypass_rls():
+            for membership in get_active_memberships(user):
+                role = getattr(membership, "role", None)
+                if role is None:
+                    continue
+                name = ProfileRole.normalize_membership_role_name(role.name)
+                role_pairs.append((name, getattr(role, "level", 0) or 0))
+    except Exception:  # noqa: BLE001 — siniflənmə heç vaxt login-i sındırmamalıdır.
+        role_pairs = []
+
+    staff_level = max(
+        (level for (name, level) in role_pairs if name not in STUDENT_PORTAL_ROLE_NAMES),
+        default=0,
+    )
+    if staff_level >= STAFF_PORTAL_MIN_LEVEL:
+        return LOGIN_AUDIENCE_STAFF
+    if any(name in STUDENT_PORTAL_ROLE_NAMES for (name, _level) in role_pairs):
+        return LOGIN_AUDIENCE_STUDENT
+    return LOGIN_AUDIENCE_STAFF
+
+
+def _login_url_with_next(url_name, next_url):
+    base = reverse(url_name)
+    if next_url:
+        return f"{base}?{urlencode({'next': next_url})}"
+    return base
+
 
 def _normalized_path(value):
     path = urlsplit(str(value or "")).path or "/"
@@ -39,11 +95,18 @@ def _normalized_path(value):
 
 
 class CustomLoginView(LoginView):
-    """Login view with custom form and suspended-organization checks."""
+    """Login view with custom form and suspended-organization checks.
+
+    ``audience`` (URL-dən ``as_view(audience=...)`` ilə təyin olunur) portalı
+    müəyyən edir: "staff" (müəllim/əməkdaş) və ya "student" (tələbə). Təyin
+    olunubsa, YANLIŞ portala düşən istifadəçi düzgün parol yazsa belə GİRƏ
+    BİLMİR (form_valid-də bloklanır). ``None`` = neytral (köhnə uyğunluq).
+    """
 
     template_name = "accounts/login.html"
     authentication_form = CustomLoginForm
     redirect_authenticated_user = True
+    audience = None
 
     def get_context_data(self, **kwargs):
         """Inject brand-aware SEO metadata (no hard-coded product name).
@@ -57,7 +120,7 @@ class CustomLoginView(LoginView):
         next_url = context.get(self.redirect_field_name, "")
         student_cabinet_url = reverse("accounts:student_cabinet")
         staff_cabinet_url = reverse("accounts:staff_cabinet")
-        audience = self._resolve_login_audience(next_url, student_cabinet_url, staff_cabinet_url)
+        audience = self.audience or self._resolve_login_audience(next_url, student_cabinet_url, staff_cabinet_url)
         context.setdefault("seo_title", f"Daxil ol | {brand}".strip(" |"))
         context.setdefault(
             "seo_description",
@@ -158,10 +221,54 @@ class CustomLoginView(LoginView):
             record_rate_limit_hit(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
         return self.form_invalid(form)
 
+    def _wrong_portal_message(self):
+        if self.audience == LOGIN_AUDIENCE_STUDENT:
+            return pgettext(
+                "accounts.login.gate",
+                "Bu giriş yalnız tələbələr üçündür. Müəllim və əməkdaşlar müəllim giriş "
+                "səhifəsindən istifadə etməlidir.",
+            )
+        return pgettext(
+            "accounts.login.gate",
+            "Bu giriş müəllim və əməkdaşlar üçündür. Tələbələr tələbə giriş səhifəsindən " "istifadə etməlidir.",
+        )
+
     def form_valid(self, form):
+        # Portal qapısı: doğru parol yazılsa da, yanlış portala düşən istifadəçi
+        # LOGIN OLUNMADAN geri qaytarılır (form_invalid) — səhv + düzgün portal ipucu ilə.
+        if self.audience:
+            portal = classify_user_portal(form.get_user())
+            if portal and portal != self.audience:
+                form.add_error(None, self._wrong_portal_message())
+                return self.form_invalid(form)
         response = super().form_valid(form)
         self.request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
         return response
+
+
+def login_portal(request):
+    """Generic ``/accounts/login/`` — GET portal SEÇİMİ (tələbə vs müəllim/əməkdaş).
+
+    Artıq birbaşa login forması göstərmir; iki ayrı portala yönləndirir. POST isə
+    köhnə uyğunluq üçün neytral (portalsız) autentifikasiyanı saxlayır (legacy
+    linklər/klientlər). ``next`` hər iki portala ötürülür.
+    """
+    if request.method == "POST":
+        return CustomLoginView.as_view()(request)
+    if request.user.is_authenticated:
+        from apps.accounts.views.dashboard import resolve_cabinet_url
+
+        return redirect(resolve_cabinet_url(request.user))
+    next_url = _sanitize_auth_redirect_target(request, request.GET.get("next")) or ""
+    context = {
+        "next": next_url,
+        "staff_login_url": _login_url_with_next("accounts:staff_login", next_url),
+        "student_login_url": _login_url_with_next("accounts:student_login", next_url),
+    }
+    response = render(request, "accounts/login_portal.html", context)
+    # Cihaz kukisi login-öncəsi (portal seçimi) mərhələsində qurulsun ki, sonrakı
+    # login POST-unda rate-limit/cihaz izləməsi üçün əlçatan olsun.
+    return _ensure_auth_device_cookie(request, response)
 
 
 class NamespacedPasswordResetView(PasswordResetView):

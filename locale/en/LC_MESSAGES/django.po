@@ -28603,6 +28603,70 @@ msgstr "History"
 msgid "Tarixçəyə baxış üçün icazəniz yoxdur."
 msgstr "You do not have permission to view the history."
 
+msgctxt "exams.template.student_exam_result"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Return to login page"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Vaxt bitəndə giriş səhifəsinə qayıdacaqsınız"
+msgstr "You will return to the login page when the time runs out"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Nəticə vaxtı və çıxış"
+msgstr "Result time and exit"
+
+msgctxt "appeals.template"
+msgid ""
+"Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra "
+"dəyişiklik edə bilməyəcəksiniz."
+msgstr ""
+"Submit the appeal for the selected questions? You won't be able to make "
+"changes after submitting."
+
+msgctxt "appeals.template"
+msgid "Bəli, göndər"
+msgstr "Yes, submit"
+
+msgctxt "accounts.login.portal"
+msgid "Daxil ol"
+msgstr "Sign in"
+
+msgctxt "accounts.login.portal"
+msgid "Kabinetə daxil olmaq üçün rolunuzu seçin."
+msgstr "Choose your role to access your cabinet."
+
+msgctxt "accounts.login.portal"
+msgid "Müəllim və əməkdaş girişi"
+msgstr "Teacher & staff sign-in"
+
+msgctxt "accounts.login.portal"
+msgid "Müəllim, imtahan mərkəzi və idarəetmə hesabları üçün."
+msgstr "For teacher, exam center and management accounts."
+
+msgctxt "accounts.login.portal"
+msgid "Tələbə girişi"
+msgstr "Student sign-in"
+
+msgctxt "accounts.login.portal"
+msgid "Tələbə kabineti: nəticələr, imtahanlar və apellyasiyalar."
+msgstr "Student cabinet: results, exams and appeals."
+
+msgctxt "accounts.login.gate"
+msgid ""
+"Bu giriş yalnız tələbələr üçündür. Müəllim və əməkdaşlar müəllim giriş "
+"səhifəsindən istifadə etməlidir."
+msgstr ""
+"This sign-in is for students only. Teachers and staff must use the teacher "
+"sign-in page."
+
+msgctxt "accounts.login.gate"
+msgid ""
+"Bu giriş müəllim və əməkdaşlar üçündür. Tələbələr tələbə giriş səhifəsindən "
+"istifadə etməlidir."
+msgstr ""
+"This sign-in is for teachers and staff. Students must use the student sign-"
+"in page."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

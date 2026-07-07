@@ -133,6 +133,81 @@
     margin: 0 0 28px;
 }
 
+/* --- Portal chooser (/accounts/login/) — tələbə vs müəllim/əməkdaş --- */
+.auth-portal-options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 4px 0 8px;
+}
+
+.auth-portal-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    background: var(--ems-neutral-0);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+.auth-portal-option:hover,
+.auth-portal-option:focus-visible {
+    border-color: var(--ems-primary-400);
+    box-shadow: 0 10px 26px rgba(37, 99, 235, 0.14);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.auth-portal-option__icon {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-600);
+}
+.auth-portal-option--student .auth-portal-option__icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.auth-portal-option__body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    text-align: left;
+}
+.auth-portal-option__title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+.auth-portal-option__desc {
+    font-size: 0.83rem;
+    color: var(--ems-neutral-500);
+    line-height: 1.35;
+}
+
+.auth-portal-option__arrow {
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: var(--ems-neutral-400);
+    display: inline-flex;
+    transition: transform 0.16s ease, color 0.16s ease;
+}
+.auth-portal-option:hover .auth-portal-option__arrow,
+.auth-portal-option:focus-visible .auth-portal-option__arrow {
+    transform: translateX(3px);
+    color: var(--ems-primary-600);
+}
+
 /* --- Cabinet audience note --- */
 .auth-route-note {
     margin: -12px 0 18px;

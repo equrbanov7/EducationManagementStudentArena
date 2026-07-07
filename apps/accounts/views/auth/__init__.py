@@ -11,6 +11,7 @@ from .login import (  # noqa: F401
     NamespacedPasswordResetConfirmView,
     NamespacedPasswordResetDoneView,
     NamespacedPasswordResetView,
+    login_portal,
 )
 from .otp_api import (  # noqa: F401
     resend_otp_api_view,
@@ -31,6 +32,7 @@ __all__ = [
     "NamespacedPasswordResetConfirmView",
     "NamespacedPasswordResetDoneView",
     "NamespacedPasswordResetView",
+    "login_portal",
     "logout_view",
     "register_view",
     "resend_code_view",

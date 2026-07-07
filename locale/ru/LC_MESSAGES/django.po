@@ -28745,6 +28745,70 @@ msgstr "История"
 msgid "Tarixçəyə baxış üçün icazəniz yoxdur."
 msgstr "У вас нет прав для просмотра истории."
 
+msgctxt "exams.template.student_exam_result"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Вернуться на страницу входа"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Vaxt bitəndə giriş səhifəsinə qayıdacaqsınız"
+msgstr "По истечении времени вы вернётесь на страницу входа"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Nəticə vaxtı və çıxış"
+msgstr "Время результата и выход"
+
+msgctxt "appeals.template"
+msgid ""
+"Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra "
+"dəyişiklik edə bilməyəcəksiniz."
+msgstr ""
+"Отправить апелляцию по выбранным вопросам? После отправки изменить будет "
+"нельзя."
+
+msgctxt "appeals.template"
+msgid "Bəli, göndər"
+msgstr "Да, отправить"
+
+msgctxt "accounts.login.portal"
+msgid "Daxil ol"
+msgstr "Вход"
+
+msgctxt "accounts.login.portal"
+msgid "Kabinetə daxil olmaq üçün rolunuzu seçin."
+msgstr "Выберите роль для входа в кабинет."
+
+msgctxt "accounts.login.portal"
+msgid "Müəllim və əməkdaş girişi"
+msgstr "Вход для преподавателей и сотрудников"
+
+msgctxt "accounts.login.portal"
+msgid "Müəllim, imtahan mərkəzi və idarəetmə hesabları üçün."
+msgstr "Для преподавателей, экзаменационного центра и управления."
+
+msgctxt "accounts.login.portal"
+msgid "Tələbə girişi"
+msgstr "Вход для студентов"
+
+msgctxt "accounts.login.portal"
+msgid "Tələbə kabineti: nəticələr, imtahanlar və apellyasiyalar."
+msgstr "Кабинет студента: результаты, экзамены и апелляции."
+
+msgctxt "accounts.login.gate"
+msgid ""
+"Bu giriş yalnız tələbələr üçündür. Müəllim və əməkdaşlar müəllim giriş "
+"səhifəsindən istifadə etməlidir."
+msgstr ""
+"Этот вход только для студентов. Преподаватели и сотрудники должны "
+"использовать вход для преподавателей."
+
+msgctxt "accounts.login.gate"
+msgid ""
+"Bu giriş müəllim və əməkdaşlar üçündür. Tələbələr tələbə giriş səhifəsindən "
+"istifadə etməlidir."
+msgstr ""
+"Этот вход для преподавателей и сотрудников. Студенты должны использовать "
+"вход для студентов."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
