@@ -1,0 +1,11 @@
+[Unit]
+Description=EMSArena timestamped PostgreSQL backup
+Wants=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/emsarena-db-backup.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

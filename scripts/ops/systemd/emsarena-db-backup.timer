@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the EMSArena PostgreSQL backup every night
+
+[Timer]
+# Every night at 02:00 server time; catch up if the machine was off.
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target
