@@ -1,0 +1,185 @@
+name: 🚢 Deploy to Linode (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      ssh-host:
+        description: "Hostname or IP address of the deployment target"
+        type: string
+        default: ""
+      ssh-username:
+        description: "SSH username for the deployment target"
+        type: string
+        default: ""
+      ssh-port:
+        description: "SSH port for the target host"
+        type: string
+        default: "22"
+      app-dir:
+        description: "Absolute path to the app checkout on the server"
+        type: string
+        default: "/opt/emsarena/app"
+      venv-dir:
+        description: "Absolute path to the Python virtualenv on legacy systemd deployments"
+        type: string
+        default: "/opt/emsarena/venv"
+      service-name:
+        description: "systemd service restarted by legacy deployments"
+        type: string
+        default: "emsarena.service"
+      app-base-url:
+        description: "Internal upstream URL used for ping and health checks"
+        type: string
+        default: "http://127.0.0.1"
+      healthcheck-host:
+        description: "Host header sent to the upstream health checks"
+        type: string
+        default: "emsarena.com"
+      deploy-timeout-seconds:
+        description: "How long to wait for the app to become healthy"
+        type: string
+        default: "300"
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: false
+      SSH_PASSWORD:
+        required: false
+      ENV_OVERRIDES:
+        description: "Newline-separated KEY=VALUE pairs to upsert into the server .env"
+        required: false
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: 🚢 Deploy to Linode
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+
+      - name: 🔐 Prepare SSH known_hosts
+        shell: bash
+        env:
+          SSH_HOST: ${{ inputs.ssh-host }}
+          SSH_PORT: ${{ inputs.ssh-port }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SSH_HOST:-}" ]; then
+            echo "SSH_HOST is empty. Set the reusable workflow input 'ssh-host'." >&2
+            exit 1
+          fi
+          install -m 700 -d ~/.ssh
+          for attempt in 1 2 3; do
+            if ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts; then
+              exit 0
+            fi
+            echo "ssh-keyscan failed for ${SSH_HOST}:${SSH_PORT} (attempt ${attempt}/3)." >&2
+            sleep 2
+          done
+          echo "Unable to fetch the SSH host key for ${SSH_HOST}:${SSH_PORT}. Verify the host/port and that the server is reachable from GitHub Actions." >&2
+          exit 1
+
+      - name: 🚢 Bootstrap host and deploy
+        shell: bash
+        env:
+          SSH_HOST: ${{ inputs.ssh-host }}
+          SSH_PORT: ${{ inputs.ssh-port }}
+          SSH_USERNAME: ${{ inputs.ssh-username }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+          APP_DIR: ${{ inputs.app-dir }}
+          VENV_DIR: ${{ inputs.venv-dir }}
+          SERVICE_NAME: ${{ inputs.service-name }}
+          APP_BASE_URL: ${{ inputs.app-base-url }}
+          HEALTHCHECK_HOST: ${{ inputs.healthcheck-host }}
+          DEPLOY_TIMEOUT_SECONDS: ${{ inputs.deploy-timeout-seconds }}
+          ENV_OVERRIDES: ${{ secrets.ENV_OVERRIDES }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SSH_HOST:-}" ]; then
+            echo "SSH_HOST is empty. Set the reusable workflow input 'ssh-host'." >&2
+            exit 1
+          fi
+          if [ -z "${SSH_USERNAME:-}" ]; then
+            echo "SSH_USERNAME is empty. Set the reusable workflow input 'ssh-username'." >&2
+            exit 1
+          fi
+
+          USE_PASSWORD_AUTH=false
+          if [ -n "$SSH_PRIVATE_KEY" ]; then
+            printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/emsarena_deploy_key
+            chmod 600 ~/.ssh/emsarena_deploy_key
+            SSH_CMD=(ssh -i ~/.ssh/emsarena_deploy_key -o BatchMode=yes -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST")
+            if ! "${SSH_CMD[@]}" true; then
+              if [ -z "$SSHPASS" ]; then
+                echo "SSH_PRIVATE_KEY did not authenticate, and SSH_PASSWORD is not configured." >&2
+                exit 1
+              fi
+              echo "SSH_PRIVATE_KEY did not authenticate; falling back to SSH_PASSWORD."
+              USE_PASSWORD_AUTH=true
+            fi
+          elif [ -n "$SSHPASS" ]; then
+            USE_PASSWORD_AUTH=true
+          else
+            echo "Either SSH_PRIVATE_KEY or SSH_PASSWORD must be configured." >&2
+            exit 1
+          fi
+
+          if [ "$USE_PASSWORD_AUTH" = "true" ]; then
+            sudo apt-get update
+            sudo apt-get install -y sshpass
+            SSH_CMD=(sshpass -e ssh -p "$SSH_PORT" -o PreferredAuthentications=password -o PubkeyAuthentication=no "$SSH_USERNAME@$SSH_HOST")
+          fi
+
+          ENV_OVERRIDES_B64="$(printf '%s' "${ENV_OVERRIDES}" | base64 -w0)"
+
+          "${SSH_CMD[@]}" "mkdir -p '${APP_DIR}'"
+          RSYNC_SSH="ssh -p ${SSH_PORT}"
+          if [ "$USE_PASSWORD_AUTH" = "false" ]; then
+            RSYNC_SSH="${RSYNC_SSH} -i ~/.ssh/emsarena_deploy_key"
+            RSYNC_CMD=(rsync -az --delete --exclude-from scripts/deploy/rsync-excludes.txt -e "$RSYNC_SSH")
+          else
+            RSYNC_SSH="${RSYNC_SSH} -o PreferredAuthentications=password -o PubkeyAuthentication=no"
+            RSYNC_CMD=(sshpass -e rsync -az --delete --exclude-from scripts/deploy/rsync-excludes.txt -e "$RSYNC_SSH")
+          fi
+
+          "${RSYNC_CMD[@]}" ./ "${SSH_USERNAME}@${SSH_HOST}:${APP_DIR}/"
+
+          "${SSH_CMD[@]}" 'bash -s' <<EOF
+          set -euo pipefail
+          export APP_DIR="${APP_DIR}"
+          export VENV_DIR="${VENV_DIR}"
+          export SERVICE_NAME="${SERVICE_NAME}"
+          export APP_BASE_URL="${APP_BASE_URL}"
+          export HEALTHCHECK_HOST="${HEALTHCHECK_HOST}"
+          export DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS}"
+          export ENV_OVERRIDES_B64="${ENV_OVERRIDES_B64}"
+          export ENV_OVERRIDES="\$(printf '%s' "\$ENV_OVERRIDES_B64" | base64 -d)"
+          unset ENV_OVERRIDES_B64
+
+          cd "${APP_DIR}"
+
+          # Sync GitHub Secrets → server .env (upsert, no-op when empty)
+          bash scripts/deploy/sync-env-overrides.sh "${APP_DIR}/.env"
+
+          # Enforce non-secret production host settings after secret sync so a
+          # stale ENV_OVERRIDES secret cannot point the app back at an old host.
+          ENV_OVERRIDES='SITE_URL=https://emsarena.com
+          ALLOWED_HOSTS=emsarena.com,www.emsarena.com,172.104.154.170,localhost,127.0.0.1
+          CSRF_TRUSTED_ORIGINS=https://emsarena.com,https://www.emsarena.com
+          LAN_HOST=emsarena.com
+          LIVE_EXAM_PUBLIC_HOST=emsarena.com
+          SECURE_SSL_REDIRECT=True
+          SESSION_COOKIE_SECURE=True
+          CSRF_COOKIE_SECURE=True' bash scripts/deploy/sync-env-overrides.sh "${APP_DIR}/.env"
+
+          bash scripts/deploy/remote_deploy.sh
+          EOF

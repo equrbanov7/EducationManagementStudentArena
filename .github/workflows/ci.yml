@@ -221,3 +221,20 @@ jobs:
           fi
 
           echo "✅ All core jobs passed! (Docker-dependent jobs are advisory)"
+
+  # ── 10. Production deploy (main only) ──────────────────────────────────
+  # Auto-deploy to the Linode production host after the pipeline is green,
+  # but ONLY on a push to `main` (not PRs, not Develop/Staging). `needs:
+  # ci-success` gates the deploy behind the aggregated pass/fail check.
+  deploy-production:
+    needs: ci-success
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_deploy-linode.yml
+    with:
+      ssh-host: "172.104.154.170"
+      ssh-username: "root"
+      healthcheck-host: "emsarena.com"
+      deploy-timeout-seconds: "300"
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
