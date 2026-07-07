@@ -341,7 +341,9 @@ class NotificationEventFlowTests(TestCase):
         )
 
     def test_group_create_notifies_added_student(self):
-        _login_with_org(self.client, self.teacher, self.organization)
+        # Qrup yaratma yalnız superadmin/administratordadır (adi müəllim yox);
+        # superadmin qrupu yaradır və müəllimi (primary) təyin edir.
+        _login_with_org(self.client, self.superadmin, self.organization)
         response = self.client.post(
             reverse("exams:teacher_create_group"),
             {
