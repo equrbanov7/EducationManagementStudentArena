@@ -246,14 +246,26 @@ and `python manage.py collectstatic --noinput` before starting Daphne, so
 database migrations and Docker-managed static assets stay current on every
 restart.
 
-## 5.1 Automatic CI deploy (restored 2026-07-07)
+## 5.1 Automatic CI deploy (self-hosted runner, 2026-07-07)
 
-On every push to `main` the CI pipeline (after `ci-success`) auto-deploys to the
-production server via the reusable workflow `.github/workflows/_deploy.yml`
-(`deploy-production` job in `ci.yml`). The deploy target host is set through the
-job `with:` inputs (`ssh-host`, `ssh-username`, `healthcheck-host`) and the
-`SSH_PRIVATE_KEY`/`SSH_PASSWORD` repository secrets — it is host-agnostic, so
-update those inputs when the server changes (no vendor lock-in).
+On every push to `main`, after `ci-success` passes, the `deploy-production` job
+in `.github/workflows/ci.yml` auto-deploys to the production server. It runs on
+the **self-hosted GitHub Actions runner** installed on the server itself
+(`runs-on: [self-hosted]`), so the deploy executes locally on the box — no SSH,
+no public IP, and the server's private LAN address does not matter.
+
+The job:
+1. `actions/checkout` into the runner workspace;
+2. `rsync -a --delete --exclude-from scripts/deploy/rsync-excludes.txt ./ "$APP_DIR/"`
+   — mirrors the code into `APP_DIR` (`/home/wcu/EducationManagementStudentArena`)
+   while preserving runtime data (`.env`, `media/`, `docker/nginx/certs/`);
+3. `bash scripts/deploy/remote_deploy.sh` — docker-compose build + release
+   (migrate/collectstatic) + `up -d` + health gate.
+
+Prerequisites on the server: the self-hosted runner service must be active, its
+run-as user must be in the `docker` group and own `APP_DIR`, and `APP_DIR/.env`
+must exist (never overwritten by the deploy). When the server changes, update
+`APP_DIR`/`runs-on` in the `deploy-production` job (no vendor lock-in).
 
 A manual deploy on the server is still possible:
 

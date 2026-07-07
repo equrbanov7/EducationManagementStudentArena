@@ -223,18 +223,38 @@ jobs:
           echo "✅ All core jobs passed! (Docker-dependent jobs are advisory)"
 
   # ── 10. Production deploy (main only) ──────────────────────────────────
-  # Auto-deploy to the production server after the pipeline is green, but ONLY
-  # on a push to `main` (not PRs, not Develop/Staging). `needs: ci-success`
-  # gates the deploy behind the aggregated pass/fail check.
+  # Runs ON the self-hosted GitHub Actions runner installed on the production
+  # server (wcuserver). The job rsyncs the freshly-checked-out code into the
+  # live app dir — preserving runtime data (.env, media/, TLS certs) via
+  # scripts/deploy/rsync-excludes.txt — then runs the docker-compose deploy +
+  # health gate (scripts/deploy/remote_deploy.sh). Because it executes locally
+  # on the box, no SSH and no public IP are needed; the server's private LAN
+  # address is irrelevant. Only fires on a push to `main`, after ci-success.
   deploy-production:
     needs: ci-success
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/_deploy.yml
-    with:
-      ssh-host: "172.104.154.170"
-      ssh-username: "root"
-      healthcheck-host: "emsarena.com"
-      deploy-timeout-seconds: "300"
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+    runs-on: [self-hosted]
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      HEALTHCHECK_HOST: emsarena.com
+      DEPLOY_TIMEOUT_SECONDS: "300"
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚢 Deploy (docker-compose, in place)
+        run: |
+          set -euo pipefail
+          if [ ! -d "$APP_DIR" ]; then
+            echo "APP_DIR ($APP_DIR) does not exist on the runner host." >&2
+            exit 1
+          fi
+          # Mirror the repo into the live app dir; runtime data (.env, media/,
+          # docker/nginx/certs/) is preserved via rsync-excludes.txt.
+          rsync -a --delete --exclude-from scripts/deploy/rsync-excludes.txt ./ "$APP_DIR/"
+          cd "$APP_DIR"
+          bash scripts/deploy/remote_deploy.sh
