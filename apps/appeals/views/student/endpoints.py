@@ -85,7 +85,8 @@ def appeal_create(request, attempt_id):
                 pgettext("appeals.view.message", "Apellyasiyanız qeydə alındı."),
             )
             if _is_final_exam(exam):
-                return redirect(_result_url(exam, attempt))
+                # Final imtahan: apellyasiyadan sonra imtahan giriş səhifəsinə çıxılır.
+                return redirect(reverse("exams:final_exam_entry"))
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
             return redirect(reverse("accounts:profile") + "?section=my-appeals")
 

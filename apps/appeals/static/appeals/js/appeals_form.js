@@ -258,6 +258,34 @@
             });
         }
 
+        // Göndərməzdən əvvəl təsdiq modalı (varsa).
+        var confirmModalEl = searchScope.querySelector("[data-appeal-confirm-modal]")
+            || document.querySelector("[data-appeal-confirm-modal]");
+        var confirmBtn = confirmModalEl ? confirmModalEl.querySelector("[data-appeal-confirm-submit]") : null;
+        var submitConfirmed = false;
+        var bsModalInstance = null;
+
+        function confirmModal() {
+            if (!confirmModalEl || !window.bootstrap || !window.bootstrap.Modal) { return null; }
+            if (!bsModalInstance) {
+                bsModalInstance = window.bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+            }
+            return bsModalInstance;
+        }
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener("click", function () {
+                submitConfirmed = true;
+                var modal = confirmModal();
+                if (modal) { modal.hide(); }
+                if (typeof form.requestSubmit === "function") {
+                    form.requestSubmit();
+                } else {
+                    form.submit();
+                }
+            });
+        }
+
         form.addEventListener("submit", function (e) {
             submitAttempted = true;
             if (!formIsValid()) {
@@ -271,6 +299,13 @@
                 if (target && typeof target.scrollIntoView === "function") {
                     target.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
+                return;
+            }
+            // Etibarlıdır — təsdiq modalı varsa əvvəlcə onu göstər, sonra göndər.
+            var modal = confirmModal();
+            if (modal && !submitConfirmed) {
+                e.preventDefault();
+                modal.show();
             }
         });
 

@@ -150,24 +150,27 @@ class AppealCreateViewTests(TestCase):
         self.assertContains(response, "Düzgün cavab")
         self.assertContains(response, "data-appeal-text=", html=False)
 
-    def test_create_page_marked_button_can_switch_to_clear_state(self):
+    def test_create_page_has_no_marked_quick_select_button(self):
+        # "İşarələnmişləri seç" sürətli düyməsi silinib (məntiqi əsası yox idi).
         self.attempt.marked_question_ids = [self.question.id]
         self.attempt.save(update_fields=["marked_question_ids"])
 
         response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "data-appeal-select-marked", html=False)
-        self.assertContains(response, "data-label-clear=", html=False)
-        self.assertContains(response, "İşarələnmişləri ləğv et")
+        self.assertNotContains(response, "data-appeal-select-marked", html=False)
 
-    def test_final_exam_hides_my_appeals_link_and_returns_to_result_after_submit(self):
+    def test_final_exam_hides_my_appeals_link_and_returns_to_entry_after_submit(self):
         self.exam.exam_type_extended = "final"
         self.exam.save(update_fields=["exam_type_extended"])
 
         response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "section=my-appeals", html=False)
+        # Final imtahanda sayt başlığı/naviqasiyası gizlədilir.
+        self.assertNotContains(response, "blog-header", html=False)
+        # Göndərmədən əvvəl təsdiq modalı olmalıdır.
+        self.assertContains(response, "data-appeal-confirm-modal", html=False)
 
         response = self.client.post(
             reverse("appeals:appeal_create", args=[self.attempt.id]),
@@ -179,7 +182,7 @@ class AppealCreateViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
+        self.assertEqual(response["Location"], reverse("exams:final_exam_entry"))
 
 
 class AppealExamCenterRoutingTests(TestCase):
