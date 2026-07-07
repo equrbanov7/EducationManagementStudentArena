@@ -19,7 +19,10 @@ from .conftest import BASE_URL, E2E_PASSWORD, E2E_USERNAME, login
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-LOGIN_URL = f"{BASE_URL}/accounts/login/"
+# The login FORM now lives at the role-specific portal URLs; /accounts/login/
+# itself is the portal chooser (covered by test_security). These form-structure
+# and invalid-credential checks target the staff login form.
+LOGIN_URL = f"{BASE_URL}/accounts/login/muellim/"
 LOGOUT_URL = f"{BASE_URL}/accounts/logout/"
 REGISTER_URL = f"{BASE_URL}/accounts/register/"
 VERIFY_CODE_URL = f"{BASE_URL}/accounts/verify-code/"
