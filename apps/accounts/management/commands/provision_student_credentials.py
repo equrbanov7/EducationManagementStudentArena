@@ -55,6 +55,16 @@ class Command(BaseCommand):
         parser.add_argument("--dry-run", action="store_true", help="Heç nə yazma — yalnız kimlərə dəyəcəyini göstər")
 
     def handle(self, *args, **options):
+        # Request-xarici (management command) DB işi RLS transaction-pooling
+        # təhlükəsiz kontekstdə icra olunmalıdır. Superadmin aləti olduğu üçün
+        # bütün təşkilat tələbələri görünsün deyə bypass_rls.
+        from core.rls import bypass_rls
+        from core.rls_pooling import rls_worker_atomic
+
+        with rls_worker_atomic(), bypass_rls():
+            self._provision(*args, **options)
+
+    def _provision(self, *args, **options):
         from apps.organizations.models import Membership, Organization
 
         try:
