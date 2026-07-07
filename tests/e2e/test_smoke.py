@@ -38,8 +38,10 @@ PROFILE_URL: str = f"{BASE_URL}/accounts/profile/"
 
 
 def login(page: Page) -> None:
-    """Navigate to the login page and submit valid credentials."""
-    page.goto(f"{BASE_URL}/accounts/login/")
+    """Navigate to the staff login form and submit valid credentials."""
+    # The login form now lives at the role-specific portal URLs; the default
+    # E2E account is staff, so use the staff portal (/accounts/login/muellim/).
+    page.goto(f"{BASE_URL}/accounts/login/muellim/")
     page.wait_for_load_state("domcontentloaded")
 
     if not E2E_USERNAME or not E2E_PASSWORD:
@@ -86,8 +88,8 @@ class TestLoginFlow:
     """Smoke tests for the authentication flow."""
 
     def test_login_page_loads(self, page: Page) -> None:
-        """The login page must be reachable and render the login form."""
-        response = page.goto(f"{BASE_URL}/accounts/login/")
+        """The staff login form must be reachable and render the form."""
+        response = page.goto(f"{BASE_URL}/accounts/login/muellim/")
         assert response is not None, "No response from login page"
         assert response.status == 200, f"Login page returned HTTP {response.status}"
 

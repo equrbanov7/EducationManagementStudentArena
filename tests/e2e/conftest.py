@@ -130,17 +130,30 @@ def require_role_account(role: str) -> E2EAccount:
     return account
 
 
-def login(page: Page, username: str | None = None, password: str | None = None) -> None:
-    """
-    Navigate to the login page and submit the credentials from the environment.
+# Login rol-qapılı iki portala bölünüb: generic /accounts/login/ artıq PORTAL
+# SEÇİMİ səhifəsidir (forma yoxdur); əsl login formaları /muellim/ (əməkdaş) və
+# /telebe/ (tələbə) altındadır. Bu rollar tələbə portalından girməlidir.
+STUDENT_PORTAL_ROLES = {"student", "late_student", "resume_student"}
 
-    If ``E2E_USERNAME`` or ``E2E_PASSWORD`` are not set the function returns
-    without filling the form, leaving the page at the login URL.
+
+def _role_portal(role: str) -> str:
+    return "student" if role in STUDENT_PORTAL_ROLES else "staff"
+
+
+def login(page: Page, username: str | None = None, password: str | None = None, portal: str = "staff") -> None:
+    """
+    Navigate to the role-specific login form and submit the credentials.
+
+    ``portal`` seçir: "staff" → /accounts/login/muellim/, "student" →
+    /accounts/login/telebe/ (generic /accounts/login/ artıq forma deyil, seçim
+    səhifəsidir). If ``E2E_USERNAME`` or ``E2E_PASSWORD`` are not set the
+    function returns without filling the form.
     """
     username = username or E2E_USERNAME
     password = password or E2E_PASSWORD
 
-    page.goto(build_url("/accounts/login/"))
+    portal_path = "/accounts/login/telebe/" if portal == "student" else "/accounts/login/muellim/"
+    page.goto(build_url(portal_path))
     page.wait_for_load_state("domcontentloaded")
 
     if not username or not password:
@@ -187,7 +200,7 @@ def select_organization(page: Page, organization_slug: str = E2E_ORG_SLUG) -> No
 def login_as_role(page: Page, role: str) -> E2EAccount:
     """Authenticate the page as a configured role user and switch organization when needed."""
     account = require_role_account(role)
-    login(page, account.username, account.password)
+    login(page, account.username, account.password, portal=_role_portal(role))
 
     if "/accounts/login/" in page.url:
         pytest.fail(
@@ -205,7 +218,7 @@ def _role_page(browser: Browser, role: str) -> Iterator[Page]:
     account = require_role_account(role)
     page = browser.new_page()
     try:
-        login(page, account.username, account.password)
+        login(page, account.username, account.password, portal=_role_portal(role))
 
         if "/accounts/login/" in page.url:
             pytest.fail(
