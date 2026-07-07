@@ -3,6 +3,16 @@
 
 {% block title %}{% trans "Apellyasiya göndər" context "appeals.template" %} — {{ exam.title }}{% endblock %}
 
+{# Final imtahan apellyasiyası — nəzarətli mühit: sayt başlığı/naviqasiyası gizlədilir. #}
+{% block route_progress %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block navbar %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block view_as_banner %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block footer %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block global_search %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block global_search_js %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block ai_assistant %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block ai_assistant_js %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260612-modal">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260612-modal">
@@ -67,17 +77,6 @@
             <input type="search" class="form-control" data-appeal-search
                    placeholder="{% trans 'Sualları axtar' context 'appeals.template' %}" aria-label="{% trans 'Sualları axtar' context 'appeals.template' %}">
         </div>
-        {% if has_marked %}
-        <button type="button"
-                class="btn btn-outline-warning btn-sm"
-                data-appeal-select-marked
-                data-label-select="{% trans 'İşarələnmişləri seç' context 'appeals.template' %}"
-                data-label-clear="{% trans 'İşarələnmişləri ləğv et' context 'appeals.template' %}"
-                aria-pressed="false">
-            <i class="fas fa-bookmark me-1" aria-hidden="true"></i>
-            <span data-appeal-select-marked-label>{% trans "İşarələnmişləri seç" context "appeals.template" %}</span>
-        </button>
-        {% endif %}
     </div>
     {% endif %}
 
@@ -228,9 +227,38 @@
         </div>
         {% endif %}
     </form>
+
+    {% if answers %}
+    {# Göndərməzdən əvvəl təsdiq modalı (Bootstrap). #}
+    <div class="modal fade" id="appealConfirmModal" tabindex="-1" aria-hidden="true"
+         aria-labelledby="appealConfirmTitle" data-appeal-confirm-modal>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appealConfirmTitle">
+                        <i class="fas fa-gavel me-2" aria-hidden="true"></i>{% trans "Apellyasiyanı göndər" context "appeals.template" %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">{% trans "Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra dəyişiklik edə bilməyəcəksiniz." context "appeals.template" %}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        {% trans "Ləğv et" context "appeals.template" %}
+                    </button>
+                    <button type="button" class="btn btn-primary" data-appeal-confirm-submit>
+                        <i class="fas fa-paper-plane me-2" aria-hidden="true"></i>{% trans "Bəli, göndər" context "appeals.template" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260706-marked-toggle"></script>
+<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260707-confirm"></script>
 {% endblock %}

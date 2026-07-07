@@ -14,7 +14,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20260707-final">
 {% endblock %}
 
 {% block content %}
@@ -370,7 +370,7 @@
         {% endfor %}
     </div>
 
-    {% if previous_attempts %}
+    {% if previous_attempts and not is_final_exam_result %}
     <div class="section-divider"></div>
     <h3 class="section-title">{% trans "heading_other_attempts" context "exams.template.student_exam_result" %}</h3>
     <div class="summary-card previous-attempts-card">
@@ -433,6 +433,23 @@
     </div>
     {% endif %}
 
+    {% if is_final_exam_result %}
+    {# Final imtahan: nəticə 5 dəq görünür. Aşağıda SABİT (fixed) zolaq — geri
+       sayan taymer + çıxış düyməsi həmişə görünür (uzun siyahıda da). #}
+    <div class="final-result-exitbar" role="region"
+         aria-label="{% trans 'Nəticə vaxtı və çıxış' context 'exams.template.student_exam_result' %}">
+        <div class="final-result-exitbar__timer" data-final-result-timer hidden>
+            <span class="final-result-exitbar__clock"><i class="far fa-clock" aria-hidden="true"></i></span>
+            <span class="final-result-exitbar__text">
+                <strong class="final-result-exitbar__count" data-final-result-countdown>--:--</strong>
+                <span class="final-result-exitbar__hint">{% trans "Vaxt bitəndə giriş səhifəsinə qayıdacaqsınız" context "exams.template.student_exam_result" %}</span>
+            </span>
+        </div>
+        <a href="{{ final_result_timeout_url }}" class="btn final-result-exitbar__btn">
+            <i class="fas fa-right-from-bracket me-2" aria-hidden="true"></i>{% trans "Giriş səhifəsinə qayıt" context "exams.template.student_exam_result" %}
+        </a>
+    </div>
+    {% else %}
     <div class="action-footer" role="navigation" aria-label="{% trans 'result_actions' context 'exams.template.student_exam_result' %}">
         <div class="action-footer__inner">
             <a href="{{ back_url }}" class="btn custom-blue-btn">
@@ -446,13 +463,14 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
-</div> 
+</div>
 {% endblock %}
 
 {% block extraJs %}
 <script src="{% static 'js/review_countdown.js' %}"></script>
 {% if is_final_exam_result %}
-<script src="{% static 'exams/js/final_result_timeout.js' %}?v=20260706-1"></script>
+<script src="{% static 'exams/js/final_result_timeout.js' %}?v=20260707-1"></script>
 {% endif %}
 {% endblock %}
