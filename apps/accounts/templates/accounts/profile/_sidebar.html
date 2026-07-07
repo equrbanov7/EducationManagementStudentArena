@@ -185,6 +185,13 @@
                 <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'exams:exam_center_pin_lookup' %}"
+               class="sidebar-menu-link">
+                <i class="fas fa-key sidebar-menu-icon c3-1"></i>
+                <span class="sidebar-menu-text">{% trans 'PIN axtarışı' %}</span>
+            </a>
+        </li>
         {% endif %}
 
         {% if 'question-bank' in allowed_sections %}

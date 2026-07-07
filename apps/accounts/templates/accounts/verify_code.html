@@ -1,65 +1,56 @@
 {% extends "base_auth.html" %}
 {% load static i18n %}
-{% block title %}{% trans "title" context "accounts.verify_code" %}{% endblock %}
+{% block title %}{% trans "title" context "accounts.verify_code" %} | {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-{# OTP səhifəsi FA ikonları (saat, göz) işlədir — yalnız bu səhifədə yüklənir #}
-<link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/register/_part1.css' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/register/_part2.css' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/register/_part3.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20260707-firstlogin">
 {% endblock %}
 
 {% block content %}
-<div class="register-page-wrapper">
-  <div class="register-card">
-    <h1 class="register-heading">{% trans "heading" context "accounts.verify_code" %}</h1>
-    <p class="register-subheading">{{ email }} {% trans "code_sent_suffix" context "accounts.verify_code" %}</p>
+<div class="auth-page-wrapper">
+  <div class="auth-card">
+    <span class="auth-brand" aria-label="{{ site_brand_name }}">
+      <img src="{% static 'brand/wcu-logo-circle.png' %}" alt="{{ site_brand_name }}"
+           class="auth-brand-logo auth-brand-logo--seal" width="108" height="108" loading="eager" decoding="async">
+    </span>
+    <h1 class="auth-heading">{% trans "heading" context "accounts.verify_code" %}</h1>
+    <p class="auth-subheading">{{ email }} {% trans "code_sent_suffix" context "accounts.verify_code" %}</p>
+
     {% if otp_expires_at %}
-    <div class="otp-timer-banner" data-otp-expires-at="{{ otp_expires_at|date:'c' }}" data-expired-label="{% trans 'Kodun vaxtı bitib' %}">
-      <i class="fas fa-clock" aria-hidden="true"></i>
-      <span class="otp-timer-banner__label">{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}</span>
-      <strong class="otp-timer-banner__value" data-otp-countdown>--:--</strong>
+    <div class="auth-otp-timer" data-otp-expires-at="{{ otp_expires_at|date:'c' }}" data-expired-label="{% trans 'Kodun vaxtı bitib' %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg>
+      <span>{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}</span>
+      <strong class="auth-otp-timer__value" data-otp-countdown>--:--</strong>
     </div>
     {% endif %}
 
-    <form method="post" class="register-form">
+    {% if messages %}
+    <div class="auth-messages">
+      {% for message in messages %}
+      <div class="auth-message auth-message--{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" class="auth-form" novalidate>
       {% csrf_token %}
-      <div class="register-form-field">
-        <label>{% trans "code_label" context "accounts.verify_code" %}</label>
-        <div class="input-visibility-wrapper">
-          <input
-            type="password"
-            name="code"
-            class="form-control"
-            maxlength="6"
-            required
-            placeholder="{% trans 'code_placeholder' context 'accounts.verify_code' %}"
-            id="verify-code-input"
-          />
-          <button
-            type="button"
-            class="input-visibility-toggle"
-            data-toggle-visibility
-            data-target="verify-code-input"
-            aria-label="Toggle field visibility"
-          >
-            <i class="fas fa-eye" aria-hidden="true"></i>
-          </button>
-        </div>
+      <div class="auth-form-field">
+        <label for="verify-code-input">{% trans "code_label" context "accounts.verify_code" %}</label>
+        <input type="text" name="code" id="verify-code-input" class="auth-otp-input"
+               inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" required
+               placeholder="{% trans 'code_placeholder' context 'accounts.verify_code' %}">
       </div>
-      <button class="register-submit-btn" type="submit">{% trans "submit_verify" context "accounts.verify_code" %}</button>
+      <button class="auth-submit-btn" type="submit">{% trans "submit_verify" context "accounts.verify_code" %}</button>
     </form>
 
-    <form method="post" action="{% url 'accounts:resend_code' %}" class="register-resend-form">
+    <form method="post" action="{% url 'accounts:resend_code' %}" class="auth-form auth-form--secondary">
       {% csrf_token %}
-      <button class="register-submit-btn" type="submit">{% trans "resend_code" context "accounts.verify_code" %}</button>
+      <button class="auth-link-btn" type="submit">{% trans "resend_code" context "accounts.verify_code" %}</button>
     </form>
   </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 <script src="{% static 'accounts/js/otp_timer.js' %}"></script>
 {% endblock %}

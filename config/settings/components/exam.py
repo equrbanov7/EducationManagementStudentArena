@@ -71,7 +71,11 @@ FINAL_EXAM_PIN_LOCK_MINUTES = _env_int_setting("FINAL_EXAM_PIN_LOCK_MINUTES", 10
 # Giriş səhifəsi üçün IP-əsaslı rate limit (cəhd / dəqiqə).
 FINAL_EXAM_ENTRY_RATE_PER_MINUTE = _env_int_setting("FINAL_EXAM_ENTRY_RATE_PER_MINUTE", 10, minimum=3)
 # Tələbə panelində PIN imtahan başlamazdan neçə dəqiqə əvvəl görünür.
-FINAL_EXAM_PIN_VISIBILITY_MINUTES = _env_int_setting("FINAL_EXAM_PIN_VISIBILITY_MINUTES", 120, minimum=0)
+# 0 = erkən pəncərə məhdudiyyəti YOXDUR → imtahan mərkəzi oturumu hazırlayıb PIN
+# yaradan kimi tələbə öz PIN-ini kabinetdə görür ("həmin vaxt"). PIN yenə yalnız
+# biletin öz sahibinə və oturum hazırlıq/giriş/aktiv fazasında göstərilir; oturum
+# bitdikdə şifrəli nüsxə silinir. Erkən görünüşü məhdudlaşdırmaq üçün env ilə >0 verin.
+FINAL_EXAM_PIN_VISIBILITY_MINUTES = _env_int_setting("FINAL_EXAM_PIN_VISIBILITY_MINUTES", 0, minimum=0)
 # Final imtahan xatırlatma bildirişlərinin göndərildiyi eşiklər (gün, vergüllə).
 # Hər eşik üçün bir dəfə (dublikat reminder_stage ilə əngəllənir).
 FINAL_EXAM_REMINDER_DAYS = tuple(

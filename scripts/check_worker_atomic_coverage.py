@@ -48,6 +48,9 @@ INTENTIONAL_EXEMPTIONS = {
     # ExamSupervisionConsumer yalnız channel-layer group send/discard edir;
     # `scope["user"]` və feature-flag settings oxuyur; DB sorğusu yoxdur.
     "apps/exams/consumers.py",
+    # make_user_import_template yalnız openpyxl ilə .xlsx şablonu yazır —
+    # heç bir DB sorğusu yoxdur (sabit nümunə sətirlər).
+    "apps/accounts/management/commands/make_user_import_template.py",
 }
 
 SEARCH_DIRS = ["apps", "core"]

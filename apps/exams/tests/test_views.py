@@ -162,6 +162,9 @@ class MyGroupsTenantIsolationTest(TestCase):
         return payload
 
     def test_my_groups_page_links_to_create_group_template(self):
+        # Qrup yaratma yalnız administratordadır — admin qutunu və linki görür.
+        self._login_as(self.org_admin_a)
+        self._set_active_org(self.org_a)
         response = self.client.get(reverse("exams:teacher_group_list"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("exams:create_student_group"))
@@ -171,8 +174,54 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertTemplateUsed(create_response, "exams/teacher/create_student_group.html")
         self.assertContains(create_response, reverse("exams:teacher_create_group"))
 
+    def test_teacher_cannot_create_or_manage_groups(self):
+        # Bənd 2: adi müəllim (təşkilat sahibi/admini olmayan) qrup yarada/idarə
+        # edə bilməz. teacher_a2 org_a-nın sahibi deyil — sadəcə müəllimdir.
+        self._login_as(self.teacher_a2)
+        self._set_active_org(self.org_a)
+        # Yaratma səhifəsi və POST → 403.
+        self.assertEqual(self.client.get(reverse("exams:create_student_group")).status_code, 403)
+        self.assertEqual(
+            self.client.post(reverse("exams:teacher_create_group"), self._group_payload(name="No")).status_code,
+            403,
+        )
+        # Siyahı görünür (oxu), amma "yeni qrup" düyməsi gizlidir.
+        list_response = self.client.get(reverse("exams:teacher_group_list"))
+        self.assertEqual(list_response.status_code, 200)
+        self.assertNotContains(list_response, reverse("exams:create_student_group"))
+
+    def test_group_manage_permission_delegation(self):
+        # Faza 3: superadmin "group.manage" icazəsini bir rola verə bilər →
+        # həmin roldakı istifadəçi (adi müəllim olsa belə) qrup yarada bilər.
+        from apps.organizations.models import Membership, Role
+        from core.constants import RoleScopeType
+
+        deleg_role = Role.objects.create(
+            organization=self.org_a,
+            name="group_manager",
+            level=55,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["group.manage"],
+            is_active=True,
+        )
+        Membership.objects.create(user=self.teacher_a2, organization=self.org_a, role=deleg_role, is_active=True)
+        self._login_as(self.teacher_a2)
+        self._set_active_org(self.org_a)
+        response = self.client.post(
+            reverse("exams:teacher_create_group"),
+            self._group_payload(
+                name="Deleg Group",
+                primary_teacher=str(self.teacher_a2.id),
+                assigned_teachers=[str(self.teacher_a2.id)],
+            ),
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(StudentGroup.objects.filter(name="Deleg Group").exists())
+
     def test_groups_are_created_and_listed_per_active_tenant(self):
-        self._login_as(self.teacher)
+        # Yaratma admin əməliyyatıdır; org_a-da org_admin qrup yaradır və
+        # müəllimi (primary_teacher) təyin edir.
+        self._login_as(self.org_admin_a)
         self._set_active_org(self.org_a)
         response = self.client.post(
             reverse("exams:teacher_create_group"),
@@ -185,21 +234,11 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertEqual(group_a.organization, self.org_a)
         self.assertEqual(group_a.teacher, self.teacher)
 
-        self._login_as(self.teacher_b)
-        self._set_active_org(self.org_b)
-        response = self.client.post(
-            reverse("exams:teacher_create_group"),
-            {
-                "name": "B Group",
-                "students": [str(self.student_b.id)],
-                "primary_teacher": str(self.teacher_b.id),
-                "assigned_teachers": [str(self.teacher_b.id)],
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        group_b = StudentGroup.objects.get(name="B Group")
-        self.assertEqual(group_b.organization, self.org_b)
-        self.assertEqual(group_b.teacher, self.teacher_b)
+        # Org B-nin adminini modelləmirik; tenant-izolyasiyanı yoxlamaq üçün org_b
+        # qrupunu birbaşa yaradırıq (müəllim yalnız öz təşkilatının qruplarını görür).
+        group_b = StudentGroup.objects.create(teacher=self.teacher_b, organization=self.org_b, name="B Group")
+        group_b.teachers.add(self.teacher_b)
+        group_b.students.add(self.student_b)
 
         self._login_as(self.teacher)
         self._set_active_org(self.org_a)
@@ -214,6 +253,7 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertNotContains(response, "A Group")
 
     def test_group_creation_rejects_cross_tenant_students(self):
+        self._login_as(self.org_admin_a)
         self._set_active_org(self.org_a)
         response = self.client.post(
             reverse("exams:teacher_create_group"),
@@ -222,7 +262,29 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(StudentGroup.objects.filter(name="Invalid Group").exists())
 
+    def test_admin_assigns_subjects_to_group(self):
+        # Faza 1: admin qrup yaradarkən registrar.Subject fənlərini təyin edir.
+        from apps.registrar.models import Subject
+
+        subject = Subject.objects.create(organization=self.org_a, code="MATH1", name="Riyaziyyat")
+        self._login_as(self.org_admin_a)
+        self._set_active_org(self.org_a)
+        response = self.client.post(
+            reverse("exams:teacher_create_group"),
+            self._group_payload(
+                name="Fenn Qrupu",
+                primary_teacher=str(self.teacher.id),
+                assigned_teachers=[str(self.teacher.id)],
+                subjects=[str(subject.id)],
+            ),
+        )
+        self.assertEqual(response.status_code, 302)
+        group = StudentGroup.objects.get(name="Fenn Qrupu")
+        self.assertIn(subject, list(group.subjects.all()))
+
     def test_group_list_contains_edit_and_delete_routes(self):
+        # Redaktə/silmə düymələri yalnız administratora görünür.
+        self._login_as(self.org_admin_a)
         self._set_active_org(self.org_a)
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="Route Group")
         group.students.add(self.student_a)
@@ -236,7 +298,7 @@ class MyGroupsTenantIsolationTest(TestCase):
     def test_add_single_student_to_group(self):
         # U6.2 — manual add (resit / transfer student) via the single-add endpoint.
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="Add Group")
-        self._login_as(self.teacher)
+        self._login_as(self.org_admin_a)
         self._set_active_org(self.org_a)
         resp = self.client.post(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_a.id]))
         self.assertEqual(resp.status_code, 302)
@@ -244,7 +306,7 @@ class MyGroupsTenantIsolationTest(TestCase):
 
     def test_add_student_rejects_cross_tenant(self):
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="XT Add Group")
-        self._login_as(self.teacher)
+        self._login_as(self.org_admin_a)
         self._set_active_org(self.org_a)
         # student_b belongs to org_b → not addable to an org_a group.
         resp = self.client.post(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_b.id]))
@@ -348,22 +410,17 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(StudentGroup.objects.filter(name="Cross Tenant Teacher Block").exists())
 
-    def test_non_student_member_can_create_group_with_single_teacher(self):
+    def test_non_student_member_cannot_create_group(self):
+        # Bənd 2: adi üzv (MEMBER) qrup yarada bilməz — yaratma yalnız
+        # superadmin/təşkilat sahibi/administratorundadır.
         self._login_as(self.member_a)
         self._set_active_org(self.org_a)
         response = self.client.post(
             reverse("exams:teacher_create_group"),
-            self._group_payload(
-                name="Member Created Group",
-                primary_teacher=str(self.teacher.id),
-                assigned_teachers=[str(self.teacher.id), str(self.teacher_a2.id)],
-            ),
+            self._group_payload(name="Member Created Group", primary_teacher=str(self.teacher.id)),
         )
-        self.assertEqual(response.status_code, 302)
-        group = StudentGroup.objects.get(name="Member Created Group")
-        self.assertEqual(group.teacher, self.teacher)
-        # Bu rol multi assignment edə bilmədiyi üçün yalnız primary saxlanmalıdır.
-        self.assertSetEqual(set(group.teachers.values_list("id", flat=True)), {self.teacher.id})
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(StudentGroup.objects.filter(name="Member Created Group").exists())
 
     def test_update_and_delete_routes_are_tenant_scoped(self):
         group_b = StudentGroup.objects.create(teacher=self.teacher_b, organization=self.org_b, name="OrgB Group")
@@ -514,7 +571,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, 'name="course_id"')
         self.assertContains(response, f'value="{self.course.id}"')
 
-    def test_modal_create_exam_form_includes_random_question_count_with_default_ten(self):
+    def test_modal_create_exam_form_includes_random_question_count_with_default_fifty(self):
         response = self.client.get(
             reverse("exams:create_exam"),
             {"modal": "1"},
@@ -522,7 +579,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="10"')
+        self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="50"')
         self.assertContains(response, 'name="fair_question_distribution_enabled"', html=False)
         self.assertContains(response, 'name="ai_difficulty_balance_enabled"', html=False)
 

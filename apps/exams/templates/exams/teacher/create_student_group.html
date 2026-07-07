@@ -90,6 +90,28 @@
                             {% endif %}
                         </div>
 
+                        <div class="mb-3">
+                            {{ form.subjects.label_tag }}
+                            {{ form.subjects }}
+                            {% if form.subjects.help_text %}
+                                <div class="form-text">{{ form.subjects.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.subjects.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.org_unit.label_tag }}
+                            {{ form.org_unit }}
+                            {% if form.org_unit.help_text %}
+                                <div class="form-text">{{ form.org_unit.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.org_unit.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
                         {% if can_multi_assign_teachers %}
                             <div class="mb-3">
                                 {% trans "label_assign_teachers_multi" context "exams.template.create_student_group" as label_assign_teachers %}

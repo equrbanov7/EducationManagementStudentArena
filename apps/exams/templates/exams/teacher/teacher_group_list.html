@@ -25,10 +25,12 @@
         <input type="text" id="groupListSearch" placeholder="{% trans 'placeholder_search_group_name' context 'exams.template.teacher_group_list' %}" class="group-search-input">
       </div>
 
+      {% if can_create_group %}
       <a href="{% url 'exams:create_student_group' %}" class="btn-create-new">
         <i class="fas fa-plus"></i>
         <span>{% trans "action_create_new_group" context "exams.template.teacher_group_list" %}</span>
       </a>
+      {% endif %}
     </div>
   </div>
 
@@ -58,6 +60,7 @@
                 </span>
               </div>
 
+              {% if can_create_group %}
               <button
                 type="button"
                 class="btn btn-sm btn-outline-secondary btn-edit-custom jsOpenEditGroup"
@@ -66,6 +69,8 @@
                 data-primary-teacher="{{ group.teacher_id }}"
                 data-students="[{% for s in group.students.all %}{{ s.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
                 data-teachers="[{% for t in group.teachers.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
+                data-subjects='[{% for sub in group.subjects.all %}"{{ sub.id }}"{% if not forloop.last %},{% endif %}{% endfor %}]'
+                data-org-unit="{{ group.org_unit_id|default:'' }}"
               >
                 <i class="fas fa-pen"></i>
               </button>
@@ -80,6 +85,7 @@
                   <i class="fas fa-trash"></i>
                 </button>
               </form>
+              {% endif %}
             </div>
           </div>
 
@@ -110,9 +116,11 @@
       <h3>{% trans "empty_no_group_yet_title" context "exams.template.teacher_group_list" %}</h3>
       <p class="text-muted">{% trans "empty_no_group_yet_desc" context "exams.template.teacher_group_list" %}</p>
 
+      {% if can_create_group %}
       <a href="{% url 'exams:create_student_group' %}" class="btn-create-new mt-3">
         {% trans "action_create_first_group" context "exams.template.teacher_group_list" %}
       </a>
+      {% endif %}
     </div>
   {% endif %}
 </div>
@@ -185,6 +193,24 @@
             {{ form.students }}
           </div>
           {% for error in form.students.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-custom" for="{{ form.subjects.id_for_label }}">{{ form.subjects.label }}</label>
+          {{ form.subjects }}
+          {% if form.subjects.help_text %}<div class="form-text">{{ form.subjects.help_text }}</div>{% endif %}
+          {% for error in form.subjects.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-custom" for="{{ form.org_unit.id_for_label }}">{{ form.org_unit.label }}</label>
+          {{ form.org_unit }}
+          {% if form.org_unit.help_text %}<div class="form-text">{{ form.org_unit.help_text }}</div>{% endif %}
+          {% for error in form.org_unit.errors %}
             <div class="invalid-feedback d-block">{{ error }}</div>
           {% endfor %}
         </div>
@@ -454,7 +480,7 @@
     }
   }
 
-  function openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId) {
+  function openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId, subjectIds, orgUnitId) {
     groupForm.reset();
     modalTitle.innerText = I18N_TEACHER_GROUP_LIST.modalTitleEditGroup;
     if (nameInput) nameInput.value = groupName || "";
@@ -482,6 +508,18 @@
       Array.from(hiddenTeachersSelect.options).forEach((option) => {
         option.selected = (teacherIds || []).map(String).includes(String(option.value));
       });
+    }
+
+    const subjectsSelect = groupForm.querySelector('[name="subjects"]');
+    if (subjectsSelect) {
+      Array.from(subjectsSelect.options).forEach((option) => {
+        option.selected = (subjectIds || []).map(String).includes(String(option.value));
+      });
+    }
+
+    const orgUnitSelect = groupForm.querySelector('[name="org_unit"]');
+    if (orgUnitSelect) {
+      orgUnitSelect.value = orgUnitId ? String(orgUnitId) : "";
     }
 
     studentsChecklist?.build();
@@ -534,11 +572,20 @@
         console.error("teachers parse error:", e);
       }
 
+      let subjectIds = [];
+      try {
+        subjectIds = JSON.parse(btn.dataset.subjects || "[]");
+      } catch (e) {
+        console.error("subjects parse error:", e);
+      }
+
+      const orgUnitId = btn.dataset.orgUnit || "";
+
       if (primaryTeacherId && !teacherIds.map(String).includes(String(primaryTeacherId))) {
         teacherIds.push(Number(primaryTeacherId));
       }
 
-      openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId);
+      openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId, subjectIds, orgUnitId);
     });
   });
 

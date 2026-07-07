@@ -404,12 +404,20 @@ class ExamForm(forms.ModelForm):
             "coding_enable_code_execution",
         ]
 
-        # Yeni imtahan yaradılarkən "aktiv" default seçili gəlsin.
+        # Yeni imtahan yaradılarkən defaultlar (imtahan mərkəzi kabinetdə yaradarkən):
+        #   • aktiv seçili;
+        #   • sual sayı = 50;
+        #   • cəhd sayı = 1;
+        #   • is_public = False → imtahan HAMIYA AÇIQ deyil, BAĞLI görünür.
         if not self.instance.pk and not self.is_bound:
             self.fields["is_active"].initial = True
             self.initial.setdefault("is_active", True)
-            self.fields["random_question_count"].initial = 10
-            self.initial.setdefault("random_question_count", 10)
+            self.fields["random_question_count"].initial = 50
+            self.initial.setdefault("random_question_count", 50)
+            self.fields["max_attempts_per_user"].initial = 1
+            self.initial.setdefault("max_attempts_per_user", 1)
+            self.fields["is_public"].initial = False
+            self.initial.setdefault("is_public", False)
             self.fields["fair_question_distribution_enabled"].initial = True
             self.initial.setdefault("fair_question_distribution_enabled", True)
             self.fields["ai_difficulty_balance_enabled"].initial = False

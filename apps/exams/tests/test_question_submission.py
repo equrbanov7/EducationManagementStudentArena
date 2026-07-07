@@ -185,6 +185,9 @@ class SubmissionServiceTests(_Base):
 
 class SubmissionViewTests(_Base):
     def test_teacher_creates_submission_via_view(self):
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="842A1")
         client = self._client_for(self.teacher)
         response = client.post(
             reverse("exams:question_submission_create"),
@@ -192,7 +195,7 @@ class SubmissionViewTests(_Base):
                 "action": "save",
                 "title": "View testi",
                 "subject": "Riyaziyyat",
-                "group_label": "842A1",
+                "group_id": str(group.id),
                 "language": "az",
                 "raw_text": VALID_TEXT,
             },
@@ -292,7 +295,77 @@ class SubmissionViewTests(_Base):
         self.assertEqual(submission.student_group, group)
         self.assertEqual(submission.group_label, "Dropdown qrupu")
 
+    def test_view_subject_scoped_to_group_subjects(self):
+        # Bənd 4-5: qrupa təyin olunmuş fənn seçiləndə göndəriş uğurludur.
+        from apps.exams.models import StudentGroup
+        from apps.registrar.models import Subject
+
+        subject = Subject.objects.create(organization=self.org, code="INF101", name="İnformatika")
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-fenn")
+        group.subjects.add(subject)
+
+        client = self._client_for(self.teacher)
+        response = client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "save",
+                "title": "Fənn skoplu",
+                "subject": "İnformatika",
+                "group_id": str(group.id),
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        submission = QuestionSubmission.objects.get(title="Fənn skoplu")
+        self.assertEqual(submission.subject, "İnformatika")
+        self.assertEqual(submission.student_group, group)
+
+    def test_create_page_renders_subject_dropdown_and_map(self):
+        # Şablon + kontekst uçdan-uca: fənn <select> + qrup→fənn JSON adası render olunur.
+        from apps.exams.models import StudentGroup
+        from apps.registrar.models import Subject
+
+        subject = Subject.objects.create(organization=self.org, code="INF101", name="İnformatika")
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-render")
+        group.subjects.add(subject)
+
+        client = self._client_for(self.teacher)
+        response = client.get(reverse("exams:question_submission_create"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="qsubSubject"')
+        self.assertContains(response, "qsubGroupsSubjects")  # JSON data adası
+        self.assertContains(response, "INF101")  # fənn xəritədə (kod, ascii-təhlükəsiz)
+        self.assertContains(response, "question_submission_subjects.js")  # skoplama skripti
+
+    def test_view_rejects_subject_not_in_group(self):
+        # Bənd 5: qrupun fənlərinə aid olmayan fənn rədd edilir.
+        from apps.exams.models import StudentGroup
+        from apps.registrar.models import Subject
+
+        subject = Subject.objects.create(organization=self.org, code="INF101", name="İnformatika")
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-fenn2")
+        group.subjects.add(subject)
+
+        client = self._client_for(self.teacher)
+        response = client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "save",
+                "title": "Yanlış fənn",
+                "subject": "Kimya",  # qrupun fənni deyil
+                "group_id": str(group.id),
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(QuestionSubmission.objects.filter(title="Yanlış fənn").exists())
+
     def test_view_save_respects_selection_and_points(self):
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i")
         client = self._client_for(self.teacher)
         client.post(
             reverse("exams:question_submission_create"),
@@ -300,7 +373,7 @@ class SubmissionViewTests(_Base):
                 "action": "save",
                 "title": "Seçim testi",
                 "subject": "İnformatika",
-                "group_label": "875i",
+                "group_id": str(group.id),
                 "language": "az",
                 "raw_text": VALID_TEXT,
                 "selected": ["2"],
@@ -314,6 +387,9 @@ class SubmissionViewTests(_Base):
         self.assertEqual(submission.parsed_snapshot[0].get("points"), 5)
 
     def test_view_save_carries_teacher_note(self):
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i")
         client = self._client_for(self.teacher)
         client.post(
             reverse("exams:question_submission_create"),
@@ -321,7 +397,7 @@ class SubmissionViewTests(_Base):
                 "action": "save",
                 "title": "Qeydli göndəriş",
                 "subject": "İnformatika",
-                "group_label": "875i",
+                "group_id": str(group.id),
                 "teacher_note": "5-8-ci suallar mühazirə 3-ə aiddir.",
                 "language": "az",
                 "raw_text": VALID_TEXT,
