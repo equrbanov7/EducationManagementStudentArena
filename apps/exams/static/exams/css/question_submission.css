@@ -185,6 +185,26 @@
     color: #94a3b8;
 }
 
+/* Müəllimə hələ qrup təyin olunmayanda (sərbəst-mətn əvəzinə informativ qeyd) */
+.qsubm-empty-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-warning-200, #fde68a);
+    border-left: 3px solid var(--ems-warning-500, #f59e0b);
+    border-radius: 10px;
+    background: var(--ems-warning-50, #fffbeb);
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.qsubm-empty-note i {
+    margin-top: 2px;
+    color: var(--ems-warning-600, #d97706);
+}
+
 /* ============================================================================
    Göndərişlər siyahısı (dashboard bölməsi + inbox) — "sualları idarə et"
    səhifəsinin dizayn dili: rəngli ikonlu stat kartlar + kart-əsaslı siyahı.

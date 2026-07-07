@@ -65,28 +65,57 @@ def _form_state(request):
 
 
 def _teacher_groups(request, organization):
-    """Müəllimin bu təşkilatdakı qrupları (dropdown üçün)."""
+    """Müəllimin bu təşkilatdakı qrupları (dropdown üçün) — fənlərlə birlikdə."""
     from django.db.models import Q
 
     return (
         StudentGroup.objects.filter(organization=organization)
         .filter(Q(teacher=request.user) | Q(teachers=request.user))
+        .prefetch_related("subjects")
         .distinct()
         .order_by("name")
     )
 
 
+def _groups_subjects_map(groups):
+    """Qrup id → fənlər (fənn dropdown-unu qrupa görə skoplamaq üçün JS xəritəsi).
+    Dəyər = fənn adı (QuestionSubmission.subject-də saxlanılan), etiket = "kod — ad"."""
+    return {
+        str(group.id): [{"value": s.name, "label": f"{s.code} — {s.name}"} for s in group.subjects.all()]
+        for group in groups
+    }
+
+
+def _ensure_subject_in_group(subject, student_group):
+    """Bənd 5: seçilmiş fənn qrupun fənlərinə aid olmalıdır. Qrupun heç fənni
+    yoxdursa keçir — bu halda dropdown boşdur və servis onsuz da boş fənni rədd
+    edir (müəllim admin-dən qrupa fənn təyin etməyi istəməlidir)."""
+    if student_group is None:
+        return
+    allowed = set(student_group.subjects.values_list("name", flat=True))
+    if allowed and subject not in allowed:
+        raise ValidationError(
+            pgettext(
+                "exams.view.question_submission.error",
+                "Seçilmiş fənn bu qrupun fənlərinə aid deyil.",
+            )
+        )
+
+
 def _resolve_group(form_state, groups):
     """
-    Formadan qrupu həll edir: seçilmiş FK-dırsa (student_group, adı) qaytarır,
-    seçilməyibsə sərbəst mətn etiketi. Heç biri yoxdursa ("", "") qayıdır.
+    Formadan qrupu həll edir: YALNIZ dropdown-dan seçilmiş FK qəbul edilir
+    (`group_id`). Qruplar superadmin/administrator tərəfindən yaradılır; müəllim
+    yalnız ona TƏYİN olunmuş qrupları seçir — sərbəst-mətn qrup ARTIQ QƏBUL
+    EDİLMİR. Etiket kimi seçilmiş qrupun adı (`group.name`) qaytarılır.
+    Seçilməyibsə (None, "") qayıdır və göndəriş servis səviyyəsində rədd edilir.
     """
     group_id = form_state.get("group_id") or ""
     if group_id.isdigit():
         group = next((g for g in groups if str(g.id) == group_id), None)
         if group is not None:
             return group, group.name
-    return None, form_state.get("group_label") or ""
+    return None, ""
 
 
 def annotate_preview_flags(questions):
@@ -172,6 +201,7 @@ def question_submission_create(request):
 
                 student_group, group_label = _resolve_group(form_state, groups)
                 try:
+                    _ensure_subject_in_group(form_state["subject"], student_group)
                     submission = submit_question_set(
                         teacher=request.user,
                         organization=organization,
@@ -211,6 +241,7 @@ def question_submission_create(request):
         "math_token": "",
         # Meta sahələri (workbench-dən kənar kart)
         "teacher_groups": groups,
+        "groups_subjects": _groups_subjects_map(groups),
         "form_state": form_state,
         # Workbench konteksti
         "wb_workbench_key": "question-submission",
@@ -292,6 +323,7 @@ def question_submission_detail(request, submission_id):
         if action == "preview":
             context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
             context["teacher_groups"] = list(_teacher_groups(request, organization))
+            context["groups_subjects"] = _groups_subjects_map(context["teacher_groups"])
             context["form_state"] = form_state
             try:
                 context.update(_preview_context(form_state["raw_text"]))
@@ -303,6 +335,7 @@ def question_submission_detail(request, submission_id):
             groups = list(_teacher_groups(request, organization))
             student_group, group_label = _resolve_group(form_state, groups)
             try:
+                _ensure_subject_in_group(form_state["subject"], student_group)
                 submission = resubmit_question_set(
                     submission,
                     title=form_state["title"],
@@ -328,6 +361,7 @@ def question_submission_detail(request, submission_id):
     context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
     if can_edit:
         context["teacher_groups"] = list(_teacher_groups(request, organization))
+        context["groups_subjects"] = _groups_subjects_map(context["teacher_groups"])
     return render(request, "exams/teacher/question_submission_detail.html", context)
 
 

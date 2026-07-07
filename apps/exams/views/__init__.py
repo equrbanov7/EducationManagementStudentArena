@@ -4,6 +4,7 @@
 # SHARED VIEWS (bütün user-lər üçün ortaq)
 # ═══════════════════════════════════════════════════════════════
 from .exam_center import (
+    exam_center_pin_lookup,
     exam_center_reports,
     exam_center_room_create,
     exam_center_room_list,
@@ -232,6 +233,7 @@ __all__ = [
     "final_exam_waiting",
     "final_ticket_state",
     # Exam Center - zallar / oturumlar / monitor / hesabat
+    "exam_center_pin_lookup",
     "exam_center_reports",
     "exam_center_room_create",
     "exam_center_room_list",

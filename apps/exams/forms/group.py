@@ -9,7 +9,12 @@ from django.db.models import Prefetch
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import StudentGroup
-from apps.organizations.public import organization_role_user_queryset, organization_user_queryset, user_has_org_role
+from apps.organizations.public import (
+    get_unit_scope,
+    organization_role_user_queryset,
+    organization_user_queryset,
+    user_has_org_role,
+)
 from core.roles import ProfileRole
 
 User = get_user_model()
@@ -90,7 +95,7 @@ class StudentGroupForm(forms.ModelForm):
 
     class Meta:
         model = StudentGroup
-        fields = ["name", "students"]
+        fields = ["name", "students", "subjects", "org_unit"]
         widgets = {
             "name": forms.TextInput(
                 attrs={
@@ -103,13 +108,27 @@ class StudentGroupForm(forms.ModelForm):
                     "class": "form-select",
                 }
             ),
+            "subjects": forms.SelectMultiple(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "org_unit": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
         labels = {
             "name": pgettext_lazy("exams.form.group.label", "name"),
             "students": pgettext_lazy("exams.form.group.label", "students"),
+            "subjects": pgettext_lazy("exams.form.group.label", "subjects"),
+            "org_unit": pgettext_lazy("exams.form.group.label", "org_unit"),
         }
         help_texts = {
             "students": pgettext_lazy("exams.form.group.help", "students"),
+            "subjects": pgettext_lazy("exams.form.group.help", "subjects"),
+            "org_unit": pgettext_lazy("exams.form.group.help", "org_unit"),
         }
 
     def __init__(self, *args, **kwargs):
@@ -174,6 +193,28 @@ class StudentGroupForm(forms.ModelForm):
         self.fields["primary_teacher"].queryset = teachers_qs
         self.fields["assigned_teachers"].queryset = teachers_qs
 
+        # Fənlər (registrar master-data) — aktiv təşkilatın fənlərinə skoplanır.
+        # `organization.subjects` tərs-relasiyası ilə (import lazım deyil).
+        if self.organization is not None:
+            self.fields["subjects"].queryset = self.organization.subjects.filter(is_active=True).order_by("code")
+        else:
+            self.fields["subjects"].queryset = self.fields["subjects"].queryset.none()
+
+        # Akademik vahid (OrgUnit) — aktoru öz scope-una görə: org-geniş rol bütün
+        # vahidləri, unit-scoped (dekan/kafedra) yalnız öz alt-ağacını təyin edə
+        # bilər. `get_unit_scope` yalnız istifadəçi + təşkilat tələb edir.
+        if self.organization is not None and self.actor is not None:
+            units_qs = self.organization.units.filter(is_active=True).order_by("path", "name")
+            scope = get_unit_scope(self.actor, self.organization)
+            if scope.is_org_wide:
+                self.fields["org_unit"].queryset = units_qs
+            elif scope.is_unit_scoped:
+                self.fields["org_unit"].queryset = units_qs.filter(scope.unit_subtree_q())
+            else:
+                self.fields["org_unit"].queryset = units_qs.none()
+        else:
+            self.fields["org_unit"].queryset = self.fields["org_unit"].queryset.none()
+
         if self.instance and self.instance.pk:
             self.fields["primary_teacher"].initial = self.instance.teacher_id
             initial_assigned = list(self.instance.teachers.values_list("id", flat=True))
@@ -234,6 +275,12 @@ class StudentGroupForm(forms.ModelForm):
             invalid_students = students.exclude(id__in=allowed_student_ids)
             if invalid_students.exists():
                 raise ValidationError(pgettext_lazy("exams.form.group.error", "tenant_students_only"))
+
+        subjects = cleaned_data.get("subjects")
+        if subjects is not None and self.organization is not None:
+            allowed_subject_ids = set(self.fields["subjects"].queryset.values_list("id", flat=True))
+            if any(subject.id not in allowed_subject_ids for subject in subjects):
+                raise ValidationError(pgettext_lazy("exams.form.group.error", "tenant_subjects_only"))
 
         if primary_teacher is None:
             raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_required"))

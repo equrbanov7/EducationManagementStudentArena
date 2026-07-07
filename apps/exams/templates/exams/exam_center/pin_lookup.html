@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "PIN axtarışı" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/pin_lookup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fxc-page">
+  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% trans "PIN axtarışı" as cur_label %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
+
+  <header class="fxc-head">
+    <div>
+      <h1><i class="fas fa-key"></i> {% trans "İstifadəçi adı üzrə PIN axtarışı" %}</h1>
+      <p class="fxc-sub">{% trans "İstifadəçi adını yazın — həmin tələbənin bütün final imtahanlarını və PIN-lərini görün." %}</p>
+    </div>
+    <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
+      <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
+    </a>
+  </header>
+
+  <form method="get" class="fxc-card fxc-filterbar">
+    <div class="fxc-field">
+      <label for="pinLookupUsername">{% trans "İstifadəçi adı" %}</label>
+      <input type="text" id="pinLookupUsername" name="username" value="{{ username }}"
+             class="form-control" autocomplete="off" autofocus
+             placeholder="{% trans 'məs. test_student01' %}">
+    </div>
+    <button type="submit" class="fxc-btn fxc-btn-primary">
+      <i class="fas fa-magnifying-glass"></i> {% trans "Axtar" %}
+    </button>
+  </form>
+
+  {% if not_found %}
+    <div class="fxc-card fxc-empty">
+      <i class="fas fa-user-slash"></i>
+      <p>{% blocktrans %}"{{ username }}" adlı istifadəçi tapılmadı.{% endblocktrans %}</p>
+    </div>
+  {% elif searched_user %}
+    <div class="fxc-card">
+      <div class="fxc-card-head">
+        <h2>
+          <i class="fas fa-user"></i>
+          {{ searched_user.get_full_name|default:searched_user.username }}
+          <span class="fxc-muted">@{{ searched_user.username }}</span>
+        </h2>
+        <span class="fxc-badge">{% blocktrans count counter=results|length %}{{ counter }} imtahan{% plural %}{{ counter }} imtahan{% endblocktrans %}</span>
+      </div>
+
+      {% if results %}
+      <div class="fxc-table-wrap">
+        <table class="fxc-table">
+          <thead>
+            <tr>
+              <th>{% trans "İmtahan" %}</th>
+              <th>{% trans "Otaq" %}</th>
+              <th>{% trans "Vaxt" %}</th>
+              <th>{% trans "Status" %}</th>
+              <th>{% trans "PIN" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in results %}
+            <tr>
+              <td>{{ row.ticket.exam.title }}</td>
+              <td>{{ row.ticket.session.room.name }}</td>
+              <td>{{ row.ticket.session.scheduled_start|date:"d.m.Y H:i" }}</td>
+              <td><span class="fxc-status fxc-status--{{ row.ticket.status }}">{{ row.ticket.get_status_display }}</span></td>
+              <td>
+                {% if row.pin %}
+                  <code class="fxc-pin">{{ row.pin }}</code>
+                {% else %}
+                  <span class="fxc-muted" title="{% trans 'PIN artıq mövcud deyil (oturum bitib, ləğv olunub və ya vaxtı keçib).' %}">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="fxc-empty">
+        <i class="fas fa-inbox"></i>
+        <p>{% trans "Bu istifadəçiyə heç bir final imtahan bileti təyin olunmayıb." %}</p>
+      </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

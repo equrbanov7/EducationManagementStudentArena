@@ -4,8 +4,21 @@
    and adapts to light/dark tokens. */
 
 /* --- Page wrapper --- */
+body.auth-body {
+    background: var(--ems-neutral-50);
+}
+
+.auth-body main {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--ems-neutral-50);
+}
+
 .auth-page-wrapper {
-    min-height: calc(100vh - 170px);
+    flex: 1 1 auto;
+    min-height: 100vh;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -116,6 +129,13 @@
 .auth-brand-logo {
     max-width: 220px;
     height: auto;
+}
+
+.auth-brand-logo--seal {
+    width: 108px;
+    max-width: 34vw;
+    aspect-ratio: 1;
+    object-fit: contain;
 }
 
 /* --- Headings --- */
@@ -413,6 +433,26 @@
         font-size: 1.35rem;
     }
 
+    .auth-portal-option {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .auth-portal-option__icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+
+    .auth-portal-option__title {
+        font-size: 0.94rem;
+        line-height: 1.25;
+    }
+
+    .auth-portal-option__desc {
+        font-size: 0.8rem;
+    }
+
     .auth-language-form {
         top: 10px;
         right: 12px;
@@ -422,4 +462,168 @@
     .auth-language-label {
         display: none; /* dar ekranda yalnız seçim qutusu qalır */
     }
+}
+
+/* ============================================================================
+   İlk giriş / OTP axını — login səhifəsi ilə eyni institutional dil
+   (parol təyini + email təsdiqi + OTP). Köhnə .auth-title/.auth-input/
+   .register-* əvəzinə vahid .auth-* dizayn sistemi.
+   ========================================================================== */
+
+/* Addım göstəricisi (1 — email · 2 — kod & parol) */
+.auth-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 2px 0 24px;
+}
+.auth-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-neutral-400);
+}
+.auth-step__num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    border: 1px solid var(--ems-neutral-200);
+}
+.auth-step--active {
+    color: var(--ems-primary-700);
+}
+.auth-step--active .auth-step__num {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border-color: var(--ems-primary-600);
+}
+.auth-step--done .auth-step__num {
+    background: var(--ems-success-600, #059669);
+    color: var(--ems-neutral-0);
+    border-color: var(--ems-success-600, #059669);
+}
+.auth-step-sep {
+    width: 26px;
+    height: 1px;
+    background: var(--ems-neutral-200);
+}
+
+/* Django messages (uğur / xəta / info) */
+.auth-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.auth-message {
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    text-align: left;
+}
+.auth-message--success {
+    background: var(--ems-success-100, #dcfce7);
+    color: var(--ems-success-strong, #0f766e);
+    border-color: var(--ems-success-600, #059669);
+}
+.auth-message--error,
+.auth-message--danger {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+    border-color: var(--ems-danger-200);
+}
+.auth-message--info,
+.auth-message--debug {
+    background: var(--ems-primary-50);
+    color: var(--ems-neutral-800);
+    border-color: var(--ems-primary-100);
+}
+.auth-message--warning {
+    background: var(--ems-warning-100, #fef3c7);
+    color: var(--ems-warning-700, #b45309);
+    border-color: var(--ems-warning-500, #f59e0b);
+}
+
+/* "Kod filan@email ünvanına göndərildi" info sətri */
+.auth-info-line {
+    margin: -6px 0 20px;
+    padding: 11px 13px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-100);
+    color: var(--ems-neutral-800);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: left;
+}
+.auth-info-line strong {
+    color: var(--ems-primary-700);
+    word-break: break-all;
+}
+
+/* OTP say-geriyə banneri (otp_timer.js: [data-otp-expires-at]/[data-otp-countdown]/.is-expired) */
+.auth-otp-timer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 20px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-600);
+    font-size: 0.85rem;
+}
+.auth-otp-timer__value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+.auth-otp-timer.is-expired {
+    background: var(--ems-danger-100);
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-700);
+}
+.auth-otp-timer.is-expired .auth-otp-timer__value {
+    color: var(--ems-danger-700);
+}
+
+/* OTP kod xanası — böyük, mərkəzləşmiş, aralıqlı rəqəmlər */
+.auth-otp-input {
+    text-align: center;
+    letter-spacing: 0.42em;
+    font-size: 1.35rem;
+    font-weight: 700;
+    padding-left: calc(14px + 0.42em);
+}
+
+/* İkincili forma (kodu yenidən göndər) — link görünüşlü düymə */
+.auth-form--secondary {
+    margin-top: 14px;
+    text-align: center;
+}
+.auth-link-btn {
+    background: none;
+    border: 0;
+    padding: 4px 6px;
+    color: var(--ems-primary-600);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+.auth-link-btn:hover {
+    text-decoration: underline;
 }

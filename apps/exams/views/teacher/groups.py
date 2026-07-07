@@ -10,6 +10,8 @@ from django.views.decorators.http import require_POST
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
 from apps.exams.views.shared.tenant import get_active_organization
+from apps.organizations.public import get_unit_scope
+from core.permissions import request_has_permission
 from core.roles import ProfileRole
 from core.tenancy import request_has_active_organization_context
 
@@ -33,6 +35,29 @@ def _ensure_group_manager(user):
     )
 
     if has_student_role and not has_teacher_like_role:
+        raise PermissionDenied(pgettext("exams.view.groups.message", "no_page_permission"))
+
+
+def _user_can_create_group(request):
+    """Qrup YARATMAQ icazəsi (bool):
+    * superadmin;
+    * təşkilat administratorları (org_owner / org_admin);
+    * Faza 3 DELEQASİYA: superadmin `group.manage` icazəsini bir rola verə
+      bilər — həmin roldakı istifadəçi də qrup yarada bilər. Default HEÇ BİR
+      rolda `group.manage` yoxdur, yəni əlavə icazə verilməyibsə heç kimin
+      (adi müəllim daxil) qrup yaratmaq icazəsi olmur.
+    """
+    user = request.user
+    if _is_superadmin(user):
+        return True
+    if hasattr(user, "has_role") and (user.has_role(ProfileRole.ORG_OWNER) or user.has_role(ProfileRole.ORG_ADMIN)):
+        return True
+    return request_has_permission(request, "group.manage")
+
+
+def _ensure_group_creator(request):
+    """Qrup yaratma/dəyişmə əməliyyatları üçün icazə guard-ı."""
+    if not _user_can_create_group(request):
         raise PermissionDenied(pgettext("exams.view.groups.message", "no_page_permission"))
 
 
@@ -72,13 +97,22 @@ def _get_required_organization(request):
 def _group_queryset_for_actor(request, organization):
     queryset = (
         StudentGroup.objects.filter(organization=organization)
-        .select_related("teacher", "organization")
-        .prefetch_related("students", "teachers")
+        .select_related("teacher", "organization", "org_unit")
+        .prefetch_related("students", "teachers", "subjects")
         .order_by("name")
     )
-    if _is_superadmin(request.user) or _can_multi_assign_teachers(request.user):
+    # Bənd 3 — rol-skoplu görünüş (mərkəzi unit-scoping servisi ilə):
+    #   org-geniş rol (rektor/prorektor/org-admin/owner/superadmin) → bütün qruplar;
+    #   unit-scoped (dekan/kafedra müdiri) → öz alt-ağacındakı qruplar (+ öz qrupları);
+    #   qalan (adi müəllim) → yalnız öz qrupları (teacher / teachers).
+    scope = get_unit_scope(request.user, organization, request)
+    if scope.is_org_wide:
         return queryset
-    return queryset.filter(Q(teacher=request.user) | Q(teachers=request.user)).distinct()
+    own_q = Q(teacher=request.user) | Q(teachers=request.user)
+    if scope.is_unit_scoped:
+        subtree_q = scope.unit_subtree_q(path_field="org_unit__path", id_field="org_unit")
+        return queryset.filter(own_q | subtree_q).distinct()
+    return queryset.filter(own_q).distinct()
 
 
 def _group_form_for_request(request, organization, data=None, instance=None):
@@ -119,6 +153,7 @@ def teacher_group_list(request):
         "form": form,
         "organization": organization,
         "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
+        "can_create_group": _user_can_create_group(request),
     }
     return render(request, "exams/teacher/teacher_group_list.html", context)
 
@@ -126,7 +161,7 @@ def teacher_group_list(request):
 @login_required
 @require_POST
 def teacher_create_group(request):
-    _ensure_group_manager(request.user)
+    _ensure_group_creator(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
@@ -175,7 +210,7 @@ def teacher_create_group(request):
 @login_required
 @require_POST
 def teacher_update_group(request, group_id):
-    _ensure_group_manager(request.user)
+    _ensure_group_creator(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
@@ -235,7 +270,7 @@ def teacher_update_group(request, group_id):
 @login_required
 @require_POST
 def teacher_delete_group(request, group_id):
-    _ensure_group_manager(request.user)
+    _ensure_group_creator(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
@@ -264,7 +299,7 @@ def teacher_delete_group(request, group_id):
 @login_required
 @require_POST
 def teacher_remove_student_from_group(request, group_id, student_id):
-    _ensure_group_manager(request.user)
+    _ensure_group_creator(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
@@ -301,7 +336,7 @@ def teacher_add_student_to_group(request, group_id, student_id):
     the whole multi-select, a manager adds one student. The student must be a
     STUDENT/LEAD_STUDENT of the active organization (validated via the scoped
     queryset) so an arbitrary user id cannot be injected."""
-    _ensure_group_manager(request.user)
+    _ensure_group_creator(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
@@ -333,7 +368,7 @@ def teacher_add_student_to_group(request, group_id, student_id):
 
 @login_required
 def create_student_group(request):
-    _ensure_group_manager(request.user)
+    _ensure_group_creator(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")

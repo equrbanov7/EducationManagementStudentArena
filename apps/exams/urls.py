@@ -107,6 +107,7 @@ urlpatterns = [
         name="exam_center_ticket_readmit",
     ),
     path("center/reports/", views.exam_center_reports, name="exam_center_reports"),
+    path("center/pin-lookup/", views.exam_center_pin_lookup, name="exam_center_pin_lookup"),
     # ==========================
     # TEACHER - Exams CRUD (sabit)
     # ==========================

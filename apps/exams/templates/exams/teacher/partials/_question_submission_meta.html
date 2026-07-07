@@ -29,43 +29,37 @@ Stil: exams/css/question_submission.css (CSP inline-style-ə icazə vermir).
 
         <div class="qsubm-field">
             <label for="qsubSubject">{% trans "Fənn" %} <span class="qsubm-req">*</span></label>
-            <div class="qsubm-input-wrap">
+            <div class="qsubm-input-wrap qsubm-input-wrap--select">
                 <i class="fas fa-book"></i>
-                <input type="text" id="qsubSubject" name="subject" maxlength="200" required
-                       form="saveForm" data-qsub-meta
-                       value="{{ form_state.subject }}" placeholder="{% trans 'məs. İnformatika' %}">
+                <select id="qsubSubject" name="subject" form="saveForm" data-qsub-meta
+                        data-qsub-subject data-initial-subject="{{ form_state.subject }}"
+                        data-empty-text="{% trans 'Bu qrupa fənn təyin olunmayıb' %}"
+                        data-choose-text="{% trans 'Fənni seçin…' %}" required>
+                    <option value="">{% trans "Əvvəlcə qrup seçin…" %}</option>
+                </select>
             </div>
+            <span class="qsubm-hint">{% trans "Fənn seçilmiş qrupun fənlərindən gəlir." %}</span>
         </div>
+        {{ groups_subjects|json_script:"qsubGroupsSubjects" }}
 
         <div class="qsubm-field">
             <label for="qsubGroup">{% trans "Qrup" %} <span class="qsubm-req">*</span></label>
             {% if teacher_groups %}
-            <div class="qsubm-group-row">
-                <div class="qsubm-input-wrap qsubm-input-wrap--select">
-                    <i class="fas fa-users"></i>
-                    <select id="qsubGroup" name="group_id" form="saveForm" data-qsub-meta>
-                        <option value="">{% trans "Qrupu seçin…" %}</option>
-                        {% for g in teacher_groups %}
-                        <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <span class="qsubm-group-or">{% trans "və ya" %}</span>
-                <div class="qsubm-input-wrap">
-                    <i class="fas fa-pen"></i>
-                    <input type="text" name="group_label" maxlength="200" form="saveForm" data-qsub-meta
-                           value="{{ form_state.group_label }}" placeholder="{% trans 'adını yazın (875i)' %}">
-                </div>
-            </div>
-            <span class="qsubm-hint">{% trans "Siyahıda yoxdursa qrupun adını sərbəst yazın." %}</span>
-            {% else %}
-            <div class="qsubm-input-wrap">
+            <div class="qsubm-input-wrap qsubm-input-wrap--select">
                 <i class="fas fa-users"></i>
-                <input type="text" id="qsubGroup" name="group_label" maxlength="200" required
-                       form="saveForm" data-qsub-meta
-                       value="{{ form_state.group_label }}" placeholder="{% trans 'məs. 875i' %}">
+                <select id="qsubGroup" name="group_id" form="saveForm" data-qsub-meta required>
+                    <option value="">{% trans "Qrupu seçin…" %}</option>
+                    {% for g in teacher_groups %}
+                    <option value="{{ g.id }}" {% if form_state.group_id == g.id|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <span class="qsubm-hint">{% trans "Qrupunuz sistemdə yoxdursa adını sərbəst yazın." %}</span>
+            <span class="qsubm-hint">{% trans "Yalnız sizə təyin olunmuş qruplar görünür; qrup administrator tərəfindən yaradılır." %}</span>
+            {% else %}
+            <div class="qsubm-empty-note">
+                <i class="fas fa-circle-info"></i>
+                {% trans "Sizə hələ qrup təyin olunmayıb. Qrup seçimi üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın." %}
+            </div>
             {% endif %}
         </div>
 

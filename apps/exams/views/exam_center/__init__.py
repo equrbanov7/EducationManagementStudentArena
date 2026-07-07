@@ -12,6 +12,7 @@ from .monitor import (
     exam_center_ticket_resume,
     exam_center_ticket_snapshot,
 )
+from .pin_lookup import exam_center_pin_lookup
 from .reports import exam_center_reports
 from .room_monitor import (
     exam_center_room_monitor,
@@ -32,6 +33,7 @@ from .sessions import (
 )
 
 __all__ = [
+    "exam_center_pin_lookup",
     "exam_center_reports",
     "exam_center_room_create",
     "exam_center_room_list",

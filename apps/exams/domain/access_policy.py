@@ -45,6 +45,26 @@ class StudentGroup(models.Model):
         blank=True,
         verbose_name=pgettext_lazy("exams.model.student_group.field", "teachers"),
     )
+    # Bu qrupun tədris etdiyi fənlər (registrar master-data). String-referans →
+    # exams→registrar import kənarı yaranmır. Müəllim sual göndərəndə fənn
+    # dropdown-u qrupun bu fənlərindən gəlir (bənd 4-5).
+    subjects = models.ManyToManyField(
+        "registrar.Subject",
+        related_name="student_groups",
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "subjects"),
+    )
+    # Qrupun akademik vahidi (OrgUnit: ixtisas/qrup). Rol-skoplu görünüşün əsası
+    # (bənd 3): kafedra öz alt-ağacını, dekan fakültəni görür. String-referans →
+    # exams→organizations onsuz da mövcud kənardır, yeni asılılıq yaranmır.
+    org_unit = models.ForeignKey(
+        "organizations.OrgUnit",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="student_groups",
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "org_unit"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

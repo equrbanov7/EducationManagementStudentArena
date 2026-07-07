@@ -33,9 +33,12 @@ class ExamFormDefaultStateTests(TestCase):
         form = ExamForm()
         self.assertTrue(form.initial.get("is_active"))
 
-    def test_create_form_defaults_random_question_count_to_ten(self):
+    def test_create_form_defaults_new_exam_parameters(self):
+        # Yeni imtahan defaultları: sual=50, cəhd=1, is_public=False (bağlı).
         form = ExamForm()
-        self.assertEqual(form.initial.get("random_question_count"), 10)
+        self.assertEqual(form.initial.get("random_question_count"), 50)
+        self.assertEqual(form.initial.get("max_attempts_per_user"), 1)
+        self.assertFalse(form.get_initial_for_field(form.fields["is_public"], "is_public"))
 
     def test_create_form_defaults_distribution_toggles_on(self):
         form = ExamForm()
