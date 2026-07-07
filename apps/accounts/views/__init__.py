@@ -24,6 +24,7 @@ from .auth import (
     NamespacedPasswordResetConfirmView,
     NamespacedPasswordResetDoneView,
     NamespacedPasswordResetView,
+    login_portal,
     logout_view,
     register_view,
     resend_code_view,
@@ -103,6 +104,7 @@ from .superadmin import (
 __all__ = [
     # Authentication
     "CustomLoginView",
+    "login_portal",
     "NamespacedPasswordResetView",
     "NamespacedPasswordResetDoneView",
     "NamespacedPasswordResetConfirmView",
