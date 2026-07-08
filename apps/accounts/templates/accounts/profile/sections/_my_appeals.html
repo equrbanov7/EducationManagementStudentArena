@@ -6,7 +6,7 @@
 {% endcomment %}
 <section class="profile-section-panel profile-section--my-appeals {% if active_section == 'my-appeals' %}is-active{% endif %}"
          data-profile-section-panel="my-appeals"
-         data-source-url="{% url 'appeals:my_appeals' %}">
+         data-source-url="{{ profile_base_url }}?section=my-appeals">
     <div class="appeal-embedded">
         <div data-appeal-list-view>
             <header class="appeal-hero appeal-hero--icon">

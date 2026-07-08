@@ -340,7 +340,7 @@
             <a href="{{ profile_base_url }}?section=my-appeals"
                data-section="my-appeals"
                data-title="{% trans 'Apellyasiyalarım' context 'appeals.template' %}"
-               data-source-url="{% url 'appeals:my_appeals' %}"
+               data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-appeals' %}active{% endif %}">
                 <i class="fas fa-gavel sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "Apellyasiyalarım" context "appeals.template" %}</span>

@@ -19,6 +19,7 @@ from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import (
     annotate_attempt_result_visibility,
+    append_query_params,
     build_exam_history_url,
     build_exam_result_url,
     current_return_to,
@@ -33,8 +34,15 @@ def _is_final_exam(exam):
     return getattr(exam, "exam_type_extended", "") == "final"
 
 
-def _final_login_url():
-    return f"{reverse('accounts:login')}?{urlencode({'next': reverse('exams:final_exam_entry')})}"
+def _is_profile_results_request(request, return_to):
+    source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    if source_section == "my-results":
+        return True
+    return "section=my-results" in (return_to or "")
+
+
+def _final_entry_url():
+    return reverse("exams:final_exam_entry")
 
 
 def _final_result_timeout_url(request):
@@ -103,15 +111,16 @@ def exam_result(request, slug, attempt_id):
     return_to = current_return_to(request)
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
     is_final_exam_result = _is_final_exam(exam)
+    is_final_center_result = is_final_exam_result and not _is_profile_results_request(request, return_to)
     final_result_remaining_seconds = None
     final_result_timeout_url = ""
 
-    if is_final_exam_result:
+    if is_final_center_result:
         final_result_remaining_seconds = _final_result_remaining_seconds(attempt)
         final_result_timeout_url = _final_result_timeout_url(request)
         if request.GET.get("final_timeout") == "1" or final_result_remaining_seconds <= 0:
             logout(request)
-            return redirect(_final_login_url())
+            return redirect(_final_entry_url())
         back_url = reverse("exams:final_exam_entry")
         history_url = ""
 
@@ -190,6 +199,12 @@ def exam_result(request, slug, attempt_id):
 
     can_appeal = score_adjustments.can_create(request, attempt)
     appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
+    if _is_profile_results_request(request, return_to):
+        appeal_create_url = append_query_params(
+            appeal_create_url,
+            from_section="my-results",
+            return_to=return_to or f"{reverse('accounts:profile')}?section=my-results",
+        )
     appeal_remaining_seconds = score_adjustments.remaining_window_seconds(attempt)
     # Qəbul olunmuş apellyasiya bonusları nəticədə əks olunsun (test üçün).
     effective_score_info = (
@@ -220,7 +235,7 @@ def exam_result(request, slug, attempt_id):
             "coding_submissions_by_qid": coding_submissions_by_qid,
             "history_url": history_url,
             "back_url": back_url,
-            "is_final_exam_result": is_final_exam_result,
+            "is_final_exam_result": is_final_center_result,
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,
@@ -229,7 +244,7 @@ def exam_result(request, slug, attempt_id):
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
             # Tələbə apellyasiyalarını ayrıca səhifə yox, dashboard bölməsində görür.
-            "my_appeals_url": "" if is_final_exam_result else reverse("accounts:profile") + "?section=my-appeals",
+            "my_appeals_url": "" if is_final_center_result else reverse("accounts:profile") + "?section=my-appeals",
             "effective_score_info": effective_score_info,
             "appeal_bonus_points": appeal_bonus_points,
             "appeal_corrected_qids": appeal_corrected_qids,

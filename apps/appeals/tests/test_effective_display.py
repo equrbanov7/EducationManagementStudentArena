@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.accounts.models import ProfileRole
-from apps.appeals.constants import APPEAL_TYPE_WRONG_ANSWER_KEY
+from apps.appeals.constants import APPEAL_ITEM_STATUS_ACCEPTED, APPEAL_TYPE_WRONG_ANSWER_KEY
 from apps.appeals.models import Appeal, AppealItem
 from apps.appeals.services import (
     accept_appeal_item,
@@ -90,6 +90,23 @@ class EffectiveDisplayTests(TestCase):
         self.assertEqual(str(effective.percentage), "20.0")
         # Bonussuz nəticə dəyişmir.
         self.assertIs(apply_bonus_to_test_result(base, None), base)
+
+    def test_bonus_map_includes_accepted_item_without_adjustment(self):
+        appeal = Appeal.objects.create(
+            attempt=self.attempt, exam=self.exam, student=self.student, organization=self.org
+        )
+        AppealItem.objects.create(
+            appeal=appeal,
+            question=self.q1,
+            answer=self.a1,
+            appeal_type=APPEAL_TYPE_WRONG_ANSWER_KEY,
+            comment="x" * 30,
+            status=APPEAL_ITEM_STATUS_ACCEPTED,
+        )
+
+        bonus_map = appeal_bonus_map([self.attempt.id])
+
+        self.assertEqual(bonus_map.get(self.attempt.id), Decimal("1"))
 
     def test_attach_summaries_include_bonus(self):
         self._accepted_appeal()
