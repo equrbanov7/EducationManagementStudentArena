@@ -14,6 +14,7 @@ from apps.exams.public import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
 from ...constants import APPEAL_MIN_COMMENT_LENGTH, APPEAL_STATUS_CHOICES, APPEAL_STATUS_VALUES, APPEAL_TYPE_CHOICES
+from ...models import AppealItem
 from ...selectors import filter_student_appeals, paginate_student_appeals, student_appeals_queryset
 from ...services import can_create_appeal, create_appeal, remaining_window_seconds
 from ..shared._helpers import _marked_question_map
@@ -87,6 +88,11 @@ def appeal_create(request, attempt_id):
         .order_by("id")
     )
     delivered_question_ids = {answer.question_id for answer in delivered_answers}
+    appealed_question_ids = set(
+        AppealItem.objects.filter(appeal__attempt=attempt, question_id__in=delivered_question_ids).values_list(
+            "question_id", flat=True
+        )
+    )
 
     if request.method == "POST":
         items = _parse_items_from_post(request, delivered_question_ids)
@@ -120,6 +126,7 @@ def appeal_create(request, attempt_id):
         "remaining_seconds": remaining_window_seconds(attempt),
         "result_url": _result_url(exam, attempt, request),
         "marked_question_by_qid": marked_map,
+        "appealed_question_by_qid": {question_id: True for question_id in appealed_question_ids},
         "has_marked": has_marked,
         "is_final_exam": _is_final_exam(exam) and not _is_profile_results_request(request),
     }

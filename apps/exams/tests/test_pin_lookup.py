@@ -71,7 +71,7 @@ class PinLookupTests(TestCase):
             is_active=True,
             is_public=False,
         )
-        cls.pin_exam.allowed_users.add(cls.pin_student)
+        cls.pin_exam.allowed_users.add(cls.pin_student, cls.teacher)
         provision_exam_student_pins(cls.pin_exam)
         cls.raw_student_pin = student_visible_pin(cls.pin_exam, cls.pin_student)
 
@@ -118,6 +118,16 @@ class PinLookupTests(TestCase):
         pins = [t["pin"] for t in data["tickets"]]
         self.assertIn(self.raw_student_pin, pins)
         self.assertEqual(data["tickets"][0]["exam_title"], "Wizard Final")
+
+    def test_search_and_detail_exclude_non_student_pin_holders(self):
+        response = self._client(self.center).get(reverse("exams:exam_center_pin_search"), {"q": "pl_teacher"})
+        self.assertEqual(response.status_code, 200)
+        ids = [r["id"] for r in response.json()["results"]]
+        self.assertNotIn(self.teacher.id, ids)
+
+        url = reverse("exams:exam_center_student_pins", kwargs={"student_id": self.teacher.id})
+        detail_response = self._client(self.center).get(url)
+        self.assertEqual(detail_response.status_code, 404)
 
     def test_revoked_pin_not_revealed(self):
         from apps.exams.services.final_center import revoke_ticket_pin

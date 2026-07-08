@@ -17,115 +17,16 @@ from apps.exams.features import (
     selectable_exam_type_choices,
 )
 from apps.exams.models import CodingExamQuestion, CodingTestCase, Exam, StudentGroup
+from apps.organizations.public import organization_role_user_queryset
+from core.roles import ProfileRole
 
-from .coding import TEST_CASE_PLACEHOLDER, dump_test_cases, parse_test_cases
+from .coding import dump_test_cases, parse_test_cases
+from .exam_coding_fields import CodingExamFieldsMixin
 
 User = get_user_model()
 
 
-class ExamForm(forms.ModelForm):
-    coding_language = forms.ChoiceField(
-        choices=CodingExamQuestion.LANGUAGE_CHOICES,
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "language"),
-        widget=forms.Select(attrs={"class": "form-select"}),
-    )
-    coding_question_title = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "title"),
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-    )
-    coding_problem_statement = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "problem_statement"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 6}),
-    )
-    coding_input_description = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "input_description"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-    )
-    coding_output_description = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "output_description"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-    )
-    coding_example_input = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "example_input"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-    )
-    coding_example_output = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "example_output"),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-    )
-    coding_time_limit_seconds = forms.IntegerField(
-        required=False,
-        min_value=1,
-        initial=2,
-        label=pgettext_lazy("exams.form.coding.label", "time_limit"),
-        widget=forms.NumberInput(attrs={"class": "form-control", "min": "1"}),
-    )
-    coding_memory_limit_mb = forms.IntegerField(
-        required=False,
-        min_value=16,
-        initial=128,
-        label=pgettext_lazy("exams.form.coding.label", "memory_limit"),
-        widget=forms.NumberInput(attrs={"class": "form-control", "min": "16"}),
-    )
-    coding_max_score = forms.IntegerField(
-        required=False,
-        min_value=1,
-        initial=100,
-        label=pgettext_lazy("exams.form.coding.label", "maximum_score"),
-        widget=forms.NumberInput(attrs={"class": "form-control", "min": "1"}),
-    )
-    coding_starter_code = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "starter_code"),
-        widget=forms.Textarea(attrs={"class": "form-control code-textarea", "rows": 8}),
-    )
-    coding_visible_test_cases = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "visible_test_cases"),
-        help_text=pgettext_lazy("exams.form.coding.help", "visible_test_cases"),
-        widget=forms.Textarea(
-            attrs={
-                "class": "form-control coding-testcase-json",
-                "rows": 5,
-                "placeholder": TEST_CASE_PLACEHOLDER,
-            }
-        ),
-    )
-    coding_hidden_test_cases = forms.CharField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "hidden_test_cases"),
-        help_text=pgettext_lazy("exams.form.coding.help", "hidden_test_cases"),
-        widget=forms.Textarea(
-            attrs={
-                "class": "form-control coding-testcase-json",
-                "rows": 5,
-                "placeholder": TEST_CASE_PLACEHOLDER,
-            }
-        ),
-    )
-    coding_allow_file_creation = forms.BooleanField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "allow_file_creation"),
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-    )
-    coding_allow_multiple_files = forms.BooleanField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "allow_multiple_files"),
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-    )
-    coding_enable_code_execution = forms.BooleanField(
-        required=False,
-        label=pgettext_lazy("exams.form.coding.label", "enable_code_execution"),
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-    )
-
+class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
     organization = forms.ModelChoiceField(
         queryset=apps.get_model("organizations", "Organization").objects.none(),
         required=False,
@@ -146,6 +47,7 @@ class ExamForm(forms.ModelForm):
             "end_datetime",
             "is_public",
             "allowed_users",
+            "excluded_users",
             "allowed_groups",
             "access_code",
             "total_duration_minutes",
@@ -226,6 +128,11 @@ class ExamForm(forms.ModelForm):
                     "class": "form-select",
                 }
             ),
+            "excluded_users": forms.SelectMultiple(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
             "allowed_groups": forms.SelectMultiple(
                 attrs={
                     "class": "form-select",
@@ -285,6 +192,7 @@ class ExamForm(forms.ModelForm):
             "end_datetime": pgettext_lazy("exams.form.exam.label", "end_datetime"),
             "is_public": pgettext_lazy("exams.form.exam.label", "is_public"),
             "allowed_users": pgettext_lazy("exams.form.exam.label", "allowed_users"),
+            "excluded_users": pgettext_lazy("exams.form.exam.label", "excluded_users"),
             "allowed_groups": pgettext_lazy("exams.form.exam.label", "allowed_groups"),
             "access_code": pgettext_lazy("exams.form.exam.label", "access_code"),
             "total_duration_minutes": pgettext_lazy("exams.form.exam.label", "total_duration_minutes"),
@@ -442,6 +350,7 @@ class ExamForm(forms.ModelForm):
 
         # Default querysets
         self.fields["allowed_users"].queryset = User.objects.filter(is_active=True).order_by("username")
+        self.fields["excluded_users"].queryset = User.objects.filter(is_active=True).order_by("username")
         self.fields["allowed_groups"].queryset = StudentGroup.objects.none()
 
         # Fənn (registrar.Subject) — təşkilata görə filtrlənir. Axtarışlı select
@@ -460,12 +369,17 @@ class ExamForm(forms.ModelForm):
         if user is not None:
             user_qs = User.objects.filter(is_active=True).exclude(id=user.id)
             if organization is not None:
-                user_qs = user_qs.filter(profile__organization=organization)
+                user_qs = organization_role_user_queryset(
+                    organization,
+                    {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
+                    queryset=user_qs,
+                )
                 group_qs = StudentGroup.objects.filter(organization=organization)
             else:
                 group_qs = StudentGroup.objects.filter(teacher=user)
 
             self.fields["allowed_users"].queryset = user_qs.distinct().order_by("username")
+            self.fields["excluded_users"].queryset = user_qs.distinct().order_by("username")
             self.fields["allowed_groups"].queryset = group_qs.order_by("name")
 
     def _load_coding_question_initial(self):
@@ -614,6 +528,16 @@ class ExamForm(forms.ModelForm):
                 "subject",
                 pgettext_lazy("exams.form.exam.error", "subject_required_for_final_midterm"),
             )
+
+        allowed_groups = cleaned_data.get("allowed_groups")
+        excluded_users = cleaned_data.get("excluded_users")
+        if excluded_users is not None:
+            if allowed_groups:
+                cleaned_data["excluded_users"] = excluded_users.filter(
+                    student_groups_as_student__in=allowed_groups
+                ).distinct()
+            else:
+                cleaned_data["excluded_users"] = excluded_users.none()
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:

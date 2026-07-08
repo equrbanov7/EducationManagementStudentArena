@@ -3,8 +3,8 @@
    Server yalnız SEÇİLİ variantları render edir; qalanlar `data-search-url`
    (exams:group_search / exams:user_search) üzərindən səhifə-səhifə (10-luq)
    gətirilir: siyahı açılanda ilk 10 yüklənir, aşağı sürüşdürdükcə növbəti 10,
-   yaxud yazıb axtarmaq olar. Qrup seçmək onsuz da bütün üzvlərinə giriş verir,
-   ona görə köhnə qrup→tələbə avtomatik sinxronizasiyası yoxdur. */
+   yaxud yazıb axtarmaq olar. Qrup üzvləri checked görünür; konkret tələbəni
+   unchecked etmək `excluded_users` kimi saxlanır. */
 (function (ns, document) {
     "use strict";
 
@@ -17,6 +17,9 @@
         }
 
         var hiddenSelect = form.querySelector('select[name="' + config.selectName + '"]');
+        var excludedSelect = config.excludedSelectName ?
+            form.querySelector('select[name="' + config.excludedSelectName + '"]') :
+            (config.selectName === "allowed_users" ? form.querySelector('select[name="excluded_users"]') : null);
         var listContainer = form.querySelector(config.listSelector);
         var searchInput = form.querySelector(config.searchSelector);
         var counter = form.querySelector(config.counterSelector);
@@ -32,6 +35,10 @@
         var selected = Object.create(null);
         Array.prototype.slice.call(hiddenSelect.selectedOptions || []).forEach(function (o) {
             selected[String(o.value)] = o.textContent || String(o.value);
+        });
+        var excluded = Object.create(null);
+        Array.prototype.slice.call((excludedSelect && excludedSelect.selectedOptions) || []).forEach(function (o) {
+            excluded[String(o.value)] = o.textContent || String(o.value);
         });
 
         // İki alt-sahə: yuxarıda seçililər (sabit), aşağıda axtarış nəticələri.
@@ -60,20 +67,31 @@
             }
         }
 
-        function syncHiddenOption(value, text, isSelected) {
+        function syncSelectOption(select, value, text, isSelected) {
+            if (!select) {
+                return;
+            }
             var esc = String(value).replace(/"/g, '\\"');
-            var option = hiddenSelect.querySelector('option[value="' + esc + '"]');
+            var option = select.querySelector('option[value="' + esc + '"]');
             if (isSelected) {
                 if (!option) {
                     option = document.createElement("option");
                     option.value = value;
                     option.textContent = text;
-                    hiddenSelect.appendChild(option);
+                    select.appendChild(option);
                 }
                 option.selected = true;
             } else if (option) {
                 option.parentNode.removeChild(option);
             }
+        }
+
+        function syncHiddenOption(value, text, isSelected) {
+            syncSelectOption(hiddenSelect, value, text, isSelected);
+        }
+
+        function syncExcludedOption(value, text, isSelected) {
+            syncSelectOption(excludedSelect, value, text, isSelected);
         }
 
         function makeRow(value, text, checked, groupMember) {
@@ -91,13 +109,39 @@
             row.appendChild(label);
 
             if (groupMember) {
-                // Seçilmiş qrupun üzvü: qrupla təyin olunub — işarəli və
-                // qeyri-aktiv göstərilir (ayrıca allowed_users-ə əlavə olunmur,
-                // çünki qrup onsuz da bütün üzvlərini əhatə edir).
-                checkbox.checked = true;
-                checkbox.disabled = true;
+                // Seçilmiş qrupun üzvü: qrupla təyin olunur, amma müəllim
+                // konkret tələbəni unchecked etməklə onu excluded_users-ə sala bilər.
+                checkbox.checked = !excluded[v];
                 row.classList.add("is-group-member");
+                row.classList.toggle("is-group-excluded", Boolean(excluded[v]));
                 row.setAttribute("title", gettext("Seçilmiş qrupla daxildir"));
+                function toggleGroupMember(next) {
+                    if (next) {
+                        delete excluded[v];
+                        syncExcludedOption(v, text, false);
+                    } else {
+                        excluded[v] = text;
+                        syncExcludedOption(v, text, true);
+                        delete selected[v];
+                        syncHiddenOption(v, text, false);
+                    }
+                    checkbox.checked = next;
+                    row.classList.toggle("is-group-excluded", !next);
+                    updateCounter();
+                    renderSelected();
+                    if (typeof selectionChangeHandler === "function") {
+                        selectionChangeHandler();
+                    }
+                }
+                checkbox.addEventListener("change", function () {
+                    toggleGroupMember(checkbox.checked);
+                });
+                row.addEventListener("click", function (event) {
+                    if (event.target === checkbox || event.target === label) {
+                        return;
+                    }
+                    toggleGroupMember(!checkbox.checked);
+                });
                 return row;
             }
 
@@ -156,9 +200,6 @@
         }
 
         function appendResults(items) {
-            // Qrup filtri aktivdirsə (sağ tələbə siyahısı seçilmiş qrupun
-            // üzvləridir) — sətirlər işarəli/qeyri-aktiv (qrupla daxil) göstərilir.
-            var asGroupMembers = Boolean(extraParamsProvider && extraParamsProvider());
             items.forEach(function (item) {
                 var id = String(item.id);
                 if (selected[id]) {
@@ -167,7 +208,7 @@
                 if (resultsWrap.querySelector('[data-value="' + id.replace(/"/g, '\\"') + '"]')) {
                     return; // dublikat
                 }
-                resultsWrap.appendChild(makeRow(id, item.text, false, asGroupMembers));
+                resultsWrap.appendChild(makeRow(id, item.text, false, Boolean(item.group_member)));
             });
         }
 
@@ -181,7 +222,10 @@
         }
 
         function loadPage(reset) {
-            if (!searchUrl || loading) {
+            if (!searchUrl) {
+                return;
+            }
+            if (loading && !reset) {
                 return;
             }
             if (reset) {
@@ -255,6 +299,9 @@
                     return { value: v, text: selected[v] };
                 });
             },
+            getExcludedValues: function () {
+                return Object.keys(excluded);
+            },
             setValueSelected: function (value, isSelected) {
                 var v = String(value);
                 if (isSelected) {
@@ -266,6 +313,20 @@
                 }
                 updateCounter();
                 renderSelected();
+            },
+            clearExcluded: function () {
+                Object.keys(excluded).forEach(function (v) {
+                    syncExcludedOption(v, excluded[v], false);
+                    delete excluded[v];
+                });
+                resultsWrap.querySelectorAll(".is-group-excluded").forEach(function (row) {
+                    row.classList.remove("is-group-excluded");
+                    var cb = row.querySelector(".create-exam-item-checkbox");
+                    if (cb) {
+                        cb.checked = true;
+                    }
+                });
+                updateCounter();
             },
             // Nəticə siyahısını yenidən yüklə (seçilmiş qrup dəyişəndə çağırılır).
             reload: function () {
@@ -282,9 +343,9 @@
         };
     }
 
-    /* Qrup→tələbə sinxronu: qrup seçiləndə sağ tələbə siyahısı yalnız həmin
-       qrup(lar)ın üzvlərini göstərir (server `groups` filtri) və dəyişəndə
-       yenidən yüklənir. Qrup seçilməyibsə bütün tələbələr göstərilir. */
+    /* Qrup→tələbə sinxronu: seçilmiş qrup ID-ləri user lookup-a ötürülür.
+       Server bütün tələbələri qaytarır, qrup üzvlərini `group_member` ilə
+       işarələyir; frontend onları checked göstərib ayrı-ayrı istisna edə bilir. */
     function initGroupUserSync(form, groupSelector, userSelector) {
         if (!groupSelector || !userSelector) {
             return;
@@ -294,6 +355,9 @@
             return ids.length ? "&groups=" + encodeURIComponent(ids.join(",")) : "";
         });
         groupSelector.setOnSelectionChange(function () {
+            if (!groupSelector.getSelectedValues().length && typeof userSelector.clearExcluded === "function") {
+                userSelector.clearExcluded();
+            }
             userSelector.reload();
         });
         // Redaktə rejimi: form açılanda qrup(lar) onsuz da seçilibsə, sağ siyahını

@@ -15,7 +15,7 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260612-modal">
-<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260612-modal">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260709-duplicate-lock">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260612-modal">
 {% endblock %}
 
@@ -87,16 +87,21 @@
           data-i18n-need-one="{% trans 'Ən azı bir sual seçin.' context 'appeals.template' %}"
           data-i18n-choose-reason="{% trans 'Səbəb tipini seçin.' context 'appeals.template' %}"
           data-i18n-too-short="{% trans 'Daha {n} simvol yazın.' context 'appeals.template' %}"
-          data-i18n-selected="{% trans '{n} sual seçildi' context 'appeals.template' %}">
+          data-i18n-selected="{% trans '{n} sual seçildi' context 'appeals.template' %}"
+          data-i18n-fix-both="{% trans '{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz.' context 'appeals.template' %}"
+          data-i18n-fix-reason="{% trans '{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz.' context 'appeals.template' %}"
+          data-i18n-fix-comment="{% trans '{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz.' context 'appeals.template' %}">
         {% csrf_token %}
 
         <div class="appeal-list">
             {% for answer in answers %}
             {% with q=answer.question %}
             {% with is_marked=marked_question_by_qid|get_item:q.id %}
-            <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}"
+            {% with already_appealed=appealed_question_by_qid|get_item:q.id %}
+            <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}{% if already_appealed %} is-locked{% endif %}"
                      data-appeal-card
                      data-appeal-marked="{% if is_marked %}1{% else %}0{% endif %}"
+                     data-appeal-locked="{% if already_appealed %}1{% else %}0{% endif %}"
                      data-appeal-text="{{ q.text|striptags }} {{ answer.text_answer|default_if_none:''|striptags }} {{ q.correct_answer|default_if_none:''|striptags }}">
                 <div class="appeal-question-card__top">
                     <div class="appeal-question-card__main">
@@ -111,13 +116,25 @@
                             </span>
                         </div>
                         {% endif %}
+                        {% if already_appealed %}
+                        <div class="appeal-meta">
+                            <span class="appeal-locked-chip">
+                                <i class="fas fa-circle-check"></i>{% trans "Bu sual üzrə apellyasiya artıq göndərilib" context "appeals.template" %}
+                            </span>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="form-check form-switch appeal-q-switch">
                         <input class="form-check-input" type="checkbox" role="switch"
                                data-appeal-toggle
-                               name="appeal_q_{{ q.id }}" id="appeal_q_{{ q.id }}" value="1">
+                               name="appeal_q_{{ q.id }}" id="appeal_q_{{ q.id }}" value="1"
+                               {% if already_appealed %}disabled aria-disabled="true"{% endif %}>
                         <label class="form-check-label" for="appeal_q_{{ q.id }}">
-                            {% trans "Apellyasiya et" context "appeals.template" %}
+                            {% if already_appealed %}
+                                {% trans "Artıq göndərilib" context "appeals.template" %}
+                            {% else %}
+                                {% trans "Apellyasiya et" context "appeals.template" %}
+                            {% endif %}
                         </label>
                     </div>
                 </div>
@@ -170,7 +187,8 @@
                             </label>
                             <div class="bootstrap-single-select">
                                 <select class="form-select bootstrap-single-select__native" data-appeal-type data-bootstrap-select
-                                        name="appeal_type_{{ q.id }}" id="appeal_type_{{ q.id }}">
+                                        name="appeal_type_{{ q.id }}" id="appeal_type_{{ q.id }}"
+                                        {% if already_appealed %}disabled{% endif %}>
                                     <option value="">{% trans "Səbəb seçin" context "appeals.template" %}</option>
                                     {% for value, label in appeal_type_choices %}
                                     <option value="{{ value }}">{{ label }}</option>
@@ -190,12 +208,14 @@
                             </div>
                             <textarea class="form-control" data-appeal-comment name="comment_{{ q.id }}"
                                       id="comment_{{ q.id }}" rows="3"
-                                      placeholder="{% blocktrans trimmed context 'appeals.template' with min=min_comment_length %}Səbəbinizi ən azı {{ min }} simvol ilə izah edin{% endblocktrans %}"></textarea>
+                                      placeholder="{% blocktrans trimmed context 'appeals.template' with min=min_comment_length %}Səbəbinizi ən azı {{ min }} simvol ilə izah edin{% endblocktrans %}"
+                                      {% if already_appealed %}disabled{% endif %}></textarea>
                             <p class="appeal-q-error" data-appeal-error hidden role="alert"></p>
                         </div>
                     </div>
                 </div>
             </section>
+            {% endwith %}
             {% endwith %}
             {% endwith %}
             {% empty %}
@@ -214,12 +234,13 @@
                     <span class="appeal-empty-hint" data-appeal-empty-hint hidden>
                         <i class="fas fa-circle-exclamation me-1"></i>{% trans "Ən azı bir sual seçin." context "appeals.template" %}
                     </span>
+                    <span class="appeal-submit-hint" data-appeal-submit-hint hidden role="alert"></span>
                 </div>
                 <div class="appeal-sticky-actions__buttons">
                     <a href="{{ result_url }}" class="btn btn-outline-secondary">
                         {% trans "Ləğv et" context "appeals.template" %}
                     </a>
-                    <button type="submit" class="btn btn-primary" data-appeal-submit disabled>
+                    <button type="submit" class="btn btn-primary" data-appeal-submit aria-disabled="true">
                         <i class="fas fa-paper-plane me-2"></i>{% trans "Apellyasiyanı göndər" context "appeals.template" %}
                     </button>
                 </div>
@@ -260,5 +281,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260707-confirm"></script>
+<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260709-duplicate-lock"></script>
 {% endblock %}

@@ -70,7 +70,6 @@
             var loadErr = "{% filter escapejs %}{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}{% endfilter %}";
             var loadingHtml = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
             var currentDetailUrl = null;
-            var pendingFlash = null;
             var modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getOrCreateInstance(modalEl) : null;
 
             function withParam(url, extra) {
@@ -97,6 +96,29 @@
                 div.setAttribute("data-manage-flash", "1");
                 div.textContent = msg;
                 return div;
+            }
+
+            function showToast(type, msg) {
+                var container = document.querySelector("body > .toast-container");
+                if (!container) {
+                    container = document.createElement("div");
+                    container.className = "toast-container";
+                    container.setAttribute("aria-live", "polite");
+                    container.setAttribute("aria-atomic", "true");
+                    document.body.appendChild(container);
+                }
+                var toast = document.createElement("div");
+                toast.className = "alert alert-" + type + " app-toast app-toast--" + type + " fade show";
+                toast.setAttribute("role", "alert");
+                toast.setAttribute("data-auto-hide", "7000");
+                toast.setAttribute("data-toast-item", "1");
+                toast.innerHTML = '<span class="app-toast__icon" aria-hidden="true"><i class="fas fa-check"></i></span>' +
+                    '<span class="app-toast__body"></span>' +
+                    '<button type="button" class="app-toast__close" data-toast-dismiss data-bs-dismiss="alert" aria-label="Bağla">' +
+                    '<i class="fas fa-xmark" aria-hidden="true"></i></button>';
+                var body = toast.querySelector(".app-toast__body");
+                if (body) { body.textContent = msg; }
+                container.appendChild(toast);
             }
 
             function clearFlash(root) {
@@ -142,11 +164,6 @@
                     .then(function (r) { if (!r.ok) { throw new Error("http"); } return r.text(); })
                     .then(function (html) {
                         modalBody.innerHTML = html;
-                        // Yadda saxlamadan sonra uğur mesajını detalın başında göstər.
-                        if (pendingFlash) {
-                            modalBody.insertBefore(makeAlert("success", pendingFlash), modalBody.firstChild);
-                            pendingFlash = null;
-                        }
                         // Bootstrap select-ləri yenidən qur (native deyil).
                         if (window.EMSBootstrapSelect && window.EMSBootstrapSelect.init) {
                             window.EMSBootstrapSelect.init(modalBody);
@@ -196,12 +213,9 @@
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
                         if (d && d.ok) {
-                            // Siyahını arxa planda təzələ, amma müəllim qərar panelində
-                            // qalsın ki, geri sayğacı (5 dəq) və yenilənmiş statusu görsün.
                             reloadList();
-                            pendingFlash = d.message || "";
-                            if (currentDetailUrl) { showDetail(currentDetailUrl); }
-                            else { showList(); }
+                            showList();
+                            showToast("success", d.toast || d.message || "Qərarlar yadda saxlanıldı.");
                         } else {
                             clearFlash(modalBody);
                             modalBody.insertBefore(makeAlert("danger", (d && d.error) || loadErr), modalBody.firstChild);
@@ -214,7 +228,6 @@
             modalEl.addEventListener("hidden.bs.modal", function () {
                 modalBody.innerHTML = loadingHtml;
                 currentDetailUrl = null;
-                pendingFlash = null;
             });
         }
 

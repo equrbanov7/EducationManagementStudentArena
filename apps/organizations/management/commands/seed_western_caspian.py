@@ -141,6 +141,7 @@ class Command(BaseCommand):
                     student_scope.append((user, scope_key))
 
             self._seed_curriculum(org, units, student_scope, decided_by=owner)
+            self._seed_lms_student_groups(org, units)
 
             superadmin_note = ""
             if options.get("with_superadmin"):
@@ -158,7 +159,8 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"✅ Qərbi Kaspi Universiteti seeded: org='{org.slug}', {created} role users{superadmin_note}, "
-                f"{len(units)} academic units (AZ + EN sectors). Shared password set as provided."
+                f"{len(units)} academic units (AZ + EN sectors) + LMS student groups. "
+                "Shared password set as provided."
             )
         )
 
@@ -348,6 +350,49 @@ class Command(BaseCommand):
         # is marked absent in every session — see _seed_journal), which recomputes
         # Enrollment.absence_hours; no manual override needed here.
         self._seed_journal(org)
+
+    def _seed_lms_student_groups(self, org, units):
+        """Create StudentGroup rows used by exam/course access selectors.
+
+        Registrar OrgUnit GROUP rows drive the academic structure; the exam
+        wizard's "Allowed groups" selector uses exams.StudentGroup. Link them
+        with org_unit so the WCU demo groups appear in both places.
+        """
+        from django.apps import apps as django_apps
+
+        StudentGroup = django_apps.get_model("exams", "StudentGroup")
+        teacher = User.objects.filter(username="wcu_teacher").first()
+        if teacher is None:
+            return
+
+        co_teachers = User.objects.filter(username__in=["wcu_teacher", "wcu_assistant", "wcu_lab_assistant"])
+        subjects = Subject.objects.filter(organization=org, code__in=["MATH101", "CS101"])
+        group_specs = [
+            (
+                "group_az",
+                self.GROUP_AZ_NAME,
+                ["wcu_lead_student_az", "wcu_student_az1", "wcu_student_az2"],
+            ),
+            (
+                "group_en",
+                self.GROUP_EN_NAME,
+                ["wcu_lead_student_en", "wcu_student_en1", "wcu_student_en2"],
+            ),
+        ]
+        for scope_key, group_name, student_usernames in group_specs:
+            org_unit = units.get(scope_key)
+            group, _ = StudentGroup.objects.get_or_create(
+                organization=org,
+                teacher=teacher,
+                name=group_name,
+                defaults={"org_unit": org_unit},
+            )
+            if org_unit and group.org_unit_id != org_unit.id:
+                group.org_unit = org_unit
+                group.save(update_fields=["org_unit"])
+            group.students.set(User.objects.filter(username__in=student_usernames))
+            group.teachers.set(co_teachers)
+            group.subjects.set(subjects)
 
     def _seed_journal(self, org):
         """Wire offerings to their LMS course + seed the electronic journal.

@@ -139,6 +139,9 @@ class ExamAccessPolicyMixin:
     def _user_in_allowed_groups(self, user: User) -> bool:
         return self.allowed_groups.filter(students=user).exists()
 
+    def _user_is_excluded(self, user: User) -> bool:
+        return self.excluded_users.filter(id=user.id).exists()
+
     def _user_in_assigned_course(self, user: User) -> bool:
         if not self.course_id:
             return False
@@ -153,6 +156,9 @@ class ExamAccessPolicyMixin:
 
         if self.is_public:
             return True
+
+        if self._user_is_excluded(user):
+            return False
 
         if self.allowed_users.filter(id=user.id).exists():
             return True
@@ -188,6 +194,9 @@ class ExamAccessPolicyMixin:
 
         if user == self.author:
             return True, None
+
+        if not self.is_public and self._user_is_excluded(user):
+            return False, pgettext("exams.model.access", "no_exam_access")
 
         in_allowed_any = (
             self.allowed_users.filter(id=user.id).exists()

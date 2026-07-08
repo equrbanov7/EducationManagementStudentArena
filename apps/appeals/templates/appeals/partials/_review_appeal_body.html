@@ -1,4 +1,4 @@
-{% load i18n get_item %}
+{% load i18n get_item l10n %}
 {% comment %}
   Ortaq müəllim qərar gövdəsi (DRY) — standalone review_appeal və dashboard
   daxili AJAX fraqmenti eyni formanı paylaşır.
@@ -39,8 +39,8 @@
 
 <form method="post" action="{% url 'appeals:review_appeal' appeal.id %}" novalidate
       data-appeals-review-form
-      data-current-score="{{ review_current_score|default:0 }}"
-      data-max-score="{{ review_max_score|default:'' }}"
+      data-current-score="{{ review_current_score|default:0|unlocalize }}"
+      data-max-score="{{ review_max_score|default:''|unlocalize }}"
       data-i18n-need-response="{% trans 'Hər qərar üçün izah/cavab yazın.' context 'appeals.template' %}"
       data-i18n-decisions="{% trans '{n} qərar verildi' context 'appeals.template' %}">
     {% csrf_token %}
@@ -50,7 +50,9 @@
         {% with is_marked=marked_question_by_qid|get_item:item.question_id %}
         <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}{% if item.is_locked %} is-locked{% endif %}"
                  data-review-card
-                 data-review-max="{{ item.max_points }}"
+                 data-review-max="{{ item.max_points|unlocalize }}"
+                 data-review-award="1"
+                 data-review-existing-delta="{{ item.existing_delta_value|default:'0' }}"
                  data-review-locked="{% if item.is_locked %}1{% else %}0{% endif %}">
             <div class="appeal-question-card__top">
                 <div class="appeal-question-card__main">
