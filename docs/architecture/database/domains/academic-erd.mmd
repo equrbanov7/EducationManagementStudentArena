@@ -1,0 +1,312 @@
+erDiagram
+    courses_course ||--o{ courses_coursegroup : course
+    courses_course ||--o{ courses_courseinstructor : course
+    courses_course ||--o{ courses_coursemembership : course
+    courses_course ||--o{ courses_courseresource : course
+    courses_coursetopic |o--o{ courses_courseresource : topic
+    courses_course ||--o{ courses_coursetopic : course
+    exams_studentgroup }o--o{ registrar_subject : subjects
+    registrar_courseoffering ||--o{ registrar_assessmentcomponent : offering
+    registrar_rubric |o--o{ registrar_assessmentcomponent : rubric
+    registrar_courseoffering ||--|| registrar_assessmentscheme : offering
+    registrar_assessmentcomponent ||--o{ registrar_componentscore : component
+    registrar_enrollment ||--o{ registrar_componentscore : enrollment
+    registrar_subject ||--o{ registrar_courseoffering : subject
+    courses_course |o--o{ registrar_courseoffering : course
+    registrar_rubriccriterion ||--o{ registrar_criterionscore : criterion
+    registrar_enrollment ||--o{ registrar_criterionscore : enrollment
+    registrar_program ||--o{ registrar_curriculum : program
+    registrar_curriculum ||--o{ registrar_curriculumsubject : curriculum
+    registrar_subject ||--o{ registrar_curriculumsubject : subject
+    registrar_courseoffering ||--o{ registrar_enrollment : offering
+    registrar_enrollment ||--|| registrar_finalgrade : enrollment
+    registrar_subject ||--o{ registrar_groupelectivechoice : chosen_subject
+    registrar_courseoffering ||--o{ registrar_lesson : offering
+    registrar_lesson ||--o{ registrar_lessonmark : lesson
+    registrar_enrollment ||--o{ registrar_lessonmark : enrollment
+    registrar_enrollment ||--o{ registrar_resitrecord : enrollment
+    registrar_rubric ||--o{ registrar_rubriccriterion : rubric
+    registrar_courseoffering ||--o{ registrar_scheduleslot : offering
+    registrar_program ||--o{ registrar_studentacademicrecord : program
+    registrar_curriculum ||--o{ registrar_studentacademicrecord : curriculum
+    courses_coursegroup ||--o{ courses_coursegroup_members : coursegroup
+    courses_course {
+        int id PK
+        string owner_id FK
+        string title
+        string slug UK
+        string status
+        datetime created_at
+        datetime updated_at
+        string organization_id FK
+        string unit_id FK
+        string period_id FK
+    }
+    courses_coursegroup {
+        int id PK
+        string course_id FK
+        string name
+        string instructor_id FK
+        datetime created_at
+        json schedule
+        int max_students
+    }
+    courses_courseinstructor {
+        int id PK
+        string course_id FK
+        string user_id FK
+        string role
+        datetime created_at
+        json permissions
+    }
+    courses_coursemembership {
+        int id PK
+        string course_id FK
+        string user_id FK
+        string role
+        string group_name
+        datetime joined_at
+    }
+    courses_courseresource {
+        int id PK
+        string course_id FK
+        string topic_id FK
+        string title
+        string resource_type
+        datetime created_at
+        text description
+        file file
+        string url
+    }
+    courses_coursetopic {
+        int id PK
+        string course_id FK
+        string title
+        datetime created_at
+        text description
+        int order
+    }
+    exams_studentgroup {
+        int id PK
+        string teacher_id FK
+        string organization_id FK
+        string name
+        string org_unit_id FK
+        datetime created_at
+    }
+    registrar_assessmentcomponent {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK
+        string name
+        int max_score
+        string rubric_id FK
+        int order
+    }
+    registrar_assessmentscheme {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK, UK
+        int entry_score_max
+        int min_final_exam_score
+        string approval_status
+        string submitted_by_id FK
+        string chair_approved_by_id FK
+    }
+    registrar_componentscore {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string component_id FK
+        string enrollment_id FK
+        decimal score
+        string entered_by_id FK
+    }
+    registrar_courseoffering {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string subject_id FK
+        string period_id FK
+        string group_id FK
+        string course_id FK
+        string instructor_id FK
+        bool is_active
+    }
+    registrar_criterionscore {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string criterion_id FK
+        string enrollment_id FK
+        string entered_by_id FK
+        decimal points
+    }
+    registrar_curriculum {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string program_id FK
+        string name
+        bool is_active
+        int admission_year
+    }
+    registrar_curriculumsubject {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string curriculum_id FK
+        string subject_id FK
+        int order
+        int semester_number
+        bool is_elective
+        string elective_group
+    }
+    registrar_enrollment {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string student_id FK
+        string offering_id FK
+        string status
+        string kind
+        int absence_hours
+    }
+    registrar_finalgrade {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string enrollment_id FK, UK
+        decimal exam_score
+        string entered_by_id FK
+        decimal bonus
+        string comment
+        bool is_published
+    }
+    registrar_groupelectivechoice {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string group_id FK
+        string period_id FK
+        string chosen_subject_id FK
+        string decided_by_id FK
+        string elective_group
+    }
+    registrar_lesson {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK
+        string created_by_id FK
+        date date
+        string kind
+        string topic
+        int hours
+    }
+    registrar_lessonmark {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string lesson_id FK
+        string enrollment_id FK
+        string status
+        decimal score
+        string entered_by_id FK
+    }
+    registrar_program {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string specialty_unit_id FK
+        string code
+        string name
+        bool is_active
+        string degree_level
+        int ects_total
+    }
+    registrar_resitrecord {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string enrollment_id FK
+        string status
+        decimal resit_score
+        string decided_by_id FK
+        string reason
+    }
+    registrar_rubric {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string name
+        bool is_active
+        string description
+    }
+    registrar_rubriccriterion {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string rubric_id FK
+        string name
+        int max_points
+        int order
+    }
+    registrar_scheduleslot {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK
+        string room
+        string week_type
+        string created_by_id FK
+        int weekday
+        string start_time
+    }
+    registrar_studentacademicrecord {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string student_id FK
+        string program_id FK
+        string curriculum_id FK
+        string group_id FK
+        string status
+        bool is_active
+    }
+    registrar_subject {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string code
+        string name
+        bool is_active
+        int ects
+        text description
+    }
+    courses_coursegroup_members {
+        int id PK
+        string coursegroup_id FK
+        string user_id FK
+    }

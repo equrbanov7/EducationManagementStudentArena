@@ -1,0 +1,40 @@
+erDiagram
+    ai_assistant_aiassistantlog {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string user_id FK
+        string organization_id FK
+        string status
+        string role_name
+        text prompt
+        string response_summary
+        string block_reason
+    }
+    audit_auditlog {
+        uuid id PK
+        string user_id FK
+        string organization_id FK
+        string resource_type
+        string content_type_id FK
+        datetime created_at
+        string action
+        string resource_id
+        string resource_repr
+        string object_id
+    }
+    django_admin_log {
+        int id PK
+        string user_id FK
+        string content_type_id FK
+        datetime action_time
+        text object_id
+        string object_repr
+        int action_flag
+        text change_message
+    }
+    django_session {
+        string session_key PK
+        text session_data
+        datetime expire_date
+    }

@@ -1,0 +1,102 @@
+erDiagram
+    blog_category |o--o{ blog_category : parent
+    blog_post ||--o{ blog_comment : post
+    blog_category |o--o{ blog_post : category
+    blog_post ||--o{ blog_postapprovallog : post
+    blog_question ||--o{ blog_question_visible_users : question
+    blog_category {
+        int id PK
+        string name
+        string slug UK
+        string parent_id FK
+        string name_az
+        string name_en
+        string name_ru
+        string name_tr
+        int sort_order
+        bool show_in_navbar
+    }
+    blog_comment {
+        int id PK
+        string post_id FK
+        string user_id FK
+        datetime created_at
+        text text
+        int rating
+    }
+    blog_post {
+        int id PK
+        string author_id FK
+        string category_id FK
+        string title
+        string slug UK
+        datetime created_at
+        datetime updated_at
+        string approval_status
+        string approved_by_id FK
+        text excerpt
+    }
+    blog_postapprovallog {
+        int id PK
+        string post_id FK
+        string reviewer_id FK
+        datetime created_at
+        string action
+        text feedback
+    }
+    blog_question {
+        int id PK
+        string author_id FK
+        datetime created_at
+        text question_text
+        text answer_text
+        bool visible_to_all
+    }
+    blog_subscriber {
+        int id PK
+        string email UK
+        bool is_active
+        datetime created_at
+        string conf_token
+    }
+    contact_contactmessage {
+        int id PK
+        string name
+        string email
+        string subject
+        datetime created_at
+        string reply_delivery_status
+        string reply_sent_by_id FK
+        string phone
+        text message
+        string ip_address
+    }
+    notifications_inappnotification {
+        int id PK
+        string recipient_id FK
+        string organization_id FK
+        string title
+        string notification_type
+        datetime deleted_at
+        datetime created_at
+        text message
+        string link
+        bool is_read
+    }
+    notifications_studentorganizationrequest {
+        int id PK
+        string user_id FK
+        string organization_id FK
+        string role_type
+        string status
+        string responded_by_id FK
+        datetime created_at
+        datetime updated_at
+        string message
+        string resolution_note
+    }
+    blog_question_visible_users {
+        int id PK
+        string question_id FK
+        string user_id FK
+    }

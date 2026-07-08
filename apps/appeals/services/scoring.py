@@ -37,6 +37,22 @@ from apps.appeals.models import AppealItem, ScoreAdjustment
 logger = logging.getLogger(__name__)
 
 
+def _accept_bonus_points():
+    """Apellyasiya QƏBUL olunanda verilən sabit bal (default +1).
+
+    Universitet qaydası: qəbul → +1 bal, rədd → 0. Reviewer əl ilə daha çox və
+    ya mənfi bal yaza bilməz — dəyər sabitdir (``settings.APPEAL_ACCEPT_BONUS_POINTS``
+    ilə tənzimlənə bilər, amma default 1)."""
+    from decimal import Decimal as _D
+
+    from django.conf import settings
+
+    try:
+        return _D(str(getattr(settings, "APPEAL_ACCEPT_BONUS_POINTS", 1)))
+    except (InvalidOperation, TypeError, ValueError):
+        return _D("1")
+
+
 # ---------------------------------------------------------------------------
 # Effektiv bal (baza + apellyasiya bonusları)
 # ---------------------------------------------------------------------------
@@ -148,26 +164,6 @@ def _question_already_correct(answer, question):
     return bool(correct and selected == correct)
 
 
-def _coerce_awarded_points(value, max_points):
-    """
-    Reviewer-in əl ilə daxil etdiyi balı [0, max_points] aralığına gətirir.
-
-    None / boş / yanlış → None qaytarır (default davranış: tam bal). Bu sayədə
-    mövcud çağırışlar (awarded_points verilmədikdə) heç dəyişmir.
-    """
-    if value is None or value == "":
-        return None
-    try:
-        points = Decimal(str(value))
-    except (InvalidOperation, TypeError, ValueError):
-        return None
-    if points < 0:
-        points = Decimal("0")
-    if max_points is not None and points > max_points:
-        points = max_points
-    return points
-
-
 def _mark_item_resolved(item, status, reviewer, response_text):
     item.status = status
     if response_text:
@@ -208,11 +204,11 @@ def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment):
 @transaction.atomic
 def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarded_points=None):
     """
-    Bir AppealItem-i qəbul edir və (test üçün) idempotent bal düzəlişi tətbiq edir.
+    Bir AppealItem-i qəbul edir və idempotent bal düzəlişi tətbiq edir.
 
-    ``awarded_points`` (opsional): reviewer həmin suala neçə bal veriləcəyini əl
-    ilə təyin edə bilər (0..sualın maksimum balı). Verilmədikdə (None) davranış
-    əvvəlki kimidir — sual üçün TAM bal verilir.
+    Universitet qaydası (2026-07): qəbul → **sabit +1 bal** (``_accept_bonus_points``),
+    rədd → 0. ``awarded_points`` artıq NƏZƏRƏ ALINMIR — reviewer daha çox və ya
+    mənfi bal yaza bilməz (parametr geriyə-uyğunluq üçün qalır).
 
     Eyni item üçün artıq aktiv düzəliş varsa, bal təkrar ARTIRILMIR — yalnız
     status/cavab yenilənir.
@@ -242,25 +238,19 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
     new_score = None
     previous_answer_score = None
     question_points = Decimal(str(question.points or 1))
-
-    awarded = _coerce_awarded_points(awarded_points, question_points)
+    bonus = _accept_bonus_points()  # sabit +1 (awarded_points nəzərə alınmır)
 
     if getattr(exam, "exam_type", None) == "test":
-        # Test: bal cavab açarından hesablandığı üçün additiv bonus (delta).
+        # Test: bal cavab açarından hesablandığı üçün additiv bonus (delta = +1).
         prev_is_correct = _question_already_correct(answer, question)
         previous_score = effective_test_score(attempt)["effective_score"]
-        base_contribution = question_points if prev_is_correct else Decimal("0")
-        # Default (awarded=None) → tam bal; əks halda reviewer-in təyin etdiyi bal.
-        target = question_points if awarded is None else awarded
-        delta = target - base_contribution
-        if delta < 0:
-            delta = Decimal("0")
-        new_is_correct = True if target >= question_points else None
+        # Artıq düzgün sayılırsa ikiqat kredit olmasın (delta 0).
+        delta = Decimal("0") if prev_is_correct else bonus
+        new_is_correct = True if delta > 0 else None
         new_score = previous_score + delta
     else:
-        # Yazılı/praktiki: sual üçün TAM bal verilir (answer.teacher_score = points),
-        # sonra attempt.teacher_score cavablardan yenidən hesablanır. Beləliklə
-        # nəticə dərhal əks olunur (test-dən fərqli olaraq, ayrıca bonus qatı yox).
+        # Yazılı/praktiki: cavabın balına +1 (sualın maksimumu ilə clamp),
+        # sonra attempt.teacher_score cavablardan yenidən hesablanır.
         from apps.exams.public import calculate_attempt_score
 
         previous_answer_score = (
@@ -268,20 +258,14 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
         )
         previous_score = calculate_attempt_score(attempt)
         if answer is not None:
-            if awarded is None:
-                # Default: tam bal (yalnız əvvəlki bal tamdan azdırsa qaldır).
-                if previous_answer_score is None or previous_answer_score < question_points:
-                    answer.teacher_score = int(question_points)
-                    answer.save(update_fields=["teacher_score", "updated_at"])
-            else:
-                # Reviewer-in təyin etdiyi bal (qismən bal mümkündür).
-                answer.teacher_score = int(awarded)
-                answer.save(update_fields=["teacher_score", "updated_at"])
+            base = previous_answer_score if previous_answer_score is not None else Decimal("0")
+            target = base + bonus
+            if target > question_points:
+                target = question_points
+            answer.teacher_score = int(target)
+            answer.save(update_fields=["teacher_score", "updated_at"])
         new_score = calculate_attempt_score(attempt)
         delta = new_score - previous_score
-        # Revert yolu ilə eyni qayda: hər hansı cavabda bal varsa yekun bal
-        # yenidən hesablanmış dəyərdir (0 daxil olmaqla) — əks halda None.
-        # Əvvəlki "if new_score > 0" şərti 0 balda köhnə dəyəri saxlayırdı.
         any_score = attempt.answers.filter(teacher_score__isnull=False).exists()
         attempt.teacher_score = int(new_score) if any_score else None
         attempt.save(update_fields=["teacher_score"])

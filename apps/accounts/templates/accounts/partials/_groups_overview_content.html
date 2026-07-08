@@ -18,10 +18,6 @@
                 <button type="button" class="btn-create-new profile-group-create-btn jsOpenCreateGroupProfile">
                     <i class="fas fa-plus"></i> {% trans "create_group" context "profile.groups" %}
                 </button>
-            {% else %}
-                <a href="{% url 'exams:create_student_group' %}" class="btn-create-new profile-group-create-btn">
-                    <i class="fas fa-plus"></i> {% trans "create_group" context "profile.groups" %}
-                </a>
             {% endif %}
         </div>
     </div>
@@ -101,19 +97,21 @@
                             </button>
                         {% endif %}
 
-                        <form method="post" action="{% url 'exams:teacher_delete_group' group.id %}" class="d-inline" id="groupDeleteForm_{{ group.id }}">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ groups_section_return_url }}">
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-danger jsOpenDeleteGroupProfile"
-                                data-delete-form-id="groupDeleteForm_{{ group.id }}"
-                                data-group-name="{{ group.name|escape }}"
-                                title="{% trans 'delete_group' context 'profile.groups' %}"
-                            >
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        {% if group_form %}
+                            <form method="post" action="{% url 'exams:teacher_delete_group' group.id %}" class="d-inline" id="groupDeleteForm_{{ group.id }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ groups_section_return_url }}">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger jsOpenDeleteGroupProfile"
+                                    data-delete-form-id="groupDeleteForm_{{ group.id }}"
+                                    data-group-name="{{ group.name|escape }}"
+                                    title="{% trans 'delete_group' context 'profile.groups' %}"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -431,7 +429,7 @@
                             {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.assigned_teachers label=groups_label_assigned_teachers search_placeholder=groups_search_teacher container_id="profileGroupTeacherSelector" help_text=groups_help_assigned_teachers %}
                         </div>
                     {% else %}
-                        <div style="display:none;">
+                        <div hidden>
                             {{ group_form.assigned_teachers }}
                         </div>
                     {% endif %}

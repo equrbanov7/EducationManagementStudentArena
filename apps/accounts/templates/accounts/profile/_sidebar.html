@@ -1,9 +1,4 @@
 {% load i18n %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { color:#dc3545; }
-  .c3-2 { margin:0;padding:0; }
-</style>
 
 <aside class="profile-sidebar" id="profileSidebar">
     <div class="sidebar-header">
@@ -99,8 +94,8 @@
             </a>
         </li>
         {% endif %}
-        {# Universitet rejimində tələbə üçün bloq (Postlar / Post yarat) gizlədilir —
-           xəbər/post lenti ana səhifədədir, kabinet akademikdir. #}
+        {% comment %}Universitet rejimində tələbə üçün bloq (Postlar / Post yarat) gizlədilir —
+           xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
         {% if 'posts' in allowed_sections and not university_mode or 'posts' in allowed_sections and not role_capabilities.is_student %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=posts"
@@ -181,14 +176,14 @@
         <li class="sidebar-menu-item">
             <a href="{% url 'exams:exam_center_room_list' %}"
                class="sidebar-menu-link">
-                <i class="fas fa-tower-observation sidebar-menu-icon c3-1"></i>
+                <i class="fas fa-tower-observation sidebar-menu-icon sidebar-menu-icon--danger"></i>
                 <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{% url 'exams:exam_center_finals' %}"
                class="sidebar-menu-link">
-                <i class="fas fa-user-plus sidebar-menu-icon c3-1"></i>
+                <i class="fas fa-user-plus sidebar-menu-icon sidebar-menu-icon--danger"></i>
                 <span class="sidebar-menu-text">{% trans 'Final təyinatları' %}</span>
             </a>
         </li>
@@ -200,7 +195,7 @@
                data-title="{% trans 'PIN axtarışı' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-pins' %}active{% endif %}">
-                <i class="fas fa-key sidebar-menu-icon c3-1"></i>
+                <i class="fas fa-key sidebar-menu-icon sidebar-menu-icon--danger"></i>
                 <span class="sidebar-menu-text">{% trans 'PIN axtarışı' %}</span>
             </a>
         </li>
@@ -212,7 +207,7 @@
                data-title="{% trans 'İmtahan statistikaları' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-stats' %}active{% endif %}">
-                <i class="fas fa-chart-line sidebar-menu-icon c3-1"></i>
+                <i class="fas fa-chart-line sidebar-menu-icon sidebar-menu-icon--danger"></i>
                 <span class="sidebar-menu-text">{% trans 'İmtahan statistikaları' %}</span>
             </a>
         </li>
@@ -248,18 +243,18 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-courses"
                data-section="my-courses"
-               data-title="{% trans 'my_created_courses' context 'profile.section' %}"
+               data-title="{% if university_mode and role_capabilities.is_teacher %}{% trans 'Təyin olunmuş fənlərim' %}{% else %}{% trans 'my_created_courses' context 'profile.section' %}{% endif %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-courses' %}active{% endif %}">
                 <i class="fas fa-book sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "my_created_courses" context "profile.sidebar" %}</span>
+                <span class="sidebar-menu-text">{% if university_mode and role_capabilities.is_teacher %}{% trans "Təyin olunmuş fənlərim" %}{% else %}{% trans "my_created_courses" context "profile.sidebar" %}{% endif %}</span>
                 {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_created_courses_count">{{ my_created_courses_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
 
-        {# Universitet rejimi: LMS kurs-marketplace bölməsi gizlədilir — akademik
-           fənlər registrar (Fənlərim/offering) üzərindən gəlir. #}
+        {% comment %}Universitet rejimi: LMS kurs-marketplace bölməsi gizlədilir — akademik
+           fənlər registrar (Fənlərim/offering) üzərindən gəlir.{% endcomment %}
         {% if 'courses' in allowed_sections and not university_mode %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=courses"
@@ -459,8 +454,8 @@
             </a>
         </li>
         {% endif %}
-        {# "Qiymət təsdiqləri" + "Akademik analitika" U12-də yuxarıdakı "Universitet"
-           qrupuna SPA-bölmə kimi köçürüldü (grade-approvals / analytics section-ları). #}
+        {% comment %}"Qiymət təsdiqləri" + "Akademik analitika" U12-də yuxarıdakı "Universitet"
+           qrupuna SPA-bölmə kimi köçürüldü (grade-approvals / analytics section-ları).{% endcomment %}
         {% if 'org-faculties' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=org-faculties"
@@ -578,7 +573,7 @@
             </a>
         </li>
         <li class="sidebar-menu-item">
-            <form method="post" action="{% url 'accounts:logout' %}" class="c3-2">
+            <form method="post" action="{% url 'accounts:logout' %}" class="sidebar-logout-form">
                 {% csrf_token %}
                 <button type="submit" class="sidebar-menu-link sidebar-menu-link--logout">
                     <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>

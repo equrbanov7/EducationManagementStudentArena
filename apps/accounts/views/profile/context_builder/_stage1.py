@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.urls import reverse
 
 from apps.accounts import profile_hooks
-from apps.courses.models import Course
+from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, StudentGroup
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
@@ -38,6 +38,31 @@ from ._helpers import _build_effective_user_roles, _restore_profile_org_context
 
 
 class _Stage1Mixin:
+    @staticmethod
+    def _attach_course_group_summaries(courses):
+        course_ids = [course.id for course in courses]
+        if not course_ids:
+            return
+
+        memberships = (
+            CourseMembership.objects.filter(
+                course_id__in=course_ids,
+                role="student",
+            )
+            .exclude(group_name="")
+            .values_list("course_id", "group_name")
+            .order_by("course_id", "group_name")
+        )
+        groups_by_course = {}
+        for course_id, group_name in memberships:
+            cleaned = (group_name or "").strip()
+            if cleaned:
+                groups_by_course.setdefault(course_id, set()).add(cleaned)
+
+        for course in courses:
+            group_names = sorted(groups_by_course.get(course.id, set()))
+            course.profile_group_names = group_names
+            course.profile_group_count = len(group_names)
 
     def _stage_1(self):
         """
@@ -98,7 +123,13 @@ class _Stage1Mixin:
             include_active_superadmin_org=self.capabilities["is_superadmin"],
             profile_section="superadmin-organizations" if self.capabilities["is_superadmin"] else "profile-info",
         )
-        self.teacher_courses = _tenant_scoped_courses(self.request, Course.objects.filter(owner=self.request.user))
+        self.teacher_courses = _tenant_scoped_courses(
+            self.request,
+            Course.objects.filter(
+                Q(owner=self.request.user)
+                | Q(memberships__user=self.request.user, memberships__role__in=["teacher", "assistant"])
+            ).distinct(),
+        )
         self.created_courses_qs = self.teacher_courses.order_by("-created_at")
         self.enrolled_courses_qs = _assigned_courses_queryset(self.request, self.request.user).order_by("-created_at")
         self.my_exams_qs = _tenant_scoped_exams(self.request, Exam.objects.filter(author=self.request.user)).order_by(
@@ -142,6 +173,7 @@ class _Stage1Mixin:
             self.my_created_courses_count = self.created_courses_qs.count()
             if self.active_section == "my-courses":
                 self.my_created_courses = list(self.created_courses_qs[:10])
+                self._attach_course_group_summaries(self.my_created_courses)
             self._my_exams_ctx = build_my_exams_context(
                 self.request, my_exams_qs=self.my_exams_qs, active_section=self.active_section
             )

@@ -1,0 +1,83 @@
+erDiagram
+    organizations_organization ||--o{ organizations_academicperiod : organization
+    organizations_country ||--o{ organizations_institution : country
+    organizations_organization ||--o{ organizations_membership : organization
+    organizations_role ||--o{ organizations_membership : role
+    organizations_orgunit |o--o{ organizations_membership : scope_unit
+    organizations_organization ||--o{ organizations_orgunit : organization
+    organizations_orgunit |o--o{ organizations_orgunit : parent
+    organizations_organization ||--o{ organizations_role : organization
+    organizations_academicperiod {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string name
+        string period_type
+        bool is_current
+        bool is_active
+        string academic_year
+        date start_date
+    }
+    organizations_country {
+        int id PK
+        string code UK
+        string name UK
+        bool is_active
+    }
+    organizations_institution {
+        int id PK
+        string country_id FK
+        string institution_type
+        string name
+        string code
+        bool is_active
+    }
+    organizations_membership {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string user_id FK
+        string organization_id FK
+        string role_id FK
+        string scope_unit_id FK
+        string title
+        string assigned_by_id FK
+        bool is_primary
+    }
+    organizations_organization {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string name
+        string slug UK
+        string org_type
+        string email
+        string owner_id FK
+        bool is_active
+        string status
+    }
+    organizations_orgunit {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string parent_id FK
+        string unit_type
+        string name
+        string slug
+        string code
+        string head_id FK
+    }
+    organizations_role {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string name
+        string scope_type
+        bool is_active
+        string display_name
+        text description
+        int level
+    }

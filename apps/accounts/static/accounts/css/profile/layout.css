@@ -29,9 +29,13 @@
 }
 
 .profile-mobile-sidebar-trigger {
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: fixed;
+    left: calc(var(--sidebar-collapsed-width) - 18px);
+    top: 132px;
+    z-index: 1060;
     width: 56px;
     height: 56px;
     border: none;
@@ -42,6 +46,12 @@
     cursor: pointer;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
     transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.profile-mobile-sidebar-trigger.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-12px) scale(0.94);
 }
 
 .profile-mobile-sidebar-trigger:hover {

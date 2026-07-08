@@ -28,16 +28,19 @@ def build_groups_context(
         if hasattr(request.user, "_highest_role_level")
         else ProfileRole.LEVELS.get(getattr(profile, "role", ProfileRole.MEMBER), 0)
     )
-    can_multi_assign = capabilities["is_superadmin"] or (
-        current_role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
+    can_manage_groups = capabilities["is_superadmin"] or capabilities["can_manage_org"]
+    can_multi_assign = can_manage_groups and (
+        capabilities["is_superadmin"] or current_role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
     )
-    group_form = StudentGroupForm(
-        actor=request.user,
-        organization=active_organization,
-        can_multi_assign_teachers=can_multi_assign,
-        is_superadmin=capabilities["is_superadmin"],
-        auto_id="group_%s",
-    )
+    group_form = None
+    if can_manage_groups:
+        group_form = StudentGroupForm(
+            actor=request.user,
+            organization=active_organization,
+            can_multi_assign_teachers=can_multi_assign,
+            is_superadmin=capabilities["is_superadmin"],
+            auto_id="group_%s",
+        )
 
     teacher_groups_qs = (
         StudentGroup.objects.filter(organization=active_organization)

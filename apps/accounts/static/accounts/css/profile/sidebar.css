@@ -21,6 +21,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--card-bg);
 }
 
 .sidebar-title {
@@ -141,6 +145,10 @@
     width: 24px;
     text-align: center;
     flex-shrink: 0;
+}
+
+.sidebar-menu-icon--danger {
+    color: #dc3545;
 }
 
 .sidebar-menu-text {
@@ -308,6 +316,11 @@
 .sidebar-menu-link--logout:hover {
     background: #fef2f2 !important;
     color: var(--ems-danger) !important;
+}
+
+.sidebar-logout-form {
+    margin: 0;
+    padding: 0;
 }
 
 .sidebar-menu-badge--warning {

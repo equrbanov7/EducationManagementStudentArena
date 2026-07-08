@@ -1,87 +1,86 @@
-{% extends "base.html" %}
+{% extends "accounts/profile_embed_base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Sual göndərişi" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+{% block embed_title %}{% trans "Sual göndərişi" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
 
-{% block extraCss %}
+{% block embed_extra_css %}
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part2.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260607-drawer">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260607-drawer">
-    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260706-1">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
 {% endblock %}
 
-{% block content %}
+{% block embed_content %}
 {% include "exams/teacher/partials/_bulk_question_workbench.html" with wb_meta_include="exams/teacher/partials/_question_submission_meta.html" %}
 {% endblock %}
 
-{% block extraJs %}
+{% block embed_extra_js %}
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
-<script src="{% static 'exams/js/question_submission_subjects.js' %}?v=20260707-1"></script>
+<script src="{% static 'exams/js/question_submission_subjects.js' %}?v=20260708-groups"></script>
 <script nonce="{{ request.csp_nonce }}">
-    // 1) Meta sahələri (başlıq/fənn/qrup/qeyd) form= ilə saveForm-a bağlıdır;
-    //    preview (birinci forma) POST olunanda da itməsinlər deyə dəyərləri
-    //    hidden input kimi preview formuna köçürürük.
-    // 2) «Təmizlə» səhifəni GET-ə yenidən yükləyir — meta dəyərləri
-    //    localStorage-da saxlanır və boş sahələrə bərpa olunur ki, müəllim
-    //    başlıq/fənn/qrupu yenidən yazmağa məcbur olmasın.
+    // Meta sahələri (başlıq/dil/fənn/qeyd + ÇOX-seçimli qrup) form="saveForm"-a
+    // bağlıdır. Preview (birinci forma) POST olunanda itməsinlər deyə dəyərləri
+    // preview formuna hidden input kimi köçürür + localStorage-da saxlayır.
     (function () {
-        var STORAGE_KEY = "qsub_meta_v1";
+        var STORAGE_KEY = "qsub_meta_v2";
 
-        function metaFields() {
+        function singleFields() {
             return Array.prototype.slice.call(document.querySelectorAll("[data-qsub-meta]"));
+        }
+        function multiBoxes() {
+            return Array.prototype.slice.call(document.querySelectorAll('[data-qsub-meta-multi]'));
         }
 
         function saveMeta() {
             try {
-                var data = {};
-                metaFields().forEach(function (field) {
-                    if (field.name) data[field.name] = field.value;
-                });
+                var data = { _single: {}, _multi: [] };
+                singleFields().forEach(function (f) { if (f.name) data._single[f.name] = f.value; });
+                multiBoxes().forEach(function (b) { if (b.checked) data._multi.push(b.value); });
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            } catch (e) { /* storage bağlıdırsa sadəcə ötür */ }
+            } catch (e) { /* ötür */ }
         }
 
         function restoreMeta() {
             try {
                 var data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
                 if (!data) return;
-                metaFields().forEach(function (field) {
-                    // Server render etdiyi dəyər üstündür — yalnız boşları doldur.
-                    if (field.name && !field.value && data[field.name]) {
-                        field.value = data[field.name];
-                    }
+                singleFields().forEach(function (f) {
+                    if (f.name && !f.value && data._single && data._single[f.name]) f.value = data._single[f.name];
                 });
-            } catch (e) { /* korlanmış dəyər — ötür */ }
+                var anyChecked = multiBoxes().some(function (b) { return b.checked; });
+                if (!anyChecked && data._multi && data._multi.length) {
+                    multiBoxes().forEach(function (b) { if (data._multi.indexOf(b.value) !== -1) b.checked = true; });
+                }
+            } catch (e) { /* ötür */ }
         }
 
         restoreMeta();
-        metaFields().forEach(function (field) {
-            field.addEventListener("input", saveMeta);
-            field.addEventListener("change", saveMeta);
+        singleFields().concat(multiBoxes()).forEach(function (f) {
+            f.addEventListener("input", saveMeta);
+            f.addEventListener("change", saveMeta);
         });
 
         var previewForm = document.querySelector(".split-layout");
         if (previewForm) {
             previewForm.addEventListener("submit", function () {
                 saveMeta();
-                metaFields().forEach(function (field) {
-                    if (!field.name) return;
-                    var hidden = previewForm.querySelector('input[type="hidden"][data-qsub-meta-mirror="' + field.name + '"]');
-                    if (!hidden) {
-                        hidden = document.createElement("input");
-                        hidden.type = "hidden";
-                        hidden.name = field.name;
-                        hidden.setAttribute("data-qsub-meta-mirror", field.name);
-                        previewForm.appendChild(hidden);
-                    }
-                    hidden.value = field.value;
-                });
+                // Köhnə mirror-ları təmizlə.
+                Array.prototype.slice.call(previewForm.querySelectorAll('[data-qsub-meta-mirror]'))
+                    .forEach(function (h) { h.remove(); });
+                function mirror(name, value) {
+                    var h = document.createElement("input");
+                    h.type = "hidden"; h.name = name; h.value = value;
+                    h.setAttribute("data-qsub-meta-mirror", name);
+                    previewForm.appendChild(h);
+                }
+                singleFields().forEach(function (f) { if (f.name) mirror(f.name, f.value); });
+                multiBoxes().forEach(function (b) { if (b.checked) mirror(b.name, b.value); });
             });
         }
 
-        // Göndəriş uğurla yola düşəndə (saveForm submit) saxlanmış meta təmizlənir.
+        // Göndəriş yola düşəndə saxlanmış meta təmizlənir.
         var saveForm = document.getElementById("saveForm");
         if (saveForm) {
             saveForm.addEventListener("submit", function () {

@@ -9,7 +9,10 @@
         var dataEl = document.getElementById("qsubGroupsSubjects");
         var subjectSelect = document.querySelector("[data-qsub-subject]");
         var groupSelect = document.getElementById("qsubGroup");
-        if (!dataEl || !subjectSelect || !groupSelect) {
+        var groupBoxes = Array.prototype.slice.call(
+            document.querySelectorAll("[data-qsub-group-checkbox], [data-qsub-meta-multi][name='group_ids']")
+        );
+        if (!dataEl || !subjectSelect || (!groupSelect && groupBoxes.length === 0)) {
             return;
         }
 
@@ -20,7 +23,11 @@
             map = {};
         }
 
-        var placeholderNoGroup = (subjectSelect.getAttribute("data-noGroup-text") || "").trim();
+        var placeholderNoGroup = (
+            subjectSelect.getAttribute("data-no-group-text") ||
+            subjectSelect.getAttribute("data-noGroup-text") ||
+            ""
+        ).trim();
         var placeholderEmpty = (subjectSelect.getAttribute("data-empty-text") || "").trim();
         var placeholderChoose = (subjectSelect.getAttribute("data-choose-text") || "").trim();
         // İlk render-dəki placeholder mətnini "qrup seçin" üçün ehtiyat kimi saxla.
@@ -55,12 +62,42 @@
             });
         }
 
-        var initialPreselect = subjectSelect.getAttribute("data-initial-subject") || "";
-        populate(groupSelect.value, initialPreselect);
+        function groupHasSubject(groupId, subjectValue) {
+            var subjects = (groupId && map[String(groupId)]) || [];
+            if (!subjectValue) {
+                return true;
+            }
+            return subjects.some(function (subject) {
+                return String(subject.value) === String(subjectValue);
+            });
+        }
 
-        groupSelect.addEventListener("change", function () {
-            populate(groupSelect.value, "");
-        });
+        function syncGroupBoxes() {
+            var selectedSubject = subjectSelect.value || "";
+            groupBoxes.forEach(function (box) {
+                var allowed = groupHasSubject(box.value, selectedSubject);
+                var chip = box.closest(".qsubm-chip");
+                box.disabled = !allowed;
+                if (!allowed) {
+                    box.checked = false;
+                }
+                if (chip) {
+                    chip.classList.toggle("is-disabled", !allowed);
+                }
+            });
+        }
+
+        var initialPreselect = subjectSelect.getAttribute("data-initial-subject") || "";
+        if (groupSelect) {
+            populate(groupSelect.value, initialPreselect);
+            groupSelect.addEventListener("change", function () {
+                populate(groupSelect.value, "");
+            });
+        }
+        if (groupBoxes.length) {
+            syncGroupBoxes();
+            subjectSelect.addEventListener("change", syncGroupBoxes);
+        }
     }
 
     if (document.readyState === "loading") {

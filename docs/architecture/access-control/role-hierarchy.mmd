@@ -1,0 +1,60 @@
+flowchart TB
+    subgraph Admin["Administrative and organizational placement"]
+      Superadmin["Superadmin / is_superuser
+GLOBAL, RLS bypass"]:::global
+      Org["Organization / University"]:::tenant
+      Rector["rector / director / manager / owner
+level 100, permissions: *"]:::full
+      Vice["vice_rector / deputy_director
+org-wide admin"]:::admin
+      HR["hr
+member and role operations"]:::ops
+      ExamCenter["exam_center_head / exam_center_staff
+exam lifecycle"]:::ops
+      Faculty["faculty / unit subtree"]:::scope
+      Dean["dean"]:::academic
+      Department["chair_head / department_head"]:::academic
+      Teacher["teacher / instructor"]:::academic
+      Assistant["assistant / lab_assistant"]:::academic
+      Tutor["tutor / program_coordinator"]:::readonly
+      Group["academic group / class"]:::scope
+      LeadStudent["lead_student"]:::self
+      Student["student"]:::self
+      Superadmin -. cross-org .-> Org
+      Org --> Rector
+      Rector --> Vice
+      Rector --> HR
+      Rector --> ExamCenter
+      Org --> Faculty
+      Faculty --> Dean
+      Dean --> Department
+      Department --> Teacher
+      Teacher --> Assistant
+      Department --> Tutor
+      Department --> Group
+      Group --> LeadStudent
+      Group --> Student
+    end
+    subgraph Auth["Authorization scope (not reporting hierarchy)"]
+      RolePerm["Role.permissions JSON
+* and prefix wildcards"]:::policy
+      Membership["Membership
+user + organization + role + optional scope_unit"]:::policy
+      RequestPerms["request.org_permissions"]:::policy
+      Backend["core.permissions / service policies"]:::policy
+      Membership --> RolePerm --> RequestPerms --> Backend
+      ExamCenter -. "exam, qa, audit scope" .-> Backend
+      HR -. "member and role scope" .-> Backend
+      Teacher -. "course exam grade own scope" .-> Backend
+      Student -. "self service" .-> Backend
+    end
+    classDef global fill:#263238,color:#fff,stroke:#111;
+    classDef tenant fill:#E3F2FD,stroke:#1565C0;
+    classDef full fill:#1B5E20,color:#fff,stroke:#0B3D12;
+    classDef admin fill:#C8E6C9,stroke:#2E7D32;
+    classDef ops fill:#FFF3E0,stroke:#EF6C00;
+    classDef academic fill:#E0F7FA,stroke:#00838F;
+    classDef readonly fill:#ECEFF1,stroke:#546E7A;
+    classDef self fill:#F3E5F5,stroke:#6A1B9A;
+    classDef scope fill:#F5F5F5,stroke:#757575;
+    classDef policy fill:#FFFDE7,stroke:#F9A825;

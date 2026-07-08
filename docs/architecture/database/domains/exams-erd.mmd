@@ -1,0 +1,435 @@
+erDiagram
+    exams_questionbank ||--o{ exams_bankquestion : bank
+    exams_bankquestion ||--o{ exams_bankquestionoption : question
+    exams_examquestion ||--|| exams_codingexamquestion : question
+    exams_codingsubmission ||--o{ exams_codingfile : submission
+    exams_exam ||--o{ exams_codingsubmission : exam
+    exams_examattempt |o--o{ exams_codingsubmission : attempt
+    exams_codingexamquestion ||--o{ exams_codingsubmission : question
+    exams_codingexamquestion ||--o{ exams_codingtestcase : coding_question
+    exams_exam }o--o{ exams_studentgroup : allowed_groups
+    exams_examattempt ||--o{ exams_examanswer : attempt
+    exams_examquestion ||--o{ exams_examanswer : question
+    exams_examanswer }o--o{ exams_examquestionoption : selected_options
+    exams_examanswer ||--o{ exams_examanswerfile : answer
+    exams_exam ||--o{ exams_examattempt : exam
+    exams_examlanguagevariant |o--o{ exams_examattempt : language_variant
+    exams_exam ||--o{ exams_examlanguagevariant : exam
+    exams_exam ||--o{ exams_examquestion : exam
+    exams_questionblock |o--o{ exams_examquestion : block
+    exams_questionbank |o--o{ exams_examquestion : bank
+    exams_bankquestion |o--o{ exams_examquestion : source_bank_question
+    exams_examlanguagevariant |o--o{ exams_examquestion : language_variant
+    exams_examquestion ||--o{ exams_examquestionoption : question
+    exams_examroom ||--o{ exams_examroomcomputer : room
+    exams_exam ||--o{ exams_examroomsession : exam
+    exams_examroom ||--o{ exams_examroomsession : room
+    exams_exam ||--o{ exams_examstudentpin : exam
+    exams_exam ||--|| exams_examsupervisionconfig : exam
+    exams_examroomsession ||--o{ exams_finalexamticket : session
+    exams_exam ||--o{ exams_finalexamticket : exam
+    exams_examattempt |o--o{ exams_finalexamticket : attempt
+    exams_examattempt ||--o{ exams_proctoringlog : exam_attempt
+    exams_exam ||--o{ exams_questionblock : exam
+    exams_studentgroup |o--o{ exams_questionsubmission : student_group
+    exams_questionbank |o--o{ exams_questionsubmission : accepted_bank
+    exams_exam ||--o{ exams_studentexamattemptgrant : exam
+    exams_exam ||--o{ exams_supervisionincident : exam
+    exams_examattempt ||--o{ exams_supervisionincident : attempt
+    live_exam_livesession ||--o{ live_exam_liveanswer : session
+    live_exam_liveplayer ||--o{ live_exam_liveanswer : player
+    live_exam_livesession ||--o{ live_exam_liveplayer : session
+    exams_exam ||--o{ live_exam_livesession : exam
+    exams_exam ||--o{ exams_exam_allowed_groups : exam
+    exams_studentgroup ||--o{ exams_exam_allowed_groups : studentgroup
+    exams_exam ||--o{ exams_exam_allowed_users : exam
+    exams_examanswer ||--o{ exams_examanswer_selected_options : examanswer
+    exams_examquestionoption ||--o{ exams_examanswer_selected_options : examquestionoption
+    exams_examroom ||--o{ exams_examroom_invigilators : examroom
+    exams_examroomsession ||--o{ exams_examroomsession_staff : examroomsession
+    exams_studentgroup ||--o{ exams_studentgroup_students : studentgroup
+    exams_studentgroup ||--o{ exams_studentgroup_subjects : studentgroup
+    exams_studentgroup ||--o{ exams_studentgroup_teachers : studentgroup
+    exams_aiconfiguration {
+        int id PK
+        datetime updated_at
+        bool enabled
+        string rate_limit
+        string summary_model
+        string grading_model
+        string assistant_model
+        decimal monthly_budget
+    }
+    exams_bankquestion {
+        int id PK
+        string bank_id FK
+        string question_type
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        text text
+        string answer_mode
+        text correct_answer
+    }
+    exams_bankquestionoption {
+        int id PK
+        string question_id FK
+        string label
+        text text
+        file image
+        bool is_correct
+    }
+    exams_codingexamquestion {
+        int id PK
+        string question_id FK, UK
+        string title
+        text problem_statement
+        int max_score
+        datetime created_at
+        datetime updated_at
+        string language
+        text input_description
+        text output_description
+    }
+    exams_codingfile {
+        int id PK
+        string submission_id FK
+        string name
+        datetime created_at
+        datetime updated_at
+        text content
+        string language
+        bool is_main
+    }
+    exams_codingsubmission {
+        int id PK
+        string student_id FK
+        string exam_id FK
+        string attempt_id FK
+        string question_id FK
+        string execution_status
+        decimal score
+        datetime updated_at
+        string selected_language
+        text submitted_code
+    }
+    exams_codingtestcase {
+        int id PK
+        string coding_question_id FK
+        datetime created_at
+        text input_data
+        text expected_output
+        string visibility
+        int point_value
+        int order
+    }
+    exams_exam {
+        int id PK
+        string author_id FK
+        string title
+        string exam_type
+        bool is_active
+        string course_id FK
+        string subject_id FK
+        string organization_id FK
+        string exam_type_extended
+        string slug UK
+    }
+    exams_examanswer {
+        int id PK
+        string attempt_id FK
+        string question_id FK
+        int teacher_score
+        datetime updated_at
+        text text_answer
+        bool is_correct
+        text teacher_feedback
+        bool has_paint
+        file paint_image
+    }
+    exams_examanswerfile {
+        int id PK
+        string answer_id FK
+        file file
+        datetime uploaded_at
+    }
+    exams_examattempt {
+        int id PK
+        string user_id FK
+        string exam_id FK
+        string language_variant_id FK
+        string status
+        int teacher_score
+        string supervision_status
+        bool checked_by_teacher
+        datetime teacher_checked_at
+        string language
+    }
+    exams_examlanguagevariant {
+        int id PK
+        string exam_id FK
+        bool is_active
+        datetime created_at
+        datetime updated_at
+        string language
+        string display_name
+        int question_count_override
+    }
+    exams_examquestion {
+        int id PK
+        string exam_id FK
+        string block_id FK
+        string bank_id FK
+        string source_bank_question_id FK
+        string language_variant_id FK
+        bool is_active
+        datetime created_at
+        int points
+        string fingerprint
+    }
+    exams_examquestionoption {
+        int id PK
+        string question_id FK
+        string label
+        text text
+        file image
+        bool is_correct
+    }
+    exams_examroom {
+        int id PK
+        string organization_id FK
+        string name
+        string code
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        string building
+        string floor
+    }
+    exams_examroomcomputer {
+        int id PK
+        string organization_id FK
+        string room_id FK
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        string label
+        int seat_number
+        string mac_address
+    }
+    exams_examroomsession {
+        int id PK
+        string organization_id FK
+        string exam_id FK
+        string room_id FK
+        string invigilator_id FK
+        string state
+        string started_by_id FK
+        string ended_by_id FK
+        string created_by_id FK
+        datetime created_at
+    }
+    exams_examstudentpin {
+        int id PK
+        string exam_id FK
+        string student_id FK
+        datetime created_at
+        datetime updated_at
+        string pin_hash
+        text pin_cipher
+    }
+    exams_examsupervisionconfig {
+        int id PK
+        string exam_id FK, UK
+        datetime created_at
+        datetime updated_at
+        bool enabled
+        string template
+        bool force_fullscreen
+        int grace_period_seconds
+        int resume_window_seconds
+        int max_fullscreen_violations
+    }
+    exams_finalexamticket {
+        int id PK
+        string organization_id FK
+        string session_id FK
+        string exam_id FK
+        string student_id FK
+        string attempt_id FK
+        string status
+        string pin_generated_by_id FK
+        string removed_by_id FK
+        datetime created_at
+    }
+    exams_proctoringlog {
+        int id PK
+        string exam_attempt_id FK
+        string event_type
+        datetime timestamp
+        json details
+    }
+    exams_questionbank {
+        int id PK
+        string name
+        string subject
+        string default_question_type
+        string organization_id FK
+        string org_unit_id FK
+        string organization_type
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+    }
+    exams_questionblock {
+        int id PK
+        string exam_id FK
+        string name
+        int order
+        int time_limit_minutes
+        bool enable_paint
+    }
+    exams_questionsubmission {
+        int id PK
+        string organization_id FK
+        string teacher_id FK
+        string title
+        string subject
+        string student_group_id FK
+        string status
+        string reviewer_id FK
+        string accepted_bank_id FK
+        datetime created_at
+    }
+    exams_studentexamattemptgrant {
+        int id PK
+        string exam_id FK
+        string student_id FK
+        string granted_by_id FK
+        datetime created_at
+        datetime updated_at
+        int extra_attempts
+    }
+    exams_studentgroup {
+        int id PK
+        string teacher_id FK
+        string organization_id FK
+        string name
+        string org_unit_id FK
+        datetime created_at
+    }
+    exams_supervisionincident {
+        int id PK
+        string organization_id FK
+        string exam_id FK
+        string attempt_id FK
+        string student_id FK
+        string event_type
+        string severity
+        datetime timestamp
+        json metadata
+        int violation_count_at_time
+    }
+    exams_textextractionjob {
+        uuid id PK
+        string organization_id FK
+        string user_id FK
+        string status
+        datetime created_at
+        string kind
+        json payload
+        json result_meta
+        string source_name
+        file file
+    }
+    live_exam_liveanswer {
+        int id PK
+        string session_id FK
+        string player_id FK
+        datetime created_at
+        int question_id
+        int choice_id
+        json choice_ids
+        bool is_correct
+        int answer_ms
+        int awarded_points
+    }
+    live_exam_liveplayer {
+        int id PK
+        string session_id FK
+        int score
+        datetime created_at
+        string nickname
+        string avatar_key
+        string accessory_key
+        string client_id
+        int streak
+        bool is_connected
+    }
+    live_exam_livesession {
+        int id PK
+        string exam_id FK
+        string host_user_id FK
+        string state
+        datetime created_at
+        string pin UK
+        bool is_locked
+        int current_index
+        datetime question_started_at
+        datetime question_ends_at
+    }
+    trial_exams_trialexamrequest {
+        int id PK
+        string user_id FK
+        string email
+        string status
+        datetime created_at
+        string reply_delivery_status
+        string reply_sent_by_id FK
+        string full_name
+        string subject_name
+        text note
+    }
+    exams_exam_allowed_groups {
+        int id PK
+        string exam_id FK
+        string studentgroup_id FK
+    }
+    exams_exam_allowed_users {
+        int id PK
+        string exam_id FK
+        string user_id FK
+    }
+    exams_examanswer_selected_options {
+        int id PK
+        string examanswer_id FK
+        string examquestionoption_id FK
+    }
+    exams_examroom_invigilators {
+        int id PK
+        string examroom_id FK
+        string user_id FK
+    }
+    exams_examroomsession_staff {
+        int id PK
+        string examroomsession_id FK
+        string user_id FK
+    }
+    exams_studentgroup_students {
+        int id PK
+        string studentgroup_id FK
+        string user_id FK
+    }
+    exams_studentgroup_subjects {
+        int id PK
+        string studentgroup_id FK
+        string subject_id FK
+    }
+    exams_studentgroup_teachers {
+        int id PK
+        string studentgroup_id FK
+        string user_id FK
+    }
