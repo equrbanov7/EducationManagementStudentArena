@@ -76,16 +76,18 @@ class EffectiveDisplayTests(TestCase):
         return appeal, item
 
     def test_bonus_map_and_apply(self):
+        # Qəbul → sabit +1 bal (tam sual balı deyil).
         self._accepted_appeal()
         bonus_map = appeal_bonus_map([self.attempt.id])
-        self.assertEqual(bonus_map.get(self.attempt.id), Decimal("2"))
+        self.assertEqual(bonus_map.get(self.attempt.id), Decimal("1"))
 
         base = calculate_test_attempt_result(self.attempt)
         self.assertEqual(base.score, Decimal("0"))
         effective = apply_bonus_to_test_result(base, bonus_map[self.attempt.id])
-        self.assertEqual(effective.score, Decimal("2"))
+        self.assertEqual(effective.score, Decimal("1"))
         self.assertEqual(effective.max_score, Decimal("5"))
-        self.assertEqual(str(effective.percentage), "40.0")
+        # 1 / 5 bal = 20%.
+        self.assertEqual(str(effective.percentage), "20.0")
         # Bonussuz nəticə dəyişmir.
         self.assertIs(apply_bonus_to_test_result(base, None), base)
 
@@ -93,7 +95,7 @@ class EffectiveDisplayTests(TestCase):
         self._accepted_appeal()
         attempts = [self.attempt]
         attach_test_result_summaries(attempts)
-        self.assertEqual(attempts[0].test_result.score, Decimal("2"))
+        self.assertEqual(attempts[0].test_result.score, Decimal("1"))
 
     def test_reject_reverts_bonus_everywhere(self):
         appeal, item = self._accepted_appeal()

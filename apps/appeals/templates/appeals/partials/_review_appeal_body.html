@@ -165,19 +165,13 @@
                     </div>
                 </div>
 
-                {# Bal sahəsi — yalnız "Qəbul et" seçiləndə görünür #}
+                {# Bal — qəbulda SABİT +1 (reviewer dəyişə bilməz); yalnız "Qəbul et"də görünür #}
                 <div class="appeal-review-points" data-review-points hidden>
-                    <div class="appeal-review-points__field">
-                        <label class="form-label small text-muted fw-bold mb-0" for="points_{{ item.id }}">
-                            {% trans "Veriləcək bal" context "appeals.template" %}
-                        </label>
-                        <div class="appeal-review-points__input">
-                            <input type="number" class="form-control" data-review-points-input
-                                   name="points_{{ item.id }}" id="points_{{ item.id }}"
-                                   min="0" max="{{ item.max_points }}" step="1" value="{{ item.awarded_value }}"
-                                   inputmode="numeric">
-                            <span class="appeal-review-points__max">/ {{ item.max_points }} {% trans "bal" context "appeals.template" %}</span>
-                        </div>
+                    <div class="appeal-review-points__fixed">
+                        <i class="fas fa-plus-circle text-success"></i>
+                        {% trans "Qəbul olunanda tələbəyə" context "appeals.template" %}
+                        <strong class="text-success">+1 {% trans "bal" context "appeals.template" %}</strong>
+                        {% trans "əlavə olunur." context "appeals.template" %}
                     </div>
                     <div class="appeal-review-points__preview">
                         {% trans "Hazırkı bal" context "appeals.template" %}:

@@ -476,3 +476,48 @@
 .qsubd-btn--ghost:hover { border-color: #6366f1; }
 .qsubd-btn--primary { background: linear-gradient(135deg, #4f6ef7, #7c3aed); color: #fff; box-shadow: 0 8px 18px -8px rgba(79,110,247,.6); }
 .qsubd-btn--primary:hover { filter: brightness(1.05); }
+
+/* ── Çox-seçimli qrup çipləri + fənn/dil select-ləri (2026-07 redesign) ── */
+.qsubm-field--groups { grid-column: 1 / -1; }
+.qsubm-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.qsubm-chip {
+    position: relative; display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px 8px 10px; border: 1.5px solid var(--ems-neutral-200, #e2e8f0);
+    border-radius: 999px; background: var(--ems-neutral-0, #fff); cursor: pointer;
+    font-size: 13.5px; font-weight: 600; color: var(--ems-neutral-700, #334155);
+    transition: border-color .15s, background .15s, color .15s, box-shadow .15s;
+    user-select: none;
+}
+.qsubm-chip:hover { border-color: var(--ems-primary-400, #60a5fa); }
+.qsubm-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.qsubm-chip__box {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 6px; flex: 0 0 auto;
+    border: 1.5px solid var(--ems-neutral-300, #cbd5e1); background: var(--ems-neutral-0, #fff);
+    color: #fff; font-size: 10px; transition: all .15s;
+}
+.qsubm-chip__box .fa-check { opacity: 0; transform: scale(.6); transition: all .15s; }
+.qsubm-chip__label { display: inline-flex; align-items: center; gap: 6px; }
+.qsubm-chip__label .fa-users { color: var(--ems-neutral-400, #94a3b8); font-size: 12px; }
+.qsubm-chip input:checked ~ .qsubm-chip__box {
+    background: var(--ems-primary-600, #2563eb); border-color: var(--ems-primary-600, #2563eb);
+}
+.qsubm-chip input:checked ~ .qsubm-chip__box .fa-check { opacity: 1; transform: scale(1); }
+.qsubm-chip:has(input:checked) {
+    border-color: var(--ems-primary-600, #2563eb); background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af); box-shadow: 0 2px 8px -4px rgba(37,99,235,.5);
+}
+.qsubm-chip:has(input:checked) .qsubm-chip__label .fa-users { color: var(--ems-primary-600, #2563eb); }
+.qsubm-chip input:focus-visible ~ .qsubm-chip__box { outline: 2px solid var(--ems-primary-400, #60a5fa); outline-offset: 2px; }
+
+/* Göndəriş sil düyməsi + Bootstrap select uyğunlaşdırma (2026-07) */
+.qsubd-delete-form { margin-top: 12px; }
+.qb-btn-danger-ghost {
+    display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px;
+    border: 1.5px solid var(--ems-danger-200, #fecaca); border-radius: 10px;
+    background: #fff; color: var(--ems-danger-600, #dc2626); font-weight: 600;
+    font-size: 13.5px; cursor: pointer; transition: all .15s;
+}
+.qb-btn-danger-ghost:hover { background: var(--ems-danger-50, #fef2f2); border-color: var(--ems-danger-400, #f87171); }
+.qsubm-bs-select .bootstrap-single-select__toggle { min-height: 46px; border-radius: 12px; }
+.qsubm-bs-select { width: 100%; }

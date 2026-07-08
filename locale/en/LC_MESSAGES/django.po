@@ -919,7 +919,7 @@ msgid "%(count)s post tapıldı"
 msgstr "%(count)s post tapıldı"
 
 msgid "Başlıq"
-msgstr "Partnership"
+msgstr "Title"
 
 msgid "Müəllif"
 msgstr "Müəllif"

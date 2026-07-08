@@ -72,19 +72,21 @@ class TestExamScoringTests(_Base):
         # Cavabsız → option-əsaslı düzgünlük False → qəbulda delta=points.
         self.answer = ExamAnswer.objects.create(attempt=self.attempt, question=self.question)
 
-    def test_accept_adds_bonus_delta(self):
+    def test_accept_adds_one_point_bonus(self):
+        # Universitet qaydası: qəbul → SABİT +1 bal (sualın tam balı deyil).
         appeal = self._appeal(self.attempt)
         item = self._item(appeal, self.question, self.answer)
 
         accept_appeal_item(item, reviewer=self.teacher, response_text="Açar səhv idi")
 
         adjustment = ScoreAdjustment.objects.get(appeal_item=item)
-        self.assertEqual(adjustment.delta_points, Decimal("2"))
+        self.assertEqual(adjustment.delta_points, Decimal("1"))
         state = appeal_score_state(self.attempt)
-        self.assertEqual(state["bonus_points"], Decimal("2"))
+        self.assertEqual(state["bonus_points"], Decimal("1"))
         eff = effective_test_score(self.attempt)
-        self.assertEqual(eff["effective_score"], Decimal("2"))
-        self.assertEqual(eff["effective_percentage"], Decimal("100.0"))
+        self.assertEqual(eff["effective_score"], Decimal("1"))
+        # 1 / 2 bal = 50%.
+        self.assertEqual(eff["effective_percentage"], Decimal("50.0"))
 
     def test_accept_is_idempotent_no_double_increment(self):
         appeal = self._appeal(self.attempt)
@@ -94,7 +96,7 @@ class TestExamScoringTests(_Base):
         accept_appeal_item(item, reviewer=self.teacher, response_text="iki")
 
         self.assertEqual(ScoreAdjustment.objects.filter(attempt=self.attempt).count(), 1)
-        self.assertEqual(appeal_score_state(self.attempt)["bonus_points"], Decimal("2"))
+        self.assertEqual(appeal_score_state(self.attempt)["bonus_points"], Decimal("1"))
 
     def test_reject_after_accept_reverts_bonus(self):
         appeal = self._appeal(self.attempt)
@@ -119,18 +121,19 @@ class WrittenExamScoringTests(_Base):
         # Müəllim əvvəlcə 0 bal verib.
         self.answer = ExamAnswer.objects.create(attempt=self.attempt, question=self.question, teacher_score=0)
 
-    def test_accept_awards_full_points(self):
+    def test_accept_adds_one_point(self):
+        # Yazılı: qəbul → cavabın balına +1 (tam bal deyil), maks. ilə clamp.
         appeal = self._appeal(self.attempt)
         item = self._item(appeal, self.question, self.answer)
 
-        accept_appeal_item(item, reviewer=self.teacher, response_text="tam bal verildi")
+        accept_appeal_item(item, reviewer=self.teacher, response_text="+1 bal verildi")
 
         self.answer.refresh_from_db()
         self.attempt.refresh_from_db()
-        self.assertEqual(self.answer.teacher_score, 5)
-        self.assertEqual(self.attempt.teacher_score, 5)
+        self.assertEqual(self.answer.teacher_score, 1)
+        self.assertEqual(self.attempt.teacher_score, 1)
         adjustment = ScoreAdjustment.objects.get(appeal_item=item)
-        self.assertEqual(adjustment.delta_points, Decimal("5"))
+        self.assertEqual(adjustment.delta_points, Decimal("1"))
         self.assertEqual(adjustment.previous_answer_score, Decimal("0"))
 
     def test_reject_after_accept_restores_previous_answer_score(self):
@@ -143,21 +146,21 @@ class WrittenExamScoringTests(_Base):
         self.answer.refresh_from_db()
         self.assertEqual(self.answer.teacher_score, 0)
 
-    def test_accept_with_zero_awarded_points_syncs_attempt_score(self):
-        """Regressiya: yekun bal 0 olanda attempt.teacher_score köhnə (stale)
-        dəyərdə qalmamalıdır — cavablardan yenidən hesablanmış 0 yazılmalıdır."""
+    def test_accept_recomputes_attempt_score_from_answers(self):
+        """Regressiya: attempt.teacher_score köhnə (stale) dəyərdə qalmamalıdır —
+        cavablardan yenidən hesablanır (+1 qəbuldan sonra)."""
         self.attempt.teacher_score = 7  # köhnə/stale ümumi bal
         self.attempt.save(update_fields=["teacher_score"])
 
         appeal = self._appeal(self.attempt)
         item = self._item(appeal, self.question, self.answer)
 
-        accept_appeal_item(item, reviewer=self.teacher, response_text="0 bal", awarded_points=0)
+        accept_appeal_item(item, reviewer=self.teacher, response_text="+1")
 
         self.answer.refresh_from_db()
         self.attempt.refresh_from_db()
-        self.assertEqual(self.answer.teacher_score, 0)
-        self.assertEqual(self.attempt.teacher_score, 0)
+        self.assertEqual(self.answer.teacher_score, 1)  # 0 + 1
+        self.assertEqual(self.attempt.teacher_score, 1)  # stale 7 deyil
 
 
 class AppealStatusAggregationTests(_Base):

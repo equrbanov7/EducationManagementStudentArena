@@ -74,19 +74,33 @@ class Command(UsersSeedMixin, BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--password", default="DemoPass123!", help="Demo user-lər üçün şifrə.")
+        parser.add_argument("--org-name", default="Demo Universiteti", help="Təşkilatın adı.")
+        parser.add_argument("--prefix", default="demo", help="İstifadəçi adı prefiksi (məs. demo, qk).")
+        parser.add_argument(
+            "--computer-mac", default="AA:BB:CC:DD:EE:02", help="Zal kompüterinin baza MAC ünvanı (identifikasiya)."
+        )
+        parser.add_argument(
+            "--computer-ips",
+            default="127.0.0.1",
+            help="Zala qeyd olunacaq IP-lər (vergüllə). Hər IP üçün ayrı kompüter yaradılır — giriş IP → zal.",
+        )
 
     @transaction.atomic
     @rls_worker_atomic()
     @bypass_rls()
     def handle(self, *args, **options):
         pw = options["password"]
+        self.prefix = (options["org_name"] and options["prefix"]) or "demo"
+        self.org_name = options["org_name"]
+        self.computer_mac = options["computer_mac"]
+        self.computer_ips = [ip.strip() for ip in (options["computer_ips"] or "").split(",") if ip.strip()]
 
-        # ── Superadmin ─────────────────────────────────────────────────────
+        # ── Superadmin (bütün demo-lar üçün ortaq) ─────────────────────────
         superadmin = self._ensure_superuser("demo_superadmin", "demo_superadmin@example.com", pw)
 
         # ── Universitet + rektor (owner) ───────────────────────────────────
-        rector = self._ensure_user("demo_rector", "demo_rector@example.com", pw)
-        org = self._ensure_organization("Demo Universiteti", OrganizationType.UNIVERSITY, rector)
+        rector = self._ensure_user(f"{self.prefix}_rector", f"{self.prefix}_rector@example.com", pw)
+        org = self._ensure_organization(self.org_name, OrganizationType.UNIVERSITY, rector)
         self._assign_profile(rector, org, ProfileRole.ORG_OWNER)
         self._ensure_membership(rector, org, self._resolve_role(org, ProfileRole.ORG_OWNER), rector)
 
@@ -104,24 +118,24 @@ class Command(UsersSeedMixin, BaseCommand):
         kaf_fin = self._ensure_unit(org, "Maliyyə kafedrası", OrgUnitType.DEPARTMENT, fac_econ, "FIN")
 
         # ── İmtahan mərkəzi: rəhbər + 2 işçi ───────────────────────────────
-        ec_head = self._ensure_user("demo_ec_head", "demo_ec_head@example.com", pw)
+        ec_head = self._ensure_user(f"{self.prefix}_ec_head", f"{self.prefix}_ec_head@example.com", pw)
         self._assign_profile(ec_head, org, ProfileRole.EXAM_CENTER_HEAD)
         self._ensure_membership(ec_head, org, head_role, rector)
 
         ec_staff = []
         for i in (1, 2):
-            s = self._ensure_user(f"demo_ec_staff{i}", f"demo_ec_staff{i}@example.com", pw)
+            s = self._ensure_user(f"{self.prefix}_ec_staff{i}", f"{self.prefix}_ec_staff{i}@example.com", pw)
             self._assign_profile(s, org, ProfileRole.EXAM_CENTER_STAFF)
             self._ensure_membership(s, org, staff_role, rector)
             ec_staff.append(s)
 
         # ── Müəllimlər (nəzarətçi namizədləri) — kafedraya bağlı ───────────
         teacher_specs = [
-            ("demo_teacher_cs1", "Aygün", "Məmmədova", kaf_cs),
-            ("demo_teacher_cs2", "Rəşad", "Əliyev", kaf_cs),
-            ("demo_teacher_se1", "Nigar", "Hüseynova", kaf_se),
-            ("demo_teacher_se2", "Elçin", "Quliyev", kaf_se),
-            ("demo_teacher_fin1", "Kamran", "İsmayılov", kaf_fin),
+            (f"{self.prefix}_teacher_cs1", "Aygün", "Məmmədova", kaf_cs),
+            (f"{self.prefix}_teacher_cs2", "Rəşad", "Əliyev", kaf_cs),
+            (f"{self.prefix}_teacher_se1", "Nigar", "Hüseynova", kaf_se),
+            (f"{self.prefix}_teacher_se2", "Elçin", "Quliyev", kaf_se),
+            (f"{self.prefix}_teacher_fin1", "Kamran", "İsmayılov", kaf_fin),
         ]
         teachers = []
         for username, first, last, kafedra in teacher_specs:
@@ -137,6 +151,14 @@ class Command(UsersSeedMixin, BaseCommand):
         group_cs = self._ensure_group(org, teachers[0], "CS-2024 (Kompüter Elmləri)", cs_students, kaf_cs)
         group_se = self._ensure_group(org, teachers[2], "SE-2024 (Proqram Mühəndisliyi)", se_students, kaf_se)
         all_students = list(cs_students) + list(se_students)
+
+        # ── Fənlər (registrar.Subject) — qruplara təyin (sual göndərişi üçün) ──
+        # Müəllim sual göndərəndə fənn ÖZ qruplarının fənlərindən gəlir.
+        subj_alg = self._ensure_subject(org, "CS101", "Alqoritmlər")
+        subj_db = self._ensure_subject(org, "CS201", "Verilənlər bazası")
+        subj_oop = self._ensure_subject(org, "SE101", "Obyekt-yönümlü proqramlaşdırma")
+        group_cs.subjects.set([subj_alg, subj_db])
+        group_se.subjects.set([subj_oop, subj_alg])  # Alqoritmlər hər iki qrupda
 
         # ── Final imtahanı + zal + oturum + biletlər (PIN axtarışı üçün) ────
         exam = self._ensure_final_exam(ec_head, org)
@@ -269,7 +291,7 @@ class Command(UsersSeedMixin, BaseCommand):
     def _make_students(self, org, owner, student_role, prefix, count, password, kafedra):
         students = []
         for idx in range(1, count + 1):
-            username = f"demo_{prefix}_student_{idx}"
+            username = f"{self.prefix}_{prefix}_student_{idx}"
             student = self._ensure_user(username, f"{username}@example.com", password)
             self._set_name(student, f"Tələbə{idx}", prefix.upper())
             self._assign_profile(student, org, ProfileRole.STUDENT)
@@ -342,21 +364,43 @@ class Command(UsersSeedMixin, BaseCommand):
         )
         return room
 
-    def _ensure_local_computer(self, org, room, creator):
-        """Zala 127.0.0.1 IP-li kompüter qeyd et — lokal test/demo-da IP→zal həlli
-        işləsin (oturum sisteminin ləğvi: tələbə qeydli kompüterdən girir)."""
-        ExamRoomComputer.objects.get_or_create(
-            room=room,
-            label="PC-DEMO-201-01",
-            defaults={
-                "organization": org,
-                "seat_number": 1,
-                "mac_address": "AA:BB:CC:DD:EE:02",
-                "ip_address": "127.0.0.1",
-                "is_active": True,
-                "created_by": creator,
-            },
+    def _ensure_subject(self, org, code, name):
+        """registrar.Subject yaradır/tapır (sual göndərişi fənn seçimi üçün)."""
+        from apps.registrar.models import Subject
+
+        subject, _ = Subject.objects.get_or_create(
+            organization=org, code=code, defaults={"name": name}
         )
+        return subject
+
+    def _ensure_local_computer(self, org, room, creator):
+        """Zala qeydli kompüter(lər) — hər ``--computer-ips`` IP-si üçün bir
+        kompüter (giriş IP → zal). MAC identifikasiya sahəsidir (HTTP-dən oxunmur;
+        giriş IP ilə bloklanır). Baza MAC-ın son okteti hər IP üçün artırılır ki,
+        `(room, mac)` unikallığı pozulmasın."""
+        base_mac = (self.computer_mac or "AA:BB:CC:DD:EE:02").upper()
+        ips = self.computer_ips or ["127.0.0.1"]
+        for idx, ip in enumerate(ips, start=1):
+            # Baza MAC-ın son baytını IP indeksinə görə dəyiş (unikal per-room).
+            parts = base_mac.split(":")
+            if len(parts) == 6:
+                try:
+                    parts[-1] = f"{(int(parts[-1], 16) + idx - 1) & 0xFF:02X}"
+                except ValueError:
+                    pass
+            mac = ":".join(parts)
+            ExamRoomComputer.objects.get_or_create(
+                room=room,
+                mac_address=mac,
+                defaults={
+                    "organization": org,
+                    "label": f"PC-{idx:02d}",
+                    "seat_number": idx,
+                    "ip_address": ip,
+                    "is_active": True,
+                    "created_by": creator,
+                },
+            )
 
     def _report(
         self,
