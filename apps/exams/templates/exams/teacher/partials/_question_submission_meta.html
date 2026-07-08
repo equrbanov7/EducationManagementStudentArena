@@ -6,6 +6,8 @@ köçürür (data-qsub-meta / data-qsub-meta-multi). Dil, fənn və ən azı bir
 MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir; qrup çox-seçimlidir.
 {% endcomment %}
 
+{{ teacher_group_subjects|json_script:"qsubGroupsSubjects" }}
+
 <section class="qsubm-card" aria-labelledby="qsubmHeading">
     <div class="qsubm-card__head">
         <div class="qsubm-card__icon"><i class="fas fa-paper-plane"></i></div>
@@ -44,7 +46,11 @@ MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir; q
         <div class="qsubm-field">
             <label for="qsubSubject">{% trans "Fənn" %} <span class="qsubm-req">*</span></label>
             <div class="bootstrap-single-select qsubm-bs-select">
-                <select id="qsubSubject" name="subject" form="saveForm" data-qsub-meta required
+                <select id="qsubSubject" name="subject" form="saveForm" data-qsub-meta data-qsub-subject required
+                        data-no-group-text="{% trans 'Fənni seçin…' %}"
+                        data-empty-text="{% trans 'Bu qrup üçün fənn yoxdur' %}"
+                        data-choose-text="{% trans 'Fənni seçin…' %}"
+                        data-initial-subject="{{ form_state.subject }}"
                         class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                     <option value="">{% trans "Fənni seçin…" %}</option>
                     {% for s in teacher_subjects %}
@@ -66,6 +72,7 @@ MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir; q
                 {% for g in teacher_groups %}
                 <label class="qsubm-chip">
                     <input type="checkbox" name="group_ids" value="{{ g.id }}" form="saveForm"
+                           data-qsub-group-checkbox
                            data-qsub-meta-multi
                            {% if g.id|stringformat:'s' in form_state.group_ids %}checked{% endif %}>
                     <span class="qsubm-chip__box"><i class="fas fa-check"></i></span>

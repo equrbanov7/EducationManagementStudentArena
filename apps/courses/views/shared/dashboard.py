@@ -57,6 +57,67 @@ def _build_exam_language_modal_context(exam):
     }
 
 
+def _course_group_summaries(course):
+    memberships = list(
+        CourseMembership.objects.filter(course=course, role="student")
+        .select_related("user")
+        .exclude(group_name="")
+        .order_by("group_name", "user__first_name", "user__last_name", "user__username")
+    )
+    grouped_memberships = defaultdict(list)
+    for membership in memberships:
+        group_name = (membership.group_name or "").strip()
+        if group_name:
+            grouped_memberships[group_name].append(membership)
+
+    if not grouped_memberships:
+        return []
+
+    student_groups = (
+        StudentGroup.objects.filter(
+            organization=course.organization,
+            name__in=grouped_memberships.keys(),
+        )
+        .select_related("teacher", "org_unit")
+        .prefetch_related("teachers", "subjects")
+        .order_by("name", "id")
+    )
+    group_by_name = {}
+    for group in student_groups:
+        if group.name not in group_by_name or group.has_teacher(course.owner):
+            group_by_name[group.name] = group
+
+    summaries = []
+    for group_name, group_memberships in sorted(grouped_memberships.items()):
+        group = group_by_name.get(group_name)
+        students = [membership.user for membership in group_memberships]
+        teacher_names = []
+        subject_names = []
+        org_unit_name = ""
+        if group is not None:
+            teacher_names.append(group.teacher.get_full_name() or group.teacher.username)
+            for teacher in group.teachers.all():
+                teacher_label = teacher.get_full_name() or teacher.username
+                if teacher_label not in teacher_names:
+                    teacher_names.append(teacher_label)
+            subject_names = [str(subject) for subject in group.subjects.all()]
+            org_unit_name = getattr(group.org_unit, "name", "") or ""
+
+        summaries.append(
+            {
+                "id": group.id if group else None,
+                "name": group_name,
+                "student_count": len(students),
+                "students_preview": students[:8],
+                "students_more_count": max(0, len(students) - 8),
+                "teacher_names": teacher_names,
+                "subject_names": subject_names,
+                "org_unit_name": org_unit_name,
+            }
+        )
+    return summaries
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Course Dashboard
 # ════════════════════════════════════════════════════════════════════════════
@@ -153,6 +214,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             context["members"] = course.memberships.select_related("user").order_by("group_name", "joined_at")
         else:
             context["members"] = []
+        context["course_group_summaries"] = _course_group_summaries(course) if context["can_manage_course"] else []
 
         # ═══════════════════════════════════════════════════════════════════
         # 4-6. TASK BÖLMƏLƏRİ (assignments / projects / labs)

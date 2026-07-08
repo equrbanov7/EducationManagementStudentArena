@@ -7,7 +7,7 @@
             <div class="section-title mb-0">
                 <div class="title-left">
                     <i class="fas fa-book text-orange"></i>
-                    <span>{% trans "title" context "profile.my_courses" %}</span>
+                    <span>{% if university_mode and role_capabilities.is_teacher %}{% trans "Təyin olunmuş fənlərim" %}{% else %}{% trans "title" context "profile.my_courses" %}{% endif %}</span>
                     <span class="count-badge badge-orange">{{ my_created_courses_count }}</span>
                 </div>
             </div>
@@ -34,6 +34,11 @@
                         <span class="meta-divider">•</span>
                         <span class="meta-item badge-status">{{ course.get_status_display }}</span>
                     </div>
+                    {% if course.profile_group_names %}
+                    <div class="course-card-meta course-card-meta--groups">
+                        <span class="meta-item"><i class="fas fa-users"></i> {% trans "Qruplar" %}: {{ course.profile_group_names|join:", " }}</span>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="course-card-action">
                     <i class="fas fa-chevron-right"></i>

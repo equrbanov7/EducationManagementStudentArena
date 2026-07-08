@@ -92,6 +92,13 @@
           {% include 'courses/partials/_resource_accordion.html' %}
         </section>
 
+        {% if can_manage_course %}
+        <section class="ems-sec" data-key="groups" data-icon="users"
+                 data-color="#2563EB" data-soft="#EFF6FF" data-deep="#1D4ED8">
+          {% include 'courses/partials/_course_groups_accordion.html' %}
+        </section>
+        {% endif %}
+
         {% if can_view_members %}
         <section class="ems-sec" data-key="members" data-icon="users"
                  data-color="#16A34A" data-soft="#DCFCE7" data-deep="#15803D">
@@ -171,6 +178,9 @@
             <div class="cstat"><div class="n">{{ topics|length }}</div><div class="l">{% trans "stat_topics" context "courses.dashboard" %}</div></div>
             {% if can_view_members %}
             <div class="cstat"><div class="n" id="sidebar-members-count">{{ members|length }}</div><div class="l">{% trans "stat_members" context "courses.dashboard" %}</div></div>
+            {% endif %}
+            {% if can_manage_course %}
+            <div class="cstat"><div class="n">{{ course_group_summaries|length }}</div><div class="l">{% trans "Qrup" %}</div></div>
             {% endif %}
           </div>
 
