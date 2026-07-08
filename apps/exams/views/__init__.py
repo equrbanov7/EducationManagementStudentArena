@@ -4,6 +4,8 @@
 # SHARED VIEWS (bütün user-lər üçün ortaq)
 # ═══════════════════════════════════════════════════════════════
 from .exam_center import (
+    exam_center_assign_students,
+    exam_center_finals,
     exam_center_pin_lookup,
     exam_center_pin_search,
     exam_center_reports,
@@ -13,7 +15,6 @@ from .exam_center import (
     exam_center_room_open_all,
     exam_center_room_snapshot,
     exam_center_room_start_all,
-    exam_center_session_assign_students,
     exam_center_session_cancel,
     exam_center_session_create,
     exam_center_session_detail,
@@ -264,7 +265,8 @@ __all__ = [
     "exam_center_room_open_all",
     "exam_center_room_snapshot",
     "exam_center_room_start_all",
-    "exam_center_session_assign_students",
+    "exam_center_assign_students",
+    "exam_center_finals",
     "exam_center_session_cancel",
     "exam_center_session_create",
     "exam_center_session_detail",

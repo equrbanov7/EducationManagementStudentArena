@@ -57,7 +57,10 @@ def _visible_grid_tickets(tickets):
 
 def _ticket_row(ticket, presence, exam_title=None):
     """Yalnız əməliyyat üçün lazım olan kompakt sahələr — cavablar/ballar YOX.
-    ``exam_title`` zal-səviyyəli aqreqasiyada fənn/imtahan adını əlavə edir."""
+    ``exam_title`` biletin öz imtahanından götürülür (hər tələbə öz imtahanı) —
+    oturum artıq imtahandan asılı deyil (oturum sisteminin ləğvi)."""
+    if exam_title is None and ticket.exam_id:
+        exam_title = ticket.exam.title
     attempt = ticket.attempt
     remaining_seconds = None
     if attempt and not attempt.is_finished and attempt.deadline_at:
@@ -92,7 +95,9 @@ def session_monitor_snapshot(session):
     maybe_auto_end(session)
 
     tickets = list(
-        session.tickets.select_related("student", "attempt").order_by("seat_number", "student__first_name", "id")
+        session.tickets.select_related("student", "attempt", "exam").order_by(
+            "seat_number", "student__first_name", "id"
+        )
     )
     # Attempt bitmiş, bilet hələ "active" qalmış sətirləri sinxonlaşdır (lazy).
     for ticket in tickets:
@@ -125,7 +130,6 @@ def session_monitor_snapshot(session):
     return {
         "session_id": session.pk,
         "state": session.state,
-        "exam_title": session.exam.title,
         "room_name": session.room.name,
         "room_capacity": session.room.capacity,
         "scheduled_start": session.scheduled_start.isoformat(),
@@ -144,9 +148,9 @@ def room_live_sessions(room):
     from apps.exams.models import ExamRoomSession
 
     sessions = list(
-        ExamRoomSession.objects.filter(room=room, state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE))
-        .select_related("exam")
-        .order_by("scheduled_start", "id")
+        ExamRoomSession.objects.filter(
+            room=room, state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)
+        ).order_by("scheduled_start", "id")
     )
     # Rəsmi deadline-ı lazily tətbiq et, sonra hələ canlı qalanları saxla.
     for session in sessions:
@@ -169,8 +173,8 @@ def room_monitor_snapshot(room):
 
     tickets = list(
         FinalExamTicket.objects.filter(session_id__in=session_ids)
-        .select_related("student", "attempt", "session", "session__exam")
-        .order_by("session__exam__title", "seat_number", "id")
+        .select_related("student", "attempt", "session", "exam")
+        .order_by("exam__title", "seat_number", "id")
     )
     for ticket in tickets:
         if ticket.status == TICKET_STATUS_ACTIVE and ticket.attempt_id:
@@ -211,7 +215,6 @@ def room_monitor_snapshot(room):
         "sessions": [
             {
                 "session_id": s.pk,
-                "exam_title": s.exam.title,
                 "state": s.state,
                 "scheduled_start": s.scheduled_start.isoformat(),
                 "scheduled_end": s.scheduled_end.isoformat(),
@@ -219,7 +222,7 @@ def room_monitor_snapshot(room):
             }
             for s in sessions
         ],
-        "students": [_ticket_row(t, presence, exam_title=t.session.exam.title) for t in _visible_grid_tickets(tickets)],
+        "students": [_ticket_row(t, presence) for t in _visible_grid_tickets(tickets)],
     }
 
 

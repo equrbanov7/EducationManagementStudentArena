@@ -116,7 +116,7 @@
         {% for s in page_obj %}
         <tr>
           <td class="fxc-strong">
-            <a href="{% url 'exams:exam_center_session_detail' session_id=s.pk %}">{{ s.exam.title }}</a>
+            <a href="{% url 'exams:exam_center_session_detail' session_id=s.pk %}">{{ s.room.name }} <code>{{ s.room.code }}</code></a>
           </td>
           <td>{{ s.room.name }}</td>
           <td>{{ s.scheduled_start|date:"d.m.Y H:i" }}</td>
