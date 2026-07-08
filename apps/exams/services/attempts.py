@@ -299,6 +299,10 @@ def _start_or_resume_attempt(request, exam: Exam):
     user = request.user
     return_to = current_return_to(request)
 
+    # Müəllim "Sınaq keç" düyməsi ilə öz imtahanını yoxlaya bilər — bu cəhd
+    # yalnız imtahan müəllifinə açıqdır və nəticələrə sayılmır (is_trial).
+    is_trial = (request.GET.get("trial") == "1" or request.POST.get("trial") == "1") and user == exam.author
+
     # ── Çoxdilli imtahan: yeni attempt üçün dil seçimi ──────────────────────
     # Mövcud aktiv attempt varsa, dil onsuz da seçilib — resume zamanı sormuruq.
     # Yalnız bir dil varsa avtomatik seçilir; birdən çox dil varsa və seçim
@@ -350,6 +354,7 @@ def _start_or_resume_attempt(request, exam: Exam):
                 user,
                 language=chosen_language,
                 language_variant=get_active_variant(exam, chosen_language) if chosen_language else None,
+                is_trial=is_trial,
             )
             if not created:
                 # A parallel request already created the attempt (DB constraint

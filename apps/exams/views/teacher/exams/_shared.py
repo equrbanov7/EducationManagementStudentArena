@@ -212,6 +212,34 @@ def _get_editable_exam_or_404(request, slug):
     return exam
 
 
+def _selected_access_entities(form):
+    """Yalnız SEÇİLİ icazəli qrup/istifadəçiləri qaytarır (lazy render üçün).
+
+    Böyük təşkilatlarda bütün variantları render etmək əvəzinə, server yalnız
+    seçililəri göndərir; qalanları axtarış endpoint-ləri (group_search /
+    user_search) debounce ilə gətirir. Nəticə forma sahələrinin queryset-inə
+    görə scope olunur (təşkilat + icazə).
+    """
+    groups_field = form.fields.get("allowed_groups")
+    users_field = form.fields.get("allowed_users")
+    if not groups_field or not users_field:
+        return [], []
+
+    group_ids = []
+    user_ids = []
+    if form.is_bound:
+        data = form.data
+        group_ids = data.getlist("allowed_groups") if hasattr(data, "getlist") else []
+        user_ids = data.getlist("allowed_users") if hasattr(data, "getlist") else []
+    elif getattr(form.instance, "pk", None):
+        group_ids = list(form.instance.allowed_groups.values_list("id", flat=True))
+        user_ids = list(form.instance.allowed_users.values_list("id", flat=True))
+
+    groups = list(groups_field.queryset.filter(id__in=group_ids)) if group_ids else []
+    users = list(users_field.queryset.filter(id__in=user_ids)) if user_ids else []
+    return groups, users
+
+
 def _build_group_student_map(form):
     """
     İcazəli qruplardan icazəli istifadəçilərə xəritə qurur.

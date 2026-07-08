@@ -48,6 +48,23 @@ def _ensure_teacher(user):
     raise PermissionDenied(pgettext("exams.service.attempt.permission", "teachers_only_page"))
 
 
+def can_view_attempt_results(user):
+    """Cəhd nəticəsini (YALNIZ GÖRMƏK) kim aça bilər?
+
+    Müəllim öz imtahanlarının cəhdlərini görür; imtahan mərkəzi rolu (rəhbər +
+    işçi) statistika bölməsindən "Bax" ilə org daxilindəki İSTƏNİLƏN imtahanın
+    nəticəsinə (read-only, bal verə bilməz) baxa bilir. ``is_exam_center_user``
+    və ``is_teacher_user`` hər ikisi superadmini əhatə edir.
+    """
+    return is_teacher_user(user) or is_exam_center_user(user)
+
+
+def _ensure_can_view_attempt_results(user):
+    if can_view_attempt_results(user):
+        return
+    raise PermissionDenied(pgettext("exams.service.attempt.permission", "teachers_only_page"))
+
+
 # ---------------------------------------------------------------------------
 # İmtahan mərkəzi siyasəti
 # ---------------------------------------------------------------------------
@@ -62,6 +79,41 @@ def is_exam_center_user(user):
     if user.is_superuser or getattr(user, "is_superadmin", False):
         return True
     return bool(getattr(user, "is_exam_center", False))
+
+
+def can_manage_exam_rooms(user):
+    """İmtahan zalı və zaldakı kompüter/MAC qeydlərini kim idarə edə bilər?
+
+    Universitet qaydası: zal/kompüter qeydiyyatı yalnız SUPERADMIN səlahiyyətidir.
+    Superadmin bunu ayrıca istifadəçiyə ``UserProfile.can_manage_exam_rooms``
+    bayrağı ilə həvalə edə bilər (imtahan mərkəzi rolu TƏK BAŞINA kifayət
+    etmir — mərkəz oturum/tələbə/PIN idarə edir, zal infrastrukturunu yox).
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return True
+    profile = getattr(user, "profile", None)
+    return bool(profile is not None and getattr(profile, "can_manage_exam_rooms", False))
+
+
+def ensure_can_manage_exam_rooms(user):
+    if can_manage_exam_rooms(user):
+        return
+    raise PermissionDenied(pgettext("exams.service.access.permission", "exam_rooms_manage_superadmin_only"))
+
+
+def can_assign_invigilators(user):
+    """Zala nəzarətçi təyin edə bilən: superadmin + imtahan mərkəzi RƏHBƏRİ.
+
+    İmtahan mərkəzi İŞÇİSİ (``exam_center_staff``) təyin ETMİR — yalnız monitor /
+    PIN axtarışı / hesabat. Köhnə tək ``exam_center`` rolu rəhbərə bərabərdir.
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return True
+    return bool(getattr(user, "is_exam_center_head", False))
 
 
 def can_manage_final_exam_content(user):
@@ -94,12 +146,15 @@ def ensure_can_create_question_bank(user):
 __all__ = [
     "FINAL_EXAM_CATEGORY",
     "_ensure_teacher",
+    "can_assign_invigilators",
     "can_create_question_bank",
     "can_manage_exam_questions",
+    "can_manage_exam_rooms",
     "can_manage_final_exam_content",
     "can_user_access_exam",
     "ensure_can_create_question_bank",
     "ensure_can_manage_exam_questions",
+    "ensure_can_manage_exam_rooms",
     "is_exam_center_user",
     "is_teacher_user",
 ]

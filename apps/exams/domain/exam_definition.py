@@ -127,6 +127,16 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         related_name="exams",
         verbose_name=pgettext_lazy("exams.model.exam.field", "course"),
     )
+    # Akademik fənn (registrar.Subject) — bu imtahanın hansı fənlə əlaqəli
+    # olduğunu göstərir. Final/midterm imtahanlarında məcburidir (forma clean()).
+    subject = models.ForeignKey(
+        "registrar.Subject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exams",
+        verbose_name=pgettext_lazy("exams.model.exam.field", "subject"),
+    )
     organization = models.ForeignKey(
         "organizations.Organization",
         on_delete=models.CASCADE,
@@ -291,8 +301,11 @@ class Exam(ExamAccessPolicyMixin, models.Model):
             return None
 
         self._expire_stale_attempts_for(user)
-        used = self.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).count()
-        left = self.max_attempts_per_user - used
+        used = self.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).exclude(is_trial=True).count()
+        # Müəllim konkret tələbəyə əlavə cəhd(lər) verə bilər — qlobal limiti
+        # dəyişmədən yalnız bu tələbənin limitini artırır.
+        extra = self.attempt_grants.filter(student=user).values_list("extra_attempts", flat=True).first() or 0
+        left = self.max_attempts_per_user + extra - used
         return max(left, 0)
 
 

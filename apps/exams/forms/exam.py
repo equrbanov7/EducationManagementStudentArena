@@ -140,6 +140,7 @@ class ExamForm(forms.ModelForm):
             "description",
             "exam_type",
             "exam_type_extended",
+            "subject",
             "is_active",
             "start_datetime",
             "end_datetime",
@@ -178,6 +179,14 @@ class ExamForm(forms.ModelForm):
                 attrs={
                     "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
                     "data-bootstrap-select": "",
+                }
+            ),
+            # Fənn — axtarışlı select ilə idarə olunur; server-side yalnız seçili
+            # variant render olunur (subject_select.js dinamik doldurur).
+            "subject": forms.Select(
+                attrs={
+                    "class": "d-none js-exam-subject-native",
+                    "data-exam-subject-select": "",
                 }
             ),
             "is_active": forms.CheckboxInput(
@@ -270,6 +279,7 @@ class ExamForm(forms.ModelForm):
             "description": pgettext_lazy("exams.form.exam.label", "description"),
             "exam_type": pgettext_lazy("exams.form.exam.label", "exam_type"),
             "exam_type_extended": pgettext_lazy("exams.form.exam.label", "exam_type_extended"),
+            "subject": pgettext_lazy("exams.form.exam.label", "subject"),
             "is_active": pgettext_lazy("exams.form.exam.label", "is_active"),
             "start_datetime": pgettext_lazy("exams.form.exam.label", "start_datetime"),
             "end_datetime": pgettext_lazy("exams.form.exam.label", "end_datetime"),
@@ -434,6 +444,18 @@ class ExamForm(forms.ModelForm):
         self.fields["allowed_users"].queryset = User.objects.filter(is_active=True).order_by("username")
         self.fields["allowed_groups"].queryset = StudentGroup.objects.none()
 
+        # Fənn (registrar.Subject) — təşkilata görə filtrlənir. Axtarışlı select
+        # olduğundan server-side bütün variantları render etmirik; queryset yalnız
+        # göndərilmiş dəyərin doğrulanması üçün lazımdır.
+        if "subject" in self.fields:
+            from apps.registrar.models import Subject
+
+            if organization is not None:
+                self.fields["subject"].queryset = Subject.objects.filter(organization=organization).order_by("code")
+            else:
+                self.fields["subject"].queryset = Subject.objects.none()
+            self.fields["subject"].required = False
+
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
             user_qs = User.objects.filter(is_active=True).exclude(id=user.id)
@@ -532,6 +554,12 @@ class ExamForm(forms.ModelForm):
                 existing_value = self.instance.random_question_count
                 return 10 if existing_value is None else existing_value
             return 10
+
+        # QEYD: `random_question_count` HƏDƏF saydır — imtahan yaradılarkən sual
+        # təyin olunur, suallar sonra əlavə olunur. Randomizer say mövcud sual
+        # sayından çoxdursa avtomatik hamısını verir. Ona görə burada bloklamırıq;
+        # sehrbaz "Sistemdə yalnız N sual var" xəbərdarlığını canlı göstərir
+        # (exam_available_question_count endpoint + review summary).
         return value
 
     def _clean_enabled_toggle(self, field_name, *, default):
@@ -578,6 +606,14 @@ class ExamForm(forms.ModelForm):
 
         if exam_type == PRACTICAL_EXAM_TYPE and not self.practical_exams_enabled:
             self.add_error("exam_type", practical_exam_disabled_message())
+
+        # Final/midterm imtahanlarında fənn (subject) məcburidir.
+        exam_type_extended = cleaned_data.get("exam_type_extended")
+        if exam_type_extended in {"final", "midterm"} and not cleaned_data.get("subject"):
+            self.add_error(
+                "subject",
+                pgettext_lazy("exams.form.exam.error", "subject_required_for_final_midterm"),
+            )
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:

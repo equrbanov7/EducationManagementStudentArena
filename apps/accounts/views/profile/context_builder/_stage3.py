@@ -285,6 +285,17 @@ class _Stage3Mixin:
             self.superadmin_ai_settings_section["post_next_url"] = _append_query_params(
                 reverse("accounts:profile"), section="superadmin-ai"
             )
+        if "superadmin-exam-rooms" in self.allowed_sections and self.active_section == "superadmin-exam-rooms":
+            from .._sections.exam_rooms import build_exam_rooms_section
+
+            build_exam_rooms_section(
+                self.request,
+                self.exam_rooms_section,
+                is_superadmin=self.capabilities["is_superadmin"],
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         self._notif_ctx = build_notifications_context(self.request, active_section=self.active_section)
         self.notif_filter = self._notif_ctx["notif_filter"]
         self.notif_type = self._notif_ctx["notif_type"]

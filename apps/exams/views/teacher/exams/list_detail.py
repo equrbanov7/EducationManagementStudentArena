@@ -21,7 +21,6 @@ from core.tenancy import get_request_organization, request_has_active_organizati
 
 from ._shared import (
     _bind_selected_organization,
-    _build_group_student_map,
     _ensure_exam_permission,
     _get_editable_exam_or_404,
     _get_exam_detail_question_page,
@@ -32,6 +31,7 @@ from ._shared import (
     _resolve_required_organization,
     _resolve_selected_superadmin_organization,
     _restore_superadmin_profile_organization,
+    _selected_access_entities,
     _teacher_profile_my_exams_url,
 )
 
@@ -163,6 +163,12 @@ def createAndEditExamView(request, slug=None):
 
             save_supervision_config_from_form(exam_instance, request.POST)
 
+            # Final/midterm imtahanlarında hər tələbəyə fərdi PIN təmin et
+            # (kabinetdə dərhal görünür, imtahan kodunu əvəz edir).
+            from apps.exams.services.student_pins import provision_exam_student_pins
+
+            provision_exam_student_pins(exam_instance)
+
             from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
 
             current_recipient_ids = get_exam_assigned_user_ids(exam_instance)
@@ -218,7 +224,7 @@ def createAndEditExamView(request, slug=None):
                 ),
             )
             return JsonResponse({"success": True, "slug": exam_instance.slug})
-        group_student_map = _build_group_student_map(form)
+        selected_groups, selected_users = _selected_access_entities(form)
         html = render_to_string(
             "exams/teacher/partials/_create_exam_modal_form.html",
             {
@@ -226,7 +232,8 @@ def createAndEditExamView(request, slug=None):
                 "is_editing": is_editing,
                 "exam": exam,
                 "linked_course": linked_course,
-                "group_student_map": group_student_map,
+                "selected_allowed_groups": selected_groups,
+                "selected_allowed_users": selected_users,
                 "supervision_config": supervision_config,
             },
             request=request,
@@ -238,7 +245,7 @@ def createAndEditExamView(request, slug=None):
             form = ExamForm(instance=exam, **form_kwargs)
         else:
             form = ExamForm(**form_kwargs)
-    group_student_map = _build_group_student_map(form)
+    selected_groups, selected_users = _selected_access_entities(form)
 
     return render(
         request,
@@ -248,7 +255,8 @@ def createAndEditExamView(request, slug=None):
             "exam": exam,
             "is_editing": is_editing,
             "linked_course": linked_course,
-            "group_student_map": group_student_map,
+            "selected_allowed_groups": selected_groups,
+            "selected_allowed_users": selected_users,
             "supervision_config": supervision_config,
         },
     )

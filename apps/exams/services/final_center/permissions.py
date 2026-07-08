@@ -30,9 +30,17 @@ def ensure_can_manage_final_center(user) -> None:
 
 
 def can_supervise_session(user, session) -> bool:
-    """Oturumun canlı idarəsi: mərkəz + təyin olunmuş nəzarətçi/heyət."""
+    """Oturumun canlı idarəsi: mərkəz + ZALA təyin olunmuş nəzarətçi.
+
+    Nəzarətçi artıq oturuma yox, ZALA təyin olunur (``ExamRoom.invigilators``) və
+    zaldakı bütün oturumları idarə edir. Köhnə oturum-səviyyəli
+    ``invigilator``/``staff`` təyinatları geriyə-uyğunluq üçün hələ də qəbul edilir.
+    """
     if can_manage_final_center(user):
         return True
+    if session.room.invigilators.filter(id=user.id).exists():
+        return True
+    # Köhnə (deprecated) oturum-səviyyəli təyinatlar — geriyə-uyğunluq.
     if session.invigilator_id == user.id:
         return True
     return session.staff.filter(id=user.id).exists()
@@ -45,8 +53,12 @@ def ensure_can_supervise_session(user, session) -> None:
 
 
 def supervised_sessions_q(user) -> Q:
-    """İstifadəçinin nəzarətçi/heyət kimi göründüyü oturumlar üçün Q filtri."""
-    return Q(invigilator=user) | Q(staff=user)
+    """İstifadəçinin nəzarətçi kimi göründüyü oturumlar üçün Q filtri.
+
+    Əsas mənbə: ZALA təyin olunmuş nəzarətçilər (``room__invigilators``).
+    Köhnə oturum-səviyyəli ``invigilator``/``staff`` da geriyə-uyğunluq üçün.
+    """
+    return Q(room__invigilators=user) | Q(invigilator=user) | Q(staff=user)
 
 
 def sessions_visible_to(user, base_queryset):

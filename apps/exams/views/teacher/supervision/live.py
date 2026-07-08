@@ -7,7 +7,6 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.features import exam_supervision_enabled
 from apps.exams.models import ExamAttempt
-from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.supervision import (
     get_attempt_live_snapshot,
     get_exam_live_monitor_data,
@@ -16,6 +15,7 @@ from apps.exams.services.supervision import (
 
 from ._shared import (
     _ensure_organization_context,
+    _ensure_supervision_access,
     _ensure_supervision_feature_enabled,
     _get_scoped_exam_or_404,
     _parse_date_param,
@@ -33,7 +33,7 @@ def exam_live_monitor(request, exam_id):
     explicit actions via the existing APIs.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     _ensure_supervision_feature_enabled()
 
     exam = _get_scoped_exam_or_404(request, org, exam_id)
@@ -60,7 +60,7 @@ def exam_live_monitor(request, exam_id):
 def exam_live_monitor_poll_api(request, exam_id):
     """JSON polling endpoint that backs the live dashboard's auto-refresh."""
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     if not exam_supervision_enabled():
         return _supervision_disabled_json()
 
@@ -79,7 +79,7 @@ def attempt_live_snapshot_api(request, attempt_id):
     "look over the shoulder" modal. Read-only; scope enforced via the exam.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     if not exam_supervision_enabled():
         return _supervision_disabled_json()
 

@@ -18,6 +18,7 @@
         "namespace.js",
         "markup.js",
         "searchable_select.js",
+        "subject_select.js",
         "toggles.js",
         "form.js",
         "entry.js"

@@ -210,6 +210,15 @@ class _Stage2Mixin:
             "post_next_url": "",
             "pending_count": 0,
         }
+        # İmtahan zalı + kompüter/MAC bölməsi (superadmin / bayraqlı idarəçi).
+        self.exam_rooms_section = {
+            "is_superadmin": False,
+            "org_options": [],
+            "selected_org": None,
+            "rooms": [],
+            "room_managers": [],
+            "post_next_url": "",
+        }
         self.org_structure_section = {
             "organization": self.active_organization,
             "units": [],

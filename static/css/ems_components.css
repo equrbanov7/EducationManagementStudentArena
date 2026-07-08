@@ -92,3 +92,62 @@ textarea:focus-visible,
     outline: 2px solid var(--ems-primary-500);
     outline-offset: 2px;
 }
+
+/* ── Reusable search input (partials/_search_input.html) ──────────────────────
+   Sağda kiçik axtarış ikonu + təmizlə (×). WCU tokens → light/dark avtomatik. */
+.search-field {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+.search-field__input {
+    width: 100%;
+    padding: 10px 78px 10px 14px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--ems-neutral-900, #0f172a);
+    background: var(--ems-neutral-0, #fff);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.search-field__input::placeholder { color: var(--ems-neutral-400); }
+.search-field__input:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px rgba(44, 91, 255, 0.15);
+}
+/* Brauzerin öz "×" düyməsini gizlət (ikiqat × olmasın). */
+.search-field__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.search-field__go,
+.search-field__clear {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.search-field__go {
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--ems-neutral-500);
+    font-size: 0.95rem;
+}
+.search-field__go:hover { background: var(--ems-neutral-100); color: var(--ems-primary-500); }
+.search-field__clear {
+    right: 44px;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    color: var(--ems-neutral-400);
+    font-size: 0.9rem;
+}
+.search-field__clear:hover { background: var(--ems-neutral-100); color: var(--ems-danger-500, #ef4444); }
+.search-field__clear[hidden] { display: none; }

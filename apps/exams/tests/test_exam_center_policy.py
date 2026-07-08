@@ -22,6 +22,7 @@ from apps.exams.services.access_policy import (
     is_exam_center_user,
 )
 from apps.organizations.models import Membership, Organization
+from apps.registrar.models import Subject
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -63,6 +64,9 @@ class _Base(TestCase):
 
         cls.exam_center = User.objects.create_user("ec_center", "ec_center@test.az", PASSWORD)
         _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center")
+
+        # Final/midterm imtahanlar üçün fənn (registrar.Subject) məcburidir.
+        cls.subject = Subject.objects.create(organization=cls.org, code="SUBJ101", name="Test Fənni")
 
         # Legacy hal: müəllifi müəllim olan final (məzmun idarəsi yenə bağlıdır).
         cls.final_exam = Exam.objects.create(
@@ -203,6 +207,8 @@ class ExamFormFinalCategoryTests(_Base):
             "exam_type": "test",
             "exam_type_extended": "final",
             "random_question_count": 10,
+            # Final/midterm üçün fənn məcburidir (bax ExamForm.clean).
+            "subject": self.subject.pk,
         }
         data.update(overrides)
         return data

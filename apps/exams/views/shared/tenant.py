@@ -44,6 +44,25 @@ def get_teacher_exam_or_404(request, **filters):
     return get_object_or_404(teacher_queryset, **filters)
 
 
+def get_result_viewable_exam_or_404(request, **filters):
+    """Nəticə görüntüləmə (read-only) üçün imtahanı həll et.
+
+    Müəllim → yalnız öz müəllifi olduğu imtahanlar (``author`` scoped).
+    İmtahan mərkəzi rolu → org daxilində İSTƏNİLƏN imtahan (statistika "Bax").
+    Hər iki halda tenant/org izolyasiyası ``tenant_scoped_exams`` ilə qorunur.
+    İcazə yoxlaması çağıran view-dadır (``_ensure_can_view_attempt_results``).
+    """
+    from apps.exams.services.access_policy import is_exam_center_user, is_teacher_user
+
+    ensure_teacher_exam_tenant_context(request)
+    if is_teacher_user(request.user) and not is_exam_center_user(request.user):
+        base_queryset = Exam.objects.filter(author=request.user)
+    else:
+        # İmtahan mərkəzi (və superadmin) org daxilində bütün imtahanları görür.
+        base_queryset = Exam.objects.all()
+    return get_object_or_404(tenant_scoped_exams(request, base_queryset), **filters)
+
+
 def exam_in_active_tenant(request, exam):
     organization = get_active_organization(request)
     if organization is None or not request_has_active_organization_context(request):

@@ -11,10 +11,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import ExamRoom
+from apps.exams.services.access_policy import can_assign_invigilators
 from apps.exams.services.final_center import (
     HEARTBEAT_INTERVAL_SECONDS,
     RoomSessionStateError,
@@ -25,19 +27,29 @@ from apps.exams.services.final_center import (
     room_monitor_snapshot,
     start_room,
 )
+from core.audit import log_action
+from core.constants import AuditAction
 
-from ._shared import supervisor_org_or_403
+from ._shared import center_staff_queryset, supervisor_org_or_403
+
+
+def _user_is_room_invigilator(user, room) -> bool:
+    """İstifadəçi bu zala (zal-səviyyəsində) nəzarətçi kimi təyin olunubmu?"""
+    return room.invigilators.filter(id=user.id).exists()
 
 
 def _get_room_and_sessions(request, room_id):
     """
     Zalı tenant daxilində tapır və istifadəçinin nəzarət edə bildiyi canlı
-    oturumları qaytarır. Ən azı bir belə oturum olmalıdır (əks halda 403).
+    oturumları qaytarır.
+
+    Giriş: imtahan mərkəzi HƏMİŞƏ; zala təyin olunmuş nəzarətçi canlı oturum
+    olmasa da (zalı boşkən də) daxil olub kompüter xəritəsinə baxa bilər.
     """
     organization = supervisor_org_or_403(request)
     room = get_object_or_404(ExamRoom, pk=room_id, organization=organization)
     sessions = [s for s in room_live_sessions(room) if can_supervise_session(request.user, s)]
-    if not sessions and not can_manage_final_center(request.user):
+    if not sessions and not can_manage_final_center(request.user) and not _user_is_room_invigilator(request.user, room):
         raise PermissionDenied(pgettext("exams.final_center.permission", "Bu zala təyin olunmamısınız."))
     return organization, room, sessions
 
@@ -99,11 +111,36 @@ def _monitor_labels():
     }
 
 
+def _room_computer_grid(room, snapshot):
+    """Qeydli kompüterlər + hər birində canlı tələbə/imtahan (seat üzrə overlay).
+
+    Registrə edilmiş ``ExamRoomComputer`` sətirlərinin üstünə snapshot-un canlı
+    tələbə sətirlərini ``seat_number`` uyğunluğu ilə yerləşdirir — nəzarətçi
+    hansı kompüterdə hansı imtahanın getdiyini birbaşa görür.
+    """
+    seat_map = {}
+    for row in snapshot.get("students", []):
+        seat = row.get("seat")
+        if seat is not None and seat not in seat_map:
+            seat_map[seat] = row
+    computers = []
+    for comp in room.computers.all():
+        computers.append({"computer": comp, "occupant": seat_map.get(comp.seat_number)})
+    return computers
+
+
 @login_required
 def exam_center_room_monitor(request, room_id):
-    """Zal monitoru — bütün canlı oturumların birləşmiş görüntüsü."""
+    """Zal monitoru — bütün canlı oturumların birləşmiş görüntüsü + kompüter xəritəsi."""
     _organization, room, _sessions = _get_room_and_sessions(request, room_id)
     snapshot = room_monitor_snapshot(room)
+    can_manage = can_manage_final_center(request.user)
+
+    room = ExamRoom.objects.prefetch_related("computers", "invigilators").get(pk=room.pk)
+    invigilators = list(room.invigilators.all())
+    # Nəzarətçi təyini YALNIZ imtahan mərkəzi RƏHBƏRİ üçün (işçi görmür).
+    can_assign = can_assign_invigilators(request.user)
+
     return render(
         request,
         "exams/exam_center/room_monitor.html",
@@ -111,10 +148,58 @@ def exam_center_room_monitor(request, room_id):
             "room": room,
             "snapshot": snapshot,
             "heartbeat_seconds": HEARTBEAT_INTERVAL_SECONDS,
-            "can_manage": can_manage_final_center(request.user),
+            "can_manage": can_manage,
+            "can_assign_invigilators": can_assign,
             "monitor_labels": _monitor_labels(),
+            "room_computers": _room_computer_grid(room, snapshot),
+            "room_invigilators": invigilators,
+            # Namizədlər AJAX ilə yüklənir (sistemi yükləməmək üçün) — səhifə
+            # açılışında bütün istifadəçilər render olunmur; bax user_search lookup.
+            "invigilator_search_url": reverse("exams:invigilator_search"),
         },
     )
+
+
+@login_required
+@require_POST
+def exam_center_room_assign_invigilators(request, room_id):
+    """Zala nəzarətçi(lər) təyin edir — yalnız imtahan mərkəzi.
+
+    ``ExamRoom.invigilators`` M2M-ni POST-dakı istifadəçi id-ləri ilə əvəz edir.
+    Yalnız org-un tələbə olmayan aktiv üzvləri qəbul edilir (kənar id-lər atılır).
+    İcazə: yalnız imtahan mərkəzi RƏHBƏRİ (``can_assign_invigilators``) — işçi YOX.
+    """
+    organization = supervisor_org_or_403(request)
+    if not can_assign_invigilators(request.user):
+        raise PermissionDenied(
+            pgettext("exams.final_center.permission", "Zala nəzarətçi təyini yalnız imtahan mərkəzi rəhbəri üçündür.")
+        )
+    room = get_object_or_404(ExamRoom, pk=room_id, organization=organization)
+
+    requested_ids = set()
+    for raw in request.POST.getlist("invigilators"):
+        raw = (raw or "").strip()
+        if raw.isdigit():
+            requested_ids.add(int(raw))
+    valid_users = list(center_staff_queryset(organization).filter(id__in=requested_ids)) if requested_ids else []
+    room.invigilators.set(valid_users)
+
+    log_action(
+        AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=room,
+        reason="final_room_invigilators_set",
+        request=request,
+        changes={"invigilator_ids": sorted(u.id for u in valid_users)},
+        resource_type="exam_room",
+        resource_id=str(room.pk),
+    )
+    messages.success(
+        request,
+        pgettext("exams.final_center.message", "Zala {count} nəzarətçi təyin olundu.").format(count=len(valid_users)),
+    )
+    return redirect("exams:exam_center_room_monitor", room_id=room.pk)
 
 
 @login_required
@@ -189,6 +274,7 @@ def exam_center_room_open_all(request, room_id):
 
 
 __all__ = [
+    "exam_center_room_assign_invigilators",
     "exam_center_room_monitor",
     "exam_center_room_open_all",
     "exam_center_room_snapshot",

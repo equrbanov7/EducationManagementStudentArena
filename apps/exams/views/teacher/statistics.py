@@ -87,7 +87,8 @@ def teacher_exam_statistics(request, slug):
     exam_detail_url, results_url, nav_query = _resolve_navigation(request, exam)
 
     # ── Gather base queryset ──────────────────────────────────────────
-    attempts = ExamAttempt.objects.filter(exam=exam).select_related("user")
+    # Sınaq (trial) cəhdləri statistikaya sayılmır.
+    attempts = ExamAttempt.objects.filter(exam=exam).exclude(is_trial=True).select_related("user")
 
     # ── Filters ───────────────────────────────────────────────────────
     group_id = _parse_int(request.GET.get("group"))

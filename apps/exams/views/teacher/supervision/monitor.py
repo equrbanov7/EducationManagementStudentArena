@@ -15,7 +15,6 @@ from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.features import disabled_supervision_status, exam_supervision_enabled
 from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
-from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.supervision import (
     get_attempt_supervision_status,
     get_supervision_monitor_data,
@@ -27,6 +26,7 @@ from apps.exams.services.supervision import (
 
 from ._shared import (
     _ensure_organization_context,
+    _ensure_supervision_access,
     _ensure_supervision_feature_enabled,
     _supervision_disabled_json,
     _supervision_exam_queryset,
@@ -121,7 +121,7 @@ def supervision_monitor(request):
     Shows all flagged students and incident logs.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     _ensure_supervision_feature_enabled()
 
     exam_id = request.GET.get("exam")
@@ -280,7 +280,7 @@ def supervision_detail(request, attempt_id):
     Detailed incident timeline for a specific student attempt.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     _ensure_supervision_feature_enabled()
 
     attempt = get_object_or_404(
@@ -322,7 +322,7 @@ def teacher_resume_api(request, attempt_id):
     Teacher action to resume a locked/removed student attempt.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     if not exam_supervision_enabled():
         return _supervision_disabled_json()
 
@@ -397,7 +397,7 @@ def teacher_stop_api(request, attempt_id):
     Submits the exam immediately and marks the student as removed.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     if not exam_supervision_enabled():
         return _supervision_disabled_json()
 
@@ -450,7 +450,7 @@ def teacher_lock_api(request, attempt_id):
     The teacher can later resume or permanently remove the student.
     """
     org = _ensure_organization_context(request)
-    _ensure_teacher(request.user)
+    _ensure_supervision_access(request)
     if not exam_supervision_enabled():
         return _supervision_disabled_json()
 

@@ -185,11 +185,28 @@
                 <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
             </a>
         </li>
+        {% endif %}
+        {% if 'exam-center-pins' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'exams:exam_center_pin_lookup' %}"
-               class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=exam-center-pins"
+               data-section="exam-center-pins"
+               data-title="{% trans 'PIN axtarışı' context 'profile.section' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-pins' %}active{% endif %}">
                 <i class="fas fa-key sidebar-menu-icon c3-1"></i>
                 <span class="sidebar-menu-text">{% trans 'PIN axtarışı' %}</span>
+            </a>
+        </li>
+        {% endif %}
+        {% if 'exam-center-stats' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=exam-center-stats"
+               data-section="exam-center-stats"
+               data-title="{% trans 'İmtahan statistikaları' context 'profile.section' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-stats' %}active{% endif %}">
+                <i class="fas fa-chart-line sidebar-menu-icon c3-1"></i>
+                <span class="sidebar-menu-text">{% trans 'İmtahan statistikaları' %}</span>
             </a>
         </li>
         {% endif %}

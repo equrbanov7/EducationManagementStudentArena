@@ -32,8 +32,11 @@
   --ew-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
   display: grid;
   grid-template-columns: 256px 1fr;
+  /* minmax(0, 1fr): sətir konteynerin hündürlüyünü aşmasın (scroll içəridə qalsın). */
+  grid-template-rows: minmax(0, 1fr);
   height: min(680px, 86vh);
   background: var(--ew-surface);
+  width: 100%;
 }
 
 /* ── left rail ── */
@@ -75,7 +78,11 @@
 .exam-wizard .ew-rail-foot i { flex-shrink: 0; margin-top: 2px; color: var(--ew-teal); }
 
 /* ── right pane ── */
-.exam-wizard .ew-pane { display: flex; flex-direction: column; min-width: 0; }
+/* min-height:0 vacibdir: grid/flex elementinin öz məzmunundan kiçilməsinə icazə
+   verir ki, .ew-pane-body-nin overflow:auto scroll-u işə düşsün (yoxsa pane
+   məzmun boyu uzanır və modal-content overflow:hidden onu kəsir → scroll işləmir). */
+.exam-wizard .ew-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; width: 100%; }
+.exam-wizard .ew-rail { min-height: 0; }
 .exam-wizard .ew-mstep { display: none; }
 .exam-wizard .ew-pane-head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
@@ -93,7 +100,13 @@
 .exam-wizard .ew-errsummary a { color: var(--ems-danger-strong); text-decoration: underline; cursor: pointer; }
 
 /* ── body + panels ── */
-.exam-wizard .ew-pane-body { flex: 1; overflow-y: auto; padding: 20px 26px; scrollbar-width: thin; }
+/* overscroll-behavior: modal daxilində sürüşdürəndə fon (profil səhifəsi)
+   hərəkət etməsin — sürüşmə modaldan kənara "zəncirlənməsin". */
+.exam-wizard .ew-pane-body { flex: 1; overflow-y: auto; padding: 20px 26px; scrollbar-width: thin; overscroll-behavior: contain; }
+.exam-wizard-modal .modal-content,
+.exam-wizard { overscroll-behavior: contain; }
+/* Modal açıq olarkən fon sürüşməsini bloklayan yardımçı sinif (entry.js). */
+html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard .ew-pane-body::-webkit-scrollbar { width: 8px; }
 .exam-wizard .ew-pane-body::-webkit-scrollbar-thumb { background: var(--ew-border); border-radius: 8px; }
 .exam-wizard .ew-nonfield { margin-bottom: 14px; }
@@ -265,6 +278,13 @@
 .ew-confirm-discardbtn { color: var(--ems-danger) !important; border-color: #F5C2C2 !important; }
 .ew-confirm-discardbtn:hover { background: #FEECEC !important; }
 
+/* yaratma təsdiqi (ətraflı icmal) */
+.ew-confirm-box--review { max-width: 500px; width: 100%; max-height: 86%; overflow-y: auto; }
+.ew-confirm-ic--ok { background: #E7F6EF; color: #0F9D58; }
+.ew-confirm-summary { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 9px 16px; margin: 4px 0 22px; padding: 14px 16px; text-align: left; font-size: 13.5px; border: 1px solid var(--ew-border); border-radius: 12px; background: var(--ew-surface); }
+.ew-confirm-summary dt { color: var(--ew-muted); font-weight: 600; }
+.ew-confirm-summary dd { margin: 0; color: var(--ew-ink); font-weight: 600; word-break: break-word; }
+
 /* ── responsive: rail → top progress, full-screen on phones ── */
 @media (max-width: 860px) {
   .exam-wizard { grid-template-columns: 1fr; height: min(760px, 92vh); }
@@ -413,3 +433,12 @@
 .supervision-template-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
 .supervision-template-info p { font-size: 0.85rem; color: #555; margin-bottom: 0.75rem; }
 .supervision-template-info ul { font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0; }
+
+/* ── yekun icmal (son addım) ── */
+.exam-wizard .ew-review { margin-top: 18px; border: 1px solid var(--ew-border); border-radius: 13px; padding: 14px 16px; background: var(--ew-surface); }
+.exam-wizard .ew-review-head { display: flex; align-items: center; gap: 9px; font-weight: 700; color: var(--ew-ink); margin-bottom: 10px; }
+.exam-wizard .ew-review-head i { color: var(--ew-teal); }
+.exam-wizard .ew-review-grid { display: grid; grid-template-columns: minmax(120px, auto) 1fr; gap: 6px 16px; margin: 0; font-size: 13px; }
+.exam-wizard .ew-review-grid dt { color: var(--ew-muted); font-weight: 600; }
+.exam-wizard .ew-review-grid dd { margin: 0; color: var(--ew-text); word-break: break-word; }
+.exam-wizard .ew-review-warn { margin-top: 12px; padding: 9px 12px; border-radius: 10px; background: #FEECEC; border: 1px solid #F5C2C2; color: #92272D; font-size: 12.5px; }

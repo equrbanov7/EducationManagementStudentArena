@@ -19,12 +19,15 @@ from .question_bank import (
     question_media_path,
     validate_video_size,
 )
+from .student_access import ExamStudentPin, StudentExamAttemptGrant
 from .submission_inbox import QuestionSubmission
 
 __all__ = [
     "BankQuestion",
     "BankQuestionOption",
     "Exam",
+    "ExamStudentPin",
+    "StudentExamAttemptGrant",
     "ExamAnswer",
     "ExamAnswerFile",
     "ExamAttempt",

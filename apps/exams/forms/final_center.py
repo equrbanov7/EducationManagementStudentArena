@@ -34,30 +34,36 @@ class ExamRoomForm(forms.ModelForm):
 class ExamRoomSessionForm(forms.ModelForm):
     """
     Oturum yaratma. Yalnız FINAL kateqoriyalı, aktiv imtahanlar seçilə bilər;
-    zal/nəzarətçi seçimləri org-scoped olur (view ötürür).
+    zal seçimi org-scoped olur (view ötürür).
+
+    Nəzarətçi ARTIQ burada YOX — nəzarətçi ZALA təyin olunur (``ExamRoom.invigilators``,
+    imtahan mərkəzi zal monitorunda) və zaldakı bütün oturumları idarə edir.
     """
 
     class Meta:
         model = ExamRoomSession
-        fields = ["exam", "room", "invigilator", "staff", "scheduled_start", "scheduled_end", "notes"]
+        fields = ["exam", "room", "scheduled_start", "scheduled_end", "notes"]
         widgets = {
             "scheduled_start": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
             "scheduled_end": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
 
-    def __init__(self, *args, organization=None, staff_queryset=None, **kwargs):
+    def __init__(self, *args, organization=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.organization = organization
         self.fields["exam"].queryset = Exam.objects.filter(
             organization=organization, exam_type_extended="final", is_archived=False
         ).order_by("-created_at")
         self.fields["room"].queryset = ExamRoom.objects.filter(organization=organization, is_active=True)
-        if staff_queryset is not None:
-            self.fields["invigilator"].queryset = staff_queryset
-            self.fields["staff"].queryset = staff_queryset
-        self.fields["staff"].required = False
-        self.fields["invigilator"].required = False
+        # Bootstrap axtarışlı select ilə zənginləşdir (js/bootstrap_select.js).
+        for field_name in ("exam", "room"):
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                    "data-bootstrap-select": "",
+                }
+            )
         for field_name in ("scheduled_start", "scheduled_end"):
             self.fields[field_name].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"]
 

@@ -98,6 +98,7 @@ from .search import global_search
 # Superadmin views
 from .superadmin import (
     superadmin_ai_settings,
+    superadmin_exam_rooms,
     superadmin_organizations,
 )
 
@@ -167,4 +168,5 @@ __all__ = [
     # Superadmin
     "superadmin_organizations",
     "superadmin_ai_settings",
+    "superadmin_exam_rooms",
 ]

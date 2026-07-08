@@ -9,6 +9,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.features import exam_supervision_enabled, supervision_disabled_message
 from apps.exams.models import Exam
+from apps.exams.services.access_policy import is_exam_center_user, is_teacher_user
 from apps.exams.views.shared.tenant import get_active_organization, tenant_scoped_exams
 from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import request_has_active_organization_context
@@ -20,6 +21,26 @@ def _ensure_organization_context(request):
     if org is None or not request_has_active_organization_context(request):
         raise PermissionDenied(pgettext("supervision.view.permission", "active_org_required"))
     return org
+
+
+def _ensure_supervision_access(request):
+    """İmtahan nəzarəti (canlı monitor) girişi.
+
+    Müəllimdən əlavə imtahan mərkəzi rolu və ya imtahan idarəetmə icazəsi olanlar
+    da daxil ola bilir (imtahanı yaradan hesab öz imtahanının canlı gedişatını
+    izləyə bilməlidir). İmtahanlar/cəhdlər onsuz da ``_supervision_exam_queryset``
+    ilə author-scoped göstərildiyi üçün istifadəçi yalnız öz imtahanlarını görür.
+    """
+    user = request.user
+    if is_teacher_user(user) or is_exam_center_user(user):
+        return
+    if (
+        request_has_permission(request, "exam.manage")
+        or request_has_permission(request, "exam.create")
+        or request_has_permission(request, "exam.edit")
+    ):
+        return
+    raise PermissionDenied(pgettext("exams.service.attempt.permission", "teachers_only_page"))
 
 
 def _supervision_exam_queryset(request, organization):

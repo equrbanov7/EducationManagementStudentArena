@@ -197,6 +197,8 @@ class _Stage4Mixin:
             "category_management_filtered_count": self.category_management_filtered_count,
             "superadmin_organizations_section": self.superadmin_organizations_section,
             "superadmin_pending_org_count": self.superadmin_organizations_section.get("pending_count", 0),
+            "exam_rooms_section": self.exam_rooms_section,
+            "can_manage_exam_rooms": self.capabilities.get("can_manage_exam_rooms", False),
             "is_teacher": self.capabilities["is_teacher"],
             "is_admin": self.capabilities["can_manage_org"],
             "is_superadmin": self.capabilities["is_superadmin"],

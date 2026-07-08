@@ -229,10 +229,18 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 DEBUG = False
 
 # Heavy exam features are disabled in production to protect server resources.
-# This keeps practical/coding exams, Piston-backed code execution, live
-# supervision polling, WebSockets, and teacher-side lock controls off.
+# This keeps practical/coding exams, Piston-backed code execution, WebSockets,
+# and teacher-side lock controls off.
 PRACTICAL_EXAMS_ENABLED = False
-EXAM_SUPERVISION_ENABLED = False
+# Exam supervision (anti-cheat proctoring) now ships in production. It is the
+# default for final/midterm exams, so it must be on unless explicitly disabled
+# via the EXAM_SUPERVISION_ENABLED env var.
+EXAM_SUPERVISION_ENABLED = os.getenv("EXAM_SUPERVISION_ENABLED", "True").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "manage/")
 if ADMIN_URL_PREFIX.strip("/").lower() == "admin":

@@ -104,6 +104,37 @@
         }
     }
 
+    // Final/midterm imtahanlarında hər sual üçün standart vaxt (Kahoot tipli
+    // canlı axın üçündür) məntiqsizdir — kateqoriya seçiminə görə gizlədirik.
+    var SECURE_CATEGORY_VALUES = { final: true, midterm: true };
+
+    function initCategoryVisibility(form) {
+        if (!form) {
+            return;
+        }
+
+        var categorySelect = form.querySelector('select[name="exam_type_extended"]');
+        if (!categorySelect) {
+            return;
+        }
+
+        var hideForSecure = [
+            form.querySelector("[data-ew-qtime-group]")
+        ];
+
+        function syncCategoryVisibility() {
+            var isSecure = Boolean(SECURE_CATEGORY_VALUES[categorySelect.value]);
+            hideForSecure.forEach(function (el) {
+                if (el) {
+                    el.hidden = isSecure;
+                }
+            });
+        }
+
+        syncCategoryVisibility();
+        categorySelect.addEventListener("change", syncCategoryVisibility);
+    }
+
     function initExamTypePicker(form) {
         if (!form) {
             return;
@@ -180,6 +211,7 @@
 
     ns.toggles = {
         initAccessToggle: initAccessToggle,
+        initCategoryVisibility: initCategoryVisibility,
         initExamTypePicker: initExamTypePicker,
         initSupervisionToggle: initSupervisionToggle,
         showModalTemplateInfo: showModalTemplateInfo
