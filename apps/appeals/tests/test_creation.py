@@ -184,6 +184,33 @@ class AppealCreateViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], reverse("exams:final_exam_entry"))
 
+    def test_final_exam_from_profile_results_returns_to_my_appeals_after_submit(self):
+        self.exam.exam_type_extended = "final"
+        self.exam.save(update_fields=["exam_type_extended"])
+        params = {
+            "from_section": "my-results",
+            "return_to": reverse("accounts:profile") + "?section=my-results",
+        }
+
+        response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]), params)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "section=my-appeals", html=False)
+        self.assertContains(response, "blog-header", html=False)
+
+        response = self.client.post(
+            reverse("appeals:appeal_create", args=[self.attempt.id]),
+            {
+                "from_section": "my-results",
+                "return_to": reverse("accounts:profile") + "?section=my-results",
+                f"appeal_q_{self.question.id}": "1",
+                f"appeal_type_{self.question.id}": APPEAL_TYPE_WRONG_ANSWER_KEY,
+                f"comment_{self.question.id}": VALID_COMMENT,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("accounts:profile") + "?section=my-appeals")
+
 
 class AppealExamCenterRoutingTests(TestCase):
     def setUp(self):

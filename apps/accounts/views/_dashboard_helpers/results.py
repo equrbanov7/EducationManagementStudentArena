@@ -37,6 +37,11 @@ def _collect_my_results(request, filter_type=None, search=None):
     filter_type = _normalize_results_filter(selected_filter)
     now = timezone.now()
     review_cutoff = now - REVIEW_EDIT_WINDOW
+    profile_results_url = _append_query_params(
+        reverse("accounts:profile"),
+        section="my-results",
+        results_type=filter_type,
+    )
 
     scoped_exams = _tenant_scoped_exams(request)
     scoped_courses = _tenant_scoped_courses(request)
@@ -109,9 +114,14 @@ def _collect_my_results(request, filter_type=None, search=None):
                     "score": score_value if is_graded_visible else None,
                     "score_percent": score_percent_value if is_graded_visible else "",
                     "feedback": attempt.teacher_feedback if is_graded_visible else "",
-                    "detail_url": reverse(
-                        "exams:exam_result",
-                        kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                    "detail_url": _append_query_params(
+                        reverse(
+                            "exams:exam_result",
+                            kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                        ),
+                        from_section="my-results",
+                        return_to=profile_results_url,
+                        results_type=filter_type,
                     ),
                 }
             )

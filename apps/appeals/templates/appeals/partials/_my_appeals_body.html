@@ -9,7 +9,8 @@
     appeal_section       — (opsional) dashboard bölmə adı, məs. "my-appeals"
 {% endcomment %}
 
-<form method="get" action="{{ appeal_list_action }}" class="appeal-filter-card">
+<form method="get" action="{{ appeal_list_action }}" class="appeal-filter-card"
+      {% if appeal_section %}data-profile-ajax-form data-section="{{ appeal_section }}"{% endif %}>
     {% if appeal_section %}<input type="hidden" name="section" value="{{ appeal_section }}">{% endif %}
     <div class="row g-3 align-items-end">
         <div class="col-md-6">

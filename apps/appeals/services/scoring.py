@@ -18,7 +18,7 @@ from dataclasses import replace as _dataclass_replace
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -60,10 +60,25 @@ def appeal_score_state(attempt):
     """Attempt üzrə aktiv (revert olunmamış) düzəlişlərin xülasəsi."""
     adjustments = list(ScoreAdjustment.objects.filter(attempt=attempt, reverted=False))
     bonus = sum((adj.delta_points or Decimal("0") for adj in adjustments), Decimal("0"))
+    fallback_bonus = Decimal("0")
+    fallback_credited_question_ids = set()
+    fallback_items = (
+        _fallback_accepted_bonus_items()
+        .filter(appeal__attempt=attempt)
+        .select_related("question", "answer")
+        .prefetch_related("question__options", "answer__selected_options")
+    )
+    for item in fallback_items:
+        item_bonus = _accepted_item_bonus(item, attempt=attempt)
+        if item_bonus <= 0:
+            continue
+        fallback_bonus += item_bonus
+        fallback_credited_question_ids.add(item.question_id)
     return {
-        "bonus_points": bonus,
-        "adjustment_count": len(adjustments),
-        "credited_question_ids": {adj.question_id for adj in adjustments if adj.delta_points and adj.delta_points > 0},
+        "bonus_points": bonus + fallback_bonus,
+        "adjustment_count": len(adjustments) + len(fallback_credited_question_ids),
+        "credited_question_ids": {adj.question_id for adj in adjustments if adj.delta_points and adj.delta_points > 0}
+        | fallback_credited_question_ids,
     }
 
 
@@ -117,7 +132,20 @@ def appeal_bonus_map(attempt_ids):
         .values("attempt_id")
         .annotate(total=Sum("delta_points"))
     )
-    return {row["attempt_id"]: row["total"] or Decimal("0") for row in rows}
+    bonus_by_attempt = {row["attempt_id"]: row["total"] or Decimal("0") for row in rows}
+    fallback_items = (
+        _fallback_accepted_bonus_items()
+        .filter(appeal__attempt_id__in=ids)
+        .select_related("appeal", "question", "answer")
+        .prefetch_related("question__options", "answer__selected_options")
+    )
+    for item in fallback_items:
+        item_bonus = _accepted_item_bonus(item)
+        if item_bonus <= 0:
+            continue
+        attempt_id = item.appeal.attempt_id
+        bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + item_bonus
+    return bonus_by_attempt
 
 
 def apply_bonus_to_test_result(result, bonus):
@@ -162,6 +190,29 @@ def _question_already_correct(answer, question):
         return False
     correct = {option.id for option in question.options.all() if option.is_correct}
     return bool(correct and selected == correct)
+
+
+def _fallback_accepted_bonus_items():
+    """
+    Köhnə data qoruması: bəzi qəbul edilmiş test apellyasiyalarında
+    ScoreAdjustment audit qeydi olmaya bilər. Belə item-lər də effektiv balda
+    görünməlidir, amma aktiv audit qeydi olanlar ikiqat sayılmamalıdır.
+    """
+    return AppealItem.objects.filter(
+        appeal__attempt__exam__exam_type="test",
+        status=APPEAL_ITEM_STATUS_ACCEPTED,
+    ).filter(Q(score_adjustment__isnull=True) | Q(score_adjustment__reverted=True))
+
+
+def _accepted_item_bonus(item, *, attempt=None):
+    answer = item.answer
+    if answer is None and attempt is not None:
+        answer = (
+            attempt.answers.filter(question=item.question).prefetch_related("selected_options").order_by("id").first()
+        )
+    if _question_already_correct(answer, item.question):
+        return Decimal("0")
+    return _accept_bonus_points()
 
 
 def _mark_item_resolved(item, status, reviewer, response_text):

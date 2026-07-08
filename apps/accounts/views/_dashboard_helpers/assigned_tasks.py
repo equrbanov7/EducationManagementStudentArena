@@ -17,6 +17,7 @@ from apps.labs.models import Lab
 from apps.projects.models import Project
 
 from .._helpers import (
+    REVIEW_EDIT_WINDOW,
     _append_query_params,
     _assigned_courses_queryset,
     _assigned_exams_queryset,
@@ -118,12 +119,28 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
         StudentExamAttemptGrant.objects.filter(exam=OuterRef("pk"), student=user).values("extra_attempts")[:1],
         output_field=IntegerField(),
     )
+    review_cutoff = now - REVIEW_EDIT_WINDOW
+    _visible_result_sq = Subquery(
+        ExamAttempt.objects.filter(
+            exam=OuterRef("pk"),
+            user=user,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+            exam__results_hidden_from_students=False,
+        )
+        .filter(Q(exam__exam_type="test") | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff))
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt"),
+        output_field=IntegerField(),
+    )
     assigned_exams_qs = (
         _assigned_exams_queryset(request, user, active_only=True)
         .annotate(
             _finished_attempts=Coalesce(_finished_sq, 0),
             _extra_grant=Coalesce(_grant_sq, 0),
+            _visible_result_attempts=Coalesce(_visible_result_sq, 0),
         )
+        .filter(_visible_result_attempts=0)
         .filter(
             Q(max_attempts_per_user__isnull=True)
             | Q(max_attempts_per_user=0)

@@ -161,8 +161,22 @@ class FinalExamCenterPageTests(TestCase):
         response = client.get(reverse("exams:exam_result", args=[self.final_exam.slug, attempt.id]))
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("accounts:login") + "?next=%2Fexams%2Ffinal%2F")
+        self.assertEqual(response["Location"], reverse("exams:final_exam_entry"))
         self.assertNotIn("_auth_user_id", client.session)
+
+    def test_final_result_from_my_results_stays_viewable_after_timeout(self):
+        attempt = self._finished_attempt(finished_at=timezone.now() - timedelta(minutes=6))
+        client = self._client()
+        back_url = reverse("accounts:profile") + "?section=my-results"
+
+        response = client.get(
+            reverse("exams:exam_result", args=[self.final_exam.slug, attempt.id]),
+            {"from_section": "my-results", "return_to": back_url},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("_auth_user_id", client.session)
+        self.assertNotContains(response, "data-final-result-timeout", html=False)
 
 
 class ExamCenterGateUnitTests(TestCase):

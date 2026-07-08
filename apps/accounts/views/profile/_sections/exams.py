@@ -41,6 +41,8 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     display_qs = my_exams_qs.annotate(
         card_question_count=Count("questions", filter=Q(questions__is_active=True), distinct=True),
         card_appeal_count=Count("appeals", distinct=True),
+        card_allowed_group_count=Count("allowed_groups", distinct=True),
+        card_allowed_user_count=Count("allowed_users", distinct=True),
     ).prefetch_related(
         Prefetch(
             "language_variants",
