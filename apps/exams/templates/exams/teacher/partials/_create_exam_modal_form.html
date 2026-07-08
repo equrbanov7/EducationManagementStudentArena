@@ -5,13 +5,14 @@
   Bootstrap select) olduğu kimi işləyir. Addım naviqasiyası + addım-əsaslı
   validasiya + aydın xəta xülasəsi exam_wizard.js-dədir.
 {% endcomment %}
-<form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate data-exam-wizard data-editing="{% if is_editing %}1{% else %}0{% endif %}">
+<form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate data-exam-wizard
+      data-editing="{% if is_editing %}1{% else %}0{% endif %}"
+      data-assigned-count-url="{% url 'exams:assigned_student_count' %}">
     {% csrf_token %}
     <input type="hidden" name="modal" value="1">
     {% if linked_course %}
         <input type="hidden" name="course_id" value="{{ linked_course.id }}">
     {% endif %}
-    {{ group_student_map|json_script:"createExamGroupStudentMap" }}
 
     <div class="exam-wizard">
         {# ───────────────────────── LEFT RAIL ───────────────────────── #}
@@ -144,6 +145,33 @@
                             <small class="form-text text-muted">{% trans "exam_type_extended_help" context "exams.template.create_exam_modal_form" %}</small>
                             {% if form.exam_type_extended.errors %}<div class="field-error">{{ form.exam_type_extended.errors.0 }}</div>{% endif %}
                         </div>
+
+                        {# Fənn — tək seçimli axtarışlı siyahı (qrup/tələbə axtarışı ilə eyni üslub). Final/midterm-də məcburidir. #}
+                        <div class="form-group form-group-full" data-ew-subject-group>
+                            <label class="create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }}</label>
+                            <div class="create-exam-searchable-select create-exam-subject-select" data-exam-subject-control
+                                 data-search-url="{% url 'exams:subject_search' %}">
+                                <div class="create-exam-search-wrap">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="createExamSubjectSearch" class="create-exam-search-input"
+                                           placeholder="{% trans 'subject_search_placeholder' context 'exams.template.create_exam_modal_form' %}"
+                                           autocomplete="off">
+                                </div>
+                                <div id="createExamSubjectResults" class="create-exam-search-list" data-exam-subject-results></div>
+                                <div class="create-exam-selection-counter">
+                                    {% trans "selected_subject" context "exams.template.create_exam_modal_form" %}:
+                                    <span data-exam-subject-selected-text>—</span>
+                                </div>
+                                <select name="{{ form.subject.html_name }}" class="d-none" data-exam-subject-native>
+                                    {% if form.instance.subject %}
+                                        <option value="{{ form.instance.subject.pk }}" selected>{{ form.instance.subject.code }} — {{ form.instance.subject.name }}</option>
+                                    {% elif form.subject.value %}
+                                        <option value="{{ form.subject.value }}" selected>{{ form.subject.value }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            {% if form.subject.errors %}<div class="field-error">{{ form.subject.errors.0 }}</div>{% endif %}
+                        </div>
                     </div>
                 </section>
 
@@ -152,20 +180,7 @@
                          data-ew-step-title="{% trans 'step_timing_title' context 'exams.wizard' %}"
                          data-ew-step-desc="{% trans 'step_timing_desc' context 'exams.wizard' %}">
                     <div class="create-exam-form-grid">
-                        <div class="form-group">
-                            {{ form.access_code.label_tag }}
-                            <div class="ew-code-row">
-                                {{ form.access_code }}
-                                <button type="button" class="ew-gencode" data-ew-gencode>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>
-                                    {% trans "code_generate" context "exams.wizard" %}
-                                </button>
-                            </div>
-                            <small class="form-text text-muted">{% trans "code_hint" context "exams.wizard" %}</small>
-                            {% if form.access_code.errors %}<div class="field-error">{{ form.access_code.errors.0 }}</div>{% endif %}
-                        </div>
-
-                        <div class="form-group" data-random-question-group data-test-random-question-group>
+                        <div class="form-group form-group-full" data-random-question-group data-test-random-question-group>
                             {{ form.random_question_count.label_tag }}
                             {{ form.random_question_count }}
                             {% if form.random_question_count.help_text %}
@@ -200,7 +215,7 @@
                             {% if form.total_duration_minutes.errors %}<div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>{% endif %}
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" data-ew-qtime-group>
                             {{ form.default_question_time_seconds.label_tag }}
                             {{ form.default_question_time_seconds }}
                             {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
@@ -288,34 +303,46 @@
 
                         <div id="createExamAccessRestrictions" class="form-group form-group-full create-exam-access-block">
                             <div class="create-exam-access-grid">
-                                <div class="create-exam-searchable-select" data-target-select-name="allowed_groups">
+                                <div class="create-exam-searchable-select" data-target-select-name="allowed_groups"
+                                     data-search-url="{% url 'exams:group_search' %}">
                                     <label class="create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
                                     <div class="create-exam-search-wrap">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}">
+                                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
                                     </div>
                                     <div id="createExamGroupsList" class="create-exam-search-list"></div>
                                     <div class="create-exam-selection-counter">
                                         {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamGroupsCount">0</span>
                                     </div>
+                                    {# Lazy: yalnız seçili qruplar render olunur; qalanı group_search ilə gəlir. #}
                                     <div class="d-none">
-                                        {{ form.allowed_groups }}
+                                        <select name="allowed_groups" multiple>
+                                            {% for group in selected_allowed_groups %}
+                                                <option value="{{ group.pk }}" selected>{{ group }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
                                 </div>
 
-                                <div class="create-exam-searchable-select" data-target-select-name="allowed_users">
+                                <div class="create-exam-searchable-select" data-target-select-name="allowed_users"
+                                     data-search-url="{% url 'exams:user_search' %}">
                                     <label class="create-exam-searchable-label" for="createExamUsersSearch">{% trans "allowed_users_individual" context "exams.template.create_exam_modal_form" %}</label>
                                     <div class="create-exam-search-wrap">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" id="createExamUsersSearch" class="create-exam-search-input" placeholder="{% trans 'search_name_or_username' context 'exams.template.create_exam_modal_form' %}">
+                                        <input type="text" id="createExamUsersSearch" class="create-exam-search-input" placeholder="{% trans 'search_name_or_username' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
                                     </div>
                                     <div id="createExamUsersList" class="create-exam-search-list"></div>
                                     <div class="create-exam-selection-counter">
                                         {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamUsersCount">0</span>
                                     </div>
+                                    {# Lazy: yalnız seçili tələbələr render olunur; qalanı user_search ilə gəlir. #}
                                     <div class="d-none">
-                                        {{ form.allowed_users }}
+                                        <select name="allowed_users" multiple>
+                                            {% for u in selected_allowed_users %}
+                                                <option value="{{ u.pk }}" selected>{{ u.get_full_name|default:u.username }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
                                 </div>
@@ -334,14 +361,14 @@
                             <label class="modal-check-label modal-check-label--supervision">
                                 <input type="checkbox" name="supervision_enabled" id="modalSupervisionEnabled"
                                        class="form-check-input"
-                                       {% if supervision_config and supervision_config.enabled %}checked{% endif %}>
+                                       {% if not is_editing or supervision_config and supervision_config.enabled %}checked{% endif %}>
                                 <span class="modal-check-label-text">{% trans "supervision_enable_label" context "exams.template.create_exam_modal_form" %}
                                     <span class="ew-switch-desc">{% trans "desc_supervision" context "exams.wizard" %}</span>
                                 </span>
                             </label>
                         </div>
 
-                        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: {% if supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
+                        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: {% if not is_editing or supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
                             <div class="create-exam-form-grid">
                                 <div class="form-group">
                                     <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
@@ -464,13 +491,9 @@
                         <span>{% trans "proctor_unavailable" context "exams.wizard" %}</span>
                     </div>
                     {% endif %}
+                    {# Yekun icmal artıq inline göstərilmir — "İmtahan yarat"a #}
+                    {# basanda təsdiq modalında (ətraflı) göstərilir. #}
                 </section>
-
-                {# Reference: live (Kahoot-style) exam is started from the exam detail. #}
-                <div class="ew-callout ew-callout--teal">
-                    <i class="fas fa-bolt" aria-hidden="true"></i>
-                    <span>{% trans "tip_live_after_create" context "exams.wizard" %}</span>
-                </div>
             </div>
 
             {# ───────────────────────── FOOTER ───────────────────────── #}

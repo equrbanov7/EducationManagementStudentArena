@@ -143,9 +143,67 @@
         });
       }
 
+      // Lazy: server yalnız seçili variantları render edir; qalanı axtarış
+      // endpoint-indən (data-search-url) debounce ilə gətirilir.
+      var lazyContainer = form.querySelector('[data-target-select-name="' + options.selectName + '"]');
+      var lazySearchUrl = lazyContainer ? lazyContainer.getAttribute("data-search-url") : "";
+      var lazyDebounce = null;
+      var lazySeq = 0;
+
+      function mergeResults(results) {
+        var existing = {};
+        Array.from(hiddenSelect.options).forEach(function (o) {
+          existing[String(o.value)] = true;
+        });
+        (results || []).forEach(function (item) {
+          if (!existing[String(item.id)]) {
+            var opt = document.createElement("option");
+            opt.value = item.id;
+            opt.text = item.text;
+            hiddenSelect.appendChild(opt);
+          }
+        });
+      }
+
+      function lazyFetch(query) {
+        if (!lazySearchUrl) {
+          renderList();
+          filterList(query);
+          return;
+        }
+        var seq = ++lazySeq;
+        var url = lazySearchUrl + (lazySearchUrl.indexOf("?") === -1 ? "?" : "&") + "q=" + encodeURIComponent(query || "");
+        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+          .then(function (r) { return r.ok ? r.json() : { results: [] }; })
+          .then(function (data) {
+            if (seq !== lazySeq) {
+              return;
+            }
+            mergeResults((data && data.results) || []);
+            renderList();
+            filterList(query);
+          })
+          .catch(function () {});
+      }
+
       if (searchInputElement) {
         searchInputElement.addEventListener("input", function () {
-          filterList(searchInputElement.value);
+          var q = searchInputElement.value.trim();
+          if (lazySearchUrl) {
+            if (lazyDebounce) {
+              clearTimeout(lazyDebounce);
+            }
+            lazyDebounce = setTimeout(function () {
+              lazyFetch(q);
+            }, 300);
+          } else {
+            filterList(q);
+          }
+        });
+        searchInputElement.addEventListener("focus", function () {
+          if (lazySearchUrl && hiddenSelect.options.length <= hiddenSelect.selectedOptions.length) {
+            lazyFetch(searchInputElement.value.trim());
+          }
         });
       }
 
@@ -351,6 +409,16 @@
         counterSelector: "#createExamUsersCount"
       });
       initGroupUserSelectionSync(form, groupSelector, userSelector);
+
+      // Paylaşılan modullar (varsa): fənn axtarışlı select + final/midterm
+      // sahə görünürlüyü.
+      var shared = window.EMSExamCreateEditModal;
+      if (shared && shared.subjectSelect && typeof shared.subjectSelect.init === "function") {
+        shared.subjectSelect.init(form);
+      }
+      if (shared && shared.toggles && typeof shared.toggles.initCategoryVisibility === "function") {
+        shared.toggles.initCategoryVisibility(form);
+      }
 
       form.addEventListener("submit", function (event) {
         event.preventDefault();

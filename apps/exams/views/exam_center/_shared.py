@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
 
-from apps.exams.models import ExamRoom, ExamRoomSession, FinalExamTicket
+from apps.exams.models import ExamRoomSession, FinalExamTicket
 from apps.exams.services.final_center import (
     can_manage_final_center,
     can_supervise_session,
@@ -33,11 +33,6 @@ def supervisor_org_or_403(request):
     if organization is None:
         raise PermissionDenied(pgettext("exams.final_center.permission", "Aktiv təşkilat konteksti tapılmadı."))
     return organization
-
-
-def get_center_room_or_404(request, room_id):
-    organization = center_org_or_403(request)
-    return organization, get_object_or_404(ExamRoom, pk=room_id, organization=organization)
 
 
 def get_center_session_or_404(request, session_id, *, for_supervision=False):
@@ -73,9 +68,22 @@ def visible_sessions_qs(request, organization):
     return sessions_visible_to(request.user, base)
 
 
+def center_staff_queryset(organization):
+    """Nəzarətçi namizədləri: org-un tələbə olmayan aktiv üzvləri (müəllim/mərkəz)."""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    return (
+        User.objects.filter(memberships__organization=organization, memberships__is_active=True)
+        .exclude(profile__role="student")
+        .distinct()
+        .order_by("first_name", "last_name", "username")
+    )
+
+
 __all__ = [
     "center_org_or_403",
-    "get_center_room_or_404",
+    "center_staff_queryset",
     "get_center_session_or_404",
     "get_session_ticket_or_404",
     "supervisor_org_or_403",

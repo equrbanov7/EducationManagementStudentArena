@@ -15,6 +15,19 @@ _DIFFICULTY_ORDER = ("easy", "medium", "hard")
 _QUESTION_SOFT_USAGE_CAP = 4
 
 
+def available_question_count(exam) -> int:
+    """İmtahanda hər tələbəyə düşə biləcək maksimal aktiv sual sayı.
+
+    Randomizer sualları ``exam.questions.filter(is_active=True)``-dən seçir
+    (bloklar da bu sualların alt-çoxluğudur), ona görə mövcud fond = aktiv
+    imtahan suallarının sayıdır. ``random_question_count`` bu saydan böyük
+    ola bilməz — forma və sehrbaz bu dəyəri xəbərdarlıq üçün istifadə edir.
+    """
+    if exam is None or not getattr(exam, "pk", None):
+        return 0
+    return exam.questions.filter(is_active=True).count()
+
+
 def _usage_cache_seconds() -> int:
     try:
         return max(0, int(getattr(settings, "EXAM_RANDOMIZER_USAGE_CACHE_SECONDS", 30)))

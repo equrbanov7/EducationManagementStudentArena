@@ -28,32 +28,31 @@
       <a href="{% url 'exams:exam_center_reports' %}" class="fxc-btn fxc-btn-ghost">
         <i class="fas fa-chart-column"></i> {% trans "Hesabatlar" %}
       </a>
-      <a href="{% url 'exams:exam_center_room_create' %}" class="fxc-btn fxc-btn-primary">
-        <i class="fas fa-plus"></i> {% trans "Yeni zal" %}
+      {% endif %}
+      {% if can_manage_rooms %}
+      {# Zal/kompüter/MAC idarəetmə yalnız superadmin bölməsindədir. #}
+      <a href="{% url 'accounts:profile' %}?section=superadmin-exam-rooms" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-screwdriver-wrench"></i> {% trans "Zal idarəetmə" %}
       </a>
       {% endif %}
     </div>
   </header>
 
   <form method="get" class="fxc-toolbar" role="search">
-    <input type="search" name="q" value="{{ search_query }}" class="fxc-input fxc-input--grow"
-           placeholder="{% trans 'Zal adı, kodu və ya bina üzrə axtar…' %}"
-           aria-label="{% trans 'Zal axtarışı' %}">
-    <select name="status" class="fxc-input fxc-input--select" aria-label="{% trans 'Status filtri' %}"
-            onchange="this.form.submit()">
-      <option value="">{% trans "Bütün zallar" %}</option>
-      <option value="live" {% if active_status == 'live' %}selected{% endif %}>{% trans "Canlı zallar" %}</option>
-      <option value="idle" {% if active_status == 'idle' %}selected{% endif %}>{% trans "Boş zallar" %}</option>
-      {% if can_manage %}
-      <option value="inactive" {% if active_status == 'inactive' %}selected{% endif %}>{% trans "Deaktiv zallar" %}</option>
-      {% endif %}
-    </select>
-    <button type="submit" class="fxc-btn fxc-btn-ghost"><i class="fas fa-search"></i> {% trans "Axtar" %}</button>
-    {% if search_query or active_status %}
-    <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
-      <i class="fas fa-xmark"></i> {% trans "Təmizlə" %}
-    </a>
-    {% endif %}
+    {% trans "Zal adı, kodu və ya bina üzrə axtar…" as room_search_ph %}
+    {% trans "Zal axtarışı" as room_search_aria %}
+    {% include "partials/_search_input.html" with name="q" value=search_query wrapper_class="fxc-search-grow" placeholder=room_search_ph aria_label=room_search_aria %}
+    <div class="bootstrap-single-select fxc-toolbar-select">
+      <select name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-fxc-autosubmit" data-bootstrap-select
+              aria-label="{% trans 'Status filtri' %}">
+        <option value="">{% trans "Bütün zallar" %}</option>
+        <option value="live" {% if active_status == 'live' %}selected{% endif %}>{% trans "Canlı zallar" %}</option>
+        <option value="idle" {% if active_status == 'idle' %}selected{% endif %}>{% trans "Boş zallar" %}</option>
+        {% if can_manage %}
+        <option value="inactive" {% if active_status == 'inactive' %}selected{% endif %}>{% trans "Deaktiv zallar" %}</option>
+        {% endif %}
+      </select>
+    </div>
   </form>
 
   {% if page_obj.object_list %}
@@ -92,20 +91,11 @@
       </div>
 
       <div class="fxc-room-card-actions">
-        {% if room.live_session_count %}
-        <a href="{% url 'exams:exam_center_room_monitor' room_id=room.pk %}" class="fxc-btn fxc-btn-sm fxc-btn-primary">
-          <i class="fas fa-tower-observation"></i> {% trans "Zalı izlə" %}
+        <a href="{% url 'exams:exam_center_room_monitor' room_id=room.pk %}"
+           class="fxc-btn fxc-btn-sm {% if room.live_session_count %}fxc-btn-primary{% else %}fxc-btn-ghost{% endif %}">
+          <i class="fas fa-arrow-right-to-bracket"></i>
+          {% if room.live_session_count %}{% trans "Zala daxil ol — canlı" %}{% else %}{% trans "Zala daxil ol" %}{% endif %}
         </a>
-        {% elif not can_manage %}
-        <span class="fxc-btn fxc-btn-sm fxc-btn-ghost" aria-disabled="true" style="pointer-events:none;opacity:.6;">
-          <i class="fas fa-hourglass-half"></i> {% trans "Gözləyir" %}
-        </span>
-        {% endif %}
-        {% if can_manage %}
-        <a href="{% url 'exams:exam_center_room_update' room_id=room.pk %}" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
-          <i class="fas fa-pen"></i> {% trans "Redaktə" %}
-        </a>
-        {% endif %}
       </div>
     </article>
     {% endfor %}
@@ -117,15 +107,26 @@
     {% if search_query %}
     <p>{% trans "Axtarışa uyğun zal tapılmadı." %}</p>
     <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost"><i class="fas fa-xmark"></i> {% trans "Axtarışı təmizlə" %}</a>
-    {% elif can_manage %}
-    <p>{% trans "Hələ zal yaradılmayıb." %}</p>
-    <a href="{% url 'exams:exam_center_room_create' %}" class="fxc-btn fxc-btn-primary">
-      <i class="fas fa-plus"></i> {% trans "İlk zalı yarat" %}
+    {% elif can_manage_rooms %}
+    <p>{% trans "Hələ zal yaradılmayıb. Zallar superadmin bölməsində idarə olunur." %}</p>
+    <a href="{% url 'accounts:profile' %}?section=superadmin-exam-rooms" class="fxc-btn fxc-btn-primary">
+      <i class="fas fa-screwdriver-wrench"></i> {% trans "Zal idarəetməsinə keç" %}
     </a>
+    {% elif can_manage %}
+    <p>{% trans "Hələ zal yaradılmayıb. Zallar superadmin tərəfindən yaradılır." %}</p>
     {% else %}
     <p>{% trans "Sizə hələ zal təyin edilməyib." %}</p>
     {% endif %}
   </div>
   {% endif %}
 </div>
+
+<script nonce="{{ request.csp_nonce }}">
+  // Filtr select-i dəyişəndə formu avtomatik göndər (CSP-safe, inline onchange yox).
+  document.querySelectorAll(".js-fxc-autosubmit").forEach(function (sel) {
+    sel.addEventListener("change", function () {
+      if (sel.form) { sel.form.submit(); }
+    });
+  });
+</script>
 {% endblock %}

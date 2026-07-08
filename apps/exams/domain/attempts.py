@@ -62,6 +62,12 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.attempt.field", "attempt_number"),
         help_text=pgettext_lazy("exams.model.attempt.help", "attempt_number"),
     )
+    # Müəllimin "Sınaq keç" (trial run) cəhdi — nəticələrə/statistikaya sayılmır.
+    is_trial = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "is_trial"),
+    )
     marked_question_ids = models.JSONField(
         default=list,
         blank=True,

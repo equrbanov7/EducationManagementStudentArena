@@ -69,25 +69,41 @@ class PinLookupTests(TestCase):
         session.save()
         return client
 
-    def test_center_finds_user_pin(self):
-        response = self._client(self.center).get(reverse("exams:exam_center_pin_lookup"), {"username": "pl_student"})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.raw_pin)  # PIN açılır
-        self.assertContains(response, "PL Final")
-
-    def test_unknown_username_shows_not_found(self):
-        response = self._client(self.center).get(reverse("exams:exam_center_pin_lookup"), {"username": "nobody_here"})
+    def test_page_shell_renders(self):
+        # Səhifə qabığı (data AJAX ilə gəlir — PIN səhifədə birbaşa YOX).
+        response = self._client(self.center).get(reverse("exams:exam_center_pin_lookup"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.raw_pin)
+
+    def test_search_finds_student(self):
+        response = self._client(self.center).get(reverse("exams:exam_center_pin_search"), {"q": "pl_student"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        ids = [r["id"] for r in data["results"]]
+        self.assertIn(self.student.id, ids)
+
+    def test_student_detail_reveals_pin(self):
+        url = reverse("exams:exam_center_student_pins", kwargs={"student_id": self.student.id})
+        response = self._client(self.center).get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        pins = [t["pin"] for t in data["tickets"]]
+        self.assertIn(self.raw_pin, pins)
+        self.assertEqual(data["tickets"][0]["exam_title"], "PL Final")
 
     def test_revoked_pin_not_revealed(self):
         from apps.exams.services.final_center import revoke_ticket_pin
 
         revoke_ticket_pin(self.ticket)
-        response = self._client(self.center).get(reverse("exams:exam_center_pin_lookup"), {"username": "pl_student"})
+        url = reverse("exams:exam_center_student_pins", kwargs={"student_id": self.student.id})
+        response = self._client(self.center).get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, self.raw_pin)  # ləğv olunmuş PIN açılmır
+        pins = [t["pin"] for t in response.json()["tickets"]]
+        self.assertNotIn(self.raw_pin, pins)
 
     def test_non_center_forbidden(self):
-        response = self._client(self.teacher).get(reverse("exams:exam_center_pin_lookup"), {"username": "pl_student"})
-        self.assertEqual(response.status_code, 403)
+        # Müəllim imtahan mərkəzi deyil → 403 (səhifə + AJAX).
+        self.assertEqual(self._client(self.teacher).get(reverse("exams:exam_center_pin_lookup")).status_code, 403)
+        self.assertEqual(
+            self._client(self.teacher).get(reverse("exams:exam_center_pin_search"), {"q": "pl"}).status_code, 403
+        )

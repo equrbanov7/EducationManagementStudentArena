@@ -1,5 +1,5 @@
 {% load i18n %}
-        {% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections %}
+        {% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_management" context "profile.sidebar" %}</span></li>
 
         {% if 'role-assignment' in allowed_sections %}
@@ -63,6 +63,18 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-org-inspector' %}active{% endif %}">
                 <i class="fas fa-search sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans 'Təşkilat məlumatları' %}</span>
+            </a>
+        </li>
+        {% endif %}
+        {% if 'superadmin-exam-rooms' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=superadmin-exam-rooms"
+               data-section="superadmin-exam-rooms"
+               data-title="{% trans 'İmtahan zalları' context 'profile.section' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-exam-rooms' %}active{% endif %}">
+                <i class="fas fa-desktop sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "İmtahan zalları" context "profile.section" %}</span>
             </a>
         </li>
         {% endif %}

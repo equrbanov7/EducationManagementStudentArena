@@ -443,6 +443,18 @@
                                             <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.teacher_exam_results" %}
                                         </button>
                                     {% endif %}
+                                    {% if item.attempts_left is not None %}
+                                        <form method="post" action="{% url 'exams:grant_extra_attempt' slug=exam.slug %}" class="ter-grant-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="student_id" value="{{ item.student_id }}">
+                                            <button type="submit" class="ter-btn ter-btn--sm ter-btn--ghost"
+                                                    title="{% trans 'grant_extra_attempt_hint' context 'exams.template.teacher_exam_results' %}">
+                                                <i class="fas fa-rotate-right"></i>
+                                                {% trans "grant_extra_attempt" context "exams.template.teacher_exam_results" %}
+                                                <span class="ter-muted">({% trans "attempts_left_short" context "exams.template.teacher_exam_results" %}: {{ item.attempts_left }})</span>
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

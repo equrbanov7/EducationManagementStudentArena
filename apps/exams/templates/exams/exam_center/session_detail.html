@@ -18,9 +18,11 @@
       <p class="fxc-sub">
         <i class="fas fa-door-open"></i> {{ session.room.name }} ({{ session.room.code }})
         · <i class="far fa-clock"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}
-        {% if session.invigilator %}
-        · <i class="fas fa-user-shield"></i> {{ session.invigilator.get_full_name|default:session.invigilator.username }}
+        {% with invs=session.room.invigilators.all %}
+        {% if invs %}
+        · <i class="fas fa-user-shield"></i> {% for u in invs %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
         {% endif %}
+        {% endwith %}
       </p>
     </div>
     <div class="fxc-head-actions">

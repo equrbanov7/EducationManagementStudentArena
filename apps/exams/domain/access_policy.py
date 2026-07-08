@@ -195,6 +195,19 @@ class ExamAccessPolicyMixin:
             or self._user_in_assigned_course(user)
         )
 
+        # Final/midterm imtahanlarında ümumi imtahan kodu yox, hər tələbənin
+        # fərdi PIN-i tələb olunur (imtahan yaradılanda avtomatik verilir).
+        if getattr(self, "exam_type_extended", None) in {"final", "midterm"}:
+            if not self.is_public and not in_allowed_any:
+                return False, pgettext("exams.model.access", "no_exam_access")
+            if not code:
+                return False, pgettext("exams.model.access", "access_code_required")
+            from apps.exams.services.student_pins import verify_student_pin
+
+            if not verify_student_pin(self, user, code):
+                return False, pgettext("exams.model.access", "access_code_invalid")
+            return True, None
+
         if not self.access_code:
             if self.is_public:
                 return True, None
@@ -218,6 +231,10 @@ class ExamAccessPolicyMixin:
 
         if not self.is_active:
             return False
+
+        # Final/midterm imtahanları hər zaman fərdi PIN tələb edir.
+        if getattr(self, "exam_type_extended", None) in {"final", "midterm"}:
+            return True
 
         if not self.access_code:
             return False

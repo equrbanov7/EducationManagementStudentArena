@@ -1,4 +1,7 @@
 .exam-create-edit-modal .modal-dialog {
+    /* Sabit en — modal məzmununa görə kiçilməsin (məs. Nəzarət addımı digər
+       addımlardan dar görünməsin); bütün addımlar eyni tam eni tutur. */
+    width: min(1280px, 96vw);
     max-width: min(1280px, 96vw);
 }
 
@@ -245,6 +248,19 @@
     accent-color: var(--ems-primary-600);
 }
 
+/* Seçilmiş qrupun üzvü — qrupla daxil (işarəli + kilidli göstərilir). */
+.create-exam-list-item.is-group-member {
+    background: var(--ems-success-50, #E7F6EF);
+}
+.create-exam-list-item.is-group-member .create-exam-item-checkbox {
+    accent-color: var(--ems-success, #0F9D58);
+    cursor: default;
+}
+.create-exam-list-item.is-group-member .create-exam-item-label {
+    color: var(--ems-gray-600, #566);
+    cursor: default;
+}
+
 .create-exam-item-label {
     margin: 0;
     cursor: pointer;
@@ -367,6 +383,7 @@
 
 @media (max-width: 768px) {
     .exam-create-edit-modal .modal-dialog {
+        width: 96vw;
         max-width: 96vw;
         margin: 0.75rem auto;
     }
@@ -389,3 +406,20 @@
         width: 100%;
     }
 }
+
+/* ── Fənn (subject) — tək seçimli axtarışlı siyahı (qrup/tələbə üslubu) ── */
+.create-exam-subject-select { position: relative; }
+.create-exam-search-empty { padding: 0.5rem 0.65rem; color: var(--ems-gray-500); font-size: 0.85rem; }
+/* Seçilmiş sətir (həm subject single-select, həm qrup/tələbədə) işıqlanır. */
+.create-exam-list-item.is-active { background: var(--ems-primary-50); font-weight: 600; }
+.create-exam-subject-check {
+    width: 16px;
+    flex-shrink: 0;
+    display: inline-flex;
+    justify-content: center;
+    color: var(--ems-primary-600);
+    opacity: 0;
+}
+.create-exam-list-item.is-active .create-exam-subject-check { opacity: 1; }
+/* Lazy siyahıda seçili sətirlərlə nəticələr arasında yüngül ayrıcı. */
+.create-exam-selected-rows:not(:empty) { border-bottom: 1px dashed var(--ems-neutral-300); }

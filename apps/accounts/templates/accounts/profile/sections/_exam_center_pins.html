@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if 'exam-center-pins' in allowed_sections %}
+<section class="profile-section-panel profile-section--exam-center-pins {% if active_section == 'exam-center-pins' %}is-active{% endif %}"
+         data-profile-section-panel="exam-center-pins"
+         data-source-url="{{ profile_base_url }}?section=exam-center-pins">
+    {% include "exams/exam_center/_pin_lookup_body.html" %}
+</section>
+{% endif %}

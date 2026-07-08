@@ -57,6 +57,50 @@ DEFAULT_ROLES = {
             "description": "Exam center managing exam lifecycle, monitoring, results and appeals",
         },
         {
+            # İmtahan mərkəzi RƏHBƏRİ — imtahan mərkəzinin başçısı; zala nəzarətçi
+            # təyin edə bilir (yeganə fərq). Digər imtahan səlahiyyətləri exam_center
+            # ilə eynidir. is_exam_center → final mərkəzinə giriş.
+            "name": "exam_center_head",
+            "display_name": "Exam Center Head",
+            "level": 85,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "org.view",
+                "unit.view",
+                "member.view",
+                "course.view",
+                "exam.*",
+                "grade.view",
+                "grade.publish",
+                "appeal.respond",
+                "appeal.decide",
+                "qa.*",
+                "analytics.view_all",
+                "audit.view",
+            ],
+            "description": "Exam center head — assigns invigilators and manages the exam centre",
+        },
+        {
+            # İmtahan mərkəzi İŞÇİSİ — monitor / PIN axtarışı / hesabat; zala
+            # nəzarətçi TƏYİN ETMİR (yalnız rəhbər). is_exam_center → giriş var.
+            "name": "exam_center_staff",
+            "display_name": "Exam Center Staff",
+            "level": 60,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "org.view",
+                "unit.view",
+                "member.view",
+                "course.view",
+                "exam.*",
+                "grade.view",
+                "qa.*",
+                "analytics.view_all",
+                "audit.view",
+            ],
+            "description": "Exam center staff — live monitoring, PIN lookup and reports (no invigilator assignment)",
+        },
+        {
             # HR — müəllim/əməkdaş idarəetməsi, vəzifə və fakültə/kafedra
             # təyinatları. İmtahan/kurs idarəetməsinə girişi yoxdur.
             "name": "hr",
@@ -481,7 +525,7 @@ def _augment_with_appeal_permissions(roles_by_type):
             manages_exams = any(perm in perms for perm in _EXAM_MANAGEMENT_PERMS)
             views_exams = "exam.view" in perms or "exam.*" in perms
             to_add = []
-            if role.get("name") == "exam_center" and manages_exams:
+            if role.get("name") in ("exam_center", "exam_center_head") and manages_exams:
                 to_add = ["appeal.create", "appeal.respond", "appeal.decide"]
             elif views_exams:
                 to_add = ["appeal.create"]

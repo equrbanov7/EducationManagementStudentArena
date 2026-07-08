@@ -57,9 +57,9 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-    border: 1px solid #0f4fc4;
+    border: 1px solid var(--ems-primary-700);
     border-radius: 10px;
-    background: linear-gradient(135deg, #1b67df 0%, #13926b 100%);
+    background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
     font-weight: 700;
     padding: 10px 16px;
@@ -169,7 +169,7 @@
 
 /* Kart Başlığı */
 .question-header {
-    background: linear-gradient(to right, var(--primary-blue), var(--dark-blue));
+    background: var(--ems-primary-600);
     color: white;
     padding: 15px 20px;
 }
@@ -377,10 +377,10 @@
 
 /* Müəllim Rəyi Bloku */
 .teacher-feedback-block {
-    background: linear-gradient(180deg, #eef5ff 0%, #f4fffb 100%);
+    background: var(--ems-primary-50);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #b6cff3; /* Bir az daha tünd mavi çərçivə */
+    border: 1px solid var(--ems-primary-100);
 }
 
 .feedback-box.alert-primary {
@@ -415,9 +415,9 @@
 
 .attempt-tools {
     padding: 14px;
-    border: 1px solid #c5d8f1;
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 12px;
-    background: linear-gradient(180deg, #f5f9ff 0%, #eff8f4 100%);
+    background: var(--ems-neutral-50);
 }
 
 .attempt-search-form {
@@ -459,7 +459,7 @@
 }
 
 .attempt-search-btn {
-    background: linear-gradient(135deg, #1f63d3 0%, #1aa574 100%);
+    background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
     padding-inline: 16px;
 }
@@ -510,7 +510,7 @@
 
 .view-attempt-container .questions-pagination .page-link.active {
     border-color: #1f63d3;
-    background: linear-gradient(135deg, #1f63d3 0%, #1aa574 100%);
+    background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
 }
 

@@ -33,7 +33,8 @@
       {% if tab == "sessions" %}
       <div class="fxc-field">
         <label for="fxc-f-state">{% trans "Vəziyyət" %}</label>
-        <select id="fxc-f-state" name="state" class="fxc-input fxc-input--select">
+        <div class="bootstrap-single-select">
+        <select id="fxc-f-state" name="state" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           <option value="prepared" {% if params.state == "prepared" %}selected{% endif %}>{% trans "Hazırlanır" %}</option>
           <option value="entry_open" {% if params.state == "entry_open" %}selected{% endif %}>{% trans "Giriş açıq" %}</option>
@@ -41,11 +42,13 @@
           <option value="ended" {% if params.state == "ended" %}selected{% endif %}>{% trans "Bitmiş" %}</option>
           <option value="cancelled" {% if params.state == "cancelled" %}selected{% endif %}>{% trans "Ləğv edilmiş" %}</option>
         </select>
+        </div>
       </div>
       {% else %}
       <div class="fxc-field">
         <label for="fxc-f-status">{% trans "Bilet statusu" %}</label>
-        <select id="fxc-f-status" name="status" class="fxc-input fxc-input--select">
+        <div class="bootstrap-single-select">
+        <select id="fxc-f-status" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           <option value="assigned" {% if params.status == "assigned" %}selected{% endif %}>{% trans "Təyin olunub" %}</option>
           <option value="waiting" {% if params.status == "waiting" %}selected{% endif %}>{% trans "Gözləyir" %}</option>
@@ -55,16 +58,19 @@
           <option value="removed" {% if params.status == "removed" %}selected{% endif %}>{% trans "Çıxarılıb" %}</option>
           <option value="absent" {% if params.status == "absent" %}selected{% endif %}>{% trans "Gəlməyib" %}</option>
         </select>
+        </div>
       </div>
       {% endif %}
       <div class="fxc-field">
         <label for="fxc-f-room">{% trans "Zal" %}</label>
-        <select id="fxc-f-room" name="room" class="fxc-input fxc-input--select">
+        <div class="bootstrap-single-select">
+        <select id="fxc-f-room" name="room" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           {% for room in rooms %}
           <option value="{{ room.pk }}" {% if params.room == room.pk|stringformat:"s" %}selected{% endif %}>{{ room.name }}</option>
           {% endfor %}
         </select>
+        </div>
       </div>
       <div class="fxc-field">
         <label for="fxc-f-from">{% trans "Tarixdən" %}</label>

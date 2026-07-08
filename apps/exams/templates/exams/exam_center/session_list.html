@@ -31,9 +31,6 @@
       <a href="{% url 'exams:exam_center_reports' %}" class="fxc-btn fxc-btn-ghost">
         <i class="fas fa-chart-column"></i> {% trans "Hesabatlar" %}
       </a>
-      <a href="{% url 'exams:exam_center_session_create' %}" class="fxc-btn fxc-btn-primary">
-        <i class="fas fa-plus"></i> {% trans "Yeni oturum" %}
-      </a>
       {% endif %}
     </div>
   </header>
@@ -92,11 +89,6 @@
       {% if can_manage %}{% trans "Bu filtrdə oturum yoxdur." %}
       {% else %}{% trans "Sizə hələ oturum təyin edilməyib." %}{% endif %}
     </p>
-    {% if can_manage %}
-    <a href="{% url 'exams:exam_center_session_create' %}" class="fxc-btn fxc-btn-primary">
-      <i class="fas fa-plus"></i> {% trans "İlk oturumu yarat" %}
-    </a>
-    {% endif %}
   </div>
   {% endif %}
 </div>

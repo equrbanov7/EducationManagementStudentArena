@@ -15,7 +15,7 @@
   <header class="fxc-head">
     <div>
       <h1><i class="fas fa-calendar-plus"></i> {% trans "Yeni imtahan oturumu" %}</h1>
-      <p class="fxc-sub">{% trans "Final imtahanını zala, vaxta və nəzarətçiyə bağlayın" %}</p>
+      <p class="fxc-sub">{% trans "Final imtahanını zala və vaxta bağlayın" %}</p>
     </div>
     <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
       <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
@@ -30,20 +30,15 @@
 
     <div class="fxc-field">
       <label for="{{ form.exam.id_for_label }}">{% trans "Final imtahanı" %} *</label>
-      {{ form.exam }}
+      <div class="bootstrap-single-select">{{ form.exam }}</div>
       {{ form.exam.errors }}
     </div>
 
     <div class="fxc-form-grid">
       <div class="fxc-field">
         <label for="{{ form.room.id_for_label }}">{% trans "Zal" %} *</label>
-        {{ form.room }}
+        <div class="bootstrap-single-select">{{ form.room }}</div>
         {{ form.room.errors }}
-      </div>
-      <div class="fxc-field">
-        <label for="{{ form.invigilator.id_for_label }}">{% trans "Nəzarətçi" %}</label>
-        {{ form.invigilator }}
-        {{ form.invigilator.errors }}
       </div>
       <div class="fxc-field">
         <label for="{{ form.scheduled_start.id_for_label }}">{% trans "Başlama vaxtı" %} *</label>
@@ -57,11 +52,9 @@
       </div>
     </div>
 
-    <div class="fxc-field">
-      <label for="{{ form.staff.id_for_label }}">{% trans "Dəstək heyəti" %}</label>
-      {{ form.staff }}
-      {{ form.staff.errors }}
-      <p class="fxc-hint">{% trans "Heyət üzvləri oturumu monitorinq edə bilir; idarəetmə imtahan mərkəzində qalır." %}</p>
+    <div class="fxc-alert fxc-alert-info" role="note">
+      <i class="fas fa-user-shield"></i>
+      {% trans "Nəzarətçi bu oturuma yox, ZALA təyin olunur — zal monitorunda «Zal nəzarətçiləri» panelindən. Zala təyin olunan nəzarətçilər zaldakı bütün oturumları idarə edir." %}
     </div>
 
     <div class="fxc-field">

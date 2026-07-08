@@ -18894,11 +18894,11 @@ msgstr "Attempt detail"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "heading_student_answers"
-msgstr "No text answer"
+msgstr "Student Answers"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_exam"
-msgstr "Exams"
+msgstr "Exam"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_type"
@@ -18909,22 +18909,22 @@ msgstr "Yoxlayan müəllim:"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_started_at"
-msgstr "Start date"
+msgstr "Started at"
 
 msgid "Ümumi müddət:"
 msgstr "Ümumi müddət:"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_result"
-msgstr "Created"
+msgstr "Result"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "result_correct"
-msgstr "Correct?"
+msgstr "Correct"
 
 msgctxt "exams.template.teacher_view_attempt"
 msgid "result_wrong"
-msgstr "Default org"
+msgstr "Wrong"
 
 #, python-format
 msgid "%(count)s cavabsız"
@@ -28722,3 +28722,63 @@ msgstr ""
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Passes"
+
+msgctxt "exams.model.exam.field"
+msgid "subject"
+msgstr "Subject"
+
+msgctxt "exams.form.exam.label"
+msgid "subject"
+msgstr "Subject"
+
+msgctxt "exams.form.exam.error"
+msgid "subject_required_for_final_midterm"
+msgstr "A subject must be selected for final and midterm exams."
+
+msgctxt "exams.form.exam.error"
+msgid "random_question_count_exceeds_available"
+msgstr "There are only %(available)s questions available — you cannot select more."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "subject_search_placeholder"
+msgstr "Search subject (code or name)…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "clear"
+msgstr "Clear"
+
+msgctxt "exams.view.exams.message"
+msgid "extra_attempt_granted"
+msgstr "Extra attempt granted to the student."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "grant_extra_attempt"
+msgstr "Grant retry"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "grant_extra_attempt_hint"
+msgstr "Grants one extra attempt to this student only."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "attempts_left_short"
+msgstr "left"
+
+msgctxt "exams.wizard"
+msgid "review_title"
+msgstr "Review — check before creating"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run"
+msgstr "Trial run"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_hint"
+msgstr "Take the exam as a student — this attempt is not counted in results."
+
+msgctxt "exams.model.attempt.field"
+msgid "is_trial"
+msgstr "Trial attempt"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "selected_subject"
+msgstr "Selected subject"

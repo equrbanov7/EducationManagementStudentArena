@@ -107,6 +107,103 @@
             if (submitBtn) {
                 submitBtn.hidden = !isLast && !editing;
             }
+            if (isLast) {
+                populateReview();
+            }
+        }
+
+        /* ── yekun icmal: son addımda formanın xülasəsini göstər ── */
+        function reviewFieldText(selector) {
+            var el = form.querySelector(selector);
+            if (!el) {
+                return "";
+            }
+            if (el.tagName === "SELECT") {
+                var opt = el.options[el.selectedIndex];
+                return opt ? (opt.textContent || "").trim() : "";
+            }
+            return (el.value || "").trim();
+        }
+
+        function populateReview() {
+            var review = form.querySelector("[data-ew-review]");
+            var grid = form.querySelector("[data-ew-review-grid]");
+            if (!review || !grid) {
+                return;
+            }
+            var dash = "—";
+            var subjectSel = form.querySelector("[data-exam-subject-native]");
+            var subjectOpt = subjectSel ? subjectSel.querySelector("option[value]") : null;
+            var subjectText = subjectOpt ? (subjectOpt.textContent || "").trim() : "";
+            var isPublic = form.querySelector('[name="is_public"]');
+            var groupsCount = form.querySelector("#createExamGroupsCount");
+            var usersCount = form.querySelector("#createExamUsersCount");
+            var supervision = form.querySelector('[name="supervision_enabled"]');
+            var typeOption = form.querySelector(".js-create-exam-type-option:checked");
+            var typeLabel = typeOption ? form.querySelector('label[for="' + typeOption.id + '"] .ew-tc-name') : null;
+
+            var recipients;
+            if (isPublic && isPublic.checked) {
+                recipients = i18n("reviewPublic", gettext("Hamıya açıq"));
+            } else {
+                var g = groupsCount ? groupsCount.textContent : "0";
+                var u = usersCount ? usersCount.textContent : "0";
+                recipients = i18n("reviewGroups", gettext("Qruplar")) + ": " + g + " · " +
+                    i18n("reviewStudents", gettext("Tələbələr")) + ": " + u;
+            }
+
+            var rows = [
+                [i18n("reviewName", gettext("Ad")), reviewFieldText('[name="title"]') || dash],
+                [i18n("reviewType", gettext("Tip")), (typeLabel ? typeLabel.textContent.trim() : "") || dash],
+                [i18n("reviewCategory", gettext("Kateqoriya")), reviewFieldText('[name="exam_type_extended"]') || dash],
+                [i18n("reviewSubject", gettext("Fənn")), subjectText || dash],
+                [i18n("reviewStart", gettext("Başlama")), reviewFieldText('[name="start_datetime"]') || dash],
+                [i18n("reviewEnd", gettext("Bitmə")), reviewFieldText('[name="end_datetime"]') || dash],
+                [i18n("reviewDuration", gettext("Müddət (dəq)")), reviewFieldText('[name="total_duration_minutes"]') || dash],
+                [i18n("reviewQuestions", gettext("Sual sayı")), reviewFieldText('[name="random_question_count"]') || dash],
+                [i18n("reviewSupervision", gettext("Nəzarət")),
+                    supervision && supervision.checked ? i18n("reviewOn", gettext("Aktiv")) : i18n("reviewOff", gettext("Deaktiv"))],
+                [i18n("reviewRecipients", gettext("Alıcılar")), recipients]
+            ];
+
+            grid.innerHTML = "";
+            rows.forEach(function (row) {
+                var dt = document.createElement("dt");
+                dt.textContent = row[0];
+                var dd = document.createElement("dd");
+                dd.textContent = row[1];
+                grid.appendChild(dt);
+                grid.appendChild(dd);
+            });
+
+            maybeWarnQuestionCount(review);
+        }
+
+        function maybeWarnQuestionCount(review) {
+            var warn = review.querySelector("[data-ew-review-warn]");
+            var url = review.getAttribute("data-available-count-url");
+            if (!warn) {
+                return;
+            }
+            var requestedInput = form.querySelector('[name="random_question_count"]');
+            var requested = requestedInput ? parseInt(requestedInput.value, 10) : NaN;
+            if (!url || isNaN(requested) || requested <= 0) {
+                warn.hidden = true;
+                return;
+            }
+            fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function (r) { return r.ok ? r.json() : { count: 0 }; })
+                .then(function (data) {
+                    var available = (data && data.count) || 0;
+                    if (available && requested > available) {
+                        warn.textContent = i18n("reviewCountWarn", gettext("Sistemdə yalnız {n} sual var."))
+                            .replace("{n}", available);
+                        warn.hidden = false;
+                    } else {
+                        warn.hidden = true;
+                    }
+                })
+                .catch(function () { warn.hidden = true; });
         }
 
         function goTo(index) {
@@ -118,19 +215,64 @@
             }
         }
 
-        /* ── step 1: ad mütləqdir ── */
+        /* ── addım-əsaslı məcburi sahələr ──
+           Addım 1 (əsaslar): ad, imtahan növü (kateqoriya), fənn.
+           Addım 2 (vaxt): başlama və son təhvil vaxtı.
+           Sahə boş qalarsa növbəti addıma keçid bağlanır. */
         function validateStep(index) {
-            if (index !== 0) {
-                return true;
+            var firstInvalid = null;
+
+            function requireField(input, message, focusTarget) {
+                if (!input) {
+                    return;
+                }
+                var group = input.closest(".form-group");
+                if (!(input.value || "").trim()) {
+                    markInvalid(input, message);
+                    if (!firstInvalid) {
+                        firstInvalid = focusTarget || input;
+                    }
+                } else if (group) {
+                    clearTransientError(group);
+                }
             }
-            var titleInput = form.querySelector('[name="title"]');
-            if (titleInput && !titleInput.value.trim()) {
-                markInvalid(titleInput, i18n("titleRequired", gettext("İmtahan adı mütləqdir.")));
-                titleInput.focus();
+
+            if (index === 0) {
+                requireField(
+                    form.querySelector('[name="title"]'),
+                    i18n("titleRequired", gettext("İmtahan adı mütləqdir."))
+                );
+                requireField(
+                    form.querySelector('[name="exam_type_extended"]'),
+                    i18n("categoryRequired", gettext("İmtahan növünü seçin."))
+                );
+                requireField(
+                    form.querySelector("[data-exam-subject-native]"),
+                    i18n("subjectRequired", gettext("Fənn seçilməlidir.")),
+                    form.querySelector("#createExamSubjectSearch")
+                );
+            } else if (index === 1) {
+                requireField(
+                    form.querySelector('[name="start_datetime"]'),
+                    i18n("startRequired", gettext("Başlama vaxtını seçin."))
+                );
+                requireField(
+                    form.querySelector('[name="end_datetime"]'),
+                    i18n("endRequired", gettext("Son təhvil vaxtını seçin."))
+                );
+                requireField(
+                    form.querySelector('[name="total_duration_minutes"]'),
+                    i18n("durationRequired", gettext("İmtahanın ümumi müddətini yazın."))
+                );
+            }
+
+            if (firstInvalid) {
+                try {
+                    firstInvalid.focus();
+                } catch (err) {
+                    /* gizli/oxunmayan sahə fokuslana bilməz — xəta xülasəsi bəsdir */
+                }
                 return false;
-            }
-            if (titleInput) {
-                clearTransientError(titleInput.closest(".form-group"));
             }
             return true;
         }

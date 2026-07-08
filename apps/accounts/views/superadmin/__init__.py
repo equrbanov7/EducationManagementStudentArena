@@ -10,10 +10,12 @@ from .endpoints import (
     superadmin_ai_settings,
     superadmin_organizations,
 )
+from .exam_rooms import superadmin_exam_rooms
 
 __all__ = [
     "superadmin_organizations",
     "superadmin_ai_settings",
+    "superadmin_exam_rooms",
     "build_superadmin_ai_settings_context",
     "_notify_superadmins_of_pending_org",
 ]
