@@ -64,6 +64,7 @@ from .presence import (
 )
 from .reminders import notify_upcoming_final_exams
 from .reports import filter_sessions, filter_tickets
+from .room_admin import RoomAdminError, add_computer, bulk_add_computers, update_computer
 from .sessions import (
     RoomSessionStateError,
     cancel_session,
@@ -96,10 +97,13 @@ __all__ = [
     "ERROR_RATE_LIMITED",
     "HEARTBEAT_INTERVAL_SECONDS",
     "PRESENCE_TTL_SECONDS",
+    "RoomAdminError",
     "RoomSessionStateError",
     "TicketStateError",
+    "add_computer",
     "assign_students",
     "begin_attempt_for_ticket",
+    "bulk_add_computers",
     "broadcast_to_staff",
     "broadcast_to_students",
     "can_manage_final_center",
@@ -153,6 +157,7 @@ __all__ = [
     "touch_presence",
     "touch_ticket_last_seen",
     "transition_ticket",
+    "update_computer",
     "user_is_org_member",
     "user_supervises_final_sessions",
     "validate_entry",

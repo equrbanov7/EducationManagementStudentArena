@@ -28133,3 +28133,63 @@ msgstr "Ölçütlerle değerlendir"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Geçer"
+
+msgctxt "exams.model.exam.field"
+msgid "subject"
+msgstr "Ders"
+
+msgctxt "exams.form.exam.label"
+msgid "subject"
+msgstr "Ders"
+
+msgctxt "exams.form.exam.error"
+msgid "subject_required_for_final_midterm"
+msgstr "Final ve vize sınavları için bir ders seçilmelidir."
+
+msgctxt "exams.form.exam.error"
+msgid "random_question_count_exceeds_available"
+msgstr "Sistemde yalnızca %(available)s soru var — daha fazlasını seçemezsiniz."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "subject_search_placeholder"
+msgstr "Ders ara (kod veya ad)…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "clear"
+msgstr "Temizle"
+
+msgctxt "exams.view.exams.message"
+msgid "extra_attempt_granted"
+msgstr "Öğrenciye ek deneme hakkı verildi."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "grant_extra_attempt"
+msgstr "Yeniden hak ver"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "grant_extra_attempt_hint"
+msgstr "Yalnızca bu öğrenciye bir ek deneme hakkı verir."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "attempts_left_short"
+msgstr "kalan"
+
+msgctxt "exams.wizard"
+msgid "review_title"
+msgstr "Özet — oluşturmadan önce kontrol edin"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run"
+msgstr "Deneme çalıştır"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_hint"
+msgstr "Sınavı öğrenci gibi deneyin — bu deneme sonuçlara sayılmaz."
+
+msgctxt "exams.model.attempt.field"
+msgid "is_trial"
+msgstr "Deneme denemesi"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "selected_subject"
+msgstr "Seçili ders"

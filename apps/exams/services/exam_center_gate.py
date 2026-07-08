@@ -67,7 +67,43 @@ def final_exam_access_allowed(request) -> bool:
     return False
 
 
+def room_ip_access_allowed(request, room) -> bool:
+    """
+    Zal-səviyyəli giriş qapısı: bu sorğu HƏMİN zalın qeydli kompüterlərindən
+    (IP üzrə) gəlirmi?
+
+    * Zalın aktiv kompüterlərində HEÇ IP təyin olunmayıbsa → ``True`` (bu zal
+      üçün per-kompüter məhdudiyyət yoxdur; qlobal ``final_exam_access_allowed``
+      artıq qərar verib).
+    * IP-lər varsa → müştəri IP-si həmin siyahıda olmalıdır. Müştəri IP-si
+      oxunmursa/uyğun gəlmirsə → ``False``.
+
+    QEYD: MAC HTTP ilə serverə çatmadığı üçün etibarlı yoxlama vahidi IP-dir
+    (bax modul başlığı). MAC yalnız identifikasiya/inventar sahəsidir.
+    """
+    ip_values = [ip for ip in room.computers.filter(is_active=True).values_list("ip_address", flat=True) if ip]
+    if not ip_values:
+        return True
+
+    client_text = get_client_ip(request)
+    try:
+        client_ip = ipaddress.ip_address(client_text)
+    except ValueError:
+        logger.warning("room_ip_access: müştəri IP-si oxunmadı (%r) — giriş rədd edildi.", client_text)
+        return False
+
+    for entry in ip_values:
+        try:
+            if client_ip == ipaddress.ip_address(entry):
+                return True
+        except ValueError:
+            logger.warning("room_ip_access: zal kompüteri IP-si yanlış formatdadır, ötürülür: %r", entry)
+            continue
+    return False
+
+
 __all__ = [
     "final_exam_access_allowed",
     "get_client_ip",
+    "room_ip_access_allowed",
 ]

@@ -17,6 +17,10 @@ from apps.exams.constants import (  # noqa: F401
 from apps.exams.domain.ai_config import (  # noqa: F401
     get_ai_config,
 )
+from apps.exams.domain.final_center import (  # noqa: F401
+    ExamRoom,
+    ExamRoomComputer,
+)
 from apps.exams.features import (  # noqa: F401
     without_disabled_practical_exams,
 )
@@ -24,9 +28,12 @@ from apps.exams.forms import (  # noqa: F401
     StudentGroupForm,
 )
 from apps.exams.services.access_policy import (  # noqa: F401
+    can_assign_invigilators,
     can_create_question_bank,
     can_manage_exam_questions,
+    can_manage_exam_rooms,
     can_manage_final_exam_content,
+    ensure_can_manage_exam_rooms,
     is_exam_center_user,
     is_teacher_user,
 )
@@ -35,7 +42,11 @@ from apps.exams.services.ai_summary import (  # noqa: F401
     generate_exam_statistics_summary,
 )
 from apps.exams.services.final_center import (  # noqa: F401
+    RoomAdminError,
+    add_computer,
+    bulk_add_computers,
     student_final_exam_context,
+    update_computer,
     user_supervises_final_sessions,
 )
 from apps.exams.services.grading import (  # noqa: F401
@@ -64,7 +75,14 @@ from apps.exams.views.shared.tenant import (  # noqa: F401
 __all__ = [
     "ATTEMPT_FINISHED_STATUSES",
     "DEFAULT_EXAM_LANGUAGE",
+    "ExamRoom",
+    "ExamRoomComputer",
+    "RoomAdminError",
     "StudentGroupForm",
+    "add_computer",
+    "bulk_add_computers",
+    "can_assign_invigilators",
+    "update_computer",
     "get_ai_rate_limit",
     "EXAM_LANGUAGE_CHOICES",
     "accessible_banks",
@@ -73,7 +91,9 @@ __all__ = [
     "calculate_attempt_score",
     "can_create_question_bank",
     "can_manage_exam_questions",
+    "can_manage_exam_rooms",
     "can_manage_final_exam_content",
+    "ensure_can_manage_exam_rooms",
     "is_exam_center_user",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",

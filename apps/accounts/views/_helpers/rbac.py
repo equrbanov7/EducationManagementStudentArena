@@ -172,7 +172,7 @@ def _role_capabilities(user, profile):
     # (üzv/vəzifə idarəetməsi, imtahan-kurs idarəetməsi YOX).
     is_org_admin = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
     is_hr = _user_has_any_role(user, {ProfileRole.HR})
-    is_exam_center = _user_has_any_role(user, {"exam_center"})
+    is_exam_center = _user_has_any_role(user, {"exam_center", "exam_center_head", "exam_center_staff"})
     is_lead_student = _user_has_any_role(user, {ProfileRole.LEAD_STUDENT})
     # Tyutor — qrup kurasiyası: öz unit alt-ağacındakı tələbə/kurs/statistika
     # görünüşü; imtahan-qiymətləndirmə-üzv idarəetməsi yoxdur. Proqram
@@ -195,6 +195,12 @@ def _role_capabilities(user, profile):
         from apps.exams.public import user_supervises_final_sessions
 
         can_access_final_center = user_supervises_final_sessions(user)
+    # İmtahan zalı + kompüter/MAC idarəsi: yalnız superadmin, YAXUD superadminin
+    # per-user bayraqla həvalə etdiyi istifadəçi. Yalnız naviqasiya görünürlüyü;
+    # icazə view qatında (``ensure_can_manage_exam_rooms``) yenidən yoxlanır.
+    from apps.exams.public import can_manage_exam_rooms as _can_manage_exam_rooms
+
+    can_manage_exam_rooms = _can_manage_exam_rooms(user)
     # Registrar console (K3): who may manage the academic catalogue (programs /
     # subjects). Org-admin (rector/vice-rector/owner) + dekan/kafedra müdürü.
     # The actual authorisation is re-checked in registrar.views (defence in depth);
@@ -244,6 +250,9 @@ def _role_capabilities(user, profile):
             "superadmin-organizations",
             "superadmin-users",
             "superadmin-ai",
+            "superadmin-exam-rooms",  # imtahan zalı + kompüter/MAC idarəsi
+            "exam-center-pins",  # PIN axtarışı (canlı search + inline detal)
+            "exam-center-stats",  # imtahan statistikaları / nəticələr
             "superadmin-contact-messages",  # public contact form inbox
             "pending-post-approvals",
             "blog",
@@ -267,6 +276,12 @@ def _role_capabilities(user, profile):
         allowed_sections.add("my-results")
         if can_view_student_assignments:
             allowed_sections.add("pending-answers")
+
+        # Superadminin həvalə etdiyi (bayraqlı) qeyri-superadmin zal idarəçisi:
+        # öz aktiv təşkilatının zallarını idarə edə bilir (cross-org yalnız
+        # superadminə açıqdır).
+        if can_manage_exam_rooms:
+            allowed_sections.add("superadmin-exam-rooms")
 
         if is_org_admin:
             allowed_sections.update(
@@ -292,7 +307,9 @@ def _role_capabilities(user, profile):
         # İmtahan mərkəzi — imtahan həyat dövrü: yaratma, qruplar, sual bankı,
         # apellyasiyalar, bildiriş dərci. Üzv/rol idarəetməsi YOXDUR.
         if is_exam_center:
-            allowed_sections.update({"my-exams", "groups", "publish-notification"})
+            allowed_sections.update(
+                {"my-exams", "groups", "publish-notification", "exam-center-pins", "exam-center-stats"}
+            )
 
         # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.
         if is_hr:
@@ -446,6 +463,7 @@ def _role_capabilities(user, profile):
         "can_manage_org": can_manage_org,
         "can_manage_registrar": can_manage_registrar,
         "can_access_final_center": can_access_final_center,
+        "can_manage_exam_rooms": can_manage_exam_rooms,
         # Grade-approval chain (U7.2): chairs/deans/admins review submitted journals.
         "can_approve_grades": is_superadmin or is_org_admin or is_unit_manager,
         "can_view_owned_learning": can_view_owned_learning,

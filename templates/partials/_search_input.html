@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}
+    Yenidən istifadəyə yararlı axtarış inputu — hər yerdə eyni görünüş.
+    Sağda kiçik axtarış ikonu (submit) + mətn olanda təmizlə (×) düyməsi.
+
+    Parametrlər:
+    - name            : input adı (default "q")
+    - value           : cari dəyər
+    - placeholder     : placeholder mətni
+    - aria_label      : əlçatanlıq etiketi (default placeholder)
+    - wrapper_class   : əlavə wrapper class-ı (məs. flex-grow üçün)
+    - input_class     : əlavə input class-ı
+    - autofocus       : True olduqda autofocus
+
+    Davranış: JS `static/js/search_field.js` (base.html-də qlobal yüklənir) —
+    yazdıqca × görünür; ×-a klik input-u təmizləyir və formu göndərir.
+{% endcomment %}
+<div class="search-field {{ wrapper_class }}" role="search">
+    <input type="search" name="{{ name|default:'q' }}" value="{{ value|default:'' }}"
+           class="search-field__input {{ input_class }}"
+           placeholder="{{ placeholder }}"
+           aria-label="{{ aria_label|default:placeholder }}"
+           autocomplete="off"{% if autofocus %} autofocus{% endif %}>
+    <button type="button" class="search-field__clear js-search-clear"
+            aria-label="{% trans 'Təmizlə' %}" title="{% trans 'Təmizlə' %}"{% if not value %} hidden{% endif %}>
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+    </button>
+    <button type="submit" class="search-field__go" aria-label="{% trans 'Axtar' %}" title="{% trans 'Axtar' %}">
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+    </button>
+</div>

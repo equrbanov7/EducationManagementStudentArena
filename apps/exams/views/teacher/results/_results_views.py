@@ -208,6 +208,8 @@ def teacher_exam_results(request, slug):
                 "delivered_count": delivered_count,
                 "anonymous_name": anonymous_name,
                 "real_name": real_name,
+                "student_id": att.user_id,
+                "attempts_left": exam.attempts_left_for(att.user),
                 "can_view_name": can_view_name,
                 "seconds_remaining": review_window_seconds or identity_window_seconds or 0,
                 "action_code": action_state["code"],

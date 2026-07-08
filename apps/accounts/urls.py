@@ -139,6 +139,7 @@ urlpatterns = [
     # Superadmin oversight
     path("superadmin/organizations/", views.superadmin_organizations, name="superadmin_organizations"),
     path("superadmin/ai-settings/", views.superadmin_ai_settings, name="superadmin_ai_settings"),
+    path("superadmin/exam-rooms/", views.superadmin_exam_rooms, name="superadmin_exam_rooms"),
     # Account management
     path("delete-account/", views.delete_account, name="delete_account"),
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),

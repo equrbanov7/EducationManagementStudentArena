@@ -109,6 +109,7 @@
             assignedExamModalStartUrl = trigger.getAttribute("data-start-url") || "";
             assignedExamModalRequiresCode = trigger.getAttribute("data-requires-code") === "1";
             assignedExamModalIsFinal = trigger.getAttribute("data-is-final") === "1";
+            var studentPin = trigger.getAttribute("data-student-pin") || "";
 
             if (assignedExamInfoExamName) {
                 assignedExamInfoExamName.textContent = trigger.getAttribute("data-exam-title") || "";
@@ -140,10 +141,24 @@
             if (assignedExamFinalBlock) {
                 assignedExamFinalBlock.hidden = true;
             }
+            var studentPinBlock = document.getElementById("assignedExamStudentPinBlock");
+            var studentPinValue = document.getElementById("assignedExamStudentPin");
+            if (studentPinBlock) {
+                studentPinBlock.hidden = true;
+            }
 
             if (assignedExamModalIsFinal) {
                 applyFinalExamModalState(trigger);
             } else {
+                // Sehrbazla yaradılan final/midterm: fərdi PIN göstər və giriş
+                // xanasına əvvəlcədən yaz (tələbə yalnız təsdiqləyir).
+                if (studentPin && studentPinBlock && studentPinValue) {
+                    studentPinValue.textContent = studentPin;
+                    studentPinBlock.hidden = false;
+                    if (assignedExamAccessCodeInput) {
+                        assignedExamAccessCodeInput.value = studentPin;
+                    }
+                }
                 if (assignedExamCodeForm) {
                     assignedExamCodeForm.classList.toggle("is-hidden", !assignedExamModalRequiresCode);
                 }

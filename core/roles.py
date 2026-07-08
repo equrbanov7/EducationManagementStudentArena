@@ -18,6 +18,12 @@ class ProfileRole:
     ORG_ADMIN = "org_admin"
     MEMBER = "member"
     HR = "hr"
+    # İmtahan mərkəzi rolları: rəhbər (zala nəzarətçi təyin edir + tam imtahan
+    # idarəsi) və işçi (monitor / PIN / hesabat, amma nəzarətçi təyin ETMİR).
+    # Köhnə tək "exam_center" rolu geriyə-uyğunluq üçün saxlanır (rəhbərə bərabər).
+    EXAM_CENTER_HEAD = "exam_center_head"
+    EXAM_CENTER_STAFF = "exam_center_staff"
+    EXAM_CENTER = "exam_center"
     TEACHER = "teacher"
     ASSISTANT_TEACHER = "assistant_teacher"
     LEAD_STUDENT = "lead_student"
@@ -29,6 +35,9 @@ class ProfileRole:
         (ORG_ADMIN, "Təşkilat Admini"),
         (MEMBER, "Üzv"),
         (HR, "HR"),
+        (EXAM_CENTER_HEAD, "İmtahan Mərkəzi Rəhbəri"),
+        (EXAM_CENTER_STAFF, "İmtahan Mərkəzi İşçisi"),
+        (EXAM_CENTER, "İmtahan Mərkəzi"),
         (TEACHER, "Müəllim"),
         (ASSISTANT_TEACHER, "Müəllim Köməkçisi"),
         (LEAD_STUDENT, "Baş Tələbə"),
@@ -40,8 +49,11 @@ class ProfileRole:
         SUPERADMIN: 100,
         ORG_OWNER: 90,
         ORG_ADMIN: 80,
+        EXAM_CENTER_HEAD: 85,
+        EXAM_CENTER: 85,
         MEMBER: 20,
         HR: 65,
+        EXAM_CENTER_STAFF: 60,
         TEACHER: 60,
         ASSISTANT_TEACHER: 55,
         LEAD_STUDENT: 30,
@@ -66,7 +78,12 @@ class ProfileRole:
         ASSISTANT_TEACHER: {ASSISTANT_TEACHER},
         "assistant": {ASSISTANT_TEACHER, "assistant"},
         "lab_assistant": {ASSISTANT_TEACHER, "lab_assistant"},
+        # Köhnə tək "exam_center" = rəhbərə bərabər (geriyə-uyğunluq).
+        # Rəhbər/işçi AYRI saxlanır ki, nəzarətçi təyini yalnız rəhbərə açıq olsun
+        # (is_exam_center hər üçünü ayrıca yoxlayır — bax accounts/roles.py).
         "exam_center": {"exam_center"},
+        EXAM_CENTER_HEAD: {EXAM_CENTER_HEAD},
+        EXAM_CENTER_STAFF: {EXAM_CENTER_STAFF},
         "tutor": {"tutor"},
         # Proqram koordinatoru tyutor-ekvivalentdir (eyni akademik kurasiya işi).
         "program_coordinator": {"program_coordinator", "tutor"},
@@ -75,7 +92,7 @@ class ProfileRole:
     # Yüksək level-ə baxmayaraq avtomatik org_admin aliası ALMAMALI rollar.
     # Bunların səlahiyyəti rol permission-ları ilə müəyyən olunur (məs. imtahan
     # mərkəzi yalnız imtahan sahəsini idarə edir, üzv/struktur idarəetməsi yox).
-    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {"exam_center", "hr"}
+    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {"exam_center", "exam_center_head", "exam_center_staff", "hr"}
 
     ADMIN_EQUIVALENT_ROLE_NAMES = {
         ORG_ADMIN,

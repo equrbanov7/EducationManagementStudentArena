@@ -25,10 +25,14 @@ urlpatterns = [
     # EXAM CENTER - Zallar / Oturumlar / Monitor / Hesabat (sabit)
     # ==========================
     path("center/rooms/", views.exam_center_room_list, name="exam_center_room_list"),
-    path("center/rooms/create/", views.exam_center_room_create, name="exam_center_room_create"),
-    path("center/rooms/<int:room_id>/edit/", views.exam_center_room_update, name="exam_center_room_update"),
     # Zal səviyyəli aqreqasiya monitoru (bütün canlı oturumlar birlikdə).
     path("center/rooms/<int:room_id>/monitor/", views.exam_center_room_monitor, name="exam_center_room_monitor"),
+    # Zala nəzarətçi təyini (imtahan mərkəzi paneli).
+    path(
+        "center/rooms/<int:room_id>/invigilators/",
+        views.exam_center_room_assign_invigilators,
+        name="exam_center_room_assign_invigilators",
+    ),
     path(
         "center/rooms/<int:room_id>/api/snapshot/",
         views.exam_center_room_snapshot,
@@ -107,12 +111,37 @@ urlpatterns = [
         name="exam_center_ticket_readmit",
     ),
     path("center/reports/", views.exam_center_reports, name="exam_center_reports"),
+    path("center/stats/data/", views.exam_center_stats_data, name="exam_center_stats_data"),
+    path("center/stats/export/", views.exam_center_stats_export, name="exam_center_stats_export"),
+    path("center/stats/filters/", views.exam_center_stats_filters, name="exam_center_stats_filters"),
     path("center/pin-lookup/", views.exam_center_pin_lookup, name="exam_center_pin_lookup"),
+    path("center/pin-lookup/search/", views.exam_center_pin_search, name="exam_center_pin_search"),
+    path(
+        "center/pin-lookup/student/<int:student_id>/",
+        views.exam_center_student_pins,
+        name="exam_center_student_pins",
+    ),
     # ==========================
     # TEACHER - Exams CRUD (sabit)
     # ==========================
     path("", views.teacher_exam_list, name="teacher_exam_list"),
     path("create/", views.createAndEditExamView, name="create_exam"),
+    # Sehrbaz axtarışlı select-ləri üçün AJAX lookup endpoint-ləri.
+    path("lookups/subjects/", views.subject_search, name="subject_search"),
+    path("lookups/groups/", views.group_search, name="group_search"),
+    path("lookups/users/", views.user_search, name="user_search"),
+    path("lookups/invigilators/", views.invigilator_search, name="invigilator_search"),
+    path("lookups/assigned-count/", views.assigned_student_count, name="assigned_student_count"),
+    path(
+        "<slug:slug>/available-question-count/",
+        views.exam_available_question_count,
+        name="exam_available_question_count",
+    ),
+    path(
+        "<slug:slug>/grant-extra-attempt/",
+        views.grant_extra_attempt,
+        name="grant_extra_attempt",
+    ),
     path("pending-work/", views.teacher_pending_attempts, name="teacher_pending_attempts"),
     # ==========================
     # TEACHER - Question Bank library (imtahandan asılı olmayan) (sabit)

@@ -366,9 +366,13 @@ def _apply_results_filters_from_params(exam, params):
     # expired-ə çevir ki, status həm cədvəldə, həm filterlərdə düzgün görünsün.
     _expire_overdue_attempts(exam)
 
-    attempts = exam.attempts.select_related("user", "exam").prefetch_related(
-        "answers__question__options",
-        "answers__selected_options",
+    attempts = (
+        exam.attempts.exclude(is_trial=True)
+        .select_related("user", "exam")
+        .prefetch_related(
+            "answers__question__options",
+            "answers__selected_options",
+        )
     )
 
     search_query = (params.get("q") or "").strip()

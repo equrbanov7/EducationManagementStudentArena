@@ -100,6 +100,10 @@
     </div>
 </div>
 
-<script src="{% static 'exams/js/course_exam_dashboard.js' %}"></script>
+{# Fənn (subject) axtarışlı select + kateqoriya-görünürlüyü üçün paylaşılan modullar. #}
+<script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260707-wizard2"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260707-wizard2"></script>
+<script src="{% static 'exams/js/course_exam_dashboard.js' %}?v=20260707-wizard2"></script>
 
 {% endif %}

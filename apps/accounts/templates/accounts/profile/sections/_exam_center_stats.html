@@ -1,0 +1,267 @@
+{% load i18n %}
+{% if 'exam-center-stats' in allowed_sections %}
+<section class="profile-section-panel profile-section--exam-center-stats {% if active_section == 'exam-center-stats' %}is-active{% endif %}"
+         data-profile-section-panel="exam-center-stats"
+         data-source-url="{{ profile_base_url }}?section=exam-center-stats">
+<style nonce="{{ request.csp_nonce }}">
+  /* Tətbiqin öz açıq (ağ + göy) dizayn token-ləri ilə — TÜND yox. */
+  .ecs { color: var(--ems-neutral-900); }
+  .ecs-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap; }
+  .ecs-head h2 { margin:0; font-size:1.35rem; font-weight:800; display:flex; align-items:center; gap:.55rem; color:var(--ems-primary-700); }
+  .ecs-head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.92rem; }
+  .ecs-btn { display:inline-flex; align-items:center; gap:.45rem; padding:.6rem 1rem; border-radius:10px; border:0; background:var(--ems-primary-600); color:#fff; font-weight:700; font-size:.88rem; cursor:pointer; text-decoration:none; box-shadow:0 1px 2px rgba(37,99,235,.25); }
+  .ecs-btn:hover { background:var(--ems-primary-700); }
+  .ecs-filters { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:.75rem; margin:1.15rem 0; }
+  .ecs-field label { display:block; font-size:.74rem; font-weight:700; color:var(--ems-neutral-500); margin-bottom:.32rem; text-transform:uppercase; letter-spacing:.02em; }
+  .ecs-field input, .ecs-field select { width:100%; padding:.62rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
+  .ecs-field input:focus, .ecs-field select:focus { outline:none; border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
+  .ecs-field input::placeholder { color:var(--ems-neutral-400); }
+  /* Filtrlərdəki Bootstrap select-lər — kompakt (nəhəng default toggle yox) */
+  .ecs-filters .bootstrap-single-select__toggle { min-height:0; padding:.62rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
+  .ecs-filters .bootstrap-single-select__toggle:hover { border-color:var(--ems-primary-300); }
+  /* Multi-select (chips + search) — ağ, göy çiplər */
+  .ecs-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.4rem; position:relative; min-height:2.7rem; }
+  .ecs-ms:focus-within { border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
+  .ecs-ms__chips { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; }
+  .ecs-chip { display:inline-flex; align-items:center; gap:.35rem; background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-100); border-radius:999px; padding:.18rem .3rem .18rem .6rem; font-size:.78rem; font-weight:700; max-width:100%; }
+  .ecs-chip span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:14rem; }
+  .ecs-chip__x { cursor:pointer; border:0; background:transparent; color:var(--ems-primary-600); font-size:1rem; line-height:1; padding:0 .1rem; }
+  .ecs-ms__search { border:0; outline:none; background:transparent; color:var(--ems-neutral-900); padding:.28rem; font-size:.88rem; min-width:100px; flex:1; }
+  .ecs-ms__search::placeholder { color:var(--ems-neutral-400); }
+  .ecs-ms__menu { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; box-shadow:0 12px 30px rgba(15,23,42,.14); max-height:230px; overflow-y:auto; z-index:30; display:none; }
+  .ecs-ms.is-open .ecs-ms__menu { display:block; }
+  .ecs-ms__opt { padding:.55rem .8rem; cursor:pointer; font-size:.86rem; color:var(--ems-neutral-800); }
+  .ecs-ms__opt:hover { background:var(--ems-primary-50); color:var(--ems-primary-700); }
+  /* Kartlar */
+  .ecs-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:.75rem; margin-bottom:1rem; }
+  .ecs-card { border:1px solid var(--ems-neutral-200); border-left:4px solid var(--ems-primary-600); border-radius:12px; background:#fff; padding:.9rem 1.05rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .ecs-card__n { font-size:1.7rem; font-weight:800; color:var(--ems-primary-700); line-height:1.05; }
+  .ecs-card__l { color:var(--ems-neutral-500); font-size:.74rem; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-top:.1rem; }
+  /* Cədvəl — açıq göy başlıq, zebra, tünd mətn */
+  .ecs-tablewrap { border:1px solid var(--ems-neutral-200); border-radius:12px; overflow-x:auto; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .ecs-table { width:100%; border-collapse:collapse; font-size:.86rem; min-width:1160px; }
+  .ecs-table th, .ecs-table td { padding:.7rem .85rem; text-align:left; border-bottom:1px solid var(--ems-neutral-200); white-space:nowrap; }
+  .ecs-table thead th { background:var(--ems-primary-50); color:var(--ems-primary-800); font-weight:800; font-size:.72rem; text-transform:uppercase; letter-spacing:.03em; border-bottom:2px solid var(--ems-primary-200); position:sticky; top:0; }
+  .ecs-table thead th.is-sortable { cursor:pointer; user-select:none; }
+  .ecs-table thead th.is-sortable:hover { background:var(--ems-primary-100); }
+  .ecs-table thead th.is-active { background:var(--ems-primary-100); color:var(--ems-primary-800); }
+  .ecs-arrow { font-size:.95rem; margin-left:.35rem; vertical-align:-1px; color:var(--ems-neutral-400); }
+  .ecs-table thead th.is-active .ecs-arrow { color:var(--ems-primary-600); }
+  .ecs-table tbody td { color:var(--ems-neutral-900); }
+  .ecs-clip { max-width:220px; overflow:hidden; text-overflow:ellipsis; }
+  .ecs-table tbody tr:nth-child(even) { background:var(--ems-neutral-50); }
+  .ecs-table tbody tr:hover { background:var(--ems-primary-50); }
+  .ecs-table tr:last-child td { border-bottom:0; }
+  .ecs-uname { color:var(--ems-neutral-500); font-size:.76rem; }
+  .ecs-pct { font-weight:800; color:var(--ems-primary-700); }
+  .ecs-view { display:inline-flex; align-items:center; gap:.35rem; padding:.32rem .7rem; border-radius:8px; background:var(--ems-primary-600); color:#fff; font-weight:700; font-size:.78rem; text-decoration:none; }
+  .ecs-view:hover { background:var(--ems-primary-700); color:#fff; }
+  .ecs-state { padding:2.6rem 1rem; text-align:center; color:var(--ems-neutral-500); }
+  .ecs-state i { font-size:1.9rem; display:block; margin-bottom:.5rem; opacity:.55; }
+  .ecs-pager { display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:1rem; color:var(--ems-neutral-500); font-size:.88rem; }
+  .ecs-pager button { padding:.48rem .95rem; border-radius:8px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-primary-700); font-weight:700; cursor:pointer; }
+  .ecs-pager button:hover:not(:disabled) { background:var(--ems-primary-50); border-color:var(--ems-primary-300); }
+  .ecs-pager button:disabled { opacity:.45; cursor:default; }
+</style>
+
+<div class="ecs"
+     data-data-url="{% url 'exams:exam_center_stats_data' %}"
+     data-filters-url="{% url 'exams:exam_center_stats_filters' %}"
+     data-export-url="{% url 'exams:exam_center_stats_export' %}"
+     data-subject-url="{% url 'exams:subject_search' %}"
+     data-group-url="{% url 'exams:group_search' %}"
+     data-view-url-template="{% url 'exams:teacher_view_attempt' slug='__SLUG__' attempt_id=0 %}">
+  <div class="ecs-head">
+    <div>
+      <h2><i class="fas fa-chart-line"></i> {% trans "İmtahan statistikaları" %}</h2>
+      <p>{% trans "Bütün imtahan nəticələri — fənn, qrup, kafedra, tip və il üzrə süzün. Sütun başlığına klik = sırala. «Bax» ilə tələbənin tam nəticəsi (apellyasiya düzəlişləri daxil) açılır." %}</p>
+    </div>
+    <a href="#" class="ecs-btn js-ecs-export"><i class="fas fa-file-excel"></i> {% trans "Excel yüklə" %}</a>
+  </div>
+
+  <div class="ecs-filters">
+    <div class="ecs-field">
+      <label>{% trans "Axtarış (tələbə)" %}</label>
+      <input type="search" class="js-ecs-q" placeholder="{% trans 'Ad, soyad, istifadəçi adı…' %}" autocomplete="off">
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "Fənn" %}</label>
+      <div class="ecs-ms js-ecs-subject"><div class="ecs-ms__chips"><input type="text" class="ecs-ms__search" placeholder="{% trans 'fənn axtar…' %}"></div><div class="ecs-ms__menu"></div></div>
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "Qrup" %}</label>
+      <div class="ecs-ms js-ecs-group"><div class="ecs-ms__chips"><input type="text" class="ecs-ms__search" placeholder="{% trans 'qrup axtar…' %}"></div><div class="ecs-ms__menu"></div></div>
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "Kafedra / fakültə" %}</label>
+      <div class="bootstrap-single-select">
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-unit" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+      </div>
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "İmtahan tipi" %}</label>
+      <div class="bootstrap-single-select">
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+      </div>
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "İl" %}</label>
+      <div class="bootstrap-single-select">
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="ecs-cards js-ecs-cards"></div>
+  <div class="ecs-tablewrap">
+    <table class="ecs-table">
+      <thead><tr class="js-ecs-thead">
+        <th class="is-sortable" data-sort="student">{% trans "Tələbə" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th>{% trans "Qrup" %}</th>
+        <th>{% trans "Kafedra" %}</th>
+        <th>{% trans "Fakültə / dekanlıq" %}</th>
+        <th>{% trans "Müəllim" %}</th>
+        <th class="is-sortable" data-sort="exam">{% trans "İmtahan" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th class="is-sortable" data-sort="subject">{% trans "Fənn" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th class="is-sortable" data-sort="score">{% trans "Bal" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th class="is-sortable" data-sort="score">{% trans "Faiz" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th>{% trans "Nəticə" %}</th>
+      </tr></thead>
+      <tbody class="js-ecs-rows"><tr><td colspan="13"><div class="ecs-state"><i class="fas fa-spinner fa-spin"></i>{% trans "Yüklənir…" %}</div></td></tr></tbody>
+    </table>
+  </div>
+  <div class="ecs-pager js-ecs-pager"></div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+  var root = document.querySelector(".ecs");
+  if (!root || root.dataset.ecsInit === "1") { return; }
+  root.dataset.ecsInit = "1";
+  var U = { data:root.dataset.dataUrl, filters:root.dataset.filtersUrl, export:root.dataset.exportUrl,
+            subject:root.dataset.subjectUrl, group:root.dataset.groupUrl, view:root.dataset.viewUrlTemplate };
+  var q = root.querySelector(".js-ecs-q"), unitSel = root.querySelector(".js-ecs-unit"),
+      typeSel = root.querySelector(".js-ecs-type"), yearSel = root.querySelector(".js-ecs-year"),
+      cards = root.querySelector(".js-ecs-cards"), rows = root.querySelector(".js-ecs-rows"),
+      pager = root.querySelector(".js-ecs-pager"), thead = root.querySelector(".js-ecs-thead");
+  var T = { total:"{% trans 'Cəhd' %}", students:"{% trans 'Tələbə' %}", exams:"{% trans 'İmtahan' %}",
+            none:"{% trans 'Nəticə tapılmadı.' %}", prev:"{% trans 'Əvvəlki' %}", next:"{% trans 'Sonrakı' %}",
+            page:"{% trans 'Səhifə' %}", of:"{% trans '/' %}", view:"{% trans 'Bax' %}" };
+  var page = 1, sort = "-date", timer = null;
+  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
+  function viewUrl(slug, id){ return U.view ? U.view.replace("__SLUG__", encodeURIComponent(slug)).replace("/attempt/0/", "/attempt/"+id+"/") : ""; }
+
+  function multiSelect(el, url) {
+    var chipsWrap = el.querySelector(".ecs-ms__chips"), search = el.querySelector(".ecs-ms__search"),
+        menu = el.querySelector(".ecs-ms__menu"), selected = {}, t = null;
+    function ids(){ return Object.keys(selected); }
+    function renderChips(){
+      chipsWrap.querySelectorAll(".ecs-chip").forEach(function(c){ c.remove(); });
+      Object.keys(selected).forEach(function(id){
+        var chip = document.createElement("span"); chip.className = "ecs-chip";
+        chip.innerHTML = '<span></span><button type="button" class="ecs-chip__x">×</button>';
+        chip.querySelector("span").textContent = selected[id];
+        chip.querySelector(".ecs-chip__x").addEventListener("click", function(){ delete selected[id]; renderChips(); reload(); });
+        chipsWrap.insertBefore(chip, search);
+      });
+    }
+    function fetchOpts(term){
+      fetch(url + (url.indexOf("?")===-1?"?":"&") + "q=" + encodeURIComponent(term) + "&limit=10", {headers:{"X-Requested-With":"XMLHttpRequest"}})
+        .then(function(r){ return r.ok?r.json():{results:[]}; })
+        .then(function(d){ menu.innerHTML="";
+          (d.results||[]).forEach(function(o){ if(selected[o.id]) return;
+            var div=document.createElement("div"); div.className="ecs-ms__opt"; div.textContent=o.text;
+            div.addEventListener("mousedown", function(ev){ ev.preventDefault(); selected[o.id]=o.text; renderChips(); el.classList.remove("is-open"); search.value=""; reload(); });
+            menu.appendChild(div); });
+          el.classList.toggle("is-open", menu.children.length>0); });
+    }
+    search.addEventListener("input", function(){ if(t) clearTimeout(t); t=setTimeout(function(){ fetchOpts(search.value.trim()); }, 250); });
+    search.addEventListener("focus", function(){ fetchOpts(search.value.trim()); });
+    search.addEventListener("blur", function(){ setTimeout(function(){ el.classList.remove("is-open"); }, 160); });
+    return { ids: ids };
+  }
+  var subjectMS = multiSelect(root.querySelector(".js-ecs-subject"), U.subject);
+  var groupMS = multiSelect(root.querySelector(".js-ecs-group"), U.group);
+
+  function params(extra){
+    var p = new URLSearchParams();
+    if (q.value.trim()) p.set("q", q.value.trim());
+    if (subjectMS.ids().length) p.set("subjects", subjectMS.ids().join(","));
+    if (groupMS.ids().length) p.set("groups", groupMS.ids().join(","));
+    if (unitSel.value) p.set("units", unitSel.value);
+    if (typeSel.value) p.set("type", typeSel.value);
+    if (yearSel.value) p.set("year", yearSel.value);
+    if (sort) p.set("sort", sort);
+    if (extra) Object.keys(extra).forEach(function(k){ p.set(k, extra[k]); });
+    return p;
+  }
+  function card(n, l){ return '<div class="ecs-card"><div class="ecs-card__n">'+n+'</div><div class="ecs-card__l">'+esc(l)+'</div></div>'; }
+  function renderCards(s){
+    cards.innerHTML = card(s.total, T.total) + card(s.students, T.students) + card(s.exams, T.exams) +
+      (s.by_type||[]).map(function(x){ return card(x.n, (x["exam__exam_type_extended"]||"—")); }).join("");
+  }
+  function renderArrows(){
+    thead.querySelectorAll("th.is-sortable").forEach(function(th){
+      var key = th.getAttribute("data-sort"); var a = th.querySelector(".ecs-arrow");
+      var active = (sort===key || sort==="-"+key);
+      th.classList.toggle("is-active", active);
+      a.className = "fas ecs-arrow " + (sort===key ? "fa-sort-up" : (sort==="-"+key ? "fa-sort-down" : "fa-sort"));
+    });
+  }
+  function renderRows(data){
+    var list = data.results||[];
+    if (!list.length){ rows.innerHTML = '<tr><td colspan="13"><div class="ecs-state"><i class="fas fa-folder-open"></i>'+T.none+'</div></td></tr>'; pager.innerHTML=""; return; }
+    function clip(v){ v = v || "—"; return '<td class="ecs-clip" title="'+esc(v)+'">'+esc(v)+'</td>'; }
+    rows.innerHTML = list.map(function(r){
+      var vu = viewUrl(r.exam_slug, r.attempt_id);
+      var view = vu ? '<a class="ecs-view" href="'+vu+'" target="_blank" rel="noopener"><i class="fas fa-eye"></i> '+T.view+'</a>' : '—';
+      return '<tr><td><b>'+esc(r.student)+'</b><br><span class="ecs-uname">@'+esc(r.username)+'</span></td>'+
+        clip(r.group)+clip(r.kafedra)+clip(r.faculty)+clip(r.teacher)+clip(r.exam)+clip(r.subject)+
+        '<td>'+esc(r.type||"—")+'</td><td>'+esc(r.score||"—")+'</td><td class="ecs-pct">'+esc(r.percentage||"—")+'</td>'+
+        '<td>'+esc(r.status)+'</td><td>'+esc(r.date)+'</td><td>'+view+'</td></tr>';
+    }).join("");
+    var pg = data.pagination;
+    pager.innerHTML = '<button class="js-ecs-prev"'+(pg.has_prev?"":" disabled")+'>'+T.prev+'</button>'+
+      '<span>'+T.page+' '+pg.page+' '+T.of+' '+pg.num_pages+' · '+pg.count+'</span>'+
+      '<button class="js-ecs-next"'+(pg.has_next?"":" disabled")+'>'+T.next+'</button>';
+    var pv=pager.querySelector(".js-ecs-prev"), nx=pager.querySelector(".js-ecs-next");
+    if(pv) pv.addEventListener("click", function(){ if(pg.has_prev){ page=pg.page-1; load(); } });
+    if(nx) nx.addEventListener("click", function(){ if(pg.has_next){ page=pg.page+1; load(); } });
+  }
+  function load(){
+    rows.innerHTML = '<tr><td colspan="13"><div class="ecs-state"><i class="fas fa-spinner fa-spin"></i></div></td></tr>';
+    renderArrows();
+    fetch(U.data + "?" + params({page:page}).toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ if(!d) return; renderCards(d.summary); renderRows(d); });
+  }
+  function reload(){ page = 1; load(); }
+
+  thead.querySelectorAll("th.is-sortable").forEach(function(th){
+    th.addEventListener("click", function(){
+      var key = th.getAttribute("data-sort");
+      sort = (sort === key) ? ("-"+key) : key;   // ilk klik ▲ (asc), ikinci ▼ (desc)
+      reload();
+    });
+  });
+  q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
+  [unitSel, typeSel, yearSel].forEach(function(s){ s.addEventListener("change", reload); });
+  root.querySelector(".js-ecs-export").addEventListener("click", function(e){ e.preventDefault(); window.location.href = U.export + "?" + params().toString(); });
+
+  fetch(U.filters, {headers:{"X-Requested-With":"XMLHttpRequest"}})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){ if(!d) return;
+      (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; yearSel.appendChild(o); });
+      (d.types||[]).forEach(function(t){ var o=document.createElement("option"); o.value=t.value; o.textContent=t.label; typeSel.appendChild(o); });
+      (d.units||[]).forEach(function(u){ var o=document.createElement("option"); o.value=u.id; o.textContent=u.name; unitSel.appendChild(o); });
+      // Bootstrap select-lər dinamik option-lardan sonra yenilənməlidir.
+      [unitSel, typeSel, yearSel].forEach(function(s){ if (typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); } });
+    });
+  load();
+})();
+</script>
+</section>
+{% endif %}

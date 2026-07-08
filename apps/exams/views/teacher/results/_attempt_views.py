@@ -13,14 +13,18 @@ from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_http_methods
 
 from apps.exams.models import ExamAttempt
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_can_view_attempt_results, _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.review_visibility import attempt_review_window_locked as _attempt_review_window_locked
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
 )
-from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
+from apps.exams.views.shared.tenant import (
+    get_result_viewable_exam_or_404,
+    get_teacher_exam_or_404,
+    tenant_scoped_exams,
+)
 from core.permissions import request_has_permission
 
 from ._helpers import (
@@ -87,10 +91,13 @@ def teacher_view_attempt(request, slug, attempt_id):
     """
     ✅ Müəllim cavabları YALNIZ GÖRMƏK üçün (bal verə bilməz)
     Test və Yazılı hər ikisi üçün işləyir
-    """
-    _ensure_teacher(request.user)
 
-    exam = get_teacher_exam_or_404(request, slug=slug)
+    İmtahan mərkəzi rolu da (statistika bölməsindəki "Bax") org daxilində
+    istənilən imtahanın nəticəsinə read-only baxa bilir.
+    """
+    _ensure_can_view_attempt_results(request.user)
+
+    exam = get_result_viewable_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
     _sync_coding_answers_from_final_submissions(attempt)

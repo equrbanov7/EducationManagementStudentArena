@@ -31,7 +31,7 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_WAITING,
 )
 from apps.exams.models import FinalExamTicket
-from apps.exams.services.exam_center_gate import final_exam_access_allowed
+from apps.exams.services.exam_center_gate import final_exam_access_allowed, room_ip_access_allowed
 from apps.exams.services.final_center import (
     ERROR_LOCKED,
     ERROR_RATE_LIMITED,
@@ -69,6 +69,18 @@ def _ensure_hall_access(request):
     """İmtahan zalı IP/CIDR qapısı (mövcud exam_center_gate xidməti)."""
     if not final_exam_access_allowed(request):
         raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
+
+
+def _room_access_ok(request, room) -> bool:
+    """Zalın qeydli kompüterlərinə görə IP qapısı (MAC identifikasiya, IP tətbiq)."""
+    return room_ip_access_allowed(request, room)
+
+
+def _room_access_error():
+    return pgettext(
+        "exams.final_center.entry",
+        "Bu kompüterdən imtahana giriş icazəsi yoxdur. Zəhmət olmasa zaldakı təyin olunmuş kompüterdən daxil olun.",
+    )
 
 
 def _entry_error_message(code):
@@ -118,6 +130,9 @@ def _route_validated_ticket(request, ticket):
     * təyin olunub → imtahan-öncəsi modal.
     """
     session = ticket.session
+    if not _room_access_ok(request, session.room):
+        clear_entry_session(request)
+        return _render_login(request, error=_room_access_error())
     if session.state not in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE):
         clear_entry_session(request)
         return _render_login(
@@ -184,7 +199,17 @@ def _handle_login(request):
     raw_pin = request.POST.get("pin", "")
     ticket, error_code = validate_entry(request, username, raw_pin)
     if ticket is None:
+        # Bilet (otaq-oturum) sistemi olmayan finallar: tələbə username +
+        # kabinetdə gördüyü fərdi PIN ilə birbaşa imtahana daxil olur.
+        pin_response = _handle_student_pin_login(request, username, raw_pin)
+        if pin_response is not None:
+            return pin_response
         return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
+
+    # Zal-səviyyəli kompüter (IP) qapısı: bilet tapıldı, amma sorğu zalın qeydli
+    # kompüterindən gəlmirsə girişə icazə vermə (istifadəçini login DA ETMƏ).
+    if not _room_access_ok(request, ticket.session.room):
+        return _render_login(request, error=_room_access_error(), username=(username or "").strip())
 
     # Fərqli istifadəçi login-i varsa təmizlə, sonra bilet sahibini login et.
     if request.user.is_authenticated and request.user.pk != ticket.student_id:
@@ -195,6 +220,48 @@ def _handle_login(request):
     store_entry_session(request, ticket)
     # PRG: modal GET-də göstərilir (refresh təkrar POST etmir).
     return redirect("exams:final_exam_entry")
+
+
+def _handle_student_pin_login(request, username, raw_pin):
+    """Biletsiz final girişi (fərdi ExamStudentPin ilə) — birbaşa imtahana keçir.
+
+    Uyğun imtahan tapılmasa ``None`` qaytarır (çağıran generik xəta göstərir).
+    Gözləmə otağı/nəzarətçi yoxdur — PIN doğrulanan kimi cəhd açılır.
+    """
+    from apps.exams.services.attempts import _start_or_resume_attempt
+    from apps.exams.services.student_pins import resolve_student_pin_login
+    from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
+
+    exam, student = resolve_student_pin_login(username, raw_pin)
+    if exam is None:
+        return None
+
+    can_start, reason = exam.can_user_start(student, code=raw_pin)
+    if not can_start:
+        return _render_login(request, error=reason or _entry_error_message(None), username=(username or "").strip())
+
+    # Sual təyin olunmayıbsa imtahanı BAŞLATMA — tələbəni ümumi imtahan
+    # siyahısına (exams/available) atmaq olmaz; giriş səhifəsində xəbərdarlıq göstər.
+    if not exam.questions.filter(is_active=True).exists():
+        return _render_login(
+            request,
+            error=pgettext(
+                "exams.final_center.entry",
+                "İmtahana hələ sual əlavə olunmayıb. Zəhmət olmasa imtahan mərkəzi ilə əlaqə saxlayın.",
+            ),
+            username=(username or "").strip(),
+        )
+
+    # Fərqli istifadəçi login-i varsa təmizlə, sonra imtahan tələbəsini login et.
+    if request.user.is_authenticated and request.user.pk != student.pk:
+        logout(request)
+    if not request.user.is_authenticated or request.user.pk != student.pk:
+        login(request, student, backend="apps.accounts.backends.EmailOrUsernameBackend")
+    if exam.organization_id:
+        request.session["active_organization"] = exam.organization.slug
+
+    ensure_student_exam_tenant_context(request)
+    return _start_or_resume_attempt(request, exam)
 
 
 def _handle_confirm(request):
@@ -250,6 +317,8 @@ def final_exam_waiting(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return deny
+    if not _room_access_ok(request, ticket.session.room):
+        raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
 
     session = ticket.session
     if ticket.status == TICKET_STATUS_ACTIVE and ticket.attempt_id:
@@ -302,6 +371,11 @@ def final_exam_begin(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return JsonResponse({"success": False, "redirect_url": reverse("exams:final_exam_entry")}, status=403)
+    if not _room_access_ok(request, ticket.session.room):
+        return JsonResponse(
+            {"success": False, "error": str(_room_access_error()), "redirect_url": reverse("exams:final_exam_entry")},
+            status=403,
+        )
 
     try:
         attempt = begin_attempt_for_ticket(ticket)

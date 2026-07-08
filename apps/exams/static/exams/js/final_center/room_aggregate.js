@@ -128,6 +128,10 @@
                 return '<option value="' + esc(s.session_id) + '">' + esc(s.exam_title) + "</option>";
             }).join("");
             examFilter.value = cur;
+            // Bootstrap select ilə zənginləşdirilibsə, dropdown-u yeni option-larla yenilə.
+            if (typeof examFilter._refreshBootstrapSelect === "function") {
+                examFilter._refreshBootstrapSelect();
+            }
         }
         // Düymə görünürlüyü: hazır (entry_open) oturum varsa "başlat" göstər.
         var hasEntryOpen = sessions.some(function (s) { return s.state === "entry_open"; });

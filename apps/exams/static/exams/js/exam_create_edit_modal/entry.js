@@ -117,7 +117,15 @@
             }
         });
 
+        // Fon sürüşməsini bloklamaq — Bootstrap-ın `modal-open`-u bəzi
+        // SPA-scroll kontekstlərində fonu tam saxlamır, ona görə <html>-ə
+        // birbaşa kilid sinfi əlavə edirik.
+        modalElement.addEventListener("shown.bs.modal", function () {
+            document.documentElement.classList.add("exam-modal-open");
+        });
+
         modalElement.addEventListener("hidden.bs.modal", function () {
+            document.documentElement.classList.remove("exam-modal-open");
             ctx.submitInFlight = false;
             hideUnsavedConfirm();
             modalElement.dataset.examDiscard = "";
