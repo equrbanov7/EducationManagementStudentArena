@@ -16,6 +16,7 @@ from apps.appeals.models import Appeal, AppealItem
 from apps.appeals.services import (
     accept_appeal_item,
     appeal_bonus_map,
+    appeal_score_state,
     apply_bonus_to_test_result,
     create_appeal,
     reject_appeal_item,
@@ -78,6 +79,8 @@ class EffectiveDisplayTests(TestCase):
     def test_bonus_map_and_apply(self):
         # Qəbul → sabit +1 bal (tam sual balı deyil).
         self._accepted_appeal()
+        state = appeal_score_state(self.attempt)
+        self.assertEqual(state["bonus_by_question_id"], {self.q1.id: Decimal("1")})
         bonus_map = appeal_bonus_map([self.attempt.id])
         self.assertEqual(bonus_map.get(self.attempt.id), Decimal("1"))
 

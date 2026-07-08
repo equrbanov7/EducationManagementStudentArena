@@ -1,12 +1,12 @@
 """Apellyasiya pəncərəsi (3 gün) testləri."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.appeals.services import is_within_appeal_window, remaining_window_seconds
+from apps.appeals.services import appeal_deadline, is_within_appeal_window, remaining_window_seconds
 from apps.exams.models import Exam, ExamAttempt
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -40,6 +40,16 @@ class AppealWindowTests(TestCase):
     def test_within_window_two_days_ago(self):
         attempt = self._attempt(finished_delta=timedelta(days=-2))
         self.assertTrue(is_within_appeal_window(attempt))
+
+    def test_window_closes_after_third_calendar_day(self):
+        finished = timezone.make_aware(datetime(2026, 7, 7, 14, 30))
+        attempt = self._attempt()
+        attempt.finished_at = finished
+        attempt.save(update_fields=["finished_at"])
+
+        self.assertEqual(appeal_deadline(attempt).date(), datetime(2026, 7, 10).date())
+        self.assertTrue(is_within_appeal_window(attempt, at_time=timezone.make_aware(datetime(2026, 7, 10, 23, 59))))
+        self.assertFalse(is_within_appeal_window(attempt, at_time=timezone.make_aware(datetime(2026, 7, 11, 0, 0))))
 
     def test_after_window_four_days_ago(self):
         attempt = self._attempt(finished_delta=timedelta(days=-4))

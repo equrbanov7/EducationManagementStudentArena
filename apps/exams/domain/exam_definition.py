@@ -182,6 +182,13 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.exam.field", "allowed_users"),
         help_text=pgettext_lazy("exams.model.exam.help", "allowed_users"),
     )
+    excluded_users = models.ManyToManyField(
+        User,
+        related_name="excluded_exams",
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.exam.field", "excluded_users"),
+        help_text=pgettext_lazy("exams.model.exam.help", "excluded_users"),
+    )
     allowed_groups = models.ManyToManyField(
         "exams.StudentGroup",
         related_name="exams",

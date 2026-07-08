@@ -387,6 +387,7 @@ def get_exam_assigned_user_ids(exam) -> set[int]:
     assigned_user_ids.update(student_id for student_id in group_student_ids if student_id)
     if exam.course_id:
         assigned_user_ids.update(exam.course.memberships.filter(role="student").values_list("user_id", flat=True))
+    assigned_user_ids.difference_update(exam.excluded_users.values_list("id", flat=True))
     return assigned_user_ids
 
 

@@ -104,7 +104,16 @@
                 <td data-label="{% trans 'Tələbə' context 'appeals.template' %}">{{ appeal.student.get_full_name|default:appeal.student.username }}</td>
                 <td class="text-center" data-label="{% trans 'Suallar' context 'appeals.template' %}"><span class="appeal-chip">{{ appeal.items.all|length }}</span></td>
                 <td class="small text-muted" data-label="{% trans 'Tarix' context 'appeals.template' %}">{{ appeal.created_at|date:"d.m.Y H:i" }}</td>
-                <td data-label="{% trans 'Status' context 'appeals.template' %}">{% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}</td>
+                <td data-label="{% trans 'Status' context 'appeals.template' %}">
+                    {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
+                    {% if appeal.edit_seconds_left %}
+                    <div class="appeal-list-edit-window">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        {% trans "Dəyişmək üçün qalan vaxt" context "appeals.template" %}:
+                        <strong>{{ appeal.edit_time_label }}</strong>
+                    </div>
+                    {% endif %}
+                </td>
                 <td class="text-end">
                     <a href="{% url 'appeals:review_appeal' appeal.id %}"
                        class="btn btn-sm btn-primary"

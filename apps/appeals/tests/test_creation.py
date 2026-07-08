@@ -8,7 +8,9 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.appeals.constants import APPEAL_MIN_COMMENT_LENGTH, APPEAL_TYPE_WRONG_ANSWER_KEY
+from apps.appeals.models import AppealItem
 from apps.appeals.services import create_appeal
+from apps.appeals.services.scoring import accept_appeal_item
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -80,6 +82,12 @@ class AppealCreationTests(TestCase):
         with self.assertRaises(ValidationError):
             create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q1), self._item(self.q1)])
 
+    def test_question_already_appealed_for_attempt_rejected(self):
+        create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q1)])
+
+        with self.assertRaisesMessage(ValidationError, "artıq göndərilib"):
+            create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q1)])
+
     def test_question_not_in_attempt_rejected(self):
         with self.assertRaises(ValidationError):
             create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q_other)])
@@ -149,6 +157,42 @@ class AppealCreateViewTests(TestCase):
         self.assertContains(response, "Yanlış cavab")
         self.assertContains(response, "Düzgün cavab")
         self.assertContains(response, "data-appeal-text=", html=False)
+        self.assertContains(response, "data-appeal-submit-hint", html=False)
+        self.assertContains(response, "data-i18n-fix-both", html=False)
+        self.assertContains(response, 'aria-disabled="true"', html=False)
+        self.assertNotContains(response, "data-appeal-submit disabled", html=False)
+
+    def test_create_page_locks_questions_already_appealed(self):
+        create_appeal(
+            attempt=self.attempt,
+            student=self.student,
+            items=[
+                {
+                    "question_id": self.question.id,
+                    "appeal_type": APPEAL_TYPE_WRONG_ANSWER_KEY,
+                    "comment": VALID_COMMENT,
+                }
+            ],
+        )
+
+        response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
+
+        self.assertContains(response, 'data-appeal-locked="1"', html=False)
+        self.assertContains(response, "Bu sual üzrə apellyasiya artıq göndərilib")
+        self.assertContains(response, "Artıq göndərilib")
+
+        response = self.client.post(
+            reverse("appeals:appeal_create", args=[self.attempt.id]),
+            {
+                f"appeal_q_{self.question.id}": "1",
+                f"appeal_type_{self.question.id}": APPEAL_TYPE_WRONG_ANSWER_KEY,
+                f"comment_{self.question.id}": VALID_COMMENT,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(AppealItem.objects.filter(appeal__attempt=self.attempt).count(), 1)
+        self.assertContains(response, "artıq göndərilib")
 
     def test_create_page_has_no_marked_quick_select_button(self):
         # "İşarələnmişləri seç" sürətli düyməsi silinib (məntiqi əsası yox idi).
@@ -280,3 +324,55 @@ class AppealExamCenterRoutingTests(TestCase):
         review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]))
         self.assertEqual(review_response.status_code, 200)
         self.assertContains(review_response, "Route sualı")
+        self.assertContains(review_response, 'data-review-award="1"', html=False)
+        self.assertContains(review_response, 'data-review-existing-delta="0"', html=False)
+
+    def test_review_ajax_accept_returns_score_delta_toast_and_list_edit_timer(self):
+        client = self._client_for(self.exam_center)
+        item = self.appeal.items.first()
+
+        response = client.post(
+            reverse("appeals:review_appeal", args=[self.appeal.id]) + "?fragment=1",
+            {
+                f"decision_{item.id}": "accept",
+                f"response_{item.id}": "Açar səhv idi",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["score_delta"], "1")
+        self.assertIn("+1 bal əlavə olundu", payload["toast"])
+        self.assertIn("5 dəqiqədən sonra", payload["toast"])
+
+        manage_response = client.get(reverse("appeals:manage_appeals"))
+        self.assertContains(manage_response, "Dəyişmək üçün qalan vaxt")
+
+        review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]))
+        self.assertContains(review_response, 'data-review-existing-delta="1"', html=False)
+
+    def test_detail_score_update_notice_belongs_to_current_appeal(self):
+        second_question = ExamQuestion.objects.create(exam=self.exam, order=2, text="İkinci sual")
+        ExamQuestionOption.objects.create(question=second_question, label="A", text="Düz cavab", is_correct=True)
+        ExamAnswer.objects.create(attempt=self.attempt, question=second_question)
+        second_appeal = create_appeal(
+            attempt=self.attempt,
+            student=self.student,
+            items=[
+                {
+                    "question_id": second_question.id,
+                    "appeal_type": APPEAL_TYPE_WRONG_ANSWER_KEY,
+                    "comment": VALID_COMMENT,
+                }
+            ],
+        )
+        accept_appeal_item(self.appeal.items.first(), reviewer=self.exam_center, response_text="Qəbul")
+        student_client = self._client_for(self.student)
+
+        accepted_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]))
+        pending_response = student_client.get(reverse("appeals:appeal_detail", args=[second_appeal.id]))
+
+        self.assertContains(accepted_response, "Bu apellyasiya nəticəsində +1 bal əlavə olundu")
+        self.assertNotContains(pending_response, "Bu apellyasiya nəticəsində")

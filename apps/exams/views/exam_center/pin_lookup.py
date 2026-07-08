@@ -21,8 +21,10 @@ from django.views.decorators.http import require_GET
 from apps.exams.models import ExamStudentPin, FinalExamTicket
 from apps.exams.services.final_center import decrypt_ticket_pin
 from apps.exams.services.student_pins import student_visible_pin
+from apps.organizations.public import organization_role_user_queryset
 from core.audit import log_action
 from core.constants import AuditAction
+from core.roles import ProfileRole
 
 from ._shared import center_org_or_403
 
@@ -60,6 +62,21 @@ def _kafedra_subquery(organization):
     )
 
 
+def _pin_holder_student_queryset(organization):
+    """Return active org students who have at least one final/wizard PIN row."""
+    ticket_student_ids = FinalExamTicket.objects.filter(organization=organization).values("student_id")
+    student_pin_ids = ExamStudentPin.objects.filter(exam__organization=organization).values("student_id")
+    users_with_pins = User.objects.filter(
+        Q(id__in=Subquery(ticket_student_ids)) | Q(id__in=Subquery(student_pin_ids)),
+        is_active=True,
+    )
+    return organization_role_user_queryset(
+        organization,
+        {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
+        queryset=users_with_pins,
+    )
+
+
 @login_required
 @require_GET
 def exam_center_pin_search(request):
@@ -67,12 +84,7 @@ def exam_center_pin_search(request):
     organization = center_org_or_403(request)
     query = (request.GET.get("q") or "").strip()
 
-    # Final-center biletləri və wizard PIN-ləri ayrı modellərdə saxlanır.
-    ticket_student_ids = FinalExamTicket.objects.filter(organization=organization).values("student_id")
-    student_pin_ids = ExamStudentPin.objects.filter(exam__organization=organization).values("student_id")
-    qs = User.objects.filter(Q(id__in=Subquery(ticket_student_ids)) | Q(id__in=Subquery(student_pin_ids))).annotate(
-        kafedra=Subquery(_kafedra_subquery(organization)),
-    )
+    qs = _pin_holder_student_queryset(organization).annotate(kafedra=Subquery(_kafedra_subquery(organization)))
     if query:
         qs = qs.filter(
             Q(username__icontains=query)
@@ -110,7 +122,7 @@ def exam_center_pin_search(request):
 def exam_center_student_pins(request, student_id):
     """Seçilmiş tələbənin final biletləri + PIN-ləri (modal). Açılış audit-ə yazılır."""
     organization = center_org_or_403(request)
-    student = User.objects.filter(id=student_id).first()
+    student = _pin_holder_student_queryset(organization).filter(id=student_id).first()
     if student is None:
         return JsonResponse({"error": "not_found"}, status=404)
 

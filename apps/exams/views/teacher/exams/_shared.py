@@ -222,22 +222,32 @@ def _selected_access_entities(form):
     """
     groups_field = form.fields.get("allowed_groups")
     users_field = form.fields.get("allowed_users")
+    excluded_users_field = form.fields.get("excluded_users")
     if not groups_field or not users_field:
-        return [], []
+        return [], [], []
 
     group_ids = []
     user_ids = []
+    excluded_user_ids = []
     if form.is_bound:
         data = form.data
         group_ids = data.getlist("allowed_groups") if hasattr(data, "getlist") else []
         user_ids = data.getlist("allowed_users") if hasattr(data, "getlist") else []
+        excluded_user_ids = data.getlist("excluded_users") if hasattr(data, "getlist") else []
     elif getattr(form.instance, "pk", None):
         group_ids = list(form.instance.allowed_groups.values_list("id", flat=True))
         user_ids = list(form.instance.allowed_users.values_list("id", flat=True))
+        if hasattr(form.instance, "excluded_users"):
+            excluded_user_ids = list(form.instance.excluded_users.values_list("id", flat=True))
 
     groups = list(groups_field.queryset.filter(id__in=group_ids)) if group_ids else []
     users = list(users_field.queryset.filter(id__in=user_ids)) if user_ids else []
-    return groups, users
+    excluded_users = (
+        list(excluded_users_field.queryset.filter(id__in=excluded_user_ids))
+        if excluded_users_field and excluded_user_ids
+        else []
+    )
+    return groups, users, excluded_users
 
 
 def _build_group_student_map(form):

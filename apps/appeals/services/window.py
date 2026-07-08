@@ -2,7 +2,7 @@
 Apellyasiya pəncərəsi — imtahan bitdikdən sonra yalnız N gün ərzində.
 """
 
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.utils import timezone
 
@@ -19,11 +19,20 @@ def _finished_at(attempt):
 
 
 def appeal_deadline(attempt):
-    """Apellyasiya üçün son tarix (finished_at + APPEAL_WINDOW_DAYS) və ya None."""
+    """Apellyasiya üçün son tarix və ya None.
+
+    Qayda date-based-dir: tələbə imtahanı 7-də bitiribsə, 8/9/10-da müraciət
+    edə bilər; 11-də həmin fənn üzrə apellyasiya bağlanır.
+    """
     finished = _finished_at(attempt)
     if not finished:
         return None
-    return finished + timedelta(days=APPEAL_WINDOW_DAYS)
+    local_finished = timezone.localtime(finished)
+    deadline_date = local_finished.date() + timedelta(days=APPEAL_WINDOW_DAYS)
+    return timezone.make_aware(
+        datetime.combine(deadline_date, time.max),
+        timezone.get_current_timezone(),
+    )
 
 
 def is_within_appeal_window(attempt, *, at_time=None):

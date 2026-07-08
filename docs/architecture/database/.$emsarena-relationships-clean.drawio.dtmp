@@ -1,0 +1,1078 @@
+<mxfile host="Electron" agent="EMSArena schema generator">
+  <diagram name="EMSArena — Cədvəl əlaqələri" id="ems-rels">
+    <mxGraphModel dx="1083" dy="679" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c9d4e3;align=left;verticalAlign=top;spacing=14;fontSize=12;fontColor=#16202f;shadow=1;arcSize=6;" value="&lt;b style=&#39;font-size:15px;&#39;&gt;EMSArena — Cədvəl əlaqə xəritəsi&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:11px;color:#5b6b82;&#39;&gt;94 cədvəl · 245 əlaqə · domenlərə görə qruplaşdırılıb&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Oxunuş:&lt;/b&gt; uşaq cədvəl → &lt;i&gt;sahə&lt;/i&gt; → valideyn cədvəl. Ox həmişə &quot;bir&quot; tərəfə (valideynə) baxır.&lt;br/&gt;&lt;b&gt;İki onurğa:&lt;/b&gt; &lt;b&gt;Organization&lt;/b&gt; (tenant) və &lt;b&gt;User&lt;/b&gt; (aktor) — demək olar hər cədvəl bunlardan birinə bağlıdır.&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Ox rəngləri (ON DELETE):&lt;/b&gt;&amp;nbsp; &lt;font color=&#39;#c8342b&#39;&gt;■ CASCADE&lt;/font&gt; (valideyn silinsə uşaq da silinir)&amp;nbsp; &lt;font color=&#39;#a86500&#39;&gt;■ SET_NULL&lt;/font&gt; (əlaqə boşalır)&amp;nbsp; &lt;font color=&#39;#345bb0&#39;&gt;■ PROTECT&lt;/font&gt; (silmək olmaz)&amp;nbsp; &lt;font color=&#39;#7a45e0&#39;&gt;▪ M2M&lt;/font&gt; (çox-çoxa, kəsik xətt)" vertex="1">
+          <mxGeometry height="146" width="1650" x="40" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="c_core" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9f0ff;strokeColor=#2158d6;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#2158d6;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="NÜVƏ · TƏŞKİLAT — tenant, struktur, rol, üzvlük" vertex="1">
+          <mxGeometry height="548" width="282" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_academicperiod" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2158d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;organizations_academicperiod&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Semestr / tədris ili + təqvim pəncərələri&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_country" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2158d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;organizations_country&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Ölkə master datası&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_institution" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2158d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;organizations_institution&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Qeydiyyat üçün müəssisə siyahısı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_membership" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2158d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;organizations_membership&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İstifadəçi ↔ rol ↔ vahid üzvlüyü&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_organization" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8ec;strokeColor=#2158d6;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="★ &lt;b style=&#39;font-size:12px;&#39;&gt;organizations_organization&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tenant kökü — universitet/məktəb/mərkəz&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_orgunit" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2158d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;organizations_orgunit&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Struktur vahidi: fakültə, kafedra, ixtisas&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_organizations_role" parent="c_core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2158d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;organizations_role&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Təşkilat daxili rol + level (0–100)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="c_users" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1e9fc;strokeColor=#7a45e0;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#7a45e0;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="İSTİFADƏÇİLƏR · AUTH — hesab, profil, icazə" vertex="1">
+          <mxGeometry height="404" width="282" x="382" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="t_accounts_emailotp" parent="c_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#7a45e0;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;accounts_emailotp&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;E-poçt təsdiq (OTP) kodları&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_accounts_userprofile" parent="c_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#7a45e0;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;accounts_userprofile&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Profil: ad, rol, aktiv təşkilat&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_auth_group" parent="c_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#7a45e0;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;auth_group&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İcazə qrupları&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_auth_permission" parent="c_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#7a45e0;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;auth_permission&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Django icazələri&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_auth_user" parent="c_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8ec;strokeColor=#7a45e0;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="★ &lt;b style=&#39;font-size:12px;&#39;&gt;auth_user&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İstifadəçi (Django) — sistemin aktoru&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="c_exams1_3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdeede;strokeColor=#dd6a12;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#dd6a12;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="İMTAHANLAR · FINAL MƏRKƏZ — sual, cəhd, zal, PIN (1/3)" vertex="1">
+          <mxGeometry height="692" width="282" x="724" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_bankquestion" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_bankquestion&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Bankdakı sual&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_bankquestionoption" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_bankquestionoption&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Bank sualı variantı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_codingexamquestion" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_codingexamquestion&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kodlaşdırma sualı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_codingfile" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_codingfile&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kod faylı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_codingsubmission" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_codingsubmission&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kod təqdimatı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_codingtestcase" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_codingtestcase&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kod test-keysi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_exam" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_exam&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İmtahan tərifi (quiz/midterm/final)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examanswer" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examanswer&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Cəhddə verilən cavab&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examanswerfile" parent="c_exams1_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examanswerfile&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Cavaba əlavə fayl&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="c_exams2_3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdeede;strokeColor=#dd6a12;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#dd6a12;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="İMTAHANLAR · FINAL MƏRKƏZ — sual, cəhd, zal, PIN (2/3)" vertex="1">
+          <mxGeometry height="692" width="282" x="1066" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examattempt" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examattempt&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbənin imtahan cəhdi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examlanguagevariant" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examlanguagevariant&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İmtahanın dil variantı (AZ/EN)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examquestion" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examquestion&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İmtahan sualı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examquestionoption" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examquestionoption&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sual variantı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examroom" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examroom&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İmtahan zalı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examroomcomputer" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examroomcomputer&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Zaldakı kompüter (IP ilə)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examroomsession" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examroomsession&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Zal oturuşu (final mərkəz)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examstudentpin" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examstudentpin&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbəyə fərdi PIN&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_examsupervisionconfig" parent="c_exams2_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_examsupervisionconfig&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Nəzarət konfiqurasiyası&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="c_exams3_3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdeede;strokeColor=#dd6a12;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#dd6a12;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="İMTAHANLAR · FINAL MƏRKƏZ — sual, cəhd, zal, PIN (3/3)" vertex="1">
+          <mxGeometry height="692" width="282" x="1408" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_finalexamticket" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_finalexamticket&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Final PIN bileti&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_proctoringlog" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_proctoringlog&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Proctoring hadisə jurnalı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_questionbank" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_questionbank&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sual bankı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_questionblock" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_questionblock&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sual bloku / bölmə&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_questionsubmission" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_questionsubmission&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Müəllimdən sual göndərişi (inbox)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_studentexamattemptgrant" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_studentexamattemptgrant&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Əlavə cəhd icazəsi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_studentgroup" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_studentgroup&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbə qrupu + giriş siyasəti&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_supervisionincident" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_supervisionincident&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Nəzarət pozuntusu&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exams_textextractionjob" parent="c_exams3_3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dd6a12;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;exams_textextractionjob&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;PDF-dən mətn çıxarma tapşırığı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="c_registrar1_2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6f6ec;strokeColor=#159a4e;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#159a4e;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="REGISTRAR · JURNAL — fənn, qeydiyyat, qiymət (1/2)" vertex="1">
+          <mxGeometry height="764" width="282" x="382" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_assessmentcomponent" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_assessmentcomponent&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Qiymət komponenti (%)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_assessmentscheme" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_assessmentscheme&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Qiymətləndirmə sxemi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_componentscore" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_componentscore&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Komponent balı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_courseoffering" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_courseoffering&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Fənnin semestr üzrə tədrisi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_criterionscore" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_criterionscore&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Meyar balı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_curriculum" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_curriculum&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tədris planı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_curriculumsubject" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_curriculumsubject&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Plandakı fənn&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_enrollment" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_enrollment&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbənin fənnə yazılışı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_finalgrade" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_finalgrade&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Yekun qiymət&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_groupelectivechoice" parent="c_registrar1_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_groupelectivechoice&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Qrupun seçmə fənn seçimi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="c_registrar2_2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6f6ec;strokeColor=#159a4e;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#159a4e;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="REGISTRAR · JURNAL — fənn, qeydiyyat, qiymət (2/2)" vertex="1">
+          <mxGeometry height="692" width="282" x="40" y="804" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_lesson" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_lesson&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Dərs (jurnal)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_lessonmark" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_lessonmark&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Dərsdə qiymət / davamiyyət&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_program" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_program&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Təhsil proqramı / ixtisas&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_resitrecord" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_resitrecord&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Təkrar imtahan qeydi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_rubric" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_rubric&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Rubrika&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_rubriccriterion" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_rubriccriterion&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Rubrika meyarı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_scheduleslot" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_scheduleslot&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Cədvəl slotu&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_studentacademicrecord" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_studentacademicrecord&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbənin akademik qeydi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="t_registrar_subject" parent="c_registrar2_2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#159a4e;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;registrar_subject&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Fənn (kataloq)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="c_courses" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e2f5f8;strokeColor=#0e8fa8;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0e8fa8;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="KURSLAR — kurs, qrup, material" vertex="1">
+          <mxGeometry height="476" width="282" x="724" y="948" as="geometry" />
+        </mxCell>
+        <mxCell id="t_courses_course" parent="c_courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8fa8;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;courses_course&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kurs (təşkilat daxili)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_courses_coursegroup" parent="c_courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8fa8;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;courses_coursegroup&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kurs qrupu&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_courses_courseinstructor" parent="c_courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8fa8;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;courses_courseinstructor&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kurs müəllimi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_courses_coursemembership" parent="c_courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8fa8;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;courses_coursemembership&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kursa üzvlük&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_courses_courseresource" parent="c_courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8fa8;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;courses_courseresource&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kurs materialı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_courses_coursetopic" parent="c_courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8fa8;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;courses_coursetopic&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kurs mövzusu&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="c_work" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecebfb;strokeColor=#4b46d6;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#4b46d6;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="TAPŞIRIQ · LAYİHƏ · LAB — praktiki işlər" vertex="1">
+          <mxGeometry height="836" width="282" x="1066" y="948" as="geometry" />
+        </mxCell>
+        <mxCell id="t_assignments_assignment" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;assignments_assignment&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sərbəst iş tapşırığı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_assignments_notification" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;assignments_notification&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tapşırıq bildirişi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_assignments_submission" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;assignments_submission&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sərbəst iş təqdimatı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_labs_lab" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;labs_lab&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Laboratoriya işi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_labs_labanswer" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;labs_labanswer&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Lab cavabı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_labs_labassignment" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;labs_labassignment&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbəyə lab təyinatı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_labs_labblock" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;labs_labblock&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Lab sual bloku&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="t_labs_labquestion" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;labs_labquestion&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Lab sualı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="t_labs_labsubmission" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;labs_labsubmission&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Lab təqdimatı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="t_projects_project" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;projects_project&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Kurs işi / layihə&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="t_projects_projectsubmission" parent="c_work" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b46d6;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;projects_projectsubmission&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Layihə təqdimatı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="762" as="geometry" />
+        </mxCell>
+        <mxCell id="c_appeals" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce8ee;strokeColor=#d61f56;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#d61f56;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="APELLYASİYA — nəticəyə etiraz" vertex="1">
+          <mxGeometry height="260" width="282" x="1408" y="948" as="geometry" />
+        </mxCell>
+        <mxCell id="t_appeals_appeal" parent="c_appeals" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d61f56;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;appeals_appeal&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;İmtahan nəticəsinə apellyasiya&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_appeals_appealitem" parent="c_appeals" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d61f56;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;appeals_appealitem&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Apellyasiyada konkret sual&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_appeals_scoreadjustment" parent="c_appeals" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d61f56;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;appeals_scoreadjustment&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Bal düzəlişi qeydi&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="c_live" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9e8fb;strokeColor=#b524c2;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#b524c2;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="CANLI İMTAHAN — real-vaxt sessiya" vertex="1">
+          <mxGeometry height="260" width="282" x="1408" y="1264" as="geometry" />
+        </mxCell>
+        <mxCell id="t_live_exam_liveanswer" parent="c_live" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b524c2;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;live_exam_liveanswer&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Canlı sessiyada cavab&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_live_exam_liveplayer" parent="c_live" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b524c2;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;live_exam_liveplayer&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Canlı sessiya iştirakçısı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_live_exam_livesession" parent="c_live" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b524c2;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;live_exam_livesession&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Canlı imtahan sessiyası&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="c_notifications" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e2f6f2;strokeColor=#0e9e8f;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0e9e8f;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="BİLDİRİŞLƏR — in-app + qoşulma sorğusu" vertex="1">
+          <mxGeometry height="188" width="282" x="382" y="1480" as="geometry" />
+        </mxCell>
+        <mxCell id="t_notifications_inappnotification" parent="c_notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e9e8f;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;notifications_inappnotification&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tətbiqdaxili bildiriş&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_notifications_studentorganizationrequest" parent="c_notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e9e8f;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;notifications_studentorganizationrequest&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Tələbənin təşkilata qoşulma sorğusu&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="c_content" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce9f2;strokeColor=#c72b86;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#c72b86;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="KONTENT · SORĞULAR — bloq, əlaqə, sınaq" vertex="1">
+          <mxGeometry height="548" width="282" x="724" y="1480" as="geometry" />
+        </mxCell>
+        <mxCell id="t_blog_category" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;blog_category&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Bloq kateqoriyası (iyerarxik)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_blog_comment" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;blog_comment&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Yazıya şərh&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="t_blog_post" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;blog_post&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Bloq yazısı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="t_blog_postapprovallog" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;blog_postapprovallog&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Yazı təsdiq jurnalı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="t_blog_question" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;blog_question&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sual-cavab (Q&amp;A)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="t_contact_contactmessage" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;contact_contactmessage&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Əlaqə formu mesajı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="t_trial_exams_trialexamrequest" parent="c_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c72b86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;trial_exams_trialexamrequest&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Sınaq imtahan sorğusu&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="c_audit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef1f5;strokeColor=#5f6f86;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#5f6f86;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="AUDİT — təhlükəsizlik jurnalı" vertex="1">
+          <mxGeometry height="116" width="282" x="40" y="1552" as="geometry" />
+        </mxCell>
+        <mxCell id="t_audit_auditlog" parent="c_audit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5f6f86;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;audit_auditlog&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Təhlükəsizlik / əməliyyat jurnalı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="c_ai" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7efdd;strokeColor=#b07d0a;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#b07d0a;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="AI KÖMƏKÇİ — sorğu jurnalı" vertex="1">
+          <mxGeometry height="116" width="282" x="1408" y="1580" as="geometry" />
+        </mxCell>
+        <mxCell id="t_ai_assistant_aiassistantlog" parent="c_ai" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b07d0a;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;ai_assistant_aiassistantlog&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;AI köməkçi sorğu jurnalı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="c_system" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef1f5;strokeColor=#8a99ad;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8a99ad;align=center;spacingTop=8;arcSize=4;container=1;collapsible=0;shadow=1;" value="DJANGO SİSTEM — daxili cədvəllər" vertex="1">
+          <mxGeometry height="188" width="282" x="40" y="1724" as="geometry" />
+        </mxCell>
+        <mxCell id="t_django_admin_log" parent="c_system" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8a99ad;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;django_admin_log&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Admin panel əməliyyat jurnalı&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="t_django_content_type" parent="c_system" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8a99ad;strokeWidth=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=8;arcSize=8;fontColor=#16202f;" value="&lt;b style=&#39;font-size:12px;&#39;&gt;django_content_type&lt;/b&gt;&lt;br/&gt;&lt;span style=&#39;font-size:9px;color:#5f708a;&#39;&gt;Model növləri (generic əlaqə üçün)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="250" x="16" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="t_accounts_emailotp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="t_accounts_userprofile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="t_accounts_userprofile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="t_accounts_userprofile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="requested_organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="t_ai_assistant_aiassistantlog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="t_ai_assistant_aiassistantlog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="t_appeals_appeal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="t_appeals_appeal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="t_appeals_appeal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="t_appeals_appeal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="t_appeals_appeal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="org_unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="t_appeals_appeal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="reviewed_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="t_appeals_appealitem" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_appeals_appeal" value="appeal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="t_appeals_appealitem" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="t_appeals_appealitem" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examanswer" value="answer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="t_appeals_appealitem" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="resolved_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="t_appeals_scoreadjustment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_appeals_appealitem" value="appeal_item">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="t_appeals_scoreadjustment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="t_appeals_scoreadjustment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="t_appeals_scoreadjustment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="applied_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="t_assignments_assignment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="t_assignments_assignment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="t_assignments_assignment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="assigned_students ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="t_assignments_notification" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="t_assignments_submission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_assignments_assignment" value="assignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="t_assignments_submission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="t_assignments_submission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="graded_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="t_audit_auditlog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e28" edge="1" parent="1" source="t_audit_auditlog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29" edge="1" parent="1" source="t_audit_auditlog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_django_content_type" value="content_type">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e30" edge="1" parent="1" source="t_blog_category" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_blog_category" value="parent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e31" edge="1" parent="1" source="t_blog_comment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_blog_post" value="post">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e32" edge="1" parent="1" source="t_blog_comment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e33" edge="1" parent="1" source="t_blog_post" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="author">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e34" edge="1" parent="1" source="t_blog_post" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_blog_category" value="category">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e35" edge="1" parent="1" source="t_blog_post" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="approved_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e36" edge="1" parent="1" source="t_blog_postapprovallog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_blog_post" value="post">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e37" edge="1" parent="1" source="t_blog_postapprovallog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="reviewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e38" edge="1" parent="1" source="t_blog_question" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="author">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e39" edge="1" parent="1" source="t_blog_question" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="visible_users ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e40" edge="1" parent="1" source="t_contact_contactmessage" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="reply_sent_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e41" edge="1" parent="1" source="t_courses_course" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="owner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e42" edge="1" parent="1" source="t_courses_course" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e43" edge="1" parent="1" source="t_courses_course" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e44" edge="1" parent="1" source="t_courses_course" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_academicperiod" value="period">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e45" edge="1" parent="1" source="t_courses_coursegroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e46" edge="1" parent="1" source="t_courses_coursegroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="instructor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e47" edge="1" parent="1" source="t_courses_coursegroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="members ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e48" edge="1" parent="1" source="t_courses_courseinstructor" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e49" edge="1" parent="1" source="t_courses_courseinstructor" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e50" edge="1" parent="1" source="t_courses_coursemembership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e51" edge="1" parent="1" source="t_courses_coursemembership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e52" edge="1" parent="1" source="t_courses_courseresource" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e53" edge="1" parent="1" source="t_courses_courseresource" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_coursetopic" value="topic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e54" edge="1" parent="1" source="t_courses_coursetopic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e55" edge="1" parent="1" source="t_exams_bankquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_questionbank" value="bank">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e56" edge="1" parent="1" source="t_exams_bankquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e57" edge="1" parent="1" source="t_exams_bankquestionoption" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_bankquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e58" edge="1" parent="1" source="t_exams_codingexamquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e59" edge="1" parent="1" source="t_exams_codingfile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_codingsubmission" value="submission">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e60" edge="1" parent="1" source="t_exams_codingsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e61" edge="1" parent="1" source="t_exams_codingsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e62" edge="1" parent="1" source="t_exams_codingsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e63" edge="1" parent="1" source="t_exams_codingsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_codingexamquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e64" edge="1" parent="1" source="t_exams_codingtestcase" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_codingexamquestion" value="coding_question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e65" edge="1" parent="1" source="t_exams_exam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="author">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e66" edge="1" parent="1" source="t_exams_exam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e67" edge="1" parent="1" source="t_exams_exam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_subject" value="subject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e68" edge="1" parent="1" source="t_exams_exam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e69" edge="1" parent="1" source="t_exams_exam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="allowed_users ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e70" edge="1" parent="1" source="t_exams_exam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_studentgroup" value="allowed_groups ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e71" edge="1" parent="1" source="t_exams_examanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e72" edge="1" parent="1" source="t_exams_examanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e73" edge="1" parent="1" source="t_exams_examanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examquestionoption" value="selected_options ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e74" edge="1" parent="1" source="t_exams_examanswerfile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examanswer" value="answer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e75" edge="1" parent="1" source="t_exams_examattempt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e76" edge="1" parent="1" source="t_exams_examattempt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e77" edge="1" parent="1" source="t_exams_examattempt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examlanguagevariant" value="language_variant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e78" edge="1" parent="1" source="t_exams_examlanguagevariant" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e79" edge="1" parent="1" source="t_exams_examquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e80" edge="1" parent="1" source="t_exams_examquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_questionblock" value="block">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e81" edge="1" parent="1" source="t_exams_examquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_questionbank" value="bank">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e82" edge="1" parent="1" source="t_exams_examquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_bankquestion" value="source_bank_question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e83" edge="1" parent="1" source="t_exams_examquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examlanguagevariant" value="language_variant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e84" edge="1" parent="1" source="t_exams_examquestionoption" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e85" edge="1" parent="1" source="t_exams_examroom" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e86" edge="1" parent="1" source="t_exams_examroom" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e87" edge="1" parent="1" source="t_exams_examroom" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="invigilators ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e88" edge="1" parent="1" source="t_exams_examroomcomputer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e89" edge="1" parent="1" source="t_exams_examroomcomputer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examroom" value="room">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e90" edge="1" parent="1" source="t_exams_examroomcomputer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e91" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e92" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e93" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examroom" value="room">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e94" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="invigilator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e95" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="started_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e96" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="ended_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e97" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e98" edge="1" parent="1" source="t_exams_examroomsession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="staff ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e99" edge="1" parent="1" source="t_exams_examstudentpin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e100" edge="1" parent="1" source="t_exams_examstudentpin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e101" edge="1" parent="1" source="t_exams_examsupervisionconfig" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e102" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e103" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examroomsession" value="session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e104" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e105" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e106" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e107" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="pin_generated_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e108" edge="1" parent="1" source="t_exams_finalexamticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="removed_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e109" edge="1" parent="1" source="t_exams_proctoringlog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="exam_attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e110" edge="1" parent="1" source="t_exams_questionbank" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e111" edge="1" parent="1" source="t_exams_questionbank" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="org_unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e112" edge="1" parent="1" source="t_exams_questionbank" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e113" edge="1" parent="1" source="t_exams_questionblock" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e114" edge="1" parent="1" source="t_exams_questionsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e115" edge="1" parent="1" source="t_exams_questionsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="teacher">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e116" edge="1" parent="1" source="t_exams_questionsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_studentgroup" value="student_group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e117" edge="1" parent="1" source="t_exams_questionsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="reviewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e118" edge="1" parent="1" source="t_exams_questionsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_questionbank" value="accepted_bank">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e119" edge="1" parent="1" source="t_exams_studentexamattemptgrant" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e120" edge="1" parent="1" source="t_exams_studentexamattemptgrant" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e121" edge="1" parent="1" source="t_exams_studentexamattemptgrant" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="granted_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e122" edge="1" parent="1" source="t_exams_studentgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="teacher">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e123" edge="1" parent="1" source="t_exams_studentgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e124" edge="1" parent="1" source="t_exams_studentgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="org_unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e125" edge="1" parent="1" source="t_exams_studentgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="students ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e126" edge="1" parent="1" source="t_exams_studentgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="teachers ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e127" edge="1" parent="1" source="t_exams_studentgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_subject" value="subjects ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e128" edge="1" parent="1" source="t_exams_supervisionincident" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e129" edge="1" parent="1" source="t_exams_supervisionincident" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e130" edge="1" parent="1" source="t_exams_supervisionincident" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_examattempt" value="attempt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e131" edge="1" parent="1" source="t_exams_supervisionincident" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e132" edge="1" parent="1" source="t_exams_textextractionjob" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e133" edge="1" parent="1" source="t_exams_textextractionjob" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e134" edge="1" parent="1" source="t_labs_lab" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e135" edge="1" parent="1" source="t_labs_lab" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e136" edge="1" parent="1" source="t_labs_lab" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="allowed_students ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e137" edge="1" parent="1" source="t_labs_labanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_lab" value="lab">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e138" edge="1" parent="1" source="t_labs_labanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_labquestion" value="question">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e139" edge="1" parent="1" source="t_labs_labanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e140" edge="1" parent="1" source="t_labs_labanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_labsubmission" value="submission">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e141" edge="1" parent="1" source="t_labs_labassignment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_lab" value="lab">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e142" edge="1" parent="1" source="t_labs_labassignment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e143" edge="1" parent="1" source="t_labs_labassignment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_labquestion" value="assigned_questions ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e144" edge="1" parent="1" source="t_labs_labblock" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_lab" value="lab">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e145" edge="1" parent="1" source="t_labs_labquestion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_labblock" value="block">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e146" edge="1" parent="1" source="t_labs_labsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_labs_labassignment" value="assignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e147" edge="1" parent="1" source="t_labs_labsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="graded_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e148" edge="1" parent="1" source="t_live_exam_liveanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_live_exam_livesession" value="session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e149" edge="1" parent="1" source="t_live_exam_liveanswer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_live_exam_liveplayer" value="player">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e150" edge="1" parent="1" source="t_live_exam_liveplayer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_live_exam_livesession" value="session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e151" edge="1" parent="1" source="t_live_exam_livesession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_exams_exam" value="exam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e152" edge="1" parent="1" source="t_live_exam_livesession" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="host_user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e153" edge="1" parent="1" source="t_notifications_inappnotification" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="recipient">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e154" edge="1" parent="1" source="t_notifications_inappnotification" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e155" edge="1" parent="1" source="t_notifications_studentorganizationrequest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e156" edge="1" parent="1" source="t_notifications_studentorganizationrequest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e157" edge="1" parent="1" source="t_notifications_studentorganizationrequest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="responded_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e158" edge="1" parent="1" source="t_organizations_academicperiod" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e159" edge="1" parent="1" source="t_organizations_institution" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_country" value="country">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e160" edge="1" parent="1" source="t_organizations_membership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e161" edge="1" parent="1" source="t_organizations_membership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e162" edge="1" parent="1" source="t_organizations_membership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_role" value="role">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e163" edge="1" parent="1" source="t_organizations_membership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="scope_unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e164" edge="1" parent="1" source="t_organizations_membership" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="assigned_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e165" edge="1" parent="1" source="t_organizations_organization" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="owner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e166" edge="1" parent="1" source="t_organizations_orgunit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e167" edge="1" parent="1" source="t_organizations_orgunit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="parent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e168" edge="1" parent="1" source="t_organizations_orgunit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="head">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e169" edge="1" parent="1" source="t_organizations_role" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e170" edge="1" parent="1" source="t_projects_project" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e171" edge="1" parent="1" source="t_projects_project" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="assigned_students ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e172" edge="1" parent="1" source="t_projects_projectsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_projects_project" value="project">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e173" edge="1" parent="1" source="t_projects_projectsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e174" edge="1" parent="1" source="t_projects_projectsubmission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="graded_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e175" edge="1" parent="1" source="t_registrar_assessmentcomponent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e176" edge="1" parent="1" source="t_registrar_assessmentcomponent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_courseoffering" value="offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e177" edge="1" parent="1" source="t_registrar_assessmentcomponent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_rubric" value="rubric">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e178" edge="1" parent="1" source="t_registrar_assessmentscheme" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e179" edge="1" parent="1" source="t_registrar_assessmentscheme" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_courseoffering" value="offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e180" edge="1" parent="1" source="t_registrar_assessmentscheme" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="submitted_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e181" edge="1" parent="1" source="t_registrar_assessmentscheme" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="chair_approved_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e182" edge="1" parent="1" source="t_registrar_assessmentscheme" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="dean_approved_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e183" edge="1" parent="1" source="t_registrar_componentscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e184" edge="1" parent="1" source="t_registrar_componentscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_assessmentcomponent" value="component">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e185" edge="1" parent="1" source="t_registrar_componentscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_enrollment" value="enrollment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e186" edge="1" parent="1" source="t_registrar_componentscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="entered_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e187" edge="1" parent="1" source="t_registrar_courseoffering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e188" edge="1" parent="1" source="t_registrar_courseoffering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_subject" value="subject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e189" edge="1" parent="1" source="t_registrar_courseoffering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_academicperiod" value="period">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e190" edge="1" parent="1" source="t_registrar_courseoffering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e191" edge="1" parent="1" source="t_registrar_courseoffering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_courses_course" value="course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e192" edge="1" parent="1" source="t_registrar_courseoffering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="instructor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e193" edge="1" parent="1" source="t_registrar_criterionscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e194" edge="1" parent="1" source="t_registrar_criterionscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_rubriccriterion" value="criterion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e195" edge="1" parent="1" source="t_registrar_criterionscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_enrollment" value="enrollment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e196" edge="1" parent="1" source="t_registrar_criterionscore" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="entered_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e197" edge="1" parent="1" source="t_registrar_curriculum" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e198" edge="1" parent="1" source="t_registrar_curriculum" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_program" value="program">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e199" edge="1" parent="1" source="t_registrar_curriculumsubject" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e200" edge="1" parent="1" source="t_registrar_curriculumsubject" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_curriculum" value="curriculum">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e201" edge="1" parent="1" source="t_registrar_curriculumsubject" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_subject" value="subject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e202" edge="1" parent="1" source="t_registrar_enrollment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e203" edge="1" parent="1" source="t_registrar_enrollment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e204" edge="1" parent="1" source="t_registrar_enrollment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_courseoffering" value="offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e205" edge="1" parent="1" source="t_registrar_finalgrade" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e206" edge="1" parent="1" source="t_registrar_finalgrade" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_enrollment" value="enrollment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e207" edge="1" parent="1" source="t_registrar_finalgrade" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="entered_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e208" edge="1" parent="1" source="t_registrar_groupelectivechoice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e209" edge="1" parent="1" source="t_registrar_groupelectivechoice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e210" edge="1" parent="1" source="t_registrar_groupelectivechoice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_academicperiod" value="period">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e211" edge="1" parent="1" source="t_registrar_groupelectivechoice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_subject" value="chosen_subject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e212" edge="1" parent="1" source="t_registrar_groupelectivechoice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="decided_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e213" edge="1" parent="1" source="t_registrar_lesson" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e214" edge="1" parent="1" source="t_registrar_lesson" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_courseoffering" value="offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e215" edge="1" parent="1" source="t_registrar_lesson" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e216" edge="1" parent="1" source="t_registrar_lessonmark" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e217" edge="1" parent="1" source="t_registrar_lessonmark" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_lesson" value="lesson">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e218" edge="1" parent="1" source="t_registrar_lessonmark" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_enrollment" value="enrollment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e219" edge="1" parent="1" source="t_registrar_lessonmark" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="entered_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e220" edge="1" parent="1" source="t_registrar_program" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e221" edge="1" parent="1" source="t_registrar_program" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="specialty_unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e222" edge="1" parent="1" source="t_registrar_resitrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e223" edge="1" parent="1" source="t_registrar_resitrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_enrollment" value="enrollment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e224" edge="1" parent="1" source="t_registrar_resitrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="decided_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e225" edge="1" parent="1" source="t_registrar_rubric" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e226" edge="1" parent="1" source="t_registrar_rubriccriterion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e227" edge="1" parent="1" source="t_registrar_rubriccriterion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_rubric" value="rubric">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e228" edge="1" parent="1" source="t_registrar_scheduleslot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e229" edge="1" parent="1" source="t_registrar_scheduleslot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_courseoffering" value="offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e230" edge="1" parent="1" source="t_registrar_scheduleslot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="created_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e231" edge="1" parent="1" source="t_registrar_studentacademicrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e232" edge="1" parent="1" source="t_registrar_studentacademicrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="student">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e233" edge="1" parent="1" source="t_registrar_studentacademicrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_program" value="program">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e234" edge="1" parent="1" source="t_registrar_studentacademicrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#345bb0;strokeWidth=1.3;fontSize=9;fontColor=#345bb0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_registrar_curriculum" value="curriculum">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e235" edge="1" parent="1" source="t_registrar_studentacademicrecord" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_orgunit" value="group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e236" edge="1" parent="1" source="t_registrar_subject" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_organizations_organization" value="organization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e237" edge="1" parent="1" source="t_trial_exams_trialexamrequest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e238" edge="1" parent="1" source="t_trial_exams_trialexamrequest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="reply_sent_by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e239" edge="1" parent="1" source="t_django_admin_log" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_user" value="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e240" edge="1" parent="1" source="t_django_admin_log" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#a86500;strokeWidth=1.3;fontSize=9;fontColor=#a86500;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_django_content_type" value="content_type">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e241" edge="1" parent="1" source="t_auth_group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_permission" value="permissions ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e242" edge="1" parent="1" source="t_auth_permission" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#c8342b;strokeWidth=1.3;fontSize=9;fontColor=#c8342b;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_django_content_type" value="content_type">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e243" edge="1" parent="1" source="t_auth_user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_group" value="groups ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e244" edge="1" parent="1" source="t_auth_user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;strokeColor=#7a45e0;strokeWidth=1.3;fontSize=9;fontColor=#7a45e0;labelBackgroundColor=#ffffff;jettySize=auto;orthogonalLoop=1;opacity=85;" target="t_auth_permission" value="user_permissions ⇄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -60,6 +60,13 @@ def appeal_score_state(attempt):
     """Attempt üzrə aktiv (revert olunmamış) düzəlişlərin xülasəsi."""
     adjustments = list(ScoreAdjustment.objects.filter(attempt=attempt, reverted=False))
     bonus = sum((adj.delta_points or Decimal("0") for adj in adjustments), Decimal("0"))
+    bonus_by_question_id = {}
+    for adj in adjustments:
+        if not adj.question_id or not adj.delta_points or adj.delta_points <= 0:
+            continue
+        bonus_by_question_id[adj.question_id] = (
+            bonus_by_question_id.get(adj.question_id, Decimal("0")) + adj.delta_points
+        )
     fallback_bonus = Decimal("0")
     fallback_credited_question_ids = set()
     fallback_items = (
@@ -74,11 +81,13 @@ def appeal_score_state(attempt):
             continue
         fallback_bonus += item_bonus
         fallback_credited_question_ids.add(item.question_id)
+        bonus_by_question_id[item.question_id] = bonus_by_question_id.get(item.question_id, Decimal("0")) + item_bonus
     return {
         "bonus_points": bonus + fallback_bonus,
         "adjustment_count": len(adjustments) + len(fallback_credited_question_ids),
         "credited_question_ids": {adj.question_id for adj in adjustments if adj.delta_points and adj.delta_points > 0}
         | fallback_credited_question_ids,
+        "bonus_by_question_id": bonus_by_question_id,
     }
 
 

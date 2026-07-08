@@ -224,7 +224,7 @@ def createAndEditExamView(request, slug=None):
                 ),
             )
             return JsonResponse({"success": True, "slug": exam_instance.slug})
-        selected_groups, selected_users = _selected_access_entities(form)
+        selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
         html = render_to_string(
             "exams/teacher/partials/_create_exam_modal_form.html",
             {
@@ -234,6 +234,7 @@ def createAndEditExamView(request, slug=None):
                 "linked_course": linked_course,
                 "selected_allowed_groups": selected_groups,
                 "selected_allowed_users": selected_users,
+                "selected_excluded_users": selected_excluded_users,
                 "supervision_config": supervision_config,
             },
             request=request,
@@ -245,7 +246,7 @@ def createAndEditExamView(request, slug=None):
             form = ExamForm(instance=exam, **form_kwargs)
         else:
             form = ExamForm(**form_kwargs)
-    selected_groups, selected_users = _selected_access_entities(form)
+    selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
 
     return render(
         request,
@@ -257,6 +258,7 @@ def createAndEditExamView(request, slug=None):
             "linked_course": linked_course,
             "selected_allowed_groups": selected_groups,
             "selected_allowed_users": selected_users,
+            "selected_excluded_users": selected_excluded_users,
             "supervision_config": supervision_config,
         },
     )

@@ -78,14 +78,34 @@
             return num(card.getAttribute("data-review-max")) || 0;
         }
 
+        function existingDelta(card) {
+            return num(card.getAttribute("data-review-existing-delta")) || 0;
+        }
+
+        function awardForCard(card) {
+            var configured = num(card.getAttribute("data-review-award"));
+            return configured > 0 ? configured : 1;
+        }
+
         function awardedForCard(card) {
             var p = parts(card);
-            if (!p.pointsInput) { return 0; }
+            if (!p.pointsInput) { return awardForCard(card); }
             var v = num(p.pointsInput.value);
             var mx = cardMax(card);
             if (v < 0) { v = 0; }
             if (mx && v > mx) { v = mx; }
             return v;
+        }
+
+        function scoreDeltaForCard(card) {
+            var v = decisionValue(card);
+            if (v === "accept") {
+                return awardedForCard(card) - existingDelta(card);
+            }
+            if (v === "reject") {
+                return -existingDelta(card);
+            }
+            return 0;
         }
 
         function isValid(card) {
@@ -98,18 +118,19 @@
             var sum = 0;
             editable.forEach(function (card) {
                 var p = parts(card);
+                var delta = scoreDeltaForCard(card);
+                sum += delta;
                 if (decisionValue(card) === "accept") {
-                    var awarded = awardedForCard(card);
-                    sum += awarded;
                     if (p.cardNext) {
-                        p.cardNext.textContent = fmtNum(currentScore + awarded);
+                        p.cardNext.textContent = fmtNum(currentScore + delta);
                     }
                 } else if (p.cardNext) {
-                    p.cardNext.textContent = fmtNum(currentScore);
+                    p.cardNext.textContent = fmtNum(currentScore + delta);
                 }
             });
             if (newScoreEl) {
                 var total = currentScore + sum;
+                if (total < 0) { total = 0; }
                 if (maxScore !== null && total > maxScore) { total = maxScore; }
                 newScoreEl.textContent = fmtNum(total) + (maxScore !== null ? " / " + fmtNum(maxScore) : "");
             }

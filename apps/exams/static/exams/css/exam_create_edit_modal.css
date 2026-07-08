@@ -248,17 +248,25 @@
     accent-color: var(--ems-primary-600);
 }
 
-/* Seçilmiş qrupun üzvü — qrupla daxil (işarəli + kilidli göstərilir). */
+/* Seçilmiş qrupun üzvü — qrupla daxil, amma ayrı tələbə kimi istisna edilə bilər. */
 .create-exam-list-item.is-group-member {
     background: var(--ems-success-50, #E7F6EF);
 }
 .create-exam-list-item.is-group-member .create-exam-item-checkbox {
     accent-color: var(--ems-success, #0F9D58);
-    cursor: default;
 }
 .create-exam-list-item.is-group-member .create-exam-item-label {
     color: var(--ems-gray-600, #566);
-    cursor: default;
+}
+.create-exam-list-item.is-group-member.is-group-excluded {
+    background: var(--ems-danger-50, #FEECEC);
+}
+.create-exam-list-item.is-group-member.is-group-excluded .create-exam-item-checkbox {
+    accent-color: var(--ems-danger, #DC3545);
+}
+.create-exam-list-item.is-group-member.is-group-excluded .create-exam-item-label {
+    color: var(--ems-danger, #B42318);
+    text-decoration: line-through;
 }
 
 .create-exam-item-label {
