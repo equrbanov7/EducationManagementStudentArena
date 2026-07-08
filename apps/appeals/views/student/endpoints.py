@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
+from apps.exams.navigation import append_query_params, current_return_to
 from apps.exams.public import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
@@ -18,8 +19,22 @@ from ...services import can_create_appeal, create_appeal, remaining_window_secon
 from ..shared._helpers import _marked_question_map
 
 
-def _result_url(exam, attempt):
-    return reverse("exams:exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
+def _is_profile_results_request(request):
+    source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    if source_section == "my-results":
+        return True
+    return "section=my-results" in (current_return_to(request) or "")
+
+
+def _result_url(exam, attempt, request=None):
+    url = reverse("exams:exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
+    if request is not None and _is_profile_results_request(request):
+        url = append_query_params(
+            url,
+            from_section="my-results",
+            return_to=current_return_to(request) or f"{reverse('accounts:profile')}?section=my-results",
+        )
+    return url
 
 
 def _is_final_exam(exam):
@@ -64,7 +79,7 @@ def appeal_create(request, attempt_id):
             request,
             pgettext("appeals.view.message", "Apellyasiya müddəti bitib və ya icazəniz yoxdur."),
         )
-        return redirect(_result_url(exam, attempt))
+        return redirect(_result_url(exam, attempt, request))
 
     delivered_answers = list(
         attempt.answers.select_related("question")
@@ -84,7 +99,7 @@ def appeal_create(request, attempt_id):
                 request,
                 pgettext("appeals.view.message", "Apellyasiyanız qeydə alındı."),
             )
-            if _is_final_exam(exam):
+            if _is_final_exam(exam) and not _is_profile_results_request(request):
                 # Final imtahan: apellyasiyadan sonra imtahan giriş səhifəsinə çıxılır.
                 return redirect(reverse("exams:final_exam_entry"))
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
@@ -103,10 +118,10 @@ def appeal_create(request, attempt_id):
         "appeal_type_choices": APPEAL_TYPE_CHOICES,
         "min_comment_length": APPEAL_MIN_COMMENT_LENGTH,
         "remaining_seconds": remaining_window_seconds(attempt),
-        "result_url": _result_url(exam, attempt),
+        "result_url": _result_url(exam, attempt, request),
         "marked_question_by_qid": marked_map,
         "has_marked": has_marked,
-        "is_final_exam": _is_final_exam(exam),
+        "is_final_exam": _is_final_exam(exam) and not _is_profile_results_request(request),
     }
     return render(request, "appeals/student/appeal_create.html", context)
 

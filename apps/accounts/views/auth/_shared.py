@@ -130,6 +130,12 @@ def _sanitize_auth_redirect_target(request, candidate_url):
     if any(character in AUTH_REDIRECT_DISALLOWED_CHARS for character in safe_path):
         return ""
 
+    # Final imtahan girişi ayrıca kiosk/PIN axınıdır. Normal kabinet login
+    # formaları heç vaxt login sonrası istifadəçini ora aparmamalıdır.
+    normalized_path = (safe_path.split("?", 1)[0] or "/").rstrip("/") + "/"
+    if normalized_path == "/exams/final/":
+        return ""
+
     return safe_path
 
 

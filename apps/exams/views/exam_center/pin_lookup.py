@@ -12,14 +12,15 @@ funksiya). İcazə ``center_org_or_403`` (is_exam_center) ilə yoxlanır.
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models import OuterRef, Q, Subquery
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 
-from apps.exams.models import FinalExamTicket
+from apps.exams.models import ExamStudentPin, FinalExamTicket
 from apps.exams.services.final_center import decrypt_ticket_pin
+from apps.exams.services.student_pins import student_visible_pin
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -62,17 +63,15 @@ def _kafedra_subquery(organization):
 @login_required
 @require_GET
 def exam_center_pin_search(request):
-    """Canlı axtarış: bu təşkilatda final bileti OLAN tələbələr (ad/username üzrə)."""
+    """Canlı axtarış: bu təşkilatda PIN-i olan tələbələr (ad/username üzrə)."""
     organization = center_org_or_403(request)
     query = (request.GET.get("q") or "").strip()
 
-    # Yalnız bu təşkilatda final bileti olan tələbələr (axtarış mənalı olsun).
-    student_ids = FinalExamTicket.objects.filter(organization=organization).values("student_id")
-    qs = User.objects.filter(id__in=Subquery(student_ids)).annotate(
+    # Final-center biletləri və wizard PIN-ləri ayrı modellərdə saxlanır.
+    ticket_student_ids = FinalExamTicket.objects.filter(organization=organization).values("student_id")
+    student_pin_ids = ExamStudentPin.objects.filter(exam__organization=organization).values("student_id")
+    qs = User.objects.filter(Q(id__in=Subquery(ticket_student_ids)) | Q(id__in=Subquery(student_pin_ids))).annotate(
         kafedra=Subquery(_kafedra_subquery(organization)),
-        ticket_count=Count(
-            "final_exam_tickets", filter=Q(final_exam_tickets__organization=organization), distinct=True
-        ),
     )
     if query:
         qs = qs.filter(
@@ -81,7 +80,17 @@ def exam_center_pin_search(request):
             | Q(last_name__icontains=query)
             | Q(email__icontains=query)
         )
-    qs = qs.order_by("first_name", "last_name", "username")[:_SEARCH_LIMIT]
+    students = list(qs.order_by("first_name", "last_name", "username")[:_SEARCH_LIMIT])
+    student_ids = [student.id for student in students]
+    exam_ids_by_student = {student_id: set() for student_id in student_ids}
+    for student_id, exam_id in FinalExamTicket.objects.filter(
+        organization=organization, student_id__in=student_ids
+    ).values_list("student_id", "exam_id"):
+        exam_ids_by_student.setdefault(student_id, set()).add(exam_id)
+    for student_id, exam_id in ExamStudentPin.objects.filter(
+        exam__organization=organization, student_id__in=student_ids
+    ).values_list("student_id", "exam_id"):
+        exam_ids_by_student.setdefault(student_id, set()).add(exam_id)
 
     results = [
         {
@@ -89,9 +98,9 @@ def exam_center_pin_search(request):
             "name": (u.get_full_name() or u.username),
             "username": u.username,
             "kafedra": getattr(u, "kafedra", "") or "",
-            "ticket_count": getattr(u, "ticket_count", 0),
+            "ticket_count": len(exam_ids_by_student.get(u.id, set())),
         }
-        for u in qs
+        for u in students
     ]
     return JsonResponse({"results": results})
 
@@ -112,7 +121,9 @@ def exam_center_student_pins(request, student_id):
     )
     items = []
     revealed = 0
+    ticket_exam_ids = set()
     for ticket in tickets:
+        ticket_exam_ids.add(ticket.exam_id)
         pin = decrypt_ticket_pin(ticket)
         if pin:
             revealed += 1
@@ -131,6 +142,36 @@ def exam_center_student_pins(request, student_id):
                 "status": ticket.status,
                 "seat": ticket.seat_number,
                 "language": ticket.get_language_display() if ticket.language else "",
+                "pin": pin or "",
+                "pin_available": bool(pin),
+            }
+        )
+
+    student_pins = (
+        ExamStudentPin.objects.filter(exam__organization=organization, student=student)
+        .exclude(exam_id__in=ticket_exam_ids)
+        .select_related("exam", "exam__subject")
+        .order_by("-created_at")
+    )
+    for student_pin in student_pins:
+        exam = student_pin.exam
+        pin = student_visible_pin(exam, student)
+        if pin:
+            revealed += 1
+        subject = getattr(exam, "subject", None)
+        items.append(
+            {
+                "exam_title": exam.title,
+                "subject": (f"{subject.code} — {subject.name}" if subject else ""),
+                "room": "",
+                "scheduled_start": (
+                    timezone.localtime(exam.start_datetime).strftime("%d.%m.%Y %H:%M") if exam.start_datetime else ""
+                ),
+                "scheduled_end": (timezone.localtime(exam.end_datetime).strftime("%H:%M") if exam.end_datetime else ""),
+                "session_state": "",
+                "status": "assigned",
+                "seat": "",
+                "language": "",
                 "pin": pin or "",
                 "pin_available": bool(pin),
             }
