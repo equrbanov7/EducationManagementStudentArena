@@ -1,0 +1,39 @@
+erDiagram
+    appeals_appeal ||--o{ appeals_appealitem : appeal
+    appeals_appealitem ||--|| appeals_scoreadjustment : appeal_item
+    appeals_appeal {
+        int id PK
+        string attempt_id FK
+        string exam_id FK
+        string student_id FK
+        string organization_id FK
+        string org_unit_id FK
+        string status
+        string reviewed_by_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    appeals_appealitem {
+        int id PK
+        string appeal_id FK
+        string question_id FK
+        string answer_id FK
+        string appeal_type
+        string status
+        string resolved_by_id FK
+        datetime created_at
+        datetime updated_at
+        text comment
+    }
+    appeals_scoreadjustment {
+        int id PK
+        string appeal_item_id FK, UK
+        string attempt_id FK
+        string question_id FK
+        decimal previous_score
+        decimal new_score
+        decimal previous_answer_score
+        string applied_by_id FK
+        decimal delta_points
+        bool previous_is_correct
+    }

@@ -70,6 +70,14 @@ class QuestionSubmission(models.Model):
         related_name="question_submissions",
         verbose_name=pgettext_lazy("exams.model.question_submission.field", "student_group"),
     )
+    # ÇOX qrup seçimi (2026-07): müəllim bir göndərişi bir neçə qrup üçün göndərə
+    # bilər. ``student_group`` (tək FK) geriyə-uyğunluq üçün qalır (birinci qrup).
+    student_groups = models.ManyToManyField(
+        "exams.StudentGroup",
+        blank=True,
+        related_name="question_submissions_multi",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "student_groups"),
+    )
     group_label = models.CharField(
         max_length=200,
         default="",

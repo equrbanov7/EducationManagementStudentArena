@@ -1,0 +1,96 @@
+erDiagram
+    auth_user |o--o{ accounts_emailotp : user
+    auth_user ||--|| accounts_userprofile : user
+    auth_user ||--o{ django_admin_log : user
+    django_content_type |o--o{ django_admin_log : content_type
+    auth_group }o--o{ auth_permission : permissions
+    django_content_type ||--o{ auth_permission : content_type
+    auth_user }o--o{ auth_group : groups
+    auth_user }o--o{ auth_permission : user_permissions
+    auth_group ||--o{ auth_group_permissions : group
+    auth_permission ||--o{ auth_group_permissions : permission
+    auth_user ||--o{ auth_user_groups : user
+    auth_group ||--o{ auth_user_groups : group
+    auth_user ||--o{ auth_user_user_permissions : user
+    auth_permission ||--o{ auth_user_user_permissions : permission
+    accounts_emailotp {
+        int id PK
+        string user_id FK
+        string email
+        string code
+        datetime created_at
+        string otp_hash
+        string purpose
+        datetime expires_at
+        bool is_verified
+        int attempts_count
+    }
+    accounts_userprofile {
+        int id PK
+        string user_id FK, UK
+        string organization_id FK
+        string requested_organization_id FK
+        string organization_type
+        string role
+        bool is_deleted
+        datetime deleted_at
+        datetime created_at
+        datetime updated_at
+    }
+    django_admin_log {
+        int id PK
+        string user_id FK
+        string content_type_id FK
+        datetime action_time
+        text object_id
+        string object_repr
+        int action_flag
+        text change_message
+    }
+    auth_group {
+        int id PK
+        string name UK
+    }
+    auth_permission {
+        int id PK
+        string name
+        string content_type_id FK
+        string codename
+    }
+    auth_user {
+        int id PK
+        string username UK
+        string email
+        bool is_active
+        string password
+        datetime last_login
+        bool is_superuser
+        string first_name
+        string last_name
+        bool is_staff
+    }
+    django_content_type {
+        int id PK
+        string app_label
+        string model
+    }
+    django_session {
+        string session_key PK
+        text session_data
+        datetime expire_date
+    }
+    auth_group_permissions {
+        int id PK
+        string group_id FK
+        string permission_id FK
+    }
+    auth_user_groups {
+        int id PK
+        string user_id FK
+        string group_id FK
+    }
+    auth_user_user_permissions {
+        int id PK
+        string user_id FK
+        string permission_id FK
+    }

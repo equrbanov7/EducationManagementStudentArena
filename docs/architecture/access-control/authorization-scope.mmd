@@ -1,0 +1,15 @@
+flowchart LR
+    User["Authenticated user"] --> Middleware["OrganizationMiddleware"]
+    Middleware --> ActiveOrg["request.organization"]
+    Middleware --> Memberships["request.org_memberships"]
+    Memberships --> Roles["Role.permissions"]
+    Roles --> OrgPerms["request.org_permissions"]
+    OrgPerms --> CorePerm["request_has_permission / ensure_request_permission"]
+    CorePerm --> Views["Views and services"]
+    Views --> QueryScope["Tenant-scoped querysets"]
+    ActiveOrg --> RLS["PostgreSQL RLS context
+app.current_org_id / app.current_user_id"]
+    RLS --> Database["Tenant tables"]
+    Superadmin["superuser / is_superadmin"] -. bypass .-> RLS
+    ServicePolicies["Object policies
+exam center, final tickets, appeals"] --> Views

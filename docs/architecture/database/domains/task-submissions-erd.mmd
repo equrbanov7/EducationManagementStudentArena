@@ -1,0 +1,155 @@
+erDiagram
+    assignments_assignment ||--o{ assignments_submission : assignment
+    labs_lab ||--o{ labs_labanswer : lab
+    labs_labquestion ||--o{ labs_labanswer : question
+    labs_labsubmission |o--o{ labs_labanswer : submission
+    labs_lab ||--o{ labs_labassignment : lab
+    labs_labassignment }o--o{ labs_labquestion : assigned_questions
+    labs_lab ||--o{ labs_labblock : lab
+    labs_labblock ||--o{ labs_labquestion : block
+    labs_labassignment ||--o{ labs_labsubmission : assignment
+    projects_project ||--o{ projects_projectsubmission : project
+    assignments_assignment ||--o{ assignments_assignment_assigned_students : assignment
+    labs_lab ||--o{ labs_lab_allowed_students : lab
+    labs_labassignment ||--o{ labs_labassignment_assigned_questions : labassignment
+    labs_labquestion ||--o{ labs_labassignment_assigned_questions : labquestion
+    projects_project ||--o{ projects_project_assigned_students : project
+    assignments_assignment {
+        int id PK
+        string course_id FK
+        string type
+        string title
+        decimal max_score
+        string created_by_id FK
+        string status
+        datetime created_at
+        datetime updated_at
+        text description
+    }
+    assignments_notification {
+        int id PK
+        string user_id FK
+        string title
+        string type
+        datetime created_at
+        text message
+        bool is_read
+        string link
+    }
+    assignments_submission {
+        int id PK
+        string assignment_id FK
+        string user_id FK
+        string status
+        decimal grade
+        string graded_by_id FK
+        datetime graded_at
+        int attempt_number
+        text content
+        json files
+    }
+    labs_lab {
+        int id PK
+        string course_id FK
+        string title
+        int max_score
+        string status
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        text description
+        datetime start_datetime
+    }
+    labs_labanswer {
+        int id PK
+        string lab_id FK
+        string question_id FK
+        string student_id FK
+        string submission_id FK
+        text answer
+        decimal score
+        int attempt_number
+        file answer_file
+        bool is_draft
+    }
+    labs_labassignment {
+        int id PK
+        string lab_id FK
+        string student_id FK
+        datetime assigned_at
+    }
+    labs_labblock {
+        int id PK
+        string lab_id FK
+        string title
+        datetime created_at
+        text description
+        int order
+        int questions_to_pick
+    }
+    labs_labquestion {
+        int id PK
+        string block_id FK
+        datetime created_at
+        datetime updated_at
+        int question_number
+        text question_text
+        file attachment
+        int points
+    }
+    labs_labsubmission {
+        int id PK
+        string assignment_id FK
+        string status
+        decimal score
+        string graded_by_id FK
+        datetime graded_at
+        datetime updated_at
+        text submission_text
+        file submission_file
+        string submission_link
+    }
+    projects_project {
+        int id PK
+        string course_id FK
+        string title
+        int max_score
+        string status
+        datetime created_at
+        datetime updated_at
+        text description
+        datetime start_date
+        datetime deadline
+    }
+    projects_projectsubmission {
+        int id PK
+        string project_id FK
+        string student_id FK
+        string status
+        decimal grade
+        datetime graded_at
+        string graded_by_id FK
+        text content
+        file file
+        text feedback
+    }
+    assignments_assignment_assigned_students {
+        int id PK
+        string assignment_id FK
+        string user_id FK
+    }
+    labs_lab_allowed_students {
+        int id PK
+        string lab_id FK
+        string user_id FK
+    }
+    labs_labassignment_assigned_questions {
+        int id PK
+        string labassignment_id FK
+        string labquestion_id FK
+    }
+    projects_project_assigned_students {
+        int id PK
+        string project_id FK
+        string user_id FK
+    }

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static i18n profile_shell %}
+{% comment %}
+Standalone səhifələri profil örtüyündə (SOL sidebar + SAĞ məzmun) göstərmək
+üçün baza şablon. Sual göndərişi workbench-i kimi səhifələr bunu extend edir:
+sidebar solda qalır, məzmun sağda .profile-main-də render olunur.
+
+Uşaq şablon təmin edir:
+* {% block embed_title %} — səhifə başlığı
+* embed_active_section (view kontekstindən) — sidebar-da aktiv keçid
+* {% block embed_extra_css %}, {% block embed_content %}, {% block embed_extra_js %}
+{% endcomment %}
+
+{% block title %}{% block embed_title %}{% endblock %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260621-section-ui">
+    {% block embed_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="profile-page" data-profile-base-url="{% url 'accounts:profile' %}">
+    {% profile_sidebar embed_active_section %}
+    <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
+    <main class="profile-main">
+        {% include "accounts/profile/_messages.html" %}
+        <div class="profile-sections profile-sections--embed">
+            {% block embed_content %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    {% comment %}Mobil sidebar açar düyməsi — SPA yükləmədən yüngül toggle.{% endcomment %}
+    <script nonce="{{ request.csp_nonce }}">
+      (function () {
+        var btn = document.querySelector('[data-profile-sidebar-toggle], .profile-hamburger, #profileSidebarToggle');
+        var sidebar = document.querySelector('.profile-sidebar');
+        var backdrop = document.getElementById('profileSidebarBackdrop');
+        function open() { if (sidebar) sidebar.classList.add('is-open'); if (backdrop) backdrop.classList.add('is-visible'); }
+        function close() { if (sidebar) sidebar.classList.remove('is-open'); if (backdrop) backdrop.classList.remove('is-visible'); }
+        if (btn) btn.addEventListener('click', function (e) { e.preventDefault(); (sidebar && sidebar.classList.contains('is-open')) ? close() : open(); });
+        if (backdrop) backdrop.addEventListener('click', close);
+      })();
+    </script>
+    {% block embed_extra_js %}{% endblock %}
+{% endblock %}

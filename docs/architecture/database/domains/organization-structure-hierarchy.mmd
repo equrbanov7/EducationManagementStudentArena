@@ -1,0 +1,24 @@
+flowchart TB
+    Organization["organizations_organization<br/>Organization"]
+    OrgUnit["organizations_orgunit<br/>REAL TABLE: OrgUnit<br/>organization_id, parent_id, unit_type, name, code, head_id, path"]
+    Faculty["Faculty<br/>OrgUnit(unit_type=faculty)<br/>Fakültə ayrıca table deyil"]
+    Kafedra["Kafedra / Department<br/>OrgUnit(unit_type=chair or department)<br/>Kafedra ayrıca table deyil"]
+    Specialty["Specialty<br/>OrgUnit(unit_type=specialty)"]
+    Group["Academic Group / Class<br/>OrgUnit subtype or exams_studentgroup.org_unit"]
+    Membership["organizations_membership<br/>scope_unit_id -> OrgUnit"]
+    Course["courses_course<br/>unit_id -> OrgUnit"]
+
+    Organization -->|organization_id| OrgUnit
+    OrgUnit -. "unit_type=faculty" .-> Faculty
+    Faculty -->|parent_id| Kafedra
+    Kafedra -->|parent_id| Specialty
+    Kafedra -->|parent_id / org_unit| Group
+    OrgUnit -->|scope_unit_id| Membership
+    OrgUnit -->|unit_id| Course
+
+    classDef table fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
+    classDef subtype fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,stroke-dasharray: 8 4;
+    classDef related fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px;
+    class Organization,OrgUnit table;
+    class Faculty,Kafedra,Specialty,Group subtype;
+    class Membership,Course related;
