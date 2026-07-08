@@ -37,6 +37,7 @@ def sync_student_pins_when_group_students_change(sender, instance, action, rever
 
 @receiver(m2m_changed, sender=Exam.allowed_groups.through)
 @receiver(m2m_changed, sender=Exam.allowed_users.through)
+@receiver(m2m_changed, sender=Exam.excluded_users.through)
 def sync_student_pins_when_exam_assignments_change(sender, instance, action, reverse, pk_set, **kwargs):
     if action not in _SYNC_ACTIONS:
         return

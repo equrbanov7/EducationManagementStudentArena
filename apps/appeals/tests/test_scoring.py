@@ -83,6 +83,7 @@ class TestExamScoringTests(_Base):
         self.assertEqual(adjustment.delta_points, Decimal("1"))
         state = appeal_score_state(self.attempt)
         self.assertEqual(state["bonus_points"], Decimal("1"))
+        self.assertEqual(state["bonus_by_question_id"], {self.question.id: Decimal("1")})
         eff = effective_test_score(self.attempt)
         self.assertEqual(eff["effective_score"], Decimal("1"))
         # 1 / 2 bal = 50%.

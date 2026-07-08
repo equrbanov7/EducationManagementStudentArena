@@ -28,7 +28,7 @@ def _default_effective_test_score(attempt, *, answers=None):
 
 
 def _default_score_state(attempt):
-    return {"bonus_points": 0, "credited_question_ids": []}
+    return {"bonus_points": 0, "credited_question_ids": [], "bonus_by_question_id": {}}
 
 
 def _default_can_create(request, attempt):

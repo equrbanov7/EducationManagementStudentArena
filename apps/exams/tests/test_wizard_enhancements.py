@@ -7,7 +7,8 @@
 """
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm
@@ -152,6 +153,53 @@ class WizardEnhancementsTests(TestCase):
         group.students.remove(self.s1)
         self.assertFalse(ExamStudentPin.objects.filter(exam=exam, student=self.s1).exists())
 
+    def test_excluded_group_student_loses_access_and_pin(self):
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="G2")
+        group.students.add(self.s1, self.s2)
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Excluded Group Final",
+            organization=self.org,
+            exam_type_extended="final",
+            is_active=True,
+            is_public=False,
+        )
+        exam.allowed_groups.add(group)
+        self.assertTrue(ExamStudentPin.objects.filter(exam=exam, student=self.s2).exists())
+
+        exam.excluded_users.add(self.s2)
+
+        self.assertTrue(exam.can_user_see(self.s1))
+        self.assertFalse(exam.can_user_see(self.s2))
+        self.assertTrue(ExamStudentPin.objects.filter(exam=exam, student=self.s1).exists())
+        self.assertFalse(ExamStudentPin.objects.filter(exam=exam, student=self.s2).exists())
+
+    def test_user_lookup_returns_students_and_marks_group_members(self):
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="Lookup G")
+        group.students.add(self.s1)
+        client = Client()
+        client.force_login(self.teacher)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+
+        response = client.get(reverse("exams:user_search"), {"groups": str(group.id)})
+        self.assertEqual(response.status_code, 200)
+        results = response.json()["results"]
+        by_id = {item["id"]: item for item in results}
+        self.assertIn(str(self.s1.id), by_id)
+        self.assertIn(str(self.s2.id), by_id)
+        self.assertTrue(by_id[str(self.s1.id)]["group_member"])
+        self.assertFalse(by_id[str(self.s2.id)]["group_member"])
+        self.assertNotIn(str(self.teacher.id), by_id)
+
+        count_response = client.get(
+            reverse("exams:assigned_student_count"),
+            {"groups": str(group.id), "excluded": str(self.s1.id)},
+        )
+        self.assertEqual(count_response.status_code, 200)
+        self.assertEqual(count_response.json()["total"], 0)
+
     # ── Per-student attempt grant ─────────────────────────────────────────
     def test_grant_increases_attempts_left_for_single_student(self):
         exam = Exam.objects.create(
@@ -183,6 +231,7 @@ class WizardEnhancementsTests(TestCase):
                 "linked_course": None,
                 "selected_allowed_groups": [],
                 "selected_allowed_users": [],
+                "selected_excluded_users": [],
                 "supervision_config": None,
             },
         )

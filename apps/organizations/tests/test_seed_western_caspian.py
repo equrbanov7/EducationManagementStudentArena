@@ -65,6 +65,14 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
             for student in Membership.objects.filter(organization=org, role__name="student"):
                 self.assertIn(student.scope_unit_id, group_ids)
 
+            from django.apps import apps as django_apps
+
+            StudentGroup = django_apps.get_model("exams", "StudentGroup")
+            lms_groups = StudentGroup.objects.filter(organization=org).prefetch_related("students")
+            self.assertEqual(lms_groups.count(), 2)
+            self.assertTrue(all(group.org_unit_id in group_ids for group in lms_groups))
+            self.assertTrue(all(group.students.exists() for group in lms_groups))
+
         rector = User.objects.get(username="wcu_rector")
         self.assertTrue(rector.check_password(self.PASSWORD))
         self.assertEqual(org.owner_id, rector.id)

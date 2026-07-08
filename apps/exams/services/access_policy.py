@@ -26,6 +26,9 @@ def can_user_access_exam(exam, user):
     if not exam.is_active:
         return False
 
+    if not exam.is_public and exam.excluded_users.filter(id=user.id).exists():
+        return False
+
     if exam.allowed_users.filter(id=user.id).exists():
         return True
 

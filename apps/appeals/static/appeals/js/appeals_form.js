@@ -39,13 +39,20 @@
             needOne: form.getAttribute("data-i18n-need-one") || gettext("Ən azı bir sual seçin."),
             chooseReason: form.getAttribute("data-i18n-choose-reason") || gettext("Səbəb tipini seçin."),
             tooShort: form.getAttribute("data-i18n-too-short") || gettext("Daha {n} simvol yazın."),
-            selected: form.getAttribute("data-i18n-selected") || gettext("{n} sual seçildi")
+            selected: form.getAttribute("data-i18n-selected") || gettext("{n} sual seçildi"),
+            fixBoth: form.getAttribute("data-i18n-fix-both")
+                || gettext("{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."),
+            fixReason: form.getAttribute("data-i18n-fix-reason")
+                || gettext("{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz."),
+            fixComment: form.getAttribute("data-i18n-fix-comment")
+                || gettext("{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz.")
         };
 
         var cards = Array.prototype.slice.call(form.querySelectorAll("[data-appeal-card]"));
         var submitBtn = form.querySelector("[data-appeal-submit]");
         var countEl = form.querySelector("[data-appeal-selected-count]");
         var emptyHint = form.querySelector("[data-appeal-empty-hint]");
+        var submitHint = form.querySelector("[data-appeal-submit-hint]");
         var submitAttempted = false;
         var searchScope = form.closest(".appeal-shell")
             || form.closest(".appeal-embedded")
@@ -64,13 +71,24 @@
             };
         }
 
+        function isLocked(card) {
+            return card.getAttribute("data-appeal-locked") === "1";
+        }
+
         function isActive(card) {
+            if (isLocked(card)) {
+                return false;
+            }
             var p = cardParts(card);
             return !!(p.toggle && p.toggle.checked);
         }
 
         function setActive(card, active, focusComment) {
             var p = cardParts(card);
+            if (isLocked(card)) {
+                active = false;
+                focusComment = false;
+            }
             if (p.toggle) {
                 p.toggle.checked = active;
             }
@@ -109,36 +127,52 @@
             }
         }
 
-        function cardValidity(card) {
-            // Qaytarır: { valid, reason } — yalnız AKTİV kartlar üçün vacibdir.
+        function cardIssues(card) {
             var p = cardParts(card);
+            var issues = [];
             if (!isActive(card)) {
-                return { valid: true, reason: null };
+                return { valid: true, issues: issues, remaining: 0 };
             }
             if (p.type && !p.type.value) {
-                return { valid: false, reason: "reason" };
+                issues.push("reason");
             }
             var len = commentLength(card);
             if (len < minLen) {
-                return { valid: false, reason: "short", remaining: minLen - len };
+                issues.push("comment");
             }
-            return { valid: true, reason: null };
+            return { valid: issues.length === 0, issues: issues, remaining: clamp(minLen - len, 0, minLen) };
+        }
+
+        function cardValidity(card) {
+            var issues = cardIssues(card);
+            if (issues.valid) {
+                return { valid: true, reason: null, remaining: 0 };
+            }
+            if (issues.issues.indexOf("reason") !== -1) {
+                return { valid: false, reason: "reason", remaining: issues.remaining };
+            }
+            return { valid: false, reason: "short", remaining: issues.remaining };
         }
 
         function showCardError(card, show) {
             var p = cardParts(card);
             if (!p.error) { return; }
-            var v = cardValidity(card);
-            if (!show || v.valid) {
+            var issueState = cardIssues(card);
+            if (!show || issueState.valid) {
                 p.error.hidden = true;
                 card.classList.remove("has-error");
                 return;
             }
             var msg = "";
-            if (v.reason === "reason") {
+            var hasReasonIssue = issueState.issues.indexOf("reason") !== -1;
+            var hasCommentIssue = issueState.issues.indexOf("comment") !== -1;
+            if (hasReasonIssue && hasCommentIssue) {
+                msg = gettext("Səbəb tipini seçin və izahı ən azı {min} simvol yazın.");
+                msg = format(msg, { min: minLen });
+            } else if (hasReasonIssue) {
                 msg = i18n.chooseReason;
-            } else if (v.reason === "short") {
-                msg = format(i18n.tooShort, { n: v.remaining });
+            } else if (hasCommentIssue) {
+                msg = format(i18n.tooShort, { n: issueState.remaining });
             }
             p.error.textContent = msg;
             p.error.hidden = false;
@@ -151,7 +185,7 @@
 
         function markedCards() {
             return cards.filter(function (card) {
-                return card.getAttribute("data-appeal-marked") === "1";
+                return card.getAttribute("data-appeal-marked") === "1" && !isLocked(card);
             });
         }
 
@@ -181,6 +215,40 @@
             return act.every(function (c) { return cardValidity(c).valid; });
         }
 
+        function questionNumber(card) {
+            var numberEl = card.querySelector(".appeal-question-number");
+            var raw = numberEl ? numberEl.textContent.trim() : "";
+            if (raw) { return raw; }
+            return String(cards.indexOf(card) + 1);
+        }
+
+        function firstInvalidCard() {
+            return activeCards().filter(function (c) { return !cardIssues(c).valid; })[0] || null;
+        }
+
+        function submitErrorMessage() {
+            var act = activeCards();
+            if (act.length === 0) { return ""; }
+            var card = firstInvalidCard();
+            if (!card) { return ""; }
+            var issues = cardIssues(card).issues;
+            var values = { q: questionNumber(card), min: minLen };
+            if (issues.indexOf("reason") !== -1 && issues.indexOf("comment") !== -1) {
+                return format(i18n.fixBoth, values);
+            }
+            if (issues.indexOf("reason") !== -1) {
+                return format(i18n.fixReason, values);
+            }
+            return format(i18n.fixComment, values);
+        }
+
+        function updateSubmitHint() {
+            if (!submitHint) { return; }
+            var msg = submitAttempted ? submitErrorMessage() : "";
+            submitHint.textContent = msg;
+            submitHint.hidden = !msg;
+        }
+
         function updateSummary() {
             var count = activeCards().length;
             if (countEl) {
@@ -192,14 +260,27 @@
             }
             if (submitBtn) {
                 var ok = formIsValid();
-                submitBtn.disabled = !ok;
+                submitBtn.setAttribute("aria-disabled", ok ? "false" : "true");
                 submitBtn.classList.toggle("is-ready", ok);
             }
             // Submit cəhdindən sonra səhvləri canlı göstər.
             if (submitAttempted) {
                 activeCards().forEach(function (c) { showCardError(c, true); });
             }
+            updateSubmitHint();
             updateMarkedButtonState();
+        }
+
+        function focusFirstInvalid(card) {
+            if (!card) { return; }
+            var issues = cardIssues(card).issues;
+            var p = cardParts(card);
+            var target = issues.indexOf("reason") !== -1 ? p.type : p.comment;
+            if (target) {
+                window.setTimeout(function () {
+                    try { target.focus(); } catch (err) { /* ignore */ }
+                }, 250);
+            }
         }
 
         cards.forEach(function (card) {
@@ -212,18 +293,18 @@
             }
             // Auto-aktivləşmə: səbəb tipini seçəndə.
             if (p.type) {
-                p.type.addEventListener("focus", function () { if (!isActive(card)) { setActive(card, true, false); } });
+                p.type.addEventListener("focus", function () { if (!isLocked(card) && !isActive(card)) { setActive(card, true, false); } });
                 p.type.addEventListener("change", function () {
-                    if (!isActive(card)) { setActive(card, true, false); }
+                    if (!isLocked(card) && !isActive(card)) { setActive(card, true, false); }
                     if (submitAttempted) { showCardError(card, true); }
                     updateSummary();
                 });
             }
             // Auto-aktivləşmə: şərhə yazmağa/fokuslanmağa başlayanda.
             if (p.comment) {
-                p.comment.addEventListener("focus", function () { if (!isActive(card)) { setActive(card, true, false); } });
+                p.comment.addEventListener("focus", function () { if (!isLocked(card) && !isActive(card)) { setActive(card, true, false); } });
                 p.comment.addEventListener("input", function () {
-                    if (!isActive(card) && p.comment.value.length > 0) { setActive(card, true, false); }
+                    if (!isLocked(card) && !isActive(card) && p.comment.value.length > 0) { setActive(card, true, false); }
                     updateCounter(card);
                     if (submitAttempted) { showCardError(card, true); }
                     updateSummary();
@@ -291,14 +372,20 @@
             if (!formIsValid()) {
                 e.preventDefault();
                 activeCards().forEach(function (c) { showCardError(c, true); });
-                var firstInvalid = activeCards().filter(function (c) { return !cardValidity(c).valid; })[0];
+                updateSubmitHint();
+                var firstInvalid = firstInvalidCard();
                 var target = firstInvalid || cards[0];
                 if (activeCards().length === 0 && emptyHint) {
                     emptyHint.hidden = false;
                 }
+                if (target && target.hidden && searchInput) {
+                    searchInput.value = "";
+                    cards.forEach(function (card) { card.hidden = false; });
+                }
                 if (target && typeof target.scrollIntoView === "function") {
                     target.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
+                focusFirstInvalid(firstInvalid);
                 return;
             }
             // Etibarlıdır — təsdiq modalı varsa əvvəlcə onu göstər, sonra göndər.
