@@ -28864,3 +28864,63 @@ msgstr ""
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Проходит"
+
+msgctxt "exams.model.exam.field"
+msgid "subject"
+msgstr "Предмет"
+
+msgctxt "exams.form.exam.label"
+msgid "subject"
+msgstr "Предмет"
+
+msgctxt "exams.form.exam.error"
+msgid "subject_required_for_final_midterm"
+msgstr "Для итоговых и промежуточных экзаменов необходимо выбрать предмет."
+
+msgctxt "exams.form.exam.error"
+msgid "random_question_count_exceeds_available"
+msgstr "В системе доступно только %(available)s вопросов — больше выбрать нельзя."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "subject_search_placeholder"
+msgstr "Поиск предмета (код или название)…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "clear"
+msgstr "Очистить"
+
+msgctxt "exams.view.exams.message"
+msgid "extra_attempt_granted"
+msgstr "Студенту предоставлена дополнительная попытка."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "grant_extra_attempt"
+msgstr "Дать пересдачу"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "grant_extra_attempt_hint"
+msgstr "Даёт одну дополнительную попытку только этому студенту."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "attempts_left_short"
+msgstr "осталось"
+
+msgctxt "exams.wizard"
+msgid "review_title"
+msgstr "Итоговый обзор — проверьте перед созданием"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run"
+msgstr "Пробный запуск"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_hint"
+msgstr "Пройдите экзамен как студент — эта попытка не учитывается в результатах."
+
+msgctxt "exams.model.attempt.field"
+msgid "is_trial"
+msgstr "Пробная попытка"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "selected_subject"
+msgstr "Выбранный предмет"

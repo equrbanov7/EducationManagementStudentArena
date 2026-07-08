@@ -3,11 +3,15 @@ Assigned-tasks collector for the profile dashboard.
 """
 
 from django.contrib.auth import get_user_model
+from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.assignments.models import Assignment
 from apps.courses.models import CourseMembership
+from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.exams.public import student_final_exam_context
 from apps.labs.models import Lab
 from apps.projects.models import Project
@@ -96,8 +100,36 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
 
     counts["courses"] = assigned_courses_qs.count()
 
-    assigned_exams_qs = _assigned_exams_queryset(request, user, active_only=True).order_by(
-        "-start_datetime", "-created_at"
+    # Cəhd limiti bitmiş (tamamlanıb qiymətləndirilmiş) imtahanlar təyin olunmuş
+    # tapşırıqlardan çıxır — tələbə nəticəsini "Nəticələr" bölməsində görür.
+    # Müəllimin verdiyi əlavə cəhd (grant) nəzərə alınır.
+    _finished_sq = Subquery(
+        ExamAttempt.objects.filter(
+            exam=OuterRef("pk"),
+            user=user,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+        )
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt"),
+        output_field=IntegerField(),
+    )
+    _grant_sq = Subquery(
+        StudentExamAttemptGrant.objects.filter(exam=OuterRef("pk"), student=user).values("extra_attempts")[:1],
+        output_field=IntegerField(),
+    )
+    assigned_exams_qs = (
+        _assigned_exams_queryset(request, user, active_only=True)
+        .annotate(
+            _finished_attempts=Coalesce(_finished_sq, 0),
+            _extra_grant=Coalesce(_grant_sq, 0),
+        )
+        .filter(
+            Q(max_attempts_per_user__isnull=True)
+            | Q(max_attempts_per_user=0)
+            | Q(_finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
+        )
+        .order_by("-start_datetime", "-created_at")
     )
     counts["exams"] = assigned_exams_qs.count()
     if filter_type in {"all", "exams"}:
@@ -109,12 +141,40 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             ):
                 continue
 
-            is_final = getattr(exam, "exam_type_extended", None) == "final"
-            final_ctx = student_final_exam_context(user, exam) if is_final else {}
+            category = getattr(exam, "exam_type_extended", None)
+            # Final imtahanları HƏMİŞƏ imtahan mərkəzi axını ilə verilir: tələbə
+            # kabinetdən imtahana BAŞLAYA BİLMİR — yalnız məlumat + fərdi giriş
+            # PIN-ini görür və imtahana `/exams/final/` səhifəsindən istifadəçi
+            # adı + PIN ilə daxil olur. Bilet hələ təyin olunmayıbsa (otaq-oturum
+            # yaradılmayıb) modal bunu bildirir; giriş kodu/PIN xanası göstərilmir.
+            is_final_exam = category == "final"
+            final_ctx = student_final_exam_context(user, exam) if is_final_exam else {}
+            has_ticket = bool(final_ctx.get("has_ticket"))
+            use_center_flow = is_final_exam
 
-            # Final imtahanları KABİNETDƏN başladılmır — vaxt aralığı oturumla
-            # təyin olunur; state final biletin oturum vaxtına görə hesablanır.
-            if is_final:
+            # Final/midterm: imtahan yaradılanda hər tələbəyə təyin olunan fərdi
+            # PIN (dərhal görünür). Midterm bunu kabinet giriş xanasında, final
+            # isə yalnız məlumat olaraq (PIN blokunda) göstərir.
+            student_pin = None
+            if category in {"final", "midterm"}:
+                from apps.exams.services.student_pins import student_visible_pin
+
+                student_pin = student_visible_pin(exam, user)
+
+            # Final imtahanının kabinetdə göstərilən giriş PIN-i: imtahan mərkəzi
+            # bileti varsa onun (zaman-pəncərəli) PIN-i, yoxdursa təyin olunmuş
+            # fərdi PIN. `final_pin_assigned` — PIN mənbəyi mövcuddur (təyin
+            # olunub); False olduqda modal "hələ təyin olunmayıb" göstərir.
+            if has_ticket:
+                final_display_pin = final_ctx.get("pin")
+                final_pin_assigned = True
+            else:
+                final_display_pin = student_pin
+                final_pin_assigned = bool(student_pin)
+
+            # Biletli final: vaxt aralığı oturumla təyin olunur; digərləri imtahan
+            # başlama/bitmə tarixinə görə.
+            if use_center_flow and has_ticket:
                 window_start = final_ctx.get("window_start")
                 window_end = final_ctx.get("window_end")
                 if window_start and now < window_start:
@@ -136,15 +196,19 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                 "exam_total_duration_minutes": exam.total_duration_minutes,
                 "exam_start_at": exam.start_datetime,
                 "exam_end_at": exam.end_datetime,
-                "exam_requires_code": bool(exam.access_code),
-                "is_final": is_final,
+                # Final imtahanı kabinetdən başladılmadığı üçün giriş kodu/PIN
+                # xanası göstərilmir; yalnız midterm/adi imtahanlar kod istəyə bilər.
+                "exam_requires_code": (not use_center_flow) and (bool(exam.access_code) or bool(student_pin)),
+                "is_final": use_center_flow,
+                # Sehrbazla yaradılan midterm imtahanında tələbənin fərdi PIN-i.
+                "student_pin": student_pin or "",
             }
-            if is_final:
+            if use_center_flow:
                 extra.update(
                     {
-                        # Final biletin oturum məlumatı (vaxt aralığı mərkəz tərəfindən təyin olunur).
-                        "final_has_ticket": final_ctx.get("has_ticket", False),
-                        "final_pin": final_ctx.get("pin"),
+                        # PIN mənbəyi (bilet və ya fərdi PIN) təyin olunubmu.
+                        "final_has_ticket": final_pin_assigned,
+                        "final_pin": final_display_pin,
                         "final_room": final_ctx.get("room_name"),
                         "final_entry_open": final_ctx.get("entry_open", False),
                         "final_status": final_ctx.get("status"),
@@ -165,8 +229,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                     from_section="assigned-exams",
                     assigned_type=filter_type,
                 ),
-                assigned_at=(final_ctx.get("window_start") if is_final else exam.start_datetime) or exam.created_at,
-                deadline=final_ctx.get("window_end") if is_final else exam.end_datetime,
+                assigned_at=(final_ctx.get("window_start") if has_ticket else exam.start_datetime) or exam.created_at,
+                deadline=final_ctx.get("window_end") if has_ticket else exam.end_datetime,
                 state=state,
                 description=exam.description,
                 extra=extra,

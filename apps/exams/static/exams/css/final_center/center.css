@@ -152,6 +152,10 @@
 /* Axtarış qutusu boş yeri tutur; kiçik ekranlarda toolbar şaquli yığılır. */
 .fxc-input--grow { flex: 1 1 240px; min-width: 0; }
 
+/* Yenidən istifadəyə yararlı axtarış inputu (_search_input.html) toolbar-da. */
+.fxc-toolbar .fxc-search-grow { flex: 1 1 260px; width: auto; min-width: 0; }
+@media (max-width: 640px) { .fxc-toolbar .fxc-search-grow { flex: 0 0 auto; width: 100%; } }
+
 @media (max-width: 640px) {
     .fxc-toolbar { flex-direction: column; align-items: stretch; }
     .fxc-toolbar .fxc-input,

@@ -9,6 +9,74 @@
 {% endblock %}
 
 {% block content %}
+<style nonce="{{ request.csp_nonce }}">
+  .rma-panel { border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; margin: 0 0 1rem; background: var(--card-bg, #fff); }
+  .rma-panel__summary { cursor: pointer; list-style: none; padding: .85rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-weight: 700; }
+  .rma-panel__summary::-webkit-details-marker { display: none; }
+  .rma-panel__summary:hover { background: rgba(37,99,235,.04); }
+  .rma-panel__right { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+  .rma-toggle { display: inline-flex; align-items: center; gap: .4rem; color: #2563eb; font-size: .82rem; font-weight: 700; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 999px; padding: .25rem .7rem; white-space: nowrap; }
+  .rma-chevron { transition: transform .2s ease; }
+  .rma-panel[open] .rma-chevron { transform: rotate(180deg); }
+  .rma-toggle__close { display: none; }
+  .rma-panel[open] .rma-toggle__open { display: none; }
+  .rma-panel[open] .rma-toggle__close { display: inline; }
+  /* Toolbar Bootstrap select-ləri — kompakt (böyük default toggle yox) */
+  .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 1 210px; width: auto; min-width: 180px; }
+  .fxc-toolbar .fxc-toolbar-select .bootstrap-single-select__toggle { min-height: 0; padding: 9px 13px; border-radius: 10px; font-size: .92rem; font-weight: 500; background: #fff; border-color: #CBD5E1; box-shadow: none; }
+  @media (max-width: 640px) { .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 0 auto; width: 100%; } }
+  .rma-chip { display: inline-flex; min-width: 1.4rem; justify-content: center; padding: 0 .4rem; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: .78rem; margin-left: .35rem; }
+  .rma-current { display: flex; gap: .3rem; flex-wrap: wrap; font-weight: 500; }
+  .rma-tag { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .12rem .55rem; font-size: .78rem; }
+  .rma-muted { color: #6b7280; font-size: .85rem; }
+  .rma-form { padding: 0 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .65rem; }
+  .rma-search { position: relative; }
+  .rma-search i { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+  .rma-search__input { width: 100%; padding: .5rem .6rem .5rem 2rem; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; background: transparent; color: inherit; }
+  .rma-list { max-height: 260px; overflow-y: auto; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; }
+  .rma-item { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-color, #f1f1f1); cursor: pointer; }
+  .rma-item:last-child { border-bottom: 0; }
+  .rma-item:hover { background: rgba(37,99,235,.06); }
+  .rma-item__name { font-weight: 600; }
+  .rma-item__user { color: #6b7280; font-size: .8rem; font-family: ui-monospace, monospace; margin-left: auto; }
+  .rma-item__kaf { color: #2563eb; font-size: .76rem; margin-left: auto; background: #eff6ff; padding: .1rem .5rem; border-radius: 999px; white-space: nowrap; }
+  .rma-item__kaf--none { color: #9ca3af; background: transparent; }
+  .rma-item__namelink { color: inherit; text-decoration: none; }
+  .rma-item__namelink:hover { color: #2563eb; text-decoration: underline; }
+  .rma-chip-sel__name { color: inherit; text-decoration: none; }
+  a.rma-chip-sel__name:hover { text-decoration: underline; }
+  .rma-empty { padding: 1rem; text-align: center; }
+  .rma-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .2rem; min-height: .5rem; }
+  .rma-chip-sel { display: inline-flex; align-items: center; gap: .4rem; background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .25rem .5rem .25rem .7rem; font-size: .82rem; font-weight: 600; }
+  .rma-chip-sel__x { border: 0; background: transparent; color: #6366f1; font-size: 1.05rem; line-height: 1; cursor: pointer; padding: 0 .1rem; }
+  .rma-chip-sel__x:hover { color: #b91c1c; }
+  .rma-result { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-color, #f1f1f1); cursor: pointer; }
+  .rma-result:last-child { border-bottom: 0; }
+  .rma-result:hover { background: rgba(37,99,235,.06); }
+  .rma-result__add { color: #16a34a; font-weight: 700; border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: 8px; width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; }
+  .rma-result__add:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .rma-loading, .rma-hint { padding: .7rem; text-align: center; color: #6b7280; font-size: .82rem; }
+  .rma-form__foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .rma-computers { margin: 0 0 1.25rem; }
+  .rma-computers__title { font-size: 1.05rem; font-weight: 800; margin: 0 0 .6rem; display: flex; align-items: center; gap: .5rem; }
+  .rma-cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
+  .rma-comp { border: 1px solid var(--border-color, #e5e7eb); border-radius: 10px; padding: .6rem .7rem; background: var(--card-bg, #fff); border-left: 4px solid #cbd5e1; }
+  .rma-comp--busy { border-left-color: #94a3b8; }
+  .rma-comp--active { border-left-color: #16a34a; }
+  .rma-comp--ready { border-left-color: #0ea5e9; }
+  .rma-comp--waiting { border-left-color: #f59e0b; }
+  .rma-comp--completed { border-left-color: #6366f1; }
+  .rma-comp--removed { border-left-color: #ef4444; }
+  .rma-comp__head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+  .rma-comp__label { font-weight: 700; display: flex; align-items: center; gap: .35rem; }
+  .rma-comp__seat { color: #6b7280; font-size: .78rem; }
+  .rma-comp__meta { margin: .3rem 0; display: flex; flex-direction: column; gap: .1rem; }
+  .rma-mac { font-family: ui-monospace, monospace; font-size: .72rem; color: #6b7280; }
+  .rma-comp__live { margin-top: .3rem; display: flex; flex-direction: column; }
+  .rma-comp__exam { font-size: .8rem; font-weight: 700; }
+  .rma-comp__student { font-size: .8rem; color: #374151; }
+  .rma-comp__idle { margin-top: .3rem; font-size: .78rem; color: #9ca3af; }
+</style>
 <div class="container py-4 fxc-page"
      id="fxc-room-root"
      data-snapshot-url="{% url 'exams:exam_center_room_snapshot' room_id=room.pk %}"
@@ -42,22 +110,107 @@
     </div>
   </header>
 
+  {% if can_assign_invigilators %}
+  {# ── Zala nəzarətçi təyini (yalnız imtahan mərkəzi RƏHBƏRİ) — AJAX axtarış ── #}
+  <details class="rma-panel"
+           data-search-url="{{ invigilator_search_url }}"
+           data-profile-url-template="{% url 'accounts:public_profile' username='__U__' %}"
+           data-assigned-field="invigilators">
+    <summary class="rma-panel__summary">
+      <span class="rma-panel__label"><i class="fas fa-user-shield"></i> {% trans "Zal nəzarətçiləri" %}
+        <span class="rma-chip js-rma-count">{{ room_invigilators|length }}</span></span>
+      <span class="rma-panel__right">
+        <span class="rma-current">
+          {% for u in room_invigilators %}<span class="rma-tag">{{ u.get_full_name|default:u.username }}</span>{% empty %}<span class="rma-muted">{% trans "Təyin olunmayıb" %}</span>{% endfor %}
+        </span>
+        <span class="rma-toggle">
+          <span class="rma-toggle__open">{% trans "Aç" %}</span>
+          <span class="rma-toggle__close">{% trans "Bağla" %}</span>
+          <i class="fas fa-chevron-down rma-chevron" aria-hidden="true"></i>
+        </span>
+      </span>
+    </summary>
+    <form method="post" action="{% url 'exams:exam_center_room_assign_invigilators' room_id=room.pk %}" class="rma-form js-rma-form">
+      {% csrf_token %}
+      <p class="rma-muted">{% trans "Zala təyin olunan nəzarətçilər zaldakı bütün imtahanları idarə edə bilər. Ad, soyad və ya kafedra üzrə axtarın." %}</p>
+
+      {# Seçilmişlər (çip) — ada klik profil səhifəsini açır; POST üçün gizli input #}
+      <div class="rma-chips js-rma-chips">
+        {% for u in room_invigilators %}
+        <span class="rma-chip-sel" data-id="{{ u.id }}">
+          <a class="rma-chip-sel__name" href="{% url 'accounts:public_profile' username=u.username %}" target="_blank" rel="noopener" title="{% trans 'Profili aç' %}">{{ u.get_full_name|default:u.username }}</a>
+          <button type="button" class="rma-chip-sel__x js-rma-remove" data-id="{{ u.id }}" aria-label="{% trans 'Çıxar' %}">&times;</button>
+          <input type="hidden" name="invigilators" value="{{ u.id }}">
+        </span>
+        {% endfor %}
+      </div>
+
+      <div class="rma-search">
+        <i class="fas fa-search"></i>
+        <input type="search" class="rma-search__input js-rma-search" placeholder="{% trans 'Müəllim / işçi / kafedra axtar…' %}" aria-label="{% trans 'Nəzarətçi axtarışı' %}" autocomplete="off">
+      </div>
+      <div class="rma-list js-rma-results" role="listbox" aria-label="{% trans 'Namizədlər' %}"></div>
+
+      <div class="rma-form__foot">
+        <span class="rma-muted">{% trans "Seçilmiş nəzarətçi:" context "exams.final_center.invigilators" %} <b class="js-rma-total">{{ room_invigilators|length }}</b></span>
+        <button type="submit" class="fxc-btn fxc-btn-primary"><i class="fas fa-check"></i> {% trans "Nəzarətçiləri yadda saxla" %}</button>
+      </div>
+    </form>
+  </details>
+  {% endif %}
+
+  {# ── Zaldakı kompüterlər (qeydli MAC/IP + canlı imtahan overlay) ── #}
+  {% if room_computers %}
+  <section class="rma-computers" aria-label="{% trans 'Zaldakı kompüterlər' %}">
+    <h2 class="rma-computers__title"><i class="fas fa-desktop"></i> {% trans "Zaldakı kompüterlər" %}
+      <span class="rma-chip">{{ room_computers|length }}</span></h2>
+    <div class="rma-cgrid">
+      {% for item in room_computers %}
+      <div class="rma-comp{% if item.occupant %} rma-comp--busy rma-comp--{{ item.occupant.status }}{% endif %}">
+        <div class="rma-comp__head">
+          <span class="rma-comp__label"><i class="fas fa-desktop"></i> {{ item.computer.label }}</span>
+          {% if item.computer.seat_number %}<span class="rma-comp__seat">#{{ item.computer.seat_number }}</span>{% endif %}
+        </div>
+        <div class="rma-comp__meta">
+          <span class="rma-mac">{{ item.computer.mac_address }}</span>
+          {% if item.computer.ip_address %}<span class="rma-mac">{{ item.computer.ip_address }}</span>{% endif %}
+        </div>
+        {% if item.occupant %}
+        <div class="rma-comp__live">
+          <span class="rma-comp__exam">{{ item.occupant.exam_title }}</span>
+          <span class="rma-comp__student">{{ item.occupant.name }}</span>
+        </div>
+        {% else %}
+        <div class="rma-comp__idle">{% trans "Boş" %}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Zal statistikası' %}"></section>
 
   <div class="fxc-toolbar">
     <input type="search" id="fxc-filter" class="fxc-input"
            placeholder="{% trans 'Tələbə / fənn üzrə süz…' %}" aria-label="{% trans 'Axtarış' %}">
-    <select id="fxc-exam-filter" class="fxc-input fxc-input--select" aria-label="{% trans 'İmtahan filtri' %}">
-      <option value="">{% trans "Bütün imtahanlar" %}</option>
-    </select>
-    <select id="fxc-status-filter" class="fxc-input fxc-input--select" aria-label="{% trans 'Status filtri' %}">
-      <option value="">{% trans "Bütün statuslar" %}</option>
-      <option value="waiting">{% trans "Gözləyir" %}</option>
-      <option value="ready">{% trans "Hazır" %}</option>
-      <option value="active">{% trans "İmtahanda" %}</option>
-      <option value="completed">{% trans "Bitirib" %}</option>
-      <option value="removed">{% trans "Çıxarılıb" %}</option>
-    </select>
+    <div class="bootstrap-single-select fxc-toolbar-select">
+      <select id="fxc-exam-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+              data-bootstrap-select aria-label="{% trans 'İmtahan filtri' %}">
+        <option value="">{% trans "Bütün imtahanlar" %}</option>
+      </select>
+    </div>
+    <div class="bootstrap-single-select fxc-toolbar-select">
+      <select id="fxc-status-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+              data-bootstrap-select aria-label="{% trans 'Status filtri' %}">
+        <option value="">{% trans "Bütün statuslar" %}</option>
+        <option value="waiting">{% trans "Gözləyir" %}</option>
+        <option value="ready">{% trans "Hazır" %}</option>
+        <option value="active">{% trans "İmtahanda" %}</option>
+        <option value="completed">{% trans "Bitirib" %}</option>
+        <option value="removed">{% trans "Çıxarılıb" %}</option>
+      </select>
+    </div>
   </div>
 
   <div class="fxc-monitor-cols">
@@ -103,4 +256,123 @@
     <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/room_aggregate.js' %}" defer></script>
+    <script nonce="{{ request.csp_nonce }}">
+    // Zala nəzarətçi təyini — AJAX (debounced) axtarış + çip seçimi.
+    // Bütün istifadəçilər eyni anda YÜKLƏNMİR: yalnız yazılan sorğuya uyğun 10-luq
+    // səhifə gətirilir (sistemi yükləməmək üçün). Kafedra adı sağda göstərilir.
+    (function () {
+      var panel = document.querySelector(".rma-panel");
+      if (!panel) { return; }
+      var searchUrl = panel.getAttribute("data-search-url") || "";
+      var profileTpl = panel.getAttribute("data-profile-url-template") || "";
+      function profileUrl(username){ return profileTpl ? profileTpl.replace("__U__", encodeURIComponent(username)) : ""; }
+      var search = panel.querySelector(".js-rma-search");
+      var results = panel.querySelector(".js-rma-results");
+      var chipsWrap = panel.querySelector(".js-rma-chips");
+      var countEl = panel.querySelector(".js-rma-count");
+      var totalEl = panel.querySelector(".js-rma-total");
+      if (!search || !results || !chipsWrap) { return; }
+
+      var DEBOUNCE = 300;
+      var timer = null;
+      var seq = 0;
+      var noResultText = "{% trans 'Namizəd tapılmadı.' %}";
+      var T = { viewProfile: "{% trans 'Profili aç' %}", add: "{% trans 'Nəzarətçi əlavə et' %}" };
+      var hintText = "{% trans 'Axtarmaq üçün yazın…' %}";
+
+      function selectedIds() {
+        return Array.prototype.map.call(
+          chipsWrap.querySelectorAll(".rma-chip-sel"),
+          function (c) { return c.getAttribute("data-id"); }
+        );
+      }
+      function updateCounts() {
+        var n = chipsWrap.querySelectorAll(".rma-chip-sel").length;
+        if (countEl) { countEl.textContent = n; }
+        if (totalEl) { totalEl.textContent = n; }
+      }
+      function addChip(id, name, username) {
+        if (selectedIds().indexOf(String(id)) !== -1) { return; }
+        var chip = document.createElement("span");
+        chip.className = "rma-chip-sel";
+        chip.setAttribute("data-id", id);
+        var url = profileUrl(username);
+        var nameEl = url
+          ? '<a class="rma-chip-sel__name" href="' + url + '" target="_blank" rel="noopener"></a>'
+          : '<span class="rma-chip-sel__name"></span>';
+        chip.innerHTML = nameEl +
+          '<button type="button" class="rma-chip-sel__x js-rma-remove" data-id="' + id + '">×</button>' +
+          '<input type="hidden" name="invigilators" value="' + id + '">';
+        chip.querySelector(".rma-chip-sel__name").textContent = name;
+        chipsWrap.appendChild(chip);
+        updateCounts();
+      }
+      chipsWrap.addEventListener("click", function (e) {
+        var btn = e.target.closest && e.target.closest(".js-rma-remove");
+        if (!btn) { return; }
+        var chip = btn.closest(".rma-chip-sel");
+        if (chip) { chip.parentNode.removeChild(chip); updateCounts(); }
+      });
+
+      function renderResults(items) {
+        results.innerHTML = "";
+        var chosen = selectedIds();
+        var shown = 0;
+        items.forEach(function (it) {
+          if (chosen.indexOf(String(it.id)) !== -1) { return; }
+          shown++;
+          var row = document.createElement("div");
+          row.className = "rma-result";
+          row.setAttribute("role", "option");
+          var kaf = it.kafedra
+            ? '<span class="rma-item__kaf">' + escapeHtml(it.kafedra) + "</span>"
+            : '<span class="rma-item__kaf rma-item__kaf--none">—</span>';
+          var url = profileUrl(it.username);
+          var nameHtml = url
+            ? '<a class="rma-item__name rma-item__namelink" href="' + url + '" target="_blank" rel="noopener" title="' + T.viewProfile + '"></a>'
+            : '<span class="rma-item__name"></span>';
+          row.innerHTML = nameHtml + kaf +
+            '<button type="button" class="rma-result__add js-rma-add" title="' + T.add + '"><i class="fas fa-plus"></i></button>';
+          row.querySelector(".rma-item__name").textContent = it.text + " · " + it.username;
+          // Ada klik → profil (yeni tab); "+" düyməsi → nəzarətçi əlavə et.
+          row.querySelector(".js-rma-add").addEventListener("click", function (ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            addChip(it.id, it.text, it.username); renderResults(items); search.focus();
+          });
+          results.appendChild(row);
+        });
+        if (!shown) {
+          results.innerHTML = '<div class="rma-empty rma-muted">' + noResultText + "</div>";
+        }
+      }
+      function escapeHtml(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+      function doSearch(q) {
+        if (!searchUrl) { return; }
+        var mine = ++seq;
+        results.innerHTML = '<div class="rma-loading">…</div>';
+        var url = searchUrl + (searchUrl.indexOf("?") === -1 ? "?" : "&") +
+          "q=" + encodeURIComponent(q) + "&limit=10";
+        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+          .then(function (r) { return r.ok ? r.json() : { results: [] }; })
+          .then(function (data) { if (mine === seq) { renderResults((data && data.results) || []); } })
+          .catch(function () { if (mine === seq) { results.innerHTML = ""; } });
+      }
+
+      search.addEventListener("input", function () {
+        if (timer) { clearTimeout(timer); }
+        var q = search.value.trim();
+        timer = setTimeout(function () {
+          if (q.length === 0) { results.innerHTML = '<div class="rma-hint">' + hintText + "</div>"; return; }
+          doSearch(q);
+        }, DEBOUNCE);
+      });
+      search.addEventListener("focus", function () {
+        if (!results.children.length && search.value.trim() === "") {
+          results.innerHTML = '<div class="rma-hint">' + hintText + "</div>";
+        }
+      });
+      updateCounts();
+    })();
+    </script>
 {% endblock %}

@@ -1,0 +1,336 @@
+{% load static i18n %}
+
+<style nonce="{{ request.csp_nonce }}">
+  .sar { --sar-line: #e5e7eb; --sar-muted: #6b7280; --sar-bg: #ffffff; --sar-soft: #f9fafb; --sar-primary: #2563eb; --sar-radius: 14px; --sar-text: #1f2937; }
+  @media (prefers-color-scheme: dark) { .sar { --sar-line: #2b3648; --sar-muted: #9aa6b8; --sar-bg: #111827; --sar-soft: #0f172a; --sar-text: #e5e7eb; } }
+  :root[data-theme="dark"] .sar { --sar-line: #2b3648; --sar-muted: #9aa6b8; --sar-bg: #111827; --sar-soft: #0f172a; --sar-text: #e5e7eb; }
+  :root[data-theme="light"] .sar { --sar-line: #e5e7eb; --sar-muted: #6b7280; --sar-bg: #ffffff; --sar-soft: #f9fafb; --sar-text: #1f2937; }
+  .sar { display: flex; flex-direction: column; gap: 1.25rem; color: var(--sar-text); }
+  .sar-roomtitle, .sar-table td, .sar-comp__label, .sar-comp__exam, .sar-comp__student, .sar-form input, .sar-form textarea { color: var(--sar-text); }
+  .sar-form input, .sar-form textarea { background: var(--sar-bg); }
+  .sar-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; justify-content: space-between; }
+  .sar-head h2 { margin: 0; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: .6rem; }
+  .sar-sub { margin: .25rem 0 0; color: var(--sar-muted); font-size: .95rem; }
+  .sar-orgpick { display: flex; gap: .5rem; align-items: flex-end; flex-wrap: wrap; }
+  .sar-orgpick label { display: block; font-size: .8rem; font-weight: 700; color: var(--sar-muted); margin-bottom: .3rem; }
+  .sar-orgpick .form-select { min-width: 260px; }
+  .sar-card { border: 1px solid var(--sar-line); border-radius: var(--sar-radius); background: var(--sar-bg); box-shadow: 0 1px 2px rgba(0,0,0,.04); overflow: hidden; }
+  .sar-card__body { padding: 1.1rem 1.25rem; }
+  .sar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
+  .sar-roomhead { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; flex-wrap: wrap; }
+  .sar-roomtitle { font-size: 1.15rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: .5rem; }
+  .sar-code { font-family: ui-monospace, monospace; font-size: .8rem; color: var(--sar-muted); }
+  .sar-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .18rem .6rem; border-radius: 999px; font-size: .74rem; font-weight: 700; }
+  .sar-pill--ok { background: #dcfce7; color: #166534; }
+  .sar-pill--off { background: #f3f4f6; color: #6b7280; }
+  .sar-pill--live { background: #fee2e2; color: #b91c1c; }
+  .sar-pill--info { background: #dbeafe; color: #1d4ed8; }
+  .sar-metrics { display: flex; flex-wrap: wrap; gap: .5rem 1.1rem; margin: .75rem 0; color: var(--sar-muted); font-size: .85rem; }
+  .sar-metrics b { color: inherit; }
+  .sar-tablewrap { overflow-x: auto; border: 1px solid var(--sar-line); border-radius: 10px; margin-top: .5rem; }
+  .sar-table { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 520px; }
+  .sar-table th, .sar-table td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--sar-line); white-space: nowrap; }
+  .sar-table th { background: var(--sar-soft); font-weight: 700; color: var(--sar-muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; }
+  .sar-table tr:last-child td { border-bottom: 0; }
+  .sar-mac { font-family: ui-monospace, monospace; }
+  .sar-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; align-items: end; }
+  .sar-form .sar-field { display: flex; flex-direction: column; gap: .25rem; }
+  .sar-form label { font-size: .74rem; font-weight: 700; color: var(--sar-muted); }
+  .sar-form input[type=text], .sar-form input[type=number], .sar-form textarea, .sar-form .form-control { width: 100%; padding: .45rem .55rem; border: 1px solid var(--sar-line); border-radius: 8px; background: var(--sar-bg); color: inherit; font-size: .85rem; }
+  .sar-form--full { grid-template-columns: 1fr; }
+  details.sar-details { border: 1px dashed var(--sar-line); border-radius: 10px; padding: .5rem .75rem; margin-top: .6rem; background: var(--sar-soft); }
+  details.sar-details > summary { cursor: pointer; font-weight: 700; font-size: .85rem; color: var(--sar-primary); list-style: none; display: flex; align-items: center; gap: .4rem; }
+  details.sar-details > summary::-webkit-details-marker { display: none; }
+  details.sar-details[open] > summary { margin-bottom: .6rem; }
+  .sar-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .8rem; border-radius: 8px; border: 1px solid var(--sar-line); background: var(--sar-bg); color: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .sar-btn:hover { background: var(--sar-soft); }
+  .sar-btn--primary { background: var(--sar-primary); color: #fff; border-color: var(--sar-primary); }
+  .sar-btn--primary:hover { filter: brightness(1.05); background: var(--sar-primary); }
+  .sar-btn--danger { color: #b91c1c; border-color: #fecaca; }
+  .sar-btn--sm { padding: .3rem .55rem; font-size: .76rem; }
+  .sar-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .sar-inline { display: flex; gap: .4rem; align-items: center; }
+  .sar-empty { text-align: center; padding: 2.5rem 1rem; color: var(--sar-muted); border: 1px dashed var(--sar-line); border-radius: var(--sar-radius); }
+  .sar-empty i { font-size: 2rem; display: block; margin-bottom: .5rem; opacity: .6; }
+  .sar-note { font-size: .78rem; color: var(--sar-muted); margin-top: .35rem; }
+  .sar-managerlist { display: flex; flex-direction: column; gap: .4rem; margin: .6rem 0; }
+  .sar-managerrow { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .45rem .6rem; border: 1px solid var(--sar-line); border-radius: 8px; }
+</style>
+
+<div class="sar">
+  <div class="sar-head">
+    <div>
+      <h2><i class="fas fa-desktop"></i> {% trans "İmtahan zalları" %}</h2>
+      <p class="sar-sub">{% trans "Zalları, kompüterləri və MAC/IP qeydlərini idarə edin. Bu bölmə yalnız superadmin (və ya təyin olunmuş zal idarəçisi) üçündür." %}</p>
+    </div>
+
+    {% if s.is_superadmin and s.org_options %}
+    <form method="get" action="{{ profile_base_url }}" class="sar-orgpick js-sar-orgform">
+      <input type="hidden" name="section" value="superadmin-exam-rooms">
+      <div class="bootstrap-single-select">
+        <label for="sar-org-select">{% trans "Təşkilat" context "accounts.superadmin_exam_rooms" %}</label>
+        <select id="sar-org-select" name="room_org" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-sar-orgselect" data-bootstrap-select>
+          {% for org in s.org_options %}
+          <option value="{{ org.id }}" {% if s.selected_org and s.selected_org.id == org.id %}selected{% endif %}>{{ org.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="sar-btn">{% trans "Seç" %}</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if not s.selected_org %}
+    <div class="sar-empty">
+      <i class="far fa-building"></i>
+      <p>{% trans "Aktiv təşkilat tapılmadı. Zal yaratmaq üçün əvvəlcə təşkilat seçin." %}</p>
+    </div>
+  {% else %}
+
+  {# ── Yeni zal ────────────────────────────────────────────────────────── #}
+  <div class="sar-card">
+    <div class="sar-card__body">
+      <details class="sar-details">
+        <summary><i class="fas fa-plus"></i> {% trans "Yeni zal yarat" %} — {{ s.selected_org.name }}</summary>
+        <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create_room">
+          <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+          <input type="hidden" name="next" value="{{ s.post_next_url }}">
+          <div class="sar-field"><label>{% trans "Ad" %} *</label><input type="text" name="name" required></div>
+          <div class="sar-field"><label>{% trans "Kod" %} *</label><input type="text" name="code" required placeholder="DEMO-101"></div>
+          <div class="sar-field"><label>{% trans "Bina" %}</label><input type="text" name="building"></div>
+          <div class="sar-field"><label>{% trans "Mərtəbə" %}</label><input type="text" name="floor"></div>
+          <div class="sar-field"><label>{% trans "Tutum (yer)" %}</label><input type="number" name="capacity" min="0" value="0"></div>
+          <div class="sar-field"><label>{% trans "Planlaşdırılan kompüter" %}</label><input type="number" name="computer_count" min="0" value="0"></div>
+          <div class="sar-field" style="grid-column: 1 / -1;"><label>{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><textarea name="notes" rows="2"></textarea></div>
+          <div class="sar-field"><label class="sar-inline"><input type="checkbox" name="is_active" checked> {% trans "Aktiv" %}</label></div>
+          <div class="sar-field"><button type="submit" class="sar-btn sar-btn--primary"><i class="fas fa-plus"></i> {% trans "Zalı yarat" %}</button></div>
+        </form>
+      </details>
+    </div>
+  </div>
+
+  {# ── Zallar ──────────────────────────────────────────────────────────── #}
+  {% if s.rooms %}
+  <div class="sar-grid">
+    {% for room in s.rooms %}
+    <article class="sar-card">
+      <div class="sar-card__body">
+        <div class="sar-roomhead">
+          <div>
+            <h3 class="sar-roomtitle"><i class="fas fa-door-open"></i> {{ room.name }}</h3>
+            <div class="sar-code">{{ room.code }}{% if room.building %} · {{ room.building }}{% if room.floor %} / {{ room.floor }}{% endif %}{% endif %}</div>
+          </div>
+          <div class="sar-actions">
+            {% if room.live_session_count %}<span class="sar-pill sar-pill--live"><i class="fas fa-circle"></i> {{ room.live_session_count }} {% trans "canlı" %}</span>{% endif %}
+            {% if room.is_active %}<span class="sar-pill sar-pill--ok">{% trans "Aktiv" %}</span>{% else %}<span class="sar-pill sar-pill--off">{% trans "Deaktiv" %}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="sar-metrics">
+          <span><i class="fas fa-chair"></i> <b>{{ room.capacity }}</b> {% trans "yer" %}</span>
+          <span><i class="fas fa-desktop"></i> <b>{{ room.computer_registered }}</b> {% trans "kompüter" %}</span>
+          <span><i class="fas fa-network-wired"></i> <b>{{ room.computer_with_ip }}</b> {% trans "IP ilə" %}</span>
+          <span><i class="fas fa-user-shield"></i> <b>{{ room.invigilators.all|length }}</b> {% trans "nəzarətçi" %}</span>
+        </div>
+
+        <div class="sar-actions">
+          <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_room_active">
+            <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            <button type="submit" class="sar-btn sar-btn--sm">
+              {% if room.is_active %}<i class="fas fa-toggle-off"></i> {% trans "Deaktiv et" context "accounts.superadmin_exam_rooms" %}{% else %}<i class="fas fa-toggle-on"></i> {% trans "Aktiv et" context "accounts.superadmin_exam_rooms" %}{% endif %}
+            </button>
+          </form>
+        </div>
+
+        {# Zalı redaktə #}
+        <details class="sar-details">
+          <summary><i class="fas fa-pen"></i> {% trans "Zalı redaktə et" %}</summary>
+          <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_room">
+            <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            <div class="sar-field"><label>{% trans "Ad" %} *</label><input type="text" name="name" value="{{ room.name }}" required></div>
+            <div class="sar-field"><label>{% trans "Kod" %} *</label><input type="text" name="code" value="{{ room.code }}" required></div>
+            <div class="sar-field"><label>{% trans "Bina" %}</label><input type="text" name="building" value="{{ room.building }}"></div>
+            <div class="sar-field"><label>{% trans "Mərtəbə" %}</label><input type="text" name="floor" value="{{ room.floor }}"></div>
+            <div class="sar-field"><label>{% trans "Tutum" %}</label><input type="number" name="capacity" min="0" value="{{ room.capacity }}"></div>
+            <div class="sar-field"><label>{% trans "Planlaşdırılan kompüter" %}</label><input type="number" name="computer_count" min="0" value="{{ room.computer_count }}"></div>
+            <div class="sar-field" style="grid-column: 1 / -1;"><label>{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><textarea name="notes" rows="2">{{ room.notes }}</textarea></div>
+            <div class="sar-field"><label class="sar-inline"><input type="checkbox" name="is_active" {% if room.is_active %}checked{% endif %}> {% trans "Aktiv" %}</label></div>
+            <div class="sar-field"><button type="submit" class="sar-btn sar-btn--primary"><i class="fas fa-save"></i> {% trans "Yadda saxla" %}</button></div>
+          </form>
+        </details>
+
+        {# Kompüterlər #}
+        <div class="sar-tablewrap">
+          <table class="sar-table">
+            <thead>
+              <tr>
+                <th>{% trans "Ad" %}</th><th>{% trans "Yer" %}</th><th>MAC</th><th>IP</th><th>{% trans "Status" %}</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in room.computers.all %}
+              <tr>
+                <td>{{ c.label }}</td>
+                <td>{{ c.seat_number|default:"—" }}</td>
+                <td class="sar-mac">{{ c.mac_address }}</td>
+                <td class="sar-mac">{{ c.ip_address|default:"—" }}</td>
+                <td>{% if c.is_active %}<span class="sar-pill sar-pill--ok">{% trans "Aktiv" %}</span>{% else %}<span class="sar-pill sar-pill--off">{% trans "Söndürülüb" %}</span>{% endif %}</td>
+                <td>
+                  <div class="sar-inline">
+                    <details class="sar-details" style="margin:0;border:0;background:transparent;padding:0;">
+                      <summary class="sar-btn sar-btn--sm"><i class="fas fa-pen"></i></summary>
+                      <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-form" style="margin-top:.5rem;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_computer">
+                        <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+                        <input type="hidden" name="room_id" value="{{ room.id }}">
+                        <input type="hidden" name="computer_id" value="{{ c.id }}">
+                        <input type="hidden" name="next" value="{{ s.post_next_url }}">
+                        <div class="sar-field"><label>{% trans "Ad" %}</label><input type="text" name="label" value="{{ c.label }}" required></div>
+                        <div class="sar-field"><label>{% trans "Yer" %}</label><input type="number" name="seat_number" min="1" value="{{ c.seat_number|default:'' }}"></div>
+                        <div class="sar-field"><label>MAC</label><input type="text" name="mac_address" value="{{ c.mac_address }}" required></div>
+                        <div class="sar-field"><label>IP</label><input type="text" name="ip_address" value="{{ c.ip_address|default:'' }}"></div>
+                        <div class="sar-field"><label class="sar-inline"><input type="checkbox" name="is_active" value="1" {% if c.is_active %}checked{% endif %}> {% trans "Aktiv" %}</label></div>
+                        <div class="sar-field"><button type="submit" class="sar-btn sar-btn--primary sar-btn--sm"><i class="fas fa-save"></i> {% trans "Yadda saxla" %}</button></div>
+                      </form>
+                    </details>
+                    <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" onsubmit="return true;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete_computer">
+                      <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+                      <input type="hidden" name="room_id" value="{{ room.id }}">
+                      <input type="hidden" name="computer_id" value="{{ c.id }}">
+                      <input type="hidden" name="next" value="{{ s.post_next_url }}">
+                      <button type="submit" class="sar-btn sar-btn--danger sar-btn--sm js-sar-confirm" data-confirm="{% trans 'Bu kompüter silinsin?' %}"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center;color:var(--sar-muted);padding:1rem;">{% trans "Hələ kompüter əlavə edilməyib." %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {# Kompüter əlavə et #}
+        <details class="sar-details">
+          <summary><i class="fas fa-plus"></i> {% trans "Kompüter əlavə et" %}</summary>
+          <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_computer">
+            <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            <div class="sar-field"><label>{% trans "Ad" %} *</label><input type="text" name="label" placeholder="PC-01" required></div>
+            <div class="sar-field"><label>{% trans "Yer" %}</label><input type="number" name="seat_number" min="1"></div>
+            <div class="sar-field"><label>MAC *</label><input type="text" name="mac_address" placeholder="AA:BB:CC:DD:EE:FF" required></div>
+            <div class="sar-field"><label>IP</label><input type="text" name="ip_address" placeholder="10.0.0.11"></div>
+            <div class="sar-field"><button type="submit" class="sar-btn sar-btn--primary"><i class="fas fa-plus"></i> {% trans "Əlavə et" %}</button></div>
+          </form>
+          <p class="sar-note"><i class="fas fa-info-circle"></i> {% trans "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)." %}</p>
+        </details>
+
+        {# Toplu əlavə #}
+        <details class="sar-details">
+          <summary><i class="fas fa-list"></i> {% trans "Toplu əlavə (MAC siyahısı)" %}</summary>
+          <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-form sar-form--full">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="bulk_add_computers">
+            <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            <div class="sar-field">
+              <label>{% trans "Hər sətir: Ad, MAC[, IP][, Yer]" %}</label>
+              <textarea name="bulk_text" rows="4" placeholder="PC-01, AA:BB:CC:DD:EE:01, 10.0.0.11, 1&#10;PC-02, AA:BB:CC:DD:EE:02, 10.0.0.12, 2"></textarea>
+            </div>
+            <div class="sar-field"><button type="submit" class="sar-btn sar-btn--primary"><i class="fas fa-upload"></i> {% trans "Toplu əlavə et" %}</button></div>
+          </form>
+        </details>
+
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="sar-empty">
+      <i class="far fa-folder-open"></i>
+      <p>{% trans "Bu təşkilatda hələ zal yoxdur. Yuxarıdakı «Yeni zal yarat» ilə başlayın." %}</p>
+    </div>
+  {% endif %}
+
+  {# ── Zal idarəçiləri (grant) — yalnız superadmin ──────────────────────── #}
+  {% if s.is_superadmin %}
+  <div class="sar-card">
+    <div class="sar-card__body">
+      <h3 class="sar-roomtitle"><i class="fas fa-user-gear"></i> {% trans "Zal idarəçiləri" %}</h3>
+      <p class="sar-note">{% trans "Bu istifadəçilər superadmin olmadan da öz təşkilatlarının zallarını idarə edə bilər." %}</p>
+
+      <div class="sar-managerlist">
+        {% for m in s.room_managers %}
+        <div class="sar-managerrow">
+          <span><i class="fas fa-user"></i> <b>{{ m.username }}</b>{% if m.first_name or m.last_name %} — {{ m.first_name }} {{ m.last_name }}{% endif %}{% if m.email %} <span class="sar-code">{{ m.email }}</span>{% endif %}</span>
+          <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="revoke_room_manager">
+            <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+            <input type="hidden" name="user_id" value="{{ m.id }}">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            <button type="submit" class="sar-btn sar-btn--danger sar-btn--sm js-sar-confirm" data-confirm="{% trans 'İcazə geri alınsın?' %}"><i class="fas fa-user-minus"></i> {% trans "Geri al" %}</button>
+          </form>
+        </div>
+        {% empty %}
+        <p class="sar-note">{% trans "Hələ təyin olunmuş idarəçi yoxdur." %}</p>
+        {% endfor %}
+      </div>
+
+      <details class="sar-details">
+        <summary><i class="fas fa-user-plus"></i> {% trans "İdarəçi təyin et" %}</summary>
+        <form method="post" action="{% url 'accounts:superadmin_exam_rooms' %}" class="sar-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="grant_room_manager">
+          <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+          <input type="hidden" name="next" value="{{ s.post_next_url }}">
+          <div class="sar-field" style="grid-column: 1 / -1;"><label>{% trans "İstifadəçi adı və ya email" %}</label><input type="text" name="username" placeholder="username" required></div>
+          <div class="sar-field"><button type="submit" class="sar-btn sar-btn--primary"><i class="fas fa-check"></i> {% trans "Təyin et" %}</button></div>
+        </form>
+      </details>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+  var root = document.currentScript.previousElementSibling;
+  if (!root || !root.classList.contains("sar")) { root = document.querySelector(".sar"); }
+  if (!root) { return; }
+  // Silmə/geri-alma təsdiqi (CSP: inline onclick yox).
+  root.addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest(".js-sar-confirm") : null;
+    if (btn && btn.dataset.confirm && !window.confirm(btn.dataset.confirm)) {
+      e.preventDefault();
+    }
+  });
+  // Org seçici dəyişəndə avtomatik submit.
+  var orgSelect = root.querySelector(".js-sar-orgselect");
+  if (orgSelect) {
+    orgSelect.addEventListener("change", function () {
+      var form = orgSelect.closest("form");
+      if (form) { form.submit(); }
+    });
+  }
+})();
+</script>

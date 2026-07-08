@@ -37,16 +37,6 @@ from ._shared import (
 User = get_user_model()
 
 
-def _staff_queryset(organization):
-    """Nəzarətçi/heyət seçimi: org-un tələbə olmayan aktiv üzvləri."""
-    return (
-        User.objects.filter(memberships__organization=organization, memberships__is_active=True)
-        .exclude(profile__role="student")
-        .distinct()
-        .order_by("first_name", "last_name", "username")
-    )
-
-
 @login_required
 def exam_center_session_list(request):
     organization = supervisor_org_or_403(request)
@@ -79,7 +69,6 @@ def exam_center_session_create(request):
     form = ExamRoomSessionForm(
         request.POST or None,
         organization=organization,
-        staff_queryset=_staff_queryset(organization),
     )
     if request.method == "POST" and form.is_valid():
         session = form.save(commit=False)

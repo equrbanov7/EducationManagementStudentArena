@@ -1,0 +1,119 @@
+"""Final/midterm imtahanlarında hər tələbənin fərdi PIN-i.
+
+İmtahan yaradılanda/redaktə olunanda təyin olunmuş hər tələbəyə unikal PIN
+verilir. PIN tələbə kabinetində DƏRHAL görünür (imtahan mərkəzindəki
+bilet-PIN sistemindən fərqli olaraq zaman-pəncərəsi yoxdur) və imtahana giriş
+zamanı doğrulanır. Kriptoqrafik primitivlər (salted hash + Fernet) mövcud
+``final_center/pins.py``-dən təkrar istifadə olunur.
+"""
+
+from django.contrib.auth.hashers import check_password, make_password
+
+from cryptography.fernet import InvalidToken
+
+from apps.exams.models import ExamStudentPin
+from apps.exams.services.final_center.pins import _DUMMY_HASH, _fernet, generate_pin_value
+
+# Fərdi PIN tələb edən imtahan kateqoriyaları.
+SECURE_PIN_CATEGORIES = {"final", "midterm"}
+
+
+def exam_requires_student_pins(exam) -> bool:
+    return getattr(exam, "exam_type_extended", None) in SECURE_PIN_CATEGORIES
+
+
+def _assigned_student_ids(exam) -> set[int]:
+    # İmtahana təyin olunmuş bütün tələbələr (fərdi + qrup + kurs üzvləri).
+    from apps.notifications.public import get_exam_assigned_user_ids
+
+    return set(get_exam_assigned_user_ids(exam))
+
+
+def provision_exam_student_pins(exam) -> None:
+    """Təyin olunmuş hər tələbəyə PIN təmin et (idempotent).
+
+    * final/midterm deyilsə → mövcud PIN-ləri təmizlə (kateqoriya dəyişibsə);
+    * hər yeni tələbə üçün PIN yarat;
+    * artıq təyin olunmayan tələbələrin PIN-lərini sil.
+    """
+    if not exam_requires_student_pins(exam):
+        ExamStudentPin.objects.filter(exam=exam).delete()
+        return
+
+    assigned_ids = _assigned_student_ids(exam)
+    existing_ids = set(ExamStudentPin.objects.filter(exam=exam).values_list("student_id", flat=True))
+
+    to_create = assigned_ids - existing_ids
+    if to_create:
+        fernet = _fernet()
+        new_pins = []
+        for student_id in to_create:
+            raw_pin = generate_pin_value()
+            new_pins.append(
+                ExamStudentPin(
+                    exam=exam,
+                    student_id=student_id,
+                    pin_hash=make_password(raw_pin),
+                    pin_cipher=fernet.encrypt(raw_pin.encode()).decode(),
+                )
+            )
+        ExamStudentPin.objects.bulk_create(new_pins, ignore_conflicts=True)
+
+    stale_ids = existing_ids - assigned_ids
+    if stale_ids:
+        ExamStudentPin.objects.filter(exam=exam, student_id__in=stale_ids).delete()
+
+
+def student_visible_pin(exam, user) -> str | None:
+    """Tələbənin öz PIN-i (kabinetdə göstərmək üçün). İcazə view qatında yoxlanır."""
+    if user is None or not getattr(user, "id", None):
+        return None
+    pin = ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_cipher").first()
+    if pin is None or not pin.pin_cipher:
+        return None
+    try:
+        return _fernet().decrypt(pin.pin_cipher.encode()).decode()
+    except (InvalidToken, ValueError):
+        return None
+
+
+def verify_student_pin(exam, user, raw_pin: str) -> bool:
+    """İmtahana giriş üçün PIN doğrulaması (sabit-vaxt müqayisə)."""
+    pin = None
+    if user is not None and getattr(user, "id", None):
+        pin = ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_hash").first()
+    stored = pin.pin_hash if pin else _DUMMY_HASH
+    matched = check_password(raw_pin or "", stored)
+    return bool(pin) and matched
+
+
+def resolve_student_pin_login(username: str, raw_pin: str):
+    """`/exams/final/` girişi: istifadəçi adı + fərdi PIN → (exam, user).
+
+    Bilet (otaq-oturum) sistemi TƏLƏB OLUNMUR — imtahan yaradılanda təyin
+    olunmuş ``ExamStudentPin`` ilə uyğun aktiv final imtahanını və tələbəni
+    qaytarır. Uyğunluq yoxdursa ``(None, None)``. İcazə/vaxt yoxlaması çağıran
+    tərəfdə (``can_user_start``) aparılır.
+    """
+    from django.contrib.auth import get_user_model
+    from django.db.models import Q
+
+    user_model = get_user_model()
+    username = (username or "").strip()
+    raw_pin = (raw_pin or "").strip()
+    if not username or not raw_pin:
+        return None, None
+
+    user = user_model.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
+    if user is None or not getattr(user, "is_active", False):
+        return None, None
+
+    pins = ExamStudentPin.objects.filter(
+        student=user,
+        exam__is_active=True,
+        exam__exam_type_extended="final",
+    ).select_related("exam", "exam__organization")
+    for pin in pins:
+        if check_password(raw_pin, pin.pin_hash or ""):
+            return pin.exam, user
+    return None, None

@@ -360,6 +360,17 @@ class UserProfile(models.Model):
         help_text="İlk girişdə OTP ilə təsdiqləndikdən sonra True; parol bərpası üçün istifadə olunur.",
     )
 
+    # Superadmin tərəfindən verilən "imtahan zalı idarəçisi" icazəsi: bu bayraq
+    # açıq olan istifadəçi (superadmin olmasa da) imtahan zalı və zaldakı
+    # kompüter/MAC qeydlərini yarada/redaktə edə bilir. Bax:
+    # apps.exams.services.access_policy.can_manage_exam_rooms.
+    can_manage_exam_rooms = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name="Zal idarəçisi",
+        help_text="Superadmin verir: imtahan zalı və kompüter/MAC qeydlərini idarə etmək icazəsi.",
+    )
+
     # Soft-delete fields for account deletion
     is_deleted = models.BooleanField(
         default=False,

@@ -542,8 +542,15 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertEqual(response.status_code, 200)
 
     def test_room_management_denied_for_invigilator(self):
+        # Zal/kompüter idarəsi artıq yalnız superadmin bölməsindədir; nəzarətçi
+        # (müəllim) və hətta imtahan mərkəzi (bayraqsız) ora daxil ola bilməz.
         client = self._client_for(self.invigilator)
-        response = client.get(reverse("exams:exam_center_room_create"))
+        response = client.get(reverse("accounts:superadmin_exam_rooms"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_room_management_denied_for_exam_center_without_flag(self):
+        client = self._client_for(self.center)
+        response = client.get(reverse("accounts:superadmin_exam_rooms"))
         self.assertEqual(response.status_code, 403)
 
     def test_session_list_hides_manage_buttons_for_invigilator(self):
@@ -556,7 +563,6 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertFalse(response.context["can_manage"])
         self.assertNotContains(response, reverse("exams:exam_center_session_create"))
         self.assertNotContains(response, reverse("exams:exam_center_reports"))
-        self.assertNotContains(response, reverse("exams:exam_center_room_create"))
 
     def test_session_list_shows_manage_buttons_for_center(self):
         client = self._client_for(self.center)
@@ -839,12 +845,15 @@ class CenterPageRenderTests(_FlowBase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Zal A")
 
-    def test_room_create_form_renders_and_saves(self):
-        client = self._client_for(self.center)
-        self.assertEqual(client.get(reverse("exams:exam_center_room_create")).status_code, 200)
+    def test_room_create_via_superadmin(self):
+        # Zal yaratma artıq superadmin bölməsindədir (accounts:superadmin_exam_rooms).
+        superadmin = User.objects.create_superuser("fcf_super", "fcf_super@test.az", PASSWORD)
+        client = self._client_for(superadmin)
         response = client.post(
-            reverse("exams:exam_center_room_create"),
+            reverse("accounts:superadmin_exam_rooms"),
             {
+                "action": "create_room",
+                "organization_id": self.org.id,
                 "name": "Yeni zal",
                 "code": "yz1",
                 "building": "",
@@ -853,10 +862,31 @@ class CenterPageRenderTests(_FlowBase):
                 "computer_count": 10,
                 "notes": "",
                 "is_active": "on",
+                "next": reverse("accounts:profile") + "?section=superadmin-exam-rooms",
             },
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(ExamRoom.objects.filter(organization=self.org, code="YZ1").exists())
+
+    def test_room_monitor_renders_with_computers_and_invigilator_panel(self):
+        from apps.exams.services.final_center import add_computer
+
+        add_computer(room=self.room, label="PC-01", mac="AA:BB:CC:DD:EE:01", ip_address="10.0.0.11", seat_number=1)
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "PC-01")
+        self.assertContains(response, "AA:BB:CC:DD:EE:01")
+        # İmtahan mərkəzi üçün nəzarətçi təyin paneli görünür.
+        self.assertContains(response, reverse("exams:exam_center_room_assign_invigilators", args=[self.room.pk]))
+
+    def test_assign_room_invigilators(self):
+        client = self._client_for(self.center)
+        response = client.post(
+            reverse("exams:exam_center_room_assign_invigilators", args=[self.room.pk]),
+            {"invigilators": [self.teacher.pk]},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(self.room.invigilators.filter(pk=self.teacher.pk).exists())
 
     def test_session_list_renders(self):
         response = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))

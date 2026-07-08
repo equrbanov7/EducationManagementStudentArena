@@ -1,0 +1,7 @@
+{% if 'superadmin-exam-rooms' in allowed_sections %}
+<section class="profile-section-panel profile-section--superadmin-exam-rooms {% if active_section == 'superadmin-exam-rooms' %}is-active{% endif %}"
+         data-profile-section-panel="superadmin-exam-rooms"
+         data-source-url="{{ profile_base_url }}?section=superadmin-exam-rooms">
+    {% include "accounts/partials/_superadmin_exam_rooms_content.html" with s=exam_rooms_section %}
+</section>
+{% endif %}
