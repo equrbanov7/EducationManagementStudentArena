@@ -6,7 +6,8 @@ imtahan BAŞLADILMIR — yalnız məlumat + PIN göstərilir; giriş `/exams/fin
 ünvanından PIN ilə edilir.
 """
 
-from apps.exams.domain.final_center import ROOM_SESSION_STATE_CANCELLED
+from django.utils import timezone
+
 from apps.exams.models import FinalExamTicket
 
 from .pins import student_visible_pin
@@ -16,33 +17,37 @@ def student_final_exam_context(user, exam) -> dict:
     """
     Tələbənin bu final imtahanı üzrə bileti varsa kabinet konteksti qaytarır.
 
-    ``has_ticket=False`` — bilet təyin olunmayıb (mərkəz hələ təyinat etməyib).
-    ``pin`` yalnız görünmə pəncərəsi daxilində və uyğun statuslarda dolur
-    (bax: ``student_visible_pin``), əks halda None.
+    Oturum sisteminin ləğvindən sonra (2026-07): vaxt pəncərəsi İMTAHANIN öz
+    cədvəlindən (``exam.start_datetime``/``end_datetime``) gəlir — bilet zala
+    yalnız giriş anında qoşulur, ona görə kabinetdə zal göstərilmir (istənilən
+    zaldakı kompüterdən girmək olar). ``has_ticket=False`` — təyinat yoxdur.
+    ``pin`` yalnız görünmə pəncərəsi daxilində və uyğun statuslarda dolur.
     """
     if not getattr(user, "is_authenticated", False):
         return {"has_ticket": False}
 
     ticket = (
         FinalExamTicket.objects.filter(student=user, exam=exam)
-        .exclude(session__state=ROOM_SESSION_STATE_CANCELLED)
         .select_related("session", "session__room")
-        .order_by("session__scheduled_start")
+        .order_by("-created_at")
         .first()
     )
     if ticket is None:
         return {"has_ticket": False}
 
-    session = ticket.session
+    now = timezone.now()
+    start = exam.start_datetime
+    end = exam.end_datetime
+    within_window = bool(start and start <= now) and bool(not end or now <= end)
     return {
         "has_ticket": True,
         "pin": student_visible_pin(ticket),
         "status": ticket.status,
-        "window_start": session.scheduled_start,
-        "window_end": session.scheduled_end,
-        "room_name": session.room.name,
-        "session_state": session.state,
-        "entry_open": session.state in ("entry_open", "active"),
+        "window_start": start,
+        "window_end": end,
+        "room_name": None,  # zaldan asılı deyil — istənilən zaldakı kompüterdən
+        "session_state": ticket.session.state if ticket.session_id else None,
+        "entry_open": within_window,
     }
 
 

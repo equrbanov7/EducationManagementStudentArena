@@ -49,6 +49,7 @@ class _FinalCenterBase(TestCase):
         cls.student = User.objects.create_user("fcp_student", "fcp_student@test.az", PASSWORD)
         _assign_user_to_org(cls.student, cls.org, ProfileRole.STUDENT, "student")
 
+        _now = timezone.now()
         cls.exam = Exam.objects.create(
             title="FCP Final",
             author=cls.center,
@@ -57,6 +58,10 @@ class _FinalCenterBase(TestCase):
             exam_type_extended="final",
             is_active=True,
             total_duration_minutes=60,
+            # PIN müddəti/görünmə pəncərəsi imtahanın cədvəlindən gəlir (oturum
+            # sisteminin ləğvi): başlanğıc 10 dəq sonra, son 2 saat sonra.
+            start_datetime=_now + timedelta(minutes=10),
+            end_datetime=_now + timedelta(hours=2),
         )
         cls.room = ExamRoom.objects.create(
             organization=cls.org, name="Zal 1", code="Z1", capacity=30, created_by=cls.center
@@ -64,7 +69,6 @@ class _FinalCenterBase(TestCase):
         now = timezone.now()
         cls.session = ExamRoomSession.objects.create(
             organization=cls.org,
-            exam=cls.exam,
             room=cls.room,
             invigilator=cls.center,
             scheduled_start=now + timedelta(minutes=10),

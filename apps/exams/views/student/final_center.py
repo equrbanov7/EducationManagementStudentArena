@@ -31,12 +31,17 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_WAITING,
 )
 from apps.exams.models import FinalExamTicket
-from apps.exams.services.exam_center_gate import final_exam_access_allowed, room_ip_access_allowed
+from apps.exams.services.exam_center_gate import (
+    final_exam_access_allowed,
+    resolve_room_computer,
+    room_ip_access_allowed,
+)
 from apps.exams.services.final_center import (
     ERROR_LOCKED,
     ERROR_RATE_LIMITED,
     HEARTBEAT_INTERVAL_SECONDS,
     TicketStateError,
+    attach_ticket_to_room_sitting,
     begin_attempt_for_ticket,
     clear_entry_session,
     enter_waiting,
@@ -114,7 +119,7 @@ def _render_login(request, *, error="", username="", modal_ticket=None, modal_er
                 "ticket": modal_ticket,
                 "session": session,
                 "exam": modal_ticket.exam,
-                "room": session.room,
+                "room": session.room if session else None,
                 "language_options": available_language_options(modal_ticket.exam),
             }
         )
@@ -130,6 +135,13 @@ def _route_validated_ticket(request, ticket):
     * təyin olunub → imtahan-öncəsi modal.
     """
     session = ticket.session
+    if session is None:
+        # Oturum bağlanmayıb/qopub — yenidən daxil olsun (kompüter IP → zal).
+        clear_entry_session(request)
+        return _render_login(
+            request,
+            error=pgettext("exams.final_center.entry", "Zal oturumuna qoşulmayıb — yenidən daxil olun."),
+        )
     if not _room_access_ok(request, session.room):
         clear_entry_session(request)
         return _render_login(request, error=_room_access_error())
@@ -206,10 +218,24 @@ def _handle_login(request):
             return pin_response
         return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
 
-    # Zal-səviyyəli kompüter (IP) qapısı: bilet tapıldı, amma sorğu zalın qeydli
-    # kompüterindən gəlmirsə girişə icazə vermə (istifadəçini login DA ETMƏ).
-    if not _room_access_ok(request, ticket.session.room):
+    # Kompüter IP → ZAL (oturum sisteminin ləğvi, 2026-07): bilet imtahana bağlıdır,
+    # tələbə hansı zalda olduğunu qeydli kompüterin IP-si müəyyən edir. Qeydiyyatsız
+    # kompüterdən giriş yoxdur (istifadəçini login DA ETMƏ).
+    room, computer = resolve_room_computer(request, ticket.organization)
+    if room is None:
         return _render_login(request, error=_room_access_error(), username=(username or "").strip())
+
+    # Otağın AÇIQ oturumuna qoşul; nəzarətçi oturumu açmayıbsa gözlə.
+    sitting = attach_ticket_to_room_sitting(ticket, room, computer)
+    if sitting is None:
+        return _render_login(
+            request,
+            error=pgettext(
+                "exams.final_center.entry",
+                "Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını gözləyin.",
+            ),
+            username=(username or "").strip(),
+        )
 
     # Fərqli istifadəçi login-i varsa təmizlə, sonra bilet sahibini login et.
     if request.user.is_authenticated and request.user.pk != ticket.student_id:
@@ -272,7 +298,7 @@ def _handle_confirm(request):
         return redirect("exams:final_exam_entry")
 
     session = ticket.session
-    if session.state not in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE):
+    if session is None or session.state not in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE):
         clear_entry_session(request)
         return _render_login(
             request,
@@ -317,10 +343,12 @@ def final_exam_waiting(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return deny
-    if not _room_access_ok(request, ticket.session.room):
+    session = ticket.session
+    if session is None:
+        return redirect("exams:final_exam_entry")
+    if not _room_access_ok(request, session.room):
         raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
 
-    session = ticket.session
     if ticket.status == TICKET_STATUS_ACTIVE and ticket.attempt_id:
         return redirect("exams:take_exam", slug=ticket.exam.slug, attempt_id=ticket.attempt_id)
     if ticket.status not in (TICKET_STATUS_WAITING, TICKET_STATUS_READY):
@@ -371,7 +399,7 @@ def final_exam_begin(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return JsonResponse({"success": False, "redirect_url": reverse("exams:final_exam_entry")}, status=403)
-    if not _room_access_ok(request, ticket.session.room):
+    if ticket.session is None or not _room_access_ok(request, ticket.session.room):
         return JsonResponse(
             {"success": False, "error": str(_room_access_error()), "redirect_url": reverse("exams:final_exam_entry")},
             status=403,
@@ -401,6 +429,8 @@ def final_ticket_state(request, ticket_id):
         return JsonResponse({"error": "entry_required"}, status=403)
 
     session = ticket.session
+    if session is None:
+        return JsonResponse({"error": "entry_required", "ticket_status": ticket.status}, status=409)
     maybe_auto_end(session)
     session.refresh_from_db(fields=["state", "started_at", "ended_at"])
     if ticket.status == TICKET_STATUS_ACTIVE:

@@ -72,7 +72,6 @@ def _export_csv(request, organization, tab, queryset):
     if tab == "sessions":
         writer.writerow(
             [
-                "exam",
                 "room",
                 "state",
                 "scheduled_start",
@@ -89,7 +88,6 @@ def _export_csv(request, organization, tab, queryset):
         for s in queryset.iterator(chunk_size=500):
             writer.writerow(
                 [
-                    s.exam.title,
                     f"{s.room.name} ({s.room.code})",
                     s.state,
                     s.scheduled_start.isoformat(),

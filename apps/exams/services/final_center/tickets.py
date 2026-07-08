@@ -76,14 +76,15 @@ def transition_ticket(ticket, new_status, *, extra_updates=None) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def assign_students(session, students, by, *, request=None):
+def assign_students(exam, students, by, *, request=None):
     """
-    Tələbələri oturuma təyin edir (bilet yaradır) və PIN-ləri dərhal verir.
+    Tələbələri İMTAHANA təyin edir (bilet yaradır) və PIN-ləri dərhal verir.
 
-    Qorumalar:
-    * zal tutumu aşıla bilməz;
-    * eyni tələbə eyni imtahana ikinci oturumda ola bilməz (DB constraint);
-    * tələbə üst-üstə düşən vaxtda BAŞQA oturuma təyin oluna bilməz.
+    Oturum sisteminin ləğvindən sonra (2026-07): təyinat zaldan asılı deyil —
+    tələbə imtahana təyin olunur, hansı zalda verəcəyi giriş anında (kompüter IP
+    → zal) müəyyən olunur. Bilet ``session=NULL`` yaradılır.
+
+    Qoruma: eyni tələbəyə eyni imtahana yalnız bir bilet (``uniq_ticket_per_exam_student``).
 
     Qaytarır: (yaradılan biletlər, ötürülən istifadəçilər siyahısı).
     """
@@ -91,36 +92,18 @@ def assign_students(session, students, by, *, request=None):
     if not students:
         return [], []
 
-    capacity = session.room.capacity or 0
-    existing_count = session.tickets.exclude(status=TICKET_STATUS_REMOVED).count()
-    if capacity and existing_count + len(students) > capacity:
-        raise TicketStateError(
-            pgettext("exams.final_center.error", "Zal tutumu aşılır — bu qədər tələbə təyin etmək mümkün deyil.")
-        )
-
-    conflict_ids = set(
-        FinalExamTicket.objects.filter(
-            student__in=students,
-            session__scheduled_start__lt=session.scheduled_end,
-            session__scheduled_end__gt=session.scheduled_start,
-        )
-        .exclude(session=session)
-        .exclude(status=TICKET_STATUS_REMOVED)
-        .values_list("student_id", flat=True)
-    )
     already_ids = set(
-        FinalExamTicket.objects.filter(exam=session.exam, student__in=students).values_list("student_id", flat=True)
+        FinalExamTicket.objects.filter(exam=exam, student__in=students).values_list("student_id", flat=True)
     )
 
     created, skipped = [], []
     for student in students:
-        if student.id in conflict_ids or student.id in already_ids:
+        if student.id in already_ids:
             skipped.append(student)
             continue
         ticket = FinalExamTicket(
-            organization=session.organization,
-            session=session,
-            exam=session.exam,
+            organization=exam.organization,
+            exam=exam,
             student=student,
         )
         set_ticket_pin(ticket, by, save=False)
@@ -128,22 +111,22 @@ def assign_students(session, students, by, *, request=None):
         created.append(ticket)
 
     if created:
-        _notify_assignment(session, created)
+        _notify_assignment(exam, created)
         log_action(
             AuditAction.CREATE,
             user=by,
-            organization=session.organization,
-            obj=session,
+            organization=exam.organization,
+            obj=exam,
             reason="final_tickets_assigned",
             request=request,
             changes={"created": len(created), "skipped": len(skipped)},
-            resource_type="exam_room_session",
-            resource_id=str(session.pk),
+            resource_type="exam",
+            resource_id=str(exam.pk),
         )
     return created, skipped
 
 
-def _notify_assignment(session, tickets):
+def _notify_assignment(exam, tickets):
     """Bildiriş PIN-siz gedir — PIN yalnız icazəli paneldə görünür."""
     try:
         from django.urls import reverse
@@ -155,16 +138,13 @@ def _notify_assignment(session, tickets):
             title=pgettext("exams.final_center.notification", "Final imtahanına təyin olundunuz"),
             message=pgettext(
                 "exams.final_center.notification",
-                "{exam} imtahanı {start} tarixində {room} zalında keçiriləcək. "
-                "İmtahan PIN-inizi imtahan mərkəzindən əldə edin və /exams/final/ ünvanından daxil olun.",
-            ).format(
-                exam=session.exam.title,
-                room=session.room.name,
-                start=timezone.localtime(session.scheduled_start).strftime("%d.%m.%Y %H:%M"),
-            ),
+                "{exam} final imtahanına təyin olundunuz. İmtahan PIN-inizi imtahan "
+                "mərkəzindən əldə edin və imtahan zalındakı kompüterdən /exams/final/ "
+                "ünvanından daxil olun.",
+            ).format(exam=exam.title),
             link=reverse("exams:final_exam_entry"),
             notification_type="exam",
-            organization=session.organization,
+            organization=exam.organization,
         )
     except Exception:  # noqa: BLE001 — bildiriş xətası təyinatı bloklamır
         logger.warning("final_center: təyinat bildirişi göndərilmədi", exc_info=True)
@@ -221,8 +201,16 @@ def resolve_ticket_language(ticket, requested_language):
 
 
 def enter_waiting(ticket, *, language, request=None) -> bool:
-    """Qaydalar təsdiqi + dil seçimi → gözləmə otağı."""
+    """Qaydalar təsdiqi + dil seçimi → gözləmə otağı.
+
+    Bilet giriş anında zal oturumuna qoşulmuş olmalıdır (``ticket.session``);
+    qoşulmayıbsa (birbaşa keçid cəhdi) rədd olunur.
+    """
     session = ticket.session
+    if session is None:
+        raise TicketStateError(
+            pgettext("exams.final_center.error", "Bu kompüter aktiv zal oturumuna qoşulmayıb — yenidən daxil olun.")
+        )
     if session.state not in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE):
         raise TicketStateError(pgettext("exams.final_center.error", "Oturum hazırda giriş üçün açıq deyil."))
 
@@ -284,6 +272,10 @@ def begin_attempt_for_ticket(ticket):
     from apps.exams.services.attempts import _create_attempt_or_get_active, generate_random_questions_for_attempt
 
     session = ticket.session
+    if session is None:
+        raise TicketStateError(
+            pgettext("exams.final_center.error", "Bu kompüter aktiv zal oturumuna qoşulmayıb — yenidən daxil olun.")
+        )
     if session.state != ROOM_SESSION_STATE_ACTIVE:
         raise TicketStateError(
             pgettext("exams.final_center.error", "İmtahan hələ başladılmayıb — nəzarətçinin startını gözləyin.")

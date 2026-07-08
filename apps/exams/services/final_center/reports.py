@@ -14,20 +14,17 @@ from .monitor import session_list_annotations
 
 def filter_sessions(organization, params):
     """
-    Oturum tarixçəsi. Dəstəklənən filtrlər: state, exam (id), room (id),
-    invigilator (id), tarix aralığı (date_from/date_to, ISO), axtarış (q).
+    Zal oturumu tarixçəsi (imtahandan asılı deyil). Filtrlər: state, room (id),
+    invigilator (id), tarix aralığı (date_from/date_to, ISO), axtarış (q — zal).
     """
     qs = (
         ExamRoomSession.objects.filter(organization=organization)
-        .select_related("exam", "room", "invigilator", "started_by", "ended_by")
+        .select_related("room", "invigilator", "started_by", "ended_by")
         .order_by("-scheduled_start", "-id")
     )
     state = (params.get("state") or "").strip()
     if state:
         qs = qs.filter(state=state)
-    exam_id = (params.get("exam") or "").strip()
-    if exam_id.isdigit():
-        qs = qs.filter(exam_id=int(exam_id))
     room_id = (params.get("room") or "").strip()
     if room_id.isdigit():
         qs = qs.filter(room_id=int(room_id))
@@ -42,9 +39,7 @@ def filter_sessions(organization, params):
         qs = qs.filter(scheduled_start__date__lte=date_to)
     query = (params.get("q") or "").strip()
     if query:
-        qs = qs.filter(
-            Q(exam__title__icontains=query) | Q(room__name__icontains=query) | Q(room__code__icontains=query)
-        )
+        qs = qs.filter(Q(room__name__icontains=query) | Q(room__code__icontains=query))
     return session_list_annotations(qs)
 
 

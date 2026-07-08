@@ -32,13 +32,11 @@ def exam_center_room_list(request):
     can_manage = can_manage_final_center(request.user)
     can_manage_rooms = can_manage_exam_rooms(request.user)
 
-    # Kartda "bu zalda hansı imtahanlar canlıdır" çiplərini göstərmək üçün canlı
-    # oturumları fənn adı ilə prefetch edirik (N+1 yox — tək əlavə sorğu).
+    # Kartda "bu zalda canlı oturum" çiplərini göstərmək üçün canlı oturumları
+    # prefetch edirik (N+1 yox). Oturum imtahandan asılı deyil (zal oturumu).
     live_prefetch = Prefetch(
         "sessions",
-        queryset=ExamRoomSession.objects.filter(state__in=_LIVE_STATES)
-        .select_related("exam")
-        .order_by("scheduled_start", "id"),
+        queryset=ExamRoomSession.objects.filter(state__in=_LIVE_STATES).order_by("scheduled_start", "id"),
         to_attr="live_sessions",
     )
     rooms = (

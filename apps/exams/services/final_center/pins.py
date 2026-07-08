@@ -20,9 +20,6 @@ from django.utils import timezone
 from cryptography.fernet import Fernet, InvalidToken
 
 from apps.exams.domain.final_center import (
-    ROOM_SESSION_STATE_ACTIVE,
-    ROOM_SESSION_STATE_ENTRY_OPEN,
-    ROOM_SESSION_STATE_PREPARED,
     TICKET_STATUS_ASSIGNED,
     TICKET_STATUS_READY,
     TICKET_STATUS_WAITING,
@@ -49,9 +46,15 @@ def generate_pin_value() -> str:
     return "".join(secrets.choice(_PIN_ALPHABET) for _ in range(_pin_length()))
 
 
-def _pin_expiry_for(session):
+def _pin_expiry_for(exam):
+    """PIN son istifadə vaxtı İMTAHANIN cədvəlindən (oturum sisteminin ləğvi):
+    ``exam.end_datetime`` + grace. Cədvəlsiz imtahanda müddət yoxdur (yalnız
+    revoke/başlama ilə ləğv olunur)."""
+    end = getattr(exam, "end_datetime", None)
+    if not end:
+        return None
     grace = int(getattr(settings, "FINAL_EXAM_PIN_EXPIRY_GRACE_MINUTES", 120))
-    return session.scheduled_end + timedelta(minutes=grace)
+    return end + timedelta(minutes=grace)
 
 
 def set_ticket_pin(ticket, by_user, *, save=True) -> str:
@@ -63,7 +66,7 @@ def set_ticket_pin(ticket, by_user, *, save=True) -> str:
     ticket.pin_hash = make_password(raw_pin)
     ticket.pin_cipher = _fernet().encrypt(raw_pin.encode()).decode()
     ticket.pin_issued_at = timezone.now()
-    ticket.pin_expires_at = _pin_expiry_for(ticket.session)
+    ticket.pin_expires_at = _pin_expiry_for(ticket.exam)
     ticket.pin_revoked_at = None
     ticket.pin_failed_attempts = 0
     ticket.pin_locked_until = None
@@ -113,27 +116,21 @@ def decrypt_ticket_pin(ticket) -> str | None:
 
 def student_visible_pin(ticket) -> str | None:
     """
-    Tələbə panelində PIN-in görünmə qaydası:
+    Tələbə panelində PIN-in görünmə qaydası (oturum sisteminin ləğvindən sonra
+    İMTAHANIN cədvəlinə əsaslanır — bilet zala yalnız giriş anında qoşulur):
 
     * yalnız biletin öz sahibi üçün (view qatı yoxlayır);
-    * oturum hazırlıq/giriş/aktiv fazasındadırsa;
     * bilet hələ yekun statusda deyilsə;
-    * konfiqurasiya olunmuş pəncərə daxilində (başlanğıcdan N dəqiqə əvvəl).
+    * görünmə pəncərəsi daxilində — imtahanın başlanğıcından N dəqiqə əvvəl.
     """
     if not ticket.has_valid_pin:
         return None
     if ticket.status not in (TICKET_STATUS_ASSIGNED, TICKET_STATUS_WAITING, TICKET_STATUS_READY):
         return None
-    session = ticket.session
-    if session.state not in (
-        ROOM_SESSION_STATE_PREPARED,
-        ROOM_SESSION_STATE_ENTRY_OPEN,
-        ROOM_SESSION_STATE_ACTIVE,
-    ):
-        return None
     visibility_minutes = int(getattr(settings, "FINAL_EXAM_PIN_VISIBILITY_MINUTES", 120))
-    if visibility_minutes > 0:
-        opens_at = session.scheduled_start - timedelta(minutes=visibility_minutes)
+    start = getattr(ticket.exam, "start_datetime", None)
+    if visibility_minutes > 0 and start:
+        opens_at = start - timedelta(minutes=visibility_minutes)
         if timezone.now() < opens_at:
             return None
     return decrypt_ticket_pin(ticket)
