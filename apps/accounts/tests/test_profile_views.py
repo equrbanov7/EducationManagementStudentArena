@@ -3886,6 +3886,9 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, "Unified Lab")
         self.assertContains(response, "Unified Project")
         self.assertContains(response, "View answer/details")
+        exam_item = next(item for item in response.context["items"] if item["title"] == "Unified Exam")
+        self.assertIn("from_section=my-results", exam_item["detail_url"])
+        self.assertIn("return_to=", exam_item["detail_url"])
 
     def test_my_results_filter_labs_only(self):
         self._login_student()

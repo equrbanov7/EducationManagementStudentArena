@@ -9,13 +9,15 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
+from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm
-from apps.exams.models import Exam, ExamAttempt, ExamStudentPin, StudentExamAttemptGrant
+from apps.exams.models import Exam, ExamAttempt, ExamStudentPin, StudentExamAttemptGrant, StudentGroup
 from apps.exams.services.student_pins import (
     provision_exam_student_pins,
     student_visible_pin,
     verify_student_pin,
 )
+from apps.exams.tests.test_exam_center_policy import _assign_user_to_org
 from apps.organizations.models import Organization
 from apps.registrar.models import Subject
 from core.constants import OrganizationType
@@ -37,6 +39,9 @@ class WizardEnhancementsTests(TestCase):
             status="active",
             is_active=True,
         )
+        _assign_user_to_org(self.teacher, self.org, ProfileRole.TEACHER, "teacher")
+        _assign_user_to_org(self.s1, self.org, ProfileRole.STUDENT, "student")
+        _assign_user_to_org(self.s2, self.org, ProfileRole.STUDENT, "student")
         self.subject = Subject.objects.create(organization=self.org, code="MATH101", name="Calculus")
 
     # ── Subject required for final/midterm ────────────────────────────────
@@ -126,6 +131,26 @@ class WizardEnhancementsTests(TestCase):
         exam = self._make_secure_exam(category="quiz")
         provision_exam_student_pins(exam)
         self.assertEqual(ExamStudentPin.objects.filter(exam=exam).count(), 0)
+
+    def test_group_student_added_after_exam_assignment_gets_pin(self):
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="G1")
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Group Final",
+            organization=self.org,
+            exam_type_extended="final",
+            is_active=True,
+            is_public=False,
+        )
+        exam.allowed_groups.add(group)
+        self.assertEqual(ExamStudentPin.objects.filter(exam=exam).count(), 0)
+
+        group.students.add(self.s1)
+        self.assertTrue(ExamStudentPin.objects.filter(exam=exam, student=self.s1).exists())
+        self.assertTrue(student_visible_pin(exam, self.s1))
+
+        group.students.remove(self.s1)
+        self.assertFalse(ExamStudentPin.objects.filter(exam=exam, student=self.s1).exists())
 
     # ── Per-student attempt grant ─────────────────────────────────────────
     def test_grant_increases_attempts_left_for_single_student(self):

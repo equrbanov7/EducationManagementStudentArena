@@ -120,6 +120,20 @@ class LoginViewTest(TestCase):
 
         self.assertRedirects(post_response, safe_next)
 
+    def test_login_ignores_final_exam_entry_next_parameter(self):
+        final_entry = reverse("exams:final_exam_entry")
+
+        get_response = self.client.get(reverse("accounts:staff_login"), {"next": final_entry})
+        self.assertEqual(get_response.status_code, 200)
+        self.assertNotContains(get_response, f'name="next" value="{final_entry}"', html=False)
+
+        post_response = self.client.post(
+            self.login_url,
+            {"username": "loginuser", "password": "StrongPass123!", "next": final_entry},
+        )
+
+        self.assertRedirects(post_response, settings.LOGIN_REDIRECT_URL, fetch_redirect_response=False)
+
     def test_login_rejects_boolean_condition_next_payload(self):
         payload = f"{reverse('accounts:profile')}' AND '1'='1' --"
 
