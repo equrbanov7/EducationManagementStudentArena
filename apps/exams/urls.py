@@ -163,6 +163,11 @@ urlpatterns = [
         name="question_submission_detail",
     ),
     path(
+        "question-submissions/<int:submission_id>/delete/",
+        views.question_submission_delete,
+        name="question_submission_delete",
+    ),
+    path(
         "question-submissions/<int:submission_id>/review/",
         views.question_submission_review,
         name="question_submission_review",

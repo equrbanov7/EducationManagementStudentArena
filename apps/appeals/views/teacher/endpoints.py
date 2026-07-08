@@ -191,23 +191,22 @@ def review_appeal(request, appeal_id):
                 if not response_text:
                     error_message = pgettext("appeals.view.message", "Hər qərar üçün izah/cavab mətni yazmalısınız.")
                     break
-                awarded = request.POST.get(f"points_{item.id}") if decision == "accept" else None
                 was_decided = item.status in final_item_statuses
-                decisions.append((item, decision, response_text, awarded, was_decided))
+                decisions.append((item, decision, response_text, was_decided))
 
         if not error_message:
-            for item, decision, response_text, awarded, was_decided in decisions:
+            for item, decision, response_text, was_decided in decisions:
                 # Window içində yenidən redaktə → əvvəlki bal düzəlişini təmizlə ki,
-                # yeni qərar/bal təmiz tətbiq olunsun (bal ikiqat sayılmasın).
+                # yeni qərar təmiz tətbiq olunsun (bal ikiqat sayılmasın).
                 if was_decided:
                     revert_item_adjustment(item)
                 if decision == "accept":
+                    # Qəbul → sabit +1 bal (bax scoring.accept_appeal_item).
                     accept_appeal_item(
                         item,
                         reviewer=request.user,
                         response_text=response_text,
                         request=request,
-                        awarded_points=awarded,
                     )
                 else:
                     reject_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)

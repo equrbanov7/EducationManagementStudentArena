@@ -53,13 +53,18 @@ def _normalize_language(raw_value):
 
 
 def _form_state(request):
+    raw_language = (request.POST.get("language") or "").strip().lower()
     return {
         "title": (request.POST.get("title") or "").strip(),
         "subject": (request.POST.get("subject") or "").strip(),
+        # Çox qrup seçimi: `group_ids` (getlist). `group_id` geriyə-uyğunluq üçün.
+        "group_ids": [g for g in request.POST.getlist("group_ids") if str(g).strip().isdigit()],
         "group_id": (request.POST.get("group_id") or "").strip(),
         "group_label": (request.POST.get("group_label") or "").strip(),
         "teacher_note": (request.POST.get("teacher_note") or "").strip(),
-        "language": _normalize_language(request.POST.get("language")),
+        # Xam dil (validasiya üçün) + normalizə olunmuş dəyər (saxlama üçün).
+        "language_raw": raw_language,
+        "language": _normalize_language(raw_language),
         "raw_text": request.POST.get("raw_text") or "",
     }
 
@@ -77,45 +82,30 @@ def _teacher_groups(request, organization):
     )
 
 
-def _groups_subjects_map(groups):
-    """Qrup id → fənlər (fənn dropdown-unu qrupa görə skoplamaq üçün JS xəritəsi).
-    Dəyər = fənn adı (QuestionSubmission.subject-də saxlanılan), etiket = "kod — ad"."""
-    return {
-        str(group.id): [{"value": s.name, "label": f"{s.code} — {s.name}"} for s in group.subjects.all()]
-        for group in groups
-    }
+def _teacher_subjects(request, organization, *, groups=None):
+    """Müəllimin ÖZ fənləri — təyin olunduğu qrupların fənlərinin birləşməsi
+    (registrar.Subject). Sual göndərişində fənn seçimi bu siyahıdan gəlir
+    (qrupdan asılı deyil — 2026-07 dəyişikliyi)."""
+    from apps.registrar.models import Subject
+
+    group_ids = [g.id for g in (groups if groups is not None else _teacher_groups(request, organization))]
+    if not group_ids:
+        return Subject.objects.none()
+    return (
+        Subject.objects.filter(organization=organization, student_groups__in=group_ids)
+        .distinct()
+        .order_by("code", "name")
+    )
 
 
-def _ensure_subject_in_group(subject, student_group):
-    """Bənd 5: seçilmiş fənn qrupun fənlərinə aid olmalıdır. Qrupun heç fənni
-    yoxdursa keçir — bu halda dropdown boşdur və servis onsuz da boş fənni rədd
-    edir (müəllim admin-dən qrupa fənn təyin etməyi istəməlidir)."""
-    if student_group is None:
-        return
-    allowed = set(student_group.subjects.values_list("name", flat=True))
-    if allowed and subject not in allowed:
-        raise ValidationError(
-            pgettext(
-                "exams.view.question_submission.error",
-                "Seçilmiş fənn bu qrupun fənlərinə aid deyil.",
-            )
-        )
-
-
-def _resolve_group(form_state, groups):
-    """
-    Formadan qrupu həll edir: YALNIZ dropdown-dan seçilmiş FK qəbul edilir
-    (`group_id`). Qruplar superadmin/administrator tərəfindən yaradılır; müəllim
-    yalnız ona TƏYİN olunmuş qrupları seçir — sərbəst-mətn qrup ARTIQ QƏBUL
-    EDİLMİR. Etiket kimi seçilmiş qrupun adı (`group.name`) qaytarılır.
-    Seçilməyibsə (None, "") qayıdır və göndəriş servis səviyyəsində rədd edilir.
-    """
-    group_id = form_state.get("group_id") or ""
-    if group_id.isdigit():
-        group = next((g for g in groups if str(g.id) == group_id), None)
-        if group is not None:
-            return group, group.name
-    return None, ""
+def _resolve_groups(form_state, groups):
+    """Formadan seçilmiş qrupları həll edir (çox qrup). Yalnız müəllimə təyin
+    olunmuş qruplar qəbul edilir. Qaytarır: (seçilmiş qruplar, birləşdirilmiş etiket)."""
+    ids = {str(g) for g in form_state.get("group_ids", [])}
+    if not ids and form_state.get("group_id"):  # geriyə-uyğunluq (tək seçim)
+        ids = {form_state["group_id"]}
+    chosen = [g for g in groups if str(g.id) in ids]
+    return chosen, ", ".join(g.name for g in chosen)
 
 
 def annotate_preview_flags(questions):
@@ -156,10 +146,12 @@ def question_submission_create(request):
     form_state = {
         "title": "",
         "subject": "",
+        "group_ids": [],
         "group_id": "",
         "group_label": "",
         "teacher_note": "",
-        "language": "az",
+        "language_raw": "",  # default seçim YOX — dil məcburi şüurlu seçilməlidir
+        "language": "",
         "raw_text": "",
     }
 
@@ -199,35 +191,53 @@ def question_submission_create(request):
                         question["points"] = int(raw_points)
                     chosen.append(question)
 
-                student_group, group_label = _resolve_group(form_state, groups)
-                try:
-                    _ensure_subject_in_group(form_state["subject"], student_group)
-                    submission = submit_question_set(
-                        teacher=request.user,
-                        organization=organization,
-                        title=form_state["title"],
-                        subject=form_state["subject"],
-                        student_group=student_group,
-                        group_label=group_label,
-                        language=form_state["language"],
-                        raw_text=raw_text,
-                        parsed=chosen,
-                        teacher_note=form_state["teacher_note"],
+                chosen_groups, group_label = _resolve_groups(form_state, groups)
+                subject_names = {s.name for s in _teacher_subjects(request, organization, groups=groups)}
+                _err = None
+                if not form_state["language_raw"]:
+                    _err = pgettext("exams.view.question_submission.error", "İmtahan dilini seçin (məcburidir).")
+                elif not form_state["subject"]:
+                    _err = pgettext("exams.view.question_submission.error", "Fənni seçin (məcburidir).")
+                elif subject_names and form_state["subject"] not in subject_names:
+                    _err = pgettext(
+                        "exams.view.question_submission.error", "Seçilmiş fənn sizin fənləriniz arasında deyil."
                     )
-                except ValidationError as exc:
-                    messages.error(request, exc.messages[0])
+                elif not chosen_groups:
+                    _err = pgettext("exams.view.question_submission.error", "Ən azı bir qrup seçin (məcburidir).")
+
+                if _err:
+                    messages.error(request, _err)
                 else:
-                    messages.success(
-                        request,
-                        pgettext(
-                            "exams.view.question_submission.message",
-                            "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual).",
-                        ).format(count=submission.question_count),
-                    )
-                    return redirect("exams:question_submission_detail", submission_id=submission.id)
+                    try:
+                        submission = submit_question_set(
+                            teacher=request.user,
+                            organization=organization,
+                            title=form_state["title"],
+                            subject=form_state["subject"],
+                            student_group=chosen_groups[0],
+                            group_label=group_label,
+                            language=form_state["language"],
+                            raw_text=raw_text,
+                            parsed=chosen,
+                            teacher_note=form_state["teacher_note"],
+                        )
+                        submission.student_groups.set(chosen_groups)
+                    except ValidationError as exc:
+                        messages.error(request, exc.messages[0])
+                    else:
+                        messages.success(
+                            request,
+                            pgettext(
+                                "exams.view.question_submission.message",
+                                "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup).",
+                            ).format(count=submission.question_count, groups=len(chosen_groups)),
+                        )
+                        return redirect("exams:question_submission_detail", submission_id=submission.id)
 
     context = {
         "exam": None,
+        # Profil örtüyü: sidebar solda qalsın, workbench sağda göstərilsin.
+        "embed_active_section": "question-submissions",
         "raw_text": raw_text,
         "parsed": parsed,
         "selected": selected,
@@ -241,7 +251,18 @@ def question_submission_create(request):
         "math_token": "",
         # Meta sahələri (workbench-dən kənar kart)
         "teacher_groups": groups,
-        "groups_subjects": _groups_subjects_map(groups),
+        "teacher_group_subjects": {
+            str(group.id): [
+                {"value": subject.name, "label": f"{subject.code} — {subject.name}"} for subject in group.subjects.all()
+            ]
+            for group in groups
+        },
+        # Fənn müəllimin ÖZ fənlərindən (qrupdan asılı deyil); qrup çox-seçimli.
+        "teacher_subjects": [
+            {"value": s.name, "label": f"{s.code} — {s.name}"}
+            for s in _teacher_subjects(request, organization, groups=groups)
+        ],
+        "submission_languages": EXAM_LANGUAGE_CHOICES,
         "form_state": form_state,
         # Workbench konteksti
         "wb_workbench_key": "question-submission",
@@ -255,7 +276,8 @@ def question_submission_create(request):
         "wb_show_settings": False,
         "wb_ai_url": reverse("exams:ai_generate_submission_questions"),
         "wb_ai_context": "test",
-        "wb_show_language": True,
+        # Dil workbench-də YOX — göndəriş meta kartında məcburi select kimidir.
+        "wb_show_language": False,
         "wb_languages": EXAM_LANGUAGE_CHOICES,
         "wb_selected_language": form_state["language"],
         "wb_show_format": False,
@@ -320,10 +342,15 @@ def question_submission_detail(request, submission_id):
         action = (request.POST.get("action") or "").strip()
         form_state = _form_state(request)
 
+        _groups = list(_teacher_groups(request, organization))
         if action == "preview":
             context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
-            context["teacher_groups"] = list(_teacher_groups(request, organization))
-            context["groups_subjects"] = _groups_subjects_map(context["teacher_groups"])
+            context["teacher_groups"] = _groups
+            context["teacher_subjects"] = [
+                {"value": s.name, "label": f"{s.code} — {s.name}"}
+                for s in _teacher_subjects(request, organization, groups=_groups)
+            ]
+            context["submission_languages"] = EXAM_LANGUAGE_CHOICES
             context["form_state"] = form_state
             try:
                 context.update(_preview_context(form_state["raw_text"]))
@@ -332,20 +359,34 @@ def question_submission_detail(request, submission_id):
             return render(request, "exams/teacher/question_submission_detail.html", context)
 
         if action == "resubmit":
-            groups = list(_teacher_groups(request, organization))
-            student_group, group_label = _resolve_group(form_state, groups)
+            chosen_groups, group_label = _resolve_groups(form_state, _groups)
+            subject_names = {s.name for s in _teacher_subjects(request, organization, groups=_groups)}
+            _err = None
+            if not form_state["language_raw"]:
+                _err = pgettext("exams.view.question_submission.error", "İmtahan dilini seçin (məcburidir).")
+            elif not form_state["subject"]:
+                _err = pgettext("exams.view.question_submission.error", "Fənni seçin (məcburidir).")
+            elif subject_names and form_state["subject"] not in subject_names:
+                _err = pgettext(
+                    "exams.view.question_submission.error", "Seçilmiş fənn sizin fənləriniz arasında deyil."
+                )
+            elif not chosen_groups:
+                _err = pgettext("exams.view.question_submission.error", "Ən azı bir qrup seçin (məcburidir).")
+            if _err:
+                messages.error(request, _err)
+                return redirect("exams:question_submission_detail", submission_id=submission.id)
             try:
-                _ensure_subject_in_group(form_state["subject"], student_group)
                 submission = resubmit_question_set(
                     submission,
                     title=form_state["title"],
                     subject=form_state["subject"],
-                    student_group=student_group,
+                    student_group=chosen_groups[0],
                     group_label=group_label,
                     language=form_state["language"],
                     raw_text=form_state["raw_text"],
                     teacher_note=form_state["teacher_note"],
                 )
+                submission.student_groups.set(chosen_groups)
             except ValidationError as exc:
                 messages.error(request, exc.messages[0])
             else:
@@ -360,13 +401,46 @@ def question_submission_detail(request, submission_id):
 
     context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
     if can_edit:
-        context["teacher_groups"] = list(_teacher_groups(request, organization))
-        context["groups_subjects"] = _groups_subjects_map(context["teacher_groups"])
+        _groups = list(_teacher_groups(request, organization))
+        context["teacher_groups"] = _groups
+        context["teacher_subjects"] = [
+            {"value": s.name, "label": f"{s.code} — {s.name}"}
+            for s in _teacher_subjects(request, organization, groups=_groups)
+        ]
+        context["submission_languages"] = EXAM_LANGUAGE_CHOICES
     return render(request, "exams/teacher/question_submission_detail.html", context)
+
+
+@login_required
+@require_POST
+def question_submission_delete(request, submission_id):
+    """Müəllim öz göndərişini silir (yalnız hələ baxılmamış «pending» və ya geri
+    qaytarılmış «rejected» göndəriş). Qəbul olunmuş göndəriş silinə bilməz."""
+    _ensure_teacher(request.user)
+    organization = _require_organization(request)
+    submission = get_object_or_404(QuestionSubmission, id=submission_id, organization=organization)
+    if submission.teacher_id != request.user.id:
+        raise Http404()
+    if not submission.can_be_edited_by_teacher:
+        messages.error(
+            request,
+            pgettext(
+                "exams.view.question_submission.error",
+                "Qəbul olunmuş göndəriş silinə bilməz.",
+            ),
+        )
+        return redirect("exams:question_submission_detail", submission_id=submission.id)
+    submission.delete()
+    messages.success(
+        request,
+        pgettext("exams.view.question_submission.message", "Göndəriş silindi."),
+    )
+    return redirect(_profile_section_url("question-submissions"))
 
 
 def _detail_context(submission, *, can_edit, is_reviewer):
     return {
+        "embed_active_section": "question-submissions",
         "submission": submission,
         "parsed_questions": annotate_preview_flags(list(submission.parsed_snapshot or [])),
         "can_edit": can_edit,
@@ -375,9 +449,12 @@ def _detail_context(submission, *, can_edit, is_reviewer):
         "form_state": {
             "title": submission.title,
             "subject": submission.subject,
+            "group_ids": [str(g.id) for g in submission.student_groups.all()]
+            or [str(submission.student_group_id or "")],
             "group_id": str(submission.student_group_id or ""),
             "group_label": submission.group_label,
             "teacher_note": submission.teacher_note,
+            "language_raw": submission.language,
             "language": submission.language,
             "raw_text": submission.raw_text,
         },

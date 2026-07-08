@@ -28,8 +28,9 @@
             }
 
             if (ctx.mobileSidebarTrigger) {
-                ctx.mobileSidebarTrigger.classList.toggle("is-hidden", !isCollapsed || !isMobileViewport());
+                ctx.mobileSidebarTrigger.classList.toggle("is-hidden", !isCollapsed);
                 ctx.mobileSidebarTrigger.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+                ctx.mobileSidebarTrigger.setAttribute("aria-hidden", isCollapsed ? "false" : "true");
             }
 
             if (ctx.sidebarBackdrop) {

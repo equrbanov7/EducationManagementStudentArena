@@ -28,6 +28,7 @@
     labs:        { az:gettext('Bloklar və suallarla praktiki laboratoriyalar'), ru:'Практические лаборатории с блоками', en:'Practical labs with blocks and questions', tr:'Bloklar ve sorularla pratik laboratuvarlar' },
     exams:       { az:gettext('Test və yazılı imtahanlar, nəzarət'), ru:'Тесты и письменные экзамены', en:'Test and written exams, proctoring', tr:gettext('Test ve yazılı sınavlar, gözetim') },
     projects:    { az:gettext('Genişmiqyaslı kurs layihələri'), ru:'Масштабные курсовые проекты', en:'Larger course projects', tr:gettext('Büyük ölçekli kurs projeleri') },
+    groups:      { az:gettext('Bu fənnin tədris olunduğu qruplar'), ru:'Группы этого предмета', en:'Groups assigned to this subject', tr:gettext('Bu dersin atandığı gruplar') },
     members:     { az:gettext('Tələbələr və qruplar'), ru:'Студенты и группы', en:'Students and groups', tr:gettext('Öğrenciler ve gruplar') }
   };
 

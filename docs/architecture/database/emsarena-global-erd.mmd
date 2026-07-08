@@ -1,0 +1,1385 @@
+erDiagram
+    auth_user |o--o{ accounts_emailotp : user
+    auth_user ||--|| accounts_userprofile : user
+    organizations_organization |o--o{ accounts_userprofile : organization
+    organizations_organization |o--o{ accounts_userprofile : requested_organization
+    auth_user ||--o{ ai_assistant_aiassistantlog : user
+    organizations_organization |o--o{ ai_assistant_aiassistantlog : organization
+    exams_examattempt ||--o{ appeals_appeal : attempt
+    exams_exam ||--o{ appeals_appeal : exam
+    auth_user ||--o{ appeals_appeal : student
+    organizations_organization ||--o{ appeals_appeal : organization
+    organizations_orgunit |o--o{ appeals_appeal : org_unit
+    auth_user |o--o{ appeals_appeal : reviewed_by
+    appeals_appeal ||--o{ appeals_appealitem : appeal
+    exams_examquestion ||--o{ appeals_appealitem : question
+    exams_examanswer |o--o{ appeals_appealitem : answer
+    auth_user |o--o{ appeals_appealitem : resolved_by
+    appeals_appealitem ||--|| appeals_scoreadjustment : appeal_item
+    exams_examattempt ||--o{ appeals_scoreadjustment : attempt
+    exams_examquestion |o--o{ appeals_scoreadjustment : question
+    auth_user |o--o{ appeals_scoreadjustment : applied_by
+    courses_course ||--o{ assignments_assignment : course
+    auth_user |o--o{ assignments_assignment : created_by
+    assignments_assignment }o--o{ auth_user : assigned_students
+    auth_user ||--o{ assignments_notification : user
+    assignments_assignment ||--o{ assignments_submission : assignment
+    auth_user ||--o{ assignments_submission : user
+    auth_user |o--o{ assignments_submission : graded_by
+    auth_user |o--o{ audit_auditlog : user
+    organizations_organization |o--o{ audit_auditlog : organization
+    django_content_type |o--o{ audit_auditlog : content_type
+    blog_category |o--o{ blog_category : parent
+    blog_post ||--o{ blog_comment : post
+    auth_user ||--o{ blog_comment : user
+    auth_user ||--o{ blog_post : author
+    blog_category |o--o{ blog_post : category
+    auth_user |o--o{ blog_post : approved_by
+    blog_post ||--o{ blog_postapprovallog : post
+    auth_user |o--o{ blog_postapprovallog : reviewer
+    auth_user ||--o{ blog_question : author
+    blog_question }o--o{ auth_user : visible_users
+    auth_user |o--o{ contact_contactmessage : reply_sent_by
+    auth_user ||--o{ courses_course : owner
+    organizations_organization ||--o{ courses_course : organization
+    organizations_orgunit |o--o{ courses_course : unit
+    organizations_academicperiod |o--o{ courses_course : period
+    courses_course ||--o{ courses_coursegroup : course
+    auth_user |o--o{ courses_coursegroup : instructor
+    courses_coursegroup }o--o{ auth_user : members
+    courses_course ||--o{ courses_courseinstructor : course
+    auth_user ||--o{ courses_courseinstructor : user
+    courses_course ||--o{ courses_coursemembership : course
+    auth_user ||--o{ courses_coursemembership : user
+    courses_course ||--o{ courses_courseresource : course
+    courses_coursetopic |o--o{ courses_courseresource : topic
+    courses_course ||--o{ courses_coursetopic : course
+    exams_questionbank ||--o{ exams_bankquestion : bank
+    auth_user |o--o{ exams_bankquestion : created_by
+    exams_bankquestion ||--o{ exams_bankquestionoption : question
+    exams_examquestion ||--|| exams_codingexamquestion : question
+    exams_codingsubmission ||--o{ exams_codingfile : submission
+    auth_user ||--o{ exams_codingsubmission : student
+    exams_exam ||--o{ exams_codingsubmission : exam
+    exams_examattempt |o--o{ exams_codingsubmission : attempt
+    exams_codingexamquestion ||--o{ exams_codingsubmission : question
+    exams_codingexamquestion ||--o{ exams_codingtestcase : coding_question
+    auth_user ||--o{ exams_exam : author
+    courses_course |o--o{ exams_exam : course
+    registrar_subject |o--o{ exams_exam : subject
+    organizations_organization ||--o{ exams_exam : organization
+    exams_exam }o--o{ auth_user : allowed_users
+    exams_exam }o--o{ exams_studentgroup : allowed_groups
+    exams_examattempt ||--o{ exams_examanswer : attempt
+    exams_examquestion ||--o{ exams_examanswer : question
+    exams_examanswer }o--o{ exams_examquestionoption : selected_options
+    exams_examanswer ||--o{ exams_examanswerfile : answer
+    auth_user ||--o{ exams_examattempt : user
+    exams_exam ||--o{ exams_examattempt : exam
+    exams_examlanguagevariant |o--o{ exams_examattempt : language_variant
+    exams_exam ||--o{ exams_examlanguagevariant : exam
+    exams_exam ||--o{ exams_examquestion : exam
+    exams_questionblock |o--o{ exams_examquestion : block
+    exams_questionbank |o--o{ exams_examquestion : bank
+    exams_bankquestion |o--o{ exams_examquestion : source_bank_question
+    exams_examlanguagevariant |o--o{ exams_examquestion : language_variant
+    exams_examquestion ||--o{ exams_examquestionoption : question
+    organizations_organization ||--o{ exams_examroom : organization
+    auth_user |o--o{ exams_examroom : created_by
+    exams_examroom }o--o{ auth_user : invigilators
+    organizations_organization ||--o{ exams_examroomcomputer : organization
+    exams_examroom ||--o{ exams_examroomcomputer : room
+    auth_user |o--o{ exams_examroomcomputer : created_by
+    organizations_organization ||--o{ exams_examroomsession : organization
+    exams_exam ||--o{ exams_examroomsession : exam
+    exams_examroom ||--o{ exams_examroomsession : room
+    auth_user |o--o{ exams_examroomsession : invigilator
+    auth_user |o--o{ exams_examroomsession : started_by
+    auth_user |o--o{ exams_examroomsession : ended_by
+    auth_user |o--o{ exams_examroomsession : created_by
+    exams_examroomsession }o--o{ auth_user : staff
+    exams_exam ||--o{ exams_examstudentpin : exam
+    auth_user ||--o{ exams_examstudentpin : student
+    exams_exam ||--|| exams_examsupervisionconfig : exam
+    organizations_organization ||--o{ exams_finalexamticket : organization
+    exams_examroomsession ||--o{ exams_finalexamticket : session
+    exams_exam ||--o{ exams_finalexamticket : exam
+    auth_user ||--o{ exams_finalexamticket : student
+    exams_examattempt |o--o{ exams_finalexamticket : attempt
+    auth_user |o--o{ exams_finalexamticket : pin_generated_by
+    auth_user |o--o{ exams_finalexamticket : removed_by
+    exams_examattempt ||--o{ exams_proctoringlog : exam_attempt
+    organizations_organization |o--o{ exams_questionbank : organization
+    organizations_orgunit |o--o{ exams_questionbank : org_unit
+    auth_user ||--o{ exams_questionbank : created_by
+    exams_exam ||--o{ exams_questionblock : exam
+    organizations_organization ||--o{ exams_questionsubmission : organization
+    auth_user ||--o{ exams_questionsubmission : teacher
+    exams_studentgroup |o--o{ exams_questionsubmission : student_group
+    auth_user |o--o{ exams_questionsubmission : reviewer
+    exams_questionbank |o--o{ exams_questionsubmission : accepted_bank
+    exams_exam ||--o{ exams_studentexamattemptgrant : exam
+    auth_user ||--o{ exams_studentexamattemptgrant : student
+    auth_user |o--o{ exams_studentexamattemptgrant : granted_by
+    auth_user ||--o{ exams_studentgroup : teacher
+    organizations_organization |o--o{ exams_studentgroup : organization
+    organizations_orgunit |o--o{ exams_studentgroup : org_unit
+    exams_studentgroup }o--o{ auth_user : students
+    exams_studentgroup }o--o{ auth_user : teachers
+    exams_studentgroup }o--o{ registrar_subject : subjects
+    organizations_organization ||--o{ exams_supervisionincident : organization
+    exams_exam ||--o{ exams_supervisionincident : exam
+    exams_examattempt ||--o{ exams_supervisionincident : attempt
+    auth_user ||--o{ exams_supervisionincident : student
+    organizations_organization |o--o{ exams_textextractionjob : organization
+    auth_user ||--o{ exams_textextractionjob : user
+    courses_course ||--o{ labs_lab : course
+    auth_user ||--o{ labs_lab : created_by
+    labs_lab }o--o{ auth_user : allowed_students
+    labs_lab ||--o{ labs_labanswer : lab
+    labs_labquestion ||--o{ labs_labanswer : question
+    auth_user ||--o{ labs_labanswer : student
+    labs_labsubmission |o--o{ labs_labanswer : submission
+    labs_lab ||--o{ labs_labassignment : lab
+    auth_user ||--o{ labs_labassignment : student
+    labs_labassignment }o--o{ labs_labquestion : assigned_questions
+    labs_lab ||--o{ labs_labblock : lab
+    labs_labblock ||--o{ labs_labquestion : block
+    labs_labassignment ||--o{ labs_labsubmission : assignment
+    auth_user |o--o{ labs_labsubmission : graded_by
+    live_exam_livesession ||--o{ live_exam_liveanswer : session
+    live_exam_liveplayer ||--o{ live_exam_liveanswer : player
+    live_exam_livesession ||--o{ live_exam_liveplayer : session
+    exams_exam ||--o{ live_exam_livesession : exam
+    auth_user ||--o{ live_exam_livesession : host_user
+    auth_user ||--o{ notifications_inappnotification : recipient
+    organizations_organization |o--o{ notifications_inappnotification : organization
+    auth_user ||--o{ notifications_studentorganizationrequest : user
+    organizations_organization ||--o{ notifications_studentorganizationrequest : organization
+    auth_user |o--o{ notifications_studentorganizationrequest : responded_by
+    organizations_organization ||--o{ organizations_academicperiod : organization
+    organizations_country ||--o{ organizations_institution : country
+    auth_user ||--o{ organizations_membership : user
+    organizations_organization ||--o{ organizations_membership : organization
+    organizations_role ||--o{ organizations_membership : role
+    organizations_orgunit |o--o{ organizations_membership : scope_unit
+    auth_user |o--o{ organizations_membership : assigned_by
+    auth_user ||--o{ organizations_organization : owner
+    organizations_organization ||--o{ organizations_orgunit : organization
+    organizations_orgunit |o--o{ organizations_orgunit : parent
+    auth_user |o--o{ organizations_orgunit : head
+    organizations_organization ||--o{ organizations_role : organization
+    courses_course ||--o{ projects_project : course
+    projects_project }o--o{ auth_user : assigned_students
+    projects_project ||--o{ projects_projectsubmission : project
+    auth_user ||--o{ projects_projectsubmission : student
+    auth_user |o--o{ projects_projectsubmission : graded_by
+    organizations_organization ||--o{ registrar_assessmentcomponent : organization
+    registrar_courseoffering ||--o{ registrar_assessmentcomponent : offering
+    registrar_rubric |o--o{ registrar_assessmentcomponent : rubric
+    organizations_organization ||--o{ registrar_assessmentscheme : organization
+    registrar_courseoffering ||--|| registrar_assessmentscheme : offering
+    auth_user |o--o{ registrar_assessmentscheme : submitted_by
+    auth_user |o--o{ registrar_assessmentscheme : chair_approved_by
+    auth_user |o--o{ registrar_assessmentscheme : dean_approved_by
+    organizations_organization ||--o{ registrar_componentscore : organization
+    registrar_assessmentcomponent ||--o{ registrar_componentscore : component
+    registrar_enrollment ||--o{ registrar_componentscore : enrollment
+    auth_user |o--o{ registrar_componentscore : entered_by
+    organizations_organization ||--o{ registrar_courseoffering : organization
+    registrar_subject ||--o{ registrar_courseoffering : subject
+    organizations_academicperiod ||--o{ registrar_courseoffering : period
+    organizations_orgunit |o--o{ registrar_courseoffering : group
+    courses_course |o--o{ registrar_courseoffering : course
+    auth_user |o--o{ registrar_courseoffering : instructor
+    organizations_organization ||--o{ registrar_criterionscore : organization
+    registrar_rubriccriterion ||--o{ registrar_criterionscore : criterion
+    registrar_enrollment ||--o{ registrar_criterionscore : enrollment
+    auth_user |o--o{ registrar_criterionscore : entered_by
+    organizations_organization ||--o{ registrar_curriculum : organization
+    registrar_program ||--o{ registrar_curriculum : program
+    organizations_organization ||--o{ registrar_curriculumsubject : organization
+    registrar_curriculum ||--o{ registrar_curriculumsubject : curriculum
+    registrar_subject ||--o{ registrar_curriculumsubject : subject
+    organizations_organization ||--o{ registrar_enrollment : organization
+    auth_user ||--o{ registrar_enrollment : student
+    registrar_courseoffering ||--o{ registrar_enrollment : offering
+    organizations_organization ||--o{ registrar_finalgrade : organization
+    registrar_enrollment ||--|| registrar_finalgrade : enrollment
+    auth_user |o--o{ registrar_finalgrade : entered_by
+    organizations_organization ||--o{ registrar_groupelectivechoice : organization
+    organizations_orgunit ||--o{ registrar_groupelectivechoice : group
+    organizations_academicperiod ||--o{ registrar_groupelectivechoice : period
+    registrar_subject ||--o{ registrar_groupelectivechoice : chosen_subject
+    auth_user |o--o{ registrar_groupelectivechoice : decided_by
+    organizations_organization ||--o{ registrar_lesson : organization
+    registrar_courseoffering ||--o{ registrar_lesson : offering
+    auth_user |o--o{ registrar_lesson : created_by
+    organizations_organization ||--o{ registrar_lessonmark : organization
+    registrar_lesson ||--o{ registrar_lessonmark : lesson
+    registrar_enrollment ||--o{ registrar_lessonmark : enrollment
+    auth_user |o--o{ registrar_lessonmark : entered_by
+    organizations_organization ||--o{ registrar_program : organization
+    organizations_orgunit |o--o{ registrar_program : specialty_unit
+    organizations_organization ||--o{ registrar_resitrecord : organization
+    registrar_enrollment ||--o{ registrar_resitrecord : enrollment
+    auth_user |o--o{ registrar_resitrecord : decided_by
+    organizations_organization ||--o{ registrar_rubric : organization
+    organizations_organization ||--o{ registrar_rubriccriterion : organization
+    registrar_rubric ||--o{ registrar_rubriccriterion : rubric
+    organizations_organization ||--o{ registrar_scheduleslot : organization
+    registrar_courseoffering ||--o{ registrar_scheduleslot : offering
+    auth_user |o--o{ registrar_scheduleslot : created_by
+    organizations_organization ||--o{ registrar_studentacademicrecord : organization
+    auth_user ||--o{ registrar_studentacademicrecord : student
+    registrar_program ||--o{ registrar_studentacademicrecord : program
+    registrar_curriculum ||--o{ registrar_studentacademicrecord : curriculum
+    organizations_orgunit |o--o{ registrar_studentacademicrecord : group
+    organizations_organization ||--o{ registrar_subject : organization
+    auth_user |o--o{ trial_exams_trialexamrequest : user
+    auth_user |o--o{ trial_exams_trialexamrequest : reply_sent_by
+    auth_user ||--o{ django_admin_log : user
+    django_content_type |o--o{ django_admin_log : content_type
+    auth_group }o--o{ auth_permission : permissions
+    django_content_type ||--o{ auth_permission : content_type
+    auth_user }o--o{ auth_group : groups
+    auth_user }o--o{ auth_permission : user_permissions
+    assignments_assignment ||--o{ assignments_assignment_assigned_students : assignment
+    auth_user ||--o{ assignments_assignment_assigned_students : user
+    auth_group ||--o{ auth_group_permissions : group
+    auth_permission ||--o{ auth_group_permissions : permission
+    auth_user ||--o{ auth_user_groups : user
+    auth_group ||--o{ auth_user_groups : group
+    auth_user ||--o{ auth_user_user_permissions : user
+    auth_permission ||--o{ auth_user_user_permissions : permission
+    blog_question ||--o{ blog_question_visible_users : question
+    auth_user ||--o{ blog_question_visible_users : user
+    courses_coursegroup ||--o{ courses_coursegroup_members : coursegroup
+    auth_user ||--o{ courses_coursegroup_members : user
+    exams_exam ||--o{ exams_exam_allowed_groups : exam
+    exams_studentgroup ||--o{ exams_exam_allowed_groups : studentgroup
+    exams_exam ||--o{ exams_exam_allowed_users : exam
+    auth_user ||--o{ exams_exam_allowed_users : user
+    exams_examanswer ||--o{ exams_examanswer_selected_options : examanswer
+    exams_examquestionoption ||--o{ exams_examanswer_selected_options : examquestionoption
+    exams_examroom ||--o{ exams_examroom_invigilators : examroom
+    auth_user ||--o{ exams_examroom_invigilators : user
+    exams_examroomsession ||--o{ exams_examroomsession_staff : examroomsession
+    auth_user ||--o{ exams_examroomsession_staff : user
+    exams_studentgroup ||--o{ exams_studentgroup_students : studentgroup
+    auth_user ||--o{ exams_studentgroup_students : user
+    exams_studentgroup ||--o{ exams_studentgroup_subjects : studentgroup
+    registrar_subject ||--o{ exams_studentgroup_subjects : subject
+    exams_studentgroup ||--o{ exams_studentgroup_teachers : studentgroup
+    auth_user ||--o{ exams_studentgroup_teachers : user
+    labs_lab ||--o{ labs_lab_allowed_students : lab
+    auth_user ||--o{ labs_lab_allowed_students : user
+    labs_labassignment ||--o{ labs_labassignment_assigned_questions : labassignment
+    labs_labquestion ||--o{ labs_labassignment_assigned_questions : labquestion
+    projects_project ||--o{ projects_project_assigned_students : project
+    auth_user ||--o{ projects_project_assigned_students : user
+    accounts_emailotp {
+        int id PK
+        string user_id FK
+        string email
+        string code
+        datetime created_at
+        string otp_hash
+        string purpose
+        datetime expires_at
+        bool is_verified
+        int attempts_count
+    }
+    accounts_userprofile {
+        int id PK
+        string user_id FK, UK
+        string organization_id FK
+        string requested_organization_id FK
+        string organization_type
+        string role
+        bool is_deleted
+        datetime deleted_at
+        datetime created_at
+        datetime updated_at
+    }
+    ai_assistant_aiassistantlog {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string user_id FK
+        string organization_id FK
+        string status
+        string role_name
+        text prompt
+        string response_summary
+        string block_reason
+    }
+    appeals_appeal {
+        int id PK
+        string attempt_id FK
+        string exam_id FK
+        string student_id FK
+        string organization_id FK
+        string org_unit_id FK
+        string status
+        string reviewed_by_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    appeals_appealitem {
+        int id PK
+        string appeal_id FK
+        string question_id FK
+        string answer_id FK
+        string appeal_type
+        string status
+        string resolved_by_id FK
+        datetime created_at
+        datetime updated_at
+        text comment
+    }
+    appeals_scoreadjustment {
+        int id PK
+        string appeal_item_id FK, UK
+        string attempt_id FK
+        string question_id FK
+        decimal previous_score
+        decimal new_score
+        decimal previous_answer_score
+        string applied_by_id FK
+        decimal delta_points
+        bool previous_is_correct
+    }
+    assignments_assignment {
+        int id PK
+        string course_id FK
+        string type
+        string title
+        decimal max_score
+        string created_by_id FK
+        string status
+        datetime created_at
+        datetime updated_at
+        text description
+    }
+    assignments_notification {
+        int id PK
+        string user_id FK
+        string title
+        string type
+        datetime created_at
+        text message
+        bool is_read
+        string link
+    }
+    assignments_submission {
+        int id PK
+        string assignment_id FK
+        string user_id FK
+        string status
+        decimal grade
+        string graded_by_id FK
+        datetime graded_at
+        int attempt_number
+        text content
+        json files
+    }
+    audit_auditlog {
+        uuid id PK
+        string user_id FK
+        string organization_id FK
+        string resource_type
+        string content_type_id FK
+        datetime created_at
+        string action
+        string resource_id
+        string resource_repr
+        string object_id
+    }
+    blog_category {
+        int id PK
+        string name
+        string slug UK
+        string parent_id FK
+        string name_az
+        string name_en
+        string name_ru
+        string name_tr
+        int sort_order
+        bool show_in_navbar
+    }
+    blog_comment {
+        int id PK
+        string post_id FK
+        string user_id FK
+        datetime created_at
+        text text
+        int rating
+    }
+    blog_post {
+        int id PK
+        string author_id FK
+        string category_id FK
+        string title
+        string slug UK
+        datetime created_at
+        datetime updated_at
+        string approval_status
+        string approved_by_id FK
+        text excerpt
+    }
+    blog_postapprovallog {
+        int id PK
+        string post_id FK
+        string reviewer_id FK
+        datetime created_at
+        string action
+        text feedback
+    }
+    blog_question {
+        int id PK
+        string author_id FK
+        datetime created_at
+        text question_text
+        text answer_text
+        bool visible_to_all
+    }
+    blog_subscriber {
+        int id PK
+        string email UK
+        bool is_active
+        datetime created_at
+        string conf_token
+    }
+    contact_contactmessage {
+        int id PK
+        string name
+        string email
+        string subject
+        datetime created_at
+        string reply_delivery_status
+        string reply_sent_by_id FK
+        string phone
+        text message
+        string ip_address
+    }
+    courses_course {
+        int id PK
+        string owner_id FK
+        string title
+        string slug UK
+        string status
+        datetime created_at
+        datetime updated_at
+        string organization_id FK
+        string unit_id FK
+        string period_id FK
+    }
+    courses_coursegroup {
+        int id PK
+        string course_id FK
+        string name
+        string instructor_id FK
+        datetime created_at
+        json schedule
+        int max_students
+    }
+    courses_courseinstructor {
+        int id PK
+        string course_id FK
+        string user_id FK
+        string role
+        datetime created_at
+        json permissions
+    }
+    courses_coursemembership {
+        int id PK
+        string course_id FK
+        string user_id FK
+        string role
+        string group_name
+        datetime joined_at
+    }
+    courses_courseresource {
+        int id PK
+        string course_id FK
+        string topic_id FK
+        string title
+        string resource_type
+        datetime created_at
+        text description
+        file file
+        string url
+    }
+    courses_coursetopic {
+        int id PK
+        string course_id FK
+        string title
+        datetime created_at
+        text description
+        int order
+    }
+    exams_aiconfiguration {
+        int id PK
+        datetime updated_at
+        bool enabled
+        string rate_limit
+        string summary_model
+        string grading_model
+        string assistant_model
+        decimal monthly_budget
+    }
+    exams_bankquestion {
+        int id PK
+        string bank_id FK
+        string question_type
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        text text
+        string answer_mode
+        text correct_answer
+    }
+    exams_bankquestionoption {
+        int id PK
+        string question_id FK
+        string label
+        text text
+        file image
+        bool is_correct
+    }
+    exams_codingexamquestion {
+        int id PK
+        string question_id FK, UK
+        string title
+        text problem_statement
+        int max_score
+        datetime created_at
+        datetime updated_at
+        string language
+        text input_description
+        text output_description
+    }
+    exams_codingfile {
+        int id PK
+        string submission_id FK
+        string name
+        datetime created_at
+        datetime updated_at
+        text content
+        string language
+        bool is_main
+    }
+    exams_codingsubmission {
+        int id PK
+        string student_id FK
+        string exam_id FK
+        string attempt_id FK
+        string question_id FK
+        string execution_status
+        decimal score
+        datetime updated_at
+        string selected_language
+        text submitted_code
+    }
+    exams_codingtestcase {
+        int id PK
+        string coding_question_id FK
+        datetime created_at
+        text input_data
+        text expected_output
+        string visibility
+        int point_value
+        int order
+    }
+    exams_exam {
+        int id PK
+        string author_id FK
+        string title
+        string exam_type
+        bool is_active
+        string course_id FK
+        string subject_id FK
+        string organization_id FK
+        string exam_type_extended
+        string slug UK
+    }
+    exams_examanswer {
+        int id PK
+        string attempt_id FK
+        string question_id FK
+        int teacher_score
+        datetime updated_at
+        text text_answer
+        bool is_correct
+        text teacher_feedback
+        bool has_paint
+        file paint_image
+    }
+    exams_examanswerfile {
+        int id PK
+        string answer_id FK
+        file file
+        datetime uploaded_at
+    }
+    exams_examattempt {
+        int id PK
+        string user_id FK
+        string exam_id FK
+        string language_variant_id FK
+        string status
+        int teacher_score
+        string supervision_status
+        bool checked_by_teacher
+        datetime teacher_checked_at
+        string language
+    }
+    exams_examlanguagevariant {
+        int id PK
+        string exam_id FK
+        bool is_active
+        datetime created_at
+        datetime updated_at
+        string language
+        string display_name
+        int question_count_override
+    }
+    exams_examquestion {
+        int id PK
+        string exam_id FK
+        string block_id FK
+        string bank_id FK
+        string source_bank_question_id FK
+        string language_variant_id FK
+        bool is_active
+        datetime created_at
+        int points
+        string fingerprint
+    }
+    exams_examquestionoption {
+        int id PK
+        string question_id FK
+        string label
+        text text
+        file image
+        bool is_correct
+    }
+    exams_examroom {
+        int id PK
+        string organization_id FK
+        string name
+        string code
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        string building
+        string floor
+    }
+    exams_examroomcomputer {
+        int id PK
+        string organization_id FK
+        string room_id FK
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        string label
+        int seat_number
+        string mac_address
+    }
+    exams_examroomsession {
+        int id PK
+        string organization_id FK
+        string exam_id FK
+        string room_id FK
+        string invigilator_id FK
+        string state
+        string started_by_id FK
+        string ended_by_id FK
+        string created_by_id FK
+        datetime created_at
+    }
+    exams_examstudentpin {
+        int id PK
+        string exam_id FK
+        string student_id FK
+        datetime created_at
+        datetime updated_at
+        string pin_hash
+        text pin_cipher
+    }
+    exams_examsupervisionconfig {
+        int id PK
+        string exam_id FK, UK
+        datetime created_at
+        datetime updated_at
+        bool enabled
+        string template
+        bool force_fullscreen
+        int grace_period_seconds
+        int resume_window_seconds
+        int max_fullscreen_violations
+    }
+    exams_finalexamticket {
+        int id PK
+        string organization_id FK
+        string session_id FK
+        string exam_id FK
+        string student_id FK
+        string attempt_id FK
+        string status
+        string pin_generated_by_id FK
+        string removed_by_id FK
+        datetime created_at
+    }
+    exams_proctoringlog {
+        int id PK
+        string exam_attempt_id FK
+        string event_type
+        datetime timestamp
+        json details
+    }
+    exams_questionbank {
+        int id PK
+        string name
+        string subject
+        string default_question_type
+        string organization_id FK
+        string org_unit_id FK
+        string organization_type
+        bool is_active
+        string created_by_id FK
+        datetime created_at
+    }
+    exams_questionblock {
+        int id PK
+        string exam_id FK
+        string name
+        int order
+        int time_limit_minutes
+        bool enable_paint
+    }
+    exams_questionsubmission {
+        int id PK
+        string organization_id FK
+        string teacher_id FK
+        string title
+        string subject
+        string student_group_id FK
+        string status
+        string reviewer_id FK
+        string accepted_bank_id FK
+        datetime created_at
+    }
+    exams_studentexamattemptgrant {
+        int id PK
+        string exam_id FK
+        string student_id FK
+        string granted_by_id FK
+        datetime created_at
+        datetime updated_at
+        int extra_attempts
+    }
+    exams_studentgroup {
+        int id PK
+        string teacher_id FK
+        string organization_id FK
+        string name
+        string org_unit_id FK
+        datetime created_at
+    }
+    exams_supervisionincident {
+        int id PK
+        string organization_id FK
+        string exam_id FK
+        string attempt_id FK
+        string student_id FK
+        string event_type
+        string severity
+        datetime timestamp
+        json metadata
+        int violation_count_at_time
+    }
+    exams_textextractionjob {
+        uuid id PK
+        string organization_id FK
+        string user_id FK
+        string status
+        datetime created_at
+        string kind
+        json payload
+        json result_meta
+        string source_name
+        file file
+    }
+    labs_lab {
+        int id PK
+        string course_id FK
+        string title
+        int max_score
+        string status
+        string created_by_id FK
+        datetime created_at
+        datetime updated_at
+        text description
+        datetime start_datetime
+    }
+    labs_labanswer {
+        int id PK
+        string lab_id FK
+        string question_id FK
+        string student_id FK
+        string submission_id FK
+        text answer
+        decimal score
+        int attempt_number
+        file answer_file
+        bool is_draft
+    }
+    labs_labassignment {
+        int id PK
+        string lab_id FK
+        string student_id FK
+        datetime assigned_at
+    }
+    labs_labblock {
+        int id PK
+        string lab_id FK
+        string title
+        datetime created_at
+        text description
+        int order
+        int questions_to_pick
+    }
+    labs_labquestion {
+        int id PK
+        string block_id FK
+        datetime created_at
+        datetime updated_at
+        int question_number
+        text question_text
+        file attachment
+        int points
+    }
+    labs_labsubmission {
+        int id PK
+        string assignment_id FK
+        string status
+        decimal score
+        string graded_by_id FK
+        datetime graded_at
+        datetime updated_at
+        text submission_text
+        file submission_file
+        string submission_link
+    }
+    live_exam_liveanswer {
+        int id PK
+        string session_id FK
+        string player_id FK
+        datetime created_at
+        int question_id
+        int choice_id
+        json choice_ids
+        bool is_correct
+        int answer_ms
+        int awarded_points
+    }
+    live_exam_liveplayer {
+        int id PK
+        string session_id FK
+        int score
+        datetime created_at
+        string nickname
+        string avatar_key
+        string accessory_key
+        string client_id
+        int streak
+        bool is_connected
+    }
+    live_exam_livesession {
+        int id PK
+        string exam_id FK
+        string host_user_id FK
+        string state
+        datetime created_at
+        string pin UK
+        bool is_locked
+        int current_index
+        datetime question_started_at
+        datetime question_ends_at
+    }
+    notifications_inappnotification {
+        int id PK
+        string recipient_id FK
+        string organization_id FK
+        string title
+        string notification_type
+        datetime deleted_at
+        datetime created_at
+        text message
+        string link
+        bool is_read
+    }
+    notifications_studentorganizationrequest {
+        int id PK
+        string user_id FK
+        string organization_id FK
+        string role_type
+        string status
+        string responded_by_id FK
+        datetime created_at
+        datetime updated_at
+        string message
+        string resolution_note
+    }
+    organizations_academicperiod {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string name
+        string period_type
+        bool is_current
+        bool is_active
+        string academic_year
+        date start_date
+    }
+    organizations_country {
+        int id PK
+        string code UK
+        string name UK
+        bool is_active
+    }
+    organizations_institution {
+        int id PK
+        string country_id FK
+        string institution_type
+        string name
+        string code
+        bool is_active
+    }
+    organizations_membership {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string user_id FK
+        string organization_id FK
+        string role_id FK
+        string scope_unit_id FK
+        string title
+        string assigned_by_id FK
+        bool is_primary
+    }
+    organizations_organization {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string name
+        string slug UK
+        string org_type
+        string email
+        string owner_id FK
+        bool is_active
+        string status
+    }
+    organizations_orgunit {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string parent_id FK
+        string unit_type
+        string name
+        string slug
+        string code
+        string head_id FK
+    }
+    organizations_role {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string name
+        string scope_type
+        bool is_active
+        string display_name
+        text description
+        int level
+    }
+    projects_project {
+        int id PK
+        string course_id FK
+        string title
+        int max_score
+        string status
+        datetime created_at
+        datetime updated_at
+        text description
+        datetime start_date
+        datetime deadline
+    }
+    projects_projectsubmission {
+        int id PK
+        string project_id FK
+        string student_id FK
+        string status
+        decimal grade
+        datetime graded_at
+        string graded_by_id FK
+        text content
+        file file
+        text feedback
+    }
+    registrar_assessmentcomponent {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK
+        string name
+        int max_score
+        string rubric_id FK
+        int order
+    }
+    registrar_assessmentscheme {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK, UK
+        int entry_score_max
+        int min_final_exam_score
+        string approval_status
+        string submitted_by_id FK
+        string chair_approved_by_id FK
+    }
+    registrar_componentscore {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string component_id FK
+        string enrollment_id FK
+        decimal score
+        string entered_by_id FK
+    }
+    registrar_courseoffering {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string subject_id FK
+        string period_id FK
+        string group_id FK
+        string course_id FK
+        string instructor_id FK
+        bool is_active
+    }
+    registrar_criterionscore {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string criterion_id FK
+        string enrollment_id FK
+        string entered_by_id FK
+        decimal points
+    }
+    registrar_curriculum {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string program_id FK
+        string name
+        bool is_active
+        int admission_year
+    }
+    registrar_curriculumsubject {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string curriculum_id FK
+        string subject_id FK
+        int order
+        int semester_number
+        bool is_elective
+        string elective_group
+    }
+    registrar_enrollment {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string student_id FK
+        string offering_id FK
+        string status
+        string kind
+        int absence_hours
+    }
+    registrar_finalgrade {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string enrollment_id FK, UK
+        decimal exam_score
+        string entered_by_id FK
+        decimal bonus
+        string comment
+        bool is_published
+    }
+    registrar_groupelectivechoice {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string group_id FK
+        string period_id FK
+        string chosen_subject_id FK
+        string decided_by_id FK
+        string elective_group
+    }
+    registrar_lesson {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK
+        string created_by_id FK
+        date date
+        string kind
+        string topic
+        int hours
+    }
+    registrar_lessonmark {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string lesson_id FK
+        string enrollment_id FK
+        string status
+        decimal score
+        string entered_by_id FK
+    }
+    registrar_program {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string specialty_unit_id FK
+        string code
+        string name
+        bool is_active
+        string degree_level
+        int ects_total
+    }
+    registrar_resitrecord {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string enrollment_id FK
+        string status
+        decimal resit_score
+        string decided_by_id FK
+        string reason
+    }
+    registrar_rubric {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string name
+        bool is_active
+        string description
+    }
+    registrar_rubriccriterion {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string rubric_id FK
+        string name
+        int max_points
+        int order
+    }
+    registrar_scheduleslot {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string offering_id FK
+        string room
+        string week_type
+        string created_by_id FK
+        int weekday
+        string start_time
+    }
+    registrar_studentacademicrecord {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string student_id FK
+        string program_id FK
+        string curriculum_id FK
+        string group_id FK
+        string status
+        bool is_active
+    }
+    registrar_subject {
+        datetime created_at
+        datetime updated_at
+        uuid id PK
+        string organization_id FK
+        string code
+        string name
+        bool is_active
+        int ects
+        text description
+    }
+    trial_exams_trialexamrequest {
+        int id PK
+        string user_id FK
+        string email
+        string status
+        datetime created_at
+        string reply_delivery_status
+        string reply_sent_by_id FK
+        string full_name
+        string subject_name
+        text note
+    }
+    django_admin_log {
+        int id PK
+        string user_id FK
+        string content_type_id FK
+        datetime action_time
+        text object_id
+        string object_repr
+        int action_flag
+        text change_message
+    }
+    auth_group {
+        int id PK
+        string name UK
+    }
+    auth_permission {
+        int id PK
+        string name
+        string content_type_id FK
+        string codename
+    }
+    auth_user {
+        int id PK
+        string username UK
+        string email
+        bool is_active
+        string password
+        datetime last_login
+        bool is_superuser
+        string first_name
+        string last_name
+        bool is_staff
+    }
+    django_content_type {
+        int id PK
+        string app_label
+        string model
+    }
+    django_session {
+        string session_key PK
+        text session_data
+        datetime expire_date
+    }
+    assignments_assignment_assigned_students {
+        int id PK
+        string assignment_id FK
+        string user_id FK
+    }
+    auth_group_permissions {
+        int id PK
+        string group_id FK
+        string permission_id FK
+    }
+    auth_user_groups {
+        int id PK
+        string user_id FK
+        string group_id FK
+    }
+    auth_user_user_permissions {
+        int id PK
+        string user_id FK
+        string permission_id FK
+    }
+    blog_question_visible_users {
+        int id PK
+        string question_id FK
+        string user_id FK
+    }
+    courses_coursegroup_members {
+        int id PK
+        string coursegroup_id FK
+        string user_id FK
+    }
+    exams_exam_allowed_groups {
+        int id PK
+        string exam_id FK
+        string studentgroup_id FK
+    }
+    exams_exam_allowed_users {
+        int id PK
+        string exam_id FK
+        string user_id FK
+    }
+    exams_examanswer_selected_options {
+        int id PK
+        string examanswer_id FK
+        string examquestionoption_id FK
+    }
+    exams_examroom_invigilators {
+        int id PK
+        string examroom_id FK
+        string user_id FK
+    }
+    exams_examroomsession_staff {
+        int id PK
+        string examroomsession_id FK
+        string user_id FK
+    }
+    exams_studentgroup_students {
+        int id PK
+        string studentgroup_id FK
+        string user_id FK
+    }
+    exams_studentgroup_subjects {
+        int id PK
+        string studentgroup_id FK
+        string subject_id FK
+    }
+    exams_studentgroup_teachers {
+        int id PK
+        string studentgroup_id FK
+        string user_id FK
+    }
+    labs_lab_allowed_students {
+        int id PK
+        string lab_id FK
+        string user_id FK
+    }
+    labs_labassignment_assigned_questions {
+        int id PK
+        string labassignment_id FK
+        string labquestion_id FK
+    }
+    projects_project_assigned_students {
+        int id PK
+        string project_id FK
+        string user_id FK
+    }

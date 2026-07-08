@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+<style>text{font-family:Arial,sans-serif}.title{font-size:24px;font-weight:700}.h{font-size:15px;font-weight:700}.t{font-size:12px}.small{font-size:11px;fill:#37474F}</style>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#37474F"/></marker></defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="45" class="title">EMSArena Organization Structure: Faculty and Kafedra as OrgUnit subtypes</text>
+<rect x="70" y="150" width="260" height="120" rx="8" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+<text x="90" y="180" class="h">organizations_organization</text><text x="90" y="205" class="t">Organization tenant root</text><text x="90" y="230" class="t">id, name, slug, org_type</text>
+<rect x="430" y="140" width="330" height="155" rx="8" fill="#E8F5E9" stroke="#2E7D32" stroke-width="2"/>
+<text x="455" y="170" class="h">organizations_orgunit</text><text x="455" y="195" class="t">REAL TABLE: OrgUnit</text><text x="455" y="220" class="t">organization_id, parent_id, unit_type</text><text x="455" y="245" class="t">name, code, head_id, level, path</text>
+<rect x="130" y="390" width="260" height="110" rx="8" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2" stroke-dasharray="8 4"/>
+<text x="150" y="422" class="h">Faculty</text><text x="150" y="450" class="t">OrgUnit(unit_type=faculty)</text><text x="150" y="475" class="t">Ayrıca table deyil</text>
+<rect x="470" y="390" width="300" height="110" rx="8" fill="#A5D6A7" stroke="#2E7D32" stroke-width="2" stroke-dasharray="8 4"/>
+<text x="490" y="422" class="h">Kafedra / Department</text><text x="490" y="450" class="t">OrgUnit(unit_type=chair/department)</text><text x="490" y="475" class="t">Ayrıca table deyil</text>
+<rect x="850" y="390" width="300" height="110" rx="8" fill="#DCE775" stroke="#827717" stroke-width="2" stroke-dasharray="8 4"/>
+<text x="870" y="422" class="h">Specialty / Ixtisas</text><text x="870" y="450" class="t">OrgUnit(unit_type=specialty)</text>
+<rect x="470" y="600" width="320" height="120" rx="8" fill="#FFF3E0" stroke="#EF6C00" stroke-width="2" stroke-dasharray="8 4"/>
+<text x="490" y="632" class="h">Academic Group / Class</text><text x="490" y="660" class="t">OrgUnit subtype or exams_studentgroup.org_unit</text>
+<line x1="330" y1="210" x2="430" y2="215" stroke="#37474F" stroke-width="1.5" marker-end="url(#arrow)"/><text x="350" y="195" class="small">organization_id</text>
+<line x1="590" y1="295" x2="260" y2="390" stroke="#37474F" stroke-width="1.5" marker-end="url(#arrow)"/><text x="350" y="335" class="small">unit_type=faculty</text>
+<line x1="390" y1="445" x2="470" y2="445" stroke="#37474F" stroke-width="1.5" marker-end="url(#arrow)"/><text x="405" y="430" class="small">parent_id</text>
+<line x1="770" y1="445" x2="850" y2="445" stroke="#37474F" stroke-width="1.5" marker-end="url(#arrow)"/><text x="790" y="430" class="small">parent_id</text>
+<line x1="620" y1="500" x2="630" y2="600" stroke="#37474F" stroke-width="1.5" marker-end="url(#arrow)"/><text x="640" y="555" class="small">group scope</text>
+<rect x="80" y="610" width="300" height="105" rx="8" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="2"/><text x="100" y="642" class="h">organizations_membership</text><text x="100" y="670" class="t">scope_unit_id -&gt; OrgUnit</text>
+<rect x="850" y="610" width="280" height="105" rx="8" fill="#FFE0B2" stroke="#EF6C00" stroke-width="2"/><text x="870" y="642" class="h">courses_course</text><text x="870" y="670" class="t">unit_id -&gt; OrgUnit</text>
+<line x1="430" y1="225" x2="230" y2="610" stroke="#37474F" stroke-width="1.2" marker-end="url(#arrow)"/><text x="250" y="565" class="small">scope_unit_id</text>
+<line x1="760" y1="225" x2="970" y2="610" stroke="#37474F" stroke-width="1.2" marker-end="url(#arrow)"/><text x="900" y="565" class="small">unit_id</text>
+<rect x="430" y="770" width="680" height="80" rx="8" fill="#FFFDE7" stroke="#F9A825"/>
+<text x="455" y="802" class="h">Qeyd</text><text x="455" y="830" class="t">Fakültə və kafedra ayrıca DB table deyil; eyni organizations_orgunit table-da unit_type və parent/path ilə ayrılır.</text>
+</svg>

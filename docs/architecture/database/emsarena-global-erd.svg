@@ -1,0 +1,1078 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="5850" height="2920" viewBox="0 0 5850 2920">
+<style>text{font-family:Arial,sans-serif}.title{font-size:24px;font-weight:700}.tbl{font-size:11px}.hdr{font-weight:700}.small{font-size:9px;fill:#37474f}.dom{font-size:14px;font-weight:700}</style>
+<rect width="100%" height="100%" fill="#ffffff"/><text x="40" y="32" class="title">EMSArena Global ERD</text>
+<rect x="25" y="50" width="290" height="230" rx="8" fill="#E8EAF6" stroke="#b0bec5" opacity="0.7"/>
+<text x="35" y="72" class="dom">AI Assistant</text>
+<rect x="375" y="50" width="290" height="530" rx="8" fill="#EDE7F6" stroke="#b0bec5" opacity="0.7"/>
+<text x="385" y="72" class="dom">Appeals</text>
+<rect x="725" y="50" width="590" height="1280" rx="8" fill="#F9FBE7" stroke="#b0bec5" opacity="0.7"/>
+<text x="735" y="72" class="dom">Assignments / Projects / Labs</text>
+<rect x="1375" y="50" width="290" height="230" rx="8" fill="#ECEFF1" stroke="#b0bec5" opacity="0.7"/>
+<text x="1385" y="72" class="dom">Audit and Security</text>
+<rect x="1725" y="50" width="290" height="1130" rx="8" fill="#E3F2FD" stroke="#b0bec5" opacity="0.7"/>
+<text x="1735" y="72" class="dom">Core / Tenant Management</text>
+<rect x="2075" y="50" width="290" height="1130" rx="8" fill="#FFF3E0" stroke="#b0bec5" opacity="0.7"/>
+<text x="2085" y="72" class="dom">Courses and Curriculum</text>
+<rect x="2425" y="50" width="290" height="530" rx="8" fill="#F5F5F5" stroke="#b0bec5" opacity="0.7"/>
+<text x="2435" y="72" class="dom">Django System</text>
+<rect x="2775" y="50" width="590" height="2780" rx="8" fill="#FFEBEE" stroke="#b0bec5" opacity="0.7"/>
+<text x="2785" y="72" class="dom">Exams and Final Center</text>
+<rect x="3425" y="50" width="290" height="530" rx="8" fill="#FCE4EC" stroke="#b0bec5" opacity="0.7"/>
+<text x="3435" y="72" class="dom">Live Exam</text>
+<rect x="3775" y="50" width="290" height="380" rx="8" fill="#FFFDE7" stroke="#b0bec5" opacity="0.7"/>
+<text x="3785" y="72" class="dom">Notifications</text>
+<rect x="4125" y="50" width="590" height="830" rx="8" fill="#F1F8E9" stroke="#b0bec5" opacity="0.7"/>
+<text x="4135" y="72" class="dom">Public Content and Requests</text>
+<rect x="4775" y="50" width="590" height="1580" rx="8" fill="#E0F7FA" stroke="#b0bec5" opacity="0.7"/>
+<text x="4785" y="72" class="dom">Registrar / Journal</text>
+<rect x="5425" y="50" width="290" height="1280" rx="8" fill="#F3E5F5" stroke="#b0bec5" opacity="0.7"/>
+<text x="5435" y="72" class="dom">Users and Authentication</text>
+<line x1="5570" y1="899" x2="5570" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="5570" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="5570" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="5570" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="170" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="170" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="899" x2="520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="520" y1="149" x2="520" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1199" x2="520" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="899" x2="520" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="520" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="520" y1="299" x2="520" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="520" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1199" x2="520" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="520" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="870" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="870" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="149" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="870" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="149" x2="1170" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1170" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1170" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="1520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2570" y1="299" x2="1520" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="4270" y1="299" x2="4570" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="4570" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="4270" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="4270" y1="149" x2="4270" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="4270" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="4270" y1="299" x2="4570" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="4570" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="4270" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="4270" y1="449" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="4570" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="899" x2="2220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="149" x2="2220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="2220" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2220" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="299" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="2220" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2220" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="2220" y2="749" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2220" y2="749" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="2220" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="1049" x2="2220" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="2220" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2099" x2="3220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="149" x2="2920" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1199" x2="3220" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="449" x2="2920" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3220" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="3220" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="299" x2="3220" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="299" x2="2920" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="3220" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="4920" y1="1499" x2="3220" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="3220" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="2920" y2="2399" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="2920" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1199" x2="2920" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="899" x2="2920" y2="1349" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="899" x2="2920" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3220" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="1199" x2="3220" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="2920" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3220" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="2099" x2="3220" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2099" x2="3220" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="149" x2="3220" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="1199" x2="3220" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1199" x2="2920" y2="1349" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="3220" y2="1349" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="1349" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1349" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="3220" y2="1499" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1349" x2="3220" y2="1499" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="1499" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1349" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1649" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="1649" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="2920" y2="1799" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1799" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3220" y2="1799" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="1649" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="3220" y2="1949" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2920" y2="2099" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="899" x2="2920" y2="2099" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="2099" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3220" y2="2099" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2920" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2399" x2="2920" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2099" x2="2920" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3220" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="2249" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="2399" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2920" y2="2399" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="899" x2="2920" y2="2399" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2399" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2399" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="2920" y1="2399" x2="4920" y2="1499" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="2920" y2="2699" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="2920" y2="2699" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="1049" x2="2920" y2="2699" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="2920" y2="2699" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="3220" y2="2699" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3220" y2="2699" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="870" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="870" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="449" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="449" x2="870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="899" x2="870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1170" y1="899" x2="870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="449" x2="1170" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1170" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1170" y1="599" x2="870" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="449" x2="1170" y2="749" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1170" y1="749" x2="870" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1170" y1="599" x2="1170" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1170" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3570" y1="449" x2="3570" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3570" y1="299" x2="3570" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3570" y1="449" x2="3570" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="3220" y1="599" x2="3570" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3570" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3920" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="3920" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3920" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="3920" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="3920" y2="299" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="1870" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="299" x2="1870" y2="449" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="1870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="1049" x2="1870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="899" x2="1870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1870" y2="599" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1870" y2="749" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="1870" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="1870" y2="899" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="1870" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="2220" y1="149" x2="870" y2="1049" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="1049" x2="5570" y2="899" stroke="#8D6E63" stroke-width="1" opacity="0.35"/>
+<line x1="870" y1="1049" x2="870" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="870" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="870" y2="1199" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="4920" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5220" y1="299" x2="4920" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="4920" y1="1199" x2="4920" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="1870" y1="749" x2="5220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5220" y1="299" x2="5220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="5220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<line x1="5570" y1="899" x2="5220" y2="149" stroke="#546E7A" stroke-width="1" opacity="0.35"/>
+<rect x="5440" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="90" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="107" class="hdr tbl">accounts_emailotp</text>
+<text x="5446" y="130" class="small">PK id: BigAutoField</text>
+<text x="5446" y="144" class="small">FK user_id: ForeignKey</text>
+<text x="5446" y="158" class="small">email: CharField</text>
+<text x="5446" y="172" class="small">code: CharField</text>
+<text x="5446" y="186" class="small">created_at: DateTimeField</text>
+<rect x="5440" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="240" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="257" class="hdr tbl">accounts_userprofile</text>
+<text x="5446" y="280" class="small">PK id: BigAutoField</text>
+<text x="5446" y="294" class="small">FK user_id: OneToOneField</text>
+<text x="5446" y="308" class="small">FK organization_id: ForeignKey</text>
+<text x="5446" y="322" class="small">FK requested_organization_id: ForeignKey</text>
+<text x="5446" y="336" class="small">organization_type: CharField</text>
+<rect x="40" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="40" y="90" width="260" height="24" fill="#E8EAF6" stroke="#455A64"/>
+<text x="46" y="107" class="hdr tbl">ai_assistant_aiassistantlog</text>
+<text x="46" y="130" class="small">created_at: DateTimeField</text>
+<text x="46" y="144" class="small">updated_at: DateTimeField</text>
+<text x="46" y="158" class="small">PK id: UUIDField</text>
+<text x="46" y="172" class="small">FK user_id: ForeignKey</text>
+<text x="46" y="186" class="small">FK organization_id: ForeignKey</text>
+<rect x="390" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="390" y="90" width="260" height="24" fill="#EDE7F6" stroke="#455A64"/>
+<text x="396" y="107" class="hdr tbl">appeals_appeal</text>
+<text x="396" y="130" class="small">PK id: BigAutoField</text>
+<text x="396" y="144" class="small">FK attempt_id: ForeignKey</text>
+<text x="396" y="158" class="small">FK exam_id: ForeignKey</text>
+<text x="396" y="172" class="small">FK student_id: ForeignKey</text>
+<text x="396" y="186" class="small">FK organization_id: ForeignKey</text>
+<rect x="390" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="390" y="240" width="260" height="24" fill="#EDE7F6" stroke="#455A64"/>
+<text x="396" y="257" class="hdr tbl">appeals_appealitem</text>
+<text x="396" y="280" class="small">PK id: BigAutoField</text>
+<text x="396" y="294" class="small">FK appeal_id: ForeignKey</text>
+<text x="396" y="308" class="small">FK question_id: ForeignKey</text>
+<text x="396" y="322" class="small">FK answer_id: ForeignKey</text>
+<text x="396" y="336" class="small">appeal_type: CharField</text>
+<rect x="390" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="390" y="390" width="260" height="24" fill="#EDE7F6" stroke="#455A64"/>
+<text x="396" y="407" class="hdr tbl">appeals_scoreadjustment</text>
+<text x="396" y="430" class="small">PK id: BigAutoField</text>
+<text x="396" y="444" class="small">FK appeal_item_id: OneToOneField</text>
+<text x="396" y="458" class="small">FK attempt_id: ForeignKey</text>
+<text x="396" y="472" class="small">FK question_id: ForeignKey</text>
+<text x="396" y="486" class="small">previous_score: DecimalField</text>
+<rect x="740" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="90" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="107" class="hdr tbl">assignments_assignment</text>
+<text x="746" y="130" class="small">PK id: BigAutoField</text>
+<text x="746" y="144" class="small">FK course_id: ForeignKey</text>
+<text x="746" y="158" class="small">type: CharField</text>
+<text x="746" y="172" class="small">title: CharField</text>
+<text x="746" y="186" class="small">max_score: DecimalField</text>
+<rect x="740" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="240" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="257" class="hdr tbl">assignments_notification</text>
+<text x="746" y="280" class="small">PK id: BigAutoField</text>
+<text x="746" y="294" class="small">FK user_id: ForeignKey</text>
+<text x="746" y="308" class="small">title: CharField</text>
+<text x="746" y="322" class="small">type: CharField</text>
+<text x="746" y="336" class="small">created_at: DateTimeField</text>
+<rect x="1040" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="240" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="257" class="hdr tbl">assignments_submission</text>
+<text x="1046" y="280" class="small">PK id: BigAutoField</text>
+<text x="1046" y="294" class="small">FK assignment_id: ForeignKey</text>
+<text x="1046" y="308" class="small">FK user_id: ForeignKey</text>
+<text x="1046" y="322" class="small">status: CharField</text>
+<text x="1046" y="336" class="small">grade: DecimalField</text>
+<rect x="1390" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1390" y="90" width="260" height="24" fill="#ECEFF1" stroke="#455A64"/>
+<text x="1396" y="107" class="hdr tbl">audit_auditlog</text>
+<text x="1396" y="130" class="small">PK id: UUIDField</text>
+<text x="1396" y="144" class="small">FK user_id: ForeignKey</text>
+<text x="1396" y="158" class="small">FK organization_id: ForeignKey</text>
+<text x="1396" y="172" class="small">resource_type: CharField</text>
+<text x="1396" y="186" class="small">FK content_type_id: ForeignKey</text>
+<rect x="4140" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4140" y="90" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4146" y="107" class="hdr tbl">blog_category</text>
+<text x="4146" y="130" class="small">PK id: BigAutoField</text>
+<text x="4146" y="144" class="small">name: CharField</text>
+<text x="4146" y="158" class="small">slug: SlugField</text>
+<text x="4146" y="172" class="small">FK parent_id: ForeignKey</text>
+<text x="4146" y="186" class="small">name_az: CharField</text>
+<rect x="4440" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4440" y="90" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4446" y="107" class="hdr tbl">blog_comment</text>
+<text x="4446" y="130" class="small">PK id: BigAutoField</text>
+<text x="4446" y="144" class="small">FK post_id: ForeignKey</text>
+<text x="4446" y="158" class="small">FK user_id: ForeignKey</text>
+<text x="4446" y="172" class="small">created_at: DateTimeField</text>
+<text x="4446" y="186" class="small">text: TextField</text>
+<rect x="4140" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4140" y="240" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4146" y="257" class="hdr tbl">blog_post</text>
+<text x="4146" y="280" class="small">PK id: BigAutoField</text>
+<text x="4146" y="294" class="small">FK author_id: ForeignKey</text>
+<text x="4146" y="308" class="small">FK category_id: ForeignKey</text>
+<text x="4146" y="322" class="small">title: CharField</text>
+<text x="4146" y="336" class="small">slug: SlugField</text>
+<rect x="4440" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4440" y="240" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4446" y="257" class="hdr tbl">blog_postapprovallog</text>
+<text x="4446" y="280" class="small">PK id: BigAutoField</text>
+<text x="4446" y="294" class="small">FK post_id: ForeignKey</text>
+<text x="4446" y="308" class="small">FK reviewer_id: ForeignKey</text>
+<text x="4446" y="322" class="small">created_at: DateTimeField</text>
+<text x="4446" y="336" class="small">action: CharField</text>
+<rect x="4140" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4140" y="390" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4146" y="407" class="hdr tbl">blog_question</text>
+<text x="4146" y="430" class="small">PK id: BigAutoField</text>
+<text x="4146" y="444" class="small">FK author_id: ForeignKey</text>
+<text x="4146" y="458" class="small">created_at: DateTimeField</text>
+<text x="4146" y="472" class="small">question_text: TextField</text>
+<text x="4146" y="486" class="small">answer_text: TextField</text>
+<rect x="4140" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4140" y="540" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4146" y="557" class="hdr tbl">blog_subscriber</text>
+<text x="4146" y="580" class="small">PK id: BigAutoField</text>
+<text x="4146" y="594" class="small">email: CharField</text>
+<text x="4146" y="608" class="small">is_active: BooleanField</text>
+<text x="4146" y="622" class="small">created_at: DateTimeField</text>
+<text x="4146" y="636" class="small">conf_token: CharField</text>
+<rect x="4440" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4440" y="540" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4446" y="557" class="hdr tbl">contact_contactmessage</text>
+<text x="4446" y="580" class="small">PK id: BigAutoField</text>
+<text x="4446" y="594" class="small">name: CharField</text>
+<text x="4446" y="608" class="small">email: CharField</text>
+<text x="4446" y="622" class="small">subject: CharField</text>
+<text x="4446" y="636" class="small">created_at: DateTimeField</text>
+<rect x="2090" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="90" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="107" class="hdr tbl">courses_course</text>
+<text x="2096" y="130" class="small">PK id: BigAutoField</text>
+<text x="2096" y="144" class="small">FK owner_id: ForeignKey</text>
+<text x="2096" y="158" class="small">title: CharField</text>
+<text x="2096" y="172" class="small">slug: SlugField</text>
+<text x="2096" y="186" class="small">status: CharField</text>
+<rect x="2090" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="240" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="257" class="hdr tbl">courses_coursegroup</text>
+<text x="2096" y="280" class="small">PK id: BigAutoField</text>
+<text x="2096" y="294" class="small">FK course_id: ForeignKey</text>
+<text x="2096" y="308" class="small">name: CharField</text>
+<text x="2096" y="322" class="small">FK instructor_id: ForeignKey</text>
+<text x="2096" y="336" class="small">created_at: DateTimeField</text>
+<rect x="2090" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="540" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="557" class="hdr tbl">courses_courseinstructor</text>
+<text x="2096" y="580" class="small">PK id: BigAutoField</text>
+<text x="2096" y="594" class="small">FK course_id: ForeignKey</text>
+<text x="2096" y="608" class="small">FK user_id: ForeignKey</text>
+<text x="2096" y="622" class="small">role: CharField</text>
+<text x="2096" y="636" class="small">created_at: DateTimeField</text>
+<rect x="2090" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="690" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="707" class="hdr tbl">courses_coursemembership</text>
+<text x="2096" y="730" class="small">PK id: BigAutoField</text>
+<text x="2096" y="744" class="small">FK course_id: ForeignKey</text>
+<text x="2096" y="758" class="small">FK user_id: ForeignKey</text>
+<text x="2096" y="772" class="small">role: CharField</text>
+<text x="2096" y="786" class="small">group_name: CharField</text>
+<rect x="2090" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="840" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="857" class="hdr tbl">courses_courseresource</text>
+<text x="2096" y="880" class="small">PK id: BigAutoField</text>
+<text x="2096" y="894" class="small">FK course_id: ForeignKey</text>
+<text x="2096" y="908" class="small">FK topic_id: ForeignKey</text>
+<text x="2096" y="922" class="small">title: CharField</text>
+<text x="2096" y="936" class="small">resource_type: CharField</text>
+<rect x="2090" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="990" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="1007" class="hdr tbl">courses_coursetopic</text>
+<text x="2096" y="1030" class="small">PK id: BigAutoField</text>
+<text x="2096" y="1044" class="small">FK course_id: ForeignKey</text>
+<text x="2096" y="1058" class="small">title: CharField</text>
+<text x="2096" y="1072" class="small">created_at: DateTimeField</text>
+<text x="2096" y="1086" class="small">description: TextField</text>
+<rect x="2790" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="90" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="107" class="hdr tbl">exams_aiconfiguration</text>
+<text x="2796" y="130" class="small">PK id: BigAutoField</text>
+<text x="2796" y="144" class="small">updated_at: DateTimeField</text>
+<text x="2796" y="158" class="small">enabled: BooleanField</text>
+<text x="2796" y="172" class="small">rate_limit: CharField</text>
+<text x="2796" y="186" class="small">summary_model: CharField</text>
+<rect x="3090" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="90" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="107" class="hdr tbl">exams_bankquestion</text>
+<text x="3096" y="130" class="small">PK id: BigAutoField</text>
+<text x="3096" y="144" class="small">FK bank_id: ForeignKey</text>
+<text x="3096" y="158" class="small">question_type: CharField</text>
+<text x="3096" y="172" class="small">is_active: BooleanField</text>
+<text x="3096" y="186" class="small">FK created_by_id: ForeignKey</text>
+<rect x="2790" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="240" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="257" class="hdr tbl">exams_bankquestionoption</text>
+<text x="2796" y="280" class="small">PK id: BigAutoField</text>
+<text x="2796" y="294" class="small">FK question_id: ForeignKey</text>
+<text x="2796" y="308" class="small">label: CharField</text>
+<text x="2796" y="322" class="small">text: TextField</text>
+<text x="2796" y="336" class="small">image: FileField</text>
+<rect x="3090" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="240" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="257" class="hdr tbl">exams_codingexamquestion</text>
+<text x="3096" y="280" class="small">PK id: BigAutoField</text>
+<text x="3096" y="294" class="small">FK question_id: OneToOneField</text>
+<text x="3096" y="308" class="small">title: CharField</text>
+<text x="3096" y="322" class="small">problem_statement: TextField</text>
+<text x="3096" y="336" class="small">max_score: PositiveIntegerField</text>
+<rect x="2790" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="390" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="407" class="hdr tbl">exams_codingfile</text>
+<text x="2796" y="430" class="small">PK id: BigAutoField</text>
+<text x="2796" y="444" class="small">FK submission_id: ForeignKey</text>
+<text x="2796" y="458" class="small">name: CharField</text>
+<text x="2796" y="472" class="small">created_at: DateTimeField</text>
+<text x="2796" y="486" class="small">updated_at: DateTimeField</text>
+<rect x="3090" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="390" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="407" class="hdr tbl">exams_codingsubmission</text>
+<text x="3096" y="430" class="small">PK id: BigAutoField</text>
+<text x="3096" y="444" class="small">FK student_id: ForeignKey</text>
+<text x="3096" y="458" class="small">FK exam_id: ForeignKey</text>
+<text x="3096" y="472" class="small">FK attempt_id: ForeignKey</text>
+<text x="3096" y="486" class="small">FK question_id: ForeignKey</text>
+<rect x="2790" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="540" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="557" class="hdr tbl">exams_codingtestcase</text>
+<text x="2796" y="580" class="small">PK id: BigAutoField</text>
+<text x="2796" y="594" class="small">FK coding_question_id: ForeignKey</text>
+<text x="2796" y="608" class="small">created_at: DateTimeField</text>
+<text x="2796" y="622" class="small">input_data: TextField</text>
+<text x="2796" y="636" class="small">expected_output: TextField</text>
+<rect x="3090" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="540" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="557" class="hdr tbl">exams_exam</text>
+<text x="3096" y="580" class="small">PK id: BigAutoField</text>
+<text x="3096" y="594" class="small">FK author_id: ForeignKey</text>
+<text x="3096" y="608" class="small">title: CharField</text>
+<text x="3096" y="622" class="small">exam_type: CharField</text>
+<text x="3096" y="636" class="small">is_active: BooleanField</text>
+<rect x="2790" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="840" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="857" class="hdr tbl">exams_examanswer</text>
+<text x="2796" y="880" class="small">PK id: BigAutoField</text>
+<text x="2796" y="894" class="small">FK attempt_id: ForeignKey</text>
+<text x="2796" y="908" class="small">FK question_id: ForeignKey</text>
+<text x="2796" y="922" class="small">teacher_score: PositiveIntegerField</text>
+<text x="2796" y="936" class="small">updated_at: DateTimeField</text>
+<rect x="2790" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="990" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1007" class="hdr tbl">exams_examanswerfile</text>
+<text x="2796" y="1030" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1044" class="small">FK answer_id: ForeignKey</text>
+<text x="2796" y="1058" class="small">file: FileField</text>
+<text x="2796" y="1072" class="small">uploaded_at: DateTimeField</text>
+<rect x="3090" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="990" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1007" class="hdr tbl">exams_examattempt</text>
+<text x="3096" y="1030" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1044" class="small">FK user_id: ForeignKey</text>
+<text x="3096" y="1058" class="small">FK exam_id: ForeignKey</text>
+<text x="3096" y="1072" class="small">FK language_variant_id: ForeignKey</text>
+<text x="3096" y="1086" class="small">status: CharField</text>
+<rect x="2790" y="1140" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="1140" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1157" class="hdr tbl">exams_examlanguagevariant</text>
+<text x="2796" y="1180" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1194" class="small">FK exam_id: ForeignKey</text>
+<text x="2796" y="1208" class="small">is_active: BooleanField</text>
+<text x="2796" y="1222" class="small">created_at: DateTimeField</text>
+<text x="2796" y="1236" class="small">updated_at: DateTimeField</text>
+<rect x="3090" y="1140" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="1140" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1157" class="hdr tbl">exams_examquestion</text>
+<text x="3096" y="1180" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1194" class="small">FK exam_id: ForeignKey</text>
+<text x="3096" y="1208" class="small">FK block_id: ForeignKey</text>
+<text x="3096" y="1222" class="small">FK bank_id: ForeignKey</text>
+<text x="3096" y="1236" class="small">FK source_bank_question_id: ForeignKey</text>
+<rect x="2790" y="1290" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="1290" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1307" class="hdr tbl">exams_examquestionoption</text>
+<text x="2796" y="1330" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1344" class="small">FK question_id: ForeignKey</text>
+<text x="2796" y="1358" class="small">label: CharField</text>
+<text x="2796" y="1372" class="small">text: TextField</text>
+<text x="2796" y="1386" class="small">image: FileField</text>
+<rect x="3090" y="1290" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="1290" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1307" class="hdr tbl">exams_examroom</text>
+<text x="3096" y="1330" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1344" class="small">FK organization_id: ForeignKey</text>
+<text x="3096" y="1358" class="small">name: CharField</text>
+<text x="3096" y="1372" class="small">code: CharField</text>
+<text x="3096" y="1386" class="small">is_active: BooleanField</text>
+<rect x="3090" y="1440" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="1440" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1457" class="hdr tbl">exams_examroomcomputer</text>
+<text x="3096" y="1480" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1494" class="small">FK organization_id: ForeignKey</text>
+<text x="3096" y="1508" class="small">FK room_id: ForeignKey</text>
+<text x="3096" y="1522" class="small">is_active: BooleanField</text>
+<text x="3096" y="1536" class="small">FK created_by_id: ForeignKey</text>
+<rect x="2790" y="1590" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="1590" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1607" class="hdr tbl">exams_examroomsession</text>
+<text x="2796" y="1630" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1644" class="small">FK organization_id: ForeignKey</text>
+<text x="2796" y="1658" class="small">FK exam_id: ForeignKey</text>
+<text x="2796" y="1672" class="small">FK room_id: ForeignKey</text>
+<text x="2796" y="1686" class="small">FK invigilator_id: ForeignKey</text>
+<rect x="2790" y="1740" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="1740" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1757" class="hdr tbl">exams_examstudentpin</text>
+<text x="2796" y="1780" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1794" class="small">FK exam_id: ForeignKey</text>
+<text x="2796" y="1808" class="small">FK student_id: ForeignKey</text>
+<text x="2796" y="1822" class="small">created_at: DateTimeField</text>
+<text x="2796" y="1836" class="small">updated_at: DateTimeField</text>
+<rect x="3090" y="1740" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="1740" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1757" class="hdr tbl">exams_examsupervisionconfig</text>
+<text x="3096" y="1780" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1794" class="small">FK exam_id: OneToOneField</text>
+<text x="3096" y="1808" class="small">created_at: DateTimeField</text>
+<text x="3096" y="1822" class="small">updated_at: DateTimeField</text>
+<text x="3096" y="1836" class="small">enabled: BooleanField</text>
+<rect x="2790" y="1890" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="1890" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1907" class="hdr tbl">exams_finalexamticket</text>
+<text x="2796" y="1930" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1944" class="small">FK organization_id: ForeignKey</text>
+<text x="2796" y="1958" class="small">FK session_id: ForeignKey</text>
+<text x="2796" y="1972" class="small">FK exam_id: ForeignKey</text>
+<text x="2796" y="1986" class="small">FK student_id: ForeignKey</text>
+<rect x="3090" y="1890" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="1890" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1907" class="hdr tbl">exams_proctoringlog</text>
+<text x="3096" y="1930" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1944" class="small">FK exam_attempt_id: ForeignKey</text>
+<text x="3096" y="1958" class="small">event_type: CharField</text>
+<text x="3096" y="1972" class="small">timestamp: DateTimeField</text>
+<text x="3096" y="1986" class="small">details: JSONField</text>
+<rect x="2790" y="2040" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="2040" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="2057" class="hdr tbl">exams_questionbank</text>
+<text x="2796" y="2080" class="small">PK id: BigAutoField</text>
+<text x="2796" y="2094" class="small">name: CharField</text>
+<text x="2796" y="2108" class="small">subject: CharField</text>
+<text x="2796" y="2122" class="small">default_question_type: CharField</text>
+<text x="2796" y="2136" class="small">FK organization_id: ForeignKey</text>
+<rect x="3090" y="2040" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="2040" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="2057" class="hdr tbl">exams_questionblock</text>
+<text x="3096" y="2080" class="small">PK id: BigAutoField</text>
+<text x="3096" y="2094" class="small">FK exam_id: ForeignKey</text>
+<text x="3096" y="2108" class="small">name: CharField</text>
+<text x="3096" y="2122" class="small">order: PositiveIntegerField</text>
+<text x="3096" y="2136" class="small">time_limit_minutes: PositiveIntegerField</text>
+<rect x="2790" y="2190" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="2190" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="2207" class="hdr tbl">exams_questionsubmission</text>
+<text x="2796" y="2230" class="small">PK id: BigAutoField</text>
+<text x="2796" y="2244" class="small">FK organization_id: ForeignKey</text>
+<text x="2796" y="2258" class="small">FK teacher_id: ForeignKey</text>
+<text x="2796" y="2272" class="small">title: CharField</text>
+<text x="2796" y="2286" class="small">subject: CharField</text>
+<rect x="3090" y="2190" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="2190" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="2207" class="hdr tbl">exams_studentexamattemptgrant</text>
+<text x="3096" y="2230" class="small">PK id: BigAutoField</text>
+<text x="3096" y="2244" class="small">FK exam_id: ForeignKey</text>
+<text x="3096" y="2258" class="small">FK student_id: ForeignKey</text>
+<text x="3096" y="2272" class="small">FK granted_by_id: ForeignKey</text>
+<text x="3096" y="2286" class="small">created_at: DateTimeField</text>
+<rect x="2790" y="2340" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="2340" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="2357" class="hdr tbl">exams_studentgroup</text>
+<text x="2796" y="2380" class="small">PK id: BigAutoField</text>
+<text x="2796" y="2394" class="small">FK teacher_id: ForeignKey</text>
+<text x="2796" y="2408" class="small">FK organization_id: ForeignKey</text>
+<text x="2796" y="2422" class="small">name: CharField</text>
+<text x="2796" y="2436" class="small">FK org_unit_id: ForeignKey</text>
+<rect x="2790" y="2640" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="2640" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="2657" class="hdr tbl">exams_supervisionincident</text>
+<text x="2796" y="2680" class="small">PK id: BigAutoField</text>
+<text x="2796" y="2694" class="small">FK organization_id: ForeignKey</text>
+<text x="2796" y="2708" class="small">FK exam_id: ForeignKey</text>
+<text x="2796" y="2722" class="small">FK attempt_id: ForeignKey</text>
+<text x="2796" y="2736" class="small">FK student_id: ForeignKey</text>
+<rect x="3090" y="2640" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="2640" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="2657" class="hdr tbl">exams_textextractionjob</text>
+<text x="3096" y="2680" class="small">PK id: UUIDField</text>
+<text x="3096" y="2694" class="small">FK organization_id: ForeignKey</text>
+<text x="3096" y="2708" class="small">FK user_id: ForeignKey</text>
+<text x="3096" y="2722" class="small">status: CharField</text>
+<text x="3096" y="2736" class="small">created_at: DateTimeField</text>
+<rect x="740" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="390" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="407" class="hdr tbl">labs_lab</text>
+<text x="746" y="430" class="small">PK id: BigAutoField</text>
+<text x="746" y="444" class="small">FK course_id: ForeignKey</text>
+<text x="746" y="458" class="small">title: CharField</text>
+<text x="746" y="472" class="small">max_score: PositiveIntegerField</text>
+<text x="746" y="486" class="small">status: CharField</text>
+<rect x="740" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="540" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="557" class="hdr tbl">labs_labanswer</text>
+<text x="746" y="580" class="small">PK id: BigAutoField</text>
+<text x="746" y="594" class="small">FK lab_id: ForeignKey</text>
+<text x="746" y="608" class="small">FK question_id: ForeignKey</text>
+<text x="746" y="622" class="small">FK student_id: ForeignKey</text>
+<text x="746" y="636" class="small">FK submission_id: ForeignKey</text>
+<rect x="1040" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="540" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="557" class="hdr tbl">labs_labassignment</text>
+<text x="1046" y="580" class="small">PK id: BigAutoField</text>
+<text x="1046" y="594" class="small">FK lab_id: ForeignKey</text>
+<text x="1046" y="608" class="small">FK student_id: ForeignKey</text>
+<text x="1046" y="622" class="small">assigned_at: DateTimeField</text>
+<rect x="1040" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="690" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="707" class="hdr tbl">labs_labblock</text>
+<text x="1046" y="730" class="small">PK id: BigAutoField</text>
+<text x="1046" y="744" class="small">FK lab_id: ForeignKey</text>
+<text x="1046" y="758" class="small">title: CharField</text>
+<text x="1046" y="772" class="small">created_at: DateTimeField</text>
+<text x="1046" y="786" class="small">description: TextField</text>
+<rect x="740" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="840" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="857" class="hdr tbl">labs_labquestion</text>
+<text x="746" y="880" class="small">PK id: BigAutoField</text>
+<text x="746" y="894" class="small">FK block_id: ForeignKey</text>
+<text x="746" y="908" class="small">created_at: DateTimeField</text>
+<text x="746" y="922" class="small">updated_at: DateTimeField</text>
+<text x="746" y="936" class="small">question_number: PositiveIntegerField</text>
+<rect x="1040" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="840" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="857" class="hdr tbl">labs_labsubmission</text>
+<text x="1046" y="880" class="small">PK id: BigAutoField</text>
+<text x="1046" y="894" class="small">FK assignment_id: ForeignKey</text>
+<text x="1046" y="908" class="small">status: CharField</text>
+<text x="1046" y="922" class="small">score: DecimalField</text>
+<text x="1046" y="936" class="small">FK graded_by_id: ForeignKey</text>
+<rect x="3440" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3440" y="90" width="260" height="24" fill="#FCE4EC" stroke="#455A64"/>
+<text x="3446" y="107" class="hdr tbl">live_exam_liveanswer</text>
+<text x="3446" y="130" class="small">PK id: BigAutoField</text>
+<text x="3446" y="144" class="small">FK session_id: ForeignKey</text>
+<text x="3446" y="158" class="small">FK player_id: ForeignKey</text>
+<text x="3446" y="172" class="small">created_at: DateTimeField</text>
+<text x="3446" y="186" class="small">question_id: IntegerField</text>
+<rect x="3440" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3440" y="240" width="260" height="24" fill="#FCE4EC" stroke="#455A64"/>
+<text x="3446" y="257" class="hdr tbl">live_exam_liveplayer</text>
+<text x="3446" y="280" class="small">PK id: BigAutoField</text>
+<text x="3446" y="294" class="small">FK session_id: ForeignKey</text>
+<text x="3446" y="308" class="small">score: IntegerField</text>
+<text x="3446" y="322" class="small">created_at: DateTimeField</text>
+<text x="3446" y="336" class="small">nickname: CharField</text>
+<rect x="3440" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3440" y="390" width="260" height="24" fill="#FCE4EC" stroke="#455A64"/>
+<text x="3446" y="407" class="hdr tbl">live_exam_livesession</text>
+<text x="3446" y="430" class="small">PK id: BigAutoField</text>
+<text x="3446" y="444" class="small">FK exam_id: ForeignKey</text>
+<text x="3446" y="458" class="small">FK host_user_id: ForeignKey</text>
+<text x="3446" y="472" class="small">state: CharField</text>
+<text x="3446" y="486" class="small">created_at: DateTimeField</text>
+<rect x="3790" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3790" y="90" width="260" height="24" fill="#FFFDE7" stroke="#455A64"/>
+<text x="3796" y="107" class="hdr tbl">notifications_inappnotification</text>
+<text x="3796" y="130" class="small">PK id: BigAutoField</text>
+<text x="3796" y="144" class="small">FK recipient_id: ForeignKey</text>
+<text x="3796" y="158" class="small">FK organization_id: ForeignKey</text>
+<text x="3796" y="172" class="small">title: CharField</text>
+<text x="3796" y="186" class="small">notification_type: CharField</text>
+<rect x="3790" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3790" y="240" width="260" height="24" fill="#FFFDE7" stroke="#455A64"/>
+<text x="3796" y="257" class="hdr tbl">notifications_studentorganizationreq</text>
+<text x="3796" y="280" class="small">PK id: BigAutoField</text>
+<text x="3796" y="294" class="small">FK user_id: ForeignKey</text>
+<text x="3796" y="308" class="small">FK organization_id: ForeignKey</text>
+<text x="3796" y="322" class="small">role_type: CharField</text>
+<text x="3796" y="336" class="small">status: CharField</text>
+<rect x="1740" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="90" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="107" class="hdr tbl">organizations_academicperiod</text>
+<text x="1746" y="130" class="small">created_at: DateTimeField</text>
+<text x="1746" y="144" class="small">updated_at: DateTimeField</text>
+<text x="1746" y="158" class="small">PK id: UUIDField</text>
+<text x="1746" y="172" class="small">FK organization_id: ForeignKey</text>
+<text x="1746" y="186" class="small">name: CharField</text>
+<rect x="1740" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="240" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="257" class="hdr tbl">organizations_country</text>
+<text x="1746" y="280" class="small">PK id: BigAutoField</text>
+<text x="1746" y="294" class="small">code: CharField</text>
+<text x="1746" y="308" class="small">name: CharField</text>
+<text x="1746" y="322" class="small">is_active: BooleanField</text>
+<rect x="1740" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="390" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="407" class="hdr tbl">organizations_institution</text>
+<text x="1746" y="430" class="small">PK id: BigAutoField</text>
+<text x="1746" y="444" class="small">FK country_id: ForeignKey</text>
+<text x="1746" y="458" class="small">institution_type: CharField</text>
+<text x="1746" y="472" class="small">name: CharField</text>
+<text x="1746" y="486" class="small">code: CharField</text>
+<rect x="1740" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="540" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="557" class="hdr tbl">organizations_membership</text>
+<text x="1746" y="580" class="small">created_at: DateTimeField</text>
+<text x="1746" y="594" class="small">updated_at: DateTimeField</text>
+<text x="1746" y="608" class="small">PK id: UUIDField</text>
+<text x="1746" y="622" class="small">FK user_id: ForeignKey</text>
+<text x="1746" y="636" class="small">FK organization_id: ForeignKey</text>
+<rect x="1740" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="690" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="707" class="hdr tbl">organizations_organization</text>
+<text x="1746" y="730" class="small">created_at: DateTimeField</text>
+<text x="1746" y="744" class="small">updated_at: DateTimeField</text>
+<text x="1746" y="758" class="small">PK id: UUIDField</text>
+<text x="1746" y="772" class="small">name: CharField</text>
+<text x="1746" y="786" class="small">slug: SlugField</text>
+<rect x="1740" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="840" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="857" class="hdr tbl">organizations_orgunit</text>
+<text x="1746" y="880" class="small">created_at: DateTimeField</text>
+<text x="1746" y="894" class="small">updated_at: DateTimeField</text>
+<text x="1746" y="908" class="small">PK id: UUIDField</text>
+<text x="1746" y="922" class="small">FK organization_id: ForeignKey</text>
+<text x="1746" y="936" class="small">FK parent_id: ForeignKey</text>
+<rect x="1740" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1740" y="990" width="260" height="24" fill="#E3F2FD" stroke="#455A64"/>
+<text x="1746" y="1007" class="hdr tbl">organizations_role</text>
+<text x="1746" y="1030" class="small">created_at: DateTimeField</text>
+<text x="1746" y="1044" class="small">updated_at: DateTimeField</text>
+<text x="1746" y="1058" class="small">PK id: UUIDField</text>
+<text x="1746" y="1072" class="small">FK organization_id: ForeignKey</text>
+<text x="1746" y="1086" class="small">name: CharField</text>
+<rect x="740" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="990" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="1007" class="hdr tbl">projects_project</text>
+<text x="746" y="1030" class="small">PK id: BigAutoField</text>
+<text x="746" y="1044" class="small">FK course_id: ForeignKey</text>
+<text x="746" y="1058" class="small">title: CharField</text>
+<text x="746" y="1072" class="small">max_score: PositiveIntegerField</text>
+<text x="746" y="1086" class="small">status: CharField</text>
+<rect x="740" y="1140" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="1140" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="1157" class="hdr tbl">projects_projectsubmission</text>
+<text x="746" y="1180" class="small">PK id: BigAutoField</text>
+<text x="746" y="1194" class="small">FK project_id: ForeignKey</text>
+<text x="746" y="1208" class="small">FK student_id: ForeignKey</text>
+<text x="746" y="1222" class="small">status: CharField</text>
+<text x="746" y="1236" class="small">grade: DecimalField</text>
+<rect x="4790" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="90" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="107" class="hdr tbl">registrar_assessmentcomponent</text>
+<text x="4796" y="130" class="small">created_at: DateTimeField</text>
+<text x="4796" y="144" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="158" class="small">PK id: UUIDField</text>
+<text x="4796" y="172" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="186" class="small">FK offering_id: ForeignKey</text>
+<rect x="5090" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="90" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="107" class="hdr tbl">registrar_assessmentscheme</text>
+<text x="5096" y="130" class="small">created_at: DateTimeField</text>
+<text x="5096" y="144" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="158" class="small">PK id: UUIDField</text>
+<text x="5096" y="172" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="186" class="small">FK offering_id: OneToOneField</text>
+<rect x="4790" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="240" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="257" class="hdr tbl">registrar_componentscore</text>
+<text x="4796" y="280" class="small">created_at: DateTimeField</text>
+<text x="4796" y="294" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="308" class="small">PK id: UUIDField</text>
+<text x="4796" y="322" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="336" class="small">FK component_id: ForeignKey</text>
+<rect x="5090" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="240" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="257" class="hdr tbl">registrar_courseoffering</text>
+<text x="5096" y="280" class="small">created_at: DateTimeField</text>
+<text x="5096" y="294" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="308" class="small">PK id: UUIDField</text>
+<text x="5096" y="322" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="336" class="small">FK subject_id: ForeignKey</text>
+<rect x="4790" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="390" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="407" class="hdr tbl">registrar_criterionscore</text>
+<text x="4796" y="430" class="small">created_at: DateTimeField</text>
+<text x="4796" y="444" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="458" class="small">PK id: UUIDField</text>
+<text x="4796" y="472" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="486" class="small">FK criterion_id: ForeignKey</text>
+<rect x="5090" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="390" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="407" class="hdr tbl">registrar_curriculum</text>
+<text x="5096" y="430" class="small">created_at: DateTimeField</text>
+<text x="5096" y="444" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="458" class="small">PK id: UUIDField</text>
+<text x="5096" y="472" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="486" class="small">FK program_id: ForeignKey</text>
+<rect x="4790" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="540" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="557" class="hdr tbl">registrar_curriculumsubject</text>
+<text x="4796" y="580" class="small">created_at: DateTimeField</text>
+<text x="4796" y="594" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="608" class="small">PK id: UUIDField</text>
+<text x="4796" y="622" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="636" class="small">FK curriculum_id: ForeignKey</text>
+<rect x="5090" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="540" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="557" class="hdr tbl">registrar_enrollment</text>
+<text x="5096" y="580" class="small">created_at: DateTimeField</text>
+<text x="5096" y="594" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="608" class="small">PK id: UUIDField</text>
+<text x="5096" y="622" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="636" class="small">FK student_id: ForeignKey</text>
+<rect x="4790" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="690" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="707" class="hdr tbl">registrar_finalgrade</text>
+<text x="4796" y="730" class="small">created_at: DateTimeField</text>
+<text x="4796" y="744" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="758" class="small">PK id: UUIDField</text>
+<text x="4796" y="772" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="786" class="small">FK enrollment_id: OneToOneField</text>
+<rect x="5090" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="690" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="707" class="hdr tbl">registrar_groupelectivechoice</text>
+<text x="5096" y="730" class="small">created_at: DateTimeField</text>
+<text x="5096" y="744" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="758" class="small">PK id: UUIDField</text>
+<text x="5096" y="772" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="786" class="small">FK group_id: ForeignKey</text>
+<rect x="4790" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="840" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="857" class="hdr tbl">registrar_lesson</text>
+<text x="4796" y="880" class="small">created_at: DateTimeField</text>
+<text x="4796" y="894" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="908" class="small">PK id: UUIDField</text>
+<text x="4796" y="922" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="936" class="small">FK offering_id: ForeignKey</text>
+<rect x="5090" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="840" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="857" class="hdr tbl">registrar_lessonmark</text>
+<text x="5096" y="880" class="small">created_at: DateTimeField</text>
+<text x="5096" y="894" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="908" class="small">PK id: UUIDField</text>
+<text x="5096" y="922" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="936" class="small">FK lesson_id: ForeignKey</text>
+<rect x="4790" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="990" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="1007" class="hdr tbl">registrar_program</text>
+<text x="4796" y="1030" class="small">created_at: DateTimeField</text>
+<text x="4796" y="1044" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="1058" class="small">PK id: UUIDField</text>
+<text x="4796" y="1072" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="1086" class="small">FK specialty_unit_id: ForeignKey</text>
+<rect x="5090" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="990" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="1007" class="hdr tbl">registrar_resitrecord</text>
+<text x="5096" y="1030" class="small">created_at: DateTimeField</text>
+<text x="5096" y="1044" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="1058" class="small">PK id: UUIDField</text>
+<text x="5096" y="1072" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="1086" class="small">FK enrollment_id: ForeignKey</text>
+<rect x="4790" y="1140" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="1140" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="1157" class="hdr tbl">registrar_rubric</text>
+<text x="4796" y="1180" class="small">created_at: DateTimeField</text>
+<text x="4796" y="1194" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="1208" class="small">PK id: UUIDField</text>
+<text x="4796" y="1222" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="1236" class="small">name: CharField</text>
+<rect x="5090" y="1140" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="1140" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="1157" class="hdr tbl">registrar_rubriccriterion</text>
+<text x="5096" y="1180" class="small">created_at: DateTimeField</text>
+<text x="5096" y="1194" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="1208" class="small">PK id: UUIDField</text>
+<text x="5096" y="1222" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="1236" class="small">FK rubric_id: ForeignKey</text>
+<rect x="4790" y="1290" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="1290" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="1307" class="hdr tbl">registrar_scheduleslot</text>
+<text x="4796" y="1330" class="small">created_at: DateTimeField</text>
+<text x="4796" y="1344" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="1358" class="small">PK id: UUIDField</text>
+<text x="4796" y="1372" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="1386" class="small">FK offering_id: ForeignKey</text>
+<rect x="5090" y="1290" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5090" y="1290" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="5096" y="1307" class="hdr tbl">registrar_studentacademicrecord</text>
+<text x="5096" y="1330" class="small">created_at: DateTimeField</text>
+<text x="5096" y="1344" class="small">updated_at: DateTimeField</text>
+<text x="5096" y="1358" class="small">PK id: UUIDField</text>
+<text x="5096" y="1372" class="small">FK organization_id: ForeignKey</text>
+<text x="5096" y="1386" class="small">FK student_id: ForeignKey</text>
+<rect x="4790" y="1440" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4790" y="1440" width="260" height="24" fill="#E0F7FA" stroke="#455A64"/>
+<text x="4796" y="1457" class="hdr tbl">registrar_subject</text>
+<text x="4796" y="1480" class="small">created_at: DateTimeField</text>
+<text x="4796" y="1494" class="small">updated_at: DateTimeField</text>
+<text x="4796" y="1508" class="small">PK id: UUIDField</text>
+<text x="4796" y="1522" class="small">FK organization_id: ForeignKey</text>
+<text x="4796" y="1536" class="small">code: CharField</text>
+<rect x="4140" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4140" y="690" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4146" y="707" class="hdr tbl">trial_exams_trialexamrequest</text>
+<text x="4146" y="730" class="small">PK id: BigAutoField</text>
+<text x="4146" y="744" class="small">FK user_id: ForeignKey</text>
+<text x="4146" y="758" class="small">email: CharField</text>
+<text x="4146" y="772" class="small">status: CharField</text>
+<text x="4146" y="786" class="small">created_at: DateTimeField</text>
+<rect x="2440" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2440" y="90" width="260" height="24" fill="#F5F5F5" stroke="#455A64"/>
+<text x="2446" y="107" class="hdr tbl">django_admin_log</text>
+<text x="2446" y="130" class="small">PK id: AutoField</text>
+<text x="2446" y="144" class="small">FK user_id: ForeignKey</text>
+<text x="2446" y="158" class="small">FK content_type_id: ForeignKey</text>
+<text x="2446" y="172" class="small">action_time: DateTimeField</text>
+<text x="2446" y="186" class="small">object_id: TextField</text>
+<rect x="5440" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="390" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="407" class="hdr tbl">auth_group</text>
+<text x="5446" y="430" class="small">PK id: AutoField</text>
+<text x="5446" y="444" class="small">name: CharField</text>
+<rect x="5440" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="690" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="707" class="hdr tbl">auth_permission</text>
+<text x="5446" y="730" class="small">PK id: AutoField</text>
+<text x="5446" y="744" class="small">name: CharField</text>
+<text x="5446" y="758" class="small">FK content_type_id: ForeignKey</text>
+<text x="5446" y="772" class="small">codename: CharField</text>
+<rect x="5440" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="840" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="857" class="hdr tbl">auth_user</text>
+<text x="5446" y="880" class="small">PK id: AutoField</text>
+<text x="5446" y="894" class="small">username: CharField</text>
+<text x="5446" y="908" class="small">email: CharField</text>
+<text x="5446" y="922" class="small">is_active: BooleanField</text>
+<text x="5446" y="936" class="small">password: CharField</text>
+<rect x="2440" y="240" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2440" y="240" width="260" height="24" fill="#F5F5F5" stroke="#455A64"/>
+<text x="2446" y="257" class="hdr tbl">django_content_type</text>
+<text x="2446" y="280" class="small">PK id: AutoField</text>
+<text x="2446" y="294" class="small">app_label: CharField</text>
+<text x="2446" y="308" class="small">model: CharField</text>
+<rect x="2440" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2440" y="390" width="260" height="24" fill="#F5F5F5" stroke="#455A64"/>
+<text x="2446" y="407" class="hdr tbl">django_session</text>
+<text x="2446" y="430" class="small">PK session_key: CharField</text>
+<text x="2446" y="444" class="small">session_data: TextField</text>
+<text x="2446" y="458" class="small">expire_date: DateTimeField</text>
+<rect x="1040" y="90" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="90" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="107" class="hdr tbl">assignments_assignment_assigned_stud</text>
+<text x="1046" y="130" class="small">PK id: BigAutoField</text>
+<text x="1046" y="144" class="small">FK assignment_id: ForeignKey</text>
+<text x="1046" y="158" class="small">FK user_id: ForeignKey</text>
+<rect x="5440" y="540" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="540" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="557" class="hdr tbl">auth_group_permissions</text>
+<text x="5446" y="580" class="small">PK id: AutoField</text>
+<text x="5446" y="594" class="small">FK group_id: ForeignKey</text>
+<text x="5446" y="608" class="small">FK permission_id: ForeignKey</text>
+<rect x="5440" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="990" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="1007" class="hdr tbl">auth_user_groups</text>
+<text x="5446" y="1030" class="small">PK id: AutoField</text>
+<text x="5446" y="1044" class="small">FK user_id: ForeignKey</text>
+<text x="5446" y="1058" class="small">FK group_id: ForeignKey</text>
+<rect x="5440" y="1140" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="5440" y="1140" width="260" height="24" fill="#F3E5F5" stroke="#455A64"/>
+<text x="5446" y="1157" class="hdr tbl">auth_user_user_permissions</text>
+<text x="5446" y="1180" class="small">PK id: AutoField</text>
+<text x="5446" y="1194" class="small">FK user_id: ForeignKey</text>
+<text x="5446" y="1208" class="small">FK permission_id: ForeignKey</text>
+<rect x="4440" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="4440" y="390" width="260" height="24" fill="#F1F8E9" stroke="#455A64"/>
+<text x="4446" y="407" class="hdr tbl">blog_question_visible_users</text>
+<text x="4446" y="430" class="small">PK id: BigAutoField</text>
+<text x="4446" y="444" class="small">FK question_id: ForeignKey</text>
+<text x="4446" y="458" class="small">FK user_id: ForeignKey</text>
+<rect x="2090" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2090" y="390" width="260" height="24" fill="#FFF3E0" stroke="#455A64"/>
+<text x="2096" y="407" class="hdr tbl">courses_coursegroup_members</text>
+<text x="2096" y="430" class="small">PK id: BigAutoField</text>
+<text x="2096" y="444" class="small">FK coursegroup_id: ForeignKey</text>
+<text x="2096" y="458" class="small">FK user_id: ForeignKey</text>
+<rect x="2790" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="690" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="707" class="hdr tbl">exams_exam_allowed_groups</text>
+<text x="2796" y="730" class="small">PK id: BigAutoField</text>
+<text x="2796" y="744" class="small">FK exam_id: ForeignKey</text>
+<text x="2796" y="758" class="small">FK studentgroup_id: ForeignKey</text>
+<rect x="3090" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="690" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="707" class="hdr tbl">exams_exam_allowed_users</text>
+<text x="3096" y="730" class="small">PK id: BigAutoField</text>
+<text x="3096" y="744" class="small">FK exam_id: ForeignKey</text>
+<text x="3096" y="758" class="small">FK user_id: ForeignKey</text>
+<rect x="3090" y="840" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="840" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="857" class="hdr tbl">exams_examanswer_selected_options</text>
+<text x="3096" y="880" class="small">PK id: BigAutoField</text>
+<text x="3096" y="894" class="small">FK examanswer_id: ForeignKey</text>
+<text x="3096" y="908" class="small">FK examquestionoption_id: ForeignKey</text>
+<rect x="2790" y="1440" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="1440" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="1457" class="hdr tbl">exams_examroom_invigilators</text>
+<text x="2796" y="1480" class="small">PK id: BigAutoField</text>
+<text x="2796" y="1494" class="small">FK examroom_id: ForeignKey</text>
+<text x="2796" y="1508" class="small">FK user_id: ForeignKey</text>
+<rect x="3090" y="1590" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="1590" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="1607" class="hdr tbl">exams_examroomsession_staff</text>
+<text x="3096" y="1630" class="small">PK id: BigAutoField</text>
+<text x="3096" y="1644" class="small">FK examroomsession_id: ForeignKey</text>
+<text x="3096" y="1658" class="small">FK user_id: ForeignKey</text>
+<rect x="3090" y="2340" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="2340" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="2357" class="hdr tbl">exams_studentgroup_students</text>
+<text x="3096" y="2380" class="small">PK id: BigAutoField</text>
+<text x="3096" y="2394" class="small">FK studentgroup_id: ForeignKey</text>
+<text x="3096" y="2408" class="small">FK user_id: ForeignKey</text>
+<rect x="2790" y="2490" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="2790" y="2490" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="2796" y="2507" class="hdr tbl">exams_studentgroup_subjects</text>
+<text x="2796" y="2530" class="small">PK id: BigAutoField</text>
+<text x="2796" y="2544" class="small">FK studentgroup_id: ForeignKey</text>
+<text x="2796" y="2558" class="small">FK subject_id: ForeignKey</text>
+<rect x="3090" y="2490" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="3090" y="2490" width="260" height="24" fill="#FFEBEE" stroke="#455A64"/>
+<text x="3096" y="2507" class="hdr tbl">exams_studentgroup_teachers</text>
+<text x="3096" y="2530" class="small">PK id: BigAutoField</text>
+<text x="3096" y="2544" class="small">FK studentgroup_id: ForeignKey</text>
+<text x="3096" y="2558" class="small">FK user_id: ForeignKey</text>
+<rect x="1040" y="390" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="390" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="407" class="hdr tbl">labs_lab_allowed_students</text>
+<text x="1046" y="430" class="small">PK id: BigAutoField</text>
+<text x="1046" y="444" class="small">FK lab_id: ForeignKey</text>
+<text x="1046" y="458" class="small">FK user_id: ForeignKey</text>
+<rect x="740" y="690" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="740" y="690" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="746" y="707" class="hdr tbl">labs_labassignment_assigned_question</text>
+<text x="746" y="730" class="small">PK id: BigAutoField</text>
+<text x="746" y="744" class="small">FK labassignment_id: ForeignKey</text>
+<text x="746" y="758" class="small">FK labquestion_id: ForeignKey</text>
+<rect x="1040" y="990" width="260" height="118" fill="#ffffff" stroke="#455A64"/>
+<rect x="1040" y="990" width="260" height="24" fill="#F9FBE7" stroke="#455A64"/>
+<text x="1046" y="1007" class="hdr tbl">projects_project_assigned_students</text>
+<text x="1046" y="1030" class="small">PK id: BigAutoField</text>
+<text x="1046" y="1044" class="small">FK project_id: ForeignKey</text>
+<text x="1046" y="1058" class="small">FK user_id: ForeignKey</text>
+<text x="40" y="2892" class="small">Generated: 2026-07-08 14:49:12. Lines show FK/M2M relationships; edit the .drawio file for full labels.</text>
+</svg>
