@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Oturum tarixçəsi" %} — {{ session.exam.title }}{% endblock %}
+{% block title %}{% trans "Oturum tarixçəsi" %} — {{ session.room.name }}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
@@ -18,7 +18,7 @@
     <div>
       <h1><i class="fas fa-clock-rotate-left"></i> {% trans "Oturum tarixçəsi" %}</h1>
       <p class="fxc-sub">
-        {{ session.exam.title }} · <i class="fas fa-door-open"></i> {{ session.room.name }} <code>{{ session.room.code }}</code>
+        <i class="fas fa-door-open"></i> {{ session.room.name }} <code>{{ session.room.code }}</code>
       </p>
     </div>
   </header>

@@ -24,6 +24,7 @@ from apps.exams.models import (
     ExamQuestion,
     ExamQuestionOption,
     ExamRoom,
+    ExamRoomComputer,
     ExamRoomSession,
     FinalExamTicket,
     StudentGroup,
@@ -87,13 +88,13 @@ class Command(UsersSeedMixin, BaseCommand):
         exam.allowed_groups.set([main_group, sub_group])
         exam.allowed_users.set([individual])
 
-        # ── Zal + oturum (təzə: təkrar işə salınanda köhnə demo oturumu silinir) ──
+        # ── Zal + oturum (imtahandan asılı deyil) + qeydli kompüter (IP→zal) ──
         room = self._ensure_room(org, center)
-        ExamRoomSession.objects.filter(exam=exam, room=room, created_by=center).exclude(state__in=("ended",)).delete()
+        self._ensure_local_computer(org, room, center)
+        ExamRoomSession.objects.filter(room=room, created_by=center).exclude(state__in=("ended",)).delete()
         now = timezone.now()
         session = ExamRoomSession.objects.create(
             organization=org,
-            exam=exam,
             room=room,
             invigilator=invigilator,
             scheduled_start=now - timedelta(minutes=5),
@@ -101,14 +102,14 @@ class Command(UsersSeedMixin, BaseCommand):
             created_by=center,
         )
 
-        # ── Təyinat: qrup + alt-sektor + fərdi (tək çağırışda birləşir) ─────
+        # ── Təyinat: tələbələr İMTAHANA təyin olunur (zaldan asılı deyil) ────
         all_students = list(az_students) + list(en_students) + [individual]
-        created, skipped = assign_students(session, all_students, center)
+        created, skipped = assign_students(exam, all_students, center)
 
         # ── Girişi aç (tələbələr dərhal PIN ilə daxil ola bilsin) ───────────
         open_entry(session, center)
 
-        self._report(password, org, center, invigilator, session, main_group, sub_group, individual, all_students)
+        self._report(password, org, center, invigilator, exam, session, main_group, sub_group, individual, all_students)
 
     # ------------------------------------------------------------------ helpers
 
@@ -221,7 +222,23 @@ class Command(UsersSeedMixin, BaseCommand):
         )
         return room
 
-    def _report(self, password, org, center, invigilator, session, main_group, sub_group, individual, students):
+    def _ensure_local_computer(self, org, room, center):
+        """Zala 127.0.0.1 IP-li kompüter qeyd et — lokal test/demo-da tələbə öz
+        maşınından girəndə IP→zal həlli işləsin (oturum sisteminin ləğvi)."""
+        ExamRoomComputer.objects.get_or_create(
+            room=room,
+            label="PC-DEMO-01",
+            defaults={
+                "organization": org,
+                "seat_number": 1,
+                "mac_address": "AA:BB:CC:DD:EE:01",
+                "ip_address": "127.0.0.1",
+                "is_active": True,
+                "created_by": center,
+            },
+        )
+
+    def _report(self, password, org, center, invigilator, exam, session, main_group, sub_group, individual, students):
         out = self.stdout
         ok = self.style.SUCCESS
         warn = self.style.WARNING
@@ -231,7 +248,7 @@ class Command(UsersSeedMixin, BaseCommand):
         out.write(ok("══════════════════════════════════════════════════════════════\n"))
 
         out.write(f"Təşkilat        : {org.name}")
-        out.write(f"İmtahan         : {session.exam.title}")
+        out.write(f"İmtahan         : {exam.title}")
         out.write(f"Zal / Oturum    : {session.room.name} · vəziyyət = {session.state} (giriş açıq)")
         out.write(
             f"Vaxt            : {timezone.localtime(session.scheduled_start):%d.%m.%Y %H:%M}"

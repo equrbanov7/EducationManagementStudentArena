@@ -102,8 +102,54 @@ def room_ip_access_allowed(request, room) -> bool:
     return False
 
 
+def resolve_room_computer(request, organization):
+    """
+    Müştəri IP-sindən ZALI və kompüteri həll et (oturum sisteminin ləğvi, 2026-07).
+
+    Tələbə qeydli kompüterdən girəndə hansı zalda olduğunu bilmək üçün: org-un
+    aktiv ``ExamRoomComputer`` sətirlərində müştəri IP-si axtarılır. Uyğun gələn
+    kompüterin zalı qaytarılır — imtahandan asılı olmayaraq, tələbə həmin zalın
+    açıq oturumuna qoşulur (bax ``attach_ticket_to_room_sitting``).
+
+    Qaytarır: ``(room, computer)`` uyğun gələndə, əks halda ``(None, None)``.
+    MAC HTTP ilə serverə çatmadığı üçün yeganə etibarlı vahid IP-dir (bax modul
+    başlığı; ``ExamRoomComputer.ip_address``).
+    """
+    from apps.exams.models import ExamRoomComputer
+    from core.rls import bypass_rls
+
+    client_text = get_client_ip(request)
+    try:
+        client_ip = ipaddress.ip_address(client_text)
+    except ValueError:
+        logger.warning("resolve_room_computer: müştəri IP-si oxunmadı (%r).", client_text)
+        return None, None
+
+    # Final girişi PUBLIC axındır (tələbə hələ login olmayıb, aktiv-org RLS
+    # konteksti yoxdur). Kompüter axtarışı ``organization``-a görə AÇIQ filtrlənir
+    # (biletin org-u), ona görə RLS bypass ilə işlədirik — tenant sızması yoxdur.
+    # QEYD: ``ip_address`` GenericIPAddressField (postgres ``inet``) — boş dəyər
+    # NULL kimi saxlanır, "" YOX. inet sütununu "" ilə müqayisə etmək bütün
+    # sətirləri düşürür, ona görə yalnız ``isnull=False`` filtri işlədilir.
+    with bypass_rls():
+        computers = list(
+            ExamRoomComputer.objects.filter(
+                organization=organization, is_active=True, ip_address__isnull=False
+            ).select_related("room")
+        )
+    for comp in computers:
+        try:
+            if ipaddress.ip_address(comp.ip_address) == client_ip:
+                return comp.room, comp
+        except ValueError:
+            logger.warning("resolve_room_computer: kompüter IP-si yanlış formatdadır, ötürülür: %r", comp.ip_address)
+            continue
+    return None, None
+
+
 __all__ = [
     "final_exam_access_allowed",
     "get_client_ip",
+    "resolve_room_computer",
     "room_ip_access_allowed",
 ]

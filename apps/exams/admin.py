@@ -242,13 +242,13 @@ class ExamRoomAdmin(admin.ModelAdmin):
 
 @admin.register(ExamRoomSession)
 class ExamRoomSessionAdmin(admin.ModelAdmin):
-    list_display = ("exam", "room", "state", "scheduled_start", "scheduled_end", "invigilator")
+    list_display = ("room", "state", "scheduled_start", "scheduled_end", "invigilator")
     list_filter = ("state",)
-    search_fields = ("exam__title", "room__name")
+    search_fields = ("room__name",)
     readonly_fields = ("started_at", "started_by", "ended_at", "ended_by", "start_connected_count")
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related("exam", "room", "invigilator")
+        return super().get_queryset(request).select_related("room", "invigilator")
 
 
 @admin.register(FinalExamTicket)

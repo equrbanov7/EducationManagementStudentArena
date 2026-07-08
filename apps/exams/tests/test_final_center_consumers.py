@@ -77,7 +77,6 @@ class FinalCenterConsumerAuthTests(TransactionTestCase):
         now = timezone.now()
         self.session = ExamRoomSession.objects.create(
             organization=self.org,
-            exam=self.exam,
             room=self.room,
             invigilator=self.center,
             scheduled_start=now + timedelta(minutes=5),

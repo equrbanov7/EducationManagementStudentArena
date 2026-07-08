@@ -33,16 +33,18 @@ class ExamRoomForm(forms.ModelForm):
 
 class ExamRoomSessionForm(forms.ModelForm):
     """
-    Oturum yaratma. Yalnız FINAL kateqoriyalı, aktiv imtahanlar seçilə bilər;
-    zal seçimi org-scoped olur (view ötürür).
+    Zal oturumu (sitting) yaratma — imtahandan ASILI DEYİL. Yalnız zal + vaxt
+    pəncərəsi seçilir; oturum açılanda otaqdakı qeydli kompüterlərdən girən
+    hər tələbə (kim hansı finala təyin olunubsa) həmin oturuma qoşulur.
 
-    Nəzarətçi ARTIQ burada YOX — nəzarətçi ZALA təyin olunur (``ExamRoom.invigilators``,
-    imtahan mərkəzi zal monitorunda) və zaldakı bütün oturumları idarə edir.
+    Nəzarətçi ZALA təyin olunur (``ExamRoom.invigilators``) və zaldakı oturumu
+    idarə edir; imtahan seçimi burada YOX (tələbə ``FinalExamTicket.exam``-a
+    təyin olunur — bax ``AssignStudentsForm``).
     """
 
     class Meta:
         model = ExamRoomSession
-        fields = ["exam", "room", "scheduled_start", "scheduled_end", "notes"]
+        fields = ["room", "scheduled_start", "scheduled_end", "notes"]
         widgets = {
             "scheduled_start": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
             "scheduled_end": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
@@ -52,18 +54,14 @@ class ExamRoomSessionForm(forms.ModelForm):
     def __init__(self, *args, organization=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.organization = organization
-        self.fields["exam"].queryset = Exam.objects.filter(
-            organization=organization, exam_type_extended="final", is_archived=False
-        ).order_by("-created_at")
         self.fields["room"].queryset = ExamRoom.objects.filter(organization=organization, is_active=True)
         # Bootstrap axtarışlı select ilə zənginləşdir (js/bootstrap_select.js).
-        for field_name in ("exam", "room"):
-            self.fields[field_name].widget.attrs.update(
-                {
-                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
-                    "data-bootstrap-select": "",
-                }
-            )
+        self.fields["room"].widget.attrs.update(
+            {
+                "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                "data-bootstrap-select": "",
+            }
+        )
         for field_name in ("scheduled_start", "scheduled_end"):
             self.fields[field_name].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"]
 
@@ -83,8 +81,17 @@ class ExamRoomSessionForm(forms.ModelForm):
 
 
 class AssignStudentsForm(forms.Form):
-    """Oturuma tələbə təyinatı: qrupdan və/və ya istifadəçi adları siyahısından."""
+    """İMTAHANA tələbə təyinatı: final imtahan seçilir, tələbələr qrupdan
+    və/və ya istifadəçi adları siyahısından təyin olunur (hər birinə PIN verilir).
 
+    Zal seçimi YOX — tələbə imtahana təyin olunur, hansı zalda verəcəyi giriş
+    anında (kompüter IP → zal) müəyyən olunur.
+    """
+
+    exam = forms.ModelChoiceField(
+        queryset=Exam.objects.none(),
+        label=pgettext_lazy("exams.final_center.form", "Final imtahanı"),
+    )
     group = forms.ModelChoiceField(
         queryset=StudentGroup.objects.none(),
         required=False,
@@ -99,6 +106,15 @@ class AssignStudentsForm(forms.Form):
 
     def __init__(self, *args, organization=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["exam"].queryset = Exam.objects.filter(
+            organization=organization, exam_type_extended="final", is_archived=False
+        ).order_by("-created_at")
+        self.fields["exam"].widget.attrs.update(
+            {
+                "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                "data-bootstrap-select": "",
+            }
+        )
         self.fields["group"].queryset = StudentGroup.objects.filter(organization=organization).order_by("name")
 
     def clean(self):

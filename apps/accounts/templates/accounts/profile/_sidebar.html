@@ -185,6 +185,13 @@
                 <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'exams:exam_center_finals' %}"
+               class="sidebar-menu-link">
+                <i class="fas fa-user-plus sidebar-menu-icon c3-1"></i>
+                <span class="sidebar-menu-text">{% trans 'Final təyinatları' %}</span>
+            </a>
+        </li>
         {% endif %}
         {% if 'exam-center-pins' in allowed_sections %}
         <li class="sidebar-menu-item">

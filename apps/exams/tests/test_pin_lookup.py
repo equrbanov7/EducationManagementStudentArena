@@ -50,7 +50,6 @@ class PinLookupTests(TestCase):
         now = timezone.now()
         cls.session = ExamRoomSession.objects.create(
             organization=cls.org,
-            exam=cls.exam,
             room=cls.room,
             invigilator=cls.center,
             scheduled_start=now + timedelta(hours=1),

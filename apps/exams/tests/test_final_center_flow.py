@@ -24,11 +24,18 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_REMOVED,
     TICKET_STATUS_WAITING,
 )
-from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, ExamRoom, ExamRoomSession, FinalExamTicket
+from apps.exams.models import (
+    Exam,
+    ExamQuestion,
+    ExamQuestionOption,
+    ExamRoom,
+    ExamRoomComputer,
+    ExamRoomSession,
+    FinalExamTicket,
+)
 from apps.exams.services.final_center import (
     RoomSessionStateError,
     TicketStateError,
-    assign_students,
     begin_attempt_for_ticket,
     end_room,
     enter_waiting,
@@ -38,7 +45,6 @@ from apps.exams.services.final_center import (
     set_ticket_pin,
     start_room,
     student_cancel_waiting,
-    validate_entry,
     validate_session_plan,
 )
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
@@ -70,6 +76,7 @@ class _FlowBase(TestCase):
         cls.student2 = User.objects.create_user("fcf_student2", "fcf_student2@test.az", PASSWORD)
         _assign_user_to_org(cls.student2, cls.org, ProfileRole.STUDENT, "student")
 
+        _now = timezone.now()
         cls.exam = Exam.objects.create(
             title="FCF Final",
             author=cls.center,
@@ -79,6 +86,8 @@ class _FlowBase(TestCase):
             is_active=True,
             total_duration_minutes=60,
             random_question_count=1,
+            start_datetime=_now + timedelta(minutes=5),
+            end_datetime=_now + timedelta(hours=2),
         )
         question = ExamQuestion.objects.create(exam=cls.exam, order=1, text="Final sualı")
         ExamQuestionOption.objects.create(question=question, label="A", text="Cavab", is_correct=True)
@@ -86,12 +95,22 @@ class _FlowBase(TestCase):
         cls.room = ExamRoom.objects.create(
             organization=cls.org, name="Zal A", code="ZA", capacity=25, created_by=cls.center
         )
+        # Kompüter IP → zal həlli üçün (oturum sisteminin ləğvi): test client IP
+        # 127.0.0.1-dir, ona görə zala həmin IP-li kompüter qeyd edilir.
+        cls.computer = ExamRoomComputer.objects.create(
+            organization=cls.org,
+            room=cls.room,
+            label="PC-LOCAL",
+            seat_number=10,  # test-lərin əlavə etdiyi seat 1 ilə toqquşmasın
+            mac_address="AA:BB:CC:DD:EE:0A",
+            ip_address="127.0.0.1",
+            created_by=cls.center,
+        )
 
     def setUp(self):
         now = timezone.now()
         self.session = ExamRoomSession.objects.create(
             organization=self.org,
-            exam=self.exam,
             room=self.room,
             invigilator=self.invigilator,
             scheduled_start=now + timedelta(minutes=5),
@@ -190,22 +209,18 @@ class EntryValidationTests(_FlowBase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("_auth_user_id", client.session)
 
-    def test_entry_rejected_when_session_not_open(self):
-        FinalExamTicket.objects.all().delete()
-        session2 = ExamRoomSession.objects.create(
-            organization=self.org,
-            exam=self.exam,
-            room=self.room,
-            scheduled_start=timezone.now() + timedelta(days=1),
-            scheduled_end=timezone.now() + timedelta(days=1, hours=2),
+    def test_entry_rejected_when_no_open_room_sitting(self):
+        # Oturum sisteminin ləğvi: PIN yoxlaması zaldan asılı deyil (validate_entry
+        # uğur verir), amma zalda AÇIQ oturum yoxdursa view giriş vermir (login
+        # olunmur) — tələbə nəzarətçinin oturumu açmasını gözləyir.
+        ExamRoomSession.objects.all().delete()
+        client = Client()
+        response = client.post(
+            reverse("exams:final_exam_entry"),
+            {"username": self.student.username, "pin": self.raw_pin},
         )
-        ticket2 = FinalExamTicket.objects.create(
-            organization=self.org, session=session2, exam=self.exam, student=self.student
-        )
-        raw2 = set_ticket_pin(ticket2, self.center)
-        ticket, error = validate_entry(_FakeRequest(), self.student.username, raw2)
-        self.assertIsNone(ticket)
-        self.assertIsNotNone(error)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", client.session)
 
     def test_get_without_pin_validation_shows_login_not_modal(self):
         """PIN yoxlamasından keçməmiş istifadəçi login formunu görür (modal yox)."""
@@ -437,41 +452,25 @@ class RoomLifecycleTests(_FlowBase):
         self.assertFalse(end_room(self.session, self.center))
 
     def test_concurrent_sessions_in_room_allowed(self):
-        # Bir zalda üst-üstə düşən oturumlar İCAZƏLİDİR (tutum dolmayınca) —
-        # zal aqreqasiyası ssenarisi (10 fərqli imtahan bir zalda).
+        # Bir zalda üst-üstə düşən oturumlar İCAZƏLİDİR — zal aqreqasiyası
+        # ssenarisi. Oturum sisteminin ləğvindən sonra tutum planda yoxlanmır
+        # (tələbələr giriş anında IP → zal ilə dinamik qoşulur).
         try:
             validate_session_plan(
                 room=self.room,
-                exam=self.exam,
                 scheduled_start=self.session.scheduled_start + timedelta(minutes=30),
                 scheduled_end=self.session.scheduled_end + timedelta(minutes=30),
             )
         except RoomSessionStateError:
-            self.fail("Eyni zalda paralel oturum icazəli olmalıdır (tutum dolmayıb).")
+            self.fail("Eyni zalda paralel oturum icazəli olmalıdır.")
 
-    def test_room_capacity_blocks_overlap_when_full(self):
-        # Zalın tutumunu 1-ə endirib 1 tələbə təyin edərək tutumu doldururuq.
-        ExamRoom.objects.filter(pk=self.room.pk).update(capacity=1)
-        self.room.refresh_from_db()
+    def test_session_plan_rejects_end_before_start(self):
         with self.assertRaises(RoomSessionStateError):
             validate_session_plan(
                 room=self.room,
-                exam=self.exam,
-                scheduled_start=self.session.scheduled_start + timedelta(minutes=10),
-                scheduled_end=self.session.scheduled_end + timedelta(minutes=10),
+                scheduled_start=self.session.scheduled_start,
+                scheduled_end=self.session.scheduled_start - timedelta(minutes=10),
             )
-
-    def test_capacity_limit_enforced(self):
-        small_room = ExamRoom.objects.create(organization=self.org, name="Kiçik", code="KC", capacity=1)
-        session2 = ExamRoomSession.objects.create(
-            organization=self.org,
-            exam=self.exam,
-            room=small_room,
-            scheduled_start=timezone.now() + timedelta(days=2),
-            scheduled_end=timezone.now() + timedelta(days=2, hours=2),
-        )
-        with self.assertRaises(TicketStateError):
-            assign_students(session2, [self.student, self.student2], self.center)
 
 
 class RemoveStudentTests(_FlowBase):
@@ -573,14 +572,13 @@ class PermissionAndTenantTests(_FlowBase):
     def test_room_list_shows_only_assigned_rooms_for_invigilator(self):
         # İmtahan Nəzarət Sisteminin girişi: nəzarətçi YALNIZ təyin olunduğu
         # oturumun zalını görür; başqa nəzarətçinin zalı siyahıda görünmür.
-        # Kart zaldakı canlı imtahanı (fənni) çip kimi göstərir.
+        # Kart zaldakı canlı oturumu çip kimi göstərir (imtahandan asılı deyil).
         other_room = ExamRoom.objects.create(
             organization=self.org, name="Zal B", code="ZB", capacity=20, created_by=self.center
         )
         now = timezone.now()
         ExamRoomSession.objects.create(
             organization=self.org,
-            exam=self.exam,
             room=other_room,
             invigilator=self.teacher,
             scheduled_start=now + timedelta(minutes=5),
@@ -591,8 +589,8 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Zal A")
         self.assertNotContains(response, "Zal B")
-        # Zal A-da giriş açıq (canlı) oturum var → fənn adı çip kimi görünür.
-        self.assertContains(response, "FCF Final")
+        # Zal A-da giriş açıq (canlı) oturum var → oturum çipi görünür.
+        self.assertContains(response, "fxc-room-exam-chip")
 
     def test_room_list_shows_all_rooms_for_center(self):
         ExamRoom.objects.create(organization=self.org, name="Zal B", code="ZB", capacity=20, created_by=self.center)
@@ -656,7 +654,6 @@ class PermissionAndTenantTests(_FlowBase):
         )
         session2 = ExamRoomSession.objects.create(
             organization=self.org,
-            exam=exam2,
             room=self.room,
             invigilator=self.invigilator,
             scheduled_start=timezone.now() + timedelta(minutes=5),
@@ -716,7 +713,6 @@ class PermissionAndTenantTests(_FlowBase):
         )
         session2 = ExamRoomSession.objects.create(
             organization=self.org,
-            exam=exam2,
             room=self.room,
             invigilator=self.invigilator,
             scheduled_start=timezone.now() + timedelta(minutes=5),
@@ -774,18 +770,10 @@ class PermissionAndTenantTests(_FlowBase):
         )
 
     def test_room_start_all_starts_every_live_session(self):
-        exam2 = Exam.objects.create(
-            title="FCF Final 2",
-            author=self.center,
-            organization=self.org,
-            exam_type="test",
-            exam_type_extended="final",
-            is_active=True,
-            random_question_count=1,
-        )
+        # Bir zalda iki paralel oturum → "hamısını başlat" hər ikisini aktiv edir
+        # (oturum imtahandan asılı deyil).
         session2 = ExamRoomSession.objects.create(
             organization=self.org,
-            exam=exam2,
             room=self.room,
             invigilator=self.invigilator,
             scheduled_start=timezone.now() + timedelta(minutes=5),
@@ -891,7 +879,8 @@ class CenterPageRenderTests(_FlowBase):
     def test_session_list_renders(self):
         response = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "FCF Final")
+        # Oturum siyahısı imtahandan yox, ZALDAN asılıdır — zal adı görünür.
+        self.assertContains(response, "Zal A")
 
     def test_session_detail_renders_with_tickets(self):
         response = self._client_for(self.center).get(

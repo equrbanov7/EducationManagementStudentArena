@@ -59,9 +59,8 @@
             {{ s.scheduled_start|date:"d.m.Y H:i" }} – {{ s.scheduled_end|time:"H:i" }}
           </span>
         </div>
-        <h2 class="fxc-session-title">{{ s.exam.title }}</h2>
+        <h2 class="fxc-session-title"><i class="fas fa-door-open"></i> {{ s.room.name }} <code>{{ s.room.code }}</code></h2>
         <div class="fxc-session-meta">
-          <span><i class="fas fa-door-open"></i> {{ s.room.name }} <code>{{ s.room.code }}</code></span>
           <span><i class="fas fa-user-shield"></i>
             {% if s.invigilator %}{{ s.invigilator.get_full_name|default:s.invigilator.username }}{% else %}{% trans "Təyin edilməyib" %}{% endif %}
           </span>

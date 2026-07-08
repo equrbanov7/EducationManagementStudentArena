@@ -283,12 +283,19 @@ class ExamRoomComputer(models.Model):
 
 class ExamRoomSession(models.Model):
     """
-    Bir imtahanın bir zalda keçirilən oturumu.
+    Bir ZALDA keçirilən oturum (sitting) — imtahandan ASILI DEYİL.
+
+    Universitet qaydası (2026-07): imtahan zaldan asılı deyil — istənilən imtahan
+    istənilən zalda verilə bilər. Ona görə oturum artıq konkret imtahana yox,
+    yalnız **zala** bağlıdır: nəzarətçi ZALI (oradakı qeydli kompüterləri)
+    açıb-başladır, otaqda fiziki oturan hər tələbə (kim hansı imtahana təyin
+    olunubsa) öz imtahanına başlayır. Tələbənin hansı imtahana təyin olunması
+    ``FinalExamTicket.exam``-da saxlanır; tələbə giriş anında (kompüter IP-si →
+    zal) həmin oturuma qoşulur (``ticket.session`` set olunur).
 
     Rəsmi start/son vaxtının YEGANƏ mənbəyi backend-dir: ``started_at`` /
     ``ended_at`` yalnız server timestamp-i ilə, şərti (idempotent) UPDATE
-    vasitəsilə yazılır. Bir zalda eyni anda yalnız bir aktiv oturum ola bilər
-    (partial unique constraint).
+    vasitəsilə yazılır.
     """
 
     STATE_CHOICES = (
@@ -304,12 +311,6 @@ class ExamRoomSession(models.Model):
         on_delete=models.CASCADE,
         related_name="exam_room_sessions",
         verbose_name=pgettext_lazy("exams.model.room_session.field", "organization"),
-    )
-    exam = models.ForeignKey(
-        "exams.Exam",
-        on_delete=models.CASCADE,
-        related_name="room_sessions",
-        verbose_name=pgettext_lazy("exams.model.room_session.field", "exam"),
     )
     # Zal tarixçəsi hesabatlar üçün qorunmalıdır — oturumu olan zal silinmir.
     room = models.ForeignKey(
@@ -405,13 +406,12 @@ class ExamRoomSession(models.Model):
         ]
         indexes = [
             models.Index(fields=["organization", "state", "-scheduled_start"], name="roomsess_org_state_sched_idx"),
-            models.Index(fields=["exam", "-scheduled_start"], name="roomsess_exam_sched_idx"),
             models.Index(fields=["room", "-scheduled_start"], name="roomsess_room_sched_idx"),
             models.Index(fields=["invigilator", "state"], name="roomsess_invig_state_idx"),
         ]
 
     def __str__(self):
-        return f"{self.exam.title} @ {self.room.name} [{self.state}]"
+        return f"{self.room.name} oturumu [{self.state}]"
 
     @property
     def is_live(self) -> bool:
@@ -455,19 +455,24 @@ class FinalExamTicket(models.Model):
         related_name="final_exam_tickets",
         verbose_name=pgettext_lazy("exams.model.final_ticket.field", "organization"),
     )
-    session = models.ForeignKey(
-        "exams.ExamRoomSession",
-        on_delete=models.CASCADE,
-        related_name="tickets",
-        verbose_name=pgettext_lazy("exams.model.final_ticket.field", "session"),
-    )
-    # Denormalizasiya: "bir tələbə — bir imtahan — bir bilet" constraint-i və
-    # hesabat sorğuları üçün (session→exam join-suz).
+    # Tələbənin təyin olunduğu İMTAHAN — biletin ƏSAS bağıdır (zal yox).
+    # Bilet təyinat anında yaradılır: "bu tələbə bu finala PIN-lə buraxılır".
     exam = models.ForeignKey(
         "exams.Exam",
         on_delete=models.CASCADE,
         related_name="final_tickets",
         verbose_name=pgettext_lazy("exams.model.final_ticket.field", "exam"),
+    )
+    # Zal oturumu GİRİŞ anında bağlanır: tələbə qeydli kompüterdən (IP → zal)
+    # girəndə həmin zalın açıq oturumuna qoşulur. Təyinat anında NULL olur.
+    # Oturum silinsə bilet qalır (imtahan-scoped, oturumdan asılı deyil).
+    session = models.ForeignKey(
+        "exams.ExamRoomSession",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tickets",
+        verbose_name=pgettext_lazy("exams.model.final_ticket.field", "session"),
     )
     student = models.ForeignKey(
         User,
@@ -556,12 +561,13 @@ class FinalExamTicket(models.Model):
         verbose_name_plural = pgettext_lazy("exams.model.final_ticket.meta", "plural")
         ordering = ["seat_number", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["session", "student"], name="uniq_ticket_per_session_student"),
-            # Bir tələbə bir imtahana yalnız bir oturumda təyin oluna bilər.
+            # ƏSAS: bir tələbəyə bir imtahana yalnız bir bilet (təyinatın vahidi).
             models.UniqueConstraint(fields=["exam", "student"], name="uniq_ticket_per_exam_student"),
+            # Bir zal oturumunda bir seat yalnız bir tələbədə (giriş anında set olur);
+            # yalnız oturum və seat təyin olunduqda tətbiq edilir.
             models.UniqueConstraint(
                 fields=["session", "seat_number"],
-                condition=models.Q(seat_number__isnull=False),
+                condition=models.Q(seat_number__isnull=False, session__isnull=False),
                 name="uniq_seat_per_session",
             ),
         ]

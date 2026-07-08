@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.domain.final_center import ExamRoomComputer
-from apps.exams.models import Exam, ExamRoom, ExamRoomSession
+from apps.exams.models import ExamRoom, ExamRoomSession
 from apps.exams.services.access_policy import can_manage_exam_rooms
 from apps.exams.services.exam_center_gate import room_ip_access_allowed
 from apps.exams.services.final_center import RoomAdminError, add_computer, can_supervise_session
@@ -114,19 +114,9 @@ class RoomInvigilatorSupervisionTests(_RoomBase):
     def test_room_invigilator_supervises_all_room_sessions(self):
         teacher = User.objects.create_user("era_teacher", "era_teacher@test.az", PASSWORD)
         _assign_user_to_org(teacher, self.org, ProfileRole.TEACHER, "teacher")
-        exam = Exam.objects.create(
-            title="ERA Final",
-            author=self.owner,
-            organization=self.org,
-            exam_type="test",
-            exam_type_extended="final",
-            is_active=True,
-            total_duration_minutes=60,
-        )
         now = timezone.now()
         session = ExamRoomSession.objects.create(
             organization=self.org,
-            exam=exam,
             room=self.room,
             scheduled_start=now + timedelta(minutes=5),
             scheduled_end=now + timedelta(hours=2),

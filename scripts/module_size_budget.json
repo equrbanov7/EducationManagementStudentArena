@@ -3,7 +3,7 @@
   "soft_cap": 600,
   "budgets": {
     "apps/accounts/static/accounts/css/login.css": 629,
-    "apps/exams/domain/final_center.py": 616,
+    "apps/exams/domain/final_center.py": 622,
     "apps/exams/forms/exam.py": 623,
     "apps/exams/static/exams/js/course_exam_dashboard.js": 642,
     "apps/exams/static/exams/js/testQuestionBank.js": 613,
