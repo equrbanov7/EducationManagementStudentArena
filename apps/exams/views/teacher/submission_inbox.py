@@ -199,7 +199,9 @@ def question_submission_create(request):
                 elif not form_state["subject"]:
                     _err = pgettext("exams.view.question_submission.error", "Fənni seçin (məcburidir).")
                 elif subject_names and form_state["subject"] not in subject_names:
-                    _err = pgettext("exams.view.question_submission.error", "Seçilmiş fənn sizin fənləriniz arasında deyil.")
+                    _err = pgettext(
+                        "exams.view.question_submission.error", "Seçilmiş fənn sizin fənləriniz arasında deyil."
+                    )
                 elif not chosen_groups:
                     _err = pgettext("exams.view.question_submission.error", "Ən azı bir qrup seçin (məcburidir).")
 
@@ -249,8 +251,17 @@ def question_submission_create(request):
         "math_token": "",
         # Meta sahələri (workbench-dən kənar kart)
         "teacher_groups": groups,
+        "teacher_group_subjects": {
+            str(group.id): [
+                {"value": subject.name, "label": f"{subject.code} — {subject.name}"} for subject in group.subjects.all()
+            ]
+            for group in groups
+        },
         # Fənn müəllimin ÖZ fənlərindən (qrupdan asılı deyil); qrup çox-seçimli.
-        "teacher_subjects": [{"value": s.name, "label": f"{s.code} — {s.name}"} for s in _teacher_subjects(request, organization, groups=groups)],
+        "teacher_subjects": [
+            {"value": s.name, "label": f"{s.code} — {s.name}"}
+            for s in _teacher_subjects(request, organization, groups=groups)
+        ],
         "submission_languages": EXAM_LANGUAGE_CHOICES,
         "form_state": form_state,
         # Workbench konteksti
@@ -356,7 +367,9 @@ def question_submission_detail(request, submission_id):
             elif not form_state["subject"]:
                 _err = pgettext("exams.view.question_submission.error", "Fənni seçin (məcburidir).")
             elif subject_names and form_state["subject"] not in subject_names:
-                _err = pgettext("exams.view.question_submission.error", "Seçilmiş fənn sizin fənləriniz arasında deyil.")
+                _err = pgettext(
+                    "exams.view.question_submission.error", "Seçilmiş fənn sizin fənləriniz arasında deyil."
+                )
             elif not chosen_groups:
                 _err = pgettext("exams.view.question_submission.error", "Ən azı bir qrup seçin (məcburidir).")
             if _err:
@@ -436,7 +449,8 @@ def _detail_context(submission, *, can_edit, is_reviewer):
         "form_state": {
             "title": submission.title,
             "subject": submission.subject,
-            "group_ids": [str(g.id) for g in submission.student_groups.all()] or [str(submission.student_group_id or "")],
+            "group_ids": [str(g.id) for g in submission.student_groups.all()]
+            or [str(submission.student_group_id or "")],
             "group_id": str(submission.student_group_id or ""),
             "group_label": submission.group_label,
             "teacher_note": submission.teacher_note,

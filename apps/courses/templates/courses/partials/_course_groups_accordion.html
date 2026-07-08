@@ -1,0 +1,94 @@
+{% load i18n %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#courseGroupsCollapse">
+            <i class="fas fa-users text-primary me-2"></i>
+            <strong>{% trans "Qruplar" %}</strong>
+            <span class="badge bg-primary ms-2">{{ course_group_summaries|length }}</span>
+        </button>
+    </h2>
+    <div id="courseGroupsCollapse" class="accordion-collapse collapse"
+         data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            {% if course_group_summaries %}
+                <div class="course-group-grid">
+                    {% for group in course_group_summaries %}
+                    <article class="course-group-card">
+                        <div class="course-group-card__main">
+                            <div class="course-group-card__icon">
+                                <i class="fas fa-user-group"></i>
+                            </div>
+                            <div>
+                                <h3>{{ group.name }}</h3>
+                                <p>
+                                    {{ group.student_count }} {% trans "tələbə" %}
+                                    {% if group.org_unit_name %} · {{ group.org_unit_name }}{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="course-group-card__meta">
+                            {% if group.teacher_names %}
+                                <span><i class="fas fa-chalkboard-user"></i>{{ group.teacher_names|join:", " }}</span>
+                            {% endif %}
+                            {% if group.subject_names %}
+                                <span><i class="fas fa-book-open"></i>{{ group.subject_names|join:", " }}</span>
+                            {% endif %}
+                        </div>
+                        <button type="button"
+                                class="course-group-card__action"
+                                data-bs-toggle="modal"
+                                data-bs-target="#courseGroupDetailModal{{ forloop.counter }}">
+                            {% trans "Ətraflı bax" %}
+                        </button>
+                    </article>
+
+                    <div class="modal fade" id="courseGroupDetailModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content course-group-modal">
+                                <div class="modal-header">
+                                    <div>
+                                        <span class="course-group-modal__eyebrow">{% trans "Fənn qrupu" %}</span>
+                                        <h5 class="modal-title">{{ group.name }}</h5>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="course-group-modal__facts">
+                                        <div><span>{% trans "Tələbə" %}</span><strong>{{ group.student_count }}</strong></div>
+                                        <div><span>{% trans "Müəllim" %}</span><strong>{{ group.teacher_names|join:", "|default:"-" }}</strong></div>
+                                        <div><span>{% trans "Akademik vahid" %}</span><strong>{{ group.org_unit_name|default:"-" }}</strong></div>
+                                    </div>
+                                    {% if group.subject_names %}
+                                    <div class="course-group-modal__block">
+                                        <h6>{% trans "Bu qrupun fənləri" %}</h6>
+                                        <p>{{ group.subject_names|join:", " }}</p>
+                                    </div>
+                                    {% endif %}
+                                    <div class="course-group-modal__block">
+                                        <h6>{% trans "Tələbələr" %}</h6>
+                                        <div class="course-group-students">
+                                            {% for student in group.students_preview %}
+                                                <span>{{ student.get_full_name|default:student.username }}</span>
+                                            {% endfor %}
+                                            {% if group.students_more_count %}
+                                                <span>+{{ group.students_more_count }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    {% trans "Bu fənnə hələ qrup təyin olunmayıb." %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

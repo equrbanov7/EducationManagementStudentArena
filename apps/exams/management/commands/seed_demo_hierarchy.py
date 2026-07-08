@@ -368,9 +368,7 @@ class Command(UsersSeedMixin, BaseCommand):
         """registrar.Subject yaradır/tapır (sual göndərişi fənn seçimi üçün)."""
         from apps.registrar.models import Subject
 
-        subject, _ = Subject.objects.get_or_create(
-            organization=org, code=code, defaults={"name": name}
-        )
+        subject, _ = Subject.objects.get_or_create(organization=org, code=code, defaults={"name": name})
         return subject
 
     def _ensure_local_computer(self, org, room, creator):
