@@ -1,5 +1,6 @@
 import json
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from django.contrib import messages
@@ -56,6 +57,16 @@ def _final_result_remaining_seconds(attempt):
         return FINAL_RESULT_REVIEW_SECONDS
     expires_at = finished_at + timedelta(seconds=FINAL_RESULT_REVIEW_SECONDS)
     return max(0, int((expires_at - timezone.now()).total_seconds()))
+
+
+def _format_score_delta(value):
+    try:
+        decimal_value = Decimal(str(value if value is not None else "0"))
+    except (InvalidOperation, TypeError, ValueError):
+        decimal_value = Decimal("0")
+    if decimal_value == decimal_value.to_integral_value():
+        return str(int(decimal_value))
+    return format(decimal_value.normalize(), "f")
 
 
 def _default_exam_back_url(exam):
@@ -212,8 +223,17 @@ def exam_result(request, slug, attempt_id):
     )
     _appeal_state = score_adjustments.score_state(attempt)
     appeal_bonus_points = _appeal_state["bonus_points"]
+    appeal_bonus_by_qid = {
+        question_id: _format_score_delta(delta)
+        for question_id, delta in (_appeal_state.get("bonus_by_question_id") or {}).items()
+        if delta and delta > 0
+    }
     # Hansı sualların balı apellyasiya ilə düzəlib (nəticədə işarələmək üçün).
-    appeal_corrected_qids = {question_id: True for question_id in _appeal_state["credited_question_ids"]}
+    appeal_corrected_qids = {
+        question_id: True
+        for question_id in _appeal_state["credited_question_ids"]
+        if question_id in appeal_bonus_by_qid
+    }
     # Baş bal göstəricisi də EFFEKTİV balı göstərsin — bonus yalnız aşağıdakı
     # qeyddə yox, əsas faiz/bal blokunda da əks olunmalıdır.
     if test_result is not None and appeal_bonus_points:
@@ -247,6 +267,8 @@ def exam_result(request, slug, attempt_id):
             "my_appeals_url": "" if is_final_center_result else reverse("accounts:profile") + "?section=my-appeals",
             "effective_score_info": effective_score_info,
             "appeal_bonus_points": appeal_bonus_points,
+            "appeal_bonus_points_display": _format_score_delta(appeal_bonus_points),
+            "appeal_bonus_by_qid": appeal_bonus_by_qid,
             "appeal_corrected_qids": appeal_corrected_qids,
         },
     )

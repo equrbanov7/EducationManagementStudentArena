@@ -40,7 +40,7 @@ def get_assigned_exams_for_user(user, organization=None, active_only=True, inclu
         )
     )
 
-    queryset = Exam.objects.filter(assignment_filter).distinct()
+    queryset = Exam.objects.filter(assignment_filter).exclude(excluded_users=user).distinct()
     if not include_public:
         queryset = queryset.filter(is_public=False)
     if active_only:

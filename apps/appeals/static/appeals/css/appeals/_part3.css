@@ -137,6 +137,16 @@
     font-size: 0.95em;
 }
 
+.appeal-list-edit-window {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: var(--ems-warning-800);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
 @media (max-width: 640px) {
     .appeal-option {
         flex-wrap: wrap;
@@ -240,4 +250,3 @@
         grid-template-columns: 1fr;
     }
 }
-

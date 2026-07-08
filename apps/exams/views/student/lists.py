@@ -411,6 +411,7 @@ def assigned_student_exam_list(request):
                 course__status="published",
             )
         )
+        .exclude(excluded_users=user)
         .distinct(),
     )
 
@@ -443,6 +444,7 @@ def student_exam_list(request):
             )
             | Q(author=user)
         )
+        .exclude(excluded_users=user)
         .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # keçmişləri gizlədir
         .distinct(),
     )

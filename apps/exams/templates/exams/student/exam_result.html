@@ -13,7 +13,7 @@
 {% block ai_assistant_js %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260709-appeal-bonus">
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20260707-final">
 {% endblock %}
 
@@ -53,6 +53,14 @@
                         <span class="stat-value text-primary score-points-value">{{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
                         <span class="score-percent-chip">{{ test_result.percentage_display }}%</span>
                     </div>
+                    {% if appeal_bonus_points and appeal_bonus_points > 0 %}
+                    <div class="appeal-score-summary-chip">
+                        <i class="fas fa-gavel"></i>
+                        {% blocktrans trimmed context "exams.template.student_exam_result" with bonus=appeal_bonus_points_display %}
+                            Apellyasiya ilə +{{ bonus }} bal əlavə olundu.
+                        {% endblocktrans %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="test-stats-grid">
@@ -129,7 +137,8 @@
             {% with ans=answers_by_qid|get_item:q.id %}
             {% with has_selection=answer_has_selection_by_qid|get_item:q.id %}
             {% with is_marked=marked_question_by_qid|get_item:q.id %}
-            <div class="question-card{% if is_marked %} question-card--marked{% endif %}">
+            {% with appeal_bonus=appeal_bonus_by_qid|get_item:q.id %}
+            <div class="question-card{% if is_marked %} question-card--marked{% endif %}{% if appeal_bonus %} question-card--appeal-updated{% endif %}">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
 
@@ -140,10 +149,12 @@
                             {% trans "marked_question_badge" context "exams.template.student_exam_result" %}
                         </div>
                         {% endif %}
-                        {% if appeal_corrected_qids|get_item:q.id %}
+                        {% if appeal_bonus %}
                         <div class="appeal-corrected-chip">
                             <i class="fas fa-gavel"></i>
-                            {% trans "appeal_corrected_badge" context "exams.template.student_exam_result" %}
+                            {% blocktrans trimmed context "exams.template.student_exam_result" with bonus=appeal_bonus %}
+                                Apellyasiya ilə +{{ bonus }} bal
+                            {% endblocktrans %}
                         </div>
                         {% endif %}
                         <div class="q-text">
@@ -367,6 +378,7 @@
             {% endwith %}
             {% endwith %}
             {% endwith %}
+            {% endwith %}
         {% endfor %}
     </div>
 
@@ -423,13 +435,6 @@
                 </table>
             </div>
         </div>
-    </div>
-    {% endif %}
-
-    {% if appeal_bonus_points and appeal_bonus_points > 0 and effective_score_info %}
-    <div class="alert alert-success d-flex justify-content-between align-items-center mt-3">
-        <span><i class="fas fa-gavel me-2"></i>{% trans "appeal_score_updated" context "exams.template.student_exam_result" %}</span>
-        <strong>{{ effective_score_info.effective_score }} / {{ effective_score_info.max_score }} ({{ effective_score_info.effective_percentage }}%)</strong>
     </div>
     {% endif %}
 

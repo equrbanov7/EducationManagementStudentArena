@@ -36,8 +36,41 @@ from ...services import (
 from ..shared._helpers import _marked_question_map
 
 
+def _format_seconds(seconds):
+    seconds = max(0, int(seconds or 0))
+    return f"{seconds // 60:02d}:{seconds % 60:02d}"
+
+
+def _format_decimal(value):
+    text = f"{value:.2f}"
+    return text.rstrip("0").rstrip(".")
+
+
 def _can_open_appeal_management(request):
     return is_exam_center_user(getattr(request, "user", None))
+
+
+def _appeal_edit_seconds_left(appeal, now):
+    seconds_left = []
+    for item in appeal.items.all():
+        if item.status not in {APPEAL_ITEM_STATUS_ACCEPTED, APPEAL_ITEM_STATUS_REJECTED}:
+            continue
+        if not item.resolved_at:
+            continue
+        seconds = int((item.resolved_at + REVIEW_EDIT_LOCK_WINDOW - now).total_seconds())
+        if seconds > 0:
+            seconds_left.append(seconds)
+    return max(seconds_left, default=0)
+
+
+def _current_review_score(appeal, is_test):
+    if is_test:
+        score_info = effective_test_score(appeal.attempt)
+        return score_info["effective_score"], score_info["max_score"], score_info
+
+    from apps.exams.public import calculate_attempt_score
+
+    return calculate_attempt_score(appeal.attempt), None, None
 
 
 def build_manage_appeals_context(request, *, list_action, section=""):
@@ -105,6 +138,10 @@ def build_manage_appeals_context(request, *, list_action, section=""):
 
     paginator = Paginator(appeals, 20)
     page_obj = paginator.get_page(request.GET.get("page", 1))
+    now = timezone.now()
+    for appeal in page_obj.object_list:
+        appeal.edit_seconds_left = _appeal_edit_seconds_left(appeal, now)
+        appeal.edit_time_label = _format_seconds(appeal.edit_seconds_left)
 
     return {
         "appeal_page_obj": page_obj,
@@ -179,6 +216,7 @@ def review_appeal(request, appeal_id):
         return bool(item.resolved_at and now >= item.resolved_at + REVIEW_EDIT_LOCK_WINDOW)
 
     if request.method == "POST":
+        score_before, _, _ = _current_review_score(appeal, is_test)
         # Validasiya: qərar verilən hər item üçün cavab mətni məcburidir.
         decisions = []
         error_message = ""
@@ -211,6 +249,8 @@ def review_appeal(request, appeal_id):
                 else:
                     reject_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)
 
+            score_after, _, _ = _current_review_score(appeal, is_test)
+            score_delta = score_after - score_before
             note = (request.POST.get("reviewer_note") or "").strip()
             if note:
                 appeal.reviewer_note = note
@@ -218,7 +258,25 @@ def review_appeal(request, appeal_id):
 
             success_text = pgettext("appeals.view.message", "Qərarlar yadda saxlanıldı.")
             if is_fragment:
-                return JsonResponse({"ok": True, "message": str(success_text)})
+                toast_text = str(success_text)
+                if score_delta > 0:
+                    toast_text = pgettext(
+                        "appeals.view.message",
+                        "+{points} bal əlavə olundu. Tələbə nəticəni 5 dəqiqədən sonra görəcək; bu 5 dəqiqə ərzində qərarı dəyişə bilərsiniz.",
+                    ).format(points=_format_decimal(score_delta))
+                elif decisions:
+                    toast_text = pgettext(
+                        "appeals.view.message",
+                        "Qərarlar yadda saxlanıldı. Tələbə nəticəni 5 dəqiqədən sonra görəcək; bu 5 dəqiqə ərzində qərarı dəyişə bilərsiniz.",
+                    )
+                return JsonResponse(
+                    {
+                        "ok": True,
+                        "message": str(success_text),
+                        "toast": str(toast_text),
+                        "score_delta": _format_decimal(score_delta),
+                    }
+                )
             messages.success(request, success_text)
             return redirect("appeals:review_appeal", appeal_id=appeal.id)
 
@@ -228,15 +286,7 @@ def review_appeal(request, appeal_id):
         messages.error(request, error_message)
 
     # ── Bal konteksti (əvvəlki → yeni bal göstərmək üçün) ──
-    score_info = effective_test_score(appeal.attempt) if is_test else None
-    if is_test and score_info:
-        review_current_score = score_info["effective_score"]
-        review_max_score = score_info["max_score"]
-    else:
-        from apps.exams.public import calculate_attempt_score
-
-        review_current_score = calculate_attempt_score(appeal.attempt)
-        review_max_score = None
+    review_current_score, review_max_score, score_info = _current_review_score(appeal, is_test)
 
     # ── Hər item üçün şablon məlumatı: kilid/window, cari qərar, seçilmiş variant ──
     for item in items:
@@ -262,6 +312,8 @@ def review_appeal(request, appeal_id):
             adjustment = item.score_adjustment
         except ObjectDoesNotExist:
             adjustment = None
+        item.existing_delta = adjustment.delta_points if adjustment and not adjustment.reverted else 0
+        item.existing_delta_value = _format_decimal(item.existing_delta)
         if item.current_decision == "accept" and adjustment and not adjustment.reverted:
             if is_test:
                 base_contribution = item.max_points if adjustment.previous_is_correct else 0

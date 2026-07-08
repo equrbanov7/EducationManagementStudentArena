@@ -136,13 +136,16 @@
             var url = form.getAttribute("data-assigned-count-url");
             var groups = groupSelector ? groupSelector.getSelectedValues() : [];
             var users = userSelector ? userSelector.getSelectedValues() : [];
+            var excluded = userSelector && typeof userSelector.getExcludedValues === "function" ?
+                userSelector.getExcludedValues() : [];
             if (!url || (!groups.length && !users.length)) {
                 renderConfirmSummary(overlay, "0");
                 return;
             }
             var q = url + (url.indexOf("?") === -1 ? "?" : "&") +
                 "groups=" + encodeURIComponent(groups.join(",")) +
-                "&users=" + encodeURIComponent(users.join(","));
+                "&users=" + encodeURIComponent(users.join(",")) +
+                "&excluded=" + encodeURIComponent(excluded.join(","));
             fetch(q, { headers: { "X-Requested-With": "XMLHttpRequest" } })
                 .then(function (r) { return r.ok ? r.json() : { total: 0 }; })
                 .then(function (d) { renderConfirmSummary(overlay, String((d && d.total) || 0)); })

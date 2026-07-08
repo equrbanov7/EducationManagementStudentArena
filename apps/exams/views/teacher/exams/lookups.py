@@ -7,13 +7,15 @@ təşkilata görə scope olunur və müəllim icazəsi tələb edir.
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from apps.exams.models import Exam, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+from apps.organizations.public import organization_role_user_queryset
+from core.roles import ProfileRole
 
 from ._shared import _resolve_required_organization
 
@@ -73,7 +75,11 @@ def _org_user_queryset(request, organization):
     """İmtahan formasındakı `allowed_users` queryset-i ilə eyni scope."""
     qs = User.objects.filter(is_active=True).exclude(id=request.user.id)
     if organization is not None:
-        qs = qs.filter(profile__organization=organization)
+        qs = organization_role_user_queryset(
+            organization,
+            {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
+            queryset=qs,
+        )
     return qs.distinct()
 
 
@@ -109,11 +115,17 @@ def user_search(request):
     query = (request.GET.get("q") or "").strip()
     qs = _org_user_queryset(request, organization)
 
-    # Qrup(lar) seçilibsə: sağ siyahı yalnız həmin qrupların üzvlərini göstərir
-    # (seçilən qrupun tələbələri). `groups` — vergüllə ayrılmış qrup ID-ləri.
+    # `groups` seçili qrupları bildirir. Sağ panel yenə bütün tələbələri göstərir;
+    # sadəcə həmin qrupların üzvləri metadata ilə işarələnir ki, frontend onları
+    # checked göstərib ayrı-ayrı istisna etməyə imkan versin.
     group_ids = [gid for gid in (request.GET.get("groups") or "").split(",") if gid.strip().isdigit()]
+    group_member_ids = set()
     if group_ids:
-        qs = qs.filter(student_groups_as_student__id__in=[int(gid) for gid in group_ids])
+        group_member_ids = set(
+            StudentGroup.objects.filter(organization=organization, id__in=[int(gid) for gid in group_ids])
+            .values_list("students__id", flat=True)
+            .distinct()
+        )
 
     if query:
         qs = qs.filter(
@@ -122,11 +134,28 @@ def user_search(request):
             | Q(last_name__icontains=query)
             | Q(email__icontains=query)
         )
-    qs = qs.order_by("username").distinct()
+    qs = qs.distinct()
+    if group_member_ids:
+        qs = qs.annotate(
+            group_member_rank=Case(
+                When(id__in=group_member_ids, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+        ).order_by("group_member_rank", "username")
+    else:
+        qs = qs.order_by("username")
 
     offset, limit = _page_bounds(request)
     results, has_more = _paginate(
-        qs, offset, limit, lambda u: {"id": str(u.id), "text": u.get_full_name() or u.username}
+        qs,
+        offset,
+        limit,
+        lambda u: {
+            "id": str(u.id),
+            "text": u.get_full_name() or u.username,
+            "group_member": u.id in group_member_ids,
+        },
     )
     return JsonResponse({"results": results, "has_more": has_more})
 
@@ -202,6 +231,7 @@ def assigned_student_count(request):
 
     group_ids = [int(g) for g in (request.GET.get("groups") or "").split(",") if g.strip().isdigit()]
     user_ids = [int(u) for u in (request.GET.get("users") or "").split(",") if u.strip().isdigit()]
+    excluded_user_ids = [int(u) for u in (request.GET.get("excluded") or "").split(",") if u.strip().isdigit()]
     if not group_ids and not user_ids:
         return JsonResponse({"total": 0})
 
@@ -210,7 +240,10 @@ def assigned_student_count(request):
         cond |= Q(student_groups_as_student__id__in=group_ids)
     if user_ids:
         cond |= Q(id__in=user_ids)
-    total = _org_user_queryset(request, organization).filter(cond).distinct().count()
+    qs = _org_user_queryset(request, organization).filter(cond)
+    if excluded_user_ids:
+        qs = qs.exclude(id__in=excluded_user_ids)
+    total = qs.distinct().count()
     return JsonResponse({"total": total})
 
 

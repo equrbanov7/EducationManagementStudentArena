@@ -85,6 +85,7 @@
 /* Sticky bar status + buttons */
 .appeal-sticky-actions__inner {
     justify-content: space-between;
+    flex-wrap: nowrap;
 }
 
 .appeal-sticky-actions__status {
@@ -92,6 +93,8 @@
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .appeal-sticky-actions__buttons {
@@ -99,6 +102,9 @@
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    margin-left: auto;
 }
 
 .appeal-selected-pill {
@@ -117,6 +123,25 @@
     color: #b45309;
     font-weight: 600;
     font-size: 0.85rem;
+}
+
+.appeal-submit-hint {
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 420px;
+    min-width: min(420px, 100%);
+    max-width: min(640px, 100%);
+    color: var(--ems-danger-strong);
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.appeal-submit-hint::before {
+    content: "\f06a";
+    margin-right: 6px;
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+    font-weight: 700;
 }
 
 .appeal-create-form [data-appeal-submit].is-ready {
@@ -502,6 +527,24 @@
 .appeal-question-card.is-locked {
     background: var(--ems-neutral-50);
     border-style: solid;
+}
+
+.appeal-question-card.is-locked .appeal-q-switch {
+    opacity: 0.72;
+}
+
+.appeal-locked-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 7px 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: 0.82rem;
+    font-weight: 800;
 }
 
 .appeal-review-panel--locked {

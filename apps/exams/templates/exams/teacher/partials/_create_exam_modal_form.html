@@ -343,8 +343,14 @@
                                                 <option value="{{ u.pk }}" selected>{{ u.get_full_name|default:u.username }}</option>
                                             {% endfor %}
                                         </select>
+                                        <select name="excluded_users" multiple>
+                                            {% for u in selected_excluded_users %}
+                                                <option value="{{ u.pk }}" selected>{{ u.get_full_name|default:u.username }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
+                                    {% if form.excluded_users.errors %}<div class="field-error">{{ form.excluded_users.errors.0 }}</div>{% endif %}
                                 </div>
                             </div>
                         </div>

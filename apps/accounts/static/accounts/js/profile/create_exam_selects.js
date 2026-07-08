@@ -7,6 +7,10 @@
             if (!form || !config) {
                 return null;
             }
+            var shared = window.EMSExamCreateEditModal && window.EMSExamCreateEditModal.searchableSelect;
+            if (shared && typeof shared.initSearchableSelect === "function") {
+                return shared.initSearchableSelect(form, config);
+            }
 
             var hiddenSelect = form.querySelector('select[name="' + config.selectName + '"]');
             var listContainer = form.querySelector(config.listSelector);
@@ -186,6 +190,11 @@
 
         function initCreateExamGroupUserSelectionSync(form, groupSelector, userSelector) {
             if (!form || !groupSelector || !userSelector) {
+                return;
+            }
+            var shared = window.EMSExamCreateEditModal && window.EMSExamCreateEditModal.searchableSelect;
+            if (shared && typeof shared.initGroupUserSync === "function") {
+                shared.initGroupUserSync(form, groupSelector, userSelector);
                 return;
             }
 

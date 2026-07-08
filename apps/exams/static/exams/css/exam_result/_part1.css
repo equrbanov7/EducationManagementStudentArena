@@ -134,6 +134,21 @@
     line-height: 1;
 }
 
+.appeal-score-summary-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 13px;
+    border: 1px solid #86efac;
+    border-radius: 999px;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
 /* Test Statistikaları Grid */
 .test-stats-grid {
     display: grid;
@@ -262,6 +277,20 @@
 .question-card--marked .q-header {
     background: linear-gradient(135deg, #fffbeb 0%, var(--ems-neutral-0) 100%);
     border-bottom-color: #fde68a;
+}
+
+.question-card--appeal-updated {
+    border-color: #22c55e;
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.16);
+}
+
+.question-card--appeal-updated .q-header {
+    background: linear-gradient(135deg, #f0fdf4 0%, var(--ems-neutral-0) 100%);
+    border-bottom-color: #bbf7d0;
+}
+
+.question-card--marked.question-card--appeal-updated {
+    border-color: #22c55e;
 }
 
 .marked-result-chip {

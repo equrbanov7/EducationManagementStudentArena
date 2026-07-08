@@ -18,6 +18,14 @@ from apps.appeals.constants import (
 from apps.appeals.models import Appeal, AppealItem
 
 
+def _already_appealed_message(item):
+    question_no = getattr(item.question, "order", None) or item.question_id
+    return pgettext(
+        "appeals.service.create.error",
+        "{question_no}-ci sual üçün apellyasiya artıq göndərilib. Eyni sualı ikinci dəfə göndərə bilməzsiniz.",
+    ).format(question_no=question_no)
+
+
 def _clean_items(attempt, items):
     """
     items: [{"question_id": int, "appeal_type": str, "comment": str}, ...]
@@ -66,6 +74,15 @@ def _clean_items(attempt, items):
             }
         )
 
+    existing_item = (
+        AppealItem.objects.select_related("question")
+        .filter(appeal__attempt=attempt, question_id__in=seen_question_ids)
+        .order_by("question__order", "question_id", "id")
+        .first()
+    )
+    if existing_item:
+        raise ValidationError(_already_appealed_message(existing_item))
+
     return cleaned
 
 
@@ -78,6 +95,10 @@ def create_appeal(*, attempt, student, items, org_unit=None):
     (``services.permissions.can_create_appeal``) edilməlidir. Burada məzmun
     validasiyası aparılır.
     """
+    from django.apps import apps as django_apps
+
+    ExamAttempt = django_apps.get_model("exams", "ExamAttempt")
+    attempt = ExamAttempt.objects.select_for_update().select_related("exam", "exam__organization").get(pk=attempt.pk)
     cleaned = _clean_items(attempt, items)
 
     exam = attempt.exam

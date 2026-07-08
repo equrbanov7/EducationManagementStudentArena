@@ -1,5 +1,7 @@
 """Appeals — apellyasiya detalı: sahib tələbə VƏ YA reviewer (F4, 2026-07-02)."""
 
+from decimal import Decimal, InvalidOperation
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, render
@@ -24,6 +26,27 @@ def _appeal_item_stats(items):
     return stats
 
 
+def _format_decimal(value):
+    try:
+        decimal_value = Decimal(str(value if value is not None else "0"))
+    except (InvalidOperation, TypeError, ValueError):
+        decimal_value = Decimal("0")
+    if decimal_value == decimal_value.to_integral_value():
+        return str(int(decimal_value))
+    return format(decimal_value.normalize(), "f")
+
+
+def _appeal_positive_bonus(items):
+    bonus = Decimal("0")
+    for item in items:
+        adjustment = getattr(item, "score_adjustment", None)
+        if not adjustment or adjustment.reverted or not adjustment.delta_points:
+            continue
+        if adjustment.delta_points > 0:
+            bonus += adjustment.delta_points
+    return bonus
+
+
 @login_required
 def appeal_detail(request, appeal_id):
     appeal = get_object_or_404(
@@ -39,6 +62,7 @@ def appeal_detail(request, appeal_id):
 
     items = list(appeal.items.all())
     score_info = effective_test_score(appeal.attempt) if appeal.exam.exam_type == "test" else None
+    appeal_positive_bonus = _appeal_positive_bonus(items)
 
     context = {
         "appeal": appeal,
@@ -47,6 +71,8 @@ def appeal_detail(request, appeal_id):
         "score_info": score_info,
         "item_stats": _appeal_item_stats(items),
         "is_within_window": is_within_appeal_window(appeal.attempt),
+        "appeal_positive_bonus": appeal_positive_bonus,
+        "appeal_positive_bonus_display": _format_decimal(appeal_positive_bonus),
         "marked_question_by_qid": _marked_question_map(appeal.attempt),
         "back_url": reverse("accounts:profile") + "?section=my-appeals",
     }
