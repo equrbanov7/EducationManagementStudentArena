@@ -81,9 +81,9 @@
 
       <div class="fxc-room-exams">
         {% if room.live_sessions %}
-          <span class="fxc-room-exams-label">{% trans "Zalda canlı imtahanlar:" %}</span>
+          <span class="fxc-room-exams-label">{% trans "Zalda canlı oturum:" %}</span>
           {% for s in room.live_sessions %}
-            <span class="fxc-room-exam-chip fxc-room-exam-chip--{{ s.state }}">{{ s.exam.title }}</span>
+            <span class="fxc-room-exam-chip fxc-room-exam-chip--{{ s.state }}">{{ s.get_state_display }} · {{ s.scheduled_start|date:"H:i" }}</span>
           {% endfor %}
         {% else %}
           <span class="fxc-room-exams-empty"><i class="far fa-clock"></i> {% trans "Hazırda canlı imtahan yoxdur" %}</span>

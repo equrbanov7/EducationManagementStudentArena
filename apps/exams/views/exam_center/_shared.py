@@ -45,7 +45,7 @@ def get_center_session_or_404(request, session_id, *, for_supervision=False):
     else:
         organization = center_org_or_403(request)
     session = get_object_or_404(
-        ExamRoomSession.objects.select_related("exam", "room", "invigilator", "organization"),
+        ExamRoomSession.objects.select_related("room", "invigilator", "organization"),
         pk=session_id,
         organization=organization,
     )
@@ -62,9 +62,21 @@ def get_session_ticket_or_404(session, ticket_id):
     )
 
 
+def get_center_ticket_or_404(request, ticket_id):
+    """İmtahan-scoped bileti tenant daxilində tapır (oturum sisteminin ləğvindən
+    sonra bilet zala yox, imtahana bağlıdır — PIN idarəsi org üzrə)."""
+    organization = center_org_or_403(request)
+    ticket = get_object_or_404(
+        FinalExamTicket.objects.select_related("student", "exam", "session", "attempt", "organization"),
+        pk=ticket_id,
+        organization=organization,
+    )
+    return organization, ticket
+
+
 def visible_sessions_qs(request, organization):
     """İstifadəçiyə görünən oturumlar (mərkəz → hamısı; nəzarətçi → təyinatlıları)."""
-    base = ExamRoomSession.objects.filter(organization=organization).select_related("exam", "room", "invigilator")
+    base = ExamRoomSession.objects.filter(organization=organization).select_related("room", "invigilator")
     return sessions_visible_to(request.user, base)
 
 

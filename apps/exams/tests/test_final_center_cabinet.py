@@ -11,11 +11,7 @@ from django.utils import timezone
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamRoom, ExamRoomSession, FinalExamTicket
 from apps.exams.public import student_final_exam_context
-from apps.exams.services.final_center import (
-    notify_upcoming_final_exams,
-    open_entry,
-    set_ticket_pin,
-)
+from apps.exams.services.final_center import notify_upcoming_final_exams, set_ticket_pin
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
 from apps.notifications.models import InAppNotification
 from apps.organizations.models import Organization
@@ -50,11 +46,18 @@ class _CabinetBase(TestCase):
         )
         cls.room = ExamRoom.objects.create(organization=cls.org, name="Zal C", code="ZC", capacity=20)
 
+    def _set_window(self, *, start_delta, end_delta):
+        """İMTAHANIN cədvəlini qur — kabinet/xatırlatma bundan asılıdır
+        (oturum sisteminin ləğvi: pəncərə imtahandan, zaldan yox)."""
+        now = timezone.now()
+        self.exam.start_datetime = now + start_delta
+        self.exam.end_datetime = now + end_delta
+        self.exam.save(update_fields=["start_datetime", "end_datetime"])
+
     def _session(self, *, start_delta, end_delta):
         now = timezone.now()
         return ExamRoomSession.objects.create(
             organization=self.org,
-            exam=self.exam,
             room=self.room,
             invigilator=self.center,
             scheduled_start=now + start_delta,
@@ -62,7 +65,7 @@ class _CabinetBase(TestCase):
             created_by=self.center,
         )
 
-    def _ticket(self, session):
+    def _ticket(self, session=None):
         ticket = FinalExamTicket.objects.create(
             organization=self.org, session=session, exam=self.exam, student=self.student
         )
@@ -76,20 +79,20 @@ class CabinetContextTests(_CabinetBase):
         self.assertFalse(ctx["has_ticket"])
 
     def test_context_exposes_window_and_pin_within_visibility(self):
-        session = self._session(start_delta=timedelta(minutes=30), end_delta=timedelta(hours=2))
-        open_entry(session, self.center)
-        self._ticket(session)
+        # İmtahan pəncərəsi indi açıqdır (başlanğıc keçib, son gələcəkdə).
+        self._set_window(start_delta=timedelta(minutes=-5), end_delta=timedelta(hours=2))
+        self._ticket()
         ctx = student_final_exam_context(self.student, self.exam)
         self.assertTrue(ctx["has_ticket"])
-        self.assertEqual(ctx["window_start"], session.scheduled_start)
-        self.assertEqual(ctx["window_end"], session.scheduled_end)
-        self.assertTrue(ctx["entry_open"])
+        self.assertEqual(ctx["window_start"], self.exam.start_datetime)
+        self.assertEqual(ctx["window_end"], self.exam.end_datetime)
+        self.assertTrue(ctx["entry_open"])  # pəncərə açıqdır
         self.assertIsNotNone(ctx["pin"])  # görünmə pəncərəsi daxilində
 
     def test_pin_hidden_outside_visibility_window(self):
-        # Başlanğıc çox uzaqda → PIN hələ görünmür (default 120 dəq pəncərə).
-        session = self._session(start_delta=timedelta(days=10), end_delta=timedelta(days=10, hours=2))
-        self._ticket(session)
+        # Başlanğıc çox uzaqda → PIN hələ görünmür (görünmə pəncərəsi bağlı).
+        self._set_window(start_delta=timedelta(days=10), end_delta=timedelta(days=10, hours=2))
+        self._ticket()
         with override_settings(FINAL_EXAM_PIN_VISIBILITY_MINUTES=60):
             ctx = student_final_exam_context(self.student, self.exam)
         self.assertTrue(ctx["has_ticket"])
@@ -101,8 +104,8 @@ class ReminderTaskTests(_CabinetBase):
         return InAppNotification.objects.filter(recipient=self.student, notification_type="exam").count()
 
     def test_reminder_sent_within_threshold(self):
-        session = self._session(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
-        ticket = self._ticket(session)
+        self._set_window(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
+        ticket = self._ticket()
         with override_settings(FINAL_EXAM_REMINDER_DAYS=(3, 1)):
             sent = notify_upcoming_final_exams()
         self.assertEqual(sent, 1)
@@ -111,8 +114,8 @@ class ReminderTaskTests(_CabinetBase):
         self.assertEqual(self._count_reminders(), 1)
 
     def test_reminder_not_duplicated_for_same_stage(self):
-        session = self._session(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
-        self._ticket(session)
+        self._set_window(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
+        self._ticket()
         with override_settings(FINAL_EXAM_REMINDER_DAYS=(3, 1)):
             notify_upcoming_final_exams()
             second = notify_upcoming_final_exams()
@@ -120,12 +123,12 @@ class ReminderTaskTests(_CabinetBase):
         self.assertEqual(self._count_reminders(), 1)
 
     def test_second_reminder_at_closer_threshold(self):
-        session = self._session(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
-        ticket = self._ticket(session)
+        self._set_window(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
+        ticket = self._ticket()
         with override_settings(FINAL_EXAM_REMINDER_DAYS=(3, 1)):
             notify_upcoming_final_exams()  # 3-day reminder
-            # Vaxtı 1 günə yaxınlaşdır (oturumu sürüşdürmək əvəzinə now-u irəli aparırıq).
-            near = timezone.now() + timedelta(days=1, hours=12)  # session.start ~ now+2d → days_left ~0.5
+            # Vaxtı 1 günə yaxınlaşdır (imtahanı sürüşdürmək əvəzinə now-u irəli aparırıq).
+            near = timezone.now() + timedelta(days=1, hours=12)  # exam.start ~ now+2d → days_left ~0.5
             second = notify_upcoming_final_exams(now=near)
         self.assertEqual(second, 1)
         ticket.refresh_from_db()
@@ -133,15 +136,15 @@ class ReminderTaskTests(_CabinetBase):
         self.assertEqual(self._count_reminders(), 2)
 
     def test_no_reminder_outside_horizon(self):
-        session = self._session(start_delta=timedelta(days=10), end_delta=timedelta(days=10, hours=2))
-        self._ticket(session)
+        self._set_window(start_delta=timedelta(days=10), end_delta=timedelta(days=10, hours=2))
+        self._ticket()
         with override_settings(FINAL_EXAM_REMINDER_DAYS=(3, 1)):
             sent = notify_upcoming_final_exams()
         self.assertEqual(sent, 0)
 
     def test_no_reminder_for_completed_ticket(self):
-        session = self._session(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
-        ticket = self._ticket(session)
+        self._set_window(start_delta=timedelta(days=2), end_delta=timedelta(days=2, hours=2))
+        ticket = self._ticket()
         FinalExamTicket.objects.filter(pk=ticket.pk).update(status="completed")
         with override_settings(FINAL_EXAM_REMINDER_DAYS=(3, 1)):
             sent = notify_upcoming_final_exams()

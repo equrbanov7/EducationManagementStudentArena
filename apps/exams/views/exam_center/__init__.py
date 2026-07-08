@@ -23,7 +23,8 @@ from .room_monitor import (
 )
 from .rooms import exam_center_room_list
 from .sessions import (
-    exam_center_session_assign_students,
+    exam_center_assign_students,
+    exam_center_finals,
     exam_center_session_create,
     exam_center_session_detail,
     exam_center_session_history,
@@ -48,7 +49,8 @@ __all__ = [
     "exam_center_room_open_all",
     "exam_center_room_snapshot",
     "exam_center_room_start_all",
-    "exam_center_session_assign_students",
+    "exam_center_assign_students",
+    "exam_center_finals",
     "exam_center_session_cancel",
     "exam_center_session_create",
     "exam_center_session_detail",

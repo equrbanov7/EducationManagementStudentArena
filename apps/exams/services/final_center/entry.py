@@ -71,19 +71,18 @@ def _rate_limited(request, username: str) -> bool:
     return False
 
 
-def _candidate_ticket(user):
+def _candidate_tickets(user):
     """
-    İstifadəçinin girişə uyğun bileti: oturumu giriş üçün açıq/aktiv olan,
-    yekunlaşmamış bilet. Ən yaxın oturum seçilir.
+    İstifadəçinin girişə namizəd biletləri: yekunlaşmamış, PIN-i etibarlı olan
+    biletlər (oturum sisteminin ləğvindən sonra — 2026-07 — SESSION FİLTRİ YOX,
+    çünki bilet giriş anında zala qoşulur, əvvəldən bağlı deyil).
 
-    ``ACTIVE`` status da daxildir — YENİDƏN GİRİŞ üçün (brauzer çöküb/internet
-    gedib/kompüter dəyişib). Amma bu YALNIZ nəzarətçi PIN-i yenidən verəndə
-    işləyir: adi aktiv tələbənin PIN-i başlanğıcda ləğv olunur (``has_valid_pin``
-    False) → ``verify_ticket_pin`` rədd edir. Yəni PIN hələ də birdəfəlikdir;
-    yalnız nəzarətçinin yeni verdiyi PIN ilə olduğu yerdən davam etmək olur.
+    İstifadəçi eyni anda birdən çox finala təyin ola bilər → HAMISI qaytarılır;
+    PIN doğrulaması hansı biletə uyğun gəldiyini müəyyən edir (``validate_entry``).
+    ``ACTIVE`` da daxildir — yenidən giriş üçün (nəzarətçi yeni PIN verib).
     """
     now = timezone.now()
-    return (
+    return list(
         FinalExamTicket.objects.filter(
             student=user,
             status__in=(
@@ -92,18 +91,19 @@ def _candidate_ticket(user):
                 TICKET_STATUS_READY,
                 TICKET_STATUS_ACTIVE,
             ),
-            session__state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE),
         )
         .filter(Q(pin_expires_at__isnull=True) | Q(pin_expires_at__gt=now))
         .select_related("session", "session__room", "exam", "organization", "student")
-        .order_by("session__scheduled_start")
-        .first()
+        .order_by("-created_at")
     )
 
 
 def validate_entry(request, username: str, raw_pin: str):
     """
-    Final girişinin tam yoxlaması.
+    Final girişinin tam yoxlaması (yalnız PIN + istifadəçi — ZAL YOX).
+
+    Zal həlli (kompüter IP → zal) və oturuma qoşulma view qatındadır (bax
+    ``final_center.py`` + ``attach_ticket_to_room_sitting``).
 
     Qaytarır: ``(ticket, None)`` uğurda, ``(None, error_code)`` xətada.
     Xəta kodları QƏSDƏN generikdir — istifadəçi mövcudluğu sızdırılmır.
@@ -123,20 +123,24 @@ def validate_entry(request, username: str, raw_pin: str):
         equalize_verification_timing(raw_pin)
         return None, ERROR_INVALID
 
-    ticket = _candidate_ticket(user)
-    if ticket is None:
+    candidates = _candidate_tickets(user)
+    if not candidates:
         equalize_verification_timing(raw_pin)
         return None, ERROR_INVALID
 
-    if ticket.is_pin_locked:
-        # Kilid halında da doğrulama aparılır (timing), amma nəticə nəzərə alınmır.
-        verify_ticket_pin(ticket, raw_pin)
-        _log_suspicious(request, ticket, "pin_locked_attempt")
-        return None, ERROR_LOCKED
+    ticket = None
+    for cand in candidates:
+        if cand.is_pin_locked:
+            verify_ticket_pin(cand, raw_pin)  # timing bərabərləşməsi; nəticə nəzərə alınmır
+            continue
+        if verify_ticket_pin(cand, raw_pin):
+            ticket = cand
+            break
 
-    if not verify_ticket_pin(ticket, raw_pin):
-        if ticket.is_pin_locked:
-            _log_suspicious(request, ticket, "pin_lock_triggered")
+    if ticket is None:
+        # Heç bir biletə uyğun gəlmədi — kilidli bilet varsa xüsusi mesaj.
+        if any(c.is_pin_locked for c in candidates):
+            _log_suspicious(request, candidates[0], "pin_locked_attempt")
             return None, ERROR_LOCKED
         return None, ERROR_INVALID
 
@@ -184,12 +188,58 @@ def clear_entry_session(request) -> None:
     request.session.pop(ENTRY_SESSION_KEY, None)
 
 
+def attach_ticket_to_room_sitting(ticket, room, computer=None):
+    """
+    Bileti otağın AÇIQ zal oturumuna qoşur (giriş anında — oturum sisteminin
+    ləğvindən sonra).
+
+    Tələbə qeydli kompüterdən (IP → zal) girəndə həmin otağın ``entry_open``/
+    ``active`` oturumu tapılır, ``ticket.session`` set olunur və seat kompüterin
+    ``seat_number``-indən götürülür (boşdursa). Nəzarətçi bu otağı başladanda
+    tələbə öz təyin olunmuş imtahanına (``ticket.exam``) başlayır.
+
+    * İdempotent: bilet artıq həmin otağın canlı oturumuna qoşulubsa onu qaytarır.
+    * Otaqda açıq oturum yoxdursa ``None`` qaytarır (view "nəzarətçini gözləyin"
+      xətası göstərir).
+    """
+    from apps.exams.models import ExamRoomSession
+    from core.rls import bypass_rls
+
+    live_states = (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)
+    if (
+        ticket.session_id
+        and ticket.session
+        and ticket.session.room_id == room.id
+        and ticket.session.state in live_states
+    ):
+        return ticket.session
+
+    # Public giriş axını — aktiv-org RLS konteksti yoxdur; oturum otağa görə
+    # açıq filtrlənir (bax resolve_room_computer). Bypass ilə oxuyuruq.
+    with bypass_rls():
+        sitting = (
+            ExamRoomSession.objects.filter(room=room, state__in=live_states).order_by("scheduled_start", "id").first()
+        )
+    if sitting is None:
+        return None
+
+    update_fields = ["session", "updated_at"]
+    ticket.session = sitting
+    seat = getattr(computer, "seat_number", None)
+    if seat and not sitting.tickets.filter(seat_number=seat).exclude(pk=ticket.pk).exists():
+        ticket.seat_number = seat
+        update_fields.append("seat_number")
+    ticket.save(update_fields=update_fields)
+    return sitting
+
+
 __all__ = [
     "ENTRY_SESSION_KEY",
     "ERROR_INVALID",
     "ERROR_LOCKED",
     "ERROR_NO_ACTIVE_SESSION",
     "ERROR_RATE_LIMITED",
+    "attach_ticket_to_room_sitting",
     "clear_entry_session",
     "entry_ticket_id",
     "store_entry_session",

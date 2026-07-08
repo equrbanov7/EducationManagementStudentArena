@@ -13,11 +13,7 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 
-from apps.exams.domain.final_center import (
-    ROOM_SESSION_STATE_ENTRY_OPEN,
-    ROOM_SESSION_STATE_PREPARED,
-    TICKET_STATUS_ASSIGNED,
-)
+from apps.exams.domain.final_center import TICKET_STATUS_ASSIGNED
 from apps.exams.models import FinalExamTicket
 
 logger = logging.getLogger("exams.final_center.reminders")
@@ -52,20 +48,20 @@ def notify_upcoming_final_exams(now=None) -> int:
     max_threshold = thresholds[0]
     horizon = now + timezone.timedelta(days=max_threshold)
 
-    # Yalnız hələ başlamamış, giriş/hazırlıq fazasındakı oturumların, hələ
-    # imtahana girməmiş (assigned) biletləri — və artıq ən kiçik eşik üçün
-    # xatırlanmamış olanlar.
+    # Oturum sisteminin ləğvindən sonra (2026-07) xatırlatma İMTAHANIN öz
+    # cədvəlinə (``exam.start_datetime``) əsaslanır — bilet giriş anına qədər
+    # zala qoşulmur. Yalnız hələ imtahana girməmiş (assigned) biletlər, imtahanı
+    # aktiv və yaxınlaşan olanlar.
     tickets = FinalExamTicket.objects.filter(
         status=TICKET_STATUS_ASSIGNED,
-        session__state__in=(ROOM_SESSION_STATE_PREPARED, ROOM_SESSION_STATE_ENTRY_OPEN),
-        session__scheduled_start__gt=now,
-        session__scheduled_start__lte=horizon,
-    ).select_related("session", "session__room", "exam", "student", "organization")
+        exam__is_active=True,
+        exam__start_datetime__gt=now,
+        exam__start_datetime__lte=horizon,
+    ).select_related("exam", "student", "organization")
 
     sent = 0
     for ticket in tickets.iterator():
-        session = ticket.session
-        days_left = (session.scheduled_start - now).total_seconds() / 86400.0
+        days_left = (ticket.exam.start_datetime - now).total_seconds() / 86400.0
         threshold = _smallest_applicable(days_left, thresholds)
         if threshold is None:
             continue
@@ -103,13 +99,12 @@ def _reminder_title(threshold: int) -> str:
 def _reminder_message(ticket, threshold: int) -> str:
     from django.utils.translation import pgettext
 
-    session = ticket.session
-    start = timezone.localtime(session.scheduled_start).strftime("%d.%m.%Y %H:%M")
+    start = timezone.localtime(ticket.exam.start_datetime).strftime("%d.%m.%Y %H:%M")
     return pgettext(
         "exams.final_center.reminder",
-        "{exam} final imtahanı {start} tarixində {room} zalında keçiriləcək. "
-        "İmtahana təyin olunmuş vaxtda /exams/final/ ünvanından istifadəçi adınız və PIN ilə daxil olun.",
-    ).format(exam=ticket.exam.title, start=start, room=session.room.name)
+        "{exam} final imtahanı {start} tarixində keçiriləcək. İmtahan zalındakı "
+        "kompüterdən /exams/final/ ünvanından istifadəçi adınız və PIN ilə daxil olun.",
+    ).format(exam=ticket.exam.title, start=start)
 
 
 __all__ = ["notify_upcoming_final_exams"]

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ session.exam.title }} @ {{ session.room.name }} — {% trans "Canlı monitor" %}{% endblock %}
+{% block title %}{{ session.room.name }} — {% trans "Canlı monitor" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
@@ -22,7 +22,7 @@
   {% csrf_token %}
 
   {% url 'exams:exam_center_session_list' as sessions_url %}
-  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.exam.title %}
+  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.room.name %}
 
   <header class="fxc-head">
     <div>
@@ -30,7 +30,7 @@
         {{ session.get_state_display }}
       </span>
       <span class="fxc-conn" id="fxc-ws-state" data-state="connecting">{% trans "Qoşulur…" %}</span>
-      <h1>{{ session.exam.title }}</h1>
+      <h1><i class="fas fa-door-open"></i> {{ session.room.name }}</h1>
       <p class="fxc-sub">
         <i class="fas fa-door-open"></i> {{ session.room.name }} ({{ session.room.code }})
         · <i class="far fa-clock"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}
@@ -139,7 +139,6 @@
       {% trans "Bu əməliyyat otaqdakı BÜTÜN gözləyən tələbələr üçün imtahanı eyni anda başladır." %}
     </p>
     <dl class="fxc-modal-facts" id="fxc-start-facts">
-      <div><dt>{% trans "İmtahan" %}</dt><dd>{{ session.exam.title }}</dd></div>
       <div><dt>{% trans "Zal" %}</dt><dd>{{ session.room.name }}</dd></div>
       <div><dt>{% trans "Təyin olunmuş" %}</dt><dd data-fact="total">—</dd></div>
       <div><dt>{% trans "Qoşulu" %}</dt><dd data-fact="connected">—</dd></div>

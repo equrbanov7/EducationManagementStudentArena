@@ -25,7 +25,7 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_READY,
     TICKET_STATUS_WAITING,
 )
-from apps.exams.models import ExamAttempt, ExamRoomSession, FinalExamTicket
+from apps.exams.models import ExamAttempt, ExamRoomSession
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -58,46 +58,21 @@ def _audit_session(session, *, action, user=None, request=None, reason="", chang
     )
 
 
-def validate_session_plan(*, room, exam, scheduled_start, scheduled_end, exclude_pk=None):
+def validate_session_plan(*, room, scheduled_start, scheduled_end, exclude_pk=None):
     """
-    Oturum planının yoxlamaları:
-    * imtahan və zal eyni təşkilatda olmalıdır;
-    * bitmə vaxtı başlama vaxtından sonra olmalıdır;
-    * zaldakı üst-üstə düşən oturumların ümumi tutumu zal tutumunu aşmamalıdır.
+    Zal oturumu (sitting) planının yoxlaması — imtahandan ASILI DEYİL
+    (oturum sisteminin ləğvi, 2026-07): oturum yalnız zal + vaxt pəncərəsidir.
 
-    QEYD: bir zalda EYNİ ANDA çoxlu (fərqli fənn) oturum ola bilər — bu,
-    imtahan zalı ssenarisinin əsasıdır (nəzarətçi hamısını birlikdə idarə edir).
-    Ona görə üst-üstə düşmə ÖZLÜYÜNDƏ xəta deyil; yalnız tutum aşılması bloklanır.
-    Xəta halında ``RoomSessionStateError`` atılır.
+    * bitmə vaxtı başlama vaxtından sonra olmalıdır.
+
+    Tutum yoxlaması artıq planda deyil — tələbələr giriş anında (kompüter IP →
+    zal) dinamik qoşulur; bir zalda paralel oturum(lar) mümkündür (nəzarətçi
+    hamısını birlikdə idarə edir). ``exclude_pk`` gələcək genişlənmə üçün saxlanır.
     """
-    if room.organization_id != exam.organization_id:
-        raise RoomSessionStateError(
-            pgettext("exams.final_center.error", "Zal və imtahan eyni təşkilata aid olmalıdır.")
-        )
     if scheduled_end <= scheduled_start:
         raise RoomSessionStateError(
             pgettext("exams.final_center.error", "Oturumun bitmə vaxtı başlama vaxtından sonra olmalıdır.")
         )
-
-    capacity = room.capacity or 0
-    if capacity:
-        overlapping = (
-            ExamRoomSession.objects.filter(room=room)
-            .exclude(state__in=(ROOM_SESSION_STATE_ENDED, ROOM_SESSION_STATE_CANCELLED))
-            .filter(scheduled_start__lt=scheduled_end, scheduled_end__gt=scheduled_start)
-        )
-        if exclude_pk:
-            overlapping = overlapping.exclude(pk=exclude_pk)
-        # Üst-üstə düşən oturumlara artıq təyin olunmuş tələbələr zal tutumunu
-        # aşırsa yeni oturum bloklanır (kompüterlər çatmır).
-        assigned_total = FinalExamTicket.objects.filter(session__in=overlapping).exclude(status="removed").count()
-        if assigned_total >= capacity:
-            raise RoomSessionStateError(
-                pgettext(
-                    "exams.final_center.error",
-                    "Bu zalda seçilmiş vaxt aralığında tutum dolub ({total}/{capacity}).",
-                ).format(total=assigned_total, capacity=capacity)
-            )
 
 
 def _live_ticket_ids(session):

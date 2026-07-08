@@ -27,6 +27,7 @@ from apps.exams.models import (
     ExamQuestion,
     ExamQuestionOption,
     ExamRoom,
+    ExamRoomComputer,
     ExamRoomSession,
     FinalExamTicket,
     StudentGroup,
@@ -143,19 +144,19 @@ class Command(UsersSeedMixin, BaseCommand):
         exam.allowed_groups.set([group_cs, group_se])
 
         room = self._ensure_room(org, ec_head)
-        ExamRoomSession.objects.filter(exam=exam, room=room).exclude(state__in=("ended",)).delete()
+        self._ensure_local_computer(org, room, ec_head)
+        ExamRoomSession.objects.filter(room=room).exclude(state__in=("ended",)).delete()
         now = timezone.now()
         session = ExamRoomSession.objects.create(
             organization=org,
-            exam=exam,
             room=room,
             scheduled_start=now - timedelta(minutes=5),
             scheduled_end=now + timedelta(hours=3),
             created_by=ec_head,
         )
-        assign_students(session, all_students, ec_head)
-        # PIN-lərin mövcudluğunu təmin et (bəziləri təyinatda yaranır — hamısını yenilə).
-        for ticket in FinalExamTicket.objects.filter(session=session):
+        # Təyinat İMTAHANA olur (zaldan asılı deyil); tələbə giriş anında oturuma qoşulur.
+        assign_students(exam, all_students, ec_head)
+        for ticket in FinalExamTicket.objects.filter(exam=exam):
             if not ticket.pin_hash:
                 set_ticket_pin(ticket, ec_head)
         open_entry(session, ec_head)
@@ -176,7 +177,19 @@ class Command(UsersSeedMixin, BaseCommand):
                 p.save(update_fields=["email_verified", "password_change_required", "updated_at"])
 
         self._report(
-            pw, superadmin, org, rector, ec_head, ec_staff, teachers, all_students, group_cs, group_se, room, session
+            pw,
+            superadmin,
+            org,
+            rector,
+            ec_head,
+            ec_staff,
+            teachers,
+            all_students,
+            group_cs,
+            group_se,
+            room,
+            session,
+            exam,
         )
 
     # ------------------------------------------------------------------ helpers
@@ -329,8 +342,37 @@ class Command(UsersSeedMixin, BaseCommand):
         )
         return room
 
+    def _ensure_local_computer(self, org, room, creator):
+        """Zala 127.0.0.1 IP-li kompüter qeyd et — lokal test/demo-da IP→zal həlli
+        işləsin (oturum sisteminin ləğvi: tələbə qeydli kompüterdən girir)."""
+        ExamRoomComputer.objects.get_or_create(
+            room=room,
+            label="PC-DEMO-201-01",
+            defaults={
+                "organization": org,
+                "seat_number": 1,
+                "mac_address": "AA:BB:CC:DD:EE:02",
+                "ip_address": "127.0.0.1",
+                "is_active": True,
+                "created_by": creator,
+            },
+        )
+
     def _report(
-        self, pw, superadmin, org, rector, ec_head, ec_staff, teachers, students, group_cs, group_se, room, session
+        self,
+        pw,
+        superadmin,
+        org,
+        rector,
+        ec_head,
+        ec_staff,
+        teachers,
+        students,
+        group_cs,
+        group_se,
+        room,
+        session,
+        exam,
     ):
         out, ok, sub = self.stdout, self.style.SUCCESS, self.style.HTTP_INFO
         out.write(ok("\n══════════════════════════════════════════════════════════════"))
@@ -347,7 +389,7 @@ class Command(UsersSeedMixin, BaseCommand):
         for t in teachers:
             out.write(f"    {t.username:20} {t.get_full_name()}")
         out.write(sub("\n  TƏLƏBƏLƏR (PIN axtarışı üçün):"))
-        by_id = {t.student_id: t for t in FinalExamTicket.objects.filter(session=session).select_related("student")}
+        by_id = {t.student_id: t for t in FinalExamTicket.objects.filter(exam=exam).select_related("student")}
         for s in students:
             ticket = by_id.get(s.id)
             pin = decrypt_ticket_pin(ticket) if ticket else "—"

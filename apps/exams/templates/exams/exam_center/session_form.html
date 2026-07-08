@@ -14,8 +14,8 @@
   {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
   <header class="fxc-head">
     <div>
-      <h1><i class="fas fa-calendar-plus"></i> {% trans "Yeni imtahan oturumu" %}</h1>
-      <p class="fxc-sub">{% trans "Final imtahanını zala və vaxta bağlayın" %}</p>
+      <h1><i class="fas fa-calendar-plus"></i> {% trans "Yeni zal oturumu" %}</h1>
+      <p class="fxc-sub">{% trans "Zalı və vaxt aralığını seçin — imtahandan asılı deyil. Tələbələr imtahana ayrıca təyin olunur." %}</p>
     </div>
     <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
       <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
@@ -28,10 +28,9 @@
     <div class="fxc-alert fxc-alert-error" role="alert">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    <div class="fxc-field">
-      <label for="{{ form.exam.id_for_label }}">{% trans "Final imtahanı" %} *</label>
-      <div class="bootstrap-single-select">{{ form.exam }}</div>
-      {{ form.exam.errors }}
+    <div class="fxc-alert fxc-alert-info" role="note">
+      <i class="fas fa-circle-info"></i>
+      {% trans "Zal oturumu imtahandan asılı deyil: otaqdakı qeydli kompüterlərdən girən hər tələbə (kim hansı finala təyin olunubsa) bu oturuma qoşulur; nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır." %}
     </div>
 
     <div class="fxc-form-grid">
