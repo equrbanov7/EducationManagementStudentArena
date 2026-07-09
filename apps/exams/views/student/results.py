@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
@@ -40,6 +41,14 @@ def _is_profile_results_request(request, return_to):
     if source_section == "my-results":
         return True
     return "section=my-results" in (return_to or "")
+
+
+def _hide_test_answer_correctness_in_cabinet(exam, *, is_profile_results):
+    return bool(
+        is_profile_results
+        and getattr(exam, "exam_type", "") == "test"
+        and getattr(exam, "exam_type_extended", "") in {"final", "midterm"}
+    )
 
 
 def _final_entry_url():
@@ -121,8 +130,10 @@ def exam_result(request, slug, attempt_id):
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
     return_to = current_return_to(request)
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
+    is_profile_results = _is_profile_results_request(request, return_to)
     is_final_exam_result = _is_final_exam(exam)
-    is_final_center_result = is_final_exam_result and not _is_profile_results_request(request, return_to)
+    is_final_center_result = is_final_exam_result and not is_profile_results
+    hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(exam, is_profile_results=is_profile_results)
     final_result_remaining_seconds = None
     final_result_timeout_url = ""
 
@@ -161,7 +172,7 @@ def exam_result(request, slug, attempt_id):
         .order_by("-started_at")
     )
     previous_attempts = annotate_attempt_result_visibility(previous_attempts)
-    attach_test_result_summaries(previous_attempts)
+    attach_test_result_summaries(previous_attempts, bonus_map_fn=score_adjustments.student_visible_bonus_map)
     for previous_attempt in previous_attempts:
         previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=request.get_full_path())
 
@@ -203,25 +214,23 @@ def exam_result(request, slug, attempt_id):
             submission.file_items = _coding_submission_file_items(submission)
             coding_submissions_by_qid.setdefault(submission.question.question_id, submission)
 
-    # ── Apellyasiya konteksti ──────────────────────────────────────────────
-    # M2 (2026-07-02): appeals importu əvəzinə exams-ın score_adjustments
-    # genişlənmə nöqtəsi (appeals ready()-də qoşulur).
-    from apps.exams import score_adjustments
-
     can_appeal = score_adjustments.can_create(request, attempt)
     appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
-    if _is_profile_results_request(request, return_to):
+    if is_profile_results:
         appeal_create_url = append_query_params(
             appeal_create_url,
             from_section="my-results",
             return_to=return_to or f"{reverse('accounts:profile')}?section=my-results",
         )
     appeal_remaining_seconds = score_adjustments.remaining_window_seconds(attempt)
-    # Qəbul olunmuş apellyasiya bonusları nəticədə əks olunsun (test üçün).
+    # Qəbul olunmuş apellyasiya bonusları tələbəyə yalnız 5 dəqiqəlik redaktə
+    # pəncərəsi bağlanandan sonra görünür.
     effective_score_info = (
-        score_adjustments.effective_test_score(attempt, answers=answers) if exam.exam_type == "test" else None
+        score_adjustments.student_visible_effective_test_score(attempt, answers=answers)
+        if exam.exam_type == "test"
+        else None
     )
-    _appeal_state = score_adjustments.score_state(attempt)
+    _appeal_state = score_adjustments.student_visible_score_state(attempt)
     appeal_bonus_points = _appeal_state["bonus_points"]
     appeal_bonus_by_qid = {
         question_id: _format_score_delta(delta)
@@ -256,6 +265,7 @@ def exam_result(request, slug, attempt_id):
             "history_url": history_url,
             "back_url": back_url,
             "is_final_exam_result": is_final_center_result,
+            "hide_test_answer_correctness": hide_test_answer_correctness,
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,
@@ -309,7 +319,7 @@ def student_exam_history(request):
     page_obj = paginator.get_page(page_number)
 
     visible_attempts = annotate_attempt_result_visibility(list(page_obj.object_list))
-    attach_test_result_summaries(visible_attempts)
+    attach_test_result_summaries(visible_attempts, bonus_map_fn=score_adjustments.student_visible_bonus_map)
     current_path = request.get_full_path()
     for attempt in visible_attempts:
         attempt.result_url = build_exam_result_url(attempt, return_to=current_path)

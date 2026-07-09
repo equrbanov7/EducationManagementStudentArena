@@ -5,10 +5,12 @@ Apellyasiya bonusunun bütün görünüş səthlərində əks olunması (end-to-
 - bildirişlər: yeni apellyasiya → imtahan mərkəzinə, qərar → tələbəyə.
 """
 
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.appeals.constants import APPEAL_ITEM_STATUS_ACCEPTED, APPEAL_TYPE_WRONG_ANSWER_KEY
@@ -20,6 +22,8 @@ from apps.appeals.services import (
     apply_bonus_to_test_result,
     create_appeal,
     reject_appeal_item,
+    student_visible_appeal_bonus_map,
+    student_visible_appeal_score_state,
 )
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
@@ -116,6 +120,22 @@ class EffectiveDisplayTests(TestCase):
         attempts = [self.attempt]
         attach_test_result_summaries(attempts)
         self.assertEqual(attempts[0].test_result.score, Decimal("1"))
+
+    def test_student_visible_bonus_waits_for_reviewer_edit_window(self):
+        appeal, item = self._accepted_appeal()
+
+        self.assertEqual(student_visible_appeal_bonus_map([self.attempt.id]), {})
+        self.assertEqual(student_visible_appeal_score_state(self.attempt)["bonus_points"], Decimal("0"))
+
+        item.refresh_from_db()
+        old_resolved_at = timezone.now() - timedelta(minutes=6)
+        item.resolved_at = old_resolved_at
+        item.save(update_fields=["resolved_at", "updated_at"])
+        appeal.reviewed_at = old_resolved_at
+        appeal.save(update_fields=["reviewed_at", "updated_at"])
+
+        self.assertEqual(student_visible_appeal_bonus_map([self.attempt.id]).get(self.attempt.id), Decimal("1"))
+        self.assertEqual(student_visible_appeal_score_state(self.attempt)["bonus_points"], Decimal("1"))
 
     def test_reject_reverts_bonus_everywhere(self):
         appeal, item = self._accepted_appeal()

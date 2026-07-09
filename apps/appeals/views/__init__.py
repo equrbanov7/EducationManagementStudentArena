@@ -11,6 +11,7 @@ from .student import appeal_create, build_my_appeals_context, my_appeals
 from .teacher import (
     _can_open_appeal_management,
     build_manage_appeals_context,
+    count_pending_manage_appeals,
     manage_appeals,
     review_appeal,
 )
@@ -23,5 +24,6 @@ __all__ = [
     "review_appeal",
     "build_my_appeals_context",
     "build_manage_appeals_context",
+    "count_pending_manage_appeals",
     "_can_open_appeal_management",
 ]

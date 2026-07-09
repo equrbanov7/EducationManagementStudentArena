@@ -243,8 +243,9 @@
 
 </div>{# /.ems-cd-modals #}
 
-{# İmtahan modalları (pilləli sehrbaz) öz xüsusi dizaynı ilə qalır — generic
-   restyle/enhancer-dən kənarda saxlanılır ki, ikiqat başlıq/pozulma olmasın. #}
+{% comment %} İmtahan modalları (pilləli sehrbaz) öz xüsusi dizaynı ilə qalır — generic
+   restyle/enhancer-dən kənarda saxlanılır ki, ikiqat başlıq/pozulma olmasın.  {% endcomment %}
+
 {% if is_owner or user_role == 'teacher' %}
     {% include "exams/components/_exam_modals.html" %}
 {% endif %}

@@ -24,18 +24,26 @@
     {% endfor %}
 </div>
 
-<form method="get" action="{{ appeal_list_action }}" class="appeal-filter-card">
+<form method="get"
+      action="{{ appeal_list_action }}"
+      class="appeal-filter-card"
+      data-appeal-manage-filter-form>
     {% if appeal_section %}<input type="hidden" name="section" value="{{ appeal_section }}">{% endif %}
     <div class="row g-3">
         <div class="col-lg-4 col-md-6">
             <label class="form-label small text-muted fw-bold" for="mq">{% trans "Axtarış" context "appeals.template" %}</label>
             <input type="text" class="form-control" id="mq" name="q" value="{{ appeal_search_query }}"
-                   placeholder="{% trans 'İmtahan və ya tələbə' context 'appeals.template' %}">
+                   placeholder="{% trans 'İmtahan və ya tələbə' context 'appeals.template' %}"
+                   data-appeal-auto-search>
         </div>
         <div class="col-lg-2 col-md-6">
             <label class="form-label small text-muted fw-bold" for="mstatus">{% trans "Status" context "appeals.template" %}</label>
             <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" id="mstatus" name="status" data-bootstrap-select>
+                <select class="form-select bootstrap-single-select__native"
+                        id="mstatus"
+                        name="status"
+                        data-bootstrap-select
+                        data-appeal-auto-field>
                     <option value="">{% trans "Hamısı" context "appeals.template" %}</option>
                     {% for value, label in appeal_status_choices %}
                     <option value="{{ value }}" {% if appeal_status_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -46,7 +54,11 @@
         <div class="col-lg-3 col-md-6">
             <label class="form-label small text-muted fw-bold" for="mexam">{% trans "İmtahan" context "appeals.template" %}</label>
             <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" id="mexam" name="exam" data-bootstrap-select>
+                <select class="form-select bootstrap-single-select__native"
+                        id="mexam"
+                        name="exam"
+                        data-bootstrap-select
+                        data-appeal-auto-field>
                     <option value="">{% trans "Bütün imtahanlar" context "appeals.template" %}</option>
                     {% for slug, title in appeal_exam_options %}
                     <option value="{{ slug }}" {% if appeal_exam_slug == slug %}selected{% endif %}>{{ title }}</option>
@@ -57,7 +69,11 @@
         <div class="col-lg-3 col-md-6">
             <label class="form-label small text-muted fw-bold" for="mtype">{% trans "Səbəb tipi" context "appeals.template" %}</label>
             <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" id="mtype" name="type" data-bootstrap-select>
+                <select class="form-select bootstrap-single-select__native"
+                        id="mtype"
+                        name="type"
+                        data-bootstrap-select
+                        data-appeal-auto-field>
                     <option value="">{% trans "Hamısı" context "appeals.template" %}</option>
                     {% for value, label in appeal_type_choices %}
                     <option value="{{ value }}" {% if appeal_type_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -67,11 +83,11 @@
         </div>
         <div class="col-lg-3 col-md-6">
             <label class="form-label small text-muted fw-bold" for="mdate_from">{% trans "Başlanğıc tarixi" context "appeals.template" %}</label>
-            <input type="date" class="form-control" id="mdate_from" name="date_from" value="{{ appeal_date_from }}">
+            <input type="date" class="form-control" id="mdate_from" name="date_from" value="{{ appeal_date_from }}" data-appeal-auto-field>
         </div>
         <div class="col-lg-3 col-md-6">
             <label class="form-label small text-muted fw-bold" for="mdate_to">{% trans "Son tarix" context "appeals.template" %}</label>
-            <input type="date" class="form-control" id="mdate_to" name="date_to" value="{{ appeal_date_to }}">
+            <input type="date" class="form-control" id="mdate_to" name="date_to" value="{{ appeal_date_to }}" data-appeal-auto-field>
         </div>
         <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2">
             <button type="submit" class="btn btn-primary flex-grow-1">

@@ -65,10 +65,11 @@ class FinalExamCenterPageTests(TestCase):
         session.save()
         return client
 
-    def _finished_attempt(self, *, finished_at=None, status="submitted"):
+    def _finished_attempt(self, *, exam=None, finished_at=None, status="submitted"):
+        exam = exam or self.final_exam
         question = ExamQuestion.objects.create(
-            exam=self.final_exam,
-            order=self.final_exam.questions.count() + 1,
+            exam=exam,
+            order=exam.questions.count() + 1,
             text="Final sualı",
         )
         option = ExamQuestionOption.objects.create(
@@ -79,7 +80,7 @@ class FinalExamCenterPageTests(TestCase):
         )
         attempt = ExamAttempt.objects.create(
             user=self.student,
-            exam=self.final_exam,
+            exam=exam,
             status=status,
             finished_at=finished_at or timezone.now(),
         )
@@ -177,6 +178,55 @@ class FinalExamCenterPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("_auth_user_id", client.session)
         self.assertNotContains(response, "data-final-result-timeout", html=False)
+
+    def test_final_result_from_center_shows_answer_analysis_but_cabinet_hides_it(self):
+        attempt = self._finished_attempt()
+        client = self._client()
+        result_url = reverse("exams:exam_result", args=[self.final_exam.slug, attempt.id])
+
+        center_response = client.get(result_url)
+        self.assertEqual(center_response.status_code, 200)
+        self.assertContains(center_response, "Final sualı")
+        self.assertContains(center_response, "Doğru cavab")
+        self.assertContains(center_response, 'class="q-body"', html=False)
+
+        cabinet_response = client.get(
+            result_url,
+            {
+                "from_section": "my-results",
+                "return_to": reverse("accounts:profile") + "?section=my-results",
+            },
+        )
+        self.assertEqual(cabinet_response.status_code, 200)
+        self.assertContains(cabinet_response, "Final sualı")
+        self.assertContains(cabinet_response, "question-card--question-only")
+        self.assertNotContains(cabinet_response, "Doğru cavab")
+        self.assertNotContains(cabinet_response, 'class="q-body"', html=False)
+
+    def test_midterm_result_from_cabinet_hides_answer_analysis(self):
+        midterm_exam = Exam.objects.create(
+            title="FEP Midterm fizika",
+            author=self.owner,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="midterm",
+            is_active=True,
+            is_public=True,
+        )
+        attempt = self._finished_attempt(exam=midterm_exam, finished_at=timezone.now() - timedelta(minutes=6))
+        response = self._client().get(
+            reverse("exams:exam_result", args=[midterm_exam.slug, attempt.id]),
+            {
+                "from_section": "my-results",
+                "return_to": reverse("accounts:profile") + "?section=my-results",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Final sualı")
+        self.assertContains(response, "question-card--question-only")
+        self.assertNotContains(response, "Doğru cavab")
+        self.assertNotContains(response, 'class="q-body"', html=False)
 
 
 class ExamCenterGateUnitTests(TestCase):

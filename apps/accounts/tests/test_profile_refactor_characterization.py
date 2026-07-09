@@ -122,6 +122,7 @@ EXPECTED_PROFILE_CONTEXT_KEYS = {
     "pending_answers_active_filter",
     "pending_answers_count",
     "pending_answers_search_query",
+    "pending_appeals_count",
     "pending_post_approval_available_groups",
     "pending_post_approval_available_organizations",
     "pending_post_approval_count",

@@ -3,8 +3,15 @@
 from .endpoints import (
     _can_open_appeal_management,
     build_manage_appeals_context,
+    count_pending_manage_appeals,
     manage_appeals,
     review_appeal,
 )
 
-__all__ = ["build_manage_appeals_context", "manage_appeals", "review_appeal", "_can_open_appeal_management"]
+__all__ = [
+    "build_manage_appeals_context",
+    "count_pending_manage_appeals",
+    "manage_appeals",
+    "review_appeal",
+    "_can_open_appeal_management",
+]

@@ -2,15 +2,8 @@
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--my-results {% if active_section == 'my-results' %}is-active{% endif %}" data-profile-section-panel="my-results" data-source-url="{% url 'accounts:my_results' %}">
     <div class="section-card">
-        
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-chart-pie text-teal"></i>
-                    <span>{% trans "title" context "profile.results" %}</span>
-                </div>
-            </div>
-        </div>
+
+
 
         <div class="modern-results-tabs">
             <a href="{{ profile_base_url }}?section=my-results&results_type=all{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
