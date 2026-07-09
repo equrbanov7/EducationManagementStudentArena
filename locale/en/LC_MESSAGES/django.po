@@ -1542,7 +1542,7 @@ msgid "Keyfiyyət"
 msgstr "Keyfiyyət"
 
 msgid "Audit jurnalı"
-msgstr "Audit jurnalı"
+msgstr "Audit log"
 
 msgid "Təşkilat ayarları və idarəetmə əməliyyatları"
 msgstr "Təşkilat ayarları və idarəetmə əməliyyatları"
@@ -2335,7 +2335,7 @@ msgstr "Organizations not found"
 # Superadmin User Management
 msgctxt "superadmin.users"
 msgid "user_management_title"
-msgstr "User Management"
+msgstr "User management"
 
 #, python-format
 msgid "%(filtered)s nəticə göstərilir. Ümumi istifadəçi sayı: %(total)s."
@@ -3557,7 +3557,7 @@ msgstr "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
 
 msgctxt "profile.sidebar"
 msgid "title"
-msgstr "Title"
+msgstr "Profile"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_light_title"
@@ -3690,11 +3690,11 @@ msgstr "Exam name is required."
 
 msgctxt "profile.sidebar"
 msgid "toggle_open"
-msgstr "Toggle open"
+msgstr "Open sidebar"
 
 msgctxt "profile.sidebar"
 msgid "toggle_open_or_close"
-msgstr "Toggle open or close"
+msgstr "Open or close sidebar"
 
 msgid "Təşkilat təsdiqi gözlənilir."
 msgstr "Send confirmation"
@@ -3711,11 +3711,11 @@ msgstr ""
 
 msgctxt "profile.sidebar"
 msgid "toggle_close"
-msgstr "Toggle close"
+msgstr "Close sidebar"
 
 msgctxt "profile.sidebar"
 msgid "group_general"
-msgstr "Group general"
+msgstr "General"
 
 msgctxt "profile.section"
 msgid "profile_info"
@@ -3746,7 +3746,7 @@ msgstr "Contact Messages"
 
 msgctxt "profile.sidebar"
 msgid "group_education"
-msgstr "Group education"
+msgstr "Education"
 
 # ── Statistics profile section (profile.statistics) ────────────
 # 
@@ -3812,15 +3812,15 @@ msgstr "My courses"
 
 msgctxt "profile.section"
 msgid "my_subjects"
-msgstr "My Subjects"
+msgstr "My subjects"
 
 msgctxt "profile.sidebar"
 msgid "my_subjects"
-msgstr "My Subjects"
+msgstr "My subjects"
 
 msgctxt "profile.sidebar"
 msgid "group_assigned"
-msgstr "Group assigned"
+msgstr "Assigned"
 
 msgctxt "profile.section"
 msgid "assigned_tasks"
@@ -3852,7 +3852,7 @@ msgstr "My appeals"
 
 msgctxt "profile.sidebar"
 msgid "group_teacher"
-msgstr "Group teacher"
+msgstr "Teacher"
 
 msgctxt "profile.section"
 msgid "groups"
@@ -3891,27 +3891,27 @@ msgid "Apellyasiyalar"
 msgstr "Appeals"
 
 msgid "Universitet idarəetməsi"
-msgstr "Education management platform"
+msgstr "University management"
 
 msgid "Fakültələr"
-msgstr "Fakültələr"
+msgstr "Faculties"
 
 msgid "Struktur üzvləri"
-msgstr "Struktur üzvləri"
+msgstr "Structure members"
 
 msgid "Bölmə imtahanları"
-msgstr "All exams"
+msgstr "Unit exams"
 
 msgid "Təşkilat rolları"
-msgstr "Share in organization"
+msgstr "Organization roles"
 
 msgctxt "profile.sidebar"
 msgid "group_language"
-msgstr "Group language"
+msgstr "Language"
 
 msgctxt "profile.sidebar"
 msgid "group_account"
-msgstr "Group account"
+msgstr "Account"
 
 msgctxt "profile.section"
 msgid "edit_profile"
@@ -3922,7 +3922,7 @@ msgid "edit_profile"
 msgstr "Edit profile"
 
 msgid "Şifrəni dəyiş"
-msgstr "Şifrəni dəyiş"
+msgstr "Change password"
 
 msgctxt "profile.sidebar"
 msgid "logout"
@@ -5208,7 +5208,7 @@ msgid "supervisor_code"
 msgstr "Supervisor code"
 
 msgid "Təşkilatdan çıx"
-msgstr "Share in organization"
+msgstr "Leave organization"
 
 msgid "Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır."
 msgstr "Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır."
@@ -5933,7 +5933,7 @@ msgid "No contact messages yet."
 msgstr "No contact messages yet."
 
 msgid "Təşkilat məlumatları"
-msgstr "Share in organization"
+msgstr "Organization details"
 
 msgid "Bu bölmə yalnız superadmin üçündür."
 msgstr "Bu bölmə yalnız superadmin üçündür."
@@ -5973,7 +5973,7 @@ msgstr "Select an organization for the request."
 
 msgctxt "profile.sidebar"
 msgid "group_management"
-msgstr "Group management"
+msgstr "Management"
 
 msgctxt "profile.section"
 msgid "role_assignment"
@@ -5985,19 +5985,19 @@ msgstr "Role assignment"
 
 msgctxt "profile.section"
 msgid "student_management"
-msgstr "Post management"
+msgstr "Student management"
 
 msgctxt "profile.section"
 msgid "staff_management"
-msgstr "Staff Management"
+msgstr "Staff management"
 
 msgctxt "profile.sidebar"
 msgid "student_management"
-msgstr "Post management"
+msgstr "Student management"
 
 msgctxt "profile.sidebar"
 msgid "staff_management"
-msgstr "Staff Management"
+msgstr "Staff management"
 
 msgctxt "profile.section"
 msgid "permissions"
@@ -6016,7 +6016,7 @@ msgid "manage_roles"
 msgstr "Manage roles"
 
 msgid "Təşkilat özəllikləri"
-msgstr "Təşkilat özəllikləri"
+msgstr "Organization features"
 
 msgctxt "profile.section"
 msgid "superadmin_control"
@@ -6028,15 +6028,15 @@ msgstr "Superadmin control"
 
 msgctxt "profile.sidebar"
 msgid "user_management"
-msgstr "User Management"
+msgstr "User management"
 
 msgctxt "superadmin.ai_settings"
 msgid "title"
-msgstr "AI Settings"
+msgstr "AI settings"
 
 msgctxt "profile.sidebar"
 msgid "ai_settings"
-msgstr "AI Settings"
+msgstr "AI settings"
 
 msgid "Açıq profil"
 msgstr "Açıq profil"
@@ -24558,7 +24558,7 @@ msgid "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 msgstr "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 
 msgid "Kafedralar"
-msgstr "Kafedralar"
+msgstr "Departments"
 
 msgid ""
 "Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
@@ -27778,6 +27778,10 @@ msgid "Akademik təqvim"
 msgstr "Academic calendar"
 
 msgctxt "profile.sidebar"
+msgid "Akademik təqvim"
+msgstr "Academic calendar"
+
+msgctxt "profile.sidebar"
 msgid "Universitet"
 msgstr "University"
 
@@ -28277,6 +28281,33 @@ msgstr "Confirm the exam rules to continue."
 
 msgid "İmtahan Nəzarət Sistemi"
 msgstr "Exam Supervision System"
+
+msgid "Final təyinatları"
+msgstr "Final assignments"
+
+msgctxt "profile.section"
+msgid "PIN axtarışı"
+msgstr "PIN search"
+
+msgid "PIN axtarışı"
+msgstr "PIN search"
+
+msgctxt "profile.section"
+msgid "İmtahan statistikaları"
+msgstr "Exam statistics"
+
+msgid "İmtahan statistikaları"
+msgstr "Exam statistics"
+
+msgid "Sual göndərişləri"
+msgstr "Question submissions"
+
+msgid "Təyin olunmuş fənlərim"
+msgstr "My assigned subjects"
+
+msgctxt "profile.section"
+msgid "İmtahan zalları"
+msgstr "Exam halls"
 
 msgid "İmtahan zalları"
 msgstr "Exam halls"

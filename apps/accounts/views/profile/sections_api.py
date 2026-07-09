@@ -40,7 +40,7 @@ from apps.accounts.models import UserProfile
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 
-from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts
+from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _role_capabilities
 
 logger = logging.getLogger(__name__)
@@ -337,12 +337,19 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
         compute=_compute_shared_badges,
     )
     if capabilities.get("can_view_student_assignments"):
-        payload["assigned_tasks_count"] = shared_badges.get("assigned_tasks", 0)
+        # This badge is part of the active task workflow: after a student finishes
+        # an exam, the assigned-task panel is already live-empty, so the sidebar
+        # must not wait for the short shared badge cache to expire.
+        payload["assigned_tasks_count"] = count_assigned_tasks(request, request.user)
         payload["my_results_count"] = shared_badges.get("my_results", 0)
         payload["pending_answers_count"] = shared_badges.get("pending_answers", 0)
     if capabilities.get("can_review_submissions"):
         payload["pending_review_count"] = shared_badges.get("pending_review", 0)
         payload["evaluated_review_count"] = shared_badges.get("evaluated_review", 0)
+    if capabilities.get("can_manage_appeals"):
+        from apps.appeals.public import count_pending_manage_appeals
+
+        payload["pending_appeals_count"] = count_pending_manage_appeals(request)
 
     # Post-approval badge (teachers/admins with that allowed section)
     if "pending-post-approvals" in capabilities.get("allowed_sections", set()):

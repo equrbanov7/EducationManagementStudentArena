@@ -13,11 +13,24 @@ from apps.exams.navigation import append_query_params, current_return_to
 from apps.exams.public import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
-from ...constants import APPEAL_MIN_COMMENT_LENGTH, APPEAL_STATUS_CHOICES, APPEAL_STATUS_VALUES, APPEAL_TYPE_CHOICES
+from ...constants import (
+    APPEAL_MIN_COMMENT_LENGTH,
+    APPEAL_STATUS_CHOICES,
+    APPEAL_STATUS_UNDER_REVIEW,
+    APPEAL_STATUS_VALUES,
+    APPEAL_TYPE_CHOICES,
+)
 from ...models import AppealItem
 from ...selectors import filter_student_appeals, paginate_student_appeals, student_appeals_queryset
-from ...services import can_create_appeal, create_appeal, remaining_window_seconds
+from ...services import (
+    appeal_item_result_visible_to_student,
+    can_create_appeal,
+    create_appeal,
+    remaining_window_seconds,
+)
 from ..shared._helpers import _marked_question_map
+
+APPEAL_STATUS_LABELS = dict(APPEAL_STATUS_CHOICES)
 
 
 def _is_profile_results_request(request):
@@ -117,6 +130,8 @@ def appeal_create(request, attempt_id):
     marked_map = _marked_question_map(attempt)
     has_marked = any(marked_map.get(answer.question_id) for answer in delivered_answers)
 
+    is_profile_results_request = _is_profile_results_request(request)
+
     context = {
         "exam": exam,
         "attempt": attempt,
@@ -128,7 +143,8 @@ def appeal_create(request, attempt_id):
         "marked_question_by_qid": marked_map,
         "appealed_question_by_qid": {question_id: True for question_id in appealed_question_ids},
         "has_marked": has_marked,
-        "is_final_exam": _is_final_exam(exam) and not _is_profile_results_request(request),
+        "hide_answer_details": is_profile_results_request,
+        "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
     }
     return render(request, "appeals/student/appeal_create.html", context)
 
@@ -149,6 +165,13 @@ def build_my_appeals_context(request, *, list_action, section=""):
         search=search_query,
     )
     page_obj = paginate_student_appeals(queryset, request.GET.get("page", 1))
+    for appeal in page_obj.object_list:
+        has_hidden_decision = any(not appeal_item_result_visible_to_student(item) for item in appeal.items.all())
+        appeal.student_display_status = APPEAL_STATUS_UNDER_REVIEW if has_hidden_decision else appeal.status
+        appeal.student_display_status_label = APPEAL_STATUS_LABELS.get(
+            appeal.student_display_status,
+            appeal.get_status_display(),
+        )
 
     return {
         "appeal_page_obj": page_obj,

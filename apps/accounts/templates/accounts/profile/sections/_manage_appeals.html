@@ -15,7 +15,6 @@
                     <span class="appeal-hero__badge"><i class="fas fa-scale-balanced"></i></span>
                     <div>
                         <span class="appeal-hero__eyebrow">{% trans "Reviewer workspace" context "appeals.template" %}</span>
-                        <h1>{% trans "Apellyasiyaların idarəsi" context "appeals.template" %}</h1>
                         <p>{% trans "Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün detal səhifəsinə keçin." context "appeals.template" %}</p>
                     </div>
                 </div>
@@ -71,6 +70,8 @@
             var loadingHtml = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
             var currentDetailUrl = null;
             var modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getOrCreateInstance(modalEl) : null;
+            var filterTimer = null;
+            var listFetchAbort = null;
 
             function withParam(url, extra) {
                 return url + (url.indexOf("?") === -1 ? "?" : "&") + extra;
@@ -83,6 +84,46 @@
                     p.delete("page");
                     return p.toString();
                 } catch (e) { return ""; }
+            }
+
+            function filterParamsFromForm(form) {
+                var params = new URLSearchParams();
+                try {
+                    var data = new FormData(form);
+                    data.forEach(function (value, key) {
+                        if (typeof File !== "undefined" && value instanceof File) { return; }
+                        params.set(key, value);
+                    });
+                } catch (e) { /* ignore */ }
+                params.set("section", "manage-appeals");
+                params.delete("page");
+                return params;
+            }
+
+            function listQueryFromParams(params) {
+                var p = new URLSearchParams(params.toString());
+                p.delete("section");
+                p.delete("page");
+                return p.toString();
+            }
+
+            function syncFilterUrl(params) {
+                if (!window.history || !window.history.replaceState) { return; }
+                try {
+                    var target = new URL(window.location.href);
+                    target.search = params.toString();
+                    window.history.replaceState(
+                        { section: "manage-appeals", ajax: true },
+                        "",
+                        target.pathname + target.search
+                    );
+                } catch (e) { /* ignore */ }
+            }
+
+            function refreshSidebarBadges() {
+                if (window.EMSProfile && typeof window.EMSProfile.refreshBadges === "function") {
+                    try { window.EMSProfile.refreshBadges(); } catch (e) { /* ignore */ }
+                }
             }
 
             function scrollTop() {
@@ -133,12 +174,22 @@
                 scrollTop();
             }
 
-            function reloadList() {
-                var q = listQuery();
-                fetch(withParam(manageUrl, "fragment=1&embedded=1" + (q ? "&" + q : "")), {
+            function reloadList(queryString) {
+                var q = typeof queryString === "string" ? queryString : listQuery();
+                if (listFetchAbort) {
+                    try { listFetchAbort.abort(); } catch (e) { /* ignore */ }
+                }
+                var controller = (typeof AbortController === "function") ? new AbortController() : null;
+                listFetchAbort = controller;
+                var fetchOptions = {
                     credentials: "same-origin",
                     headers: { "X-Requested-With": "XMLHttpRequest" }
-                })
+                };
+                if (controller) {
+                    fetchOptions.signal = controller.signal;
+                }
+                bodyHost.setAttribute("aria-busy", "true");
+                fetch(withParam(manageUrl, "fragment=1&embedded=1" + (q ? "&" + q : "")), fetchOptions)
                     .then(function (r) { if (!r.ok) { throw new Error("http"); } return r.text(); })
                     .then(function (html) {
                         bodyHost.innerHTML = html;
@@ -146,7 +197,41 @@
                             window.EMSBootstrapSelect.init(bodyHost);
                         }
                     })
-                    .catch(function () { /* fail-soft: köhnə siyahı qalır */ });
+                    .catch(function (err) {
+                        if (err && err.name === "AbortError") { return; }
+                        /* fail-soft: köhnə siyahı qalır */
+                    })
+                    .then(function () {
+                        if (listFetchAbort === controller) {
+                            listFetchAbort = null;
+                        }
+                        bodyHost.removeAttribute("aria-busy");
+                    });
+            }
+
+            function submitFilterForm(form) {
+                if (!form) { return; }
+                if (filterTimer) {
+                    window.clearTimeout(filterTimer);
+                    filterTimer = null;
+                }
+                if (typeof window.fetch !== "function") {
+                    form.submit();
+                    return;
+                }
+                var params = filterParamsFromForm(form);
+                syncFilterUrl(params);
+                reloadList(listQueryFromParams(params));
+            }
+
+            function scheduleFilterSubmit(form, delayMs) {
+                if (!form) { return; }
+                if (filterTimer) {
+                    window.clearTimeout(filterTimer);
+                }
+                filterTimer = window.setTimeout(function () {
+                    submitFilterForm(form);
+                }, delayMs);
             }
 
             function showDetail(url) {
@@ -179,6 +264,33 @@
                         modalBody.appendChild(makeAlert("danger", loadErr));
                     });
             }
+
+            // Filtr formu dəyişən kimi siyahını yenilə; düymə sadəcə fallback qalır.
+            bodyHost.addEventListener("submit", function (e) {
+                var form = e.target && e.target.closest ? e.target.closest("[data-appeal-manage-filter-form]") : null;
+                if (!form) { return; }
+                e.preventDefault();
+                submitFilterForm(form);
+            });
+
+            bodyHost.addEventListener("input", function (e) {
+                var field = e.target && e.target.closest ? e.target.closest("[data-appeal-auto-search]") : null;
+                if (!field || !field.form) { return; }
+                scheduleFilterSubmit(field.form, 350);
+            });
+
+            bodyHost.addEventListener("keydown", function (e) {
+                var field = e.target && e.target.closest ? e.target.closest("[data-appeal-auto-search]") : null;
+                if (!field || !field.form || e.key !== "Enter") { return; }
+                e.preventDefault();
+                submitFilterForm(field.form);
+            });
+
+            bodyHost.addEventListener("change", function (e) {
+                var field = e.target && e.target.closest ? e.target.closest("[data-appeal-auto-field]") : null;
+                if (!field || !field.form) { return; }
+                scheduleFilterSubmit(field.form, 0);
+            });
 
             // Siyahıdan "Bax" → detalı eyni paneldə aç.
             listView.addEventListener("click", function (e) {
@@ -215,6 +327,7 @@
                         if (d && d.ok) {
                             reloadList();
                             showList();
+                            refreshSidebarBadges();
                             showToast("success", d.toast || d.message || "Qərarlar yadda saxlanıldı.");
                         } else {
                             clearFlash(modalBody);

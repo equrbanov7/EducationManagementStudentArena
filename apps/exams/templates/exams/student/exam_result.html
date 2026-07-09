@@ -13,7 +13,7 @@
 {% block ai_assistant_js %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260709-appeal-bonus">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260709-question-only">
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20260707-final">
 {% endblock %}
 
@@ -53,7 +53,7 @@
                         <span class="stat-value text-primary score-points-value">{{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
                         <span class="score-percent-chip">{{ test_result.percentage_display }}%</span>
                     </div>
-                    {% if appeal_bonus_points and appeal_bonus_points > 0 %}
+                    {% if appeal_bonus_points and appeal_bonus_points > 0 and not hide_test_answer_correctness %}
                     <div class="appeal-score-summary-chip">
                         <i class="fas fa-gavel"></i>
                         {% blocktrans trimmed context "exams.template.student_exam_result" with bonus=appeal_bonus_points_display %}
@@ -63,6 +63,7 @@
                     {% endif %}
                 </div>
 
+                {% if not hide_test_answer_correctness %}
                 <div class="test-stats-grid">
                     <div class="stat-item">
                         <span class="stat-label">{% trans "label_correct" context "exams.template.student_exam_result" %}</span>
@@ -85,6 +86,7 @@
                         <span class="stat-value text-warning">{{ marked_question_count|default:0 }}</span>
                     </div>
                 </div>
+                {% endif %}
 
             {% else %}
                 <div class="final-score-area w-100">
@@ -138,7 +140,7 @@
             {% with has_selection=answer_has_selection_by_qid|get_item:q.id %}
             {% with is_marked=marked_question_by_qid|get_item:q.id %}
             {% with appeal_bonus=appeal_bonus_by_qid|get_item:q.id %}
-            <div class="question-card{% if is_marked %} question-card--marked{% endif %}{% if appeal_bonus %} question-card--appeal-updated{% endif %}">
+            <div class="question-card{% if is_marked %} question-card--marked{% endif %}{% if appeal_bonus and not hide_test_answer_correctness %} question-card--appeal-updated{% endif %}{% if exam.exam_type == "test" and hide_test_answer_correctness %} question-card--question-only{% endif %}">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
 
@@ -149,7 +151,7 @@
                             {% trans "marked_question_badge" context "exams.template.student_exam_result" %}
                         </div>
                         {% endif %}
-                        {% if appeal_bonus %}
+                        {% if appeal_bonus and not hide_test_answer_correctness %}
                         <div class="appeal-corrected-chip">
                             <i class="fas fa-gavel"></i>
                             {% blocktrans trimmed context "exams.template.student_exam_result" with bonus=appeal_bonus %}
@@ -179,8 +181,11 @@
                   
                 </div>
 
+                {% if exam.exam_type == "test" and hide_test_answer_correctness %}
+                {% else %}
                 <div class="q-body">
                     {% if exam.exam_type == "test" %}
+                        {% if not hide_test_answer_correctness %}
                         <ul class="option-list">
                             {% for opt in q.options.all %}
                                 <li class="option-item
@@ -219,6 +224,7 @@
                                 <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
                             {% endif %}
                         </div>
+                        {% endif %}
 
                     {% elif exam.exam_type == "coding" %}
                         {% with coding_submission=coding_submissions_by_qid|get_item:q.id %}
@@ -374,6 +380,7 @@
                         </div>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
             {% endwith %}
             {% endwith %}

@@ -17,12 +17,13 @@ heavy collectors. RLS behaviour is unchanged.
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Q
+from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import CourseMembership
-from apps.exams.models import ExamAttempt
+from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.labs.models import Lab, LabSubmission
 from apps.projects.models import Project, ProjectSubmission
 
@@ -36,6 +37,66 @@ from .._helpers import (
 
 User = get_user_model()
 
+FINISHED_ATTEMPT_STATUSES = ("submitted", "expired")
+
+
+def _count_assigned_exams(request, user) -> int:
+    """
+    Cheap exam count matching `_collect_assigned_tasks`.
+
+    Completed exams whose result is already visible move to "My results", so they
+    must not keep the "Assigned tasks" sidebar badge alive.
+    """
+    now = timezone.now()
+    review_cutoff = now - REVIEW_EDIT_WINDOW
+
+    finished_sq = Subquery(
+        ExamAttempt.objects.filter(
+            exam=OuterRef("pk"),
+            user=user,
+            status__in=FINISHED_ATTEMPT_STATUSES,
+        )
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt"),
+        output_field=IntegerField(),
+    )
+    grant_sq = Subquery(
+        StudentExamAttemptGrant.objects.filter(exam=OuterRef("pk"), student=user).values("extra_attempts")[:1],
+        output_field=IntegerField(),
+    )
+    visible_result_sq = Subquery(
+        ExamAttempt.objects.filter(
+            exam=OuterRef("pk"),
+            user=user,
+            status__in=FINISHED_ATTEMPT_STATUSES,
+            exam__results_hidden_from_students=False,
+        )
+        .filter(Q(exam__exam_type="test") | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff))
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt"),
+        output_field=IntegerField(),
+    )
+
+    return (
+        _assigned_exams_queryset(request, user, active_only=True)
+        .annotate(
+            _finished_attempts=Coalesce(finished_sq, 0),
+            _extra_grant=Coalesce(grant_sq, 0),
+            _visible_result_attempts=Coalesce(visible_result_sq, 0),
+        )
+        .filter(_visible_result_attempts=0)
+        .filter(
+            Q(max_attempts_per_user__isnull=True)
+            | Q(max_attempts_per_user=0)
+            | Q(_finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
+        )
+        .values("id")
+        .distinct()
+        .count()
+    )
+
 
 def count_assigned_tasks(request, user) -> int:
     """
@@ -45,7 +106,7 @@ def count_assigned_tasks(request, user) -> int:
     because `Lab.allowed_groups` is stored as CSV.
     """
     # Exams (tenant-scoped, active_only=True, includes group/course-based).
-    exam_count = _assigned_exams_queryset(request, user, active_only=True).values("id").distinct().count()
+    exam_count = _count_assigned_exams(request, user)
 
     # Courses the user is enrolled in — required for assignments/labs/projects.
     assigned_courses_qs = _tenant_scoped_courses(request)

@@ -1547,7 +1547,7 @@ msgid "Keyfiyyət"
 msgstr "Keyfiyyət"
 
 msgid "Audit jurnalı"
-msgstr "Audit jurnalı"
+msgstr "Denetim günlüğü"
 
 msgid "Təşkilat ayarları və idarəetmə əməliyyatları"
 msgstr "Təşkilat ayarları və idarəetmə əməliyyatları"
@@ -2339,7 +2339,7 @@ msgstr "Organizasyon bulunamadı."
 # Superadmin User Management
 msgctxt "superadmin.users"
 msgid "user_management_title"
-msgstr "Kullanıcı Yönetimi"
+msgstr "Kullanıcı yönetimi"
 
 #, python-format
 msgid "%(filtered)s nəticə göstərilir. Ümumi istifadəçi sayı: %(total)s."
@@ -3819,7 +3819,7 @@ msgstr "Derslerim"
 
 msgctxt "profile.sidebar"
 msgid "group_assigned"
-msgstr "atandı"
+msgstr "Atananlar"
 
 msgctxt "profile.section"
 msgid "assigned_tasks"
@@ -3863,19 +3863,19 @@ msgstr "Gruplar"
 
 msgctxt "profile.section"
 msgid "post_management"
-msgstr "Post yönetimi"
+msgstr "Gönderi yönetimi"
 
 msgctxt "profile.sidebar"
 msgid "post_management"
-msgstr "Post yönetimi"
+msgstr "Gönderi yönetimi"
 
 msgctxt "profile.section"
 msgid "pending_review"
-msgstr "Kontrol edilecek"
+msgstr "İnceleme bekleyenler"
 
 msgctxt "profile.sidebar"
 msgid "pending_review"
-msgstr "Kontrol edilecek"
+msgstr "İnceleme bekleyenler"
 
 msgctxt "profile.section"
 msgid "review_results"
@@ -3890,7 +3890,7 @@ msgid "Apellyasiyalar"
 msgstr "İtirazlar"
 
 msgid "Universitet idarəetməsi"
-msgstr "Eğitim yönetimi platformu"
+msgstr "Üniversite yönetimi"
 
 msgid "Fakültələr"
 msgstr "Fakültələr"
@@ -3902,7 +3902,7 @@ msgid "Bölmə imtahanları"
 msgstr "Tüm sınavlar"
 
 msgid "Təşkilat rolları"
-msgstr "Organizasyonda paylaş"
+msgstr "Organizasyon rolleri"
 
 msgctxt "profile.sidebar"
 msgid "group_language"
@@ -3921,7 +3921,7 @@ msgid "edit_profile"
 msgstr "Profili düzenle"
 
 msgid "Şifrəni dəyiş"
-msgstr "Şifrəni dəyiş"
+msgstr "Şifreyi değiştir"
 
 msgctxt "profile.sidebar"
 msgid "logout"
@@ -4917,7 +4917,7 @@ msgid "Post təsdiqlənib paylaşılacaq."
 msgstr "Post təsdiqlənib paylaşılacaq."
 
 msgid "Təsdiqlə və paylaş"
-msgstr "Organizasyonda paylaş"
+msgstr "Organizasyondan ayrıl"
 
 msgid "Silmə səbəbi"
 msgstr "Silmeyi onayla"
@@ -5218,7 +5218,7 @@ msgstr "Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılm
 
 msgctxt "profile.sidebar"
 msgid "delete_account"
-msgstr "Hesabı Sil"
+msgstr "Hesabı sil"
 
 msgid "Yeni şəkil seçin"
 msgstr "Yeni şəkil seçin"
@@ -5935,7 +5935,7 @@ msgid "No contact messages yet."
 msgstr "Henüz iletişim mesajı yok."
 
 msgid "Təşkilat məlumatları"
-msgstr "Organizasyonda paylaş"
+msgstr "Organizasyon bilgileri"
 
 msgid "Bu bölmə yalnız superadmin üçündür."
 msgstr "Bu bölmə yalnız superadmin üçündür."
@@ -5975,31 +5975,31 @@ msgstr "Başvuru için bir kuruluş seçin."
 
 msgctxt "profile.sidebar"
 msgid "group_management"
-msgstr "Yönetmek"
+msgstr "Yönetim"
 
 msgctxt "profile.section"
 msgid "role_assignment"
-msgstr "Bir rol belirleyin"
+msgstr "Rol atama"
 
 msgctxt "profile.sidebar"
 msgid "role_assignment"
-msgstr "Bir rol belirleyin"
+msgstr "Rol atama"
 
 msgctxt "profile.section"
 msgid "student_management"
-msgstr "Post yönetimi"
+msgstr "Öğrenci yönetimi"
 
 msgctxt "profile.section"
 msgid "staff_management"
-msgstr "Personel Yönetimi"
+msgstr "Personel yönetimi"
 
 msgctxt "profile.sidebar"
 msgid "student_management"
-msgstr "Post yönetimi"
+msgstr "Öğrenci yönetimi"
 
 msgctxt "profile.sidebar"
 msgid "staff_management"
-msgstr "Personel Yönetimi"
+msgstr "Personel yönetimi"
 
 msgctxt "profile.section"
 msgid "permissions"
@@ -6018,7 +6018,7 @@ msgid "manage_roles"
 msgstr "Rolleri yönet"
 
 msgid "Təşkilat özəllikləri"
-msgstr "Təşkilat özəllikləri"
+msgstr "Organizasyon özellikleri"
 
 msgctxt "profile.section"
 msgid "superadmin_control"
@@ -6030,15 +6030,15 @@ msgstr "Süper yönetici kontrolü"
 
 msgctxt "profile.sidebar"
 msgid "user_management"
-msgstr "Kullanıcı Yönetimi"
+msgstr "Kullanıcı yönetimi"
 
 msgctxt "superadmin.ai_settings"
 msgid "title"
-msgstr "AI Ayarları"
+msgstr "AI ayarları"
 
 msgctxt "profile.sidebar"
 msgid "ai_settings"
-msgstr "AI Ayarları"
+msgstr "AI ayarları"
 
 msgid "Açıq profil"
 msgstr "Açıq profil"
@@ -24551,7 +24551,7 @@ msgid "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 msgstr "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 
 msgid "Kafedralar"
-msgstr "Kafedralar"
+msgstr "Bölümler"
 
 msgid ""
 "Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
@@ -27701,10 +27701,10 @@ msgstr "ort. puan"
 
 msgctxt "profile.sidebar"
 msgid "Akademik analitika"
-msgstr "Akademik analitik"
+msgstr "Akademik analiz"
 
 msgid "Akademik analitika"
-msgstr "Akademik analitik"
+msgstr "Akademik analiz"
 
 msgctxt "registrar.analytics"
 msgid "Keçid"
@@ -27786,6 +27786,10 @@ msgid "Akademik təqvim"
 msgstr "Akademik takvim"
 
 msgctxt "profile.sidebar"
+msgid "Akademik təqvim"
+msgstr "Akademik takvim"
+
+msgctxt "profile.sidebar"
 msgid "Universitet"
 msgstr "Üniversite"
 
@@ -27795,7 +27799,7 @@ msgstr "Ders programı"
 
 msgctxt "profile.sidebar"
 msgid "Elektron jurnal"
-msgstr "Elektronik jurnal"
+msgstr "Elektronik yoklama defteri"
 
 msgctxt "registrar.journal"
 msgid "Davamiyyət və ballar"
@@ -28193,3 +28197,33 @@ msgstr "Deneme denemesi"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "selected_subject"
 msgstr "Seçili ders"
+
+msgid "İmtahan Nəzarət Sistemi"
+msgstr "Sınav denetim sistemi"
+
+msgid "Final təyinatları"
+msgstr "Final atamaları"
+
+msgctxt "profile.section"
+msgid "PIN axtarışı"
+msgstr "PIN araması"
+
+msgid "PIN axtarışı"
+msgstr "PIN araması"
+
+msgctxt "profile.section"
+msgid "İmtahan statistikaları"
+msgstr "Sınav istatistikleri"
+
+msgid "İmtahan statistikaları"
+msgstr "Sınav istatistikleri"
+
+msgid "Sual göndərişləri"
+msgstr "Soru gönderimleri"
+
+msgid "Təyin olunmuş fənlərim"
+msgstr "Atanmış derslerim"
+
+msgctxt "profile.section"
+msgid "İmtahan zalları"
+msgstr "Sınav salonları"

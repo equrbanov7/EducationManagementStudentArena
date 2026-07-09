@@ -293,6 +293,10 @@
     border-color: #22c55e;
 }
 
+.question-card--question-only .q-header {
+    border-bottom: 0;
+}
+
 .marked-result-chip {
     display: inline-flex;
     align-items: center;

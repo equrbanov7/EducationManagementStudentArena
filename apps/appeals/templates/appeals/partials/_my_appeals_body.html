@@ -52,7 +52,7 @@
                     <span><i class="far fa-calendar me-1"></i>{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
                 </div>
             </div>
-            {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
+            {% include "appeals/partials/_status_badge.html" with status=appeal.student_display_status label=appeal.student_display_status_label %}
         </div>
     </a>
     {% endfor %}

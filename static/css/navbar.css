@@ -788,7 +788,7 @@ button.blog-header__user-menu-item{
 
 .blog-header__user-menu {
     top: calc(100% + 10px);
-    min-width: 244px;
+    width: min(320px, calc(100vw - 24px));
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 16px;
     box-shadow: 0 20px 44px -12px rgba(15, 23, 42, 0.28);
@@ -808,14 +808,14 @@ button.blog-header__user-menu-item{
     flex-shrink: 0;
     width: 42px;
     height: 42px;
-    border-radius: 50%;
+    border-radius: 50%; background: linear-gradient(135deg, var(--ems-primary-500), var(--ems-primary-700));
     color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1rem; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
 }
 
 .blog-header__user-head-initials {
@@ -825,7 +825,7 @@ button.blog-header__user-menu-item{
 .blog-header__user-head-text {
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    min-width: 0; flex: 1 1 auto;
 }
 
 .blog-header__user-head-name {
@@ -836,7 +836,7 @@ button.blog-header__user-menu-item{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 170px;
+    max-width: 100%;
 }
 
 .blog-header__user-head-org {
@@ -846,7 +846,7 @@ button.blog-header__user-menu-item{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 170px;
+    max-width: 100%;
 }
 
 .blog-header__user-menu-sep {

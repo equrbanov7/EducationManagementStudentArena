@@ -3180,6 +3180,57 @@ class ProfileViewTest(TestCase):
         self.assertIn("from_section=assigned-exams", exam_item["detail_url"])
         self.assertIn("assigned_type=all", exam_item["detail_url"])
 
+    def test_assigned_tasks_badge_api_drops_finished_visible_exam_with_stale_cache(self):
+        from django.core.cache import cache
+        from django.utils import timezone
+
+        from apps.accounts.models import ProfileRole
+        from apps.exams.models import Exam, ExamAttempt
+
+        cache.clear()
+        teacher = User.objects.create_user(
+            username="tasks_badge_teacher",
+            email="tasks_badge_teacher@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Assigned Tasks Badge Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
+
+        exam = Exam.objects.create(
+            author=teacher,
+            organization=organization,
+            title="Badge Test Exam",
+            exam_type="test",
+            is_active=True,
+            is_public=False,
+            results_hidden_from_students=False,
+        )
+        exam.allowed_users.add(self.user)
+
+        _login_with_org(self.client, self.user, organization)
+        badge_url = reverse("accounts:profile_badges_api")
+        first_response = self.client.get(badge_url)
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(first_response.json()["badges"]["assigned_tasks_count"], 1)
+
+        ExamAttempt.objects.create(
+            user=self.user,
+            exam=exam,
+            status="submitted",
+            finished_at=timezone.now(),
+        )
+
+        second_response = self.client.get(badge_url)
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(second_response.json()["badges"]["assigned_tasks_count"], 0)
+
     def test_assigned_tasks_search_filters_items(self):
         from datetime import timedelta
 
@@ -3889,6 +3940,19 @@ class MyResultsViewTest(TestCase):
         exam_item = next(item for item in response.context["items"] if item["title"] == "Unified Exam")
         self.assertIn("from_section=my-results", exam_item["detail_url"])
         self.assertIn("return_to=", exam_item["detail_url"])
+
+    def test_my_result_detail_exam_redirect_marks_profile_results_source(self):
+        self._login_student()
+        response = self.client.get(
+            reverse(
+                "accounts:my_result_detail",
+                kwargs={"item_type": "exams", "item_id": self.exam_attempt.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("from_section=my-results", response.url)
+        self.assertIn("return_to=", response.url)
 
     def test_my_results_filter_labs_only(self):
         self._login_student()
