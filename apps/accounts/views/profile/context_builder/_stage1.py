@@ -303,6 +303,11 @@ class _Stage1Mixin:
                 self.pending_answers_count = self.pending_answer_counts.get("all", 0)
             else:
                 self.pending_answers_count = self.profile_badge_counts.get("pending_answers", 0)
+        self.pending_appeals_count = 0
+        if self.capabilities.get("can_manage_appeals"):
+            from apps.appeals.public import count_pending_manage_appeals
+
+            self.pending_appeals_count = count_pending_manage_appeals(self.request)
         self.pending_review_count = self.profile_badge_counts.get("pending_review", 0)
         self.evaluated_review_count = self.profile_badge_counts.get("evaluated_review", 0)
         self.teacher_groups = []

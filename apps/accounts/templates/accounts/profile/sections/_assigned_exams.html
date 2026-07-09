@@ -2,14 +2,7 @@
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-exams {% if active_section == 'assigned-exams' %}is-active{% endif %}" data-profile-section-panel="assigned-exams" data-source-url="{% url 'accounts:assigned_exams' %}">
     <div class="section-card">
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-tasks text-sky"></i>
-                    <span>{% trans "title" context "profile.assigned_tasks" %}</span>
-                </div>
-            </div>
-        </div>
+
 
         <div class="modern-results-tabs assigned-task-tabs">
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=all"

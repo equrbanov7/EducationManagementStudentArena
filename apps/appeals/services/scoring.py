@@ -27,12 +27,14 @@ from apps.appeals.constants import (
     APPEAL_ITEM_STATUS_PENDING,
     APPEAL_ITEM_STATUS_REJECTED,
     APPEAL_STATUS_ACCEPTED,
+    APPEAL_STATUS_FINAL,
     APPEAL_STATUS_PARTIALLY_ACCEPTED,
     APPEAL_STATUS_PENDING,
     APPEAL_STATUS_REJECTED,
     APPEAL_STATUS_UNDER_REVIEW,
 )
 from apps.appeals.models import AppealItem, ScoreAdjustment
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +58,40 @@ def _accept_bonus_points():
 # ---------------------------------------------------------------------------
 # Effektiv bal (baza + apellyasiya bonusları)
 # ---------------------------------------------------------------------------
-def appeal_score_state(attempt):
-    """Attempt üzrə aktiv (revert olunmamış) düzəlişlərin xülasəsi."""
-    adjustments = list(ScoreAdjustment.objects.filter(attempt=attempt, reverted=False))
+def _review_window_cutoff(at_time=None):
+    return (at_time or timezone.now()) - REVIEW_EDIT_LOCK_WINDOW
+
+
+def appeal_item_result_visible_to_student(item, *, at_time=None):
+    """Qərar tələbəyə yalnız 5 dəqiqəlik redaktə pəncərəsi bağlanandan sonra görünür."""
+    if item.status == APPEAL_ITEM_STATUS_PENDING:
+        return True
+    if not item.resolved_at:
+        return True
+    return (at_time or timezone.now()) >= item.resolved_at + REVIEW_EDIT_LOCK_WINDOW
+
+
+def appeal_result_hidden_from_student(appeal, *, at_time=None):
+    """Apellyasiyada tələbədən gizlədilməli yeni qərar varmı."""
+    if appeal.status not in APPEAL_STATUS_FINAL:
+        return False
+    return any(not appeal_item_result_visible_to_student(item, at_time=at_time) for item in appeal.items.all())
+
+
+def _student_visible_adjustments(at_time=None):
+    cutoff = _review_window_cutoff(at_time)
+    return ScoreAdjustment.objects.filter(reverted=False).filter(
+        Q(appeal_item__resolved_at__isnull=True) | Q(appeal_item__resolved_at__lte=cutoff)
+    )
+
+
+def _student_visible_fallback_items(at_time=None):
+    cutoff = _review_window_cutoff(at_time)
+    return _fallback_accepted_bonus_items().filter(Q(resolved_at__isnull=True) | Q(resolved_at__lte=cutoff))
+
+
+def _score_state_from_sources(attempt, *, adjustments_qs, fallback_items_qs):
+    adjustments = list(adjustments_qs.filter(attempt=attempt))
     bonus = sum((adj.delta_points or Decimal("0") for adj in adjustments), Decimal("0"))
     bonus_by_question_id = {}
     for adj in adjustments:
@@ -70,8 +103,7 @@ def appeal_score_state(attempt):
     fallback_bonus = Decimal("0")
     fallback_credited_question_ids = set()
     fallback_items = (
-        _fallback_accepted_bonus_items()
-        .filter(appeal__attempt=attempt)
+        fallback_items_qs.filter(appeal__attempt=attempt)
         .select_related("question", "answer")
         .prefetch_related("question__options", "answer__selected_options")
     )
@@ -91,25 +123,31 @@ def appeal_score_state(attempt):
     }
 
 
-def effective_test_score(attempt, *, answers=None):
-    """
-    Test attempt-i üçün apellyasiya bonusları nəzərə alınmaqla effektiv bal.
+def appeal_score_state(attempt):
+    """Attempt üzrə aktiv (revert olunmamış) düzəlişlərin xülasəsi."""
+    return _score_state_from_sources(
+        attempt,
+        adjustments_qs=ScoreAdjustment.objects.filter(reverted=False),
+        fallback_items_qs=_fallback_accepted_bonus_items(),
+    )
 
-    Qaytarır: dict(base, bonus_points, effective_score, max_score, effective_percentage).
-    Faza 4 nəticə səhifəsi bunu istifadə edəcək.
 
-    `answers` verilərsə (prefetch olunmuş attempt.answers.all()), siyahı
-    görünüşlərində hər attempt üçün əlavə answer sorğuları yaranmır.
-    """
+def student_visible_appeal_score_state(attempt, *, at_time=None):
+    """Tələbə səthləri üçün yalnız redaktə pəncərəsi bağlanmış bonusların xülasəsi."""
+    return _score_state_from_sources(
+        attempt,
+        adjustments_qs=_student_visible_adjustments(at_time),
+        fallback_items_qs=_student_visible_fallback_items(at_time),
+    )
+
+
+def _effective_test_score_with_bonus(attempt, *, answers=None, bonus):
     from apps.exams.public import calculate_test_attempt_result
 
     base = calculate_test_attempt_result(attempt, answers=answers)
-    bonus = appeal_score_state(attempt)["bonus_points"]
-
     effective_score = base.score + bonus
     if base.max_score and effective_score > base.max_score:
         effective_score = base.max_score
-
     if base.max_score and base.max_score > 0:
         effective_percentage = (effective_score * Decimal("100") / base.max_score).quantize(
             Decimal("0.1"), rounding=ROUND_HALF_UP
@@ -126,7 +164,26 @@ def effective_test_score(attempt, *, answers=None):
     }
 
 
-def appeal_bonus_map(attempt_ids):
+def effective_test_score(attempt, *, answers=None):
+    """
+    Test attempt-i üçün apellyasiya bonusları nəzərə alınmaqla effektiv bal.
+
+    Qaytarır: dict(base, bonus_points, effective_score, max_score, effective_percentage).
+    Faza 4 nəticə səhifəsi bunu istifadə edəcək.
+
+    `answers` verilərsə (prefetch olunmuş attempt.answers.all()), siyahı
+    görünüşlərində hər attempt üçün əlavə answer sorğuları yaranmır.
+    """
+    return _effective_test_score_with_bonus(attempt, answers=answers, bonus=appeal_score_state(attempt)["bonus_points"])
+
+
+def student_visible_effective_test_score(attempt, *, answers=None, at_time=None):
+    """Test attempt-i üçün tələbəyə görünən effektiv bal."""
+    bonus = student_visible_appeal_score_state(attempt, at_time=at_time)["bonus_points"]
+    return _effective_test_score_with_bonus(attempt, answers=answers, bonus=bonus)
+
+
+def _bonus_map_from_sources(attempt_ids, *, adjustments_qs, fallback_items_qs):
     """
     attempt_id → aktiv (revert olunmamış) apellyasiya bonuslarının cəmi.
 
@@ -136,15 +193,10 @@ def appeal_bonus_map(attempt_ids):
     ids = [pk for pk in attempt_ids if pk]
     if not ids:
         return {}
-    rows = (
-        ScoreAdjustment.objects.filter(attempt_id__in=ids, reverted=False)
-        .values("attempt_id")
-        .annotate(total=Sum("delta_points"))
-    )
+    rows = adjustments_qs.filter(attempt_id__in=ids).values("attempt_id").annotate(total=Sum("delta_points"))
     bonus_by_attempt = {row["attempt_id"]: row["total"] or Decimal("0") for row in rows}
     fallback_items = (
-        _fallback_accepted_bonus_items()
-        .filter(appeal__attempt_id__in=ids)
+        fallback_items_qs.filter(appeal__attempt_id__in=ids)
         .select_related("appeal", "question", "answer")
         .prefetch_related("question__options", "answer__selected_options")
     )
@@ -155,6 +207,22 @@ def appeal_bonus_map(attempt_ids):
         attempt_id = item.appeal.attempt_id
         bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + item_bonus
     return bonus_by_attempt
+
+
+def appeal_bonus_map(attempt_ids):
+    return _bonus_map_from_sources(
+        attempt_ids,
+        adjustments_qs=ScoreAdjustment.objects.filter(reverted=False),
+        fallback_items_qs=_fallback_accepted_bonus_items(),
+    )
+
+
+def student_visible_appeal_bonus_map(attempt_ids, *, at_time=None):
+    return _bonus_map_from_sources(
+        attempt_ids,
+        adjustments_qs=_student_visible_adjustments(at_time),
+        fallback_items_qs=_student_visible_fallback_items(at_time),
+    )
 
 
 def apply_bonus_to_test_result(result, bonus):
@@ -496,10 +564,15 @@ def _notify_student_appeal_resolved(appeal):
 __all__ = [
     "accept_appeal_item",
     "appeal_bonus_map",
+    "appeal_item_result_visible_to_student",
+    "appeal_result_hidden_from_student",
     "appeal_score_state",
     "apply_bonus_to_test_result",
     "effective_test_score",
     "recompute_appeal_status",
     "reject_appeal_item",
     "revert_item_adjustment",
+    "student_visible_appeal_bonus_map",
+    "student_visible_appeal_score_state",
+    "student_visible_effective_test_score",
 ]

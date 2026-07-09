@@ -101,6 +101,7 @@ class _Stage4Mixin:
             "pending_answer_counts": self.pending_answer_counts,
             "pending_answers_active_filter": self.pending_answers_active_filter,
             "pending_answers_search_query": self.pending_answers_search_query,
+            "pending_appeals_count": self.pending_appeals_count,
             "pending_review_count": self.pending_review_count,
             "evaluated_review_count": self.evaluated_review_count,
             "teacher_groups": self.teacher_groups,

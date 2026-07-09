@@ -66,12 +66,12 @@ def _collect_my_results(request, filter_type=None, search=None):
             .order_by("-started_at")
         )
         attempts = list(attempts)
-        # Apellyasiya bonusları (tək sorğu) — qəbul olunmuş apellyasiyalar
-        # tələbənin görəcəyi balda dərhal əks olunsun.
+        # Apellyasiya bonusları (tək sorğu) — tələbənin görəcəyi balda yalnız
+        # 5 dəqiqəlik reviewer redaktə pəncərəsi bağlanandan sonra əks olunsun.
         try:
-            from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
+            from apps.appeals.public import apply_bonus_to_test_result, student_visible_appeal_bonus_map
 
-            _appeal_bonus_by_attempt = appeal_bonus_map([a.id for a in attempts])
+            _appeal_bonus_by_attempt = student_visible_appeal_bonus_map([a.id for a in attempts])
         except Exception:
             _appeal_bonus_by_attempt, apply_bonus_to_test_result = {}, None
         for attempt in attempts:

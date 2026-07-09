@@ -28,9 +28,10 @@
             }
 
             if (ctx.mobileSidebarTrigger) {
-                ctx.mobileSidebarTrigger.classList.toggle("is-hidden", !isCollapsed);
+                var showMobileTrigger = isCollapsed && isMobileViewport();
+                ctx.mobileSidebarTrigger.classList.toggle("is-hidden", !showMobileTrigger);
                 ctx.mobileSidebarTrigger.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
-                ctx.mobileSidebarTrigger.setAttribute("aria-hidden", isCollapsed ? "false" : "true");
+                ctx.mobileSidebarTrigger.setAttribute("aria-hidden", showMobileTrigger ? "false" : "true");
             }
 
             if (ctx.sidebarBackdrop) {

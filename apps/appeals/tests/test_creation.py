@@ -162,6 +162,23 @@ class AppealCreateViewTests(TestCase):
         self.assertContains(response, 'aria-disabled="true"', html=False)
         self.assertNotContains(response, "data-appeal-submit disabled", html=False)
 
+    def test_create_page_from_profile_results_hides_answer_details(self):
+        response = self.client.get(
+            reverse("appeals:appeal_create", args=[self.attempt.id]),
+            {
+                "from_section": "my-results",
+                "return_to": reverse("accounts:profile") + "?section=my-results",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "GDPR sualı")
+        self.assertContains(response, "Cavabınız: səhv")
+        self.assertNotContains(response, "Variantlar")
+        self.assertNotContains(response, "Tələbənin cavabı")
+        self.assertNotContains(response, "Yanlış cavab")
+        self.assertNotContains(response, "Düzgün cavab")
+
     def test_create_page_locks_questions_already_appealed(self):
         create_appeal(
             attempt=self.attempt,
@@ -320,12 +337,46 @@ class AppealExamCenterRoutingTests(TestCase):
         manage_response = client.get(reverse("appeals:manage_appeals"))
         self.assertEqual(manage_response.status_code, 200)
         self.assertContains(manage_response, "Route Appeal Exam")
+        self.assertContains(manage_response, "data-appeal-manage-filter-form", html=False)
+        self.assertContains(manage_response, "data-appeal-auto-search", html=False)
 
         review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]))
         self.assertEqual(review_response.status_code, 200)
         self.assertContains(review_response, "Route sualı")
         self.assertContains(review_response, 'data-review-award="1"', html=False)
         self.assertContains(review_response, 'data-review-existing-delta="0"', html=False)
+
+    def test_exam_center_profile_sidebar_shows_pending_appeal_badge(self):
+        client = self._client_for(self.exam_center)
+
+        response = client.get(reverse("accounts:profile"), {"section": "manage-appeals"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["pending_appeals_count"], 1)
+        self.assertInHTML(
+            (
+                '<span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" '
+                'data-badge-key="pending_appeals_count">1</span>'
+            ),
+            response.content.decode(),
+        )
+
+    def test_profile_badges_api_updates_pending_appeals_after_decision(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        client = self._client_for(self.exam_center)
+        badge_url = reverse("accounts:profile_badges_api")
+
+        first_response = client.get(badge_url)
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(first_response.json()["badges"]["pending_appeals_count"], 1)
+
+        accept_appeal_item(self.appeal.items.first(), reviewer=self.exam_center, response_text="Qəbul")
+
+        second_response = client.get(badge_url)
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(second_response.json()["badges"]["pending_appeals_count"], 0)
 
     def test_review_ajax_accept_returns_score_delta_toast_and_list_edit_timer(self):
         client = self._client_for(self.exam_center)
@@ -354,6 +405,8 @@ class AppealExamCenterRoutingTests(TestCase):
         self.assertContains(review_response, 'data-review-existing-delta="1"', html=False)
 
     def test_detail_score_update_notice_belongs_to_current_appeal(self):
+        from datetime import timedelta
+
         second_question = ExamQuestion.objects.create(exam=self.exam, order=2, text="İkinci sual")
         ExamQuestionOption.objects.create(question=second_question, label="A", text="Düz cavab", is_correct=True)
         ExamAnswer.objects.create(attempt=self.attempt, question=second_question)
@@ -374,5 +427,17 @@ class AppealExamCenterRoutingTests(TestCase):
         accepted_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]))
         pending_response = student_client.get(reverse("appeals:appeal_detail", args=[second_appeal.id]))
 
-        self.assertContains(accepted_response, "Bu apellyasiya nəticəsində +1 bal əlavə olundu")
+        self.assertNotContains(accepted_response, "Bu apellyasiya nəticəsində")
+        self.assertContains(accepted_response, "Baxılır")
         self.assertNotContains(pending_response, "Bu apellyasiya nəticəsində")
+
+        old_resolved_at = timezone.now() - timedelta(minutes=6)
+        item = self.appeal.items.first()
+        item.resolved_at = old_resolved_at
+        item.save(update_fields=["resolved_at", "updated_at"])
+        self.appeal.reviewed_at = old_resolved_at
+        self.appeal.save(update_fields=["reviewed_at", "updated_at"])
+
+        visible_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]))
+        self.assertContains(visible_response, "Bu apellyasiya nəticəsində +1 bal əlavə olundu")
+        self.assertContains(visible_response, "Qəbul")

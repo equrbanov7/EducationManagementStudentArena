@@ -21,6 +21,7 @@ from ...constants import (
     APPEAL_ITEM_STATUS_ACCEPTED,
     APPEAL_ITEM_STATUS_REJECTED,
     APPEAL_STATUS_CHOICES,
+    APPEAL_STATUS_PENDING,
     APPEAL_STATUS_VALUES,
     APPEAL_TYPE_CHOICES,
     APPEAL_TYPE_VALUES,
@@ -48,6 +49,23 @@ def _format_decimal(value):
 
 def _can_open_appeal_management(request):
     return is_exam_center_user(getattr(request, "user", None))
+
+
+def count_pending_manage_appeals(request):
+    """Reviewer sidebar badge üçün tenant-scoped gözləyən apellyasiya sayı."""
+    if not _can_open_appeal_management(request):
+        return 0
+
+    user = request.user
+    organization = get_request_organization(request)
+    appeals = Appeal.objects.filter(status=APPEAL_STATUS_PENDING)
+
+    if organization is not None:
+        appeals = appeals.filter(organization=organization)
+    elif not is_superadmin_user(user):
+        return 0
+
+    return appeals.count()
 
 
 def _appeal_edit_seconds_left(appeal, now):

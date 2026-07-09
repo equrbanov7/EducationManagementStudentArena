@@ -63,6 +63,12 @@
     transform: translateX(2px);
 }
 
+@media (min-width: 769px) {
+    .profile-mobile-sidebar-trigger {
+        display: none;
+    }
+}
+
 .profile-sidebar-backdrop {
     display: none;
 }
