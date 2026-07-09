@@ -1547,7 +1547,7 @@ msgid "Keyfiyyət"
 msgstr "Keyfiyyət"
 
 msgid "Audit jurnalı"
-msgstr "Audit jurnalı"
+msgstr "Журнал аудита"
 
 msgid "Təşkilat ayarları və idarəetmə əməliyyatları"
 msgstr "Təşkilat ayarları və idarəetmə əməliyyatları"
@@ -3721,7 +3721,7 @@ msgstr "Закрыть боковую панель"
 
 msgctxt "profile.sidebar"
 msgid "group_general"
-msgstr "Общий"
+msgstr "Общее"
 
 msgctxt "profile.section"
 msgid "profile_info"
@@ -3826,7 +3826,7 @@ msgstr "Мои предметы"
 
 msgctxt "profile.sidebar"
 msgid "group_assigned"
-msgstr "Назначен"
+msgstr "Назначения"
 
 msgctxt "profile.section"
 msgid "assigned_tasks"
@@ -3858,7 +3858,7 @@ msgstr "Мои апелляции"
 
 msgctxt "profile.sidebar"
 msgid "group_teacher"
-msgstr "Учитель"
+msgstr "Преподаватель"
 
 msgctxt "profile.section"
 msgid "groups"
@@ -3870,46 +3870,46 @@ msgstr "Группы"
 
 msgctxt "profile.section"
 msgid "post_management"
-msgstr "Управление персоналом"
+msgstr "Управление постами"
 
 msgctxt "profile.sidebar"
 msgid "post_management"
-msgstr "Управление персоналом"
+msgstr "Управление постами"
 
 msgctxt "profile.section"
 msgid "pending_review"
-msgstr "Это будет проверено"
+msgstr "На проверке"
 
 msgctxt "profile.sidebar"
 msgid "pending_review"
-msgstr "Это будет проверено"
+msgstr "На проверке"
 
 msgctxt "profile.section"
 msgid "review_results"
-msgstr "Посмотреть результат"
+msgstr "Проверенные результаты"
 
 msgctxt "profile.sidebar"
 msgid "review_results"
-msgstr "Посмотреть результат"
+msgstr "Проверенные результаты"
 
 msgctxt "appeals.template"
 msgid "Apellyasiyalar"
 msgstr "Апелляции"
 
 msgid "Universitet idarəetməsi"
-msgstr "Платформа управления образованием"
+msgstr "Управление университетом"
 
 msgid "Fakültələr"
-msgstr "Fakültələr"
+msgstr "Факультеты"
 
 msgid "Struktur üzvləri"
-msgstr "Struktur üzvləri"
+msgstr "Участники структуры"
 
 msgid "Bölmə imtahanları"
-msgstr "Все экзамены"
+msgstr "Экзамены подразделения"
 
 msgid "Təşkilat rolları"
-msgstr "Поделиться в организации"
+msgstr "Роли организации"
 
 msgctxt "profile.sidebar"
 msgid "group_language"
@@ -3917,7 +3917,7 @@ msgstr "Язык"
 
 msgctxt "profile.sidebar"
 msgid "group_account"
-msgstr "Счет"
+msgstr "Аккаунт"
 
 msgctxt "profile.section"
 msgid "edit_profile"
@@ -3928,7 +3928,7 @@ msgid "edit_profile"
 msgstr "Редактировать профиль"
 
 msgid "Şifrəni dəyiş"
-msgstr "Şifrəni dəyiş"
+msgstr "Изменить пароль"
 
 msgctxt "profile.sidebar"
 msgid "logout"
@@ -5216,7 +5216,7 @@ msgid "supervisor_code"
 msgstr "Код контроллера"
 
 msgid "Təşkilatdan çıx"
-msgstr "Поделиться в организации"
+msgstr "Выйти из организации"
 
 msgid "Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır."
 msgstr "Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır."
@@ -5941,7 +5941,7 @@ msgid "No contact messages yet."
 msgstr "Сообщений контакта пока нет."
 
 msgid "Təşkilat məlumatları"
-msgstr "Поделиться в организации"
+msgstr "Сведения об организации"
 
 msgid "Bu bölmə yalnız superadmin üçündür."
 msgstr "Bu bölmə yalnız superadmin üçündür."
@@ -5985,15 +5985,15 @@ msgstr "Управление"
 
 msgctxt "profile.section"
 msgid "role_assignment"
-msgstr "Установить роль"
+msgstr "Назначение ролей"
 
 msgctxt "profile.sidebar"
 msgid "role_assignment"
-msgstr "Установить роль"
+msgstr "Назначение ролей"
 
 msgctxt "profile.section"
 msgid "student_management"
-msgstr "Управление пользователями"
+msgstr "Управление студентами"
 
 msgctxt "profile.section"
 msgid "staff_management"
@@ -6001,7 +6001,7 @@ msgstr "Управление персоналом"
 
 msgctxt "profile.sidebar"
 msgid "student_management"
-msgstr "Управление пользователями"
+msgstr "Управление студентами"
 
 msgctxt "profile.sidebar"
 msgid "staff_management"
@@ -6024,15 +6024,15 @@ msgid "manage_roles"
 msgstr "Управление ролями"
 
 msgid "Təşkilat özəllikləri"
-msgstr "Təşkilat özəllikləri"
+msgstr "Возможности организации"
 
 msgctxt "profile.section"
 msgid "superadmin_control"
-msgstr "Суперадмин контроль"
+msgstr "Контроль суперадмина"
 
 msgctxt "profile.sidebar"
 msgid "superadmin_control"
-msgstr "Суперадмин контроль"
+msgstr "Контроль суперадмина"
 
 msgctxt "profile.sidebar"
 msgid "user_management"
@@ -24608,7 +24608,7 @@ msgid "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 msgstr "Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz."
 
 msgid "Kafedralar"
-msgstr "Kafedralar"
+msgstr "Кафедры"
 
 msgid ""
 "Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər."
@@ -27915,6 +27915,10 @@ msgid "Akademik təqvim"
 msgstr "Академический календарь"
 
 msgctxt "profile.sidebar"
+msgid "Akademik təqvim"
+msgstr "Академический календарь"
+
+msgctxt "profile.sidebar"
 msgid "Universitet"
 msgstr "Университет"
 
@@ -28924,3 +28928,30 @@ msgstr "Пробная попытка"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "selected_subject"
 msgstr "Выбранный предмет"
+
+msgid "Final təyinatları"
+msgstr "Назначения на финальные экзамены"
+
+msgctxt "profile.section"
+msgid "PIN axtarışı"
+msgstr "Поиск PIN"
+
+msgid "PIN axtarışı"
+msgstr "Поиск PIN"
+
+msgctxt "profile.section"
+msgid "İmtahan statistikaları"
+msgstr "Статистика экзаменов"
+
+msgid "İmtahan statistikaları"
+msgstr "Статистика экзаменов"
+
+msgid "Sual göndərişləri"
+msgstr "Отправленные вопросы"
+
+msgid "Təyin olunmuş fənlərim"
+msgstr "Назначенные мне предметы"
+
+msgctxt "profile.section"
+msgid "İmtahan zalları"
+msgstr "Экзаменационные залы"

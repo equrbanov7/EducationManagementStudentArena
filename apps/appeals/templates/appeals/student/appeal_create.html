@@ -102,13 +102,24 @@
                      data-appeal-card
                      data-appeal-marked="{% if is_marked %}1{% else %}0{% endif %}"
                      data-appeal-locked="{% if already_appealed %}1{% else %}0{% endif %}"
-                     data-appeal-text="{{ q.text|striptags }} {{ answer.text_answer|default_if_none:''|striptags }} {{ q.correct_answer|default_if_none:''|striptags }}">
+                     data-appeal-text="{{ q.text|striptags }}{% if not hide_answer_details %} {{ answer.text_answer|default_if_none:''|striptags }} {{ q.correct_answer|default_if_none:''|striptags }}{% endif %}">
                 <div class="appeal-question-card__top">
                     <div class="appeal-question-card__main">
                         <p class="appeal-question-title">
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
                             {{ q.text|striptags|truncatechars:190 }}
                         </p>
+                        {% if hide_answer_details and exam.exam_type == "test" %}
+                        <div class="appeal-meta">
+                            <span class="appeal-chip">
+                                {% if answer.is_correct %}
+                                <i class="fas fa-check-circle"></i>{% trans "Cavabınız: düzgün" context "appeals.template" %}
+                                {% else %}
+                                <i class="fas fa-times-circle"></i>{% trans "Cavabınız: səhv" context "appeals.template" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
                         {% if is_marked %}
                         <div class="appeal-meta">
                             <span class="appeal-marked-chip">
@@ -139,6 +150,7 @@
                     </div>
                 </div>
 
+                {% if not hide_answer_details %}
                 <div class="appeal-answer-review appeal-answer-review--create">
                     {% if exam.exam_type == "test" %}
                     <div class="appeal-answer-review__label">{% trans "Variantlar" context "appeals.template" %}</div>
@@ -178,6 +190,7 @@
                     {% endif %}
                     {% endif %}
                 </div>
+                {% endif %}
 
                 <div class="appeal-q-body" data-appeal-body>
                     <div class="row g-3">

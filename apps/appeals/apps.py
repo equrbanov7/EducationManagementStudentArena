@@ -18,11 +18,17 @@ class AppealsConfig(AppConfig):
             can_create_appeal,
             effective_test_score,
             remaining_window_seconds,
+            student_visible_appeal_bonus_map,
+            student_visible_appeal_score_state,
+            student_visible_effective_test_score,
         )
 
         score_adjustments.register("bonus_map", appeal_bonus_map)
         score_adjustments.register("apply_bonus", apply_bonus_to_test_result)
         score_adjustments.register("effective_test_score", effective_test_score)
         score_adjustments.register("score_state", appeal_score_state)
+        score_adjustments.register("student_visible_bonus_map", student_visible_appeal_bonus_map)
+        score_adjustments.register("student_visible_effective_test_score", student_visible_effective_test_score)
+        score_adjustments.register("student_visible_score_state", student_visible_appeal_score_state)
         score_adjustments.register("can_create", can_create_appeal)
         score_adjustments.register("remaining_window_seconds", remaining_window_seconds)

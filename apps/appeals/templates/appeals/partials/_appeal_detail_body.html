@@ -22,12 +22,12 @@
             <h1>{{ appeal.exam.title }}</h1>
             <p>
                 {% trans "Göndərilib" context "appeals.template" %}: {{ appeal.created_at|date:"d.m.Y H:i" }}
-                {% if appeal.reviewed_at %} · {% trans "Baxılıb" context "appeals.template" %}: {{ appeal.reviewed_at|date:"d.m.Y H:i" }}{% endif %}
+                {% if appeal.reviewed_at and not hidden_owner_decisions %} · {% trans "Baxılıb" context "appeals.template" %}: {{ appeal.reviewed_at|date:"d.m.Y H:i" }}{% endif %}
             </p>
         </div>
     </div>
     <div class="appeal-hero__actions">
-        {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
+        {% include "appeals/partials/_status_badge.html" with status=appeal_display_status label=appeal_display_status_label %}
     </div>
 </header>
 
@@ -64,7 +64,7 @@
 </div>
 {% endif %}
 
-{% if appeal.reviewer_note %}
+{% if appeal.reviewer_note and not hidden_owner_decisions %}
 <section class="appeal-note-card p-3 mb-3">
     <div class="small text-muted fw-bold mb-1">{% trans "Baxan şəxsin qeydi" context "appeals.template" %}</div>
     <div>{{ appeal.reviewer_note|linebreaksbr }}</div>
@@ -90,19 +90,19 @@
                     {% endif %}
                 </div>
             </div>
-            {% include "appeals/partials/_status_badge.html" with status=item.status label=item.get_status_display %}
+            {% include "appeals/partials/_status_badge.html" with status=item.student_display_status label=item.student_display_status_label %}
         </div>
 
         <div class="appeal-detail-grid">
             <div class="appeal-detail-label">{% trans "Şərhiniz" context "appeals.template" %}</div>
             <div class="appeal-detail-value">{{ item.comment|linebreaksbr }}</div>
 
-            {% if item.reviewer_response %}
+            {% if item.reviewer_response and not item.student_result_hidden %}
             <div class="appeal-detail-label">{% trans "Cavab" context "appeals.template" %}</div>
             <div class="appeal-detail-value">{{ item.reviewer_response|linebreaksbr }}</div>
             {% endif %}
 
-            {% if item.score_adjustment and item.score_adjustment.delta_points and not item.score_adjustment.reverted %}
+            {% if item.score_adjustment and item.score_adjustment.delta_points and not item.score_adjustment.reverted and not item.student_result_hidden %}
             <div class="appeal-detail-label">{% trans "Bal dəyişikliyi" context "appeals.template" %}</div>
             <div class="appeal-detail-value text-success fw-bold">+{{ item.score_adjustment.delta_points }}</div>
             {% endif %}

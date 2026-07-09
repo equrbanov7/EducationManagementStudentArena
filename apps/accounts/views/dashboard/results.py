@@ -39,6 +39,7 @@ def my_result_detail(request, item_type, item_id):
         return redirect("accounts:profile")
 
     requested_section = (request.GET.get("section") or "").strip().lower()
+    results_filter = "all"
     if requested_section == "pending-answers":
         pending_filter = _normalize_pending_answers_filter(request.GET.get("pending_type") or request.GET.get("type"))
         back_url = _append_query_params(
@@ -88,7 +89,15 @@ def my_result_detail(request, item_type, item_id):
                 ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(back_url)
-        return redirect("exams:exam_result", slug=attempt.exam.slug, attempt_id=attempt.id)
+        result_url = reverse("exams:exam_result", kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id})
+        if requested_section != "pending-answers":
+            result_url = _append_query_params(
+                result_url,
+                from_section="my-results",
+                return_to=back_url,
+                results_type=results_filter,
+            )
+        return redirect(result_url)
 
     if normalized_type == "courses":
         submission = get_object_or_404(

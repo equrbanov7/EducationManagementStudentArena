@@ -31,6 +31,18 @@ def _default_score_state(attempt):
     return {"bonus_points": 0, "credited_question_ids": [], "bonus_by_question_id": {}}
 
 
+def _default_student_visible_bonus_map(attempt_ids):
+    return {}
+
+
+def _default_student_visible_effective_test_score(attempt, *, answers=None):
+    return None
+
+
+def _default_student_visible_score_state(attempt):
+    return {"bonus_points": 0, "credited_question_ids": [], "bonus_by_question_id": {}}
+
+
 def _default_can_create(request, attempt):
     return False
 
@@ -44,6 +56,9 @@ _HOOKS = {
     "apply_bonus": _default_apply_bonus,
     "effective_test_score": _default_effective_test_score,
     "score_state": _default_score_state,
+    "student_visible_bonus_map": _default_student_visible_bonus_map,
+    "student_visible_effective_test_score": _default_student_visible_effective_test_score,
+    "student_visible_score_state": _default_student_visible_score_state,
     "can_create": _default_can_create,
     "remaining_window_seconds": _default_remaining_window_seconds,
 }
@@ -70,6 +85,18 @@ def effective_test_score(attempt, *, answers=None):
 
 def score_state(attempt):
     return _HOOKS["score_state"](attempt)
+
+
+def student_visible_bonus_map(attempt_ids):
+    return _HOOKS["student_visible_bonus_map"](attempt_ids)
+
+
+def student_visible_effective_test_score(attempt, *, answers=None):
+    return _HOOKS["student_visible_effective_test_score"](attempt, answers=answers)
+
+
+def student_visible_score_state(attempt):
+    return _HOOKS["student_visible_score_state"](attempt)
 
 
 def can_create(request, attempt):

@@ -434,6 +434,9 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-appeals' %}active{% endif %}">
                 <i class="fas fa-gavel sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "Apellyasiyalar" context "appeals.template" %}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse"
+                      data-badge-key="pending_appeals_count"
+                      {% if not pending_appeals_count %}style="display:none"{% endif %}>{{ pending_appeals_count }}</span>
             </a>
         </li>
         {% endif %}

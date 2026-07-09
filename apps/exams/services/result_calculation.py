@@ -132,7 +132,7 @@ def sync_test_attempt_counts(attempt, *, answers=None):
     return result
 
 
-def attach_test_result_summaries(attempts):
+def attach_test_result_summaries(attempts, *, bonus_map_fn=None):
     """
     Hər test attempt-inə `.test_result` əlavə edir — qəbul olunmuş apellyasiya
     bonusları DAXİL (effektiv bal). Bonuslar bütün attempt-lər üçün tək
@@ -148,7 +148,8 @@ def attach_test_result_summaries(attempts):
     # genişlənmə nöqtəsi (score_adjustments) — appeals ready()-də qoşulur.
     from apps.exams import score_adjustments
 
-    bonus_by_attempt_id = score_adjustments.bonus_map([attempt.id for attempt in test_attempts])
+    resolve_bonus_map = bonus_map_fn or score_adjustments.bonus_map
+    bonus_by_attempt_id = resolve_bonus_map([attempt.id for attempt in test_attempts])
     apply_bonus = score_adjustments.apply_bonus
 
     # Faza 4 (audit 2026-07-02): N+1 aradan qaldırıldı — bütün attempt-lərin

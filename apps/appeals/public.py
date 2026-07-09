@@ -8,11 +8,13 @@ Bu fasad profil bölmələri kimi yuxarı-səviyyə istehlakçılar üçündür.
 from apps.appeals.services import (  # noqa: F401
     appeal_bonus_map,
     apply_bonus_to_test_result,
+    student_visible_appeal_bonus_map,
 )
 from apps.appeals.views import _can_open_appeal_management as can_open_appeal_management  # noqa: F401
 from apps.appeals.views import (  # noqa: F401
     build_manage_appeals_context,
     build_my_appeals_context,
+    count_pending_manage_appeals,
 )
 
 __all__ = [
@@ -21,4 +23,6 @@ __all__ = [
     "apply_bonus_to_test_result",
     "build_manage_appeals_context",
     "build_my_appeals_context",
+    "count_pending_manage_appeals",
+    "student_visible_appeal_bonus_map",
 ]
