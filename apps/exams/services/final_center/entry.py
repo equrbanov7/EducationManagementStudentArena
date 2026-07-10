@@ -20,9 +20,12 @@ from django.utils import timezone
 from apps.exams.domain.final_center import (
     ROOM_SESSION_STATE_ACTIVE,
     ROOM_SESSION_STATE_ENTRY_OPEN,
+    TICKET_STATUS_ABSENT,
     TICKET_STATUS_ACTIVE,
     TICKET_STATUS_ASSIGNED,
+    TICKET_STATUS_COMPLETED,
     TICKET_STATUS_READY,
+    TICKET_STATUS_REMOVED,
     TICKET_STATUS_WAITING,
 )
 from apps.exams.models import FinalExamTicket
@@ -188,6 +191,80 @@ def clear_entry_session(request) -> None:
     request.session.pop(ENTRY_SESSION_KEY, None)
 
 
+# PIN axını üçün avtomatik yaradılan zal oturumunun standart müddəti.
+# start_room vaxt pəncərəsi və maybe_auto_end bu intervala baxır.
+AUTO_SITTING_DURATION_HOURS = 6
+
+
+def ensure_open_room_sitting(room):
+    """
+    Otağın canlı (giriş-açıq/aktiv) oturumunu qaytarır; yoxdursa PIN axını
+    üçün AVTOMATİK giriş-açıq oturum yaradır — imtahan mərkəzi əvvəlcədən
+    oturum planlaşdırmalı deyil. Nəzarətçi zal monitorunda «Başlat» vuranda
+    bu oturum aktivləşir və gözləyən tələbələr imtahana keçir.
+    """
+    from datetime import timedelta
+
+    from apps.exams.models import ExamRoomSession
+    from core.rls import bypass_rls
+
+    live_states = (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)
+    now = timezone.now()
+    # Public giriş axını (tələbə hələ login olmayıb) — RLS bypass (bax
+    # attach_ticket_to_room_sitting).
+    with bypass_rls():
+        sitting = (
+            ExamRoomSession.objects.filter(room=room, state__in=live_states).order_by("scheduled_start", "id").first()
+        )
+        if sitting is not None:
+            return sitting
+        return ExamRoomSession.objects.create(
+            organization_id=room.organization_id,
+            room=room,
+            state=ROOM_SESSION_STATE_ENTRY_OPEN,
+            entry_opened_at=now,
+            scheduled_start=now,
+            scheduled_end=now + timedelta(hours=AUTO_SITTING_DURATION_HOURS),
+        )
+
+
+def ensure_pin_ticket(exam, student, room, computer=None):
+    """
+    ExamStudentPin girişi üçün bileti tapır/yaradır və otağın oturumuna qoşur.
+
+    Bilet burada yalnız DAXİLİ vəziyyət daşıyıcısıdır (gözləmə otağı, sinxron
+    start, zal monitoru) — autentifikasiya artıq ExamStudentPin ilə aparılıb,
+    biletin öz PIN sahələri istifadə olunmur/doldurulmur.
+
+    Qaytarır: ``(ticket, None)`` uğurda, ``(None, error_message)`` rədd halında.
+    """
+    from django.utils.translation import pgettext
+
+    from core.rls import bypass_rls
+
+    with bypass_rls():
+        ticket, _created = FinalExamTicket.objects.get_or_create(
+            exam=exam,
+            student=student,
+            defaults={"organization_id": exam.organization_id},
+        )
+    if ticket.status == TICKET_STATUS_COMPLETED:
+        return None, pgettext("exams.final_center.entry", "Bu imtahanı artıq bitirmisiniz.")
+    if ticket.status in (TICKET_STATUS_REMOVED, TICKET_STATUS_ABSENT):
+        return None, pgettext(
+            "exams.final_center.entry",
+            "İmtahana girişiniz bağlanıb — imtahan mərkəzinə müraciət edin.",
+        )
+    ensure_open_room_sitting(room)
+    sitting = attach_ticket_to_room_sitting(ticket, room, computer)
+    if sitting is None:  # yarış halı — oturum elə indicə bağlandı
+        return None, pgettext(
+            "exams.final_center.entry",
+            "Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını gözləyin.",
+        )
+    return ticket, None
+
+
 def attach_ticket_to_room_sitting(ticket, room, computer=None):
     """
     Bileti otağın AÇIQ zal oturumuna qoşur (giriş anında — oturum sisteminin
@@ -241,6 +318,8 @@ __all__ = [
     "ERROR_RATE_LIMITED",
     "attach_ticket_to_room_sitting",
     "clear_entry_session",
+    "ensure_open_room_sitting",
+    "ensure_pin_ticket",
     "entry_ticket_id",
     "store_entry_session",
     "validate_entry",

@@ -206,21 +206,38 @@ def org_computer_access_allowed(request, organization) -> bool:
 
 def exam_room_isolation_allowed(exam, room) -> bool:
     """
-    Otaq izolyasiyası (biletsiz final yolu): imtahan hansı zal(lar)da CANLI
-    gedirsə, yeni giriş yalnız həmin zal(lar)ın kompüterlərindən mümkündür.
-    İlk girən tələbənin zalı imtahanı həmin zala bağlayır; canlı cəhdlər
-    bitəndə bağlılıq öz-özünə düşür. ``room`` None olduqda (org-da qeydli
-    kompüter yoxdur) məhdudiyyət tətbiq olunmur.
+    Otaq izolyasiyası (PIN final yolu): imtahan hansı zal(lar)da CANLI gedirsə,
+    yeni giriş yalnız həmin zal(lar)ın kompüterlərindən mümkündür. İlk girən
+    tələbənin zalı imtahanı həmin zala bağlayır; canlı bilet/cəhdlər bitəndə
+    bağlılıq öz-özünə düşür. ``room`` None olduqda (org-da qeydli kompüter
+    yoxdur) məhdudiyyət tətbiq olunmur.
     """
     if room is None:
         return True
-    from apps.exams.models import ExamAttempt
-
-    live_room_ids = set(
-        ExamAttempt.objects.filter(exam=exam, status="in_progress", is_trial=False, room__isnull=False).values_list(
-            "room_id", flat=True
-        )
+    from apps.exams.domain.final_center import (
+        ROOM_SESSION_STATE_ACTIVE,
+        ROOM_SESSION_STATE_ENTRY_OPEN,
+        TICKET_LIVE_STATUSES,
+        TICKET_STATUS_ASSIGNED,
     )
+    from apps.exams.models import ExamAttempt, FinalExamTicket
+    from core.rls import bypass_rls
+
+    # Public giriş axını (login-dən əvvəl) — RLS bypass (bax resolve_room_computer).
+    # ASSIGNED bilet də sayılır (tələbə girib, hələ təsdiq/gözləmədədir) —
+    # amma yalnız CANLI oturumda; bitmiş oturumların biletləri bağlamır.
+    with bypass_rls():
+        live_room_ids = set(
+            ExamAttempt.objects.filter(exam=exam, status="in_progress", is_trial=False, room__isnull=False).values_list(
+                "room_id", flat=True
+            )
+        ) | set(
+            FinalExamTicket.objects.filter(
+                exam=exam,
+                status__in=(TICKET_STATUS_ASSIGNED, *TICKET_LIVE_STATUSES),
+                session__state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE),
+            ).values_list("session__room_id", flat=True)
+        )
     return not live_room_ids or room.pk in live_room_ids
 
 
