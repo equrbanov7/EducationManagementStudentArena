@@ -183,23 +183,25 @@ def build_manage_appeals_context(request, *, list_action, section=""):
 
 @login_required
 def manage_appeals(request):
-    """Müəllim/reviewer üçün apellyasiya idarəetmə siyahısı (filtr + axtarış)."""
+    """Müəllim/reviewer apellyasiya siyahısı — yalnız dashboard bölməsi.
+
+    Standalone səhifə yoxdur: birbaşa URL (köhnə link/bookmark) sidebar-lı
+    profil bölməsinə yönləndirilir; filtr parametrləri qorunur. Fragment
+    rejimi dashboard-un AJAX siyahı yeniləməsi üçün qalır.
+    """
     if not _can_open_appeal_management(request):
         raise PermissionDenied
 
     is_fragment = request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest"
-    # `embedded=1` → dashboard bölməsi kontekstində render (link/form profil
-    # URL-inə yönəlir, sidebar sabit qalır). Əks halda standalone səhifə.
-    if request.GET.get("embedded") == "1":
-        context = build_manage_appeals_context(
-            request, list_action=reverse("accounts:profile"), section="manage-appeals"
-        )
-    else:
-        context = build_manage_appeals_context(request, list_action=reverse("appeals:manage_appeals"))
+    if not is_fragment:
+        query = request.GET.urlencode()
+        target = reverse("accounts:profile") + "?section=manage-appeals"
+        if query:
+            target += "&" + query
+        return redirect(target)
 
-    if is_fragment:
-        return render(request, "appeals/partials/_manage_appeals_body.html", context)
-    return render(request, "appeals/teacher/manage_appeals.html", context)
+    context = build_manage_appeals_context(request, list_action=reverse("accounts:profile"), section="manage-appeals")
+    return render(request, "appeals/partials/_manage_appeals_body.html", context)
 
 
 @login_required
@@ -224,6 +226,11 @@ def review_appeal(request, appeal_id):
 
     # Dashboard daxili AJAX (manage-appeals bölməsi) → fraqment/JSON rejimi.
     is_fragment = request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest"
+    # Standalone qərar səhifəsi yoxdur — qərar yalnız dashboard modalında
+    # verilir; birbaşa URL sidebar-lı siyahı bölməsinə yönləndirilir.
+    dashboard_url = reverse("accounts:profile") + "?section=manage-appeals"
+    if not is_fragment and request.method != "POST":
+        return redirect(dashboard_url)
 
     final_item_statuses = {APPEAL_ITEM_STATUS_ACCEPTED, APPEAL_ITEM_STATUS_REJECTED}
     now = timezone.now()
@@ -296,12 +303,13 @@ def review_appeal(request, appeal_id):
                     }
                 )
             messages.success(request, success_text)
-            return redirect("appeals:review_appeal", appeal_id=appeal.id)
+            return redirect(dashboard_url)
 
         # Validasiya səhvi
         if is_fragment:
             return JsonResponse({"ok": False, "error": str(error_message)}, status=200)
         messages.error(request, error_message)
+        return redirect(dashboard_url)
 
     # ── Bal konteksti (əvvəlki → yeni bal göstərmək üçün) ──
     review_current_score, review_max_score, score_info = _current_review_score(appeal, is_test)
@@ -349,6 +357,10 @@ def review_appeal(request, appeal_id):
         else:
             item.selected_option_ids = set()
 
+    # Redaktə oluna bilən (kilidlənməmiş) item qalmayıbsa → qərar formu artıq
+    # final-dır: "yadda saxla" düyməsi və ümumi qeyd sahəsi gizlədilir.
+    review_has_editable = any(not item.is_locked for item in items)
+
     context = {
         "appeal": appeal,
         "items": items,
@@ -356,8 +368,7 @@ def review_appeal(request, appeal_id):
         "score_info": score_info,
         "review_current_score": review_current_score,
         "review_max_score": review_max_score,
+        "review_has_editable": review_has_editable,
         "marked_question_by_qid": _marked_question_map(appeal.attempt),
     }
-    if is_fragment:
-        return render(request, "appeals/partials/_review_appeal_body.html", context)
-    return render(request, "appeals/teacher/review_appeal.html", context)
+    return render(request, "appeals/partials/_review_appeal_body.html", context)

@@ -89,6 +89,72 @@ class TestExamScoringTests(_Base):
         # 1 / 2 bal = 50%.
         self.assertEqual(eff["effective_percentage"], Decimal("50.0"))
 
+    def test_same_question_not_credited_twice_across_items(self):
+        # Legacy dublikat: eyni sual iki ayrı apellyasiya item-ində qəbul
+        # olunsa belə, sual attempt üzrə yalnız BİR dəfə kreditlənir (+1).
+        first_item = self._item(self._appeal(self.attempt), self.question, self.answer)
+        second_item = self._item(self._appeal(self.attempt), self.question, self.answer)
+
+        accept_appeal_item(first_item, reviewer=self.teacher, response_text="Açar səhv idi")
+        second_adjustment = accept_appeal_item(second_item, reviewer=self.teacher, response_text="Təkrar")
+
+        self.assertEqual(second_adjustment.delta_points, Decimal("0"))
+        state = appeal_score_state(self.attempt)
+        self.assertEqual(state["bonus_points"], Decimal("1"))
+        self.assertEqual(effective_test_score(self.attempt)["effective_score"], Decimal("1"))
+
+    def test_fallback_does_not_double_credit_already_credited_question(self):
+        # Legacy hal: eyni sualda bir item aktiv düzəlişlə kreditlənib, digəri
+        # isə accepted + reverted düzəlişlə qalıb (fallback namizədi).
+        # Fallback artıq kreditlənmiş sualı İKİNCİ dəfə saymamalıdır.
+        from apps.appeals.services import appeal_bonus_map
+
+        first_item = self._item(self._appeal(self.attempt), self.question, self.answer)
+        second_item = self._item(self._appeal(self.attempt), self.question, self.answer)
+        accept_appeal_item(first_item, reviewer=self.teacher, response_text="ok")
+        accept_appeal_item(second_item, reviewer=self.teacher, response_text="ok")
+        ScoreAdjustment.objects.filter(appeal_item=second_item).update(reverted=True)
+
+        state = appeal_score_state(self.attempt)
+        self.assertEqual(state["bonus_points"], Decimal("1"))
+        self.assertEqual(effective_test_score(self.attempt)["effective_score"], Decimal("1"))
+        self.assertEqual(appeal_bonus_map([self.attempt.id]), {self.attempt.id: Decimal("1")})
+
+    def test_student_visible_status_by_qid(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.appeals.services import student_visible_appeal_status_by_qid
+
+        q2 = ExamQuestion.objects.create(exam=self.exam, order=2, text="Q2", points=1)
+        ExamQuestionOption.objects.create(question=q2, label="A", text="a", is_correct=True)
+        a2 = ExamAnswer.objects.create(attempt=self.attempt, question=q2)
+        q3 = ExamQuestion.objects.create(exam=self.exam, order=3, text="Q3", points=1)
+        ExamQuestionOption.objects.create(question=q3, label="A", text="a", is_correct=True)
+        a3 = ExamAnswer.objects.create(attempt=self.attempt, question=q3)
+
+        appeal = self._appeal(self.attempt)
+        self._item(appeal, self.question, self.answer)  # qərarsız → pending
+        accepted_item = self._item(appeal, q2, a2)
+        rejected_item = self._item(appeal, q3, a3)
+        accept_appeal_item(accepted_item, reviewer=self.teacher, response_text="ok")
+        reject_appeal_item(rejected_item, reviewer=self.teacher, response_text="yox")
+
+        # Qərarlar yeni verilib → 5 dəqiqəlik pəncərə → tələbəyə hamısı "pending".
+        status = student_visible_appeal_status_by_qid(self.attempt)
+        self.assertEqual(status[self.question.id], "pending")
+        self.assertEqual(status[q2.id], "pending")
+        self.assertEqual(status[q3.id], "pending")
+
+        # Pəncərə bağlandı → real qərarlar görünür.
+        cutoff = timezone.now() - timedelta(minutes=6)
+        AppealItem.objects.filter(pk__in=[accepted_item.pk, rejected_item.pk]).update(resolved_at=cutoff)
+        status = student_visible_appeal_status_by_qid(self.attempt)
+        self.assertEqual(status[self.question.id], "pending")
+        self.assertEqual(status[q2.id], "accepted")
+        self.assertEqual(status[q3.id], "rejected")
+
     def test_accept_is_idempotent_no_double_increment(self):
         appeal = self._appeal(self.attempt)
         item = self._item(appeal, self.question, self.answer)

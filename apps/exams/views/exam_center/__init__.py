@@ -34,11 +34,14 @@ from .sessions import (
     exam_center_ticket_seat,
 )
 from .statistics import exam_center_stats_data, exam_center_stats_export, exam_center_stats_filters
+from .statistics_charts import exam_center_stats_ai, exam_center_stats_charts
 
 __all__ = [
     "exam_center_pin_lookup",
     "exam_center_pin_search",
     "exam_center_student_pins",
+    "exam_center_stats_ai",
+    "exam_center_stats_charts",
     "exam_center_stats_data",
     "exam_center_stats_export",
     "exam_center_stats_filters",

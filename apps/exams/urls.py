@@ -112,6 +112,8 @@ urlpatterns = [
     path("center/stats/data/", views.exam_center_stats_data, name="exam_center_stats_data"),
     path("center/stats/export/", views.exam_center_stats_export, name="exam_center_stats_export"),
     path("center/stats/filters/", views.exam_center_stats_filters, name="exam_center_stats_filters"),
+    path("center/stats/charts/", views.exam_center_stats_charts, name="exam_center_stats_charts"),
+    path("center/stats/ai/", views.exam_center_stats_ai, name="exam_center_stats_ai"),
     path("center/pin-lookup/", views.exam_center_pin_lookup, name="exam_center_pin_lookup"),
     path("center/pin-lookup/search/", views.exam_center_pin_search, name="exam_center_pin_search"),
     path(

@@ -19,6 +19,7 @@ from .scoring import (
     revert_item_adjustment,
     student_visible_appeal_bonus_map,
     student_visible_appeal_score_state,
+    student_visible_appeal_status_by_qid,
     student_visible_effective_test_score,
 )
 from .state_machine import InvalidAppealTransition, assert_transition, can_transition
@@ -53,5 +54,6 @@ __all__ = [
     "revert_item_adjustment",
     "student_visible_appeal_bonus_map",
     "student_visible_appeal_score_state",
+    "student_visible_appeal_status_by_qid",
     "student_visible_effective_test_score",
 ]
