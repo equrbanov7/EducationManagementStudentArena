@@ -27,6 +27,10 @@ from .tickets import sync_ticket_completion
 # köhnə nəticə DƏRHAL düşür.
 FINAL_RESULT_VISIBLE_SECONDS = 180
 
+# Biletsiz (ExamStudentPin) cəhdin bitmiş nəticəsi zal monitorunda bu qədər
+# saat görünür (canlı cəhdlər həmişə görünür).
+ROOM_ATTEMPT_FINISHED_VISIBLE_HOURS = 8
+
 
 def _visible_grid_tickets(tickets):
     """
@@ -158,11 +162,66 @@ def room_live_sessions(room):
     return [s for s in sessions if s.state in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)]
 
 
+def _room_attempt_rows(room):
+    """
+    Biletsiz (ExamStudentPin) canlı cəhdlər — zal kompüterindən girişdə cəhd
+    ``room``/``room_computer`` ilə möhürlənir (bax final_center view). Oturum/
+    bilet sistemi işlədilməyən imtahanlar da zal monitorunda görünsün deyə
+    snapshot-a bu sətirlər əlavə olunur. Bitmiş cəhdlər son
+    ``ROOM_ATTEMPT_FINISHED_VISIBLE_HOURS`` saat ərzində göstərilir.
+    """
+    from datetime import timedelta
+
+    from apps.exams.models import ExamAttempt
+
+    since = timezone.now() - timedelta(hours=ROOM_ATTEMPT_FINISHED_VISIBLE_HOURS)
+    attempts = (
+        ExamAttempt.objects.filter(room=room, is_trial=False)
+        .filter(Q(status="in_progress") | Q(finished_at__gte=since))
+        .select_related("user", "exam", "room_computer")
+        .order_by("exam__title", "id")
+    )
+    rows = []
+    for attempt in attempts:
+        remaining_seconds = None
+        if not attempt.is_finished and attempt.deadline_at:
+            remaining_seconds = max(0, int((attempt.deadline_at - timezone.now()).total_seconds()))
+        live = attempt.status == "in_progress"
+        rows.append(
+            {
+                # Bilet yoxdur — JS bilet əməliyyatlarını (data-ticket) bu
+                # sətirlər üçün göstərmir (ticket_id=None).
+                "ticket_id": None,
+                "student_id": attempt.user_id,
+                "name": attempt.user.get_full_name() or attempt.user.username,
+                "username": attempt.user.username,
+                "seat": attempt.room_computer.seat_number if attempt.room_computer else None,
+                "status": TICKET_STATUS_ACTIVE if live else TICKET_STATUS_COMPLETED,
+                "language": attempt.language,
+                "connected": live,
+                "pin_issued": True,
+                "pin_locked": False,
+                "reconnect_count": 0,
+                "last_seen_at": None,
+                "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
+                "completed_at": attempt.finished_at.isoformat() if attempt.finished_at else None,
+                "remaining_seconds": remaining_seconds,
+                "supervision_status": attempt.supervision_status,
+                "violation_count": attempt.supervision_violation_count,
+                "removal_action": "",
+                "session_id": f"exam-{attempt.exam_id}",
+                "exam_title": attempt.exam.title,
+            }
+        )
+    return rows
+
+
 def room_monitor_snapshot(room):
     """
     Zal-səviyyəli aqreqasiya: zaldakı BÜTÜN canlı oturumların (imtahanların)
     tələbələrini birləşdirir. Hər sətir fənn/imtahan adı ilə etiketlənir;
     nəzarətçi bir zalda neçə imtahan varsa hamısını bir ekranda görür.
+    Oturumsuz (biletsiz PIN) cəhdlər də zal kompüterinə görə əlavə olunur.
     """
     from collections import defaultdict
 
@@ -203,6 +262,20 @@ def room_monitor_snapshot(room):
     for ticket in tickets:
         if ticket.status in counts:
             counts[ticket.status] += 1
+
+    # Biletsiz (PIN) cəhdlər: sayğaclara və tələbə siyahısına əlavə olunur;
+    # hər imtahan üçün psevdo-oturum çipi göstərilir (filter də işləsin).
+    attempt_rows = _room_attempt_rows(room)
+    for row in attempt_rows:
+        counts["total"] += 1
+        counts[row["status"]] += 1
+        if row["connected"]:
+            counts["connected"] += 1
+    attempt_exams = {}
+    for row in attempt_rows:
+        if row["status"] == TICKET_STATUS_ACTIVE:
+            attempt_exams.setdefault(row["session_id"], row["exam_title"])
+
     counts["offline"] = max(0, counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"])
     counts["participated"] = counts["active"] + counts["completed"]
 
@@ -221,8 +294,19 @@ def room_monitor_snapshot(room):
                 "started_at": s.started_at.isoformat() if s.started_at else None,
             }
             for s in sessions
+        ]
+        + [
+            {
+                "session_id": sid,
+                "state": "active",
+                "exam_title": title,
+                "scheduled_start": None,
+                "scheduled_end": None,
+                "started_at": None,
+            }
+            for sid, title in attempt_exams.items()
         ],
-        "students": [_ticket_row(t, presence) for t in _visible_grid_tickets(tickets)],
+        "students": [_ticket_row(t, presence) for t in _visible_grid_tickets(tickets)] + attempt_rows,
     }
 
 

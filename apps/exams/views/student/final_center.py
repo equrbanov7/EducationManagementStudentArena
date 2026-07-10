@@ -30,8 +30,9 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_READY,
     TICKET_STATUS_WAITING,
 )
-from apps.exams.models import FinalExamTicket
+from apps.exams.models import ExamAttempt, FinalExamTicket
 from apps.exams.services.exam_center_gate import (
+    exam_room_isolation_allowed,
     final_exam_access_allowed,
     org_computer_access_allowed,
     resolve_room_computer,
@@ -269,6 +270,24 @@ def _handle_student_pin_login(request, username, raw_pin):
     if not org_computer_access_allowed(request, exam.organization if exam.organization_id else None):
         return _render_login(request, error=_room_access_error(), username=(username or "").strip())
 
+    # Kompüterin zalı (MAC/IP → zal). Otaq izolyasiyası: imtahan hansı zal(lar)da
+    # CANLI gedirsə, başqa zalın kompüterindən həmin imtahana giriş yoxdur —
+    # ilk girən tələbənin zalı imtahanı həmin zala bağlayır (canlı cəhdlər
+    # bitəndə bağlılıq öz-özünə düşür). Cəhd aşağıda zal/kompüterlə möhürlənir
+    # ki, zal monitoru biletsiz imtahanları da göstərsin.
+    entry_room, entry_computer = (None, None)
+    if exam.organization_id:
+        entry_room, entry_computer = resolve_room_computer(request, exam.organization)
+    if not exam_room_isolation_allowed(exam, entry_room):
+        return _render_login(
+            request,
+            error=pgettext(
+                "exams.final_center.entry",
+                "Bu imtahan hazırda başqa zalda keçirilir — öz zalınızdakı imtahana daxil olun.",
+            ),
+            username=(username or "").strip(),
+        )
+
     can_start, reason = exam.can_user_start(student, code=raw_pin)
     if not can_start:
         return _render_login(request, error=reason or _entry_error_message(None), username=(username or "").strip())
@@ -294,7 +313,17 @@ def _handle_student_pin_login(request, username, raw_pin):
         request.session["active_organization"] = exam.organization.slug
 
     ensure_student_exam_tenant_context(request)
-    return _start_or_resume_attempt(request, exam)
+    response = _start_or_resume_attempt(request, exam)
+
+    # Cəhdi zal/kompüterlə möhürlə — zal monitoru biletsiz imtahanları da
+    # göstərir (bax room_monitor_snapshot._room_attempt_rows).
+    if entry_room is not None:
+        attempt = ExamAttempt.objects.filter(user=student, exam=exam, status="in_progress").order_by("-id").first()
+        if attempt and (attempt.room_id != entry_room.pk or attempt.room_computer_id != entry_computer.pk):
+            attempt.room = entry_room
+            attempt.room_computer = entry_computer
+            attempt.save(update_fields=["room", "room_computer"])
+    return response
 
 
 def _handle_confirm(request):
