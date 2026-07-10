@@ -926,3 +926,141 @@ class CenterPageRenderTests(_FlowBase):
         response = client.get(reverse("exams:final_exam_waiting", args=[self.ticket.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "fexc-waiting-root")
+
+
+class StudentPinWaitingFlowTests(_FlowBase):
+    """ExamStudentPin girişi GÖZLƏMƏ OTAĞI axınına düşür (dərhal başlamır).
+
+    Bilet burada daxili vəziyyət daşıyıcısıdır (PIN-siz, avtomatik yaradılır);
+    imtahan yalnız nəzarətçi zalı başladanda açılır. Otaq izolyasiyası: imtahan
+    hansı zalda canlıdırsa, başqa zalın kompüterindən giriş rədd edilir.
+    """
+
+    PIN_RAW = "735124"
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from django.contrib.auth.hashers import make_password
+
+        from apps.exams.models import ExamStudentPin
+
+        # İmtahan pəncərəsi açıq olsun (can_user_start üçün).
+        cls.exam.start_datetime = timezone.now() - timedelta(minutes=5)
+        cls.exam.save(update_fields=["start_datetime"])
+        cls.exam.allowed_users.add(cls.student2)
+        # Signal avtomatik PIN yarada bilər — məlum PIN-ə yenilə.
+        ExamStudentPin.objects.update_or_create(
+            exam=cls.exam,
+            student=cls.student2,
+            defaults={"pin_hash": make_password(cls.PIN_RAW), "pin_cipher": ""},
+        )
+
+    def _pin_login(self, client, **extra):
+        return client.post(
+            reverse("exams:final_exam_entry"),
+            {"username": self.student2.username, "pin": self.PIN_RAW},
+            **extra,
+        )
+
+    def test_pin_login_creates_ticket_and_lands_in_gate_not_exam(self):
+        from apps.exams.models import ExamAttempt
+
+        client = Client()
+        response = self._pin_login(client)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("exams:final_exam_entry"))
+
+        ticket = FinalExamTicket.objects.get(exam=self.exam, student=self.student2)
+        self.assertEqual(ticket.status, TICKET_STATUS_ASSIGNED)
+        # Mövcud canlı (entry_open) oturuma qoşulur — yenisi yaradılmır.
+        self.assertEqual(ticket.session_id, self.session.pk)
+        self.assertEqual(client.session["final_exam_ticket_id"], ticket.pk)
+        # İmtahan DƏRHAL BAŞLAMIR — attempt yoxdur.
+        self.assertFalse(ExamAttempt.objects.filter(exam=self.exam, user=self.student2).exists())
+        # GET → imtahan-öncəsi modal (qaydalar + dil).
+        page = client.get(reverse("exams:final_exam_entry"))
+        self.assertEqual(page.status_code, 200)
+        self.assertTrue(page.context["show_gate_modal"])
+
+    def test_pin_login_auto_creates_sitting_when_room_idle(self):
+        # Zalda canlı oturum yoxdursa avtomatik giriş-açıq oturum yaradılır.
+        ExamRoomSession.objects.all().delete()
+        client = Client()
+        response = self._pin_login(client)
+        self.assertEqual(response.status_code, 302)
+        ticket = FinalExamTicket.objects.get(exam=self.exam, student=self.student2)
+        self.assertIsNotNone(ticket.session)
+        self.assertEqual(ticket.session.room_id, self.room.pk)
+        self.assertEqual(ticket.session.state, "entry_open")
+
+    def test_pin_flow_waits_then_starts_with_room_stamp(self):
+        client = Client()
+        self._pin_login(client)
+        client.post(
+            reverse("exams:final_exam_entry"),
+            {"action": "confirm", "accept_rules": "1", "language": ""},
+        )
+        ticket = FinalExamTicket.objects.get(exam=self.exam, student=self.student2)
+        self.assertEqual(ticket.status, TICKET_STATUS_WAITING)
+
+        # Nəzarətçi zalı başladır → tələbə begin ilə attempt açır.
+        self.assertTrue(start_room(self.session, self.invigilator))
+        response = client.post(reverse("exams:final_exam_begin", args=[ticket.pk]))
+        data = response.json()
+        self.assertTrue(data["success"])
+        ticket.refresh_from_db()
+        self.assertEqual(ticket.status, TICKET_STATUS_ACTIVE)
+        # Cəhd zalla möhürlənir (monitor + otaq izolyasiyası üçün).
+        self.assertEqual(ticket.attempt.room_id, self.room.pk)
+
+    def test_pin_login_blocked_from_other_room_while_live(self):
+        # setUp bileti (assigned + canlı oturum, Zal A) imtahanı Zal A-ya bağlayır.
+        room_b = ExamRoom.objects.create(
+            organization=self.org, name="Zal B-İzol", code="ZB-I", capacity=20, created_by=self.center
+        )
+        ExamRoomComputer.objects.create(
+            organization=self.org,
+            room=room_b,
+            label="PC-B",
+            seat_number=1,
+            mac_address="AA:BB:CC:DD:EE:0B",
+            ip_address="10.0.0.22",
+            created_by=self.center,
+        )
+        client = Client()
+        response = self._pin_login(client, REMOTE_ADDR="10.0.0.22")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "başqa zalda keçirilir")
+        # Öz zalının kompüterindən isə girə bilir.
+        response = self._pin_login(client)
+        self.assertEqual(response.status_code, 302)
+
+
+class RoomListScopingTests(_FlowBase):
+    """Zal siyahısı: nəzarətçi yalnız özünə təyin olunmuş zalları görür."""
+
+    def test_room_invigilator_sees_only_assigned_room(self):
+        ExamRoom.objects.create(
+            organization=self.org, name="Zal C-Görünməz", code="ZC-G", capacity=20, created_by=self.center
+        )
+        self.room.invigilators.add(self.teacher)
+        client = self._client_for(self.teacher)
+        response = client.get(reverse("exams:exam_center_room_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Zal A")
+        self.assertNotContains(response, "Zal C-Görünməz")
+
+    def test_unassigned_teacher_sees_no_rooms(self):
+        outsider = User.objects.create_user("fcf_outsider", "fcf_outsider@test.az", PASSWORD)
+        _assign_user_to_org(outsider, self.org, ProfileRole.TEACHER, "teacher")
+        client = self._client_for(outsider)
+        response = client.get(reverse("exams:exam_center_room_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Zal A")
+
+    def test_exam_center_sees_all_rooms(self):
+        client = self._client_for(self.center)
+        response = client.get(reverse("exams:exam_center_room_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Zal A")

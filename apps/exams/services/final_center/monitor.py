@@ -178,6 +178,8 @@ def _room_attempt_rows(room):
     attempts = (
         ExamAttempt.objects.filter(room=room, is_trial=False)
         .filter(Q(status="in_progress") | Q(finished_at__gte=since))
+        # Biletli cəhdlər bilet sətri kimi göstərilir — dublikat olmasın.
+        .filter(final_tickets__isnull=True)
         .select_related("user", "exam", "room_computer")
         .order_by("exam__title", "id")
     )

@@ -54,12 +54,16 @@ def exam_center_room_list(request):
         .order_by("name", "id")
     )
 
-    # Nəzarətçi (idarəçi deyil) yalnız təyin olunduğu oturumların zallarını görür.
+    # Nəzarətçi (idarəçi deyil) YALNIZ özünə aid zalları görür: zala təyin
+    # olunduğu (ExamRoom.invigilators — oturum olmasa belə) və ya təyinatlı
+    # oturumu olan zallar. Təyinatsız istifadəçi heç bir zal görmür.
     # Alt-sorğu ilə süzürük ki, annotasiya sayğacları JOIN-dən təsirlənməsin.
     if not can_manage:
-        visible_room_ids = sessions_visible_to(
-            request.user, ExamRoomSession.objects.filter(organization=organization)
-        ).values_list("room_id", flat=True)
+        visible_room_ids = set(
+            sessions_visible_to(request.user, ExamRoomSession.objects.filter(organization=organization)).values_list(
+                "room_id", flat=True
+            )
+        ) | set(request.user.invigilated_rooms.filter(organization=organization).values_list("pk", flat=True))
         rooms = rooms.filter(pk__in=visible_room_ids)
 
     query = (request.GET.get("q") or "").strip()

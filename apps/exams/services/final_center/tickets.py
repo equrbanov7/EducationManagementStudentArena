@@ -294,6 +294,16 @@ def begin_attempt_for_ticket(ticket):
             language=ticket.language or None,
             language_variant=(get_active_variant(ticket.exam, ticket.language) if ticket.language else None),
         )
+        # Cəhdi zal/kompüterlə möhürlə — otaq izolyasiyası (exam_center_gate)
+        # və zal monitoru bu sahələrə əsaslanır.
+        room = session.room
+        computer = None
+        if ticket.seat_number is not None:
+            computer = room.computers.filter(seat_number=ticket.seat_number, is_active=True).first()
+        if attempt.room_id != room.pk or attempt.room_computer_id != (computer.pk if computer else None):
+            attempt.room = room
+            attempt.room_computer = computer
+            attempt.save(update_fields=["room", "room_computer"])
         transition_ticket(
             ticket,
             TICKET_STATUS_ACTIVE,
