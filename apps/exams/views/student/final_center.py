@@ -30,7 +30,7 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_READY,
     TICKET_STATUS_WAITING,
 )
-from apps.exams.models import ExamAttempt, FinalExamTicket
+from apps.exams.models import FinalExamTicket
 from apps.exams.services.exam_center_gate import (
     exam_room_isolation_allowed,
     final_exam_access_allowed,
@@ -46,6 +46,7 @@ from apps.exams.services.final_center import (
     attach_ticket_to_room_sitting,
     begin_attempt_for_ticket,
     clear_entry_session,
+    ensure_pin_ticket,
     enter_waiting,
     entry_ticket_id,
     maybe_auto_end,
@@ -251,10 +252,14 @@ def _handle_login(request):
 
 
 def _handle_student_pin_login(request, username, raw_pin):
-    """Biletsiz final girişi (fərdi ExamStudentPin ilə) — birbaşa imtahana keçir.
+    """Fərdi ExamStudentPin ilə final girişi — GÖZLƏMƏ OTAĞI axını.
 
     Uyğun imtahan tapılmasa ``None`` qaytarır (çağıran generik xəta göstərir).
-    Gözləmə otağı/nəzarətçi yoxdur — PIN doğrulanan kimi cəhd açılır.
+    Tələbə qeydli zal kompüterindən girəndə imtahan DƏRHAL BAŞLAMIR: daxili
+    bilet + zal oturumu yaradılır (bilet PIN-siz, yalnız vəziyyət daşıyıcısı),
+    tələbə imtahan-öncəsi modal → gözləmə otağına düşür və nəzarətçi zal
+    monitorunda «Başlat» vuranda imtahan açılır (sinxron start). Org-da qeydli
+    kompüter yoxdursa köhnə birbaşa-başlama davranışı qalır.
     """
     from apps.exams.services.attempts import _start_or_resume_attempt
     from apps.exams.services.student_pins import resolve_student_pin_login
@@ -304,6 +309,14 @@ def _handle_student_pin_login(request, username, raw_pin):
             username=(username or "").strip(),
         )
 
+    # Zal axını: bilet + oturum (login-dən ƏVVƏL — rədd halında istifadəçi
+    # login OLUNMUR, _handle_login ilə eyni davranış).
+    pin_ticket = None
+    if entry_room is not None:
+        pin_ticket, ticket_error = ensure_pin_ticket(exam, student, entry_room, entry_computer)
+        if pin_ticket is None:
+            return _render_login(request, error=ticket_error, username=(username or "").strip())
+
     # Fərqli istifadəçi login-i varsa təmizlə, sonra imtahan tələbəsini login et.
     if request.user.is_authenticated and request.user.pk != student.pk:
         logout(request)
@@ -313,17 +326,15 @@ def _handle_student_pin_login(request, username, raw_pin):
         request.session["active_organization"] = exam.organization.slug
 
     ensure_student_exam_tenant_context(request)
-    response = _start_or_resume_attempt(request, exam)
 
-    # Cəhdi zal/kompüterlə möhürlə — zal monitoru biletsiz imtahanları da
-    # göstərir (bax room_monitor_snapshot._room_attempt_rows).
-    if entry_room is not None:
-        attempt = ExamAttempt.objects.filter(user=student, exam=exam, status="in_progress").order_by("-id").first()
-        if attempt and (attempt.room_id != entry_room.pk or attempt.room_computer_id != entry_computer.pk):
-            attempt.room = entry_room
-            attempt.room_computer = entry_computer
-            attempt.save(update_fields=["room", "room_computer"])
-    return response
+    if pin_ticket is None:
+        # Org zal-kompüter sistemi işlətmir → köhnə birbaşa başlama davranışı.
+        return _start_or_resume_attempt(request, exam)
+
+    # PRG: imtahan-öncəsi modal GET-də açılır → təsdiq → gözləmə otağı →
+    # nəzarətçi startı (bax _route_validated_ticket / _handle_confirm).
+    store_entry_session(request, pin_ticket)
+    return redirect("exams:final_exam_entry")
 
 
 def _handle_confirm(request):
