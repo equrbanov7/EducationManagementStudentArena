@@ -6,26 +6,82 @@ Qayda:
 * Doldurulubsa → yalnız siyahıdakı IP-lərdən / CIDR şəbəkələrindən gələn
   sorğular buraxılır (məs. imtahan zalının kompüterləri).
 
-MAC ünvanı barədə: MAC yalnız lokal şəbəkə (L2) kadrlarında mövcuddur və
-HTTP sorğusu ilə serverə ÇATMIR — proxy/router arxasından texniki cəhətdən
-oxuna bilməz. MAC-əsaslı məhdudiyyət imtahan zalının şlüzündə (məs. router
-MAC-filter + sabit IP mapping) və ya gələcək müştəri agenti ilə tətbiq
-olunmalıdır; server tərəfində etibarlı yoxlama vahidi IP/CIDR-dir.
+MAC ünvanı barədə: MAC HTTP sorğusu ilə serverə ÇATMIR — proxy/router
+arxasından oxuna bilməz. AMMA imtahan zalı kompüterləri serverlə eyni L2
+seqmentdə olduqda onların real MAC-ları host-un ARP cədvəlində görünür.
+``EXAM_CLIENT_MAC_RESOLUTION="arp_agent"`` rejimində müştəri IP-sinin MAC-ı
+host ARP agentindən (bax docker/arp-agent) soruşulur və kompüter yoxlamaları
+IP əvəzinə MAC ilə aparılır — DHCP-də IP dəyişəndə giriş pozulmur. Rejim
+"off" olduqda köhnə IP-əsaslı yoxlama qalır (dev/test). Kənar (marşrutlanmış)
+sorğular üçün ARP qeydi yoxdur → MAC rejimi fail-closed işləyir.
 """
 
 import ipaddress
+import json
 import logging
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
+def mac_enforcement_active() -> bool:
+    """Kompüter yoxlamaları MAC (ARP agenti) rejimindədirmi?"""
+    return getattr(settings, "EXAM_CLIENT_MAC_RESOLUTION", "off") == "arp_agent"
+
+
+def resolve_client_mac(request) -> str | None:
+    """Müştəri IP-sinin MAC-ını host ARP agentindən alır (yalnız MAC rejimi).
+
+    Qaytarır: kanonik ``AA:BB:CC:DD:EE:FF`` formatında MAC, tapılmayanda /
+    agent əlçatmaz olanda / rejim "off" olanda ``None``. Kənar müştərilərin
+    (başqa şəbəkədən marşrutlanan) ARP qeydi olmur — onlar üçün həmişə None.
+    """
+    from apps.exams.models import ExamRoomComputer
+
+    if not mac_enforcement_active():
+        return None
+    base = (getattr(settings, "EXAM_ARP_AGENT_URL", "") or "").rstrip("/")
+    if not base:
+        logger.error("resolve_client_mac: EXAM_ARP_AGENT_URL boşdur — MAC rejimi işləyə bilmir.")
+        return None
+    ip_text = get_client_ip(request)
+    try:
+        ipaddress.ip_address(ip_text)
+    except ValueError:
+        return None
+    timeout = getattr(settings, "EXAM_ARP_AGENT_TIMEOUT_SECONDS", 0.5)
+    try:
+        with urlopen(f"{base}/mac?{urlencode({'ip': ip_text})}", timeout=timeout) as resp:  # nosec B310
+            raw_mac = (json.load(resp) or {}).get("mac")
+    except Exception as exc:  # agent xətası imtahan qapısını AÇMIR (fail-closed)
+        logger.warning("resolve_client_mac: ARP agenti cavab vermədi (%s) — giriş rədd ediləcək.", exc)
+        return None
+    if not raw_mac:
+        return None
+    try:
+        return ExamRoomComputer.normalize_mac(raw_mac)
+    except ValueError:
+        logger.warning("resolve_client_mac: agentdən yanlış MAC formatı: %r", raw_mac)
+        return None
+
+
 def get_client_ip(request) -> str:
-    """Sorğunun müştəri IP-si (etibarlı proxy arxasında XFF-in ilk üzvü)."""
+    """Sorğunun müştəri IP-si (etibarlı proxy arxasında XFF-in SON üzvü).
+
+    Nginx ``$proxy_add_x_forwarded_for`` ilə öz gördüyü peer ünvanını zəncirin
+    SONUNA əlavə edir. İlk üzvü götürmək olmaz — müştəri saxta
+    ``X-Forwarded-For: <icazəli-IP>`` başlığı göndərib IP allowlist-i keçə
+    bilərdi; son üzv müştəri tərəfindən idarə oluna bilmir. İmtahan zalı
+    kompüterləri nginx-ə birbaşa qoşulur (son üzv = real zal IP-si); ictimai
+    trafik Cloudflare-dən keçəndə son üzv CF edge IP-si olur və allowlist-ə
+    düşmür — kənar giriş məhz bu səbəbdən bağlı qalır.
+    """
     forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if forwarded_for:
-        candidate = forwarded_for.split(",")[0].strip()
+        candidate = forwarded_for.split(",")[-1].strip()
         if candidate:
             return candidate
     return request.META.get("REMOTE_ADDR") or ""
@@ -70,17 +126,24 @@ def final_exam_access_allowed(request) -> bool:
 def room_ip_access_allowed(request, room) -> bool:
     """
     Zal-səviyyəli giriş qapısı: bu sorğu HƏMİN zalın qeydli kompüterlərindən
-    (IP üzrə) gəlirmi?
+    gəlirmi? MAC rejimində müqayisə MAC ilə, "off" rejimində IP ilə aparılır.
 
-    * Zalın aktiv kompüterlərində HEÇ IP təyin olunmayıbsa → ``True`` (bu zal
-      üçün per-kompüter məhdudiyyət yoxdur; qlobal ``final_exam_access_allowed``
-      artıq qərar verib).
-    * IP-lər varsa → müştəri IP-si həmin siyahıda olmalıdır. Müştəri IP-si
-      oxunmursa/uyğun gəlmirsə → ``False``.
-
-    QEYD: MAC HTTP ilə serverə çatmadığı üçün etibarlı yoxlama vahidi IP-dir
-    (bax modul başlığı). MAC yalnız identifikasiya/inventar sahəsidir.
+    * Zalın heç bir aktiv kompüteri (MAC rejimində) / IP-li kompüteri ("off")
+      yoxdursa → ``True`` (bu zal üçün per-kompüter məhdudiyyət yoxdur; qlobal
+      ``final_exam_access_allowed`` artıq qərar verib).
+    * Qeydlər varsa → müştəri onlardan birinə uyğun gəlməlidir; MAC/IP
+      oxunmursa → ``False`` (fail-closed).
     """
+    if mac_enforcement_active():
+        mac_values = set(room.computers.filter(is_active=True).values_list("mac_address", flat=True))
+        if not mac_values:
+            return True
+        client_mac = resolve_client_mac(request)
+        if client_mac is None:
+            logger.warning("room_access: müştəri MAC-ı tapılmadı — giriş rədd edildi.")
+            return False
+        return client_mac in mac_values
+
     ip_values = [ip for ip in room.computers.filter(is_active=True).values_list("ip_address", flat=True) if ip]
     if not ip_values:
         return True
@@ -102,21 +165,75 @@ def room_ip_access_allowed(request, room) -> bool:
     return False
 
 
+def org_computer_access_allowed(request, organization) -> bool:
+    """
+    Org-səviyyə kompüter qapısı — biletsiz (ExamStudentPin) final girişi üçün.
+
+    Org-da HEÇ aktiv qeydli kompüter yoxdursa → ``True`` (zal-kompüter sistemi
+    işlətməyən org-lar üçün mövcud davranış qorunur). Qeydlər varsa → sorğu
+    onlardan birindən gəlməlidir (MAC rejimində MAC, "off" rejimində IP ilə).
+    PUBLIC axındır (tələbə hələ login olmayıb) — RLS bypass ilə oxunur.
+    """
+    from apps.exams.models import ExamRoomComputer
+    from core.rls import bypass_rls
+
+    if organization is None:
+        return True
+    with bypass_rls():
+        qs = ExamRoomComputer.objects.filter(organization=organization, is_active=True)
+        if not qs.exists():
+            return True
+        if mac_enforcement_active():
+            client_mac = resolve_client_mac(request)
+            if client_mac is None:
+                logger.warning("org_computer_access: müştəri MAC-ı tapılmadı — giriş rədd edildi.")
+                return False
+            return qs.filter(mac_address=client_mac).exists()
+        client_text = get_client_ip(request)
+        try:
+            client_ip = ipaddress.ip_address(client_text)
+        except ValueError:
+            logger.warning("org_computer_access: müştəri IP-si oxunmadı (%r) — giriş rədd edildi.", client_text)
+            return False
+        for entry in qs.filter(ip_address__isnull=False).values_list("ip_address", flat=True):
+            try:
+                if ipaddress.ip_address(entry) == client_ip:
+                    return True
+            except ValueError:
+                continue
+    return False
+
+
 def resolve_room_computer(request, organization):
     """
-    Müştəri IP-sindən ZALI və kompüteri həll et (oturum sisteminin ləğvi, 2026-07).
+    Müştəri sorğusundan ZALI və kompüteri həll et (oturum sisteminin ləğvi, 2026-07).
 
     Tələbə qeydli kompüterdən girəndə hansı zalda olduğunu bilmək üçün: org-un
-    aktiv ``ExamRoomComputer`` sətirlərində müştəri IP-si axtarılır. Uyğun gələn
+    aktiv ``ExamRoomComputer`` sətirlərində müştəri axtarılır — MAC rejimində
+    ARP-dən alınan MAC ilə, "off" rejimində müştəri IP-si ilə. Uyğun gələn
     kompüterin zalı qaytarılır — imtahandan asılı olmayaraq, tələbə həmin zalın
     açıq oturumuna qoşulur (bax ``attach_ticket_to_room_sitting``).
 
     Qaytarır: ``(room, computer)`` uyğun gələndə, əks halda ``(None, None)``.
-    MAC HTTP ilə serverə çatmadığı üçün yeganə etibarlı vahid IP-dir (bax modul
-    başlığı; ``ExamRoomComputer.ip_address``).
     """
     from apps.exams.models import ExamRoomComputer
     from core.rls import bypass_rls
+
+    # Final girişi PUBLIC axındır (tələbə hələ login olmayıb, aktiv-org RLS
+    # konteksti yoxdur). Kompüter axtarışı ``organization``-a görə AÇIQ filtrlənir
+    # (biletin org-u), ona görə RLS bypass ilə işlədirik — tenant sızması yoxdur.
+    if mac_enforcement_active():
+        client_mac = resolve_client_mac(request)
+        if client_mac is None:
+            logger.warning("resolve_room_computer: müştəri MAC-ı tapılmadı — kompüter uyğunlaşdırılmadı.")
+            return None, None
+        with bypass_rls():
+            comp = (
+                ExamRoomComputer.objects.filter(organization=organization, is_active=True, mac_address=client_mac)
+                .select_related("room")
+                .first()
+            )
+        return (comp.room, comp) if comp else (None, None)
 
     client_text = get_client_ip(request)
     try:
@@ -125,9 +242,6 @@ def resolve_room_computer(request, organization):
         logger.warning("resolve_room_computer: müştəri IP-si oxunmadı (%r).", client_text)
         return None, None
 
-    # Final girişi PUBLIC axındır (tələbə hələ login olmayıb, aktiv-org RLS
-    # konteksti yoxdur). Kompüter axtarışı ``organization``-a görə AÇIQ filtrlənir
-    # (biletin org-u), ona görə RLS bypass ilə işlədirik — tenant sızması yoxdur.
     # QEYD: ``ip_address`` GenericIPAddressField (postgres ``inet``) — boş dəyər
     # NULL kimi saxlanır, "" YOX. inet sütununu "" ilə müqayisə etmək bütün
     # sətirləri düşürür, ona görə yalnız ``isnull=False`` filtri işlədilir.
@@ -150,6 +264,9 @@ def resolve_room_computer(request, organization):
 __all__ = [
     "final_exam_access_allowed",
     "get_client_ip",
+    "mac_enforcement_active",
+    "org_computer_access_allowed",
+    "resolve_client_mac",
     "resolve_room_computer",
     "room_ip_access_allowed",
 ]
