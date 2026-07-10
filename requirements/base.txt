@@ -2,13 +2,13 @@
 # EMS ARENA - BASE DEPENDENCIES
 # ═══════════════════════════════════════════════════════════════════════════
 # Core dependencies shared across all environments
-# Python: 3.11 / 3.12 | Django: 5.2.15
+# Python: 3.11 / 3.12 | Django: 5.2.16
 # ═══════════════════════════════════════════════════════════════════════════
 
 # ═══════════════════════════════════════════════════════════════════════════
 # CORE DJANGO
 # ═══════════════════════════════════════════════════════════════════════════
-Django==5.2.15
+Django==5.2.16  # security: PYSEC-2026-2090/2091/2092 (cache-vary cookie leak, header injection, GDALRaster over-read)
 sqlparse==0.5.4
 asgiref==3.11.0
 tzdata==2025.2
