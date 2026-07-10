@@ -108,6 +108,11 @@ def _score_state_from_sources(attempt, *, adjustments_qs, fallback_items_qs):
         .prefetch_related("question__options", "answer__selected_options")
     )
     for item in fallback_items:
+        # Eyni sual bir attempt üzrə yalnız BİR dəfə kreditlənir: aktiv audit
+        # qeydi (adjustment) və ya əvvəlki fallback item artıq kredit veribsə,
+        # bu item ikiqat sayılmır (legacy dublikat qoruması).
+        if item.question_id in bonus_by_question_id or item.question_id in fallback_credited_question_ids:
+            continue
         item_bonus = _accepted_item_bonus(item, attempt=attempt)
         if item_bonus <= 0:
             continue
@@ -139,6 +144,33 @@ def student_visible_appeal_score_state(attempt, *, at_time=None):
         adjustments_qs=_student_visible_adjustments(at_time),
         fallback_items_qs=_student_visible_fallback_items(at_time),
     )
+
+
+def student_visible_appeal_status_by_qid(attempt, *, at_time=None):
+    """
+    Nəticə səhifəsi üçün: question_id → tələbəyə görünən apellyasiya statusu
+    (``"pending"`` | ``"accepted"`` | ``"rejected"``).
+
+    Qərar hələ tələbəyə görünmürsə (5 dəqiqəlik redaktə pəncərəsi) status
+    "pending" kimi qaytarılır. Eyni suala bir neçə item düşərsə (legacy
+    dublikat) prioritet: accepted > pending > rejected.
+    """
+    priority = {APPEAL_ITEM_STATUS_ACCEPTED: 2, APPEAL_ITEM_STATUS_PENDING: 1, APPEAL_ITEM_STATUS_REJECTED: 0}
+    result = {}
+    items = AppealItem.objects.filter(appeal__attempt=attempt).only("status", "resolved_at", "question_id")
+    for item in items:
+        if item.status == APPEAL_ITEM_STATUS_PENDING or not appeal_item_result_visible_to_student(
+            item, at_time=at_time
+        ):
+            status = APPEAL_ITEM_STATUS_PENDING
+        elif item.status in (APPEAL_ITEM_STATUS_ACCEPTED, APPEAL_ITEM_STATUS_REJECTED):
+            status = item.status
+        else:
+            status = APPEAL_ITEM_STATUS_PENDING
+        current = result.get(item.question_id)
+        if current is None or priority[status] > priority[current]:
+            result[item.question_id] = status
+    return result
 
 
 def _effective_test_score_with_bonus(attempt, *, answers=None, bonus):
@@ -193,18 +225,34 @@ def _bonus_map_from_sources(attempt_ids, *, adjustments_qs, fallback_items_qs):
     ids = [pk for pk in attempt_ids if pk]
     if not ids:
         return {}
-    rows = adjustments_qs.filter(attempt_id__in=ids).values("attempt_id").annotate(total=Sum("delta_points"))
-    bonus_by_attempt = {row["attempt_id"]: row["total"] or Decimal("0") for row in rows}
+    rows = (
+        adjustments_qs.filter(attempt_id__in=ids)
+        .values("attempt_id", "question_id")
+        .annotate(total=Sum("delta_points"))
+    )
+    bonus_by_attempt = {}
+    credited_pairs = set()  # (attempt_id, question_id) — artıq kredit alan suallar
+    for row in rows:
+        attempt_id = row["attempt_id"]
+        total = row["total"] or Decimal("0")
+        bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + total
+        if total > 0 and row["question_id"]:
+            credited_pairs.add((attempt_id, row["question_id"]))
     fallback_items = (
         fallback_items_qs.filter(appeal__attempt_id__in=ids)
         .select_related("appeal", "question", "answer")
         .prefetch_related("question__options", "answer__selected_options")
     )
     for item in fallback_items:
+        attempt_id = item.appeal.attempt_id
+        # Eyni sual bir attempt üzrə yalnız BİR dəfə kreditlənir (legacy
+        # dublikat qoruması) — bax _score_state_from_sources.
+        if (attempt_id, item.question_id) in credited_pairs:
+            continue
         item_bonus = _accepted_item_bonus(item)
         if item_bonus <= 0:
             continue
-        attempt_id = item.appeal.attempt_id
+        credited_pairs.add((attempt_id, item.question_id))
         bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + item_bonus
     return bonus_by_attempt
 
@@ -368,12 +416,21 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
     question_points = Decimal(str(question.points or 1))
     bonus = _accept_bonus_points()  # sabit +1 (awarded_points nəzərə alınmır)
 
+    # Eyni sual bir attempt üzrə yalnız BİR dəfə kreditlənir. Yaratma
+    # validasiyası dublikatı bloklayır, amma köhnə (legacy) dublikat item-lər
+    # üçün də qəbul zamanı ikinci bonus verilmir (delta 0 qalır).
+    already_credited = (
+        ScoreAdjustment.objects.filter(attempt=attempt, question=question, reverted=False)
+        .exclude(appeal_item=item)
+        .exists()
+    )
+
     if getattr(exam, "exam_type", None) == "test":
         # Test: bal cavab açarından hesablandığı üçün additiv bonus (delta = +1).
         prev_is_correct = _question_already_correct(answer, question)
         previous_score = effective_test_score(attempt)["effective_score"]
-        # Artıq düzgün sayılırsa ikiqat kredit olmasın (delta 0).
-        delta = Decimal("0") if prev_is_correct else bonus
+        # Artıq düzgün sayılırsa və ya sual artıq kreditlənibsə ikiqat kredit olmasın.
+        delta = Decimal("0") if (prev_is_correct or already_credited) else bonus
         new_is_correct = True if delta > 0 else None
         new_score = previous_score + delta
     else:
@@ -385,7 +442,7 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
             Decimal(str(answer.teacher_score)) if (answer is not None and answer.teacher_score is not None) else None
         )
         previous_score = calculate_attempt_score(attempt)
-        if answer is not None:
+        if answer is not None and not already_credited:
             base = previous_answer_score if previous_answer_score is not None else Decimal("0")
             target = base + bonus
             if target > question_points:

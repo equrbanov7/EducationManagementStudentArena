@@ -13,7 +13,7 @@
 {% block ai_assistant_js %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260709-question-only">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260710-verdict">
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20260707-final">
 {% endblock %}
 
@@ -25,6 +25,16 @@
      data-final-result-timeout-url="{{ final_result_timeout_url }}"
      {% endif %}>
     
+    {% if is_profile_results %}
+    {% comment %}Yalnız profildən (Nəticələrim) baxılanda görünür — imtahan
+    yenicə bitəndə (midterm/final) naviqasiya göstərilmir.{% endcomment %}
+    <div class="result-back-bar">
+        <a href="{{ result_profile_back_url }}" class="btn btn-outline-secondary result-back-btn">
+            <i class="fas fa-arrow-left me-2"></i>{% trans "Profilə qayıt" context "exams.template.student_exam_result" %}
+        </a>
+    </div>
+    {% endif %}
+
     <div class="text-center mb-5">
         <h1 class="page-title">{{ exam.title }} - {% trans "heading_your_result" context "exams.template.student_exam_result" %}</h1>
     </div>
@@ -53,11 +63,19 @@
                         <span class="stat-value text-primary score-points-value">{{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
                         <span class="score-percent-chip">{{ test_result.percentage_display }}%</span>
                     </div>
-                    {% if appeal_bonus_points and appeal_bonus_points > 0 and not hide_test_answer_correctness %}
+                    {% if appeal_bonus_points and appeal_bonus_points > 0 %}
                     <div class="appeal-score-summary-chip">
                         <i class="fas fa-gavel"></i>
                         {% blocktrans trimmed context "exams.template.student_exam_result" with bonus=appeal_bonus_points_display %}
                             Apellyasiya ilə +{{ bonus }} bal əlavə olundu.
+                        {% endblocktrans %}
+                    </div>
+                    {% endif %}
+                    {% if appeal_pending_count %}
+                    <div class="appeal-score-summary-chip appeal-score-summary-chip--pending">
+                        <i class="fas fa-hourglass-half"></i>
+                        {% blocktrans trimmed context "exams.template.student_exam_result" with pending=appeal_pending_count %}
+                            {{ pending }} sual apellyasiyadadır — cavab gözlənilir.
                         {% endblocktrans %}
                     </div>
                     {% endif %}
@@ -140,23 +158,55 @@
             {% with has_selection=answer_has_selection_by_qid|get_item:q.id %}
             {% with is_marked=marked_question_by_qid|get_item:q.id %}
             {% with appeal_bonus=appeal_bonus_by_qid|get_item:q.id %}
-            <div class="question-card{% if is_marked %} question-card--marked{% endif %}{% if appeal_bonus and not hide_test_answer_correctness %} question-card--appeal-updated{% endif %}{% if exam.exam_type == "test" and hide_test_answer_correctness %} question-card--question-only{% endif %}">
+            {% with appeal_status=appeal_status_by_qid|get_item:q.id %}
+            {% with verdict=answer_verdict_by_qid|get_item:q.id %}
+            <div class="question-card{% if is_marked %} question-card--marked{% endif %}{% if appeal_status == "accepted" %} question-card--appeal-updated{% endif %}{% if exam.exam_type == "test" and hide_test_answer_correctness %} question-card--question-only{% endif %}">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
 
                     <div class="questionAndMedia">
+                        {% if verdict == "correct" %}
+                        <div class="q-verdict-chip q-verdict-chip--correct">
+                            <i class="fas fa-check-circle"></i>
+                            {% trans "label_correct" context "exams.template.student_exam_result" %}
+                        </div>
+                        {% elif verdict == "wrong" %}
+                        <div class="q-verdict-chip q-verdict-chip--wrong">
+                            <i class="fas fa-times-circle"></i>
+                            {% trans "label_wrong" context "exams.template.student_exam_result" %}
+                        </div>
+                        {% elif verdict == "unanswered" %}
+                        <div class="q-verdict-chip q-verdict-chip--unanswered">
+                            <i class="far fa-circle"></i>
+                            {% trans "label_unanswered" context "exams.template.student_exam_result" %}
+                        </div>
+                        {% endif %}
                         {% if is_marked %}
                         <div class="marked-result-chip">
                             <i class="fas fa-bookmark"></i>
                             {% trans "marked_question_badge" context "exams.template.student_exam_result" %}
                         </div>
                         {% endif %}
-                        {% if appeal_bonus and not hide_test_answer_correctness %}
+                        {% if appeal_status == "accepted" %}
                         <div class="appeal-corrected-chip">
                             <i class="fas fa-gavel"></i>
+                            {% if appeal_bonus %}
                             {% blocktrans trimmed context "exams.template.student_exam_result" with bonus=appeal_bonus %}
-                                Apellyasiya ilə +{{ bonus }} bal
+                                Apellyasiya qəbul edildi — +{{ bonus }} bal
                             {% endblocktrans %}
+                            {% else %}
+                            {% trans "Apellyasiya qəbul edildi" context "exams.template.student_exam_result" %}
+                            {% endif %}
+                        </div>
+                        {% elif appeal_status == "pending" %}
+                        <div class="appeal-status-chip appeal-status-chip--pending">
+                            <i class="fas fa-hourglass-half"></i>
+                            {% trans "Apellyasiyaya göndərilib — cavab gözlənilir" context "exams.template.student_exam_result" %}
+                        </div>
+                        {% elif appeal_status == "rejected" %}
+                        <div class="appeal-status-chip appeal-status-chip--rejected">
+                            <i class="fas fa-circle-xmark"></i>
+                            {% trans "Apellyasiya rədd edildi" context "exams.template.student_exam_result" %}
                         </div>
                         {% endif %}
                         <div class="q-text">
@@ -386,6 +436,8 @@
             {% endwith %}
             {% endwith %}
             {% endwith %}
+            {% endwith %}
+            {% endwith %}
         {% endfor %}
     </div>
 
@@ -461,21 +513,9 @@
             <i class="fas fa-right-from-bracket me-2" aria-hidden="true"></i>{% trans "Giriş səhifəsinə qayıt" context "exams.template.student_exam_result" %}
         </a>
     </div>
-    {% else %}
-    <div class="action-footer" role="navigation" aria-label="{% trans 'result_actions' context 'exams.template.student_exam_result' %}">
-        <div class="action-footer__inner">
-            <a href="{{ back_url }}" class="btn custom-blue-btn">
-                <i class="fas fa-arrow-left me-2"></i> {% trans "action_back_to_exams" context "exams.template.student_exam_result" %}
-            </a>
-
-            {% if history_url %}
-            <a href="{{ history_url }}" class="btn custom-blue-btn">
-                {% trans "action_my_answers" context "exams.template.student_exam_result" %} ({{ previous_attempts_count }}) <i class="fas fa-history ms-2"></i>
-            </a>
-            {% endif %}
-        </div>
-    </div>
     {% endif %}
+    {% comment %}"İmtahanlara qayıt" / "Cavablarım" alt paneli silindi —
+    naviqasiya yalnız yuxarıdakı "Profilə qayıt" düyməsi ilə.{% endcomment %}
 
 </div>
 {% endblock %}

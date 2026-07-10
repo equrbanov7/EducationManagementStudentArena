@@ -205,11 +205,14 @@ def _type_label(key):
     return labels.get(key, key)
 
 
-def _build_type_tabs(counts):
+def _build_type_tabs(counts, *, include_final_midterm=True):
     """
     Göstəriləcək tip tablarını qurur. Əsas tablar həmişə görünür; canlı,
     praktiki, placement və practice yalnız say > 0 olduqda görünür ki,
     interfeys lüzumsuz dolmasın.
+
+    ``include_final_midterm=False`` → final/midterm tabları HEÇ VAXT
+    göstərilmir (açıq imtahan siyahısı yalnız sınaq/canlı imtahanlar üçündür).
     """
     tabs = [{"key": "all", "label": _type_label("all"), "count": counts.get("total", 0)}]
 
@@ -219,8 +222,9 @@ def _build_type_tabs(counts):
             tabs.append({"key": key, "label": _type_label(key), "count": count})
 
     add("live", "live")
-    add("final", "final", always=True)
-    add("midterm", "midterm", always=True)
+    if include_final_midterm:
+        add("final", "final", always=True)
+        add("midterm", "midterm", always=True)
     add("quiz", "quiz", always=True)
     add("written", "written", always=True)
     add("test", "test", always=True)
@@ -321,13 +325,18 @@ def _build_exam_items(page_object_list, user, request, live_map):
     return exam_items
 
 
-def _render_exam_list(request, *, base_queryset, page_title, current_url_name, show_type_tabs=True):
+def _render_exam_list(
+    request, *, base_queryset, page_title, current_url_name, show_type_tabs=True, include_final_midterm=True
+):
     """
     student_exam_list və assigned_student_exam_list üçün ortaq render axını.
 
     `base_queryset` artıq tenant + giriş-icazəsi filtrlərini ehtiva edir.
     Bütün görünürlük/tip/canlı filtrləri paginate-dən ƏVVƏL SQL-də tətbiq
     olunur ki, Paginator.count ekrandakı kart sayı ilə uyğun gəlsin.
+
+    ``include_final_midterm=False`` → final/midterm tabları gizlədilir
+    (çağıran tərəf onları base_queryset-dən də çıxarmalıdır).
     """
     user = request.user
     exams_qs = _annotate_exam_list_base(base_queryset, user)
@@ -381,7 +390,9 @@ def _render_exam_list(request, *, base_queryset, page_title, current_url_name, s
         "page_title": page_title,
         "current_url_name": current_url_name,
         "type_counts": type_counts,
-        "type_tabs": _build_type_tabs(type_counts) if show_type_tabs else [],
+        "type_tabs": (
+            _build_type_tabs(type_counts, include_final_midterm=include_final_midterm) if show_type_tabs else []
+        ),
         "live_count": type_counts.get("live", 0),
         "active_type": filter_type,
         "active_sort": sort,
@@ -425,6 +436,14 @@ def assigned_student_exam_list(request):
 
 @login_required
 def student_exam_list(request):
+    """Açıq imtahan siyahısı ("İmtahanlar") — yalnız sınaq/canlı imtahanlar.
+
+    Final və midterm bura HEÇ BİR halda düşmür (filterlərdə belə görünmür):
+    onlar sərt prosesli imtahanlardır (final → imtahan mərkəzi PIN girişi,
+    midterm → təyinatlı axın). Bu səhifə dərs boyu keçirilən quiz/practice/
+    placement və canlı imtahanlar üçündür — tələbə kabinetdən buraya keçib
+    sınaq verə bilir.
+    """
     ensure_student_exam_tenant_context(request)
     user = request.user
     now = timezone.now()
@@ -445,6 +464,7 @@ def student_exam_list(request):
             | Q(author=user)
         )
         .exclude(excluded_users=user)
+        .exclude(exam_type_extended__in=("final", "midterm"))
         .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # keçmişləri gizlədir
         .distinct(),
     )
@@ -454,4 +474,5 @@ def student_exam_list(request):
         base_queryset=base_queryset,
         page_title=pgettext_lazy("exams.view.student.list.title", "available_exams"),
         current_url_name="student_exam_list",
+        include_final_midterm=False,
     )

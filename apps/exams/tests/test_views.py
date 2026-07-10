@@ -2296,6 +2296,50 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_tenant_exam.slug)
 
+    def test_student_exam_list_never_shows_final_or_midterm(self):
+        # Açıq "İmtahanlar" siyahısı yalnız sınaq/canlı imtahanlar üçündür —
+        # final/midterm heç bir halda görünmür (tablarda belə), tip filtri
+        # ilə birbaşa URL yığılsa da sızmır.
+        final_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Hidden Final Exam",
+            exam_type="test",
+            exam_type_extended="final",
+            is_active=True,
+            is_public=True,
+        )
+        midterm_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Hidden Midterm Exam",
+            exam_type="test",
+            exam_type_extended="midterm",
+            is_active=True,
+            is_public=True,
+        )
+        quiz_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Visible Quiz Exam",
+            exam_type="test",
+            exam_type_extended="quiz",
+            is_active=True,
+            is_public=True,
+        )
+        ExamQuestion.objects.create(exam=quiz_exam, text="Quiz question", order=1, points=1)
+
+        response = self.client.get(reverse("exams:student_exam_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, quiz_exam.title)
+        self.assertNotContains(response, final_exam.title)
+        self.assertNotContains(response, midterm_exam.title)
+        tab_keys = {tab["key"] for tab in response.context["type_tabs"]}
+        self.assertNotIn("final", tab_keys)
+        self.assertNotIn("midterm", tab_keys)
+        self.assertIn("quiz", tab_keys)
+
+        forced = self.client.get(reverse("exams:student_exam_list"), {"type": "final"})
+        self.assertEqual(forced.status_code, 200)
+        self.assertNotContains(forced, final_exam.title)
+
     def test_student_exam_list_filters_practical_separately_from_written(self):
         written_exam = Exam.objects.create(
             author=self.teacher,
@@ -2348,21 +2392,23 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "Nəticə tapılmadı")
 
     def test_student_exam_card_shows_category_and_mechanic_badges(self):
-        final_test_exam = Exam.objects.create(
+        # Açıq siyahıda final/midterm görünmür — kateqoriya nişanı sınaq (quiz)
+        # imtahanı üzərində yoxlanılır.
+        quiz_test_exam = Exam.objects.create(
             author=self.teacher,
-            title="Final Test Badge Exam",
+            title="Quiz Test Badge Exam",
             exam_type="test",
-            exam_type_extended="final",
+            exam_type_extended="quiz",
             is_active=True,
             is_public=True,
         )
-        ExamQuestion.objects.create(exam=final_test_exam, text="Final test badge question", order=1, points=1)
+        ExamQuestion.objects.create(exam=quiz_test_exam, text="Quiz test badge question", order=1, points=1)
 
-        response = self.client.get(reverse("exams:student_exam_list"), {"q": final_test_exam.title})
+        response = self.client.get(reverse("exams:student_exam_list"), {"q": quiz_test_exam.title})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, final_test_exam.title)
-        self.assertContains(response, '<span class="ex-badge" data-type="final">', html=False)
+        self.assertContains(response, quiz_test_exam.title)
+        self.assertContains(response, '<span class="ex-badge" data-type="quiz">', html=False)
         self.assertContains(response, '<span class="ex-badge ex-badge--mechanic" data-type="test">', html=False)
 
     def test_student_exam_views_restore_profile_org_context_when_session_org_is_missing(self):
@@ -3407,7 +3453,17 @@ class StudentExamVisibilityFilteringTest(TestCase):
             response.context["history_url"],
             f'{reverse("exams:student_exam_history")}?{urlencode({"exam": self.course_assigned_exam.slug, "return_to": expected_back_url})}',
         )
-        self.assertContains(response, expected_back_url)
+        # İmtahan yenicə bitmiş görünüşdə naviqasiya render olunmur: alt
+        # "İmtahanlara qayıt / Cavablarım" paneli silinib, "Profilə qayıt"
+        # düyməsi isə yalnız profildən (my-results) baxılanda görünür.
+        self.assertNotContains(response, "action-footer")
+        self.assertNotContains(response, "result-back-btn")
+        profile_response = self.client.get(
+            reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]),
+            {"from_section": "my-results"},
+        )
+        self.assertContains(profile_response, "result-back-btn")
+        self.assertContains(profile_response, "section=my-results")
 
     def test_exam_result_restores_original_back_url_when_opened_from_history(self):
         attempt = ExamAttempt.objects.create(

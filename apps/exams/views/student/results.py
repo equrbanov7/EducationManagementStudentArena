@@ -193,6 +193,20 @@ def exam_result(request, slug, attempt_id):
     questions = [a.question for a in answers]
     answers_by_qid = {a.question_id: a for a in answers}
     answer_has_selection_by_qid = {a.question_id: bool(list(a.selected_options.all())) for a in answers}
+    # Hər sual üzrə verdikt (düz/səhv/cavabsız) — cavab detalları gizli olan
+    # kabinet rejimində də tələbə öz cavabının nəticəsini görsün. Qayda
+    # calculate_test_attempt_result ilə eynidir (prefetch olunmuş cavablar üzərində).
+    answer_verdict_by_qid = {}
+    if exam.exam_type == "test":
+        for answer in answers:
+            selected_ids = {opt.id for opt in answer.selected_options.all()}
+            if not selected_ids:
+                answer_verdict_by_qid[answer.question_id] = "unanswered"
+                continue
+            correct_ids = {opt.id for opt in answer.question.options.all() if opt.is_correct}
+            answer_verdict_by_qid[answer.question_id] = (
+                "correct" if (correct_ids and selected_ids == correct_ids) else "wrong"
+            )
     marked_question_ids = {
         int(question_id)
         for question_id in (getattr(attempt, "marked_question_ids", None) or [])
@@ -243,6 +257,10 @@ def exam_result(request, slug, attempt_id):
         for question_id in _appeal_state["credited_question_ids"]
         if question_id in appeal_bonus_by_qid
     }
+    # Hər sual üzrə tələbəyə görünən apellyasiya statusu (pending/accepted/rejected)
+    # — sual kartında "cavab gözlənilir / qəbul edildi / rədd edildi" çipi üçün.
+    appeal_status_by_qid = score_adjustments.student_visible_status_by_qid(attempt)
+    appeal_pending_count = sum(1 for status in appeal_status_by_qid.values() if status == "pending")
     # Baş bal göstəricisi də EFFEKTİV balı göstərsin — bonus yalnız aşağıdakı
     # qeyddə yox, əsas faiz/bal blokunda da əks olunmalıdır.
     if test_result is not None and appeal_bonus_points:
@@ -257,6 +275,7 @@ def exam_result(request, slug, attempt_id):
             "questions": questions,
             "answers_by_qid": answers_by_qid,
             "answer_has_selection_by_qid": answer_has_selection_by_qid,
+            "answer_verdict_by_qid": answer_verdict_by_qid,
             "marked_question_by_qid": {question_id: True for question_id in marked_question_ids},
             "marked_question_count": len(marked_question_ids),
             "marked_question_ids_json": json.dumps(sorted(marked_question_ids)),
@@ -273,13 +292,25 @@ def exam_result(request, slug, attempt_id):
             "can_appeal": can_appeal,
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
-            # Tələbə apellyasiyalarını ayrıca səhifə yox, dashboard bölməsində görür.
-            "my_appeals_url": "" if is_final_center_result else reverse("accounts:profile") + "?section=my-appeals",
+            # "Apellyasiyalarım" keçidi yalnız profildən (my-results) baxılan
+            # nəticədə görünür — imtahan yenicə bitəndə (midterm/final) yox.
+            "my_appeals_url": (reverse("accounts:profile") + "?section=my-appeals") if is_profile_results else "",
+            # Yuxarıdakı "Profilə qayıt" düyməsi də yalnız profildən gələndə
+            # görünür və HƏMİŞƏ profil "Nəticələrim" bölməsinə aparır
+            # (return_to filtr/səhifə parametrlərini saxlayırsa, o üstün tutulur).
+            "is_profile_results": is_profile_results,
+            "result_profile_back_url": (
+                return_to
+                if (return_to and "section=my-results" in return_to)
+                else reverse("accounts:profile") + "?section=my-results"
+            ),
             "effective_score_info": effective_score_info,
             "appeal_bonus_points": appeal_bonus_points,
             "appeal_bonus_points_display": _format_score_delta(appeal_bonus_points),
             "appeal_bonus_by_qid": appeal_bonus_by_qid,
             "appeal_corrected_qids": appeal_corrected_qids,
+            "appeal_status_by_qid": appeal_status_by_qid,
+            "appeal_pending_count": appeal_pending_count,
         },
     )
 
