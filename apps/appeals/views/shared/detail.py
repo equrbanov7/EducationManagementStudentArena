@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from ...constants import (
@@ -79,6 +79,13 @@ def appeal_detail(request, appeal_id):
     if not is_owner and not can_review_appeal(request, appeal):
         raise PermissionDenied
 
+    # Standalone detal səhifəsi yoxdur — detal yalnız dashboard modalında
+    # açılır; birbaşa URL sidebar-lı müvafiq bölməyə yönləndirilir.
+    is_fragment = request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest"
+    if not is_fragment:
+        section = "my-appeals" if is_owner else "manage-appeals"
+        return redirect(reverse("accounts:profile") + "?section=" + section)
+
     items = list(appeal.items.all())
     hidden_owner_decisions = False
     for item in items:
@@ -115,7 +122,4 @@ def appeal_detail(request, appeal_id):
     }
 
     # Dashboard daxili AJAX swap üçün yalnız gövdə fraqmenti qaytarılır.
-    is_fragment = request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest"
-    if is_fragment:
-        return render(request, "appeals/partials/_appeal_detail_body.html", context)
-    return render(request, "appeals/student/appeal_detail.html", context)
+    return render(request, "appeals/partials/_appeal_detail_body.html", context)

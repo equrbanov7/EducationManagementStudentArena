@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load static i18n %}
 {% if 'exam-center-stats' in allowed_sections %}
 <section class="profile-section-panel profile-section--exam-center-stats {% if active_section == 'exam-center-stats' %}is-active{% endif %}"
          data-profile-section-panel="exam-center-stats"
@@ -62,6 +62,34 @@
   .ecs-pager button { padding:.48rem .95rem; border-radius:8px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-primary-700); font-weight:700; cursor:pointer; }
   .ecs-pager button:hover:not(:disabled) { background:var(--ems-primary-50); border-color:var(--ems-primary-300); }
   .ecs-pager button:disabled { opacity:.45; cursor:default; }
+  /* Qrafiklər — cədvəlin altında, açıq (ağ + göy) tokenlərlə */
+  .ecs-charts { margin-top:1.5rem; }
+  .ecs-charts__head h3 { margin:0; font-size:1.08rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
+  .ecs-charts__head p { margin:.25rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; }
+  .ecs-charts__grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:1rem; margin-top:1rem; }
+  .ecs-chartbox { border:1px solid var(--ems-neutral-200); border-radius:12px; background:#fff; padding:1rem 1.1rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .ecs-chartbox--wide { grid-column:1 / -1; }
+  .ecs-chartbox__title { font-size:.86rem; font-weight:800; color:var(--ems-neutral-700); display:flex; align-items:center; gap:.45rem; margin-bottom:.7rem; }
+  .ecs-chartbox__title i { color:var(--ems-primary-600); }
+  .ecs-chartbox__title span { font-weight:600; color:var(--ems-neutral-400); font-size:.76rem; }
+  .ecs-chartbox__wrap { position:relative; height:250px; }
+  .ecs-chartbox--wide .ecs-chartbox__wrap { height:280px; }
+  .ecs-chartbox__empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--ems-neutral-400); font-size:.88rem; }
+  /* AI analiz paneli */
+  .ecs-ai { margin-top:1.25rem; border:1px solid var(--ems-primary-100); border-radius:12px; background:linear-gradient(180deg, var(--ems-primary-50), #fff 55%); padding:1.1rem 1.2rem; }
+  .ecs-ai__head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+  .ecs-ai__head h3 { margin:0; font-size:1.05rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
+  .ecs-ai__head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; max-width:46rem; }
+  .ecs-ai__out { margin-top:.9rem; }
+  .ecs-ai__hint { color:var(--ems-neutral-400); font-size:.86rem; }
+  .ecs-ai__loading { color:var(--ems-primary-700); font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+  .ecs-ai__error { color:#b91c1c; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:.7rem .9rem; font-size:.88rem; }
+  .ecs-ai__text { background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; padding:1rem 1.15rem; color:var(--ems-neutral-800); font-size:.92rem; line-height:1.6; }
+  .ecs-ai__text h3, .ecs-ai__text h4 { color:var(--ems-primary-700); margin:.9rem 0 .35rem; font-size:1rem; }
+  .ecs-ai__text h3:first-child, .ecs-ai__text h4:first-child, .ecs-ai__text p:first-child { margin-top:0; }
+  .ecs-ai__text ul { margin:.4rem 0 .6rem 1.2rem; padding:0; }
+  .ecs-ai__quota { margin-top:.7rem; padding:.55rem .8rem; background:var(--ems-primary-50); border-radius:8px; font-size:.82rem; color:var(--ems-primary-800); }
+  .ecs-ai__cached i { color:var(--ems-success-600, #059669); }
 </style>
 
 <div class="ecs"
@@ -134,6 +162,61 @@
     </table>
   </div>
   <div class="ecs-pager js-ecs-pager"></div>
+
+  <div class="ecs-charts js-ecs-charts"
+       data-charts-url="{% url 'exams:exam_center_stats_charts' %}"
+       data-ai-url="{% url 'exams:exam_center_stats_ai' %}">
+    <script type="application/json" class="js-ecs-i18n">{
+      "empty": "{% trans 'Məlumat yoxdur'|escapejs context 'exams.center.stats' %}",
+      "attempts": "{% trans 'Cəhd sayı'|escapejs context 'exams.center.stats' %}",
+      "avg": "{% trans 'Orta nəticə'|escapejs context 'exams.center.stats' %}",
+      "pass": "{% trans 'Keçib'|escapejs context 'exams.center.stats' %}",
+      "fail": "{% trans 'Kəsilib'|escapejs context 'exams.center.stats' %}",
+      "ai_loading": "{% trans 'AI analiz hazırlanır…'|escapejs context 'exams.center.stats' %}",
+      "ai_error": "{% trans 'AI analizi alınmadı. Bir az sonra yenidən cəhd edin.'|escapejs context 'exams.center.stats' %}",
+      "ai_quota": "{% trans 'Qalan AI limiti'|escapejs context 'exams.center.stats' %}",
+      "ai_cached": "{% trans 'keşdən'|escapejs context 'exams.center.stats' %}"
+    }</script>
+    <div class="ecs-charts__head">
+      <h3><i class="fas fa-chart-pie"></i> {% trans "Analitik qrafiklər" context "exams.center.stats" %}</h3>
+      <p>{% trans "Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş nəticələr üzrə hesablanır. Faiz metrikaları test tipli imtahanlara aiddir." context "exams.center.stats" %}</p>
+    </div>
+    <div class="ecs-charts__grid">
+      <div class="ecs-chartbox ecs-chartbox--wide">
+        <div class="ecs-chartbox__title"><i class="fas fa-chart-bar"></i> {% trans "Nəticə paylanması" context "exams.center.stats" %} <span>{% trans "faiz aralıqları üzrə cəhd sayı" context "exams.center.stats" %}</span></div>
+        <div class="ecs-chartbox__wrap"><canvas class="js-ecs-c-dist"></canvas></div>
+      </div>
+      <div class="ecs-chartbox ecs-chartbox--wide">
+        <div class="ecs-chartbox__title"><i class="fas fa-chart-line"></i> {% trans "Aylıq dinamika" context "exams.center.stats" %} <span>{% trans "cəhd sayı və orta nəticə" context "exams.center.stats" %}</span></div>
+        <div class="ecs-chartbox__wrap"><canvas class="js-ecs-c-monthly"></canvas></div>
+      </div>
+      <div class="ecs-chartbox">
+        <div class="ecs-chartbox__title"><i class="fas fa-layer-group"></i> {% trans "İmtahan tipi üzrə cəhdlər" context "exams.center.stats" %}</div>
+        <div class="ecs-chartbox__wrap"><canvas class="js-ecs-c-type"></canvas></div>
+      </div>
+      <div class="ecs-chartbox">
+        <div class="ecs-chartbox__title"><i class="fas fa-book"></i> {% trans "Fənn üzrə orta nəticə" context "exams.center.stats" %} <span>{% trans "ən çox cəhd olunan 10 fənn" context "exams.center.stats" %}</span></div>
+        <div class="ecs-chartbox__wrap"><canvas class="js-ecs-c-subject"></canvas></div>
+      </div>
+      <div class="ecs-chartbox">
+        <div class="ecs-chartbox__title"><i class="fas fa-check-double"></i> {% trans "Keçmə nisbəti" context "exams.center.stats" %}</div>
+        <div class="ecs-chartbox__wrap"><canvas class="js-ecs-c-pass"></canvas></div>
+      </div>
+    </div>
+
+    <div class="ecs-ai">
+      <div class="ecs-ai__head">
+        <div>
+          <h3><i class="fas fa-robot"></i> {% trans "AI analizi" context "exams.center.stats" %}</h3>
+          <p>{% trans "Filtrə uyğun bütün nəticələri süni intellekt ümumiləşdirir — güclü və zəif sahələr, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir və limit sərf olunmur." context "exams.center.stats" %}</p>
+        </div>
+        <button type="button" class="ecs-btn js-ecs-ai-btn"><i class="fas fa-magic"></i> {% trans "AI ilə analiz et" context "exams.center.stats" %}</button>
+      </div>
+      <div class="ecs-ai__out js-ecs-ai-out">
+        <div class="ecs-ai__hint">{% trans "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır." context "exams.center.stats" %}</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
@@ -234,6 +317,8 @@
   function load(){
     rows.innerHTML = '<tr><td colspan="13"><div class="ecs-state"><i class="fas fa-spinner fa-spin"></i></div></td></tr>';
     renderArrows();
+    // Qrafik modulu (exam_center_stats_charts.js) cari filtrlərlə sinxronlaşır.
+    try { document.dispatchEvent(new CustomEvent("ecs:filters", { detail: { query: params().toString() } })); } catch (e) {}
     fetch(U.data + "?" + params({page:page}).toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
       .then(function(r){ return r.ok?r.json():null; })
       .then(function(d){ if(!d) return; renderCards(d.summary); renderRows(d); });
@@ -263,5 +348,6 @@
   load();
 })();
 </script>
+<script src="{% static 'exams/js/exam_center_stats_charts.js' %}?v=20260710-1"></script>
 </section>
 {% endif %}

@@ -24,19 +24,6 @@
     </div>
 </header>
 
-{# Bal xülasəsi: hazırkı → yeni (təxmini, canlı) #}
-<div class="appeal-score-summary">
-    <div class="appeal-score-summary__item">
-        <span><i class="fas fa-chart-line me-1"></i>{% trans "Hazırkı bal" context "appeals.template" %}</span>
-        <strong>{{ review_current_score }}{% if review_max_score %} / {{ review_max_score }}{% endif %}</strong>
-    </div>
-    <i class="fas fa-arrow-right appeal-score-summary__arrow"></i>
-    <div class="appeal-score-summary__item appeal-score-summary__item--next">
-        <span><i class="fas fa-arrow-trend-up me-1"></i>{% trans "Yeni bal (təxmini)" context "appeals.template" %}</span>
-        <strong data-review-new-score>{{ review_current_score }}{% if review_max_score %} / {{ review_max_score }}{% endif %}</strong>
-    </div>
-</div>
-
 <form method="post" action="{% url 'appeals:review_appeal' appeal.id %}" novalidate
       data-appeals-review-form
       data-current-score="{{ review_current_score|default:0|unlocalize }}"
@@ -44,6 +31,14 @@
       data-i18n-need-response="{% trans 'Hər qərar üçün izah/cavab yazın.' context 'appeals.template' %}"
       data-i18n-decisions="{% trans '{n} qərar verildi' context 'appeals.template' %}">
     {% csrf_token %}
+
+    {# Bal xülasəsi: imtahan balı (açıq qərar verildikcə canlı yenilənir) #}
+    <div class="appeal-score-summary appeal-score-summary--single">
+        <div class="appeal-score-summary__item appeal-score-summary__item--result">
+            <span><i class="fas fa-chart-line me-1"></i>{% trans "İmtahan balı" context "appeals.template" %}</span>
+            <strong data-review-new-score>{{ review_current_score }}{% if review_max_score %} / {{ review_max_score }}{% endif %}</strong>
+        </div>
+    </div>
 
     <div class="appeal-list">
         {% for item in items %}
@@ -120,10 +115,7 @@
                     {% if item.status == "accepted" and item.score_adjustment and item.score_adjustment.delta_points and not item.score_adjustment.reverted %}
                     <div class="appeal-detail-label">{% trans "Verilən bal" context "appeals.template" %}</div>
                     <div class="appeal-detail-value text-success fw-bold">
-                        +{{ item.score_adjustment.delta_points }}
-                        {% if item.score_adjustment.previous_score is not None and item.score_adjustment.new_score is not None %}
-                        <span class="text-muted fw-normal">({{ item.score_adjustment.previous_score }} → {{ item.score_adjustment.new_score }})</span>
-                        {% endif %}
+                        +{{ item.score_adjustment.delta_points }} {% trans "bal" context "appeals.template" %}
                     </div>
                     {% endif %}
                 </div>
@@ -179,7 +171,7 @@
                         {% trans "Hazırkı bal" context "appeals.template" %}:
                         <strong>{{ review_current_score }}</strong>
                         <i class="fas fa-arrow-right mx-1"></i>
-                        {% trans "Yeni bal (təxmini)" context "appeals.template" %}:
+                        {% trans "Yeni bal" context "appeals.template" %}:
                         <strong class="text-success" data-review-card-next>{{ review_current_score }}</strong>
                     </div>
                 </div>
@@ -190,6 +182,7 @@
         {% endfor %}
     </div>
 
+    {% if review_has_editable %}
     <section class="appeal-note-card p-3 mt-3">
         <label class="form-label small text-muted fw-bold" for="reviewer_note">
             {% trans "Ümumi qeyd" context "appeals.template" %}
@@ -197,19 +190,24 @@
         <textarea class="form-control" name="reviewer_note" id="reviewer_note" rows="3"
                   placeholder="{% trans 'Opsional daxili qeyd' context 'appeals.template' %}">{{ appeal.reviewer_note }}</textarea>
     </section>
+    {% endif %}
 
-    <div class="appeal-sticky-actions">
+    <div class="appeal-sticky-actions{% if not review_has_editable %} appeal-sticky-actions--final{% endif %}">
         <div class="appeal-sticky-actions__inner">
+            {% if review_has_editable %}
             <div class="appeal-sticky-actions__status">
                 <span class="appeal-review-decisions-pill" data-review-decisions-count>{% trans "0 qərar verildi" context "appeals.template" %}</span>
             </div>
+            {% endif %}
             <div class="appeal-sticky-actions__buttons">
                 <a href="{% url 'appeals:manage_appeals' %}" class="btn btn-outline-secondary" data-review-cancel>
                     <i class="fas fa-arrow-left me-2"></i>{% trans "Siyahıya qayıt" context "appeals.template" %}
                 </a>
+                {% if review_has_editable %}
                 <button type="submit" class="btn btn-primary" data-review-submit>
                     <i class="fas fa-save me-2"></i>{% trans "Qərarları yadda saxla" context "appeals.template" %}
                 </button>
+                {% endif %}
             </div>
         </div>
     </div>

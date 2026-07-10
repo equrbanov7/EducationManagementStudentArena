@@ -1,12 +1,14 @@
-{% load static i18n %}
+{% load i18n %}
 {% comment %}
   "Apellyasiyalarım" profil bölməsi — dashboard sağ content hissəsində AJAX ilə
-  açılır (sidebar sabit qalır). Detal Bootstrap modalında açılır; JS uğursuz
-  olarsa link öz standalone səhifəsinə keçir (progressive enhancement).
+  açılır (sidebar sabit qalır). Detal Bootstrap modalında açılır.
+  Bütün JS davranışı static appeals/js/appeals_sections.js-dədir (EMSDelegate,
+  document-level) — AJAX section swap-larından sonra da işlək qalır.
 {% endcomment %}
 <section class="profile-section-panel profile-section--my-appeals {% if active_section == 'my-appeals' %}is-active{% endif %}"
          data-profile-section-panel="my-appeals"
-         data-source-url="{{ profile_base_url }}?section=my-appeals">
+         data-source-url="{{ profile_base_url }}?section=my-appeals"
+         data-i18n-load-error="{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}">
     <div class="appeal-embedded">
         <div data-appeal-list-view>
             <header class="appeal-hero appeal-hero--icon">
@@ -46,79 +48,4 @@
             </div>
         </div>
     </div>
-
-    <script nonce="{{ request.csp_nonce }}">
-    (function () {
-        function initAppealsSection() {
-            var panel = document.querySelector('[data-profile-section-panel="my-appeals"]');
-            if (!panel || panel.getAttribute("data-appeals-swap-bound") === "1") {
-                return;
-            }
-            panel.setAttribute("data-appeals-swap-bound", "1");
-
-            var listView = panel.querySelector("[data-appeal-list-view]");
-            var modalEl = panel.querySelector("[data-appeal-detail-modal]");
-            var modalBody = modalEl ? modalEl.querySelector("[data-appeal-modal-body]") : null;
-            if (!listView || !modalEl || !modalBody) {
-                return;
-            }
-
-            var loadErr = "{% filter escapejs %}{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}{% endfilter %}";
-            var loadingHtml = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
-            var modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getOrCreateInstance(modalEl) : null;
-
-            function makeAlert(type, message) {
-                var div = document.createElement("div");
-                div.className = "alert alert-" + type + " mb-0";
-                div.setAttribute("role", "alert");
-                div.textContent = message;
-                return div;
-            }
-
-            function showDetail(url) {
-                if (!modal) {
-                    window.location.href = url;
-                    return;
-                }
-                modalBody.innerHTML = loadingHtml;
-                modal.show();
-
-                var fetchUrl = url + (url.indexOf("?") === -1 ? "?" : "&") + "fragment=1";
-                fetch(fetchUrl, {
-                    credentials: "same-origin",
-                    headers: { "X-Requested-With": "XMLHttpRequest" }
-                })
-                    .then(function (r) {
-                        if (!r.ok) { throw new Error("http_" + r.status); }
-                        return r.text();
-                    })
-                    .then(function (html) {
-                        modalBody.innerHTML = html;
-                        modalBody.scrollTop = 0;
-                    })
-                    .catch(function () {
-                        modalBody.innerHTML = "";
-                        modalBody.appendChild(makeAlert("danger", loadErr));
-                    });
-            }
-
-            listView.addEventListener("click", function (e) {
-                var link = e.target && e.target.closest ? e.target.closest("[data-appeal-detail-url]") : null;
-                if (!link) { return; }
-                e.preventDefault();
-                showDetail(link.getAttribute("data-appeal-detail-url"));
-            });
-
-            modalEl.addEventListener("hidden.bs.modal", function () {
-                modalBody.innerHTML = loadingHtml;
-            });
-        }
-
-        if (window.EMSReady) {
-            window.EMSReady(initAppealsSection);
-        } else {
-            initAppealsSection();
-        }
-    })();
-    </script>
 </section>
