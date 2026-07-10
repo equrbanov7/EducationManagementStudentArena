@@ -68,6 +68,27 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         db_index=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "is_trial"),
     )
+    # Cəhdin fiziki yeri — girişdə qeydli zal kompüterindən (MAC/IP) həll
+    # olunur (bax exam_center_gate.resolve_room_computer). Zal monitoru
+    # biletsiz (ExamStudentPin) cəhdləri bu sahələrlə göstərir; otaq
+    # izolyasiyası (imtahan hansı zalda gedirsə, yalnız oradan giriş) buna
+    # əsaslanır. Qeydli kompüter olmayan girişlərdə boş qalır.
+    room = models.ForeignKey(
+        "exams.ExamRoom",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attempts",
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "room"),
+    )
+    room_computer = models.ForeignKey(
+        "exams.ExamRoomComputer",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attempts",
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "room_computer"),
+    )
     marked_question_ids = models.JSONField(
         default=list,
         blank=True,

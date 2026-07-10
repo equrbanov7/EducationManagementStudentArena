@@ -151,6 +151,99 @@ class MacGateTests(_RoomBase):
         self.assertTrue(org_computer_access_allowed(self.request, None))
 
 
+class RoomIsolationAndMonitorTests(_RoomBase):
+    """Biletsiz cəhdlərin zal möhürü: otaq izolyasiyası + zal monitoru sətirləri."""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import Exam
+
+        cls.room_b = ExamRoom.objects.create(organization=cls.org, name="Zal B", code="ZB", capacity=25)
+        now = timezone.now()
+        cls.exam = Exam.objects.create(
+            title="İzolyasiya Final",
+            author=cls.owner,
+            organization=cls.org,
+            exam_type="test",
+            exam_type_extended="final",
+            is_active=True,
+            total_duration_minutes=60,
+            start_datetime=now - timedelta(minutes=5),
+            end_datetime=now + timedelta(hours=2),
+        )
+        cls.student = User.objects.create_user("era_iso_student", "era_iso@test.az", PASSWORD)
+
+    def _attempt(self, status="in_progress", room=None, computer=None, user=None):
+        from apps.exams.models import ExamAttempt
+
+        attempt = ExamAttempt.objects.create(
+            user=user or self.student, exam=self.exam, status=status, room=room, room_computer=computer
+        )
+        if status != "in_progress":
+            from django.utils import timezone
+
+            attempt.finished_at = timezone.now()
+            attempt.save(update_fields=["finished_at"])
+        return attempt
+
+    def test_isolation_open_without_live_attempts(self):
+        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
+
+        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room))
+        self.assertTrue(exam_room_isolation_allowed(self.exam, None))
+
+    def test_isolation_binds_to_first_live_room(self):
+        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
+
+        self._attempt(room=self.room)
+        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room))
+        self.assertFalse(exam_room_isolation_allowed(self.exam, self.room_b))
+
+    def test_isolation_releases_when_attempts_finish(self):
+        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
+
+        self._attempt(status="submitted", room=self.room)
+        # Canlı cəhd yoxdur → bağlılıq düşüb, istənilən zaldan giriş olar.
+        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room_b))
+
+    def test_room_monitor_snapshot_includes_ticketless_attempts(self):
+        from apps.exams.services.final_center.monitor import room_monitor_snapshot
+
+        comp = add_computer(room=self.room, label="PC-01", mac="AA:BB:CC:DD:EE:01", seat_number=2)
+        other_student = User.objects.create_user("era_iso_student2", "era_iso2@test.az", PASSWORD)
+        self._attempt(room=self.room, computer=comp)
+        self._attempt(status="submitted", room=self.room, user=other_student)
+
+        snapshot = room_monitor_snapshot(self.room)
+        rows = {r["username"]: r for r in snapshot["students"]}
+        self.assertIn("era_iso_student", rows)
+        live_row = rows["era_iso_student"]
+        self.assertEqual(live_row["status"], "active")
+        self.assertEqual(live_row["seat"], 2)
+        self.assertIsNone(live_row["ticket_id"])
+        self.assertEqual(live_row["exam_title"], "İzolyasiya Final")
+        self.assertEqual(rows["era_iso_student2"]["status"], "completed")
+        self.assertEqual(snapshot["counts"]["active"], 1)
+        self.assertEqual(snapshot["counts"]["completed"], 1)
+        self.assertEqual(snapshot["counts"]["total"], 2)
+        # Canlı imtahan üçün psevdo-oturum çipi (filter seçimləri üçün).
+        chip_ids = [s["session_id"] for s in snapshot["sessions"]]
+        self.assertIn(f"exam-{self.exam.pk}", chip_ids)
+
+    def test_other_room_snapshot_does_not_show_foreign_attempts(self):
+        from apps.exams.services.final_center.monitor import room_monitor_snapshot
+
+        self._attempt(room=self.room)
+        snapshot_b = room_monitor_snapshot(self.room_b)
+        self.assertEqual(snapshot_b["students"], [])
+        self.assertEqual(snapshot_b["counts"]["total"], 0)
+
+
 class OrgGateIpModeTests(_RoomBase):
     """ "off" (IP) rejimində org-səviyyə qapı IP ilə işləyir."""
 
