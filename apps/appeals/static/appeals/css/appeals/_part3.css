@@ -1,3 +1,94 @@
+/* ── Veriləcək bal sahəsi ── */
+.appeal-review-points {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 14px;
+    background: var(--ems-neutral-50);
+}
+
+.appeal-review-points__field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.appeal-review-points__input {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.appeal-review-points__input .form-control {
+    width: 110px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.appeal-review-points__max {
+    color: var(--appeal-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.appeal-review-points__preview {
+    margin-top: 10px;
+    color: var(--appeal-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.appeal-review-points__preview strong {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Kilidli (qərar verilmiş) item ── */
+.appeal-question-card.is-locked {
+    background: var(--ems-neutral-50);
+    border-style: solid;
+}
+
+.appeal-question-card.is-locked .appeal-q-switch {
+    opacity: 0.72;
+}
+
+.appeal-locked-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 7px 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.appeal-review-panel--locked {
+    background: transparent;
+}
+
+.appeal-locked-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+.appeal-locked-note i {
+    color: var(--ems-neutral-400);
+}
+
 /* Bootstrap-select müraciət panelində native ilə eyni hündürlük */
 .appeal-review-panel .bootstrap-single-select {
     width: 100%;
