@@ -331,16 +331,34 @@ class AppealExamCenterRoutingTests(TestCase):
         self.assertEqual(client.get(reverse("appeals:manage_appeals")).status_code, 403)
         self.assertEqual(client.get(reverse("appeals:review_appeal", args=[self.appeal.id])).status_code, 403)
 
+    def test_standalone_appeal_urls_redirect_to_dashboard_sections(self):
+        # Standalone səhifə yoxdur → birbaşa URL sidebar-lı dashboard bölməsinə yönlənir.
+        client = self._client_for(self.exam_center)
+
+        manage_redirect = client.get(reverse("appeals:manage_appeals") + "?status=pending")
+        self.assertEqual(manage_redirect.status_code, 302)
+        self.assertIn("section=manage-appeals", manage_redirect["Location"])
+        self.assertIn("status=pending", manage_redirect["Location"])
+
+        review_redirect = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]))
+        self.assertEqual(review_redirect.status_code, 302)
+        self.assertIn("section=manage-appeals", review_redirect["Location"])
+
+        student_client = self._client_for(self.student)
+        detail_redirect = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]))
+        self.assertEqual(detail_redirect.status_code, 302)
+        self.assertIn("section=my-appeals", detail_redirect["Location"])
+
     def test_exam_center_sees_all_org_appeals_and_can_review(self):
         client = self._client_for(self.exam_center)
 
-        manage_response = client.get(reverse("appeals:manage_appeals"))
+        manage_response = client.get(reverse("appeals:manage_appeals") + "?fragment=1")
         self.assertEqual(manage_response.status_code, 200)
         self.assertContains(manage_response, "Route Appeal Exam")
         self.assertContains(manage_response, "data-appeal-manage-filter-form", html=False)
         self.assertContains(manage_response, "data-appeal-auto-search", html=False)
 
-        review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]))
+        review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]) + "?fragment=1")
         self.assertEqual(review_response.status_code, 200)
         self.assertContains(review_response, "Route sualı")
         self.assertContains(review_response, 'data-review-award="1"', html=False)
@@ -398,10 +416,10 @@ class AppealExamCenterRoutingTests(TestCase):
         self.assertIn("+1 bal əlavə olundu", payload["toast"])
         self.assertIn("5 dəqiqədən sonra", payload["toast"])
 
-        manage_response = client.get(reverse("appeals:manage_appeals"))
+        manage_response = client.get(reverse("appeals:manage_appeals") + "?fragment=1")
         self.assertContains(manage_response, "Dəyişmək üçün qalan vaxt")
 
-        review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]))
+        review_response = client.get(reverse("appeals:review_appeal", args=[self.appeal.id]) + "?fragment=1")
         self.assertContains(review_response, 'data-review-existing-delta="1"', html=False)
 
     def test_detail_score_update_notice_belongs_to_current_appeal(self):
@@ -424,8 +442,8 @@ class AppealExamCenterRoutingTests(TestCase):
         accept_appeal_item(self.appeal.items.first(), reviewer=self.exam_center, response_text="Qəbul")
         student_client = self._client_for(self.student)
 
-        accepted_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]))
-        pending_response = student_client.get(reverse("appeals:appeal_detail", args=[second_appeal.id]))
+        accepted_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]) + "?fragment=1")
+        pending_response = student_client.get(reverse("appeals:appeal_detail", args=[second_appeal.id]) + "?fragment=1")
 
         self.assertNotContains(accepted_response, "Bu apellyasiya nəticəsində")
         self.assertContains(accepted_response, "Baxılır")
@@ -438,6 +456,6 @@ class AppealExamCenterRoutingTests(TestCase):
         self.appeal.reviewed_at = old_resolved_at
         self.appeal.save(update_fields=["reviewed_at", "updated_at"])
 
-        visible_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]))
+        visible_response = student_client.get(reverse("appeals:appeal_detail", args=[self.appeal.id]) + "?fragment=1")
         self.assertContains(visible_response, "Bu apellyasiya nəticəsində +1 bal əlavə olundu")
         self.assertContains(visible_response, "Qəbul")

@@ -16,12 +16,13 @@
         <div class="col-md-6">
             <label class="form-label small text-muted fw-bold" for="appealQ">{% trans "Axtarış" context "appeals.template" %}</label>
             <input type="text" class="form-control" id="appealQ" name="q"
-                   value="{{ appeal_search_query }}" placeholder="{% trans 'İmtahan adı üzrə axtar' context 'appeals.template' %}">
+                   value="{{ appeal_search_query }}" placeholder="{% trans 'İmtahan adı üzrə axtar' context 'appeals.template' %}"
+                   data-appeal-auto-search>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <label class="form-label small text-muted fw-bold" for="appealStatus">{% trans "Status" context "appeals.template" %}</label>
             <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" id="appealStatus" name="status" data-bootstrap-select>
+                <select class="form-select bootstrap-single-select__native" id="appealStatus" name="status" data-bootstrap-select data-appeal-auto-field>
                     <option value="">{% trans "Bütün statuslar" context "appeals.template" %}</option>
                     {% for value, label in appeal_status_choices %}
                     <option value="{{ value }}" {% if appeal_status_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -29,11 +30,7 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-filter me-2"></i>{% trans "Filtrlə" context "appeals.template" %}
-            </button>
-        </div>
+        
     </div>
 </form>
 

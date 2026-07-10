@@ -472,6 +472,17 @@
     font-size: 1.1rem;
 }
 
+/* Tək plitəli xülasə (imtahan balı) — qərar verildikcə canlı yenilənir. */
+.appeal-score-summary--single .appeal-score-summary__item--result {
+    flex: 1 1 100%;
+    border-color: #bfd3f7;
+    background: linear-gradient(135deg, #eff5ff 0%, var(--ems-neutral-0) 80%);
+}
+
+.appeal-score-summary__item--result strong {
+    color: #1a3d8f;
+}
+
 .appeal-chip--soft {
     background: var(--ems-neutral-100);
     color: var(--appeal-muted);

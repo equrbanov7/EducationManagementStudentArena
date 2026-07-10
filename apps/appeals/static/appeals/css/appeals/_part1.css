@@ -188,6 +188,99 @@
     margin-bottom: 20px;
 }
 
+.appeal-filter-card .form-control {
+    width: 100%;
+    min-height: 4.05rem;
+    padding: 0.95rem 1rem;
+    border: 1px solid #d5e1f3;
+    border-radius: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.appeal-filter-card .form-control:focus {
+    border-color: #4b7cf0;
+    box-shadow: 0 0 0 4px rgba(75, 124, 240, 0.14);
+}
+
+/* Filtr sətrindəki düymələr input/select ilə eyni hündürlükdə hizalanır. */
+.appeal-filter-card .btn {
+    min-height: 4.05rem;
+    padding: 0.75rem 1.35rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.appeal-filter-card .btn-outline-secondary {
+    border-color: #d5e1f3;
+    color: var(--appeal-muted);
+    background: var(--ems-neutral-0);
+}
+
+.appeal-filter-card .btn-outline-secondary:hover,
+.appeal-filter-card .btn-outline-secondary:focus {
+    border-color: #9dbaf5;
+    color: var(--appeal-ink);
+    background: #f8fbff;
+}
+
+.appeal-filter-card .appeal-filter-reset {
+    width: 100%;
+}
+
+/* ── Filtr yüklənərkən: siyahı gövdəsi üzərində incə overlay + spinner ── */
+[data-manage-body] {
+    position: relative;
+    min-height: 120px;
+    transition: opacity 0.15s ease;
+}
+
+[data-manage-body][aria-busy="true"] {
+    pointer-events: none;
+}
+
+[data-manage-body][aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: 18px;
+    background: rgba(248, 251, 255, 0.62);
+    backdrop-filter: blur(1px);
+    /* Sürətli yüklənmələrdə titrəmə olmasın deyə spinner 160ms gecikir. */
+    animation: appeal-busy-fade 0.16s ease-in forwards;
+}
+
+[data-manage-body][aria-busy="true"]::before {
+    content: "";
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    z-index: 5;
+    width: 38px;
+    height: 38px;
+    margin-left: -19px;
+    border-radius: 50%;
+    border: 3px solid rgba(75, 124, 240, 0.22);
+    border-top-color: #4b7cf0;
+    animation: appeal-busy-fade 0.16s ease-in forwards, appeal-spin 0.7s linear infinite;
+}
+
+@keyframes appeal-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes appeal-busy-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 .appeal-info-card {
     display: flex;
     gap: 14px;

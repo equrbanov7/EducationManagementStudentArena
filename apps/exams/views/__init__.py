@@ -25,6 +25,8 @@ from .exam_center import (
     exam_center_session_open_entry,
     exam_center_session_snapshot,
     exam_center_session_start,
+    exam_center_stats_ai,
+    exam_center_stats_charts,
     exam_center_stats_data,
     exam_center_stats_export,
     exam_center_stats_filters,
@@ -256,6 +258,8 @@ __all__ = [
     # Exam Center - zallar / oturumlar / monitor / hesabat
     "exam_center_pin_lookup",
     "exam_center_pin_search",
+    "exam_center_stats_ai",
+    "exam_center_stats_charts",
     "exam_center_stats_data",
     "exam_center_stats_export",
     "exam_center_stats_filters",
