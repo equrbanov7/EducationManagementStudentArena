@@ -204,6 +204,26 @@ def org_computer_access_allowed(request, organization) -> bool:
     return False
 
 
+def exam_room_isolation_allowed(exam, room) -> bool:
+    """
+    Otaq izolyasiyası (biletsiz final yolu): imtahan hansı zal(lar)da CANLI
+    gedirsə, yeni giriş yalnız həmin zal(lar)ın kompüterlərindən mümkündür.
+    İlk girən tələbənin zalı imtahanı həmin zala bağlayır; canlı cəhdlər
+    bitəndə bağlılıq öz-özünə düşür. ``room`` None olduqda (org-da qeydli
+    kompüter yoxdur) məhdudiyyət tətbiq olunmur.
+    """
+    if room is None:
+        return True
+    from apps.exams.models import ExamAttempt
+
+    live_room_ids = set(
+        ExamAttempt.objects.filter(exam=exam, status="in_progress", is_trial=False, room__isnull=False).values_list(
+            "room_id", flat=True
+        )
+    )
+    return not live_room_ids or room.pk in live_room_ids
+
+
 def resolve_room_computer(request, organization):
     """
     Müştəri sorğusundan ZALI və kompüteri həll et (oturum sisteminin ləğvi, 2026-07).
@@ -262,6 +282,7 @@ def resolve_room_computer(request, organization):
 
 
 __all__ = [
+    "exam_room_isolation_allowed",
     "final_exam_access_allowed",
     "get_client_ip",
     "mac_enforcement_active",

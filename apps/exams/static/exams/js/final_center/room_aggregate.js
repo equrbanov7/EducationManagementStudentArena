@@ -168,8 +168,13 @@
             var subj = (s.exam_title || "");
             if (subj.indexOf("—") !== -1) subj = subj.split("—").pop();
             subj = subj.replace(/\(.*\)/, "").trim().slice(0, 12);
+            // Biletsiz (PIN) cəhd sətirlərində bilet əməliyyatı yoxdur —
+            // data-ticket qoyulmur, klik təbii olaraq nəzərə alınmır.
+            var ticketAttrs = s.ticket_id
+                ? 'data-ticket="' + esc(s.ticket_id) + '" data-session="' + esc(s.session_id) + '" '
+                : "";
             return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + '" ' +
-                'data-ticket="' + esc(s.ticket_id) + '" data-session="' + esc(s.session_id) + '" ' +
+                ticketAttrs +
                 'title="' + esc(s.name) + " · " + esc(s.exam_title || "") + '">' +
                 badges +
                 '<span class="fxc-cell-num">' + esc(("0" + label).slice(-2)) + "</span>" +
@@ -199,6 +204,19 @@
             var locked = s.supervision_status === "locked";
             var subj = (s.exam_title || "");
             if (subj.indexOf("—") !== -1) subj = subj.split("—").pop().trim();
+            // Biletsiz (PIN) cəhdlər: bilet-əsaslı əməliyyat düymələri yoxdur —
+            // pozuntu sayı yalnız məlumat üçün göstərilir.
+            if (!s.ticket_id) {
+                return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") + '">' +
+                    '<div class="fxc-vio-top">' +
+                        '<span class="fxc-vio-name">' + esc(s.name) + "</span>" +
+                        '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
+                            esc(t("violations.word", "pozuntu")) + "</span>" +
+                    "</div>" +
+                    '<div class="fxc-vio-sub">' + esc(subj) +
+                        (locked ? ' · <b>' + esc(t("violations.locked", "Dayandırılıb")) + "</b>" : "") + "</div>" +
+                    "</div>";
+            }
             var mainBtn = locked
                 ? '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-vio-act="grant" ' +
                     'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
