@@ -33,6 +33,7 @@ from apps.exams.domain.final_center import (
 from apps.exams.models import FinalExamTicket
 from apps.exams.services.exam_center_gate import (
     final_exam_access_allowed,
+    org_computer_access_allowed,
     resolve_room_computer,
     room_ip_access_allowed,
 )
@@ -261,6 +262,12 @@ def _handle_student_pin_login(request, username, raw_pin):
     exam, student = resolve_student_pin_login(username, raw_pin)
     if exam is None:
         return None
+
+    # Qeydli kompüter qapısı: biletsiz yol da yalnız icazə verilmiş zal
+    # kompüterlərindən işləyir (org-da qeydli kompüter varsa). Bax
+    # ``org_computer_access_allowed`` — MAC rejimində MAC, əks halda IP ilə.
+    if not org_computer_access_allowed(request, exam.organization if exam.organization_id else None):
+        return _render_login(request, error=_room_access_error(), username=(username or "").strip())
 
     can_start, reason = exam.can_user_start(student, code=raw_pin)
     if not can_start:

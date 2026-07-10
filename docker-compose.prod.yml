@@ -270,6 +270,24 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
+  # ARP agent — imtahan zalı MAC yoxlaması üçün host ARP cədvəli xidməti.
+  # network_mode: host → host-un /proc/net/arp-ını oxuyur; yalnız docker
+  # bridge gateway-inə (172.18.0.1) bind olur, LAN-dan əlçatmaz. İstehlakçı:
+  # apps/exams/services/exam_center_gate.py (resolve_client_mac).
+  # Build tələb etmir — stdlib skripti bind-mount ilə işləyir.
+  # ─────────────────────────────────────────────────────────────────────────
+  arp-agent:
+    image: python:3.12-alpine
+    command: ["python", "/agent/arp_agent.py"]
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./docker/arp-agent:/agent:ro
+    environment:
+      ARP_AGENT_BIND: ${ARP_AGENT_BIND:-172.18.0.1}
+      ARP_AGENT_PORT: ${ARP_AGENT_PORT:-8953}
+
+  # ─────────────────────────────────────────────────────────────────────────
   # App — Daphne ASGI server (HTTP + WebSocket)
   # Not exposed externally; nginx proxies all traffic to it. The service is
   # scale-ready: run release tasks once, then set APP_REPLICAS=2/3/4 in deploy.
@@ -287,9 +305,14 @@ services:
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
       ADMIN_URL_PREFIX: ${ADMIN_URL_PREFIX:-manage/}
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
-      # Final imtahan qapısı: yalnız 38-ci otağın qeydli kompüterləri.
-      # .env-də FINAL_EXAM_ALLOWED_IPS təyin etməklə override olunur.
-      FINAL_EXAM_ALLOWED_IPS: ${FINAL_EXAM_ALLOWED_IPS:-10.0.3.66,10.0.9.214,10.0.6.164}
+      # Final imtahan qapısı: səhifə yalnız kampus LAN-ından (10.0.0.0/19)
+      # açılır; per-kompüter icazə MAC ilə yoxlanır (aşağıdakı arp_agent
+      # rejimi) — DHCP-də IP dəyişəndə giriş pozulmur. .env override edə bilər.
+      FINAL_EXAM_ALLOWED_IPS: ${FINAL_EXAM_ALLOWED_IPS:-10.0.0.0/19}
+      # İmtahan zalı kompüterləri MAC ilə tanınır: müştəri MAC-ı host ARP
+      # cədvəlindən arp-agent sidecar-ı vasitəsilə oxunur (bax həmin servis).
+      EXAM_CLIENT_MAC_RESOLUTION: ${EXAM_CLIENT_MAC_RESOLUTION:-arp_agent}
+      EXAM_ARP_AGENT_URL: ${EXAM_ARP_AGENT_URL:-http://172.18.0.1:8953}
       ADMIN_LOGIN_RATE_LIMIT: ${ADMIN_LOGIN_RATE_LIMIT:-3/15m}
       ADMIN_2FA_REQUIRED: ${ADMIN_2FA_REQUIRED:-True}
       ADMIN_OTP_VERIFY_RATE_LIMIT: ${ADMIN_OTP_VERIFY_RATE_LIMIT:-5/10m}
