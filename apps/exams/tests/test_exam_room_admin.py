@@ -1,16 +1,21 @@
-"""İmtahan zalı administrasiyası — kompüter/MAC, IP giriş qapısı, icazə, nəzarətçi."""
+"""İmtahan zalı administrasiyası — kompüter/MAC, IP/MAC giriş qapısı, icazə, nəzarətçi."""
 
 from datetime import timedelta
+from unittest import mock
 
 from django.contrib.auth import get_user_model
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.domain.final_center import ExamRoomComputer
 from apps.exams.models import ExamRoom, ExamRoomSession
 from apps.exams.services.access_policy import can_manage_exam_rooms
-from apps.exams.services.exam_center_gate import room_ip_access_allowed
+from apps.exams.services.exam_center_gate import (
+    org_computer_access_allowed,
+    resolve_room_computer,
+    room_ip_access_allowed,
+)
 from apps.exams.services.final_center import RoomAdminError, add_computer, can_supervise_session
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
 from apps.organizations.models import Organization
@@ -91,6 +96,73 @@ class RoomIpGateTests(_RoomBase):
         # Yeganə IP söndürülüb → qeydli IP yoxdur → icazəli (qlobal gate qərar verir).
         request = self.rf.get("/exams/final/", REMOTE_ADDR="10.0.0.99")
         self.assertTrue(room_ip_access_allowed(request, self.room))
+
+
+@override_settings(EXAM_CLIENT_MAC_RESOLUTION="arp_agent")
+class MacGateTests(_RoomBase):
+    """MAC (arp_agent) rejimi: kompüter yoxlamaları IP yox, MAC ilə aparılır."""
+
+    MAC = "C8:D3:FF:B3:89:50"
+
+    def setUp(self):
+        self.rf = RequestFactory()
+        self.request = self.rf.get("/exams/final/", REMOTE_ADDR="10.0.3.66")
+
+    def _with_client_mac(self, mac):
+        return mock.patch(
+            "apps.exams.services.exam_center_gate.resolve_client_mac",
+            return_value=mac,
+        )
+
+    def test_registered_mac_allowed_ip_irrelevant(self):
+        # IP DB-dəki ilə uyğun DEYİL — MAC rejimində bunun əhəmiyyəti yoxdur.
+        add_computer(room=self.room, label="PC-01", mac=self.MAC, ip_address="10.0.99.99")
+        with self._with_client_mac(self.MAC):
+            self.assertTrue(room_ip_access_allowed(self.request, self.room))
+            room, comp = resolve_room_computer(self.request, self.org)
+        self.assertEqual(room, self.room)
+        self.assertEqual(comp.mac_address, self.MAC)
+
+    def test_unregistered_mac_blocked(self):
+        add_computer(room=self.room, label="PC-01", mac=self.MAC)
+        with self._with_client_mac("AA:AA:AA:AA:AA:01"):
+            self.assertFalse(room_ip_access_allowed(self.request, self.room))
+            self.assertEqual(resolve_room_computer(self.request, self.org), (None, None))
+
+    def test_unresolvable_mac_fail_closed(self):
+        # Agent əlçatmaz / kənar müştəri (ARP qeydi yoxdur) → giriş rədd.
+        add_computer(room=self.room, label="PC-01", mac=self.MAC)
+        with self._with_client_mac(None):
+            self.assertFalse(room_ip_access_allowed(self.request, self.room))
+            self.assertEqual(resolve_room_computer(self.request, self.org), (None, None))
+            self.assertFalse(org_computer_access_allowed(self.request, self.org))
+
+    def test_org_gate_matches_mac(self):
+        add_computer(room=self.room, label="PC-01", mac=self.MAC)
+        with self._with_client_mac(self.MAC):
+            self.assertTrue(org_computer_access_allowed(self.request, self.org))
+        with self._with_client_mac("AA:AA:AA:AA:AA:01"):
+            self.assertFalse(org_computer_access_allowed(self.request, self.org))
+
+    def test_org_gate_open_when_no_computers(self):
+        # Org-da qeydli kompüter yoxdursa biletsiz yol mövcud davranışda qalır.
+        with self._with_client_mac(None):
+            self.assertTrue(org_computer_access_allowed(self.request, self.org))
+        self.assertTrue(org_computer_access_allowed(self.request, None))
+
+
+class OrgGateIpModeTests(_RoomBase):
+    """ "off" (IP) rejimində org-səviyyə qapı IP ilə işləyir."""
+
+    def setUp(self):
+        self.rf = RequestFactory()
+
+    def test_ip_mode_matches_registered_ip(self):
+        add_computer(room=self.room, label="PC-01", mac="AA:BB:CC:DD:EE:01", ip_address="10.0.0.11")
+        ok = self.rf.get("/exams/final/", REMOTE_ADDR="10.0.0.11")
+        bad = self.rf.get("/exams/final/", REMOTE_ADDR="10.0.0.99")
+        self.assertTrue(org_computer_access_allowed(ok, self.org))
+        self.assertFalse(org_computer_access_allowed(bad, self.org))
 
 
 class ManageRoomsPermissionTests(_RoomBase):
