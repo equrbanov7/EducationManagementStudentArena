@@ -233,9 +233,16 @@ class ExamCenterGateUnitTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
-    def test_get_client_ip_prefers_xff(self):
-        request = self.factory.get("/", HTTP_X_FORWARDED_FOR="203.0.113.9, 10.0.0.1", REMOTE_ADDR="10.0.0.1")
-        self.assertEqual(get_client_ip(request), "203.0.113.9")
+    def test_get_client_ip_uses_last_xff_member(self):
+        # Nginx real peer ünvanını zəncirin SONUNA əlavə edir — müştərinin
+        # göndərdiyi saxta ilk üzv (203.0.113.9) allowlist-i keçə bilməməlidir.
+        request = self.factory.get("/", HTTP_X_FORWARDED_FOR="203.0.113.9, 10.0.0.1", REMOTE_ADDR="172.18.0.5")
+        self.assertEqual(get_client_ip(request), "10.0.0.1")
+
+    def test_spoofed_xff_prefix_cannot_bypass_allowlist(self):
+        request = self.factory.get("/", HTTP_X_FORWARDED_FOR="10.0.3.66, 198.51.100.7", REMOTE_ADDR="172.18.0.5")
+        with override_settings(FINAL_EXAM_ALLOWED_IPS=["10.0.3.66"]):
+            self.assertFalse(final_exam_access_allowed(request))
 
     def test_empty_allowlist_allows_all(self):
         request = self.factory.get("/", REMOTE_ADDR="198.51.100.7")
