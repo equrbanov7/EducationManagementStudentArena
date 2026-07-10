@@ -58,6 +58,17 @@ EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO = _env_float_setting("EXAM_PDF_OCR_HIGHLIGHT_MI
 # şlüzü/agenti vasitəsilə tətbiq oluna bilər; server tərəfi IP/CIDR yoxlayır.
 FINAL_EXAM_ALLOWED_IPS = [item.strip() for item in os.getenv("FINAL_EXAM_ALLOWED_IPS", "").split(",") if item.strip()]
 
+# --- İmtahan zalı MAC yoxlaması (ARP agenti) ---------------------------------
+# "off" → köhnə IP-əsaslı kompüter yoxlaması (dev/test default).
+# "arp_agent" → müştəri MAC-ı host-un ARP cədvəlindən (docker/arp-agent
+# sidecar-ı vasitəsilə) oxunur və ExamRoomComputer qeydləri MAC ilə
+# tutuşdurulur — DHCP IP dəyişəndə giriş pozulmur. MAC yalnız serverlə eyni
+# L2 seqmentdəki müştərilər üçün görünür; kənar/marşrutlanmış sorğular üçün
+# MAC yoxdur → giriş rədd edilir (fail-closed).
+EXAM_CLIENT_MAC_RESOLUTION = os.getenv("EXAM_CLIENT_MAC_RESOLUTION", "off").strip() or "off"
+EXAM_ARP_AGENT_URL = os.getenv("EXAM_ARP_AGENT_URL", "http://172.18.0.1:8953").strip()
+EXAM_ARP_AGENT_TIMEOUT_SECONDS = _env_float_setting("EXAM_ARP_AGENT_TIMEOUT_SECONDS", 0.5, minimum=0.05)
+
 # --- Final imtahan PIN siyasəti ----------------------------------------------
 # Hər tələbəyə imtahan üçün fərdi, kriptoqrafik təsadüfi PIN verilir.
 # Saxlanma: salted hash (doğrulama) + Fernet şifrəli nüsxə (icazəli göstərmə);
