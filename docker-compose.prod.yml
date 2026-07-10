@@ -287,6 +287,9 @@ services:
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
       ADMIN_URL_PREFIX: ${ADMIN_URL_PREFIX:-manage/}
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
+      # Final imtahan qapısı: yalnız 38-ci otağın qeydli kompüterləri.
+      # .env-də FINAL_EXAM_ALLOWED_IPS təyin etməklə override olunur.
+      FINAL_EXAM_ALLOWED_IPS: ${FINAL_EXAM_ALLOWED_IPS:-10.0.3.66,10.0.9.214,10.0.6.164}
       ADMIN_LOGIN_RATE_LIMIT: ${ADMIN_LOGIN_RATE_LIMIT:-3/15m}
       ADMIN_2FA_REQUIRED: ${ADMIN_2FA_REQUIRED:-True}
       ADMIN_OTP_VERIFY_RATE_LIMIT: ${ADMIN_OTP_VERIFY_RATE_LIMIT:-5/10m}
