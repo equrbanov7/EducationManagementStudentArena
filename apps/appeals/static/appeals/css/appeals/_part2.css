@@ -1,3 +1,97 @@
+/* =========================================================================
+   Apellyasiya yaratma — interaktiv UI (auto-aktivləşmə, sayğac, validation)
+   ========================================================================= */
+.appeal-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.appeal-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 14px;
+    border: 1px solid var(--appeal-border);
+    border-radius: 999px;
+    background: var(--appeal-surface);
+    color: var(--appeal-muted);
+    font-weight: 600;
+    font-size: 0.86rem;
+}
+
+.appeal-step__num {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--appeal-blue-soft);
+    color: var(--appeal-blue);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.appeal-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.appeal-toolbar__search {
+    position: relative;
+    flex: 1 1 260px;
+}
+
+.appeal-toolbar__search i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-400);
+    pointer-events: none;
+}
+
+.appeal-toolbar__search .form-control {
+    padding-left: 38px;
+    border-radius: 12px;
+}
+
+/* Switch */
+.appeal-q-switch {
+    flex-shrink: 0;
+    padding-left: 2.6em;
+}
+
+.appeal-q-switch .form-check-input {
+    width: 2.1em;
+    height: 1.15em;
+    cursor: pointer;
+}
+
+.appeal-q-switch .form-check-input:checked {
+    background-color: var(--appeal-blue);
+    border-color: var(--appeal-blue);
+}
+
+.appeal-q-switch .form-check-label {
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--appeal-muted);
+}
+
+.appeal-question-card.is-active .appeal-q-switch .form-check-label {
+    color: var(--appeal-blue);
+}
+
+.appeal-question-card__main {
+    min-width: 0;
+}
+
 
 /* Aktiv kart vizual olaraq fərqlənir */
 .appeal-question-card {
@@ -488,93 +582,3 @@
     color: var(--appeal-muted);
 }
 
-/* ── Veriləcək bal sahəsi ── */
-.appeal-review-points {
-    margin-top: 14px;
-    padding: 14px 16px;
-    border: 1px dashed var(--ems-neutral-300);
-    border-radius: 14px;
-    background: var(--ems-neutral-50);
-}
-
-.appeal-review-points__field {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.appeal-review-points__input {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.appeal-review-points__input .form-control {
-    width: 110px;
-    font-weight: 600;
-    text-align: center;
-}
-
-.appeal-review-points__max {
-    color: var(--appeal-muted);
-    font-weight: 600;
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-
-.appeal-review-points__preview {
-    margin-top: 10px;
-    color: var(--appeal-muted);
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.appeal-review-points__preview strong {
-    font-variant-numeric: tabular-nums;
-}
-
-/* ── Kilidli (qərar verilmiş) item ── */
-.appeal-question-card.is-locked {
-    background: var(--ems-neutral-50);
-    border-style: solid;
-}
-
-.appeal-question-card.is-locked .appeal-q-switch {
-    opacity: 0.72;
-}
-
-.appeal-locked-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    width: fit-content;
-    padding: 7px 12px;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-600);
-    font-size: 0.82rem;
-    font-weight: 800;
-}
-
-.appeal-review-panel--locked {
-    background: transparent;
-}
-
-.appeal-locked-note {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-600);
-    font-weight: 600;
-    font-size: 0.82rem;
-}
-
-.appeal-locked-note i {
-    color: var(--ems-neutral-400);
-}
