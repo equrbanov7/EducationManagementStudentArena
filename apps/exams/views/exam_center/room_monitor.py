@@ -124,7 +124,9 @@ def _room_computer_grid(room, snapshot):
         if seat is not None and seat not in seat_map:
             seat_map[seat] = row
     computers = []
-    for comp in room.computers.all():
+    # Yalnız AKTİV kompüterlər — deaktiv qeydlər giriş hüququ vermir (bax
+    # exam_center_gate), ona görə xəritədə göstərilib nəzarətçini çaşdırmasın.
+    for comp in room.computers.filter(is_active=True):
         computers.append({"computer": comp, "occupant": seat_map.get(comp.seat_number)})
     return computers
 
