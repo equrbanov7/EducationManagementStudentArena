@@ -7,15 +7,51 @@ zamanı doğrulanır. Kriptoqrafik primitivlər (salted hash + Fernet) mövcud
 ``final_center/pins.py``-dən təkrar istifadə olunur.
 """
 
+import logging
+
+from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.cache import cache
 
 from cryptography.fernet import InvalidToken
 
 from apps.exams.models import ExamStudentPin
 from apps.exams.services.final_center.pins import _DUMMY_HASH, _fernet, generate_pin_value
 
+logger = logging.getLogger("exams.student_pin.entry")
+
 # Fərdi PIN tələb edən imtahan kateqoriyaları.
 SECURE_PIN_CATEGORIES = {"final", "midterm"}
+
+
+def _student_pin_rate_key(username: str) -> str:
+    return f"finpin:rl:{(username or '').strip().lower()[:150]}"
+
+
+def student_pin_login_rate_limited(username: str) -> bool:
+    """Per-username (freeze-safe) sliding-window throttle for the ExamStudentPin
+    login path (EXAM-SEC-002).
+
+    Keyed ONLY on the submitted username — never on the client IP — so a shared
+    exam-hall / localhost IP cannot freeze other students, and one student's
+    failed attempts only slow that same student.  The window self-heals every
+    ``FINAL_EXAM_STUDENT_PIN_RATE_WINDOW_SECONDS`` (default 60s), throttling
+    brute force without a durable account lockout (which would be DoS-able).
+    ``FINAL_EXAM_STUDENT_PIN_RATE_PER_MINUTE`` <= 0 disables the throttle.
+    """
+    limit = int(getattr(settings, "FINAL_EXAM_STUDENT_PIN_RATE_PER_MINUTE", 10))
+    username = (username or "").strip()
+    if limit <= 0 or not username:
+        return False
+    window = int(getattr(settings, "FINAL_EXAM_STUDENT_PIN_RATE_WINDOW_SECONDS", 60))
+    key = _student_pin_rate_key(username)
+    cache.add(key, 0, window)
+    try:
+        count = cache.incr(key)
+    except ValueError:  # açar TTL-i incr anında bitibsə
+        cache.set(key, 1, window)
+        count = 1
+    return count > limit
 
 
 def exam_requires_student_pins(exam) -> bool:
