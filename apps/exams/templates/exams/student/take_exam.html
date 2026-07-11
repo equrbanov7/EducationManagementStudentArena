@@ -103,6 +103,7 @@
           data-autosave-interval-ms="{{ exam_autosave_interval_ms }}"
           data-autosave-jitter-ms="{{ exam_autosave_jitter_ms }}"
           data-autosave-binary-uploads-enabled="{{ exam_autosave_binary_uploads_enabled|yesno:'1,0' }}"
+          data-question-seen-url="{% url 'exams:question_seen' exam.slug attempt.id %}"
           class="modern-exam-form">
         {% csrf_token %}
         <input type="hidden"

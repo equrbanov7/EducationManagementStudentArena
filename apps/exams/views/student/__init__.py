@@ -2,12 +2,14 @@
 
 from .attempts import start_exam, take_exam
 from .lists import assigned_student_exam_list, student_exam_list
+from .question_timer import question_seen
 from .results import exam_result, student_exam_history
 
 __all__ = [
     "exam_result",
     "student_exam_history",
     "start_exam",
+    "question_seen",
     "take_exam",
     "assigned_student_exam_list",
     "student_exam_list",

@@ -135,6 +135,11 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
     # artır; client öz base_revision-unu göndərir. Uyğunsuzluq (başqa tab daha
     # yeni yazıb) → 409, stale overwrite qarşısı alınır.
     autosave_revision = models.PositiveIntegerField(default=0)
+    # EXAM-P1-04: server-authoritative per-question timer. Sual İLK dəfə
+    # göstəriləndə {question_id: ISO started_at} yazılır; server deadline =
+    # started_at + effective_time_limit + grace. Müddəti keçmiş sualın POST
+    # sahələri saxlanmır (client timer-i devtools ilə uzatmaq işləmir).
+    question_timing = models.JSONField(default=dict, blank=True)
     supervision_status = models.CharField(
         max_length=20,
         choices=SUPERVISION_STATUS_CHOICES,
