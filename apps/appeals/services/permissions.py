@@ -24,6 +24,19 @@ def _same_tenant(request, appeal):
     return organization is not None and appeal.organization_id == organization.id
 
 
+def _is_conflicted_reviewer(request, appeal):
+    """Reviewer independence (EXAM-P1-18): imtahanın müəllifi öz imtahanına
+    qarşı apellyasiyaya baxa/qərar verə bilməz — öz qiymətini müdafiə edən
+    şəxs müstəqil reviewer ola bilməz. Superadmin bu qadağadan azaddır (audit
+    məqsədləri üçün). Müəllif tapılmasa (məlumatsız) konservativ davranıb
+    konflikt saymırıq ki, legitim mərkəz axını pozulmasın."""
+    user = getattr(request, "user", None)
+    if is_superadmin_user(user):
+        return False
+    author_id = getattr(getattr(appeal, "exam", None), "author_id", None)
+    return author_id is not None and author_id == getattr(user, "id", None)
+
+
 def can_create_appeal(request, attempt, *, at_time=None):
     user = getattr(request, "user", None)
     if not getattr(user, "is_authenticated", False):
@@ -39,12 +52,16 @@ def can_review_appeal(request, appeal):
     """Apellyasiyaya baxıb item-lərə cavab verə bilərmi (imtahan mərkəzi)."""
     if not _same_tenant(request, appeal):
         return False
+    if _is_conflicted_reviewer(request, appeal):
+        return False
     return is_exam_center_user(getattr(request, "user", None))
 
 
 def can_decide_appeal(request, appeal):
     """Yekun status qərarı / override verə bilərmi (imtahan mərkəzi)."""
     if not _same_tenant(request, appeal):
+        return False
+    if _is_conflicted_reviewer(request, appeal):
         return False
     return is_exam_center_user(getattr(request, "user", None))
 

@@ -54,6 +54,11 @@ def log_supervision_incident(attempt, event_type, metadata=None):
         violation_count_at_time=violation_count,
     )
 
+    # EXAM-P1-20: supervision incident-i SLI kimi qeyd et.
+    from apps.exams.metrics import record_supervision_incident
+
+    record_supervision_incident(event_type)
+
     # Check if violation limit exceeded
     max_violations = config.get_max_total_violations()
     limit_exceeded = is_violation and violation_count >= max_violations

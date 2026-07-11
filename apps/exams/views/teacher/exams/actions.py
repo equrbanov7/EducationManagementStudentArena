@@ -66,6 +66,11 @@ def toggle_exam_results_visibility(request, slug):
     exam.results_hidden_from_students = not exam.results_hidden_from_students
     exam.save(update_fields=["results_hidden_from_students"])
 
+    # EXAM-P1-20: nəticə görünürlük dəyişikliyini SLI kimi qeyd et.
+    from apps.exams.metrics import record_result_published
+
+    record_result_published("hidden" if exam.results_hidden_from_students else "published")
+
     if exam.results_hidden_from_students:
         messages.success(
             request,

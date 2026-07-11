@@ -103,6 +103,31 @@
 - Postgres-marked suite: **40 passed** (real Postgres 16); yeni `exams 0046` partial unique index və `exams 0045` snapshot sütunu fresh migrate-də təsdiqləndi.
 - black/isort/flake8, module-size gate, `makemigrations --check`, `manage.py check` — hamısı təmiz.
 
-## Açıq qalan (auditdən növbəti prioritetlər)
+## Üçüncü dalğa düzəlişləri (2026-07-11, davam — Wave A–H)
 
-Qalan bəndlər üçün auditin III hissəsinə bax: server-side per-question timer (P1-04), autosave OCC/idempotency (P1-06), PIN lifecycle (P1-08), immutable image promotion + rollback, off-site backup + restore drill, load/WS capacity sübutu, business observability/SLO.
+Yekun yoxlama: **SQLite 2858 passed, 4 skipped**; **Postgres-marked 47 passed**
+(real Postgres 16); black/isort/flake8, module gate-ləri, `makemigrations --check`
+təmiz.
+
+| Tapıntı | Nə edildi | Sübut |
+|---|---|---|
+| **RLS: labs/projects** (layihə P1) | `organizations 0018` — 8 cədvələ (lab/block/question/assignment/submission/answer, project/submission) course→org dolayı RLS | `TestRLSLabsProjects` (4 test) |
+| **Audit append-only** (layihə P1) | `organizations 0019` — DB trigger UPDATE/DELETE-i bloklayır (owner/superuser daxil) | `TestAuditLogAppendOnly` (3 test) |
+| **Grade clamp + bulk ordering** (layihə P1) | `task_submission_core`: bal `[0,max]` clamp; bulk grading id-sırası bərpası (yanlış tələbəyə bal getmir) | `ClampScoreTest`, `ResolveTaskMaxScoreTest`, `BulkGradeLengthGuardTest` |
+| **EXAM-P1-08** PIN lifecycle | `ExamStudentPin.expires_at/revoked_at` (mig 0047) + verify/login enforcement (additive, geriyə-uyğun) | `test_revoked_pin_is_rejected`, `test_expired_pin_is_rejected` |
+| **EXAM-P1-05** disabled-field data-loss | `q_present_{id}` marker + server guard: timer-expired absent field saxlanmış cavabı SİLMİR | `test_finish_preserves_answer_of_absent_timer_expired_question` |
+| **EXAM-P1-07** draft cleanup | timer-expiry finish yolu localStorage draft-ı təmizləyir (əvvəl saxlayırdı) | `timers.js` |
+| **EXAM-P1-17** dil parity | `services/language_parity.py` — variantlar arası sual sayı/bal parity validatoru | 4 parity testi |
+| **EXAM-P1-18** appeal reviewer independence | imtahan müəllifi öz imtahanına apellyasiyaya baxa/qərar verə bilmir (superadmin istisna) | `test_reviewer_independence.py` (6 test) |
+| **EXAM-P1-15** import lease/retry | `reap_stuck_extraction_jobs` beat task — crash olub PROCESSING-də ilişən job-lar lease sonrası FAILED | `TestStuckJobReaper` (2 test) |
+| **EXAM-P1-20** business SLI | `apps/exams/metrics.py` — start/submit/autosave/result/PIN/supervision Counter-ları; PIN verify + supervision + result-toggle-da wire | `test_business_metrics.py` |
+
+## Açıq qalan — kod ilə həll OLUNMAYAN (sənə handoff)
+
+Tam siyahı: [INFRA_HANDOFF.md](./INFRA_HANDOFF.md). Qısaca:
+
+- **Server addımı:** DB rolu provisioning (P0-01), köhnə CF iptables təmizliyi.
+- **İnfrastruktur:** off-site backup + restore drill, immutable image promotion + rollback, PgBouncer/Redis/Celery ölçüləndirmə.
+- **Yük/performans:** real imtahan yolu üçün 100/500/1000 VU + 1000 WS testi (ölçü hələ yoxdur).
+- **Observability:** Grafana dashboard + alert qaydaları (SLI Counter-ları kodda hazırdır).
+- **Məhsul-həssas kod (browser E2E + dizayn tələb edir):** access code şifrələmə (P1-09), server per-question timer (P1-04), autosave OCC (P1-06), formal state machine (P1-01), client-telemetry proctoring (P1-11), coding sandbox limitləri (P1-14), task concurrency row-lock.

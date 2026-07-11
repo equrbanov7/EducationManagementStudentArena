@@ -26,4 +26,5 @@ tarixçəsi (tapıntı → yoxlama → düzəliş → sübut) bir yerdə qalır.
 | [EMSArena_Exam_Database_Table_Inventory_AZ_2026-07-11.md](./2026-07-11-codex-tam-audit/EMSArena_Exam_Database_Table_Inventory_AZ_2026-07-11.md) | Exam DB cədvəl/field inventarı |
 | [FIX_REPORT_2026-07-11.md](./2026-07-11-codex-tam-audit/FIX_REPORT_2026-07-11.md) | Tapıntıların yoxlanması və edilən düzəlişlər (sübutlarla) |
 | [REAUDIT_PROMPT.md](./2026-07-11-codex-tam-audit/REAUDIT_PROMPT.md) | Codex-in yenidən-audit tapşırığı: düzəlişlərin verifikasiyası + performans ölçmə |
+| [INFRA_HANDOFF.md](./2026-07-11-codex-tam-audit/INFRA_HANDOFF.md) | Kod ilə həll olunmayan qalan işlər (server/infra/yük/məhsul-dizayn) |
 | `screenshots/exam/` | Audit zamanı çəkilmiş UI screenshot-ları |

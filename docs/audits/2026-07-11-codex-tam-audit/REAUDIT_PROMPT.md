@@ -30,6 +30,15 @@ Hər biri üçün: (1) düzəlişin kodda olduğunu gör, (2) müsbət test yaz/
 | EXAM-P1-13 | Coding final idempotency | mig `exams/0046` partial unique + `coding_submit` row lock | Eyni attempt-ə paralel/təkrar submit → yalnız 1 `is_final=True` sətir. Postgres-də `\d+ exams_codingsubmission` ilə partial unique index-i təsdiqlə. |
 | PROXY-P0 | Nginx XFF hardening (CF yoxdur) | `docker/nginx/nginx.conf` | Origin-ə birbaşa `X-Forwarded-For: 1.2.3.4` göndər → Django `get_client_ip` bunu QƏBUL ETMƏMƏLİ (nginx overwrite edir). Rate-limit/allowlist spoof cəhdi. |
 | CI-P1 | docker/scan/smoke/E2E blocking | `.github/workflows/ci.yml` ci-success | Job-lardan biri fail olanda `ci-success`-in də fail olduğunu (deploy getmədiyini) təsdiqlə. |
+| RLS labs/projects | 8 cədvələ RLS (`organizations 0018`) | `TestRLSLabsProjects` | Tenant B kontekstində A-nın lab answer / project submission-unu oxu → 0 sətir. |
+| Audit append-only | UPDATE/DELETE trigger (`organizations 0019`) | `TestAuditLogAppendOnly` | Audit sətrini owner/superuser ilə UPDATE/DELETE cəhd et → exception. |
+| Grade clamp | `task_submission_core.apply_grade` | `ClampScoreTest` | max-dan böyük / mənfi bal ver → `[0,max]`-a clamp; bulk grading id-sırasını qoruyur. |
+| EXAM-P1-08 PIN lifecycle | `expires_at/revoked_at` (mig 0047) | `test_revoked/expired_pin_is_rejected` | Düzgün PIN-i revoke et / expiry keçir → giriş rədd. |
+| EXAM-P1-05 disabled-field | `q_present_` marker guard | `test_finish_preserves...` | Timer-expired sualı finish-də absent burax → saxlanmış cavab qorunur (silinmir). |
+| EXAM-P1-17 dil parity | `services/language_parity.py` | 4 parity testi | Variantlar arası fərqli sual sayı/bal → issue siyahısı. |
+| EXAM-P1-18 reviewer independence | `appeals/services/permissions.py` | `test_reviewer_independence` | İmtahan müəllifi öz imtahanına appeal review/decide → False; başqa mərkəz istifadəçisi → True. |
+| EXAM-P1-15 import reaper | `reap_stuck_extraction_jobs` | `TestStuckJobReaper` | PROCESSING job-u köhnə `started_at` ilə → reaper FAILED edir; fresh toxunulmur. |
+| EXAM-P1-20 SLI | `apps/exams/metrics.py` | `test_business_metrics` | PIN verify / supervision / result-toggle Counter-ları artırılır; prometheus yoxdursa no-op. |
 
 **Regresiya bazası (təkrar işə sal):**
 ```

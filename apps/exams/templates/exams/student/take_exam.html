@@ -181,7 +181,13 @@
                      data-question-id="{{ q.id }}"
                      id="slide-{{ forloop.counter0 }}"
                      data-time-limit="{{ q.effective_time_limit|default:0 }}">
-                    
+
+                    {# EXAM-P1-05: "bu sual formada aktivdir" markeri. Per-question
+                       timer bitəndə disableSlideInputs bunu da disable edir (disabled
+                       input POST-a düşmür), ona görə server həmin sualın saxlanmış
+                       cavabını SİLMİR (əvvəlki: absent field = boş cavab = itki). #}
+                    <input type="hidden" name="q_present_{{ q.id }}" value="1">
+
                     <div class="question-content">
                         <div class="question-card-header">
                             <div class="question-kicker">

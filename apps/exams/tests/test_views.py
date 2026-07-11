@@ -2923,6 +2923,41 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(first_answer.text_answer, "New first answer")
         self.assertEqual(second_answer.text_answer, "Keep second answer")
 
+    def test_finish_preserves_answer_of_absent_timer_expired_question(self):
+        """EXAM-P1-05: per-question timer bitib inputları disable olan sual
+        (q_present markeri POST-da yoxdur) finish zamanı saxlanmış cavabı itirmir."""
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Timer Expiry Preservation Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="written",
+        )
+        written_exam.allowed_users.add(self.student)
+        q1 = ExamQuestion.objects.create(exam=written_exam, text="Q1 timed out", order=1, points=1)
+        q2 = ExamQuestion.objects.create(exam=written_exam, text="Q2 active", order=2, points=1)
+        attempt = ExamAttempt.objects.create(
+            user=self.student, exam=written_exam, status="in_progress", attempt_number=1
+        )
+        a1 = ExamAnswer.objects.create(attempt=attempt, question=q1, text_answer="Saved before timeout")
+        a2 = ExamAnswer.objects.create(attempt=attempt, question=q2, text_answer="")
+
+        # Finish POST: q1 disabled (marker + field absent), yalnız q2 submit olunur.
+        response = self.client.post(
+            reverse("exams:take_exam", args=[written_exam.slug, attempt.id]),
+            {
+                "submit_action": "finish",
+                f"q_present_{q2.id}": "1",
+                f"q_{q2.id}": "Answer for active question",
+            },
+        )
+        self.assertIn(response.status_code, (200, 302))
+        a1.refresh_from_db()
+        a2.refresh_from_db()
+        # q1-in saxlanmış cavabı QORUNUR (absent field onu silmir).
+        self.assertEqual(a1.text_answer, "Saved before timeout")
+        self.assertEqual(a2.text_answer, "Answer for active question")
+
     @override_settings(EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED=False)
     def test_take_exam_autosave_ignores_file_and_paint_payloads(self):
         written_exam = Exam.objects.create(

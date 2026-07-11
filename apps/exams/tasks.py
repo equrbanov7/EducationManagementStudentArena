@@ -41,6 +41,40 @@ def expire_stale_resumed_attempts():
     return expired
 
 
+@shared_task(name="exams.reap_stuck_extraction_jobs")
+def reap_stuck_extraction_jobs(lease_seconds: int = 1200):
+    """EXAM-P1-15: crash-safe lease reaper.
+
+    Bir ``TextExtractionJob`` PENDING→PROCESSING atomik claim edildikdən sonra
+    icraçı (worker və ya inline-fallback) crash edərsə, job əbədi PROCESSING-də
+    ilişib qalırdı — istifadəçi status poll edir, heç vaxt nəticə gəlmir. Bu
+    task ``started_at`` üstündən ``lease_seconds`` (default task time_limit-dən
+    böyük) keçmiş PROCESSING job-ları FAILED-ə keçirir ki, istifadəçi xəta
+    görüb yenidən cəhd edə bilsin. Global sweep — tenant izolyasiyası bypass ilə.
+    """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.exams.models import TextExtractionJob
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    cutoff = timezone.now() - timedelta(seconds=lease_seconds)
+    with rls_worker_atomic(), bypass_rls():
+        reaped = TextExtractionJob.objects.filter(
+            status=TextExtractionJob.STATUS_PROCESSING,
+            started_at__lt=cutoff,
+        ).update(
+            status=TextExtractionJob.STATUS_FAILED,
+            error="İcra vaxtı bitdi (lease). Zəhmət olmasa yenidən cəhd edin.",
+            finished_at=timezone.now(),
+        )
+    if reaped:
+        logger.warning("reap_stuck_extraction_jobs: %d ilişmiş job FAILED edildi", reaped)
+    return reaped
+
+
 @shared_task(name="exams.notify_upcoming_final_exams")
 def notify_upcoming_final_exams():
     """

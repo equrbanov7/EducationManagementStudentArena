@@ -374,8 +374,22 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
 
         autosave_changed_question_ids = _posted_autosave_question_ids(request, action=action)
 
+        # EXAM-P1-05: per-question timer bitəndə həmin sualın inputları (o
+        # cümlədən gizli "q_present_" markeri) disable olur və POST-a düşmür.
+        # Belə sualı finish zamanı emal etsək, boş POST saxlanmış cavabı
+        # SİLƏRDİ. Marker mövcud formalarda absent sualları ötürürük; markersiz
+        # (köhnə/keşlənmiş) formalar üçün köhnə davranış qalır (geriyə-uyğun).
+        form_has_presence_markers = any(key.startswith("q_present_") for key in request.POST)
+
         for q in questions:
             if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
+                continue
+
+            if (
+                autosave_changed_question_ids is None
+                and form_has_presence_markers
+                and request.POST.get(f"q_present_{q.id}") != "1"
+            ):
                 continue
 
             answer_data = answers_by_qid.get(q.id) or {}

@@ -114,13 +114,24 @@ def student_visible_pin(exam, user) -> str | None:
 
 
 def verify_student_pin(exam, user, raw_pin: str) -> bool:
-    """İmtahana giriş üçün PIN doğrulaması (sabit-vaxt müqayisə)."""
+    """İmtahana giriş üçün PIN doğrulaması (sabit-vaxt müqayisə).
+
+    EXAM-P1-08: revoke olunmuş və ya vaxtı keçmiş PIN doğrulanmır — lakin
+    sabit-vaxt davranışını qorumaq üçün müqayisə həmişə icra olunur.
+    """
     pin = None
     if user is not None and getattr(user, "id", None):
-        pin = ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_hash").first()
+        pin = (
+            ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_hash", "expires_at", "revoked_at").first()
+        )
     stored = pin.pin_hash if pin else _DUMMY_HASH
     matched = check_password(raw_pin or "", stored)
-    return bool(pin) and matched
+    ok = bool(pin) and pin.is_usable() and matched
+    # EXAM-P1-20: PIN giriş nəticəsini SLI kimi qeyd et.
+    from apps.exams.metrics import record_pin_attempt
+
+    record_pin_attempt("success" if ok else "failure")
+    return ok
 
 
 def resolve_student_pin_login(username: str, raw_pin: str):
@@ -150,6 +161,7 @@ def resolve_student_pin_login(username: str, raw_pin: str):
         exam__exam_type_extended="final",
     ).select_related("exam", "exam__organization")
     for pin in pins:
-        if check_password(raw_pin, pin.pin_hash or ""):
+        # EXAM-P1-08: revoke/expiry olunmuş PIN girişi keçirməməlidir.
+        if pin.is_usable() and check_password(raw_pin, pin.pin_hash or ""):
             return pin.exam, user
     return None, None

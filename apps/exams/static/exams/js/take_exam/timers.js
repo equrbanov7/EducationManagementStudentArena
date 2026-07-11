@@ -39,7 +39,9 @@
             ctx.examForm.appendChild(hiddenInput);
             ns.progress.syncMarkedQuestionInput(ctx);
             ns.config.refreshFormCsrfToken(ctx);
-            ns.draft.persistLocalDraft(ctx);
+            // EXAM-P1-07: finish edərkən localStorage-dakı plaintext cavab
+            // qaralamasını SAXLAMA — təmizlə (paylaşılan cihazda qalıq qalmasın).
+            ns.draft.clearLocalDraft(ctx);
             localStorage.removeItem(ctx.storageKey);
             ctx.examForm.submit();
         }
