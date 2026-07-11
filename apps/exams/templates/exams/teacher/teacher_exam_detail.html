@@ -213,11 +213,14 @@
 
                     <form method="post" action="{% url 'exams:toggle_exam_active' exam.slug %}" class="inline-action-form">
                         {% csrf_token %}
+                        {# Seq3: müəllimin GÖRDÜYÜ niyyət göndərilir — paralel tab double-flip etməsin. #}
                         {% if exam.is_active %}
+                            <input type="hidden" name="desired_state" value="0">
                             <button type="submit" class="action-btn warning-btn">
                                 <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% else %}
+                            <input type="hidden" name="desired_state" value="1">
                             <button type="submit" class="action-btn success-btn">
                                 <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_exam_detail" %}
                             </button>
