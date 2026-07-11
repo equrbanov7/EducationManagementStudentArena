@@ -19,13 +19,16 @@ from ...constants import (
     APPEAL_STATUS_UNDER_REVIEW,
     APPEAL_STATUS_VALUES,
     APPEAL_TYPE_CHOICES,
+    APPEAL_WINDOW_DAYS,
 )
 from ...models import AppealItem
 from ...selectors import filter_student_appeals, paginate_student_appeals, student_appeals_queryset
 from ...services import (
+    appeal_deadline,
     appeal_item_result_visible_to_student,
     can_create_appeal,
     create_appeal,
+    is_within_appeal_window,
     remaining_window_seconds,
 )
 from ..shared._helpers import _marked_question_map
@@ -76,6 +79,42 @@ def _parse_items_from_post(request, delivered_question_ids):
     return items
 
 
+def _attempt_appeals_for_student(attempt):
+    """Bu attempt üzrə tələbənin apellyasiyaları (nəticə/status baxışı üçün)."""
+    from ...models import Appeal
+
+    appeals = list(
+        Appeal.objects.filter(attempt=attempt, student=attempt.user).prefetch_related("items").order_by("-created_at")
+    )
+    for appeal in appeals:
+        has_hidden_decision = any(not appeal_item_result_visible_to_student(item) for item in appeal.items.all())
+        appeal.student_display_status = APPEAL_STATUS_UNDER_REVIEW if has_hidden_decision else appeal.status
+        appeal.student_display_status_label = APPEAL_STATUS_LABELS.get(
+            appeal.student_display_status,
+            appeal.get_status_display(),
+        )
+    return appeals
+
+
+def _render_appeal_window_closed(request, exam, attempt, *, window_closed):
+    """Pəncərə bağlı (və ya icazə yox) — read-only appeal səhifəsi."""
+    is_profile_results_request = _is_profile_results_request(request)
+    context = {
+        "exam": exam,
+        "attempt": attempt,
+        "appeal_window_closed": True,
+        "appeal_window_days": APPEAL_WINDOW_DAYS,
+        "appeal_deadline": appeal_deadline(attempt),
+        "window_expired": window_closed,
+        "attempt_appeals": _attempt_appeals_for_student(attempt),
+        "result_url": _result_url(exam, attempt, request),
+        "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
+        # Read-only rejim üçün form dəyişənləri boş/deaktiv.
+        "answers": [],
+    }
+    return render(request, "appeals/student/appeal_create.html", context)
+
+
 @login_required
 def appeal_create(request, attempt_id):
     ensure_student_exam_tenant_context(request)
@@ -89,11 +128,12 @@ def appeal_create(request, attempt_id):
         raise Http404
 
     if not can_create_appeal(request, attempt):
-        messages.error(
-            request,
-            pgettext("appeals.view.message", "Apellyasiya müddəti bitib və ya icazəniz yoxdur."),
-        )
-        return redirect(_result_url(exam, attempt, request))
+        # UX: pəncərə (3 gün) bağlanıbsa çılpaq error/redirect əvəzinə oxu-rejimli
+        # "müddət bitib" səhifəsi göstərilir — tələbə əvvəlki nəticəyə və öz
+        # apellyasiyalarının nəticəsinə baxa bilir, yenidən vermək istəsə isə
+        # 3-gün qaydası aydın UX formatında görünür.
+        window_closed = not is_within_appeal_window(attempt)
+        return _render_appeal_window_closed(request, exam, attempt, window_closed=window_closed)
 
     delivered_answers = list(
         attempt.answers.select_related("question")

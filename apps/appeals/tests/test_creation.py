@@ -50,7 +50,9 @@ class AppealCreationTests(TestCase):
         self.q1 = ExamQuestion.objects.create(exam=self.exam, order=1, text="Q1")
         self.q2 = ExamQuestion.objects.create(exam=self.exam, order=2, text="Q2")
         self.q_other = ExamQuestion.objects.create(exam=self.exam, order=3, text="Not delivered")
-        self.attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, status="submitted")
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student, exam=self.exam, status="submitted", finished_at=timezone.now()
+        )
         # Delivered set = q1, q2 (q_other NOT delivered).
         ExamAnswer.objects.create(attempt=self.attempt, question=self.q1)
         ExamAnswer.objects.create(attempt=self.attempt, question=self.q2)
@@ -161,6 +163,70 @@ class AppealCreateViewTests(TestCase):
         self.assertContains(response, "data-i18n-fix-both", html=False)
         self.assertContains(response, 'aria-disabled="true"', html=False)
         self.assertNotContains(response, "data-appeal-submit disabled", html=False)
+
+    def _close_window(self):
+        from datetime import timedelta
+
+        # İmtahan 4 gün əvvəl bitib → 3-günlük pəncərə bağlıdır.
+        self.attempt.finished_at = timezone.now() - timedelta(days=4)
+        self.attempt.save(update_fields=["finished_at"])
+
+    def test_closed_window_shows_readonly_notice_not_form(self):
+        """3 gün keçib: səhifə 200 qaytarır, form yox, "müddət bitib" bildirişi var."""
+        self._close_window()
+        response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Apellyasiya müddəti bitib")
+        self.assertContains(response, "Nəticəyə bax")
+        # Göndərmə formu görünmür.
+        self.assertNotContains(response, "data-appeal-search", html=False)
+        self.assertNotContains(response, "data-appeals-form", html=False)
+
+    def test_closed_window_shows_existing_appeal_result(self):
+        """Pəncərə açıq ikən verilmiş appeal, pəncərə bağlananda da statusu ilə görünür."""
+        create_appeal(
+            attempt=self.attempt,
+            student=self.student,
+            items=[
+                {"question_id": self.question.id, "appeal_type": APPEAL_TYPE_WRONG_ANSWER_KEY, "comment": VALID_COMMENT}
+            ],
+        )
+        self._close_window()
+        response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Apellyasiyanızın nəticəsi")
+
+    def test_closed_window_post_does_not_create_appeal(self):
+        """Bağlı pəncərədə crafted POST appeal yaratmır (view + servis guard)."""
+        self._close_window()
+        response = self.client.post(
+            reverse("appeals:appeal_create", args=[self.attempt.id]),
+            {
+                f"appeal_q_{self.question.id}": "1",
+                f"appeal_type_{self.question.id}": APPEAL_TYPE_WRONG_ANSWER_KEY,
+                f"comment_{self.question.id}": VALID_COMMENT,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        from apps.appeals.models import Appeal
+
+        self.assertFalse(Appeal.objects.filter(attempt=self.attempt).exists())
+
+    def test_service_rejects_appeal_after_window(self):
+        """create_appeal servisi bağlı pəncərədə ValidationError atır (defense-in-depth)."""
+        self._close_window()
+        with self.assertRaises(ValidationError):
+            create_appeal(
+                attempt=self.attempt,
+                student=self.student,
+                items=[
+                    {
+                        "question_id": self.question.id,
+                        "appeal_type": APPEAL_TYPE_WRONG_ANSWER_KEY,
+                        "comment": VALID_COMMENT,
+                    }
+                ],
+            )
 
     def test_create_page_from_profile_results_hides_answer_details(self):
         response = self.client.get(
