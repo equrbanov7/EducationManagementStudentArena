@@ -183,6 +183,50 @@ class TestAnswerSnapshotIntegrity(TestCase):
         for ans in answers:
             snap = ans.question_snapshot
             self.assertTrue(snap, "snapshot boş olmamalıdır")
-            self.assertEqual(snap.get("v"), 1)
+            self.assertEqual(snap.get("v"), 2)
             snapshot_correct = {o["id"] for o in snap["options"] if o["is_correct"]}
             self.assertEqual(snapshot_correct, {correct_by_qid[ans.question_id]})
+
+    def test_v2_snapshot_freezes_question_text_and_option_text(self):
+        """EXAM-P0-03 (v2): mətn/variant mətni dondurulur; sual redaktəsi
+        çatdırılma görünüşünü dəyişmir."""
+        from apps.exams.services.question_snapshot import delivered_question_view
+
+        q = self._question(order=1)
+        opt_a = self._option(q, text="Original A", is_correct=True)
+        self._option(q, text="Original B", is_correct=False)
+        self.exam.random_question_count = 1
+        self.exam.save(update_fields=["random_question_count"])
+
+        attempt = self._attempt()
+        generate_random_questions_for_attempt(attempt)
+        answer = attempt.answers.get(question=q)
+        snap = answer.question_snapshot
+        self.assertEqual(snap["v"], 2)
+        self.assertEqual(snap["text"], "Q1")
+        opt_texts = {o["id"]: o["text"] for o in snap["options"]}
+        self.assertEqual(opt_texts[opt_a.id], "Original A")
+
+        # Müəllim sual mətni + variant mətnini dəyişir.
+        q.text = "EDITED QUESTION"
+        q.save(update_fields=["text"])
+        ExamQuestionOption.objects.filter(pk=opt_a.id).update(text="EDITED A")
+
+        # Çatdırılma görünüşü snapshot-dan gəlir — dəyişmir.
+        view = delivered_question_view(answer)
+        self.assertTrue(view["from_snapshot"])
+        self.assertEqual(view["text"], "Q1")
+        view_opt = {o["id"]: o["text"] for o in view["options"]}
+        self.assertEqual(view_opt[opt_a.id], "Original A")
+
+    def test_delivered_view_falls_back_to_live_for_legacy(self):
+        """v1/boş snapshot → canlı suala düşür (geriyə-uyğunluq)."""
+        from apps.exams.services.question_snapshot import delivered_question_view
+
+        q = self._question(order=1)
+        self._option(q, text="Live A", is_correct=True)
+        attempt = self._attempt()
+        answer = ExamAnswer.objects.create(attempt=attempt, question=q)  # snapshot={} default
+        view = delivered_question_view(answer)
+        self.assertFalse(view["from_snapshot"])
+        self.assertEqual(view["text"], "Q1")
