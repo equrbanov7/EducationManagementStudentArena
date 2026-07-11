@@ -131,6 +131,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         related_name="graded_exam_attempts",
         verbose_name=pgettext_lazy("exams.model.attempt.field", "graded_by"),
     )
+    # EXAM-P1-06: autosave optimistic concurrency. Hər uğurlu server yazısında
+    # artır; client öz base_revision-unu göndərir. Uyğunsuzluq (başqa tab daha
+    # yeni yazıb) → 409, stale overwrite qarşısı alınır.
+    autosave_revision = models.PositiveIntegerField(default=0)
     supervision_status = models.CharField(
         max_length=20,
         choices=SUPERVISION_STATUS_CHOICES,

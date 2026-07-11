@@ -121,6 +121,10 @@
         if (ctx.markedQuestionIdsField) {
             formData.append("marked_question_ids", ctx.markedQuestionIdsField.value);
         }
+        // EXAM-P1-06: OCC — cari bildiyimiz server revision-u göndər.
+        if (ctx.autosaveRevisionField) {
+            formData.append("autosave_revision", ctx.autosaveRevisionField.value || "0");
+        }
 
         ctx.dirtyQuestionIds.forEach(function (questionId) {
             formData.append("changed_questions[]", questionId);
@@ -308,6 +312,26 @@
                 body: formData
             })
                 .then(function (res) {
+                    // EXAM-P1-06: OCC konflikti — başqa tab daha yeni yazıb.
+                    if (res.status === 409) {
+                        return res.json().then(function (data) {
+                            if (notification) {
+                                ns.notifications.hide(notification);
+                            }
+                            ns.notifications.show(
+                                data.message || ctx.i18n.autosaveConflict || "Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin.",
+                                "error",
+                                8000
+                            );
+                            // Server revision-u qəbul et; növbəti yazı düzgün base ilə getsin.
+                            if (ctx.autosaveRevisionField && typeof data.server_revision !== "undefined") {
+                                ctx.autosaveRevisionField.value = String(data.server_revision);
+                            }
+                            ctx.hasUnsavedChanges = true;
+                            ns.draft.persistLocalDraft(ctx);
+                            throw new Error("autosave_conflict");
+                        });
+                    }
                     if (!res.ok) {
                         throw new Error(res.status === 403 ? "csrf_or_session" : "Draft save failed");
                     }
@@ -323,6 +347,10 @@
                     return res.json();
                 })
                 .then(function (data) {
+                    // EXAM-P1-06: serverin yeni revision-unu qəbul et (növbəti OCC üçün).
+                    if (ctx.autosaveRevisionField && typeof data.server_revision !== "undefined") {
+                        ctx.autosaveRevisionField.value = String(data.server_revision);
+                    }
                     if (sentRevision === ctx.answerRevision) {
                         if (effectiveAction === "autosave" && !ctx.autoSaveBinaryUploadsEnabled) {
                             sentDirtyQuestionIds.forEach(function (questionId) {
@@ -380,6 +408,12 @@
                 .catch(function (err) {
                     if (notification) {
                         ns.notifications.hide(notification);
+                    }
+                    // EXAM-P1-06: OCC konflikti artıq öz mesajını göstərib —
+                    // saveError göstərmə və auto-retry queue etmə (stale overwrite
+                    // qarşısı; istifadəçi səhifəni yeniləyib davam etməlidir).
+                    if (err && err.message === "autosave_conflict") {
+                        throw err;
                     }
                     ctx.hasUnsavedChanges = true;
                     ns.draft.persistLocalDraft(ctx);
