@@ -107,7 +107,7 @@ class AssignStudentsForm(forms.Form):
     def __init__(self, *args, organization=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["exam"].queryset = Exam.objects.filter(
-            organization=organization, exam_type_extended="final", is_archived=False
+            organization=organization, exam_type_extended="final", is_archived=False, is_deleted=False
         ).order_by("-created_at")
         self.fields["exam"].widget.attrs.update(
             {

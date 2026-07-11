@@ -359,6 +359,9 @@ urlpatterns = [
     ),
     path("<slug:slug>/edit/", views.createAndEditExamView, name="edit_exam"),
     path("<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
+    path("deleted/", views.deleted_exams_list, name="deleted_exams_list"),
+    path("<slug:slug>/restore/", views.restore_exam, name="restore_exam"),
+    path("<slug:slug>/permanent-delete/", views.permanent_delete_exam, name="permanent_delete_exam"),
     path("<slug:slug>/archive/", views.toggle_exam_archive, name="toggle_exam_archive"),
     path("<slug:slug>/duplicate/", views.duplicate_exam, name="duplicate_exam"),
     # ==========================

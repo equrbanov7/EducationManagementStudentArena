@@ -15,6 +15,7 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.db.models import F
 from django.utils import timezone
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -157,12 +158,16 @@ def verify_ticket_pin(ticket, raw_pin: str) -> bool:
 
     max_failures = int(getattr(settings, "FINAL_EXAM_PIN_MAX_FAILURES", 5))
     lock_minutes = int(getattr(settings, "FINAL_EXAM_PIN_LOCK_MINUTES", 10))
-    ticket.pin_failed_attempts += 1
-    update_fields = ["pin_failed_attempts", "updated_at"]
+    # Atomic increment (F()) so parallel wrong-PIN attempts cannot lose counts
+    # and slip past the lockout threshold under a race (EXAM-SEC-003).  Re-read
+    # the persisted value before deciding whether to arm the lockout window, and
+    # arm it with a conditional UPDATE so only one racing request sets it.
+    type(ticket).objects.filter(pk=ticket.pk).update(pin_failed_attempts=F("pin_failed_attempts") + 1, updated_at=now)
+    ticket.refresh_from_db(fields=["pin_failed_attempts", "pin_locked_until"])
     if ticket.pin_failed_attempts >= max_failures and not ticket.is_pin_locked:
-        ticket.pin_locked_until = now + timedelta(minutes=lock_minutes)
-        update_fields.append("pin_locked_until")
-    ticket.save(update_fields=update_fields)
+        locked_until = now + timedelta(minutes=lock_minutes)
+        type(ticket).objects.filter(pk=ticket.pk, pin_locked_until__isnull=True).update(pin_locked_until=locked_until)
+        ticket.pin_locked_until = locked_until
     return False
 
 

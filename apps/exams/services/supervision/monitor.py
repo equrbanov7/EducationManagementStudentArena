@@ -107,7 +107,9 @@ def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None)
             "incidents_qs": SupervisionIncident.objects.none(),
         }
 
-    exam_choices_qs = exam_queryset if exam_queryset is not None else Exam.objects.filter(organization=organization)
+    exam_choices_qs = (
+        exam_queryset if exam_queryset is not None else Exam.objects.filter(organization=organization, is_deleted=False)
+    )
     exam_choices_qs = exam_choices_qs.filter(organization=organization)
 
     monitor_exams = exam_choices_qs

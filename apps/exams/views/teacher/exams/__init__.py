@@ -2,7 +2,10 @@
 
 from .actions import (  # noqa: F401
     delete_exam,
+    deleted_exams_list,
     duplicate_exam,
+    permanent_delete_exam,
+    restore_exam,
     toggle_exam_active,
     toggle_exam_archive,
     toggle_exam_results_visibility,
@@ -28,7 +31,10 @@ __all__ = [
     "invigilator_search",
     "createAndEditExamView",
     "delete_exam",
+    "deleted_exams_list",
     "duplicate_exam",
+    "permanent_delete_exam",
+    "restore_exam",
     "exam_available_question_count",
     "grant_extra_attempt",
     "group_search",

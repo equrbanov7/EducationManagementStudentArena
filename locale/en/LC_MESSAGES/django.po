@@ -5624,7 +5624,7 @@ msgstr "Are you sure you want to delete this exam?"
 
 msgctxt "exams.dashboard"
 msgid "delete_modal_warn"
-msgstr ""
+msgstr "Results are not deleted — the exam moves to Trash and can be restored from there."
 "This action cannot be undone. All attempts and results for this exam will "
 "also be deleted."
 
@@ -28813,3 +28813,97 @@ msgstr "Trial attempt"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "selected_subject"
 msgstr "Selected subject"
+
+# --- Soft-delete / Trash (exam deletion preserves results) ---
+
+msgctxt "exams.view.exams.message"
+msgid "exam_soft_deleted"
+msgstr "Exam deleted — results are kept (in Trash)."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_restored"
+msgstr "Exam restored."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_permanently_deleted"
+msgstr "Exam permanently deleted."
+
+msgctxt "exams.view.results.message"
+msgid "cannot_grade_deleted_exam"
+msgstr "You can't grade a deleted exam. Restore it first."
+
+msgctxt "exams.view.results.message"
+msgid "deleted_exam_readonly_notice"
+msgstr "This exam is in Trash — results are shown read-only."
+
+msgctxt "exams.view.results.message"
+msgid "back_to_trash"
+msgstr "Back to Trash"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_title"
+msgstr "Deleted exams"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_subtitle"
+msgstr "Deleted exams keep their results. From here you can view them, restore an exam, or delete it permanently."
+
+msgctxt "exams.template.deleted_exams"
+msgid "back_to_my_exams"
+msgstr "Back to my exams"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_exam"
+msgstr "Exam"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_results"
+msgstr "Results"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_deleted_at"
+msgstr "Deleted at"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_actions"
+msgstr "Actions"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_view_results"
+msgstr "View results"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_restore"
+msgstr "Restore"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_permanent_delete"
+msgstr "Delete permanently"
+
+msgctxt "exams.template.deleted_exams"
+msgid "confirm_permanent_delete"
+msgstr "This exam and all its results will be permanently deleted. This cannot be undone. Continue?"
+
+msgctxt "exams.template.deleted_exams"
+msgid "empty_state"
+msgstr "Trash is empty."
+
+msgctxt "profile.my_exams"
+msgid "trash_link"
+msgstr "Trash"
+
+msgctxt "exams.model.exam.field"
+msgid "is_deleted"
+msgstr "is deleted"
+
+msgctxt "exams.model.exam.field"
+msgid "deleted_at"
+msgstr "deleted at"
+
+msgctxt "exams.model.exam.help"
+msgid "is_deleted"
+msgstr "Soft delete — the exam is hidden, results are kept."
+
+msgctxt "exams.model.exam.help"
+msgid "deleted_at"
+msgstr "When the exam was soft-deleted."
