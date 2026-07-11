@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import Count
 
 from apps.exams.constants import LABELS
-from apps.exams.models import ExamAnswer
+from apps.exams.models import ExamAnswer, ExamQuestionOption
 from apps.exams.services.language_variants import effective_needed_count_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer
 
@@ -378,8 +378,29 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                     use_difficulty_balance=use_difficulty_balance,
                 )
 
-        # ExamAnswer-ları bulk yarat
+        # ExamAnswer-ları bulk yarat — hər birinə immutable sual snapshot-u ilə
+        # (EXAM-INTEGRITY-001): çatdırılan variant/düzgünlük dondurulur ki,
+        # sonradan sualın redaktəsi keçmiş nəticələri geriyə dönük dəyişməsin.
+        # Variantlar TƏK sorğu ilə yığılır (N+1 yox).
+        options_by_qid: dict[int, list] = {}
+        for opt in ExamQuestionOption.objects.filter(question_id__in=[q.id for q in selected_qs]).only(
+            "id", "question_id", "is_correct"
+        ):
+            options_by_qid.setdefault(opt.question_id, []).append({"id": opt.id, "is_correct": bool(opt.is_correct)})
+
         ExamAnswer.objects.bulk_create(
-            [ExamAnswer(attempt=attempt, question=q) for q in selected_qs],
+            [
+                ExamAnswer(
+                    attempt=attempt,
+                    question=q,
+                    question_snapshot={
+                        "v": 1,
+                        "points": int(getattr(q, "points", 1) or 1),
+                        "answer_mode": getattr(q, "answer_mode", "") or "",
+                        "options": options_by_qid.get(q.id, []),
+                    },
+                )
+                for q in selected_qs
+            ],
             ignore_conflicts=True,
         )

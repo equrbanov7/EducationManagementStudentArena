@@ -366,6 +366,14 @@ class ExamAnswer(AnswerGradingMixin, models.Model):
     paint_image = models.ImageField(upload_to="exam_paints/%Y/%m/", null=True, blank=True)
     paint_updated_at = models.DateTimeField(null=True, blank=True)
     paint_data_url = models.TextField(null=True, blank=True)
+    # Immutable sual snapshot-u (EXAM-INTEGRITY-001): sual çatdırılan anda balı,
+    # cavab rejimi və variantlarının düzgünlüyü dondurulur. Test tipli
+    # qiymətləndirmə (result_calculation) snapshot varsa ondan hesablanır — belə
+    # ki, sonradan sualın/variantın redaktəsi keçmiş cəhdlərin balını GERİYƏ
+    # DÖNÜK dəyişməsin. Boş olduqda (köhnə cəhdlər) qiymət canlı suala görə
+    # hesablanır (tam geriyə-uyğunluq). Format: {"v":1,"points":int,
+    # "answer_mode":str,"options":[{"id":int,"is_correct":bool}, ...]}.
+    question_snapshot = models.JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.answer.meta", "singular")
