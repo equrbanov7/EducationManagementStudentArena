@@ -80,4 +80,54 @@ def delivered_question_view(answer):
     }
 
 
-__all__ = ["build_question_snapshot", "delivered_question_view"]
+def _media_url(name):
+    """Storage-relativ ad → tam URL (canlı `FieldFile.url` ilə eyni backend)."""
+    if not name:
+        return ""
+    from django.core.files.storage import default_storage
+
+    try:
+        return default_storage.url(name)
+    except (ValueError, NotImplementedError):
+        return ""
+
+
+def delivered_question_render(answer, selected_ids):
+    """Nəticə/appeal template-i üçün dondurulmuş sual görünüşü.
+
+    ``delivered_question_view``-nin üstünə media URL-lərini və hər variant üçün
+    ``is_selected`` bayrağını (dondurulmuş seçimdən) əlavə edir ki, template
+    canlı ``q.text``/``opt in ans.selected_options.all`` əvəzinə çatdırılma
+    anındakı görünüşü render etsin. ``selected_ids`` — dondurulmuş (yoxdursa
+    canlı) seçilmiş variant id-ləri.
+    """
+    from types import SimpleNamespace
+
+    view = delivered_question_view(answer)
+    options = [
+        SimpleNamespace(
+            id=opt["id"],
+            text=opt.get("text", ""),
+            label=opt.get("label", ""),
+            is_correct=bool(opt.get("is_correct")),
+            is_selected=opt["id"] in selected_ids,
+        )
+        for opt in view["options"]
+    ]
+    return SimpleNamespace(
+        text=view["text"],
+        correct_answer=view["correct_answer"],
+        image_url=_media_url(view["image"]),
+        video_url=_media_url(view["video"]),
+        points=view["points"],
+        answer_mode=view["answer_mode"],
+        options=options,
+        from_snapshot=view["from_snapshot"],
+    )
+
+
+__all__ = [
+    "build_question_snapshot",
+    "delivered_question_view",
+    "delivered_question_render",
+]

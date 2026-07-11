@@ -159,18 +159,19 @@
         <div class="appeal-list">
             {% for answer in answers %}
             {% with q=answer.question %}
+            {% with delivered=answer.delivered %}
             {% with is_marked=marked_question_by_qid|get_item:q.id %}
             {% with already_appealed=appealed_question_by_qid|get_item:q.id %}
             <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}{% if already_appealed %} is-locked{% endif %}"
                      data-appeal-card
                      data-appeal-marked="{% if is_marked %}1{% else %}0{% endif %}"
                      data-appeal-locked="{% if already_appealed %}1{% else %}0{% endif %}"
-                     data-appeal-text="{{ q.text|striptags }}{% if not hide_answer_details %} {{ answer.text_answer|default_if_none:''|striptags }} {{ q.correct_answer|default_if_none:''|striptags }}{% endif %}">
+                     data-appeal-text="{{ delivered.text|striptags }}{% if not hide_answer_details %} {{ answer.text_answer|default_if_none:''|striptags }} {{ delivered.correct_answer|default_if_none:''|striptags }}{% endif %}">
                 <div class="appeal-question-card__top">
                     <div class="appeal-question-card__main">
                         <p class="appeal-question-title">
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
-                            {{ q.text|striptags|truncatechars:190 }}
+                            {{ delivered.text|striptags|truncatechars:190 }}
                         </p>
                         {% if hide_answer_details and exam.exam_type == "test" %}
                         <div class="appeal-meta">
@@ -218,12 +219,12 @@
                     {% if exam.exam_type == "test" %}
                     <div class="appeal-answer-review__label">{% trans "Variantlar" context "appeals.template" %}</div>
                     <ul class="appeal-options">
-                        {% for opt in q.options.all %}
-                        <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt in answer.selected_options.all and not opt.is_correct %} is-wrong{% endif %}">
+                        {% for opt in delivered.options %}
+                        <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt.is_selected and not opt.is_correct %} is-wrong{% endif %}">
                             <span class="appeal-option__icon">
                                 {% if opt.is_correct %}
                                 <i class="fas fa-check-circle"></i>
-                                {% elif opt in answer.selected_options.all %}
+                                {% elif opt.is_selected %}
                                 <i class="fas fa-times-circle"></i>
                                 {% else %}
                                 <i class="far fa-circle"></i>
@@ -231,7 +232,7 @@
                             </span>
                             <span class="appeal-option__text">{% if opt.label %}<b>{{ opt.label }}.</b> {% endif %}{{ opt.text }}</span>
                             <span class="appeal-option__tags">
-                                {% if opt in answer.selected_options.all %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
+                                {% if opt.is_selected %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
                                 {% if opt.is_correct %}<span class="appeal-option__tag appeal-option__tag--correct">{% trans "Düzgün cavab" context "appeals.template" %}</span>{% endif %}
                             </span>
                         </li>
@@ -247,9 +248,9 @@
                     {% else %}
                     <div class="appeal-answer-review__empty">{% trans "Cavab yazılmayıb" context "appeals.template" %}</div>
                     {% endif %}
-                    {% if q.correct_answer %}
+                    {% if delivered.correct_answer %}
                     <div class="appeal-answer-review__label mt-3">{% trans "Düzgün cavab" context "appeals.template" %}</div>
-                    <div class="appeal-answer-review__text">{{ q.correct_answer|linebreaksbr }}</div>
+                    <div class="appeal-answer-review__text">{{ delivered.correct_answer|linebreaksbr }}</div>
                     {% endif %}
                     {% endif %}
                 </div>
@@ -291,6 +292,7 @@
                     </div>
                 </div>
             </section>
+            {% endwith %}
             {% endwith %}
             {% endwith %}
             {% endwith %}
