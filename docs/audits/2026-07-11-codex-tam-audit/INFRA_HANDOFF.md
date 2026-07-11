@@ -83,7 +83,15 @@ browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
 - Seq1 — grade-event append-only ledger + original grader identity (exams 0048,
   organizations 0022 RLS); appeal reviewer independence müəllif + ilk grader-ə.
 - Seq2 — full delivered snapshot v2 (mətn/media/variant mətni/label dondurulur;
-  `delivered_question_view` accessor; geriyə-uyğun).
+  `delivered_question_view` accessor; geriyə-uyğun) **+ snapshot-only render**:
+  nəticə (`exam_result.html`) və appeal-create (`appeal_create.html`) səhifələri
+  artıq canlı `q.text`/`opt in ans.selected_options` əvəzinə dondurulmuş
+  `delivered_question_render()` görünüşündən render olunur (mətn/variant/media/
+  düzgün-cavab + frozen `is_selected`); köhnə (snapshotsuz) cəhdlər canlıya düşür.
+- Seq4 (autosave OCC hissəsi) — client `autosave_revision` göndərir; server
+  daha yenidirsə stale yazı 409 `{conflict, server_revision}` ilə rədd edilir
+  (last-write-wins clobber-i aradan qaldırır); JS 409-da revision-u yeniləyir,
+  normal bildiriş göstərir. base yoxdursa geriyə-uyğun. `record_autosave` SLI.
 - Seq6 (qismən) — exam biznes SLI-ları call site-lara wire olunub (start/submit/
   autosave/result/PIN/supervision); `attach_test_result_summaries` query-budget
   testi mövcuddur.
@@ -91,10 +99,9 @@ browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
 **Qalan — browser E2E tələb edir (kritik exam-taking axışı, vizual verifikasiya):**
 - Seq3 — formal exam/result state machine + atomik publish gate (draft/review/
   published/appeal_closed). Böyük; publish UX browser-də yoxlanmalıdır.
-- Seq4 — server-authoritative per-question deadline + autosave OCC/409 conflict
-  UX. JS + multi-tab browser E2E tələb edir.
-- Seq2-nin qalanı — nəticə/appeal template-inin canlı `q.text` əvəzinə
-  `delivered_question_view`-dən render etməsi (vizual regresiya riski).
+- Seq4 (qalan) — server-authoritative per-question deadline: per-question
+  "question shown" siqnalı + save enforcement + take_exam UI; feature-ölçülü,
+  canlı imtahan-vermə axışında multi-tab/timer browser E2E tələb edir.
 
 **Qalan — məhsul-həssas qərar:**
 - Seq5 — access code at-rest şifrələmə: access code müəllim-görünən paylaşılan
