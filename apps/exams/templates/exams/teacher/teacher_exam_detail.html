@@ -200,11 +200,14 @@
                           action="{% url 'exams:toggle_exam_results_visibility' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                           class="inline-action-form">
                         {% csrf_token %}
+                        {# Görünən niyyət göndərilir: köhnə tab eyni state-i geri çevirməsin. #}
                         {% if exam.results_hidden_from_students %}
+                            <input type="hidden" name="desired_state" value="0">
                             <button type="submit" class="action-btn visibility-show-btn">
                                 <i class="fas fa-eye"></i> {% trans "action_show_results" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% else %}
+                            <input type="hidden" name="desired_state" value="1">
                             <button type="submit" class="action-btn visibility-hide-btn">
                                 <i class="fas fa-eye-slash"></i> {% trans "action_hide_results" context "exams.template.teacher_exam_detail" %}
                             </button>

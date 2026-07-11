@@ -104,6 +104,9 @@
                 hasUnsavedChanges: false,
                 autoSaveTimer: null,
                 autoSaveRequestInFlight: false,
+                // 409-dan sonra stale local draft yeni revision-la avtomatik
+                // yazılmasın; yalnız səhifə reload-u state-i yeniləyir.
+                autosaveConflict: false,
                 answerRevision: 0,
                 questionTransitionTimer: null,
                 questionTransitionHideTimer: null,

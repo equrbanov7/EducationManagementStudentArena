@@ -188,8 +188,18 @@
                      data-index="{{ forloop.counter0 }}" 
                      data-question-id="{{ q.id }}"
                      id="slide-{{ forloop.counter0 }}"
-                     data-time-limit="{{ q.effective_time_limit|default:0 }}">
+                     data-time-limit="{{ q.effective_time_limit|default:0 }}"{% if item.server_delivery %} data-server-delivery="1"{% endif %}>
 
+                    {% if item.server_delivery %}
+                    {# EXAM-P1-04 strict delivery: vaxtlı test sualının məzmunu İLK
+                       GET-də səhifə mənbəyinə DÜŞMÜR — timer serverdə başlayanda
+                       question-seen JS injection ilə gəlir (aşağıdakı yer tutucu). #}
+                    <div class="question-content" data-server-delivery-body>
+                        <div class="server-delivery-pending" data-server-delivery-pending>
+                            <span class="skeleton transition-skeleton-line"></span>
+                        </div>
+                    </div>
+                    {% else %}
                     {# EXAM-P1-05: "bu sual formada aktivdir" markeri. Per-question
                        timer bitəndə disableSlideInputs bunu da disable edir (disabled
                        input POST-a düşmür), ona görə server həmin sualın saxlanmış
@@ -314,6 +324,7 @@
                             </div>
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
                 {% endwith %}
                 {% endwith %}

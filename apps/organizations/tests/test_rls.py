@@ -61,6 +61,7 @@ from apps.exams.models import (
     ExamAnswer,
     ExamAnswerFile,
     ExamAttempt,
+    ExamGradeEvent,
     ExamQuestion,
     ExamQuestionOption,
     ExamRoom,
@@ -1128,6 +1129,131 @@ class TestAuditLogAppendOnly:
         with bypass_rls():
             log = AuditLog.objects.create(action="view")
         assert log.pk is not None
+
+
+class TestExamGradeEventAppendOnly:
+    """Grade ledger mutations are rejected by PostgreSQL itself, even with RLS bypass."""
+
+    @pytest.fixture()
+    def grade_event(self, two_orgs):
+        from django.contrib.auth import get_user_model
+
+        org, _ = two_orgs
+        user_model = get_user_model()
+        student = user_model.objects.create_user("grade_event_student", "ges@rls.test", "pw")
+        grader = user_model.objects.create_user("grade_event_grader", "geg@rls.test", "pw")
+        with bypass_rls():
+            exam = Exam.objects.create(
+                organization=org,
+                author=org.owner,
+                title="Append-only grade ledger",
+                exam_type="written",
+            )
+            question = ExamQuestion.objects.create(exam=exam, text="Q", order=1, points=10)
+            attempt = ExamAttempt.objects.create(user=student, exam=exam, status="submitted")
+            return ExamGradeEvent.objects.create(
+                attempt=attempt,
+                question=question,
+                grader=grader,
+                old_score=None,
+                new_score=7,
+                max_points=10,
+            )
+
+    def test_raw_update_is_blocked_even_with_bypass(self, grade_event):
+        _skip_if_not_pg()
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_examgradeevent SET new_score = %s WHERE id = %s",
+                    [9, grade_event.pk],
+                )
+
+    def test_raw_delete_is_blocked_even_with_bypass(self, grade_event):
+        _skip_if_not_pg()
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute("DELETE FROM exams_examgradeevent WHERE id = %s", [grade_event.pk])
+
+    def test_fk_deletion_nullifies_reference_but_preserves_ledger_row(self, grade_event):
+        """Declared SET NULL lifecycle is the only permitted UPDATE shape."""
+        _skip_if_not_pg()
+        question = grade_event.question
+        grader = grade_event.grader
+
+        with bypass_rls():
+            question.delete()
+            grader.delete()
+
+        grade_event.refresh_from_db()
+        assert grade_event.question_id is None
+        assert grade_event.grader_id is None
+
+    def test_fk_reassignment_and_null_to_value_are_blocked(self, grade_event):
+        _skip_if_not_pg()
+        with bypass_rls():
+            replacement = ExamQuestion.objects.create(
+                exam=grade_event.attempt.exam,
+                text="Replacement question",
+                order=2,
+                points=10,
+            )
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_examgradeevent SET question_id = %s WHERE id = %s",
+                    [replacement.pk, grade_event.pk],
+                )
+
+        with bypass_rls(), connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE exams_examgradeevent SET question_id = NULL WHERE id = %s",
+                [grade_event.pk],
+            )
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_examgradeevent SET question_id = %s WHERE id = %s",
+                    [replacement.pk, grade_event.pk],
+                )
+
+    def test_cross_exam_question_insert_is_blocked(self, two_orgs):
+        """An A-tenant attempt cannot be paired with a B-tenant question in the ledger."""
+        from django.contrib.auth import get_user_model
+
+        org_a, org_b = two_orgs
+        student = get_user_model().objects.create_user("grade_cross_student", "gcs@rls.test", "pw")
+        with bypass_rls():
+            exam_a = Exam.objects.create(
+                organization=org_a,
+                author=org_a.owner,
+                title="Grade ledger A",
+                exam_type="written",
+            )
+            exam_b = Exam.objects.create(
+                organization=org_b,
+                author=org_b.owner,
+                title="Grade ledger B",
+                exam_type="written",
+            )
+            attempt_a = ExamAttempt.objects.create(user=student, exam=exam_a, status="submitted")
+            question_b = ExamQuestion.objects.create(exam=exam_b, text="B question", order=1, points=10)
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamGradeEvent.objects.create(
+                    attempt=attempt_a,
+                    question=question_b,
+                    grader=org_a.owner,
+                    old_score=None,
+                    new_score=7,
+                    max_points=10,
+                )
 
 
 class TestRLSLabsProjects:

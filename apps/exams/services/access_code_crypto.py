@@ -20,6 +20,10 @@ from django.conf import settings
 from cryptography.fernet import Fernet, InvalidToken
 
 
+class AccessCodeDecryptionError(ValueError):
+    """Stored value looks encrypted but cannot be authenticated/decrypted."""
+
+
 def _fernet() -> Fernet:
     key = urlsafe_b64encode(sha256(f"exam-access-code:{settings.SECRET_KEY}".encode()).digest())
     return Fernet(key)
@@ -33,14 +37,21 @@ def encrypt_access_code(plain: str) -> str:
 
 
 def decrypt_access_code(stored: str) -> str:
-    """Şifrlənmiş giriş kodunu aç. Boş dəyər boş; açıla bilməyən (köhnə xam
-    mətn və ya zədələnmiş) dəyər olduğu kimi qaytarılır (geriyə-uyğunluq)."""
+    """Şifrlənmiş giriş kodunu aç; yalnız real legacy 6-rəqəmli xam kodu qəbul et.
+
+    Fernet autentifikasiyası keçməyən uzun/zədələnmiş ciphertext-i xam giriş
+    koduna çevirmək fail-open davranış olardı. Köhnə sxem ``CharField(6)`` idi
+    və model səviyyəsində alfanumerik sətirlər də yaradıla bilirdi; fallback
+    buna görə yalnız exact 6 ASCII alfanumerik simvolla məhdudlaşdırılır.
+    """
     if not stored:
         return ""
     try:
         return _fernet().decrypt(stored.encode()).decode()
-    except (InvalidToken, ValueError):
-        return stored
+    except (InvalidToken, ValueError) as exc:
+        if len(stored) == 6 and stored.isascii() and stored.isalnum():
+            return stored
+        raise AccessCodeDecryptionError("Access-code ciphertext could not be authenticated.") from exc
 
 
-__all__ = ["encrypt_access_code", "decrypt_access_code"]
+__all__ = ["AccessCodeDecryptionError", "encrypt_access_code", "decrypt_access_code"]

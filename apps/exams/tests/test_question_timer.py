@@ -9,7 +9,9 @@ və siqnal göndərməmiş (köhnə client) cəhdlər geriyə-uyğun işləyir.
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -83,12 +85,34 @@ class QuestionTimerServiceTests(QuestionTimerTestBase):
         self.assertEqual(attempt.question_timing[str(q.id)], started_raw)
         self.assertLessEqual(again["remaining_seconds"], first["remaining_seconds"])
 
+    def test_mark_seen_repairs_malformed_legacy_timestamp(self):
+        q = self._question(time_limit=60)
+        attempt = self._attempt(q)
+        attempt.question_timing[str(q.id)] = {"invalid": "shape"}
+        attempt.save(update_fields=["question_timing"])
+
+        info = mark_question_seen(attempt, q)
+
+        self.assertEqual(info["limit_seconds"], 60)
+        self.assertIsInstance(attempt.question_timing[str(q.id)], str)
+
+    def test_mark_seen_rechecks_finished_state_under_row_lock(self):
+        q = self._question(time_limit=60)
+        attempt = self._attempt(q)
+        ExamAttempt.objects.filter(pk=attempt.pk).update(status="submitted", finished_at=timezone.now())
+
+        info = mark_question_seen(attempt, q)
+
+        self.assertTrue(info["attempt_finished"])
+        attempt.refresh_from_db()
+        self.assertNotIn(str(q.id), attempt.question_timing)
+
     def test_no_limit_records_nothing(self):
         q = self._question(time_limit=None)
         attempt = self._attempt(q)
         info = mark_question_seen(attempt, q)
         self.assertIsNone(info["limit_seconds"])
-        self.assertEqual(attempt.question_timing, {})
+        self.assertNotIn(str(q.id), attempt.question_timing)
         self.assertFalse(question_timer_expired(attempt, q))
 
     def test_expired_only_after_limit_plus_grace(self):
@@ -122,6 +146,30 @@ class QuestionSeenEndpointTests(QuestionTimerTestBase):
         self.assertLessEqual(payload["remaining_seconds"], 45)
         attempt.refresh_from_db()
         self.assertIn(str(q.id), attempt.question_timing)
+
+    def test_endpoint_writes_timing_once_then_is_read_only(self):
+        q = self._question(time_limit=45)
+        attempt = self._attempt(q)
+        _login_with_org(self.client, self.student, self.org)
+
+        with CaptureQueriesContext(connection) as first_queries:
+            first = self.client.post(self._seen_url(attempt), {"question_id": q.id})
+        with CaptureQueriesContext(connection) as repeat_queries:
+            repeat = self.client.post(self._seen_url(attempt), {"question_id": q.id})
+
+        self.assertEqual((first.status_code, repeat.status_code), (200, 200))
+        first_updates = [
+            query["sql"]
+            for query in first_queries.captured_queries
+            if query["sql"].lstrip().startswith('UPDATE "exams_examattempt"')
+        ]
+        repeat_updates = [
+            query["sql"]
+            for query in repeat_queries.captured_queries
+            if query["sql"].lstrip().startswith('UPDATE "exams_examattempt"')
+        ]
+        self.assertEqual(len(first_updates), 1)
+        self.assertEqual(repeat_updates, [])
 
     def test_endpoint_rejects_foreign_attempt(self):
         q = self._question(time_limit=45)
@@ -193,9 +241,29 @@ class ExpiredQuestionSaveEnforcementTests(QuestionTimerTestBase):
         # Siqnal göndərməyən köhnə client: started_at yoxdur → bloklanmır.
         q = self._question(time_limit=30)
         attempt = self._attempt(q)
+        # 0053-dən əvvəl yaranmış attempt-lərdə protokol markeri yoxdur.
+        attempt.question_timing = {}
+        attempt.save(update_fields=["question_timing"])
         _login_with_org(self.client, self.student, self.org)
         option = q.options.filter(is_correct=True).first()
         response = self._autosave(attempt, q, option)
         self.assertEqual(response.status_code, 200)
         answer = attempt.answers.get(question=q)
         self.assertEqual({opt.id for opt in answer.selected_options.all()}, {option.id})
+
+    def test_strict_unseen_question_write_is_rejected(self):
+        """Yeni attempt `question-seen`-i suppress edən client-in yazısını qəbul etmir."""
+        q = self._question(time_limit=30)
+        attempt = self._attempt(q)
+        _login_with_org(self.client, self.student, self.org)
+        option = q.options.filter(is_correct=True).first()
+
+        response = self._autosave(attempt, q, option)
+
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["error"], "question_timer_not_started")
+        self.assertFalse(response.json()["conflict"])
+        answer = attempt.answers.get(question=q)
+        self.assertEqual(set(answer.selected_options.all()), set())
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.autosave_revision, 0)

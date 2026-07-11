@@ -12,11 +12,13 @@ edir).
 
 
 def _option_snapshot(opt):
+    image = getattr(opt, "image", None)
     return {
         "id": opt.id,
         "is_correct": bool(getattr(opt, "is_correct", False)),
         "text": getattr(opt, "text", "") or "",
         "label": getattr(opt, "label", "") or "",
+        "image": image.name if image else "",
     }
 
 
@@ -39,9 +41,17 @@ def build_question_snapshot(question, options=None):
                 "id": opt["id"] if isinstance(opt, dict) else opt.id,
                 "is_correct": bool(opt["is_correct"]) if isinstance(opt, dict) else bool(opt.is_correct),
                 **(
-                    {"text": opt.get("text", ""), "label": opt.get("label", "")}
+                    {
+                        "text": opt.get("text", ""),
+                        "label": opt.get("label", ""),
+                        "image": opt.get("image", ""),
+                    }
                     if isinstance(opt, dict)
-                    else {"text": getattr(opt, "text", "") or "", "label": getattr(opt, "label", "") or ""}
+                    else {
+                        "text": getattr(opt, "text", "") or "",
+                        "label": getattr(opt, "label", "") or "",
+                        "image": opt.image.name if getattr(opt, "image", None) else "",
+                    }
                 ),
             }
             for opt in options
@@ -109,6 +119,7 @@ def delivered_question_render(answer, selected_ids):
             id=opt["id"],
             text=opt.get("text", ""),
             label=opt.get("label", ""),
+            image_url=_media_url(opt.get("image", "")),
             is_correct=bool(opt.get("is_correct")),
             is_selected=opt["id"] in selected_ids,
         )

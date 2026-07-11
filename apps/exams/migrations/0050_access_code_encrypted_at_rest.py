@@ -25,6 +25,27 @@ def encrypt_existing_access_codes(apps, schema_editor):
             exam.save(update_fields=["access_code"])
 
 
+def decrypt_existing_access_codes(apps, schema_editor):
+    """Rollback-dan əvvəl ciphertext-i köhnə ``CharField(max_length=6)`` üçün aç.
+
+    Tarixi model bu mərhələdə hələ şəffaf encrypted field istifadə edir. ORM
+    ``save()`` açılmış dəyəri yenidən şifrələyəcəyi üçün raw SQL zəruridir.
+    """
+    from apps.exams.services.access_code_crypto import decrypt_access_code
+    from core.rls import bypass_rls
+
+    table = schema_editor.connection.ops.quote_name("exams_exam")
+    with bypass_rls(), schema_editor.connection.cursor() as cursor:
+        cursor.execute(f"SELECT id, access_code FROM {table} WHERE access_code <> %s", [""])
+        rows = cursor.fetchall()
+        for exam_id, stored in rows:
+            plain = decrypt_access_code(stored)
+            cursor.execute(
+                f"UPDATE {table} SET access_code = %s WHERE id = %s",
+                [plain, exam_id],
+            )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -39,5 +60,5 @@ class Migration(migrations.Migration):
                 blank=True, help_text="access_code", max_length=255, verbose_name="access_code"
             ),
         ),
-        migrations.RunPython(encrypt_existing_access_codes, migrations.RunPython.noop),
+        migrations.RunPython(encrypt_existing_access_codes, decrypt_existing_access_codes),
     ]

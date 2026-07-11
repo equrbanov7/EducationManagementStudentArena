@@ -166,6 +166,8 @@ class TestAnswerSnapshotIntegrity(TestCase):
     def test_randomizer_populates_question_snapshot(self):
         q1 = self._question(order=1)
         a1 = self._option(q1, text="A", is_correct=True)
+        a1.image = "question_media/exam_1/opt_1/formula.png"
+        a1.save(update_fields=["image"])
         self._option(q1, text="B", is_correct=False)
         q2 = self._question(order=2)
         a2 = self._option(q2, text="A", is_correct=True)
@@ -186,6 +188,9 @@ class TestAnswerSnapshotIntegrity(TestCase):
             self.assertEqual(snap.get("v"), 2)
             snapshot_correct = {o["id"] for o in snap["options"] if o["is_correct"]}
             self.assertEqual(snapshot_correct, {correct_by_qid[ans.question_id]})
+        first_snapshot = attempt.answers.get(question=q1).question_snapshot
+        first_option_snapshot = next(option for option in first_snapshot["options"] if option["id"] == a1.id)
+        self.assertEqual(first_option_snapshot["image"], a1.image.name)
 
     def test_v2_snapshot_freezes_question_text_and_option_text(self):
         """EXAM-P0-03 (v2): mətn/variant mətni dondurulur; sual redaktəsi
@@ -264,6 +269,31 @@ class TestAnswerSnapshotIntegrity(TestCase):
         # Tələbənin seçimi (frozen) is_selected ilə işarələnir.
         self.assertFalse(by_id[opt_a.id].is_selected)
         self.assertTrue(by_id[opt_b.id].is_selected)
+
+    def test_v2_snapshot_freezes_option_image_reference(self):
+        """Variant şəkli də çatdırılmış görünüşün bir hissəsidir."""
+        from apps.exams.services.question_snapshot import build_question_snapshot, delivered_question_render
+
+        q = self._question(order=1)
+        option = self._option(q, text="Düstur", is_correct=True)
+        option.image = "question_media/exam_1/opt_1/original.png"
+        option.save(update_fields=["image"])
+        attempt = self._attempt()
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=q,
+            question_snapshot=build_question_snapshot(q, [option]),
+        )
+
+        option.image = "question_media/exam_1/opt_1/edited.png"
+        option.save(update_fields=["image"])
+
+        rendered = delivered_question_render(answer, {option.id})
+        self.assertEqual(
+            answer.question_snapshot["options"][0]["image"],
+            "question_media/exam_1/opt_1/original.png",
+        )
+        self.assertTrue(rendered.options[0].image_url.endswith("/question_media/exam_1/opt_1/original.png"))
 
     def test_delivered_render_legacy_uses_live_and_marks_selection(self):
         """Snapshot-suz cavab canlı suala düşür, is_selected yenə də işləyir."""

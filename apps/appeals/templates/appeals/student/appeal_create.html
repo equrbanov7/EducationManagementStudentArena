@@ -173,7 +173,7 @@
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
                             {{ delivered.text|striptags|truncatechars:190 }}
                         </p>
-                        {% if hide_answer_details and exam.exam_type == "test" %}
+                        {% if hide_answer_details and not answers_release_locked and exam.exam_type == "test" %}
                         <div class="appeal-meta">
                             <span class="appeal-chip">
                                 {% if answer.is_correct %}
@@ -231,6 +231,9 @@
                                 {% endif %}
                             </span>
                             <span class="appeal-option__text">{% if opt.label %}<b>{{ opt.label }}.</b> {% endif %}{{ opt.text }}</span>
+                            {% if opt.image_url %}
+                            <img src="{{ opt.image_url }}" alt="" loading="lazy" class="img-fluid mt-2">
+                            {% endif %}
                             <span class="appeal-option__tags">
                                 {% if opt.is_selected %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
                                 {% if opt.is_correct %}<span class="appeal-option__tag appeal-option__tag--correct">{% trans "Düzgün cavab" context "appeals.template" %}</span>{% endif %}

@@ -14248,7 +14248,7 @@ msgstr "Sual üzrə nəticə analizi"
 
 msgctxt "exams.template.student_exam_result"
 msgid "notice_answers_release_locked"
-msgstr "Cavab analizi imtahan pəncərəsi bağlandıqdan sonra açılacaq. Balınız yuxarıda göstərilir."
+msgstr "Nəticə və cavab analizi imtahan pəncərəsi bağlandıqdan sonra açılacaq."
 
 msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"
