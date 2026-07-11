@@ -70,3 +70,41 @@ tələb etdiyi üçün bu dalğada edilmədi:
 - JS unit/lint/type pipeline yoxdur; a11y automation (axe/pa11y) yoxdur; query-budget testləri çox azdır.
 - Privacy/retention schedule + istifadəçi-facing Terms/Privacy səhifələri.
 - Bunlar CI konfiqurasiyası + məhsul/hüquq işidir.
+
+## 9. Tövsiyə olunan sequence — icra statusu (2026-07-11, davam)
+
+İstifadəçinin tələbi ilə tövsiyə olunan kod ardıcıllığına başlanıldı. Təhlükəsiz
+(test ilə doğrulanan, kritik axışı riskə atmayan) hissələr icra edildi;
+browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
+
+**Bitdi (kod + test, push olundu):**
+- Appeal 3-günlük pəncərə UX: bağlananda read-only nəticə/appeal baxışı + aydın
+  xəbərdarlıq; create_appeal servisində defense-in-depth pəncərə invariantı.
+- Seq1 — grade-event append-only ledger + original grader identity (exams 0048,
+  organizations 0022 RLS); appeal reviewer independence müəllif + ilk grader-ə.
+- Seq2 — full delivered snapshot v2 (mətn/media/variant mətni/label dondurulur;
+  `delivered_question_view` accessor; geriyə-uyğun).
+- Seq6 (qismən) — exam biznes SLI-ları call site-lara wire olunub (start/submit/
+  autosave/result/PIN/supervision); `attach_test_result_summaries` query-budget
+  testi mövcuddur.
+
+**Qalan — browser E2E tələb edir (kritik exam-taking axışı, vizual verifikasiya):**
+- Seq3 — formal exam/result state machine + atomik publish gate (draft/review/
+  published/appeal_closed). Böyük; publish UX browser-də yoxlanmalıdır.
+- Seq4 — server-authoritative per-question deadline + autosave OCC/409 conflict
+  UX. JS + multi-tab browser E2E tələb edir.
+- Seq2-nin qalanı — nəticə/appeal template-inin canlı `q.text` əvəzinə
+  `delivered_question_view`-dən render etməsi (vizual regresiya riski).
+
+**Qalan — məhsul-həssas qərar:**
+- Seq5 — access code at-rest şifrələmə: access code müəllim-görünən paylaşılan
+  sirdir (tələbələrə göstərilir) və bir çox oxu/müqayisə/display sahəsinə toxunur;
+  Fernet-at-rest (PIN pattern-i) + tam trace tələb edir. PIN one-use: finals
+  reconnect axışını poza bilər (məhsul qərarı).
+
+**Qalan — riskli optimizasiya / ayrıca iş:**
+- Registrar `get_offering_results` N+1 (compute_final_result per-enrollment):
+  batch-prefetch restrukturu final-qiymət məntiqinə (100+ test) toxunur, ayrıca
+  ehtiyatlı optimizasiya kimi edilməlidir.
+- Assignment/project/lab max-attempt concurrency row-lock: 3 modulun submission
+  axışına ayrıca toxunuş.
