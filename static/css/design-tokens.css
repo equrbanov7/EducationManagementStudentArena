@@ -4,7 +4,7 @@
    MƏQSƏD: hazırda CSS-lərdə hardcode edilmiş brend rəngləri (məs. #2563eb 269
    dəfə, #ffffff 718 dəfə) burada VAHİD mənbədən idarə olunsun. Yeni/redaktə
    olunan stillərdə hex əvəzinə var(--...) istifadə edin. Miqrasiya tədricən:
-   docs/UI_COLOR_TOKENS_MIGRASIYA.md.
+   docs/frontend/UI_COLOR_TOKENS_MIGRASIYA.md.
 
    Palitra layihədəki mövcud de-fakto dəyərlərdən (Tailwind slate/blue) çıxarılıb
    — heç bir vizual dəyişiklik yoxdur, sadəcə adlandırma.

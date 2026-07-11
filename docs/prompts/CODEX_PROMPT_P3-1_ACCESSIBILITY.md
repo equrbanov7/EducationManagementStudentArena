@@ -6,7 +6,7 @@
 
 - Django server-rendered templates + Bootstrap + vanilla ES-module JS. Global design tokens exist (`static/css/design-tokens.css`, `--ems-*`).
 - No systematic accessibility audit has been done. Known gaps from the technical audit: inline styles, hardcoded colors (contrast unknown), `!important` overuse, no verified keyboard/ARIA/contrast conformance.
-- **Coordinate with the frontend refactor** (`docs/CODEX_PROMPT_FRONTEND_REFACTOR.md`) — do a11y color fixes via the token palette, don't fight that PR.
+- **Coordinate with the frontend refactor** (`docs/prompts/CODEX_PROMPT_FRONTEND_REFACTOR.md`) — do a11y color fixes via the token palette, don't fight that PR.
 
 ## Task 0 — Tooling (set up once)
 

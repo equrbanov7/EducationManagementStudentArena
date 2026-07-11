@@ -5,7 +5,7 @@ Bu modul YALNIZ ``settings.RLS_TRANSACTION_SCOPED`` flaqı açıq olduqda
 mövcud session-scope davranış (``core.rls.apply_rls_request_context``) qüvvədə
 qalır.
 
-Mexanizm, risklər və rollout: ``docs/FAZA2_3B_TRANSACTION_POOLING.md``.
+Mexanizm, risklər və rollout: ``docs/performance/FAZA2_3B_TRANSACTION_POOLING.md``.
 
 Qısaca: PgBouncer transaction-mode-da bağlantı hər transaction-dan sonra hovuza
 qaytarılır, ona görə RLS GUC-ları ``SET LOCAL`` (``set_config(..., is_local=true)``)
@@ -101,7 +101,7 @@ def rls_worker_atomic():
         with rls_worker_atomic(), bypass_rls():
             ...DB sorğuları...
 
-    Bax: ``docs/FAZA2_3B_TRANSACTION_POOLING.md`` (6-cı bölmə).
+    Bax: ``docs/performance/FAZA2_3B_TRANSACTION_POOLING.md`` (6-cı bölmə).
     """
     if getattr(settings, "RLS_TRANSACTION_SCOPED", False):
         with transaction.atomic():

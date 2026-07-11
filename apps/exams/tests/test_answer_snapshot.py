@@ -104,6 +104,65 @@ class TestAnswerSnapshotIntegrity(TestCase):
         ExamQuestionOption.objects.filter(pk=wrong.id).update(is_correct=True)
         self.assertEqual(calculate_test_attempt_result(attempt).correct_count, 0)
 
+    def test_frozen_selection_survives_option_delete_recreate(self):
+        """EXAM-P0-03: variant redaktəsi (delete/recreate) keçmiş seçimi silmir.
+
+        Variant edit-i köhnə option sətirlərini silib yenilərini yaradır;
+        selected_options through sətirləri CASCADE ilə itir. Dondurulmuş
+        selected_option_ids_snapshot + question_snapshot cütlüyü balı qoruyur.
+        """
+        q = self._question(order=1)
+        correct = self._option(q, text="A", is_correct=True)
+        wrong = self._option(q, text="B", is_correct=False)
+
+        attempt = self._attempt()
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=q,
+            question_snapshot={
+                "v": 1,
+                "points": 1,
+                "answer_mode": "single",
+                "options": [
+                    {"id": correct.id, "is_correct": True},
+                    {"id": wrong.id, "is_correct": False},
+                ],
+            },
+            selected_option_ids_snapshot=[correct.id],
+        )
+        answer.selected_options.set([correct])
+
+        self.assertEqual(calculate_test_attempt_result(attempt).score, Decimal("1"))
+
+        # Müəllim sualı redaktə edir: köhnə variantlar silinir, yeniləri yaranır
+        # (forms/question.py davranışı). Through sətirləri CASCADE ilə itir.
+        q.options.all().delete()
+        self._option(q, text="A2", is_correct=True)
+        self._option(q, text="B2", is_correct=False)
+
+        answer.refresh_from_db()
+        self.assertEqual(answer.selected_options.count(), 0)  # M2M itib
+
+        after = calculate_test_attempt_result(attempt)
+        # Dondurulmuş seçim + snapshot correctness → bal dəyişmir.
+        self.assertEqual(after.correct_count, 1)
+        self.assertEqual(after.unanswered_count, 0)
+        self.assertEqual(after.score, Decimal("1"))
+
+    def test_empty_frozen_selection_counts_as_unanswered(self):
+        """Boş list (cavabsız) legacy None-dan fərqlənir və avtoritativdir."""
+        q = self._question(order=1)
+        self._option(q, text="A", is_correct=True)
+
+        attempt = self._attempt()
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=q,
+            selected_option_ids_snapshot=[],
+        )
+        result = calculate_test_attempt_result(attempt)
+        self.assertEqual(result.unanswered_count, 1)
+
     def test_randomizer_populates_question_snapshot(self):
         q1 = self._question(order=1)
         a1 = self._option(q1, text="A", is_correct=True)

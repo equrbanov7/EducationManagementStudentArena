@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -488,17 +489,26 @@ def coding_submit(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
-    already_finished = attempt.is_finished
-    time_expired = attempt.is_time_limit_reached()
 
-    if already_finished:
-        return JsonResponse(
-            {
-                "success": True,
-                "finished": True,
-                "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
-            }
-        )
+    # EXAM-P1-13: finalizasiya idempotent və race-safe olmalıdır. Attempt
+    # sətrini kilidləyib is_finished-i kilid DAXİLİNDƏ yenidən yoxlayırıq —
+    # paralel ikinci submit birincinin commit-indən sonra kilidi alıb erkən
+    # (dublikatsız) qayıdır.
+    with transaction.atomic():
+        locked_attempt = ExamAttempt.objects.select_for_update().get(pk=attempt.pk)
+        if locked_attempt.is_finished:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "finished": True,
+                    "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
+                }
+            )
+        return _finalize_coding_submit(request, locked_attempt)
+
+
+def _finalize_coding_submit(request, attempt):
+    time_expired = attempt.is_time_limit_reached()
 
     submission_items, error = _build_submission_items(request, attempt)
     if error:

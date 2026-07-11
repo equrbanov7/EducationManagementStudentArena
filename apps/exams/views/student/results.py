@@ -51,6 +51,18 @@ def _hide_test_answer_correctness_in_cabinet(exam, *, is_profile_results):
     )
 
 
+def _exam_answers_release_locked(exam):
+    """
+    EXAM-P0-05: imtahan pəncərəsi hələ bağlanmayıbsa (digər tələbələr işləyə
+    bilər) düzgün cavab, variant düzgünlüyü və per-sual verdikt açılmır —
+    erkən bitirən tələbə cavabları paylaşa bilməsin. end_datetime olmayan
+    (həmişə açıq, məşq tipli) imtahanlara kilid tətbiq olunmur.
+    """
+    if not getattr(exam, "end_datetime", None):
+        return False
+    return not exam.is_after_end()
+
+
 def _final_entry_url():
     return reverse("exams:final_exam_entry")
 
@@ -133,7 +145,10 @@ def exam_result(request, slug, attempt_id):
     is_profile_results = _is_profile_results_request(request, return_to)
     is_final_exam_result = _is_final_exam(exam)
     is_final_center_result = is_final_exam_result and not is_profile_results
-    hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(exam, is_profile_results=is_profile_results)
+    answers_release_locked = _exam_answers_release_locked(exam)
+    hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(
+        exam, is_profile_results=is_profile_results
+    ) or (getattr(exam, "exam_type", "") == "test" and answers_release_locked)
     final_result_remaining_seconds = None
     final_result_timeout_url = ""
 
@@ -197,9 +212,17 @@ def exam_result(request, slug, attempt_id):
     # kabinet rejimində də tələbə öz cavabının nəticəsini görsün. Qayda
     # calculate_test_attempt_result ilə eynidir (prefetch olunmuş cavablar üzərində).
     answer_verdict_by_qid = {}
-    if exam.exam_type == "test":
+    # EXAM-P0-05: pəncərə açıq olduqca verdikt də (düz/səhv) sızıntıdır —
+    # tələbə öz seçiminin düzgünlüyünü bilib paylaşa bilər.
+    if exam.exam_type == "test" and not answers_release_locked:
         for answer in answers:
-            selected_ids = {opt.id for opt in answer.selected_options.all()}
+            # EXAM-P0-03: verdikt də dondurulmuş seçimdən hesablanır ki,
+            # bal ilə eyni mənbədən gəlsin.
+            frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+            if frozen_selection is not None:
+                selected_ids = {int(option_id) for option_id in frozen_selection}
+            else:
+                selected_ids = {opt.id for opt in answer.selected_options.all()}
             if not selected_ids:
                 answer_verdict_by_qid[answer.question_id] = "unanswered"
                 continue
@@ -293,6 +316,7 @@ def exam_result(request, slug, attempt_id):
             "back_url": back_url,
             "is_final_exam_result": is_final_center_result,
             "hide_test_answer_correctness": hide_test_answer_correctness,
+            "answers_release_locked": answers_release_locked,
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,

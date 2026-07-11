@@ -12,3 +12,6 @@ class OrganizationsConfig(AppConfig):
             import apps.organizations.signals  # noqa
         except ImportError:
             pass
+
+        # EXAM-P0-01: DB rolunun RLS-ə tabe olduğunu yoxlayan system check.
+        import apps.organizations.checks  # noqa: F401

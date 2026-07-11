@@ -14253,6 +14253,10 @@ msgid "heading_question_result_analysis"
 msgstr "Анализ результата по вопросу"
 
 msgctxt "exams.template.student_exam_result"
+msgid "notice_answers_release_locked"
+msgstr "Разбор ответов станет доступен после закрытия окна экзамена. Ваш балл показан выше."
+
+msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"
 msgstr "Вопрос, отмеченный на экзамене"
 
@@ -21706,6 +21710,10 @@ msgstr "Организация заблокирована или неактив�
 msgctxt "live_exam.view.permission"
 msgid "exam_manage_required"
 msgstr "Отвечать *"
+
+msgctxt "live_exam.view.message"
+msgid "session_finished"
+msgstr "Эта игра уже завершена."
 
 msgctxt "live_exam.view.message"
 msgid "game_already_started"

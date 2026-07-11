@@ -126,6 +126,14 @@ def _save_test_answer_if_changed(answer, question, selected_option_ids, current_
     next_is_correct = bool(correct_option_ids and selected_option_ids == correct_option_ids)
     update_fields = []
 
+    # EXAM-P0-03: seçim ID-ləri cavabın özündə dondurulur ki, variant
+    # redaktəsi (delete/recreate) M2M through sətirlərini silsə belə keçmiş
+    # seçim və bal bərpa oluna bilsin.
+    frozen_selection = sorted(selected_option_ids)
+    if answer.selected_option_ids_snapshot != frozen_selection:
+        answer.selected_option_ids_snapshot = frozen_selection
+        update_fields.append("selected_option_ids_snapshot")
+
     if answer.text_answer:
         answer.text_answer = ""
         update_fields.append("text_answer")

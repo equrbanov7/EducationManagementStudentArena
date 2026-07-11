@@ -200,27 +200,33 @@ jobs:
             exit 1
           fi
 
-          # ── Docker-dependent jobs are non-blocking (advisory) ──────────
-          # Docker Hub connectivity issues (rate-limit, timeout) on shared CI
-          # runners must not block the core pipeline.  These are reported as
-          # warnings so they remain visible without failing the merge gate.
+          # ── Docker-dependent jobs are BLOCKING (audit PROJ-P1 #5) ──────
+          # Əvvəllər advisory idi: build olunmayan, kritik CVE-li, prod
+          # settings-də açılmayan və ya E2E-si qırılan kod `main`-ə keçib
+          # deploy oluna bilirdi. Artıq bunlar da merge/deploy gate-ini
+          # bloklayır. Docker Hub keçici problemləri (rate-limit/timeout)
+          # üçün həll — job-u YENİDƏN İŞƏ SALMAQ, ətrafından keçmək yox.
           if [[ "${{ needs.docker-build.result }}" == "failure" ]]; then
-            echo "::warning::⚠️ Docker Build job failed (non-blocking)."
+            echo "❌ Docker Build job failed!"
+            exit 1
           fi
 
           if [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
-            echo "::warning::⚠️ Container Scan failed (non-blocking). Review the Trivy report."
+            echo "❌ Container Scan (Trivy) failed! Review the report."
+            exit 1
           fi
 
           if [[ "${{ needs.prod-smoke.result }}" == "failure" ]]; then
-            echo "::warning::⚠️ Prod Smoke Test failed (non-blocking)."
+            echo "❌ Prod Smoke Test failed!"
+            exit 1
           fi
 
           if [[ "${{ needs.e2e-smoke.result }}" == "failure" ]]; then
-            echo "::warning::⚠️ E2E Smoke Test failed (non-blocking)."
+            echo "❌ E2E Smoke Test failed!"
+            exit 1
           fi
 
-          echo "✅ All core jobs passed! (Docker-dependent jobs are advisory)"
+          echo "✅ All jobs passed!"
 
   # ── 10. Production deploy (main only) ──────────────────────────────────
   # Runs ON the self-hosted GitHub Actions runner installed on the production

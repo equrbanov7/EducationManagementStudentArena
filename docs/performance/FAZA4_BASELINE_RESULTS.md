@@ -2,7 +2,7 @@
 
 **Status:** ⏳ Doldurulacaq — staging rollout icra edildikdən sonra.
 
-Runbook: `docs/FAZA4_STAGING_RUNBOOK.md`.
+Runbook: `docs/operations/FAZA4_STAGING_RUNBOOK.md`.
 
 ## Test mətriksi (500 VU + 1000 VU)
 

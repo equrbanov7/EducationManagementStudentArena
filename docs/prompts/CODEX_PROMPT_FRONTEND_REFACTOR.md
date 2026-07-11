@@ -7,7 +7,7 @@
 EMSArena is a Django 5.2 multi-tenant EdTech/exam platform. A global design-token layer already exists and is wired into `templates/base.html`:
 
 - **Tokens:** `static/css/design-tokens.css` — 40 `--ems-*` custom properties (slate/blue palette: `--ems-primary-*`, `--ems-neutral-*`, `--ems-gray-*`, `--ems-success/danger/warning-*`, plus semantic aliases `--ems-text`, `--ems-border`, `--ems-bg`, `--ems-link`).
-- **Migration guide (follow it):** `docs/UI_COLOR_TOKENS_MIGRASIYA.md`.
+- **Migration guide (follow it):** `docs/frontend/UI_COLOR_TOKENS_MIGRASIYA.md`.
 - **Module-size rule (mandatory):** `AGENTS.md §1` — new files ≤ 600 lines; existing large assets are frozen in `scripts/module_size_budget.json` (ratchet: you may only shrink them). Run `python scripts/check_module_size.py --check` before committing; CI enforces it.
 
 **Current measured state (2026-07-04):**

@@ -165,7 +165,7 @@ SITE_URL = "http://testserver"
 # Keep public self-registration ENABLED in the test settings so the existing
 # registration-flow tests keep exercising the signup machinery. Production
 # defaults to disabled (e-university provisioning model — see
-# docs/ACCOUNT_PROVISIONING.md). The dedicated "signup disabled" behaviour is
+# docs/operations/ACCOUNT_PROVISIONING.md). The dedicated "signup disabled" behaviour is
 # covered by tests that opt in via @override_settings(PUBLIC_SIGNUP_ENABLED=False).
 PUBLIC_SIGNUP_ENABLED = True
 
