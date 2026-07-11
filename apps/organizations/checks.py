@@ -44,8 +44,17 @@ def _current_role_bypasses_rls():
 
 @register("database")
 def check_db_role_not_superuser(app_configs, databases=None, **kwargs):
-    """DB-yə qoşulan rol superuser/BYPASSRLS olmamalıdır (EXAM-P0-01)."""
-    mode = (os.environ.get("EMS_DB_ROLE_ENFORCE") or "warn").strip().lower()
+    """DB-yə qoşulan rol superuser/BYPASSRLS olmamalıdır (EXAM-P0-01).
+
+    Sərtlik əvvəlcə Django ``EMS_DB_ROLE_ENFORCE`` setting-indən, sonra eyni
+    adlı env dəyişənindən oxunur (default ``warn``). Test/CI mühitində DB
+    rolu qanuni olaraq superuser olduğu üçün ``off`` təyin edilir ki, strict
+    ``check --fail-level WARNING`` addımı yanlış fail verməsin.
+    """
+    from django.conf import settings
+
+    mode = getattr(settings, "EMS_DB_ROLE_ENFORCE", None) or os.environ.get("EMS_DB_ROLE_ENFORCE") or "warn"
+    mode = str(mode).strip().lower()
     if mode == "off":
         return []
     if connection.vendor != "postgresql":

@@ -194,3 +194,9 @@ WHITENOISE_AUTOREFRESH = True
 #     def __getitem__(self, item):
 #         return None
 # MIGRATION_MODULES = DisableMigrations()
+
+# EXAM-P0-01: test/CI DB rolu qanuni olaraq superuser-dir (test runner). DB-rol
+# system check-i (organizations.W011) burada söndürülür ki, strict
+# `manage.py check --fail-level WARNING` / `check --deploy` yanlış fail verməsin.
+# Prod-da compose `EMS_DB_ROLE_ENFORCE=warn` (sonra error) təyin edir.
+EMS_DB_ROLE_ENFORCE = "off"

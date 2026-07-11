@@ -106,6 +106,10 @@ jobs:
           DEBUG: "False"
           ALLOWED_HOSTS: "localhost,127.0.0.1"
           ADMIN_ALLOWED_IPS: "127.0.0.1"
+          # EXAM-P0-01: CI throwaway DB qaçılmaz olaraq superuser-dir; deploy
+          # check yalnız KONFİQ-i (HSTS/SSL/cookie) yoxlayır, canlı DB rolunu
+          # yox. DB-rol check-i (organizations.W011) burada söndürülür.
+          EMS_DB_ROLE_ENFORCE: "off"
           # FAZA 5: run the deploy check against PostgreSQL so it matches the
           # real production database engine (psycopg2 ships in production.txt).
           DATABASE_URL: postgres://security_user:security_password@localhost:5432/security_db
