@@ -21,6 +21,7 @@ from apps.exams.services.attempts import (
     generate_random_questions_for_attempt,
     get_attempt_limit_result_redirect_url,
 )
+from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.services.randomizer import build_shuffled_options
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
@@ -362,6 +363,10 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
             if autosave_changed_question_ids is None and finish_skips_absent_question(
                 request, q.id, form_has_presence_markers=form_has_presence_markers
             ):
+                continue
+            # EXAM-P1-04: server deadline keçmiş sualın yazısı saxlanmır —
+            # client timer-ini devtools ilə uzatmaq artıq işləmir.
+            if question_timer_expired(attempt, q):
                 continue
 
             answer_data = answers_by_qid.get(q.id) or {}

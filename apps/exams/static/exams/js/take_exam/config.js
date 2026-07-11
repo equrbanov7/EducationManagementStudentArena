@@ -111,6 +111,7 @@
                 binaryDirtyQuestionIds: new Set(),
                 examType: examForm.dataset.examType,
                 autoSaveBinaryUploadsEnabled: examForm.dataset.autosaveBinaryUploadsEnabled === "1",
+                questionSeenUrl: examForm.dataset.questionSeenUrl || "",
                 examId: examId,
                 attemptId: attemptId,
                 storageKey: "exam_" + examId + "_attempt_" + attemptId + "_currentIndex",

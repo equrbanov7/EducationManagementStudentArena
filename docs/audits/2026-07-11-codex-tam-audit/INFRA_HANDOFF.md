@@ -92,6 +92,18 @@ browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
   daha yenidirsə stale yazı 409 `{conflict, server_revision}` ilə rədd edilir
   (last-write-wins clobber-i aradan qaldırır); JS 409-da revision-u yeniləyir,
   normal bildiriş göstərir. base yoxdursa geriyə-uyğun. `record_autosave` SLI.
+- Seq3 — atomik publish/unpublish + publish qapısı (`services/lifecycle.py`,
+  şərti-UPDATE state machine): sualsız/silinmiş imtahan dərc olunmur (aydın
+  toast xətası ilə qaralama qalır), paralel tab double-flip edə bilmir
+  (`desired_state` niyyəti), publish/unpublish/nəticə-görünürlük audit-loglanır.
+  Browser E2E ilə yoxlandı (boş imtahan → xəta, hazır → dərc, stale repost → no-op).
+- Seq4 (per-question timer) — **server-authoritative** (EXAM-P1-04): sual ilk
+  göstəriləndə `question-seen` siqnalı `attempt.question_timing`-ə yazılır
+  (ilk yazı qalır — reload/ikinci tab timer-i sıfırlamır); client countdown
+  server qalığı ilə sinxronlaşır; saxlama yolunda müddəti (limit+grace) keçmiş
+  sualın POST-u atılır. Browser E2E: dondurulmuş-timer hücumu 55s-də cavab yaza
+  bilmədi (`selected_options=[]`). Siqnal göndərməyən köhnə client geriyə-uyğundur
+  (ümumi imtahan deadline-ı yenə bağlayır).
 - Seq5 (access-code hissəsi) — imtahan giriş kodu artıq bazada **Fernet-at-rest**
   şifrli saxlanır (`EncryptedAccessCodeField` şəffaf sahə, `access_code_crypto`
   servisi, exams 0050 AlterField+RunPython `bypass_rls`-lə mövcud kodları şifrələ).
@@ -102,12 +114,10 @@ browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
   autosave/result/PIN/supervision); `attach_test_result_summaries` query-budget
   testi mövcuddur.
 
-**Qalan — browser E2E tələb edir (kritik exam-taking axışı, vizual verifikasiya):**
-- Seq3 — formal exam/result state machine + atomik publish gate (draft/review/
-  published/appeal_closed). Böyük; publish UX browser-də yoxlanmalıdır.
-- Seq4 (qalan) — server-authoritative per-question deadline: per-question
-  "question shown" siqnalı + save enforcement + take_exam UI; feature-ölçülü,
-  canlı imtahan-vermə axışında multi-tab/timer browser E2E tələb edir.
+**Qalan — məhsul iş axını qərarı:**
+- Seq3-ün genişlənməsi: ayrıca draft→review→approved təsdiq İŞ AXINI (yeni
+  rollar/UI) — atomik publish + qapı artıq var; review/approval mərhələləri
+  yeni məhsul funksiyasıdır, tələb olunarsa ayrıca dizayn edilməlidir.
 
 **Qalan — məhsul-həssas qərar:**
 - Seq5 (qalan) — PIN one-use/rotation: fərdi imtahan PIN-inin bir dəfəlik olması

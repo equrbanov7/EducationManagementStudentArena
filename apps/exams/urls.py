@@ -279,6 +279,11 @@ urlpatterns = [
         name="coding_submission_download",
     ),
     path("<slug:slug>/attempt/<int:attempt_id>/", views.take_exam, name="take_exam"),
+    path(
+        "<slug:slug>/attempt/<int:attempt_id>/question-seen/",
+        views.question_seen,
+        name="question_seen",
+    ),
     # ==========================
     # SLUG - Teacher Question Bank
     # ==========================

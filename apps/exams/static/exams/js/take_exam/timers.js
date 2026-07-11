@@ -84,6 +84,44 @@
             ctx.qTimerContainer.classList.remove("danger");
         },
 
+        // EXAM-P1-04: serverə "sual göstərildi" siqnalı — server İLK göstərilməni
+        // qeyd edir və countdown-un SERVER qalığını qaytarır; local deadline onunla
+        // əvəzlənir (devtools ilə uzatma, reload-da sıfırlanma aradan qalxır).
+        syncQuestionTimerWithServer: function (ctx, slideElement) {
+            if (!ctx.questionSeenUrl || !window.fetch) {
+                return;
+            }
+            var questionId = slideElement.getAttribute("data-question-id");
+            if (!questionId) {
+                return;
+            }
+            var formData = new FormData();
+            formData.append("question_id", questionId);
+            formData.append("csrfmiddlewaretoken", ns.config.getCsrfToken(ctx));
+            fetch(ctx.questionSeenUrl, {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin"
+            })
+                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (data) {
+                    if (!data || !data.success || data.remaining_seconds === null || data.remaining_seconds === undefined) {
+                        return;
+                    }
+                    // Slide bu arada dəyişibsə köhnə cavabı tətbiq etmə.
+                    if (ctx.questionTimerSlide !== slideElement) {
+                        return;
+                    }
+                    ctx.questionTimerDeadlineMs = Date.now() + (data.remaining_seconds * 1000);
+                    if (typeof ctx.questionTimerTick === "function") {
+                        ctx.questionTimerTick();
+                    }
+                })
+                .catch(function () {
+                    // Şəbəkə xətasında local countdown davam edir (geriyə-uyğun).
+                });
+        },
+
         startQuestionTimer: function (ctx, slideElement) {
             ns.timers.stopQuestionTimer(ctx);
 
@@ -101,6 +139,7 @@
                 ctx.qTimerContainer.style.display = "flex";
                 ctx.questionTimerSlide = slideElement;
                 ctx.questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);
+                ns.timers.syncQuestionTimerWithServer(ctx, slideElement);
 
                 ctx.questionTimerTick = function () {
                     var secondsLeft = syncQuestionTimerState(ctx);
