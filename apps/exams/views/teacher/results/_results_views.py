@@ -46,7 +46,9 @@ def teacher_exam_results(request, slug):
     - aşağıda/sağda seçilmiş cəhdin cavabları + qiymətləndirmə formu
     """
     _ensure_teacher(request.user)
-    exam = get_teacher_exam_or_404(request, slug=slug)
+    # Yumşaq silinmiş imtahanın nəticələri "Zibil qutusu"ndan yalnız-oxu kimi
+    # görünür (include_deleted). Qiymətləndirmə/dəyişiklik bloklanır.
+    exam = get_teacher_exam_or_404(request, slug=slug, include_deleted=True)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
     exam_navigation_query = urlencode(navigation_params)
     exam_detail_url = _append_query_params(
@@ -59,6 +61,12 @@ def teacher_exam_results(request, slug):
 
     # ---------- POST: müəllim bal + feedback saxlayır ----------
     if request.method == "POST":
+        if exam.is_deleted:
+            messages.error(
+                request,
+                pgettext_lazy("exams.view.results.message", "cannot_grade_deleted_exam"),
+            )
+            return redirect(request.path)
         if not request_has_permission(request, "grade.input"):
             messages.error(
                 request,
@@ -318,7 +326,9 @@ def teacher_exam_results(request, slug):
             "sort_dir": sort_dir,
             "sort_base_query": sort_base_query,
             "pagination_query": pagination_query,
-            "can_delete_attempts": request_has_permission(request, "exam.delete"),
+            # Silinmiş imtahan yalnız-oxu göstərilir: qiymət/silmə/redaktə gizlədilir.
+            "exam_is_deleted": exam.is_deleted,
+            "can_delete_attempts": request_has_permission(request, "exam.delete") and not exam.is_deleted,
             "available_groups": available_groups,
             "group_filter": group_filter_value,
             "export_xlsx_url": export_xlsx_url,

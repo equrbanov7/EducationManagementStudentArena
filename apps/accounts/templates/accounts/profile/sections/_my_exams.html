@@ -21,6 +21,11 @@
         </p>
       </div>
       <div class="tx-head-actions">
+        <a href="{% url 'exams:deleted_exams_list' %}"
+           class="tx-btn tx-btn--ghost"
+           title="{% trans 'trash_link' context 'profile.my_exams' %}">
+          <i class="fas fa-trash-can" aria-hidden="true"></i> {% trans "trash_link" context "profile.my_exams" %}
+        </a>
         <button type="button"
                 class="tx-btn tx-btn--primary js-open-exam-form-modal"
                 data-exam-modal-mode="create"

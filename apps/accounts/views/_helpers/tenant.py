@@ -35,9 +35,14 @@ def _tenant_scoped_courses(request, queryset=None):
     return scoped_by_organization(base_queryset, request)
 
 
-def _tenant_scoped_exams(request, queryset=None):
+def _tenant_scoped_exams(request, queryset=None, *, include_deleted=False):
+    """Org-scoped imtahan queryset — default olaraq yumşaq silinmiş (``is_deleted``)
+    imtahanları çıxarır. Bax: ``apps.exams.views.shared.tenant.tenant_scoped_exams``."""
     base_queryset = queryset if queryset is not None else Exam.objects.all()
-    return without_disabled_practical_exams(scoped_by_organization(base_queryset, request))
+    scoped = without_disabled_practical_exams(scoped_by_organization(base_queryset, request))
+    if not include_deleted:
+        scoped = scoped.filter(is_deleted=False)
+    return scoped
 
 
 def _assigned_courses_queryset(request, user):

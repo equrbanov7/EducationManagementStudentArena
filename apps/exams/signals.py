@@ -13,7 +13,7 @@ _SYNC_ACTIONS = {"post_add", "post_remove", "post_clear"}
 def _sync_pin_assignments_for_group_ids(group_ids):
     if not group_ids:
         return
-    exams = Exam.objects.filter(allowed_groups__id__in=group_ids).distinct()
+    exams = Exam.objects.filter(allowed_groups__id__in=group_ids, is_deleted=False).distinct()
     for exam in exams:
         provision_exam_student_pins(exam)
 
@@ -48,7 +48,7 @@ def sync_student_pins_when_exam_assignments_change(sender, instance, action, rev
         if reverse:
             if action == "post_clear":
                 return
-            for exam in Exam.objects.filter(pk__in=pk_set or ()):
+            for exam in Exam.objects.filter(pk__in=pk_set or (), is_deleted=False):
                 provision_exam_student_pins(exam)
         else:
             provision_exam_student_pins(instance)
