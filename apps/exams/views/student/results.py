@@ -203,7 +203,15 @@ def exam_result(request, slug, attempt_id):
             if not selected_ids:
                 answer_verdict_by_qid[answer.question_id] = "unanswered"
                 continue
-            correct_ids = {opt.id for opt in answer.question.options.all() if opt.is_correct}
+            # EXAM-INTEGRITY-001: snapshot varsa düzgünlük ondan götürülür ki,
+            # nəticə səhifəsindəki verdikt qiymətlə eyni (dondurulmuş) mənbədən
+            # gəlsin; snapshot yoxdursa canlı suala düşürük.
+            snapshot = getattr(answer, "question_snapshot", None)
+            snapshot_options = snapshot.get("options") if isinstance(snapshot, dict) else None
+            if snapshot_options:
+                correct_ids = {opt["id"] for opt in snapshot_options if opt.get("is_correct")}
+            else:
+                correct_ids = {opt.id for opt in answer.question.options.all() if opt.is_correct}
             answer_verdict_by_qid[answer.question_id] = (
                 "correct" if (correct_ids and selected_ids == correct_ids) else "wrong"
             )
