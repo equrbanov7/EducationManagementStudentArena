@@ -54,3 +54,24 @@ def annotate_attempt_result_visibility(attempts, *, current_time=None):
         prepared_attempts.append(attempt)
 
     return prepared_attempts
+
+
+def posted_autosave_question_ids(request, *, action):
+    """Autosave POST-undakı dəyişmiş sual id-ləri (yoxdursa None = full save)."""
+    if action != "autosave":
+        return None
+    raw_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist("changed_questions")
+    parsed_ids = set()
+    for raw_id in raw_ids:
+        try:
+            parsed_ids.add(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+    return parsed_ids
+
+
+def finish_skips_absent_question(request, question_id, *, form_has_presence_markers):
+    """EXAM-P1-05: finish zamanı timer-expired (q_present markeri absent) sualı
+    ötür ki, boş POST saxlanmış cavabı silməsin. Markersiz (köhnə/keşlənmiş)
+    formada köhnə davranış qalır (geriyə-uyğun)."""
+    return form_has_presence_markers and request.POST.get(f"q_present_{question_id}") != "1"
