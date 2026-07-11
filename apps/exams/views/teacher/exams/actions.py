@@ -10,7 +10,6 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.exams.services.language_parity import language_parity_error_message
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._shared import (
@@ -29,7 +28,12 @@ logger = logging.getLogger(__name__)
 @login_required
 def toggle_exam_active(request, slug):
     """
-    Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
+    Müəllim imtahanı istənilən vaxt dərc/deaktiv edə bilsin.
+
+    Seq3 (EXAM-P1-01): keçid atomikdir (şərti UPDATE) — paralel tab/müəllim
+    double-flip edə bilməz; publish qapısı (aktiv sual + dil parity) keçilməsə
+    imtahan qaralama qalır. Forma müəllimin GÖRDÜYÜ niyyəti ``desired_state``
+    ilə göndərir; köhnə (parametrsiz) formalar cari vəziyyətdən flip edir.
     """
     organization = _resolve_required_organization(request)
     if organization is None:
@@ -39,22 +43,27 @@ def toggle_exam_active(request, slug):
     exam = get_teacher_exam_or_404(request, slug=slug)
 
     if request.method == "POST":
-        parity_error = language_parity_error_message(exam) if not exam.is_active else ""
-        if parity_error:
-            messages.error(request, parity_error)
-            return redirect("exams:teacher_exam_detail", slug=exam.slug)
-        exam.is_active = not exam.is_active
-        exam.save()
-        if exam.is_active:
-            from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
-            from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
+        from apps.exams.services.lifecycle import publish_exam, unpublish_exam
 
-            schedule_ai_question_difficulty_warmup(exam)
-            notify_task_assignment(
-                task=exam,
-                user_ids=get_exam_assigned_user_ids(exam),
-                task_kind="exam",
-            )
+        desired_raw = request.POST.get("desired_state")
+        want_active = desired_raw == "1" if desired_raw in {"0", "1"} else not exam.is_active
+        if want_active:
+            changed, error = publish_exam(exam, by_user=request.user, request=request)
+            if error:
+                messages.error(request, error)
+                return redirect("exams:teacher_exam_detail", slug=exam.slug)
+            if changed:
+                from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
+                from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
+
+                schedule_ai_question_difficulty_warmup(exam)
+                notify_task_assignment(
+                    task=exam,
+                    user_ids=get_exam_assigned_user_ids(exam),
+                    task_kind="exam",
+                )
+        else:
+            unpublish_exam(exam, by_user=request.user, request=request)
     return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
 
@@ -68,8 +77,15 @@ def toggle_exam_results_visibility(request, slug):
     _ensure_exam_permission(request, "exam.edit")
     exam = get_teacher_exam_or_404(request, slug=slug)
 
-    exam.results_hidden_from_students = not exam.results_hidden_from_students
-    exam.save(update_fields=["results_hidden_from_students"])
+    # Seq3: nəticə görünürlüyü də atomik keçiddir (paralel tab double-flip etməsin).
+    from apps.exams.services.lifecycle import set_results_hidden
+
+    set_results_hidden(
+        exam,
+        not exam.results_hidden_from_students,
+        by_user=request.user,
+        request=request,
+    )
 
     # EXAM-P1-20: nəticə görünürlük dəyişikliyini SLI kimi qeyd et.
     from apps.exams.metrics import record_result_published
