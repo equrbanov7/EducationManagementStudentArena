@@ -92,6 +92,12 @@ browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
   daha yenidirsə stale yazı 409 `{conflict, server_revision}` ilə rədd edilir
   (last-write-wins clobber-i aradan qaldırır); JS 409-da revision-u yeniləyir,
   normal bildiriş göstərir. base yoxdursa geriyə-uyğun. `record_autosave` SLI.
+- Seq5 (access-code hissəsi) — imtahan giriş kodu artıq bazada **Fernet-at-rest**
+  şifrli saxlanır (`EncryptedAccessCodeField` şəffaf sahə, `access_code_crypto`
+  servisi, exams 0050 AlterField+RunPython `bypass_rls`-lə mövcud kodları şifrələ).
+  Müəllim-görünən sirr olduğu üçün birtərəfli hash YOX — Python-da xam görünür,
+  bütün oxu/müqayisə/göstərmə yolları dəyişmir; köhnə xam mətn sətir açıla
+  bilmirsə olduğu kimi keçir (geriyə-uyğun), növbəti save-də şifrlənir.
 - Seq6 (qismən) — exam biznes SLI-ları call site-lara wire olunub (start/submit/
   autosave/result/PIN/supervision); `attach_test_result_summaries` query-budget
   testi mövcuddur.
@@ -104,10 +110,9 @@ browser-E2E və ya məhsul-qərarı tələb edənlər dəqiq işarələndi.
   canlı imtahan-vermə axışında multi-tab/timer browser E2E tələb edir.
 
 **Qalan — məhsul-həssas qərar:**
-- Seq5 — access code at-rest şifrələmə: access code müəllim-görünən paylaşılan
-  sirdir (tələbələrə göstərilir) və bir çox oxu/müqayisə/display sahəsinə toxunur;
-  Fernet-at-rest (PIN pattern-i) + tam trace tələb edir. PIN one-use: finals
-  reconnect axışını poza bilər (məhsul qərarı).
+- Seq5 (qalan) — PIN one-use/rotation: fərdi imtahan PIN-inin bir dəfəlik olması
+  finals **reconnect** axışını poza bilər (tələbə düşüb yenidən girəndə eyni PIN
+  lazımdır). Bu məhsul qərarıdır — access-code şifrələmə hissəsi bitdi (yuxarı).
 
 **Qalan — riskli optimizasiya / ayrıca iş:**
 - Registrar `get_offering_results` N+1 (compute_final_result per-enrollment):
