@@ -107,8 +107,26 @@ class SupervisionIncidentApiHardeningTests(TestCase):
                 break
         self.assertEqual(last_status, 429)
 
-    def test_non_dict_metadata_becomes_empty(self):
+    def test_non_dict_metadata_is_rejected(self):
         response = self._post({"event_type": "tab_switched", "metadata": "not-a-dict"})
-        self.assertEqual(response.status_code, 200)
-        incident = SupervisionIncident.objects.latest("id")
-        self.assertEqual(incident.metadata, {})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(SupervisionIncident.objects.count(), 0)
+
+    def test_json_root_must_be_object(self):
+        response = self.client.post(self.url, data="[]", content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(SupervisionIncident.objects.count(), 0)
+
+    def test_unknown_root_field_is_rejected(self):
+        response = self._post({"event_type": "tab_switched", "metadata": {}, "unexpected": True})
+        self.assertEqual(response.status_code, 400)
+
+    def test_oversized_body_is_rejected_before_json_processing(self):
+        response = self._post({"event_type": "tab_switched", "metadata": {"blob": "x" * 20000}})
+        self.assertEqual(response.status_code, 413)
+
+    def test_violation_count_increments_without_lost_updates(self):
+        self.assertEqual(self._post({"event_type": "tab_switched", "metadata": {}}).status_code, 200)
+        self.assertEqual(self._post({"event_type": "tab_switched", "metadata": {}}).status_code, 200)
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.attempt.supervision_violation_count, 2)

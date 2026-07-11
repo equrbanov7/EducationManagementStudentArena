@@ -18,6 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      # Exercise the real production split-role path. Fresh Postgres volumes
+      # create this LOGIN NOSUPERUSER NOBYPASSRLS role via postgres-init.
+      APP_DATABASE_USER: emsarena_app
+      APP_DATABASE_PASSWORD: ci-smoke-app-role-password
+      EMS_DB_ROLE_ENFORCE: error
 
     steps:
       - name: 📥 Checkout code
@@ -84,6 +90,23 @@ jobs:
           done
           echo "::error::❌ Production stack $ATTEMPTS cəhddən sonra qalxmadı."
           exit 1
+
+      - name: 🔐 Verify restricted runtime DB role
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T app \
+            python manage.py shell -c \
+            "from django.db import connection; c=connection.cursor(); c.execute('SELECT current_user, rolsuper, rolbypassrls FROM pg_roles WHERE rolname=current_user'); role, is_super, bypass=c.fetchone(); print(f'runtime_db_role={role} rolsuper={is_super} rolbypassrls={bypass}'); assert not is_super and not bypass"
 
       # Poll /health/ and /ping/ with retries (up to 120 s)
       - name: 🩺 Poll health and ping endpoints

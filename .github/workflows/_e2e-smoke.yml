@@ -37,6 +37,9 @@ jobs:
       POSTGRES_DB: emsarena
       POSTGRES_USER: emsarena
       POSTGRES_PASSWORD: ci-smoke-postgres-password
+      APP_DATABASE_USER: emsarena_app
+      APP_DATABASE_PASSWORD: ci-smoke-app-role-password
+      EMS_DB_ROLE_ENFORCE: error
       REDIS_PASSWORD: ci-smoke-redis-password
       GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
       ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
@@ -114,6 +117,12 @@ jobs:
               exit 1
             fi
           done
+
+      - name: 🔐 Verify restricted runtime DB role
+        run: |
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T app \
+            python manage.py shell -c \
+            "from django.db import connection; c=connection.cursor(); c.execute('SELECT current_user, rolsuper, rolbypassrls FROM pg_roles WHERE rolname=current_user'); role, is_super, bypass=c.fetchone(); print(f'runtime_db_role={role} rolsuper={is_super} rolbypassrls={bypass}'); assert not is_super and not bypass"
 
       # Seed a deterministic university user inside the running app container
       # so the authenticated smoke tests always run in CI.

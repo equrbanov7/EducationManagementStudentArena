@@ -14,6 +14,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
+from apps.exams.metrics import record_autosave
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
@@ -37,6 +38,7 @@ from ._helpers import (
     posted_autosave_question_ids,
     safe_same_origin_redirect_path,
 )
+from .access_guard import ensure_active_attempt_access
 from .script_data import take_exam_script_data
 
 
@@ -316,6 +318,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
     with transaction.atomic():
         attempt = ExamAttempt.objects.select_for_update().select_related("exam").get(id=attempt.id, user=request.user)
         exam = attempt.exam
+        ensure_active_attempt_access(attempt, request.user)
 
         if attempt.is_finished:
             return _finished_attempt_response(request, attempt, return_to=return_to)
@@ -423,6 +426,8 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
             attempt.status = "draft"
             attempt.save(update_fields=["status"])
 
+        if action == "autosave":
+            record_autosave("success")
         if is_ajax:
             return JsonResponse({"success": True, "finished": False})
 
@@ -452,6 +457,7 @@ def take_exam(request, slug, attempt_id):
         user=request.user,
     )
     exam = attempt.exam
+    ensure_active_attempt_access(attempt, request.user)
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
     supervision_feature_enabled = exam_supervision_enabled()

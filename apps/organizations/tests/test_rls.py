@@ -695,11 +695,15 @@ class TestRLSExamExpanded:
             "org_a": org_a,
             "exam_a": exam_a,
             "block_a": block_a,
+            "block_b": block_b,
             "question_a": question_a,
+            "question_b": question_b,
             "option_a": option_a,
+            "option_b": option_b,
             "group_a": group_a,
             "student_a": student_a,
             "answer_a": answer_a,
+            "answer_b": answer_b,
             "answer_file_a": answer_file_a,
             "proctor_a": proctor_a,
         }
@@ -755,6 +759,33 @@ class TestRLSExamExpanded:
         assert ExamAnswerFile.objects.first().pk == expanded_exam_graph["answer_file_a"].pk
         assert ProctoringLog.objects.count() == 1
         assert ProctoringLog.objects.first().pk == expanded_exam_graph["proctor_a"].pk
+
+    def test_cross_exam_answer_relationships_are_rejected(self, expanded_exam_graph):
+        """A tenant row cannot point at a different exam's question/option."""
+        _skip_if_not_pg()
+        org_a = expanded_exam_graph["org_a"]
+        answer_a = expanded_exam_graph["answer_a"]
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamQuestion.objects.filter(pk=expanded_exam_graph["question_a"].pk).update(
+                    block_id=expanded_exam_graph["block_b"].pk
+                )
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamAnswer.objects.filter(pk=answer_a.pk).update(question_id=expanded_exam_graph["question_b"].pk)
+
+        selected_options_through = ExamAnswer._meta.get_field("selected_options").remote_field.through
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                selected_options_through.objects.create(
+                    examanswer_id=answer_a.pk,
+                    examquestionoption_id=expanded_exam_graph["option_b"].pk,
+                )
 
 
 class TestRLSExamGapTables:
@@ -812,7 +843,7 @@ class TestRLSExamGapTables:
             ExamStudentPin.objects.create(exam=exam, student=student, pin_hash=f"hash-{suffix}", pin_cipher=b"")
             StudentExamAttemptGrant.objects.create(exam=exam, student=student, extra_attempts=1, granted_by=teacher)
             ExamSupervisionConfig.objects.create(exam=exam)
-            SupervisionIncident.objects.create(
+            incident = SupervisionIncident.objects.create(
                 organization=org,
                 exam=exam,
                 attempt=attempt,
@@ -829,6 +860,7 @@ class TestRLSExamGapTables:
             question_submission = QuestionSubmission.objects.create(
                 organization=org,
                 teacher=teacher,
+                student_group=group,
                 title=f"Gap Submission {suffix}",
                 raw_text="1) Question?",
             )
@@ -851,7 +883,10 @@ class TestRLSExamGapTables:
                 "exam": exam,
                 "coding_question": coding_question,
                 "submission": submission,
+                "attempt": attempt,
+                "incident": incident,
                 "group": group,
+                "subject": subject,
                 "question_submission": question_submission,
                 "room": room,
                 "session": session,
@@ -950,6 +985,63 @@ class TestRLSExamGapTables:
                     pin_cipher=b"",
                 )
 
+    def test_cross_tenant_exam_relationship_updates_are_rejected(self, gap_table_graph):
+        """WITH CHECK validates every tenant-bearing FK, not only the first."""
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        side_b = gap_table_graph["b"]
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                CodingSubmission.objects.filter(pk=side_a["submission"].pk).update(
+                    question_id=side_b["coding_question"].pk
+                )
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                SupervisionIncident.objects.filter(pk=side_a["incident"].pk).update(attempt_id=side_b["attempt"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                QuestionSubmission.objects.filter(pk=side_a["question_submission"].pk).update(
+                    student_group_id=side_b["group"].pk
+                )
+
+    def test_cross_tenant_exam_m2m_insert_and_update_are_rejected(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        side_b = gap_table_graph["b"]
+        submission_groups = QuestionSubmission._meta.get_field("student_groups").remote_field.through
+        group_subjects = StudentGroup._meta.get_field("subjects").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                submission_groups.objects.create(
+                    questionsubmission_id=side_a["question_submission"].pk,
+                    studentgroup_id=side_b["group"].pk,
+                )
+
+        own_link = submission_groups.objects.get(
+            questionsubmission_id=side_a["question_submission"].pk,
+            studentgroup_id=side_a["group"].pk,
+        )
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                submission_groups.objects.filter(pk=own_link.pk).update(studentgroup_id=side_b["group"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                group_subjects.objects.create(
+                    studentgroup_id=side_a["group"].pk,
+                    subject_id=side_b["subject"].pk,
+                )
+
 
 class TestAuditLogAppendOnly:
     """audit_auditlog append-only trigger (organizations 0019, audit P1 #5)."""
@@ -975,6 +1067,49 @@ class TestAuditLogAppendOnly:
             AuditLog.objects.filter(pk=log.pk).update(user_id=None, organization_id=None)
         log.refresh_from_db()
         assert log.user_id is None
+
+    def test_real_fk_delete_set_null_is_allowed(self, db):
+        """The FK's own ON DELETE SET NULL update must keep the audit row."""
+        _skip_if_not_pg()
+        from django.contrib.auth import get_user_model
+
+        from apps.audit.models import AuditLog
+
+        user = get_user_model().objects.create_user("audit_deleted_user", "audit-delete@rls.test", "pw")
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view", user=user)
+
+        user.delete()
+        log.refresh_from_db()
+        assert log.user_id is None
+
+    def test_fk_reassignment_is_blocked(self, two_orgs):
+        """Nullable audit FKs may become NULL, but cannot be reassigned."""
+        _skip_if_not_pg()
+        from django.contrib.contenttypes.models import ContentType
+
+        from apps.audit.models import AuditLog
+        from apps.organizations.models import Organization
+
+        org_a, org_b = two_orgs
+        audit_type = ContentType.objects.get_for_model(AuditLog)
+        organization_type = ContentType.objects.get_for_model(Organization)
+        with bypass_rls():
+            log = AuditLog.objects.create(
+                action="view",
+                user=org_a.owner,
+                organization=org_a,
+                content_type=audit_type,
+            )
+
+        for mutation in (
+            {"user_id": org_b.owner_id},
+            {"organization_id": org_b.pk},
+            {"content_type_id": organization_type.pk},
+        ):
+            with pytest.raises(DatabaseError):
+                with transaction.atomic(), bypass_rls():
+                    AuditLog.objects.filter(pk=log.pk).update(**mutation)
 
     def test_delete_is_blocked(self, db):
         _skip_if_not_pg()
@@ -1033,6 +1168,8 @@ class TestRLSLabsProjects:
             block = LabBlock.objects.create(lab=lab, title=f"Block {suffix}", order=1)
             question = LabQuestion.objects.create(block=block, question_text="Q?", question_number=1, points=10)
             assignment = LabAssignment.objects.create(lab=lab, student=student)
+            lab.allowed_students.add(student)
+            assignment.assigned_questions.add(question)
             submission = LabSubmission.objects.create(assignment=assignment, attempt_number=1)
             answer = LabAnswer.objects.create(
                 lab=lab, question=question, student=student, submission=submission, answer="ans"
@@ -1045,10 +1182,12 @@ class TestRLSLabsProjects:
                 deadline=now + timedelta(days=7),
                 max_score=100,
             )
+            project.assigned_students.add(student)
             project_submission = ProjectSubmission.objects.create(project=project, student=student, content="work")
 
             data[suffix] = {
                 "org": org,
+                "student": student,
                 "lab": lab,
                 "block": block,
                 "question": question,
@@ -1076,6 +1215,8 @@ class TestRLSLabsProjects:
         assert LabSubmission.objects.count() == 1
         assert LabAnswer.objects.count() == 1
         assert LabAnswer.objects.first().pk == side_a["answer"].pk
+        assert Lab._meta.get_field("allowed_students").remote_field.through.objects.count() == 1
+        assert LabAssignment._meta.get_field("assigned_questions").remote_field.through.objects.count() == 1
 
     def test_projects_tables_are_isolated(self, labs_projects_graph):
         _skip_if_not_pg()
@@ -1089,11 +1230,12 @@ class TestRLSLabsProjects:
         assert Project.objects.first().pk == side_a["project"].pk
         assert ProjectSubmission.objects.count() == 1
         assert ProjectSubmission.objects.first().pk == side_a["project_submission"].pk
+        assert Project._meta.get_field("assigned_students").remote_field.through.objects.count() == 1
 
     def test_no_tenant_sees_no_labs_projects_rows(self, labs_projects_graph):
         _skip_if_not_pg()
-        from apps.labs.models import LabAnswer, LabSubmission
-        from apps.projects.models import ProjectSubmission
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabSubmission
+        from apps.projects.models import Project, ProjectSubmission
 
         _enable_rls()
         _clear_tenant()
@@ -1101,6 +1243,9 @@ class TestRLSLabsProjects:
         assert LabSubmission.objects.count() == 0
         assert LabAnswer.objects.count() == 0
         assert ProjectSubmission.objects.count() == 0
+        assert Lab._meta.get_field("allowed_students").remote_field.through.objects.count() == 0
+        assert LabAssignment._meta.get_field("assigned_questions").remote_field.through.objects.count() == 0
+        assert Project._meta.get_field("assigned_students").remote_field.through.objects.count() == 0
 
     def test_cross_tenant_project_submission_insert_rejected(self, labs_projects_graph):
         _skip_if_not_pg()
@@ -1124,6 +1269,24 @@ class TestRLSLabsProjects:
                         "VALUES (%s, %s, 'x', 'pending', now())",
                         [side_b["project"].id, intruder.id],
                     )
+
+    def test_cross_lab_assignment_question_link_is_rejected(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.labs.models import LabAssignment
+
+        side_a = labs_projects_graph["a"]
+        side_b = labs_projects_graph["b"]
+        through = LabAssignment._meta.get_field("assigned_questions").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                through.objects.create(
+                    labassignment_id=side_a["assignment"].pk,
+                    labquestion_id=side_b["question"].pk,
+                )
 
 
 class TestRLSAssignmentJoinTables:

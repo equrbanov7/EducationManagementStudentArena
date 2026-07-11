@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -23,7 +24,7 @@ from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_pat
 from core.permissions import request_has_permission
 
 from ...lab_access import can_teacher_access_lab, resolve_identity_window, resolve_recheck_window
-from ...lab_grading_service import format_decimal_input, parse_decimal_input
+from ...lab_grading_service import format_decimal_input, grade_lab_answer, grade_lab_submission, parse_decimal_input
 from ...models import LabAnswer, LabSubmission
 from ..shared._helpers import _get_tenant_lab_or_404, _get_tenant_submission_or_404, _lab_back_url
 
@@ -282,47 +283,40 @@ def grade_submission_page(request, pk):
             return redirect(request.path)
 
         try:
-            auto_total = Decimal("0")
-            has_posted_answer_scores = False
-            for answer in answers:
-                raw_score = (request.POST.get(f"answer_score_{answer.id}", "") or "").strip()
-                if raw_score == "":
-                    answer.score = None
-                else:
-                    has_posted_answer_scores = True
-                    val = parse_decimal_input(raw_score)
-                    if val is None:
-                        val = Decimal("0")
-                    if val < 0:
-                        val = Decimal("0")
-                    q_max = Decimal(str(answer.question.points or 0))
-                    if q_max > 0 and val > q_max:
-                        val = q_max
-                    answer.score = val
-                    auto_total += val
-                answer.save(update_fields=["score", "submitted_at"])
+            # All per-question scores and the final score commit together. The
+            # grading services re-read each row with SELECT ... FOR UPDATE so a
+            # concurrent reviewer cannot silently overwrite a partial result.
+            with transaction.atomic():
+                auto_total = Decimal("0")
+                has_posted_answer_scores = False
+                for answer in answers:
+                    raw_score = (request.POST.get(f"answer_score_{answer.id}", "") or "").strip()
+                    if raw_score == "":
+                        val = None
+                    else:
+                        has_posted_answer_scores = True
+                        val = parse_decimal_input(raw_score)
+                        if val is None:
+                            val = Decimal("0")
+                    graded_answer = grade_lab_answer(answer, val)
+                    if graded_answer.score is not None:
+                        auto_total += graded_answer.score
 
-            score_raw = (request.POST.get("score", "") or "").strip()
-            entered_total = parse_decimal_input(score_raw)
-            use_manual_total = request.POST.get("use_manual_total") == "1"
-            should_use_manual_total = entered_total is not None and (
-                use_manual_total or not has_posted_answer_scores or entered_total != auto_total
-            )
-            final_score = entered_total if should_use_manual_total else auto_total
+                score_raw = (request.POST.get("score", "") or "").strip()
+                entered_total = parse_decimal_input(score_raw)
+                use_manual_total = request.POST.get("use_manual_total") == "1"
+                should_use_manual_total = entered_total is not None and (
+                    use_manual_total or not has_posted_answer_scores or entered_total != auto_total
+                )
+                final_score = entered_total if should_use_manual_total else auto_total
 
-            if final_score < 0:
-                final_score = Decimal("0")
-            lab_max = Decimal(str(lab.max_score or 0))
-            if lab_max > 0 and final_score > lab_max:
-                final_score = lab_max
-
-            submission.score = final_score
-            submission.feedback = request.POST.get("feedback", "")
-            submission.status = "graded"
-            submission.graded_by = request.user
-            if not submission.graded_at:
-                submission.graded_at = timezone.now()
-            submission.save()
+                submission = grade_lab_submission(
+                    submission,
+                    final_score,
+                    request.POST.get("feedback", ""),
+                    request.user,
+                    refresh_graded_at=False,
+                )
 
             messages.success(request, pgettext("labs.view.message", "grade_saved_successfully"))
             return redirect("labs:lab_submissions", pk=lab.id)

@@ -9,10 +9,10 @@
 #   Alerting (e-mail): ALERT_EMAIL_TO (+ BREVO_SMTP_LOGIN / BREVO_SMTP_KEY)
 #
 # TLS / SSL Architecture:
-#   Cloudflare can connect to the origin over plain HTTP (Flexible) or HTTPS
-#   (Full).  This stack exposes both port 80 and 443 so Cloudflare Full mode
-#   does not fail when the zone is configured to use encrypted origin pulls.
-#   Certificates for origin HTTPS are mounted from docker/nginx/certs.
+#   Production Cloudflare mode MUST use Full (strict); Flexible mode is not
+#   supported. The Nginx real-IP module trusts CF-Connecting-IP only from the
+#   official CIDRs mounted below. EDGE_PROXY_MODE controls origin firewall
+#   enforcement in scripts/deploy/remote_deploy.sh.
 #
 # Security notes:
 #   - Redis is NOT exposed externally; it is reachable only inside the
@@ -689,6 +689,7 @@ services:
       - "443:443"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/cloudflare-realip.conf:/etc/nginx/trusted_proxies/cloudflare-realip.conf:ro
       - ./docker/nginx/certs:/etc/nginx/certs:ro
       - static_data:/var/www/staticfiles:ro
       - media_data:/var/www/media:ro
