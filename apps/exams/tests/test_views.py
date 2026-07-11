@@ -2991,6 +2991,82 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(second_answer.text_answer, "Keep second answer")
         record_autosave.assert_called_once_with("success")
 
+    def _occ_exam_attempt(self):
+        exam = Exam.objects.create(
+            author=self.teacher, title="OCC Exam", is_active=True, is_public=False, exam_type="written"
+        )
+        exam.allowed_users.add(self.student)
+        q = ExamQuestion.objects.create(exam=exam, text="Q", order=1, points=1)
+        attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="in_progress", attempt_number=1)
+        ExamAnswer.objects.create(attempt=attempt, question=q, text_answer="")
+        return exam, attempt, q
+
+    def test_autosave_increments_revision_and_returns_it(self):
+        """EXAM-P1-06: uğurlu autosave server_revision qaytarır və artırır."""
+        exam, attempt, q = self._occ_exam_attempt()
+        url = reverse("exams:take_exam", args=[exam.slug, attempt.id])
+        r1 = self.client.post(
+            url,
+            {"submit_action": "autosave", "changed_questions[]": [str(q.id)], f"q_{q.id}": "a1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r1.status_code, 200)
+        self.assertEqual(r1.json()["server_revision"], 1)
+
+    def test_stale_autosave_revision_returns_409_conflict(self):
+        """EXAM-P1-06: köhnə base_revision ilə autosave 409 (stale overwrite yox)."""
+        exam, attempt, q = self._occ_exam_attempt()
+        url = reverse("exams:take_exam", args=[exam.slug, attempt.id])
+        # Tab A: rev 0→1.
+        self.client.post(
+            url,
+            {
+                "submit_action": "autosave",
+                "changed_questions[]": [str(q.id)],
+                f"q_{q.id}": "tabA",
+                "autosave_revision": "0",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        # Tab B: hələ rev 0-dadır → 409.
+        r = self.client.post(
+            url,
+            {
+                "submit_action": "autosave",
+                "changed_questions[]": [str(q.id)],
+                f"q_{q.id}": "tabB-stale",
+                "autosave_revision": "0",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 409)
+        body = r.json()
+        self.assertTrue(body["conflict"])
+        self.assertEqual(body["server_revision"], 1)
+        # Tab B-nin köhnə cavabı YAZILMAYIB.
+        attempt.answers.get(question=q).refresh_from_db()
+        self.assertEqual(attempt.answers.get(question=q).text_answer, "tabA")
+
+    def test_take_exam_page_seeds_autosave_revision_field(self):
+        """EXAM-P1-06: səhifə cari server revision-u gizli field kimi seed edir."""
+        exam, attempt, q = self._occ_exam_attempt()
+        ExamAttempt.objects.filter(pk=attempt.pk).update(autosave_revision=3)
+        response = self.client.get(reverse("exams:take_exam", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="autosave-revision-field"')
+        self.assertContains(response, 'value="3"')
+
+    def test_autosave_without_base_revision_is_backward_compatible(self):
+        """base_revision göndərilməyən (köhnə forma) autosave işləməyə davam edir."""
+        exam, attempt, q = self._occ_exam_attempt()
+        url = reverse("exams:take_exam", args=[exam.slug, attempt.id])
+        r = self.client.post(
+            url,
+            {"submit_action": "autosave", "changed_questions[]": [str(q.id)], f"q_{q.id}": "nolock"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 200)
+
     @patch("apps.exams.metrics.record_attempt_submitted")
     def test_finish_preserves_answer_of_absent_timer_expired_question(self, record_submitted):
         """EXAM-P1-05: per-question timer bitib inputları disable olan sual

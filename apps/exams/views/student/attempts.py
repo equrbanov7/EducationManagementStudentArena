@@ -30,13 +30,16 @@ from core.upload_security import randomize_uploaded_filename, validate_uploaded_
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
+    autosave_occ_conflict_response,
     build_exam_history_url,
     build_exam_result_url,
+    bump_autosave_revision,
     current_return_to,
     ensure_student_exam_tenant_context,
     finish_skips_absent_question,
     posted_autosave_question_ids,
     safe_same_origin_redirect_path,
+    selected_option_ids_from_request,
 )
 from .access_guard import ensure_active_attempt_access
 from .script_data import take_exam_script_data
@@ -76,25 +79,6 @@ def _finished_attempt_response(request, attempt, *, return_to):
             }
         )
     return redirect(redirect_url)
-
-
-def _selected_option_ids_from_request(request, question):
-    if question.answer_mode == "single":
-        raw_option_id = request.POST.get(f"q_{question.id}")
-        if not raw_option_id:
-            return set()
-        try:
-            return {int(raw_option_id)}
-        except (TypeError, ValueError):
-            return set()
-
-    selected_option_ids = set()
-    for raw_option_id in request.POST.getlist(f"q_{question.id}"):
-        try:
-            selected_option_ids.add(int(raw_option_id))
-        except (TypeError, ValueError):
-            continue
-    return selected_option_ids
 
 
 def _valid_question_option_ids(question):
@@ -323,6 +307,12 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
         if attempt.is_finished:
             return _finished_attempt_response(request, attempt, return_to=return_to)
 
+        # EXAM-P1-06: autosave/finish optimistic concurrency — stale tab yazısı
+        # 409 alır (helper-də; base_revision yoxdursa geriyə-uyğun).
+        occ_conflict = autosave_occ_conflict_response(request, attempt, action)
+        if occ_conflict is not None:
+            return occ_conflict
+
         # Re-check the deadline while holding the attempt row lock. This keeps
         # final submit, autosave, and timer-expiry paths from racing each other.
         if exam.total_duration_minutes and attempt.started_at:
@@ -384,7 +374,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                 _save_test_answer_if_changed(
                     ans,
                     q,
-                    _selected_option_ids_from_request(request, q),
+                    selected_option_ids_from_request(request, q),
                     answer_data.get("selected_option_ids", set()),
                 )
             else:
@@ -409,6 +399,9 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
         if exam.exam_type == "test" and (action != "autosave" or is_time_up):
             attempt.recalculate_score()
 
+        # EXAM-P1-06: uğurlu yazıdan sonra revision-u artır (OCC).
+        bump_autosave_revision(attempt)
+
         if action == "finish" or is_time_up:
             status = "expired" if is_time_up else "submitted"
             attempt.mark_finished(status=status)
@@ -429,7 +422,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
         if action == "autosave":
             record_autosave("success")
         if is_ajax:
-            return JsonResponse({"success": True, "finished": False})
+            return JsonResponse({"success": True, "finished": False, "server_revision": attempt.autosave_revision})
 
         return redirect(
             append_return_to(
@@ -591,6 +584,7 @@ def take_exam(request, slug, attempt_id):
         "exam_autosave_jitter_ms": settings.EXAM_AUTOSAVE_JITTER_MS,
         "exam_autosave_binary_uploads_enabled": settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
         "marked_question_ids_json": json.dumps(getattr(attempt, "marked_question_ids", None) or []),
+        "autosave_revision": getattr(attempt, "autosave_revision", 0),
         "take_exam_script_data": take_exam_script_data(remaining_seconds),
     }
     return render(request, "exams/student/take_exam.html", context)

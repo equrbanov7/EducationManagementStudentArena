@@ -90,6 +90,7 @@
                 questionNavButtons: document.querySelectorAll("[data-question-nav]"),
                 markButtons: document.querySelectorAll("[data-mark-question]"),
                 markedQuestionIdsField: document.getElementById("marked-question-ids-field"),
+                autosaveRevisionField: document.getElementById("autosave-revision-field"),
                 qTimerContainer: document.getElementById("question-timer-container"),
                 qTimerValue: document.getElementById("question-timer-value"),
                 questionTimerInterval: null,
