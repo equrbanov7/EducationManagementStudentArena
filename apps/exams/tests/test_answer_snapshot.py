@@ -230,3 +230,55 @@ class TestAnswerSnapshotIntegrity(TestCase):
         view = delivered_question_view(answer)
         self.assertFalse(view["from_snapshot"])
         self.assertEqual(view["text"], "Q1")
+
+    def test_delivered_render_reads_snapshot_text_options_and_selection(self):
+        """Nəticə/appeal render-i çatdırılma anındakı mətndən + dondurulmuş
+        seçimdən gəlir; müəllif sonrakı redaktəsi görünüşü dəyişmir."""
+        from apps.exams.services.question_snapshot import build_question_snapshot, delivered_question_render
+
+        q = self._question(order=1)
+        opt_a = self._option(q, text="Original A", is_correct=True)
+        opt_b = self._option(q, text="Original B", is_correct=False)
+        attempt = self._attempt()
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=q,
+            question_snapshot=build_question_snapshot(q, [opt_a, opt_b]),
+        )
+        answer.selected_options.set([opt_b])
+
+        # Müəllim SUBMIT-dən sonra mətn/variant/düzgünlüyü dəyişir.
+        q.text = "EDITED QUESTION"
+        q.save(update_fields=["text"])
+        ExamQuestionOption.objects.filter(pk=opt_a.id).update(text="EDITED A", is_correct=False)
+        ExamQuestionOption.objects.filter(pk=opt_b.id).update(text="EDITED B", is_correct=True)
+
+        rendered = delivered_question_render(answer, {opt_b.id})
+        self.assertTrue(rendered.from_snapshot)
+        self.assertEqual(rendered.text, "Q1")
+        by_id = {o.id: o for o in rendered.options}
+        # Dondurulmuş mətn + düzgünlük (redaktədən əvvəlki).
+        self.assertEqual(by_id[opt_a.id].text, "Original A")
+        self.assertTrue(by_id[opt_a.id].is_correct)
+        self.assertFalse(by_id[opt_b.id].is_correct)
+        # Tələbənin seçimi (frozen) is_selected ilə işarələnir.
+        self.assertFalse(by_id[opt_a.id].is_selected)
+        self.assertTrue(by_id[opt_b.id].is_selected)
+
+    def test_delivered_render_legacy_uses_live_and_marks_selection(self):
+        """Snapshot-suz cavab canlı suala düşür, is_selected yenə də işləyir."""
+        from apps.exams.services.question_snapshot import delivered_question_render
+
+        q = self._question(order=1)
+        opt_a = self._option(q, text="Live A", is_correct=True)
+        opt_b = self._option(q, text="Live B", is_correct=False)
+        attempt = self._attempt()
+        answer = ExamAnswer.objects.create(attempt=attempt, question=q)  # snapshot={} default
+        answer.selected_options.set([opt_a])
+
+        rendered = delivered_question_render(answer, {opt_a.id})
+        self.assertFalse(rendered.from_snapshot)
+        self.assertEqual(rendered.text, "Q1")
+        by_id = {o.id: o for o in rendered.options}
+        self.assertTrue(by_id[opt_a.id].is_selected)
+        self.assertFalse(by_id[opt_b.id].is_selected)

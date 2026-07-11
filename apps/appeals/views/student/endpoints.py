@@ -11,6 +11,7 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAttempt
 from apps.exams.navigation import append_query_params, current_return_to
 from apps.exams.public import tenant_scoped_exams
+from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
 from ...constants import (
@@ -166,6 +167,15 @@ def appeal_create(request, attempt_id):
 
     for answer in delivered_answers:
         answer.has_selection = bool(list(answer.selected_options.all()))
+        # EXAM-P0-03: apellyasiya sübutu da çatdırılma anındakı dondurulmuş sual
+        # görünüşündən render olunur (müəllif sonradan redaktə etsə də sabit
+        # qalır); dondurulmuş seçim yoxdursa canlı seçimə düşülür.
+        frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+        if frozen_selection is not None:
+            selected_ids = {int(option_id) for option_id in frozen_selection}
+        else:
+            selected_ids = {opt.id for opt in answer.selected_options.all()}
+        answer.delivered = delivered_question_render(answer, selected_ids)
 
     marked_map = _marked_question_map(attempt)
     has_marked = any(marked_map.get(answer.question_id) for answer in delivered_answers)

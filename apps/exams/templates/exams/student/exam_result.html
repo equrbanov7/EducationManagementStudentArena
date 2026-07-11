@@ -167,6 +167,7 @@
             {% with appeal_bonus=appeal_bonus_by_qid|get_item:q.id %}
             {% with appeal_status=appeal_status_by_qid|get_item:q.id %}
             {% with verdict=answer_verdict_by_qid|get_item:q.id %}
+            {% with delivered=delivered_by_qid|get_item:q.id %}
             <div class="question-card{% if is_marked %} question-card--marked{% endif %}{% if appeal_status == "accepted" %} question-card--appeal-updated{% endif %}{% if exam.exam_type == "test" and hide_test_answer_correctness %} question-card--question-only{% endif %}">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
@@ -217,18 +218,18 @@
                         </div>
                         {% endif %}
                         <div class="q-text">
-                            {{ q.text|linebreaks }}
+                            {{ delivered.text|linebreaks }}
                         </div>
-                        {% if q.image %}
+                        {% if delivered.image_url %}
                             <div class="question-media">
-                            <img src="{{ q.image.url }}" alt="{% trans 'alt_question_image' context 'exams.template.student_exam_result' %}">
+                            <img src="{{ delivered.image_url }}" alt="{% trans 'alt_question_image' context 'exams.template.student_exam_result' %}">
                             </div>
                         {% endif %}
-                      
-                        {% if q.video %}
+
+                        {% if delivered.video_url %}
                             <div class="question-media">
                             <video controls preload="metadata" playsinline>
-                                <source src="{{ q.video.url }}">
+                                <source src="{{ delivered.video_url }}">
                                 {% trans "video_not_supported" context "exams.template.student_exam_result" %}
                             </video>
                             </div>
@@ -244,24 +245,24 @@
                     {% if exam.exam_type == "test" %}
                         {% if not hide_test_answer_correctness %}
                         <ul class="option-list">
-                            {% for opt in q.options.all %}
+                            {% for opt in delivered.options %}
                                 <li class="option-item
                                     {% if opt.is_correct %}correct-option{% endif %}
-                                    {% if ans and opt in ans.selected_options.all and not opt.is_correct %}wrong-selected{% endif %}
-                                    {% if ans and opt in ans.selected_options.all and opt.is_correct %}correct-selected{% endif %}
+                                    {% if ans and opt.is_selected and not opt.is_correct %}wrong-selected{% endif %}
+                                    {% if ans and opt.is_selected and opt.is_correct %}correct-selected{% endif %}
                                 ">
                                     <div class="d-flex align-items-center">
                                         {% if opt.is_correct %}
                                             <i class="fas fa-check-circle correct-icon"></i>
-                                        {% elif ans and opt in ans.selected_options.all and not opt.is_correct %}
+                                        {% elif ans and opt.is_selected and not opt.is_correct %}
                                             <i class="fas fa-times-circle wrong-icon"></i>
                                         {% else %}
                                             <i class="far fa-circle option-icon"></i>
                                         {% endif %}
                                         <span class="option-text">{{ opt.text }}</span>
                                     </div>
-                                    
-                                    {% if ans and opt in ans.selected_options.all %}
+
+                                    {% if ans and opt.is_selected %}
                                         <span class="badge bg-light text-dark border">{% trans "your_selection" context "exams.template.student_exam_result" %}</span>
                                     {% endif %}
                                 </li>
@@ -426,12 +427,12 @@
                                 </div>
                             {% else %}
                                 {# EXAM-P0-05: ideal cavab imtahan pəncərəsi bağlanana qədər açılmır #}
-                                {% if q.correct_answer and not answers_release_locked %}
+                                {% if delivered.correct_answer and not answers_release_locked %}
                                     <div class="mt-4">
                                         <label class="response-label text-success mb-2">
                                             <i class="fas fa-check-double"></i> {% trans "label_ideal_answer_example" context "exams.template.student_exam_result" %}:
                                         </label>
-                                        <pre class="code-block correct-answer">{{ q.correct_answer }}</pre>
+                                        <pre class="code-block correct-answer">{{ delivered.correct_answer }}</pre>
                                     </div>
                                 {% endif %}
                             {% endif %}
@@ -440,6 +441,7 @@
                 </div>
                 {% endif %}
             </div>
+            {% endwith %}
             {% endwith %}
             {% endwith %}
             {% endwith %}
