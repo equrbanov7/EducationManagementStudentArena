@@ -42,6 +42,69 @@
         </div>
     </header>
 
+    {% if appeal_window_closed %}
+    {# ── Apellyasiya müddəti bitib — read-only baxış (UX) ──────────────── #}
+    <div class="appeal-info-card appeal-info-card--warning" role="status">
+        <i class="fas fa-hourglass-end"></i>
+        <div>
+            <strong>{% trans "Apellyasiya müddəti bitib" context "appeals.template" %}</strong>
+            <p>
+                {% blocktrans trimmed context "appeals.template" with days=appeal_window_days %}
+                    Apellyasiya yalnız imtahan bitdikdən sonra {{ days }} gün ərzində göndərilə bilər.
+                    Bu müddət keçdiyi üçün yeni apellyasiya göndərmək mümkün deyil.
+                {% endblocktrans %}
+                {% if appeal_deadline %}
+                <span class="d-block mt-1 text-muted">
+                    {% blocktrans trimmed context "appeals.template" with deadline=appeal_deadline|date:"d.m.Y" %}
+                        Son tarix: {{ deadline }}.
+                    {% endblocktrans %}
+                </span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if attempt_appeals %}
+    <section class="appeal-closed-appeals">
+        <h2 class="appeal-section-title">{% trans "Apellyasiyanızın nəticəsi" context "appeals.template" %}</h2>
+        <ul class="appeal-closed-list">
+            {% for appeal in attempt_appeals %}
+            <li class="appeal-closed-list__item">
+                <div class="appeal-closed-list__head">
+                    <span class="appeal-status-chip appeal-status-chip--{{ appeal.student_display_status }}">
+                        {{ appeal.student_display_status_label }}
+                    </span>
+                    <span class="text-muted">{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div class="appeal-closed-list__meta">
+                    {% blocktrans trimmed context "appeals.template" with count=appeal.items.count %}
+                        {{ count }} sual üzrə apellyasiya
+                    {% endblocktrans %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'accounts:profile' %}?section=my-appeals" class="btn btn-outline-primary mt-2">
+            <i class="fas fa-list-ul me-2"></i>{% trans "Bütün apellyasiyalarım" context "appeals.template" %}
+        </a>
+    </section>
+    {% else %}
+    <div class="appeal-info-card">
+        <i class="fas fa-circle-info"></i>
+        <div>
+            <strong>{% trans "Bu imtahan üçün apellyasiya göndərməmisiniz" context "appeals.template" %}</strong>
+            <p>{% trans "Nəticənizi aşağıdakı düymə ilə yenidən görə bilərsiniz." context "appeals.template" %}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="appeal-closed-actions">
+        <a href="{{ result_url }}" class="btn btn-primary">
+            <i class="fas fa-clipboard-check me-2"></i>{% trans "Nəticəyə bax" context "appeals.template" %}
+        </a>
+    </div>
+    {% else %}
+
     {# Necə işləyir — qısa addımlar #}
     <div class="appeal-steps">
         <div class="appeal-step">
@@ -261,6 +324,7 @@
         </div>
         {% endif %}
     </form>
+    {% endif %}{# not appeal_window_closed #}
 
     {% if answers %}
     {# Göndərməzdən əvvəl təsdiq modalı (Bootstrap). #}

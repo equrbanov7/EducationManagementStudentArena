@@ -341,3 +341,72 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Apellyasiya müddəti bitib — read-only baxış (UX) ─────────────────────── */
+.appeal-info-card--warning {
+    border-color: var(--ems-warning-300, #fcd34d);
+    background: var(--ems-warning-50, #fffbeb);
+}
+.appeal-info-card--warning > i {
+    color: var(--ems-warning-600, #d97706);
+}
+.appeal-closed-appeals {
+    margin-top: 1.25rem;
+}
+.appeal-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800, #1f2937);
+    margin-bottom: 0.75rem;
+}
+.appeal-closed-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+}
+.appeal-closed-list__item {
+    border: 1px solid var(--ems-neutral-200, #e5e7eb);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: var(--ems-neutral-0, #fff);
+}
+.appeal-closed-list__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+.appeal-closed-list__meta {
+    color: var(--ems-neutral-500, #6b7280);
+    font-size: 0.9rem;
+}
+.appeal-status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--ems-neutral-100, #f3f4f6);
+    color: var(--ems-neutral-700, #374151);
+}
+.appeal-status-chip--accepted,
+.appeal-status-chip--partially_accepted {
+    background: var(--ems-success-50, #ecfdf5);
+    color: var(--ems-success-700, #047857);
+}
+.appeal-status-chip--rejected {
+    background: var(--ems-danger-50, #fef2f2);
+    color: var(--ems-danger-700, #b91c1c);
+}
+.appeal-status-chip--pending,
+.appeal-status-chip--under_review {
+    background: var(--ems-warning-50, #fffbeb);
+    color: var(--ems-warning-700, #b45309);
+}
+.appeal-closed-actions {
+    margin-top: 1.25rem;
+}

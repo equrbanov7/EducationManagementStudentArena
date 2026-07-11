@@ -62,7 +62,9 @@ class EffectiveDisplayTests(TestCase):
         ExamQuestionOption.objects.create(question=self.q1, label="B", text="b", is_correct=False)
         self.q2 = ExamQuestion.objects.create(exam=self.exam, order=2, text="Q2", points=3)
         ExamQuestionOption.objects.create(question=self.q2, label="A", text="a", is_correct=True)
-        self.attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, status="submitted")
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student, exam=self.exam, status="submitted", finished_at=timezone.now()
+        )
         self.a1 = ExamAnswer.objects.create(attempt=self.attempt, question=self.q1)
         self.a2 = ExamAnswer.objects.create(attempt=self.attempt, question=self.q2)
 
