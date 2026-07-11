@@ -2042,6 +2042,40 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(attempt.teacher_score, 1)
         self.assertTrue(attempt.checked_by_teacher)
 
+    def test_grading_records_grade_event_and_grader_identity(self):
+        """Seq1: grading POST append-only grade-event yaradır + graded_by təyin edir."""
+        from apps.exams.models import ExamGradeEvent
+
+        written_exam = Exam.objects.create(
+            author=self.teacher, title="Ledger Exam", exam_type="written", is_active=True
+        )
+        question = ExamQuestion.objects.create(exam=written_exam, text="Q", order=1, answer_mode="single", points=10)
+        attempt = ExamAttempt.objects.create(user=self.student, exam=written_exam, status="submitted")
+        ExamAnswer.objects.create(attempt=attempt, question=question, text_answer="ans")
+
+        self.client.post(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
+            {f"score_{question.id}": "7", f"feedback_{question.id}": "ok"},
+        )
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.graded_by_id, self.teacher.id)
+        events = ExamGradeEvent.objects.filter(attempt=attempt)
+        self.assertEqual(events.count(), 1)
+        ev = events.first()
+        self.assertIsNone(ev.old_score)
+        self.assertEqual(ev.new_score, 7)
+        self.assertEqual(ev.grader_id, self.teacher.id)
+        self.assertEqual(ev.max_points, 10)
+
+        # Yenidən qiymət dəyişəndə ikinci event yazılır; graded_by dəyişmir.
+        self.client.post(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
+            {f"score_{question.id}": "9", f"feedback_{question.id}": "updated"},
+        )
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.graded_by_id, self.teacher.id)
+        self.assertEqual(ExamGradeEvent.objects.filter(attempt=attempt).count(), 2)
+
     def test_teacher_check_attempt_post_uses_snapshot_points_over_live_question(self):
         """EXAM-P0-04 + INTEGRITY-001: clamp sərhədi çatdırılma snapshot-undan gəlir."""
         written_exam = Exam.objects.create(

@@ -20,8 +20,12 @@ def _request(user):
     return SimpleNamespace(user=user)
 
 
-def _appeal(author_id, org_id=1):
-    return SimpleNamespace(exam=SimpleNamespace(author_id=author_id), organization_id=org_id)
+def _appeal(author_id, org_id=1, graded_by_id=None):
+    return SimpleNamespace(
+        exam=SimpleNamespace(author_id=author_id),
+        organization_id=org_id,
+        attempt=SimpleNamespace(graded_by_id=graded_by_id),
+    )
 
 
 class ReviewerIndependenceTests(SimpleTestCase):
@@ -32,6 +36,17 @@ class ReviewerIndependenceTests(SimpleTestCase):
     def test_non_author_is_not_conflicted(self):
         user = SimpleNamespace(id=8, is_superuser=False, is_superadmin=False)
         self.assertFalse(_is_conflicted_reviewer(_request(user), _appeal(author_id=7)))
+
+    def test_original_grader_is_conflicted(self):
+        # Seq1: müəllif olmasa da, ilk qiymətləndirən grader konfliktlidir.
+        user = SimpleNamespace(id=42, is_superuser=False, is_superadmin=False)
+        appeal = _appeal(author_id=7, graded_by_id=42)
+        self.assertTrue(_is_conflicted_reviewer(_request(user), appeal))
+
+    def test_independent_reviewer_not_grader_not_author(self):
+        user = SimpleNamespace(id=99, is_superuser=False, is_superadmin=False)
+        appeal = _appeal(author_id=7, graded_by_id=42)
+        self.assertFalse(_is_conflicted_reviewer(_request(user), appeal))
 
     def test_missing_author_is_not_conflicted(self):
         user = SimpleNamespace(id=8, is_superuser=False, is_superadmin=False)

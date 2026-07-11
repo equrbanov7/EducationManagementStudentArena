@@ -120,6 +120,17 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         blank=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "teacher_feedback"),
     )
+    # EXAM (re-audit §5.6/P1-18): ilk manual qiymətləndirən müəllim. Appeal
+    # reviewer independence-i dərinləşdirir — öz qiymətinə baxan şəxs müstəqil
+    # reviewer ola bilməz. İlk grading POST-unda set olunur, sonra dəyişmir.
+    graded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="graded_exam_attempts",
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "graded_by"),
+    )
     supervision_status = models.CharField(
         max_length=20,
         choices=SUPERVISION_STATUS_CHOICES,
@@ -469,9 +480,58 @@ class ProctoringLog(models.Model):
         return f"{self.exam_attempt.user.username} - {self.get_event_type_display()} @ {self.timestamp}"
 
 
+class ExamGradeEvent(models.Model):
+    """Append-only manual-grading ledger (re-audit §5.6 / grade tamper-evidence).
+
+    Hər manual bal dəyişikliyi (kim, nə vaxt, köhnə→yeni bal, hansı sual)
+    burada qeydə alınır. Ledger yalnız INSERT üçündür — tarixçə redaktə
+    olunmur (audit üçün). Tenant izolyasiyası ``organizations 0022`` RLS
+    policy-si ilə (exam→organization dolayı).
+    """
+
+    attempt = models.ForeignKey(
+        "exams.ExamAttempt",
+        on_delete=models.CASCADE,
+        related_name="grade_events",
+        verbose_name=pgettext_lazy("exams.model.grade_event.field", "attempt"),
+    )
+    question = models.ForeignKey(
+        "exams.ExamQuestion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="grade_events",
+        verbose_name=pgettext_lazy("exams.model.grade_event.field", "question"),
+    )
+    grader = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exam_grade_events",
+        verbose_name=pgettext_lazy("exams.model.grade_event.field", "grader"),
+    )
+    old_score = models.IntegerField(null=True, blank=True)
+    new_score = models.IntegerField(null=True, blank=True)
+    max_points = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = pgettext_lazy("exams.model.grade_event.meta", "singular")
+        verbose_name_plural = pgettext_lazy("exams.model.grade_event.meta", "plural")
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["attempt", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"grade {self.attempt_id}/{self.question_id}: {self.old_score}→{self.new_score}"
+
+
 __all__ = [
     "ExamAnswer",
     "ExamAnswerFile",
     "ExamAttempt",
+    "ExamGradeEvent",
     "ProctoringLog",
 ]

@@ -33,8 +33,16 @@ def _is_conflicted_reviewer(request, appeal):
     user = getattr(request, "user", None)
     if is_superadmin_user(user):
         return False
+    user_id = getattr(user, "id", None)
+    if user_id is None:
+        return False
+    # İmtahan müəllifi öz imtahanına baxa bilməz.
     author_id = getattr(getattr(appeal, "exam", None), "author_id", None)
-    return author_id is not None and author_id == getattr(user, "id", None)
+    if author_id is not None and author_id == user_id:
+        return True
+    # İlk manual qiymətləndirən müəllim də öz qiymətinə baxan reviewer ola bilməz.
+    graded_by_id = getattr(getattr(appeal, "attempt", None), "graded_by_id", None)
+    return graded_by_id is not None and graded_by_id == user_id
 
 
 def can_create_appeal(request, attempt, *, at_time=None):
