@@ -151,7 +151,14 @@
     <div class="section-divider"></div>
 
     <h3 class="section-title">{% trans "heading_question_result_analysis" context "exams.template.student_exam_result" %}</h3>
-    
+
+    {% if answers_release_locked %}
+        <div class="alert alert-info d-flex align-items-center gap-2">
+            <i class="fas fa-lock"></i>
+            <span>{% trans "notice_answers_release_locked" context "exams.template.student_exam_result" %}</span>
+        </div>
+    {% endif %}
+
     <div class="questions-list">
         {% for q in questions %}
             {% with ans=answers_by_qid|get_item:q.id %}
@@ -418,7 +425,8 @@
                                     </div>
                                 </div>
                             {% else %}
-                                {% if q.correct_answer %}
+                                {# EXAM-P0-05: ideal cavab imtahan pəncərəsi bağlanana qədər açılmır #}
+                                {% if q.correct_answer and not answers_release_locked %}
                                     <div class="mt-4">
                                         <label class="response-label text-success mb-2">
                                             <i class="fas fa-check-double"></i> {% trans "label_ideal_answer_example" context "exams.template.student_exam_result" %}:

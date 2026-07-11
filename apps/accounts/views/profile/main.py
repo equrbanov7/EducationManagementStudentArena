@@ -1,7 +1,7 @@
 """Profil view-i — nazik HTTP giriş nöqtəsi.
 
 Bütün context-yığımı ``context_builder.build_profile_response``-dədir (view/logika
-ayrılığı — SoC). Bax: docs/REFACTOR_PLAN_profile_main.md (Mərhələ A).
+ayrılığı — SoC). Bax: docs/architecture/REFACTOR_PLAN_profile_main.md (Mərhələ A).
 """
 
 from django.contrib.auth.decorators import login_required

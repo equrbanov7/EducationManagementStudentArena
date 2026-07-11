@@ -276,7 +276,7 @@ class OrganizationMiddleware:
             # Faza 2 / Mərhələ 3B: flaq açıq olduqda RLS-i request transaction-ı
             # daxilində SET LOCAL ilə tətbiq edən execute_wrapper qoşulur
             # (PgBouncer transaction-mode təhlükəsiz). Default OFF → mövcud
-            # session-scope davranış. Bax: docs/FAZA2_3B_TRANSACTION_POOLING.md.
+            # session-scope davranış. Bax: docs/performance/FAZA2_3B_TRANSACTION_POOLING.md.
             if getattr(settings, "RLS_TRANSACTION_SCOPED", False):
                 from core.rls_pooling import RLSTransactionGuard
 

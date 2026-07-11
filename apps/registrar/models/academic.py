@@ -97,7 +97,7 @@ class Curriculum(UUIDModel, TimeStampedModel):
 
     The set of ``CurriculumSubject`` rows defines, per semester, which subjects
     are mandatory and which belong to elective blocks the group/student chooses
-    from (see docs/UNIVERSITY_SYSTEM_ROADMAP.md §2)."""
+    from (see docs/architecture/UNIVERSITY_SYSTEM_ROADMAP.md §2)."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="curricula")
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="curricula")

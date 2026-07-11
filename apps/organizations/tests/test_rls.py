@@ -40,6 +40,8 @@ Prerequisites
   ``organizations.0004_expand_rls_scope`` applied.
 """
 
+from datetime import timedelta
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError, connection, transaction
 from django.test import RequestFactory
@@ -51,15 +53,26 @@ from apps.accounts.views._helpers import _build_student_org_request_section
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseGroup, CourseMembership
 from apps.exams.models import (
+    CodingExamQuestion,
+    CodingFile,
+    CodingSubmission,
+    CodingTestCase,
     Exam,
     ExamAnswer,
     ExamAnswerFile,
     ExamAttempt,
     ExamQuestion,
     ExamQuestionOption,
+    ExamRoom,
+    ExamRoomSession,
+    ExamStudentPin,
+    ExamSupervisionConfig,
     ProctoringLog,
     QuestionBlock,
+    QuestionSubmission,
+    StudentExamAttemptGrant,
     StudentGroup,
+    SupervisionIncident,
 )
 from apps.live_exam.auth import build_player_token, get_player_from_token
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -742,6 +755,200 @@ class TestRLSExamExpanded:
         assert ExamAnswerFile.objects.first().pk == expanded_exam_graph["answer_file_a"].pk
         assert ProctoringLog.objects.count() == 1
         assert ProctoringLog.objects.first().pk == expanded_exam_graph["proctor_a"].pk
+
+
+class TestRLSExamGapTables:
+    """RLS isolation for the exam tables covered by 0017 (audit EXAM-P0-02).
+
+    Coding, tələbə giriş (PIN/grant), supervision, sual göndərişi və qalan
+    M2M join cədvəlləri — hamısı tenant üzrə izolyasiya olunmalıdır.
+    """
+
+    @pytest.fixture()
+    def gap_table_graph(self, two_orgs, role_per_org):
+        from django.contrib.auth import get_user_model
+        from django.utils import timezone as dj_timezone
+
+        from apps.registrar.models import Subject
+
+        org_a, org_b = two_orgs
+        role_a, role_b = role_per_org
+        User = get_user_model()
+
+        data = {}
+        for suffix, org, role in (("a", org_a, role_a), ("b", org_b, role_b)):
+            teacher = User.objects.create_user(f"rls_gap_teacher_{suffix}", f"rgapt{suffix}@rls.test", "pw")
+            student = User.objects.create_user(f"rls_gap_student_{suffix}", f"rgaps{suffix}@rls.test", "pw")
+            Membership.objects.create(user=teacher, organization=org, role=role, is_primary=True, is_active=True)
+
+            exam = Exam.objects.create(
+                organization=org, author=org.owner, title=f"Gap Exam {suffix.upper()}", exam_type="coding"
+            )
+            question = ExamQuestion.objects.create(exam=exam, text=f"Gap Q {suffix}", order=1)
+            exam.excluded_users.add(student)
+
+            coding_question = CodingExamQuestion.objects.create(
+                question=question,
+                language=CodingExamQuestion.LANGUAGE_PYTHON,
+                title=f"Coding {suffix}",
+                problem_statement="Solve it",
+            )
+            CodingTestCase.objects.create(
+                coding_question=coding_question,
+                input_data="1\n",
+                expected_output="1\n",
+            )
+            attempt = ExamAttempt.objects.create(user=student, exam=exam, attempt_number=1, status="in_progress")
+            submission = CodingSubmission.objects.create(
+                student=student,
+                exam=exam,
+                attempt=attempt,
+                question=coding_question,
+                selected_language="python",
+                submitted_code="print(1)",
+            )
+            CodingFile.objects.create(submission=submission, name="main.py", content="print(1)")
+
+            ExamStudentPin.objects.create(exam=exam, student=student, pin_hash=f"hash-{suffix}", pin_cipher=b"")
+            StudentExamAttemptGrant.objects.create(exam=exam, student=student, extra_attempts=1, granted_by=teacher)
+            ExamSupervisionConfig.objects.create(exam=exam)
+            SupervisionIncident.objects.create(
+                organization=org,
+                exam=exam,
+                attempt=attempt,
+                student=student,
+                event_type="tab_switch",
+            )
+
+            group = StudentGroup.objects.create(teacher=teacher, organization=org, name=f"Gap Group {suffix}")
+            subject = Subject.objects.create(
+                organization=org, code=f"GAP{suffix.upper()}101", name=f"Gap Subject {suffix}"
+            )
+            group.subjects.add(subject)
+
+            question_submission = QuestionSubmission.objects.create(
+                organization=org,
+                teacher=teacher,
+                title=f"Gap Submission {suffix}",
+                raw_text="1) Question?",
+            )
+            question_submission.student_groups.add(group)
+
+            room = ExamRoom.objects.create(organization=org, name=f"Gap Room {suffix}", created_by=teacher)
+            room.invigilators.add(teacher)
+            now = dj_timezone.now()
+            session = ExamRoomSession.objects.create(
+                organization=org,
+                room=room,
+                scheduled_start=now,
+                scheduled_end=now + timedelta(hours=2),
+                created_by=teacher,
+            )
+            session.staff.add(teacher)
+
+            data[suffix] = {
+                "org": org,
+                "exam": exam,
+                "coding_question": coding_question,
+                "submission": submission,
+                "group": group,
+                "question_submission": question_submission,
+                "room": room,
+                "session": session,
+            }
+        return data
+
+    def test_coding_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert CodingExamQuestion.objects.count() == 1
+        assert CodingExamQuestion.objects.first().pk == side_a["coding_question"].pk
+        assert CodingTestCase.objects.count() == 1
+        assert CodingSubmission.objects.count() == 1
+        assert CodingSubmission.objects.first().pk == side_a["submission"].pk
+        assert CodingFile.objects.count() == 1
+
+    def test_student_access_and_supervision_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert ExamStudentPin.objects.count() == 1
+        assert ExamStudentPin.objects.first().exam_id == side_a["exam"].id
+        assert StudentExamAttemptGrant.objects.count() == 1
+        assert ExamSupervisionConfig.objects.count() == 1
+        assert SupervisionIncident.objects.count() == 1
+        assert SupervisionIncident.objects.first().organization_id == side_a["org"].id
+
+    def test_question_submission_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        submission_groups_through = QuestionSubmission._meta.get_field("student_groups").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert QuestionSubmission.objects.count() == 1
+        assert QuestionSubmission.objects.first().pk == side_a["question_submission"].pk
+        assert submission_groups_through.objects.count() == 1
+
+    def test_gap_join_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        excluded_through = Exam._meta.get_field("excluded_users").remote_field.through
+        invigilators_through = ExamRoom._meta.get_field("invigilators").remote_field.through
+        staff_through = ExamRoomSession._meta.get_field("staff").remote_field.through
+        subjects_through = StudentGroup._meta.get_field("subjects").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert excluded_through.objects.count() == 1
+        assert excluded_through.objects.first().exam_id == side_a["exam"].id
+        assert invigilators_through.objects.count() == 1
+        assert invigilators_through.objects.first().examroom_id == side_a["room"].id
+        assert staff_through.objects.count() == 1
+        assert staff_through.objects.first().examroomsession_id == side_a["session"].id
+        assert subjects_through.objects.count() == 1
+        assert subjects_through.objects.first().studentgroup_id == side_a["group"].id
+
+    def test_no_tenant_sees_no_gap_rows(self, gap_table_graph):
+        _skip_if_not_pg()
+
+        _enable_rls()
+        _clear_tenant()
+
+        assert CodingSubmission.objects.count() == 0
+        assert ExamStudentPin.objects.count() == 0
+        assert SupervisionIncident.objects.count() == 0
+        assert QuestionSubmission.objects.count() == 0
+
+    def test_cross_tenant_pin_insert_is_rejected(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_b = gap_table_graph["b"]
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        intruder = User.objects.create_user("rls_gap_intruder", "rgapi@rls.test", "pw")
+
+        _enable_rls()
+        _set_tenant(gap_table_graph["a"]["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamStudentPin.objects.create(
+                    exam=side_b["exam"],
+                    student=intruder,
+                    pin_hash="cross-tenant",
+                    pin_cipher=b"",
+                )
 
 
 class TestRLSAssignmentJoinTables:

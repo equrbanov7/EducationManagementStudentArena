@@ -54,7 +54,15 @@ x-app-env: &app-env
   DJANGO_SETTINGS_MODULE: config.settings.production
   APP_ENV: ${APP_ENV:-production}
   APP_VERSION: ${APP_VERSION:-unknown}
-  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+  # EXAM-P0-01: runtime ayrıca NOSUPERUSER NOBYPASSRLS rolu ilə qoşulur —
+  # superuser FORCE RLS-i belə yan keçir. APP_DATABASE_USER verilməyibsə
+  # köhnə davranışa (bootstrap user) düşür ki, mövcud deploy qırılmasın;
+  # rolu scripts/provision-app-db-role.sh ilə yaradın. Miqrasiyalar üçün
+  # owner kanalı aşağıdakı MIGRATION_DATABASE_URL-dir (release.sh istifadə edir).
+  DATABASE_URL: postgres://${APP_DATABASE_USER:-${POSTGRES_USER}}:${APP_DATABASE_PASSWORD:-${POSTGRES_PASSWORD}}@pgbouncer:5432/${POSTGRES_DB}
+  MIGRATION_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+  # DB rol yoxlamasının sərtliyi: warn (default) | error | off.
+  EMS_DB_ROLE_ENFORCE: ${EMS_DB_ROLE_ENFORCE:-warn}
   DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
   REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379/0}
   SECRET_KEY: ${SECRET_KEY}
@@ -131,8 +139,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # EXAM-P0-01: fresh volume-da NOSUPERUSER tətbiq rolu üçün (init skripti).
+      APP_DATABASE_USER: ${APP_DATABASE_USER:-}
+      APP_DATABASE_PASSWORD: ${APP_DATABASE_PASSWORD:-}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
     logging: *default-logging
     deploy:
@@ -151,7 +163,7 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   # Postgres backup — daily pg_dump with local rotation (audit step 5).
   # Dumps land in ./backups/postgres (mounted on the host).  Off-site copy
-  # (S3/B2/rsync) MUST be configured separately — see docs/deployment.md.
+  # (S3/B2/rsync) MUST be configured separately — see docs/operations/deployment.md.
   # ─────────────────────────────────────────────────────────────────────────
   postgres-backup:
     image: prodrigestivill/postgres-backup-local:16-alpine

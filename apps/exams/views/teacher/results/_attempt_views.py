@@ -28,6 +28,7 @@ from apps.exams.views.shared.tenant import (
 from core.permissions import request_has_permission
 
 from ._helpers import (
+    _answer_max_points,
     _append_query_params,
     _build_anonymous_name,
     _build_answer_review_item,
@@ -275,17 +276,13 @@ def teacher_check_attempt(request, slug, attempt_id):
             q = a.question
 
             score_raw = (request.POST.get(f"score_{q.id}") or "").strip()
-            max_points_raw = (request.POST.get(f"max_points_{q.id}") or "").strip()
             feedback = (request.POST.get(f"feedback_{q.id}") or "").strip()
 
-            if max_points_raw:
-                try:
-                    max_points_val = int(max_points_raw)
-                except ValueError:
-                    max_points_val = q.points
-                max_points_val = max(1, max_points_val)
-            else:
-                max_points_val = max(1, q.points)
+            # EXAM-P0-04: maksimum bal client POST-undan QƏBUL EDİLMİR — cavabın
+            # çatdırılma snapshot-undan (yoxdursa canlı sualdan) götürülür, bal
+            # [0, max] aralığına clamp olunur və grading POST heç vaxt sual
+            # tərifini (ExamQuestion.points) dəyişmir.
+            max_points_val = _answer_max_points(a)
 
             if score_raw == "":
                 a.teacher_score = None
@@ -294,16 +291,10 @@ def teacher_check_attempt(request, slug, attempt_id):
                     score_val = int(score_raw)
                 except ValueError:
                     score_val = 0
-                score_val = max(0, score_val)
-                if score_val > max_points_val:
-                    max_points_val = score_val
+                score_val = min(max(0, score_val), max_points_val)
                 a.teacher_score = score_val
                 total_score += score_val
                 any_score = True
-
-            if q.points != max_points_val:
-                q.points = max_points_val
-                q.save(update_fields=["points"])
 
             a.teacher_feedback = feedback
             a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
@@ -367,11 +358,9 @@ def ai_grade_answer(request, slug, attempt_id):
         return JsonResponse({"ok": False, "error": "Answer not found"}, status=404)
 
     q = answer.question
-    try:
-        max_points = int(data.get("max_points", q.points) or q.points)
-    except (TypeError, ValueError):
-        max_points = q.points
-    max_points = max(1, max_points)
+    # EXAM-P0-04: AI qiymətləndirmə üçün də maksimum bal client-dən yox,
+    # snapshot/sualdan gəlir.
+    max_points = _answer_max_points(answer)
 
     result = grade_written_answer(
         question_text=q.text,

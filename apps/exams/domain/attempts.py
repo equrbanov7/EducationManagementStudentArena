@@ -374,6 +374,12 @@ class ExamAnswer(AnswerGradingMixin, models.Model):
     # hesablanır (tam geriyə-uyğunluq). Format: {"v":1,"points":int,
     # "answer_mode":str,"options":[{"id":int,"is_correct":bool}, ...]}.
     question_snapshot = models.JSONField(default=dict, blank=True)
+    # EXAM-P0-03: tələbənin seçdiyi variant ID-ləri cavab yazılan anda burada
+    # dondurulur. selected_options M2M-i canlıdır — variant redaktəsi
+    # (delete/recreate) through sətirlərini silib keçmiş seçimi itirə bilər.
+    # None = köhnə cavab (canlı M2M-ə düşülür); list (boş da ola bilər) =
+    # avtoritativ dondurulmuş seçim.
+    selected_option_ids_snapshot = models.JSONField(null=True, blank=True, default=None)
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.answer.meta", "singular")

@@ -246,7 +246,7 @@ class PublicSignupDisabledTest(TestCase):
 
     When PUBLIC_SIGNUP_ENABLED is off, the public register/verify routes must
     redirect to the login page (accounts are provisioned by the university
-    administration — see docs/ACCOUNT_PROVISIONING.md) and no account may be
+    administration — see docs/operations/ACCOUNT_PROVISIONING.md) and no account may be
     created through them.
     """
 

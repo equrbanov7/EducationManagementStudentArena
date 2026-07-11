@@ -81,7 +81,7 @@ k6 run k6/student-exam-flow-test.js  | tee baseline_session_student_1000vu.log
 k6 run k6/dashboard-navigation-test.js | tee baseline_session_dashboard_1000vu.log
 ```
 
-**Baseline metriklər (`docs/FAZA4_BASELINE_RESULTS.md`-ə yaz):**
+**Baseline metriklər (`docs/performance/FAZA4_BASELINE_RESULTS.md`-ə yaz):**
 - `http_req_duration` p50, p95, p99
 - `http_req_failed` rate
 - `checks` pass rate
@@ -188,7 +188,7 @@ Canary uğurlu keçdikdən sonra:
 
 ## 7. Nəticələr (doldurulacaq)
 
-Bax: `docs/FAZA4_BASELINE_RESULTS.md` (yaradıldıqdan sonra hər testin bitirməsindən sonra doldurulur).
+Bax: `docs/performance/FAZA4_BASELINE_RESULTS.md` (yaradıldıqdan sonra hər testin bitirməsindən sonra doldurulur).
 
 | Test | Baseline (session) | Transaction pool | Delta |
 |------|--------------------|-----------------:|-------|
@@ -202,9 +202,9 @@ Bax: `docs/FAZA4_BASELINE_RESULTS.md` (yaradıldıqdan sonra hər testin bitirm�
 
 ## Əlavə istinadlar
 
-- `docs/FAZA2_3B_TRANSACTION_POOLING.md` — arxitektura və mexanizm izahı
-- `docs/CODEX_PROMPT_P0-1_TRANSACTION_POOLING.md` — orijinal Codex tapşırığı
-- `docs/FAZA4_TASK1_AUDIT.md` — request-external DB path audit
+- `docs/performance/FAZA2_3B_TRANSACTION_POOLING.md` — arxitektura və mexanizm izahı
+- `docs/prompts/CODEX_PROMPT_P0-1_TRANSACTION_POOLING.md` — orijinal Codex tapşırığı
+- `docs/audits/FAZA4_TASK1_AUDIT.md` — request-external DB path audit
 - `apps/organizations/tests/test_rls_transaction_pooling.py` — regression testləri
 - `.github/workflows/_rls-txn-pool.yml` — CI gate
 - `scripts/check_worker_atomic_coverage.py` — yerli/CI coverage guardı

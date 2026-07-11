@@ -75,6 +75,22 @@ def _sync_coding_answers_from_final_submissions(attempt):
             answer.save(update_fields=["text_answer", "updated_at"])
 
 
+def _answer_max_points(answer):
+    """
+    Cavabın maksimum balı — çatdırılma anındakı snapshot-dan (EXAM-INTEGRITY-001),
+    snapshot boşdursa canlı sualdan. Qiymətləndirmə sərhədi HEÇ VAXT client
+    POST-undan götürülmür (EXAM-P0-04).
+    """
+    snapshot = getattr(answer, "question_snapshot", None)
+    points = snapshot.get("points") if isinstance(snapshot, dict) else None
+    if points is None:
+        points = getattr(answer.question, "points", 1)
+    try:
+        return max(1, int(points))
+    except (TypeError, ValueError):
+        return 1
+
+
 def _build_answer_review_item(answer):
     answer_files = list(answer.files.all())
     has_text_answer = bool((getattr(answer, "text_answer", "") or "").strip())
@@ -101,6 +117,7 @@ def _build_answer_review_item(answer):
     return {
         "question": answer.question,
         "answer": answer,
+        "max_points": _answer_max_points(answer),
         "coding_submission": coding_submission,
         "coding_files": coding_files,
         "coding_file_count": len(coding_files),

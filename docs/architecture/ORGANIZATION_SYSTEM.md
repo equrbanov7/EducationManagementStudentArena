@@ -316,9 +316,9 @@ python manage.py create_sample_orgs --username=testuser
 
 ## Documentation
 
-- `docs/architecture.md` - System architecture
-- `docs/models.md` - Model relationships with ER diagrams
-- `docs/api.md` - API documentation
+- `docs/architecture/architecture.md` - System architecture
+- `docs/architecture/models.md` - Model relationships with ER diagrams
+- `docs/api/api.md` - API documentation
 
 ## Security
 

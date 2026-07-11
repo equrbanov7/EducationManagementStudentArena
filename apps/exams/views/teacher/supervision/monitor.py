@@ -23,6 +23,7 @@ from apps.exams.services.supervision import (
     teacher_resume_attempt,
     teacher_stop_attempt,
 )
+from core.rate_limit import record_rate_limit_hit
 
 from ._shared import (
     _ensure_organization_context,
@@ -31,6 +32,27 @@ from ._shared import (
     _supervision_disabled_json,
     _supervision_exam_queryset,
 )
+
+# EXAM-P1-10: tələbə brauzerindən gələn supervision incident POST-u
+# etibarsızdır — payload sərt validasiya olunur və per-attempt throttle
+# tətbiq edilir ki, saxta/spam hadisələr audit sayını şişirdə bilməsin.
+_SUPERVISION_INCIDENT_RATE = "60/1m"
+_SUPERVISION_METADATA_MAX_KEYS = 20
+_SUPERVISION_METADATA_MAX_VALUE_LEN = 500
+
+
+def _sanitize_incident_metadata(metadata):
+    """Client metadata-nı təhlükəsiz, yastı primitivlərə endirir."""
+    if not isinstance(metadata, dict):
+        return {}
+    clean = {}
+    for key, value in list(metadata.items())[:_SUPERVISION_METADATA_MAX_KEYS]:
+        key = str(key)[:100]
+        if isinstance(value, bool) or value is None or isinstance(value, (int, float)):
+            clean[key] = value
+        else:
+            clean[key] = str(value)[:_SUPERVISION_METADATA_MAX_VALUE_LEN]
+    return clean
 
 
 @login_required
@@ -67,9 +89,17 @@ def log_incident_api(request, attempt_id):
     if event_type not in valid_types:
         return JsonResponse({"error": "Invalid event type."}, status=400)
 
-    # Ensure metadata is dict and limit size
-    if not isinstance(metadata, dict):
-        metadata = {}
+    # EXAM-P1-10: per-attempt throttle — bir cəhd üçün incident selini kəs.
+    exceeded, retry_after = record_rate_limit_hit("supervision_incident", _SUPERVISION_INCIDENT_RATE, attempt.id)
+    if exceeded:
+        response = JsonResponse({"error": "Too many incidents."}, status=429)
+        if retry_after:
+            response["Retry-After"] = str(retry_after)
+        return response
+
+    # EXAM-P1-10: metadata sərt sanitizasiya olunur (açar/dəyər sayı və uzunluq
+    # limiti, yalnız yastı primitivlər) — arbitrary/nested dict saxlanmır.
+    metadata = _sanitize_incident_metadata(metadata)
 
     result = log_supervision_incident(attempt, event_type, metadata)
 

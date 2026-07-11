@@ -50,7 +50,7 @@ def _public_signup_enabled() -> bool:
     """Whether the public self-registration route is open.
 
     Default OFF (e-university provisioning model — accounts are created by the
-    university administration; see docs/ACCOUNT_PROVISIONING.md). Controlled by
+    university administration; see docs/operations/ACCOUNT_PROVISIONING.md). Controlled by
     ``settings.PUBLIC_SIGNUP_ENABLED`` (env: ``PUBLIC_SIGNUP_ENABLED``).
     """
     return bool(getattr(settings, "PUBLIC_SIGNUP_ENABLED", False))

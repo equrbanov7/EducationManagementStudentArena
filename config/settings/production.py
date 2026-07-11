@@ -287,7 +287,7 @@ DATABASES = {
 #
 # DİQQƏT: bu flaq YALNIZ staging-də cross-tenant izolyasiya + k6 load testindən
 # sonra açılmalıdır. Canlı RLS plumbing və PgBouncer POOL_MODE=transaction keçidi
-# üçün bax: docs/FAZA2_3B_TRANSACTION_POOLING.md. Default OFF → mövcud davranış.
+# üçün bax: docs/performance/FAZA2_3B_TRANSACTION_POOLING.md. Default OFF → mövcud davranış.
 RLS_TRANSACTION_SCOPED = _env_bool("RLS_TRANSACTION_SCOPED", False)
 if RLS_TRANSACTION_SCOPED:
     DATABASES["default"]["ATOMIC_REQUESTS"] = True

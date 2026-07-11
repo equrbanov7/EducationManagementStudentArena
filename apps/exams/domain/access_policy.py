@@ -151,14 +151,17 @@ class ExamAccessPolicyMixin:
         if user == self.author:
             return True
 
-        if not self.is_active:
+        # EXAM-P1-02: arxivlənmiş/soft-silinmiş imtahan tələbəyə görünmür.
+        if not self.is_active or self.is_archived or getattr(self, "is_deleted", False):
+            return False
+
+        # EXAM-P1-03: exclusion siyahısı public imtahanlara da şamildir —
+        # açıq imtahan bloklanmış istifadəçini görünürlükdən keçirməməlidir.
+        if self._user_is_excluded(user):
             return False
 
         if self.is_public:
             return True
-
-        if self._user_is_excluded(user):
-            return False
 
         if self.allowed_users.filter(id=user.id).exists():
             return True
@@ -178,12 +181,23 @@ class ExamAccessPolicyMixin:
         if not self.is_active:
             return False, pgettext("exams.model.access", "exam_not_active")
 
+        # EXAM-P1-02: UI düymələrinin gizlənməsi sərhəd deyil — birbaşa URL ilə
+        # arxivlənmiş və ya soft-silinmiş imtahan başladıla bilməz.
+        if self.is_archived or getattr(self, "is_deleted", False):
+            return False, pgettext("exams.model.access", "exam_not_active")
+
         if self.is_before_start():
             start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
             return False, pgettext("exams.model.access", "exam_not_started").format(start_str=start_str)
 
         if self.is_after_end():
             return False, pgettext("exams.model.access", "exam_ended")
+
+        # EXAM-P1-03: exclusion public imtahanlara da şamildir və aktiv cəhdin
+        # davam etdirilməsindən əvvəl yoxlanır — istisna edilən tələbə davam
+        # edə bilməz.
+        if user != self.author and self._user_is_excluded(user):
+            return False, pgettext("exams.model.access", "no_exam_access")
 
         if self._user_has_active_attempt(user):
             return True, None
@@ -194,9 +208,6 @@ class ExamAccessPolicyMixin:
 
         if user == self.author:
             return True, None
-
-        if not self.is_public and self._user_is_excluded(user):
-            return False, pgettext("exams.model.access", "no_exam_access")
 
         in_allowed_any = (
             self.allowed_users.filter(id=user.id).exists()

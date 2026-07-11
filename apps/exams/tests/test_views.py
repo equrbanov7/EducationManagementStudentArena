@@ -1814,7 +1814,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, "courseActionConfirmModal")
         self.assertContains(response, 'id="modalScoreInput"')
         self.assertContains(response, 'id="modalMaxPointsInput"')
-        self.assertContains(response, f'name="max_points_{question.id}"')
+        # EXAM-P0-04: max bal artıq POST edilmir — input display-only-dur.
+        self.assertNotContains(response, f'name="max_points_{question.id}"')
+        self.assertContains(response, f'id="hidden_max_points_{question.id}"')
         self.assertContains(response, 'step="1"')
 
     def test_teacher_check_attempt_shows_exam_timing_summary(self):
@@ -1946,7 +1948,8 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         self.assertRedirects(save_response, return_to, fetch_redirect_response=False)
 
-    def test_teacher_check_attempt_post_updates_question_max_points(self):
+    def test_teacher_check_attempt_post_ignores_client_max_points(self):
+        """EXAM-P0-04: grading POST sual tərifini (points) dəyişə bilməz."""
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="Editable Max Written Exam",
@@ -1958,7 +1961,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             text="Explain the solution",
             order=1,
             answer_mode="single",
-            points=1,
+            points=5,
         )
         attempt = ExamAttempt.objects.create(
             user=self.student,
@@ -1975,7 +1978,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
             {
                 f"score_{question.id}": "4",
-                f"max_points_{question.id}": "6",
+                f"max_points_{question.id}": "100",
                 f"feedback_{question.id}": "Updated with new max",
             },
         )
@@ -1985,14 +1988,16 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         answer.refresh_from_db()
         attempt.refresh_from_db()
 
-        self.assertEqual(question.points, 6)
+        # Client-in göndərdiyi max_points sual tərifinə yazılmır.
+        self.assertEqual(question.points, 5)
         self.assertEqual(answer.teacher_score, 4)
         self.assertEqual(answer.teacher_feedback, "Updated with new max")
         self.assertEqual(attempt.teacher_score, 4)
         self.assertTrue(attempt.checked_by_teacher)
         self.assertIsNotNone(attempt.teacher_checked_at)
 
-    def test_teacher_check_attempt_post_keeps_score_above_existing_question_points(self):
+    def test_teacher_check_attempt_post_clamps_score_to_question_max(self):
+        """EXAM-P0-04: bal [0, max] aralığına clamp olunur — max artırılmır."""
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="Free Score Written Exam",
@@ -2001,7 +2006,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         )
         question = ExamQuestion.objects.create(
             exam=written_exam,
-            text="Allow scores above old max",
+            text="Clamp scores above max",
             order=1,
             answer_mode="single",
             points=1,
@@ -2022,7 +2027,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             {
                 f"score_{question.id}": "10",
                 f"max_points_{question.id}": "1",
-                f"feedback_{question.id}": "Free score should be preserved",
+                f"feedback_{question.id}": "Score must be clamped",
             },
         )
 
@@ -2031,15 +2036,63 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         answer.refresh_from_db()
         attempt.refresh_from_db()
 
-        self.assertEqual(question.points, 10)
-        self.assertEqual(answer.teacher_score, 10)
-        self.assertEqual(answer.teacher_feedback, "Free score should be preserved")
-        self.assertEqual(attempt.teacher_score, 10)
+        self.assertEqual(question.points, 1)
+        self.assertEqual(answer.teacher_score, 1)
+        self.assertEqual(answer.teacher_feedback, "Score must be clamped")
+        self.assertEqual(attempt.teacher_score, 1)
         self.assertTrue(attempt.checked_by_teacher)
+
+    def test_teacher_check_attempt_post_uses_snapshot_points_over_live_question(self):
+        """EXAM-P0-04 + INTEGRITY-001: clamp sərhədi çatdırılma snapshot-undan gəlir."""
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Snapshot Max Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Snapshot bounds grading",
+            order=1,
+            answer_mode="single",
+            points=3,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+            question_snapshot={"v": 1, "points": 3, "answer_mode": "single", "options": []},
+        )
+
+        # Sual sonradan redaktə olunub balı artırılsa da, keçmiş cavabın
+        # qiymətləndirmə sərhədi çatdırılma anındakı 3 bal olaraq qalır.
+        question.points = 50
+        question.save(update_fields=["points"])
+
+        response = self.client.post(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
+            {
+                f"score_{question.id}": "40",
+                f"feedback_{question.id}": "Bounded by snapshot",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        answer.refresh_from_db()
+        attempt.refresh_from_db()
+
+        self.assertEqual(answer.teacher_score, 3)
+        self.assertEqual(attempt.teacher_score, 3)
         self.assertIsNotNone(attempt.teacher_checked_at)
 
     @patch("apps.exams.services.ai_grading.grade_written_answer")
-    def test_ai_grade_answer_uses_posted_max_points(self, mock_grade_written_answer):
+    def test_ai_grade_answer_ignores_posted_max_points(self, mock_grade_written_answer):
+        """EXAM-P0-04: AI qiymətləndirmə max balı client body-dən götürmür."""
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="AI Max Written Exam",
@@ -2072,7 +2125,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         response = self.client.post(
             reverse("exams:ai_grade_answer", args=[written_exam.slug, attempt.id]),
-            data='{"question_id": %d, "max_points": 5}' % question.id,
+            data='{"question_id": %d, "max_points": 500}' % question.id,
             content_type="application/json",
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
@@ -2080,7 +2133,8 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["score"], 5)
         mock_grade_written_answer.assert_called_once()
-        self.assertEqual(mock_grade_written_answer.call_args.kwargs["max_points"], 5)
+        # Client body-dəki max_points ignor olunur; sualdan (points=1) gəlir.
+        self.assertEqual(mock_grade_written_answer.call_args.kwargs["max_points"], 1)
 
     @patch("apps.exams.services.ai_grading.requests.post")
     def test_ai_grade_answer_accepts_image_only_written_submission(self, mock_post):
@@ -3746,6 +3800,110 @@ class StudentExamResultVisibilityWindowTest(TestCase):
 
         response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
         self.assertEqual(response.status_code, 200)
+
+    def _create_test_exam_with_answered_attempt(self, *, end_delta):
+        """Bir sual + 2 variantlı test imtahanı və cavablı submitted attempt."""
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title=f"Release Lock Test Exam {end_delta}",
+            exam_type="test",
+            is_active=True,
+            start_datetime=timezone.now() - timedelta(hours=2),
+            end_datetime=timezone.now() + end_delta,
+        )
+        question = ExamQuestion.objects.create(
+            exam=exam,
+            text="Locked window question",
+            order=1,
+            answer_mode="single",
+            points=1,
+        )
+        correct = ExamQuestionOption.objects.create(question=question, text="Correct option", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="Wrong option", is_correct=False)
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(attempt=attempt, question=question)
+        answer.selected_options.add(correct)
+        return exam, attempt
+
+    def test_correct_answers_hidden_while_exam_window_open(self):
+        """EXAM-P0-05: pəncərə açıq olduqca variant düzgünlüyü və verdikt sızmır."""
+        exam, attempt = self._create_test_exam_with_answered_attempt(end_delta=timedelta(hours=2))
+
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["answers_release_locked"])
+        self.assertTrue(response.context["hide_test_answer_correctness"])
+        self.assertEqual(response.context["answer_verdict_by_qid"], {})
+        self.assertNotContains(response, "correct-option")
+        self.assertNotContains(response, "Correct option")
+
+    def test_correct_answers_visible_after_exam_window_closes(self):
+        exam, attempt = self._create_test_exam_with_answered_attempt(end_delta=timedelta(hours=-1))
+
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["answers_release_locked"])
+        self.assertFalse(response.context["hide_test_answer_correctness"])
+        self.assertContains(response, "correct-option")
+
+    def test_open_ended_exam_is_not_release_locked(self):
+        """end_datetime olmayan (məşq) imtahanda cavab analizi dərhal açıqdır."""
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Open Ended Practice Exam",
+            exam_type="test",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=exam,
+            text="Practice question",
+            order=1,
+            answer_mode="single",
+            points=1,
+        )
+        ExamQuestionOption.objects.create(question=question, text="Correct option", is_correct=True)
+        attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted")
+        ExamAnswer.objects.create(attempt=attempt, question=question)
+
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["answers_release_locked"])
+
+    def test_written_ideal_answer_hidden_while_exam_window_open(self):
+        """EXAM-P0-05: yoxlanılmamış yazılı cavabda ideal cavab pəncərə açıq ikən görünmür."""
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Locked Written Exam",
+            exam_type="written",
+            is_active=True,
+            start_datetime=timezone.now() - timedelta(hours=2),
+            end_datetime=timezone.now() + timedelta(hours=2),
+        )
+        ExamQuestion.objects.create(
+            exam=exam,
+            text="Explain thoroughly",
+            order=1,
+            answer_mode="open",
+            points=5,
+            correct_answer="Ideal model answer text",
+        )
+        attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted")
+        question = exam.questions.first()
+        ExamAnswer.objects.create(attempt=attempt, question=question, text_answer="My essay")
+
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Ideal model answer text")
+
+        exam.end_datetime = timezone.now() - timedelta(minutes=1)
+        exam.save(update_fields=["end_datetime"])
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ideal model answer text")
 
 
 class TeacherQuestionsBankViewTest(TestCase):

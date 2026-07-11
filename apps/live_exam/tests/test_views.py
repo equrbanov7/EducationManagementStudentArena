@@ -711,6 +711,50 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 409)
         self.assertFalse(response.json()["ok"])
 
+    def test_join_enter_rejects_new_player_after_game_started(self):
+        """EXAM-P1-12: oyun lobby-dən çıxandan sonra yeni oyunçu qoşula bilməz."""
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.save(update_fields=["state"])
+
+        response = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "LateComer", "avatar_key": "avatar_1"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(response.json()["ok"])
+        self.assertFalse(LivePlayer.objects.filter(session=self.session, nickname="LateComer").exists())
+
+    def test_join_enter_rejects_all_when_session_finished(self):
+        """EXAM-P1-12: bitmiş oyuna heç kim (reconnect belə) qoşula bilməz."""
+        self.session.state = LiveSession.STATE_FINISHED
+        self.session.save(update_fields=["state"])
+
+        response = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "AnyPlayer", "avatar_key": "avatar_1"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(response.json()["ok"])
+
+    def test_join_enter_allows_existing_player_reconnect_mid_game(self):
+        """EXAM-P1-12: artıq qəbul edilmiş oyunçu oyun gedişdə reconnect edə bilər."""
+        self.client.cookies["live_client_id"] = "returning-client"
+        LivePlayer.objects.create(
+            session=self.session,
+            nickname="Returner",
+            avatar_key="avatar_1",
+            client_id="returning-client",
+        )
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.save(update_fields=["state"])
+
+        response = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "Returner", "avatar_key": "avatar_1"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+
 
 @override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_EXAM_JOIN_RATE_LIMIT="1/1m")
 class LiveJoinRateLimitTest(TestCase):
