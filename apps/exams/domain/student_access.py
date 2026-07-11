@@ -12,6 +12,7 @@
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 User = get_user_model()
@@ -33,6 +34,18 @@ class ExamStudentPin(models.Model):
     # Doğrulama üçün salted hash; icazəli göstərmə üçün Fernet şifrəli nüsxə.
     pin_hash = models.CharField(max_length=255)
     pin_cipher = models.TextField(blank=True, default="")
+    # EXAM-P1-08: PIN lifecycle. Hər ikisi NULL = məhdudiyyət yoxdur (geriyə-
+    # uyğun). expires_at keçibsə və ya revoked_at təyin olunubsa PIN doğrulanmır.
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.student_pin.field", "expires_at"),
+    )
+    revoked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.student_pin.field", "revoked_at"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -48,6 +61,15 @@ class ExamStudentPin(models.Model):
 
     def __str__(self):
         return f"PIN {self.student_id} → exam {self.exam_id}"
+
+    def is_usable(self, *, now=None) -> bool:
+        """PIN aktivdirmi — revoke olunmayıb və vaxtı keçməyib."""
+        now = now or timezone.now()
+        if self.revoked_at is not None:
+            return False
+        if self.expires_at is not None and self.expires_at <= now:
+            return False
+        return True
 
 
 class StudentExamAttemptGrant(models.Model):

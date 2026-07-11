@@ -95,9 +95,49 @@ def update_submission(
     return submission
 
 
+def _resolve_task_max_score(submission):
+    """Submission-un aid olduğu tapşırığın max balını tap (assignment/project/lab).
+
+    Tapılmasa None qaytarır (clamp tətbiq olunmur — geriyə-uyğunluq).
+    """
+    for attr in ("assignment", "project"):
+        task = getattr(submission, attr, None)
+        if task is not None:
+            # LabSubmission.assignment → LabAssignment.lab.max_score
+            max_score = getattr(task, "max_score", None)
+            if max_score is None:
+                lab = getattr(task, "lab", None)
+                max_score = getattr(lab, "max_score", None)
+            if max_score is not None:
+                return max_score
+    return None
+
+
+def _clamp_score(parsed_score, max_score):
+    """Balı [0, max] aralığına salır (audit: grade clamp invariantı)."""
+    if parsed_score is None:
+        return parsed_score
+    try:
+        value = Decimal(str(parsed_score))
+    except (InvalidOperation, ValueError, TypeError):
+        return parsed_score
+    if value < 0:
+        value = Decimal("0")
+    if max_score is not None:
+        try:
+            ceiling = Decimal(str(max_score))
+            if value > ceiling:
+                value = ceiling
+        except (InvalidOperation, ValueError, TypeError):
+            pass
+    return value
+
+
 @transaction.atomic
 def apply_grade(submission, score, feedback, graded_by, *, graded_status="graded", preserve_existing_graded_at=False):
     parsed_score = parse_score_value(score, default=score)
+    # Audit: qiymət heç vaxt [0, max] aralığından kənara çıxmamalıdır.
+    parsed_score = _clamp_score(parsed_score, _resolve_task_max_score(submission))
 
     submission.grade = parsed_score
     submission.feedback = feedback
@@ -113,14 +153,23 @@ def apply_grade(submission, score, feedback, graded_by, *, graded_status="graded
     return submission
 
 
-@transaction.atomic
 def bulk_grade_submissions(submissions, scores, feedback_list, graded_by, *, graded_status="graded"):
-    count = 0
+    # Audit: `submissions` unordered queryset ola bilər — score/feedback
+    # siyahıları POZİSİYA ilə uyğunlaşdırılır. Materialize edib zip etməklə
+    # balın yanlış tələbəyə getmə riski var idi. İndi çağıran tərəf sıralı
+    # cütlük ötürməlidir; uzunluq uyğunsuzluğu transaction açılmadan bloklanır.
+    submissions = list(submissions)
+    if not (len(submissions) == len(scores) == len(feedback_list)):
+        raise ValueError("submissions, scores və feedback_list eyni uzunluqda olmalıdır")
+    return _bulk_grade_submissions_atomic(submissions, scores, feedback_list, graded_by, graded_status=graded_status)
 
+
+@transaction.atomic
+def _bulk_grade_submissions_atomic(submissions, scores, feedback_list, graded_by, *, graded_status="graded"):
+    count = 0
     for submission, score, feedback in zip(submissions, scores, feedback_list):
         apply_grade(submission, score, feedback, graded_by, graded_status=graded_status)
         count += 1
-
     return count
 
 

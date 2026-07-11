@@ -113,6 +113,37 @@ class WizardEnhancementsTests(TestCase):
         self.assertTrue(verify_student_pin(exam, self.s1, pin1))
         self.assertFalse(verify_student_pin(exam, self.s1, pin2))
 
+    def test_revoked_pin_is_rejected(self):
+        """EXAM-P1-08: revoke olunmuş PIN doğru olsa belə giriş vermir."""
+        exam = self._make_secure_exam()
+        provision_exam_student_pins(exam)
+        pin1 = student_visible_pin(exam, self.s1)
+        self.assertTrue(verify_student_pin(exam, self.s1, pin1))
+
+        from django.utils import timezone
+
+        ExamStudentPin.objects.filter(exam=exam, student=self.s1).update(revoked_at=timezone.now())
+        self.assertFalse(verify_student_pin(exam, self.s1, pin1))
+
+    def test_expired_pin_is_rejected(self):
+        """EXAM-P1-08: vaxtı keçmiş PIN doğru olsa belə giriş vermir."""
+        exam = self._make_secure_exam()
+        provision_exam_student_pins(exam)
+        pin1 = student_visible_pin(exam, self.s1)
+
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        ExamStudentPin.objects.filter(exam=exam, student=self.s1).update(
+            expires_at=timezone.now() - timedelta(minutes=1)
+        )
+        self.assertFalse(verify_student_pin(exam, self.s1, pin1))
+
+        # Gələcək expiry — hələ etibarlı.
+        ExamStudentPin.objects.filter(exam=exam, student=self.s1).update(expires_at=timezone.now() + timedelta(hours=1))
+        self.assertTrue(verify_student_pin(exam, self.s1, pin1))
+
     def test_provision_is_idempotent_and_prunes_removed(self):
         exam = self._make_secure_exam()
         provision_exam_student_pins(exam)

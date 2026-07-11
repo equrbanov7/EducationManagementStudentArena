@@ -951,6 +951,169 @@ class TestRLSExamGapTables:
                 )
 
 
+class TestAuditLogAppendOnly:
+    """audit_auditlog append-only trigger (organizations 0019, audit P1 #5)."""
+
+    def test_update_is_blocked(self, db):
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls():
+                AuditLog.objects.filter(pk=log.pk).update(action="tampered")
+
+    def test_delete_is_blocked(self, db):
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls():
+                AuditLog.objects.filter(pk=log.pk).delete()
+
+    def test_insert_still_works(self, db):
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+        assert log.pk is not None
+
+
+class TestRLSLabsProjects:
+    """RLS isolation for labs/projects tables covered by 0018 (audit P1 #1).
+
+    Tələbə lab cavabları və layihə təqdimatları course→organization üzərindən
+    tenant-scoped-dur; cross-tenant oxu/yazı bloklanmalıdır.
+    """
+
+    @pytest.fixture()
+    def labs_projects_graph(self, two_orgs):
+        from datetime import timedelta
+
+        from django.contrib.auth import get_user_model
+        from django.utils import timezone as dj_timezone
+
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+        from apps.projects.models import Project, ProjectSubmission
+
+        org_a, org_b = two_orgs
+        User = get_user_model()
+        now = dj_timezone.now()
+        data = {}
+        for suffix, org in (("a", org_a), ("b", org_b)):
+            student = User.objects.create_user(f"rls_lp_student_{suffix}", f"rlp{suffix}@rls.test", "pw")
+            course = Course.objects.create(
+                organization=org, owner=org.owner, title=f"LP Course {suffix}", status="published"
+            )
+            lab = Lab.objects.create(
+                course=course,
+                title=f"Lab {suffix}",
+                start_datetime=now - timedelta(days=1),
+                end_datetime=now + timedelta(days=7),
+                max_score=100,
+                status="published",
+                created_by=org.owner,
+            )
+            block = LabBlock.objects.create(lab=lab, title=f"Block {suffix}", order=1)
+            question = LabQuestion.objects.create(block=block, question_text="Q?", question_number=1, points=10)
+            assignment = LabAssignment.objects.create(lab=lab, student=student)
+            submission = LabSubmission.objects.create(assignment=assignment, attempt_number=1)
+            answer = LabAnswer.objects.create(
+                lab=lab, question=question, student=student, submission=submission, answer="ans"
+            )
+
+            project = Project.objects.create(
+                course=course,
+                title=f"Project {suffix}",
+                start_date=now - timedelta(days=1),
+                deadline=now + timedelta(days=7),
+                max_score=100,
+            )
+            project_submission = ProjectSubmission.objects.create(project=project, student=student, content="work")
+
+            data[suffix] = {
+                "org": org,
+                "lab": lab,
+                "block": block,
+                "question": question,
+                "assignment": assignment,
+                "submission": submission,
+                "answer": answer,
+                "project": project,
+                "project_submission": project_submission,
+            }
+        return data
+
+    def test_labs_tables_are_isolated(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+
+        side_a = labs_projects_graph["a"]
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert Lab.objects.count() == 1
+        assert Lab.objects.first().pk == side_a["lab"].pk
+        assert LabBlock.objects.count() == 1
+        assert LabQuestion.objects.count() == 1
+        assert LabAssignment.objects.count() == 1
+        assert LabSubmission.objects.count() == 1
+        assert LabAnswer.objects.count() == 1
+        assert LabAnswer.objects.first().pk == side_a["answer"].pk
+
+    def test_projects_tables_are_isolated(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.projects.models import Project, ProjectSubmission
+
+        side_a = labs_projects_graph["a"]
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert Project.objects.count() == 1
+        assert Project.objects.first().pk == side_a["project"].pk
+        assert ProjectSubmission.objects.count() == 1
+        assert ProjectSubmission.objects.first().pk == side_a["project_submission"].pk
+
+    def test_no_tenant_sees_no_labs_projects_rows(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.labs.models import LabAnswer, LabSubmission
+        from apps.projects.models import ProjectSubmission
+
+        _enable_rls()
+        _clear_tenant()
+
+        assert LabSubmission.objects.count() == 0
+        assert LabAnswer.objects.count() == 0
+        assert ProjectSubmission.objects.count() == 0
+
+    def test_cross_tenant_project_submission_insert_rejected(self, labs_projects_graph):
+        _skip_if_not_pg()
+        # Raw SQL ilə yoxlanır: ORM save-də notifications pre_save signal-ı
+        # obyektin öz org-una tenant kontekstini dəyişir (legitim davranış),
+        # ona görə WITH CHECK-i saf şəkildə yalnız raw INSERT ilə test edirik.
+        from django.contrib.auth import get_user_model
+
+        side_b = labs_projects_graph["b"]
+        intruder = get_user_model().objects.create_user("rls_lp_intruder", "rlpi@rls.test", "pw")
+
+        _enable_rls()
+        _set_tenant(labs_projects_graph["a"]["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                with connection.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO projects_projectsubmission "
+                        "(project_id, student_id, content, status, submitted_at) "
+                        "VALUES (%s, %s, 'x', 'pending', now())",
+                        [side_b["project"].id, intruder.id],
+                    )
+
+
 class TestRLSAssignmentJoinTables:
     """RLS isolation for assignment recipient joins added in 0004."""
 
