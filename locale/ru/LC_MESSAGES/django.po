@@ -5632,7 +5632,7 @@ msgstr "Вы уверены, что хотите удалить этот экз�
 
 msgctxt "exams.dashboard"
 msgid "delete_modal_warn"
-msgstr ""
+msgstr "Результаты не удаляются — экзамен перемещается в Корзину, откуда его можно восстановить."
 "Это действие необратимо. Все попытки и результаты по этому экзамену также "
 "будут удалены."
 
@@ -28955,3 +28955,97 @@ msgstr "Назначенные мне предметы"
 msgctxt "profile.section"
 msgid "İmtahan zalları"
 msgstr "Экзаменационные залы"
+
+# --- Soft-delete / Trash (exam deletion preserves results) ---
+
+msgctxt "exams.view.exams.message"
+msgid "exam_soft_deleted"
+msgstr "Экзамен удалён — результаты сохранены (в Корзине)."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_restored"
+msgstr "Экзамен восстановлен."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_permanently_deleted"
+msgstr "Экзамен удалён навсегда."
+
+msgctxt "exams.view.results.message"
+msgid "cannot_grade_deleted_exam"
+msgstr "Нельзя оценивать удалённый экзамен. Сначала восстановите его."
+
+msgctxt "exams.view.results.message"
+msgid "deleted_exam_readonly_notice"
+msgstr "Этот экзамен в Корзине — результаты доступны только для чтения."
+
+msgctxt "exams.view.results.message"
+msgid "back_to_trash"
+msgstr "Вернуться в Корзину"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_title"
+msgstr "Удалённые экзамены"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_subtitle"
+msgstr "У удалённых экзаменов сохраняются результаты. Здесь можно их просмотреть, восстановить экзамен или удалить навсегда."
+
+msgctxt "exams.template.deleted_exams"
+msgid "back_to_my_exams"
+msgstr "К моим экзаменам"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_exam"
+msgstr "Экзамен"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_results"
+msgstr "Результаты"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_deleted_at"
+msgstr "Дата удаления"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_actions"
+msgstr "Действия"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_view_results"
+msgstr "Смотреть результаты"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_restore"
+msgstr "Восстановить"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_permanent_delete"
+msgstr "Удалить навсегда"
+
+msgctxt "exams.template.deleted_exams"
+msgid "confirm_permanent_delete"
+msgstr "Этот экзамен и все его результаты будут удалены навсегда. Это действие необратимо. Продолжить?"
+
+msgctxt "exams.template.deleted_exams"
+msgid "empty_state"
+msgstr "Корзина пуста."
+
+msgctxt "profile.my_exams"
+msgid "trash_link"
+msgstr "Корзина"
+
+msgctxt "exams.model.exam.field"
+msgid "is_deleted"
+msgstr "удалён"
+
+msgctxt "exams.model.exam.field"
+msgid "deleted_at"
+msgstr "время удаления"
+
+msgctxt "exams.model.exam.help"
+msgid "is_deleted"
+msgstr "Мягкое удаление — экзамен скрыт, результаты сохранены."
+
+msgctxt "exams.model.exam.help"
+msgid "deleted_at"
+msgstr "Когда экзамен был мягко удалён."

@@ -98,7 +98,17 @@ def calculate_test_attempt_result(attempt, *, answers=None):
 
     for answer in answers:
         question = answer.question
-        points = _as_decimal(getattr(question, "points", 1), default="1")
+        # EXAM-INTEGRITY-001: qiymət çatdırılan anın snapshot-undan hesablanır ki,
+        # sonradan sualın/variantın redaktəsi keçmiş balı dəyişməsin. Snapshot
+        # boşdursa (köhnə cəhdlər) canlı suala düşürük (geriyə-uyğunluq).
+        snapshot = getattr(answer, "question_snapshot", None)
+        snapshot_options = snapshot.get("options") if isinstance(snapshot, dict) else None
+        if snapshot_options:
+            points = _as_decimal(snapshot.get("points", getattr(question, "points", 1)), default="1")
+            correct_option_ids = {opt["id"] for opt in snapshot_options if opt.get("is_correct")}
+        else:
+            points = _as_decimal(getattr(question, "points", 1), default="1")
+            correct_option_ids = {option.id for option in question.options.all() if option.is_correct}
         max_score += points
 
         selected_option_ids = _option_ids(answer.selected_options)
@@ -106,7 +116,6 @@ def calculate_test_attempt_result(attempt, *, answers=None):
             unanswered_count += 1
             continue
 
-        correct_option_ids = {option.id for option in question.options.all() if option.is_correct}
         if correct_option_ids and selected_option_ids == correct_option_ids:
             correct_count += 1
             score += points

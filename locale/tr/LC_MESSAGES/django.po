@@ -5626,7 +5626,7 @@ msgstr "Bu sınavı silmek istediğinize emin misiniz?"
 
 msgctxt "exams.dashboard"
 msgid "delete_modal_warn"
-msgstr ""
+msgstr "Sonuçlar silinmez — sınav Çöp Kutusuna taşınır ve oradan geri yüklenebilir."
 "Bu işlem geri alınamaz. Bu sınava ait tüm denemeler ve sonuçlar da "
 "silinecek."
 
@@ -28227,3 +28227,97 @@ msgstr "Atanmış derslerim"
 msgctxt "profile.section"
 msgid "İmtahan zalları"
 msgstr "Sınav salonları"
+
+# --- Soft-delete / Trash (exam deletion preserves results) ---
+
+msgctxt "exams.view.exams.message"
+msgid "exam_soft_deleted"
+msgstr "Sınav silindi — sonuçlar korundu (Çöp Kutusunda)."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_restored"
+msgstr "Sınav geri yüklendi."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_permanently_deleted"
+msgstr "Sınav kalıcı olarak silindi."
+
+msgctxt "exams.view.results.message"
+msgid "cannot_grade_deleted_exam"
+msgstr "Silinmiş bir sınav notlandırılamaz. Önce geri yükleyin."
+
+msgctxt "exams.view.results.message"
+msgid "deleted_exam_readonly_notice"
+msgstr "Bu sınav Çöp Kutusunda — sonuçlar salt okunur gösterilir."
+
+msgctxt "exams.view.results.message"
+msgid "back_to_trash"
+msgstr "Çöp Kutusuna dön"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_title"
+msgstr "Silinmiş sınavlar"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_subtitle"
+msgstr "Silinmiş sınavların sonuçları korunur. Buradan onları görüntüleyebilir, bir sınavı geri yükleyebilir veya kalıcı olarak silebilirsiniz."
+
+msgctxt "exams.template.deleted_exams"
+msgid "back_to_my_exams"
+msgstr "Sınavlarıma dön"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_exam"
+msgstr "Sınav"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_results"
+msgstr "Sonuçlar"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_deleted_at"
+msgstr "Silinme tarihi"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_actions"
+msgstr "İşlemler"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_view_results"
+msgstr "Sonuçları gör"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_restore"
+msgstr "Geri yükle"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_permanent_delete"
+msgstr "Kalıcı olarak sil"
+
+msgctxt "exams.template.deleted_exams"
+msgid "confirm_permanent_delete"
+msgstr "Bu sınav ve tüm sonuçları kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?"
+
+msgctxt "exams.template.deleted_exams"
+msgid "empty_state"
+msgstr "Çöp Kutusu boş."
+
+msgctxt "profile.my_exams"
+msgid "trash_link"
+msgstr "Çöp Kutusu"
+
+msgctxt "exams.model.exam.field"
+msgid "is_deleted"
+msgstr "silindi"
+
+msgctxt "exams.model.exam.field"
+msgid "deleted_at"
+msgstr "silinme zamanı"
+
+msgctxt "exams.model.exam.help"
+msgid "is_deleted"
+msgstr "Yumuşak silme — sınav gizlenir, sonuçlar korunur."
+
+msgctxt "exams.model.exam.help"
+msgid "deleted_at"
+msgstr "Sınavın yumuşak silindiği zaman."

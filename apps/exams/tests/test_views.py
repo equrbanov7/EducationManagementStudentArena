@@ -1014,9 +1014,12 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
-        self.assertFalse(Exam.objects.filter(id=self.exam_visible.id).exists())
+        # Soft delete: sətir qalır, yalnız işarələnir.
+        self.exam_visible.refresh_from_db()
+        self.assertTrue(self.exam_visible.is_deleted)
+        self.assertIsNotNone(self.exam_visible.deleted_at)
 
-    def test_delete_exam_with_attempts_cascades_attempts(self):
+    def test_delete_exam_soft_deletes_and_preserves_attempts(self):
         attempt = ExamAttempt.objects.create(
             user=self.student,
             exam=self.exam_visible,
@@ -1026,8 +1029,74 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         response = self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
 
         self.assertEqual(response.status_code, 302)
+        # İmtahan sətri qorunur (yumşaq silmə) və silinmiş kimi işarələnir.
+        self.exam_visible.refresh_from_db()
+        self.assertTrue(self.exam_visible.is_deleted)
+        self.assertFalse(self.exam_visible.is_active)
+        # Nəticələr (attempts) qorunur — silinmə CASCADE etmir.
+        self.assertTrue(ExamAttempt.objects.filter(id=attempt.id).exists())
+
+    def test_soft_deleted_exam_is_hidden_from_teacher_edit_lookup(self):
+        self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+        # Silinmiş imtahan redaktə lookup-ından çıxarılır (404).
+        response = self.client.get(reverse("exams:edit_exam", args=[self.exam_visible.slug]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_deleted_exams_list_lists_soft_deleted_exam(self):
+        self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+        response = self.client.get(reverse("exams:deleted_exams_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.exam_visible.title)
+
+    def test_restore_exam_brings_it_back(self):
+        self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+        response = self.client.post(reverse("exams:restore_exam", args=[self.exam_visible.slug]))
+        self.assertEqual(response.status_code, 302)
+        self.exam_visible.refresh_from_db()
+        self.assertFalse(self.exam_visible.is_deleted)
+        self.assertIsNone(self.exam_visible.deleted_at)
+
+    def test_permanent_delete_removes_exam_and_attempts(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+        # Yalnız yumşaq silinmiş imtahanı birdəfəlik silmək olar.
+        self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+        response = self.client.post(reverse("exams:permanent_delete_exam", args=[self.exam_visible.slug]))
+        self.assertEqual(response.status_code, 302)
         self.assertFalse(Exam.objects.filter(id=self.exam_visible.id).exists())
         self.assertFalse(ExamAttempt.objects.filter(id=attempt.id).exists())
+
+    def test_permanent_delete_rejects_non_deleted_exam(self):
+        # Yumşaq silinməmiş imtahan üçün birdəfəlik silmə mövcud deyil (404).
+        response = self.client.post(reverse("exams:permanent_delete_exam", args=[self.exam_visible.slug]))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Exam.objects.filter(id=self.exam_visible.id).exists())
+
+    def test_view_results_of_deleted_exam_is_readonly(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+        self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+
+        # Silinmiş imtahanın nəticələrinə "Zibil qutusu"ndan baxmaq olar.
+        response = self.client.get(reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]))
+        self.assertEqual(response.status_code, 200)
+        # Yalnız-oxu banneri "Zibil qutusu"na keçid göstərir.
+        self.assertContains(response, reverse("exams:deleted_exams_list"))
+
+        # Qiymətləndirmə POST-u bloklanır (redirect).
+        post = self.client.post(
+            reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]),
+            {"attempt_id": attempt.id, "teacher_score": "50"},
+        )
+        self.assertEqual(post.status_code, 302)
+        attempt.refresh_from_db()
+        self.assertIsNone(attempt.teacher_score)
 
     def test_edit_other_tenant_exam_is_not_found(self):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
@@ -2295,6 +2364,19 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:student_exam_list"), {"q": self.other_tenant_exam.title})
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_tenant_exam.slug)
+
+    def test_student_available_exam_list_hides_soft_deleted_exam(self):
+        # Baseline — imtahan görünür.
+        response = self.client.get(reverse("exams:student_exam_list"), {"q": self.course_assigned_exam.title})
+        self.assertContains(response, self.course_assigned_exam.slug)
+
+        # is_active toxunulmadan yalnız yumşaq silinir; siyahıdan çıxmasının
+        # yeganə səbəbi is_deleted filtridir.
+        self.course_assigned_exam.is_deleted = True
+        self.course_assigned_exam.save(update_fields=["is_deleted"])
+
+        response = self.client.get(reverse("exams:student_exam_list"), {"q": self.course_assigned_exam.title})
+        self.assertNotContains(response, self.course_assigned_exam.slug)
 
     def test_student_exam_list_never_shows_final_or_midterm(self):
         # Açıq "İmtahanlar" siyahısı yalnız sınaq/canlı imtahanlar üçündür —

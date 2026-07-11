@@ -262,8 +262,19 @@ def _handle_student_pin_login(request, username, raw_pin):
     kompüter yoxdursa köhnə birbaşa-başlama davranışı qalır.
     """
     from apps.exams.services.attempts import _start_or_resume_attempt
-    from apps.exams.services.student_pins import resolve_student_pin_login
+    from apps.exams.services.student_pins import resolve_student_pin_login, student_pin_login_rate_limited
     from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
+
+    uname = (username or "").strip()
+
+    # Freeze-safe throttle (EXAM-SEC-002): this ExamStudentPin route is the
+    # second entry path and must not stay brute-forceable when the ticket
+    # path's IP limiter trips.  The throttle is keyed per-username (never per
+    # shared IP), so localhost / a NAT'd exam hall cannot freeze other students,
+    # and stopping one student never blocks the rest.
+    if uname and student_pin_login_rate_limited(uname):
+        logger.warning("student_pin_login rate limited for username=%s", uname)
+        return _render_login(request, error=_entry_error_message(ERROR_RATE_LIMITED), username=uname)
 
     exam, student = resolve_student_pin_login(username, raw_pin)
     if exam is None:

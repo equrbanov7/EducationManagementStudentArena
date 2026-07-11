@@ -97,7 +97,8 @@ def teacher_view_attempt(request, slug, attempt_id):
     """
     _ensure_can_view_attempt_results(request.user)
 
-    exam = get_result_viewable_exam_or_404(request, slug=slug)
+    # "Zibil qutusu"ndan da yalnız-oxu baxış üçün silinmiş imtahanı tapa bilirik.
+    exam = get_result_viewable_exam_or_404(request, slug=slug, include_deleted=True)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
     _sync_coding_answers_from_final_submissions(attempt)

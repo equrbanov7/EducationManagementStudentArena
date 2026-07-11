@@ -212,6 +212,23 @@ def _get_editable_exam_or_404(request, slug):
     return exam
 
 
+def _get_deleted_exam_or_404(request, slug):
+    """Yumşaq silinmiş (``is_deleted=True``) imtahanı həll et — "Zibil qutusu"
+    əməliyyatları (bərpa / birdəfəlik silmə / nəticələrə baxış) üçün.
+
+    ``_get_editable_exam_or_404``-dən fərqli olaraq YALNIZ silinmiş imtahanları
+    tapır; org/müəllif izolyasiyası eynidir.
+    """
+    exam = tenant_scoped_exams(request, Exam.objects.filter(slug=slug, is_deleted=True), include_deleted=True).first()
+    if exam is None:
+        raise Http404
+
+    if exam.author_id != request.user.id and not _is_superadmin(request.user):
+        raise PermissionDenied(pgettext("exams.view.exams.permission", "not_exam_owner"))
+
+    return exam
+
+
 def _selected_access_entities(form):
     """Yalnız SEÇİLİ icazəli qrup/istifadəçiləri qaytarır (lazy render üçün).
 

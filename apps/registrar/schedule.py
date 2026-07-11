@@ -197,7 +197,7 @@ def get_week_exams(*, organization, course_ids, monday, author=None, weekdays=_T
         scope = scope | Q(author=author)
 
     exams = (
-        Exam.objects.filter(organization=organization, is_active=True, start_datetime__isnull=False)
+        Exam.objects.filter(organization=organization, is_active=True, is_deleted=False, start_datetime__isnull=False)
         .filter(start_datetime__date__gte=monday, start_datetime__date__lte=saturday)
         .filter(scope)
         .select_related("course")
