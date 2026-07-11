@@ -5626,7 +5626,7 @@ msgstr "Bu imtahanı silmək istədiyinizə əminsiniz?"
 
 msgctxt "exams.dashboard"
 msgid "delete_modal_warn"
-msgstr ""
+msgstr "Nəticələr silinmir — imtahan Zibil qutusuna keçir və oradan bərpa oluna bilər."
 "Bu əməliyyat geri qaytarıla bilməz. İmtahan üzrə bütün cəhdlər və nəticələr "
 "də silinəcək."
 
@@ -28221,3 +28221,97 @@ msgstr "Sınaq cəhdi"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "selected_subject"
 msgstr "Seçilmiş fənn"
+
+# --- Soft-delete / Trash (exam deletion preserves results) ---
+
+msgctxt "exams.view.exams.message"
+msgid "exam_soft_deleted"
+msgstr "İmtahan silindi — nəticələr saxlanıldı (Zibil qutusunda)."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_restored"
+msgstr "İmtahan bərpa olundu."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_permanently_deleted"
+msgstr "İmtahan birdəfəlik silindi."
+
+msgctxt "exams.view.results.message"
+msgid "cannot_grade_deleted_exam"
+msgstr "Silinmiş imtahanı qiymətləndirmək olmaz. Əvvəlcə onu bərpa edin."
+
+msgctxt "exams.view.results.message"
+msgid "deleted_exam_readonly_notice"
+msgstr "Bu imtahan Zibil qutusundadır — nəticələr yalnız oxu üçün göstərilir."
+
+msgctxt "exams.view.results.message"
+msgid "back_to_trash"
+msgstr "Zibil qutusuna qayıt"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_title"
+msgstr "Silinmiş imtahanlar"
+
+msgctxt "exams.template.deleted_exams"
+msgid "page_subtitle"
+msgstr "Silinmiş imtahanların nəticələri qorunur. Buradan onlara baxa, imtahanı bərpa edə və ya birdəfəlik silə bilərsiniz."
+
+msgctxt "exams.template.deleted_exams"
+msgid "back_to_my_exams"
+msgstr "İmtahanlarıma qayıt"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_exam"
+msgstr "İmtahan"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_results"
+msgstr "Nəticələr"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_deleted_at"
+msgstr "Silinmə tarixi"
+
+msgctxt "exams.template.deleted_exams"
+msgid "col_actions"
+msgstr "Əməliyyatlar"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_view_results"
+msgstr "Nəticələrə bax"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_restore"
+msgstr "Bərpa et"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_permanent_delete"
+msgstr "Birdəfəlik sil"
+
+msgctxt "exams.template.deleted_exams"
+msgid "confirm_permanent_delete"
+msgstr "Bu imtahan və bütün nəticələri birdəfəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz. Davam edilsin?"
+
+msgctxt "exams.template.deleted_exams"
+msgid "empty_state"
+msgstr "Zibil qutusu boşdur."
+
+msgctxt "profile.my_exams"
+msgid "trash_link"
+msgstr "Zibil qutusu"
+
+msgctxt "exams.model.exam.field"
+msgid "is_deleted"
+msgstr "silinib"
+
+msgctxt "exams.model.exam.field"
+msgid "deleted_at"
+msgstr "silinmə vaxtı"
+
+msgctxt "exams.model.exam.help"
+msgid "is_deleted"
+msgstr "Yumşaq silmə — imtahan gizlədilir, nəticələr saxlanılır."
+
+msgctxt "exams.model.exam.help"
+msgid "deleted_at"
+msgstr "İmtahanın yumşaq silindiyi vaxt."

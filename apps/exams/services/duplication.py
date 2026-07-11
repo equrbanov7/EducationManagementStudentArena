@@ -79,6 +79,9 @@ def duplicate_exam(*, exam: Exam, user, title_suffix: str = " (kopya)") -> Exam:
     copy.is_active = False
     copy.is_archived = False
     copy.archived_at = None
+    # Dublikat heç vaxt "silinmiş" başlamamalıdır (qaralama kimi yaranır).
+    copy.is_deleted = False
+    copy.deleted_at = None
     copy.access_code = ""
     copy.save()
 

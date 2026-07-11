@@ -395,7 +395,7 @@ def link_exam_to_course(request, pk):
 
         exam_qs = without_disabled_practical_exams(
             scoped_by_organization(
-                Exam.objects.filter(author=request.user),
+                Exam.objects.filter(author=request.user, is_deleted=False),
                 request,
             )
         )

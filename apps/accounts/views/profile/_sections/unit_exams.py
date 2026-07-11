@@ -45,7 +45,7 @@ def build_unit_exams_context(request, *, allowed_sections, active_section) -> di
         scope_unit__in=unit_ids.values("pk"),
     ).values("user_id")
     qs = (
-        Exam.objects.filter(organization=org)
+        Exam.objects.filter(organization=org, is_deleted=False)
         .filter(Q(course__unit__in=unit_ids.values("pk")) | Q(author_id__in=member_user_ids))
         .select_related("author", "course")
         .annotate(attempts_total=Count("attempts", distinct=True))

@@ -224,6 +224,23 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         null=True,
         help_text=pgettext_lazy("exams.model.exam.help", "archived_at"),
     )
+    # Yumşaq silmə (soft delete): müəllim imtahanı "silir", amma sətir və bütün
+    # cəhdlər/nəticələr bazada qalır — yalnız gizlədilir və "Zibil qutusu"na
+    # keçir. Oradan nəticələrə baxıla, imtahan bərpa oluna və ya birdəfəlik
+    # (CASCADE) silinə bilər. is_archived-dən fərqli: arxiv göründüyü kimi qalır,
+    # silinmiş imtahan isə bütün siyahılardan çıxarılır.
+    is_deleted = models.BooleanField(
+        pgettext_lazy("exams.model.exam.field", "is_deleted"),
+        default=False,
+        db_index=True,
+        help_text=pgettext_lazy("exams.model.exam.help", "is_deleted"),
+    )
+    deleted_at = models.DateTimeField(
+        pgettext_lazy("exams.model.exam.field", "deleted_at"),
+        blank=True,
+        null=True,
+        help_text=pgettext_lazy("exams.model.exam.help", "deleted_at"),
+    )
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.exam.meta", "singular")

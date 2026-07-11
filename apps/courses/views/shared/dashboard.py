@@ -254,7 +254,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             context["course_exams"] = (
                 without_disabled_practical_exams(
                     scoped_by_organization(
-                        Exam.objects.filter(course=course),
+                        Exam.objects.filter(course=course, is_deleted=False),
                         self.request,
                     )
                 )
@@ -268,7 +268,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             context["teacher_exams"] = (
                 without_disabled_practical_exams(
                     scoped_by_organization(
-                        Exam.objects.filter(author=user).exclude(course=course),
+                        Exam.objects.filter(author=user, is_deleted=False).exclude(course=course),
                         self.request,
                     )
                 )
@@ -281,7 +281,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             all_course_exams = list(
                 without_disabled_practical_exams(
                     scoped_by_organization(
-                        Exam.objects.filter(course=course, is_active=True),
+                        Exam.objects.filter(course=course, is_active=True, is_deleted=False),
                         self.request,
                     )
                 ).annotate(questions_total=Count("questions", distinct=True))

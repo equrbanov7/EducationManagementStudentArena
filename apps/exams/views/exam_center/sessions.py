@@ -176,7 +176,7 @@ def exam_center_finals(request):
     """
     organization = center_org_or_403(request)
     finals = (
-        Exam.objects.filter(organization=organization, exam_type_extended="final", is_archived=False)
+        Exam.objects.filter(organization=organization, exam_type_extended="final", is_archived=False, is_deleted=False)
         .annotate(ticket_count=Count("final_tickets", distinct=True))
         .order_by("-created_at")
     )
