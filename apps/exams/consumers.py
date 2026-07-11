@@ -34,16 +34,51 @@ class ExamSupervisionConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=4403)
             return
 
-        self.attempt_id = self.scope["url_route"]["kwargs"]["attempt_id"]
-        self.group_name = f"exam_supervision_{self.attempt_id}"
-
         user = self.scope.get("user")
         if not getattr(user, "is_authenticated", False):
             await self.close(code=4401)
             return
 
+        try:
+            self.attempt_id = int(self.scope["url_route"]["kwargs"]["attempt_id"])
+        except (KeyError, TypeError, ValueError):
+            await self.close(code=4400)
+            return
+
+        # Authorization (EXAM-SEC-001): only the student sitting this attempt —
+        # or the exam author / a superadmin observing — may subscribe.  Without
+        # it any authenticated user could tap another attempt's supervision feed
+        # by guessing the sequential attempt id.
+        if not await self._can_observe_attempt(user, self.attempt_id):
+            await self.close(code=4403)
+            return
+
+        self.group_name = f"exam_supervision_{self.attempt_id}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
+
+    @database_sync_to_async
+    def _can_observe_attempt(self, user, attempt_id) -> bool:
+        """
+        Owner-scoped access to an attempt's realtime supervision feed.  The sole
+        expected client is the student taking the attempt (they receive the
+        teacher's lock/resume/stop events); the exam author and superadmins may
+        also observe.  RLS is bypassed for the lookup so the legitimate owner is
+        never rejected when the WebSocket scope carries no active-org context —
+        authorization is enforced explicitly on ``user_id`` below.
+        """
+        from apps.exams.models import ExamAttempt
+        from core.rls import bypass_rls
+
+        with bypass_rls():
+            row = ExamAttempt.objects.filter(pk=attempt_id).values("user_id", "exam__author_id").first()
+        if row is None:
+            return False
+        if row["user_id"] == user.id:
+            return True
+        if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+            return True
+        return row["exam__author_id"] == user.id
 
     async def disconnect(self, close_code):
         group_name = getattr(self, "group_name", None)
