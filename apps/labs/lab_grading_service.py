@@ -27,10 +27,34 @@ def format_decimal_input(value):
     return formatted or "0"
 
 
+def _clamp_decimal_score(value, maximum):
+    """Return a score inside ``[0, maximum]`` using exact Decimal math."""
+    if value is None:
+        return None
+    parsed = value if isinstance(value, Decimal) else Decimal(str(value))
+    parsed = max(parsed, Decimal("0"))
+    if maximum is None:
+        return parsed
+    ceiling = max(Decimal(str(maximum)), Decimal("0"))
+    return min(parsed, ceiling)
+
+
+def _lock_instance(instance, *related_fields):
+    """Re-read a persisted grading target with a transaction row lock."""
+    manager = getattr(type(instance), "_default_manager", None)
+    pk = getattr(instance, "pk", None)
+    if manager is None or pk is None:
+        return instance
+    queryset = manager.select_for_update()
+    if related_fields:
+        queryset = queryset.select_related(*related_fields)
+    return queryset.get(pk=pk)
+
+
 @transaction.atomic
 def grade_lab_submission(submission, score, feedback, graded_by, *, refresh_graded_at=True):
-    if isinstance(score, str):
-        score = Decimal(score)
+    submission = _lock_instance(submission, "assignment__lab")
+    score = _clamp_decimal_score(score, submission.assignment.lab.max_score)
 
     submission.score = score
     submission.feedback = feedback
@@ -45,8 +69,8 @@ def grade_lab_submission(submission, score, feedback, graded_by, *, refresh_grad
 
 @transaction.atomic
 def grade_lab_answer(answer, score, feedback=None):
-    if isinstance(score, str):
-        score = Decimal(score)
+    answer = _lock_instance(answer, "question")
+    score = _clamp_decimal_score(score, answer.question.points)
 
     answer.score = score
     answer.save(update_fields=["score", "submitted_at"])

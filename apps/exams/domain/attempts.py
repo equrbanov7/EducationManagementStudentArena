@@ -299,6 +299,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         return True
 
     def mark_finished(self, status="submitted", extra_update_fields=None):
+        was_finished = self.is_finished
         self.status = status
         finished_at = timezone.now()
         # Gecikmiş bitirmə (lazy expire, sweep, tələbənin günlər sonra qayıtması)
@@ -315,6 +316,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         if extra_update_fields:
             update_fields.extend(extra_update_fields)
         self.save(update_fields=list(dict.fromkeys(update_fields)))
+        if not was_finished:
+            from apps.exams.metrics import record_attempt_submitted
+
+            record_attempt_submitted(getattr(self.exam, "exam_type", "unknown"), status)
 
     def recalculate_score(self):
         if getattr(self.exam, "exam_type", None) == "test":

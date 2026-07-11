@@ -2607,10 +2607,12 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_tenant_exam.slug)
 
-    def test_course_assigned_exam_can_be_started_by_student(self):
+    @patch("apps.exams.services.attempts.record_attempt_started")
+    def test_course_assigned_exam_can_be_started_by_student(self, record_started):
         response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.course_assigned_exam.attempts.filter(user=self.student).exists())
+        record_started.assert_called_once_with(self.course_assigned_exam.exam_type)
 
     def test_in_progress_exam_resumes_from_start_route_when_attempt_limit_is_one(self):
         self.course_assigned_exam.max_attempts_per_user = 1
@@ -2626,6 +2628,36 @@ class StudentExamVisibilityFilteringTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
+
+    def test_excluded_student_cannot_use_direct_active_attempt_endpoint(self):
+        question = self.course_assigned_exam.questions.order_by("id").first()
+        attempt = ExamAttempt.objects.create(
+            user=self.student, exam=self.course_assigned_exam, status="in_progress", attempt_number=1
+        )
+        answer = ExamAnswer.objects.create(attempt=attempt, question=question, text_answer="protected")
+        self.course_assigned_exam.excluded_users.add(self.student)
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]),
+            {"submit_action": "finish", f"q_present_{question.id}": "1", f"q_{question.id}": "tampered"},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        answer.refresh_from_db()
+        attempt.refresh_from_db()
+        self.assertEqual(answer.text_answer, "protected")
+        self.assertEqual(attempt.status, "in_progress")
+
+    def test_archived_exam_direct_active_attempt_endpoint_is_forbidden(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student, exam=self.course_assigned_exam, status="in_progress", attempt_number=1
+        )
+        self.course_assigned_exam.is_archived = True
+        self.course_assigned_exam.save(update_fields=["is_archived"])
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 403)
 
     def test_in_progress_code_exam_resumes_without_reasking_for_code(self):
         attempt = ExamAttempt.objects.create(
@@ -2868,7 +2900,8 @@ class StudentExamVisibilityFilteringTest(TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, expected_title)
 
-    def test_take_exam_autosave_updates_only_changed_questions(self):
+    @patch("apps.exams.views.student.attempts.record_autosave")
+    def test_take_exam_autosave_updates_only_changed_questions(self, record_autosave):
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="Interval Autosave Written Exam",
@@ -2922,8 +2955,10 @@ class StudentExamVisibilityFilteringTest(TestCase):
         second_answer.refresh_from_db()
         self.assertEqual(first_answer.text_answer, "New first answer")
         self.assertEqual(second_answer.text_answer, "Keep second answer")
+        record_autosave.assert_called_once_with("success")
 
-    def test_finish_preserves_answer_of_absent_timer_expired_question(self):
+    @patch("apps.exams.metrics.record_attempt_submitted")
+    def test_finish_preserves_answer_of_absent_timer_expired_question(self, record_submitted):
         """EXAM-P1-05: per-question timer bitib inputları disable olan sual
         (q_present markeri POST-da yoxdur) finish zamanı saxlanmış cavabı itirmir."""
         written_exam = Exam.objects.create(
@@ -2957,6 +2992,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         # q1-in saxlanmış cavabı QORUNUR (absent field onu silmir).
         self.assertEqual(a1.text_answer, "Saved before timeout")
         self.assertEqual(a2.text_answer, "Answer for active question")
+        record_submitted.assert_called_once_with("written", "submitted")
 
     @override_settings(EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED=False)
     def test_take_exam_autosave_ignores_file_and_paint_payloads(self):

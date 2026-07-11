@@ -1,5 +1,11 @@
 # Codex tam auditi — düzəliş hesabatı (2026-07-11)
 
+> **Re-audit qeydi:** Bu fayl düzəliş müəllifinin icra iddialarını və ilkin
+> test nəticələrini tarixi qeyd kimi saxlayır. Müstəqil adversarial yoxlama bəzi
+> “HƏLL EDİLDİ” iddialarının dar testdə keçdiyini, lakin bütöv tapıntının
+> natamam qaldığını göstərib. Cari authoritative status üçün
+> [REAUDIT_REPORT_AZ_2026-07-11.md](./REAUDIT_REPORT_AZ_2026-07-11.md)-ə baxın.
+
 **Audit:** [EMSArena_End_to_End_Audit_AZ_2026-07-11.md](./EMSArena_End_to_End_Audit_AZ_2026-07-11.md)
 **Düzəlişlərin icra tarixi:** 2026-07-11 (audit ilə eyni gün)
 **Bütün tapıntılar kod üzərində yenidən yoxlanıb təsdiqlənəndən sonra düzəldilib.**

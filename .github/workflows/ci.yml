@@ -170,33 +170,34 @@ jobs:
           echo "E2E Smoke:        ${{ needs.e2e-smoke.result }}"
           echo "=========================="
 
-          if [[ "${{ needs.lint.result }}" == "failure" ]]; then
-            echo "❌ Lint job failed!"
+          # Fail closed: cancelled/skipped/unknown are not successful gates.
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "❌ Lint job did not succeed: ${{ needs.lint.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.unit-tests-311.result }}" == "failure" || "${{ needs.unit-tests-312.result }}" == "failure" ]]; then
-            echo "❌ Unit Tests failed!"
+          if [[ "${{ needs.unit-tests-311.result }}" != "success" || "${{ needs.unit-tests-312.result }}" != "success" ]]; then
+            echo "❌ Unit Tests did not both succeed!"
             exit 1
           fi
 
-          if [[ "${{ needs.rls-txn-pool.result }}" == "failure" ]]; then
-            echo "❌ RLS Transaction-Pooling Gate failed!"
+          if [[ "${{ needs.rls-txn-pool.result }}" != "success" ]]; then
+            echo "❌ RLS Transaction-Pooling Gate did not succeed: ${{ needs.rls-txn-pool.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "❌ Build job failed!"
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "❌ Build job did not succeed: ${{ needs.build.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.security.result }}" == "failure" ]]; then
-            echo "❌ Security scan failed!"
+          if [[ "${{ needs.security.result }}" != "success" ]]; then
+            echo "❌ Security scan did not succeed: ${{ needs.security.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
-            echo "❌ Secret Scan failed!"
+          if [[ "${{ needs.secret-scan.result }}" != "success" ]]; then
+            echo "❌ Secret Scan did not succeed: ${{ needs.secret-scan.result }}"
             exit 1
           fi
 
@@ -206,23 +207,23 @@ jobs:
           # deploy oluna bilirdi. Artıq bunlar da merge/deploy gate-ini
           # bloklayır. Docker Hub keçici problemləri (rate-limit/timeout)
           # üçün həll — job-u YENİDƏN İŞƏ SALMAQ, ətrafından keçmək yox.
-          if [[ "${{ needs.docker-build.result }}" == "failure" ]]; then
-            echo "❌ Docker Build job failed!"
+          if [[ "${{ needs.docker-build.result }}" != "success" ]]; then
+            echo "❌ Docker Build did not succeed: ${{ needs.docker-build.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
-            echo "❌ Container Scan (Trivy) failed! Review the report."
+          if [[ "${{ needs.container-scan.result }}" != "success" ]]; then
+            echo "❌ Container Scan (Trivy) did not succeed: ${{ needs.container-scan.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.prod-smoke.result }}" == "failure" ]]; then
-            echo "❌ Prod Smoke Test failed!"
+          if [[ "${{ needs.prod-smoke.result }}" != "success" ]]; then
+            echo "❌ Prod Smoke Test did not succeed: ${{ needs.prod-smoke.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.e2e-smoke.result }}" == "failure" ]]; then
-            echo "❌ E2E Smoke Test failed!"
+          if [[ "${{ needs.e2e-smoke.result }}" != "success" ]]; then
+            echo "❌ E2E Smoke Test did not succeed: ${{ needs.e2e-smoke.result }}"
             exit 1
           fi
 

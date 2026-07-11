@@ -4,16 +4,25 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/opt/emsarena/app}"
 VENV_DIR="${VENV_DIR:-/opt/emsarena/venv}"
 SERVICE_NAME="${SERVICE_NAME:-emsarena.service}"
-APP_BASE_URL="${APP_BASE_URL:-http://127.0.0.1}"
+DEPLOY_MODE="${DEPLOY_MODE:-docker}"
+if [ -z "${APP_BASE_URL:-}" ]; then
+  if [ "$DEPLOY_MODE" = "docker" ]; then
+    APP_BASE_URL="https://127.0.0.1"
+  else
+    APP_BASE_URL="http://127.0.0.1"
+  fi
+fi
 HEALTHCHECK_HOST="${HEALTHCHECK_HOST:-emsarena.com}"
+ORIGIN_HEALTHCHECK_INSECURE_TLS="${ORIGIN_HEALTHCHECK_INSECURE_TLS:-true}"
+EDGE_PROXY_MODE="${EDGE_PROXY_MODE:-cloudflare}"
 PING_PATH="${PING_PATH:-/ping/}"
 HEALTH_PATH="${HEALTH_PATH:-/health/}"
 DISABLE_LEGACY_DAPHNE_SERVICE="${DISABLE_LEGACY_DAPHNE_SERVICE:-true}"
 DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-300}"
-DEPLOY_MODE="${DEPLOY_MODE:-docker}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 APP_REPLICAS="${APP_REPLICAS:-1}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-1}"
+CLOUDFLARE_REALIP_FILE="${APP_DIR}/docker/nginx/cloudflare-realip.conf"
 
 # Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
 # files owned by a different user (e.g. a previous root deploy) and failed with
@@ -34,6 +43,11 @@ if ! [[ "$CELERY_REPLICAS" =~ ^[0-9]+$ ]] || [ "$CELERY_REPLICAS" -lt 0 ]; then
   exit 1
 fi
 
+if [ "$EDGE_PROXY_MODE" != "cloudflare" ] && [ "$EDGE_PROXY_MODE" != "direct" ]; then
+  echo "EDGE_PROXY_MODE must be 'cloudflare' or 'direct'." >&2
+  exit 1
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
   SUDO=""
 else
@@ -49,8 +63,21 @@ fi
 
 curl_headers=(
   -H "Host: ${HEALTHCHECK_HOST}"
-  -H "X-Forwarded-Proto: https"
 )
+curl_options=(-sS)
+if [ "$ORIGIN_HEALTHCHECK_INSECURE_TLS" = "true" ]; then
+  case "$APP_BASE_URL" in
+    https://127.0.0.1*|https://localhost*|https://\[::1\]*)
+      # Origin/self-signed certificates are not public trust anchors.  TLS
+      # verification is disabled only for the loopback deployment probe.
+      curl_options+=(--insecure)
+      ;;
+    *)
+      echo "ORIGIN_HEALTHCHECK_INSECURE_TLS=true is allowed only for a loopback APP_BASE_URL." >&2
+      exit 1
+      ;;
+  esac
+fi
 
 wait_for_http() {
   local url="$1"
@@ -65,7 +92,7 @@ wait_for_http() {
   fi
 
   while true; do
-    status="$(curl -s -o "$body_file" -w '%{http_code}' "${curl_headers[@]}" "$url" || true)"
+    status="$(curl "${curl_options[@]}" -o "$body_file" -w '%{http_code}' "${curl_headers[@]}" "$url" || true)"
     if [[ " ${expected_codes} " == *" ${status} "* ]]; then
       return 0
     fi
@@ -156,35 +183,83 @@ ensure_origin_cert() {
   chmod 644 "$cert_file"
 }
 
-repair_cloudflare_docker_user_firewall() {
-  local iface
+sync_cloudflare_networks() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required to validate Cloudflare network ranges." >&2
+    exit 1
+  fi
+  python3 "${APP_DIR}/scripts/deploy/sync_cloudflare_networks.py" \
+    --output "$CLOUDFLARE_REALIP_FILE"
+}
+
+remove_edge_firewall_family() {
+  local tool="$1"
+  local chain="$2"
+  local iface="$3"
   local port
 
-  if ! command -v iptables >/dev/null 2>&1; then
-    return 0
+  command -v "$tool" >/dev/null 2>&1 || return 0
+  $SUDO "$tool" -S DOCKER-USER >/dev/null 2>&1 || return 0
+  for port in 80 443; do
+    while $SUDO "$tool" -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j "$chain" 2>/dev/null; do
+      $SUDO "$tool" -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j "$chain"
+    done
+    # Remove the historical jump that did not include --ctstate.
+    while $SUDO "$tool" -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j "$chain" 2>/dev/null; do
+      $SUDO "$tool" -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j "$chain"
+    done
+  done
+  if $SUDO "$tool" -S "$chain" >/dev/null 2>&1; then
+    $SUDO "$tool" -F "$chain"
+    $SUDO "$tool" -X "$chain"
   fi
+}
 
-  if ! $SUDO iptables -S DOCKER-USER >/dev/null 2>&1; then
-    return 0
-  fi
+configure_cloudflare_firewall_family() {
+  local tool="$1"
+  local chain="$2"
+  local iface="$3"
+  local family="$4"
+  local cidr
+  local port
 
-  if ! $SUDO iptables -S EMSARENA-CF-WEB >/dev/null 2>&1; then
-    return 0
-  fi
+  command -v "$tool" >/dev/null 2>&1 || return 0
+  $SUDO "$tool" -S DOCKER-USER >/dev/null 2>&1 || return 0
 
-  iface="$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')"
-  if [ -z "$iface" ]; then
-    return 0
-  fi
+  remove_edge_firewall_family "$tool" "$chain" "$iface"
+  $SUDO "$tool" -N "$chain"
+  while read -r cidr; do
+    [ -n "$cidr" ] || continue
+    if { [ "$family" = "4" ] && [[ "$cidr" != *:* ]]; } || \
+       { [ "$family" = "6" ] && [[ "$cidr" == *:* ]]; }; then
+      $SUDO "$tool" -A "$chain" -s "$cidr" -j ACCEPT
+    fi
+  done < <(awk '/^set_real_ip_from / {gsub(/;/, "", $2); print $2}' "$CLOUDFLARE_REALIP_FILE")
+  $SUDO "$tool" -A "$chain" -j DROP
 
   for port in 80 443; do
-    while $SUDO iptables -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j EMSARENA-CF-WEB 2>/dev/null; do
-      $SUDO iptables -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j EMSARENA-CF-WEB
-    done
-
-    $SUDO iptables -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j EMSARENA-CF-WEB 2>/dev/null \
-      || $SUDO iptables -I DOCKER-USER 1 -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j EMSARENA-CF-WEB
+    $SUDO "$tool" -I DOCKER-USER 1 -i "$iface" -p tcp -m conntrack \
+      --ctstate NEW --ctorigdstport "$port" -j "$chain"
   done
+}
+
+configure_edge_firewall() {
+  local iface
+  iface="$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')"
+  if [ -z "$iface" ]; then
+    echo "Unable to determine the public network interface." >&2
+    exit 1
+  fi
+
+  if [ "$EDGE_PROXY_MODE" = "direct" ]; then
+    remove_edge_firewall_family iptables EMSARENA-CF-WEB "$iface"
+    remove_edge_firewall_family ip6tables EMSARENA-CF-WEB6 "$iface"
+    return 0
+  fi
+
+  sync_cloudflare_networks
+  configure_cloudflare_firewall_family iptables EMSARENA-CF-WEB "$iface" 4
+  configure_cloudflare_firewall_family ip6tables EMSARENA-CF-WEB6 "$iface" 6
 }
 
 app_replicas_ready() {
@@ -224,7 +299,7 @@ docker_deploy() {
 
   docker compose version >/dev/null
   ensure_origin_cert
-  repair_cloudflare_docker_user_firewall
+  configure_edge_firewall
 
   docker compose -f "$COMPOSE_FILE" config >"$COMPOSE_CONFIG"
   docker compose -f "$COMPOSE_FILE" build

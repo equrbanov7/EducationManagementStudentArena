@@ -98,6 +98,43 @@ export function htmlDecode(value) {
     .replace(/&gt;/g, ">");
 }
 
+export function stripHtml(value) {
+  return htmlDecode(String(value || "").replace(/<[^>]+>/g, " "))
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function parseJsonScript(html, elementId, fallback) {
+  const escapedId = String(elementId || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `<script\\b[^>]*id=["']${escapedId}["'][^>]*>([\\s\\S]*?)<\\/script>`,
+    "i",
+  );
+  const match = pattern.exec(String(html || ""));
+  if (!match) return fallback;
+  try {
+    return JSON.parse(htmlDecode(match[1]));
+  } catch (_error) {
+    return fallback;
+  }
+}
+
+export function parseJsonBody(response, fallback) {
+  try {
+    return JSON.parse(String((response && response.body) || ""));
+  } catch (_error) {
+    return fallback;
+  }
+}
+
+export function cookieHeaderForUrl(url) {
+  const values = http.cookieJar().cookiesForURL(url || BASE_URL) || {};
+  return Object.keys(values)
+    .filter((name) => values[name] && values[name].length)
+    .map((name) => `${name}=${values[name][0]}`)
+    .join("; ");
+}
+
 export function extractCsrf(response) {
   const body = response && response.body ? String(response.body) : "";
   const hidden = /name\s*=\s*['"]csrfmiddlewaretoken['"][^>]*value\s*=\s*['"]([^'"]+)['"]/i.exec(body);
@@ -293,9 +330,60 @@ export function parseNormalQuestions(html) {
     byId[qid].kind = "written";
   }
 
+  const optionLabelRe = /<label\b[^>]*class\s*=\s*['"][^'"]*option-card[^'"]*['"][^>]*>([\s\S]*?)<\/label>/gi;
+  while ((match = optionLabelRe.exec(html || "")) !== null) {
+    const fragment = match[1];
+    const input = /<input\b[^>]*name\s*=\s*['"]q_(\d+)['"][^>]*>/i.exec(fragment);
+    if (!input) continue;
+    const qid = input[1];
+    const value = attrValue(input[0], "value");
+    const labelMatch = /<span\b[^>]*class\s*=\s*['"][^'"]*opt-text[^'"]*['"][^>]*>([\s\S]*?)<\/span>/i.exec(
+      fragment,
+    );
+    byId[qid] = byId[qid] || { id: qid, options: [], kind: "unknown" };
+    byId[qid].optionLabels = byId[qid].optionLabels || {};
+    if (value && labelMatch) byId[qid].optionLabels[value] = stripHtml(labelMatch[1]);
+  }
+
   return Object.keys(byId)
     .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
     .map((id) => byId[id]);
+}
+
+function regexEscape(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function normalAnswerPersisted(html, question, expectedValue) {
+  if (question.options && question.options.length) {
+    const tags = String(html || "").match(/<input\b[^>]*>/gi) || [];
+    return tags.some((tag) => {
+      const name = attrValue(tag, "name");
+      const value = attrValue(tag, "value");
+      return name === `q_${question.id}` && value === String(expectedValue) && /\bchecked\b/i.test(tag);
+    });
+  }
+  const pattern = new RegExp(
+    `<textarea\\b[^>]*name=["']q_${regexEscape(question.id)}["'][^>]*>([\\s\\S]*?)<\\/textarea>`,
+    "i",
+  );
+  const match = pattern.exec(String(html || ""));
+  return !!match && htmlDecode(match[1]).includes(String(expectedValue));
+}
+
+export function normalAnswerVisibleInResult(html, question, expectedValue) {
+  const body = String(html || "");
+  if (!(question.options && question.options.length)) {
+    return htmlDecode(body).includes(String(expectedValue));
+  }
+  const selectedLabel = (question.optionLabels || {})[String(expectedValue)] || "";
+  const selectedItems = [];
+  const itemRe = /<li\b[^>]*class\s*=\s*['"][^'"]*(?:correct-selected|wrong-selected)[^'"]*['"][^>]*>([\s\S]*?)<\/li>/gi;
+  let match;
+  while ((match = itemRe.exec(body)) !== null) selectedItems.push(stripHtml(match[1]));
+  if (!selectedItems.length) return false;
+  if (!selectedLabel) return true;
+  return selectedItems.some((item) => item.includes(selectedLabel));
 }
 
 export function pickAnswer(question, index) {
@@ -343,8 +431,54 @@ export function parseCodingConfig(html) {
     autosaveUrl: jsString("autosaveUrl"),
     runUrl: jsString("runUrl"),
     submitUrl: jsString("submitUrl"),
+    resultUrl: jsString("resultUrl"),
     csrfToken: jsString("csrfToken"),
     selectedLanguage: jsString("selectedLanguage") || "python",
+    attemptId: jsString("attemptId"),
+  };
+}
+
+export function parseCodingQuestions(html) {
+  const rows = parseJsonScript(html, "coding-questions", []);
+  return Array.isArray(rows) ? rows : [];
+}
+
+export function codingSourceFor(language, marker) {
+  const custom = __ENV.K6_CODING_CONTENT;
+  if (custom) return custom.replace(/\{\{MARKER\}\}/g, marker);
+  if (language === "javascript") return `// ${marker}\nconsole.log(${JSON.stringify(marker)});\n`;
+  if (language === "cpp") {
+    return `// ${marker}\n#include <iostream>\nint main(){std::cout << ${JSON.stringify(marker)}; return 0;}\n`;
+  }
+  if (language === "java") {
+    return `// ${marker}\nclass Main { public static void main(String[] args) { System.out.print(${JSON.stringify(
+      marker,
+    )}); } }\n`;
+  }
+  if (language === "html") return `<!-- ${marker} -->\n<p>${marker}</p>\n`;
+  return `# ${marker}\nprint(${JSON.stringify(marker)})\n`;
+}
+
+export function buildCodingQuestionPayload(question, marker) {
+  const selectedLanguage = question.selected_language || question.language || "python";
+  const originalFiles = question.initial_files || question.starter_files || [];
+  const files = originalFiles.length
+    ? originalFiles.map((item, index) => ({
+        name: item.name,
+        content: index === 0 ? codingSourceFor(selectedLanguage, marker) : item.content || "",
+      }))
+    : [
+        {
+          name: __ENV.K6_CODING_FILE_NAME || (selectedLanguage === "javascript" ? "main.js" : "main.py"),
+          content: codingSourceFor(selectedLanguage, marker),
+        },
+      ];
+  return {
+    question_id: question.id,
+    selected_language: selectedLanguage,
+    active_file_name: files[0].name,
+    files,
+    stdin: "",
   };
 }
 

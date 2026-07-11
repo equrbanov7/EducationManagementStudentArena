@@ -10,6 +10,7 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.language_parity import language_parity_error_message
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._shared import (
@@ -38,6 +39,10 @@ def toggle_exam_active(request, slug):
     exam = get_teacher_exam_or_404(request, slug=slug)
 
     if request.method == "POST":
+        parity_error = language_parity_error_message(exam) if not exam.is_active else ""
+        if parity_error:
+            messages.error(request, parity_error)
+            return redirect("exams:teacher_exam_detail", slug=exam.slug)
         exam.is_active = not exam.is_active
         exam.save()
         if exam.is_active:

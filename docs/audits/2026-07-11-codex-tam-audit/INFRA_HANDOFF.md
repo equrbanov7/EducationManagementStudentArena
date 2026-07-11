@@ -1,5 +1,11 @@
 # İnfrastruktur/əməliyyat handoff — kod ilə həll OLUNMAYAN işlər
 
+> **Re-audit qeydi:** Bu handoff ilkin fix dalğasından sonrakı vəziyyəti təsvir
+> edir və bəzi scope-ları artıq natamamdır. Cross-FK/M2M RLS, audit attribution
+> tamper-i, lab grade clamp, faktiki Cloudflare topologiyası və deploy drift-i
+> üçün cari authoritative plan
+> [REAUDIT_REPORT_AZ_2026-07-11.md](./REAUDIT_REPORT_AZ_2026-07-11.md)-dədir.
+
 Bu sənəd 2026-07-11 auditinin **kod dəyişikliyi ilə bağlana bilməyən** qalan
 bəndlərini toplayır. Bunlar server girişi, CI/CD infrastruktur qərarı, yük
 generatoru və ya məhsul-səviyyə dizayn tələb edir — hamısı **sənə** qalır.

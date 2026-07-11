@@ -57,4 +57,15 @@ def language_variants_in_parity(exam):
     return not check_language_variant_parity(exam)
 
 
-__all__ = ["check_language_variant_parity", "language_variants_in_parity"]
+def language_parity_error_message(exam):
+    """Activation/start UX üçün lokallaşdırılmış ilk parity xətası."""
+    issues = check_language_variant_parity(exam)
+    if not issues:
+        return ""
+    return pgettext(
+        "exams.service.language_parity",
+        "Dil variantları eyni aktiv sual sayına və ümumi bala malik olmalıdır: {issue}",
+    ).format(issue=issues[0])
+
+
+__all__ = ["check_language_variant_parity", "language_parity_error_message", "language_variants_in_parity"]
