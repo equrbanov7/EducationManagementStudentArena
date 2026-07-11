@@ -8,7 +8,7 @@ or migration references that still point at ``apps.exams.models``.
 
 from apps.exams.domain.access_policy import StudentGroup
 from apps.exams.domain.ai_config import AIConfiguration
-from apps.exams.domain.attempts import ExamAnswer, ExamAnswerFile, ExamAttempt, ProctoringLog
+from apps.exams.domain.attempts import ExamAnswer, ExamAnswerFile, ExamAttempt, ExamGradeEvent, ProctoringLog
 from apps.exams.domain.coding import CodingExamQuestion, CodingFile, CodingSubmission, CodingTestCase
 from apps.exams.domain.exam_definition import Exam, QuestionBlock
 from apps.exams.domain.final_center import ExamRoom, ExamRoomComputer, ExamRoomSession, FinalExamTicket
@@ -44,6 +44,7 @@ __all__ = [
     "ExamAnswer",
     "ExamAnswerFile",
     "ExamAttempt",
+    "ExamGradeEvent",
     "ExamLanguageVariant",
     "ExamQuestion",
     "ExamQuestionOption",

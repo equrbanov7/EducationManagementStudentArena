@@ -270,8 +270,10 @@ def teacher_check_attempt(request, slug, attempt_id):
 
         total_score = 0
         any_score = False
+        from apps.exams.models import ExamGradeEvent
         from apps.notifications.public import notify_student_about_feedback
 
+        grade_events = []
         for a in answers_qs:
             q = a.question
 
@@ -283,6 +285,7 @@ def teacher_check_attempt(request, slug, attempt_id):
             # [0, max] aralığına clamp olunur və grading POST heç vaxt sual
             # tərifini (ExamQuestion.points) dəyişmir.
             max_points_val = _answer_max_points(a)
+            previous_score = a.teacher_score
 
             if score_raw == "":
                 a.teacher_score = None
@@ -299,12 +302,33 @@ def teacher_check_attempt(request, slug, attempt_id):
             a.teacher_feedback = feedback
             a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
 
+            # Grade ledger (append-only): yalnız bal faktiki dəyişəndə qeyd et.
+            if a.teacher_score != previous_score:
+                grade_events.append(
+                    ExamGradeEvent(
+                        attempt=attempt,
+                        question=q,
+                        grader=request.user,
+                        old_score=previous_score,
+                        new_score=a.teacher_score,
+                        max_points=max_points_val,
+                    )
+                )
+
+        if grade_events:
+            ExamGradeEvent.objects.bulk_create(grade_events)
+
         # İlk yoxlama vaxtını saxla; 5 dəqiqəlik redaktə pəncərəsi bu vaxtdan hesablanır.
         attempt.teacher_score = total_score if any_score else None
         attempt.checked_by_teacher = True
         if not attempt.teacher_checked_at:
             attempt.teacher_checked_at = timezone.now()
-        attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
+        # İlk qiymətləndirən müəllimi saxla (appeal reviewer independence üçün).
+        attempt_update_fields = ["teacher_score", "checked_by_teacher", "teacher_checked_at"]
+        if attempt.graded_by_id is None:
+            attempt.graded_by = request.user
+            attempt_update_fields.append("graded_by")
+        attempt.save(update_fields=attempt_update_fields)
         notify_student_about_feedback(
             task=exam,
             student=attempt.user,
