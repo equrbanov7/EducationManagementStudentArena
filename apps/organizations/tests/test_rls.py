@@ -954,7 +954,7 @@ class TestRLSExamGapTables:
 class TestAuditLogAppendOnly:
     """audit_auditlog append-only trigger (organizations 0019, audit P1 #5)."""
 
-    def test_update_is_blocked(self, db):
+    def test_content_update_is_blocked(self, db):
         _skip_if_not_pg()
         from apps.audit.models import AuditLog
 
@@ -963,6 +963,18 @@ class TestAuditLogAppendOnly:
         with pytest.raises(DatabaseError):
             with transaction.atomic(), bypass_rls():
                 AuditLog.objects.filter(pk=log.pk).update(action="tampered")
+
+    def test_fk_nullification_update_is_allowed(self, db):
+        # ON DELETE SET NULL (user/org silinəndə) audit sətrini qorumalı,
+        # yalnız FK-ni NULL etməli — bu UPDATE bloklanmamalıdır.
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+            AuditLog.objects.filter(pk=log.pk).update(user_id=None, organization_id=None)
+        log.refresh_from_db()
+        assert log.user_id is None
 
     def test_delete_is_blocked(self, db):
         _skip_if_not_pg()
