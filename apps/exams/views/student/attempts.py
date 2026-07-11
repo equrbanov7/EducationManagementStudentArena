@@ -33,6 +33,8 @@ from ._helpers import (
     build_exam_result_url,
     current_return_to,
     ensure_student_exam_tenant_context,
+    finish_skips_absent_question,
+    posted_autosave_question_ids,
     safe_same_origin_redirect_path,
 )
 from .script_data import take_exam_script_data
@@ -72,20 +74,6 @@ def _finished_attempt_response(request, attempt, *, return_to):
             }
         )
     return redirect(redirect_url)
-
-
-def _posted_autosave_question_ids(request, *, action):
-    if action != "autosave":
-        return None
-
-    raw_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist("changed_questions")
-    parsed_ids = set()
-    for raw_id in raw_ids:
-        try:
-            parsed_ids.add(int(raw_id))
-        except (TypeError, ValueError):
-            continue
-    return parsed_ids
 
 
 def _selected_option_ids_from_request(request, question):
@@ -338,7 +326,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
             finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
             is_time_up = timezone.now() >= finish_time
 
-        autosave_question_ids_for_fetch = _posted_autosave_question_ids(request, action=action)
+        autosave_question_ids_for_fetch = posted_autosave_question_ids(request, action=action)
         answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
 
         if not answers:
@@ -372,23 +360,14 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
 
         _save_marked_question_ids_from_request(request, attempt)
 
-        autosave_changed_question_ids = _posted_autosave_question_ids(request, action=action)
-
-        # EXAM-P1-05: per-question timer bitəndə həmin sualın inputları (o
-        # cümlədən gizli "q_present_" markeri) disable olur və POST-a düşmür.
-        # Belə sualı finish zamanı emal etsək, boş POST saxlanmış cavabı
-        # SİLƏRDİ. Marker mövcud formalarda absent sualları ötürürük; markersiz
-        # (köhnə/keşlənmiş) formalar üçün köhnə davranış qalır (geriyə-uyğun).
+        autosave_changed_question_ids = posted_autosave_question_ids(request, action=action)
         form_has_presence_markers = any(key.startswith("q_present_") for key in request.POST)
 
         for q in questions:
             if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
                 continue
-
-            if (
-                autosave_changed_question_ids is None
-                and form_has_presence_markers
-                and request.POST.get(f"q_present_{q.id}") != "1"
+            if autosave_changed_question_ids is None and finish_skips_absent_question(
+                request, q.id, form_has_presence_markers=form_has_presence_markers
             ):
                 continue
 
@@ -514,7 +493,7 @@ def take_exam(request, slug, attempt_id):
         and exam.exam_type != "coding"
     )
     autosave_question_ids_for_fetch = (
-        _posted_autosave_question_ids(request, action="autosave") if is_autosave_post else None
+        posted_autosave_question_ids(request, action="autosave") if is_autosave_post else None
     )
 
     answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
