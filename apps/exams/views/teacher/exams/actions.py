@@ -10,6 +10,7 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.retention import AcademicHistoryProtected, permanently_delete_exam_without_history
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._shared import (
@@ -80,17 +81,20 @@ def toggle_exam_results_visibility(request, slug):
     # Seq3: nəticə görünürlüyü də atomik keçiddir (paralel tab double-flip etməsin).
     from apps.exams.services.lifecycle import set_results_hidden
 
-    set_results_hidden(
+    desired_raw = request.POST.get("desired_state")
+    want_hidden = desired_raw == "1" if desired_raw in {"0", "1"} else not exam.results_hidden_from_students
+    changed = set_results_hidden(
         exam,
-        not exam.results_hidden_from_students,
+        want_hidden,
         by_user=request.user,
         request=request,
     )
 
     # EXAM-P1-20: nəticə görünürlük dəyişikliyini SLI kimi qeyd et.
-    from apps.exams.metrics import record_result_published
+    if changed:
+        from apps.exams.metrics import record_result_published
 
-    record_result_published("hidden" if exam.results_hidden_from_students else "published")
+        record_result_published("hidden" if exam.results_hidden_from_students else "published")
 
     if exam.results_hidden_from_students:
         messages.success(
@@ -349,10 +353,11 @@ def restore_exam(request, slug):
 @login_required
 @require_POST
 def permanent_delete_exam(request, slug):
-    """İmtahanı "Zibil qutusu"ndan BİRDƏFƏLİK sil — geri qaytarılmır.
+    """Boş imtahanı "Zibil qutusu"ndan birdəfəlik sil.
 
-    Bu, əsl fiziki silmədir: imtahan sətri və bütün cəhdlər/nəticələr CASCADE
-    ilə birlikdə silinir. Yalnız artıq yumşaq silinmiş imtahanlar üçün.
+    Akademik cəhd/nəticə varsa retention qaydası fiziki silməni bloklayır;
+    müəllim həmin imtahanı arxivdə saxlamalıdır. Yalnız artıq yumşaq silinmiş,
+    heç bir cəhdi olmayan imtahan fiziki silinə bilər.
     """
     organization = _resolve_required_organization(request)
     if organization is None:
@@ -362,20 +367,15 @@ def permanent_delete_exam(request, slug):
     if exam.author_id != request.user.id:
         _ensure_exam_permission(request, "exam.delete")
 
-    from apps.audit.public import log_action
-    from core.constants import AuditAction
-
-    log_action(
-        action=AuditAction.DELETE,
-        user=request.user,
-        organization=exam.organization,
-        obj=exam,
-        old_values={"title": exam.title, "slug": exam.slug},
-        reason="exam_permanently_deleted",
-        request=request,
-    )
-    _exam_pk = exam.pk
-    exam.delete()
+    try:
+        _exam_pk = permanently_delete_exam_without_history(
+            exam,
+            actor=request.user,
+            request=request,
+        )
+    except AcademicHistoryProtected as exc:
+        messages.error(request, exc.messages[0])
+        return redirect("exams:deleted_exams_list")
     try:
         from core.cache import invalidate_exam_metadata_cache, invalidate_exam_question_ids_cache
 

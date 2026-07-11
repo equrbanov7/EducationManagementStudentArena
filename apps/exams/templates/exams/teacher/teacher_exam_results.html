@@ -359,7 +359,13 @@
                         {% with att=item.attempt %}
                         <tr data-seconds-remaining="{{ item.countdown_seconds|default:0 }}">
                             {% if can_delete_attempts %}
-                                <td><input type="checkbox" class="ter-checkbox js-attempt-checkbox" value="{{ att.id }}"></td>
+                                <td>
+                                    {% if item.can_delete_attempt %}
+                                        <input type="checkbox" class="ter-checkbox js-attempt-checkbox" value="{{ att.id }}">
+                                    {% else %}
+                                        <span class="ter-muted" title="{% trans 'Akademik tarixçə qorunur' %}"><i class="fas fa-lock" aria-hidden="true"></i></span>
+                                    {% endif %}
+                                </td>
                             {% endif %}
                             <td class="ter-num">{{ forloop.counter0|add:page_obj.start_index }}</td>
                             <td class="ter-user-cell ter-cell-left">
@@ -447,7 +453,7 @@
                                             <span class="timer-display">--:--</span>
                                         </div>
                                     {% endif %}
-                                    {% if can_delete_attempts %}
+                                    {% if can_delete_attempts and item.can_delete_attempt %}
                                         <button type="button" class="ter-btn ter-btn--sm ter-btn--ghost-danger js-single-delete-attempt" data-attempt-id="{{ att.id }}">
                                             <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.teacher_exam_results" %}
                                         </button>

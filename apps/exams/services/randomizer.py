@@ -387,7 +387,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
 
         options_by_qid: dict[int, list] = {}
         for opt in ExamQuestionOption.objects.filter(question_id__in=[q.id for q in selected_qs]).only(
-            "id", "question_id", "is_correct", "text", "label"
+            "id", "question_id", "is_correct", "text", "label", "image"
         ):
             options_by_qid.setdefault(opt.question_id, []).append(
                 {
@@ -395,6 +395,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                     "is_correct": bool(opt.is_correct),
                     "text": opt.text or "",
                     "label": opt.label or "",
+                    "image": opt.image.name if opt.image else "",
                 }
             )
 

@@ -22,7 +22,6 @@ from apps.exams.services.attempts import (
     get_attempt_limit_result_redirect_url,
 )
 from apps.exams.services.question_timer import question_timer_expired
-from apps.exams.services.randomizer import build_shuffled_options
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -34,6 +33,7 @@ from ._helpers import (
     autosave_occ_conflict_response,
     build_exam_history_url,
     build_exam_result_url,
+    build_take_exam_question_payload,
     bump_autosave_revision,
     current_return_to,
     ensure_student_exam_tenant_context,
@@ -42,6 +42,7 @@ from ._helpers import (
     safe_same_origin_redirect_path,
     selected_option_ids_from_request,
 )
+from ._timer_write_guard import reject_unstarted_timed_write
 from .access_guard import ensure_active_attempt_access
 from .script_data import take_exam_script_data
 
@@ -364,8 +365,12 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                 request, q.id, form_has_presence_markers=form_has_presence_markers
             ):
                 continue
-            # EXAM-P1-04: server deadline keçmiş sualın yazısı saxlanmır —
-            # client timer-ini devtools ilə uzatmaq artıq işləmir.
+            timer_guard = reject_unstarted_timed_write(
+                request, attempt, q, exam_type=exam.exam_type, action=action, is_ajax=is_ajax
+            )
+            if timer_guard is not None:
+                return timer_guard
+            # Server deadline keçmiş sualın yazısı saxlanmır.
             if question_timer_expired(attempt, q):
                 continue
 
@@ -567,12 +572,7 @@ def take_exam(request, slug, attempt_id):
         pass  # Template will handle the locked overlay
 
     previous_attempts = _previous_attempts_for_context(request, exam, attempt)
-    q_payload = []
-    for q in questions:
-        opts = []
-        if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-            opts = build_shuffled_options(attempt.id, q)
-        q_payload.append({"q": q, "opts": opts})
+    q_payload = build_take_exam_question_payload(exam, attempt, questions)
 
     context = {
         "exam": exam,

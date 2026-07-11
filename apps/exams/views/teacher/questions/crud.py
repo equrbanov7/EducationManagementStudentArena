@@ -2,8 +2,10 @@
 
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -281,9 +283,22 @@ def delete_exam_question(request, slug, question_id):
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
-        with transaction.atomic():
-            question.delete()
+        from apps.exams.services.question_invariants import (
+            active_exam_question_invariant_message,
+            delete_exam_questions,
+        )
+
+        try:
+            delete_exam_questions(exam, [question.pk])
             _resequence_exam_questions(exam)
+        except (ValidationError, IntegrityError):
+            messages.error(request, active_exam_question_invariant_message())
+            return redirect(
+                _append_navigation_query(
+                    reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                    navigation_query,
+                )
+            )
         # Invalidate the cached question ID list for this exam.
         try:
             from core.cache import invalidate_exam_question_ids_cache

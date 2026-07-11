@@ -1,5 +1,7 @@
 """Apellyasiya yaratma validasiya testləri."""
 
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
@@ -12,6 +14,7 @@ from apps.appeals.models import AppealItem
 from apps.appeals.services import create_appeal
 from apps.appeals.services.scoring import accept_appeal_item
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
+from apps.exams.services.question_snapshot import build_question_snapshot
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -164,6 +167,55 @@ class AppealCreateViewTests(TestCase):
         self.assertContains(response, 'aria-disabled="true"', html=False)
         self.assertNotContains(response, "data-appeal-submit disabled", html=False)
 
+    def test_result_and_appeal_render_frozen_snapshot_after_live_edit(self):
+        self.question.text = "Çatdırılmış sual"
+        self.question.save(update_fields=["text"])
+        self.correct.text = "Çatdırılmış düzgün"
+        self.correct.save(update_fields=["text"])
+        self.wrong.text = "Çatdırılmış seçim"
+        self.wrong.save(update_fields=["text"])
+        self.answer.question_snapshot = build_question_snapshot(self.question, [self.correct, self.wrong])
+        self.answer.selected_option_ids_snapshot = [self.wrong.id]
+        self.answer.save(update_fields=["question_snapshot", "selected_option_ids_snapshot"])
+
+        self.question.text = "Canlı redaktə edilmiş sual"
+        self.question.save(update_fields=["text"])
+        self.correct.text = "Canlı redaktə edilmiş düzgün"
+        self.correct.is_correct = False
+        self.correct.save(update_fields=["text", "is_correct"])
+        self.wrong.text = "Canlı redaktə edilmiş seçim"
+        self.wrong.is_correct = True
+        self.wrong.save(update_fields=["text", "is_correct"])
+
+        urls = [
+            reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]),
+            reverse("appeals:appeal_create", args=[self.attempt.id]),
+        ]
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "Çatdırılmış sual")
+                self.assertContains(response, "Çatdırılmış düzgün")
+                self.assertContains(response, "Çatdırılmış seçim")
+                self.assertNotContains(response, "Canlı redaktə edilmiş")
+
+    def test_result_and_appeal_legacy_answer_fall_back_to_live_question(self):
+        self.answer.question_snapshot = {}
+        self.answer.selected_option_ids_snapshot = None
+        self.answer.save(update_fields=["question_snapshot", "selected_option_ids_snapshot"])
+        self.question.text = "Legacy canlı sual"
+        self.question.save(update_fields=["text"])
+
+        for url in (
+            reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]),
+            reverse("appeals:appeal_create", args=[self.attempt.id]),
+        ):
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "Legacy canlı sual")
+
     def _close_window(self):
         from datetime import timedelta
 
@@ -244,6 +296,27 @@ class AppealCreateViewTests(TestCase):
         self.assertNotContains(response, "Tələbənin cavabı")
         self.assertNotContains(response, "Yanlış cavab")
         self.assertNotContains(response, "Düzgün cavab")
+
+    def test_create_page_hides_correctness_until_exam_window_closes(self):
+        """Erkən bitirən tələbə appeal URL-i ilə cavab açarını sızdıra bilməz."""
+        self.exam.end_datetime = timezone.now() + timedelta(hours=1)
+        self.exam.save(update_fields=["end_datetime"])
+
+        response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["hide_answer_details"])
+        self.assertContains(response, "GDPR sualı")
+        self.assertNotContains(response, "Variantlar")
+        self.assertNotContains(response, "Tələbənin cavabı")
+        self.assertNotContains(response, "Cavabınız: səhv")
+        self.assertNotContains(response, "Cavabınız: düzgün")
+        self.assertNotContains(response, "Yanlış cavab")
+        self.assertNotContains(response, "Düzgün cavab")
+
+        result_response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
+        self.assertEqual(result_response.status_code, 200)
+        self.assertNotContains(result_response, "score-points-value", html=False)
 
     def test_create_page_locks_questions_already_appealed(self):
         create_appeal(

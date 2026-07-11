@@ -14217,7 +14217,7 @@ msgstr "Soru Sonuç Analizi"
 
 msgctxt "exams.template.student_exam_result"
 msgid "notice_answers_release_locked"
-msgstr "Cevap analizi sınav penceresi kapandıktan sonra açılacaktır. Puanınız yukarıda gösterilmektedir."
+msgstr "Sonuç ve cevap analizi sınav penceresi kapandıktan sonra açılacaktır."
 
 msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"

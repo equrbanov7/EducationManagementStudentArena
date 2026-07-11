@@ -290,6 +290,17 @@ class ExamGradingServicesTest(TestCase):
         graded_answer = services.grade_exam_answer(self.answer, 8, self.teacher)
 
         self.assertEqual(graded_answer.teacher_score, 8)
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.attempt.graded_by_id, self.teacher.id)
+        event = self.attempt.grade_events.get()
+        self.assertEqual((event.old_score, event.new_score), (None, 8))
+        self.assertEqual(event.grader_id, self.teacher.id)
+
+    def test_grade_exam_answer_clamps_to_delivered_maximum(self):
+        graded_answer = services.grade_exam_answer(self.answer, 99, self.teacher)
+
+        self.assertEqual(graded_answer.teacher_score, 10)
+        self.assertEqual(self.attempt.grade_events.get().max_points, 10)
 
     def test_calculate_attempt_score(self):
         """Test calculating total attempt score."""
@@ -1887,7 +1898,7 @@ class ExamGradingServiceTest(TestCase):
         self.answer.refresh_from_db()
         answer2.refresh_from_db()
         self.assertEqual(self.answer.teacher_score, 5)
-        self.assertEqual(answer2.teacher_score, 7)
+        self.assertEqual(answer2.teacher_score, 5)
 
     def test_grade_exam_answer_rounds_half_up_instead_of_truncating(self):
         """Kəsr bal səssizcə kəsilmir, ən yaxına yuvarlaqlaşdırılır (integer sahə)."""

@@ -61,6 +61,9 @@ from apps.exams.services.question_bank_attach import (  # noqa: F401
 from apps.exams.services.result_calculation import (  # noqa: F401
     calculate_test_attempt_result,
 )
+from apps.exams.services.result_release import (  # noqa: F401
+    exam_answers_release_locked,
+)
 from apps.exams.services.review_visibility import (  # noqa: F401
     resolve_exam_attempt_name_visibility,
     resolve_exam_attempt_review_window_seconds,
@@ -94,6 +97,7 @@ __all__ = [
     "can_manage_exam_rooms",
     "can_manage_final_exam_content",
     "ensure_can_manage_exam_rooms",
+    "exam_answers_release_locked",
     "is_exam_center_user",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",

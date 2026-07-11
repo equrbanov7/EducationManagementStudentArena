@@ -11,7 +11,11 @@ from django.db import connection
 from django.test import TestCase
 
 from apps.exams.models import Exam
-from apps.exams.services.access_code_crypto import decrypt_access_code, encrypt_access_code
+from apps.exams.services.access_code_crypto import (
+    AccessCodeDecryptionError,
+    decrypt_access_code,
+    encrypt_access_code,
+)
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -56,6 +60,14 @@ class TestAccessCodeEncryption(TestCase):
     def test_crypto_unopenable_value_passes_through(self):
         # Köhnə xam mətn (Fernet token deyil) olduğu kimi qaytarılır.
         self.assertEqual(decrypt_access_code("123456"), "123456")
+        self.assertEqual(decrypt_access_code("ABC123"), "ABC123")
+
+    def test_corrupted_ciphertext_is_not_treated_as_a_plaintext_access_code(self):
+        cipher = encrypt_access_code("123456")
+        corrupted = f"{cipher[:-1]}{'A' if cipher[-1] != 'A' else 'B'}"
+
+        with self.assertRaises(AccessCodeDecryptionError):
+            decrypt_access_code(corrupted)
 
     def test_access_code_stored_encrypted_at_rest(self):
         exam = self._exam(access_code="135790")

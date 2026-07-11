@@ -12,6 +12,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAnswer
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
+from apps.exams.services.manual_grading import answer_max_points as _answer_max_points
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
 
@@ -73,22 +74,6 @@ def _sync_coding_answers_from_final_submissions(attempt):
         if not created and not (answer.text_answer or "").strip() and submission.submitted_code:
             answer.text_answer = submission.submitted_code
             answer.save(update_fields=["text_answer", "updated_at"])
-
-
-def _answer_max_points(answer):
-    """
-    Cavabın maksimum balı — çatdırılma anındakı snapshot-dan (EXAM-INTEGRITY-001),
-    snapshot boşdursa canlı sualdan. Qiymətləndirmə sərhədi HEÇ VAXT client
-    POST-undan götürülmür (EXAM-P0-04).
-    """
-    snapshot = getattr(answer, "question_snapshot", None)
-    points = snapshot.get("points") if isinstance(snapshot, dict) else None
-    if points is None:
-        points = getattr(answer.question, "points", 1)
-    try:
-        return max(1, int(points))
-    except (TypeError, ValueError):
-        return 1
 
 
 def _build_answer_review_item(answer):

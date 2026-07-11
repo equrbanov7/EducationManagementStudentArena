@@ -18,6 +18,7 @@ from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
+from apps.exams.services.result_release import exam_answers_release_locked
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import (
@@ -50,18 +51,6 @@ def _hide_test_answer_correctness_in_cabinet(exam, *, is_profile_results):
         and getattr(exam, "exam_type", "") == "test"
         and getattr(exam, "exam_type_extended", "") in {"final", "midterm"}
     )
-
-
-def _exam_answers_release_locked(exam):
-    """
-    EXAM-P0-05: imtahan pəncərəsi hələ bağlanmayıbsa (digər tələbələr işləyə
-    bilər) düzgün cavab, variant düzgünlüyü və per-sual verdikt açılmır —
-    erkən bitirən tələbə cavabları paylaşa bilməsin. end_datetime olmayan
-    (həmişə açıq, məşq tipli) imtahanlara kilid tətbiq olunmur.
-    """
-    if not getattr(exam, "end_datetime", None):
-        return False
-    return not exam.is_after_end()
 
 
 def _final_entry_url():
@@ -146,7 +135,7 @@ def exam_result(request, slug, attempt_id):
     is_profile_results = _is_profile_results_request(request, return_to)
     is_final_exam_result = _is_final_exam(exam)
     is_final_center_result = is_final_exam_result and not is_profile_results
-    answers_release_locked = _exam_answers_release_locked(exam)
+    answers_release_locked = exam_answers_release_locked(exam)
     hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(
         exam, is_profile_results=is_profile_results
     ) or (getattr(exam, "exam_type", "") == "test" and answers_release_locked)

@@ -288,6 +288,15 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         else:
             self.fields.pop("organization", None)
 
+        # Publish/unpublish yalnız lifecycle service-in atomik, auditli qapısı
+        # ilə edilir. Modal create/edit forması bu state-i birbaşa dəyişə
+        # bilməz; sahə geriyə-uyğun POST parsing üçün saxlanıb gizlədilir.
+        self.fields["is_active"].disabled = True
+        self.fields["is_active"].widget = forms.HiddenInput()
+        stable_active_state = bool(self.instance.is_active) if self.instance.pk else False
+        self.fields["is_active"].initial = stable_active_state
+        self.initial["is_active"] = stable_active_state
+
         self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
         self.fields["random_question_count"].required = False
@@ -323,13 +332,11 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         ]
 
         # Yeni imtahan yaradılarkən defaultlar (imtahan mərkəzi kabinetdə yaradarkən):
-        #   • aktiv seçili;
+        #   • qaralama (publish yalnız sual qapısından sonra ayrıca edilir);
         #   • sual sayı = 50;
         #   • cəhd sayı = 1;
         #   • is_public = False → imtahan HAMIYA AÇIQ deyil, BAĞLI görünür.
         if not self.instance.pk and not self.is_bound:
-            self.fields["is_active"].initial = True
-            self.initial.setdefault("is_active", True)
             self.fields["random_question_count"].initial = 50
             self.initial.setdefault("random_question_count", 50)
             self.fields["max_attempts_per_user"].initial = 1

@@ -14215,7 +14215,7 @@ msgstr "Question Result Analysis"
 
 msgctxt "exams.template.student_exam_result"
 msgid "notice_answers_release_locked"
-msgstr "Answer analysis will be available after the exam window closes. Your score is shown above."
+msgstr "The result and answer analysis will be available after the exam window closes."
 
 msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"

@@ -100,15 +100,22 @@ def autosave_occ_conflict_response(request, attempt, action):
         return None
     if action == "autosave":
         record_autosave("conflict")
+    message = pgettext(
+        "exams.view.access.message",
+        "Bu imtahan başqa bir tab/pəncərədə yenilənib. Ən son cavabları görmək üçün səhifəni yeniləyin.",
+    )
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
+        from django.contrib import messages
+        from django.shortcuts import redirect
+
+        messages.error(request, message)
+        return redirect(request.get_full_path())
     return JsonResponse(
         {
             "success": False,
             "conflict": True,
             "server_revision": attempt.autosave_revision,
-            "message": pgettext(
-                "exams.view.access.message",
-                "Bu imtahan başqa bir tab/pəncərədə yenilənib. Ən son cavabları görmək üçün səhifəni yeniləyin.",
-            ),
+            "message": message,
         },
         status=409,
     )
@@ -120,6 +127,27 @@ def bump_autosave_revision(attempt):
 
     type(attempt).objects.filter(pk=attempt.pk).update(autosave_revision=F("autosave_revision") + 1)
     attempt.refresh_from_db(fields=["autosave_revision"])
+
+
+def build_take_exam_question_payload(exam, attempt, questions):
+    """take_exam slide payload-u: hər sual üçün {q, opts, server_delivery}.
+
+    EXAM-P1-04 strict delivery: yeni-protokol attempt-də vaxtlı test sualının
+    məzmunu (mətn/variant/media/düzgün cavab) İLK GET-də səhifə mənbəyinə düşmür
+    — ``server_delivery`` işarələnir, variantlar boş buraxılır və məzmun timer
+    serverdə başlayandan sonra ``question-seen`` ilə gəlir.
+    """
+    from apps.exams.services.question_timer import question_timer_start_required
+    from apps.exams.services.randomizer import build_shuffled_options
+
+    payload = []
+    for question in questions:
+        opts = []
+        strict_delivery = exam.exam_type == "test" and question_timer_start_required(attempt, question)
+        if not strict_delivery and exam.exam_type == "test" and question.answer_mode in ("single", "multiple"):
+            opts = build_shuffled_options(attempt.id, question)
+        payload.append({"q": question, "opts": opts, "server_delivery": strict_delivery})
+    return payload
 
 
 def selected_option_ids_from_request(request, question):

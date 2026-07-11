@@ -3,6 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from django.db import transaction
 
 from apps.exams.models import ExamAnswer
+from apps.exams.services.manual_grading import apply_single_answer_grade
 
 
 def calculate_attempt_score(attempt):
@@ -23,12 +24,17 @@ def grade_exam_answer(answer, score, graded_by=None, feedback=None):
     # integer-əsaslıdır). Səssiz kəsmə (int() truncation) əvəzinə ən yaxına
     # yuvarlaqlaşdırırıq və mənfi dəyərləri 0-a sıxırıq — live_exam.scoring
     # ilə eyni davranış.
-    answer.teacher_score = max(0, int(Decimal(score).quantize(Decimal("1"), rounding=ROUND_HALF_UP)))
-    if feedback is not None:
-        answer.teacher_feedback = feedback
-        answer.save(update_fields=["teacher_score", "teacher_feedback"])
-    else:
-        answer.save(update_fields=["teacher_score"])
+    normalized_score = max(0, int(Decimal(score).quantize(Decimal("1"), rounding=ROUND_HALF_UP)))
+    persisted = apply_single_answer_grade(
+        answer_id=answer.pk,
+        score=normalized_score,
+        grader=graded_by,
+        feedback=feedback,
+    )
+    # Preserve the historical API contract: callers receive the same model
+    # instance they passed in, now synchronized with the locked DB row.
+    answer.teacher_score = persisted.teacher_score
+    answer.teacher_feedback = persisted.teacher_feedback
     return answer
 
 

@@ -16,6 +16,7 @@ from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import _ensure_can_view_attempt_results, _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.result_calculation import calculate_test_attempt_result
+from apps.exams.services.retention import delete_retention_safe_attempts
 from apps.exams.services.review_visibility import attempt_review_window_locked as _attempt_review_window_locked
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
@@ -73,17 +74,29 @@ def delete_exam_attempts(request, slug):
         messages.warning(request, pgettext_lazy("exams.view.results.message", "select_attempt_to_delete"))
         return redirect(redirect_url)
 
-    attempts_qs = exam.attempts.filter(id__in=attempt_ids)
-    attempt_count = attempts_qs.count()
-    if attempt_count == 0:
+    outcome = delete_retention_safe_attempts(
+        exam,
+        attempt_ids,
+        actor=request.user,
+        request=request,
+    )
+    if outcome.selected_count == 0:
         messages.warning(request, pgettext_lazy("exams.view.results.message", "attempt_not_found"))
         return redirect(redirect_url)
 
-    attempts_qs.delete()
-    messages.success(
-        request,
-        pgettext_lazy("exams.view.results.message", "attempts_deleted").format(count=attempt_count),
-    )
+    if outcome.deleted_count:
+        messages.success(
+            request,
+            pgettext_lazy("exams.view.results.message", "attempts_deleted").format(count=outcome.deleted_count),
+        )
+    if outcome.protected_ids:
+        messages.warning(
+            request,
+            pgettext_lazy(
+                "exams.view.results.message",
+                "{count} akademik cəhd retention qaydasına görə silinmədi; yalnız trial cəhdləri silinə bilər.",
+            ).format(count=len(outcome.protected_ids)),
+        )
     return redirect(redirect_url)
 
 
@@ -268,73 +281,29 @@ def teacher_check_attempt(request, slug, attempt_id):
             )
             return redirect(view_attempt_url)
 
-        total_score = 0
-        any_score = False
-        from apps.exams.models import ExamGradeEvent
+        from apps.exams.services.manual_grading import ManualGradingWindowClosed, apply_manual_grading
         from apps.notifications.public import notify_student_about_feedback
 
-        grade_events = []
-        for a in answers_qs:
-            q = a.question
+        try:
+            attempt, grading_changed = apply_manual_grading(
+                attempt_id=attempt.id,
+                grader=request.user,
+                payload=request.POST,
+            )
+        except ManualGradingWindowClosed:
+            messages.error(
+                request,
+                pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
+            )
+            return redirect(view_attempt_url)
 
-            score_raw = (request.POST.get(f"score_{q.id}") or "").strip()
-            feedback = (request.POST.get(f"feedback_{q.id}") or "").strip()
-
-            # EXAM-P0-04: maksimum bal client POST-undan QƏBUL EDİLMİR — cavabın
-            # çatdırılma snapshot-undan (yoxdursa canlı sualdan) götürülür, bal
-            # [0, max] aralığına clamp olunur və grading POST heç vaxt sual
-            # tərifini (ExamQuestion.points) dəyişmir.
-            max_points_val = _answer_max_points(a)
-            previous_score = a.teacher_score
-
-            if score_raw == "":
-                a.teacher_score = None
-            else:
-                try:
-                    score_val = int(score_raw)
-                except ValueError:
-                    score_val = 0
-                score_val = min(max(0, score_val), max_points_val)
-                a.teacher_score = score_val
-                total_score += score_val
-                any_score = True
-
-            a.teacher_feedback = feedback
-            a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
-
-            # Grade ledger (append-only): yalnız bal faktiki dəyişəndə qeyd et.
-            if a.teacher_score != previous_score:
-                grade_events.append(
-                    ExamGradeEvent(
-                        attempt=attempt,
-                        question=q,
-                        grader=request.user,
-                        old_score=previous_score,
-                        new_score=a.teacher_score,
-                        max_points=max_points_val,
-                    )
-                )
-
-        if grade_events:
-            ExamGradeEvent.objects.bulk_create(grade_events)
-
-        # İlk yoxlama vaxtını saxla; 5 dəqiqəlik redaktə pəncərəsi bu vaxtdan hesablanır.
-        attempt.teacher_score = total_score if any_score else None
-        attempt.checked_by_teacher = True
-        if not attempt.teacher_checked_at:
-            attempt.teacher_checked_at = timezone.now()
-        # İlk qiymətləndirən müəllimi saxla (appeal reviewer independence üçün).
-        attempt_update_fields = ["teacher_score", "checked_by_teacher", "teacher_checked_at"]
-        if attempt.graded_by_id is None:
-            attempt.graded_by = request.user
-            attempt_update_fields.append("graded_by")
-        attempt.save(update_fields=attempt_update_fields)
-        notify_student_about_feedback(
-            task=exam,
-            student=attempt.user,
-            task_kind="exam",
-            extra_metadata={"attempt_id": attempt.id},
-        )
+        if grading_changed:
+            notify_student_about_feedback(
+                task=exam,
+                student=attempt.user,
+                task_kind="exam",
+                extra_metadata={"attempt_id": attempt.id},
+            )
 
         messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))
         return redirect(results_return_url)

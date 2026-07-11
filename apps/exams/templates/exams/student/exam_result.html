@@ -57,6 +57,12 @@
         <div class="summary-body">
             {% if exam.exam_type == 'test' %}
                 
+                {% if answers_release_locked %}
+                <div class="alert alert-info d-flex align-items-center gap-2 w-100 mb-4">
+                    <i class="fas fa-lock"></i>
+                    <span>{% trans "notice_answers_release_locked" context "exams.template.student_exam_result" %}</span>
+                </div>
+                {% else %}
                 <div class="stat-item main-score w-100 mb-4">
                     <span class="stat-label">{% trans "label_score" context "exams.template.student_exam_result" %}</span>
                     <div class="score-display-row">
@@ -80,6 +86,7 @@
                     </div>
                     {% endif %}
                 </div>
+                {% endif %}
 
                 {% if not hide_test_answer_correctness %}
                 <div class="test-stats-grid">
@@ -151,13 +158,6 @@
     <div class="section-divider"></div>
 
     <h3 class="section-title">{% trans "heading_question_result_analysis" context "exams.template.student_exam_result" %}</h3>
-
-    {% if answers_release_locked %}
-        <div class="alert alert-info d-flex align-items-center gap-2">
-            <i class="fas fa-lock"></i>
-            <span>{% trans "notice_answers_release_locked" context "exams.template.student_exam_result" %}</span>
-        </div>
-    {% endif %}
 
     <div class="questions-list">
         {% for q in questions %}
@@ -260,6 +260,9 @@
                                             <i class="far fa-circle option-icon"></i>
                                         {% endif %}
                                         <span class="option-text">{{ opt.text }}</span>
+                                        {% if opt.image_url %}
+                                            <img src="{{ opt.image_url }}" alt="" loading="lazy" class="img-fluid mt-2">
+                                        {% endif %}
                                     </div>
 
                                     {% if ans and opt.is_selected %}

@@ -10,7 +10,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
 from apps.exams.navigation import append_query_params, current_return_to
-from apps.exams.public import tenant_scoped_exams
+from apps.exams.public import exam_answers_release_locked, tenant_scoped_exams
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
@@ -181,6 +181,7 @@ def appeal_create(request, attempt_id):
     has_marked = any(marked_map.get(answer.question_id) for answer in delivered_answers)
 
     is_profile_results_request = _is_profile_results_request(request)
+    answers_release_locked = exam_answers_release_locked(exam)
 
     context = {
         "exam": exam,
@@ -193,7 +194,11 @@ def appeal_create(request, attempt_id):
         "marked_question_by_qid": marked_map,
         "appealed_question_by_qid": {question_id: True for question_id in appealed_question_ids},
         "has_marked": has_marked,
-        "hide_answer_details": is_profile_results_request,
+        # EXAM-P0-05: nəticə səhifəsindəki release kilidi appeal
+        # URL-indən yan keçilə bilməz. Eyni siyasət correctness variantlarını,
+        # ideal cavabı və tələbə seçimini birlikdə gizlədir.
+        "hide_answer_details": is_profile_results_request or answers_release_locked,
+        "answers_release_locked": answers_release_locked,
         "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
     }
     return render(request, "appeals/student/appeal_create.html", context)

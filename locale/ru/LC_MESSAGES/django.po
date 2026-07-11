@@ -14254,7 +14254,7 @@ msgstr "Анализ результата по вопросу"
 
 msgctxt "exams.template.student_exam_result"
 msgid "notice_answers_release_locked"
-msgstr "Разбор ответов станет доступен после закрытия окна экзамена. Ваш балл показан выше."
+msgstr "Результат и разбор ответов станут доступны после закрытия окна экзамена."
 
 msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"

@@ -4,7 +4,9 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django.shortcuts import redirect, render
@@ -16,6 +18,11 @@ from apps.exams.constants import EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.models import ExamQuestion
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.bank_analysis import analyze_question_bank
+from apps.exams.services.question_invariants import (
+    active_exam_question_invariant_message,
+    deactivate_exam_questions,
+    delete_exam_questions,
+)
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._shared import (
@@ -46,26 +53,34 @@ def teacher_questions_bank(request, slug):
         action = (request.POST.get("bulk_action") or "").strip().lower()
 
         if action == "delete_all":
-            deleted = exam.questions.count()
-            exam.questions.all().delete()
-            _resequence_exam_questions(exam)
-            messages.success(
-                request,
-                pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
-            )
+            question_ids = list(exam.questions.values_list("pk", flat=True))
+            try:
+                deleted = delete_exam_questions(exam, question_ids)
+            except (ValidationError, IntegrityError):
+                messages.error(request, active_exam_question_invariant_message())
+            else:
+                _resequence_exam_questions(exam)
+                messages.success(
+                    request,
+                    pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
+                )
         elif action == "delete_language":
             lang = (request.POST.get("language") or "").strip().lower()
             if lang not in EXAM_LANGUAGE_VALUES:
                 messages.error(request, pgettext("exams.view.questions_bank.message", "Düzgün dil seçin."))
             else:
                 scoped_qs = exam.questions.filter(language=lang)
-                deleted = scoped_qs.count()
-                scoped_qs.delete()
-                _resequence_exam_questions(exam)
-                messages.success(
-                    request,
-                    pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
-                )
+                question_ids = list(scoped_qs.values_list("pk", flat=True))
+                try:
+                    deleted = delete_exam_questions(exam, question_ids)
+                except (ValidationError, IntegrityError):
+                    messages.error(request, active_exam_question_invariant_message())
+                else:
+                    _resequence_exam_questions(exam)
+                    messages.success(
+                        request,
+                        pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
+                    )
         else:
             selected_ids = [int(item) for item in request.POST.getlist("selected_question_ids") if item.isdigit()]
             selected_qs = ExamQuestion.objects.filter(exam=exam, id__in=selected_ids)
@@ -74,11 +89,15 @@ def teacher_questions_bank(request, slug):
             if selected_count == 0:
                 messages.warning(request, pgettext("exams.view.questions_bank.message", "select_at_least_one"))
             elif action == "deactivate":
-                updated = selected_qs.update(is_active=False)
-                messages.success(
-                    request,
-                    pgettext("exams.view.questions_bank.message", "deactivated_selected").format(count=updated),
-                )
+                try:
+                    updated = deactivate_exam_questions(exam, selected_ids)
+                except (ValidationError, IntegrityError):
+                    messages.error(request, active_exam_question_invariant_message())
+                else:
+                    messages.success(
+                        request,
+                        pgettext("exams.view.questions_bank.message", "deactivated_selected").format(count=updated),
+                    )
             elif action == "activate":
                 updated = selected_qs.update(is_active=True)
                 messages.success(
@@ -86,13 +105,16 @@ def teacher_questions_bank(request, slug):
                     pgettext("exams.view.questions_bank.message", "activated_selected").format(count=updated),
                 )
             elif action == "delete":
-                deleted = selected_count
-                selected_qs.delete()
-                _resequence_exam_questions(exam)
-                messages.success(
-                    request,
-                    pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
-                )
+                try:
+                    deleted = delete_exam_questions(exam, selected_ids)
+                except (ValidationError, IntegrityError):
+                    messages.error(request, active_exam_question_invariant_message())
+                else:
+                    _resequence_exam_questions(exam)
+                    messages.success(
+                        request,
+                        pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
+                    )
             else:
                 messages.error(request, pgettext("exams.view.questions_bank.message", "invalid_bulk_action"))
 

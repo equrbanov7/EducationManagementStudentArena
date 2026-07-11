@@ -6,6 +6,8 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
+from apps.exams.domain.grade_events import ExamGradeEventManager, _immutable_error
+from apps.exams.question_timer_protocol import default_question_timing
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
 
 from .grading import AnswerGradingMixin, AttemptGradingMixin
@@ -39,7 +41,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.attempt.field", "teacher_checked_at"),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_attempts")
-    exam = models.ForeignKey("exams.Exam", on_delete=models.CASCADE, related_name="attempts")
+    # Academic attempts outlive teacher-facing exam deletion actions.  Draft
+    # exams without attempts may still be physically removed, while any
+    # delivered attempt forces archive/soft-delete semantics.
+    exam = models.ForeignKey("exams.Exam", on_delete=models.PROTECT, related_name="attempts")
     # Student imtahana başlayarkən seçdiyi dil. Çoxdilli imtahanlarda yalnız bu
     # dilin sualları yüklənir; tək-dilli imtahanlarda boş qala bilər.
     language = models.CharField(
@@ -139,7 +144,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
     # göstəriləndə {question_id: ISO started_at} yazılır; server deadline =
     # started_at + effective_time_limit + grace. Müddəti keçmiş sualın POST
     # sahələri saxlanmır (client timer-i devtools ilə uzatmaq işləmir).
-    question_timing = models.JSONField(default=dict, blank=True)
+    question_timing = models.JSONField(default=default_question_timing, blank=True)
     supervision_status = models.CharField(
         max_length=20,
         choices=SUPERVISION_STATUS_CHOICES,
@@ -524,6 +529,7 @@ class ExamGradeEvent(models.Model):
     new_score = models.IntegerField(null=True, blank=True)
     max_points = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = ExamGradeEventManager()
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.grade_event.meta", "singular")
@@ -535,6 +541,14 @@ class ExamGradeEvent(models.Model):
 
     def __str__(self):
         return f"grade {self.attempt_id}/{self.question_id}: {self.old_score}→{self.new_score}"
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise _immutable_error()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise _immutable_error()
 
 
 __all__ = [
