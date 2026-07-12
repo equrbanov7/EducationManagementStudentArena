@@ -393,16 +393,16 @@ EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.environ.get("EMAIL_HOST_
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@emsarena.com"
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))  # seconds; avoids hanging workers
 
-# LAN host
-LAN_HOST = os.getenv("LAN_HOST", "emsarena.com")
-LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "emsarena.com")
+# LAN host — real dəyər serverin .env-indən gəlir (LAN yerləşdirməsində IP).
+LAN_HOST = os.getenv("LAN_HOST", "")
+LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "")
 
 # CSRF trusted origins
 raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 
-# Site URL
-SITE_URL = os.getenv("SITE_URL", "https://emsarena.com")
+# Site URL — real dəyər .env-dən gəlir; domen istifadə olunmur (LAN deploy).
+SITE_URL = os.getenv("SITE_URL", "https://127.0.0.1")
 
 # Logging configuration
 LOGGING = {
