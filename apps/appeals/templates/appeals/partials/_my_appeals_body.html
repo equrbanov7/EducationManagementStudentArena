@@ -9,6 +9,13 @@
     appeal_section       — (opsional) dashboard bölmə adı, məs. "my-appeals"
 {% endcomment %}
 
+<div class="appeal-body-toolbar">
+    <button type="button" class="appeal-new-btn" data-bs-toggle="modal" data-bs-target="#newAppealModal">
+        <i class="fas fa-gavel" aria-hidden="true"></i>
+        <span>{% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}</span>
+    </button>
+</div>
+
 <form method="get" action="{{ appeal_list_action }}" class="appeal-filter-card"
       {% if appeal_section %}data-profile-ajax-form data-section="{{ appeal_section }}"{% endif %}>
     {% if appeal_section %}<input type="hidden" name="section" value="{{ appeal_section }}">{% endif %}
@@ -76,3 +83,50 @@
     <p class="mb-0">{% trans "Nəticə səhifəsindən apellyasiya göndərdikdən sonra müraciətləriniz burada görünəcək." context "appeals.template" %}</p>
 </div>
 {% endif %}
+
+{# Yeni apellyasiya müraciəti modalı — 3-günlük pəncərəsi açıq final/midterm cəhdləri #}
+<div class="modal fade appeal-new-modal" id="newAppealModal" tabindex="-1"
+     aria-labelledby="newAppealModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title h5 mb-1" id="newAppealModalLabel">{% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}</h2>
+                    <p class="appeal-new-modal__subtitle mb-0">
+                        {% blocktrans context "appeals.template" with days=appeal_window_days %}İmtahan bitdikdən sonra {{ days }} gün ərzində apellyasiya verə bilərsiniz.{% endblocktrans %}
+                    </p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
+            </div>
+            <div class="modal-body">
+                {% if appeal_eligible_attempts %}
+                <ul class="appeal-eligible-list">
+                    {% for attempt in appeal_eligible_attempts %}
+                    <li class="appeal-eligible-item">
+                        <div class="appeal-eligible-item__info">
+                            <span class="appeal-eligible-item__title">{{ attempt.exam.title }}</span>
+                            <span class="appeal-eligible-item__meta">
+                                <span><i class="far fa-calendar" aria-hidden="true"></i> {{ attempt.finished_at|date:"d.m.Y H:i" }}</span>
+                                <span class="appeal-eligible-item__deadline">
+                                    <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                                    {% blocktrans context "appeals.template" with deadline=attempt.appeal_deadline|date:"d.m.Y" %}son tarix: {{ deadline }}{% endblocktrans %}
+                                </span>
+                            </span>
+                        </div>
+                        <a href="{{ attempt.appeal_create_url }}" class="appeal-eligible-item__cta" data-no-route-loading>
+                            <i class="fas fa-gavel" aria-hidden="true"></i>
+                            <span>{% trans "Apellyasiyaya ver" context "appeals.template" %}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="appeal-empty appeal-empty--modal">
+                    <i class="fas fa-inbox"></i>
+                    <p class="mb-0">{% trans "Hazırda apellyasiya verə biləcəyiniz final və ya midterm imtahanı yoxdur." context "appeals.template" %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
