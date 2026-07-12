@@ -104,13 +104,24 @@ class BuildStudentTranscriptTest(TestCase):
         return Enrollment.objects.create(organization=self.org, student=self.student, offering=offering)
 
     def _grade(self, offering, enrollment, *, entry, exam=None):
-        """Set the semester entry score (one seminar mark) + optional exam."""
-        seminar = gradebook.create_lesson(offering=offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR)
-        gradebook.save_marks(
-            offering=offering,
-            entries=[{"lesson_id": seminar.id, "enrollment_id": enrollment.id, "status": "present", "score": entry}],
-            by_user=self.teacher,
-        )
+        """Set the semester entry score (≤10-luq seminar markları) + optional exam."""
+        remaining = int(entry)
+        day = 1
+        while remaining > 0:
+            chunk = min(10, remaining)
+            seminar = gradebook.create_lesson(
+                allow_past=True, offering=offering, date=datetime.date(2024, 10, day), kind=LessonKind.SEMINAR
+            )
+            gradebook.save_marks(
+                enforce_day=False,
+                offering=offering,
+                entries=[
+                    {"lesson_id": seminar.id, "enrollment_id": enrollment.id, "status": "present", "score": chunk}
+                ],
+                by_user=self.teacher,
+            )
+            remaining -= chunk
+            day += 1
         if exam is not None:
             finals.set_exam_score(enrollment=enrollment, score=exam, by_user=self.teacher)
 

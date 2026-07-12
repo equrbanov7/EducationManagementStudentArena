@@ -99,8 +99,9 @@ class Lesson(UUIDModel, TimeStampedModel):
 
     ``kind`` decides what the teacher records: LECTURE → attendance only;
     SEMINAR/LAB → attendance + a score. Ordering by date gives the running
-    sequence (neçənci dərs). The lesson date is editable only within a short
-    window after creation (enforced in the service layer)."""
+    sequence (neçənci dərs). The lesson row (date/time/kind/topic) is editable
+    or deletable only within a short window after creation (service layer);
+    marks are writable only on the lesson's own day."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="lessons")
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="lessons")
@@ -108,6 +109,8 @@ class Lesson(UUIDModel, TimeStampedModel):
     kind = models.CharField(max_length=16, choices=LessonKind.choices, default=LessonKind.LECTURE)
     topic = models.CharField(max_length=255, blank=True, help_text="Mövzu (opsional).")
     hours = models.PositiveSmallIntegerField(default=2, help_text="Bu dərsin akademik saatı (qayıb hesabı üçün).")
+    start_time = models.TimeField(null=True, blank=True, help_text="Dərs saatı (cədvəl slotundan seçilir — opsional).")
+    end_time = models.TimeField(null=True, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -220,6 +223,17 @@ class RubricCriterion(UUIDModel, TimeStampedModel):
         return f"{self.name} ({self.max_points})"
 
 
+class ComponentKind(models.TextChoices):
+    """Komponentin tipi — UI hansı tabda göstərəcəyini və xüsusi davranışı seçir.
+
+    KOLLOKVIUM: 3 kollokvium (K1-K3) + keçirilmə tarixi (``held_on``).
+    SELF_WORK: sərbəst iş — balı mövzu-çeklist cəmindən avtomatik yazılır."""
+
+    GENERIC = "generic", pgettext_lazy("registrar.component_kind", "Generic")
+    KOLLOKVIUM = "kollokvium", pgettext_lazy("registrar.component_kind", "Kollokvium")
+    SELF_WORK = "self_work", pgettext_lazy("registrar.component_kind", "Independent work")
+
+
 class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
     """One weighted entry-score component of an offering (seminar / kollokvium /
     SDF / layihə). ``max_score`` is its contribution ceiling; the components'
@@ -230,6 +244,10 @@ class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
     )
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="assessment_components")
     name = models.CharField(max_length=100, help_text="Komponent adı (məs. Seminar, Kollokvium 1, SDF, Layihə).")
+    kind = models.CharField(max_length=16, choices=ComponentKind.choices, default=ComponentKind.GENERIC, db_index=True)
+    held_on = models.DateField(
+        null=True, blank=True, help_text="Keçirilmə tarixi (kollokvium üçün — tələbə tarixçəsində göstərilir)."
+    )
     max_score = models.PositiveSmallIntegerField(default=10, help_text="Bu komponentin giriş balına maksimum töhfəsi.")
     rubric = models.ForeignKey(
         Rubric,
@@ -307,6 +325,90 @@ class CriterionScore(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.criterion_id} · {self.enrollment_id} = {self.points}"
+
+
+# ── Sərbəst iş (çeklist) + Kurs işi ──────────────────────────────────────────
+#
+# Sərbəst iş: müəllim mövzu siyahısı qurur (≤10), hər tələbəyə mövzu-mövzu
+# "təhvil verilib/verilməyib" işarəsi qoyulur; cəm avtomatik kind=SELF_WORK
+# komponent balına yazılır. Kurs işi giriş balına DAXİL DEYİL — ayrıca 0-100
+# qiymətdir (yekun cədvəldə öz sütunu).
+
+
+class SelfWorkTopic(UUIDModel, TimeStampedModel, OrderedModel):
+    """Sərbəst iş mövzusu (offering üzrə sıralı siyahı, adətən 10 ədəd)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="self_work_topics"
+    )
+    offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="self_work_topics")
+    title = models.CharField(max_length=255)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["offering", "order", "created_at"]
+        verbose_name = pgettext_lazy("registrar.model.selfwork_topic.meta", "independent work topic")
+        verbose_name_plural = pgettext_lazy("registrar.model.selfwork_topic.meta", "independent work topics")
+        indexes = [models.Index(fields=["organization", "offering"])]
+
+    def __str__(self):
+        return f"{self.offering_id} · {self.title[:40]}"
+
+
+class SelfWorkMark(UUIDModel, TimeStampedModel):
+    """Bir tələbənin bir sərbəst iş mövzusu üzrə təhvil işarəsi (1/0)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="self_work_marks"
+    )
+    topic = models.ForeignKey(SelfWorkTopic, on_delete=models.CASCADE, related_name="marks")
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="self_work_marks")
+    done = models.BooleanField(default=False)
+    entered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.selfwork_mark.meta", "independent work mark")
+        verbose_name_plural = pgettext_lazy("registrar.model.selfwork_mark.meta", "independent work marks")
+        constraints = [
+            models.UniqueConstraint(fields=["topic", "enrollment"], name="uniq_selfwork_topic_enrollment"),
+        ]
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"{self.topic_id} · {self.enrollment_id} = {int(self.done)}"
+
+
+class CourseWork(UUIDModel, TimeStampedModel):
+    """Kurs işi — giriş balından KƏNAR ayrıca 0-100 qiymət (mövzu + təhvil tarixi).
+
+    Hər qeydiyyata ən çox bir kurs işi; redaktə pəncərəsi servis qatında
+    (yazılışdan sonra məhdud müddət) tətbiq olunur."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="course_works"
+    )
+    enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name="course_work")
+    topic = models.CharField(max_length=255, help_text="Kurs işinin mövzusu.")
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Bal (0-100).")
+    submitted_on = models.DateField(null=True, blank=True, help_text="Təhvil tarixi.")
+    entered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.coursework.meta", "course work")
+        verbose_name_plural = pgettext_lazy("registrar.model.coursework.meta", "course works")
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"coursework<{self.enrollment_id}> {self.score}"
 
 
 # ── Yekun qiymət + təkrar imtahan (U3+, kəsilmə/resit qaydası) ────────────────

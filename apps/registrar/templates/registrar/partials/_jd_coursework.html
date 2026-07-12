@@ -1,0 +1,94 @@
+{% load i18n %}
+{% comment %}Kurs işi tabı (mockup): solda qeydiyyat siyahısı, sağda "Yeni kurs işi"
+formu. Sətirdəki ✎ formu doldurur (yalnız 2 saat pəncərəsi içində); bal 0-100
+server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
+<div class="jd2-split jd2-split--cw">
+    <div class="jd2-cw-list">
+        <div class="jd2-panel-label jd2-cw-listhead">
+            <span>{% trans "KURS İŞLƏRİ — QEYDİYYAT" context "registrar.journal" %}</span>
+        </div>
+        <table class="jd2-cw-table">
+            <thead>
+                <tr>
+                    <th class="jd2-cw-no">№</th>
+                    <th>{% trans "SOYAD AD ATA ADI" context "registrar.journal" %}</th>
+                    <th>{% trans "MÖVZUNUN ADI" context "registrar.journal" %}</th>
+                    <th class="jd2-cw-date">{% trans "TARİX" context "registrar.journal" %}</th>
+                    <th class="jd2-cw-score">{% trans "BAL" context "registrar.journal" %} /100</th>
+                    {% if can_edit %}<th class="jd2-cw-act"></th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in coursework_rows %}
+                {% if row.work %}
+                <tr>
+                    <td class="jd2-cw-no">{{ forloop.counter }}</td>
+                    <td class="jd2-cw-name">{{ row.student.get_full_name|default:row.student.username }}</td>
+                    <td class="jd2-cw-topic">{{ row.work.topic }}</td>
+                    <td class="jd2-cw-date">{% if row.work.submitted_on %}{{ row.work.submitted_on|date:"d.m.Y" }}{% else %}—{% endif %}</td>
+                    <td class="jd2-cw-score">
+                        {% if row.work.score is not None %}
+                        <span class="jd2-scorechip {% if row.work.score >= 81 %}is-good{% elif row.work.score >= 61 %}is-mid{% else %}is-low{% endif %}">{{ row.work.score|floatformat:'-2' }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    {% if can_edit %}
+                    <td class="jd2-cw-act">
+                        {% if not row.locked %}
+                        <button type="button" class="jd2-cw-editbtn" data-jd-cw-edit
+                                data-enrollment="{{ row.enrollment.id }}"
+                                data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                data-topic="{{ row.work.topic }}"
+                                data-score="{% if row.work.score is not None %}{{ row.work.score|floatformat:'-2' }}{% endif %}"
+                                data-date="{% if row.work.submitted_on %}{{ row.work.submitted_on|date:'Y-m-d' }}{% endif %}"
+                                title="{% trans 'Redaktə (2 saat pəncərəsi)' context 'registrar.journal' %}">✎</button>
+                        {% else %}
+                        <i class="fas fa-lock jcell-lock" title="{% trans '2 saat pəncərəsi bağlanıb' context 'registrar.journal' %}"></i>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="jd2-cw-restnote">{% trans "Qalan tələbələr üçün kurs işi hələ daxil edilməyib." context "registrar.journal" %}</div>
+    </div>
+
+    {% if can_edit %}
+    <div class="jd2-cw-formcol">
+        <div class="jd2-cw-formtitle" data-jd-cw-formtitle>{% trans "Yeni kurs işi" context "registrar.journal" %}</div>
+        <form method="post" action="{% url 'registrar:journal_coursework_save' offering.id %}" data-jd-cw-form>
+            {% csrf_token %}
+            <div class="jd2-field">
+                <span class="jd2-field-label">{% trans "TƏLƏBƏ" context "registrar.journal" %}</span>
+                <select name="cw_enrollment" required data-jd-cw-student data-bootstrap-select>
+                    <option value="">{% trans "Seçin…" context "registrar.journal" %}</option>
+                    {% for row in coursework_rows %}
+                    <option value="{{ row.enrollment.id }}" {% if row.locked %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="jd2-field">
+                <span class="jd2-field-label">{% trans "MÖVZU" context "registrar.journal" %}</span>
+                <input type="text" name="cw_topic" maxlength="255" required data-jd-cw-topic
+                       placeholder="{% trans 'Kurs işinin mövzusu…' context 'registrar.journal' %}">
+            </div>
+            <div class="jd2-field-pair">
+                <div class="jd2-field">
+                    <span class="jd2-field-label">{% trans "BAL (0–100)" context "registrar.journal" %}</span>
+                    <input type="number" name="cw_score" min="0" max="100" step="1" data-jd-cw-score>
+                </div>
+                <div class="jd2-field">
+                    <span class="jd2-field-label">{% trans "TƏHVİL TARİXİ" context "registrar.journal" %}</span>
+                    <input type="date" name="cw_date" data-jd-cw-date>
+                </div>
+            </div>
+            <div class="jd2-cw-btns">
+                <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
+                <button type="reset" class="jd2-cancel-btn" data-jd-cw-reset>{% trans "İmtina et" context "registrar.journal" %}</button>
+            </div>
+            <div class="jd2-cw-note">{% trans "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd 2 saat sonra kilidlənir." context "registrar.journal" %}</div>
+        </form>
+    </div>
+    {% endif %}
+</div>

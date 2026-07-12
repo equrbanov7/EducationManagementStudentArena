@@ -24,6 +24,7 @@ from .models import (
     CourseOffering,
     LessonKind,
     ScheduleSlot,
+    SlotKind,
     WeekType,
 )
 
@@ -55,7 +56,7 @@ def journal_list(request):
     """The teacher's own offerings — entry points into each journal."""
     from apps.registrar import page_contexts
 
-    context = page_contexts.journal_list_context(request.user)
+    context = page_contexts.journal_list_context(request.user, request=request)
     context["active_main_nav"] = "journal"
     return render(request, "registrar/journal_list.html", context)
 
@@ -111,20 +112,44 @@ def journal_detail(request, offering_id):
             return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
         return _handle_save_marks(request, offering)
 
-    journal = gradebook.get_offering_journal(offering=offering)
+    import datetime as _dt
+
+    from django.utils import timezone as _tz
+
+    from apps.registrar import journal_extras
+
+    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
+    coursework_rows = journal_extras.get_course_work_rows(offering)
+    finals_data = finals.get_offering_results(offering=offering)
+    # Yekun cədvəldə kurs işi ayrıca sütun kimi göstərilir (giriş balına daxil deyil).
+    work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
+    for row in finals_data["rows"]:
+        row["coursework"] = work_by_enrollment.get(row["enrollment"].id)
+
+    today = _tz.localdate()
+    today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
+
     return render(
         request,
         "registrar/journal_detail.html",
         {
             "offering": offering,
             "journal": journal,
-            "finals": finals.get_offering_results(offering=offering),
-            "component_grid": gradebook.get_component_grid(offering=offering),
+            "finals": finals_data,
+            "final_breakdown": journal_extras.get_final_breakdown(offering),
+            "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
+            "selfwork_board": journal_extras.get_selfwork_board(offering),
+            "coursework_rows": coursework_rows,
             "org_rubrics": _org_rubrics(offering.organization),
             "can_edit": can_edit_perm and not appr["is_locked"],
             "approval": appr,
             "grade_history": grade_audit.get_grade_history(offering=offering),
             "lesson_kinds": LessonKind.choices,
+            "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
+            "topic_choices": journal_extras.lesson_topic_choices(offering),
+            "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
+            "standard_times": schedule.STANDARD_LESSON_TIMES,
+            "today_parity": today_parity,
             "active_main_nav": "journal",
         },
     )
@@ -307,13 +332,16 @@ def _handle_save_finals(request, offering):
 
 
 def _handle_add_lesson(request, offering):
-    """Create a new lesson column (date + type + optional topic/hours)."""
+    """Create a new lesson column (date + type + topic + standart dərs saatı)."""
     if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
         messages.warning(request, _("Jurnal yekunlaşdırılıb — dərs əlavə etmək olmaz."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     date = request.POST.get("lesson_date") or None
-    kind = request.POST.get("lesson_kind")
+    # Dərs tipi kilidi: cədvəldə tək növ slot varsa POST nə deyirsə desin o növ.
+    from apps.registrar import journal_extras as _je
+
+    kind = _je.locked_lesson_kind(offering) or request.POST.get("lesson_kind")
     if kind not in dict(LessonKind.choices):
         kind = LessonKind.LECTURE
     if not date:
@@ -322,38 +350,66 @@ def _handle_add_lesson(request, offering):
 
     hours_raw = (request.POST.get("lesson_hours") or "").strip()
     hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
-    gradebook.create_lesson(
-        offering=offering,
-        date=date,
-        kind=kind,
-        topic=(request.POST.get("lesson_topic") or "").strip(),
-        hours=hours,
-        created_by=request.user,
-    )
-    messages.success(request, _("Dərs əlavə edildi."))
+    start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
+
+    try:
+        gradebook.create_lesson(
+            offering=offering,
+            date=date,
+            kind=kind,
+            topic=(request.POST.get("lesson_topic") or "").strip(),
+            hours=hours,
+            start_time=start_time,
+            end_time=end_time,
+            created_by=request.user,
+        )
+        messages.success(request, _("Dərs əlavə edildi."))
+    except gradebook.LessonRuleError as exc:
+        messages.error(request, str(exc))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
 def _handle_save_marks(request, offering):
-    """Parse editable grid cells (hidden ``cell__L__E`` markers) → save_marks."""
+    """Parse editable grid cells → save_marks.
+
+    Yeni format (üç-vəziyyətli çip): ``att__L__E`` = '' | present | absent —
+    boş dəyər GÖNDƏRİLMİR/yazılmır (müəllim toxunmadığı xana işarə almır).
+    Köhnə format (cell__/absent__) geriyə-uyğunluq üçün saxlanır."""
     entries = []
-    for key in request.POST:
-        if not key.startswith("cell__"):
-            continue
-        # cell__<lesson_id>__<enrollment_id>
-        parts = key.split("__", 2)
-        if len(parts) != 3:
-            continue
-        _prefix, lesson_id, enrollment_id = parts
-        absent = f"absent__{lesson_id}__{enrollment_id}" in request.POST
-        entries.append(
-            {
-                "lesson_id": lesson_id,
-                "enrollment_id": enrollment_id,
-                "status": AttendanceStatus.ABSENT if absent else AttendanceStatus.PRESENT,
-                "score": request.POST.get(f"score__{lesson_id}__{enrollment_id}"),
-            }
-        )
+    tri_state = any(key.startswith("att__") for key in request.POST)
+    if tri_state:
+        for key, raw in request.POST.items():
+            if not key.startswith("att__"):
+                continue
+            parts = key.split("__", 2)
+            if len(parts) != 3:
+                continue
+            _prefix, lesson_id, enrollment_id = parts
+            score = request.POST.get(f"score__{lesson_id}__{enrollment_id}")
+            if raw not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
+                # Bal yazılıbsa iştirak öz-özünə bəllidir (i/e) — ayrıca işarə lazım deyil.
+                if (score or "").strip():
+                    raw = AttendanceStatus.PRESENT
+                else:
+                    continue  # boş xana — işarə yazılmır
+            entries.append({"lesson_id": lesson_id, "enrollment_id": enrollment_id, "status": raw, "score": score})
+    else:
+        for key in request.POST:
+            if not key.startswith("cell__"):
+                continue
+            parts = key.split("__", 2)
+            if len(parts) != 3:
+                continue
+            _prefix, lesson_id, enrollment_id = parts
+            absent = f"absent__{lesson_id}__{enrollment_id}" in request.POST
+            entries.append(
+                {
+                    "lesson_id": lesson_id,
+                    "enrollment_id": enrollment_id,
+                    "status": AttendanceStatus.ABSENT if absent else AttendanceStatus.PRESENT,
+                    "score": request.POST.get(f"score__{lesson_id}__{enrollment_id}"),
+                }
+            )
 
     written = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user)
     messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
@@ -412,11 +468,17 @@ def _handle_add_slot(request, organization, period):
         weekday = int(request.POST.get("weekday") or 0)
     except (TypeError, ValueError):
         weekday = 0
-    start_time = parse_time(request.POST.get("start_time") or "")
-    end_time = parse_time(request.POST.get("end_time") or "")
+    # Standart dərs saatı seçimi (üstünlük); köhnə sərbəst vaxt sahələri fallback.
+    start_time, end_time = schedule.parse_time_slot(request.POST.get("time_slot"))
+    if start_time is None:
+        start_time = parse_time(request.POST.get("start_time") or "")
+        end_time = parse_time(request.POST.get("end_time") or "")
     week_type = request.POST.get("week_type")
     if week_type not in dict(WeekType.choices):
         week_type = WeekType.ALL
+    slot_kind = request.POST.get("slot_kind")
+    if slot_kind not in dict(SlotKind.choices):
+        slot_kind = SlotKind.LECTURE
     if not (1 <= weekday <= 7) or start_time is None or end_time is None or start_time >= end_time:
         messages.error(request, _("Gün və düzgün başlama/bitmə vaxtı tələb olunur."))
         return _redirect_after_schedule(request)
@@ -429,6 +491,7 @@ def _handle_add_slot(request, organization, period):
             end_time=end_time,
             room=(request.POST.get("room") or "").strip(),
             week_type=week_type,
+            kind=slot_kind,
             created_by=request.user,
         )
         messages.success(request, _("Dərs cədvəlinə slot əlavə edildi."))

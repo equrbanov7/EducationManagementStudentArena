@@ -77,17 +77,24 @@ class FinalsTest(TestCase):
             self.enrollment = self.offering.enrollments.get()
 
     def _set_entry(self, points):
-        """Give the student `points` of semester entry score via a seminar mark."""
-        seminar = gradebook.create_lesson(
-            offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
-        )
-        gradebook.save_marks(
-            offering=self.offering,
-            entries=[
-                {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": points}
-            ],
-            by_user=self.teacher,
-        )
+        """Give the student `points` of entry score via seminar marks (≤10 hər biri)."""
+        remaining = int(points)
+        day = 1
+        while remaining > 0:
+            chunk = min(10, remaining)
+            seminar = gradebook.create_lesson(
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, day), kind=LessonKind.SEMINAR
+            )
+            gradebook.save_marks(
+                enforce_day=False,
+                offering=self.offering,
+                entries=[
+                    {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": chunk}
+                ],
+                by_user=self.teacher,
+            )
+            remaining -= chunk
+            day += 1
 
     # ── letters ───────────────────────────────────────────────────────────────
     def test_score_to_letter(self):

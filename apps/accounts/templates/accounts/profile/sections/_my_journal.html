@@ -1,9 +1,15 @@
 {% load i18n %}
 {% comment %}U12 — registrar kabinet bölməsi: paylaşılan content partial-ı profil
 shell-inin sağ panelində göstərir (sidebar itmir). Kontekst: apps.registrar.public.
-build_profile_registrar_section (yalnız aktiv bölmə üçün qurulur — lazy).{% endcomment %}
+build_profile_registrar_section (yalnız aktiv bölmə üçün qurulur — lazy).
+Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu); müəllim/admin → qrup siyahısı
+(əsas giriş yeni tabda /jurnal/ olsa da, birbaşa URL üçün fallback).{% endcomment %}
 <section class="profile-section-panel profile-section--my-journal profile-section--registrar-embed {% if active_section == 'my-journal' %}is-active{% endif %}"
          data-profile-section-panel="my-journal"
          data-source-url="{{ profile_base_url }}?section=my-journal">
+    {% if journal_student_section %}
+    {% include "registrar/partials/_journal_student_content.html" %}
+    {% else %}
     {% include "registrar/partials/_journal_list_content.html" %}
+    {% endif %}
 </section>

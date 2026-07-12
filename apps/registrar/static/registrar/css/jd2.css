@@ -1,0 +1,373 @@
+/* ═══ Elektron jurnal — mockup dizaynı (jd2-*) ══════════════════════════════
+   Dəqiq dəyərlər dizayn şablonundan: navy #0F2A5C · başlıq fonu #F0F6FF ·
+   xətlər #E7EEF9/#DCE6F7 · mətn #12274E/#3A5384/#5B72A0/#8AA0C8. */
+
+.jd2 { --j-navy: #0f2a5c; --j-ink: #12274e; --j-mid: #3a5384; --j-muted: #5b72a0; --j-soft: #8aa0c8; --j-line: #dce6f7; --j-cell: #e7eef9; --j-headbg: #f0f6ff; }
+
+/* ── Səhifə başlığı ─────────────────────────────────────────────────────── */
+.jd2-pagehead { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.jd2-mark {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+}
+.jd2-pagetitle { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.3px; color: var(--j-ink); }
+.jd2-pagesub { font-size: 13px; color: var(--j-muted); font-weight: 500; }
+
+/* ── Stepper ────────────────────────────────────────────────────────────── */
+.jd2-stepper {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid var(--j-line); border-radius: 14px;
+    padding: 14px 18px; margin-bottom: 18px; overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(18, 39, 78, 0.05);
+}
+.jd2-step {
+    border: none; background: transparent; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; font-family: inherit;
+    flex-shrink: 0; text-decoration: none; padding: 0;
+}
+.jd2-step:disabled { cursor: default; }
+.jd2-step-line { flex: 1; min-width: 18px; height: 2px; background: var(--j-line); }
+.jd2-step-no {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 12px; flex-shrink: 0;
+    background: #fff; border: 1.5px solid var(--j-line); color: var(--j-soft);
+}
+.jd2-step-no.is-active { background: #2563eb; border-color: #2563eb; color: #fff; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+.jd2-step-no.is-done { background: #dbeafe; border-color: #dbeafe; color: #1d4ed8; }
+.jd2-step-label { font-size: 12.5px; white-space: nowrap; font-weight: 600; color: var(--j-soft); }
+.jd2-step-label.is-active { font-weight: 800; color: var(--j-ink); }
+.jd2-step-label.is-done { font-weight: 700; color: var(--j-mid); }
+
+/* ── Filter zolağı (qrup seçimi) ────────────────────────────────────────── */
+.jd2-filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.jd2-filter {
+    background: #fff; border: 1px solid var(--j-line); border-radius: 12px;
+    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+}
+.jd2-filter-label { font-size: 11px; font-weight: 700; color: var(--j-soft); letter-spacing: 0.5px; }
+.jd2-filter-value { font-weight: 800; font-size: 14px; color: var(--j-ink); }
+.jd2-filter select {
+    border: none; background: transparent; font-family: inherit;
+    font-weight: 800; font-size: 14px; color: var(--j-ink); cursor: pointer;
+}
+.jd2-filter select:focus { outline: none; }
+.jd2-list-hint { margin: 12px 2px 0; font-size: 12.5px; color: var(--j-muted); font-weight: 600; }
+.jl-subject-sub { font-size: 12px; color: var(--j-muted); font-weight: 600; margin-top: 2px; }
+.jl-row { cursor: pointer; }
+
+/* ── Jurnal pəncərəsi ───────────────────────────────────────────────────── */
+.jd2-window {
+    background: #fff; border: 1px solid var(--j-line); border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(18, 39, 78, 0.07); overflow: hidden;
+}
+.jd2-winhead {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 20px; background: var(--j-navy); color: #fff;
+}
+.jd2-winhead-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.jd2-wintitle { font-weight: 800; font-size: 15px; }
+.jd2-wincode { font-family: ui-monospace, monospace; font-size: 12.5px; color: #93b4e8; font-weight: 700; }
+.jd2-winsub { font-size: 13px; font-weight: 700; color: #bfdbfe; }
+.jd2-winlock { font-size: 11.5px; font-weight: 800; background: rgba(255, 255, 255, 0.14); border-radius: 6px; padding: 3px 9px; }
+.jd2-winhead-right { display: flex; align-items: center; gap: 10px; }
+.jd2-windate { font-size: 12px; font-weight: 700; color: #93b4e8; white-space: nowrap; }
+.jd2-winclose {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px; text-decoration: none;
+}
+.jd2-winclose:hover { background: rgba(255, 255, 255, 0.25); color: #fff; }
+
+/* Tab zolağı */
+.jd2-tabsbar {
+    display: flex; align-items: center; gap: 6px; padding: 10px 16px;
+    border-bottom: 1px solid var(--j-cell); background: #f7faff; flex-wrap: wrap;
+}
+.jd2-tab {
+    border: none; cursor: pointer; font-family: inherit; font-size: 12.5px;
+    font-weight: 700; border-radius: 9px; padding: 8px 16px;
+    background: transparent; color: var(--j-muted);
+}
+.jd2-tab.is-active { background: #2563eb; color: #fff; }
+.jd2-tabsbar-actions { margin-left: auto; display: flex; gap: 8px; }
+.jd2-newlesson-btn {
+    border: none; cursor: pointer; font-family: inherit;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: #fff;
+    border-radius: 10px; padding: 9px 16px; font-size: 12.5px; font-weight: 700;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.jd2-export-btn {
+    border: 1px solid var(--j-line); background: #fff; color: var(--j-mid);
+    border-radius: 10px; padding: 9px 16px; font-size: 12.5px; font-weight: 700;
+    text-decoration: none;
+}
+.jd2-export-btn:hover { color: #1d4ed8; }
+
+/* ── İki sütunlu panel (təqvim planı / kurs işi / sərbəst iş) ───────────── */
+.jd2-split { display: grid; grid-template-columns: 320px 1fr; gap: 0; }
+.jd2-split--cw { grid-template-columns: 1fr 380px; }
+.jd2-topics { border-right: 1px solid var(--j-cell); }
+.jd2-panel-label {
+    padding: 12px 16px; font-size: 11.5px; font-weight: 800; color: var(--j-soft);
+    letter-spacing: 0.5px; border-bottom: 1px solid var(--j-cell);
+}
+.jd2-topic-scroll { max-height: 520px; overflow-y: auto; }
+.jd2-topic-row { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f1f5fc; }
+.jd2-topic-date { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 38px; flex-shrink: 0; }
+.jd2-topic-title { font-size: 12.5px; font-weight: 600; color: var(--j-mid); }
+.jd2-topic-empty { color: var(--j-soft); }
+.jd2-topic-row.is-today { background: #eaf1fe; border-left: 3px solid #2563eb; }
+.jd2-topic-row.is-today .jd2-topic-date { color: #1d4ed8; font-weight: 800; }
+.jd2-topic-row.is-today .jd2-topic-title { color: #12336e; font-weight: 700; }
+.jd2-today-badge {
+    font-size: 10px; font-weight: 800; background: #2563eb; color: #fff;
+    border-radius: 5px; padding: 2px 6px; margin-left: 6px; white-space: nowrap;
+}
+.jd2-gridcol { overflow: hidden; }
+.jd2-grid-wrap { overflow-x: auto; }
+
+/* ── Grid cədvəli ───────────────────────────────────────────────────────── */
+.jd2-table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 12.5px; }
+.jd2-table thead th {
+    background: var(--j-headbg); color: var(--j-muted);
+    padding: 10px 6px; font-size: 10.5px; font-weight: 800; text-align: center;
+}
+.jd2-th-student {
+    text-align: left !important; padding-left: 16px !important; min-width: 210px;
+    position: sticky; left: 0; background: var(--j-headbg); z-index: 2;
+}
+.jd2-th-lesson.is-today { background: #dbeafe; color: #1d4ed8; }
+.jd2-th-today { font-weight: 800; }
+.jd2-th-parity.is-ust { color: #1d4ed8; }
+.jd2-th-parity.is-alt { color: #6d5bd0; }
+.jd2-th-kind { color: var(--j-soft); font-weight: 700; }
+.jd2-th-sub { color: var(--j-soft); font-weight: 700; }
+.jd2-th-edit { border: none; background: transparent; cursor: pointer; color: var(--j-soft); font-size: 10px; padding: 2px 4px; }
+.jd2-th-edit:hover { color: #1d4ed8; }
+.jd2-th-bulk { display: flex; gap: 3px; justify-content: center; margin-top: 3px; }
+.jd2-bulk { border: none; cursor: pointer; font-family: inherit; font-size: 10px; font-weight: 800; border-radius: 5px; padding: 2px 7px; }
+.jd2-bulk--ie { background: #dcfce7; color: #059669; }
+.jd2-bulk--qb { background: #fee2e2; color: #dc2626; }
+.jd2-th-qayib { padding-right: 12px !important; }
+
+.jd2-row td { border-bottom: 1px solid #eef3fb; text-align: center; padding: 8px 4px; }
+.jd2-row.is-barred td { background: #fef2f2; }
+.jd2-row.is-warning td { background: #fffbeb; }
+.jd2-td-student {
+    text-align: left !important; padding: 8px 8px 8px 16px !important;
+    position: sticky; left: 0; background: #fff; z-index: 1;
+    display: flex; align-items: center; gap: 8px;
+}
+.jd2-row.is-barred .jd2-td-student { background: #fef2f2; }
+.jd2-row.is-warning .jd2-td-student { background: #fffbeb; }
+.jd2-stu-no { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 16px; }
+.jd2-stu-name { font-weight: 700; font-size: 12.5px; color: var(--j-ink); }
+.jd2-cell.is-today { background: rgba(219, 234, 254, 0.45); }
+.jd2-ro { font-weight: 800; font-size: 12px; }
+.jd2-ro--ie { color: #059669; }
+.jd2-ro--qb { color: #dc2626; }
+.jd2-ro--empty { color: #cbd5e1; }
+.jd2-ro-score { display: block; font-weight: 700; font-size: 11px; color: var(--j-mid); }
+.jd2-score { width: 52px; margin-top: 3px; }
+.jd2-qchip {
+    background: #eaf1fe; color: #1d4ed8; font-weight: 800; font-size: 11.5px;
+    border-radius: 7px; padding: 4px 9px; white-space: nowrap;
+}
+.jd2-qchip.is-warning { background: #fef3c7; color: #b45309; }
+.jd2-qchip.is-barred { background: #fee2e2; color: #dc2626; }
+.jd2-savebar { display: flex; justify-content: flex-end; padding: 10px 16px; }
+
+/* Alt legend zolağı */
+.jd2-footbar {
+    display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--j-cell);
+    background: #f7faff; flex-wrap: wrap; align-items: center;
+    font-size: 12px; color: var(--j-muted); font-weight: 600;
+}
+.jd2-foot-legend { background: #fff; border: 1px solid var(--j-line); border-radius: 10px; padding: 7px 12px; color: var(--j-mid); }
+.jd2-ie { color: #059669; font-weight: 800; }
+.jd2-qb { color: #dc2626; font-weight: 800; margin-left: 10px; }
+.jd2-foot-chips { margin-left: auto; display: flex; gap: 8px; font-size: 11.5px; font-weight: 700; }
+.jd2-limitchip { border-radius: 8px; padding: 5px 10px; }
+.jd2-limitchip--warn { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; }
+.jd2-limitchip--barred { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; }
+
+/* ── Kurs işi ───────────────────────────────────────────────────────────── */
+.jd2-cw-list { border-right: 1px solid var(--j-cell); min-width: 0; }
+.jd2-cw-listhead { display: flex; align-items: center; justify-content: space-between; }
+.jd2-cw-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.jd2-cw-table thead th {
+    background: var(--j-headbg); color: var(--j-muted); font-size: 11px; font-weight: 800;
+    padding: 10px 8px; text-align: left;
+}
+.jd2-cw-table tbody td { padding: 11px 8px; border-bottom: 1px solid #eef3fb; }
+.jd2-cw-no { width: 40px; padding-left: 16px !important; color: var(--j-soft); font-weight: 700; }
+.jd2-cw-name { font-weight: 700; color: var(--j-ink); }
+.jd2-cw-topic { color: var(--j-mid); font-weight: 600; }
+.jd2-cw-date { width: 92px; color: var(--j-muted); font-weight: 600; }
+.jd2-cw-score { width: 80px; text-align: center !important; }
+.jd2-cw-act { width: 44px; text-align: center !important; }
+.jd2-scorechip { font-weight: 800; border-radius: 7px; padding: 4px 10px; }
+.jd2-scorechip.is-good { background: #dcfce7; color: #059669; }
+.jd2-scorechip.is-mid { background: #fef3c7; color: #b45309; }
+.jd2-scorechip.is-low { background: #fee2e2; color: #dc2626; }
+.jd2-cw-editbtn { border: none; background: #eaf1fe; color: #1d4ed8; border-radius: 7px; padding: 4px 8px; cursor: pointer; font-size: 12px; }
+.jd2-cw-restnote { padding: 12px 16px; font-size: 12px; color: var(--j-soft); font-weight: 600; }
+.jd2-cw-formcol { padding: 18px 20px; background: #f7faff; }
+.jd2-cw-formtitle { font-weight: 800; font-size: 14px; margin-bottom: 14px; color: var(--j-ink); }
+.jd2-cw-btns { display: flex; gap: 10px; margin-top: 6px; }
+.jd2-cw-note { font-size: 11.5px; color: var(--j-soft); font-weight: 600; margin-top: 10px; }
+
+/* Form sahələri (kurs işi + modal) */
+.jd2-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.jd2-field-label { font-size: 11px; font-weight: 800; color: var(--j-soft); letter-spacing: 0.5px; }
+.jd2-field input,
+.jd2-field select {
+    background: #fff; border: 1.5px solid var(--j-line); border-radius: 10px;
+    padding: 10px 14px; font-family: inherit; font-weight: 700; font-size: 13px;
+    color: var(--j-ink);
+}
+.jd2-field input:focus,
+.jd2-field select:focus { outline: none; border-color: #bfd5f8; }
+.jd2-field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.jd2-apply-btn {
+    flex: 1; border: none; cursor: pointer; font-family: inherit;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: #fff;
+    border-radius: 10px; padding: 11px 18px; font-size: 13px; font-weight: 700;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.jd2-cancel-btn {
+    flex: 1; border: 1px solid var(--j-line); cursor: pointer; font-family: inherit;
+    background: #fff; color: var(--j-mid); border-radius: 10px; padding: 11px 18px;
+    font-size: 13px; font-weight: 700;
+}
+
+/* ── Yekun qiymət breakdown ─────────────────────────────────────────────── */
+.jd2-fbtable { min-width: 1240px; }
+.jd2-fbtable thead th { border-bottom: 1px solid var(--j-cell); border-left: 1px solid var(--j-cell); }
+.jd2-fbtable thead th:first-child { border-left: none; }
+.jd2-fb-semhead { background: #eaf1fe !important; color: #1d4ed8 !important; }
+.jd2-fb-sub { font-weight: 700 !important; }
+.jd2-fb-entryhead { background: #dbeafe !important; color: #1d4ed8 !important; padding: 8px 12px !important; }
+.jd2-fb-qeyd { text-align: left !important; min-width: 190px; padding-left: 14px !important; }
+.jd2-fb-num { font-weight: 700; color: var(--j-ink); }
+.jd2-fb-dim { font-weight: 600; }
+.jd2-fb-accent { font-weight: 800 !important; color: #1d4ed8 !important; }
+.jd2-fb-entry { background: rgba(219, 234, 254, 0.35); padding: 8px 12px !important; }
+.jd2-fb-entryval { display: block; font-weight: 800; font-size: 14px; }
+.jd2-fb-entryval.is-ok { color: #059669; }
+.jd2-fb-entryval.is-warning { color: #b45309; }
+.jd2-fb-entryval.is-barred { color: #dc2626; }
+.jd2-fb-bar { display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--j-cell); overflow: hidden; margin: 4px auto 0; }
+.jd2-fb-barfill { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, #1d4ed8, #60a5fa); }
+.jd2-fb-barfill.is-barred { background: linear-gradient(90deg, #dc2626, #f87171); }
+td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
+.jd2-qeyd { font-size: 11.5px; font-weight: 600; color: var(--j-soft); }
+.jd2-qeyd--warn { color: #b45309; font-weight: 700; }
+.jd2-qeyd--barred { color: #dc2626; font-weight: 800; }
+
+/* ── Modal (navy başlıq + paritet badge) ────────────────────────────────── */
+.jd2-modal-head {
+    background: var(--j-navy); color: #fff; border-radius: 18px 18px 0 0;
+    padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+}
+.jd2-modal-head h3 { margin: 0; font-size: 15px; font-weight: 800; color: #fff; }
+.jd2-modal-close {
+    position: static; width: 28px; height: 28px; border-radius: 8px; border: none;
+    background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 800; font-size: 13px; cursor: pointer;
+}
+.jd2-date-row { display: flex; align-items: center; gap: 10px; }
+.jd2-date-row input { flex: 1; }
+.jd2-parity-badge { font-size: 10px; font-weight: 800; border-radius: 6px; padding: 4px 9px; letter-spacing: 0.4px; white-space: nowrap; }
+.jd2-parity-badge.is-ust { background: var(--j-navy); color: #7dd3fc; }
+.jd2-parity-badge.is-alt { background: #ede9fe; color: #6d5bd0; }
+
+@media (max-width: 900px) {
+    .jd2-split, .jd2-split--cw { grid-template-columns: 1fr; }
+    .jd2-topics, .jd2-cw-list { border-right: none; border-bottom: 1px solid var(--j-cell); }
+    .jd2-tabsbar-actions { margin-left: 0; width: 100%; }
+}
+
+/* ── Geniş layout (mockup: qıraq boşluqları 28-32px, dar 1180 konteyner yox) ── */
+.journal-page.jd2 { max-width: 1600px; padding: 24px 32px 48px; }
+
+/* ── Dərs tipi pilləri (filter zolağının davamı — mockup) ────────────────── */
+.jd2-kindpills {
+    display: flex; background: #fff; border: 1px solid var(--j-line);
+    border-radius: 12px; padding: 4px; gap: 4px;
+}
+.jd2-kindpill {
+    border: none; cursor: pointer; font-family: inherit;
+    padding: 8px 15px; border-radius: 8px; background: transparent;
+    color: var(--j-muted); font-size: 12.5px; font-weight: 700;
+}
+.jd2-kindpill.is-active { background: #2563eb; color: #fff; }
+.jd2-kindpill:hover:not(.is-active) { color: #1d4ed8; }
+
+/* ── Kilidli dərs tipi çipi (tək slot növü olan jurnal) ──────────────────── */
+.jd2-locked-kind {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #eaf1fe; color: #1d4ed8; border: 1.5px solid #bfd5f8;
+    border-radius: 10px; padding: 10px 14px; font-weight: 700; font-size: 13px;
+}
+.jd2-locked-kind i { font-size: 10px; opacity: 0.7; }
+
+/* ── Bootstrap-select vidcetləri jd2 kontekstində (kompakt görünüş) ──────── */
+.jd2-filter .bootstrap-single-select__toggle {
+    min-height: 0; padding: 0; border: none; background: transparent;
+    box-shadow: none; font-weight: 800; font-size: 14px; color: var(--j-ink);
+}
+.jd2-filter .bootstrap-single-select__toggle:hover { color: #1d4ed8; }
+.jd2-field .bootstrap-single-select__toggle,
+.sgx-field .bootstrap-single-select__toggle {
+    min-height: 0; padding: 10px 14px; border-radius: 10px;
+    border: 1.5px solid var(--j-line, #dce6f7); background: #fff;
+    box-shadow: none; font-weight: 700; font-size: 13px; color: var(--j-ink, #12274e);
+}
+.jd2-field .bootstrap-single-select__toggle:hover,
+.sgx-field .bootstrap-single-select__toggle:hover { border-color: #bfd5f8; }
+
+/* ── Davamiyyət v2 ───────────────────────────────────────────────────────── */
+/* Seminar/lab xanası: bal inputu + q/b çipi (bal → avtomatik i/e) */
+.jd2-semcell { display: inline-flex; align-items: center; gap: 5px; }
+.jd2-semcell .jd2-score { margin-top: 0; }
+.jd2-qb-chip {
+    border: 1px solid #fca5a5; background: #fff; color: #dc2626;
+    cursor: pointer; font-family: inherit; font-weight: 800; font-size: 10.5px;
+    border-radius: 6px; padding: 4px 7px; opacity: 0.55;
+}
+.jd2-qb-chip.is-active { background: #fee2e2; opacity: 1; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25); }
+
+/* Təqvim planı: keçirilib / gözləyir vəziyyətləri */
+.jd2-covered-badge {
+    font-size: 10px; font-weight: 800; color: #059669;
+    background: #dcfce7; border-radius: 5px; padding: 1px 6px; margin-left: 6px; white-space: nowrap;
+}
+.jd2-topic-row.is-pending .jd2-topic-title { color: var(--j-soft); font-weight: 500; }
+
+/* Modern Save düyməsi */
+.jd2-save-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: none; cursor: pointer; font-family: inherit;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: #fff;
+    border-radius: 12px; padding: 11px 22px; font-size: 13.5px; font-weight: 700;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.jd2-save-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.38); }
+.jd2-save-btn:active { transform: none; }
+
+/* Kollokvium K1-K3 + CƏMİ */
+.jd2-th-koll { min-width: 90px; }
+.jd2-th-koll.is-total { background: #dbeafe; color: #1d4ed8; }
+.jd2-cell.is-total { background: rgba(219, 234, 254, 0.45); }
+.jd2-ksum { font-weight: 800; color: #1d4ed8; font-size: 13px; }
+.jd2-panel-hint { padding: 10px 16px 0; font-size: 12px; color: var(--j-muted); font-weight: 600; margin: 0; }
+
+/* Çıxış təsdiq modalı */
+.jd2-leave-card { width: min(460px, 100%); }
+.jd2-leave-text { margin: 0; font-size: 13.5px; color: var(--j-mid); font-weight: 600; line-height: 1.55; }
+.jd2-leave-go { flex: 0 1 auto; text-decoration: none; text-align: center; }
