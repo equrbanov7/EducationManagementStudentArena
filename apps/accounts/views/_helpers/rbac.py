@@ -253,6 +253,7 @@ def _role_capabilities(user, profile):
             "superadmin-exam-rooms",  # imtahan zalı + kompüter/MAC idarəsi
             "exam-center-pins",  # PIN axtarışı (canlı search + inline detal)
             "exam-center-stats",  # imtahan statistikaları / nəticələr
+            "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
             "pending-post-approvals",
             "blog",
@@ -308,7 +309,14 @@ def _role_capabilities(user, profile):
         # apellyasiyalar, bildiriş dərci. Üzv/rol idarəetməsi YOXDUR.
         if is_exam_center:
             allowed_sections.update(
-                {"my-exams", "groups", "publish-notification", "exam-center-pins", "exam-center-stats"}
+                {
+                    "my-exams",
+                    "groups",
+                    "publish-notification",
+                    "exam-center-pins",
+                    "exam-center-stats",
+                    "appeal-stats",
+                }
             )
 
         # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.

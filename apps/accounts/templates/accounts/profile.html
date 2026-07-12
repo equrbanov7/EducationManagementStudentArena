@@ -151,6 +151,8 @@
                 {% include "accounts/profile/sections/_exam_center_pins.html" %}
             {% elif active_section == "exam-center-stats" and 'exam-center-stats' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_center_stats.html" %}
+            {% elif active_section == "appeal-stats" and 'appeal-stats' in allowed_sections %}
+                {% include "accounts/profile/sections/_appeal_stats.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
             {% elif active_section == "statistics" %}
