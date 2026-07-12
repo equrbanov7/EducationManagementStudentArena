@@ -204,6 +204,38 @@ def appeal_create(request, attempt_id):
     return render(request, "appeals/student/appeal_create.html", context)
 
 
+def _appeal_eligible_attempts(request):
+    """ "Yeni apellyasiya" modal-ı üçün uyğun cəhdlər.
+
+    Tələbənin 3-günlük pəncərəsi hələ açıq olan bitmiş final/midterm cəhdləri —
+    hər biri üçün müraciət səhifəsinə keçid. Adi test/quiz cəhdləri apellyasiya
+    axışına daxil deyil (yalnız final/midterm).
+    """
+    from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+
+    attempts = (
+        ExamAttempt.objects.filter(
+            user=request.user,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+            exam__exam_type_extended__in=("final", "midterm"),
+        )
+        .select_related("exam")
+        .order_by("-finished_at")
+    )
+    eligible = []
+    for attempt in attempts:
+        if not can_create_appeal(request, attempt):
+            continue
+        attempt.appeal_deadline = appeal_deadline(attempt)
+        attempt.appeal_remaining_seconds = remaining_window_seconds(attempt)
+        attempt.appeal_create_url = append_query_params(
+            reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id}),
+            from_section="my-appeals",
+        )
+        eligible.append(attempt)
+    return eligible
+
+
 def build_my_appeals_context(request, *, list_action, section=""):
     """
     Ortaq apellyasiya siyahısı konteksti (DRY) — həm standalone ``my_appeals``,
@@ -228,6 +260,7 @@ def build_my_appeals_context(request, *, list_action, section=""):
             appeal.get_status_display(),
         )
 
+    eligible_attempts = _appeal_eligible_attempts(request)
     return {
         "appeal_page_obj": page_obj,
         "appeal_list": page_obj.object_list,
@@ -236,6 +269,8 @@ def build_my_appeals_context(request, *, list_action, section=""):
         "appeal_search_query": search_query,
         "appeal_list_action": list_action,
         "appeal_section": section,
+        "appeal_eligible_attempts": eligible_attempts,
+        "appeal_window_days": APPEAL_WINDOW_DAYS,
     }
 
 
