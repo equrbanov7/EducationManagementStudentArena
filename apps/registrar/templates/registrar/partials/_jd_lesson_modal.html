@@ -1,0 +1,88 @@
+{% load i18n %}
+{% comment %}Yeni dərs / dərs redaktəsi modalı (mockup: navy başlıq + tarixin yanında
+həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu LMS kursunun
+mövzu siyahısından gəlir (siyahı yoxdursa sərbəst mətn); cədvəldə tək növ slot
+varsa dərs tipi kilidlidir.{% endcomment %}
+<div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}" hidden>
+    <div class="jd-modal-backdrop" data-jd-modal-close></div>
+    <div class="jd-modal-card" role="dialog" aria-modal="true" aria-labelledby="jd-lesson-modal-title">
+        <div class="jd-modal-head jd2-modal-head">
+            <h3 id="jd-lesson-modal-title" data-jd-modal-title-add>{% trans "Yeni dərs əlavə et" context "registrar.journal" %}</h3>
+            <h3 id="jd-lesson-modal-title-edit" data-jd-modal-title-edit hidden>{% trans "Dərsi redaktə et" context "registrar.journal" %}</h3>
+            <button type="button" class="jd-modal-close jd2-modal-close" data-jd-modal-close aria-label="{% trans 'Bağla' context 'registrar.journal' %}">✕</button>
+        </div>
+        <form method="post" data-jd-lesson-form data-add-url="{% url 'registrar:journal_detail' offering.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_lesson" data-jd-lesson-action>
+            <div class="jd-modal-body">
+                <div class="jd2-field">
+                    <span class="jd2-field-label">{% trans "TARİX" context "registrar.journal" %}</span>
+                    <span class="jd2-date-row">
+                        <input type="date" name="lesson_date" required min="{{ journal.today|date:'Y-m-d' }}"
+                               value="{{ journal.today|date:'Y-m-d' }}" data-jd-lesson-date>
+                        <span class="jd2-parity-badge" data-jd-parity-badge hidden></span>
+                    </span>
+                    <small class="jd-field-hint">{% trans "Keçmiş tarixə dərs açmaq olmaz." context "registrar.journal" %}</small>
+                </div>
+                <div class="jd2-field">
+                    <span class="jd2-field-label">{% trans "MÖVZU — TƏQVİM PLANINDAN" context "registrar.journal" %}</span>
+                    {% if topic_choices %}
+                    <select name="lesson_topic" data-jd-lesson-topic data-bootstrap-select>
+                        <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
+                        {% for t in topic_choices %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                    </select>
+                    {% else %}
+                    <input type="text" name="lesson_topic" maxlength="255" data-jd-lesson-topic
+                           placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">
+                    <small class="jd-field-hint">{% trans "Kursun mövzu siyahısı yoxdur — mövzunu əl ilə yazın." context "registrar.journal" %}</small>
+                    {% endif %}
+                </div>
+                <div class="jd2-field-pair">
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "DƏRS TİPİ" context "registrar.journal" %}</span>
+                        {% if locked_lesson_kind %}
+                        {% comment %}Cədvəldə tək növ slot var — tip kilidlidir (server də məcbur edir).{% endcomment %}
+                        <input type="hidden" name="lesson_kind" value="{{ locked_lesson_kind }}">
+                        <span class="jd2-locked-kind" data-jd-lesson-kind-locked>
+                            {% for value, label in lesson_kinds %}{% if value == locked_lesson_kind %}{{ label }}{% endif %}{% endfor %}
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        {% else %}
+                        <select name="lesson_kind" data-jd-lesson-kind data-bootstrap-select>
+                            {% for value, label in lesson_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                        {% endif %}
+                    </div>
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "SAAT" context "registrar.journal" %}</span>
+                        <input type="number" name="lesson_hours" min="1" max="8" value="2" data-jd-lesson-hours>
+                    </div>
+                </div>
+                <div class="jd2-field">
+                    <span class="jd2-field-label">{% trans "DƏRS SAATI" context "registrar.journal" %}</span>
+                    <select name="lesson_time" data-jd-lesson-time data-bootstrap-select>
+                        <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
+                        {% for start, end in standard_times %}
+                        <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="jd-field-hint">{% trans "Universitetin standart dərs saatlarından biri seçilir." context "registrar.journal" %}</small>
+                </div>
+                <p class="jd-modal-note">
+                    {% trans "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi 2 saat içində silmək/düzəltmək olar." context "registrar.journal" %}
+                </p>
+            </div>
+            <div class="jd-modal-foot">
+                <button type="button" class="jd2-cancel-btn" data-jd-modal-close>{% trans "İmtina et" context "registrar.journal" %}</button>
+                <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
+            </div>
+        </form>
+        {# Silmə — redaktə rejimində görünür; ayrıca form (nested form olmaz). #}
+        <form method="post" class="jd-lesson-delete-form" data-jd-lesson-delete hidden
+              onsubmit="return confirm('{% trans "Dərsi silmək? Sütun və (təzə) işarələr birlikdə silinəcək." context "registrar.journal" %}');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_lesson">
+            <button type="submit" class="jd-danger-btn"><i class="fas fa-trash-can"></i> {% trans "Dərsi sil" context "registrar.journal" %}</button>
+        </form>
+    </div>
+</div>

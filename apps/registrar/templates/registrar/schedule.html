@@ -4,10 +4,14 @@
 {% block title %}{% trans "Dərs cədvəli" context "registrar.schedule" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260704-2">
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
 {% endblock %}
 
 {% block content %}
 {% include "accounts/profile/_messages.html" %}
 {% include "registrar/partials/_schedule_content.html" %}
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
 {% endblock %}

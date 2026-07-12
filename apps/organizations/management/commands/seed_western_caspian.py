@@ -432,6 +432,7 @@ class Command(BaseCommand):
             if not offering.lessons.exists():  # idempotent — do not duplicate lessons
                 for kind, day_offset in plan:
                     lesson = registrar_gradebook.create_lesson(
+                        allow_past=True,
                         offering=offering,
                         date=base + datetime.timedelta(days=day_offset),
                         kind=kind,
@@ -449,7 +450,9 @@ class Command(BaseCommand):
                                 "score": None if kind == "lecture" or absent else 8,
                             }
                         )
-                    registrar_gradebook.save_marks(offering=offering, entries=entries, by_user=teacher)
+                    registrar_gradebook.save_marks(
+                        enforce_day=False, offering=offering, entries=entries, by_user=teacher
+                    )
 
             # Yekun imtahan + təkrar imtahan demo (idempotent): barred AZ student
             # → resit (absence); az2 → low exam (fails → resit); others → pass.

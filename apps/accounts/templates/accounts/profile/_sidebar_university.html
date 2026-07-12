@@ -29,6 +29,8 @@
 {% endif %}
 {% if "my-journal" in allowed_sections %}
 <li class="sidebar-menu-item">
+    {% if role_capabilities.is_student %}
+    {# Tələbə: jurnal xülasəsi profil shell-inin sağ panelində açılır (sidebar qalır). #}
     <a href="{{ profile_base_url }}?section=my-journal"
        data-section="my-journal"
        data-title="{% trans 'Elektron jurnal' context 'profile.sidebar' %}"
@@ -37,6 +39,15 @@
         <i class="fas fa-book-open sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Elektron jurnal" context "profile.sidebar" %}</span>
     </a>
+    {% else %}
+    {# Müəllim/admin: jurnal iş sahəsi ayrıca URL-də YENİ TABDA açılır (sidebar yoxdur). #}
+    <a href="{% url 'registrar:journal_list' %}" target="_blank" rel="noopener"
+       class="sidebar-menu-link">
+        <i class="fas fa-book-open sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Elektron jurnal" context "profile.sidebar" %}</span>
+        <i class="fas fa-arrow-up-right-from-square sidebar-menu-ext"></i>
+    </a>
+    {% endif %}
 </li>
 {% endif %}
 {% if "grade-approvals" in allowed_sections %}

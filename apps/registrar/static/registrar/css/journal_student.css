@@ -1,0 +1,121 @@
+/* Tələbənin elektron jurnalı — mockup dizaynı (sjx-*, light-only).
+   Dəyərlər dizayn şablonundan: kart #fff/#DCE6F7 · başlıq #F0F6FF ·
+   status yaşıl #059669 · mavi #1D4ED8 · xəbərdarlıq #B45309/#DC2626. */
+
+.sjx { --s-ink: #12274e; --s-mid: #3a5384; --s-muted: #5b72a0; --s-soft: #8aa0c8; --s-line: #dce6f7; --s-cell: #e7eef9; }
+
+/* ── Kimlik + fənn pilləri ──────────────────────────────────────────────── */
+.sjx-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.sjx-identity { display: flex; align-items: center; gap: 12px; }
+.sjx-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #e0e7ff; color: #4f46e5;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+}
+.sjx-identity-name { font-weight: 800; font-size: 15px; color: var(--s-ink); }
+.sjx-identity-sub { font-size: 12.5px; color: var(--s-muted); font-weight: 600; }
+.sjx-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.sjx-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid var(--s-line); color: var(--s-muted);
+    border-radius: 10px; padding: 9px 16px; font-size: 12.5px; font-weight: 700;
+    text-decoration: none;
+}
+.sjx-pill.is-active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.sjx-pill:hover:not(.is-active) { color: #1d4ed8; }
+.sjx-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: #dc2626; display: inline-block; }
+
+/* ── KPI kartları ───────────────────────────────────────────────────────── */
+.sjx-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.sjx-kpi { background: #fff; border: 1px solid var(--s-line); border-radius: 14px; padding: 14px 18px; }
+.sjx-kpi--ok { border-color: #bbf7d0; }
+.sjx-kpi--bad { border-color: #fca5a5; }
+.sjx-kpi-label { font-size: 11px; font-weight: 800; color: var(--s-soft); letter-spacing: 0.4px; }
+.sjx-kpi-value { font-size: 22px; font-weight: 800; margin-top: 4px; color: var(--s-ink); }
+.sjx-kpi-value.is-ok { color: #059669; }
+.sjx-kpi-value.is-warn { color: #b45309; }
+.sjx-kpi-value.is-danger { color: #dc2626; }
+.sjx-kpi-value.is-blue { color: #1d4ed8; }
+.sjx-kpi-unit { font-size: 12px; color: var(--s-soft); font-weight: 700; }
+.sjx-kpi-sub { font-size: 11.5px; color: var(--s-soft); font-weight: 600; margin-top: 6px; }
+.sjx-kpi-status { font-size: 16px; font-weight: 800; margin-top: 6px; }
+.sjx-kpi-status.is-ok { color: #059669; }
+.sjx-kpi-status.is-danger { color: #dc2626; }
+.sjx-kpi-bar { margin-top: 8px; height: 5px; border-radius: 3px; background: var(--s-cell); overflow: hidden; }
+.sjx-kpi-barfill { display: block; height: 100%; background: #059669; width: 0; }
+.sjx-kpi-barfill.is-blue { background: linear-gradient(90deg, #1d4ed8, #60a5fa); }
+.sjx-kpi-barfill.is-danger { background: #dc2626; }
+
+/* ── Bal bölgüsü ────────────────────────────────────────────────────────── */
+.sjx-balbox { background: #fff; border: 1px solid var(--s-line); border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; }
+.sjx-balbox-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.sjx-balbox-formula { font-size: 11.5px; color: var(--s-muted); font-weight: 600; }
+.sjx-balbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--s-cell); }
+.sjx-balseg { display: block; height: 100%; width: 0; }
+.sjx-balseg--lessons { background: #60a5fa; }
+.sjx-balseg--koll { background: #2563eb; }
+.sjx-balseg--selfwork { background: #0891b2; }
+.sjx-ballegend { display: flex; gap: 14px; margin-top: 8px; font-size: 11.5px; font-weight: 700; color: var(--s-muted); flex-wrap: wrap; }
+.sjx-dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; }
+.sjx-dot--lessons { background: #60a5fa; }
+.sjx-dot--koll { background: #2563eb; }
+.sjx-dot--selfwork { background: #0891b2; }
+
+/* ── Tarixçə cədvəli ────────────────────────────────────────────────────── */
+.sjx-historybox {
+    background: #fff; border: 1px solid var(--s-line); border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(18, 39, 78, 0.07); overflow: hidden; margin-bottom: 14px;
+}
+.sjx-table-wrap { overflow-x: auto; }
+.sjx-table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 640px; }
+.sjx-table thead th {
+    background: #f0f6ff; color: var(--s-muted); font-size: 11px; font-weight: 800;
+    padding: 10px 8px; text-align: left;
+}
+.sjx-th-date { width: 80px; padding-left: 18px !important; }
+.sjx-th-week { width: 70px; }
+.sjx-th-att, .sjx-th-score { text-align: center !important; width: 110px; }
+.sjx-table tbody td { padding: 10px 8px; border-bottom: 1px solid #eef3fb; }
+.sjx-table tbody tr:last-child td { border-bottom: none; }
+.sjx-table tbody tr.is-koll td { background: #fffbeb; }
+.sjx-date { padding-left: 18px !important; font-weight: 700; color: var(--s-muted); white-space: nowrap; }
+.sjx-topic { font-weight: 600; color: var(--s-mid); }
+.sjx-kollmark { color: #b45309; font-weight: 700; }
+.sjx-att-cell, .sjx-score-cell { text-align: center; }
+.sjx-att { font-weight: 800; font-size: 12px; }
+.sjx-att--ie { color: #059669; }
+.sjx-att--qb { color: #dc2626; }
+.sjx-score-cell b { font-weight: 700; color: var(--s-ink); }
+.sjx-kollscore { color: #b45309 !important; font-weight: 800 !important; }
+.sjx-empty-line { color: var(--s-soft); font-weight: 600; font-size: 13px; padding: 14px 18px; margin: 0; }
+
+/* ── Sərbəst iş + kurs işi ──────────────────────────────────────────────── */
+.sjx-swbox { background: #fff; border: 1px solid var(--s-line); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+.sjx-h3-badge { background: #eaf1fe; color: #1d4ed8; border-radius: 7px; padding: 2px 9px; font-size: 11px; margin-left: 6px; }
+.sjx-sw-list { margin: 0; padding: 10px 18px 14px; list-style: none; font-size: 13px; color: var(--s-mid); }
+.sjx-sw-list li { display: flex; align-items: center; gap: 9px; padding: 4px 0; font-weight: 600; }
+.sjx-sw-dot {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 6px; font-weight: 800; font-size: 12px;
+    background: #f1f5f9; color: var(--s-soft); flex-shrink: 0;
+}
+.sjx-sw-dot.is-on { background: #dcfce7; color: #059669; }
+.sjx-cw {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--s-line); border-radius: 14px;
+    padding: 12px 18px; font-size: 13.5px; margin-bottom: 14px;
+}
+.sjx-cw .jd2-panel-label { padding: 0; border: none; }
+.sjx-cw-topic { font-weight: 700; color: var(--s-ink); flex: 1; }
+.sjx-cw b { color: #1d4ed8; font-size: 15px; }
+.sjx-cw small { color: var(--s-soft); font-weight: 600; }
+
+/* ── Alt sətir: legend + xəbərdarlıqlar ─────────────────────────────────── */
+.sjx-footrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--s-muted); font-weight: 600; }
+.sjx-foot-legend { background: #fff; border: 1px solid var(--s-line); border-radius: 10px; padding: 8px 14px; }
+.sjx-foot-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; border-radius: 10px; padding: 8px 14px; font-weight: 700; }
+.sjx-foot-warn { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; border-radius: 10px; padding: 8px 14px; font-weight: 700; }

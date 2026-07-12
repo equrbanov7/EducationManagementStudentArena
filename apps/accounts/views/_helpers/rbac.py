@@ -369,7 +369,9 @@ def _role_capabilities(user, profile):
 
     if getattr(_u12_settings, "UNIVERSITY_MODE", True) and (has_active_org_context or is_superadmin):
         allowed_sections.update({"my-schedule", "academic-calendar"})
-        if is_teacher or is_org_admin or is_superadmin:
+        # Müəllim/admin: sidebar linki jurnal iş sahəsini YENİ TABDA (/jurnal/) açır.
+        # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
+        if is_teacher or is_org_admin or is_superadmin or is_student:
             allowed_sections.add("my-journal")
         if is_superadmin or is_org_admin or is_unit_manager:
             allowed_sections.update({"grade-approvals", "analytics"})

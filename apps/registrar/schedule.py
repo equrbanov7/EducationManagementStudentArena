@@ -16,7 +16,36 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import ScheduleSlot, WeekType
+from apps.registrar.models import ScheduleSlot, SlotKind, WeekType
+
+# Axşam təhsili bandı: bu saatdan gec başlayan slotlar ayrıca bölmədə göstərilir
+# (magistratura axşam qrupları). Grid sətirləri mövcud slotların (start,end)
+# dəyərlərindən yığılır; slot YARADILARKƏN isə müəllim aşağıdakı standart
+# saatlardan birini seçir (istifadəçi tələbi — universitet standart zəngləri).
+EVENING_START = datetime.time(18, 0)
+
+STANDARD_LESSON_TIMES = (
+    ("08:30", "10:00"),
+    ("10:10", "11:40"),
+    ("11:50", "13:20"),
+    ("13:35", "15:05"),
+    ("15:15", "16:45"),
+    ("16:55", "18:25"),
+    ("18:40", "20:00"),
+    ("20:10", "21:30"),
+)
+
+
+def parse_time_slot(raw):
+    """ "HH:MM|HH:MM" formatlı standart saat seçimini (start, end) cütünə çevir.
+
+    Yalnız STANDARD_LESSON_TIMES-dan olan dəyər qəbul edilir — sərbəst vaxt yox."""
+    value = (raw or "").strip()
+    for start, end in STANDARD_LESSON_TIMES:
+        if value == f"{start}|{end}":
+            return datetime.time.fromisoformat(start), datetime.time.fromisoformat(end)
+    return None, None
+
 
 # 1=Bazar ertəsi … 7=Bazar (ISO). Şablon üçün ad + qısa ad servisdən gəlir.
 WEEKDAYS = (
@@ -49,7 +78,17 @@ class ScheduleConflict(Exception):
 
 
 @transaction.atomic
-def create_slot(*, offering, weekday, start_time, end_time, room="", week_type=WeekType.ALL, created_by=None):
+def create_slot(
+    *,
+    offering,
+    weekday,
+    start_time,
+    end_time,
+    room="",
+    week_type=WeekType.ALL,
+    kind=SlotKind.LECTURE,
+    created_by=None,
+):
     """Create a timetable slot, rejecting group/instructor/room clashes."""
     room = (room or "").strip()
     conflict = find_conflict(
@@ -71,6 +110,7 @@ def create_slot(*, offering, weekday, start_time, end_time, room="", week_type=W
         end_time=end_time,
         room=room,
         week_type=week_type,
+        kind=kind,
         created_by=created_by,
     )
 
@@ -211,6 +251,63 @@ def get_week_exams(*, organization, course_ids, monday, author=None, weekdays=_T
         if weekday in valid_days:
             by_day.setdefault(weekday, []).append({"exam": exam, "start": local_start})
     return by_day
+
+
+def build_time_grid(slots, *, week_context, exams_by_day=None, weekdays=_TEACHING_WEEKDAYS):
+    """Saat-sətirli həftə grid-i (yeni cədvəl dizaynı).
+
+    Sətirlər mövcud slotların fərqli (start,end) cütlərindən yığılır (saat
+    zolaqları hardcode edilmir); sütunlar günlərdir. 18:00-dan gec başlayan
+    zolaqlar ayrıca "axşam təhsili" bandına düşür. Hər hücrə həmin gün+zolağın
+    slotlarını üst/alt paritet bayrağı ilə daşıyır (bölünmüş hücrə renderi)."""
+    exams_by_day = exams_by_day or {}
+    parity = week_context["parity"]
+    today = week_context["today"]
+    dates = week_context["dates"]
+
+    _roman = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI", 7: "VII"}
+    day_headers = [
+        {
+            "weekday": num,
+            "label": label,
+            "roman": _roman.get(num, str(num)),
+            "date": dates.get(num),
+            "is_today": dates.get(num) == today,
+            "exams": exams_by_day.get(num, []),
+        }
+        for num, label in weekdays
+    ]
+
+    bands_map: dict = {}  # (start,end) → {weekday: [slot_item]}
+    for slot in slots:
+        key = (slot.start_time, slot.end_time)
+        bands_map.setdefault(key, {}).setdefault(slot.weekday, []).append(
+            {"slot": slot, "this_week": slot.week_type == WeekType.ALL or slot.week_type == parity}
+        )
+
+    def _rows(keys):
+        rows = []
+        for start, end in keys:
+            by_day = bands_map[(start, end)]
+            cells = []
+            for num, _label in weekdays:
+                items = by_day.get(num, [])
+                # ÜST slot üstdə, ALT altda görünsün (bölünmüş hücrə sırası).
+                items.sort(key=lambda it: {WeekType.ALL: 0, WeekType.ODD: 1, WeekType.EVEN: 2}[it["slot"].week_type])
+                cells.append(
+                    {"weekday": num, "date": dates.get(num), "is_today": dates.get(num) == today, "slots": items}
+                )
+            rows.append({"start": start, "end": end, "cells": cells})
+        return rows
+
+    day_keys = sorted(k for k in bands_map if k[0] < EVENING_START)
+    evening_keys = sorted(k for k in bands_map if k[0] >= EVENING_START)
+    return {
+        "day_headers": day_headers,
+        "rows": _rows(day_keys),
+        "evening_rows": _rows(evening_keys),
+        "is_empty": not bands_map,
+    }
 
 
 def build_week_view(slots, *, week_context, exams_by_day=None, weekdays=_TEACHING_WEEKDAYS):

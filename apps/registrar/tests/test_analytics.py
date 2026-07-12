@@ -84,28 +84,30 @@ class _AnalyticsBase(TestCase):
             cls.enrollments = {
                 s.username: Enrollment.objects.get(student=s, offering=cls.offering) for s in cls.students
             }
-            # Entry scores via a seminar lesson mark, then exams.
-            lesson = gradebook.create_lesson(
-                offering=cls.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
-            )
-            gradebook.save_marks(
-                offering=cls.offering,
-                entries=[
+            # Entry scores via seminar marks (per-mark tavan 10): student0 → 4×10=40,
+            # student1 → yalnız ilk dərsdə 10.
+            for day in range(1, 5):
+                lesson = gradebook.create_lesson(
+                    allow_past=True, offering=cls.offering, date=datetime.date(2024, 10, day), kind=LessonKind.SEMINAR
+                )
+                entries = [
                     {
                         "lesson_id": lesson.id,
                         "enrollment_id": cls.enrollments["an_student0"].id,
                         "status": "present",
-                        "score": 40,
-                    },
-                    {
-                        "lesson_id": lesson.id,
-                        "enrollment_id": cls.enrollments["an_student1"].id,
-                        "status": "present",
                         "score": 10,
-                    },
-                ],
-                by_user=cls.teacher,
-            )
+                    }
+                ]
+                if day == 1:
+                    entries.append(
+                        {
+                            "lesson_id": lesson.id,
+                            "enrollment_id": cls.enrollments["an_student1"].id,
+                            "status": "present",
+                            "score": 10,
+                        }
+                    )
+                gradebook.save_marks(enforce_day=False, offering=cls.offering, entries=entries, by_user=cls.teacher)
             # student0: 40 + 45 = 85 → pass; student1: 10 + 20 = 30 → fail;
             # student2: no exam → in progress.
             finals.set_exam_score(enrollment=cls.enrollments["an_student0"], score=45, by_user=cls.teacher)

@@ -80,9 +80,10 @@ class JournalExportTest(TestCase):
             cls.offering.save(update_fields=["instructor"])
             cls.enrollment = cls.offering.enrollments.get()
             lesson = gradebook.create_lesson(
-                offering=cls.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=cls.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=cls.offering,
                 entries=[
                     {"lesson_id": lesson.id, "enrollment_id": cls.enrollment.id, "status": "present", "score": 40}

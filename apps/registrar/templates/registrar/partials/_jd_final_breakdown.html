@@ -1,0 +1,58 @@
+{% load i18n %}
+{% comment %}Yekun qiymət tabı (mockup): Davamiyyət/10 · Kollokvium 1-3 + orta ·
+Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qədər bal.
+İmtahana qədər bal kanonik entry_score-dan gəlir; sütunlar informativdir.{% endcomment %}
+<div class="journal-grid-wrap jd2-grid-wrap" data-journal-grid>
+    <table class="jd2-table jd2-fbtable">
+        <thead>
+            <tr>
+                <th rowspan="2" class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
+                <th rowspan="2">{% trans "DAVAMİYYƏT" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
+                <th colspan="{{ final_breakdown.kolls|length|add:2 }}" class="jd2-fb-semhead">{% trans "SEMİNAR" context "registrar.journal" %}</th>
+                <th rowspan="2">{% trans "SƏRBƏST İŞ" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
+                <th rowspan="2">{% trans "LAB. İŞİ" context "registrar.journal" %}</th>
+                <th rowspan="2">{% trans "KURS İŞİ" context "registrar.journal" %}<div class="jd2-th-sub">/100</div></th>
+                <th rowspan="2" class="jd2-fb-entryhead">{% trans "İMTAHANA QƏDƏR BAL" context "registrar.journal" %}<div>/{{ final_breakdown.entry_max }}</div></th>
+                <th rowspan="2" class="jd2-fb-qeyd">{% trans "QEYD" context "registrar.journal" %}</th>
+            </tr>
+            <tr>
+                {% for c in final_breakdown.kolls %}<th class="jd2-fb-sub">{{ c.name }}</th>{% endfor %}
+                <th class="jd2-fb-sub">{% trans "Kollokvium orta balı" context "registrar.journal" %}</th>
+                <th class="jd2-fb-sub">{% trans "Seminarın orta balı" context "registrar.journal" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in final_breakdown.rows %}
+            <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">
+                <td class="jd2-td-student">
+                    <span class="jd2-stu-no">{{ forloop.counter }}</span>
+                    <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                </td>
+                <td class="jd2-fb-num">{{ row.dav }}</td>
+                {% for v in row.kvals %}<td class="jd2-fb-num jd2-fb-dim">{% if v is not None %}{{ v|floatformat:'-1' }}{% else %}—{% endif %}</td>{% endfor %}
+                <td class="jd2-fb-num jd2-fb-accent">{% if row.korta is not None %}{{ row.korta|floatformat:'-1' }}{% else %}—{% endif %}</td>
+                <td class="jd2-fb-num">{% if row.sorta is not None %}{{ row.sorta|floatformat:'-1' }}{% else %}—{% endif %}</td>
+                <td class="jd2-fb-num">{{ row.selfwork }}</td>
+                <td class="jd2-fb-num jd2-fb-dim">{% if row.lab_orta is not None %}{{ row.lab_orta|floatformat:'-1' }}{% else %}—{% endif %}</td>
+                <td class="jd2-fb-num">{% if row.coursework and row.coursework.score is not None %}{{ row.coursework.score|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                <td class="jd2-fb-entry">
+                    <span class="jd2-fb-entryval {% if row.barred %}is-barred{% elif row.warning %}is-warning{% else %}is-ok{% endif %}">{{ row.entry|floatformat:'-1' }}</span>
+                    <span class="jd2-fb-bar"><span class="jd2-fb-barfill {% if row.barred %}is-barred{% endif %}" data-jd-width="{{ row.entry_pct }}"></span></span>
+                </td>
+                <td class="jd2-fb-qeyd">
+                    {% if row.barred %}<span class="jd2-qeyd jd2-qeyd--barred">{% trans "Qayıb limiti keçib — imtahana buraxılmır" context "registrar.journal" %}</span>
+                    {% elif row.warning %}<span class="jd2-qeyd jd2-qeyd--warn">{% trans "Qayıb limitinə yaxın" context "registrar.journal" %} ({{ row.absence_hours }}/{{ final_breakdown.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %})</span>
+                    {% else %}<span class="jd2-qeyd">—</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="jd2-footbar">
+    <span class="jd2-foot-note">{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + kollokvium + sərbəst iş, tavan" context "registrar.journal" %} {{ final_breakdown.entry_max }}).</span>
+    <span class="jd2-foot-chips">
+        <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Qayıb limitinə yaxın" context "registrar.journal" %}</span>
+        <span class="jd2-limitchip jd2-limitchip--barred">■ {% trans "Kəsilir — imtahana buraxılmır" context "registrar.journal" %}</span>
+    </span>
+</div>

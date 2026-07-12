@@ -1,32 +1,91 @@
 {% load static i18n %}
-<div class="journal-page">
-    <div class="journal-head">
-        <h1 class="journal-title">
-            <i class="fas fa-book-open"></i> {% trans "Elektron jurnal" context "registrar.journal" %}
-        </h1>
-        <p class="journal-subtitle">{% trans "Tədris etdiyiniz fənlər üzrə tələbə ballarını idarə edin." context "registrar.journal" %}</p>
+{% comment %}Elektron jurnal — Addım 1: Qrup seçimi (mockup ilə birə-bir).
+Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏLLİM (öz adı)
+· dərs tipi pilləri (?kind= — cədvəl slotlarından).{% endcomment %}
+<div class="journal-page jl-page jd2">
+    <div class="jd2-pagehead">
+        <div class="jd2-mark">EU</div>
+        <div>
+            <h1 class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</h1>
+            <div class="jd2-pagesub">{% if journal_selected_period %}{{ journal_selected_period.year_label }} — {{ journal_selected_period.season_label }}{% elif journal_periods %}{{ journal_periods.0.year_label }} — {{ journal_periods.0.season_label }}{% endif %}</div>
+        </div>
     </div>
 
+    {% include "registrar/partials/_jd_stepper.html" with stepper_step=1 stepper_detail=False %}
+
+    <form method="get" class="jd2-filters" data-jd-filterform>
+        <label class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
+            <select name="year" onchange="this.form.submit()" data-bootstrap-select>
+                <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                {% for y in journal_years %}
+                <option value="{{ y.value }}" {% if journal_selected_year == y.value %}selected{% endif %}>{{ y.label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "YARIM İL" context "registrar.journal" %}</span>
+            <select name="period" onchange="this.form.submit()" data-bootstrap-select>
+                <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                {% for p in journal_periods %}
+                <option value="{{ p.id }}" {% if journal_selected_period and journal_selected_period.id == p.id %}selected{% endif %}>{{ p.season_label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <span class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
+            <b class="jd2-filter-value">{{ teacher_label }}</b>
+        </span>
+        <span class="jd2-kindpills">
+            <button type="submit" name="kind" value=""
+                    class="jd2-kindpill {% if not journal_selected_kind %}is-active{% endif %}">{% trans "Hamısı" context "registrar.journal" %}</button>
+            {% for value, label in journal_kinds %}
+            <button type="submit" name="kind" value="{{ value }}"
+                    class="jd2-kindpill {% if journal_selected_kind == value %}is-active{% endif %}">{{ label }}</button>
+            {% endfor %}
+        </span>
+    </form>
+
     {% if offerings %}
-    <div class="journal-offerings">
-        {% for offering in offerings %}
-        <a class="journal-offering-card" href="{% url 'registrar:journal_detail' offering.id %}">
-            <div class="journal-offering-code">{{ offering.subject.code }}</div>
-            <div class="journal-offering-body">
-                <div class="journal-offering-name">{{ offering.subject.name }}</div>
-                <div class="journal-offering-meta">
-                    {% if offering.group %}<span><i class="fas fa-users"></i> {{ offering.group.name }}</span>{% endif %}
-                    {% if offering.period %}<span><i class="fas fa-calendar-alt"></i> {{ offering.period.name }}</span>{% endif %}
-                </div>
-            </div>
-            <div class="journal-offering-go"><i class="fas fa-arrow-right"></i></div>
-        </a>
-        {% endfor %}
+    <div class="jl-table-wrap">
+        <table class="jl-table">
+            <thead>
+                <tr>
+                    <th class="jl-col-no">№</th>
+                    <th>{% trans "QRUPLAR" context "registrar.journal" %}</th>
+                    <th class="jl-col-kind">{% trans "DƏRS TİPİ" context "registrar.journal" %}</th>
+                    <th class="jl-col-count">{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}</th>
+                    <th class="jl-col-action"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offering in offerings %}
+                <tr class="jl-row" data-jl-href="{% url 'registrar:journal_detail' offering.id %}">
+                    <td class="jl-col-no">{{ forloop.counter }}</td>
+                    <td>
+                        <div class="jl-group-line">
+                            <span class="jl-group">{% if offering.group %}{{ offering.group.name }}{% else %}{% trans "Bütün ixtisas" context "registrar.journal" %}{% endif %}</span>
+                            {% if offering.is_evening %}<span class="jl-badge jl-badge--master">{% trans "MAGİSTRATURA" context "registrar.journal" %}</span>{% endif %}
+                        </div>
+                        <div class="jl-subject-sub">{{ offering.subject.code }} — {{ offering.subject.name }}{% if offering.is_evening %} · {% trans "axşam (21:30-dək)" context "registrar.journal" %}{% endif %}</div>
+                    </td>
+                    <td class="jl-col-kind">{{ offering.kind_label|default:"—" }}</td>
+                    <td class="jl-col-count"><b>{{ offering.student_count }}</b></td>
+                    <td class="jl-col-action">
+                        <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}">
+                            {% trans "Jurnalı aç" context "registrar.journal" %} →
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    <p class="jd2-list-hint">{% trans "Qrupun sətrinə klikləməklə həmin qrupun elektron jurnalı açılır." context "registrar.journal" %}</p>
     {% else %}
     <div class="journal-empty">
         <i class="fas fa-folder-open"></i>
-        <p>{% trans "Sizə hələ tədris fənni (offering) təyin olunmayıb." context "registrar.journal" %}</p>
+        <p>{% trans "Bu filtrlərlə tədris fənni (offering) tapılmadı." context "registrar.journal" %}</p>
     </div>
     {% endif %}
 </div>

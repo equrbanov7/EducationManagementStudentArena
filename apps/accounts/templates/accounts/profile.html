@@ -25,8 +25,10 @@
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260712-new-appeal-modal">
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260705-2">
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260712-3">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260712-5">
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
 {% endblock %}
@@ -268,6 +270,8 @@ window.EXAM_WIZARD_I18N = {
 <script src="{% static 'accounts/js/statistics/ai_summary.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/entry.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
+<script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
+<script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/labels.js' %}"></script>

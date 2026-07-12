@@ -6,8 +6,12 @@ iə/qb. Sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı (
 ballarının cəmi) AVTOMATİK hesablayır. Yekun imtahan burada yoxdur.
 
 Kilid qaydaları (geriyə-dönük dəyişiklik olmasın):
-* dərs tarixi yaranışdan sonra yalnız qısa müddət (``DATE_EDIT_WINDOW``) dəyişilir;
-* iştirak/bal xanası yazıldıqdan ``MARK_EDIT_WINDOW`` sonra kilidlənir.
+* dərs sətri (tarix/növ/mövzu/saat) yaranışdan ``LESSON_EDIT_WINDOW`` (2 saat)
+  içində redaktə/silinə bilər — sonra dondurulur;
+* keçmiş tarixə dərs yaratmaq qadağandır;
+* YENİ iştirak/bal yalnız dərsin öz günündə yazılır; yazılmış xana
+  ``MARK_EDIT_WINDOW`` (2 saat) sonra kilidlənir (DB trigger + servis);
+* seminar/lab balı 0-10 aralığında clamp olunur.
 
 Status (görünüş): qayıb saatı proqramın ``absence_limit_percent``-i × fənnin tam
 saatını keçirsə → tələbə "kəsilir" (imtahana buraxılmır, sətir qırmızı); limitə
@@ -24,10 +28,8 @@ from django.utils import timezone
 
 from apps.registrar import grade_audit, services
 from apps.registrar.models import (
-    AssessmentComponent,
     AssessmentScheme,
     AttendanceStatus,
-    ComponentScore,
     Enrollment,
     Lesson,
     LessonKind,
@@ -35,15 +37,22 @@ from apps.registrar.models import (
     StudentAcademicRecord,
 )
 
-# Redaktə pəncərələri.
-DATE_EDIT_WINDOW = timedelta(minutes=5)  # dərs tarixi yaranışdan sonra
-MARK_EDIT_WINDOW = timedelta(days=1)  # iştirak/bal yazıldıqdan sonra
+# Redaktə pəncərələri (2 saat — sonra toxunulmazdır; DB trigger də qoruyur).
+LESSON_EDIT_WINDOW = timedelta(hours=2)  # dərs sətri yaranışdan sonra
+MARK_EDIT_WINDOW = timedelta(hours=2)  # iştirak/bal yazıldıqdan sonra
+DATE_EDIT_WINDOW = LESSON_EDIT_WINDOW  # köhnə ad (geriyə-uyğunluq)
 
 DEFAULT_LESSON_HOURS = 2
+LESSON_SCORE_MAX = Decimal("10")  # seminar/lab balı: min 0, max 10
 _DEFAULT_ABSENCE_LIMIT = 25
 _WARN_RATIO = Decimal("0.75")  # limitin bu payına çatanda xəbərdarlıq (bozarır)
 
 SCORE_LESSON_KINDS = frozenset({LessonKind.SEMINAR, LessonKind.LAB})
+
+
+class LessonRuleError(Exception):
+    """Dərs qaydası pozuntusu (keçmiş tarix, pəncərə bitib və s.) — istifadəçiyə
+    göstərilə bilən mesaj daşıyır."""
 
 
 def _to_decimal(raw) -> Decimal:
@@ -74,9 +83,14 @@ def lesson_allows_score(lesson) -> bool:
     return lesson.kind in SCORE_LESSON_KINDS
 
 
-def can_edit_lesson_date(lesson, *, now=None) -> bool:
+def can_edit_lesson(lesson, *, now=None) -> bool:
+    """Dərs sətri (tarix/növ/mövzu/saat/silmə) yalnız yaranışdan 2 saat içində."""
     now = now or timezone.now()
-    return (now - lesson.created_at) <= DATE_EDIT_WINDOW
+    return (now - lesson.created_at) <= LESSON_EDIT_WINDOW
+
+
+# Köhnə ad — mövcud çağırışlar üçün.
+can_edit_lesson_date = can_edit_lesson
 
 
 def can_edit_mark(mark, *, now=None) -> bool:
@@ -101,36 +115,123 @@ def absence_limit_percent_for(offering) -> int:
 # ── Lesson (dərs) CRUD ───────────────────────────────────────────────────────
 
 
+def _coerce_date(value):
+    import datetime
+
+    if isinstance(value, datetime.date):
+        return value
+    try:
+        return datetime.date.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
 @transaction.atomic
-def create_lesson(*, offering, date, kind=LessonKind.LECTURE, topic="", hours=None, created_by=None):
-    """Add a held session (a new journal column)."""
+def create_lesson(
+    *,
+    offering,
+    date,
+    kind=LessonKind.LECTURE,
+    topic="",
+    hours=None,
+    start_time=None,
+    end_time=None,
+    created_by=None,
+    allow_past=False,
+):
+    """Add a held session (a new journal column).
+
+    Qaydalar: jurnal kilidli olmamalıdır; KEÇMİŞ tarixə dərs açmaq olmaz
+    (geriyə-dönük doldurma qadağandır) — bu gün və gələcək (planlama) olar.
+    ``allow_past`` YALNIZ seed/test dəstəyi üçündür — HTTP qatı heç vaxt ötürmür."""
+    if journal_is_locked(offering):
+        raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
+    parsed = _coerce_date(date)
+    if parsed is None:
+        raise LessonRuleError("Dərs tarixi düzgün deyil.")
+    if not allow_past and parsed < timezone.localdate():
+        raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
     ensure_assessment_scheme(offering=offering)
     return Lesson.objects.create(
         organization=offering.organization,
         offering=offering,
-        date=date,
+        date=parsed,
         kind=kind,
         topic=topic or "",
         hours=hours or DEFAULT_LESSON_HOURS,
+        start_time=start_time,
+        end_time=end_time,
         created_by=created_by,
     )
 
 
 @transaction.atomic
-def update_lesson_date(*, lesson, date) -> bool:
-    """Fix a wrong lesson date — only within the short post-creation window."""
-    if not can_edit_lesson_date(lesson):
+def update_lesson(*, lesson, date=None, kind=None, topic=None, hours=None, start_time=None, end_time=None) -> bool:
+    """Səhv açılmış dərsi düzəlt — yalnız yaranışdan 2 saat içində."""
+    if journal_is_locked(lesson.offering) or not can_edit_lesson(lesson):
         return False
-    lesson.date = date
-    lesson.save(update_fields=["date"])
+    fields = []
+    if date is not None:
+        parsed = _coerce_date(date)
+        if parsed is None or parsed < timezone.localdate():
+            raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
+        lesson.date = parsed
+        fields.append("date")
+    if kind is not None and kind in dict(LessonKind.choices):
+        lesson.kind = kind
+        fields.append("kind")
+    if topic is not None:
+        lesson.topic = topic
+        fields.append("topic")
+    if hours is not None:
+        lesson.hours = hours
+        fields.append("hours")
+    if start_time is not None:
+        lesson.start_time = start_time or None
+        fields.append("start_time")
+    if end_time is not None:
+        lesson.end_time = end_time or None
+        fields.append("end_time")
+    if fields:
+        lesson.save(update_fields=fields)
     return True
+
+
+@transaction.atomic
+def delete_lesson(*, lesson, by_user=None) -> bool:
+    """Səhv açılmış dərsi sil — yalnız yaranışdan 2 saat içində.
+
+    Sütunun (təzə) işarələri kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
+    if journal_is_locked(lesson.offering) or not can_edit_lesson(lesson):
+        return False
+    offering = lesson.offering
+    label = f"{lesson.date} · {lesson.get_kind_display()}"
+    touched = [m.enrollment for m in LessonMark.objects.filter(lesson=lesson).select_related("enrollment")]
+    lesson.delete()
+    for enrollment in touched:
+        recompute_absence_hours(enrollment=enrollment)
+    grade_audit.log_grade_changes(
+        offering=offering,
+        by_user=by_user,
+        kind="mark",
+        changes=[{"student": "—", "item": label, "old": "dərs sütunu", "new": "silindi"}],
+    )
+    return True
+
+
+# Köhnə ad — mövcud çağırışlar üçün (yalnız tarix dəyişən variant).
+def update_lesson_date(*, lesson, date) -> bool:
+    try:
+        return update_lesson(lesson=lesson, date=date)
+    except LessonRuleError:
+        return False
 
 
 # ── Mark (iştirak/bal) yazma ─────────────────────────────────────────────────
 
 
 @transaction.atomic
-def save_marks(*, offering, entries, by_user=None):
+def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     """Persist attendance/score cells for an offering (bulk, from the grid).
 
     ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
@@ -138,6 +239,7 @@ def save_marks(*, offering, entries, by_user=None):
     (cross-offering/tenant injection rejected), honours the per-mark edit window
     (locked cells are skipped) and the lesson type (lecture cells never store a
     score). Blocked entirely when the journal is locked. Returns cells written.
+    ``enforce_day=False`` YALNIZ seed/test üçündür — HTTP qatı heç vaxt ötürmür.
     """
     if journal_is_locked(offering):
         return 0
@@ -145,11 +247,15 @@ def save_marks(*, offering, entries, by_user=None):
     lessons = {str(latt.id): latt for latt in offering.lessons.all()}
     enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
     existing = {(m.lesson_id, m.enrollment_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+    # Bildiriş keçidləri üçün yazıdan ƏVVƏLKİ qayıb saatları.
+    prior_hours = {e.id: e.absence_hours for e in enrollments.values()}
 
     written = 0
     touched = set()
     audit_changes = []
+    notify_events = []
     now = timezone.now()
+    today = timezone.localdate()
     for entry in entries or []:
         lesson = lessons.get(str(entry.get("lesson_id")))
         enrollment = enrollments.get(str(entry.get("enrollment_id")))
@@ -158,15 +264,20 @@ def save_marks(*, offering, entries, by_user=None):
         mark = existing.get((lesson.id, enrollment.id))
         if not can_edit_mark(mark, now=now):
             continue  # locked — no back-dated tampering
+        if enforce_day and mark is None and lesson.date != today:
+            continue  # YENİ işarə yalnız dərsin öz günündə yazılır
 
         status = entry.get("status")
         if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
             status = AttendanceStatus.PRESENT
         score = None
         if lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
-            score = max(Decimal("0"), _to_decimal(entry.get("score")))
+            # Seminar/lab balı: min 0, max 10 (sərt tavan).
+            score = min(max(Decimal("0"), _to_decimal(entry.get("score"))), LESSON_SCORE_MAX)
 
         old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
+        old_status = mark.status if mark is not None and mark.pk else None
+        old_score = mark.score if mark is not None and mark.pk else None
         if mark is None:
             mark = LessonMark(organization=offering.organization, lesson=lesson, enrollment=enrollment)
         new = _mark_repr(status, score)
@@ -183,15 +294,40 @@ def save_marks(*, offering, entries, by_user=None):
                     "new": new,
                 }
             )
+            # Tələbə bildirişləri: q/b qeydi və yeni/dəyişmiş bal.
+            from apps.registrar import journal_notifications as jn
+
+            if status == AttendanceStatus.ABSENT and old_status != AttendanceStatus.ABSENT:
+                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_ABSENT})
+            if score is not None and score != old_score:
+                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_SCORE, "score": score})
         touched.add(enrollment)
         written += 1
 
     # Keep the denormalised Enrollment.absence_hours (used by the "Fənlərim"
     # exam-eligibility badge) in sync with the journal — the single source of truth.
+    allowed = _allowed_absence_hours(offering, list(lessons.values()))
+    warn_at = allowed * _WARN_RATIO
     for enrollment in touched:
-        recompute_absence_hours(enrollment=enrollment)
+        new_hours = recompute_absence_hours(enrollment=enrollment)
+        prev = Decimal(prior_hours.get(enrollment.id, 0))
+        cur = Decimal(new_hours)
+        if allowed > 0 and cur > prev:
+            from apps.registrar import journal_notifications as jn
+
+            if prev <= allowed < cur:
+                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_BARRED})
+            elif prev < warn_at <= cur <= allowed:
+                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_LIMIT_WARNING, "hours": new_hours})
 
     grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="mark", changes=audit_changes)
+
+    if notify_events:
+        from django.db import transaction as _tx
+
+        from apps.registrar import journal_notifications as jn
+
+        _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
     return written
 
 
@@ -215,6 +351,16 @@ def recompute_absence_hours(*, enrollment):
     return hours
 
 
+def _lesson_parity(offering, lesson) -> str:
+    """Dərs tarixinin üst/alt həftə pariteti ('odd'/'even') — başlıq etiketləri."""
+    from datetime import timedelta as _td
+
+    from apps.registrar import schedule as _schedule
+
+    monday = lesson.date - _td(days=lesson.date.weekday())
+    return _schedule.week_parity(offering.period, monday)
+
+
 # ── Jurnal görünüşü (müəllim grid) ───────────────────────────────────────────
 
 
@@ -223,14 +369,18 @@ def _allowed_absence_hours(offering, lessons):
     return Decimal(total_hours) * Decimal(absence_limit_percent_for(offering)) / Decimal(100)
 
 
-def get_offering_journal(*, offering):
+def get_offering_journal(*, offering, newest_first=False):
     """Full journal grid: lessons (columns) × enrolled students (rows) + summary.
 
     One pass over the marks (no per-cell query). Each row carries the running
     absence hours, the accumulated entry score (giriş balı, capped) and the
-    barred / warning status used to grey or redden the row."""
+    barred / warning status used to grey or redden the row.
+    ``newest_first=True`` → sütun sırası tərs (ən yeni dərs adların yanında) —
+    müəllim grid-i üçün; export xronoloji qalır."""
     scheme = ensure_assessment_scheme(offering=offering)
-    lessons = list(offering.lessons.all())
+    lessons = list(offering.lessons.order_by("date", "created_at"))
+    if newest_first:
+        lessons.reverse()
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
         .select_related("student")
@@ -239,8 +389,22 @@ def get_offering_journal(*, offering):
     mark_map = {(m.enrollment_id, m.lesson_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
 
     now = timezone.now()
+    today = timezone.localdate()
     allowed_absence = _allowed_absence_hours(offering, lessons)
     warn_at = allowed_absence * _WARN_RATIO
+
+    lesson_meta = [
+        {
+            "lesson": lesson,
+            "is_today": lesson.date == today,
+            "editable": can_edit_lesson(lesson, now=now),  # sütun redaktə/silmə (2 saat)
+            "markable": lesson.date == today,  # yeni işarə yalnız bu gün
+            # xronoloji nömrə (köhnədən yeniyə) — sıra tərs olsa da nömrə sabitdir
+            "seq": (len(lessons) - idx) if newest_first else (idx + 1),
+            "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
+        }
+        for idx, lesson in enumerate(lessons)
+    ]
 
     rows = []
     for enrollment in enrollments:
@@ -250,12 +414,15 @@ def get_offering_journal(*, offering):
             mark = mark_map.get((enrollment.id, lesson.id))
             if mark is not None and mark.status == AttendanceStatus.ABSENT:
                 absence_hours += lesson.hours
+            locked = mark is not None and not can_edit_mark(mark, now=now)
             cells.append(
                 {
                     "lesson": lesson,
                     "mark": mark,
                     "allows_score": lesson_allows_score(lesson),
-                    "locked": mark is not None and not can_edit_mark(mark, now=now),
+                    "locked": locked,
+                    # yazıla bilən: mövcud işarə pəncərə içində, YA boş xana bu günün dərsində
+                    "writable": (mark is not None and not locked) or (mark is None and lesson.date == today),
                 }
             )
         # Canonical entry score (component-weighted when defined, else lesson sum).
@@ -278,7 +445,9 @@ def get_offering_journal(*, offering):
         "offering": offering,
         "scheme": scheme,
         "lessons": lessons,
+        "lesson_meta": lesson_meta,
         "rows": rows,
+        "today": today,
         "limit_percent": absence_limit_percent_for(offering),
         "allowed_absence": allowed_absence,
         "entry_score_max": scheme.entry_score_max,
@@ -326,169 +495,12 @@ def get_student_journal_summary(*, record, period, semester_number):
     return {"subjects": subjects}
 
 
-# ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
-
-
-def entry_score_for(enrollment, cap) -> Decimal:
-    """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
-
-    Component-based (weighted) when the offering defines ``AssessmentComponent``
-    rows — each score capped at its own ``max_score``; otherwise the legacy sum of
-    per-lesson seminar/lab marks. Single source of truth for both the teacher
-    journal and the student summary (finals delegates here)."""
-    cap = Decimal(cap)
-    components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
-    if components:
-        max_by = {c.id: Decimal(c.max_score) for c in components}
-        total = sum(
-            (
-                min(cs.score or Decimal("0"), max_by[cs.component_id])
-                for cs in ComponentScore.objects.filter(component_id__in=list(max_by), enrollment=enrollment)
-            ),
-            Decimal("0"),
-        )
-        return min(total, cap)
-
-    total = sum(
-        (m.score for m in LessonMark.objects.filter(enrollment=enrollment) if m.score is not None),
-        Decimal("0"),
-    )
-    return min(total, cap)
-
-
-def get_components(offering):
-    """Ordered assessment components of an offering."""
-    return list(AssessmentComponent.objects.filter(offering=offering).order_by("order", "name"))
-
-
-@transaction.atomic
-def save_components(*, offering, definitions, by_user=None):
-    """Upsert/delete an offering's assessment components from ``definitions``.
-
-    ``definitions`` = list of ``{"id"?, "name", "max_score", "rubric_id"?}``.
-    Rows with an id not present are deleted. Blocked once the journal is locked."""
-    if journal_is_locked(offering):
-        return get_components(offering)
-
-    from apps.registrar.models import Rubric
-
-    org_rubrics = {str(r.id): r for r in Rubric.objects.filter(organization=offering.organization, is_active=True)}
-    existing = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
-    existing_by_name = {c.name.strip().lower(): c for c in existing.values()}
-    seen: set = set()
-    for order, defn in enumerate(definitions):
-        name = (defn.get("name") or "").strip()
-        if not name:
-            continue
-        max_score = max(1, min(100, int(_to_decimal(defn.get("max_score")))))
-        # Match by explicit id, else by (case-insensitive) name so a re-save
-        # without ids upserts instead of colliding with the unique (offering, name).
-        rubric = org_rubrics.get(str(defn.get("rubric_id") or ""))  # U22: meyar şablonu (opsional)
-        component = existing.get(str(defn.get("id") or "")) or existing_by_name.get(name.lower())
-        if component is not None and str(component.id) not in seen:
-            component.name = name
-            component.max_score = max_score
-            component.order = order
-            component.rubric = rubric
-            component.save(update_fields=["name", "max_score", "order", "rubric"])
-            seen.add(str(component.id))
-        elif component is None:
-            created = AssessmentComponent.objects.create(
-                organization=offering.organization,
-                offering=offering,
-                name=name,
-                max_score=max_score,
-                order=order,
-                rubric=rubric,
-            )
-            seen.add(str(created.id))
-    # Drop components the teacher removed from the form.
-    for cid, component in existing.items():
-        if cid not in seen:
-            component.delete()
-    return get_components(offering)
-
-
-@transaction.atomic
-def save_component_scores(*, offering, entries, by_user=None):
-    """Persist per-(component, enrollment) scores. ``entries`` = list of
-    ``{"component_id", "enrollment_id", "score"}``. Lock-aware + tenant-safe."""
-    if journal_is_locked(offering):
-        return 0
-
-    valid_components = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
-    valid_enrollments = {str(e.id): e for e in offering.enrollments.all()}
-    written = 0
-    audit_changes = []
-    for entry in entries:
-        component = valid_components.get(str(entry.get("component_id")))
-        enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
-        if component is None or enrollment is None:
-            continue
-        existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
-        old_score = existing.score if existing else None
-        raw = entry.get("score")
-        if raw in (None, ""):
-            if existing is not None:
-                existing.delete()
-                audit_changes.append(_component_change(component, enrollment, old_score, None))
-            continue
-        score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
-        ComponentScore.objects.update_or_create(
-            organization=offering.organization,
-            component=component,
-            enrollment=enrollment,
-            defaults={"score": score, "entered_by": by_user},
-        )
-        if old_score != score:
-            audit_changes.append(_component_change(component, enrollment, old_score, score))
-        written += 1
-    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="component", changes=audit_changes)
-    return written
-
-
-def _component_change(component, enrollment, old_score, new_score):
-    return {
-        "student": grade_audit.student_label(enrollment),
-        "item": component.name,
-        "old": grade_audit.score_repr(old_score),
-        "new": grade_audit.score_repr(new_score),
-    }
-
-
-def get_component_grid(offering):
-    """Teacher grid: components (columns) × enrolled students (rows) + scores."""
-    components = get_components(offering)
-    enrollments = list(
-        offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
-        .select_related("student")
-        .order_by("student__last_name", "student__username")
-    )
-    comp_ids = [c.id for c in components]
-    score_map: dict = {}
-    if comp_ids:
-        for cs in ComponentScore.objects.filter(component_id__in=comp_ids, enrollment__offering=offering):
-            score_map[(cs.enrollment_id, cs.component_id)] = cs.score
-    rows = [
-        {
-            "enrollment": e,
-            "student": e.student,
-            "cells": [{"component": c, "score": score_map.get((e.id, c.id))} for c in components],
-        }
-        for e in enrollments
-    ]
-    total_max = sum(c.max_score for c in components)
-    return {"components": components, "rows": rows, "total_max": total_max}
-
-
-def get_component_breakdown(enrollment):
-    """Student-facing per-component breakdown (name, score, max)."""
-    components = get_components(enrollment.offering)
-    if not components:
-        return []
-    comp_ids = [c.id for c in components]
-    score_by = {
-        cs.component_id: cs.score
-        for cs in ComponentScore.objects.filter(component_id__in=comp_ids, enrollment=enrollment)
-    }
-    return [{"name": c.name, "score": score_by.get(c.id), "max": c.max_score} for c in components]
+# ── Komponent funksiyaları ayrıca modulda (modul-ölçü büdcəsi) — re-eksport ──
+from apps.registrar.gradebook_components import (  # noqa: E402,F401
+    entry_score_for,
+    get_component_breakdown,
+    get_component_grid,
+    get_components,
+    save_component_scores,
+    save_components,
+)

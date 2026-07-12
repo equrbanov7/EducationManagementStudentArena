@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from . import analytics_views, console_views, pdf_views, views
+from . import analytics_views, console_views, journal_actions, pdf_views, views
 
 app_name = "registrar"
 
@@ -37,5 +37,9 @@ urlpatterns = [
     path("idareetme/telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
     path("<uuid:offering_id>/rubrik/<uuid:component_id>/", views.rubric_grade_view, name="rubric_grade"),
     path("<uuid:offering_id>/export.xlsx", pdf_views.journal_xlsx, name="journal_xlsx"),
+    path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
+    path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
+    path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),
+    path("<uuid:offering_id>/kurs-isi/", journal_actions.coursework_save, name="journal_coursework_save"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]

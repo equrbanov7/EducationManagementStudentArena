@@ -235,8 +235,13 @@ class RubricViewTest(RubricBaseTest):
         with bypass_rls():
             self.assertFalse(Rubric.objects.filter(organization=self.org, name="Pozuq").exists())
 
-    def test_journal_components_tab_shows_rubric_controls(self):
-        resp = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
-        page = resp.content.decode()
-        self.assertIn("comp_rubric__0", page)
-        self.assertIn(reverse("registrar:rubric_grade", args=[self.offering.id, self.component.id]), page)
+    def test_rubric_grade_page_still_reachable(self):
+        """Mockup redizaynında Komponentlər tabı UI-dan çıxarılıb; rubrik
+        qiymətləndirmə səhifəsi birbaşa URL ilə işlək qalır."""
+        resp = self._client(self.teacher).get(
+            reverse("registrar:rubric_grade", args=[self.offering.id, self.component.id])
+        )
+        self.assertEqual(resp.status_code, 200)
+        # Jurnal detalında köhnə komponent formu artıq render olunmur.
+        detail = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertNotContains(detail, "comp_rubric__0")

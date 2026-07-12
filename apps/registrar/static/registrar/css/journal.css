@@ -493,3 +493,39 @@
     border-radius: 6px;
 }
 .gh-arrow { color: var(--ems-neutral-400); font-size: 0.7rem; }
+
+/* ═══ Qrup seçimi cədvəli (jurnal giriş nöqtəsi — mockup ilə birə-bir) ═══ */
+.jl-table-wrap {
+    overflow-x: auto; border-radius: 16px; border: 1px solid #dce6f7;
+    background: #fff; box-shadow: 0 8px 28px rgba(18, 39, 78, 0.07);
+}
+.jl-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.jl-table thead th {
+    background: #0f2a5c; color: #fff; text-align: left;
+    padding: 12px 14px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px;
+}
+.jl-table tbody td { padding: 13px 14px; border-bottom: 1px solid #eef3fb; vertical-align: middle; }
+.jl-table tbody tr:last-child td { border-bottom: none; }
+.jl-table tbody tr.jl-row:hover { background: #f7faff; }
+.jl-col-no { width: 56px; color: #5b72a0; font-weight: 700; }
+.jl-group-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.jl-group { font-weight: 700; color: #12274e; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+.jl-row:hover .jl-group { color: #1d4ed8; }
+.jl-subject-sub { font-size: 12px; color: #5b72a0; font-weight: 600; margin-top: 2px; }
+.jl-col-kind { width: 150px; font-size: 13px; font-weight: 600; color: #3a5384; }
+.jl-col-count { width: 120px; text-align: center; font-size: 14px; font-weight: 800; color: #12274e; }
+.jl-col-action { width: 140px; text-align: left; }
+.jl-open-btn {
+    display: inline-block; text-decoration: none; white-space: nowrap;
+    border: 1px solid #dce6f7; color: #5b72a0; background: #fff;
+    border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.jl-row:hover .jl-open-btn,
+.jl-open-btn:hover { background: #2563eb; border-color: #2563eb; color: #fff; }
+.jl-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.4px;
+    border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+}
+.jl-badge--master { background: #dbeafe; color: #1d4ed8; }
+.jl-badge--info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
