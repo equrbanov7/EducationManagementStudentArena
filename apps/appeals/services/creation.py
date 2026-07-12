@@ -97,8 +97,17 @@ def create_appeal(*, attempt, student, items, org_unit=None):
     """
     from django.apps import apps as django_apps
 
+    from apps.appeals.services.window import is_within_appeal_window
+
     ExamAttempt = django_apps.get_model("exams", "ExamAttempt")
     attempt = ExamAttempt.objects.select_for_update().select_related("exam", "exam__organization").get(pk=attempt.pk)
+
+    # Defense-in-depth: 3-günlük pəncərə view-dən əlavə burada da invariantdır —
+    # kilidlənmiş attempt üzərində yenidən yoxlanır ki, bağlanmış pəncərədə
+    # crafted POST və ya başqa çağırış yolu appeal yarada bilməsin.
+    if not is_within_appeal_window(attempt):
+        raise ValidationError(pgettext("appeals.service.create.error", "Apellyasiya müddəti bitib."))
+
     cleaned = _clean_items(attempt, items)
 
     exam = attempt.exam

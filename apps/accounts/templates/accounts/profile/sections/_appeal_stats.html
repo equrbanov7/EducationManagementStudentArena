@@ -1,0 +1,404 @@
+{% load static i18n %}
+{% if 'appeal-stats' in allowed_sections %}
+<section class="profile-section-panel profile-section--appeal-stats {% if active_section == 'appeal-stats' %}is-active{% endif %}"
+         data-profile-section-panel="appeal-stats"
+         data-source-url="{{ profile_base_url }}?section=appeal-stats">
+<style nonce="{{ request.csp_nonce }}">
+  .aps { color: var(--ems-neutral-900); }
+  .aps-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap; }
+  .aps-head h2 { margin:0; font-size:1.35rem; font-weight:800; display:flex; align-items:center; gap:.55rem; color:var(--ems-primary-700); }
+  .aps-head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.92rem; max-width:52rem; }
+  .aps-btn { display:inline-flex; align-items:center; gap:.45rem; padding:.6rem 1rem; border-radius:10px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-primary-700); font-weight:700; font-size:.85rem; cursor:pointer; text-decoration:none; }
+  .aps-btn:hover { background:var(--ems-primary-50); border-color:var(--ems-primary-300); }
+  .aps-btn--primary { background:var(--ems-primary-600); color:#fff; border-color:var(--ems-primary-600); box-shadow:0 1px 2px rgba(37,99,235,.25); }
+  .aps-btn--primary:hover { background:var(--ems-primary-700); color:#fff; }
+  .aps-filters { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:.75rem; margin:1.15rem 0; }
+  .aps-field label { display:block; font-size:.72rem; font-weight:700; color:var(--ems-neutral-500); margin-bottom:.32rem; text-transform:uppercase; letter-spacing:.02em; }
+  .aps-field input, .aps-field select { width:100%; padding:.6rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
+  .aps-field input:focus, .aps-field select:focus { outline:none; border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
+  .aps-filters .bootstrap-single-select__toggle { min-height:0; padding:.6rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
+  .aps-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.35rem; position:relative; min-height:2.7rem; }
+  .aps-ms:focus-within { border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
+  .aps-ms__chips { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; }
+  .aps-chip { display:inline-flex; align-items:center; gap:.3rem; background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-100); border-radius:999px; padding:.15rem .3rem .15rem .55rem; font-size:.76rem; font-weight:700; }
+  .aps-chip span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:12rem; }
+  .aps-chip__x { cursor:pointer; border:0; background:transparent; color:var(--ems-primary-600); font-size:1rem; line-height:1; padding:0 .1rem; }
+  .aps-ms__search { border:0; outline:none; background:transparent; color:var(--ems-neutral-900); padding:.28rem; font-size:.86rem; min-width:90px; flex:1; }
+  .aps-ms__menu { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; box-shadow:0 12px 30px rgba(15,23,42,.14); max-height:230px; overflow-y:auto; z-index:30; display:none; }
+  .aps-ms.is-open .aps-ms__menu { display:block; }
+  .aps-ms__opt { padding:.55rem .8rem; cursor:pointer; font-size:.86rem; color:var(--ems-neutral-800); }
+  .aps-ms__opt:hover { background:var(--ems-primary-50); color:var(--ems-primary-700); }
+  .aps-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:.75rem; margin-bottom:1rem; }
+  .aps-card { border:1px solid var(--ems-neutral-200); border-left:4px solid var(--ems-primary-600); border-radius:12px; background:#fff; padding:.9rem 1.05rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .aps-card--pending { border-left-color:var(--ems-warning-500, #f59e0b); }
+  .aps-card--accepted { border-left-color:var(--ems-success-600, #059669); }
+  .aps-card--rejected { border-left-color:var(--ems-danger-500, #ef4444); }
+  .aps-card__n { font-size:1.7rem; font-weight:800; color:var(--ems-primary-700); line-height:1.05; }
+  .aps-card--pending .aps-card__n { color:var(--ems-warning-600, #d97706); }
+  .aps-card--accepted .aps-card__n { color:var(--ems-success-600, #059669); }
+  .aps-card--rejected .aps-card__n { color:var(--ems-danger-600, #dc2626); }
+  .aps-card__l { color:var(--ems-neutral-500); font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-top:.1rem; }
+  .aps-tablewrap { border:1px solid var(--ems-neutral-200); border-radius:12px; overflow-x:auto; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .aps-table { width:100%; border-collapse:collapse; font-size:.86rem; min-width:980px; }
+  .aps-table th, .aps-table td { padding:.7rem .85rem; text-align:left; border-bottom:1px solid var(--ems-neutral-200); white-space:nowrap; }
+  .aps-table thead th { background:var(--ems-primary-50); color:var(--ems-primary-800); font-weight:800; font-size:.7rem; text-transform:uppercase; letter-spacing:.03em; border-bottom:2px solid var(--ems-primary-200); position:sticky; top:0; }
+  .aps-table thead th.is-sortable { cursor:pointer; user-select:none; }
+  .aps-table thead th.is-sortable:hover { background:var(--ems-primary-100); }
+  .aps-table thead th.is-active { background:var(--ems-primary-100); }
+  .aps-arrow { font-size:.9rem; margin-left:.3rem; color:var(--ems-neutral-400); }
+  .aps-table thead th.is-active .aps-arrow { color:var(--ems-primary-600); }
+  .aps-table tbody td { color:var(--ems-neutral-900); }
+  .aps-clip { max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+  .aps-table tbody tr:nth-child(even) { background:var(--ems-neutral-50); }
+  .aps-table tbody tr:hover { background:var(--ems-primary-50); }
+  .aps-uname { color:var(--ems-neutral-500); font-size:.76rem; }
+  .aps-badge { display:inline-block; padding:.2rem .55rem; border-radius:999px; font-size:.72rem; font-weight:800; }
+  .aps-badge--pending { background:var(--ems-warning-50,#fffbeb); color:var(--ems-warning-700,#b45309); }
+  .aps-badge--accepted, .aps-badge--partially_accepted { background:var(--ems-success-100,#d1fae5); color:var(--ems-success-700,#047857); }
+  .aps-badge--rejected { background:#fee2e2; color:#b91c1c; }
+  .aps-badge--under_review { background:var(--ems-primary-50); color:var(--ems-primary-700); }
+  .aps-view { display:inline-flex; align-items:center; gap:.35rem; padding:.32rem .7rem; border-radius:8px; background:var(--ems-primary-600); color:#fff; font-weight:700; font-size:.76rem; text-decoration:none; }
+  .aps-view:hover { background:var(--ems-primary-700); color:#fff; }
+  .aps-state { padding:2.4rem 1rem; text-align:center; color:var(--ems-neutral-500); }
+  .aps-state i { font-size:1.8rem; display:block; margin-bottom:.5rem; opacity:.55; }
+  .aps-skel { height:1rem; border-radius:6px; background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-200) 37%,var(--ems-neutral-100) 63%); background-size:400% 100%; animation:aps-shimmer 1.3s ease infinite; }
+  @keyframes aps-shimmer { 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+  .aps-pager { display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:1rem; color:var(--ems-neutral-500); font-size:.88rem; }
+  .aps-pager button { padding:.46rem .95rem; border-radius:8px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-primary-700); font-weight:700; cursor:pointer; }
+  .aps-pager button:hover:not(:disabled) { background:var(--ems-primary-50); }
+  .aps-pager button:disabled { opacity:.45; cursor:default; }
+  .aps-charts { margin-top:1.5rem; }
+  .aps-charts__head h3 { margin:0; font-size:1.08rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
+  .aps-charts__head p { margin:.25rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; }
+  .aps-charts__grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:1rem; margin-top:1rem; }
+  .aps-chartbox { border:1px solid var(--ems-neutral-200); border-radius:12px; background:#fff; padding:1rem 1.1rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+  .aps-chartbox--wide { grid-column:1 / -1; }
+  .aps-chartbox__title { font-size:.86rem; font-weight:800; color:var(--ems-neutral-700); display:flex; align-items:center; gap:.45rem; margin-bottom:.7rem; }
+  .aps-chartbox__title i { color:var(--ems-primary-600); }
+  .aps-chartbox__wrap { position:relative; height:250px; }
+  .aps-ai { margin-top:1.25rem; border:1px solid var(--ems-primary-100); border-radius:12px; background:linear-gradient(180deg, var(--ems-primary-50), #fff 55%); padding:1.1rem 1.2rem; }
+  .aps-ai__head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+  .aps-ai__head h3 { margin:0; font-size:1.05rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
+  .aps-ai__head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; max-width:46rem; }
+  .aps-ai__out { margin-top:.9rem; }
+  .aps-ai__hint { color:var(--ems-neutral-400); font-size:.86rem; }
+  .aps-ai__loading { color:var(--ems-primary-700); font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+  .aps-ai__error { color:#b91c1c; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:.7rem .9rem; font-size:.88rem; }
+  .aps-ai__text { background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; padding:1rem 1.15rem; color:var(--ems-neutral-800); font-size:.92rem; line-height:1.6; }
+  .aps-ai__text h1, .aps-ai__text h2, .aps-ai__text h3, .aps-ai__text h4 { color:var(--ems-primary-700); margin:.9rem 0 .35rem; font-size:1rem; }
+  .aps-ai__text ul { margin:.4rem 0 .6rem 1.2rem; padding:0; }
+  .aps-ai__quota { margin-top:.7rem; padding:.55rem .8rem; background:var(--ems-primary-50); border-radius:8px; font-size:.82rem; color:var(--ems-primary-800); }
+</style>
+
+<div class="aps"
+     data-data-url="{% url 'appeals:appeal_stats_data' %}"
+     data-charts-url="{% url 'appeals:appeal_stats_charts' %}"
+     data-filters-url="{% url 'appeals:appeal_stats_filters' %}"
+     data-ai-url="{% url 'appeals:appeal_stats_ai' %}"
+     data-subject-url="{% url 'exams:subject_search' %}"
+     data-group-url="{% url 'exams:group_search' %}"
+     data-detail-url-template="{% url 'appeals:appeal_detail' 0 %}">
+  <div class="aps-head">
+    <div>
+      <h2><i class="fas fa-gavel"></i> {% trans "Apellyasiya statistikası" %}</h2>
+      <p>{% trans "Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status, semestr və il üzrə süzün. Sütun başlığına klik = sırala. Yüksək qəbul faizi qiymətləndirmə/cavab açarı problemlərinə işarə ola bilər." %}</p>
+    </div>
+    <button type="button" class="aps-btn js-aps-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" %}</button>
+  </div>
+
+  <div class="aps-filters">
+    <div class="aps-field">
+      <label>{% trans "Axtarış" %}</label>
+      <input type="search" class="js-aps-q" placeholder="{% trans 'Tələbə və ya imtahan adı…' %}" autocomplete="off">
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Fənn" %}</label>
+      <div class="aps-ms js-aps-subject"><div class="aps-ms__chips"><input type="text" class="aps-ms__search" placeholder="{% trans 'fənn axtar…' %}"></div><div class="aps-ms__menu"></div></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Qrup" %}</label>
+      <div class="aps-ms js-aps-group"><div class="aps-ms__chips"><input type="text" class="aps-ms__search" placeholder="{% trans 'qrup axtar…' %}"></div><div class="aps-ms__menu"></div></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Kafedra / fakültə" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-unit" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "İmtahan tipi" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "İmtahan forması" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Status" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Semestr" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "İl" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+  </div>
+
+  <div class="aps-cards js-aps-cards"></div>
+  <div class="aps-tablewrap">
+    <table class="aps-table">
+      <thead><tr class="js-aps-thead">
+        <th class="is-sortable" data-sort="student">{% trans "Tələbə" %}<i class="fas fa-sort aps-arrow"></i></th>
+        <th>{% trans "Qrup" %}</th>
+        <th>{% trans "Müəllim" %}</th>
+        <th class="is-sortable" data-sort="exam">{% trans "İmtahan" %}<i class="fas fa-sort aps-arrow"></i></th>
+        <th class="is-sortable" data-sort="subject">{% trans "Fənn" %}<i class="fas fa-sort aps-arrow"></i></th>
+        <th class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort aps-arrow"></i></th>
+        <th>{% trans "Sual" %}</th>
+        <th class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort aps-arrow"></i></th>
+        <th class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort aps-arrow"></i></th>
+        <th>{% trans "Detal" %}</th>
+      </tr></thead>
+      <tbody class="js-aps-rows"></tbody>
+    </table>
+  </div>
+  <div class="aps-pager js-aps-pager"></div>
+
+  <div class="aps-charts">
+    <div class="aps-charts__head">
+      <h3><i class="fas fa-chart-pie"></i> {% trans "Analitik qrafiklər" %}</h3>
+      <p>{% trans "Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş apellyasiyalar üzrə hesablanır." %}</p>
+    </div>
+    <div class="aps-charts__grid">
+      <div class="aps-chartbox">
+        <div class="aps-chartbox__title"><i class="fas fa-circle-half-stroke"></i> {% trans "Status üzrə bölgü" %}</div>
+        <div class="aps-chartbox__wrap"><canvas class="js-aps-c-status"></canvas></div>
+      </div>
+      <div class="aps-chartbox">
+        <div class="aps-chartbox__title"><i class="fas fa-layer-group"></i> {% trans "İmtahan tipi üzrə" %}</div>
+        <div class="aps-chartbox__wrap"><canvas class="js-aps-c-type"></canvas></div>
+      </div>
+      <div class="aps-chartbox aps-chartbox--wide">
+        <div class="aps-chartbox__title"><i class="fas fa-chart-line"></i> {% trans "Aylıq dinamika" %}</div>
+        <div class="aps-chartbox__wrap"><canvas class="js-aps-c-monthly"></canvas></div>
+      </div>
+      <div class="aps-chartbox">
+        <div class="aps-chartbox__title"><i class="fas fa-book"></i> {% trans "Fənn üzrə (ən çox 10)" %}</div>
+        <div class="aps-chartbox__wrap"><canvas class="js-aps-c-subject"></canvas></div>
+      </div>
+      <div class="aps-chartbox">
+        <div class="aps-chartbox__title"><i class="fas fa-chalkboard-user"></i> {% trans "Müəllim üzrə (ən çox 10)" %}</div>
+        <div class="aps-chartbox__wrap"><canvas class="js-aps-c-teacher"></canvas></div>
+      </div>
+    </div>
+
+    <div class="aps-ai">
+      <div class="aps-ai__head">
+        <div>
+          <h3><i class="fas fa-robot"></i> {% trans "AI xülasə" %}</h3>
+          <p>{% trans "Filtrə uyğun bütün apellyasiyaları süni intellekt ümumiləşdirir — harada cəmləşir, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir, limit sərf olunmur." %}</p>
+        </div>
+        <button type="button" class="aps-btn aps-btn--primary js-aps-ai-btn"><i class="fas fa-magic"></i> {% trans "AI ilə analiz et" %}</button>
+      </div>
+      <div class="aps-ai__out js-aps-ai-out">
+        <div class="aps-ai__hint">{% trans "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır." %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+  var root = document.querySelector(".aps");
+  if (!root || root.dataset.apsInit === "1") { return; }
+  root.dataset.apsInit = "1";
+  var U = { data:root.dataset.dataUrl, charts:root.dataset.chartsUrl, filters:root.dataset.filtersUrl,
+            ai:root.dataset.aiUrl, subject:root.dataset.subjectUrl, group:root.dataset.groupUrl,
+            detail:root.dataset.detailUrlTemplate };
+  var T = { total:"{% trans 'Ümumi' %}", students:"{% trans 'Tələbə' %}", exams:"{% trans 'İmtahan' %}",
+            none:"{% trans 'Apellyasiya tapılmadı.' %}", prev:"{% trans 'Əvvəlki' %}", next:"{% trans 'Sonrakı' %}",
+            page:"{% trans 'Səhifə' %}", view:"{% trans 'Bax' %}",
+            ai_loading:"{% trans 'AI xülasə hazırlanır…' %}", ai_error:"{% trans 'AI analizi alınmadı. Bir az sonra yenidən cəhd edin.' %}",
+            ai_quota:"{% trans 'Qalan AI limiti' %}", ai_cached:"{% trans 'keşdən' %}", hint:"{% trans 'Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır.' %}" };
+  var COLORS = ["#2563eb","#059669","#f59e0b","#ef4444","#8b5cf6","#0ea5e9","#14b8a6","#f97316","#ec4899","#64748b"];
+  var q = root.querySelector(".js-aps-q");
+  var sel = { unit:root.querySelector(".js-aps-unit"), type:root.querySelector(".js-aps-type"),
+              format:root.querySelector(".js-aps-format"), status:root.querySelector(".js-aps-status"),
+              semester:root.querySelector(".js-aps-semester"), year:root.querySelector(".js-aps-year") };
+  var cards = root.querySelector(".js-aps-cards"), rows = root.querySelector(".js-aps-rows"),
+      pager = root.querySelector(".js-aps-pager"), thead = root.querySelector(".js-aps-thead");
+  var page = 1, sort = "-date", timer = null, charts = {};
+  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
+  function detailUrl(id){ return U.detail ? U.detail.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
+
+  function multiSelect(el, url){
+    var chipsWrap=el.querySelector(".aps-ms__chips"), search=el.querySelector(".aps-ms__search"),
+        menu=el.querySelector(".aps-ms__menu"), selected={}, t=null;
+    function ids(){ return Object.keys(selected); }
+    function renderChips(){
+      chipsWrap.querySelectorAll(".aps-chip").forEach(function(c){ c.remove(); });
+      Object.keys(selected).forEach(function(id){
+        var chip=document.createElement("span"); chip.className="aps-chip";
+        chip.innerHTML='<span></span><button type="button" class="aps-chip__x">×</button>';
+        chip.querySelector("span").textContent=selected[id];
+        chip.querySelector(".aps-chip__x").addEventListener("click", function(){ delete selected[id]; renderChips(); reload(); });
+        chipsWrap.insertBefore(chip, search);
+      });
+    }
+    function fetchOpts(term){
+      fetch(url+(url.indexOf("?")===-1?"?":"&")+"q="+encodeURIComponent(term)+"&limit=10", {headers:{"X-Requested-With":"XMLHttpRequest"}})
+        .then(function(r){ return r.ok?r.json():{results:[]}; })
+        .then(function(d){ menu.innerHTML="";
+          (d.results||[]).forEach(function(o){ if(selected[o.id]) return;
+            var div=document.createElement("div"); div.className="aps-ms__opt"; div.textContent=o.text;
+            div.addEventListener("mousedown", function(ev){ ev.preventDefault(); selected[o.id]=o.text; renderChips(); el.classList.remove("is-open"); search.value=""; reload(); });
+            menu.appendChild(div); });
+          el.classList.toggle("is-open", menu.children.length>0); });
+    }
+    search.addEventListener("input", function(){ if(t) clearTimeout(t); t=setTimeout(function(){ fetchOpts(search.value.trim()); }, 250); });
+    search.addEventListener("focus", function(){ fetchOpts(search.value.trim()); });
+    search.addEventListener("blur", function(){ setTimeout(function(){ el.classList.remove("is-open"); }, 160); });
+    function clear(){ selected={}; renderChips(); }
+    return { ids:ids, clear:clear };
+  }
+  var subjectMS = multiSelect(root.querySelector(".js-aps-subject"), U.subject);
+  var groupMS = multiSelect(root.querySelector(".js-aps-group"), U.group);
+
+  function params(extra){
+    var p=new URLSearchParams();
+    if(q.value.trim()) p.set("q", q.value.trim());
+    if(subjectMS.ids().length) p.set("subjects", subjectMS.ids().join(","));
+    if(groupMS.ids().length) p.set("groups", groupMS.ids().join(","));
+    if(sel.unit.value) p.set("units", sel.unit.value);
+    if(sel.type.value) p.set("type", sel.type.value);
+    if(sel.format.value) p.set("format", sel.format.value);
+    if(sel.status.value) p.set("status", sel.status.value);
+    if(sel.semester.value) p.set("semester", sel.semester.value);
+    if(sel.year.value) p.set("year", sel.year.value);
+    if(sort) p.set("sort", sort);
+    if(extra) Object.keys(extra).forEach(function(k){ p.set(k, extra[k]); });
+    return p;
+  }
+  function card(n,l,mod){ return '<div class="aps-card'+(mod?" aps-card--"+mod:"")+'"><div class="aps-card__n">'+n+'</div><div class="aps-card__l">'+esc(l)+'</div></div>'; }
+  function renderCards(s){
+    var html = card(s.total,T.total)+card(s.students,T.students)+card(s.exams,T.exams);
+    (s.by_status||[]).forEach(function(x){ html += card(x.n, x.label, x.code); });
+    cards.innerHTML = html;
+  }
+  function renderArrows(){
+    thead.querySelectorAll("th.is-sortable").forEach(function(th){
+      var key=th.getAttribute("data-sort"), a=th.querySelector(".aps-arrow");
+      th.classList.toggle("is-active", sort===key||sort==="-"+key);
+      a.className="fas aps-arrow "+(sort===key?"fa-sort-up":(sort==="-"+key?"fa-sort-down":"fa-sort"));
+    });
+  }
+  function skeletonRows(){
+    var tr=""; for(var i=0;i<8;i++){ tr+='<tr>'; for(var c=0;c<10;c++){ tr+='<td><div class="aps-skel"></div></td>'; } tr+='</tr>'; }
+    rows.innerHTML=tr;
+  }
+  function renderRows(data){
+    var list=data.results||[];
+    if(!list.length){ rows.innerHTML='<tr><td colspan="10"><div class="aps-state"><i class="fas fa-folder-open"></i>'+T.none+'</div></td></tr>'; pager.innerHTML=""; return; }
+    function clip(v){ v=v||"—"; return '<td class="aps-clip" title="'+esc(v)+'">'+esc(v)+'</td>'; }
+    rows.innerHTML=list.map(function(r){
+      var badge='<span class="aps-badge aps-badge--'+esc(r.status_code)+'">'+esc(r.status)+'</span>';
+      return '<tr><td><b>'+esc(r.student)+'</b><br><span class="aps-uname">@'+esc(r.username)+'</span></td>'+
+        clip(r.group)+clip(r.teacher)+clip(r.exam)+clip(r.subject)+
+        '<td>'+esc(r.type||"—")+'</td><td>'+esc(r.items)+'</td><td>'+badge+'</td><td>'+esc(r.date)+'</td>'+
+        '<td><a class="aps-view" href="'+detailUrl(r.appeal_id)+'"><i class="fas fa-eye"></i> '+T.view+'</a></td></tr>';
+    }).join("");
+    var pg=data.pagination;
+    pager.innerHTML='<button class="js-aps-prev"'+(pg.has_prev?"":" disabled")+'>'+T.prev+'</button>'+
+      '<span>'+T.page+' '+pg.page+' / '+pg.num_pages+' · '+pg.count+'</span>'+
+      '<button class="js-aps-next"'+(pg.has_next?"":" disabled")+'>'+T.next+'</button>';
+    var pv=pager.querySelector(".js-aps-prev"), nx=pager.querySelector(".js-aps-next");
+    if(pv) pv.addEventListener("click", function(){ if(pg.has_prev){ page=pg.page-1; load(); } });
+    if(nx) nx.addEventListener("click", function(){ if(pg.has_next){ page=pg.page+1; load(); } });
+  }
+
+  function whenChart(cb){ if(typeof window.Chart==="function"){ cb(); return; } var n=0, iv=setInterval(function(){ if(typeof window.Chart==="function"||n++>50){ clearInterval(iv); if(typeof window.Chart==="function") cb(); } }, 100); }
+  function draw(key, canvas, cfg){ if(!canvas) return; if(charts[key]) charts[key].destroy(); charts[key]=new window.Chart(canvas, cfg); }
+  function baseOpts(extra){ return Object.assign({responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}, extra||{}); }
+  function renderCharts(d){
+    whenChart(function(){
+      draw("status", root.querySelector(".js-aps-c-status"), {type:"doughnut",
+        data:{labels:d.by_status.labels, datasets:[{data:d.by_status.counts, backgroundColor:COLORS}]},
+        options:baseOpts({cutout:"62%", plugins:{legend:{display:true, position:"bottom"}}})});
+      draw("type", root.querySelector(".js-aps-c-type"), {type:"bar",
+        data:{labels:d.by_type.labels, datasets:[{data:d.by_type.counts, backgroundColor:"#2563eb", borderRadius:6}]},
+        options:baseOpts({scales:{y:{beginAtZero:true, ticks:{precision:0}}}})});
+      draw("monthly", root.querySelector(".js-aps-c-monthly"), {type:"line",
+        data:{labels:d.monthly.labels, datasets:[{data:d.monthly.counts, borderColor:"#2563eb", backgroundColor:"rgba(37,99,235,.12)", fill:true, tension:.3}]},
+        options:baseOpts({scales:{y:{beginAtZero:true, ticks:{precision:0}}}})});
+      draw("subject", root.querySelector(".js-aps-c-subject"), {type:"bar",
+        data:{labels:d.by_subject.labels, datasets:[{data:d.by_subject.counts, backgroundColor:"#059669", borderRadius:6}]},
+        options:baseOpts({indexAxis:"y", scales:{x:{beginAtZero:true, ticks:{precision:0}}}})});
+      draw("teacher", root.querySelector(".js-aps-c-teacher"), {type:"bar",
+        data:{labels:d.by_teacher.labels, datasets:[{data:d.by_teacher.counts, backgroundColor:"#8b5cf6", borderRadius:6}]},
+        options:baseOpts({indexAxis:"y", scales:{x:{beginAtZero:true, ticks:{precision:0}}}})});
+    });
+  }
+
+  function load(){
+    skeletonRows(); renderArrows();
+    fetch(U.data+"?"+params({page:page}).toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ if(!d) return; renderCards(d.summary); renderRows(d); });
+    fetch(U.charts+"?"+params().toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ if(d) renderCharts(d); });
+  }
+  function reload(){ page=1; load(); }
+
+  thead.querySelectorAll("th.is-sortable").forEach(function(th){
+    th.addEventListener("click", function(){ var key=th.getAttribute("data-sort"); sort=(sort===key)?("-"+key):key; reload(); });
+  });
+  q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
+  Object.keys(sel).forEach(function(k){ sel[k].addEventListener("change", reload); });
+  root.querySelector(".js-aps-reset").addEventListener("click", function(){
+    q.value=""; subjectMS.clear(); groupMS.clear();
+    Object.keys(sel).forEach(function(k){ sel[k].value=""; if(typeof sel[k]._refreshBootstrapSelect==="function") sel[k]._refreshBootstrapSelect(); });
+    sort="-date"; reload();
+  });
+
+  // AI xülasə
+  var aiOut = root.querySelector(".js-aps-ai-out");
+  root.querySelector(".js-aps-ai-btn").addEventListener("click", function(){
+    aiOut.innerHTML='<div class="aps-ai__loading"><i class="fas fa-spinner fa-spin"></i>'+esc(T.ai_loading)+'</div>';
+    fetch(U.ai+"?"+params().toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d || !d.ok){ aiOut.innerHTML='<div class="aps-ai__error">'+esc((d&&d.error)||T.ai_error)+'</div>'; return; }
+        var html='<div class="aps-ai__text">'+markdown(d.summary||"")+'</div>';
+        if(d.limit!=null){ html+='<div class="aps-ai__quota">'+esc(T.ai_quota)+': '+esc(d.remaining)+'/'+esc(d.limit)+(d.cached?' · '+esc(T.ai_cached):'')+'</div>'; }
+        aiOut.innerHTML=html;
+      })
+      .catch(function(){ aiOut.innerHTML='<div class="aps-ai__error">'+esc(T.ai_error)+'</div>'; });
+  });
+  function markdown(t){
+    var h=esc(t);
+    h=h.replace(/^### (.*)$/gm,"<h4>$1</h4>").replace(/^## (.*)$/gm,"<h3>$1</h3>").replace(/^# (.*)$/gm,"<h3>$1</h3>");
+    h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+    h=h.replace(/^\s*[-*] (.*)$/gm,"<li>$1</li>").replace(/(<li>[\s\S]*?<\/li>)/g,"<ul>$1</ul>");
+    h=h.replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
+    return "<p>"+h+"</p>";
+  }
+
+  fetch(U.filters, {headers:{"X-Requested-With":"XMLHttpRequest"}})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){ if(!d) return;
+      function fill(s, arr, valKey, labKey){ (arr||[]).forEach(function(x){ var o=document.createElement("option"); o.value=x[valKey]; o.textContent=x[labKey]; s.appendChild(o); }); }
+      (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; sel.year.appendChild(o); });
+      fill(sel.unit, d.units, "id", "name");
+      fill(sel.type, d.types, "value", "label");
+      fill(sel.format, d.formats, "value", "label");
+      fill(sel.status, d.statuses, "value", "label");
+      fill(sel.semester, d.semesters, "value", "label");
+      Object.keys(sel).forEach(function(k){ if(typeof sel[k]._refreshBootstrapSelect==="function") sel[k]._refreshBootstrapSelect(); });
+    });
+  load();
+})();
+</script>
+</section>
+{% endif %}

@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -14,6 +15,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.features import practical_exam_disabled_message, practical_exams_enabled
+from apps.exams.metrics import record_autosave
 from apps.exams.models import CodingExamQuestion, CodingSubmission, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
@@ -32,6 +34,7 @@ from apps.exams.services.coding_throttle import acquire_run_slot, release_run_sl
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import build_exam_result_url, current_return_to, ensure_student_exam_tenant_context
+from .access_guard import ensure_active_attempt_access
 
 
 def _json_error(message, *, status=400, extra=None):
@@ -56,7 +59,7 @@ def _get_coding_attempt(request, slug, attempt_id):
     if not practical_exams_enabled():
         raise Http404(practical_exam_disabled_message())
     ensure_student_exam_tenant_context(request)
-    return get_object_or_404(
+    attempt = get_object_or_404(
         ExamAttempt.objects.select_related("exam", "user"),
         id=attempt_id,
         exam__in=tenant_scoped_exams(request),
@@ -64,6 +67,8 @@ def _get_coding_attempt(request, slug, attempt_id):
         exam__exam_type="coding",
         user=request.user,
     )
+    ensure_active_attempt_access(attempt, request.user)
+    return attempt
 
 
 def _get_attempt_coding_questions(attempt):
@@ -401,6 +406,7 @@ def coding_autosave(request, slug, attempt_id):
     if attempt.status != "draft":
         attempt.status = "draft"
         attempt.save(update_fields=["status"])
+    record_autosave("success")
     return JsonResponse({"success": True, "submission": _submission_payload(submission)})
 
 
@@ -488,17 +494,24 @@ def coding_submit(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
-    already_finished = attempt.is_finished
-    time_expired = attempt.is_time_limit_reached()
 
-    if already_finished:
-        return JsonResponse(
-            {
-                "success": True,
-                "finished": True,
-                "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
-            }
-        )
+    # Attempt lock-u paralel ikinci final submit-i idempotent edir (EXAM-P1-13).
+    with transaction.atomic():
+        locked_attempt = ExamAttempt.objects.select_for_update().get(pk=attempt.pk)
+        ensure_active_attempt_access(locked_attempt, request.user)
+        if locked_attempt.is_finished:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "finished": True,
+                    "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
+                }
+            )
+        return _finalize_coding_submit(request, locked_attempt)
+
+
+def _finalize_coding_submit(request, attempt):
+    time_expired = attempt.is_time_limit_reached()
 
     submission_items, error = _build_submission_items(request, attempt)
     if error:

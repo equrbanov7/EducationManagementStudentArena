@@ -107,10 +107,11 @@ class ApprovalServiceTest(_ApprovalBase):
     def test_submit_locks_mark_editing(self):
         with bypass_rls():
             lesson = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
             written = gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}

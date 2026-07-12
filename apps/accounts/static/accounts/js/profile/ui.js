@@ -313,7 +313,10 @@
                 titleEl.textContent = gettext("Giriş Kodu");
             }
             if (textEl) {
-                textEl.innerHTML = '<strong>"' + (examTitle || "") + gettext('"</strong> imtahanına keçid üçün kodu yazın.');
+                var titleStrong = document.createElement("strong");
+                titleStrong.textContent = '"' + (examTitle || "");
+                var instruction = gettext('"</strong> imtahanına keçid üçün kodu yazın.').replace("</strong>", "");
+                textEl.replaceChildren(titleStrong, document.createTextNode(instruction));
             }
             codeInput.value = "";
 

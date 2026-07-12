@@ -21,7 +21,14 @@ from .review import (
     resolve_identity_window,
     resolve_recheck_window,
 )
-from .services import attach_submission_file, merge_submission_content, parse_score_value
+from .services import (
+    _clamp_score,
+    _resolve_task_max_score,
+    attach_submission_file,
+    bulk_grade_submissions,
+    merge_submission_content,
+    parse_score_value,
+)
 
 
 def _submission(status="graded", graded_at=None, grade=None, **extra):
@@ -56,6 +63,51 @@ class ParseScoreValueTest(SimpleTestCase):
         self.assertIsNone(parse_score_value("qeyri-ədəd"))
         self.assertEqual(parse_score_value("bad", default=Decimal("0")), Decimal("0"))
         self.assertIsNone(parse_score_value(None))
+
+
+class ClampScoreTest(SimpleTestCase):
+    """Audit: qiymət [0, max] aralığına salınır."""
+
+    def test_clamps_above_max(self):
+        self.assertEqual(_clamp_score(Decimal("150"), 100), Decimal("100"))
+
+    def test_clamps_below_zero(self):
+        self.assertEqual(_clamp_score(Decimal("-5"), 100), Decimal("0"))
+
+    def test_within_range_unchanged(self):
+        self.assertEqual(_clamp_score(Decimal("42"), 100), Decimal("42"))
+
+    def test_no_max_only_floors_at_zero(self):
+        self.assertEqual(_clamp_score(Decimal("-3"), None), Decimal("0"))
+        self.assertEqual(_clamp_score(Decimal("999"), None), Decimal("999"))
+
+    def test_none_score_passthrough(self):
+        self.assertIsNone(_clamp_score(None, 100))
+
+
+class ResolveTaskMaxScoreTest(SimpleTestCase):
+    def test_resolves_from_assignment(self):
+        sub = SimpleNamespace(assignment=SimpleNamespace(max_score=50), project=None)
+        self.assertEqual(_resolve_task_max_score(sub), 50)
+
+    def test_resolves_from_project(self):
+        sub = SimpleNamespace(project=SimpleNamespace(max_score=80))
+        self.assertEqual(_resolve_task_max_score(sub), 80)
+
+    def test_resolves_lab_via_assignment_lab(self):
+        # LabSubmission.assignment → LabAssignment.lab.max_score
+        lab_assignment = SimpleNamespace(max_score=None, lab=SimpleNamespace(max_score=70))
+        sub = SimpleNamespace(assignment=lab_assignment)
+        self.assertEqual(_resolve_task_max_score(sub), 70)
+
+    def test_returns_none_when_unresolvable(self):
+        self.assertIsNone(_resolve_task_max_score(SimpleNamespace()))
+
+
+class BulkGradeLengthGuardTest(SimpleTestCase):
+    def test_mismatched_lengths_raise(self):
+        with self.assertRaises(ValueError):
+            bulk_grade_submissions([object()], [1, 2], ["a", "b"], graded_by=None)
 
 
 class AttachSubmissionFileTest(SimpleTestCase):

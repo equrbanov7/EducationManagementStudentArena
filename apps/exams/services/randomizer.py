@@ -382,23 +382,29 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
         # (EXAM-INTEGRITY-001): çatdırılan variant/düzgünlük dondurulur ki,
         # sonradan sualın redaktəsi keçmiş nəticələri geriyə dönük dəyişməsin.
         # Variantlar TƏK sorğu ilə yığılır (N+1 yox).
+        # EXAM-P0-03 (v2): mətn/label də dondurulur — tək sorğu ilə (N+1 yox).
+        from apps.exams.services.question_snapshot import build_question_snapshot
+
         options_by_qid: dict[int, list] = {}
         for opt in ExamQuestionOption.objects.filter(question_id__in=[q.id for q in selected_qs]).only(
-            "id", "question_id", "is_correct"
+            "id", "question_id", "is_correct", "text", "label", "image"
         ):
-            options_by_qid.setdefault(opt.question_id, []).append({"id": opt.id, "is_correct": bool(opt.is_correct)})
+            options_by_qid.setdefault(opt.question_id, []).append(
+                {
+                    "id": opt.id,
+                    "is_correct": bool(opt.is_correct),
+                    "text": opt.text or "",
+                    "label": opt.label or "",
+                    "image": opt.image.name if opt.image else "",
+                }
+            )
 
         ExamAnswer.objects.bulk_create(
             [
                 ExamAnswer(
                     attempt=attempt,
                     question=q,
-                    question_snapshot={
-                        "v": 1,
-                        "points": int(getattr(q, "points", 1) or 1),
-                        "answer_mode": getattr(q, "answer_mode", "") or "",
-                        "options": options_by_qid.get(q.id, []),
-                    },
+                    question_snapshot=build_question_snapshot(q, options_by_qid.get(q.id, [])),
                 )
                 for q in selected_qs
             ],

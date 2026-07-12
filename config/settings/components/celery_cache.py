@@ -60,4 +60,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.notify_upcoming_final_exams",
         "schedule": 3600.0,  # seconds
     },
+    # EXAM-P1-15: crash olub PROCESSING-də ilişmiş text-extraction/AI job-ları
+    # lease vaxtından sonra FAILED-ə keçir ki, istifadəçi yenidən cəhd edə bilsin.
+    "exams-reap-stuck-extraction-jobs": {
+        "task": "exams.reap_stuck_extraction_jobs",
+        "schedule": 300.0,  # seconds
+    },
 }

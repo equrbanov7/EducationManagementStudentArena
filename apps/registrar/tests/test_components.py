@@ -110,16 +110,18 @@ class AssessmentComponentTest(TestCase):
 
         with bypass_rls():
             seminar = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 12}
                 ],
                 by_user=self.teacher,
             )
-            self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("12"))
+            # Per-mark tavan 10-dur: 12 yazılsa da 10 saxlanır (seminar/lab qaydası).
+            self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("10"))
 
     def test_save_components_upsert_and_delete(self):
         with bypass_rls():

@@ -42,6 +42,69 @@
         </div>
     </header>
 
+    {% if appeal_window_closed %}
+    {# ── Apellyasiya müddəti bitib — read-only baxış (UX) ──────────────── #}
+    <div class="appeal-info-card appeal-info-card--warning" role="status">
+        <i class="fas fa-hourglass-end"></i>
+        <div>
+            <strong>{% trans "Apellyasiya müddəti bitib" context "appeals.template" %}</strong>
+            <p>
+                {% blocktrans trimmed context "appeals.template" with days=appeal_window_days %}
+                    Apellyasiya yalnız imtahan bitdikdən sonra {{ days }} gün ərzində göndərilə bilər.
+                    Bu müddət keçdiyi üçün yeni apellyasiya göndərmək mümkün deyil.
+                {% endblocktrans %}
+                {% if appeal_deadline %}
+                <span class="d-block mt-1 text-muted">
+                    {% blocktrans trimmed context "appeals.template" with deadline=appeal_deadline|date:"d.m.Y" %}
+                        Son tarix: {{ deadline }}.
+                    {% endblocktrans %}
+                </span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if attempt_appeals %}
+    <section class="appeal-closed-appeals">
+        <h2 class="appeal-section-title">{% trans "Apellyasiyanızın nəticəsi" context "appeals.template" %}</h2>
+        <ul class="appeal-closed-list">
+            {% for appeal in attempt_appeals %}
+            <li class="appeal-closed-list__item">
+                <div class="appeal-closed-list__head">
+                    <span class="appeal-status-chip appeal-status-chip--{{ appeal.student_display_status }}">
+                        {{ appeal.student_display_status_label }}
+                    </span>
+                    <span class="text-muted">{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div class="appeal-closed-list__meta">
+                    {% blocktrans trimmed context "appeals.template" with count=appeal.items.count %}
+                        {{ count }} sual üzrə apellyasiya
+                    {% endblocktrans %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'accounts:profile' %}?section=my-appeals" class="btn btn-outline-primary mt-2">
+            <i class="fas fa-list-ul me-2"></i>{% trans "Bütün apellyasiyalarım" context "appeals.template" %}
+        </a>
+    </section>
+    {% else %}
+    <div class="appeal-info-card">
+        <i class="fas fa-circle-info"></i>
+        <div>
+            <strong>{% trans "Bu imtahan üçün apellyasiya göndərməmisiniz" context "appeals.template" %}</strong>
+            <p>{% trans "Nəticənizi aşağıdakı düymə ilə yenidən görə bilərsiniz." context "appeals.template" %}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="appeal-closed-actions">
+        <a href="{{ result_url }}" class="btn btn-primary">
+            <i class="fas fa-clipboard-check me-2"></i>{% trans "Nəticəyə bax" context "appeals.template" %}
+        </a>
+    </div>
+    {% else %}
+
     {# Necə işləyir — qısa addımlar #}
     <div class="appeal-steps">
         <div class="appeal-step">
@@ -96,20 +159,21 @@
         <div class="appeal-list">
             {% for answer in answers %}
             {% with q=answer.question %}
+            {% with delivered=answer.delivered %}
             {% with is_marked=marked_question_by_qid|get_item:q.id %}
             {% with already_appealed=appealed_question_by_qid|get_item:q.id %}
             <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}{% if already_appealed %} is-locked{% endif %}"
                      data-appeal-card
                      data-appeal-marked="{% if is_marked %}1{% else %}0{% endif %}"
                      data-appeal-locked="{% if already_appealed %}1{% else %}0{% endif %}"
-                     data-appeal-text="{{ q.text|striptags }}{% if not hide_answer_details %} {{ answer.text_answer|default_if_none:''|striptags }} {{ q.correct_answer|default_if_none:''|striptags }}{% endif %}">
+                     data-appeal-text="{{ delivered.text|striptags }}{% if not hide_answer_details %} {{ answer.text_answer|default_if_none:''|striptags }} {{ delivered.correct_answer|default_if_none:''|striptags }}{% endif %}">
                 <div class="appeal-question-card__top">
                     <div class="appeal-question-card__main">
                         <p class="appeal-question-title">
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
-                            {{ q.text|striptags|truncatechars:190 }}
+                            {{ delivered.text|striptags|truncatechars:190 }}
                         </p>
-                        {% if hide_answer_details and exam.exam_type == "test" %}
+                        {% if hide_answer_details and not answers_release_locked and exam.exam_type == "test" %}
                         <div class="appeal-meta">
                             <span class="appeal-chip">
                                 {% if answer.is_correct %}
@@ -155,20 +219,23 @@
                     {% if exam.exam_type == "test" %}
                     <div class="appeal-answer-review__label">{% trans "Variantlar" context "appeals.template" %}</div>
                     <ul class="appeal-options">
-                        {% for opt in q.options.all %}
-                        <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt in answer.selected_options.all and not opt.is_correct %} is-wrong{% endif %}">
+                        {% for opt in delivered.options %}
+                        <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt.is_selected and not opt.is_correct %} is-wrong{% endif %}">
                             <span class="appeal-option__icon">
                                 {% if opt.is_correct %}
                                 <i class="fas fa-check-circle"></i>
-                                {% elif opt in answer.selected_options.all %}
+                                {% elif opt.is_selected %}
                                 <i class="fas fa-times-circle"></i>
                                 {% else %}
                                 <i class="far fa-circle"></i>
                                 {% endif %}
                             </span>
                             <span class="appeal-option__text">{% if opt.label %}<b>{{ opt.label }}.</b> {% endif %}{{ opt.text }}</span>
+                            {% if opt.image_url %}
+                            <img src="{{ opt.image_url }}" alt="" loading="lazy" class="img-fluid mt-2">
+                            {% endif %}
                             <span class="appeal-option__tags">
-                                {% if opt in answer.selected_options.all %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
+                                {% if opt.is_selected %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
                                 {% if opt.is_correct %}<span class="appeal-option__tag appeal-option__tag--correct">{% trans "Düzgün cavab" context "appeals.template" %}</span>{% endif %}
                             </span>
                         </li>
@@ -184,9 +251,9 @@
                     {% else %}
                     <div class="appeal-answer-review__empty">{% trans "Cavab yazılmayıb" context "appeals.template" %}</div>
                     {% endif %}
-                    {% if q.correct_answer %}
+                    {% if delivered.correct_answer %}
                     <div class="appeal-answer-review__label mt-3">{% trans "Düzgün cavab" context "appeals.template" %}</div>
-                    <div class="appeal-answer-review__text">{{ q.correct_answer|linebreaksbr }}</div>
+                    <div class="appeal-answer-review__text">{{ delivered.correct_answer|linebreaksbr }}</div>
                     {% endif %}
                     {% endif %}
                 </div>
@@ -231,6 +298,7 @@
             {% endwith %}
             {% endwith %}
             {% endwith %}
+            {% endwith %}
             {% empty %}
             <div class="appeal-empty">
                 <i class="fas fa-inbox"></i>
@@ -261,6 +329,7 @@
         </div>
         {% endif %}
     </form>
+    {% endif %}{# not appeal_window_closed #}
 
     {% if answers %}
     {# Göndərməzdən əvvəl təsdiq modalı (Bootstrap). #}

@@ -94,7 +94,7 @@ jobs:
         run: |
           echo "::group::🛡️ rls_worker_atomic() coverage"
           python scripts/check_worker_atomic_coverage.py --check || {
-            echo "::error::❌ Yeni request-external DB entry-point rls_worker_atomic() istifadə etmir. Bax: docs/FAZA4_TASK1_AUDIT.md"
+            echo "::error::❌ Yeni request-external DB entry-point rls_worker_atomic() istifadə etmir. Bax: docs/audits/FAZA4_TASK1_AUDIT.md"
             exit 1
           }
           echo "::endgroup::"

@@ -1,6 +1,6 @@
 """Enrollment services (U2): mandatory auto-enroll + group-level elective choice.
 
-The student academic flow from docs/UNIVERSITY_SYSTEM_ROADMAP.md §2:
+The student academic flow from docs/architecture/UNIVERSITY_SYSTEM_ROADMAP.md §2:
 
   * ``enroll_mandatory_subjects`` — on specialty/curriculum assignment, enroll the
     student in every mandatory subject of the semester.

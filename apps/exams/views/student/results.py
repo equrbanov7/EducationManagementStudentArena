@@ -16,7 +16,9 @@ from django.utils.translation import pgettext
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
+from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
+from apps.exams.services.result_release import exam_answers_release_locked
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import (
@@ -133,7 +135,10 @@ def exam_result(request, slug, attempt_id):
     is_profile_results = _is_profile_results_request(request, return_to)
     is_final_exam_result = _is_final_exam(exam)
     is_final_center_result = is_final_exam_result and not is_profile_results
-    hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(exam, is_profile_results=is_profile_results)
+    answers_release_locked = exam_answers_release_locked(exam)
+    hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(
+        exam, is_profile_results=is_profile_results
+    ) or (getattr(exam, "exam_type", "") == "test" and answers_release_locked)
     final_result_remaining_seconds = None
     final_result_timeout_url = ""
 
@@ -193,13 +198,33 @@ def exam_result(request, slug, attempt_id):
     questions = [a.question for a in answers]
     answers_by_qid = {a.question_id: a for a in answers}
     answer_has_selection_by_qid = {a.question_id: bool(list(a.selected_options.all())) for a in answers}
+    # EXAM-P0-03: hər cavab üçün dondurulmuş (yoxdursa canlı) seçilmiş variant
+    # id-ləri — verdikt, effektiv bal və çatdırılma-render-i eyni mənbədən gəlsin.
+    selected_ids_by_qid = {}
+    for answer in answers:
+        frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+        if frozen_selection is not None:
+            selected_ids_by_qid[answer.question_id] = {int(option_id) for option_id in frozen_selection}
+        else:
+            selected_ids_by_qid[answer.question_id] = {opt.id for opt in answer.selected_options.all()}
+    # EXAM-P0-03: nəticə səhifəsi çatdırılma anındakı sual görünüşündən render
+    # olunur (müəllif sonradan mətn/variant redaktə etsə də keçmiş cəhd sabit
+    # qalır); snapshot yoxdursa canlı suala düşülür (geriyə-uyğun).
+    delivered_by_qid = {
+        answer.question_id: delivered_question_render(answer, selected_ids_by_qid.get(answer.question_id, set()))
+        for answer in answers
+    }
     # Hər sual üzrə verdikt (düz/səhv/cavabsız) — cavab detalları gizli olan
     # kabinet rejimində də tələbə öz cavabının nəticəsini görsün. Qayda
     # calculate_test_attempt_result ilə eynidir (prefetch olunmuş cavablar üzərində).
     answer_verdict_by_qid = {}
-    if exam.exam_type == "test":
+    # EXAM-P0-05: pəncərə açıq olduqca verdikt də (düz/səhv) sızıntıdır —
+    # tələbə öz seçiminin düzgünlüyünü bilib paylaşa bilər.
+    if exam.exam_type == "test" and not answers_release_locked:
         for answer in answers:
-            selected_ids = {opt.id for opt in answer.selected_options.all()}
+            # EXAM-P0-03: verdikt də dondurulmuş seçimdən hesablanır ki,
+            # bal ilə eyni mənbədən gəlsin.
+            selected_ids = selected_ids_by_qid.get(answer.question_id, set())
             if not selected_ids:
                 answer_verdict_by_qid[answer.question_id] = "unanswered"
                 continue
@@ -282,6 +307,7 @@ def exam_result(request, slug, attempt_id):
             "attempt": attempt,
             "questions": questions,
             "answers_by_qid": answers_by_qid,
+            "delivered_by_qid": delivered_by_qid,
             "answer_has_selection_by_qid": answer_has_selection_by_qid,
             "answer_verdict_by_qid": answer_verdict_by_qid,
             "marked_question_by_qid": {question_id: True for question_id in marked_question_ids},
@@ -293,6 +319,7 @@ def exam_result(request, slug, attempt_id):
             "back_url": back_url,
             "is_final_exam_result": is_final_center_result,
             "hide_test_answer_correctness": hide_test_answer_correctness,
+            "answers_release_locked": answers_release_locked,
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,

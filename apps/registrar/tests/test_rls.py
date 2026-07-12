@@ -187,9 +187,10 @@ def two_org_journals(two_org_enrollments):
     for org in (org_a, org_b):
         offering = CourseOffering.objects.get(organization=org)
         gradebook.ensure_assessment_scheme(offering=offering)
-        lesson = gradebook.create_lesson(offering=offering, date=datetime.date(2024, 10, 1))
+        lesson = gradebook.create_lesson(allow_past=True, offering=offering, date=datetime.date(2024, 10, 1))
         enrollment = Enrollment.objects.get(organization=org)
         gradebook.save_marks(
+            enforce_day=False,
             offering=offering,
             entries=[{"lesson_id": lesson.id, "enrollment_id": enrollment.id, "status": "absent"}],
         )

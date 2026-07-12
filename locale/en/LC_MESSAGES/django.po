@@ -14214,6 +14214,10 @@ msgid "heading_question_result_analysis"
 msgstr "Question Result Analysis"
 
 msgctxt "exams.template.student_exam_result"
+msgid "notice_answers_release_locked"
+msgstr "The result and answer analysis will be available after the exam window closes."
+
+msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"
 msgstr "Question marked during the exam"
 
@@ -21658,6 +21662,10 @@ msgstr "The organization is suspended or inactive."
 msgctxt "live_exam.view.permission"
 msgid "exam_manage_required"
 msgstr "Answer *"
+
+msgctxt "live_exam.view.message"
+msgid "session_finished"
+msgstr "This game has already finished."
 
 msgctxt "live_exam.view.message"
 msgid "game_already_started"

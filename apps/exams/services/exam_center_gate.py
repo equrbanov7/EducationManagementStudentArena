@@ -71,13 +71,12 @@ def resolve_client_mac(request) -> str | None:
 def get_client_ip(request) -> str:
     """Sorğunun müştəri IP-si (etibarlı proxy arxasında XFF-in SON üzvü).
 
-    Nginx ``$proxy_add_x_forwarded_for`` ilə öz gördüyü peer ünvanını zəncirin
-    SONUNA əlavə edir. İlk üzvü götürmək olmaz — müştəri saxta
-    ``X-Forwarded-For: <icazəli-IP>`` başlığı göndərib IP allowlist-i keçə
-    bilərdi; son üzv müştəri tərəfindən idarə oluna bilmir. İmtahan zalı
-    kompüterləri nginx-ə birbaşa qoşulur (son üzv = real zal IP-si); ictimai
-    trafik Cloudflare-dən keçəndə son üzv CF edge IP-si olur və allowlist-ə
-    düşmür — kənar giriş məhz bu səbəbdən bağlı qalır.
+    Nginx (2026-07-11 auditindən sonra) X-Forwarded-For-u client zəncirinə
+    əlavə ETMİR — başlığı öz gördüyü peer ünvanı ilə OVERWRITE edir, yəni
+    dəyər həmişə tək və nginx-ə məxsusdur. Son üzvü götürmək köhnə (append)
+    konfiqurasiya ilə də geriyə-uyğundur: hər iki halda son üzv müştəri
+    tərəfindən idarə oluna bilmir. İmtahan zalı kompüterləri nginx-ə birbaşa
+    qoşulduğu üçün dəyər real zal IP-sidir.
     """
     forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if forwarded_for:

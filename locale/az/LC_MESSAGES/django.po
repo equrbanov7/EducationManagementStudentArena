@@ -14247,6 +14247,10 @@ msgid "heading_question_result_analysis"
 msgstr "Sual üzrə nəticə analizi"
 
 msgctxt "exams.template.student_exam_result"
+msgid "notice_answers_release_locked"
+msgstr "Nəticə və cavab analizi imtahan pəncərəsi bağlandıqdan sonra açılacaq."
+
+msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"
 msgstr "İmtahanda işarələnmiş sual"
 
@@ -21691,6 +21695,10 @@ msgstr "org_suspended_or_inactive"
 msgctxt "live_exam.view.permission"
 msgid "exam_manage_required"
 msgstr "Cavab *"
+
+msgctxt "live_exam.view.message"
+msgid "session_finished"
+msgstr "Bu oyun artıq bitib."
 
 msgctxt "live_exam.view.message"
 msgid "game_already_started"

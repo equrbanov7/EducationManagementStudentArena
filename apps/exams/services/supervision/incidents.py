@@ -1,5 +1,6 @@
 """supervision paketi — incidents."""
 
+from django.db.models import F
 from django.utils import timezone
 
 from apps.exams.features import exam_supervision_enabled
@@ -39,9 +40,14 @@ def log_supervision_incident(attempt, event_type, metadata=None):
     violation_count = attempt.supervision_violation_count
 
     if is_violation:
-        violation_count += 1
-        attempt.supervision_violation_count = violation_count
-        attempt.save(update_fields=["supervision_violation_count"])
+        # F() paralel brauzer hadisələrinin eyni köhnə dəyəri yazıb
+        # artım itirməsinin qarşısını alır; refresh cavab/audit snapshot-u
+        # üçün DB-dəki faktiki yeni sayı qaytarır.
+        attempt.__class__.objects.filter(pk=attempt.pk).update(
+            supervision_violation_count=F("supervision_violation_count") + 1
+        )
+        attempt.refresh_from_db(fields=["supervision_violation_count", "supervision_status"])
+        violation_count = attempt.supervision_violation_count
 
     incident = SupervisionIncident.objects.create(
         organization=exam.organization,
@@ -53,6 +59,11 @@ def log_supervision_incident(attempt, event_type, metadata=None):
         metadata=metadata or {},
         violation_count_at_time=violation_count,
     )
+
+    # EXAM-P1-20: supervision incident-i SLI kimi qeyd et.
+    from apps.exams.metrics import record_supervision_incident
+
+    record_supervision_incident(event_type)
 
     # Check if violation limit exceeded
     max_violations = config.get_max_total_violations()

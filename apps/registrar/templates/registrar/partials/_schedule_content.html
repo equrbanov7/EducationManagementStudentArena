@@ -1,125 +1,197 @@
 {% load static i18n %}
-<div class="schedule-page">
-    <div class="schedule-head">
-        <h1 class="schedule-title"><i class="fas fa-calendar-week"></i> {% trans "Dərs cədvəli" context "registrar.schedule" %}</h1>
-        {% if has_context %}
-        <div class="schedule-meta">
-            <span><i class="fas fa-user"></i> {{ owner_label }}</span>
-            {% if period %}<span><i class="fas fa-calendar-alt"></i> {{ period.name }}</span>{% endif %}
-            <span class="schedule-role-badge">{% if role == 'student' %}{% trans "Qrup cədvəli" context "registrar.schedule" %}{% else %}{% trans "Müəllim cədvəli" context "registrar.schedule" %}{% endif %}</span>
-            <a class="schedule-calendar-link" href="{% url 'registrar:calendar' %}">
-                <i class="fas fa-calendar-days"></i> {% trans "Akademik təqvim" context "registrar.schedule" %}
-            </a>
-            {% if period %}
-            <a class="schedule-ics-link" href="{% url 'registrar:schedule_ics' %}"
-               title="{% trans 'Google/Apple Calendar üçün .ics faylı' context 'registrar.schedule' %}">
-                <i class="fas fa-calendar-plus"></i> {% trans "Kalendara əlavə et" context "registrar.schedule" %}
-            </a>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
+{% comment %}Dərs cədvəli — mockup dizaynı (saat×gün grid). Standalone + profil paneli.
+Tələbə görünüşü dizaynla bire-bir: kimlik sətri + Bu həftə/Gələn həftə pilləri +
+grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlavə et".{% endcomment %}
+<div class="schedule-page sgx" data-schedule-root>
 
     {% if not has_context %}
-    <div class="schedule-empty"><i class="fas fa-info-circle"></i><p>{% trans "Aktiv təşkilat konteksti yoxdur." context "registrar.schedule" %}</p></div>
+    <div class="sgx-empty"><i class="fas fa-info-circle"></i><p>{% trans "Aktiv təşkilat konteksti yoxdur." context "registrar.schedule" %}</p></div>
     {% else %}
 
-    {# ── Həftə naviqasiyası: tarixlər + üst/alt həftə ─────────────────────── #}
-    <div class="schedule-weekbar">
-        <a class="week-nav" href="{{ schedule_nav_prefix|default:'?' }}w={{ week.prev_offset }}" aria-label="{% trans 'Əvvəlki həftə' context 'registrar.schedule' %}"><i class="fas fa-chevron-left"></i></a>
-        <div class="week-range">
-            <span class="week-dates">{{ week.monday|date:"d M" }} – {{ week.sunday|date:"d M" }}</span>
-            <span class="week-parity week-parity--{{ week.parity }}">
-                {% if week.parity == 'odd' %}<i class="fas fa-arrow-up"></i> {% trans "Üst həftə" context "registrar.schedule" %}{% else %}<i class="fas fa-arrow-down"></i> {% trans "Alt həftə" context "registrar.schedule" %}{% endif %}
-            </span>
-            {% if not week.is_current %}<a class="week-today-link" href="{{ schedule_nav_prefix|default:'?' }}w=0">{% trans "Bu həftə" context "registrar.schedule" %}</a>{% endif %}
+    {# ── Kimlik sətri + həftə pilləri (mockup üst zolağı) ──────────────────── #}
+    <div class="sgx-topbar">
+        <div class="sgx-identity">
+            <div class="sgx-avatar">{{ owner_label|slice:":1"|upper }}{% if role == 'student' %}{{ owner_label|slice:"1:2"|upper }}{% endif %}</div>
+            <div>
+                <div class="sgx-identity-name">{{ owner_label }}</div>
+                <div class="sgx-identity-sub">
+                    {% if role == 'student' %}
+                    {% if record.group %}{% trans "Qrup" context "registrar.schedule" %} {{ record.group.name }}{% endif %}{% if record.program %} · {{ record.program.name }}{% endif %}{% if student_course_no %} · {{ student_course_no }} {% trans "kurs" context "registrar.schedule" %}{% endif %}
+                    {% else %}
+                    {% trans "Müəllim cədvəli" context "registrar.schedule" %}{% if period %} · {{ period.name }}{% endif %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <a class="week-nav" href="{{ schedule_nav_prefix|default:'?' }}w={{ week.next_offset }}" aria-label="{% trans 'Növbəti həftə' context 'registrar.schedule' %}"><i class="fas fa-chevron-right"></i></a>
+        <div class="sgx-topbar-right">
+            <div class="sgx-weekpills">
+                <a class="sgx-weekpill {% if week.offset == 0 %}is-active{% endif %}" href="{{ schedule_nav_prefix|default:'?' }}w=0">
+                    {% if week.offset == 0 %}{% if week.parity == 'odd' %}{% trans "Bu həftə — ÜST" context "registrar.schedule" %}{% else %}{% trans "Bu həftə — ALT" context "registrar.schedule" %}{% endif %}{% else %}{% if week.parity == 'odd' %}{% trans "Bu həftə — ALT" context "registrar.schedule" %}{% else %}{% trans "Bu həftə — ÜST" context "registrar.schedule" %}{% endif %}{% endif %}
+                </a>
+                <a class="sgx-weekpill {% if week.offset == 1 %}is-active{% endif %}" href="{{ schedule_nav_prefix|default:'?' }}w=1">
+                    {% if week.offset == 0 %}{% if week.parity == 'odd' %}{% trans "Gələn həftə — ALT" context "registrar.schedule" %}{% else %}{% trans "Gələn həftə — ÜST" context "registrar.schedule" %}{% endif %}{% else %}{% if week.parity == 'odd' %}{% trans "Gələn həftə — ÜST" context "registrar.schedule" %}{% else %}{% trans "Gələn həftə — ALT" context "registrar.schedule" %}{% endif %}{% endif %}
+                </a>
+            </div>
+            {% if teacher_offerings %}
+            <button type="button" class="sgx-primary-btn" data-sgx-open-add><i class="fas fa-plus"></i> {% trans "Slot əlavə et" context "registrar.schedule" %}</button>
+            {% endif %}
+        </div>
     </div>
 
-    {% if teacher_offerings %}
-    <form method="post" action="{% url 'registrar:schedule' %}" class="schedule-add">
-        {% csrf_token %}
-        {% if schedule_embedded %}<input type="hidden" name="next" value="{% url 'accounts:profile' %}?section=my-schedule">{% endif %}
-        <span class="schedule-add-title"><i class="fas fa-plus-circle"></i> {% trans "Slot əlavə et" context "registrar.schedule" %}</span>
-        <select name="offering_id" required aria-label="{% trans 'Fənn' context 'registrar.schedule' %}">
-            {% for off in teacher_offerings %}<option value="{{ off.id }}">{{ off.subject.code }}{% if off.group %} · {{ off.group.name }}{% endif %}</option>{% endfor %}
-        </select>
-        <select name="weekday" aria-label="{% trans 'Gün' context 'registrar.schedule' %}">
-            {% for num, label in weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
-        </select>
-        <input type="time" name="start_time" required aria-label="{% trans 'Başlama' context 'registrar.schedule' %}">
-        <input type="time" name="end_time" required aria-label="{% trans 'Bitmə' context 'registrar.schedule' %}">
-        <input type="text" name="room" placeholder="{% trans 'Otaq' context 'registrar.schedule' %}" maxlength="64">
-        <select name="week_type" aria-label="{% trans 'Həftə' context 'registrar.schedule' %}">
-            {% for value, label in week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select>
-        <button type="submit" class="schedule-add-btn">{% trans "Əlavə et" context "registrar.schedule" %}</button>
-    </form>
+    {% if time_grid.is_empty %}
+    <div class="sgx-empty">
+        <i class="fas fa-calendar-plus"></i>
+        <p>{% trans "Bu semestr üçün hələ cədvəl slotu yoxdur." context "registrar.schedule" %}</p>
+        {% if teacher_offerings %}<p class="sgx-empty-hint">{% trans "Yuxarıdan slot əlavə edin." context "registrar.schedule" %}</p>{% endif %}
+    </div>
+    {% else %}
+
+    <div class="sgx-grid-wrap">
+        <table class="sgx-grid">
+            <thead>
+                <tr>
+                    <th class="sgx-col-time">{% trans "SAAT" context "registrar.schedule" %}</th>
+                    {% for day in time_grid.day_headers %}
+                    <th class="sgx-col-day {% if day.is_today %}is-today{% endif %}">
+                        <span class="sgx-day-name">{{ day.label }}</span>
+                        <span class="sgx-day-sub">{{ day.roman }} {% trans "gün" context "registrar.schedule" %}{% if day.is_today %} · {% trans "bu gün" context "registrar.schedule" %}{% endif %}</span>
+                        {% for ex in day.exams %}
+                        <span class="sgx-day-exam" title="{{ ex.exam.title }}"><i class="fas fa-file-signature"></i> {{ ex.start|time:"H:i" }} {% trans "İmtahan" context "registrar.schedule" %}</span>
+                        {% endfor %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in time_grid.rows %}
+                {% include "registrar/partials/_schedule_row.html" with row=row %}
+                {% endfor %}
+                {% if time_grid.evening_rows %}
+                <tr class="sgx-band-row">
+                    <td colspan="{{ time_grid.day_headers|length|add:1 }}">
+                        <span class="sgx-band-badge">{% trans "Magistratura" context "registrar.schedule" %}</span>
+                        <span class="sgx-band-hint">{% trans "Axşam təhsili — dərslər 21:30-da bitir" context "registrar.schedule" %}</span>
+                    </td>
+                </tr>
+                {% for row in time_grid.evening_rows %}
+                {% include "registrar/partials/_schedule_row.html" with row=row %}
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="sgx-legend">
+        <span class="sgx-legend-item"><span class="sgx-swatch sgx-swatch--lecture"></span> {% trans "Mühazirə" context "registrar.schedule" %}</span>
+        <span class="sgx-legend-item"><span class="sgx-swatch sgx-swatch--seminar"></span> {% trans "Məşğələ" context "registrar.schedule" %}</span>
+        <span class="sgx-legend-item"><span class="sgx-swatch sgx-swatch--lab"></span> {% trans "Laboratoriya" context "registrar.schedule" %}</span>
+        <span class="sgx-legend-sep"></span>
+        <span class="sgx-legend-item"><span class="sgx-mini-badge sgx-mini-badge--odd">ÜST</span> / <span class="sgx-mini-badge sgx-mini-badge--even">ALT</span> {% trans "həftə fərqi olan dərslər hüceyrədə bölünmüş göstərilir" context "registrar.schedule" %}</span>
+    </div>
     {% endif %}
 
-    <div class="schedule-grid">
-        {% for day in week_days %}
-        <div class="schedule-day {% if day.is_today %}is-today{% endif %}">
-            <div class="schedule-day-label">
-                <span class="day-name">{{ day.label }}</span>
-                <span class="day-date">{{ day.date|date:"d M" }}</span>
-                {% if day.is_today %}<span class="day-today-badge">{% trans "Bu gün" context "registrar.schedule" %}</span>{% endif %}
+    {# ── Fənn detalı modalı (klik) — JS data-atributlardan doldurur ────────── #}
+    <div class="sgx-modal" data-sgx-modal hidden>
+        <div class="sgx-modal-backdrop" data-sgx-close></div>
+        <div class="sgx-modal-card" role="dialog" aria-modal="true" aria-labelledby="sgx-modal-title">
+            <div class="sgx-modal-head" data-sgx-modal-head>
+                <div class="sgx-modal-kind" data-sgx-f="kind_label"></div>
+                <h3 class="sgx-modal-title" id="sgx-modal-title"><span data-sgx-f="code"></span> <span data-sgx-f="name"></span></h3>
+                <button type="button" class="sgx-modal-close" data-sgx-close aria-label="{% trans 'Bağla' context 'registrar.schedule' %}">&times;</button>
             </div>
-
-            {% if day.exams %}
-            <ul class="day-exams">
-                {% for ex in day.exams %}
-                <li class="day-exam">
-                    <span class="exam-flag"><i class="fas fa-file-signature"></i> {% trans "İmtahan" context "registrar.schedule" %}</span>
-                    <span class="exam-title">{{ ex.exam.title }}</span>
-                    <span class="exam-time"><i class="fas fa-clock"></i> {{ ex.start|time:"H:i" }}</span>
-                </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-
-            {% if day.slots %}
-            <ul class="schedule-slots">
-                {% for item in day.slots %}
-                <li class="schedule-slot slot-kind--{{ item.slot.week_type }} {% if not item.this_week %}slot-other-week{% endif %}">
-                    <div class="slot-time">{{ item.slot.start_time|time:"H:i" }}–{{ item.slot.end_time|time:"H:i" }}</div>
-                    <div class="slot-body">
-                        <div class="slot-subject">{{ item.slot.offering.subject.code }} — {{ item.slot.offering.subject.name }}</div>
-                        <div class="slot-detail">
-                            {% if item.slot.room %}<span><i class="fas fa-door-open"></i> {{ item.slot.room }}</span>{% endif %}
-                            {% if role == 'student' and item.slot.offering.instructor %}<span><i class="fas fa-chalkboard-teacher"></i> {{ item.slot.offering.instructor.get_full_name|default:item.slot.offering.instructor.username }}</span>{% endif %}
-                            {% if role == 'teacher' and item.slot.offering.group %}<span><i class="fas fa-users"></i> {{ item.slot.offering.group.name }}</span>{% endif %}
-                        </div>
-                        {% if item.slot.week_type != 'all' %}
-                        <span class="slot-week slot-week--{{ item.slot.week_type }}">
-                            {% if item.slot.week_type == 'odd' %}<i class="fas fa-arrow-up"></i> {% trans "Üst həftə" context "registrar.schedule" %}{% else %}<i class="fas fa-arrow-down"></i> {% trans "Alt həftə" context "registrar.schedule" %}{% endif %}
-                            {% if not item.this_week %}· {% trans "bu həftə yox" context "registrar.schedule" %}{% endif %}
-                        </span>
-                        {% endif %}
-                    </div>
-                    {% if teacher_offerings %}
-                    <form method="post" action="{% url 'registrar:schedule_slot_delete' item.slot.id %}" class="slot-del" onsubmit="return confirm('{% trans "Slotu silmək?" context "registrar.schedule" %}');">
-                        {% csrf_token %}
-                        {% if schedule_embedded %}<input type="hidden" name="next" value="{% url 'accounts:profile' %}?section=my-schedule">{% endif %}
-                        <button type="submit" aria-label="{% trans 'Sil' context 'registrar.schedule' %}"><i class="fas fa-times"></i></button>
-                    </form>
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-            {% elif not day.exams %}
-            <div class="schedule-day-empty">—</div>
-            {% endif %}
+            <div class="sgx-modal-body">
+                <div class="sgx-modal-rows">
+                    <div class="sgx-mrow"><span class="sgx-mlabel">{% trans "Vaxt" context "registrar.schedule" %}</span><span data-sgx-f="when"></span></div>
+                    <div class="sgx-mrow"><span class="sgx-mlabel">{% trans "Həftə" context "registrar.schedule" %}</span><span data-sgx-f="parity_label"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="room"><span class="sgx-mlabel">{% trans "Auditoriya" context "registrar.schedule" %}</span><span data-sgx-f="room"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="teacher"><span class="sgx-mlabel">{% trans "Müəllim" context "registrar.schedule" %}</span><span data-sgx-f="teacher"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="group"><span class="sgx-mlabel">{% trans "Qrup" context "registrar.schedule" %}</span><span data-sgx-f="group"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="count"><span class="sgx-mlabel">{% trans "Tələbə sayı" context "registrar.schedule" %}</span><span data-sgx-f="count"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="ects"><span class="sgx-mlabel">ECTS</span><span data-sgx-f="ects"></span></div>
+                </div>
+                {% if role == 'student' %}
+                <div class="sgx-modal-stats" data-sgx-row="stats"
+                     data-barred-label="{% trans 'Kəsilir' context 'registrar.schedule' %}"
+                     data-ok-label="{% trans 'Normal' context 'registrar.schedule' %}">
+                    <div class="sgx-stat-card"><b data-sgx-f="abs"></b><small>{% trans "qayıb saatı" context "registrar.schedule" %}</small></div>
+                    <div class="sgx-stat-card"><b data-sgx-f="entry"></b><small>{% trans "giriş balı" context "registrar.schedule" %}</small></div>
+                    <div class="sgx-stat-card sgx-stat-card--status"><b data-sgx-f="status"></b><small>{% trans "status" context "registrar.schedule" %}</small></div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="sgx-modal-foot">
+                {% if role == 'teacher' %}
+                <a class="sgx-primary-btn" data-sgx-f="journal_link" href="#" target="_blank" rel="noopener"><i class="fas fa-book-open"></i> {% trans "Jurnalı aç" context "registrar.schedule" %}</a>
+                {% if teacher_offerings %}
+                <form method="post" data-sgx-delete-form onsubmit="return confirm('{% trans "Slotu silmək?" context "registrar.schedule" %}');">
+                    {% csrf_token %}
+                    {% if schedule_embedded %}<input type="hidden" name="next" value="{% url 'accounts:profile' %}?section=my-schedule">{% endif %}
+                    <button type="submit" class="sgx-danger-btn"><i class="fas fa-trash-can"></i> {% trans "Slotu sil" context "registrar.schedule" %}</button>
+                </form>
+                {% endif %}
+                {% endif %}
+                <button type="button" class="sgx-ghost-btn" data-sgx-close>{% trans "Bağla" context "registrar.schedule" %}</button>
+            </div>
         </div>
-        {% endfor %}
     </div>
 
-    <div class="schedule-legend">
-        <span class="legend-item"><span class="legend-swatch legend-swatch--all"></span> {% trans "Hər həftə" context "registrar.schedule" %}</span>
-        <span class="legend-item"><span class="legend-swatch legend-swatch--odd"></span> {% trans "Üst həftə" context "registrar.schedule" %}</span>
-        <span class="legend-item"><span class="legend-swatch legend-swatch--even"></span> {% trans "Alt həftə" context "registrar.schedule" %}</span>
-        <span class="legend-item"><span class="legend-swatch legend-swatch--exam"></span> {% trans "İmtahan" context "registrar.schedule" %}</span>
+    {# ── Slot əlavə et modalı (yalnız müəllim/org sahibi) ──────────────────── #}
+    {% if teacher_offerings %}
+    <div class="sgx-modal" data-sgx-add-modal hidden>
+        <div class="sgx-modal-backdrop" data-sgx-close></div>
+        <div class="sgx-modal-card" role="dialog" aria-modal="true" aria-labelledby="sgx-add-title">
+            <div class="sgx-modal-head sgx-modal-head--add">
+                <h3 class="sgx-modal-title" id="sgx-add-title"><i class="fas fa-plus-circle"></i> {% trans "Cədvələ slot əlavə et" context "registrar.schedule" %}</h3>
+                <button type="button" class="sgx-modal-close" data-sgx-close aria-label="{% trans 'Bağla' context 'registrar.schedule' %}">&times;</button>
+            </div>
+            <form method="post" action="{% url 'registrar:schedule' %}" class="sgx-add-form">
+                {% csrf_token %}
+                {% if schedule_embedded %}<input type="hidden" name="next" value="{% url 'accounts:profile' %}?section=my-schedule">{% endif %}
+                <div class="sgx-add-grid">
+                    <label class="sgx-field sgx-field--wide">
+                        <span>{% trans "Fənn" context "registrar.schedule" %}</span>
+                        <select name="offering_id" required data-bootstrap-select>
+                            {% for off in teacher_offerings %}<option value="{{ off.id }}">{{ off.subject.code }} — {{ off.subject.name }}{% if off.group %} · {{ off.group.name }}{% endif %}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <label class="sgx-field">
+                        <span>{% trans "Dərs növü" context "registrar.schedule" %}</span>
+                        <select name="slot_kind" data-bootstrap-select>
+                            {% for value, label in slot_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <label class="sgx-field">
+                        <span>{% trans "Gün" context "registrar.schedule" %}</span>
+                        <select name="weekday" data-bootstrap-select>
+                            {% for num, label in weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <label class="sgx-field">
+                        <span>{% trans "Dərs saatı" context "registrar.schedule" %}</span>
+                        <select name="time_slot" required data-bootstrap-select>
+                            {% for start, end in standard_times %}
+                            <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="sgx-field">
+                        <span>{% trans "Otaq" context "registrar.schedule" %}</span>
+                        <input type="text" name="room" maxlength="64" placeholder="Otaq 304 · II korpus">
+                    </label>
+                    <label class="sgx-field">
+                        <span>{% trans "Həftə" context "registrar.schedule" %}</span>
+                        <select name="week_type" data-bootstrap-select>
+                            {% for value, label in week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </label>
+                </div>
+                <div class="sgx-modal-foot">
+                    <button type="submit" class="sgx-primary-btn"><i class="fas fa-plus"></i> {% trans "Əlavə et" context "registrar.schedule" %}</button>
+                    <button type="button" class="sgx-ghost-btn" data-sgx-close>{% trans "İmtina" context "registrar.schedule" %}</button>
+                </div>
+            </form>
+        </div>
     </div>
+    {% endif %}
     {% endif %}
 </div>

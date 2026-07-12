@@ -1,0 +1,38 @@
+{% load i18n %}
+{# İmtahan mərkəzi sidebar link-ləri (PIN axtarışı, imtahan + apellyasiya statistikası). #}
+{% if 'exam-center-pins' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=exam-center-pins"
+       data-section="exam-center-pins"
+       data-title="{% trans 'PIN axtarışı' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-pins' %}active{% endif %}">
+        <i class="fas fa-key sidebar-menu-icon sidebar-menu-icon--danger"></i>
+        <span class="sidebar-menu-text">{% trans 'PIN axtarışı' %}</span>
+    </a>
+</li>
+{% endif %}
+{% if 'exam-center-stats' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=exam-center-stats"
+       data-section="exam-center-stats"
+       data-title="{% trans 'İmtahan statistikaları' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-stats' %}active{% endif %}">
+        <i class="fas fa-chart-line sidebar-menu-icon sidebar-menu-icon--danger"></i>
+        <span class="sidebar-menu-text">{% trans 'İmtahan statistikaları' %}</span>
+    </a>
+</li>
+{% endif %}
+{% if 'appeal-stats' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=appeal-stats"
+       data-section="appeal-stats"
+       data-title="{% trans 'Apellyasiya statistikası' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'appeal-stats' %}active{% endif %}">
+        <i class="fas fa-gavel sidebar-menu-icon sidebar-menu-icon--danger"></i>
+        <span class="sidebar-menu-text">{% trans 'Apellyasiya statistikası' %}</span>
+    </a>
+</li>
+{% endif %}

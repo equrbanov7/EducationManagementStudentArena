@@ -24,14 +24,119 @@ def _profile_section_prefix(section: str) -> str:
     return f"{reverse('accounts:profile')}?section={section}&"
 
 
-def journal_list_context(user) -> dict:
-    """The teacher's own offerings — entry points into each journal."""
-    offerings = (
+def journal_list_context(user, request=None) -> dict:
+    """The teacher's own offerings — entry points into each journal.
+
+    Mockup filter zolağı TAM işləkdir: TƏDRİS İLİ (``?year=``), YARIM İL
+    (``?period=``), dərs tipi pilləri (``?kind=`` — cədvəl slotlarından).
+    Hər offering-ə dərs tipi etiketi və magistratura (axşam) bayrağı bağlanır."""
+    from django.db.models import Count, Q
+
+    from apps.registrar.models import ScheduleSlot, SlotKind
+    from apps.registrar.schedule import EVENING_START
+
+    offerings = list(
         CourseOffering.objects.filter(instructor=user, is_active=True)
         .select_related("subject", "period", "group")
+        .annotate(student_count=Count("enrollments", filter=Q(enrollments__status="enrolled")))
         .order_by("-period__start_date", "subject__code")
     )
-    return {"offerings": offerings}
+
+    # Cədvəl slotlarından: offering → dərs tip(lər)i + axşam (magistratura) bayrağı.
+    kind_labels = dict(SlotKind.choices)
+    kinds_by_offering: dict = {}
+    evening_offerings: set = set()
+    for offering_id, kind, start_time in ScheduleSlot.objects.filter(offering__in=offerings).values_list(
+        "offering_id", "kind", "start_time"
+    ):
+        kinds_by_offering.setdefault(offering_id, [])
+        if kind not in kinds_by_offering[offering_id]:
+            kinds_by_offering[offering_id].append(kind)
+        if start_time >= EVENING_START:
+            evening_offerings.add(offering_id)
+    for offering in offerings:
+        kinds = kinds_by_offering.get(offering.id, [])
+        offering.slot_kinds = kinds
+        offering.kind_label = " · ".join(str(kind_labels[k]) for k in kinds) if kinds else ""
+        offering.is_evening = offering.id in evening_offerings
+
+    periods = sorted({o.period for o in offerings if o.period}, key=lambda p: p.start_date, reverse=True)
+    for p in periods:
+        p.year_label = (p.academic_year or "").replace("/", "-")  # "2025-2026" formatı
+        p.season_label = _season_label(p)
+    years = sorted({p.academic_year for p in periods}, reverse=True)
+    year_choices = [{"value": y, "label": y.replace("/", "-")} for y in years]
+
+    selected_year = ""
+    selected_period = None
+    selected_kind = ""
+    explicit_filter = False
+    if request is not None:
+        explicit_filter = "year" in request.GET or "period" in request.GET
+        selected_year = (request.GET.get("year") or "").strip()
+        if selected_year not in years:
+            selected_year = ""
+        requested_period = (request.GET.get("period") or "").strip()
+        selected_period = next((p for p in periods if str(p.id) == requested_period), None)
+        selected_kind = (request.GET.get("kind") or "").strip()
+        if selected_kind not in dict(SlotKind.choices):
+            selected_kind = ""
+
+    # Avto-seçim (filter açıq göndərilməyibsə): bu günə düşən semestr; yoxdursa
+    # fəsil qaydası — yanvarın sonuna kimi Payız, iyula kimi Yaz, sonra Yay.
+    if not explicit_filter and selected_period is None and periods:
+        selected_period = _current_semester(periods)
+        if selected_period is not None:
+            selected_year = selected_period.academic_year
+
+    if selected_year:
+        offerings = [o for o in offerings if o.period and o.period.academic_year == selected_year]
+    if selected_period is not None:
+        offerings = [o for o in offerings if o.period_id == selected_period.id]
+    if selected_kind:
+        offerings = [o for o in offerings if selected_kind in o.slot_kinds]
+
+    # YARIM İL seçimləri seçilmiş ilə görə daralır (mockup davranışı).
+    period_choices = [p for p in periods if not selected_year or p.academic_year == selected_year]
+
+    return {
+        "offerings": offerings,
+        "journal_years": year_choices,
+        "journal_selected_year": selected_year,
+        "journal_periods": period_choices,
+        "journal_selected_period": selected_period,
+        "journal_kinds": SlotKind.choices,
+        "journal_selected_kind": selected_kind,
+        "teacher_label": user.get_full_name() or user.username,
+    }
+
+
+def _season_label(period) -> str:
+    """Yarımilin fəsil adı (Payız / Yaz / Yay) — başlanğıc ayından."""
+    month = period.start_date.month if getattr(period, "start_date", None) else 9
+    if month >= 8 or month == 12:
+        return "Payız semestri"
+    if month <= 5:
+        return "Yaz semestri"
+    return "Yay semestri"
+
+
+def _current_semester(periods):
+    """Bu günə uyğun yarımil: tarixə düşən period; yoxdursa fəsil qaydası
+    (sentyabr–yanvar → Payız, fevral–iyun → Yaz, iyul–avqust → Yay)."""
+    today = timezone.localdate()
+    containing = [p for p in periods if p.start_date <= today <= p.end_date]
+    if containing:
+        return containing[0]
+    month = today.month
+    if month >= 9 or month == 1:
+        season = "Payız semestri"
+    elif month <= 6:
+        season = "Yaz semestri"
+    else:
+        season = "Yay semestri"
+    matching = [p for p in periods if p.season_label == season and p.start_date <= today]
+    return matching[0] if matching else periods[0]
 
 
 def calendar_context(organization) -> dict:
@@ -137,21 +242,106 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         author=exam_author,
     )
 
+    time_grid = schedule.build_time_grid(slots, week_context=week_context, exams_by_day=exams_by_day)
+    _attach_slot_extras(
+        time_grid,
+        stats_map=_student_offering_stats(request.user, organization, record, period) if role == "student" else None,
+        counts_map=_offering_student_counts(teacher_offerings) if role == "teacher" else None,
+    )
+
+    from apps.registrar.models import SlotKind
+
     # Həftə naviqasiyası: standalone-da `?w=N`, profil panelində shell daxilində qalır.
     nav_prefix = _profile_section_prefix("my-schedule") if embedded else "?"
     return {
         "has_context": True,
         "role": role,
         "owner_label": owner_label,
+        "record": record,
+        "student_course_no": _course_number(record, period) if role == "student" else "",
         "period": period,
         "week": week_context,
-        "week_days": schedule.build_week_view(slots, week_context=week_context, exams_by_day=exams_by_day),
+        "time_grid": time_grid,
         "teacher_offerings": teacher_offerings,
         "weekdays": schedule.WEEKDAYS,
         "week_types": WeekType.choices,
+        "slot_kinds": SlotKind.choices,
+        "standard_times": schedule.STANDARD_LESSON_TIMES,
         "schedule_nav_prefix": nav_prefix,
         "schedule_embedded": embedded,
     }
+
+
+def _course_number(record, period) -> str:
+    """Tələbənin kursu (rum rəqəmi ilə, məs. III) — qəbul ilindən hesablanır."""
+    if record is None or period is None or not getattr(period, "start_date", None):
+        return ""
+    start = period.start_date
+    years = start.year - record.admission_year + (1 if start.month >= 8 else 0)
+    romans = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI"}
+    return romans.get(max(1, years), "")
+
+
+def _attach_slot_extras(grid, *, stats_map=None, counts_map=None):
+    """Modal üçün hər slot elementinə rol-spesifik əlavələr bağlanır:
+    tələbəyə öz jurnal statusu (qayıb/giriş balı), müəllimə qrupun tələbə sayı."""
+    for rows in (grid["rows"], grid["evening_rows"]):
+        for row in rows:
+            for cell in row["cells"]:
+                for item in cell["slots"]:
+                    offering_id = item["slot"].offering_id
+                    if stats_map is not None:
+                        item["stats"] = stats_map.get(offering_id)
+                    if counts_map is not None:
+                        item["student_count"] = counts_map.get(offering_id, 0)
+
+
+def _student_offering_stats(user, organization, record, period) -> dict:
+    """Tələbənin fənn-fənn jurnal xülasəsi (cədvəl modalı üçün, yüngül).
+
+    Qayıb saatı denormalizə olunmuş ``Enrollment.absence_hours``-dan gəlir;
+    giriş balı kanonik :func:`gradebook.entry_score_for` ilə hesablanır."""
+    from decimal import Decimal
+
+    from apps.registrar import gradebook
+    from apps.registrar.models import Enrollment
+
+    if record is None or period is None:
+        return {}
+    limit_percent = record.program.absence_limit_percent if record.program else 25
+    stats: dict = {}
+    enrollments = Enrollment.objects.filter(
+        organization=organization, student=user, offering__period=period
+    ).select_related("offering", "offering__assessment_scheme")
+    for enrollment in enrollments:
+        offering = enrollment.offering
+        scheme = getattr(offering, "assessment_scheme", None)
+        cap = scheme.entry_score_max if scheme else 50
+        allowed = Decimal(offering.lesson_hours or 0) * Decimal(limit_percent) / Decimal(100)
+        stats[offering.id] = {
+            "absence_hours": enrollment.absence_hours,
+            "allowed_absence": allowed,
+            "entry_score": gradebook.entry_score_for(enrollment, cap),
+            "entry_score_max": cap,
+            "barred": allowed > 0 and Decimal(enrollment.absence_hours) > allowed,
+        }
+    return stats
+
+
+def _offering_student_counts(offerings) -> dict:
+    """Müəllim modalı üçün: hər offering-in aktiv tələbə sayı (tək sorğu)."""
+    from django.db.models import Count
+
+    from apps.registrar.models import Enrollment
+
+    if not offerings:
+        return {}
+    rows = (
+        Enrollment.objects.filter(offering__in=list(offerings), status=Enrollment.Status.ENROLLED)
+        .values("offering_id")
+        .annotate(n=Count("id"))
+    )
+    return {row["offering_id"]: row["n"] for row in rows}
 
 
 def _current_period(organization):

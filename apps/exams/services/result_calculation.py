@@ -111,7 +111,14 @@ def calculate_test_attempt_result(attempt, *, answers=None):
             correct_option_ids = {option.id for option in question.options.all() if option.is_correct}
         max_score += points
 
-        selected_option_ids = _option_ids(answer.selected_options)
+        # EXAM-P0-03: seçim snapshot-u varsa ondan oxunur — variant redaktəsi
+        # canlı M2M through sətirlərini silsə belə keçmiş seçim itmir.
+        # None = köhnə cavab → canlı M2M (geriyə-uyğunluq).
+        frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+        if frozen_selection is not None:
+            selected_option_ids = {int(option_id) for option_id in frozen_selection}
+        else:
+            selected_option_ids = _option_ids(answer.selected_options)
         if not selected_option_ids:
             unanswered_count += 1
             continue

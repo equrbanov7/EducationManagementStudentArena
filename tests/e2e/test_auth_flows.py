@@ -220,7 +220,7 @@ class TestPublicSignupDisabled:
     """E-university provisioning: public self-signup is disabled in production.
 
     The prod image ships with PUBLIC_SIGNUP_ENABLED=False (accounts are created by
-    the university administration — see docs/ACCOUNT_PROVISIONING.md), so the
+    the university administration — see docs/operations/ACCOUNT_PROVISIONING.md), so the
     public register route redirects to login and the login page exposes no
     "register" link. (If a deployment re-enables signup, these expectations
     change — update alongside the flag.)

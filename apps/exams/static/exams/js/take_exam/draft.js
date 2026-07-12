@@ -121,6 +121,10 @@
         if (ctx.markedQuestionIdsField) {
             formData.append("marked_question_ids", ctx.markedQuestionIdsField.value);
         }
+        // EXAM-P1-06: OCC — cari bildiyimiz server revision-u göndər.
+        if (ctx.autosaveRevisionField) {
+            formData.append("autosave_revision", ctx.autosaveRevisionField.value || "0");
+        }
 
         ctx.dirtyQuestionIds.forEach(function (questionId) {
             formData.append("changed_questions[]", questionId);
@@ -141,14 +145,22 @@
 
         persistLocalDraft: function (ctx) {
             try {
-                localStorage.setItem(ctx.draftStorageKey, JSON.stringify(collectLocalDraft(ctx)));
+                // Cavab məzmunu paylaşılan cihazda brauzer sessiyasından sonra
+                // qalmasın; naviqasiya state-indən fərqli olaraq tab-scope saxlanır.
+                sessionStorage.setItem(ctx.draftStorageKey, JSON.stringify(collectLocalDraft(ctx)));
             } catch (error) {
-                // localStorage failure must not block the exam flow.
+                // Storage failure must not block the exam flow.
             }
         },
 
         clearLocalDraft: function (ctx) {
-            localStorage.removeItem(ctx.draftStorageKey);
+            try {
+                sessionStorage.removeItem(ctx.draftStorageKey);
+                // Əvvəlki versiyanın plaintext qalığını da təmizlə.
+                localStorage.removeItem(ctx.draftStorageKey);
+            } catch (error) {
+                // Storage cleanup failure must not block finish/navigation.
+            }
         },
 
         schedulePersistLocalDraft: function (ctx, delayMs) {
@@ -177,7 +189,17 @@
             var draft = null;
 
             try {
-                draft = JSON.parse(localStorage.getItem(ctx.draftStorageKey) || "null");
+                var serializedDraft = sessionStorage.getItem(ctx.draftStorageKey);
+                if (!serializedDraft) {
+                    // Bir-dəfəlik legacy miqrasiyası: cari tab-da draft-ı qoru,
+                    // davamətlı localStorage nüsxəsini dərhal sil.
+                    serializedDraft = localStorage.getItem(ctx.draftStorageKey);
+                    if (serializedDraft) {
+                        sessionStorage.setItem(ctx.draftStorageKey, serializedDraft);
+                    }
+                    localStorage.removeItem(ctx.draftStorageKey);
+                }
+                draft = JSON.parse(serializedDraft || "null");
             } catch (error) {
                 ns.draft.clearLocalDraft(ctx);
                 return;
@@ -235,7 +257,7 @@
         },
 
         queueAutoSave: function (ctx, delayMs) {
-            if (ctx.autoSaveTimer) {
+            if (ctx.autosaveConflict || ctx.autoSaveTimer) {
                 return;
             }
 
@@ -248,7 +270,7 @@
         },
 
         flushAutoSave: function (ctx) {
-            if (!ctx.hasUnsavedChanges) {
+            if (ctx.autosaveConflict || !ctx.hasUnsavedChanges) {
                 return;
             }
 
@@ -273,6 +295,9 @@
         sendDraft: function (ctx, action, options) {
             var effectiveAction = action || "autosave";
             var effectiveOptions = options || {};
+            if (ctx.autosaveConflict) {
+                return Promise.reject(new Error("autosave_conflict"));
+            }
             if (effectiveAction === "autosave" && ctx.finishRequestInFlight) {
                 return Promise.resolve(null);
             }
@@ -308,6 +333,61 @@
                 body: formData
             })
                 .then(function (res) {
+                    // EXAM-P1-06: OCC konflikti — başqa tab daha yeni yazıb.
+                    if (res.status === 409) {
+                        return res.json().then(function (data) {
+                            if (notification) {
+                                ns.notifications.hide(notification);
+                            }
+                            if (data.error === "question_timer_not_started") {
+                                ns.notifications.show(
+                                    data.message || "Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır.",
+                                    "error",
+                                    8000
+                                );
+                                ctx.hasUnsavedChanges = true;
+                                ns.draft.persistLocalDraft(ctx);
+                                var timerSlide = document.querySelector(
+                                    '.question-slide[data-question-id="' + String(data.question_id || "") + '"]'
+                                );
+                                return ns.timers.syncQuestionTimerWithServer(ctx, timerSlide).then(function (syncData) {
+                                    if (syncData && syncData.success) {
+                                        // Server start-ı indi təsdiqlədi; dirty cavabı qısa
+                                        // gecikmə ilə eyni revision-dan yenidən sına.
+                                        if (effectiveAction === "autosave") {
+                                            ctx.autoSaveTimer = setTimeout(function () {
+                                                ctx.autoSaveTimer = null;
+                                                ns.draft.flushAutoSave(ctx);
+                                            }, 500);
+                                        } else {
+                                            setTimeout(function () {
+                                                ns.draft.sendDraft(ctx, effectiveAction, effectiveOptions).catch(function () {});
+                                            }, 500);
+                                        }
+                                    } else {
+                                        ns.draft.queueAutoSave(ctx);
+                                    }
+                                    throw new Error("question_timer_sync_required");
+                                });
+                            }
+                            ns.notifications.show(
+                                data.message || ctx.i18n.autosaveConflict || "Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin.",
+                                "error",
+                                8000
+                            );
+                            // Konflikt həll edilmədən server revision-u qəbul etmək
+                            // stale draft-ı növbəti retry-da legitim göstərərdi. Bütün
+                            // avtomatik yazı yollarını reload-a qədər dondururuq.
+                            ctx.autosaveConflict = true;
+                            if (ctx.autoSaveTimer) {
+                                clearTimeout(ctx.autoSaveTimer);
+                                ctx.autoSaveTimer = null;
+                            }
+                            ctx.hasUnsavedChanges = true;
+                            ns.draft.persistLocalDraft(ctx);
+                            throw new Error("autosave_conflict");
+                        });
+                    }
                     if (!res.ok) {
                         throw new Error(res.status === 403 ? "csrf_or_session" : "Draft save failed");
                     }
@@ -323,6 +403,10 @@
                     return res.json();
                 })
                 .then(function (data) {
+                    // EXAM-P1-06: serverin yeni revision-unu qəbul et (növbəti OCC üçün).
+                    if (ctx.autosaveRevisionField && typeof data.server_revision !== "undefined") {
+                        ctx.autosaveRevisionField.value = String(data.server_revision);
+                    }
                     if (sentRevision === ctx.answerRevision) {
                         if (effectiveAction === "autosave" && !ctx.autoSaveBinaryUploadsEnabled) {
                             sentDirtyQuestionIds.forEach(function (questionId) {
@@ -381,6 +465,12 @@
                     if (notification) {
                         ns.notifications.hide(notification);
                     }
+                    // EXAM-P1-06: OCC konflikti artıq öz mesajını göstərib —
+                    // saveError göstərmə və auto-retry queue etmə (stale overwrite
+                    // qarşısı; istifadəçi səhifəni yeniləyib davam etməlidir).
+                    if (err && (err.message === "autosave_conflict" || err.message === "question_timer_sync_required")) {
+                        throw err;
+                    }
                     ctx.hasUnsavedChanges = true;
                     ns.draft.persistLocalDraft(ctx);
 
@@ -400,19 +490,23 @@
                 .finally(function () {
                     if (effectiveAction === "autosave") {
                         ctx.autoSaveRequestInFlight = false;
-                        if (ctx.hasUnsavedChanges) {
+                        if (!ctx.autosaveConflict && ctx.hasUnsavedChanges) {
                             ns.draft.queueAutoSave(ctx);
                         }
                     }
                 });
         },
 
-        init: function (ctx) {
-            window.markExamAnswerChanged = function (delayMs, questionId, options) {
-                ns.draft.markAnswerChanged(ctx, delayMs, questionId, options);
-            };
-
-            document.querySelectorAll('input[name^="q_"]').forEach(function (input) {
+        // EXAM-P1-04 strict delivery: server-injected slide-lərin input-larına da
+        // change listener-i qoşmaq üçün ayrıca (idempotent) bağlayıcı; init həm
+        // də sonradan inject olunan gövdə üçün çağırılır.
+        bindAnswerInputs: function (ctx, root) {
+            var scope = root || document;
+            scope.querySelectorAll('input[name^="q_"]').forEach(function (input) {
+                if (input.getAttribute("data-answer-bound") === "1") {
+                    return;
+                }
+                input.setAttribute("data-answer-bound", "1");
                 input.addEventListener("change", function () {
                     if (ctx.examType === "test") {
                         ns.draft.markAnswerChanged(ctx, 1000, getQuestionIdFromField(input));
@@ -423,71 +517,27 @@
                 });
             });
 
-            document.querySelectorAll("textarea.written-answer").forEach(function (textarea) {
+            scope.querySelectorAll("textarea.written-answer").forEach(function (textarea) {
+                if (textarea.getAttribute("data-answer-bound") === "1") {
+                    return;
+                }
+                textarea.setAttribute("data-answer-bound", "1");
                 textarea.addEventListener("input", function () {
                     ns.draft.markAnswerChanged(ctx, 3000, getQuestionIdFromField(textarea));
                 });
             });
+        },
+
+        init: function (ctx) {
+            window.markExamAnswerChanged = function (delayMs, questionId, options) {
+                ns.draft.markAnswerChanged(ctx, delayMs, questionId, options);
+            };
+
+            ns.draft.bindAnswerInputs(ctx, document);
 
             if (ctx.saveDraftBtn) {
                 ctx.saveDraftBtn.addEventListener("click", function () {
-                    var originalText = ctx.saveDraftBtn.innerHTML;
-                    ctx.saveDraftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + ctx.i18n.btnSaving;
-                    ctx.saveDraftBtn.disabled = true;
-
-                    var sentRevision = ctx.answerRevision;
-                    var formData = buildDraftFormData(ctx, "save_draft");
-
-                    fetch(window.location.href, {
-                        method: "POST",
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest",
-                            "X-CSRFToken": ns.config.getCsrfToken(ctx)
-                        },
-                        body: formData
-                    })
-                        .then(function (res) {
-                            if (!res.ok) {
-                                throw new Error("Draft save failed");
-                            }
-                            return res.json();
-                        })
-                        .then(function (data) {
-                            if (sentRevision === ctx.answerRevision) {
-                                ctx.hasUnsavedChanges = false;
-                                ctx.dirtyQuestionIds.clear();
-                                ctx.binaryDirtyQuestionIds.clear();
-                                ns.draft.clearLocalDraft(ctx);
-                            } else {
-                                ctx.hasUnsavedChanges = true;
-                                ns.draft.persistLocalDraft(ctx);
-                                ns.draft.queueAutoSave(ctx);
-                            }
-
-                            if (data.finished && data.redirect_url) {
-                                localStorage.removeItem(ctx.storageKey);
-                                localStorage.removeItem(ctx.markedStorageKey);
-                                ns.draft.clearLocalDraft(ctx);
-                                ns.navigation.prepareExamFinishNavigation(ctx);
-                                window.location.href = data.redirect_url;
-                                return;
-                            }
-
-                            ctx.saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> ' + ctx.i18n.btnSaved;
-                            ns.notifications.show(ctx.i18n.draftSavedWithCheck, "success", 2000);
-
-                            setTimeout(function () {
-                                ctx.saveDraftBtn.innerHTML = originalText;
-                                ctx.saveDraftBtn.disabled = false;
-                            }, 2000);
-                        })
-                        .catch(function () {
-                            ctx.hasUnsavedChanges = true;
-                            ns.draft.persistLocalDraft(ctx);
-                            ctx.saveDraftBtn.innerHTML = originalText;
-                            ctx.saveDraftBtn.disabled = false;
-                            ns.notifications.show(ctx.i18n.saveError, "error", 3000);
-                        });
+                    ns.draft.sendDraft(ctx, "save_draft").catch(function () {});
                 });
             }
 

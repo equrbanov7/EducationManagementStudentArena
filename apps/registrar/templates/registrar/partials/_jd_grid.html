@@ -1,0 +1,134 @@
+{% load i18n %}
+{% comment %}Qiymətləndirmə tabı (mockup): solda TƏQVİM PLANI (kurs mövzuları +
+keçirilmə tarixi), sağda davamiyyət/bal grid-i. Başlıqlar sadədir (yalnız tarix
++ BU GÜN). Lecture xanası: i/e·q/b çipi. Seminar/lab xanası: bal (0-10) + q/b —
+bal yazılıbsa iştirak avtomatik i/e sayılır. Ən yeni dərs adların yanındadır.
+Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcomment %}
+<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_marks">
+
+    <div class="jd2-split">
+        {# ── Sol: təqvim planı — mövzular + keçirilib/tarix ───────────────── #}
+        <div class="jd2-topics">
+            <div class="jd2-panel-label">{% trans "TƏQVİM PLANI — MÖVZULAR" context "registrar.journal" %}</div>
+            <div class="jd2-topic-scroll">
+                {% for item in calendar_plan %}
+                <div class="jd2-topic-row {% if item.is_today %}is-today{% elif not item.covered %}is-pending{% endif %}">
+                    <span class="jd2-topic-date">{% if item.lesson %}{{ item.lesson.date|date:"d.m" }}{% endif %}</span>
+                    <span class="jd2-topic-title">
+                        {{ item.title }}
+                        {% if item.is_today %}<span class="jd2-today-badge">{% trans "BU GÜN" context "registrar.journal" %}</span>
+                        {% elif item.covered %}<span class="jd2-covered-badge">✓ {% trans "keçirilib" context "registrar.journal" %}</span>{% endif %}
+                    </span>
+                </div>
+                {% empty %}
+                <div class="jd2-topic-row"><span class="jd2-topic-title jd2-topic-empty">{% trans "Hələ mövzu/dərs yoxdur." context "registrar.journal" %}</span></div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# ── Sağ: davamiyyət grid-i ───────────────────────────────────────── #}
+        <div class="jd2-gridcol">
+            <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
+                <table class="jd2-table">
+                    <thead>
+                        <tr>
+                            <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
+                            {% for lm in journal.lesson_meta %}
+                            <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}"
+                                title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.topic %} — {{ lm.lesson.topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}">
+                                {{ lm.lesson.date|date:"d.m" }}
+                                {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}
+                                {% if can_edit and lm.editable %}
+                                <button type="button" class="jd2-th-edit" data-jd-edit-lesson
+                                        data-lesson-id="{{ lm.lesson.id }}"
+                                        data-lesson-date="{{ lm.lesson.date|date:'Y-m-d' }}"
+                                        data-lesson-kind="{{ lm.lesson.kind }}"
+                                        data-lesson-topic="{{ lm.lesson.topic }}"
+                                        data-lesson-hours="{{ lm.lesson.hours }}"
+                                        data-lesson-start="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% endif %}"
+                                        data-lesson-end="{% if lm.lesson.end_time %}{{ lm.lesson.end_time|time:'H:i' }}{% endif %}"
+                                        data-action-url="{% url 'registrar:journal_lesson_action' offering.id lm.lesson.id %}"
+                                        title="{% trans 'Redaktə / sil (2 saat pəncərəsi)' context 'registrar.journal' %}"><i class="fas fa-pen"></i></button>
+                                {% endif %}
+                                {% if can_edit and lm.markable %}
+                                <span class="jd2-th-bulk">
+                                    <button type="button" class="jd2-bulk jd2-bulk--ie" data-jd-bulk="present" data-lesson="{{ lm.lesson.id }}" title="{% trans 'Hamısına i/e' context 'registrar.journal' %}">i/e</button>
+                                    <button type="button" class="jd2-bulk jd2-bulk--qb" data-jd-bulk="absent" data-lesson="{{ lm.lesson.id }}" title="{% trans 'Hamısına q/b' context 'registrar.journal' %}">q/b</button>
+                                </span>
+                                {% endif %}
+                            </th>
+                            {% endfor %}
+                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "limit" context "registrar.journal" %} {{ journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %}</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in journal.rows %}
+                        <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">
+                            <td class="jd2-td-student">
+                                <span class="jd2-stu-no">{{ forloop.counter }}</span>
+                                <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                            </td>
+                            {% for cell in row.cells %}
+                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}">
+                                {% if can_edit and cell.writable %}
+                                <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
+                                       value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att>
+                                {% if cell.allows_score %}
+                                {% comment %}Seminar/lab: bal + q/b. Bal yazılıbsa i/e avtomatikdir.{% endcomment %}
+                                <span class="jd2-semcell" data-jd-semcell data-lesson="{{ cell.lesson.id }}">
+                                    <input type="number" class="cell-score jd2-score" min="0" max="10" step="0.5"
+                                           name="score__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
+                                           value="{% if cell.mark and cell.mark.score is not None %}{{ cell.mark.score|floatformat:'-2' }}{% endif %}"
+                                           placeholder="{% trans 'bal' context 'registrar.journal' %}" data-jd-score>
+                                    <button type="button" class="jd2-qb-chip {% if cell.mark and cell.mark.status == 'absent' %}is-active{% endif %}" data-jd-qb>q/b</button>
+                                </span>
+                                {% else %}
+                                <button type="button"
+                                        class="att-chip {% if cell.mark and cell.mark.status == 'absent' %}att-chip--qb{% elif cell.mark %}att-chip--ie{% else %}att-chip--empty{% endif %}"
+                                        data-jd-chip data-lesson="{{ cell.lesson.id }}">
+                                    {% if cell.mark and cell.mark.status == 'absent' %}q/b{% elif cell.mark %}i/e{% else %}—{% endif %}
+                                </button>
+                                {% endif %}
+                                {% else %}
+                                {% if cell.mark %}
+                                    {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb">q/b</span>
+                                    {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie">{{ cell.mark.score|floatformat:'-2' }}</span>
+                                    {% else %}<span class="jd2-ro jd2-ro--ie">i/e</span>{% endif %}
+                                {% else %}<span class="jd2-ro jd2-ro--empty">—</span>{% endif %}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="jd2-td-qayib">
+                                <span class="jd2-qchip {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">{{ row.absence_hours }} {% trans "saat" context "registrar.journal" %}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if can_edit and journal.lessons %}
+            <div class="jd2-savebar">
+                <button type="submit" class="jd2-save-btn"><i class="fas fa-floppy-disk"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── Alt legend zolağı (mockup) ───────────────────────────────────────── #}
+    <div class="jd2-footbar">
+        <span class="jd2-foot-legend"><b class="jd2-ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} <b class="jd2-qb">q/b</b> {% trans "qayıb" context "registrar.journal" %}</span>
+        <span class="jd2-foot-note">{% trans "Davamiyyət yalnız cari gün üzrə qeyd edilə bilər · yazılmış qeyd 2 saatdan sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir." context "registrar.journal" %}</span>
+        <span class="jd2-foot-chips">
+            <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Limitə yaxın" context "registrar.journal" %}</span>
+            <span class="jd2-limitchip jd2-limitchip--barred">■ {% trans "Limit keçib — kəsilir" context "registrar.journal" %}</span>
+        </span>
+    </div>
+</form>
+
+{% if not journal.lessons %}
+{% trans "Hələ dərs əlavə edilməyib" context "registrar.journal" as jd_empty_title %}
+{% trans "«+ Yeni dərs» düyməsi ilə bu günün dərsini açın — sonra iştirak/qayıb və bal yazın." context "registrar.journal" as jd_empty_hint %}
+{% include "partials/_empty_state.html" with empty_icon="fa-calendar-plus" empty_title=jd_empty_title empty_hint=jd_empty_hint %}
+{% endif %}

@@ -12,6 +12,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAnswer
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
+from apps.exams.services.manual_grading import answer_max_points as _answer_max_points
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
 
@@ -101,6 +102,7 @@ def _build_answer_review_item(answer):
     return {
         "question": answer.question,
         "answer": answer,
+        "max_points": _answer_max_points(answer),
         "coding_submission": coding_submission,
         "coding_files": coding_files,
         "coding_file_count": len(coding_files),

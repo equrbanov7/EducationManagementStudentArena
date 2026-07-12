@@ -208,3 +208,151 @@
     box-shadow: 0 0 0 3px var(--ems-primary-100);
 }
 .jd-comment-ro { font-size: 0.78rem; color: var(--ems-neutral-600); font-style: italic; }
+
+/* ═══ Yenidən-dizayn dalğası: yeni grid + tab elementləri ══════════════════ */
+
+/* Toolbar */
+.jd-grid-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.jd-add-lesson-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--ems-primary-600, #2563eb); color: #fff; border: none; cursor: pointer;
+    border-radius: 10px; padding: 9px 16px; font-size: 13.5px; font-weight: 700; font-family: inherit;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.jd-add-lesson-btn:hover { background: var(--ems-primary-700, #1d4ed8); }
+.jd-toolbar-hint { font-size: 12px; color: var(--ems-neutral-500, #64748b); font-weight: 600; }
+
+/* № sticky sütunu */
+.jd-grid .col-no { width: 34px; min-width: 34px; text-align: center; color: var(--ems-neutral-400, #94a3b8); font-weight: 700; font-size: 12px; }
+.jd-sticky-no { position: sticky; left: 0; background: var(--ems-neutral-0, #fff); z-index: 1; }
+.jd-grid .jd-sticky-col { left: 34px; }
+.jd-grid thead .jd-sticky-no,
+.jd-grid thead .jd-sticky-col { z-index: 3; }
+
+/* Dərs başlığı */
+.jd-grid th.col-lesson.is-today { background: var(--ems-primary-600, #2563eb); color: #fff; }
+.lesson-today-badge {
+    display: block; font-size: 9px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.22); border-radius: 5px; padding: 1px 5px; margin-top: 2px;
+}
+.lesson-time { display: block; font-size: 10px; opacity: 0.8; font-weight: 600; }
+.lesson-edit-btn {
+    border: none; background: transparent; cursor: pointer; color: inherit; opacity: 0.75;
+    font-size: 11px; padding: 2px 4px; border-radius: 5px;
+}
+.lesson-edit-btn:hover { opacity: 1; background: rgba(0, 0, 0, 0.08); }
+.lesson-frozen { font-size: 10px; opacity: 0.55; }
+.lesson-bulk { display: flex; gap: 3px; justify-content: center; margin-top: 3px; }
+.lesson-bulk-btn {
+    border: none; cursor: pointer; font-family: inherit; font-size: 10px; font-weight: 800;
+    border-radius: 5px; padding: 2px 7px;
+}
+.lesson-bulk-btn--ie { background: var(--ems-emerald-100, #d1fae5); color: var(--ems-success-strong, #047857); }
+.lesson-bulk-btn--qb { background: var(--ems-danger-100, #fee2e2); color: var(--ems-danger-strong, #b91c1c); }
+
+/* Üç-vəziyyətli davamiyyət çipi */
+.att-chip {
+    border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 12px;
+    border-radius: 7px; padding: 4px 10px; min-width: 40px;
+    box-shadow: 0 1px 3px rgba(18, 39, 78, 0.12); transition: transform 0.1s ease;
+}
+.att-chip:active { transform: scale(0.94); }
+.att-chip--ie { background: var(--ems-emerald-100, #dcfce7); color: var(--ems-success-600, #059669); }
+.att-chip--qb { background: var(--ems-danger-100, #fee2e2); color: var(--ems-danger-500, #dc2626); }
+.att-chip--empty { background: var(--ems-neutral-100, #f1f5f9); color: var(--ems-neutral-400, #94a3b8); }
+.att-chip--demo { cursor: default; box-shadow: none; margin: 0 4px 0 10px; }
+.jd-legend-inline { font-size: 12px; color: var(--ems-neutral-500, #64748b); font-weight: 600; display: inline-flex; align-items: center; }
+.jcell.is-today { background: var(--ems-primary-50, #eff6ff); }
+.jcell-lock { font-size: 9px; color: var(--ems-neutral-400, #94a3b8); margin-left: 3px; }
+.att-ro--empty { color: var(--ems-neutral-300, #cbd5e1); font-weight: 700; }
+
+/* Kollokvium */
+.jd-kollokvium-dates { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 14px; }
+.jd-kdate { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ems-neutral-500, #64748b); }
+.jd-kdate input { border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 9px; padding: 7px 10px; font-family: inherit; }
+.th-date { display: block; font-size: 10px; font-weight: 600; opacity: 0.75; }
+
+/* Sərbəst iş */
+.jd-selfwork-topics { display: flex; align-items: center; gap: 8px; margin: 10px 0 14px; }
+.jd-selfwork-topics input[type="text"] {
+    flex: 1; max-width: 420px; border: 1px solid var(--ems-neutral-200, #e2e8f0);
+    border-radius: 10px; padding: 9px 12px; font-family: inherit; font-size: 13px;
+}
+.jd-add-topic-btn {
+    border: none; cursor: pointer; background: var(--ems-primary-600, #2563eb); color: #fff;
+    width: 36px; height: 36px; border-radius: 10px; font-size: 14px;
+}
+.jd-add-topic-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.jd-topic-count { font-size: 12px; font-weight: 800; color: var(--ems-neutral-500, #64748b); }
+.jd-selfwork-layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+.jd-topic-list {
+    margin: 0; padding: 10px 10px 10px 30px; background: var(--ems-neutral-50, #f8fafc);
+    border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 12px; font-size: 12.5px;
+}
+.jd-topic-list li { padding: 5px 0; display: flex; align-items: center; gap: 8px; }
+.jd-topic-title { flex: 1; font-weight: 600; color: var(--ems-neutral-700, #334155); }
+.jd-topic-del button { border: none; background: transparent; color: var(--ems-danger-500, #dc2626); cursor: pointer; font-size: 11px; opacity: 0.7; }
+.jd-topic-del button:hover { opacity: 1; }
+.sw-chip {
+    display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+    border-radius: 7px; border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 11.5px;
+}
+.sw-chip--on { background: var(--ems-primary-50, #eaf1fe); color: var(--ems-primary-700, #1d4ed8); }
+.sw-chip--off { background: var(--ems-danger-100, #fee2e2); color: var(--ems-danger-500, #dc2626); }
+.sw-chip--ro { cursor: default; }
+.col-sw { min-width: 34px; text-align: center; }
+
+/* Kurs işi */
+.col-cw-topic { min-width: 260px; }
+.cw-topic-input, .cw-date-input {
+    width: 100%; border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 8px;
+    padding: 7px 9px; font-family: inherit; font-size: 12.5px;
+}
+.cw-date-input { width: auto; }
+
+/* Modal */
+.jd-modal { position: fixed; inset: 0; z-index: 1080; display: flex; align-items: center; justify-content: center; padding: 18px; }
+.jd-modal[hidden] { display: none; }
+.jd-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 42, 92, 0.45); backdrop-filter: blur(2px); }
+.jd-modal-card {
+    position: relative; background: var(--ems-neutral-0, #fff); border-radius: 18px;
+    width: min(560px, 100%); max-height: 90vh; overflow: auto;
+    box-shadow: 0 24px 60px rgba(15, 42, 92, 0.35);
+}
+.jd-modal-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--ems-neutral-100, #f1f5f9); position: relative; }
+.jd-modal-head h3 { margin: 0; font-size: 16.5px; font-weight: 800; color: var(--ems-neutral-900, #0f172a); }
+.jd-modal-close {
+    position: absolute; top: 12px; right: 14px; border: none; background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-500, #64748b); width: 30px; height: 30px; border-radius: 9px; font-size: 17px; cursor: pointer; line-height: 1;
+}
+.jd-modal-body { padding: 14px 20px; }
+.jd-modal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.jd-field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 700; color: var(--ems-neutral-500, #64748b); }
+.jd-field--wide { grid-column: 1 / -1; }
+.jd-field input, .jd-field select {
+    border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 10px; padding: 9px 11px;
+    font-family: inherit; font-size: 13.5px; color: var(--ems-neutral-900, #0f172a);
+}
+.jd-field-hint { font-weight: 600; font-size: 10.5px; color: var(--ems-neutral-400, #94a3b8); }
+.jd-time-pair { display: flex; gap: 8px; }
+.jd-time-pair input { flex: 1; }
+.jd-modal-note {
+    margin: 12px 0 0; background: var(--ems-primary-50, #eff6ff); border-radius: 10px;
+    padding: 10px 12px; font-size: 12px; color: var(--ems-neutral-600, #475569); font-weight: 600;
+}
+.jd-modal-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 16px; border-top: 1px solid var(--ems-neutral-100, #f1f5f9); }
+.jd-ghost-btn {
+    border: 1px solid var(--ems-neutral-200, #e2e8f0); background: var(--ems-neutral-0, #fff);
+    color: var(--ems-neutral-500, #64748b); border-radius: 10px; padding: 9px 16px;
+    font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.jd-danger-btn {
+    border: none; background: var(--ems-danger-100, #fee2e2); color: var(--ems-danger-strong, #b91c1c);
+    border-radius: 10px; padding: 9px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.jd-lesson-delete-form { padding: 0 20px 16px; display: flex; justify-content: flex-start; }
+
+@media (max-width: 900px) {
+    .jd-selfwork-layout { grid-template-columns: 1fr; }
+    .jd-modal-grid { grid-template-columns: 1fr; }
+}

@@ -90,6 +90,7 @@
                 questionNavButtons: document.querySelectorAll("[data-question-nav]"),
                 markButtons: document.querySelectorAll("[data-mark-question]"),
                 markedQuestionIdsField: document.getElementById("marked-question-ids-field"),
+                autosaveRevisionField: document.getElementById("autosave-revision-field"),
                 qTimerContainer: document.getElementById("question-timer-container"),
                 qTimerValue: document.getElementById("question-timer-value"),
                 questionTimerInterval: null,
@@ -103,6 +104,9 @@
                 hasUnsavedChanges: false,
                 autoSaveTimer: null,
                 autoSaveRequestInFlight: false,
+                // 409-dan sonra stale local draft yeni revision-la avtomatik
+                // yazılmasın; yalnız səhifə reload-u state-i yeniləyir.
+                autosaveConflict: false,
                 answerRevision: 0,
                 questionTransitionTimer: null,
                 questionTransitionHideTimer: null,
@@ -110,6 +114,7 @@
                 binaryDirtyQuestionIds: new Set(),
                 examType: examForm.dataset.examType,
                 autoSaveBinaryUploadsEnabled: examForm.dataset.autosaveBinaryUploadsEnabled === "1",
+                questionSeenUrl: examForm.dataset.questionSeenUrl || "",
                 examId: examId,
                 attemptId: attemptId,
                 storageKey: "exam_" + examId + "_attempt_" + attemptId + "_currentIndex",

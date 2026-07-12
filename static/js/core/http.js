@@ -2,7 +2,7 @@
  * EMSCore.fetchJSON — layihə üçün standart fetch sarğısı (Faza 6.3).
  * ─────────────────────────────────────────────────────────────────────
  * YENİ kod fetch() əvəzinə bundan istifadə etməlidir (köhnə ~70 çağırış
- * tədricən miqrasiya olunur — docs/AJAX_SAFE_JS_PATTERN.md).
+ * tədricən miqrasiya olunur — docs/frontend/AJAX_SAFE_JS_PATTERN.md).
  *
  * Verir: CSRF başlığı (unsafe metodlarda avtomatik), X-Requested-With,
  * JSON body (options.data) + JSON parse, same-origin credentials,

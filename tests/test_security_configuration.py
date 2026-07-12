@@ -1,6 +1,7 @@
 import importlib
 import os
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 from django.conf import settings
@@ -9,6 +10,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 User = get_user_model()
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class SecurityConfigurationTest(TestCase):
@@ -87,6 +89,13 @@ class SecurityConfigurationTest(TestCase):
         directives = self._parse_csp(response)
         self.assertIn("style-src", directives)
         self.assertNotIn("'unsafe-inline'", directives["style-src"])
+
+    def test_assigned_exam_title_is_not_inserted_with_inner_html(self):
+        source = (ROOT / "apps/accounts/static/accounts/js/profile/ui.js").read_text(encoding="utf-8")
+
+        self.assertNotIn("textEl.innerHTML", source)
+        self.assertIn("titleStrong.textContent", source)
+        self.assertIn("textEl.replaceChildren", source)
 
 
 class SessionTimeoutSettingsTest(TestCase):

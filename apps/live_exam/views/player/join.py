@@ -217,6 +217,22 @@ def live_join_enter(request, pin):
             locked_session = LiveSession.objects.select_for_update().get(pk=session.pk)
             player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
 
+            # EXAM-P1-12: late-join qorunması. Bitmiş oyuna heç kim qoşula
+            # bilməz; oyun gedişdə olduqda (lobby-dən çıxıb) yalnız ARTIQ
+            # qəbul edilmiş oyunçu (reconnect) davam edə bilər — yeni oyunçu
+            # yox. Yoxlama kilid daxilindədir ki, host-un state keçidi ilə
+            # yarış olmasın.
+            if locked_session.state == LiveSession.STATE_FINISHED:
+                return JsonResponse(
+                    {"ok": False, "message": pgettext("live_exam.view.message", "session_finished")},
+                    status=403,
+                )
+            if player is None and locked_session.state != LiveSession.STATE_LOBBY:
+                return JsonResponse(
+                    {"ok": False, "message": pgettext("live_exam.view.message", "game_already_started")},
+                    status=403,
+                )
+
             if player is None and LivePlayer.objects.filter(session=locked_session).count() >= max_participants:
                 return JsonResponse(
                     {

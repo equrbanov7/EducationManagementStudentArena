@@ -1,0 +1,56 @@
+{% load i18n %}
+{# Bir saat zolağı sətri: SAAT + hər günün hüceyrəsi (mockup kart formatı). #}
+<tr class="sgx-row">
+    <td class="sgx-col-time">
+        <b>{{ row.start|time:"H:i" }}</b>
+        <small>{{ row.end|time:"H:i" }}</small>
+    </td>
+    {% for cell in row.cells %}
+    <td class="sgx-cell {% if cell.is_today %}is-today{% endif %}">
+        {% for item in cell.slots %}
+        {% with slot=item.slot off=item.slot.offering %}
+        <button type="button"
+                class="sgx-card sgx-card--{{ slot.kind }} {% if not item.this_week %}is-offweek{% endif %}"
+                data-sgx-slot
+                data-code="{{ off.subject.code }}"
+                data-name="{{ off.subject.name }}"
+                data-kind="{{ slot.kind }}"
+                data-kind-label="{{ slot.get_kind_display }}"
+                data-when="{{ cell.date|date:'d.m.Y' }} · {{ row.start|time:'H:i' }}–{{ row.end|time:'H:i' }}"
+                data-parity="{{ slot.week_type }}"
+                data-parity-label="{% if slot.week_type == 'odd' %}{% trans 'Üst həftə' context 'registrar.schedule' %}{% elif slot.week_type == 'even' %}{% trans 'Alt həftə' context 'registrar.schedule' %}{% else %}{% trans 'Hər həftə' context 'registrar.schedule' %}{% endif %}{% if not item.this_week %} · {% trans 'bu həftə yox' context 'registrar.schedule' %}{% endif %}"
+                data-room="{{ slot.room }}"
+                data-ects="{{ off.subject.ects }}"
+                {% if role == 'student' and off.instructor %}data-teacher="{{ off.instructor.get_full_name|default:off.instructor.username }}"{% endif %}
+                {% if role == 'teacher' %}
+                data-group="{% if off.group %}{{ off.group.name }}{% endif %}"
+                data-count="{{ item.student_count|default:0 }}"
+                data-journal-url="{% url 'registrar:journal_detail' off.id %}"
+                data-delete-url="{% url 'registrar:schedule_slot_delete' slot.id %}"
+                {% endif %}
+                {% if item.stats %}
+                data-abs="{{ item.stats.absence_hours }}"
+                data-abs-limit="{{ item.stats.allowed_absence|floatformat:0 }}"
+                data-entry="{{ item.stats.entry_score|floatformat:'-2' }}"
+                data-entry-max="{{ item.stats.entry_score_max }}"
+                data-barred="{{ item.stats.barred|yesno:'1,0' }}"
+                {% endif %}>
+            <span class="sgx-card-titlerow">
+                {% if slot.week_type == 'odd' %}<span class="sgx-chip sgx-chip--ust">ÜST</span>
+                {% elif slot.week_type == 'even' %}<span class="sgx-chip sgx-chip--alt">ALT</span>{% endif %}
+                <span class="sgx-card-title">{{ off.subject.name }}</span>
+            </span>
+            <span class="sgx-card-meta">{{ slot.get_kind_display }}{% if role == 'student' and off.instructor %} · {{ off.instructor.get_full_name|default:off.instructor.username }}{% elif role == 'teacher' and off.group %} · {{ off.group.name }}{% endif %}</span>
+            {% if slot.room %}<span class="sgx-card-room">{{ slot.room }}</span>{% endif %}
+        </button>
+        {% endwith %}
+        {% endfor %}
+        {% if cell.slots|length == 1 %}
+        {% with only=cell.slots.0.slot %}
+        {% if only.week_type == 'odd' %}<span class="sgx-cell-gap">ALT — {% trans "boş" context "registrar.schedule" %}</span>
+        {% elif only.week_type == 'even' %}<span class="sgx-cell-gap">ÜST — {% trans "boş" context "registrar.schedule" %}</span>{% endif %}
+        {% endwith %}
+        {% endif %}
+    </td>
+    {% endfor %}
+</tr>

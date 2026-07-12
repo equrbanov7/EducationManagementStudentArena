@@ -341,3 +341,217 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Apellyasiya müddəti bitib — read-only baxış (UX) ─────────────────────── */
+.appeal-info-card--warning {
+    border-color: var(--ems-warning-300, #fcd34d);
+    background: var(--ems-warning-50, #fffbeb);
+}
+.appeal-info-card--warning > i {
+    color: var(--ems-warning-600, #d97706);
+}
+.appeal-closed-appeals {
+    margin-top: 1.25rem;
+}
+.appeal-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800, #1f2937);
+    margin-bottom: 0.75rem;
+}
+.appeal-closed-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+}
+.appeal-closed-list__item {
+    border: 1px solid var(--ems-neutral-200, #e5e7eb);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: var(--ems-neutral-0, #fff);
+}
+.appeal-closed-list__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+.appeal-closed-list__meta {
+    color: var(--ems-neutral-500, #6b7280);
+    font-size: 0.9rem;
+}
+.appeal-status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--ems-neutral-100, #f3f4f6);
+    color: var(--ems-neutral-700, #374151);
+}
+.appeal-status-chip--accepted,
+.appeal-status-chip--partially_accepted {
+    background: var(--ems-success-50, #ecfdf5);
+    color: var(--ems-success-700, #047857);
+}
+.appeal-status-chip--rejected {
+    background: var(--ems-danger-50, #fef2f2);
+    color: var(--ems-danger-700, #b91c1c);
+}
+.appeal-status-chip--pending,
+.appeal-status-chip--under_review {
+    background: var(--ems-warning-50, #fffbeb);
+    color: var(--ems-warning-700, #b45309);
+}
+.appeal-closed-actions {
+    margin-top: 1.25rem;
+}
+
+/* ============================================================
+   Yeni apellyasiya müraciəti — toolbar düyməsi + modal (Part B)
+   ============================================================ */
+.appeal-body-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.appeal-new-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.15rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--ems-primary-600), var(--ems-primary-700));
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.appeal-new-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+    filter: brightness(1.03);
+}
+.appeal-new-btn:focus-visible {
+    outline: 3px solid var(--ems-primary-200);
+    outline-offset: 2px;
+}
+.appeal-new-btn i {
+    font-size: 0.9em;
+}
+
+.appeal-new-modal .modal-content {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+}
+.appeal-new-modal .modal-header {
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--ems-primary-50);
+    border-bottom: 1px solid var(--ems-primary-100);
+    padding: 1.15rem 1.35rem;
+}
+.appeal-new-modal__subtitle {
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+}
+.appeal-new-modal .modal-body {
+    padding: 1.1rem 1.35rem 1.35rem;
+}
+
+.appeal-eligible-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.appeal-eligible-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 0.85rem;
+    background: var(--ems-neutral-0);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.appeal-eligible-item:hover {
+    border-color: var(--ems-primary-200);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08);
+}
+.appeal-eligible-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+.appeal-eligible-item__title {
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.appeal-eligible-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-500);
+}
+.appeal-eligible-item__deadline {
+    color: var(--ems-warning-700, #b45309);
+    font-weight: 600;
+}
+.appeal-eligible-item__cta {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.05rem;
+    border-radius: 0.7rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.appeal-eligible-item__cta:hover {
+    background: var(--ems-primary-600);
+    color: #fff;
+    transform: translateY(-1px);
+}
+.appeal-empty--modal {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+.appeal-empty--modal i {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--ems-neutral-400);
+}
+
+@media (max-width: 576px) {
+    .appeal-eligible-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .appeal-eligible-item__cta {
+        justify-content: center;
+    }
+}

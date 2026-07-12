@@ -63,18 +63,46 @@ def _scheme_map(offering_ids):
 
 
 def _component_offerings(offering_ids) -> set:
-    return set(AssessmentComponent.objects.filter(offering_id__in=offering_ids).values_list("offering_id", flat=True))
+    """Yalnız GENERIC komponentli offering-lər lesson-cəmi əvəz edir
+    (kollokvium/sərbəst iş ÜSTƏGƏLdir — gradebook.entry_score_for güzgüsü)."""
+    return set(
+        AssessmentComponent.objects.filter(offering_id__in=offering_ids, kind="generic").values_list(
+            "offering_id", flat=True
+        )
+    )
 
 
-def _component_sum_map(enrollment_ids):
+def _capped_component_sum(enrollment_ids, *, kinds):
     decimal_field = DecimalField(max_digits=8, decimal_places=2)
     capped = Least(F("score"), Cast(F("component__max_score"), decimal_field), output_field=decimal_field)
     rows = (
-        ComponentScore.objects.filter(enrollment_id__in=enrollment_ids)
+        ComponentScore.objects.filter(enrollment_id__in=enrollment_ids, component__kind__in=kinds)
         .values("enrollment_id")
         .annotate(total=Sum(capped))
     )
     return {r["enrollment_id"]: r["total"] or Decimal("0") for r in rows}
+
+
+def _component_sum_map(enrollment_ids):
+    return _capped_component_sum(enrollment_ids, kinds=["generic"])
+
+
+def _kollokvium_sum_map(enrollment_ids):
+    return _capped_component_sum(enrollment_ids, kinds=["kollokvium"])
+
+
+def _selfwork_map(enrollment_ids):
+    """enrollment_id → təhvil verilmiş sərbəst iş sayı (hər biri 1 bal, ≤10)."""
+    from django.db.models import Count
+
+    from apps.registrar.models import SelfWorkMark
+
+    rows = (
+        SelfWorkMark.objects.filter(enrollment_id__in=enrollment_ids, done=True)
+        .values("enrollment_id")
+        .annotate(total=Count("id"))
+    )
+    return {r["enrollment_id"]: min(Decimal(r["total"]), Decimal(10)) for r in rows}
 
 
 def _lesson_sum_map(enrollment_ids):
@@ -128,6 +156,9 @@ def _evaluate(enrollment, maps):
         raw_entry = maps["component_sums"].get(enrollment.id, Decimal("0"))
     else:
         raw_entry = maps["lesson_sums"].get(enrollment.id, Decimal("0"))
+    # Kollokvium + sərbəst iş həmişə üstəgəl (gradebook.entry_score_for güzgüsü).
+    raw_entry += maps["kollokvium_sums"].get(enrollment.id, Decimal("0"))
+    raw_entry += maps["selfwork_sums"].get(enrollment.id, Decimal("0"))
     entry = min(raw_entry, Decimal(entry_max))
 
     exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
@@ -255,6 +286,8 @@ def build_period_analytics(*, organization, period) -> dict:
         "schemes": _scheme_map(offering_ids),
         "component_offerings": _component_offerings(offering_ids),
         "component_sums": _component_sum_map(enrollment_ids),
+        "kollokvium_sums": _kollokvium_sum_map(enrollment_ids),
+        "selfwork_sums": _selfwork_map(enrollment_ids),
         "lesson_sums": _lesson_sum_map(enrollment_ids),
         "exams": _exam_map(enrollment_ids),
         "resits": _resit_map(enrollment_ids),

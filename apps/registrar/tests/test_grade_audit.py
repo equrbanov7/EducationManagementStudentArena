@@ -76,9 +76,10 @@ class GradeAuditTest(TestCase):
     def test_mark_change_is_audited(self):
         with bypass_rls():
             lesson = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}
@@ -94,9 +95,10 @@ class GradeAuditTest(TestCase):
     def test_correction_records_old_and_new(self):
         with bypass_rls():
             lesson = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}
@@ -104,26 +106,27 @@ class GradeAuditTest(TestCase):
                 by_user=self.teacher,
             )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
-                    {"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 15}
+                    {"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 9}
                 ],
                 by_user=self.teacher,
             )
             correction = self._grade_logs().filter(resource_type="registrar.grade.mark").order_by("-created_at").first()
             self.assertEqual(correction.changes[0]["old"], "iə 10")
-            self.assertEqual(correction.changes[0]["new"], "iə 15")
+            self.assertEqual(correction.changes[0]["new"], "iə 9")
 
     def test_unchanged_resave_writes_no_audit(self):
         with bypass_rls():
             lesson = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             entries = [{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}]
-            gradebook.save_marks(offering=self.offering, entries=entries, by_user=self.teacher)
+            gradebook.save_marks(enforce_day=False, offering=self.offering, entries=entries, by_user=self.teacher)
             before = self._grade_logs().count()
             # Re-saving identical values must not create a new audit entry.
-            gradebook.save_marks(offering=self.offering, entries=entries, by_user=self.teacher)
+            gradebook.save_marks(enforce_day=False, offering=self.offering, entries=entries, by_user=self.teacher)
             self.assertEqual(self._grade_logs().count(), before)
 
     def test_component_score_change_is_audited(self):
@@ -152,9 +155,10 @@ class GradeAuditTest(TestCase):
     def test_get_grade_history_returns_newest_first(self):
         with bypass_rls():
             lesson = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
             )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}

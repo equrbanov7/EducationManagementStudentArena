@@ -16,7 +16,7 @@ The fix is **transaction pooling**: run each request inside one atomic transacti
 - **Request-external DB (consumers/tasks/commands):** must run their DB work inside `with rls_worker_atomic(): ...` (a no-op when the flag is off; wraps in `transaction.atomic()` so `SET LOCAL` is transaction-scoped when on).
 - **PgBouncer:** `docker-compose.prod.yml:204` → `POOL_MODE: ${PGBOUNCER_POOL_MODE:-session}`. Transaction pooling = set `PGBOUNCER_POOL_MODE=transaction`.
 - **Existing tests:** `apps/organizations/tests/test_rls_transaction_pooling.py` (`test_worker_atomic_sets_local_tenant_and_clears_after_block`, `test_reused_connection_gets_fresh_tenant_context`, `test_missing_tenant_context_fails_closed`), `core/tests/test_rls_pooling.py`.
-- **Reference guide:** `docs/FAZA2_3B_TRANSACTION_POOLING.md` (read it fully first).
+- **Reference guide:** `docs/performance/FAZA2_3B_TRANSACTION_POOLING.md` (read it fully first).
 - **Load tests:** `k6/{login-load-test,mixed-realistic-load-test,student-exam-flow-test,dashboard-navigation-test}.js`.
 
 ## Task 1 — Audit ALL request-external DB paths (code; Codex)

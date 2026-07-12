@@ -25,17 +25,14 @@
 
 ```
 Internet
-   │  HTTPS (443)
-   ▼
-Load Balancer  ← SSL/TLS terminates here (cert managed externally)
-   │  HTTP (80)  + X-Forwarded-Proto: https
-   ▼
+│  HTTPS (443)
+▼
 ┌──────────────────────────────────────────────────┐
 │  Docker host (emsarena-network bridge)           │
 │                                                  │
 │  ┌─────────┐   HTTP   ┌─────────────────────┐   │
 │  │  Nginx  │ ──────▶  │  Daphne (port 8000) │   │
-│  │  :80    │          │  Django ASGI app     │   │
+│  │ :80/443 │          │  Django ASGI app     │   │
 │  └────┬────┘          └─────────┬───────────┘   │
 │       │                         │                │
 │  Static / Media            ┌────┴────┐  ┌──────┐ │
@@ -43,13 +40,13 @@ Load Balancer  ← SSL/TLS terminates here (cert managed externally)
 └──────────────────────────────────────────────────┘
 ```
 
-**SSL termination strategy — Option B (External Load Balancer):**
-- The Load Balancer (AWS ALB, Cloudflare, HAProxy, …) handles all TLS.
-- Nginx only listens on **port 80** inside the container.
-- The LB adds `X-Forwarded-Proto: https` so Django and Nginx both know the
-  original connection was secure.
-- Django is pre-configured with `SECURE_PROXY_SSL_HEADER` and
-  `USE_X_FORWARDED_HOST = True` to trust this header.
+**SSL termination strategy — direct edge:**
+- Public DNS points directly to this host; there is no CDN/load balancer.
+- Nginx listens on ports **80/443** and terminates TLS with a public-CA
+  certificate stored outside Git.
+- Nginx discards inbound `X-Forwarded-For` / `X-Forwarded-Proto` and derives
+  both from the direct TCP connection, so clients cannot spoof exam-center IP
+  allowlists or rate-limit identity.
 
 ---
 
@@ -60,7 +57,8 @@ Load Balancer  ← SSL/TLS terminates here (cert managed externally)
 | Docker Engine | 24.x | `docker --version` |
 | Docker Compose plugin | 2.20 | `docker compose version` |
 | Git | 2.x | For pulling the repository |
-| An external Load Balancer | — | Must support X-Forwarded-Proto |
+| Public DNS + public IPv4/IPv6 | — | A/AAAA must point directly to the Docker host/NAT |
+| Public-CA TLS certificate | — | Full chain + matching private key for `HEALTHCHECK_HOST` |
 
 No Python, PostgreSQL, or Redis installation is needed on the host — all
 services run inside Docker containers.
@@ -86,6 +84,9 @@ before running any `docker compose` command.  Never commit this file.
 | `ALLOWED_HOSTS` | `emsarena.com,www.emsarena.com` | Comma-separated list of valid `Host` headers |
 | `CSRF_TRUSTED_ORIGINS` | `https://emsarena.com` | Comma-separated origins for CSRF validation |
 | `SITE_URL` | `https://emsarena.com` | Canonical site URL (used in emails, WebSocket CSP) |
+| `EDGE_PROXY_MODE` | `direct` | Only supported production topology; any other value blocks deploy |
+| `DIRECT_ORIGIN_IPS` | `<server-public-ip>` | Exact comma/space-separated public DNS A/AAAA set; deploy fails on mismatch |
+| `TLS_CERT_MIN_VALIDITY_SECONDS` | `604800` | Reject a certificate expiring inside this window |
 | `ADMIN_URL_PREFIX` | `manage/` | Non-default Django admin path. Must not be `admin/` in production. |
 | `ADMIN_ALLOWED_IPS` | `203.0.113.10,198.51.100.20` or blank | Comma-separated allowlist of source IPs permitted to access the admin panel. Leave blank to disable the IP restriction entirely. |
 
@@ -296,9 +297,9 @@ set it up once. The live app environment file should remain at:
 ```
 
 The SSH sync step excludes runtime data such as `.env`, `media/`, and
-`docker/nginx/certs/`, so user uploads, Cloudflare origin certificates, and
-server-side secrets are preserved across deployments without requiring Git
-access from the production host.
+`docker/nginx/certs/`, so user uploads, public-CA TLS material, and server-side
+secrets are preserved across deployments without requiring Git access from
+the production host.
 
 ### Zero-downtime update checklist
 
@@ -622,39 +623,39 @@ and run `SELECT COUNT(*) FROM exams_examattempt;` to validate.
 
 ---
 
-## 13. Origin lockdown — only Cloudflare may reach the origin (audit step 4)
+## 13. Direct-edge DNS, firewall and TLS preflight
 
-The application must not be reachable by its origin IP; otherwise CSRF/WAF
-protections at Cloudflare can be bypassed entirely.
+Production has one trusted proxy boundary: Nginx itself. Complete these steps
+before enabling the deploy workflow:
 
-1. **Firewall**: allow 80/443 only from Cloudflare ranges
-   (https://www.cloudflare.com/ips/). Example with ufw:
+1. **DNS**: point the canonical domain A/AAAA records directly to the server
+   public address(es), then put that exact set in `DIRECT_ORIGIN_IPS`. The
+   deploy resolves `HEALTHCHECK_HOST` and requires exact equality; stale proxy
+   or parking addresses block release.
+2. **Firewall**: allow public TCP 80/443 to the host, restrict SSH/admin
+   management ports to operator networks, and keep Postgres/Redis/Daphne
+   unexposed. The deploy removes historical `EMSARENA-CF-WEB*` Docker chains;
+   inspect `iptables -S DOCKER-USER` once after the first direct-edge rollout.
+3. **TLS material**: provision a public-CA certificate outside Git. Copy the
+   full chain to `docker/nginx/certs/origin.crt` and the matching private key to
+   `docker/nginx/certs/origin.key` (`0600`, deploy user readable). The deploy
+   does not generate a self-signed fallback; it checks expiry, SAN/hostname,
+   public trust and key match before touching containers.
+4. **Renewal**: configure the ACME client renewal hook to atomically refresh
+   those two files and run `docker compose -f docker-compose.prod.yml exec -T
+   nginx nginx -s reload`. Keep at least the
+   `TLS_CERT_MIN_VALIDITY_SECONDS` window (default seven days).
+5. **Verification**:
 
    ```bash
-   for ip in $(curl -s https://www.cloudflare.com/ips-v4) $(curl -s https://www.cloudflare.com/ips-v6); do
-     sudo ufw allow proto tcp from "$ip" to any port 80,443
-   done
-   sudo ufw deny 80/tcp && sudo ufw deny 443/tcp   # default-deny for everyone else
-   sudo ufw reload
+   dig +short A emsarena.com
+   dig +short AAAA emsarena.com
+   openssl s_client -connect emsarena.com:443 -servername emsarena.com </dev/null
+   curl --fail --show-error https://emsarena.com/health/
    ```
-   Refresh the list monthly (cron) — Cloudflare ranges change rarely but do change.
 
-2. **Authenticated Origin Pulls (recommended, additional layer)**:
-   Cloudflare dashboard → SSL/TLS → Origin Server → enable
-   *Authenticated Origin Pulls*; then in `docker/nginx/nginx.conf` add:
-
-   ```nginx
-   ssl_client_certificate /etc/nginx/certs/cloudflare-origin-pull-ca.pem;
-   ssl_verify_client on;
-   ```
-   (CA cert: https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/)
-
-3. **SSL mode**: Cloudflare → SSL/TLS → Overview must be **Full (strict)**,
-   never *Flexible*.
-
-4. **Verification (acceptance criterion)**: direct
-   `curl -m 5 https://<origin-ip>/ -k` from outside must time out or be
-   refused, while https://emsarena.com works through Cloudflare.
+   The resolved addresses must equal `DIRECT_ORIGIN_IPS`; the certificate chain
+   and hostname must verify without `-k`.
 
 
 
