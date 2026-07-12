@@ -84,6 +84,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "superadmin-exam-rooms": "accounts/profile/sections/superadmin/_superadmin_exam_rooms.html",
     "exam-center-pins": "accounts/profile/sections/_exam_center_pins.html",
     "exam-center-stats": "accounts/profile/sections/_exam_center_stats.html",
+    "appeal-stats": "accounts/profile/sections/_appeal_stats.html",
     "superadmin-contact-messages": "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
     "statistics": "accounts/profile/sections/_statistics.html",
     "edit-profile": "accounts/profile/sections/_edit_profile.html",

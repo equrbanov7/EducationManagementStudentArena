@@ -181,8 +181,23 @@ def generate_exam_statistics_summary(
     lang = language_code or get_language() or "en"
     lang_name = _language_name(lang)
 
-    # ── Cache check — skip API call if data is unchanged ─────────────
     cache_key = _stats_cache_key(exam_title, exam_type, stats, lang)
+    prompt = _build_prompt(
+        exam_title=exam_title,
+        exam_type=exam_type,
+        stats=stats,
+        lang_name=lang_name,
+    )
+    return _execute_summary(cache_key=cache_key, prompt=prompt, api_key=api_key, user_id=user_id)
+
+
+def _execute_summary(*, cache_key: str, prompt: str, api_key: str, user_id: int | None) -> dict:
+    """Ortaq AI-icra: data-hash keş yoxlaması → rate limit → Gemini çağırışı.
+
+    Keş dəyişməyən data üçün API çağırışını atır; rate limit yalnız real çağırışda
+    (keş miss) tətbiq olunur — [[feedback_ai_caching_rule]] ilə uyğun.
+    """
+    # ── Cache check — skip API call if data is unchanged ─────────────
     cached = cache.get(cache_key)
     if cached is not None:
         quota = get_user_ai_quota_info(user_id) if user_id else {}
@@ -193,14 +208,6 @@ def generate_exam_statistics_summary(
         rate_limit_error = check_user_ai_rate_limit(user_id)
         if rate_limit_error is not None:
             return rate_limit_error
-
-    # ── Call Gemini API ──────────────────────────────────────────────
-    prompt = _build_prompt(
-        exam_title=exam_title,
-        exam_type=exam_type,
-        stats=stats,
-        lang_name=lang_name,
-    )
 
     model_chain = _get_summary_model_chain()
 
@@ -280,3 +287,51 @@ Please provide:
 7. **Students at Risk** — Identify struggling students or groups that need extra attention.
 
 Format the response in clean Markdown with headers. Be concise but thorough. Do not include the raw data in your response. Focus on insights and actionable information."""
+
+
+def generate_appeal_statistics_summary(
+    *,
+    stats: dict,
+    language_code: str | None = None,
+    user_id: int | None = None,
+) -> dict:
+    """İmtahan mərkəzi apellyasiya statistikasının AI xülasəsi.
+
+    ``stats`` — filtrlənmiş apellyasiyaların əvvəlcədən hesablanmış aqreqatları
+    (ümumi/status/tip/fənn/müəllim/aylıq). Data-hash keş + istifadəçi-başına
+    rate limit ``_execute_summary``-də tətbiq olunur (dəyişməyən data üçün API
+    çağırışı sərf olunmur).
+    """
+    if not _is_ai_enabled():
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "ai_disabled")}
+
+    api_key = _get_api_key()
+    if not api_key:
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "gemini_api_key_missing")}
+
+    lang = language_code or get_language() or "en"
+    lang_name = _language_name(lang)
+    cache_key = _stats_cache_key("appeal-statistics", "appeal", stats, lang)
+    prompt = _build_appeal_prompt(stats=stats, lang_name=lang_name)
+    return _execute_summary(cache_key=cache_key, prompt=prompt, api_key=api_key, user_id=user_id)
+
+
+def _build_appeal_prompt(*, stats: dict, lang_name: str) -> str:
+    stats_json = json.dumps(stats, ensure_ascii=False, default=str)
+    return f"""You are an expert academic-integrity and assessment analyst for an exam center. Analyze the following EXAM APPEAL (grade-review request) statistics and provide a professional summary for exam-center leadership.
+
+**Language:** Respond ONLY in {lang_name}.
+
+**Appeal statistics data (JSON):**
+```json
+{stats_json}
+```
+
+Please provide:
+1. **Overview** — Total appeals, acceptance vs rejection rate, and how many are still pending.
+2. **Where appeals concentrate** — Subjects, teachers, groups, or exam types with the most appeals or the highest acceptance rate (a high acceptance rate may signal grading/answer-key issues).
+3. **Trends** — Notable changes over time (by month/semester) and any spikes.
+4. **Fairness & quality signals** — Patterns that suggest systematic grading problems, unclear questions, or answer-key errors worth reviewing.
+5. **Recommendations** — Concrete actions for the exam center (e.g. review specific subjects/teachers, revise question wording, retrain graders).
+
+Format the response in clean Markdown with headers. Be concise but insight-driven. Do not restate the raw numbers verbatim; focus on what they mean and what to do."""
