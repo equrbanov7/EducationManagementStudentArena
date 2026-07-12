@@ -75,6 +75,10 @@ def _ticket_row(ticket, presence, exam_title=None):
         "name": ticket.student.get_full_name() or ticket.student.username,
         "username": ticket.student.username,
         "seat": ticket.seat_number,
+        # Cəhd hansı fiziki kompüterlə möhürlənib — zal xəritəsi overlay-ı
+        # seat_number NULL olsa belə (kompüterin seat-i yoxdursa/seat toqquşması)
+        # doğru kompüteri tapsın deyə birbaşa computer id.
+        "computer_id": attempt.room_computer_id if attempt else None,
         "status": ticket.status,
         "language": ticket.language,
         "connected": ticket.pk in presence,
@@ -198,6 +202,7 @@ def _room_attempt_rows(room):
                 "name": attempt.user.get_full_name() or attempt.user.username,
                 "username": attempt.user.username,
                 "seat": attempt.room_computer.seat_number if attempt.room_computer else None,
+                "computer_id": attempt.room_computer_id,
                 "status": TICKET_STATUS_ACTIVE if live else TICKET_STATUS_COMPLETED,
                 "language": attempt.language,
                 "connected": live,

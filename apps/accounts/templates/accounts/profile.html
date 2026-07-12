@@ -38,7 +38,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,grade-approvals,analytics"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,grade-approvals,analytics,system-monitoring"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -308,6 +308,6 @@ window.EXAM_WIZARD_I18N = {
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260618-1"></script>
 <script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260709-score-preview"></script>
-<script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260710-appeals-modal"></script>
+<script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260713-qa"></script>
 <script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>
 {% endblock %}

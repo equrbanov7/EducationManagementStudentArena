@@ -97,7 +97,15 @@
             headers: { "X-Requested-With": "XMLHttpRequest" }
         })
             .then(function (r) {
-                if (!r.ok) { throw new Error("http_" + r.status); }
+                if (!r.ok) {
+                    // Server mənalı xəta göndəribsə (403 JSON) onu göstər —
+                    // generik "Yüklənmə alınmadı" yalnız son çarədir.
+                    return r.text().then(function (t) {
+                        var msg = "";
+                        try { msg = (JSON.parse(t) || {}).error || ""; } catch (e) { /* JSON deyil */ }
+                        throw new Error(msg || ("http_" + r.status));
+                    });
+                }
                 return r.text();
             })
             .then(function (html) {
@@ -105,9 +113,12 @@
                 modalBody.scrollTop = 0;
                 if (afterSwap) { afterSwap(); }
             })
-            .catch(function () {
+            .catch(function (err) {
                 modalBody.innerHTML = "";
-                modalBody.appendChild(makeAlert("danger", loadErrorText(panel)));
+                var message = err && err.message && err.message.indexOf("http_") !== 0
+                    ? err.message
+                    : loadErrorText(panel);
+                modalBody.appendChild(makeAlert("danger", message));
             });
     }
 
