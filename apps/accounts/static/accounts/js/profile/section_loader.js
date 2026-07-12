@@ -265,12 +265,22 @@
                 ctx.sectionsHost.setAttribute("aria-busy", "true");
                 ctx.sectionsHost.classList.add("is-loading");
             }
+            // Üst route-progress zolağı: SPA yükləməsində səhifə yenilənmir,
+            // ona görə zolağı burada başladıb clearSectionLoading-də bitiririk
+            // (əks halda route_loading.js-in click handler-i onu başladır və
+            // heç vaxt bitmirdi — "loading ilişib qalır" bug-ı).
+            if (window.EMSRouteProgress) {
+                window.EMSRouteProgress.start();
+            }
         }
 
         function clearSectionLoading() {
             if (ctx.sectionsHost) {
                 ctx.sectionsHost.removeAttribute("aria-busy");
                 ctx.sectionsHost.classList.remove("is-loading");
+            }
+            if (window.EMSRouteProgress) {
+                window.EMSRouteProgress.finish();
             }
         }
 
