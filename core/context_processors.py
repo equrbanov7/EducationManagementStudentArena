@@ -32,8 +32,8 @@ from django.utils.translation import pgettext, pgettext_lazy
 # translation for the configured SITE_BRAND_NAME (az/en/ru/tr).
 _DEFAULT_BRAND_TRANSLATABLE = pgettext_lazy("brand", "Qərbi Kaspi Universiteti")
 
-# Canonical public origin, e.g. "https://emsarena.com" (no trailing slash).
-SITE_ORIGIN = getattr(settings, "SITE_URL", "https://emsarena.com").rstrip("/")
+# Canonical origin from SITE_URL (no trailing slash).
+SITE_ORIGIN = getattr(settings, "SITE_URL", "https://127.0.0.1").rstrip("/")
 
 # Brand / organization name reused across structured data + page titles.
 # White-labelled per deployment via settings.SITE_BRAND_NAME (default: the
