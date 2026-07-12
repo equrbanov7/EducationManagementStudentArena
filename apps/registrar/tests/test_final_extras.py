@@ -69,16 +69,19 @@ class FinalExtrasTest(TestCase):
             cls.offering.instructor = cls.teacher
             cls.offering.save(update_fields=["instructor"])
             cls.enrollment = cls.offering.enrollments.get()
-            lesson = gradebook.create_lesson(
-                offering=cls.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
-            )
-            gradebook.save_marks(
-                offering=cls.offering,
-                entries=[
-                    {"lesson_id": lesson.id, "enrollment_id": cls.enrollment.id, "status": "present", "score": 40}
-                ],
-                by_user=cls.teacher,
-            )
+            # Entry 40 = 4 seminar dərsi × 10 bal (per-mark tavan 10-dur).
+            for day in range(1, 5):
+                lesson = gradebook.create_lesson(
+                    allow_past=True, offering=cls.offering, date=datetime.date(2024, 10, day), kind=LessonKind.SEMINAR
+                )
+                gradebook.save_marks(
+                    enforce_day=False,
+                    offering=cls.offering,
+                    entries=[
+                        {"lesson_id": lesson.id, "enrollment_id": cls.enrollment.id, "status": "present", "score": 10}
+                    ],
+                    by_user=cls.teacher,
+                )
             finals.set_exam_score(enrollment=cls.enrollment, score=45, by_user=cls.teacher)  # total 85
 
     def test_bonus_raises_total_and_letter(self):
@@ -92,14 +95,19 @@ class FinalExtrasTest(TestCase):
     def test_total_clamped_at_100(self):
         with bypass_rls():
             finals.set_final_extras(enrollment=self.enrollment, bonus="20", by_user=self.teacher)
+            # Beşinci seminar → entry 50 (per-mark tavan 10 olduğundan əlavə dərs).
+            extra = gradebook.create_lesson(
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 5), kind=LessonKind.SEMINAR
+            )
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {
-                        "lesson_id": self.offering.lessons.get().id,
+                        "lesson_id": extra.id,
                         "enrollment_id": self.enrollment.id,
                         "status": "present",
-                        "score": 50,
+                        "score": 10,
                     }
                 ],
                 by_user=self.teacher,

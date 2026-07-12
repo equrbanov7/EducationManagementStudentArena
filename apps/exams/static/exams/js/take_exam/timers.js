@@ -32,16 +32,13 @@
         if (ctx.currentIndex < ctx.totalSlides - 1) {
             ns.navigation.showSlide(ctx, ctx.currentIndex + 1);
         } else {
-            var hiddenInput = document.createElement("input");
-            hiddenInput.type = "hidden";
-            hiddenInput.name = "submit_action";
-            hiddenInput.value = "finish";
-            ctx.examForm.appendChild(hiddenInput);
             ns.progress.syncMarkedQuestionInput(ctx);
             ns.config.refreshFormCsrfToken(ctx);
+            ctx.finishRequestInFlight = true;
             ns.draft.persistLocalDraft(ctx);
-            localStorage.removeItem(ctx.storageKey);
-            ctx.examForm.submit();
+            ns.draft.sendDraft(ctx, "finish").catch(function () {
+                ctx.finishRequestInFlight = false;
+            });
         }
         ns.progress.updateProgress(ctx);
     }
@@ -82,6 +79,85 @@
             ctx.qTimerContainer.classList.remove("danger");
         },
 
+        // EXAM-P1-04 strict delivery: server-dən gələn təhlükəsiz sual gövdəsini
+        // yer tutucuya inject et və dinamik input/mark düymələrini yenidən bağla.
+        injectServerDeliveredBody: function (ctx, slideElement, html) {
+            if (!html || !slideElement || slideElement.getAttribute("data-server-delivery") !== "1") {
+                return;
+            }
+            slideElement.innerHTML = html;
+            slideElement.setAttribute("data-server-delivery", "hydrated");
+
+            if (ns.draft && typeof ns.draft.bindAnswerInputs === "function") {
+                ns.draft.bindAnswerInputs(ctx, slideElement);
+            }
+
+            var markButton = slideElement.querySelector("[data-mark-question]");
+            if (markButton) {
+                var questionId = String(markButton.dataset.questionId || "");
+                var isMarked = ctx.markedQuestionIds && ctx.markedQuestionIds.has(questionId);
+                markButton.classList.toggle("is-marked", !!isMarked);
+                markButton.setAttribute("aria-pressed", isMarked ? "true" : "false");
+                var icon = markButton.querySelector("i");
+                var label = markButton.querySelector("[data-mark-label]");
+                if (icon) { icon.className = isMarked ? "fas fa-bookmark" : "far fa-bookmark"; }
+                if (label) { label.textContent = isMarked ? ctx.i18n.marked : ctx.i18n.mark; }
+                markButton.addEventListener("click", function () {
+                    ns.progress.toggleMarkedQuestion(ctx, markButton.dataset.questionId);
+                });
+            }
+
+            ns.progress.updateProgress(ctx);
+        },
+
+        // EXAM-P1-04: serverə "sual göstərildi" siqnalı — server İLK göstərilməni
+        // qeyd edir və countdown-un SERVER qalığını qaytarır; local deadline onunla
+        // əvəzlənir (devtools ilə uzatma, reload-da sıfırlanma aradan qalxır).
+        syncQuestionTimerWithServer: function (ctx, slideElement) {
+            if (!ctx.questionSeenUrl || !window.fetch) {
+                return Promise.resolve(null);
+            }
+            var questionId = slideElement ? slideElement.getAttribute("data-question-id") : "";
+            if (!questionId) {
+                return Promise.resolve(null);
+            }
+            var formData = new FormData();
+            formData.append("question_id", questionId);
+            formData.append("csrfmiddlewaretoken", ns.config.getCsrfToken(ctx));
+            return fetch(ctx.questionSeenUrl, {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin"
+            })
+                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (data) {
+                    if (!data || !data.success) {
+                        return data;
+                    }
+                    // Strict delivery: təhlükəsiz gövdəni yer tutucuya inject et
+                    // (slide görünür olmasa da — məzmun bir dəfə hidrat olunsun).
+                    if (data.html) {
+                        ns.timers.injectServerDeliveredBody(ctx, slideElement, data.html);
+                    }
+                    if (data.remaining_seconds === null || data.remaining_seconds === undefined) {
+                        return data;
+                    }
+                    // Slide bu arada dəyişibsə köhnə countdown-u tətbiq etmə.
+                    if (ctx.questionTimerSlide !== slideElement) {
+                        return data;
+                    }
+                    ctx.questionTimerDeadlineMs = Date.now() + (data.remaining_seconds * 1000);
+                    if (typeof ctx.questionTimerTick === "function") {
+                        ctx.questionTimerTick();
+                    }
+                    return data;
+                })
+                .catch(function () {
+                    // Şəbəkə xətasında local countdown davam edir (geriyə-uyğun).
+                    return null;
+                });
+        },
+
         startQuestionTimer: function (ctx, slideElement) {
             ns.timers.stopQuestionTimer(ctx);
 
@@ -99,6 +175,7 @@
                 ctx.qTimerContainer.style.display = "flex";
                 ctx.questionTimerSlide = slideElement;
                 ctx.questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);
+                ns.timers.syncQuestionTimerWithServer(ctx, slideElement);
 
                 ctx.questionTimerTick = function () {
                     var secondsLeft = syncQuestionTimerState(ctx);
@@ -146,27 +223,21 @@
                         ns.timers.stopQuestionTimer(ctx);
                         timerValueElement.textContent = "00:00";
 
-                        ns.navigation.prepareExamFinishNavigation(ctx);
-
                         var timeUpMsg = (ctx.i18n.timeUpMessage || "").trim();
                         if (!timeUpMsg) {
                             timeUpMsg = "\u23F0 Time is up!";
                         }
                         ns.notifications.show(timeUpMsg, "error", 0);
 
-                        var hiddenInput = document.createElement("input");
-                        hiddenInput.type = "hidden";
-                        hiddenInput.name = "submit_action";
-                        hiddenInput.value = "finish";
-                        ctx.examForm.appendChild(hiddenInput);
-
                         ns.progress.syncMarkedQuestionInput(ctx);
                         ns.config.refreshFormCsrfToken(ctx);
                         ns.draft.persistLocalDraft(ctx);
-                        localStorage.removeItem(ctx.storageKey);
 
                         setTimeout(function () {
-                            ctx.examForm.submit();
+                            ctx.finishRequestInFlight = true;
+                            ns.draft.sendDraft(ctx, "finish").catch(function () {
+                                ctx.finishRequestInFlight = false;
+                            });
                         }, 1500);
                         return;
                     }

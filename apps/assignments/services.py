@@ -130,8 +130,12 @@ def bulk_grade_assignment_submissions(submission_ids, scores, feedback_list, gra
     Returns:
         int: Number of submissions graded
     """
-    submissions = Submission.objects.filter(id__in=submission_ids)
-    return bulk_grade_submissions(submissions, scores, feedback_list, graded_by, graded_status="graded")
+    # Audit: filter() DB sırası ilə qaytarır — score/feedback siyahıları
+    # submission_ids POZİSİYASI ilə uyğundur. Balın yanlış tələbəyə getməməsi
+    # üçün submission_ids sırasını bərpa edirik.
+    by_id = {s.id: s for s in Submission.objects.filter(id__in=submission_ids)}
+    ordered = [by_id[sid] for sid in submission_ids if sid in by_id]
+    return bulk_grade_submissions(ordered, scores, feedback_list, graded_by, graded_status="graded")
 
 
 # ════════════════════════════════════════════════════════════════════════════

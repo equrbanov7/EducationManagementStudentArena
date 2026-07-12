@@ -6,6 +6,8 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
+from apps.exams.domain.grade_events import ExamGradeEventManager, _immutable_error
+from apps.exams.question_timer_protocol import default_question_timing
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
 
 from .grading import AnswerGradingMixin, AttemptGradingMixin
@@ -39,7 +41,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.attempt.field", "teacher_checked_at"),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_attempts")
-    exam = models.ForeignKey("exams.Exam", on_delete=models.CASCADE, related_name="attempts")
+    # Academic attempts outlive teacher-facing exam deletion actions.  Draft
+    # exams without attempts may still be physically removed, while any
+    # delivered attempt forces archive/soft-delete semantics.
+    exam = models.ForeignKey("exams.Exam", on_delete=models.PROTECT, related_name="attempts")
     # Student imtahana başlayarkən seçdiyi dil. Çoxdilli imtahanlarda yalnız bu
     # dilin sualları yüklənir; tək-dilli imtahanlarda boş qala bilər.
     language = models.CharField(
@@ -120,6 +125,26 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         blank=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "teacher_feedback"),
     )
+    # EXAM (re-audit §5.6/P1-18): ilk manual qiymətləndirən müəllim. Appeal
+    # reviewer independence-i dərinləşdirir — öz qiymətinə baxan şəxs müstəqil
+    # reviewer ola bilməz. İlk grading POST-unda set olunur, sonra dəyişmir.
+    graded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="graded_exam_attempts",
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "graded_by"),
+    )
+    # EXAM-P1-06: autosave optimistic concurrency. Hər uğurlu server yazısında
+    # artır; client öz base_revision-unu göndərir. Uyğunsuzluq (başqa tab daha
+    # yeni yazıb) → 409, stale overwrite qarşısı alınır.
+    autosave_revision = models.PositiveIntegerField(default=0)
+    # EXAM-P1-04: server-authoritative per-question timer. Sual İLK dəfə
+    # göstəriləndə {question_id: ISO started_at} yazılır; server deadline =
+    # started_at + effective_time_limit + grace. Müddəti keçmiş sualın POST
+    # sahələri saxlanmır (client timer-i devtools ilə uzatmaq işləmir).
+    question_timing = models.JSONField(default=default_question_timing, blank=True)
     supervision_status = models.CharField(
         max_length=20,
         choices=SUPERVISION_STATUS_CHOICES,
@@ -299,6 +324,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         return True
 
     def mark_finished(self, status="submitted", extra_update_fields=None):
+        was_finished = self.is_finished
         self.status = status
         finished_at = timezone.now()
         # Gecikmiş bitirmə (lazy expire, sweep, tələbənin günlər sonra qayıtması)
@@ -315,6 +341,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         if extra_update_fields:
             update_fields.extend(extra_update_fields)
         self.save(update_fields=list(dict.fromkeys(update_fields)))
+        if not was_finished:
+            from apps.exams.metrics import record_attempt_submitted
+
+            record_attempt_submitted(getattr(self.exam, "exam_type", "unknown"), status)
 
     def recalculate_score(self):
         if getattr(self.exam, "exam_type", None) == "test":
@@ -374,6 +404,12 @@ class ExamAnswer(AnswerGradingMixin, models.Model):
     # hesablanır (tam geriyə-uyğunluq). Format: {"v":1,"points":int,
     # "answer_mode":str,"options":[{"id":int,"is_correct":bool}, ...]}.
     question_snapshot = models.JSONField(default=dict, blank=True)
+    # EXAM-P0-03: tələbənin seçdiyi variant ID-ləri cavab yazılan anda burada
+    # dondurulur. selected_options M2M-i canlıdır — variant redaktəsi
+    # (delete/recreate) through sətirlərini silib keçmiş seçimi itirə bilər.
+    # None = köhnə cavab (canlı M2M-ə düşülür); list (boş da ola bilər) =
+    # avtoritativ dondurulmuş seçim.
+    selected_option_ids_snapshot = models.JSONField(null=True, blank=True, default=None)
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.answer.meta", "singular")
@@ -458,9 +494,67 @@ class ProctoringLog(models.Model):
         return f"{self.exam_attempt.user.username} - {self.get_event_type_display()} @ {self.timestamp}"
 
 
+class ExamGradeEvent(models.Model):
+    """Append-only manual-grading ledger (re-audit §5.6 / grade tamper-evidence).
+
+    Hər manual bal dəyişikliyi (kim, nə vaxt, köhnə→yeni bal, hansı sual)
+    burada qeydə alınır. Ledger yalnız INSERT üçündür — tarixçə redaktə
+    olunmur (audit üçün). Tenant izolyasiyası ``organizations 0022`` RLS
+    policy-si ilə (exam→organization dolayı).
+    """
+
+    attempt = models.ForeignKey(
+        "exams.ExamAttempt",
+        on_delete=models.CASCADE,
+        related_name="grade_events",
+        verbose_name=pgettext_lazy("exams.model.grade_event.field", "attempt"),
+    )
+    question = models.ForeignKey(
+        "exams.ExamQuestion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="grade_events",
+        verbose_name=pgettext_lazy("exams.model.grade_event.field", "question"),
+    )
+    grader = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exam_grade_events",
+        verbose_name=pgettext_lazy("exams.model.grade_event.field", "grader"),
+    )
+    old_score = models.IntegerField(null=True, blank=True)
+    new_score = models.IntegerField(null=True, blank=True)
+    max_points = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    objects = ExamGradeEventManager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("exams.model.grade_event.meta", "singular")
+        verbose_name_plural = pgettext_lazy("exams.model.grade_event.meta", "plural")
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["attempt", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"grade {self.attempt_id}/{self.question_id}: {self.old_score}→{self.new_score}"
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise _immutable_error()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise _immutable_error()
+
+
 __all__ = [
     "ExamAnswer",
     "ExamAnswerFile",
     "ExamAttempt",
+    "ExamGradeEvent",
     "ProctoringLog",
 ]

@@ -57,6 +57,10 @@ def create_or_update_draft_submission(*, attempt, coding_question, selected_lang
 def create_final_submission(*, attempt, coding_question, selected_language, files):
     files = normalize_files(files, coding_question=coding_question)
     main_file = get_main_file(files)
+    # EXAM-P1-13: (attempt, question) üzrə partial unique constraint bir
+    # finaldan çoxuna icazə vermir. Təkrar finalizasiya (retry) constraint-i
+    # pozmasın deyə əvvəlki finalları əvvəlcə demote edirik.
+    CodingSubmission.objects.filter(attempt=attempt, question=coding_question, is_final=True).update(is_final=False)
     submission = CodingSubmission.objects.create(
         student=attempt.user,
         exam=attempt.exam,

@@ -440,3 +440,43 @@ class TestMathTokenPropagation:
         data = resp.json()
         assert data["status"] == TextExtractionJob.STATUS_SUCCESS
         assert data["meta"]["math_token"] == "tok123"
+
+
+class TestStuckJobReaper:
+    """EXAM-P1-15: crash olub PROCESSING-də ilişən job lease reaper ilə FAILED olur."""
+
+    def test_reaper_fails_stale_processing_job(self, org):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.tasks import reap_stuck_extraction_jobs
+
+        stale = TextExtractionJob.objects.create(
+            organization=org,
+            user=org.owner,
+            status=TextExtractionJob.STATUS_PROCESSING,
+            started_at=timezone.now() - timedelta(seconds=2000),
+        )
+        fresh = TextExtractionJob.objects.create(
+            organization=org,
+            user=org.owner,
+            status=TextExtractionJob.STATUS_PROCESSING,
+            started_at=timezone.now(),
+        )
+
+        reaped = reap_stuck_extraction_jobs(lease_seconds=1200)
+        assert reaped == 1
+
+        stale.refresh_from_db()
+        fresh.refresh_from_db()
+        assert stale.status == TextExtractionJob.STATUS_FAILED
+        assert stale.error
+        assert fresh.status == TextExtractionJob.STATUS_PROCESSING
+
+    def test_reaper_ignores_pending_and_success(self, org):
+        from apps.exams.tasks import reap_stuck_extraction_jobs
+
+        TextExtractionJob.objects.create(organization=org, user=org.owner, status=TextExtractionJob.STATUS_PENDING)
+        TextExtractionJob.objects.create(organization=org, user=org.owner, status=TextExtractionJob.STATUS_SUCCESS)
+        assert reap_stuck_extraction_jobs(lease_seconds=1) == 0

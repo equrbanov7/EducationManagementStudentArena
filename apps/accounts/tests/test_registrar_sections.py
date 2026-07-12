@@ -65,7 +65,7 @@ class RegistrarProfileSectionsTest(TestCase):
         resp = self._client(self.student).get(reverse("accounts:profile"), {"section": "my-schedule"})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'data-profile-section-panel="my-schedule"')
-        self.assertContains(resp, "schedule-grid")  # actual timetable content
+        self.assertContains(resp, "sgx-weekpills")  # mockup: Bu həftə / Gələn həftə pilləri
         self.assertContains(resp, "profile-sidebar")  # sidebar stays
 
     def test_calendar_section_renders(self):
@@ -97,9 +97,11 @@ class RegistrarProfileSectionsTest(TestCase):
         resp = self._fragment(self.student, "analytics")
         self.assertEqual(resp.status_code, 403)
 
-    def test_fragment_api_denies_journal_to_student(self):
+    def test_fragment_api_allows_journal_to_student(self):
+        """Yenidən-dizayn: tələbə öz jurnal xülasəsini profil panelində görür."""
         resp = self._fragment(self.student, "my-journal")
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(json.loads(resp.content)["ok"])
 
     def test_fragment_api_allows_analytics_to_dean(self):
         resp = self._fragment(self.dean, "analytics")
@@ -112,7 +114,13 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertIn('data-section="my-schedule"', student_page)
         self.assertIn('data-section="academic-calendar"', student_page)
         self.assertNotIn('data-section="analytics"', student_page)
-        self.assertNotIn('data-section="my-journal"', student_page)
+        # Tələbə: jurnal SPA bölmə kimi açılır (öz xülasəsi).
+        self.assertIn('data-section="my-journal"', student_page)
+
+        # Müəllim: jurnal iş sahəsi yeni tabda ayrıca URL-də açılır.
+        teacher_page = self._client(self.teacher).get(reverse("accounts:profile")).content.decode()
+        self.assertNotIn('data-section="my-journal"', teacher_page)
+        self.assertIn('href="/jurnal/" target="_blank"', teacher_page)
 
         dean_page = self._client(self.dean).get(reverse("accounts:profile")).content.decode()
         self.assertIn('data-section="analytics"', dean_page)

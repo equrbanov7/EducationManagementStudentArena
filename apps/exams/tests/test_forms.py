@@ -29,9 +29,13 @@ class ExamFormDefaultStateTests(TestCase):
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
-    def test_create_form_marks_is_active_checked_by_default(self):
+    def test_create_form_defaults_new_exam_to_draft(self):
+        # Seq3 (EXAM-P1-01): yeni imtahan QARALAMA yaranır — is_active gizli,
+        # deaktiv sahədir və dərc yalnız publish qapısından (aktiv sual + parity)
+        # keçir. Beləcə boş imtahan təsadüfən canlıya çıxa bilmir.
         form = ExamForm()
-        self.assertTrue(form.initial.get("is_active"))
+        self.assertFalse(form.initial.get("is_active"))
+        self.assertTrue(form.fields["is_active"].disabled)
 
     def test_create_form_defaults_new_exam_parameters(self):
         # Yeni imtahan defaultları: sual=50, cəhd=1, is_public=False (bağlı).

@@ -253,6 +253,7 @@ def _role_capabilities(user, profile):
             "superadmin-exam-rooms",  # imtahan zalı + kompüter/MAC idarəsi
             "exam-center-pins",  # PIN axtarışı (canlı search + inline detal)
             "exam-center-stats",  # imtahan statistikaları / nəticələr
+            "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
             "pending-post-approvals",
             "blog",
@@ -308,7 +309,14 @@ def _role_capabilities(user, profile):
         # apellyasiyalar, bildiriş dərci. Üzv/rol idarəetməsi YOXDUR.
         if is_exam_center:
             allowed_sections.update(
-                {"my-exams", "groups", "publish-notification", "exam-center-pins", "exam-center-stats"}
+                {
+                    "my-exams",
+                    "groups",
+                    "publish-notification",
+                    "exam-center-pins",
+                    "exam-center-stats",
+                    "appeal-stats",
+                }
             )
 
         # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.
@@ -361,7 +369,9 @@ def _role_capabilities(user, profile):
 
     if getattr(_u12_settings, "UNIVERSITY_MODE", True) and (has_active_org_context or is_superadmin):
         allowed_sections.update({"my-schedule", "academic-calendar"})
-        if is_teacher or is_org_admin or is_superadmin:
+        # Müəllim/admin: sidebar linki jurnal iş sahəsini YENİ TABDA (/jurnal/) açır.
+        # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
+        if is_teacher or is_org_admin or is_superadmin or is_student:
             allowed_sections.add("my-journal")
         if is_superadmin or is_org_admin or is_unit_manager:
             allowed_sections.update({"grade-approvals", "analytics"})

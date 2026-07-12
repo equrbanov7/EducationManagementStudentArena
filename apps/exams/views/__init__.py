@@ -50,6 +50,7 @@ from .student.final_center import (
     final_ticket_state,
 )
 from .student.lists import assigned_student_exam_list, student_exam_list
+from .student.question_timer import question_seen
 
 # ═══════════════════════════════════════════════════════════════
 # STUDENT VIEWS
@@ -247,6 +248,7 @@ __all__ = [
     "student_exam_history",
     # Student - Attempts
     "start_exam",
+    "question_seen",
     "take_exam",
     "coding_autosave",
     "coding_run",

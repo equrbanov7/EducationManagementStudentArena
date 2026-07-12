@@ -103,12 +103,20 @@
           data-autosave-interval-ms="{{ exam_autosave_interval_ms }}"
           data-autosave-jitter-ms="{{ exam_autosave_jitter_ms }}"
           data-autosave-binary-uploads-enabled="{{ exam_autosave_binary_uploads_enabled|yesno:'1,0' }}"
+          data-question-seen-url="{% url 'exams:question_seen' exam.slug attempt.id %}"
           class="modern-exam-form">
         {% csrf_token %}
         <input type="hidden"
                name="marked_question_ids"
                id="marked-question-ids-field"
                value="{{ marked_question_ids_json|default:'[]' }}">
+        {# EXAM-P1-06: autosave optimistic concurrency — server bu revision-u
+           artırır; başqa tab daha yeni yazıbsa 409 qayıdır (stale overwrite yox). #}
+        <input type="hidden"
+               name="autosave_revision"
+               id="autosave-revision-field"
+               data-autosave-revision
+               value="{{ autosave_revision|default:0 }}">
 
         <div class="exam-workspace">
             <aside class="question-sidebar" aria-label="{% trans 'Questions' context 'exams.template.take_exam' %}">
@@ -180,8 +188,24 @@
                      data-index="{{ forloop.counter0 }}" 
                      data-question-id="{{ q.id }}"
                      id="slide-{{ forloop.counter0 }}"
-                     data-time-limit="{{ q.effective_time_limit|default:0 }}">
-                    
+                     data-time-limit="{{ q.effective_time_limit|default:0 }}"{% if item.server_delivery %} data-server-delivery="1"{% endif %}>
+
+                    {% if item.server_delivery %}
+                    {# EXAM-P1-04 strict delivery: vaxtlı test sualının məzmunu İLK
+                       GET-də səhifə mənbəyinə DÜŞMÜR — timer serverdə başlayanda
+                       question-seen JS injection ilə gəlir (aşağıdakı yer tutucu). #}
+                    <div class="question-content" data-server-delivery-body>
+                        <div class="server-delivery-pending" data-server-delivery-pending>
+                            <span class="skeleton transition-skeleton-line"></span>
+                        </div>
+                    </div>
+                    {% else %}
+                    {# EXAM-P1-05: "bu sual formada aktivdir" markeri. Per-question
+                       timer bitəndə disableSlideInputs bunu da disable edir (disabled
+                       input POST-a düşmür), ona görə server həmin sualın saxlanmış
+                       cavabını SİLMİR (əvvəlki: absent field = boş cavab = itki). #}
+                    <input type="hidden" name="q_present_{{ q.id }}" value="1">
+
                     <div class="question-content">
                         <div class="question-card-header">
                             <div class="question-kicker">
@@ -300,6 +324,7 @@
                             </div>
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
                 {% endwith %}
                 {% endwith %}

@@ -4,15 +4,58 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/opt/emsarena/app}"
 VENV_DIR="${VENV_DIR:-/opt/emsarena/venv}"
 SERVICE_NAME="${SERVICE_NAME:-emsarena.service}"
-APP_BASE_URL="${APP_BASE_URL:-http://127.0.0.1}"
+
+# Docker Compose reads .env itself, but this deploy script also owns DNS/TLS
+# preflights. Read only explicitly requested, non-secret keys instead of
+# sourcing the whole file as shell code.
+dotenv_value() {
+  local key="$1"
+  local value=""
+  [ -f "${APP_DIR}/.env" ] || return 0
+  value="$(awk -v wanted="${key}" '
+    index($0, wanted "=") == 1 { value = substr($0, length(wanted) + 2) }
+    END { print value }
+  ' "${APP_DIR}/.env")"
+  value="${value%$'\r'}"
+  if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+    value="${value:1:${#value}-2}"
+  elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+    value="${value:1:${#value}-2}"
+  fi
+  printf '%s' "$value"
+}
+
+DEPLOY_MODE="${DEPLOY_MODE:-$(dotenv_value DEPLOY_MODE)}"
+DEPLOY_MODE="${DEPLOY_MODE:-docker}"
+if [ -z "${APP_BASE_URL:-}" ]; then
+  APP_BASE_URL="$(dotenv_value APP_BASE_URL)"
+fi
+if [ -z "${APP_BASE_URL:-}" ]; then
+  if [ "$DEPLOY_MODE" = "docker" ]; then
+    APP_BASE_URL="https://127.0.0.1"
+  else
+    APP_BASE_URL="http://127.0.0.1"
+  fi
+fi
+HEALTHCHECK_HOST="${HEALTHCHECK_HOST:-$(dotenv_value HEALTHCHECK_HOST)}"
 HEALTHCHECK_HOST="${HEALTHCHECK_HOST:-emsarena.com}"
+ORIGIN_HEALTHCHECK_INSECURE_TLS="${ORIGIN_HEALTHCHECK_INSECURE_TLS:-$(dotenv_value ORIGIN_HEALTHCHECK_INSECURE_TLS)}"
+ORIGIN_HEALTHCHECK_INSECURE_TLS="${ORIGIN_HEALTHCHECK_INSECURE_TLS:-true}"
+EDGE_PROXY_MODE="${EDGE_PROXY_MODE:-$(dotenv_value EDGE_PROXY_MODE)}"
+EDGE_PROXY_MODE="${EDGE_PROXY_MODE:-direct}"
+DIRECT_ORIGIN_IPS="${DIRECT_ORIGIN_IPS:-$(dotenv_value DIRECT_ORIGIN_IPS)}"
+TLS_CERT_MIN_VALIDITY_SECONDS="${TLS_CERT_MIN_VALIDITY_SECONDS:-$(dotenv_value TLS_CERT_MIN_VALIDITY_SECONDS)}"
+TLS_CERT_MIN_VALIDITY_SECONDS="${TLS_CERT_MIN_VALIDITY_SECONDS:-604800}"
+TLS_ALLOW_SELF_SIGNED_LOCAL="${TLS_ALLOW_SELF_SIGNED_LOCAL:-$(dotenv_value TLS_ALLOW_SELF_SIGNED_LOCAL)}"
+TLS_ALLOW_SELF_SIGNED_LOCAL="${TLS_ALLOW_SELF_SIGNED_LOCAL:-false}"
 PING_PATH="${PING_PATH:-/ping/}"
 HEALTH_PATH="${HEALTH_PATH:-/health/}"
 DISABLE_LEGACY_DAPHNE_SERVICE="${DISABLE_LEGACY_DAPHNE_SERVICE:-true}"
 DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-300}"
-DEPLOY_MODE="${DEPLOY_MODE:-docker}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+APP_REPLICAS="${APP_REPLICAS:-$(dotenv_value APP_REPLICAS)}"
 APP_REPLICAS="${APP_REPLICAS:-1}"
+CELERY_REPLICAS="${CELERY_REPLICAS:-$(dotenv_value CELERY_REPLICAS)}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-1}"
 
 # Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
@@ -34,6 +77,21 @@ if ! [[ "$CELERY_REPLICAS" =~ ^[0-9]+$ ]] || [ "$CELERY_REPLICAS" -lt 0 ]; then
   exit 1
 fi
 
+if [ "$EDGE_PROXY_MODE" != "direct" ]; then
+  echo "EDGE_PROXY_MODE must be 'direct'; proxy/CDN modes are not supported by this deployment." >&2
+  exit 1
+fi
+
+if ! [[ "$TLS_CERT_MIN_VALIDITY_SECONDS" =~ ^[0-9]+$ ]] || [ "$TLS_CERT_MIN_VALIDITY_SECONDS" -lt 3600 ]; then
+  echo "TLS_CERT_MIN_VALIDITY_SECONDS must be an integer of at least 3600." >&2
+  exit 1
+fi
+
+if [ "$TLS_ALLOW_SELF_SIGNED_LOCAL" != "true" ] && [ "$TLS_ALLOW_SELF_SIGNED_LOCAL" != "false" ]; then
+  echo "TLS_ALLOW_SELF_SIGNED_LOCAL must be 'true' or 'false'." >&2
+  exit 1
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
   SUDO=""
 else
@@ -49,8 +107,21 @@ fi
 
 curl_headers=(
   -H "Host: ${HEALTHCHECK_HOST}"
-  -H "X-Forwarded-Proto: https"
 )
+curl_options=(-sS)
+if [ "$ORIGIN_HEALTHCHECK_INSECURE_TLS" = "true" ]; then
+  case "$APP_BASE_URL" in
+    https://127.0.0.1*|https://localhost*|https://\[::1\]*)
+      # Origin/self-signed certificates are not public trust anchors.  TLS
+      # verification is disabled only for the loopback deployment probe.
+      curl_options+=(--insecure)
+      ;;
+    *)
+      echo "ORIGIN_HEALTHCHECK_INSECURE_TLS=true is allowed only for a loopback APP_BASE_URL." >&2
+      exit 1
+      ;;
+  esac
+fi
 
 wait_for_http() {
   local url="$1"
@@ -65,7 +136,7 @@ wait_for_http() {
   fi
 
   while true; do
-    status="$(curl -s -o "$body_file" -w '%{http_code}' "${curl_headers[@]}" "$url" || true)"
+    status="$(curl "${curl_options[@]}" -o "$body_file" -w '%{http_code}' "${curl_headers[@]}" "$url" || true)"
     if [[ " ${expected_codes} " == *" ${status} "* ]]; then
       return 0
     fi
@@ -130,61 +201,101 @@ legacy_deploy() {
   $SUDO systemctl status "$SERVICE_NAME" --no-pager | sed -n '1,20p'
 }
 
-ensure_origin_cert() {
+preflight_direct_dns() {
+  if [ -z "$DIRECT_ORIGIN_IPS" ]; then
+    echo "DIRECT_ORIGIN_IPS is required for a direct-edge deployment." >&2
+    exit 1
+  fi
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required for the direct-edge DNS preflight." >&2
+    exit 1
+  fi
+
+  python3 - "$HEALTHCHECK_HOST" "$DIRECT_ORIGIN_IPS" <<'PY'
+import ipaddress
+import socket
+import sys
+
+hostname, raw_expected = sys.argv[1:]
+try:
+    expected = {ipaddress.ip_address(token) for token in raw_expected.replace(",", " ").split()}
+except ValueError as exc:
+    raise SystemExit(f"DIRECT_ORIGIN_IPS contains an invalid address: {exc}") from exc
+
+if not expected:
+    raise SystemExit("DIRECT_ORIGIN_IPS must contain at least one public address.")
+if any(not address.is_global for address in expected):
+    raise SystemExit("DIRECT_ORIGIN_IPS may contain only globally routable public addresses.")
+
+try:
+    answers = socket.getaddrinfo(hostname, 443, type=socket.SOCK_STREAM)
+except socket.gaierror as exc:
+    raise SystemExit(f"Public DNS lookup failed for {hostname}: {exc}") from exc
+
+resolved = {ipaddress.ip_address(answer[4][0]) for answer in answers}
+if resolved != expected:
+    expected_text = ", ".join(sorted(map(str, expected)))
+    resolved_text = ", ".join(sorted(map(str, resolved))) or "<none>"
+    raise SystemExit(
+        f"Direct-edge DNS mismatch for {hostname}: expected [{expected_text}], resolved [{resolved_text}]."
+    )
+
+print(f"Direct-edge DNS preflight passed for {hostname} ({', '.join(sorted(map(str, resolved)))})")
+PY
+}
+
+validate_origin_cert() {
   local cert_dir="${APP_DIR}/docker/nginx/certs"
   local cert_file="${cert_dir}/origin.crt"
   local key_file="${cert_dir}/origin.key"
 
-  mkdir -p "$cert_dir"
-  chmod 700 "$cert_dir"
-
-  if [ -s "$cert_file" ] && [ -s "$key_file" ]; then
-    return 0
+  if [ ! -s "$cert_file" ] || [ ! -s "$key_file" ]; then
+    echo "Missing direct-edge TLS certificate/key: ${cert_file}, ${key_file}." >&2
+    echo "Provision a public-CA full chain and private key before deploying; no self-signed certificate is generated." >&2
+    exit 1
   fi
+  bash "${APP_DIR}/scripts/deploy/validate_direct_tls.sh" \
+    "$cert_file" \
+    "$key_file" \
+    "$HEALTHCHECK_HOST" \
+    "$TLS_CERT_MIN_VALIDITY_SECONDS" \
+    "$TLS_ALLOW_SELF_SIGNED_LOCAL"
+}
 
-  if ! command -v openssl >/dev/null 2>&1; then
-    echo "openssl is required to create the nginx origin certificate." >&2
+remove_edge_firewall_family() {
+  local tool="$1"
+  local chain="$2"
+  local iface="$3"
+  local port
+
+  command -v "$tool" >/dev/null 2>&1 || return 0
+  $SUDO "$tool" -S DOCKER-USER >/dev/null 2>&1 || return 0
+  for port in 80 443; do
+    while $SUDO "$tool" -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j "$chain" 2>/dev/null; do
+      $SUDO "$tool" -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j "$chain"
+    done
+    # Remove the historical jump that did not include --ctstate.
+    while $SUDO "$tool" -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j "$chain" 2>/dev/null; do
+      $SUDO "$tool" -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j "$chain"
+    done
+  done
+  if $SUDO "$tool" -S "$chain" >/dev/null 2>&1; then
+    $SUDO "$tool" -F "$chain"
+    $SUDO "$tool" -X "$chain"
+  fi
+}
+
+remove_legacy_edge_firewall() {
+  local iface
+  iface="$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')"
+  if [ -z "$iface" ]; then
+    echo "Unable to determine the public network interface." >&2
     exit 1
   fi
 
-  openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
-    -keyout "$key_file" \
-    -out "$cert_file" \
-    -subj '/CN=emsarena.com' \
-    -addext 'subjectAltName=DNS:emsarena.com,DNS:www.emsarena.com' >/dev/null 2>&1
-  chmod 600 "$key_file"
-  chmod 644 "$cert_file"
-}
-
-repair_cloudflare_docker_user_firewall() {
-  local iface
-  local port
-
-  if ! command -v iptables >/dev/null 2>&1; then
-    return 0
-  fi
-
-  if ! $SUDO iptables -S DOCKER-USER >/dev/null 2>&1; then
-    return 0
-  fi
-
-  if ! $SUDO iptables -S EMSARENA-CF-WEB >/dev/null 2>&1; then
-    return 0
-  fi
-
-  iface="$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')"
-  if [ -z "$iface" ]; then
-    return 0
-  fi
-
-  for port in 80 443; do
-    while $SUDO iptables -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j EMSARENA-CF-WEB 2>/dev/null; do
-      $SUDO iptables -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j EMSARENA-CF-WEB
-    done
-
-    $SUDO iptables -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j EMSARENA-CF-WEB 2>/dev/null \
-      || $SUDO iptables -I DOCKER-USER 1 -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j EMSARENA-CF-WEB
-  done
+  # One-time cleanup for hosts upgraded from the retired proxy deployment.
+  remove_edge_firewall_family iptables EMSARENA-CF-WEB "$iface"
+  remove_edge_firewall_family ip6tables EMSARENA-CF-WEB6 "$iface"
 }
 
 app_replicas_ready() {
@@ -223,8 +334,9 @@ docker_deploy() {
   fi
 
   docker compose version >/dev/null
-  ensure_origin_cert
-  repair_cloudflare_docker_user_firewall
+  preflight_direct_dns
+  validate_origin_cert
+  remove_legacy_edge_firewall
 
   docker compose -f "$COMPOSE_FILE" config >"$COMPOSE_CONFIG"
   docker compose -f "$COMPOSE_FILE" build

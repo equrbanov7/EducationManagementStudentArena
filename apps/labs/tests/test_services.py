@@ -4,6 +4,7 @@ Service tests for labs app.
 
 from datetime import timedelta
 from decimal import Decimal
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -111,6 +112,47 @@ class LabGradingServicesTest(TestCase):
         self.assertEqual(graded_submission.feedback, "Good work!")
         self.assertEqual(graded_submission.graded_by, self.teacher)
         self.assertEqual(graded_submission.status, "graded")
+
+    def test_grade_lab_submission_clamps_and_locks_row(self):
+        self.lab.max_score = 10
+        self.lab.save(update_fields=["max_score"])
+
+        manager = LabSubmission._default_manager
+        with mock.patch.object(manager, "select_for_update", wraps=manager.select_for_update) as lock:
+            graded_submission = services.grade_lab_submission(
+                self.submission,
+                Decimal("150"),
+                "Too high",
+                self.teacher,
+            )
+
+        lock.assert_called_once_with()
+        self.assertEqual(graded_submission.score, Decimal("10"))
+        graded_submission.refresh_from_db()
+        self.assertEqual(graded_submission.score, Decimal("10"))
+
+    def test_grade_lab_submission_floors_negative_score(self):
+        graded_submission = services.grade_lab_submission(
+            self.submission,
+            Decimal("-7"),
+            "Negative",
+            self.teacher,
+        )
+        self.assertEqual(graded_submission.score, Decimal("0"))
+
+    def test_grade_lab_answer_clamps_to_question_points_and_locks_row(self):
+        block = LabBlock.objects.create(lab=self.lab, title="Clamp block")
+        question = LabQuestion.objects.create(block=block, question_text="Clamp?", points=7)
+        answer = LabAnswer.objects.create(lab=self.lab, question=question, student=self.student, answer="answer")
+
+        manager = LabAnswer._default_manager
+        with mock.patch.object(manager, "select_for_update", wraps=manager.select_for_update) as lock:
+            graded_answer = services.grade_lab_answer(answer, Decimal("99"))
+
+        lock.assert_called_once_with()
+        self.assertEqual(graded_answer.score, Decimal("7"))
+        graded_answer.refresh_from_db()
+        self.assertEqual(graded_answer.score, Decimal("7"))
 
     def test_parse_score_value(self):
         """Test parsing score values."""

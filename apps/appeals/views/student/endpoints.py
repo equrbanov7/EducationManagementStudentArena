@@ -10,7 +10,8 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
 from apps.exams.navigation import append_query_params, current_return_to
-from apps.exams.public import tenant_scoped_exams
+from apps.exams.public import exam_answers_release_locked, tenant_scoped_exams
+from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
 from ...constants import (
@@ -19,13 +20,16 @@ from ...constants import (
     APPEAL_STATUS_UNDER_REVIEW,
     APPEAL_STATUS_VALUES,
     APPEAL_TYPE_CHOICES,
+    APPEAL_WINDOW_DAYS,
 )
 from ...models import AppealItem
 from ...selectors import filter_student_appeals, paginate_student_appeals, student_appeals_queryset
 from ...services import (
+    appeal_deadline,
     appeal_item_result_visible_to_student,
     can_create_appeal,
     create_appeal,
+    is_within_appeal_window,
     remaining_window_seconds,
 )
 from ..shared._helpers import _marked_question_map
@@ -76,6 +80,42 @@ def _parse_items_from_post(request, delivered_question_ids):
     return items
 
 
+def _attempt_appeals_for_student(attempt):
+    """Bu attempt üzrə tələbənin apellyasiyaları (nəticə/status baxışı üçün)."""
+    from ...models import Appeal
+
+    appeals = list(
+        Appeal.objects.filter(attempt=attempt, student=attempt.user).prefetch_related("items").order_by("-created_at")
+    )
+    for appeal in appeals:
+        has_hidden_decision = any(not appeal_item_result_visible_to_student(item) for item in appeal.items.all())
+        appeal.student_display_status = APPEAL_STATUS_UNDER_REVIEW if has_hidden_decision else appeal.status
+        appeal.student_display_status_label = APPEAL_STATUS_LABELS.get(
+            appeal.student_display_status,
+            appeal.get_status_display(),
+        )
+    return appeals
+
+
+def _render_appeal_window_closed(request, exam, attempt, *, window_closed):
+    """Pəncərə bağlı (və ya icazə yox) — read-only appeal səhifəsi."""
+    is_profile_results_request = _is_profile_results_request(request)
+    context = {
+        "exam": exam,
+        "attempt": attempt,
+        "appeal_window_closed": True,
+        "appeal_window_days": APPEAL_WINDOW_DAYS,
+        "appeal_deadline": appeal_deadline(attempt),
+        "window_expired": window_closed,
+        "attempt_appeals": _attempt_appeals_for_student(attempt),
+        "result_url": _result_url(exam, attempt, request),
+        "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
+        # Read-only rejim üçün form dəyişənləri boş/deaktiv.
+        "answers": [],
+    }
+    return render(request, "appeals/student/appeal_create.html", context)
+
+
 @login_required
 def appeal_create(request, attempt_id):
     ensure_student_exam_tenant_context(request)
@@ -89,11 +129,12 @@ def appeal_create(request, attempt_id):
         raise Http404
 
     if not can_create_appeal(request, attempt):
-        messages.error(
-            request,
-            pgettext("appeals.view.message", "Apellyasiya müddəti bitib və ya icazəniz yoxdur."),
-        )
-        return redirect(_result_url(exam, attempt, request))
+        # UX: pəncərə (3 gün) bağlanıbsa çılpaq error/redirect əvəzinə oxu-rejimli
+        # "müddət bitib" səhifəsi göstərilir — tələbə əvvəlki nəticəyə və öz
+        # apellyasiyalarının nəticəsinə baxa bilir, yenidən vermək istəsə isə
+        # 3-gün qaydası aydın UX formatında görünür.
+        window_closed = not is_within_appeal_window(attempt)
+        return _render_appeal_window_closed(request, exam, attempt, window_closed=window_closed)
 
     delivered_answers = list(
         attempt.answers.select_related("question")
@@ -126,11 +167,21 @@ def appeal_create(request, attempt_id):
 
     for answer in delivered_answers:
         answer.has_selection = bool(list(answer.selected_options.all()))
+        # EXAM-P0-03: apellyasiya sübutu da çatdırılma anındakı dondurulmuş sual
+        # görünüşündən render olunur (müəllif sonradan redaktə etsə də sabit
+        # qalır); dondurulmuş seçim yoxdursa canlı seçimə düşülür.
+        frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+        if frozen_selection is not None:
+            selected_ids = {int(option_id) for option_id in frozen_selection}
+        else:
+            selected_ids = {opt.id for opt in answer.selected_options.all()}
+        answer.delivered = delivered_question_render(answer, selected_ids)
 
     marked_map = _marked_question_map(attempt)
     has_marked = any(marked_map.get(answer.question_id) for answer in delivered_answers)
 
     is_profile_results_request = _is_profile_results_request(request)
+    answers_release_locked = exam_answers_release_locked(exam)
 
     context = {
         "exam": exam,
@@ -143,10 +194,46 @@ def appeal_create(request, attempt_id):
         "marked_question_by_qid": marked_map,
         "appealed_question_by_qid": {question_id: True for question_id in appealed_question_ids},
         "has_marked": has_marked,
-        "hide_answer_details": is_profile_results_request,
+        # EXAM-P0-05: nəticə səhifəsindəki release kilidi appeal
+        # URL-indən yan keçilə bilməz. Eyni siyasət correctness variantlarını,
+        # ideal cavabı və tələbə seçimini birlikdə gizlədir.
+        "hide_answer_details": is_profile_results_request or answers_release_locked,
+        "answers_release_locked": answers_release_locked,
         "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
     }
     return render(request, "appeals/student/appeal_create.html", context)
+
+
+def _appeal_eligible_attempts(request):
+    """ "Yeni apellyasiya" modal-ı üçün uyğun cəhdlər.
+
+    Tələbənin 3-günlük pəncərəsi hələ açıq olan bitmiş final/midterm cəhdləri —
+    hər biri üçün müraciət səhifəsinə keçid. Adi test/quiz cəhdləri apellyasiya
+    axışına daxil deyil (yalnız final/midterm).
+    """
+    from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+
+    attempts = (
+        ExamAttempt.objects.filter(
+            user=request.user,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+            exam__exam_type_extended__in=("final", "midterm"),
+        )
+        .select_related("exam")
+        .order_by("-finished_at")
+    )
+    eligible = []
+    for attempt in attempts:
+        if not can_create_appeal(request, attempt):
+            continue
+        attempt.appeal_deadline = appeal_deadline(attempt)
+        attempt.appeal_remaining_seconds = remaining_window_seconds(attempt)
+        attempt.appeal_create_url = append_query_params(
+            reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id}),
+            from_section="my-appeals",
+        )
+        eligible.append(attempt)
+    return eligible
 
 
 def build_my_appeals_context(request, *, list_action, section=""):
@@ -173,6 +260,7 @@ def build_my_appeals_context(request, *, list_action, section=""):
             appeal.get_status_display(),
         )
 
+    eligible_attempts = _appeal_eligible_attempts(request)
     return {
         "appeal_page_obj": page_obj,
         "appeal_list": page_obj.object_list,
@@ -181,6 +269,8 @@ def build_my_appeals_context(request, *, list_action, section=""):
         "appeal_search_query": search_query,
         "appeal_list_action": list_action,
         "appeal_section": section,
+        "appeal_eligible_attempts": eligible_attempts,
+        "appeal_window_days": APPEAL_WINDOW_DAYS,
     }
 
 

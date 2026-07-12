@@ -527,6 +527,43 @@ class ExamAccessControlTest(TestCase):
         can_start, _ = self.exam.can_user_start(self.student)
         self.assertTrue(can_start)
 
+    def test_public_exam_blocks_excluded_user(self):
+        """EXAM-P1-03: exclusion siyahısı public imtahanda da işləyir."""
+        self.exam.excluded_users.add(self.student)
+
+        self.assertFalse(self.exam.can_user_see(self.student))
+        can_start, message = self.exam.can_user_start(self.student)
+        self.assertFalse(can_start)
+        self.assertIsNotNone(message)
+
+    def test_excluded_user_cannot_resume_active_attempt(self):
+        """EXAM-P1-03: istisna aktiv cəhdin davamından da üstündür."""
+        ExamAttempt.objects.create(user=self.student, exam=self.exam, status="in_progress", attempt_number=1)
+        self.exam.excluded_users.add(self.student)
+
+        can_start, _ = self.exam.can_user_start(self.student)
+        self.assertFalse(can_start)
+
+    def test_archived_exam_cannot_be_started_or_seen(self):
+        """EXAM-P1-02: arxiv aktiv qalsa belə start/görünürlük bağlanır."""
+        self.exam.is_archived = True
+        self.exam.save(update_fields=["is_archived"])
+
+        self.assertFalse(self.exam.can_user_see(self.student))
+        can_start, _ = self.exam.can_user_start(self.student)
+        self.assertFalse(can_start)
+        # Müəllif öz arxivini görməyə davam edir.
+        self.assertTrue(self.exam.can_user_see(self.teacher))
+
+    def test_soft_deleted_exam_cannot_be_started_or_seen(self):
+        """EXAM-P1-02: soft-delete birbaşa URL start-ını da bağlayır."""
+        self.exam.is_deleted = True
+        self.exam.save(update_fields=["is_deleted"])
+
+        self.assertFalse(self.exam.can_user_see(self.student))
+        can_start, _ = self.exam.can_user_start(self.student)
+        self.assertFalse(can_start)
+
     def test_exam_time_restrictions(self):
         """Test exam time-based restrictions."""
         # Exam that hasn't started yet

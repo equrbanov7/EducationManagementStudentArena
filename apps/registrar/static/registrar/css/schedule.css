@@ -1,296 +1,341 @@
-/* Dərs cədvəli (timetable) — həftəlik gün-kartları + tarixlər + üst/alt həftə +
-   həmin gün imtahanları. Token-əsaslı (--ems-*), inline CSS yox. */
+/* ═══ Dərs cədvəli — mockup dizaynı (saat×gün grid, light-only) ═════════════
+   Dəqiq dəyərlər dizayn şablonundan: mühazirə #EAF1FE/#2563EB ·
+   məşğələ #E6F7FB/#0891B2 · laboratoriya #F1EFFB/#6D5BD0.
+   Saat sətirləri slotların real vaxtlarından yığılır (hardcode yoxdur). */
 
-.schedule-page {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 1.5rem 1rem 3rem;
-}
+.schedule-page { max-width: 1240px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.sgx { --sgx-navy: #12274e; --sgx-ink: #12336e; --sgx-muted: #5b72a0; --sgx-soft: #8aa0c8; --sgx-line: #dce6f7; --sgx-cell-line: #e7eef9; }
 
-.schedule-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--ems-neutral-900);
-    margin: 0 0 0.4rem;
-}
-.schedule-title i { color: var(--ems-primary-600); }
-
-.schedule-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-    font-size: 0.85rem;
-    color: var(--ems-neutral-600);
-    margin-bottom: 1.25rem;
-}
-.schedule-meta i { color: var(--ems-primary-500); margin-right: 3px; }
-.schedule-role-badge {
-    background: var(--ems-primary-100);
-    color: var(--ems-primary-700);
-    font-weight: 600;
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-.schedule-calendar-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ems-primary-600);
-    text-decoration: none;
-}
-.schedule-calendar-link:hover { color: var(--ems-primary-700); text-decoration: underline; }
-
-/* U19: iCal export linki — calendar linki ilə eyni ton, yaşıl vurğusuz. */
-.schedule-ics-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: var(--ems-primary-600);
-    font-weight: 600;
-    text-decoration: none;
-}
-.schedule-ics-link:hover { color: var(--ems-primary-700); text-decoration: underline; }
-
-/* ── Həftə naviqasiya paneli ──────────────────────────────────────────── */
-.schedule-weekbar {
+/* ── Üst zolaq: kimlik + həftə pilləri ──────────────────────────────────── */
+.sgx-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 0.6rem 0.85rem;
-    margin-bottom: 1.1rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
-    background: var(--ems-neutral-0);
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
 }
-.week-nav {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    border: 1px solid var(--ems-neutral-200);
-    color: var(--ems-neutral-600);
-    background: var(--ems-neutral-50);
-    text-decoration: none;
-    transition: background 0.15s, color 0.15s;
-}
-.week-nav:hover { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.week-range {
+.sgx-identity { display: flex; align-items: center; gap: 12px; }
+.sgx-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4f46e5;
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
     justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.5px;
 }
-.week-dates { font-weight: 700; color: var(--ems-neutral-900); font-size: 0.95rem; }
-.week-parity {
-    display: inline-flex;
-    align-items: center;
+.sgx-identity-name { font-weight: 800; font-size: 15px; color: var(--sgx-navy); }
+.sgx-identity-sub { font-size: 12.5px; color: var(--sgx-muted); font-weight: 600; }
+.sgx-topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sgx-weekpills {
+    display: flex;
+    background: #fff;
+    border: 1px solid var(--sgx-line);
+    border-radius: 10px;
+    padding: 4px;
     gap: 4px;
-    font-weight: 600;
-    font-size: 0.8rem;
-    padding: 3px 10px;
-    border-radius: 999px;
 }
-.week-parity--odd { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.week-parity--even { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-.week-today-link {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ems-primary-600);
+.sgx-weekpill {
+    padding: 7px 14px;
+    border-radius: 7px;
+    color: var(--sgx-muted);
+    font-size: 12.5px;
+    font-weight: 700;
     text-decoration: none;
-    padding: 3px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--ems-primary-200);
+    white-space: nowrap;
 }
-.week-today-link:hover { background: var(--ems-primary-100); }
+.sgx-weekpill.is-active { background: #2563eb; color: #fff; }
+.sgx-weekpill:hover:not(.is-active) { color: #1d4ed8; }
 
-/* ── Slot əlavə paneli ────────────────────────────────────────────────── */
-.schedule-add {
-    display: flex;
-    flex-wrap: wrap;
+/* Düymələr (modal + slot əlavə) */
+.sgx-primary-btn,
+.sgx-ghost-btn,
+.sgx-danger-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 0.85rem 1rem;
-    margin-bottom: 1.25rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
-    background: var(--ems-neutral-50);
-}
-.schedule-add-title { font-weight: 600; color: var(--ems-neutral-700); font-size: 0.9rem; }
-.schedule-add-title i { color: var(--ems-primary-600); }
-.schedule-add select,
-.schedule-add input {
-    padding: 8px 10px;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    background: var(--ems-neutral-0);
-    color: var(--ems-neutral-900);
-}
-.schedule-add input[type="text"] { width: 110px; }
-.schedule-add-btn {
-    padding: 8px 16px;
-    background: var(--ems-primary-600);
-    color: var(--ems-neutral-0);
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.85rem;
+    gap: 7px;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: 12.5px;
+    font-weight: 700;
     cursor: pointer;
+    text-decoration: none;
+    border: 1px solid transparent;
+    font-family: inherit;
 }
-.schedule-add-btn:hover { background: var(--ems-primary-700); }
+.sgx-primary-btn {
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.sgx-primary-btn:hover { filter: brightness(1.05); color: #fff; }
+.sgx-ghost-btn { background: #fff; border-color: var(--sgx-line); color: #3a5384; }
+.sgx-danger-btn { background: #fee2e2; color: #b91c1c; }
 
-/* ── Həftəlik grid — gün kartları ─────────────────────────────────────── */
-.schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
+/* ── Grid konteyneri ────────────────────────────────────────────────────── */
+.sgx-grid-wrap {
+    background: #fff;
+    border: 1px solid var(--sgx-line);
+    border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(18, 39, 78, 0.07);
+    overflow-x: auto;
 }
-.schedule-day {
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
-    background: var(--ems-neutral-0);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+.sgx-grid { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1180px; }
+.sgx-grid thead th {
+    background: #0f2a5c;
+    color: #fff;
+    text-align: center;
+    padding: 13px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
-.schedule-day.is-today {
-    border-color: var(--ems-primary-400);
-    box-shadow: 0 0 0 2px var(--ems-primary-100);
+.sgx-col-time { width: 96px; min-width: 96px; text-align: center; }
+.sgx-grid thead .sgx-col-time { font-size: 11.5px; font-weight: 700; color: #93b4e8; letter-spacing: 0.5px; }
+.sgx-day-name { display: block; font-weight: 800; font-size: 14px; }
+.sgx-day-sub { display: block; font-size: 11px; color: #93b4e8; font-weight: 600; margin-top: 1px; }
+/* Bugünkü gün başlığı: navy üzərinə 35% mavi qatı (mockup dəyəri). */
+.sgx-grid thead th.is-today { background: #3d68b0; }
+.sgx-grid thead th.is-today .sgx-day-sub { color: #bfdbfe; font-weight: 700; }
+.sgx-day-exam {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 10.5px;
+    font-weight: 700;
 }
-.schedule-day-label {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    flex-wrap: wrap;
-    padding: 8px 12px;
-    background: var(--ems-neutral-50);
-    border-bottom: 1px solid var(--ems-neutral-100);
+
+.sgx-row .sgx-col-time {
+    background: #f7faff;
+    border-right: 1px solid var(--sgx-cell-line);
+    border-bottom: 1px solid var(--sgx-cell-line);
+    padding: 10px;
+    text-align: center;
+}
+.sgx-row .sgx-col-time b { display: block; font-weight: 800; font-size: 13px; color: var(--sgx-navy); }
+.sgx-row .sgx-col-time small { font-size: 11px; color: var(--sgx-soft); font-weight: 600; }
+.sgx-cell {
+    padding: 6px;
+    border-right: 1px solid var(--sgx-cell-line);
+    border-bottom: 1px solid var(--sgx-cell-line);
+    vertical-align: top;
+    min-width: 150px;
+    min-height: 88px;
+}
+.sgx-cell:last-child { border-right: none; }
+.sgx-cell.is-today { background: #f7faff; }
+
+/* ── Slot kartı (mockup: sol 4px zolaq + tint fon) ──────────────────────── */
+.sgx-card {
+    display: block;
+    width: 100%;
     text-align: left;
-}
-.schedule-day.is-today .schedule-day-label { background: var(--ems-primary-100); }
-.day-name { font-weight: 700; font-size: 0.85rem; color: var(--ems-neutral-800); }
-.day-date { font-size: 0.75rem; color: var(--ems-neutral-500); }
-.day-today-badge {
-    margin-left: auto;
-    background: var(--ems-primary-600);
-    color: var(--ems-neutral-0);
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 999px;
-}
-
-/* ── Həmin gün imtahanları ────────────────────────────────────────────── */
-.day-exams { list-style: none; margin: 0; padding: 8px 8px 0; display: flex; flex-direction: column; gap: 6px; }
-.day-exam {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 7px 9px;
-    border-radius: 10px;
-    background: var(--ems-danger-100);
-    border-left: 3px solid var(--ems-danger-strong);
-}
-.exam-flag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--ems-danger-strong);
-}
-.exam-title { font-size: 0.82rem; font-weight: 600; color: var(--ems-neutral-900); line-height: 1.2; }
-.exam-time { font-size: 0.72rem; color: var(--ems-neutral-600); }
-
-/* ── Dərs slotları ────────────────────────────────────────────────────── */
-.schedule-slots { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
-.schedule-slot {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    background: var(--ems-primary-50);
-    border-left: 3px solid var(--ems-primary-500);
-}
-.schedule-slot.slot-kind--odd { background: var(--ems-primary-50); border-left-color: var(--ems-primary-600); }
-.schedule-slot.slot-kind--even { background: var(--ems-warning-100); border-left-color: var(--ems-warning-800); }
-.schedule-slot.slot-other-week { opacity: 0.5; filter: grayscale(0.35); }
-
-.slot-time { font-size: 0.78rem; font-weight: 700; color: var(--ems-primary-700); }
-.slot-subject { font-size: 0.82rem; font-weight: 600; color: var(--ems-neutral-900); line-height: 1.25; }
-.slot-detail {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 8px;
-    font-size: 0.72rem;
-    color: var(--ems-neutral-500);
-}
-.slot-detail i { margin-right: 2px; }
-.slot-week {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    align-self: flex-start;
-    padding: 1px 7px;
-    border-radius: 5px;
-    font-weight: 600;
-    font-size: 0.68rem;
-}
-.slot-week--odd { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.slot-week--even { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-
-.slot-del { position: absolute; top: 4px; right: 4px; }
-.slot-del button {
-    background: transparent;
     border: none;
-    color: var(--ems-neutral-400);
     cursor: pointer;
-    font-size: 0.72rem;
-    padding: 2px 4px;
-    border-radius: 4px;
+    font-family: inherit;
+    border-radius: 10px;
+    padding: 8px 10px;
+    border-left: 4px solid transparent;
+    margin-bottom: 5px;
+    transition: filter 0.12s ease;
+    box-sizing: border-box;
+}
+.sgx-card:last-of-type { margin-bottom: 0; }
+.sgx-card:hover { filter: brightness(0.97); }
+.sgx-card--lecture { background: #eaf1fe; border-left-color: #2563eb; }
+.sgx-card--seminar { background: #e6f7fb; border-left-color: #0891b2; }
+.sgx-card--lab { background: #f1effb; border-left-color: #6d5bd0; }
+.sgx-card.is-offweek { opacity: 0.45; }
+.sgx-card-titlerow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sgx-card-title { font-weight: 800; font-size: 13px; color: var(--sgx-ink); line-height: 1.25; }
+.sgx-card-meta { display: block; font-size: 11.5px; color: #3a5384; margin-top: 2px; font-weight: 500; }
+.sgx-card-room { display: block; font-size: 11px; color: var(--sgx-muted); margin-top: 3px; }
+.sgx-chip {
+    font-size: 9.5px;
+    font-weight: 800;
+    border-radius: 5px;
+    padding: 2px 6px;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+.sgx-chip--ust { background: #0f2a5c; color: #7dd3fc; }
+.sgx-chip--alt { background: #ede9fe; color: #6d5bd0; }
+.sgx-cell-gap {
+    display: block;
+    text-align: center;
+    font-size: 10.5px;
+    color: #94a3b8;
+    font-weight: 600;
+    border: 1.5px dashed #c4d4f0;
+    border-radius: 999px;
+    padding: 4px 8px;
+    margin-top: 5px;
+}
+
+/* Axşam (magistratura) bandı */
+.sgx-band-row td {
+    background: #eef3fb;
+    padding: 9px 16px;
+    border-top: 1px solid var(--sgx-line);
+    border-bottom: 1px solid var(--sgx-line);
+}
+.sgx-band-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 7px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+.sgx-band-hint { margin-left: 10px; font-size: 12px; color: var(--sgx-muted); font-weight: 600; }
+
+/* Legend */
+.sgx-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    background: #fff;
+    border: 1px solid var(--sgx-line);
+    border-radius: 12px;
+    padding: 9px 14px;
+    font-size: 12px;
+    color: var(--sgx-muted);
+    font-weight: 600;
+}
+.sgx-legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.sgx-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.sgx-swatch--lecture { background: #2563eb; }
+.sgx-swatch--seminar { background: #0891b2; }
+.sgx-swatch--lab { background: #6d5bd0; }
+.sgx-legend-sep { flex: 0 0 1px; height: 16px; background: var(--sgx-line); }
+.sgx-mini-badge { font-size: 9.5px; font-weight: 800; border-radius: 5px; padding: 2px 6px; letter-spacing: 0.3px; }
+.sgx-mini-badge--odd { background: #0f2a5c; color: #7dd3fc; }
+.sgx-mini-badge--even { background: #ede9fe; color: #6d5bd0; }
+
+/* Boş vəziyyət */
+.sgx-empty {
+    background: #fff;
+    border: 1px dashed var(--sgx-line);
+    border-radius: 16px;
+    text-align: center;
+    padding: 42px 20px;
+    color: var(--sgx-muted);
+}
+.sgx-empty i { font-size: 26px; margin-bottom: 8px; color: #3b82f6; }
+.sgx-empty p { margin: 4px 0; font-weight: 600; }
+.sgx-empty-hint { font-size: 12.5px; opacity: 0.8; }
+
+/* ── Modallar ───────────────────────────────────────────────────────────── */
+.sgx-modal { position: fixed; inset: 0; z-index: 1080; display: flex; align-items: center; justify-content: center; padding: 18px; }
+.sgx-modal[hidden] { display: none; }
+.sgx-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 42, 92, 0.45); backdrop-filter: blur(2px); }
+.sgx-modal-card {
+    position: relative;
+    background: #fff;
+    border-radius: 18px;
+    width: min(520px, 100%);
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 24px 60px rgba(15, 42, 92, 0.35);
+    animation: sgxPop 0.16s ease;
+}
+@keyframes sgxPop {
+    from { transform: translateY(8px) scale(0.98); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+.sgx-modal-head { padding: 18px 20px 14px; border-bottom: 1px solid #eef3fb; position: relative; }
+.sgx-modal-head::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 4px;
+    border-radius: 3px;
+    background: #2563eb;
+}
+.sgx-modal-head--kind-lecture::before { background: #2563eb; }
+.sgx-modal-head--kind-seminar::before { background: #0891b2; }
+.sgx-modal-head--kind-lab::before { background: #6d5bd0; }
+.sgx-modal-kind {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--sgx-soft);
+    margin-bottom: 3px;
+}
+.sgx-modal-title { margin: 0; font-size: 17px; font-weight: 800; color: var(--sgx-navy); padding-right: 30px; }
+.sgx-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    border: none;
+    background: #eef3fb;
+    color: var(--sgx-muted);
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 17px;
+    cursor: pointer;
     line-height: 1;
 }
-.slot-del button:hover { color: var(--ems-danger-strong); background: var(--ems-danger-100); }
-
-.schedule-day-empty { padding: 1.25rem; text-align: center; color: var(--ems-neutral-300); }
-
-/* ── Açıqlama (legend) ────────────────────────────────────────────────── */
-.schedule-legend {
+.sgx-modal-close:hover { background: #fee2e2; color: #b91c1c; }
+.sgx-modal-body { padding: 14px 20px; }
+.sgx-modal-rows { display: flex; flex-direction: column; gap: 8px; }
+.sgx-mrow { display: flex; justify-content: space-between; gap: 14px; font-size: 13.5px; color: var(--sgx-navy); font-weight: 600; }
+.sgx-mrow[hidden] { display: none; }
+.sgx-mlabel { color: var(--sgx-muted); font-weight: 600; font-size: 12.5px; }
+.sgx-modal-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.sgx-stat-card { background: #eef3fb; border-radius: 12px; padding: 10px; text-align: center; }
+.sgx-stat-card b { display: block; font-size: 16px; color: var(--sgx-navy); }
+.sgx-stat-card small { color: var(--sgx-muted); font-weight: 600; font-size: 11px; }
+.sgx-stat-card--status.is-barred b { color: #dc2626; }
+.sgx-stat-card--status.is-ok b { color: #059669; }
+.sgx-modal-foot {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 20px 18px;
+    border-top: 1px solid #eef3fb;
     flex-wrap: wrap;
-    gap: 12px 18px;
-    margin-top: 1.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--ems-neutral-100);
-    font-size: 0.78rem;
-    color: var(--ems-neutral-600);
 }
-.legend-item { display: inline-flex; align-items: center; gap: 6px; }
-.legend-swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
-.legend-swatch--all { background: var(--ems-primary-500); }
-.legend-swatch--odd { background: var(--ems-primary-600); }
-.legend-swatch--even { background: var(--ems-warning-800); }
-.legend-swatch--exam { background: var(--ems-danger-strong); }
+.sgx-modal-foot form { margin: 0; }
 
-.schedule-empty { text-align: center; padding: 3rem 1rem; color: var(--ems-neutral-500); }
-.schedule-empty i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
-.schedule-empty p { margin: 0; }
+/* Slot əlavə formu */
+.sgx-add-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px 20px 4px; }
+.sgx-field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 700; color: var(--sgx-muted); }
+.sgx-field--wide { grid-column: 1 / -1; }
+.sgx-field select,
+.sgx-field input {
+    border: 1px solid var(--sgx-line);
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--sgx-navy);
+    background: #fff;
+}
+.sgx-field select:focus,
+.sgx-field input:focus { outline: 2px solid #c4d4f0; border-color: #3b82f6; }
 
-@media (max-width: 560px) {
-    .schedule-weekbar { flex-wrap: wrap; }
-    .week-range { order: 3; width: 100%; }
+/* Responsiv */
+@media (max-width: 768px) {
+    .sgx-topbar { flex-direction: column; align-items: flex-start; }
+    .sgx-add-grid { grid-template-columns: 1fr; }
+    .sgx-modal { padding: 10px; }
 }

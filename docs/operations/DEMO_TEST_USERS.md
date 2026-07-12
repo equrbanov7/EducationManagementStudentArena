@@ -61,7 +61,7 @@ Mühəndislik və Tətbiqi Elmlər fakültəsi
 
 Qrup **dil bölməsinə** (AZ / İngilis) aiddir. Bu struktur **universitetə görə
 dəyişir** — bölmə adları, sayı və iyerarxiya dərinliyi hər tenant üçün fərqli
-ola bilər (bax `docs/UNIVERSITY_SYSTEM_ROADMAP.md`). Ona görə bölmə qrup adında
+ola bilər (bax `docs/architecture/UNIVERSITY_SYSTEM_ROADMAP.md`). Ona görə bölmə qrup adında
 kodlanır, sərt-kod enum deyil — model tenant-konfiqurasiya əsaslıdır.
 
 ## Lokal giriş (login "girmir" problemi)

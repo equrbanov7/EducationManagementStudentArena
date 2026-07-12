@@ -125,10 +125,10 @@
                                id="hidden_score_{{ q.id }}"
                                name="score_{{ q.id }}" 
                                value="{% if ans and ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}">
+                        {# EXAM-P0-04: max bal serverdə snapshot-dan hesablanır; POST edilmir #}
                         <input type="hidden"
                                id="hidden_max_points_{{ q.id }}"
-                               name="max_points_{{ q.id }}"
-                               value="{{ q.points }}">
+                               value="{{ item.max_points }}">
                         
                         {# ---- GİZLİ FEEDBACK TEXTAREA ---- #}
                         <textarea class="tca-hidden"
@@ -143,7 +143,7 @@
                              data-has-ai-gradable="{% if item.has_ai_gradeable_content %}1{% else %}0{% endif %}"
                              data-has-file-answer="{% if item.has_file_answer %}1{% else %}0{% endif %}"
                              data-has-paint-answer="{% if item.has_paint_answer %}1{% else %}0{% endif %}"
-                             data-q-points="{{ q.points }}"
+                             data-q-points="{{ item.max_points }}"
                              data-q-correct-answer="{{ q.correct_answer|default_if_none:''|escape }}">
                         </div>
 
@@ -314,12 +314,15 @@
                     <div class="score-input-wrap">
                         <input type="number" id="modalScoreInput" class="form-control" step="1" min="0" inputmode="numeric">
                         <span class="score-max-divider" aria-hidden="true">/</span>
+                        {# EXAM-P0-04: max bal yalnız göstərilir; dəyişmək üçün sual redaktə formu #}
                         <input type="number"
                                id="modalMaxPointsInput"
                                class="form-control score-max-input"
                                step="1"
                                min="1"
                                inputmode="numeric"
+                               readonly
+                               tabindex="-1"
                                aria-label="Max points">
                     </div>
                 </div>

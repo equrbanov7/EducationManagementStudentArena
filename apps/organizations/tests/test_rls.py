@@ -40,6 +40,8 @@ Prerequisites
   ``organizations.0004_expand_rls_scope`` applied.
 """
 
+from datetime import timedelta
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError, connection, transaction
 from django.test import RequestFactory
@@ -51,15 +53,27 @@ from apps.accounts.views._helpers import _build_student_org_request_section
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseGroup, CourseMembership
 from apps.exams.models import (
+    CodingExamQuestion,
+    CodingFile,
+    CodingSubmission,
+    CodingTestCase,
     Exam,
     ExamAnswer,
     ExamAnswerFile,
     ExamAttempt,
+    ExamGradeEvent,
     ExamQuestion,
     ExamQuestionOption,
+    ExamRoom,
+    ExamRoomSession,
+    ExamStudentPin,
+    ExamSupervisionConfig,
     ProctoringLog,
     QuestionBlock,
+    QuestionSubmission,
+    StudentExamAttemptGrant,
     StudentGroup,
+    SupervisionIncident,
 )
 from apps.live_exam.auth import build_player_token, get_player_from_token
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -682,11 +696,15 @@ class TestRLSExamExpanded:
             "org_a": org_a,
             "exam_a": exam_a,
             "block_a": block_a,
+            "block_b": block_b,
             "question_a": question_a,
+            "question_b": question_b,
             "option_a": option_a,
+            "option_b": option_b,
             "group_a": group_a,
             "student_a": student_a,
             "answer_a": answer_a,
+            "answer_b": answer_b,
             "answer_file_a": answer_file_a,
             "proctor_a": proctor_a,
         }
@@ -742,6 +760,659 @@ class TestRLSExamExpanded:
         assert ExamAnswerFile.objects.first().pk == expanded_exam_graph["answer_file_a"].pk
         assert ProctoringLog.objects.count() == 1
         assert ProctoringLog.objects.first().pk == expanded_exam_graph["proctor_a"].pk
+
+    def test_cross_exam_answer_relationships_are_rejected(self, expanded_exam_graph):
+        """A tenant row cannot point at a different exam's question/option."""
+        _skip_if_not_pg()
+        org_a = expanded_exam_graph["org_a"]
+        answer_a = expanded_exam_graph["answer_a"]
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamQuestion.objects.filter(pk=expanded_exam_graph["question_a"].pk).update(
+                    block_id=expanded_exam_graph["block_b"].pk
+                )
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamAnswer.objects.filter(pk=answer_a.pk).update(question_id=expanded_exam_graph["question_b"].pk)
+
+        selected_options_through = ExamAnswer._meta.get_field("selected_options").remote_field.through
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                selected_options_through.objects.create(
+                    examanswer_id=answer_a.pk,
+                    examquestionoption_id=expanded_exam_graph["option_b"].pk,
+                )
+
+
+class TestRLSExamGapTables:
+    """RLS isolation for the exam tables covered by 0017 (audit EXAM-P0-02).
+
+    Coding, tələbə giriş (PIN/grant), supervision, sual göndərişi və qalan
+    M2M join cədvəlləri — hamısı tenant üzrə izolyasiya olunmalıdır.
+    """
+
+    @pytest.fixture()
+    def gap_table_graph(self, two_orgs, role_per_org):
+        from django.contrib.auth import get_user_model
+        from django.utils import timezone as dj_timezone
+
+        from apps.registrar.models import Subject
+
+        org_a, org_b = two_orgs
+        role_a, role_b = role_per_org
+        User = get_user_model()
+
+        data = {}
+        for suffix, org, role in (("a", org_a, role_a), ("b", org_b, role_b)):
+            teacher = User.objects.create_user(f"rls_gap_teacher_{suffix}", f"rgapt{suffix}@rls.test", "pw")
+            student = User.objects.create_user(f"rls_gap_student_{suffix}", f"rgaps{suffix}@rls.test", "pw")
+            Membership.objects.create(user=teacher, organization=org, role=role, is_primary=True, is_active=True)
+
+            exam = Exam.objects.create(
+                organization=org, author=org.owner, title=f"Gap Exam {suffix.upper()}", exam_type="coding"
+            )
+            question = ExamQuestion.objects.create(exam=exam, text=f"Gap Q {suffix}", order=1)
+            exam.excluded_users.add(student)
+
+            coding_question = CodingExamQuestion.objects.create(
+                question=question,
+                language=CodingExamQuestion.LANGUAGE_PYTHON,
+                title=f"Coding {suffix}",
+                problem_statement="Solve it",
+            )
+            CodingTestCase.objects.create(
+                coding_question=coding_question,
+                input_data="1\n",
+                expected_output="1\n",
+            )
+            attempt = ExamAttempt.objects.create(user=student, exam=exam, attempt_number=1, status="in_progress")
+            submission = CodingSubmission.objects.create(
+                student=student,
+                exam=exam,
+                attempt=attempt,
+                question=coding_question,
+                selected_language="python",
+                submitted_code="print(1)",
+            )
+            CodingFile.objects.create(submission=submission, name="main.py", content="print(1)")
+
+            ExamStudentPin.objects.create(exam=exam, student=student, pin_hash=f"hash-{suffix}", pin_cipher=b"")
+            StudentExamAttemptGrant.objects.create(exam=exam, student=student, extra_attempts=1, granted_by=teacher)
+            ExamSupervisionConfig.objects.create(exam=exam)
+            incident = SupervisionIncident.objects.create(
+                organization=org,
+                exam=exam,
+                attempt=attempt,
+                student=student,
+                event_type="tab_switch",
+            )
+
+            group = StudentGroup.objects.create(teacher=teacher, organization=org, name=f"Gap Group {suffix}")
+            subject = Subject.objects.create(
+                organization=org, code=f"GAP{suffix.upper()}101", name=f"Gap Subject {suffix}"
+            )
+            group.subjects.add(subject)
+
+            question_submission = QuestionSubmission.objects.create(
+                organization=org,
+                teacher=teacher,
+                student_group=group,
+                title=f"Gap Submission {suffix}",
+                raw_text="1) Question?",
+            )
+            question_submission.student_groups.add(group)
+
+            room = ExamRoom.objects.create(organization=org, name=f"Gap Room {suffix}", created_by=teacher)
+            room.invigilators.add(teacher)
+            now = dj_timezone.now()
+            session = ExamRoomSession.objects.create(
+                organization=org,
+                room=room,
+                scheduled_start=now,
+                scheduled_end=now + timedelta(hours=2),
+                created_by=teacher,
+            )
+            session.staff.add(teacher)
+
+            data[suffix] = {
+                "org": org,
+                "exam": exam,
+                "coding_question": coding_question,
+                "submission": submission,
+                "attempt": attempt,
+                "incident": incident,
+                "group": group,
+                "subject": subject,
+                "question_submission": question_submission,
+                "room": room,
+                "session": session,
+            }
+        return data
+
+    def test_coding_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert CodingExamQuestion.objects.count() == 1
+        assert CodingExamQuestion.objects.first().pk == side_a["coding_question"].pk
+        assert CodingTestCase.objects.count() == 1
+        assert CodingSubmission.objects.count() == 1
+        assert CodingSubmission.objects.first().pk == side_a["submission"].pk
+        assert CodingFile.objects.count() == 1
+
+    def test_student_access_and_supervision_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert ExamStudentPin.objects.count() == 1
+        assert ExamStudentPin.objects.first().exam_id == side_a["exam"].id
+        assert StudentExamAttemptGrant.objects.count() == 1
+        assert ExamSupervisionConfig.objects.count() == 1
+        assert SupervisionIncident.objects.count() == 1
+        assert SupervisionIncident.objects.first().organization_id == side_a["org"].id
+
+    def test_question_submission_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        submission_groups_through = QuestionSubmission._meta.get_field("student_groups").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert QuestionSubmission.objects.count() == 1
+        assert QuestionSubmission.objects.first().pk == side_a["question_submission"].pk
+        assert submission_groups_through.objects.count() == 1
+
+    def test_gap_join_tables_are_isolated(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        excluded_through = Exam._meta.get_field("excluded_users").remote_field.through
+        invigilators_through = ExamRoom._meta.get_field("invigilators").remote_field.through
+        staff_through = ExamRoomSession._meta.get_field("staff").remote_field.through
+        subjects_through = StudentGroup._meta.get_field("subjects").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert excluded_through.objects.count() == 1
+        assert excluded_through.objects.first().exam_id == side_a["exam"].id
+        assert invigilators_through.objects.count() == 1
+        assert invigilators_through.objects.first().examroom_id == side_a["room"].id
+        assert staff_through.objects.count() == 1
+        assert staff_through.objects.first().examroomsession_id == side_a["session"].id
+        assert subjects_through.objects.count() == 1
+        assert subjects_through.objects.first().studentgroup_id == side_a["group"].id
+
+    def test_no_tenant_sees_no_gap_rows(self, gap_table_graph):
+        _skip_if_not_pg()
+
+        _enable_rls()
+        _clear_tenant()
+
+        assert CodingSubmission.objects.count() == 0
+        assert ExamStudentPin.objects.count() == 0
+        assert SupervisionIncident.objects.count() == 0
+        assert QuestionSubmission.objects.count() == 0
+
+    def test_cross_tenant_pin_insert_is_rejected(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_b = gap_table_graph["b"]
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        intruder = User.objects.create_user("rls_gap_intruder", "rgapi@rls.test", "pw")
+
+        _enable_rls()
+        _set_tenant(gap_table_graph["a"]["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamStudentPin.objects.create(
+                    exam=side_b["exam"],
+                    student=intruder,
+                    pin_hash="cross-tenant",
+                    pin_cipher=b"",
+                )
+
+    def test_cross_tenant_exam_relationship_updates_are_rejected(self, gap_table_graph):
+        """WITH CHECK validates every tenant-bearing FK, not only the first."""
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        side_b = gap_table_graph["b"]
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                CodingSubmission.objects.filter(pk=side_a["submission"].pk).update(
+                    question_id=side_b["coding_question"].pk
+                )
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                SupervisionIncident.objects.filter(pk=side_a["incident"].pk).update(attempt_id=side_b["attempt"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                QuestionSubmission.objects.filter(pk=side_a["question_submission"].pk).update(
+                    student_group_id=side_b["group"].pk
+                )
+
+    def test_cross_tenant_exam_m2m_insert_and_update_are_rejected(self, gap_table_graph):
+        _skip_if_not_pg()
+        side_a = gap_table_graph["a"]
+        side_b = gap_table_graph["b"]
+        submission_groups = QuestionSubmission._meta.get_field("student_groups").remote_field.through
+        group_subjects = StudentGroup._meta.get_field("subjects").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                submission_groups.objects.create(
+                    questionsubmission_id=side_a["question_submission"].pk,
+                    studentgroup_id=side_b["group"].pk,
+                )
+
+        own_link = submission_groups.objects.get(
+            questionsubmission_id=side_a["question_submission"].pk,
+            studentgroup_id=side_a["group"].pk,
+        )
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                submission_groups.objects.filter(pk=own_link.pk).update(studentgroup_id=side_b["group"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                group_subjects.objects.create(
+                    studentgroup_id=side_a["group"].pk,
+                    subject_id=side_b["subject"].pk,
+                )
+
+
+class TestAuditLogAppendOnly:
+    """audit_auditlog append-only trigger (organizations 0019, audit P1 #5)."""
+
+    def test_content_update_is_blocked(self, db):
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls():
+                AuditLog.objects.filter(pk=log.pk).update(action="tampered")
+
+    def test_fk_nullification_update_is_allowed(self, db):
+        # ON DELETE SET NULL (user/org silinəndə) audit sətrini qorumalı,
+        # yalnız FK-ni NULL etməli — bu UPDATE bloklanmamalıdır.
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+            AuditLog.objects.filter(pk=log.pk).update(user_id=None, organization_id=None)
+        log.refresh_from_db()
+        assert log.user_id is None
+
+    def test_real_fk_delete_set_null_is_allowed(self, db):
+        """The FK's own ON DELETE SET NULL update must keep the audit row."""
+        _skip_if_not_pg()
+        from django.contrib.auth import get_user_model
+
+        from apps.audit.models import AuditLog
+
+        user = get_user_model().objects.create_user("audit_deleted_user", "audit-delete@rls.test", "pw")
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view", user=user)
+
+        user.delete()
+        log.refresh_from_db()
+        assert log.user_id is None
+
+    def test_fk_reassignment_is_blocked(self, two_orgs):
+        """Nullable audit FKs may become NULL, but cannot be reassigned."""
+        _skip_if_not_pg()
+        from django.contrib.contenttypes.models import ContentType
+
+        from apps.audit.models import AuditLog
+        from apps.organizations.models import Organization
+
+        org_a, org_b = two_orgs
+        audit_type = ContentType.objects.get_for_model(AuditLog)
+        organization_type = ContentType.objects.get_for_model(Organization)
+        with bypass_rls():
+            log = AuditLog.objects.create(
+                action="view",
+                user=org_a.owner,
+                organization=org_a,
+                content_type=audit_type,
+            )
+
+        for mutation in (
+            {"user_id": org_b.owner_id},
+            {"organization_id": org_b.pk},
+            {"content_type_id": organization_type.pk},
+        ):
+            with pytest.raises(DatabaseError):
+                with transaction.atomic(), bypass_rls():
+                    AuditLog.objects.filter(pk=log.pk).update(**mutation)
+
+    def test_delete_is_blocked(self, db):
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls():
+                AuditLog.objects.filter(pk=log.pk).delete()
+
+    def test_insert_still_works(self, db):
+        _skip_if_not_pg()
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            log = AuditLog.objects.create(action="view")
+        assert log.pk is not None
+
+
+class TestExamGradeEventAppendOnly:
+    """Grade ledger mutations are rejected by PostgreSQL itself, even with RLS bypass."""
+
+    @pytest.fixture()
+    def grade_event(self, two_orgs):
+        from django.contrib.auth import get_user_model
+
+        org, _ = two_orgs
+        user_model = get_user_model()
+        student = user_model.objects.create_user("grade_event_student", "ges@rls.test", "pw")
+        grader = user_model.objects.create_user("grade_event_grader", "geg@rls.test", "pw")
+        with bypass_rls():
+            exam = Exam.objects.create(
+                organization=org,
+                author=org.owner,
+                title="Append-only grade ledger",
+                exam_type="written",
+            )
+            question = ExamQuestion.objects.create(exam=exam, text="Q", order=1, points=10)
+            attempt = ExamAttempt.objects.create(user=student, exam=exam, status="submitted")
+            return ExamGradeEvent.objects.create(
+                attempt=attempt,
+                question=question,
+                grader=grader,
+                old_score=None,
+                new_score=7,
+                max_points=10,
+            )
+
+    def test_raw_update_is_blocked_even_with_bypass(self, grade_event):
+        _skip_if_not_pg()
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_examgradeevent SET new_score = %s WHERE id = %s",
+                    [9, grade_event.pk],
+                )
+
+    def test_raw_delete_is_blocked_even_with_bypass(self, grade_event):
+        _skip_if_not_pg()
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute("DELETE FROM exams_examgradeevent WHERE id = %s", [grade_event.pk])
+
+    def test_fk_deletion_nullifies_reference_but_preserves_ledger_row(self, grade_event):
+        """Declared SET NULL lifecycle is the only permitted UPDATE shape."""
+        _skip_if_not_pg()
+        question = grade_event.question
+        grader = grade_event.grader
+
+        with bypass_rls():
+            question.delete()
+            grader.delete()
+
+        grade_event.refresh_from_db()
+        assert grade_event.question_id is None
+        assert grade_event.grader_id is None
+
+    def test_fk_reassignment_and_null_to_value_are_blocked(self, grade_event):
+        _skip_if_not_pg()
+        with bypass_rls():
+            replacement = ExamQuestion.objects.create(
+                exam=grade_event.attempt.exam,
+                text="Replacement question",
+                order=2,
+                points=10,
+            )
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_examgradeevent SET question_id = %s WHERE id = %s",
+                    [replacement.pk, grade_event.pk],
+                )
+
+        with bypass_rls(), connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE exams_examgradeevent SET question_id = NULL WHERE id = %s",
+                [grade_event.pk],
+            )
+        with pytest.raises(DatabaseError):
+            with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_examgradeevent SET question_id = %s WHERE id = %s",
+                    [replacement.pk, grade_event.pk],
+                )
+
+    def test_cross_exam_question_insert_is_blocked(self, two_orgs):
+        """An A-tenant attempt cannot be paired with a B-tenant question in the ledger."""
+        from django.contrib.auth import get_user_model
+
+        org_a, org_b = two_orgs
+        student = get_user_model().objects.create_user("grade_cross_student", "gcs@rls.test", "pw")
+        with bypass_rls():
+            exam_a = Exam.objects.create(
+                organization=org_a,
+                author=org_a.owner,
+                title="Grade ledger A",
+                exam_type="written",
+            )
+            exam_b = Exam.objects.create(
+                organization=org_b,
+                author=org_b.owner,
+                title="Grade ledger B",
+                exam_type="written",
+            )
+            attempt_a = ExamAttempt.objects.create(user=student, exam=exam_a, status="submitted")
+            question_b = ExamQuestion.objects.create(exam=exam_b, text="B question", order=1, points=10)
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                ExamGradeEvent.objects.create(
+                    attempt=attempt_a,
+                    question=question_b,
+                    grader=org_a.owner,
+                    old_score=None,
+                    new_score=7,
+                    max_points=10,
+                )
+
+
+class TestRLSLabsProjects:
+    """RLS isolation for labs/projects tables covered by 0018 (audit P1 #1).
+
+    Tələbə lab cavabları və layihə təqdimatları course→organization üzərindən
+    tenant-scoped-dur; cross-tenant oxu/yazı bloklanmalıdır.
+    """
+
+    @pytest.fixture()
+    def labs_projects_graph(self, two_orgs):
+        from datetime import timedelta
+
+        from django.contrib.auth import get_user_model
+        from django.utils import timezone as dj_timezone
+
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+        from apps.projects.models import Project, ProjectSubmission
+
+        org_a, org_b = two_orgs
+        User = get_user_model()
+        now = dj_timezone.now()
+        data = {}
+        for suffix, org in (("a", org_a), ("b", org_b)):
+            student = User.objects.create_user(f"rls_lp_student_{suffix}", f"rlp{suffix}@rls.test", "pw")
+            course = Course.objects.create(
+                organization=org, owner=org.owner, title=f"LP Course {suffix}", status="published"
+            )
+            lab = Lab.objects.create(
+                course=course,
+                title=f"Lab {suffix}",
+                start_datetime=now - timedelta(days=1),
+                end_datetime=now + timedelta(days=7),
+                max_score=100,
+                status="published",
+                created_by=org.owner,
+            )
+            block = LabBlock.objects.create(lab=lab, title=f"Block {suffix}", order=1)
+            question = LabQuestion.objects.create(block=block, question_text="Q?", question_number=1, points=10)
+            assignment = LabAssignment.objects.create(lab=lab, student=student)
+            lab.allowed_students.add(student)
+            assignment.assigned_questions.add(question)
+            submission = LabSubmission.objects.create(assignment=assignment, attempt_number=1)
+            answer = LabAnswer.objects.create(
+                lab=lab, question=question, student=student, submission=submission, answer="ans"
+            )
+
+            project = Project.objects.create(
+                course=course,
+                title=f"Project {suffix}",
+                start_date=now - timedelta(days=1),
+                deadline=now + timedelta(days=7),
+                max_score=100,
+            )
+            project.assigned_students.add(student)
+            project_submission = ProjectSubmission.objects.create(project=project, student=student, content="work")
+
+            data[suffix] = {
+                "org": org,
+                "student": student,
+                "lab": lab,
+                "block": block,
+                "question": question,
+                "assignment": assignment,
+                "submission": submission,
+                "answer": answer,
+                "project": project,
+                "project_submission": project_submission,
+            }
+        return data
+
+    def test_labs_tables_are_isolated(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+
+        side_a = labs_projects_graph["a"]
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert Lab.objects.count() == 1
+        assert Lab.objects.first().pk == side_a["lab"].pk
+        assert LabBlock.objects.count() == 1
+        assert LabQuestion.objects.count() == 1
+        assert LabAssignment.objects.count() == 1
+        assert LabSubmission.objects.count() == 1
+        assert LabAnswer.objects.count() == 1
+        assert LabAnswer.objects.first().pk == side_a["answer"].pk
+        assert Lab._meta.get_field("allowed_students").remote_field.through.objects.count() == 1
+        assert LabAssignment._meta.get_field("assigned_questions").remote_field.through.objects.count() == 1
+
+    def test_projects_tables_are_isolated(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.projects.models import Project, ProjectSubmission
+
+        side_a = labs_projects_graph["a"]
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        assert Project.objects.count() == 1
+        assert Project.objects.first().pk == side_a["project"].pk
+        assert ProjectSubmission.objects.count() == 1
+        assert ProjectSubmission.objects.first().pk == side_a["project_submission"].pk
+        assert Project._meta.get_field("assigned_students").remote_field.through.objects.count() == 1
+
+    def test_no_tenant_sees_no_labs_projects_rows(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabSubmission
+        from apps.projects.models import Project, ProjectSubmission
+
+        _enable_rls()
+        _clear_tenant()
+
+        assert LabSubmission.objects.count() == 0
+        assert LabAnswer.objects.count() == 0
+        assert ProjectSubmission.objects.count() == 0
+        assert Lab._meta.get_field("allowed_students").remote_field.through.objects.count() == 0
+        assert LabAssignment._meta.get_field("assigned_questions").remote_field.through.objects.count() == 0
+        assert Project._meta.get_field("assigned_students").remote_field.through.objects.count() == 0
+
+    def test_cross_tenant_project_submission_insert_rejected(self, labs_projects_graph):
+        _skip_if_not_pg()
+        # Raw SQL ilə yoxlanır: ORM save-də notifications pre_save signal-ı
+        # obyektin öz org-una tenant kontekstini dəyişir (legitim davranış),
+        # ona görə WITH CHECK-i saf şəkildə yalnız raw INSERT ilə test edirik.
+        from django.contrib.auth import get_user_model
+
+        side_b = labs_projects_graph["b"]
+        intruder = get_user_model().objects.create_user("rls_lp_intruder", "rlpi@rls.test", "pw")
+
+        _enable_rls()
+        _set_tenant(labs_projects_graph["a"]["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                with connection.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO projects_projectsubmission "
+                        "(project_id, student_id, content, status, submitted_at) "
+                        "VALUES (%s, %s, 'x', 'pending', now())",
+                        [side_b["project"].id, intruder.id],
+                    )
+
+    def test_cross_lab_assignment_question_link_is_rejected(self, labs_projects_graph):
+        _skip_if_not_pg()
+        from apps.labs.models import LabAssignment
+
+        side_a = labs_projects_graph["a"]
+        side_b = labs_projects_graph["b"]
+        through = LabAssignment._meta.get_field("assigned_questions").remote_field.through
+
+        _enable_rls()
+        _set_tenant(side_a["org"].pk)
+
+        with pytest.raises(DatabaseError):
+            with transaction.atomic():
+                through.objects.create(
+                    labassignment_id=side_a["assignment"].pk,
+                    labquestion_id=side_b["question"].pk,
+                )
 
 
 class TestRLSAssignmentJoinTables:

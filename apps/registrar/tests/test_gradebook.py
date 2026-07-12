@@ -83,7 +83,12 @@ class JournalServiceTest(TestCase):
 
     def _lesson(self, kind=LessonKind.LECTURE, day=1, hours=2):
         return gradebook.create_lesson(
-            offering=self.offering, date=datetime.date(2024, 10, day), kind=kind, hours=hours, created_by=self.teacher
+            allow_past=True,
+            offering=self.offering,
+            date=datetime.date(2024, 10, day),
+            kind=kind,
+            hours=hours,
+            created_by=self.teacher,
         )
 
     # ── scheme + lesson types ────────────────────────────────────────────────
@@ -103,6 +108,7 @@ class JournalServiceTest(TestCase):
         with bypass_rls():
             seminar = self._lesson(kind=LessonKind.SEMINAR, day=2)
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 9}
@@ -117,6 +123,7 @@ class JournalServiceTest(TestCase):
         with bypass_rls():
             lecture = self._lesson(kind=LessonKind.LECTURE, day=1)
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": lecture.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 9}
@@ -132,6 +139,7 @@ class JournalServiceTest(TestCase):
             for day in (1, 2, 3):
                 lesson = self._lesson(day=day)
                 gradebook.save_marks(
+                    enforce_day=False,
                     offering=self.offering,
                     entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
                     by_user=self.teacher,
@@ -148,6 +156,7 @@ class JournalServiceTest(TestCase):
             for day in (2, 3, 4):
                 seminar = self._lesson(kind=LessonKind.SEMINAR, day=day)
                 gradebook.save_marks(
+                    enforce_day=False,
                     offering=self.offering,
                     entries=[
                         {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}
@@ -164,8 +173,9 @@ class JournalServiceTest(TestCase):
             other_offering = services.get_or_create_offering(
                 organization=self.org, subject=other_subject, period=self.period, group=self.group
             )
-            foreign = gradebook.create_lesson(offering=other_offering, date=datetime.date(2024, 10, 1))
+            foreign = gradebook.create_lesson(allow_past=True, offering=other_offering, date=datetime.date(2024, 10, 1))
             written = gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[{"lesson_id": foreign.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
                 by_user=self.teacher,
@@ -179,6 +189,7 @@ class JournalServiceTest(TestCase):
             scheme.is_published = True
             scheme.save(update_fields=["is_published"])
             written = gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
                 by_user=self.teacher,
@@ -189,6 +200,7 @@ class JournalServiceTest(TestCase):
         with bypass_rls():
             lesson = self._lesson()
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present"}],
                 by_user=self.teacher,
@@ -199,6 +211,7 @@ class JournalServiceTest(TestCase):
             mark.refresh_from_db()
             self.assertFalse(gradebook.can_edit_mark(mark))
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
                 by_user=self.teacher,
@@ -208,19 +221,25 @@ class JournalServiceTest(TestCase):
 
     def test_lesson_date_edit_window(self):
         with bypass_rls():
+            today = timezone.localdate()
             lesson = self._lesson(day=1)
-            self.assertTrue(gradebook.update_lesson_date(lesson=lesson, date=datetime.date(2024, 10, 5)))
-            Lesson.objects.filter(pk=lesson.pk).update(created_at=timezone.now() - datetime.timedelta(minutes=10))
+            # Pəncərə içində redaktə mümkündür (tarix bu gündən əvvəl ola bilməz).
+            self.assertTrue(gradebook.update_lesson_date(lesson=lesson, date=today + datetime.timedelta(days=1)))
+            # Keçmiş tarixə çəkmək pəncərə içində də qadağandır.
+            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today - datetime.timedelta(days=1)))
+            # 2 saatlıq pəncərə bitdi → dondurulur.
+            Lesson.objects.filter(pk=lesson.pk).update(created_at=timezone.now() - datetime.timedelta(hours=3))
             lesson.refresh_from_db()
-            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=datetime.date(2024, 10, 9)))
+            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today + datetime.timedelta(days=2)))
             lesson.refresh_from_db()
-            self.assertEqual(lesson.date, datetime.date(2024, 10, 5))  # unchanged — window closed
+            self.assertEqual(lesson.date, today + datetime.timedelta(days=1))  # unchanged — window closed
 
     # ── student view ─────────────────────────────────────────────────────────
     def test_student_journal_summary_shape(self):
         with bypass_rls():
             seminar = self._lesson(kind=LessonKind.SEMINAR, day=2)
             gradebook.save_marks(
+                enforce_day=False,
                 offering=self.offering,
                 entries=[
                     {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 7}

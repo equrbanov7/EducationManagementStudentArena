@@ -2,7 +2,7 @@
 
 DB tələb etmir: guard məntiqini mock connection/execute ilə yoxlayır. Tam
 inteqrasiya (PostgreSQL + transaction pooling) ayrıca staging testləri tələb edir
-(bax: docs/FAZA2_3B_TRANSACTION_POOLING.md).
+(bax: docs/performance/FAZA2_3B_TRANSACTION_POOLING.md).
 """
 
 from contextlib import contextmanager

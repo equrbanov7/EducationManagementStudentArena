@@ -72,15 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function syncScoreConstraints() {
         if (!modalScoreInput || !modalMaxPointsInput) return;
+        // EXAM-P0-04: max bal serverdə snapshot-dan gəlir və dəyişməzdir;
+        // bal max-ı aşarsa bal max-a endirilir (əvvəlki "max-ı qaldır" davranışı yox).
         const maxPoints = parseInt(normalizePositiveIntegerInput(
             modalMaxPointsInput,
             modalMaxPointsInput.getAttribute('min') || '1'
         ), 10);
-        modalScoreInput.removeAttribute('max');
+        if (!Number.isFinite(maxPoints)) return;
+        modalScoreInput.setAttribute('max', String(maxPoints));
 
         const scoreValue = readNonNegativeIntegerValue(modalScoreInput);
-        if (scoreValue !== null && Number.isFinite(maxPoints) && scoreValue > maxPoints) {
-            modalMaxPointsInput.value = String(scoreValue);
+        if (scoreValue !== null && scoreValue > maxPoints) {
+            modalScoreInput.value = String(maxPoints);
         }
     }
 

@@ -332,7 +332,8 @@ class CodingExamSubmissionApiTests(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
-    def test_autosave_and_submit_store_code_submission(self):
+    @patch("apps.exams.views.student.coding.record_autosave")
+    def test_autosave_and_submit_store_code_submission(self, record_autosave):
         payload = {
             "selected_language": "python",
             "files": [{"name": "main.py", "content": "print('hello')\n", "language": "python", "is_main": True}],
@@ -361,6 +362,73 @@ class CodingExamSubmissionApiTests(TestCase):
         self.assertEqual(final_submission.code_files.count(), 1)
         self.attempt.refresh_from_db()
         self.assertTrue(self.attempt.is_finished)
+        record_autosave.assert_called_once_with("success")
+
+    def test_excluded_student_cannot_autosave_or_submit_known_coding_attempt(self):
+        payload = {
+            "selected_language": "python",
+            "files": [{"name": "main.py", "content": "print('blocked')", "language": "python", "is_main": True}],
+        }
+        self.exam.excluded_users.add(self.student)
+
+        autosave = self.client.post(
+            reverse("exams:coding_autosave", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id}),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        submit = self.client.post(
+            reverse("exams:coding_submit", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id}),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(autosave.status_code, 403)
+        self.assertEqual(submit.status_code, 403)
+        self.assertFalse(CodingSubmission.objects.filter(attempt=self.attempt).exists())
+
+    def test_submit_after_finish_is_idempotent(self):
+        """EXAM-P1-13: bitmiş attempt-ə təkrar submit yeni final yaratmır."""
+        payload = {
+            "selected_language": "python",
+            "files": [{"name": "main.py", "content": "print('hello')\n", "language": "python", "is_main": True}],
+            "stdin": "",
+        }
+        url = reverse("exams:coding_submit", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
+
+        first = self.client.post(url, data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(CodingSubmission.objects.filter(attempt=self.attempt, is_final=True).count(), 1)
+
+        # İkinci submit (retry) — attempt artıq bitib; yeni final əlavə olunmamalı.
+        second = self.client.post(url, data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(second.status_code, 200)
+        self.assertTrue(second.json()["finished"])
+        self.assertEqual(CodingSubmission.objects.filter(attempt=self.attempt, is_final=True).count(), 1)
+
+    def test_create_final_submission_demotes_prior_final(self):
+        """EXAM-P1-13: yenidən finalizasiya köhnə finalı demote edir (constraint pozulmur)."""
+        from apps.exams.services.coding_runtime import create_final_submission
+
+        files = [{"name": "main.py", "content": "print(1)\n", "language": "python", "is_main": True}]
+        first = create_final_submission(
+            attempt=self.attempt,
+            coding_question=self.coding_question,
+            selected_language="python",
+            files=files,
+        )
+        second = create_final_submission(
+            attempt=self.attempt,
+            coding_question=self.coding_question,
+            selected_language="python",
+            files=[{"name": "main.py", "content": "print(2)\n", "language": "python", "is_main": True}],
+        )
+        first.refresh_from_db()
+        self.assertFalse(first.is_final)
+        self.assertTrue(second.is_final)
+        self.assertEqual(
+            CodingSubmission.objects.filter(attempt=self.attempt, question=self.coding_question, is_final=True).count(),
+            1,
+        )
 
     def test_take_coding_exam_includes_five_minute_warning_modal(self):
         self.exam.total_duration_minutes = 30

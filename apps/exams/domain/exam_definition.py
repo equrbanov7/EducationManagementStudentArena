@@ -15,6 +15,7 @@ from apps.exams.constants import (
 )
 
 from .access_policy import ExamAccessPolicyMixin
+from .fields import EncryptedAccessCodeField
 
 User = get_user_model()
 
@@ -196,9 +197,12 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.exam.field", "allowed_groups"),
         help_text=pgettext_lazy("exams.model.exam.help", "allowed_groups"),
     )
-    access_code = models.CharField(
+    # EXAM-P1-09: bazada Fernet-şifrli saxlanır (şəffaf) — Python-da xam görünür,
+    # forma clean_access_code hələ 6-simvol xam qaydasını tətbiq edir. DB sütunu
+    # şifr-mətn üçün genişdir (max_length=255).
+    access_code = EncryptedAccessCodeField(
         pgettext_lazy("exams.model.exam.field", "access_code"),
-        max_length=6,
+        max_length=255,
         blank=True,
         help_text=pgettext_lazy("exams.model.exam.help", "access_code"),
     )

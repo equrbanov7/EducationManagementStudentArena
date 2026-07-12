@@ -152,16 +152,24 @@ class GradingScalePipelineTest(TestCase):
             cls.offering = cls.enrollment.offering
             cls.offering.instructor = cls.teacher
             cls.offering.save(update_fields=["instructor"])
-            lesson = gradebook.create_lesson(
-                offering=cls.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
-            )
-            gradebook.save_marks(
-                offering=cls.offering,
-                entries=[
-                    {"lesson_id": lesson.id, "enrollment_id": cls.enrollment.id, "status": "present", "score": 42}
-                ],
-                by_user=cls.teacher,
-            )
+            # Entry 42 = 10+10+10+10+2 (per-mark tavan 10-dur).
+            for day, chunk in enumerate([10, 10, 10, 10, 2], start=1):
+                lesson = gradebook.create_lesson(
+                    allow_past=True, offering=cls.offering, date=datetime.date(2024, 10, day), kind=LessonKind.SEMINAR
+                )
+                gradebook.save_marks(
+                    enforce_day=False,
+                    offering=cls.offering,
+                    entries=[
+                        {
+                            "lesson_id": lesson.id,
+                            "enrollment_id": cls.enrollment.id,
+                            "status": "present",
+                            "score": chunk,
+                        }
+                    ],
+                    by_user=cls.teacher,
+                )
             finals.set_exam_score(enrollment=cls.enrollment, score=45, by_user=cls.teacher)  # total 87
             grading_scale.set_bands(cls.org, CUSTOM_BANDS)
             cls.org.refresh_from_db()

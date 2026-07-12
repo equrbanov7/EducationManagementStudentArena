@@ -282,6 +282,16 @@ class CodingSubmission(models.Model):
             models.Index(fields=["attempt", "question", "is_final"]),
             models.Index(fields=["execution_status"]),
         ]
+        constraints = [
+            # EXAM-P1-13: bir (attempt, question) üçün ən çoxu BİR final
+            # submission ola bilər — paralel submit dublikat final yarada
+            # bilməz. attempt NULL ola bildiyi üçün şərtə daxil edilir.
+            models.UniqueConstraint(
+                fields=["attempt", "question"],
+                condition=models.Q(is_final=True, attempt__isnull=False),
+                name="uniq_final_coding_submission_per_attempt_question",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.student.username} - {self.question.title} ({self.execution_status})"

@@ -42,7 +42,7 @@ LOGOUT_REDIRECT_URL = "/"
 # EMSArena is an e-university platform. Following the account-provisioning model
 # used by real universities (UNEC, ADA, Western Caspian, …), end users do NOT
 # self-register: the university administration provisions accounts and assigns
-# roles (see docs/ACCOUNT_PROVISIONING.md). The public `accounts:register`
+# roles (see docs/operations/ACCOUNT_PROVISIONING.md). The public `accounts:register`
 # route is therefore DISABLED by default — it redirects to the login page with a
 # "contact your administrator" message. Set PUBLIC_SIGNUP_ENABLED=1 to re-open
 # public self-signup (e.g. for a non-university tenant or a marketing pilot).
@@ -103,9 +103,8 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = "Lax"
 
 # Custom CSRF failure view: logs full diagnostic context (reason, Origin,
-# Referer, CF-Ray, cookie presence) and shows a user-friendly page instead of
-# Django's bare 403.  Used to pinpoint the source of production login 403s
-# (Django CSRF vs Cloudflare).
+# Referer, cookie presence) and shows a user-friendly page instead of
+# Django's bare 403.  Used to pinpoint the source of production login 403s.
 CSRF_FAILURE_VIEW = "core.views.csrf_failure"
 
 # Language cookie: HttpOnly and SameSite to protect the i18n cookie

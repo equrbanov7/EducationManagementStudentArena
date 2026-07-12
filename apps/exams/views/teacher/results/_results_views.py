@@ -14,6 +14,10 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.manual_grading import (
+    ManualGradingWindowClosed,
+    apply_attempt_grade,
+)
 from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
@@ -81,6 +85,8 @@ def teacher_exam_results(request, slug):
 
         selected_attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 
+        score_value = None
+        score_is_valid = not score_raw
         if score_raw:
             try:
                 score_val = int(score_raw)
@@ -88,44 +94,39 @@ def teacher_exam_results(request, slug):
                 messages.error(request, pgettext_lazy("exams.view.results.message", "score_must_be_integer"))
             else:
                 if 0 <= score_val <= 100:
-                    selected_attempt.teacher_score = score_val
-                    selected_attempt.teacher_feedback = feedback
-                    selected_attempt.mark_checked()
-                    notify_student_about_feedback(
-                        task=exam,
-                        student=selected_attempt.user,
-                        task_kind="exam",
-                        extra_metadata={"attempt_id": selected_attempt.id},
-                    )
-                    messages.success(request, pgettext_lazy("exams.view.results.message", "score_feedback_saved"))
-                    return redirect(
-                        _append_query_params(
-                            request.path,
-                            attempt=selected_attempt.id,
-                            **navigation_params,
-                        )
-                    )
+                    score_value = score_val
+                    score_is_valid = True
                 else:
                     messages.error(request, pgettext_lazy("exams.view.results.message", "score_range_0_100"))
-        else:
-            # yalnız feedback saxlanılır
-            selected_attempt.teacher_score = None
-            selected_attempt.teacher_feedback = feedback
-            selected_attempt.checked_by_teacher = False
-            selected_attempt.save(
-                update_fields=[
-                    "teacher_score",
-                    "teacher_feedback",
-                    "checked_by_teacher",
-                ]
+
+        if score_is_valid:
+            try:
+                selected_attempt, grading_changed = apply_attempt_grade(
+                    attempt_id=selected_attempt.id,
+                    score=score_value,
+                    feedback=feedback,
+                    grader=request.user,
+                )
+            except ManualGradingWindowClosed:
+                messages.error(
+                    request,
+                    pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
+                )
+                return redirect(request.path)
+
+            if grading_changed:
+                notify_student_about_feedback(
+                    task=exam,
+                    student=selected_attempt.user,
+                    task_kind="exam",
+                    extra_metadata={"attempt_id": selected_attempt.id},
+                )
+            success_message = (
+                pgettext_lazy("exams.view.results.message", "score_feedback_saved")
+                if score_value is not None
+                else pgettext_lazy("exams.view.results.message", "feedback_saved")
             )
-            notify_student_about_feedback(
-                task=exam,
-                student=selected_attempt.user,
-                task_kind="exam",
-                extra_metadata={"attempt_id": selected_attempt.id},
-            )
-            messages.success(request, pgettext_lazy("exams.view.results.message", "feedback_saved"))
+            messages.success(request, success_message)
             return redirect(
                 _append_query_params(
                     request.path,
@@ -156,6 +157,11 @@ def teacher_exam_results(request, slug):
     paginator = Paginator(attempts, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
     attempts_page = list(page_obj.object_list)
+    can_delete_attempts = bool(
+        request_has_permission(request, "exam.delete")
+        and not exam.is_deleted
+        and any(attempt.is_trial for attempt in attempts_page)
+    )
 
     # ---------- GET: hansı attempt seçilib? ----------
     if selected_attempt is None:
@@ -211,6 +217,10 @@ def teacher_exam_results(request, slug):
         attempts_data.append(
             {
                 "attempt": att,
+                # Academic attempts are retention-protected.  Physical delete
+                # controls are exposed only for disposable teacher trial runs;
+                # the service revalidates this under row locks.
+                "can_delete_attempt": att.is_trial,
                 "test_result": test_result,
                 "appeal_bonus": appeal_bonus,
                 "delivered_count": delivered_count,
@@ -328,7 +338,7 @@ def teacher_exam_results(request, slug):
             "pagination_query": pagination_query,
             # Silinmiş imtahan yalnız-oxu göstərilir: qiymət/silmə/redaktə gizlədilir.
             "exam_is_deleted": exam.is_deleted,
-            "can_delete_attempts": request_has_permission(request, "exam.delete") and not exam.is_deleted,
+            "can_delete_attempts": can_delete_attempts,
             "available_groups": available_groups,
             "group_filter": group_filter_value,
             "export_xlsx_url": export_xlsx_url,

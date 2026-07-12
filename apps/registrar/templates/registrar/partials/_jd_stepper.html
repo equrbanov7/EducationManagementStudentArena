@@ -1,0 +1,43 @@
+{% load i18n %}
+{% comment %}6 addımlı jurnal stepper-i (mockup). `stepper_step` = aktiv addım (1-6).
+Detal səhifəsində addımlar klikləndikdə uyğun tab açılır (journal_grid.js
+data-jd-step → tab sinxronu); addım 1 qrup seçiminə qayıdır, addım 3 yeni-dərs
+modalını açır. Siyahı səhifəsində yalnız addım 1 aktivdir.{% endcomment %}
+<div class="jd2-stepper" data-jd-stepper>
+    {% if stepper_detail %}
+    <a class="jd2-step" href="{% url 'registrar:journal_list' %}" data-jd-step="1">
+        <span class="jd2-step-no {% if stepper_step == 1 %}is-active{% elif stepper_step > 1 %}is-done{% endif %}">1</span>
+        <span class="jd2-step-label {% if stepper_step == 1 %}is-active{% elif stepper_step > 1 %}is-done{% endif %}">{% trans "Qrup seçimi" context "registrar.journal" %}</span>
+    </a>
+    {% else %}
+    <span class="jd2-step" data-jd-step="1">
+        <span class="jd2-step-no is-active">1</span>
+        <span class="jd2-step-label is-active">{% trans "Qrup seçimi" context "registrar.journal" %}</span>
+    </span>
+    {% endif %}
+    <span class="jd2-step-line"></span>
+    <button type="button" class="jd2-step" data-jd-step="2" data-jd-step-tab="grid" {% if not stepper_detail %}disabled{% endif %}>
+        <span class="jd2-step-no {% if stepper_step == 2 %}is-active{% elif stepper_step > 2 %}is-done{% endif %}">2</span>
+        <span class="jd2-step-label {% if stepper_step == 2 %}is-active{% elif stepper_step > 2 %}is-done{% endif %}">{% trans "Davamiyyət" context "registrar.journal" %}</span>
+    </button>
+    <span class="jd2-step-line"></span>
+    <button type="button" class="jd2-step" data-jd-step="3" data-jd-step-modal {% if not stepper_detail or not can_edit %}disabled{% endif %}>
+        <span class="jd2-step-no {% if stepper_step == 3 %}is-active{% elif stepper_step > 3 %}is-done{% endif %}">3</span>
+        <span class="jd2-step-label {% if stepper_step == 3 %}is-active{% elif stepper_step > 3 %}is-done{% endif %}">{% trans "Yeni dərs" context "registrar.journal" %}</span>
+    </button>
+    <span class="jd2-step-line"></span>
+    <button type="button" class="jd2-step" data-jd-step="4" data-jd-step-tab="kurs-isi" {% if not stepper_detail %}disabled{% endif %}>
+        <span class="jd2-step-no {% if stepper_step == 4 %}is-active{% elif stepper_step > 4 %}is-done{% endif %}">4</span>
+        <span class="jd2-step-label {% if stepper_step == 4 %}is-active{% elif stepper_step > 4 %}is-done{% endif %}">{% trans "Kurs işi" context "registrar.journal" %}</span>
+    </button>
+    <span class="jd2-step-line"></span>
+    <button type="button" class="jd2-step" data-jd-step="5" data-jd-step-tab="serbest" {% if not stepper_detail %}disabled{% endif %}>
+        <span class="jd2-step-no {% if stepper_step == 5 %}is-active{% elif stepper_step > 5 %}is-done{% endif %}">5</span>
+        <span class="jd2-step-label {% if stepper_step == 5 %}is-active{% elif stepper_step > 5 %}is-done{% endif %}">{% trans "Sərbəst iş" context "registrar.journal" %}</span>
+    </button>
+    <span class="jd2-step-line"></span>
+    <button type="button" class="jd2-step" data-jd-step="6" data-jd-step-tab="yekun" {% if not stepper_detail %}disabled{% endif %}>
+        <span class="jd2-step-no {% if stepper_step == 6 %}is-active{% endif %}">6</span>
+        <span class="jd2-step-label {% if stepper_step == 6 %}is-active{% endif %}">{% trans "Yekun qiymət" context "registrar.journal" %}</span>
+    </button>
+</div>

@@ -97,7 +97,7 @@ class Curriculum(UUIDModel, TimeStampedModel):
 
     The set of ``CurriculumSubject`` rows defines, per semester, which subjects
     are mandatory and which belong to elective blocks the group/student chooses
-    from (see docs/UNIVERSITY_SYSTEM_ROADMAP.md §2)."""
+    from (see docs/architecture/UNIVERSITY_SYSTEM_ROADMAP.md §2)."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="curricula")
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="curricula")
@@ -374,6 +374,14 @@ class WeekType(models.TextChoices):
     EVEN = "even", pgettext_lazy("registrar.week_type", "Even weeks")  # alt həftə
 
 
+class SlotKind(models.TextChoices):
+    """Cədvəl hüceyrəsinin dərs növü — rəng kodu və jurnal dərs növü ilə eyni dəyərlər."""
+
+    LECTURE = "lecture", pgettext_lazy("registrar.slot_kind", "Lecture")
+    SEMINAR = "seminar", pgettext_lazy("registrar.slot_kind", "Seminar")
+    LAB = "lab", pgettext_lazy("registrar.slot_kind", "Laboratory")
+
+
 class ScheduleSlot(UUIDModel, TimeStampedModel):
     """One weekly recurring class slot (a timetable row)."""
 
@@ -386,6 +394,12 @@ class ScheduleSlot(UUIDModel, TimeStampedModel):
     end_time = models.TimeField()
     room = models.CharField(max_length=64, blank=True, help_text="Auditoriya (opsional).")
     week_type = models.CharField(max_length=8, choices=WeekType.choices, default=WeekType.ALL)
+    kind = models.CharField(
+        max_length=16,
+        choices=SlotKind.choices,
+        default=SlotKind.LECTURE,
+        help_text="Dərs növü (mühazirə/məşğələ/laboratoriya) — cədvəl rəng kodu.",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )

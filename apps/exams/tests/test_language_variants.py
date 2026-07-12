@@ -118,3 +118,57 @@ class MultiLanguageExamTests(TestCase):
         attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, status="in_progress")
         # exam.random_question_count = 10
         self.assertEqual(lv.effective_needed_count_for_attempt(attempt), 10)
+
+    # ── EXAM-P1-17: dil variantı parity validatoru ──────────────────────
+    def _variant_question(self, variant, *, order, points):
+        q = ExamQuestion.objects.create(
+            exam=self.exam,
+            order=order,
+            text=f"Q{order}-{variant.language}",
+            language=variant.language,
+            language_variant=variant,
+            points=points,
+        )
+        return q
+
+    def test_parity_ok_when_variants_match(self):
+        from apps.exams.services.language_parity import check_language_variant_parity
+
+        az = ExamLanguageVariant.objects.create(exam=self.exam, language="az", is_active=True)
+        ru = ExamLanguageVariant.objects.create(exam=self.exam, language="ru", is_active=True)
+        self._variant_question(az, order=1, points=5)
+        self._variant_question(az, order=2, points=5)
+        self._variant_question(ru, order=3, points=5)
+        self._variant_question(ru, order=4, points=5)
+
+        self.assertEqual(check_language_variant_parity(self.exam), [])
+
+    def test_parity_flags_question_count_mismatch(self):
+        from apps.exams.services.language_parity import check_language_variant_parity
+
+        az = ExamLanguageVariant.objects.create(exam=self.exam, language="az", is_active=True)
+        ru = ExamLanguageVariant.objects.create(exam=self.exam, language="ru", is_active=True)
+        self._variant_question(az, order=1, points=5)
+        self._variant_question(az, order=2, points=5)
+        self._variant_question(ru, order=3, points=5)  # ru-da 1 sual az
+
+        issues = check_language_variant_parity(self.exam)
+        self.assertTrue(issues)
+
+    def test_parity_flags_points_mismatch(self):
+        from apps.exams.services.language_parity import check_language_variant_parity
+
+        az = ExamLanguageVariant.objects.create(exam=self.exam, language="az", is_active=True)
+        ru = ExamLanguageVariant.objects.create(exam=self.exam, language="ru", is_active=True)
+        self._variant_question(az, order=1, points=10)
+        self._variant_question(ru, order=2, points=3)  # eyni say, fərqli bal
+
+        issues = check_language_variant_parity(self.exam)
+        self.assertTrue(issues)
+
+    def test_single_variant_is_always_parity(self):
+        from apps.exams.services.language_parity import check_language_variant_parity
+
+        az = ExamLanguageVariant.objects.create(exam=self.exam, language="az", is_active=True)
+        self._variant_question(az, order=1, points=5)
+        self.assertEqual(check_language_variant_parity(self.exam), [])

@@ -14216,6 +14216,10 @@ msgid "heading_question_result_analysis"
 msgstr "Soru Sonuç Analizi"
 
 msgctxt "exams.template.student_exam_result"
+msgid "notice_answers_release_locked"
+msgstr "Sonuç ve cevap analizi sınav penceresi kapandıktan sonra açılacaktır."
+
+msgctxt "exams.template.student_exam_result"
 msgid "marked_question_badge"
 msgstr "Sınavda işaretlenen soru"
 
@@ -21660,6 +21664,10 @@ msgstr "Kurum askıya alınmış veya etkin değil."
 msgctxt "live_exam.view.permission"
 msgid "exam_manage_required"
 msgstr "Cevap *"
+
+msgctxt "live_exam.view.message"
+msgid "session_finished"
+msgstr "Bu oyun zaten sona erdi."
 
 msgctxt "live_exam.view.message"
 msgid "game_already_started"

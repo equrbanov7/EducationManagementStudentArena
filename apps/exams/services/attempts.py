@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+from apps.exams.metrics import record_attempt_started
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.navigation import append_return_to as _append_return_to
 from apps.exams.navigation import current_return_to
@@ -367,6 +368,7 @@ def _start_or_resume_attempt(request, exam: Exam):
                 )
 
             generate_random_questions_for_attempt(attempt)
+            record_attempt_started(exam.exam_type)
     except ExamStartBusy:
         messages.warning(
             request,

@@ -177,16 +177,14 @@ csrf_logger = logging.getLogger("core.csrf")
 def csrf_failure(request, reason=""):
     """Custom CSRF failure view (CSRF_FAILURE_VIEW).
 
-    Purpose: distinguish real Django CSRF rejections from Cloudflare-level
-    403s.  Every CSRF failure is logged with full request context so the
-    root cause of login 403s can be confirmed from logs alone:
-      - if a 403 appears here -> Django CSRF (reason tells which check failed)
-      - if a 403 reaches the user but never appears in these logs or nginx
-        access logs -> it was produced by Cloudflare.
+    Purpose: log every CSRF failure with full request context so the root
+    cause of login 403s can be confirmed from logs alone (reason tells which
+    check failed). A 403 that reaches the user but never appears here came
+    from an upstream layer (nginx rate limit / firewall), not Django CSRF.
     """
     csrf_logger.warning(
         "CSRF failure: reason=%r path=%s method=%s origin=%r referer=%r host=%r "
-        "secure=%s has_csrf_cookie=%s has_session_cookie=%s authenticated=%s cf_ray=%r",
+        "secure=%s has_csrf_cookie=%s has_session_cookie=%s authenticated=%s",
         reason,
         request.path,
         request.method,
@@ -197,7 +195,6 @@ def csrf_failure(request, reason=""):
         settings.CSRF_COOKIE_NAME in request.COOKIES,
         settings.SESSION_COOKIE_NAME in request.COOKIES,
         getattr(getattr(request, "user", None), "is_authenticated", False),
-        request.headers.get("CF-Ray"),
     )
 
     # Auth forms are the most common stale-CSRF targets (bfcache / long-open

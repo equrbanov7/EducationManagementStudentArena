@@ -165,7 +165,7 @@ SITE_URL = "http://testserver"
 # Keep public self-registration ENABLED in the test settings so the existing
 # registration-flow tests keep exercising the signup machinery. Production
 # defaults to disabled (e-university provisioning model — see
-# docs/ACCOUNT_PROVISIONING.md). The dedicated "signup disabled" behaviour is
+# docs/operations/ACCOUNT_PROVISIONING.md). The dedicated "signup disabled" behaviour is
 # covered by tests that opt in via @override_settings(PUBLIC_SIGNUP_ENABLED=False).
 PUBLIC_SIGNUP_ENABLED = True
 
@@ -194,3 +194,9 @@ WHITENOISE_AUTOREFRESH = True
 #     def __getitem__(self, item):
 #         return None
 # MIGRATION_MODULES = DisableMigrations()
+
+# EXAM-P0-01: test/CI DB rolu qanuni olaraq superuser-dir (test runner). DB-rol
+# system check-i (organizations.W011) burada söndürülür ki, strict
+# `manage.py check --fail-level WARNING` / `check --deploy` yanlış fail verməsin.
+# Prod-da compose `EMS_DB_ROLE_ENFORCE=warn` (sonra error) təyin edir.
+EMS_DB_ROLE_ENFORCE = "off"

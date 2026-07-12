@@ -14,13 +14,14 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
+from apps.exams.metrics import record_autosave
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
     generate_random_questions_for_attempt,
     get_attempt_limit_result_redirect_url,
 )
-from apps.exams.services.randomizer import build_shuffled_options
+from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -29,12 +30,20 @@ from core.upload_security import randomize_uploaded_filename, validate_uploaded_
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
+    autosave_occ_conflict_response,
     build_exam_history_url,
     build_exam_result_url,
+    build_take_exam_question_payload,
+    bump_autosave_revision,
     current_return_to,
     ensure_student_exam_tenant_context,
+    finish_skips_absent_question,
+    posted_autosave_question_ids,
     safe_same_origin_redirect_path,
+    selected_option_ids_from_request,
 )
+from ._timer_write_guard import reject_unstarted_timed_write
+from .access_guard import ensure_active_attempt_access
 from .script_data import take_exam_script_data
 
 
@@ -74,39 +83,6 @@ def _finished_attempt_response(request, attempt, *, return_to):
     return redirect(redirect_url)
 
 
-def _posted_autosave_question_ids(request, *, action):
-    if action != "autosave":
-        return None
-
-    raw_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist("changed_questions")
-    parsed_ids = set()
-    for raw_id in raw_ids:
-        try:
-            parsed_ids.add(int(raw_id))
-        except (TypeError, ValueError):
-            continue
-    return parsed_ids
-
-
-def _selected_option_ids_from_request(request, question):
-    if question.answer_mode == "single":
-        raw_option_id = request.POST.get(f"q_{question.id}")
-        if not raw_option_id:
-            return set()
-        try:
-            return {int(raw_option_id)}
-        except (TypeError, ValueError):
-            return set()
-
-    selected_option_ids = set()
-    for raw_option_id in request.POST.getlist(f"q_{question.id}"):
-        try:
-            selected_option_ids.add(int(raw_option_id))
-        except (TypeError, ValueError):
-            continue
-    return selected_option_ids
-
-
 def _valid_question_option_ids(question):
     return {option.id for option in question.options.all()}
 
@@ -125,6 +101,14 @@ def _save_test_answer_if_changed(answer, question, selected_option_ids, current_
     correct_option_ids = _correct_question_option_ids(question)
     next_is_correct = bool(correct_option_ids and selected_option_ids == correct_option_ids)
     update_fields = []
+
+    # EXAM-P0-03: seçim ID-ləri cavabın özündə dondurulur ki, variant
+    # redaktəsi (delete/recreate) M2M through sətirlərini silsə belə keçmiş
+    # seçim və bal bərpa oluna bilsin.
+    frozen_selection = sorted(selected_option_ids)
+    if answer.selected_option_ids_snapshot != frozen_selection:
+        answer.selected_option_ids_snapshot = frozen_selection
+        update_fields.append("selected_option_ids_snapshot")
 
     if answer.text_answer:
         answer.text_answer = ""
@@ -320,9 +304,16 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
     with transaction.atomic():
         attempt = ExamAttempt.objects.select_for_update().select_related("exam").get(id=attempt.id, user=request.user)
         exam = attempt.exam
+        ensure_active_attempt_access(attempt, request.user)
 
         if attempt.is_finished:
             return _finished_attempt_response(request, attempt, return_to=return_to)
+
+        # EXAM-P1-06: autosave/finish optimistic concurrency — stale tab yazısı
+        # 409 alır (helper-də; base_revision yoxdursa geriyə-uyğun).
+        occ_conflict = autosave_occ_conflict_response(request, attempt, action)
+        if occ_conflict is not None:
+            return occ_conflict
 
         # Re-check the deadline while holding the attempt row lock. This keeps
         # final submit, autosave, and timer-expiry paths from racing each other.
@@ -330,7 +321,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
             finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
             is_time_up = timezone.now() >= finish_time
 
-        autosave_question_ids_for_fetch = _posted_autosave_question_ids(request, action=action)
+        autosave_question_ids_for_fetch = posted_autosave_question_ids(request, action=action)
         answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
 
         if not answers:
@@ -364,10 +355,23 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
 
         _save_marked_question_ids_from_request(request, attempt)
 
-        autosave_changed_question_ids = _posted_autosave_question_ids(request, action=action)
+        autosave_changed_question_ids = posted_autosave_question_ids(request, action=action)
+        form_has_presence_markers = any(key.startswith("q_present_") for key in request.POST)
 
         for q in questions:
             if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
+                continue
+            if autosave_changed_question_ids is None and finish_skips_absent_question(
+                request, q.id, form_has_presence_markers=form_has_presence_markers
+            ):
+                continue
+            timer_guard = reject_unstarted_timed_write(
+                request, attempt, q, exam_type=exam.exam_type, action=action, is_ajax=is_ajax
+            )
+            if timer_guard is not None:
+                return timer_guard
+            # Server deadline keçmiş sualın yazısı saxlanmır.
+            if question_timer_expired(attempt, q):
                 continue
 
             answer_data = answers_by_qid.get(q.id) or {}
@@ -380,7 +384,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                 _save_test_answer_if_changed(
                     ans,
                     q,
-                    _selected_option_ids_from_request(request, q),
+                    selected_option_ids_from_request(request, q),
                     answer_data.get("selected_option_ids", set()),
                 )
             else:
@@ -405,6 +409,9 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
         if exam.exam_type == "test" and (action != "autosave" or is_time_up):
             attempt.recalculate_score()
 
+        # EXAM-P1-06: uğurlu yazıdan sonra revision-u artır (OCC).
+        bump_autosave_revision(attempt)
+
         if action == "finish" or is_time_up:
             status = "expired" if is_time_up else "submitted"
             attempt.mark_finished(status=status)
@@ -422,8 +429,10 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
             attempt.status = "draft"
             attempt.save(update_fields=["status"])
 
+        if action == "autosave":
+            record_autosave("success")
         if is_ajax:
-            return JsonResponse({"success": True, "finished": False})
+            return JsonResponse({"success": True, "finished": False, "server_revision": attempt.autosave_revision})
 
         return redirect(
             append_return_to(
@@ -451,6 +460,7 @@ def take_exam(request, slug, attempt_id):
         user=request.user,
     )
     exam = attempt.exam
+    ensure_active_attempt_access(attempt, request.user)
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
     supervision_feature_enabled = exam_supervision_enabled()
@@ -492,7 +502,7 @@ def take_exam(request, slug, attempt_id):
         and exam.exam_type != "coding"
     )
     autosave_question_ids_for_fetch = (
-        _posted_autosave_question_ids(request, action="autosave") if is_autosave_post else None
+        posted_autosave_question_ids(request, action="autosave") if is_autosave_post else None
     )
 
     answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
@@ -562,12 +572,7 @@ def take_exam(request, slug, attempt_id):
         pass  # Template will handle the locked overlay
 
     previous_attempts = _previous_attempts_for_context(request, exam, attempt)
-    q_payload = []
-    for q in questions:
-        opts = []
-        if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-            opts = build_shuffled_options(attempt.id, q)
-        q_payload.append({"q": q, "opts": opts})
+    q_payload = build_take_exam_question_payload(exam, attempt, questions)
 
     context = {
         "exam": exam,
@@ -584,6 +589,7 @@ def take_exam(request, slug, attempt_id):
         "exam_autosave_jitter_ms": settings.EXAM_AUTOSAVE_JITTER_MS,
         "exam_autosave_binary_uploads_enabled": settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
         "marked_question_ids_json": json.dumps(getattr(attempt, "marked_question_ids", None) or []),
+        "autosave_revision": getattr(attempt, "autosave_revision", 0),
         "take_exam_script_data": take_exam_script_data(remaining_seconds),
     }
     return render(request, "exams/student/take_exam.html", context)

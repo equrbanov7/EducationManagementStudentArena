@@ -282,7 +282,6 @@ class CsrfFailureViewTests(TestCase):
         self.assertIn("reason=", joined)
         self.assertIn("path=/accounts/login/", joined)
         self.assertIn("has_csrf_cookie=", joined)
-        self.assertIn("cf_ray=", joined)
 
     def test_csrf_failure_on_non_login_path_has_no_auto_redirect(self):
         response = self.csrf_client.post("/contact/", {"name": "x"})

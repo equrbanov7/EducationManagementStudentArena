@@ -1,0 +1,72 @@
+{% load i18n %}
+{% comment %}
+EXAM-P1-04 strict delivery: vaxtlı sualın təhlükəsiz gövdəsi — server tərəfdə
+render olunur, yalnız timer serverdə başlayandan sonra tələbəyə göndərilir.
+Düzgün-cavab metadatası bura HEÇ VAXT düşmür (safe_delivered_question onu çıxarır).
+Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən işləsin.
+{% endcomment %}
+<input type="hidden" name="q_present_{{ question_id }}" value="1">
+
+<div class="question-content">
+    <div class="question-card-header">
+        <div class="question-kicker">
+            <span class="q-number">Q{{ question_number }}</span>
+            <span>{% trans "label_question" context "exams.template.take_exam" %} {{ question_number }} {% trans "of" context "exams.template.take_exam" %} {{ question_total }}</span>
+        </div>
+        <button type="button"
+                class="mark-question-btn"
+                data-mark-question
+                data-question-id="{{ question_id }}"
+                aria-pressed="false">
+            <i class="far fa-bookmark" aria-hidden="true"></i>
+            <span data-mark-label>{% trans "Mark" context "exams.template.take_exam" %}</span>
+        </button>
+    </div>
+
+    <div class="q-text">{{ delivered.text|linebreaks }}</div>
+
+    {% if delivered.image_url %}
+        <div class="question-media">
+            <img src="{{ delivered.image_url }}" alt="{% trans 'alt_question_image' context 'exams.template.take_exam' %}">
+        </div>
+    {% endif %}
+
+    {% if delivered.video_url %}
+        <div class="question-media">
+            <video controls preload="metadata" playsinline>
+                <source src="{{ delivered.video_url }}">
+                {% trans "video_not_supported" context "exams.template.take_exam" %}
+            </video>
+        </div>
+    {% endif %}
+
+    {% if delivered.answer_mode == "multiple" %}
+        <div class="options-group">
+            {% for opt in delivered.options %}
+                <label class="option-card">
+                    <input type="checkbox"
+                           name="q_{{ question_id }}"
+                           value="{{ opt.id }}"
+                           data-question-id="{{ question_id }}"
+                           {% if opt.is_selected %}checked{% endif %}>
+                    <span class="option-letter box-mark">{{ opt.label }}</span>
+                    <span class="opt-text">{{ opt.text }}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                </label>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="options-group">
+            {% for opt in delivered.options %}
+                <label class="option-card">
+                    <input type="radio"
+                           name="q_{{ question_id }}"
+                           value="{{ opt.id }}"
+                           data-question-id="{{ question_id }}"
+                           {% if opt.is_selected %}checked{% endif %}>
+                    <span class="option-letter circle-mark">{{ opt.label }}</span>
+                    <span class="opt-text">{{ opt.text }}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                </label>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

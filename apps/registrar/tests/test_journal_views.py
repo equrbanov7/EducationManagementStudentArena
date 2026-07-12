@@ -88,20 +88,40 @@ class JournalViewTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_add_lesson(self):
+        from django.utils import timezone as _tz
+
         client = self._client(self.teacher)
         resp = client.post(
             reverse("registrar:journal_detail", args=[self.offering.id]),
-            {"action": "add_lesson", "lesson_date": "2024-10-01", "lesson_kind": "seminar", "lesson_hours": "2"},
+            {
+                "action": "add_lesson",
+                "lesson_date": _tz.localdate().isoformat(),
+                "lesson_kind": "seminar",
+                "lesson_hours": "2",
+            },
         )
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():
             lesson = Lesson.objects.get(offering=self.offering)
             self.assertEqual(lesson.kind, LessonKind.SEMINAR)
 
-    def test_save_marks_records_attendance_and_score(self):
+    def test_add_lesson_past_date_rejected(self):
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "add_lesson", "lesson_date": "2024-10-01", "lesson_kind": "seminar", "lesson_hours": "2"},
+        )
+        self.assertEqual(resp.status_code, 302)  # xəta mesajı ilə geri
         with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
+
+    def test_save_marks_records_attendance_and_score(self):
+        from django.utils import timezone as _tz
+
+        with bypass_rls():
+            # YENİ işarə yalnız dərsin öz günündə yazıla bilər → bu günkü dərs.
             lesson = gradebook.create_lesson(
-                offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.SEMINAR
+                allow_past=True, offering=self.offering, date=_tz.localdate(), kind=LessonKind.SEMINAR
             )
         client = self._client(self.teacher)
         resp = client.post(
@@ -119,7 +139,7 @@ class JournalViewTest(TestCase):
 
     def test_other_teacher_cannot_post(self):
         with bypass_rls():
-            lesson = gradebook.create_lesson(offering=self.offering, date=datetime.date(2024, 10, 1))
+            lesson = gradebook.create_lesson(allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1))
         client = self._client(self.other_teacher)
         resp = client.post(
             reverse("registrar:journal_detail", args=[self.offering.id]),
