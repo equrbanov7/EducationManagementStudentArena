@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS Arena — Loki (tək-binar, filesystem) — Sistem Monitorinqi logları
+#
+# Yalnız daxili emsarena-network-dən əlçatandır (heç bir publik port yoxdur).
+# Retention: compactor ilə 14 gün (336h) — konteyner loglarının mərkəzi
+# axtarışı üçün kifayətdir; disk istifadəsi loki_data volume-undadır.
+# İngestion limitləri log-selinin (alert storm və s.) Loki-ni boğmasının
+# qarşısını alır.
+# ═══════════════════════════════════════════════════════════════════════════
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: warn
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: "2026-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  retention_delete_delay: 2h
+  delete_request_store: filesystem
+
+limits_config:
+  retention_period: 336h
+  ingestion_rate_mb: 8
+  ingestion_burst_size_mb: 16
+  max_streams_per_user: 5000
+  max_line_size: 256KB
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+  max_query_lookback: 336h
+  max_query_length: 721h
+  max_query_series: 500
+  volume_enabled: true
+
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 64
+
+analytics:
+  reporting_enabled: false

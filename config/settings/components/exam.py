@@ -9,10 +9,14 @@ idarə olunur (asılılıqlar: bax base.py).
 
 # flake8: noqa: F821  (paylaşılan namespace: adlar base.py-dən gəlir)
 
-# Student exam autosave is intentionally slow on the server side. Answers are
-# still written to browser localStorage immediately, while DB writes are batched.
-EXAM_AUTOSAVE_INTERVAL_MS = _env_int_setting("EXAM_AUTOSAVE_INTERVAL_MS", 300_000, minimum=60_000)
-EXAM_AUTOSAVE_JITTER_MS = _env_int_setting("EXAM_AUTOSAVE_JITTER_MS", 60_000, minimum=0)
+# Autosave interval. Cavablar dərhal brauzer localStorage-inə yazılır; server
+# DB yazıları bu intervalla batch olunur. QEYD (2026-07-13): əvvəlki 5 dəq
+# nəzarətçinin "çiyni üzərindən" canlı görüntüsünü faktiki yararsız edirdi
+# (snapshot serverdəki answers-i oxuyur → 5 dəq gecikmə). LAN exam-center
+# miqyasında 30s həm canlı monitorinqi işlək edir, həm yükü məqbul saxlayır.
+# .env ilə override oluna bilər (böyük miqyasda artırın).
+EXAM_AUTOSAVE_INTERVAL_MS = _env_int_setting("EXAM_AUTOSAVE_INTERVAL_MS", 30_000, minimum=10_000)
+EXAM_AUTOSAVE_JITTER_MS = _env_int_setting("EXAM_AUTOSAVE_JITTER_MS", 10_000, minimum=0)
 EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED = _env_bool_setting("EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED", False)
 
 # Written-answer uploads are accepted on explicit save/submit, but kept tight

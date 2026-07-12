@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS Arena — Promtail: Docker konteyner loglarını Loki-yə göndərir.
+#
+# docker_sd ilə bütün compose konteynerləri avtomatik tapılır; label-lar
+# aşağı-kardinallıqlıdır (yalnız konteyner/servis adı + stream). Log
+# MƏZMUNU dəyişdirilmir — həssas maskalanma mənbədə (Django JSON logger)
+# aparılır; heç bir kredensial burada label-a çıxarılmır.
+# ═══════════════════════════════════════════════════════════════════════════
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: warn
+
+positions:
+  filename: /positions/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+    relabel_configs:
+      # "/emsarena-nginx" → "emsarena-nginx"
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: container
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: service
+      - source_labels: ["__meta_docker_container_log_stream"]
+        target_label: stream
+      - target_label: job
+        replacement: docker

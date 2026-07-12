@@ -30,6 +30,7 @@ from ...models import Appeal
 from ...services import (
     accept_appeal_item,
     can_review_appeal,
+    can_view_appeal_managed,
     effective_test_score,
     reject_appeal_item,
     revert_item_adjustment,
@@ -213,8 +214,40 @@ def review_appeal(request, appeal_id):
         ),
         id=appeal_id,
     )
-    if not can_review_appeal(request, appeal):
-        raise PermissionDenied
+    review_can_decide = can_review_appeal(request, appeal)
+    if not review_can_decide:
+        # Reviewer-independence: imtahan müəllifi/qiymətləndirən qərar verə
+        # bilməz, amma READ-ONLY baxa bilər. Heç bir baxış haqqı yoxdursa —
+        # fraqment sorğusuna generik "Loading failed" əvəzinə mənalı mesaj.
+        if not can_view_appeal_managed(request, appeal):
+            if request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": str(
+                            pgettext(
+                                "appeals.view.message",
+                                "Bu apellyasiyaya baxmaq icazəniz yoxdur.",
+                            )
+                        ),
+                    },
+                    status=403,
+                )
+            raise PermissionDenied
+        if request.method == "POST":
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": str(
+                        pgettext(
+                            "appeals.view.message",
+                            "Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — "
+                            "imtahanın müəllifi/qiymətləndirəni öz işinə qərar verə bilməz.",
+                        )
+                    ),
+                },
+                status=403,
+            )
 
     items = list(
         appeal.items.select_related("question", "answer", "score_adjustment")
@@ -359,7 +392,7 @@ def review_appeal(request, appeal_id):
 
     # Redaktə oluna bilən (kilidlənməmiş) item qalmayıbsa → qərar formu artıq
     # final-dır: "yadda saxla" düyməsi və ümumi qeyd sahəsi gizlədilir.
-    review_has_editable = any(not item.is_locked for item in items)
+    review_has_editable = review_can_decide and any(not item.is_locked for item in items)
 
     context = {
         "appeal": appeal,
@@ -369,6 +402,7 @@ def review_appeal(request, appeal_id):
         "review_current_score": review_current_score,
         "review_max_score": review_max_score,
         "review_has_editable": review_has_editable,
+        "review_can_decide": review_can_decide,
         "marked_question_by_qid": _marked_question_map(appeal.attempt),
     }
     return render(request, "appeals/partials/_review_appeal_body.html", context)

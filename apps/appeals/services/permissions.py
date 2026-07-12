@@ -74,8 +74,24 @@ def can_decide_appeal(request, appeal):
     return is_exam_center_user(getattr(request, "user", None))
 
 
+def can_view_appeal_managed(request, appeal):
+    """Apellyasiya detalını READ-ONLY aça bilərmi (idarəetmə səthində).
+
+    Reviewer-independence (EXAM-P1-18) QƏRARI bloklayır, BAXIŞI yox: imtahan
+    mərkəzi istifadəçisi öz imtahanına (müəllif/qiymətləndirən kimi konflikt)
+    apellyasiyada QƏRAR verə bilməz, amma məzmununu GÖRMƏLİDİR — əks halda
+    reviewer siyahısındakı "Bax" generik "Yüklənmə alınmadı" xətası verirdi.
+    Qeyri-mərkəz istifadəçilərə (adi müəllim) idarəetmə səthi bağlı qalır —
+    onlar apellyasiyanı yalnız öz standart detal görünüşündən açır.
+    """
+    if not _same_tenant(request, appeal):
+        return False
+    return is_exam_center_user(getattr(request, "user", None))
+
+
 __all__ = [
     "can_create_appeal",
     "can_decide_appeal",
     "can_review_appeal",
+    "can_view_appeal_managed",
 ]

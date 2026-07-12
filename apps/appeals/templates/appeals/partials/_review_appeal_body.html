@@ -32,6 +32,16 @@
       data-i18n-decisions="{% trans '{n} qərar verildi' context 'appeals.template' %}">
     {% csrf_token %}
 
+    {% if not review_can_decide %}
+    <div class="alert alert-info d-flex align-items-start gap-2" role="status">
+        <i class="fas fa-eye mt-1"></i>
+        <div>
+            <strong>{% trans "Yalnız baxış rejimi" context "appeals.template" %}.</strong>
+            {% trans "Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — imtahanın müəllifi/qiymətləndirəni öz işinə qərar verə bilməz." context "appeals.template" %}
+        </div>
+    </div>
+    {% endif %}
+
     {# Bal xülasəsi: imtahan balı (açıq qərar verildikcə canlı yenilənir) #}
     <div class="appeal-score-summary appeal-score-summary--single">
         <div class="appeal-score-summary__item appeal-score-summary__item--result">
@@ -121,6 +131,12 @@
                 </div>
                 <div class="appeal-locked-note">
                     <i class="fas fa-lock"></i>{% trans "Qərar verilib — dəyişdirilə bilməz" context "appeals.template" %}
+                </div>
+            </div>
+            {% elif not review_can_decide %}
+            <div class="appeal-review-panel">
+                <div class="appeal-locked-note">
+                    <i class="fas fa-hourglass-half"></i>{% trans "Qərar gözlənilir — imtahan mərkəzi baxacaq" context "appeals.template" %}
                 </div>
             </div>
             {% else %}
