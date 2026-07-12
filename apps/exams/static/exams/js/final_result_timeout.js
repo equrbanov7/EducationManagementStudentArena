@@ -33,36 +33,52 @@
             timerWrap.hidden = false;
         }
 
-        function render() {
-            if (countEl) {
-                countEl.textContent = formatClock(remaining);
-            }
-            // Son 60 saniyə — təcili görünüş.
-            if (timerWrap) {
-                timerWrap.classList.toggle("is-urgent", remaining <= 60);
-            }
+        // Mütləq deadline: səyyah setInterval-ı fon tabında throttle edir
+        // (təxminən dəqiqədə bir) — sadə "remaining -= 1" sayğacı sürüşüb
+        // donur. Deadline + Date.now() ilə hər render dəqiq qalanı hesablayır,
+        // fokus qayıdanda dərhal düzəlir.
+        var deadlineMs = Date.now() + remaining * 1000;
+        var intervalId = null;
+
+        function secondsLeft() {
+            return Math.max(0, Math.round((deadlineMs - Date.now()) / 1000));
         }
 
         function redirect() {
+            if (intervalId !== null) {
+                window.clearInterval(intervalId);
+                intervalId = null;
+            }
             window.location.replace(url);
         }
 
+        function render() {
+            var left = secondsLeft();
+            if (countEl) {
+                countEl.textContent = formatClock(left);
+            }
+            // Son 60 saniyə — təcili görünüş.
+            if (timerWrap) {
+                timerWrap.classList.toggle("is-urgent", left <= 60);
+            }
+            if (left <= 0) {
+                redirect();
+            }
+        }
+
         render();
-        if (remaining <= 0) {
-            redirect();
+        if (secondsLeft() <= 0) {
             return;
         }
 
-        var intervalId = window.setInterval(function () {
-            remaining -= 1;
-            if (remaining <= 0) {
+        intervalId = window.setInterval(render, 1000);
+        // Fon tabından qayıdanda dərhal düzgün dəyəri göstər (throttle drift-i sıfırla).
+        document.addEventListener("visibilitychange", function () {
+            if (!document.hidden) {
                 render();
-                window.clearInterval(intervalId);
-                redirect();
-                return;
             }
-            render();
-        }, 1000);
+        });
+        window.addEventListener("focus", render);
     }
 
     if (window.EMSReady) {

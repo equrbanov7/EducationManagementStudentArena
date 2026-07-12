@@ -55,7 +55,9 @@ def _get_json(service: str, path: str, params: dict | None = None) -> dict | Non
 
     base = _base_urls()[service]
     raw_key = f"{service}:{path}:{urlencode(sorted((params or {}).items()))}"
-    cache_key = "monitoring:q:" + hashlib.md5(raw_key.encode()).hexdigest()
+    # Yalnız cache-açar qısaltması üçündür (memcached 250-simvol limiti) —
+    # kriptoqrafik məqsəd yoxdur.
+    cache_key = "monitoring:q:" + hashlib.md5(raw_key.encode(), usedforsecurity=False).hexdigest()
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
