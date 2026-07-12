@@ -94,3 +94,236 @@ groups:
         annotations:
           summary: "Host yaddaş istifadəsi yüksəkdir (>92%)"
           description: "10 dəqiqədir yaddaş istifadəsi {{ $value | humanizePercentage }} səviyyəsindədir (Redis/postgres OOM riski)."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # Sistem Monitorinqi dalğası (2026-07-12): konteyner / redis / nginx /
+  # blackbox / celery / backup / host qaydaları. Hədlər .env ilə deyil,
+  # burada saxlanır (Prometheus rule-ları statikdir) — dəyişdirmək üçün bu
+  # faylı redaktə edib prometheus-u reload edin (deploy bunu avtomatik edir).
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: emsarena-host-extra
+    rules:
+      - alert: HostHighCpu
+        expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host CPU yüksəkdir (>85%, 5 dəq)"
+          description: "Orta CPU istifadəsi 5 dəqiqədir 85%-dən yuxarıdır."
+
+      - alert: HostCpuCritical
+        expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[2m]))) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host CPU kritikdir (>95%, 2 dəq)"
+          description: "Orta CPU istifadəsi 2 dəqiqədir 95%-dən yuxarıdır."
+
+      - alert: HostHighLoad
+        expr: node_load5 > count(count(node_cpu_seconds_total) by (cpu)) * 1.0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Load average nüvə sayını aşır (10 dəq)"
+          description: "5 dəqiqəlik load {{ $value | printf \"%.1f\" }} — CPU nüvə sayından çoxdur."
+
+      - alert: HostSwapHigh
+        expr: >
+          (node_memory_SwapTotal_bytes > 0)
+          and ((1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) > 0.30)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Swap istifadəsi 30%-i keçdi"
+          description: "Swap təzyiqi RAM çatışmazlığına işarədir."
+
+      - alert: HostInodeLow
+        expr: >
+          (node_filesystem_files_free{fstype!~"tmpfs|overlay"}
+           / node_filesystem_files{fstype!~"tmpfs|overlay"}) < 0.15
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Inode ehtiyatı azdır (<15%)"
+          description: "{{ $labels.mountpoint }} üzərində inode-lar tükənir."
+
+      - alert: HostDiskEmergency
+        expr: >
+          (node_filesystem_avail_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"}
+           / node_filesystem_size_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"}) < 0.03
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DISK FÖVQƏLADƏ: <3% boş yer"
+          description: "Kök faylsistemində boş yer 3%-dən azdır — dərhal müdaxilə lazımdır."
+
+  - name: emsarena-containers
+    rules:
+      - alert: ContainerDown
+        expr: >
+          time() - container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+"} > 60
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Konteyner itib: {{ $labels.name }}"
+          description: "{{ $labels.name }} 1 dəqiqədən çoxdur cAdvisor-da görünmür."
+
+      - alert: ContainerRestartLoop
+        expr: >
+          increase(container_start_time_seconds{name=~"emsarena-.+|educationmanagementstudentarena-.+"}[10m]) > 3
+        labels:
+          severity: critical
+        annotations:
+          summary: "Konteyner restart dövrəsindədir: {{ $labels.name }}"
+          description: "{{ $labels.name }} son 10 dəqiqədə 3+ dəfə start olub."
+
+      - alert: ContainerOOMKilled
+        expr: >
+          increase(container_oom_events_total{name=~"emsarena-.+|educationmanagementstudentarena-.+"}[10m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "OOM: {{ $labels.name }}"
+          description: "{{ $labels.name }} yaddaş limitinə görə öldürülüb."
+
+      - alert: ContainerMemoryNearLimit
+        expr: >
+          (container_memory_usage_bytes{name=~"emsarena-.+|educationmanagementstudentarena-.+"}
+           / container_spec_memory_limit_bytes{name=~"emsarena-.+|educationmanagementstudentarena-.+"} > 0.90)
+          and (container_spec_memory_limit_bytes > 0)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Konteyner yaddaşı limitə yaxındır: {{ $labels.name }}"
+          description: "{{ $labels.name }} yaddaş limitinin 90%-indən çoxunu istifadə edir (5 dəq)."
+
+  - name: emsarena-redis
+    rules:
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis əlçatmazdır"
+          description: "redis_exporter Redis-ə qoşula bilmir — cache, channel layer və Celery broker təsirlənir."
+
+      - alert: RedisMemoryHigh
+        expr: >
+          (redis_memory_max_bytes > 0)
+          and (redis_memory_used_bytes / redis_memory_max_bytes > 0.85)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis yaddaşı 85%-i keçdi"
+          description: "maxmemory təyin olunubsa eviction riski var; Celery broker DB-si üçün təhlükəlidir."
+
+      - alert: RedisEvictedKeys
+        expr: increase(redis_evicted_keys_total[10m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis açar eviction-u baş verdi"
+          description: "Eviction Celery broker mesajlarını silə bilər — dərhal yaddaş araşdırılmalıdır."
+
+      - alert: RedisBlockedClients
+        expr: redis_blocked_clients > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis-də bloklanmış klientlər var"
+          description: "{{ $value }} klient bloklanıb (BLPOP və s.) — gecikmə artımına işarə ola bilər."
+
+  - name: emsarena-nginx-blackbox
+    rules:
+      - alert: NginxDown
+        expr: nginx_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx əlçatmazdır"
+          description: "nginx_exporter stub_status-a çata bilmir."
+
+      - alert: EndpointProbeFailed
+        expr: probe_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint probe uğursuzdur: {{ $labels.probe_target }}"
+          description: "{{ $labels.probe_target }} 2 dəqiqədir blackbox yoxlamasından keçmir."
+
+      - alert: EndpointSlowProbe
+        expr: probe_duration_seconds > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Endpoint yavaş cavab verir: {{ $labels.probe_target }}"
+          description: "Probe müddəti 5 saniyəni keçir (5 dəq)."
+
+      - alert: TlsCertExpiringSoon
+        expr: (probe_ssl_earliest_cert_expiry - time()) < 30 * 24 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: "TLS sertifikatının bitməsinə <30 gün qalır"
+          description: "docker/nginx/certs/origin.crt yenilənməlidir (LAN self-signed: openssl ilə regen + nginx reload)."
+
+      - alert: TlsCertExpiryCritical
+        expr: (probe_ssl_earliest_cert_expiry - time()) < 7 * 24 * 3600
+        labels:
+          severity: critical
+        annotations:
+          summary: "TLS sertifikatının bitməsinə <7 gün qalır"
+          description: "Sertifikat dərhal yenilənməlidir, əks halda brauzer girişləri kəsiləcək."
+
+  - name: emsarena-celery-backup
+    rules:
+      # Mənbə: apps/monitoring collectors (beat task → cache → /metrics/).
+      - alert: CeleryWorkersDown
+        expr: emsarena_celery_workers_online == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Heç bir Celery worker onlayn deyil"
+          description: "Bildiriş, e-poçt və imtahan task-ları icra olunmur."
+
+      - alert: CeleryBeatStale
+        expr: time() - emsarena_celery_stats_collected_timestamp > 300
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Celery Beat dayanıb və ya gecikir"
+          description: "Monitorinq beat task-ı 5+ dəqiqədir statistika yeniləmir."
+
+      - alert: CeleryQueueBacklog
+        expr: emsarena_celery_queue_length > 200
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery növbəsi yığılır ({{ $value }} task)"
+          description: "Broker növbəsi 10 dəqiqədir 200-dən çox task saxlayır."
+
+      - alert: BackupTooOld
+        expr: emsarena_backup_age_seconds > 26 * 3600
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL backup 26 saatdan köhnədir"
+          description: "postgres-backup servisi yoxlanmalıdır (gündəlik cədvəl pozulub)."

@@ -112,6 +112,11 @@ x-app-env: &app-env
   AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-virtual}
   AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH:-true}
   AWS_QUERYSTRING_EXPIRE: ${AWS_QUERYSTRING_EXPIRE:-900}
+  # Sistem Monitorinqi: webhook tokeni + (istəyə bağlı) backend URL override-ları.
+  ALERTMANAGER_WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
+  MONITORING_PROMETHEUS_URL: ${MONITORING_PROMETHEUS_URL:-http://prometheus:9090}
+  MONITORING_LOKI_URL: ${MONITORING_LOKI_URL:-http://loki:3100}
+  MONITORING_ALERTMANAGER_URL: ${MONITORING_ALERTMANAGER_URL:-http://alertmanager:9093}
   SENTRY_DSN: ${SENTRY_DSN:-}
   SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
   SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
@@ -393,6 +398,8 @@ services:
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
     volumes:
       - media_data:/app/media
+      # Monitorinq: backup təzəliyi metrikası üçün yalnız-oxu görünüş.
+      - ./backups/postgres:/backups:ro
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -504,6 +511,7 @@ services:
       SMTP_PASS: ${BREVO_SMTP_KEY:-}
       ALERT_FROM: ${ALERT_EMAIL_FROM:-no-reply@emsarena.com}
       ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
+      WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
@@ -513,6 +521,7 @@ services:
         -e "s|__SMTP_PASS__|$${SMTP_PASS}|g"
         -e "s|__ALERT_FROM__|$${ALERT_FROM}|g"
         -e "s|__ALERT_TO__|$${ALERT_TO}|g"
+        -e "s|__WEBHOOK_TOKEN__|$${WEBHOOK_TOKEN}|g"
         /etc/alertmanager/alertmanager.tmpl.yml > /tmp/alertmanager.yml
         && exec /bin/alertmanager --config.file=/tmp/alertmanager.yml
         --storage.path=/alertmanager
@@ -609,6 +618,157 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Monitorinq Mərkəzi exporterləri (Sistem Monitorinqi — superadmin UI).
+  # Heç biri publik port açmır; hamısı yalnız emsarena-network daxilindədir
+  # və Prometheus tərəfindən scrape olunur.
+  # ─────────────────────────────────────────────────────────────────────────
+  cadvisor:
+    # Konteyner-səviyyə CPU/RAM/IO/restart metrikaları (Docker monitorinqi).
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: emsarena-cadvisor
+    # cgroup v2 oxumaq üçün tələb olunur; bütün mount-lar read-only-dir.
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    command:
+      - --housekeeping_interval=15s
+      - --docker_only=true
+      - --store_container_labels=false
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${CADVISOR_CPU_LIMIT:-0.4}"
+          memory: ${CADVISOR_MEM_LIMIT:-256M}
+    networks:
+      - emsarena-network
+
+  redis_exporter:
+    image: oliver006/redis_exporter:v1.66.0
+    container_name: emsarena-redis-exporter
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${REDIS_EXPORTER_CPU_LIMIT:-0.2}"
+          memory: ${REDIS_EXPORTER_MEM_LIMIT:-64M}
+    networks:
+      - emsarena-network
+
+  nginx_exporter:
+    # nginx stub_status (daxili :8081) → Prometheus formatı.
+    image: nginx/nginx-prometheus-exporter:1.3.0
+    container_name: emsarena-nginx-exporter
+    command:
+      - --nginx.scrape-uri=http://nginx:8081/stub_status
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${NGINX_EXPORTER_CPU_LIMIT:-0.1}"
+          memory: ${NGINX_EXPORTER_MEM_LIMIT:-32M}
+    networks:
+      - emsarena-network
+
+  pgbouncer_exporter:
+    # PgBouncer pool statistikası (SHOW POOLS/STATS) — admin konsol üzərindən.
+    image: prometheuscommunity/pgbouncer-exporter:v0.10.2
+    container_name: emsarena-pgbouncer-exporter
+    environment:
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/pgbouncer?sslmode=disable
+    depends_on:
+      - pgbouncer
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${PGBOUNCER_EXPORTER_CPU_LIMIT:-0.1}"
+          memory: ${PGBOUNCER_EXPORTER_MEM_LIMIT:-64M}
+    networks:
+      - emsarena-network
+
+  blackbox_exporter:
+    # LAN endpoint-lərinin kənar-görünüş yoxlaması (ping/health/login) —
+    # publik domen YOXDUR (LAN deploy), probe-lar nginx üzərindən gedir.
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: emsarena-blackbox-exporter
+    volumes:
+      - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${BLACKBOX_CPU_LIMIT:-0.1}"
+          memory: ${BLACKBOX_MEM_LIMIT:-64M}
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Mərkəzləşdirilmiş loglar: Loki (saxlama) + Promtail (konteyner loglarının
+  # toplanması). Retention Loki compactor-u ilə idarə olunur (default 14 gün).
+  # ─────────────────────────────────────────────────────────────────────────
+  loki:
+    image: grafana/loki:3.1.1
+    container_name: emsarena-loki
+    command:
+      - -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./docker/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${LOKI_CPU_LIMIT:-0.5}"
+          memory: ${LOKI_MEM_LIMIT:-512M}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3100/ready >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - emsarena-network
+
+  promtail:
+    image: grafana/promtail:3.1.1
+    container_name: emsarena-promtail
+    command:
+      - -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail_positions:/positions
+    depends_on:
+      - loki
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${PROMTAIL_CPU_LIMIT:-0.3}"
+          memory: ${PROMTAIL_MEM_LIMIT:-128M}
     networks:
       - emsarena-network
 
@@ -721,4 +881,6 @@ volumes:
   prometheus_data:
   grafana_data:
   alertmanager_data:
+  loki_data:
+  promtail_positions:
   piston_packages:

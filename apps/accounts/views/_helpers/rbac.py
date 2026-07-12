@@ -255,6 +255,7 @@ def _role_capabilities(user, profile):
             "exam-center-stats",  # imtahan statistikaları / nəticələr
             "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
+            "system-monitoring",  # Sistem Monitorinqi (yalnız superadmin; server-side qorunur)
             "pending-post-approvals",
             "blog",
             "edit-profile",

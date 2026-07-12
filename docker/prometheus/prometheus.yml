@@ -33,3 +33,52 @@ scrape_configs:
     static_configs:
       - targets:
           - prometheus:9090
+
+  # ── Sistem Monitorinqi (superadmin mərkəzi) əlavə mənbələri ──────────────
+  - job_name: emsarena-cadvisor
+    static_configs:
+      - targets:
+          - cadvisor:8080
+
+  - job_name: emsarena-redis
+    static_configs:
+      - targets:
+          - redis_exporter:9121
+
+  - job_name: emsarena-nginx
+    static_configs:
+      - targets:
+          - nginx_exporter:9113
+
+  - job_name: emsarena-pgbouncer
+    static_configs:
+      - targets:
+          - pgbouncer_exporter:9127
+
+  - job_name: emsarena-alertmanager
+    static_configs:
+      - targets:
+          - alertmanager:9093
+
+  - job_name: emsarena-loki
+    static_configs:
+      - targets:
+          - loki:3100
+
+  # LAN endpoint sağlamlığı (blackbox): ping/health/login nginx üzərindən.
+  - job_name: emsarena-blackbox
+    metrics_path: /probe
+    params:
+      module: [http_2xx_lan]
+    static_configs:
+      - targets:
+          - https://nginx/ping/
+          - https://nginx/health/
+          - https://nginx/accounts/login/
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: probe_target
+      - target_label: __address__
+        replacement: blackbox_exporter:9115

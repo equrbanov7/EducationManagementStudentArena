@@ -157,6 +157,8 @@
                 {% include "accounts/profile/sections/_appeal_stats.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
+            {% elif active_section == "system-monitoring" and 'system-monitoring' in allowed_sections %}
+                {% include "accounts/profile/sections/superadmin/_system_monitoring.html" %}
             {% elif active_section == "statistics" %}
                 {% include "accounts/profile/sections/_statistics.html" %}
             {% elif active_section == "edit-profile" %}
