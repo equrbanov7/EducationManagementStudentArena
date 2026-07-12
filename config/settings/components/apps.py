@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "apps.organizations.apps.OrganizationsConfig",
     "apps.registrar.apps.RegistrarConfig",
     "apps.audit.apps.AuditConfig",
+    "apps.monitoring.apps.MonitoringConfig",
     "apps.ai_assistant.apps.AIAssistantConfig",
     "daphne",
     "apps.exams",
