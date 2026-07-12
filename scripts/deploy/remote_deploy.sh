@@ -38,7 +38,7 @@ if [ -z "${APP_BASE_URL:-}" ]; then
   fi
 fi
 HEALTHCHECK_HOST="${HEALTHCHECK_HOST:-$(dotenv_value HEALTHCHECK_HOST)}"
-HEALTHCHECK_HOST="${HEALTHCHECK_HOST:-emsarena.com}"
+HEALTHCHECK_HOST="${HEALTHCHECK_HOST:-127.0.0.1}"
 ORIGIN_HEALTHCHECK_INSECURE_TLS="${ORIGIN_HEALTHCHECK_INSECURE_TLS:-$(dotenv_value ORIGIN_HEALTHCHECK_INSECURE_TLS)}"
 ORIGIN_HEALTHCHECK_INSECURE_TLS="${ORIGIN_HEALTHCHECK_INSECURE_TLS:-true}"
 EDGE_PROXY_MODE="${EDGE_PROXY_MODE:-$(dotenv_value EDGE_PROXY_MODE)}"
@@ -77,8 +77,12 @@ if ! [[ "$CELERY_REPLICAS" =~ ^[0-9]+$ ]] || [ "$CELERY_REPLICAS" -lt 0 ]; then
   exit 1
 fi
 
-if [ "$EDGE_PROXY_MODE" != "direct" ]; then
-  echo "EDGE_PROXY_MODE must be 'direct'; proxy/CDN modes are not supported by this deployment." >&2
+# "direct": publik domen birbaşa bu serverə baxır (DNS+publik-CA TLS preflight).
+# "lan": müəssisədaxili yerləşdirmə — publik DNS yoxdur, host özəl IP-dir,
+#        self-signed sertifikata TLS_ALLOW_SELF_SIGNED_LOCAL=true ilə icazə.
+# Proxy/CDN rejimləri dəstəklənmir (real müştəri IP-ləri itir).
+if [ "$EDGE_PROXY_MODE" != "direct" ] && [ "$EDGE_PROXY_MODE" != "lan" ]; then
+  echo "EDGE_PROXY_MODE must be 'direct' or 'lan'; proxy/CDN modes are not supported by this deployment." >&2
   exit 1
 fi
 
@@ -259,7 +263,9 @@ validate_origin_cert() {
     "$key_file" \
     "$HEALTHCHECK_HOST" \
     "$TLS_CERT_MIN_VALIDITY_SECONDS" \
-    "$TLS_ALLOW_SELF_SIGNED_LOCAL"
+    "$TLS_ALLOW_SELF_SIGNED_LOCAL" \
+    "" \
+    "$EDGE_PROXY_MODE"
 }
 
 remove_edge_firewall_family() {
@@ -334,7 +340,10 @@ docker_deploy() {
   fi
 
   docker compose version >/dev/null
-  preflight_direct_dns
+  # lan rejimində publik DNS yoxdur — DNS preflight yalnız direct-edge üçündür.
+  if [ "$EDGE_PROXY_MODE" = "direct" ]; then
+    preflight_direct_dns
+  fi
   validate_origin_cert
   remove_legacy_edge_firewall
 
