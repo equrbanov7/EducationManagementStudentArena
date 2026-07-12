@@ -247,7 +247,7 @@ jobs:
       cancel-in-progress: false
     env:
       APP_DIR: /home/wcu/EducationManagementStudentArena
-      HEALTHCHECK_HOST: emsarena.com
+      # HEALTHCHECK_HOST/EDGE_PROXY_MODE serverin .env-indən oxunur (LAN deploy).
       DEPLOY_TIMEOUT_SECONDS: "300"
     steps:
       - name: 📥 Checkout code

@@ -9,6 +9,9 @@ ALLOW_SELF_SIGNED_LOCAL="${5:-false}"
 # Test/staging may pass a private CA explicitly. Production leaves this empty
 # and OpenSSL uses the host public trust store.
 CA_FILE="${6:-}"
+# "direct" (default) or "lan". lan = intranet deployment with no public DNS;
+# self-signed certificates are additionally allowed for private-network hosts.
+EDGE_MODE="${7:-direct}"
 
 if ! command -v openssl >/dev/null 2>&1; then
   echo "openssl is required to validate direct-edge TLS material." >&2
@@ -26,20 +29,29 @@ if [ "$ALLOW_SELF_SIGNED_LOCAL" != "true" ] && [ "$ALLOW_SELF_SIGNED_LOCAL" != "
   echo "ALLOW_SELF_SIGNED_LOCAL must be true or false." >&2
   exit 1
 fi
+if [ "$EDGE_MODE" != "direct" ] && [ "$EDGE_MODE" != "lan" ]; then
+  echo "EDGE_MODE must be direct or lan." >&2
+  exit 1
+fi
 
 if ! openssl x509 -in "$CERT_FILE" -noout -checkend "$MIN_VALIDITY_SECONDS" >/dev/null; then
   echo "TLS certificate is invalid or expires inside the required safety window." >&2
   exit 1
 fi
 
+# QEYD: openssl -checkhost/-checkip uyğunsuzluqda da exit 0 qaytarır —
+# nəticə yalnız çıxış mətnindədir, ona görə "does NOT match" axtarılır.
 case "$TLS_HOST" in
-  *:*) openssl x509 -in "$CERT_FILE" -noout -checkip "$TLS_HOST" >/dev/null ;;
-  *[!0-9.]*) openssl x509 -in "$CERT_FILE" -noout -checkhost "$TLS_HOST" >/dev/null ;;
-  *) openssl x509 -in "$CERT_FILE" -noout -checkip "$TLS_HOST" >/dev/null ;;
-esac || {
-  echo "TLS certificate does not cover the configured hostname." >&2
-  exit 1
-}
+  *:*) host_check="$(openssl x509 -in "$CERT_FILE" -noout -checkip "$TLS_HOST")" ;;
+  *[!0-9.]*) host_check="$(openssl x509 -in "$CERT_FILE" -noout -checkhost "$TLS_HOST")" ;;
+  *) host_check="$(openssl x509 -in "$CERT_FILE" -noout -checkip "$TLS_HOST")" ;;
+esac
+case "$host_check" in
+  *"does NOT match"*|"")
+    echo "TLS certificate does not cover the configured hostname." >&2
+    exit 1
+    ;;
+esac
 
 cert_public_key="$(openssl x509 -in "$CERT_FILE" -pubkey -noout | openssl pkey -pubin -outform DER 2>/dev/null | openssl dgst -sha256)"
 key_public_key="$(openssl pkey -in "$KEY_FILE" -pubout -outform DER 2>/dev/null | openssl dgst -sha256)"
@@ -55,13 +67,24 @@ if [ "${cert_subject#subject=}" = "${cert_issuer#issuer=}" ]; then
     echo "Self-signed TLS certificates are rejected for direct production." >&2
     exit 1
   fi
+  self_signed_host_ok=false
   case "$TLS_HOST" in
-    localhost|127.0.0.1|::1) ;;
-    *)
-      echo "Self-signed override is restricted to a loopback hostname." >&2
-      exit 1
+    localhost|127.0.0.1|::1)
+      self_signed_host_ok=true
       ;;
   esac
+  if [ "$self_signed_host_ok" != "true" ] && [ "$EDGE_MODE" = "lan" ]; then
+    # LAN rejimi: yalnız RFC1918 özəl IP literalları (publik-CA mümkün deyil).
+    case "$TLS_HOST" in
+      10.*|192.168.*|172.1[6-9].*|172.2[0-9].*|172.3[0-1].*)
+        self_signed_host_ok=true
+        ;;
+    esac
+  fi
+  if [ "$self_signed_host_ok" != "true" ]; then
+    echo "Self-signed override is restricted to loopback (or a private LAN IP when EDGE_MODE=lan)." >&2
+    exit 1
+  fi
 else
   verify_args=(-purpose sslserver -verify_hostname "$TLS_HOST" -untrusted "$CERT_FILE")
   if [ -n "$CA_FILE" ]; then

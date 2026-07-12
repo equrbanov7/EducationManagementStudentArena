@@ -81,11 +81,13 @@ before running any `docker compose` command.  Never commit this file.
 | `DATABASE_URL` | `postgres://emsarena:<pw>@postgres:5432/emsarena` | Full database URL passed to Django |
 | `REDIS_PASSWORD` | `<strong password>` | Redis `--requirepass` value |
 | `REDIS_URL` | `redis://:${REDIS_PASSWORD}@redis:6379/0` | Full Redis URL (channel layer) |
-| `ALLOWED_HOSTS` | `emsarena.com,www.emsarena.com` | Comma-separated list of valid `Host` headers |
-| `CSRF_TRUSTED_ORIGINS` | `https://emsarena.com` | Comma-separated origins for CSRF validation |
-| `SITE_URL` | `https://emsarena.com` | Canonical site URL (used in emails, WebSocket CSP) |
-| `EDGE_PROXY_MODE` | `direct` | Only supported production topology; any other value blocks deploy |
-| `DIRECT_ORIGIN_IPS` | `<server-public-ip>` | Exact comma/space-separated public DNS A/AAAA set; deploy fails on mismatch |
+| `ALLOWED_HOSTS` | `10.0.2.42,localhost,127.0.0.1` | Comma-separated list of valid `Host` headers (LAN IP-based; public domain retired) |
+| `CSRF_TRUSTED_ORIGINS` | `https://10.0.2.42` | Comma-separated origins for CSRF validation |
+| `SITE_URL` | `https://10.0.2.42` | Canonical site URL (used in emails, WebSocket CSP) |
+| `EDGE_PROXY_MODE` | `lan` | `lan` (intranet, no public DNS — current production) or `direct` (public domain straight to this server); proxy/CDN values block deploy |
+| `DIRECT_ORIGIN_IPS` | `<server-public-ip>` | `direct` mode only: exact comma/space-separated public DNS A/AAAA set; deploy fails on mismatch |
+| `HEALTHCHECK_HOST` | `10.0.2.42` | Host header for deploy health probes; must be covered by the TLS cert SAN |
+| `TLS_ALLOW_SELF_SIGNED_LOCAL` | `true` (lan) / `false` (direct) | lan mode accepts a self-signed cert whose SAN covers the LAN IP |
 | `TLS_CERT_MIN_VALIDITY_SECONDS` | `604800` | Reject a certificate expiring inside this window |
 | `ADMIN_URL_PREFIX` | `manage/` | Non-default Django admin path. Must not be `admin/` in production. |
 | `ADMIN_ALLOWED_IPS` | `203.0.113.10,198.51.100.20` or blank | Comma-separated allowlist of source IPs permitted to access the admin panel. Leave blank to disable the IP restriction entirely. |
@@ -625,8 +627,24 @@ and run `SELECT COUNT(*) FROM exams_examattempt;` to validate.
 
 ## 13. Direct-edge DNS, firewall and TLS preflight
 
-Production has one trusted proxy boundary: Nginx itself. Complete these steps
-before enabling the deploy workflow:
+Production has one trusted proxy boundary: Nginx itself.
+
+**Current production is `EDGE_PROXY_MODE=lan`** — an intranet deployment with no
+public domain (emsarena.com is retired; users browse the LAN IP directly). In
+lan mode the deploy skips the public-DNS preflight and accepts a self-signed
+certificate whose SAN covers the LAN IP (`TLS_ALLOW_SELF_SIGNED_LOCAL=true`).
+Regenerate it with:
+
+```bash
+openssl req -x509 -newkey rsa:2048 -nodes -days 730 \
+  -keyout docker/nginx/certs/origin.key -out docker/nginx/certs/origin.crt \
+  -subj "/O=WCU/CN=10.0.2.42" \
+  -addext "subjectAltName=IP:10.0.2.42,IP:127.0.0.1,DNS:localhost"
+docker compose -f docker-compose.prod.yml exec -T nginx nginx -s reload
+```
+
+The steps below apply only if production ever moves back to a public domain
+(`EDGE_PROXY_MODE=direct`):
 
 1. **DNS**: point the canonical domain A/AAAA records directly to the server
    public address(es), then put that exact set in `DIRECT_ORIGIN_IPS`. The

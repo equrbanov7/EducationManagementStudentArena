@@ -36,8 +36,8 @@ from django.views.decorators.http import require_GET
 # --------------------------------------------------------------------------
 # Canonical origin helpers
 # --------------------------------------------------------------------------
-#: Public origin of the site, e.g. "https://emsarena.com" (no trailing slash).
-SITE_ORIGIN = getattr(settings, "SITE_URL", "https://emsarena.com").rstrip("/")
+#: Canonical origin of the site from SITE_URL (no trailing slash).
+SITE_ORIGIN = getattr(settings, "SITE_URL", "https://127.0.0.1").rstrip("/")
 
 
 def _abs(path: str) -> str:
