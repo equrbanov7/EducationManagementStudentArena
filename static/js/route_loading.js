@@ -89,6 +89,12 @@
     window.addEventListener("pageshow", finishProgress);
     window.addEventListener("DOMContentLoaded", finishProgress);
 
+    // SPA fraqment yükləmələri (profil bölmə linkləri) səhifəni YENİLƏMİR —
+    // pageshow/DOMContentLoaded atəşlənmir və zolaq əbədi fırlanırdı (bug:
+    // cədvəldə həftə pilinə basanda loading bitmirdi). Bölmə yükləyicisi bu
+    // API ilə zolağı özü idarə edir: fetch başlayanda start, bitəndə finish.
+    window.EMSRouteProgress = { start: startProgress, finish: finishProgress };
+
     // ---- 2. Skeleton hide + fade-in ----------------------------------------
     function hydrateListing() {
         document.body.classList.add("is-page-loaded");
