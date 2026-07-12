@@ -296,8 +296,9 @@ def alertmanager_webhook(request):
         return HttpResponseForbidden("forbidden")
 
     try:
+        # UnicodeDecodeError ValueError-un alt-sinifidir → tək ValueError kifayətdir.
         payload = json.loads(request.body.decode("utf-8") or "{}")
-    except (ValueError, UnicodeDecodeError):
+    except ValueError:
         return JsonResponse({"detail": "invalid payload"}, status=400)
 
     from .incidents import ingest_alertmanager_payload
