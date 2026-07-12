@@ -297,26 +297,17 @@ class AppealCreateViewTests(TestCase):
         self.assertNotContains(response, "Yanlış cavab")
         self.assertNotContains(response, "Düzgün cavab")
 
-    def test_create_page_hides_correctness_until_exam_window_closes(self):
-        """Erkən bitirən tələbə appeal URL-i ilə cavab açarını sızdıra bilməz."""
+    def test_create_page_shows_answer_details_immediately(self):
+        """Məhsul qərarı (2026-07-13): tələbə təhvildən sonra dərhal öz
+        cavablarını və detallarını görür — apellyasiya səthi də kilidsizdir."""
         self.exam.end_datetime = timezone.now() + timedelta(hours=1)
         self.exam.save(update_fields=["end_datetime"])
 
         response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["hide_answer_details"])
+        self.assertFalse(response.context["hide_answer_details"])
         self.assertContains(response, "GDPR sualı")
-        self.assertNotContains(response, "Variantlar")
-        self.assertNotContains(response, "Tələbənin cavabı")
-        self.assertNotContains(response, "Cavabınız: səhv")
-        self.assertNotContains(response, "Cavabınız: düzgün")
-        self.assertNotContains(response, "Yanlış cavab")
-        self.assertNotContains(response, "Düzgün cavab")
-
-        result_response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
-        self.assertEqual(result_response.status_code, 200)
-        self.assertNotContains(result_response, "score-points-value", html=False)
 
     def test_create_page_locks_questions_already_appealed(self):
         create_appeal(

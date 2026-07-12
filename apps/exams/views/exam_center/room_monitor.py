@@ -118,8 +118,15 @@ def _room_computer_grid(room, snapshot):
     tələbə sətirlərini ``seat_number`` uyğunluğu ilə yerləşdirir — nəzarətçi
     hansı kompüterdə hansı imtahanın getdiyini birbaşa görür.
     """
+    # İki uyğunlaşdırma açarı: (1) birbaşa kompüter id (cəhd hansı kompüterlə
+    # möhürlənib) — ƏSAS; (2) seat_number — köhnə/geriyə-uyğun fallback. Birinci
+    # sayəsində seat_number NULL olsa belə dolu PC boş görünmür (bug fix).
+    by_computer = {}
     seat_map = {}
     for row in snapshot.get("students", []):
+        cid = row.get("computer_id")
+        if cid is not None and cid not in by_computer:
+            by_computer[cid] = row
         seat = row.get("seat")
         if seat is not None and seat not in seat_map:
             seat_map[seat] = row
@@ -127,7 +134,8 @@ def _room_computer_grid(room, snapshot):
     # Yalnız AKTİV kompüterlər — deaktiv qeydlər giriş hüququ vermir (bax
     # exam_center_gate), ona görə xəritədə göstərilib nəzarətçini çaşdırmasın.
     for comp in room.computers.filter(is_active=True):
-        computers.append({"computer": comp, "occupant": seat_map.get(comp.seat_number)})
+        occupant = by_computer.get(comp.pk) or seat_map.get(comp.seat_number)
+        computers.append({"computer": comp, "occupant": occupant})
     return computers
 
 

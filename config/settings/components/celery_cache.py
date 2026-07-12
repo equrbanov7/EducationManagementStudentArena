@@ -66,4 +66,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.reap_stuck_extraction_jobs",
         "schedule": 300.0,  # seconds
     },
+    # Sistem Monitorinqi: worker/queue statistikası cache-ə → /metrics/
+    # gauge-ları (CeleryWorkersDown/CeleryBeatStale alert-lərinin mənbəyi).
+    "monitoring-collect-celery-stats": {
+        "task": "monitoring.collect_celery_stats",
+        "schedule": 60.0,  # seconds
+    },
+    # Backup təzəliyi (BackupTooOld alerti üçün) — 15 dəqiqədən bir.
+    "monitoring-collect-backup-age": {
+        "task": "monitoring.collect_backup_age",
+        "schedule": 900.0,  # seconds
+    },
 }

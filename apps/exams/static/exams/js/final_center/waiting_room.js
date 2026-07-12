@@ -35,7 +35,11 @@
 
     var FALLBACK_POLL_MS = 30000; // yalnız WS qopuq olanda
     var MAX_RECONNECT_DELAY_MS = 30000;
-    var BEGIN_JITTER_MS = 2500;
+    // Start "thundering herd"-ını yaymaq üçün kiçik jitter. Server tərəfdə
+    // onsuz da concurrency semaforu + növbə var (EXAM_START_GLOBAL_CONCURRENCY),
+    // ona görə 2.5s həddindən çox idi — proktor "başlat"a basanda tələbə
+    // gözləyirdi. 700ms həm axını yayır, həm dərhal hiss olunur.
+    var BEGIN_JITTER_MS = 700;
 
     function getCsrfToken() {
         var input = root.querySelector("input[name=csrfmiddlewaretoken]");

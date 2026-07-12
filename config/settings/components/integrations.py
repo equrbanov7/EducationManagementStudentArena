@@ -72,3 +72,16 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
+
+
+# ---------------------------------------------------------------------------
+# Sistem Monitorinqi (apps.monitoring) — backend-only asılılıq ünvanları.
+# Bunlar YALNIZ daxili Docker şəbəkəsindəki servislərdir; heç vaxt frontend-ə
+# ötürülmür. Boş/əlçatmaz olduqda API-lar "degraded" cavab qaytarır.
+# ---------------------------------------------------------------------------
+MONITORING_PROMETHEUS_URL = os.getenv("MONITORING_PROMETHEUS_URL", "http://prometheus:9090")
+MONITORING_LOKI_URL = os.getenv("MONITORING_LOKI_URL", "http://loki:3100")
+MONITORING_ALERTMANAGER_URL = os.getenv("MONITORING_ALERTMANAGER_URL", "http://alertmanager:9093")
+# Alertmanager webhook-unun paylaşılan tokeni (docker-compose alertmanager
+# servisi eyni dəyəri __WEBHOOK_TOKEN__ kimi alır). Boşdursa webhook bağlıdır.
+ALERTMANAGER_WEBHOOK_TOKEN = os.getenv("ALERTMANAGER_WEBHOOK_TOKEN", "")

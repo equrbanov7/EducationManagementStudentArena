@@ -169,6 +169,21 @@ def createAndEditExamView(request, slug=None):
 
             provision_exam_student_pins(exam_instance)
 
+            # Məhsul qərarı (2026-07-13): imtahan yaradılıb/redaktə olunanda
+            # dərc qapısı (aktiv sual + dil-parity + silinməmiş) keçirsə,
+            # AVTOMATİK aktiv statusa keçir — müəllimə ayrıca "dərc et" addımı
+            # lazım deyil. Qapı keçmirsə (məs. hələ sual yoxdur) səssizcə
+            # deaktiv qalır (boş imtahan tələbəyə çıxarıla bilməz).
+            if not exam_instance.is_active and not exam_instance.is_deleted:
+                from django.db import transaction as _txn
+
+                from apps.exams.services.lifecycle import publish_exam
+
+                with _txn.atomic():
+                    published, _publish_err = publish_exam(exam_instance, by_user=request.user, request=request)
+                if published:
+                    exam_instance.is_active = True
+
             from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
 
             current_recipient_ids = get_exam_assigned_user_ids(exam_instance)

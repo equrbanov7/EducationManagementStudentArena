@@ -4181,17 +4181,16 @@ class StudentExamResultVisibilityWindowTest(TestCase):
         answer.selected_options.add(correct)
         return exam, attempt
 
-    def test_correct_answers_hidden_while_exam_window_open(self):
-        """EXAM-P0-05: pəncərə açıq olduqca variant düzgünlüyü və verdikt sızmır."""
+    def test_correct_answers_visible_while_exam_window_open(self):
+        """Məhsul qərarı (2026-07-13): tələbə təhvil verən kimi öz nəticəsini
+        və cavab analizini dərhal görür — pəncərənin bağlanması gözlənilmir."""
         exam, attempt = self._create_test_exam_with_answered_attempt(end_delta=timedelta(hours=2))
 
         response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["answers_release_locked"])
-        self.assertTrue(response.context["hide_test_answer_correctness"])
-        self.assertEqual(response.context["answer_verdict_by_qid"], {})
-        self.assertNotContains(response, "correct-option")
-        self.assertNotContains(response, "Correct option")
+        self.assertFalse(response.context["answers_release_locked"])
+        self.assertFalse(response.context["hide_test_answer_correctness"])
+        self.assertContains(response, "correct-option")
 
     def test_correct_answers_visible_after_exam_window_closes(self):
         exam, attempt = self._create_test_exam_with_answered_attempt(end_delta=timedelta(hours=-1))
@@ -4225,11 +4224,12 @@ class StudentExamResultVisibilityWindowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["answers_release_locked"])
 
-    def test_written_ideal_answer_hidden_while_exam_window_open(self):
-        """EXAM-P0-05: yoxlanılmamış yazılı cavabda ideal cavab pəncərə açıq ikən görünmür."""
+    def test_written_ideal_answer_visible_immediately(self):
+        """Məhsul qərarı (2026-07-13): tələbə təhvildən dərhal sonra öz nəticəsini
+        və ideal cavabı görür — pəncərə bağlanması gözlənilmir."""
         exam = Exam.objects.create(
             author=self.teacher,
-            title="Locked Written Exam",
+            title="Immediate Written Exam",
             exam_type="written",
             is_active=True,
             start_datetime=timezone.now() - timedelta(hours=2),
@@ -4247,12 +4247,6 @@ class StudentExamResultVisibilityWindowTest(TestCase):
         question = exam.questions.first()
         ExamAnswer.objects.create(attempt=attempt, question=question, text_answer="My essay")
 
-        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Ideal model answer text")
-
-        exam.end_datetime = timezone.now() - timedelta(minutes=1)
-        exam.save(update_fields=["end_datetime"])
         response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ideal model answer text")

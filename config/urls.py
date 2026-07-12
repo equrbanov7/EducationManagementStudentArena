@@ -97,6 +97,8 @@ urlpatterns = [
     ),
     # AI assistant API
     path("api/ai-assistant/", include(("apps.ai_assistant.urls", "ai_assistant"), namespace="ai_assistant")),
+    # Sistem Monitorinqi (superadmin-only; server-side icazə + audit).
+    path("api/superadmin/monitoring/", include(("apps.monitoring.urls", "monitoring"), namespace="monitoring")),
     # API versioned endpoints
     path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),

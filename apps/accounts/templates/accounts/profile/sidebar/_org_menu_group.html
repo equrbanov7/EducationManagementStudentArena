@@ -122,5 +122,17 @@
                 <span class="sidebar-menu-text">{% trans "ai_settings" context "profile.sidebar" %}</span>
             </a>
         </li>
+        {% if 'system-monitoring' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=system-monitoring"
+               data-section="system-monitoring"
+               data-title="{% trans 'Sistem Monitorinqi' context 'profile.sidebar' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'system-monitoring' %}active{% endif %}">
+                <i class="fas fa-heartbeat sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans 'Sistem Monitorinqi' context 'profile.sidebar' %}</span>
+            </a>
+        </li>
+        {% endif %}
         {% endif %}
         {% endif %}

@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS Arena — Blackbox exporter konfiqurasiyası (Sistem Monitorinqi)
+#
+# LAN yerləşdirməsi: publik domen/DNS YOXDUR. Probe-lar daxili şəbəkədən
+# nginx-ə gedir (self-signed sertifikat → insecure_skip_verify true, çünki
+# etibar zənciri yox, YALNIZ endpoint sağlamlığı yoxlanılır).
+# Hədəflər docker/prometheus/prometheus.yml-dəki blackbox job-undadır.
+# ═══════════════════════════════════════════════════════════════════════════
+modules:
+  http_2xx_lan:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      preferred_ip_protocol: ip4
+      headers:
+        Host: "10.0.2.42"
+      fail_if_ssl: false
+      fail_if_not_ssl: false
+      tls_config:
+        insecure_skip_verify: true
+
+  # Login səhifəsi üçün: 200 gözlənilir, redirect izlənmir.
+  http_login_lan:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      no_follow_redirects: false
+      preferred_ip_protocol: ip4
+      headers:
+        Host: "10.0.2.42"
+      fail_if_not_ssl: false
+      tls_config:
+        insecure_skip_verify: true
