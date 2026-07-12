@@ -29,6 +29,19 @@ class AccessCodeMigrationRollbackTests(TransactionTestCase):
         executor = MigrationExecutor(connection)
         self.latest_targets = executor.loader.graph.leaf_nodes()
         executor.migrate([self.migrate_from])
+        self._realign_sequences()
+
+    def _realign_sequences(self):
+        # Qraf-dakı seed data-migration-ları ``auth_user`` sətirlərini EXPLICIT PK
+        # ilə yaradır və serial sequence-i irəli aparmır; ``reset_sequences`` isə
+        # onu 1-ə salır. Nəticədə aşağıdakı ``create_user`` mövcud id ilə toqquşur.
+        # Integer-serial pk-lı cədvəllərin sequence-ini max(id)-ə köklə (org UUID-
+        # pk-dır — sequence-i yoxdur, toqquşmur).
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT setval(pg_get_serial_sequence('auth_user', 'id'), "
+                "GREATEST((SELECT COALESCE(MAX(id), 1) FROM auth_user), 1))"
+            )
 
     def tearDown(self):
         # Restore the full graph before TransactionTestCase flushes the DB.
