@@ -226,6 +226,12 @@ services:
       SERVER_IDLE_TIMEOUT: ${PGBOUNCER_SERVER_IDLE_TIMEOUT:-60}
       SERVER_RESET_QUERY: ${PGBOUNCER_SERVER_RESET_QUERY:-DISCARD ALL}
       AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
+      # edoburu/pgbouncer entrypoint-i ADMIN_USERS verilməzsə "postgres"
+      # literalına düşür (pgbouncer.ini: admin_users = ${ADMIN_USERS:-postgres}).
+      # Owner rolumuzun adı POSTGRES_USER-dir və literal "postgres" ola bilməz
+      # — buna görə pgbouncer_exporter SHOW POOLS/STATS üçün xüsusi "pgbouncer"
+      # pseudo-bazasına qoşula bilmirdi (Monitorinq Mərkəzi, 2026-07-13).
+      ADMIN_USERS: ${POSTGRES_USER}
     depends_on:
       postgres:
         condition: service_healthy
