@@ -420,7 +420,7 @@
                     topicField.value = editData.topic || "";
                 }
             }
-            modal.querySelector("[data-jd-lesson-hours]").value = editData.hours || 2;
+            setSelectValue(modal.querySelector("[data-jd-lesson-hours]"), String(editData.hours || 2));
             // Standart dərs saatı: mövcud start-end cütünü seçimdə tap.
             setSelectValue(timeSelect, editData.start && editData.end ? editData.start + "|" + editData.end : "");
         } else {

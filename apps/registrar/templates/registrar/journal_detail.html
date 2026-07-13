@@ -116,20 +116,16 @@
             <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="yekun" data-jd-step-of="6" id="jd-tab-yekun" aria-controls="jd-panel-yekun">
                 {% trans "Yekun qiymət" context "registrar.journal" %}
             </button>
-            <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="finals" id="jd-tab-finals" aria-controls="jd-panel-finals">
-                {% trans "İmtahan" context "registrar.finals" %}
-            </button>
-            {% if grade_history %}
-            <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="history" id="jd-tab-history" aria-controls="jd-panel-history">
-                {% trans "Tarixçə" context "registrar.journal" %}
-            </button>
-            {% endif %}
             <div class="jd2-tabsbar-actions">
                 {% if can_edit %}
-                <button type="button" class="jd2-newlesson-btn" data-jd-open-lesson-modal>+ {% trans "Yeni dərs" context "registrar.journal" %}</button>
+                <button type="button" class="jd2-newlesson-btn" data-jd-open-lesson-modal>
+                    <i class="fas fa-plus"></i> {% trans "Yeni dərs" context "registrar.journal" %}
+                </button>
                 {% endif %}
                 <a class="jd2-export-btn" href="{% url 'registrar:journal_xlsx' offering.id %}"
-                   title="{% trans 'Jurnalı Excel (xlsx) olaraq yüklə' context 'registrar.journal' %}">⭳ Export</a>
+                   title="{% trans 'Jurnalı Excel (xlsx) olaraq yüklə' context 'registrar.journal' %}">
+                    <i class="fas fa-file-excel"></i> {% trans "Export" context "registrar.journal" %}
+                </a>
             </div>
         </nav>
 
@@ -158,128 +154,6 @@
             {% include "registrar/partials/_jd_final_breakdown.html" %}
         </section>
 
-        {# ═══ İmtahan nəticəsi (yekun imtahan + resit + yekunlaşdırma) ═══════ #}
-        <section class="jd-panel" data-jtab-panel="finals" id="jd-panel-finals" role="tabpanel" aria-labelledby="jd-tab-finals" hidden>
-            <form method="post" class="journal-finals-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="save_finals">
-                <div class="journal-grid-wrap jd-grid-wrap" data-journal-grid>
-                    <table class="journal-grid finals-grid jd-grid">
-                        <thead>
-                            <tr>
-                                <th class="col-student jd-sticky-col">{% trans "Tələbə" context "registrar.journal" %}</th>
-                                <th>{% trans "Giriş balı" context "registrar.journal" %}</th>
-                                <th>{% trans "Kurs işi" context "registrar.journal" %} <span class="col-max">/100</span></th>
-                                <th>{% trans "Yekun imtahan" context "registrar.finals" %}</th>
-                                <th>{% trans "Ümumi" context "registrar.finals" %}</th>
-                                <th>{% trans "Hərf" context "registrar.journal" %}</th>
-                                <th>{% trans "Bonus" context "registrar.finals" %}</th>
-                                <th>{% trans "Nəticə" context "registrar.finals" %}</th>
-                                <th>{% trans "Təkrar imtahan" context "registrar.finals" %}</th>
-                                <th>{% trans "Rəy" context "registrar.finals" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in finals.rows %}
-                            {% with r=row.result %}
-                            <tr class="journal-row {% if r.failed %}row-barred{% endif %}">
-                                <td class="col-student jd-sticky-col"><span class="student-name">{{ row.student.get_full_name|default:row.student.username }}</span></td>
-                                <td>{{ r.entry_score|floatformat:'-2' }}<span class="col-max">/{{ finals.scheme.entry_score_max }}</span></td>
-                                <td>{% if row.coursework and row.coursework.score is not None %}{{ row.coursework.score|floatformat:'-2' }}{% else %}—{% endif %}</td>
-                                <td>
-                                    {% if can_edit %}
-                                    <input type="number" class="cell-score" min="0" max="{{ r.exam_score_max }}" step="0.5"
-                                           name="exam__{{ row.enrollment.id }}" value="{% if r.exam_score is not None %}{{ r.exam_score|floatformat:'-2' }}{% endif %}"
-                                           placeholder="{% trans 'bal' context 'registrar.journal' %}">
-                                    {% else %}{{ r.exam_score|default_if_none:"—" }}{% endif %}
-                                </td>
-                                <td class="cell-total">{% if r.graded %}{{ r.total|floatformat:'-2' }}{% else %}—{% endif %}</td>
-                                <td>{% if r.graded %}<span class="cell-letter grade-{{ r.letter }}">{{ r.letter }}</span>{% else %}—{% endif %}</td>
-                                <td>
-                                    {% if can_edit %}
-                                    <input type="number" class="cell-score jd-bonus-input" min="-20" max="20" step="0.5"
-                                           name="bonus__{{ row.enrollment.id }}" value="{% if r.bonus %}{{ r.bonus|floatformat:'-2' }}{% endif %}"
-                                           placeholder="±" title="{% trans 'Bonus (+) / cərimə (−)' context 'registrar.finals' %}">
-                                    {% elif r.bonus %}{{ r.bonus|floatformat:'-2' }}{% else %}—{% endif %}
-                                </td>
-                                <td>
-                                    {% if r.barred %}<span class="journal-badge journal-badge--barred">{% trans "Kəsilir (qayıb)" context "registrar.finals" %}</span>
-                                    {% elif r.passed %}<span class="journal-badge journal-badge--ok">{% trans "Keçdi" context "registrar.finals" %}</span>
-                                    {% elif r.failed %}<span class="journal-badge journal-badge--barred">{% trans "Kəsildi" context "registrar.finals" %}</span>
-                                    {% else %}<span class="journal-badge journal-badge--warn">{% trans "Qiymətlənməyib" context "registrar.finals" %}</span>{% endif %}
-                                </td>
-                                <td>
-                                    {% if r.resit %}
-                                        {% if can_edit %}
-                                        <input type="number" class="cell-score" min="0" max="{{ r.exam_score_max }}" step="0.5"
-                                               name="resit__{{ row.enrollment.id }}" value="{% if r.resit.resit_score is not None %}{{ r.resit.resit_score|floatformat:'-2' }}{% endif %}"
-                                               placeholder="{% trans 'təkrar bal' context 'registrar.finals' %}">
-                                        {% else %}{{ r.resit.resit_score|default_if_none:"—" }}{% endif %}
-                                        <span class="resit-badge">{{ r.resit.get_status_display }}</span>
-                                    {% else %}—{% endif %}
-                                </td>
-                                <td class="jd-comment-cell">
-                                    {% if can_edit %}
-                                    <input type="text" class="jd-comment-input" maxlength="500"
-                                           name="fcomment__{{ row.enrollment.id }}" value="{{ r.comment }}"
-                                           placeholder="{% trans 'Rəy (opsional)' context 'registrar.finals' %}">
-                                    {% elif r.comment %}<span class="jd-comment-ro" title="{{ r.comment }}">{{ r.comment|truncatechars:40 }}</span>{% else %}—{% endif %}
-                                </td>
-                            </tr>
-                            {% endwith %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% if can_edit %}
-                <div class="journal-actions jd-save-bar">
-                    <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Nəticələri saxla" context "registrar.finals" %}</button>
-                    <button type="submit" name="action" value="publish" class="journal-publish-btn"
-                            onclick="return confirm('{% trans "Jurnalı yekunlaşdırmaq? Sonra redaktə bağlanır." context "registrar.finals" %}');">
-                        <i class="fas fa-lock"></i> {% trans "Yekunlaşdır" context "registrar.finals" %}
-                    </button>
-                </div>
-                {% endif %}
-            </form>
-        </section>
-
-        {# ═══ Qiymət dəyişikliyi tarixçəsi (U7.3) ════════════════════════════ #}
-        {% if grade_history %}
-        <section class="jd-panel" data-jtab-panel="history" id="jd-panel-history" role="tabpanel" aria-labelledby="jd-tab-history" hidden>
-            <p class="jd-panel-hint"><i class="fas fa-circle-info"></i> {% trans "kim, nə vaxt, köhnə → yeni" context "registrar.audit" %}</p>
-            <div class="grade-history">
-                {% for entry in grade_history %}
-                <div class="grade-history-item">
-                    <div class="grade-history-head">
-                        <span class="grade-history-kind grade-history-kind--{{ entry.kind }}">
-                            {% if entry.kind == 'mark' %}{% trans "Davamiyyət/bal" context "registrar.audit" %}
-                            {% elif entry.kind == 'component' %}{% trans "Komponent balı" context "registrar.audit" %}
-                            {% elif entry.kind == 'final' %}{% trans "Yekun imtahan" context "registrar.audit" %}
-                            {% elif entry.kind == 'resit' %}{% trans "Təkrar imtahan" context "registrar.audit" %}
-                            {% else %}{{ entry.kind_label }}{% endif %}
-                        </span>
-                        <span class="grade-history-meta">
-                            <i class="fas fa-user"></i> {% if entry.user %}{{ entry.user.get_full_name|default:entry.user.username }}{% else %}{% trans "Sistem" context "registrar.audit" %}{% endif %}
-                            · <i class="fas fa-clock"></i> {{ entry.when|date:"d.m.Y H:i" }}
-                            · <span class="grade-history-count">{{ entry.count }} {% trans "dəyişiklik" context "registrar.audit" %}</span>
-                        </span>
-                    </div>
-                    <ul class="grade-history-changes">
-                        {% for ch in entry.changes %}
-                        <li>
-                            <span class="gh-student">{{ ch.student }}</span>
-                            <span class="gh-item">{{ ch.item }}</span>
-                            <span class="gh-old">{{ ch.old }}</span>
-                            <i class="fas fa-arrow-right gh-arrow"></i>
-                            <span class="gh-new">{{ ch.new }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
     </div>
 
     {% else %}
@@ -316,5 +190,5 @@
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260705-1"></script>
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260712-6"></script>
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260713-jbatch"></script>
 {% endblock %}

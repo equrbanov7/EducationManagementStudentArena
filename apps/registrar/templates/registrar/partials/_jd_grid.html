@@ -60,7 +60,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 {% endif %}
                             </th>
                             {% endfor %}
-                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "limit" context "registrar.journal" %} {{ journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %}</div></th>
+                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "limit" context "registrar.journal" %} {{ journal.limit_percent|floatformat:0 }}%</div></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,7 +101,8 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                             </td>
                             {% endfor %}
                             <td class="jd2-td-qayib">
-                                <span class="jd2-qchip {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">{{ row.absence_hours }} {% trans "saat" context "registrar.journal" %}</span>
+                                <span class="jd2-qchip {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}"
+                                      title="{{ row.absence_hours }} {% trans 'saat' context 'registrar.journal' %}">{{ row.absence_count }} q/b</span>
                             </td>
                         </tr>
                         {% endfor %}
