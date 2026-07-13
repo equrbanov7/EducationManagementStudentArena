@@ -30,7 +30,6 @@ from ...models import Appeal
 from ...services import (
     accept_appeal_item,
     can_review_appeal,
-    can_view_appeal_managed,
     effective_test_score,
     reject_appeal_item,
     revert_item_adjustment,
@@ -216,38 +215,23 @@ def review_appeal(request, appeal_id):
     )
     review_can_decide = can_review_appeal(request, appeal)
     if not review_can_decide:
-        # Reviewer-independence: imtahan müəllifi/qiymətləndirən qərar verə
-        # bilməz, amma READ-ONLY baxa bilər. Heç bir baxış haqqı yoxdursa —
-        # fraqment sorğusuna generik "Loading failed" əvəzinə mənalı mesaj.
-        if not can_view_appeal_managed(request, appeal):
-            if request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest":
-                return JsonResponse(
-                    {
-                        "ok": False,
-                        "error": str(
-                            pgettext(
-                                "appeals.view.message",
-                                "Bu apellyasiyaya baxmaq icazəniz yoxdur.",
-                            )
-                        ),
-                    },
-                    status=403,
-                )
-            raise PermissionDenied
-        if request.method == "POST":
+        # Yalnız təşkilatın imtahan mərkəzi istifadəçisi (və superadmin) apellyasiyanı
+        # açıb qərar verə bilir; başqaları üçün fraqment sorğusuna generik "Loading
+        # failed" əvəzinə mənalı 403 mesajı qaytarırıq.
+        if request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "ok": False,
                     "error": str(
                         pgettext(
                             "appeals.view.message",
-                            "Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — "
-                            "imtahanın müəllifi/qiymətləndirəni öz işinə qərar verə bilməz.",
+                            "Bu apellyasiyaya baxmaq icazəniz yoxdur.",
                         )
                     ),
                 },
                 status=403,
             )
+        raise PermissionDenied
 
     items = list(
         appeal.items.select_related("question", "answer", "score_adjustment")
