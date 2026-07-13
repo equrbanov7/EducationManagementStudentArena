@@ -5,7 +5,6 @@ from .permissions import (
     can_create_appeal,
     can_decide_appeal,
     can_review_appeal,
-    can_view_appeal_managed,
 )
 from .scoring import (
     accept_appeal_item,
@@ -45,7 +44,6 @@ __all__ = [
     "can_create_appeal",
     "can_decide_appeal",
     "can_review_appeal",
-    "can_view_appeal_managed",
     "can_transition",
     "create_appeal",
     "effective_test_score",

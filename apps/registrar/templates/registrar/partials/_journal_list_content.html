@@ -16,21 +16,25 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
     <form method="get" class="jd2-filters" data-jd-filterform>
         <label class="jd2-filter">
             <span class="jd2-filter-label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
-            <select name="year" onchange="this.form.submit()" data-bootstrap-select>
-                <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
-                {% for y in journal_years %}
-                <option value="{{ y.value }}" {% if journal_selected_year == y.value %}selected{% endif %}>{{ y.label }}</option>
-                {% endfor %}
-            </select>
+            <div class="bootstrap-single-select">
+                <select name="year" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                    {% for y in journal_years %}
+                    <option value="{{ y.value }}" {% if journal_selected_year == y.value %}selected{% endif %}>{{ y.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </label>
         <label class="jd2-filter">
             <span class="jd2-filter-label">{% trans "YARIM İL" context "registrar.journal" %}</span>
-            <select name="period" onchange="this.form.submit()" data-bootstrap-select>
-                <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
-                {% for p in journal_periods %}
-                <option value="{{ p.id }}" {% if journal_selected_period and journal_selected_period.id == p.id %}selected{% endif %}>{{ p.season_label }}</option>
-                {% endfor %}
-            </select>
+            <div class="bootstrap-single-select">
+                <select name="period" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                    {% for p in journal_periods %}
+                    <option value="{{ p.id }}" {% if journal_selected_period and journal_selected_period.id == p.id %}selected{% endif %}>{{ p.season_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </label>
         <span class="jd2-filter">
             <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
