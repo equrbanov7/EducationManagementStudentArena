@@ -20,6 +20,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from apps.registrar import grade_audit
 from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
@@ -461,11 +462,13 @@ def calendar_plan(offering, lessons, today):
         )
         seen.add(title)
     for lesson in chrono:
-        if lesson.topic in seen:
+        if lesson.topic and lesson.topic in seen:
             continue
+        # Mövzu qeyd olunmayan dərs: panel MÖVZULAR-dır — dərs tipini (Lecture/
+        # Seminar) BAŞLIQ kimi göstərmirik. Mövzu yoxdursa neytral etiket.
         plan.append(
             {
-                "title": lesson.topic or lesson.get_kind_display(),
+                "title": lesson.topic or _("Mövzu qeyd olunmayıb"),
                 "lesson": lesson,
                 "covered": True,
                 "is_today": lesson.date == today,

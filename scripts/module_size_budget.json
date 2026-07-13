@@ -7,6 +7,7 @@
     "apps/exams/static/exams/js/course_exam_dashboard.js": 642,
     "apps/exams/static/exams/js/testQuestionBank.js": 613,
     "apps/exams/templates/exams/teacher/teacher_group_list.html": 642,
+    "apps/organizations/management/commands/seed_western_caspian.py": 602,
     "static/css/ai_assistant.css": 635,
     "static/css/navbar.css": 983
   }

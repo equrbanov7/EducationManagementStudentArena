@@ -34,6 +34,7 @@ from apps.registrar.models import (
     CurriculumSubject,
     Enrollment,
     Program,
+    SlotKind,
     StudentAcademicRecord,
     Subject,
 )
@@ -397,28 +398,28 @@ class Command(BaseCommand):
     def _seed_journal(self, org):
         """Wire offerings to their LMS course + seed the electronic journal.
 
-        Every offering gets the demo teacher as instructor, a linked Course
-        (subject → fənn içi) with members synced, and a set of held lessons
-        (mühazirə + seminar) with attendance (iə/qb) and seminar scores — so the
-        müəllim journal and student "Qiymətlərim" have real data. One AZ student
-        is marked absent enough to exceed the 25% limit (barred → row red)."""
+        Hər offering: müəllim instruktor, linked Course (üzvlər sync), keçirilmiş
+        dərslər (mühazirə + seminar) davamiyyət/ballarla, mövzu planı (CourseTopic)
+        və növbələnən slot tipi. az1 25% limiti keçir (barred → sətir qırmızı)."""
         import datetime
 
         teacher = User.objects.filter(username="wcu_teacher").first()
-        # 8 sessions (2h each): a mix of lectures (attendance only) and seminars
-        # (attendance + score). Dates walk back from a fixed demo baseline.
+        # 8 sessions (2h each): mühazirə (yalnız davamiyyət) + seminar (davamiyyət + bal).
         base = datetime.date(2024, 10, 1)
-        plan = [
-            ("lecture", 0),
-            ("seminar", 3),
-            ("lecture", 7),
-            ("seminar", 10),
-            ("lecture", 14),
-            ("seminar", 17),
-            ("lecture", 21),
-            ("seminar", 24),
+        # fmt: off
+        plan = [("lecture", 0), ("seminar", 3), ("lecture", 7), ("seminar", 10),
+                ("lecture", 14), ("seminar", 17), ("lecture", 21), ("seminar", 24)]
+        # Demo mövzu planı — yeni-dərs modalının mövzu seçimi + sol təqvim planı.
+        demo_topics = [
+            "Giriş və əsas anlayışlar", "Dəyişənlər və məlumat tipləri", "Şərt operatorları",
+            "Dövrlər (loop)", "Funksiyalar", "Massivlər və siyahılar",
+            "Sətir əməliyyatları", "Yekunlaşdırıcı mövzu",
         ]
+        # fmt: on
+        # App registry ilə — organizations→courses statik importu (dep dövrü) yox.
+        from django.apps import apps as django_apps
 
+        CourseTopic = django_apps.get_model("courses", "CourseTopic")
         offerings = CourseOffering.objects.filter(organization=org).select_related("subject", "group", "period")
         for offering in offerings:
             if teacher and offering.instructor_id is None:
@@ -429,14 +430,21 @@ class Command(BaseCommand):
             registrar_gradebook.ensure_assessment_scheme(offering=offering)
             enrollments = list(offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student"))
 
+            # Kursa mövzu planı (idempotent) — modal seçimi + təqvim planı üçün.
+            if offering.course_id and not CourseTopic.objects.filter(course_id=offering.course_id).exists():
+                CourseTopic.objects.bulk_create(
+                    [CourseTopic(course_id=offering.course_id, title=t, order=i) for i, t in enumerate(demo_topics, 1)]
+                )
             if not offering.lessons.exists():  # idempotent — do not duplicate lessons
-                for kind, day_offset in plan:
+                for lesson_idx, (kind, day_offset) in enumerate(plan):
+                    # Dərsə plandan mövzu bağla → təqvim planı mövzu adı ilə görünür.
                     lesson = registrar_gradebook.create_lesson(
                         allow_past=True,
                         offering=offering,
-                        date=base + datetime.timedelta(days=day_offset),
                         kind=kind,
                         created_by=teacher,
+                        date=base + datetime.timedelta(days=day_offset),
+                        topic=demo_topics[lesson_idx] if lesson_idx < len(demo_topics) else "",
                     )
                     entries = []
                     for enrollment in enrollments:
@@ -501,6 +509,8 @@ class Command(BaseCommand):
             # Two lessons/day within the group; each group uses its own 2 bands.
             weekday = ((k // 2) % 6) + 1
             band = band_table[(group_index * 2 + (k % 2)) % len(band_table)]
+            # Dərs tipini növbələ (Lecture/Seminar/Lab) → siyahıda "DƏRS TİPİ" varie olsun.
+            slot_kind = [SlotKind.LECTURE, SlotKind.SEMINAR, SlotKind.LAB][index % 3]
             try:
                 registrar_schedule.create_slot(
                     offering=offering,
@@ -508,6 +518,7 @@ class Command(BaseCommand):
                     start_time=band[0],
                     end_time=band[1],
                     room=str(201 + index),
+                    kind=slot_kind,
                     created_by=offering.instructor,
                 )
             except registrar_schedule.ScheduleConflict:

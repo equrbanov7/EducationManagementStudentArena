@@ -27,10 +27,12 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "MÖVZU — TƏQVİM PLANINDAN" context "registrar.journal" %}</span>
                     {% if topic_choices %}
-                    <select name="lesson_topic" data-jd-lesson-topic data-bootstrap-select>
-                        <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                        {% for t in topic_choices %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="lesson_topic" class="bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
+                            <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
+                            {% for t in topic_choices %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                        </select>
+                    </div>
                     {% else %}
                     <input type="text" name="lesson_topic" maxlength="255" data-jd-lesson-topic
                            placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">
@@ -48,24 +50,33 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                             <i class="fas fa-lock"></i>
                         </span>
                         {% else %}
-                        <select name="lesson_kind" data-jd-lesson-kind data-bootstrap-select>
-                            {% for value, label in lesson_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="lesson_kind" class="bootstrap-single-select__native" data-jd-lesson-kind data-bootstrap-select>
+                                {% for value, label in lesson_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
                         {% endif %}
                     </div>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "SAAT" context "registrar.journal" %}</span>
-                        <input type="number" name="lesson_hours" min="1" max="8" value="2" data-jd-lesson-hours>
+                        <div class="bootstrap-single-select">
+                            <select name="lesson_hours" class="bootstrap-single-select__native" data-jd-lesson-hours data-bootstrap-select>
+                                <option value="1">1</option>
+                                <option value="2" selected>2</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "DƏRS SAATI" context "registrar.journal" %}</span>
-                    <select name="lesson_time" data-jd-lesson-time data-bootstrap-select>
-                        <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
-                        {% for start, end in standard_times %}
-                        <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="lesson_time" class="bootstrap-single-select__native" data-jd-lesson-time data-bootstrap-select>
+                            <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
+                            {% for start, end in standard_times %}
+                            <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <small class="jd-field-hint">{% trans "Universitetin standart dərs saatlarından biri seçilir." context "registrar.journal" %}</small>
                 </div>
                 <p class="jd-modal-note">
