@@ -410,10 +410,12 @@ def get_offering_journal(*, offering, newest_first=False):
     for enrollment in enrollments:
         cells = []
         absence_hours = 0
+        absence_count = 0
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             if mark is not None and mark.status == AttendanceStatus.ABSENT:
                 absence_hours += lesson.hours
+                absence_count += 1
             locked = mark is not None and not can_edit_mark(mark, now=now)
             cells.append(
                 {
@@ -435,6 +437,9 @@ def get_offering_journal(*, offering, newest_first=False):
                 "student": enrollment.student,
                 "cells": cells,
                 "absence_hours": absence_hours,
+                # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir; barred/warning
+                # isə akademik saat-limitinə görə qalır (Enrollment.absence_hours).
+                "absence_count": absence_count,
                 "entry_score": entry_score,
                 "barred": barred,
                 "warning": warning,
