@@ -371,3 +371,43 @@ td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
 .jd2-leave-card { width: min(460px, 100%); }
 .jd2-leave-text { margin: 0; font-size: 13.5px; color: var(--j-mid); font-weight: 600; line-height: 1.55; }
 .jd2-leave-go { flex: 0 1 auto; text-decoration: none; text-align: center; }
+
+
+/* ═══ Sərbəst iş (mockup: sol mövzu paneli + 10-sütun grid + canlı cəm) ═══ */
+.jd-sw2-layout { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
+.jd-sw2-topics { background: #fff; border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
+.jd-sw2-topics-head { padding: 14px 16px 10px; font-size: 11px; font-weight: 800; letter-spacing: 0.6px; color: var(--j-muted); text-transform: uppercase; }
+.jd-sw2-topic-list { list-style: none; margin: 0; padding: 0; }
+.jd-sw2-topic { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-top: 1px solid var(--j-line); font-size: 13px; }
+.jd-sw2-topic.is-empty { opacity: 0.55; }
+.jd-sw2-topic-no { flex: 0 0 22px; text-align: center; font-weight: 800; color: var(--j-soft); font-size: 12px; }
+.jd-sw2-topic-title { flex: 1; font-weight: 600; color: var(--j-ink); }
+.jd-sw2-topic-placeholder { font-style: italic; color: var(--j-soft); font-weight: 500; }
+.jd-sw2-cari { flex: 0 0 auto; background: var(--j-navy); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 999px; }
+.jd-sw2-del button { border: none; background: transparent; color: var(--ems-danger-500, #dc2626); cursor: pointer; font-size: 12px; opacity: 0.55; padding: 0; }
+.jd-sw2-del button:hover { opacity: 1; }
+.jd-sw2-add { display: flex; gap: 6px; padding: 12px 16px; border-top: 1px solid var(--j-line); background: #fbfdff; }
+.jd-sw2-add input { flex: 1; border: 1px dashed var(--j-line); border-radius: 9px; padding: 8px 12px; font-family: inherit; font-size: 12.5px; }
+.jd-sw2-add-btn { flex: 0 0 auto; width: 38px; border: none; border-radius: 9px; background: var(--j-navy); color: #fff; cursor: pointer; font-size: 13px; }
+.jd-sw2-gridcol { min-width: 0; }
+.jd-sw2-table { min-width: 720px; }
+.jd-sw2-th-col { min-width: 40px; text-align: center; }
+.jd-sw2-th-sum, .jd-sw2-sum { text-align: center; font-weight: 800; }
+.jd-sw2-cell { text-align: center; }
+.jd-sw2-sum .cell-entry { font-size: 14px; font-weight: 800; color: var(--j-navy); }
+.jd2-rowno { color: var(--j-soft); font-weight: 700; font-size: 11px; margin-right: 4px; }
+.jd-sw2-foot { margin: 14px 2px 0; font-size: 12.5px; color: var(--j-muted); font-weight: 600; }
+.jd-sw2-foot .jd2-ie { color: #15803d; } .jd-sw2-foot .jd2-qb { color: #dc2626; }
+.sw-chip--disabled { background: #f1f5f9; color: #b6c2d6; cursor: not-allowed; }
+@media (max-width: 900px) { .jd-sw2-layout { grid-template-columns: 1fr; } }
+
+
+/* ═══ Seminar/lab xanası: kompakt bootstrap-select (q/b · i/e · bal) ═══ */
+.jd2-semselect { width: 66px; margin: 0 auto; }
+.jd2-semselect .bootstrap-single-select__toggle {
+    min-height: 30px; padding: 3px 6px; font-size: 12px; font-weight: 700;
+    border-radius: 8px; border: 1px solid var(--j-line); color: var(--j-ink);
+}
+.jd2-semselect .bootstrap-single-select__toggle.is-placeholder { color: var(--j-soft); }
+.jd2-semselect .bootstrap-single-select__caret { font-size: 9px; }
+.jd2-semselect .dropdown-menu { min-width: 92px; max-height: 260px; overflow-y: auto; }

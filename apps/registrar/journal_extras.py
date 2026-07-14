@@ -215,8 +215,12 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None) 
 
 
 def get_selfwork_board(offering):
-    """Sərbəst iş tabı: mövzular (sətir başlıqları) × tələbələr, 1/0 + cəmlər."""
+    """Sərbəst iş tabı: HƏMİŞƏ 10 sabit slot (mövzu sayından asılı deyil) ×
+    tələbələr, 1/0 + canlı cəm. Mövzu əlavə olunmamış slot boş/deaktivdir —
+    mockup kimi cədvəl həmişə 10 sütunlu görünür, cəmi maksimum 10 bal."""
     topics = list(SelfWorkTopic.objects.filter(offering=offering).order_by("order", "created_at"))
+    # 10 slot: i-ci slotda mövzu varsa onu, yoxdursa None göstər.
+    slots = [{"index": i + 1, "topic": (topics[i] if i < len(topics) else None)} for i in range(SELF_WORK_MAX_TOPICS)]
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
         .select_related("student")
@@ -230,20 +234,22 @@ def get_selfwork_board(offering):
     for e in enrollments:
         cells = []
         total = 0
-        for t in topics:
-            mark = mark_map.get((e.id, t.id))
+        for slot in slots:
+            topic = slot["topic"]
+            mark = mark_map.get((e.id, topic.id)) if topic else None
             done = bool(mark and mark.done)
             total += 1 if done else 0
             cells.append(
                 {
-                    "topic": t,
+                    "index": slot["index"],
+                    "topic": topic,  # None → boş slot (mövzu hələ əlavə olunmayıb)
                     "done": done,
                     # geri alma kilidi: verilib və 2 saat keçib
                     "locked": bool(mark and mark.done and (now - mark.updated_at) > MARK_EDIT_WINDOW),
                 }
             )
         rows.append({"enrollment": e, "student": e.student, "cells": cells, "total": total})
-    return {"topics": topics, "rows": rows, "max_topics": SELF_WORK_MAX_TOPICS}
+    return {"topics": topics, "slots": slots, "rows": rows, "max_topics": SELF_WORK_MAX_TOPICS}
 
 
 # ── Kurs işi (0-100, giriş balından kənar) ───────────────────────────────────

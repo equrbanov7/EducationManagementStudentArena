@@ -76,14 +76,23 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
                                        value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att>
                                 {% if cell.allows_score %}
-                                {% comment %}Seminar/lab: bal + q/b. Bal yazılıbsa i/e avtomatikdir.{% endcomment %}
-                                <span class="jd2-semcell" data-jd-semcell data-lesson="{{ cell.lesson.id }}">
-                                    <input type="number" class="cell-score jd2-score" min="0" max="10" step="0.5"
-                                           name="score__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
-                                           value="{% if cell.mark and cell.mark.score is not None %}{{ cell.mark.score|floatformat:'-2' }}{% endif %}"
-                                           placeholder="{% trans 'bal' context 'registrar.journal' %}" data-jd-score>
-                                    <button type="button" class="jd2-qb-chip {% if cell.mark and cell.mark.status == 'absent' %}is-active{% endif %}" data-jd-qb>q/b</button>
-                                </span>
+                                {% comment %}Seminar/lab: tək bootstrap-select — q/b · i/e · bal (0–10).
+                                Bal seçilsə i/e avtomatik; gizli att/score sahələri JS ilə sinxronlanır.{% endcomment %}
+                                <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
+                                       value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att data-jd-sem-att>
+                                <input type="hidden" name="score__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
+                                       value="{% if cell.mark and cell.mark.score is not None %}{{ cell.mark.score|floatformat:'-2' }}{% endif %}" data-jd-sem-score>
+                                <div class="bootstrap-single-select jd2-semselect">
+                                    <select class="bootstrap-single-select__native jd2-semnative" data-bootstrap-select data-jd-semselect
+                                            data-lesson="{{ cell.lesson.id }}">
+                                        <option value="" {% if not cell.mark %}selected{% endif %}>—</option>
+                                        <option value="qb" {% if cell.mark and cell.mark.status == 'absent' %}selected{% endif %}>q/b</option>
+                                        <option value="ie" {% if cell.mark and cell.mark.status != 'absent' and cell.mark.score is None %}selected{% endif %}>i/e</option>
+                                        {% for s in seminar_score_options %}
+                                        <option value="{{ s|floatformat:'-2' }}" {% if cell.mark and cell.mark.score is not None and cell.mark.score|floatformat:'-2' == s|floatformat:'-2' %}selected{% endif %}>{{ s|floatformat:'-2' }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                                 {% else %}
                                 <button type="button"
                                         class="att-chip {% if cell.mark and cell.mark.status == 'absent' %}att-chip--qb{% elif cell.mark %}att-chip--ie{% else %}att-chip--empty{% endif %}"

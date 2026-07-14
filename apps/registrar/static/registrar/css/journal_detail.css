@@ -297,7 +297,7 @@
     display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
     border-radius: 7px; border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 11.5px;
 }
-.sw-chip--on { background: var(--ems-primary-50, #eaf1fe); color: var(--ems-primary-700, #1d4ed8); }
+.sw-chip--on { background: #dcfce7; color: #15803d; }
 .sw-chip--off { background: var(--ems-danger-100, #fee2e2); color: var(--ems-danger-500, #dc2626); }
 .sw-chip--ro { cursor: default; }
 .col-sw { min-width: 34px; text-align: center; }
