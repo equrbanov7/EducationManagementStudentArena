@@ -188,6 +188,8 @@
 .mon-metric { background: #f7f9fc; border: 1px solid var(--lv-border); border-radius: var(--lv-radius-sm); padding: 0.7rem; text-align: center; }
 .mon-metric .mm-v { font-size: 1.3rem; font-weight: 700; }
 .mon-metric .mm-l { font-size: 0.7rem; color: var(--lv-muted); text-transform: uppercase; letter-spacing: 0.02em; margin-top: 0.25rem; }
+.mon-metric .mm-sub { font-size: 0.72rem; color: var(--lv-muted); font-weight: 600; margin-top: 0.15rem; }
+.mon-metric--live { background: #eff6ff; border-color: #bfdbfe; }
 .mon-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--lv-muted); margin: 1.2rem 0 0.7rem; }
 .ans-item { border: 1px solid var(--lv-border); border-radius: var(--lv-radius-sm); padding: 0.75rem 0.9rem; margin-bottom: 0.6rem; }
 .ans-item .ans-q { font-size: 0.86rem; font-weight: 600; margin-bottom: 0.35rem; }
