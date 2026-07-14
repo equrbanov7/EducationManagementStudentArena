@@ -238,6 +238,10 @@
     font-weight: 700;
 }
 
+.appeal-list-edit-window.is-expired {
+    display: none;
+}
+
 @media (max-width: 640px) {
     .appeal-option {
         flex-wrap: wrap;
