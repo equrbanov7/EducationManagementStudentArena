@@ -20,6 +20,7 @@ from apps.exams.services.attempts import (
     _start_or_resume_attempt,
     generate_random_questions_for_attempt,
     get_attempt_limit_result_redirect_url,
+    get_effective_max_attempts,
 )
 from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
@@ -283,7 +284,7 @@ def start_exam(request, slug):
             messages.info(
                 request,
                 pgettext("exams.service.attempt.message", "max_attempts_reached").format(
-                    max_attempts=exam.max_attempts_per_user
+                    max_attempts=get_effective_max_attempts(exam, request.user) or exam.max_attempts_per_user
                 ),
             )
             return redirect(attempt_limit_result_url)
