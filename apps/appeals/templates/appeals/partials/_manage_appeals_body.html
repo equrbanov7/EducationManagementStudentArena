@@ -121,10 +121,10 @@
                 <td data-label="{% trans 'Status' context 'appeals.template' %}">
                     {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
                     {% if appeal.edit_seconds_left %}
-                    <div class="appeal-list-edit-window">
+                    <div class="appeal-list-edit-window" data-review-window>
                         <i class="fas fa-clock" aria-hidden="true"></i>
                         {% trans "Dəyişmək üçün qalan vaxt" context "appeals.template" %}:
-                        <strong>{{ appeal.edit_time_label }}</strong>
+                        <strong data-appeal-countdown="{{ appeal.edit_seconds_left }}">{{ appeal.edit_time_label }}</strong>
                     </div>
                     {% endif %}
                 </td>
