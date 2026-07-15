@@ -5,8 +5,40 @@
 (function () {
   "use strict";
 
+  // Axtarış "debounce" ilə avtomatik işləyir (düymə yoxdur) və hər sorğuda bütün
+  // profil bölməsi AJAX ilə yenidən qurulur. Panel dəyişdiyi üçün input yeni DOM
+  // elementi olur və fokus itir — istifadəçi yazmağa davam edə bilmir. Ona görə
+  // caret + son yazı vaxtını yadda saxlayıb, swap istifadəçinin öz yazısından
+  // qaynaqlanıbsa (qısa pəncərə), təzə input-a fokusu bərpa edirik.
+  var qbSearchState = { caret: null, ts: 0 };
+  var QB_REFOCUS_WINDOW_MS = 2500;
+
+  function initQuestionBankSearch(root) {
+    var input = root.querySelector(".qb-banklist-search input[name='bank_search']");
+    if (!input) return;
+
+    if (qbSearchState.ts && (Date.now() - qbSearchState.ts) < QB_REFOCUS_WINDOW_MS) {
+      try {
+        input.focus();
+        var pos = qbSearchState.caret == null
+          ? input.value.length
+          : Math.min(qbSearchState.caret, input.value.length);
+        input.setSelectionRange(pos, pos);
+      } catch (e) { /* ignore */ }
+    }
+
+    if (input.getAttribute("data-qb-search-ready") === "1") return;
+    input.setAttribute("data-qb-search-ready", "1");
+    input.addEventListener("input", function () {
+      qbSearchState.caret = input.selectionStart;
+      qbSearchState.ts = Date.now();
+    });
+  }
+
   function initQuestionBankList(root) {
     root = root && typeof root.querySelectorAll === "function" ? root : document;
+
+    initQuestionBankSearch(root);
 
     root.querySelectorAll(".js-edit-bank").forEach(function (btn) {
       if (btn.getAttribute("data-qb-list-ready") === "1") return;
