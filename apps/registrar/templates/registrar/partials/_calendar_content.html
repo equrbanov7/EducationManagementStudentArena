@@ -23,7 +23,7 @@
         {% with p=item.period %}
         <article class="acal-period {% if item.is_running %}acal-period--running{% endif %}">
             <header class="acal-period-head">
-                <h2 class="acal-period-title">{{ p.name }} <span class="acal-period-year">{{ p.academic_year }}</span></h2>
+                <h2 class="acal-period-title">{{ p.name }} <span class="acal-period-year">{{ p.year_display }}</span></h2>
                 <div class="acal-period-chips">
                     {% if p.is_current %}<span class="journal-badge journal-badge--ok"><i class="fas fa-star"></i> {% trans "Cari semestr" context "registrar.calendar" %}</span>{% endif %}
                     {% if item.is_running %}<span class="journal-badge acal-badge--running"><i class="fas fa-play"></i> {% trans "Davam edir" context "registrar.calendar" %}</span>{% endif %}
