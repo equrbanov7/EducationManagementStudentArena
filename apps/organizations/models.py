@@ -2,6 +2,8 @@
 Models for the organizations app.
 """
 
+import re
+
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
@@ -390,8 +392,28 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
             models.Index(fields=["organization", "is_current"]),
         ]
 
+    @staticmethod
+    def format_year(raw):
+        """Akademik ili həmişə "2025/2026" formatına gətir.
+
+        Saxlanan dəyər sərbəst mətndir və qeyri-ardıcıl ola bilər ("2024/2025",
+        "2024-2025", "2024") — ilk 4-rəqəmli ili tapıb "Y/Y+1" qaytarırıq.
+        4-rəqəmli il tapılmasa xam dəyəri olduğu kimi qaytarırıq. Yalnız göstəriş
+        üçündür; saxlanan sahə dəyişmir (miqrasiya/unikallıq təsiri yoxdur).
+        """
+        raw = (raw or "").strip()
+        match = re.search(r"\d{4}", raw)
+        if not match:
+            return raw
+        start = int(match.group())
+        return f"{start}/{start + 1}"
+
+    @property
+    def year_display(self):
+        return self.format_year(self.academic_year)
+
     def __str__(self):
-        return f"{self.organization.name} - {self.name} {self.academic_year}"
+        return f"{self.organization.name} - {self.name} {self.year_display}"
 
     def save(self, *args, **kwargs):
         # Auto-deactivate previous current period
