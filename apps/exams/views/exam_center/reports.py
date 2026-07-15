@@ -55,6 +55,12 @@ def exam_center_reports(request):
     )
 
 
+def _local_iso(value):
+    """UTC saxlanan tarixi yerli zonaya (Asia/Baku) çevirib ISO qaytar — CSV
+    UI ilə eyni saatı göstərsin (əvvəl xam UTC isoformat verilirdi, 4 saat geri)."""
+    return timezone.localtime(value).isoformat() if value else ""
+
+
 def _export_csv(request, organization, tab, queryset):
     log_action(
         AuditAction.EXPORT,
@@ -90,10 +96,10 @@ def _export_csv(request, organization, tab, queryset):
                 [
                     f"{s.room.name} ({s.room.code})",
                     s.state,
-                    s.scheduled_start.isoformat(),
-                    s.scheduled_end.isoformat(),
-                    s.started_at.isoformat() if s.started_at else "",
-                    s.ended_at.isoformat() if s.ended_at else "",
+                    _local_iso(s.scheduled_start),
+                    _local_iso(s.scheduled_end),
+                    _local_iso(s.started_at),
+                    _local_iso(s.ended_at),
                     (s.invigilator.get_full_name() or s.invigilator.username) if s.invigilator else "",
                     s.ticket_total,
                     s.ticket_completed,
@@ -128,9 +134,9 @@ def _export_csv(request, organization, tab, queryset):
                     t.status,
                     t.language,
                     t.seat_number or "",
-                    t.entry_validated_at.isoformat() if t.entry_validated_at else "",
-                    t.started_at.isoformat() if t.started_at else "",
-                    t.completed_at.isoformat() if t.completed_at else "",
+                    _local_iso(t.entry_validated_at),
+                    _local_iso(t.started_at),
+                    _local_iso(t.completed_at),
                     t.removal_action,
                     t.removal_reason,
                 ]

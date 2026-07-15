@@ -38,11 +38,19 @@ def _is_final_exam(exam):
     return getattr(exam, "exam_type_extended", "") == "final"
 
 
+# Profil kabinet bölmələri — həm "Nəticələrim", həm də "Apellyasiyalarım"-dan
+# nəticəyə baxış profil rejimidir (canlı final imtahan-mərkəzi deyil). my-appeals
+# tanınmadığından final nəticəsi kabinetdən açılanda is_final_center_result True
+# olub logout + PIN giriş ekranına yönləndirirdi.
+_PROFILE_CABINET_SECTIONS = ("my-results", "my-appeals")
+
+
 def _is_profile_results_request(request, return_to):
     source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
-    if source_section == "my-results":
+    if source_section in _PROFILE_CABINET_SECTIONS:
         return True
-    return "section=my-results" in (return_to or "")
+    return_to = return_to or ""
+    return any(f"section={section}" in return_to for section in _PROFILE_CABINET_SECTIONS)
 
 
 def _hide_test_answer_correctness_in_cabinet(exam, *, is_profile_results):

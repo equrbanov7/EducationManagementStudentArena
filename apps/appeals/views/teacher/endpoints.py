@@ -259,20 +259,35 @@ def review_appeal(request, appeal_id):
 
     if request.method == "POST":
         score_before, _, _ = _current_review_score(appeal, is_test)
-        # Validasiya: qərar verilən hər item üçün cavab mətni məcburidir.
+        # Validasiya: (1) kilidli olmayan HƏR sual üçün qərar verilməlidir —
+        # apellyasiya açıldıqdan sonra yarımçıq qərar saxlanıla bilməz; (2) qərar
+        # verilən hər item üçün izah/cavab mətni məcburidir. Qərarsızlıq prioritetdir
+        # (JS gate ilə eyni), ona görə hər iki halı sayıb sonra qərar veririk.
         decisions = []
         error_message = ""
+        undecided_count = 0
+        missing_response = False
         for item in items:
             if _edit_locked(item):
                 continue  # 5 dəq keçib — kilidli, dəyişdirilə bilməz
             decision = (request.POST.get(f"decision_{item.id}") or "").strip()
             response_text = (request.POST.get(f"response_{item.id}") or "").strip()
-            if decision in ("accept", "reject"):
-                if not response_text:
-                    error_message = pgettext("appeals.view.message", "Hər qərar üçün izah/cavab mətni yazmalısınız.")
-                    break
-                was_decided = item.status in final_item_statuses
-                decisions.append((item, decision, response_text, was_decided))
+            if decision not in ("accept", "reject"):
+                undecided_count += 1
+                continue
+            if not response_text:
+                missing_response = True
+                continue
+            was_decided = item.status in final_item_statuses
+            decisions.append((item, decision, response_text, was_decided))
+
+        if undecided_count > 0:
+            error_message = pgettext(
+                "appeals.view.message",
+                "Bütün suallara qərar verməlisiniz — bəzi suallar qərarsız qalıb.",
+            )
+        elif missing_response:
+            error_message = pgettext("appeals.view.message", "Hər qərar üçün izah/cavab mətni yazmalısınız.")
 
         if not error_message:
             for item, decision, response_text, was_decided in decisions:

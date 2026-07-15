@@ -192,11 +192,28 @@ def can_user_start_new_attempt(exam, user):
     if active_attempt:
         return False, "active_attempt_exists"
 
-    max_attempts = exam.max_attempts_per_user
-    if max_attempts and get_finished_attempts_for_user(exam, user).count() >= max_attempts:
+    # Qrant-şüurlu: attempts_left_for() qlobal max_attempts_per_user-in üstünə
+    # həmin tələbəyə verilmiş əlavə cəhdləri (StudentExamAttemptGrant) də sayır.
+    # None = limitsiz. Köhnə versiya yalnız qlobal limiti yoxlayır və müəllimin
+    # verdiyi "ikinci şans"ı görmürdü.
+    attempts_left = exam.attempts_left_for(user)
+    if attempts_left is not None and attempts_left <= 0:
         return False, "max_attempts_reached"
 
     return True, "ok"
+
+
+def get_effective_max_attempts(exam, user):
+    """Bu tələbə üçün EFFEKTİV maksimal cəhd sayı = qlobal limit + qrant(lar).
+
+    Mesajlarda ("ən çox N cəhd") düzgün rəqəmin göstərilməsi üçün — müəllim əlavə
+    cəhd veribsə, tələbənin real haqqı qlobal ``max_attempts_per_user``-dan çoxdur.
+    Limitsizdirsə (limit 0/None) None qaytarır.
+    """
+    if not exam.max_attempts_per_user:
+        return None
+    extra = exam.attempt_grants.filter(student=user).values_list("extra_attempts", flat=True).first() or 0
+    return exam.max_attempts_per_user + extra
 
 
 def _next_attempt_number(exam, user) -> int:
@@ -273,8 +290,7 @@ def _build_exam_result_url(exam, attempt, return_to):
 
 
 def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
-    max_attempts = exam.max_attempts_per_user
-    if not max_attempts or not exam.is_active or exam.is_before_start() or exam.is_after_end():
+    if not exam.max_attempts_per_user or not exam.is_active or exam.is_before_start() or exam.is_after_end():
         return ""
 
     return_to = current_return_to(request)
@@ -282,11 +298,17 @@ def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
     if get_active_attempt_for_user(exam, user):
         return ""
 
-    finished_qs = get_finished_attempts_for_user(exam, user)
-    if finished_qs.count() < max_attempts:
+    # Qrant-şüurlu limit yoxlaması: müəllimin verdiyi əlavə cəhd(lər) qlobal
+    # limitin üstünə gəlir. attempts_left_for None (limitsiz) və ya >0 qaytarırsa
+    # tələbənin hələ cəhd haqqı var — köhnə nəticə səhifəsinə atmırıq. Əvvəl bu
+    # helper yalnız finished-count >= max_attempts yoxlayırdı və qrantı gözardı
+    # edib "ikinci şans" verilmiş tələbəni geri atırdı (can_user_start icazə
+    # versə belə).
+    attempts_left = exam.attempts_left_for(user)
+    if attempts_left is None or attempts_left > 0:
         return ""
 
-    last_attempt = finished_qs.first()
+    last_attempt = get_finished_attempts_for_user(exam, user).first()
     if not last_attempt:
         return ""
 
@@ -341,7 +363,9 @@ def _start_or_resume_attempt(request, exam: Exam):
                     )
                 )
 
-            max_attempts = exam.max_attempts_per_user
+            # Mesaj üçün effektiv limit (qlobal + qrant) — bounce yalnız effektiv
+            # limit dolduqda baş verir, ona görə tələbəyə real haqqını göstərək.
+            max_attempts = get_effective_max_attempts(exam, user) or exam.max_attempts_per_user
             attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, user)
             if attempt_limit_result_url:
                 messages.info(

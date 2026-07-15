@@ -9,7 +9,6 @@ from django.utils.translation import pgettext_lazy
 from apps.exams.constants import (
     ATTEMPT_FINISHED_STATUSES,
     EXAM_STATUS_ACTIVE,
-    EXAM_STATUS_ARCHIVED,
     EXAM_STATUS_DRAFT,
     EXAM_STATUS_SCHEDULED,
 )
@@ -308,16 +307,16 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         """
         Müəllim panelində qruplaşdırma üçün hesablanmış status:
 
-        * ``archived``  — müəllim arxivləyib (``is_archived``).
         * ``draft``     — hələ dərc edilməyib (``is_active`` = False).
         * ``scheduled`` — aktiv, amma başlama vaxtından əvvəl.
         * ``active``    — aktiv və indi tələbələrə açıqdır.
 
+        Qeyd: "arxiv" konsepti ləğv edildi — aktivləşdir/deaktiv et ilə eyni işi
+        görürdü. Deaktiv (draft) imtahan zaten gizli/başladıla bilməzdir.
+
         Mənbə yeganədir: şablonlar, KPI sayğacları və filtrlər hamısı bu
         propertydən istifadə edir ki, status məntiqi bir yerdə qalsın.
         """
-        if self.is_archived:
-            return EXAM_STATUS_ARCHIVED
         if not self.is_active:
             return EXAM_STATUS_DRAFT
         if self.is_before_start():

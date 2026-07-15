@@ -37,7 +37,11 @@
 
         var i18n = {
             needResponse: form.getAttribute("data-i18n-need-response") || gettext("Cavab/izah mətni yazın."),
-            decisions: form.getAttribute("data-i18n-decisions") || gettext("{n} qərar verildi")
+            decisions: form.getAttribute("data-i18n-decisions") || gettext("{n} qərar verildi"),
+            incompleteTitle: form.getAttribute("data-i18n-incomplete-title") || gettext("Bütün suallara qərar verin"),
+            incompleteBody: form.getAttribute("data-i18n-incomplete-body")
+                || gettext("Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:"),
+            incompleteOk: form.getAttribute("data-i18n-incomplete-ok") || gettext("Anladım")
         };
         var currentScore = num(form.getAttribute("data-current-score"));
         var rawMax = form.getAttribute("data-max-score");
@@ -177,6 +181,43 @@
             return editable.filter(isDecided);
         }
 
+        function undecidedCards() {
+            return editable.filter(function (c) { return !isDecided(c); });
+        }
+
+        function cardNumber(card) {
+            var el = card.querySelector(".appeal-question-number");
+            return el ? (el.textContent || "").trim() : "";
+        }
+
+        // Mərkəzi xəbərdarlıq pəncərəsi — Bootstrap modal yığını (z-index) problemi
+        // olmasın deyə JS-lə qurulur; həm manage-appeals, həm appeal-stats modalında işləyir.
+        function showIncompleteModal(missingNumbers) {
+            var existing = document.querySelector(".appeal-incomplete-overlay");
+            if (existing) { existing.parentNode.removeChild(existing); }
+            var overlay = document.createElement("div");
+            overlay.className = "appeal-incomplete-overlay";
+            var numbers = missingNumbers.map(function (n) {
+                return '<span class="appeal-incomplete__chip">' + n + "</span>";
+            }).join("");
+            overlay.innerHTML =
+                '<div class="appeal-incomplete__box" role="alertdialog" aria-modal="true">' +
+                '<div class="appeal-incomplete__icon"><i class="fas fa-triangle-exclamation"></i></div>' +
+                '<h3 class="appeal-incomplete__title">' + i18n.incompleteTitle + "</h3>" +
+                '<p class="appeal-incomplete__body">' + i18n.incompleteBody + "</p>" +
+                '<div class="appeal-incomplete__chips">' + numbers + "</div>" +
+                '<button type="button" class="btn btn-primary appeal-incomplete__ok">' + i18n.incompleteOk + "</button>" +
+                "</div>";
+            function close() { if (overlay.parentNode) { overlay.parentNode.removeChild(overlay); } }
+            overlay.addEventListener("click", function (e) { if (e.target === overlay) { close(); } });
+            overlay.querySelector(".appeal-incomplete__ok").addEventListener("click", close);
+            document.addEventListener("keydown", function esc(e) {
+                if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+            });
+            document.body.appendChild(overlay);
+            overlay.querySelector(".appeal-incomplete__ok").focus();
+        }
+
         function updateSummary() {
             if (countEl) {
                 countEl.textContent = format(i18n.decisions, { n: decidedCards().length });
@@ -192,6 +233,7 @@
             if (p.decision) {
                 p.decision.addEventListener("change", function () {
                     reflectDecision(card, true);
+                    if (isDecided(card)) { card.classList.remove("is-undecided"); }
                     if (submitAttempted) { showError(card, true); }
                     updateSummary();
                 });
@@ -209,6 +251,19 @@
 
         form.addEventListener("submit", function (e) {
             submitAttempted = true;
+            // 1) Bütün (kilidli olmayan) suallara qərar verilməlidir — yarımçıq
+            //    qərar saxlanıla bilməz. Qərarsız qalanları mərkəzi pəncərədə göstər.
+            var undecided = undecidedCards();
+            if (undecided.length > 0) {
+                e.preventDefault();
+                undecided.forEach(function (c) { c.classList.add("has-error", "is-undecided"); });
+                showIncompleteModal(undecided.map(cardNumber).filter(Boolean));
+                if (undecided[0].scrollIntoView) {
+                    undecided[0].scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+                return;
+            }
+            // 2) Qərar verilən hər kart üçün izah tələb olunur.
             var invalid = decidedCards().filter(function (c) { return !isValid(c); });
             if (invalid.length > 0) {
                 e.preventDefault();

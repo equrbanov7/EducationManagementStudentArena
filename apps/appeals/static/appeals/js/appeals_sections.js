@@ -26,6 +26,15 @@
         return el && el.closest ? el.closest('[data-profile-section-panel="' + section + '"]') : null;
     }
 
+    // Reviewer qərar modalı həm "Apellyasiyalar" (manage-appeals), həm də
+    // "Apellyasiya statistikası" (appeal-stats) bölmələrində açıla bilər — hər
+    // ikisini tanıyan ümumi panel axtarışı.
+    function reviewPanelFor(el) {
+        return el && el.closest
+            ? el.closest('[data-profile-section-panel="manage-appeals"], [data-profile-section-panel="appeal-stats"]')
+            : null;
+    }
+
     function loadErrorText(panel) {
         return (panel && panel.getAttribute("data-i18n-load-error")) || "Yüklənmə alınmadı, yenidən cəhd edin.";
     }
@@ -280,7 +289,7 @@
     /* ── Reviewer: "Bax" → qərar modalı ────────────────────────────────── */
 
     window.EMSDelegate.on("click", "[data-appeal-review-url]", function (event, link) {
-        var panel = panelFor(link, "manage-appeals");
+        var panel = reviewPanelFor(link);
         if (!panel) { return; }
         var modalEl = panel.querySelector("[data-manage-review-modal]");
         var modalBody = modalEl ? modalEl.querySelector("[data-manage-modal-body]") : null;
@@ -301,7 +310,7 @@
 
     // Detal daxilində geri / ləğv → modalı bağla və siyahını yenilə.
     window.EMSDelegate.on("click", "[data-manage-detail-back], [data-review-cancel]", function (event, el) {
-        var panel = panelFor(el, "manage-appeals");
+        var panel = reviewPanelFor(el);
         if (!panel) { return; }
         event.preventDefault();
         var modal = getModal(panel.querySelector("[data-manage-review-modal]"));
@@ -314,7 +323,7 @@
 
     // Qərar formu submit → AJAX (client validation appeals_review.js-də).
     window.EMSDelegate.on("submit", "[data-appeals-review-form]", function (event, form) {
-        var panel = panelFor(form, "manage-appeals");
+        var panel = reviewPanelFor(form);
         if (!panel) { return; }
         if (event.defaultPrevented) { return; } // client validation bloklayıb
         event.preventDefault();
@@ -357,4 +366,63 @@
         var body = modalEl.querySelector("[data-manage-modal-body]");
         if (body) { body.innerHTML = LOADING_HTML; }
     });
+
+    /* ── Siyahıdakı "qalan vaxt" sayğacı — canlı tick ─────────────────────
+       Server-render yalnız başlanğıc dəyəri verir; sekmə açıq qalsa da
+       (başqa sekmədə olsanız belə) hər saniyə burda dekrementlənir.
+       AJAX filtr swap-ından sonra köhnə node-lar DOM-dan çıxır (isConnected
+       false olur) və siyahıdan silinir; yeni gələn [data-appeal-countdown]
+       elementlər hər tick-də (scanCountdowns) avtomatik tutulur. ────────── */
+    var activeCountdowns = [];
+
+    function pad2(n) { return (n < 10 ? "0" : "") + n; }
+
+    function renderCountdown(el, remaining) {
+        el.textContent = pad2(Math.floor(remaining / 60)) + ":" + pad2(remaining % 60);
+    }
+
+    function bindCountdown(el) {
+        if (!el || el.getAttribute("data-countdown-bound") === "1") { return; }
+        var remaining = parseInt(el.getAttribute("data-appeal-countdown"), 10);
+        if (isNaN(remaining)) { return; }
+        el.setAttribute("data-countdown-bound", "1");
+        var windowBox = el.closest("[data-review-window]");
+        if (remaining <= 0) {
+            renderCountdown(el, 0);
+            if (windowBox) { windowBox.classList.add("is-expired"); }
+            return;
+        }
+        renderCountdown(el, remaining);
+        activeCountdowns.push({ el: el, remaining: remaining, windowBox: windowBox });
+    }
+
+    function scanCountdowns(root) {
+        var scope = (root && root.querySelectorAll) ? root : document;
+        Array.prototype.forEach.call(scope.querySelectorAll("[data-appeal-countdown]"), bindCountdown);
+    }
+
+    function tickCountdowns() {
+        scanCountdowns(document);
+        activeCountdowns = activeCountdowns.filter(function (c) {
+            if (!c.el.isConnected) { return false; }
+            c.remaining -= 1;
+            if (c.remaining <= 0) {
+                renderCountdown(c.el, 0);
+                if (c.windowBox) { c.windowBox.classList.add("is-expired"); }
+                return false;
+            }
+            renderCountdown(c.el, c.remaining);
+            return true;
+        });
+    }
+
+    window.setInterval(tickCountdowns, 1000);
+
+    if (window.EMSReady) {
+        window.EMSReady(function () { scanCountdowns(document); });
+    } else if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () { scanCountdowns(document); });
+    } else {
+        scanCountdowns(document);
+    }
 })();

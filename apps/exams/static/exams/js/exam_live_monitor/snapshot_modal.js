@@ -199,6 +199,14 @@
         sLabel = d.checked_by_teacher ? u.t(ctx, "teacher_score_label", gettext("Qiymət")) : u.t(ctx, "auto_score_label", gettext("Avtomatik nəticə"));
       }
       scoreBlock = '<div class="mon-metric"><div class="mm-v" style="color:#16a34a">' + sVal + '</div><div class="mm-l">' + u.esc(sLabel) + '</div></div>';
+    } else if (d.live_score_percent != null) {
+      // İmtahan davam edərkən cari (müvəqqəti) avtomatik bal — cavablanmamış
+      // suallar səhv sayılır, ona görə imtahan indi bitsəydi neçə bal olardısını
+      // göstərir. Yaşıldan fərqli (mavi) rəng ilə "hələ yekun deyil" bildirir.
+      var liveDetail = (d.live_score != null && d.live_max_score != null)
+        ? '<div class="mm-sub">' + u.esc(d.live_score) + '/' + u.esc(d.live_max_score) + '</div>' : '';
+      scoreBlock = '<div class="mon-metric mon-metric--live"><div class="mm-v" style="color:#2563eb">' + d.live_score_percent + '%</div>' +
+        '<div class="mm-l">' + u.esc(u.t(ctx, "live_score_label", gettext("Cari bal (canlı)"))) + '</div>' + liveDetail + '</div>';
     }
     var incHtml = (d.incidents && d.incidents.length) ? d.incidents.map(function (e) {
       return '<div class="inc-item"><i class="fas fa-circle" style="font-size:0.5rem;color:#dc3545"></i> ' +
@@ -249,6 +257,14 @@
       if (cell) openModal(ctx, cell.getAttribute("data-attempt"));
     });
     u.$("modalClose").addEventListener("click", function () { closeModal(ctx); });
+    // "Yenilə" — modal açıq qalarkən performans üçün avtomatik poll YOXDUR;
+    // nəzarətçi bu düymə ilə cari cavabları və canlı balı yenidən çəkir.
+    var refreshBtn = u.$("modalRefreshBtn");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", function () {
+        if (ctx.currentAttempt) openModal(ctx, ctx.currentAttempt);
+      });
+    }
     u.$("modalBody").addEventListener("click", function (e) {
       var toggle = e.target.closest("[data-codetoggle]");
       if (!toggle) return;

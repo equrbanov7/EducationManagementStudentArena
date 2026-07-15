@@ -25,40 +25,33 @@
         markDirty();
     }
 
-    // ── Seminar/lab xanası: bal + q/b. Bal yazılıbsa iştirak avtomatik i/e. ──
-    function syncSemCell(semcell) {
-        var td = semcell.closest("td");
-        var att = td.querySelector("[data-jd-att]");
-        var score = semcell.querySelector("[data-jd-score]");
-        var qb = semcell.querySelector("[data-jd-qb]");
-        if (!att) return;
-        if (qb.classList.contains("is-active")) {
-            att.value = "absent";
-        } else if (score && score.value !== "") {
-            att.value = "present";
+    // ── Seminar/lab xanası: tək bootstrap-select (q/b · i/e · bal 0–10). ──
+    // Seçim gizli att/score sahələrini sinxronlayır; bal seçilsə i/e avtomatik.
+    function applySemSelect(select) {
+        var td = select.closest("td");
+        if (!td) return;
+        var att = td.querySelector("[data-jd-sem-att]");
+        var score = td.querySelector("[data-jd-sem-score]");
+        var v = select.value;
+        if (v === "qb") {
+            if (att) att.value = "absent";
+            if (score) score.value = "";
+        } else if (v === "ie") {
+            if (att) att.value = "present";
+            if (score) score.value = "";
+        } else if (v === "") {
+            if (att) att.value = "";
+            if (score) score.value = "";
         } else {
-            // toxunulmamış/boş xana: mövcud i/e qalır, yeni işarə yazılmır
-            if (att.value === "absent") att.value = "";
+            // rəqəmsal bal → iştirak avtomatik i/e (present)
+            if (att) att.value = "present";
+            if (score) score.value = v;
         }
     }
 
-    function setSemCell(semcell, mode) {
-        var score = semcell.querySelector("[data-jd-score]");
-        var qb = semcell.querySelector("[data-jd-qb]");
-        if (mode === "absent") {
-            qb.classList.add("is-active");
-            if (score) score.value = "";
-        } else if (mode === "present") {
-            qb.classList.remove("is-active");
-            var att = semcell.closest("td").querySelector("[data-jd-att]");
-            if (att) att.value = "present";
-            markDirty();
-            return;
-        } else {
-            qb.classList.remove("is-active");
-        }
-        syncSemCell(semcell);
-        markDirty();
+    // Cədvəl başlığı bulk düyməsi: q/b → "qb", i/e → "ie" (bal saxlanılmır).
+    function bulkSemSelect(select, mode) {
+        setSelectValue(select, mode === "absent" ? "qb" : "ie");
     }
 
     // ── Stepper ↔ tab sinxronu ────────────────────────────────────────────
@@ -108,13 +101,6 @@
             return;
         }
 
-        var qbChip = event.target.closest("[data-jd-qb]");
-        if (qbChip) {
-            var semcell = qbChip.closest("[data-jd-semcell]");
-            setSemCell(semcell, qbChip.classList.contains("is-active") ? "clear" : "absent");
-            return;
-        }
-
         var bulk = event.target.closest("[data-jd-bulk]");
         if (bulk) {
             var lessonId = bulk.getAttribute("data-lesson");
@@ -125,9 +111,9 @@
                     setCell(cellChip, value);
                 });
             document
-                .querySelectorAll('[data-jd-semcell][data-lesson="' + lessonId + '"]')
-                .forEach(function (cell) {
-                    setSemCell(cell, value);
+                .querySelectorAll('[data-jd-semselect][data-lesson="' + lessonId + '"]')
+                .forEach(function (sel) {
+                    bulkSemSelect(sel, value);
                 });
             return;
         }
@@ -140,6 +126,7 @@
             swChip.textContent = next;
             swChip.classList.toggle("sw-chip--on", next === "1");
             swChip.classList.toggle("sw-chip--off", next === "0");
+            recomputeSelfworkTotal(swChip.closest("[data-jd-sw-row]"));
             markDirty();
             return;
         }
@@ -223,6 +210,20 @@
     document.querySelectorAll("[data-jd-width]").forEach(function (bar) {
         bar.style.width = bar.getAttribute("data-jd-width") + "%";
     });
+
+    // ── Sərbəst iş CƏMİ (canlı — 1/0 çipləri) ─────────────────────────────
+    function recomputeSelfworkTotal(row) {
+        if (!row) return;
+        var total = 0;
+        row.querySelectorAll("[data-jd-sw]").forEach(function (input) {
+            if (input.value === "1") total += 1;
+        });
+        row.querySelectorAll("[data-jd-sw-ro]").forEach(function (ro) {
+            if (ro.getAttribute("data-jd-sw-ro") === "1") total += 1;
+        });
+        var out = row.querySelector("[data-jd-sw-total]");
+        if (out) out.textContent = String(total);
+    }
 
     // ── Kollokvium CƏMİ (canlı — K1+K2+K3) ────────────────────────────────
     function refreshKollokviumSums() {
@@ -320,10 +321,16 @@
             var input = chip.parentElement.querySelector("[data-jd-att]");
             if (input) paintChip(chip, input.value);
         });
-        document.querySelectorAll("[data-jd-semcell]").forEach(function (cell) {
-            var att = cell.closest("td").querySelector("[data-jd-att]");
-            var qb = cell.querySelector("[data-jd-qb]");
-            if (att && qb) qb.classList.toggle("is-active", att.value === "absent");
+        // Seminar select-ləri: gizli att/score dəyərlərinə uyğun seçimi bərpa et.
+        document.querySelectorAll("[data-jd-semselect]").forEach(function (sel) {
+            var td = sel.closest("td");
+            var att = td.querySelector("[data-jd-sem-att]");
+            var score = td.querySelector("[data-jd-sem-score]");
+            var v = "";
+            if (att && att.value === "absent") v = "qb";
+            else if (score && score.value !== "") v = score.value;
+            else if (att && att.value === "present") v = "ie";
+            setSelectValue(sel, v);
         });
         document.querySelectorAll("[data-jd-sw]").forEach(function (input) {
             var chip = input.parentElement.querySelector("[data-jd-sw-chip]");
@@ -332,19 +339,23 @@
             chip.classList.toggle("sw-chip--on", input.value === "1");
             chip.classList.toggle("sw-chip--off", input.value !== "1");
         });
+        document.querySelectorAll("[data-jd-sw-row]").forEach(recomputeSelfworkTotal);
         refreshKollokviumSums();
     }
 
     document.addEventListener("input", function (event) {
         var field = event.target;
         if (field.name && field.name.indexOf("kscore__") === 0) refreshKollokviumSums();
-        if (field.closest && field.closest("[data-jd-semcell]") && field.hasAttribute("data-jd-score")) {
-            var semcell = field.closest("[data-jd-semcell]");
-            var qb = semcell.querySelector("[data-jd-qb]");
-            if (field.value !== "" && qb) qb.classList.remove("is-active");
-            syncSemCell(semcell);
-        }
         if (field.closest && field.closest("form[data-jd-draft]")) markDirty();
+    });
+
+    // Seminar select (bootstrap vidcet native "change" göndərir) → att/score sync.
+    document.addEventListener("change", function (event) {
+        var sel = event.target.closest && event.target.closest("[data-jd-semselect]");
+        if (sel) {
+            applySemSelect(sel);
+            markDirty();
+        }
     });
 
     document.addEventListener("submit", function (event) {
@@ -353,6 +364,53 @@
 
     restoreDraft();
     refreshKollokviumSums();
+
+    // ── Sərbəst iş mövzusu silmə: təsdiq modalı (bal itkisi xəbərdarlığı) ──
+    function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = s == null ? "" : String(s);
+        return d.innerHTML;
+    }
+
+    function showSelfworkDeleteModal(delForm) {
+        var title = (delForm.getAttribute("data-topic-title") || "").trim();
+        var existing = document.querySelector(".jd-sw-del-overlay");
+        if (existing) { existing.parentNode.removeChild(existing); }
+        var overlay = document.createElement("div");
+        overlay.className = "jd-sw-del-overlay";
+        overlay.innerHTML =
+            '<div class="jd-sw-del__box" role="alertdialog" aria-modal="true">' +
+            '<div class="jd-sw-del__icon"><i class="fas fa-triangle-exclamation"></i></div>' +
+            '<h3 class="jd-sw-del__title">Mövzunu silmək?</h3>' +
+            (title ? '<div class="jd-sw-del__topic">“' + escapeHtml(title) + '”</div>' : '') +
+            '<p class="jd-sw-del__body">Bu mövzu silinəcək və <b>tələbələrin bu mövzu üzrə balları da silinəcək</b>. ' +
+            'Bu əməliyyat geri qaytarıla bilməz.</p>' +
+            '<div class="jd-sw-del__actions">' +
+            '<button type="button" class="jd-sw-del__cancel">Ləğv et</button>' +
+            '<button type="button" class="jd-sw-del__ok">Sil</button>' +
+            '</div></div>';
+        function close() { if (overlay.parentNode) { overlay.parentNode.removeChild(overlay); } }
+        overlay.addEventListener("click", function (e) { if (e.target === overlay) { close(); } });
+        overlay.querySelector(".jd-sw-del__cancel").addEventListener("click", close);
+        overlay.querySelector(".jd-sw-del__ok").addEventListener("click", function () {
+            delForm.setAttribute("data-sw-del-ok", "1");
+            close();
+            delForm.submit();
+        });
+        document.addEventListener("keydown", function esc(e) {
+            if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".jd-sw-del__ok").focus();
+    }
+
+    document.addEventListener("submit", function (event) {
+        var delForm = event.target;
+        if (!delForm.matches || !delForm.matches("[data-jd-sw-del]")) { return; }
+        if (delForm.getAttribute("data-sw-del-ok") === "1") { return; } // təsdiqlənib
+        event.preventDefault();
+        showSelfworkDeleteModal(delForm);
+    }, true);
 
     // ── Yeni dərs / redaktə modalı ────────────────────────────────────────
     var modal = document.querySelector("[data-jd-lesson-modal]");

@@ -13,7 +13,7 @@
             <label class="analytics-period-label" for="analytics-period">{% trans "Semestr" context "registrar.analytics" %}</label>
             <select id="analytics-period" name="period" class="analytics-period-select" data-autosubmit>
                 {% for p in periods %}
-                <option value="{{ p.id }}" {% if analytics.period and p.id == analytics.period.id %}selected{% endif %}>{{ p.name }} · {{ p.academic_year }}</option>
+                <option value="{{ p.id }}" {% if analytics.period and p.id == analytics.period.id %}selected{% endif %}>{{ p.name }} · {{ p.year_display }}</option>
                 {% endfor %}
             </select>
             <noscript><button type="submit" class="journal-save-btn">{% trans "Göstər" context "registrar.analytics" %}</button></noscript>

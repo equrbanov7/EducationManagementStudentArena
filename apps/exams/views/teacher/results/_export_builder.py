@@ -113,8 +113,10 @@ def build_exam_results_xlsx_export(exam, attempts_list):
             att.user.username,
             att.user.email or "",
             att.get_status_display(),
-            att.started_at.replace(tzinfo=None) if att.started_at else "",
-            effective_finish.replace(tzinfo=None) if effective_finish else "",
+            # UTC saxlanan tarixi əvvəlcə yerli zonaya (Asia/Baku) çevir, sonra tz-i
+            # at — əks halda Excel UTC divar-saatını göstərir (UI-dən 4 saat geri).
+            timezone.localtime(att.started_at).replace(tzinfo=None) if att.started_at else "",
+            timezone.localtime(effective_finish).replace(tzinfo=None) if effective_finish else "",
             duration_str,
         ]
 

@@ -248,6 +248,102 @@ class WizardEnhancementsTests(TestCase):
         # Digər tələbəyə təsir etmir.
         self.assertEqual(exam.attempts_left_for(self.s2), 1)
 
+    def test_granted_extra_attempt_is_honoured_by_the_start_path(self):
+        """Regressiya: qrant yalnız ``attempts_left_for``-da yox, START yolunda da
+        hörmət olunmalıdır. Xəta: ``can_user_start`` qrantı sayırdı (imtahan
+        görünürdü), amma cəhd YARADAN yol (``get_attempt_limit_result_redirect_url``
+        / ``can_user_start_new_attempt``) qrantı gözardı edib tələbəni köhnə
+        nəticəyə atırdı. Bu testlər həmin start-yol helper-lərini örtür."""
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.contrib.sessions.backends.db import SessionStore
+        from django.test import RequestFactory
+
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
+        from apps.exams.services.attempts import (
+            _start_or_resume_attempt,
+            can_user_start_new_attempt,
+            get_attempt_limit_result_redirect_url,
+            get_effective_max_attempts,
+        )
+
+        def _request(user):
+            req = RequestFactory().post("/exams/start/")
+            req.user = user
+            req.session = SessionStore()
+            req._messages = FallbackStorage(req)
+            return req
+
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Resit Exam",
+            organization=self.org,
+            is_active=True,
+            exam_type="test",
+            max_attempts_per_user=1,
+        )
+        for i in range(2):
+            q = ExamQuestion.objects.create(exam=exam, text=f"Q{i}", order=i + 1, answer_mode="single", points=1)
+            ExamQuestionOption.objects.create(question=q, text="right", is_correct=True)
+            ExamQuestionOption.objects.create(question=q, text="wrong", is_correct=False)
+        # Tələbə yeganə haqqını istifadə edib (limit dolub).
+        ExamAttempt.objects.create(user=self.s1, exam=exam, attempt_number=1, status="submitted")
+
+        # Qrantsız → hər iki gate bloklayır, effektiv limit = qlobal (1).
+        self.assertEqual(can_user_start_new_attempt(exam, self.s1), (False, "max_attempts_reached"))
+        self.assertTrue(get_attempt_limit_result_redirect_url(_request(self.s1), exam, self.s1))  # bounce
+        self.assertEqual(get_effective_max_attempts(exam, self.s1), 1)
+
+        # Müəllim +1 verir → hər iki gate açılır, effektiv limit = 2.
+        StudentExamAttemptGrant.objects.create(exam=exam, student=self.s1, extra_attempts=1, granted_by=self.teacher)
+        self.assertEqual(can_user_start_new_attempt(exam, self.s1), (True, "ok"))
+        self.assertEqual(get_attempt_limit_result_redirect_url(_request(self.s1), exam, self.s1), "")  # bounce YOX
+        self.assertEqual(get_effective_max_attempts(exam, self.s1), 2)
+
+        # Və start yolu REAL yeni cəhd yaradır (köhnə nəticəyə atmır).
+        before = exam.attempts.filter(user=self.s1).count()
+        _start_or_resume_attempt(_request(self.s1), exam)
+        self.assertEqual(exam.attempts.filter(user=self.s1).count(), before + 1)
+        self.assertTrue(exam.attempts.filter(user=self.s1, status="in_progress").exists())
+
+    def test_group_grant_creates_per_student_grants(self):
+        """#6: bütöv qrupa "ikinci şans" → qrupun hər üzvünə fərdi grant yazılır
+        (əvvəl qrup-səviyyəli grant mexanizmi ümumiyyətlə yox idi)."""
+        from apps.exams.models import StudentExamAttemptGrant
+
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Group Grant Exam",
+            organization=self.org,
+            is_active=True,
+            exam_type="test",
+            max_attempts_per_user=1,
+        )
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="GG")
+        group.students.add(self.s1, self.s2)
+        # Hər üzv yeganə haqqını istifadə edib.
+        ExamAttempt.objects.create(user=self.s1, exam=exam, attempt_number=1, status="submitted")
+        ExamAttempt.objects.create(user=self.s2, exam=exam, attempt_number=1, status="submitted")
+        self.assertEqual(exam.attempts_left_for(self.s1), 0)
+
+        client = Client()
+        client.force_login(self.teacher)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        resp = client.post(
+            reverse("exams:grant_extra_attempt_group", args=[exam.slug]),
+            {"group_id": str(group.id)},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["granted_count"], 2)
+        self.assertEqual(StudentExamAttemptGrant.objects.filter(exam=exam).count(), 2)
+        # Grant start yolunda görünür (attempts_left artıq 1).
+        self.assertEqual(exam.attempts_left_for(self.s1), 1)
+        self.assertEqual(exam.attempts_left_for(self.s2), 1)
+
     # ── Modal partial renders with the new hooks ──────────────────────────
     def test_create_modal_partial_renders_new_controls(self):
         from django.template.loader import render_to_string

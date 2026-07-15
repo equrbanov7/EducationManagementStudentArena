@@ -83,9 +83,25 @@ def _filtered_attempts(request, organization):
     if group_ids:
         qs = qs.filter(exam__allowed_groups__id__in=group_ids)
 
+    # Köhnə birləşmiş "units" filtri (geriyə-uyğunluq — bookmarked URL-lər).
     unit_ids = _csv_ints(request.GET.get("units"))
     if unit_ids:
         qs = qs.filter(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
+
+    # Ayrı FAKÜLTƏ filtri: qrupun org_unit-inin VALİDEYNİ fakültədir.
+    faculty_ids = _csv_ints(request.GET.get("faculties"))
+    if faculty_ids:
+        qs = qs.filter(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
+
+    # Ayrı KAFEDRA filtri: qrupun org_unit-i birbaşa kafedradır.
+    department_ids = _csv_ints(request.GET.get("departments"))
+    if department_ids:
+        qs = qs.filter(exam__allowed_groups__org_unit_id__in=department_ids)
+
+    # MÜƏLLİM (imtahan müəllifi) filtri.
+    teacher_ids = _csv_ints(request.GET.get("teachers"))
+    if teacher_ids:
+        qs = qs.filter(exam__author_id__in=teacher_ids)
 
     exam_type = (request.GET.get("type") or "").strip()
     if exam_type:
@@ -256,12 +272,39 @@ def exam_center_stats_filters(request):
     units = list(
         OrgUnit.objects.filter(organization=organization, is_active=True)
         .order_by("name")
-        .values("id", "name", "unit_type")
+        .values("id", "name", "unit_type", "parent_id")
     )
+    # Fakültə (faculty/deanery) və kafedra (chair/department) ayrı siyahılara bölünür
+    # ki, iki müstəqil filtr olsun (kaskad üçün kafedrada parent_id qalır).
+    faculty_types = {"faculty", "deanery"}
+    department_types = {"chair", "department"}
+    faculties = [{"id": u["id"], "name": u["name"]} for u in units if u["unit_type"] in faculty_types]
+    departments = [
+        {"id": u["id"], "name": u["name"], "parent_id": u["parent_id"]}
+        for u in units
+        if u["unit_type"] in department_types
+    ]
+
+    teachers = [
+        {
+            "id": row["author_id"],
+            "name": (f"{row['author__first_name']} {row['author__last_name']}".strip() or row["author__username"]),
+        }
+        for row in (
+            Exam.objects.filter(organization=organization, author__isnull=False)
+            .values("author_id", "author__first_name", "author__last_name", "author__username")
+            .distinct()
+            .order_by("author__first_name", "author__last_name")
+        )
+    ]
+
     return JsonResponse(
         {
             "years": years,
-            "units": units,
+            "units": units,  # geriyə-uyğunluq
+            "faculties": faculties,
+            "departments": departments,
+            "teachers": teachers,
             "types": [{"value": v, "label": str(lbl)} for v, lbl in exam_type_choices],
         }
     )

@@ -110,6 +110,13 @@
             meta.push('<span><i class="fas fa-user"></i> ' + esc(d.student_username || "") + "</span>");
             if (d.has_attempt) {
                 meta.push('<span><i class="fas fa-list-check"></i> ' + esc(d.answered) + " / " + esc(d.total_questions) + " cavab</span>");
+                // Bal: bitmiş cəhd üçün yekun faiz, davam edən test üçün canlı
+                // (müvəqqəti) faiz — imtahan indi bitsəydi neçə bal olardı.
+                if (d.is_finished && d.score_percent != null) {
+                    meta.push('<span class="fxc-pill fxc-pill--score"><i class="fas fa-award"></i> ' + esc(d.score_percent) + "%</span>");
+                } else if (!d.is_finished && d.live_score_percent != null) {
+                    meta.push('<span class="fxc-pill fxc-pill--score"><i class="fas fa-gauge-high"></i> Cari bal: ' + esc(d.live_score_percent) + "%</span>");
+                }
                 if (d.supervision_status && d.supervision_status !== "active") {
                     meta.push('<span class="fxc-pill fxc-pill--warn">' + esc(supLabel(d.supervision_status)) + "</span>");
                 }
