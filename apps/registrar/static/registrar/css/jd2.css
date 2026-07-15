@@ -411,3 +411,63 @@ td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
 .jd2-semselect .bootstrap-single-select__toggle.is-placeholder { color: var(--j-soft); }
 .jd2-semselect .bootstrap-single-select__caret { font-size: 9px; }
 .jd2-semselect .dropdown-menu { min-width: 92px; max-height: 260px; overflow-y: auto; }
+
+/* ── Sərbəst iş mövzusu silmə təsdiq modalı (bal itkisi xəbərdarlığı) ─────── */
+.jd-sw-del-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.55);
+    animation: jd-sw-del-fade 0.15s ease-out;
+}
+
+@keyframes jd-sw-del-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.jd-sw-del__box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.6rem 1.6rem 1.35rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
+.jd-sw-del__icon {
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ems-danger-100, #fee2e2);
+    color: var(--ems-danger-600, #dc2626);
+    font-size: 1.45rem;
+}
+
+.jd-sw-del__title { font-size: 1.12rem; font-weight: 800; color: var(--ems-neutral-900, #0f172a); margin: 0 0 0.3rem; }
+.jd-sw-del__topic { font-size: 0.9rem; font-weight: 700; color: var(--ems-neutral-600, #475569); margin-bottom: 0.5rem; }
+.jd-sw-del__body { font-size: 0.88rem; color: var(--ems-neutral-600, #475569); margin: 0 0 1.2rem; line-height: 1.45; }
+.jd-sw-del__body b { color: var(--ems-danger-700, #b91c1c); }
+
+.jd-sw-del__actions { display: flex; gap: 10px; justify-content: center; }
+
+.jd-sw-del__cancel,
+.jd-sw-del__ok {
+    min-width: 120px;
+    padding: 0.6rem 1rem;
+    border-radius: 11px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.jd-sw-del__cancel { background: var(--ems-neutral-100, #f1f5f9); color: var(--ems-neutral-700, #334155); border-color: var(--ems-neutral-200, #e2e8f0); }
+.jd-sw-del__ok { background: var(--ems-danger-600, #dc2626); color: #fff; }
+.jd-sw-del__ok:hover { background: var(--ems-danger-700, #b91c1c); }

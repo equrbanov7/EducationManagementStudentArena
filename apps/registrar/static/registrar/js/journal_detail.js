@@ -48,13 +48,34 @@
     });
 
     // Bərpa: URL hash → sessionStorage → default (grid).
-    var initial = (window.location.hash || "").replace("#tab-", "");
+    // Server hər iki formatı göndərə bilər: "#serbest" (journal_actions._back) və ya
+    // "#tab-serbest" — ona görə ilk "#" və opsional "tab-" prefiksini soyuruq.
+    // (Əvvəl yalnız "#tab-" soyulurdu, "#serbest" tanınmır, POST-dan sonra tab
+    //  Davamiyyət-ə atırdı.)
+    var initial = (window.location.hash || "").replace(/^#(?:tab-)?/, "");
     if (!initial) {
       try { initial = window.sessionStorage.getItem(storageKey) || ""; } catch (e) { /* ignore */ }
     }
     if (initial && initial !== "grid") {
       activate(initial, false);
     }
+
+    // Sərbəst iş (və digər) form POST-u tam səhifə reload edir → scroll yuxarı atır.
+    // Submit-dən əvvəl scroll mövqeyini saxla, reload-dan sonra bərpa et.
+    var scrollKey = "jd-scroll:" + (page.getAttribute("data-offering-id") || "");
+    page.addEventListener("submit", function () {
+      try { window.sessionStorage.setItem(scrollKey, String(window.scrollY || window.pageYOffset || 0)); } catch (e) { /* ignore */ }
+    }, true);
+    try {
+      var savedScroll = window.sessionStorage.getItem(scrollKey);
+      if (savedScroll !== null) {
+        window.sessionStorage.removeItem(scrollKey);
+        var y = parseInt(savedScroll, 10);
+        if (!isNaN(y) && y > 0) {
+          window.requestAnimationFrame(function () { window.scrollTo(0, y); });
+        }
+      }
+    } catch (e) { /* ignore */ }
   }
 
   // ── Excel-vari klaviatura keçidi ─────────────────────────────────────────

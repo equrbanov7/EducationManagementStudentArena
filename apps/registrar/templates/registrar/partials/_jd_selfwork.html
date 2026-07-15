@@ -19,7 +19,7 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                 {% endif %}
                 {% if can_edit %}
                 <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-del"
-                      onsubmit="return confirm('{% trans "Mövzunu silmək? (Yalnız heç kimə işarə qoyulmayıbsa mümkündür.)" context "registrar.journal" %}');">
+                      data-jd-sw-del data-topic-title="{{ slot.topic.title }}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete_topic">
                     <input type="hidden" name="topic_id" value="{{ slot.topic.id }}">
