@@ -191,6 +191,24 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 if len(variant_langs) == 1:
                     self.initial["language"] = variant_langs[0]
 
+        # Dil seçimini imtahanın MÖVCUD aktiv variantları ilə məhdudlaşdır. Əks halda
+        # müəllim təsadüfən imtahanda olmayan dili seçib ona aktiv variant yaradır
+        # (ensure_default_variant), və tələbənin dil seçimində "olmayan" dil görünür.
+        # Yeni dil variantı yalnız dil menecerindən (languages.add_variant) əlavə edilir.
+        if "language" in self.fields and self.exam is not None:
+            allowed = list(
+                dict.fromkeys(self.exam.language_variants.filter(is_active=True).values_list("language", flat=True))
+            )
+            # Redaktə: mövcud sualın dili həmişə seçimlərdə qalsın (data itməsin).
+            edit_instance = getattr(self, "instance", None)
+            if edit_instance and getattr(edit_instance, "pk", None) and edit_instance.language:
+                if edit_instance.language not in allowed:
+                    allowed.append(edit_instance.language)
+            if not allowed:
+                allowed = [DEFAULT_EXAM_LANGUAGE]
+            label_map = dict(self.fields["language"].choices)
+            self.fields["language"].choices = [(code, label_map.get(code, code)) for code in allowed]
+
         # Edit zamanı mövcud variantları inputlara doldur
         instance = getattr(self, "instance", None)
         if instance and instance.pk:

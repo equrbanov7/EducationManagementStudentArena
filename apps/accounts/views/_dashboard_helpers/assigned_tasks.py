@@ -140,7 +140,14 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             _extra_grant=Coalesce(_grant_sq, 0),
             _visible_result_attempts=Coalesce(_visible_result_sq, 0),
         )
-        .filter(_visible_result_attempts=0)
+        # Nəticə artıq görünürsə imtahan siyahıdan çıxır — AMMA tələbənin hələ
+        # cəhd haqqı varsa (məs. müəllim əlavə cəhd/qrant veribsə) yenidən görünsün.
+        # Əvvəl bu istisna qeyd-şərtsiz idi, ona görə qrant nəticə görünəndən sonra
+        # verilsə imtahan heç vaxt geri qayıtmırdı.
+        .filter(
+            Q(_visible_result_attempts=0)
+            | Q(max_attempts_per_user__gt=0, _finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
+        )
         .filter(
             Q(max_attempts_per_user__isnull=True)
             | Q(max_attempts_per_user=0)

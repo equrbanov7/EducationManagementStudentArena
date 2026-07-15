@@ -10,7 +10,7 @@ from .actions import (  # noqa: F401
     toggle_exam_archive,
     toggle_exam_results_visibility,
 )
-from .attempt_grants import grant_extra_attempt  # noqa: F401
+from .attempt_grants import grant_extra_attempt, grant_extra_attempt_group  # noqa: F401
 from .list_detail import (  # noqa: F401
     createAndEditExamView,
     teacher_exam_detail,
@@ -37,6 +37,7 @@ __all__ = [
     "restore_exam",
     "exam_available_question_count",
     "grant_extra_attempt",
+    "grant_extra_attempt_group",
     "group_search",
     "subject_search",
     "teacher_exam_detail",

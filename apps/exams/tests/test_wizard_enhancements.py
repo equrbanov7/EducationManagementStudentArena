@@ -305,6 +305,45 @@ class WizardEnhancementsTests(TestCase):
         self.assertEqual(exam.attempts.filter(user=self.s1).count(), before + 1)
         self.assertTrue(exam.attempts.filter(user=self.s1, status="in_progress").exists())
 
+    def test_group_grant_creates_per_student_grants(self):
+        """#6: bütöv qrupa "ikinci şans" → qrupun hər üzvünə fərdi grant yazılır
+        (əvvəl qrup-səviyyəli grant mexanizmi ümumiyyətlə yox idi)."""
+        from apps.exams.models import StudentExamAttemptGrant
+
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Group Grant Exam",
+            organization=self.org,
+            is_active=True,
+            exam_type="test",
+            max_attempts_per_user=1,
+        )
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="GG")
+        group.students.add(self.s1, self.s2)
+        # Hər üzv yeganə haqqını istifadə edib.
+        ExamAttempt.objects.create(user=self.s1, exam=exam, attempt_number=1, status="submitted")
+        ExamAttempt.objects.create(user=self.s2, exam=exam, attempt_number=1, status="submitted")
+        self.assertEqual(exam.attempts_left_for(self.s1), 0)
+
+        client = Client()
+        client.force_login(self.teacher)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        resp = client.post(
+            reverse("exams:grant_extra_attempt_group", args=[exam.slug]),
+            {"group_id": str(group.id)},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["granted_count"], 2)
+        self.assertEqual(StudentExamAttemptGrant.objects.filter(exam=exam).count(), 2)
+        # Grant start yolunda görünür (attempts_left artıq 1).
+        self.assertEqual(exam.attempts_left_for(self.s1), 1)
+        self.assertEqual(exam.attempts_left_for(self.s2), 1)
+
     # ── Modal partial renders with the new hooks ──────────────────────────
     def test_create_modal_partial_renders_new_controls(self):
         from django.template.loader import render_to_string

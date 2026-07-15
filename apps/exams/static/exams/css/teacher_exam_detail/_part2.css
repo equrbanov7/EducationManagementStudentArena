@@ -312,3 +312,24 @@
     }
 }
 
+
+/* "Aktivləşmək üçün sual əlavə et" qeydi (arxiv ləğvi ilə birlikdə) */
+.exam-activate-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--ems-warning-50, #fffbeb);
+    border: 1px solid var(--ems-warning-300, #fcd34d);
+    color: var(--ems-warning-800, #92400e);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.exam-activate-note i {
+    margin-top: 2px;
+    color: var(--ems-warning-600, #d97706);
+}

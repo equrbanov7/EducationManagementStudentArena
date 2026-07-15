@@ -86,7 +86,11 @@ def _count_assigned_exams(request, user) -> int:
             _extra_grant=Coalesce(grant_sq, 0),
             _visible_result_attempts=Coalesce(visible_result_sq, 0),
         )
-        .filter(_visible_result_attempts=0)
+        # Siyahı ilə eyni: nəticə görünsə də tələbənin cəhd haqqı (qrant) varsa say.
+        .filter(
+            Q(_visible_result_attempts=0)
+            | Q(max_attempts_per_user__gt=0, _finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
+        )
         .filter(
             Q(max_attempts_per_user__isnull=True)
             | Q(max_attempts_per_user=0)
