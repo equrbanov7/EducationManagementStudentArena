@@ -165,12 +165,11 @@ def add_selfwork_topic(*, offering, title) -> SelfWorkTopic | None:
 
 @transaction.atomic
 def delete_selfwork_topic(*, topic) -> bool:
-    """Mövzunu sil — yalnız heç kimə 'verilib' işarəsi yoxdursa (bal itməsin)."""
+    """Mövzunu sil. Bu mövzu üzrə tələbə işarələri (SelfWorkMark) də silinir
+    (topic FK CASCADE) — UI silmədən əvvəl bal itkisi barədə xəbərdarlıq göstərir."""
     if journal_is_locked(topic.offering):
         return False
-    if SelfWorkMark.objects.filter(topic=topic, done=True).exists():
-        return False
-    topic.delete()
+    topic.delete()  # SelfWorkMark-lar FK cascade ilə birlikdə silinir (bal da gedir)
     return True
 
 

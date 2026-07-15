@@ -6,7 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260712-3">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260712-5">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260715-jbatch2">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
 {% endblock %}
 
@@ -17,7 +17,7 @@
         <div class="jd2-mark">EU</div>
         <div>
             <h1 class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</h1>
-            <div class="jd2-pagesub">{% if offering.period %}{{ offering.period.academic_year }} — {{ offering.period.name }}{% endif %}</div>
+            <div class="jd2-pagesub">{% if offering.period %}{{ offering.period.year_display }} — {{ offering.period.name }}{% endif %}</div>
         </div>
     </div>
 
@@ -189,6 +189,6 @@
 {% endblock %}
 
 {% block extraJs %}
-    <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260705-1"></script>
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260713-jbatch"></script>
+    <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260715-jbatch2"></script>
 {% endblock %}

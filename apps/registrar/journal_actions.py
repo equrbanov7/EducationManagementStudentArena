@@ -128,9 +128,9 @@ def selfwork_action(request, offering_id):
     if action == "delete_topic":
         topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
         if journal_extras.delete_selfwork_topic(topic=topic):
-            messages.success(request, _("Mövzu silindi."))
+            messages.success(request, _("Mövzu (və üzrə balları) silindi."))
         else:
-            messages.error(request, _("Mövzu silinmədi — artıq təhvil işarələri var."))
+            messages.error(request, _("Mövzu silinmədi — jurnal bağlıdır."))
         return _back(offering, "serbest")
 
     # İşarə dəyişiklikləri: sw__<topic_id>__<enrollment_id> = 0|1

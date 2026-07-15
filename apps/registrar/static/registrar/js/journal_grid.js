@@ -365,6 +365,53 @@
     restoreDraft();
     refreshKollokviumSums();
 
+    // ── Sərbəst iş mövzusu silmə: təsdiq modalı (bal itkisi xəbərdarlığı) ──
+    function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = s == null ? "" : String(s);
+        return d.innerHTML;
+    }
+
+    function showSelfworkDeleteModal(delForm) {
+        var title = (delForm.getAttribute("data-topic-title") || "").trim();
+        var existing = document.querySelector(".jd-sw-del-overlay");
+        if (existing) { existing.parentNode.removeChild(existing); }
+        var overlay = document.createElement("div");
+        overlay.className = "jd-sw-del-overlay";
+        overlay.innerHTML =
+            '<div class="jd-sw-del__box" role="alertdialog" aria-modal="true">' +
+            '<div class="jd-sw-del__icon"><i class="fas fa-triangle-exclamation"></i></div>' +
+            '<h3 class="jd-sw-del__title">Mövzunu silmək?</h3>' +
+            (title ? '<div class="jd-sw-del__topic">“' + escapeHtml(title) + '”</div>' : '') +
+            '<p class="jd-sw-del__body">Bu mövzu silinəcək və <b>tələbələrin bu mövzu üzrə balları da silinəcək</b>. ' +
+            'Bu əməliyyat geri qaytarıla bilməz.</p>' +
+            '<div class="jd-sw-del__actions">' +
+            '<button type="button" class="jd-sw-del__cancel">Ləğv et</button>' +
+            '<button type="button" class="jd-sw-del__ok">Sil</button>' +
+            '</div></div>';
+        function close() { if (overlay.parentNode) { overlay.parentNode.removeChild(overlay); } }
+        overlay.addEventListener("click", function (e) { if (e.target === overlay) { close(); } });
+        overlay.querySelector(".jd-sw-del__cancel").addEventListener("click", close);
+        overlay.querySelector(".jd-sw-del__ok").addEventListener("click", function () {
+            delForm.setAttribute("data-sw-del-ok", "1");
+            close();
+            delForm.submit();
+        });
+        document.addEventListener("keydown", function esc(e) {
+            if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".jd-sw-del__ok").focus();
+    }
+
+    document.addEventListener("submit", function (event) {
+        var delForm = event.target;
+        if (!delForm.matches || !delForm.matches("[data-jd-sw-del]")) { return; }
+        if (delForm.getAttribute("data-sw-del-ok") === "1") { return; } // təsdiqlənib
+        event.preventDefault();
+        showSelfworkDeleteModal(delForm);
+    }, true);
+
     // ── Yeni dərs / redaktə modalı ────────────────────────────────────────
     var modal = document.querySelector("[data-jd-lesson-modal]");
     if (!modal) return;
