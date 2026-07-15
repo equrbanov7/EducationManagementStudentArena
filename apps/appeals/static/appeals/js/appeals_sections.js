@@ -26,6 +26,15 @@
         return el && el.closest ? el.closest('[data-profile-section-panel="' + section + '"]') : null;
     }
 
+    // Reviewer qərar modalı həm "Apellyasiyalar" (manage-appeals), həm də
+    // "Apellyasiya statistikası" (appeal-stats) bölmələrində açıla bilər — hər
+    // ikisini tanıyan ümumi panel axtarışı.
+    function reviewPanelFor(el) {
+        return el && el.closest
+            ? el.closest('[data-profile-section-panel="manage-appeals"], [data-profile-section-panel="appeal-stats"]')
+            : null;
+    }
+
     function loadErrorText(panel) {
         return (panel && panel.getAttribute("data-i18n-load-error")) || "Yüklənmə alınmadı, yenidən cəhd edin.";
     }
@@ -280,7 +289,7 @@
     /* ── Reviewer: "Bax" → qərar modalı ────────────────────────────────── */
 
     window.EMSDelegate.on("click", "[data-appeal-review-url]", function (event, link) {
-        var panel = panelFor(link, "manage-appeals");
+        var panel = reviewPanelFor(link);
         if (!panel) { return; }
         var modalEl = panel.querySelector("[data-manage-review-modal]");
         var modalBody = modalEl ? modalEl.querySelector("[data-manage-modal-body]") : null;
@@ -301,7 +310,7 @@
 
     // Detal daxilində geri / ləğv → modalı bağla və siyahını yenilə.
     window.EMSDelegate.on("click", "[data-manage-detail-back], [data-review-cancel]", function (event, el) {
-        var panel = panelFor(el, "manage-appeals");
+        var panel = reviewPanelFor(el);
         if (!panel) { return; }
         event.preventDefault();
         var modal = getModal(panel.querySelector("[data-manage-review-modal]"));
@@ -314,7 +323,7 @@
 
     // Qərar formu submit → AJAX (client validation appeals_review.js-də).
     window.EMSDelegate.on("submit", "[data-appeals-review-form]", function (event, form) {
-        var panel = panelFor(form, "manage-appeals");
+        var panel = reviewPanelFor(form);
         if (!panel) { return; }
         if (event.defaultPrevented) { return; } // client validation bloklayıb
         event.preventDefault();
