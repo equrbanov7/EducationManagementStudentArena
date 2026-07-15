@@ -9,15 +9,18 @@ davamiyyət/bal doldurur ki, elektron jurnal test edilə bilsin.
 
 import datetime
 
+from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from apps.exams.models import StudentGroup
 from apps.registrar import gradebook as gb
 from apps.registrar import journal_extras
 from apps.registrar.models import CourseOffering, Enrollment, LessonMark, SelfWorkTopic
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
+# exams/organizations modelləri app-registry ilə lazy alınır — registrar→exams /
+# registrar→organizations statik importu modul-sərhəd (dep-dövrü) qapısını pozur.
 User = get_user_model()
 
 
@@ -30,10 +33,11 @@ class Command(BaseCommand):
         parser.add_argument("--password", default="12345678", help="Yeni tələbələrin parolu.")
 
     def handle(self, *args, **opts):
-        with bypass_rls():
+        with rls_worker_atomic(), bypass_rls():
             self._run(opts)
 
     def _run(self, opts):
+        StudentGroup = django_apps.get_model("exams", "StudentGroup")
         group = StudentGroup.objects.filter(name__icontains=opts["group"]).order_by("id").first()
         if group is None:
             self.stderr.write(self.style.ERROR(f"Qrup tapılmadı: {opts['group']}"))
@@ -44,8 +48,7 @@ class Command(BaseCommand):
         # exams qrupunun org_unit-i ilə offering-ləri tapırıq.
         org_unit = group.org_unit
         if org_unit is None:
-            from apps.organizations.models import OrgUnit
-
+            OrgUnit = django_apps.get_model("organizations", "OrgUnit")
             org_unit = OrgUnit.objects.filter(organization=org, name=group.name).first()
         if org_unit is None:
             self.stderr.write(self.style.ERROR(f"'{group.name}' üçün registrar OrgUnit tapılmadı."))
