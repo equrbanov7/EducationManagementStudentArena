@@ -64,11 +64,16 @@ class Command(BaseCommand):
         profile.organization_type = OrganizationType.UNIVERSITY
         profile.student_university_name = organization.name
         profile.role = role
-        profile.email_verified = True          # → ilk-giriş/OTP axını YOX
+        profile.email_verified = True  # → ilk-giriş/OTP axını YOX
         profile.password_change_required = False  # → parol dəyişmə məcburiyyəti YOX
         fields = [
-            "organization", "organization_type", "student_university_name",
-            "role", "email_verified", "password_change_required", "updated_at",
+            "organization",
+            "organization_type",
+            "student_university_name",
+            "role",
+            "email_verified",
+            "password_change_required",
+            "updated_at",
         ]
         if group_number is not None and hasattr(profile, "student_group_number"):
             profile.student_group_number = group_number
@@ -189,19 +194,31 @@ class Command(BaseCommand):
 
         # 3) Fakültə → Kafedra (kafedranın parent-i fakültədir).
         faculty = self._ensure_unit(
-            organization, f"{prefix}-faculty",
-            unit_type="faculty", name="Stress Test Fakültəsi", code="STF", parent=None, head=owner,
+            organization,
+            f"{prefix}-faculty",
+            unit_type="faculty",
+            name="Stress Test Fakültəsi",
+            code="STF",
+            parent=None,
+            head=owner,
         )
         department = self._ensure_unit(
-            organization, f"{prefix}-department",
-            unit_type="department", name="Stress Test Kafedrası", code="STK", parent=faculty, head=teacher,
+            organization,
+            f"{prefix}-department",
+            unit_type="department",
+            name="Stress Test Kafedrası",
+            code="STK",
+            parent=faculty,
+            head=teacher,
         )
 
         # 4) Qruplar (hər biri müəllimə və kafedraya bağlı).
         groups = []
         for i in range(1, n_groups + 1):
             group, _ = StudentGroup.objects.get_or_create(
-                organization=organization, teacher=teacher, name=f"{prefix.upper()}-QRUP-{i}",
+                organization=organization,
+                teacher=teacher,
+                name=f"{prefix.upper()}-QRUP-{i}",
             )
             if group.org_unit_id != department.id:
                 group.org_unit = department
@@ -235,8 +252,12 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING("  GİRİŞ (hamısı EYNİ parol, OTP YOX, birbaşa kabinet):"))
         self.stdout.write(f"    Müəllim (imtahan qurur/başladır) : {teacher.username}")
         self.stdout.write(f"    Owner   (təşkilat idarəçisi)      : {owner.username}")
-        self.stdout.write(f"    Tələbələr                         : {prefix}_student_001 … {prefix}_student_{n_students:03d}")
+        self.stdout.write(
+            f"    Tələbələr                         : {prefix}_student_001 … {prefix}_student_{n_students:03d}"
+        )
         self.stdout.write(f"    Parol (HAMISI)                    : {password}")
         self.stdout.write("")
-        self.stdout.write(f"  Təmizləmək: python manage.py seed_stress_test --purge --prefix {prefix} --org-slug {org_slug}")
+        self.stdout.write(
+            f"  Təmizləmək: python manage.py seed_stress_test --purge --prefix {prefix} --org-slug {org_slug}"
+        )
         self.stdout.write(self.style.SUCCESS(line))
