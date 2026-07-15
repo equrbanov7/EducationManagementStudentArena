@@ -29,7 +29,10 @@
       data-current-score="{{ review_current_score|default:0|unlocalize }}"
       data-max-score="{{ review_max_score|default:''|unlocalize }}"
       data-i18n-need-response="{% trans 'Hər qərar üçün izah/cavab yazın.' context 'appeals.template' %}"
-      data-i18n-decisions="{% trans '{n} qərar verildi' context 'appeals.template' %}">
+      data-i18n-decisions="{% trans '{n} qərar verildi' context 'appeals.template' %}"
+      data-i18n-incomplete-title="{% trans 'Bütün suallara qərar verin' context 'appeals.template' %}"
+      data-i18n-incomplete-body="{% trans 'Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:' context 'appeals.template' %}"
+      data-i18n-incomplete-ok="{% trans 'Anladım' context 'appeals.template' %}">
     {% csrf_token %}
 
     {% if not review_can_decide %}
