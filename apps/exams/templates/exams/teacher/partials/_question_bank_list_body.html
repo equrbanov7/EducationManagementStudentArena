@@ -12,14 +12,13 @@ Kontekst:
   banks, page_obj, search_query, language_choices, default_type_choices
   qbl_create_next   — bank yaradıldıqdan sonra qayıdış (profil bölməsi / boş)
   qbl_section       — profil bölməsində "question-bank" (axtarış/pagination üçün)
-  qbl_pagination_query — pagination extra_query (bank_q + section)
+  qbl_pagination_query — pagination extra_query (bank_search + section)
   qbl_back_url      — redaktə/sil sonrası profil bölməsinə qayıdış
 {% endcomment %}
 <div class="qb-page">
 
     <div class="qb-page__head">
         <div>
-            <h1 class="qb-page__title">{% trans "Sual Bankı" %}</h1>
             <p class="qb-page__subtitle">{% trans "Təkrar istifadə oluna bilən sual kitabxanaları — imtahanlardan asılı deyil." %}</p>
         </div>
     </div>
@@ -93,14 +92,15 @@ Kontekst:
     </div>
     {% endif %}
 
-    {# ── Axtarış ── #}
-    <form method="get" class="qb-banklist-search js-profile-section-link-skip">
+    {# ── Axtarış (debounce ilə avtomatik — düymə yoxdur) ── #}
+    <form method="get" class="qb-banklist-search"
+          {% if qbl_section %}data-profile-ajax-form data-section="{{ qbl_section }}"{% endif %}
+          data-debounce-ms="400">
         {% if qbl_section %}<input type="hidden" name="section" value="{{ qbl_section }}">{% endif %}
         <div class="qb-input-wrap">
             <i class="fas fa-search"></i>
-            <input type="text" name="bank_q" value="{{ search_query }}" placeholder="{% trans 'Bank adı və ya fənn üzrə axtar...' %}">
+            <input type="text" name="bank_search" value="{{ search_query }}" placeholder="{% trans 'Bank adı və ya fənn üzrə axtar...' %}">
         </div>
-        <button type="submit" class="qbx-btn qbx-btn--ghost"><i class="fas fa-filter"></i> {% trans "Axtar" %}</button>
     </form>
 
     {# ── Banklar ── #}
