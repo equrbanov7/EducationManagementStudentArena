@@ -1,75 +1,78 @@
 {% load i18n %}
-{# ── Sərbəst iş tabı: mövzu siyahısı (≤10) + tələbə×mövzu 1/0 çeklisti. #}
-<p class="jd-panel-hint">
-    <i class="fas fa-circle-info"></i>
-    {% trans "Hər sərbəst iş 1 balla qiymətləndirilir — cəmi maksimum 10 bal. 1 — təhvil verilib, 0 — verilməyib. Verilmiş işin geri alınması yalnız 2 saat içində mümkündür." context "registrar.journal" %}
-</p>
+{% comment %}Sərbəst iş tabı (mockup): solda nömrəli MÖVZULAR (10 slot, CARİ badge),
+altında "Yeni mövzu daxil edin" input; sağda HƏMİŞƏ 10 sütunlu 1/0 grid + canlı
+CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
+<div class="jd-sw2-layout">
+    {# ── Sol: sərbəst iş mövzuları (10 slot) ─────────────────────────────── #}
+    <aside class="jd-sw2-topics">
+        <div class="jd-sw2-topics-head">
+            {% trans "SƏRBƏST İŞ MÖVZULARI" context "registrar.journal" %} ({{ selfwork_board.topics|length }})
+        </div>
+        <ol class="jd-sw2-topic-list">
+            {% for slot in selfwork_board.slots %}
+            <li class="jd-sw2-topic {% if not slot.topic %}is-empty{% endif %}">
+                <span class="jd-sw2-topic-no">{{ slot.index }}</span>
+                {% if slot.topic %}
+                <span class="jd-sw2-topic-title">{{ slot.topic.title }}</span>
+                {% if forloop.last or slot.index == selfwork_board.topics|length %}
+                <span class="jd-sw2-cari">{% trans "CARİ" context "registrar.journal" %}</span>
+                {% endif %}
+                {% if can_edit %}
+                <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-del"
+                      data-jd-sw-del data-topic-title="{{ slot.topic.title }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_topic">
+                    <input type="hidden" name="topic_id" value="{{ slot.topic.id }}">
+                    <button type="submit" aria-label="{% trans 'Sil' context 'registrar.journal' %}"><i class="fas fa-times"></i></button>
+                </form>
+                {% endif %}
+                {% else %}
+                <span class="jd-sw2-topic-title jd-sw2-topic-placeholder">{% trans "— boş —" context "registrar.journal" %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+        {% if can_edit and selfwork_board.topics|length < selfwork_board.max_topics %}
+        <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-add">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_topic">
+            <input type="text" name="topic_title" maxlength="255"
+                   placeholder="{% trans 'Yeni mövzu daxil edin…' context 'registrar.journal' %}">
+            <button type="submit" class="jd-sw2-add-btn" aria-label="{% trans 'Əlavə et' context 'registrar.journal' %}"><i class="fas fa-plus"></i></button>
+        </form>
+        {% endif %}
+    </aside>
 
-{% if can_edit %}
-<form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-selfwork-topics">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="add_topic">
-    <input type="text" name="topic_title" maxlength="255"
-           placeholder="{% trans 'Yeni mövzu daxil edin…' context 'registrar.journal' %}"
-           {% if selfwork_board.topics|length >= selfwork_board.max_topics %}disabled{% endif %}>
-    <button type="submit" class="jd-add-topic-btn"
-            {% if selfwork_board.topics|length >= selfwork_board.max_topics %}disabled{% endif %}>
-        <i class="fas fa-plus"></i>
-    </button>
-    <span class="jd-topic-count">{{ selfwork_board.topics|length }}/{{ selfwork_board.max_topics }}</span>
-</form>
-{% endif %}
-
-{% if selfwork_board.topics %}
-<div class="jd-selfwork-layout">
-    <ol class="jd-topic-list">
-        {% for t in selfwork_board.topics %}
-        <li>
-            <span class="jd-topic-title">{{ t.title }}</span>
-            {% if can_edit %}
-            <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-topic-del"
-                  onsubmit="return confirm('{% trans "Mövzunu silmək? (Yalnız heç kimə işarə qoyulmayıbsa mümkündür.)" context "registrar.journal" %}');">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete_topic">
-                <input type="hidden" name="topic_id" value="{{ t.id }}">
-                <button type="submit" aria-label="{% trans 'Sil' context 'registrar.journal' %}"><i class="fas fa-times"></i></button>
-            </form>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ol>
-
-    <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-selfwork-form" data-jd-draft="selfwork">
+    {# ── Sağ: 10 sütunlu 1/0 grid + canlı CƏMİ ───────────────────────────── #}
+    <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-gridcol" data-jd-draft="selfwork">
         {% csrf_token %}
-        <div class="journal-grid-wrap jd-grid-wrap" data-journal-grid>
-            <table class="journal-grid jd-grid">
+        <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
+            <table class="jd2-table jd-sw2-table">
                 <thead>
                     <tr>
-                        <th class="col-no jd-sticky-no">№</th>
-                        <th class="col-student jd-sticky-col">{% trans "Soyad Ad Ata adı" context "registrar.journal" %}</th>
-                        {% for t in selfwork_board.topics %}<th class="col-sw" title="{{ t.title }}">{{ forloop.counter }}</th>{% endfor %}
-                        <th>{% trans "Cəmi" context "registrar.journal" %} /{{ selfwork_board.max_topics }}</th>
+                        <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
+                        {% for slot in selfwork_board.slots %}<th class="jd-sw2-th-col" {% if slot.topic %}title="{{ slot.topic.title }}"{% endif %}>{{ slot.index }}</th>{% endfor %}
+                        <th class="jd-sw2-th-sum">{% trans "CƏMİ" context "registrar.journal" %} /{{ selfwork_board.max_topics }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in selfwork_board.rows %}
-                    <tr class="journal-row">
-                        <td class="col-no jd-sticky-no">{{ forloop.counter }}</td>
-                        <td class="col-student jd-sticky-col">{{ row.student.get_full_name|default:row.student.username }}</td>
+                    <tr class="journal-row" data-jd-sw-row>
+                        <td class="jd2-td-student"><span class="jd2-rowno">{{ forloop.counter }}</span> {{ row.student.get_full_name|default:row.student.username }}</td>
                         {% for cell in row.cells %}
-                        <td>
-                            {% if can_edit and not cell.locked %}
+                        <td class="jd-sw2-cell">
+                            {% if not cell.topic %}
+                            <span class="sw-chip sw-chip--disabled" title="{% trans 'Mövzu hələ əlavə olunmayıb' context 'registrar.journal' %}">–</span>
+                            {% elif can_edit and not cell.locked %}
                             <input type="hidden" name="sw__{{ cell.topic.id }}__{{ row.enrollment.id }}" value="{% if cell.done %}1{% else %}0{% endif %}" data-jd-sw>
-                            <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-chip>
-                                {% if cell.done %}1{% else %}0{% endif %}
-                            </button>
+                            <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
                             {% else %}
-                            <span class="sw-chip sw-chip--ro {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}">{% if cell.done %}1{% else %}0{% endif %}</span>
+                            <span class="sw-chip sw-chip--ro {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-ro="{% if cell.done %}1{% else %}0{% endif %}">{% if cell.done %}1{% else %}0{% endif %}</span>
                             {% if cell.locked %}<i class="fas fa-lock jcell-lock" title="{% trans 'Geri alma pəncərəsi bağlanıb' context 'registrar.journal' %}"></i>{% endif %}
                             {% endif %}
                         </td>
                         {% endfor %}
-                        <td><span class="cell-entry">{{ row.total }}</span></td>
+                        <td class="jd-sw2-sum"><span class="cell-entry" data-jd-sw-total>{{ row.total }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -77,12 +80,13 @@
         </div>
         {% if can_edit %}
         <div class="journal-actions jd-save-bar">
-            <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Sərbəst işi yadda saxla" context "registrar.journal" %}</button>
+            <button type="submit" class="journal-save-btn jd2-save-btn"><i class="fas fa-save"></i> {% trans "Sərbəst işi yadda saxla" context "registrar.journal" %}</button>
         </div>
         {% endif %}
     </form>
 </div>
-{% else %}
-{% trans "Hələ sərbəst iş mövzusu yoxdur" context "registrar.journal" as jd_sw_empty %}
-{% include "partials/_empty_state.html" with empty_icon="fa-list-check" empty_title=jd_sw_empty %}
-{% endif %}
+<p class="jd-sw2-foot">
+    {% trans "Hər sərbəst iş 1 balla qiymətləndirilir — cəmi maksimum 10 bal." context "registrar.journal" %}
+    <b class="jd2-ie">1</b> {% trans "təhvil verilib" context "registrar.journal" %},
+    <b class="jd2-qb">0</b> {% trans "verilməyib" context "registrar.journal" %}.
+</p>

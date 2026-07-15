@@ -149,6 +149,9 @@ def journal_detail(request, offering_id):
             "topic_choices": journal_extras.lesson_topic_choices(offering),
             "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
             "standard_times": schedule.STANDARD_LESSON_TIMES,
+            # Seminar/lab xanası üçün bal seçimləri (0–10, 0.5 addımla) — bootstrap
+            # select-option: q/b · i/e · bal.
+            "seminar_score_options": [i / 2 for i in range(0, 21)],
             "today_parity": today_parity,
             "active_main_nav": "journal",
         },

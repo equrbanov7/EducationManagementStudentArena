@@ -55,7 +55,8 @@ def _written_test_snapshot_answers(attempt, exam_type):
     different from the exam bank order when random question distribution is on.
     Correct/selected-option flags are included because this view is teacher-only.
 
-    Returns ``(rows, answered_count)``.
+    Returns ``(rows, answered_count, answers)`` — the raw ``answers`` list is
+    surfaced so the live-score calc can reuse it instead of re-querying.
     """
     answers = list(
         attempt.answers.select_related("question", "question__exam", "question__block")
@@ -139,7 +140,7 @@ def _written_test_snapshot_answers(attempt, exam_type):
             }
         )
 
-    return rows, answered_count
+    return rows, answered_count, answers
 
 
 def _coding_snapshot_answers(attempt):
@@ -250,6 +251,9 @@ def get_attempt_live_snapshot(attempt):
             "correct_count": attempt.correct_count,
             "wrong_count": attempt.wrong_count,
             "score_percent": None,
+            "live_score_percent": None,
+            "live_score": None,
+            "live_max_score": None,
             "checked_by_teacher": attempt.checked_by_teacher,
             "teacher_score": attempt.teacher_score,
             "is_finished": attempt.is_finished,
@@ -263,6 +267,7 @@ def get_attempt_live_snapshot(attempt):
         }
 
     exam_type = getattr(attempt.exam, "exam_type", "") or ""
+    test_answers = None
     if exam_type == "coding":
         # Practical / coding exams store the student's work in CodingSubmission
         # (one per coding question), NOT in attempt.answers.  We surface the
@@ -272,8 +277,9 @@ def get_attempt_live_snapshot(attempt):
         total_questions = len(answer_rows) or get_exam_question_total(attempt.exam)
     else:
         # Test / written exams keep their live answers in attempt.answers,
-        # autosaved per question while the student works.
-        answer_rows, answered_count = _written_test_snapshot_answers(attempt, exam_type)
+        # autosaved per question while the student works. The raw list is kept
+        # so the live-score calc reuses it (no second query).
+        answer_rows, answered_count, test_answers = _written_test_snapshot_answers(attempt, exam_type)
         total_questions = len(answer_rows) or get_exam_question_total(attempt.exam)
 
     incidents = SupervisionIncident.objects.filter(attempt=attempt).order_by("-timestamp")[:50]
@@ -298,6 +304,14 @@ def get_attempt_live_snapshot(attempt):
             graded = attempt.correct_count + attempt.wrong_count
             score_percent = round(attempt.correct_count * 100 / graded, 1) if graded else None
 
+    # Canlı (müvəqqəti) bal — imtahan HƏLƏ DAVAM EDƏRKƏN nəzarətçinin görməsi
+    # üçün. Yalnız test imtahanları anlıq avtomatik qiymətlənə bilir (yazılı /
+    # praktiki müəllim yoxlaması tələb edir). Cavablanmamış suallar səhv sayılır
+    # — yəni "imtahan indi bitsəydi neçə bal olardı". Bal-çəkili məntiq yekun
+    # nəticə ilə eynidir (calculate_test_attempt_result). Test cavablarının
+    # is_correct sahəsi autosave zamanı canlı yenilənir, ona görə bu real-vaxt.
+    live_score = _build_live_score(attempt, exam_type, answers=test_answers)
+
     return {
         "attempt_id": attempt.id,
         "student_name": attempt.user.get_full_name() or attempt.user.username,
@@ -310,6 +324,7 @@ def get_attempt_live_snapshot(attempt):
         "correct_count": attempt.correct_count,
         "wrong_count": attempt.wrong_count,
         "score_percent": score_percent,
+        **live_score,
         "checked_by_teacher": attempt.checked_by_teacher,
         "teacher_score": attempt.teacher_score,
         "is_finished": attempt.is_finished,
@@ -321,3 +336,32 @@ def get_attempt_live_snapshot(attempt):
         "answers": answer_rows,
         "incidents": incident_rows,
     }
+
+
+def _build_live_score(attempt, exam_type, answers=None):
+    """Canlı/müvəqqəti bal sözlüyü (imtahan davam edərkən nəzarətçi üçün).
+
+    Yalnız bitməmiş TEST imtahanları anlıq avtomatik qiymətlənir; digər hallarda
+    ``live_score_percent`` None qalır (yekun bal ``score_percent``-dədir və ya
+    müəllim yoxlaması gözləyir). ``answers`` verilirsə (snapshot onsuz da yükləyib)
+    təkrar sorğu olmasın deyə birbaşa ötürülür.
+    """
+    default = {
+        "live_score_percent": None,
+        "live_score": None,
+        "live_max_score": None,
+    }
+    if attempt.is_finished or exam_type != "test":
+        return default
+    try:
+        from apps.exams.services.result_calculation import calculate_test_attempt_result
+
+        result = calculate_test_attempt_result(attempt, answers=answers)
+        default["live_score_percent"] = round(float(result.percentage), 1)
+        default["live_score"] = result.score_display
+        default["live_max_score"] = result.max_score_display
+    except Exception:
+        # Hesablama alınmasa canlı bal göstərmirik — snapshot yenə də cavabları
+        # göstərir, sadəcə bal bloku olmur.
+        pass
+    return default

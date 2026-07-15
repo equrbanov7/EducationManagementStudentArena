@@ -174,6 +174,7 @@ def createAndEditExamView(request, slug=None):
             # AVTOMATİK aktiv statusa keçir — müəllimə ayrıca "dərc et" addımı
             # lazım deyil. Qapı keçmirsə (məs. hələ sual yoxdur) səssizcə
             # deaktiv qalır (boş imtahan tələbəyə çıxarıla bilməz).
+            publish_notice = ""
             if not exam_instance.is_active and not exam_instance.is_deleted:
                 from django.db import transaction as _txn
 
@@ -183,6 +184,10 @@ def createAndEditExamView(request, slug=None):
                     published, _publish_err = publish_exam(exam_instance, by_user=request.user, request=request)
                 if published:
                     exam_instance.is_active = True
+                elif _publish_err:
+                    # İmtahan aktivləşmədi (məs. sual yoxdur) — səbəbi modala ötür ki,
+                    # müəllim "aktiv olması üçün sual əlavə et" qeydini görsün.
+                    publish_notice = str(_publish_err)
 
             from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
 
@@ -238,7 +243,7 @@ def createAndEditExamView(request, slug=None):
                     else pgettext_lazy("exams.view.exams.message", "exam_created")
                 ),
             )
-            return JsonResponse({"success": True, "slug": exam_instance.slug})
+            return JsonResponse({"success": True, "slug": exam_instance.slug, "notice": publish_notice})
         selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
         html = render_to_string(
             "exams/teacher/partials/_create_exam_modal_form.html",
@@ -320,6 +325,9 @@ def teacher_exam_detail(request, slug):
             "questions_next_offset": question_page["next_offset"],
             "questions_page_size": question_page["page_size"],
             "questions_total_count": exam.questions.count(),
+            # Publish qapısı aktiv sual tələb edir — "aktivləşdirmək üçün sual əlavə et"
+            # qeydini göstərmək üçün.
+            "active_questions_count": exam.questions.filter(is_active=True).count(),
             "profile_return_url": profile_return_url,
             "exam_navigation_query": nav_query,
             "exam_back_label": exam_back_label,

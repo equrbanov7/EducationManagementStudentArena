@@ -236,13 +236,19 @@ class SelfWorkTest(TestCase):
             mark.refresh_from_db()
             self.assertTrue(mark.done)
 
-    def test_topic_with_done_marks_not_deletable(self):
+    def test_topic_delete_cascades_marks(self):
+        # Yeni davranış (istifadəçi tələbi): mövzu işarələnmiş olsa belə silinir və
+        # bu mövzu üzrə SelfWorkMark-lar da (bal) FK cascade ilə birlikdə silinir.
+        # UI silmədən əvvəl xəbərdarlıq modalı göstərir.
         with bypass_rls():
             topic = journal_extras.add_selfwork_topic(offering=self.offering, title="T1")
             journal_extras.set_selfwork_mark(
                 offering=self.offering, topic_id=topic.id, enrollment_id=self.enrollment.id, done=True
             )
-            self.assertFalse(journal_extras.delete_selfwork_topic(topic=topic))
+            self.assertTrue(SelfWorkMark.objects.filter(topic=topic).exists())
+            self.assertTrue(journal_extras.delete_selfwork_topic(topic=topic))
+            self.assertFalse(SelfWorkTopic.objects.filter(pk=topic.pk).exists())
+            self.assertFalse(SelfWorkMark.objects.filter(topic_id=topic.pk).exists())
 
 
 class CourseWorkTest(TestCase):

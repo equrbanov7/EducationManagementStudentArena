@@ -37,21 +37,40 @@ from ..shared._helpers import _marked_question_map
 APPEAL_STATUS_LABELS = dict(APPEAL_STATUS_CHOICES)
 
 
-def _is_profile_results_request(request):
+# Profil "kabinet" bölmələri — tələbə imtahan nəticəsinə/apellyasiyaya bu
+# bölmələrdən keçəndə canlı imtahan-mərkəzi mühiti deyil, profil rejimi olmalıdır.
+# my-appeals də daxildir (əvvəl yalnız my-results tanınırdı — final imtahanda
+# "Nəticəyə qayıt" tələbəni PIN giriş ekranına atırdı).
+_PROFILE_CABINET_SECTIONS = ("my-results", "my-appeals")
+
+
+def _profile_cabinet_section(request):
+    """İstək profil kabinetindən (my-results / my-appeals) gəlirsə həmin bölməni,
+    əks halda boş sətir qaytarır."""
     source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
-    if source_section == "my-results":
-        return True
-    return "section=my-results" in (current_return_to(request) or "")
+    if source_section in _PROFILE_CABINET_SECTIONS:
+        return source_section
+    return_to = current_return_to(request) or ""
+    for section in _PROFILE_CABINET_SECTIONS:
+        if f"section={section}" in return_to:
+            return section
+    return ""
+
+
+def _is_profile_results_request(request):
+    return bool(_profile_cabinet_section(request))
 
 
 def _result_url(exam, attempt, request=None):
     url = reverse("exams:exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
-    if request is not None and _is_profile_results_request(request):
-        url = append_query_params(
-            url,
-            from_section="my-results",
-            return_to=current_return_to(request) or f"{reverse('accounts:profile')}?section=my-results",
-        )
+    if request is not None:
+        section = _profile_cabinet_section(request)
+        if section:
+            url = append_query_params(
+                url,
+                from_section=section,
+                return_to=current_return_to(request) or f"{reverse('accounts:profile')}?section={section}",
+            )
     return url
 
 

@@ -232,16 +232,21 @@ Kontekst (view-dən):
 
             <section class="qb-bulk-toolbar">
                 <div class="qb-select-actions">
-                    <button type="button" id="selectAllPageBtn" class="qb-btn qb-btn-soft-blue">
-                        <i class="fas fa-check-double"></i> {% trans "action_select_all_page" context "exams.template.teacher_questions_bank" %}
+                    {# Filtr-şüurlu seçim düyməsi: aktiv süzgəcə görə "bütün xətalıları/xəbərdarlıqları… seç"
+                       (yalnız cari səhifə — server onsuz da səhifəni süzgəcə görə daraldıb). #}
+                    <button type="button" id="selectAllPageBtn" class="qb-btn qb-btn-soft-blue" data-active-flag="{{ active_flag }}">
+                        <i class="fas fa-check-double"></i>
+                        {% if active_flag == 'has-error' %}{% trans "Bütün xətalıları seç" context "exams.template.teacher_questions_bank" %}
+                        {% elif active_flag == 'has-warning' %}{% trans "Bütün xəbərdarlıqları seç" context "exams.template.teacher_questions_bank" %}
+                        {% elif active_flag == 'has-dup' %}{% trans "Bütün dublikatları seç" context "exams.template.teacher_questions_bank" %}
+                        {% elif active_flag == 'has-structure' %}{% trans "Variant problemlilərini seç" context "exams.template.teacher_questions_bank" %}
+                        {% elif active_flag == 'has-balance' %}{% trans "Balans problemlilərini seç" context "exams.template.teacher_questions_bank" %}
+                        {% elif active_flag == 'is-clean' %}{% trans "Təmizləri seç" context "exams.template.teacher_questions_bank" %}
+                        {% else %}{% trans "action_select_all_page" context "exams.template.teacher_questions_bank" %}{% endif %}
                     </button>
                     <button type="button" id="clearSelectionBtn" class="qb-btn qb-btn-soft">
                         <i class="fas fa-eraser"></i> {% trans "action_clear_selection" context "exams.template.teacher_questions_bank" %}
                     </button>
-                    <label class="qb-select-all-inline">
-                        <input type="checkbox" id="tableSelectAll">
-                        <span>{% trans "action_select_all_page" context "exams.template.teacher_questions_bank" %}</span>
-                    </label>
                     <span id="selectedCountLabel" class="qb-selected-counter">{% trans "selected_count_zero" context "exams.template.teacher_questions_bank" %}</span>
                 </div>
                 <div class="qb-bulk-actions">

@@ -62,10 +62,13 @@ def journal_list_context(user, request=None) -> dict:
 
     periods = sorted({o.period for o in offerings if o.period}, key=lambda p: p.start_date, reverse=True)
     for p in periods:
-        p.year_label = (p.academic_year or "").replace("/", "-")  # "2025-2026" formatı
+        p.year_label = p.year_display  # "2025/2026" formatı (AcademicPeriod.format_year)
         p.season_label = _season_label(p)
-    years = sorted({p.academic_year for p in periods}, reverse=True)
-    year_choices = [{"value": y, "label": y.replace("/", "-")} for y in years]
+    # Filtr üçün RAW academic_year dəyəri saxlanılır (GET matching xam mətnə görədir),
+    # yalnız görünən etiket normallaşdırılır.
+    year_label_map = {p.academic_year: p.year_display for p in periods}
+    years = sorted(year_label_map, reverse=True)
+    year_choices = [{"value": y, "label": year_label_map[y]} for y in years]
 
     selected_year = ""
     selected_period = None

@@ -105,11 +105,6 @@
                   data-action-url="{% url 'exams:duplicate_exam' exam.slug %}">
             <i class="fas fa-copy" aria-hidden="true"></i> {% trans "action_duplicate" context "exams.dashboard" %}
           </button>
-          <button type="button" class="tx-menu-item js-tx-post-action" role="menuitem"
-                  data-action-url="{% url 'exams:toggle_exam_archive' exam.slug %}">
-            <i class="fas fa-box-archive" aria-hidden="true"></i>
-            {% if exam.is_archived %}{% trans "action_unarchive" context "exams.dashboard" %}{% else %}{% trans "action_archive" context "exams.dashboard" %}{% endif %}
-          </button>
           <button type="button" class="tx-menu-item tx-menu-item--danger js-tx-delete" role="menuitem"
                   data-delete-url="{% url 'exams:delete_exam' exam.slug %}"
                   data-exam-name="{{ exam.title }}">

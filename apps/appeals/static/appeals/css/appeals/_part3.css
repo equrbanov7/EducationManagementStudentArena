@@ -238,6 +238,10 @@
     font-weight: 700;
 }
 
+.appeal-list-edit-window.is-expired {
+    display: none;
+}
+
 @media (max-width: 640px) {
     .appeal-option {
         flex-wrap: wrap;
@@ -554,4 +558,86 @@
     .appeal-eligible-item__cta {
         justify-content: center;
     }
+}
+
+/* ── Yarımçıq qərar xəbərdarlığı (bütün suallara qərar verilməlidir) ─────── */
+.appeal-question-card.is-undecided {
+    border-color: var(--ems-warning-400, #fbbf24);
+    box-shadow: 0 12px 30px rgba(217, 119, 6, 0.14);
+}
+
+.appeal-incomplete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;               /* Bootstrap modal (~1055) üstündə */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.55);
+    animation: appeal-incomplete-fade 0.15s ease-out;
+}
+
+@keyframes appeal-incomplete-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.appeal-incomplete__box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.75rem 1.75rem 1.5rem;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
+.appeal-incomplete__icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ems-warning-100, #fef3c7);
+    color: var(--ems-warning-700, #b45309);
+    font-size: 1.5rem;
+}
+
+.appeal-incomplete__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900, #0f172a);
+    margin: 0 0 0.5rem;
+}
+
+.appeal-incomplete__body {
+    font-size: 0.9rem;
+    color: var(--ems-neutral-600, #475569);
+    margin: 0 0 1rem;
+}
+
+.appeal-incomplete__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+.appeal-incomplete__chip {
+    min-width: 30px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--ems-warning-50, #fffbeb);
+    border: 1px solid var(--ems-warning-300, #fcd34d);
+    color: var(--ems-warning-800, #92400e);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.appeal-incomplete__ok {
+    min-width: 140px;
 }

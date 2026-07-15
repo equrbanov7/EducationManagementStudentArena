@@ -2,7 +2,8 @@
 {% if 'appeal-stats' in allowed_sections %}
 <section class="profile-section-panel profile-section--appeal-stats {% if active_section == 'appeal-stats' %}is-active{% endif %}"
          data-profile-section-panel="appeal-stats"
-         data-source-url="{{ profile_base_url }}?section=appeal-stats">
+         data-source-url="{{ profile_base_url }}?section=appeal-stats"
+         data-i18n-load-error="{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}">
 <style nonce="{{ request.csp_nonce }}">
   .aps { color: var(--ems-neutral-900); }
   .aps-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap; }
@@ -97,7 +98,8 @@
      data-ai-url="{% url 'appeals:appeal_stats_ai' %}"
      data-subject-url="{% url 'exams:subject_search' %}"
      data-group-url="{% url 'exams:group_search' %}"
-     data-detail-url-template="{% url 'appeals:appeal_detail' 0 %}">
+     data-detail-url-template="{% url 'appeals:appeal_detail' 0 %}"
+     data-review-url-template="{% url 'appeals:review_appeal' 0 %}">
   <div class="aps-head">
     <div>
       <h2><i class="fas fa-gavel"></i> {% trans "Apellyasiya statistikası" %}</h2>
@@ -215,7 +217,7 @@
   root.dataset.apsInit = "1";
   var U = { data:root.dataset.dataUrl, charts:root.dataset.chartsUrl, filters:root.dataset.filtersUrl,
             ai:root.dataset.aiUrl, subject:root.dataset.subjectUrl, group:root.dataset.groupUrl,
-            detail:root.dataset.detailUrlTemplate };
+            detail:root.dataset.detailUrlTemplate, review:root.dataset.reviewUrlTemplate };
   var T = { total:"{% trans 'Ümumi' %}", students:"{% trans 'Tələbə' %}", exams:"{% trans 'İmtahan' %}",
             none:"{% trans 'Apellyasiya tapılmadı.' %}", prev:"{% trans 'Əvvəlki' %}", next:"{% trans 'Sonrakı' %}",
             page:"{% trans 'Səhifə' %}", view:"{% trans 'Bax' %}",
@@ -231,6 +233,7 @@
   var page = 1, sort = "-date", timer = null, charts = {};
   function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
   function detailUrl(id){ return U.detail ? U.detail.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
+  function reviewUrl(id){ return U.review ? U.review.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
 
   function multiSelect(el, url){
     var chipsWrap=el.querySelector(".aps-ms__chips"), search=el.querySelector(".aps-ms__search"),
@@ -306,7 +309,7 @@
       return '<tr><td><b>'+esc(r.student)+'</b><br><span class="aps-uname">@'+esc(r.username)+'</span></td>'+
         clip(r.group)+clip(r.teacher)+clip(r.exam)+clip(r.subject)+
         '<td>'+esc(r.type||"—")+'</td><td>'+esc(r.items)+'</td><td>'+badge+'</td><td>'+esc(r.date)+'</td>'+
-        '<td><a class="aps-view" href="'+detailUrl(r.appeal_id)+'"><i class="fas fa-eye"></i> '+T.view+'</a></td></tr>';
+        '<td><a class="aps-view" href="'+reviewUrl(r.appeal_id)+'" data-appeal-review-url="'+reviewUrl(r.appeal_id)+'" data-no-route-loading><i class="fas fa-eye"></i> '+T.view+'</a></td></tr>';
     }).join("");
     var pg=data.pagination;
     pager.innerHTML='<button class="js-aps-prev"'+(pg.has_prev?"":" disabled")+'>'+T.prev+'</button>'+
@@ -400,5 +403,28 @@
   load();
 })();
 </script>
+
+{# Reviewer qərar modalı — statistika səhifəsindən naviqasiyasız açılır (manage-appeals ilə eyni maşınalıq). #}
+<div class="modal fade appeal-modal appeal-modal--review"
+     id="apsAppealReviewModal"
+     tabindex="-1"
+     aria-labelledby="apsAppealReviewModalLabel"
+     aria-hidden="true"
+     data-manage-review-modal>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable appeal-modal__dialog">
+        <div class="modal-content appeal-modal__content">
+            <div class="modal-header appeal-modal__header">
+                <h5 class="modal-title" id="apsAppealReviewModalLabel">{% trans "Apellyasiyaya bax" context "appeals.template" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
+            </div>
+            <div class="modal-body appeal-modal__body" data-manage-modal-body>
+                <div class="appeal-skeleton">
+                    <div class="appeal-skeleton__row"></div>
+                    <div class="appeal-skeleton__row"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </section>
 {% endif %}

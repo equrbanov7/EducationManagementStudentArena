@@ -65,6 +65,21 @@ class ExamRoomSessionForm(forms.ModelForm):
         for field_name in ("scheduled_start", "scheduled_end"):
             self.fields[field_name].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"]
 
+    @staticmethod
+    def _ensure_local_aware(value):
+        """`datetime-local` naive gəlir — istifadəçinin yerli vaxtıdır (Asia/Baku).
+        ExamForm ilə eyni: açıq şəkildə cari zona ilə aware edirik ki, DB sürücüsü
+        naive dəyəri UTC kimi saxlayıb sürüşmə (və RuntimeWarning) yaratmasın."""
+        if value and timezone.is_naive(value):
+            return timezone.make_aware(value, timezone.get_current_timezone())
+        return value
+
+    def clean_scheduled_start(self):
+        return self._ensure_local_aware(self.cleaned_data.get("scheduled_start"))
+
+    def clean_scheduled_end(self):
+        return self._ensure_local_aware(self.cleaned_data.get("scheduled_end"))
+
     def clean(self):
         cleaned = super().clean()
         start, end = cleaned.get("scheduled_start"), cleaned.get("scheduled_end")

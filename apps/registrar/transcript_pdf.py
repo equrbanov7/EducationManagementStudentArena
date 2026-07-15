@@ -191,7 +191,7 @@ def _draw_table_header(sheet):
 
 def _draw_semester(sheet, semester):
     period = semester["period"]
-    head = f"{period.name}  ·  {period.academic_year}"
+    head = f"{period.name}  ·  {period.year_display}"
     sheet.ensure(64)
     sheet.text(_MARGIN, head, size=10.5, bold=True, color=_BLUE)
     figures = _("GPA %(gpa)s · %(earned)s kredit") % {

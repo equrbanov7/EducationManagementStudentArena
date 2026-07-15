@@ -67,12 +67,13 @@ EXAM_STATUS_SCHEDULED = "scheduled"
 EXAM_STATUS_DRAFT = "draft"
 EXAM_STATUS_ARCHIVED = "archived"
 
-# Müəllim panelində bölmələrin göstərilmə sırası.
+# Müəllim panelində bölmələrin göstərilmə sırası. "Arxiv" bölməsi ləğv edildi
+# (aktiv/deaktiv ilə eyni işi görürdü) — EXAM_STATUS_ARCHIVED sabiti geriyə-uyğunluq
+# üçün qalır, amma heç bir yerdə status kimi qaytarılmır/göstərilmir.
 EXAM_STATUS_ORDER = (
     EXAM_STATUS_ACTIVE,
     EXAM_STATUS_SCHEDULED,
     EXAM_STATUS_DRAFT,
-    EXAM_STATUS_ARCHIVED,
 )
 
 # Status üçün vizual tokenlər (rəng, yumşaq fon, dərin mətn, FontAwesome ikon).

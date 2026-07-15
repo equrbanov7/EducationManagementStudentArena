@@ -8,7 +8,11 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import Exam
-from apps.exams.services.attempts import _start_or_resume_attempt, get_attempt_limit_result_redirect_url
+from apps.exams.services.attempts import (
+    _start_or_resume_attempt,
+    get_attempt_limit_result_redirect_url,
+    get_effective_max_attempts,
+)
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
@@ -65,12 +69,14 @@ def exam_code_check(request):
     if not can_start:
         attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, request.user)
         if attempt_limit_result_url:
+            # Effektiv limit = qlobal + tələbəyə verilmiş qrant(lar).
+            effective_max = get_effective_max_attempts(exam, request.user) or exam.max_attempts_per_user
             if _is_ajax_request(request):
                 return JsonResponse(
                     {
                         "success": False,
                         "error": pgettext("exams.service.attempt.message", "max_attempts_reached").format(
-                            max_attempts=exam.max_attempts_per_user
+                            max_attempts=effective_max
                         ),
                         "redirect_url": attempt_limit_result_url,
                     },
@@ -78,9 +84,7 @@ def exam_code_check(request):
                 )
             messages.info(
                 request,
-                pgettext("exams.service.attempt.message", "max_attempts_reached").format(
-                    max_attempts=exam.max_attempts_per_user
-                ),
+                pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=effective_max),
             )
             return redirect(attempt_limit_result_url)
         if _is_ajax_request(request):
