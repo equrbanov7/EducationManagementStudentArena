@@ -121,9 +121,21 @@
       <div class="ecs-ms js-ecs-group"><div class="ecs-ms__chips"><input type="text" class="ecs-ms__search" placeholder="{% trans 'qrup axtar…' %}"></div><div class="ecs-ms__menu"></div></div>
     </div>
     <div class="ecs-field">
-      <label>{% trans "Kafedra / fakültə" %}</label>
+      <label>{% trans "Fakültə" %}</label>
       <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-unit" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-faculty" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+      </div>
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "Kafedra" %}</label>
+      <div class="bootstrap-single-select">
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-department" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+      </div>
+    </div>
+    <div class="ecs-field">
+      <label>{% trans "Müəllim" %}</label>
+      <div class="bootstrap-single-select">
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-teacher" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
     <div class="ecs-field">
@@ -226,7 +238,9 @@
   root.dataset.ecsInit = "1";
   var U = { data:root.dataset.dataUrl, filters:root.dataset.filtersUrl, export:root.dataset.exportUrl,
             subject:root.dataset.subjectUrl, group:root.dataset.groupUrl, view:root.dataset.viewUrlTemplate };
-  var q = root.querySelector(".js-ecs-q"), unitSel = root.querySelector(".js-ecs-unit"),
+  var q = root.querySelector(".js-ecs-q"),
+      facultySel = root.querySelector(".js-ecs-faculty"), deptSel = root.querySelector(".js-ecs-department"),
+      teacherSel = root.querySelector(".js-ecs-teacher"),
       typeSel = root.querySelector(".js-ecs-type"), yearSel = root.querySelector(".js-ecs-year"),
       cards = root.querySelector(".js-ecs-cards"), rows = root.querySelector(".js-ecs-rows"),
       pager = root.querySelector(".js-ecs-pager"), thead = root.querySelector(".js-ecs-thead");
@@ -274,7 +288,9 @@
     if (q.value.trim()) p.set("q", q.value.trim());
     if (subjectMS.ids().length) p.set("subjects", subjectMS.ids().join(","));
     if (groupMS.ids().length) p.set("groups", groupMS.ids().join(","));
-    if (unitSel.value) p.set("units", unitSel.value);
+    if (facultySel.value) p.set("faculties", facultySel.value);
+    if (deptSel.value) p.set("departments", deptSel.value);
+    if (teacherSel.value) p.set("teachers", teacherSel.value);
     if (typeSel.value) p.set("type", typeSel.value);
     if (yearSel.value) p.set("year", yearSel.value);
     if (sort) p.set("sort", sort);
@@ -333,7 +349,20 @@
     });
   });
   q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
-  [unitSel, typeSel, yearSel].forEach(function(s){ s.addEventListener("change", reload); });
+  [facultySel, deptSel, teacherSel, typeSel, yearSel].forEach(function(s){ s.addEventListener("change", reload); });
+  // Fakültə → kafedra kaskadı: fakültə seçiləndə kafedra siyahısı həmin fakültənin
+  // kafedraları ilə daralır.
+  var allDepartments = [];
+  function populateDepartments(){
+    var facId = facultySel.value;
+    var list = facId ? allDepartments.filter(function(u){ return String(u.parent_id) === String(facId); }) : allDepartments;
+    var current = deptSel.value;
+    deptSel.innerHTML = '<option value="">{% trans "Hamısı" %}</option>';
+    list.forEach(function(u){ var o=document.createElement("option"); o.value=u.id; o.textContent=u.name; deptSel.appendChild(o); });
+    if (current && list.some(function(u){ return String(u.id) === String(current); })) { deptSel.value = current; }
+    if (typeof deptSel._refreshBootstrapSelect === "function") { deptSel._refreshBootstrapSelect(); }
+  }
+  facultySel.addEventListener("change", populateDepartments);
   root.querySelector(".js-ecs-export").addEventListener("click", function(e){ e.preventDefault(); window.location.href = U.export + "?" + params().toString(); });
 
   fetch(U.filters, {headers:{"X-Requested-With":"XMLHttpRequest"}})
@@ -341,9 +370,12 @@
     .then(function(d){ if(!d) return;
       (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; yearSel.appendChild(o); });
       (d.types||[]).forEach(function(t){ var o=document.createElement("option"); o.value=t.value; o.textContent=t.label; typeSel.appendChild(o); });
-      (d.units||[]).forEach(function(u){ var o=document.createElement("option"); o.value=u.id; o.textContent=u.name; unitSel.appendChild(o); });
+      (d.faculties||[]).forEach(function(u){ var o=document.createElement("option"); o.value=u.id; o.textContent=u.name; facultySel.appendChild(o); });
+      (d.teachers||[]).forEach(function(t){ var o=document.createElement("option"); o.value=t.id; o.textContent=t.name; teacherSel.appendChild(o); });
+      allDepartments = d.departments || [];
+      populateDepartments();
       // Bootstrap select-lər dinamik option-lardan sonra yenilənməlidir.
-      [unitSel, typeSel, yearSel].forEach(function(s){ if (typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); } });
+      [facultySel, teacherSel, typeSel, yearSel].forEach(function(s){ if (typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); } });
     });
   load();
 })();

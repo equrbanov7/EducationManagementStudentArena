@@ -1191,30 +1191,14 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
-    def test_teacher_exam_detail_includes_archive_toggle(self):
+    def test_teacher_exam_detail_has_no_archive_toggle(self):
+        # "Arxiv" konsepti ləğv edildi (aktiv/deaktiv ilə eyni işi görürdü) — detal
+        # səhifəsində arxiv düyməsi/URL-i artıq görünməməlidir.
         response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Arxivlə")
-        self.assertContains(response, reverse("exams:toggle_exam_archive", args=[self.exam_visible.slug]))
-
-        self.exam_visible.is_archived = True
-        self.exam_visible.save(update_fields=["is_archived"])
-
-        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
-        self.assertContains(response, "Arxivdən çıxar")
-
-    def test_teacher_can_archive_from_detail_and_stay_on_detail(self):
-        detail_url = reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug])
-        response = self.client.post(
-            reverse("exams:toggle_exam_archive", args=[self.exam_visible.slug]),
-            {"next": detail_url},
-        )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, detail_url)
-        self.exam_visible.refresh_from_db()
-        self.assertTrue(self.exam_visible.is_archived)
+        self.assertNotContains(response, reverse("exams:toggle_exam_archive", args=[self.exam_visible.slug]))
+        self.assertNotContains(response, "Arxivlə")
 
     def test_teacher_exam_detail_initially_renders_first_question_batch(self):
         for order in range(2, 26):

@@ -38,6 +38,12 @@
                     {% else %}
                         <span class="status-badge passive">{% trans "status_passive" context "exams.template.teacher_exam_detail" %}</span>
                     {% endif %}
+                    {% if not exam.is_active and not active_questions_count %}
+                        <div class="exam-activate-note" role="note">
+                            <i class="fas fa-circle-info"></i>
+                            {% trans "İmtahanın aktivləşməsi (tələbələrə açılması) üçün ən azı bir sual əlavə edin." context "exams.template.teacher_exam_detail" %}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="info-card">
                     <span class="info-label"><i class="fas fa-eye"></i> {% trans "label_results_visibility" context "exams.template.teacher_exam_detail" %}:</span>
@@ -226,20 +232,6 @@
                             <input type="hidden" name="desired_state" value="1">
                             <button type="submit" class="action-btn success-btn">
                                 <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_exam_detail" %}
-                            </button>
-                        {% endif %}
-                    </form>
-
-                    <form method="post" action="{% url 'exams:toggle_exam_archive' exam.slug %}" class="inline-action-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                        {% if exam.is_archived %}
-                            <button type="submit" class="action-btn unarchive-btn">
-                                <i class="fas fa-box-open"></i> {% trans "action_unarchive" context "exams.dashboard" %}
-                            </button>
-                        {% else %}
-                            <button type="submit" class="action-btn archive-btn">
-                                <i class="fas fa-box-archive"></i> {% trans "action_archive" context "exams.dashboard" %}
                             </button>
                         {% endif %}
                     </form>

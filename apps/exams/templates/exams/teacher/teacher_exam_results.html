@@ -138,6 +138,29 @@
                     </select>
                 </div>
             </div>
+
+            {# Bütöv qrupa ikinci şans (əlavə cəhd) — seçilmiş qrupun hər üzvünə grant yazır #}
+            <div class="ter-filter-field ter-group-grant-field">
+                <label class="ter-filter-label" for="resultsGroupGrantSelect">
+                    <i class="fas fa-users"></i> {% trans "Qrupa ikinci şans" context "exams.template.teacher_exam_results" %}
+                </label>
+                <form method="post" action="{% url 'exams:grant_extra_attempt_group' slug=exam.slug %}" class="ter-group-grant-form d-flex gap-2">
+                    {% csrf_token %}
+                    <div class="bootstrap-single-select flex-grow-1">
+                        <select name="group_id" id="resultsGroupGrantSelect"
+                                class="form-select bootstrap-single-select__native" data-bootstrap-select required>
+                            <option value="">{% trans 'Qrup seçin…' context 'exams.template.teacher_exam_results' %}</option>
+                            {% for grp in available_groups %}
+                                <option value="{{ grp.id }}">{{ grp.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="ter-btn ter-btn--sm ter-btn--ghost" style="white-space:nowrap;"
+                            title="{% trans 'Seçilmiş qrupun bütün tələbələrinə bu imtahan üçün əlavə cəhd verir.' context 'exams.template.teacher_exam_results' %}">
+                        <i class="fas fa-rotate-right"></i> {% trans "Əlavə cəhd ver" context "exams.template.teacher_exam_results" %}
+                    </button>
+                </form>
+            </div>
             {% endif %}
 
             <div class="ter-filter-field">

@@ -142,6 +142,11 @@ urlpatterns = [
         views.grant_extra_attempt,
         name="grant_extra_attempt",
     ),
+    path(
+        "<slug:slug>/grant-extra-attempt-group/",
+        views.grant_extra_attempt_group,
+        name="grant_extra_attempt_group",
+    ),
     path("pending-work/", views.teacher_pending_attempts, name="teacher_pending_attempts"),
     # ==========================
     # TEACHER - Question Bank library (imtahandan asılı olmayan) (sabit)
