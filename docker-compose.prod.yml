@@ -565,8 +565,14 @@ services:
     ports:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      # Mount the whole config directory, NOT the individual files. A single-file
+      # bind mount pins the container to that file's inode; when a deploy rewrites
+      # prometheus.yml/alerts.yml (rsync writes a new file + renames → new inode),
+      # the running container keeps reading the old, now-deleted inode ("//deleted"
+      # in its mount table) and silently serves a stale config until fully
+      # recreated — a SIGHUP/reload cannot fix it. A directory mount resolves the
+      # filename on each open, so the reload step below actually picks up changes.
+      - ./docker/prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
     depends_on:
       app:

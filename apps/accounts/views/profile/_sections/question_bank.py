@@ -32,7 +32,7 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)
-    search_query = (request.GET.get("bank_q") or "").strip()[:120]
+    search_query = (request.GET.get("bank_search") or "").strip()[:120]
     qs = accessible_banks(request.user, organization).annotate(
         lib_count=Count("library_questions", filter=Q(library_questions__is_active=True))
     )
@@ -45,11 +45,11 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
         "question_bank_banks": page_obj.object_list,
         "question_bank_page_obj": page_obj,
         "question_bank_search_query": search_query,
-        "question_bank_pagination_query": _query_string(section="question-bank", bank_q=search_query),
+        "question_bank_pagination_query": _query_string(section="question-bank", bank_search=search_query),
         "question_bank_back_url": _append_query_params(
             reverse("accounts:profile"),
             section="question-bank",
-            bank_q=search_query,
+            bank_search=search_query,
             bank_page=request.GET.get("bank_page"),
         ),
         "question_bank_language_choices": EXAM_LANGUAGE_CHOICES,

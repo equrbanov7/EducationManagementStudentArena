@@ -171,6 +171,21 @@ refresh_nginx_upstream() {
   docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate nginx
 }
 
+reload_prometheus_config() {
+  # prometheus.yml / alerts.yml are bind-mounted read-only. `docker compose up -d`
+  # does NOT recreate the container when only the mounted file *content* changed,
+  # so without this step a deploy leaves Prometheus serving its old in-memory
+  # config (new scrape jobs / alert rules never take effect). SIGHUP makes it
+  # re-read the config; the directory mount (see docker-compose.prod.yml) ensures
+  # it sees the freshly-synced files. Fall back to a recreate if the reload fails.
+  echo "Reloading Prometheus configuration..."
+  if docker compose -f "$COMPOSE_FILE" exec -T prometheus kill -HUP 1 2>/dev/null; then
+    return 0
+  fi
+  echo "Prometheus SIGHUP reload failed; recreating prometheus." >&2
+  docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate prometheus
+}
+
 legacy_deploy() {
   if [ ! -x "${VENV_DIR}/bin/python" ]; then
     echo "Missing virtualenv at ${VENV_DIR}." >&2
@@ -382,6 +397,7 @@ docker_deploy() {
   done
 
   refresh_nginx_upstream
+  reload_prometheus_config
 
   wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "$PING_JSON" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true

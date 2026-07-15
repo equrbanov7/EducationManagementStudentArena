@@ -169,6 +169,7 @@ class _Stage1Mixin:
         self.question_bank_back_url = self.question_bank_create_next_url
         self.question_bank_language_choices = []
         self.question_bank_default_type_choices = []
+        self.question_bank_can_create = False
         if self.capabilities["can_view_owned_learning"]:
             self.my_created_courses_count = self.created_courses_qs.count()
             if self.active_section == "my-courses":
@@ -202,6 +203,7 @@ class _Stage1Mixin:
         self.question_bank_back_url = self._qb_ctx["question_bank_back_url"]
         self.question_bank_language_choices = self._qb_ctx["question_bank_language_choices"]
         self.question_bank_default_type_choices = self._qb_ctx["question_bank_default_type_choices"]
+        self.question_bank_can_create = self._qb_ctx["question_bank_can_create"]
         self._posts_ctx = profile_hooks.posts_section(
             self.request, capabilities=self.capabilities, active_section=self.active_section
         )
