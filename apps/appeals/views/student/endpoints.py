@@ -179,7 +179,16 @@ def appeal_create(request, attempt_id):
                 pgettext("appeals.view.message", "Apellyasiyanız qeydə alındı."),
             )
             if _is_final_exam(exam) and not _is_profile_results_request(request):
-                # Final imtahan: apellyasiyadan sonra imtahan giriş səhifəsinə çıxılır.
+                # Final imtahan: apellyasiyadan sonra tələbə zal rejimindən ÇIXARILIR.
+                # Giriş sessiyası təmizlənir və logout edilir ki, təkrar imtahan
+                # giriş QAYDALARI modalına yox, təmiz login səhifəsinə düşsün
+                # (bilet artıq COMPLETED, amma zal oturumu hələ açıq ola bilər).
+                from django.contrib.auth import logout
+
+                from apps.exams.services.final_center import clear_entry_session
+
+                clear_entry_session(request)
+                logout(request)
                 return redirect(reverse("exams:final_exam_entry"))
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
             return redirect(reverse("accounts:profile") + "?section=my-appeals")
