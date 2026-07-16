@@ -349,15 +349,44 @@ class _Stage1Mixin:
             caps = self.capabilities
             if caps.get("is_teacher") or caps.get("is_unit_manager"):
                 from apps.organizations.models import Membership
+                from core.constants import OrgUnitType
+
+                # Fakültə/kafedra ayrı sahələr kimi göstərilir — hər ikisi
+                # Membership.scope_unit-dən avtomatik hesablanır, istifadəçi
+                # tərəfindən dəyişdirilə bilməz (bax [[project_group_sector_variability]]).
+                faculty_types = {
+                    OrgUnitType.FACULTY,
+                    OrgUnitType.DEANERY,
+                    OrgUnitType.INSTITUTE,
+                    OrgUnitType.RECTORATE,
+                    OrgUnitType.VICE_RECTORATE,
+                }
+                department_types = {OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT}
 
                 seen_units = set()
                 for membership in Membership.objects.filter(
                     user=self.request.user, is_active=True, organization=self.active_organization
                 ).select_related("scope_unit"):
                     unit = membership.scope_unit
-                    if unit is not None and unit.id not in seen_units:
-                        seen_units.add(unit.id)
-                        self.academic_units.append(unit)
+                    if unit is None or unit.id in seen_units:
+                        continue
+                    seen_units.add(unit.id)
+
+                    faculty_unit = None
+                    department_unit = None
+                    for node in [unit, *unit.get_ancestors()]:
+                        if department_unit is None and node.unit_type in department_types:
+                            department_unit = node
+                        if faculty_unit is None and node.unit_type in faculty_types:
+                            faculty_unit = node
+
+                    self.academic_units.append(
+                        {
+                            "unit": unit,
+                            "faculty": faculty_unit,
+                            "department": department_unit,
+                        }
+                    )
             if caps.get("is_teacher"):
                 seen_subjects = set()
                 for offering in (
