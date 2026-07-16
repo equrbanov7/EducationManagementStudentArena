@@ -177,6 +177,32 @@
             </main>
 
             <aside class="public-profile-sidebar">
+                {% if admin_membership %}
+                    <section class="public-section-card public-section-card--sidebar">
+                        <div class="public-section-card__header">
+                            <h2>{% trans 'Struktur məlumatı' %}</h2>
+                        </div>
+                        <dl class="public-profile-facts">
+                            <div class="public-profile-facts__row">
+                                <dt>{% trans 'Rol' %}</dt>
+                                <dd>{{ admin_membership.role.display_name }}</dd>
+                            </div>
+                            <div class="public-profile-facts__row">
+                                <dt>{% trans 'Bölmə' %}</dt>
+                                <dd>{% if admin_membership.scope_unit %}{{ admin_membership.scope_unit.name }}{% else %}{% trans 'Hamısı' %}{% endif %}</dd>
+                            </div>
+                            <div class="public-profile-facts__row">
+                                <dt>{% trans 'Email' %}</dt>
+                                <dd>{{ profile_user.email }}</dd>
+                            </div>
+                            <div class="public-profile-facts__row">
+                                <dt>{% trans 'Üzvlüyə qoşulma' %}</dt>
+                                <dd>{{ admin_membership.created_at|date:"d M Y" }}</dd>
+                            </div>
+                        </dl>
+                    </section>
+                {% endif %}
+
                 <section class="public-section-card public-section-card--sidebar">
                     <div class="public-section-card__header">
                         <h2>{% trans 'Açıq məlumatlar' %}</h2>
