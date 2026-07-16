@@ -100,6 +100,7 @@
           data-exam-id="{{ exam.id }}"
           data-attempt-id="{{ attempt.id }}"
           data-exam-type="{{ exam.exam_type }}"
+          data-exam-type-extended="{{ exam.exam_type_extended }}"
           data-autosave-interval-ms="{{ exam_autosave_interval_ms }}"
           data-autosave-jitter-ms="{{ exam_autosave_jitter_ms }}"
           data-autosave-binary-uploads-enabled="{{ exam_autosave_binary_uploads_enabled|yesno:'1,0' }}"
@@ -456,7 +457,7 @@
         supervisionStatus: "{{ supervision.supervision_status|default:'active' }}"
     };
     </script>
-    <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20260611-fresh-csrf"></script>
+    <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20260716-intervention"></script>
     {% endif %}
 {% endblock %}
 

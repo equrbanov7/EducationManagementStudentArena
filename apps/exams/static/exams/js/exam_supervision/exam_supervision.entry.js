@@ -1,9 +1,10 @@
-import ExamSupervision from "./state.js?v=20260611-fresh-csrf";
-import "./ui.js?v=20260611-fresh-csrf";
-import "./event_capture.js?v=20260611-fresh-csrf";
-import "./scoring.js?v=20260611-fresh-csrf";
-import "./api.js?v=20260611-fresh-csrf";
-import "./websocket.js?v=20260611-fresh-csrf";
+import ExamSupervision from "./state.js?v=20260716-intervention";
+import "./ui.js?v=20260716-intervention";
+import "./event_capture.js?v=20260716-intervention";
+import "./scoring.js?v=20260716-intervention";
+import "./api.js?v=20260716-intervention";
+import "./intervention.js?v=20260716-intervention";
+import "./websocket.js?v=20260716-intervention";
 
 window.ExamSupervision = ExamSupervision;
 

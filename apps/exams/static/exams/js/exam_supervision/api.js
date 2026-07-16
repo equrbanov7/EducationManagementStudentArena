@@ -1,16 +1,22 @@
-import { ExamSupervision } from "./state.js?v=20260611-fresh-csrf";
+import { ExamSupervision } from "./state.js?v=20260716-intervention";
 
 Object.assign(ExamSupervision, {
         _checkSupervisionStatus: function (callback) {
             if (!this.statusEndpoint) return;
             fetch(this.statusEndpoint, {
                 method: "GET",
+                cache: "no-store",
                 headers: { "X-Requested-With": "XMLHttpRequest" },
             })
                 .then(function (r) {
                     return r.json();
                 })
                 .then(function (data) {
+                    if (data && data.entry_session_valid === false) {
+                        ExamSupervision.destroy();
+                        window.location.replace(data.redirect_url || "/exams/final/");
+                        return;
+                    }
                     if (callback) callback(data);
                 })
                 .catch(function () {});
@@ -49,7 +55,7 @@ Object.assign(ExamSupervision, {
                     function (data) {
                         if (data.supervision_status === "locked" || data.supervision_status === "removed") {
                             if (data.manual_lock) {
-                                ExamSupervision._showTeacherLockOverlay();
+                                ExamSupervision._showTeacherLockOverlay(data.intervention_reason);
                             } else {
                                 ExamSupervision._onLimitExceeded();
                             }

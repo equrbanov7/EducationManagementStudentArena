@@ -10,10 +10,12 @@ Təhlükəsizlik xətləri:
 """
 
 import logging
+import secrets
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
@@ -32,6 +34,7 @@ from apps.exams.models import FinalExamTicket
 from apps.exams.services.exam_center_gate import get_client_ip
 from core.audit import log_action
 from core.constants import AuditAction
+from core.rls import bypass_rls
 
 from .pins import equalize_verification_timing, verify_ticket_pin
 
@@ -42,6 +45,7 @@ User = get_user_model()
 # View qatında session-a yazılan açar: PIN yoxlamasından keçmiş bilet id-si.
 # Gate/waiting/begin səhifələri yalnız bu təsdiqdən sonra açılır.
 ENTRY_SESSION_KEY = "final_exam_ticket_id"
+ENTRY_VERSION_SESSION_KEY = "final_exam_entry_version"
 
 # Generik xəta kodları → lokalizasiya view/template qatında.
 ERROR_INVALID = "invalid_credentials"
@@ -94,7 +98,9 @@ def _candidate_tickets(user):
                 TICKET_STATUS_READY,
                 TICKET_STATUS_ACTIVE,
             ),
+            pin_revoked_at__isnull=True,
         )
+        .exclude(pin_hash="")
         .filter(Q(pin_expires_at__isnull=True) | Q(pin_expires_at__gt=now))
         .select_related("session", "session__room", "exam", "organization", "student")
         .order_by("-created_at")
@@ -126,43 +132,47 @@ def validate_entry(request, username: str, raw_pin: str):
         equalize_verification_timing(raw_pin)
         return None, ERROR_INVALID
 
-    candidates = _candidate_tickets(user)
-    if not candidates:
-        equalize_verification_timing(raw_pin)
-        return None, ERROR_INVALID
+    # Public pre-auth axınında aktiv tenant yoxdur. Bypass yalnız artıq
+    # username ilə məhdudlaşdırılmış bilet namizədlərinin PIN yoxlaması,
+    # lockout yeniləməsi və audit yazısı müddətində açılır.
+    with bypass_rls():
+        candidates = _candidate_tickets(user)
+        if not candidates:
+            equalize_verification_timing(raw_pin)
+            return None, ERROR_INVALID
 
-    ticket = None
-    for cand in candidates:
-        if cand.is_pin_locked:
-            verify_ticket_pin(cand, raw_pin)  # timing bərabərləşməsi; nəticə nəzərə alınmır
-            continue
-        if verify_ticket_pin(cand, raw_pin):
-            ticket = cand
-            break
+        ticket = None
+        for cand in candidates:
+            if cand.is_pin_locked:
+                verify_ticket_pin(cand, raw_pin)  # timing bərabərləşməsi; nəticə nəzərə alınmır
+                continue
+            if verify_ticket_pin(cand, raw_pin):
+                ticket = cand
+                break
 
-    if ticket is None:
-        # Heç bir biletə uyğun gəlmədi — kilidli bilet varsa xüsusi mesaj.
-        if any(c.is_pin_locked for c in candidates):
-            _log_suspicious(request, candidates[0], "pin_locked_attempt")
-            return None, ERROR_LOCKED
-        return None, ERROR_INVALID
+        if ticket is None:
+            # Heç bir biletə uyğun gəlmədi — kilidli bilet varsa xüsusi mesaj.
+            if any(c.is_pin_locked for c in candidates):
+                _log_suspicious(request, candidates[0], "pin_locked_attempt")
+                return None, ERROR_LOCKED
+            return None, ERROR_INVALID
 
-    now = timezone.now()
-    if not ticket.entry_validated_at:
-        ticket.entry_validated_at = now
-        ticket.save(update_fields=["entry_validated_at", "updated_at"])
+        now = timezone.now()
+        if not ticket.entry_validated_at:
+            ticket.entry_validated_at = now
+            ticket.save(update_fields=["entry_validated_at", "updated_at"])
 
-    log_action(
-        AuditAction.VERIFY,
-        user=user,
-        organization=ticket.organization,
-        obj=ticket,
-        reason="final_entry_validated",
-        request=request,
-        resource_type="final_exam_ticket",
-        resource_id=str(ticket.pk),
-    )
-    return ticket, None
+        log_action(
+            AuditAction.VERIFY,
+            user=user,
+            organization=ticket.organization,
+            obj=ticket,
+            reason="final_entry_validated",
+            request=request,
+            resource_type="final_exam_ticket",
+            resource_id=str(ticket.pk),
+        )
+        return ticket, None
 
 
 def _log_suspicious(request, ticket, label: str) -> None:
@@ -179,16 +189,120 @@ def _log_suspicious(request, ticket, label: str) -> None:
     )
 
 
+def _entry_version(ticket) -> str:
+    """Cari giriş credential nəslinin sessiyada saxlanılan sabit markeri.
+
+    İki lövbər birləşdirilir: PIN rotasiyası (pin_issued_at) VƏ hər uğurlu
+    brauzer claim-i (entry_validated_at) versiyanı dəyişməlidir. Tək sahə
+    götürülsəydi, pin_issued_at dolu biletlərdə student-PIN claim bump-ı
+    görünməz qalır və eyni fərdi PIN iki paralel sessiya saxlaya bilirdi.
+    """
+    issued = ticket.pin_issued_at.isoformat() if ticket.pin_issued_at else ""
+    validated = ticket.entry_validated_at.isoformat() if ticket.entry_validated_at else ""
+    if not issued and not validated:
+        return ""
+    return f"{issued}|{validated}"
+
+
 def store_entry_session(request, ticket) -> None:
     request.session[ENTRY_SESSION_KEY] = ticket.pk
+    request.session[ENTRY_VERSION_SESSION_KEY] = _entry_version(ticket)
 
 
 def entry_ticket_id(request):
     return request.session.get(ENTRY_SESSION_KEY)
 
 
+def entry_session_matches(request, ticket) -> bool:
+    """Sessiya həmin biletin ən son PIN/giriş nəslinə bağlıdırmı."""
+    return entry_session_values_match(
+        entry_ticket_id(request),
+        request.session.get(ENTRY_VERSION_SESSION_KEY),
+        ticket,
+    )
+
+
+def entry_session_values_match(ticket_id, version, ticket) -> bool:
+    """HTTP və WebSocket sessiyaları üçün ortaq credential-nəsli yoxlaması."""
+    if ticket_id != ticket.pk:
+        return False
+    stored = str(version or "")
+    current = _entry_version(ticket)
+    return bool(stored and current and secrets.compare_digest(stored, current))
+
+
 def clear_entry_session(request) -> None:
     request.session.pop(ENTRY_SESSION_KEY, None)
+    request.session.pop(ENTRY_VERSION_SESSION_KEY, None)
+
+
+@transaction.atomic
+def claim_ticket_pin_entry(ticket, room, computer=None):
+    """Doğrulanmış bilet PIN-ini atomik olaraq bir brauzer sessiyası üçün sərf et.
+
+    Paralel iki request eyni PIN-i doğrulasa belə ``select_for_update`` yalnız
+    birinə claim verir. PIN nəsli dəyişibsə və ya başqa request artıq sərf
+    edibsə ``None`` qaytarılır.
+    """
+    # Public pre-auth request-də aktiv tenant yoxdur. Bypass yalnız credential
+    # ilə əvvəlcədən tapılmış ticket PK-si + eyni təşkilatlı room üzərindədir.
+    with bypass_rls():
+        # of=("self",): nullable FK-lara (session/attempt) select_related LEFT
+        # JOIN yaradır; PostgreSQL outer join-un nullable tərəfinə FOR UPDATE
+        # qoymağa icazə vermir — yalnız bilet sətri kilidlənməlidir.
+        locked = (
+            FinalExamTicket.objects.select_for_update(of=("self",))
+            .select_related("session", "session__room", "exam", "organization", "student", "attempt")
+            .filter(pk=ticket.pk)
+            .first()
+        )
+        if locked is None or not locked.has_valid_pin:
+            return None
+        if _entry_version(locked) != _entry_version(ticket):
+            return None
+
+        # Ticket lock-u saxlanarkən yer dəyişməsini də tamamla. Beləliklə eyni
+        # PIN ilə yarışan ikinci kompüter attempt location-ını dəyişə bilməz.
+        if attach_ticket_to_room_sitting(locked, room, computer) is None:
+            return None
+
+        now = timezone.now()
+        locked.entry_validated_at = now
+        locked.pin_revoked_at = now
+        locked.pin_cipher = ""
+        locked.save(update_fields=["entry_validated_at", "pin_revoked_at", "pin_cipher", "updated_at"])
+        return locked
+
+
+@transaction.atomic
+def claim_student_pin_entry(ticket):
+    """ExamStudentPin girişi üçün yalnız ən son brauzer sessiyasını aktiv saxla."""
+    with bypass_rls():
+        locked = (
+            FinalExamTicket.objects.select_for_update(of=("self",))
+            .select_related("session", "session__room", "exam", "organization", "student", "attempt")
+            .filter(pk=ticket.pk)
+            .first()
+        )
+        if locked is None:
+            return None
+        locked.entry_validated_at = timezone.now()
+        locked.save(update_fields=["entry_validated_at", "updated_at"])
+        return locked
+
+
+def final_attempt_entry_session_valid(request, attempt) -> bool:
+    """Final attempt URL/yazı endpoint-i yalnız aktiv giriş sessiyasına açıqdır."""
+    if getattr(attempt.exam, "exam_type_extended", "") != "final":
+        return True
+    with bypass_rls():
+        ticket = (
+            FinalExamTicket.objects.filter(attempt=attempt, student_id=attempt.user_id)
+            .only("id", "pin_issued_at", "entry_validated_at")
+            .first()
+        )
+    # Köhnə, final-center bileti olmayan attempt-lər üçün geriyə uyğunluq.
+    return ticket is None or entry_session_matches(request, ticket)
 
 
 # PIN axını üçün avtomatik yaradılan zal oturumunun standart müddəti.
@@ -280,34 +394,68 @@ def attach_ticket_to_room_sitting(ticket, room, computer=None):
       xətası göstərir).
     """
     from apps.exams.models import ExamRoomSession
-    from core.rls import bypass_rls
 
     live_states = (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)
-    if (
-        ticket.session_id
-        and ticket.session
-        and ticket.session.room_id == room.id
-        and ticket.session.state in live_states
-    ):
-        return ticket.session
-
-    # Public giriş axını — aktiv-org RLS konteksti yoxdur; oturum otağa görə
-    # açıq filtrlənir (bax resolve_room_computer). Bypass ilə oxuyuruq.
-    with bypass_rls():
-        sitting = (
-            ExamRoomSession.objects.filter(room=room, state__in=live_states).order_by("scheduled_start", "id").first()
+    # Credential ilə tapılmış bilet yalnız öz təşkilatının otağına bağlana bilər.
+    # Bu invariant bypass sahəsini tenantlararası ümumi yazıya çevrilməkdən qoruyur.
+    if ticket.organization_id != room.organization_id:
+        logger.warning(
+            "final ticket room organization mismatch: ticket=%s room=%s",
+            ticket.pk,
+            room.pk,
         )
-    if sitting is None:
         return None
 
-    update_fields = ["session", "updated_at"]
-    ticket.session = sitting
-    seat = getattr(computer, "seat_number", None)
-    if seat and not sitting.tickets.filter(seat_number=seat).exclude(pk=ticket.pk).exists():
-        ticket.seat_number = seat
-        update_fields.append("seat_number")
-    ticket.save(update_fields=update_fields)
-    return sitting
+    # Public giriş axını — aktiv-org RLS konteksti yoxdur. Oxu, seat collision
+    # yoxlaması və ticket UPDATE-i eyni dar bypass daxilində olmalıdır.
+    with bypass_rls():
+        sitting = None
+        if ticket.session_id:
+            sitting = ExamRoomSession.objects.filter(
+                pk=ticket.session_id,
+                room=room,
+                state__in=live_states,
+            ).first()
+        if sitting is None:
+            sitting = (
+                ExamRoomSession.objects.filter(room=room, state__in=live_states)
+                .order_by("scheduled_start", "id")
+                .first()
+            )
+        if sitting is None:
+            return None
+
+        seat = getattr(computer, "seat_number", None)
+        if seat and sitting.tickets.filter(seat_number=seat).exclude(pk=ticket.pk).exists():
+            # (session, seat_number) DB-də unikaldır — dolu yeri yazmaq olmaz.
+            # Amma dolu yer (o cümlədən bitmiş/çıxarılmış biletin köhnə yeri)
+            # girişi BLOKLAMAMALIDIR: yer sadəcə boş saxlanılır (köhnə davranış),
+            # giriş özü birdəfəlik PIN claim-i ilə qorunur.
+            logger.warning(
+                "final ticket target seat is occupied: ticket=%s sitting=%s seat=%s", ticket.pk, sitting.pk, seat
+            )
+            seat = None
+
+        update_fields = []
+        if ticket.session_id != sitting.pk:
+            ticket.session = sitting
+            update_fields.append("session")
+        if ticket.seat_number != seat:
+            ticket.seat_number = seat
+            update_fields.append("seat_number")
+        if update_fields:
+            ticket.save(update_fields=[*update_fields, "updated_at"])
+
+        # Kompüter dəyişəndə yeni attempt YARATMA: mövcud attempt-i yeni
+        # zal/kompüterlə möhürlə və DB-dəki cavabları olduğu kimi saxla.
+        if ticket.attempt_id:
+            from apps.exams.models import ExamAttempt
+
+            ExamAttempt.objects.filter(pk=ticket.attempt_id).update(
+                room=room,
+                room_computer=computer,
+            )
+        return sitting
 
 
 __all__ = [
@@ -316,11 +464,16 @@ __all__ = [
     "ERROR_LOCKED",
     "ERROR_NO_ACTIVE_SESSION",
     "ERROR_RATE_LIMITED",
+    "claim_student_pin_entry",
+    "claim_ticket_pin_entry",
     "attach_ticket_to_room_sitting",
     "clear_entry_session",
     "ensure_open_room_sitting",
     "ensure_pin_ticket",
+    "entry_session_matches",
+    "entry_session_values_match",
     "entry_ticket_id",
+    "final_attempt_entry_session_valid",
     "store_entry_session",
     "validate_entry",
 ]

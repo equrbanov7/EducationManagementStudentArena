@@ -175,7 +175,12 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if attempt.exam.exam_type == 'test' or attempt.checked_by_teacher %}
+                                {% if attempt.exam_intervention.is_terminal %}
+                                    <span class="status-badge status-expired"><i class="fa-solid fa-user-slash"></i> {% trans 'İmtahandan çıxarılıb' %}</span>
+                                    {% if attempt.exam_intervention.reason %}
+                                    <div class="small text-danger mt-1">{{ attempt.exam_intervention.reason|truncatechars:80 }}</div>
+                                    {% endif %}
+                                {% elif attempt.exam.exam_type == 'test' or attempt.checked_by_teacher %}
                                     <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> {% trans 'Qiymətləndirildi' %}</span>
                                 {% elif attempt.status == 'expired' %}
                                     <span class="status-badge status-expired"><i class="fa-solid fa-hourglass-end"></i> Vaxt bitdi</span>

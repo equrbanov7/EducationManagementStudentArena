@@ -73,6 +73,11 @@
         cancelled: "Oturum ləğv edildi."
     };
 
+    function interventionMessage(base, reason) {
+        reason = String(reason || "").trim();
+        return reason ? base + " Səbəb: " + reason : base;
+    }
+
     function showManualStart() {
         // İmtahan başlayıb: əl ilə başlatma düyməsini göstər (avtomatik keçid
         // hər hansı səbəbdən alınmasa tələbə həmin kompüterdə yenidən cəhd etsin).
@@ -145,7 +150,14 @@
                 break;
             case "removed":
                 finished = true;
-                setMessage(i18n.removed);
+                setMessage(interventionMessage(i18n.removed, data.reason));
+                break;
+            case "suspended":
+                setMessage(interventionMessage("İmtahanınız müvəqqəti dayandırıldı.", data.reason));
+                break;
+            case "credential_rotated":
+                finished = true;
+                window.location.replace("/exams/final/");
                 break;
             default:
                 break;
@@ -172,9 +184,20 @@
     function startFallbackPolling() {
         if (fallbackTimer || finished) return;
         fallbackTimer = window.setInterval(function () {
-            fetch(stateUrl, { credentials: "same-origin" })
-                .then(function (resp) { return resp.json(); })
+            fetch(stateUrl, { credentials: "same-origin", cache: "no-store" })
+                .then(function (resp) {
+                    // 403 = giriş sessiyası artıq etibarsızdır (məs. yeni PIN
+                    // verilib). WS ölü olsa belə köhnə brauzer girişə qayıtmalıdır.
+                    if (resp.status === 403) {
+                        finished = true;
+                        stopFallbackPolling();
+                        window.location.replace("/exams/final/");
+                        return null;
+                    }
+                    return resp.json();
+                })
                 .then(function (data) {
+                    if (!data) return;
                     bumpChecks();
                     if (data.session_state === "active") scheduleBegin();
                     if (data.session_state === "ended" || data.session_state === "cancelled") {
@@ -184,7 +207,7 @@
                     }
                     if (data.ticket_status === "removed") {
                         finished = true;
-                        setMessage(i18n.removed);
+                        setMessage(interventionMessage(i18n.removed, data.removal_reason));
                         stopFallbackPolling();
                     }
                 })
@@ -218,9 +241,17 @@
             handleEvent(data);
         };
 
-        socket.onclose = function () {
+        socket.onclose = function (evt) {
             stopHeartbeat();
             if (finished) return;
+            // 4403: server bu sessiyanı artıq tanımır (məs. yeni PIN verilib) —
+            // reconnect mənasızdır, dərhal giriş səhifəsinə qayıt.
+            if (evt && evt.code === 4403) {
+                finished = true;
+                stopFallbackPolling();
+                window.location.replace("/exams/final/");
+                return;
+            }
             setConn("offline", i18n.reconnecting);
             reconnectAttempt += 1;
             // Backoff + jitter: 1s, 2s, 4s… max 30s; server eyni anda minlərlə

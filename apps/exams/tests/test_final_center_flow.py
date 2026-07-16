@@ -994,6 +994,16 @@ class StudentPinWaitingFlowTests(_FlowBase):
         self.assertEqual(ticket.session.room_id, self.room.pk)
         self.assertEqual(ticket.session.state, "entry_open")
 
+    def test_personal_pin_reentry_does_not_increment_pinless_ticket_failures(self):
+        self.assertEqual(self._pin_login(Client()).status_code, 302)
+        ticket = FinalExamTicket.objects.get(exam=self.exam, student=self.student2)
+        self.assertEqual(ticket.pin_hash, "")
+
+        self.assertEqual(self._pin_login(Client()).status_code, 302)
+        ticket.refresh_from_db()
+        self.assertEqual(ticket.pin_failed_attempts, 0)
+        self.assertIsNone(ticket.pin_locked_until)
+
     def test_pin_flow_waits_then_starts_with_room_stamp(self):
         client = Client()
         self._pin_login(client)

@@ -68,6 +68,7 @@ from apps.exams.services.review_visibility import (  # noqa: F401
     resolve_exam_attempt_name_visibility,
     resolve_exam_attempt_review_window_seconds,
 )
+from apps.exams.services.supervision import attach_attempt_interventions  # noqa: F401
 from apps.exams.services.teacher_dashboard import (  # noqa: F401
     build_teacher_exam_dashboard,
 )
@@ -90,6 +91,7 @@ __all__ = [
     "EXAM_LANGUAGE_CHOICES",
     "accessible_banks",
     "available_language_options",
+    "attach_attempt_interventions",
     "build_teacher_exam_dashboard",
     "calculate_attempt_score",
     "can_create_question_bank",

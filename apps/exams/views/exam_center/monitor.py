@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from apps.exams.services.final_center import (
@@ -56,6 +57,7 @@ def exam_center_session_snapshot(request, session_id):
 
 
 @login_required
+@never_cache
 def exam_center_ticket_snapshot(request, session_id, ticket_id):
     """
     Bir tələbənin "çiyni üzərindən" canlı görüntüsü: hazırda hansı sualı yazır,
