@@ -166,7 +166,6 @@ def handle_profile_post(
         profile.student_group_number = (
             request.POST.get("student_group_number", profile.student_group_number) or ""
         ).strip()
-        profile.department = (request.POST.get("department", profile.department) or "").strip()
 
         # Handle avatar upload
         uploaded_avatar = request.FILES.get("avatar")
