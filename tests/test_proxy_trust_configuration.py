@@ -48,6 +48,17 @@ def test_direct_deploy_requires_dns_to_resolve_only_to_declared_origin_addresses
     assert "EDGE_PROXY_MODE=cloudflare" not in env_example
 
 
+def test_deploy_recreates_nginx_when_single_file_bind_mount_is_stale():
+    script = (ROOT / "scripts/deploy/remote_deploy.sh").read_text(encoding="utf-8")
+    refresh = script.split("refresh_nginx_upstream() {", 1)[1].split("\n}", 1)[0]
+
+    assert 'sha256sum "$NGINX_CONFIG_FILE"' in refresh
+    assert "sha256sum /etc/nginx/conf.d/default.conf" in refresh
+    assert '"$host_config_hash" != "$container_config_hash"' in refresh
+    assert "run --rm --no-deps nginx nginx -t" in refresh
+    assert "up -d --no-deps --force-recreate nginx" in refresh
+
+
 def test_obsolete_cloudflare_runtime_assets_are_absent():
     assert not (ROOT / "docker/nginx/cloudflare-realip.conf").exists()
     assert not (ROOT / "scripts/deploy/sync_cloudflare_networks.py").exists()
