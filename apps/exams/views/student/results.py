@@ -19,6 +19,7 @@ from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.services.result_release import exam_answers_release_locked
+from apps.exams.services.supervision import attach_attempt_interventions, get_attempt_intervention
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import (
@@ -160,6 +161,7 @@ def exam_result(request, slug, attempt_id):
         history_url = ""
 
     attempt = annotate_attempt_result_visibility([attempt])[0]
+    exam_intervention = get_attempt_intervention(attempt)
     if not attempt.can_view_result:
         message = (
             "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib."
@@ -313,6 +315,7 @@ def exam_result(request, slug, attempt_id):
         {
             "exam": exam,
             "attempt": attempt,
+            "exam_intervention": exam_intervention,
             "questions": questions,
             "answers_by_qid": answers_by_qid,
             "delivered_by_qid": delivered_by_qid,
@@ -393,6 +396,7 @@ def student_exam_history(request):
     page_obj = paginator.get_page(page_number)
 
     visible_attempts = annotate_attempt_result_visibility(list(page_obj.object_list))
+    attach_attempt_interventions(visible_attempts)
     attach_test_result_summaries(visible_attempts, bonus_map_fn=score_adjustments.student_visible_bonus_map)
     current_path = request.get_full_path()
     for attempt in visible_attempts:

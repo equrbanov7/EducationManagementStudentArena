@@ -39,12 +39,32 @@
         <h1 class="page-title">{{ exam.title }} - {% trans "heading_your_result" context "exams.template.student_exam_result" %}</h1>
     </div>
 
+    {% if exam_intervention.is_terminal %}
+    <div class="alert alert-danger d-flex gap-3 align-items-start mb-4" role="alert">
+        <i class="fas fa-user-slash fa-lg mt-1" aria-hidden="true"></i>
+        <div>
+            <h2 class="h5 fw-bold mb-2">
+                {% if exam_intervention.action == "technical" %}
+                    {% trans "İmtahanınız texniki səbəblə dayandırılıb" %}
+                {% else %}
+                    {% trans "Siz imtahandan çıxarılmısınız" %}
+                {% endif %}
+            </h2>
+            {% if exam_intervention.reason %}
+            <p class="mb-0"><strong>{% trans "Səbəb" %}:</strong> {{ exam_intervention.reason }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <div class="summary-card">
         
         <div class="summary-header">
             <span class="text-uppercase tracking-wider text-muted small fw-bold">{% trans "exam_status" context "exams.template.student_exam_result" %}</span>
             <div class="mt-2">
-                {% if attempt.status == "submitted" %}
+                {% if exam_intervention.is_terminal %}
+                    <span class="status-badge badge-danger">{% trans "İmtahandan çıxarılıb" %}</span>
+                {% elif attempt.status == "submitted" %}
                     <span class="status-badge badge-success">{% trans "status_submitted" context "exams.template.student_exam_result" %}</span>
                 {% elif attempt.status == "expired" %}
                     <span class="status-badge badge-danger">{% trans "status_expired" context "exams.template.student_exam_result" %}</span>

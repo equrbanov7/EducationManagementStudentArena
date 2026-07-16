@@ -1,578 +1,73 @@
-{% load i18n %}
-{% comment %}
-Sistem Monitorinqi (superadmin-only). Bütün məlumat /api/superadmin/monitoring/
-endpoint-lərindən gəlir — icazə server-side yoxlanılır; bu template yalnız
-görünüşdür. Chart.js qlobal yüklüdür (window.Chart). Light-only --ems-* tokenləri.
-{% endcomment %}
-<div class="smx" id="smx-root"
-     data-api-base="/api/superadmin/monitoring/"
-     data-csrf="{{ csrf_token }}">
+{% load static i18n %}
+<section class="profile-section-panel profile-section--system-monitoring {% if active_section == 'system-monitoring' %}is-active{% endif %}"
+         data-profile-section-panel="system-monitoring">
+  <link rel="stylesheet"
+        href="{% static 'accounts/css/profile/sections/system_monitoring.css' %}?v=20260716-3">
 
-  <div class="smx-head">
-    <div>
-      <h2 class="smx-title"><i class="fas fa-heartbeat"></i> {% trans "Sistem Monitorinqi" context "monitoring" %}</h2>
-      <p class="smx-sub">{% trans "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət" context "monitoring" %}</p>
+  <div class="smx" id="smx-root"
+       data-api-base="/api/superadmin/monitoring/"
+       data-csrf="{{ csrf_token }}">
+    <div class="smx-head">
+      <div>
+        <h2 class="smx-title">
+          <i class="fas fa-heartbeat"></i>
+          {% trans "Sistem Monitorinqi" context "monitoring" %}
+        </h2>
+        <p class="smx-sub">
+          {% trans "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət" context "monitoring" %}
+        </p>
+      </div>
+      <div class="smx-controls">
+        <select id="smx-range" class="smx-select"
+                aria-label="{% trans 'Vaxt aralığı' context 'monitoring' %}">
+          <option value="300">5 dəq</option>
+          <option value="900">15 dəq</option>
+          <option value="3600" selected>1 saat</option>
+          <option value="21600">6 saat</option>
+          <option value="86400">24 saat</option>
+          <option value="604800">7 gün</option>
+          <option value="2592000">30 gün</option>
+        </select>
+        <button type="button" id="smx-refresh" class="smx-btn"
+                title="{% trans 'Yenilə' context 'monitoring' %}">
+          <i class="fas fa-rotate"></i>
+        </button>
+        <label class="smx-auto">
+          <input type="checkbox" id="smx-auto" checked>
+          {% trans "Avto" context "monitoring" %}
+        </label>
+        <span class="smx-updated" id="smx-updated">—</span>
+      </div>
     </div>
-    <div class="smx-controls">
-      <select id="smx-range" class="smx-select" aria-label="{% trans 'Vaxt aralığı' context 'monitoring' %}">
-        <option value="300">5 dəq</option>
-        <option value="900">15 dəq</option>
-        <option value="3600" selected>1 saat</option>
-        <option value="21600">6 saat</option>
-        <option value="86400">24 saat</option>
-        <option value="604800">7 gün</option>
-        <option value="2592000">30 gün</option>
-      </select>
-      <button type="button" id="smx-refresh" class="smx-btn" title="{% trans 'Yenilə' context 'monitoring' %}">
-        <i class="fas fa-rotate"></i>
-      </button>
-      <label class="smx-auto"><input type="checkbox" id="smx-auto" checked> {% trans "Avto" context "monitoring" %}</label>
-      <span class="smx-updated" id="smx-updated">—</span>
+
+    <div class="smx-tabs" role="tablist">
+      <button class="smx-tab active" data-tab="overview">{% trans "İcmal" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="server">{% trans "Server" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="containers">{% trans "Konteynerlər" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="application">{% trans "Tətbiq" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="database">{% trans "Baza" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="redis-celery">Redis · Celery</button>
+      <button class="smx-tab" data-tab="exams">{% trans "İmtahanlar" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="security-events">{% trans "Təhlükəsizlik" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="logs">{% trans "Loglar" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="alerts">{% trans "Alertlər" context "monitoring" %}</button>
+      <button class="smx-tab" data-tab="incidents">{% trans "İnsidentlər" context "monitoring" %}</button>
+    </div>
+
+    <div id="smx-degraded" class="smx-degraded" hidden>
+      <i class="fas fa-triangle-exclamation"></i>
+      <span id="smx-degraded-text"></span>
+    </div>
+    <div id="smx-body" class="smx-body" aria-live="polite">
+      <div class="smx-loading">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        {% trans "Yüklənir…" context "monitoring" %}
+      </div>
     </div>
   </div>
 
-  <div class="smx-tabs" role="tablist">
-    <button class="smx-tab active" data-tab="overview">{% trans "İcmal" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="server">{% trans "Server" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="containers">{% trans "Konteynerlər" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="application">{% trans "Tətbiq" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="database">{% trans "Baza" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="redis-celery">Redis · Celery</button>
-    <button class="smx-tab" data-tab="exams">{% trans "İmtahanlar" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="security-events">{% trans "Təhlükəsizlik" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="logs">{% trans "Loglar" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="alerts">{% trans "Alertlər" context "monitoring" %}</button>
-    <button class="smx-tab" data-tab="incidents">{% trans "İnsidentlər" context "monitoring" %}</button>
-  </div>
-
-  <div id="smx-degraded" class="smx-degraded" hidden>
-    <i class="fas fa-triangle-exclamation"></i>
-    <span id="smx-degraded-text"></span>
-  </div>
-
-  <div id="smx-body" class="smx-body" aria-live="polite">
-    <div class="smx-loading"><i class="fas fa-circle-notch fa-spin"></i> {% trans "Yüklənir…" context "monitoring" %}</div>
-  </div>
-</div>
-
-<style nonce="{{ request.csp_nonce }}">
-  .smx { --smx-navy:#0f2a5c; --smx-blue:#2563eb; --smx-ok:#16a34a; --smx-warn:#d97706; --smx-crit:#dc2626;
-         --smx-bg:#f6f8fc; --smx-line:#dbe4f0; font-size:14px; color:#16202f; }
-  .smx-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
-  .smx-title { margin:0; font-size:20px; color:var(--smx-navy); }
-  .smx-title i { color:var(--smx-blue); margin-right:6px; }
-  .smx-sub { margin:2px 0 0; color:#5b6b82; font-size:13px; }
-  .smx-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .smx-select, .smx-btn { border:1px solid var(--smx-line); border-radius:8px; background:#fff; padding:6px 10px; font-size:13px; cursor:pointer; }
-  .smx-btn:hover { border-color:var(--smx-blue); color:var(--smx-blue); }
-  .smx-auto { display:flex; align-items:center; gap:4px; font-size:12px; color:#5b6b82; }
-  .smx-updated { font-size:12px; color:#8a97a8; min-width:110px; text-align:right; }
-  .smx-tabs { display:flex; gap:4px; flex-wrap:wrap; margin:14px 0 12px; border-bottom:2px solid var(--smx-line); padding-bottom:0; }
-  .smx-tab { border:none; background:none; padding:8px 12px; font-size:13px; font-weight:600; color:#5b6b82;
-             cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; }
-  .smx-tab.active { color:var(--smx-navy); border-bottom-color:var(--smx-blue); }
-  .smx-degraded { background:#fef3c7; border:1px solid #f59e0b; color:#92400e; padding:8px 12px; border-radius:8px; margin-bottom:10px; font-size:13px; }
-  .smx-loading, .smx-empty, .smx-error { padding:36px; text-align:center; color:#8a97a8; }
-  .smx-error { color:var(--smx-crit); }
-  .smx-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px; margin-bottom:16px; }
-  .smx-card { background:#fff; border:1px solid var(--smx-line); border-radius:10px; padding:12px 14px; }
-  .smx-card .k { font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:#8a97a8; }
-  .smx-card .v { font-size:20px; font-weight:700; color:var(--smx-navy); margin-top:2px; }
-  .smx-card .v small { font-size:12px; font-weight:500; color:#8a97a8; }
-  .smx-card.ok .v { color:var(--smx-ok); } .smx-card.warn .v { color:var(--smx-warn); } .smx-card.crit .v { color:var(--smx-crit); }
-  .smx-grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
-  .smx-panel { background:#fff; border:1px solid var(--smx-line); border-radius:10px; padding:12px; }
-  .smx-panel h4 { margin:0 0 8px; font-size:13px; color:var(--smx-navy); }
-  .smx-panel canvas { width:100%; height:180px; }
-  .smx-table-wrap { overflow-x:auto; }
-  .smx-table { width:100%; border-collapse:collapse; font-size:13px; background:#fff; border:1px solid var(--smx-line); border-radius:10px; }
-  .smx-table th { background:var(--smx-bg); color:#5b6b82; text-align:left; padding:8px 10px; font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
-  .smx-table td { padding:8px 10px; border-top:1px solid var(--smx-line); white-space:nowrap; }
-  .smx-dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
-  .smx-dot.ok { background:var(--smx-ok); } .smx-dot.bad { background:var(--smx-crit); } .smx-dot.na { background:#c3ced9; }
-  .smx-pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; }
-  .smx-pill.critical { background:#fee2e2; color:#b91c1c; } .smx-pill.high { background:#fee2e2; color:#b91c1c; }
-  .smx-pill.medium, .smx-pill.warning { background:#fef3c7; color:#92400e; }
-  .smx-pill.low, .smx-pill.info { background:#e0ecff; color:#1d4ed8; }
-  .smx-pill.open { background:#fee2e2; color:#b91c1c; } .smx-pill.resolved { background:#dcfce7; color:#15803d; }
-  .smx-pill.acknowledged, .smx-pill.investigating, .smx-pill.monitoring { background:#fef3c7; color:#92400e; }
-  .smx-pill.silenced { background:#e5e7eb; color:#374151; }
-  .smx-filter { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
-  .smx-filter input, .smx-filter select { border:1px solid var(--smx-line); border-radius:8px; padding:6px 10px; font-size:13px; }
-  .smx-log { font-family:ui-monospace,Menlo,monospace; font-size:12px; white-space:pre-wrap; word-break:break-all; }
-  .smx-actions button { margin-right:4px; font-size:12px; padding:3px 8px; border-radius:6px; border:1px solid var(--smx-line); background:#fff; cursor:pointer; }
-  .smx-actions button:hover { border-color:var(--smx-blue); color:var(--smx-blue); }
-</style>
-
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-  "use strict";
-  // Profil SPA-sı bölməni AJAX ilə yenidən inject edir və inline skriptləri
-  // yenidən icra edir. Bir neçə köhnə/təzə #smx-root nüsxəsi qarışmasın deyə
-  // bu skript ÖZ root-una (currentScript-in ən yaxın əcdadı) bağlanır və köhnə
-  // nüsxələri təmizləyir — global getElementById DEYİL.
-  // Skript .smx div-inin qardaşıdır (currentScript.closest işləmir). Hələ
-  // init olunmamış son root-u götür (SPA AJAX ilə yenidən inject edəndə ən
-  // təzə nüsxə odur); köhnə init olunmuşlara toxunma.
-  var roots = document.querySelectorAll("#smx-root");
-  var root = null;
-  roots.forEach(function (node) {
-    if (!node.dataset.smxInit) { root = node; }
-  });
-  if (!root) return;
-  root.dataset.smxInit = "1";
-
-  function q(id) { return root.querySelector("#" + id); }
-  var API = root.dataset.apiBase;
-  var CSRF = root.dataset.csrf;
-  var body = q("smx-body");
-  var degradedBox = q("smx-degraded");
-  var degradedText = q("smx-degraded-text");
-  var updatedEl = q("smx-updated");
-  var rangeSel = q("smx-range");
-  var autoCb = q("smx-auto");
-  var activeTab = "overview";
-  var charts = {};
-  var timer = null;
-
-  function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
-  function fmtBytes(v) {
-    if (v == null || isNaN(v)) return "—";
-    var units = ["B","KB","MB","GB","TB"], i = 0; v = Number(v);
-    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
-    return v.toFixed(v >= 100 ? 0 : 1) + " " + units[i];
-  }
-  function fmtDur(sec) {
-    if (sec == null || isNaN(sec)) return "—";
-    sec = Math.floor(sec);
-    var d = Math.floor(sec/86400), h = Math.floor(sec%86400/3600), m = Math.floor(sec%3600/60);
-    if (d > 0) return d + " gün " + h + " saat";
-    if (h > 0) return h + " saat " + m + " dəq";
-    return m + " dəq " + (sec%60) + " san";
-  }
-  function pct(v) { return v == null || isNaN(v) ? "—" : Number(v).toFixed(1) + "%"; }
-  function num(v, digits) { return v == null || isNaN(v) ? "—" : Number(v).toFixed(digits == null ? 0 : digits); }
-  function cls(v, warn, crit) { return v == null ? "" : v >= crit ? "crit" : v >= warn ? "warn" : "ok"; }
-  function card(k, v, klass) { return '<div class="smx-card ' + (klass||"") + '"><div class="k">' + esc(k) + '</div><div class="v">' + v + '</div></div>'; }
-  function dot(up) { return '<span class="smx-dot ' + (up == null ? "na" : up ? "ok" : "bad") + '"></span>'; }
-  function pill(text, klass) { return '<span class="smx-pill ' + esc(klass) + '">' + esc(text) + '</span>'; }
-
-  function destroyCharts() { Object.keys(charts).forEach(function (k) { try { charts[k].destroy(); } catch (e) {} }); charts = {}; }
-  function lineChart(id, series, opts) {
-    var canvas = document.getElementById(id);
-    if (!canvas || typeof window.Chart !== "function" || !series || !series.length) return;
-    var datasets = series.map(function (s, i) {
-      var colors = ["#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed"];
-      return {
-        label: s.label || Object.values(s.labels || {}).join(" ") || "seriya",
-        data: (s.points || []).map(function (p) { return { x: p[0] * 1000, y: p[1] }; }),
-        borderColor: colors[i % colors.length], backgroundColor: "transparent",
-        pointRadius: 0, borderWidth: 2, tension: 0.25,
-      };
-    });
-    charts[id] = new window.Chart(canvas, {
-      type: "line",
-      data: { datasets: datasets },
-      options: {
-        animation: false, responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: datasets.length > 1 } },
-        scales: {
-          x: { type: "time", ticks: { maxTicksLimit: 6 }, grid: { display: false } },
-          y: { beginAtZero: true, suggestedMax: (opts && opts.max) || undefined, ticks: { maxTicksLimit: 5 } },
-        },
-      },
-    });
-  }
-
-  function setDegraded(payload) {
-    if (payload && payload.status === "degraded") {
-      degradedBox.hidden = false;
-      degradedText.textContent = (payload.message || "Monitorinq asılılığı əlçatmazdır") +
-        (payload.last_successful_update ? " · son uğurlu yenilənmə: " + payload.last_successful_update : "");
-      return true;
-    }
-    degradedBox.hidden = true;
-    return false;
-  }
-
-  function fetchJSON(path, params) {
-    var qs = new URLSearchParams(params || {});
-    return fetch(API + path + "?" + qs.toString(), { credentials: "same-origin" })
-      .then(function (r) {
-        if (r.status === 403) throw new Error("Bu bölməyə icazəniz yoxdur.");
-        if (!r.ok) throw new Error("Server xətası: " + r.status);
-        return r.json();
-      });
-  }
-
-  /* ── Renderlər ─────────────────────────────────────────────────────── */
-  function renderOverview(d) {
-    var s = d.server || {}, app = d.app || {}, svc = d.services || {}, ex = d.exams || {};
-    var html = '<div class="smx-cards">';
-    html += card("CPU", pct(s.cpu_percent), cls(s.cpu_percent, 85, 95));
-    html += card("RAM", pct(s.memory_percent), cls(s.memory_percent, 85, 95));
-    html += card("Disk", pct(s.disk_percent), cls(s.disk_percent, 80, 90));
-    html += card("Uptime", esc(fmtDur(s.uptime_seconds)));
-    html += card("Konteynerlər", num(d.containers_alive) + " <small>işlək</small>");
-    html += card("Sorğu axını", num(app.request_rate, 1) + " <small>req/s</small>");
-    html += card("5xx nisbəti", pct(app.error_rate_percent), cls(app.error_rate_percent, 2, 10));
-    html += card("p95 gecikmə", app.p95_seconds == null ? "—" : (app.p95_seconds * 1000).toFixed(0) + " <small>ms</small>", cls(app.p95_seconds, 2, 5));
-    html += card("PostgreSQL", dot(svc.postgres_up === 1) + (svc.postgres_up === 1 ? "işləyir" : svc.postgres_up == null ? "—" : "DAYANIB"), svc.postgres_up === 1 ? "ok" : "crit");
-    html += card("Redis", dot(svc.redis_up === 1) + (svc.redis_up === 1 ? "işləyir" : svc.redis_up == null ? "—" : "DAYANIB"), svc.redis_up === 1 ? "ok" : "crit");
-    html += card("Nginx", dot(svc.nginx_up === 1) + (svc.nginx_up === 1 ? "işləyir" : svc.nginx_up == null ? "—" : "DAYANIB"), svc.nginx_up === 1 ? "ok" : "crit");
-    html += card("Celery worker", num(svc.celery_workers), (svc.celery_workers || 0) > 0 ? "ok" : "crit");
-    html += card("Son backup", esc(fmtDur(svc.backup_age_seconds)) + " <small>əvvəl</small>", svc.backup_age_seconds != null && svc.backup_age_seconds > 93600 ? "crit" : "ok");
-    html += card("Aktiv imtahanlar", num(ex.active_exams));
-    html += card("İmtahandakı tələbələr", num(ex.students_in_exam));
-    html += card("Açıq insidentlər", num(d.incidents_open), (d.incidents_critical_open || 0) > 0 ? "crit" : (d.incidents_open || 0) > 0 ? "warn" : "ok");
-    html += card("Təhlükəsizlik (24s)", num(d.security_events_24h));
-    html += "</div>";
-
-    html += '<div class="smx-panel"><h4>Monitorinq hədəfləri (Prometheus job-ları)</h4><div>';
-    Object.keys(d.targets || {}).sort().forEach(function (job) {
-      html += '<span style="margin-right:14px; font-size:13px;">' + dot(d.targets[job]) + esc(job) + "</span>";
-    });
-    html += "</div></div>";
-    body.innerHTML = html;
-  }
-
-  function renderServer(d) {
-    var s = d.summary || {}, c = d.charts || {};
-    var html = '<div class="smx-cards">';
-    html += card("Uptime", esc(fmtDur(s.uptime_seconds)));
-    html += card("CPU nüvələri", num(s.cores));
-    html += card("Load 1/5/15", num(s.load1,1) + " / " + num(s.load5,1) + " / " + num(s.load15,1));
-    html += card("RAM", fmtBytes(s.mem_total && s.mem_available ? s.mem_total - s.mem_available : null) + " <small>/ " + fmtBytes(s.mem_total) + "</small>");
-    html += card("Disk boş", fmtBytes(s.disk_free) + " <small>/ " + fmtBytes(s.disk_total) + "</small>");
-    html += card("Inode boş", pct(s.inode_free_percent));
-    html += card("Proseslər", num(s.processes));
-    html += card("Fayl deskriptorları", num(s.file_descriptors));
-    html += "</div>";
-    html += '<div class="smx-grid2">' +
-      '<div class="smx-panel"><h4>CPU %</h4><canvas id="smx-c-cpu"></canvas></div>' +
-      '<div class="smx-panel"><h4>RAM %</h4><canvas id="smx-c-mem"></canvas></div>' +
-      '<div class="smx-panel"><h4>Load (1 dəq)</h4><canvas id="smx-c-load"></canvas></div>' +
-      '<div class="smx-panel"><h4>Disk istifadəsi %</h4><canvas id="smx-c-disk"></canvas></div>' +
-      '<div class="smx-panel"><h4>Disk I/O %</h4><canvas id="smx-c-io"></canvas></div>' +
-      '<div class="smx-panel"><h4>Şəbəkə (B/s) — RX/TX</h4><canvas id="smx-c-net"></canvas></div>' +
-      "</div>";
-    body.innerHTML = html;
-    lineChart("smx-c-cpu", c.cpu, { max: 100 });
-    lineChart("smx-c-mem", c.memory, { max: 100 });
-    lineChart("smx-c-load", c.load);
-    lineChart("smx-c-disk", c.disk_used_percent, { max: 100 });
-    lineChart("smx-c-io", c.disk_io, { max: 100 });
-    var net = [];
-    (c.net_rx || []).forEach(function (s2) { s2.label = "RX"; net.push(s2); });
-    (c.net_tx || []).forEach(function (s2) { s2.label = "TX"; net.push(s2); });
-    lineChart("smx-c-net", net);
-  }
-
-  function renderContainers(d) {
-    var rows = d.containers || [];
-    if (!rows.length) { body.innerHTML = '<div class="smx-empty">Konteyner məlumatı yoxdur (cAdvisor işə düşməyib?)</div>'; return; }
-    var html = '<div class="smx-table-wrap"><table class="smx-table"><thead><tr>' +
-      "<th></th><th>Konteyner</th><th>Uptime</th><th>CPU</th><th>RAM</th><th>Limit</th><th>Restart (24s)</th><th>OOM</th><th>RX/TX</th><th>Image</th>" +
-      "</tr></thead><tbody>";
-    rows.forEach(function (r) {
-      html += "<tr><td>" + dot(r.alive) + "</td><td><b>" + esc(r.name) + "</b></td>" +
-        "<td>" + esc(fmtDur(r.uptime_seconds)) + "</td>" +
-        "<td>" + num(r.cpu_percent, 1) + "%</td>" +
-        "<td>" + fmtBytes(r.memory_bytes) + "</td>" +
-        "<td>" + (r.memory_limit_bytes ? fmtBytes(r.memory_limit_bytes) : "—") + "</td>" +
-        "<td" + (r.restarts_24h > 3 ? ' style="color:var(--smx-crit);font-weight:700;"' : "") + ">" + r.restarts_24h + "</td>" +
-        "<td" + (r.oom_events > 0 ? ' style="color:var(--smx-crit);font-weight:700;"' : "") + ">" + r.oom_events + "</td>" +
-        "<td>" + fmtBytes(r.net_rx_bps) + "/s · " + fmtBytes(r.net_tx_bps) + "/s</td>" +
-        '<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;">' + esc(r.image) + "</td></tr>";
-    });
-    body.innerHTML = html + "</tbody></table></div>";
-  }
-
-  function renderApplication(d) {
-    var s = d.summary || {}, c = d.charts || {};
-    var html = '<div class="smx-cards">';
-    html += card("p50", s.p50 == null ? "—" : (s.p50*1000).toFixed(0) + " <small>ms</small>");
-    html += card("p95", s.p95 == null ? "—" : (s.p95*1000).toFixed(0) + " <small>ms</small>", cls(s.p95, 2, 5));
-    html += card("p99", s.p99 == null ? "—" : (s.p99*1000).toFixed(0) + " <small>ms</small>", cls(s.p99, 2, 5));
-    html += card("2xx (15 dəq)", num(s.status_2xx_15m));
-    html += card("3xx", num(s.status_3xx_15m));
-    html += card("4xx", num(s.status_4xx_15m));
-    html += card("5xx", num(s.status_5xx_15m), (s.status_5xx_15m||0) > 0 ? "warn" : "ok");
-    html += card("429", num(s.status_429_15m));
-    html += "</div>";
-    html += '<div class="smx-grid2">' +
-      '<div class="smx-panel"><h4>Sorğu axını (req/s)</h4><canvas id="smx-a-rate"></canvas></div>' +
-      '<div class="smx-panel"><h4>5xx nisbəti %</h4><canvas id="smx-a-err"></canvas></div>' +
-      '<div class="smx-panel"><h4>p95 gecikmə (s)</h4><canvas id="smx-a-p95"></canvas></div>' +
-      '<div class="smx-panel"><h4>p99 gecikmə (s)</h4><canvas id="smx-a-p99"></canvas></div>' +
-      "</div>";
-    function topTable(title, rows, unit) {
-      var t = '<div class="smx-panel" style="margin-top:12px;"><h4>' + title + '</h4>';
-      if (!rows || !rows.length) return t + '<div class="smx-empty" style="padding:12px;">Məlumat yoxdur</div></div>';
-      t += '<table class="smx-table"><tbody>';
-      rows.forEach(function (r) { t += "<tr><td>" + esc(r.path) + '</td><td style="text-align:right;">' + num(r.value, 3) + " " + unit + "</td></tr>"; });
-      return t + "</tbody></table></div>";
-    }
-    html += topTable("Ən yavaş endpoint-lər (orta, 30 dəq)", s.slow_endpoints, "s");
-    html += topTable("Ən çox 5xx verən endpoint-lər (30 dəq)", s.error_endpoints, "xəta");
-    body.innerHTML = html;
-    lineChart("smx-a-rate", c.request_rate);
-    lineChart("smx-a-err", c.error_rate, { max: 100 });
-    lineChart("smx-a-p95", c.latency_p95);
-    lineChart("smx-a-p99", c.latency_p99);
-  }
-
-  function renderDatabase(d) {
-    var s = d.summary || {}, c = d.charts || {};
-    var html = '<div class="smx-cards">';
-    html += card("PostgreSQL", dot(s.pg_up === 1) + (s.pg_up === 1 ? "işləyir" : "DAYANIB"), s.pg_up === 1 ? "ok" : "crit");
-    html += card("Bağlantılar", num(s.total_connections) + " <small>/ " + num(s.max_connections) + "</small>",
-                 cls(s.max_connections ? 100*s.total_connections/s.max_connections : null, 80, 95));
-    html += card("Aktiv / Boşda", num(s.active_connections) + " / " + num(s.idle_connections));
-    html += card("Cache hit", pct(s.cache_hit_ratio), s.cache_hit_ratio != null && s.cache_hit_ratio < 95 ? "warn" : "ok");
-    html += card("Baza ölçüsü", fmtBytes(s.db_size_bytes));
-    html += card("Deadlock (1s)", num(s.deadlocks_1h), (s.deadlocks_1h||0) > 0 ? "crit" : "ok");
-    html += card("Temp fayllar (1s)", num(s.temp_files_1h));
-    html += card("Backup yaşı", esc(fmtDur(s.backup_age_seconds)), s.backup_age_seconds != null && s.backup_age_seconds > 93600 ? "crit" : "ok");
-    html += "</div>";
-    html += "<h4 style='margin:6px 0;color:var(--smx-navy);'>PgBouncer (session mode — RLS üçün dəyişdirilmir)</h4>";
-    html += '<div class="smx-cards">';
-    html += card("Aktiv klientlər", num(s.pgbouncer_active_clients));
-    html += card("Gözləyən klientlər", num(s.pgbouncer_waiting_clients), (s.pgbouncer_waiting_clients||0) > 0 ? "warn" : "ok");
-    html += card("Aktiv server bağlantıları", num(s.pgbouncer_active_servers));
-    html += card("Boş server bağlantıları", num(s.pgbouncer_idle_servers));
-    html += card("Max gözləmə", num(s.pgbouncer_max_wait_seconds, 2) + " <small>s</small>");
-    html += "</div>";
-    html += '<div class="smx-grid2">' +
-      '<div class="smx-panel"><h4>Bağlantı sayı</h4><canvas id="smx-d-conn"></canvas></div>' +
-      '<div class="smx-panel"><h4>Tranzaksiya/s</h4><canvas id="smx-d-tps"></canvas></div>' +
-      "</div>";
-    body.innerHTML = html;
-    lineChart("smx-d-conn", c.connections);
-    lineChart("smx-d-tps", c.tps);
-  }
-
-  function renderRedisCelery(d) {
-    var s = d.summary || {}, c = d.charts || {};
-    var html = '<div class="smx-cards">';
-    html += card("Redis", dot(s.redis_up === 1) + (s.redis_up === 1 ? "işləyir" : "DAYANIB"), s.redis_up === 1 ? "ok" : "crit");
-    html += card("Yaddaş", fmtBytes(s.redis_memory_used) + (s.redis_memory_max ? " <small>/ " + fmtBytes(s.redis_memory_max) + "</small>" : ""));
-    html += card("Klientlər", num(s.redis_clients));
-    html += card("Bloklanmış", num(s.redis_blocked), (s.redis_blocked||0) > 10 ? "warn" : "ok");
-    html += card("Hit nisbəti", pct(s.redis_hit_ratio));
-    html += card("Evicted (cəmi)", num(s.redis_evicted_total), (s.redis_evicted_total||0) > 0 ? "crit" : "ok");
-    html += card("Celery worker", num(s.celery_workers_online), (s.celery_workers_online||0) > 0 ? "ok" : "crit");
-    html += card("Aktiv / Reserved", num(s.celery_active_tasks) + " / " + num(s.celery_reserved_tasks));
-    html += card("Növbə uzunluğu", num(s.celery_queue_length), (s.celery_queue_length||0) > 200 ? "warn" : "ok");
-    html += card("Statistika yaşı", esc(fmtDur(s.celery_stats_age_seconds)), s.celery_stats_age_seconds != null && s.celery_stats_age_seconds > 300 ? "crit" : "ok");
-    html += "</div>";
-    html += '<div class="smx-grid2">' +
-      '<div class="smx-panel"><h4>Redis yaddaş (B)</h4><canvas id="smx-r-mem"></canvas></div>' +
-      '<div class="smx-panel"><h4>Redis əmr/s</h4><canvas id="smx-r-ops"></canvas></div>' +
-      '<div class="smx-panel"><h4>Celery növbəsi</h4><canvas id="smx-r-q"></canvas></div>' +
-      "</div>";
-    body.innerHTML = html;
-    lineChart("smx-r-mem", c.redis_memory);
-    lineChart("smx-r-ops", c.redis_ops);
-    lineChart("smx-r-q", c.celery_queue);
-  }
-
-  function renderExams(d) {
-    var db = d.db || {}, ct = d.counters || {}, c = d.charts || {};
-    var html = "";
-    if (d.metrics_degraded) html += '<div class="smx-degraded" style="margin-bottom:10px;"><i class="fas fa-triangle-exclamation"></i> Metrik servisi əlçatmazdır — yalnız baza sayğacları göstərilir.</div>';
-    html += '<div class="smx-cards">';
-    html += card("Aktiv imtahanlar", num(db.active_exams));
-    html += card("Hazırda imtahanda", num(db.in_progress_attempts));
-    html += card("Bu gün təhvil verilən", num(db.submitted_today));
-    html += card("PIN cəhdləri (1s)", num(ct.pin_attempts_1h));
-    html += card("Uğursuz PIN (1s)", num(ct.pin_failures_1h), (ct.pin_failures_1h||0) > 20 ? "warn" : "ok");
-    html += card("Autosave xətaları (1s)", num(ct.autosave_errors_1h), (ct.autosave_errors_1h||0) > 0 ? "warn" : "ok");
-    html += card("Nəzarət insidentləri (1s)", num(ct.supervision_incidents_1h));
-    html += "</div>";
-    if (c && c.attempt_starts) {
-      html += '<div class="smx-grid2">' +
-        '<div class="smx-panel"><h4>Cəhd başlanğıcları (15 dəq pəncərə)</h4><canvas id="smx-e-start"></canvas></div>' +
-        '<div class="smx-panel"><h4>Təhvillər</h4><canvas id="smx-e-sub"></canvas></div>' +
-        '<div class="smx-panel"><h4>Autosave xətaları</h4><canvas id="smx-e-as"></canvas></div>' +
-        '<div class="smx-panel"><h4>Uğursuz PIN cəhdləri</h4><canvas id="smx-e-pin"></canvas></div>' +
-        "</div>";
-    }
-    html += '<p style="color:#8a97a8;font-size:12px;margin-top:10px;">Yalnız aqreqat statistika göstərilir — sual, cavab, PIN və şəxsi məlumat bu modulda YOXDUR.</p>';
-    body.innerHTML = html;
-    if (c && c.attempt_starts) {
-      lineChart("smx-e-start", c.attempt_starts);
-      lineChart("smx-e-sub", c.submissions);
-      lineChart("smx-e-as", c.autosave_failures);
-      lineChart("smx-e-pin", c.pin_failures);
-    }
-  }
-
-  function renderSecurity(d) {
-    var rows = d.events || [];
-    var html = '<div class="smx-filter"><select id="smx-sec-type">' +
-      '<option value="">Bütün hadisələr</option>' +
-      '<option value="login_failed">Uğursuz giriş</option>' +
-      '<option value="login_brute_force">Brute-force</option>' +
-      '<option value="superadmin_login">Superadmin girişi</option>' +
-      '<option value="superadmin_login_failed">Superadmin uğursuz girişi</option>' +
-      '<option value="unauthorized_monitoring">İcazəsiz monitorinq</option>' +
-      "</select></div>";
-    if (!rows.length) { body.innerHTML = html + '<div class="smx-empty">Təhlükəsizlik hadisəsi yoxdur</div>'; bindSecFilter(); return; }
-    html += '<div class="smx-table-wrap"><table class="smx-table"><thead><tr>' +
-      "<th>Vaxt</th><th>Hadisə</th><th>Önəm</th><th>İstifadəçi</th><th>IP</th><th>Say</th><th>Mesaj</th>" +
-      "</tr></thead><tbody>";
-    rows.forEach(function (r) {
-      html += "<tr><td>" + esc(new Date(r.last_seen).toLocaleString("az")) + "</td>" +
-        "<td>" + esc(r.event_type_display) + "</td>" +
-        "<td>" + pill(r.severity, r.severity) + "</td>" +
-        "<td>" + esc(r.user || "—") + "</td>" +
-        "<td>" + esc(r.ip || "—") + "</td>" +
-        "<td>" + r.count + "</td>" +
-        '<td style="white-space:normal;">' + esc(r.message) + "</td></tr>";
-    });
-    body.innerHTML = html + "</tbody></table></div>";
-    bindSecFilter();
-    function bindSecFilter() {
-      var sel = document.getElementById("smx-sec-type");
-      if (sel) sel.addEventListener("change", function () { load("security-events", { type: sel.value }); });
-    }
-  }
-
-  function renderLogs(d) {
-    var lines = d.lines || [], containers = d.containers || [];
-    var html = '<div class="smx-filter">' +
-      '<select id="smx-log-container"><option value="">Bütün konteynerlər</option>' +
-      containers.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + "</option>"; }).join("") +
-      "</select>" +
-      '<select id="smx-log-level"><option value="">Bütün səviyyələr</option><option value="error">error</option><option value="warning">warning</option><option value="critical">critical</option></select>' +
-      '<input type="text" id="smx-log-q" placeholder="Mətn axtarışı…" maxlength="120">' +
-      '<button type="button" class="smx-btn" id="smx-log-go"><i class="fas fa-search"></i> Axtar</button>' +
-      "</div>";
-    if (!lines.length) html += '<div class="smx-empty">Log tapılmadı</div>';
-    else {
-      html += '<div class="smx-table-wrap"><table class="smx-table"><tbody>';
-      lines.forEach(function (l) {
-        html += '<tr><td style="color:#8a97a8;">' + esc(new Date(l.ts).toLocaleTimeString("az")) + "</td>" +
-          "<td><b>" + esc(l.container) + "</b></td>" +
-          '<td class="smx-log" style="white-space:normal;">' + esc(l.line) + "</td></tr>";
-      });
-      html += "</tbody></table></div>";
-    }
-    body.innerHTML = html;
-    var go = document.getElementById("smx-log-go");
-    if (go) go.addEventListener("click", function () {
-      load("logs", {
-        container: (document.getElementById("smx-log-container") || {}).value || "",
-        level: (document.getElementById("smx-log-level") || {}).value || "",
-        q: (document.getElementById("smx-log-q") || {}).value || "",
-      });
-    });
-  }
-
-  function renderAlerts(d) {
-    var rows = d.alerts || [];
-    if (!rows.length) { body.innerHTML = '<div class="smx-empty">Aktiv alert yoxdur ✅</div>'; return; }
-    var html = '<div class="smx-table-wrap"><table class="smx-table"><thead><tr>' +
-      "<th>Alert</th><th>Önəm</th><th>Vəziyyət</th><th>Başlayıb</th><th>Xülasə</th>" +
-      "</tr></thead><tbody>";
-    rows.forEach(function (r) {
-      html += "<tr><td><b>" + esc(r.name) + "</b></td>" +
-        "<td>" + pill(r.severity || "—", r.severity || "info") + "</td>" +
-        "<td>" + esc(r.state) + (r.silenced ? " " + pill("susdurulub", "silenced") : "") + "</td>" +
-        "<td>" + esc(r.starts_at ? new Date(r.starts_at).toLocaleString("az") : "—") + "</td>" +
-        '<td style="white-space:normal;">' + esc(r.summary) + "</td></tr>";
-    });
-    body.innerHTML = html + "</tbody></table></div>";
-  }
-
-  function renderIncidents(d) {
-    var rows = d.incidents || [];
-    var html = '<div class="smx-filter"><select id="smx-inc-status">' +
-      '<option value="open">Açıq olanlar</option><option value="">Hamısı</option>' +
-      '<option value="resolved">Həll olunub</option><option value="silenced">Susdurulub</option>' +
-      "</select></div>";
-    if (!rows.length) { body.innerHTML = html + '<div class="smx-empty">İnsident yoxdur ✅</div>'; bind(); return; }
-    html += '<div class="smx-table-wrap"><table class="smx-table"><thead><tr>' +
-      "<th>Başlıq</th><th>Önəm</th><th>Status</th><th>Servis</th><th>Başlayıb</th><th>Müddət</th><th>Əməliyyat</th>" +
-      "</tr></thead><tbody>";
-    rows.forEach(function (r) {
-      var actions = "";
-      if (r.status !== "resolved") {
-        actions = '<span class="smx-actions">' +
-          '<button data-inc="' + r.id + '" data-act="acknowledge">Qəbul et</button>' +
-          '<button data-inc="' + r.id + '" data-act="resolve">Həll olundu</button>' +
-          '<button data-inc="' + r.id + '" data-act="silence">Susdur</button></span>';
-      }
-      html += "<tr><td style='white-space:normal;'><b>" + esc(r.title) + "</b>" +
-        (r.resolution_note ? '<div style="color:#8a97a8;font-size:12px;">' + esc(r.resolution_note) + "</div>" : "") + "</td>" +
-        "<td>" + pill(r.severity, r.severity) + "</td>" +
-        "<td>" + pill(r.status, r.status) + "</td>" +
-        "<td>" + esc(r.service || "—") + "</td>" +
-        "<td>" + esc(r.started_at ? new Date(r.started_at).toLocaleString("az") : "—") + "</td>" +
-        "<td>" + esc(fmtDur(r.duration_seconds)) + "</td>" +
-        "<td>" + actions + "</td></tr>";
-    });
-    body.innerHTML = html + "</tbody></table></div>";
-    bind();
-    function bind() {
-      var sel = document.getElementById("smx-inc-status");
-      if (sel) sel.addEventListener("change", function () { load("incidents", { status: sel.value }); });
-      body.querySelectorAll("[data-inc]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var note = btn.dataset.act === "resolve" ? (window.prompt("Həll qeydi (istəyə bağlı):") || "") : "";
-          var form = new URLSearchParams({ action: btn.dataset.act, note: note });
-          fetch(API + "incidents/" + btn.dataset.inc + "/action/", {
-            method: "POST", credentials: "same-origin",
-            headers: { "X-CSRFToken": CSRF, "Content-Type": "application/x-www-form-urlencoded" },
-            body: form.toString(),
-          }).then(function () { load("incidents", { status: (sel || {}).value || "open" }); });
-        });
-      });
-    }
-  }
-
-  var RENDERERS = {
-    "overview": renderOverview, "server": renderServer, "containers": renderContainers,
-    "application": renderApplication, "database": renderDatabase, "redis-celery": renderRedisCelery,
-    "exams": renderExams, "security-events": renderSecurity, "logs": renderLogs,
-    "alerts": renderAlerts, "incidents": renderIncidents,
-  };
-
-  function load(tab, extraParams) {
-    destroyCharts();
-    body.innerHTML = '<div class="smx-loading"><i class="fas fa-circle-notch fa-spin"></i> Yüklənir…</div>';
-    var params = Object.assign({ range: rangeSel.value }, extraParams || {});
-    if (tab === "incidents" && !("status" in params)) params.status = "open";
-    fetchJSON(tab + "/", params)
-      .then(function (payload) {
-        if (setDegraded(payload)) { body.innerHTML = '<div class="smx-empty">Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur.</div>'; return; }
-        RENDERERS[tab]((payload && payload.data) || {});
-        updatedEl.textContent = "Yeniləndi: " + new Date().toLocaleTimeString("az");
-      })
-      .catch(function (err) { body.innerHTML = '<div class="smx-error"><i class="fas fa-circle-exclamation"></i> ' + esc(err.message) + "</div>"; });
-  }
-
-  function schedule() {
-    if (timer) clearInterval(timer);
-    timer = setInterval(function () {
-      if (autoCb.checked && document.contains(root)) load(activeTab);
-      if (!document.contains(root)) clearInterval(timer);
-    }, 30000);
-  }
-
-  root.querySelectorAll(".smx-tab").forEach(function (tab) {
-    tab.addEventListener("click", function () {
-      root.querySelectorAll(".smx-tab").forEach(function (t) { t.classList.remove("active"); });
-      tab.classList.add("active");
-      activeTab = tab.dataset.tab;
-      load(activeTab);
-    });
-  });
-  q("smx-refresh").addEventListener("click", function () { load(activeTab); });
-  rangeSel.addEventListener("change", function () { load(activeTab); });
-
-  load("overview");
-  schedule();
-})();
-</script>
+  <script src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20260716-3"
+          nonce="{{ request.csp_nonce }}"></script>
+  <script src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20260716-3"
+          nonce="{{ request.csp_nonce }}"></script>
+</section>

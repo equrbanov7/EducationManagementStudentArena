@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260611-fresh-csrf";
+import { ExamSupervision } from "./state.js?v=20260716-intervention";
 
 Object.assign(ExamSupervision, {
         _bindEvents: function () {

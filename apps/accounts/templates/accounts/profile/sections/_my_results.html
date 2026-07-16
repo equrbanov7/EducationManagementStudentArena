@@ -69,11 +69,22 @@
                         </div>
                     </div>
                     <div class="result-status-wrap">
+                        {% if item.removed_from_exam %}
+                        <span class="status-badge status-expired">{% trans "İmtahandan çıxarılıb" %}</span>
+                        {% else %}
                         <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="result-card-body">
+                    {% if item.removed_from_exam and item.removal_reason %}
+                    <div class="result-feedback-box">
+                        <div class="feedback-icon"><i class="fas fa-user-slash"></i></div>
+                        <p><strong>{% trans "Səbəb" %}:</strong> {{ item.removal_reason|truncatechars:180 }}</p>
+                    </div>
+                    {% endif %}
+
                     {% if item.score != None %}
                     <div class="result-score-box">
                         <span class="score-label">{% trans "score_label" context "profile.results" %}:</span>

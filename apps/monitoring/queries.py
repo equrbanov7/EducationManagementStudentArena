@@ -11,6 +11,7 @@ import time
 from typing import Any
 
 from .clients import PrometheusClient, degraded
+from .pagination import clamp_page, paginated_data
 
 #: cAdvisor-da izlədiyimiz konteyner adları nümunəsi.
 CONTAINER_RE = 'name=~"emsarena-.+|educationmanagementstudentarena-.+"'
@@ -26,6 +27,20 @@ RANGE_STEPS = {
     30 * 24 * 3600: "8h",
 }
 MAX_RANGE_SECONDS = 30 * 24 * 3600
+
+#: node_exporter host kök faylsistemini konteyner daxilində də ``/`` kimi
+#: etiketləyir. Bütün disk sorğuları eyni selector-u işlətməlidir.
+ROOT_FILESYSTEM_SELECTOR = 'mountpoint="/",fstype!~"tmpfs|overlay"'
+ROOT_DISK_USED_PERCENT_PROMQL = (
+    f"100 * (1 - node_filesystem_avail_bytes{{{ROOT_FILESYSTEM_SELECTOR}}}"
+    f" / node_filesystem_size_bytes{{{ROOT_FILESYSTEM_SELECTOR}}})"
+)
+ROOT_DISK_TOTAL_PROMQL = f"node_filesystem_size_bytes{{{ROOT_FILESYSTEM_SELECTOR}}}"
+ROOT_DISK_FREE_PROMQL = f"node_filesystem_avail_bytes{{{ROOT_FILESYSTEM_SELECTOR}}}"
+ROOT_INODE_FREE_PERCENT_PROMQL = (
+    f"100 * node_filesystem_files_free{{{ROOT_FILESYSTEM_SELECTOR}}}"
+    f" / node_filesystem_files{{{ROOT_FILESYSTEM_SELECTOR}}}"
+)
 
 
 def clamp_range(seconds: int) -> tuple[int, str]:
@@ -69,8 +84,7 @@ def server_section(range_seconds: int) -> dict:
         "load": _series(prom, "node_load1", range_seconds),
         "disk_used_percent": _series(
             prom,
-            '100 * (1 - node_filesystem_avail_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"}'
-            ' / node_filesystem_size_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"})',
+            ROOT_DISK_USED_PERCENT_PROMQL,
             range_seconds,
         ),
         "disk_io": _series(prom, "sum(rate(node_disk_io_time_seconds_total[5m])) * 100", range_seconds),
@@ -92,23 +106,66 @@ def server_section(range_seconds: int) -> dict:
         "load15": prom.scalar("node_load15"),
         "mem_total": prom.scalar("node_memory_MemTotal_bytes"),
         "mem_available": prom.scalar("node_memory_MemAvailable_bytes"),
-        "disk_total": prom.scalar('node_filesystem_size_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"}'),
-        "disk_free": prom.scalar('node_filesystem_avail_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"}'),
-        "inode_free_percent": prom.scalar(
-            '100 * node_filesystem_files_free{mountpoint="/host",fstype!~"tmpfs|overlay"}'
-            ' / node_filesystem_files{mountpoint="/host",fstype!~"tmpfs|overlay"}'
-        ),
+        "disk_total": prom.scalar(ROOT_DISK_TOTAL_PROMQL),
+        "disk_free": prom.scalar(ROOT_DISK_FREE_PROMQL),
+        "inode_free_percent": prom.scalar(ROOT_INODE_FREE_PERCENT_PROMQL),
         "processes": prom.scalar("node_procs_running"),
         "file_descriptors": prom.scalar("node_filefd_allocated"),
     }
     return _ok({"charts": charts, "summary": summary})
 
 
-def containers_section() -> dict:
+def _container_selector(names: list[str]) -> str:
+    regex_special = frozenset(r"\.^$|?*+()[]{}")
+    escaped = []
+    for name in names:
+        regex_value = "".join(f"\\{char}" if char in regex_special else char for char in name)
+        # PromQL string literalində regex backslash ayrıca escape olunmalıdır:
+        # ``app\\.1`` Prometheus tərəfindən regex ``app\.1`` kimi oxunur.
+        escaped.append(regex_value.replace("\\", "\\\\").replace('"', '\\"'))
+    return f'name=~"^(?:{"|".join(escaped)})$"'
+
+
+def containers_section(*, page: int = 1, page_size: int = 25) -> dict:
     prom = PrometheusClient()
     last_seen = prom.query(f"container_last_seen{{{CONTAINER_RE}}}")
     if last_seen is None:
         return degraded("prometheus", "cAdvisor metrikaları əlçatmazdır")
+
+    containers_by_name: dict[str, dict[str, Any]] = {}
+    for item in last_seen:
+        metric = item.get("metric", {})
+        name = metric.get("name", "")
+        if not name:
+            continue
+        try:
+            seen = float(item["value"][1])
+        except (KeyError, IndexError, TypeError, ValueError):
+            seen = 0.0
+        current = containers_by_name.get(name)
+        if current is None or seen >= current["seen"]:
+            containers_by_name[name] = {
+                "image": metric.get("image", ""),
+                "seen": seen,
+            }
+
+    names = sorted(containers_by_name)
+    total = len(names)
+    page = clamp_page(page, total=total, page_size=page_size)
+    offset = (page - 1) * page_size
+    page_names = names[offset : offset + page_size]
+    if not page_names:
+        return _ok(
+            paginated_data(
+                "containers",
+                [],
+                total=total,
+                page=page,
+                page_size=page_size,
+            )
+        )
+
+    selector = _container_selector(page_names)
 
     def _metric_map(promql: str) -> dict[str, float]:
         result = prom.query(promql) or []
@@ -121,30 +178,20 @@ def containers_section() -> dict:
                 continue
         return mapping
 
-    cpu = _metric_map(f"100 * sum by (name) (rate(container_cpu_usage_seconds_total{{{CONTAINER_RE}}}[5m]))")
-    memory = _metric_map(f"sum by (name) (container_memory_usage_bytes{{{CONTAINER_RE}}})")
-    mem_limit = _metric_map(f"sum by (name) (container_spec_memory_limit_bytes{{{CONTAINER_RE}}})")
-    started = _metric_map(f"max by (name) (container_start_time_seconds{{{CONTAINER_RE}}})")
-    restarts = _metric_map(f"changes(container_start_time_seconds{{{CONTAINER_RE}}}[24h])")
-    net_rx = _metric_map(f"sum by (name) (rate(container_network_receive_bytes_total{{{CONTAINER_RE}}}[5m]))")
-    net_tx = _metric_map(f"sum by (name) (rate(container_network_transmit_bytes_total{{{CONTAINER_RE}}}[5m]))")
-    oom = _metric_map(f"sum by (name) (container_oom_events_total{{{CONTAINER_RE}}})")
-    images: dict[str, str] = {}
-    for item in last_seen:
-        metric = item.get("metric", {})
-        if metric.get("name"):
-            images[metric["name"]] = metric.get("image", "")
+    cpu = _metric_map(f"100 * sum by (name) (rate(container_cpu_usage_seconds_total{{{selector}}}[5m]))")
+    memory = _metric_map(f"sum by (name) (container_memory_usage_bytes{{{selector}}})")
+    mem_limit = _metric_map(f"sum by (name) (container_spec_memory_limit_bytes{{{selector}}})")
+    started = _metric_map(f"max by (name) (container_start_time_seconds{{{selector}}})")
+    restarts = _metric_map(f"changes(container_start_time_seconds{{{selector}}}[24h])")
+    net_rx = _metric_map(f"sum by (name) (rate(container_network_receive_bytes_total{{{selector}}}[5m]))")
+    net_tx = _metric_map(f"sum by (name) (rate(container_network_transmit_bytes_total{{{selector}}}[5m]))")
+    oom = _metric_map(f"sum by (name) (container_oom_events_total{{{selector}}})")
 
     now = time.time()
     rows = []
-    for item in last_seen:
-        name = item.get("metric", {}).get("name", "")
-        if not name:
-            continue
-        try:
-            seen = float(item["value"][1])
-        except (KeyError, IndexError, TypeError, ValueError):
-            seen = 0.0
+    for name in page_names:
+        container = containers_by_name[name]
+        seen = container["seen"]
         rows.append(
             {
                 "name": name,
@@ -157,11 +204,18 @@ def containers_section() -> dict:
                 "net_rx_bps": net_rx.get(name),
                 "net_tx_bps": net_tx.get(name),
                 "oom_events": int(oom.get(name, 0)),
-                "image": images.get(name, ""),
+                "image": container["image"],
             }
         )
-    rows.sort(key=lambda row: row["name"])
-    return _ok({"containers": rows})
+    return _ok(
+        paginated_data(
+            "containers",
+            rows,
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+    )
 
 
 def application_section(range_seconds: int) -> dict:

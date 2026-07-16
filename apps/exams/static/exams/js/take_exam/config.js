@@ -59,15 +59,24 @@
             var examId = examForm.dataset.examId;
             var attemptId = examForm.dataset.attemptId;
             var defaultAutoSaveIntervalMs = 300000;
+            var isFinalExam = examForm.dataset.examTypeExtended === "final";
             var serverAutoSaveIntervalMs = Math.max(
-                60000,
+                10000,
                 parseInt(examForm.dataset.autosaveIntervalMs || String(defaultAutoSaveIntervalMs), 10) ||
                     defaultAutoSaveIntervalMs
             );
+            // Zal finalında kompüter dəyişməsi/crash zamanı yalnız bir neçə
+            // saniyəlik cavab riskdə qalsın; yalnız dirty sual serverə gedir.
+            if (isFinalExam) {
+                serverAutoSaveIntervalMs = Math.min(serverAutoSaveIntervalMs, 3000);
+            }
             var autoSaveJitterMaxMs = Math.max(
                 0,
                 parseInt(examForm.dataset.autosaveJitterMs || "0", 10) || 0
             );
+            if (isFinalExam) {
+                autoSaveJitterMaxMs = 0;
+            }
             var autoSaveDelayMs = serverAutoSaveIntervalMs + autoSaveSpread(examId, attemptId, autoSaveJitterMaxMs);
 
             var slides = document.querySelectorAll(".question-slide");

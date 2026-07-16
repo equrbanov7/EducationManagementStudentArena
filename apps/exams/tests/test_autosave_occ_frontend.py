@@ -27,3 +27,11 @@ class AutosaveOccFrontendContractTests(SimpleTestCase):
         self.assertIn("sessionStorage.getItem(ctx.draftStorageKey", draft_source)
         self.assertIn("localStorage.removeItem(ctx.draftStorageKey)", draft_source)
         self.assertNotIn("localStorage.setItem(ctx.draftStorageKey", draft_source)
+
+    def test_explicit_answer_debounce_is_not_clamped_to_fallback_interval(self):
+        """Seçilən cavab 60s+ lokal qalmamalı, canlı monitor üçün tez yazılmalıdır."""
+        draft_source = (JS_DIR / "draft.js").read_text(encoding="utf-8")
+
+        self.assertIn("delayMs === undefined", draft_source)
+        self.assertIn(": Math.max(250, Number(delayMs) || 0)", draft_source)
+        self.assertNotIn("Math.max(ctx.autoSaveDelayMs, requestedDelayMs)", draft_source)

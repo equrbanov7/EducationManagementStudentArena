@@ -155,6 +155,11 @@ def regenerate_pin(ticket, by, *, request=None) -> str:
     if ticket.status in (TICKET_STATUS_COMPLETED, TICKET_STATUS_REMOVED):
         raise TicketStateError(pgettext("exams.final_center.error", "Yekun statuslu bilet üçün PIN yenilənə bilməz."))
     raw_pin = set_ticket_pin(ticket, by)
+    notify_ticket(ticket.pk, {"event": "credential_rotated"})
+    if ticket.attempt_id:
+        from apps.exams.services.supervision import notify_attempt_student
+
+        notify_attempt_student(ticket.attempt_id, {"action": "session_revoked"})
     _audit_ticket(
         ticket,
         action=AuditAction.UPDATE,
@@ -309,6 +314,12 @@ def begin_attempt_for_ticket(ticket):
             TICKET_STATUS_ACTIVE,
             extra_updates={"attempt": attempt, "started_at": timezone.now()},
         )
+        # ExamStudentPin yalnız ilkin giriş üçündür. Attempt başlayan kimi onu
+        # də ləğv et ki, kompüter dəyişməsi yalnız nəzarətçinin verdiyi yeni,
+        # birdəfəlik ticket PIN-i ilə mümkün olsun.
+        from apps.exams.services.student_pins import revoke_student_pin
+
+        revoke_student_pin(ticket.exam, ticket.student)
         # İmtahan BAŞLADI → PIN birdəfəlikdir: dərhal ləğv olunur ki, eyni PIN
         # təkrar giriş üçün işə yaramasın (status filtrindən əlavə HARD zəmanət).
         revoke_ticket_pin(ticket)
@@ -371,7 +382,20 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
             )
         from apps.exams.services.supervision import teacher_lock_attempt
 
-        teacher_lock_attempt(ticket.attempt, by)
+        teacher_lock_attempt(ticket.attempt, by, reason=reason)
+        updated_at = timezone.now()
+        FinalExamTicket.objects.filter(pk=ticket.pk).update(
+            removal_action="suspended",
+            removal_reason=reason,
+            removed_at=None,
+            removed_by=by,
+            updated_at=updated_at,
+        )
+        ticket.removal_action = "suspended"
+        ticket.removal_reason = reason
+        ticket.removed_at = None
+        ticket.removed_by = by
+        ticket.updated_at = updated_at
         _audit_ticket(
             ticket,
             action=AuditAction.UPDATE,
@@ -381,8 +405,14 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
         )
         broadcast_to_staff(
             ticket.session_id,
-            {"event": "student_suspended", "ticket_id": ticket.pk, "status": ticket.status},
+            {
+                "event": "student_suspended",
+                "ticket_id": ticket.pk,
+                "status": ticket.status,
+                "reason": reason,
+            },
         )
+        notify_ticket(ticket.pk, {"event": "suspended", "action": "suspended", "reason": reason})
         return True
 
     old_status = ticket.status
@@ -404,7 +434,7 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
         if not attempt.is_finished:
             from apps.exams.services.supervision import teacher_stop_attempt
 
-            teacher_stop_attempt(attempt, by)
+            teacher_stop_attempt(attempt, by, reason=reason, action=action)
 
     if not allow_reentry:
         revoke_ticket_pin(ticket)
@@ -418,17 +448,32 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
         reason=f"final_student_removed[{action}]: {reason}"[:500],
         changes={"status": [old_status, TICKET_STATUS_REMOVED], "allow_reentry": [None, allow_reentry]},
     )
-    notify_ticket(ticket.pk, {"event": "removed", "action": action})
+    notify_ticket(ticket.pk, {"event": "removed", "action": action, "reason": reason})
     broadcast_to_staff(
         ticket.session_id,
-        {"event": "student_removed", "ticket_id": ticket.pk, "status": TICKET_STATUS_REMOVED},
+        {
+            "event": "student_removed",
+            "ticket_id": ticket.pk,
+            "status": TICKET_STATUS_REMOVED,
+            "action": action,
+            "reason": reason,
+        },
     )
     return True
 
 
 def readmit_student(ticket, by, *, request=None) -> bool:
     """Çıxarılmış tələbənin yenidən buraxılması (yalnız imtahan mərkəzi)."""
-    ok = transition_ticket(ticket, TICKET_STATUS_ASSIGNED, extra_updates={"removal_action": "", "removed_at": None})
+    ok = transition_ticket(
+        ticket,
+        TICKET_STATUS_ASSIGNED,
+        extra_updates={
+            "removal_action": "",
+            "removal_reason": "",
+            "removed_at": None,
+            "removed_by": None,
+        },
+    )
     if not ok:
         return False
     set_ticket_pin(ticket, by)

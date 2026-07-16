@@ -261,8 +261,13 @@
                 return;
             }
 
-            var requestedDelayMs = delayMs === undefined ? ctx.autoSaveDelayMs : Number(delayMs) || 0;
-            var effectiveDelayMs = Math.max(ctx.autoSaveDelayMs, requestedDelayMs);
+            // Explicit per-field debounce (test: 1s, written: 3s) must win over
+            // the low-frequency fallback interval. Otherwise a selected answer
+            // can remain only in the browser for 60s+ and is invisible to the
+            // live monitor or a replacement computer.
+            var effectiveDelayMs = delayMs === undefined
+                ? ctx.autoSaveDelayMs
+                : Math.max(250, Number(delayMs) || 0);
             ctx.autoSaveTimer = setTimeout(function () {
                 ctx.autoSaveTimer = null;
                 ns.draft.flushAutoSave(ctx);

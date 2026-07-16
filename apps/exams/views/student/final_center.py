@@ -21,6 +21,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.exams.domain.final_center import (
@@ -43,11 +44,13 @@ from apps.exams.services.final_center import (
     ERROR_RATE_LIMITED,
     HEARTBEAT_INTERVAL_SECONDS,
     TicketStateError,
-    attach_ticket_to_room_sitting,
     begin_attempt_for_ticket,
+    claim_student_pin_entry,
+    claim_ticket_pin_entry,
     clear_entry_session,
     ensure_pin_ticket,
     enter_waiting,
+    entry_session_matches,
     entry_ticket_id,
     maybe_auto_end,
     store_entry_session,
@@ -56,6 +59,7 @@ from apps.exams.services.final_center import (
     validate_entry,
 )
 from apps.exams.services.language_variants import available_language_options
+from core.rls import bypass_rls
 
 logger = logging.getLogger("exams.final_center.student")
 
@@ -101,6 +105,27 @@ def _entry_error_message(code):
         )
     # Generik mesaj — istifadəçi adı/PIN-in hansının səhv olduğu deyilmir.
     return pgettext("exams.final_center.entry", "Məlumatlar yanlışdır və ya aktiv final imtahanınız yoxdur.")
+
+
+def _claim_failure_message(room):
+    """Claim uğursuzluğunun tələbəyə deyilə bilən səbəbini seç.
+
+    Açıq oturumun olmaması nəzarətçi hərəkətidir — bunu deməkdə təhlükəsizlik
+    riski yoxdur; qalan səbəblər (sərf olunmuş PIN, tutulmuş yer) generik qalır.
+    """
+    from apps.exams.models import ExamRoomSession
+
+    with bypass_rls():
+        has_open_sitting = ExamRoomSession.objects.filter(
+            room=room,
+            state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE),
+        ).exists()
+    if not has_open_sitting:
+        return pgettext(
+            "exams.final_center.entry",
+            "Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını gözləyin.",
+        )
+    return _entry_error_message(None)
 
 
 def _render_login(request, *, error="", username="", modal_ticket=None, modal_error=""):
@@ -166,11 +191,12 @@ def _validated_session_ticket(request):
     ticket_id = entry_ticket_id(request)
     if not request.user.is_authenticated or not ticket_id:
         return None
-    return (
+    ticket = (
         FinalExamTicket.objects.select_related(*_TICKET_SELECT_RELATED)
         .filter(pk=ticket_id, student=request.user)
         .first()
     )
+    return ticket if ticket is not None and entry_session_matches(request, ticket) else None
 
 
 @require_http_methods(["GET", "POST"])
@@ -228,17 +254,11 @@ def _handle_login(request):
     if room is None:
         return _render_login(request, error=_room_access_error(), username=(username or "").strip())
 
-    # Otağın AÇIQ oturumuna qoşul; nəzarətçi oturumu açmayıbsa gözlə.
-    sitting = attach_ticket_to_room_sitting(ticket, room, computer)
-    if sitting is None:
-        return _render_login(
-            request,
-            error=pgettext(
-                "exams.final_center.entry",
-                "Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını gözləyin.",
-            ),
-            username=(username or "").strip(),
-        )
+    # Otağa bağlama + birdəfəlik PIN claim-i eyni ticket lock-u altında gedir:
+    # paralel ikinci kompüter nə sessiya ala, nə də attempt location-ını dəyişə bilər.
+    ticket = claim_ticket_pin_entry(ticket, room, computer)
+    if ticket is None:
+        return _render_login(request, error=_claim_failure_message(room), username=(username or "").strip())
 
     # Fərqli istifadəçi login-i varsa təmizlə, sonra bilet sahibini login et.
     if request.user.is_authenticated and request.user.pk != ticket.student_id:
@@ -304,13 +324,18 @@ def _handle_student_pin_login(request, username, raw_pin):
             username=(username or "").strip(),
         )
 
-    can_start, reason = exam.can_user_start(student, code=raw_pin)
+    # Credential artıq resolve_student_pin_login ilə konkret tələbə+imtahana
+    # bağlanıb. Public request-də tenant hələ qurulmadığı üçün start siyasəti
+    # və sual mövcudluğu həmin dar, credential-scoped bypass daxilində yoxlanır.
+    with bypass_rls():
+        can_start, reason = exam.can_user_start(student, code=raw_pin)
+        has_active_questions = exam.questions.filter(is_active=True).exists()
     if not can_start:
         return _render_login(request, error=reason or _entry_error_message(None), username=(username or "").strip())
 
     # Sual təyin olunmayıbsa imtahanı BAŞLATMA — tələbəni ümumi imtahan
     # siyahısına (exams/available) atmaq olmaz; giriş səhifəsində xəbərdarlıq göstər.
-    if not exam.questions.filter(is_active=True).exists():
+    if not has_active_questions:
         return _render_login(
             request,
             error=pgettext(
@@ -327,6 +352,9 @@ def _handle_student_pin_login(request, username, raw_pin):
         pin_ticket, ticket_error = ensure_pin_ticket(exam, student, entry_room, entry_computer)
         if pin_ticket is None:
             return _render_login(request, error=ticket_error, username=(username or "").strip())
+        pin_ticket = claim_student_pin_entry(pin_ticket)
+        if pin_ticket is None:
+            return _render_login(request, error=_entry_error_message(None), username=(username or "").strip())
 
     # Fərqli istifadəçi login-i varsa təmizlə, sonra imtahan tələbəsini login et.
     if request.user.is_authenticated and request.user.pk != student.pk:
@@ -386,7 +414,7 @@ def _resolve_own_ticket(request, ticket_id):
         pk=ticket_id,
         student=request.user,
     )
-    if entry_ticket_id(request) != ticket.pk:
+    if not entry_session_matches(request, ticket):
         return ticket, redirect("exams:final_exam_entry")
     return ticket, None
 
@@ -477,6 +505,7 @@ def final_exam_begin(request, ticket_id):
 
 
 @login_required
+@never_cache
 def final_ticket_state(request, ticket_id):
     """
     Aşağı tezlikli fallback poll (WS kəsiləndə). Kompakt payload — sual/cavab
@@ -498,6 +527,8 @@ def final_ticket_state(request, ticket_id):
         {
             "session_state": session.state,
             "ticket_status": ticket.status,
+            "removal_action": ticket.removal_action,
+            "removal_reason": ticket.removal_reason,
             "started_at": session.started_at.isoformat() if session.started_at else None,
             "server_now": timezone.now().isoformat(),
         }
