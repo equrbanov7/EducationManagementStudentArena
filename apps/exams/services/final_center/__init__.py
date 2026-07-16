@@ -76,6 +76,7 @@ from .reports import filter_sessions, filter_tickets
 from .room_admin import RoomAdminError, add_computer, bulk_add_computers, update_computer
 from .sessions import (
     RoomSessionStateError,
+    auto_close_stale_room_sessions,
     cancel_session,
     end_room,
     maybe_auto_end,
@@ -125,6 +126,7 @@ __all__ = [
     "can_supervise_session",
     "can_supervise_session_ws",
     "can_view_final_history",
+    "auto_close_stale_room_sessions",
     "cancel_session",
     "clear_entry_session",
     "connected_count",
