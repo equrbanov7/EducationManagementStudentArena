@@ -139,12 +139,13 @@
             if (leaveModal) {
                 leaveModal.querySelector("[data-jd-leave-go]").setAttribute("href", winClose.getAttribute("href"));
                 leaveModal.hidden = false;
+                lockPageScroll();
             }
             return;
         }
         if (event.target.closest("[data-jd-leave-stay]")) {
             var lm = document.querySelector("[data-jd-leave-modal]");
-            if (lm) lm.hidden = true;
+            if (lm) { lm.hidden = true; unlockPageScroll(); }
             return;
         }
 
@@ -230,13 +231,13 @@
         document.querySelectorAll(".jd-kollokvium-form tbody tr").forEach(function (row) {
             var total = 0;
             var any = false;
-            row.querySelectorAll('input[name^="kscore__"], .jd2-ro').forEach(function (el) {
+            // Kollokvium xanaları: bootstrap-select (name=kscore__…) və ya kilidli
+            // read-only span. Boş buraxılan bal 0 sayılır — CƏMİ həmişə rəqəmdir.
+            row.querySelectorAll('select[name^="kscore__"], input[name^="kscore__"], .jd2-ro').forEach(function (el) {
+                any = true;
                 var raw = el.value !== undefined ? el.value : el.textContent;
                 var num = parseFloat(String(raw).replace(",", "."));
-                if (!isNaN(num)) {
-                    total += num;
-                    any = true;
-                }
+                if (!isNaN(num)) total += num;
             });
             var out = row.querySelector("[data-jd-ksum]");
             if (out) out.textContent = any ? String(Math.round(total * 10) / 10) : "—";
@@ -356,6 +357,11 @@
             applySemSelect(sel);
             markDirty();
         }
+        var ksel = event.target.closest && event.target.closest("[data-jd-kscore]");
+        if (ksel) {
+            refreshKollokviumSums();
+            markDirty();
+        }
     });
 
     document.addEventListener("submit", function (event) {
@@ -412,6 +418,52 @@
         showSelfworkDeleteModal(delForm);
     }, true);
 
+    // ── Ümumi təsdiq modalı (info + təsdiq) — [data-jd-confirm] formları üçün ──
+    // Native confirm() əvəzinə səliqəli modal (məs. dərs sütununu silmə). Başlıq/
+    // mətn/düymə mətni forma data-confirm-* atributlarından oxunur. z-index 2000 →
+    // dərs modalının (1080) üstündə görünür.
+    function showJdConfirm(triggerForm) {
+        var title = triggerForm.getAttribute("data-confirm-title") || "Təsdiq";
+        var body = triggerForm.getAttribute("data-confirm-body") || "";
+        var detail = triggerForm.getAttribute("data-confirm-detail") || "";
+        var okLabel = triggerForm.getAttribute("data-confirm-ok") || "Təsdiqlə";
+        var existing = document.querySelector(".jd-sw-del-overlay");
+        if (existing) { existing.parentNode.removeChild(existing); }
+        var overlay = document.createElement("div");
+        overlay.className = "jd-sw-del-overlay";
+        overlay.innerHTML =
+            '<div class="jd-sw-del__box" role="alertdialog" aria-modal="true">' +
+            '<div class="jd-sw-del__icon"><i class="fas fa-triangle-exclamation"></i></div>' +
+            '<h3 class="jd-sw-del__title">' + escapeHtml(title) + '</h3>' +
+            (detail ? '<div class="jd-sw-del__topic">' + escapeHtml(detail) + '</div>' : '') +
+            (body ? '<p class="jd-sw-del__body">' + escapeHtml(body) + '</p>' : '') +
+            '<div class="jd-sw-del__actions">' +
+            '<button type="button" class="jd-sw-del__cancel">Ləğv et</button>' +
+            '<button type="button" class="jd-sw-del__ok">' + escapeHtml(okLabel) + '</button>' +
+            '</div></div>';
+        function close() { if (overlay.parentNode) { overlay.parentNode.removeChild(overlay); } }
+        overlay.addEventListener("click", function (e) { if (e.target === overlay) { close(); } });
+        overlay.querySelector(".jd-sw-del__cancel").addEventListener("click", close);
+        overlay.querySelector(".jd-sw-del__ok").addEventListener("click", function () {
+            triggerForm.setAttribute("data-jd-confirm-ok", "1");
+            close();
+            triggerForm.submit();
+        });
+        document.addEventListener("keydown", function esc(e) {
+            if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".jd-sw-del__ok").focus();
+    }
+
+    document.addEventListener("submit", function (event) {
+        var f = event.target;
+        if (!f.matches || !f.matches("[data-jd-confirm]")) { return; }
+        if (f.getAttribute("data-jd-confirm-ok") === "1") { return; } // təsdiqlənib
+        event.preventDefault();
+        showJdConfirm(f);
+    }, true);
+
     // ── Yeni dərs / redaktə modalı ────────────────────────────────────────
     var modal = document.querySelector("[data-jd-lesson-modal]");
     if (!modal) return;
@@ -451,6 +503,30 @@
         dateInput.addEventListener("change", refreshParityBadge);
     }
 
+    // ── Dərs saatı MƏCBURİDİR: seçilmədən dərs əlavə/redaktə tətbiq olunmasın ──
+    var timeError = modal.querySelector("[data-jd-time-error]");
+    function timeToggle() {
+        var wrap = timeSelect ? timeSelect.closest(".bootstrap-single-select") : null;
+        return wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
+    }
+    if (form && timeSelect) {
+        form.addEventListener("submit", function (ev) {
+            if (!timeSelect.value) {
+                ev.preventDefault();
+                if (timeError) timeError.hidden = false;
+                var tg = timeToggle();
+                if (tg) { tg.classList.add("is-invalid"); tg.focus(); }
+            }
+        });
+        timeSelect.addEventListener("change", function () {
+            if (timeSelect.value) {
+                if (timeError) timeError.hidden = true;
+                var tg = timeToggle();
+                if (tg) tg.classList.remove("is-invalid");
+            }
+        });
+    }
+
     function setSelectValue(select, value) {
         if (!select) return;
         select.value = value || "";
@@ -463,12 +539,21 @@
         titleAdd.hidden = editing;
         titleEdit.hidden = !editing;
         deleteForm.hidden = !editing;
+        // Dərs saatı xəta vəziyyətini sıfırla (əvvəlki cəhddən qalmasın).
+        if (timeError) timeError.hidden = true;
+        var _tg = timeToggle();
+        if (_tg) _tg.classList.remove("is-invalid");
         var kindField = modal.querySelector("select[data-jd-lesson-kind]");
         var topicField = modal.querySelector("[data-jd-lesson-topic]");
         if (editing) {
             form.action = editData.actionUrl;
             actionInput.value = "update_lesson";
             deleteForm.action = editData.actionUrl;
+            // Təsdiq modalında hansı dərs silinir — tarix + mövzu göstər.
+            deleteForm.setAttribute(
+                "data-confirm-detail",
+                (editData.date || "") + (editData.topic ? " · " + editData.topic : "")
+            );
             dateInput.value = editData.date;
             if (kindField) setSelectValue(kindField, editData.kind);
             if (topicField) {
@@ -488,12 +573,25 @@
         refreshParityBadge();
         setStep(3); // stepper: Yeni dərs addımı
         modal.hidden = false;
+        lockPageScroll();
+    }
+
+    // Modal açıqkən səhifə fonu sürüşməsin. Səhifənin scroll konteyneri <html>-dir
+    // (body DEYİL — main.css), ona görə tək body.overflow işləmirdi; HƏM
+    // documentElement HƏM body kilidlənir. Modal position:fixed olduğundan öz
+    // daxili scroll-u (jd-modal-card: overflow:auto) təsirlənmir.
+    function lockPageScroll() {
+        document.documentElement.style.overflow = "hidden";
         document.body.style.overflow = "hidden";
+    }
+    function unlockPageScroll() {
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
     }
 
     function closeModal() {
         modal.hidden = true;
-        document.body.style.overflow = "";
+        unlockPageScroll();
         var mapped = stepOfActiveTab();
         if (mapped) setStep(mapped); // modal bağlandı → aktiv tabın addımına qayıt
     }

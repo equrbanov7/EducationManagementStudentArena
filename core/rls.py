@@ -113,6 +113,24 @@ def _get_rls_setting(name: str, *, default: str = "") -> str:
     return str(value)
 
 
+@contextmanager
+def journal_unlock(*, local: bool | None = None):
+    """Temporarily bypass the 2-hour journal-mark immutability trigger.
+
+    The Postgres trigger ``registrar_journal_mark_guard`` blocks UPDATE of
+    lesson-mark / component-score rows older than 2h unless
+    ``app.journal_unlock = 'on'``. Legitimate window-scoped kollokvium edits
+    (İmtahan Mərkəzi pəncərəsi) and admin corrections set it for the duration of
+    a transaction. No-op off-Postgres (the trigger only exists there; the service
+    layer still enforces its own rules).
+    """
+    _set_rls_setting("app.journal_unlock", "on", local=local)
+    try:
+        yield
+    finally:
+        _set_rls_setting("app.journal_unlock", "", local=local)
+
+
 def set_rls_tenant(org_id: Any, *, local: bool | None = None) -> None:
     """Set the active tenant context for RLS policies.
 

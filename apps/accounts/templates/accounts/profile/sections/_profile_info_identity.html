@@ -163,6 +163,8 @@
                 <div class="info-label"><i class="fas fa-building"></i> {% trans "organization" context "profile.info" %}</div>
                 <div class="info-value">{{ profile.organization_name|default:profile_default_org }}</div>
             </div>
+            {# Tələbə-yönlü sahələr yalnız tələbə/lider tələbə üçün (müəllimdə "-" görünməsin). #}
+            {% if role_capabilities.is_student %}
             <div class="info-item info-item--full">
                 <div class="info-label"><i class="fas fa-users"></i> {% trans 'Qrup üzvlüyü' %}</div>
                 <div class="info-value">
@@ -194,11 +196,52 @@
                 <div class="info-label"><i class="fas fa-hashtag"></i> {% trans "school_code" context "profile.info" %}</div>
                 <div class="info-value">{{ profile.student_school_identifier|default:"-" }}</div>
             </div>
+            {% endif %}
             <div class="info-item">
                 <div class="info-label"><i class="fas fa-calendar-alt"></i> {% trans "joined_date" context "profile.info" %}</div>
                 <div class="info-value">{{ user.date_joined|date:"d M Y" }}</div>
             </div>
         </div>
+
+        {# ── Rol-əsaslı akademik məlumatlar (müəllim/dekan/kafedra/tələbə) ── #}
+        {% if academic_units or teacher_subjects or student_records %}
+        <div class="section-title profile-section-title--academic">
+            <i class="fas fa-graduation-cap"></i>
+            <span>{% trans 'Akademik məlumatlar' %}</span>
+        </div>
+        <div class="info-grid">
+            {% for unit in academic_units %}
+            <div class="info-item info-item--full">
+                <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Fakültə / Kafedra' %}</div>
+                <div class="info-value">{{ unit.get_full_path }}</div>
+            </div>
+            {% endfor %}
+            {% for record in student_records %}
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-user-graduate"></i> {% trans 'İxtisas' %}</div>
+                <div class="info-value">{{ record.program.name }}</div>
+            </div>
+            {% if record.group %}
+            <div class="info-item info-item--full">
+                <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Akademik struktur' %}</div>
+                <div class="info-value">{{ record.group.get_full_path }}</div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% if teacher_subjects %}
+            <div class="info-item info-item--full">
+                <div class="info-label"><i class="fas fa-book"></i> {% trans 'Tədris etdiyi fənlər' %}</div>
+                <div class="info-value">
+                    <div class="profile-group-chip-list profile-group-chip-list--scroll">
+                        {% for offering in teacher_subjects %}
+                        <span class="profile-group-chip">{{ offering.subject.name }}{% if offering.group %} <small>· {{ offering.group.name }}</small>{% endif %}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
 
         {% if profile.bio %}
         <div class="profile-bio info-item bio-item">
@@ -214,25 +257,8 @@
         </div>
         {% endif %}
 
-        {% if student_can_leave_org %}
-        <div class="section-card mt-3">
-            <div class="section-title">
-                <i class="fas fa-door-open"></i>
-                <span>{% trans 'Təşkilatdan çıx' %}</span>
-            </div>
-            <p class="text-muted mb-3">
-                {% trans 'Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır.' %}
-            </p>
-            <button type="button"
-                    class="btn btn-danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#studentLeaveOrgConfirmModal"
-                    data-next-section="profile-info">
-                <i class="fas fa-sign-out-alt"></i> {% trans 'Təşkilatdan çıx' %}
-            </button>
-        </div>
-        {% endif %}
-
+        {# "Təşkilatdan çıx" (leave-org) və "Hesabı sil" (delete-account) burada
+           göstərilmir — istifadəçi tələbi ilə bu funksionallıq profildən çıxarıldı. #}
         <div class="profile-edit-link">
             <a href="{{ profile_base_url }}?section=edit-profile" class="btn-edit-profile js-profile-section-link"
                data-section="edit-profile" data-title="{% trans 'edit_profile' context 'profile.section' %}">
@@ -242,14 +268,6 @@
                data-section="change-password" data-title="{% trans 'Şifrəni dəyiş' %}">
                 <i class="fas fa-lock"></i> {% trans 'Şifrəni dəyiş' %}
             </a>
-            {% if 'delete-account' in allowed_sections %}
-            <button type="button"
-                    class="btn-edit-profile btn-edit-profile--danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteAccountConfirmModal">
-                <i class="fas fa-user-times"></i> {% trans "delete_account" context "profile.sidebar" %}
-            </button>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -302,39 +320,6 @@
     </div>
 </div>
 
-{% if student_can_leave_org %}
-<div class="modal fade" id="studentLeaveOrgConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{% url 'accounts:student_leave_organization' %}">
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-door-open me-2"></i>{% trans 'Təşkilatdan çıxışı təsdiqlə' %}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2">{% trans 'Bu əməliyyatdan sonra təşkilat üzvlüyünüz deaktiv ediləcək.' %}</p>
-                    <input type="hidden" name="next" id="studentLeaveOrgModalNext" value="{{ profile_base_url }}?section=profile-info">
-                    <label for="studentLeaveReasonInput" class="form-label">{% trans 'Çıxma səbəbi' %}</label>
-                    <textarea id="studentLeaveReasonInput"
-                              name="leave_reason"
-                              class="form-control"
-                              rows="4"
-                              placeholder="{% trans 'Çıxma səbəbini yazın...' %}"
-                              required></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i> {% trans 'Təsdiqlə və çıx' %}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
-
 <script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
     function showAvatarFallback(imageNode, fallbackNode) {
@@ -380,18 +365,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             avatarPreviewImage.src = URL.createObjectURL(file);
             avatarPreviewImage.style.display = '';
-        });
-    }
-
-    var leaveModal = document.getElementById("studentLeaveOrgConfirmModal");
-    if (leaveModal) {
-        var nextInput = document.getElementById("studentLeaveOrgModalNext");
-        leaveModal.addEventListener("show.bs.modal", function (event) {
-            if (!nextInput) return;
-            var trigger = event.relatedTarget;
-            var nextSection = trigger ? trigger.getAttribute("data-next-section") : "";
-            var section = nextSection || "profile-info";
-            nextInput.value = "{{ profile_base_url }}?section=" + section;
         });
     }
 });

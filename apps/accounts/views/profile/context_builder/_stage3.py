@@ -296,6 +296,17 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "kollokvium-windows" in self.allowed_sections and self.active_section == "kollokvium-windows":
+            from .._sections.kollokvium_windows import build_kollokvium_windows_section
+
+            build_kollokvium_windows_section(
+                self.request,
+                self.kollokvium_windows_section,
+                is_superadmin=self.capabilities["is_superadmin"],
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         self._notif_ctx = build_notifications_context(self.request, active_section=self.active_section)
         self.notif_filter = self._notif_ctx["notif_filter"]
         self.notif_type = self._notif_ctx["notif_type"]

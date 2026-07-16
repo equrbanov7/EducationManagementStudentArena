@@ -331,7 +331,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
 
-    def test_profile_info_places_delete_account_in_action_area(self):
+    def test_profile_info_omits_delete_account_and_leave_org(self):
+        """Delete-account və leave-org profildən çıxarıldı (istifadəçi tələbi)."""
         self.client.login(username="testuser", password="testpass123")
         self.client.cookies["django_language"] = "en"
 
@@ -341,9 +342,8 @@ class ProfileViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Delete Account")
-        self.assertContains(response, 'data-bs-target="#deleteAccountConfirmModal"', html=False)
-        self.assertNotContains(response, 'data-section="delete-account"', html=False)
+        self.assertNotContains(response, 'data-bs-target="#deleteAccountConfirmModal"', html=False)
+        self.assertNotContains(response, 'data-bs-target="#studentLeaveOrgConfirmModal"', html=False)
 
     def test_delete_account_section_falls_back_to_profile_info(self):
         self.client.login(username="testuser", password="testpass123")

@@ -129,9 +129,18 @@ def save_components(*, offering, definitions, by_user=None):
 
 
 @transaction.atomic
-def save_component_scores(*, offering, entries, by_user=None):
+def save_component_scores(*, offering, entries, by_user=None, bypass_edit_window=False):
     """Persist per-(component, enrollment) scores. ``entries`` = list of
-    ``{"component_id", "enrollment_id", "score"}``. Lock-aware + tenant-safe."""
+    ``{"component_id", "enrollment_id", "score"}``. Lock-aware + tenant-safe.
+
+    ``bypass_edit_window``: kollokvium İmtahan Mərkəzi pəncərəsi AÇIQ olduqda True
+    verilir — 2 saat kilidini HƏM servis-səviyyəsində, HƏM DB trigger-ində
+    (``journal_unlock`` GUC) bypass edir ki, müəllim aralıq boyu balı dəyişsin.
+    """
+    from contextlib import nullcontext
+
+    from core.rls import journal_unlock
+
     if journal_is_locked(offering):
         return 0
 
@@ -141,35 +150,41 @@ def save_component_scores(*, offering, entries, by_user=None):
     audit_changes = []
     notify_events = []
     now = timezone.now()
-    for entry in entries:
-        component = valid_components.get(str(entry.get("component_id")))
-        enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
-        if component is None or enrollment is None:
-            continue
-        existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
-        if existing is not None and (now - existing.created_at) > MARK_EDIT_WINDOW:
-            continue  # komponent balı da 2 saatdan sonra toxunulmazdır
-        old_score = existing.score if existing else None
-        raw = entry.get("score")
-        if raw in (None, ""):
-            if existing is not None:
-                existing.delete()
-                audit_changes.append(_component_change(component, enrollment, old_score, None))
-            continue
-        score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
-        ComponentScore.objects.update_or_create(
-            organization=offering.organization,
-            component=component,
-            enrollment=enrollment,
-            defaults={"score": score, "entered_by": by_user},
-        )
-        if old_score != score:
-            audit_changes.append(_component_change(component, enrollment, old_score, score))
-            from apps.registrar import journal_notifications as jn
+    with journal_unlock() if bypass_edit_window else nullcontext():
+        for entry in entries:
+            component = valid_components.get(str(entry.get("component_id")))
+            enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
+            if component is None or enrollment is None:
+                continue
+            # Kollokvium YALNIZ pəncərə-yoxlanışlı yolla (journal_actions.kollokvium_save,
+            # bypass_edit_window=True) yazıla bilər — generic cscore__/rubrik yolları
+            # İmtahan Mərkəzi pəncərəsini YAN KEÇMƏMƏLİDİR.
+            if component.kind == ComponentKind.KOLLOKVIUM and not bypass_edit_window:
+                continue
+            existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
+            if not bypass_edit_window and existing is not None and (now - existing.created_at) > MARK_EDIT_WINDOW:
+                continue  # komponent balı da 2 saatdan sonra toxunulmazdır (kollokvium istisna — pəncərə)
+            old_score = existing.score if existing else None
+            raw = entry.get("score")
+            if raw in (None, ""):
+                if existing is not None:
+                    existing.delete()
+                    audit_changes.append(_component_change(component, enrollment, old_score, None))
+                continue
+            score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
+            ComponentScore.objects.update_or_create(
+                organization=offering.organization,
+                component=component,
+                enrollment=enrollment,
+                defaults={"score": score, "entered_by": by_user},
+            )
+            if old_score != score:
+                audit_changes.append(_component_change(component, enrollment, old_score, score))
+                from apps.registrar import journal_notifications as jn
 
-            kind = jn.EVENT_KOLLOKVIUM if component.kind == ComponentKind.KOLLOKVIUM else jn.EVENT_SCORE
-            notify_events.append({"enrollment": enrollment, "kind": kind, "score": score})
-        written += 1
+                kind = jn.EVENT_KOLLOKVIUM if component.kind == ComponentKind.KOLLOKVIUM else jn.EVENT_SCORE
+                notify_events.append({"enrollment": enrollment, "kind": kind, "score": score})
+            written += 1
     grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="component", changes=audit_changes)
 
     if notify_events:

@@ -151,6 +151,10 @@ def create_lesson(
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
     if not allow_past and parsed < timezone.localdate():
         raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
+    # Eyni gündə eyni dərs saatına iki dərs yazıla bilməz (üst-üstə düşməsin).
+    # Yalnız saat verildikdə yoxlanır — seed/vaxtsız dərslər təsirlənmir.
+    if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
+        raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     ensure_assessment_scheme(offering=offering)
     return Lesson.objects.create(
         organization=offering.organization,

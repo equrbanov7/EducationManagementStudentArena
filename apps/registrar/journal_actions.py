@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
@@ -87,26 +88,44 @@ def lesson_action(request, offering_id, lesson_id):
 @login_required
 @require_POST
 def kollokvium_save(request, offering_id):
-    """Kollokvium tabı: keçirilmə tarixləri + tələbə balları (kdate__/kscore__)."""
-    offering = _offering_or_404(request, offering_id)
-    components = {str(c.id): c for c in journal_extras.ensure_kollokviums(offering)}
+    """Kollokvium balları — YALNIZ İmtahan Mərkəzi pəncərəsi AÇIQ olan K-lar üçün.
 
-    for key, raw in request.POST.items():
-        if key.startswith("kdate__"):
-            component = components.get(key[len("kdate__") :])
-            if component is not None:
-                journal_extras.set_kollokvium_date(component=component, held_on=parse_date(raw or "") or None)
+    Tarix xanaları yoxdur (aralığı İmtahan Mərkəzi təyin edir). Açıq pəncərədə
+    2 saat kilidi bypass olunur — müəllim aralıq boyu balı dəyişə bilər.
+    """
+    from apps.registrar import kollokvium_windows as kw
+
+    offering = _offering_or_404(request, offering_id)
+    components = list(journal_extras.ensure_kollokviums(offering))
+    idx_by_id = {str(c.id): idx for idx, c in enumerate(components)}
+    today = timezone.localdate()
 
     entries = []
+    blocked = False
     for key, raw in request.POST.items():
         if not key.startswith("kscore__"):
             continue
         parts = key.split("__", 2)
-        if len(parts) != 3 or parts[1] not in components:
+        if len(parts) != 3 or parts[1] not in idx_by_id:
             continue
+        if not kw.is_open(offering, idx_by_id[parts[1]], today):
+            blocked = True
+            continue  # pəncərə bağlı / aktiv deyil — bu K-ya yazma qadağandır
         entries.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
-    written = gradebook.save_component_scores(offering=offering, entries=entries, by_user=request.user)
-    messages.success(request, _("Kollokvium məlumatları yadda saxlanıldı (%(n)s xana).") % {"n": written})
+
+    if not entries:
+        messages.error(
+            request,
+            _("Kollokvium bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı aktivləşdirməlidir."),
+        )
+        return _back(offering, "kollokvium")
+
+    written = gradebook.save_component_scores(
+        offering=offering, entries=entries, by_user=request.user, bypass_edit_window=True
+    )
+    if blocked:
+        messages.warning(request, _("Bəzi kollokviumların pəncərəsi bağlı olduğu üçün yazılmadı."))
+    messages.success(request, _("Kollokvium balları yadda saxlanıldı (%(n)s xana).") % {"n": written})
     return _back(offering, "kollokvium")
 
 
