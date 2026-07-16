@@ -151,7 +151,14 @@
             if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < ctx.totalSlides) {
                 ctx.currentIndex = savedIndex;
             } else {
-                ctx.currentIndex = 0;
+                // Yeni kompüterdə localStorage yoxdur: DB-dən bərpa olunan
+                // cavabları keç və ilk cavabsız sualdan davam et.
+                ctx.currentIndex = Array.from(ctx.slides).findIndex(function (slide) {
+                    return !ns.progress.isSlideAnswered(slide);
+                });
+                if (ctx.currentIndex < 0) {
+                    ctx.currentIndex = Math.max(ctx.totalSlides - 1, 0);
+                }
             }
             ns.navigation.showSlide(ctx, ctx.currentIndex);
             if (ctx.loadingScreen) {

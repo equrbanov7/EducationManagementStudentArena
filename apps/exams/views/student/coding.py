@@ -67,7 +67,7 @@ def _get_coding_attempt(request, slug, attempt_id):
         exam__exam_type="coding",
         user=request.user,
     )
-    ensure_active_attempt_access(attempt, request.user)
+    ensure_active_attempt_access(attempt, request.user, request=request)
     return attempt
 
 
@@ -498,7 +498,7 @@ def coding_submit(request, slug, attempt_id):
     # Attempt lock-u paralel ikinci final submit-i idempotent edir (EXAM-P1-13).
     with transaction.atomic():
         locked_attempt = ExamAttempt.objects.select_for_update().get(pk=attempt.pk)
-        ensure_active_attempt_access(locked_attempt, request.user)
+        ensure_active_attempt_access(locked_attempt, request.user, request=request)
         if locked_attempt.is_finished:
             return JsonResponse(
                 {

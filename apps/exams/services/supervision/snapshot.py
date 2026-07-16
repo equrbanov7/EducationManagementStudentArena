@@ -4,6 +4,7 @@ from apps.exams.features import exam_supervision_enabled
 from apps.exams.models import SupervisionIncident
 from apps.exams.services.randomizer import build_shuffled_options
 
+from .interventions import get_attempt_intervention
 from .monitor import (
     get_exam_question_total,
 )
@@ -258,6 +259,8 @@ def get_attempt_live_snapshot(attempt):
             "teacher_score": attempt.teacher_score,
             "is_finished": attempt.is_finished,
             "status": attempt.status,
+            "intervention_action": "",
+            "intervention_reason": "",
             "exam_title": attempt.exam.title,
             "exam_type": getattr(attempt.exam, "exam_type", "") or "",
             "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
@@ -311,6 +314,7 @@ def get_attempt_live_snapshot(attempt):
     # nəticə ilə eynidir (calculate_test_attempt_result). Test cavablarının
     # is_correct sahəsi autosave zamanı canlı yenilənir, ona görə bu real-vaxt.
     live_score = _build_live_score(attempt, exam_type, answers=test_answers)
+    intervention = get_attempt_intervention(attempt)
 
     return {
         "attempt_id": attempt.id,
@@ -329,6 +333,8 @@ def get_attempt_live_snapshot(attempt):
         "teacher_score": attempt.teacher_score,
         "is_finished": attempt.is_finished,
         "status": attempt.status,
+        "intervention_action": intervention["action"],
+        "intervention_reason": intervention["reason"],
         "exam_title": attempt.exam.title,
         "exam_type": getattr(attempt.exam, "exam_type", "") or "",
         "started_at": attempt.started_at.isoformat() if attempt.started_at else None,

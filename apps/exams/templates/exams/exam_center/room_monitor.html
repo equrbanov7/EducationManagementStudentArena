@@ -5,7 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260716-live-snapshot">
 {% endblock %}
 
 {% block content %}
@@ -254,7 +254,7 @@
 
 {% block extraJs %}
     <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
-    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}" defer></script>
+    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20260716-live-snapshot" defer></script>
     <script src="{% static 'exams/js/final_center/room_aggregate.js' %}" defer></script>
     <script nonce="{{ request.csp_nonce }}">
     // Zala nəzarətçi təyini — AJAX (debounced) axtarış + çip seçimi.

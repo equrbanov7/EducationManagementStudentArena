@@ -12,11 +12,13 @@ import logging
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.cache import cache
+from django.utils import timezone
 
 from cryptography.fernet import InvalidToken
 
 from apps.exams.models import ExamStudentPin
 from apps.exams.services.final_center.pins import _DUMMY_HASH, _fernet, generate_pin_value
+from core.rls import bypass_rls
 
 logger = logging.getLogger("exams.student_pin.entry")
 
@@ -134,6 +136,18 @@ def verify_student_pin(exam, user, raw_pin: str) -> bool:
     return ok
 
 
+def revoke_student_pin(exam, user) -> bool:
+    """İmtahan başlayanda ilkin fərdi PIN-i birdəfəlik ləğv et."""
+    if user is None or not getattr(user, "id", None):
+        return False
+    return bool(
+        ExamStudentPin.objects.filter(exam=exam, student=user, revoked_at__isnull=True).update(
+            revoked_at=timezone.now(),
+            pin_cipher="",
+        )
+    )
+
+
 def resolve_student_pin_login(username: str, raw_pin: str):
     """`/exams/final/` girişi: istifadəçi adı + fərdi PIN → (exam, user).
 
@@ -155,11 +169,18 @@ def resolve_student_pin_login(username: str, raw_pin: str):
     if user is None or not getattr(user, "is_active", False):
         return None, None
 
-    pins = ExamStudentPin.objects.filter(
-        student=user,
-        exam__is_active=True,
-        exam__exam_type_extended="final",
-    ).select_related("exam", "exam__organization")
+    # Public girişdə tələbə hələ autentifikasiya/tenant seçimi etməyib, buna
+    # görə RLS normal olaraq bütün ExamStudentPin sətirlərini gizlədir. Bypass
+    # yalnız username ilə tapılmış istifadəçinin aktiv final PIN-lərini
+    # materializasiya edir; xam PIN müqayisəsi və nəticə bypass-dan kənardadır.
+    with bypass_rls():
+        pins = list(
+            ExamStudentPin.objects.filter(
+                student=user,
+                exam__is_active=True,
+                exam__exam_type_extended="final",
+            ).select_related("exam", "exam__organization")
+        )
     for pin in pins:
         # EXAM-P1-08: revoke/expiry olunmuş PIN girişi keçirməməlidir.
         if pin.is_usable() and check_password(raw_pin, pin.pin_hash or ""):

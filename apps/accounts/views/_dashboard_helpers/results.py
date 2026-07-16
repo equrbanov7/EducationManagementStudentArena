@@ -10,7 +10,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Submission
 from apps.exams.models import ExamAttempt
-from apps.exams.public import calculate_test_attempt_result
+from apps.exams.public import attach_attempt_interventions, calculate_test_attempt_result
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
 
@@ -66,6 +66,7 @@ def _collect_my_results(request, filter_type=None, search=None):
             .order_by("-started_at")
         )
         attempts = list(attempts)
+        attach_attempt_interventions(attempts)
         # Apellyasiya bonusları (tək sorğu) — tələbənin görəcəyi balda yalnız
         # 5 dəqiqəlik reviewer redaktə pəncərəsi bağlanandan sonra əks olunsun.
         try:
@@ -114,6 +115,8 @@ def _collect_my_results(request, filter_type=None, search=None):
                     "score": score_value if is_graded_visible else None,
                     "score_percent": score_percent_value if is_graded_visible else "",
                     "feedback": attempt.teacher_feedback if is_graded_visible else "",
+                    "removed_from_exam": attempt.exam_intervention["is_terminal"],
+                    "removal_reason": attempt.exam_intervention["reason"],
                     "detail_url": _append_query_params(
                         reverse(
                             "exams:exam_result",

@@ -79,7 +79,9 @@ export var ExamSupervision = {
                 var self = this;
                 this._checkSupervisionStatus(function (data) {
                     if (data && data.manual_lock) {
-                        self._showTeacherLockOverlay();
+                        self._showTeacherLockOverlay(data.intervention_reason);
+                    } else if (data && data.supervision_status === "removed") {
+                        self._showRemovalOverlay(data.intervention_reason, data.intervention_action);
                     } else {
                         self._onLimitExceeded();
                     }

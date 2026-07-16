@@ -305,7 +305,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
     with transaction.atomic():
         attempt = ExamAttempt.objects.select_for_update().select_related("exam").get(id=attempt.id, user=request.user)
         exam = attempt.exam
-        ensure_active_attempt_access(attempt, request.user)
+        ensure_active_attempt_access(attempt, request.user, request=request)
 
         if attempt.is_finished:
             return _finished_attempt_response(request, attempt, return_to=return_to)
@@ -461,7 +461,7 @@ def take_exam(request, slug, attempt_id):
         user=request.user,
     )
     exam = attempt.exam
-    ensure_active_attempt_access(attempt, request.user)
+    ensure_active_attempt_access(attempt, request.user, request=request)
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
     supervision_feature_enabled = exam_supervision_enabled()

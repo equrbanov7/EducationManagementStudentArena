@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260611-fresh-csrf";
+import { ExamSupervision } from "./state.js?v=20260716-intervention";
 
 Object.assign(ExamSupervision, {
         _createWarningModal: function () {
@@ -293,7 +293,7 @@ Object.assign(ExamSupervision, {
 
         // Dedicated overlay for a *manual* teacher pause ("Müvəqqəti blokla").
         // Visually matches the violation-lock overlay so the student gets the
-        _showTeacherLockOverlay: function () {
+        _showTeacherLockOverlay: function (reason) {
             this.isActive = false;
             this._hideWarning();
             this._clearGraceTimer();
@@ -302,7 +302,9 @@ Object.assign(ExamSupervision, {
             // pause supersedes it with the correct messaging.
             var existingLimit = document.getElementById("supervision-locked-overlay");
             if (existingLimit) existingLimit.remove();
-            if (document.getElementById("supervision-teacher-lock-overlay")) {
+            var existingTeacherLock = document.getElementById("supervision-teacher-lock-overlay");
+            if (existingTeacherLock) {
+                if (this._renderInterventionReason) this._renderInterventionReason(existingTeacherLock, reason);
                 this._startTeacherLockPolling();
                 return;
             }
@@ -331,6 +333,7 @@ Object.assign(ExamSupervision, {
                 '</div>' +
                 '</div>';
             document.body.appendChild(overlay);
+            if (this._renderInterventionReason) this._renderInterventionReason(overlay, reason);
 
             // Poll for the teacher's resume / a force-stop. The WebSocket usually
             // delivers this instantly, but polling is the resilient fallback.
@@ -359,7 +362,14 @@ Object.assign(ExamSupervision, {
                     } else if (data.is_finished) {
                         clearInterval(ExamSupervision._teacherLockPoll);
                         ExamSupervision._teacherLockPoll = null;
-                        ExamSupervision._leaveToResult();
+                        if (data.intervention_action || data.intervention_reason) {
+                            ExamSupervision._showRemovalOverlay(
+                                data.intervention_reason,
+                                data.intervention_action
+                            );
+                        } else {
+                            ExamSupervision._leaveToResult();
+                        }
                     }
                 });
             }, 1000);

@@ -5,13 +5,16 @@ from collections import defaultdict
 from datetime import datetime
 from urllib.parse import urlencode
 
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import RequestDataTooBig
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.translation import pgettext
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.features import disabled_supervision_status, exam_supervision_enabled
@@ -154,6 +157,7 @@ def log_incident_api(request, attempt_id):
 
 @login_required
 @require_GET
+@never_cache
 def supervision_status_api(request, attempt_id):
     """
     Get current supervision status for an attempt.
@@ -164,6 +168,18 @@ def supervision_status_api(request, attempt_id):
         id=attempt_id,
         user=request.user,
     )
+    from apps.exams.services.final_center import clear_entry_session, final_attempt_entry_session_valid
+
+    if not final_attempt_entry_session_valid(request, attempt):
+        clear_entry_session(request)
+        logout(request)
+        return JsonResponse(
+            {
+                "entry_session_valid": False,
+                "redirect_url": reverse("exams:final_exam_entry"),
+            },
+            status=403,
+        )
     if not exam_supervision_enabled():
         return JsonResponse(disabled_supervision_status(attempt))
 

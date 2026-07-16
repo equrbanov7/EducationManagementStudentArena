@@ -77,6 +77,15 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
             "status",
         ]
     )
+    # Final imtahan mərkəzində müvəqqəti dayandırma üçün saxlanmış cari səbəb
+    # bərpadan sonra artıq aktiv müdaxilə deyil. Hadisənin özü incident tarixçəsində
+    # qalır, tələbəyə göstərilən cari status isə təmizlənir.
+    attempt.final_tickets.filter(removal_action="suspended").update(
+        removal_action="",
+        removal_reason="",
+        removed_at=None,
+        removed_by=None,
+    )
 
     action_type = "teacher_granted_chance" if grant_extra_chance else "teacher_resumed"
     SupervisionIncident.objects.create(
@@ -109,7 +118,7 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     return True
 
 
-def teacher_lock_attempt(attempt, teacher):
+def teacher_lock_attempt(attempt, teacher, reason=""):
     """
     Teacher temporarily locks an attempt.
 
@@ -127,6 +136,7 @@ def teacher_lock_attempt(attempt, teacher):
     if attempt.supervision_status == "locked":
         raise ValueError("Attempt is already locked.")
 
+    display_reason = (reason or "").strip()[:1000]
     old_status = attempt.supervision_status
     attempt.supervision_status = "locked"
     # Mark this as a *manual* teacher pause. Unlike an auto-lock we deliberately
@@ -148,6 +158,7 @@ def teacher_lock_attempt(attempt, teacher):
             "teacher_username": teacher.username,
             "previous_status": old_status,
             "reason": "teacher_temporary_lock",
+            "display_reason": display_reason,
         },
         violation_count_at_time=attempt.supervision_violation_count,
         teacher_action="teacher_temporary_lock",
@@ -158,7 +169,8 @@ def teacher_lock_attempt(attempt, teacher):
         {
             "action": "locked",
             "supervision_status": "locked",
-            "reason": "teacher_temporary_lock",
+            "reason": display_reason,
+            "reason_code": "teacher_temporary_lock",
             "manual": True,
         },
     )
@@ -166,7 +178,7 @@ def teacher_lock_attempt(attempt, teacher):
     return True
 
 
-def teacher_stop_attempt(attempt, teacher):
+def teacher_stop_attempt(attempt, teacher, reason="", action="removed"):
     """
     Teacher force-stops a supervised attempt, submitting it immediately.
 
@@ -178,6 +190,7 @@ def teacher_stop_attempt(attempt, teacher):
     if attempt.is_finished:
         raise ValueError("Attempt is already finished.")
 
+    display_reason = (reason or "").strip()[:1000]
     old_status = attempt.supervision_status
     attempt.supervision_status = "removed"
     attempt.mark_finished(status="submitted", extra_update_fields=["supervision_status"])
@@ -194,6 +207,8 @@ def teacher_stop_attempt(attempt, teacher):
             "teacher_username": teacher.username,
             "previous_status": old_status,
             "reason": "teacher_force_stopped",
+            "display_reason": display_reason,
+            "intervention_action": action,
         },
         violation_count_at_time=attempt.supervision_violation_count,
         teacher_action="teacher_force_stopped",
@@ -205,7 +220,9 @@ def teacher_stop_attempt(attempt, teacher):
             "action": "stopped",
             "supervision_status": "removed",
             "is_finished": True,
-            "reason": "teacher_force_stopped",
+            "reason": display_reason,
+            "reason_code": "teacher_force_stopped",
+            "intervention_action": action,
         },
     )
 

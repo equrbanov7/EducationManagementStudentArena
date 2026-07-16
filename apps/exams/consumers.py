@@ -185,7 +185,12 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=4400)
             return
 
-        info = await self._authorize(user, self.ticket_id)
+        from apps.exams.services.final_center.entry import ENTRY_SESSION_KEY, ENTRY_VERSION_SESSION_KEY
+
+        session = self.scope.get("session")
+        self.entry_ticket_id = session.get(ENTRY_SESSION_KEY) if session is not None else None
+        self.entry_version = session.get(ENTRY_VERSION_SESSION_KEY) if session is not None else None
+        info = await self._authorize(user, self.ticket_id, self.entry_ticket_id, self.entry_version)
         if info is None:
             await self.close(code=4403)
             return
@@ -202,7 +207,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
         await self._mark_connected(info["reconnect"])
 
     @database_sync_to_async
-    def _authorize(self, user, ticket_id):
+    def _authorize(self, user, ticket_id, entry_ticket_id, entry_version):
         """
         Bilet sahibliyi + oturumun canlı olması. Çıxarılmış/bitmiş biletlər
         qoşula bilməz. Qaytarır: {"session_id", "reconnect"} | None.
@@ -215,9 +220,14 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
             TICKET_STATUS_WAITING,
         )
         from apps.exams.models import FinalExamTicket
+        from apps.exams.services.final_center import entry_session_values_match
 
         ticket = FinalExamTicket.objects.select_related("session").filter(pk=ticket_id, student=user).first()
         if ticket is None:
+            return None
+        if (ticket.pin_issued_at or ticket.entry_validated_at) and not entry_session_values_match(
+            entry_ticket_id, entry_version, ticket
+        ):
             return None
         if ticket.status not in (TICKET_STATUS_WAITING, TICKET_STATUS_READY, TICKET_STATUS_ACTIVE):
             return None
@@ -277,30 +287,49 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
 
         action = content.get("action")
         if action == "heartbeat":
-            await self._heartbeat()
+            if not await self._heartbeat():
+                await self.close(code=4403)
         elif action == "ready":
-            await self._set_ready(bool(content.get("value", True)))
+            if not await self._set_ready(bool(content.get("value", True))):
+                await self.close(code=4403)
 
     @database_sync_to_async
     def _heartbeat(self):
         from apps.exams.models import FinalExamTicket
-        from apps.exams.services.final_center import touch_presence, touch_ticket_last_seen
+        from apps.exams.services.final_center import (
+            entry_session_values_match,
+            touch_presence,
+            touch_ticket_last_seen,
+        )
 
+        ticket = (
+            FinalExamTicket.objects.filter(pk=self.ticket_id)
+            .only("id", "last_seen_at", "pin_issued_at", "entry_validated_at")
+            .first()
+        )
+        if ticket is None or (
+            (ticket.pin_issued_at or ticket.entry_validated_at)
+            and not entry_session_values_match(self.entry_ticket_id, self.entry_version, ticket)
+        ):
+            return False
         touch_presence(self.session_id, self.ticket_id, status=self._ticket_status)
-        ticket = FinalExamTicket.objects.filter(pk=self.ticket_id).only("id", "last_seen_at").first()
-        if ticket:
-            touch_ticket_last_seen(ticket)
+        touch_ticket_last_seen(ticket)
+        return True
 
     @database_sync_to_async
     def _set_ready(self, value: bool):
         from apps.exams.models import FinalExamTicket
-        from apps.exams.services.final_center import set_ready
+        from apps.exams.services.final_center import entry_session_values_match, set_ready
 
         ticket = FinalExamTicket.objects.select_related("session").filter(pk=self.ticket_id).first()
-        if ticket is None:
-            return
+        if ticket is None or (
+            (ticket.pin_issued_at or ticket.entry_validated_at)
+            and not entry_session_values_match(self.entry_ticket_id, self.entry_version, ticket)
+        ):
+            return False
         if set_ready(ticket, value):
             self._ticket_status = ticket.status
+        return True
 
     async def final_event(self, event):
         await self.send_json(event.get("data") or {})

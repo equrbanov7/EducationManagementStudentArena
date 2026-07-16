@@ -53,6 +53,7 @@ HEALTH_PATH="${HEALTH_PATH:-/health/}"
 DISABLE_LEGACY_DAPHNE_SERVICE="${DISABLE_LEGACY_DAPHNE_SERVICE:-true}"
 DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-300}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-${APP_DIR}/docker/nginx/nginx.conf}"
 APP_REPLICAS="${APP_REPLICAS:-$(dotenv_value APP_REPLICAS)}"
 APP_REPLICAS="${APP_REPLICAS:-1}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-$(dotenv_value CELERY_REPLICAS)}"
@@ -159,6 +160,30 @@ wait_for_http() {
 }
 
 refresh_nginx_upstream() {
+  local host_config_hash=""
+  local container_config_hash=""
+
+  # nginx.conf single-file bind mount-dur. Deploy rsync atomic rename etdikdə
+  # işləyən container köhnə (deleted) inode-a bağlı qala bilər; bu halda
+  # `nginx -s reload` də köhnə konfiqi yenidən oxuyur. Host/container hash
+  # fərqi bunu aşkarlayır və yalnız nginx-i yeni mount ilə recreate edir.
+  if [ -f "$NGINX_CONFIG_FILE" ]; then
+    host_config_hash="$(sha256sum "$NGINX_CONFIG_FILE" | awk '{print $1}')"
+    container_config_hash="$(
+      docker compose -f "$COMPOSE_FILE" exec -T nginx \
+        sha256sum /etc/nginx/conf.d/default.conf 2>/dev/null | awk '{print $1}' || true
+    )"
+  fi
+
+  if [ -n "$host_config_hash" ] &&
+    [ -n "$container_config_hash" ] &&
+    [ "$host_config_hash" != "$container_config_hash" ]; then
+    echo "nginx bind mount is stale; validating the synced config before recreate..."
+    docker compose -f "$COMPOSE_FILE" run --rm --no-deps nginx nginx -t
+    docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate nginx
+    return 0
+  fi
+
   # Docker Compose can recreate the app container without recreating nginx.
   # nginx resolves upstream names at config load time, so a deploy can leave it
   # proxying to the old app container IP until the proxy is reloaded.

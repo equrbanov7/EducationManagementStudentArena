@@ -965,6 +965,137 @@ class TestRLSExamGapTables:
         assert SupervisionIncident.objects.count() == 0
         assert QuestionSubmission.objects.count() == 0
 
+    def test_public_final_student_pin_resolution_uses_controlled_bypass(self, gap_table_graph):
+        _skip_if_not_pg()
+        from django.contrib.auth.hashers import make_password
+
+        from apps.exams.services.student_pins import resolve_student_pin_login
+
+        side_a = gap_table_graph["a"]
+        student = side_a["exam"].excluded_users.first()
+        raw_pin = "73512468"
+        Exam.objects.filter(pk=side_a["exam"].pk).update(exam_type_extended="final", is_active=True)
+        ExamStudentPin.objects.filter(exam=side_a["exam"]).update(pin_hash=make_password(raw_pin))
+
+        _enable_rls()
+        assert ExamStudentPin.objects.count() == 0
+
+        resolved_exam, resolved_user = resolve_student_pin_login(
+            student.username,
+            raw_pin,
+        )
+
+        assert resolved_exam is not None
+        assert resolved_exam.pk == side_a["exam"].pk
+        assert resolved_user is not None
+        # Resolver bypass-ı request axınına sızdırmamalıdır.
+        assert ExamStudentPin.objects.count() == 0
+
+    def test_public_final_ticket_resolution_uses_controlled_bypass(self, gap_table_graph):
+        _skip_if_not_pg()
+        from apps.exams.domain.final_center import ROOM_SESSION_STATE_ENTRY_OPEN
+        from apps.exams.models import FinalExamTicket
+        from apps.exams.services.final_center import (
+            claim_ticket_pin_entry,
+            set_ticket_pin,
+            validate_entry,
+        )
+
+        side_a = gap_table_graph["a"]
+        student = side_a["exam"].excluded_users.first()
+        ExamRoomSession.objects.filter(pk=side_a["session"].pk).update(state=ROOM_SESSION_STATE_ENTRY_OPEN)
+        ticket = FinalExamTicket.objects.create(
+            organization=side_a["org"],
+            exam=side_a["exam"],
+            student=student,
+        )
+        raw_pin = set_ticket_pin(ticket, side_a["org"].owner)
+
+        _enable_rls()
+        assert FinalExamTicket.objects.count() == 0
+
+        request = RequestFactory().post("/exams/final/")
+        resolved_ticket, error = validate_entry(request, student.username, raw_pin)
+
+        assert error is None
+        assert resolved_ticket is not None
+        assert resolved_ticket.pk == ticket.pk
+        claimed = claim_ticket_pin_entry(resolved_ticket, side_a["room"])
+        assert claimed is not None
+        sitting = claimed.session
+        assert sitting is not None
+        assert sitting.pk == side_a["session"].pk
+        # Ticket resolver də bypass vəziyyətini əvvəlki secure default-a qaytarır.
+        assert FinalExamTicket.objects.count() == 0
+        with bypass_rls():
+            ticket.refresh_from_db()
+            assert ticket.entry_validated_at is not None
+            assert ticket.pin_revoked_at is not None
+            assert ticket.session_id == side_a["session"].pk
+
+    def test_public_final_student_pin_http_entry_works_without_tenant(self, gap_table_graph):
+        _skip_if_not_pg()
+        from django.contrib.auth.hashers import make_password
+        from django.test import Client, override_settings
+        from django.urls import reverse
+        from django.utils import timezone
+
+        side_a = gap_table_graph["a"]
+        org = side_a["org"]
+        student = side_a["exam"].excluded_users.first()
+        role = Role.objects.filter(organization=org).first()
+        Membership.objects.create(
+            user=student,
+            organization=org,
+            role=role,
+            is_primary=True,
+            is_active=True,
+        )
+        now = timezone.now()
+        exam = Exam.objects.create(
+            organization=org,
+            author=org.owner,
+            title="Public RLS Final Entry",
+            exam_type="test",
+            exam_type_extended="final",
+            is_active=True,
+            is_public=False,
+            random_question_count=1,
+            start_datetime=now - timedelta(minutes=5),
+            end_datetime=now + timedelta(hours=1),
+        )
+        exam.allowed_users.add(student)
+        question = ExamQuestion.objects.create(exam=exam, text="RLS final question", order=1)
+        ExamQuestionOption.objects.create(question=question, label="A", text="Correct", is_correct=True)
+        raw_pin = "86421357"
+        ExamStudentPin.objects.update_or_create(
+            exam=exam,
+            student=student,
+            defaults={"pin_hash": make_password(raw_pin), "pin_cipher": ""},
+        )
+
+        _enable_rls()
+        assert ExamStudentPin.objects.count() == 0
+
+        client = Client()
+        with override_settings(FINAL_EXAM_ALLOWED_IPS=[], EXAM_CLIENT_MAC_RESOLUTION="off"):
+            response = client.post(
+                reverse("exams:final_exam_entry"),
+                {"username": student.username, "pin": raw_pin},
+                REMOTE_ADDR="127.0.0.1",
+            )
+
+        assert response.status_code == 302
+        assert int(client.session["_auth_user_id"]) == student.pk
+        with bypass_rls():
+            attempt = ExamAttempt.objects.get(exam=exam, user=student)
+        assert response["Location"] == reverse(
+            "exams:take_exam",
+            kwargs={"slug": exam.slug, "attempt_id": attempt.pk},
+        )
+        # HTTP axını da bypass vəziyyətini sızdırmamalıdır.
+        assert ExamStudentPin.objects.count() == 0
+
     def test_cross_tenant_pin_insert_is_rejected(self, gap_table_graph):
         _skip_if_not_pg()
         side_b = gap_table_graph["b"]
@@ -1222,6 +1353,7 @@ class TestExamGradeEventAppendOnly:
 
     def test_cross_exam_question_insert_is_blocked(self, two_orgs):
         """An A-tenant attempt cannot be paired with a B-tenant question in the ledger."""
+        _skip_if_not_pg()
         from django.contrib.auth import get_user_model
 
         org_a, org_b = two_orgs
