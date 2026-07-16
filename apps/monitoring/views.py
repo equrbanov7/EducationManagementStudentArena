@@ -19,13 +19,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from . import queries
-from .clients import AlertmanagerClient, LokiClient, PrometheusClient, degraded
+from .clients import LOKI_MAX_LINES, AlertmanagerClient, LokiClient, PrometheusClient, degraded
 from .models import Incident, IncidentStatus, SecurityEvent
+from .pagination import clamp_page, paginated_data, parse_pagination
 from .permissions import superadmin_monitoring_required
 
 logger = logging.getLogger(__name__)
-
-PAGE_SIZE = 25
 
 
 def _range_seconds(request) -> int:
@@ -59,10 +58,7 @@ def overview_api(request):
         "server": {
             "cpu_percent": prom.scalar('100 * (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])))'),
             "memory_percent": prom.scalar("100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"),
-            "disk_percent": prom.scalar(
-                '100 * (1 - node_filesystem_avail_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"}'
-                ' / node_filesystem_size_bytes{mountpoint="/host",fstype!~"tmpfs|overlay"})'
-            ),
+            "disk_percent": prom.scalar(queries.ROOT_DISK_USED_PERCENT_PROMQL),
             "uptime_seconds": prom.scalar("node_time_seconds - node_boot_time_seconds"),
         },
         "containers_alive": containers_alive,
@@ -80,6 +76,7 @@ def overview_api(request):
             "postgres_up": prom.scalar("pg_up"),
             "redis_up": prom.scalar("redis_up"),
             "nginx_up": prom.scalar("nginx_up"),
+            "endpoint_probes_up": prom.scalar('min(probe_success{job="emsarena-blackbox"})'),
             "celery_workers": prom.scalar("emsarena_celery_workers_online"),
             "backup_age_seconds": prom.scalar("emsarena_backup_age_seconds"),
         },
@@ -110,7 +107,8 @@ def server_api(request):
 @require_GET
 @superadmin_monitoring_required
 def containers_api(request):
-    return JsonResponse(queries.containers_section())
+    page, page_size = parse_pagination(request.GET)
+    return JsonResponse(queries.containers_section(page=page, page_size=page_size))
 
 
 @require_GET
@@ -169,7 +167,7 @@ def logs_api(request):
     level = (request.GET.get("level") or "").strip().lower()
     range_seconds, _ = queries.clamp_range(_range_seconds(request))
 
-    selector = f'{{container=~"{container}.*"}}' if container else '{job="docker"}'
+    selector = f"{{container={json.dumps(container, ensure_ascii=False)}}}" if container else '{job="docker"}'
     logql = selector
     if search:
         escaped = search.replace("\\", "\\\\").replace("`", "")
@@ -177,10 +175,29 @@ def logs_api(request):
     if level in {"error", "warning", "critical"}:
         logql += f" |~ `(?i){level}`"
 
-    end_ns = time.time_ns()
-    start_ns = end_ns - range_seconds * 1_000_000_000
+    page, page_size = parse_pagination(request.GET)
+    max_log_page = max(1, (LOKI_MAX_LINES + page_size - 1) // page_size)
+    page = min(page, max_log_page)
+
+    now_ns = time.time_ns()
+    try:
+        anchor_ns = int(request.GET.get("anchor_ns", now_ns))
+    except (TypeError, ValueError):
+        anchor_ns = now_ns
+    anchor_ns = max(1, min(anchor_ns, now_ns))
+    before_raw = request.GET.get("before_ns")
+    if page > 1 and not before_raw:
+        page = 1
+    try:
+        end_ns = int(before_raw) if before_raw else anchor_ns
+    except (TypeError, ValueError):
+        end_ns = anchor_ns
+    end_ns = max(1, min(end_ns, anchor_ns))
+    start_ns = max(0, anchor_ns - range_seconds * 1_000_000_000)
+    end_ns = max(start_ns, end_ns)
     client = LokiClient()
-    result = client.query_range(logql, start_ns=start_ns, end_ns=end_ns, limit=200)
+    query_limit = min(page_size + 1, LOKI_MAX_LINES)
+    result = client.query_range(logql, start_ns=start_ns, end_ns=end_ns, limit=query_limit)
     if result is None:
         return JsonResponse(degraded("loki", "Log servisi müvəqqəti əlçatmazdır"))
 
@@ -188,16 +205,46 @@ def logs_api(request):
     for stream in result:
         labels = stream.get("stream", {})
         for ts, line in stream.get("values", []):
+            try:
+                ts_ns = int(ts)
+            except (TypeError, ValueError):
+                continue
             lines.append(
                 {
-                    "ts": int(ts) // 1_000_000,  # ms
+                    "_ts_ns": ts_ns,
+                    "ts": ts_ns // 1_000_000,  # ms
                     "container": labels.get("container", ""),
                     "line": line[:1000],
                 }
             )
-    lines.sort(key=lambda row: row["ts"], reverse=True)
+    lines.sort(key=lambda row: (row["_ts_ns"], row["container"], row["line"]), reverse=True)
+
+    page_lines = lines[:page_size]
+    has_next = len(lines) > page_size
+    next_cursor_ns = max(1, page_lines[-1]["_ts_ns"] - 1) if has_next and page_lines else None
+    for row in page_lines:
+        row.pop("_ts_ns", None)
+    total_exact = not has_next
+    total = (page - 1) * page_size + len(page_lines) + int(has_next)
+    total_pages = page + int(has_next)
     containers = client.labels_values("container") or []
-    return JsonResponse({"status": "ok", "data": {"lines": lines[:200], "containers": containers}})
+    data = paginated_data(
+        "lines",
+        page_lines,
+        total=total,
+        page=page,
+        page_size=page_size,
+        has_next=has_next,
+        total_pages=total_pages,
+        total_exact=total_exact,
+        extra={
+            "containers": containers,
+            "anchor_ns": anchor_ns,
+            "before_ns": end_ns,
+            "next_cursor_ns": next_cursor_ns,
+        },
+    )
+    return JsonResponse({"status": "ok", "data": data})
 
 
 @require_GET
@@ -209,11 +256,10 @@ def incidents_api(request):
         qs = qs.exclude(status=IncidentStatus.RESOLVED)
     elif status_filter:
         qs = qs.filter(status=status_filter)
-    try:
-        page = max(1, int(request.GET.get("page", 1)))
-    except (TypeError, ValueError):
-        page = 1
+    page, page_size = parse_pagination(request.GET)
     total = qs.count()
+    page = clamp_page(page, total=total, page_size=page_size)
+    qs = qs.order_by("-started_at", "-pk")
     rows = [
         {
             "id": incident.pk,
@@ -228,9 +274,16 @@ def incidents_api(request):
             "assigned_to": getattr(incident.assigned_to, "username", None),
             "resolution_note": incident.resolution_note,
         }
-        for incident in qs.select_related("assigned_to")[(page - 1) * PAGE_SIZE : page * PAGE_SIZE]
+        for incident in qs.select_related("assigned_to")[(page - 1) * page_size : page * page_size]
     ]
-    return JsonResponse({"status": "ok", "data": {"incidents": rows, "total": total, "page": page}})
+    data = paginated_data(
+        "incidents",
+        rows,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+    return JsonResponse({"status": "ok", "data": data})
 
 
 @require_POST
@@ -256,11 +309,10 @@ def security_events_api(request):
     event_type = request.GET.get("type", "")
     if event_type:
         qs = qs.filter(event_type=event_type)
-    try:
-        page = max(1, int(request.GET.get("page", 1)))
-    except (TypeError, ValueError):
-        page = 1
+    page, page_size = parse_pagination(request.GET)
     total = qs.count()
+    page = clamp_page(page, total=total, page_size=page_size)
+    qs = qs.order_by("-last_seen_at", "-pk")
     rows = [
         {
             "id": event.pk,
@@ -275,9 +327,16 @@ def security_events_api(request):
             "last_seen": event.last_seen_at.isoformat(),
             "resolved": event.resolved,
         }
-        for event in qs[(page - 1) * PAGE_SIZE : page * PAGE_SIZE]
+        for event in qs[(page - 1) * page_size : page * page_size]
     ]
-    return JsonResponse({"status": "ok", "data": {"events": rows, "total": total, "page": page}})
+    data = paginated_data(
+        "events",
+        rows,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+    return JsonResponse({"status": "ok", "data": data})
 
 
 @csrf_exempt
