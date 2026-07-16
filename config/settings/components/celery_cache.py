@@ -45,6 +45,10 @@ CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
 CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
 
 # Periodic tasks (require running `celery -A config beat`).
+# crontab lokal ad kimi qalır (kiçik hərf → Django setting olmur); beat
+# cədvəlindəki gündəlik fixed-time işlər üçün lazımdır.
+from celery.schedules import crontab  # noqa: E402
+
 CELERY_BEAT_SCHEDULE = {
     # Auto-finish supervised attempts whose resume window elapsed without the
     # student returning.  Runs every minute so the supervision monitor never
@@ -76,5 +80,12 @@ CELERY_BEAT_SCHEDULE = {
     "monitoring-collect-backup-age": {
         "task": "monitoring.collect_backup_age",
         "schedule": 900.0,  # seconds
+    },
+    # Gün sonu təhlükəsizlik süpürgəsi: hər gün 22:00-da (Asia/Baku) hələ açıq
+    # qalmış zal oturumlarını avtomatik bağlayır — aktivləri bitirir, giriş açıq
+    # amma başlamamışları ləğv edir. Heç bir imtahan gecəyə qalmasın deyə.
+    "exams-auto-close-daily-room-sessions": {
+        "task": "exams.auto_close_daily_room_sessions",
+        "schedule": crontab(hour=22, minute=0),
     },
 }

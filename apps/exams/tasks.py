@@ -95,6 +95,30 @@ def notify_upcoming_final_exams():
     return sent
 
 
+@shared_task(name="exams.auto_close_daily_room_sessions")
+def auto_close_daily_room_sessions():
+    """Gün sonu (22:00 Asia/Baku) təhlükəsizlik süpürgəsi: hələ açıq qalmış zal
+    oturumlarını avtomatik bağlayır ki, heç bir imtahan gecəyə qalmasın.
+
+    Aktiv oturumlar bitirilir (cavablar qorunur), giriş açıq amma başlamamış
+    oturumlar ləğv olunur. Gələcək tarixli oturumlara toxunulmur. Global sweep —
+    tenant izolyasiyası bypass altında, hər yazı öz təşkilatını audit-ə yazır.
+    """
+    from apps.exams.services.final_center import auto_close_stale_room_sessions
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    with rls_worker_atomic(), bypass_rls():
+        result = auto_close_stale_room_sessions()
+    if result.get("ended") or result.get("cancelled"):
+        logger.info(
+            "auto_close_daily_room_sessions: ended=%d cancelled=%d",
+            result.get("ended", 0),
+            result.get("cancelled", 0),
+        )
+    return result
+
+
 @shared_task(
     name="exams.run_text_extraction_job",
     time_limit=900,
