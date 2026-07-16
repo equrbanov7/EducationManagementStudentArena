@@ -185,22 +185,27 @@ class KollokviumTest(TestCase):
         with bypass_rls():
             k1 = journal_extras.ensure_kollokviums(self.offering)[0]
             self.assertTrue(journal_extras.set_kollokvium_date(component=k1, held_on=TODAY()))
+            # Kollokvium yalnız İmtahan Mərkəzi pəncərəsi vasitəsilə yazılır
+            # (bypass_edit_window=True); generic save_component_scores onu skip edir.
             gradebook.save_component_scores(
                 offering=self.offering,
                 entries=[{"component_id": k1.id, "enrollment_id": self.enrollment.id, "score": "25"}],
                 by_user=self.teacher,
+                bypass_edit_window=True,
             )
             cs = ComponentScore.objects.get(component=k1, enrollment=self.enrollment)
             self.assertEqual(cs.score, Decimal("10"))  # max_score=10 clamp
-            # 2 saat sonra komponent balı da dondurulur.
+            # Kollokvium 2 saat kilidinə TABE DEYİL — pəncərə açıq olduqca (bypass)
+            # bal dəyişdirilə bilər (window-gating 2h kilidini əvəz edir).
             ComponentScore.objects.filter(pk=cs.pk).update(created_at=timezone.now() - datetime.timedelta(hours=3))
             gradebook.save_component_scores(
                 offering=self.offering,
                 entries=[{"component_id": k1.id, "enrollment_id": self.enrollment.id, "score": "1"}],
                 by_user=self.teacher,
+                bypass_edit_window=True,
             )
             cs.refresh_from_db()
-            self.assertEqual(cs.score, Decimal("10"))
+            self.assertEqual(cs.score, Decimal("1"))
 
 
 class SelfWorkTest(TestCase):
@@ -319,6 +324,7 @@ class JournalNotificationTest(TestCase):
                     offering=self.offering,
                     entries=[{"component_id": k1.id, "enrollment_id": self.enrollment.id, "score": "8"}],
                     by_user=self.teacher,
+                    bypass_edit_window=True,  # kollokvium İmtahan Mərkəzi pəncərəsi ilə yazılır
                 )
             self.assertTrue(InAppNotification.objects.filter(recipient=self.student).exists())
 

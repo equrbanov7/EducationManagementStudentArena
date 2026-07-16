@@ -1674,7 +1674,8 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:student_organization_management"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
         self.assertNotContains(response, reverse("accounts:student_organization_request"))
-        self.assertContains(response, reverse("accounts:student_leave_organization"))
+        # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
+        self.assertNotContains(response, reverse("accounts:student_leave_organization"))
 
     def test_profile_restores_org_context_for_teacher_course_modal(self):
         personal_org = Organization.objects.create(
@@ -1887,7 +1888,8 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:pending_review"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
         self.assertNotContains(response, reverse("accounts:student_organization_request"))
-        self.assertContains(response, reverse("accounts:student_leave_organization"))
+        # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
+        self.assertNotContains(response, reverse("accounts:student_leave_organization"))
 
     def test_groups_section_supports_search_detail_and_student_pagination(self):
         from apps.exams.models import StudentGroup
