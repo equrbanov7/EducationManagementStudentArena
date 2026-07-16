@@ -27,8 +27,11 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.exams.domain.final_center import (
     ROOM_SESSION_STATE_ACTIVE,
     ROOM_SESSION_STATE_ENTRY_OPEN,
+    TICKET_STATUS_ABSENT,
     TICKET_STATUS_ACTIVE,
+    TICKET_STATUS_COMPLETED,
     TICKET_STATUS_READY,
+    TICKET_STATUS_REMOVED,
     TICKET_STATUS_WAITING,
 )
 from apps.exams.models import FinalExamTicket
@@ -162,6 +165,15 @@ def _route_validated_ticket(request, ticket):
     * aktiv + attempt → imtahan (take_exam);
     * təyin olunub → imtahan-öncəsi modal.
     """
+    # İmtahanı bitirmiş / çıxarılmış / gəlməyən bilet üçün giriş qaydaları
+    # modalını TƏKRAR göstərmə (oturum hələ açıq olsa belə). Tələbə imtahandan
+    # çıxıb — sessiyanı təmizlə, logout et və təmiz login səhifəsinə qaytar.
+    # (Məs. final apellyasiyasından sonra bura yönlənmə.)
+    if ticket.status in (TICKET_STATUS_COMPLETED, TICKET_STATUS_REMOVED, TICKET_STATUS_ABSENT):
+        clear_entry_session(request)
+        logout(request)
+        return redirect("exams:final_exam_entry")
+
     session = ticket.session
     if session is None:
         # Oturum bağlanmayıb/qopub — yenidən daxil olsun (kompüter IP → zal).

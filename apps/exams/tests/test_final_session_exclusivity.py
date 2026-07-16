@@ -187,6 +187,36 @@ class FinalSessionExclusivityTests(_FlowBase):
         self.assertIsNone(self.ticket.seat_number)
         self.assertEqual(self.ticket.session_id, self.session.pk)
 
+    def test_completed_ticket_routes_to_login_not_rules_modal(self):
+        """Final apellyasiyasından sonra bura yönlənmə buqu: bilet COMPLETED,
+        zal oturumu hələ ACTIVE olsa da giriş QAYDALARI modalı təkrar
+        açılmamalı — sessiya təmizlənib login səhifəsinə qaytarılmalıdır."""
+        from apps.exams.domain.final_center import (
+            ROOM_SESSION_STATE_ACTIVE,
+            TICKET_STATUS_COMPLETED,
+        )
+
+        client, response = self._entry_client()
+        self.assertEqual(response.status_code, 302)
+
+        # İmtahan hələ gedir (oturum aktiv), tələbə isə imtahanını bitirib.
+        start_room(self.session, self.invigilator, override=True)
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.state, ROOM_SESSION_STATE_ACTIVE)
+        self.ticket.refresh_from_db()
+        self.ticket.status = TICKET_STATUS_COMPLETED
+        self.ticket.save(update_fields=["status"])
+
+        response = client.get(reverse("exams:final_exam_entry"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("exams:final_exam_entry"))
+        self.assertNotIn("_auth_user_id", client.session)
+
+        # Yönləndikdən sonra təmiz login səhifəsi (modal YOX).
+        follow = client.get(reverse("exams:final_exam_entry"))
+        self.assertEqual(follow.status_code, 200)
+        self.assertFalse(follow.context["show_gate_modal"])
+
     def test_attempt_start_revokes_original_exam_student_pin(self):
         personal_pin = ExamStudentPin.objects.create(
             exam=self.exam,
