@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260611-fresh-csrf";
+import { ExamSupervision } from "./state.js?v=20260716-intervention";
 
 Object.assign(ExamSupervision, {
         // Primary, infra-independent delivery path: a fast status poll that
@@ -24,12 +24,16 @@ Object.assign(ExamSupervision, {
                     if (data.is_finished) {
                         // Teacher removed / auto-finished the attempt → leave the
                         // exam immediately (result page) instead of waiting.
-                        self._leaveToResult();
+                        if (data.intervention_action || data.intervention_reason) {
+                            self._showRemovalOverlay(data.intervention_reason, data.intervention_action);
+                        } else {
+                            self._leaveToResult();
+                        }
                         return;
                     }
                     if (data.supervision_status === "locked") {
                         if (data.manual_lock) {
-                            self._showTeacherLockOverlay();
+                            self._showTeacherLockOverlay(data.intervention_reason);
                         } else {
                             self._onLimitExceeded();
                         }

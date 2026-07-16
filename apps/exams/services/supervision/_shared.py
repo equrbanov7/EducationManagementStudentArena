@@ -27,6 +27,11 @@ def _notify_student_via_ws(attempt_id: int, event_data: dict) -> None:
         pass
 
 
+def notify_attempt_student(attempt_id: int, event_data: dict) -> None:
+    """İmtahan tələbəsinə təhlükəsiz public WS bildirişi göndər."""
+    _notify_student_via_ws(attempt_id, event_data)
+
+
 def get_supervision_config(exam):
     """Get supervision config for an exam, or None if not enabled."""
     if not exam_supervision_enabled():

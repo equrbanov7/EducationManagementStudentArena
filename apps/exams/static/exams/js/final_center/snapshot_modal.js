@@ -21,6 +21,7 @@
     // yenilənmə 30 saniyədədir; "Yenilə" düyməsi isə dərhal yeniləyir.
     var POLL_MS = 30000;
     var pollTimer = null;
+    var requestSerial = 0;
 
     function esc(t) {
         var d = document.createElement("div");
@@ -80,15 +81,25 @@
         var body = document.getElementById("fxc-snapshot-body");
         if (body && !silent) body.innerHTML = '<p class="fxc-muted fxc-center">Yüklənir…</p>';
         var keepScroll = body ? body.scrollTop : 0;
-        fetch(fillUrl(snapshotTpl, current.sessionId, current.ticketId), { credentials: "same-origin" })
-            .then(function (r) { return r.json(); })
+        var mine = ++requestSerial;
+        var snapshotUrl = fillUrl(snapshotTpl, current.sessionId, current.ticketId);
+        snapshotUrl += (snapshotUrl.indexOf("?") === -1 ? "?" : "&") + "_snapshot_ts=" + Date.now();
+        fetch(snapshotUrl, { credentials: "same-origin", cache: "no-store" })
+            .then(function (r) {
+                if (!r.ok) throw new Error("snapshot_failed");
+                return r.json();
+            })
             .then(function (d) {
+                // Manual refresh and background poll overlap when the network is
+                // slow: an older response must never overwrite the newer state.
+                if (mine !== requestSerial) return;
                 render(d);
                 if (silent && body) body.scrollTop = keepScroll;
                 // Cəhd bitibsə və ya hələ başlamayıbsa canlı poll-a ehtiyac yoxdur.
                 if (d.is_finished || !d.has_attempt) stopPolling();
             })
             .catch(function () {
+                if (mine !== requestSerial) return;
                 if (body && !silent) body.innerHTML = '<p class="fxc-modal-error">Məlumat yüklənmədi.</p>';
             });
     }
@@ -119,6 +130,10 @@
                 }
                 if (d.supervision_status && d.supervision_status !== "active") {
                     meta.push('<span class="fxc-pill fxc-pill--warn">' + esc(supLabel(d.supervision_status)) + "</span>");
+                }
+                if (d.intervention_reason) {
+                    meta.push('<span class="fxc-pill fxc-pill--warn"><i class="fas fa-circle-info"></i> Səbəb: ' +
+                        esc(d.intervention_reason) + "</span>");
                 }
                 if (d.violation_count) meta.push('<span class="fxc-pill fxc-pill--warn">' + esc(d.violation_count) + " pozuntu</span>");
             }
@@ -160,10 +175,14 @@
                 var oc = "";
                 if (o.is_selected) oc += " selected";
                 if (o.is_correct) oc += " correct";
+                if (o.is_selected && !o.is_correct) oc += " wrong";
+                var badges = "";
+                if (o.is_selected) badges += '<span class="fxc-snap-badge fxc-snap-badge--selected">Tələbənin cavabı</span>';
+                if (o.is_correct) badges += '<span class="fxc-snap-badge fxc-snap-badge--correct">Düzgün cavab</span>';
                 return '<div class="fxc-snap-opt' + oc + '">' +
                     '<span class="fxc-snap-opt-lbl">' + esc(o.label || "") + "</span>" +
                     '<span class="fxc-snap-opt-txt">' + esc(o.text || "") + "</span>" +
-                    (o.is_selected ? '<i class="fas fa-circle-check"></i>' : "") +
+                    badges +
                     "</div>";
             }).join("") + "</div>";
         } else if (a.text_answer) {

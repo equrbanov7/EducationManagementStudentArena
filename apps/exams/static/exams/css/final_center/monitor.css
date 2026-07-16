@@ -559,6 +559,13 @@
 .fxc-snap-opt.selected { border-color: #93C5FD; background: #EFF6FF; color: #1E40AF; }
 .fxc-snap-opt.selected .fxc-snap-opt-lbl { background: #2C5BFF; color: #fff; }
 .fxc-snap-opt.correct .fxc-snap-opt-lbl { box-shadow: 0 0 0 2px #86EFAC; }
+.fxc-snap-opt.wrong { border-color: #FCA5A5; background: #FEF2F2; color: #991B1B; }
+.fxc-snap-badge {
+    flex: none; border-radius: 999px; padding: 2px 7px; font-size: .66rem;
+    font-weight: 800; white-space: nowrap;
+}
+.fxc-snap-badge--selected { color: #1D4ED8; background: #DBEAFE; }
+.fxc-snap-badge--correct { color: #15803D; background: #DCFCE7; }
 
 /* ── Responsivlik (planşet / mobil) ── */
 @media (max-width: 900px) {

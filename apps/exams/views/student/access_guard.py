@@ -26,11 +26,25 @@ def active_attempt_access_denial_reason(attempt, user):
     return None
 
 
-def ensure_active_attempt_access(attempt, user):
+def ensure_active_attempt_access(attempt, user, *, request=None):
     """Access ləğv olunubsa student endpoint-ini 403 ilə dayandırır."""
     reason = active_attempt_access_denial_reason(attempt, user)
     if reason:
         raise PermissionDenied(reason)
+    if request is not None and not getattr(attempt, "is_finished", False):
+        from django.contrib.auth import logout
+
+        from apps.exams.services.final_center import clear_entry_session, final_attempt_entry_session_valid
+
+        if not final_attempt_entry_session_valid(request, attempt):
+            clear_entry_session(request)
+            logout(request)
+            raise PermissionDenied(
+                pgettext(
+                    "exams.view.final_center.permission",
+                    "Bu giriş sessiyası artıq etibarlı deyil. Nəzarətçinin verdiyi yeni PIN ilə daxil olun.",
+                )
+            )
 
 
 __all__ = ["active_attempt_access_denial_reason", "ensure_active_attempt_access"]

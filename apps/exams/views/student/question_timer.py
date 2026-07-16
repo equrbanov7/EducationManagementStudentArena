@@ -52,7 +52,7 @@ def question_seen(request, slug, attempt_id):
         exam__slug=slug,
         user=request.user,
     )
-    ensure_active_attempt_access(attempt, request.user)
+    ensure_active_attempt_access(attempt, request.user, request=request)
     if attempt.is_finished:
         return JsonResponse({"success": False, "error": "attempt_finished"}, status=409)
 

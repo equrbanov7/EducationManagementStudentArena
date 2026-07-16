@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260611-fresh-csrf";
+import { ExamSupervision } from "./state.js?v=20260716-intervention";
 
 Object.assign(ExamSupervision, {
         /* ---------- WebSocket for real-time teacher actions ---------- */
@@ -62,13 +62,13 @@ Object.assign(ExamSupervision, {
                 // overlay (no auto-finish countdown); an auto-lock keeps the
                 // violation-limit flow.
                 if (data.manual) {
-                    this._showTeacherLockOverlay();
+                    this._showTeacherLockOverlay(data.reason);
                 } else {
                     this._onLimitExceeded();
                 }
             } else if (data.action === "stopped") {
-                // Teacher force-stopped the exam — leave to the result page.
-                this._leaveToResult();
+                // Səbəbi tələbəyə göstər, sonra nəticəyə keçidi onun ixtiyarına ver.
+                this._showRemovalOverlay(data.reason, data.intervention_action);
             } else if (data.action === "resumed") {
                 // Teacher resumed the student
                 if (this._lockCountdownTimer) {
@@ -88,6 +88,9 @@ Object.assign(ExamSupervision, {
                 }
                 this._updateBadge();
                 this._showResumeFullscreenOverlay(null);
+            } else if (data.action === "session_revoked") {
+                this._closeWebSocket();
+                window.location.replace("/exams/final/");
             }
         },
 });

@@ -14,6 +14,7 @@ from .actions import (
 from .constants import (
     VIOLATION_EVENT_TYPES,
 )
+from .interventions import get_attempt_intervention
 
 
 def get_attempt_supervision_status(attempt):
@@ -47,6 +48,7 @@ def get_attempt_supervision_status(attempt):
             "recovery_policy": config.recovery_policy,
         }
 
+    intervention = get_attempt_intervention(attempt)
     return {
         "supervised": config is not None,
         "supervision_status": attempt.supervision_status,
@@ -57,6 +59,8 @@ def get_attempt_supervision_status(attempt):
         "resume_window_seconds": resume_window_seconds,
         "resume_seconds_remaining": resume_seconds_remaining,
         "resume_deadline": resume_deadline.isoformat() if resume_deadline else None,
+        "intervention_action": intervention["action"],
+        "intervention_reason": intervention["reason"],
         "config": config_payload,
     }
 
