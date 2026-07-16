@@ -334,6 +334,10 @@
     font-family: inherit; font-size: 13.5px; color: var(--ems-neutral-900, #0f172a);
 }
 .jd-field-hint { font-weight: 600; font-size: 10.5px; color: var(--ems-neutral-400, #94a3b8); }
+/* Sahə xətası (məs. dərs saatı seçilməyib) + bootstrap-select toggle qırmızı çərçivə. */
+.jd-field-error { display: block; margin-top: 4px; font-weight: 700; font-size: 11px; color: #dc2626; }
+.jd-field-error i { font-size: 10px; margin-right: 3px; }
+.bootstrap-single-select__toggle.is-invalid { border-color: #dc2626 !important; box-shadow: 0 0 0 2px rgba(220,38,38,.12) !important; }
 .jd-time-pair { display: flex; gap: 8px; }
 .jd-time-pair input { flex: 1; }
 .jd-modal-note {

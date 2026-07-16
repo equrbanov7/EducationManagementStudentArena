@@ -5,8 +5,8 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260712-3">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260715-jbatch2">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
 {% endblock %}
 
@@ -129,6 +129,15 @@
             </div>
         </nav>
 
+        {# ── Kollokvium son-tarix xəbərdarlıq lenti — HƏR tabda görünür (açıq pəncərə varsa) ── #}
+        {% if kollokvium_grid.any_open %}
+        <div class="jd2-kmarquee" role="status" aria-live="polite">
+            <div class="jd2-kmarquee__track">
+                {% for half in "ab" %}{% for rep in "12345678" %}{% for col in kollokvium_grid.columns %}{% if col.open %}<span class="jd2-kmarquee__item"><i class="fas fa-triangle-exclamation"></i> {% trans "Diqqət" context "registrar.journal" %} · {% trans "Kollokvium" context "registrar.journal" %} {{ col.k_index|add:1 }} {% trans "balını" context "registrar.journal" %} <b>{{ col.deadline|date:"d.m.Y" }}</b> {% trans "tarixinə kimi yazın" context "registrar.journal" %}</span>{% endif %}{% endfor %}{% endfor %}{% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         {# ═══ Qiymətləndirmə: təqvim planı + davamiyyət/bal grid-i ═══════════ #}
         <section class="jd-panel is-active" data-jtab-panel="grid" id="jd-panel-grid" role="tabpanel" aria-labelledby="jd-tab-grid">
             {% include "registrar/partials/_jd_grid.html" %}
@@ -190,5 +199,5 @@
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260715-jbatch2"></script>
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260716-jbatch8"></script>
 {% endblock %}

@@ -56,6 +56,9 @@ from .dashboard import (
     teacher_dashboard,
 )
 
+# İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri
+from .kollokvium_windows import kollokvium_windows
+
 # Organization views
 from .organization import (
     student_leave_organization,
@@ -169,4 +172,5 @@ __all__ = [
     "superadmin_organizations",
     "superadmin_ai_settings",
     "superadmin_exam_rooms",
+    "kollokvium_windows",
 ]

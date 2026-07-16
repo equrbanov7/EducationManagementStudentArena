@@ -98,6 +98,7 @@ class JournalViewTest(TestCase):
                 "lesson_date": _tz.localdate().isoformat(),
                 "lesson_kind": "seminar",
                 "lesson_hours": "2",
+                "lesson_time": "08:30|10:00",
             },
         )
         self.assertEqual(resp.status_code, 302)
@@ -105,11 +106,53 @@ class JournalViewTest(TestCase):
             lesson = Lesson.objects.get(offering=self.offering)
             self.assertEqual(lesson.kind, LessonKind.SEMINAR)
 
+    def test_add_lesson_requires_time(self):
+        """Dərs saatı seçilmədən yeni dərs yaradılmır (server-side məcburi)."""
+        from django.utils import timezone as _tz
+
+        client = self._client(self.teacher)
+        client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {
+                "action": "add_lesson",
+                "lesson_date": _tz.localdate().isoformat(),
+                "lesson_kind": "seminar",
+                "lesson_hours": "2",
+            },  # lesson_time YOX
+        )
+        with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
+
+    def test_add_lesson_duplicate_time_rejected(self):
+        """Eyni gündə eyni dərs saatına ikinci dərs yaradılmır."""
+        from django.utils import timezone as _tz
+
+        client = self._client(self.teacher)
+        today = _tz.localdate().isoformat()
+        payload = {
+            "action": "add_lesson",
+            "lesson_date": today,
+            "lesson_kind": "seminar",
+            "lesson_hours": "2",
+            "lesson_time": "10:10|11:40",
+        }
+        url = reverse("registrar:journal_detail", args=[self.offering.id])
+        client.post(url, payload)
+        client.post(url, payload)  # eyni tarix+saat → rədd
+        with bypass_rls():
+            self.assertEqual(Lesson.objects.filter(offering=self.offering).count(), 1)
+
     def test_add_lesson_past_date_rejected(self):
         client = self._client(self.teacher)
         resp = client.post(
             reverse("registrar:journal_detail", args=[self.offering.id]),
-            {"action": "add_lesson", "lesson_date": "2024-10-01", "lesson_kind": "seminar", "lesson_hours": "2"},
+            {
+                "action": "add_lesson",
+                "lesson_date": "2024-10-01",
+                "lesson_kind": "seminar",
+                "lesson_hours": "2",
+                "lesson_time": "08:30|10:00",  # saat verilir → yalnız keçmiş-tarix rədd olunur
+            },
         )
         self.assertEqual(resp.status_code, 302)  # xəta mesajı ilə geri
         with bypass_rls():

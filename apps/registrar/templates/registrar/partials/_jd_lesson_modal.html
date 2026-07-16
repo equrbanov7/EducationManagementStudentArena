@@ -26,11 +26,11 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 </div>
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "MÖVZU — TƏQVİM PLANINDAN" context "registrar.journal" %}</span>
-                    {% if topic_choices %}
+                    {% if topic_choices_meta %}
                     <div class="bootstrap-single-select">
                         <select name="lesson_topic" class="bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                            {% for t in topic_choices %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                            {% for t in topic_choices_meta %}<option value="{{ t.title }}"{% if t.covered %} class="jd-topic-covered" style="color:#15803d"{% endif %}>{{ t.title }}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
                         </select>
                     </div>
                     {% else %}
@@ -78,6 +78,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                         </select>
                     </div>
                     <small class="jd-field-hint">{% trans "Universitetin standart dərs saatlarından biri seçilir." context "registrar.journal" %}</small>
+                    <small class="jd-field-error" data-jd-time-error hidden><i class="fas fa-triangle-exclamation"></i> {% trans "Dərs saatı seçilməlidir — standart saatlardan birini seçin." context "registrar.journal" %}</small>
                 </div>
                 <p class="jd-modal-note">
                     {% trans "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi 2 saat içində silmək/düzəltmək olar." context "registrar.journal" %}
@@ -88,9 +89,14 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
             </div>
         </form>
-        {# Silmə — redaktə rejimində görünür; ayrıca form (nested form olmaz). #}
+        {# Silmə — redaktə rejimində görünür; ayrıca form (nested form olmaz).
+           Native confirm() əvəzinə səliqəli təsdiq modalı (data-jd-confirm →
+           journal_grid.js showJdConfirm). CSP-safe: inline handler yox. #}
         <form method="post" class="jd-lesson-delete-form" data-jd-lesson-delete hidden
-              onsubmit="return confirm('{% trans "Dərsi silmək? Sütun və (təzə) işarələr birlikdə silinəcək." context "registrar.journal" %}');">
+              data-jd-confirm
+              data-confirm-title="{% trans 'Dərsi silmək?' context 'registrar.journal' %}"
+              data-confirm-body="{% trans 'Bu dərs sütunu və ona aid bütün bal/qayıb qeydləri birlikdə silinəcək. Yalnız dərs yaradıldıqdan 2 saat ərzində mümkündür və geri qaytarıla bilməz.' context 'registrar.journal' %}"
+              data-confirm-ok="{% trans 'Sil' context 'registrar.journal' %}">
             {% csrf_token %}
             <input type="hidden" name="action" value="delete_lesson">
             <button type="submit" class="jd-danger-btn"><i class="fas fa-trash-can"></i> {% trans "Dərsi sil" context "registrar.journal" %}</button>

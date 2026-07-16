@@ -331,7 +331,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
 
-    def test_profile_info_places_delete_account_in_action_area(self):
+    def test_profile_info_omits_delete_account_and_leave_org(self):
+        """Delete-account və leave-org profildən çıxarıldı (istifadəçi tələbi)."""
         self.client.login(username="testuser", password="testpass123")
         self.client.cookies["django_language"] = "en"
 
@@ -341,9 +342,8 @@ class ProfileViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Delete Account")
-        self.assertContains(response, 'data-bs-target="#deleteAccountConfirmModal"', html=False)
-        self.assertNotContains(response, 'data-section="delete-account"', html=False)
+        self.assertNotContains(response, 'data-bs-target="#deleteAccountConfirmModal"', html=False)
+        self.assertNotContains(response, 'data-bs-target="#studentLeaveOrgConfirmModal"', html=False)
 
     def test_delete_account_section_falls_back_to_profile_info(self):
         self.client.login(username="testuser", password="testpass123")
@@ -1674,7 +1674,8 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:student_organization_management"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
         self.assertNotContains(response, reverse("accounts:student_organization_request"))
-        self.assertContains(response, reverse("accounts:student_leave_organization"))
+        # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
+        self.assertNotContains(response, reverse("accounts:student_leave_organization"))
 
     def test_profile_restores_org_context_for_teacher_course_modal(self):
         personal_org = Organization.objects.create(
@@ -1887,7 +1888,8 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:pending_review"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
         self.assertNotContains(response, reverse("accounts:student_organization_request"))
-        self.assertContains(response, reverse("accounts:student_leave_organization"))
+        # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
+        self.assertNotContains(response, reverse("accounts:student_leave_organization"))
 
     def test_groups_section_supports_search_detail_and_student_pagination(self):
         from apps.exams.models import StudentGroup

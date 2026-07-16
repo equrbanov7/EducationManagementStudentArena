@@ -147,11 +147,14 @@ def journal_detail(request, offering_id):
             "lesson_kinds": LessonKind.choices,
             "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
             "topic_choices": journal_extras.lesson_topic_choices(offering),
+            "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
             "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
             "standard_times": schedule.STANDARD_LESSON_TIMES,
-            # Seminar/lab xanası üçün bal seçimləri (0–10, 0.5 addımla) — bootstrap
-            # select-option: q/b · i/e · bal.
-            "seminar_score_options": [i / 2 for i in range(0, 21)],
+            # Seminar/lab xanası üçün bal seçimləri — YALNIZ tam ədəd 0–10 (0.5
+            # addım YOX; müəllim tələbi). bootstrap select-option: q/b · i/e · bal.
+            "seminar_score_options": list(range(0, 11)),
+            # Kollokvium xanası üçün bal seçimləri — 0–10 tam ədəd (seminar kimi).
+            "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
             "today_parity": today_parity,
             "active_main_nav": "journal",
         },
@@ -354,6 +357,10 @@ def _handle_add_lesson(request, offering):
     hours_raw = (request.POST.get("lesson_hours") or "").strip()
     hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
     start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
+    # Dərs saatı MƏCBURİDİR — standart saat seçilmədən dərs açılmasın.
+    if not start_time or not end_time:
+        messages.error(request, _("Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     try:
         gradebook.create_lesson(

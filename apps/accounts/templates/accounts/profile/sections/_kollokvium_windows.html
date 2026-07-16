@@ -1,0 +1,7 @@
+{% if 'kollokvium-windows' in allowed_sections %}
+<section class="profile-section-panel profile-section--kollokvium-windows {% if active_section == 'kollokvium-windows' %}is-active{% endif %}"
+         data-profile-section-panel="kollokvium-windows"
+         data-source-url="{{ profile_base_url }}?section=kollokvium-windows">
+    {% include "accounts/partials/_kollokvium_windows_content.html" with s=kollokvium_windows_section %}
+</section>
+{% endif %}

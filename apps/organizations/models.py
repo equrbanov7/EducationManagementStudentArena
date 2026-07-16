@@ -468,6 +468,18 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
     def exam_session_state(self):
         return self._window_state(self.exam_session_start, self.exam_session_end)
 
+    @property
+    def is_past(self):
+        """Semestr tam keçib (bugün end_date-dən sonradır) → redaktə kilidlidir.
+
+        ``_window_state`` "closed" qaydası ilə eyni (registration/exam-session
+        pəncərələri + jurnal ``is_running`` ilə tutarlı, tarix-əsaslı). Keçmiş
+        tədris ili/semestr üçün kollokvium pəncərəsi dəyişdirilə bilməz; cari və
+        GƏLƏCƏK dövrlər (start_date > today → end_date > today) redaktə oluna
+        bilər.
+        """
+        return self._window_state(self.start_date, self.end_date) == "closed"
+
 
 class Role(UUIDModel, TimeStampedModel):
     """

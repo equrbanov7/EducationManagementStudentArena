@@ -219,6 +219,19 @@ class _Stage2Mixin:
             "room_managers": [],
             "post_next_url": "",
         }
+        # Kollokvium bal-yazma pəncərələri (İmtahan Mərkəzi).
+        self.kollokvium_windows_section = {
+            "is_superadmin": False,
+            "is_head": False,
+            "org_options": [],
+            "selected_org": None,
+            "periods": [],
+            "period": None,
+            "k_rows": [],
+            "faculties": [],
+            "departments": [],
+            "post_next_url": "",
+        }
         self.org_structure_section = {
             "organization": self.active_organization,
             "units": [],
