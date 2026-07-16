@@ -89,12 +89,6 @@
                            value="{{ profile.student_group_number|default:'' }}"
                            placeholder="{% trans 'placeholder_group_number' context 'profile.edit' %}">
                 </div>
-                <div class="info-item">
-                    <label class="info-label" for="department">{% trans "department" context "profile.edit" %}</label>
-                    <input type="text" class="form-control" id="department" name="department"
-                           value="{{ profile.department|default:'' }}"
-                           placeholder="{% trans 'placeholder_department' context 'profile.edit' %}">
-                </div>
             </div>
 
             <div id="editProfileTypeWarning" class="alert alert-warning mt-3 c3-1">

@@ -1,21 +1,15 @@
 {% load i18n %}
 {% with s=audit_log_section %}
 <div class="org-management org-management--audit">
-    <div class="org-management__header">
-        <div>
-            <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
-            <h1>{% trans "heading" context "audit.list" %}</h1>
-            <p class="org-management__subtitle">
-                {% if s.current_organization %}
-                    {{ s.current_organization.name }} — {% trans "subtitle_recent" context "audit.list" %}
-                {% elif s.is_superadmin %}
-                    {% trans "subtitle_all_orgs" context "audit.list" %}
-                {% else %}
-                    {% trans "subtitle_recent" context "audit.list" %}
-                {% endif %}
-            </p>
-        </div>
-    </div>
+    <p class="org-management__subtitle org-management__subtitle--standalone">
+        {% if s.current_organization %}
+            {{ s.current_organization.name }} — {% trans "subtitle_recent" context "audit.list" %}
+        {% elif s.is_superadmin %}
+            {% trans "subtitle_all_orgs" context "audit.list" %}
+        {% else %}
+            {% trans "subtitle_recent" context "audit.list" %}
+        {% endif %}
+    </p>
 
     {% if s.audit_logs %}
         <div class="org-management__table-wrap">
@@ -33,7 +27,13 @@
                     {% for log in s.audit_logs %}
                         <tr>
                             <td>{{ log.created_at }}</td>
-                            <td>{% if log.user %}{{ log.user.username }}{% else %}{% trans "anonymous" context "audit.list" %}{% endif %}</td>
+                            <td>
+                                {% if log.user %}
+                                    <a href="{% url 'accounts:public_profile' log.user.username %}">{{ log.user.username }}</a>
+                                {% else %}
+                                    {% trans "anonymous" context "audit.list" %}
+                                {% endif %}
+                            </td>
                             <td>{{ log.get_action_display|default:log.action }}</td>
                             <td>{{ log.get_resource_display }}</td>
                             <td>{% if log.organization %}{{ log.organization.name }}{% else %}-{% endif %}</td>
@@ -42,6 +42,7 @@
                 </tbody>
             </table>
         </div>
+        {% include "partials/_pagination.html" with page_obj=s.audit_logs_page_obj page_param="audit_page" extra_query=s.pagination_query %}
     {% else %}
         <div class="org-management__empty">{% trans "empty" context "audit.list" %}</div>
     {% endif %}

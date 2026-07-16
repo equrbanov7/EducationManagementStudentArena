@@ -210,10 +210,14 @@
             <span>{% trans 'Akademik məlumatlar' %}</span>
         </div>
         <div class="info-grid">
-            {% for unit in academic_units %}
-            <div class="info-item info-item--full">
-                <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Fakültə / Kafedra' %}</div>
-                <div class="info-value">{{ unit.get_full_path }}</div>
+            {% for entry in academic_units %}
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-building-columns"></i> {% trans 'Fakültə' %}</div>
+                <div class="info-value info-value--readonly">{{ entry.faculty.name|default:profile_not_set }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Kafedra' %}</div>
+                <div class="info-value info-value--readonly">{{ entry.department.name|default:profile_not_set }}</div>
             </div>
             {% endfor %}
             {% for record in student_records %}
