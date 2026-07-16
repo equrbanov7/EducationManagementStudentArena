@@ -267,9 +267,56 @@ def maybe_auto_end(session) -> bool:
     return end_room(session, None, auto=True)
 
 
+def auto_close_stale_room_sessions(*, now=None) -> dict:
+    """Gün sonu təhlükəsizlik süpürgəsi (22:00 cron): hələ açıq qalmış zal
+    oturumlarını avtomatik bağlayır ki, heç bir imtahan gecəyə qalmasın.
+
+    * ``active`` oturumlar bitirilir (``end_room`` — cavablar qorunur, tələbələr
+      ``completed``/``absent`` olur);
+    * ``entry_open`` oturumlar (giriş açıq, amma imtahan başlamayıb) ləğv olunur;
+    * GƏLƏCƏK tarixli oturumlara toxunulmur — yalnız ``scheduled_start <= now``
+      olan, yəni pəncərəsi artıq başlamış oturumlar bağlanır.
+
+    Global sweep-dir (bütün tenant-lar); hər yazı öz oturumunun təşkilatını
+    audit-ə qeyd edir. Qaytarır: ``{"ended": N, "cancelled": M}``.
+    """
+    now = now or timezone.now()
+    ended = 0
+    cancelled = 0
+
+    # Aktiv oturum artıq gedir — scheduled_start-dan asılı olmayaraq (override ilə
+    # erkən başladıla bilər) 22:00 kəsimində mütləq bitirilir.
+    active_pks = list(ExamRoomSession.objects.filter(state=ROOM_SESSION_STATE_ACTIVE).values_list("pk", flat=True))
+    for session in ExamRoomSession.objects.filter(pk__in=active_pks):
+        try:
+            if end_room(session, None, auto=True):
+                ended += 1
+        except Exception:  # bir oturumun xətası qalanları dayandırmasın
+            logger.exception("auto_close_stale_room_sessions: end_room failed for session=%s", session.pk)
+
+    # Giriş açıq amma başlamamış oturum: yalnız pəncərəsi ARTIQ başlamışsa
+    # (scheduled_start <= now) ləğv et — gələcək üçün erkən açılmışlara toxunma.
+    entry_pks = list(
+        ExamRoomSession.objects.filter(state=ROOM_SESSION_STATE_ENTRY_OPEN, scheduled_start__lte=now).values_list(
+            "pk", flat=True
+        )
+    )
+    for session in ExamRoomSession.objects.filter(pk__in=entry_pks):
+        try:
+            if cancel_session(session, None, reason="auto_daily_cutoff"):
+                cancelled += 1
+        except Exception:
+            logger.exception("auto_close_stale_room_sessions: cancel failed for session=%s", session.pk)
+
+    if ended or cancelled:
+        logger.info("auto_close_stale_room_sessions: ended=%d cancelled=%d", ended, cancelled)
+    return {"ended": ended, "cancelled": cancelled}
+
+
 __all__ = [
     "RoomSessionStateError",
     "START_EARLY_TOLERANCE",
+    "auto_close_stale_room_sessions",
     "cancel_session",
     "end_room",
     "maybe_auto_end",

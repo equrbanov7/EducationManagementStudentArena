@@ -81,6 +81,7 @@
      id="fxc-room-root"
      data-snapshot-url="{% url 'exams:exam_center_room_snapshot' room_id=room.pk %}"
      data-start-all-url="{% url 'exams:exam_center_room_start_all' room_id=room.pk %}"
+     data-end-all-url="{% url 'exams:exam_center_room_end_all' room_id=room.pk %}"
      data-open-all-url="{% url 'exams:exam_center_room_open_all' room_id=room.pk %}"
      data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=0 ticket_id=0 %}"
      data-heartbeat-seconds="{{ heartbeat_seconds }}">
@@ -106,6 +107,9 @@
       </button>
       <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-all-btn" hidden>
         <i class="fas fa-play"></i> {% trans "Zalda hamısını başlat" %}
+      </button>
+      <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-end-all-btn" hidden>
+        <i class="fas fa-stop"></i> {% trans "Zalda hamısını bitir" %}
       </button>
     </div>
   </header>

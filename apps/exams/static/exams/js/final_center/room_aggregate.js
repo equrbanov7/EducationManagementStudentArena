@@ -17,6 +17,7 @@
 
     var snapshotUrl = root.dataset.snapshotUrl;
     var startAllUrl = root.dataset.startAllUrl;
+    var endAllUrl = root.dataset.endAllUrl;
     var openAllUrl = root.dataset.openAllUrl;
 
     var statsEl = document.getElementById("fxc-stats");
@@ -26,6 +27,7 @@
     var statusFilter = document.getElementById("fxc-status-filter");
     var filterInput = document.getElementById("fxc-filter");
     var startAllBtn = document.getElementById("fxc-start-all-btn");
+    var endAllBtn = document.getElementById("fxc-end-all-btn");
     var openAllBtn = document.getElementById("fxc-open-all-btn");
     var vioListEl = document.getElementById("fxc-violations-list");
     var vioCountEl = document.getElementById("fxc-vio-count");
@@ -133,9 +135,12 @@
                 examFilter._refreshBootstrapSelect();
             }
         }
-        // Düymə görünürlüyü: hazır (entry_open) oturum varsa "başlat" göstər.
+        // Düymə görünürlüyü: hazır (entry_open) oturum varsa "başlat", aktiv
+        // oturum varsa "bitir" göstər.
         var hasEntryOpen = sessions.some(function (s) { return s.state === "entry_open"; });
+        var hasActive = sessions.some(function (s) { return s.state === "active"; });
         if (startAllBtn) startAllBtn.hidden = !hasEntryOpen;
+        if (endAllBtn) endAllBtn.hidden = !hasActive;
         if (openAllBtn) openAllBtn.hidden = true; // prepared oturumlar snapshot-da deyil; server yoxlayır
     }
 
@@ -307,6 +312,33 @@
                 confirmText: t("start.confirm", "Başlat"),
                 confirmClass: "fxc-btn-success",
                 onConfirm: function (state, modalUi) { modalUi.override = state.override; doStartAll(modalUi); }
+            });
+        });
+    }
+    function doEndAll(modalUi) {
+        modalUi.setLoading(true);
+        modalUi.showError("");
+        post(endAllUrl).then(function (d) {
+            if (d && d.success) { modalUi.close(); fetchSnapshot(); return; }
+            modalUi.showError((d && d.error) || t("end.failed", "Bitirmək mümkün olmadı."));
+            modalUi.setLoading(false);
+        }).catch(function () { modalUi.showError(t("end.failed", "Bitirmək mümkün olmadı.")); modalUi.setLoading(false); });
+    }
+
+    if (endAllBtn) {
+        endAllBtn.addEventListener("click", function () {
+            if (!window.FXCConfirm) {
+                if (!window.confirm(t("confirmEndAll", "Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz."))) return;
+                endAllBtn.disabled = true;
+                post(endAllUrl).then(function () { fetchSnapshot(); }).finally(function () { endAllBtn.disabled = false; });
+                return;
+            }
+            window.FXCConfirm.open({
+                title: t("end.title", "İmtahanı bitir"),
+                message: t("confirmEndAll", "Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz."),
+                confirmText: t("end.confirm", "Bitir"),
+                confirmClass: "fxc-btn-danger",
+                onConfirm: function (state, modalUi) { doEndAll(modalUi); }
             });
         });
     }
