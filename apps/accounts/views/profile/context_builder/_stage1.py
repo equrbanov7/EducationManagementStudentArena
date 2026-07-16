@@ -336,6 +336,46 @@ class _Stage1Mixin:
         self.student_member_groups_more_count = max(
             0, self.student_member_groups_count - len(self.student_member_groups)
         )
+
+        # ── Rol-əsaslı akademik məlumatlar (profil "Akademik məlumatlar" kartı) ──
+        # Müəllim/dekan/kafedra müdiri → fakültə/kafedra (Membership.scope_unit);
+        # müəllim → tədris etdiyi fənlər (taught_offerings); tələbə → İxtisas +
+        # akademik struktur (academic_records → program + group). Yalnız profil
+        # məlumat bölməsində hesablanır (əlavə sorğu digər bölmələrdə olmasın).
+        self.academic_units = []
+        self.teacher_subjects = []
+        self.student_records = []
+        if self.active_organization is not None and self.active_section == "profile-info":
+            caps = self.capabilities
+            if caps.get("is_teacher") or caps.get("is_unit_manager"):
+                from apps.organizations.models import Membership
+
+                seen_units = set()
+                for membership in Membership.objects.filter(
+                    user=self.request.user, is_active=True, organization=self.active_organization
+                ).select_related("scope_unit"):
+                    unit = membership.scope_unit
+                    if unit is not None and unit.id not in seen_units:
+                        seen_units.add(unit.id)
+                        self.academic_units.append(unit)
+            if caps.get("is_teacher"):
+                seen_subjects = set()
+                for offering in (
+                    self.request.user.taught_offerings.filter(organization=self.active_organization)
+                    .select_related("subject", "group")
+                    .order_by("subject__name")
+                ):
+                    key = (offering.subject_id, offering.group_id)
+                    if key not in seen_subjects:
+                        seen_subjects.add(key)
+                        self.teacher_subjects.append(offering)
+            if caps.get("is_student"):
+                self.student_records = list(
+                    self.request.user.academic_records.filter(
+                        is_active=True, organization=self.active_organization
+                    ).select_related("program", "group")
+                )
+
         self.group_form = None
         self.can_multi_assign_group_teachers = False
         self.groups_section_return_url = f"{reverse('accounts:profile')}?section=groups"

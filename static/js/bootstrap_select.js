@@ -26,7 +26,12 @@
         var desiredMax = 320; // CSS max-height (20rem) ilə uyğun
         var spaceBelow = viewportHeight - rect.bottom - gap - 8;
         var spaceAbove = rect.top - gap - 8;
-        var openUp = spaceBelow < 180 && spaceAbove > spaceBelow;
+        // Menyunun TAM hündürlüyü aşağıda sığmırsa və yuxarıda daha çox yer
+        // varsa — yuxarı aç. Beləcə cədvəlin aşağı sətirlərində bütün seçimlər
+        // (məs. 0–10 kollokvium balları) SCROLL-suz görünür.
+        var menuH = menu.scrollHeight || 300;
+        var needed = Math.min(desiredMax, menuH);
+        var openUp = spaceBelow < needed && spaceAbove > spaceBelow;
 
         menu.classList.add("is-fixed");
         menu.style.position = "fixed";
@@ -132,6 +137,13 @@
                 optionButton.dataset.value = option.value;
                 optionButton.disabled = option.disabled;
                 optionButton.classList.toggle("is-placeholder", isPlaceholder);
+                // Option-un öz class-larını menyu düyməsinə köçür (məs.
+                // "jd-topic-covered" → keçirilmiş mövzular yaşıl rənglənsin).
+                if (option.className) {
+                    option.classList.forEach(function (c) {
+                        optionButton.classList.add(c);
+                    });
+                }
 
                 var optionLabel = document.createElement("span");
                 optionLabel.className = "bootstrap-single-select__option-label";
