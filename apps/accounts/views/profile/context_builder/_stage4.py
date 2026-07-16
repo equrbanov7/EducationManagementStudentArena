@@ -122,6 +122,10 @@ class _Stage4Mixin:
             "student_member_groups": self.student_member_groups,
             "student_member_groups_count": self.student_member_groups_count,
             "student_member_groups_more_count": self.student_member_groups_more_count,
+            # Rol-əsaslı akademik məlumatlar (profil "Akademik məlumatlar" kartı).
+            "academic_units": self.academic_units,
+            "teacher_subjects": self.teacher_subjects,
+            "student_records": self.student_records,
             "group_form": self.group_form,
             "can_multi_assign_group_teachers": self.can_multi_assign_group_teachers,
             "groups_section_return_url": self.groups_section_return_url,
@@ -200,6 +204,7 @@ class _Stage4Mixin:
             "superadmin_organizations_section": self.superadmin_organizations_section,
             "superadmin_pending_org_count": self.superadmin_organizations_section.get("pending_count", 0),
             "exam_rooms_section": self.exam_rooms_section,
+            "kollokvium_windows_section": self.kollokvium_windows_section,
             "can_manage_exam_rooms": self.capabilities.get("can_manage_exam_rooms", False),
             "is_teacher": self.capabilities["is_teacher"],
             "is_admin": self.capabilities["can_manage_org"],

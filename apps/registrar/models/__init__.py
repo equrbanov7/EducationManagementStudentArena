@@ -42,6 +42,11 @@ from .grading import (
     SelfWorkMark,
     SelfWorkTopic,
 )
+from .kollokvium_window import (
+    KOLLOKVIUM_WINDOW_COUNT,
+    KollokviumExtraGrant,
+    KollokviumWindow,
+)
 
 __all__ = [
     "AcademicStatus",
@@ -61,6 +66,9 @@ __all__ = [
     "EnrollmentKind",
     "FinalGrade",
     "GroupElectiveChoice",
+    "KOLLOKVIUM_WINDOW_COUNT",
+    "KollokviumExtraGrant",
+    "KollokviumWindow",
     "Lesson",
     "LessonKind",
     "LessonMark",

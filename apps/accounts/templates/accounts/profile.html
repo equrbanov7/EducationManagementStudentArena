@@ -155,6 +155,8 @@
                 {% include "accounts/profile/sections/_exam_center_stats.html" %}
             {% elif active_section == "appeal-stats" and 'appeal-stats' in allowed_sections %}
                 {% include "accounts/profile/sections/_appeal_stats.html" %}
+            {% elif active_section == "kollokvium-windows" and 'kollokvium-windows' in allowed_sections %}
+                {% include "accounts/profile/sections/_kollokvium_windows.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
             {% elif active_section == "system-monitoring" and 'system-monitoring' in allowed_sections %}
@@ -171,10 +173,6 @@
                 {% include "accounts/profile/sections/_shortcut_sections.html" %}
             {% endif %}
 
-            {# Delete-account modalı sidebar düyməsindən hər bölmədə işə düşməlidir. #}
-            {% include "accounts/profile/sections/_delete_account.html" %}
-
-            
             {% if 'my-courses' in allowed_sections %}
                 {% include "courses/partials/_create_course_modal.html" %}
             {% endif %}

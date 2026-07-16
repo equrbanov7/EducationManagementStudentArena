@@ -36,3 +36,15 @@
     </a>
 </li>
 {% endif %}
+{% if 'kollokvium-windows' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=kollokvium-windows"
+       data-section="kollokvium-windows"
+       data-title="{% trans 'Kollokvium pəncərələri' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'kollokvium-windows' %}active{% endif %}">
+        <i class="fas fa-calendar-check sidebar-menu-icon sidebar-menu-icon--danger"></i>
+        <span class="sidebar-menu-text">{% trans 'Kollokvium pəncərələri' %}</span>
+    </a>
+</li>
+{% endif %}

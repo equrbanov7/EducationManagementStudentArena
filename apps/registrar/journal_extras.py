@@ -94,19 +94,38 @@ def set_kollokvium_date(*, component, held_on) -> bool:
 
 
 def get_kollokvium_grid(offering):
-    """Kollokvium tabı: 3 komponent (tarixli) × tələbələr + ballar."""
+    """Kollokvium tabı: 3 komponent × tələbələr + ballar.
+
+    Redaktə edilə bilirlik İmtahan Mərkəzi PƏNCƏRƏSİNDƏN gəlir — kollokvium üçün
+    2 saat kilidi YOXDUR (pəncərə onu əvəz edir). Hər sütun (K1/K2/K3) üçün
+    vəziyyət ``kollokvium_windows.entry_state`` ilə hesablanır.
+    """
+    from apps.registrar import kollokvium_windows as kw
+
     components = ensure_kollokviums(offering)
+    today = timezone.localdate()
+    states = [kw.entry_state(offering, idx, today) for idx in range(len(components))]
+    columns = [
+        {
+            "component": c,
+            "k_index": idx,
+            "status": states[idx]["status"],
+            "opens_on": states[idx].get("opens_on"),
+            "deadline": states[idx].get("deadline"),
+            "open": states[idx]["status"] == "open",
+        }
+        for idx, c in enumerate(components)
+    ]
+    open_by_comp = {c.id: columns[idx]["open"] for idx, c in enumerate(components)}
+
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
         .select_related("student")
         .order_by("student__last_name", "student__username")
     )
     score_map = {}
-    lock_map = {}
-    now = timezone.now()
     for cs in ComponentScore.objects.filter(component__in=components, enrollment__offering=offering):
         score_map[(cs.enrollment_id, cs.component_id)] = cs.score
-        lock_map[(cs.enrollment_id, cs.component_id)] = (now - cs.created_at) > MARK_EDIT_WINDOW
     rows = [
         {
             "enrollment": e,
@@ -115,14 +134,19 @@ def get_kollokvium_grid(offering):
                 {
                     "component": c,
                     "score": score_map.get((e.id, c.id)),
-                    "locked": lock_map.get((e.id, c.id), False),
+                    "editable": open_by_comp[c.id],
                 }
                 for c in components
             ],
         }
         for e in enrollments
     ]
-    return {"components": components, "rows": rows}
+    return {
+        "components": components,
+        "columns": columns,
+        "rows": rows,
+        "any_open": any(col["open"] for col in columns),
+    }
 
 
 # ── Sərbəst iş (mövzu çeklisti) ──────────────────────────────────────────────
@@ -437,6 +461,21 @@ def lesson_topic_choices(offering):
     return list(
         CourseTopic.objects.filter(course_id=offering.course_id).order_by("order").values_list("title", flat=True)
     )
+
+
+def lesson_topic_meta(offering, lessons):
+    """Yeni dərs modalındakı mövzu dropdown-u üçün: hər mövzu + KEÇİRİLİB statusu
+    (+ tarix). ``lesson_topic_choices`` düz başlıqları başqa yerlərdə istifadə
+    olunur; burada müəllim artıq keçirilmiş mövzuları bir baxışda görsün deyə
+    keçirilmə məlumatı da qaytarılır."""
+    covered = {}
+    for lesson in lessons:
+        if lesson.topic and lesson.topic not in covered:
+            covered[lesson.topic] = lesson.date
+    return [
+        {"title": title, "covered": title in covered, "date": covered.get(title)}
+        for title in lesson_topic_choices(offering)
+    ]
 
 
 # Qeyd: dərs saatı artıq STANDARD_LESSON_TIMES-dan seçilir (schedule.py) —
