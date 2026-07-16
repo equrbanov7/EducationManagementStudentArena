@@ -22,6 +22,7 @@ from apps.exams.services.final_center import (
     RoomSessionStateError,
     can_manage_final_center,
     can_supervise_session,
+    end_room,
     open_entry,
     room_live_sessions,
     room_monitor_snapshot,
@@ -89,6 +90,7 @@ def _monitor_labels():
         "noResults": _("Nəticə yoxdur"),
         "allExams": _("Bütün imtahanlar"),
         "confirmStartAll": _("Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"),
+        "confirmEndAll": _("Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz."),
         "live": _("Canlı"),
         "disconnected": _("Bağlantı kəsildi"),
         "updatedAt": _("Yeniləndi"),
@@ -97,6 +99,11 @@ def _monitor_labels():
             "confirm": _("Başlat"),
             "failed": _("Başlatmaq mümkün olmadı."),
             "override": _("Vaxt pəncərəsindən asılı olmayaraq məcburi başlat"),
+        },
+        "end": {
+            "title": _("İmtahanı bitir"),
+            "confirm": _("Bitir"),
+            "failed": _("Bitirmək mümkün olmadı."),
         },
         "violations": {
             "view": _("Bax"),
@@ -262,6 +269,33 @@ def exam_center_room_start_all(request, room_id):
 
 @login_required
 @require_POST
+def exam_center_room_end_all(request, room_id):
+    """
+    Zaldakı BÜTÜN aktiv oturumları birlikdə bitirir. Nəzarətçi bir dəfə
+    "hamısını bitir" deyir — zalda gedən hansı imtahanlar varsa hamısı
+    yekunlaşır (cavablar qorunur; tələbələr ``completed``/``absent`` olur).
+    Hər oturum idempotent işlənir.
+    """
+    _organization, room, sessions = _get_room_and_sessions(request, room_id)
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+    ended = 0
+    for session in sessions:
+        if session.state == "active" and end_room(session, request.user, request=request):
+            ended += 1
+    if is_ajax:
+        return JsonResponse({"success": ended > 0, "ended": ended})
+    if ended:
+        messages.success(
+            request,
+            pgettext("exams.final_center.message", "Zaldakı {count} imtahan birlikdə bitirildi.").format(count=ended),
+        )
+    else:
+        messages.warning(request, pgettext("exams.final_center.message", "Bitiriləcək aktiv oturum tapılmadı."))
+    return redirect("exams:exam_center_room_monitor", room_id=room.pk)
+
+
+@login_required
+@require_POST
 def exam_center_room_open_all(request, room_id):
     """Zaldakı bütün hazır (prepared) oturumların girişini açır."""
     _organization, room, _sessions = _get_room_and_sessions(request, room_id)
@@ -285,6 +319,7 @@ def exam_center_room_open_all(request, room_id):
 
 __all__ = [
     "exam_center_room_assign_invigilators",
+    "exam_center_room_end_all",
     "exam_center_room_monitor",
     "exam_center_room_open_all",
     "exam_center_room_snapshot",

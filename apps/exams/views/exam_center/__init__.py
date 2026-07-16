@@ -16,6 +16,7 @@ from .pin_lookup import exam_center_pin_lookup, exam_center_pin_search, exam_cen
 from .reports import exam_center_reports
 from .room_monitor import (
     exam_center_room_assign_invigilators,
+    exam_center_room_end_all,
     exam_center_room_monitor,
     exam_center_room_open_all,
     exam_center_room_snapshot,
@@ -49,6 +50,7 @@ __all__ = [
     "exam_center_room_assign_invigilators",
     "exam_center_room_list",
     "exam_center_room_monitor",
+    "exam_center_room_end_all",
     "exam_center_room_open_all",
     "exam_center_room_snapshot",
     "exam_center_room_start_all",
