@@ -176,7 +176,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${POSTGRES_CPU_LIMIT:-16}"
+          # No hard CPU cap (see app note): 16 > a 4-CPU CI runner errors on
+          # container create. Postgres uses available cores; memory stays bounded.
           memory: ${POSTGRES_MEM_LIMIT:-16384M}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -400,7 +401,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${APP_CPU_LIMIT:-4.0}"
+          # No hard CPU cap: a docker `cpus` value cannot exceed the host core
+          # count (it errors on a 4-CPU CI runner / small servers), and capping
+          # is exactly what throttled prod. Let the app use the box; memory stays
+          # bounded. (Old APP_CPU_LIMIT env is intentionally no longer applied.)
           memory: ${APP_MEM_LIMIT:-2048M}
     # Real HTTP yoxlaması: /health/ DB-ni yoxlayır (Redis problemi "degraded"
     # 207 qaytarır və sağlam sayılır). X-Forwarded-Proto: https başlığı
