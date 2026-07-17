@@ -64,6 +64,23 @@ def _csv_ints(raw):
     return [int(x) for x in (raw or "").split(",") if x.strip().isdigit()]
 
 
+def _csv_uuids(raw):
+    """UUID PK-lı sahələr (Subject, OrgUnit) üçün. `_csv_ints` UUID-ləri
+    ATIRDI (isdigit False) → fənn/fakültə/kafedra filtri səssizcə işləməzdi."""
+    import uuid as _uuid
+
+    out = []
+    for x in (raw or "").split(","):
+        x = x.strip()
+        if not x:
+            continue
+        try:
+            out.append(str(_uuid.UUID(x)))
+        except ValueError:
+            continue
+    return out
+
+
 def _unit_ids_with_children(organization, unit_ids):
     if not unit_ids:
         return []
@@ -88,7 +105,7 @@ def _filtered_appeals(request, organization):
             | Q(exam__title__icontains=q)
         )
 
-    subject_ids = _csv_ints(request.GET.get("subjects"))
+    subject_ids = _csv_uuids(request.GET.get("subjects"))
     if subject_ids:
         qs = qs.filter(exam__subject_id__in=subject_ids)
 
@@ -96,9 +113,23 @@ def _filtered_appeals(request, organization):
     if group_ids:
         qs = qs.filter(exam__allowed_groups__id__in=group_ids)
 
-    unit_ids = _csv_ints(request.GET.get("units"))
+    unit_ids = _csv_uuids(request.GET.get("units"))
     if unit_ids:
         qs = qs.filter(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
+
+    # Ayrı fakültə/kafedra/müəllim filtrləri (imtahan statistikası ilə eyni sxem;
+    # fakültə seçiləndə onun kafedraları göstərilir — kaskad).
+    faculty_ids = _csv_uuids(request.GET.get("faculties"))
+    if faculty_ids:
+        qs = qs.filter(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
+
+    department_ids = _csv_uuids(request.GET.get("departments"))
+    if department_ids:
+        qs = qs.filter(exam__allowed_groups__org_unit_id__in=department_ids)
+
+    teacher_ids = _csv_ints(request.GET.get("teachers"))
+    if teacher_ids:
+        qs = qs.filter(exam__author_id__in=teacher_ids)
 
     exam_type = (request.GET.get("type") or "").strip()
     if exam_type:
@@ -297,12 +328,37 @@ def appeal_stats_filters(request):
     units = list(
         OrgUnit.objects.filter(organization=organization, is_active=True)
         .order_by("name")
-        .values("id", "name", "unit_type")
+        .values("id", "name", "unit_type", "parent_id")
     )
+    # Fakültə (faculty/deanery) və kafedra (chair/department) ayrı — iki müstəqil
+    # filtr + kaskad (imtahan statistikası ilə eyni sxem). Müəllim = Exam.author.
+    faculty_types = {"faculty", "deanery"}
+    department_types = {"chair", "department"}
+    faculties = [{"id": u["id"], "name": u["name"]} for u in units if u["unit_type"] in faculty_types]
+    departments = [
+        {"id": u["id"], "name": u["name"], "parent_id": u["parent_id"]}
+        for u in units
+        if u["unit_type"] in department_types
+    ]
+    teachers = [
+        {
+            "id": row["author_id"],
+            "name": (f"{row['author__first_name']} {row['author__last_name']}".strip() or row["author__username"]),
+        }
+        for row in (
+            Exam.objects.filter(organization=organization, author__isnull=False)
+            .values("author_id", "author__first_name", "author__last_name", "author__username")
+            .distinct()
+            .order_by("author__first_name", "author__last_name")
+        )
+    ]
     return JsonResponse(
         {
             "years": years,
-            "units": units,
+            "units": units,  # geriyə-uyğunluq
+            "faculties": faculties,
+            "departments": departments,
+            "teachers": teachers,
             "types": [{"value": v, "label": str(lbl)} for v, lbl in Exam.EXAM_TYPE_EXTENDED_CHOICES],
             "formats": [{"value": v, "label": str(lbl)} for v, lbl in Exam.EXAM_TYPE_CHOICES],
             "statuses": [{"value": v, "label": str(lbl)} for v, lbl in APPEAL_STATUS_CHOICES],
