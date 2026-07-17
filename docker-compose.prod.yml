@@ -434,7 +434,8 @@ services:
   celery_worker:
     image: ${APP_IMAGE:-emsarena-prod:latest}
     build: *app-build
-    command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=${CELERY_WORKER_CONCURRENCY:-2}"]
+    # Default queue only: light tasks + the 60s expiry sweeps + notifications.
+    command: ["celery", "-A", "config", "worker", "-l", "INFO", "-Q", "celery", "--concurrency=${CELERY_WORKER_CONCURRENCY:-4}"]
     environment:
       <<: *app-env
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
@@ -454,6 +455,34 @@ services:
         limits:
           cpus: "${CELERY_CPU_LIMIT:-1.0}"
           memory: ${CELERY_MEM_LIMIT:-1024M}
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Celery worker (HEAVY) — OCR / AI / export jobs on the dedicated "heavy"
+  # queue so a slow job never starves the default-queue expiry sweeps. No cpus
+  # cap (uses host cores; CI-safe); extra memory for OCR/AI/Excel bursts.
+  # ─────────────────────────────────────────────────────────────────────────
+  celery_worker_heavy:
+    image: ${APP_IMAGE:-emsarena-prod:latest}
+    build: *app-build
+    command: ["celery", "-A", "config", "worker", "-l", "INFO", "-Q", "heavy", "--concurrency=${CELERY_HEAVY_CONCURRENCY:-2}"]
+    environment:
+      <<: *app-env
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: ${CELERY_HEAVY_MEM_LIMIT:-2048M}
     networks:
       - emsarena-network
 
