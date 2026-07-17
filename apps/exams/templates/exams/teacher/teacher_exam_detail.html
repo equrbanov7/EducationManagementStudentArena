@@ -73,8 +73,10 @@
                 {% endif %}
             </section>
 
-            {# Live başlat - YALNIZ TEST İMTAHANLARI ÜÇÜN (tam enli sətir) #}
-            {% if exam.exam_type == "test" %}
+            {# Live başlat - YALNIZ TEST İMTAHANLARI ÜÇÜN (tam enli sətir).
+               Final/midterm imtahan mərkəzi axını ilə keçirilir — canlı sessiya
+               düyməsi onlarda GÖRÜNMÜR (yalnız quiz/adi test). #}
+            {% if exam.exam_type == "test" and exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
             <section class="live-start-section">
                 {% if exam.is_active %}
                     <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
@@ -220,6 +222,9 @@
                         {% endif %}
                     </form>
 
+                    {# Aktivləşdir/Deaktiv et final/midterm-də GÖRÜNMÜR — onların
+                       həyat dövrü imtahan mərkəzi axını ilə idarə olunur. #}
+                    {% if exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
                     <form method="post" action="{% url 'exams:toggle_exam_active' exam.slug %}" class="inline-action-form">
                         {% csrf_token %}
                         {# Seq3: müəllimin GÖRDÜYÜ niyyət göndərilir — paralel tab double-flip etməsin. #}
@@ -235,6 +240,7 @@
                             </button>
                         {% endif %}
                     </form>
+                    {% endif %}
 
                     <a href="{% url 'exams:edit_exam' exam.slug %}"
                        class="action-btn outline-btn js-open-exam-form-modal"

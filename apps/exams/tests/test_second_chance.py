@@ -235,3 +235,31 @@ class StudentListGrantAwareTests(_Base):
         # Grant limiti artırır → imtahan həm siyahıda, həm tapşırıqlarda geri gəlir.
         response = client.get(reverse("exams:assigned_exam_list"))
         self.assertContains(response, "Limitli imtahan")
+
+
+class ExamDetailControlsVisibilityTests(_Base):
+    """Final/midterm detalında canlı-sessiya və aktiv/deaktiv düymələri gizlidir."""
+
+    def _detail(self, exam):
+        return self._client_for(self.center).get(
+            reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
+        )
+
+    def test_final_hides_live_start_and_active_toggle(self):
+        exam = self._make_exam("final")
+        response = self._detail(exam)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, f"/{exam.slug}/toggle-active/")
+        self.assertNotContains(response, "live-start-section")
+
+    def test_midterm_hides_live_start_and_active_toggle(self):
+        exam = self._make_exam("midterm")
+        response = self._detail(exam)
+        self.assertNotContains(response, f"/{exam.slug}/toggle-active/", status_code=200)
+        self.assertNotContains(response, "live-start-section")
+
+    def test_quiz_keeps_live_start_and_active_toggle(self):
+        exam = self._make_exam("quiz")
+        response = self._detail(exam)
+        self.assertContains(response, f"/{exam.slug}/toggle-active/", status_code=200)
+        self.assertContains(response, "live-start-section")
