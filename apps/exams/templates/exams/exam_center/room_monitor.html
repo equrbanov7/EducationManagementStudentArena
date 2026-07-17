@@ -5,7 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260716-live-snapshot">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260717-vio-modal">
 {% endblock %}
 
 {% block content %}
@@ -84,6 +84,7 @@
      data-end-all-url="{% url 'exams:exam_center_room_end_all' room_id=room.pk %}"
      data-open-all-url="{% url 'exams:exam_center_room_open_all' room_id=room.pk %}"
      data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=0 ticket_id=0 %}"
+     data-violations-url-template="{% url 'exams:exam_center_attempt_violations' room_id=room.pk attempt_id=0 %}"
      data-heartbeat-seconds="{{ heartbeat_seconds }}">
 
   {% csrf_token %}
@@ -252,6 +253,25 @@
 {# Standart təsdiq modalı (window.confirm əvəzinə) #}
 {% include "exams/exam_center/_confirm_modal.html" %}
 
+{# Pozuntu detalları modalı — tələbə xanasına və ya "Bax"a klikdə açılır:
+   hansı qaydalar, nə vaxt pozulub + varsa uzaqlaşdırma səbəbi. #}
+<div class="fxc-vio-modal" id="fxc-vio-modal" hidden role="dialog" aria-modal="true"
+     aria-labelledby="fxc-vio-modal-title">
+  <div class="fxc-vio-modal__backdrop" data-vio-close></div>
+  <div class="fxc-vio-modal__card" role="document">
+    <div class="fxc-vio-modal__head">
+      <div>
+        <h3 class="fxc-vio-modal__title" id="fxc-vio-modal-title">{% trans "Qayda pozuntuları" %}</h3>
+        <p class="fxc-vio-modal__sub" id="fxc-vio-modal-sub"></p>
+      </div>
+      <button type="button" class="fxc-vio-modal__close" data-vio-close
+              aria-label="{% trans 'Bağla' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="fxc-vio-modal__removed" id="fxc-vio-modal-removed" hidden></div>
+    <div class="fxc-vio-modal__body" id="fxc-vio-modal-body" aria-live="polite"></div>
+  </div>
+</div>
+
 {{ snapshot|json_script:"fxc-initial-room-snapshot" }}
 {{ monitor_labels|json_script:"fxc-monitor-i18n" }}
 {% endblock %}
@@ -259,7 +279,7 @@
 {% block extraJs %}
     <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20260717-score-bal" defer></script>
-    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}" defer></script>
+    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20260717-vio-modal" defer></script>
     <script nonce="{{ request.csp_nonce }}">
     // Zala nəzarətçi təyini — AJAX (debounced) axtarış + çip seçimi.
     // Bütün istifadəçilər eyni anda YÜKLƏNMİR: yalnız yazılan sorğuya uyğun 10-luq

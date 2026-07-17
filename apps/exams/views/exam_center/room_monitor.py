@@ -114,7 +114,11 @@ def _monitor_labels():
             "locked": _("Dayandırılıb"),
             "blockReason": _("Bloklama səbəbi:"),
             "confirmGrant": _("Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"),
+            "removedBanner": _("İmtahandan uzaqlaşdırılıb"),
+            "noRules": _("Qeydə alınmış qayda pozuntusu yoxdur."),
+            "loadError": _("Məlumat yüklənmədi."),
         },
+        "loading": _("Yüklənir…"),
     }
 
 
@@ -224,6 +228,52 @@ def exam_center_room_snapshot(request, room_id):
     """Zal monitorunun JSON snapshot-u (aşağı tezlikli polling)."""
     _organization, room, _sessions = _get_room_and_sessions(request, room_id)
     return JsonResponse(room_monitor_snapshot(room))
+
+
+@login_required
+def exam_center_attempt_violations(request, room_id, attempt_id):
+    """Bir cəhdin (tələbənin) pozuntu detalları — hansı qaydalar, nə vaxt
+    pozulub + varsa imtahandan uzaqlaşdırma səbəbi. Zal nəzarətçisi tələbə
+    xanasına və ya "qayda pozanlar" siyahısındakı "Bax"a klik edəndə açılan
+    kiçik modal üçün. Yalnız bu zala aid cəhdlər (tenant + zal skopu)."""
+    from apps.exams.models import ExamAttempt
+    from apps.exams.services.supervision import get_attempt_intervention
+
+    _organization, room, _sessions = _get_room_and_sessions(request, room_id)
+    attempt = get_object_or_404(
+        ExamAttempt.objects.select_related("user", "exam"),
+        pk=attempt_id,
+        room_id=room.id,
+    )
+    incidents = attempt.supervision_incidents.order_by("-timestamp")[:200]
+    intervention = get_attempt_intervention(attempt)
+    return JsonResponse(
+        {
+            "student": attempt.user.get_full_name() or attempt.user.username,
+            "username": attempt.user.username,
+            "exam_title": attempt.exam.title,
+            "violation_count": attempt.supervision_violation_count,
+            "supervision_status": attempt.supervision_status,
+            "removal": (
+                {
+                    "action": intervention.get("action"),
+                    "reason": intervention.get("reason"),
+                    "is_terminal": intervention.get("is_terminal"),
+                }
+                if intervention
+                else None
+            ),
+            "incidents": [
+                {
+                    "event": inc.get_event_type_display(),
+                    "code": inc.event_type,
+                    "severity": inc.severity,
+                    "at": inc.timestamp.isoformat(),
+                }
+                for inc in incidents
+            ],
+        }
+    )
 
 
 @login_required
