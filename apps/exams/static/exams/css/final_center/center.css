@@ -426,6 +426,9 @@
 .fxc-pill--live { background: #FCE7EE; color: #9F1239; }
 .fxc-pill--muted { background: #F1F4F9; color: #94A3B8; }
 .fxc-pill--score { background: #DBEAFE; color: #1D4ED8; }
+/* Canlı bal: keçid həddindən (17) aşağı qırmızı, ondan yuxarı yaşıl. */
+.fxc-pill--score-low { background: #FEE2E2; color: #B91C1C; }
+.fxc-pill--score-pass { background: #DCFCE7; color: #15803D; }
 
 .fxc-pill--state-prepared { background: #F1F4F9; color: #475569; }
 .fxc-pill--state-entry_open { background: #E0F2FE; color: #075985; }

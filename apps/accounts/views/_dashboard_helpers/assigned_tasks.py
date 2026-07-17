@@ -7,6 +7,7 @@ from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from apps.assignments.models import Assignment
 from apps.courses.models import CourseMembership
@@ -156,6 +157,41 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
         .order_by("-start_datetime", "-created_at")
     )
     counts["exams"] = assigned_exams_qs.count()
+
+    # ── Cədvəl blokları (2026-07): eyni vaxt / eyni gün — TOPLU hesablanır ──
+    # Kabinet modalı "başla" düyməsi əvəzinə səliqəli izah göstərsin deyə hər
+    # imtahan üçün blok səbəbini əvvəlcədən veririk (per-imtahan sorğu yox).
+    from django.utils import timezone as _tz
+
+    _today = _tz.localdate()
+    _active_exam_ids = set(
+        ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False).values_list(
+            "exam_id", flat=True
+        )
+    )
+    _today_official_ids = set(
+        ExamAttempt.objects.filter(
+            user=user,
+            is_trial=False,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+            finished_at__date=_today,
+            exam__exam_type_extended__in=("final", "midterm"),
+        ).values_list("exam_id", flat=True)
+    )
+    _retake_exam_ids = set(StudentExamAttemptGrant.objects.filter(student=user).values_list("exam_id", flat=True))
+
+    def _schedule_block_reason(exam):
+        """Bu imtahan üçün cədvəl-blok səbəbi (yoxdursa boş sətir)."""
+        if _active_exam_ids - {exam.id}:
+            return pgettext("exams.model.access", "other_exam_in_progress")
+        if (
+            getattr(exam, "exam_type_extended", None) in {"final", "midterm"}
+            and exam.id not in _retake_exam_ids
+            and (_today_official_ids - {exam.id})
+        ):
+            return pgettext("exams.model.access", "already_examined_today")
+        return ""
+
     if filter_type in {"all", "exams"}:
         for exam in assigned_exams_qs:
             if not matches_search(
@@ -229,6 +265,9 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                 "is_final": use_center_flow,
                 # Sehrbazla yaradılan midterm imtahanında tələbənin fərdi PIN-i.
                 "student_pin": student_pin or "",
+                # Cədvəl-blok səbəbi (boşdursa blok yoxdur) — modal "başla"
+                # əvəzinə səliqəli izah göstərsin.
+                "start_block_reason": _schedule_block_reason(exam),
             }
             if use_center_flow:
                 extra.update(

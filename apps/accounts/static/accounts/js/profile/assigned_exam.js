@@ -175,6 +175,28 @@
                 var cancelBtn = document.getElementById("assignedExamInfoCancelBtn");
                 if (cancelBtn) cancelBtn.textContent = gettext("Ləğv et");
             }
+            // Cədvəl-blok (2026-07): eyni vaxt / eyni gün qaydası pozulanda
+            // "İmtahana başla" əvəzinə səliqəli izah banneri (final + adi hər ikisi).
+            var blockReason = trigger.getAttribute("data-start-block-reason") || "";
+            var blockNotice = document.getElementById("assignedExamBlockNotice");
+            var blockReasonEl = document.getElementById("assignedExamBlockReason");
+            if (blockNotice) {
+                if (blockReason) {
+                    if (blockReasonEl) {
+                        blockReasonEl.textContent = blockReason;
+                    }
+                    blockNotice.hidden = false;
+                    if (assignedExamInfoStartBtn) {
+                        assignedExamInfoStartBtn.hidden = true;
+                    }
+                    if (assignedExamCodeForm) {
+                        assignedExamCodeForm.classList.add("is-hidden");
+                    }
+                } else {
+                    blockNotice.hidden = true;
+                }
+            }
+
             assignedExamCodeSubmitInFlight = false;
 
             assignedExamInfoBackdrop.classList.add("is-open");

@@ -36,7 +36,6 @@ from apps.exams.domain.final_center import (
 )
 from apps.exams.models import FinalExamTicket
 from apps.exams.services.exam_center_gate import (
-    exam_room_isolation_allowed,
     final_exam_access_allowed,
     org_computer_access_allowed,
     resolve_room_computer,
@@ -318,23 +317,18 @@ def _handle_student_pin_login(request, username, raw_pin):
     if not org_computer_access_allowed(request, exam.organization if exam.organization_id else None):
         return _render_login(request, error=_room_access_error(), username=(username or "").strip())
 
-    # Kompüterin zalı (MAC/IP → zal). Otaq izolyasiyası: imtahan hansı zal(lar)da
-    # CANLI gedirsə, başqa zalın kompüterindən həmin imtahana giriş yoxdur —
-    # ilk girən tələbənin zalı imtahanı həmin zala bağlayır (canlı cəhdlər
-    # bitəndə bağlılıq öz-özünə düşür). Cəhd aşağıda zal/kompüterlə möhürlənir
-    # ki, zal monitoru biletsiz imtahanları da göstərsin.
+    # Kompüterin zalı (MAC/IP → zal). Cəhd aşağıda zal/kompüterlə möhürlənir ki,
+    # zal monitoru biletsiz imtahanları da göstərsin.
+    #
+    # QEYD (2026-07 dəyişikliyi): otaq izolyasiyası LƏĞV edildi — eyni imtahan
+    # eyni anda BİR NEÇƏ zalda keçirilə bilər (böyük imtahanlar bir neçə otağa
+    # bölünür). Giriş onsuz da yalnız QEYDLİ kompüterdən (yuxarıdakı
+    # ``org_computer_access_allowed`` — MAC/IP gate) + fərdi PIN + cəhd limiti
+    # ilə idarə olunur; imtahanı bir zala bağlamaq artıq idi və istənilən
+    # uyğun-MAC zaldan girişi səhvən bloklayırdı.
     entry_room, entry_computer = (None, None)
     if exam.organization_id:
         entry_room, entry_computer = resolve_room_computer(request, exam.organization)
-    if not exam_room_isolation_allowed(exam, entry_room):
-        return _render_login(
-            request,
-            error=pgettext(
-                "exams.final_center.entry",
-                "Bu imtahan hazırda başqa zalda keçirilir — öz zalınızdakı imtahana daxil olun.",
-            ),
-            username=(username or "").strip(),
-        )
 
     # Credential artıq resolve_student_pin_login ilə konkret tələbə+imtahana
     # bağlanıb. Public request-də tenant hələ qurulmadığı üçün start siyasəti

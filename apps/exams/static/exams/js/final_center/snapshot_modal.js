@@ -56,6 +56,10 @@
         current.sessionId = sessionId;
         current.ticketId = ticketId;
         modal.hidden = false;
+        // Arxa fon skroll etməsin: modal açıqkən həm <html>, həm <body> kilidlənir
+        // (yalnız birini kilidləmək bəzi brauzerlərdə səhifəni tərpədir).
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
         setError("");
         hideReentryPin(); // əvvəlki tələbənin PIN-i qalmasın
         load(false);
@@ -64,6 +68,8 @@
 
     function close() {
         modal.hidden = true;
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
         stopPolling();
     }
 
@@ -125,8 +131,12 @@
                 // (müvəqqəti) faiz — imtahan indi bitsəydi neçə bal olardı.
                 if (d.is_finished && d.score_percent != null) {
                     meta.push('<span class="fxc-pill fxc-pill--score"><i class="fas fa-award"></i> ' + esc(d.score_percent) + "%</span>");
-                } else if (!d.is_finished && d.live_score_percent != null) {
-                    meta.push('<span class="fxc-pill fxc-pill--score"><i class="fas fa-gauge-high"></i> Cari bal: ' + esc(d.live_score_percent) + "%</span>");
+                } else if (!d.is_finished && d.live_score != null) {
+                    // Cari bal FAİZ deyil, BAL sayı ilə: keçid həddindən (17) aşağı
+                    // qırmızı, ondan yuxarı yaşıl — nəzarətçi bir baxışda görsün.
+                    var lv = parseFloat(d.live_score);
+                    var lvCls = (!isNaN(lv) && lv >= 17) ? "fxc-pill--score-pass" : "fxc-pill--score-low";
+                    meta.push('<span class="fxc-pill ' + lvCls + '"><i class="fas fa-gauge-high"></i> Cari bal: ' + esc(d.live_score) + " bal</span>");
                 }
                 if (d.supervision_status && d.supervision_status !== "active") {
                     meta.push('<span class="fxc-pill fxc-pill--warn">' + esc(supLabel(d.supervision_status)) + "</span>");
