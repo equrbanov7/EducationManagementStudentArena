@@ -94,6 +94,7 @@ class ExamAttemptAdmin(admin.ModelAdmin):
     )
     list_filter = ("exam", "status")
     search_fields = ("user__username", "exam__title")
+    list_select_related = ("user", "exam")
 
 
 @admin.register(ExamAnswer)
@@ -101,6 +102,7 @@ class ExamAnswerAdmin(admin.ModelAdmin):
     list_display = ("attempt", "question", "is_correct", "updated_at")
     list_filter = ("question__exam", "is_correct")
     search_fields = ("attempt__user__username", "question__text")
+    list_select_related = ("attempt", "question")
 
 
 @admin.register(CodingExamQuestion)
@@ -122,6 +124,7 @@ class CodingSubmissionAdmin(admin.ModelAdmin):
     list_filter = ("execution_status", "is_final", "selected_language", "submitted_at")
     search_fields = ("student__username", "exam__title", "question__title", "submitted_code")
     readonly_fields = ("submitted_at", "updated_at")
+    list_select_related = ("student", "exam", "question")
     inlines = [CodingFileInline]
 
 
