@@ -61,6 +61,31 @@ def _coerce_seat(raw) -> int | None:
     return seat
 
 
+def _ensure_mac_free_in_org(room: ExamRoom, mac_norm: str, *, exclude_pk=None) -> None:
+    """MAC bu təşkilatın BAŞQA zalında qeydlidirsə, zalın adını deyən xəta atır.
+
+    Fiziki kompüter eyni anda bir zaldadır — MAC başqa zalda tapılırsa bu, demək
+    olar həmişə admin səhvidir («əlavə etmişəm, amma siyahıda görmürəm»
+    şikayətinin klassik səbəbi: qeyd başqa zalda/təşkilat seçimində qalıb).
+    """
+    clash = (
+        ExamRoomComputer.objects.filter(organization_id=room.organization_id, mac_address=mac_norm)
+        .exclude(room=room)
+        .select_related("room")
+    )
+    if exclude_pk:
+        clash = clash.exclude(pk=exclude_pk)
+    other = clash.first()
+    if other is not None:
+        raise RoomAdminError(
+            pgettext(
+                "exams.final_center.room_admin",
+                "Bu MAC artıq «%(room)s» zalında qeydlidir (%(label)s). Kompüteri əvvəlcə oradan silin və ya redaktə edin.",
+            )
+            % {"room": other.room.name, "label": other.label}
+        )
+
+
 def add_computer(
     *, room: ExamRoom, label: str, mac: str, seat_number=None, ip_address: str = "", notes: str = "", user=None
 ) -> ExamRoomComputer:
@@ -77,6 +102,7 @@ def add_computer(
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu MAC artıq bu zalda qeydlidir: %(mac)s") % {"mac": mac_norm}
         )
+    _ensure_mac_free_in_org(room, mac_norm)
     if base.filter(label__iexact=label).exists():
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu adla kompüter artıq var: %(label)s") % {"label": label}
@@ -121,6 +147,7 @@ def update_computer(
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu MAC artıq bu zalda qeydlidir: %(mac)s") % {"mac": mac_norm}
         )
+    _ensure_mac_free_in_org(computer.room, mac_norm, exclude_pk=computer.pk)
     if siblings.filter(label__iexact=label).exists():
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu adla kompüter artıq var: %(label)s") % {"label": label}
@@ -139,6 +166,20 @@ def update_computer(
         computer.is_active = bool(is_active)
     computer.save()
     return computer
+
+
+def delete_room(*, room: ExamRoom) -> None:
+    """Zalı silir. Oturum tarixçəsi olan zal SİLİNMİR (audit qorunur) —
+    əvəzində deaktiv edilməlidir. Kompüter qeydləri zalla birgə silinir."""
+    if room.sessions.exists():
+        raise RoomAdminError(
+            pgettext(
+                "exams.final_center.room_admin",
+                "«%(room)s» zalının oturum tarixçəsi var — silinə bilməz. Zalı deaktiv edin.",
+            )
+            % {"room": room.name}
+        )
+    room.delete()
 
 
 @transaction.atomic
@@ -174,5 +215,6 @@ __all__ = [
     "RoomAdminError",
     "add_computer",
     "bulk_add_computers",
+    "delete_room",
     "update_computer",
 ]
