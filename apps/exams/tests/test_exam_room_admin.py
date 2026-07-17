@@ -72,6 +72,110 @@ class AddComputerServiceTests(_RoomBase):
         with self.assertRaises(RoomAdminError):
             add_computer(room=self.room, label="PC-01", mac="not-a-mac")
 
+    def test_same_mac_in_other_room_of_same_org_rejected_with_room_name(self):
+        # «Əlavə etmişəm, amma görmürəm» bugı: MAC eyni təşkilatın BAŞQA zalında
+        # qalıb — xəta hansı zalda olduğunu deməlidir.
+        other_room = ExamRoom.objects.create(organization=self.org, name="Zal B2", code="ZB2")
+        add_computer(room=other_room, label="PC-01", mac="AA:BB:CC:DD:EE:07")
+        with self.assertRaises(RoomAdminError) as ctx:
+            add_computer(room=self.room, label="PC-09", mac="aa-bb-cc-dd-ee-07")
+        self.assertIn("Zal B2", str(ctx.exception))
+
+    def test_same_mac_in_other_org_allowed(self):
+        other_org = Organization.objects.create(
+            name="ERA Other University",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.owner,
+            status="active",
+            is_active=True,
+        )
+        foreign_room = ExamRoom.objects.create(organization=other_org, name="Yad zal", code="YZ")
+        add_computer(room=foreign_room, label="PC-01", mac="AA:BB:CC:DD:EE:08")
+        comp = add_computer(room=self.room, label="PC-08", mac="AA:BB:CC:DD:EE:08")
+        self.assertEqual(comp.room, self.room)
+
+    def test_update_rejects_mac_registered_in_other_room(self):
+        from apps.exams.services.final_center import update_computer
+
+        other_room = ExamRoom.objects.create(organization=self.org, name="Zal B3", code="ZB3")
+        add_computer(room=other_room, label="PC-01", mac="AA:BB:CC:DD:EE:0A")
+        comp = add_computer(room=self.room, label="PC-02", mac="AA:BB:CC:DD:EE:0B")
+        with self.assertRaises(RoomAdminError) as ctx:
+            update_computer(computer=comp, label="PC-02", mac="AA:BB:CC:DD:EE:0A")
+        self.assertIn("Zal B3", str(ctx.exception))
+
+
+class DeleteRoomServiceTests(_RoomBase):
+    def test_delete_room_without_sessions_removes_computers(self):
+        from apps.exams.services.final_center import delete_room
+
+        room = ExamRoom.objects.create(organization=self.org, name="Silinən zal", code="SZ")
+        add_computer(room=room, label="PC-01", mac="AA:BB:CC:DD:EE:21")
+        delete_room(room=room)
+        self.assertFalse(ExamRoom.objects.filter(code="SZ").exists())
+        self.assertFalse(ExamRoomComputer.objects.filter(mac_address="AA:BB:CC:DD:EE:21").exists())
+
+    def test_delete_room_with_session_history_blocked(self):
+        from apps.exams.services.final_center import delete_room
+
+        room = ExamRoom.objects.create(organization=self.org, name="Tarixçəli zal", code="TZ")
+        now = timezone.now()
+        ExamRoomSession.objects.create(
+            organization=self.org,
+            room=room,
+            scheduled_start=now - timedelta(hours=3),
+            scheduled_end=now - timedelta(hours=1),
+        )
+        with self.assertRaises(RoomAdminError) as ctx:
+            delete_room(room=room)
+        self.assertIn("Tarixçəli zal", str(ctx.exception))
+        self.assertTrue(ExamRoom.objects.filter(code="TZ").exists())
+
+
+class SuperadminRoomViewTests(_RoomBase):
+    """View qatı: delete_room action-u + vurğu (hl) parametrləri."""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.superadmin = User.objects.create_superuser("era_admin", "era_admin@test.az", PASSWORD)
+
+    def _client(self):
+        from django.test import Client
+
+        client = Client()
+        client.force_login(self.superadmin)
+        return client
+
+    def test_delete_room_action_deletes_and_redirects(self):
+        from django.urls import reverse
+
+        room = ExamRoom.objects.create(organization=self.org, name="View zalı", code="VZ")
+        response = self._client().post(
+            reverse("accounts:superadmin_exam_rooms"),
+            {"action": "delete_room", "organization_id": str(self.org.pk), "room_id": str(room.pk)},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ExamRoom.objects.filter(pk=room.pk).exists())
+
+    def test_add_computer_action_appends_highlight(self):
+        from django.urls import reverse
+
+        response = self._client().post(
+            reverse("accounts:superadmin_exam_rooms"),
+            {
+                "action": "add_computer",
+                "organization_id": str(self.org.pk),
+                "room_id": str(self.room.pk),
+                "label": "HL-PC",
+                "mac_address": "AA:BB:CC:DD:EE:31",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        comp = ExamRoomComputer.objects.get(label="HL-PC")
+        self.assertIn(f"hl_comp={comp.pk}", response["Location"])
+        self.assertIn(f"#sar-room-{self.room.pk}", response["Location"])
+
 
 class RoomIpGateTests(_RoomBase):
     def setUp(self):

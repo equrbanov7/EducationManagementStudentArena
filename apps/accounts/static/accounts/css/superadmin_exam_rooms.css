@@ -1,0 +1,209 @@
+/* ============================================================================
+   Superadmin — İmtahan zalları + kompüter/MAC idarəetməsi.
+   Dizayn dili: app-in ağ+mavi (light-only) --ems-* tokenləri; "sualları idarə
+   et" kart ailəsi (yumşaq kölgə, 16px radius, uppercase etiketlər).
+   QEYD: CSP inline <style>-ə icazə vermir — bütün stillər bu fayldadır.
+   ========================================================================== */
+
+.sar { display: flex; flex-direction: column; gap: 18px; color: var(--ems-neutral-800, #1e293b); }
+
+/* ── Başlıq zolağı ── */
+.sar-head { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; justify-content: space-between; }
+.sar-head h2 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--ems-neutral-900, #0f172a); display: flex; align-items: center; gap: 10px; }
+.sar-sub { margin: 4px 0 0; color: var(--ems-neutral-500, #64748b); font-size: 0.9rem; max-width: 720px; }
+.sar-head-actions { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+
+.sar-orgpick { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.sar-orgpick label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ems-neutral-500, #64748b); margin-bottom: 4px; }
+.sar-orgpick .bootstrap-single-select { min-width: 260px; }
+.sar-orgpick .bootstrap-single-select__toggle { min-height: 42px; border-radius: 12px; }
+
+/* ── Düymələr ── */
+.sar-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 16px; border-radius: 11px;
+    border: 1.5px solid var(--ems-neutral-200, #e2e8f0);
+    background: #fff; color: var(--ems-neutral-700, #334155);
+    font-size: 0.84rem; font-weight: 700; cursor: pointer; text-decoration: none;
+    transition: border-color .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.sar-btn:hover { border-color: var(--ems-primary-400, #60a5fa); color: var(--ems-primary-700, #1d4ed8); background: var(--ems-primary-50, #eff6ff); text-decoration: none; }
+.sar-btn--primary {
+    background: linear-gradient(135deg, var(--ems-primary-600, #2563eb), var(--ems-primary-700, #1d4ed8));
+    color: #fff; border-color: transparent;
+    box-shadow: 0 8px 18px -8px rgba(37, 99, 235, .55);
+}
+.sar-btn--primary:hover { filter: brightness(1.06); color: #fff; background: linear-gradient(135deg, var(--ems-primary-600, #2563eb), var(--ems-primary-700, #1d4ed8)); }
+.sar-btn--danger { color: var(--ems-danger-600, #dc2626); border-color: var(--ems-danger-200, #fecaca); }
+.sar-btn--danger:hover { background: var(--ems-danger-50, #fef2f2); border-color: var(--ems-danger-400, #f87171); color: var(--ems-danger-700, #b91c1c); }
+.sar-btn--sm { padding: 6px 10px; font-size: 0.76rem; border-radius: 9px; }
+.sar-btn--icon { width: 32px; height: 32px; padding: 0; justify-content: center; }
+
+/* ── Kartlar ── */
+.sar-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -20px rgba(15, 23, 42, 0.18);
+}
+.sar-card__body { padding: 18px 20px; }
+.sar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 16px; }
+@media (max-width: 1240px) { .sar-grid { grid-template-columns: 1fr; } }
+
+.sar-roomhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.sar-roomtitle { font-size: 1.08rem; font-weight: 800; margin: 0; color: var(--ems-neutral-900, #0f172a); display: flex; align-items: center; gap: 8px; }
+.sar-roomtitle i { color: var(--ems-primary-600, #2563eb); }
+.sar-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; color: var(--ems-neutral-500, #64748b); margin-top: 2px; }
+.sar-roomnotes { margin: 8px 0 0; font-size: 0.82rem; color: var(--ems-neutral-500, #64748b); display: flex; gap: 6px; align-items: flex-start; }
+.sar-roomnotes i { margin-top: 2px; font-size: 0.72rem; }
+
+/* ── Pill-lər ── */
+.sar-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.sar-pill--ok { background: var(--ems-success-50, #ecfdf5); color: var(--ems-success-700, #047857); }
+.sar-pill--off { background: var(--ems-neutral-100, #f1f5f9); color: var(--ems-neutral-500, #64748b); }
+.sar-pill--live { background: var(--ems-danger-50, #fef2f2); color: var(--ems-danger-700, #b91c1c); }
+.sar-pill--info { background: var(--ems-primary-50, #eff6ff); color: var(--ems-primary-700, #1d4ed8); }
+.sar-pill--warn { background: var(--ems-warning-50, #fffbeb); color: var(--ems-warning-700, #b45309); }
+.sar-live-dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; animation: sar-pulse 1.4s ease-in-out infinite; }
+@keyframes sar-pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* ── Metrikalar ── */
+.sar-metrics { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 0; color: var(--ems-neutral-500, #64748b); font-size: 0.83rem; }
+.sar-metrics b { color: var(--ems-neutral-800, #1e293b); }
+.sar-metrics i { margin-right: 4px; color: var(--ems-neutral-400, #94a3b8); }
+
+/* ── Kompüter cədvəli ── */
+.sar-tablewrap { overflow-x: auto; border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 12px; }
+.sar-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 560px; }
+.sar-table th, .sar-table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--ems-neutral-100, #f1f5f9); white-space: nowrap; }
+.sar-table th { background: var(--ems-neutral-50, #f8fafc); font-weight: 700; color: var(--ems-neutral-500, #64748b); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.sar-table tbody tr { transition: background .15s ease; }
+.sar-table tbody tr:hover { background: var(--ems-primary-50, #eff6ff); }
+.sar-table tr:last-child td { border-bottom: 0; }
+.sar-table .sar-td-actions { text-align: right; }
+.sar-empty-row { text-align: center; color: var(--ems-neutral-400, #94a3b8); padding: 18px 10px !important; }
+
+.sar-mac {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem; font-weight: 600;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-700, #334155);
+    border-radius: 7px; padding: 3px 8px;
+}
+.sar-copy { border: 0; background: transparent; cursor: pointer; color: var(--ems-neutral-400, #94a3b8); padding: 2px; font-size: 0.72rem; }
+.sar-copy:hover { color: var(--ems-primary-600, #2563eb); }
+.sar-copy.is-copied { color: var(--ems-success-600, #059669); }
+
+.sar-rowactions { display: inline-flex; gap: 6px; align-items: center; }
+.sar-rowactions form { margin: 0; }
+
+/* ── Kart əməliyyat cərgəsi ── */
+.sar-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+.sar-actions form { margin: 0; }
+.sar-actions .sar-spacer { margin-left: auto; }
+
+/* ── Boş hallar ── */
+.sar-empty { text-align: center; padding: 44px 16px; color: var(--ems-neutral-500, #64748b); border: 1px dashed var(--ems-neutral-300, #cbd5e1); border-radius: 16px; background: #fff; }
+.sar-empty i { font-size: 1.9rem; display: block; margin-bottom: 10px; color: var(--ems-neutral-400, #94a3b8); }
+
+/* ── İdarəçilər ── */
+.sar-managerlist { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+.sar-managerrow {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 11px;
+    font-size: 0.86rem;
+}
+.sar-managerrow i { color: var(--ems-neutral-400, #94a3b8); margin-right: 4px; }
+.sar-grantform { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.sar-grantform .sar-field { flex: 1 1 240px; }
+
+.sar-note { font-size: 0.78rem; color: var(--ems-neutral-500, #64748b); margin: 6px 0 0; }
+.sar-note i { margin-right: 4px; }
+
+/* ── Forma sahələri (modal daxili) ── */
+.sar-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.sar-form--single { grid-template-columns: 1fr; }
+.sar-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sar-field--full { grid-column: 1 / -1; }
+.sar-field > label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ems-neutral-600, #475569); }
+.sar-req { color: var(--ems-danger-600, #dc2626); }
+.sar-field input[type=text], .sar-field input[type=number], .sar-field textarea {
+    width: 100%; border: 1.5px solid var(--ems-neutral-200, #e2e8f0); border-radius: 11px;
+    background: var(--ems-neutral-50, #f8fafc); color: var(--ems-neutral-900, #0f172a);
+    padding: 9px 12px; font-size: 0.88rem;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.sar-field input:focus, .sar-field textarea:focus {
+    outline: none; border-color: var(--ems-primary-500, #3b82f6); background: #fff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+.sar-field textarea { resize: vertical; min-height: 54px; }
+.sar-field .sar-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.04em; }
+.sar-hint { font-size: 0.74rem; color: var(--ems-neutral-400, #94a3b8); }
+.sar-check { display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; font-weight: 600; color: var(--ems-neutral-700, #334155); cursor: pointer; }
+.sar-check input { width: 17px; height: 17px; accent-color: var(--ems-primary-600, #2563eb); }
+@media (max-width: 620px) { .sar-form { grid-template-columns: 1fr; } }
+
+/* ============================================================================
+   Mərkəzdə açılan modal (sarm) — CSP-safe, JS body-yə mount edir.
+   ========================================================================== */
+.sarm-overlay {
+    position: fixed; inset: 0; z-index: 1080;
+    display: none;
+    align-items: flex-start; justify-content: center;
+    padding: 5vh 16px 16px;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(2px);
+    overflow-y: auto;
+}
+.sarm-overlay.is-open { display: flex; }
+
+.sarm {
+    background: #fff;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 620px;
+    box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.45);
+    animation: sarm-in .18s ease-out;
+}
+.sarm--wide { max-width: 720px; }
+@keyframes sarm-in { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.sarm__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-100, #f1f5f9);
+}
+.sarm__icon {
+    width: 38px; height: 38px; border-radius: 11px; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ems-primary-50, #eff6ff); color: var(--ems-primary-600, #2563eb);
+    font-size: 15px;
+}
+.sarm__icon--danger { background: var(--ems-danger-50, #fef2f2); color: var(--ems-danger-600, #dc2626); }
+.sarm__titles { flex: 1 1 auto; min-width: 0; }
+.sarm__title { margin: 0; font-size: 1rem; font-weight: 800; color: var(--ems-neutral-900, #0f172a); }
+.sarm__subtitle { margin: 1px 0 0; font-size: 0.78rem; color: var(--ems-neutral-500, #64748b); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sarm__close {
+    border: 0; background: var(--ems-neutral-100, #f1f5f9); color: var(--ems-neutral-500, #64748b);
+    width: 32px; height: 32px; border-radius: 9px; cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+    transition: background .15s ease, color .15s ease;
+}
+.sarm__close:hover { background: var(--ems-danger-50, #fef2f2); color: var(--ems-danger-600, #dc2626); }
+
+.sarm__body { padding: 18px 20px; }
+.sarm__foot {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ems-neutral-100, #f1f5f9);
+}
+
+/* ── Vurğu (flash) — yeni əlavə edilən / dəyişən sətir və kart ── */
+@keyframes sar-flash {
+    0% { background-color: var(--ems-primary-100, #dbeafe); box-shadow: 0 0 0 3px rgba(37, 99, 235, .25); }
+    100% { background-color: transparent; box-shadow: none; }
+}
+.sar-flash-row td { animation: sar-flash 2.2s ease-out; }
+.sar-flash-card { animation: sar-flash 2.2s ease-out; }
