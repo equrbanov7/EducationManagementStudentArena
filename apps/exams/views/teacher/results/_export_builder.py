@@ -34,6 +34,11 @@ def build_exam_results_xlsx_export(exam, attempts_list):
     except ImportError as exc:  # pragma: no cover - deps quraşdırılıb
         raise RuntimeError("openpyxl is not installed. Add openpyxl to requirements.") from exc
 
+    # İmtahandan uzaqlaşdırılmış tələbələrin səbəbi ixracda görünsün (N+1-siz).
+    from apps.exams.services.supervision import attach_attempt_interventions
+
+    attach_attempt_interventions(attempts_list)
+
     wb = Workbook()
     ws = wb.active
     ws.title = (exam.title[:28] + "…") if len(exam.title) > 30 else exam.title
@@ -53,6 +58,7 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         "İstifadəçi adı",
         "E-poçt",
         "Status",
+        "Uzaqlaşdırma səbəbi",
         "Başlama",
         "Bitmə",
         "Müddət (s:dq:sn)",
@@ -106,6 +112,10 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         else:
             duration_str = ""
 
+        _intervention = getattr(att, "exam_intervention", None)
+        _removal_reason = (
+            _intervention.get("reason") if _intervention and _intervention.get("is_terminal") else ""
+        ) or ""
         row = [
             row_idx - 1,
             user_groups,
@@ -113,6 +123,7 @@ def build_exam_results_xlsx_export(exam, attempts_list):
             att.user.username,
             att.user.email or "",
             att.get_status_display(),
+            _removal_reason,
             # UTC saxlanan tarixi əvvəlcə yerli zonaya (Asia/Baku) çevir, sonra tz-i
             # at — əks halda Excel UTC divar-saatını göstərir (UI-dən 4 saat geri).
             timezone.localtime(att.started_at).replace(tzinfo=None) if att.started_at else "",
@@ -145,8 +156,9 @@ def build_exam_results_xlsx_export(exam, attempts_list):
             delivered = att.correct_count + att.wrong_count
             row += [att.correct_count, att.wrong_count, delivered]
 
-        # Sola düzlənən sütunlar: Qruplar (2), Ad Soyad (3), İstifadəçi adı (4), E-poçt (5), Başlama (7), Bitmə (8)
-        left_columns = {2, 3, 4, 5, 7, 8}
+        # Sola düzlənən sütunlar: Qruplar (2), Ad Soyad (3), İstifadəçi adı (4),
+        # E-poçt (5), Uzaqlaşdırma səbəbi (7), Başlama (8), Bitmə (9).
+        left_columns = {2, 3, 4, 5, 7, 8, 9}
         for col_idx, value in enumerate(row, start=1):
             cell = ws.cell(row=row_idx, column=col_idx, value=value)
             cell.alignment = left if col_idx in left_columns else center
@@ -154,8 +166,8 @@ def build_exam_results_xlsx_export(exam, attempts_list):
                 cell.number_format = "DD.MM.YYYY HH:MM"
 
     # Sütun genişlikləri (header sırasına uyğun)
-    # #, Qruplar, Ad Soyad, İstifadəçi adı, E-poçt, Status, Başlama, Bitmə, Müddət
-    widths = [5, 26, 26, 20, 28, 16, 20, 20, 16]
+    # #, Qruplar, Ad Soyad, İstifadəçi adı, E-poçt, Status, Uzaqlaşdırma səbəbi, Başlama, Bitmə, Müddət
+    widths = [5, 26, 26, 20, 28, 16, 30, 20, 20, 16]
     if is_written_or_coding:
         widths += [14, 12]  # Müəllim balı, Yoxlanıb
     if is_test:

@@ -18382,6 +18382,10 @@ msgctxt "exams.template.teacher_exam_results"
 msgid "badge_checked"
 msgstr "Kontrol edildi"
 
+msgctxt "exams.template.teacher_exam_results"
+msgid "badge_removed"
+msgstr "Sınavdan çıkarıldı"
+
 #, python-format
 msgid "Apellyasiya ilə +%(bonus)s bal əlavə olunub"
 msgstr "Apellyasiya ilə +%(bonus)s bal əlavə olunub"

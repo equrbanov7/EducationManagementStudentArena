@@ -414,7 +414,12 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if att.status == 'expired' %}
+                                {% if item.intervention and item.intervention.is_terminal %}
+                                    <span class="ter-badge ter-badge--removed"><i class="fas fa-user-slash"></i> {% trans "badge_removed" context "exams.template.teacher_exam_results" %}</span>
+                                    {% if item.intervention.reason %}
+                                        <div class="ter-removed-reason" title="{{ item.intervention.reason }}">{{ item.intervention.reason }}</div>
+                                    {% endif %}
+                                {% elif att.status == 'expired' %}
                                     <span class="ter-badge ter-badge--neutral">{{ att.get_status_display }}</span>
                                 {% elif exam.exam_type == 'test' or att.checked_by_teacher %}
                                     <span class="ter-badge ter-badge--success">{{ att.get_status_display }}</span>
