@@ -59,6 +59,23 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
 CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
 
+# ── Queue separation (audit: the single highest-leverage change) ──────────────
+# Heavy/bursty jobs (OCR, AI generation, Excel export) go to a dedicated "heavy"
+# queue consumed by the celery_worker_heavy pool, so a slow OCR/AI job can NEVER
+# starve the latency-sensitive 60s attempt-expiry sweeps + notifications, which
+# stay on the default "celery" queue.
+CELERY_TASK_DEFAULT_QUEUE = "celery"
+CELERY_TASK_ROUTES = {
+    "exams.run_text_extraction_job": {"queue": "heavy"},
+    "exams.run_ai_generation_job": {"queue": "heavy"},
+    "exams.run_export_job": {"queue": "heavy"},
+}
+# A long OCR/AI job must not hold prefetched slots hostage; re-queue on crash.
+CELERY_WORKER_PREFETCH_MULTIPLIER = _env_int_setting("CELERY_PREFETCH_MULTIPLIER", 1, minimum=1)
+CELERY_TASK_ACKS_LATE = True
+# Bound the Redis result backend so it can't grow unbounded under maxmemory-noeviction.
+CELERY_RESULT_EXPIRES = _env_int_setting("CELERY_RESULT_EXPIRES", 3600, minimum=60)
+
 # Periodic tasks (require running `celery -A config beat`).
 # crontab lokal ad kimi qalır (kiçik hərf → Django setting olmur); beat
 # cədvəlindəki gündəlik fixed-time işlər üçün lazımdır.
