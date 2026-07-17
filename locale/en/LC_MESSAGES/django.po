@@ -28915,3 +28915,603 @@ msgstr "Soft delete — the exam is hidden, results are kept."
 msgctxt "exams.model.exam.help"
 msgid "deleted_at"
 msgstr "When the exam was soft-deleted."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Aktiv filtrlər"
+msgstr "Active filters"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Baxılır"
+msgstr "In review"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Başlıq, fənn və ya qrup üzrə axtar…"
+msgstr "Search by title, subject or group…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+msgstr "Search by title, subject, group or teacher…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+msgstr "This submission will be permanently deleted. Continue?"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bu şərtlərə uyğun göndəriş tapılmadı."
+msgstr "No submissions match these filters."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün dillər"
+msgstr "All languages"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün fakültələr"
+msgstr "All faculties"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün illər"
+msgstr "All years"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün kafedralar"
+msgstr "All departments"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün müəllimlər"
+msgstr "All teachers"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün semestrlər"
+msgstr "All semesters"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Dil"
+msgstr "Language"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Düzəlt"
+msgstr "Edit"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Düzəliş gözləyən"
+msgstr "Awaiting corrections"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Filtri sil"
+msgstr "Remove filter"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Filtri təmizlə"
+msgstr "Clear filters"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Geri qaytarılıb — düzəliş gözlənilir"
+msgstr "Returned — awaiting corrections"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Göndərişlərdə axtar"
+msgstr "Search submissions"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hamısını təmizlə"
+msgstr "Clear all"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın."
+msgstr "You have no submissions yet — start with “New submission”."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hələ heç bir sual göndərişi yoxdur."
+msgstr "There are no question submissions yet."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın."
+msgstr "Review question sets submitted by teachers: accept them (saved to a bank) or return them with a note."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qeydə baxın, düzəldin və yenidən göndərin."
+msgstr "Read the note, make corrections and resubmit."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qəbul"
+msgstr "Accepted"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qəbul edilmiş"
+msgstr "Accepted"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd"
+msgstr "Rejected"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd edilmiş"
+msgstr "Rejected"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Status filtri"
+msgstr "Status filter"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin."
+msgstr "Send your questions to the exam centre electronically — see the warnings, fix them or submit right away."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Tədris ili"
+msgstr "Academic year"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Yeni göndəriş"
+msgstr "New submission"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Ümumi göndəriş"
+msgstr "Total submissions"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "sual"
+msgstr "questions"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "«%(title)s» göndərişini düzəlt"
+msgstr "Edit submission “%(title)s”"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "«%(title)s» göndərişini sil"
+msgstr "Delete submission “%(title)s”"
+
+msgctxt "exams.template.question_submission"
+msgid "(bir və ya bir neçə)"
+msgstr "(one or more)"
+
+msgctxt "exams.template.question_submission"
+msgid "(boşdursa başlıq götürülür)"
+msgstr "(if empty, the title is used)"
+
+msgctxt "exams.template.question_submission"
+msgid "(opsional)"
+msgstr "(optional)"
+
+msgctxt "exams.template.question_submission"
+msgid "Baxılır"
+msgstr "In review"
+
+msgctxt "exams.template.question_submission"
+msgid "Başlıq"
+msgstr "Title"
+
+msgctxt "exams.template.question_submission"
+msgid "Boş saxlasanız suallar yeni banka yazılacaq."
+msgstr "Leave empty to write the questions to a new bank."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+msgstr "This submission will be permanently deleted. Continue?"
+
+msgctxt "exams.template.question_submission"
+msgid "Bu göndərişdə %(count)s xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın."
+msgstr "This submission has %(count)s questions with errors — check the list below before accepting."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək."
+msgstr "This text will be shown to the teacher as a banner on the submission page."
+
+msgctxt "exams.template.question_submission"
+msgid "Dil, fənn və qrup mütləqdir"
+msgstr "Language, subject and group are required"
+
+msgctxt "exams.template.question_submission"
+msgid "Dili seçin…"
+msgstr "Select language…"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş et"
+msgstr "Edit"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəlt və yenidən göndər"
+msgstr "Fix and resubmit"
+
+msgctxt "exams.template.question_submission"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "exams.template.question_submission"
+msgid "Fənni seçin…"
+msgstr "Select subject…"
+
+msgctxt "exams.template.question_submission"
+msgid "Geri qaytar"
+msgstr "Return"
+
+msgctxt "exams.template.question_submission"
+msgid "Geri qaytarılıb"
+msgstr "Returned"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərildi"
+msgstr "Submitted"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərilmiş suallar"
+msgstr "Submitted questions"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş məlumatları"
+msgstr "Submission details"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər."
+msgstr "The submission will be returned to the teacher with a note — they can fix it and resubmit."
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş qəbul edildi"
+msgstr "Submission accepted"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişi sil"
+msgstr "Delete submission"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişin statusu"
+msgstr "Submission status"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişlərə qayıt"
+msgstr "Back to submissions"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişə baxış"
+msgstr "Submission review"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllim nəyi düzəltməlidir?"
+msgstr "What should the teacher fix?"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllimin qeydi"
+msgstr "Teacher's note"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllimə qeyd"
+msgstr "Note to the teacher"
+
+msgctxt "exams.template.question_submission"
+msgid "Qeydiniz"
+msgstr "Your note"
+
+msgctxt "exams.template.question_submission"
+msgid "Qrup(lar)"
+msgstr "Group(s)"
+
+msgctxt "exams.template.question_submission"
+msgid "Qruplar"
+msgstr "Groups"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul edildi"
+msgstr "Accepted"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul edilib"
+msgstr "Accepted"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul et"
+msgstr "Accept"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul et və banka əlavə et"
+msgstr "Accept and add to bank"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar"
+msgstr "Decision"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar qeydi"
+msgstr "Decision note"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərarınızı seçin"
+msgstr "Choose your decision"
+
+msgctxt "exams.template.question_submission"
+msgid "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir."
+msgstr "No subjects are assigned to you yet — a subject must be added to your group."
+
+msgctxt "exams.template.question_submission"
+msgid "Sizə hələ qrup təyin olunmayıb. Qrup üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın."
+msgstr "No group is assigned to you yet. Contact the exam centre/administrator for a group."
+
+msgctxt "exams.template.question_submission"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual"
+msgstr "Questions"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual eyni anda seçilmiş bütün qruplar üçün göndərilir."
+msgstr "The set is submitted for all selected groups at once."
+
+msgctxt "exams.template.question_submission"
+msgid "Sual göndərişi"
+msgstr "Question submission"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar"
+msgstr "Questions"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar hansı banka yazılsın?"
+msgstr "Which bank should the questions go to?"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək."
+msgstr "The questions will be written to the selected bank and the teacher will be notified."
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar və xəbərdarlıqlar"
+msgstr "Questions and warnings"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin."
+msgstr "Type the questions or upload a file, preview them — see the warnings, then submit."
+
+msgctxt "exams.template.question_submission"
+msgid "Sualların yazıldığı dil — mərkəz bankda bu dillə saxlayır."
+msgstr "The language the questions are written in — the centre stores them in this language."
+
+msgctxt "exams.template.question_submission"
+msgid "Xəbərdarlıq"
+msgstr "Warnings"
+
+msgctxt "exams.template.question_submission"
+msgid "Xəbərdarlıqlar"
+msgstr "Warnings"
+
+msgctxt "exams.template.question_submission"
+msgid "Xəta"
+msgstr "Errors"
+
+msgctxt "exams.template.question_submission"
+msgid "Xətalı"
+msgstr "With errors"
+
+msgctxt "exams.template.question_submission"
+msgid "Yalnız sizin fənləriniz görünür."
+msgstr "Only your subjects are shown."
+
+msgctxt "exams.template.question_submission"
+msgid "Yeni bankın adı"
+msgstr "New bank name"
+
+msgctxt "exams.template.question_submission"
+msgid "Yenidən göndər"
+msgstr "Resubmit"
+
+msgctxt "exams.template.question_submission"
+msgid "Yoxla (preview)"
+msgstr "Check (preview)"
+
+msgctxt "exams.template.question_submission"
+msgid "Yoxlama nəticəsi"
+msgstr "Check result"
+
+msgctxt "exams.template.question_submission"
+msgid "məs. 3-cü sualda düzgün cavab işarələnməyib..."
+msgstr "e.g. the correct answer is not marked in question 3..."
+
+msgctxt "exams.template.question_submission"
+msgid "məs. təşəkkürlər, suallar final bankına əlavə olundu…"
+msgstr "e.g. thank you, the questions were added to the final bank…"
+
+msgctxt "exams.template.question_submission"
+msgid "%(count)s sual «%(bank)s» bankına yazıldı"
+msgstr "%(count)s questions were written to the “%(bank)s” bank"
+
+msgctxt "exams.template.question_submission"
+msgid "Ümumi sual sayı"
+msgstr "Total questions"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan dili"
+msgstr "Exam language"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi"
+msgstr "Exam centre"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək."
+msgstr "The exam centre will receive the submission with these details."
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi göndərişi geri qaytardı — düzəliş gözlənilir"
+msgstr "The exam centre returned the submission — corrections expected"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzindədir"
+msgstr "With the exam centre"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə göndər"
+msgstr "Send to the exam centre"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə qeyd"
+msgstr "Note to the exam centre"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə sual göndər"
+msgstr "Send questions to the exam centre"
+
+msgctxt "exams.template.question_submission"
+msgid "Əvvəlcə qərar seçin"
+msgstr "Choose a decision first"
+
+msgctxt "exams.template.question_submission"
+msgid "— Yeni bank yaradılsın —"
+msgstr "— Create a new bank —"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz qəbul edildi və sual bankına əlavə olundu."
+msgstr "Your question submission \"{title}\" was accepted and added to the question bank."
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz rədd edildi. Qeydə baxıb düzəldərək yenidən göndərə bilərsiniz."
+msgstr "Your question submission \"{title}\" was returned. Read the note, fix the issues and resubmit."
+
+msgctxt "exams.notification.question_submission"
+msgid "Sual göndərişinə baxıldı"
+msgstr "Question submission reviewed"
+
+msgctxt "exams.notification.question_submission"
+msgid "Yeni sual göndərişi"
+msgstr "New question submission"
+
+msgctxt "exams.notification.question_submission"
+msgid "{teacher} \"{title}\" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} submitted a new question set \"{title}\" ({subject} · {group}, {count} questions)."
+
+msgctxt "exams.notification.question_submission"
+msgid "{teacher} \"{title}\" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} corrected and resubmitted the question set \"{title}\" ({subject} · {group}, {count} questions)."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bank başqa təşkilata aiddir."
+msgstr "The bank belongs to another organization."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bu göndəriş artıq yekunlaşıb — dəyişdirilə bilməz."
+msgstr "This submission is already finalized — it can no longer be changed."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bu göndərişə artıq baxılıb."
+msgstr "This submission has already been reviewed."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Fənn qeyd olunmalıdır."
+msgstr "Subject is required."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Hansı qrup üçün olduğu qeyd olunmalıdır."
+msgstr "Specify which group it is for."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Mövzu/başlıq boş ola bilməz."
+msgstr "Title cannot be empty."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Mətndən heç bir sual çıxarıla bilmədi."
+msgstr "No questions could be extracted from the text."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Snapshot-dan heç bir sual banka yazıla bilmədi (A–D variantları natamamdır)."
+msgstr "No questions from the snapshot could be written to the bank (options A–D are incomplete)."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Sual mətni çox qısadır."
+msgstr "The question text is too short."
+
+msgctxt "exams.view.question_submission.ai"
+msgid "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+msgstr "AI question generation failed. Try again in a moment."
+
+msgctxt "exams.view.question_submission.ai"
+msgid "Sual göndərişi"
+msgstr "Question submission"
+
+msgctxt "exams.view.question_submission.error"
+msgid "Fənni seçin (məcburidir)."
+msgstr "Select a subject (required)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Qəbul olunmuş göndəriş silinə bilməz."
+msgstr "An accepted submission cannot be deleted."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Seçilmiş fənn sizin fənləriniz arasında deyil."
+msgstr "The selected subject is not among your subjects."
+
+msgctxt "exams.view.question_submission.error"
+msgid "İmtahan dilini seçin (məcburidir)."
+msgstr "Select the exam language (required)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Ən azı bir qrup seçin (məcburidir)."
+msgstr "Select at least one group (required)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Fayl oxunmadı: {error}"
+msgstr "Could not read the file: {error}"
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup)."
+msgstr "The submission was delivered to the exam centre ({count} questions, {groups} groups)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş qəbul edildi — {count} sual \"{bank}\" bankına əlavə olundu."
+msgstr "Submission accepted — {count} questions were added to the \"{bank}\" bank."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş rədd edildi və müəllimə bildirildi."
+msgstr "The submission was returned and the teacher was notified."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş silindi."
+msgstr "Submission deleted."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş yeniləndi və imtahan mərkəzinə təkrar çatdırıldı."
+msgstr "The submission was updated and redelivered to the exam centre."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Rədd üçün müəllimə qeyd yazın — nəyi düzəltməlidir."
+msgstr "To return it, write a note for the teacher — what needs to be fixed."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Yanlış əməliyyat."
+msgstr "Invalid action."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Aktiv təşkilat konteksti tapılmadı."
+msgstr "No active organization context found."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Bu göndəriş dəyişdirilə bilməz."
+msgstr "This submission cannot be modified."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgid_plural "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgstr[0] "The exam centre returned %(counter)s submission."
+msgstr[1] "The exam centre returned %(counter)s submissions."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "%(counter)s sual"
+msgid_plural "%(counter)s sual"
+msgstr[0] "%(counter)s question"
+msgstr[1] "%(counter)s questions"
