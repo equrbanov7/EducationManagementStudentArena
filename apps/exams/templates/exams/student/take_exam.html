@@ -111,8 +111,8 @@
                name="marked_question_ids"
                id="marked-question-ids-field"
                value="{{ marked_question_ids_json|default:'[]' }}">
-        {% comment %} {# EXAM-P1-06: autosave optimistic concurrency — server bu revision-u
-           artırır; başqa tab daha yeni yazıbsa 409 qayıdır (stale overwrite yox). #} {% endcomment %}
+        {% comment %}  EXAM-P1-06: autosave optimistic concurrency — server bu revision-u
+           artırır; başqa tab daha yeni yazıbsa 409 qayıdır (stale overwrite yox). {% endcomment %} 
         <input type="hidden"
                name="autosave_revision"
                id="autosave-revision-field"
@@ -192,19 +192,19 @@
                      data-time-limit="{{ q.effective_time_limit|default:0 }}"{% if item.server_delivery %} data-server-delivery="1"{% endif %}>
 
                     {% if item.server_delivery %}
-                    {% comment %} {# EXAM-P1-04 strict delivery: vaxtlı test sualının məzmunu İLK
+                    {% comment %}  EXAM-P1-04 strict delivery: vaxtlı test sualının məzmunu İLK
                        GET-də səhifə mənbəyinə DÜŞMÜR — timer serverdə başlayanda
-                       question-seen JS injection ilə gəlir (aşağıdakı yer tutucu). #} {% endcomment %}
+                       question-seen JS injection ilə gəlir (aşağıdakı yer tutucu). {% endcomment %} 
                     <div class="question-content" data-server-delivery-body>
                         <div class="server-delivery-pending" data-server-delivery-pending>
                             <span class="skeleton transition-skeleton-line"></span>
                         </div>
                     </div>
                     {% else %}
-                    {% comment %} {# EXAM-P1-05: "bu sual formada aktivdir" markeri. Per-question
+                    {% comment %}  EXAM-P1-05: "bu sual formada aktivdir" markeri. Per-question
                        timer bitəndə disableSlideInputs bunu da disable edir (disabled
                        input POST-a düşmür), ona görə server həmin sualın saxlanmış
-                       cavabını SİLMİR (əvvəlki: absent field = boş cavab = itki). #} {% endcomment %}
+                       cavabını SİLMİR (əvvəlki: absent field = boş cavab = itki). {% endcomment %} 
                     <input type="hidden" name="q_present_{{ q.id }}" value="1">
 
                     <div class="question-content">

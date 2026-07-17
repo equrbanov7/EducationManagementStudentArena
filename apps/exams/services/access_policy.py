@@ -76,6 +76,10 @@ def _ensure_can_view_attempt_results(user):
 # da yalnız imtahan mərkəzi tərəfindən yaradılır. Müəllim quiz/midterm və
 # kateqoriyasız imtahanların məzmununu idarə etməkdə sərbəstdir.
 FINAL_EXAM_CATEGORY = "final"
+# 2026-07 qaydası: final İLƏ YANAŞI midterm (kollokvium) imtahanını da yalnız
+# imtahan mərkəzi YARADIR/çevirir (müəllimin yaratma formu bu kateqoriyaları
+# təklif etmir; mövcud imtahanın redaktəsi qorunur).
+SECURE_EXAM_CATEGORIES = frozenset({"final", "midterm"})
 
 
 def is_exam_center_user(user):

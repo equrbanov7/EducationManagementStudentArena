@@ -22,6 +22,7 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
 
     from apps.exams.models import ExamLanguageVariant
     from apps.exams.public import build_teacher_exam_dashboard
+    from apps.exams.services.access_policy import is_exam_center_user
 
     # --- Search ---
     search_query = (request.GET.get("exam_q", "") or "").strip()
@@ -54,7 +55,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     return {
         "my_exams_count": len(exams_list),
         "my_exams_list": exams_list,
-        "my_exams_dashboard": build_teacher_exam_dashboard(exams_list),
+        "my_exams_dashboard": build_teacher_exam_dashboard(
+            exams_list, include_empty_categories=is_exam_center_user(request.user)
+        ),
         "my_exams_search_query": search_query,
         "my_exams_filter_type": filter_type,
     }

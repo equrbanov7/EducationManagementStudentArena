@@ -89,9 +89,9 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
             </div>
         </form>
-        {# Silmə — redaktə rejimində görünür; ayrıca form (nested form olmaz).
+        {% comment %} Silmə — redaktə rejimində görünür; ayrıca form (nested form olmaz).
            Native confirm() əvəzinə səliqəli təsdiq modalı (data-jd-confirm →
-           journal_grid.js showJdConfirm). CSP-safe: inline handler yox. #}
+           journal_grid.js showJdConfirm). CSP-safe: inline handler yox. {% endcomment %}
         <form method="post" class="jd-lesson-delete-form" data-jd-lesson-delete hidden
               data-jd-confirm
               data-confirm-title="{% trans 'Dərsi silmək?' context 'registrar.journal' %}"

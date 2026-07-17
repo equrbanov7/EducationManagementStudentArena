@@ -232,8 +232,8 @@ Kontekst (view-dən):
 
             <section class="qb-bulk-toolbar">
                 <div class="qb-select-actions">
-                    {# Filtr-şüurlu seçim düyməsi: aktiv süzgəcə görə "bütün xətalıları/xəbərdarlıqları… seç"
-                       (yalnız cari səhifə — server onsuz da səhifəni süzgəcə görə daraldıb). #}
+                    {% comment %} Filtr-şüurlu seçim düyməsi: aktiv süzgəcə görə "bütün xətalıları/xəbərdarlıqları… seç"
+                       (yalnız cari səhifə — server onsuz da səhifəni süzgəcə görə daraldıb). {% endcomment %}
                     <button type="button" id="selectAllPageBtn" class="qb-btn qb-btn-soft-blue" data-active-flag="{{ active_flag }}">
                         <i class="fas fa-check-double"></i>
                         {% if active_flag == 'has-error' %}{% trans "Bütün xətalıları seç" context "exams.template.teacher_questions_bank" %}

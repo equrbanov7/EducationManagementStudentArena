@@ -69,6 +69,11 @@ from apps.exams.services.review_visibility import (  # noqa: F401
     resolve_exam_attempt_name_visibility,
     resolve_exam_attempt_review_window_seconds,
 )
+from apps.exams.services.second_chance import (  # noqa: F401
+    MAX_EXTRA_ATTEMPTS,
+    SecondChanceError,
+    grant_second_chance,
+)
 from apps.exams.services.supervision import attach_attempt_interventions  # noqa: F401
 from apps.exams.services.teacher_dashboard import (  # noqa: F401
     build_teacher_exam_dashboard,
@@ -85,8 +90,11 @@ __all__ = [
     "RoomAdminError",
     "StudentGroupForm",
     "add_computer",
+    "MAX_EXTRA_ATTEMPTS",
+    "SecondChanceError",
     "bulk_add_computers",
     "delete_room",
+    "grant_second_chance",
     "can_assign_invigilators",
     "update_computer",
     "get_ai_rate_limit",
