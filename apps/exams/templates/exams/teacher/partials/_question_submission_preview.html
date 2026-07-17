@@ -13,21 +13,21 @@ Stil: exams/css/question_submission.css (qsubp-* / qsubs-stats).
     <div class="qsubs-stat">
         <div class="qsubs-stat__icon qsubs-stat__icon--blue"><i class="fas fa-list-check"></i></div>
         <div>
-            <span class="qsubs-stat__label">{% trans "Sual" %}</span>
+            <span class="qsubs-stat__label">{% trans "Sual" context "exams.template.question_submission" %}</span>
             <span class="qsubs-stat__value">{{ counts.questions }}</span>
         </div>
     </div>
     <div class="qsubs-stat">
         <div class="qsubs-stat__icon qsubs-stat__icon--red"><i class="fas fa-circle-xmark"></i></div>
         <div>
-            <span class="qsubs-stat__label">{% trans "Xəta" %}</span>
+            <span class="qsubs-stat__label">{% trans "Xəta" context "exams.template.question_submission" %}</span>
             <span class="qsubs-stat__value">{{ counts.errors }}</span>
         </div>
     </div>
     <div class="qsubs-stat">
         <div class="qsubs-stat__icon qsubs-stat__icon--amber"><i class="fas fa-triangle-exclamation"></i></div>
         <div>
-            <span class="qsubs-stat__label">{% trans "Xəbərdarlıq" %}</span>
+            <span class="qsubs-stat__label">{% trans "Xəbərdarlıq" context "exams.template.question_submission" %}</span>
             <span class="qsubs-stat__value">{{ counts.warnings }}</span>
         </div>
     </div>
@@ -57,7 +57,7 @@ Stil: exams/css/question_submission.css (qsubp-* / qsubs-stats).
         <details class="qsubp-warnings" {% if q.has_error %}data-severity="error" open{% endif %}>
             <summary>
                 <i class="fas fa-list-check"></i>
-                {% trans "Xəbərdarlıqlar" %}
+                {% trans "Xəbərdarlıqlar" context "exams.template.question_submission" %}
                 <span>({{ q.warnings|length }})</span>
             </summary>
             <div class="qsubp-warnings__body">

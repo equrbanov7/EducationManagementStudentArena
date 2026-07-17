@@ -28323,3 +28323,995 @@ msgstr "Yumşaq silmə — imtahan gizlədilir, nəticələr saxlanılır."
 msgctxt "exams.model.exam.help"
 msgid "deleted_at"
 msgstr "İmtahanın yumşaq silindiyi vaxt."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Aktiv filtrlər"
+msgstr "Aktiv filtrlər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Başlıq, fənn və ya qrup üzrə axtar…"
+msgstr "Başlıq, fənn və ya qrup üzrə axtar…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+msgstr "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+msgstr "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bu şərtlərə uyğun göndəriş tapılmadı."
+msgstr "Bu şərtlərə uyğun göndəriş tapılmadı."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün dillər"
+msgstr "Bütün dillər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün fakültələr"
+msgstr "Bütün fakültələr"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün illər"
+msgstr "Bütün illər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün kafedralar"
+msgstr "Bütün kafedralar"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün müəllimlər"
+msgstr "Bütün müəllimlər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün semestrlər"
+msgstr "Bütün semestrlər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Dil"
+msgstr "Dil"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Düzəlt"
+msgstr "Düzəlt"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Düzəliş gözləyən"
+msgstr "Düzəliş gözləyən"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Filtri sil"
+msgstr "Filtri sil"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Filtri təmizlə"
+msgstr "Filtri təmizlə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Geri qaytarılıb — düzəliş gözlənilir"
+msgstr "Geri qaytarılıb — düzəliş gözlənilir"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Göndərişlərdə axtar"
+msgstr "Göndərişlərdə axtar"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hamısını təmizlə"
+msgstr "Hamısını təmizlə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın."
+msgstr "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hələ heç bir sual göndərişi yoxdur."
+msgstr "Hələ heç bir sual göndərişi yoxdur."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın."
+msgstr "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qeydə baxın, düzəldin və yenidən göndərin."
+msgstr "Qeydə baxın, düzəldin və yenidən göndərin."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qəbul"
+msgstr "Qəbul"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qəbul edilmiş"
+msgstr "Qəbul edilmiş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd"
+msgstr "Rədd"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd edilmiş"
+msgstr "Rədd edilmiş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Status filtri"
+msgstr "Status filtri"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin."
+msgstr "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Yeni göndəriş"
+msgstr "Yeni göndəriş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Ümumi göndəriş"
+msgstr "Ümumi göndəriş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "sual"
+msgstr "sual"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "«%(title)s» göndərişini düzəlt"
+msgstr "«%(title)s» göndərişini düzəlt"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "«%(title)s» göndərişini sil"
+msgstr "«%(title)s» göndərişini sil"
+
+msgctxt "exams.template.question_submission"
+msgid "(bir və ya bir neçə)"
+msgstr "(bir və ya bir neçə)"
+
+msgctxt "exams.template.question_submission"
+msgid "(boşdursa başlıq götürülür)"
+msgstr "(boşdursa başlıq götürülür)"
+
+msgctxt "exams.template.question_submission"
+msgid "(opsional)"
+msgstr "(opsional)"
+
+msgctxt "exams.template.question_submission"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "exams.template.question_submission"
+msgid "Başlıq"
+msgstr "Başlıq"
+
+msgctxt "exams.template.question_submission"
+msgid "Boş saxlasanız suallar yeni banka yazılacaq."
+msgstr "Boş saxlasanız suallar yeni banka yazılacaq."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+msgstr "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+
+msgctxt "exams.template.question_submission"
+msgid "Bu göndərişdə %(count)s xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın."
+msgstr "Bu göndərişdə %(count)s xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək."
+msgstr "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək."
+
+msgctxt "exams.template.question_submission"
+msgid "Dil, fənn və qrup mütləqdir"
+msgstr "Dil, fənn və qrup mütləqdir"
+
+msgctxt "exams.template.question_submission"
+msgid "Dili seçin…"
+msgstr "Dili seçin…"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş et"
+msgstr "Düzəliş et"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəlt və yenidən göndər"
+msgstr "Düzəlt və yenidən göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "exams.template.question_submission"
+msgid "Fənni seçin…"
+msgstr "Fənni seçin…"
+
+msgctxt "exams.template.question_submission"
+msgid "Geri qaytar"
+msgstr "Geri qaytar"
+
+msgctxt "exams.template.question_submission"
+msgid "Geri qaytarılıb"
+msgstr "Geri qaytarılıb"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərildi"
+msgstr "Göndərildi"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərilmiş suallar"
+msgstr "Göndərilmiş suallar"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş məlumatları"
+msgstr "Göndəriş məlumatları"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər."
+msgstr "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər."
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş qəbul edildi"
+msgstr "Göndəriş qəbul edildi"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişi sil"
+msgstr "Göndərişi sil"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişin statusu"
+msgstr "Göndərişin statusu"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişlərə qayıt"
+msgstr "Göndərişlərə qayıt"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişə baxış"
+msgstr "Göndərişə baxış"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllim nəyi düzəltməlidir?"
+msgstr "Müəllim nəyi düzəltməlidir?"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllimin qeydi"
+msgstr "Müəllimin qeydi"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllimə qeyd"
+msgstr "Müəllimə qeyd"
+
+msgctxt "exams.template.question_submission"
+msgid "Qeydiniz"
+msgstr "Qeydiniz"
+
+msgctxt "exams.template.question_submission"
+msgid "Qrup(lar)"
+msgstr "Qrup(lar)"
+
+msgctxt "exams.template.question_submission"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul edildi"
+msgstr "Qəbul edildi"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul edilib"
+msgstr "Qəbul edilib"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul et"
+msgstr "Qəbul et"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul et və banka əlavə et"
+msgstr "Qəbul et və banka əlavə et"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar"
+msgstr "Qərar"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar qeydi"
+msgstr "Qərar qeydi"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərarınızı seçin"
+msgstr "Qərarınızı seçin"
+
+msgctxt "exams.template.question_submission"
+msgid "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir."
+msgstr "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir."
+
+msgctxt "exams.template.question_submission"
+msgid "Sizə hələ qrup təyin olunmayıb. Qrup üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın."
+msgstr "Sizə hələ qrup təyin olunmayıb. Qrup üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın."
+
+msgctxt "exams.template.question_submission"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual"
+msgstr "Sual"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual eyni anda seçilmiş bütün qruplar üçün göndərilir."
+msgstr "Sual eyni anda seçilmiş bütün qruplar üçün göndərilir."
+
+msgctxt "exams.template.question_submission"
+msgid "Sual göndərişi"
+msgstr "Sual göndərişi"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar"
+msgstr "Suallar"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar hansı banka yazılsın?"
+msgstr "Suallar hansı banka yazılsın?"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək."
+msgstr "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək."
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar və xəbərdarlıqlar"
+msgstr "Suallar və xəbərdarlıqlar"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin."
+msgstr "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin."
+
+msgctxt "exams.template.question_submission"
+msgid "Sualların yazıldığı dil — mərkəz bankda bu dillə saxlayır."
+msgstr "Sualların yazıldığı dil — mərkəz bankda bu dillə saxlayır."
+
+msgctxt "exams.template.question_submission"
+msgid "Xəbərdarlıq"
+msgstr "Xəbərdarlıq"
+
+msgctxt "exams.template.question_submission"
+msgid "Xəbərdarlıqlar"
+msgstr "Xəbərdarlıqlar"
+
+msgctxt "exams.template.question_submission"
+msgid "Xəta"
+msgstr "Xəta"
+
+msgctxt "exams.template.question_submission"
+msgid "Xətalı"
+msgstr "Xətalı"
+
+msgctxt "exams.template.question_submission"
+msgid "Yalnız sizin fənləriniz görünür."
+msgstr "Yalnız sizin fənləriniz görünür."
+
+msgctxt "exams.template.question_submission"
+msgid "Yeni bankın adı"
+msgstr "Yeni bankın adı"
+
+msgctxt "exams.template.question_submission"
+msgid "Yenidən göndər"
+msgstr "Yenidən göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Yoxla (preview)"
+msgstr "Yoxla (preview)"
+
+msgctxt "exams.template.question_submission"
+msgid "Yoxlama nəticəsi"
+msgstr "Yoxlama nəticəsi"
+
+msgctxt "exams.template.question_submission"
+msgid "məs. 3-cü sualda düzgün cavab işarələnməyib..."
+msgstr "məs. 3-cü sualda düzgün cavab işarələnməyib..."
+
+msgctxt "exams.template.question_submission"
+msgid "məs. təşəkkürlər, suallar final bankına əlavə olundu…"
+msgstr "məs. təşəkkürlər, suallar final bankına əlavə olundu…"
+
+msgctxt "exams.template.question_submission"
+msgid "%(count)s sual «%(bank)s» bankına yazıldı"
+msgstr "%(count)s sual «%(bank)s» bankına yazıldı"
+
+msgctxt "exams.template.question_submission"
+msgid "Ümumi sual sayı"
+msgstr "Ümumi sual sayı"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan dili"
+msgstr "İmtahan dili"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi"
+msgstr "İmtahan mərkəzi"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək."
+msgstr "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək."
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi göndərişi geri qaytardı — düzəliş gözlənilir"
+msgstr "İmtahan mərkəzi göndərişi geri qaytardı — düzəliş gözlənilir"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzindədir"
+msgstr "İmtahan mərkəzindədir"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə göndər"
+msgstr "İmtahan mərkəzinə göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə qeyd"
+msgstr "İmtahan mərkəzinə qeyd"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə sual göndər"
+msgstr "İmtahan mərkəzinə sual göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Əvvəlcə qərar seçin"
+msgstr "Əvvəlcə qərar seçin"
+
+msgctxt "exams.template.question_submission"
+msgid "— Yeni bank yaradılsın —"
+msgstr "— Yeni bank yaradılsın —"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz qəbul edildi və sual bankına əlavə olundu."
+msgstr "\"{title}\" sual göndərişiniz qəbul edildi və sual bankına əlavə olundu."
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz rədd edildi. Qeydə baxıb düzəldərək yenidən göndərə bilərsiniz."
+msgstr "\"{title}\" sual göndərişiniz rədd edildi. Qeydə baxıb düzəldərək yenidən göndərə bilərsiniz."
+
+msgctxt "exams.notification.question_submission"
+msgid "Sual göndərişinə baxıldı"
+msgstr "Sual göndərişinə baxıldı"
+
+msgctxt "exams.notification.question_submission"
+msgid "Yeni sual göndərişi"
+msgstr "Yeni sual göndərişi"
+
+msgctxt "exams.notification.question_submission"
+msgid "{teacher} \"{title}\" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} \"{title}\" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual)."
+
+msgctxt "exams.notification.question_submission"
+msgid "{teacher} \"{title}\" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} \"{title}\" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual)."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bank başqa təşkilata aiddir."
+msgstr "Bank başqa təşkilata aiddir."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bu göndəriş artıq yekunlaşıb — dəyişdirilə bilməz."
+msgstr "Bu göndəriş artıq yekunlaşıb — dəyişdirilə bilməz."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bu göndərişə artıq baxılıb."
+msgstr "Bu göndərişə artıq baxılıb."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Fənn qeyd olunmalıdır."
+msgstr "Fənn qeyd olunmalıdır."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Hansı qrup üçün olduğu qeyd olunmalıdır."
+msgstr "Hansı qrup üçün olduğu qeyd olunmalıdır."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Mövzu/başlıq boş ola bilməz."
+msgstr "Mövzu/başlıq boş ola bilməz."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Mətndən heç bir sual çıxarıla bilmədi."
+msgstr "Mətndən heç bir sual çıxarıla bilmədi."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Snapshot-dan heç bir sual banka yazıla bilmədi (A–D variantları natamamdır)."
+msgstr "Snapshot-dan heç bir sual banka yazıla bilmədi (A–D variantları natamamdır)."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Sual mətni çox qısadır."
+msgstr "Sual mətni çox qısadır."
+
+msgctxt "exams.view.question_submission.ai"
+msgid "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+msgstr "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+
+msgctxt "exams.view.question_submission.ai"
+msgid "Sual göndərişi"
+msgstr "Sual göndərişi"
+
+msgctxt "exams.view.question_submission.error"
+msgid "Fənni seçin (məcburidir)."
+msgstr "Fənni seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Qəbul olunmuş göndəriş silinə bilməz."
+msgstr "Qəbul olunmuş göndəriş silinə bilməz."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Seçilmiş fənn sizin fənləriniz arasında deyil."
+msgstr "Seçilmiş fənn sizin fənləriniz arasında deyil."
+
+msgctxt "exams.view.question_submission.error"
+msgid "İmtahan dilini seçin (məcburidir)."
+msgstr "İmtahan dilini seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Ən azı bir qrup seçin (məcburidir)."
+msgstr "Ən azı bir qrup seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Fayl oxunmadı: {error}"
+msgstr "Fayl oxunmadı: {error}"
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup)."
+msgstr "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş qəbul edildi — {count} sual \"{bank}\" bankına əlavə olundu."
+msgstr "Göndəriş qəbul edildi — {count} sual \"{bank}\" bankına əlavə olundu."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş rədd edildi və müəllimə bildirildi."
+msgstr "Göndəriş rədd edildi və müəllimə bildirildi."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş silindi."
+msgstr "Göndəriş silindi."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş yeniləndi və imtahan mərkəzinə təkrar çatdırıldı."
+msgstr "Göndəriş yeniləndi və imtahan mərkəzinə təkrar çatdırıldı."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Rədd üçün müəllimə qeyd yazın — nəyi düzəltməlidir."
+msgstr "Rədd üçün müəllimə qeyd yazın — nəyi düzəltməlidir."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Yanlış əməliyyat."
+msgstr "Yanlış əməliyyat."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Aktiv təşkilat konteksti tapılmadı."
+msgstr "Aktiv təşkilat konteksti tapılmadı."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Bu göndəriş dəyişdirilə bilməz."
+msgstr "Bu göndəriş dəyişdirilə bilməz."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgid_plural "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgstr[0] "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgstr[1] "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "%(counter)s sual"
+msgid_plural "%(counter)s sual"
+msgstr[0] "%(counter)s sual"
+msgstr[1] "%(counter)s sual"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)s kompüter əlavə edildi."
+msgstr "%(n)s kompüter əlavə edildi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(u)s zal idarəçiliyindən çıxarıldı."
+msgstr "%(u)s zal idarəçiliyindən çıxarıldı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(u)s zal idarəçisi təyin edildi."
+msgstr "%(u)s zal idarəçisi təyin edildi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv et"
+msgstr "Aktiv et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv təşkilat tapılmadı. Zal yaratmaq üçün əvvəlcə təşkilat seçin."
+msgstr "Aktiv təşkilat tapılmadı. Zal yaratmaq üçün əvvəlcə təşkilat seçin."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bina"
+msgstr "Bina"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu bölmə yalnız zal idarəçiləri üçündür."
+msgstr "Bu bölmə yalnız zal idarəçiləri üçündür."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu istifadəçilər superadmin olmadan da öz təşkilatlarının zallarını idarə edə bilər."
+msgstr "Bu istifadəçilər superadmin olmadan da öz təşkilatlarının zallarını idarə edə bilər."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu təşkilatda hələ zal yoxdur — «Yeni zal» ilə başlayın."
+msgstr "Bu təşkilatda hələ zal yoxdur — «Yeni zal» ilə başlayın."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Deaktiv"
+msgstr "Deaktiv"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Deaktiv et"
+msgstr "Deaktiv et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Form məlumatları düzgün deyil."
+msgstr "Form məlumatları düzgün deyil."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Geri al"
+msgstr "Geri al"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hələ kompüter əlavə edilməyib — «Kompüter əlavə et» ilə başlayın."
+msgstr "Hələ kompüter əlavə edilməyib — «Kompüter əlavə et» ilə başlayın."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hələ təyin olunmuş idarəçi yoxdur."
+msgstr "Hələ təyin olunmuş idarəçi yoxdur."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hər sətir: Ad, MAC[, IP][, Yer]"
+msgstr "Hər sətir: Ad, MAC[, IP][, Yer]"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "IP ilə"
+msgstr "IP ilə"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kod"
+msgstr "Kod"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter silindi."
+msgstr "Kompüter silindi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter yeniləndi."
+msgstr "Kompüter yeniləndi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter əlavə edildi."
+msgstr "Kompüter əlavə edildi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter əlavə et"
+msgstr "Kompüter əlavə et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüteri redaktə et"
+msgstr "Kompüteri redaktə et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)."
+msgstr "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "MAC-ı kopyala"
+msgstr "MAC-ı kopyala"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Mərtəbə"
+msgstr "Mərtəbə"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Naməlum əməliyyat."
+msgstr "Naməlum əməliyyat."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Planlaşdırılan kompüter"
+msgstr "Planlaşdırılan kompüter"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Qeydiyyatdan keçən kompüter sayı planla üst-üstə düşmür"
+msgstr "Qeydiyyatdan keçən kompüter sayı planla üst-üstə düşmür"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Söndürülüb"
+msgstr "Söndürülüb"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Toplu əlavə"
+msgstr "Toplu əlavə"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Toplu əlavə (MAC siyahısı)"
+msgstr "Toplu əlavə (MAC siyahısı)"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Toplu əlavə et"
+msgstr "Toplu əlavə et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Tutum (yer)"
+msgstr "Tutum (yer)"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Təşkilat"
+msgstr "Təşkilat"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Təşkilat konteksti tapılmadı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)."
+msgstr "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yeni zal"
+msgstr "Yeni zal"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yeni zal yarat"
+msgstr "Yeni zal yarat"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yer"
+msgstr "Yer"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yer nömrəsi"
+msgstr "Yer nömrəsi"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal idarəçiləri"
+msgstr "Zal idarəçiləri"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal statusu dəyişdirildi."
+msgstr "Zal statusu dəyişdirildi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal yaradıldı."
+msgstr "Zal yaradıldı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal yeniləndi."
+msgstr "Zal yeniləndi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalları, kompüterləri və MAC/IP qeydlərini idarə edin. Bu bölmə yalnız superadmin (və ya təyin olunmuş zal idarəçisi) üçündür."
+msgstr "Zalları, kompüterləri və MAC/IP qeydlərini idarə edin. Bu bölmə yalnız superadmin (və ya təyin olunmuş zal idarəçisi) üçündür."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalı redaktə et"
+msgstr "Zalı redaktə et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalı sil"
+msgstr "Zalı sil"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalı yarat"
+msgstr "Zalı yarat"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "canlı"
+msgstr "canlı"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "kompüter"
+msgstr "kompüter"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "nəzarətçi"
+msgstr "nəzarətçi"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "plan:"
+msgstr "plan:"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "yer"
+msgstr "yer"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(label)s» (%(mac)s) silinsin?"
+msgstr "«%(label)s» (%(mac)s) silinsin?"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(label)s» kompüterini redaktə et"
+msgstr "«%(label)s» kompüterini redaktə et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(label)s» kompüterini sil"
+msgstr "«%(label)s» kompüterini sil"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(name)s» zalı və %(count_c)s kompüter qeydi həmişəlik silinəcək. Davam edilsin?"
+msgstr "«%(name)s» zalı və %(count_c)s kompüter qeydi həmişəlik silinəcək. Davam edilsin?"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(room)s» zalı silindi."
+msgstr "«%(room)s» zalı silindi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İcazə geri alınsın?"
+msgstr "İcazə geri alınsın?"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İcazə vermək yalnız superadminə məxsusdur."
+msgstr "İcazə vermək yalnız superadminə məxsusdur."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İdarəçi təyin et"
+msgstr "İdarəçi təyin et"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İmtahan zalları"
+msgstr "İmtahan zalları"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi adı və ya email"
+msgstr "İstifadəçi adı və ya email"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi göstərilməyib."
+msgstr "İstifadəçi göstərilməyib."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi profili yoxdur."
+msgstr "İstifadəçi profili yoxdur."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi tapılmadı: %(u)s"
+msgstr "İstifadəçi tapılmadı: %(u)s"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Əlavə ediləcək sətir tapılmadı."
+msgstr "Əlavə ediləcək sətir tapılmadı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Əlavə et"
+msgstr "Əlavə et"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu MAC artıq bu zalda qeydlidir: %(mac)s"
+msgstr "Bu MAC artıq bu zalda qeydlidir: %(mac)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu MAC artıq «%(room)s» zalında qeydlidir (%(label)s). Kompüteri əvvəlcə oradan silin və ya redaktə edin."
+msgstr "Bu MAC artıq «%(room)s» zalında qeydlidir (%(label)s). Kompüteri əvvəlcə oradan silin və ya redaktə edin."
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu adla kompüter artıq var: %(label)s"
+msgstr "Bu adla kompüter artıq var: %(label)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu yer nömrəsi artıq tutulub: %(seat)s"
+msgstr "Bu yer nömrəsi artıq tutulub: %(seat)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "IP ünvanı düzgün deyil: %(ip)s"
+msgstr "IP ünvanı düzgün deyil: %(ip)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Kompüter adı boş ola bilməz."
+msgstr "Kompüter adı boş ola bilməz."
+
+msgctxt "exams.final_center.room_admin"
+msgid "MAC ünvanı düzgün deyil: %(mac)s"
+msgstr "MAC ünvanı düzgün deyil: %(mac)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Sətir %(n)s: %(err)s"
+msgstr "Sətir %(n)s: %(err)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Sətir %(n)s: ad və MAC lazımdır."
+msgstr "Sətir %(n)s: ad və MAC lazımdır."
+
+msgctxt "exams.final_center.room_admin"
+msgid "Yer nömrəsi müsbət olmalıdır."
+msgstr "Yer nömrəsi müsbət olmalıdır."
+
+msgctxt "exams.final_center.room_admin"
+msgid "Yer nömrəsi rəqəm olmalıdır: %(seat)s"
+msgstr "Yer nömrəsi rəqəm olmalıdır: %(seat)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "«%(room)s» zalının oturum tarixçəsi var — silinə bilməz. Zalı deaktiv edin."
+msgstr "«%(room)s» zalının oturum tarixçəsi var — silinə bilməz. Zalı deaktiv edin."
+
+msgctxt "exams.final_center.form"
+msgid "Başlama vaxtı keçmişdə ola bilməz."
+msgstr "Başlama vaxtı keçmişdə ola bilməz."
+
+msgctxt "exams.final_center.form"
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+
+msgctxt "exams.final_center.form"
+msgid "Bu kod ilə zal artıq mövcuddur."
+msgstr "Bu kod ilə zal artıq mövcuddur."
+
+msgctxt "exams.final_center.form"
+msgid "Final imtahanı"
+msgstr "Final imtahanı"
+
+msgctxt "exams.final_center.form"
+msgid "Qrup seçin və ya istifadəçi adlarını daxil edin."
+msgstr "Qrup seçin və ya istifadəçi adlarını daxil edin."
+
+msgctxt "exams.final_center.form"
+msgid "Tələbə qrupu"
+msgstr "Tələbə qrupu"
+
+msgctxt "exams.final_center.form"
+msgid "Vergül və ya yeni sətirlə ayrılmış istifadəçi adları."
+msgstr "Vergül və ya yeni sətirlə ayrılmış istifadəçi adları."
+
+msgctxt "exams.final_center.form"
+msgid "İstifadəçi adları"
+msgstr "İstifadəçi adları"
