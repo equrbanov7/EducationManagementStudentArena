@@ -187,6 +187,34 @@ def get_finished_attempts_for_user(exam, user):
     return exam.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).order_by("-started_at")
 
 
+def sweep_overdue_attempts(queryset=None):
+    """Vaxtı bitmiş (deadline-ı keçmiş) draft/in_progress cəhdləri avtomatik
+    bitirir — tələbənin brauzeri bağlı olsa belə imtahan «yarımçıq/gözləmədə»
+    qalmasın; nəzarətçi, müəllim və nəticə ekranlarında dərhal bitmiş görünsün.
+
+    Cəhd ``expired`` kimi bağlanır, saxlanmış cavablar qorunur (test balı
+    oxuma zamanı ``score_percent`` ilə hesablanır, ona görə tələbənin o ana
+    qədər yazdığı avtomatik sayılır). Qlobal periodik Celery sweep-dən və lazy
+    monitor oxumalarından təhlükəsiz çağırıla bilər. Bitirilən cəhd sayını
+    qaytarır.
+
+    Tenant izolyasiyası: çağıran org-skoplu ``queryset`` ötürür; skopsuz
+    default yalnız qlobal periodik sweep üçündür və hər cəhd öz imtahanının
+    ``organization``-una yazılır.
+    """
+    if queryset is None:
+        queryset = ExamAttempt.objects.all()
+
+    candidates = queryset.filter(status__in=["draft", "in_progress"], is_trial=False).select_related(
+        "exam", "exam__organization", "user"
+    )
+    expired = 0
+    for attempt in candidates.iterator():
+        if attempt.expire_if_time_limit_reached():
+            expired += 1
+    return expired
+
+
 def can_user_start_new_attempt(exam, user):
     active_attempt = get_active_attempt_for_user(exam, user)
     if active_attempt:
