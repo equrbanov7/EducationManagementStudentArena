@@ -232,6 +232,21 @@ class _Stage2Mixin:
             "departments": [],
             "post_next_url": "",
         }
+        # «İmtahan şansı ver» (ikinci şans) bölməsi (İmtahan Mərkəzi).
+        self.exam_chance_section = {
+            "selected_org": None,
+            "exams": [],
+            "groups": [],
+            "recent_grants": [],
+            "student_results": [],
+            "filters": {},
+            "years": [],
+            "periods": [],
+            "faculties": [],
+            "kafedras": [],
+            "selected_exam_id": "",
+            "post_next_url": "",
+        }
         self.org_structure_section = {
             "organization": self.active_organization,
             "units": [],

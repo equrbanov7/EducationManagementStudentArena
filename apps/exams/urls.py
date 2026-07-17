@@ -50,13 +50,6 @@ urlpatterns = [
         name="exam_center_session_history",
     ),
     # Final təyinatları (imtahan-scoped — zaldan asılı deyil).
-    path("center/finals/", views.exam_center_finals, name="exam_center_finals"),
-    path("center/finals/assign/", views.exam_center_assign_students, name="exam_center_assign_students"),
-    path(
-        "center/finals/tickets/<int:ticket_id>/pin/",
-        views.exam_center_ticket_pin,
-        name="exam_center_ticket_pin",
-    ),
     path(
         "center/sessions/<int:session_id>/monitor/",
         views.exam_center_session_monitor,
