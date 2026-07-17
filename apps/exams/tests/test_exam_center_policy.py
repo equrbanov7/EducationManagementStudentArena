@@ -218,12 +218,13 @@ class ExamFormFinalCategoryTests(_Base):
         self.assertFalse(form.is_valid())
         self.assertIn("exam_type_extended", form.errors)
 
-    def test_teacher_final_choice_hidden(self):
+    def test_teacher_final_and_midterm_choices_hidden(self):
+        # 2026-07 qaydası: midterm (kollokvium) da yalnız imtahan mərkəzinindir.
         form = ExamForm(user=self.teacher, organization=self.org)
         choice_values = {choice[0] for choice in form.fields["exam_type_extended"].choices}
         self.assertNotIn("final", choice_values)
+        self.assertNotIn("midterm", choice_values)
         self.assertIn("quiz", choice_values)
-        self.assertIn("midterm", choice_values)
 
     def test_exam_center_can_select_final_category(self):
         form = ExamForm(self._form_data(), user=self.exam_center, organization=self.org)
@@ -236,10 +237,14 @@ class ExamFormFinalCategoryTests(_Base):
         self.assertContains(response, 'name="exam_type_extended"', html=False)
         self.assertContains(response, 'value="final"', html=False)
 
-    def test_teacher_can_select_quiz_and_midterm(self):
-        for category in ("quiz", "midterm"):
-            form = ExamForm(self._form_data(exam_type_extended=category), user=self.teacher, organization=self.org)
-            self.assertTrue(form.is_valid(), form.errors)
+    def test_teacher_can_select_quiz_only(self):
+        form = ExamForm(self._form_data(exam_type_extended="quiz"), user=self.teacher, organization=self.org)
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_teacher_cannot_select_midterm(self):
+        form = ExamForm(self._form_data(exam_type_extended="midterm"), user=self.teacher, organization=self.org)
+        self.assertFalse(form.is_valid())
+        self.assertIn("exam_type_extended", form.errors)
 
     def test_teacher_editing_existing_final_keeps_value(self):
         # Mövcud final instansının dəyəri dəyişmirsə redaktə partlamır.

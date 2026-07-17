@@ -57,6 +57,7 @@ from .dashboard import (
 )
 
 # İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri
+from .exam_chance import exam_chance
 from .kollokvium_windows import kollokvium_windows
 
 # Organization views
@@ -172,5 +173,6 @@ __all__ = [
     "superadmin_organizations",
     "superadmin_ai_settings",
     "superadmin_exam_rooms",
+    "exam_chance",
     "kollokvium_windows",
 ]

@@ -307,6 +307,16 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "exam-chance" in self.allowed_sections and self.active_section == "exam-chance":
+            from .._sections.exam_chance import build_exam_chance_section
+
+            build_exam_chance_section(
+                self.request,
+                self.exam_chance_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         self._notif_ctx = build_notifications_context(self.request, active_section=self.active_section)
         self.notif_filter = self._notif_ctx["notif_filter"]
         self.notif_type = self._notif_ctx["notif_type"]

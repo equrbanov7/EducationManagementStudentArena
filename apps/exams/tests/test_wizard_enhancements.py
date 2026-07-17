@@ -55,7 +55,9 @@ class WizardEnhancementsTests(TestCase):
                 "random_question_count": "10",
             },
             organization=self.org,
-            user=self.teacher,
+            # Midterm artıq yalnız imtahan mərkəzinindir; bu test fənn
+            # validasiyasını yoxlayır — rol-məhdudiyyətsiz forma qururuq.
+            user=None,
         )
         self.assertFalse(form.is_valid())
         self.assertIn("subject", form.errors)
@@ -70,7 +72,7 @@ class WizardEnhancementsTests(TestCase):
                 "random_question_count": "10",
             },
             organization=self.org,
-            user=self.teacher,
+            user=None,
         )
         self.assertTrue(form.is_valid(), form.errors.as_json())
 

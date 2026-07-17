@@ -4,7 +4,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.exams.models import Exam, ExamRoom, ExamRoomSession, StudentGroup
+from apps.exams.models import ExamRoom, ExamRoomSession
 
 
 class ExamRoomForm(forms.ModelForm):
@@ -39,7 +39,7 @@ class ExamRoomSessionForm(forms.ModelForm):
 
     Nəzarətçi ZALA təyin olunur (``ExamRoom.invigilators``) və zaldakı oturumu
     idarə edir; imtahan seçimi burada YOX (tələbə ``FinalExamTicket.exam``-a
-    təyin olunur — bax ``AssignStudentsForm``).
+    təyin olunur — «İmtahan şansı ver» bölməsi/fərdi PIN axını ilə).
     """
 
     class Meta:
@@ -95,59 +95,7 @@ class ExamRoomSessionForm(forms.ModelForm):
         return cleaned
 
 
-class AssignStudentsForm(forms.Form):
-    """İMTAHANA tələbə təyinatı: final imtahan seçilir, tələbələr qrupdan
-    və/və ya istifadəçi adları siyahısından təyin olunur (hər birinə PIN verilir).
-
-    Zal seçimi YOX — tələbə imtahana təyin olunur, hansı zalda verəcəyi giriş
-    anında (kompüter IP → zal) müəyyən olunur.
-    """
-
-    exam = forms.ModelChoiceField(
-        queryset=Exam.objects.none(),
-        label=pgettext_lazy("exams.final_center.form", "Final imtahanı"),
-    )
-    group = forms.ModelChoiceField(
-        queryset=StudentGroup.objects.none(),
-        required=False,
-        label=pgettext_lazy("exams.final_center.form", "Tələbə qrupu"),
-    )
-    usernames = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "username1, username2 …"}),
-        label=pgettext_lazy("exams.final_center.form", "İstifadəçi adları"),
-        help_text=pgettext_lazy("exams.final_center.form", "Vergül və ya yeni sətirlə ayrılmış istifadəçi adları."),
-    )
-
-    def __init__(self, *args, organization=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["exam"].queryset = Exam.objects.filter(
-            organization=organization, exam_type_extended="final", is_archived=False, is_deleted=False
-        ).order_by("-created_at")
-        self.fields["exam"].widget.attrs.update(
-            {
-                "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
-                "data-bootstrap-select": "",
-            }
-        )
-        self.fields["group"].queryset = StudentGroup.objects.filter(organization=organization).order_by("name")
-
-    def clean(self):
-        cleaned = super().clean()
-        if not cleaned.get("group") and not (cleaned.get("usernames") or "").strip():
-            raise forms.ValidationError(
-                pgettext_lazy("exams.final_center.form", "Qrup seçin və ya istifadəçi adlarını daxil edin.")
-            )
-        return cleaned
-
-    def username_list(self):
-        raw = self.cleaned_data.get("usernames") or ""
-        parts = [p.strip() for chunk in raw.splitlines() for p in chunk.split(",")]
-        return [p for p in parts if p]
-
-
 __all__ = [
-    "AssignStudentsForm",
     "ExamRoomForm",
     "ExamRoomSessionForm",
 ]

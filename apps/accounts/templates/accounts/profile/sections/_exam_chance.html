@@ -1,0 +1,7 @@
+{% if 'exam-chance' in allowed_sections %}
+<section class="profile-section-panel profile-section--exam-chance {% if active_section == 'exam-chance' %}is-active{% endif %}"
+         data-profile-section-panel="exam-chance"
+         data-source-url="{{ profile_base_url }}?section=exam-chance">
+    {% include "accounts/partials/_exam_chance_content.html" with s=exam_chance_section %}
+</section>
+{% endif %}

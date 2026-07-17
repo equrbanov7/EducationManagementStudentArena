@@ -255,6 +255,7 @@ def _role_capabilities(user, profile):
             "exam-center-stats",  # imtahan statistikaları / nəticələr
             "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "kollokvium-windows",  # kollokvium bal-yazma pəncərələri (imtahan mərkəzi)
+            "exam-chance",  # imtahan şansı ver (ikinci şans — imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
             "system-monitoring",  # Sistem Monitorinqi (yalnız superadmin; server-side qorunur)
             "pending-post-approvals",
@@ -319,6 +320,7 @@ def _role_capabilities(user, profile):
                     "exam-center-stats",
                     "appeal-stats",
                     "kollokvium-windows",
+                    "exam-chance",
                 }
             )
 

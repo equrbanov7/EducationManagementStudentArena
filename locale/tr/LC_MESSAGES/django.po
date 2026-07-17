@@ -29321,3 +29321,223 @@ msgstr "Virgül veya yeni satırla ayrılmış kullanıcı adları."
 msgctxt "exams.final_center.form"
 msgid "İstifadəçi adları"
 msgstr "Kullanıcı adları"
+
+msgctxt "profile.section"
+msgid "İmtahan şansı ver"
+msgstr "Sınav hakkı ver"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan şansı ver"
+msgstr "Sınav hakkı ver"
+
+msgctxt "accounts.exam_chance"
+msgid "Seçilmiş final/kollokvium imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür."
+msgstr "Seçilen final/vize sınavı için öğrenciye veya tüm gruba yeniden deneme hakkı verin. Sistem otomatik olarak yeni giriş PIN'i oluşturur, finalin girişini yeniden açar ve sınav öğrencinin atanmış görevlerinde yeniden görünür."
+
+msgctxt "accounts.exam_chance"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Etkin kuruluş bulunamadı."
+
+msgctxt "accounts.exam_chance"
+msgid "Bu təşkilatda hələ final/kollokvium imtahanı yoxdur."
+msgstr "Bu kuruluşta henüz final/vize sınavı yok."
+
+msgctxt "accounts.exam_chance"
+msgid "Yenidən cəhd hüququ"
+msgstr "Yeniden deneme hakkı"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan"
+msgstr "Sınav"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahanı seçin…"
+msgstr "Sınav seçin…"
+
+msgctxt "accounts.exam_chance"
+msgid "Final"
+msgstr "Final"
+
+msgctxt "accounts.exam_chance"
+msgid "Kollokvium"
+msgstr "Vize"
+
+msgctxt "accounts.exam_chance"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "accounts.exam_chance"
+msgid "(bütöv qrupa vermək üçün)"
+msgstr "(tüm gruba vermek için)"
+
+msgctxt "accounts.exam_chance"
+msgid "— Qrup seçilməyib —"
+msgstr "— Grup seçilmedi —"
+
+msgctxt "accounts.exam_chance"
+msgid "Əlavə cəhd sayı"
+msgstr "Ek deneme sayısı"
+
+msgctxt "accounts.exam_chance"
+msgid "Adətən 1 — tələbə imtahana bir dəfə də girə bilər."
+msgstr "Genellikle 1 — öğrenci sınava bir kez daha girebilir."
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.exam_chance"
+msgid "(istifadəçi adı və ya email — vergül/yeni sətirlə; qrupla birlikdə də olar)"
+msgstr "(kullanıcı adı veya e-posta — virgül/yeni satırla; grupla birlikte de olur)"
+
+msgctxt "accounts.exam_chance"
+msgid "Şans ver"
+msgstr "Hak ver"
+
+msgctxt "accounts.exam_chance"
+msgid "Şans veriləndə: cəhd limiti seçilən qədər artır, final/kollokvium üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır."
+msgstr "Hak verildiğinde: deneme limiti seçilen kadar artar, final/vize için YENİ kişisel PIN oluşturulur (kabinde hemen görünür), finalin eski giriş bileti sıfırlanır ve sınav «Atanmış görevler»de yeniden görünür. Tüm işlem denetim günlüğüne yazılır."
+
+msgctxt "accounts.exam_chance"
+msgid "Son verilən şanslar"
+msgstr "Son verilen haklar"
+
+msgctxt "accounts.exam_chance"
+msgid "Tarix"
+msgstr "Tarih"
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "accounts.exam_chance"
+msgid "Cəmi əlavə cəhd"
+msgstr "Toplam ek deneme"
+
+msgctxt "accounts.exam_chance"
+msgid "Verən"
+msgstr "Veren"
+
+msgctxt "accounts.exam_chance"
+msgid "Hələ şans verilməyib."
+msgstr "Henüz hak verilmedi."
+
+msgctxt "accounts.exam_chance"
+msgid "Bu bölmə yalnız imtahan mərkəzi üçündür."
+msgstr "Bu bölüm yalnızca sınav merkezi içindir."
+
+msgctxt "accounts.exam_chance"
+msgid "Aktiv təşkilat konteksti tapılmadı."
+msgstr "Etkin kuruluş bağlamı bulunamadı."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan seçin."
+msgstr "Sınav seçin."
+
+msgctxt "accounts.exam_chance"
+msgid "İstifadəçi tapılmadı və ya bu təşkilatda deyil: %(u)s"
+msgstr "Kullanıcı bulunamadı veya bu kuruluşta değil: %(u)s"
+
+msgctxt "accounts.exam_chance"
+msgid "«%(exam)s» üzrə %(n)s tələbəyə +%(extra)s cəhd verildi."
+msgstr "«%(exam)s» için %(n)s öğrenciye +%(extra)s deneme verildi."
+
+msgctxt "accounts.exam_chance"
+msgid "Yeni PIN-lər yaradıldı: %(n)s."
+msgstr "Yeni PIN'ler oluşturuldu: %(n)s."
+
+msgctxt "accounts.exam_chance"
+msgid "Final girişi yenidən açıldı: %(n)s."
+msgstr "Final girişi yeniden açıldı: %(n)s."
+
+msgctxt "exams.second_chance.notification"
+msgid "İmtahan üçün yenidən şans verildi"
+msgstr "Sınav için yeniden hak verildi"
+
+msgctxt "exams.second_chance.notification"
+msgid "«{exam}» imtahanı üzrə sizə yenidən cəhd hüququ verildi. Yeni giriş PIN-iniz kabinetinizdəki tapşırıq kartında görünür."
+msgstr "«{exam}» sınavı için size yeniden deneme hakkı verildi. Yeni giriş PIN'iniz kabininizdeki görev kartında görünür."
+
+msgctxt "exams.second_chance.error"
+msgid "Ən azı bir tələbə seçilməlidir."
+msgstr "En az bir öğrenci seçilmelidir."
+
+msgctxt "exams.form.exam.error"
+msgid "secure_exam_category_exam_center_only"
+msgstr "Final ve vize sınavlarını yalnızca sınav merkezi oluşturabilir."
+
+msgctxt "exams.final_center.session_detail"
+msgid "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır."
+msgstr "Salon oturumu sınavdan bağımsızdır. Öğrenci kayıtlı bilgisayardan kişisel PIN'iyle girince bu oturuma katılır. Gözetmen oturumu başlattığında herkes kendi sınavına başlar."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan filtri"
+msgstr "Sınav filtresi"
+
+msgctxt "accounts.exam_chance"
+msgid "Tədris ili"
+msgstr "Öğretim yılı"
+
+msgctxt "accounts.exam_chance"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "accounts.exam_chance"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "accounts.exam_chance"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün illər"
+msgstr "Tüm yıllar"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün semestrlər"
+msgstr "Tüm dönemler"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün fakültələr"
+msgstr "Tüm fakülteler"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün kafedralar"
+msgstr "Tüm bölümler"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan axtarışı"
+msgstr "Sınav arama"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan adı ilə axtar…"
+msgstr "Sınav adına göre ara…"
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbə axtarışı"
+msgstr "Öğrenci arama"
+
+msgctxt "accounts.exam_chance"
+msgid "Qrup, istifadəçi adı və ya ad-soyad…"
+msgstr "Grup, kullanıcı adı veya ad soyad…"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı."
+msgstr "Bu koşullara uygun final/vize sınavı bulunamadı."
+
+msgctxt "accounts.exam_chance"
+msgid "Axtarış nəticəsi"
+msgstr "Arama sonuçları"
+
+msgctxt "accounts.exam_chance"
+msgid "işarələdiklərinizə şans veriləcək"
+msgstr "işaretlediğiniz öğrencilere hak verilecek"
+
+msgctxt "accounts.exam_chance"
+msgid "Nəticə tapılmadı — axtarışı dəyişin."
+msgstr "Sonuç bulunamadı — aramayı değiştirin."
+
+msgctxt "accounts.exam_chance"
+msgid "Əlavə tələbələr"
+msgstr "Ek öğrenciler"

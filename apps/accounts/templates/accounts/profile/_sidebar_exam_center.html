@@ -36,6 +36,18 @@
     </a>
 </li>
 {% endif %}
+{% if 'exam-chance' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=exam-chance"
+       data-section="exam-chance"
+       data-title="{% trans 'İmtahan şansı ver' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-chance' %}active{% endif %}">
+        <i class="fas fa-rotate-right sidebar-menu-icon sidebar-menu-icon--danger"></i>
+        <span class="sidebar-menu-text">{% trans 'İmtahan şansı ver' context 'profile.section' %}</span>
+    </a>
+</li>
+{% endif %}
 {% if 'kollokvium-windows' in allowed_sections %}
 <li class="sidebar-menu-item">
     <a href="{{ profile_base_url }}?section=kollokvium-windows"
