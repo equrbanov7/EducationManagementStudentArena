@@ -531,8 +531,8 @@
     {% endif %}
 
     {% if is_final_exam_result %}
-    {# Final imtahan: nəticə 5 dəq görünür. Aşağıda SABİT (fixed) zolaq — geri
-       sayan taymer + çıxış düyməsi həmişə görünür (uzun siyahıda da). #}
+    {% comment %} Final imtahan: nəticə 5 dəq görünür. Aşağıda SABİT (fixed) zolaq — geri
+       sayan taymer + çıxış düyməsi həmişə görünür (uzun siyahıda da). {% endcomment %}
     <div class="final-result-exitbar" role="region"
          aria-label="{% trans 'Nəticə vaxtı və çıxış' context 'exams.template.student_exam_result' %}">
         <div class="final-result-exitbar__timer" data-final-result-timer hidden>

@@ -34,15 +34,20 @@ def _parse_usernames(raw):
     return [t.strip() for t in tokens if t.strip()]
 
 
-def _collect_students(organization, group, username_tokens):
-    """Qrup üzvləri + ad-ad verilən istifadəçilər (org üzvlüyü məcburi).
-
-    Qaytarır: (tələbə siyahısı, tapılmayan token-lər).
+def _collect_students(organization, group, username_tokens, student_ids=()):
+    """Qrup üzvləri + axtarışdan seçilmiş id-lər + ad-ad verilən istifadəçilər
+    (hamısı org üzvlüyünə yoxlanır). Qaytarır: (tələbə siyahısı, tapılmayanlar).
     """
     students = {}
     if group is not None:
         for student in group.students.all():
             students[student.pk] = student
+
+    ids = [i for i in student_ids if str(i).isdigit()]
+    if ids:
+        id_qs = organization_user_queryset(organization, queryset=User.objects.filter(pk__in=ids))
+        for user in id_qs:
+            students[user.pk] = user
 
     missing = []
     for token in username_tokens:
@@ -91,7 +96,9 @@ def exam_chance(request):
             group = get_object_or_404(StudentGroup, pk=int(group_id), organization=organization)
 
         username_tokens = _parse_usernames(request.POST.get("usernames"))
-        students, missing = _collect_students(organization, group, username_tokens)
+        students, missing = _collect_students(
+            organization, group, username_tokens, student_ids=request.POST.getlist("student_ids")
+        )
         for token in missing[:5]:
             messages.warning(
                 request,

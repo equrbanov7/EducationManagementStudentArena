@@ -40,11 +40,10 @@
             </a>
         </li>
         {% endif %}
-{% comment %} 
-        {# `data-source-url`-də dedicated server-side view-ləri qoyuruq:
+        {% comment %} `data-source-url`-də dedicated server-side view-ləri qoyuruq:
            - JS tərəfindən istifadə edilmir (hələ də `?section=` formu fəaldır)
            - testlərin reverse() ilə axtardığı URL-lər HTML-də mövcud olur
-           - no-JS user-lər üçün progresiv fallback potensialı təmin edir #} {% endcomment %}
+           - no-JS user-lər üçün progresiv fallback potensialı təmin edir {% endcomment %}
         {% comment %}"Təşkilata qoşul" (student-organization-request) sidebar bəndi
         GİZLƏDİLİB (istifadəçi tələbi): sistemə istifadəçilər yalnız admin tərəfindən
         icazə ilə əlavə olunur — özləri qoşulmur. Bölmə/route hələ mövcuddur (birbaşa

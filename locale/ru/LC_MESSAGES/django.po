@@ -30201,3 +30201,75 @@ msgstr "Финальные и промежуточные экзамены мож
 msgctxt "exams.final_center.session_detail"
 msgid "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır."
 msgstr "Сессия зала не привязана к экзамену. Студент подключается к ней, войдя со своим личным PIN с зарегистрированного компьютера. Когда наблюдатель запускает сессию, каждый начинает свой экзамен."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan filtri"
+msgstr "Фильтр экзаменов"
+
+msgctxt "accounts.exam_chance"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.exam_chance"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.exam_chance"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.exam_chance"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün illər"
+msgstr "Все годы"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün semestrlər"
+msgstr "Все семестры"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün fakültələr"
+msgstr "Все факультеты"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün kafedralar"
+msgstr "Все кафедры"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan axtarışı"
+msgstr "Поиск экзамена"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan adı ilə axtar…"
+msgstr "Поиск по названию экзамена…"
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbə axtarışı"
+msgstr "Поиск студента"
+
+msgctxt "accounts.exam_chance"
+msgid "Qrup, istifadəçi adı və ya ad-soyad…"
+msgstr "Группа, имя пользователя или ФИО…"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı."
+msgstr "По заданным условиям финальных/промежуточных экзаменов не найдено."
+
+msgctxt "accounts.exam_chance"
+msgid "Axtarış nəticəsi"
+msgstr "Результаты поиска"
+
+msgctxt "accounts.exam_chance"
+msgid "işarələdiklərinizə şans veriləcək"
+msgstr "шанс получат отмеченные студенты"
+
+msgctxt "accounts.exam_chance"
+msgid "Nəticə tapılmadı — axtarışı dəyişin."
+msgstr "Ничего не найдено — измените запрос."
+
+msgctxt "accounts.exam_chance"
+msgid "Əlavə tələbələr"
+msgstr "Дополнительные студенты"
