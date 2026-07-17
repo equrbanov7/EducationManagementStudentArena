@@ -38,6 +38,11 @@ urlpatterns = [
         views.exam_center_room_snapshot,
         name="exam_center_room_snapshot",
     ),
+    path(
+        "center/rooms/<int:room_id>/api/attempts/<int:attempt_id>/violations/",
+        views.exam_center_attempt_violations,
+        name="exam_center_attempt_violations",
+    ),
     path("center/rooms/<int:room_id>/start-all/", views.exam_center_room_start_all, name="exam_center_room_start_all"),
     path("center/rooms/<int:room_id>/end-all/", views.exam_center_room_end_all, name="exam_center_room_end_all"),
     path("center/rooms/<int:room_id>/open-all/", views.exam_center_room_open_all, name="exam_center_room_open_all"),

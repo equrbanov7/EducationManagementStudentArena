@@ -19,6 +19,7 @@
     var startAllUrl = root.dataset.startAllUrl;
     var endAllUrl = root.dataset.endAllUrl;
     var openAllUrl = root.dataset.openAllUrl;
+    var violationsTpl = root.dataset.violationsUrlTemplate; // .../attempts/0/violations/
 
     var statsEl = document.getElementById("fxc-stats");
     var mapEl = document.getElementById("fxc-computer-map");
@@ -82,6 +83,87 @@
         var d = document.createElement("div");
         d.textContent = t == null ? "" : String(t);
         return d.innerHTML;
+    }
+
+    // ── Pozuntu detalları modalı (hansı qaydalar pozulub + uzaqlaşdırma səbəbi) ──
+    var vioModal = document.getElementById("fxc-vio-modal");
+    var vioModalSub = document.getElementById("fxc-vio-modal-sub");
+    var vioModalBody = document.getElementById("fxc-vio-modal-body");
+    var vioModalRemoved = document.getElementById("fxc-vio-modal-removed");
+
+    function closeViolationsModal() {
+        if (!vioModal) return;
+        vioModal.hidden = true;
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+    }
+
+    function renderViolationsModal(d) {
+        if (vioModalSub) {
+            vioModalSub.textContent = (d.student || "") + (d.exam_title ? " · " + d.exam_title : "");
+        }
+        if (vioModalRemoved) {
+            if (d.removal && d.removal.is_terminal) {
+                vioModalRemoved.hidden = false;
+                vioModalRemoved.innerHTML = '<i class="fas fa-user-slash"></i> ' +
+                    esc(t("violations.removedBanner", "İmtahandan uzaqlaşdırılıb")) +
+                    (d.removal.reason ? " — " + esc(d.removal.reason) : "");
+            } else {
+                vioModalRemoved.hidden = true;
+                vioModalRemoved.innerHTML = "";
+            }
+        }
+        if (!vioModalBody) return;
+        var incidents = d.incidents || [];
+        if (!incidents.length) {
+            vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' +
+                esc(t("violations.noRules", "Qeydə alınmış qayda pozuntusu yoxdur.")) + "</p>";
+            return;
+        }
+        vioModalBody.innerHTML =
+            '<div class="fxc-vio-modal__count">' + esc(d.violation_count || incidents.length) + " " +
+                esc(t("violations.word", "pozuntu")) + "</div>" +
+            '<ul class="fxc-vio-modal__list">' +
+            incidents.map(function (inc) {
+                var when = inc.at || "";
+                try { when = new Date(inc.at).toLocaleString(); } catch (e) { when = inc.at || ""; }
+                return '<li class="fxc-vio-modal__item fxc-vio-sev--' + esc(inc.severity || "medium") + '">' +
+                    '<span class="fxc-vio-modal__rule">' + esc(inc.event) + "</span>" +
+                    '<span class="fxc-vio-modal__time">' + esc(when) + "</span>" +
+                    "</li>";
+            }).join("") +
+            "</ul>";
+    }
+
+    function openViolationsModal(attemptId) {
+        if (!vioModal || !violationsTpl || !attemptId) return;
+        vioModal.hidden = false;
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+        if (vioModalSub) vioModalSub.textContent = "";
+        if (vioModalRemoved) { vioModalRemoved.hidden = true; vioModalRemoved.innerHTML = ""; }
+        if (vioModalBody) {
+            vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' + esc(t("loading", "Yüklənir…")) + "</p>";
+        }
+        var url = violationsTpl.replace("attempts/0/", "attempts/" + attemptId + "/");
+        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d) {
+                    if (vioModalBody) {
+                        vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' +
+                            esc(t("violations.loadError", "Məlumat yüklənmədi.")) + "</p>";
+                    }
+                    return;
+                }
+                renderViolationsModal(d);
+            })
+            .catch(function () {
+                if (vioModalBody) {
+                    vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' +
+                        esc(t("violations.loadError", "Məlumat yüklənmədi.")) + "</p>";
+                }
+            });
     }
 
     var STAT_CARDS = [
@@ -173,13 +255,15 @@
             var subj = (s.exam_title || "");
             if (subj.indexOf("—") !== -1) subj = subj.split("—").pop();
             subj = subj.replace(/\(.*\)/, "").trim().slice(0, 12);
-            // Biletsiz (PIN) cəhd sətirlərində bilet əməliyyatı yoxdur —
-            // data-ticket qoyulmur, klik təbii olaraq nəzərə alınmır.
+            // Biletli cəhd → çiyin-üstü snapshot (data-ticket). Biletsiz (PIN)
+            // cəhd də klikə cavab versin deyə data-attempt qoyulur — pozuntu/
+            // fəaliyyət detalları modalı açılır (əvvəllər klik nəzərə alınmırdı).
             var ticketAttrs = s.ticket_id
                 ? 'data-ticket="' + esc(s.ticket_id) + '" data-session="' + esc(s.session_id) + '" '
                 : "";
+            var attemptAttr = s.attempt_id ? 'data-attempt="' + esc(s.attempt_id) + '" ' : "";
             return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + '" ' +
-                ticketAttrs +
+                ticketAttrs + attemptAttr +
                 'title="' + esc(s.name) + " · " + esc(s.exam_title || "") + '">' +
                 badges +
                 '<span class="fxc-cell-num">' + esc(("0" + label).slice(-2)) + "</span>" +
@@ -211,7 +295,15 @@
             if (subj.indexOf("—") !== -1) subj = subj.split("—").pop().trim();
             // Biletsiz (PIN) cəhdlər: bilet-əsaslı əməliyyat düymələri yoxdur —
             // pozuntu sayı yalnız məlumat üçün göstərilir.
+            var detailBtn = s.attempt_id
+                ? '<div class="fxc-vio-actions">' +
+                    '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
+                        'data-attempt="' + esc(s.attempt_id) + '">' +
+                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", "Bax")) + "</button></div>"
+                : "";
             if (!s.ticket_id) {
+                // Biletsiz (PIN) cəhd — bilet əməliyyatı yoxdur, amma "Bax" ilə
+                // hansı qaydaların pozulduğu detal modalında göstərilir.
                 return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") + '">' +
                     '<div class="fxc-vio-top">' +
                         '<span class="fxc-vio-name">' + esc(s.name) + "</span>" +
@@ -220,6 +312,7 @@
                     "</div>" +
                     '<div class="fxc-vio-sub">' + esc(subj) +
                         (locked ? ' · <b>' + esc(t("violations.locked", "Dayandırılıb")) + "</b>" : "") + "</div>" +
+                    detailBtn +
                     "</div>";
             }
             var mainBtn = locked
@@ -238,8 +331,8 @@
                 '<div class="fxc-vio-sub">' + esc(subj) +
                     (locked ? ' · <b>' + esc(t("violations.locked", "Dayandırılıb")) + "</b>" : "") + "</div>" +
                 '<div class="fxc-vio-actions">' +
-                    '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="view" ' +
-                        'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
+                    '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
+                        'data-attempt="' + esc(s.attempt_id || "") + '">' +
                         '<i class="fas fa-eye"></i> ' + esc(t("violations.view", "Bax")) + "</button>" +
                     mainBtn +
                 "</div></div>";
@@ -351,9 +444,14 @@
 
     if (mapEl) {
         mapEl.addEventListener("click", function (evt) {
-            var cell = evt.target.closest("[data-ticket]");
-            if (cell && window.FXCSnapshot) {
+            var cell = evt.target.closest(".fxc-cell");
+            if (!cell) return;
+            // Biletli → çiyin-üstü canlı snapshot; biletsiz (PIN) → pozuntu/
+            // fəaliyyət detalları modalı (klik artıq nəzərə alınır).
+            if (cell.dataset.ticket && window.FXCSnapshot) {
                 window.FXCSnapshot.open(cell.dataset.session, cell.dataset.ticket);
+            } else if (cell.dataset.attempt) {
+                openViolationsModal(cell.dataset.attempt);
             }
         });
     }
@@ -364,8 +462,8 @@
             var btn = evt.target.closest("[data-vio-act]");
             if (!btn) return;
             var sid = btn.dataset.session, tid = btn.dataset.ticket, act = btn.dataset.vioAct;
-            if (act === "view") {
-                if (window.FXCSnapshot) window.FXCSnapshot.open(sid, tid);
+            if (act === "detail") {
+                openViolationsModal(btn.dataset.attempt);
             } else if (act === "grant") {
                 if (!window.confirm(t("violations.confirmGrant", "Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"))) return;
                 btn.disabled = true;
@@ -383,6 +481,16 @@
         });
     }
     if (window.FXCSnapshot) window.FXCSnapshot.setOnChange(scheduleRefresh);
+
+    // Pozuntu modalını bağla: backdrop / bağla düyməsi / Escape.
+    if (vioModal) {
+        vioModal.addEventListener("click", function (evt) {
+            if (evt.target.closest("[data-vio-close]")) closeViolationsModal();
+        });
+        document.addEventListener("keydown", function (evt) {
+            if (evt.key === "Escape" && !vioModal.hidden) closeViolationsModal();
+        });
+    }
 
     if (filterInput) filterInput.addEventListener("input", renderMap);
     if (statusFilter) statusFilter.addEventListener("change", renderMap);

@@ -57,6 +57,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.expire_stale_resumed_attempts",
         "schedule": 60.0,  # seconds
     },
+    # Vaxtı bitmiş (deadline-ı keçmiş) draft/in_progress cəhdləri avtomatik
+    # bitirir ki, imtahan heç yerdə (zal monitoru, müəllim nəzarəti, nəticə)
+    # "gözləmədə/davam edir" kimi ilişib qalmasın — tələbənin brauzeri bağlı
+    # olub client-side avtomatik təqdim işləməsə belə. Hər dəqiqə.
+    "exams-expire-overdue-attempts": {
+        "task": "exams.expire_overdue_attempts",
+        "schedule": 60.0,  # seconds
+    },
     # Final imtahanı yaxınlaşan tələbələrə xatırlatma bildirişi (saatda bir).
     # Dublikat FinalExamTicket.reminder_stage ilə əngəllənir, ona görə saatlıq
     # işləmə spam yaratmır.
