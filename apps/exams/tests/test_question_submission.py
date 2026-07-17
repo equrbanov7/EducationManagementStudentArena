@@ -219,10 +219,13 @@ class SubmissionViewTests(_Base):
         self.assertContains(response, "q-card")
         self.assertEqual(QuestionSubmission.objects.count(), 0)
 
-    def test_inbox_requires_exam_center(self):
+    def test_inbox_redirects_to_profile_section(self):
+        # Köhnə ayrıca qutu səhifəsi ləğv edilib — profil bölməsinə yönləndirir.
         url = reverse("exams:question_submission_inbox")
-        self.assertEqual(self._client_for(self.teacher).get(url).status_code, 403)
-        self.assertEqual(self._client_for(self.exam_center).get(url).status_code, 200)
+        for user in (self.teacher, self.exam_center):
+            response = self._client_for(user).get(url)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("section=question-submissions", response["Location"])
 
     def test_review_decide_accept_flow(self):
         submission = self._submission(title="Qərar axını")
@@ -438,13 +441,113 @@ class ProfileSectionTests(_Base):
         self.assertContains(response, "Sual göndərişləri")
         self.assertContains(response, "Yeni göndəriş")
 
-    def test_exam_center_sees_inbox_variant(self):
+    def test_exam_center_sees_inline_filters(self):
+        # "Qutunu aç" düyməsi ləğv edilib — filtr paneli bölmənin özündədir.
         self._submission(title="Bölmə testi")
         client = self._client_for(self.exam_center)
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Qutunu aç")
         self.assertContains(response, "Bölmə testi")
+        self.assertContains(response, "qsubf-bar")
+        self.assertContains(response, 'name="qsub_faculty"')
+        self.assertContains(response, 'name="qsub_lang"')
+        self.assertNotContains(response, "Qutunu aç")
+
+    def test_section_search_filters_list(self):
+        self._submission(title="Riyaziyyat toplusu")
+        self._submission(title="Fizika toplusu")
+        client = self._client_for(self.teacher)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions&qsub_q=Fizika")
+        self.assertContains(response, "Fizika toplusu")
+        self.assertNotContains(response, "Riyaziyyat toplusu")
+
+    def test_section_status_filter(self):
+        accepted = self._submission(title="Qəbul olunan toplu")
+        accept_submission(accepted, reviewer=self.exam_center)
+        self._submission(title="Gözləyən toplu")
+        client = self._client_for(self.teacher)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions&qsub_status=accepted")
+        self.assertContains(response, "Qəbul olunan toplu")
+        self.assertNotContains(response, "Gözləyən toplu")
+
+    def test_section_pagination(self):
+        for i in range(12):
+            self._submission(title=f"Səhifə testi {i:02d}")
+        client = self._client_for(self.teacher)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
+        # 10 element/səhifə: ən yenilər birinci səhifədə, pager 2-ci səhifəyə link verir.
+        self.assertContains(response, "Səhifə testi 11")
+        self.assertNotContains(response, "Səhifə testi 01")
+        self.assertContains(response, "qsub_page=2")
+
+    def test_section_language_filter_for_reviewer(self):
+        self._submission(title="AZ toplusu")
+        self._submission(title="EN toplusu", language="en")
+        client = self._client_for(self.exam_center)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions&qsub_lang=en")
+        self.assertContains(response, "EN toplusu")
+        self.assertNotContains(response, "AZ toplusu")
+
+    def test_section_faculty_filter_for_reviewer(self):
+        from apps.exams.models import StudentGroup
+        from apps.organizations.models import OrgUnit
+        from core.constants import OrgUnitType
+
+        faculty = OrgUnit.objects.create(
+            organization=self.org, unit_type=OrgUnitType.FACULTY, name="Mühəndislik fakültəsi"
+        )
+        kafedra = OrgUnit.objects.create(
+            organization=self.org, unit_type=OrgUnitType.CHAIR, name="İnformatika kafedrası", parent=faculty
+        )
+        group = StudentGroup.objects.create(
+            teacher=self.teacher, organization=self.org, name="875i-fak", org_unit=kafedra
+        )
+        inside = self._submission(title="Fakültə daxili toplu", student_group=group)
+        inside.student_groups.set([group])
+        self._submission(title="Fakültə xarici toplu")
+
+        client = self._client_for(self.exam_center)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions&qsub_faculty={faculty.pk}")
+        self.assertContains(response, "Fakültə daxili toplu")
+        self.assertNotContains(response, "Fakültə xarici toplu")
+        # Kafedra filtri subtree üzrə də işləyir.
+        response = client.get(
+            f"{reverse('accounts:profile')}?section=question-submissions"
+            f"&qsub_faculty={faculty.pk}&qsub_kafedra={kafedra.pk}"
+        )
+        self.assertContains(response, "Fakültə daxili toplu")
+        self.assertNotContains(response, "Fakültə xarici toplu")
+
+    def test_teacher_can_delete_pending_submission(self):
+        submission = self._submission(title="Silinəcək toplu")
+        client = self._client_for(self.teacher)
+        response = client.post(reverse("exams:question_submission_delete", kwargs={"submission_id": submission.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(QuestionSubmission.objects.filter(id=submission.id).exists())
+
+    def test_teacher_cannot_delete_accepted_submission(self):
+        submission = self._submission(title="Silinməz toplu")
+        accept_submission(submission, reviewer=self.exam_center)
+        client = self._client_for(self.teacher)
+        client.post(reverse("exams:question_submission_delete", kwargs={"submission_id": submission.id}))
+        self.assertTrue(QuestionSubmission.objects.filter(id=submission.id).exists())
+
+    def test_rejected_detail_shows_verdict_banner(self):
+        submission = self._submission(title="Bannerli toplu")
+        reject_submission(submission, reviewer=self.exam_center, note="2-ci sualı düzəldin.")
+        client = self._client_for(self.teacher)
+        response = client.get(reverse("exams:question_submission_detail", kwargs={"submission_id": submission.id}))
+        self.assertContains(response, "qsubd-verdict--rejected")
+        self.assertContains(response, "2-ci sualı düzəldin.")
+
+    def test_review_page_renders_decision_choices(self):
+        submission = self._submission(title="Qərar UI toplusu")
+        response = self._client_for(self.exam_center).get(
+            reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
+        )
+        self.assertContains(response, "qsubr-choice--accept")
+        self.assertContains(response, "qsubr-choice--reject")
+        self.assertContains(response, 'name="decision"')
 
     def test_teacher_sees_rejected_alert(self):
         submission = self._submission(title="Geri qaytarılan")

@@ -28323,3 +28323,603 @@ msgstr "Yumşaq silmə — imtahan gizlədilir, nəticələr saxlanılır."
 msgctxt "exams.model.exam.help"
 msgid "deleted_at"
 msgstr "İmtahanın yumşaq silindiyi vaxt."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Aktiv filtrlər"
+msgstr "Aktiv filtrlər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Başlıq, fənn və ya qrup üzrə axtar…"
+msgstr "Başlıq, fənn və ya qrup üzrə axtar…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+msgstr "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+msgstr "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bu şərtlərə uyğun göndəriş tapılmadı."
+msgstr "Bu şərtlərə uyğun göndəriş tapılmadı."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün dillər"
+msgstr "Bütün dillər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün fakültələr"
+msgstr "Bütün fakültələr"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün illər"
+msgstr "Bütün illər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün kafedralar"
+msgstr "Bütün kafedralar"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün müəllimlər"
+msgstr "Bütün müəllimlər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Bütün semestrlər"
+msgstr "Bütün semestrlər"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Dil"
+msgstr "Dil"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Düzəlt"
+msgstr "Düzəlt"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Düzəliş gözləyən"
+msgstr "Düzəliş gözləyən"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Filtri sil"
+msgstr "Filtri sil"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Filtri təmizlə"
+msgstr "Filtri təmizlə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Geri qaytarılıb — düzəliş gözlənilir"
+msgstr "Geri qaytarılıb — düzəliş gözlənilir"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Göndərişlərdə axtar"
+msgstr "Göndərişlərdə axtar"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hamısını təmizlə"
+msgstr "Hamısını təmizlə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın."
+msgstr "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Hələ heç bir sual göndərişi yoxdur."
+msgstr "Hələ heç bir sual göndərişi yoxdur."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın."
+msgstr "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qeydə baxın, düzəldin və yenidən göndərin."
+msgstr "Qeydə baxın, düzəldin və yenidən göndərin."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qəbul"
+msgstr "Qəbul"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qəbul edilmiş"
+msgstr "Qəbul edilmiş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd"
+msgstr "Rədd"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd edilmiş"
+msgstr "Rədd edilmiş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Status filtri"
+msgstr "Status filtri"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin."
+msgstr "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Yeni göndəriş"
+msgstr "Yeni göndəriş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Ümumi göndəriş"
+msgstr "Ümumi göndəriş"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "sual"
+msgstr "sual"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "«%(title)s» göndərişini düzəlt"
+msgstr "«%(title)s» göndərişini düzəlt"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "«%(title)s» göndərişini sil"
+msgstr "«%(title)s» göndərişini sil"
+
+msgctxt "exams.template.question_submission"
+msgid "(bir və ya bir neçə)"
+msgstr "(bir və ya bir neçə)"
+
+msgctxt "exams.template.question_submission"
+msgid "(boşdursa başlıq götürülür)"
+msgstr "(boşdursa başlıq götürülür)"
+
+msgctxt "exams.template.question_submission"
+msgid "(opsional)"
+msgstr "(opsional)"
+
+msgctxt "exams.template.question_submission"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "exams.template.question_submission"
+msgid "Başlıq"
+msgstr "Başlıq"
+
+msgctxt "exams.template.question_submission"
+msgid "Boş saxlasanız suallar yeni banka yazılacaq."
+msgstr "Boş saxlasanız suallar yeni banka yazılacaq."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+msgstr "Bu göndəriş həmişəlik silinəcək. Davam edilsin?"
+
+msgctxt "exams.template.question_submission"
+msgid "Bu göndərişdə %(count)s xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın."
+msgstr "Bu göndərişdə %(count)s xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək."
+msgstr "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək."
+
+msgctxt "exams.template.question_submission"
+msgid "Dil, fənn və qrup mütləqdir"
+msgstr "Dil, fənn və qrup mütləqdir"
+
+msgctxt "exams.template.question_submission"
+msgid "Dili seçin…"
+msgstr "Dili seçin…"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş et"
+msgstr "Düzəliş et"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəlt və yenidən göndər"
+msgstr "Düzəlt və yenidən göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "exams.template.question_submission"
+msgid "Fənni seçin…"
+msgstr "Fənni seçin…"
+
+msgctxt "exams.template.question_submission"
+msgid "Geri qaytar"
+msgstr "Geri qaytar"
+
+msgctxt "exams.template.question_submission"
+msgid "Geri qaytarılıb"
+msgstr "Geri qaytarılıb"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərildi"
+msgstr "Göndərildi"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərilmiş suallar"
+msgstr "Göndərilmiş suallar"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş məlumatları"
+msgstr "Göndəriş məlumatları"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər."
+msgstr "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər."
+
+msgctxt "exams.template.question_submission"
+msgid "Göndəriş qəbul edildi"
+msgstr "Göndəriş qəbul edildi"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişi sil"
+msgstr "Göndərişi sil"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişin statusu"
+msgstr "Göndərişin statusu"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişlərə qayıt"
+msgstr "Göndərişlərə qayıt"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişə baxış"
+msgstr "Göndərişə baxış"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllim nəyi düzəltməlidir?"
+msgstr "Müəllim nəyi düzəltməlidir?"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllimin qeydi"
+msgstr "Müəllimin qeydi"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllimə qeyd"
+msgstr "Müəllimə qeyd"
+
+msgctxt "exams.template.question_submission"
+msgid "Qeydiniz"
+msgstr "Qeydiniz"
+
+msgctxt "exams.template.question_submission"
+msgid "Qrup(lar)"
+msgstr "Qrup(lar)"
+
+msgctxt "exams.template.question_submission"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul edildi"
+msgstr "Qəbul edildi"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul edilib"
+msgstr "Qəbul edilib"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul et"
+msgstr "Qəbul et"
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul et və banka əlavə et"
+msgstr "Qəbul et və banka əlavə et"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar"
+msgstr "Qərar"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar qeydi"
+msgstr "Qərar qeydi"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərarınızı seçin"
+msgstr "Qərarınızı seçin"
+
+msgctxt "exams.template.question_submission"
+msgid "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir."
+msgstr "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir."
+
+msgctxt "exams.template.question_submission"
+msgid "Sizə hələ qrup təyin olunmayıb. Qrup üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın."
+msgstr "Sizə hələ qrup təyin olunmayıb. Qrup üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın."
+
+msgctxt "exams.template.question_submission"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual"
+msgstr "Sual"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual eyni anda seçilmiş bütün qruplar üçün göndərilir."
+msgstr "Sual eyni anda seçilmiş bütün qruplar üçün göndərilir."
+
+msgctxt "exams.template.question_submission"
+msgid "Sual göndərişi"
+msgstr "Sual göndərişi"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar"
+msgstr "Suallar"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar hansı banka yazılsın?"
+msgstr "Suallar hansı banka yazılsın?"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək."
+msgstr "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək."
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar və xəbərdarlıqlar"
+msgstr "Suallar və xəbərdarlıqlar"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin."
+msgstr "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin."
+
+msgctxt "exams.template.question_submission"
+msgid "Sualların yazıldığı dil — mərkəz bankda bu dillə saxlayır."
+msgstr "Sualların yazıldığı dil — mərkəz bankda bu dillə saxlayır."
+
+msgctxt "exams.template.question_submission"
+msgid "Xəbərdarlıq"
+msgstr "Xəbərdarlıq"
+
+msgctxt "exams.template.question_submission"
+msgid "Xəbərdarlıqlar"
+msgstr "Xəbərdarlıqlar"
+
+msgctxt "exams.template.question_submission"
+msgid "Xəta"
+msgstr "Xəta"
+
+msgctxt "exams.template.question_submission"
+msgid "Xətalı"
+msgstr "Xətalı"
+
+msgctxt "exams.template.question_submission"
+msgid "Yalnız sizin fənləriniz görünür."
+msgstr "Yalnız sizin fənləriniz görünür."
+
+msgctxt "exams.template.question_submission"
+msgid "Yeni bankın adı"
+msgstr "Yeni bankın adı"
+
+msgctxt "exams.template.question_submission"
+msgid "Yenidən göndər"
+msgstr "Yenidən göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Yoxla (preview)"
+msgstr "Yoxla (preview)"
+
+msgctxt "exams.template.question_submission"
+msgid "Yoxlama nəticəsi"
+msgstr "Yoxlama nəticəsi"
+
+msgctxt "exams.template.question_submission"
+msgid "məs. 3-cü sualda düzgün cavab işarələnməyib..."
+msgstr "məs. 3-cü sualda düzgün cavab işarələnməyib..."
+
+msgctxt "exams.template.question_submission"
+msgid "məs. təşəkkürlər, suallar final bankına əlavə olundu…"
+msgstr "məs. təşəkkürlər, suallar final bankına əlavə olundu…"
+
+msgctxt "exams.template.question_submission"
+msgid "%(count)s sual «%(bank)s» bankına yazıldı"
+msgstr "%(count)s sual «%(bank)s» bankına yazıldı"
+
+msgctxt "exams.template.question_submission"
+msgid "Ümumi sual sayı"
+msgstr "Ümumi sual sayı"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan dili"
+msgstr "İmtahan dili"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi"
+msgstr "İmtahan mərkəzi"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək."
+msgstr "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək."
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzi göndərişi geri qaytardı — düzəliş gözlənilir"
+msgstr "İmtahan mərkəzi göndərişi geri qaytardı — düzəliş gözlənilir"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzindədir"
+msgstr "İmtahan mərkəzindədir"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə göndər"
+msgstr "İmtahan mərkəzinə göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə qeyd"
+msgstr "İmtahan mərkəzinə qeyd"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan mərkəzinə sual göndər"
+msgstr "İmtahan mərkəzinə sual göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Əvvəlcə qərar seçin"
+msgstr "Əvvəlcə qərar seçin"
+
+msgctxt "exams.template.question_submission"
+msgid "— Yeni bank yaradılsın —"
+msgstr "— Yeni bank yaradılsın —"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz qəbul edildi və sual bankına əlavə olundu."
+msgstr "\"{title}\" sual göndərişiniz qəbul edildi və sual bankına əlavə olundu."
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz rədd edildi. Qeydə baxıb düzəldərək yenidən göndərə bilərsiniz."
+msgstr "\"{title}\" sual göndərişiniz rədd edildi. Qeydə baxıb düzəldərək yenidən göndərə bilərsiniz."
+
+msgctxt "exams.notification.question_submission"
+msgid "Sual göndərişinə baxıldı"
+msgstr "Sual göndərişinə baxıldı"
+
+msgctxt "exams.notification.question_submission"
+msgid "Yeni sual göndərişi"
+msgstr "Yeni sual göndərişi"
+
+msgctxt "exams.notification.question_submission"
+msgid "{teacher} \"{title}\" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} \"{title}\" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual)."
+
+msgctxt "exams.notification.question_submission"
+msgid "{teacher} \"{title}\" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} \"{title}\" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual)."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bank başqa təşkilata aiddir."
+msgstr "Bank başqa təşkilata aiddir."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bu göndəriş artıq yekunlaşıb — dəyişdirilə bilməz."
+msgstr "Bu göndəriş artıq yekunlaşıb — dəyişdirilə bilməz."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Bu göndərişə artıq baxılıb."
+msgstr "Bu göndərişə artıq baxılıb."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Fənn qeyd olunmalıdır."
+msgstr "Fənn qeyd olunmalıdır."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Hansı qrup üçün olduğu qeyd olunmalıdır."
+msgstr "Hansı qrup üçün olduğu qeyd olunmalıdır."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Mövzu/başlıq boş ola bilməz."
+msgstr "Mövzu/başlıq boş ola bilməz."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Mətndən heç bir sual çıxarıla bilmədi."
+msgstr "Mətndən heç bir sual çıxarıla bilmədi."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Snapshot-dan heç bir sual banka yazıla bilmədi (A–D variantları natamamdır)."
+msgstr "Snapshot-dan heç bir sual banka yazıla bilmədi (A–D variantları natamamdır)."
+
+msgctxt "exams.service.question_submission.error"
+msgid "Sual mətni çox qısadır."
+msgstr "Sual mətni çox qısadır."
+
+msgctxt "exams.view.question_submission.ai"
+msgid "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+msgstr "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+
+msgctxt "exams.view.question_submission.ai"
+msgid "Sual göndərişi"
+msgstr "Sual göndərişi"
+
+msgctxt "exams.view.question_submission.error"
+msgid "Fənni seçin (məcburidir)."
+msgstr "Fənni seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Qəbul olunmuş göndəriş silinə bilməz."
+msgstr "Qəbul olunmuş göndəriş silinə bilməz."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Seçilmiş fənn sizin fənləriniz arasında deyil."
+msgstr "Seçilmiş fənn sizin fənləriniz arasında deyil."
+
+msgctxt "exams.view.question_submission.error"
+msgid "İmtahan dilini seçin (məcburidir)."
+msgstr "İmtahan dilini seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "Ən azı bir qrup seçin (məcburidir)."
+msgstr "Ən azı bir qrup seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Fayl oxunmadı: {error}"
+msgstr "Fayl oxunmadı: {error}"
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup)."
+msgstr "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş qəbul edildi — {count} sual \"{bank}\" bankına əlavə olundu."
+msgstr "Göndəriş qəbul edildi — {count} sual \"{bank}\" bankına əlavə olundu."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş rədd edildi və müəllimə bildirildi."
+msgstr "Göndəriş rədd edildi və müəllimə bildirildi."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş silindi."
+msgstr "Göndəriş silindi."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş yeniləndi və imtahan mərkəzinə təkrar çatdırıldı."
+msgstr "Göndəriş yeniləndi və imtahan mərkəzinə təkrar çatdırıldı."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Rədd üçün müəllimə qeyd yazın — nəyi düzəltməlidir."
+msgstr "Rədd üçün müəllimə qeyd yazın — nəyi düzəltməlidir."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Yanlış əməliyyat."
+msgstr "Yanlış əməliyyat."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Aktiv təşkilat konteksti tapılmadı."
+msgstr "Aktiv təşkilat konteksti tapılmadı."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Bu göndəriş dəyişdirilə bilməz."
+msgstr "Bu göndəriş dəyişdirilə bilməz."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgid_plural "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgstr[0] "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+msgstr[1] "İmtahan mərkəzi %(counter)s göndərişi geri qaytarıb."
+
+msgctxt "accounts.profile.question_submissions"
+msgid "%(counter)s sual"
+msgid_plural "%(counter)s sual"
+msgstr[0] "%(counter)s sual"
+msgstr[1] "%(counter)s sual"

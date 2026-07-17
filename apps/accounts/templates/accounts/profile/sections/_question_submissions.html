@@ -1,7 +1,9 @@
 {% load static i18n %}
 {% comment %}
 Profil bölməsi: Sual göndərişləri ("sualları idarə et" dizayn dili).
-Müəllim — öz göndərişləri + yeni göndəriş; İmtahan mərkəzi — qutu (inbox).
+Müəllim — öz göndərişləri (axtarış + status filtri + səhifələmə + düzəlt/sil);
+İmtahan mərkəzi — bütün göndərişlər EYNİ səhifədə inline filtrlənir
+(fakültə/kafedra/müəllim/tədris ili/semestr/dil) — ayrıca qutu səhifəsi yoxdur.
 
 QEYD: kök element mütləq profile-section-panel + data-profile-section-panel
 olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/göstərir.
@@ -10,69 +12,134 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
 <section class="profile-section-panel profile-section--question-submissions {% if active_section == 'question-submissions' %}is-active{% endif %}"
          data-profile-section-panel="question-submissions">
 <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
+<link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
 <div class="qsub-section">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <div>
-            
-            <p class="text-muted mb-0">
-                {% if question_submissions_is_reviewer %}
-                    {% trans "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın." %}
-                {% else %}
-                    {% trans "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin." %}
-                {% endif %}
-            </p>
-        </div>
-        <div class="d-flex gap-2">
+        <p class="text-muted mb-0">
             {% if question_submissions_is_reviewer %}
-            <a href="{{ question_submissions_inbox_url }}" class="qsubd-btn qsubd-btn--primary js-profile-section-link-skip">
-                <i class="fas fa-inbox"></i> {% trans "Qutunu aç" %}
-            </a>
+                {% trans "Müəllimlərin göndərdiyi sual toplularına baxın: qəbul edin (banka yazılır) və ya qeydlə geri qaytarın." context "accounts.profile.question_submissions" %}
             {% else %}
-            <a href="{{ question_submissions_create_url }}" class="qsubd-btn qsubd-btn--primary js-profile-section-link-skip">
-                <i class="fas fa-plus"></i> {% trans "Yeni göndəriş" %}
-            </a>
+                {% trans "Suallarınızı elektron şəkildə imtahan mərkəzinə göndərin — xəbərdarlıqları görün, düzəldin və ya birbaşa göndərin." context "accounts.profile.question_submissions" %}
             {% endif %}
+        </p>
+        {% if not question_submissions_is_reviewer %}
+        <div class="d-flex gap-2">
+            <a href="{{ question_submissions_create_url }}" class="qsubd-btn qsubd-btn--primary js-profile-section-link-skip">
+                <i class="fas fa-plus"></i> {% trans "Yeni göndəriş" context "accounts.profile.question_submissions" %}
+            </a>
         </div>
+        {% endif %}
     </div>
 
-    {# ── Statistika kartları ── #}
-    <div class="qsubs-stats">
-        <div class="qsubs-stat">
-            <div class="qsubs-stat__icon qsubs-stat__icon--blue"><i class="fas fa-paper-plane"></i></div>
+    {# ── Statistika kartları = status filtrləri ── #}
+    <div class="qsubs-stats" role="group" aria-label="{% trans 'Status filtri' context 'accounts.profile.question_submissions' %}">
+        {% for card in question_submissions_status_cards %}
+        <a href="?{{ card.query }}"
+           class="qsubs-stat qsubs-stat--link {% if card.is_active %}qsubs-stat--active{% endif %}"
+           aria-pressed="{% if card.is_active %}true{% else %}false{% endif %}">
+            <div class="qsubs-stat__icon qsubs-stat__icon--{{ card.tone }}"><i class="fas {{ card.icon }}"></i></div>
             <div>
-                <span class="qsubs-stat__label">{% trans "Ümumi göndəriş" %}</span>
-                <span class="qsubs-stat__value">{{ question_submissions_total_count }}</span>
+                <span class="qsubs-stat__label">{{ card.label }}</span>
+                <span class="qsubs-stat__value">{{ card.value }}</span>
             </div>
-        </div>
-        <div class="qsubs-stat">
-            <div class="qsubs-stat__icon qsubs-stat__icon--amber"><i class="fas fa-hourglass-half"></i></div>
-            <div>
-                <span class="qsubs-stat__label">{% trans "Baxılır" %}</span>
-                <span class="qsubs-stat__value">{{ question_submissions_pending_count }}</span>
-            </div>
-        </div>
-        <div class="qsubs-stat">
-            <div class="qsubs-stat__icon qsubs-stat__icon--green"><i class="fas fa-check"></i></div>
-            <div>
-                <span class="qsubs-stat__label">{% trans "Qəbul edilmiş" %}</span>
-                <span class="qsubs-stat__value">{{ question_submissions_accepted_count }}</span>
-            </div>
-        </div>
-        <div class="qsubs-stat">
-            <div class="qsubs-stat__icon qsubs-stat__icon--red"><i class="fas fa-rotate-left"></i></div>
-            <div>
-                <span class="qsubs-stat__label">{% if question_submissions_is_reviewer %}{% trans "Rədd edilmiş" %}{% else %}{% trans "Düzəliş gözləyən" %}{% endif %}</span>
-                <span class="qsubs-stat__value">{{ question_submissions_rejected_count }}</span>
-            </div>
-        </div>
+            <span class="qsubs-stat__check"><i class="fas fa-check"></i></span>
+        </a>
+        {% endfor %}
     </div>
+
+    {# ── Axtarış + filtr çubuğu ── #}
+    <form method="get" class="qsubf-bar js-profile-debounce-search js-qsub-filter-form" data-debounce-ms="600" role="search">
+        <input type="hidden" name="section" value="question-submissions">
+        <input type="hidden" name="qsub_status" value="{{ question_submissions_status }}">
+        <div class="qsubf-search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search"
+                   name="qsub_q"
+                   value="{{ question_submissions_search }}"
+                   placeholder="{% if question_submissions_is_reviewer %}{% trans 'Başlıq, fənn, qrup və ya müəllim üzrə axtar…' context 'accounts.profile.question_submissions' %}{% else %}{% trans 'Başlıq, fənn və ya qrup üzrə axtar…' context 'accounts.profile.question_submissions' %}{% endif %}"
+                   aria-label="{% trans 'Göndərişlərdə axtar' context 'accounts.profile.question_submissions' %}"
+                   autocomplete="off">
+        </div>
+        {% if question_submissions_is_reviewer %}
+        <div class="qsubf-selects">
+            <div class="bootstrap-single-select qsubf-select">
+                <select class="form-select bootstrap-single-select__native" name="qsub_faculty" data-bootstrap-select
+                        aria-label="{% trans 'Fakültə' context 'accounts.profile.question_submissions' %}">
+                    <option value="">{% trans "Bütün fakültələr" context "accounts.profile.question_submissions" %}</option>
+                    {% for unit in question_submissions_faculties %}
+                    <option value="{{ unit.pk }}" {% if question_submissions_filters.faculty == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bootstrap-single-select qsubf-select">
+                <select class="form-select bootstrap-single-select__native" name="qsub_kafedra" data-bootstrap-select
+                        aria-label="{% trans 'Kafedra' context 'accounts.profile.question_submissions' %}">
+                    <option value="">{% trans "Bütün kafedralar" context "accounts.profile.question_submissions" %}</option>
+                    {% for unit in question_submissions_kafedras %}
+                    <option value="{{ unit.pk }}" {% if question_submissions_filters.kafedra == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bootstrap-single-select qsubf-select">
+                <select class="form-select bootstrap-single-select__native" name="qsub_teacher" data-bootstrap-select
+                        aria-label="{% trans 'Müəllim' context 'accounts.profile.question_submissions' %}">
+                    <option value="">{% trans "Bütün müəllimlər" context "accounts.profile.question_submissions" %}</option>
+                    {% for t in question_submissions_teachers %}
+                    <option value="{{ t.pk }}" {% if question_submissions_filters.teacher == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.get_full_name|default:t.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bootstrap-single-select qsubf-select qsubf-select--sm">
+                <select class="form-select bootstrap-single-select__native" name="qsub_year" data-bootstrap-select
+                        aria-label="{% trans 'Tədris ili' context 'accounts.profile.question_submissions' %}">
+                    <option value="">{% trans "Bütün illər" context "accounts.profile.question_submissions" %}</option>
+                    {% for year in question_submissions_years %}
+                    <option value="{{ year }}" {% if question_submissions_filters.year == year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bootstrap-single-select qsubf-select">
+                <select class="form-select bootstrap-single-select__native" name="qsub_period" data-bootstrap-select
+                        aria-label="{% trans 'Semestr' context 'accounts.profile.question_submissions' %}">
+                    <option value="">{% trans "Bütün semestrlər" context "accounts.profile.question_submissions" %}</option>
+                    {% for p in question_submissions_periods %}
+                    <option value="{{ p.pk }}" {% if question_submissions_filters.period == p.pk|stringformat:'s' %}selected{% endif %}>{{ p.name }}{% if not question_submissions_filters.year %} · {{ p.academic_year }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bootstrap-single-select qsubf-select qsubf-select--sm">
+                <select class="form-select bootstrap-single-select__native" name="qsub_lang" data-bootstrap-select
+                        aria-label="{% trans 'Dil' context 'accounts.profile.question_submissions' %}">
+                    <option value="">{% trans "Bütün dillər" context "accounts.profile.question_submissions" %}</option>
+                    {% for code, label in question_submissions_languages %}
+                    <option value="{{ code }}" {% if question_submissions_filters.lang == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+
+    {% if question_submissions_active_chips %}
+    <div class="qsubf-chips" aria-label="{% trans 'Aktiv filtrlər' context 'accounts.profile.question_submissions' %}">
+        {% for chip in question_submissions_active_chips %}
+        <a href="?{{ chip.query }}" class="qsubf-chip" title="{% trans 'Filtri sil' context 'accounts.profile.question_submissions' %}">
+            <span class="qsubf-chip__title">{{ chip.title }}:</span> {{ chip.value }}
+            <i class="fas fa-xmark" aria-hidden="true"></i>
+        </a>
+        {% endfor %}
+        <a href="{{ question_submissions_clear_url }}" class="qsubf-clear">
+            <i class="fas fa-filter-circle-xmark"></i> {% trans "Hamısını təmizlə" context "accounts.profile.question_submissions" %}
+        </a>
+    </div>
+    {% endif %}
 
     {% if question_submissions_rejected_count and not question_submissions_is_reviewer %}
     <div class="alert alert-warning d-flex align-items-center gap-2">
         <i class="fas fa-rotate-left"></i>
         <div>
-            <strong>{% trans "İmtahan mərkəzi" %} {{ question_submissions_rejected_count }} {% trans "göndərişi geri qaytarıb." %}</strong>
-            {% trans "Qeydə baxın, düzəldin və yenidən göndərin." %}
+            <strong>{% blocktrans count counter=question_submissions_rejected_count context "accounts.profile.question_submissions" %}İmtahan mərkəzi {{ counter }} göndərişi geri qaytarıb.{% plural %}İmtahan mərkəzi {{ counter }} göndərişi geri qaytarıb.{% endblocktrans %}</strong>
+            {% trans "Qeydə baxın, düzəldin və yenidən göndərin." context "accounts.profile.question_submissions" %}
         </div>
     </div>
     {% endif %}
@@ -80,42 +147,73 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
     {% if question_submissions_items %}
     <div class="qsubs-list">
         {% for s in question_submissions_items %}
-        <a href="{% if question_submissions_is_reviewer %}{% url 'exams:question_submission_review' s.id %}{% else %}{% url 'exams:question_submission_detail' s.id %}{% endif %}"
-           class="qsubs-item qsubs-item--{{ s.status }} js-profile-section-link-skip">
+        <div class="qsubs-item qsubs-item--{{ s.status }} qsubs-item--card">
+            <a href="{% if question_submissions_is_reviewer %}{% url 'exams:question_submission_review' s.id %}{% else %}{% url 'exams:question_submission_detail' s.id %}{% endif %}"
+               class="qsubs-item__overlay js-profile-section-link-skip"
+               aria-label="{{ s.title }}"></a>
             <div class="qsubs-item__main">
                 <p class="qsubs-item__title">{{ s.title }}</p>
                 <div class="qsubs-item__meta">
                     {% if question_submissions_is_reviewer %}<span><i class="fas fa-user"></i>{{ s.teacher.get_full_name|default:s.teacher.username }}</span>{% endif %}
                     <span><i class="fas fa-book"></i>{{ s.subject }}</span>
                     <span><i class="fas fa-users"></i>{{ s.group_label }}</span>
+                    <span><i class="fas fa-globe"></i>{{ s.get_language_display }}</span>
                     <span><i class="far fa-clock"></i>{{ s.created_at|date:"d.m.Y H:i" }}</span>
                     {% if s.resubmission_count %}<span><i class="fas fa-rotate-right"></i>×{{ s.resubmission_count }}</span>{% endif %}
                 </div>
             </div>
             <div class="qsubs-item__badges">
-                <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{{ s.question_count }} {% trans "sual" %}</span>
+                <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{% blocktrans count counter=s.question_count context "accounts.profile.question_submissions" %}{{ counter }} sual{% plural %}{{ counter }} sual{% endblocktrans %}</span>
                 {% if s.error_count %}<span class="qsubs-pill qsubs-pill--error"><i class="fas fa-circle-xmark"></i>{{ s.error_count }}</span>{% endif %}
                 {% if s.warning_count %}<span class="qsubs-pill qsubs-pill--warning"><i class="fas fa-triangle-exclamation"></i>{{ s.warning_count }}</span>{% endif %}
                 {% if s.status == "pending" %}
-                    <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-hourglass-half"></i>{% trans "Baxılır" %}</span>
+                    <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-hourglass-half"></i>{% trans "Baxılır" context "accounts.profile.question_submissions" %}</span>
                 {% elif s.status == "accepted" %}
-                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-check"></i>{% trans "Qəbul" %}</span>
+                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-check"></i>{% trans "Qəbul" context "accounts.profile.question_submissions" %}</span>
                 {% else %}
-                    <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-rotate-left"></i>{% if question_submissions_is_reviewer %}{% trans "Rədd" %}{% else %}{% trans "Geri qaytarılıb — düzəliş gözlənilir" %}{% endif %}</span>
+                    <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-rotate-left"></i>{% if question_submissions_is_reviewer %}{% trans "Rədd" context "accounts.profile.question_submissions" %}{% else %}{% trans "Geri qaytarılıb — düzəliş gözlənilir" context "accounts.profile.question_submissions" %}{% endif %}</span>
                 {% endif %}
             </div>
-        </a>
+            {% if not question_submissions_is_reviewer and s.can_be_edited_by_teacher %}
+            <div class="qsubs-item__actions">
+                <a href="{% url 'exams:question_submission_detail' s.id %}"
+                   class="qsubs-iconbtn js-profile-section-link-skip"
+                   title="{% trans 'Düzəlt' context 'accounts.profile.question_submissions' %}"
+                   aria-label="{% blocktrans with title=s.title context "accounts.profile.question_submissions" %}«{{ title }}» göndərişini düzəlt{% endblocktrans %}">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <form method="post" action="{% url 'exams:question_submission_delete' s.id %}"
+                      class="js-qsub-delete-form"
+                      data-confirm="{% trans 'Bu göndəriş həmişəlik silinəcək. Davam edilsin?' context 'accounts.profile.question_submissions' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="qsubs-iconbtn qsubs-iconbtn--danger"
+                            title="{% trans 'Sil' context 'accounts.profile.question_submissions' %}"
+                            aria-label="{% blocktrans with title=s.title context "accounts.profile.question_submissions" %}«{{ title }}» göndərişini sil{% endblocktrans %}">
+                        <i class="fas fa-trash-can"></i>
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
         {% endfor %}
+    </div>
+    {% include "partials/_pagination.html" with page_obj=question_submissions_page extra_query=question_submissions_pagination_query page_param="qsub_page" %}
+    {% elif question_submissions_total_count %}
+    <div class="qsubs-empty">
+        <i class="fas fa-filter-circle-xmark"></i>
+        {% trans "Bu şərtlərə uyğun göndəriş tapılmadı." context "accounts.profile.question_submissions" %}
+        <a href="{{ question_submissions_clear_url }}" class="qsubs-empty__link">{% trans "Filtri təmizlə" context "accounts.profile.question_submissions" %}</a>
     </div>
     {% else %}
     <div class="qsubs-empty">
         <i class="far fa-paper-plane"></i>
         {% if question_submissions_is_reviewer %}
-            {% trans "Hələ heç bir sual göndərişi yoxdur." %}
+            {% trans "Hələ heç bir sual göndərişi yoxdur." context "accounts.profile.question_submissions" %}
         {% else %}
-            {% trans "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın." %}
+            {% trans "Hələ göndərişiniz yoxdur — «Yeni göndəriş» ilə başlayın." context "accounts.profile.question_submissions" %}
         {% endif %}
     </div>
     {% endif %}
 </div>
+<script src="{% static 'exams/js/question_submission_list.js' %}?v=20260717-filters" defer></script>
 </section>
