@@ -1043,6 +1043,12 @@ class TestRLSExamGapTables:
         side_a = gap_table_graph["a"]
         org = side_a["org"]
         student = side_a["exam"].excluded_users.first()
+        # Bu test RLS/tenant bypass mexanikasını yoxlayır, imtahan-cədvəli
+        # qaydasını yox. Fixture həmin tələbəyə başqa (coding) imtahanda
+        # in_progress cəhd yaradır; 2026-07 «eyni anda bir imtahan» qaydası bu
+        # qalıq cəhdi görüb girişi bloklayardı, ona görə əvvəlcə onu bağlayırıq.
+        for stale in ExamAttempt.objects.filter(user=student, status__in=["draft", "in_progress"]):
+            stale.mark_finished(status="expired")
         role = Role.objects.filter(organization=org).first()
         Membership.objects.create(
             user=student,
