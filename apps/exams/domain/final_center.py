@@ -259,6 +259,9 @@ class ExamRoomComputer(models.Model):
         ]
         indexes = [
             models.Index(fields=["room", "is_active"], name="roomcomp_room_active_idx"),
+            # Final-exam entry gate: org_computer_access_allowed() by (org, MAC).
+            models.Index(fields=["organization", "mac_address"], name="roomcomp_org_mac_idx"),
+            models.Index(fields=["organization", "is_active"], name="roomcomp_org_active_idx"),
         ]
 
     def __str__(self):

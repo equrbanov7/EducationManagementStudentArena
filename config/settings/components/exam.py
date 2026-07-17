@@ -40,8 +40,12 @@ EXAM_PAINT_MAX_BASE64_CHARS = _env_int_setting("EXAM_PAINT_MAX_BASE64_CHARS", 1_
 # still get a clean Django 400 instead of an opaque proxy 413.
 DATA_UPLOAD_MAX_MEMORY_SIZE = _env_int_setting("DATA_UPLOAD_MAX_MEMORY_SIZE_MB", 50, minimum=3) * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = _env_int_setting("DATA_UPLOAD_MAX_NUMBER_FIELDS", 10_000, minimum=1_000)
-EXAM_START_GLOBAL_CONCURRENCY = _env_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 12, minimum=0)
-EXAM_START_PER_EXAM_CONCURRENCY = _env_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 6, minimum=0)
+# Sized to DB write capacity (pgbouncer pool ~150 / Postgres max_connections),
+# NOT the legacy CPU cap. At 12/6 only a dozen students could start system-wide
+# and the rest blocked a sync thread (sleep-poll) up to the wait timeout →
+# simultaneous exam start froze the whole app. See docs/performance/OPTIMIZATION_5000_USERS.md.
+EXAM_START_GLOBAL_CONCURRENCY = _env_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 200, minimum=0)
+EXAM_START_PER_EXAM_CONCURRENCY = _env_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 100, minimum=0)
 EXAM_START_WAIT_TIMEOUT_SECONDS = _env_float_setting("EXAM_START_WAIT_TIMEOUT_SECONDS", 30.0, minimum=0.0)
 EXAM_START_POLL_INTERVAL_SECONDS = _env_float_setting("EXAM_START_POLL_INTERVAL_SECONDS", 0.05, minimum=0.01)
 EXAM_START_LOCK_LEASE_SECONDS = _env_int_setting("EXAM_START_LOCK_LEASE_SECONDS", 120, minimum=1)

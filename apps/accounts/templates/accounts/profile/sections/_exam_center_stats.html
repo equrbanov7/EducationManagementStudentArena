@@ -13,14 +13,16 @@
   .ecs-btn:hover { background:var(--ems-primary-700); }
   .ecs-filters { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:.75rem; margin:1.15rem 0; }
   .ecs-field label { display:block; font-size:.74rem; font-weight:700; color:var(--ems-neutral-500); margin-bottom:.32rem; text-transform:uppercase; letter-spacing:.02em; }
-  .ecs-field input, .ecs-field select { width:100%; padding:.62rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
+  /* Bütün filtr elementləri eyni hündürlükdə (axtarış-seçici, dropdown, input). */
+  .ecs-field input, .ecs-field select { width:100%; min-height:2.7rem; box-sizing:border-box; padding:.5rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
   .ecs-field input:focus, .ecs-field select:focus { outline:none; border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
   .ecs-field input::placeholder { color:var(--ems-neutral-400); }
   /* Filtrlərdəki Bootstrap select-lər — kompakt (nəhəng default toggle yox) */
-  .ecs-filters .bootstrap-single-select__toggle { min-height:0; padding:.62rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
+  .ecs-filters .bootstrap-single-select__toggle { min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; padding:.5rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
   .ecs-filters .bootstrap-single-select__toggle:hover { border-color:var(--ems-primary-300); }
   /* Multi-select (chips + search) — ağ, göy çiplər */
-  .ecs-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.4rem; position:relative; min-height:2.7rem; }
+  .ecs-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.35rem .5rem; position:relative; min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; }
+  .ecs-ms__chips { flex:1; min-width:0; }
   .ecs-ms:focus-within { border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
   .ecs-ms__chips { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; }
   .ecs-chip { display:inline-flex; align-items:center; gap:.35rem; background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-100); border-radius:999px; padding:.18rem .3rem .18rem .6rem; font-size:.78rem; font-weight:700; max-width:100%; }
@@ -117,11 +119,13 @@
     </div>
     <div class="ecs-field">
       <label>{% trans "Fənn" %}</label>
-      <div class="ecs-ms js-ecs-subject"><div class="ecs-ms__chips"><input type="text" class="ecs-ms__search" placeholder="{% trans 'fənn axtar…' %}"></div><div class="ecs-ms__menu"></div></div>
+      {% trans "fənn axtar…" as ecs_subject_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-subject" placeholder=ecs_subject_ph %}
     </div>
     <div class="ecs-field">
       <label>{% trans "Qrup" %}</label>
-      <div class="ecs-ms js-ecs-group"><div class="ecs-ms__chips"><input type="text" class="ecs-ms__search" placeholder="{% trans 'qrup axtar…' %}"></div><div class="ecs-ms__menu"></div></div>
+      {% trans "qrup axtar…" as ecs_group_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-group" placeholder=ecs_group_ph %}
     </div>
     <div class="ecs-field">
       <label>{% trans "Fakültə" %}</label>

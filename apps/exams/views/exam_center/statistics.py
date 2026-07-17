@@ -52,6 +52,23 @@ def _csv_ints(raw):
     return [int(x) for x in (raw or "").split(",") if x.strip().isdigit()]
 
 
+def _csv_uuids(raw):
+    """UUID PK-lı sahələr (Subject, OrgUnit) üçün. `_csv_ints` UUID-ləri
+    ATIRDI (isdigit False) → fənn/fakültə/kafedra filtri səssizcə işləməzdi."""
+    import uuid as _uuid
+
+    out = []
+    for x in (raw or "").split(","):
+        x = x.strip()
+        if not x:
+            continue
+        try:
+            out.append(str(_uuid.UUID(x)))
+        except ValueError:
+            continue
+    return out
+
+
 def _unit_ids_with_children(organization, unit_ids):
     """Seçilmiş bölmələr + onların birbaşa alt-bölmələri (fakültə → kafedralar)."""
     if not unit_ids:
@@ -76,7 +93,7 @@ def _filtered_attempts(request, organization):
             Q(user__first_name__icontains=q) | Q(user__last_name__icontains=q) | Q(user__username__icontains=q)
         )
 
-    subject_ids = _csv_ints(request.GET.get("subjects"))
+    subject_ids = _csv_uuids(request.GET.get("subjects"))
     if subject_ids:
         qs = qs.filter(exam__subject_id__in=subject_ids)
 
@@ -85,17 +102,17 @@ def _filtered_attempts(request, organization):
         qs = qs.filter(exam__allowed_groups__id__in=group_ids)
 
     # Köhnə birləşmiş "units" filtri (geriyə-uyğunluq — bookmarked URL-lər).
-    unit_ids = _csv_ints(request.GET.get("units"))
+    unit_ids = _csv_uuids(request.GET.get("units"))
     if unit_ids:
         qs = qs.filter(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
 
     # Ayrı FAKÜLTƏ filtri: qrupun org_unit-inin VALİDEYNİ fakültədir.
-    faculty_ids = _csv_ints(request.GET.get("faculties"))
+    faculty_ids = _csv_uuids(request.GET.get("faculties"))
     if faculty_ids:
         qs = qs.filter(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
 
     # Ayrı KAFEDRA filtri: qrupun org_unit-i birbaşa kafedradır.
-    department_ids = _csv_ints(request.GET.get("departments"))
+    department_ids = _csv_uuids(request.GET.get("departments"))
     if department_ids:
         qs = qs.filter(exam__allowed_groups__org_unit_id__in=department_ids)
 
