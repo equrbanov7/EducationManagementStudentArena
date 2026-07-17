@@ -191,6 +191,26 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         indexes = [
             models.Index(fields=["user", "exam", "status"]),
             models.Index(fields=["user", "exam", "-started_at"]),
+            # Live proctor monitor: filter(exam=...).order_by("started_at"),
+            # polled repeatedly by exam-center staff during an exam.
+            models.Index(fields=["exam", "started_at"], name="examattempt_exam_started_idx"),
+            # Flagged-students panel: exam=..., -supervision_violation_count.
+            models.Index(
+                fields=["exam", "-supervision_violation_count"],
+                name="examattempt_exam_violation_idx",
+            ),
+            # Global 60s Celery sweep (expire_overdue_attempts) scans active rows.
+            models.Index(
+                fields=["status"],
+                name="examattempt_active_sweep_idx",
+                condition=models.Q(status__in=["draft", "in_progress"], is_trial=False),
+            ),
+            # Global 60s resume-window sweep (expire_stale_resumed_attempts).
+            models.Index(
+                fields=["supervision_status"],
+                name="examattempt_locked_sweep_idx",
+                condition=models.Q(supervision_status="locked"),
+            ),
         ]
         constraints = [
             # DB-level last line of defence against double-start races.

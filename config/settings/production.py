@@ -405,6 +405,19 @@ CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 SITE_URL = os.getenv("SITE_URL", "https://127.0.0.1")
 
 # Logging configuration
+# Mass-login CPU: pin PBKDF2 to the OWASP-2023 floor (600k) instead of Django
+# 5.2's 1M default (~40% less CPU per login). Old hashes still verify + auto
+# re-hash on next login. See core/hashers.py. (Argon2 is faster still — needs
+# argon2-cffi + image rebuild.)
+PASSWORD_HASHERS = [
+    "core.hashers.OWASPPBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

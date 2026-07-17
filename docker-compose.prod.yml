@@ -87,8 +87,8 @@ x-app-env: &app-env
   EXAM_ANSWER_FILE_MAX_SIZE_MB: ${EXAM_ANSWER_FILE_MAX_SIZE_MB:-5}
   EXAM_ANSWER_MAX_FILES_PER_QUESTION: ${EXAM_ANSWER_MAX_FILES_PER_QUESTION:-3}
   EXAM_PAINT_MAX_BASE64_CHARS: ${EXAM_PAINT_MAX_BASE64_CHARS:-1500000}
-  EXAM_START_GLOBAL_CONCURRENCY: ${EXAM_START_GLOBAL_CONCURRENCY:-12}
-  EXAM_START_PER_EXAM_CONCURRENCY: ${EXAM_START_PER_EXAM_CONCURRENCY:-6}
+  EXAM_START_GLOBAL_CONCURRENCY: ${EXAM_START_GLOBAL_CONCURRENCY:-200}
+  EXAM_START_PER_EXAM_CONCURRENCY: ${EXAM_START_PER_EXAM_CONCURRENCY:-100}
   EXAM_START_WAIT_TIMEOUT_SECONDS: ${EXAM_START_WAIT_TIMEOUT_SECONDS:-30}
   EXAM_START_POLL_INTERVAL_SECONDS: ${EXAM_START_POLL_INTERVAL_SECONDS:-0.05}
   EXAM_START_LOCK_LEASE_SECONDS: ${EXAM_START_LOCK_LEASE_SECONDS:-120}
@@ -138,7 +138,29 @@ services:
     command:
       - postgres
       - -c
-      - max_connections=${POSTGRES_MAX_CONNECTIONS:-200}
+      - max_connections=${POSTGRES_MAX_CONNECTIONS:-250}
+      - -c
+      - shared_buffers=${POSTGRES_SHARED_BUFFERS:-2GB}
+      - -c
+      - effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE:-6GB}
+      - -c
+      - work_mem=${POSTGRES_WORK_MEM:-16MB}
+      - -c
+      - maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM:-512MB}
+      - -c
+      - wal_buffers=64MB
+      - -c
+      - max_wal_size=4GB
+      - -c
+      - min_wal_size=1GB
+      - -c
+      - checkpoint_completion_target=0.9
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - effective_io_concurrency=200
+      - -c
+      - max_parallel_workers_per_gather=2
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -154,8 +176,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${POSTGRES_CPU_LIMIT:-2.0}"
-          memory: ${POSTGRES_MEM_LIMIT:-2048M}
+          cpus: "${POSTGRES_CPU_LIMIT:-16}"
+          memory: ${POSTGRES_MEM_LIMIT:-16384M}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -218,10 +240,10 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       POOL_MODE: ${PGBOUNCER_POOL_MODE:-session}
-      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-1000}
-      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-40}
-      MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-4}
-      RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-20}
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-2000}
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-150}
+      MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-10}
+      RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-50}
       RESERVE_POOL_TIMEOUT: ${PGBOUNCER_RESERVE_POOL_TIMEOUT:-3}
       SERVER_IDLE_TIMEOUT: ${PGBOUNCER_SERVER_IDLE_TIMEOUT:-60}
       SERVER_RESET_QUERY: ${PGBOUNCER_SERVER_RESET_QUERY:-DISCARD ALL}
@@ -240,8 +262,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${PGBOUNCER_CPU_LIMIT:-0.5}"
-          memory: ${PGBOUNCER_MEM_LIMIT:-256M}
+          cpus: "${PGBOUNCER_CPU_LIMIT:-1.0}"
+          memory: ${PGBOUNCER_MEM_LIMIT:-512M}
     healthcheck:
       test:
         [
@@ -274,6 +296,16 @@ services:
       - redis-server
       - --appendonly
       - "yes"
+      # maxmemory + noeviction: broker/cache/WS layer must NOT be OOM-killed
+      # (that would wipe sessions mid-exam). noeviction errors at the cap instead
+      # of evicting broker data; keep the cap below REDIS_MEM_LIMIT. io-threads
+      # offloads socket I/O for the 5000-connection WS fan-out (redis 7).
+      - --maxmemory
+      - ${REDIS_MAXMEMORY:-3gb}
+      - --maxmemory-policy
+      - noeviction
+      - --io-threads
+      - "4"
       - --requirepass
       - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     restart: unless-stopped
@@ -281,8 +313,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${REDIS_CPU_LIMIT:-0.5}"
-          memory: ${REDIS_MEM_LIMIT:-512M}
+          cpus: "${REDIS_CPU_LIMIT:-2.0}"
+          memory: ${REDIS_MEM_LIMIT:-4096M}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -320,7 +352,7 @@ services:
     environment:
       <<: *app-env
       RUN_RELEASE_ON_START: ${RUN_RELEASE_ON_START:-true}
-      ASGI_THREADS: ${ASGI_THREADS:-8}
+      ASGI_THREADS: ${ASGI_THREADS:-12}
       DAPHNE_HTTP_TIMEOUT: ${DAPHNE_HTTP_TIMEOUT:-900}
       DAPHNE_APPLICATION_CLOSE_TIMEOUT: ${DAPHNE_APPLICATION_CLOSE_TIMEOUT:-120}
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-multiproc
@@ -368,8 +400,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${APP_CPU_LIMIT:-1.5}"
-          memory: ${APP_MEM_LIMIT:-1536M}
+          cpus: "${APP_CPU_LIMIT:-4.0}"
+          memory: ${APP_MEM_LIMIT:-2048M}
     # Real HTTP yoxlaması: /health/ DB-ni yoxlayır (Redis problemi "degraded"
     # 207 qaytarır və sağlam sayılır). X-Forwarded-Proto: https başlığı
     # SECURE_SSL_REDIRECT yönləndirməsinin qarşısını alır (nginx /metrics/
@@ -380,14 +412,14 @@ services:
         - CMD-SHELL
         - >-
           python -c "import urllib.request,sys;
-          req=urllib.request.Request('http://localhost:8000/health/',
+          req=urllib.request.Request('http://localhost:8000/ping/',
           headers={'X-Forwarded-Proto': 'https'});
-          resp=urllib.request.urlopen(req, timeout=5);
+          resp=urllib.request.urlopen(req, timeout=18);
           sys.exit(0 if resp.status < 400 else 1)"
       interval: 30s
-      timeout: 10s
+      timeout: 20s
       retries: 5
-      start_period: 30s
+      start_period: 120s
     networks:
       - emsarena-network
 
@@ -873,8 +905,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${NGINX_CPU_LIMIT:-0.5}"
-          memory: ${NGINX_MEM_LIMIT:-256M}
+          cpus: "${NGINX_CPU_LIMIT:-4.0}"
+          memory: ${NGINX_MEM_LIMIT:-512M}
     healthcheck:
       test: ["CMD", "nginx", "-t"]
       interval: 30s
