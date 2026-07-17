@@ -96,3 +96,70 @@ class ExamAttemptTimerExpiryTest(TestCase):
         self.assertEqual(attempt.status, "expired")
         self.assertEqual(attempt.finished_at, deadline)
         self.assertLessEqual(attempt.duration_seconds, self.DURATION_MINUTES * 60)
+
+
+class SweepOverdueAttemptsTest(TestCase):
+    """Qlobal periodik sweep + Celery task: brauzer bağlı olsa belə vaxtı
+    bitmiş cəhdlər avtomatik bağlansın (heç yerdə "gözləmədə" ilişməsin)."""
+
+    DURATION_MINUTES = 60
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("sweep_teacher", "sweep_t@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("sweep_student", "sweep_s@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Sweep Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.exam = Exam.objects.create(
+            title="Sweep Timed Exam",
+            author=self.teacher,
+            is_active=True,
+            total_duration_minutes=self.DURATION_MINUTES,
+            organization=self.org,
+        )
+
+    def _overdue_attempt(self):
+        attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, status="in_progress")
+        # started_at auto_now_add-dır — deadline-ı keçmiş etmək üçün UPDATE ilə geri çək.
+        ExamAttempt.objects.filter(pk=attempt.pk).update(
+            started_at=timezone.now() - timedelta(minutes=self.DURATION_MINUTES + 5)
+        )
+        return attempt
+
+    def test_sweep_finishes_overdue_attempt(self):
+        from apps.exams.services.attempts import sweep_overdue_attempts
+
+        attempt = self._overdue_attempt()
+        count = sweep_overdue_attempts()
+        self.assertEqual(count, 1)
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "expired")
+        self.assertTrue(attempt.is_finished)
+
+    def test_sweep_ignores_live_and_trial_attempts(self):
+        from apps.exams.services.attempts import sweep_overdue_attempts
+
+        live = ExamAttempt.objects.create(user=self.student, exam=self.exam, status="in_progress")
+        trial = ExamAttempt.objects.create(user=self.teacher, exam=self.exam, status="in_progress", is_trial=True)
+        ExamAttempt.objects.filter(pk=trial.pk).update(
+            started_at=timezone.now() - timedelta(minutes=self.DURATION_MINUTES + 5)
+        )
+        count = sweep_overdue_attempts()
+        self.assertEqual(count, 0)  # canlı cəhd deadline-ı keçməyib, trial isə istisna
+        live.refresh_from_db()
+        trial.refresh_from_db()
+        self.assertEqual(live.status, "in_progress")
+        self.assertEqual(trial.status, "in_progress")
+
+    def test_celery_task_delegates_to_sweep(self):
+        from apps.exams.tasks import expire_overdue_attempts
+
+        attempt = self._overdue_attempt()
+        result = expire_overdue_attempts()
+        self.assertEqual(result, 1)
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "expired")
