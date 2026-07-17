@@ -243,18 +243,19 @@ class ExamDetailControlsVisibilityTests(_Base):
     def _detail(self, exam):
         return self._client_for(self.center).get(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
-    def test_final_hides_live_start_and_active_toggle(self):
+    def test_final_hides_live_start_but_keeps_active_toggle(self):
         exam = self._make_exam("final")
         response = self._detail(exam)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, f"/{exam.slug}/toggle-active/")
         self.assertNotContains(response, "live-start-section")
+        # Aktivləşdir/Deaktiv et BÜTÜN kateqoriyalarda qalır (istifadəçi tələbi).
+        self.assertContains(response, f"/{exam.slug}/toggle-active/")
 
-    def test_midterm_hides_live_start_and_active_toggle(self):
+    def test_midterm_hides_live_start_but_keeps_active_toggle(self):
         exam = self._make_exam("midterm")
         response = self._detail(exam)
-        self.assertNotContains(response, f"/{exam.slug}/toggle-active/", status_code=200)
-        self.assertNotContains(response, "live-start-section")
+        self.assertNotContains(response, "live-start-section", status_code=200)
+        self.assertContains(response, f"/{exam.slug}/toggle-active/")
 
     def test_quiz_keeps_live_start_and_active_toggle(self):
         exam = self._make_exam("quiz")

@@ -222,9 +222,6 @@
                         {% endif %}
                     </form>
 
-                    {% comment %} Aktivləşdir/Deaktiv et final/midterm-də GÖRÜNMÜR — onların
-                       həyat dövrü imtahan mərkəzi axını ilə idarə olunur. {% endcomment %}
-                    {% if exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
                     <form method="post" action="{% url 'exams:toggle_exam_active' exam.slug %}" class="inline-action-form">
                         {% csrf_token %}
                         {# Seq3: müəllimin GÖRDÜYÜ niyyət göndərilir — paralel tab double-flip etməsin. #}
@@ -240,7 +237,6 @@
                             </button>
                         {% endif %}
                     </form>
-                    {% endif %}
 
                     <a href="{% url 'exams:edit_exam' exam.slug %}"
                        class="action-btn outline-btn js-open-exam-form-modal"
