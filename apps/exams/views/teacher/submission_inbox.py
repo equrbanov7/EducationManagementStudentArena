@@ -463,39 +463,14 @@ def _detail_context(submission, *, can_edit, is_reviewer):
 
 
 # ---------------------------------------------------------------------------
-# İmtahan mərkəzi: qutu + baxış
+# İmtahan mərkəzi: baxış (köhnə "qutu" səhifəsi profil bölməsinə köçüb)
 # ---------------------------------------------------------------------------
 @login_required
 def question_submission_inbox(request):
-    _ensure_teacher(request.user)
-    organization = _require_organization(request)
-    if not is_exam_center_user(request.user):
-        raise PermissionDenied(
-            pgettext("exams.service.access.permission", "question_submission_review_exam_center_only")
-        )
-
-    status_filter = (request.GET.get("status") or "pending").strip().lower()
-    if status_filter not in {"pending", "accepted", "rejected", "all"}:
-        status_filter = "pending"
-
-    submissions = QuestionSubmission.objects.filter(organization=organization).select_related(
-        "teacher", "accepted_bank"
-    )
-    if status_filter != "all":
-        submissions = submissions.filter(status=status_filter)
-
-    return render(
-        request,
-        "exams/teacher/question_submission_inbox.html",
-        {
-            "submissions": submissions[:100],
-            "status_filter": status_filter,
-            "pending_count": QuestionSubmission.objects.filter(
-                organization=organization, status=QuestionSubmission.STATUS_PENDING
-            ).count(),
-            "back_url": _profile_section_url("question-submissions"),
-        },
-    )
+    """Köhnə ayrıca qutu (inbox) səhifəsi ləğv edilib — göndərişlər indi profil
+    bölməsində inline filtrlənir (axtarış + fakültə/kafedra/müəllim/dövr/dil).
+    Route köhnə bookmark/linklər üçün yönləndirmə kimi saxlanılır."""
+    return redirect(_profile_section_url("question-submissions"))
 
 
 @login_required
@@ -518,7 +493,7 @@ def question_submission_review(request, submission_id):
             "submission": submission,
             "parsed_questions": annotate_preview_flags(list(submission.parsed_snapshot or [])),
             "banks": banks,
-            "back_url": reverse("exams:question_submission_inbox"),
+            "back_url": _profile_section_url("question-submissions"),
         },
     )
 
@@ -576,7 +551,7 @@ def question_submission_decide(request, submission_id):
         messages.error(request, exc.messages[0])
         return redirect("exams:question_submission_review", submission_id=submission.id)
 
-    return redirect("exams:question_submission_inbox")
+    return redirect(_profile_section_url("question-submissions"))
 
 
 __all__ = [

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ submission.title }} — {% trans "Göndərişə baxış" %}{% endblock %}
+{% block title %}{{ submission.title }} — {% trans "Göndərişə baxış" context "exams.template.question_submission" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part1.css' %}?v=20260607-management">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part2.css' %}?v=20260607-management">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
 {% endblock %}
 
 {% block content %}
@@ -25,7 +26,7 @@
         </div>
         <div class="qb-header-actions">
             <a href="{{ back_url }}" class="qb-btn qb-btn-light">
-                <i class="fas fa-arrow-left"></i> {% trans "Qutuya qayıt" %}
+                <i class="fas fa-arrow-left"></i> {% trans "Göndərişlərə qayıt" context "exams.template.question_submission" %}
             </a>
             {% if submission.accepted_bank %}
             <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="qb-btn qb-btn-teal">
@@ -39,21 +40,21 @@
         <article class="qb-stat-card">
             <span class="qb-stat-card__icon qb-ic-slate"><i class="fas fa-database"></i></span>
             <div class="qb-stat-card__body">
-                <span class="qb-stat-card__label">{% trans "Ümumi sual sayı" %}</span>
+                <span class="qb-stat-card__label">{% trans "Ümumi sual sayı" context "exams.template.question_submission" %}</span>
                 <strong>{{ submission.question_count }}</strong>
             </div>
         </article>
         <article class="qb-stat-card qb-stat-card-red">
             <span class="qb-stat-card__icon qb-ic-red"><i class="fas fa-circle-xmark"></i></span>
             <div class="qb-stat-card__body">
-                <span class="qb-stat-card__label">{% trans "Xətalı" %}</span>
+                <span class="qb-stat-card__label">{% trans "Xətalı" context "exams.template.question_submission" %}</span>
                 <strong>{{ submission.error_count }}</strong>
             </div>
         </article>
         <article class="qb-stat-card qb-stat-card-amber">
             <span class="qb-stat-card__icon qb-ic-amber"><i class="fas fa-triangle-exclamation"></i></span>
             <div class="qb-stat-card__body">
-                <span class="qb-stat-card__label">{% trans "Xəbərdarlıq" %}</span>
+                <span class="qb-stat-card__label">{% trans "Xəbərdarlıq" context "exams.template.question_submission" %}</span>
                 <strong>{{ submission.warning_count }}</strong>
             </div>
         </article>
@@ -61,24 +62,24 @@
         <article class="qb-stat-card qb-stat-card-blue">
             <span class="qb-stat-card__icon qb-ic-blue"><i class="fas fa-hourglass-half"></i></span>
             <div class="qb-stat-card__body">
-                <span class="qb-stat-card__label">{% trans "Status" %}</span>
-                <strong>{% trans "Baxılır" %}</strong>
+                <span class="qb-stat-card__label">{% trans "Status" context "exams.template.question_submission" %}</span>
+                <strong>{% trans "Baxılır" context "exams.template.question_submission" %}</strong>
             </div>
         </article>
         {% elif submission.status == "accepted" %}
         <article class="qb-stat-card qb-stat-card-green">
             <span class="qb-stat-card__icon qb-ic-green"><i class="fas fa-circle-check"></i></span>
             <div class="qb-stat-card__body">
-                <span class="qb-stat-card__label">{% trans "Status" %}</span>
-                <strong>{% trans "Qəbul edilib" %}</strong>
+                <span class="qb-stat-card__label">{% trans "Status" context "exams.template.question_submission" %}</span>
+                <strong>{% trans "Qəbul edilib" context "exams.template.question_submission" %}</strong>
             </div>
         </article>
         {% else %}
         <article class="qb-stat-card qb-stat-card-red">
             <span class="qb-stat-card__icon qb-ic-red"><i class="fas fa-rotate-left"></i></span>
             <div class="qb-stat-card__body">
-                <span class="qb-stat-card__label">{% trans "Status" %}</span>
-                <strong>{% trans "Rədd edilib" %}</strong>
+                <span class="qb-stat-card__label">{% trans "Status" context "exams.template.question_submission" %}</span>
+                <strong>{% trans "Geri qaytarılıb" context "exams.template.question_submission" %}</strong>
             </div>
         </article>
         {% endif %}
@@ -88,7 +89,7 @@
     <div class="qsubd-note qsubd-note--teacher">
         <div class="qsubd-note__icon"><i class="fas fa-comment-dots"></i></div>
         <div>
-            <div class="qsubd-note__label">{% trans "Müəllimin qeydi" %}</div>
+            <div class="qsubd-note__label">{% trans "Müəllimin qeydi" context "exams.template.question_submission" %}</div>
             <div class="qsubd-note__text">{{ submission.teacher_note|linebreaksbr }}</div>
         </div>
     </div>
@@ -98,59 +99,111 @@
     <div class="qsubd-note qsubd-note--reviewer">
         <div class="qsubd-note__icon"><i class="fas fa-clipboard-check"></i></div>
         <div>
-            <div class="qsubd-note__label">{% trans "Qərar qeydi" %}</div>
+            <div class="qsubd-note__label">{% trans "Qərar qeydi" context "exams.template.question_submission" %}</div>
             <div class="qsubd-note__text">{{ submission.reviewer_note|linebreaksbr }}</div>
         </div>
     </div>
     {% endif %}
 
     {% if submission.is_pending %}
-    <h2 class="qsubd-section-title"><i class="fas fa-gavel"></i> {% trans "Qərar" %}</h2>
-    <form method="post" action="{% url 'exams:question_submission_decide' submission.id %}" class="qsubm-card">
+    <h2 class="qsubd-section-title" id="qsubDecision"><i class="fas fa-gavel"></i> {% trans "Qərar" context "exams.template.question_submission" %}</h2>
+    {% if submission.error_count %}
+    <div class="qsubr-error-note" role="alert">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div>{% blocktrans with count=submission.error_count context "exams.template.question_submission" %}Bu göndərişdə {{ count }} xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın.{% endblocktrans %}</div>
+    </div>
+    {% endif %}
+    <form method="post" action="{% url 'exams:question_submission_decide' submission.id %}" class="qsubm-card js-qsubr-form">
         {% csrf_token %}
-        <div class="qsubm-grid">
-            <div class="qsubm-field qsubm-field--title">
-                <label for="qsubBank">{% trans "Mövcud banka əlavə et" %}</label>
-                <div class="qsubm-input-wrap qsubm-input-wrap--select">
-                    <i class="fas fa-layer-group"></i>
-                    <select id="qsubBank" name="bank_id">
-                        <option value="">{% trans "— Yeni bank yaradılsın —" %}</option>
-                        {% for bank in banks %}
-                        <option value="{{ bank.id }}">{{ bank.name }}{% if bank.subject %} ({{ bank.subject }}){% endif %}</option>
-                        {% endfor %}
-                    </select>
+        <fieldset class="qsubr-choices">
+            <legend>{% trans "Qərarınızı seçin" context "exams.template.question_submission" %}</legend>
+            <label class="qsubr-choice qsubr-choice--accept">
+                <input type="radio" name="decision" value="accept" required>
+                <span class="qsubr-choice__card">
+                    <span class="qsubr-choice__icon"><i class="fas fa-check"></i></span>
+                    <span>
+                        <span class="qsubr-choice__title">{% trans "Qəbul et" context "exams.template.question_submission" %}</span>
+                        <p class="qsubr-choice__hint">{% trans "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək." context "exams.template.question_submission" %}</p>
+                    </span>
+                    <span class="qsubr-choice__check"><i class="fas fa-check"></i></span>
+                </span>
+            </label>
+            <label class="qsubr-choice qsubr-choice--reject">
+                <input type="radio" name="decision" value="reject" required>
+                <span class="qsubr-choice__card">
+                    <span class="qsubr-choice__icon"><i class="fas fa-rotate-left"></i></span>
+                    <span>
+                        <span class="qsubr-choice__title">{% trans "Geri qaytar" context "exams.template.question_submission" %}</span>
+                        <p class="qsubr-choice__hint">{% trans "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər." context "exams.template.question_submission" %}</p>
+                    </span>
+                    <span class="qsubr-choice__check"><i class="fas fa-check"></i></span>
+                </span>
+            </label>
+        </fieldset>
+
+        <div class="qsubr-panel js-qsubr-panel" data-decision="accept">
+            <div class="qsubm-grid">
+                <div class="qsubm-field qsubm-field--title">
+                    <label for="qsubBank">{% trans "Suallar hansı banka yazılsın?" context "exams.template.question_submission" %}</label>
+                    <div class="bootstrap-single-select qsubm-bs-select">
+                        <select id="qsubBank" name="bank_id" disabled
+                                class="form-select bootstrap-single-select__native js-qsubr-bank" data-bootstrap-select>
+                            <option value="">{% trans "— Yeni bank yaradılsın —" context "exams.template.question_submission" %}</option>
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}">{{ bank.name }}{% if bank.subject %} ({{ bank.subject }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <span class="qsubm-hint">{% trans "Boş saxlasanız suallar yeni banka yazılacaq." context "exams.template.question_submission" %}</span>
                 </div>
-                <span class="qsubm-hint">{% trans "Boş saxlasanız suallar yeni banka yazılacaq." %}</span>
-            </div>
-            <div class="qsubm-field qsubm-field--title">
-                <label for="qsubNewBank">{% trans "Yeni bankın adı" %} <span class="qsubm-optional">{% trans "(boşdursa başlıq götürülür)" %}</span></label>
-                <div class="qsubm-input-wrap">
-                    <i class="fas fa-pen"></i>
-                    <input type="text" id="qsubNewBank" name="new_bank_name" maxlength="200" placeholder="{{ submission.title }}">
+                <div class="qsubm-field qsubm-field--title js-qsubr-newbank">
+                    <label for="qsubNewBank">{% trans "Yeni bankın adı" context "exams.template.question_submission" %} <span class="qsubm-optional">{% trans "(boşdursa başlıq götürülür)" context "exams.template.question_submission" %}</span></label>
+                    <div class="qsubm-input-wrap">
+                        <i class="fas fa-pen"></i>
+                        <input type="text" id="qsubNewBank" name="new_bank_name" maxlength="200" disabled placeholder="{{ submission.title }}">
+                    </div>
                 </div>
-            </div>
-            <div class="qsubm-field qsubm-field--note">
-                <label for="qsubNote">{% trans "Qeyd" %} <span class="qsubm-req">{% trans "(rədd üçün mütləqdir — müəllim bunu görəcək)" %}</span></label>
-                <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
-                    <i class="fas fa-comment-dots"></i>
-                    <textarea id="qsubNote" name="note" rows="3"
-                              placeholder="{% trans 'məs. 3-cü sualda düzgün cavab işarələnməyib...' %}"></textarea>
+                <div class="qsubm-field qsubm-field--note">
+                    <label for="qsubAcceptNote">{% trans "Müəllimə qeyd" context "exams.template.question_submission" %} <span class="qsubm-optional">{% trans "(opsional)" context "exams.template.question_submission" %}</span></label>
+                    <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
+                        <i class="fas fa-comment-dots"></i>
+                        <textarea id="qsubAcceptNote" name="note" rows="2" disabled
+                                  placeholder="{% trans 'məs. təşəkkürlər, suallar final bankına əlavə olundu…' context 'exams.template.question_submission' %}"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="qsubd-actions">
-            <button type="submit" name="decision" value="reject" class="qb-btn qb-btn-outline-danger">
-                <i class="fas fa-xmark"></i> {% trans "Rədd et" %}
-            </button>
-            <button type="submit" name="decision" value="accept" class="qb-btn qb-btn-green">
-                <i class="fas fa-check"></i> {% trans "Qəbul et və banka əlavə et" %}
+
+        <div class="qsubr-panel js-qsubr-panel" data-decision="reject">
+            <div class="qsubm-field qsubm-field--note">
+                <label for="qsubRejectNote">{% trans "Müəllim nəyi düzəltməlidir?" context "exams.template.question_submission" %} <span class="qsubm-req">*</span></label>
+                <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
+                    <i class="fas fa-comment-dots"></i>
+                    <textarea id="qsubRejectNote" name="note" rows="3" required disabled
+                              placeholder="{% trans 'məs. 3-cü sualda düzgün cavab işarələnməyib...' context 'exams.template.question_submission' %}"></textarea>
+                </div>
+                <span class="qsubm-hint">{% trans "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək." context "exams.template.question_submission" %}</span>
+            </div>
+        </div>
+
+        <div class="qsubr-submit-row">
+            <button type="submit" class="qb-btn qsubr-submit js-qsubr-submit" disabled
+                    data-idle-label="{% trans 'Əvvəlcə qərar seçin' context 'exams.template.question_submission' %}"
+                    data-accept-label="{% trans 'Qəbul et və banka əlavə et' context 'exams.template.question_submission' %}"
+                    data-reject-label="{% trans 'Geri qaytar' context 'exams.template.question_submission' %}">
+                <i class="fas fa-gavel js-qsubr-submit-icon"></i>
+                <span class="js-qsubr-submit-label">{% trans "Əvvəlcə qərar seçin" context "exams.template.question_submission" %}</span>
             </button>
         </div>
     </form>
     {% endif %}
 
-    <h2 class="qsubd-section-title"><i class="fas fa-list-check"></i> {% trans "Suallar və xəbərdarlıqlar" %}</h2>
+    <h2 class="qsubd-section-title"><i class="fas fa-list-check"></i> {% trans "Suallar və xəbərdarlıqlar" context "exams.template.question_submission" %}</h2>
     {% include "exams/teacher/partials/_question_submission_preview.html" with questions=parsed_questions counts=None %}
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'exams/js/question_submission_review.js' %}?v=20260717-decision" defer></script>
 {% endblock %}

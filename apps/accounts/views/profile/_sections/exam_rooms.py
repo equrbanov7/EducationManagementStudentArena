@@ -26,6 +26,11 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         selected_org = None
         if selected_org_id:
             selected_org = Organization.objects.filter(pk=selected_org_id).first()
+        # Defolt: superadminin AKTİV təşkilatı — əlifba üzrə ilk org yox.
+        # (Əks halda MAC «yanlış» təşkilatın eyni adlı zalına yazılır və
+        # istifadəçi öz org kontekstində onu görmür.)
+        if selected_org is None and active_organization is not None:
+            selected_org = active_organization
         if selected_org is None and org_options:
             selected_org = Organization.objects.filter(pk=org_options[0]["id"]).first()
     else:
