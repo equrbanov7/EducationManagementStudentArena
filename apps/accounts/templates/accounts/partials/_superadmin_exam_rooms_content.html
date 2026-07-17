@@ -259,8 +259,8 @@ Zal və kompüter redaktəsi mərkəzdə açılan modallarla aparılır (sarm-*)
               <input type="hidden" name="next" value="{{ s.post_next_url }}">
               <div class="sar-form sar-form--single">
                 <div class="sar-field">
-                  <label>{% trans "Hər sətir: Ad, MAC[, IP][, Yer]" context "accounts.superadmin_exam_rooms" %}</label>
-                  <textarea name="bulk_text" rows="6" class="sar-mono" placeholder="PC-01, AA:BB:CC:DD:EE:01, 10.0.0.11, 1&#10;PC-02, AA:BB:CC:DD:EE:02, 10.0.0.12, 2"></textarea>
+                  <label>{% trans "Hər sətir: Ad, MAC[, Yer][, IP]" context "accounts.superadmin_exam_rooms" %}</label>
+                  <textarea name="bulk_text" rows="6" class="sar-mono" placeholder="PC-01, AA:BB:CC:DD:EE:01, 1&#10;PC-02, AA:BB:CC:DD:EE:02, 2, 10.0.0.12"></textarea>
                   <span class="sar-hint">{% trans "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)." context "accounts.superadmin_exam_rooms" %}</span>
                 </div>
               </div>

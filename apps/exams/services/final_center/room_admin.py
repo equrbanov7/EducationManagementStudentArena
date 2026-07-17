@@ -186,9 +186,13 @@ def delete_room(*, room: ExamRoom) -> None:
 def bulk_add_computers(*, room: ExamRoom, text: str, user=None) -> tuple[int, list[str]]:
     """Sətir-sətir kompüter əlavə edir.
 
-    Format (hər sətir): ``LABEL, MAC[, IP][, SEAT]`` — vergül və ya tab ilə.
-    Boş/``#``-şərh sətirləri ötürülür. Uğursuz sətirlər ATLANIR və mesajları
-    qaytarılır (qismən uğur). Yaradılan sayı + xəta siyahısı qaytarır.
+    Format (hər sətir): ``AD, MAC[, YER][, IP]`` — vergül və ya tab ilə.
+    Ad və MAC məcburidir; yer nömrəsi və IP seçimlidir. Qalan sahələr
+    məzmununa görə avtomatik tanınır (nöqtə/iki-nöqtə olan token = IP,
+    sırf rəqəm = yer nömrəsi), ona görə sıra çevik saxlanır və IP boş
+    buraxılanda («AD, MAC, YER») xəta vermir. Boş/``#``-şərh sətirləri
+    ötürülür. Uğursuz sətirlər ATLANIR və mesajları qaytarılır (qismən
+    uğur). Yaradılan sayı + xəta siyahısı qaytarır.
     """
     created = 0
     errors: list[str] = []
@@ -196,13 +200,25 @@ def bulk_add_computers(*, room: ExamRoom, text: str, user=None) -> tuple[int, li
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
+        # Boş tokenlər buraxılır ki, «AD, MAC, , YER» kimi boş IP-slotu olan
+        # köhnə sətirlər də pozisiya sürüşməsi yaratmasın.
         parts = [p.strip() for p in line.replace("\t", ",").split(",") if p.strip()]
         if len(parts) < 2:
             errors.append(pgettext("exams.final_center.room_admin", "Sətir %(n)s: ad və MAC lazımdır.") % {"n": index})
             continue
         label, mac = parts[0], parts[1]
-        ip_address = parts[2] if len(parts) >= 3 else ""
-        seat = parts[3] if len(parts) >= 4 else None
+        seat = None
+        ip_address = ""
+        # Qalan (seçimli) tokenləri məzmununa görə təsnif et: IP-də nöqtə
+        # (IPv4) və ya iki nöqtə (IPv6) olur, yer nömrəsi isə sırf rəqəmdir.
+        for token in parts[2:]:
+            if "." in token or ":" in token:
+                if not ip_address:
+                    ip_address = token
+            elif seat is None:
+                seat = token
+            elif not ip_address:
+                ip_address = token
         try:
             add_computer(room=room, label=label, mac=mac, seat_number=seat, ip_address=ip_address, user=user)
             created += 1

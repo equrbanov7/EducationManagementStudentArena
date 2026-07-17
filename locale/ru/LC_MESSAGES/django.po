@@ -29735,8 +29735,8 @@ msgid "Hələ təyin olunmuş idarəçi yoxdur."
 msgstr "Управляющие пока не назначены."
 
 msgctxt "accounts.superadmin_exam_rooms"
-msgid "Hər sətir: Ad, MAC[, IP][, Yer]"
-msgstr "Каждая строка: Название, MAC[, IP][, Место]"
+msgid "Hər sətir: Ad, MAC[, Yer][, IP]"
+msgstr "Каждая строка: Название, MAC[, Место][, IP]"
 
 msgctxt "accounts.superadmin_exam_rooms"
 msgid "IP ilə"
