@@ -29907,3 +29907,151 @@ msgstr "Usernames separated by commas or new lines."
 msgctxt "exams.final_center.form"
 msgid "İstifadəçi adları"
 msgstr "Usernames"
+
+msgctxt "profile.section"
+msgid "İmtahan şansı ver"
+msgstr "Grant exam retake"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan şansı ver"
+msgstr "Grant exam retake"
+
+msgctxt "accounts.exam_chance"
+msgid "Seçilmiş final/kollokvium imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür."
+msgstr "Grant a retake for the selected final/midterm exam to a student or a whole group. The system automatically issues a new entry PIN, re-opens the final's entry and the exam reappears in the student's assigned tasks."
+
+msgctxt "accounts.exam_chance"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "No active organization found."
+
+msgctxt "accounts.exam_chance"
+msgid "Bu təşkilatda hələ final/kollokvium imtahanı yoxdur."
+msgstr "This organization has no final/midterm exams yet."
+
+msgctxt "accounts.exam_chance"
+msgid "Yenidən cəhd hüququ"
+msgstr "Retake permission"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan"
+msgstr "Exam"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahanı seçin…"
+msgstr "Select an exam…"
+
+msgctxt "accounts.exam_chance"
+msgid "Final"
+msgstr "Final"
+
+msgctxt "accounts.exam_chance"
+msgid "Kollokvium"
+msgstr "Midterm"
+
+msgctxt "accounts.exam_chance"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.exam_chance"
+msgid "(bütöv qrupa vermək üçün)"
+msgstr "(to grant to a whole group)"
+
+msgctxt "accounts.exam_chance"
+msgid "— Qrup seçilməyib —"
+msgstr "— No group selected —"
+
+msgctxt "accounts.exam_chance"
+msgid "Əlavə cəhd sayı"
+msgstr "Extra attempts"
+
+msgctxt "accounts.exam_chance"
+msgid "Adətən 1 — tələbə imtahana bir dəfə də girə bilər."
+msgstr "Usually 1 — the student can sit the exam once more."
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "accounts.exam_chance"
+msgid "(istifadəçi adı və ya email — vergül/yeni sətirlə; qrupla birlikdə də olar)"
+msgstr "(username or email — comma/new line; can be combined with a group)"
+
+msgctxt "accounts.exam_chance"
+msgid "Şans ver"
+msgstr "Grant retake"
+
+msgctxt "accounts.exam_chance"
+msgid "Şans veriləndə: cəhd limiti seçilən qədər artır, final/kollokvium üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır."
+msgstr "When granted: the attempt limit increases by the chosen amount, a NEW personal PIN is issued for final/midterm (immediately visible in the cabinet), the final's old entry ticket is reset and the exam reappears in “Assigned tasks”. The whole operation is written to the audit log."
+
+msgctxt "accounts.exam_chance"
+msgid "Son verilən şanslar"
+msgstr "Recently granted retakes"
+
+msgctxt "accounts.exam_chance"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.exam_chance"
+msgid "Cəmi əlavə cəhd"
+msgstr "Total extra attempts"
+
+msgctxt "accounts.exam_chance"
+msgid "Verən"
+msgstr "Granted by"
+
+msgctxt "accounts.exam_chance"
+msgid "Hələ şans verilməyib."
+msgstr "No retakes granted yet."
+
+msgctxt "accounts.exam_chance"
+msgid "Bu bölmə yalnız imtahan mərkəzi üçündür."
+msgstr "This section is only for the exam centre."
+
+msgctxt "accounts.exam_chance"
+msgid "Aktiv təşkilat konteksti tapılmadı."
+msgstr "No active organization context found."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan seçin."
+msgstr "Select an exam."
+
+msgctxt "accounts.exam_chance"
+msgid "İstifadəçi tapılmadı və ya bu təşkilatda deyil: %(u)s"
+msgstr "User not found or not in this organization: %(u)s"
+
+msgctxt "accounts.exam_chance"
+msgid "«%(exam)s» üzrə %(n)s tələbəyə +%(extra)s cəhd verildi."
+msgstr "Granted +%(extra)s attempt(s) to %(n)s student(s) for “%(exam)s”."
+
+msgctxt "accounts.exam_chance"
+msgid "Yeni PIN-lər yaradıldı: %(n)s."
+msgstr "New PINs issued: %(n)s."
+
+msgctxt "accounts.exam_chance"
+msgid "Final girişi yenidən açıldı: %(n)s."
+msgstr "Final entry re-opened: %(n)s."
+
+msgctxt "exams.second_chance.notification"
+msgid "İmtahan üçün yenidən şans verildi"
+msgstr "You were granted an exam retake"
+
+msgctxt "exams.second_chance.notification"
+msgid "«{exam}» imtahanı üzrə sizə yenidən cəhd hüququ verildi. Yeni giriş PIN-iniz kabinetinizdəki tapşırıq kartında görünür."
+msgstr "You were granted another attempt for the exam “{exam}”. Your new entry PIN is visible on the task card in your cabinet."
+
+msgctxt "exams.second_chance.error"
+msgid "Ən azı bir tələbə seçilməlidir."
+msgstr "Select at least one student."
+
+msgctxt "exams.form.exam.error"
+msgid "secure_exam_category_exam_center_only"
+msgstr "Only the exam centre can create final and midterm exams."
+
+msgctxt "exams.final_center.session_detail"
+msgid "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır."
+msgstr "A room sitting is exam-independent. A student joins it by signing in with their personal PIN from a registered computer. When the invigilator starts the sitting, everyone begins their own exam."

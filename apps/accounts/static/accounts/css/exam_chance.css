@@ -1,0 +1,80 @@
+/* ============================================================================
+   İmtahan Mərkəzi — «İmtahan şansı ver» (ikinci şans) bölməsi.
+   Dizayn dili: ağ+mavi --ems-* tokenləri (light-only), zal idarəetməsi ailəsi.
+   ========================================================================== */
+
+.exch { display: flex; flex-direction: column; gap: 18px; color: var(--ems-neutral-800, #1e293b); }
+
+.exch-head h2 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--ems-neutral-900, #0f172a); display: flex; align-items: center; gap: 10px; }
+.exch-head h2 i { color: var(--ems-primary-600, #2563eb); }
+.exch-sub { margin: 4px 0 0; color: var(--ems-neutral-500, #64748b); font-size: 0.9rem; max-width: 760px; }
+
+.exch-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -20px rgba(15, 23, 42, 0.18);
+    padding: 18px 20px;
+}
+
+.exch-card h3 { margin: 0 0 4px; font-size: 1.02rem; font-weight: 800; color: var(--ems-neutral-900, #0f172a); display: flex; align-items: center; gap: 8px; }
+.exch-card h3 i { color: var(--ems-primary-600, #2563eb); }
+
+.exch-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; margin-top: 12px; }
+.exch-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.exch-field--full { grid-column: 1 / -1; }
+.exch-field > label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ems-neutral-600, #475569); }
+.exch-req { color: var(--ems-danger-600, #dc2626); }
+.exch-optional { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--ems-neutral-400, #94a3b8); }
+.exch-field input[type=number], .exch-field textarea {
+    width: 100%; border: 1.5px solid var(--ems-neutral-200, #e2e8f0); border-radius: 11px;
+    background: var(--ems-neutral-50, #f8fafc); color: var(--ems-neutral-900, #0f172a);
+    padding: 9px 12px; font-size: 0.88rem;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.exch-field input:focus, .exch-field textarea:focus {
+    outline: none; border-color: var(--ems-primary-500, #3b82f6); background: #fff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+.exch-field textarea { resize: vertical; min-height: 54px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; }
+.exch-hint { font-size: 0.74rem; color: var(--ems-neutral-400, #94a3b8); }
+.exch-field .bootstrap-single-select__toggle { min-height: 42px; border-radius: 11px; }
+@media (max-width: 640px) { .exch-form { grid-template-columns: 1fr; } }
+
+.exch-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+.exch-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 12px; border: 0; cursor: pointer;
+    font-size: 0.9rem; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, var(--ems-primary-600, #2563eb), var(--ems-primary-700, #1d4ed8));
+    box-shadow: 0 8px 18px -8px rgba(37, 99, 235, .55);
+    transition: filter .15s ease;
+}
+.exch-btn:hover { filter: brightness(1.06); }
+
+/* Nə baş verəcək qeydi */
+.exch-note {
+    display: flex; align-items: flex-start; gap: 10px;
+    border: 1px solid var(--ems-primary-100, #dbeafe);
+    border-left: 4px solid var(--ems-primary-500, #3b82f6);
+    border-radius: 12px; background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-neutral-700, #334155); font-size: 0.84rem; line-height: 1.5;
+    padding: 12px 14px; margin-top: 14px;
+}
+.exch-note i { margin-top: 2px; color: var(--ems-primary-600, #2563eb); }
+
+/* Son şanslar cədvəli */
+.exch-tablewrap { overflow-x: auto; border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 12px; margin-top: 12px; }
+.exch-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 560px; }
+.exch-table th, .exch-table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--ems-neutral-100, #f1f5f9); white-space: nowrap; }
+.exch-table th { background: var(--ems-neutral-50, #f8fafc); font-weight: 700; color: var(--ems-neutral-500, #64748b); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.exch-table tbody tr:hover { background: var(--ems-primary-50, #eff6ff); }
+.exch-table tr:last-child td { border-bottom: 0; }
+
+.exch-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.exch-pill--final { background: var(--ems-danger-50, #fef2f2); color: var(--ems-danger-700, #b91c1c); }
+.exch-pill--midterm { background: var(--ems-warning-50, #fffbeb); color: var(--ems-warning-700, #b45309); }
+.exch-pill--extra { background: var(--ems-success-50, #ecfdf5); color: var(--ems-success-700, #047857); }
+
+.exch-empty { text-align: center; padding: 40px 16px; color: var(--ems-neutral-500, #64748b); border: 1px dashed var(--ems-neutral-300, #cbd5e1); border-radius: 16px; background: #fff; }
+.exch-empty i { font-size: 1.9rem; display: block; margin-bottom: 10px; color: var(--ems-neutral-400, #94a3b8); }

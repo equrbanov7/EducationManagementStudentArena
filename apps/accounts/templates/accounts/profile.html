@@ -157,6 +157,8 @@
                 {% include "accounts/profile/sections/_appeal_stats.html" %}
             {% elif active_section == "kollokvium-windows" and 'kollokvium-windows' in allowed_sections %}
                 {% include "accounts/profile/sections/_kollokvium_windows.html" %}
+            {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
+                {% include "accounts/profile/sections/_exam_chance.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
             {% elif active_section == "system-monitoring" and 'system-monitoring' in allowed_sections %}

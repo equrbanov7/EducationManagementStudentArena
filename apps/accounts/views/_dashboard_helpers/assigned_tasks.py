@@ -190,8 +190,11 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             # fərdi PIN. `final_pin_assigned` — PIN mənbəyi mövcuddur (təyin
             # olunub); False olduqda modal "hələ təyin olunmayıb" göstərir.
             if has_ticket:
-                final_display_pin = final_ctx.get("pin")
-                final_pin_assigned = True
+                # Giriş anında avto-yaranan / ikinci şansda sıfırlanan biletin
+                # ÖZ PIN-i olmur — fərdi ExamStudentPin-ə düş (giriş onsuz da
+                # onunla aparılır).
+                final_display_pin = final_ctx.get("pin") or student_pin
+                final_pin_assigned = bool(final_display_pin)
             else:
                 final_display_pin = student_pin
                 final_pin_assigned = bool(student_pin)

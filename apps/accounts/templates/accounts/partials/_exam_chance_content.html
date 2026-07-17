@@ -1,0 +1,116 @@
+{% load static i18n %}
+{% comment %}
+İmtahan Mərkəzi — «İmtahan şansı ver» (ikinci şans). Seçilmiş final/midterm
+imtahanı üzrə qrupa və ya ad-ad tələbələrə yenidən cəhd hüququ verilir:
+grant + yeni fərdi PIN + final biletinin sıfırlanması. Hamısı audit jurnalına
+yazılır; aşağıdakı cədvəl son verilən şansları göstərir.
+{% endcomment %}
+
+<link rel="stylesheet" href="{% static 'accounts/css/exam_chance.css' %}?v=20260717a">
+
+<div class="exch">
+  <div class="exch-head">
+    <h2><i class="fas fa-rotate-right"></i> {% trans "İmtahan şansı ver" context "accounts.exam_chance" %}</h2>
+    <p class="exch-sub">{% trans "Seçilmiş final/kollokvium imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür." context "accounts.exam_chance" %}</p>
+  </div>
+
+  {% if not s.selected_org %}
+    <div class="exch-empty">
+      <i class="far fa-building"></i>
+      <p>{% trans "Aktiv təşkilat tapılmadı." context "accounts.exam_chance" %}</p>
+    </div>
+  {% elif not s.exams %}
+    <div class="exch-empty">
+      <i class="far fa-folder-open"></i>
+      <p>{% trans "Bu təşkilatda hələ final/kollokvium imtahanı yoxdur." context "accounts.exam_chance" %}</p>
+    </div>
+  {% else %}
+
+  <div class="exch-card">
+    <h3><i class="fas fa-user-clock"></i> {% trans "Yenidən cəhd hüququ" context "accounts.exam_chance" %}</h3>
+    <form method="post" action="{% url 'accounts:exam_chance' %}" class="exch-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ s.post_next_url }}">
+      <div class="exch-field exch-field--full">
+        <label for="exchExam">{% trans "İmtahan" context "accounts.exam_chance" %} <span class="exch-req">*</span></label>
+        <div class="bootstrap-single-select">
+          <select id="exchExam" name="exam_id" required class="form-select bootstrap-single-select__native" data-bootstrap-select>
+            <option value="">{% trans "İmtahanı seçin…" context "accounts.exam_chance" %}</option>
+            {% for exam in s.exams %}
+            <option value="{{ exam.pk }}" {% if s.selected_exam_id == exam.pk|stringformat:'s' %}selected{% endif %}>
+              {{ exam.title }} — {% if exam.exam_type_extended == 'final' %}{% trans "Final" context "accounts.exam_chance" %}{% else %}{% trans "Kollokvium" context "accounts.exam_chance" %}{% endif %}{% if exam.start_datetime %} · {{ exam.start_datetime|date:"d.m.Y H:i" }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="exch-field">
+        <label for="exchGroup">{% trans "Qrup" context "accounts.exam_chance" %} <span class="exch-optional">{% trans "(bütöv qrupa vermək üçün)" context "accounts.exam_chance" %}</span></label>
+        <div class="bootstrap-single-select">
+          <select id="exchGroup" name="group_id" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+            <option value="">{% trans "— Qrup seçilməyib —" context "accounts.exam_chance" %}</option>
+            {% for group in s.groups %}
+            <option value="{{ group.pk }}">{{ group.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="exch-field">
+        <label for="exchExtra">{% trans "Əlavə cəhd sayı" context "accounts.exam_chance" %}</label>
+        <input type="number" id="exchExtra" name="extra_attempts" min="1" max="10" value="1">
+        <span class="exch-hint">{% trans "Adətən 1 — tələbə imtahana bir dəfə də girə bilər." context "accounts.exam_chance" %}</span>
+      </div>
+      <div class="exch-field exch-field--full">
+        <label for="exchUsernames">{% trans "Tələbələr" context "accounts.exam_chance" %} <span class="exch-optional">{% trans "(istifadəçi adı və ya email — vergül/yeni sətirlə; qrupla birlikdə də olar)" context "accounts.exam_chance" %}</span></label>
+        <textarea id="exchUsernames" name="usernames" rows="3" placeholder="student1, student2@uni.edu"></textarea>
+      </div>
+      <div class="exch-field exch-field--full">
+        <div class="exch-actions">
+          <button type="submit" class="exch-btn"><i class="fas fa-rotate-right"></i> {% trans "Şans ver" context "accounts.exam_chance" %}</button>
+        </div>
+      </div>
+    </form>
+    <div class="exch-note">
+      <i class="fas fa-circle-info"></i>
+      <div>{% trans "Şans veriləndə: cəhd limiti seçilən qədər artır, final/kollokvium üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır." context "accounts.exam_chance" %}</div>
+    </div>
+  </div>
+
+  <div class="exch-card">
+    <h3><i class="fas fa-clock-rotate-left"></i> {% trans "Son verilən şanslar" context "accounts.exam_chance" %}</h3>
+    {% if s.recent_grants %}
+    <div class="exch-tablewrap">
+      <table class="exch-table">
+        <thead>
+          <tr>
+            <th>{% trans "Tarix" context "accounts.exam_chance" %}</th>
+            <th>{% trans "İmtahan" context "accounts.exam_chance" %}</th>
+            <th>{% trans "Tələbə" context "accounts.exam_chance" %}</th>
+            <th>{% trans "Cəmi əlavə cəhd" context "accounts.exam_chance" %}</th>
+            <th>{% trans "Verən" context "accounts.exam_chance" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for grant in s.recent_grants %}
+          <tr>
+            <td>{{ grant.updated_at|date:"d.m.Y H:i" }}</td>
+            <td>
+              {{ grant.exam.title|truncatechars:44 }}
+              {% if grant.exam.exam_type_extended == 'final' %}<span class="exch-pill exch-pill--final">{% trans "Final" context "accounts.exam_chance" %}</span>
+              {% elif grant.exam.exam_type_extended == 'midterm' %}<span class="exch-pill exch-pill--midterm">{% trans "Kollokvium" context "accounts.exam_chance" %}</span>{% endif %}
+            </td>
+            <td>{{ grant.student.get_full_name|default:grant.student.username }}</td>
+            <td><span class="exch-pill exch-pill--extra">+{{ grant.extra_attempts }}</span></td>
+            <td>{{ grant.granted_by.get_full_name|default:grant.granted_by.username|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="exch-hint">{% trans "Hələ şans verilməyib." context "accounts.exam_chance" %}</p>
+    {% endif %}
+  </div>
+
+  {% endif %}
+</div>
