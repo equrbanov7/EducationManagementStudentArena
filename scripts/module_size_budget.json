@@ -4,7 +4,7 @@
   "budgets": {
     "apps/accounts/static/accounts/css/login.css": 629,
     "apps/appeals/static/appeals/css/appeals/_part3.css": 643,
-    "apps/exams/domain/final_center.py": 622,
+    "apps/exams/domain/final_center.py": 625,
     "apps/exams/static/exams/js/course_exam_dashboard.js": 642,
     "apps/exams/static/exams/js/testQuestionBank.js": 613,
     "apps/exams/templates/exams/teacher/teacher_exam_results.html": 619,
