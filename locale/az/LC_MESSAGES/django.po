@@ -28997,8 +28997,8 @@ msgid "Hələ təyin olunmuş idarəçi yoxdur."
 msgstr "Hələ təyin olunmuş idarəçi yoxdur."
 
 msgctxt "accounts.superadmin_exam_rooms"
-msgid "Hər sətir: Ad, MAC[, IP][, Yer]"
-msgstr "Hər sətir: Ad, MAC[, IP][, Yer]"
+msgid "Hər sətir: Ad, MAC[, Yer][, IP]"
+msgstr "Hər sətir: Ad, MAC[, Yer][, IP]"
 
 msgctxt "accounts.superadmin_exam_rooms"
 msgid "IP ilə"
