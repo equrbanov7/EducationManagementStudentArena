@@ -95,7 +95,8 @@
                             data-final-room="{{ item.final_room|default:'' }}"
                             data-final-entry-open="{% if item.final_entry_open %}1{% else %}0{% endif %}"
                             data-final-entry-url="{{ item.final_entry_url|default:'' }}"
-                            data-student-pin="{{ item.student_pin|default:'' }}">
+                            data-student-pin="{{ item.student_pin|default:'' }}"
+                            data-start-block-reason="{{ item.start_block_reason|default:'' }}">
                         <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
                         <i class="fas fa-arrow-right icon-arrow"></i>
                     </button>
@@ -195,6 +196,13 @@
                    placeholder="{% trans 'Giriş kodu və ya PIN' %}">
             <div class="assigned-exam-code-error" id="assignedExamCodeError" hidden></div>
         </form>
+
+        {% comment %}Cədvəl-blok xəbərdarlığı: eyni vaxt / eyni gün qaydası pozulanda
+        "İmtahana başla" əvəzinə səliqəli izah göstərilir (JS idarə edir).{% endcomment %}
+        <div class="assigned-exam-block-notice" id="assignedExamBlockNotice" role="alert" hidden>
+            <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+            <span id="assignedExamBlockReason"></span>
+        </div>
 
         <div class="assigned-exam-info-actions">
             <button type="button" class="btn-action btn-task-secondary" id="assignedExamInfoCancelBtn">{% trans 'Ləğv et' %}</button>

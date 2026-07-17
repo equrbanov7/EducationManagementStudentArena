@@ -30127,3 +30127,19 @@ msgstr "No results — change the search."
 msgctxt "accounts.exam_chance"
 msgid "Əlavə tələbələr"
 msgstr "Additional students"
+
+msgctxt "exams.model.access"
+msgid "other_exam_in_progress"
+msgstr "You already have another exam in progress. You can sit only one exam at a time — finish the current one first."
+
+msgctxt "exams.model.access"
+msgid "already_examined_today"
+msgstr "You have already sat one official exam today. A second final/midterm on the same day is only possible if the exam centre granted a retake."
+
+msgctxt "accounts.assigned_tasks"
+msgid "İmtahana başlamaq mümkün deyil"
+msgstr "Cannot start the exam"
+
+msgctxt "accounts.assigned_tasks"
+msgid "Başa düşdüm"
+msgstr "Understood"

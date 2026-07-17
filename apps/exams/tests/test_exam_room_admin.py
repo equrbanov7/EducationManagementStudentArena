@@ -295,25 +295,16 @@ class RoomIsolationAndMonitorTests(_RoomBase):
             attempt.save(update_fields=["finished_at"])
         return attempt
 
-    def test_isolation_open_without_live_attempts(self):
-        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
+    def test_same_exam_across_multiple_rooms_allowed(self):
+        # 2026-07: otaq izolyasiyası ləğv edildi — eyni imtahan bir neçə zalda
+        # keçirilə bilər. Bir tələbə zal A-da başlasa belə, zal B-də qeydli
+        # kompüterdən giriş bloklanmır (MAC/IP gate + PIN + cəhd limiti idarə edir).
+        self._attempt(room=self.room)  # zal A-da canlı cəhd
+        from apps.exams.services.final_center.monitor import room_monitor_snapshot
 
-        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room))
-        self.assertTrue(exam_room_isolation_allowed(self.exam, None))
-
-    def test_isolation_binds_to_first_live_room(self):
-        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
-
-        self._attempt(room=self.room)
-        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room))
-        self.assertFalse(exam_room_isolation_allowed(self.exam, self.room_b))
-
-    def test_isolation_releases_when_attempts_finish(self):
-        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
-
-        self._attempt(status="submitted", room=self.room)
-        # Canlı cəhd yoxdur → bağlılıq düşüb, istənilən zaldan giriş olar.
-        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room_b))
+        # Zal B monitoru öz tələbələrini göstərir — imtahan A-ya bağlanmır.
+        snapshot_b = room_monitor_snapshot(self.room_b)
+        self.assertEqual(snapshot_b["counts"]["active"], 0)
 
     def test_room_monitor_snapshot_includes_ticketless_attempts(self):
         from apps.exams.services.final_center.monitor import room_monitor_snapshot
