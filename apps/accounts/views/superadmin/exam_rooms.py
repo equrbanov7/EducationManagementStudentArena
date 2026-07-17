@@ -26,6 +26,7 @@ from apps.exams.public import (
     add_computer,
     bulk_add_computers,
     can_manage_exam_rooms,
+    delete_room,
     update_computer,
 )
 from core.audit import log_action
@@ -77,14 +78,23 @@ def superadmin_exam_rooms(request):
         if organization is None:
             messages.error(request, pgettext("accounts.superadmin_exam_rooms", "Təşkilat konteksti tapılmadı."))
             return redirect(next_url)
-        # room_org GET parametrini redirect-də saxla (superadmin seçdiyi org).
-        if _is_superadmin_user(request.user):
+        # room_org GET parametrini redirect-də saxla (superadmin seçdiyi org);
+        # `next` onsuz da ehtiva edirsə təkrarlama.
+        if _is_superadmin_user(request.user) and "room_org=" not in next_url:
             next_url = _append_query_params(next_url, room_org=str(organization.pk))
 
         try:
-            _dispatch_action(request, action, organization)
+            extras = _dispatch_action(request, action, organization)
         except RoomAdminError as exc:
             messages.error(request, str(exc))
+        else:
+            # Uğurlu əməliyyatdan sonra təsirlənən sətri/zalı vurğula (JS flash).
+            if extras:
+                fragment = extras.pop("_fragment", "")
+                if extras:
+                    next_url = _append_query_params(next_url, **extras)
+                if fragment:
+                    next_url = f"{next_url}#{fragment}"
         return redirect(next_url)
 
     return _render_profile_section(request, "superadmin-exam-rooms")
@@ -117,7 +127,7 @@ def _dispatch_action(request, action, organization):
             resource_id=str(room.pk),
         )
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Zal yaradıldı."))
-        return
+        return {"hl_room": str(room.pk), "_fragment": f"sar-room-{room.pk}"}
 
     if action == "update_room":
         room = _get_org_room(organization, request.POST.get("room_id"))
@@ -136,7 +146,7 @@ def _dispatch_action(request, action, organization):
             resource_id=str(room.pk),
         )
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Zal yeniləndi."))
-        return
+        return {"hl_room": str(room.pk), "_fragment": f"sar-room-{room.pk}"}
 
     if action == "toggle_room_active":
         room = _get_org_room(organization, request.POST.get("room_id"))
@@ -147,7 +157,7 @@ def _dispatch_action(request, action, organization):
 
     if action == "add_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
-        add_computer(
+        computer = add_computer(
             room=room,
             label=request.POST.get("label", ""),
             mac=request.POST.get("mac_address", ""),
@@ -157,7 +167,7 @@ def _dispatch_action(request, action, organization):
             user=user,
         )
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Kompüter əlavə edildi."))
-        return
+        return {"hl_comp": str(computer.pk), "_fragment": f"sar-room-{room.pk}"}
 
     if action == "update_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
@@ -172,13 +182,32 @@ def _dispatch_action(request, action, organization):
             is_active=request.POST.get("is_active") == "1",
         )
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Kompüter yeniləndi."))
-        return
+        return {"hl_comp": str(computer.pk), "_fragment": f"sar-room-{room.pk}"}
 
     if action == "delete_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
         computer = get_object_or_404(ExamRoomComputer, pk=request.POST.get("computer_id"), room=room)
         computer.delete()
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Kompüter silindi."))
+        return
+
+    if action == "delete_room":
+        room = _get_org_room(organization, request.POST.get("room_id"))
+        room_pk, room_name = room.pk, room.name
+        delete_room(room=room)
+        log_action(
+            AuditAction.DELETE,
+            user=user,
+            organization=organization,
+            reason="final_room_deleted",
+            request=request,
+            resource_type="exam_room",
+            resource_id=str(room_pk),
+        )
+        messages.success(
+            request,
+            pgettext("accounts.superadmin_exam_rooms", "«%(room)s» zalı silindi.") % {"room": room_name},
+        )
         return
 
     if action == "bulk_add_computers":
@@ -193,7 +222,7 @@ def _dispatch_action(request, action, organization):
             messages.warning(request, err)
         if not created and not errors:
             messages.info(request, pgettext("accounts.superadmin_exam_rooms", "Əlavə ediləcək sətir tapılmadı."))
-        return
+        return {"_fragment": f"sar-room-{room.pk}"} if created else None
 
     if action in {"grant_room_manager", "revoke_room_manager"}:
         # Yalnız superadmin başqasına icazə verə/geri ala bilər (bayraqlı user yox).

@@ -1,7 +1,7 @@
 {% extends "accounts/profile_embed_base.html" %}
 {% load static i18n %}
 
-{% block embed_title %}{% trans "Sual göndərişi" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
+{% block embed_title %}{% trans "Sual göndərişi" context "exams.template.question_submission" %} — {% trans "İmtahan mərkəzi" context "exams.template.question_submission" %}{% endblock %}
 
 {% block embed_extra_css %}
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20260621-sticky-footer">
