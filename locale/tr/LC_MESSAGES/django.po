@@ -29003,8 +29003,8 @@ msgid "Hələ təyin olunmuş idarəçi yoxdur."
 msgstr "Henüz atanmış yönetici yok."
 
 msgctxt "accounts.superadmin_exam_rooms"
-msgid "Hər sətir: Ad, MAC[, IP][, Yer]"
-msgstr "Her satır: Ad, MAC[, IP][, Koltuk]"
+msgid "Hər sətir: Ad, MAC[, Yer][, IP]"
+msgstr "Her satır: Ad, MAC[, Koltuk][, IP]"
 
 msgctxt "accounts.superadmin_exam_rooms"
 msgid "IP ilə"
@@ -29541,3 +29541,19 @@ msgstr "Sonuç bulunamadı — aramayı değiştirin."
 msgctxt "accounts.exam_chance"
 msgid "Əlavə tələbələr"
 msgstr "Ek öğrenciler"
+
+msgctxt "exams.model.access"
+msgid "other_exam_in_progress"
+msgstr "Şu anda başka bir sınavınız devam ediyor. Aynı anda yalnızca bir sınava girebilirsiniz — önce mevcut sınavı tamamlayın."
+
+msgctxt "exams.model.access"
+msgid "already_examined_today"
+msgstr "Bugün zaten bir resmi sınava girdiniz. Aynı gün ikinci final/vize yalnızca sınav merkezi telafi (retake) izni verdiyse mümkündür."
+
+msgctxt "accounts.assigned_tasks"
+msgid "İmtahana başlamaq mümkün deyil"
+msgstr "Sınava başlanamıyor"
+
+msgctxt "accounts.assigned_tasks"
+msgid "Başa düşdüm"
+msgstr "Anladım"
