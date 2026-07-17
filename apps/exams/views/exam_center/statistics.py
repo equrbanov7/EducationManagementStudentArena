@@ -21,6 +21,7 @@ from django.views.decorators.http import require_GET
 from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import is_exam_center_user
 from apps.exams.services.result_calculation import attach_test_result_summaries
+from apps.exams.services.supervision import attach_attempt_interventions
 
 from ._shared import supervisor_org_or_403
 
@@ -143,6 +144,8 @@ def _row(attempt):
     kafedras = _dedup(g.org_unit.name for g in groups if g.org_unit_id)
     faculties = _dedup(g.org_unit.parent.name for g in groups if g.org_unit_id and g.org_unit.parent_id)
     teacher = exam.author.get_full_name() or exam.author.username if exam.author_id else ""
+    intervention = getattr(attempt, "exam_intervention", None)
+    removed = bool(intervention and intervention.get("is_terminal"))
     return {
         "attempt_id": attempt.id,
         "exam_slug": exam.slug,
@@ -158,6 +161,9 @@ def _row(attempt):
         "percentage": (result.percentage_display if result else ""),
         "score": (f"{result.score}/{result.max_score}" if result else ""),
         "status": attempt.get_status_display(),
+        # İmtahandan uzaqlaşdırılmış tələbə cədvəldə qırmızı görünsün + səbəb.
+        "removed": removed,
+        "removal_reason": (intervention.get("reason") if intervention else "") or "",
         "date": timezone.localtime(attempt.finished_at or attempt.started_at).strftime("%d.%m.%Y %H:%M"),
     }
 
@@ -183,6 +189,7 @@ def exam_center_stats_data(request):
     page_obj = Paginator(_sorted(attempts, request), _PAGE_SIZE).get_page(request.GET.get("page"))
     page_attempts = list(page_obj.object_list)
     attach_test_result_summaries(page_attempts)
+    attach_attempt_interventions(page_attempts)
 
     return JsonResponse(
         {
@@ -206,6 +213,7 @@ def exam_center_stats_export(request):
     organization = _stats_org(request)
     attempts = list(_sorted(_filtered_attempts(request, organization), request)[:5000])
     attach_test_result_summaries(attempts)
+    attach_attempt_interventions(attempts)
 
     try:
         from openpyxl import Workbook
@@ -227,6 +235,7 @@ def exam_center_stats_export(request):
         ("Bal", "score"),
         ("Faiz", "percentage"),
         ("Status", "status"),
+        ("Uzaqlaşdırma səbəbi", "removal_reason"),
         ("Tarix", "date"),
     ]
     wb = Workbook()

@@ -339,6 +339,10 @@ def sync_ticket_completion(ticket) -> bool:
         return False
     attempt = ticket.attempt
     if not attempt.is_finished:
+        # Deadline keçibsə əvvəlcə avtomatik bitir — tələbənin brauzeri bağlı
+        # olub client-side avtomatik təqdim işləməsə belə bilet "aktiv" ilişməsin.
+        attempt.expire_if_time_limit_reached()
+    if not attempt.is_finished:
         return False
     ok = transition_ticket(
         ticket,

@@ -41,6 +41,31 @@ def expire_stale_resumed_attempts():
     return expired
 
 
+@shared_task(name="exams.expire_overdue_attempts")
+def expire_overdue_attempts():
+    """
+    Auto-finish any draft/in_progress attempt whose exam-duration deadline has
+    passed.  Runs globally every minute so a timed exam never lingers "in
+    progress / pending" after time is up — in the room monitor, the teacher's
+    supervision monitor, or anywhere else — even when the student's browser is
+    closed (so its client-side auto-submit never fired).  Answers saved up to
+    the deadline are preserved and graded.
+
+    Returns the number of attempts that were auto-finished.
+    """
+    from apps.exams.services.attempts import sweep_overdue_attempts
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    # Global periodic sweep has no org_id argument; each finished attempt is
+    # written under its own exam.organization, preserving tenant isolation.
+    with rls_worker_atomic(), bypass_rls():
+        expired = sweep_overdue_attempts()
+    if expired:
+        logger.info("expire_overdue_attempts: auto-finished %d attempt(s)", expired)
+    return expired
+
+
 @shared_task(name="exams.reap_stuck_extraction_jobs")
 def reap_stuck_extraction_jobs(lease_seconds: int = 1200):
     """EXAM-P1-15: crash-safe lease reaper.

@@ -17,6 +17,17 @@
     color: var(--ter-primary-dark);
     margin-left: 6px;
 }
+/* İmtahandan uzaqlaşdırılmış tələbə — qırmızı vurğu. */
+.ter-badge--removed { background: #FEE2E2; color: #B91C1C; }
+.ter-removed-reason {
+    margin-top: 3px;
+    font-size: .72rem;
+    color: #B91C1C;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 /* ── Action stack ─────────────────────────────────────────────── */
 .ter-action-stack {
