@@ -394,6 +394,36 @@ class ExamSchedulingRulesTests(_Base):
         blocked, _reason = exam._concurrent_or_same_day_block(self.student)
         self.assertFalse(blocked)
 
+    def test_stale_expired_other_attempt_does_not_block(self):
+        """Başqa imtahanda tərk edilmiş (deadline-ı keçmiş) in_progress cəhd
+        «eyni anda bir imtahan» bloku yaratmamalıdır — əvvəlcə expired olunur.
+        Qeyri-rəsmi (quiz) imtahan seçilir ki, yalnız concurrent qayda işə düşsün."""
+        from apps.exams.models import ExamAttempt
+
+        quiz = Exam.objects.create(
+            title="Tərk edilmiş quiz",
+            author=self.center,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="quiz",
+            is_active=True,
+            is_public=False,
+            total_duration_minutes=30,
+            start_datetime=timezone.now() - timedelta(hours=4),
+            end_datetime=timezone.now() + timedelta(hours=1),
+        )
+        quiz.allowed_users.add(self.student)
+        exam_b = self._make_exam("final", title="Yeni final")
+        stale = ExamAttempt.objects.create(user=self.student, exam=quiz, status="in_progress")
+        # started_at auto_now_add-dır; keçmiş dəyəri UPDATE ilə məcburi yaz ki,
+        # deadline (started_at + 30dəq) artıq keçmiş olsun.
+        ExamAttempt.objects.filter(pk=stale.pk).update(started_at=timezone.now() - timedelta(hours=3))
+
+        blocked, _reason = exam_b._concurrent_or_same_day_block(self.student)
+        self.assertFalse(blocked)
+        stale.refresh_from_db()
+        self.assertEqual(stale.status, "expired")
+
     def test_second_official_exam_same_day_blocked(self):
         exam_a = self._make_exam("final", title="Səhər finalı")
         exam_b = self._make_exam("midterm", title="Günorta kollokviumu")

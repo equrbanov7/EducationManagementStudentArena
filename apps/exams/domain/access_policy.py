@@ -152,11 +152,19 @@ class ExamAccessPolicyMixin:
         from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
         from apps.exams.models import ExamAttempt
 
-        active_qs = ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False).exclude(
-            exam_id=self.pk
+        # Digər imtahanlardakı köhnəlmiş (vaxtı keçmiş) cəhdləri əvvəlcə bağla:
+        # tərk edilmiş/çökmüş sessiya «eyni anda bir imtahan» qaydası ilə tələbəni
+        # növbəti imtahandan ƏBƏDİ bloklamamalıdır. Yalnız HƏQİQƏTƏN aktiv qalan
+        # (deadline-ı keçməmiş) cəhd blok yaradır — bu, `_expire_stale_attempts_for`
+        # məntiqinin digər imtahanlara genişləndirilməsidir.
+        other_active = (
+            ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False)
+            .exclude(exam_id=self.pk)
+            .select_related("exam")
         )
-        if active_qs.exists():
-            return True, pgettext("exams.model.access", "other_exam_in_progress")
+        for attempt in other_active:
+            if not attempt.expire_if_time_limit_reached():
+                return True, pgettext("exams.model.access", "other_exam_in_progress")
 
         if getattr(self, "exam_type_extended", None) in {"final", "midterm"}:
             has_retake_grant = self.attempt_grants.filter(student=user).exists()
