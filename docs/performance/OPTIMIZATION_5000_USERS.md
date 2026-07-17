@@ -169,3 +169,12 @@ _Transaction pooling (§5) tətbiq olunanda P1 pgbouncer sizing + middleware `at
 
 - **Migration 0058 + 0024**: `ExamRoomComputer(organization,mac_address)` + `(organization,is_active)` (final-giriş MAC gate P0) və `Membership(user,organization,is_active)` (per-request üzvlük həlli) indeksləri. ✅ tətbiq + doğrulandı.
 - **⚠️ N+1 (`lists.py:302`) blind DÜZƏLDİLMƏDİ**: memory `attempt_limit_and_live_monitoring` — *"attempts_left_for grant-aware həqiqət mənbəyidir, xam saylardan yenidən hesablama"*. Annotasiya grant məntiqini (əlavə qrant, reset və s.) TAM güzgüləyib testlə təsdiqlənməlidir; sadə arifmetika səhv nəticə verər. Test + server ilə gedəcək.
+
+## 14. Batch 4 — CI fix (vacib docker dərsi)
+
+**Docker `cpus` limiti host nüvə sayını KEÇƏ BİLMƏZ** (`memory` keçə bilər). `POSTGRES_CPU_LIMIT=16` default-u 4-CPU CI runner-ində postgres konteynerinin yaranmasını qırdı (`range of CPUs is from 0.01 to 4.00`) → stack qalxmadı → prod-smoke + e2e-smoke düşdü. **Bu, əvvəlki §3-dəki "postgres 16 cpu / app 4 cpu" yanaşmasını əvəz edir:**
+- **app + postgres**: hard `cpus` cap **silindi** (uncapped → host nüvələrindən istifadə; həm 80-core prod, həm 4-core CI, həm istənilən yeni serverdə işləyir; throttle yox). `APP_CPU_LIMIT`/`POSTGRES_CPU_LIMIT` env-ləri artıq TƏTBİQ OLUNMUR.
+- **redis(2)/nginx(4)/pgbouncer(1)**: cap-lar qalır (≤4 = CI-safe, faydalı izolyasiya; ≥4-core serverlərdə problem yox).
+- **memory** limitləri + postgres tuning (`shared_buffers` və s.) qalır — bunlar host-u keçə bilər, xəta vermir. Prod .env-də `POSTGRES_SHARED_BUFFERS=15GB`, `POSTGRES_EFFECTIVE_CACHE_SIZE=40GB` (§4) hələ də tövsiyə olunur.
+
+Dərs: CPU üçün **cap yox, host-a burax**; yaddaş/pool/thread üçün env ilə tune et.
