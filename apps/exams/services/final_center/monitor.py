@@ -189,6 +189,10 @@ def _room_attempt_rows(room):
     )
     rows = []
     for attempt in attempts:
+        # Lazy auto-finish: deadline-ı keçmiş cəhd monitor oxunanda dərhal
+        # bitmiş görünsün (periodik sweep-i gözləmədən). Cavablar qorunur.
+        if attempt.status == "in_progress":
+            attempt.expire_if_time_limit_reached()
         remaining_seconds = None
         if not attempt.is_finished and attempt.deadline_at:
             remaining_seconds = max(0, int((attempt.deadline_at - timezone.now()).total_seconds()))
