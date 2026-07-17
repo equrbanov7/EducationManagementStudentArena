@@ -52,6 +52,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Admin 2FA gate: parol keçmiş amma OTP təsdiqlənməmiş admin istifadəçini
+    # verify-otp-dan başqa hər yerdən saxlayır (auth-dan dərhal sonra — pending
+    # session heç bir authenticated səhifəyə çıxmasın). Bax core.admin_auth.
+    "core.admin_auth.AdminOTPGateMiddleware",
     "core.middleware.RequestQueueMiddleware",
     "apps.accounts.middleware.SessionTimeoutMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
