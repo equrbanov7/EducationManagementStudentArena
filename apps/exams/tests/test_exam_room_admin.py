@@ -16,7 +16,12 @@ from apps.exams.services.exam_center_gate import (
     resolve_room_computer,
     room_ip_access_allowed,
 )
-from apps.exams.services.final_center import RoomAdminError, add_computer, can_supervise_session
+from apps.exams.services.final_center import (
+    RoomAdminError,
+    add_computer,
+    bulk_add_computers,
+    can_supervise_session,
+)
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -103,6 +108,66 @@ class AddComputerServiceTests(_RoomBase):
         with self.assertRaises(RoomAdminError) as ctx:
             update_computer(computer=comp, label="PC-02", mac="AA:BB:CC:DD:EE:0A")
         self.assertIn("Zal B3", str(ctx.exception))
+
+
+class BulkAddComputersTests(_RoomBase):
+    def _macs(self):
+        return {c.mac_address: c for c in ExamRoomComputer.objects.filter(room=self.room)}
+
+    def test_name_mac_seat_without_ip(self):
+        """«AD, MAC, YER» — IP yazılmadan yer nömrəsi düzgün oxunur (əsas şikayət)."""
+        created, errors = bulk_add_computers(
+            room=self.room,
+            text="PC-01, 00-23-24-F5-0C-FF, 1\nPC-02, 00-23-24-F5-88-3B, 2",
+        )
+        self.assertEqual(created, 2)
+        self.assertEqual(errors, [])
+        comps = self._macs()
+        self.assertEqual(comps["00:23:24:F5:0C:FF"].seat_number, 1)
+        self.assertFalse(comps["00:23:24:F5:0C:FF"].ip_address)
+        self.assertEqual(comps["00:23:24:F5:88:3B"].seat_number, 2)
+
+    def test_legacy_empty_ip_slot_before_seat_still_parses(self):
+        """Köhnə «AD, MAC, , YER» sətri boş IP-slotuna baxmayaraq yeri düzgün oxuyur."""
+        created, errors = bulk_add_computers(
+            room=self.room,
+            text="PC-01, 00-23-24-F5-0C-FF, , 1",
+        )
+        self.assertEqual(created, 1)
+        self.assertEqual(errors, [])
+        comp = self._macs()["00:23:24:F5:0C:FF"]
+        self.assertEqual(comp.seat_number, 1)
+        self.assertFalse(comp.ip_address)
+
+    def test_seat_and_ip_autodetected_regardless_of_order(self):
+        created, errors = bulk_add_computers(
+            room=self.room,
+            text="PC-01, AA:BB:CC:DD:EE:01, 3, 10.0.0.13\nPC-02, AA:BB:CC:DD:EE:02, 10.0.0.14, 4",
+        )
+        self.assertEqual(created, 2)
+        self.assertEqual(errors, [])
+        comps = self._macs()
+        self.assertEqual(comps["AA:BB:CC:DD:EE:01"].seat_number, 3)
+        self.assertEqual(comps["AA:BB:CC:DD:EE:01"].ip_address, "10.0.0.13")
+        self.assertEqual(comps["AA:BB:CC:DD:EE:02"].seat_number, 4)
+        self.assertEqual(comps["AA:BB:CC:DD:EE:02"].ip_address, "10.0.0.14")
+
+    def test_name_and_mac_only(self):
+        created, errors = bulk_add_computers(room=self.room, text="PC-01, AA:BB:CC:DD:EE:05")
+        self.assertEqual(created, 1)
+        self.assertEqual(errors, [])
+        comp = self._macs()["AA:BB:CC:DD:EE:05"]
+        self.assertIsNone(comp.seat_number)
+        self.assertFalse(comp.ip_address)
+
+    def test_missing_mac_line_reported_and_skipped(self):
+        created, errors = bulk_add_computers(
+            room=self.room,
+            text="PC-01\nPC-02, AA:BB:CC:DD:EE:06, 7",
+        )
+        self.assertEqual(created, 1)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("1", errors[0])
 
 
 class DeleteRoomServiceTests(_RoomBase):
@@ -295,25 +360,16 @@ class RoomIsolationAndMonitorTests(_RoomBase):
             attempt.save(update_fields=["finished_at"])
         return attempt
 
-    def test_isolation_open_without_live_attempts(self):
-        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
+    def test_same_exam_across_multiple_rooms_allowed(self):
+        # 2026-07: otaq izolyasiyası ləğv edildi — eyni imtahan bir neçə zalda
+        # keçirilə bilər. Bir tələbə zal A-da başlasa belə, zal B-də qeydli
+        # kompüterdən giriş bloklanmır (MAC/IP gate + PIN + cəhd limiti idarə edir).
+        self._attempt(room=self.room)  # zal A-da canlı cəhd
+        from apps.exams.services.final_center.monitor import room_monitor_snapshot
 
-        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room))
-        self.assertTrue(exam_room_isolation_allowed(self.exam, None))
-
-    def test_isolation_binds_to_first_live_room(self):
-        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
-
-        self._attempt(room=self.room)
-        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room))
-        self.assertFalse(exam_room_isolation_allowed(self.exam, self.room_b))
-
-    def test_isolation_releases_when_attempts_finish(self):
-        from apps.exams.services.exam_center_gate import exam_room_isolation_allowed
-
-        self._attempt(status="submitted", room=self.room)
-        # Canlı cəhd yoxdur → bağlılıq düşüb, istənilən zaldan giriş olar.
-        self.assertTrue(exam_room_isolation_allowed(self.exam, self.room_b))
+        # Zal B monitoru öz tələbələrini göstərir — imtahan A-ya bağlanmır.
+        snapshot_b = room_monitor_snapshot(self.room_b)
+        self.assertEqual(snapshot_b["counts"]["active"], 0)
 
     def test_room_monitor_snapshot_includes_ticketless_attempts(self):
         from apps.exams.services.final_center.monitor import room_monitor_snapshot
