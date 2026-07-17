@@ -41,8 +41,7 @@
 
   <div class="fxc-alert fxc-alert-info" role="note">
     <i class="fas fa-circle-info"></i>
-    {% trans "Zal oturumu imtahandan asılı deyil. Tələbələr «Final təyinatları»ndan imtahana təyin olunur; qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır." %}
-    <a href="{% url 'exams:exam_center_finals' %}">{% trans "Final təyinatları →" %}</a>
+    {% trans "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır." context "exams.final_center.session_detail" %}
   </div>
 
   <section aria-labelledby="fxc-tickets-title">

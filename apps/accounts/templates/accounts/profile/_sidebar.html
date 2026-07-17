@@ -180,13 +180,6 @@
                 <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
             </a>
         </li>
-        <li class="sidebar-menu-item">
-            <a href="{% url 'exams:exam_center_finals' %}"
-               class="sidebar-menu-link">
-                <i class="fas fa-user-plus sidebar-menu-icon sidebar-menu-icon--danger"></i>
-                <span class="sidebar-menu-text">{% trans 'Final təyinatları' %}</span>
-            </a>
-        </li>
         {% endif %}
         {% include "accounts/profile/_sidebar_exam_center.html" %}
 

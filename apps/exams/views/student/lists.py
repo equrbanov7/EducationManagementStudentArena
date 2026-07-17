@@ -61,6 +61,13 @@ def _user_finished_attempt_count_sq(user):
     )
 
 
+def _user_extra_grant_sq(user):
+    """Per-exam subquery: bu tələbəyə verilmiş əlavə cəhd (ikinci şans) sayı."""
+    from apps.exams.models import StudentExamAttemptGrant
+
+    return StudentExamAttemptGrant.objects.filter(exam=OuterRef("pk"), student=user).values("extra_attempts")[:1]
+
+
 def _live_session_exists_sq():
     """Per-exam Exists subquery: imtahanın aktiv (bitməmiş) canlı sessiyası varmı."""
     return get_live_session_model().objects.filter(exam=OuterRef("pk"), state__in=get_live_active_states())
@@ -77,7 +84,7 @@ def _exclude_attempt_exhausted(queryset):
     return queryset.filter(
         Q(max_attempts_per_user__isnull=True)
         | Q(max_attempts_per_user=0)
-        | Q(finished_attempt_count__lt=F("max_attempts_per_user"))
+        | Q(finished_attempt_count__lt=F("max_attempts_per_user") + F("extra_grant_count"))
     )
 
 
@@ -268,6 +275,7 @@ def _annotate_exam_list_base(queryset, user):
     return queryset.select_related("author", "organization", "course").annotate(
         user_attempt_count=Subquery(user_attempt_count_sq),
         finished_attempt_count=Coalesce(Subquery(_user_finished_attempt_count_sq(user)), 0),
+        extra_grant_count=Coalesce(Subquery(_user_extra_grant_sq(user)), 0),
         is_live_now=Exists(_live_session_exists_sq()),
     )
 
