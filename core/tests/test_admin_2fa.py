@@ -135,3 +135,70 @@ class AdminTwoFactorFlowTest(TestCase):
                 resource_id=self.superuser.username,
             ).exists()
         )
+
+    # ── OTP gate: pending session BAŞQA sayt səhifələrinə çıxa bilməməlidir ──
+    def test_pending_otp_blocks_non_admin_pages(self):
+        # Parol keçdi → OTP challenge (pending). Bu vəziyyətdə istifadəçi OTP-ni
+        # keçmədən başqa authenticated səhifəyə (profil) girə BİLMƏMƏLİDİR.
+        self._login_with_password()
+
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("admin:verify-otp"))
+
+    def test_pending_otp_allows_verify_and_logout(self):
+        # İstisna yollar açıq qalmalıdır: verify-otp (OTP daxil et) + logout (imtina).
+        self._login_with_password()
+
+        verify = self.client.get(reverse("admin:verify-otp"))
+        self.assertEqual(verify.status_code, 200)
+        self.assertContains(verify, 'class="admin-otp-page"', html=False)
+
+        # Logout gate ilə bloklanmır (istifadəçi imtina edə bilsin) — verify-otp-a
+        # yönləndirilmir. Django admin logout-un öz davranışı (POST/302) qalır.
+        logout = self.client.get(reverse("admin:logout"))
+        location = logout.headers.get("Location", "")
+        self.assertNotEqual(location, reverse("admin:verify-otp"))
+
+    def test_verified_session_can_open_other_pages(self):
+        # OTP təsdiqləndikdən sonra profil normal açılır (gate yalnız pending-də).
+        self._login_with_password()
+        self.client.post(reverse("admin:verify-otp"), {"code": self._latest_otp_code()})
+
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_non_admin_session_unaffected_by_gate(self):
+        # Adi (staff olmayan) istifadəçi — gate heç vaxt işə düşmür.
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        plain = User.objects.create_user(
+            username="plain_user", email="plain_user@example.com", password="StrongPass123!"
+        )
+        self.client.force_login(plain)
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_main_site_login_cannot_bypass_admin_otp(self):
+        # ƏSAS bypass: staff istifadəçi əsas sayt login-i (/accounts/login/) ilə
+        # girsə belə, OTP təsdiqlənməyənə qədər digər səhifələrə çıxa bilməməlidir.
+        self.client.force_login(self.superuser)  # əsas sayt login-ini modelləşdirir
+
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("admin:verify-otp"))
+
+    def test_verify_page_bootstraps_otp_after_main_login(self):
+        # Əsas login ilə gələn staff verify-otp-a düşəndə OTP avtomatik göndərilir.
+        self.client.force_login(self.superuser)
+        self.client.get(reverse("accounts:profile"))  # gate → verify-otp
+
+        verify = self.client.get(reverse("admin:verify-otp"))
+        self.assertEqual(verify.status_code, 200)
+        self.assertTrue(mail.outbox, "verify-otp səhifəsi OTP-ni bootstrap etməlidir.")
+
+        # OTP təsdiqlənəndən sonra profil normal açılır.
+        self.client.post(reverse("admin:verify-otp"), {"code": self._latest_otp_code()})
+        profile = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(profile.status_code, 200)

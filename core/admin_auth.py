@@ -170,6 +170,65 @@ def log_admin_security_event(
         logger.exception("Failed to write admin security audit log for action %s", action)
 
 
+class AdminOTPGateMiddleware:
+    """Admin 2FA gate — parol keçmiş, OTP hələ təsdiqlənməmiş admin istifadəçini
+    OTP təsdiq səhifəsindən BAŞQA HƏR YERDƏN saxlayır.
+
+    Kök problem: Django admin login parol doğrulandıqda dərhal
+    ``django.contrib.auth.login()`` çağırır — yəni session TAM authenticated
+    olur, SONRA OTP challenge qoyulur (``mark_admin_2fa_pending``). OTP gate isə
+    yalnız admin site-ın ``has_permission``-ında yoxlanır, ona görə istifadəçi
+    OTP-ni keçmədən başqa tab-da ``/accounts/profile/`` (və ya istənilən
+    ``@login_required`` səhifə) yaza bilir və girirdi — 2FA bypass.
+
+    Middleware OTP TƏSDİQLƏNMƏYƏN admin session-u (harada login olursa olsun —
+    admin login, ƏSAS sayt login-i ``/accounts/login/``, force_login, session
+    bərpası) ``admin:verify-otp``-dan başqa hər yerdən saxlayır. Yalnız staff +
+    ``ADMIN_2FA_REQUIRED`` + təsdiqlənməmiş halda işə düşür — adi istifadəçilərə
+    və OTP-si təsdiqlənmiş adminlərə heç bir təsir yoxdur. İstisna: verify-otp/
+    resend-otp, logout (imtina), statik/media. Challenge (OTP email) verify-otp
+    görünüşündə bootstrap olunur — email göndərmə məntiqi bir yerdə qalır.
+
+    QEYD: yalnız ``admin login``-i qorumaq kifayət deyildi — is_staff superadmin
+    ƏSAS sayt login-i ilə OTP-siz girə bilirdi (challenge heç başlamırdı). Ona
+    görə şərt ``pending`` yox, ``not verified``-dır.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self._exempt_cache = None
+
+    def _exempt_prefixes(self):
+        # reverse() lazy: URLConf hazır olandan sonra bir dəfə hesablanır.
+        if self._exempt_cache is None:
+            from django.conf import settings
+            from django.urls import NoReverseMatch, reverse
+
+            prefixes = []
+            for name in ("admin:verify-otp", "admin:resend-otp", "admin:logout"):
+                try:
+                    prefixes.append(reverse(name))
+                except NoReverseMatch:
+                    continue
+            for attr in ("STATIC_URL", "MEDIA_URL"):
+                value = getattr(settings, attr, "") or ""
+                if value.startswith("/"):
+                    prefixes.append(value)
+            self._exempt_cache = tuple(p for p in prefixes if p)
+        return self._exempt_cache
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if admin_2fa_required_for_user(user) and not admin_2fa_verified(request):
+            path = request.path_info
+            if not any(path.startswith(prefix) for prefix in self._exempt_prefixes()):
+                from django.shortcuts import redirect
+                from django.urls import reverse
+
+                return redirect(reverse("admin:verify-otp"))
+        return self.get_response(request)
+
+
 def admin_verify_rate_limited(request, *, user) -> tuple[bool, int | None]:
     key_parts = admin_otp_limit_keys(request, user=user)
     return is_rate_limited(ADMIN_OTP_VERIFY_SCOPE, get_admin_otp_verify_rate_limit(), *key_parts)
