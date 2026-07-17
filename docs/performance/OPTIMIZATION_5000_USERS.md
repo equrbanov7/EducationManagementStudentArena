@@ -164,3 +164,8 @@ _Transaction pooling (§5) tətbiq olunanda P1 pgbouncer sizing + middleware `at
 | 8 | pgbouncer / RLS transaction pooling | ✅ audit (yol + P0 fix) |
 | 9 | Frontend / static / şablon | ✅ audit (backlog) |
 | 10 | Reporting / statistika / jurnal / media-OCR-export | ✅ audit (backlog) |
+
+## 13. Sonrakı tətbiqlər (batch 2)
+
+- **Migration 0058 + 0024**: `ExamRoomComputer(organization,mac_address)` + `(organization,is_active)` (final-giriş MAC gate P0) və `Membership(user,organization,is_active)` (per-request üzvlük həlli) indeksləri. ✅ tətbiq + doğrulandı.
+- **⚠️ N+1 (`lists.py:302`) blind DÜZƏLDİLMƏDİ**: memory `attempt_limit_and_live_monitoring` — *"attempts_left_for grant-aware həqiqət mənbəyidir, xam saylardan yenidən hesablama"*. Annotasiya grant məntiqini (əlavə qrant, reset və s.) TAM güzgüləyib testlə təsdiqlənməlidir; sadə arifmetika səhv nəticə verər. Test + server ilə gedəcək.
