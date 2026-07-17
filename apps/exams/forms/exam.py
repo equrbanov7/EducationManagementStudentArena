@@ -245,14 +245,15 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             self.fields["exam_type_extended"].required = False
             common_category_values = {"quiz", "midterm", "final"}
 
-            # FINAL kateqoriyası yalnız imtahan mərkəzinə aiddir: müəllim final
-            # imtahan yarada/çevirə bilməz (mövcud final instansı redaktədə
-            # seçim kimi qalır ki, forma partlamasın — clean() yenə qoruyur).
-            from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY, can_manage_final_exam_content
+            # FINAL və MIDTERM (kollokvium) kateqoriyaları yalnız imtahan
+            # mərkəzinə aiddir: müəllim bu kateqoriyalarda imtahan yarada/çevirə
+            # bilməz (mövcud instans redaktədə seçim kimi qalır ki, forma
+            # partlamasın — clean() yenə qoruyur).
+            from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES, can_manage_final_exam_content
 
             self._can_manage_final_exams = user is None or can_manage_final_exam_content(user)
             if not self._can_manage_final_exams:
-                common_category_values = common_category_values - {FINAL_EXAM_CATEGORY}
+                common_category_values = common_category_values - SECURE_EXAM_CATEGORIES
 
             current_category_value = (
                 self.initial.get("exam_type_extended")
@@ -448,13 +449,15 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
 
     def clean_exam_type_extended(self):
         value = self.cleaned_data.get("exam_type_extended") or None
-        if value == "final" and not getattr(self, "_can_manage_final_exams", True):
-            # Mövcud final imtahanın redaktəsində dəyər dəyişmirsə icazə ver;
-            # müəllimin YENİ final yaratması / finala çevirməsi qadağandır.
+        from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
+
+        if value in SECURE_EXAM_CATEGORIES and not getattr(self, "_can_manage_final_exams", True):
+            # Mövcud final/midterm imtahanın redaktəsində dəyər dəyişmirsə icazə
+            # ver; müəllimin YENİ final/midterm yaratması / çevirməsi qadağandır.
             current_value = getattr(getattr(self, "instance", None), "exam_type_extended", None)
-            if current_value != "final":
+            if current_value != value:
                 raise forms.ValidationError(
-                    pgettext_lazy("exams.form.exam.error", "final_exam_category_exam_center_only")
+                    pgettext_lazy("exams.form.exam.error", "secure_exam_category_exam_center_only")
                 )
         return value
 

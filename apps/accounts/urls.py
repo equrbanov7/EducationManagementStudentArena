@@ -141,6 +141,7 @@ urlpatterns = [
     path("superadmin/ai-settings/", views.superadmin_ai_settings, name="superadmin_ai_settings"),
     path("superadmin/exam-rooms/", views.superadmin_exam_rooms, name="superadmin_exam_rooms"),
     path("kollokvium-windows/", views.kollokvium_windows, name="kollokvium_windows"),
+    path("exam-chance/", views.exam_chance, name="exam_chance"),
     # Account management
     path("delete-account/", views.delete_account, name="delete_account"),
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),

@@ -46,9 +46,9 @@
     <link rel="stylesheet" href="{% static 'css/global_search.css' %}?v=20260705-1">
     {% endif %}
 
-    {% comment %} {# Courses app CSS köçürüldü: yalnız courses səhifələrində
+    {% comment %}  Courses app CSS köçürüldü: yalnız courses səhifələrində
        `apps/courses/templates/courses/partials/_courses_assets_css.html`
-       partial-ı vasitəsi ilə yüklənir (extraCss block daxilində). #} {% endcomment %}
+       partial-ı vasitəsi ilə yüklənir (extraCss block daxilində). {% endcomment %} 
 
     {# "View as" UI yalnız səlahiyyətli/aktiv hallarda yüklənir (perf) #}
     {% if view_as.active or view_as.can_use %}

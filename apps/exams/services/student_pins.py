@@ -136,6 +136,29 @@ def verify_student_pin(exam, user, raw_pin: str) -> bool:
     return ok
 
 
+def reissue_student_pin(exam, student) -> bool:
+    """Tələbəyə bu imtahan üçün TƏZƏ fərdi PIN ver (ikinci şans axını).
+
+    İmtahan başlayanda köhnə PIN birdəfəlik ləğv olunur (``revoke_student_pin``)
+    — yenidən şans veriləndə tələbənin yeni etibarlı PIN-i olmalıdır. Mövcud
+    sətir yenilənir (revoked/expired sıfırlanır), yoxdursa yaradılır.
+    """
+    if not exam_requires_student_pins(exam):
+        return False
+    raw_pin = generate_pin_value()
+    ExamStudentPin.objects.update_or_create(
+        exam=exam,
+        student=student,
+        defaults={
+            "pin_hash": make_password(raw_pin),
+            "pin_cipher": _fernet().encrypt(raw_pin.encode()).decode(),
+            "revoked_at": None,
+            "expires_at": None,
+        },
+    )
+    return True
+
+
 def revoke_student_pin(exam, user) -> bool:
     """İmtahan başlayanda ilkin fərdi PIN-i birdəfəlik ləğv et."""
     if user is None or not getattr(user, "id", None):

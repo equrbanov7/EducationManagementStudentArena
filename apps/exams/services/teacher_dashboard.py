@@ -37,7 +37,7 @@ _STATUS_HINTS = {
 }
 
 
-def build_teacher_exam_dashboard(exams) -> dict:
+def build_teacher_exam_dashboard(exams, *, include_empty_categories: bool = True) -> dict:
     """
     `exams`: filtrlənmiş Exam iterable (annotate/prefetch artıq tətbiq olunub).
 
@@ -93,6 +93,10 @@ def build_teacher_exam_dashboard(exams) -> dict:
 
     category_filters = []
     for key in EXAM_CATEGORY_FILTER_ORDER:
+        # Müəllim final/midterm YARADA bilmədiyi üçün boş kateqoriya çipi ona
+        # göstərilmir (köhnə imtahanı olan müəllimdə çip sayı ilə birgə qalır).
+        if not include_empty_categories and category_counts.get(key, 0) == 0:
+            continue
         meta = EXAM_CATEGORY_META.get(key, {})
         category_filters.append(
             {

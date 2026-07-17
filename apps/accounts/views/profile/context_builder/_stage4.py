@@ -205,6 +205,7 @@ class _Stage4Mixin:
             "superadmin_pending_org_count": self.superadmin_organizations_section.get("pending_count", 0),
             "exam_rooms_section": self.exam_rooms_section,
             "kollokvium_windows_section": self.kollokvium_windows_section,
+            "exam_chance_section": self.exam_chance_section,
             "can_manage_exam_rooms": self.capabilities.get("can_manage_exam_rooms", False),
             "is_teacher": self.capabilities["is_teacher"],
             "is_admin": self.capabilities["can_manage_org"],
