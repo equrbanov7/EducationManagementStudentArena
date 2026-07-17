@@ -358,3 +358,145 @@ class ExamChanceFilterTests(_Base):
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(StudentExamAttemptGrant.objects.filter(exam=exam, student=self.student).exists())
+
+
+class ExamSchedulingRulesTests(_Base):
+    """2026-07 imtahan-cədvəli qaydaları — _concurrent_or_same_day_block birbaşa
+    yoxlanır (PIN/parity qarışıqlığından azad)."""
+
+    def _finished_attempt(self, exam, *, day_offset=0):
+        from apps.exams.models import ExamAttempt
+
+        return ExamAttempt.objects.create(
+            user=self.student,
+            exam=exam,
+            status="submitted",
+            finished_at=timezone.now() - timedelta(days=day_offset),
+        )
+
+    def test_other_exam_in_progress_blocks(self):
+        from apps.exams.models import ExamAttempt
+
+        exam_a = self._make_exam("final", title="A finalı")
+        exam_b = self._make_exam("final", title="B finalı")
+        ExamAttempt.objects.create(user=self.student, exam=exam_a, status="in_progress")
+
+        blocked, reason = exam_b._concurrent_or_same_day_block(self.student)
+        self.assertTrue(blocked)
+        self.assertIn("başqa imtahan", reason)
+
+    def test_same_exam_active_attempt_not_blocked(self):
+        from apps.exams.models import ExamAttempt
+
+        exam = self._make_exam("final")
+        ExamAttempt.objects.create(user=self.student, exam=exam, status="in_progress")
+        # Öz aktiv cəhdi BAŞQA imtahan sayılmır → blok yox.
+        blocked, _reason = exam._concurrent_or_same_day_block(self.student)
+        self.assertFalse(blocked)
+
+    def test_stale_expired_other_attempt_does_not_block(self):
+        """Başqa imtahanda tərk edilmiş (deadline-ı keçmiş) in_progress cəhd
+        «eyni anda bir imtahan» bloku yaratmamalıdır — əvvəlcə expired olunur.
+        Qeyri-rəsmi (quiz) imtahan seçilir ki, yalnız concurrent qayda işə düşsün."""
+        from apps.exams.models import ExamAttempt
+
+        quiz = Exam.objects.create(
+            title="Tərk edilmiş quiz",
+            author=self.center,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="quiz",
+            is_active=True,
+            is_public=False,
+            total_duration_minutes=30,
+            start_datetime=timezone.now() - timedelta(hours=4),
+            end_datetime=timezone.now() + timedelta(hours=1),
+        )
+        quiz.allowed_users.add(self.student)
+        exam_b = self._make_exam("final", title="Yeni final")
+        stale = ExamAttempt.objects.create(user=self.student, exam=quiz, status="in_progress")
+        # started_at auto_now_add-dır; keçmiş dəyəri UPDATE ilə məcburi yaz ki,
+        # deadline (started_at + 30dəq) artıq keçmiş olsun.
+        ExamAttempt.objects.filter(pk=stale.pk).update(started_at=timezone.now() - timedelta(hours=3))
+
+        blocked, _reason = exam_b._concurrent_or_same_day_block(self.student)
+        self.assertFalse(blocked)
+        stale.refresh_from_db()
+        self.assertEqual(stale.status, "expired")
+
+    def test_second_official_exam_same_day_blocked(self):
+        exam_a = self._make_exam("final", title="Səhər finalı")
+        exam_b = self._make_exam("midterm", title="Günorta kollokviumu")
+        self._finished_attempt(exam_a, day_offset=0)
+
+        blocked, reason = exam_b._concurrent_or_same_day_block(self.student)
+        self.assertTrue(blocked)
+        self.assertIn("bir rəsmi imtahan", reason)
+
+    def test_same_day_allowed_with_retake_grant(self):
+        exam_a = self._make_exam("final", title="A")
+        exam_b = self._make_exam("final", title="B")
+        self._finished_attempt(exam_a, day_offset=0)
+        grant_second_chance(exam=exam_b, students=[self.student], granted_by=self.center)
+
+        blocked, _reason = exam_b._concurrent_or_same_day_block(self.student)
+        self.assertFalse(blocked)  # retake grant → gün qaydası keçilir
+
+    def test_yesterday_exam_does_not_block_today(self):
+        exam_a = self._make_exam("final", title="Dünənki")
+        exam_b = self._make_exam("final", title="Bugünkü")
+        self._finished_attempt(exam_a, day_offset=1)
+
+        blocked, _reason = exam_b._concurrent_or_same_day_block(self.student)
+        self.assertFalse(blocked)
+
+    def test_quiz_not_subject_to_same_day_rule(self):
+        exam_final = self._make_exam("final", title="Rəsmi final")
+        self._finished_attempt(exam_final, day_offset=0)
+        quiz = Exam.objects.create(
+            title="Sərbəst quiz",
+            author=self.center,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="quiz",
+            is_active=True,
+            is_public=False,
+            max_attempts_per_user=1,
+            start_datetime=timezone.now() - timedelta(hours=1),
+            end_datetime=timezone.now() + timedelta(hours=3),
+        )
+        quiz.allowed_users.add(self.student)
+        # Quiz gün qaydasına tabe deyil (yalnız final/midterm).
+        blocked, _reason = quiz._concurrent_or_same_day_block(self.student)
+        self.assertFalse(blocked)
+
+    def test_start_exam_view_blocks_other_in_progress(self):
+        # Uçdan-uca: start_exam view başqa aktiv cəhd olanda bloklayır + redirect.
+        from apps.exams.models import ExamAttempt
+
+        exam_a = self._make_exam("midterm", title="Aktiv midterm")
+        exam_b = self._make_exam("midterm", title="İkinci midterm")
+        ExamAttempt.objects.create(user=self.student, exam=exam_a, status="in_progress")
+
+        client = self._client_for(self.student)
+        response = client.get(reverse("exams:start_exam", kwargs={"slug": exam_b.slug}))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ExamAttempt.objects.filter(user=self.student, exam=exam_b).exists())
+
+
+class ProvisionRestoresPinTests(_Base):
+    """provision_exam_student_pins boş/revoke olunmuş PIN-i bərpa edir (2026-07)."""
+
+    def test_provision_restores_empty_cipher(self):
+        exam = self._make_exam("final")
+        provision_exam_student_pins(exam)
+        # İmtahan başlayanda köhnə davranışı simulyasiya et: revoke (boş cipher).
+        revoke_student_pin(exam, self.student)
+        self.assertIsNone(student_visible_pin(exam, self.student))
+
+        # Yenidən provision (imtahan redaktəsi / qrup dəyişikliyi) → PIN bərpa.
+        provision_exam_student_pins(exam)
+        restored = student_visible_pin(exam, self.student)
+        self.assertIsNotNone(restored)
+        pin = ExamStudentPin.objects.get(exam=exam, student=self.student)
+        self.assertIsNone(pin.revoked_at)
