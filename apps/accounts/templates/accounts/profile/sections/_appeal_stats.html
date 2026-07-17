@@ -15,10 +15,12 @@
   .aps-btn--primary:hover { background:var(--ems-primary-700); color:#fff; }
   .aps-filters { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:.75rem; margin:1.15rem 0; }
   .aps-field label { display:block; font-size:.72rem; font-weight:700; color:var(--ems-neutral-500); margin-bottom:.32rem; text-transform:uppercase; letter-spacing:.02em; }
-  .aps-field input, .aps-field select { width:100%; padding:.6rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
+  /* Bütün filtr elementləri eyni hündürlükdə (axtarış-seçici, dropdown, input). */
+  .aps-field input, .aps-field select { width:100%; min-height:2.7rem; box-sizing:border-box; padding:.5rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
   .aps-field input:focus, .aps-field select:focus { outline:none; border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
-  .aps-filters .bootstrap-single-select__toggle { min-height:0; padding:.6rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
-  .aps-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.35rem; position:relative; min-height:2.7rem; }
+  .aps-filters .bootstrap-single-select__toggle { min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; padding:.5rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
+  .aps-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.35rem .5rem; position:relative; min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; }
+  .aps-ms__chips { flex:1; min-width:0; }
   .aps-ms:focus-within { border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
   .aps-ms__chips { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; }
   .aps-chip { display:inline-flex; align-items:center; gap:.3rem; background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-100); border-radius:999px; padding:.15rem .3rem .15rem .55rem; font-size:.76rem; font-weight:700; }
@@ -115,15 +117,25 @@
     </div>
     <div class="aps-field">
       <label>{% trans "Fənn" %}</label>
-      <div class="aps-ms js-aps-subject"><div class="aps-ms__chips"><input type="text" class="aps-ms__search" placeholder="{% trans 'fənn axtar…' %}"></div><div class="aps-ms__menu"></div></div>
+      {% trans "fənn axtar…" as aps_subject_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-subject" placeholder=aps_subject_ph %}
     </div>
     <div class="aps-field">
       <label>{% trans "Qrup" %}</label>
-      <div class="aps-ms js-aps-group"><div class="aps-ms__chips"><input type="text" class="aps-ms__search" placeholder="{% trans 'qrup axtar…' %}"></div><div class="aps-ms__menu"></div></div>
+      {% trans "qrup axtar…" as aps_group_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-group" placeholder=aps_group_ph %}
     </div>
     <div class="aps-field">
-      <label>{% trans "Kafedra / fakültə" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-unit" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      <label>{% trans "Fakültə" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-faculty" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Kafedra" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-department" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    </div>
+    <div class="aps-field">
+      <label>{% trans "Müəllim" %}</label>
+      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-teacher" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
     <div class="aps-field">
       <label>{% trans "İmtahan tipi" %}</label>
@@ -225,9 +237,24 @@
             ai_quota:"{% trans 'Qalan AI limiti' %}", ai_cached:"{% trans 'keşdən' %}", hint:"{% trans 'Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır.' %}" };
   var COLORS = ["#2563eb","#059669","#f59e0b","#ef4444","#8b5cf6","#0ea5e9","#14b8a6","#f97316","#ec4899","#64748b"];
   var q = root.querySelector(".js-aps-q");
-  var sel = { unit:root.querySelector(".js-aps-unit"), type:root.querySelector(".js-aps-type"),
+  var sel = { faculty:root.querySelector(".js-aps-faculty"), department:root.querySelector(".js-aps-department"),
+              teacher:root.querySelector(".js-aps-teacher"), type:root.querySelector(".js-aps-type"),
               format:root.querySelector(".js-aps-format"), status:root.querySelector(".js-aps-status"),
               semester:root.querySelector(".js-aps-semester"), year:root.querySelector(".js-aps-year") };
+  // Fakültə→kafedra kaskadı (imtahan statistikası ilə eyni davranış).
+  var allDepartments = [];
+  var APS_ALL = (sel.department.querySelector("option") || {}).textContent || "";
+  function populateDepartments(){
+    var fid = sel.faculty.value, cur = sel.department.value;
+    sel.department.innerHTML = '<option value="">' + APS_ALL + "</option>";
+    allDepartments.forEach(function(u){
+      if(!fid || String(u.parent_id)===String(fid)){
+        var o=document.createElement("option"); o.value=u.id; o.textContent=u.name; sel.department.appendChild(o);
+      }
+    });
+    sel.department.value = (cur && sel.department.querySelector('option[value="'+cur+'"]')) ? cur : "";
+    if(typeof sel.department._refreshBootstrapSelect==="function") sel.department._refreshBootstrapSelect();
+  }
   var cards = root.querySelector(".js-aps-cards"), rows = root.querySelector(".js-aps-rows"),
       pager = root.querySelector(".js-aps-pager"), thead = root.querySelector(".js-aps-thead");
   var page = 1, sort = "-date", timer = null, charts = {};
@@ -273,7 +300,9 @@
     if(q.value.trim()) p.set("q", q.value.trim());
     if(subjectMS.ids().length) p.set("subjects", subjectMS.ids().join(","));
     if(groupMS.ids().length) p.set("groups", groupMS.ids().join(","));
-    if(sel.unit.value) p.set("units", sel.unit.value);
+    if(sel.faculty.value) p.set("faculties", sel.faculty.value);
+    if(sel.department.value) p.set("departments", sel.department.value);
+    if(sel.teacher.value) p.set("teachers", sel.teacher.value);
     if(sel.type.value) p.set("type", sel.type.value);
     if(sel.format.value) p.set("format", sel.format.value);
     if(sel.status.value) p.set("status", sel.status.value);
@@ -358,10 +387,13 @@
     th.addEventListener("click", function(){ var key=th.getAttribute("data-sort"); sort=(sort===key)?("-"+key):key; reload(); });
   });
   q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
-  Object.keys(sel).forEach(function(k){ sel[k].addEventListener("change", reload); });
+  // Fakültə istisna: dəyişəndə əvvəlcə kafedraları yenilə, sonra yüklə.
+  Object.keys(sel).forEach(function(k){ if(k!=="faculty") sel[k].addEventListener("change", reload); });
+  sel.faculty.addEventListener("change", function(){ populateDepartments(); reload(); });
   root.querySelector(".js-aps-reset").addEventListener("click", function(){
     q.value=""; subjectMS.clear(); groupMS.clear();
     Object.keys(sel).forEach(function(k){ sel[k].value=""; if(typeof sel[k]._refreshBootstrapSelect==="function") sel[k]._refreshBootstrapSelect(); });
+    populateDepartments();
     sort="-date"; reload();
   });
 
@@ -393,7 +425,10 @@
     .then(function(d){ if(!d) return;
       function fill(s, arr, valKey, labKey){ (arr||[]).forEach(function(x){ var o=document.createElement("option"); o.value=x[valKey]; o.textContent=x[labKey]; s.appendChild(o); }); }
       (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; sel.year.appendChild(o); });
-      fill(sel.unit, d.units, "id", "name");
+      fill(sel.faculty, d.faculties, "id", "name");
+      fill(sel.teacher, d.teachers, "id", "name");
+      allDepartments = d.departments || [];
+      populateDepartments();
       fill(sel.type, d.types, "value", "label");
       fill(sel.format, d.formats, "value", "label");
       fill(sel.status, d.statuses, "value", "label");

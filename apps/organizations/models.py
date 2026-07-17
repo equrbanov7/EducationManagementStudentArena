@@ -556,6 +556,9 @@ class Membership(UUIDModel, TimeStampedModel):
             models.Index(fields=["user", "organization"]),
             models.Index(fields=["organization", "role"]),
             models.Index(fields=["user", "is_primary"]),
+            # Per-request active-membership resolution in OrganizationMiddleware
+            # (filter(user=, organization=, is_active=True)) — every request.
+            models.Index(fields=["user", "organization", "is_active"], name="membership_user_org_active_idx"),
         ]
 
     def __str__(self):

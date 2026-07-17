@@ -127,6 +127,54 @@ class AppealStatisticsTests(TestCase):
         self.assertTrue(data["types"])
         self.assertTrue(data["formats"])
 
+    def test_filters_metadata_has_faculty_department_teacher_cascade(self):
+        from apps.exams.models import StudentGroup
+        from apps.organizations.models import OrgUnit
+        from core.constants import OrgUnitType
+
+        grp_teacher = User.objects.create_user("aps_grpt1", "aps_grpt1@test.az", PASSWORD)
+        _assign_user_to_org(grp_teacher, self.org, ProfileRole.TEACHER, "teacher")
+        faculty = OrgUnit.objects.create(organization=self.org, unit_type=OrgUnitType.FACULTY, name="APS Fakültə")
+        kafedra = OrgUnit.objects.create(
+            organization=self.org, unit_type=OrgUnitType.CHAIR, name="APS Kafedra", parent=faculty
+        )
+        group = StudentGroup.objects.create(
+            teacher=grp_teacher, organization=self.org, name="APS-901", org_unit=kafedra
+        )
+        self.final.allowed_groups.add(group)
+
+        data = self._client(self.center).get(self.filters_url).json()
+        self.assertIn("faculties", data)
+        self.assertIn("teachers", data)
+        self.assertTrue(any(str(f["id"]) == str(faculty.id) for f in data["faculties"]))
+        # Kafedra parent_id daşıyır ki, kaskad işləsin.
+        dept = next((d for d in data["departments"] if str(d["id"]) == str(kafedra.id)), None)
+        self.assertIsNotNone(dept)
+        self.assertEqual(str(dept["parent_id"]), str(faculty.id))
+
+    def test_faculty_and_teacher_filters_narrow_results(self):
+        from apps.exams.models import StudentGroup
+        from apps.organizations.models import OrgUnit
+        from core.constants import OrgUnitType
+
+        grp_teacher = User.objects.create_user("aps_grpt2", "aps_grpt2@test.az", PASSWORD)
+        _assign_user_to_org(grp_teacher, self.org, ProfileRole.TEACHER, "teacher")
+        faculty = OrgUnit.objects.create(organization=self.org, unit_type=OrgUnitType.FACULTY, name="F2")
+        kafedra = OrgUnit.objects.create(organization=self.org, unit_type=OrgUnitType.CHAIR, name="K2", parent=faculty)
+        group = StudentGroup.objects.create(teacher=grp_teacher, organization=self.org, name="G2", org_unit=kafedra)
+        self.final.allowed_groups.add(group)  # yalnız final bu fakültəyə bağlı
+
+        client = self._client(self.center)
+        # Fakültə filtri → yalnız final-ın apellyasiyaları (2).
+        data = client.get(self.data_url, {"faculties": str(faculty.id)}).json()
+        self.assertEqual(data["summary"]["total"], 2)
+        # Kafedra filtri → eyni.
+        data = client.get(self.data_url, {"departments": str(kafedra.id)}).json()
+        self.assertEqual(data["summary"]["total"], 2)
+        # Müəllim filtri: owner hər iki imtahanın müəllifidir → 3; uyğunsuz id → 0.
+        self.assertEqual(client.get(self.data_url, {"teachers": str(self.owner.id)}).json()["summary"]["total"], 3)
+        self.assertEqual(client.get(self.data_url, {"teachers": "99999"}).json()["summary"]["total"], 0)
+
     @override_settings(GEMINI_API_KEY="")
     def test_ai_endpoint_fail_soft_without_api_key(self):
         response = self._client(self.center).get(self.ai_url)
