@@ -1,0 +1,7 @@
+{% comment %}
+Təkrar-istifadəli axtarış-seçici (chips + type-ahead) — imtahan/apellyasiya
+statistikası filtrlərində fənn/qrup üçün. Sinif prefiksi (`prefix`) və JS-hook
+(`hook`) parametrlə verilir ki, hər səhifə öz mövcud CSS/JS-i ilə işləsin.
+Parametrlər: prefix (ecs|aps), hook (məs. ecs-subject), placeholder.
+{% endcomment %}
+<div class="{{ prefix }}-ms js-{{ hook }}"><div class="{{ prefix }}-ms__chips"><input type="text" class="{{ prefix }}-ms__search" placeholder="{{ placeholder }}" autocomplete="off"></div><div class="{{ prefix }}-ms__menu"></div></div>
