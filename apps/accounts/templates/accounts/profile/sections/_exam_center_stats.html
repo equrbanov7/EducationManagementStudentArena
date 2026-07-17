@@ -55,6 +55,9 @@
   .ecs-uname { color:var(--ems-neutral-500); font-size:.76rem; }
   .ecs-pct { font-weight:800; color:var(--ems-primary-700); }
   .ecs-view { display:inline-flex; align-items:center; gap:.35rem; padding:.32rem .7rem; border-radius:8px; background:var(--ems-primary-600); color:#fff; font-weight:700; font-size:.78rem; text-decoration:none; }
+  .ecs-row--removed { background:#FEF2F2; }
+  .ecs-status-removed { color:#B91C1C; font-weight:700; }
+  .ecs-removed-reason { font-weight:400; font-size:.72rem; color:#B91C1C; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ecs-view:hover { background:var(--ems-primary-700); color:#fff; }
   .ecs-state { padding:2.6rem 1rem; text-align:center; color:var(--ems-neutral-500); }
   .ecs-state i { font-size:1.9rem; display:block; margin-bottom:.5rem; opacity:.55; }
@@ -246,7 +249,8 @@
       pager = root.querySelector(".js-ecs-pager"), thead = root.querySelector(".js-ecs-thead");
   var T = { total:"{% trans 'Cəhd' %}", students:"{% trans 'Tələbə' %}", exams:"{% trans 'İmtahan' %}",
             none:"{% trans 'Nəticə tapılmadı.' %}", prev:"{% trans 'Əvvəlki' %}", next:"{% trans 'Sonrakı' %}",
-            page:"{% trans 'Səhifə' %}", of:"{% trans '/' %}", view:"{% trans 'Bax' %}" };
+            page:"{% trans 'Səhifə' %}", of:"{% trans '/' %}", view:"{% trans 'Bax' %}",
+            removed:"{% trans 'İmtahandan uzaqlaşdırılıb' %}" };
   var page = 1, sort = "-date", timer = null;
   function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
   function viewUrl(slug, id){ return U.view ? U.view.replace("__SLUG__", encodeURIComponent(slug)).replace("/attempt/0/", "/attempt/"+id+"/") : ""; }
@@ -317,10 +321,15 @@
     rows.innerHTML = list.map(function(r){
       var vu = viewUrl(r.exam_slug, r.attempt_id);
       var view = vu ? '<a class="ecs-view" href="'+vu+'" target="_blank" rel="noopener"><i class="fas fa-eye"></i> '+T.view+'</a>' : '—';
-      return '<tr><td><b>'+esc(r.student)+'</b><br><span class="ecs-uname">@'+esc(r.username)+'</span></td>'+
+      // İmtahandan uzaqlaşdırılmış tələbə — qırmızı sətir + status + səbəb.
+      var statusCell = r.removed
+        ? '<td class="ecs-status-removed"><b>'+esc(T.removed)+'</b>'+
+            (r.removal_reason ? '<div class="ecs-removed-reason" title="'+esc(r.removal_reason)+'">'+esc(r.removal_reason)+'</div>' : '')+'</td>'
+        : '<td>'+esc(r.status)+'</td>';
+      return '<tr'+(r.removed?' class="ecs-row--removed"':'')+'><td><b>'+esc(r.student)+'</b><br><span class="ecs-uname">@'+esc(r.username)+'</span></td>'+
         clip(r.group)+clip(r.kafedra)+clip(r.faculty)+clip(r.teacher)+clip(r.exam)+clip(r.subject)+
         '<td>'+esc(r.type||"—")+'</td><td>'+esc(r.score||"—")+'</td><td class="ecs-pct">'+esc(r.percentage||"—")+'</td>'+
-        '<td>'+esc(r.status)+'</td><td>'+esc(r.date)+'</td><td>'+view+'</td></tr>';
+        statusCell+'<td>'+esc(r.date)+'</td><td>'+view+'</td></tr>';
     }).join("");
     var pg = data.pagination;
     pager.innerHTML = '<button class="js-ecs-prev"'+(pg.has_prev?"":" disabled")+'>'+T.prev+'</button>'+

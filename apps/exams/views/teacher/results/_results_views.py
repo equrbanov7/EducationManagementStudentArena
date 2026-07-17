@@ -25,6 +25,7 @@ from apps.exams.services.review_visibility import (
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_review_window_seconds as _resolve_attempt_review_window_seconds,
 )
+from apps.exams.services.supervision import attach_attempt_interventions
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.permissions import request_has_permission
 
@@ -189,6 +190,10 @@ def teacher_exam_results(request, slug):
     # apellyasiyalar müəllimin gördüyü Bal/Faiz sütunlarında da əks olunsun.
     appeal_bonus_by_attempt = _appeal_bonus_map_for(attempts_page) if exam.exam_type == "test" else {}
 
+    # İmtahandan uzaqlaşdırılmış tələbələr cədvəldə qırmızı görünsün + səbəb
+    # (N+1-siz). `att.exam_intervention` = {action, reason, is_terminal}.
+    attach_attempt_interventions(attempts_page)
+
     for att in attempts_page:
         anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=exam.id)
 
@@ -241,6 +246,7 @@ def teacher_exam_results(request, slug):
                 "effective_finish": effective_finish,
                 "finish_inferred": finish_inferred,
                 "effective_duration_seconds": effective_duration,
+                "intervention": getattr(att, "exam_intervention", None),
             }
         )
 
