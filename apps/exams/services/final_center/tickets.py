@@ -314,14 +314,14 @@ def begin_attempt_for_ticket(ticket):
             TICKET_STATUS_ACTIVE,
             extra_updates={"attempt": attempt, "started_at": timezone.now()},
         )
-        # ExamStudentPin yalnız ilkin giriş üçündür. Attempt başlayan kimi onu
-        # də ləğv et ki, kompüter dəyişməsi yalnız nəzarətçinin verdiyi yeni,
-        # birdəfəlik ticket PIN-i ilə mümkün olsun.
-        from apps.exams.services.student_pins import revoke_student_pin
-
-        revoke_student_pin(ticket.exam, ticket.student)
-        # İmtahan BAŞLADI → PIN birdəfəlikdir: dərhal ləğv olunur ki, eyni PIN
-        # təkrar giriş üçün işə yaramasın (status filtrindən əlavə HARD zəmanət).
+        # QEYD (2026-07 dəyişikliyi): ExamStudentPin attempt başlayanda ARTIQ
+        # ləğv EDİLMİR. Tələbə eyni imtahanı bir neçə otaqda / kompüterdə davam
+        # etdirə bilməlidir (kompüter dəyişməsi, texniki fasilə) — öz fərdi PIN-i
+        # ilə istənilən QEYDLİ kompüterdən yenidən girib aktiv cəhdinə qayıtsın.
+        # Təkrar-giriş riski onsuz da qorunur: MAC/IP gate yalnız qeydli
+        # kompüterlərə icazə verir, cəhd limiti YENİ cəhdi bloklayır (PIN yalnız
+        # mövcud aktiv cəhdə qaytarır), imtahan bitəndə isə limit girişi kəsir.
+        # Ticket PIN (nəzarətçinin verdiyi) yenə birdəfəlikdir.
         revoke_ticket_pin(ticket)
     if not attempt.answers.exists():
         generate_random_questions_for_attempt(attempt)

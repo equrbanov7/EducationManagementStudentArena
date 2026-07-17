@@ -1024,8 +1024,11 @@ class StudentPinWaitingFlowTests(_FlowBase):
         # Cəhd zalla möhürlənir (monitor + otaq izolyasiyası üçün).
         self.assertEqual(ticket.attempt.room_id, self.room.pk)
 
-    def test_pin_login_blocked_from_other_room_while_live(self):
-        # setUp bileti (assigned + canlı oturum, Zal A) imtahanı Zal A-ya bağlayır.
+    def test_pin_login_allowed_from_any_registered_room(self):
+        # 2026-07: otaq izolyasiyası LƏĞV edildi — eyni imtahan bir neçə zalda
+        # keçirilə bilər. Zal A-da canlı oturum olsa belə, Zal B-nin QEYDLİ
+        # kompüterindən PIN girişi bloklanmır (MAC/IP gate onsuz da yalnız
+        # qeydli kompüterlərə icazə verir).
         room_b = ExamRoom.objects.create(
             organization=self.org, name="Zal B-İzol", code="ZB-I", capacity=20, created_by=self.center
         )
@@ -1040,10 +1043,7 @@ class StudentPinWaitingFlowTests(_FlowBase):
         )
         client = Client()
         response = self._pin_login(client, REMOTE_ADDR="10.0.0.22")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "başqa zalda keçirilir")
-        # Öz zalının kompüterindən isə girə bilir.
-        response = self._pin_login(client)
+        # Başqa zalın qeydli kompüterindən də giriş uğurludur (302 — modal/gözləmə).
         self.assertEqual(response.status_code, 302)
 
 

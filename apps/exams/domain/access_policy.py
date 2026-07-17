@@ -136,6 +136,50 @@ class ExamAccessPolicyMixin:
         self._expire_stale_attempts_for(user)
         return self.attempts.filter(user=user, status__in=["draft", "in_progress"]).exists()
 
+    def _concurrent_or_same_day_block(self, user: User) -> tuple[bool, str | None]:
+        """2026-07 imtahan-cədvəli qaydaları (yalnız YENİ cəhd üçün):
+
+        1. **Eyni vaxtda bir imtahan** — tələbənin BAŞQA imtahanda aktiv (draft/
+           in_progress) cəhdi varsa, yeni imtahan başlada bilməz (fiziki olaraq
+           bir anda bir imtahan). Bu imtahanın öz davamı yuxarıda icazəlidir.
+        2. **Eyni gündə bir rəsmi imtahan** — bu imtahan final/kollokviumdursa
+           və tələbə həmin gün BAŞQA final/kollokvium verib(sə), yenisi bloklanır.
+           İSTİSNA: imtahan mərkəzi bu imtahan üçün retake (əlavə cəhd) veribsə
+           (``StudentExamAttemptGrant``), gün qaydası tətbiq olunmur.
+
+        Qaytarır: ``(bloklandı, lokalizə-səbəb)``.
+        """
+        from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+        from apps.exams.models import ExamAttempt
+
+        active_qs = ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False).exclude(
+            exam_id=self.pk
+        )
+        if active_qs.exists():
+            return True, pgettext("exams.model.access", "other_exam_in_progress")
+
+        if getattr(self, "exam_type_extended", None) in {"final", "midterm"}:
+            has_retake_grant = self.attempt_grants.filter(student=user).exists()
+            if not has_retake_grant:
+                from django.utils import timezone
+
+                today = timezone.localdate()
+                same_day_official = (
+                    ExamAttempt.objects.filter(
+                        user=user,
+                        is_trial=False,
+                        status__in=ATTEMPT_FINISHED_STATUSES,
+                        finished_at__date=today,
+                        exam__exam_type_extended__in=("final", "midterm"),
+                    )
+                    .exclude(exam_id=self.pk)
+                    .exists()
+                )
+                if same_day_official:
+                    return True, pgettext("exams.model.access", "already_examined_today")
+
+        return False, None
+
     def _user_in_allowed_groups(self, user: User) -> bool:
         return self.allowed_groups.filter(students=user).exists()
 
@@ -201,6 +245,14 @@ class ExamAccessPolicyMixin:
 
         if self._user_has_active_attempt(user):
             return True, None
+
+        # YENİ cəhd (bu imtahanın aktiv cəhdi yoxdur). 2026-07 qaydaları:
+        # (müəllif özü / sınaq bu qaydalardan azaddır — o, aşağıda user==author
+        #  yolu ilə keçir; burada yalnız tələbələr yoxlanır.)
+        if user != self.author:
+            blocked, block_reason = self._concurrent_or_same_day_block(user)
+            if blocked:
+                return False, block_reason
 
         # Aktiv attempt yoxdursa yeni start yalnız dillər arası say/bal
         # parity-si qorunanda mümkündür. 0/1 aktiv variantlı legacy

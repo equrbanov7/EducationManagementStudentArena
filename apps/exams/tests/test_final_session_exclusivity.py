@@ -217,7 +217,11 @@ class FinalSessionExclusivityTests(_FlowBase):
         self.assertEqual(follow.status_code, 200)
         self.assertFalse(follow.context["show_gate_modal"])
 
-    def test_attempt_start_revokes_original_exam_student_pin(self):
+    def test_attempt_start_keeps_original_exam_student_pin(self):
+        # 2026-07 dəyişikliyi: attempt başlayanda ExamStudentPin ARTIQ ləğv
+        # EDİLMİR — tələbə eyni imtahanı başqa qeydli kompüterdən öz fərdi PIN-i
+        # ilə davam etdirə bilməlidir (kompüter dəyişməsi, texniki fasilə).
+        # Təkrar-giriş riski MAC/IP gate + cəhd limiti ilə qorunur.
         personal_pin = ExamStudentPin.objects.create(
             exam=self.exam,
             student=self.student,
@@ -230,8 +234,8 @@ class FinalSessionExclusivityTests(_FlowBase):
         begin_attempt_for_ticket(self.ticket)
 
         personal_pin.refresh_from_db()
-        self.assertIsNotNone(personal_pin.revoked_at)
-        self.assertEqual(personal_pin.pin_cipher, "")
+        self.assertIsNone(personal_pin.revoked_at)
+        self.assertEqual(personal_pin.pin_cipher, "encrypted-placeholder")
 
     def test_rotated_pin_blocks_stale_direct_attempt_url(self):
         old_client, response = self._entry_client()

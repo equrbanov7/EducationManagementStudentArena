@@ -12,6 +12,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.cache import cache
+from django.db.models import Q
 from django.utils import timezone
 
 from cryptography.fernet import InvalidToken
@@ -80,10 +81,10 @@ def provision_exam_student_pins(exam) -> None:
 
     assigned_ids = _assigned_student_ids(exam)
     existing_ids = set(ExamStudentPin.objects.filter(exam=exam).values_list("student_id", flat=True))
+    fernet = _fernet()
 
     to_create = assigned_ids - existing_ids
     if to_create:
-        fernet = _fernet()
         new_pins = []
         for student_id in to_create:
             raw_pin = generate_pin_value()
@@ -96,6 +97,21 @@ def provision_exam_student_pins(exam) -> None:
                 )
             )
         ExamStudentPin.objects.bulk_create(new_pins, ignore_conflicts=True)
+
+    # 2026-07: boş şifrəli / köhnə-revoke olunmuş PIN-ləri BƏRPA et. Əvvəllər
+    # imtahan başlayanda ExamStudentPin ləğv olunurdu (pin_cipher=""); indi
+    # revoke edilmir, ona görə köhnə imtahanların boş PIN-ləri təzələnir ki,
+    # tələbə kabinetdə PIN-ini yenidən görsün (təyin olunmuş tələbələr üçün).
+    stale_cipher = ExamStudentPin.objects.filter(exam=exam, student_id__in=assigned_ids).filter(
+        Q(pin_cipher="") | Q(revoked_at__isnull=False)
+    )
+    for pin in stale_cipher:
+        raw_pin = generate_pin_value()
+        pin.pin_hash = make_password(raw_pin)
+        pin.pin_cipher = fernet.encrypt(raw_pin.encode()).decode()
+        pin.revoked_at = None
+        pin.expires_at = None
+        pin.save(update_fields=["pin_hash", "pin_cipher", "revoked_at", "expires_at", "updated_at"])
 
     stale_ids = existing_ids - assigned_ids
     if stale_ids:
