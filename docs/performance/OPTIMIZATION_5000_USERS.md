@@ -178,3 +178,11 @@ _Transaction pooling (§5) tətbiq olunanda P1 pgbouncer sizing + middleware `at
 - **memory** limitləri + postgres tuning (`shared_buffers` və s.) qalır — bunlar host-u keçə bilər, xəta vermir. Prod .env-də `POSTGRES_SHARED_BUFFERS=15GB`, `POSTGRES_EFFECTIVE_CACHE_SIZE=40GB` (§4) hələ də tövsiyə olunur.
 
 Dərs: CPU üçün **cap yox, host-a burax**; yaddaş/pool/thread üçün env ilə tune et.
+
+## 15. Faza icrası (2026-07-18, avtonom)
+
+**FAZA 1 (tətbiq + doğrulandı):** Celery queue ayrılması — OCR/AI/export `heavy` queue + `celery_worker_heavy` (cpus cap yox = CI-safe), main worker `-Q celery` conc 2→4, prefetch=1 + acks_late + result_expires. **Gotcha:** yeni CELERY_* adları `production.py`-ın `from .base import (...)` siyahısına əlavə olunmalı idi (yoxsa prod-da səssizcə tətbiq olunmur — [[project_settings_production_import_list]]).
+
+**FAZA 2 (sənədləşdi):** `docs/architecture/RLS_POLICY_OWNERSHIP.md` — cross-app RLS policy xəritəsi + accounts-split / heavy-deps-image tövsiyələri (böyük/riskli → reviewed change üçün saxlanıldı).
+
+**FAZA 3 (təhlükəsiz alt-dəst tətbiq):** admin `list_select_related` (ExamAttempt/Answer/Coding — admin N+1). **Təxirə salındı** (server + test lazım, kor göndərilmir): login `UPPER()` functional indekslər (default auth_user → raw-SQL, postgres index-usage doğrulana bilməz offline), N+1 (`lists.py:302`, grant-aware — memory xəbərdarlığı), bump_autosave_revision/M2M `.set()` (autosave write path — E2E test lazım), RequestQueue autosave istisnası (submit qorumasını zəiflədə bilər), RLS predicate `::uuid`, transaction pooling + middleware fix, nginx keepalive/worker config.
