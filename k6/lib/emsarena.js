@@ -219,11 +219,15 @@ export function loadedUserCount() {
   return requireUsers().length;
 }
 
+// Portal split: /accounts/login/ is a CHOOSER; real forms are role-gated.
+// Students authenticate at /accounts/login/telebe/, staff at /accounts/login/muellim/.
+export const LOGIN_PATH = __ENV.K6_LOGIN_PATH || "/accounts/login/telebe/";
+
 export function login(user, options) {
   const opts = options || {};
   if (opts.clearCookies !== false) clearAuthCookies();
 
-  const loginUrl = absoluteUrl("/accounts/login/");
+  const loginUrl = absoluteUrl(opts.loginPath || LOGIN_PATH);
   const page = http.get(loginUrl, {
     tags: Object.assign({ endpoint: "login_page", class: "normal" }, opts.tags || {}),
   });

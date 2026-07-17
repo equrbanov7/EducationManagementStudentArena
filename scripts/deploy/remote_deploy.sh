@@ -55,9 +55,9 @@ DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-300}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-${APP_DIR}/docker/nginx/nginx.conf}"
 APP_REPLICAS="${APP_REPLICAS:-$(dotenv_value APP_REPLICAS)}"
-APP_REPLICAS="${APP_REPLICAS:-1}"
+APP_REPLICAS="${APP_REPLICAS:-8}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-$(dotenv_value CELERY_REPLICAS)}"
-CELERY_REPLICAS="${CELERY_REPLICAS:-1}"
+CELERY_REPLICAS="${CELERY_REPLICAS:-2}"
 
 # Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
 # files owned by a different user (e.g. a previous root deploy) and failed with
