@@ -78,3 +78,50 @@
 
 .exch-empty { text-align: center; padding: 40px 16px; color: var(--ems-neutral-500, #64748b); border: 1px dashed var(--ems-neutral-300, #cbd5e1); border-radius: 16px; background: #fff; }
 .exch-empty i { font-size: 1.9rem; display: block; margin-bottom: 10px; color: var(--ems-neutral-400, #94a3b8); }
+
+/* ── Filtr paneli (il/semestr/fakültə/kafedra + axtarışlar) ── */
+.exch-filter-row { display: flex; flex-wrap: wrap; gap: 12px 14px; margin-top: 12px; }
+.exch-filter-row .exch-field { flex: 1 1 170px; min-width: 150px; }
+.exch-field--grow { flex: 1 1 240px !important; }
+.exch-search { position: relative; display: flex; align-items: center; }
+.exch-search > i { position: absolute; left: 12px; color: var(--ems-neutral-400, #94a3b8); font-size: 0.8rem; pointer-events: none; }
+.exch-search input[type=search] {
+    width: 100%; border: 1.5px solid var(--ems-neutral-200, #e2e8f0); border-radius: 11px;
+    background: var(--ems-neutral-50, #f8fafc); color: var(--ems-neutral-900, #0f172a);
+    padding: 9px 12px 9px 34px; font-size: 0.88rem;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.exch-search input[type=search]:focus {
+    outline: none; border-color: var(--ems-primary-500, #3b82f6); background: #fff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+/* ── Tələbə axtarış nəticələri (checkbox çipləri) ── */
+.exch-students { display: flex; flex-wrap: wrap; gap: 8px; }
+.exch-stu {
+    position: relative; display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px 7px 9px; border: 1.5px solid var(--ems-neutral-200, #e2e8f0);
+    border-radius: 999px; background: #fff; cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; color: var(--ems-neutral-700, #334155);
+    transition: border-color .15s, background .15s, box-shadow .15s;
+    user-select: none;
+}
+.exch-stu:hover { border-color: var(--ems-primary-400, #60a5fa); }
+.exch-stu input { position: absolute; opacity: 0; width: 0; height: 0; }
+.exch-stu__box {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 17px; height: 17px; border-radius: 6px; flex: 0 0 auto;
+    border: 1.5px solid var(--ems-neutral-300, #cbd5e1); background: #fff;
+    color: #fff; font-size: 9px; transition: all .15s;
+}
+.exch-stu__box .fa-check { opacity: 0; transform: scale(.6); transition: all .15s; }
+.exch-stu input:checked ~ .exch-stu__box {
+    background: var(--ems-primary-600, #2563eb); border-color: var(--ems-primary-600, #2563eb);
+}
+.exch-stu input:checked ~ .exch-stu__box .fa-check { opacity: 1; transform: scale(1); }
+.exch-stu:has(input:checked) {
+    border-color: var(--ems-primary-600, #2563eb); background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+}
+.exch-stu__user { font-weight: 500; color: var(--ems-neutral-400, #94a3b8); font-size: 0.74rem; }
+.exch-stu input:focus-visible ~ .exch-stu__box { outline: 2px solid var(--ems-primary-400, #60a5fa); outline-offset: 2px; }

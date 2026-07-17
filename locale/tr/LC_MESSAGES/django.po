@@ -29469,3 +29469,75 @@ msgstr "Final ve vize sınavlarını yalnızca sınav merkezi oluşturabilir."
 msgctxt "exams.final_center.session_detail"
 msgid "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır."
 msgstr "Salon oturumu sınavdan bağımsızdır. Öğrenci kayıtlı bilgisayardan kişisel PIN'iyle girince bu oturuma katılır. Gözetmen oturumu başlattığında herkes kendi sınavına başlar."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan filtri"
+msgstr "Sınav filtresi"
+
+msgctxt "accounts.exam_chance"
+msgid "Tədris ili"
+msgstr "Öğretim yılı"
+
+msgctxt "accounts.exam_chance"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "accounts.exam_chance"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "accounts.exam_chance"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün illər"
+msgstr "Tüm yıllar"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün semestrlər"
+msgstr "Tüm dönemler"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün fakültələr"
+msgstr "Tüm fakülteler"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün kafedralar"
+msgstr "Tüm bölümler"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan axtarışı"
+msgstr "Sınav arama"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan adı ilə axtar…"
+msgstr "Sınav adına göre ara…"
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbə axtarışı"
+msgstr "Öğrenci arama"
+
+msgctxt "accounts.exam_chance"
+msgid "Qrup, istifadəçi adı və ya ad-soyad…"
+msgstr "Grup, kullanıcı adı veya ad soyad…"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı."
+msgstr "Bu koşullara uygun final/vize sınavı bulunamadı."
+
+msgctxt "accounts.exam_chance"
+msgid "Axtarış nəticəsi"
+msgstr "Arama sonuçları"
+
+msgctxt "accounts.exam_chance"
+msgid "işarələdiklərinizə şans veriləcək"
+msgstr "işaretlediğiniz öğrencilere hak verilecek"
+
+msgctxt "accounts.exam_chance"
+msgid "Nəticə tapılmadı — axtarışı dəyişin."
+msgstr "Sonuç bulunamadı — aramayı değiştirin."
+
+msgctxt "accounts.exam_chance"
+msgid "Əlavə tələbələr"
+msgstr "Ek öğrenciler"

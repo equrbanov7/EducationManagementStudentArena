@@ -30055,3 +30055,75 @@ msgstr "Only the exam centre can create final and midterm exams."
 msgctxt "exams.final_center.session_detail"
 msgid "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır."
 msgstr "A room sitting is exam-independent. A student joins it by signing in with their personal PIN from a registered computer. When the invigilator starts the sitting, everyone begins their own exam."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan filtri"
+msgstr "Exam filter"
+
+msgctxt "accounts.exam_chance"
+msgid "Tədris ili"
+msgstr "Academic year"
+
+msgctxt "accounts.exam_chance"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "accounts.exam_chance"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "accounts.exam_chance"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün illər"
+msgstr "All years"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün semestrlər"
+msgstr "All semesters"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün fakültələr"
+msgstr "All faculties"
+
+msgctxt "accounts.exam_chance"
+msgid "Bütün kafedralar"
+msgstr "All departments"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan axtarışı"
+msgstr "Exam search"
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan adı ilə axtar…"
+msgstr "Search by exam title…"
+
+msgctxt "accounts.exam_chance"
+msgid "Tələbə axtarışı"
+msgstr "Student search"
+
+msgctxt "accounts.exam_chance"
+msgid "Qrup, istifadəçi adı və ya ad-soyad…"
+msgstr "Group, username or full name…"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı."
+msgstr "No final/midterm exams match these filters."
+
+msgctxt "accounts.exam_chance"
+msgid "Axtarış nəticəsi"
+msgstr "Search results"
+
+msgctxt "accounts.exam_chance"
+msgid "işarələdiklərinizə şans veriləcək"
+msgstr "the checked students will receive the retake"
+
+msgctxt "accounts.exam_chance"
+msgid "Nəticə tapılmadı — axtarışı dəyişin."
+msgstr "No results — change the search."
+
+msgctxt "accounts.exam_chance"
+msgid "Əlavə tələbələr"
+msgstr "Additional students"

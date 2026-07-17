@@ -238,6 +238,12 @@ class _Stage2Mixin:
             "exams": [],
             "groups": [],
             "recent_grants": [],
+            "student_results": [],
+            "filters": {},
+            "years": [],
+            "periods": [],
+            "faculties": [],
+            "kafedras": [],
             "selected_exam_id": "",
             "post_next_url": "",
         }

@@ -241,9 +241,7 @@ class ExamDetailControlsVisibilityTests(_Base):
     """Final/midterm detalında canlı-sessiya və aktiv/deaktiv düymələri gizlidir."""
 
     def _detail(self, exam):
-        return self._client_for(self.center).get(
-            reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
-        )
+        return self._client_for(self.center).get(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
     def test_final_hides_live_start_and_active_toggle(self):
         exam = self._make_exam("final")
@@ -263,3 +261,99 @@ class ExamDetailControlsVisibilityTests(_Base):
         response = self._detail(exam)
         self.assertContains(response, f"/{exam.slug}/toggle-active/", status_code=200)
         self.assertContains(response, "live-start-section")
+
+
+class ExamChanceFilterTests(_Base):
+    """exam-chance filtr paneli: il/semestr, fakültə→kafedra, imtahan/tələbə axtarışı."""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from apps.organizations.models import AcademicPeriod, OrgUnit
+        from core.constants import AcademicPeriodType, OrgUnitType
+
+        cls.faculty = OrgUnit.objects.create(
+            organization=cls.org, unit_type=OrgUnitType.FACULTY, name="Mühəndislik fakültəsi"
+        )
+        cls.kafedra = OrgUnit.objects.create(
+            organization=cls.org, unit_type=OrgUnitType.CHAIR, name="İnformatika kafedrası", parent=cls.faculty
+        )
+        cls.other_faculty = OrgUnit.objects.create(
+            organization=cls.org, unit_type=OrgUnitType.FACULTY, name="İqtisadiyyat fakültəsi"
+        )
+        cls.other_kafedra = OrgUnit.objects.create(
+            organization=cls.org, unit_type=OrgUnitType.CHAIR, name="Maliyyə kafedrası", parent=cls.other_faculty
+        )
+        cls.group = StudentGroup.objects.create(
+            teacher=cls.teacher, organization=cls.org, name="INF-840i", org_unit=cls.kafedra
+        )
+        cls.group.students.add(cls.student)
+        cls.period = AcademicPeriod.objects.create(
+            organization=cls.org,
+            name="Payız semestri",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2026-2027",
+            start_date=timezone.now().date() - timedelta(days=10),
+            end_date=timezone.now().date() + timedelta(days=100),
+            is_active=True,
+        )
+
+    def _section(self, query=""):
+        return self._client_for(self.center).get(f"{reverse('accounts:profile')}?section=exam-chance{query}")
+
+    def test_faculty_filter_narrows_exams_and_kafedra_options(self):
+        inside = self._make_exam("final", title="Fakültə daxili final")
+        inside.allowed_groups.add(self.group)
+        self._make_exam("final", title="Fakültəsiz final")
+
+        response = self._section(f"&chance_faculty={self.faculty.pk}")
+        self.assertContains(response, "Fakültə daxili final")
+        self.assertNotContains(response, "Fakültəsiz final")
+        # Kafedra seçimləri yalnız seçilmiş fakültənin uşaqlarıdır.
+        self.assertContains(response, "İnformatika kafedrası")
+        self.assertNotContains(response, "Maliyyə kafedrası")
+
+    def test_year_filter_narrows_exams(self):
+        self._make_exam("final", title="Bu semestr finalı")
+        self._make_exam(
+            "final",
+            title="Köhnə final",
+            start_datetime=timezone.now() - timedelta(days=400),
+            end_datetime=timezone.now() - timedelta(days=399),
+        )
+        response = self._section("&chance_year=2026-2027")
+        self.assertContains(response, "Bu semestr finalı")
+        self.assertNotContains(response, "Köhnə final")
+
+    def test_exam_title_search(self):
+        self._make_exam("final", title="Riyaziyyat finalı")
+        self._make_exam("final", title="Fizika finalı")
+        response = self._section("&chance_exam_q=Riyaziyyat")
+        self.assertContains(response, "Riyaziyyat finalı")
+        self.assertNotContains(response, "Fizika finalı")
+
+    def test_student_search_by_group_username_and_name(self):
+        self._make_exam("final")
+        self.student.first_name = "Aygün"
+        self.student.last_name = "Məmmədova"
+        self.student.save(update_fields=["first_name", "last_name"])
+
+        # Qrup adı ilə
+        response = self._section("&chance_student_q=INF-840")
+        self.assertContains(response, 'name="student_ids"')
+        self.assertContains(response, self.student.username)
+        # Ad-soyad ilə
+        response = self._section("&chance_student_q=Məmmədova")
+        self.assertContains(response, self.student.username)
+        # İstifadəçi adı ilə
+        response = self._section(f"&chance_student_q={self.student.username[:8]}")
+        self.assertContains(response, self.student.username)
+
+    def test_grant_via_student_ids(self):
+        exam = self._make_exam("final", title="Checkbox finalı")
+        response = self._client_for(self.center).post(
+            reverse("accounts:exam_chance"),
+            {"exam_id": str(exam.pk), "student_ids": [str(self.student.pk)], "extra_attempts": "1"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(StudentExamAttemptGrant.objects.filter(exam=exam, student=self.student).exists())
