@@ -28929,3 +28929,395 @@ msgid "%(counter)s sual"
 msgid_plural "%(counter)s sual"
 msgstr[0] "%(counter)s soru"
 msgstr[1] "%(counter)s soru"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)s kompüter əlavə edildi."
+msgstr "%(n)s bilgisayar eklendi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(u)s zal idarəçiliyindən çıxarıldı."
+msgstr "%(u)s salon yöneticiliğinden çıkarıldı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(u)s zal idarəçisi təyin edildi."
+msgstr "%(u)s salon yöneticisi olarak atandı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv"
+msgstr "Etkin"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv et"
+msgstr "Etkinleştir"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv təşkilat tapılmadı. Zal yaratmaq üçün əvvəlcə təşkilat seçin."
+msgstr "Etkin kuruluş bulunamadı. Salon oluşturmadan önce kuruluş seçin."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bina"
+msgstr "Bina"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu bölmə yalnız zal idarəçiləri üçündür."
+msgstr "Bu bölüm yalnızca salon yöneticileri içindir."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu istifadəçilər superadmin olmadan da öz təşkilatlarının zallarını idarə edə bilər."
+msgstr "Bu kullanıcılar süper yönetici olmadan kendi kuruluşlarının salonlarını yönetebilir."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu təşkilatda hələ zal yoxdur — «Yeni zal» ilə başlayın."
+msgstr "Bu kuruluşta henüz salon yok — «Yeni salon» ile başlayın."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Deaktiv"
+msgstr "Devre dışı"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Deaktiv et"
+msgstr "Devre dışı bırak"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Form məlumatları düzgün deyil."
+msgstr "Form verileri geçersiz."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Geri al"
+msgstr "Geri al"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hələ kompüter əlavə edilməyib — «Kompüter əlavə et» ilə başlayın."
+msgstr "Henüz bilgisayar eklenmedi — «Bilgisayar ekle» ile başlayın."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hələ təyin olunmuş idarəçi yoxdur."
+msgstr "Henüz atanmış yönetici yok."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hər sətir: Ad, MAC[, IP][, Yer]"
+msgstr "Her satır: Ad, MAC[, IP][, Koltuk]"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "IP ilə"
+msgstr "IP ile"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kod"
+msgstr "Kod"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter silindi."
+msgstr "Bilgisayar silindi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter yeniləndi."
+msgstr "Bilgisayar güncellendi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter əlavə edildi."
+msgstr "Bilgisayar eklendi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter əlavə et"
+msgstr "Bilgisayar ekle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüteri redaktə et"
+msgstr "Bilgisayarı düzenle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)."
+msgstr "MAC kimlik için saklanır; erişim izni IP üzerinden verilir (tarayıcı MAC'i sunucuya gönderemez)."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "MAC-ı kopyala"
+msgstr "MAC'i kopyala"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Mərtəbə"
+msgstr "Kat"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Naməlum əməliyyat."
+msgstr "Bilinmeyen işlem."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Planlaşdırılan kompüter"
+msgstr "Planlanan bilgisayar"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Qeydiyyatdan keçən kompüter sayı planla üst-üstə düşmür"
+msgstr "Kayıtlı bilgisayar sayısı planla eşleşmiyor"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Redaktə et"
+msgstr "Düzenle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Status"
+msgstr "Durum"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Söndürülüb"
+msgstr "Kapalı"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Toplu əlavə"
+msgstr "Toplu ekle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Toplu əlavə (MAC siyahısı)"
+msgstr "Toplu ekleme (MAC listesi)"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Toplu əlavə et"
+msgstr "Toplu ekle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Tutum (yer)"
+msgstr "Kapasite (koltuk)"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Təşkilat"
+msgstr "Kuruluş"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Kuruluş bağlamı bulunamadı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)."
+msgstr "Başarısız satırlar atlanır ve nedeni mesajla bildirilir (kısmi başarı)."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yeni zal"
+msgstr "Yeni salon"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yeni zal yarat"
+msgstr "Yeni salon oluştur"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yer"
+msgstr "Koltuk"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yer nömrəsi"
+msgstr "Koltuk numarası"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal idarəçiləri"
+msgstr "Salon yöneticileri"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal statusu dəyişdirildi."
+msgstr "Salon durumu değiştirildi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal yaradıldı."
+msgstr "Salon oluşturuldu."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal yeniləndi."
+msgstr "Salon güncellendi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalları, kompüterləri və MAC/IP qeydlərini idarə edin. Bu bölmə yalnız superadmin (və ya təyin olunmuş zal idarəçisi) üçündür."
+msgstr "Salonları, bilgisayarları ve MAC/IP kayıtlarını yönetin. Bu bölüm yalnızca süper yönetici (veya atanmış salon yöneticisi) içindir."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalı redaktə et"
+msgstr "Salonu düzenle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalı sil"
+msgstr "Salonu sil"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zalı yarat"
+msgstr "Salonu oluştur"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "canlı"
+msgstr "canlı"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "kompüter"
+msgstr "bilgisayar"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "nəzarətçi"
+msgstr "gözetmen"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "plan:"
+msgstr "plan:"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "yer"
+msgstr "koltuk"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(label)s» (%(mac)s) silinsin?"
+msgstr "«%(label)s» (%(mac)s) silinsin mi?"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(label)s» kompüterini redaktə et"
+msgstr "«%(label)s» bilgisayarını düzenle"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(label)s» kompüterini sil"
+msgstr "«%(label)s» bilgisayarını sil"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(name)s» zalı və %(count_c)s kompüter qeydi həmişəlik silinəcək. Davam edilsin?"
+msgstr "«%(name)s» salonu ve %(count_c)s bilgisayar kaydı kalıcı olarak silinecek. Devam edilsin mi?"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(room)s» zalı silindi."
+msgstr "«%(room)s» salonu silindi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İcazə geri alınsın?"
+msgstr "Bu izin geri alınsın mı?"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İcazə vermək yalnız superadminə məxsusdur."
+msgstr "İzin vermek yalnızca süper yöneticiye aittir."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İdarəçi təyin et"
+msgstr "Yönetici ata"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İmtahan zalları"
+msgstr "Sınav salonları"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İmtina"
+msgstr "Vazgeç"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi adı və ya email"
+msgstr "Kullanıcı adı veya e-posta"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi göstərilməyib."
+msgstr "Kullanıcı belirtilmedi."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi profili yoxdur."
+msgstr "Kullanıcının profili yok."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İstifadəçi tapılmadı: %(u)s"
+msgstr "Kullanıcı bulunamadı: %(u)s"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Əlavə ediləcək sətir tapılmadı."
+msgstr "Eklenecek satır bulunamadı."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Əlavə et"
+msgstr "Ekle"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu MAC artıq bu zalda qeydlidir: %(mac)s"
+msgstr "Bu MAC bu salonda zaten kayıtlı: %(mac)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu MAC artıq «%(room)s» zalında qeydlidir (%(label)s). Kompüteri əvvəlcə oradan silin və ya redaktə edin."
+msgstr "Bu MAC zaten «%(room)s» salonunda kayıtlı (%(label)s). Önce bilgisayarı oradan silin veya düzenleyin."
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu adla kompüter artıq var: %(label)s"
+msgstr "Bu adla bilgisayar zaten var: %(label)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Bu yer nömrəsi artıq tutulub: %(seat)s"
+msgstr "Bu koltuk numarası zaten dolu: %(seat)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "IP ünvanı düzgün deyil: %(ip)s"
+msgstr "IP adresi geçersiz: %(ip)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Kompüter adı boş ola bilməz."
+msgstr "Bilgisayar adı boş olamaz."
+
+msgctxt "exams.final_center.room_admin"
+msgid "MAC ünvanı düzgün deyil: %(mac)s"
+msgstr "MAC adresi geçersiz: %(mac)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Sətir %(n)s: %(err)s"
+msgstr "Satır %(n)s: %(err)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "Sətir %(n)s: ad və MAC lazımdır."
+msgstr "Satır %(n)s: ad ve MAC gereklidir."
+
+msgctxt "exams.final_center.room_admin"
+msgid "Yer nömrəsi müsbət olmalıdır."
+msgstr "Koltuk numarası pozitif olmalıdır."
+
+msgctxt "exams.final_center.room_admin"
+msgid "Yer nömrəsi rəqəm olmalıdır: %(seat)s"
+msgstr "Koltuk numarası sayı olmalıdır: %(seat)s"
+
+msgctxt "exams.final_center.room_admin"
+msgid "«%(room)s» zalının oturum tarixçəsi var — silinə bilməz. Zalı deaktiv edin."
+msgstr "«%(room)s» salonunun oturum geçmişi var — silinemez. Salonu devre dışı bırakın."
+
+msgctxt "exams.final_center.form"
+msgid "Başlama vaxtı keçmişdə ola bilməz."
+msgstr "Başlama zamanı geçmişte olamaz."
+
+msgctxt "exams.final_center.form"
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitiş zamanı başlama zamanından sonra olmalıdır."
+
+msgctxt "exams.final_center.form"
+msgid "Bu kod ilə zal artıq mövcuddur."
+msgstr "Bu kodla salon zaten mevcut."
+
+msgctxt "exams.final_center.form"
+msgid "Final imtahanı"
+msgstr "Final sınavı"
+
+msgctxt "exams.final_center.form"
+msgid "Qrup seçin və ya istifadəçi adlarını daxil edin."
+msgstr "Grup seçin veya kullanıcı adlarını girin."
+
+msgctxt "exams.final_center.form"
+msgid "Tələbə qrupu"
+msgstr "Öğrenci grubu"
+
+msgctxt "exams.final_center.form"
+msgid "Vergül və ya yeni sətirlə ayrılmış istifadəçi adları."
+msgstr "Virgül veya yeni satırla ayrılmış kullanıcı adları."
+
+msgctxt "exams.final_center.form"
+msgid "İstifadəçi adları"
+msgstr "Kullanıcı adları"
