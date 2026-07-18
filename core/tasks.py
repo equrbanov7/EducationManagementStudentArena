@@ -105,18 +105,3 @@ def send_audit_log_async(*, action, user=None, organization=None, obj=None, **kw
 
     with rls_worker_atomic():
         log_action(action=action, user=user, organization=organization, obj=obj, **kwargs)
-
-
-def export_exam_results_csv(*, exam_pk: int, recipient_email: str) -> None:
-    """
-    Placeholder for a heavy CSV export task.
-
-    In production this would generate a CSV of exam results and email it to
-    *recipient_email*.  The actual implementation is left for the feature
-    branch that introduces result export.
-    """
-    logger.info(
-        "export_exam_results_csv: exam_pk=%s recipient=%s  (not yet implemented)",
-        exam_pk,
-        recipient_email,
-    )
