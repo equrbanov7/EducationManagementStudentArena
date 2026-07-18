@@ -42,9 +42,6 @@ WRAP_PATTERN = re.compile(r"rls_worker_atomic")
 # Bilərəkdən istisnalar — DB-yə toxunmayan komponentlər.
 # Yeni istisna əlavə edərkən komment ilə səbəbini yaz.
 INTENTIONAL_EXEMPTIONS = {
-    # Deprecated no-op — Django auth groups artıq istifadə olunmur; command
-    # yalnız self.stdout.write çağırır.
-    "apps/accounts/management/commands/create_roles.py",
     # ExamSupervisionConsumer yalnız channel-layer group send/discard edir;
     # `scope["user"]` və feature-flag settings oxuyur; DB sorğusu yoxdur.
     "apps/exams/consumers.py",

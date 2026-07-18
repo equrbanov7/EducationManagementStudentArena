@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{{ course.title }} - {% trans "page_suffix_edit" context "courses.edit_page" %} - EMSArena{% endblock %}
+{% block title %}{{ course.title }} - {% trans "page_suffix_edit" context "courses.edit_page" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss%}
 {% include "courses/partials/_courses_assets_css.html" %}

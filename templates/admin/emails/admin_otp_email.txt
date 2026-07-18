@@ -1,6 +1,6 @@
 Salam {{ user.get_username }},
 
-EMS Arena admin panelinə giriş üçün OTP kodunuz:
+{{ brand }} admin panelinə giriş üçün OTP kodunuz:
 
 {{ code }}
 

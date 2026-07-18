@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% blocktrans with org_name=organization.name %}Post İdarəetmə - {{ org_name }} - EMSArena{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans with org_name=organization.name %}Post İdarəetmə - {{ org_name }}{% endblocktrans %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/post_management.css' %}">
+<link rel="stylesheet" href="{% static 'blog/css/post_management.css' %}">
 {% endblock %}
 
 {% block content %}

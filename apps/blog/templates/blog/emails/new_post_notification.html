@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMSArena | Yeni post</title>
+    <title>{{ brand }} | Yeni post</title>
   </head>
   <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#172033;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
@@ -13,14 +13,14 @@
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 40px rgba(15,23,42,0.10);">
             <tr>
               <td style="background:linear-gradient(135deg,#1e293b,#0ea5e9);padding:28px 32px;color:#ffffff;">
-                <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">EMSArena</div>
+                <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">{{ brand }}</div>
                 <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">{% trans 'Yeni post yayımlandı' %}</h1>
               </td>
             </tr>
             <tr>
               <td style="padding:32px;">
                 <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam,</p>
-                <p style="margin:0 0 24px;font-size:16px;line-height:1.7;">{% trans 'EMSArena blogunda yeni bir post yayımlandı:' %}</p>
+                <p style="margin:0 0 24px;font-size:16px;line-height:1.7;">{% blocktrans %}{{ brand }} blogunda yeni bir post yayımlandı:{% endblocktrans %}</p>
 
                 <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #bae6fd;border-radius:16px;background:#f0f9ff;">
                   <h2 style="margin:0 0 8px;font-size:20px;color:#0f172a;">{{ post.title }}</h2>
@@ -38,7 +38,7 @@
                 </table>
 
                 <p style="margin:0;font-size:13px;color:#64748b;line-height:1.7;">
-                  {% trans 'Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun.' %}
+                  {% blocktrans %}Bu emaili aldınızsa, {{ brand }} bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun.{% endblocktrans %}
                 </p>
               </td>
             </tr>

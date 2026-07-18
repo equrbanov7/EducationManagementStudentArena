@@ -132,6 +132,7 @@ def send_admin_otp_email(user, *, request=None) -> tuple[str, object]:
     EmailOTP = django_apps.get_model("accounts", "EmailOTP")
     code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.ADMIN_LOGIN)
     context = {
+        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
         "user": user,
         "code": code,
         "otp_expiry_minutes": get_auth_otp_expiry_minutes(),

@@ -16,10 +16,10 @@
         <div class="ems-hero__content">
             <span class="ems-hero__eyebrow">
                 <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-                {% trans "EMSArena ilə tanış olun" %}
+                {% blocktrans %}{{ site_brand_name }} ilə tanış olun{% endblocktrans %}
             </span>
             <h1 class="main-title">
-                <span class="highlight">EMSArena</span>: {% trans "təhsilin yeni nəsil arenası" %}
+                <span class="highlight">{{ site_brand_name }}</span>: {% trans "təhsilin yeni nəsil arenası" %}
             </h1>
             <p class="hero-description">
                 {% trans "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi." %}
@@ -44,14 +44,14 @@
         </div>
         <div class="ems-hero__visual">
             <img src="{% static 'brand/logo-stacked.png' %}"
-                 alt="{% trans 'EMSArena loqo' %}"
+                 alt="{% blocktrans %}{{ site_brand_name }} loqo{% endblocktrans %}"
                  class="ems-hero__logo"
                  loading="eager">
         </div>
     </header>
 
     {# ---------- Platform highlights (realistic for early-stage product) ---------- #}
-    <section class="ems-stats animate-fade-in delay-1" aria-label="{% trans 'EMSArena platform xüsusiyyətləri' %}">
+    <section class="ems-stats animate-fade-in delay-1" aria-label="{% blocktrans %}{{ site_brand_name }} platform xüsusiyyətləri{% endblocktrans %}">
         <div class="ems-stat">
             <p class="ems-stat__number">4</p>
             <p class="ems-stat__label">{% trans "Dəstəklənən dil" %}</p>

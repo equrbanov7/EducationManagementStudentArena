@@ -12,20 +12,6 @@ from django.utils.translation import pgettext_lazy
 DATA_URL_PNG_RE = re.compile(r"^data:image\/png;base64,(.+)$")
 
 
-class UserRole:
-    """User role constants - Deprecated, use ORGANIZATION_ROLES instead"""
-
-    TEACHER = "teacher"
-    STUDENT = "student"
-    ADMIN = "admin"
-
-    CHOICES = [
-        (TEACHER, "Teacher"),
-        (STUDENT, "Student"),
-        (ADMIN, "Admin"),
-    ]
-
-
 # ═══════════════════════════════════════════════════════════════════════════
 # ORGANIZATION-TYPE-AWARE ROLE DEFINITIONS
 # ═══════════════════════════════════════════════════════════════════════════
@@ -110,54 +96,6 @@ ROLE_LEVEL_TEACHER = 60  # Teacher and above
 ROLE_LEVEL_MODERATOR = 40  # Moderator and above
 ROLE_LEVEL_ADMIN = 80  # Admin level (department_head and above)
 ROLE_LEVEL_TOP_ADMIN = 95  # Top admin (rector/director/vice_rector/vice_director)
-
-
-class ExamType:
-    """Exam type constants"""
-
-    QUIZ = "quiz"
-    MIDTERM = "midterm"
-    FINAL = "final"
-    ASSIGNMENT = "assignment"
-
-    CHOICES = [
-        (QUIZ, "Quiz"),
-        (MIDTERM, "Midterm"),
-        (FINAL, "Final"),
-        (ASSIGNMENT, "Assignment"),
-    ]
-
-
-class SubmissionStatus:
-    """Submission status constants"""
-
-    PENDING = "pending"
-    SUBMITTED = "submitted"
-    GRADED = "graded"
-    LATE = "late"
-
-    CHOICES = [
-        (PENDING, "Pending"),
-        (SUBMITTED, "Submitted"),
-        (GRADED, "Graded"),
-        (LATE, "Late"),
-    ]
-
-
-class QuestionType:
-    """Question type constants"""
-
-    MULTIPLE_CHOICE = "multiple_choice"
-    TRUE_FALSE = "true_false"
-    SHORT_ANSWER = "short_answer"
-    ESSAY = "essay"
-
-    CHOICES = [
-        (MULTIPLE_CHOICE, "Multiple Choice"),
-        (TRUE_FALSE, "True/False"),
-        (SHORT_ANSWER, "Short Answer"),
-        (ESSAY, "Essay"),
-    ]
 
 
 # Organization System Constants
