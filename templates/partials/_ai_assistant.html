@@ -75,7 +75,7 @@
      data-history-ttl-ms="900000"
      data-limit-label="{% trans 'Sorğular' context 'ai_assistant.limit' %}"
      data-loading-label="{% trans 'yüklənir...' context 'ai_assistant.limit' %}"
-     data-greeting="{% trans 'Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?' context 'ai_assistant.greeting' %}"
+     data-greeting="{% blocktrans context 'ai_assistant.greeting' %}Salam! Mən {{ site_brand_name }} AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?{% endblocktrans %}"
      data-limit-disabled-message="{% trans 'AI sorğu limiti hazırda aktiv deyil.' context 'ai_assistant.error' %}"
      data-send-failed-message="{% trans 'Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin.' context 'ai_assistant.error' %}"
      data-generic-error-message="{% trans 'Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.' context 'ai_assistant.error' %}"
@@ -83,7 +83,7 @@
     {# Header #}
     <div class="ai-chat-header">
         <div class="ai-chat-header-bar">
-            {% with org_name=current_organization.name|default:"EMSArena" %}
+            {% with org_name=current_organization.name|default:site_brand_name %}
             <div class="ai-chat-org-logo{% if not current_organization.logo %} ai-chat-org-logo--fallback{% endif %}" title="{{ org_name }}">
                 {% if current_organization.logo %}
                     <img src="{{ current_organization.logo.url }}" alt="{{ org_name }}">

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_not_required
@@ -41,9 +42,14 @@ from core.utils import get_auth_otp_expiry_minutes
 logger = logging.getLogger(__name__)
 
 
+# White-label admin chrome: derived from the configured institution brand so
+# the admin header/title carry the deployment's name, not the product name.
+_ADMIN_BRAND = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
+
+
 class EMSArenaAdminSite(admin.AdminSite):
-    site_header = "EMS Arena Administration"
-    site_title = "EMS Arena Admin"
+    site_header = f"{_ADMIN_BRAND} Administration"
+    site_title = f"{_ADMIN_BRAND} Admin"
     index_title = "Platform administration"
 
     def _begin_admin_otp_challenge(self, request, user, *, next_url: str):
