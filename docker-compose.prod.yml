@@ -63,6 +63,10 @@ x-app-env: &app-env
   # DB rol yoxlamasının sərtliyi: warn (default) | error | off.
   EMS_DB_ROLE_ENFORCE: ${EMS_DB_ROLE_ENFORCE:-warn}
   DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
+  # PgBouncer transaction-pooling rejimi üçün RLS SET LOCAL yolu (FAZA 2/3B).
+  # DİQQƏT: bu bayraq PGBOUNCER_POOL_MODE=transaction ilə BİRLİKDƏ dəyişməlidir —
+  # tək tərəfli dəyişiklik ya sorğuları pozar, ya da tenant sızması riski yaradar.
+  RLS_TRANSACTION_SCOPED: ${RLS_TRANSACTION_SCOPED:-False}
   REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379/0}
   SECRET_KEY: ${SECRET_KEY}
   ALLOWED_HOSTS: ${ALLOWED_HOSTS}
