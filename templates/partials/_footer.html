@@ -11,9 +11,9 @@
 
             {# Brand column #}
             <div class="ems-footer__brand">
-                <a href="{{ home_url }}" class="ems-footer__logo" aria-label="{% trans 'EMSArena ana səhifə' %}">
+                <a href="{{ home_url }}" class="ems-footer__logo" aria-label="{% blocktrans %}{{ site_brand_name }} ana səhifə{% endblocktrans %}">
                     <img src="{% static 'brand/logo-horizontal.png' %}"
-                         alt="EMSArena"
+                         alt="{{ site_brand_name }}"
                          class="ems-footer__logo-img"
                          loading="lazy">
                 </a>
@@ -107,7 +107,7 @@
         {# ---------- Bottom: Legal + Copyright ---------- #}
         <div class="ems-footer__bottom">
             <p class="ems-footer__copy">
-                © <span id="footerCurrentYear">2026</span> EMSArena. {% trans "Bütün hüquqlar qorunur." %}
+                © <span id="footerCurrentYear">2026</span> {{ site_brand_name }}. {% trans "Bütün hüquqlar qorunur." %}
             </p>
             <p class="ems-footer__made-by">
                 {% trans "Hazırladı" %}:

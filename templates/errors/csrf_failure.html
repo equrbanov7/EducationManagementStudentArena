@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Page expired" context "core.errors.csrf" %} | EMSArena</title>
+    <title>{% trans "Page expired" context "core.errors.csrf" %} | {{ site_brand_name }}</title>
     {% if auto_redirect %}
     {# Stale auth form (bfcache / long-open tab): auto-redirect to a freshly #}
     {# rendered form with a new CSRF token. Meta refresh is CSP-safe.       #}
@@ -22,7 +22,7 @@
         <section class="error-card" aria-labelledby="error-title">
             <div class="error-brand">
                 <span class="error-brand-mark"><i class="fas fa-rotate-right"></i></span>
-                <span>EMSArena</span>
+                <span>{{ site_brand_name }}</span>
             </div>
 
             <div class="error-grid">

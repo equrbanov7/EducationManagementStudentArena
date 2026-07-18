@@ -146,7 +146,7 @@ def superadmin_post_management(request):
         "role_choices": ProfileRole.CHOICES,
         "total_count": paginator.count,
     }
-    return render(request, "accounts/superadmin_post_management.html", context)
+    return render(request, "blog/superadmin_post_management.html", context)
 
 
 @login_required
@@ -347,7 +347,7 @@ def org_post_management(request):
         "role_choices": ProfileRole.CHOICES,
         "total_count": paginator.count,
     }
-    return render(request, "accounts/org_post_management.html", context)
+    return render(request, "blog/org_post_management.html", context)
 
 
 @login_required

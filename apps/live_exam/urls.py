@@ -48,7 +48,5 @@ urlpatterns = [
     path("live/state/<str:pin>/", views.live_state_json, name="state_json"),
     path("live/<str:pin>/start/", views.host_start_game, name="start_game"),
     path("live/<str:pin>/next/", views.host_next_question, name="next_question"),
-    path("live/<str:pin>/skip-intro/", views.host_skip_question_intro, name="skip_intro"),
-    path("live/<str:pin>/end/", views.host_reveal, name="end_question"),
     path("live/<str:pin>/finish/", views.host_finish, name="finish_game"),
 ]

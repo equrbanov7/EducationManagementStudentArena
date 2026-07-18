@@ -1,6 +1,7 @@
 """accounts auth forms paketi — login."""
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
@@ -102,6 +103,7 @@ class CustomPasswordResetForm(PasswordResetForm):
                 request=request,
             )
             context = {
+                "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
                 "email": user.email,
                 "user": user,
                 "uid": uid,
