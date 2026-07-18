@@ -346,3 +346,94 @@ def test_txn_applied_flag_reset_between_transactions(two_org_units):
             assert getattr(connection, "_rls_txn_applied", False) is True
             assert _current_setting("app.current_org_id") == str(org_b.pk)
     reset_txn_flags(connection)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OrganizationMiddleware — P0 gap fix: org resolution (bypass_rls membership
+# reads) must run INSIDE an atomic block when RLS_TRANSACTION_SCOPED is on, so
+# those reads use SET LOCAL. Under PgBouncer transaction mode a session-scoped
+# SET issued outside a transaction would land on an arbitrary pooled backend —
+# breaking resolution and leaking the bypass flag into the next tenant's
+# request. These tests exercise the middleware end-to-end on both flag paths.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _build_member_user(org, *, username):
+    """Create a user with a single active membership in *org*."""
+    from apps.organizations.models import Membership, Role
+    from core.constants import RoleScopeType
+
+    User = get_user_model()
+    user = User.objects.create_user(username, f"{username}@example.test", "pw")
+    role = Role.objects.create(
+        organization=org,
+        name=f"member-{username}",
+        display_name="Member",
+        level=10,
+        scope_type=RoleScopeType.ORGANIZATION,
+        permissions=[],
+    )
+    Membership.objects.create(user=user, organization=org, role=role, is_active=True, is_primary=True)
+    return user
+
+
+def _run_middleware_capturing_atomic(user):
+    """Run OrganizationMiddleware for *user* (no session org → Step 2 auto-select)
+    and return (request, in_atomic_during_resolution)."""
+    from django.http import HttpResponse
+    from django.test import RequestFactory
+
+    from apps.organizations.middleware import OrganizationMiddleware
+
+    captured = {}
+    original = OrganizationMiddleware._fetch_active_memberships
+
+    def spy(u):
+        # Record whether the membership read happens inside a transaction.
+        captured["in_atomic"] = connection.in_atomic_block
+        return original(u)
+
+    OrganizationMiddleware._fetch_active_memberships = staticmethod(spy)
+    try:
+        request = RequestFactory().get("/")
+        request.user = user
+        request.session = {}  # dict session is enough for middleware get/pop/set
+        middleware = OrganizationMiddleware(lambda r: HttpResponse("ok"))
+        middleware(request)
+    finally:
+        OrganizationMiddleware._fetch_active_memberships = staticmethod(original)
+    return request, captured.get("in_atomic")
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=True)
+def test_middleware_resolution_runs_inside_atomic_when_txn_scoped(two_org_units):
+    """Flag ON → resolution runs inside an atomic block (SET LOCAL-safe) and
+    still resolves the user's org correctly."""
+    _skip_if_not_pg()
+    org_a, _org_b, _unit_a, _unit_b = two_org_units
+    user = _build_member_user(org_a, username="txn_mw_on")
+
+    request, in_atomic = _run_middleware_capturing_atomic(user)
+
+    assert in_atomic is True, "org resolution must run inside a transaction when RLS_TRANSACTION_SCOPED is on"
+    assert request.organization == org_a
+    # The bypass used during resolution was SET LOCAL: it is discarded on the
+    # resolution transaction's commit rather than persisting as a session GUC.
+    # (The autouse fixture keeps a session-scope bypass baseline for setup, so we
+    # assert the local set did not *add* new persistent state beyond that
+    # baseline — i.e. `_rls_txn_applied` was cleared by the middleware finally.)
+    assert getattr(connection, "_rls_txn_applied", False) is False
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=False)
+def test_middleware_resolution_session_scoped_when_flag_off(two_org_units):
+    """Flag OFF (default) → resolution runs outside a transaction (existing
+    session-scope behaviour) and still resolves the org."""
+    _skip_if_not_pg()
+    org_a, _org_b, _unit_a, _unit_b = two_org_units
+    user = _build_member_user(org_a, username="txn_mw_off")
+
+    request, in_atomic = _run_middleware_capturing_atomic(user)
+
+    assert in_atomic is False, "with the flag off, resolution keeps the legacy non-atomic session-scope path"
+    assert request.organization == org_a
