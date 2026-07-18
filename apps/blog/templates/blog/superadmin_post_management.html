@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% blocktrans with org_name=organization.name %}Post İdarəetmə - {{ org_name }}{% endblocktrans %} - {{ site_brand_name }}{% endblock %}
+{% block title %}{% trans 'Post İdarəetmə' %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/post_management.css' %}">
+<link rel="stylesheet" href="{% static 'blog/css/post_management.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@
     <div class="profile-main profile-main--results">
         <div class="profile-header">
             <h1 class="profile-title">
-                <i class="fas fa-newspaper"></i> {% trans 'Post İdarəetmə —' %} {{ organization.name }}
+                <i class="fas fa-newspaper"></i> {% trans 'Post İdarəetmə (Superadmin)' %}
             </h1>
             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.common" %}
@@ -26,6 +26,15 @@
                     <div class="post-mgmt-filters__field">
                         <label for="filter-q">{% trans 'Axtar' %}</label>
                         <input type="text" id="filter-q" name="q" value="{{ search_query }}" class="form-control" placeholder="{% trans 'Başlıq, müəllif, məzmun...' %}">
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-org">{% trans 'Təşkilat' %}</label>
+                        <select id="filter-org" name="org" class="form-control">
+                            <option value="">{% trans 'Hamısı' %}</option>
+                            {% for org in organizations %}
+                                <option value="{{ org.id }}" {% if org_filter == org.id|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="post-mgmt-filters__field">
                         <label for="filter-role">{% trans 'Rol' %}</label>
@@ -58,7 +67,7 @@
                     </div>
                     <div class="post-mgmt-filters__actions">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> {% trans 'Filtrə et' %}</button>
-                        <a href="{% url 'accounts:org_post_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> {% trans 'Sıfırla' %}</a>
+                        <a href="{% url 'accounts:superadmin_post_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> {% trans 'Sıfırla' %}</a>
                     </div>
                 </div>
             </form>
@@ -98,17 +107,11 @@
                                 {% endif %}
                             </td>
                             <td>{{ post.created_at|date:"d.m.Y H:i" }}</td>
-                            <td class="post-mgmt-actions-cell">
-                                <button class="btn btn-warning btn-sm js-org-feedback-post"
+                            <td>
+                                <button class="btn btn-danger btn-sm js-sa-delete-post"
                                         data-post-id="{{ post.pk }}"
                                         data-post-title="{{ post.title|escape }}"
-                                        data-moderate-url="{% url 'accounts:org_moderate_post' post.pk %}">
-                                    <i class="fas fa-comment-dots"></i> {% trans 'Düzəliş tələb et' %}
-                                </button>
-                                <button class="btn btn-danger btn-sm js-org-delete-post"
-                                        data-post-id="{{ post.pk }}"
-                                        data-post-title="{{ post.title|escape }}"
-                                        data-moderate-url="{% url 'accounts:org_moderate_post' post.pk %}">
+                                        data-delete-url="{% url 'accounts:superadmin_delete_post' post.pk %}">
                                     <i class="fas fa-trash"></i> Sil
                                 </button>
                             </td>
@@ -131,40 +134,19 @@
         {% endif %}
 
         <!-- Delete Modal -->
-        <div id="orgDeleteModal" class="modal-overlay">
+        <div id="saDeleteModal" class="modal-overlay">
             <div class="modal-content">
                 <h3><i class="fas fa-exclamation-triangle"></i> {% trans 'Post Silinməsi' %}</h3>
-                <p><span id="orgDeletePostTitle" class="post-mgmt-modal-title"></span> {% trans 'postu silinəcək.' %}</p>
-                <form id="orgDeleteForm" method="post">
+                <p><span id="saDeletePostTitle" class="post-mgmt-modal-title"></span> {% trans 'postu silinəcək.' %}</p>
+                <form id="saDeleteForm" method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="delete">
                     <div class="form-group">
-                        <label for="orgDeleteReason">{% trans 'Silinmə səbəbi (məcburi)' %}</label>
-                        <textarea id="orgDeleteReason" name="feedback" class="form-control" rows="3" required></textarea>
+                        <label for="saDeleteReason">{% trans 'Silinmə səbəbi (məcburi)' %}</label>
+                        <textarea id="saDeleteReason" name="reason" class="form-control" rows="3" required></textarea>
                     </div>
                     <div class="modal-buttons">
-                        <button type="button" id="orgDeleteCancel" class="modal-cancel-btn">{% trans 'Ləğv et' %}</button>
+                        <button type="button" id="saDeleteCancel" class="modal-cancel-btn">{% trans 'Ləğv et' %}</button>
                         <button type="submit" class="modal-confirm-btn delete-btn">Sil</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Request Changes Modal -->
-        <div id="orgFeedbackModal" class="modal-overlay">
-            <div class="modal-content">
-                <h3><i class="fas fa-comment-dots"></i> {% trans 'Düzəliş Tələbi' %}</h3>
-                <p><span id="orgFeedbackPostTitle" class="post-mgmt-modal-title"></span> {% trans 'postuna feedback göndəriləcək.' %}</p>
-                <form id="orgFeedbackForm" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="request_changes">
-                    <div class="form-group">
-                        <label for="orgFeedbackText">{% trans 'Feedback (məcburi)' %}</label>
-                        <textarea id="orgFeedbackText" name="feedback" class="form-control" rows="3" required></textarea>
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="button" id="orgFeedbackCancel" class="modal-cancel-btn">{% trans 'Ləğv et' %}</button>
-                        <button type="submit" class="modal-confirm-btn">{% trans 'Göndər' %}</button>
                     </div>
                 </form>
             </div>
@@ -176,66 +158,33 @@
 {% block extraJs %}
 <script nonce="{{ request.csp_nonce }}">
 (function() {
-    /* Delete modal */
-    var delModal = document.getElementById("orgDeleteModal");
-    var delForm = document.getElementById("orgDeleteForm");
-    var delTitle = document.getElementById("orgDeletePostTitle");
-    var delCancel = document.getElementById("orgDeleteCancel");
-    var delReason = document.getElementById("orgDeleteReason");
+    var modal = document.getElementById("saDeleteModal");
+    var form = document.getElementById("saDeleteForm");
+    var titleSpan = document.getElementById("saDeletePostTitle");
+    var cancelBtn = document.getElementById("saDeleteCancel");
+    var reasonInput = document.getElementById("saDeleteReason");
 
-    document.querySelectorAll(".js-org-delete-post").forEach(function(btn) {
+    document.querySelectorAll(".js-sa-delete-post").forEach(function(btn) {
         btn.addEventListener("click", function() {
-            delTitle.textContent = this.dataset.postTitle;
-            delForm.action = this.dataset.moderateUrl;
-            delReason.value = "";
-            delModal.classList.add("active");
+            titleSpan.textContent = this.dataset.postTitle;
+            form.action = this.dataset.deleteUrl;
+            reasonInput.value = "";
+            modal.classList.add("active");
             document.body.classList.add("modal-open");
         });
     });
 
-    function closeDelModal() {
-        delModal.classList.remove("active");
+    function closeModal() {
+        modal.classList.remove("active");
         document.body.classList.remove("modal-open");
     }
 
-    delCancel.addEventListener("click", closeDelModal);
-    delModal.addEventListener("click", function(e) {
-        if (e.target === delModal) closeDelModal();
+    cancelBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", function(e) {
+        if (e.target === modal) closeModal();
     });
-
-    /* Feedback modal */
-    var fbModal = document.getElementById("orgFeedbackModal");
-    var fbForm = document.getElementById("orgFeedbackForm");
-    var fbTitle = document.getElementById("orgFeedbackPostTitle");
-    var fbCancel = document.getElementById("orgFeedbackCancel");
-    var fbText = document.getElementById("orgFeedbackText");
-
-    document.querySelectorAll(".js-org-feedback-post").forEach(function(btn) {
-        btn.addEventListener("click", function() {
-            fbTitle.textContent = this.dataset.postTitle;
-            fbForm.action = this.dataset.moderateUrl;
-            fbText.value = "";
-            fbModal.classList.add("active");
-            document.body.classList.add("modal-open");
-        });
-    });
-
-    function closeFbModal() {
-        fbModal.classList.remove("active");
-        document.body.classList.remove("modal-open");
-    }
-
-    fbCancel.addEventListener("click", closeFbModal);
-    fbModal.addEventListener("click", function(e) {
-        if (e.target === fbModal) closeFbModal();
-    });
-
-    /* Escape closes either modal */
     document.addEventListener("keydown", function(e) {
-        if (e.key === "Escape") {
-            if (delModal.classList.contains("active")) closeDelModal();
-            if (fbModal.classList.contains("active")) closeFbModal();
-        }
+        if (e.key === "Escape" && modal.classList.contains("active")) closeModal();
     });
 })();
 </script>

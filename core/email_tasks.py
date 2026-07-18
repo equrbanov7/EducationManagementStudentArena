@@ -274,7 +274,7 @@ def send_new_post_notification_email(
             "post": post,
             "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
         }
-        html_message = render_to_string("accounts/emails/new_post_notification.html", context)
+        html_message = render_to_string("blog/emails/new_post_notification.html", context)
         plain_message = strip_tags(html_message)
 
         try:
