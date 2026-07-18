@@ -54,7 +54,13 @@ def subscribe_page(request):
                 if created or not subscriber.is_active:
 
                     # 2. Email şablonunu yarat
-                    html_message = render_to_string("email_templates/welcome_email.html", {"email": email})
+                    html_message = render_to_string(
+                        "email_templates/welcome_email.html",
+                        {
+                            "email": email,
+                            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+                        },
+                    )
 
                     # 3. Email göndər
                     send_mail(

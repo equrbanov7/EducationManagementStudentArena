@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans '404 – Səhifə Tapılmadı | EMSArena' %}</title>
+    <title>{% trans '404 – Səhifə Tapılmadı' %} | {{ site_brand_name }}</title>
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
@@ -16,7 +16,7 @@
         <section class="error-card" aria-labelledby="error-title">
             <div class="error-brand">
                 <span class="error-brand-mark"><i class="fas fa-shield-halved"></i></span>
-                <span>EMSArena</span>
+                <span>{{ site_brand_name }}</span>
             </div>
 
             <div class="error-grid">

@@ -1,6 +1,6 @@
 Salam {{ recipient_name }},
 
-{% if verification_link %}EMSArena hesabınızı təsdiqləmək üçün aşağıdakı linki açın:
+{% if verification_link %}{{ brand }} hesabınızı təsdiqləmək üçün aşağıdakı linki açın:
 {{ verification_link }}
 {% endif %}
 

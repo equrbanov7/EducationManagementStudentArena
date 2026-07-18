@@ -30293,3 +30293,92 @@ msgstr "Невозможно начать экзамен"
 msgctxt "accounts.assigned_tasks"
 msgid "Başa düşdüm"
 msgstr "Понятно"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "Şifrə sıfırlama"
+msgstr "Şifrə sıfırlama"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "403 – Giriş Qadağandır"
+msgstr "403 – Giriş Qadağandır"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "404 – Səhifə Tapılmadı"
+msgstr "404 – Səhifə Tapılmadı"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "400 – Yanlış Sorğu"
+msgstr "400 – Yanlış Sorğu"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "500 – Server Xətası"
+msgstr "500 – Server Xətası"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "Xoş gəldiniz"
+msgstr "Xoş gəldiniz"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(brand)s blogunda yeni bir post yayımlandı:"
+msgstr "%(brand)s blogunda yeni bir post yayımlandı:"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "Bu emaili aldınızsa, %(brand)s bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun."
+msgstr "Bu emaili aldınızsa, %(brand)s bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun."
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(brand)s blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və xəbərlərdən ilk siz xəbərdar olacaqsınız."
+msgstr "%(brand)s blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və xəbərlərdən ilk siz xəbərdar olacaqsınız."
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(brand)s admin panelinə giriş üçün OTP kodunuz:"
+msgstr "%(brand)s admin panelinə giriş üçün OTP kodunuz:"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(brand)s saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz."
+msgstr "%(brand)s saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz."
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "Bu mesaja cavab vermək üçün %(brand)s admin panelinə keçin."
+msgstr "Bu mesaja cavab vermək üçün %(brand)s admin panelinə keçin."
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(brand)s saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz."
+msgstr "%(brand)s saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz."
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(site_brand_name)s ana səhifə"
+msgstr "%(site_brand_name)s ana səhifə"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(site_brand_name)s ilə tanış olun"
+msgstr "%(site_brand_name)s ilə tanış olun"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(site_brand_name)s loqo"
+msgstr "%(site_brand_name)s loqo"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(site_brand_name)s platform xüsusiyyətləri"
+msgstr "%(site_brand_name)s platform xüsusiyyətləri"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(site_brand_name)s hansı təşkilatlar üçün uyğundur?"
+msgstr "%(site_brand_name)s hansı təşkilatlar üçün uyğundur?"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "Review public contact form messages and reply from the official %(site_brand_name)s mailboxes."
+msgstr "Review public contact form messages and reply from the official %(site_brand_name)s mailboxes."
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgctxt "ai_assistant.greeting"
+msgid "Salam! Mən %(site_brand_name)s AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
+msgstr "Salam! Mən %(site_brand_name)s AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "Post İdarəetmə - %(org_name)s"
+msgstr "Post İdarəetmə - %(org_name)s"
+
+#. white-label brand rebrand (auto-appended, source-mirrored)
+msgid "%(item_type)s nəticəsi"
+msgstr "%(item_type)s nəticəsi"
