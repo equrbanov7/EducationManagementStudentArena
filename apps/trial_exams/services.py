@@ -83,9 +83,11 @@ def _send_owner_notification(request_obj: TrialExamRequest) -> bool:
     }
     reply_url, admin_detail_url = _admin_links(request_obj)
     profile_detail_url = _profile_detail_url(request_obj)
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
     context = {
         "request_obj": request_obj,
-        "site_name": "EMSArena",
+        "brand": brand,
+        "site_name": brand,
         "reply_url": reply_url,
         "detail_url": profile_detail_url,
         "profile_detail_url": profile_detail_url,
@@ -170,6 +172,7 @@ def _send_reply_email(request_obj: TrialExamRequest, reply_body: str, reply_from
         "request_obj": request_obj,
         "reply_body": reply_body,
         "from_email": from_email,
+        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
     }
     html_body = render_to_string("trial_exams/email/trial_reply.html", context)
     text_body = strip_tags(html_body)

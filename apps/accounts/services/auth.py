@@ -122,7 +122,12 @@ def _build_email_context(*, user, email: str, purpose: str, code: str, request=N
     if user is not None:
         recipient_name = getattr(user, "get_full_name", lambda: "")().strip() or getattr(user, "username", "")
 
+    from django.conf import settings
+
     return {
+        # White-label brand for the email chrome; emails render without the
+        # request context processors so it must be passed explicitly.
+        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
         "user": user,
         "recipient_name": recipient_name or email,
         "email": email,

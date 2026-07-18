@@ -4,6 +4,50 @@
 
 ---
 
+## 🏫 Branding & white-labeling
+
+EMS Arena is fully white-labelable. The brand name shown across the UI, emails,
+page titles, PWA manifest and admin is driven by the **`SITE_BRAND_NAME`** setting
+(env var; default **"Qərbi Kaspi Universiteti"**) — no hardcoded product name in
+user-visible text. Swap `SITE_BRAND_NAME` and the `static/brand/` logo/favicon
+assets to re-skin for any institution. (Internal identifiers — container/image/DB
+names, `ems-*` CSS tokens — intentionally stay as-is.)
+
+## 🏗️ Architecture
+
+A disciplined **modular monolith**: 18 apps under `apps/*` + a shared `core/`
+kernel, with a CI-enforced module-boundary gate (`scripts/module_deps.py` — 0
+circular deps, 0 `core→apps` imports) and per-app `public.py` facades. Multi-tenant
+isolation is enforced at the database layer via Postgres **Row-Level Security**
+(`core/rls.py`; cross-app policy map in `docs/architecture/RLS_POLICY_OWNERSHIP.md`).
+Target scale is 5,000–10,000 concurrent users on a single server — the strategy is
+to **scale the monolith** (more Daphne replicas, Postgres read replicas, Celery
+queue separation), not to split into microservices.
+
+**Apps:** `exams` (engine: attempts, question bank, coding runtime, AI grading,
+final-exam center, supervision) · `accounts` (auth/RBAC/profile/superadmin) ·
+`registrar` (academic structure + gradebook/journal) · `organizations` (tenant
+hierarchy + membership) · `live_exam` (real-time quiz) · `blog` · `courses` ·
+`labs` · `assignments` · `projects` · `appeals` · `notifications` · `monitoring` ·
+`ai_assistant` · `contact` · `trial_exams` · `audit` · `task_submission_core`.
+
+## ⚡ Performance & scale
+
+The root cause of prior production slowness was Docker CPU caps starving the app
+tier to ~6 of 80 cores (host 92% idle). Fixed: uncapped app/Postgres CPU +
+Postgres/Redis/pgbouncer tuning + reduced login-hash cost + a dedicated Celery
+**`heavy`** queue so OCR/AI/export jobs never starve the latency-sensitive attempt
+sweeps. Full analysis, the exact `.env` values, and the still-pending P0 backlog
+(RLS `::uuid` predicate, transaction pooling) live in
+**[`docs/performance/OPTIMIZATION_5000_USERS.md`](docs/performance/OPTIMIZATION_5000_USERS.md)**.
+
+## 🧪 Load testing (k6)
+
+k6 scenarios live in `k6/` (login stampede, mixed realistic, `exam-day-5000`,
+websocket, final-PIN) driven by `k6/run-ladder.sh` (escalating 50→1000 VU ladder →
+per-stage JSON + markdown report). Seed isolated, OTP-free load-test users with
+`python manage.py seed_stress_test --students N --groups M`.
+
 ## ✨ Features
 
 ### 📚 **Course Management**

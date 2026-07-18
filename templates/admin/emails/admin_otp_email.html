@@ -1,7 +1,7 @@
 {% load i18n %}
 <p>Salam {{ user.get_username }},</p>
 
-<p>{% trans 'EMS Arena admin panelinə giriş üçün OTP kodunuz:' %}</p>
+<p>{% blocktrans %}{{ brand }} admin panelinə giriş üçün OTP kodunuz:{% endblocktrans %}</p>
 
 <p style="font-size: 32px; font-weight: 700; letter-spacing: 0.25em;">{{ code }}</p>
 
