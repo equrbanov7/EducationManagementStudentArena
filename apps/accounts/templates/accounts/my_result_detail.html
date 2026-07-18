@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n lab_filters %}
-{% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">

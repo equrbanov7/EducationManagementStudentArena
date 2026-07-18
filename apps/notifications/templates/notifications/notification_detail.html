@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{{ notification.title }} — {% trans "Notification" %} — EMSArena{% endblock %}
+{% block title %}{{ notification.title }} — {% trans "Notification" %} — {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'notifications/css/notifications.css' %}">

@@ -117,9 +117,13 @@ def site_webmanifest(request):
     """
     import json
 
+    # White-label PWA name: driven by the configured institution brand so the
+    # installed app carries the deployment's name, not the product name.
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
+    brand_short = getattr(settings, "SITE_BRAND_SHORT", "") or brand
     manifest = {
-        "name": "EMSArena",
-        "short_name": "EMSArena",
+        "name": brand,
+        "short_name": brand_short,
         "description": (
             "Education management, LMS and online exam platform for " "universities, schools and training centers."
         ),

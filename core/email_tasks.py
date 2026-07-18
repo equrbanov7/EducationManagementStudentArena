@@ -119,6 +119,10 @@ def send_account_otp_email(
                 resolved_name = resolved_name or user.get_full_name().strip() or user.username
 
         context = {
+            # White-label brand for the email chrome (title + header). Emails are
+            # rendered without request context processors, so it must be injected
+            # here explicitly (same source as the OTP subject line above).
+            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
             "user": user,
             "recipient_name": resolved_name or recipient_email,
             "email": recipient_email,
@@ -266,8 +270,11 @@ def send_new_post_notification_email(
         if not subscriber_emails:
             return
 
-        context = {"post": post}
-        html_message = render_to_string("accounts/emails/new_post_notification.html", context)
+        context = {
+            "post": post,
+            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+        }
+        html_message = render_to_string("blog/emails/new_post_notification.html", context)
         plain_message = strip_tags(html_message)
 
         try:

@@ -62,10 +62,12 @@ def _send_internal_notification(message: ContactMessage) -> bool:
     reply_url = build_absolute_url(reverse("admin:contact_contactmessage_reply", args=[message.pk]))
     detail_url = build_absolute_url(reverse("admin:contact_contactmessage_change", args=[message.pk]))
 
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
     context = {
         "message": message,
         "subject_display": message.get_subject_display(),
-        "site_name": "EMSArena",
+        "brand": brand,
+        "site_name": brand,
         "reply_url": reply_url,
         "detail_url": detail_url,
     }
@@ -110,6 +112,7 @@ def _send_reply_email(message: ContactMessage, reply_body: str, reply_from: str)
         "message": message,
         "reply_body": reply_body,
         "from_email": from_email,
+        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
     }
     html_body = render_to_string("contact/email/contact_reply.html", context)
     text_body = strip_tags(html_body)

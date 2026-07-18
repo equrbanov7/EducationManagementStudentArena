@@ -23,6 +23,7 @@ def send_verify_email(user, code: str, *, request=None, expires_at=None):
 
     subject = pgettext("accounts.email.subject", "Email təsdiqi")
     context = {
+        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
         "user": user,
         "code": code,
         "verification_link": link,

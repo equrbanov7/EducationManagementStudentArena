@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% blocktrans with item_type=item_type_label %}{{ item_type }} nəticəsi - EMSArena{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans with item_type=item_type_label %}{{ item_type }} nəticəsi{% endblocktrans %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/review_result_detail.css' %}">
