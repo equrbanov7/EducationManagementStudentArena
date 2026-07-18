@@ -1,0 +1,86 @@
+name: 🔧 Prod .env Update
+
+# Serverə SSH-sız .env idarəetməsi: self-hosted runner (github-runner istifadəçisi)
+# APP_DIR-dəki .env-in sahibidir, ona görə açar=dəyər upsert edib ardınca
+# config-only redeploy (remote_deploy.sh, APP_DIR-dəki mövcud main kodu ilə)
+# işlədə bilir. Deploy ilə eyni concurrency qrupunu bölüşür ki, real CD deploy-la
+# toqquşmasın.
+#
+# DİQQƏT: input dəyərləri run logunda GÖRÜNÜR — gizli dəyərlər (parollar, API
+# açarları) üçün bu workflow-u YOX, serverdə əl ilə redaktəni istifadə edin.
+
+on:
+  workflow_dispatch:
+    inputs:
+      env_lines:
+        description: ".env-ə yazılacaq KEY=VALUE sətirləri (hər sətirdə bir). Mövcud açar üzərinə yazılır, yenisi əlavə olunur."
+        required: true
+        type: string
+      redeploy:
+        description: "Yeniləmədən sonra tam redeploy (remote_deploy.sh) işlət"
+        type: boolean
+        default: true
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  update-env:
+    runs-on: [self-hosted]
+    environment: production
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      DEPLOY_TIMEOUT_SECONDS: "300"
+      ENV_LINES: ${{ inputs.env_lines }}
+    steps:
+      - name: 📝 Upsert .env keys (with backup)
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          test -f .env || { echo "Missing $APP_DIR/.env" >&2; exit 1; }
+          ts="$(date +%Y%m%d-%H%M%S)"
+          cp .env ".env.bak.${ts}"
+          # Yalnız son 10 backup qalsın.
+          ls -t .env.bak.* 2>/dev/null | tail -n +11 | xargs -r rm -- || true
+          while IFS= read -r line; do
+            line="${line%$'\r'}"
+            [ -z "$line" ] && continue
+            case "$line" in "#"*) continue ;; esac
+            case "$line" in
+              *=*) ;;
+              *) echo "Skipping non KEY=VALUE line: $line" >&2; continue ;;
+            esac
+            key="${line%%=*}"
+            value="${line#*=}"
+            if ! printf '%s' "$key" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$'; then
+              echo "Invalid key name: $key" >&2
+              exit 1
+            fi
+            grep -v "^${key}=" .env > .env.tmp || true
+            mv .env.tmp .env
+            printf '%s=%s\n' "$key" "$value" >> .env
+            echo "upserted: ${key}"
+          done <<< "$ENV_LINES"
+          echo "backup: .env.bak.${ts}"
+
+      - name: 🚢 Config-only redeploy (existing main code in APP_DIR)
+        if: ${{ inputs.redeploy }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          bash scripts/deploy/remote_deploy.sh
+
+      - name: 🔎 Verify effective config
+        if: ${{ inputs.redeploy }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          echo "── containers ──"
+          docker compose -f docker-compose.prod.yml ps --format 'table {{.Name}}\t{{.Status}}' | head -25
+          echo "── app: RLS_TRANSACTION_SCOPED (effective in container) ──"
+          docker compose -f docker-compose.prod.yml exec -T --index 1 app sh -c 'echo "RLS_TRANSACTION_SCOPED=${RLS_TRANSACTION_SCOPED:-<unset>}"' || true
+          echo "── pgbouncer: pool_mode ──"
+          docker compose -f docker-compose.prod.yml exec -T pgbouncer sh -c 'grep -iE "^\s*pool_mode" /etc/pgbouncer/pgbouncer.ini || true' || true
+          echo "── recent app errors (last 100 lines, ERROR only) ──"
+          docker compose -f docker-compose.prod.yml logs --tail 100 app 2>/dev/null | grep -iE "error|traceback" | tail -20 || echo "(no errors)"
