@@ -11,7 +11,20 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 
 from apps.registrar import services
+from apps.registrar.exam_bridge import (
+    exam_eligibility,
+    exam_result_summary,
+    record_exam_result,
+)
 from apps.registrar.models import StudentAcademicRecord
+
+# İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
+# (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
+__all__ = [
+    "exam_eligibility",
+    "exam_result_summary",
+    "record_exam_result",
+]
 
 # ``AcademicPeriod`` lives in the organizations module. Registrar already
 # references organizations models only via string FKs (no Python import), which
