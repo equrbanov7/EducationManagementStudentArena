@@ -578,3 +578,21 @@ body.ex-live-pin-modal-open { overflow: hidden; }
     .exam-start-modal__code-head { flex-direction: column; }
     .exam-start-modal__code-input { font-size: 0.98rem; letter-spacing: 0.12em; }
 }
+
+/* Elektron jurnal buraxılış qadağası — fənn üzrə qayıb limiti keçilib.
+   Start düyməsi əvəzinə qırmızı-ton bildiriş; UX/UI göy palitrasını pozmur. */
+.ems-exams .ex-journal-barred {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #b42318;
+    background: #fef3f2;
+    border: 1px solid #fda29b;
+}
+.ems-exams .ex-journal-barred svg { flex: 0 0 auto; }
+.ems-exams .ex-list.grid .ex-journal-barred { width: 100%; }
