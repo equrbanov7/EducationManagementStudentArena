@@ -353,7 +353,10 @@ class StudentJournalFazaBTest(_BaseJournalSetup):
         self.assertTrue(sec["subjects"])
         self.assertIn("teacher", sec["subjects"][0])
         self.assertEqual(sec["subjects"][0]["teacher"], self.teacher)
-        self.assertTrue(sec["semester_options"])  # semester picker
+        # Term picker = academic-year + season (Payız/Yaz/Yay), NOT semester 1-10.
+        self.assertTrue(sec["year_choices"])
+        self.assertTrue(sec["period_choices"])
+        self.assertEqual(sec["selected_period_id"], str(self.period.id))
 
     def test_subject_selected_shows_detail_with_kinds(self):
         self._seminar_mark(3, 7)

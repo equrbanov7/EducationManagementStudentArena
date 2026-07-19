@@ -6,9 +6,9 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260719-corrlink">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260719-daysum">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260719-corr">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260719-daysum">
 {% endblock %}
 
 {% block content %}
@@ -197,6 +197,29 @@
     {% endif %}
 
     {% include "registrar/partials/_correction_history_modal.html" %}
+
+    {# ── Gün özəti modalı (redaktə vaxtı keçmiş sütun başlığına klik) ────────── #}
+    <div class="corr-modal" id="jdDayModal" hidden data-jd-day-modal>
+        <div class="corr-modal-backdrop" data-jd-day-close></div>
+        <div class="corr-modal-card" role="dialog" aria-modal="true">
+            <div class="corr-modal-head">
+                <h2 data-jd-day-title>{% trans "Gün özəti" context "registrar.journal" %}</h2>
+                <button type="button" class="corr-modal-x" data-jd-day-close aria-label="{% trans 'Bağla' context 'registrar.journal' %}">&times;</button>
+            </div>
+            <div style="padding:1rem 1.25rem;">
+                <div class="corr-modal-meta" data-jd-day-kind></div>
+                <div class="jd-day-topic" data-jd-day-topic style="margin-bottom:0.75rem;color:#33415c;"></div>
+                <div class="jd-day-stats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                    <div class="jd-day-stat"><b data-jd-day-ie></b> <span>{% trans "iştirak (i/e)" context "registrar.journal" %}</span></div>
+                    <div class="jd-day-stat"><b data-jd-day-qb></b> <span>{% trans "qayıb (q/b)" context "registrar.journal" %}</span></div>
+                    <div class="jd-day-stat"><b data-jd-day-uq></b> <span>{% trans "üzrlü (üq)" context "registrar.journal" %}</span></div>
+                    <div class="jd-day-stat"><b data-jd-day-scored></b> <span>{% trans "bal yazılıb" context "registrar.journal" %}</span></div>
+                    <div class="jd-day-stat" style="grid-column:1/-1;"><b data-jd-day-marked></b>/<b data-jd-day-total></b> <span>{% trans "qeyd edilib" context "registrar.journal" %}</span></div>
+                </div>
+                <p style="margin-top:0.9rem;font-size:0.82rem;color:#94a3b8;">{% trans "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir." context "registrar.journal" %}</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -204,4 +227,5 @@
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260716-jbatch8"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}

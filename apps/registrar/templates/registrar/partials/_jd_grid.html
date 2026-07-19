@@ -36,9 +36,21 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                         <tr>
                             <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
                             {% for lm in journal.lesson_meta %}
-                            <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}"
+                            <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}{% if not lm.editable %} jd2-th-lesson--locked{% endif %}"
                                 title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.topic %} — {{ lm.lesson.topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}">
+                                {% if not lm.editable %}
+                                {# Redaktə pəncərəsi keçib → tarixə klik oxu-rejimi GÜN ÖZƏTİ modalını açır. #}
+                                <button type="button" class="jd2-th-date-btn" data-jd-day-summary
+                                        data-date="{{ lm.lesson.date|date:'d.m.Y' }}"
+                                        data-kind="{{ lm.lesson.get_kind_display }}"
+                                        data-topic="{{ lm.lesson.topic }}"
+                                        data-ie="{{ lm.summary.ie }}" data-qb="{{ lm.summary.qb }}"
+                                        data-uq="{{ lm.summary.uq }}" data-scored="{{ lm.summary.scored }}"
+                                        data-total="{{ lm.summary.total }}" data-marked="{{ lm.summary.marked }}"
+                                        title="{% trans 'Gün özəti (redaktə vaxtı keçib)' context 'registrar.journal' %}">{{ lm.lesson.date|date:"d.m" }}</button>
+                                {% else %}
                                 {{ lm.lesson.date|date:"d.m" }}
+                                {% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}
                                 {% if can_edit and lm.editable %}
                                 <button type="button" class="jd2-th-edit" data-jd-edit-lesson

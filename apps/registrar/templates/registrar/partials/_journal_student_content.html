@@ -15,16 +15,27 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 </div>
             </div>
         </div>
-        {# Tədris ili + semestr seçici (müəllim jurnalı kimi) #}
-        <div class="sjx-term">
-            {% if sec.academic_year %}<span class="sjx-term-year">{{ sec.academic_year }}</span>{% endif %}
-            <label class="sjx-term-label" for="sjxSemester">{% trans "Semestr" context "registrar.journal" %}</label>
-            <select id="sjxSemester" class="sjx-term-select" data-sjx-semester
-                    data-base-url="{{ profile_base_url|default:'/accounts/profile/' }}">
-                {% for n in sec.semester_options %}
-                <option value="{{ n }}" {% if n == sec.semester_number %}selected{% endif %}>{{ n }}</option>
-                {% endfor %}
-            </select>
+        {# Tədris ili + yarım il (Payız/Yaz/Yay) — MÜƏLLİM jurnalı ilə eyni #}
+        <div class="sjx-term" data-base-url="{{ profile_base_url|default:'/accounts/profile/' }}"
+             data-selected-period="{{ sec.selected_period_id }}">
+            <div class="sjx-term-field">
+                <label class="sjx-term-label" for="sjxYear">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</label>
+                <select id="sjxYear" class="sjx-term-select" data-sjx-year>
+                    {% for y in sec.year_choices %}
+                    <option value="{{ y.value }}" {% if y.value == sec.selected_year %}selected{% endif %}>{{ y.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="sjx-term-field">
+                <label class="sjx-term-label" for="sjxPeriod">{% trans "YARIM İL" context "registrar.journal" %}</label>
+                <select id="sjxPeriod" class="sjx-term-select" data-sjx-period>
+                    {% for p in sec.period_choices %}
+                    <option value="{{ p.id }}" data-year="{{ p.year }}"
+                            {% if p.id == sec.selected_period_id %}selected{% endif %}
+                            {% if p.year != sec.selected_year %}hidden{% endif %}>{{ p.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
     </div>
 
@@ -34,7 +45,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     <div class="sjx-cards">
         {% for row in sec.subjects %}
         <a class="sjx-card {% if row.journal.barred %}is-barred{% endif %}"
-           href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;semester={{ sec.semester_number }}&amp;subject={{ row.enrollment.id }}">
+           href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;period={{ sec.selected_period_id }}&amp;subject={{ row.enrollment.id }}">
             <div class="sjx-card-top">
                 <span class="sjx-card-subject">{{ row.subject.name }}</span>
                 <span class="sjx-card-ects">{{ row.ects }} ECTS</span>
@@ -44,7 +55,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 {% if row.teacher %}{{ row.teacher.get_full_name|default:row.teacher.username }}{% else %}{% trans "Müəllim təyin edilməyib" context "registrar.journal" %}{% endif %}
             </div>
             <div class="sjx-card-foot">
-                <span class="sjx-card-score">{% trans "Giriş balı" context "registrar.journal" %}: <b>{{ row.journal.entry_score|floatformat:'-1' }}/{{ row.journal.entry_score_max }}</b></span>
+                <span class="sjx-card-score">{% trans "Giriş balı" context "registrar.journal" %}: <b>{{ row.journal.entry_score|floatformat:0 }}/{{ row.journal.entry_score_max }}</b></span>
                 {% if row.journal.barred %}<span class="sjx-card-badge is-danger">{% trans "İmtahana buraxılmır" context "registrar.journal" %}</span>{% else %}<span class="sjx-card-badge is-ok">{% trans "Buraxılır" context "registrar.journal" %} ✓</span>{% endif %}
             </div>
         </a>
@@ -56,7 +67,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     {% else %}
     {# ── Detal: geri düyməsi + fənn/müəllim başlığı ──────────────────────────── #}
     <div class="sjx-detail-head">
-        <a class="sjx-back" href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;semester={{ sec.semester_number }}">
+        <a class="sjx-back" href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;period={{ sec.selected_period_id }}">
             <i class="fas fa-arrow-left"></i> {% trans "Fənlər" context "registrar.journal" %}
         </a>
         <div class="sjx-detail-title">
@@ -83,7 +94,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
         </div>
         <div class="sjx-kpi">
             <div class="sjx-kpi-label">{% trans "İMTAHANA QƏDƏR BAL" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-value is-blue">{{ d.entry_score|floatformat:'-1' }} <span class="sjx-kpi-unit">/ {{ d.entry_score_max }}</span></div>
+            <div class="sjx-kpi-value is-blue">{{ d.entry_score|floatformat:0 }} <span class="sjx-kpi-unit">/ {{ d.entry_score_max }}</span></div>
             <div class="sjx-kpi-bar"><span class="sjx-kpi-barfill is-blue" data-jd-width="{{ d.entry_pct }}"></span></div>
         </div>
         <div class="sjx-kpi {% if not d.journal.barred %}sjx-kpi--ok{% else %}sjx-kpi--bad{% endif %}">
@@ -98,8 +109,8 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     {# ── Bal bölgüsü (real kompozisiya) ────────────────────────────────────── #}
     <div class="sjx-balbox">
         <div class="sjx-balbox-head">
-            <span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score|floatformat:'-1' }}/{{ d.entry_score_max }})</span>
-            <span class="sjx-balbox-formula">{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:'-1' }} + {% trans "Kollokvium" context "registrar.journal" %} {{ d.parts.koll_sum|floatformat:'-1' }} + {% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
+            <span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score|floatformat:0 }}/{{ d.entry_score_max }})</span>
+            <span class="sjx-balbox-formula">{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }} + {% trans "Kollokvium" context "registrar.journal" %} {{ d.parts.koll_sum|floatformat:0 }} + {% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
         </div>
         <div class="sjx-balbar">
             <span class="sjx-balseg sjx-balseg--lessons" data-jd-width="{{ d.parts.lesson_pct }}"></span>
@@ -107,8 +118,8 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             <span class="sjx-balseg sjx-balseg--selfwork" data-jd-width="{{ d.parts.selfwork_pct }}"></span>
         </div>
         <div class="sjx-ballegend">
-            <span><i class="sjx-dot sjx-dot--lessons"></i>{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:'-1' }}</span>
-            <span><i class="sjx-dot sjx-dot--koll"></i>{% trans "Kollokvium" context "registrar.journal" %} {{ d.parts.koll_sum|floatformat:'-1' }}</span>
+            <span><i class="sjx-dot sjx-dot--lessons"></i>{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }}</span>
+            <span><i class="sjx-dot sjx-dot--koll"></i>{% trans "Kollokvium" context "registrar.journal" %} {{ d.parts.koll_sum|floatformat:0 }}</span>
             <span><i class="sjx-dot sjx-dot--selfwork"></i>{% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
         </div>
     </div>
@@ -135,8 +146,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         <th class="sjx-th-week">{% trans "HƏFTƏ" context "registrar.journal" %}</th>
                         <th class="sjx-th-kind">{% trans "TİP" context "registrar.journal" %}</th>
                         <th>{% trans "MÖVZU" context "registrar.journal" %}</th>
-                        <th class="sjx-th-att">{% trans "DAVAMİYYƏT" context "registrar.journal" %}</th>
-                        <th class="sjx-th-score">{% trans "BAL" context "registrar.journal" %}</th>
+                        <th class="sjx-th-result">{% trans "NƏTİCƏ" context "registrar.journal" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -149,7 +159,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         data-teacher="{% if h.teacher %}{{ h.teacher.get_full_name|default:h.teacher.username }}{% endif %}"
                         data-topic="{{ h.mark.lesson.topic|default:h.kind_display }}"
                         data-att="{% if h.mark.status == 'absent' %}q/b{% elif h.mark.status == 'excused' %}üq{% else %}i/e{% endif %}"
-                        data-score="{% if h.kollokvium and h.kollokvium.score is not None %}Kol.: {{ h.kollokvium.score|floatformat:'-1' }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:'-2' }}{% else %}—{% endif %}"
+                        data-score="{% if h.kollokvium and h.kollokvium.score is not None %}Kol.: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
                         data-corrected="{% if h.corrected %}1{% endif %}">
                         <td class="sjx-date">{{ h.mark.lesson.date|date:"d.m" }}</td>
                         <td>
@@ -161,14 +171,19 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                             {% if h.kollokvium %} — <span class="sjx-kollmark">{{ h.kollokvium.component.name|lower }}</span>{% endif %}
                             {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                         </td>
-                        <td class="sjx-att-cell">
-                            {% if h.mark.status == 'absent' %}<span class="sjx-att sjx-att--qb">q/b</span>{% elif h.mark.status == 'excused' %}<span class="sjx-att sjx-att--uq">üq</span>{% else %}<span class="sjx-att sjx-att--ie">i/e</span>{% endif %}
-                        </td>
-                        <td class="sjx-score-cell">
+                        <td class="sjx-result-cell">
+                            {# Bir sütun: bal varsa bal (davamiyyət avtomatik i/e); yoxdursa q/b · üq · i/e #}
                             {% if h.kollokvium and h.kollokvium.score is not None %}
-                            <b class="sjx-kollscore">Kol.: {{ h.kollokvium.score|floatformat:'-1' }}</b>
-                            {% elif h.mark.score is not None %}<b>{{ h.mark.score|floatformat:'-2' }}</b>
-                            {% else %}—{% endif %}
+                                <b class="sjx-kollscore">Kol.: {{ h.kollokvium.score|floatformat:0 }}</b>
+                            {% elif h.mark.score is not None %}
+                                <b class="sjx-att sjx-att--ie">{{ h.mark.score|floatformat:0 }}</b>
+                            {% elif h.mark.status == 'absent' %}
+                                <span class="sjx-att sjx-att--qb">q/b</span>
+                            {% elif h.mark.status == 'excused' %}
+                                <span class="sjx-att sjx-att--uq">üq</span>
+                            {% else %}
+                                <span class="sjx-att sjx-att--ie">i/e</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
