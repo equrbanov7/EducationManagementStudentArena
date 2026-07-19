@@ -108,8 +108,7 @@
      data-review-url-template="{% url 'appeals:review_appeal' 0 %}">
   <div class="aps-head">
     <div>
-      <h2><i class="fas fa-gavel"></i> {% trans "Apellyasiya statistikası" %}</h2>
-      <p>{% trans "Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status, semestr və il üzrə süzün. Sütun başlığına klik = sırala. Yüksək qəbul faizi qiymətləndirmə/cavab açarı problemlərinə işarə ola bilər." %}</p>
+      <p>{% trans "Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status, semestr və tədris ili üzrə süzün. Sütun başlığına klik = sırala. Yüksək qəbul faizi qiymətləndirmə/cavab açarı problemlərinə işarə ola bilər." %}</p>
     </div>
     <button type="button" class="aps-btn js-aps-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" %}</button>
   </div>
@@ -161,7 +160,7 @@
       <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
     <div class="aps-field">
-      <label>{% trans "İl" %}</label>
+      <label>{% trans "Tədris ili" %}</label>
       <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
   </div>
@@ -397,7 +396,7 @@
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(d){ if(!d) return;
       function fill(s, arr, valKey, labKey){ (arr||[]).forEach(function(x){ var o=document.createElement("option"); o.value=x[valKey]; o.textContent=x[labKey]; s.appendChild(o); }); }
-      (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; sel.year.appendChild(o); });
+      (d.academic_years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y.value; o.textContent=y.label; sel.year.appendChild(o); });
       // Fakültə/kafedra/müəllim artıq lazy axtarışlı seçicilərdir → burada doldurulmur.
       fill(sel.type, d.types, "value", "label");
       fill(sel.format, d.formats, "value", "label");

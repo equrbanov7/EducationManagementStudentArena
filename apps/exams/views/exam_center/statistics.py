@@ -28,6 +28,18 @@ from ._shared import supervisor_org_or_403
 _FINISHED = ("submitted", "expired")
 _PAGE_SIZE = 15
 
+# Tədris ili sentyabrda başlayır (AZ universitetləri): sentyabr–avqust = bir
+# tədris ili. Cəhdin təqvim tarixindən tədris ilinin BAŞLANĞIC ilini çıxarırıq
+# (məs. 17.07.2026 → 2025/2026, çünki iyul sentyabrdan əvvəldir).
+_ACADEMIC_YEAR_START_MONTH = 9
+
+
+def _academic_year_start(dt):
+    """datetime → tədris ilinin başlanğıc təqvim ili (lokal vaxta görə)."""
+    local = timezone.localtime(dt)
+    return local.year if local.month >= _ACADEMIC_YEAR_START_MONTH else local.year - 1
+
+
 # Sütun → DB order ifadəsi (klik-sıralama üçün). "score" xam düzgün cavab sayı
 # (correct_count) ilə sıralanır — bal-proksi (bərabər-çəkili suallar üçün).
 _SORT_MAP = {
@@ -125,9 +137,16 @@ def _filtered_attempts(request, organization):
     if exam_type:
         qs = qs.filter(exam__exam_type_extended=exam_type)
 
+    # TƏDRİS İLİ filtri: `year` tədris ilinin başlanğıc təqvim ilidir (məs. 2025 =
+    # 2025/2026). Sentyabr–avqust aralığına görə süzülür.
     year = (request.GET.get("year") or "").strip()
     if year.isdigit():
-        qs = qs.filter(started_at__year=int(year))
+        from datetime import datetime
+
+        start = int(year)
+        lo = timezone.make_aware(datetime(start, _ACADEMIC_YEAR_START_MONTH, 1))
+        hi = timezone.make_aware(datetime(start + 1, _ACADEMIC_YEAR_START_MONTH, 1))
+        qs = qs.filter(started_at__gte=lo, started_at__lt=hi)
 
     return qs.distinct()
 
@@ -378,15 +397,17 @@ def exam_center_stats_filters(request):
 
     exam_type_choices = Exam.EXAM_TYPE_EXTENDED_CHOICES
 
-    years = sorted(
+    # Tədris illəri (2025/2026 formatı) — cəhd tarixlərindən sentyabr sərhədi ilə.
+    year_starts = sorted(
         {
-            d.year
+            _academic_year_start(d)
             for d in ExamAttempt.objects.filter(
                 exam__organization=organization, is_trial=False, status__in=_FINISHED
             ).values_list("started_at", flat=True)
         },
         reverse=True,
     )
+    academic_years = [{"value": str(s), "label": f"{s}/{s + 1}"} for s in year_starts]
     units = list(
         OrgUnit.objects.filter(organization=organization, is_active=True)
         .order_by("name")
@@ -418,7 +439,7 @@ def exam_center_stats_filters(request):
 
     return JsonResponse(
         {
-            "years": years,
+            "academic_years": academic_years,
             "units": units,  # geriyə-uyğunluq
             "faculties": faculties,
             "departments": departments,

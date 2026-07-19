@@ -113,8 +113,7 @@
      data-view-url-template="{% url 'exams:teacher_view_attempt' slug='__SLUG__' attempt_id=0 %}">
   <div class="ecs-head">
     <div>
-      <h2><i class="fas fa-chart-line"></i> {% trans "İmtahan statistikaları" %}</h2>
-      <p>{% trans "Bütün imtahan nəticələri — fənn, qrup, kafedra, tip və il üzrə süzün. Sütun başlığına klik = sırala. «Bax» ilə tələbənin tam nəticəsi (apellyasiya düzəlişləri daxil) açılır." %}</p>
+      <p>{% trans "Bütün imtahan nəticələri — fənn, qrup, kafedra, tip və tədris ili üzrə süzün. Sütun başlığına klik = sırala. «Bax» ilə tələbənin tam nəticəsi (apellyasiya düzəlişləri daxil) açılır." %}</p>
     </div>
     <a href="#" class="ecs-btn js-ecs-export"><i class="fas fa-file-excel"></i> {% trans "Excel yüklə" %}</a>
   </div>
@@ -156,7 +155,7 @@
       </div>
     </div>
     <div class="ecs-field">
-      <label>{% trans "İl" %}</label>
+      <label>{% trans "Tədris ili" %}</label>
       <div class="bootstrap-single-select">
         <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
@@ -365,7 +364,7 @@
   fetch(U.filters, {headers:{"X-Requested-With":"XMLHttpRequest"}})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(d){ if(!d) return;
-      (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; yearSel.appendChild(o); });
+      (d.academic_years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y.value; o.textContent=y.label; yearSel.appendChild(o); });
       (d.types||[]).forEach(function(t){ var o=document.createElement("option"); o.value=t.value; o.textContent=t.label; typeSel.appendChild(o); });
       // Bootstrap select-lər dinamik option-lardan sonra yenilənməlidir.
       [typeSel, yearSel].forEach(function(s){ if (typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); } });
