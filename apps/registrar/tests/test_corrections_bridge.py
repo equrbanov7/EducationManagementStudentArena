@@ -333,3 +333,48 @@ class ExamBridgeTest(_BaseJournalSetup):
                 score_percent=90,
             )
         self.assertIsNone(fg)
+
+
+class CorrectionViewTest(_BaseJournalSetup):
+    def _login_corrector(self):
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+
+    def test_non_corrector_cannot_open_correction_list(self):
+        self.client.force_login(self.student)
+        session = self.client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        resp = self.client.get("/jurnal/duzelis/")
+        self.assertEqual(resp.status_code, 404)
+
+    def test_corrector_opens_correction_list_and_journal(self):
+        self._login_corrector()
+        resp = self.client.get("/jurnal/duzelis/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, self.subject.name)
+        resp2 = self.client.get(f"/jurnal/duzelis/{self.offering.id}/")
+        self.assertEqual(resp2.status_code, 200)
+
+    def test_apply_endpoint_records_correction(self):
+        _lesson, mark = self._seminar_mark(7, 3)
+        self._login_corrector()
+        resp = self.client.post(
+            f"/jurnal/duzelis/{self.offering.id}/tetbiq/",
+            data={
+                "mark_id": str(mark.id),
+                "field": "score",
+                "new_score": "8",
+                "reason": CorrectionReason.APPEAL,
+                "note": "Apellyasiya qərarı",
+                "document": _pdf(),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get("ok"))
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, Decimal("8"))
+        self.assertTrue(JournalCorrection.objects.filter(lesson_mark=mark).exists())
