@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% comment %}İmtahan-start stampede: kapasite dolu olanda tələbəyə göstərilir.
+Səhifə thread tutmadan avtomatik olaraq bir neçə saniyəyə start URL-inə
+yenidən yönəlir (meta-refresh) → dalğa-dalğa boşalır, server çökmür.{% endcomment %}
+{% block title %}{% trans "İmtahan başladılır" context "exams.starting" %} — {{ site_brand_name }}{% endblock %}
+
+{% block extraHead %}
+<meta http-equiv="refresh" content="{{ retry_after }};url={{ retry_url }}">
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+<div style="max-width:520px;margin:12vh auto;padding:2rem;text-align:center;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;">
+  <div style="width:56px;height:56px;margin:0 auto 1.25rem;border:5px solid #dbe4ff;border-top-color:#2563eb;border-radius:50%;animation:sp 0.9s linear infinite;"></div>
+  <h1 style="font-size:1.35rem;font-weight:800;color:#0f2a5e;margin:0 0 0.5rem;">
+    {% trans "İmtahan başladılır…" context "exams.starting" %}
+  </h1>
+  <p style="color:#5b6b8c;font-size:0.95rem;line-height:1.5;margin:0 0 1.25rem;">
+    {% blocktrans context "exams.starting" %}Hazırda çox sayda tələbə eyni anda bu imtahana başlayır. Növbəniz bir neçə saniyəyə çatacaq — bu səhifə avtomatik yenilənir, heç nə etməyinizə ehtiyac yoxdur.{% endblocktrans %}
+  </p>
+  <a href="{{ retry_url }}" style="display:inline-block;padding:0.6rem 1.4rem;background:#2563eb;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">
+    {% trans "İndi yoxla" context "exams.starting" %}
+  </a>
+</div>
+<style>@keyframes sp{to{transform:rotate(360deg)}}</style>
+{% endblock %}
