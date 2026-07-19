@@ -269,12 +269,13 @@ def render_transcript_pdf(*, organization, student, record, data) -> bytes:
     _draw_summary(sheet, data)
     sheet.finish_footers(timezone.localtime())
 
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     doc.set_metadata(
         {
             "title": _("Akademik transkript"),
             "author": organization.name,
-            "creator": "EMSArena",
-            "producer": "EMSArena / PyMuPDF",
+            "creator": getattr(organization, "name", "") or brand,
+            "producer": f"{brand} / PyMuPDF",
         }
     )
     doc.subset_fonts()

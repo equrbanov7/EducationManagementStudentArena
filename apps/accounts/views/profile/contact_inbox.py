@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.contrib import messages as django_messages
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
@@ -27,11 +28,15 @@ logger = logging.getLogger(__name__)
 CONTACT_LIST_LIMIT = 50
 CONTACT_SIDEBAR_BADGE_LIMIT = 99  # cap so the badge stays compact
 
-_DEFAULT_TRIAL_REPLY = _(
-    "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində "
-    "yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və "
-    "limitsiz şəkildə verə bilərsiniz. Uğurlar!"
-)
+
+def _default_trial_reply() -> str:
+    """Brand-driven default reply body (no hard-coded product name)."""
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    return _(
+        "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s "
+        "sistemində yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən "
+        "imtahanı pulsuz və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
+    ) % {"brand": brand}
 
 
 def _can_access_contact_inbox(capabilities: dict) -> bool:
@@ -169,7 +174,7 @@ def build_contact_inbox_context(
             ).count()
             + TrialExamRequest.objects.filter(reply_delivery_status=TrialExamRequest.REPLY_DELIVERY_RECORDED).count(),
             "contact_search_query": search_query,
-            "default_trial_reply": _DEFAULT_TRIAL_REPLY,
+            "default_trial_reply": _default_trial_reply(),
         }
     )
 
