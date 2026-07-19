@@ -142,7 +142,7 @@ def get_student_semester_plan(*, record, period, semester_number):
     enrollments = list(
         Enrollment.objects.filter(
             organization=record.organization, student=record.student, offering__period=period
-        ).select_related("offering__subject", "offering__course")
+        ).select_related("offering__subject", "offering__course", "offering__assessment_scheme")
     )
 
     elective_rows = CurriculumSubject.objects.filter(

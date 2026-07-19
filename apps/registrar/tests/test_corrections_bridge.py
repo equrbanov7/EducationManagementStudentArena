@@ -367,6 +367,53 @@ class StudentJournalFazaBTest(_BaseJournalSetup):
         self.assertTrue(all("kind" in h for h in sec["detail"]["history"]))
 
 
+class JournalSummaryQueryCountTest(_BaseJournalSetup):
+    def _add_second_subject_with_marks(self):
+        from apps.registrar.models import CurriculumSubject, LessonKind, Subject
+
+        with bypass_rls():
+            subj2 = Subject.objects.create(organization=self.org, code="CS102", name="Alqoritmlər")
+            CurriculumSubject.objects.create(
+                organization=self.org, curriculum=self.curriculum, subject=subj2, semester_number=1
+            )
+            services.enroll_mandatory_subjects(record=self.record, period=self.period, semester_number=1)
+            off2 = self.student.enrollments.filter(offering__subject=subj2).first().offering
+            off2.lesson_hours = 60
+            off2.save(update_fields=["lesson_hours"])
+            for d in (11, 12, 13):
+                lesson = gradebook.create_lesson(
+                    allow_past=True, offering=off2, date=datetime.date(2024, 10, d), kind=LessonKind.SEMINAR
+                )
+                LessonMark.objects.create(
+                    organization=self.org,
+                    lesson=lesson,
+                    enrollment=off2.enrollments.get(student=self.student),
+                    status=AttendanceStatus.PRESENT,
+                    score=Decimal(6),
+                )
+
+    def test_summary_query_count_does_not_scale_with_subjects(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        self._seminar_mark(3, 7)  # marks on subject 1
+        # 1 subject
+        with bypass_rls():
+            with CaptureQueriesContext(connection) as ctx1:
+                gradebook.get_student_journal_summary(record=self.record, period=self.period, semester_number=1)
+        q1 = len(ctx1.captured_queries)
+
+        self._add_second_subject_with_marks()  # now 2 subjects
+        with bypass_rls():
+            with CaptureQueriesContext(connection) as ctx2:
+                gradebook.get_student_journal_summary(record=self.record, period=self.period, semester_number=1)
+        q2 = len(ctx2.captured_queries)
+
+        # Batched: adding a subject must NOT add per-subject queries (N+1 gone).
+        # Allow a tiny margin; without batching this delta was ~4-5 per subject.
+        self.assertLessEqual(q2 - q1, 1, f"journal summary N+1: 1-subj={q1}q, 2-subj={q2}q")
+
+
 class CorrectionMediaAccessTest(_BaseJournalSetup):
     def test_pdf_denied_to_unrelated_user_allowed_to_owner(self):
         from core.media_views import _check_journal_correction_access
