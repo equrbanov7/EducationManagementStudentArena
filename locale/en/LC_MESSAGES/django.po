@@ -30236,3 +30236,103 @@ msgstr "Post İdarəetmə - %(org_name)s"
 #. white-label brand rebrand (auto-appended, source-mirrored)
 msgid "%(item_type)s nəticəsi"
 msgstr "%(item_type)s nəticəsi"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_journal_result"
+msgstr "Journal result"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_entry_score"
+msgstr "Entry score"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_exam_score"
+msgstr "Exam score"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_total_score"
+msgstr "Total score"
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_barred"
+msgstr "You are not admitted to the exam (absence limit)."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_failed"
+msgstr "You failed this subject."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_passed"
+msgstr "You passed this subject."
+
+msgctxt "registrar.attendance"
+msgid "Excused absence"
+msgstr ""
+
+msgctxt "registrar.correction_reason"
+msgid "Medical certificate"
+msgstr ""
+
+msgctxt "registrar.correction_reason"
+msgid "Official leave / permission"
+msgstr ""
+
+msgctxt "registrar.correction_reason"
+msgid "Data-entry error"
+msgstr ""
+
+msgctxt "registrar.correction_reason"
+msgid "Appeal decision"
+msgstr ""
+
+msgctxt "registrar.correction_reason"
+msgid "Other (see note)"
+msgstr ""
+
+msgctxt "registrar.correction_field"
+msgid "Attendance"
+msgstr ""
+
+msgctxt "registrar.correction_field"
+msgid "Score"
+msgstr ""
+
+msgctxt "registrar.exam_bridge"
+msgid "You are not admitted to the exam: %(hours)s absence hours exceed the %(limit)s%% limit for this subject."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "A justification document (PDF) is required."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "A note explaining the correction is required."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Choose a correction reason."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Choose the new attendance value."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Choose what to correct: attendance or score."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Lecture cells hold no score — only attendance can be corrected."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Score must be a whole number."
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Score must be between 0 and %(max)s."
+msgstr ""
+
+msgctxt "registrar.notify"
+msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
+msgstr "An official correction was made in your journal — see the journal for details"

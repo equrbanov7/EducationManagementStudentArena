@@ -473,3 +473,70 @@
     }
 }
 
+
+/* ── Elektron jurnal nəticəsi (giriş + imtahan → ümumi bal + A–F hərf) ──────
+   İmtahan mərkəzi ↔ jurnal körpüsü. Göy palitrada, müasir kart. */
+.journal-result-card {
+    margin: 0 0 1.25rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid #dbe4ff;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f5f8ff 0%, #eef3ff 100%);
+}
+.journal-result-card .jr-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.75rem;
+}
+.journal-result-card .jr-body {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.journal-result-card .jr-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 84px;
+    padding: 0.5rem 0.75rem;
+    background: #fff;
+    border: 1px solid #e2e8f5;
+    border-radius: 10px;
+}
+.journal-result-card .jr-total { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb inset; }
+.journal-result-card .jr-part-label { font-size: 0.72rem; color: #64748b; font-weight: 600; }
+.journal-result-card .jr-part-value { font-size: 1.35rem; font-weight: 800; color: #1e293b; }
+.journal-result-card .jr-plus,
+.journal-result-card .jr-eq { font-size: 1.25rem; font-weight: 700; color: #94a3b8; }
+.journal-result-card .jr-letter {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #fff;
+    background: #2563eb;
+}
+.journal-result-card .jr-letter--fail,
+.journal-result-card .jr-letter--f { background: #dc2626; }
+.journal-result-card .jr-note {
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+}
+.journal-result-card .jr-note--pass { color: #15803d; background: #f0fdf4; }
+.journal-result-card .jr-note--fail,
+.journal-result-card .jr-note--barred { color: #b42318; background: #fef3f2; }

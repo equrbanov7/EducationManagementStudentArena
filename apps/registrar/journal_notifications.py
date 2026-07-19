@@ -20,6 +20,7 @@ EVENT_KOLLOKVIUM = "kollokvium"  # kollokvium balı
 EVENT_COURSEWORK = "coursework"  # kurs işi balı
 EVENT_LIMIT_WARNING = "limit_warning"  # limitin 75%-inə çatdı
 EVENT_BARRED = "barred"  # limit keçildi — imtahana buraxılmır
+EVENT_CORRECTED = "corrected"  # rəsmi jurnal düzəlişi (admin, sənədli)
 
 
 def _line_for(event) -> str:
@@ -38,6 +39,8 @@ def _line_for(event) -> str:
         }
     if kind == EVENT_BARRED:
         return pgettext("registrar.notify", "Qayıb limiti keçildi — imtahana buraxılmırsınız")
+    if kind == EVENT_CORRECTED:
+        return pgettext("registrar.notify", "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın")
     return ""
 
 
