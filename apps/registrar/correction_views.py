@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from . import corrections, gradebook
@@ -95,9 +95,9 @@ def correction_journal(request, offering_id):
             "corrections_map": corrections_map,
             "correction_reasons": CorrectionReason.choices,
             "attendance_choices": [
-                (AttendanceStatus.PRESENT, _("İştirak (iə)")),
-                (AttendanceStatus.ABSENT, _("Qayıb (qb)")),
-                (AttendanceStatus.EXCUSED, _("Üzrlü qayıb (üq)")),
+                (AttendanceStatus.PRESENT, pgettext("registrar.correction", "İştirak (iə)")),
+                (AttendanceStatus.ABSENT, pgettext("registrar.correction", "Qayıb (qb)")),
+                (AttendanceStatus.EXCUSED, pgettext("registrar.correction", "Üzrlü qayıb (üq)")),
             ],
             "apply_url": reverse("registrar:correction_apply", args=[offering.pk]),
             "corrector_name": request.user.get_full_name() or request.user.username,
@@ -141,5 +141,5 @@ def correction_apply(request, offering_id):
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"ok": True})
-    messages.success(request, _("Düzəliş yadda saxlanıldı."))
+    messages.success(request, pgettext("registrar.correction", "Düzəliş yadda saxlanıldı."))
     return redirect(reverse("registrar:correction_journal", args=[offering.pk]))
