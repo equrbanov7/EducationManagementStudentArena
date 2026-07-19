@@ -101,6 +101,7 @@ def home(request):
     if clear_filter_query:
         clear_category_filter_url = f"{clear_category_filter_url}?{clear_filter_query}"
 
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     context = {
         "page_obj": page_obj,
         "categories": categories,
@@ -124,9 +125,9 @@ def home(request):
         # Organization / WebSite / SoftwareApplication JSON-LD that helps
         # Google understand the brand (and become eligible for sitelinks).
         "seo_is_home": True,
-        "seo_title": "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması",
+        "seo_title": f"{brand} – Təhsil İdarəetmə və Onlayn İmtahan Platforması",
         "seo_description": (
-            "EMSArena universitetlər, məktəblər, kurs mərkəzləri və müəllimlər "
+            f"{brand} universitetlər, məktəblər, kurs mərkəzləri və müəllimlər "
             "üçün LMS, onlayn imtahan, elektron jurnal, qiymətləndirmə və "
             "analitika platformasıdır."
         ),
@@ -136,15 +137,17 @@ def home(request):
 
 
 def about(request):
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     return render(
         request,
         "blog/about.html",
         {
-            "seo_title": _("Haqqımızda – EMSArena"),
+            "seo_title": _("Haqqımızda – %(brand)s") % {"brand": brand},
             "seo_description": _(
-                "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+                "%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
                 "Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
-            ),
+            )
+            % {"brand": brand},
             "seo_breadcrumbs": [
                 {"name": _("Ana səhifə"), "url": request.build_absolute_uri("/")},
                 {"name": _("Haqqımızda"), "url": request.build_absolute_uri()},

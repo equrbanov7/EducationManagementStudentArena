@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import user_passes_test
@@ -27,11 +28,17 @@ from .services import send_reply_to_trial_request
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_REPLY = _(
-    "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində "
+_DEFAULT_REPLY_TEMPLATE = _(
+    "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s sistemində "
     "yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və "
     "limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 )
+
+
+def _default_reply_text() -> str:
+    """Render ``_DEFAULT_REPLY_TEMPLATE`` with the active tenant brand."""
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    return _DEFAULT_REPLY_TEMPLATE % {"brand": brand}
 
 
 class TrialReplyForm(forms.Form):
@@ -48,7 +55,7 @@ class TrialReplyForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 10, "style": "width:100%;"}),
         min_length=10,
         max_length=10000,
-        initial=_DEFAULT_REPLY,
+        initial=_default_reply_text,
         help_text=_("Tələbəyə göndəriləcək təsdiq. Sadə mətn olaraq görünəcək."),
     )
 

@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Count
 from django.template.loader import render_to_string
@@ -26,8 +27,10 @@ _ALLOWED_SORTS = {"newest", "oldest", "az", "za"}
 _PICKER_PAGE_SIZE = 40
 
 
-_BANK_TEMPLATE_TEST_TXT = """\
-# EMSArena — Test sual bankı şablonu
+def _bank_template_test_txt():
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    return f"""\
+# {brand} — Test sual bankı şablonu
 # Hər sualın 4 və ya 5 variantı olmalıdır (A–E). Düz cavabı 3 üsuldan biri ilə qeyd edin:
 #   1) Sual sonunda "Cavab: B"   2) Düz variantın əvvəlinə * qoyun "*B)"   3) İşarə yoxdursa A.
 # Çox cavablı: "Cavab: A,C". Hər sualdan sonra boş sətir buraxın.
@@ -54,8 +57,10 @@ Cavab: B
 """
 
 
-_BANK_TEMPLATE_WRITTEN_TXT = """\
-# EMSArena — Yazılı sual bankı şablonu
+def _bank_template_written_txt():
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    return f"""\
+# {brand} — Yazılı sual bankı şablonu
 # Hər sual yeni sətirdə nömrə ilə başlasın. Variant lazım deyil — yalnız sual mətni.
 
 1. Verilənlər strukturu nədir? İzah edin.

@@ -18,11 +18,11 @@ from apps.exams.services.parsing import extract_text_from_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._helpers import (
-    _QUESTION_BANK_TEMPLATE_TXT,
     _append_navigation_query,
     _normalize_exam_language,
     _parse_points_payload,
     _parse_selected_question_indices,
+    _question_bank_template_txt,
     _resolve_question_bank_navigation,
     _test_workbench_context,
 )
@@ -43,8 +43,8 @@ def test_question_bank_template_download(request, slug):
 
     from django.http import HttpResponse
 
-    response = HttpResponse(_QUESTION_BANK_TEMPLATE_TXT, content_type="text/plain; charset=utf-8")
-    response["Content-Disposition"] = 'attachment; filename="emsarena_test_template.txt"'
+    response = HttpResponse(_question_bank_template_txt(), content_type="text/plain; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="sual_sablonu.txt"'
     return response
 
 
