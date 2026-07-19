@@ -407,6 +407,14 @@ def get_offering_journal(*, offering, newest_first=False):
         .order_by("student__last_name", "student__username")
     )
     mark_map = {(m.enrollment_id, m.lesson_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+    # Rəsmi düzəliş almış xanalar (sarı + kilidli göstəriş üçün).
+    from .models import JournalCorrection
+
+    corrected_mark_ids = set(
+        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).values_list(
+            "lesson_mark_id", flat=True
+        )
+    )
 
     now = timezone.now()
     today = timezone.localdate()
@@ -436,15 +444,18 @@ def get_offering_journal(*, offering, newest_first=False):
             if mark is not None and mark.status == AttendanceStatus.ABSENT:
                 absence_hours += lesson.hours
                 absence_count += 1
-            locked = mark is not None and not can_edit_mark(mark, now=now)
+            corrected = mark is not None and mark.id in corrected_mark_ids
+            locked = corrected or (mark is not None and not can_edit_mark(mark, now=now))
             cells.append(
                 {
                     "lesson": lesson,
                     "mark": mark,
                     "allows_score": lesson_allows_score(lesson),
                     "locked": locked,
+                    # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
+                    "corrected": corrected,
                     # yazıla bilən: mövcud işarə pəncərə içində, YA boş xana bu günün dərsində
-                    "writable": (mark is not None and not locked) or (mark is None and lesson.date == today),
+                    "writable": (not corrected) and ((mark is not None and not locked) or (mark is None and lesson.date == today)),
                 }
             )
         # Canonical entry score (component-weighted when defined, else lesson sum).

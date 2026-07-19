@@ -190,6 +190,11 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         }
         kollokviums = [{"component": c, "score": score_by.get(c.id), "held_on": c.held_on} for c in kcomps]
 
+    # Rəsmi düzəliş almış xanalar (tələbə tərəfdə sarı + tarixçə üçün, sənədsiz).
+    from apps.registrar import corrections as _corrections
+
+    corr_map = _corrections.corrections_map_for_enrollment(enrollment)
+
     # Tarixçə sətirləri: paritet çipi + kollokvium markeri (held_on tarixinə görə).
     koll_by_date = {k["held_on"]: k for k in kollokviums if k["held_on"]}
     history = [
@@ -197,6 +202,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             "mark": m,
             "parity": gradebook._lesson_parity(offering, m.lesson),
             "kollokvium": koll_by_date.get(m.lesson.date),
+            "corrected": str(m.id) in corr_map,
         }
         for m in marks
     ]
@@ -248,6 +254,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         },
         "journal": journal_row["journal"] if journal_row else None,
     }
+    section["corrections_map"] = corr_map
     return {"journal_student_section": section}
 
 
