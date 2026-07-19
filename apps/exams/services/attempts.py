@@ -307,6 +307,12 @@ def submit_exam_attempt(attempt):
 
         sync_test_attempt_counts(attempt)
     attempt.mark_finished(status="submitted")
+    # Elektron jurnala nəticəni yaz (test = avtomatik qiymətli). Yazılı imtahanlar
+    # üçün körpü manual-grading bitəndə çağırılır. on_commit → körpü yalnız cəhd
+    # uğurla saxlanandan sonra işləsin (best-effort, imtahanı sındırmır).
+    from apps.exams.services.journal_sync import sync_attempt_to_journal
+
+    transaction.on_commit(lambda: sync_attempt_to_journal(attempt))
     return attempt
 
 

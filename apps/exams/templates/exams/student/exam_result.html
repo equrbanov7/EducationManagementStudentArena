@@ -108,6 +108,42 @@
                 </div>
                 {% endif %}
 
+                {% if journal_result %}
+                {# Elektron jurnal: giriş + imtahan → ümumi bal + hərf qiyməti (A–F). #}
+                <div class="journal-result-card" role="group" aria-label="{% trans 'label_journal_result' context 'exams.template.student_exam_result' %}">
+                    <div class="jr-head">
+                        <i class="fas fa-book"></i>
+                        <span>{% trans "label_journal_result" context "exams.template.student_exam_result" %}</span>
+                    </div>
+                    <div class="jr-body">
+                        <div class="jr-part">
+                            <span class="jr-part-label">{% trans "label_entry_score" context "exams.template.student_exam_result" %}</span>
+                            <span class="jr-part-value">{{ journal_result.entry_score|floatformat:0 }}</span>
+                        </div>
+                        <span class="jr-plus">+</span>
+                        <div class="jr-part">
+                            <span class="jr-part-label">{% trans "label_exam_score" context "exams.template.student_exam_result" %}</span>
+                            <span class="jr-part-value">{% if journal_result.exam_score is not None %}{{ journal_result.exam_score|floatformat:0 }}{% else %}—{% endif %}</span>
+                        </div>
+                        <span class="jr-eq">=</span>
+                        <div class="jr-part jr-total">
+                            <span class="jr-part-label">{% trans "label_total_score" context "exams.template.student_exam_result" %}</span>
+                            <span class="jr-part-value">{{ journal_result.total|floatformat:0 }}</span>
+                        </div>
+                        <div class="jr-letter jr-letter--{{ journal_result.letter|lower }}{% if journal_result.failed %} jr-letter--fail{% endif %}">
+                            {{ journal_result.letter }}
+                        </div>
+                    </div>
+                    {% if journal_result.barred %}
+                    <div class="jr-note jr-note--barred">{% trans "notice_journal_barred" context "exams.template.student_exam_result" %}</div>
+                    {% elif journal_result.failed %}
+                    <div class="jr-note jr-note--fail">{% trans "notice_journal_failed" context "exams.template.student_exam_result" %}</div>
+                    {% elif journal_result.passed %}
+                    <div class="jr-note jr-note--pass">{% trans "notice_journal_passed" context "exams.template.student_exam_result" %}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 {% if not hide_test_answer_correctness %}
                 <div class="test-stats-grid">
                     <div class="stat-item">

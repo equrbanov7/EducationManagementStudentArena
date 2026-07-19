@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Jurnal düzəlişi" context "registrar.correction" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260719-corr">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260719-corr">
+{% endblock %}
+
+{% block content %}
+{% include "accounts/profile/_messages.html" %}
+<div class="corr-wrap">
+    <header class="corr-head">
+        <h1 class="corr-title">{% trans "Jurnal düzəlişi" context "registrar.correction" %}</h1>
+        <p class="corr-sub">{% trans "Müəllim və fənn seçin — jurnalı düzəliş rejimində açın. Hər düzəliş sənəd (PDF), səbəb və qeyd tələb edir; kim nəyi dəyişdi audit olunur." context "registrar.correction" %}</p>
+    </header>
+
+    <form method="get" class="corr-search" role="search">
+        <input type="text" name="q" value="{{ query }}" class="corr-search-input"
+               placeholder="{% trans 'Fənn, kod və ya müəllim axtar…' context 'registrar.correction' %}">
+        <button type="submit" class="corr-btn corr-btn--primary">{% trans "Axtar" context "registrar.correction" %}</button>
+        {% if request.GET.all %}<a href="{% url 'registrar:correction_list' %}?q={{ query }}" class="corr-btn corr-btn--ghost">{% trans "Yalnız cari semestr" context "registrar.correction" %}</a>
+        {% else %}<a href="{% url 'registrar:correction_list' %}?q={{ query }}&all=1" class="corr-btn corr-btn--ghost">{% trans "Bütün semestrlər" context "registrar.correction" %}</a>{% endif %}
+    </form>
+
+    <div class="corr-offering-grid">
+        {% for offering in offerings %}
+        <a class="corr-offering-card" href="{% url 'registrar:correction_journal' offering.id %}">
+            <span class="corr-offering-subject">{{ offering.subject.name }}</span>
+            <span class="corr-offering-meta">
+                {% if offering.subject.code %}<span class="corr-chip">{{ offering.subject.code }}</span>{% endif %}
+                {% if offering.group %}<span class="corr-chip corr-chip--group">{{ offering.group.name }}</span>{% endif %}
+            </span>
+            <span class="corr-offering-teacher">
+                <i class="fas fa-chalkboard-teacher"></i>
+                {% if offering.instructor %}{{ offering.instructor.get_full_name|default:offering.instructor.username }}{% else %}{% trans "Müəllim təyin edilməyib" context "registrar.correction" %}{% endif %}
+            </span>
+            <span class="corr-offering-period">{{ offering.period.year_display|default:offering.period.academic_year }} · {{ offering.period.name }}</span>
+        </a>
+        {% empty %}
+        <div class="corr-empty">{% trans "Uyğun fənn açılışı tapılmadı." context "registrar.correction" %}</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

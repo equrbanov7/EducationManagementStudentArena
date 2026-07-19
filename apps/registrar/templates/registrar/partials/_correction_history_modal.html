@@ -1,0 +1,15 @@
+{% load static i18n %}
+{% comment %}Paylaşılan read-only düzəliş-tarixçə modalı (müəllim + tələbə jurnalları).
+Kontekst: ``corrections_map`` = {mark_id: [düzəliş qeydləri]} (sənədsiz). Sarı
+xanadakı ✎ nişanına klik → correction_history.js modalı bu data ilə açır.{% endcomment %}
+<div class="corr-modal" id="corrHistoryModalRO" hidden data-corr-history-modal>
+    <div class="corr-modal-backdrop" data-corr-close></div>
+    <div class="corr-modal-card" role="dialog" aria-modal="true">
+        <div class="corr-modal-head">
+            <h2>{% trans "Düzəliş tarixçəsi" context "registrar.correction" %}</h2>
+            <button type="button" class="corr-modal-x" data-corr-close aria-label="{% trans 'Bağla' context 'registrar.correction' %}">&times;</button>
+        </div>
+        <div class="corr-history-body" data-corr-history-body></div>
+    </div>
+</div>
+{{ corrections_map|json_script:"corrHistoryDataRO" }}
