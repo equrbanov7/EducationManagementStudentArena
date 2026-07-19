@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.cache import caches
 from django.db import IntegrityError, transaction
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
 
@@ -40,6 +40,13 @@ def _exam_start_cache():
 
 def _exam_start_wait_timeout() -> float:
     return _safe_float_setting("EXAM_START_WAIT_TIMEOUT_SECONDS", 30.0, minimum=0.0)
+
+
+def _exam_start_capacity_wait() -> float:
+    # Short thread-hold for the CROSS-USER capacity gate (a stampede on one exam
+    # must not hold worker threads for the full 30s → the auto-retry page drains
+    # waiters instead). Falls back to the (longer) actor-lock timeout if unset.
+    return _safe_float_setting("EXAM_START_CAPACITY_WAIT_SECONDS", 4.0, minimum=0.0)
 
 
 def _exam_start_poll_interval() -> float:
@@ -139,7 +146,9 @@ def _exam_start_capacity_gate(exam_id: int):
         return
 
     lease_seconds = _exam_start_lock_lease_seconds()
-    timeout = _exam_start_wait_timeout()
+    # Capacity gate uses the SHORT hold so a single-exam stampede bounces to the
+    # auto-retry page rather than pinning worker threads (crash prevention).
+    timeout = _exam_start_capacity_wait()
     deadline = time.monotonic() + timeout
     acquired_keys: list[str] = []
 
@@ -428,14 +437,20 @@ def _start_or_resume_attempt(request, exam: Exam):
             generate_random_questions_for_attempt(attempt)
             record_attempt_started(exam.exam_type)
     except ExamStartBusy:
-        messages.warning(
+        # Bir imtahana eyni-anlı start stampede-i: worker thread-i tutub çökmək
+        # əvəzinə tələbəyə yüngül, ÖZÜ-YENİLƏNƏN səhifə qaytarırıq. Növbə dalğa-
+        # dalğa boşalır; tələbə heç nə etmir, səhifə start URL-inə geri dönür.
+        base_retry = _safe_int_setting("EXAM_START_RETRY_AFTER_SECONDS", 3, minimum=1)
+        retry_after = base_retry + (int(time.monotonic() * 1000) % 3)  # 0-2s jitter (deterministik-olmayan)
+        retry_url = _append_return_to(reverse("exams:start_exam", kwargs={"slug": exam.slug}), return_to)
+        response = render(
             request,
-            pgettext(
-                "exams.service.attempt.message",
-                "Server hazırda çox imtahan start sorğusu emal edir. Bir neçə saniyə sonra yenidən yoxlayın.",
-            ),
+            "exams/student/exam_starting.html",
+            {"retry_after": retry_after, "retry_url": retry_url},
+            status=503,
         )
-        return redirect(_append_return_to(reverse("exams:student_exam_list"), return_to))
+        response["Retry-After"] = str(retry_after)
+        return response
 
     messages.success(
         request,
