@@ -186,8 +186,11 @@
 
         select.addEventListener("change", sync);
 
-        // Kəsilmə fix-i: clipping konteyner daxilindədirsə menyunu fixed aç.
-        var useFixedStrategy = null; // lazy hesablanır (ilk açılışda)
+        // Kəsilmə fix-i: menyunu HƏMİŞƏ viewport-a görə (fixed) yerləşdiririk —
+        // aşağıda yer yoxdursa yuxarı açılır, sağ/aşağı kənardan çıxmır. Bootstrap
+        // `data-bs-display="static"` Popper flip-i söndürdüyü üçün əks halda uzun
+        // seçim mətnləri və ya səhifə dibindəki select-lər ekrandan kənara çıxırdı.
+        var useFixedStrategy = true;
 
         function closeDropdown() {
             if (window.bootstrap && window.bootstrap.Dropdown) {
@@ -204,9 +207,6 @@
         }
 
         toggle.addEventListener("show.bs.dropdown", function () {
-            if (useFixedStrategy === null) {
-                useFixedStrategy = hasClippingAncestor(wrapper);
-            }
             if (!useFixedStrategy) {
                 return;
             }
