@@ -335,6 +335,38 @@ class ExamBridgeTest(_BaseJournalSetup):
         self.assertIsNone(fg)
 
 
+class StudentJournalFazaBTest(_BaseJournalSetup):
+    def _ctx(self, **params):
+        from django.test import RequestFactory
+
+        from apps.registrar.public import build_student_journal_context
+
+        req = RequestFactory().get("/", params)
+        req.user = self.student
+        with bypass_rls():
+            return build_student_journal_context(req, organization=self.org)["journal_student_section"]
+
+    def test_no_subject_shows_cards_not_detail(self):
+        self._seminar_mark(3, 7)
+        sec = self._ctx()  # no ?subject → cards landing
+        self.assertIsNone(sec["detail"])
+        self.assertTrue(sec["subjects"])
+        self.assertIn("teacher", sec["subjects"][0])
+        self.assertEqual(sec["subjects"][0]["teacher"], self.teacher)
+        self.assertTrue(sec["semester_options"])  # semester picker
+
+    def test_subject_selected_shows_detail_with_kinds(self):
+        self._seminar_mark(3, 7)
+        self._absent_lesson(4, hours=2)
+        sec = self._ctx(subject=str(self.enrollment.id))
+        self.assertIsNotNone(sec["detail"])
+        self.assertEqual(sec["detail"]["teacher"], self.teacher)
+        kinds = {k["value"] for k in sec["detail"]["lesson_kinds"]}
+        self.assertTrue(kinds)  # lesson-type filter options present
+        # history rows carry kind for the type column + filter
+        self.assertTrue(all("kind" in h for h in sec["detail"]["history"]))
+
+
 class CorrectionViewTest(_BaseJournalSetup):
     def _login_corrector(self):
         self.client.force_login(self.admin)

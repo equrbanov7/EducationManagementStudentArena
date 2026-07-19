@@ -29744,3 +29744,55 @@ msgstr "Bal 0 ilə %(max)s arasında olmalıdır."
 msgctxt "registrar.notify"
 msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
 msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Fənlər"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Semestr"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Müəllim təyin edilməyib"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Buraxılır"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "TİP"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Hamısı"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Dərs tipinə görə süz"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Dərs tipi"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Müəllim"
+msgstr ""
+
+msgctxt "registrar.journal"
+msgid "Bal"
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Fənlər"
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Bağla"
+msgstr ""
+
+msgctxt "registrar.correction"
+msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
+msgstr ""
