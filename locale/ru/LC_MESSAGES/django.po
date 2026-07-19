@@ -30482,3 +30482,55 @@ msgstr "Балл должен быть от 0 до %(max)s."
 msgctxt "registrar.notify"
 msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
 msgstr "В вашем журнале внесено официальное исправление — подробности в журнале"
+
+msgctxt "registrar.journal"
+msgid "Fənlər"
+msgstr "Предметы"
+
+msgctxt "registrar.journal"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "registrar.journal"
+msgid "Müəllim təyin edilməyib"
+msgstr "Преподаватель не назначен"
+
+msgctxt "registrar.journal"
+msgid "Buraxılır"
+msgstr "Допущен"
+
+msgctxt "registrar.journal"
+msgid "TİP"
+msgstr "ТИП"
+
+msgctxt "registrar.journal"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "registrar.journal"
+msgid "Dərs tipinə görə süz"
+msgstr "Фильтр по типу занятия"
+
+msgctxt "registrar.journal"
+msgid "Dərs tipi"
+msgstr "Тип занятия"
+
+msgctxt "registrar.journal"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "registrar.journal"
+msgid "Bal"
+msgstr "Балл"
+
+msgctxt "registrar.correction"
+msgid "Fənlər"
+msgstr "Предметы"
+
+msgctxt "registrar.correction"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "registrar.correction"
+msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
+msgstr "В эту запись внесено официальное исправление — нажмите на значок, чтобы посмотреть историю."
