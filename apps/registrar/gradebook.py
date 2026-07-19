@@ -251,6 +251,15 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     lessons = {str(latt.id): latt for latt in offering.lessons.all()}
     enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
     existing = {(m.lesson_id, m.enrollment_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+    # Rəsmi (sənədli) düzəliş almış xanalar müəllim tərəfindən DƏYİŞİLƏ BİLMƏZ —
+    # yalnız yeni rəsmi düzəliş (apps/registrar/corrections.py) dəyişə bilər.
+    from .models import JournalCorrection
+
+    corrected_ids = set(
+        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).values_list(
+            "lesson_mark_id", flat=True
+        )
+    )
     # Bildiriş keçidləri üçün yazıdan ƏVVƏLKİ qayıb saatları.
     prior_hours = {e.id: e.absence_hours for e in enrollments.values()}
 
@@ -266,6 +275,8 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
         if lesson is None or enrollment is None:
             continue
         mark = existing.get((lesson.id, enrollment.id))
+        if mark is not None and mark.pk and mark.pk in corrected_ids:
+            continue  # rəsmi düzəlişli xana — müəllim üçün kilidli
         if not can_edit_mark(mark, now=now):
             continue  # locked — no back-dated tampering
         if enforce_day and mark is None and lesson.date != today:
@@ -337,7 +348,12 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
 
 def _mark_repr(status, score) -> str:
     """Compact attendance+score label for the audit trail (e.g. ``qb`` / ``iə 8``)."""
-    att = "qb" if status == AttendanceStatus.ABSENT else "iə"
+    if status == AttendanceStatus.ABSENT:
+        att = "qb"
+    elif status == AttendanceStatus.EXCUSED:
+        att = "üq"  # üzrlü qayıb (rəsmi düzəliş yolu ilə)
+    else:
+        att = "iə"
     return f"{att} {grade_audit.score_repr(score)}" if score is not None else att
 
 
