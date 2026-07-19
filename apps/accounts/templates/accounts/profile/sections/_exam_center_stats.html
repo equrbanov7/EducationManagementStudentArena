@@ -243,7 +243,11 @@
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
-(function () {
+(function boot() {
+  // Axtarışlı seçici komponenti (searchable_select.js) hələ yüklənməyibsə
+  // (skript sırası) — ecsInit qoymadan gözlə, sonra başlat. Beləcə cədvəl heç
+  // vaxt "Yüklənir…"-də ilişib qalmır.
+  if (!window.EMSSearchableSelect) { setTimeout(boot, 30); return; }
   var root = document.querySelector(".ecs");
   if (!root || root.dataset.ecsInit === "1") { return; }
   root.dataset.ecsInit = "1";

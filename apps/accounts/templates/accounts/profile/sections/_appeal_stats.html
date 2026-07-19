@@ -230,7 +230,10 @@
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
-(function () {
+(function boot() {
+  // searchable_select.js hələ yüklənməyibsə (skript sırası) — apsInit qoymadan
+  // gözlə, sonra başlat (cədvəl "Yüklənir…"-də ilişib qalmasın).
+  if (!window.EMSSearchableSelect) { setTimeout(boot, 30); return; }
   var root = document.querySelector(".aps");
   if (!root || root.dataset.apsInit === "1") { return; }
   root.dataset.apsInit = "1";
