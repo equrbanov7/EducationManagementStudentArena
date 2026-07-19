@@ -30,6 +30,16 @@ from ...models import Appeal
 
 _PAGE_SIZE = 15
 
+# Tədris ili sentyabrda başlayır (sentyabr–avqust = bir tədris ili).
+_ACADEMIC_YEAR_START_MONTH = 9
+
+
+def _academic_year_start(dt):
+    """datetime → tədris ilinin başlanğıc təqvim ili (lokal vaxta görə)."""
+    local = timezone.localtime(dt)
+    return local.year if local.month >= _ACADEMIC_YEAR_START_MONTH else local.year - 1
+
+
 # Sütun → DB order ifadəsi (klik-sıralama).
 _SORT_MAP = {
     "student": ("student__first_name", "student__last_name", "student__username"),
@@ -143,9 +153,15 @@ def _filtered_appeals(request, organization):
     if status in APPEAL_STATUS_VALUES:
         qs = qs.filter(status=status)
 
+    # TƏDRİS İLİ filtri: `year` başlanğıc təqvim ili (2025 = 2025/2026).
     year = (request.GET.get("year") or "").strip()
     if year.isdigit():
-        qs = qs.filter(created_at__year=int(year))
+        from datetime import datetime
+
+        start = int(year)
+        lo = timezone.make_aware(datetime(start, _ACADEMIC_YEAR_START_MONTH, 1))
+        hi = timezone.make_aware(datetime(start + 1, _ACADEMIC_YEAR_START_MONTH, 1))
+        qs = qs.filter(created_at__gte=lo, created_at__lt=hi)
 
     semester = (request.GET.get("semester") or "").strip()
     if semester in _SEMESTERS:
@@ -321,10 +337,15 @@ def appeal_stats_filters(request):
     from apps.exams.models import Exam
     from apps.organizations.models import OrgUnit
 
-    years = sorted(
-        {d.year for d in Appeal.objects.filter(organization=organization).values_list("created_at", flat=True)},
+    # Tədris illəri (2025/2026 formatı) — apellyasiya tarixlərindən sentyabr sərhədi ilə.
+    year_starts = sorted(
+        {
+            _academic_year_start(d)
+            for d in Appeal.objects.filter(organization=organization).values_list("created_at", flat=True)
+        },
         reverse=True,
     )
+    academic_years = [{"value": str(s), "label": f"{s}/{s + 1}"} for s in year_starts]
     units = list(
         OrgUnit.objects.filter(organization=organization, is_active=True)
         .order_by("name")
@@ -354,7 +375,7 @@ def appeal_stats_filters(request):
     ]
     return JsonResponse(
         {
-            "years": years,
+            "academic_years": academic_years,
             "units": units,  # geriyə-uyğunluq
             "faculties": faculties,
             "departments": departments,
