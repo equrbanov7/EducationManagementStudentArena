@@ -2,13 +2,18 @@
 
 from django.urls import path
 
-from . import analytics_views, console_views, journal_actions, pdf_views, views
+from . import analytics_views, console_views, correction_views, journal_actions, pdf_views, views
 
 app_name = "registrar"
 
 urlpatterns = [
     path("", views.journal_list, name="journal_list"),
     path("tesdiqler/", views.approvals_inbox, name="approvals_inbox"),
+    # Admin jurnal düzəlişi (üzrlü qayıb / sənədli korreksiya) — literal prefiks,
+    # uuid catch-all-dan əvvəl.
+    path("duzelis/", correction_views.correction_offering_list, name="correction_list"),
+    path("duzelis/<uuid:offering_id>/", correction_views.correction_journal, name="correction_journal"),
+    path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("teqvim/", views.calendar_view, name="calendar"),
