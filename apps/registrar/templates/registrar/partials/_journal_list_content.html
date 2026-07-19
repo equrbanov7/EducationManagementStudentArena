@@ -9,6 +9,11 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             <h1 class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</h1>
             <div class="jd2-pagesub">{% if journal_selected_period %}{{ journal_selected_period.year_label }} — {{ journal_selected_period.season_label }}{% elif journal_periods %}{{ journal_periods.0.year_label }} — {{ journal_periods.0.season_label }}{% endif %}</div>
         </div>
+        {% if can_correct_journal %}
+        <a class="jd2-correct-link" href="{% url 'registrar:correction_list' %}">
+            <i class="fas fa-user-shield"></i> {% trans "Jurnal düzəlişi" context "registrar.correction" %}
+        </a>
+        {% endif %}
     </div>
 
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=1 stepper_detail=False %}

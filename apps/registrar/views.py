@@ -54,10 +54,13 @@ def _can_edit_journal(user, offering) -> bool:
 @login_required
 def journal_list(request):
     """The teacher's own offerings — entry points into each journal."""
+    from apps.registrar import corrections as corrections_service
     from apps.registrar import page_contexts
 
     context = page_contexts.journal_list_context(request.user, request=request)
     context["active_main_nav"] = "journal"
+    # Korrektorlara (superadmin / journal.correct) düzəliş interfeysinə keçid göstər.
+    context["can_correct_journal"] = corrections_service.can_correct_journal(request)
     return render(request, "registrar/journal_list.html", context)
 
 
