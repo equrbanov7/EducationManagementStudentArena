@@ -35,6 +35,10 @@ class LessonKind(models.TextChoices):
 class AttendanceStatus(models.TextChoices):
     PRESENT = "present", pgettext_lazy("registrar.attendance", "Present")  # iştirak (iə)
     ABSENT = "absent", pgettext_lazy("registrar.attendance", "Absent")  # qayıb (qb)
+    # Üzrlü qayıb (ü/q): YALNIZ rəsmi sənədli jurnal-düzəliş axını ilə qoyulur
+    # (apps/registrar/corrections.py) — müəllim UI-ında seçim kimi YOXDUR.
+    # Qayıb-limit hesabına DAXİL DEYİL (absence_hours bunu saymır).
+    EXCUSED = "excused", pgettext_lazy("registrar.attendance", "Excused absence")
 
 
 class ApprovalStatus(models.TextChoices):

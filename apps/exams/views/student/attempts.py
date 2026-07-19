@@ -295,6 +295,13 @@ def start_exam(request, slug):
         messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
         return redirect(_resolve_exam_failure_redirect(request))
 
+    # Elektron jurnal buraxılış qapısı: qayıb limiti keçilibsə start olmaz (no-op if unlinked).
+    from apps.exams.services.journal_sync import registrar_block_reason
+
+    block_reason = registrar_block_reason(request, exam)
+    if block_reason:
+        messages.error(request, block_reason)
+        return redirect(_resolve_exam_failure_redirect(request))
     return _start_or_resume_attempt(request, exam)
 
 

@@ -29644,3 +29644,103 @@ msgstr "Post İdarəetmə - %(org_name)s"
 #. white-label brand rebrand (auto-appended, source-mirrored)
 msgid "%(item_type)s nəticəsi"
 msgstr "%(item_type)s nəticəsi"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_journal_result"
+msgstr "Jurnal nəticəsi"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_entry_score"
+msgstr "Giriş balı"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_exam_score"
+msgstr "İmtahan balı"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_total_score"
+msgstr "Ümumi bal"
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_barred"
+msgstr "İmtahana buraxılmırsınız (qayıb limiti)."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_failed"
+msgstr "Bu fəndən kəsildiniz."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_passed"
+msgstr "Bu fəndən keçdiniz."
+
+msgctxt "registrar.attendance"
+msgid "Excused absence"
+msgstr "Üzrlü qayıb"
+
+msgctxt "registrar.correction_reason"
+msgid "Medical certificate"
+msgstr "Tibbi arayış"
+
+msgctxt "registrar.correction_reason"
+msgid "Official leave / permission"
+msgstr "Rəsmi icazə / ezamiyyət"
+
+msgctxt "registrar.correction_reason"
+msgid "Data-entry error"
+msgstr "Daxiletmə xətası"
+
+msgctxt "registrar.correction_reason"
+msgid "Appeal decision"
+msgstr "Apellyasiya qərarı"
+
+msgctxt "registrar.correction_reason"
+msgid "Other (see note)"
+msgstr "Digər (qeydə bax)"
+
+msgctxt "registrar.correction_field"
+msgid "Attendance"
+msgstr "Davamiyyət"
+
+msgctxt "registrar.correction_field"
+msgid "Score"
+msgstr "Bal"
+
+msgctxt "registrar.exam_bridge"
+msgid "You are not admitted to the exam: %(hours)s absence hours exceed the %(limit)s%% limit for this subject."
+msgstr "İmtahana buraxılmırsınız: bu fənn üzrə %(hours)s saat qayıb %(limit)s%% limitini keçir."
+
+msgctxt "registrar.correction"
+msgid "A justification document (PDF) is required."
+msgstr "Əsaslandırıcı sənəd (PDF) mütləqdir."
+
+msgctxt "registrar.correction"
+msgid "A note explaining the correction is required."
+msgstr "Düzəlişi izah edən qeyd mütləqdir."
+
+msgctxt "registrar.correction"
+msgid "Choose a correction reason."
+msgstr "Düzəliş səbəbini seçin."
+
+msgctxt "registrar.correction"
+msgid "Choose the new attendance value."
+msgstr "Yeni davamiyyət dəyərini seçin."
+
+msgctxt "registrar.correction"
+msgid "Choose what to correct: attendance or score."
+msgstr "Nəyi düzəltdiyinizi seçin: davamiyyət və ya bal."
+
+msgctxt "registrar.correction"
+msgid "Lecture cells hold no score — only attendance can be corrected."
+msgstr "Mühazirə xanasında bal yoxdur — yalnız davamiyyət düzəldilə bilər."
+
+msgctxt "registrar.correction"
+msgid "Score must be a whole number."
+msgstr "Bal tam ədəd olmalıdır."
+
+msgctxt "registrar.correction"
+msgid "Score must be between 0 and %(max)s."
+msgstr "Bal 0 ilə %(max)s arasında olmalıdır."
+
+msgctxt "registrar.notify"
+msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
+msgstr ""

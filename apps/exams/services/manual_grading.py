@@ -45,6 +45,13 @@ def _mark_attempt_graded(attempt, *, grader, total_score, checked, now):
         attempt.graded_by = grader
         update_fields.append("graded_by")
     attempt.save(update_fields=update_fields)
+    # Yazılı imtahan yoxlanıb bitəndə nəticəni elektron jurnala yaz (best-effort).
+    if checked:
+        from django.db import transaction as _tx
+
+        from apps.exams.services.journal_sync import sync_attempt_to_journal
+
+        _tx.on_commit(lambda: sync_attempt_to_journal(attempt))
 
 
 @transaction.atomic
