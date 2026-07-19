@@ -423,6 +423,33 @@ def get_offering_journal(*, offering, newest_first=False):
     allowed_absence = _allowed_absence_hours(offering, lessons)
     warn_at = allowed_absence * _WARN_RATIO
 
+    # Per-lesson özət (müəllim: redaktə pəncərəsi keçmiş sütun başlığına klik →
+    # oxu-rejimi gün özəti). Əlavə sorğu yox — mark_map yaddaşdadır.
+    total_students = len(enrollments)
+    lesson_summary: dict = {}
+    for lesson in lessons:
+        ie = qb = uq = scored = 0
+        for enrollment in enrollments:
+            m = mark_map.get((enrollment.id, lesson.id))
+            if m is None:
+                continue
+            if m.status == AttendanceStatus.ABSENT:
+                qb += 1
+            elif m.status == AttendanceStatus.EXCUSED:
+                uq += 1
+            else:
+                ie += 1
+            if m.score is not None:
+                scored += 1
+        lesson_summary[lesson.id] = {
+            "ie": ie,
+            "qb": qb,
+            "uq": uq,
+            "scored": scored,
+            "total": total_students,
+            "marked": ie + qb + uq,
+        }
+
     lesson_meta = [
         {
             "lesson": lesson,
@@ -432,6 +459,7 @@ def get_offering_journal(*, offering, newest_first=False):
             # xronoloji nömrə (köhnədən yeniyə) — sıra tərs olsa da nömrə sabitdir
             "seq": (len(lessons) - idx) if newest_first else (idx + 1),
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
+            "summary": lesson_summary.get(lesson.id, {}),
         }
         for idx, lesson in enumerate(lessons)
     ]

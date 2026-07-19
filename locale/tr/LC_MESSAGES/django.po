@@ -30008,7 +30008,9 @@ msgstr ""
 "talepleriniz için bize yazın."
 
 #, python-format
-msgid "%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+msgid ""
+"%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+"Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
 msgstr ""
 "%(brand)s; eğitim yönetimi, LMS ve online sınav platformudur. Ekibimiz, "
 "misyonumuz ve platformun olanakları hakkında bilgi edinin."
@@ -30044,7 +30046,8 @@ msgstr "Re: [%(brand)s] %(subject)s"
 #, python-format
 msgid ""
 "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s sistemində"
-" "
+" yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz "
+"və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 msgstr ""
 "Merhaba! Gönderdiğiniz sorulara göre deneme sınavınız %(brand)s’da "
 "oluşturuldu. Hesabınıza giriş yapıp “Sınavlar” bölümünden ücretsiz ve "
@@ -30065,6 +30068,42 @@ msgstr "[%(brand)s Deneme] %(subject)s — %(name)s"
 #, python-format
 msgid "Əlaqə – %(brand)s"
 msgstr "İletişim – %(brand)s"
+
+msgctxt "registrar.journal"
+msgid "NƏTİCƏ"
+msgstr "SONUÇ"
+
+msgctxt "registrar.journal"
+msgid "iştirak (i/e)"
+msgstr "katılım (k)"
+
+msgctxt "registrar.journal"
+msgid "qayıb (q/b)"
+msgstr "devamsız (d)"
+
+msgctxt "registrar.journal"
+msgid "üzrlü (üq)"
+msgstr "mazeretli (m)"
+
+msgctxt "registrar.journal"
+msgid "bal yazılıb"
+msgstr "puanlandı"
+
+msgctxt "registrar.journal"
+msgid "qeyd edilib"
+msgstr "kaydedildi"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti"
+msgstr "Gün özeti"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti (redaktə vaxtı keçib)"
+msgstr "Gün özeti (düzenleme süresi doldu)"
+
+msgctxt "registrar.journal"
+msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
+msgstr "Düzenleme süresi doldu — bu yalnızca okunur özettir."
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"

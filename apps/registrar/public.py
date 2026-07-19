@@ -132,14 +132,51 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     if record is None:
         return None
 
+    from apps.registrar.page_contexts import _season_label
+
     AcademicPeriod = _academic_period_model()
-    period = (
-        AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
-        or AcademicPeriod.objects.filter(organization=organization).order_by("-start_date").first()
+    # Tədris ili + yarım il (Payız/Yaz/Yay) seçicisi — MÜƏLLİM jurnalı ilə eyni
+    # məntiq (semestr 1-10 YOX). Yalnız tələbənin qeydiyyatı olan dövrlər.
+    # (Enrollment funksiyanın yuxarısında artıq import olunub.)
+    period_ids = list(
+        Enrollment.objects.filter(organization=organization, student=request.user)
+        .values_list("offering__period_id", flat=True)
+        .distinct()
     )
+    all_periods = list(
+        AcademicPeriod.objects.filter(organization=organization, id__in=period_ids).order_by("-start_date")
+    )
+    if not all_periods:  # heç bir qeydiyyat yoxdursa — cari dövrü göstər (boş kartlar)
+        cur = (
+            AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
+            or AcademicPeriod.objects.filter(organization=organization).order_by("-start_date").first()
+        )
+        all_periods = [cur] if cur else []
+    for p in all_periods:
+        p.year_label = p.year_display
+        p.season_label = _season_label(p)
+
+    requested_period = (request.GET.get("period") or "").strip()
+    period = next((p for p in all_periods if str(p.id) == requested_period), None)
+    if period is None:
+        period = next((p for p in all_periods if getattr(p, "is_current", False)), None) or (
+            all_periods[0] if all_periods else None
+        )
+
     section = {"is_student_journal": True, "record": record, "period": period, "subjects": [], "detail": None}
     if period is None:
         return {"journal_student_section": section}
+
+    # Tədris ili seçimləri (RAW academic_year → label) + dövr seçimləri (season).
+    year_label_map = {p.academic_year: p.year_display for p in all_periods}
+    section["year_choices"] = [{"value": y, "label": year_label_map[y]} for y in sorted(year_label_map, reverse=True)]
+    section["period_choices"] = [
+        {"id": str(p.id), "year": p.academic_year, "label": p.season_label} for p in all_periods
+    ]
+    section["selected_year"] = period.academic_year
+    section["selected_period_id"] = str(period.id)
+    section["academic_year"] = period.year_display
+    section["season_label"] = getattr(period, "season_label", "")
 
     semester_number = _resolve_semester_number(request)
     summary = gradebook.get_student_journal_summary(record=record, period=period, semester_number=semester_number)
@@ -148,13 +185,6 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         row["teacher"] = getattr(row["enrollment"].offering, "instructor", None)
     section["subjects"] = summary["subjects"]
     section["semester_number"] = semester_number
-    # Semestr seçicisi: proqram müddətinə görə (bakalavr 8, magistr 4) — yoxdursa 8.
-    _sem_count = 8
-    degree = getattr(getattr(record, "program", None), "degree_level", "") or ""
-    if degree == "master":
-        _sem_count = 4
-    section["semester_options"] = list(range(1, _sem_count + 1))
-    section["academic_year"] = getattr(period, "year_display", None) or getattr(period, "academic_year", "")
     # Başqa fənlər üzrə limit xəbərdarlıqları (mockup: alt qırmızı çip).
     section["warnings"] = [
         row

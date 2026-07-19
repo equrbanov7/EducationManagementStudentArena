@@ -29999,8 +29999,12 @@ msgstr ""
 "istəkləriniz üçün bizə yazın."
 
 #, python-format
-msgid "%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
-msgstr "%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+msgid ""
+"%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+"Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
+msgstr ""
+"%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+"Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
 
 #, python-format
 msgid "%(brand)s — Sınaq imtahanınız hazırdır: %(subject)s"
@@ -30033,10 +30037,12 @@ msgstr "Re: [%(brand)s] %(subject)s"
 #, python-format
 msgid ""
 "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s sistemində"
-" "
+" yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz "
+"və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 msgstr ""
 "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s sistemində"
-" "
+" yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz "
+"və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 
 #, python-format
 msgid "Sınaq imtahanı – %(brand)s"
@@ -30053,6 +30059,42 @@ msgstr "[%(brand)s Sınaq] %(subject)s — %(name)s"
 #, python-format
 msgid "Əlaqə – %(brand)s"
 msgstr "Əlaqə – %(brand)s"
+
+msgctxt "registrar.journal"
+msgid "NƏTİCƏ"
+msgstr "NƏTİCƏ"
+
+msgctxt "registrar.journal"
+msgid "iştirak (i/e)"
+msgstr "iştirak (i/e)"
+
+msgctxt "registrar.journal"
+msgid "qayıb (q/b)"
+msgstr "qayıb (q/b)"
+
+msgctxt "registrar.journal"
+msgid "üzrlü (üq)"
+msgstr "üzrlü (üq)"
+
+msgctxt "registrar.journal"
+msgid "bal yazılıb"
+msgstr "bal yazılıb"
+
+msgctxt "registrar.journal"
+msgid "qeyd edilib"
+msgstr "qeyd edilib"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti"
+msgstr "Gün özəti"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti (redaktə vaxtı keçib)"
+msgstr "Gün özəti (redaktə vaxtı keçib)"
+
+msgctxt "registrar.journal"
+msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
+msgstr "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"

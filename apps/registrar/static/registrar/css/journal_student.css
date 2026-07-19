@@ -178,3 +178,10 @@
 .sjx-day-row:last-child { border-bottom: none; }
 .sjx-day-key { color: #64748b; font-weight: 600; }
 .sjx-day-corrnote { margin-top: 0.75rem; font-size: 0.8rem; color: #92600a; background: #fffdf5; border: 1px solid #f2c94c; border-radius: 8px; padding: 0.5rem 0.7rem; }
+
+/* FAZA B düzəliş: tədris ili + yarım il seçicisi (2 dropdown) + birləşmiş nəticə sütunu */
+.sjx-term { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.sjx-term-field { display: flex; flex-direction: column; gap: 3px; }
+.sjx-term-field .sjx-term-label { font-size: 0.72rem; font-weight: 700; color: #5b6b8c; letter-spacing: 0.03em; }
+.sjx-th-result { text-align: center; width: 96px; }
+.sjx-result-cell { text-align: center; font-weight: 700; }

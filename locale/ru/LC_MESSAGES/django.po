@@ -30727,7 +30727,7 @@ msgstr "№ · ФАМИЛИЯ ИМЯ"
 
 msgctxt "registrar.correction"
 msgid "İştirak (iə)"
-msgstr "Присутствие (пр)"
+msgstr "Присутствие (п)"
 
 msgctxt "registrar.correction"
 msgid "Qayıb (qb)"
@@ -30750,7 +30750,9 @@ msgstr ""
 "сотрудничестве."
 
 #, python-format
-msgid "%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+msgid ""
+"%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+"Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
 msgstr ""
 "%(brand)s — платформа управления образованием, LMS и онлайн-экзаменов. "
 "Узнайте о нашей команде, миссии и возможностях платформы."
@@ -30786,7 +30788,8 @@ msgstr "Re: [%(brand)s] %(subject)s"
 #, python-format
 msgid ""
 "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s sistemində"
-" "
+" yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz "
+"və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 msgstr ""
 "Здравствуйте! На основе отправленных вами вопросов в %(brand)s создан ваш "
 "пробный экзамен. Войдите в аккаунт и проходите его бесплатно и без "
@@ -30807,6 +30810,42 @@ msgstr "[%(brand)s Пробный] %(subject)s — %(name)s"
 #, python-format
 msgid "Əlaqə – %(brand)s"
 msgstr "Контакты – %(brand)s"
+
+msgctxt "registrar.journal"
+msgid "NƏTİCƏ"
+msgstr "РЕЗУЛЬТАТ"
+
+msgctxt "registrar.journal"
+msgid "iştirak (i/e)"
+msgstr "присутствие (п)"
+
+msgctxt "registrar.journal"
+msgid "qayıb (q/b)"
+msgstr "пропуск (пр)"
+
+msgctxt "registrar.journal"
+msgid "üzrlü (üq)"
+msgstr "уважит. (у)"
+
+msgctxt "registrar.journal"
+msgid "bal yazılıb"
+msgstr "оценено"
+
+msgctxt "registrar.journal"
+msgid "qeyd edilib"
+msgstr "отмечено"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti"
+msgstr "Сводка дня"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti (redaktə vaxtı keçib)"
+msgstr "Сводка дня (время правки истекло)"
+
+msgctxt "registrar.journal"
+msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
+msgstr "Время правки истекло — это сводка только для чтения."
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
