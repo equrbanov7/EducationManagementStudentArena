@@ -143,8 +143,18 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     semester_number = _resolve_semester_number(request)
     summary = gradebook.get_student_journal_summary(record=record, period=period, semester_number=semester_number)
+    # FAZA B: hər fənnin müəllimini kart üçün əlavə et (kiçik N — tələbənin fənləri).
+    for row in summary["subjects"]:
+        row["teacher"] = getattr(row["enrollment"].offering, "instructor", None)
     section["subjects"] = summary["subjects"]
     section["semester_number"] = semester_number
+    # Semestr seçicisi: proqram müddətinə görə (bakalavr 8, magistr 4) — yoxdursa 8.
+    _sem_count = 8
+    degree = getattr(getattr(record, "program", None), "degree_level", "") or ""
+    if degree == "master":
+        _sem_count = 4
+    section["semester_options"] = list(range(1, _sem_count + 1))
+    section["academic_year"] = getattr(period, "year_display", None) or getattr(period, "academic_year", "")
     # Başqa fənlər üzrə limit xəbərdarlıqları (mockup: alt qırmızı çip).
     section["warnings"] = [
         row
@@ -156,10 +166,9 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         )
     ]
 
+    # FAZA B: ?subject yoxdursa FƏNN KARTLARI göstərilir (avtomatik açılış yox) —
+    # müəllim jurnalı kimi: kartlar → klik → cədvəl.
     selected = (request.GET.get("subject") or "").strip()
-    if not selected and summary["subjects"]:
-        # Mockup davranışı: parametr yoxdursa ilk fənn avtomatik açılır.
-        selected = str(summary["subjects"][0]["enrollment"].id)
     if not selected:
         return {"journal_student_section": section}
 
@@ -203,9 +212,20 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             "parity": gradebook._lesson_parity(offering, m.lesson),
             "kollokvium": koll_by_date.get(m.lesson.date),
             "corrected": str(m.id) in corr_map,
+            # Dərs tipi (mühazirə/seminar/lab) — cədvəldə sütun + filtr üçün.
+            "kind": m.lesson.kind,
+            "kind_display": m.lesson.get_kind_display(),
+            "teacher": getattr(offering, "instructor", None),
         }
         for m in marks
     ]
+    # Bu fənndə mövcud dərs tipləri (filtr düymələri üçün).
+    section_kinds = []
+    _seen_kinds = set()
+    for m in marks:
+        if m.lesson.kind not in _seen_kinds:
+            _seen_kinds.add(m.lesson.kind)
+            section_kinds.append({"value": m.lesson.kind, "label": m.lesson.get_kind_display()})
 
     selfwork = journal_extras.get_selfwork_board(offering)
     own_selfwork = next((r for r in selfwork["rows"] if r["enrollment"].id == enrollment.id), None)
@@ -234,6 +254,8 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         "subject": offering.subject,
         "marks": marks,
         "history": history,
+        "lesson_kinds": section_kinds,
+        "teacher": getattr(offering, "instructor", None),
         "hidden_today": hidden_today,
         "kollokviums": kollokviums,
         "koll_avg": koll_avg,
