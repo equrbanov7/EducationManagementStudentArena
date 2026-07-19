@@ -72,15 +72,18 @@ jobs:
           bash scripts/deploy/remote_deploy.sh
 
       - name: 🔎 Verify effective config
-        if: ${{ inputs.redeploy }}
+        # Runs even for redeploy=false dispatches (verify-only mode) and never
+        # fails the job on cosmetic issues. NOTE: no `head` on piped docker
+        # output — with pipefail an early-closed pipe (SIGPIPE) kills the step.
+        if: ${{ !cancelled() }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           cd "$APP_DIR"
           echo "── containers ──"
-          docker compose -f docker-compose.prod.yml ps --format 'table {{.Name}}\t{{.Status}}' | head -25
+          docker compose -f docker-compose.prod.yml ps --format '{{.Name}}\t{{.Status}}' || true
           echo "── app: RLS_TRANSACTION_SCOPED (effective in container) ──"
           docker compose -f docker-compose.prod.yml exec -T --index 1 app sh -c 'echo "RLS_TRANSACTION_SCOPED=${RLS_TRANSACTION_SCOPED:-<unset>}"' || true
           echo "── pgbouncer: pool_mode ──"
-          docker compose -f docker-compose.prod.yml exec -T pgbouncer sh -c 'grep -iE "^\s*pool_mode" /etc/pgbouncer/pgbouncer.ini || true' || true
+          docker compose -f docker-compose.prod.yml exec -T pgbouncer sh -c 'grep -iE "pool_mode" /etc/pgbouncer/pgbouncer.ini || true' || true
           echo "── recent app errors (last 100 lines, ERROR only) ──"
-          docker compose -f docker-compose.prod.yml logs --tail 100 app 2>/dev/null | grep -iE "error|traceback" | tail -20 || echo "(no errors)"
+          (docker compose -f docker-compose.prod.yml logs --tail 100 app 2>/dev/null | grep -iE "error|traceback" | tail -20) || echo "(no errors)"
