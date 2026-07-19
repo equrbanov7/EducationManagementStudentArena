@@ -27,7 +27,7 @@
     const limitLabel = panel.dataset.limitLabel || gettext("Sorğular");
     const loadingLabel = panel.dataset.loadingLabel || gettext("yüklənir...");
     const uiText = {
-        greeting: panel.dataset.greeting || gettext("Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"),
+        greeting: panel.dataset.greeting || gettext("Salam! Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"),
         limitDisabled: panel.dataset.limitDisabledMessage || gettext("AI sorğu limiti hazırda aktiv deyil."),
         sendFailed: panel.dataset.sendFailedMessage || gettext("Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."),
         genericError: panel.dataset.genericErrorMessage || gettext("Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."),

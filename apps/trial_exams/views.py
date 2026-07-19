@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
@@ -55,8 +56,9 @@ def _initial_from_user(request: HttpRequest) -> dict:
 @require_http_methods(["GET", "POST"])
 def trial_exam_request_page(request: HttpRequest) -> HttpResponse:
     """Render the trial-exam request page and process submissions."""
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     seo_context = {
-        "seo_title": _("Sınaq imtahanı – EMSArena"),
+        "seo_title": _("Sınaq imtahanı – %(brand)s") % {"brand": brand},
         "seo_description": _(
             "Pulsuz və limitsiz sınaq imtahanı yarat: suallarını PDF formatında "
             "yüklə, komandamız gün ərzində sistemə əlavə etsin."

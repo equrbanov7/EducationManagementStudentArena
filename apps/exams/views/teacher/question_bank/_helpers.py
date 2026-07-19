@@ -4,6 +4,7 @@ import logging
 import re
 from urllib.parse import urlencode, urlsplit
 
+from django.conf import settings
 from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
@@ -420,8 +421,10 @@ def _warning_reference_text(warning):
     return ""
 
 
-_QUESTION_BANK_TEMPLATE_TXT = """\
-# EMSArena — Test sual bankı şablonu
+def _question_bank_template_txt():
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    return f"""\
+# {brand} — Test sual bankı şablonu
 # Hər sualın 4 və ya 5 variantı olmalıdır (A–E). Düz cavabı 3 üsuldan biri ilə qeyd edə bilərsiniz.
 # 1) Cavabı sual sonunda yazın: "Cavab: B"
 # 2) Düz variantın əvvəlinə * qoyun: "*B) Mətnim"

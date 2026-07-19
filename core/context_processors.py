@@ -39,13 +39,13 @@ SITE_ORIGIN = getattr(settings, "SITE_URL", "https://127.0.0.1").rstrip("/")
 # White-labelled per deployment via settings.SITE_BRAND_NAME (default: the
 # Western Caspian University). Kept as a module attribute for backwards compat.
 ORG_NAME = getattr(settings, "SITE_BRAND_NAME", "Qərbi Kaspi Universiteti")
+# Deployment brand drives the SEO description — no hardcoded vendor name.
 ORG_DESCRIPTION_AZ = (
-    "EMSArena universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün "
-    "LMS, onlayn imtahan, elektron jurnal, qiymətləndirmə və analitika "
-    "platformasıdır."
+    f"{ORG_NAME} — universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün "
+    "LMS, onlayn imtahan, elektron jurnal, qiymətləndirmə və analitika platforması."
 )
 ORG_DESCRIPTION_EN = (
-    "EMSArena is a modern LMS, education management and online exam platform "
+    f"{ORG_NAME} is a modern LMS, education management and online exam platform "
     "for universities, schools, training centers, teachers and students."
 )
 
@@ -54,10 +54,10 @@ DEFAULT_DESCRIPTIONS = {
     "az": ORG_DESCRIPTION_AZ,
     "en": ORG_DESCRIPTION_EN,
     "ru": (
-        "EMSArena — современная платформа LMS, управления образованием и "
+        f"{ORG_NAME} — современная платформа LMS, управления образованием и "
         "онлайн-экзаменов для университетов, школ и учебных центров."
     ),
-    "tr": ("EMSArena; üniversiteler, okullar ve kurs merkezleri için LMS, " "online sınav ve e-günlük platformudur."),
+    "tr": (f"{ORG_NAME}; üniversiteler, okullar ve kurs merkezleri için LMS, online sınav ve e-günlük platformudur."),
 }
 
 DEFAULT_KEYWORDS = (
@@ -182,4 +182,8 @@ def feature_flags(request):
         "site_brand_name": pgettext("brand", getattr(settings, "SITE_BRAND_NAME", "Qərbi Kaspi Universiteti")),
         "site_brand_short": getattr(settings, "SITE_BRAND_SHORT", "QKU"),
         "university_mode": bool(getattr(settings, "UNIVERSITY_MODE", True)),
+        # Deployment contact addresses (footer / contact page) — env-configurable,
+        # brand-neutral fallback. Avoids hardcoding a vendor inbox in templates.
+        "contact_public_email": getattr(settings, "CONTACT_PUBLIC_EMAIL", ""),
+        "contact_support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", ""),
     }
