@@ -3,14 +3,11 @@
 (function () {
   "use strict";
 
-  // ── Semestr seçici → bölməni yenilə (?semester=N) ──
-  document.addEventListener("change", function (ev) {
-    var sel = ev.target.closest("[data-sjx-semester]");
-    if (!sel) return;
-    var base = sel.getAttribute("data-base-url") || "/accounts/profile/";
-    var url = base + "?section=my-journal&semester=" + encodeURIComponent(sel.value);
-    // Profil SPA linki kimi getmək üçün gizli keçid yaradıb klikləyirik
-    // (mövcud ajax.js delegasiyası tutub AJAX yükləyir; tutmasa tam keçid).
+  // ── Tədris ili + yarım il seçicisi → bölməni ?period=<id> ilə yenilə ──
+  function gotoPeriod(periodId) {
+    var term = document.querySelector("[data-sjx-term]") || document.querySelector(".sjx-term");
+    var base = (term && term.getAttribute("data-base-url")) || "/accounts/profile/";
+    var url = base + "?section=my-journal&period=" + encodeURIComponent(periodId);
     var a = document.createElement("a");
     a.href = url;
     a.className = "js-profile-section-link";
@@ -20,6 +17,27 @@
     a.click();
     setTimeout(function () { a.remove(); }, 0);
     if (!document.querySelector("[data-profile-sections-host]")) window.location.href = url;
+  }
+
+  document.addEventListener("change", function (ev) {
+    // Tədris ili dəyişəndə: həmin ilin yarım-illərini göstər + ilkini seç.
+    var yearSel = ev.target.closest("[data-sjx-year]");
+    if (yearSel) {
+      var year = yearSel.value;
+      var periodSel = document.querySelector("[data-sjx-period]");
+      if (!periodSel) return;
+      var first = null;
+      Array.prototype.forEach.call(periodSel.options, function (opt) {
+        var match = opt.getAttribute("data-year") === year;
+        opt.hidden = !match;
+        if (match && first === null) first = opt.value;
+      });
+      if (first) gotoPeriod(first);
+      return;
+    }
+    // Yarım il dəyişəndə: birbaşa həmin dövrə keç.
+    var periodSel2 = ev.target.closest("[data-sjx-period]");
+    if (periodSel2) gotoPeriod(periodSel2.value);
   });
 
   // ── Dərs tipi filtri ──

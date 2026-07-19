@@ -30347,73 +30347,75 @@ msgstr "You passed this subject."
 
 msgctxt "registrar.attendance"
 msgid "Excused absence"
-msgstr ""
+msgstr "Excused absence"
 
 msgctxt "registrar.correction_reason"
 msgid "Medical certificate"
-msgstr ""
+msgstr "Medical certificate"
 
 msgctxt "registrar.correction_reason"
 msgid "Official leave / permission"
-msgstr ""
+msgstr "Official leave / permission"
 
 msgctxt "registrar.correction_reason"
 msgid "Data-entry error"
-msgstr ""
+msgstr "Data-entry error"
 
 msgctxt "registrar.correction_reason"
 msgid "Appeal decision"
-msgstr ""
+msgstr "Appeal decision"
 
 msgctxt "registrar.correction_reason"
 msgid "Other (see note)"
-msgstr ""
+msgstr "Other (see note)"
 
 msgctxt "registrar.correction_field"
 msgid "Attendance"
-msgstr ""
+msgstr "Attendance"
 
 msgctxt "registrar.correction_field"
 msgid "Score"
-msgstr ""
+msgstr "Score"
 
 msgctxt "registrar.exam_bridge"
 msgid ""
 "You are not admitted to the exam: %(hours)s absence hours exceed the "
 "%(limit)s%% limit for this subject."
 msgstr ""
+"You are not admitted to the exam: %(hours)s absence hours exceed the "
+"%(limit)s%% limit for this subject."
 
 msgctxt "registrar.correction"
 msgid "A justification document (PDF) is required."
-msgstr ""
+msgstr "A justification document (PDF) is required."
 
 msgctxt "registrar.correction"
 msgid "A note explaining the correction is required."
-msgstr ""
+msgstr "A note explaining the correction is required."
 
 msgctxt "registrar.correction"
 msgid "Choose a correction reason."
-msgstr ""
+msgstr "Choose a correction reason."
 
 msgctxt "registrar.correction"
 msgid "Choose the new attendance value."
-msgstr ""
+msgstr "Choose the new attendance value."
 
 msgctxt "registrar.correction"
 msgid "Choose what to correct: attendance or score."
-msgstr ""
+msgstr "Choose what to correct: attendance or score."
 
 msgctxt "registrar.correction"
 msgid "Lecture cells hold no score — only attendance can be corrected."
-msgstr ""
+msgstr "Lecture cells hold no score — only attendance can be corrected."
 
 msgctxt "registrar.correction"
 msgid "Score must be a whole number."
-msgstr ""
+msgstr "Score must be a whole number."
 
 msgctxt "registrar.correction"
 msgid "Score must be between 0 and %(max)s."
-msgstr ""
+msgstr "Score must be between 0 and %(max)s."
 
 msgctxt "registrar.notify"
 msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
@@ -30604,7 +30606,9 @@ msgstr ""
 "and collaboration requests."
 
 #, python-format
-msgid "%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+msgid ""
+"%(brand)s təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+"Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
 msgstr ""
 "%(brand)s is an education-management, LMS and online-exam platform. Learn "
 "about our team, mission and the platform's capabilities."
@@ -30640,7 +30644,8 @@ msgstr "Re: [%(brand)s] %(subject)s"
 #, python-format
 msgid ""
 "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız %(brand)s sistemində"
-" "
+" yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz "
+"və limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 msgstr ""
 "Hello! Based on the questions you sent, your trial exam has been created in "
 "%(brand)s. Log in to your account and take it for free and without limits "
@@ -30661,6 +30666,42 @@ msgstr "[%(brand)s Trial] %(subject)s — %(name)s"
 #, python-format
 msgid "Əlaqə – %(brand)s"
 msgstr "Contact – %(brand)s"
+
+msgctxt "registrar.journal"
+msgid "NƏTİCƏ"
+msgstr "RESULT"
+
+msgctxt "registrar.journal"
+msgid "iştirak (i/e)"
+msgstr "present (p)"
+
+msgctxt "registrar.journal"
+msgid "qayıb (q/b)"
+msgstr "absent (a)"
+
+msgctxt "registrar.journal"
+msgid "üzrlü (üq)"
+msgstr "excused (e)"
+
+msgctxt "registrar.journal"
+msgid "bal yazılıb"
+msgstr "scored"
+
+msgctxt "registrar.journal"
+msgid "qeyd edilib"
+msgstr "recorded"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti"
+msgstr "Day summary"
+
+msgctxt "registrar.journal"
+msgid "Gün özəti (redaktə vaxtı keçib)"
+msgstr "Day summary (edit window passed)"
+
+msgctxt "registrar.journal"
+msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
+msgstr "The edit window has passed — this is a read-only summary."
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
