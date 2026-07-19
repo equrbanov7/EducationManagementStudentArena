@@ -11,11 +11,13 @@
         <form method="get" class="analytics-period-form">
             {% if analytics_embedded %}<input type="hidden" name="section" value="analytics">{% endif %}
             <label class="analytics-period-label" for="analytics-period">{% trans "Semestr" context "registrar.analytics" %}</label>
-            <select id="analytics-period" name="period" class="analytics-period-select" data-autosubmit>
-                {% for p in periods %}
-                <option value="{{ p.id }}" {% if analytics.period and p.id == analytics.period.id %}selected{% endif %}>{{ p.name }} · {{ p.year_display }}</option>
-                {% endfor %}
-            </select>
+            <div class="bootstrap-single-select">
+                <select id="analytics-period" name="period" class="analytics-period-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-autosubmit data-bootstrap-select>
+                    {% for p in periods %}
+                    <option value="{{ p.id }}" {% if analytics.period and p.id == analytics.period.id %}selected{% endif %}>{{ p.name }} · {{ p.year_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <noscript><button type="submit" class="journal-save-btn">{% trans "Göstər" context "registrar.analytics" %}</button></noscript>
         </form>
         {% endif %}

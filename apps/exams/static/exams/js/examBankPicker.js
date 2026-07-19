@@ -59,9 +59,26 @@
       return values;
     }
 
+    var SKELETON_TOOLBAR =
+      '<div class="bankpicker-toolbar">' +
+      '<span class="skeleton skeleton-block" style="height:44px;flex:2 1 220px"></span>' +
+      '<span class="skeleton skeleton-block" style="height:44px;flex:2 1 200px"></span>' +
+      '<span class="skeleton skeleton-block" style="height:44px;flex:1 1 140px"></span>' +
+      '<span class="skeleton skeleton-block" style="height:44px;flex:1 1 140px"></span>' +
+      "</div>";
+    var SKELETON_ITEM =
+      '<div class="bankpicker-item"><div style="display:flex;flex-direction:column;gap:.4rem;width:100%">' +
+      '<span class="skeleton skeleton-line" style="width:80%"></span>' +
+      '<span class="skeleton skeleton-line skeleton-line--sm" style="width:40%"></span></div></div>';
+
+    function skeletonItems(n) {
+      var out = "";
+      for (var i = 0; i < n; i++) out += SKELETON_ITEM;
+      return out;
+    }
+
     function setBodyLoading() {
-      body.innerHTML =
-        gettext('<div class="bankpicker-loading"><span class="bankpicker-spinner" aria-hidden="true"></span> Yüklənir...</div>');
+      body.innerHTML = '<div class="bankpicker-skeleton" aria-hidden="true">' + SKELETON_TOOLBAR + skeletonItems(4) + "</div>";
     }
 
     // ── Açılış: tam modal gövdəsi ──
@@ -96,8 +113,7 @@
       var params = currentControls();
       params.content = "1";
       params.page = "1";
-      holder.innerHTML =
-        gettext('<div class="bankpicker-loading"><span class="bankpicker-spinner" aria-hidden="true"></span> Yüklənir...</div>');
+      holder.innerHTML = '<div class="bankpicker-skeleton" aria-hidden="true">' + skeletonItems(4) + "</div>";
       fetch(buildUrl(params), { headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" })
         .then(function (r) { return r.text(); })
         .then(function (html) {

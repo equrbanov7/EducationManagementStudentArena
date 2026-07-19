@@ -29,31 +29,37 @@
                     </div>
                     <div class="post-mgmt-filters__field">
                         <label for="filter-org">{% trans 'Təşkilat' %}</label>
-                        <select id="filter-org" name="org" class="form-control">
-                            <option value="">{% trans 'Hamısı' %}</option>
-                            {% for org in organizations %}
-                                <option value="{{ org.id }}" {% if org_filter == org.id|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select id="filter-org" name="org" class="form-control form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                <option value="">{% trans 'Hamısı' %}</option>
+                                {% for org in organizations %}
+                                    <option value="{{ org.id }}" {% if org_filter == org.id|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                     <div class="post-mgmt-filters__field">
                         <label for="filter-role">{% trans 'Rol' %}</label>
-                        <select id="filter-role" name="role" class="form-control">
-                            <option value="">{% trans 'Hamısı' %}</option>
-                            {% for value, label in role_choices %}
-                                <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select id="filter-role" name="role" class="form-control form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                <option value="">{% trans 'Hamısı' %}</option>
+                                {% for value, label in role_choices %}
+                                    <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                     <div class="post-mgmt-filters__field">
                         <label for="filter-status">{% trans 'Status' %}</label>
-                        <select id="filter-status" name="status" class="form-control">
-                            <option value="">{% trans 'Hamısı' %}</option>
-                            <option value="published" {% if status_filter == "published" %}selected{% endif %}>{% trans 'Yayımlanmış' %}</option>
-                            <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>{% trans 'Qaralama' %}</option>
-                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>{% trans 'Təsdiq gözləyir' %}</option>
-                            <option value="needs_changes" {% if status_filter == "needs_changes" %}selected{% endif %}>{% trans 'Düzəliş tələb olunur' %}</option>
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select id="filter-status" name="status" class="form-control form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                <option value="">{% trans 'Hamısı' %}</option>
+                                <option value="published" {% if status_filter == "published" %}selected{% endif %}>{% trans 'Yayımlanmış' %}</option>
+                                <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>{% trans 'Qaralama' %}</option>
+                                <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>{% trans 'Təsdiq gözləyir' %}</option>
+                                <option value="needs_changes" {% if status_filter == "needs_changes" %}selected{% endif %}>{% trans 'Düzəliş tələb olunur' %}</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="post-mgmt-filters__row">

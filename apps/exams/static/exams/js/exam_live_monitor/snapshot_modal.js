@@ -234,7 +234,14 @@
   function openModal(ctx, attemptId) {
     ctx.currentAttempt = attemptId;
     ctx.modal.classList.add("show");
-    u.$("modalBody").innerHTML = gettext('<div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>Yüklənir…</p></div>');
+    u.$("modalBody").innerHTML =
+      '<div class="mon-grid" aria-hidden="true">' +
+      '<div class="mon-metric"><span class="skeleton skeleton-line" style="width:60%;margin:0 auto"></span></div>' +
+      '<div class="mon-metric"><span class="skeleton skeleton-line" style="width:60%;margin:0 auto"></span></div>' +
+      '<div class="mon-metric"><span class="skeleton skeleton-line" style="width:60%;margin:0 auto"></span></div>' +
+      '</div>' +
+      '<div class="skeleton skeleton-line skeleton-line--sm" aria-hidden="true"></div>' +
+      '<div class="skeleton skeleton-block" style="height:70px;margin-top:8px" aria-hidden="true"></div>';
     ["modalResumeBtn", "modalPauseBtn", "modalStopBtn"].forEach(function (b) { u.$(b).style.display = "none"; });
     fetch(ctx.SNAPSHOT_BASE + attemptId + "/", { headers: { "X-Requested-With": "XMLHttpRequest" } })
       .then(function (r) { return r.json(); })

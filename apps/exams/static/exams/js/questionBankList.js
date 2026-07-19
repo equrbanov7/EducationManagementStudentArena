@@ -53,7 +53,11 @@
         editForm.action = btn.getAttribute("data-update-url") || "";
         var set = function (id, val) {
           var el = document.getElementById(id);
-          if (el) el.value = val;
+          if (!el) return;
+          el.value = val;
+          // Bootstrap-select toggle native dəyər dəyişimini "change" event-i kimi
+          // eşitmir (proqramla təyin olunub) — görünüşü əl ilə sinxronlaşdırırıq.
+          if (el._syncBootstrapSelect) el._syncBootstrapSelect();
         };
 
         set("editBankName2", btn.getAttribute("data-name") || "");

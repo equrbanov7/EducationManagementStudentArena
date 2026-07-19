@@ -87,11 +87,13 @@
                 <input type="hidden" name="action" value="add_variant">
                 <div class="qb-field">
                     <label class="qb-field__label" for="add_language">{% trans "Dil" %}</label>
-                    <select class="qb-select" id="add_language" name="language">
-                        {% for code, label in addable_languages %}
-                        <option value="{{ code }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select class="qb-select form-select bootstrap-single-select__native js-bootstrap-single-select" id="add_language" name="language" data-bootstrap-select>
+                            {% for code, label in addable_languages %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="qb-field">
                     <label class="qb-field__label" for="add_display_name">{% trans "Göstəriş adı (opsional)" %}</label>

@@ -78,16 +78,18 @@
     <input type="search" id="fxc-filter" class="fxc-input"
            placeholder="{% trans 'Tələbə adı və ya istifadəçi adı üzrə süz…' %}"
            aria-label="{% trans 'Tələbə axtarışı' %}">
-    <select id="fxc-status-filter" class="fxc-input fxc-input--select" aria-label="{% trans 'Status filtri' %}">
-      <option value="">{% trans "Bütün statuslar" %}</option>
-      <option value="assigned">{% trans "Təyin olunub" %}</option>
-      <option value="waiting">{% trans "Gözləyir" %}</option>
-      <option value="ready">{% trans "Hazır" %}</option>
-      <option value="active">{% trans "İmtahanda" %}</option>
-      <option value="completed">{% trans "Bitirib" %}</option>
-      <option value="removed">{% trans "Çıxarılıb" %}</option>
-      <option value="absent">{% trans "Gəlməyib" %}</option>
-    </select>
+    <div class="bootstrap-single-select">
+      <select id="fxc-status-filter" class="fxc-input fxc-input--select form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select aria-label="{% trans 'Status filtri' %}">
+        <option value="">{% trans "Bütün statuslar" %}</option>
+        <option value="assigned">{% trans "Təyin olunub" %}</option>
+        <option value="waiting">{% trans "Gözləyir" %}</option>
+        <option value="ready">{% trans "Hazır" %}</option>
+        <option value="active">{% trans "İmtahanda" %}</option>
+        <option value="completed">{% trans "Bitirib" %}</option>
+        <option value="removed">{% trans "Çıxarılıb" %}</option>
+        <option value="absent">{% trans "Gəlməyib" %}</option>
+      </select>
+    </div>
   </div>
 
   {# ── Kompüter xəritəsi (nömrələr = kompüter/yer nömrələri) ── #}
@@ -124,7 +126,19 @@
         </tr>
       </thead>
       <tbody id="fxc-student-rows">
-        <tr><td colspan="9" class="fxc-muted fxc-center">{% trans "Yüklənir…" %}</td></tr>
+        {% for _ in "123"|make_list %}
+        <tr aria-hidden="true">
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+          <td><span class="skeleton skeleton-line"></span></td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
@@ -194,11 +208,13 @@
     <p class="fxc-modal-student" id="fxc-remove-student">—</p>
     <div class="fxc-field">
       <label for="fxc-remove-action">{% trans "Əməliyyat növü" %}</label>
-      <select id="fxc-remove-action" class="fxc-input fxc-input--select">
-        <option value="suspended">{% trans "Müvəqqəti dayandır (ekran kilidlənir, davam etdirilə bilər)" %}</option>
-        <option value="removed">{% trans "İmtahandan çıxar (cəhd təhvil verilir)" %}</option>
-        <option value="technical">{% trans "Texniki fasilə kimi qeyd et (çıxarılır, qeyd texniki)" %}</option>
-      </select>
+      <div class="bootstrap-single-select">
+        <select id="fxc-remove-action" class="fxc-input fxc-input--select form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+          <option value="suspended">{% trans "Müvəqqəti dayandır (ekran kilidlənir, davam etdirilə bilər)" %}</option>
+          <option value="removed">{% trans "İmtahandan çıxar (cəhd təhvil verilir)" %}</option>
+          <option value="technical">{% trans "Texniki fasilə kimi qeyd et (çıxarılır, qeyd texniki)" %}</option>
+        </select>
+      </div>
     </div>
     <div class="fxc-field">
       <label for="fxc-remove-reason">{% trans "Səbəb (məcburi)" %}</label>

@@ -153,7 +153,12 @@
     if (aiBtn && aiContent) {
         aiBtn.addEventListener("click", function() {
             aiBtn.disabled = true;
-            aiContent.innerHTML = '<div class="sd-ai-loading"><i class="fas fa-spinner fa-spin"></i> {% trans "ai_loading" context "exams.template.exam_statistics" %}</div>';
+            aiContent.innerHTML = '<div class="sd-ai-loading" aria-hidden="true">' +
+                '<div style="display:flex;flex-direction:column;gap:.5rem;width:100%">' +
+                '<span class="skeleton skeleton-line skeleton-line--lg"></span>' +
+                '<span class="skeleton skeleton-line"></span>' +
+                '<span class="skeleton skeleton-line skeleton-line--sm"></span>' +
+                '</div></div>';
 
             var currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set("ai_summary", "1");

@@ -62,20 +62,22 @@
             <div class="info-grid profile-form-grid mt-3">
                 <div class="info-item">
                     <label class="info-label" for="organization_type">{% trans "organization_type" context "profile.edit" %}</label>
-                    <select class="form-select" id="organization_type" name="organization_type" disabled aria-disabled="true">
-                        <option value="individual" {% if profile.organization_type == 'individual' %}selected{% endif %}>
-                            {% trans "org_type_individual" context "profile.edit" %}
-                        </option>
-                        <option value="school" {% if profile.organization_type == 'school' %}selected{% endif %}>
-                            {% trans "org_type_school" context "profile.edit" %}
-                        </option>
-                        <option value="university" {% if profile.organization_type == 'university' %}selected{% endif %}>
-                            {% trans "org_type_university" context "profile.edit" %}
-                        </option>
-                        <option value="course_center" {% if profile.organization_type == 'course_center' %}selected{% endif %}>
-                            {% trans "org_type_course_center" context "profile.edit" %}
-                        </option>
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="organization_type" name="organization_type" disabled aria-disabled="true" data-bootstrap-select>
+                            <option value="individual" {% if profile.organization_type == 'individual' %}selected{% endif %}>
+                                {% trans "org_type_individual" context "profile.edit" %}
+                            </option>
+                            <option value="school" {% if profile.organization_type == 'school' %}selected{% endif %}>
+                                {% trans "org_type_school" context "profile.edit" %}
+                            </option>
+                            <option value="university" {% if profile.organization_type == 'university' %}selected{% endif %}>
+                                {% trans "org_type_university" context "profile.edit" %}
+                            </option>
+                            <option value="course_center" {% if profile.organization_type == 'course_center' %}selected{% endif %}>
+                                {% trans "org_type_course_center" context "profile.edit" %}
+                            </option>
+                        </select>
+                    </div>
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="student_specialization">{% trans "specialization" context "profile.edit" %}</label>

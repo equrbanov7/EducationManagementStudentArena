@@ -129,6 +129,12 @@
             menu.innerHTML = "";
 
             Array.prototype.forEach.call(select.options, function (option, index) {
+                // Gizli option-ları menyuda göstərmə (native select davranışı) —
+                // kaskad/il filtri `option.hidden` ilə süzərsə, styled menyu da
+                // yalnız uyğun seçimləri göstərsin (məs. tələbə jurnalı yarım-il).
+                if (option.hidden) {
+                    return;
+                }
                 var optionButton = document.createElement("button");
                 var isPlaceholder = index === 0 && !option.value;
 
