@@ -311,10 +311,17 @@ def _build_exam_items(page_object_list, user, request, live_map):
         else:
             access_label = pgettext("exams.view.student.list.label", "access_allowed_only")
 
+        # Elektron jurnal buraxılış statusu: fənn üzrə qayıb limiti keçilibsə
+        # kartda "imtahana buraxılmırsınız + səbəb" göstərilir (start da bloklanır).
+        from apps.exams.services.journal_sync import registrar_block_reason
+
+        journal_block_reason = registrar_block_reason(request, exam)
+
         exam_items.append(
             {
                 "exam": exam,
                 "left": left,
+                "journal_block_reason": journal_block_reason,
                 "attempt_count": exam.user_attempt_count or 0,
                 "requires_code": requires_code,
                 "access_label": access_label,

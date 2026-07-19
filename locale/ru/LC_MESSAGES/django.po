@@ -30382,3 +30382,103 @@ msgstr "Post İdarəetmə - %(org_name)s"
 #. white-label brand rebrand (auto-appended, source-mirrored)
 msgid "%(item_type)s nəticəsi"
 msgstr "%(item_type)s nəticəsi"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_journal_result"
+msgstr "Результат журнала"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_entry_score"
+msgstr "Входной балл"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_exam_score"
+msgstr "Экзаменационный балл"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_total_score"
+msgstr "Итоговый балл"
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_barred"
+msgstr "Вы не допущены к экзамену (лимит пропусков)."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_failed"
+msgstr "Вы не сдали этот предмет."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_journal_passed"
+msgstr "Вы сдали этот предмет."
+
+msgctxt "registrar.attendance"
+msgid "Excused absence"
+msgstr "Уважительный пропуск"
+
+msgctxt "registrar.correction_reason"
+msgid "Medical certificate"
+msgstr "Медицинская справка"
+
+msgctxt "registrar.correction_reason"
+msgid "Official leave / permission"
+msgstr "Официальное разрешение"
+
+msgctxt "registrar.correction_reason"
+msgid "Data-entry error"
+msgstr "Ошибка ввода данных"
+
+msgctxt "registrar.correction_reason"
+msgid "Appeal decision"
+msgstr "Решение по апелляции"
+
+msgctxt "registrar.correction_reason"
+msgid "Other (see note)"
+msgstr "Другое (см. примечание)"
+
+msgctxt "registrar.correction_field"
+msgid "Attendance"
+msgstr "Посещаемость"
+
+msgctxt "registrar.correction_field"
+msgid "Score"
+msgstr "Балл"
+
+msgctxt "registrar.exam_bridge"
+msgid "You are not admitted to the exam: %(hours)s absence hours exceed the %(limit)s%% limit for this subject."
+msgstr "Вы не допущены к экзамену: %(hours)s часов пропусков превышают лимит %(limit)s%% по этому предмету."
+
+msgctxt "registrar.correction"
+msgid "A justification document (PDF) is required."
+msgstr "Требуется подтверждающий документ (PDF)."
+
+msgctxt "registrar.correction"
+msgid "A note explaining the correction is required."
+msgstr "Требуется примечание с пояснением исправления."
+
+msgctxt "registrar.correction"
+msgid "Choose a correction reason."
+msgstr "Выберите причину исправления."
+
+msgctxt "registrar.correction"
+msgid "Choose the new attendance value."
+msgstr "Выберите новое значение посещаемости."
+
+msgctxt "registrar.correction"
+msgid "Choose what to correct: attendance or score."
+msgstr "Выберите, что исправить: посещаемость или балл."
+
+msgctxt "registrar.correction"
+msgid "Lecture cells hold no score — only attendance can be corrected."
+msgstr "В лекционной ячейке нет балла — можно исправить только посещаемость."
+
+msgctxt "registrar.correction"
+msgid "Score must be a whole number."
+msgstr "Балл должен быть целым числом."
+
+msgctxt "registrar.correction"
+msgid "Score must be between 0 and %(max)s."
+msgstr "Балл должен быть от 0 до %(max)s."
+
+msgctxt "registrar.notify"
+msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
+msgstr "В вашем журнале внесено официальное исправление — подробности в журнале"

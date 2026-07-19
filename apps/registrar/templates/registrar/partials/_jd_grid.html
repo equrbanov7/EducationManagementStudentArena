@@ -71,7 +71,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
                             </td>
                             {% for cell in row.cells %}
-                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}">
+                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">
                                 {% if can_edit and cell.writable %}
                                 <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
                                        value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att>
@@ -103,9 +103,11 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 {% else %}
                                 {% if cell.mark %}
                                     {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb">q/b</span>
+                                    {% elif cell.mark.status == 'excused' %}<span class="jd2-ro jd2-ro--uq">üq</span>
                                     {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie">{{ cell.mark.score|floatformat:'-2' }}</span>
                                     {% else %}<span class="jd2-ro jd2-ro--ie">i/e</span>{% endif %}
                                 {% else %}<span class="jd2-ro jd2-ro--empty">—</span>{% endif %}
+                                {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                                 {% endif %}
                             </td>
                             {% endfor %}

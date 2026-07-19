@@ -215,7 +215,12 @@
                                 <a class="ex-btn ghost" href="{{ item.history_url }}">{% trans "action_my_answers" context "exams.template.student_exam_list" %} ({{ item.attempt_count }})</a>
                             {% endif %}
 
-                            {% if item.is_live %}
+                            {% if item.journal_block_reason %}
+                                <span class="ex-journal-barred" role="status">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                                    {{ item.journal_block_reason }}
+                                </span>
+                            {% elif item.is_live %}
                                 <button type="button"
                                         class="ex-btn join"
                                         data-open-live-pin-modal

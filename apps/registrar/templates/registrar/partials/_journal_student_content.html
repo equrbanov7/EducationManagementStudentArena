@@ -95,7 +95,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 </thead>
                 <tbody>
                     {% for h in d.history %}
-                    <tr class="{% if h.kollokvium %}is-koll{% endif %}">
+                    <tr class="{% if h.kollokvium %}is-koll{% endif %}{% if h.corrected %} sjx-row--fixed{% endif %}">
                         <td class="sjx-date">{{ h.mark.lesson.date|date:"d.m" }}</td>
                         <td>
                             {% if h.parity == 'odd' %}<span class="sgx-chip sgx-chip--ust">ÜST</span>{% else %}<span class="sgx-chip sgx-chip--alt">ALT</span>{% endif %}
@@ -103,9 +103,10 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         <td class="sjx-topic">
                             {{ h.mark.lesson.topic|default:h.mark.lesson.get_kind_display }}
                             {% if h.kollokvium %} — <span class="sjx-kollmark">{{ h.kollokvium.component.name|lower }}</span>{% endif %}
+                            {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                         </td>
                         <td class="sjx-att-cell">
-                            {% if h.mark.status == 'absent' %}<span class="sjx-att sjx-att--qb">q/b</span>{% else %}<span class="sjx-att sjx-att--ie">i/e</span>{% endif %}
+                            {% if h.mark.status == 'absent' %}<span class="sjx-att sjx-att--qb">q/b</span>{% elif h.mark.status == 'excused' %}<span class="sjx-att sjx-att--uq">üq</span>{% else %}<span class="sjx-att sjx-att--ie">i/e</span>{% endif %}
                         </td>
                         <td class="sjx-score-cell">
                             {% if h.kollokvium and h.kollokvium.score is not None %}
@@ -164,5 +165,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
         {% endfor %}
     </div>
     {% endif %}
+
+    {% if d %}{% include "registrar/partials/_correction_history_modal.html" with corrections_map=journal_student_section.corrections_map %}{% endif %}
 </div>
 {% endwith %}

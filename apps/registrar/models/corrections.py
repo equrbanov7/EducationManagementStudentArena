@@ -1,0 +1,92 @@
+"""Jurnal düzəlişləri (üzrlü qayıb / bal korreksiyası) — sənədli audit qeydi.
+
+Superadmin / təşkilat admini (``journal.correct`` icazəsi) müəllimin jurnalına
+girib bir xananı (davamiyyət və ya bal) rəsmi sənəd əsasında düzəldir. Hər
+düzəliş MÜTLƏQ üç şeylə gəlir: səbəb (seçim), qeyd (mətn) və PDF sənəd
+(məs. xəstəlik vərəqəsi). Düzəldənin adı avtomatik profildən götürülür —
+əl ilə dəyişdirilə bilməz. Düzəlişli xana müəllim və tələbə jurnallarında
+sarı rənglə işarələnir; klik tarixçə modalını açır.
+
+Servis qatı: ``apps/registrar/corrections.py`` (2 saatlıq kilidi
+``journal_unlock`` ilə keçir, dəyəri tətbiq edir, audit yazır).
+"""
+
+from __future__ import annotations
+
+from django.conf import settings
+from django.db import models
+from django.utils.translation import pgettext_lazy
+
+from core.models import TimeStampedModel, UUIDModel
+from core.upload_security import FileUploadValidator
+
+from .grading import LessonMark
+
+_MAX_DOCUMENT_MB = 10
+
+
+def correction_document_path(instance, filename: str) -> str:
+    """Qorunan media altında saxlama yolu (org-scoped)."""
+    return f"journal_corrections/{instance.organization_id}/{filename}"
+
+
+class CorrectionField(models.TextChoices):
+    """Xananın hansı hissəsi düzəldilir."""
+
+    ATTENDANCE = "attendance", pgettext_lazy("registrar.correction_field", "Attendance")
+    SCORE = "score", pgettext_lazy("registrar.correction_field", "Score")
+
+
+class CorrectionReason(models.TextChoices):
+    """Düzəlişin rəsmi səbəbi (modal-da seçilir)."""
+
+    MEDICAL = "medical", pgettext_lazy("registrar.correction_reason", "Medical certificate")
+    OFFICIAL = "official", pgettext_lazy("registrar.correction_reason", "Official leave / permission")
+    TECHNICAL = "technical", pgettext_lazy("registrar.correction_reason", "Data-entry error")
+    APPEAL = "appeal", pgettext_lazy("registrar.correction_reason", "Appeal decision")
+    OTHER = "other", pgettext_lazy("registrar.correction_reason", "Other (see note)")
+
+
+class JournalCorrection(UUIDModel, TimeStampedModel):
+    """Bir jurnal xanasına edilən bir rəsmi düzəliş (tam audit qeydi).
+
+    Köhnə/yeni dəyərlər snapshot kimi saxlanır — düzəlişlər zənciri xronoloji
+    tarixçə verir. Qeyd + PDF sənəd + səbəb məcburidir (servis qatı yoxlayır).
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="journal_corrections"
+    )
+    lesson_mark = models.ForeignKey(LessonMark, on_delete=models.CASCADE, related_name="corrections")
+    field = models.CharField(max_length=12, choices=CorrectionField.choices)
+    old_status = models.CharField(max_length=12, blank=True, default="")
+    new_status = models.CharField(max_length=12, blank=True, default="")
+    old_score = models.IntegerField(null=True, blank=True)
+    new_score = models.IntegerField(null=True, blank=True)
+    reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
+    note = models.TextField(help_text="Düzəlişin izahı — tələbə və müəllim görür (məcburi).")
+    document = models.FileField(
+        upload_to=correction_document_path,
+        validators=[FileUploadValidator(allowed_extensions={".pdf"}, max_size_mb=_MAX_DOCUMENT_MB)],
+        help_text="Əsas sənəd — yalnız PDF (məcburi).",
+    )
+    corrected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="journal_corrections"
+    )
+    # Ad profildən avtomatik snapshot-lanır (istifadəçi sonradan silinsə belə
+    # tarixçədə kimin düzəltdiyi dəyişməz qalsın deyə).
+    corrected_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.correction.meta", "journal correction")
+        verbose_name_plural = pgettext_lazy("registrar.model.correction.meta", "journal corrections")
+        indexes = [
+            models.Index(fields=["organization", "lesson_mark"]),
+            models.Index(fields=["organization", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"correction<{self.lesson_mark_id}> {self.field} ({self.reason})"

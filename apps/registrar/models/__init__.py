@@ -21,6 +21,11 @@ from .academic import (
     Subject,
     WeekType,
 )
+from .corrections import (
+    CorrectionField,
+    CorrectionReason,
+    JournalCorrection,
+)
 from .grading import (
     ApprovalStatus,
     AssessmentComponent,
@@ -56,9 +61,12 @@ __all__ = [
     "AttendanceStatus",
     "ComponentKind",
     "ComponentScore",
+    "CorrectionField",
+    "CorrectionReason",
     "CourseWork",
     "CriterionScore",
     "CourseOffering",
+    "JournalCorrection",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",

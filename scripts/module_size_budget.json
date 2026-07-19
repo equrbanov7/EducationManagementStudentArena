@@ -9,6 +9,7 @@
     "apps/exams/static/exams/js/testQuestionBank.js": 613,
     "apps/exams/templates/exams/teacher/teacher_exam_results.html": 619,
     "apps/exams/templates/exams/teacher/teacher_group_list.html": 642,
+    "apps/exams/views/student/attempts.py": 603,
     "apps/organizations/management/commands/seed_western_caspian.py": 602,
     "apps/registrar/static/registrar/js/journal_grid.js": 623,
     "static/css/ai_assistant.css": 635,

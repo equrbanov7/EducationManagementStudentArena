@@ -116,9 +116,11 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
+    from apps.registrar import corrections as corrections_service
     from apps.registrar import journal_extras
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
+    corrections_map = corrections_service.corrections_map_for_offering(offering)
     coursework_rows = journal_extras.get_course_work_rows(offering)
     finals_data = finals.get_offering_results(offering=offering)
     # Yekun cədvəldə kurs işi ayrıca sütun kimi göstərilir (giriş balına daxil deyil).
@@ -135,6 +137,7 @@ def journal_detail(request, offering_id):
         {
             "offering": offering,
             "journal": journal,
+            "corrections_map": corrections_map,
             "finals": finals_data,
             "final_breakdown": journal_extras.get_final_breakdown(offering),
             "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
