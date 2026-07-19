@@ -146,7 +146,13 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
   {% else %}
 
   {% if s.period_is_past %}
-  <div class="kw-pastbanner"><i class="fas fa-lock"></i> <span>{% trans "Bu semestr bitib — köhnə tədris ili/semestr üçün dəyişiklik mümkün deyil (yalnız baxış)." context "registrar.kollokvium_window" %}</span></div>
+  <div class="kw-pastbanner"><i class="fas fa-lock"></i>
+    {% if not s.has_editable_period %}
+    <span>{% trans "Bu təşkilat üçün cari və ya gələcək semestr yoxdur — aşağıdakı bitmiş semestr yalnız baxış üçündür. Tarixləri təyin etmək üçün əvvəlcə Akademik təqvimdə yeni tədris ili/semestr yaradın." context "registrar.kollokvium_window" %}</span>
+    {% else %}
+    <span>{% trans "Bu semestr bitib — tarixləri dəyişmək mümkün deyil (yalnız baxış). Redaktə üçün yuxarıdan cari/gələcək tədris ili və semestri seçin." context "registrar.kollokvium_window" %}</span>
+    {% endif %}
+  </div>
   {% endif %}
 
   <div class="kw-grid">
@@ -173,13 +179,14 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
         <input type="hidden" name="period" value="{{ s.period.id }}">
         <input type="hidden" name="k_index" value="{{ kr.k_index }}">
         <div class="kw-dates">
+          {% trans "Bitmiş semestr — tarix dəyişmək mümkün deyil" context "registrar.kollokvium_window" as kw_locked_title %}
           <div class="kw-field">
             <label>{% trans "Açılış" context "registrar.kollokvium_window" %}</label>
-            <input type="date" name="opens_on" value="{% if kr.window %}{{ kr.window.opens_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled{% endif %}>
+            <input type="date" name="opens_on" value="{% if kr.window %}{{ kr.window.opens_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
           </div>
           <div class="kw-field">
             <label>{% trans "Bağlanış" context "registrar.kollokvium_window" %}</label>
-            <input type="date" name="closes_on" value="{% if kr.window %}{{ kr.window.closes_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled{% endif %}>
+            <input type="date" name="closes_on" value="{% if kr.window %}{{ kr.window.closes_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
           </div>
         </div>
       </form>
