@@ -8,6 +8,7 @@ import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -65,12 +66,15 @@ def _normalize_email(email: str) -> str:
 
 
 def _otp_subject_for_purpose(purpose: str) -> str:
+    # Brand-driven so OTP emails carry the configured institution name
+    # (Qərbi Kaspi Universiteti) instead of a hard-coded product name.
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     return {
-        EmailOTP.Purpose.SIGNUP: "EMSArena email təsdiqi",
-        EmailOTP.Purpose.LOGIN: "EMSArena giriş OTP kodu",
-        EmailOTP.Purpose.PASSWORD_RESET: "EMSArena şifrə sıfırlama OTP kodu",
-        EmailOTP.Purpose.ADMIN_LOGIN: "EMSArena admin giriş OTP kodu",
-    }.get(purpose, "EMSArena OTP kodu")
+        EmailOTP.Purpose.SIGNUP: f"{brand} email təsdiqi",
+        EmailOTP.Purpose.LOGIN: f"{brand} giriş OTP kodu",
+        EmailOTP.Purpose.PASSWORD_RESET: f"{brand} şifrə sıfırlama OTP kodu",
+        EmailOTP.Purpose.ADMIN_LOGIN: f"{brand} admin giriş OTP kodu",
+    }.get(purpose, f"{brand} OTP kodu")
 
 
 def _otp_headline_for_purpose(purpose: str) -> str:
@@ -127,7 +131,7 @@ def _build_email_context(*, user, email: str, purpose: str, code: str, request=N
     return {
         # White-label brand for the email chrome; emails render without the
         # request context processors so it must be passed explicitly.
-        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
         "user": user,
         "recipient_name": recipient_name or email,
         "email": email,

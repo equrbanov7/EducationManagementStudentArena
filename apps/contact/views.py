@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
@@ -47,11 +48,13 @@ def _client_ip(request: HttpRequest) -> str:
 @require_http_methods(["GET", "POST"])
 def contact_page(request: HttpRequest) -> HttpResponse:
     """Render the contact page and process submissions."""
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     seo_context = {
-        "seo_title": _("Əlaqə – EMSArena"),
+        "seo_title": _("Əlaqə – %(brand)s") % {"brand": brand},
         "seo_description": _(
-            "EMSArena ilə əlaqə saxlayın. Suallarınız, " "təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
-        ),
+            "%(brand)s ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
+        )
+        % {"brand": brand},
         "seo_breadcrumbs": [
             {"name": _("Ana səhifə"), "url": request.build_absolute_uri("/")},
             {"name": _("Əlaqə"), "url": request.build_absolute_uri()},

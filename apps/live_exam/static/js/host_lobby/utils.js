@@ -198,7 +198,7 @@ export function lobbyCopy() {
     const lang = String(CONFIG.languageCode || "az").slice(0, 2).toLowerCase();
     const copy = {
         az: {
-            brand: "EMSArena Live",
+            brand: "Canlı",
             joinLabel: gettext("Qoşulmaq üçün"),
             joinHint: gettext("Tələbələr link, PIN və ya QR kod ilə qoşula bilər."),
             pinLabel: gettext("Canlı PIN"),
@@ -213,7 +213,7 @@ export function lobbyCopy() {
             removePlayerLabel: gettext("İştirakçını çıxar"),
         },
         en: {
-            brand: "EMSArena Live",
+            brand: "Live",
             joinLabel: "Join the live exam",
             joinHint: "Students can join with the link, PIN, or QR code.",
             pinLabel: "Live PIN",
@@ -228,7 +228,7 @@ export function lobbyCopy() {
             removePlayerLabel: "Remove participant",
         },
         ru: {
-            brand: "EMSArena Live",
+            brand: "Прямой эфир",
             joinLabel: "Подключение к игре",
             joinHint: "Участники могут войти по ссылке, PIN-коду или QR-коду.",
             pinLabel: "PIN игры",
@@ -243,7 +243,7 @@ export function lobbyCopy() {
             removePlayerLabel: "Удалить участника",
         },
         tr: {
-            brand: "EMSArena Live",
+            brand: "Canlı",
             joinLabel: gettext("Canli sinava katıl"),
             joinHint: gettext("Öğrenciler bağlantı, PIN veya QR kod ile katılabilir."),
             pinLabel: gettext("Canlı PIN"),

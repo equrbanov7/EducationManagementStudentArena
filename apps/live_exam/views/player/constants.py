@@ -6,7 +6,7 @@ from apps.live_exam.models import LiveSession
 PIN_ENTRY_COPY = {
     "az": {
         "title": "Canlı imtahana qoşul",
-        "eyebrow": "EMSArena Live",
+        "eyebrow": "Canlı",
         "subtitle": "Müəllimin göstərdiyi PIN-i yaz, sonra adını seçib oyuna daxil ol.",
         "pin_label": "Oyun PIN-i",
         "pin_placeholder": "Məsələn: 3A8K2B94F1",
@@ -25,7 +25,7 @@ PIN_ENTRY_COPY = {
     },
     "en": {
         "title": "Join a live exam",
-        "eyebrow": "EMSArena Live",
+        "eyebrow": "Live",
         "subtitle": "Enter the PIN shown by the teacher, then choose your name and join the game.",
         "pin_label": "Game PIN",
         "pin_placeholder": "Example: 3A8K2B94F1",
@@ -44,7 +44,7 @@ PIN_ENTRY_COPY = {
     },
     "ru": {
         "title": "Присоединитесь к живому экзамену",
-        "eyebrow": "EMSArena Live",
+        "eyebrow": "Прямой эфир",
         "subtitle": "Введите PIN, который показал преподаватель, затем выберите имя и войдите в игру.",
         "pin_label": "PIN игры",
         "pin_placeholder": "Например: 3A8K2B94F1",
@@ -63,7 +63,7 @@ PIN_ENTRY_COPY = {
     },
     "tr": {
         "title": "Canlı sınava katıl",
-        "eyebrow": "EMSArena Live",
+        "eyebrow": "Canlı",
         "subtitle": "Öğretmenin gösterdiği PIN kodunu gir, sonra adını seçip oyuna katıl.",
         "pin_label": "Oyun PIN'i",
         "pin_placeholder": "Örnek: 3A8K2B94F1",
