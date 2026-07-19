@@ -57,10 +57,12 @@
 
     {% block extraCss %}{% endblock %}
 
-    {# searchable_select.js <head>-də (defer-siz) yüklənir: aktiv profil bölməsi
-       (imtahan/apellyasiya statistikası) SERVER-render olunanda onun inline
-       skripti body-də parse zamanı `window.EMSSearchableSelect`-i SİNXRON çağırır
-       — ona görə body-sonundan yox, body-dən əvvəl təyin olunmalıdır. #}
+    {% comment %}
+      searchable_select.js <head>-də (defer-siz) yüklənir: aktiv profil bölməsi
+      (imtahan/apellyasiya statistikası) SERVER-render olunanda onun inline skripti
+      body-də parse zamanı window.EMSSearchableSelect-i SİNXRON çağırır — ona görə
+      body-sonundan yox, body-dən əvvəl təyin olunmalıdır.
+    {% endcomment %}
     <script src="{% static 'js/searchable_select.js' %}?v=20260720-2"></script>
 </head>
 
