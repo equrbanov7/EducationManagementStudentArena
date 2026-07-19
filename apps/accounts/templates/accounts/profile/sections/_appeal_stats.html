@@ -27,10 +27,11 @@
   .aps-chip span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:12rem; }
   .aps-chip__x { cursor:pointer; border:0; background:transparent; color:var(--ems-primary-600); font-size:1rem; line-height:1; padding:0 .1rem; }
   .aps-ms__search { border:0; outline:none; background:transparent; color:var(--ems-neutral-900); padding:.28rem; font-size:.86rem; min-width:90px; flex:1; }
-  .aps-ms__menu { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; box-shadow:0 12px 30px rgba(15,23,42,.14); max-height:230px; overflow-y:auto; z-index:30; display:none; }
+  .aps-ms__menu { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; box-shadow:0 12px 30px rgba(15,23,42,.14); max-height:300px; overflow-y:auto; z-index:1050; display:none; }
   .aps-ms.is-open .aps-ms__menu { display:block; }
   .aps-ms__opt { padding:.55rem .8rem; cursor:pointer; font-size:.86rem; color:var(--ems-neutral-800); }
   .aps-ms__opt:hover { background:var(--ems-primary-50); color:var(--ems-primary-700); }
+  .aps-ms__more { padding:.5rem .8rem; text-align:center; color:var(--ems-neutral-400); font-size:1rem; letter-spacing:.2em; }
   .aps-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:.75rem; margin-bottom:1rem; }
   .aps-card { border:1px solid var(--ems-neutral-200); border-left:4px solid var(--ems-primary-600); border-radius:12px; background:#fff; padding:.9rem 1.05rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
   .aps-card--pending { border-left-color:var(--ems-warning-500, #f59e0b); }
@@ -100,6 +101,9 @@
      data-ai-url="{% url 'appeals:appeal_stats_ai' %}"
      data-subject-url="{% url 'exams:subject_search' %}"
      data-group-url="{% url 'exams:group_search' %}"
+     data-faculty-url="{% url 'exams:stats_faculty_search' %}"
+     data-department-url="{% url 'exams:stats_department_search' %}"
+     data-teacher-url="{% url 'exams:stats_teacher_search' %}"
      data-detail-url-template="{% url 'appeals:appeal_detail' 0 %}"
      data-review-url-template="{% url 'appeals:review_appeal' 0 %}">
   <div class="aps-head">
@@ -127,15 +131,18 @@
     </div>
     <div class="aps-field">
       <label>{% trans "Fakültə" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-faculty" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      {% trans "fakültə axtar…" as aps_faculty_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-faculty" placeholder=aps_faculty_ph %}
     </div>
     <div class="aps-field">
       <label>{% trans "Kafedra" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-department" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      {% trans "kafedra axtar…" as aps_dept_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-department" placeholder=aps_dept_ph %}
     </div>
     <div class="aps-field">
       <label>{% trans "Müəllim" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-teacher" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      {% trans "müəllim axtar…" as aps_teacher_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-teacher" placeholder=aps_teacher_ph %}
     </div>
     <div class="aps-field">
       <label>{% trans "İmtahan tipi" %}</label>
@@ -229,6 +236,7 @@
   root.dataset.apsInit = "1";
   var U = { data:root.dataset.dataUrl, charts:root.dataset.chartsUrl, filters:root.dataset.filtersUrl,
             ai:root.dataset.aiUrl, subject:root.dataset.subjectUrl, group:root.dataset.groupUrl,
+            faculty:root.dataset.facultyUrl, department:root.dataset.departmentUrl, teacher:root.dataset.teacherUrl,
             detail:root.dataset.detailUrlTemplate, review:root.dataset.reviewUrlTemplate };
   var T = { total:"{% trans 'Ümumi' %}", students:"{% trans 'Tələbə' %}", exams:"{% trans 'İmtahan' %}",
             none:"{% trans 'Apellyasiya tapılmadı.' %}", prev:"{% trans 'Əvvəlki' %}", next:"{% trans 'Sonrakı' %}",
@@ -237,24 +245,18 @@
             ai_quota:"{% trans 'Qalan AI limiti' %}", ai_cached:"{% trans 'keşdən' %}", hint:"{% trans 'Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır.' %}" };
   var COLORS = ["#2563eb","#059669","#f59e0b","#ef4444","#8b5cf6","#0ea5e9","#14b8a6","#f97316","#ec4899","#64748b"];
   var q = root.querySelector(".js-aps-q");
-  var sel = { faculty:root.querySelector(".js-aps-faculty"), department:root.querySelector(".js-aps-department"),
-              teacher:root.querySelector(".js-aps-teacher"), type:root.querySelector(".js-aps-type"),
+  // Sabit qısa siyahılar native bootstrap-select olaraq qalır.
+  var sel = { type:root.querySelector(".js-aps-type"),
               format:root.querySelector(".js-aps-format"), status:root.querySelector(".js-aps-status"),
               semester:root.querySelector(".js-aps-semester"), year:root.querySelector(".js-aps-year") };
-  // Fakültə→kafedra kaskadı (imtahan statistikası ilə eyni davranış).
-  var allDepartments = [];
-  var APS_ALL = (sel.department.querySelector("option") || {}).textContent || "";
-  function populateDepartments(){
-    var fid = sel.faculty.value, cur = sel.department.value;
-    sel.department.innerHTML = '<option value="">' + APS_ALL + "</option>";
-    allDepartments.forEach(function(u){
-      if(!fid || String(u.parent_id)===String(fid)){
-        var o=document.createElement("option"); o.value=u.id; o.textContent=u.name; sel.department.appendChild(o);
-      }
-    });
-    sel.department.value = (cur && sel.department.querySelector('option[value="'+cur+'"]')) ? cur : "";
-    if(typeof sel.department._refreshBootstrapSelect==="function") sel.department._refreshBootstrapSelect();
-  }
+  // Fakültə/kafedra/müəllim — lazy axtarışlı seçicilər (paylaşılan komponent).
+  var SS = window.EMSSearchableSelect;
+  var facultyPick = SS.create(root.querySelector(".js-aps-faculty"), { url:U.faculty, onChange:reload });
+  var deptPick    = SS.create(root.querySelector(".js-aps-department"), {
+    url:U.department, dependParam:"faculty",
+    getDependValue:function(){ return facultyPick.value(); }, onChange:reload });
+  var teacherPick = SS.create(root.querySelector(".js-aps-teacher"), { url:U.teacher, onChange:reload });
+  facultyPick.on("change", function(){ deptPick.reset(); });
   var cards = root.querySelector(".js-aps-cards"), rows = root.querySelector(".js-aps-rows"),
       pager = root.querySelector(".js-aps-pager"), thead = root.querySelector(".js-aps-thead");
   var page = 1, sort = "-date", timer = null, charts = {};
@@ -262,47 +264,17 @@
   function detailUrl(id){ return U.detail ? U.detail.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
   function reviewUrl(id){ return U.review ? U.review.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
 
-  function multiSelect(el, url){
-    var chipsWrap=el.querySelector(".aps-ms__chips"), search=el.querySelector(".aps-ms__search"),
-        menu=el.querySelector(".aps-ms__menu"), selected={}, t=null;
-    function ids(){ return Object.keys(selected); }
-    function renderChips(){
-      chipsWrap.querySelectorAll(".aps-chip").forEach(function(c){ c.remove(); });
-      Object.keys(selected).forEach(function(id){
-        var chip=document.createElement("span"); chip.className="aps-chip";
-        chip.innerHTML='<span></span><button type="button" class="aps-chip__x">×</button>';
-        chip.querySelector("span").textContent=selected[id];
-        chip.querySelector(".aps-chip__x").addEventListener("click", function(){ delete selected[id]; renderChips(); reload(); });
-        chipsWrap.insertBefore(chip, search);
-      });
-    }
-    function fetchOpts(term){
-      fetch(url+(url.indexOf("?")===-1?"?":"&")+"q="+encodeURIComponent(term)+"&limit=10", {headers:{"X-Requested-With":"XMLHttpRequest"}})
-        .then(function(r){ return r.ok?r.json():{results:[]}; })
-        .then(function(d){ menu.innerHTML="";
-          (d.results||[]).forEach(function(o){ if(selected[o.id]) return;
-            var div=document.createElement("div"); div.className="aps-ms__opt"; div.textContent=o.text;
-            div.addEventListener("mousedown", function(ev){ ev.preventDefault(); selected[o.id]=o.text; renderChips(); el.classList.remove("is-open"); search.value=""; reload(); });
-            menu.appendChild(div); });
-          el.classList.toggle("is-open", menu.children.length>0); });
-    }
-    search.addEventListener("input", function(){ if(t) clearTimeout(t); t=setTimeout(function(){ fetchOpts(search.value.trim()); }, 250); });
-    search.addEventListener("focus", function(){ fetchOpts(search.value.trim()); });
-    search.addEventListener("blur", function(){ setTimeout(function(){ el.classList.remove("is-open"); }, 160); });
-    function clear(){ selected={}; renderChips(); }
-    return { ids:ids, clear:clear };
-  }
-  var subjectMS = multiSelect(root.querySelector(".js-aps-subject"), U.subject);
-  var groupMS = multiSelect(root.querySelector(".js-aps-group"), U.group);
+  var subjectMS = SS.create(root.querySelector(".js-aps-subject"), { url:U.subject, multi:true, onChange:reload });
+  var groupMS   = SS.create(root.querySelector(".js-aps-group"),   { url:U.group,   multi:true, onChange:reload });
 
   function params(extra){
     var p=new URLSearchParams();
     if(q.value.trim()) p.set("q", q.value.trim());
     if(subjectMS.ids().length) p.set("subjects", subjectMS.ids().join(","));
     if(groupMS.ids().length) p.set("groups", groupMS.ids().join(","));
-    if(sel.faculty.value) p.set("faculties", sel.faculty.value);
-    if(sel.department.value) p.set("departments", sel.department.value);
-    if(sel.teacher.value) p.set("teachers", sel.teacher.value);
+    if(facultyPick.value()) p.set("faculties", facultyPick.value());
+    if(deptPick.value()) p.set("departments", deptPick.value());
+    if(teacherPick.value()) p.set("teachers", teacherPick.value());
     if(sel.type.value) p.set("type", sel.type.value);
     if(sel.format.value) p.set("format", sel.format.value);
     if(sel.status.value) p.set("status", sel.status.value);
@@ -387,13 +359,11 @@
     th.addEventListener("click", function(){ var key=th.getAttribute("data-sort"); sort=(sort===key)?("-"+key):key; reload(); });
   });
   q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
-  // Fakültə istisna: dəyişəndə əvvəlcə kafedraları yenilə, sonra yüklə.
-  Object.keys(sel).forEach(function(k){ if(k!=="faculty") sel[k].addEventListener("change", reload); });
-  sel.faculty.addEventListener("change", function(){ populateDepartments(); reload(); });
+  Object.keys(sel).forEach(function(k){ sel[k].addEventListener("change", reload); });
   root.querySelector(".js-aps-reset").addEventListener("click", function(){
     q.value=""; subjectMS.clear(); groupMS.clear();
+    facultyPick.reset(); deptPick.reset(); teacherPick.reset();
     Object.keys(sel).forEach(function(k){ sel[k].value=""; if(typeof sel[k]._refreshBootstrapSelect==="function") sel[k]._refreshBootstrapSelect(); });
-    populateDepartments();
     sort="-date"; reload();
   });
 
@@ -425,10 +395,7 @@
     .then(function(d){ if(!d) return;
       function fill(s, arr, valKey, labKey){ (arr||[]).forEach(function(x){ var o=document.createElement("option"); o.value=x[valKey]; o.textContent=x[labKey]; s.appendChild(o); }); }
       (d.years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y; o.textContent=y; sel.year.appendChild(o); });
-      fill(sel.faculty, d.faculties, "id", "name");
-      fill(sel.teacher, d.teachers, "id", "name");
-      allDepartments = d.departments || [];
-      populateDepartments();
+      // Fakültə/kafedra/müəllim artıq lazy axtarışlı seçicilərdir → burada doldurulmur.
       fill(sel.type, d.types, "value", "label");
       fill(sel.format, d.formats, "value", "label");
       fill(sel.status, d.statuses, "value", "label");

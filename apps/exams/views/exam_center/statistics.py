@@ -276,6 +276,98 @@ def exam_center_stats_export(request):
     return response
 
 
+def _lookup_bounds(request):
+    """(offset, limit) — axtarışlı seçicilər üçün lazy səhifələmə (default 10)."""
+    try:
+        offset = max(0, int(request.GET.get("offset", 0)))
+    except (TypeError, ValueError):
+        offset = 0
+    try:
+        limit = int(request.GET.get("limit", 10))
+    except (TypeError, ValueError):
+        limit = 10
+    return offset, max(1, min(limit, 50))
+
+
+def _lookup_page(qs, offset, limit, serializer):
+    """`limit + 1` gətir → `has_more` təyin et (infinite scroll üçün)."""
+    window = list(qs[offset : offset + limit + 1])
+    return [serializer(o) for o in window[:limit]], len(window) > limit
+
+
+@login_required
+@require_GET
+def stats_faculty_search(request):
+    """Fakültə/dekanlıq axtarışı (OrgUnit) — statistika filtrləri üçün, lazy."""
+    organization = _stats_org(request)
+    from apps.organizations.models import OrgUnit
+
+    query = (request.GET.get("q") or "").strip()
+    qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("faculty", "deanery"))
+    if query:
+        qs = qs.filter(name__icontains=query)
+    qs = qs.order_by("name")
+
+    offset, limit = _lookup_bounds(request)
+    results, has_more = _lookup_page(qs, offset, limit, lambda u: {"id": str(u.id), "text": u.name})
+    return JsonResponse({"results": results, "has_more": has_more})
+
+
+@login_required
+@require_GET
+def stats_department_search(request):
+    """Kafedra/bölmə axtarışı — `?faculty=<id>` verilibsə həmin fakültəyə görə daralır."""
+    organization = _stats_org(request)
+    from apps.organizations.models import OrgUnit
+
+    query = (request.GET.get("q") or "").strip()
+    qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
+    faculty_ids = _csv_uuids(request.GET.get("faculty"))
+    if faculty_ids:
+        qs = qs.filter(parent_id__in=faculty_ids)
+    if query:
+        qs = qs.filter(name__icontains=query)
+    qs = qs.order_by("name")
+
+    offset, limit = _lookup_bounds(request)
+    results, has_more = _lookup_page(qs, offset, limit, lambda u: {"id": str(u.id), "text": u.name})
+    return JsonResponse({"results": results, "has_more": has_more})
+
+
+@login_required
+@require_GET
+def stats_teacher_search(request):
+    """Müəllim (imtahan müəllifi) axtarışı — ad/soyad/istifadəçi adı üzrə, lazy."""
+    organization = _stats_org(request)
+    from apps.exams.models import Exam
+
+    query = (request.GET.get("q") or "").strip()
+    rows = Exam.objects.filter(organization=organization, author__isnull=False)
+    if query:
+        rows = rows.filter(
+            Q(author__first_name__icontains=query)
+            | Q(author__last_name__icontains=query)
+            | Q(author__username__icontains=query)
+        )
+    rows = (
+        rows.values("author_id", "author__first_name", "author__last_name", "author__username")
+        .distinct()
+        .order_by("author__first_name", "author__last_name")
+    )
+
+    offset, limit = _lookup_bounds(request)
+    results, has_more = _lookup_page(
+        rows,
+        offset,
+        limit,
+        lambda r: {
+            "id": str(r["author_id"]),
+            "text": (f"{r['author__first_name']} {r['author__last_name']}".strip() or r["author__username"]),
+        },
+    )
+    return JsonResponse({"results": results, "has_more": has_more})
+
+
 @login_required
 @require_GET
 def exam_center_stats_filters(request):
@@ -340,4 +432,7 @@ __all__ = [
     "exam_center_stats_data",
     "exam_center_stats_export",
     "exam_center_stats_filters",
+    "stats_faculty_search",
+    "stats_department_search",
+    "stats_teacher_search",
 ]

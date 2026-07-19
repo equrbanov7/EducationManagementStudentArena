@@ -37,6 +37,9 @@ from .exam_center import (
     exam_center_ticket_resume,
     exam_center_ticket_seat,
     exam_center_ticket_snapshot,
+    stats_department_search,
+    stats_faculty_search,
+    stats_teacher_search,
 )
 from .shared.access import exam_code_check
 from .student.attempts import start_exam, take_exam
@@ -272,6 +275,9 @@ __all__ = [
     "exam_center_stats_data",
     "exam_center_stats_export",
     "exam_center_stats_filters",
+    "stats_faculty_search",
+    "stats_department_search",
+    "stats_teacher_search",
     "exam_center_student_pins",
     "exam_center_reports",
     "exam_center_room_assign_invigilators",
