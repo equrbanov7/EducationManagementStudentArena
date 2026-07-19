@@ -30,14 +30,33 @@ import {
   requireHttpProfile,
 } from "./lib/profiles.js";
 
-const profile = requireHttpProfile();
-const credentialCount = loadedUserCount();
-assertCredentialCapacity(profile, credentialCount);
-
-export const options = Object.assign({}, profile.options, {
-  thresholds: commonThresholds,
-  summaryTrendStats: ["min", "med", "avg", "p(90)", "p(95)", "p(99)", "max"],
-});
+// Ladder override: EXAM_FLOW_VUS set → simple constant-vus stage (for the
+// on-server max-capacity ladder); otherwise fall back to the named K6_PROFILE.
+const _ladderVus = Number(__ENV.EXAM_FLOW_VUS || 0);
+let options;
+if (_ladderVus > 0) {
+  options = {
+    scenarios: {
+      full_exam: {
+        executor: "constant-vus",
+        vus: _ladderVus,
+        duration: __ENV.EXAM_FLOW_DURATION || "60s",
+        gracefulStop: "20s",
+      },
+    },
+    thresholds: commonThresholds,
+    summaryTrendStats: ["min", "med", "avg", "p(90)", "p(95)", "p(99)", "max"],
+  };
+} else {
+  const profile = requireHttpProfile();
+  const credentialCount = loadedUserCount();
+  assertCredentialCapacity(profile, credentialCount);
+  options = Object.assign({}, profile.options, {
+    thresholds: commonThresholds,
+    summaryTrendStats: ["min", "med", "avg", "p(90)", "p(95)", "p(99)", "max"],
+  });
+}
+export { options };
 
 const attemptsStarted = new Counter("exam_flow_attempts_started");
 const answersAutosaved = new Counter("exam_flow_answers_autosaved");
