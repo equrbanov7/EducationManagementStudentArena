@@ -44,9 +44,17 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = _env_int_setting("DATA_UPLOAD_MAX_NUMBER_FIELDS"
 # NOT the legacy CPU cap. At 12/6 only a dozen students could start system-wide
 # and the rest blocked a sync thread (sleep-poll) up to the wait timeout →
 # simultaneous exam start froze the whole app. See docs/performance/OPTIMIZATION_5000_USERS.md.
-EXAM_START_GLOBAL_CONCURRENCY = _env_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 200, minimum=0)
-EXAM_START_PER_EXAM_CONCURRENCY = _env_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 100, minimum=0)
+EXAM_START_GLOBAL_CONCURRENCY = _env_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 500, minimum=0)
+EXAM_START_PER_EXAM_CONCURRENCY = _env_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 250, minimum=0)
 EXAM_START_WAIT_TIMEOUT_SECONDS = _env_float_setting("EXAM_START_WAIT_TIMEOUT_SECONDS", 30.0, minimum=0.0)
+# How long a start request may HOLD a worker thread waiting for a capacity slot
+# before it bounces to the auto-retry page. Kept short so a stampede on ONE exam
+# (e.g. 1000 simultaneous starts) never exhausts the ASGI thread pool → no crash;
+# waiters get a lightweight self-refreshing page and drain in waves. The 100-user
+# case never waits (well under the per-exam limit), so it is unaffected.
+EXAM_START_CAPACITY_WAIT_SECONDS = _env_float_setting("EXAM_START_CAPACITY_WAIT_SECONDS", 4.0, minimum=0.0)
+# Client auto-retry backoff window (seconds) for the "exam starting" page.
+EXAM_START_RETRY_AFTER_SECONDS = _env_int_setting("EXAM_START_RETRY_AFTER_SECONDS", 3, minimum=1)
 EXAM_START_POLL_INTERVAL_SECONDS = _env_float_setting("EXAM_START_POLL_INTERVAL_SECONDS", 0.05, minimum=0.01)
 EXAM_START_LOCK_LEASE_SECONDS = _env_int_setting("EXAM_START_LOCK_LEASE_SECONDS", 120, minimum=1)
 EXAM_RANDOMIZER_USAGE_CACHE_SECONDS = _env_int_setting("EXAM_RANDOMIZER_USAGE_CACHE_SECONDS", 30, minimum=0)

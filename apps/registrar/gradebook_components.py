@@ -26,7 +26,7 @@ from .gradebook import MARK_EDIT_WINDOW, _to_decimal, journal_is_locked  # noqa:
 # ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
 
 
-def entry_score_for(enrollment, cap) -> Decimal:
+def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
     """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
 
     Qayda (analytics._evaluate ilə GÜZGÜ saxlanmalıdır):
@@ -35,9 +35,15 @@ def entry_score_for(enrollment, cap) -> Decimal:
       cəmi işlədilir;
     * KOLLOKVIUM komponent balları həmişə ÜSTƏGƏLdir;
     * SƏRBƏST İŞ çeklist cəmi (təhvil sayı) həmişə ÜSTƏGƏLdir;
-    * yekun ``cap`` ilə clamp olunur."""
+    * yekun ``cap`` ilə clamp olunur.
+
+    Performans: ``marks`` (bu enrollment-in LessonMark-ları) və ``components``
+    (offering-in AssessmentComponent-ləri) əvvəlcədən verilə bilər — toplu
+    (batch) çağırışlarda per-subject təkrar sorğunu aradan qaldırır. Verilməsə
+    əvvəlki kimi ayrıca sorğulanır (geriyə-uyğun)."""
     cap = Decimal(cap)
-    components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
+    if components is None:
+        components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
     generic = [c for c in components if c.kind == ComponentKind.GENERIC]
     kollokvium = [c for c in components if c.kind == ComponentKind.KOLLOKVIUM]
     selfwork = [c for c in components if c.kind == ComponentKind.SELF_WORK]
@@ -52,10 +58,8 @@ def entry_score_for(enrollment, cap) -> Decimal:
             Decimal("0"),
         )
     else:
-        total = sum(
-            (m.score for m in LessonMark.objects.filter(enrollment=enrollment) if m.score is not None),
-            Decimal("0"),
-        )
+        mark_iter = marks if marks is not None else LessonMark.objects.filter(enrollment=enrollment)
+        total = sum((m.score for m in mark_iter if m.score is not None), Decimal("0"))
 
     if kollokvium:
         kmax_by = {c.id: Decimal(c.max_score) for c in kollokvium}
