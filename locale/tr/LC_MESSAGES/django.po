@@ -29802,3 +29802,119 @@ msgstr "Kapat"
 msgctxt "registrar.correction"
 msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
 msgstr "Bu kayıtta resmi bir düzeltme var — geçmişi görmek için işarete tıklayın."
+
+msgctxt "registrar.correction"
+msgid "Axtar"
+msgstr "Ara"
+
+msgctxt "registrar.correction"
+msgid "Bal"
+msgstr "Puan"
+
+msgctxt "registrar.correction"
+msgid "Bu fənndə hələ tələbə/dərs yoxdur."
+msgstr "Bu derste henüz öğrenci/ders yok."
+
+msgctxt "registrar.correction"
+msgid "Bütün semestrlər"
+msgstr "Tüm dönemler"
+
+msgctxt "registrar.correction"
+msgid "Davamiyyət"
+msgstr "Devam"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş olunmuş xana"
+msgstr "Düzeltilmiş hücre"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş tarixçəsi"
+msgstr "Düzeltme geçmişi"
+
+msgctxt "registrar.correction"
+msgid "Düzəlişi edən"
+msgstr "Düzelten"
+
+msgctxt "registrar.correction"
+msgid "Dəyişmək üçün istənilən xananın üzərinə klikləyin."
+msgstr "Düzeltmek için herhangi bir hücreye tıklayın."
+
+msgctxt "registrar.correction"
+msgid "Fənn siyahısı"
+msgstr "Ders listesi"
+
+msgctxt "registrar.correction"
+msgid "Jurnal düzəlişi"
+msgstr "Jurnal düzeltmesi"
+
+msgctxt "registrar.correction"
+msgid "Müəllim və fənn seçin — jurnalı düzəliş rejimində açın. Hər düzəliş sənəd (PDF), səbəb və qeyd tələb edir; kim nəyi dəyişdi audit olunur."
+msgstr "Bir öğretmen ve ders seçin — jurnalı düzeltme modunda açın. Her düzeltme belge (PDF), neden ve not gerektirir; kimin neyi değiştirdiği denetlenir."
+
+msgctxt "registrar.correction"
+msgid "Müəllim təyin edilməyib"
+msgstr "Öğretmen atanmadı"
+
+msgctxt "registrar.correction"
+msgid "Nəyi düzəldirsiniz?"
+msgstr "Neyi düzeltiyorsunuz?"
+
+msgctxt "registrar.correction"
+msgid "QAYIB"
+msgstr "DEVAMSIZLIK"
+
+msgctxt "registrar.correction"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "registrar.correction"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "registrar.correction"
+msgid "Sənəd (PDF)"
+msgstr "Belge (PDF)"
+
+msgctxt "registrar.correction"
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+msgctxt "registrar.correction"
+msgid "Uyğun fənn açılışı tapılmadı."
+msgstr "Eşleşen ders bulunamadı."
+
+msgctxt "registrar.correction"
+msgid "Yalnız cari semestr"
+msgstr "Yalnızca mevcut dönem"
+
+msgctxt "registrar.correction"
+msgid "Yeni bal (tam ədəd)"
+msgstr "Yeni puan (tam sayı)"
+
+msgctxt "registrar.correction"
+msgid "Yeni davamiyyət"
+msgstr "Yeni devam"
+
+msgctxt "registrar.correction"
+msgid "İmtina"
+msgstr "İptal"
+
+msgctxt "registrar.correction"
+msgid "№ · SOYAD AD"
+msgstr "№ · SOYAD AD"
+
+msgctxt "registrar.correction"
+msgid "İştirak (iə)"
+msgstr "Katılım (k)"
+
+msgctxt "registrar.correction"
+msgid "Qayıb (qb)"
+msgstr "Devamsız (d)"
+
+msgctxt "registrar.correction"
+msgid "Üzrlü qayıb (üq)"
+msgstr "Mazeretli (m)"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş yadda saxlanıldı."
+msgstr "Düzeltme kaydedildi."

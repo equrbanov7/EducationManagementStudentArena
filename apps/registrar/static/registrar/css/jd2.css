@@ -525,3 +525,20 @@ option.jd-topic-covered { color: #15803d; }
 .jd-sw-del__cancel { background: var(--ems-neutral-100, #f1f5f9); color: var(--ems-neutral-700, #334155); border-color: var(--ems-neutral-200, #e2e8f0); }
 .jd-sw-del__ok { background: var(--ems-danger-600, #dc2626); color: #fff; }
 .jd-sw-del__ok:hover { background: var(--ems-danger-700, #b91c1c); }
+
+/* Korrektor keçidi (jurnal siyahısı başlığında) — admin düzəliş interfeysinə. */
+.jd2-correct-link {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    background: #2563eb;
+    text-decoration: none;
+    transition: background .15s;
+}
+.jd2-correct-link:hover { background: #1d4ed8; color: #fff; }
