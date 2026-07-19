@@ -65,6 +65,7 @@ _PRIVATE_PREFIXES: tuple[str, ...] = (
     "labs/",
     "question_media/",
     "trial_exams/",
+    "journal_corrections/",
 )
 
 # Minimum role level considered "teacher-level" for access to sensitive files
@@ -318,6 +319,29 @@ def _check_trial_exam_access(user, path: str) -> bool:
         return False
 
 
+# Təşkilat-admin səviyyəsi (org_admin=80) — jurnal düzəliş sənədləri həssasdır
+# (tibbi arayış və s.), yalnız korrektorlar (admin) + sənədin aid olduğu tələbə.
+_ORG_ADMIN_MIN_LEVEL = 80
+
+
+def _check_journal_correction_access(user, path: str) -> bool:
+    """Verify access to ``journal_corrections/`` PDFs (medical/official docs).
+
+    Superusers/staff are granted earlier. Here: the student whose corrected mark
+    it is, OR an admin-level member of the correction's organization."""
+    try:
+        JournalCorrection = django_apps.get_model("registrar", "JournalCorrection")
+        correction = JournalCorrection.objects.select_related("organization", "lesson_mark__enrollment").get(
+            document=path
+        )
+    except JournalCorrection.DoesNotExist:
+        return False
+    student_id = getattr(correction.lesson_mark.enrollment, "student_id", None)
+    if student_id is not None and student_id == user.id:
+        return True
+    return _user_has_org_membership(user, correction.organization, min_level=_ORG_ADMIN_MIN_LEVEL)
+
+
 # ---------------------------------------------------------------------------
 # Access-checker registry
 # ---------------------------------------------------------------------------
@@ -339,6 +363,7 @@ _ACCESS_CHECKERS: dict[str, object] = {
     "course_resources/": _check_course_resource_access,
     "question_media/": _check_question_media_access,
     "trial_exams/": _check_trial_exam_access,
+    "journal_corrections/": _check_journal_correction_access,
 }
 
 
