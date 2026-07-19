@@ -367,6 +367,23 @@ class StudentJournalFazaBTest(_BaseJournalSetup):
         self.assertTrue(all("kind" in h for h in sec["detail"]["history"]))
 
 
+class CorrectionMediaAccessTest(_BaseJournalSetup):
+    def test_pdf_denied_to_unrelated_user_allowed_to_owner(self):
+        from core.media_views import _check_journal_correction_access
+
+        _lesson, mark = self._seminar_mark(8, 3)
+        with bypass_rls():
+            c = corrections.apply_correction(
+                mark=mark, field=CorrectionField.SCORE, new_score=9,
+                reason=CorrectionReason.MEDICAL, note="arayış", document=_pdf(), by_user=self.admin,
+            )
+            path = c.document.name
+            # Owning student may read their own justification document.
+            self.assertTrue(_check_journal_correction_access(self.student, path))
+            # An unrelated non-admin (the teacher) is denied.
+            self.assertFalse(_check_journal_correction_access(self.teacher, path))
+
+
 class CorrectionViewTest(_BaseJournalSetup):
     def _login_corrector(self):
         self.client.force_login(self.admin)
