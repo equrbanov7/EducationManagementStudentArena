@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260719-corr">
 {% endblock %}
 
 {% block content %}
@@ -274,6 +275,7 @@ window.EXAM_WIZARD_I18N = {
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
 <script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
+<script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/labels.js' %}"></script>

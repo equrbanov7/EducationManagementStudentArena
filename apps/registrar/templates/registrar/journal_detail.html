@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260719-corr">
 {% endblock %}
 
 {% block content %}
@@ -194,10 +195,13 @@
         </div>
     </div>
     {% endif %}
+
+    {% include "registrar/partials/_correction_history_modal.html" %}
 </div>
 {% endblock %}
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260716-jbatch8"></script>
+    <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
