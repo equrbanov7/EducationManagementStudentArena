@@ -374,8 +374,13 @@ class CorrectionMediaAccessTest(_BaseJournalSetup):
         _lesson, mark = self._seminar_mark(8, 3)
         with bypass_rls():
             c = corrections.apply_correction(
-                mark=mark, field=CorrectionField.SCORE, new_score=9,
-                reason=CorrectionReason.MEDICAL, note="arayış", document=_pdf(), by_user=self.admin,
+                mark=mark,
+                field=CorrectionField.SCORE,
+                new_score=9,
+                reason=CorrectionReason.MEDICAL,
+                note="arayış",
+                document=_pdf(),
+                by_user=self.admin,
             )
             path = c.document.name
             # Owning student may read their own justification document.
