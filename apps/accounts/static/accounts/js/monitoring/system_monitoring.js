@@ -108,11 +108,9 @@
         }
 
         function skeletonCards(count) {
-            var single = '<div class="smx-card">' +
-                '<span class="skeleton skeleton-line skeleton-line--sm"></span>' +
+            var s = '<div class="smx-card"><span class="skeleton skeleton-line skeleton-line--sm"></span>' +
                 '<span class="skeleton skeleton-line skeleton-line--lg" style="margin-top:8px"></span></div>';
-            return '<div class="smx-cards" aria-hidden="true">' +
-                new Array(count || 8).fill(single).join("") + "</div>";
+            return '<div class="smx-cards" aria-hidden="true">' + new Array(count || 8).fill(s).join("") + "</div>";
         }
 
         function dot(up) {
