@@ -30336,3 +30336,55 @@ msgstr ""
 msgctxt "registrar.notify"
 msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
 msgstr "An official correction was made in your journal — see the journal for details"
+
+msgctxt "registrar.journal"
+msgid "Fənlər"
+msgstr "Subjects"
+
+msgctxt "registrar.journal"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "registrar.journal"
+msgid "Müəllim təyin edilməyib"
+msgstr "No teacher assigned"
+
+msgctxt "registrar.journal"
+msgid "Buraxılır"
+msgstr "Admitted"
+
+msgctxt "registrar.journal"
+msgid "TİP"
+msgstr "TYPE"
+
+msgctxt "registrar.journal"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "registrar.journal"
+msgid "Dərs tipinə görə süz"
+msgstr "Filter by lesson type"
+
+msgctxt "registrar.journal"
+msgid "Dərs tipi"
+msgstr "Lesson type"
+
+msgctxt "registrar.journal"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "registrar.journal"
+msgid "Bal"
+msgstr "Score"
+
+msgctxt "registrar.correction"
+msgid "Fənlər"
+msgstr "Subjects"
+
+msgctxt "registrar.correction"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "registrar.correction"
+msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
+msgstr "This entry has an official correction — click the mark to view the history."

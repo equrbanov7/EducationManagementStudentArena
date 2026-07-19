@@ -29750,3 +29750,55 @@ msgstr "Puan 0 ile %(max)s arasında olmalıdır."
 msgctxt "registrar.notify"
 msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
 msgstr "Jurnalınızda resmi bir düzeltme yapıldı — ayrıntılar için jurnala bakın"
+
+msgctxt "registrar.journal"
+msgid "Fənlər"
+msgstr "Dersler"
+
+msgctxt "registrar.journal"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "registrar.journal"
+msgid "Müəllim təyin edilməyib"
+msgstr "Öğretmen atanmadı"
+
+msgctxt "registrar.journal"
+msgid "Buraxılır"
+msgstr "Kabul edildi"
+
+msgctxt "registrar.journal"
+msgid "TİP"
+msgstr "TÜR"
+
+msgctxt "registrar.journal"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "registrar.journal"
+msgid "Dərs tipinə görə süz"
+msgstr "Ders türüne göre filtrele"
+
+msgctxt "registrar.journal"
+msgid "Dərs tipi"
+msgstr "Ders türü"
+
+msgctxt "registrar.journal"
+msgid "Müəllim"
+msgstr "Öğretmen"
+
+msgctxt "registrar.journal"
+msgid "Bal"
+msgstr "Puan"
+
+msgctxt "registrar.correction"
+msgid "Fənlər"
+msgstr "Dersler"
+
+msgctxt "registrar.correction"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "registrar.correction"
+msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
+msgstr "Bu kayıtta resmi bir düzeltme var — geçmişi görmek için işarete tıklayın."
