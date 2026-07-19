@@ -37,11 +37,11 @@ from ._shared import (
     _sanitize_auth_redirect_target,
 )
 from .constants import (
-    _REGISTER_SEO,
     AUTH_RATE_LIMIT_MESSAGE,
     OTP_RESEND_LIMIT_SCOPE,
     OTP_VERIFY_LIMIT_SCOPE,
     User,
+    _register_seo,
     logger,
 )
 
@@ -147,7 +147,7 @@ def register_view(request):
         {
             "form": form,
             "lookup_payload": get_signup_lookup_payload(),
-            **_REGISTER_SEO,
+            **_register_seo(),
         },
     )
 

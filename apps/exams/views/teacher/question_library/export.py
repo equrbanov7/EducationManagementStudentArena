@@ -11,8 +11,8 @@ from apps.exams.services.question_bank_attach import accessible_banks
 from core.tenancy import get_request_organization
 
 from ._shared import (
-    _BANK_TEMPLATE_TEST_TXT,
-    _BANK_TEMPLATE_WRITTEN_TXT,
+    _bank_template_test_txt,
+    _bank_template_written_txt,
     _normalize_format,
 )
 
@@ -24,7 +24,7 @@ def question_bank_template_download(request, bank_id):
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
 
     q_format = _normalize_format(bank.default_question_type)
-    template_text = _BANK_TEMPLATE_WRITTEN_TXT if q_format == "written" else _BANK_TEMPLATE_TEST_TXT
+    template_text = _bank_template_written_txt() if q_format == "written" else _bank_template_test_txt()
 
     # Yalnız TXT — DOCX importu söndürüldüyü üçün DOCX şablonu da verilmir.
     response = HttpResponse(template_text, content_type="text/plain; charset=utf-8")
