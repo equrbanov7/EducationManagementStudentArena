@@ -455,7 +455,8 @@ def get_offering_journal(*, offering, newest_first=False):
                     # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
                     "corrected": corrected,
                     # yazıla bilən: mövcud işarə pəncərə içində, YA boş xana bu günün dərsində
-                    "writable": (not corrected) and ((mark is not None and not locked) or (mark is None and lesson.date == today)),
+                    "writable": (not corrected)
+                    and ((mark is not None and not locked) or (mark is None and lesson.date == today)),
                 }
             )
         # Canonical entry score (component-weighted when defined, else lesson sum).
