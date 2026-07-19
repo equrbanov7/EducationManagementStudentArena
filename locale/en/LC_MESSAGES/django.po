@@ -30388,3 +30388,119 @@ msgstr "Close"
 msgctxt "registrar.correction"
 msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
 msgstr "This entry has an official correction — click the mark to view the history."
+
+msgctxt "registrar.correction"
+msgid "Axtar"
+msgstr "Search"
+
+msgctxt "registrar.correction"
+msgid "Bal"
+msgstr "Score"
+
+msgctxt "registrar.correction"
+msgid "Bu fənndə hələ tələbə/dərs yoxdur."
+msgstr "No students/lessons in this subject yet."
+
+msgctxt "registrar.correction"
+msgid "Bütün semestrlər"
+msgstr "All semesters"
+
+msgctxt "registrar.correction"
+msgid "Davamiyyət"
+msgstr "Attendance"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş olunmuş xana"
+msgstr "Corrected cell"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş tarixçəsi"
+msgstr "Correction history"
+
+msgctxt "registrar.correction"
+msgid "Düzəlişi edən"
+msgstr "Corrected by"
+
+msgctxt "registrar.correction"
+msgid "Dəyişmək üçün istənilən xananın üzərinə klikləyin."
+msgstr "Click any cell to correct it."
+
+msgctxt "registrar.correction"
+msgid "Fənn siyahısı"
+msgstr "Subject list"
+
+msgctxt "registrar.correction"
+msgid "Jurnal düzəlişi"
+msgstr "Journal correction"
+
+msgctxt "registrar.correction"
+msgid "Müəllim və fənn seçin — jurnalı düzəliş rejimində açın. Hər düzəliş sənəd (PDF), səbəb və qeyd tələb edir; kim nəyi dəyişdi audit olunur."
+msgstr "Choose a teacher and subject — open the journal in correction mode. Every correction requires a document (PDF), a reason and a note; who changed what is audited."
+
+msgctxt "registrar.correction"
+msgid "Müəllim təyin edilməyib"
+msgstr "No teacher assigned"
+
+msgctxt "registrar.correction"
+msgid "Nəyi düzəldirsiniz?"
+msgstr "What are you correcting?"
+
+msgctxt "registrar.correction"
+msgid "QAYIB"
+msgstr "ABSENCE"
+
+msgctxt "registrar.correction"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "registrar.correction"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "registrar.correction"
+msgid "Sənəd (PDF)"
+msgstr "Document (PDF)"
+
+msgctxt "registrar.correction"
+msgid "Təsdiqlə"
+msgstr "Confirm"
+
+msgctxt "registrar.correction"
+msgid "Uyğun fənn açılışı tapılmadı."
+msgstr "No matching course offering found."
+
+msgctxt "registrar.correction"
+msgid "Yalnız cari semestr"
+msgstr "Current semester only"
+
+msgctxt "registrar.correction"
+msgid "Yeni bal (tam ədəd)"
+msgstr "New score (whole number)"
+
+msgctxt "registrar.correction"
+msgid "Yeni davamiyyət"
+msgstr "New attendance"
+
+msgctxt "registrar.correction"
+msgid "İmtina"
+msgstr "Cancel"
+
+msgctxt "registrar.correction"
+msgid "№ · SOYAD AD"
+msgstr "№ · SURNAME NAME"
+
+msgctxt "registrar.correction"
+msgid "İştirak (iə)"
+msgstr "Present (p)"
+
+msgctxt "registrar.correction"
+msgid "Qayıb (qb)"
+msgstr "Absent (a)"
+
+msgctxt "registrar.correction"
+msgid "Üzrlü qayıb (üq)"
+msgstr "Excused absence (e)"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş yadda saxlanıldı."
+msgstr "Correction saved."
