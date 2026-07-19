@@ -85,3 +85,10 @@
 .jd2-cell.corr-fixed { background: #fff3cd; }
 .sjx-row--fixed { background: #fffdf5; }
 .sjx-row--fixed .corr-fixed-badge { color: #d99e13; margin-left: 4px; }
+
+/* Müəllim grid: redaktə vaxtı keçmiş tarix başlığı klik-edilə bilən (gün özəti). */
+.jd2-th-date-btn { background: none; border: none; cursor: pointer; font: inherit; color: #2563eb; padding: 0; text-decoration: underline dotted; }
+.jd2-th-date-btn:hover { color: #1d4ed8; }
+.jd2-th-lesson--locked { opacity: 0.95; }
+.jd-day-stat { background: #f5f8ff; border: 1px solid #e2e8f5; border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; color: #33415c; }
+.jd-day-stat b { color: #0f2a5e; font-size: 1.05rem; }
