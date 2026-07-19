@@ -82,12 +82,14 @@
             {% endif %}
             <label>
                 <span>{% trans 'Fakültə' %}</span>
-                <select name="parent" {% if not s.can_create_kafedra %}disabled{% endif %}>
-                    <option value="">{% trans 'Fakültə seçin' %}</option>
-                    {% for faculty in s.faculty_parent_options %}
-                        <option value="{{ faculty.id }}" {% if s.form_values.unit_kind == "kafedra" and s.form_values.parent == faculty.id|stringformat:"s" %}selected{% endif %}>{{ faculty.name }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" name="parent" data-bootstrap-select {% if not s.can_create_kafedra %}disabled{% endif %}>
+                        <option value="">{% trans 'Fakültə seçin' %}</option>
+                        {% for faculty in s.faculty_parent_options %}
+                            <option value="{{ faculty.id }}" {% if s.form_values.unit_kind == "kafedra" and s.form_values.parent == faculty.id|stringformat:"s" %}selected{% endif %}>{{ faculty.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </label>
             {% if s.form_values.unit_kind == "kafedra" and s.form_errors.parent %}
                 <div class="org-management__field-error">{{ s.form_errors.parent }}</div>

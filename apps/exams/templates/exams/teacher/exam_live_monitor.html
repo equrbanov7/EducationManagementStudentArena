@@ -46,12 +46,14 @@
                {% if session_dates %}max="{{ today_value }}"{% endif %}>
         {% if session_dates %}
         <label for="dateSelect">{% trans "label_sessions" context "exams.template.exam_live_monitor" %}</label>
-        <select id="dateSelect">
-            <option value="">{% trans "select_date_placeholder" context "exams.template.exam_live_monitor" %}</option>
-            {% for d in session_dates %}
-            <option value="{{ d|date:'Y-m-d' }}" {% if selected_date == d|date:'Y-m-d' %}selected{% endif %}>{{ d|date:'d.m.Y' }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select">
+            <select id="dateSelect" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                <option value="">{% trans "select_date_placeholder" context "exams.template.exam_live_monitor" %}</option>
+                {% for d in session_dates %}
+                <option value="{{ d|date:'Y-m-d' }}" {% if selected_date == d|date:'Y-m-d' %}selected{% endif %}>{{ d|date:'d.m.Y' }}</option>
+                {% endfor %}
+            </select>
+        </div>
         {% endif %}
     </form>
 
@@ -138,7 +140,13 @@
             <button type="button" class="lv-close" id="modalClose">&times;</button>
         </div>
         <div class="lv-modal-body" id="modalBody">
-            <div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>{% trans "loading" context "exams.template.exam_live_monitor" %}</p></div>
+            <div class="mon-grid" aria-hidden="true">
+                <div class="mon-metric"><span class="skeleton skeleton-line" style="width:60%;margin:0 auto"></span></div>
+                <div class="mon-metric"><span class="skeleton skeleton-line" style="width:60%;margin:0 auto"></span></div>
+                <div class="mon-metric"><span class="skeleton skeleton-line" style="width:60%;margin:0 auto"></span></div>
+            </div>
+            <div class="skeleton skeleton-line skeleton-line--sm" aria-hidden="true"></div>
+            <div class="skeleton skeleton-block" style="height:70px;margin-top:8px" aria-hidden="true"></div>
         </div>
         <div class="lv-modal-foot">
             <span class="modal-answer-count" id="modalAnswerCount"></span>

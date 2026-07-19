@@ -51,10 +51,12 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">{% trans "label_status" context "labs.template.lab_modals" %}</label>
-                                    <select id="editLabStatus" name="status" class="form-select">
-                                        <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
-                                        <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
-                                    </select>
+                                    <div class="bootstrap-single-select">
+                                        <select id="editLabStatus" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                            <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
+                                            <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mb-3">

@@ -118,8 +118,8 @@
         }
 
         modeSelectionState.edit = createSelectionState();
-        $('editLabGroupList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
-        $('editLabStudentList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+        $('editLabGroupList').innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
+        $('editLabStudentList').innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
 
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
@@ -141,7 +141,10 @@
             if ($('editLabEnd')) $('editLabEnd').value = d.end_datetime || '';
             if ($('editLabMaxScore')) $('editLabMaxScore').value = d.max_score || 100;
             if ($('editLabMaxAttempts')) $('editLabMaxAttempts').value = d.max_attempts || 1;
-            if ($('editLabStatus')) $('editLabStatus').value = d.status || 'draft';
+            if ($('editLabStatus')) {
+                $('editLabStatus').value = d.status || 'draft';
+                $('editLabStatus')._refreshBootstrapSelect && $('editLabStatus')._refreshBootstrapSelect();
+            }
             if ($('editLabQPS')) $('editLabQPS').value = d.questions_per_student || 0;
             if ($('editAllowLate')) $('editAllowLate').checked = d.allow_late_submission;
             if ($('editLatePenalty')) $('editLatePenalty').value = d.late_penalty_percent || 0;
@@ -216,7 +219,7 @@
         const container = $(mode + 'LabGroupList');
         if (!container) return;
 
-        container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+        container.innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
 
         fetch('/labs/api/groups/' + COURSE_ID + '/')
         .then(r => r.json())
@@ -270,7 +273,7 @@
             return;
         }
 
-        container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+        container.innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
 
         fetch('/labs/api/students/' + COURSE_ID + '/?groups=' + encodeURIComponent(groups.join(',')))
         .then(r => r.json())

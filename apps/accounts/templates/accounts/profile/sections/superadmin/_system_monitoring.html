@@ -18,16 +18,19 @@
         </p>
       </div>
       <div class="smx-controls">
-        <select id="smx-range" class="smx-select"
-                aria-label="{% trans 'Vaxt aralığı' context 'monitoring' %}">
-          <option value="300">5 dəq</option>
-          <option value="900">15 dəq</option>
-          <option value="3600" selected>1 saat</option>
-          <option value="21600">6 saat</option>
-          <option value="86400">24 saat</option>
-          <option value="604800">7 gün</option>
-          <option value="2592000">30 gün</option>
-        </select>
+        <div class="bootstrap-single-select">
+          <select id="smx-range" class="smx-select bootstrap-single-select__native js-bootstrap-single-select"
+                  data-bootstrap-select
+                  aria-label="{% trans 'Vaxt aralığı' context 'monitoring' %}">
+            <option value="300">5 dəq</option>
+            <option value="900">15 dəq</option>
+            <option value="3600" selected>1 saat</option>
+            <option value="21600">6 saat</option>
+            <option value="86400">24 saat</option>
+            <option value="604800">7 gün</option>
+            <option value="2592000">30 gün</option>
+          </select>
+        </div>
         <button type="button" id="smx-refresh" class="smx-btn"
                 title="{% trans 'Yenilə' context 'monitoring' %}">
           <i class="fas fa-rotate"></i>
@@ -59,9 +62,13 @@
       <span id="smx-degraded-text"></span>
     </div>
     <div id="smx-body" class="smx-body" aria-live="polite">
-      <div class="smx-loading">
-        <i class="fas fa-circle-notch fa-spin"></i>
-        {% trans "Yüklənir…" context "monitoring" %}
+      <div class="smx-cards" aria-hidden="true">
+        {% for i in "12345678" %}
+        <div class="smx-card">
+          <span class="skeleton skeleton-line skeleton-line--sm"></span>
+          <span class="skeleton skeleton-line skeleton-line--lg" style="margin-top:8px"></span>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>

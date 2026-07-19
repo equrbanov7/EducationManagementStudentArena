@@ -58,42 +58,48 @@
                 <label class="results-filter-label" for="resultsFilterStatusSelect">
                     {% trans "filter_by_status" context "labs.template.lab_submissions" %}
                 </label>
-                <select name="status"
-                        id="resultsFilterStatusSelect"
-                        class="form-select js-auto-filter js-filter-resettable"
-                        data-reset-value="all">
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
-                        {% trans "filter_all_statuses" context "labs.template.lab_submissions" %}
-                    </option>
-                    <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>
-                        {% trans "status_pending" context "labs.template.lab_submissions" %}
-                    </option>
-                    <option value="late" {% if status_filter == 'late' %}selected{% endif %}>
-                        {% trans "status_late" context "labs.template.lab_submissions" %}
-                    </option>
-                    <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
-                        {% trans "status_graded" context "labs.template.lab_submissions" %}
-                    </option>
-                    <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>
-                        {% trans 'Qaytarılıb' %}
-                    </option>
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="status"
+                            id="resultsFilterStatusSelect"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select js-auto-filter js-filter-resettable"
+                            data-bootstrap-select
+                            data-reset-value="all">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
+                            {% trans "filter_all_statuses" context "labs.template.lab_submissions" %}
+                        </option>
+                        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>
+                            {% trans "status_pending" context "labs.template.lab_submissions" %}
+                        </option>
+                        <option value="late" {% if status_filter == 'late' %}selected{% endif %}>
+                            {% trans "status_late" context "labs.template.lab_submissions" %}
+                        </option>
+                        <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
+                            {% trans "status_graded" context "labs.template.lab_submissions" %}
+                        </option>
+                        <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>
+                            {% trans 'Qaytarılıb' %}
+                        </option>
+                    </select>
+                </div>
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterGroupSelect">
                     {% trans "filter_by_group" context "labs.template.lab_submissions" %}
                 </label>
-                <select name="group"
-                        id="resultsFilterGroupSelect"
-                        class="form-select js-auto-filter js-filter-resettable"
-                        data-reset-value="all">
-                    <option value="all" {% if group_filter == 'all' %}selected{% endif %}>
-                        {% trans "filter_all_groups" context "labs.template.lab_submissions" %}
-                    </option>
-                    {% for g in groups %}
-                        <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="group"
+                            id="resultsFilterGroupSelect"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select js-auto-filter js-filter-resettable"
+                            data-bootstrap-select
+                            data-reset-value="all">
+                        <option value="all" {% if group_filter == 'all' %}selected{% endif %}>
+                            {% trans "filter_all_groups" context "labs.template.lab_submissions" %}
+                        </option>
+                        {% for g in groups %}
+                            <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateFromInput">

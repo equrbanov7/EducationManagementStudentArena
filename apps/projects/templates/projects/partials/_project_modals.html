@@ -19,11 +19,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{% trans "label_status" context "projects.modals" %}</label>
-                            <select name="status" class="form-select">
-                                <option value="active">{% trans "status_active" context "projects.modals" %}</option>
-                                <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
-                                <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
-                            </select>
+                            <div class="bootstrap-single-select">
+                                <select name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                    <option value="active">{% trans "status_active" context "projects.modals" %}</option>
+                                    <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
+                                    <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -94,11 +96,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{% trans "label_status" context "projects.modals" %}</label>
-                            <select id="editStatus" name="status" class="form-select">
-                                <option value="active">{% trans "status_active" context "projects.modals" %}</option>
-                                <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
-                                <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
-                            </select>
+                            <div class="bootstrap-single-select">
+                                <select id="editStatus" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                    <option value="active">{% trans "status_active" context "projects.modals" %}</option>
+                                    <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
+                                    <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -264,7 +268,7 @@
 
     function loadGroups(mode, checkedGroups = []) {
         const container = $(mode + 'GroupList');
-        container.innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
+        container.innerHTML = `<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>`;
 
         fetch(`/projects/api/groups/?course_id=${COURSE_ID}`)
             .then(r => r.json())
@@ -313,7 +317,7 @@
             return;
         }
 
-        container.innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
+        container.innerHTML = `<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>`;
 
         fetch(`/projects/api/students/?course_id=${COURSE_ID}&groups=${encodeURIComponent(groups.join(','))}`)
             .then(r => r.json())
@@ -422,8 +426,8 @@
         const url = btn.dataset.url;
 
         modeSelectionState.edit = createSelectionState();
-        $('editGroupList').innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
-        $('editStudentList').innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
+        $('editGroupList').innerHTML = `<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>`;
+        $('editStudentList').innerHTML = `<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>`;
 
         bootstrap.Modal.getOrCreateInstance($('editProjectModal')).show();
 
@@ -442,6 +446,7 @@
                 $('editMaxAttempts').value = d.max_attempts || 1;
                 $('editMaxScore').value = d.max_score || 100;
                 $('editStatus').value = d.status || 'active';
+                $('editStatus')._refreshBootstrapSelect && $('editStatus')._refreshBootstrapSelect();
 
                 modeSelectionState.edit = createSelectionState(
                     d.student_ids || [],

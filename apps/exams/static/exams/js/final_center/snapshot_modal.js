@@ -85,7 +85,14 @@
     // silent=true → arxa-fon poll: "Yüklənir…" göstərmir və scroll mövqeyini saxlayır.
     function load(silent) {
         var body = document.getElementById("fxc-snapshot-body");
-        if (body && !silent) body.innerHTML = '<p class="fxc-muted fxc-center">Yüklənir…</p>';
+        if (body && !silent) {
+            body.innerHTML =
+                '<div class="fxc-snapshot-answers" aria-hidden="true">' +
+                '<div class="fxc-snap-q"><span class="skeleton skeleton-line" style="width:70%"></span></div>' +
+                '<div class="fxc-snap-q"><span class="skeleton skeleton-line" style="width:55%"></span></div>' +
+                '<div class="fxc-snap-q"><span class="skeleton skeleton-line" style="width:65%"></span></div>' +
+                "</div>";
+        }
         var keepScroll = body ? body.scrollTop : 0;
         var mine = ++requestSerial;
         var snapshotUrl = fillUrl(snapshotTpl, current.sessionId, current.ticketId);

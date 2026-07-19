@@ -107,6 +107,14 @@
                 escapeHtml(key) + '</div><div class="v">' + value + "</div></div>";
         }
 
+        function skeletonCards(count) {
+            var single = '<div class="smx-card">' +
+                '<span class="skeleton skeleton-line skeleton-line--sm"></span>' +
+                '<span class="skeleton skeleton-line skeleton-line--lg" style="margin-top:8px"></span></div>';
+            return '<div class="smx-cards" aria-hidden="true">' +
+                new Array(count || 8).fill(single).join("") + "</div>";
+        }
+
         function dot(up) {
             return '<span class="smx-dot ' + (up == null ? "na" : up ? "ok" : "bad") + '"></span>';
         }
@@ -363,8 +371,7 @@
             var sequence = ++requestSequence;
             if (!options.silent) {
                 destroyCharts();
-                body.innerHTML = '<div class="smx-loading">' +
-                    '<i class="fas fa-circle-notch fa-spin"></i> Yüklənir…</div>';
+                body.innerHTML = skeletonCards(8);
             }
             refreshButton.classList.add("is-loading");
             var fetchOptions = {
