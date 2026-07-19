@@ -116,9 +116,8 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_extras
-
     from apps.registrar import corrections as corrections_service
+    from apps.registrar import journal_extras
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections_service.corrections_map_for_offering(offering)
