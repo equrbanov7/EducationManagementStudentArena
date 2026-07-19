@@ -309,12 +309,26 @@ def exam_result(request, slug, attempt_id):
     if test_result is not None and appeal_bonus_points:
         test_result = score_adjustments.apply_bonus(test_result, appeal_bonus_points)
 
+    # Elektron jurnal nəticəsi: giriş + imtahan balı → ümumi bal + hərf (A–F).
+    # İmtahan bir jurnal fənninə bağlıdırsa göstərilir (best-effort, sındırmır).
+    journal_result = None
+    subject_id = getattr(exam, "subject_id", None)
+    if subject_id and getattr(exam, "organization_id", None):
+        try:
+            from apps.registrar.public import exam_result_summary
+
+            summary = exam_result_summary(student=attempt.user, subject_id=subject_id, organization=exam.organization)
+            journal_result = summary if summary.get("linked") else None
+        except Exception:
+            journal_result = None
+
     return render(
         request,
         "exams/student/exam_result.html",
         {
             "exam": exam,
             "attempt": attempt,
+            "journal_result": journal_result,
             "exam_intervention": exam_intervention,
             "questions": questions,
             "answers_by_qid": answers_by_qid,

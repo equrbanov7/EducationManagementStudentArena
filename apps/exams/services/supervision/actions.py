@@ -226,6 +226,13 @@ def teacher_stop_attempt(attempt, teacher, reason="", action="removed"):
         },
     )
 
+    # Qovulan tələbə → elektron jurnalda avtomatik F (0 bal). Best-effort körpü.
+    from django.db import transaction as _tx
+
+    from apps.exams.services.journal_sync import sync_attempt_to_journal
+
+    _tx.on_commit(lambda: sync_attempt_to_journal(attempt))
+
     return True
 
 
