@@ -20,10 +20,12 @@ yaxınlaşırsa → xəbərdarlıq (sətir bozarır).
 
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.db.models import Count
 from django.utils import timezone
 
 from apps.registrar import grade_audit, services
@@ -501,15 +503,35 @@ def get_student_journal_summary(*, record, period, semester_number):
     from this student's own lesson marks (only their row — never the roster)."""
     plan = services.get_student_semester_plan(record=record, period=period, semester_number=semester_number)
     limit_percent = record.program.absence_limit_percent if record.program else _DEFAULT_ABSENCE_LIMIT
+    enrollments = plan["enrollments"]
+    if not enrollments:
+        return {"subjects": []}
+
+    # ── Toplu (batch) sorğular — per-subject N+1-i aradan qaldırır ──────────────
+    enr_ids = [e.id for e in enrollments]
+    offering_ids = list({e.offering_id for e in enrollments})
+    marks_by_enr: dict = defaultdict(list)
+    for m in LessonMark.objects.filter(enrollment_id__in=enr_ids).select_related("lesson"):
+        marks_by_enr[m.enrollment_id].append(m)
+    from apps.registrar.models import AssessmentComponent
+
+    comps_by_off: dict = defaultdict(list)
+    for c in AssessmentComponent.objects.filter(offering_id__in=offering_ids):
+        comps_by_off[c.offering_id].append(c)
+    lesson_counts = {
+        row["offering_id"]: row["c"]
+        for row in Lesson.objects.filter(offering_id__in=offering_ids).values("offering_id").annotate(c=Count("id"))
+    }
+
     subjects = []
-    for enrollment in plan["enrollments"]:
+    for enrollment in enrollments:
         offering = enrollment.offering
-        marks = list(LessonMark.objects.filter(enrollment=enrollment).select_related("lesson"))
+        marks = marks_by_enr.get(enrollment.id, [])
         absence_hours = sum(m.lesson.hours for m in marks if m.status == AttendanceStatus.ABSENT)
         scheme = getattr(offering, "assessment_scheme", None)
         cap = scheme.entry_score_max if scheme else 50
-        entry_score = entry_score_for(enrollment, cap)
-        lessons_held = offering.lessons.count()
+        entry_score = entry_score_for(enrollment, cap, marks=marks, components=comps_by_off.get(offering.id, []))
+        lessons_held = lesson_counts.get(offering.id, 0)
         total_hours = offering.lesson_hours or 0
         allowed = Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
         barred = allowed > 0 and Decimal(absence_hours) > allowed
