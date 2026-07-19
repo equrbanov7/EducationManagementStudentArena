@@ -36,10 +36,19 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_OWNER_EMAIL = "info@emsarena.com"
 
-_REPLY_FROM_ADDRESSES = {
-    "info": ("EMSArena", "info@emsarena.com"),
-    "support": ("EMSArena Support", "support@emsarena.com"),
-}
+_REPLY_FROM_KEYS = frozenset({"info", "support"})
+
+
+def _reply_from_addresses(brand: str) -> dict[str, tuple[str, str]]:
+    """Return the ``reply_from`` -> (display name, address) mapping.
+
+    Display names carry the tenant brand; the mailbox addresses stay pinned
+    to the operator inboxes regardless of tenant.
+    """
+    return {
+        "info": (brand, "info@emsarena.com"),
+        "support": (f"{brand} Support", "support@emsarena.com"),
+    }
 
 
 def _resolve_notify_address() -> str:
@@ -77,13 +86,14 @@ def _file_download_url(request_obj: TrialExamRequest) -> str:
 def _send_owner_notification(request_obj: TrialExamRequest) -> bool:
     """Email the configured owner inbox about a new trial request."""
     recipient = _resolve_notify_address()
-    subject = _("[EMSArena Sınaq] %(subject)s — %(name)s") % {
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    subject = _("[%(brand)s Sınaq] %(subject)s — %(name)s") % {
+        "brand": brand,
         "subject": request_obj.subject_name,
         "name": request_obj.full_name,
     }
     reply_url, admin_detail_url = _admin_links(request_obj)
     profile_detail_url = _profile_detail_url(request_obj)
-    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
     context = {
         "request_obj": request_obj,
         "brand": brand,
@@ -103,7 +113,7 @@ def _send_owner_notification(request_obj: TrialExamRequest) -> bool:
         html_body=html_body,
         text_body=text_body,
         from_email=from_email,
-        from_name="EMSArena",
+        from_name=brand,
         to=[recipient],
         reply_to=[request_obj.email],
     )
@@ -165,14 +175,18 @@ def dispatch_trial_notifications(request_obj: TrialExamRequest) -> None:
 # ---------------------------------------------------------------------------
 def _send_reply_email(request_obj: TrialExamRequest, reply_body: str, reply_from: str) -> tuple[bool, str]:
     """Render and dispatch the confirmation email. Caller MUST persist first."""
-    from_name, from_email = _REPLY_FROM_ADDRESSES[reply_from]
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    from_name, from_email = _reply_from_addresses(brand)[reply_from]
 
-    subject = _("EMSArena — Sınaq imtahanınız hazırdır: %(subject)s") % {"subject": request_obj.subject_name}
+    subject = _("%(brand)s — Sınaq imtahanınız hazırdır: %(subject)s") % {
+        "brand": brand,
+        "subject": request_obj.subject_name,
+    }
     context = {
         "request_obj": request_obj,
         "reply_body": reply_body,
         "from_email": from_email,
-        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+        "brand": brand,
     }
     html_body = render_to_string("trial_exams/email/trial_reply.html", context)
     text_body = strip_tags(html_body)
@@ -205,7 +219,7 @@ def send_reply_to_trial_request(
     """
     from django.utils import timezone
 
-    if reply_from not in _REPLY_FROM_ADDRESSES:
+    if reply_from not in _REPLY_FROM_KEYS:
         raise ValueError(f"Unknown reply_from inbox: {reply_from!r}")
 
     request_obj.reply_body = reply_body

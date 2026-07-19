@@ -37,9 +37,9 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_OWNER_EMAIL = "info@emsarena.com"
 
-_REPLY_FROM_ADDRESSES = {
-    "info": ("EMSArena", "info@emsarena.com"),
-    "support": ("EMSArena Support", "support@emsarena.com"),
+_REPLY_FROM_EMAILS = {
+    "info": "info@emsarena.com",
+    "support": "support@emsarena.com",
 }
 
 
@@ -54,7 +54,9 @@ def _resolve_notify_address() -> str:
 def _send_internal_notification(message: ContactMessage) -> bool:
     """Send the new-message alert to the configured staff mailbox."""
     recipient = _resolve_notify_address()
-    subject = _("[EMSArena Contact] %(subject)s — %(name)s") % {
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    subject = _("[%(brand)s Contact] %(subject)s — %(name)s") % {
+        "brand": brand,
         "subject": message.get_subject_display(),
         "name": message.name,
     }
@@ -62,7 +64,6 @@ def _send_internal_notification(message: ContactMessage) -> bool:
     reply_url = build_absolute_url(reverse("admin:contact_contactmessage_reply", args=[message.pk]))
     detail_url = build_absolute_url(reverse("admin:contact_contactmessage_change", args=[message.pk]))
 
-    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
     context = {
         "message": message,
         "subject_display": message.get_subject_display(),
@@ -80,7 +81,7 @@ def _send_internal_notification(message: ContactMessage) -> bool:
         html_body=html_body,
         text_body=text_body,
         from_email=from_email,
-        from_name="EMSArena",
+        from_name=brand,
         to=[recipient],
         reply_to=[message.email],
     )
@@ -105,14 +106,16 @@ def dispatch_contact_notification(message: ContactMessage) -> None:
 # ---------------------------------------------------------------------------
 def _send_reply_email(message: ContactMessage, reply_body: str, reply_from: str) -> tuple[bool, str]:
     """Render and dispatch the reply email. Caller MUST persist already."""
-    from_name, from_email = _REPLY_FROM_ADDRESSES[reply_from]
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    from_email = _REPLY_FROM_EMAILS[reply_from]
+    from_name = f"{brand} Support" if reply_from == "support" else brand
 
-    subject = _("Re: [EMSArena] %(subject)s") % {"subject": message.get_subject_display()}
+    subject = _("Re: [%(brand)s] %(subject)s") % {"brand": brand, "subject": message.get_subject_display()}
     context = {
         "message": message,
         "reply_body": reply_body,
         "from_email": from_email,
-        "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+        "brand": brand,
     }
     html_body = render_to_string("contact/email/contact_reply.html", context)
     text_body = strip_tags(html_body)
@@ -147,7 +150,7 @@ def send_reply_to_contact(
     """
     from django.utils import timezone
 
-    if reply_from not in _REPLY_FROM_ADDRESSES:
+    if reply_from not in _REPLY_FROM_EMAILS:
         raise ValueError(f"Unknown reply_from inbox: {reply_from!r}")
 
     # ---- Persist FIRST (cheap, transactional) ----

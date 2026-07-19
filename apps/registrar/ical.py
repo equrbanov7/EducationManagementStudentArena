@@ -17,10 +17,10 @@ from __future__ import annotations
 
 import datetime
 
+from django.conf import settings
+
 from apps.registrar.models import WeekType
 from apps.registrar.schedule import week_parity
-
-_PRODID = "-//EMSArena//Ders cedveli//AZ"
 
 
 def _escape(text: str) -> str:
@@ -113,11 +113,12 @@ def _slot_event(slot, period, stamp: str) -> list[str]:
 
 def build_schedule_ics(*, slots, period, calendar_name: str) -> str:
     """Slot siyahısı → tam VCALENDAR mətni (period yoxdursa boş kalendar)."""
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     stamp = f"{datetime.datetime.utcnow():%Y%m%dT%H%M%SZ}"
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        f"PRODID:{_PRODID}",
+        f"PRODID:-//{brand}//Ders cedveli//AZ",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
         f"X-WR-CALNAME:{_escape(calendar_name)}",

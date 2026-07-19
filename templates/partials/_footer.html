@@ -20,25 +20,15 @@
                 <p class="ems-footer__tagline">
                     {% trans "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli." %}
                 </p>
-                <div class="ems-footer__socials" aria-label="{% trans 'Sosial şəbəkələr' %}">
-                    <a href="https://instagram.com/emsarena_edtech"
-                       target="_blank" rel="noopener noreferrer"
+                {% if contact_public_email %}
+                <div class="ems-footer__socials" aria-label="{% trans 'Əlaqə' %}">
+                    <a href="mailto:{{ contact_public_email }}"
                        class="ems-footer__social"
-                       aria-label="Instagram – emsarena_edtech">
-                        <i class="fab fa-instagram" aria-hidden="true"></i>
-                    </a>
-                    <a href="https://wa.me/994000000000"
-                       target="_blank" rel="noopener noreferrer"
-                       class="ems-footer__social"
-                       aria-label="WhatsApp">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                    </a>
-                    <a href="mailto:info@emsarena.com"
-                       class="ems-footer__social"
-                       aria-label="Email">
+                       aria-label="{% trans 'E-poçt' %}">
                         <i class="fas fa-envelope" aria-hidden="true"></i>
                     </a>
                 </div>
+                {% endif %}
             </div>
 
             {# Platform column #}
@@ -74,24 +64,18 @@
             <div class="ems-footer__col">
                 <h3 class="ems-footer__col-title">{% trans "Əlaqə" %}</h3>
                 <ul class="ems-footer__contact-list">
+                    {% if contact_public_email %}
                     <li class="ems-footer__contact-item">
                         <i class="fas fa-envelope" aria-hidden="true"></i>
-                        <a href="mailto:info@emsarena.com" class="ems-footer__link">info@emsarena.com</a>
+                        <a href="mailto:{{ contact_public_email }}" class="ems-footer__link">{{ contact_public_email }}</a>
                     </li>
+                    {% endif %}
+                    {% if contact_support_email %}
                     <li class="ems-footer__contact-item">
                         <i class="fas fa-life-ring" aria-hidden="true"></i>
-                        <a href="mailto:support@emsarena.com" class="ems-footer__link">support@emsarena.com</a>
+                        <a href="mailto:{{ contact_support_email }}" class="ems-footer__link">{{ contact_support_email }}</a>
                     </li>
-                    <li class="ems-footer__contact-item">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                        <a href="https://wa.me/994000000000" target="_blank" rel="noopener noreferrer" class="ems-footer__link">WhatsApp</a>
-                    </li>
-                    <li class="ems-footer__contact-item">
-                        <i class="fab fa-instagram" aria-hidden="true"></i>
-                        <a href="https://instagram.com/emsarena_edtech"
-                           target="_blank" rel="noopener noreferrer"
-                           class="ems-footer__link">@emsarena_edtech</a>
-                    </li>
+                    {% endif %}
                     <li class="ems-footer__contact-item">
                         <i class="fas fa-location-dot" aria-hidden="true"></i>
                         <span>{% trans 'Bakı, Azərbaycan' %}</span>
@@ -108,12 +92,6 @@
         <div class="ems-footer__bottom">
             <p class="ems-footer__copy">
                 © <span id="footerCurrentYear">2026</span> {{ site_brand_name }}. {% trans "Bütün hüquqlar qorunur." %}
-            </p>
-            <p class="ems-footer__made-by">
-                {% trans "Hazırladı" %}:
-                <a href="https://instagram.com/emsarena_edtech"
-                   target="_blank" rel="noopener noreferrer"
-                   class="ems-footer__link ems-footer__link--accent">Elvin Qurbanov</a>
             </p>
         </div>
 
