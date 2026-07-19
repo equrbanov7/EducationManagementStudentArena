@@ -30,7 +30,8 @@ from ._shared import center_org_or_403
 
 User = get_user_model()
 
-_SEARCH_LIMIT = 15
+_SEARCH_LIMIT_DEFAULT = 15
+_SEARCH_LIMIT_MAX = 50
 
 
 @login_required
@@ -80,9 +81,23 @@ def _pin_holder_student_queryset(organization):
 @login_required
 @require_GET
 def exam_center_pin_search(request):
-    """Canlı axtarış: bu təşkilatda PIN-i olan tələbələr (ad/username üzrə)."""
+    """Canlı axtarış: bu təşkilatda PIN-i olan tələbələr (ad/username üzrə).
+
+    Lazy səhifələnən (offset/limit + has_more) — panel açılanda ilk səhifə
+    dərhal göstərilir, aşağı sürüşdürdükcə növbəti səhifə gəlir (bütün
+    PIN-li tələbələr bir dəfəyə yüklənmir).
+    """
     organization = center_org_or_403(request)
     query = (request.GET.get("q") or "").strip()
+    try:
+        offset = max(0, int(request.GET.get("offset", 0)))
+    except (TypeError, ValueError):
+        offset = 0
+    try:
+        limit = int(request.GET.get("limit", _SEARCH_LIMIT_DEFAULT))
+    except (TypeError, ValueError):
+        limit = _SEARCH_LIMIT_DEFAULT
+    limit = max(1, min(limit, _SEARCH_LIMIT_MAX))
 
     qs = _pin_holder_student_queryset(organization).annotate(kafedra=Subquery(_kafedra_subquery(organization)))
     if query:
@@ -92,7 +107,9 @@ def exam_center_pin_search(request):
             | Q(last_name__icontains=query)
             | Q(email__icontains=query)
         )
-    students = list(qs.order_by("first_name", "last_name", "username")[:_SEARCH_LIMIT])
+    window = list(qs.order_by("first_name", "last_name", "username")[offset : offset + limit + 1])
+    has_more = len(window) > limit
+    students = window[:limit]
     student_ids = [student.id for student in students]
     exam_ids_by_student = {student_id: set() for student_id in student_ids}
     for student_id, exam_id in FinalExamTicket.objects.filter(
@@ -114,7 +131,7 @@ def exam_center_pin_search(request):
         }
         for u in students
     ]
-    return JsonResponse({"results": results})
+    return JsonResponse({"results": results, "has_more": has_more})
 
 
 @login_required
