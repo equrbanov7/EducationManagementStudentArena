@@ -342,6 +342,32 @@
     color: var(--ems-warning-700, #b45309);
 }
 
+/* Semestr başlığındakı meta — fənn sayı + toplanmış kredit + ÜOMG. */
+.oa-semester-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.oa-semester-credits,
+.oa-semester-gpa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.12rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+.oa-semester-credits {
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+.oa-semester-gpa {
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-600, #475569);
+}
+
 /* Bölmə başlığı altındakı təsvir (dublikat başlıq əvəzinə). */
 .oa-subtitle {
     margin: 0;

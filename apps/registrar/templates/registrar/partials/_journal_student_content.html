@@ -106,7 +106,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             <div class="sjx-kpi-status {% if d.journal.barred %}is-danger{% else %}is-ok{% endif %}">
                 {% if d.journal.barred %}{% trans "İmtahana buraxılmır" context "registrar.journal" %}{% else %}{% trans "İmtahana buraxılır" context "registrar.journal" %} ✓{% endif %}
             </div>
-            <div class="sjx-kpi-sub">{% trans "Davamiyyət" context "registrar.journal" %}: {{ d.dav_score }}/10</div>
+            <div class="sjx-kpi-sub">{% trans "Davamiyyət" context "registrar.journal" %}: {% if d.dav_score is not None %}{{ d.dav_score|floatformat:'-2' }}/10{% else %}{% trans "imtahana buraxılmır" context "registrar.journal" %}{% endif %}</div>
         </div>
     </div>
 
