@@ -524,3 +524,69 @@ def calendar_plan(offering, lessons, today):
         if lesson.topic:
             seen.add(lesson.topic)
     return plan
+
+
+def journal_teaching_summary(offering):
+    """Fənn açılışının dərs-saat mənzərəsi + növ-müəllimləri (bir sorğuda).
+
+    Qaytarır:
+      * ``kinds`` — YALNIZ MÖVCUD dərs növləri (mühazirə/seminar/lab); hər biri üçün
+        keçirilmiş saat + o növü keçən müəllim(lər)in adı. Yalnız bir növ varsa yalnız
+        o görünür (#8); 2 müəllim arasında bölünübsə hər növün öz müəllimi (#9).
+      * ``held_total`` keçirilmiş toplam saat, ``total`` fənnin tam saatı,
+        ``remaining`` qalan saat (#7). ``over`` — həddi keçibsə True (#6 göstərişi).
+    """
+    from apps.registrar.models import Lesson, LessonKind
+
+    lessons = list(
+        Lesson.objects.filter(offering=offering)
+        .select_related("instructor")
+        .only("kind", "hours", "instructor__first_name", "instructor__last_name", "instructor__username")
+    )
+    fallback = offering.instructor
+    by_kind: dict = {}
+    for lesson in lessons:
+        row = by_kind.setdefault(lesson.kind, {"held": 0, "teachers": {}})
+        row["held"] += int(lesson.hours or 0)
+        inst = lesson.instructor or fallback
+        if inst is not None:
+            row["teachers"][inst.id] = (inst.get_full_name() or "").strip() or inst.username
+    labels = dict(LessonKind.choices)
+    order = {"lecture": 0, "seminar": 1, "lab": 2}
+    kinds = [
+        {
+            "kind": kind,
+            "label": labels.get(kind, kind),
+            "held": data["held"],
+            "teachers": list(data["teachers"].values()),
+        }
+        for kind, data in by_kind.items()
+    ]
+    kinds.sort(key=lambda k: order.get(k["kind"], 9))
+    held_total = sum(k["held"] for k in kinds)
+    total = int(offering.lesson_hours or 0)
+    return {
+        "kinds": kinds,
+        "held_total": held_total,
+        "total": total,
+        "remaining": max(0, total - held_total) if total else None,
+        "over": bool(total and held_total > total),
+    }
+
+
+def lesson_teacher_choices(offering):
+    """Dərs modalı üçün müəllim namizədləri — açılışın müəllimi + təşkilatın digər
+    dərs deyən müəllimləri (fənn 2 müəllim arasında bölünə bilər — mühazirə/seminar)."""
+    from django.contrib.auth import get_user_model
+
+    from apps.registrar.models import CourseOffering
+
+    ids = set(
+        CourseOffering.objects.filter(organization=offering.organization, instructor__isnull=False).values_list(
+            "instructor_id", flat=True
+        )
+    )
+    if offering.instructor_id:
+        ids.add(offering.instructor_id)
+    users = get_user_model().objects.filter(pk__in=ids).order_by("last_name", "first_name", "username")
+    return [{"id": str(u.id), "name": (u.get_full_name() or "").strip() or u.username} for u in users]

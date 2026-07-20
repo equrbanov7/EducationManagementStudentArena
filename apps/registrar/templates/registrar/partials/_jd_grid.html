@@ -59,6 +59,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                         data-lesson-kind="{{ lm.lesson.kind }}"
                                         data-lesson-topic="{{ lm.lesson.topic }}"
                                         data-lesson-hours="{{ lm.lesson.hours }}"
+                                        data-lesson-instructor="{{ lm.lesson.instructor_id|default:'' }}"
                                         data-lesson-start="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% endif %}"
                                         data-lesson-end="{% if lm.lesson.end_time %}{{ lm.lesson.end_time|time:'H:i' }}{% endif %}"
                                         data-action-url="{% url 'registrar:journal_lesson_action' offering.id lm.lesson.id %}"

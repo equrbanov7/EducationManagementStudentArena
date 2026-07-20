@@ -118,6 +118,15 @@ class Lesson(UUIDModel, TimeStampedModel):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="taught_lessons",
+        help_text="Bu dərsi keçən müəllim — fənn 2 müəllim arasında bölünübsə (məs. mühazirə "
+        "bir müəllim, seminar başqa). Boşdursa açılışın (CourseOffering) müəllimi götürülür.",
+    )
 
     objects = models.Manager()
 

@@ -86,6 +86,19 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <small class="jd-field-hint">{% trans "Universitetin standart dərs saatlarından biri seçilir." context "registrar.journal" %}</small>
                     <small class="jd-field-error" data-jd-time-error hidden><i class="fas fa-triangle-exclamation"></i> {% trans "Dərs saatı seçilməlidir — standart saatlardan birini seçin." context "registrar.journal" %}</small>
                 </div>
+                {% if lesson_teacher_choices %}
+                <div class="jd2-field">
+                    <span class="jd2-field-label">{% trans "DƏRSİN MÜƏLLİMİ" context "registrar.journal" %}</span>
+                    <div class="bootstrap-single-select">
+                        <select name="lesson_instructor" class="bootstrap-single-select__native" data-jd-lesson-instructor data-bootstrap-select>
+                            {% for t in lesson_teacher_choices %}
+                            <option value="{{ t.id }}"{% if offering.instructor_id|stringformat:'s' == t.id %} selected{% endif %}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <small class="jd-field-hint">{% trans "Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu dərsin müəllimini seçin." context "registrar.journal" %}</small>
+                </div>
+                {% endif %}
                 <p class="jd-modal-note">
                     {% trans "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi 2 saat içində silmək/düzəltmək olar." context "registrar.journal" %}
                 </p>
