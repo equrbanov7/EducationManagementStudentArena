@@ -77,6 +77,29 @@ def build_student_transcript_context(request, *, organization) -> dict:
     return {"student_transcript_section": data}
 
 
+def _empty_overall_academic() -> dict:
+    return {"has_record": False, "semesters": [], "year_options": [], "season_options": []}
+
+
+def build_student_overall_academic_context(request, *, organization) -> dict:
+    """Context for the student "Ümumi tədris məlumatı" cabinet section.
+
+    Every subject the student has ever taken, grouped by semester (newest
+    first) and decorated with the teacher name + fail-reason so the cabinet
+    can offer search/filter over the full academic record (see
+    :func:`transcript.build_student_overall_record`). Mirrors
+    :func:`build_student_transcript_context`'s empty-state contract; does NOT
+    duplicate the transcript's GPA aggregation.
+    """
+    if organization is None or not getattr(request.user, "is_authenticated", False):
+        return {"overall_academic_section": _empty_overall_academic()}
+
+    from apps.registrar import transcript as transcript_service
+
+    data = transcript_service.build_student_overall_record(student=request.user, organization=organization)
+    return {"overall_academic_section": data}
+
+
 def build_profile_registrar_section(request, *, organization, section: str) -> dict:
     """Context for the registrar cabinet sections rendered INSIDE the profile
     shell (U12): schedule, academic calendar, teacher journal list, grade

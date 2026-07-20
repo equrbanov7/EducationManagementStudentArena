@@ -1,0 +1,178 @@
+{% load i18n %}
+{% comment %}
+"Ümumi tədris məlumatı" (overall academic record) — every subject the student
+has ever taken, grouped by semester (newest first), searchable/filterable
+client-side. Data comes from build_student_overall_academic_context ->
+transcript.build_student_overall_record (registrar/public.py), a pure-read
+decoration over the same enrollment aggregation the "Transkript" section uses
+— this section does NOT recompute GPA/pass-fail logic itself.
+{% endcomment %}
+{% with oa=overall_academic_section %}
+<section class="profile-section-panel profile-section--overall-academic {% if active_section == 'overall-academic' %}is-active{% endif %}"
+         data-profile-section-panel="overall-academic"
+         data-oa-root
+         data-source-url="{{ profile_base_url }}?section=overall-academic">
+    <div class="section-card">
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-chart-simple text-teal"></i>
+                    <span>{% trans "Ümumi tədris məlumatı" context "profile.overall_academic" %}</span>
+                </div>
+            </div>
+            <a class="oa-transcript-link"
+               href="{{ profile_base_url }}?section=my-transcript"
+               data-section="my-transcript"
+               title="{% trans 'Rəsmi kredit-çəkili transkriptə bax' context 'profile.overall_academic' %}">
+                <i class="fas fa-scroll"></i> {% trans "Transkriptə bax" context "profile.overall_academic" %}
+            </a>
+        </div>
+
+        {% if not oa.has_record %}
+        <div class="oa-empty-record">
+            <i class="fas fa-folder-open"></i>
+            <p>{% trans "Hələ tədris qeydiyyatı üzrə fənn qeydi yoxdur." context "profile.overall_academic" %}</p>
+        </div>
+        {% else %}
+
+        <div class="oa-filter-bar" data-oa-filter-bar>
+            <div class="oa-filter-search">
+                <i class="fas fa-search"></i>
+                <input type="text"
+                       class="form-control"
+                       data-oa-search-input
+                       autocomplete="off"
+                       placeholder="{% trans 'Fənn və ya müəllim axtar…' context 'profile.overall_academic' %}">
+            </div>
+
+            <div class="oa-filter-select">
+                <label class="oa-filter-label">{% trans "Tədris ili" context "profile.overall_academic" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                            data-bootstrap-select data-oa-year-filter>
+                        <option value="">{% trans "Hamısı" context "profile.overall_academic" %}</option>
+                        {% for y in oa.year_options %}
+                        <option value="{{ y }}">{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="oa-filter-select">
+                <label class="oa-filter-label">{% trans "Semestr" context "profile.overall_academic" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                            data-bootstrap-select data-oa-season-filter>
+                        <option value="">{% trans "Hamısı" context "profile.overall_academic" %}</option>
+                        {% for s in oa.season_options %}
+                        <option value="{{ s }}">{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="oa-filter-toggles">
+                <label class="oa-toggle">
+                    <input type="checkbox" data-oa-filter="failed">
+                    <span>{% trans "Yalnız kəsilənlər" context "profile.overall_academic" %}</span>
+                </label>
+                <label class="oa-toggle">
+                    <input type="checkbox" data-oa-filter="barred">
+                    <span>{% trans "İmtahana buraxılmayan (25 faiz həddi)" context "profile.overall_academic" %}</span>
+                </label>
+                <label class="oa-toggle">
+                    <input type="checkbox" data-oa-filter="absence-fail">
+                    <span>{% trans "Q/b-dan kəsilən" context "profile.overall_academic" %}</span>
+                </label>
+            </div>
+
+            <button type="button" class="oa-filter-reset" data-oa-reset>
+                <i class="fas fa-rotate-left"></i> {% trans "Sıfırla" context "profile.overall_academic" %}
+            </button>
+        </div>
+
+        <div class="oa-results-meta">
+            <span data-oa-count data-oa-count-suffix="{% trans 'nəticə göstərilir' context 'profile.overall_academic' %}"></span>
+        </div>
+
+        <div class="oa-empty" data-oa-empty hidden>
+            <i class="fas fa-inbox"></i>
+            <p>{% trans "Filtərə uyğun fənn tapılmadı." context "profile.overall_academic" %}</p>
+        </div>
+
+        {% for sem in oa.semesters %}
+        <div class="oa-semester" data-oa-semester
+             data-oa-year="{{ sem.period.year_display }}"
+             data-oa-season="{{ sem.period.name }}">
+            <div class="oa-semester-head">
+                <h5 class="oa-semester-title">
+                    <i class="fas fa-calendar-alt"></i> {{ sem.period.name }} <span class="oa-semester-year">{{ sem.period.year_display }}</span>
+                </h5>
+                <span class="oa-semester-count">{{ sem.rows|length }} {% trans "fənn" context "profile.overall_academic" %}</span>
+            </div>
+            <div class="oa-table-wrap">
+                <table class="oa-table">
+                    <thead>
+                        <tr>
+                            <th class="ta-left">{% trans "Fənn" context "profile.overall_academic" %}</th>
+                            <th>{% trans "Kredit" context "profile.overall_academic" %}</th>
+                            <th class="ta-left">{% trans "Müəllim" context "profile.overall_academic" %}</th>
+                            <th>{% trans "Giriş balı" context "profile.overall_academic" %}</th>
+                            <th>{% trans "Çıxış balı" context "profile.overall_academic" %}</th>
+                            <th>{% trans "Nəticə" context "profile.overall_academic" %}</th>
+                            <th>{% trans "Dərəcə" context "profile.overall_academic" %}</th>
+                            <th>{% trans "Status" context "profile.overall_academic" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in sem.rows %}
+                        <tr class="oa-row {% if row.result.failed %}oa-row--fail{% elif row.result.passed %}oa-row--pass{% endif %}"
+                            data-oa-row
+                            data-oa-search="{{ row.subject.code|lower }} {{ row.subject.name|lower }} {{ row.teacher_name|lower }}"
+                            data-oa-failed="{% if row.result.failed %}1{% else %}0{% endif %}"
+                            data-oa-barred="{% if row.result.barred %}1{% else %}0{% endif %}"
+                            data-oa-fail-reason="{{ row.fail_reason }}">
+                            <td class="ta-left">
+                                <span class="oa-subject-code">{{ row.subject.code }}</span>
+                                <span class="oa-subject-name">{{ row.subject.name }}</span>
+                                {% if row.fail_reason == "absence" %}
+                                <span class="oa-reason-badge is-absence"><i class="fas fa-user-clock"></i> {% trans "Q/b-dan kəsilib" context "profile.overall_academic" %}</span>
+                                {% elif row.fail_reason == "exam" %}
+                                <span class="oa-reason-badge is-exam"><i class="fas fa-file-circle-xmark"></i> {% trans "İmtahandan kəsilib" context "profile.overall_academic" %}</span>
+                                {% elif row.fail_reason == "total" %}
+                                <span class="oa-reason-badge is-total"><i class="fas fa-calculator"></i> {% trans "Ümumi baldan kəsilib" context "profile.overall_academic" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ row.credit }}</td>
+                            <td class="ta-left">{{ row.teacher_name|default:"—" }}</td>
+                            <td>{{ row.result.entry_score|floatformat:'-2' }}</td>
+                            <td>{% if row.result.graded %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                            <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}</td>
+                            <td>
+                                {% if row.in_gpa %}
+                                <span class="grade-{{ row.result.letter }} oa-letter">{{ row.result.letter }}</span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>
+                                {% if row.result.barred %}
+                                <span class="oa-status is-barred">{% trans "Kəsilir" context "profile.overall_academic" %}</span>
+                                {% elif row.result.passed %}
+                                <span class="oa-status is-pass">{% trans "Keçdi" context "profile.overall_academic" %}</span>
+                                {% elif row.result.failed %}
+                                <span class="oa-status is-fail">{% trans "Kəsildi" context "profile.overall_academic" %}</span>
+                                {% else %}
+                                <span class="oa-status is-progress">{% trans "Davam edir" context "profile.overall_academic" %}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% endif %}
+    </div>
+</section>
+{% endwith %}
