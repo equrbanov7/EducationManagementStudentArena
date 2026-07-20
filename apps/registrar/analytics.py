@@ -240,7 +240,8 @@ class _Bucket:
             self.graded += 1
             self.total_sum += result["total"]
         if result["passed"] or result["failed"]:
-            self.quality_points += result["gpa"] * result["credit"]
+            # ÜOMG 100 bal üzərindən: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni).
+            self.quality_points += result["total"] * result["credit"]
             self.gpa_credits += result["credit"]
         if result["passed"]:
             self.passed += 1

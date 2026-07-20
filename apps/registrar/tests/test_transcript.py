@@ -152,19 +152,19 @@ class BuildStudentTranscriptTest(TestCase):
         self.assertEqual(data["semesters"][0]["period"].id, self.p1.id)
 
         sem1 = data["semesters"][0]
-        # (3.50*5 + 0*5) / 10 = 1.75
-        self.assertEqual(sem1["gpa"], Decimal("1.75"))
+        # ÜOMG 100 bal: (85*5 + 45*5) / 10 = 650/10 = 65.00
+        self.assertEqual(sem1["gpa"], Decimal("65.00"))
         self.assertEqual(sem1["credits_earned"], 5)  # only CS101 passed
         self.assertEqual(sem1["credits_gpa"], 10)
 
         sem2 = data["semesters"][1]
-        # Only CS201 is graded; CS202 excluded → GPA 4.00 over 6 credits.
-        self.assertEqual(sem2["gpa"], Decimal("4.00"))
+        # Only CS201 is graded (92); CS202 excluded → ÜOMG 92.00 over 6 credits.
+        self.assertEqual(sem2["gpa"], Decimal("92.00"))
         self.assertEqual(sem2["credits_earned"], 6)
         self.assertEqual(sem2["credits_gpa"], 6)
 
-        # Cumulative: (3.5*5 + 0*5 + 4*6) / 16 = 41.5/16 = 2.59375 → 2.59
-        self.assertEqual(data["cumulative_gpa"], Decimal("2.59"))
+        # Cumulative ÜOMG (100 bal): (85*5 + 45*5 + 92*6) / 16 = 1202/16 = 75.125 → 75.13
+        self.assertEqual(data["cumulative_gpa"], Decimal("75.13"))
         self.assertEqual(data["total_credits_earned"], 11)
         self.assertEqual(data["total_credits_gpa"], 16)
         self.assertEqual(data["ects_total"], 240)

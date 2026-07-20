@@ -103,7 +103,8 @@ def _aggregate_students(organization, records):
             continue
         result = analytics.evaluate_enrollment(enrollment, maps)
         if result["passed"] or result["failed"]:
-            acc["quality_points"] += result["gpa"] * result["credit"]
+            # ÜOMG 100 bal: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni).
+            acc["quality_points"] += result["total"] * result["credit"]
             acc["gpa_credits"] += result["credit"]
         if result["passed"]:
             acc["credits_earned"] += result["credit"]
