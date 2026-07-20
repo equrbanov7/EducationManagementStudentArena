@@ -1,6 +1,6 @@
 {% load i18n %}
 {# ── U12: Universitet bölmələri — SPA panel (sidebar itmir) ────────── #}
-{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "grade-approvals" in allowed_sections or "analytics" in allowed_sections or "overall-academic" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "grade-approvals" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections %}
 <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Universitet" context "profile.sidebar" %}</span></li>
 {% endif %}
 {% if "overall-academic" in allowed_sections %}
@@ -83,6 +83,18 @@
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'analytics' %}active{% endif %}">
         <i class="fas fa-chart-line sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Akademik analitika" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "academic-records" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=academic-records"
+       data-section="academic-records"
+       data-title="{% trans 'Akademik qeydlər' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'academic-records' %}active{% endif %}">
+        <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Akademik qeydlər" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}
