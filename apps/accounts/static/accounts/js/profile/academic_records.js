@@ -41,6 +41,9 @@
 
         var page = 0; // offset (0-based)
         var LIMIT = 25;
+        var yearSel = root.querySelector(".js-acr-year");
+        var seasonSel = root.querySelector(".js-acr-season");
+        var yearPopulated = false;
 
         function esc(s) {
             var d = document.createElement("div");
@@ -106,6 +109,8 @@
             if (programPick.value()) p.set("program", programPick.value());
             if (groupPick.value()) p.set("group", groupPick.value());
             if (studentPick.value()) p.set("student", studentPick.value());
+            if (yearSel && yearSel.value) p.set("year", yearSel.value);
+            if (seasonSel && seasonSel.value) p.set("season", seasonSel.value);
             if (extra) {
                 Object.keys(extra).forEach(function (k) {
                     p.set(k, extra[k]);
@@ -212,6 +217,20 @@
             });
         }
 
+        function populateYears(years) {
+            if (yearPopulated || !yearSel || !years || !years.length) return;
+            yearPopulated = true;
+            years.forEach(function (y) {
+                var o = document.createElement("option");
+                o.value = y;
+                o.textContent = y;
+                yearSel.appendChild(o);
+            });
+            if (typeof yearSel._refreshBootstrapSelect === "function") {
+                yearSel._refreshBootstrapSelect();
+            }
+        }
+
         function load() {
             skeleton();
             fetch(U.data + "?" + params({ offset: page, limit: LIMIT }).toString(), {
@@ -222,6 +241,7 @@
                 })
                 .then(function (d) {
                     if (!d) return;
+                    populateYears(d.year_options);
                     renderCards(d.summary);
                     renderRows(d);
                 });
@@ -231,6 +251,10 @@
             page = 0;
             load();
         }
+
+        [yearSel, seasonSel].forEach(function (sel) {
+            if (sel) sel.addEventListener("change", reload);
+        });
 
         // ── Tələbə detalı modalı ──────────────────────────────────────────────
         var modal = root.querySelector(".js-acr-modal");
@@ -326,6 +350,14 @@
             programPick.reset();
             groupPick.reset();
             studentPick.reset();
+            [yearSel, seasonSel].forEach(function (sel) {
+                if (!sel) return;
+                sel.value = "";
+                if (typeof sel._refreshBootstrapSelect === "function") sel._refreshBootstrapSelect();
+                else if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.sync === "function") {
+                    window.EMSBootstrapSelect.sync(sel);
+                }
+            });
             reload();
         });
 
