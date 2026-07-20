@@ -86,7 +86,20 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                             </td>
                             {% for cell in row.cells %}
                             <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">
-                                {% if can_edit and cell.writable %}
+                                {% if correction_mode and cell.mark %}
+                                {# Yerində audited düzəliş: xana düyməyə çevrilir → modal (correction.js). #}
+                                <button type="button" class="corr-cell-btn" data-corr-cell
+                                        data-mark-id="{{ cell.mark.id }}"
+                                        data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                        data-date="{{ cell.lesson.date|date:'d.m.Y' }}"
+                                        data-kind="{{ cell.lesson.get_kind_display }}"
+                                        data-allows-score="{% if cell.allows_score %}1{% else %}0{% endif %}"
+                                        data-status="{{ cell.mark.status }}"
+                                        data-score="{% if cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% endif %}"
+                                        {% if cell.corrected %}data-history="{{ cell.mark.id }}"{% endif %}>
+                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% else %}i/e{% endif %}{% if cell.mark.score is not None %} · {{ cell.mark.score|floatformat:0 }}{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                                </button>
+                                {% elif can_edit and cell.writable %}
                                 <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
                                        value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att>
                                 {% if cell.allows_score %}
