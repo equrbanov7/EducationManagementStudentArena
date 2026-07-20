@@ -41,10 +41,63 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
                 </select>
             </div>
         </label>
+        {% if journal_is_broad %}
+        {# Korrektor (İKT rəhbəri/admin) — bütün jurnallar üçün geniş filtrlər. #}
+        <label class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "FAKÜLTƏ" context "registrar.journal" %}</span>
+            <div class="bootstrap-single-select">
+                <select name="faculty" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                    {% for f in journal_faculties %}
+                    <option value="{{ f.value }}" {% if journal_selected_faculty == f.value %}selected{% endif %}>{{ f.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+        <label class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "KAFEDRA" context "registrar.journal" %}</span>
+            <div class="bootstrap-single-select">
+                <select name="department" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                    {% for d in journal_departments %}
+                    <option value="{{ d.value }}" {% if journal_selected_department == d.value %}selected{% endif %}>{{ d.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+        <label class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "QRUP" context "registrar.journal" %}</span>
+            <div class="bootstrap-single-select">
+                <select name="group" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                    {% for g in journal_groups %}
+                    <option value="{{ g.value }}" {% if journal_selected_group == g.value %}selected{% endif %}>{{ g.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+        <label class="jd2-filter">
+            <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
+            <div class="bootstrap-single-select">
+                <select name="teacher" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
+                    {% for t in journal_teachers %}
+                    <option value="{{ t.value }}" {% if journal_selected_teacher == t.value %}selected{% endif %}>{{ t.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+        <label class="jd2-filter jd2-filter--search">
+            <span class="jd2-filter-label">{% trans "AXTARIŞ" context "registrar.journal" %}</span>
+            <input type="search" name="q" value="{{ journal_query }}" class="jd2-filter-search"
+                   placeholder="{% trans 'fənn və ya müəllim…' context 'registrar.journal' %}" autocomplete="off">
+        </label>
+        {% else %}
         <span class="jd2-filter">
             <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
             <b class="jd2-filter-value">{{ teacher_label }}</b>
         </span>
+        {% endif %}
         <span class="jd2-kindpills">
             <button type="submit" name="kind" value=""
                     class="jd2-kindpill {% if not journal_selected_kind %}is-active{% endif %}">{% trans "Hamısı" context "registrar.journal" %}</button>

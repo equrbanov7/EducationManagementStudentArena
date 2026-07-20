@@ -73,6 +73,28 @@ class JournalViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "CS101")
 
+    def test_other_teacher_list_excludes_offering(self):
+        # Adi müəllim yalnız öz jurnalını görür — başqasının CS101-i görünməməlidir.
+        resp = self._client(self.other_teacher).get(reverse("registrar:journal_list"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, "CS101")
+
+    def test_corrector_sees_all_offerings_broad(self):
+        # Korrektor (superuser → can_correct_journal) BÜTÜN org jurnallarını görür,
+        # dərs deməsə də; müəllim/fakültə/kafedra/qrup filtrləri görünür.
+        with bypass_rls():
+            admin = User.objects.create_user("jv_admin", "jv_admin@qku.edu.az", "pw", is_superuser=True)
+        resp = self._client(admin).get(reverse("registrar:journal_list"), {"year": "2024/2025"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "CS101")  # başqasının dərsi, amma korrektor görür
+        self.assertContains(resp, 'name="teacher"')  # müəllim filtri
+        self.assertContains(resp, 'name="faculty"')  # fakültə filtri
+        # Mövcud olmayan müəllim üzrə süzgəc → CS101 çıxmır.
+        resp2 = self._client(admin).get(
+            reverse("registrar:journal_list"), {"year": "2024/2025", "teacher": str(self.student.id)}
+        )
+        self.assertNotContains(resp2, "CS101")
+
     def test_journal_detail_renders(self):
         resp = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
         self.assertEqual(resp.status_code, 200)
