@@ -392,6 +392,10 @@ def _handle_add_lesson(request, offering):
             start_time=start_time,
             end_time=end_time,
             created_by=request.user,
+            # İKT Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
+            allow_past=bool(
+                getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
+            ),
         )
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:
