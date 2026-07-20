@@ -92,6 +92,15 @@ class _RecordsBase(TestCase):
                 is_primary=True,
                 is_active=True,
             )
+            # İmtahan mərkəzi — MƏRKƏZİ rol, unit scope-u yoxdur (org-wide görməlidir).
+            cls.exam_center = User.objects.create_user("rec_exam", "rec_exam@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.exam_center,
+                organization=cls.org,
+                role=cls.org.roles.get(name="exam_center"),
+                is_primary=True,
+                is_active=True,
+            )
 
     @classmethod
     def _make_group(cls, faculty, chair, group, tag, *, n):
@@ -232,6 +241,19 @@ class RecordsEndpointTest(_RecordsBase):
         resp = self._client(self.teacher).get(reverse("accounts:records_overview_data"))
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.json()["has_access"])
+
+    def test_exam_center_sees_all_students_org_wide(self):
+        """İmtahan mərkəzi mərkəzi rol → unit scope-u olmasa da bütün tələbələri görür."""
+        resp = self._client(self.exam_center).get(reverse("accounts:records_overview_data"))
+        self.assertEqual(resp.status_code, 200)
+        payload = resp.json()
+        self.assertTrue(payload["has_access"])
+        self.assertEqual(payload["total"], 5)
+
+    def test_exam_center_profile_page_renders_section(self):
+        resp = self._client(self.exam_center).get(reverse("accounts:profile"), {"section": "academic-records"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("profile-section--academic-records", resp.content.decode())
 
     def test_dean_faculty_lookup_scoped(self):
         resp = self._client(self.dean).get(reverse("accounts:records_faculty_search"))
