@@ -30105,6 +30105,21 @@ msgctxt "registrar.journal"
 msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
 msgstr "Düzenleme süresi doldu — bu yalnızca okunur özettir."
 
+msgid "fənn axtar…"
+msgstr "ders ara…"
+
+msgid "qrup axtar…"
+msgstr "grup ara…"
+
+msgid "fakültə axtar…"
+msgstr "fakülte ara…"
+
+msgid "kafedra axtar…"
+msgstr "bölüm ara…"
+
+msgid "müəllim axtar…"
+msgstr "öğretmen ara…"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

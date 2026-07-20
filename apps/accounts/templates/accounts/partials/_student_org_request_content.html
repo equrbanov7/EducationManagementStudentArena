@@ -117,12 +117,14 @@
                value="{{ search_query }}"
                placeholder="{% trans 'search_placeholder' context 'profile.join_org' %}"
                class="form-control">
-        <select name="student_org_request_type" class="form-select c3-1">
-            <option value="">{% trans "all_org_types" context "profile.join_org" %}</option>
-            <option value="university" {% if org_type_filter == 'university' %}selected{% endif %}>{% trans "university" context "organization.type" %}</option>
-            <option value="school" {% if org_type_filter == 'school' %}selected{% endif %}>{% trans "school" context "organization.type" %}</option>
-            <option value="course_center" {% if org_type_filter == 'course_center' %}selected{% endif %}>{% trans "course_center" context "organization.type" %}</option>
-        </select>
+        <div class="bootstrap-single-select c3-1">
+            <select name="student_org_request_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                <option value="">{% trans "all_org_types" context "profile.join_org" %}</option>
+                <option value="university" {% if org_type_filter == 'university' %}selected{% endif %}>{% trans "university" context "organization.type" %}</option>
+                <option value="school" {% if org_type_filter == 'school' %}selected{% endif %}>{% trans "school" context "organization.type" %}</option>
+                <option value="course_center" {% if org_type_filter == 'course_center' %}selected{% endif %}>{% trans "course_center" context "organization.type" %}</option>
+            </select>
+        </div>
         <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
     </form>
 

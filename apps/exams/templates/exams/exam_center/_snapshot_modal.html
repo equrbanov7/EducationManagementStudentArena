@@ -45,7 +45,11 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
     </div>
     <p class="fxc-modal-error" id="fxc-snapshot-error" hidden></p>
     <div class="fxc-snapshot-body" id="fxc-snapshot-body">
-      <p class="fxc-muted fxc-center">{% trans "Yüklənir…" %}</p>
+      <div class="fxc-snapshot-answers" aria-hidden="true">
+        <div class="fxc-snap-q"><span class="skeleton skeleton-line" style="width:70%"></span></div>
+        <div class="fxc-snap-q"><span class="skeleton skeleton-line" style="width:55%"></span></div>
+        <div class="fxc-snap-q"><span class="skeleton skeleton-line" style="width:65%"></span></div>
+      </div>
     </div>
     <div class="fxc-actions">
       <button type="button" class="fxc-btn fxc-btn-ghost" id="fxc-snapshot-refresh">

@@ -129,6 +129,12 @@
             menu.innerHTML = "";
 
             Array.prototype.forEach.call(select.options, function (option, index) {
+                // Gizli option-ları menyuda göstərmə (native select davranışı) —
+                // kaskad/il filtri `option.hidden` ilə süzərsə, styled menyu da
+                // yalnız uyğun seçimləri göstərsin (məs. tələbə jurnalı yarım-il).
+                if (option.hidden) {
+                    return;
+                }
                 var optionButton = document.createElement("button");
                 var isPlaceholder = index === 0 && !option.value;
 
@@ -186,8 +192,11 @@
 
         select.addEventListener("change", sync);
 
-        // Kəsilmə fix-i: clipping konteyner daxilindədirsə menyunu fixed aç.
-        var useFixedStrategy = null; // lazy hesablanır (ilk açılışda)
+        // Kəsilmə fix-i: menyunu HƏMİŞƏ viewport-a görə (fixed) yerləşdiririk —
+        // aşağıda yer yoxdursa yuxarı açılır, sağ/aşağı kənardan çıxmır. Bootstrap
+        // `data-bs-display="static"` Popper flip-i söndürdüyü üçün əks halda uzun
+        // seçim mətnləri və ya səhifə dibindəki select-lər ekrandan kənara çıxırdı.
+        var useFixedStrategy = true;
 
         function closeDropdown() {
             if (window.bootstrap && window.bootstrap.Dropdown) {
@@ -204,9 +213,6 @@
         }
 
         toggle.addEventListener("show.bs.dropdown", function () {
-            if (useFixedStrategy === null) {
-                useFixedStrategy = hasClippingAncestor(wrapper);
-            }
             if (!useFixedStrategy) {
                 return;
             }

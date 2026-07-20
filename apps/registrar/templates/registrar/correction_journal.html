@@ -98,17 +98,21 @@
 
                 <label class="corr-field">
                     <span class="corr-field-label">{% trans "Nəyi düzəldirsiniz?" context "registrar.correction" %}</span>
-                    <select name="field" data-corr-field class="corr-input">
-                        <option value="attendance">{% trans "Davamiyyət" context "registrar.correction" %}</option>
-                        <option value="score" data-corr-score-opt>{% trans "Bal" context "registrar.correction" %}</option>
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="field" data-corr-field class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                            <option value="attendance">{% trans "Davamiyyət" context "registrar.correction" %}</option>
+                            <option value="score" data-corr-score-opt>{% trans "Bal" context "registrar.correction" %}</option>
+                        </select>
+                    </div>
                 </label>
 
                 <label class="corr-field" data-corr-att-wrap>
                     <span class="corr-field-label">{% trans "Yeni davamiyyət" context "registrar.correction" %}</span>
-                    <select name="new_status" class="corr-input">
-                        {% for value, label in attendance_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="new_status" class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                            {% for value, label in attendance_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
                 </label>
 
                 <label class="corr-field" data-corr-score-wrap hidden>
@@ -118,10 +122,12 @@
 
                 <label class="corr-field">
                     <span class="corr-field-label">{% trans "Səbəb" context "registrar.correction" %} <b class="corr-req">*</b></span>
-                    <select name="reason" class="corr-input" required>
-                        <option value="">—</option>
-                        {% for value, label in correction_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="reason" class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select required>
+                            <option value="">—</option>
+                            {% for value, label in correction_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
                 </label>
 
                 <label class="corr-field">

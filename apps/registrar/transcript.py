@@ -2,15 +2,23 @@
 
 A transcript groups a student's enrollments by academic period (semester) and,
 for each, reuses :func:`finals.compute_final_result` to get the letter grade +
-GPA point. The cumulative GPA is **credit-weighted** (Boloniya/ECTS):
+GPA point. The cumulative GPA is **credit-weighted** (Boloniya/ECTS), matching
+the official AZ university "ÜOMG" (Ümumi Orta Qiymət Göstəricisi):
 
-    GPA = Σ(gpa_point × credit) / Σ(credit)   over courses with a definite result
+    ÜOMG = Σ(gpa_point × credit) / Σ(credit)   over courses with a definite result
 
 A course counts toward the GPA once its result is definite (``passed`` or
 ``failed`` — a bar counts as a failed attempt); a still-ungraded course is "in
 progress" and excluded until it has an exam/resit score. Earned credits are the
 credits of *passed* courses only. This layer is additive and pure-read — it adds
 no models and never writes.
+
+On top of the flat per-semester grouping (``semesters``, kept for backward
+compatibility), the semesters are also folded into ``years`` — one bucket per
+academic year (e.g. "2024-2025") holding its semesters (Payız / Yaz / Yay, in
+chronological order) plus a year-level credit-weighted ÜOMG — so the official
+"AKADEMİK TRANSKRİPT" layout (UNEC-style: one row of academic-year blocks, two
+semester columns each) can be rendered directly off the returned structure.
 """
 
 from __future__ import annotations
@@ -68,6 +76,46 @@ def _summarize(rows) -> dict:
     }
 
 
+def _season_of(period) -> str:
+    """Semestrin fəsil adı (Payız/Yaz/Yay) — başlanğıc ayından (page_contexts-in
+    ``_season_label`` ilə eyni qayda, qısa forma: "semestri" şəkilçisiz, çünki
+    rəsmi transkriptdə fəsil adı sütun/başlıq kimi tək başına göstərilir)."""
+    start_date = getattr(period, "start_date", None)
+    month = start_date.month if start_date else 9
+    if month >= 8 or month == 12:
+        return "Payız"
+    if month <= 5:
+        return "Yaz"
+    return "Yay"
+
+
+def _year_label(period) -> str:
+    """Rəsmi transkript başlığı üçün "2024-2025" formatı (year_display-in
+    defis-li variantı — UNEC nümunəsində "Akademik il 2025-2026" kimi göstərilir)."""
+    return (getattr(period, "year_display", "") or "").replace("/", "-")
+
+
+def _group_by_year(semesters: list[dict]) -> list[dict]:
+    """Fold the chronological semester list into one bucket per academic year
+    (each already carrying its ``season``/``year_key`` from the caller), with a
+    year-level credit-weighted ÜOMG computed over all of that year's rows."""
+    years: list[dict] = []
+    by_year: dict = {}
+    for bucket in semesters:
+        year_key = bucket["year_key"]
+        year_bucket = by_year.get(year_key)
+        if year_bucket is None:
+            year_bucket = {"year_key": year_key, "year_label": bucket["year_label"], "semesters": []}
+            by_year[year_key] = year_bucket
+            years.append(year_bucket)
+        year_bucket["semesters"].append(bucket)
+
+    for year_bucket in years:
+        year_rows = [row for sem in year_bucket["semesters"] for row in sem["rows"]]
+        year_bucket.update(_summarize(year_rows))
+    return years
+
+
 def build_student_transcript(*, student, organization, program=None):
     """Full transcript for one student: chronological semesters + cumulative GPA.
 
@@ -78,7 +126,13 @@ def build_student_transcript(*, student, organization, program=None):
     enrollments = list(
         Enrollment.objects.filter(organization=organization, student=student)
         .exclude(status=Enrollment.Status.DROPPED)
-        .select_related("offering", "offering__subject", "offering__period", "offering__assessment_scheme")
+        .select_related(
+            "offering",
+            "offering__subject",
+            "offering__period",
+            "offering__assessment_scheme",
+            "offering__instructor",
+        )
         .order_by("offering__period__start_date", "offering__subject__code")
     )
     if not enrollments:
@@ -86,6 +140,7 @@ def build_student_transcript(*, student, organization, program=None):
             "has_record": False,
             "student": student,
             "semesters": [],
+            "years": [],
             "cumulative_gpa": Decimal("0.00"),
             "total_credits_earned": 0,
             "total_credits_gpa": 0,
@@ -109,15 +164,89 @@ def build_student_transcript(*, student, organization, program=None):
 
     for bucket in semesters:
         bucket.update(_summarize(bucket["rows"]))
+        period = bucket["period"]
+        bucket["season"] = _season_of(period)
+        bucket["year_label"] = _year_label(period)
+        bucket["year_key"] = period.year_display
 
     overall = _summarize(rows)
     return {
         "has_record": True,
         "student": student,
         "semesters": semesters,
+        "years": _group_by_year(semesters),
         "cumulative_gpa": overall["gpa"],
         "quality_points": overall["quality_points"],
         "total_credits_gpa": overall["credits_gpa"],
         "total_credits_earned": overall["credits_earned"],
         "ects_total": int(getattr(program, "ects_total", 0) or 0) if program else 0,
+    }
+
+
+def _fail_reason_code(result) -> str:
+    """ "absence" / "exam" / "total" classification for a FAILED result — same
+    priority order as :func:`apps.registrar.exam_bridge._resit_reason` (barred
+    over ungraded-exam over total-below-threshold) so the "Ümumi tədris
+    məlumatı" badge never disagrees with the resit-eligibility reason."""
+    if result["barred"]:
+        return "absence"
+    if result["graded"] and not result["exam_ok"]:
+        return "exam"
+    return "total"
+
+
+def build_student_overall_record(*, student, organization):
+    """Per-subject academic record for the "Ümumi tədris məlumatı" (overall
+    academic record) cabinet section — every subject the student has ever
+    taken, flattened + decorated with the teacher name and a fail-reason code,
+    grouped by semester (newest first) for client-side search/filtering.
+
+    Pure read; reuses :func:`build_student_transcript`'s enrollment
+    aggregation instead of re-querying, so this layer never drifts from the
+    transcript's pass/fail/letter logic. Also returns the distinct
+    (year, season) option lists the cabinet's filter dropdowns need.
+    """
+    data = build_student_transcript(student=student, organization=organization)
+    if not data["has_record"]:
+        return {"has_record": False, "semesters": [], "year_options": [], "season_options": []}
+
+    semesters: list[dict] = []
+    year_options: list[str] = []
+    season_options: list[str] = []
+    for sem in data["semesters"]:
+        period = sem["period"]
+        year_display = period.year_display
+        if year_display not in year_options:
+            year_options.append(year_display)
+        if period.name not in season_options:
+            season_options.append(period.name)
+
+        rows = []
+        for row in sem["rows"]:
+            result = row["result"]
+            instructor = getattr(row["offering"], "instructor", None)
+            teacher_name = ""
+            if instructor is not None:
+                teacher_name = (instructor.get_full_name() or "").strip() or instructor.username
+            rows.append(
+                {
+                    "subject": row["subject"],
+                    "credit": row["credit"],
+                    "teacher_name": teacher_name,
+                    "result": result,
+                    "in_gpa": row["in_gpa"],
+                    "fail_reason": _fail_reason_code(result) if result["failed"] else "",
+                }
+            )
+        semesters.append({"period": period, "rows": rows})
+
+    # build_student_transcript orders semesters chronologically (ascending);
+    # the cabinet wants the newest semester first, like the transcript screenshot.
+    semesters.reverse()
+    year_options.reverse()
+    return {
+        "has_record": True,
+        "semesters": semesters,
+        "year_options": year_options,
+        "season_options": season_options,
     }

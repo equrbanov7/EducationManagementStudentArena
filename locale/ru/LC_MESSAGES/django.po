@@ -30847,6 +30847,21 @@ msgctxt "registrar.journal"
 msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
 msgstr "Время правки истекло — это сводка только для чтения."
 
+msgid "fənn axtar…"
+msgstr "поиск предмета…"
+
+msgid "qrup axtar…"
+msgstr "поиск группы…"
+
+msgid "fakültə axtar…"
+msgstr "поиск факультета…"
+
+msgid "kafedra axtar…"
+msgstr "поиск кафедры…"
+
+msgid "müəllim axtar…"
+msgstr "поиск преподавателя…"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

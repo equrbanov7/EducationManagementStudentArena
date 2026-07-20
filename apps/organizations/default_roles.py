@@ -81,6 +81,32 @@ DEFAULT_ROLES = {
             "description": "Exam center head — assigns invigilators and manages the exam centre",
         },
         {
+            # İKT Rəhbəri — texniki/akademik super-operator. Jurnal limitlərini
+            # (2 saat pəncərəsi, bitmiş semestr) sənədli DÜZƏLİŞ (journal.correct →
+            # PDF + audit) ilə keçir; kollokvium keçmiş-kilidini keçir; imtahan
+            # mərkəzinin tam səlahiyyəti + üzv/struktur idarəsi. Bütün əməllər audit.
+            "name": "ikt_rehber",
+            "display_name": "İKT Rəhbəri",
+            "level": 88,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "org.view",
+                "org.edit",
+                "unit.*",
+                "member.*",
+                "course.*",
+                "exam.*",
+                "grade.*",
+                "journal.correct",
+                "appeal.respond",
+                "appeal.decide",
+                "qa.*",
+                "analytics.view_all",
+                "audit.view",
+            ],
+            "description": "ICT manager — documented journal-correction override (bypasses edit-window & closed semesters), full exam-centre + structure access; every action audited",
+        },
+        {
             # İmtahan mərkəzi İŞÇİSİ — monitor / PIN axtarışı / hesabat; zala
             # nəzarətçi TƏYİN ETMİR (yalnız rəhbər). is_exam_center → giriş var.
             "name": "exam_center_staff",

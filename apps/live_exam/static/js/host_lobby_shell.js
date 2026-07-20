@@ -194,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         selectControls.forEach(([element, key]) => {
             element.value = snapshot.settings?.[key] || element.value;
+            element._refreshBootstrapSelect && element._refreshBootstrapSelect();
         });
 
         dom.themeButtons.forEach((button) => {
