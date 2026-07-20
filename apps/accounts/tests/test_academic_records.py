@@ -271,6 +271,14 @@ class RecordsEndpointTest(_RecordsBase):
         self.assertTrue(payload["has_access"])
         self.assertEqual(payload["total"], 5)
 
+    def test_journal_teacher_search_endpoint(self):
+        # Mərkəzi rol (imtahan mərkəzi) → 200 + düzgün forma; adi müəllim → boş.
+        resp = self._client(self.exam_center).get(reverse("accounts:journal_teacher_search"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("results", resp.json())
+        resp2 = self._client(self.teacher).get(reverse("accounts:journal_teacher_search"))
+        self.assertEqual(resp2.json()["results"], [])
+
     def test_exam_center_profile_page_renders_section(self):
         resp = self._client(self.exam_center).get(reverse("accounts:profile"), {"section": "academic-records"})
         self.assertEqual(resp.status_code, 200)

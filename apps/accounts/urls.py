@@ -97,6 +97,12 @@ urlpatterns = [
     path(
         "profile/academic-records/search/student/", academic_records_views.student_search, name="records_student_search"
     ),
+    # Elektron jurnal siyahısının müəllim filtri (İKT rəhbəri/admin) — searchable picker.
+    path(
+        "profile/academic-records/search/teacher/",
+        academic_records_views.journal_teacher_search,
+        name="journal_teacher_search",
+    ),
     # P3.1 + P3.2 — progressive enhancement endpoints. Heç bir mövcud URL
     # toxunulmur; bunlar JS-li klientlər üçün lazy-load üçündür.
     path(
