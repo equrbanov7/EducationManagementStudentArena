@@ -1,0 +1,441 @@
+/* Staff hierarchical academic-records ("Akademik qeydlər") — açıq (ağ + göy)
+   dizayn tokenləri ilə (--ems-*), TÜND rejim yox. Qiymət hərf çipləri
+   (.grade-A … .grade-F) my_subjects.css/transcript.css ilə paylaşılır. */
+
+.acr {
+    color: var(--ems-neutral-900);
+}
+.acr-head p {
+    margin: 0 0 0.4rem;
+    max-width: 70ch;
+    color: var(--ems-neutral-500);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* ── Filtrlər ─────────────────────────────────────────────────────────────── */
+.acr-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+    margin: 1.1rem 0;
+    padding: 1rem 1.05rem;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 14px;
+    background: var(--ems-primary-50, var(--ems-neutral-50));
+}
+.acr-field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+/* Axtarış-seçici toggle-ları eyni hündürlükdə (bərabər input). */
+.acr-filters .bootstrap-single-select__toggle,
+.acr-field input {
+    min-height: 2.6rem;
+    box-sizing: border-box;
+}
+.acr-field--reset {
+    display: flex;
+    align-items: flex-end;
+}
+.acr-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.6rem;
+    padding: 0 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--ems-neutral-300);
+    background: #fff;
+    color: var(--ems-neutral-600);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.acr-reset:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-800);
+}
+
+/* ── Xülasə box-ları ─────────────────────────────────────────────────────── */
+.acr-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.acr-card {
+    border: 1px solid var(--ems-neutral-200);
+    border-left: 4px solid var(--ems-primary-600);
+    border-radius: 12px;
+    background: #fff;
+    padding: 0.9rem 1.05rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.acr-card--ok {
+    border-left-color: var(--ems-success-600, #059669);
+}
+.acr-card--bad {
+    border-left-color: var(--ems-danger-strong, #dc2626);
+}
+.acr-card--warn {
+    border-left-color: var(--ems-warning-700, #b45309);
+}
+.acr-card__n {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--ems-primary-700);
+    line-height: 1.05;
+}
+.acr-card--bad .acr-card__n {
+    color: var(--ems-danger-strong, #dc2626);
+}
+.acr-card--warn .acr-card__n {
+    color: var(--ems-warning-700, #b45309);
+}
+.acr-card__l {
+    color: var(--ems-neutral-500);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    margin-top: 0.1rem;
+}
+
+/* ── Cədvəl ───────────────────────────────────────────────────────────────── */
+.acr-tablewrap {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.acr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    min-width: 820px;
+}
+.acr-table th,
+.acr-table td {
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    white-space: nowrap;
+}
+.acr-table thead th {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 800;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid var(--ems-primary-200);
+}
+.acr-th-no,
+.acr-td-no {
+    width: 2.5rem;
+    text-align: center;
+    color: var(--ems-neutral-400);
+}
+.acr-num {
+    text-align: center;
+}
+.acr-strong {
+    font-weight: 800;
+    color: var(--ems-primary-700);
+}
+.acr-bad {
+    color: var(--ems-danger-strong, #dc2626);
+    font-weight: 800;
+}
+.acr-warn {
+    color: var(--ems-warning-700, #b45309);
+    font-weight: 800;
+}
+.acr-clip {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.acr-table tbody tr:nth-child(even) {
+    background: var(--ems-neutral-50);
+}
+.acr-table tbody tr:hover {
+    background: var(--ems-primary-50);
+}
+.acr-row--fail td {
+    background: var(--ems-danger-100, #fee2e2);
+}
+.acr-table tr:last-child td {
+    border-bottom: 0;
+}
+.acr-uname {
+    color: var(--ems-neutral-500);
+    font-size: 0.76rem;
+}
+.acr-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.32rem 0.7rem;
+    border-radius: 8px;
+    border: 0;
+    background: var(--ems-primary-600);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+.acr-view:hover {
+    background: var(--ems-primary-700);
+}
+.acr-state {
+    padding: 2.4rem 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+.acr-state i {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    opacity: 0.55;
+}
+.acr-skel {
+    height: 0.95rem;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-200) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: acr-shimmer 1.3s ease infinite;
+}
+@keyframes acr-shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+.acr-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    color: var(--ems-neutral-500);
+    font-size: 0.88rem;
+}
+.acr-pager button {
+    padding: 0.46rem 0.95rem;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-300);
+    background: #fff;
+    color: var(--ems-primary-700);
+    font-weight: 700;
+    cursor: pointer;
+}
+.acr-pager button:hover:not(:disabled) {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-300);
+}
+.acr-pager button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* ── Tələbə detalı modalı ─────────────────────────────────────────────────── */
+.acr-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+.acr-modal[hidden] {
+    display: none;
+}
+.acr-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+.acr-modal__box {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+    width: min(920px, 100%);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.acr-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-primary-50);
+}
+.acr-modal__head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ems-primary-700);
+}
+.acr-modal__x {
+    border: 0;
+    background: transparent;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+.acr-modal__x:hover {
+    color: var(--ems-neutral-800);
+}
+.acr-modal__body {
+    padding: 1.15rem 1.25rem;
+    overflow-y: auto;
+}
+
+/* Modaldakı semestr blokları */
+.acr-sem {
+    margin-bottom: 1.35rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.acr-sem-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.7rem 1rem;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+.acr-sem-title {
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.acr-sem-title i {
+    color: var(--ems-primary-500);
+}
+.acr-sem-meta {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.acr-sem-credit,
+.acr-sem-gpa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.12rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+.acr-sem-credit {
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+.acr-sem-gpa {
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-600, #475569);
+}
+.acr-sem-tablewrap {
+    overflow-x: auto;
+}
+.acr-sem-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+}
+.acr-sem-table th {
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-500);
+    border-bottom: 1px solid var(--ems-neutral-200);
+    white-space: nowrap;
+}
+.acr-sem-table td {
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    vertical-align: middle;
+}
+.acr-ta-left {
+    text-align: left !important;
+}
+.acr-sem-table .acr-row--fail td {
+    background: var(--ems-danger-100, #fee2e2);
+}
+.acr-letter {
+    display: inline-block;
+    min-width: 1.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    font-weight: 700;
+}
+.acr-status {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+.acr-status.is-pass {
+    background: var(--ems-success-100, #d1fae5);
+    color: var(--ems-success-600, #059669);
+}
+.acr-status.is-fail,
+.acr-status.is-barred {
+    background: var(--ems-danger-100, #fee2e2);
+    color: var(--ems-danger-strong, #dc2626);
+}
+.acr-status.is-progress {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+.acr-reason {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: var(--ems-danger-100, #fee2e2);
+    color: var(--ems-danger-strong, #dc2626);
+    white-space: nowrap;
+}
+.acr-reason.is-qb {
+    background: var(--ems-warning-100, #fef3c7);
+    color: var(--ems-warning-700, #b45309);
+}
+
+@media (max-width: 640px) {
+    .acr-filters {
+        grid-template-columns: 1fr;
+    }
+}
