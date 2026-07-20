@@ -379,7 +379,12 @@
         aiBtn.addEventListener("click", function() {
             aiBtn.disabled = true;
             aiBtn.style.opacity = "0.6";
-            aiContent.innerHTML = '<div class="sd-ai-loading"><i class="fas fa-spinner fa-spin"></i> {% trans "ai_loading" context "liveExam.template.session_detail" %}</div>';
+            aiContent.innerHTML = '<div class="d-flex flex-column gap-2" aria-hidden="true">'
+                + '<span class="skeleton skeleton-line skeleton-line--lg"></span>'
+                + '<span class="skeleton skeleton-line"></span>'
+                + '<span class="skeleton skeleton-line"></span>'
+                + '<span class="skeleton skeleton-line skeleton-line--sm"></span>'
+                + '</div>';
 
             var currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set("ai_summary", "1");

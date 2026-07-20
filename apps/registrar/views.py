@@ -41,10 +41,15 @@ def _current_period(organization):
 
 
 def _can_edit_journal(user, offering) -> bool:
-    """Only the offering's instructor, the org owner, or a superuser may edit."""
+    """Offering müəllimi, org sahibi, superuser — və İKT Rəhbəri jurnalı redaktə edə bilər.
+
+    İKT Rəhbəri texniki/akademik super-operatordur: pəncərə daxili xanaları
+    birbaşa yaza bilər, kilidlənmiş (2 saat keçmiş) xanaları isə sənədli düzəliş
+    (correction + PDF) ilə düzəldir. Hər iki yol audit olunur.
+    """
     if not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_superuser", False):
+    if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
     if offering.instructor_id and offering.instructor_id == user.id:
         return True

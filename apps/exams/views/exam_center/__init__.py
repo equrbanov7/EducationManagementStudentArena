@@ -32,7 +32,14 @@ from .sessions import (
     exam_center_ticket_readmit,
     exam_center_ticket_seat,
 )
-from .statistics import exam_center_stats_data, exam_center_stats_export, exam_center_stats_filters
+from .statistics import (
+    exam_center_stats_data,
+    exam_center_stats_export,
+    exam_center_stats_filters,
+    stats_department_search,
+    stats_faculty_search,
+    stats_teacher_search,
+)
 from .statistics_charts import exam_center_stats_ai, exam_center_stats_charts
 
 __all__ = [
@@ -44,6 +51,9 @@ __all__ = [
     "exam_center_stats_data",
     "exam_center_stats_export",
     "exam_center_stats_filters",
+    "stats_faculty_search",
+    "stats_department_search",
+    "stats_teacher_search",
     "exam_center_reports",
     "exam_center_room_assign_invigilators",
     "exam_center_room_list",

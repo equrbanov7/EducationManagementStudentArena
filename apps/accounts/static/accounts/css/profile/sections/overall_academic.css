@@ -1,0 +1,314 @@
+/* Student cabinet — "Ümumi tədris məlumatı" (overall-academic) section.
+   Searchable/filterable list of every subject the student has taken, grouped
+   by semester (newest first). Uses shared --ems-* design tokens only (light
+   theme, blue tones) — no hard-coded colors, no dark mode. Grade colour chips
+   (.grade-A … .grade-F) are shared with my_subjects.css/transcript.css. */
+
+.profile-section--overall-academic .oa-transcript-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 13px;
+    border-radius: 8px;
+    background: var(--ems-primary-600);
+    color: #fff;
+    text-decoration: none;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+}
+.profile-section--overall-academic .oa-transcript-link:hover {
+    background: var(--ems-primary-700);
+    color: #fff;
+}
+.profile-section--overall-academic .oa-transcript-link i {
+    font-size: 0.9rem;
+}
+
+.oa-empty-record {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+.oa-empty-record i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--ems-neutral-400);
+}
+
+/* ── Filter bar ────────────────────────────────────────────────────────── */
+.oa-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.85rem;
+    margin: 1rem 0 0.85rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 14px;
+    background: var(--ems-primary-50, var(--ems-neutral-50));
+}
+
+.oa-filter-search {
+    position: relative;
+    flex: 1 1 220px;
+    min-width: 200px;
+}
+.oa-filter-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-400);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+.oa-filter-search input {
+    width: 100%;
+    height: 38px;
+    padding-left: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    font-size: 0.85rem;
+}
+.oa-filter-search input:focus {
+    border-color: var(--ems-primary-400);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.oa-filter-select {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 160px;
+}
+.oa-filter-select .bootstrap-single-select,
+.oa-filter-select select {
+    height: 38px;
+}
+
+.oa-filter-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-500);
+    font-weight: 600;
+}
+
+.oa-filter-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    align-items: center;
+    padding-bottom: 2px;
+}
+
+.oa-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+    user-select: none;
+}
+.oa-toggle input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.oa-filter-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 38px;
+    padding: 0 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-600);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.oa-filter-reset:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-800);
+}
+
+.oa-results-meta {
+    margin: 0 0 0.6rem;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+}
+
+.oa-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+.oa-empty i {
+    font-size: 1.6rem;
+    margin-bottom: 0.4rem;
+    color: var(--ems-neutral-400);
+}
+
+/* ── Semester block ───────────────────────────────────────────────────── */
+.oa-semester {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--ems-neutral-0);
+}
+.oa-semester.is-hidden {
+    display: none;
+}
+
+.oa-semester-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.oa-semester-title {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+.oa-semester-title i {
+    color: var(--ems-primary-500);
+}
+.oa-semester-year {
+    font-weight: 500;
+    color: var(--ems-neutral-500);
+    font-size: 0.85rem;
+}
+.oa-semester-count {
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Semester table ───────────────────────────────────────────────────── */
+.oa-table-wrap {
+    overflow-x: auto;
+}
+.oa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.oa-table thead th {
+    padding: 0.55rem 0.6rem;
+    text-align: center;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-500);
+    border-bottom: 1px solid var(--ems-neutral-200);
+    white-space: nowrap;
+}
+.oa-table tbody td {
+    padding: 0.55rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    vertical-align: middle;
+}
+.oa-table .ta-left {
+    text-align: left;
+}
+
+.oa-row.is-hidden {
+    display: none;
+}
+
+.oa-subject-code {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+}
+.oa-subject-name {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+}
+
+.oa-letter {
+    display: inline-block;
+    min-width: 1.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.oa-row--fail td {
+    background: var(--ems-danger-100);
+}
+.oa-row--pass td {
+    background: transparent;
+}
+
+.oa-status {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.oa-status.is-pass {
+    background: var(--ems-success-100);
+    color: var(--ems-success-600);
+}
+.oa-status.is-fail,
+.oa-status.is-barred {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+.oa-status.is-progress {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.oa-reason-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .oa-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .oa-filter-select,
+    .oa-filter-search {
+        min-width: 0;
+    }
+    .oa-filter-reset {
+        align-self: flex-start;
+    }
+}

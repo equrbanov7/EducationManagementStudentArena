@@ -188,6 +188,10 @@ def build_kollokvium_windows_section(
     section["period"] = period
     # Keçmiş (bitmiş) semestr üçün UI read-only (server-side də view-də bloklanır).
     section["period_is_past"] = bool(period and period.is_past)
+    # Bu təşkilatda ümumiyyətlə cari/gələcək (redaktə oluna bilən) semestr varmı?
+    # Yoxdursa default keçmiş semestrə düşür — istifadəçiyə SƏBƏBİ + həlli göstərilir
+    # ("cari semestr yoxdur, yeni yarat") deyə ayrıca xəbərdarlıq üçün.
+    section["has_editable_period"] = any(not p.is_past for p in all_periods)
     section["post_next_url"] = _append_query_params(
         reverse("accounts:profile"),
         section="kollokvium-windows",
