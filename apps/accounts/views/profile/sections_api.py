@@ -108,6 +108,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "my-journal": "accounts/profile/sections/_my_journal.html",
     "grade-approvals": "accounts/profile/sections/_grade_approvals.html",
     "analytics": "accounts/profile/sections/_analytics.html",
+    "academic-records": "accounts/profile/sections/_academic_records.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
