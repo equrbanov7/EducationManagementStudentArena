@@ -44,11 +44,31 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-group" placeholder=acr_group_ph %}
       </div>
       <div class="acr-field">
+        <label>{% trans "Tədris ili" context "registrar.records" %}</label>
+        <div class="bootstrap-single-select">
+          <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-year" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "registrar.records" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="acr-field">
+        <label>{% trans "Semestr" context "registrar.records" %}</label>
+        <div class="bootstrap-single-select">
+          <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-season" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "registrar.records" %}</option>
+            <option value="Payız">{% trans "Payız" context "registrar.records" %}</option>
+            <option value="Yaz">{% trans "Yaz" context "registrar.records" %}</option>
+            <option value="Yay">{% trans "Yay" context "registrar.records" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="acr-field acr-field--student">
         <label>{% trans "Tələbə" context "registrar.records" %}</label>
         {% trans "tələbə axtar…" as acr_student_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-student" placeholder=acr_student_ph %}
       </div>
       <div class="acr-field acr-field--reset">
+        <label>&nbsp;</label>
         <button type="button" class="acr-reset js-acr-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" context "registrar.records" %}</button>
       </div>
     </div>

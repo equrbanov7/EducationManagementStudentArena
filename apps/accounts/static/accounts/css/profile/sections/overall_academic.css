@@ -368,6 +368,49 @@
     color: var(--ems-neutral-600, #475569);
 }
 
+/* Kumulyativ xülasə strip — ÜOMG (100 bal) + toplanmış kredit box-ları. */
+.oa-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.85rem 0 0.4rem;
+}
+.oa-summary-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 150px;
+    padding: 0.7rem 1.05rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-left: 4px solid var(--ems-neutral-300);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+.oa-summary-box--uomg {
+    border-left-color: var(--ems-primary-600);
+    background: var(--ems-primary-50, #eff6ff);
+}
+.oa-summary-n {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--ems-primary-700);
+    line-height: 1.05;
+}
+.oa-summary-l {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+/* ÜOMG dəyərinin yanındakı "/100" miqyas işarəsi. */
+.oa-scale {
+    font-weight: 600;
+    opacity: 0.6;
+    font-size: 0.85em;
+    margin-left: 1px;
+}
+
 /* Bölmə başlığı altındakı təsvir (dublikat başlıq əvəzinə). */
 .oa-subtitle {
     margin: 0;

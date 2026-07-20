@@ -63,14 +63,28 @@ def _build_row(enrollment, organization=None):
 
 
 def _summarize(rows) -> dict:
-    """Credit-weighted GPA + credit tallies for a list of transcript rows."""
+    """Kredit-çəkili ÜOMG (100 bal) + kredit yekunları.
+
+    AZ kredit sistemi (UNEC/AMU əsasnamələri): ÜOMG **100 bal** üzərindən hesablanır —
+
+        ÜOMG = Σ(yekun_bal × kredit) / Σ(kredit)
+
+    burada ``yekun_bal`` fənnin 100-lük yekun balıdır (``result["total"]``), cəm isə
+    qəti nəticəli (keçmiş VƏ ya kəsilmiş) fənlər üzrədir — kəsilmiş fənn aşağı balı
+    ilə ÜOMG-ni azaldır. Qazanılmış kredit yalnız KEÇİLMİŞ fənlərdir. (4.0-lıq GPA
+    nöqtəsi ``finals.score_to_letter``-də hərf üçün qalır, amma ÜOMG artıq ondan
+    asılı deyil.)"""
     gpa_credits = sum((r["credit"] for r in rows if r["in_gpa"]), 0)
-    quality_points = sum((r["quality_points"] for r in rows if r["in_gpa"]), Decimal("0"))
+    score_points = sum(
+        (Decimal(str(r["result"]["total"])) * r["credit"] for r in rows if r["in_gpa"]),
+        Decimal("0"),
+    )
     earned_credits = sum((r["credit"] for r in rows if r["result"]["passed"]), 0)
-    gpa = _round2(quality_points / gpa_credits) if gpa_credits else Decimal("0.00")
+    uomg = _round2(score_points / gpa_credits) if gpa_credits else Decimal("0.00")
     return {
-        "gpa": gpa,
-        "quality_points": _round2(quality_points),
+        "gpa": uomg,  # geriyə-uyğunluq: bütün "ÜOMG" göstəriciləri bu dəyəri oxuyur (indi 100 bal)
+        "uomg": uomg,  # ÜOMG (100 bal) — açıq ad
+        "quality_points": _round2(score_points),
         "credits_gpa": gpa_credits,
         "credits_earned": earned_credits,
     }
@@ -267,4 +281,8 @@ def build_student_overall_record(*, student, organization):
         "semesters": semesters,
         "year_options": year_options,
         "season_options": season_options,
+        # Kumulyativ ÜOMG (100 bal) + kredit — bölmə başlığındakı xülasə üçün.
+        "overall_uomg": data["cumulative_gpa"],
+        "total_credits_earned": data["total_credits_earned"],
+        "total_credits_gpa": data["total_credits_gpa"],
     }

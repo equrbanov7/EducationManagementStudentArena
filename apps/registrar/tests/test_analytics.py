@@ -128,8 +128,8 @@ class AnalyticsServiceTest(_AnalyticsBase):
         self.assertEqual(totals["failed"], 1)
         self.assertEqual(totals["in_progress"], 1)
         self.assertEqual(totals["pass_rate"], Decimal("50.00"))
-        # GPA: pass total 85 → B (3.50); fail total 30 → F (0.00); equal credits → 1.75.
-        self.assertEqual(totals["avg_gpa"], Decimal("1.75"))
+        # ÜOMG 100 bal: pass total 90 (85+5 bonus), fail total 30; equal 6cr → (90+30)/2 = 60.00.
+        self.assertEqual(totals["avg_gpa"], Decimal("60.00"))
 
     def test_program_and_group_buckets(self):
         with bypass_rls():
