@@ -32,9 +32,10 @@
         var searchInput = root.querySelector("[data-oa-search-input]");
         var yearSelect = root.querySelector("[data-oa-year-filter]");
         var seasonSelect = root.querySelector("[data-oa-season-filter]");
+        var letterSelect = root.querySelector("[data-oa-letter-filter]");
         var failedCheckbox = root.querySelector('[data-oa-filter="failed"]');
-        var barredCheckbox = root.querySelector('[data-oa-filter="barred"]');
-        var absenceCheckbox = root.querySelector('[data-oa-filter="absence-fail"]');
+        var qbCheckbox = root.querySelector('[data-oa-filter="qb"]');
+        var exam25Checkbox = root.querySelector('[data-oa-filter="exam25"]');
         var resetButton = root.querySelector("[data-oa-reset]");
         var countEl = root.querySelector("[data-oa-count]");
         var emptyEl = root.querySelector("[data-oa-empty]");
@@ -49,9 +50,10 @@
             var query = (searchInput && searchInput.value || "").trim().toLowerCase();
             var year = yearSelect ? yearSelect.value : "";
             var season = seasonSelect ? seasonSelect.value : "";
+            var letter = letterSelect ? letterSelect.value : "";
             var onlyFailed = Boolean(failedCheckbox && failedCheckbox.checked);
-            var onlyBarred = Boolean(barredCheckbox && barredCheckbox.checked);
-            var onlyAbsenceFail = Boolean(absenceCheckbox && absenceCheckbox.checked);
+            var onlyQb = Boolean(qbCheckbox && qbCheckbox.checked);
+            var onlyExam25 = Boolean(exam25Checkbox && exam25Checkbox.checked);
             var visibleTotal = 0;
 
             semesterGroups.forEach(function (group) {
@@ -67,16 +69,19 @@
                         var haystack = row.getAttribute("data-oa-search") || "";
                         matches = haystack.indexOf(query) !== -1;
                     }
+                    if (matches && letter) {
+                        matches = (row.getAttribute("data-oa-letter") || "") === letter;
+                    }
                     if (matches && onlyFailed) {
                         matches = row.getAttribute("data-oa-failed") === "1";
                     }
-                    if (matches && onlyBarred) {
-                        // 25% həddi — İMTAHANA BURAXILMAYAN (q/b-dan fərqli).
-                        matches = row.getAttribute("data-oa-fail-reason") === "barred";
-                    }
-                    if (matches && onlyAbsenceFail) {
-                        // Q/B-DAN kəsilən — giriş balı aşağı (25% barred deyil).
+                    if (matches && onlyQb) {
+                        // Q/B-DAN kəsilən = davamiyyət 25% həddi → imtahana buraxılmayıb.
                         matches = row.getAttribute("data-oa-fail-reason") === "qb";
+                    }
+                    if (matches && onlyExam25) {
+                        // 25% = imtahana girib, kəsilib (təkrar imtahan hüququ).
+                        matches = row.getAttribute("data-oa-fail-reason") === "exam25";
                     }
 
                     row.classList.toggle("is-hidden", !matches);
@@ -103,12 +108,12 @@
         if (searchInput) {
             searchInput.addEventListener("input", debouncedApply);
         }
-        [yearSelect, seasonSelect].forEach(function (select) {
+        [yearSelect, seasonSelect, letterSelect].forEach(function (select) {
             if (select) {
                 select.addEventListener("change", applyFilters);
             }
         });
-        [failedCheckbox, barredCheckbox, absenceCheckbox].forEach(function (checkbox) {
+        [failedCheckbox, qbCheckbox, exam25Checkbox].forEach(function (checkbox) {
             if (checkbox) {
                 checkbox.addEventListener("change", applyFilters);
             }
@@ -118,7 +123,7 @@
                 if (searchInput) {
                     searchInput.value = "";
                 }
-                [yearSelect, seasonSelect].forEach(function (select) {
+                [yearSelect, seasonSelect, letterSelect].forEach(function (select) {
                     if (!select) {
                         return;
                     }
@@ -127,7 +132,7 @@
                         window.EMSBootstrapSelect.sync(select);
                     }
                 });
-                [failedCheckbox, barredCheckbox, absenceCheckbox].forEach(function (checkbox) {
+                [failedCheckbox, qbCheckbox, exam25Checkbox].forEach(function (checkbox) {
                     if (checkbox) {
                         checkbox.checked = false;
                     }
