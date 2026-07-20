@@ -44,9 +44,9 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             </div>
         </label>
         {% if journal_is_broad %}
-        {# Korrektor (İKT rəhbəri/admin) — bütün jurnallar üçün axtarışlı seçicilər
-           (imtahan statistikası formatı: type-ahead + lazy + kaskad). Seçim GET forma
-           gizli inputa yazılır və səhifə yenilənir; cari seçim setValue ilə göstərilir. #}
+        {% comment %}Korrektor (İKT rəhbəri/admin) — bütün jurnallar üçün axtarışlı
+        seçicilər (imtahan statistikası formatı: type-ahead + lazy + kaskad). Seçim GET
+        forma gizli inputa yazılır və səhifə yenilənir; cari seçim setValue ilə göstərilir.{% endcomment %}
         <div class="jd2-filter">
             <span class="jd2-filter-label">{% trans "FAKÜLTƏ" context "registrar.journal" %}</span>
             <input type="hidden" name="faculty" value="{{ journal_selected_faculty }}" data-jl-hidden="faculty">

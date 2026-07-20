@@ -105,12 +105,17 @@ def journal_list_context(user, request=None) -> dict:
         if selected_kind not in dict(SlotKind.choices):
             selected_kind = ""
 
-    # Avto-seçim (filter açıq göndərilməyibsə): bu günə düşən semestr; yoxdursa
-    # fəsil qaydası — yanvarın sonuna kimi Payız, iyula kimi Yaz, sonra Yay.
-    if not explicit_filter and selected_period is None and periods:
+    # Avto-seçim YALNIZ müəllim görünüşü üçün: bu günə düşən semestr (öz az sayda
+    # dərsi arasında). Korrektor (geniş) görünüşdə avto-seçim YOX — İKT rəhbəri/admin
+    # DEFAULT olaraq BÜTÜN jurnalları görsün, sonra filtrləsin.
+    if not is_broad and not explicit_filter and selected_period is None and periods:
         selected_period = _current_semester(periods)
         if selected_period is not None:
             selected_year = selected_period.academic_year
+    # Kaskad mühafizəsi: il seçiləndə köhnə (stale) period həmin ilə aid deyilsə at
+    # — yoxsa "il=2024/2025 + period=2025/2026-payız" heç nə göstərmir.
+    if selected_period is not None and selected_year and selected_period.academic_year != selected_year:
+        selected_period = None
 
     # ── Korrektor (geniş) görünüş üçün əlavə filtrlər: müəllim, qrup, fakültə,
     # kafedra, mətn axtarışı. Seçim siyahıları TAM dəstdən (illik süzgəcdən əvvəl)
