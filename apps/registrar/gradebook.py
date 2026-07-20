@@ -505,8 +505,7 @@ def get_offering_journal(*, offering, newest_first=False):
                 "student": enrollment.student,
                 "cells": cells,
                 "absence_hours": absence_hours,
-                # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir; barred/warning
-                # isə akademik saat-limitinə görə qalır (Enrollment.absence_hours).
+                # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir (barred saat-limitinə görə).
                 "absence_count": absence_count,
                 "entry_score": entry_score,
                 "barred": barred,
@@ -523,6 +522,8 @@ def get_offering_journal(*, offering, newest_first=False):
         "today": today,
         "limit_percent": absence_limit_percent_for(offering),
         "allowed_absence": allowed_absence,
+        # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
+        "limit_qb": int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0,
         "entry_score_max": scheme.entry_score_max,
     }
 

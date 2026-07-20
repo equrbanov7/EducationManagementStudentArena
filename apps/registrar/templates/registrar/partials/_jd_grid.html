@@ -52,7 +52,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 {{ lm.lesson.date|date:"d.m" }}
                                 {% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}
-                                {% if can_edit and lm.editable %}
+                                {% if can_edit and lm.editable or can_edit and can_override_lessons %}
                                 <button type="button" class="jd2-th-edit" data-jd-edit-lesson
                                         data-lesson-id="{{ lm.lesson.id }}"
                                         data-lesson-date="{{ lm.lesson.date|date:'Y-m-d' }}"
@@ -72,7 +72,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 {% endif %}
                             </th>
                             {% endfor %}
-                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "limit" context "registrar.journal" %} {{ journal.limit_percent|floatformat:0 }}%</div></th>
+                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub" title="{% trans 'Dərs saatına görə icazə verilən maksimum q/b (25% həddi)' context 'registrar.journal' %}">{% trans "limit" context "registrar.journal" %} {{ journal.limit_qb }} q/b</div></th>
                         </tr>
                     </thead>
                     <tbody>

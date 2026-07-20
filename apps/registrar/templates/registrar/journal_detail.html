@@ -252,6 +252,6 @@
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
     {% if correction_mode %}
-    <script src="{% static 'registrar/js/correction.js' %}?v=20260720-inline" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/correction.js' %}?v=CORR3" nonce="{{ request.csp_nonce }}"></script>
     {% endif %}
 {% endblock %}

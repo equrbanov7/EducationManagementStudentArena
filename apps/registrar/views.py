@@ -171,6 +171,11 @@ def journal_detail(request, offering_id):
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
         "can_correct_journal": can_correct,
+        # İKT rəhbəri/superuser 2 saatlıq pəncərədən sonra da dərsi (tarix/saat) redaktə
+        # edə bilər → köhnə dərslərdə də ✎ düyməsi görünsün (allow_past/allow_locked bypass).
+        "can_override_lessons": bool(
+            getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
+        ),
     }
     if correction_mode:
         # Yerində düzəliş rejimi: audited correction editoru üçün kontekst
