@@ -148,7 +148,8 @@
 }
 .jd2-th-student {
     text-align: left !important; padding-left: 16px !important; min-width: 210px;
-    position: sticky; left: 0; background: var(--j-headbg); z-index: 2;
+    position: sticky; left: 0; background: var(--j-headbg); z-index: 3;
+    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.18);
 }
 .jd2-th-lesson.is-today { background: #dbeafe; color: #1d4ed8; }
 .jd2-th-today { font-weight: 800; }
@@ -167,15 +168,22 @@
 .jd2-row td { border-bottom: 1px solid #eef3fb; text-align: center; padding: 8px 4px; }
 .jd2-row.is-barred td { background: #fef2f2; }
 .jd2-row.is-warning td { background: #fffbeb; }
+/* İlk sütun (tələbə) həmişə görünsün — sağa scroll-da sabit qalır. display:flex
+   sticky-ni bəzi brauzerlərdə pozduğu üçün td table-cell qalır, məzmun inner
+   div-də flex-lənir. z-index cell-lərdən yüksək + kölgə ilə ayrılır. */
 .jd2-td-student {
     text-align: left !important; padding: 8px 8px 8px 16px !important;
-    position: sticky; left: 0; background: #fff; z-index: 1;
-    display: flex; align-items: center; gap: 8px;
+    position: sticky; left: 0; background: #fff; z-index: 2;
+    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.12);
 }
+.jd2-stu-inner { display: flex; align-items: center; gap: 8px; }
 .jd2-row.is-barred .jd2-td-student { background: #fef2f2; }
 .jd2-row.is-warning .jd2-td-student { background: #fffbeb; }
-.jd2-stu-no { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 16px; }
+.jd2-stu-no { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 16px; flex: none; }
 .jd2-stu-name { font-weight: 700; font-size: 12.5px; color: var(--j-ink); }
+/* q/b hər yerdə eyni qırmızı — seminar/lab select-i də (data-mark JS ilə qoyulur). */
+.jd2-semselect[data-mark="qb"] .bootstrap-single-select__toggle { color: #dc2626; }
+.jd2-semselect[data-mark="ie"] .bootstrap-single-select__toggle { color: #059669; }
 .jd2-cell.is-today { background: rgba(219, 234, 254, 0.45); }
 .jd2-ro { font-weight: 800; font-size: 12px; }
 .jd2-ro--ie { color: #059669; }

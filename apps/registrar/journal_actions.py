@@ -45,10 +45,13 @@ def lesson_action(request, offering_id, lesson_id):
     offering = _offering_or_404(request, offering_id)
     lesson = get_object_or_404(Lesson, pk=lesson_id, offering=offering)
     action = request.POST.get("action")
+    # İKT Rəhbəri / superuser: 2 saatlıq pəncərəni + keçmiş-tarix qadağasını keçir
+    # (dərsi istənilən tarixə/saata dəyişə, silə bilər). Yayımlanmış jurnal yenə kilidli.
+    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
 
     if action == "delete_lesson":
-        if gradebook.delete_lesson(lesson=lesson, by_user=request.user):
-            messages.success(request, _("Dərs silindi (2 saat pəncərəsi içində)."))
+        if gradebook.delete_lesson(lesson=lesson, by_user=request.user, allow_locked=override):
+            messages.success(request, _("Dərs silindi."))
         else:
             messages.error(request, _("Dərs silinmədi — 2 saatlıq düzəliş pəncərəsi bitib."))
         return _back(offering)
@@ -72,6 +75,8 @@ def lesson_action(request, offering_id, lesson_id):
                 ),
                 start_time=start_time or "",
                 end_time=end_time or "",
+                allow_past=override,
+                allow_locked=override,
             )
         except gradebook.LessonRuleError as exc:
             messages.error(request, str(exc))

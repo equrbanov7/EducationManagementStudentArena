@@ -79,8 +79,10 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                         {% for row in journal.rows %}
                         <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">
                             <td class="jd2-td-student">
-                                <span class="jd2-stu-no">{{ forloop.counter }}</span>
-                                <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                                <div class="jd2-stu-inner">
+                                    <span class="jd2-stu-no">{{ forloop.counter }}</span>
+                                    <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                                </div>
                             </td>
                             {% for cell in row.cells %}
                             <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">
