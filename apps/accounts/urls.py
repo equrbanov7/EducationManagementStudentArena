@@ -6,6 +6,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
+from .views import academic_records as academic_records_views
 
 app_name = "accounts"
 
@@ -72,6 +73,30 @@ urlpatterns = [
     # Profile
     path("profile/", views.user_profile, name="profile"),
     path("profile/statistics/export-csv/", views.statistics_export_csv, name="statistics_export_csv"),
+    # Staff iyerarxik akademik-qeyd icmalı ("Akademik qeydlər" profil bölməsi) —
+    # cross-domain (registrar nəticələr + organizations strukturu) inteqrasiya
+    # endpoint-ləri accounts-dadır (modul-sərhəd dövrünü önləmək üçün).
+    path("profile/academic-records/data/", academic_records_views.records_overview_data, name="records_overview_data"),
+    path(
+        "profile/academic-records/student/",
+        academic_records_views.records_student_detail,
+        name="records_student_detail",
+    ),
+    path(
+        "profile/academic-records/search/faculty/", academic_records_views.faculty_search, name="records_faculty_search"
+    ),
+    path(
+        "profile/academic-records/search/department/",
+        academic_records_views.department_search,
+        name="records_department_search",
+    ),
+    path(
+        "profile/academic-records/search/program/", academic_records_views.program_search, name="records_program_search"
+    ),
+    path("profile/academic-records/search/group/", academic_records_views.group_search, name="records_group_search"),
+    path(
+        "profile/academic-records/search/student/", academic_records_views.student_search, name="records_student_search"
+    ),
     # P3.1 + P3.2 — progressive enhancement endpoints. Heç bir mövcud URL
     # toxunulmur; bunlar JS-li klientlər üçün lazy-load üçündür.
     path(

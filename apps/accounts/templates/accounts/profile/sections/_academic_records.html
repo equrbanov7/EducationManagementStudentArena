@@ -1,0 +1,125 @@
+{% load static i18n %}
+{% comment %}
+Staff HİERARXİK akademik-qeyd icmalı ("Akademik qeydlər") — dekan / kafedra
+müdiri / rektor / registrator öz görünüş sahəsindəki (unit scope) tələbələrin
+nəticələrini fakültə → kafedra → ixtisas → qrup → tələbə süzgəci ilə görür.
+Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllardadır
+(profile.html-də yüklənir). Bax: apps/registrar/records_views.py + records_lookups.py.
+{% endcomment %}
+{% if 'academic-records' in allowed_sections %}
+<section class="profile-section-panel profile-section--academic-records {% if active_section == 'academic-records' %}is-active{% endif %}"
+         data-profile-section-panel="academic-records"
+         data-source-url="{{ profile_base_url }}?section=academic-records">
+  <div class="acr"
+       data-data-url="{% url 'accounts:records_overview_data' %}"
+       data-detail-url="{% url 'accounts:records_student_detail' %}"
+       data-faculty-url="{% url 'accounts:records_faculty_search' %}"
+       data-department-url="{% url 'accounts:records_department_search' %}"
+       data-program-url="{% url 'accounts:records_program_search' %}"
+       data-group-url="{% url 'accounts:records_group_search' %}"
+       data-student-url="{% url 'accounts:records_student_search' %}">
+    <div class="acr-head">
+      <p>{% trans "Öz strukturunuzdakı tələbələrin akademik nəticələri — fakültə, kafedra, ixtisas, qrup üzrə süzün və ya tələbə axtarın. Aşağıdakı box-lar seçilmiş süzgəc üzrə ümumi mənzərəni göstərir. Hər kəs yalnız öz strukturunun altını görür." context "registrar.records" %}</p>
+    </div>
+
+    <div class="acr-filters">
+      <div class="acr-field">
+        <label>{% trans "Fakültə" context "registrar.records" %}</label>
+        {% trans "fakültə axtar…" as acr_faculty_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-faculty" placeholder=acr_faculty_ph %}
+      </div>
+      <div class="acr-field">
+        <label>{% trans "Kafedra" context "registrar.records" %}</label>
+        {% trans "kafedra axtar…" as acr_dept_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-department" placeholder=acr_dept_ph %}
+      </div>
+      <div class="acr-field">
+        <label>{% trans "İxtisas" context "registrar.records" %}</label>
+        {% trans "ixtisas axtar…" as acr_program_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-program" placeholder=acr_program_ph %}
+      </div>
+      <div class="acr-field">
+        <label>{% trans "Qrup" context "registrar.records" %}</label>
+        {% trans "qrup axtar…" as acr_group_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-group" placeholder=acr_group_ph %}
+      </div>
+      <div class="acr-field">
+        <label>{% trans "Tələbə" context "registrar.records" %}</label>
+        {% trans "tələbə axtar…" as acr_student_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-student" placeholder=acr_student_ph %}
+      </div>
+      <div class="acr-field acr-field--reset">
+        <button type="button" class="acr-reset js-acr-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" context "registrar.records" %}</button>
+      </div>
+    </div>
+
+    <div class="acr-cards js-acr-cards"></div>
+
+    <div class="acr-tablewrap">
+      <table class="acr-table">
+        <thead>
+          <tr>
+            <th class="acr-th-no">№</th>
+            <th>{% trans "Tələbə" context "registrar.records" %}</th>
+            <th>{% trans "İxtisas" context "registrar.records" %}</th>
+            <th>{% trans "Qrup" context "registrar.records" %}</th>
+            <th class="acr-num">{% trans "Toplanmış kredit" context "registrar.records" %}</th>
+            <th class="acr-num">{% trans "Kəsr" context "registrar.records" %}</th>
+            <th class="acr-num" title="{% trans 'Q/b-dan — imtahana buraxılmayıb' context 'registrar.records' %}">{% trans "Q/b" context "registrar.records" %}</th>
+            <th class="acr-num" title="{% trans 'İmtahandan kəsilib — 25% təkrar imtahan' context 'registrar.records' %}">{% trans "25%" context "registrar.records" %}</th>
+            <th class="acr-num">{% trans "ÜOMG" context "registrar.records" %}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody class="js-acr-rows">
+          <tr><td colspan="10"><div class="acr-state"><i class="fas fa-spinner fa-spin"></i> {% trans "Yüklənir…" context "registrar.records" %}</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="acr-pager js-acr-pager"></div>
+
+    {# Tələbə detalı modalı (drill-down) — semestr üzrə fənn nəticələri #}
+    <div class="acr-modal js-acr-modal" hidden>
+      <div class="acr-modal__backdrop js-acr-modal-close"></div>
+      <div class="acr-modal__box" role="dialog" aria-modal="true">
+        <div class="acr-modal__head">
+          <h3 class="js-acr-modal-title"></h3>
+          <button type="button" class="acr-modal__x js-acr-modal-close" aria-label="{% trans 'Bağla' context 'registrar.records' %}">&times;</button>
+        </div>
+        <div class="acr-modal__body js-acr-modal-body"></div>
+      </div>
+    </div>
+
+    <script type="application/json" class="js-acr-i18n">{
+      "students": "{% trans 'Tələbə'|escapejs context 'registrar.records' %}",
+      "credits": "{% trans 'Toplanmış kredit'|escapejs context 'registrar.records' %}",
+      "fails": "{% trans 'Ümumi kəsr'|escapejs context 'registrar.records' %}",
+      "qb": "{% trans 'Q/b-dan kəsr'|escapejs context 'registrar.records' %}",
+      "exam25": "{% trans 'İmtahandan (25%)'|escapejs context 'registrar.records' %}",
+      "avg_gpa": "{% trans 'Orta ÜOMG'|escapejs context 'registrar.records' %}",
+      "none": "{% trans 'Nəticə tapılmadı.'|escapejs context 'registrar.records' %}",
+      "no_access": "{% trans 'Bu bölmə üçün struktur icazəniz yoxdur.'|escapejs context 'registrar.records' %}",
+      "prev": "{% trans 'Əvvəlki'|escapejs context 'registrar.records' %}",
+      "next": "{% trans 'Sonrakı'|escapejs context 'registrar.records' %}",
+      "view": "{% trans 'Bax'|escapejs context 'registrar.records' %}",
+      "credit": "{% trans 'Kredit'|escapejs context 'registrar.records' %}",
+      "subject": "{% trans 'Fənn'|escapejs context 'registrar.records' %}",
+      "teacher": "{% trans 'Müəllim'|escapejs context 'registrar.records' %}",
+      "entry": "{% trans 'Giriş balı'|escapejs context 'registrar.records' %}",
+      "exit": "{% trans 'Çıxış balı'|escapejs context 'registrar.records' %}",
+      "total": "{% trans 'Nəticə'|escapejs context 'registrar.records' %}",
+      "grade": "{% trans 'Dərəcə'|escapejs context 'registrar.records' %}",
+      "status": "{% trans 'Status'|escapejs context 'registrar.records' %}",
+      "passed": "{% trans 'Keçdi'|escapejs context 'registrar.records' %}",
+      "failed": "{% trans 'Kəsildi'|escapejs context 'registrar.records' %}",
+      "barred": "{% trans 'İmtahana buraxılmır'|escapejs context 'registrar.records' %}",
+      "progress": "{% trans 'Davam edir'|escapejs context 'registrar.records' %}",
+      "qb_badge": "{% trans 'Q/b-dan kəsilib — imtahana buraxılmayıb'|escapejs context 'registrar.records' %}",
+      "exam25_badge": "{% trans 'İmtahandan kəsilib (25% təkrar imtahan)'|escapejs context 'registrar.records' %}",
+      "sem_credit": "{% trans 'kredit'|escapejs context 'registrar.records' %}",
+      "no_record": "{% trans 'Bu tələbənin hələ tədris qeydi yoxdur.'|escapejs context 'registrar.records' %}",
+      "detail_error": "{% trans 'Detal yüklənmədi.'|escapejs context 'registrar.records' %}"
+    }</script>
+  </div>
+</section>
+{% endif %}
