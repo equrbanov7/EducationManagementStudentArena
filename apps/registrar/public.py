@@ -142,7 +142,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import gradebook, journal_extras
+    from apps.registrar import attendance, gradebook, journal_extras
     from apps.registrar.models import ComponentKind, ComponentScore, Enrollment, LessonMark
 
     if organization is None or not getattr(request.user, "is_authenticated", False):
@@ -289,7 +289,14 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     # KPI + bal bölgüsü (real kompozisiya): dərs balları + kollokvium + sərbəst iş.
     entry = gradebook.entry_score_for(enrollment, cap)
-    absent_count = sum(1 for m in marks if m.status == "absent")
+    # Davamiyyət balı (10-luq) — rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli:
+    # 10 × (1 − buraxılmış_saat/dərs_saatı), 25%-dən çox qayıbda "imtahana buraxılmır".
+    dav_lesson_hours = offering.lesson_hours or sum((m.lesson.hours for m in marks), 0)
+    dav_score, dav_barred = attendance.attendance_score(
+        dav_lesson_hours,
+        enrollment.absence_hours,
+        limit_percent=gradebook.absence_limit_percent_for(offering),
+    )
     koll_entered = [k["score"] for k in kollokviums if k["score"] is not None]
     koll_sum = sum(koll_entered, Decimal("0"))
     selfwork_total = own_selfwork["total"] if own_selfwork else 0
@@ -312,7 +319,8 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         "hidden_today": hidden_today,
         "kollokviums": kollokviums,
         "koll_avg": koll_avg,
-        "dav_score": max(0, 10 - absent_count),
+        "dav_score": dav_score,
+        "dav_barred": dav_barred,
         "selfwork_topics": selfwork["topics"],
         "selfwork_row": own_selfwork,
         "coursework": getattr(enrollment, "course_work", None),

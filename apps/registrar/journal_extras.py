@@ -358,7 +358,7 @@ def get_final_breakdown(offering):
 
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir."""
-    from apps.registrar import gradebook
+    from apps.registrar import attendance, gradebook
     from apps.registrar.models import LessonKind, LessonMark
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
@@ -405,11 +405,14 @@ def get_final_breakdown(offering):
         barred = allowed_absence > 0 and absence_hours > allowed_absence
         warning = (not barred) and allowed_absence > 0 and absence_hours >= warn_at
         entry = gradebook.entry_score_for(e, scheme.entry_score_max)
+        # Davamiyyət balı (10-luq) — rəsmi cədvəl: 10 × (1 − buraxılmış_saat/dərs_saatı),
+        # 25% həddi keçiləndə None (imtahana buraxılmır). ``allowed`` = ümumi dərs saatı.
+        dav_score, _dav_barred = attendance.attendance_score(allowed, absence_hours, limit_percent=limit_percent)
         rows.append(
             {
                 "enrollment": e,
                 "student": e.student,
-                "dav": max(0, 10 - agg["absent"]),  # mockup: 10 − qayıb dərs sayı
+                "dav": dav_score,  # rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli üzrə
                 "kvals": kvals,
                 "korta": _avg(entered),
                 "sorta": _avg(agg["sem"]),
