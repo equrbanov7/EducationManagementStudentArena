@@ -1,21 +1,11 @@
 """Elektron jurnal (davamiyyət/qiymət jurnalı) — services (U3, UNEC modeli).
 
-Müəllim hər dərs (``Lesson``) günü tələbələrin iştirak/qayıbını (iə/qb), seminar
-və laboratoriya dərslərində isə balını (``LessonMark``) yazır — mühazirədə yalnız
-iə/qb. Sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı (seminar/lab
-ballarının cəmi) AVTOMATİK hesablayır. Yekun imtahan burada yoxdur.
-
-Kilid qaydaları (geriyə-dönük dəyişiklik olmasın):
-* dərs sətri (tarix/növ/mövzu/saat) yaranışdan ``LESSON_EDIT_WINDOW`` (2 saat)
-  içində redaktə/silinə bilər — sonra dondurulur;
-* keçmiş tarixə dərs yaratmaq qadağandır;
-* YENİ iştirak/bal yalnız dərsin öz günündə yazılır; yazılmış xana
-  ``MARK_EDIT_WINDOW`` (2 saat) sonra kilidlənir (DB trigger + servis);
-* seminar/lab balı 0-10 aralığında clamp olunur.
-
-Status (görünüş): qayıb saatı proqramın ``absence_limit_percent``-i × fənnin tam
-saatını keçirsə → tələbə "kəsilir" (imtahana buraxılmır, sətir qırmızı); limitə
-yaxınlaşırsa → xəbərdarlıq (sətir bozarır).
+Müəllim hər dərs günü iştirak/qayıbı (iə/qb), seminar/lab-da isə balı (``LessonMark``)
+yazır; sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı avtomatik hesablayır.
+Kilid qaydaları (geriyə-dönük dəyişiklik olmasın): dərs sətri + yazılmış xana yaranışdan
+2 saat (``LESSON/MARK_EDIT_WINDOW``, DB trigger + servis) sonra dondurulur; keçmiş tarixə
+dərs qadağan; yeni işarə yalnız dərsin günündə; bal 0-10 clamp. Qayıb saatı proqramın
+``absence_limit_percent``-i × fənn saatını keçirsə tələbə "kəsilir" (imtahana buraxılmır).
 """
 
 from __future__ import annotations
@@ -172,14 +162,29 @@ def create_lesson(
 
 
 @transaction.atomic
-def update_lesson(*, lesson, date=None, kind=None, topic=None, hours=None, start_time=None, end_time=None) -> bool:
-    """Səhv açılmış dərsi düzəlt — yalnız yaranışdan 2 saat içində."""
-    if journal_is_locked(lesson.offering) or not can_edit_lesson(lesson):
+def update_lesson(
+    *,
+    lesson,
+    date=None,
+    kind=None,
+    topic=None,
+    hours=None,
+    start_time=None,
+    end_time=None,
+    allow_past=False,
+    allow_locked=False,
+) -> bool:
+    """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked`` pəncərəni,
+    ``allow_past`` keçmiş-tarixi keçir — yalnız İKT Rəhbəri/superuser (rol HTTP qatında
+    yoxlanır); yayımlanmış jurnal yenə kilidli."""
+    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     fields = []
     if date is not None:
         parsed = _coerce_date(date)
-        if parsed is None or parsed < timezone.localdate():
+        if parsed is None:
+            raise LessonRuleError("Dərs tarixi düzgün deyil.")
+        if parsed < timezone.localdate() and not allow_past:
             raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
         lesson.date = parsed
         fields.append("date")
@@ -204,11 +209,12 @@ def update_lesson(*, lesson, date=None, kind=None, topic=None, hours=None, start
 
 
 @transaction.atomic
-def delete_lesson(*, lesson, by_user=None) -> bool:
+def delete_lesson(*, lesson, by_user=None, allow_locked=False) -> bool:
     """Səhv açılmış dərsi sil — yalnız yaranışdan 2 saat içində.
 
+    ``allow_locked`` 2 saatlıq pəncərəni keçir (yalnız İKT Rəhbəri/superuser).
     Sütunun (təzə) işarələri kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
-    if journal_is_locked(lesson.offering) or not can_edit_lesson(lesson):
+    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     offering = lesson.offering
     label = f"{lesson.date} · {lesson.get_kind_display()}"
