@@ -321,6 +321,8 @@ def _role_capabilities(user, profile):
                     "appeal-stats",
                     "kollokvium-windows",
                     "exam-chance",
+                    # Mərkəzi rol → bütün tələbələrin akademik qeydlərini görür.
+                    "academic-records",
                 }
             )
 

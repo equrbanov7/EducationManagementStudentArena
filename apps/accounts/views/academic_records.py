@@ -21,24 +21,38 @@ from django.views.decorators.http import require_GET
 
 from apps.accounts import academic_records
 from apps.organizations.models import OrgUnit
-from apps.organizations.scoping import get_unit_scope, scope_org_units
+from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope, scope_org_units
 from apps.registrar import transcript
 from apps.registrar.models import Program, StudentAcademicRecord
+from core.roles import user_has_any_role
 
 _FILTER_KEYS = ("faculty", "department", "program", "group", "student")
 _PAGE_DEFAULT = 10
 _PAGE_MAX = 50
+
+# İmtahan mərkəzi + İKT rəhbəri MƏRKƏZİ rollardır — unit scope-ları olmasa da bütün
+# təşkilat üzrə akademik nəticələri görməlidirlər (mərkəzi imtahan/idarəetmə nəzarəti).
+# Dekan/kafedra müdiri unit-scope ilə qalır; adi müəllim/tələbə giriş almır.
+_CENTRAL_ROLES = frozenset({"exam_center", "exam_center_head", "exam_center_staff", "ikt_rehber"})
 
 
 # ── Ortaq köməkçilər ─────────────────────────────────────────────────────────
 
 
 def _scope(request):
-    """(organization, scope) — aktiv təşkilat + istifadəçinin unit scope-u."""
+    """(organization, scope) — aktiv təşkilat + istifadəçinin görünüş sahəsi.
+
+    Superadmin/owner/rektorat org-wide, dekan/kafedra müdiri unit-subtree
+    (:func:`get_unit_scope`). Mərkəzi rollar (imtahan mərkəzi / İKT rəhbəri) unit
+    scope-ları olmadığından org-wide-a yüksəldilir — beləcə bütün tələbələri görürlər.
+    """
     organization = getattr(request, "organization", None)
     if organization is None:
         return None, None
-    return organization, get_unit_scope(request.user, organization, request=request)
+    scope = get_unit_scope(request.user, organization, request=request)
+    if not scope.has_structure_access and user_has_any_role(request.user, _CENTRAL_ROLES):
+        scope = ORG_WIDE_SCOPE
+    return organization, scope
 
 
 def _int_param(request, name, default):
