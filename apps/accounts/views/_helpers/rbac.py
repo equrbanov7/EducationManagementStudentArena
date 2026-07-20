@@ -380,7 +380,7 @@ def _role_capabilities(user, profile):
         if is_teacher or is_org_admin or is_superadmin or is_student:
             allowed_sections.add("my-journal")
         if is_superadmin or is_org_admin or is_unit_manager:
-            allowed_sections.update({"grade-approvals", "analytics"})
+            allowed_sections.update({"grade-approvals", "analytics", "academic-records"})
 
     # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
     # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API

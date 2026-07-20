@@ -269,20 +269,17 @@ class _Bucket:
         }
 
 
-def build_period_analytics(*, organization, period) -> dict:
-    """Full dashboard payload for one org + period (fixed query count)."""
-    enrollments = list(
-        Enrollment.objects.filter(organization=organization, offering__period=period)
-        .exclude(status=Enrollment.Status.DROPPED)
-        .select_related("offering", "offering__subject", "offering__group")
-    )
-    if not enrollments:
-        return {"has_data": False, "period": period, "totals": None, "programs": [], "groups": [], "at_risk": []}
-
+def build_evaluation_maps(organization, enrollments) -> dict:
+    """Verilmiş enrollment siyahısı üçün bütün bulk map-ları qurur (sabit sorğu
+    sayı — hər map bir sorğu). Həm :func:`build_period_analytics` (dövr analitikası),
+    həm də akademik-qeyd icmalı (:mod:`apps.registrar.records_overview`) eyni
+    riyaziyyatı (``_evaluate``) bölüşsün deyə çıxarılıb — beləcə iki kod yolu
+    ``compute_final_result``-dan fərqlənmir (``test_analytics.py`` konsistensiya
+    testi ilə kilidlənib)."""
     enrollment_ids = [e.id for e in enrollments]
     offering_ids = list({e.offering_id for e in enrollments})
     student_ids = list({e.student_id for e in enrollments})
-    maps = {
+    return {
         "schemes": _scheme_map(offering_ids),
         "component_offerings": _component_offerings(offering_ids),
         "component_sums": _component_sum_map(enrollment_ids),
@@ -294,6 +291,25 @@ def build_period_analytics(*, organization, period) -> dict:
         "records": _record_map(organization, student_ids),
         "organization": organization,  # U17: tenant hərf şkalası
     }
+
+
+def evaluate_enrollment(enrollment, maps) -> dict:
+    """Bir enrollment-in nəticəsi (``compute_final_result`` güzgüsü) — public ad
+    (records_overview modulu üçün). Bax :func:`_evaluate`."""
+    return _evaluate(enrollment, maps)
+
+
+def build_period_analytics(*, organization, period) -> dict:
+    """Full dashboard payload for one org + period (fixed query count)."""
+    enrollments = list(
+        Enrollment.objects.filter(organization=organization, offering__period=period)
+        .exclude(status=Enrollment.Status.DROPPED)
+        .select_related("offering", "offering__subject", "offering__group")
+    )
+    if not enrollments:
+        return {"has_data": False, "period": period, "totals": None, "programs": [], "groups": [], "at_risk": []}
+
+    maps = build_evaluation_maps(organization, enrollments)
 
     overall = _Bucket("overall", "")
     programs: dict = {}
