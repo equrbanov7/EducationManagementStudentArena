@@ -31,20 +31,24 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <select name="organization_status" class="form-select org-management-select">
-            <option value="">{% trans "All statuses" context "staff.management" %}</option>
-            <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>{% trans "Active" context "staff.management" %}</option>
-            <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>{% trans "Pending" context "staff.management" %}</option>
-            <option value="suspended" {% if organization_status_filter == "suspended" %}selected{% endif %}>{% trans "Suspended" context "staff.management" %}</option>
-            <option value="inactive" {% if organization_status_filter == "inactive" %}selected{% endif %}>{% trans "Inactive" context "staff.management" %}</option>
-        </select>
-        <select name="organization_type" class="form-select org-management-select">
-            <option value="">{% trans "All types" context "staff.management" %}</option>
-            <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>{% trans "School" context "staff.management" %}</option>
-            <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>{% trans "University" context "staff.management" %}</option>
-            <option value="course_center" {% if organization_type_filter == "course_center" %}selected{% endif %}>{% trans "Course center" context "staff.management" %}</option>
-            <option value="individual" {% if organization_type_filter == "individual" %}selected{% endif %}>{% trans "Individual" context "staff.management" %}</option>
-        </select>
+        <div class="bootstrap-single-select org-management-select">
+            <select name="organization_status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                <option value="">{% trans "All statuses" context "staff.management" %}</option>
+                <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>{% trans "Active" context "staff.management" %}</option>
+                <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>{% trans "Pending" context "staff.management" %}</option>
+                <option value="suspended" {% if organization_status_filter == "suspended" %}selected{% endif %}>{% trans "Suspended" context "staff.management" %}</option>
+                <option value="inactive" {% if organization_status_filter == "inactive" %}selected{% endif %}>{% trans "Inactive" context "staff.management" %}</option>
+            </select>
+        </div>
+        <div class="bootstrap-single-select org-management-select">
+            <select name="organization_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                <option value="">{% trans "All types" context "staff.management" %}</option>
+                <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>{% trans "School" context "staff.management" %}</option>
+                <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>{% trans "University" context "staff.management" %}</option>
+                <option value="course_center" {% if organization_type_filter == "course_center" %}selected{% endif %}>{% trans "Course center" context "staff.management" %}</option>
+                <option value="individual" {% if organization_type_filter == "individual" %}selected{% endif %}>{% trans "Individual" context "staff.management" %}</option>
+            </select>
+        </div>
         <button type="submit" class="btn btn-primary">
             <i class="fas fa-filter"></i> {% trans "Apply filters" context "staff.management" %}
         </button>

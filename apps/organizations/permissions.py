@@ -66,6 +66,12 @@ PERMISSION_CATEGORIES = {
         "grade.publish",
         "grade.override",
     ],
+    # Jurnal düzəlişi (correction) — 2 saat/bitmiş-semestr limitlərini sənədli
+    # (PDF + audit) keçmə hüququ. İKT Rəhbəri rolunun açar icazəsi.
+    "journal": [
+        "journal.view",
+        "journal.correct",
+    ],
     "exams": [
         "exam.view",
         "exam.create",

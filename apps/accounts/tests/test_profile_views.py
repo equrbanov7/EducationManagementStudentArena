@@ -548,7 +548,11 @@ class ProfileViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'class="form-select" id="organization_type"', html=False)
+        # Bootstrap-single-select komponentinə çevrilib (data-bootstrap-select +
+        # native select saxlanılır); yenə də disabled, tərcümə olunmuş etiket/dəyər.
+        self.assertContains(response, 'id="organization_type"', html=False)
+        self.assertContains(response, "bootstrap-single-select__native", html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
         self.assertContains(response, 'disabled aria-disabled="true"', html=False)
         self.assertContains(response, "Organization Type")
         self.assertContains(response, "University")

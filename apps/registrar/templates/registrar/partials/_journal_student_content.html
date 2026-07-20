@@ -20,21 +20,25 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
              data-selected-period="{{ sec.selected_period_id }}">
             <div class="sjx-term-field">
                 <label class="sjx-term-label" for="sjxYear">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</label>
-                <select id="sjxYear" class="sjx-term-select" data-sjx-year>
-                    {% for y in sec.year_choices %}
-                    <option value="{{ y.value }}" {% if y.value == sec.selected_year %}selected{% endif %}>{{ y.label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select id="sjxYear" class="sjx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sjx-year data-bootstrap-select>
+                        {% for y in sec.year_choices %}
+                        <option value="{{ y.value }}" {% if y.value == sec.selected_year %}selected{% endif %}>{{ y.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="sjx-term-field">
                 <label class="sjx-term-label" for="sjxPeriod">{% trans "YARIM İL" context "registrar.journal" %}</label>
-                <select id="sjxPeriod" class="sjx-term-select" data-sjx-period>
-                    {% for p in sec.period_choices %}
-                    <option value="{{ p.id }}" data-year="{{ p.year }}"
-                            {% if p.id == sec.selected_period_id %}selected{% endif %}
-                            {% if p.year != sec.selected_year %}hidden{% endif %}>{{ p.label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select id="sjxPeriod" class="sjx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sjx-period data-bootstrap-select>
+                        {% for p in sec.period_choices %}
+                        <option value="{{ p.id }}" data-year="{{ p.year }}"
+                                {% if p.id == sec.selected_period_id %}selected{% endif %}
+                                {% if p.year != sec.selected_year %}hidden{% endif %}>{{ p.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
         </div>
     </div>

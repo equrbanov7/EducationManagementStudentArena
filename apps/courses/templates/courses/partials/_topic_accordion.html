@@ -224,7 +224,12 @@
 
         const applyTopicContext = function() {
             const topicSelect = document.getElementById('resourceTopic');
-            if (topicSelect) topicSelect.value = topicId;
+            if (topicSelect) {
+                topicSelect.value = topicId;
+                if (window.EMSBootstrapSelect) {
+                    window.EMSBootstrapSelect.sync(topicSelect);
+                }
+            }
 
             const topicName = document.getElementById('resourceModalTopicName');
             if (topicName) topicName.textContent = ` - ${topicTitle}`;

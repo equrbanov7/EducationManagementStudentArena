@@ -59,23 +59,26 @@
                 <label class="results-filter-label" for="resultsFilterStatusSelect">
                     {% trans "table_status" context "projects.review" %}
                 </label>
-                <select name="status"
-                        id="resultsFilterStatusSelect"
-                        class="form-select js-auto-filter js-filter-resettable"
-                        data-reset-value="all">
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
-                        {% trans 'Bütün statuslar' %}
-                    </option>
-                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>
-                        {% trans 'Gözləyir' %}
-                    </option>
-                    <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
-                        {% trans 'Qiymətləndirilib' %}
-                    </option>
-                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>
-                        {% trans 'Rədd edilib' %}
-                    </option>
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="status"
+                            id="resultsFilterStatusSelect"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select js-auto-filter js-filter-resettable"
+                            data-bootstrap-select
+                            data-reset-value="all">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
+                            {% trans 'Bütün statuslar' %}
+                        </option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>
+                            {% trans 'Gözləyir' %}
+                        </option>
+                        <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
+                            {% trans 'Qiymətləndirilib' %}
+                        </option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>
+                            {% trans 'Rədd edilib' %}
+                        </option>
+                    </select>
+                </div>
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateFromInput">

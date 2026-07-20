@@ -21,9 +21,21 @@ Həm imtahan test-bankı, həm yazılı imtahan redaktoru bu shell-i include edi
             </button>
         </header>
         <div class="bankpicker-dialog__body" data-bank-picker-body>
-            <div class="bankpicker-loading">
-                <span class="bankpicker-spinner" aria-hidden="true"></span>
-                {% trans "Yüklənir..." %}
+            <div class="bankpicker-skeleton" aria-hidden="true">
+                <div class="bankpicker-toolbar">
+                    <span class="skeleton skeleton-block" style="height:44px;flex:2 1 220px"></span>
+                    <span class="skeleton skeleton-block" style="height:44px;flex:2 1 200px"></span>
+                    <span class="skeleton skeleton-block" style="height:44px;flex:1 1 140px"></span>
+                    <span class="skeleton skeleton-block" style="height:44px;flex:1 1 140px"></span>
+                </div>
+                {% for _ in "1234"|make_list %}
+                <div class="bankpicker-item">
+                    <div style="display:flex;flex-direction:column;gap:.4rem;width:100%">
+                        <span class="skeleton skeleton-line" style="width:80%"></span>
+                        <span class="skeleton skeleton-line skeleton-line--sm" style="width:40%"></span>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>

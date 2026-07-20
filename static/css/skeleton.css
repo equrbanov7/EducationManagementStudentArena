@@ -48,6 +48,19 @@
     border-radius: 999px;
 }
 
+/* --- generic building blocks (tables, cards, avatars) --------------------
+   Reuse these anywhere a spinner / "Yüklənir…" placeholder guards a
+   JS-populated table or list. Example table row:
+       <tr><td><span class="skeleton skeleton-line"></span></td>…</tr>
+   Example block / card:
+       <div class="skeleton skeleton-block" style="height:120px"></div>
+*/
+.skeleton-block { height: 100px; width: 100%; border-radius: 12px; }
+.skeleton-circle { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-btn { height: 34px; width: 96px; border-radius: 8px; }
+/* Cədvəl xanası içində istifadə üçün — table-hüceyrəyə uyğun hündürlük. */
+td > .skeleton-line, th > .skeleton-line { height: 14px; }
+
 .skeleton-pill {
     height: 12px;
     width: 80px;

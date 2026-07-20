@@ -41,21 +41,25 @@
             </label>
             <label class="user-management-filter-field">
                 <span>Rol</span>
-                <select name="user_role" class="form-select">
-                    <option value="">{% trans 'Hamısı' %}</option>
-                    {% for option in role_options %}
-                    <option value="{{ option.value }}" {% if role_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="user_role" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                        <option value="">{% trans 'Hamısı' %}</option>
+                        {% for option in role_options %}
+                        <option value="{{ option.value }}" {% if role_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </label>
             <label class="user-management-filter-field">
                 <span>{% trans 'Təşkilat' %}</span>
-                <select name="user_org" class="form-select">
-                    <option value="">{% trans 'Hamısı' %}</option>
-                    {% for option in organization_options %}
-                    <option value="{{ option.value }}" {% if organization_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="user_org" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                        <option value="">{% trans 'Hamısı' %}</option>
+                        {% for option in organization_options %}
+                        <option value="{{ option.value }}" {% if organization_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </label>
             <label class="user-management-filter-field">
                 <span>Qrup / sinif</span>
@@ -67,11 +71,13 @@
             </label>
             <label class="user-management-filter-field">
                 <span>{% trans 'Sıralama' %}</span>
-                <select name="user_sort" class="form-select">
-                    {% for option in sort_options %}
-                    <option value="{{ option.value }}" {% if sort_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="user_sort" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                        {% for option in sort_options %}
+                        <option value="{{ option.value }}" {% if sort_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </label>
         </div>
         <div class="user-management-filter-actions">

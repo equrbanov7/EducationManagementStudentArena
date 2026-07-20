@@ -28,15 +28,17 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
             </div>
             <div>
                 <label class="info-label" for="inspectOrgSelect">{% trans 'Təşkilat' %}</label>
-                <select name="inspect_org" id="inspectOrgSelect" class="form-select">
-                    <option value="">{% trans '— Təşkilat seçin —' %}</option>
-                    {% for org in superadmin_org_inspector_section.organizations %}
-                    <option value="{{ org.id }}"
-                            {% if superadmin_org_inspector_section.selected_org and superadmin_org_inspector_section.selected_org.id == org.id %}selected{% endif %}>
-                        {{ org.name }} ({{ org.org_type }})
-                    </option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="inspect_org" id="inspectOrgSelect" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                        <option value="">{% trans '— Təşkilat seçin —' %}</option>
+                        {% for org in superadmin_org_inspector_section.organizations %}
+                        <option value="{{ org.id }}"
+                                {% if superadmin_org_inspector_section.selected_org and superadmin_org_inspector_section.selected_org.id == org.id %}selected{% endif %}>
+                            {{ org.name }} ({{ org.org_type }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fas fa-filter"></i> Bax

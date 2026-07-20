@@ -32,34 +32,40 @@
             <div class="filter-grid">
                 <div class="form-group">
                     <label class="form-label" for="course">{% trans "filter_course_label" context "accounts.grading_queue_page" %}</label>
-                    <select class="form-select" id="course" name="course">
-                        <option value="">{% trans "filter_course_all" context "accounts.grading_queue_page" %}</option>
-                        {% for course in courses %}
-                        <option value="{{ course.id }}" {% if request.GET.course == course.id|stringformat:"s" %}selected{% endif %}>
-                            {{ course.title }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="course" name="course" data-bootstrap-select>
+                            <option value="">{% trans "filter_course_all" context "accounts.grading_queue_page" %}</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}" {% if request.GET.course == course.id|stringformat:"s" %}selected{% endif %}>
+                                {{ course.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="assignment">{% trans "filter_assignment_label" context "accounts.grading_queue_page" %}</label>
-                    <select class="form-select" id="assignment" name="assignment">
-                        <option value="">{% trans "filter_assignment_all" context "accounts.grading_queue_page" %}</option>
-                        {% for assignment in assignments %}
-                        <option value="{{ assignment.id }}" {% if request.GET.assignment == assignment.id|stringformat:"s" %}selected{% endif %}>
-                            {{ assignment.title }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="assignment" name="assignment" data-bootstrap-select>
+                            <option value="">{% trans "filter_assignment_all" context "accounts.grading_queue_page" %}</option>
+                            {% for assignment in assignments %}
+                            <option value="{{ assignment.id }}" {% if request.GET.assignment == assignment.id|stringformat:"s" %}selected{% endif %}>
+                                {{ assignment.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="sort">{% trans "filter_sort_label" context "accounts.grading_queue_page" %}</label>
-                    <select class="form-select" id="sort" name="sort">
-                        <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>{% trans "sort_oldest" context "accounts.grading_queue_page" %}</option>
-                        <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>{% trans "sort_newest" context "accounts.grading_queue_page" %}</option>
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="sort" name="sort" data-bootstrap-select>
+                            <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>{% trans "sort_oldest" context "accounts.grading_queue_page" %}</option>
+                            <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>{% trans "sort_newest" context "accounts.grading_queue_page" %}</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">

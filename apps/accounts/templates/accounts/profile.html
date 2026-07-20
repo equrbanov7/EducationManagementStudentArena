@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260704-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-1">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260715-appeal-batch">
@@ -39,7 +40,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,grade-approvals,analytics,system-monitoring"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,grade-approvals,analytics,system-monitoring"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -100,6 +101,8 @@
                 {% include "accounts/profile/sections/_my_subjects.html" %}
             {% elif active_section == "my-transcript" %}
                 {% include "accounts/profile/sections/_my_transcript.html" %}
+            {% elif active_section == "overall-academic" %}
+                {% include "accounts/profile/sections/_overall_academic.html" %}
             {% elif active_section == "my-schedule" %}
                 {% include "accounts/profile/sections/_my_schedule.html" %}
             {% elif active_section == "academic-calendar" %}
@@ -261,6 +264,7 @@ window.EXAM_WIZARD_I18N = {
 <script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260709-access-fix"></script>
 <script src="{% static 'accounts/js/profile/create_exam_modal.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/ajax.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260720-1"></script>
 <script src="{% static 'accounts/js/profile/assigned_exam.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'accounts/js/profile/init.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/profile.entry.js' %}?v=20260612-org-ajax"></script>
@@ -276,7 +280,7 @@ window.EXAM_WIZARD_I18N = {
 <script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
-<script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260719-term2" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260720-bsperiod" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/labels.js' %}"></script>

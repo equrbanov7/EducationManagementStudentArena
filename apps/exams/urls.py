@@ -128,6 +128,9 @@ urlpatterns = [
     # Sehrbaz axtarışlı select-ləri üçün AJAX lookup endpoint-ləri.
     path("lookups/subjects/", views.subject_search, name="subject_search"),
     path("lookups/groups/", views.group_search, name="group_search"),
+    path("lookups/faculties/", views.stats_faculty_search, name="stats_faculty_search"),
+    path("lookups/departments/", views.stats_department_search, name="stats_department_search"),
+    path("lookups/teachers/", views.stats_teacher_search, name="stats_teacher_search"),
     path("lookups/users/", views.user_search, name="user_search"),
     path("lookups/invigilators/", views.invigilator_search, name="invigilator_search"),
     path("lookups/assigned-count/", views.assigned_student_count, name="assigned_student_count"),

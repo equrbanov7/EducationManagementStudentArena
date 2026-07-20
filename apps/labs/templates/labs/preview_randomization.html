@@ -47,15 +47,20 @@
                         <i class="fas fa-user-graduate me-1 text-primary-blue"></i> 
                         {% trans "label_select_student" context "labs.template.preview_randomization" %}
                     </label>
-                    <select name="student" class="form-select form-select-modern" data-submit-on-change>
-                        <option value="">{% trans "placeholder_select_student" context "labs.template.preview_randomization" %}</option>
-                        {% for m in memberships %}
-                        <option value="{{ m.user.id }}" {% if selected_student and selected_student.id == m.user.id %}selected{% endif %}>
-                            {{ m.user.get_full_name|default:m.user.username }}
-                            {% if m.group_name %}({{ m.group_name }}){% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="student"
+                                class="form-select form-select-modern bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select
+                                data-submit-on-change>
+                            <option value="">{% trans "placeholder_select_student" context "labs.template.preview_randomization" %}</option>
+                            {% for m in memberships %}
+                            <option value="{{ m.user.id }}" {% if selected_student and selected_student.id == m.user.id %}selected{% endif %}>
+                                {{ m.user.get_full_name|default:m.user.username }}
+                                {% if m.group_name %}({{ m.group_name }}){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="col-md-6 helpSelectStudent">
                     <div class="bg-light p-3 rounded-3 border-start border-4 border-primary">
