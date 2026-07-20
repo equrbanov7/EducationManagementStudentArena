@@ -68,21 +68,37 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                 </div>
             </div>
 
+            <div class="oa-filter-select">
+                <label class="oa-filter-label">{% trans "Dərəcə (qiymət)" context "profile.overall_academic" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                            data-bootstrap-select data-oa-letter-filter>
+                        <option value="">{% trans "Hamısı" context "profile.overall_academic" %}</option>
+                        <option value="A">{% trans "A — aldığım" context "profile.overall_academic" %}</option>
+                        <option value="B">{% trans "B — aldığım" context "profile.overall_academic" %}</option>
+                        <option value="C">{% trans "C — aldığım" context "profile.overall_academic" %}</option>
+                        <option value="D">{% trans "D — aldığım" context "profile.overall_academic" %}</option>
+                        <option value="E">{% trans "E — aldığım" context "profile.overall_academic" %}</option>
+                        <option value="F">{% trans "F — aldığım" context "profile.overall_academic" %}</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="oa-filter-toggles" role="group" aria-label="{% trans 'Süzgəclər' context 'profile.overall_academic' %}">
                 <label class="oa-chip">
                     <input type="checkbox" data-oa-filter="failed">
                     <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
-                    <span>{% trans "Yalnız kəsilənlər" context "profile.overall_academic" %}</span>
+                    <span>{% trans "Kəsildiyim fənlər" context "profile.overall_academic" %}</span>
                 </label>
                 <label class="oa-chip">
-                    <input type="checkbox" data-oa-filter="barred">
-                    <i class="fas fa-ban" aria-hidden="true"></i>
-                    <span>{% trans "İmtahana buraxılmayan (25%)" context "profile.overall_academic" %}</span>
-                </label>
-                <label class="oa-chip">
-                    <input type="checkbox" data-oa-filter="absence-fail">
+                    <input type="checkbox" data-oa-filter="qb">
                     <i class="fas fa-user-clock" aria-hidden="true"></i>
-                    <span>{% trans "Q/b-dan kəsilən" context "profile.overall_academic" %}</span>
+                    <span>{% trans "Q/b-dan kəsildiyim (imtahana buraxılmadığım)" context "profile.overall_academic" %}</span>
+                </label>
+                <label class="oa-chip">
+                    <input type="checkbox" data-oa-filter="exam25">
+                    <i class="fas fa-file-circle-xmark" aria-hidden="true"></i>
+                    <span>{% trans "İmtahandan kəsildiyim (25%)" context "profile.overall_academic" %}</span>
                 </label>
             </div>
 
@@ -108,7 +124,17 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                 <h5 class="oa-semester-title">
                     <i class="fas fa-calendar-alt"></i> <span class="oa-semester-year">{{ sem.period.year_display }}</span> · {{ sem.season }}
                 </h5>
-                <span class="oa-semester-count">{{ sem.rows|length }} {% trans "fənn" context "profile.overall_academic" %}</span>
+                <div class="oa-semester-meta">
+                    <span class="oa-semester-count">{{ sem.rows|length }} {% trans "fənn" context "profile.overall_academic" %}</span>
+                    <span class="oa-semester-credits" title="{% trans 'Bu semestrdə toplanmış kredit (keçilmiş fənlər)' context 'profile.overall_academic' %}">
+                        <i class="fas fa-award"></i> {{ sem.credits_earned }} {% trans "kredit" context "profile.overall_academic" %}
+                    </span>
+                    {% if sem.gpa is not None %}
+                    <span class="oa-semester-gpa" title="{% trans 'Semestr ÜOMG (orta bal)' context 'profile.overall_academic' %}">
+                        {% trans "ÜOMG" context "profile.overall_academic" %} {{ sem.gpa|floatformat:2 }}
+                    </span>
+                    {% endif %}
+                </div>
             </div>
             <div class="oa-table-wrap">
                 <table class="oa-table">
@@ -130,17 +156,15 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                             data-oa-row
                             data-oa-search="{{ row.subject.code|lower }} {{ row.subject.name|lower }} {{ row.teacher_name|lower }}"
                             data-oa-failed="{% if row.result.failed %}1{% else %}0{% endif %}"
-                            data-oa-barred="{% if row.result.barred %}1{% else %}0{% endif %}"
+                            data-oa-letter="{% if row.in_gpa %}{{ row.result.letter }}{% endif %}"
                             data-oa-fail-reason="{{ row.fail_reason }}">
                             <td class="ta-left">
                                 <span class="oa-subject-code">{{ row.subject.code }}</span>
                                 <span class="oa-subject-name">{{ row.subject.name }}</span>
-                                {% if row.fail_reason == "barred" %}
-                                <span class="oa-reason-badge is-barred"><i class="fas fa-ban"></i> {% trans "İmtahana buraxılmayıb (25%)" context "profile.overall_academic" %}</span>
-                                {% elif row.fail_reason == "qb" %}
-                                <span class="oa-reason-badge is-absence"><i class="fas fa-user-clock"></i> {% trans "Q/b-dan kəsilib" context "profile.overall_academic" %}</span>
-                                {% elif row.fail_reason == "exam" %}
-                                <span class="oa-reason-badge is-exam"><i class="fas fa-file-circle-xmark"></i> {% trans "İmtahandan kəsilib" context "profile.overall_academic" %}</span>
+                                {% if row.fail_reason == "qb" %}
+                                <span class="oa-reason-badge is-absence"><i class="fas fa-user-clock"></i> {% trans "Q/b-dan kəsilib — imtahana buraxılmayıb (fənn yenidən keçilməli)" context "profile.overall_academic" %}</span>
+                                {% elif row.fail_reason == "exam25" %}
+                                <span class="oa-reason-badge is-exam"><i class="fas fa-file-circle-xmark"></i> {% trans "İmtahandan kəsilib (25% ilə təkrar imtahan hüququ)" context "profile.overall_academic" %}</span>
                                 {% elif row.fail_reason == "total" %}
                                 <span class="oa-reason-badge is-total"><i class="fas fa-calculator"></i> {% trans "Ümumi baldan kəsilib" context "profile.overall_academic" %}</span>
                                 {% endif %}
