@@ -39,8 +39,8 @@
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=2 stepper_detail=True %}
 
     {% if correction_mode %}
-    {# Yerində audited düzəliş — NORMAL grid-in özündə (ayrı editor YOX). Xanalar
-       _jd_grid.html-də düyməyə çevrilir; klikdə aşağıdakı modal açılır. #}
+    {% comment %}Yerində audited düzəliş — NORMAL grid-in özündə (ayrı editor YOX).
+    Xanalar _jd_grid.html-də düyməyə çevrilir; klikdə aşağıdakı modal açılır.{% endcomment %}
     <div class="jd2-correct-banner">
         <i class="fas fa-lock-open"></i>
         {% trans "Düzəliş rejimi açıqdır — xanaya klikləyib balı/davamiyyəti dəyişin. Hər dəyişiklik səbəb + qeyd + PDF sənədlə loglanır. Bitirmək üçün yuxarıdan «kilidlə»." context "registrar.correction" %}
