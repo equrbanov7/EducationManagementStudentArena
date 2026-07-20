@@ -16,7 +16,11 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
 
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=1 stepper_detail=False %}
 
-    <form method="get" class="jd2-filters" data-jd-filterform>
+    <form method="get" class="jd2-filters" data-jd-filterform
+          data-faculty-url="{% url 'accounts:records_faculty_search' %}"
+          data-department-url="{% url 'accounts:records_department_search' %}"
+          data-group-url="{% url 'accounts:records_group_search' %}"
+          data-teacher-url="{% url 'accounts:journal_teacher_search' %}">
         <label class="jd2-filter">
             <span class="jd2-filter-label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
             <div class="bootstrap-single-select">
@@ -40,51 +44,39 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             </div>
         </label>
         {% if journal_is_broad %}
-        {# Korrektor (İKT rəhbəri/admin) — bütün jurnallar üçün geniş filtrlər. #}
-        <label class="jd2-filter">
+        {# Korrektor (İKT rəhbəri/admin) — bütün jurnallar üçün axtarışlı seçicilər
+           (imtahan statistikası formatı: type-ahead + lazy + kaskad). Seçim GET forma
+           gizli inputa yazılır və səhifə yenilənir; cari seçim setValue ilə göstərilir. #}
+        <div class="jd2-filter">
             <span class="jd2-filter-label">{% trans "FAKÜLTƏ" context "registrar.journal" %}</span>
-            <div class="bootstrap-single-select">
-                <select name="faculty" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
-                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
-                    {% for f in journal_faculties %}
-                    <option value="{{ f.value }}" {% if journal_selected_faculty == f.value %}selected{% endif %}>{{ f.label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </label>
-        <label class="jd2-filter">
+            <input type="hidden" name="faculty" value="{{ journal_selected_faculty }}" data-jl-hidden="faculty">
+            {% trans "fakültə axtar…" as jl_faculty_ph %}
+            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-faculty" placeholder=jl_faculty_ph %}
+        </div>
+        <div class="jd2-filter">
             <span class="jd2-filter-label">{% trans "KAFEDRA" context "registrar.journal" %}</span>
-            <div class="bootstrap-single-select">
-                <select name="department" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
-                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
-                    {% for d in journal_departments %}
-                    <option value="{{ d.value }}" {% if journal_selected_department == d.value %}selected{% endif %}>{{ d.label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </label>
-        <label class="jd2-filter">
+            <input type="hidden" name="department" value="{{ journal_selected_department }}" data-jl-hidden="department">
+            {% trans "kafedra axtar…" as jl_dept_ph %}
+            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-department" placeholder=jl_dept_ph %}
+        </div>
+        <div class="jd2-filter">
             <span class="jd2-filter-label">{% trans "QRUP" context "registrar.journal" %}</span>
-            <div class="bootstrap-single-select">
-                <select name="group" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
-                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
-                    {% for g in journal_groups %}
-                    <option value="{{ g.value }}" {% if journal_selected_group == g.value %}selected{% endif %}>{{ g.label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </label>
-        <label class="jd2-filter">
+            <input type="hidden" name="group" value="{{ journal_selected_group }}" data-jl-hidden="group">
+            {% trans "qrup axtar…" as jl_group_ph %}
+            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-group" placeholder=jl_group_ph %}
+        </div>
+        <div class="jd2-filter">
             <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
-            <div class="bootstrap-single-select">
-                <select name="teacher" class="bootstrap-single-select__native" onchange="this.form.submit()" data-bootstrap-select>
-                    <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
-                    {% for t in journal_teachers %}
-                    <option value="{{ t.value }}" {% if journal_selected_teacher == t.value %}selected{% endif %}>{{ t.label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </label>
+            <input type="hidden" name="teacher" value="{{ journal_selected_teacher }}" data-jl-hidden="teacher">
+            {% trans "müəllim axtar…" as jl_teacher_ph %}
+            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-teacher" placeholder=jl_teacher_ph %}
+        </div>
+        <script type="application/json" data-jl-preselect>{
+            "faculty": {"id": "{{ journal_selected_faculty|escapejs }}", "label": "{{ journal_selected_faculty_label|escapejs }}"},
+            "department": {"id": "{{ journal_selected_department|escapejs }}", "label": "{{ journal_selected_department_label|escapejs }}"},
+            "group": {"id": "{{ journal_selected_group|escapejs }}", "label": "{{ journal_selected_group_label|escapejs }}"},
+            "teacher": {"id": "{{ journal_selected_teacher|escapejs }}", "label": "{{ journal_selected_teacher_label|escapejs }}"}
+        }</script>
         <label class="jd2-filter jd2-filter--search">
             <span class="jd2-filter-label">{% trans "AXTARIŞ" context "registrar.journal" %}</span>
             <input type="search" name="q" value="{{ journal_query }}" class="jd2-filter-search"
@@ -149,3 +141,55 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
     </div>
     {% endif %}
 </div>
+
+{% if journal_is_broad %}
+<script nonce="{{ request.csp_nonce }}">
+(function boot() {
+    // Axtarışlı seçici komponenti hələ yüklənməyibsə (skript sırası) — gözlə.
+    if (!window.EMSSearchableSelect) { setTimeout(boot, 30); return; }
+    var form = document.querySelector("[data-jd-filterform]");
+    if (!form || form.dataset.jlInit === "1") { return; }
+    form.dataset.jlInit = "1";
+    var SS = window.EMSSearchableSelect;
+    var U = {
+        faculty: form.dataset.facultyUrl, department: form.dataset.departmentUrl,
+        group: form.dataset.groupUrl, teacher: form.dataset.teacherUrl,
+    };
+    var PRE = {};
+    try {
+        var pnode = form.querySelector("[data-jl-preselect]");
+        PRE = pnode ? JSON.parse(pnode.textContent || "{}") : {};
+    } catch (e) { PRE = {}; }
+    var initializing = true;
+    function hidden(name) { return form.querySelector('[data-jl-hidden="' + name + '"]'); }
+    function submitFor(name, pick) {
+        if (initializing) { return; }
+        var h = hidden(name); if (h) { h.value = pick.value() || ""; }
+        // Kaskad: üst dəyişəndə alt filtrləri sıfırla (stale qalmasın).
+        if (name === "faculty") { ["department", "group"].forEach(function (n) { var x = hidden(n); if (x) x.value = ""; }); }
+        if (name === "department") { var g = hidden("group"); if (g) g.value = ""; }
+        form.submit();
+    }
+    var faculty = SS.create(form.querySelector(".js-jl-faculty"), {
+        url: U.faculty, onChange: function () { submitFor("faculty", faculty); },
+    });
+    var dept = SS.create(form.querySelector(".js-jl-department"), {
+        url: U.department, dependParam: "faculty",
+        getDependValue: function () { return faculty.value(); },
+        onChange: function () { submitFor("department", dept); },
+    });
+    var group = SS.create(form.querySelector(".js-jl-group"), {
+        url: U.group, dependParam: "department",
+        getDependValue: function () { return dept.value(); },
+        onChange: function () { submitFor("group", group); },
+    });
+    var teacher = SS.create(form.querySelector(".js-jl-teacher"), {
+        url: U.teacher, onChange: function () { submitFor("teacher", teacher); },
+    });
+    // Cari seçimi göstər (setValue emit edir → initializing bayrağı submit-i saxlayır).
+    function pre(pick, name) { var d = PRE[name]; if (pick && d && d.id) { pick.setValue(d.id, d.label || d.id); } }
+    pre(faculty, "faculty"); pre(dept, "department"); pre(group, "group"); pre(teacher, "teacher");
+    initializing = false;
+})();
+</script>
+{% endif %}

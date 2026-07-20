@@ -1,21 +1,11 @@
 """Elektron jurnal (davamiyyət/qiymət jurnalı) — services (U3, UNEC modeli).
 
-Müəllim hər dərs (``Lesson``) günü tələbələrin iştirak/qayıbını (iə/qb), seminar
-və laboratoriya dərslərində isə balını (``LessonMark``) yazır — mühazirədə yalnız
-iə/qb. Sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı (seminar/lab
-ballarının cəmi) AVTOMATİK hesablayır. Yekun imtahan burada yoxdur.
-
-Kilid qaydaları (geriyə-dönük dəyişiklik olmasın):
-* dərs sətri (tarix/növ/mövzu/saat) yaranışdan ``LESSON_EDIT_WINDOW`` (2 saat)
-  içində redaktə/silinə bilər — sonra dondurulur;
-* keçmiş tarixə dərs yaratmaq qadağandır;
-* YENİ iştirak/bal yalnız dərsin öz günündə yazılır; yazılmış xana
-  ``MARK_EDIT_WINDOW`` (2 saat) sonra kilidlənir (DB trigger + servis);
-* seminar/lab balı 0-10 aralığında clamp olunur.
-
-Status (görünüş): qayıb saatı proqramın ``absence_limit_percent``-i × fənnin tam
-saatını keçirsə → tələbə "kəsilir" (imtahana buraxılmır, sətir qırmızı); limitə
-yaxınlaşırsa → xəbərdarlıq (sətir bozarır).
+Müəllim hər dərs günü iştirak/qayıbı (iə/qb), seminar/lab-da isə balı (``LessonMark``)
+yazır; sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı avtomatik hesablayır.
+Kilid qaydaları (geriyə-dönük dəyişiklik olmasın): dərs sətri + yazılmış xana yaranışdan
+2 saat (``LESSON/MARK_EDIT_WINDOW``, DB trigger + servis) sonra dondurulur; keçmiş tarixə
+dərs qadağan; yeni işarə yalnız dərsin günündə; bal 0-10 clamp. Qayıb saatı proqramın
+``absence_limit_percent``-i × fənn saatını keçirsə tələbə "kəsilir" (imtahana buraxılmır).
 """
 
 from __future__ import annotations
@@ -184,12 +174,9 @@ def update_lesson(
     allow_past=False,
     allow_locked=False,
 ) -> bool:
-    """Səhv açılmış dərsi düzəlt — yalnız yaranışdan 2 saat içində.
-
-    ``allow_locked`` 2 saatlıq redaktə pəncərəsini, ``allow_past`` isə keçmiş-tarix
-    qadağasını keçir — YALNIZ İKT Rəhbəri/superuser üçün (HTTP qatında rol-yoxlaması
-    ilə ötürülür). Yayımlanmış/təsdiqlənmiş jurnal (``journal_is_locked``) yenə də
-    kilidlidir."""
+    """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked`` pəncərəni,
+    ``allow_past`` keçmiş-tarixi keçir — yalnız İKT Rəhbəri/superuser (rol HTTP qatında
+    yoxlanır); yayımlanmış jurnal yenə kilidli."""
     if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     fields = []

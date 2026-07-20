@@ -181,6 +181,9 @@ def journal_list_context(user, request=None) -> dict:
     # YARIM İL seçimləri seçilmiş ilə görə daralır (mockup davranışı).
     period_choices = [p for p in periods if not selected_year or p.academic_year == selected_year]
 
+    def _sel_label(choices, val):
+        return next((c["label"] for c in choices if c["value"] == val), "")
+
     return {
         "offerings": offerings,
         "journal_years": year_choices,
@@ -201,6 +204,11 @@ def journal_list_context(user, request=None) -> dict:
         "journal_departments": dept_choices,
         "journal_selected_department": selected_dept,
         "journal_query": query,
+        # Searchable-picker preselection üçün cari seçimin adı (AJAX picker setValue).
+        "journal_selected_teacher_label": _sel_label(teacher_choices, selected_teacher),
+        "journal_selected_group_label": _sel_label(group_choices, selected_group),
+        "journal_selected_faculty_label": _sel_label(faculty_choices, selected_faculty),
+        "journal_selected_department_label": _sel_label(dept_choices, selected_dept),
     }
 
 

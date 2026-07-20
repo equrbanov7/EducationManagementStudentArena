@@ -34,8 +34,8 @@
         var score = td.querySelector("[data-jd-sem-score]");
         var v = select.value;
         // q/b həmişə qırmızı görünsün deyə wrapper-ə vəziyyət işarəsi qoy (CSS oxuyur).
-        var wrap = select.closest(".jd2-semselect");
-        if (wrap) wrap.setAttribute("data-mark", v === "qb" ? "qb" : v === "ie" ? "ie" : v ? "score" : "empty");
+        var w = select.closest(".jd2-semselect");
+        if (w) w.setAttribute("data-mark", v === "qb" ? "qb" : v === "ie" ? "ie" : v ? "score" : "empty");
         if (v === "qb") {
             if (att) att.value = "absent";
             if (score) score.value = "";
@@ -335,9 +335,7 @@
             else if (score && score.value !== "") v = score.value;
             else if (att && att.value === "present") v = "ie";
             setSelectValue(sel, v);
-            // İlkin yüklənmədə də q/b rəngini (data-mark) təyin et.
-            var wrap = sel.closest(".jd2-semselect");
-            if (wrap) wrap.setAttribute("data-mark", v === "qb" ? "qb" : v === "ie" ? "ie" : v ? "score" : "empty");
+            applySemSelect(sel); // ilkin yüklənmədə q/b rəngini (data-mark) də təyin edir
         });
         document.querySelectorAll("[data-jd-sw]").forEach(function (input) {
             var chip = input.parentElement.querySelector("[data-jd-sw-chip]");
