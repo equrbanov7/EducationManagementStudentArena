@@ -59,6 +59,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                         data-lesson-kind="{{ lm.lesson.kind }}"
                                         data-lesson-topic="{{ lm.lesson.topic }}"
                                         data-lesson-hours="{{ lm.lesson.hours }}"
+                                        data-lesson-locked="{% if not lm.editable %}1{% endif %}"
                                         data-lesson-instructor="{{ lm.lesson.instructor_id|default:'' }}"
                                         data-lesson-start="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% endif %}"
                                         data-lesson-end="{% if lm.lesson.end_time %}{{ lm.lesson.end_time|time:'H:i' }}{% endif %}"
@@ -98,7 +99,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                         data-status="{{ cell.mark.status }}"
                                         data-score="{% if cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% endif %}"
                                         {% if cell.corrected %}data-history="{{ cell.mark.id }}"{% endif %}>
-                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% else %}i/e{% endif %}{% if cell.mark.score is not None %} · {{ cell.mark.score|floatformat:0 }}{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% elif cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% else %}i/e{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
                                 </button>
                                 {% elif can_edit and cell.writable %}
                                 <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"

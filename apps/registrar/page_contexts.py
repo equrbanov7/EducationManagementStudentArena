@@ -90,32 +90,33 @@ def journal_list_context(user, request=None) -> dict:
     years = sorted(year_label_map, reverse=True)
     year_choices = [{"value": y, "label": year_label_map[y]} for y in years]
 
+    # YARIM İL = fəsil (Payız/Yaz/Yay) — TƏKRAR YOX (çox il olsa da hər fəsil bir dəfə).
+    _season_order = {"Payız": 0, "Yaz": 1, "Yay": 2}
+    season_choices = sorted({p.season_label for p in periods}, key=lambda s: _season_order.get(s, 9))
+
     selected_year = ""
-    selected_period = None
+    selected_season = ""
     selected_kind = ""
     explicit_filter = False
     if request is not None:
-        explicit_filter = "year" in request.GET or "period" in request.GET
+        explicit_filter = "year" in request.GET or "season" in request.GET
         selected_year = (request.GET.get("year") or "").strip()
         if selected_year not in years:
             selected_year = ""
-        requested_period = (request.GET.get("period") or "").strip()
-        selected_period = next((p for p in periods if str(p.id) == requested_period), None)
+        selected_season = (request.GET.get("season") or "").strip()
+        if selected_season not in season_choices:
+            selected_season = ""
         selected_kind = (request.GET.get("kind") or "").strip()
         if selected_kind not in dict(SlotKind.choices):
             selected_kind = ""
 
-    # Avto-seçim YALNIZ müəllim görünüşü üçün: bu günə düşən semestr (öz az sayda
-    # dərsi arasında). Korrektor (geniş) görünüşdə avto-seçim YOX — İKT rəhbəri/admin
-    # DEFAULT olaraq BÜTÜN jurnalları görsün, sonra filtrləsin.
-    if not is_broad and not explicit_filter and selected_period is None and periods:
-        selected_period = _current_semester(periods)
-        if selected_period is not None:
-            selected_year = selected_period.academic_year
-    # Kaskad mühafizəsi: il seçiləndə köhnə (stale) period həmin ilə aid deyilsə at
-    # — yoxsa "il=2024/2025 + period=2025/2026-payız" heç nə göstərmir.
-    if selected_period is not None and selected_year and selected_period.academic_year != selected_year:
-        selected_period = None
+    # Avto-seçim YALNIZ müəllim görünüşü üçün: cari semestr (il + fəsil). Korrektor
+    # (geniş) görünüşdə avto-seçim YOX — İKT/admin DEFAULT bütün jurnalları görsün.
+    if not is_broad and not explicit_filter and periods:
+        current = _current_semester(periods)
+        if current is not None:
+            selected_year = current.academic_year
+            selected_season = current.season_label
 
     # ── Korrektor (geniş) görünüş üçün əlavə filtrlər: müəllim, qrup, fakültə,
     # kafedra, mətn axtarışı. Seçim siyahıları TAM dəstdən (illik süzgəcdən əvvəl)
@@ -162,8 +163,8 @@ def journal_list_context(user, request=None) -> dict:
 
     if selected_year:
         offerings = [o for o in offerings if o.period and o.period.academic_year == selected_year]
-    if selected_period is not None:
-        offerings = [o for o in offerings if o.period_id == selected_period.id]
+    if selected_season:
+        offerings = [o for o in offerings if o.period and _season_label(o.period) == selected_season]
     if selected_kind:
         offerings = [o for o in offerings if selected_kind in o.slot_kinds]
     if selected_teacher:
@@ -183,18 +184,47 @@ def journal_list_context(user, request=None) -> dict:
             f"{(o.instructor.get_full_name() or o.instructor.username) if o.instructor else ''}".lower()
         ]
 
-    # YARIM İL seçimləri seçilmiş ilə görə daralır (mockup davranışı).
-    period_choices = [p for p in periods if not selected_year or p.academic_year == selected_year]
-
     def _sel_label(choices, val):
         return next((c["label"] for c in choices if c["value"] == val), "")
 
+    # "Sıfırla" düyməsi yalnız bir filtr aktivdirsə göstərilir.
+    has_filters = any(
+        [
+            selected_year,
+            selected_season,
+            selected_kind,
+            selected_teacher,
+            selected_group,
+            selected_faculty,
+            selected_dept,
+            query,
+        ]
+    )
+
+    # Səhifələmə (İKT rəhbəri bütün offering-ləri görür → çox sətir). Filtr
+    # querystring-i qorunur (page istisna) ki, keçidlər filtri saxlasın.
+    from django.core.paginator import Paginator
+
+    paginator = Paginator(offerings, 20)
+    page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
+    row_offset = page_obj.start_index() - 1 if page_obj else 0
+    querystring = ""
+    if request is not None:
+        params = request.GET.copy()
+        params.pop("page", None)
+        querystring = params.urlencode()
+
     return {
-        "offerings": offerings,
+        "offerings": list(page_obj),
+        "page_obj": page_obj,
+        "is_paginated": page_obj.has_other_pages(),
+        "row_offset": row_offset,
+        "journal_querystring": querystring,
+        "journal_has_filters": has_filters,
         "journal_years": year_choices,
         "journal_selected_year": selected_year,
-        "journal_periods": period_choices,
-        "journal_selected_period": selected_period,
+        "journal_seasons": season_choices,
+        "journal_selected_season": selected_season,
         "journal_kinds": SlotKind.choices,
         "journal_selected_kind": selected_kind,
         "teacher_label": user.get_full_name() or user.username,

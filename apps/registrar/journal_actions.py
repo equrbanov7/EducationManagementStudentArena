@@ -61,18 +61,52 @@ def lesson_action(request, offering_id, lesson_id):
         from apps.registrar.journal_extras import locked_lesson_kind as _locked_lesson_kind
 
         start_time, end_time = schedule_service.parse_time_slot(request.POST.get("lesson_time"))
+        hours = int(request.POST.get("lesson_hours")) if (request.POST.get("lesson_hours") or "").isdigit() else None
+        # Dərs tipi: korrektor (İKT) kilidi keçir (mühazirə↔seminar qarışığını
+        # düzəldə bilsin); adi müəllim üçün cədvəl tək növü kilidləyir.
+        posted_kind = request.POST.get("lesson_kind") or None
+        kind = posted_kind if override else (_locked_lesson_kind(offering) or posted_kind)
+
+        # İKT + kilidlənmiş dərs (2 saat keçib) → sənədli düzəliş yolu: bal
+        # dəyişikliyi kimi səbəb + qeyd + PDF MƏCBURİ və audit olunur.
+        locked = not gradebook.can_edit_lesson(lesson)
+        if override and locked:
+            from django.core.exceptions import ValidationError
+
+            from apps.registrar import corrections as corrections_service
+
+            try:
+                corrections_service.apply_lesson_correction(
+                    lesson=lesson,
+                    new_date=request.POST.get("lesson_date") or None,
+                    new_kind=kind,
+                    new_hours=hours,
+                    new_start_time=start_time or "",
+                    new_end_time=end_time or "",
+                    reason=request.POST.get("correction_reason") or "",
+                    note=request.POST.get("correction_note") or "",
+                    document=request.FILES.get("correction_document"),
+                    by_user=request.user,
+                    request=request,
+                )
+            except ValidationError as exc:
+                messages.error(request, "; ".join(exc.messages))
+                return _back(offering)
+            # Mövzu sənəd tələb etmir — ayrıca (kilidsiz) yenilənir.
+            if request.POST.get("lesson_topic") is not None:
+                gradebook.update_lesson(
+                    lesson=lesson, topic=request.POST.get("lesson_topic"), allow_past=True, allow_locked=True
+                )
+            messages.success(request, _("Dərs sənədli düzəlişlə yeniləndi."))
+            return _back(offering)
+
         try:
             ok = gradebook.update_lesson(
                 lesson=lesson,
                 date=request.POST.get("lesson_date") or None,
-                # Dərs tipi kilidi: cədvəldə tək növ slot varsa dəyişilə bilməz.
-                kind=_locked_lesson_kind(offering) or request.POST.get("lesson_kind") or None,
+                kind=kind,
                 topic=request.POST.get("lesson_topic"),
-                hours=(
-                    int(request.POST.get("lesson_hours"))
-                    if (request.POST.get("lesson_hours") or "").isdigit()
-                    else None
-                ),
+                hours=hours,
                 start_time=start_time or "",
                 end_time=end_time or "",
                 allow_past=override,
