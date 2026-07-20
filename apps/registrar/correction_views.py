@@ -13,14 +13,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from . import corrections, gradebook
 from .models import AttendanceStatus, CorrectionReason, CourseOffering, LessonMark
-from .views import _current_period
 
 
 def _require_corrector(request):
@@ -37,40 +36,12 @@ def _active_org(request):
 
 @login_required
 def correction_offering_list(request):
-    """Düzəliş üçün fənn/müəllim seçim səhifəsi (korrektorlar bütün org açılışlarını görür)."""
+    """DEPRECATED — ayrı düzəliş siyahısı ləğv edildi. Korrektor jurnal siyahısından
+    (bütün offering-lər) istənilən jurnalı açıb yerində "Jurnal düzəlişi" toggle ilə
+    düzəldir. Köhnə URL jurnal siyahısına yönləndirir."""
     _require_corrector(request)
-    org = _active_org(request)
-
-    period = _current_period(org)
-    query = (request.GET.get("q") or "").strip()
-    offerings = (
-        CourseOffering.objects.filter(organization=org)
-        .select_related("subject", "instructor", "group", "period")
-        .order_by("subject__name")
-    )
-    if period is not None and not request.GET.get("all"):
-        offerings = offerings.filter(period=period)
-    if query:
-        from django.db.models import Q
-
-        offerings = offerings.filter(
-            Q(subject__name__icontains=query)
-            | Q(subject__code__icontains=query)
-            | Q(instructor__first_name__icontains=query)
-            | Q(instructor__last_name__icontains=query)
-            | Q(instructor__username__icontains=query)
-        )
-
-    return render(
-        request,
-        "registrar/correction_offering_list.html",
-        {
-            "offerings": offerings[:200],
-            "query": query,
-            "period": period,
-            "active_main_nav": "journal",
-        },
-    )
+    _active_org(request)
+    return redirect("registrar:journal_list")
 
 
 def build_correction_context(offering, request) -> dict:
@@ -94,17 +65,12 @@ def build_correction_context(offering, request) -> dict:
 
 @login_required
 def correction_journal(request, offering_id):
-    """Bir açılışın jurnalı düzəliş rejimində (müəllimdəki grid + sarı düzəliş xanaları)."""
+    """DEPRECATED — ayrı düzəliş səhifəsi ləğv edildi; yerində düzəliş rejiminə
+    (journal_detail ?correct=1, normal grid-in özündə) yönləndirir."""
     _require_corrector(request)
     org = _active_org(request)
-    offering = get_object_or_404(
-        CourseOffering.objects.select_related("subject", "period", "group", "organization", "instructor"),
-        pk=offering_id,
-        organization=org,
-    )
-    context = build_correction_context(offering, request)
-    context.update({"offering": offering, "active_main_nav": "journal"})
-    return render(request, "registrar/correction_journal.html", context)
+    offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
 
 
 @login_required
@@ -138,9 +104,9 @@ def correction_apply(request, offering_id):
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"ok": False, "error": message}, status=400)
         messages.error(request, message)
-        return redirect(reverse("registrar:correction_journal", args=[offering.pk]))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"ok": True})
     messages.success(request, pgettext("registrar.correction", "Düzəliş yadda saxlanıldı."))
-    return redirect(reverse("registrar:correction_journal", args=[offering.pk]))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
