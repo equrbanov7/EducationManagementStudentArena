@@ -339,6 +339,7 @@ def _role_capabilities(user, profile):
             if getattr(_dj_settings, "UNIVERSITY_MODE", True):
                 allowed_sections.add("my-subjects")
                 allowed_sections.add("my-transcript")
+                allowed_sections.add("overall-academic")
 
         if not (is_student or is_teacher or is_org_admin):
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
