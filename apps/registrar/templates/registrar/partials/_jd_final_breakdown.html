@@ -28,7 +28,7 @@ Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qəd�
                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
                     <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
                 </td>
-                <td class="jd2-fb-num">{{ row.dav }}</td>
+                <td class="jd2-fb-num {% if row.dav is None %}jd2-fb-dim{% endif %}">{% if row.dav is not None %}{{ row.dav|floatformat:'-2' }}{% else %}—{% endif %}</td>
                 {% for v in row.kvals %}<td class="jd2-fb-num jd2-fb-dim">{% if v is not None %}{{ v|floatformat:'-1' }}{% else %}—{% endif %}</td>{% endfor %}
                 <td class="jd2-fb-num jd2-fb-accent">{% if row.korta is not None %}{{ row.korta|floatformat:'-1' }}{% else %}—{% endif %}</td>
                 <td class="jd2-fb-num">{% if row.sorta is not None %}{{ row.sorta|floatformat:'-1' }}{% else %}—{% endif %}</td>
