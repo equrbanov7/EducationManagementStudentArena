@@ -24,6 +24,10 @@ class ProfileRole:
     EXAM_CENTER_HEAD = "exam_center_head"
     EXAM_CENTER_STAFF = "exam_center_staff"
     EXAM_CENTER = "exam_center"
+    # İKT Rəhbəri — texniki/akademik super-operator: jurnal limitlərini (2 saat,
+    # bitmiş semestr), kollokvium keçmiş-kilidini keçir, səhv qeydləri sənədli
+    # düzəliş (correction + PDF) ilə düzəldir/silir. Bütün əməlləri audit olunur.
+    IKT_REHBER = "ikt_rehber"
     TEACHER = "teacher"
     ASSISTANT_TEACHER = "assistant_teacher"
     LEAD_STUDENT = "lead_student"
@@ -38,6 +42,7 @@ class ProfileRole:
         (EXAM_CENTER_HEAD, "İmtahan Mərkəzi Rəhbəri"),
         (EXAM_CENTER_STAFF, "İmtahan Mərkəzi İşçisi"),
         (EXAM_CENTER, "İmtahan Mərkəzi"),
+        (IKT_REHBER, "İKT Rəhbəri"),
         (TEACHER, "Müəllim"),
         (ASSISTANT_TEACHER, "Müəllim Köməkçisi"),
         (LEAD_STUDENT, "Baş Tələbə"),
@@ -51,6 +56,7 @@ class ProfileRole:
         ORG_ADMIN: 80,
         EXAM_CENTER_HEAD: 85,
         EXAM_CENTER: 85,
+        IKT_REHBER: 88,
         MEMBER: 20,
         HR: 65,
         EXAM_CENTER_STAFF: 60,
@@ -84,6 +90,9 @@ class ProfileRole:
         "exam_center": {"exam_center"},
         EXAM_CENTER_HEAD: {EXAM_CENTER_HEAD},
         EXAM_CENTER_STAFF: {EXAM_CENTER_STAFF},
+        # İKT Rəhbəri həm imtahan mərkəzi (final/kollokvium/statistika), həm də
+        # org-admin (level 88 ≥ 80 → aşağıdakı alias qaydası ilə org_admin) gücünə malikdir.
+        IKT_REHBER: {IKT_REHBER, EXAM_CENTER_HEAD},
         "tutor": {"tutor"},
         # Proqram koordinatoru tyutor-ekvivalentdir (eyni akademik kurasiya işi).
         "program_coordinator": {"program_coordinator", "tutor"},

@@ -32,6 +32,8 @@
         opt.hidden = !match;
         if (match && first === null) first = opt.value;
       });
+      // Styled dropdown (bootstrap-single-select) gizli option-lara görə yenilənsin.
+      if (typeof periodSel._refreshBootstrapSelect === "function") periodSel._refreshBootstrapSelect();
       if (first) gotoPeriod(first);
       return;
     }

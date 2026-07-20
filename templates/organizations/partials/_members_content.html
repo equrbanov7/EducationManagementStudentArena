@@ -20,14 +20,16 @@
         </label>
         <label>
             <span>{% trans "role_label" context "organizations.members" %}</span>
-            <select name="role">
-                <option value="">{% trans "all_roles" context "organizations.members" %}</option>
-                {% for role in s.roles %}
-                    <option value="{{ role.name }}" {% if s.current_role == role.name %}selected{% endif %}>
-                        {{ role.display_name }}
-                    </option>
-                {% endfor %}
-            </select>
+            <div class="bootstrap-single-select">
+                <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" name="role" data-bootstrap-select>
+                    <option value="">{% trans "all_roles" context "organizations.members" %}</option>
+                    {% for role in s.roles %}
+                        <option value="{{ role.name }}" {% if s.current_role == role.name %}selected{% endif %}>
+                            {{ role.display_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
         </label>
         <button type="submit" class="org-management__submit">{% trans "filter_button" context "organizations.members" %}</button>
     </form>

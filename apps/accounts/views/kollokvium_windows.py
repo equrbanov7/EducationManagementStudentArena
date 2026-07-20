@@ -41,13 +41,22 @@ class KollokviumAdminError(Exception):
     """Pəncərə/grant əməliyyatının istifadəçi-üzlü xətası (yuxarıda tutulur)."""
 
 
-def _reject_if_period_past(period):
-    """Keçmiş akademik dövr (semestr) üçün bütün kollokvium mutasiyalarını rədd et.
+def _reject_if_period_past(period, user=None):
+    """Keçmiş akademik dövr (semestr) üçün kollokvium mutasiyalarını rədd et.
 
-    Heç kim köhnə il/semestr üçün pəncərə tarixi, aktivləşdirmə və ya əlavə gün
-    dəyişə bilməz — server-side məcburidir (yalnız UI gizlətməsi kifayət deyil).
-    Qayda ``AcademicPeriod.is_past`` (end_date < bugün) ilə eynidir.
+    Adi istifadəçilər köhnə il/semestr üçün pəncərə tarixi, aktivləşdirmə və ya
+    əlavə gün dəyişə bilməz — server-side məcburidir (yalnız UI gizlətməsi kifayət
+    deyil). Qayda ``AcademicPeriod.is_past`` (end_date < bugün) ilə eynidir.
+
+    İSTİSNA: İKT Rəhbəri və superadmin bitmiş semestr üçün də düzəliş edə bilər
+    (səhv yazıları düzəltmək üçün) — bu əməllər onsuz da audit olunur.
     """
+    if user is not None and (
+        getattr(user, "is_superuser", False)
+        or getattr(user, "is_superadmin", False)
+        or getattr(user, "is_ikt_rehber", False)
+    ):
+        return
     if period is not None and period.is_past:
         raise KollokviumAdminError(
             pgettext(
@@ -123,7 +132,7 @@ def _dispatch_action(request, action, organization):
             raise KollokviumAdminError(_first_form_error(form))
         k_index = form.cleaned_data["k_index"]
         period = form.cleaned_data["period"]
-        _reject_if_period_past(period)  # köhnə il/semestr üçün yazma qadağan
+        _reject_if_period_past(period, user)  # köhnə il/semestr üçün yazma qadağan (İKT Rəhbəri istisna)
         # Sıra qaydası: K{n} yalnız K{n-1} təyin olunduqdan sonra (İmtahan Mərkəzi
         # tələbi — K1 qoyulmamış K2/K3 təyin edilə bilməz).
         if (
@@ -160,7 +169,7 @@ def _dispatch_action(request, action, organization):
 
     if action == "toggle_window_active":
         window = get_object_or_404(KollokviumWindow, pk=request.POST.get("window_id"), organization=organization)
-        _reject_if_period_past(window.period)
+        _reject_if_period_past(window.period, user)
         window.is_active = not window.is_active
         window.save(update_fields=["is_active", "updated_at"])
         log_action(
@@ -178,7 +187,7 @@ def _dispatch_action(request, action, organization):
 
     if action == "delete_window":
         window = get_object_or_404(KollokviumWindow, pk=request.POST.get("window_id"), organization=organization)
-        _reject_if_period_past(window.period)
+        _reject_if_period_past(window.period, user)
         window.delete()
         messages.success(request, pgettext("accounts.kollokvium_windows", "Pəncərə silindi."))
         return
@@ -189,7 +198,7 @@ def _dispatch_action(request, action, organization):
                 pgettext("accounts.kollokvium_windows", "Əlavə gün yalnız İmtahan Mərkəzi rəhbərinə məxsusdur.")
             )
         window = get_object_or_404(KollokviumWindow, pk=request.POST.get("window_id"), organization=organization)
-        _reject_if_period_past(window.period)
+        _reject_if_period_past(window.period, user)
         form = KollokviumExtraGrantForm(request.POST, organization=organization, window=window)
         if not form.is_valid():
             raise KollokviumAdminError(_first_form_error(form))
@@ -227,7 +236,7 @@ def _dispatch_action(request, action, organization):
             pk=request.POST.get("grant_id"),
             organization=organization,
         )
-        _reject_if_period_past(grant.window.period)
+        _reject_if_period_past(grant.window.period, user)
         # Redaktədə mövcud bölmə artıq deaktivdirsə də (soft-delete) qəbul et.
         form = KollokviumExtraGrantForm(
             request.POST, organization=organization, window=grant.window, include_unit_id=grant.org_unit_id
@@ -278,7 +287,7 @@ def _dispatch_action(request, action, organization):
             pk=request.POST.get("grant_id"),
             organization=organization,
         )
-        _reject_if_period_past(grant.window.period)
+        _reject_if_period_past(grant.window.period, user)
         grant_pk = str(grant.pk)
         grant.delete()
         log_action(

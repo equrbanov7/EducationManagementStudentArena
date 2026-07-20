@@ -97,13 +97,15 @@
                 </td>
                 <td>
                     <div class="d-flex gap-2 align-items-center">
-                        <select name="role_id" class="form-control" required data-role-assignment-role-select {% if not can_assign_roles %}disabled{% endif %}>
-                            {% for role in assignable_roles %}
-                            <option value="{{ role.id }}" {% if role.id == member.role.id %}selected{% endif %}>
-                                {{ role.display_name }} ({{ role.level }})
-                            </option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="role_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" required data-bootstrap-select data-role-assignment-role-select {% if not can_assign_roles %}disabled{% endif %}>
+                                {% for role in assignable_roles %}
+                                <option value="{{ role.id }}" {% if role.id == member.role.id %}selected{% endif %}>
+                                    {{ role.display_name }} ({{ role.level }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         <button type="button"
                                 class="btn btn-primary btn-sm js-role-assignment-action-confirm"
                                 data-target-action="update_member"
@@ -204,11 +206,13 @@
                     </td>
                     <td>
                         <div class="d-flex gap-2 align-items-center">
-                            <select name="role_id" class="form-control" required data-role-assignment-role-select {% if not can_assign_roles %}disabled{% endif %}>
-                                {% for role in assignable_roles %}
-                                <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
-                                {% endfor %}
-                            </select>
+                            <div class="bootstrap-single-select">
+                                <select name="role_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" required data-bootstrap-select data-role-assignment-role-select {% if not can_assign_roles %}disabled{% endif %}>
+                                    {% for role in assignable_roles %}
+                                    <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                             <button type="button"
                                     class="btn btn-success btn-sm js-role-assignment-action-confirm"
                                     data-target-action="attach_user"

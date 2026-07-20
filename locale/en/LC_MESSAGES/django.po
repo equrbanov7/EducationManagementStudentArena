@@ -30703,6 +30703,21 @@ msgctxt "registrar.journal"
 msgid "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir."
 msgstr "The edit window has passed — this is a read-only summary."
 
+msgid "fənn axtar…"
+msgstr "search subject…"
+
+msgid "qrup axtar…"
+msgstr "search group…"
+
+msgid "fakültə axtar…"
+msgstr "search faculty…"
+
+msgid "kafedra axtar…"
+msgstr "search department…"
+
+msgid "müəllim axtar…"
+msgstr "search teacher…"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

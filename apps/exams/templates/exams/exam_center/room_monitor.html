@@ -301,9 +301,9 @@
       var DEBOUNCE = 300;
       var timer = null;
       var seq = 0;
+      var PAGE_SIZE = 10, offset = 0, hasMore = false, loadingMore = false, currentQuery = "", opened = false;
       var noResultText = "{% trans 'Namizəd tapılmadı.' %}";
       var T = { viewProfile: "{% trans 'Profili aç' %}", add: "{% trans 'Nəzarətçi əlavə et' %}" };
-      var hintText = "{% trans 'Axtarmaq üçün yazın…' %}";
 
       function selectedIds() {
         return Array.prototype.map.call(
@@ -339,6 +339,11 @@
         if (chip) { chip.parentNode.removeChild(chip); updateCounts(); }
       });
 
+      // Bütün indiyə qədər yüklənmiş namizədlər (səhifə-səhifə toplanır) —
+      // "+" ilə əlavə edildikdə tam siyahı yenidən çəkilir ki, əvvəlki
+      // səhifələrin sətirləri itməsin.
+      var loadedItems = [];
+
       function renderResults(items) {
         results.innerHTML = "";
         var chosen = selectedIds();
@@ -362,7 +367,7 @@
           // Ada klik → profil (yeni tab); "+" düyməsi → nəzarətçi əlavə et.
           row.querySelector(".js-rma-add").addEventListener("click", function (ev) {
             ev.preventDefault(); ev.stopPropagation();
-            addChip(it.id, it.text, it.username); renderResults(items); search.focus();
+            addChip(it.id, it.text, it.username); renderResults(loadedItems); search.focus();
           });
           results.appendChild(row);
         });
@@ -372,31 +377,51 @@
       }
       function escapeHtml(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
 
-      function doSearch(q) {
+      // `reset`=true → yeni axtarış (panel açılanda da ilk səhifə); `reset`=false
+      // → aşağı sürüşdürdükcə növbəti səhifə (bütün namizədlər bir dəfəyə
+      // yüklənmir).
+      function doSearch(q, reset) {
         if (!searchUrl) { return; }
-        var mine = ++seq;
-        results.innerHTML = '<div class="rma-loading">…</div>';
+        if (reset) { offset = 0; hasMore = false; currentQuery = q; loadedItems = []; }
+        if (!reset) { if (loadingMore || !hasMore) { return; } loadingMore = true; }
+        var mine = reset ? ++seq : seq;
+        if (reset) { results.innerHTML = '<div class="rma-loading">…</div>'; }
         var url = searchUrl + (searchUrl.indexOf("?") === -1 ? "?" : "&") +
-          "q=" + encodeURIComponent(q) + "&limit=10";
+          "q=" + encodeURIComponent(q) + "&offset=" + offset + "&limit=" + PAGE_SIZE;
         fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-          .then(function (r) { return r.ok ? r.json() : { results: [] }; })
-          .then(function (data) { if (mine === seq) { renderResults((data && data.results) || []); } })
-          .catch(function () { if (mine === seq) { results.innerHTML = ""; } });
+          .then(function (r) { return r.ok ? r.json() : { results: [], has_more: false }; })
+          .then(function (data) {
+            if (reset && mine !== seq) { return; }
+            var items = (data && data.results) || [];
+            loadedItems = loadedItems.concat(items);
+            offset += items.length;
+            hasMore = Boolean(data && data.has_more);
+            if (!reset) { loadingMore = false; }
+            renderResults(loadedItems);
+          })
+          .catch(function () {
+            if (reset) { if (mine === seq) { results.innerHTML = ""; } }
+            else { loadingMore = false; }
+          });
       }
 
+      results.addEventListener("scroll", function () {
+        if (loadingMore || !hasMore) { return; }
+        if (results.scrollTop + results.clientHeight >= results.scrollHeight - 40) {
+          doSearch(currentQuery, false);
+        }
+      });
       search.addEventListener("input", function () {
         if (timer) { clearTimeout(timer); }
         var q = search.value.trim();
-        timer = setTimeout(function () {
-          if (q.length === 0) { results.innerHTML = '<div class="rma-hint">' + hintText + "</div>"; return; }
-          doSearch(q);
-        }, DEBOUNCE);
+        timer = setTimeout(function () { doSearch(q, true); }, DEBOUNCE);
       });
-      search.addEventListener("focus", function () {
-        if (!results.children.length && search.value.trim() === "") {
-          results.innerHTML = '<div class="rma-hint">' + hintText + "</div>";
-        }
-      });
+      // Panel açılanda (klik) ilk səhifə dərhal yüklənir — "yazın" ipucu yerinə.
+      function ensureOpened() {
+        if (!opened) { opened = true; doSearch("", true); }
+      }
+      panel.addEventListener("toggle", function () { if (panel.open) { ensureOpened(); } });
+      search.addEventListener("focus", ensureOpened);
       updateCounts();
     })();
     </script>

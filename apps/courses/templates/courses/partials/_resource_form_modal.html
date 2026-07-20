@@ -69,12 +69,14 @@
                         <label for="resourceTopic" class="form-label">
                             <strong>{% trans "field_topic" context "courses.partial.resource_modal" %}</strong>
                         </label>
-                        <select class="form-select" id="resourceTopic" name="topic">
-                            <option value="">{% trans "option_no_topic" context "courses.partial.resource_modal" %}</option>
-                            {% for topic in topics %}
-                                <option value="{{ topic.id }}">{{ topic.order }}. {{ topic.title }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="resourceTopic" name="topic" data-bootstrap-select>
+                                <option value="">{% trans "option_no_topic" context "courses.partial.resource_modal" %}</option>
+                                {% for topic in topics %}
+                                    <option value="{{ topic.id }}">{{ topic.order }}. {{ topic.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         <small class="text-muted">
                             {% trans "help_topic_optional" context "courses.partial.resource_modal" %}
                         </small>
@@ -184,8 +186,11 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
             
             // Clear form
             document.getElementById('resourceForm').reset();
+            if (window.EMSBootstrapSelect) {
+                window.EMSBootstrapSelect.sync(document.getElementById('resourceTopic'));
+            }
             document.getElementById('resourceModalTopicName').textContent = '';
-            
+
             // Show success message
             notify(data.message, 'success');
             
@@ -210,6 +215,9 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
 // Clear modal on close
 document.getElementById('resourceFormModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('resourceForm').reset();
+    if (window.EMSBootstrapSelect) {
+        window.EMSBootstrapSelect.sync(document.getElementById('resourceTopic'));
+    }
     document.getElementById('resourceModalTopicName').textContent = '';
     document.getElementById('resourceErrors').classList.add('d-none');
 });

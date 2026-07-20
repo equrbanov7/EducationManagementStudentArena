@@ -230,6 +230,8 @@ User.add_to_class("is_org_owner", property(lambda self: _has_role(self, ProfileR
 User.add_to_class("is_org_admin", property(lambda self: _has_role(self, ProfileRole.ORG_ADMIN)))
 User.add_to_class("is_member", property(lambda self: _has_role(self, ProfileRole.MEMBER)))
 User.add_to_class("is_hr", property(lambda self: _has_role(self, ProfileRole.HR)))
+# İKT Rəhbəri — jurnal/kollokvium limitlərini keçən super-operator (audited).
+User.add_to_class("is_ikt_rehber", property(lambda self: _has_role(self, ProfileRole.IKT_REHBER)))
 User.add_to_class(
     "is_exam_center",
     property(
@@ -237,13 +239,20 @@ User.add_to_class(
             _has_role(self, "exam_center")
             or _has_role(self, ProfileRole.EXAM_CENTER_HEAD)
             or _has_role(self, ProfileRole.EXAM_CENTER_STAFF)
+            or _has_role(self, ProfileRole.IKT_REHBER)
         )
     ),
 )
-# Yalnız RƏHBƏR (və köhnə exam_center) — zala nəzarətçi təyin edə bilir.
+# Yalnız RƏHBƏR (və köhnə exam_center, İKT Rəhbəri) — zala nəzarətçi təyin edə bilir.
 User.add_to_class(
     "is_exam_center_head",
-    property(lambda self: (_has_role(self, "exam_center") or _has_role(self, ProfileRole.EXAM_CENTER_HEAD))),
+    property(
+        lambda self: (
+            _has_role(self, "exam_center")
+            or _has_role(self, ProfileRole.EXAM_CENTER_HEAD)
+            or _has_role(self, ProfileRole.IKT_REHBER)
+        )
+    ),
 )
 User.add_to_class("is_tutor", property(lambda self: _has_role(self, "tutor")))
 User.add_to_class("is_lead_student", property(lambda self: _has_role(self, ProfileRole.LEAD_STUDENT)))

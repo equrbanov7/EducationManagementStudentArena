@@ -60,6 +60,13 @@
     fieldSel.value = "attendance";
     if (cell.dataset.status) attWrap.querySelector("select").value = cell.dataset.status;
     if (cell.dataset.score) scoreWrap.querySelector("input").value = cell.dataset.score;
+    // Bootstrap-select toggle-ları proqramla dəyişən value/disabled-i əks etdirsin
+    // (native select .value ilə "change" event atılmır).
+    if (window.EMSBootstrapSelect) {
+      window.EMSBootstrapSelect.refresh(fieldSel);
+      window.EMSBootstrapSelect.sync(attWrap.querySelector("select"));
+      window.EMSBootstrapSelect.sync(form.querySelector("[name='reason']"));
+    }
     syncFieldMode();
     open(modal);
   });

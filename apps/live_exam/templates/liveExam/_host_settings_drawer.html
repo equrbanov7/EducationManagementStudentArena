@@ -54,30 +54,40 @@
                     </button>
                 </div>
             </div>
-            <label class="host-settings-item host-settings-item--field">
+            <div class="host-settings-item host-settings-item--field">
                 <div class="host-settings-item__copy">
                     <strong>{% trans "language_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "language_help" context "live_exam.host_settings" %}</span>
                 </div>
-                <select id="settingLanguage" class="host-settings-select">
-                    <option value="system">{% trans "language_system" context "live_exam.host_settings" %}</option>
-                    <option value="az">{% trans "language_az" context "live_exam.host_settings" %}</option>
-                    <option value="en">{% trans "language_en" context "live_exam.host_settings" %}</option>
-                    <option value="ru">{% trans "language_ru" context "live_exam.host_settings" %}</option>
-                    <option value="tr">{% trans "language_tr" context "live_exam.host_settings" %}</option>
-                </select>
-            </label>
-            <label class="host-settings-item host-settings-item--field">
+                <div class="bootstrap-single-select">
+                    <select id="settingLanguage"
+                            class="host-settings-select bootstrap-single-select__native js-bootstrap-single-select"
+                            data-bootstrap-select
+                            aria-label="{% trans 'language_label' context 'live_exam.host_settings' %}">
+                        <option value="system">{% trans "language_system" context "live_exam.host_settings" %}</option>
+                        <option value="az">{% trans "language_az" context "live_exam.host_settings" %}</option>
+                        <option value="en">{% trans "language_en" context "live_exam.host_settings" %}</option>
+                        <option value="ru">{% trans "language_ru" context "live_exam.host_settings" %}</option>
+                        <option value="tr">{% trans "language_tr" context "live_exam.host_settings" %}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="host-settings-item host-settings-item--field">
                 <div class="host-settings-item__copy">
                     <strong>{% trans "lobby_music_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "lobby_music_help" context "live_exam.host_settings" %}</span>
                 </div>
-                <select id="settingLobbyMusic" class="host-settings-select">
-                    <option value="original">{% trans "music_original" context "live_exam.host_settings" %}</option>
-                    <option value="focus">{% trans "music_focus" context "live_exam.host_settings" %}</option>
-                    <option value="silent">{% trans "music_silent" context "live_exam.host_settings" %}</option>
-                </select>
-            </label>
+                <div class="bootstrap-single-select">
+                    <select id="settingLobbyMusic"
+                            class="host-settings-select bootstrap-single-select__native js-bootstrap-single-select"
+                            data-bootstrap-select
+                            aria-label="{% trans 'lobby_music_label' context 'live_exam.host_settings' %}">
+                        <option value="original">{% trans "music_original" context "live_exam.host_settings" %}</option>
+                        <option value="focus">{% trans "music_focus" context "live_exam.host_settings" %}</option>
+                        <option value="silent">{% trans "music_silent" context "live_exam.host_settings" %}</option>
+                    </select>
+                </div>
+            </div>
             <div class="host-settings-item host-settings-item--field">
                 <div class="host-settings-item__copy">
                     <strong>{% trans "sfx_volume_label" context "live_exam.host_settings" %}</strong>
