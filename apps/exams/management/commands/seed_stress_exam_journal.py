@@ -19,7 +19,9 @@ sahibin jurnal + imtahan↔jurnal körpüsünü VİZUAL test edə bilməsi üç�
     ≥1 bal korreksiyası + ≥1 davamiyyət korreksiyası (qb → üzrlü), hər biri
     minimal PDF sənədlə (``apps.registrar.corrections.apply_correction``);
   * ``--seed-failures`` — ≥2 tələbə davamiyyətdən (qayıb limitini keçərək)
-    kəsilir, ≥2 tələbə imtahandan (aşağı bal, ``exam_bridge`` vasitəsilə F).
+    kəsilir, ≥2 tələbə imtahandan (aşağı bal, ``exam_bridge`` vasitəsilə F);
+  * ``--seed-past-years`` — 2 keçmiş tədris ili (2022/2023, 2023/2024), sabit
+    tələbədə A-E+barred+qb+imtahan qarışığı (data: ``_stress_past_years_data.py``).
 
 İdempotentdir — təkrar çağırış mövcud qeydləri təkrarlamır (get_or_create /
 update_or_create; korreksiyalar mövcud ``JournalCorrection`` yoxlanışı ilə bir
@@ -99,6 +101,12 @@ class Command(BaseCommand):
             default=True,
             help="Kəsilən tələbələr: davamiyyət limitindən (barred) və imtahandan (aşağı bal → F).",
         )
+        parser.add_argument(
+            "--seed-past-years",
+            action=argparse.BooleanOptionalAction,
+            default=True,
+            help="Keçmiş illər (2022/2023, 2023/2024): sabit tələbədə A-E+barred+qb+imtahan qarışığı.",
+        )
 
     @transaction.atomic
     @rls_worker_atomic()
@@ -133,6 +141,14 @@ class Command(BaseCommand):
         if opts["seed_failures"] and offerings_2526 and roles:
             failures = self._seed_failures(org, teacher, offerings_2526, roles)
 
+        offerings_past: dict = {}
+        if opts["seed_past_years"]:
+            from . import _stress_past_years_data as past_data
+
+            offerings_past = past_data.seed_past_years(org=org, teacher=teacher, students=students)
+            if not offerings_past:
+                self.stdout.write("  (keçmiş illər: STR proqramı/kurikulumu tapılmadı — seed edilmədi)")
+
         line = "─" * 60
         self.stdout.write(self.style.SUCCESS(line))
         self.stdout.write(self.style.SUCCESS("STRESS EXAM + JOURNAL HAZIRDIR"))
@@ -146,6 +162,8 @@ class Command(BaseCommand):
         if failures:
             self.stdout.write(f"  Kəsilən (davamiyyət)   : {len(failures.get('attendance', []))}")
             self.stdout.write(f"  Kəsilən (imtahan)      : {len(failures.get('exam', []))}")
+        if offerings_past:
+            self.stdout.write(f"  Keçmiş illər fənn : {', '.join(sorted(offerings_past))}")
         self.stdout.write(self.style.SUCCESS(f"K6_TEST_EXAM_SLUG={exam.slug}"))
         self.stdout.write(self.style.SUCCESS(line))
 
