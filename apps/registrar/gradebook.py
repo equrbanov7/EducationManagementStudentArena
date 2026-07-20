@@ -172,14 +172,32 @@ def create_lesson(
 
 
 @transaction.atomic
-def update_lesson(*, lesson, date=None, kind=None, topic=None, hours=None, start_time=None, end_time=None) -> bool:
-    """Səhv açılmış dərsi düzəlt — yalnız yaranışdan 2 saat içində."""
-    if journal_is_locked(lesson.offering) or not can_edit_lesson(lesson):
+def update_lesson(
+    *,
+    lesson,
+    date=None,
+    kind=None,
+    topic=None,
+    hours=None,
+    start_time=None,
+    end_time=None,
+    allow_past=False,
+    allow_locked=False,
+) -> bool:
+    """Səhv açılmış dərsi düzəlt — yalnız yaranışdan 2 saat içində.
+
+    ``allow_locked`` 2 saatlıq redaktə pəncərəsini, ``allow_past`` isə keçmiş-tarix
+    qadağasını keçir — YALNIZ İKT Rəhbəri/superuser üçün (HTTP qatında rol-yoxlaması
+    ilə ötürülür). Yayımlanmış/təsdiqlənmiş jurnal (``journal_is_locked``) yenə də
+    kilidlidir."""
+    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     fields = []
     if date is not None:
         parsed = _coerce_date(date)
-        if parsed is None or parsed < timezone.localdate():
+        if parsed is None:
+            raise LessonRuleError("Dərs tarixi düzgün deyil.")
+        if parsed < timezone.localdate() and not allow_past:
             raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
         lesson.date = parsed
         fields.append("date")
@@ -204,11 +222,12 @@ def update_lesson(*, lesson, date=None, kind=None, topic=None, hours=None, start
 
 
 @transaction.atomic
-def delete_lesson(*, lesson, by_user=None) -> bool:
+def delete_lesson(*, lesson, by_user=None, allow_locked=False) -> bool:
     """Səhv açılmış dərsi sil — yalnız yaranışdan 2 saat içində.
 
+    ``allow_locked`` 2 saatlıq pəncərəni keçir (yalnız İKT Rəhbəri/superuser).
     Sütunun (təzə) işarələri kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
-    if journal_is_locked(lesson.offering) or not can_edit_lesson(lesson):
+    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     offering = lesson.offering
     label = f"{lesson.date} · {lesson.get_kind_display()}"

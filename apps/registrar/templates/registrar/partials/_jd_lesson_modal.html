@@ -18,11 +18,17 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "TARİX" context "registrar.journal" %}</span>
                     <span class="jd2-date-row">
-                        <input type="date" name="lesson_date" required min="{{ journal.today|date:'Y-m-d' }}"
+                        {# İKT Rəhbəri istənilən (keçmiş) tarixə dərs aça/dəyişə bilər — min qoyulmur. #}
+                        <input type="date" name="lesson_date" required
+                               {% if not request.user.is_ikt_rehber %}min="{{ journal.today|date:'Y-m-d' }}"{% endif %}
                                value="{{ journal.today|date:'Y-m-d' }}" data-jd-lesson-date>
                         <span class="jd2-parity-badge" data-jd-parity-badge hidden></span>
                     </span>
+                    {% if not request.user.is_ikt_rehber %}
                     <small class="jd-field-hint">{% trans "Keçmiş tarixə dərs açmaq olmaz." context "registrar.journal" %}</small>
+                    {% else %}
+                    <small class="jd-field-hint">{% trans "İKT Rəhbəri: istənilən tarix/saat seçilə bilər." context "registrar.journal" %}</small>
+                    {% endif %}
                 </div>
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "MÖVZU — TƏQVİM PLANINDAN" context "registrar.journal" %}</span>
