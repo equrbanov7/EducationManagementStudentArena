@@ -116,8 +116,8 @@ class JournalViewTest(TestCase):
         # ?correct=1 → eyni səhifədə audited düzəliş editoru (ayrı səhifə YOX).
         resp = self._client(admin).get(reverse("registrar:journal_detail", args=[self.offering.id]), {"correct": "1"})
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "data-correction-root")  # correction.js kökü
-        self.assertContains(resp, "is-correcting")  # normal grid gizlədilir
+        self.assertContains(resp, "data-correction-root")  # correction.js kökü (=.jd2)
+        self.assertContains(resp, "is-correcting")  # correction rejimi NORMAL grid-in özündə (xanalar düymə olur)
         self.assertContains(resp, "data-corr-form")  # audited düzəliş modalı (səbəb/qeyd/PDF)
         # Adi müəllim ?correct=1 versə də editor açılmır (korrektor deyil).
         resp2 = self._client(self.teacher).get(
