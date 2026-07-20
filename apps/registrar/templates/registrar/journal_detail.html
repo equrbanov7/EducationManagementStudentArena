@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260719-daysum">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260719-daysum">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260720-inline">
 {% endblock %}
 
 {% block content %}
-<div class="journal-page jd-page jd2" data-offering-id="{{ offering.id }}">
+<div class="journal-page jd-page jd2 {% if correction_mode %}is-correcting{% endif %}" data-offering-id="{{ offering.id }}">
     {# ── Səhifə başlığı + stepper (mockup) ─────────────────────────────────── #}
     <div class="jd2-pagehead">
         <div class="jd2-mark">EU</div>
@@ -20,10 +20,31 @@
             <h1 class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</h1>
             <div class="jd2-pagesub">{% if offering.period %}{{ offering.period.year_display }} — {{ offering.period.name }}{% endif %}</div>
         </div>
+        {% if can_correct_journal %}
+        {# İKT rəhbəri/admin: yerində kilid-aç toggle — ayrı səhifə YOX, eyni URL. #}
+        {% if correction_mode %}
+        <a class="jd2-correct-toggle is-on" href="{% url 'registrar:journal_detail' offering.id %}">
+            <i class="fas fa-lock"></i> {% trans "Düzəlişi bitir (kilidlə)" context "registrar.correction" %}
+        </a>
+        {% else %}
+        <a class="jd2-correct-toggle" href="{% url 'registrar:journal_detail' offering.id %}?correct=1">
+            <i class="fas fa-lock-open"></i> {% trans "Jurnal düzəlişi" context "registrar.correction" %}
+        </a>
+        {% endif %}
+        {% endif %}
     </div>
 
     {% include "accounts/profile/_messages.html" %}
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=2 stepper_detail=True %}
+
+    {% if correction_mode %}
+    {# Yerində audited düzəliş editoru — normal grid CSS ilə gizlədilir (.is-correcting). #}
+    <div class="jd2-correct-banner">
+        <i class="fas fa-lock-open"></i>
+        {% trans "Düzəliş rejimi açıqdır — xanaya klikləyib balı/davamiyyəti dəyişin. Hər dəyişiklik səbəb + qeyd + PDF sənədlə loglanır. Bitirmək üçün yuxarıdan «kilidlə»." context "registrar.correction" %}
+    </div>
+    {% include "registrar/partials/_correction_editor.html" %}
+    {% endif %}
 
     {% comment %}Qiymət təsdiq zənciri — YALNIZ təsdiq prosesi başlayıbsa görünür
     (istifadəçi tələbi: draft rejimində bu blok səhifəni tutmasın).{% endcomment %}
@@ -228,4 +249,7 @@
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260716-jbatch8"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
+    {% if correction_mode %}
+    <script src="{% static 'registrar/js/correction.js' %}?v=20260720-inline" nonce="{{ request.csp_nonce }}"></script>
+    {% endif %}
 {% endblock %}

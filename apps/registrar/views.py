@@ -80,15 +80,20 @@ def journal_detail(request, offering_id):
         CourseOffering.objects.select_related("subject", "period", "group", "organization"),
         pk=offering_id,
     )
+    from apps.registrar import corrections as corrections_service
+
     appr = approval.approval_context(offering=offering, user=request.user)
     can_edit_perm = _can_edit_journal(request.user, offering)
+    can_correct = corrections_service.can_correct_journal(request)
     can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
         request.user, offering.organization
     )
-    # Do not leak existence: only editors, or reviewers of an already-submitted
-    # journal, may open the page.
-    if not can_edit_perm and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
+    # Do not leak existence: only editors, correctors (İKT rəhbəri/admin), or
+    # reviewers of an already-submitted journal, may open the page.
+    if not can_edit_perm and not can_correct and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
         raise Http404
+    # Yerində düzəliş rejimi (kilid-aç toggle) — yalnız korrektor + ?correct=1.
+    correction_mode = request.method == "GET" and request.GET.get("correct") == "1" and can_correct
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -124,7 +129,6 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import corrections as corrections_service
     from apps.registrar import journal_extras
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
@@ -139,37 +143,42 @@ def journal_detail(request, offering_id):
     today = _tz.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
 
-    return render(
-        request,
-        "registrar/journal_detail.html",
-        {
-            "offering": offering,
-            "journal": journal,
-            "corrections_map": corrections_map,
-            "finals": finals_data,
-            "final_breakdown": journal_extras.get_final_breakdown(offering),
-            "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
-            "selfwork_board": journal_extras.get_selfwork_board(offering),
-            "coursework_rows": coursework_rows,
-            "org_rubrics": _org_rubrics(offering.organization),
-            "can_edit": can_edit_perm and not appr["is_locked"],
-            "approval": appr,
-            "grade_history": grade_audit.get_grade_history(offering=offering),
-            "lesson_kinds": LessonKind.choices,
-            "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
-            "topic_choices": journal_extras.lesson_topic_choices(offering),
-            "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
-            "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
-            "standard_times": schedule.STANDARD_LESSON_TIMES,
-            # Seminar/lab xanası üçün bal seçimləri — YALNIZ tam ədəd 0–10 (0.5
-            # addım YOX; müəllim tələbi). bootstrap select-option: q/b · i/e · bal.
-            "seminar_score_options": list(range(0, 11)),
-            # Kollokvium xanası üçün bal seçimləri — 0–10 tam ədəd (seminar kimi).
-            "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
-            "today_parity": today_parity,
-            "active_main_nav": "journal",
-        },
-    )
+    context = {
+        "offering": offering,
+        "journal": journal,
+        "corrections_map": corrections_map,
+        "finals": finals_data,
+        "final_breakdown": journal_extras.get_final_breakdown(offering),
+        "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
+        "selfwork_board": journal_extras.get_selfwork_board(offering),
+        "coursework_rows": coursework_rows,
+        "org_rubrics": _org_rubrics(offering.organization),
+        "can_edit": can_edit_perm and not appr["is_locked"],
+        "approval": appr,
+        "grade_history": grade_audit.get_grade_history(offering=offering),
+        "lesson_kinds": LessonKind.choices,
+        "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
+        "topic_choices": journal_extras.lesson_topic_choices(offering),
+        "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
+        "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
+        "standard_times": schedule.STANDARD_LESSON_TIMES,
+        # Seminar/lab xanası üçün bal seçimləri — YALNIZ tam ədəd 0–10 (0.5
+        # addım YOX; müəllim tələbi). bootstrap select-option: q/b · i/e · bal.
+        "seminar_score_options": list(range(0, 11)),
+        # Kollokvium xanası üçün bal seçimləri — 0–10 tam ədəd (seminar kimi).
+        "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
+        "today_parity": today_parity,
+        "active_main_nav": "journal",
+        "correction_mode": correction_mode,
+        "can_correct_journal": can_correct,
+    }
+    if correction_mode:
+        # Yerində düzəliş rejimi: audited correction editoru üçün kontekst
+        # (journal + corrections_map include_document ilə əvəzlənir).
+        from apps.registrar.correction_views import build_correction_context
+
+        context.update(build_correction_context(offering, request))
+    return render(request, "registrar/journal_detail.html", context)
 
 
 def _org_rubrics(organization):

@@ -1,0 +1,159 @@
+{% load i18n %}
+{% comment %}
+Jurnal düzəliş editoru (audited) — HƏM standalone `correction_journal.html`, HƏM DƏ
+`journal_detail.html`-in yerində "düzəliş rejimi" (?correct=1) toggle-ı üçün. Bütün
+dəyişikliklər `corrections.apply_correction` üzərindən gedir (kilid açılır + audit +
+sənəd + bildiriş). correction.js `data-correction-root`-a bağlanır.
+Kontekst: apply_url, corrector_name, journal, corrections_map, attendance_choices,
+correction_reasons.
+{% endcomment %}
+<div class="corr-wrap" data-correction-root
+     data-apply-url="{{ apply_url }}"
+     data-corrector-name="{{ corrector_name }}">
+    <div class="corr-legend">
+        <span class="corr-legend-item"><span class="corr-swatch corr-swatch--fixed"></span> {% trans "Düzəliş olunmuş xana" context "registrar.correction" %}</span>
+        <span class="corr-legend-item"><i class="fas fa-lock-open"></i> {% trans "Kilid açıqdır — dəyişmək üçün istənilən xananın üzərinə klikləyin (səbəb + qeyd + PDF sənəd tələb olunur, hər dəyişiklik loglanır)." context "registrar.correction" %}</span>
+    </div>
+
+    <div class="journal-grid-wrap jd2-grid-wrap corr-grid-wrap" data-journal-grid>
+        <table class="jd2-table">
+            <thead>
+                <tr>
+                    <th class="jd2-th-student">{% trans "№ · SOYAD AD" context "registrar.correction" %}</th>
+                    {% for lm in journal.lesson_meta %}
+                    <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}"
+                        title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.topic %} — {{ lm.lesson.topic }}{% endif %}">
+                        {{ lm.lesson.date|date:"d.m" }}
+                        <div class="jd2-th-sub">{{ lm.lesson.get_kind_display|slice:":3"|lower }}</div>
+                    </th>
+                    {% endfor %}
+                    <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.correction" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in journal.rows %}
+                <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">
+                    <td class="jd2-td-student">
+                        <span class="jd2-stu-no">{{ forloop.counter }}</span>
+                        <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                    </td>
+                    {% for cell in row.cells %}
+                    {% if cell.mark %}
+                        {% with cid=cell.mark.id|stringformat:"s" %}
+                        <td class="jd2-cell corr-cell {% if corrections_map|default_if_none:'' %}{% if cid in corrections_map %}corr-cell--fixed{% endif %}{% endif %}">
+                            <button type="button" class="corr-cell-btn"
+                                    data-corr-cell
+                                    data-mark-id="{{ cell.mark.id }}"
+                                    data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                    data-date="{{ cell.lesson.date|date:'d.m.Y' }}"
+                                    data-kind="{{ cell.lesson.get_kind_display }}"
+                                    data-allows-score="{% if cell.allows_score %}1{% else %}0{% endif %}"
+                                    data-status="{{ cell.mark.status }}"
+                                    data-score="{% if cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% endif %}"
+                                    {% if cid in corrections_map %}data-history="{{ cid }}"{% endif %}>
+                                {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% else %}i/e{% endif %}{% if cell.mark.score is not None %} · {{ cell.mark.score|floatformat:0 }}{% endif %}
+                                {% if cid in corrections_map %}<span class="corr-fixed-badge" title="{% trans 'Düzəliş olunub — tarixçəni görmək üçün klikləyin' context 'registrar.correction' %}">✎</span>{% endif %}
+                            </button>
+                        </td>
+                        {% endwith %}
+                    {% else %}
+                        <td class="jd2-cell corr-cell corr-cell--empty">—</td>
+                    {% endif %}
+                    {% endfor %}
+                    <td class="jd2-td-qayib">{{ row.absence_count }}</td>
+                </tr>
+                {% empty %}
+                <tr><td class="corr-empty" colspan="99">{% trans "Bu fənndə hələ tələbə/dərs yoxdur." context "registrar.correction" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ── Düzəliş modalı ──────────────────────────────────────────────────── #}
+    <div class="corr-modal" id="corrModal" hidden data-corr-modal>
+        <div class="corr-modal-backdrop" data-corr-close></div>
+        <div class="corr-modal-card" role="dialog" aria-modal="true" aria-labelledby="corrModalTitle">
+            <div class="corr-modal-head">
+                <h2 id="corrModalTitle">{% trans "Jurnal düzəlişi" context "registrar.correction" %}</h2>
+                <button type="button" class="corr-modal-x" data-corr-close aria-label="{% trans 'Bağla' context 'registrar.correction' %}">&times;</button>
+            </div>
+            <form method="post" action="{{ apply_url }}" enctype="multipart/form-data" data-corr-form>
+                {% csrf_token %}
+                <input type="hidden" name="mark_id" data-corr-mark-id>
+                <div class="corr-modal-meta">
+                    <span data-corr-student></span> · <span data-corr-date></span> · <span data-corr-kind></span>
+                </div>
+
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Nəyi düzəldirsiniz?" context "registrar.correction" %}</span>
+                    <div class="bootstrap-single-select">
+                        <select name="field" data-corr-field class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                            <option value="attendance">{% trans "Davamiyyət" context "registrar.correction" %}</option>
+                            <option value="score" data-corr-score-opt>{% trans "Bal" context "registrar.correction" %}</option>
+                        </select>
+                    </div>
+                </label>
+
+                <label class="corr-field" data-corr-att-wrap>
+                    <span class="corr-field-label">{% trans "Yeni davamiyyət" context "registrar.correction" %}</span>
+                    <div class="bootstrap-single-select">
+                        <select name="new_status" class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                            {% for value, label in attendance_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </label>
+
+                <label class="corr-field" data-corr-score-wrap hidden>
+                    <span class="corr-field-label">{% trans "Yeni bal (tam ədəd)" context "registrar.correction" %}</span>
+                    <input type="number" name="new_score" min="0" max="10" step="1" class="corr-input">
+                </label>
+
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Səbəb" context "registrar.correction" %} <b class="corr-req">*</b></span>
+                    <div class="bootstrap-single-select">
+                        <select name="reason" class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select required>
+                            <option value="">—</option>
+                            {% for value, label in correction_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </label>
+
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Qeyd" context "registrar.correction" %} <b class="corr-req">*</b></span>
+                    <textarea name="note" rows="2" class="corr-input" required
+                              placeholder="{% trans 'Düzəlişin izahı (tələbə və müəllim görür)' context 'registrar.correction' %}"></textarea>
+                </label>
+
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Sənəd (PDF)" context "registrar.correction" %} <b class="corr-req">*</b></span>
+                    <input type="file" name="document" accept="application/pdf,.pdf" class="corr-input" required>
+                </label>
+
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Düzəlişi edən" context "registrar.correction" %}</span>
+                    <input type="text" class="corr-input" value="{{ corrector_name }}" readonly disabled>
+                </label>
+
+                <div class="corr-modal-error" data-corr-error hidden></div>
+                <div class="corr-modal-foot">
+                    <button type="button" class="corr-btn corr-btn--ghost" data-corr-close>{% trans "İmtina" context "registrar.correction" %}</button>
+                    <button type="submit" class="corr-btn corr-btn--primary" data-corr-submit>{% trans "Təsdiqlə" context "registrar.correction" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── Tarixçə modalı ─────────────────────────────────────────────────── #}
+    <div class="corr-modal" id="corrHistoryModal" hidden data-corr-history-modal>
+        <div class="corr-modal-backdrop" data-corr-close></div>
+        <div class="corr-modal-card" role="dialog" aria-modal="true">
+            <div class="corr-modal-head">
+                <h2>{% trans "Düzəliş tarixçəsi" context "registrar.correction" %}</h2>
+                <button type="button" class="corr-modal-x" data-corr-close aria-label="{% trans 'Bağla' context 'registrar.correction' %}">&times;</button>
+            </div>
+            <div class="corr-history-body" data-corr-history-body></div>
+        </div>
+    </div>
+
+    {{ corrections_map|json_script:"corrHistoryData" }}
+</div>
