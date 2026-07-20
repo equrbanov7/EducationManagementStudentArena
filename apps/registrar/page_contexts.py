@@ -32,12 +32,32 @@ def journal_list_context(user, request=None) -> dict:
     Hər offering-ə dərs tipi etiketi və magistratura (axşam) bayrağı bağlanır."""
     from django.db.models import Count, Q
 
+    from apps.registrar import corrections as corrections_service
     from apps.registrar.models import ScheduleSlot, SlotKind
     from apps.registrar.schedule import EVENING_START
 
+    # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
+    # təşkilatın jurnallarını görür (öz dərsi olmasa da); adi müəllim yalnız özününkünü.
+    can_correct = bool(request is not None and corrections_service.can_correct_journal(request))
+    organization = getattr(request, "organization", None) if request is not None else None
+    base_qs = CourseOffering.objects.filter(is_active=True)
+    if can_correct and organization is not None:
+        base_qs = base_qs.filter(organization=organization)
+        is_broad = True
+    else:
+        base_qs = base_qs.filter(instructor=user)
+        is_broad = False
+
     offerings = list(
-        CourseOffering.objects.filter(instructor=user, is_active=True)
-        .select_related("subject", "period", "group")
+        base_qs.select_related(
+            "subject",
+            "period",
+            "group",
+            "group__parent",
+            "group__parent__parent",
+            "group__parent__parent__parent",
+            "instructor",
+        )
         .annotate(student_count=Count("enrollments", filter=Q(enrollments__status="enrolled")))
         .order_by("-period__start_date", "subject__code")
     )
@@ -92,12 +112,71 @@ def journal_list_context(user, request=None) -> dict:
         if selected_period is not None:
             selected_year = selected_period.academic_year
 
+    # ── Korrektor (geniş) görünüş üçün əlavə filtrlər: müəllim, qrup, fakültə,
+    # kafedra, mətn axtarışı. Seçim siyahıları TAM dəstdən (illik süzgəcdən əvvəl)
+    # qurulur ki, dropdown-lar həmişə mövcud variantları göstərsin. Fakültə/kafedra
+    # OrgUnit ata-zəncirindən (path) alınır — organizations importu yoxdur (dövr yox).
+    def _ancestor_of(unit, types):
+        node = unit
+        while node is not None:
+            if getattr(node, "unit_type", None) in types:
+                return node
+            node = getattr(node, "parent", None)
+        return None
+
+    teacher_choices, group_choices, faculty_choices, dept_choices = [], [], [], []
+    selected_teacher = selected_group = selected_faculty = selected_dept = ""
+    query = ""
+    if is_broad:
+        seen_t, seen_g, seen_f, seen_d = set(), set(), set(), set()
+        for o in offerings:
+            if o.instructor_id and o.instructor_id not in seen_t:
+                seen_t.add(o.instructor_id)
+                label = (o.instructor.get_full_name() or o.instructor.username) if o.instructor else ""
+                teacher_choices.append({"value": str(o.instructor_id), "label": label})
+            g = o.group
+            if g is not None and g.id not in seen_g:
+                seen_g.add(g.id)
+                group_choices.append({"value": str(g.id), "label": g.name})
+            fac = _ancestor_of(g, ("faculty", "deanery")) if g is not None else None
+            if fac is not None and fac.id not in seen_f:
+                seen_f.add(fac.id)
+                faculty_choices.append({"value": str(fac.id), "label": fac.name})
+            dep = _ancestor_of(g, ("chair", "department")) if g is not None else None
+            if dep is not None and dep.id not in seen_d:
+                seen_d.add(dep.id)
+                dept_choices.append({"value": str(dep.id), "label": dep.name})
+        for choices in (teacher_choices, group_choices, faculty_choices, dept_choices):
+            choices.sort(key=lambda c: c["label"].lower())
+        if request is not None:
+            selected_teacher = (request.GET.get("teacher") or "").strip()
+            selected_group = (request.GET.get("group") or "").strip()
+            selected_faculty = (request.GET.get("faculty") or "").strip()
+            selected_dept = (request.GET.get("department") or "").strip()
+            query = (request.GET.get("q") or "").strip()
+
     if selected_year:
         offerings = [o for o in offerings if o.period and o.period.academic_year == selected_year]
     if selected_period is not None:
         offerings = [o for o in offerings if o.period_id == selected_period.id]
     if selected_kind:
         offerings = [o for o in offerings if selected_kind in o.slot_kinds]
+    if selected_teacher:
+        offerings = [o for o in offerings if str(o.instructor_id) == selected_teacher]
+    if selected_group:
+        offerings = [o for o in offerings if o.group_id and str(o.group_id) == selected_group]
+    if selected_faculty:
+        offerings = [o for o in offerings if o.group and o.group.path and selected_faculty in o.group.path.split("/")]
+    if selected_dept:
+        offerings = [o for o in offerings if o.group and o.group.path and selected_dept in o.group.path.split("/")]
+    if query:
+        ql = query.lower()
+        offerings = [
+            o
+            for o in offerings
+            if ql in f"{o.subject.code} {o.subject.name} "
+            f"{(o.instructor.get_full_name() or o.instructor.username) if o.instructor else ''}".lower()
+        ]
 
     # YARIM İL seçimləri seçilmiş ilə görə daralır (mockup davranışı).
     period_choices = [p for p in periods if not selected_year or p.academic_year == selected_year]
@@ -111,6 +190,17 @@ def journal_list_context(user, request=None) -> dict:
         "journal_kinds": SlotKind.choices,
         "journal_selected_kind": selected_kind,
         "teacher_label": user.get_full_name() or user.username,
+        # Korrektor (İKT rəhbəri/admin) geniş görünüşü + əlavə filtrlər.
+        "journal_is_broad": is_broad,
+        "journal_teachers": teacher_choices,
+        "journal_selected_teacher": selected_teacher,
+        "journal_groups": group_choices,
+        "journal_selected_group": selected_group,
+        "journal_faculties": faculty_choices,
+        "journal_selected_faculty": selected_faculty,
+        "journal_departments": dept_choices,
+        "journal_selected_department": selected_dept,
+        "journal_query": query,
     }
 
 

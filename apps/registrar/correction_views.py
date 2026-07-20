@@ -73,6 +73,25 @@ def correction_offering_list(request):
     )
 
 
+def build_correction_context(offering, request) -> dict:
+    """Jurnal-düzəliş editoru üçün paylaşılan kontekst — HƏM standalone
+    ``correction_journal`` səhifəsi, HƏM DƏ ``journal_detail``-in yerində düzəliş
+    rejimi (``?correct=1``) eyni audited editoru göstərsin deyə. Bütün yazma
+    ``corrections.apply_correction`` (audit + sənəd) üzərindəndir."""
+    return {
+        "journal": gradebook.get_offering_journal(offering=offering, newest_first=True),
+        "corrections_map": corrections.corrections_map_for_offering(offering, include_document=True),
+        "correction_reasons": CorrectionReason.choices,
+        "attendance_choices": [
+            (AttendanceStatus.PRESENT, pgettext("registrar.correction", "İştirak (iə)")),
+            (AttendanceStatus.ABSENT, pgettext("registrar.correction", "Qayıb (qb)")),
+            (AttendanceStatus.EXCUSED, pgettext("registrar.correction", "Üzrlü qayıb (üq)")),
+        ],
+        "apply_url": reverse("registrar:correction_apply", args=[offering.pk]),
+        "corrector_name": request.user.get_full_name() or request.user.username,
+    }
+
+
 @login_required
 def correction_journal(request, offering_id):
     """Bir açılışın jurnalı düzəliş rejimində (müəllimdəki grid + sarı düzəliş xanaları)."""
@@ -83,27 +102,9 @@ def correction_journal(request, offering_id):
         pk=offering_id,
         organization=org,
     )
-    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
-    corrections_map = corrections.corrections_map_for_offering(offering, include_document=True)
-
-    return render(
-        request,
-        "registrar/correction_journal.html",
-        {
-            "offering": offering,
-            "journal": journal,
-            "corrections_map": corrections_map,
-            "correction_reasons": CorrectionReason.choices,
-            "attendance_choices": [
-                (AttendanceStatus.PRESENT, pgettext("registrar.correction", "İştirak (iə)")),
-                (AttendanceStatus.ABSENT, pgettext("registrar.correction", "Qayıb (qb)")),
-                (AttendanceStatus.EXCUSED, pgettext("registrar.correction", "Üzrlü qayıb (üq)")),
-            ],
-            "apply_url": reverse("registrar:correction_apply", args=[offering.pk]),
-            "corrector_name": request.user.get_full_name() or request.user.username,
-            "active_main_nav": "journal",
-        },
-    )
+    context = build_correction_context(offering, request)
+    context.update({"offering": offering, "active_main_nav": "journal"})
+    return render(request, "registrar/correction_journal.html", context)
 
 
 @login_required
