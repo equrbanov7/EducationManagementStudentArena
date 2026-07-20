@@ -32,6 +32,18 @@ decoration over the same enrollment aggregation the "Transkript" section uses
         </div>
         {% else %}
 
+        {# Kumulyativ xülasə — ÜOMG 100 bal üzərindən (Σ(bal×kredit)/Σ(kredit)) + toplanmış kredit. #}
+        <div class="oa-summary">
+            <div class="oa-summary-box oa-summary-box--uomg">
+                <span class="oa-summary-n">{{ oa.overall_uomg|floatformat:2 }}</span>
+                <span class="oa-summary-l">{% trans "Kumulyativ ÜOMG (100 bal)" context "profile.overall_academic" %}</span>
+            </div>
+            <div class="oa-summary-box">
+                <span class="oa-summary-n">{{ oa.total_credits_earned }}</span>
+                <span class="oa-summary-l">{% trans "Toplanmış kredit" context "profile.overall_academic" %}</span>
+            </div>
+        </div>
+
         <div class="oa-filter-bar" data-oa-filter-bar>
             <div class="oa-filter-search">
                 <i class="fas fa-search"></i>
@@ -130,8 +142,8 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                         <i class="fas fa-award"></i> {{ sem.credits_earned }} {% trans "kredit" context "profile.overall_academic" %}
                     </span>
                     {% if sem.gpa is not None %}
-                    <span class="oa-semester-gpa" title="{% trans 'Semestr ÜOMG (orta bal)' context 'profile.overall_academic' %}">
-                        {% trans "ÜOMG" context "profile.overall_academic" %} {{ sem.gpa|floatformat:2 }}
+                    <span class="oa-semester-gpa" title="{% trans 'Semestr ÜOMG — 100 bal üzərində kredit-çəkili orta' context 'profile.overall_academic' %}">
+                        {% trans "ÜOMG" context "profile.overall_academic" %} {{ sem.gpa|floatformat:2 }}<span class="oa-scale">/100</span>
                     </span>
                     {% endif %}
                 </div>

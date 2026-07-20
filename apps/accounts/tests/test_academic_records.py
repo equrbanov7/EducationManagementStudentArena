@@ -185,6 +185,27 @@ class RecordsAggregationTest(_RecordsBase):
             )
         self.assertEqual(data["total"], 3)  # yalnız fakültə A
 
+    def test_year_and_season_filter(self):
+        with bypass_rls():
+            data = records_overview.build_records_overview(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+            )
+            self.assertEqual(data["year_options"], ["2024/2025"])  # fixture-də tək dövr
+            same = records_overview.build_records_overview(
+                organization=self.org,
+                scope=ORG_WIDE_SCOPE,
+                filters={"year": "2024/2025", "season": "Payız"},
+                offset=0,
+                limit=100,
+            )
+            none_year = records_overview.build_records_overview(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={"year": "2099/2100"}, offset=0, limit=100
+            )
+        self.assertEqual(same["summary"]["credits_earned"], data["summary"]["credits_earned"])
+        self.assertEqual(same["summary"]["fails"], data["summary"]["fails"])
+        self.assertEqual(none_year["summary"]["credits_earned"], 0)
+        self.assertEqual(none_year["summary"]["fails"], 0)
+
 
 class RecordsScopingTest(_RecordsBase):
     def test_dean_sees_only_own_faculty(self):

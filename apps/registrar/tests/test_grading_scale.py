@@ -193,7 +193,8 @@ class GradingScalePipelineTest(TestCase):
             data = transcript.build_student_transcript(student=self.student, organization=self.org)
         row = data["semesters"][0]["rows"][0]
         self.assertEqual(row["result"]["letter"], "S")
-        self.assertEqual(data["cumulative_gpa"], Decimal("4.00"))
+        # ÜOMG 100 bal: tək fənn total 87 → 87.00.
+        self.assertEqual(data["cumulative_gpa"], Decimal("87.00"))
 
     def test_analytics_matches_finals_with_custom_scale(self):
         from apps.registrar import analytics
@@ -201,7 +202,8 @@ class GradingScalePipelineTest(TestCase):
         with bypass_rls():
             data = analytics.build_period_analytics(organization=self.org, period=self.period)
         self.assertTrue(data["has_data"])
-        self.assertEqual(data["totals"]["avg_gpa"], Decimal("4.00"))
+        # ÜOMG 100 bal: tək fənn total 87 → 87.00.
+        self.assertEqual(data["totals"]["avg_gpa"], Decimal("87.00"))
 
 
 class GradingScaleEndpointTest(TestCase):
