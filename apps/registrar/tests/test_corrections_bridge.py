@@ -454,13 +454,16 @@ class CorrectionViewTest(_BaseJournalSetup):
         resp = self.client.get("/jurnal/duzelis/")
         self.assertEqual(resp.status_code, 404)
 
-    def test_corrector_opens_correction_list_and_journal(self):
+    def test_corrector_correction_urls_redirect_in_place(self):
+        # Ayrı düzəliş səhifələri ləğv edildi → jurnal siyahısına / yerində düzəliş
+        # rejiminə (journal_detail ?correct=1) yönləndirir.
         self._login_corrector()
         resp = self.client.get("/jurnal/duzelis/")
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, self.subject.name)
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(resp.url.endswith("/jurnal/"))
         resp2 = self.client.get(f"/jurnal/duzelis/{self.offering.id}/")
-        self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(resp2.status_code, 302)
+        self.assertIn("?correct=1", resp2.url)
 
     def test_apply_endpoint_records_correction(self):
         _lesson, mark = self._seminar_mark(7, 3)

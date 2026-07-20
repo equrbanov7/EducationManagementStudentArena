@@ -94,9 +94,13 @@
 .jd-day-stat b { color: #0f2a5e; font-size: 1.05rem; }
 
 /* ── Yerində düzəliş rejimi (journal_detail ?correct=1) ────────────────────── */
-/* Correction rejimi açıq olduqda normal jurnal pəncərəsi (tablar/grid) gizlənir —
-   yalnız audited düzəliş editoru görünür. Böyük şablon dəyişikliyi olmadan. */
-.jd2.is-correcting .jd2-window { display: none; }
+/* Correction rejimi NORMAL grid-in ÖZÜNDƏ işləyir (ayrı editor yox) — xanalar
+   düyməyə çevrilir, klikdə modal açılır. Grid gizlədilmir. */
+.jd2.is-correcting .corr-cell-btn {
+    width: 100%; border: 0; background: transparent; cursor: pointer;
+    font: inherit; color: inherit; padding: 4px 2px; border-radius: 6px;
+}
+.jd2.is-correcting .corr-cell-btn:hover { background: #fef3c7; outline: 1px solid #fcd34d; }
 .jd2-correct-toggle {
     display: inline-flex; align-items: center; gap: 0.4rem; margin-left: auto;
     padding: 0.5rem 0.9rem; border-radius: 10px; font-weight: 700; font-size: 0.85rem;

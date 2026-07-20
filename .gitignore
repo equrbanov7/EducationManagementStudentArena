@@ -197,3 +197,4 @@ backups/
 # k6 stress-test artifacts (generated; data/ has a shared test password)
 k6/reports/
 k6/data/
+QKU_Stress_Test_Hesabat_*.docx
