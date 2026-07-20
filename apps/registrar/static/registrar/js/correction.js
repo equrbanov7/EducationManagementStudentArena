@@ -57,7 +57,9 @@
     // Bal yalnız seminar/lab xanasında seçilə bilər.
     var allowsScore = cell.dataset.allowsScore === "1";
     scoreOpt.disabled = !allowsScore;
-    fieldSel.value = "attendance";
+    // Seminar/lab (bal olan) xana → default "Bal" düzəlişi (normal jurnal kimi);
+    // mühazirə (yalnız davamiyyət) → "Davamiyyət".
+    fieldSel.value = allowsScore ? "score" : "attendance";
     if (cell.dataset.status) attWrap.querySelector("select").value = cell.dataset.status;
     if (cell.dataset.score) scoreWrap.querySelector("input").value = cell.dataset.score;
     // Bootstrap-select toggle-ları proqramla dəyişən value/disabled-i əks etdirsin
