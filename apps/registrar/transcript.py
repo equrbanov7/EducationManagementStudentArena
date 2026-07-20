@@ -184,24 +184,19 @@ def build_student_transcript(*, student, organization, program=None):
 
 
 def _fail_reason_code(result) -> str:
-    """Bir KƏSİLMİŞ nəticənin səbəb kodu — dörd AYRI hal (25% ≠ q/b):
+    """Bir KƏSİLMİŞ nəticənin səbəb kodu — iki AYRI hal (q/b ≠ 25%):
 
-    * ``"barred"`` — 25% davamiyyət həddi keçilib, tələbə İMTAHANA BURAXILMIR
-      (imtahan verə bilmir → avtomatik kəsilir);
-    * ``"exam"``   — imtahan verilib, amma çıxış balı minimumdan aşağıdır;
-    * ``"qb"``     — imtahan OK-dir, amma giriş (jurnal q/b) balı aşağı olduğundan
-      cəm keçid həddindən aşağı düşür → Q/B-DAN kəsilib (25%-dən fərqli);
-    * ``"total"``  — digər hallar (ümumi bal aşağı).
-
-    Prioritet ``exam_bridge._resit_reason`` ilə uyğundur ki, badge resit səbəbi
-    ilə ziddiyyət təşkil etməsin.
+    * ``"qb"``     — DAVAMİYYƏTDƏN kəsilib: qayıb dərs saatlarının 25%-ini keçdiyi
+      üçün tələbə final imtahanına BURAXILMIR → fənn yenidən keçilməlidir (yenidən
+      tədris). ``result["barred"]``.
+    * ``"exam25"`` — İMTAHANDAN kəsilib: tələbə final imtahanına GİRİB, amma fənni
+      keçə bilməyib → 25% (fənn haqqının 25%-i) ilə bir dəfə təkrar imtahan hüququ.
+    * ``"total"``  — nadir/qeyri-müəyyən hal (imtahan qeyd olunmayıb).
     """
     if result["barred"]:
-        return "barred"
-    if result["graded"] and not result["exam_ok"]:
-        return "exam"
-    if result["graded"] and result["exam_ok"] and result["total"] < result["pass_threshold"]:
-        return "qb"
+        return "qb"  # davamiyyət 25% saat həddi → imtahana buraxılmayıb
+    if result["graded"] and not result["passed"]:
+        return "exam25"  # imtahana girib, kəsilib → 25% təkrar imtahan
     return "total"
 
 
@@ -251,7 +246,17 @@ def build_student_overall_record(*, student, organization):
                     "fail_reason": _fail_reason_code(result) if result["failed"] else "",
                 }
             )
-        semesters.append({"period": period, "season": season, "rows": rows})
+        semesters.append(
+            {
+                "period": period,
+                "season": season,
+                "rows": rows,
+                # Semestrdə TOPLANMIŞ kredit (yalnız keçilmiş fənlər) — cədvəldə göstərilir.
+                "credits_earned": sem.get("credits_earned", 0),
+                "credits_gpa": sem.get("credits_gpa", 0),
+                "gpa": sem.get("gpa"),
+            }
+        )
 
     # build_student_transcript orders semesters chronologically (ascending);
     # the cabinet wants the newest semester first, like the transcript screenshot.
