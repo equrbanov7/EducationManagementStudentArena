@@ -71,10 +71,12 @@
                         matches = row.getAttribute("data-oa-failed") === "1";
                     }
                     if (matches && onlyBarred) {
-                        matches = row.getAttribute("data-oa-barred") === "1";
+                        // 25% həddi — İMTAHANA BURAXILMAYAN (q/b-dan fərqli).
+                        matches = row.getAttribute("data-oa-fail-reason") === "barred";
                     }
                     if (matches && onlyAbsenceFail) {
-                        matches = row.getAttribute("data-oa-fail-reason") === "absence";
+                        // Q/B-DAN kəsilən — giriş balı aşağı (25% barred deyil).
+                        matches = row.getAttribute("data-oa-fail-reason") === "qb";
                     }
 
                     row.classList.toggle("is-hidden", !matches);
