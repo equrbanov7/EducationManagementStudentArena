@@ -577,6 +577,17 @@
             form.action = form.getAttribute("data-add-url");
             actionInput.value = "add_lesson";
         }
+        // Sənədli düzəliş sahələri (İKT): yalnız KİLİDLİ dərs redaktəsində — PDF
+        // + qeyd məcburi olur; əlavə/kilidsiz redaktədə gizli və məcburiyyətsiz.
+        var corrFields = modal.querySelector("[data-jd-corr-fields]");
+        if (corrFields) {
+            var needCorr = editing && editData.locked;
+            corrFields.hidden = !needCorr;
+            var doc = corrFields.querySelector("[data-jd-corr-doc]");
+            var note = corrFields.querySelector("[data-jd-corr-note]");
+            if (doc) doc.required = needCorr;
+            if (note) note.required = needCorr;
+        }
         refreshParityBadge();
         setStep(3); // stepper: Yeni dərs addımı
         modal.hidden = false;
@@ -619,6 +630,7 @@
                 start: editBtn.getAttribute("data-lesson-start"),
                 end: editBtn.getAttribute("data-lesson-end"),
                 instructor: editBtn.getAttribute("data-lesson-instructor"),
+                locked: editBtn.getAttribute("data-lesson-locked") === "1",
             });
             return;
         }

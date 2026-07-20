@@ -21,6 +21,7 @@ from . import approval, finals, grade_audit, gradebook, schedule
 from .models import (
     ApprovalStatus,
     AttendanceStatus,
+    CorrectionReason,
     CourseOffering,
     LessonKind,
     ScheduleSlot,
@@ -162,8 +163,7 @@ def journal_detail(request, offering_id):
         "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
-        # Seminar/lab xanası üçün bal seçimləri — YALNIZ tam ədəd 0–10 (0.5
-        # addım YOX; müəllim tələbi). bootstrap select-option: q/b · i/e · bal.
+        # Seminar/lab bal seçimləri — YALNIZ tam ədəd 0–10 (q/b · i/e · bal).
         "seminar_score_options": list(range(0, 11)),
         # Kollokvium xanası üçün bal seçimləri — 0–10 tam ədəd (seminar kimi).
         "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
@@ -171,10 +171,10 @@ def journal_detail(request, offering_id):
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
         "can_correct_journal": can_correct,
-        # İKT rəhbəri/superuser 2 saat pəncərədən sonra da dərsi redaktə edir → ✎ görünür.
         "can_override_lessons": bool(
             getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
         ),
+        "correction_reasons": CorrectionReason.choices,
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
         "lesson_teacher_choices": journal_extras.lesson_teacher_choices(offering),

@@ -25,7 +25,15 @@ from core.rls import journal_unlock
 
 from . import grade_audit
 from .gradebook import LESSON_SCORE_MAX, lesson_allows_score, recompute_absence_hours
-from .models import AttendanceStatus, CorrectionField, CorrectionReason, JournalCorrection, LessonMark
+from .models import (
+    AttendanceStatus,
+    CorrectionField,
+    CorrectionReason,
+    JournalCorrection,
+    LessonCorrection,
+    LessonKind,
+    LessonMark,
+)
 
 CORRECT_PERMISSION = "journal.correct"
 
@@ -169,6 +177,140 @@ def apply_correction(
             events=[{"enrollment": enrollment, "kind": jn.EVENT_CORRECTED}],
         )
     )
+    return correction
+
+
+def _lesson_time_str(lesson) -> str:
+    """Dərsin saat aralığını "HH:MM–HH:MM" mətni kimi (snapshot üçün)."""
+    if lesson.start_time and lesson.end_time:
+        return f"{lesson.start_time.strftime('%H:%M')}–{lesson.end_time.strftime('%H:%M')}"
+    return ""
+
+
+@transaction.atomic
+def apply_lesson_correction(
+    *,
+    lesson,
+    new_date=None,
+    new_kind=None,
+    new_hours=None,
+    new_start_time=None,
+    new_end_time=None,
+    reason: str,
+    note: str,
+    document,
+    by_user,
+    request=None,
+) -> LessonCorrection:
+    """Dərs sətrinə (tarix / tip / saat) rəsmi, sənədli düzəliş — İKT rəhbəri üçün.
+
+    Bal düzəlişi ilə eyni müqavilə: səbəb + qeyd + PDF MƏCBURİ; 2 saatlıq
+    pəncərə + keçmiş-tarix qadağası keçilir; dəyişiklik audit olunur. Ən azı bir
+    sahə dəyişməlidir (əks halda ``ValidationError``)."""
+    from .gradebook import update_lesson
+
+    if reason not in CorrectionReason.values:
+        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
+    note = (note or "").strip()
+    if not note:
+        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
+    if not document:
+        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+
+    old = {
+        "date": lesson.date,
+        "kind": lesson.kind,
+        "hours": lesson.hours,
+        "time": _lesson_time_str(lesson),
+    }
+    kind = new_kind if (new_kind in dict(LessonKind.choices)) else None
+    ok = update_lesson(
+        lesson=lesson,
+        date=new_date or None,
+        kind=kind,
+        hours=new_hours,
+        start_time=new_start_time,
+        end_time=new_end_time,
+        allow_past=True,
+        allow_locked=True,
+    )
+    if not ok:
+        raise ValidationError(
+            pgettext("registrar.correction", "The journal is published — the lesson can't be changed.")
+        )
+    lesson.refresh_from_db()
+
+    new = {"date": lesson.date, "kind": lesson.kind, "hours": lesson.hours, "time": _lesson_time_str(lesson)}
+    if all(old[k] == new[k] for k in old):
+        raise ValidationError(pgettext("registrar.correction", "Nothing changed — adjust a field before saving."))
+
+    correction = LessonCorrection(
+        organization=lesson.organization,
+        lesson=lesson,
+        old_date=old["date"],
+        new_date=new["date"],
+        old_kind=old["kind"],
+        new_kind=new["kind"],
+        old_hours=old["hours"],
+        new_hours=new["hours"],
+        old_time=old["time"],
+        new_time=new["time"],
+        reason=reason,
+        note=note,
+        document=document,
+        corrected_by=by_user,
+        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+    )
+    correction.full_clean()  # PDF validatorları
+    correction.save()
+
+    # DİQQƏT: LessonKind label-ları lazy translation proxy-dir → JSONField-ə
+    # birbaşa yazılsa DB xətası verib TRANZAKSİYANI zəhərləyir. Hər dəyər str().
+    changes = []
+    _k = {k: str(v) for k, v in dict(LessonKind.choices).items()}
+    if old["date"] != new["date"]:
+        changes.append(
+            {"item": str(pgettext("registrar.correction", "Date")), "old": str(old["date"]), "new": str(new["date"])}
+        )
+    if old["kind"] != new["kind"]:
+        changes.append(
+            {
+                "item": str(pgettext("registrar.correction", "Type")),
+                "old": _k.get(old["kind"], old["kind"]),
+                "new": _k.get(new["kind"], new["kind"]),
+            }
+        )
+    if old["hours"] != new["hours"]:
+        changes.append(
+            {"item": str(pgettext("registrar.correction", "Hours")), "old": str(old["hours"]), "new": str(new["hours"])}
+        )
+    if old["time"] != new["time"]:
+        changes.append(
+            {
+                "item": str(pgettext("registrar.correction", "Time")),
+                "old": old["time"] or "—",
+                "new": new["time"] or "—",
+            }
+        )
+    for c in changes:
+        c["student"] = f"{lesson.date} · {_k.get(lesson.kind, lesson.kind)}"
+    # Audit savepoint-də: xəta olsa yalnız audit geri qayıdır, dərs düzəlişi qalır.
+    try:
+        with transaction.atomic():
+            grade_audit.log_grade_changes(
+                offering=lesson.offering, by_user=by_user, kind="lesson-correction", changes=changes
+            )
+            log_action(
+                action=AuditAction.UPDATE,
+                user=by_user,
+                organization=lesson.organization,
+                obj=correction,
+                reason=f"lesson correction: {reason}",
+                request=request,
+                changes=[{"field": c["item"], "old": c["old"], "new": c["new"]} for c in changes],
+            )
+    except Exception:  # audit heç vaxt axını sındırmır
+        pass
     return correction
 
 

@@ -20,7 +20,7 @@ from django.utils.translation import pgettext_lazy
 from core.models import TimeStampedModel, UUIDModel
 from core.upload_security import FileUploadValidator
 
-from .grading import LessonMark
+from .grading import Lesson, LessonKind, LessonMark
 
 _MAX_DOCUMENT_MB = 10
 
@@ -28,6 +28,11 @@ _MAX_DOCUMENT_MB = 10
 def correction_document_path(instance, filename: str) -> str:
     """Qorunan media altında saxlama yolu (org-scoped)."""
     return f"journal_corrections/{instance.organization_id}/{filename}"
+
+
+def lesson_correction_document_path(instance, filename: str) -> str:
+    """Dərs-səviyyə düzəliş sənədi üçün org-scoped saxlama yolu."""
+    return f"journal_lesson_corrections/{instance.organization_id}/{filename}"
 
 
 class CorrectionField(models.TextChoices):
@@ -90,3 +95,51 @@ class JournalCorrection(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"correction<{self.lesson_mark_id}> {self.field} ({self.reason})"
+
+
+class LessonCorrection(UUIDModel, TimeStampedModel):
+    """Dərs sətrinə (tarix / dərs tipi / saat) edilən rəsmi düzəliş — sənədli.
+
+    İKT Rəhbəri kilidlənmiş (2 saat keçmiş) dərsin tarixini, tipini (mühazirə ↔
+    seminar) və ya saatını düzəldəndə bal düzəlişi ilə eyni tələb qüvvədədir:
+    səbəb + qeyd + PDF sənəd məcburidir və audit olunur. Köhnə/yeni dəyərlər
+    snapshot kimi saxlanır ki, dərs sonra dəyişsə belə tarixçə qalsın.
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="lesson_corrections"
+    )
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="corrections")
+    old_date = models.DateField(null=True, blank=True)
+    new_date = models.DateField(null=True, blank=True)
+    old_kind = models.CharField(max_length=16, choices=LessonKind.choices, blank=True, default="")
+    new_kind = models.CharField(max_length=16, choices=LessonKind.choices, blank=True, default="")
+    old_hours = models.PositiveSmallIntegerField(null=True, blank=True)
+    new_hours = models.PositiveSmallIntegerField(null=True, blank=True)
+    old_time = models.CharField(max_length=32, blank=True, default="")
+    new_time = models.CharField(max_length=32, blank=True, default="")
+    reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
+    note = models.TextField(help_text="Düzəlişin izahı (məcburi).")
+    document = models.FileField(
+        upload_to=lesson_correction_document_path,
+        validators=[FileUploadValidator(allowed_extensions={".pdf"}, max_size_mb=_MAX_DOCUMENT_MB)],
+        help_text="Əsas sənəd — yalnız PDF (məcburi).",
+    )
+    corrected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="lesson_corrections"
+    )
+    corrected_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.lesson_correction.meta", "lesson correction")
+        verbose_name_plural = pgettext_lazy("registrar.model.lesson_correction.meta", "lesson corrections")
+        indexes = [
+            models.Index(fields=["organization", "lesson"]),
+            models.Index(fields=["organization", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"lesson-correction<{self.lesson_id}> ({self.reason})"

@@ -11,7 +11,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
             <h3 id="jd-lesson-modal-title-edit" data-jd-modal-title-edit hidden>{% trans "Dərsi redaktə et" context "registrar.journal" %}</h3>
             <button type="button" class="jd-modal-close jd2-modal-close" data-jd-modal-close aria-label="{% trans 'Bağla' context 'registrar.journal' %}">✕</button>
         </div>
-        <form method="post" data-jd-lesson-form data-add-url="{% url 'registrar:journal_detail' offering.id %}">
+        <form method="post" enctype="multipart/form-data" data-jd-lesson-form data-add-url="{% url 'registrar:journal_detail' offering.id %}">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_lesson" data-jd-lesson-action>
             <div class="jd-modal-body">
@@ -48,8 +48,9 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-field-pair">
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "DƏRS TİPİ" context "registrar.journal" %}</span>
-                        {% if locked_lesson_kind %}
-                        {% comment %}Cədvəldə tək növ slot var — tip kilidlidir (server də məcbur edir).{% endcomment %}
+                        {% if locked_lesson_kind and not can_override_lessons %}
+                        {% comment %}Cədvəldə tək növ slot var — tip kilidlidir (server də məcbur edir).
+                        İKT rəhbəri kilidi keçir (mühazirə↔seminar qarışığını düzəldə bilsin).{% endcomment %}
                         <input type="hidden" name="lesson_kind" value="{{ locked_lesson_kind }}">
                         <span class="jd2-locked-kind" data-jd-lesson-kind-locked>
                             {% for value, label in lesson_kinds %}{% if value == locked_lesson_kind %}{{ label }}{% endif %}{% endfor %}
@@ -97,6 +98,34 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                         </select>
                     </div>
                     <small class="jd-field-hint">{% trans "Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu dərsin müəllimini seçin." context "registrar.journal" %}</small>
+                </div>
+                {% endif %}
+                {% if can_override_lessons %}
+                {% comment %}İKT rəhbəri kilidlənmiş (2 saat keçmiş) dərsi dəyişəndə bal
+                düzəlişi kimi sənədli düzəliş tələb olunur — JS yalnız kilidli dərs
+                redaktəsində göstərir (data-jd-corr-fields).{% endcomment %}
+                <div class="jd2-corr-fields" data-jd-corr-fields hidden>
+                    <p class="jd2-corr-banner">
+                        <i class="fas fa-lock"></i>
+                        {% trans "Bu dərs kilidlənib (2 saat keçib). Tarix/tip/saat dəyişikliyi rəsmi sənədlə (təqdimat) audit olunur." context "registrar.journal" %}
+                    </p>
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "DÜZƏLİŞ SƏBƏBİ" context "registrar.journal" %}</span>
+                        <div class="bootstrap-single-select">
+                            <select name="correction_reason" class="bootstrap-single-select__native" data-jd-corr-reason data-bootstrap-select>
+                                {% for value, label in correction_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "QEYD (məcburi)" context "registrar.journal" %}</span>
+                        <textarea name="correction_note" rows="2" data-jd-corr-note
+                                  placeholder="{% trans 'Düzəlişin izahı…' context 'registrar.journal' %}"></textarea>
+                    </div>
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "SƏNƏD — PDF (məcburi)" context "registrar.journal" %}</span>
+                        <input type="file" name="correction_document" accept="application/pdf" data-jd-corr-doc>
+                    </div>
                 </div>
                 {% endif %}
                 <p class="jd-modal-note">

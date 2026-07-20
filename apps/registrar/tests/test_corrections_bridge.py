@@ -17,6 +17,7 @@ from apps.registrar.models import (
     Curriculum,
     CurriculumSubject,
     JournalCorrection,
+    LessonCorrection,
     LessonKind,
     LessonMark,
     Program,
@@ -485,3 +486,55 @@ class CorrectionViewTest(_BaseJournalSetup):
         mark.refresh_from_db()
         self.assertEqual(mark.score, Decimal("8"))
         self.assertTrue(JournalCorrection.objects.filter(lesson_mark=mark).exists())
+
+
+class LessonCorrectionServiceTest(_BaseJournalSetup):
+    """#5/#6 — İKT dərs tarixi/tipi/saatı dəyişəndə sənədli, audited düzəliş."""
+
+    def test_requires_document(self):
+        lesson, _mark = self._absent_lesson(3)
+        with bypass_rls():
+            with self.assertRaises(ValidationError):
+                corrections.apply_lesson_correction(
+                    lesson=lesson,
+                    new_date="2024-10-05",
+                    reason=CorrectionReason.TECHNICAL,
+                    note="Səhv tarix",
+                    document=None,
+                    by_user=self.admin,
+                )
+
+    def test_changes_date_and_kind_and_records_snapshot(self):
+        lesson, _mark = self._absent_lesson(3)  # LECTURE, 2024-10-03
+        with bypass_rls():
+            corr = corrections.apply_lesson_correction(
+                lesson=lesson,
+                new_date="2024-10-09",
+                new_kind=LessonKind.SEMINAR,
+                reason=CorrectionReason.TECHNICAL,
+                note="Mühazirə/seminar qarışıb + tarix səhv",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+        lesson.refresh_from_db()
+        self.assertEqual(lesson.date, datetime.date(2024, 10, 9))
+        self.assertEqual(lesson.kind, LessonKind.SEMINAR)
+        self.assertEqual(corr.old_kind, LessonKind.LECTURE)
+        self.assertEqual(corr.new_kind, LessonKind.SEMINAR)
+        self.assertEqual(corr.old_date, datetime.date(2024, 10, 3))
+        self.assertEqual(corr.corrected_by_name, "Aygün Registrar")
+        self.assertTrue(LessonCorrection.objects.filter(lesson=lesson).exists())
+
+    def test_no_change_rejected(self):
+        lesson, _mark = self._absent_lesson(3)
+        with bypass_rls():
+            with self.assertRaises(ValidationError):
+                corrections.apply_lesson_correction(
+                    lesson=lesson,
+                    new_date="2024-10-03",
+                    new_kind=LessonKind.LECTURE,
+                    reason=CorrectionReason.TECHNICAL,
+                    note="Dəyişiklik yoxdur",
+                    document=_pdf(),
+                    by_user=self.admin,
+                )
