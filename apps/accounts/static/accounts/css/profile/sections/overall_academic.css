@@ -89,6 +89,14 @@
 .oa-filter-select select {
     height: 38px;
 }
+/* Bootstrap-select toggle düyməsi də tam 38px olsun (bərabər input hündürlüyü). */
+.oa-filter-select .bootstrap-single-select__toggle {
+    min-height: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
 
 .oa-filter-label {
     font-size: 0.72rem;
@@ -101,25 +109,55 @@
 .oa-filter-toggles {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem 1rem;
+    gap: 0.5rem;
     align-items: center;
-    padding-bottom: 2px;
 }
 
-.oa-toggle {
+/* Modern pill/chip süzgəc — kvadrat checkbox əvəzinə. Checkbox gizli qalır
+   (JS .checked oxuyur), aktivləşəndə pill göy-dolur. */
+.oa-chip {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    height: 38px;
+    padding: 0 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-600);
     font-size: 0.82rem;
-    color: var(--ems-neutral-700);
+    font-weight: 600;
     cursor: pointer;
     user-select: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.oa-toggle input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--ems-primary-600);
-    cursor: pointer;
+.oa-chip i {
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+.oa-chip input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+.oa-chip:hover {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+}
+.oa-chip:has(input:checked) {
+    background: var(--ems-primary-600);
+    border-color: var(--ems-primary-600);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.35);
+}
+.oa-chip:has(input:checked) i {
+    opacity: 1;
+}
+/* Klaviatura ilə fokus üçün görünən halqa (checkbox gizli olsa da). */
+.oa-chip:focus-within {
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
 }
 
 .oa-filter-reset {
@@ -297,6 +335,20 @@
     background: var(--ems-danger-100);
     color: var(--ems-danger-strong);
     white-space: nowrap;
+}
+/* 25% həddi (imtahana buraxılmayan) — q/b-dən vizual fərqlənsin: amber. */
+.oa-reason-badge.is-barred {
+    background: var(--ems-warning-100, #fef3c7);
+    color: var(--ems-warning-700, #b45309);
+}
+
+/* Bölmə başlığı altındakı təsvir (dublikat başlıq əvəzinə). */
+.oa-subtitle {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--ems-neutral-500);
+    font-size: 0.88rem;
+    line-height: 1.45;
 }
 
 @media (max-width: 640px) {

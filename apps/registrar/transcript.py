@@ -184,14 +184,24 @@ def build_student_transcript(*, student, organization, program=None):
 
 
 def _fail_reason_code(result) -> str:
-    """ "absence" / "exam" / "total" classification for a FAILED result — same
-    priority order as :func:`apps.registrar.exam_bridge._resit_reason` (barred
-    over ungraded-exam over total-below-threshold) so the "Ümumi tədris
-    məlumatı" badge never disagrees with the resit-eligibility reason."""
+    """Bir KƏSİLMİŞ nəticənin səbəb kodu — dörd AYRI hal (25% ≠ q/b):
+
+    * ``"barred"`` — 25% davamiyyət həddi keçilib, tələbə İMTAHANA BURAXILMIR
+      (imtahan verə bilmir → avtomatik kəsilir);
+    * ``"exam"``   — imtahan verilib, amma çıxış balı minimumdan aşağıdır;
+    * ``"qb"``     — imtahan OK-dir, amma giriş (jurnal q/b) balı aşağı olduğundan
+      cəm keçid həddindən aşağı düşür → Q/B-DAN kəsilib (25%-dən fərqli);
+    * ``"total"``  — digər hallar (ümumi bal aşağı).
+
+    Prioritet ``exam_bridge._resit_reason`` ilə uyğundur ki, badge resit səbəbi
+    ilə ziddiyyət təşkil etməsin.
+    """
     if result["barred"]:
-        return "absence"
+        return "barred"
     if result["graded"] and not result["exam_ok"]:
         return "exam"
+    if result["graded"] and result["exam_ok"] and result["total"] < result["pass_threshold"]:
+        return "qb"
     return "total"
 
 
@@ -216,10 +226,13 @@ def build_student_overall_record(*, student, organization):
     for sem in data["semesters"]:
         period = sem["period"]
         year_display = period.year_display
+        # Fəsil AYRICA (Payız/Yaz/Yay) — period.name ("2024/2025 Payız semestri")
+        # deyil; il artıq qrup başlığındadır, filtr yalnız fəsli süzsün.
+        season = sem.get("season") or _season_of(period)
         if year_display not in year_options:
             year_options.append(year_display)
-        if period.name not in season_options:
-            season_options.append(period.name)
+        if season not in season_options:
+            season_options.append(season)
 
         rows = []
         for row in sem["rows"]:
@@ -238,7 +251,7 @@ def build_student_overall_record(*, student, organization):
                     "fail_reason": _fail_reason_code(result) if result["failed"] else "",
                 }
             )
-        semesters.append({"period": period, "rows": rows})
+        semesters.append({"period": period, "season": season, "rows": rows})
 
     # build_student_transcript orders semesters chronologically (ascending);
     # the cabinet wants the newest semester first, like the transcript screenshot.
