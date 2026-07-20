@@ -100,6 +100,31 @@ class JournalViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "jv_student")
 
+    def test_correction_toggle_visible_for_corrector_only(self):
+        with bypass_rls():
+            admin = User.objects.create_user("jv_corr", "jv_corr@qku.edu.az", "pw", is_superuser=True)
+        # Korrektor jurnalı açanda "Jurnal düzəlişi" toggle-ı görünür.
+        resp = self._client(admin).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertContains(resp, "jd2-correct-toggle")
+        # Adi müəllim toggle-ı görmür.
+        resp2 = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertNotContains(resp2, "jd2-correct-toggle")
+
+    def test_correction_mode_renders_inline_editor(self):
+        with bypass_rls():
+            admin = User.objects.create_user("jv_corr2", "jv_corr2@qku.edu.az", "pw", is_superuser=True)
+        # ?correct=1 → eyni səhifədə audited düzəliş editoru (ayrı səhifə YOX).
+        resp = self._client(admin).get(reverse("registrar:journal_detail", args=[self.offering.id]), {"correct": "1"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "data-correction-root")  # correction.js kökü
+        self.assertContains(resp, "is-correcting")  # normal grid gizlədilir
+        self.assertContains(resp, "data-corr-form")  # audited düzəliş modalı (səbəb/qeyd/PDF)
+        # Adi müəllim ?correct=1 versə də editor açılmır (korrektor deyil).
+        resp2 = self._client(self.teacher).get(
+            reverse("registrar:journal_detail", args=[self.offering.id]), {"correct": "1"}
+        )
+        self.assertNotContains(resp2, "data-correction-root")
+
     def test_non_instructor_cannot_access(self):
         resp = self._client(self.other_teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
         self.assertEqual(resp.status_code, 404)
