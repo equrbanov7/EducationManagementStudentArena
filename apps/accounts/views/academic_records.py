@@ -283,3 +283,37 @@ def student_search(request):
         if len(results) > limit:
             break
     return JsonResponse({"results": results[:limit], "has_more": len(results) > limit})
+
+
+@login_required
+@require_GET
+def journal_teacher_search(request):
+    """Müəllim axtarışı — təşkilatın dərs açılışlarının (offering) müəllimləri, scope
+    daxilində. Elektron jurnal siyahısının müəllim filtri üçün (İKT rəhbəri/admin)."""
+    organization, scope = _scope(request)
+    if organization is None or not scope.has_structure_access:
+        return JsonResponse({"results": [], "has_more": False})
+
+    from apps.registrar.models import CourseOffering
+
+    offerings = CourseOffering.objects.filter(organization=organization, is_active=True, instructor__isnull=False)
+    # Unit-scoped istifadəçi yalnız öz alt-ağacındakı qrupların offering-lərinin
+    # müəllimlərini görür; org-wide hamısını.
+    if not scope.is_org_wide:
+        offerings = offerings.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
+    teacher_ids = list(offerings.values_list("instructor_id", flat=True).distinct())
+    if not teacher_ids:
+        return JsonResponse({"results": [], "has_more": False})
+
+    users = get_user_model().objects.filter(pk__in=teacher_ids)
+    query = (request.GET.get("q") or "").strip()
+    if query:
+        users = users.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query)
+        )
+    users = users.order_by("last_name", "first_name", "username")
+    return _page(
+        users,
+        request,
+        lambda u: {"id": str(u.id), "text": (u.get_full_name() or "").strip() or u.username},
+    )
