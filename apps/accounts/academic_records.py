@@ -22,7 +22,7 @@ from django.db.models import Q
 
 from apps.organizations.models import OrgUnit
 from apps.organizations.scoping import UnitScope
-from apps.registrar import analytics
+from apps.registrar import analytics, transcript
 from apps.registrar.models import Enrollment, StudentAcademicRecord
 
 _TWO = Decimal("0.01")
@@ -77,20 +77,35 @@ def _scoped_records(organization, scope: UnitScope, filters: dict):
     return qs
 
 
-def _aggregate_students(organization, records):
-    """Per-student aqreqasiya (kredit/kəsr/qb/exam25/GPA) + ümumi box-lar.
+def _aggregate_students(organization, records, *, year=None, season=None):
+    """Per-student aqreqasiya (kredit/kəsr/qb/exam25/ÜOMG) + ümumi box-lar + il seçimləri.
 
-    Bir dəfə bütün enrollment-ləri çəkir, bulk map qurur, hər enrollment-i
-    :func:`analytics.evaluate_enrollment` ilə qiymətləndirir."""
+    Bir dəfə bütün enrollment-ləri çəkir, tədris ili/semestr süzgəcini (verilibsə)
+    tətbiq edir, bulk map qurur, hər enrollment-i :func:`analytics.evaluate_enrollment`
+    ilə qiymətləndirir. Qaytarır: ``(rows, box, year_options)``."""
     students = {r.student_id: r for r in records}
     if not students:
-        return [], _empty_summary()
+        return [], _empty_summary(), []
 
-    enrollments = list(
+    all_enrollments = list(
         Enrollment.objects.filter(organization=organization, student_id__in=list(students))
         .exclude(status=Enrollment.Status.DROPPED)
-        .select_related("offering", "offering__subject")
+        .select_related("offering", "offering__subject", "offering__period")
     )
+    # Tədris ili seçimləri — scope-dakı bütün dövrlərdən (süzgəcdən ƏVVƏL, ki dropdown
+    # həmişə mövcud illəri göstərsin). Ən yeni öndə.
+    year_options = sorted(
+        {e.offering.period.year_display for e in all_enrollments if e.offering.period_id},
+        reverse=True,
+    )
+    # Tədris ili / semestr süzgəci — seçiləndə box-lar həmin dövrü əks etdirir.
+    enrollments = all_enrollments
+    if year:
+        enrollments = [e for e in enrollments if e.offering.period_id and e.offering.period.year_display == year]
+    if season:
+        enrollments = [
+            e for e in enrollments if e.offering.period_id and transcript._season_of(e.offering.period) == season
+        ]
     maps = analytics.build_evaluation_maps(organization, enrollments)
 
     per_student: dict = {
@@ -103,7 +118,8 @@ def _aggregate_students(organization, records):
             continue
         result = analytics.evaluate_enrollment(enrollment, maps)
         if result["passed"] or result["failed"]:
-            acc["quality_points"] += result["gpa"] * result["credit"]
+            # ÜOMG 100 bal: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni).
+            acc["quality_points"] += result["total"] * result["credit"]
             acc["gpa_credits"] += result["credit"]
         if result["passed"]:
             acc["credits_earned"] += result["credit"]
@@ -148,7 +164,7 @@ def _aggregate_students(organization, records):
     del box["quality_points"], box["gpa_credits"]
     # Kəsri çox olan öndə, sonra ad üzrə — problemli tələbələr görünsün.
     rows.sort(key=lambda r: (-r["fails"], r["name"].lower()))
-    return rows, box
+    return rows, box, year_options
 
 
 def _empty_summary() -> dict:
@@ -175,10 +191,19 @@ def build_records_overview(*, organization, scope: UnitScope, filters=None, offs
     if not scope.has_structure_access:
         summary = _empty_summary()
         del summary["quality_points"], summary["gpa_credits"]
-        return {"has_access": False, "summary": summary, "results": [], "has_more": False, "total": 0}
+        return {
+            "has_access": False,
+            "summary": summary,
+            "results": [],
+            "has_more": False,
+            "total": 0,
+            "year_options": [],
+        }
 
     records = list(_scoped_records(organization, scope, filters))
-    rows, summary = _aggregate_students(organization, records)
+    rows, summary, year_options = _aggregate_students(
+        organization, records, year=filters.get("year"), season=filters.get("season")
+    )
     total = len(rows)
     page = rows[offset : offset + limit]
     return {
@@ -187,6 +212,7 @@ def build_records_overview(*, organization, scope: UnitScope, filters=None, offs
         "results": page,
         "has_more": offset + limit < total,
         "total": total,
+        "year_options": year_options,
     }
 
 

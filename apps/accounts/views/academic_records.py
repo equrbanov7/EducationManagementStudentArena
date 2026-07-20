@@ -26,7 +26,7 @@ from apps.registrar import transcript
 from apps.registrar.models import Program, StudentAcademicRecord
 from core.roles import user_has_any_role
 
-_FILTER_KEYS = ("faculty", "department", "program", "group", "student")
+_FILTER_KEYS = ("faculty", "department", "program", "group", "student", "year", "season")
 _PAGE_DEFAULT = 10
 _PAGE_MAX = 50
 
