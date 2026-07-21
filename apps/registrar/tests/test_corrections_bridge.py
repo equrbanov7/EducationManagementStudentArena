@@ -758,3 +758,28 @@ class ItemCorrectionTest(_BaseJournalSetup):
             self.assertFalse(
                 ComponentScoreCorrection.objects.filter(component=comp, enrollment=self.enrollment).exists()
             )
+
+
+class JournalAccessTest(_BaseJournalSetup):
+    """Korrektor (İKT) düzəliş rejimi olmadan HEÇ NƏ dəyişə bilməz — birbaşa
+    redaktə yalnız müəllim/sahib/superuser üçündür."""
+
+    def test_direct_editor_excludes_corrector(self):
+        from types import SimpleNamespace
+
+        from apps.registrar.journal_access import can_edit_journal, is_direct_editor
+
+        with bypass_rls():
+            # İKT: jurnalı AÇA bilər (korrektor), amma birbaşa redaktor DEYİL.
+            ikt = SimpleNamespace(is_authenticated=True, is_superuser=False, is_ikt_rehber=True, id=987654)
+            self.assertTrue(can_edit_journal(ikt, self.offering))
+            self.assertFalse(is_direct_editor(ikt, self.offering))
+            # Müəllim (offering instructor): hər ikisi.
+            self.assertTrue(is_direct_editor(self.teacher, self.offering))
+            self.assertTrue(can_edit_journal(self.teacher, self.offering))
+            # Superuser: birbaşa redaktor (god mode).
+            self.assertTrue(is_direct_editor(self.admin, self.offering))
+            # Kənar istifadəçi: nə biri, nə o biri.
+            outsider = User.objects.create_user("cx_out", "cx_out@qku.edu.az", "pw")
+            self.assertFalse(can_edit_journal(outsider, self.offering))
+            self.assertFalse(is_direct_editor(outsider, self.offering))

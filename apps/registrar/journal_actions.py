@@ -20,7 +20,7 @@ from django.views.decorators.http import require_POST
 
 from . import gradebook, journal_extras
 from .models import CourseOffering, Lesson, SelfWorkTopic
-from .views import _can_edit_journal
+from .views import _can_edit_journal, _is_direct_editor
 
 
 def _offering_or_404(request, offering_id):
@@ -36,6 +36,24 @@ def _offering_or_404(request, offering_id):
 def _back(offering, tab=""):
     url = reverse("registrar:journal_detail", args=[offering.pk])
     return redirect(f"{url}#{tab}" if tab else url)
+
+
+def _corrector_direct_write_blocked(request, offering, tab=""):
+    """Korrektor (İKT) birbaşa (audit-siz) yazmağa cəhd edirsə RƏDD et.
+
+    İKT jurnalı yalnız «Jurnal düzəlişi» rejimində sənədli (audited) dəyişir; normal
+    tab-lardan (sərbəst iş / kollokvium / kurs işi) birbaşa yazma qadağandır. Müəllim /
+    sahib / superuser (birbaşa redaktor) təsirlənmir. Qaytarır: redirect (bloklandı) və
+    ya None (icazə var)."""
+    if _is_direct_editor(request.user, offering):
+        return None
+    messages.error(
+        request,
+        _(
+            "Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT rəhbəri yalnız sənədli düzəliş edə bilər."
+        ),
+    )
+    return _back(offering, tab)
 
 
 def _resolve_instructor(offering, raw_id):
@@ -172,6 +190,9 @@ def kollokvium_save(request, offering_id):
     from apps.registrar import kollokvium_windows as kw
 
     offering = _offering_or_404(request, offering_id)
+    blocked = _corrector_direct_write_blocked(request, offering, "kollokvium")
+    if blocked:
+        return blocked
     components = list(journal_extras.ensure_kollokviums(offering))
     idx_by_id = {str(c.id): idx for idx, c in enumerate(components)}
     today = timezone.localdate()
@@ -210,6 +231,9 @@ def kollokvium_save(request, offering_id):
 def selfwork_action(request, offering_id):
     """Sərbəst iş tabı: mövzu əlavə/sil və işarə (1/0) dəyişiklikləri."""
     offering = _offering_or_404(request, offering_id)
+    blocked = _corrector_direct_write_blocked(request, offering, "serbest")
+    if blocked:
+        return blocked
     action = request.POST.get("action")
     # İKT/superuser 2 saatlıq geri-alma pəncərəsini keçir (correction override).
     override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
@@ -266,6 +290,9 @@ def coursework_save(request, offering_id):
     İki format dəstəklənir: mockup formu (``cw_enrollment``/``cw_topic``/
     ``cw_score``/``cw_date`` — bir tələbə) və toplu ``cwtopic__<id>`` sahələri."""
     offering = _offering_or_404(request, offering_id)
+    blocked = _corrector_direct_write_blocked(request, offering, "kurs-isi")
+    if blocked:
+        return blocked
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     saved = 0
     frozen = 0
