@@ -90,6 +90,8 @@
 /* Read-only jurnal (müəllim/tələbə) düzəliş nişanı düymə kimi — klik → tarixçə. */
 .corr-fixed-badge { background: none; border: none; cursor: pointer; padding: 0 2px; }
 .jd2-cell.corr-fixed { background: #fff3cd; }
+/* Sərbəst iş / kollokvium / kurs işi düzəlişi normal görünüşdə də sarı. */
+.sw-chip.corr-fixed, .jd2-ro.corr-fixed, .jd2-cw-score.corr-fixed { background: #fff3cd; }
 .sjx-row--fixed { background: #fffdf5; }
 .sjx-row--fixed .corr-fixed-badge { color: #d99e13; margin-left: 4px; }
 

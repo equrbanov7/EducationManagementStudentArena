@@ -465,3 +465,25 @@ def coursework_corrections_map(offering, *, include_document=False):
 
 # COURSE_WORK_MAX re-export (validasiya üçün — journal_extras-dən).
 COURSE_WORK_MAX = Decimal("100")
+
+
+def annotate_normal_view(offering, context):
+    """Normal (düzəliş-rejimsiz) görünüş üçün sərbəst iş / kurs işi / kollokvium
+    board-larını sarı düzəliş işarəsi (``corrected`` + ``corr_key``) ilə annotasiya
+    et (yerində) və read-only tarixçə map-larını qaytar (sənədsiz). Beləcə bal
+    xanası kimi bu tab-larda da düzəlişli xana normal görünüşdə sarı olur + kliklə
+    tarixçə açılır. Kontekst-də board-lar artıq qurulub — onları dəyişirik."""
+    sw = selfwork_corrections_map(offering)
+    cw = coursework_corrections_map(offering)
+    cm = component_corrections_map(offering)
+    if context.get("selfwork_board"):
+        annotate_selfwork_board(context["selfwork_board"], sw)
+    if context.get("coursework_rows") is not None:
+        annotate_coursework_rows(context["coursework_rows"], cw)
+    if context.get("kollokvium_grid"):
+        annotate_kollokvium_grid(context["kollokvium_grid"], cm)
+    return {
+        "selfwork_corrections_map": sw,
+        "coursework_corrections_map": cw,
+        "component_corrections_map": cm,
+    }

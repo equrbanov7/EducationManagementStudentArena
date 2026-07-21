@@ -13,3 +13,8 @@ xanadakı ✎ nişanına klik → correction_history.js modalı bu data ilə aç
     </div>
 </div>
 {{ corrections_map|json_script:"corrHistoryDataRO" }}
+{% comment %}Sərbəst iş / kurs işi / kollokvium düzəlişləri də normal görünüşdə sarı +
+kliklə tarixçə (data-corr-type ilə ayrılır). Yalnız müəllim jurnalında mövcuddur.{% endcomment %}
+{% if selfwork_corrections_map %}{{ selfwork_corrections_map|json_script:"corrSwHistoryDataRO" }}{% endif %}
+{% if coursework_corrections_map %}{{ coursework_corrections_map|json_script:"corrCwHistoryDataRO" }}{% endif %}
+{% if component_corrections_map %}{{ component_corrections_map|json_script:"corrCmHistoryDataRO" }}{% endif %}
