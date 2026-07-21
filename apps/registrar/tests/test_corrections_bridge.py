@@ -192,6 +192,28 @@ class CorrectionServiceTest(_BaseJournalSetup):
         self.assertEqual(c.new_score, 9)
         self.assertEqual(c.corrected_by_name, "Aygün Registrar")  # from profile, not typed
 
+    def test_revert_last_grade_correction_restores_previous_value(self):
+        # Səhvən edilmiş düzəlişi geri al → xana köhnə (müəllim) dəyərinə qayıdır,
+        # sarı işarə (JournalCorrection) itir.
+        _lesson, mark = self._seminar_mark(11, 3)
+        with bypass_rls():
+            corrections.apply_correction(
+                mark=mark,
+                field=CorrectionField.SCORE,
+                new_score=9,
+                reason=CorrectionReason.APPEAL,
+                note="Səhv düzəliş",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            mark.refresh_from_db()
+            self.assertEqual(mark.score, Decimal("9"))
+            ok = corrections.revert_last_grade_correction(mark=mark, by_user=self.admin)
+            self.assertTrue(ok)
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, Decimal("3"))  # köhnə dəyər qayıtdı
+        self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())  # sarı getdi
+
     def test_float_score_rejected(self):
         _lesson, mark = self._seminar_mark(4, 3)
         with bypass_rls():
@@ -486,6 +508,30 @@ class CorrectionViewTest(_BaseJournalSetup):
         mark.refresh_from_db()
         self.assertEqual(mark.score, Decimal("8"))
         self.assertTrue(JournalCorrection.objects.filter(lesson_mark=mark).exists())
+
+    def test_delete_endpoint_reverts_correction(self):
+        _lesson, mark = self._seminar_mark(9, 4)
+        with bypass_rls():
+            corrections.apply_correction(
+                mark=mark,
+                field=CorrectionField.SCORE,
+                new_score=10,
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+        self._login_corrector()
+        resp = self.client.post(
+            f"/jurnal/duzelis/{self.offering.id}/sil/",
+            data={"type": "grade", "mark_id": str(mark.id)},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get("ok"))
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, Decimal("4"))
+        self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())
 
 
 class LessonCorrectionServiceTest(_BaseJournalSetup):

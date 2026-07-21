@@ -19,7 +19,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from . import corrections, gradebook
-from .models import AttendanceStatus, CorrectionReason, CourseOffering, LessonMark
+from .models import AttendanceStatus, CorrectionReason, CourseOffering, Lesson, LessonMark
 
 
 def _require_corrector(request):
@@ -59,6 +59,7 @@ def build_correction_context(offering, request) -> dict:
             (AttendanceStatus.EXCUSED, pgettext("registrar.correction", "Üzrlü qayıb (üq)")),
         ],
         "apply_url": reverse("registrar:correction_apply", args=[offering.pk]),
+        "delete_url": reverse("registrar:correction_delete", args=[offering.pk]),
         "corrector_name": request.user.get_full_name() or request.user.username,
     }
 
@@ -109,4 +110,33 @@ def correction_apply(request, offering_id):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"ok": True})
     messages.success(request, pgettext("registrar.correction", "Düzəliş yadda saxlanıldı."))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
+
+
+@login_required
+@require_POST
+def correction_delete(request, offering_id):
+    """Səhvən edilmiş SON düzəlişi geri al (revert): dəyər köhnəyə qayıdır, sarı itir."""
+    _require_corrector(request)
+    org = _active_org(request)
+    offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
+    ctype = (request.POST.get("type") or "grade").strip()
+
+    if ctype == "lesson":
+        lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
+        ok = corrections.revert_last_lesson_correction(lesson=lesson, by_user=request.user, request=request)
+    else:  # grade (davamiyyət/bal xanası)
+        mark = get_object_or_404(
+            LessonMark.objects.select_related("lesson", "enrollment", "organization"),
+            pk=request.POST.get("mark_id"),
+            lesson__offering=offering,
+        )
+        ok = corrections.revert_last_grade_correction(mark=mark, by_user=request.user, request=request)
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"ok": ok})
+    if ok:
+        messages.success(request, pgettext("registrar.correction", "Düzəliş geri alındı."))
+    else:
+        messages.error(request, pgettext("registrar.correction", "Geri alınacaq düzəliş tapılmadı."))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")

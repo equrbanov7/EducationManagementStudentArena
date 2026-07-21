@@ -14,6 +14,7 @@ urlpatterns = [
     path("duzelis/", correction_views.correction_offering_list, name="correction_list"),
     path("duzelis/<uuid:offering_id>/", correction_views.correction_journal, name="correction_journal"),
     path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
+    path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("teqvim/", views.calendar_view, name="calendar"),

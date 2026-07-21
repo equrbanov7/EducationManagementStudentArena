@@ -314,11 +314,102 @@ def apply_lesson_correction(
     return correction
 
 
+@transaction.atomic
+def revert_last_grade_correction(*, mark, by_user, request=None) -> bool:
+    """Bir xananın SON düzəlişini geri al: dəyəri köhnəyə qaytar, qeydi sil.
+
+    Səhvən edilmiş düzəlişi geri qaytarmaq üçün (İKT/korrektor). Zəncirdə başqa
+    düzəliş qalsa xana sarı qalır; sonuncu da silinsə əsl (müəllim) dəyər qayıdır
+    və sarı işarə itir. Davamiyyət saatları yenidən hesablanır; audit yazılır."""
+    correction = mark.corrections.order_by("-created_at").first()
+    if correction is None:
+        return False
+    if correction.field == CorrectionField.ATTENDANCE:
+        prev, cur = correction.new_status, correction.old_status
+        mark.status = correction.old_status
+        old_repr = _ATT_LABELS.get(prev, prev)
+        new_repr = _ATT_LABELS.get(cur, cur)
+    else:
+        mark.score = correction.old_score
+        old_repr = str(correction.new_score)
+        new_repr = str(correction.old_score if correction.old_score is not None else "—")
+    with journal_unlock():
+        mark.save(update_fields=["status", "score", "updated_at"])
+    correction.delete()
+    enrollment = mark.enrollment
+    recompute_absence_hours(enrollment=enrollment)
+    lesson = mark.lesson
+    try:
+        with transaction.atomic():
+            grade_audit.log_grade_changes(
+                offering=lesson.offering,
+                by_user=by_user,
+                kind="correction-revert",
+                changes=[
+                    {
+                        "student": grade_audit.student_label(enrollment),
+                        "item": f"{lesson.date} · {str(lesson.get_kind_display())}",
+                        "old": old_repr,
+                        "new": f"{new_repr} ({str(pgettext('registrar.correction', 'correction reverted'))})",
+                    }
+                ],
+            )
+    except Exception:  # audit heç vaxt axını sındırmır
+        pass
+
+    from apps.registrar import journal_notifications as jn
+
+    transaction.on_commit(
+        lambda: jn.send_journal_events(
+            offering=lesson.offering, events=[{"enrollment": enrollment, "kind": jn.EVENT_CORRECTED}]
+        )
+    )
+    return True
+
+
+@transaction.atomic
+def revert_last_lesson_correction(*, lesson, by_user, request=None) -> bool:
+    """Dərsin SON sənədli düzəlişini geri al: tarix/tip/saat/saatı köhnəyə qaytar."""
+    from .gradebook import update_lesson
+
+    correction = lesson.corrections.order_by("-created_at").first()
+    if correction is None:
+        return False
+    start = end = None
+    if correction.old_time and "–" in correction.old_time:
+        from apps.registrar import schedule as schedule_service
+
+        start, end = schedule_service.parse_time_slot(correction.old_time.replace("–", "|"))
+    update_lesson(
+        lesson=lesson,
+        date=correction.old_date,
+        kind=correction.old_kind or None,
+        hours=correction.old_hours,
+        start_time=start or "",
+        end_time=end or "",
+        allow_past=True,
+        allow_locked=True,
+    )
+    correction.delete()
+    try:
+        with transaction.atomic():
+            grade_audit.log_grade_changes(
+                offering=lesson.offering,
+                by_user=by_user,
+                kind="lesson-correction-revert",
+                changes=[{"student": str(lesson.date), "item": "dərs", "old": "düzəliş", "new": "geri alındı"}],
+            )
+    except Exception:  # audit heç vaxt axını sındırmır
+        pass
+    return True
+
+
 # ── Oxu köməkçiləri (grid/tələbə annotasiyası) ───────────────────────────────
 
 
 def _entry(c: JournalCorrection, *, include_document: bool) -> dict:
     data = {
+        "id": str(c.id),
         "date": c.created_at.strftime("%d.%m.%Y %H:%M"),
         "field": c.field,
         "field_display": c.get_field_display(),
