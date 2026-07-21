@@ -43,6 +43,10 @@ def coursework_correction_document_path(instance, filename: str) -> str:
     return f"journal_coursework_corrections/{instance.organization_id}/{filename}"
 
 
+def component_correction_document_path(instance, filename: str) -> str:
+    return f"journal_component_corrections/{instance.organization_id}/{filename}"
+
+
 class CorrectionField(models.TextChoices):
     """Xananın hansı hissəsi düzəldilir."""
 
@@ -236,3 +240,44 @@ class CourseWorkCorrection(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"coursework-correction<{self.enrollment_id}> ({self.reason})"
+
+
+class ComponentScoreCorrection(UUIDModel, TimeStampedModel):
+    """Komponent balına (məs. Kollokvium K1/K2/K3 — komponent × tələbə) sənədli
+    düzəliş — bal xanası ilə eyni müqavilə (səbəb + qeyd + PDF, audit, sarı, geri
+    alına bilər). Müəllim balı səhv yazıbsa İKT rəhbəri düzəldir."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="component_corrections"
+    )
+    component = models.ForeignKey("registrar.AssessmentComponent", on_delete=models.CASCADE, related_name="corrections")
+    enrollment = models.ForeignKey(
+        "registrar.Enrollment", on_delete=models.CASCADE, related_name="component_corrections"
+    )
+    old_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    new_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
+    note = models.TextField(help_text="Düzəlişin izahı (məcburi).")
+    document = models.FileField(
+        upload_to=component_correction_document_path,
+        validators=[FileUploadValidator(allowed_extensions={".pdf"}, max_size_mb=_MAX_DOCUMENT_MB)],
+        help_text="Əsas sənəd — yalnız PDF (məcburi).",
+    )
+    corrected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="component_corrections"
+    )
+    corrected_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.component_correction.meta", "component-score correction")
+        verbose_name_plural = pgettext_lazy("registrar.model.component_correction.meta", "component-score corrections")
+        indexes = [
+            models.Index(fields=["organization", "component", "enrollment"]),
+            models.Index(fields=["organization", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"component-correction<{self.component_id}/{self.enrollment_id}> ({self.reason})"

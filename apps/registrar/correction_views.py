@@ -20,7 +20,16 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from . import corrections, gradebook
-from .models import AttendanceStatus, CorrectionReason, CourseOffering, Enrollment, Lesson, LessonMark, SelfWorkTopic
+from .models import (
+    AssessmentComponent,
+    AttendanceStatus,
+    CorrectionReason,
+    CourseOffering,
+    Enrollment,
+    Lesson,
+    LessonMark,
+    SelfWorkTopic,
+)
 
 
 def _require_corrector(request):
@@ -54,16 +63,21 @@ def build_correction_context(offering, request) -> dict:
 
     sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True)
     cw_map = item_corrections.coursework_corrections_map(offering, include_document=True)
+    cm_map = item_corrections.component_corrections_map(offering, include_document=True)
     return {
         "journal": gradebook.get_offering_journal(offering=offering, newest_first=True),
         "corrections_map": corrections.corrections_map_for_offering(offering, include_document=True),
-        # Sərbəst iş / kurs işi düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
+        # Sərbəst iş / kurs işi / kollokvium düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
         "selfwork_board": item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map),
         "coursework_rows": item_corrections.annotate_coursework_rows(
             journal_extras.get_course_work_rows(offering), cw_map
         ),
+        "kollokvium_grid": item_corrections.annotate_kollokvium_grid(
+            journal_extras.get_kollokvium_grid(offering), cm_map
+        ),
         "selfwork_corrections_map": sw_map,
         "coursework_corrections_map": cw_map,
+        "component_corrections_map": cm_map,
         "correction_reasons": CorrectionReason.choices,
         "attendance_choices": [
             (AttendanceStatus.PRESENT, pgettext("registrar.correction", "İştirak (iə)")),
@@ -108,6 +122,12 @@ def _apply_item_correction(request, offering):
             new_done=request.POST.get("new_done") == "1",
             **common,
         )
+    elif target == "component":
+        component = get_object_or_404(AssessmentComponent, pk=request.POST.get("component_id"), offering=offering)
+        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        item_corrections.apply_component_correction(
+            component=component, enrollment=enrollment, new_score=request.POST.get("new_score_cm"), **common
+        )
     else:  # coursework
         enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
         item_corrections.apply_coursework_correction(
@@ -129,7 +149,7 @@ def correction_apply(request, offering_id):
 
     target = (request.POST.get("target") or "grade").strip()
     try:
-        if target in ("selfwork", "coursework"):
+        if target in ("selfwork", "coursework", "component"):
             _apply_item_correction(request, offering)
         else:
             mark = get_object_or_404(
@@ -173,7 +193,7 @@ def correction_delete(request, offering_id):
     if ctype == "lesson":
         lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
         ok = corrections.revert_last_lesson_correction(lesson=lesson, by_user=request.user, request=request)
-    elif ctype in ("selfwork", "coursework"):
+    elif ctype in ("selfwork", "coursework", "component"):
         from . import item_corrections
 
         enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
@@ -181,6 +201,11 @@ def correction_delete(request, offering_id):
             topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
             ok = item_corrections.revert_last_selfwork_correction(
                 topic=topic, enrollment=enrollment, by_user=request.user, request=request
+            )
+        elif ctype == "component":
+            component = get_object_or_404(AssessmentComponent, pk=request.POST.get("component_id"), offering=offering)
+            ok = item_corrections.revert_last_component_correction(
+                component=component, enrollment=enrollment, by_user=request.user, request=request
             )
         else:
             ok = item_corrections.revert_last_coursework_correction(

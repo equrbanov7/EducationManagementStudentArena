@@ -22,6 +22,7 @@ from .academic import (
     WeekType,
 )
 from .corrections import (
+    ComponentScoreCorrection,
     CorrectionField,
     CorrectionReason,
     CourseWorkCorrection,
@@ -73,6 +74,7 @@ __all__ = [
     "LessonCorrection",
     "SelfWorkCorrection",
     "CourseWorkCorrection",
+    "ComponentScoreCorrection",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",
