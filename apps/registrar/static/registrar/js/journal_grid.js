@@ -426,7 +426,7 @@
     // Native confirm() əvəzinə səliqəli modal (məs. dərs sütununu silmə). Başlıq/
     // mətn/düymə mətni forma data-confirm-* atributlarından oxunur. z-index 2000 →
     // dərs modalının (1080) üstündə görünür.
-    function showJdConfirm(triggerForm) {
+    function showJdConfirm(triggerForm, onOk) {
         var title = triggerForm.getAttribute("data-confirm-title") || "Təsdiq";
         var body = triggerForm.getAttribute("data-confirm-body") || "";
         var detail = triggerForm.getAttribute("data-confirm-detail") || "";
@@ -449,9 +449,13 @@
         overlay.addEventListener("click", function (e) { if (e.target === overlay) { close(); } });
         overlay.querySelector(".jd-sw-del__cancel").addEventListener("click", close);
         overlay.querySelector(".jd-sw-del__ok").addEventListener("click", function () {
-            triggerForm.setAttribute("data-jd-confirm-ok", "1");
             close();
-            triggerForm.submit();
+            if (typeof onOk === "function") {
+                onOk();
+            } else {
+                triggerForm.setAttribute("data-jd-confirm-ok", "1");
+                triggerForm.submit();
+            }
         });
         document.addEventListener("keydown", function esc(e) {
             if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
@@ -474,7 +478,7 @@
 
     var form = modal.querySelector("[data-jd-lesson-form]");
     var actionInput = modal.querySelector("[data-jd-lesson-action]");
-    var deleteForm = modal.querySelector("[data-jd-lesson-delete]");
+    var deleteBtn = modal.querySelector("[data-jd-lesson-delete]");
     var titleAdd = modal.querySelector("[data-jd-modal-title-add]");
     var titleEdit = modal.querySelector("[data-jd-modal-title-edit]");
     var dateInput = modal.querySelector("[data-jd-lesson-date]");
@@ -515,6 +519,10 @@
     }
     if (form && timeSelect) {
         form.addEventListener("submit", function (ev) {
+            // Silmə (do_delete) dərs saatı tələb etmir — yalnız redaktə/əlavə üçün.
+            if (ev.submitter && ev.submitter.name === "do_delete") {
+                return;
+            }
             if (!timeSelect.value) {
                 ev.preventDefault();
                 if (timeError) timeError.hidden = false;
@@ -531,6 +539,27 @@
         });
     }
 
+    // Silmə düyməsi redaktə formasının içindədir → təsdiq → formu do_delete ilə göndər.
+    // Kilidli dərsdə PDF `required` olduğundan requestSubmit brauzer validasiyasını
+    // işlədir (sənədsiz silmək OLMAZ); server də apply_lesson_deletion-da yoxlayır.
+    if (deleteBtn && form) {
+        deleteBtn.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            showJdConfirm(deleteBtn, function () {
+                if (form.requestSubmit) {
+                    form.requestSubmit(deleteBtn);
+                } else {
+                    var h = document.createElement("input");
+                    h.type = "hidden";
+                    h.name = "do_delete";
+                    h.value = "1";
+                    form.appendChild(h);
+                    form.submit();
+                }
+            });
+        });
+    }
+
     function setSelectValue(select, value) {
         if (!select) return;
         select.value = value || "";
@@ -542,7 +571,7 @@
         var editing = Boolean(editData);
         titleAdd.hidden = editing;
         titleEdit.hidden = !editing;
-        deleteForm.hidden = !editing;
+        deleteBtn.hidden = !editing;
         // Dərs saatı xəta vəziyyətini sıfırla (əvvəlki cəhddən qalmasın).
         if (timeError) timeError.hidden = true;
         var _tg = timeToggle();
@@ -552,9 +581,8 @@
         if (editing) {
             form.action = editData.actionUrl;
             actionInput.value = "update_lesson";
-            deleteForm.action = editData.actionUrl;
             // Təsdiq modalında hansı dərs silinir — tarix + mövzu göstər.
-            deleteForm.setAttribute(
+            deleteBtn.setAttribute(
                 "data-confirm-detail",
                 (editData.date || "") + (editData.topic ? " · " + editData.topic : "")
             );

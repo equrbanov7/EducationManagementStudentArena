@@ -121,7 +121,11 @@ class LessonCorrection(UUIDModel, TimeStampedModel):
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="lesson_corrections"
     )
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="corrections")
+    # SET_NULL (CASCADE deyil): kilidlənmiş dərs SİLİNƏNDƏ də sənədli düzəliş qeydi
+    # (kim, niyə, PDF) qalmalıdır — silinmiş dərsin izi itməsin.
+    lesson = models.ForeignKey(Lesson, null=True, blank=True, on_delete=models.SET_NULL, related_name="corrections")
+    lesson_label = models.CharField(max_length=120, blank=True, default="", help_text="Silinmə üçün dərs snapshotu.")
+    is_deletion = models.BooleanField(default=False, help_text="Bu qeyd dərsin silinməsidir (redaktə deyil).")
     old_date = models.DateField(null=True, blank=True)
     new_date = models.DateField(null=True, blank=True)
     old_kind = models.CharField(max_length=16, choices=LessonKind.choices, blank=True, default="")
