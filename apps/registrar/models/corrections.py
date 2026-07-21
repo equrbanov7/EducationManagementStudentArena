@@ -80,6 +80,10 @@ class JournalCorrection(UUIDModel, TimeStampedModel):
     new_status = models.CharField(max_length=12, blank=True, default="")
     old_score = models.IntegerField(null=True, blank=True)
     new_score = models.IntegerField(null=True, blank=True)
+    # Boş xanaya (əvvəl mark yox idi) edilən düzəliş LessonMark-ı özü yaradır.
+    # Bu bayraq geri almada həmin saxta sətri tam silmək üçün lazımdır ki, xana
+    # yenidən BOŞ olsun (uydurma 'iştirak' izi qalmasın).
+    created_mark = models.BooleanField(default=False, editable=False)
     reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
     note = models.TextField(help_text="Düzəlişin izahı — tələbə və müəllim görür (məcburi).")
     document = models.FileField(

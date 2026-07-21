@@ -154,20 +154,10 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
     </div>
     <p class="jd2-list-hint">{% trans "Qrupun sətrinə klikləməklə həmin qrupun elektron jurnalı açılır." context "registrar.journal" %}</p>
     {% if is_paginated %}
-    <nav class="jd2-pager" aria-label="{% trans 'Səhifələr' context 'registrar.journal' %}">
-        {% if page_obj.has_previous %}
-        <a class="jd2-pager-btn" href="?{% if journal_querystring %}{{ journal_querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">‹ {% trans "Əvvəlki" context "registrar.journal" %}</a>
-        {% else %}
-        <span class="jd2-pager-btn is-disabled">‹ {% trans "Əvvəlki" context "registrar.journal" %}</span>
-        {% endif %}
-        <span class="jd2-pager-info">{% blocktrans context "registrar.journal" with cur=page_obj.number total=page_obj.paginator.num_pages count_all=page_obj.paginator.count %}{{ cur }} / {{ total }} səhifə · {{ count_all }} jurnal{% endblocktrans %}</span>
-        {% if page_obj.has_next %}
-        <a class="jd2-pager-btn" href="?{% if journal_querystring %}{{ journal_querystring }}&{% endif %}page={{ page_obj.next_page_number }}">{% trans "Sonrakı" context "registrar.journal" %} ›</a>
-        {% else %}
-        <span class="jd2-pager-btn is-disabled">{% trans "Sonrakı" context "registrar.journal" %} ›</span>
-        {% endif %}
-    </nav>
+    <div class="jd2-pager-count">{% blocktrans context "registrar.journal" with total=page_obj.paginator.num_pages count_all=page_obj.paginator.count %}{{ count_all }} jurnal · {{ total }} səhifə{% endblocktrans %}</div>
     {% endif %}
+    {# Paylaşılan pagination komponenti (labs/assignments və s. ilə eyni). #}
+    {% include "partials/_pagination.html" with page_obj=page_obj extra_query=journal_querystring %}
     {% else %}
     <div class="journal-empty">
         <i class="fas fa-folder-open"></i>
