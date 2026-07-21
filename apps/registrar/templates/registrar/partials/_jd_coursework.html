@@ -30,6 +30,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                         {% if row.work.score is not None %}
                         <span class="jd2-scorechip {% if row.work.score >= 81 %}is-good{% elif row.work.score >= 61 %}is-mid{% else %}is-low{% endif %}">{{ row.work.score|floatformat:'-2' }}</span>
                         {% else %}—{% endif %}
+                        {% if row.corrected and not correction_mode %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ row.corr_key }}" data-corr-type="coursework" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                     </td>
                     {% if correction_mode %}
                     <td class="jd2-cw-act">
