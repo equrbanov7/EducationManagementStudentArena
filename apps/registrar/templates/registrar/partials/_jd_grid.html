@@ -52,7 +52,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                 {{ lm.lesson.date|date:"d.m" }}
                                 {% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}
-                                {% if can_edit and lm.editable or can_edit and can_override_lessons %}
+                                {% if can_edit and lm.editable or correction_mode and can_override_lessons %}
                                 <button type="button" class="jd2-th-edit" data-jd-edit-lesson
                                         data-lesson-id="{{ lm.lesson.id }}"
                                         data-lesson-date="{{ lm.lesson.date|date:'Y-m-d' }}"
