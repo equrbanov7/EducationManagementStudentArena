@@ -71,6 +71,13 @@
 .corr-hist-reason { font-size: 0.8rem; font-weight: 600; color: #92600a; }
 .corr-hist-note { font-size: 0.82rem; color: #5b6b8c; margin-top: 2px; }
 .corr-hist-by { font-size: 0.76rem; color: #94a3b8; margin-top: 4px; font-style: italic; }
+/* "Düzəlişi sil" — yalnız ən son düzəliş qeydində (korrektor geri alır). */
+.corr-hist-del {
+    margin-top: 8px; border: 1px solid #fca5a5; background: #fef2f2; color: #dc2626;
+    border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.corr-hist-del:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+.corr-hist-del:disabled { opacity: 0.5; cursor: default; }
 
 /* Üzrlü qayıb (üq) çipləri — müəllim grid (jd2) + tələbə cədvəli (sjx). */
 .jd2-ro--uq, .sjx-att--uq {

@@ -42,7 +42,7 @@
 
     // Düzəlişli xanada ✎ → tarixçə; başqa yerdə → düzəliş modalı.
     if (badge && cell.dataset.history && histData[cell.dataset.history]) {
-      renderHistory(histData[cell.dataset.history]);
+      renderHistory(histData[cell.dataset.history], cell.dataset.history);
       open(histModal);
       return;
     }
@@ -73,25 +73,56 @@
     open(modal);
   });
 
-  function renderHistory(entries) {
+  function renderHistory(entries, markId) {
     var body = root.querySelector("[data-corr-history-body]");
     body.innerHTML = "";
-    (entries || []).forEach(function (c) {
+    var list = entries || [];
+    list.forEach(function (c, idx) {
       var item = document.createElement("div");
       item.className = "corr-hist-item";
       var doc = c.document_url
         ? '<a class="corr-hist-doc" href="' + c.document_url + '" target="_blank" rel="noopener">PDF</a>'
         : "";
+      // Yalnız ƏN SON düzəliş geri alına bilər (zəncir pozulmasın) — sonuncu element.
+      var delBtn =
+        idx === list.length - 1 && markId
+          ? '<button type="button" class="corr-hist-del" data-corr-del="' + esc(markId) + '">' +
+            "Düzəlişi sil" +
+            "</button>"
+          : "";
       item.innerHTML =
         '<div class="corr-hist-top"><span class="corr-hist-date">' + esc(c.date) + "</span>" + doc + "</div>" +
         '<div class="corr-hist-change"><b>' + esc(c.field_display) + ":</b> " + esc(String(c.old)) +
         ' <span class="corr-hist-arrow">→</span> <b>' + esc(String(c.new)) + "</b></div>" +
         '<div class="corr-hist-reason">' + esc(c.reason) + "</div>" +
         '<div class="corr-hist-note">' + esc(c.note) + "</div>" +
-        '<div class="corr-hist-by">' + esc(c.by) + "</div>";
+        '<div class="corr-hist-by">' + esc(c.by) + "</div>" +
+        delBtn;
       body.appendChild(item);
     });
   }
+
+  // "Düzəlişi sil" → son düzəlişi geri al (dəyər köhnəyə qayıdır, sarı itir).
+  root.addEventListener("click", function (ev) {
+    var del = ev.target.closest("[data-corr-del]");
+    if (!del || !root.dataset.deleteUrl) return;
+    if (!window.confirm("Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq.")) return;
+    del.disabled = true;
+    var fd = new FormData();
+    fd.append("type", "grade");
+    fd.append("mark_id", del.getAttribute("data-corr-del"));
+    var token = form.querySelector("[name=csrfmiddlewaretoken]");
+    if (token) fd.append("csrfmiddlewaretoken", token.value);
+    fetch(root.dataset.deleteUrl, {
+      method: "POST",
+      body: fd,
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin",
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j.ok) { window.location.reload(); } else { del.disabled = false; } })
+      .catch(function () { del.disabled = false; });
+  });
 
   function esc(s) {
     var d = document.createElement("div");

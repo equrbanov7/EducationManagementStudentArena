@@ -13,7 +13,7 @@
 
 {% block content %}
 <div class="journal-page jd-page jd2 {% if correction_mode %}is-correcting{% endif %}" data-offering-id="{{ offering.id }}"
-     {% if correction_mode %}data-correction-root data-apply-url="{{ apply_url }}" data-corrector-name="{{ corrector_name }}"{% endif %}>
+     {% if correction_mode %}data-correction-root data-apply-url="{{ apply_url }}" data-delete-url="{{ delete_url }}" data-corrector-name="{{ corrector_name }}"{% endif %}>
     {# ── Səhifə başlığı + stepper (mockup) ─────────────────────────────────── #}
     <div class="jd2-pagehead">
         <div class="jd2-mark">EU</div>
