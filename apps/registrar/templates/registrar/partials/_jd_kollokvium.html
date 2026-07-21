@@ -48,7 +48,18 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
                     </td>
                     {% for cell in row.cells %}
                     <td class="jd2-cell">
-                        {% if can_edit and cell.editable %}
+                        {% if correction_mode %}
+                        {# Düzəliş rejimi: kollokvium xanası → sənədli düzəliş düyməsi (correction.js). #}
+                        <button type="button" class="jd2-ro jd2-kcorr {% if cell.score is not None %}jd2-ro--ie{% else %}jd2-ro--empty{% endif %}{% if cell.corrected %} corr-fixed{% endif %}"
+                                data-corr-cell data-corr-target="component"
+                                data-component-id="{{ cell.component.id }}" data-enrollment-id="{{ row.enrollment.id }}"
+                                data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                data-kind="{% trans 'Kollokvium' context 'registrar.journal' %}"
+                                data-cm-score="{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% endif %}"
+                                {% if cell.corrected %}data-history="{{ cell.corr_key }}"{% endif %}>
+                            {% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                        </button>
+                        {% elif can_edit and cell.editable %}
                         <div class="bootstrap-single-select jd2-semselect jd2-kselect">
                             <select class="bootstrap-single-select__native jd2-semnative" data-bootstrap-select data-jd-kscore
                                     name="kscore__{{ cell.component.id }}__{{ row.enrollment.id }}">

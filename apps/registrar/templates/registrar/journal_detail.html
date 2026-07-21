@@ -8,12 +8,12 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-corr2">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-teach">
 {% endblock %}
 
 {% block content %}
 <div class="journal-page jd-page jd2 {% if correction_mode %}is-correcting{% endif %}" data-offering-id="{{ offering.id }}"
-     {% if correction_mode %}data-correction-root data-apply-url="{{ apply_url }}" data-corrector-name="{{ corrector_name }}"{% endif %}>
+     {% if correction_mode %}data-correction-root data-apply-url="{{ apply_url }}" data-delete-url="{{ delete_url }}" data-corrector-name="{{ corrector_name }}"{% endif %}>
     {# ── Səhifə başlığı + stepper (mockup) ─────────────────────────────────── #}
     <div class="jd2-pagehead">
         <div class="jd2-mark">EU</div>
@@ -39,8 +39,8 @@
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=2 stepper_detail=True %}
 
     {% if correction_mode %}
-    {# Yerində audited düzəliş — NORMAL grid-in özündə (ayrı editor YOX). Xanalar
-       _jd_grid.html-də düyməyə çevrilir; klikdə aşağıdakı modal açılır. #}
+    {% comment %}Yerində audited düzəliş — NORMAL grid-in özündə (ayrı editor YOX).
+    Xanalar _jd_grid.html-də düyməyə çevrilir; klikdə aşağıdakı modal açılır.{% endcomment %}
     <div class="jd2-correct-banner">
         <i class="fas fa-lock-open"></i>
         {% trans "Düzəliş rejimi açıqdır — xanaya klikləyib balı/davamiyyəti dəyişin. Hər dəyişiklik səbəb + qeyd + PDF sənədlə loglanır. Bitirmək üçün yuxarıdan «kilidlə»." context "registrar.correction" %}
@@ -123,6 +123,21 @@
                 <a class="jd2-winclose" href="{% url 'registrar:journal_list' %}" aria-label="{% trans 'Bağla' context 'registrar.journal' %}">✕</a>
             </div>
         </div>
+
+        {% comment %}#7/#8/#9 — keçirilmiş dərs saatı (növ üzrə) + hər növün müəllim(lər)i
+        (mühazirə göy, seminar yaşıl, lab narıncı) + qalan saat. Yalnız MÖVCUD növlər.{% endcomment %}
+        {% if teaching_summary.kinds %}
+        <div class="jd2-teach-summary">
+            {% for k in teaching_summary.kinds %}
+            <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }}">
+                <b>{{ k.label }}</b> · {{ k.held }} {% trans "saat" context "registrar.journal" %}{% if k.teachers %} · {{ k.teachers|join:", " }}{% endif %}
+            </span>
+            {% endfor %}
+            <span class="jd2-teach-total{% if teaching_summary.over %} is-over{% endif %}">
+                {% trans "Keçirilmiş" context "registrar.journal" %}: <b>{{ teaching_summary.held_total }}</b>{% if teaching_summary.total %} / {{ teaching_summary.total }} {% trans "saat" context "registrar.journal" %} · {% trans "qalan" context "registrar.journal" %} <b>{{ teaching_summary.remaining }}</b>{% if teaching_summary.over %} — {% trans "hədd keçilib!" context "registrar.journal" %}{% endif %}{% else %} {% trans "saat" context "registrar.journal" %}{% endif %}
+            </span>
+        </div>
+        {% endif %}
 
         <nav class="jd2-tabsbar" role="tablist" aria-label="{% trans 'Jurnal bölmələri' context 'registrar.journal' %}" data-journal-tabs>
             <button type="button" class="jd2-tab is-active" role="tab" aria-selected="true" data-jtab="grid" data-jd-step-of="2" id="jd-tab-grid" aria-controls="jd-panel-grid">
@@ -248,10 +263,10 @@
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260721-jgrid"></script>
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260721-jteach"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
     {% if correction_mode %}
-    <script src="{% static 'registrar/js/correction.js' %}?v=20260720-inline" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/correction.js' %}?v=CORR3" nonce="{{ request.csp_nonce }}"></script>
     {% endif %}
 {% endblock %}

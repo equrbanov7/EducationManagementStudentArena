@@ -38,6 +38,19 @@ def _back(offering, tab=""):
     return redirect(f"{url}#{tab}" if tab else url)
 
 
+def _resolve_instructor(offering, raw_id):
+    """POST-dakı ``lesson_instructor`` id-ni istifadəçiyə çevir (boş → None).
+
+    Bu dərsin müəllimi (fənn 2 müəllim arasında bölünübsə); boşdursa dəyişmə
+    (None → update_lesson toxunmur, açılışın müəllimi qalır)."""
+    raw_id = (raw_id or "").strip()
+    if not raw_id:
+        return None
+    from django.contrib.auth import get_user_model
+
+    return get_user_model().objects.filter(pk=raw_id).first()
+
+
 @login_required
 @require_POST
 def lesson_action(request, offering_id, lesson_id):
@@ -61,20 +74,53 @@ def lesson_action(request, offering_id, lesson_id):
         from apps.registrar.journal_extras import locked_lesson_kind as _locked_lesson_kind
 
         start_time, end_time = schedule_service.parse_time_slot(request.POST.get("lesson_time"))
+        hours = int(request.POST.get("lesson_hours")) if (request.POST.get("lesson_hours") or "").isdigit() else None
+        # Dərs tipi: korrektor (İKT) kilidi keçir (mühazirə↔seminar qarışığını
+        # düzəldə bilsin); adi müəllim üçün cədvəl tək növü kilidləyir.
+        posted_kind = request.POST.get("lesson_kind") or None
+        kind = posted_kind if override else (_locked_lesson_kind(offering) or posted_kind)
+        instructor = _resolve_instructor(offering, request.POST.get("lesson_instructor"))
+
+        # İKT + kilidlənmiş dərs (2 saat keçib) → sənədli düzəliş yolu: tarix/tip/
+        # saat/mövzu/müəllim — hamısı səbəb + qeyd + PDF MƏCBURİ və audit olunur.
+        locked = not gradebook.can_edit_lesson(lesson)
+        if override and locked:
+            from django.core.exceptions import ValidationError
+
+            from apps.registrar import corrections as corrections_service
+
+            try:
+                corrections_service.apply_lesson_correction(
+                    lesson=lesson,
+                    new_date=request.POST.get("lesson_date") or None,
+                    new_kind=kind,
+                    new_hours=hours,
+                    new_start_time=start_time or "",
+                    new_end_time=end_time or "",
+                    new_topic=request.POST.get("lesson_topic"),
+                    new_instructor=instructor,
+                    reason=request.POST.get("correction_reason") or "",
+                    note=request.POST.get("correction_note") or "",
+                    document=request.FILES.get("correction_document"),
+                    by_user=request.user,
+                    request=request,
+                )
+            except ValidationError as exc:
+                messages.error(request, "; ".join(exc.messages))
+                return _back(offering)
+            messages.success(request, _("Dərs sənədli düzəlişlə yeniləndi."))
+            return _back(offering)
+
         try:
             ok = gradebook.update_lesson(
                 lesson=lesson,
                 date=request.POST.get("lesson_date") or None,
-                # Dərs tipi kilidi: cədvəldə tək növ slot varsa dəyişilə bilməz.
-                kind=_locked_lesson_kind(offering) or request.POST.get("lesson_kind") or None,
+                kind=kind,
                 topic=request.POST.get("lesson_topic"),
-                hours=(
-                    int(request.POST.get("lesson_hours"))
-                    if (request.POST.get("lesson_hours") or "").isdigit()
-                    else None
-                ),
+                hours=hours,
                 start_time=start_time or "",
                 end_time=end_time or "",
+                instructor=instructor,
                 allow_past=override,
                 allow_locked=override,
             )
@@ -140,6 +186,8 @@ def selfwork_action(request, offering_id):
     """Sərbəst iş tabı: mövzu əlavə/sil və işarə (1/0) dəyişiklikləri."""
     offering = _offering_or_404(request, offering_id)
     action = request.POST.get("action")
+    # İKT/superuser 2 saatlıq geri-alma pəncərəsini keçir (correction override).
+    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
 
     if action == "add_topic":
         topic = journal_extras.add_selfwork_topic(offering=offering, title=request.POST.get("topic_title"))
@@ -172,6 +220,7 @@ def selfwork_action(request, offering_id):
             enrollment_id=parts[2],
             done=raw == "1",
             by_user=request.user,
+            allow_locked=override,
         )
         if ok:
             changed += 1
@@ -195,6 +244,8 @@ def coursework_save(request, offering_id):
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     saved = 0
     frozen = 0
+    # İKT/superuser 2 saatlıq pəncərəni keçir (correction override).
+    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
 
     single = enrollments.get(request.POST.get("cw_enrollment") or "")
     if single is not None:
@@ -204,6 +255,7 @@ def coursework_save(request, offering_id):
             score=request.POST.get("cw_score"),
             submitted_on=parse_date(request.POST.get("cw_date") or ""),
             by_user=request.user,
+            allow_locked=override,
         )
         if ok:
             messages.success(request, _("Kurs işi yadda saxlanıldı."))
@@ -224,7 +276,12 @@ def coursework_save(request, offering_id):
         if not topic and not (score or "").strip():
             continue  # boş sətir — toxunma
         if journal_extras.save_course_work(
-            enrollment=enrollment, topic=topic, score=score, submitted_on=submitted, by_user=request.user
+            enrollment=enrollment,
+            topic=topic,
+            score=score,
+            submitted_on=submitted,
+            by_user=request.user,
+            allow_locked=override,
         ):
             saved += 1
         else:

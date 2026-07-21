@@ -22,9 +22,13 @@ from .academic import (
     WeekType,
 )
 from .corrections import (
+    ComponentScoreCorrection,
     CorrectionField,
     CorrectionReason,
+    CourseWorkCorrection,
     JournalCorrection,
+    LessonCorrection,
+    SelfWorkCorrection,
 )
 from .grading import (
     ApprovalStatus,
@@ -67,6 +71,10 @@ __all__ = [
     "CriterionScore",
     "CourseOffering",
     "JournalCorrection",
+    "LessonCorrection",
+    "SelfWorkCorrection",
+    "CourseWorkCorrection",
+    "ComponentScoreCorrection",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",
