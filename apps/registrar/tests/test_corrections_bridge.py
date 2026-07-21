@@ -214,6 +214,35 @@ class CorrectionServiceTest(_BaseJournalSetup):
         self.assertEqual(mark.score, Decimal("3"))  # köhnə dəyər qayıtdı
         self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())  # sarı getdi
 
+    def test_revert_empty_cell_correction_deletes_the_fabricated_mark(self):
+        # Boş xanaya (əvvəl mark yox) edilən düzəliş geri alınanda saxta LessonMark
+        # TAM silinir → xana yenidən BOŞ olur (uydurma 'iştirak' izi qalmaz).
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 22), kind=LessonKind.SEMINAR
+            )
+            unsaved = LessonMark(
+                organization=self.org, lesson=lesson, enrollment=self.enrollment, status=AttendanceStatus.PRESENT
+            )
+            corrections.apply_correction(
+                mark=unsaved,
+                field=CorrectionField.SCORE,
+                new_score=8,
+                reason=CorrectionReason.TECHNICAL,
+                note="Boş xanaya bal",
+                document=_pdf(),
+                by_user=self.admin,
+                was_empty=True,
+            )
+            mark = LessonMark.objects.get(lesson=lesson, enrollment=self.enrollment)
+            self.assertEqual(mark.score, Decimal("8"))
+            corr = JournalCorrection.objects.get(lesson_mark=mark)
+            self.assertTrue(corr.created_mark)  # bu düzəliş mark-ı özü yaradıb
+            # Geri al → saxta mark tam gedir, xana boş.
+            self.assertTrue(corrections.revert_last_grade_correction(mark=mark, by_user=self.admin))
+        self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
+        self.assertFalse(JournalCorrection.objects.filter(id=corr.id).exists())
+
     def test_float_score_rejected(self):
         _lesson, mark = self._seminar_mark(4, 3)
         with bypass_rls():
@@ -541,6 +570,35 @@ class CorrectionViewTest(_BaseJournalSetup):
         self.assertEqual(c.old_status, "")  # köhnə: yox idi
         self.assertEqual(c.new_status, AttendanceStatus.ABSENT)
         self.assertIsNotNone(Lesson.objects.filter(id=lesson.id).first())
+
+    def test_failed_empty_cell_correction_leaves_no_orphan_mark(self):
+        # BOŞ xanaya edilən düzəliş validasiyadan keçməsə (yanlış/olmayan PDF),
+        # HEÇ bir LessonMark qalmamalıdır — audit olunmamış 'iştirak' izi olmaz.
+        # (mark artıq apply_correction-un atomik blokunda, validasiyadan SONRA yaranır).
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 21), kind=LessonKind.SEMINAR
+            )
+        self._login_corrector()
+        resp = self.client.post(
+            f"/jurnal/duzelis/{self.offering.id}/tetbiq/",
+            data={
+                "lesson_id": str(lesson.id),
+                "enrollment_id": str(self.enrollment.id),
+                "field": "score",
+                "new_score": "8",
+                "reason": CorrectionReason.TECHNICAL,
+                "note": "Boş xana",
+                # PDF deyil → server FileUploadValidator rədd edir.
+                "document": SimpleUploadedFile("bad.txt", b"not a pdf", content_type="text/plain"),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(resp.json().get("ok"))
+        with bypass_rls():
+            self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
+            self.assertEqual(JournalCorrection.objects.count(), 0)
 
     def test_delete_endpoint_reverts_correction(self):
         _lesson, mark = self._seminar_mark(9, 4)
