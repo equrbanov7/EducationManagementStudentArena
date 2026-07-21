@@ -88,18 +88,20 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                             </td>
                             {% for cell in row.cells %}
                             <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">
-                                {% if correction_mode and cell.mark %}
-                                {# Yerində audited düzəliş: xana düyməyə çevrilir → modal (correction.js). #}
-                                <button type="button" class="corr-cell-btn" data-corr-cell
-                                        data-mark-id="{{ cell.mark.id }}"
+                                {% if correction_mode %}
+                                {# Yerində audited düzəliş: HƏR xana (boş daxil) → modal (correction.js). #}
+                                <button type="button" class="corr-cell-btn{% if not cell.mark %} corr-cell-btn--empty{% endif %}" data-corr-cell
+                                        {% if cell.mark %}data-mark-id="{{ cell.mark.id }}"{% endif %}
+                                        data-lesson-id="{{ cell.lesson.id }}"
+                                        data-enrollment-id="{{ row.enrollment.id }}"
                                         data-student="{{ row.student.get_full_name|default:row.student.username }}"
                                         data-date="{{ cell.lesson.date|date:'d.m.Y' }}"
                                         data-kind="{{ cell.lesson.get_kind_display }}"
                                         data-allows-score="{% if cell.allows_score %}1{% else %}0{% endif %}"
-                                        data-status="{{ cell.mark.status }}"
-                                        data-score="{% if cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% endif %}"
+                                        data-status="{% if cell.mark %}{{ cell.mark.status }}{% endif %}"
+                                        data-score="{% if cell.mark and cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% endif %}"
                                         {% if cell.corrected %}data-history="{{ cell.mark.id }}"{% endif %}>
-                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% elif cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% else %}i/e{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% elif cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% elif cell.mark %}i/e{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
                                 </button>
                                 {% elif can_edit and cell.writable %}
                                 <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"

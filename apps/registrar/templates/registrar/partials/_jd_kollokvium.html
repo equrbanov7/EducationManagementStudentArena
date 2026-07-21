@@ -70,7 +70,7 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
                             </select>
                         </div>
                         {% else %}
-                        <span class="jd2-ro {% if cell.score is not None %}jd2-ro--ie{% else %}jd2-ro--empty{% endif %}">{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}</span>
+                        <span class="jd2-ro {% if cell.score is not None %}jd2-ro--ie{% else %}jd2-ro--empty{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}{% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="component" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}</span>
                         {% endif %}
                     </td>
                     {% endfor %}

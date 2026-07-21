@@ -139,6 +139,32 @@ def _apply_item_correction(request, offering):
         )
 
 
+def _resolve_grade_mark(request, offering):
+    """Bal/davamiyyət xanasının LessonMark-ını tap. BOŞ xana (mark_id yox) →
+    lesson+enrollment-dan YARADILACAQ obyekt qaytar (hələ SAXLANMIR) ki, İKT
+    işarəsi olmayan xanaya da dəyər verə bilsin. Qaytarır (mark, was_empty).
+
+    Boş xanada mark məhz ``apply_correction`` daxilində — validasiyadan SONRA, onun
+    atomik blokunda — saxlanır; düzəliş rədd olunsa audit olunmamış sətir qalmaz."""
+    mark_id = (request.POST.get("mark_id") or "").strip()
+    if mark_id:
+        mark = get_object_or_404(
+            LessonMark.objects.select_related("lesson", "enrollment", "organization"),
+            pk=mark_id,
+            lesson__offering=offering,
+        )
+        return mark, False
+    lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
+    enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+    existing = LessonMark.objects.filter(lesson=lesson, enrollment=enrollment).select_related("lesson").first()
+    if existing is not None:
+        return existing, False
+    mark = LessonMark(
+        organization=offering.organization, lesson=lesson, enrollment=enrollment, status=AttendanceStatus.PRESENT
+    )
+    return mark, True
+
+
 @login_required
 @require_POST
 def correction_apply(request, offering_id):
@@ -152,11 +178,7 @@ def correction_apply(request, offering_id):
         if target in ("selfwork", "coursework", "component"):
             _apply_item_correction(request, offering)
         else:
-            mark = get_object_or_404(
-                LessonMark.objects.select_related("lesson", "enrollment", "organization"),
-                pk=request.POST.get("mark_id"),
-                lesson__offering=offering,
-            )
+            mark, was_empty = _resolve_grade_mark(request, offering)
             corrections.apply_correction(
                 mark=mark,
                 field=request.POST.get("field"),
@@ -167,6 +189,7 @@ def correction_apply(request, offering_id):
                 document=request.FILES.get("document"),
                 by_user=request.user,
                 request=request,
+                was_empty=was_empty,
             )
     except ValidationError as exc:
         message = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)

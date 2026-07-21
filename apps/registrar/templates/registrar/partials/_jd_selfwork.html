@@ -76,10 +76,11 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                             </button>
                             {% elif can_edit and not cell.locked %}
                             <input type="hidden" name="sw__{{ cell.topic.id }}__{{ row.enrollment.id }}" value="{% if cell.done %}1{% else %}0{% endif %}" data-jd-sw>
-                            <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
+                            <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
+                            {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="selfwork" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                             {% else %}
-                            <span class="sw-chip sw-chip--ro {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-ro="{% if cell.done %}1{% else %}0{% endif %}">{% if cell.done %}1{% else %}0{% endif %}</span>
-                            {% if cell.locked %}<i class="fas fa-lock jcell-lock" title="{% trans 'Geri alma pəncərəsi bağlanıb' context 'registrar.journal' %}"></i>{% endif %}
+                            <span class="sw-chip sw-chip--ro {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}" data-jd-sw-ro="{% if cell.done %}1{% else %}0{% endif %}">{% if cell.done %}1{% else %}0{% endif %}</span>
+                            {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="selfwork" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif cell.locked %}<i class="fas fa-lock jcell-lock" title="{% trans 'Geri alma pəncərəsi bağlanıb' context 'registrar.journal' %}"></i>{% endif %}
                             {% endif %}
                         </td>
                         {% endfor %}
