@@ -509,6 +509,39 @@ class CorrectionViewTest(_BaseJournalSetup):
         self.assertEqual(mark.score, Decimal("8"))
         self.assertTrue(JournalCorrection.objects.filter(lesson_mark=mark).exists())
 
+    def test_apply_endpoint_creates_mark_for_empty_cell(self):
+        # BOŞ xana (mark yox) → düzəliş rejimində dəyər ver: server mark yaradır,
+        # old = "—" (boş idi). İşarəsi olmayan xanaya da müdaxilə mümkün olur.
+        from apps.registrar.models import Lesson
+
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 12), kind=LessonKind.LECTURE
+            )
+        self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
+        self._login_corrector()
+        resp = self.client.post(
+            f"/jurnal/duzelis/{self.offering.id}/tetbiq/",
+            data={
+                "lesson_id": str(lesson.id),
+                "enrollment_id": str(self.enrollment.id),
+                "field": "attendance",
+                "new_status": AttendanceStatus.ABSENT,
+                "reason": CorrectionReason.TECHNICAL,
+                "note": "Boş qalmışdı, q/b yazıldı",
+                "document": _pdf(),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get("ok"))
+        mark = LessonMark.objects.get(lesson=lesson, enrollment=self.enrollment)  # yaradıldı
+        self.assertEqual(mark.status, AttendanceStatus.ABSENT)
+        c = JournalCorrection.objects.get(lesson_mark=mark)
+        self.assertEqual(c.old_status, "")  # köhnə: yox idi
+        self.assertEqual(c.new_status, AttendanceStatus.ABSENT)
+        self.assertIsNotNone(Lesson.objects.filter(id=lesson.id).first())
+
     def test_delete_endpoint_reverts_correction(self):
         _lesson, mark = self._seminar_mark(9, 4)
         with bypass_rls():

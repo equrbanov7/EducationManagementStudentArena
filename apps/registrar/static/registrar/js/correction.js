@@ -82,6 +82,9 @@
     if (componentIdInput) componentIdInput.value = cell.dataset.componentId || "";
     if (enrIdInput) enrIdInput.value = cell.dataset.enrollmentId || "";
     form.querySelector("[data-corr-mark-id]").value = cell.dataset.markId || "";
+    // Boş xana (mark yoxdur) → lesson_id ilə server mark yaradır.
+    var lessonIdInput = form.querySelector("[data-corr-lesson-id]");
+    if (lessonIdInput) lessonIdInput.value = cell.dataset.lessonId || "";
     form.querySelector("[data-corr-student]").textContent = cell.dataset.student || "";
     form.querySelector("[data-corr-date]").textContent = cell.dataset.date || "";
     form.querySelector("[data-corr-kind]").textContent = cell.dataset.kind || "";

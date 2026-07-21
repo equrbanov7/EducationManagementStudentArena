@@ -83,8 +83,11 @@ def apply_correction(
     document,
     by_user,
     request=None,
+    was_empty: bool = False,
 ) -> JournalCorrection:
-    """Bir jurnal xanasına rəsmi düzəliş tətbiq et (hamısı bir transaksiyada)."""
+    """Bir jurnal xanasına rəsmi düzəliş tətbiq et (hamısı bir transaksiyada).
+
+    ``was_empty`` — xana boş idi (mark təzə yaradıldı) → köhnə dəyər "—" (yoxdur)."""
     if field not in CorrectionField.values:
         raise ValidationError(pgettext("registrar.correction", "Choose what to correct: attendance or score."))
     if reason not in CorrectionReason.values:
@@ -110,7 +113,7 @@ def apply_correction(
     if field == CorrectionField.ATTENDANCE:
         if new_status not in AttendanceStatus.values:
             raise ValidationError(pgettext("registrar.correction", "Choose the new attendance value."))
-        correction.old_status = mark.status
+        correction.old_status = "" if was_empty else mark.status
         correction.new_status = new_status
         mark.status = new_status
     else:  # SCORE
@@ -119,7 +122,7 @@ def apply_correction(
                 pgettext("registrar.correction", "Lecture cells hold no score — only attendance can be corrected.")
             )
         score = _clean_int_score(new_score)
-        correction.old_score = int(mark.score) if mark.score is not None else None
+        correction.old_score = None if was_empty else (int(mark.score) if mark.score is not None else None)
         correction.new_score = score
         mark.score = score
 
