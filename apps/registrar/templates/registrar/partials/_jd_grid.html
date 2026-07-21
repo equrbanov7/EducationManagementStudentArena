@@ -89,8 +89,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                             {% for cell in row.cells %}
                             <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">
                                 {% if correction_mode %}
-                                {# Yerində audited düzəliş: HƏR xana (boş daxil) düyməyə çevrilir → modal.
-                                   Boş xana üçün mark yoxdur → lesson+enrollment göndərilir, server mark yaradır. #}
+                                {# Yerində audited düzəliş: HƏR xana (boş daxil) → modal (correction.js). #}
                                 <button type="button" class="corr-cell-btn{% if not cell.mark %} corr-cell-btn--empty{% endif %}" data-corr-cell
                                         {% if cell.mark %}data-mark-id="{{ cell.mark.id }}"{% endif %}
                                         data-lesson-id="{{ cell.lesson.id }}"
