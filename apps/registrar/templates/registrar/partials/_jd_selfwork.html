@@ -63,7 +63,7 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                         <td class="jd-sw2-cell">
                             {% if not cell.topic %}
                             <span class="sw-chip sw-chip--disabled" title="{% trans 'Mövzu hələ əlavə olunmayıb' context 'registrar.journal' %}">–</span>
-                            {% elif can_edit and not cell.locked %}
+                            {% elif can_edit and not cell.locked or can_edit and can_override_lessons %}
                             <input type="hidden" name="sw__{{ cell.topic.id }}__{{ row.enrollment.id }}" value="{% if cell.done %}1{% else %}0{% endif %}" data-jd-sw>
                             <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
                             {% else %}

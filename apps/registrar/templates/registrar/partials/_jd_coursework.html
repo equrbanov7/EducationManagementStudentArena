@@ -33,7 +33,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                     </td>
                     {% if can_edit %}
                     <td class="jd2-cw-act">
-                        {% if not row.locked %}
+                        {% if not row.locked or can_override_lessons %}
                         <button type="button" class="jd2-cw-editbtn" data-jd-cw-edit
                                 data-enrollment="{{ row.enrollment.id }}"
                                 data-student="{{ row.student.get_full_name|default:row.student.username }}"
@@ -64,7 +64,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 <select name="cw_enrollment" required data-jd-cw-student data-bootstrap-select>
                     <option value="">{% trans "Seçin…" context "registrar.journal" %}</option>
                     {% for row in coursework_rows %}
-                    <option value="{{ row.enrollment.id }}" {% if row.locked %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
+                    <option value="{{ row.enrollment.id }}" {% if row.locked and not can_override_lessons %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
                     {% endfor %}
                 </select>
             </div>

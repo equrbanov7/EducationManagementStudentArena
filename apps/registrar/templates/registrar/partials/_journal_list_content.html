@@ -79,7 +79,7 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
         }</script>
         <label class="jd2-filter jd2-filter--search">
             <span class="jd2-filter-label">{% trans "AXTARIŞ" context "registrar.journal" %}</span>
-            <input type="search" name="q" value="{{ journal_query }}" class="jd2-filter-search"
+            <input type="search" name="q" value="{{ journal_query }}" class="jd2-filter-search" data-jl-search-debounce
                    placeholder="{% trans 'fənn və ya müəllim…' context 'registrar.journal' %}" autocomplete="off">
         </label>
         {% else %}
@@ -198,6 +198,15 @@ window.jlShowLoading = function () {
     });
     var reset = form.querySelector(".jd2-filter-reset");
     if (reset) { reset.addEventListener("click", function () { window.jlShowLoading(); }); }
+    // AXTARIŞ qutusu: yazdıqca 350ms debounce ilə göndər (hər hərfdə yox).
+    var searchBox = form.querySelector("[data-jl-search-debounce]");
+    if (searchBox) {
+        var searchTimer = null;
+        searchBox.addEventListener("input", function () {
+            if (searchTimer) { clearTimeout(searchTimer); }
+            searchTimer = setTimeout(function () { window.jlShowLoading(); form.submit(); }, 350);
+        });
+    }
 })();
 </script>
 {% if journal_is_broad %}
