@@ -34,6 +34,8 @@
 .corr-cell { text-align: center; padding: 0 !important; }
 .corr-cell-btn { width: 100%; min-height: 34px; border: none; background: transparent; cursor: pointer; font-weight: 600; color: #33415c; position: relative; padding: 6px 4px; border-radius: 6px; }
 .corr-cell-btn:hover { background: #eef3ff; }
+/* Boş xana (işarə yox) — düzəliş rejimində kliklənə bilər (İKT işarə əlavə edir). */
+.corr-cell-btn--empty { color: #b8c2d6; border: 1px dashed #cfdcf0; }
 .corr-cell--fixed { background: #fff3cd; }
 .corr-cell--fixed .corr-cell-btn { color: #92600a; }
 .corr-cell--empty { color: #c3ccdd; text-align: center; }

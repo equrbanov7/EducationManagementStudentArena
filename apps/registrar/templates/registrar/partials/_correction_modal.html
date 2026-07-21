@@ -18,6 +18,7 @@ correction_reasons.
         <form method="post" action="{{ apply_url }}" enctype="multipart/form-data" data-corr-form>
             {% csrf_token %}
             <input type="hidden" name="mark_id" data-corr-mark-id>
+            <input type="hidden" name="lesson_id" data-corr-lesson-id>
             {# Sərbəst iş / kurs işi düzəlişi üçün hədəf + kimlik (bal xanası: target boş = grade). #}
             <input type="hidden" name="target" data-corr-target>
             <input type="hidden" name="topic_id" data-corr-topic-id>
