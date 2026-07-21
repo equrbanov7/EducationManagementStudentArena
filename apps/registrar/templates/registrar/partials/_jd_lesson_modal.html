@@ -100,10 +100,10 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <small class="jd-field-hint">{% trans "Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu dərsin müəllimini seçin." context "registrar.journal" %}</small>
                 </div>
                 {% endif %}
-                {% if can_override_lessons %}
-                {% comment %}İKT rəhbəri kilidlənmiş (2 saat keçmiş) dərsi dəyişəndə bal
-                düzəlişi kimi sənədli düzəliş tələb olunur — JS yalnız kilidli dərs
-                redaktəsində göstərir (data-jd-corr-fields).{% endcomment %}
+                {% if is_corrector_only %}
+                {% comment %}Korrektor (İKT) dərsi dəyişəndə/siləndə HƏR halda (kilidli
+                və ya kilidsiz) bal düzəlişi kimi sənədli düzəliş tələb olunur — bu blok
+                yalnız korrektor-only üçün render olunur, JS redaktədə göstərir.{% endcomment %}
                 <div class="jd2-corr-fields" data-jd-corr-fields hidden>
                     <p class="jd2-corr-banner">
                         <i class="fas fa-lock"></i>

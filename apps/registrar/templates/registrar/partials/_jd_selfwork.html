@@ -74,7 +74,7 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                                     {% if cell.corrected %}data-history="{{ cell.corr_key }}"{% endif %}>
                                 {% if cell.done %}1{% else %}0{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
                             </button>
-                            {% elif can_edit and not cell.locked or can_edit and can_override_lessons %}
+                            {% elif can_edit and not cell.locked %}
                             <input type="hidden" name="sw__{{ cell.topic.id }}__{{ row.enrollment.id }}" value="{% if cell.done %}1{% else %}0{% endif %}" data-jd-sw>
                             <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
                             {% else %}
