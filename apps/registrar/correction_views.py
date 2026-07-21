@@ -141,8 +141,11 @@ def _apply_item_correction(request, offering):
 
 def _resolve_grade_mark(request, offering):
     """Bal/davamiyyət xanasının LessonMark-ını tap. BOŞ xana (mark_id yox) →
-    lesson+enrollment-dan yarat ki, İKT işarəsi olmayan xanaya da dəyər verə bilsin.
-    Qaytarır (mark, was_empty)."""
+    lesson+enrollment-dan YARADILACAQ obyekt qaytar (hələ SAXLANMIR) ki, İKT
+    işarəsi olmayan xanaya da dəyər verə bilsin. Qaytarır (mark, was_empty).
+
+    Boş xanada mark məhz ``apply_correction`` daxilində — validasiyadan SONRA, onun
+    atomik blokunda — saxlanır; düzəliş rədd olunsa audit olunmamış sətir qalmaz."""
     mark_id = (request.POST.get("mark_id") or "").strip()
     if mark_id:
         mark = get_object_or_404(
@@ -159,7 +162,6 @@ def _resolve_grade_mark(request, offering):
     mark = LessonMark(
         organization=offering.organization, lesson=lesson, enrollment=enrollment, status=AttendanceStatus.PRESENT
     )
-    mark.save()
     return mark, True
 
 

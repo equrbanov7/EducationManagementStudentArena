@@ -99,13 +99,16 @@ def apply_correction(
         raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
 
     lesson = mark.lesson
+    # lesson_mark QƏSDƏN indi təyin edilmir: boş xanada mark hələ saxlanmayıb.
+    # Onu validasiyadan SONRA, bu atomik blokda yaradırıq ki, düzəliş rədd olunsa
+    # (məs. PDF yox/yanlış) savepoint geri alsın — audit olunmamış iz qalmasın.
     correction = JournalCorrection(
         organization=mark.organization,
-        lesson_mark=mark,
         field=field,
         reason=reason,
         note=note,
         document=document,
+        created_mark=was_empty,
         corrected_by=by_user,
         corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
     )
@@ -126,11 +129,17 @@ def apply_correction(
         correction.new_score = score
         mark.score = score
 
-    correction.full_clean()  # PDF/ölçü validatorları burada işləyir
+    # PDF/ölçü validatorları burada işləyir (lesson_mark hələ boş ola bilər → istisna).
+    correction.full_clean(exclude=["lesson_mark"])
 
-    # 2 saatlıq pəncərə + PG trigger rəsmi düzəliş yolunda keçilir.
+    # 2 saatlıq pəncərə + PG trigger rəsmi düzəliş yolunda keçilir. Boş xanada
+    # LessonMark məhz burada — validasiyadan sonra — INSERT olunur.
     with journal_unlock():
-        mark.save(update_fields=["status", "score", "updated_at"])
+        if mark.pk is None:
+            mark.save()
+        else:
+            mark.save(update_fields=["status", "score", "updated_at"])
+    correction.lesson_mark = mark
     correction.save()
 
     enrollment = mark.enrollment
@@ -424,21 +433,29 @@ def revert_last_grade_correction(*, mark, by_user, request=None) -> bool:
     correction = mark.corrections.order_by("-created_at").first()
     if correction is None:
         return False
+    enrollment = mark.enrollment
+    lesson = mark.lesson
     if correction.field == CorrectionField.ATTENDANCE:
         prev, cur = correction.new_status, correction.old_status
-        mark.status = correction.old_status
         old_repr = _ATT_LABELS.get(prev, prev)
-        new_repr = _ATT_LABELS.get(cur, cur)
+        new_repr = _ATT_LABELS.get(cur, cur) or "—"
     else:
-        mark.score = correction.old_score
         old_repr = str(correction.new_score)
         new_repr = str(correction.old_score if correction.old_score is not None else "—")
-    with journal_unlock():
-        mark.save(update_fields=["status", "score", "updated_at"])
-    correction.delete()
-    enrollment = mark.enrollment
+    if correction.created_mark and mark.corrections.count() == 1:
+        # Bu düzəliş boş xanaya mark-ı özü yaradıb və zəncirdə tək odur → geri alma
+        # saxta sətri tam silir ki, xana yenidən BOŞ ("—") olsun (CASCADE düzəlişi də silir).
+        with journal_unlock():
+            mark.delete()
+    else:
+        if correction.field == CorrectionField.ATTENDANCE:
+            mark.status = correction.old_status
+        else:
+            mark.score = correction.old_score
+        with journal_unlock():
+            mark.save(update_fields=["status", "score", "updated_at"])
+        correction.delete()
     recompute_absence_hours(enrollment=enrollment)
-    lesson = mark.lesson
     try:
         with transaction.atomic():
             grade_audit.log_grade_changes(
