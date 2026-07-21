@@ -611,6 +611,32 @@ class LessonCorrectionServiceTest(_BaseJournalSetup):
             self.assertEqual(lesson.topic, "")
             self.assertEqual(lesson.instructor_id, old_instr)  # köhnə müəllim qayıtdı
 
+    def test_deletion_requires_document_and_record_survives(self):
+        # Kilidli dərsi silmək də PDF tələb edir; sənədsiz OLMAZ. Silinəndən sonra
+        # sənədli qeyd (SET_NULL) qalır — kim, niyə, hansı PDF ilə sildi.
+        from apps.registrar.models import Lesson
+
+        lesson, _mark = self._absent_lesson(8)
+        lesson_id = lesson.id
+        with bypass_rls():
+            with self.assertRaises(ValidationError):
+                corrections.apply_lesson_deletion(
+                    lesson=lesson, reason=CorrectionReason.TECHNICAL, note="x", document=None, by_user=self.admin
+                )
+            self.assertTrue(Lesson.objects.filter(id=lesson_id).exists())  # sənədsiz silinmədi
+            corr = corrections.apply_lesson_deletion(
+                lesson=lesson,
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv açılmış dərs",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+        self.assertFalse(Lesson.objects.filter(id=lesson_id).exists())  # dərs silindi
+        corr.refresh_from_db()
+        self.assertTrue(corr.is_deletion)
+        self.assertIsNone(corr.lesson_id)  # SET_NULL — dərs getdi, qeyd qaldı
+        self.assertTrue(corr.document)  # PDF sənədi qaldı
+
 
 class ItemCorrectionTest(_BaseJournalSetup):
     """E) Sərbəst iş + kurs işi sənədli düzəliş (bal xanası ilə eyni prosedur) + geri alma."""

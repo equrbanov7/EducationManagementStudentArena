@@ -58,11 +58,36 @@ def lesson_action(request, offering_id, lesson_id):
     offering = _offering_or_404(request, offering_id)
     lesson = get_object_or_404(Lesson, pk=lesson_id, offering=offering)
     action = request.POST.get("action")
+    # Silmə düyməsi redaktə formasının içindədir (eyni MƏCBURİ PDF-i paylaşır) →
+    # do_delete=1 gələndə action-i silməyə çevir.
+    if request.POST.get("do_delete") == "1":
+        action = "delete_lesson"
     # İKT Rəhbəri / superuser: 2 saatlıq pəncərəni + keçmiş-tarix qadağasını keçir
     # (dərsi istənilən tarixə/saata dəyişə, silə bilər). Yayımlanmış jurnal yenə kilidli.
     override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
 
     if action == "delete_lesson":
+        # İKT + kilidlənmiş dərs → silmə də bal/redaktə düzəlişi kimi rəsmi
+        # sənəd (səbəb + qeyd + PDF) tələb edir; sənədsiz silmək OLMAZ.
+        if override and not gradebook.can_edit_lesson(lesson):
+            from django.core.exceptions import ValidationError
+
+            from apps.registrar import corrections as corrections_service
+
+            try:
+                corrections_service.apply_lesson_deletion(
+                    lesson=lesson,
+                    reason=request.POST.get("correction_reason") or "",
+                    note=request.POST.get("correction_note") or "",
+                    document=request.FILES.get("correction_document"),
+                    by_user=request.user,
+                    request=request,
+                )
+            except ValidationError as exc:
+                messages.error(request, "; ".join(exc.messages))
+                return _back(offering)
+            messages.success(request, _("Dərs sənədli əsasla silindi."))
+            return _back(offering)
         if gradebook.delete_lesson(lesson=lesson, by_user=request.user, allow_locked=override):
             messages.success(request, _("Dərs silindi."))
         else:
