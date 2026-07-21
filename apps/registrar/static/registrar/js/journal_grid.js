@@ -570,9 +570,23 @@
             setSelectValue(modal.querySelector("[data-jd-lesson-hours]"), String(editData.hours || 2));
             // Standart dərs saatı: mövcud start-end cütünü seçimdə tap.
             setSelectValue(timeSelect, editData.start && editData.end ? editData.start + "|" + editData.end : "");
+            // Dərsin müəllimi (fənn 2 müəllim arasında bölünübsə).
+            var instrField = modal.querySelector("[data-jd-lesson-instructor]");
+            if (instrField && editData.instructor) setSelectValue(instrField, editData.instructor);
         } else {
             form.action = form.getAttribute("data-add-url");
             actionInput.value = "add_lesson";
+        }
+        // Sənədli düzəliş sahələri (İKT): yalnız KİLİDLİ dərs redaktəsində — PDF
+        // + qeyd məcburi olur; əlavə/kilidsiz redaktədə gizli və məcburiyyətsiz.
+        var corrFields = modal.querySelector("[data-jd-corr-fields]");
+        if (corrFields) {
+            var needCorr = editing && editData.locked;
+            corrFields.hidden = !needCorr;
+            var doc = corrFields.querySelector("[data-jd-corr-doc]");
+            var note = corrFields.querySelector("[data-jd-corr-note]");
+            if (doc) doc.required = needCorr;
+            if (note) note.required = needCorr;
         }
         refreshParityBadge();
         setStep(3); // stepper: Yeni dərs addımı
@@ -615,6 +629,8 @@
                 hours: editBtn.getAttribute("data-lesson-hours"),
                 start: editBtn.getAttribute("data-lesson-start"),
                 end: editBtn.getAttribute("data-lesson-end"),
+                instructor: editBtn.getAttribute("data-lesson-instructor"),
+                locked: editBtn.getAttribute("data-lesson-locked") === "1",
             });
             return;
         }

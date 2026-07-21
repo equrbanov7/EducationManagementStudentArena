@@ -15,7 +15,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                     <th>{% trans "MÖVZUNUN ADI" context "registrar.journal" %}</th>
                     <th class="jd2-cw-date">{% trans "TARİX" context "registrar.journal" %}</th>
                     <th class="jd2-cw-score">{% trans "BAL" context "registrar.journal" %} /100</th>
-                    {% if can_edit %}<th class="jd2-cw-act"></th>{% endif %}
+                    {% if can_edit or correction_mode %}<th class="jd2-cw-act"></th>{% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -26,14 +26,28 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                     <td class="jd2-cw-name">{{ row.student.get_full_name|default:row.student.username }}</td>
                     <td class="jd2-cw-topic">{{ row.work.topic }}</td>
                     <td class="jd2-cw-date">{% if row.work.submitted_on %}{{ row.work.submitted_on|date:"d.m.Y" }}{% else %}—{% endif %}</td>
-                    <td class="jd2-cw-score">
+                    <td class="jd2-cw-score {% if row.corrected %}corr-fixed{% endif %}">
                         {% if row.work.score is not None %}
                         <span class="jd2-scorechip {% if row.work.score >= 81 %}is-good{% elif row.work.score >= 61 %}is-mid{% else %}is-low{% endif %}">{{ row.work.score|floatformat:'-2' }}</span>
                         {% else %}—{% endif %}
                     </td>
-                    {% if can_edit %}
+                    {% if correction_mode %}
                     <td class="jd2-cw-act">
-                        {% if not row.locked %}
+                        {# Düzəliş rejimi: sənədli düzəliş düyməsi (correction.js). #}
+                        <button type="button" class="jd2-cw-editbtn{% if row.corrected %} corr-fixed{% endif %}"
+                                data-corr-cell data-corr-target="coursework"
+                                data-enrollment-id="{{ row.enrollment.id }}"
+                                data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                data-kind="{% trans 'Kurs işi' context 'registrar.journal' %}"
+                                data-cw-score="{% if row.work.score is not None %}{{ row.work.score|floatformat:'-2' }}{% endif %}"
+                                data-cw-topic="{{ row.work.topic }}"
+                                data-cw-date="{% if row.work.submitted_on %}{{ row.work.submitted_on|date:'Y-m-d' }}{% endif %}"
+                                {% if row.corrected %}data-history="{{ row.corr_key }}"{% endif %}
+                                title="{% trans 'Sənədli düzəliş' context 'registrar.journal' %}">{% if row.corrected %}✎{% else %}<i class="fas fa-pen"></i>{% endif %}</button>
+                    </td>
+                    {% elif can_edit %}
+                    <td class="jd2-cw-act">
+                        {% if not row.locked or can_override_lessons %}
                         <button type="button" class="jd2-cw-editbtn" data-jd-cw-edit
                                 data-enrollment="{{ row.enrollment.id }}"
                                 data-student="{{ row.student.get_full_name|default:row.student.username }}"
@@ -64,7 +78,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 <select name="cw_enrollment" required data-jd-cw-student data-bootstrap-select>
                     <option value="">{% trans "Seçin…" context "registrar.journal" %}</option>
                     {% for row in coursework_rows %}
-                    <option value="{{ row.enrollment.id }}" {% if row.locked %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
+                    <option value="{{ row.enrollment.id }}" {% if row.locked and not can_override_lessons %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
                     {% endfor %}
                 </select>
             </div>
