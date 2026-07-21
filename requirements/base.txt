@@ -56,7 +56,7 @@ constantly==23.10.4
 cryptography==49.0.0
 hyperlink==21.0.0
 Incremental==24.11.0
-pyasn1==0.6.3
+pyasn1==0.6.4
 pyasn1_modules==0.4.2
 pycparser==2.23
 pyOpenSSL==26.3.0
