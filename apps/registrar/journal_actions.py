@@ -174,6 +174,8 @@ def selfwork_action(request, offering_id):
     """Sərbəst iş tabı: mövzu əlavə/sil və işarə (1/0) dəyişiklikləri."""
     offering = _offering_or_404(request, offering_id)
     action = request.POST.get("action")
+    # İKT/superuser 2 saatlıq geri-alma pəncərəsini keçir (correction override).
+    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
 
     if action == "add_topic":
         topic = journal_extras.add_selfwork_topic(offering=offering, title=request.POST.get("topic_title"))
@@ -206,6 +208,7 @@ def selfwork_action(request, offering_id):
             enrollment_id=parts[2],
             done=raw == "1",
             by_user=request.user,
+            allow_locked=override,
         )
         if ok:
             changed += 1
@@ -229,6 +232,8 @@ def coursework_save(request, offering_id):
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     saved = 0
     frozen = 0
+    # İKT/superuser 2 saatlıq pəncərəni keçir (correction override).
+    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
 
     single = enrollments.get(request.POST.get("cw_enrollment") or "")
     if single is not None:
@@ -238,6 +243,7 @@ def coursework_save(request, offering_id):
             score=request.POST.get("cw_score"),
             submitted_on=parse_date(request.POST.get("cw_date") or ""),
             by_user=request.user,
+            allow_locked=override,
         )
         if ok:
             messages.success(request, _("Kurs işi yadda saxlanıldı."))
@@ -258,7 +264,12 @@ def coursework_save(request, offering_id):
         if not topic and not (score or "").strip():
             continue  # boş sətir — toxunma
         if journal_extras.save_course_work(
-            enrollment=enrollment, topic=topic, score=score, submitted_on=submitted, by_user=request.user
+            enrollment=enrollment,
+            topic=topic,
+            score=score,
+            submitted_on=submitted,
+            by_user=request.user,
+            allow_locked=override,
         ):
             saved += 1
         else:

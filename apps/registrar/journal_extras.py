@@ -198,8 +198,9 @@ def delete_selfwork_topic(*, topic) -> bool:
 
 
 @transaction.atomic
-def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None) -> bool:
-    """Təhvil işarəsi: 1 hər zaman qoyulur; 1→0 geri alma yalnız 2 saat içində."""
+def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, allow_locked=False) -> bool:
+    """Təhvil işarəsi: 1 hər zaman qoyulur; 1→0 geri alma yalnız 2 saat içində.
+    ``allow_locked`` İKT/superuser üçün 2 saat pəncərəsini keçir."""
     if journal_is_locked(offering):
         return False
     topic = SelfWorkTopic.objects.filter(pk=topic_id, offering=offering).first()
@@ -216,8 +217,8 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None) 
     else:
         if mark.done == bool(done):
             return True
-        if mark.done and not done and (timezone.now() - mark.updated_at) > MARK_EDIT_WINDOW:
-            return False  # verilmiş işi 2 saatdan sonra geri almaq olmaz
+        if mark.done and not done and not allow_locked and (timezone.now() - mark.updated_at) > MARK_EDIT_WINDOW:
+            return False  # verilmiş işi 2 saatdan sonra geri almaq olmaz (İKT keçir)
         mark.done = bool(done)
         mark.entered_by = by_user
         mark.save(update_fields=["done", "entered_by", "updated_at"])
@@ -279,14 +280,14 @@ def get_selfwork_board(offering):
 
 
 @transaction.atomic
-def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=None) -> bool:
-    """Kurs işini yaz/yenilə — mövcud qeyd yalnız 2 saat içində dəyişilir."""
+def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=None, allow_locked=False) -> bool:
+    """Kurs işini yaz/yenilə — mövcud qeyd yalnız 2 saat içində (İKT keçir)."""
     offering = enrollment.offering
     if journal_is_locked(offering):
         return False
     existing = CourseWork.objects.filter(enrollment=enrollment).first()
     now = timezone.now()
-    if existing is not None and (now - existing.created_at) > MARK_EDIT_WINDOW:
+    if existing is not None and not allow_locked and (now - existing.created_at) > MARK_EDIT_WINDOW:
         return False
     value = _to_decimal(score)
     if value is not None:
