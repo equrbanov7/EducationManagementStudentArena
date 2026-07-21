@@ -24,8 +24,10 @@ from .academic import (
 from .corrections import (
     CorrectionField,
     CorrectionReason,
+    CourseWorkCorrection,
     JournalCorrection,
     LessonCorrection,
+    SelfWorkCorrection,
 )
 from .grading import (
     ApprovalStatus,
@@ -69,6 +71,8 @@ __all__ = [
     "CourseOffering",
     "JournalCorrection",
     "LessonCorrection",
+    "SelfWorkCorrection",
+    "CourseWorkCorrection",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",

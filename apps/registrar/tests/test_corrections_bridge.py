@@ -584,3 +584,82 @@ class LessonCorrectionServiceTest(_BaseJournalSetup):
                     document=_pdf(),
                     by_user=self.admin,
                 )
+
+
+class ItemCorrectionTest(_BaseJournalSetup):
+    """E) Sərbəst iş + kurs işi sənədli düzəliş (bal xanası ilə eyni prosedur) + geri alma."""
+
+    def test_selfwork_correction_applies_reverts_and_requires_doc(self):
+        from apps.registrar import item_corrections, journal_extras
+        from apps.registrar.models import SelfWorkCorrection, SelfWorkMark
+
+        with bypass_rls():
+            topic = journal_extras.add_selfwork_topic(offering=self.offering, title="SW1")
+            # Sənədsiz → rədd.
+            with self.assertRaises(ValidationError):
+                item_corrections.apply_selfwork_correction(
+                    offering=self.offering,
+                    topic=topic,
+                    enrollment=self.enrollment,
+                    new_done=True,
+                    reason=CorrectionReason.TECHNICAL,
+                    note="x",
+                    document=None,
+                    by_user=self.admin,
+                )
+            corr = item_corrections.apply_selfwork_correction(
+                offering=self.offering,
+                topic=topic,
+                enrollment=self.enrollment,
+                new_done=True,
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            self.assertTrue(SelfWorkMark.objects.get(topic=topic, enrollment=self.enrollment).done)
+            self.assertEqual(corr.old_done, False)
+            self.assertEqual(corr.new_done, True)
+            cmap = item_corrections.selfwork_corrections_map(self.offering)
+            self.assertIn(f"{topic.id}:{self.enrollment.id}", cmap)
+            # Geri al → təhvil 0-a qayıdır, correction itir (sarı gedir).
+            self.assertTrue(
+                item_corrections.revert_last_selfwork_correction(
+                    topic=topic, enrollment=self.enrollment, by_user=self.admin
+                )
+            )
+            self.assertFalse(SelfWorkMark.objects.get(topic=topic, enrollment=self.enrollment).done)
+            self.assertFalse(SelfWorkCorrection.objects.filter(topic=topic, enrollment=self.enrollment).exists())
+
+    def test_coursework_correction_applies_and_reverts(self):
+        from decimal import Decimal as D
+
+        from apps.registrar import item_corrections, journal_extras
+        from apps.registrar.models import CourseWork, CourseWorkCorrection
+
+        with bypass_rls():
+            journal_extras.save_course_work(
+                enrollment=self.enrollment,
+                topic="İlk",
+                score="50",
+                submitted_on=datetime.date(2024, 10, 1),
+                by_user=self.teacher,
+            )
+            corr = item_corrections.apply_coursework_correction(
+                enrollment=self.enrollment,
+                new_score="88",
+                new_topic="Düzəliş",
+                new_date=None,
+                reason=CorrectionReason.APPEAL,
+                note="Apellyasiya",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            self.assertEqual(CourseWork.objects.get(enrollment=self.enrollment).score, D("88"))
+            self.assertEqual(corr.old_score, D("50"))
+            self.assertEqual(corr.new_score, D("88"))
+            self.assertTrue(
+                item_corrections.revert_last_coursework_correction(enrollment=self.enrollment, by_user=self.admin)
+            )
+            self.assertEqual(CourseWork.objects.get(enrollment=self.enrollment).score, D("50"))
+            self.assertFalse(CourseWorkCorrection.objects.filter(enrollment=self.enrollment).exists())

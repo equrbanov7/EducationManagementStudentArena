@@ -18,11 +18,15 @@ correction_reasons.
         <form method="post" action="{{ apply_url }}" enctype="multipart/form-data" data-corr-form>
             {% csrf_token %}
             <input type="hidden" name="mark_id" data-corr-mark-id>
+            {# Sərbəst iş / kurs işi düzəlişi üçün hədəf + kimlik (bal xanası: target boş = grade). #}
+            <input type="hidden" name="target" data-corr-target>
+            <input type="hidden" name="topic_id" data-corr-topic-id>
+            <input type="hidden" name="enrollment_id" data-corr-enrollment-id>
             <div class="corr-modal-meta">
                 <span data-corr-student></span> · <span data-corr-date></span> · <span data-corr-kind></span>
             </div>
 
-            <label class="corr-field">
+            <label class="corr-field" data-corr-field-wrap>
                 <span class="corr-field-label">{% trans "Nəyi düzəldirsiniz?" context "registrar.correction" %}</span>
                 <div class="bootstrap-single-select">
                     <select name="field" data-corr-field class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
@@ -31,6 +35,33 @@ correction_reasons.
                     </select>
                 </div>
             </label>
+
+            {# Sərbəst iş: təhvil 0/1. #}
+            <label class="corr-field" data-corr-sw-wrap hidden>
+                <span class="corr-field-label">{% trans "Təhvil (sərbəst iş)" context "registrar.correction" %}</span>
+                <div class="bootstrap-single-select">
+                    <select name="new_done" class="corr-input form-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="1">{% trans "Verilib (1)" context "registrar.correction" %}</option>
+                        <option value="0">{% trans "Verilməyib (0)" context "registrar.correction" %}</option>
+                    </select>
+                </div>
+            </label>
+
+            {# Kurs işi: bal (0-100) + mövzu + tarix. #}
+            <div data-corr-cw-wrap hidden>
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Yeni bal (0-100)" context "registrar.correction" %}</span>
+                    <input type="number" name="new_score_cw" min="0" max="100" step="1" class="corr-input" data-corr-cw-score>
+                </label>
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Mövzu" context "registrar.correction" %}</span>
+                    <input type="text" name="new_topic" maxlength="255" class="corr-input" data-corr-cw-topic>
+                </label>
+                <label class="corr-field">
+                    <span class="corr-field-label">{% trans "Təhvil tarixi" context "registrar.correction" %}</span>
+                    <input type="date" name="new_date" class="corr-input" data-corr-cw-date>
+                </label>
+            </div>
 
             <label class="corr-field" data-corr-att-wrap>
                 <span class="corr-field-label">{% trans "Yeni davamiyyət" context "registrar.correction" %}</span>
@@ -94,3 +125,5 @@ correction_reasons.
 </div>
 
 {{ corrections_map|json_script:"corrHistoryData" }}
+{{ selfwork_corrections_map|json_script:"corrSwHistoryData" }}
+{{ coursework_corrections_map|json_script:"corrCwHistoryData" }}
