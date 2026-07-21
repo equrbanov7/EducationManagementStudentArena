@@ -663,3 +663,46 @@ class ItemCorrectionTest(_BaseJournalSetup):
             )
             self.assertEqual(CourseWork.objects.get(enrollment=self.enrollment).score, D("50"))
             self.assertFalse(CourseWorkCorrection.objects.filter(enrollment=self.enrollment).exists())
+
+    def test_component_kollokvium_correction_applies_and_reverts(self):
+        from decimal import Decimal as D
+
+        from apps.registrar import item_corrections, journal_extras
+        from apps.registrar.models import ComponentScore, ComponentScoreCorrection
+
+        with bypass_rls():
+            comp = list(journal_extras.ensure_kollokviums(self.offering))[0]
+            corr = item_corrections.apply_component_correction(
+                component=comp,
+                enrollment=self.enrollment,
+                new_score="7",
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv kollokvium balı",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            self.assertEqual(ComponentScore.objects.get(component=comp, enrollment=self.enrollment).score, D("7"))
+            self.assertIsNone(corr.old_score)
+            self.assertEqual(corr.new_score, D("7"))
+            self.assertIn(f"{comp.id}:{self.enrollment.id}", item_corrections.component_corrections_map(self.offering))
+            # Sənədsiz → rədd.
+            with self.assertRaises(ValidationError):
+                item_corrections.apply_component_correction(
+                    component=comp,
+                    enrollment=self.enrollment,
+                    new_score="9",
+                    reason=CorrectionReason.TECHNICAL,
+                    note="x",
+                    document=None,
+                    by_user=self.admin,
+                )
+            # Geri al → köhnə (yox) dəyər → ComponentScore silinir, sarı gedir.
+            self.assertTrue(
+                item_corrections.revert_last_component_correction(
+                    component=comp, enrollment=self.enrollment, by_user=self.admin
+                )
+            )
+            self.assertFalse(ComponentScore.objects.filter(component=comp, enrollment=self.enrollment).exists())
+            self.assertFalse(
+                ComponentScoreCorrection.objects.filter(component=comp, enrollment=self.enrollment).exists()
+            )

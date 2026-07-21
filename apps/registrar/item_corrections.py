@@ -19,9 +19,12 @@ from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.rls import journal_unlock
 
 from . import grade_audit, journal_extras
 from .models import (
+    ComponentScore,
+    ComponentScoreCorrection,
     CorrectionReason,
     CourseWork,
     CourseWorkCorrection,
@@ -244,6 +247,146 @@ def revert_last_coursework_correction(*, enrollment, by_user, request=None) -> b
         request,
     )
     return True
+
+
+# ── Kollokvium / komponent balı ──────────────────────────────────────────────
+
+
+@transaction.atomic
+def apply_component_correction(*, component, enrollment, new_score, reason, note, document, by_user, request=None):
+    """Komponent balına (Kollokvium K1/K2/K3) sənədli düzəliş — 2 saat + pəncərə keçilir."""
+    note = _validate(reason, note, document)
+    offering = component.offering
+    if journal_extras.journal_is_locked(offering):
+        raise ValidationError(pgettext("registrar.correction", "The journal is published — it can't be changed."))
+    existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
+    old_score = existing.score if existing else None
+    if new_score in (None, ""):
+        new_val = None
+    else:
+        new_val = max(Decimal("0"), min(_to_decimal(new_score), Decimal(component.max_score)))
+    if old_score == new_val:
+        raise ValidationError(pgettext("registrar.correction", "Nothing changed — adjust a field before saving."))
+    with journal_unlock():  # ComponentScore-da da 2 saat DB trigger var — rəsmi yolda keçilir.
+        if new_val is None:
+            if existing is not None:
+                existing.delete()
+        else:
+            ComponentScore.objects.update_or_create(
+                organization=offering.organization,
+                component=component,
+                enrollment=enrollment,
+                defaults={"score": new_val, "entered_by": by_user},
+            )
+    correction = ComponentScoreCorrection(
+        organization=offering.organization,
+        component=component,
+        enrollment=enrollment,
+        old_score=old_score,
+        new_score=new_val,
+        reason=reason,
+        note=note,
+        document=document,
+        corrected_by=by_user,
+        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+    )
+    correction.full_clean()
+    correction.save()
+    _audit(
+        offering,
+        by_user,
+        "component-correction",
+        [
+            {
+                "student": grade_audit.student_label(enrollment),
+                "item": str(getattr(component, "title", "") or getattr(component, "name", "") or "komponent"),
+                "old": grade_audit.score_repr(old_score),
+                "new": grade_audit.score_repr(new_val),
+            }
+        ],
+        correction,
+        request,
+    )
+    return correction
+
+
+@transaction.atomic
+def revert_last_component_correction(*, component, enrollment, by_user, request=None) -> bool:
+    correction = (
+        ComponentScoreCorrection.objects.filter(component=component, enrollment=enrollment)
+        .order_by("-created_at")
+        .first()
+    )
+    if correction is None:
+        return False
+    with journal_unlock():
+        if correction.old_score is None:
+            ComponentScore.objects.filter(component=component, enrollment=enrollment).delete()
+        else:
+            ComponentScore.objects.update_or_create(
+                organization=component.offering.organization,
+                component=component,
+                enrollment=enrollment,
+                defaults={"score": correction.old_score, "entered_by": by_user},
+            )
+    correction.delete()
+    _audit(
+        component.offering,
+        by_user,
+        "component-correction-revert",
+        [
+            {
+                "student": grade_audit.student_label(enrollment),
+                "item": "kollokvium",
+                "old": "düzəliş",
+                "new": "geri alındı",
+            }
+        ],
+        None,
+        request,
+    )
+    return True
+
+
+def _to_decimal(raw):
+    return journal_extras._to_decimal(raw)
+
+
+def _cm_entry(c, include_document):
+    data = {
+        "id": str(c.id),
+        "date": c.created_at.strftime("%d.%m.%Y %H:%M"),
+        "field_display": str(pgettext("registrar.correction", "Kollokvium")),
+        "old": grade_audit.score_repr(c.old_score),
+        "new": grade_audit.score_repr(c.new_score),
+        "reason": c.get_reason_display(),
+        "note": c.note,
+        "by": c.corrected_by_name,
+    }
+    if include_document and c.document:
+        data["document_url"] = c.document.url
+    return data
+
+
+def component_corrections_map(offering, *, include_document=False):
+    """{"<component_id>:<enrollment_id>": [düzəliş qeydləri]} — sarı xana + tarixçə."""
+    result: dict[str, list[dict]] = {}
+    qs = ComponentScoreCorrection.objects.filter(component__offering=offering).order_by("created_at")
+    for c in qs:
+        result.setdefault(f"{c.component_id}:{c.enrollment_id}", []).append(_cm_entry(c, include_document))
+    return result
+
+
+def annotate_kollokvium_grid(grid, cmap):
+    """Kollokvium grid xanalarına `corr_key` + `corrected` (sarı) əlavə et."""
+    for row in grid.get("rows", []):
+        for cell in row.get("cells", []):
+            comp = cell.get("component")
+            if comp is not None:
+                key = f"{comp.id}:{row['enrollment'].id}"
+                cell["corr_key"] = key
+                cell["corrected"] = key in cmap
+    return grid
 
 
 # ── Oxu köməkçiləri (sarı xana + tarixçə) ────────────────────────────────────

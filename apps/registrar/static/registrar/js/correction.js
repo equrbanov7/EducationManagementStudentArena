@@ -23,14 +23,17 @@
   var histData = readJson("corrHistoryData"); // grade (mark_id)
   var swHist = readJson("corrSwHistoryData"); // selfwork ("topic:enrollment")
   var cwHist = readJson("corrCwHistoryData"); // coursework (enrollment_id)
+  var cmHist = readJson("corrCmHistoryData"); // component/kollokvium ("component:enrollment")
 
   // Hədəf-aware modal sahələri.
   var targetInput = form.querySelector("[data-corr-target]");
   var topicIdInput = form.querySelector("[data-corr-topic-id]");
+  var componentIdInput = form.querySelector("[data-corr-component-id]");
   var enrIdInput = form.querySelector("[data-corr-enrollment-id]");
   var fieldWrap = form.querySelector("[data-corr-field-wrap]");
   var swWrap = form.querySelector("[data-corr-sw-wrap]");
   var cwWrap = form.querySelector("[data-corr-cw-wrap]");
+  var cmWrap = form.querySelector("[data-corr-cm-wrap]");
   var histCtx = { type: "grade" }; // tarixçə modalında "Düzəlişi sil" üçün kontekst
 
   function open(el) { el.hidden = false; document.body.style.overflow = "hidden"; }
@@ -54,7 +57,8 @@
     if (!cell) return;
 
     var target = cell.dataset.corrTarget || "grade";
-    var histMap = target === "selfwork" ? swHist : target === "coursework" ? cwHist : histData;
+    var histMap =
+      target === "selfwork" ? swHist : target === "coursework" ? cwHist : target === "component" ? cmHist : histData;
 
     // Düzəlişli xanada ✎ → tarixçə; başqa yerdə → düzəliş modalı.
     if (badge && cell.dataset.history && histMap[cell.dataset.history]) {
@@ -62,6 +66,7 @@
         type: target,
         markId: cell.dataset.markId,
         topicId: cell.dataset.topicId,
+        componentId: cell.dataset.componentId,
         enrollmentId: cell.dataset.enrollmentId,
       };
       renderHistory(histMap[cell.dataset.history]);
@@ -74,6 +79,7 @@
     form.reset();
     targetInput.value = target === "grade" ? "" : target;
     if (topicIdInput) topicIdInput.value = cell.dataset.topicId || "";
+    if (componentIdInput) componentIdInput.value = cell.dataset.componentId || "";
     if (enrIdInput) enrIdInput.value = cell.dataset.enrollmentId || "";
     form.querySelector("[data-corr-mark-id]").value = cell.dataset.markId || "";
     form.querySelector("[data-corr-student]").textContent = cell.dataset.student || "";
@@ -83,11 +89,13 @@
     var isGrade = target === "grade";
     var isSw = target === "selfwork";
     var isCw = target === "coursework";
+    var isCm = target === "component";
     if (fieldWrap) fieldWrap.hidden = !isGrade;
     attWrap.hidden = !isGrade;
     scoreWrap.hidden = true;
     if (swWrap) swWrap.hidden = !isSw;
     if (cwWrap) cwWrap.hidden = !isCw;
+    if (cmWrap) cmWrap.hidden = !isCm;
     // Gizli grade sahələri HTML5 validasiyanı bloklamasın — required təmizlə.
     attWrap.querySelector("select").required = false;
     scoreWrap.querySelector("input").required = false;
@@ -112,6 +120,8 @@
       cwWrap.querySelector("[data-corr-cw-score]").value = cell.dataset.cwScore || "";
       cwWrap.querySelector("[data-corr-cw-topic]").value = cell.dataset.cwTopic || "";
       cwWrap.querySelector("[data-corr-cw-date]").value = cell.dataset.cwDate || "";
+    } else if (isCm) {
+      cmWrap.querySelector("[data-corr-cm-score]").value = cell.dataset.cmScore || "";
     }
     if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.sync(form.querySelector("[name='reason']"));
     open(modal);
@@ -154,6 +164,7 @@
     fd.append("type", histCtx.type || "grade");
     if (histCtx.markId) fd.append("mark_id", histCtx.markId);
     if (histCtx.topicId) fd.append("topic_id", histCtx.topicId);
+    if (histCtx.componentId) fd.append("component_id", histCtx.componentId);
     if (histCtx.enrollmentId) fd.append("enrollment_id", histCtx.enrollmentId);
     var token = form.querySelector("[name=csrfmiddlewaretoken]");
     if (token) fd.append("csrfmiddlewaretoken", token.value);
