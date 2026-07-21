@@ -19,8 +19,11 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 </tr>
             </thead>
             <tbody>
+                {% comment %}Düzəliş rejimində BÜTÜN tələbələr görünür — İKT rəhbəri kurs işi
+                olmayan tələbəyə də audited (PDF) ✎ ilə kurs işi əlavə edə bilsin. Normal
+                görünüşdə yalnız kurs işi olanlar (müəllim sağdakı formadan əlavə edir).{% endcomment %}
                 {% for row in coursework_rows %}
-                {% if row.work %}
+                {% if row.work or correction_mode %}
                 <tr>
                     <td class="jd2-cw-no">{{ forloop.counter }}</td>
                     <td class="jd2-cw-name">{{ row.student.get_full_name|default:row.student.username }}</td>
@@ -66,7 +69,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 {% endfor %}
             </tbody>
         </table>
-        <div class="jd2-cw-restnote">{% trans "Qalan tələbələr üçün kurs işi hələ daxil edilməyib." context "registrar.journal" %}</div>
+        {% if not correction_mode %}<div class="jd2-cw-restnote">{% trans "Qalan tələbələr üçün kurs işi hələ daxil edilməyib." context "registrar.journal" %}</div>{% endif %}
     </div>
 
     {% if can_edit %}
