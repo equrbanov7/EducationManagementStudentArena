@@ -43,7 +43,7 @@
     var isScore = fieldSel.value === "score";
     scoreWrap.hidden = !isScore;
     attWrap.hidden = isScore;
-    scoreWrap.querySelector("input").required = isScore;
+    scoreWrap.querySelector("select").required = isScore;
     attWrap.querySelector("select").required = !isScore;
   }
   fieldSel.addEventListener("change", syncFieldMode);
@@ -82,6 +82,9 @@
     if (componentIdInput) componentIdInput.value = cell.dataset.componentId || "";
     if (enrIdInput) enrIdInput.value = cell.dataset.enrollmentId || "";
     form.querySelector("[data-corr-mark-id]").value = cell.dataset.markId || "";
+    // Boş xana (mark yoxdur) → lesson_id ilə server mark yaradır.
+    var lessonIdInput = form.querySelector("[data-corr-lesson-id]");
+    if (lessonIdInput) lessonIdInput.value = cell.dataset.lessonId || "";
     form.querySelector("[data-corr-student]").textContent = cell.dataset.student || "";
     form.querySelector("[data-corr-date]").textContent = cell.dataset.date || "";
     form.querySelector("[data-corr-kind]").textContent = cell.dataset.kind || "";
@@ -98,17 +101,20 @@
     if (cmWrap) cmWrap.hidden = !isCm;
     // Gizli grade sahələri HTML5 validasiyanı bloklamasın — required təmizlə.
     attWrap.querySelector("select").required = false;
-    scoreWrap.querySelector("input").required = false;
+    scoreWrap.querySelector("select").required = false;
 
     if (isGrade) {
       var allowsScore = cell.dataset.allowsScore === "1";
       scoreOpt.disabled = !allowsScore;
       fieldSel.value = allowsScore ? "score" : "attendance";
       if (cell.dataset.status) attWrap.querySelector("select").value = cell.dataset.status;
-      if (cell.dataset.score) scoreWrap.querySelector("input").value = cell.dataset.score;
+      // Bal: 0–10 seçim (seminar kimi) — cari bal seçili gəlir, boşdursa 0.
+      var scoreSel = scoreWrap.querySelector("select");
+      scoreSel.value = cell.dataset.score || "0";
       if (window.EMSBootstrapSelect) {
         window.EMSBootstrapSelect.refresh(fieldSel);
         window.EMSBootstrapSelect.sync(attWrap.querySelector("select"));
+        window.EMSBootstrapSelect.sync(scoreSel);
       }
       syncFieldMode();
     } else if (isSw) {

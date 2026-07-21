@@ -4,10 +4,17 @@
   "use strict";
 
   // json_script-i HƏR dəfə təzə oxu — profil SPA bölməsi AJAX ilə yenilənəndə
-  // köhnə data qalmasın (section reload tələsi).
-  function readData() {
+  // köhnə data qalmasın (section reload tələsi). data-corr-type ilə düzgün map:
+  // bal (grade), sərbəst iş (selfwork), kurs işi (coursework), kollokvium (component).
+  var RO_MAPS = {
+    grade: "corrHistoryDataRO",
+    selfwork: "corrSwHistoryDataRO",
+    coursework: "corrCwHistoryDataRO",
+    component: "corrCmHistoryDataRO",
+  };
+  function readData(type) {
     try {
-      var raw = document.getElementById("corrHistoryDataRO");
+      var raw = document.getElementById(RO_MAPS[type] || RO_MAPS.grade);
       return raw ? JSON.parse(raw.textContent || "{}") : {};
     } catch (e) { return {}; }
   }
@@ -47,7 +54,7 @@
     }
     var badge = ev.target.closest("[data-corr-history]");
     if (!badge || !modal) return;
-    var data = readData();
+    var data = readData(badge.getAttribute("data-corr-type") || "grade");
     var key = badge.getAttribute("data-corr-history");
     if (!data[key]) return;
     ev.preventDefault();

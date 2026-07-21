@@ -76,8 +76,7 @@ def journal_detail(request, offering_id):
 
     appr = approval.approval_context(offering=offering, user=request.user)
     can_edit_perm = _can_edit_journal(request.user, offering)
-    # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL: İKT
-    # yalnız düzəliş rejimində audited dəyişir, normal görünüşdə read-only.
+    # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
     can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
@@ -132,7 +131,6 @@ def journal_detail(request, offering_id):
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     coursework_rows = journal_extras.get_course_work_rows(offering)
     finals_data = finals.get_offering_results(offering=offering)
-    # Yekun cədvəldə kurs işi ayrıca sütun kimi göstərilir (giriş balına daxil deyil).
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
     for row in finals_data["rows"]:
         row["coursework"] = work_by_enrollment.get(row["enrollment"].id)
@@ -159,9 +157,7 @@ def journal_detail(request, offering_id):
         "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
-        # Seminar/lab bal seçimləri — YALNIZ tam ədəd 0–10 (q/b · i/e · bal).
         "seminar_score_options": list(range(0, 11)),
-        # Kollokvium xanası üçün bal seçimləri — 0–10 tam ədəd (seminar kimi).
         "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
         "today_parity": today_parity,
         "active_main_nav": "journal",
@@ -183,6 +179,11 @@ def journal_detail(request, offering_id):
         from apps.registrar.correction_views import build_correction_context
 
         context.update(build_correction_context(offering, request))
+    else:
+        # Normal görünüş: sərbəst iş/kurs işi/kollokvium düzəlişləri də sarı + tarixçə.
+        from apps.registrar import item_corrections
+
+        context.update(item_corrections.annotate_normal_view(offering, context))
     return render(request, "registrar/journal_detail.html", context)
 
 
@@ -207,8 +208,7 @@ def rubric_grade_view(request, offering_id, component_id):
         CourseOffering.objects.select_related("subject", "period", "group", "organization"),
         pk=offering_id,
     )
-    # Rubrik kriteriya balları ComponentScore-u yenidən hesablayır → yalnız birbaşa
-    # redaktor; korrektor (İKT) audited component-correction (PDF) yolunu işlədir.
+    # Rubrik kriteriya balları ComponentScore yazır → yalnız birbaşa redaktor (İKT yox).
     if not _is_direct_editor(request.user, offering):
         raise Http404
     component = get_object_or_404(AssessmentComponent, pk=component_id, offering=offering)
