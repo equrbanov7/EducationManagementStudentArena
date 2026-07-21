@@ -585,6 +585,32 @@ class LessonCorrectionServiceTest(_BaseJournalSetup):
                     by_user=self.admin,
                 )
 
+    def test_topic_and_instructor_corrected_and_reverted(self):
+        # Dərs mövzusu + müəllimi də audited PDF flow-dan keçir və geri alınır.
+        lesson, _mark = self._absent_lesson(6)  # topic="", instructor=None
+        with bypass_rls():
+            corrections.apply_lesson_correction(
+                lesson=lesson,
+                new_topic="Düzgün mövzu",
+                new_instructor=self.owner,
+                reason=CorrectionReason.TECHNICAL,
+                note="Mövzu və müəllim səhv idi",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            lesson.refresh_from_db()
+            self.assertEqual(lesson.topic, "Düzgün mövzu")
+            self.assertEqual(lesson.instructor_id, self.owner.id)
+            corr = LessonCorrection.objects.filter(lesson=lesson).latest("created_at")
+            self.assertEqual(corr.old_topic, "")
+            self.assertEqual(corr.new_topic, "Düzgün mövzu")
+            self.assertEqual(corr.new_instructor_id, self.owner.id)
+            old_instr = corr.old_instructor_id  # dərsin ilkin (açılış) müəllimi
+            self.assertTrue(corrections.revert_last_lesson_correction(lesson=lesson, by_user=self.admin))
+            lesson.refresh_from_db()
+            self.assertEqual(lesson.topic, "")
+            self.assertEqual(lesson.instructor_id, old_instr)  # köhnə müəllim qayıtdı
+
 
 class ItemCorrectionTest(_BaseJournalSetup):
     """E) Sərbəst iş + kurs işi sənədli düzəliş (bal xanası ilə eyni prosedur) + geri alma."""

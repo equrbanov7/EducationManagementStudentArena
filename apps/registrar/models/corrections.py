@@ -130,6 +130,14 @@ class LessonCorrection(UUIDModel, TimeStampedModel):
     new_hours = models.PositiveSmallIntegerField(null=True, blank=True)
     old_time = models.CharField(max_length=32, blank=True, default="")
     new_time = models.CharField(max_length=32, blank=True, default="")
+    old_topic = models.CharField(max_length=255, blank=True, default="")
+    new_topic = models.CharField(max_length=255, blank=True, default="")
+    old_instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    new_instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
     note = models.TextField(help_text="Düzəlişin izahı (məcburi).")
     document = models.FileField(
