@@ -38,6 +38,19 @@ def _back(offering, tab=""):
     return redirect(f"{url}#{tab}" if tab else url)
 
 
+def _resolve_instructor(offering, raw_id):
+    """POST-dakı ``lesson_instructor`` id-ni istifadəçiyə çevir (boş → None).
+
+    Bu dərsin müəllimi (fənn 2 müəllim arasında bölünübsə); boşdursa dəyişmə
+    (None → update_lesson toxunmur, açılışın müəllimi qalır)."""
+    raw_id = (raw_id or "").strip()
+    if not raw_id:
+        return None
+    from django.contrib.auth import get_user_model
+
+    return get_user_model().objects.filter(pk=raw_id).first()
+
+
 @login_required
 @require_POST
 def lesson_action(request, offering_id, lesson_id):
@@ -66,9 +79,10 @@ def lesson_action(request, offering_id, lesson_id):
         # düzəldə bilsin); adi müəllim üçün cədvəl tək növü kilidləyir.
         posted_kind = request.POST.get("lesson_kind") or None
         kind = posted_kind if override else (_locked_lesson_kind(offering) or posted_kind)
+        instructor = _resolve_instructor(offering, request.POST.get("lesson_instructor"))
 
-        # İKT + kilidlənmiş dərs (2 saat keçib) → sənədli düzəliş yolu: bal
-        # dəyişikliyi kimi səbəb + qeyd + PDF MƏCBURİ və audit olunur.
+        # İKT + kilidlənmiş dərs (2 saat keçib) → sənədli düzəliş yolu: tarix/tip/
+        # saat/mövzu/müəllim — hamısı səbəb + qeyd + PDF MƏCBURİ və audit olunur.
         locked = not gradebook.can_edit_lesson(lesson)
         if override and locked:
             from django.core.exceptions import ValidationError
@@ -83,6 +97,8 @@ def lesson_action(request, offering_id, lesson_id):
                     new_hours=hours,
                     new_start_time=start_time or "",
                     new_end_time=end_time or "",
+                    new_topic=request.POST.get("lesson_topic"),
+                    new_instructor=instructor,
                     reason=request.POST.get("correction_reason") or "",
                     note=request.POST.get("correction_note") or "",
                     document=request.FILES.get("correction_document"),
@@ -92,11 +108,6 @@ def lesson_action(request, offering_id, lesson_id):
             except ValidationError as exc:
                 messages.error(request, "; ".join(exc.messages))
                 return _back(offering)
-            # Mövzu sənəd tələb etmir — ayrıca (kilidsiz) yenilənir.
-            if request.POST.get("lesson_topic") is not None:
-                gradebook.update_lesson(
-                    lesson=lesson, topic=request.POST.get("lesson_topic"), allow_past=True, allow_locked=True
-                )
             messages.success(request, _("Dərs sənədli düzəlişlə yeniləndi."))
             return _back(offering)
 
@@ -109,6 +120,7 @@ def lesson_action(request, offering_id, lesson_id):
                 hours=hours,
                 start_time=start_time or "",
                 end_time=end_time or "",
+                instructor=instructor,
                 allow_past=override,
                 allow_locked=override,
             )

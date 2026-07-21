@@ -196,13 +196,15 @@ def apply_lesson_correction(
     new_hours=None,
     new_start_time=None,
     new_end_time=None,
+    new_topic=None,
+    new_instructor=None,
     reason: str,
     note: str,
     document,
     by_user,
     request=None,
 ) -> LessonCorrection:
-    """Dərs sətrinə (tarix / tip / saat) rəsmi, sənədli düzəliş — İKT rəhbəri üçün.
+    """Dərs sətrinə (tarix / tip / saat / mövzu / müəllim) rəsmi, sənədli düzəliş.
 
     Bal düzəlişi ilə eyni müqavilə: səbəb + qeyd + PDF MƏCBURİ; 2 saatlıq
     pəncərə + keçmiş-tarix qadağası keçilir; dəyişiklik audit olunur. Ən azı bir
@@ -217,20 +219,28 @@ def apply_lesson_correction(
     if not document:
         raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
 
+    def _iname(user):
+        return (user.get_full_name() or user.username) if user else "—"
+
     old = {
         "date": lesson.date,
         "kind": lesson.kind,
         "hours": lesson.hours,
         "time": _lesson_time_str(lesson),
+        "topic": lesson.topic or "",
+        "instr": lesson.instructor_id,
     }
+    old_instructor = lesson.instructor
     kind = new_kind if (new_kind in dict(LessonKind.choices)) else None
     ok = update_lesson(
         lesson=lesson,
         date=new_date or None,
         kind=kind,
+        topic=new_topic,
         hours=new_hours,
         start_time=new_start_time,
         end_time=new_end_time,
+        instructor=new_instructor,
         allow_past=True,
         allow_locked=True,
     )
@@ -240,7 +250,14 @@ def apply_lesson_correction(
         )
     lesson.refresh_from_db()
 
-    new = {"date": lesson.date, "kind": lesson.kind, "hours": lesson.hours, "time": _lesson_time_str(lesson)}
+    new = {
+        "date": lesson.date,
+        "kind": lesson.kind,
+        "hours": lesson.hours,
+        "time": _lesson_time_str(lesson),
+        "topic": lesson.topic or "",
+        "instr": lesson.instructor_id,
+    }
     if all(old[k] == new[k] for k in old):
         raise ValidationError(pgettext("registrar.correction", "Nothing changed — adjust a field before saving."))
 
@@ -255,6 +272,10 @@ def apply_lesson_correction(
         new_hours=new["hours"],
         old_time=old["time"],
         new_time=new["time"],
+        old_topic=old["topic"],
+        new_topic=new["topic"],
+        old_instructor=old_instructor,
+        new_instructor=lesson.instructor,
         reason=reason,
         note=note,
         document=document,
@@ -290,6 +311,22 @@ def apply_lesson_correction(
                 "item": str(pgettext("registrar.correction", "Time")),
                 "old": old["time"] or "—",
                 "new": new["time"] or "—",
+            }
+        )
+    if old["topic"] != new["topic"]:
+        changes.append(
+            {
+                "item": str(pgettext("registrar.correction", "Topic")),
+                "old": old["topic"] or "—",
+                "new": new["topic"] or "—",
+            }
+        )
+    if old["instr"] != new["instr"]:
+        changes.append(
+            {
+                "item": str(pgettext("registrar.correction", "Instructor")),
+                "old": _iname(old_instructor),
+                "new": _iname(lesson.instructor),
             }
         )
     for c in changes:
@@ -369,7 +406,7 @@ def revert_last_grade_correction(*, mark, by_user, request=None) -> bool:
 
 @transaction.atomic
 def revert_last_lesson_correction(*, lesson, by_user, request=None) -> bool:
-    """Dərsin SON sənədli düzəlişini geri al: tarix/tip/saat/saatı köhnəyə qaytar."""
+    """Dərsin SON sənədli düzəlişini geri al: tarix/tip/saat/mövzu/müəllim köhnəyə qaytar."""
     from .gradebook import update_lesson
 
     correction = lesson.corrections.order_by("-created_at").first()
@@ -384,12 +421,19 @@ def revert_last_lesson_correction(*, lesson, by_user, request=None) -> bool:
         lesson=lesson,
         date=correction.old_date,
         kind=correction.old_kind or None,
+        topic=correction.old_topic,
         hours=correction.old_hours,
         start_time=start or "",
         end_time=end or "",
+        instructor=correction.old_instructor,
         allow_past=True,
         allow_locked=True,
     )
+    # instructor=None (köhnə per-dərs müəllim yox) update_lesson-da skip olunur → birbaşa təmizlə.
+    if correction.old_instructor_id is None and lesson.instructor_id is not None:
+        with journal_unlock():
+            lesson.instructor = None
+            lesson.save(update_fields=["instructor"])
     correction.delete()
     try:
         with transaction.atomic():
