@@ -609,7 +609,9 @@
         // + qeyd məcburi olur; əlavə/kilidsiz redaktədə gizli və məcburiyyətsiz.
         var corrFields = modal.querySelector("[data-jd-corr-fields]");
         if (corrFields) {
-            var needCorr = editing && editData.locked;
+            // Blok yalnız korrektor-only (İKT) üçün render olunur → redaktədə HƏR
+            // halda (kilidli/kilidsiz) sənəd tələb olunur.
+            var needCorr = editing;
             corrFields.hidden = !needCorr;
             var doc = corrFields.querySelector("[data-jd-corr-doc]");
             var note = corrFields.querySelector("[data-jd-corr-note]");

@@ -170,6 +170,8 @@ def journal_detail(request, offering_id):
         "can_override_lessons": bool(
             getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
         ),
+        # Korrektor-only (İKT): dərs modalında PDF sahələri HƏMİŞƏ tələb olunur.
+        "is_corrector_only": can_correct and not is_direct_editor,
         "correction_reasons": CorrectionReason.choices,
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
@@ -205,7 +207,9 @@ def rubric_grade_view(request, offering_id, component_id):
         CourseOffering.objects.select_related("subject", "period", "group", "organization"),
         pk=offering_id,
     )
-    if not _can_edit_journal(request.user, offering):
+    # Rubrik kriteriya balları ComponentScore-u yenidən hesablayır → yalnız birbaşa
+    # redaktor; korrektor (İKT) audited component-correction (PDF) yolunu işlədir.
+    if not _is_direct_editor(request.user, offering):
         raise Http404
     component = get_object_or_404(AssessmentComponent, pk=component_id, offering=offering)
     grid = rubrics_service.get_rubric_grid(component)
@@ -515,8 +519,8 @@ def _handle_add_slot(request, organization, period):
         .select_related("organization")
         .first()
     )
-    if offering is None or not _can_edit_journal(request.user, offering):
-        raise Http404  # only the teaching instructor / org owner may schedule
+    if offering is None or not _is_direct_editor(request.user, offering):
+        raise Http404  # only the teaching instructor / org owner may schedule (NOT the corrector)
 
     from django.utils.dateparse import parse_time
 
@@ -565,7 +569,7 @@ def _handle_add_slot(request, organization, period):
 def schedule_slot_delete(request, slot_id):
     """Delete a slot (only the teaching instructor / org owner / superuser)."""
     slot = get_object_or_404(ScheduleSlot.objects.select_related("offering", "offering__organization"), pk=slot_id)
-    if request.method == "POST" and _can_edit_journal(request.user, slot.offering):
+    if request.method == "POST" and _is_direct_editor(request.user, slot.offering):
         slot.delete()
         messages.success(request, _("Slot silindi."))
     return _redirect_after_schedule(request)
