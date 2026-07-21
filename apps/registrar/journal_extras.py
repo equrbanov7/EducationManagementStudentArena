@@ -198,8 +198,9 @@ def delete_selfwork_topic(*, topic) -> bool:
 
 
 @transaction.atomic
-def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None) -> bool:
-    """Təhvil işarəsi: 1 hər zaman qoyulur; 1→0 geri alma yalnız 2 saat içində."""
+def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, allow_locked=False) -> bool:
+    """Təhvil işarəsi: 1 hər zaman qoyulur; 1→0 geri alma yalnız 2 saat içində.
+    ``allow_locked`` İKT/superuser üçün 2 saat pəncərəsini keçir."""
     if journal_is_locked(offering):
         return False
     topic = SelfWorkTopic.objects.filter(pk=topic_id, offering=offering).first()
@@ -216,8 +217,8 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None) 
     else:
         if mark.done == bool(done):
             return True
-        if mark.done and not done and (timezone.now() - mark.updated_at) > MARK_EDIT_WINDOW:
-            return False  # verilmiş işi 2 saatdan sonra geri almaq olmaz
+        if mark.done and not done and not allow_locked and (timezone.now() - mark.updated_at) > MARK_EDIT_WINDOW:
+            return False  # verilmiş işi 2 saatdan sonra geri almaq olmaz (İKT keçir)
         mark.done = bool(done)
         mark.entered_by = by_user
         mark.save(update_fields=["done", "entered_by", "updated_at"])
@@ -279,14 +280,14 @@ def get_selfwork_board(offering):
 
 
 @transaction.atomic
-def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=None) -> bool:
-    """Kurs işini yaz/yenilə — mövcud qeyd yalnız 2 saat içində dəyişilir."""
+def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=None, allow_locked=False) -> bool:
+    """Kurs işini yaz/yenilə — mövcud qeyd yalnız 2 saat içində (İKT keçir)."""
     offering = enrollment.offering
     if journal_is_locked(offering):
         return False
     existing = CourseWork.objects.filter(enrollment=enrollment).first()
     now = timezone.now()
-    if existing is not None and (now - existing.created_at) > MARK_EDIT_WINDOW:
+    if existing is not None and not allow_locked and (now - existing.created_at) > MARK_EDIT_WINDOW:
         return False
     value = _to_decimal(score)
     if value is not None:
@@ -524,3 +525,69 @@ def calendar_plan(offering, lessons, today):
         if lesson.topic:
             seen.add(lesson.topic)
     return plan
+
+
+def journal_teaching_summary(offering):
+    """Fənn açılışının dərs-saat mənzərəsi + növ-müəllimləri (bir sorğuda).
+
+    Qaytarır:
+      * ``kinds`` — YALNIZ MÖVCUD dərs növləri (mühazirə/seminar/lab); hər biri üçün
+        keçirilmiş saat + o növü keçən müəllim(lər)in adı. Yalnız bir növ varsa yalnız
+        o görünür (#8); 2 müəllim arasında bölünübsə hər növün öz müəllimi (#9).
+      * ``held_total`` keçirilmiş toplam saat, ``total`` fənnin tam saatı,
+        ``remaining`` qalan saat (#7). ``over`` — həddi keçibsə True (#6 göstərişi).
+    """
+    from apps.registrar.models import Lesson, LessonKind
+
+    lessons = list(
+        Lesson.objects.filter(offering=offering)
+        .select_related("instructor")
+        .only("kind", "hours", "instructor__first_name", "instructor__last_name", "instructor__username")
+    )
+    fallback = offering.instructor
+    by_kind: dict = {}
+    for lesson in lessons:
+        row = by_kind.setdefault(lesson.kind, {"held": 0, "teachers": {}})
+        row["held"] += int(lesson.hours or 0)
+        inst = lesson.instructor or fallback
+        if inst is not None:
+            row["teachers"][inst.id] = (inst.get_full_name() or "").strip() or inst.username
+    labels = dict(LessonKind.choices)
+    order = {"lecture": 0, "seminar": 1, "lab": 2}
+    kinds = [
+        {
+            "kind": kind,
+            "label": labels.get(kind, kind),
+            "held": data["held"],
+            "teachers": list(data["teachers"].values()),
+        }
+        for kind, data in by_kind.items()
+    ]
+    kinds.sort(key=lambda k: order.get(k["kind"], 9))
+    held_total = sum(k["held"] for k in kinds)
+    total = int(offering.lesson_hours or 0)
+    return {
+        "kinds": kinds,
+        "held_total": held_total,
+        "total": total,
+        "remaining": max(0, total - held_total) if total else None,
+        "over": bool(total and held_total > total),
+    }
+
+
+def lesson_teacher_choices(offering):
+    """Dərs modalı üçün müəllim namizədləri — açılışın müəllimi + təşkilatın digər
+    dərs deyən müəllimləri (fənn 2 müəllim arasında bölünə bilər — mühazirə/seminar)."""
+    from django.contrib.auth import get_user_model
+
+    from apps.registrar.models import CourseOffering
+
+    ids = set(
+        CourseOffering.objects.filter(organization=offering.organization, instructor__isnull=False).values_list(
+            "instructor_id", flat=True
+        )
+    )
+    if offering.instructor_id:
+        ids.add(offering.instructor_id)
+    users = get_user_model().objects.filter(pk__in=ids).order_by("last_name", "first_name", "username")
+    return [{"id": str(u.id), "name": (u.get_full_name() or "").strip() or u.username} for u in users]

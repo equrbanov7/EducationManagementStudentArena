@@ -21,6 +21,7 @@ from . import approval, finals, grade_audit, gradebook, schedule
 from .models import (
     ApprovalStatus,
     AttendanceStatus,
+    CorrectionReason,
     CourseOffering,
     LessonKind,
     ScheduleSlot,
@@ -162,8 +163,7 @@ def journal_detail(request, offering_id):
         "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
-        # Seminar/lab xanası üçün bal seçimləri — YALNIZ tam ədəd 0–10 (0.5
-        # addım YOX; müəllim tələbi). bootstrap select-option: q/b · i/e · bal.
+        # Seminar/lab bal seçimləri — YALNIZ tam ədəd 0–10 (q/b · i/e · bal).
         "seminar_score_options": list(range(0, 11)),
         # Kollokvium xanası üçün bal seçimləri — 0–10 tam ədəd (seminar kimi).
         "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
@@ -171,6 +171,13 @@ def journal_detail(request, offering_id):
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
         "can_correct_journal": can_correct,
+        "can_override_lessons": bool(
+            getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
+        ),
+        "correction_reasons": CorrectionReason.choices,
+        # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
+        "teaching_summary": journal_extras.journal_teaching_summary(offering),
+        "lesson_teacher_choices": journal_extras.lesson_teacher_choices(offering),
     }
     if correction_mode:
         # Yerində düzəliş rejimi: audited correction editoru üçün kontekst
@@ -382,6 +389,24 @@ def _handle_add_lesson(request, offering):
         messages.error(request, _("Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
+    # #6 — fənnin tam saat həddi: keçirilmiş + yeni saat toplamı keçməsin (60→62 olmaz).
+    summary = _je.journal_teaching_summary(offering)
+    if summary["total"] and summary["held_total"] + (hours or gradebook.DEFAULT_LESSON_HOURS) > summary["total"]:
+        messages.error(
+            request,
+            _("Fənnin dərs saatı həddi (%(t)s saat) keçilir — keçirilmiş %(h)s saat, qalan yalnız %(r)s saat.")
+            % {"t": summary["total"], "h": summary["held_total"], "r": summary["remaining"]},
+        )
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+    # #9 — bu dərsin müəllimi (fənn 2 müəllim arasında bölünübsə); boşdursa açılışınkı.
+    instructor = None
+    _inst_id = (request.POST.get("lesson_instructor") or "").strip()
+    if _inst_id:
+        from django.contrib.auth import get_user_model
+
+        instructor = get_user_model().objects.filter(pk=_inst_id).first()
+
     try:
         gradebook.create_lesson(
             offering=offering,
@@ -392,6 +417,7 @@ def _handle_add_lesson(request, offering):
             start_time=start_time,
             end_time=end_time,
             created_by=request.user,
+            instructor=instructor,
             # İKT Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
             allow_past=bool(
                 getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
