@@ -129,13 +129,11 @@ def create_lesson(
     start_time=None,
     end_time=None,
     created_by=None,
+    instructor=None,
     allow_past=False,
 ):
-    """Add a held session (a new journal column).
-
-    Qaydalar: jurnal kilidli olmamalıdır; KEÇMİŞ tarixə dərs açmaq olmaz
-    (geriyə-dönük doldurma qadağandır) — bu gün və gələcək (planlama) olar.
-    ``allow_past`` YALNIZ seed/test dəstəyi üçündür — HTTP qatı heç vaxt ötürmür."""
+    """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
+    ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir."""
     if journal_is_locked(offering):
         raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
     parsed = _coerce_date(date)
@@ -143,8 +141,7 @@ def create_lesson(
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
     if not allow_past and parsed < timezone.localdate():
         raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
-    # Eyni gündə eyni dərs saatına iki dərs yazıla bilməz (üst-üstə düşməsin).
-    # Yalnız saat verildikdə yoxlanır — seed/vaxtsız dərslər təsirlənmir.
+    new_hours = hours or DEFAULT_LESSON_HOURS
     if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     ensure_assessment_scheme(offering=offering)
@@ -154,10 +151,11 @@ def create_lesson(
         date=parsed,
         kind=kind,
         topic=topic or "",
-        hours=hours or DEFAULT_LESSON_HOURS,
+        hours=new_hours,
         start_time=start_time,
         end_time=end_time,
         created_by=created_by,
+        instructor=instructor or offering.instructor,
     )
 
 
@@ -171,12 +169,12 @@ def update_lesson(
     hours=None,
     start_time=None,
     end_time=None,
+    instructor=None,
     allow_past=False,
     allow_locked=False,
 ) -> bool:
-    """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked`` pəncərəni,
-    ``allow_past`` keçmiş-tarixi keçir — yalnız İKT Rəhbəri/superuser (rol HTTP qatında
-    yoxlanır); yayımlanmış jurnal yenə kilidli."""
+    """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked``/``allow_past``
+    pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli."""
     if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     fields = []
@@ -203,6 +201,9 @@ def update_lesson(
     if end_time is not None:
         lesson.end_time = end_time or None
         fields.append("end_time")
+    if instructor is not None:
+        lesson.instructor = instructor
+        fields.append("instructor")
     if fields:
         lesson.save(update_fields=fields)
     return True
@@ -210,10 +211,8 @@ def update_lesson(
 
 @transaction.atomic
 def delete_lesson(*, lesson, by_user=None, allow_locked=False) -> bool:
-    """Səhv açılmış dərsi sil — yalnız yaranışdan 2 saat içində.
-
-    ``allow_locked`` 2 saatlıq pəncərəni keçir (yalnız İKT Rəhbəri/superuser).
-    Sütunun (təzə) işarələri kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
+    """Səhv açılmış dərsi sil (2 saat içində; ``allow_locked`` İKT/superuser üçün keçir).
+    İşarələr kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
     if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
     offering = lesson.offering
@@ -505,8 +504,7 @@ def get_offering_journal(*, offering, newest_first=False):
                 "student": enrollment.student,
                 "cells": cells,
                 "absence_hours": absence_hours,
-                # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir; barred/warning
-                # isə akademik saat-limitinə görə qalır (Enrollment.absence_hours).
+                # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir (barred saat-limitinə görə).
                 "absence_count": absence_count,
                 "entry_score": entry_score,
                 "barred": barred,
@@ -523,6 +521,8 @@ def get_offering_journal(*, offering, newest_first=False):
         "today": today,
         "limit_percent": absence_limit_percent_for(offering),
         "allowed_absence": allowed_absence,
+        # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
+        "limit_qb": int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0,
         "entry_score_max": scheme.entry_score_max,
     }
 

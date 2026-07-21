@@ -241,6 +241,26 @@ class SelfWorkTest(TestCase):
             mark.refresh_from_db()
             self.assertTrue(mark.done)
 
+    def test_revoke_allowed_with_override_after_window(self):
+        # İKT/superuser (allow_locked=True) 2 saat pəncərəsindən sonra da geri ala bilər.
+        with bypass_rls():
+            topic = journal_extras.add_selfwork_topic(offering=self.offering, title="T1")
+            journal_extras.set_selfwork_mark(
+                offering=self.offering, topic_id=topic.id, enrollment_id=self.enrollment.id, done=True
+            )
+            mark = SelfWorkMark.objects.get(topic=topic, enrollment=self.enrollment)
+            SelfWorkMark.objects.filter(pk=mark.pk).update(updated_at=timezone.now() - datetime.timedelta(hours=3))
+            ok = journal_extras.set_selfwork_mark(
+                offering=self.offering,
+                topic_id=topic.id,
+                enrollment_id=self.enrollment.id,
+                done=False,
+                allow_locked=True,
+            )
+            self.assertTrue(ok)
+            mark.refresh_from_db()
+            self.assertFalse(mark.done)
+
     def test_topic_delete_cascades_marks(self):
         # Yeni davranış (istifadəçi tələbi): mövzu işarələnmiş olsa belə silinir və
         # bu mövzu üzrə SelfWorkMark-lar da (bal) FK cascade ilə birlikdə silinir.
@@ -282,6 +302,21 @@ class CourseWorkTest(TestCase):
             )
             work.refresh_from_db()
             self.assertEqual(work.score, Decimal("100"))  # dondu
+
+    def test_save_allowed_with_override_after_freeze(self):
+        # İKT/superuser (allow_locked=True) donmuş kurs işini də dəyişə bilər.
+        with bypass_rls():
+            journal_extras.save_course_work(
+                enrollment=self.enrollment, topic="İlk", score="50", submitted_on=TODAY(), by_user=self.teacher
+            )
+            work = CourseWork.objects.get(enrollment=self.enrollment)
+            CourseWork.objects.filter(pk=work.pk).update(created_at=timezone.now() - datetime.timedelta(hours=3))
+            ok = journal_extras.save_course_work(
+                enrollment=self.enrollment, topic="Düzəliş", score="90", by_user=self.teacher, allow_locked=True
+            )
+            self.assertTrue(ok)
+            work.refresh_from_db()
+            self.assertEqual(work.score, Decimal("90"))
 
 
 class JournalNotificationTest(TestCase):

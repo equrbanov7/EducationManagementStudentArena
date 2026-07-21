@@ -63,7 +63,18 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                         <td class="jd-sw2-cell">
                             {% if not cell.topic %}
                             <span class="sw-chip sw-chip--disabled" title="{% trans 'Mövzu hələ əlavə olunmayıb' context 'registrar.journal' %}">–</span>
-                            {% elif can_edit and not cell.locked %}
+                            {% elif correction_mode %}
+                            {# Düzəliş rejimi: xana → sənədli düzəliş düyməsi (correction.js). #}
+                            <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}"
+                                    data-corr-cell data-corr-target="selfwork"
+                                    data-topic-id="{{ cell.topic.id }}" data-enrollment-id="{{ row.enrollment.id }}"
+                                    data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                    data-date="{{ cell.topic.title }}" data-kind="{% trans 'Sərbəst iş' context 'registrar.journal' %}"
+                                    data-done="{% if cell.done %}1{% else %}0{% endif %}"
+                                    {% if cell.corrected %}data-history="{{ cell.corr_key }}"{% endif %}>
+                                {% if cell.done %}1{% else %}0{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                            </button>
+                            {% elif can_edit and not cell.locked or can_edit and can_override_lessons %}
                             <input type="hidden" name="sw__{{ cell.topic.id }}__{{ row.enrollment.id }}" value="{% if cell.done %}1{% else %}0{% endif %}" data-jd-sw>
                             <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
                             {% else %}

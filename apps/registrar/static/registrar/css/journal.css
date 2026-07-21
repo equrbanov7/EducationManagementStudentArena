@@ -529,3 +529,42 @@
 }
 .jl-badge--master { background: #dbeafe; color: #1d4ed8; }
 .jl-badge--info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+/* Səhifələmə (jurnal siyahısı) */
+.jd2-pager {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    margin: 18px 0 4px; flex-wrap: wrap;
+}
+.jd2-pager-btn {
+    text-decoration: none; border: 1px solid #dce6f7; background: #fff;
+    color: #2563eb; border-radius: 8px; padding: 7px 15px;
+    font-size: 12.5px; font-weight: 700;
+}
+.jd2-pager-btn:hover { background: #2563eb; border-color: #2563eb; color: #fff; }
+.jd2-pager-btn.is-disabled { color: #b8c2d6; border-color: #eef2f8; cursor: default; }
+.jd2-pager-info { font-size: 12.5px; font-weight: 700; color: #64748b; }
+
+/* Filtr sətri: bərabər hündürlük — çip/picker sıçramasın (layout shift yox) */
+.jd2-filters { align-items: stretch; }
+.jd2-filter { min-height: 46px; box-sizing: border-box; }
+.jl-ms { min-height: 44px; box-sizing: border-box; }
+
+/* ── Filtr yüklənmə skeleti ────────────────────────────────────────────────
+   Filtr dəyişəndə `.jl-page.is-loading` real cədvəli gizlədib skeleti göstərir;
+   server GET cavabını gözləyərkən boşluq/sıçrama olmur. */
+.jl-skel { display: none; margin-top: 2px; }
+.jl-page.is-loading .jl-skel { display: block; }
+.jl-page.is-loading .jl-table-wrap,
+.jl-page.is-loading .jd2-list-hint,
+.jl-page.is-loading .jd2-pager,
+.jl-page.is-loading .journal-empty { display: none; }
+.jl-skel-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px; border: 1px solid #eef2f8; border-radius: 12px; margin-bottom: 8px;
+}
+.jl-skel-cell { height: 14px; border-radius: 999px; }
+.jl-skel-cell--no { width: 22px; }
+.jl-skel-cell--grow { flex: 1; height: 18px; }
+.jl-skel-cell--kind { width: 90px; }
+.jl-skel-cell--count { width: 50px; }
+.jl-skel-cell--btn { width: 96px; height: 32px; border-radius: 8px; }

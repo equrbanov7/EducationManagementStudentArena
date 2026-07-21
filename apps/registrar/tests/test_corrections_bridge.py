@@ -17,6 +17,7 @@ from apps.registrar.models import (
     Curriculum,
     CurriculumSubject,
     JournalCorrection,
+    LessonCorrection,
     LessonKind,
     LessonMark,
     Program,
@@ -190,6 +191,28 @@ class CorrectionServiceTest(_BaseJournalSetup):
         self.assertEqual(c.old_score, 3)
         self.assertEqual(c.new_score, 9)
         self.assertEqual(c.corrected_by_name, "Aygün Registrar")  # from profile, not typed
+
+    def test_revert_last_grade_correction_restores_previous_value(self):
+        # Səhvən edilmiş düzəlişi geri al → xana köhnə (müəllim) dəyərinə qayıdır,
+        # sarı işarə (JournalCorrection) itir.
+        _lesson, mark = self._seminar_mark(11, 3)
+        with bypass_rls():
+            corrections.apply_correction(
+                mark=mark,
+                field=CorrectionField.SCORE,
+                new_score=9,
+                reason=CorrectionReason.APPEAL,
+                note="Səhv düzəliş",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            mark.refresh_from_db()
+            self.assertEqual(mark.score, Decimal("9"))
+            ok = corrections.revert_last_grade_correction(mark=mark, by_user=self.admin)
+            self.assertTrue(ok)
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, Decimal("3"))  # köhnə dəyər qayıtdı
+        self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())  # sarı getdi
 
     def test_float_score_rejected(self):
         _lesson, mark = self._seminar_mark(4, 3)
@@ -485,3 +508,227 @@ class CorrectionViewTest(_BaseJournalSetup):
         mark.refresh_from_db()
         self.assertEqual(mark.score, Decimal("8"))
         self.assertTrue(JournalCorrection.objects.filter(lesson_mark=mark).exists())
+
+    def test_delete_endpoint_reverts_correction(self):
+        _lesson, mark = self._seminar_mark(9, 4)
+        with bypass_rls():
+            corrections.apply_correction(
+                mark=mark,
+                field=CorrectionField.SCORE,
+                new_score=10,
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+        self._login_corrector()
+        resp = self.client.post(
+            f"/jurnal/duzelis/{self.offering.id}/sil/",
+            data={"type": "grade", "mark_id": str(mark.id)},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get("ok"))
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, Decimal("4"))
+        self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())
+
+
+class LessonCorrectionServiceTest(_BaseJournalSetup):
+    """#5/#6 — İKT dərs tarixi/tipi/saatı dəyişəndə sənədli, audited düzəliş."""
+
+    def test_requires_document(self):
+        lesson, _mark = self._absent_lesson(3)
+        with bypass_rls():
+            with self.assertRaises(ValidationError):
+                corrections.apply_lesson_correction(
+                    lesson=lesson,
+                    new_date="2024-10-05",
+                    reason=CorrectionReason.TECHNICAL,
+                    note="Səhv tarix",
+                    document=None,
+                    by_user=self.admin,
+                )
+
+    def test_changes_date_and_kind_and_records_snapshot(self):
+        lesson, _mark = self._absent_lesson(3)  # LECTURE, 2024-10-03
+        with bypass_rls():
+            corr = corrections.apply_lesson_correction(
+                lesson=lesson,
+                new_date="2024-10-09",
+                new_kind=LessonKind.SEMINAR,
+                reason=CorrectionReason.TECHNICAL,
+                note="Mühazirə/seminar qarışıb + tarix səhv",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+        lesson.refresh_from_db()
+        self.assertEqual(lesson.date, datetime.date(2024, 10, 9))
+        self.assertEqual(lesson.kind, LessonKind.SEMINAR)
+        self.assertEqual(corr.old_kind, LessonKind.LECTURE)
+        self.assertEqual(corr.new_kind, LessonKind.SEMINAR)
+        self.assertEqual(corr.old_date, datetime.date(2024, 10, 3))
+        self.assertEqual(corr.corrected_by_name, "Aygün Registrar")
+        self.assertTrue(LessonCorrection.objects.filter(lesson=lesson).exists())
+
+    def test_no_change_rejected(self):
+        lesson, _mark = self._absent_lesson(3)
+        with bypass_rls():
+            with self.assertRaises(ValidationError):
+                corrections.apply_lesson_correction(
+                    lesson=lesson,
+                    new_date="2024-10-03",
+                    new_kind=LessonKind.LECTURE,
+                    reason=CorrectionReason.TECHNICAL,
+                    note="Dəyişiklik yoxdur",
+                    document=_pdf(),
+                    by_user=self.admin,
+                )
+
+    def test_topic_and_instructor_corrected_and_reverted(self):
+        # Dərs mövzusu + müəllimi də audited PDF flow-dan keçir və geri alınır.
+        lesson, _mark = self._absent_lesson(6)  # topic="", instructor=None
+        with bypass_rls():
+            corrections.apply_lesson_correction(
+                lesson=lesson,
+                new_topic="Düzgün mövzu",
+                new_instructor=self.owner,
+                reason=CorrectionReason.TECHNICAL,
+                note="Mövzu və müəllim səhv idi",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            lesson.refresh_from_db()
+            self.assertEqual(lesson.topic, "Düzgün mövzu")
+            self.assertEqual(lesson.instructor_id, self.owner.id)
+            corr = LessonCorrection.objects.filter(lesson=lesson).latest("created_at")
+            self.assertEqual(corr.old_topic, "")
+            self.assertEqual(corr.new_topic, "Düzgün mövzu")
+            self.assertEqual(corr.new_instructor_id, self.owner.id)
+            old_instr = corr.old_instructor_id  # dərsin ilkin (açılış) müəllimi
+            self.assertTrue(corrections.revert_last_lesson_correction(lesson=lesson, by_user=self.admin))
+            lesson.refresh_from_db()
+            self.assertEqual(lesson.topic, "")
+            self.assertEqual(lesson.instructor_id, old_instr)  # köhnə müəllim qayıtdı
+
+
+class ItemCorrectionTest(_BaseJournalSetup):
+    """E) Sərbəst iş + kurs işi sənədli düzəliş (bal xanası ilə eyni prosedur) + geri alma."""
+
+    def test_selfwork_correction_applies_reverts_and_requires_doc(self):
+        from apps.registrar import item_corrections, journal_extras
+        from apps.registrar.models import SelfWorkCorrection, SelfWorkMark
+
+        with bypass_rls():
+            topic = journal_extras.add_selfwork_topic(offering=self.offering, title="SW1")
+            # Sənədsiz → rədd.
+            with self.assertRaises(ValidationError):
+                item_corrections.apply_selfwork_correction(
+                    offering=self.offering,
+                    topic=topic,
+                    enrollment=self.enrollment,
+                    new_done=True,
+                    reason=CorrectionReason.TECHNICAL,
+                    note="x",
+                    document=None,
+                    by_user=self.admin,
+                )
+            corr = item_corrections.apply_selfwork_correction(
+                offering=self.offering,
+                topic=topic,
+                enrollment=self.enrollment,
+                new_done=True,
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            self.assertTrue(SelfWorkMark.objects.get(topic=topic, enrollment=self.enrollment).done)
+            self.assertEqual(corr.old_done, False)
+            self.assertEqual(corr.new_done, True)
+            cmap = item_corrections.selfwork_corrections_map(self.offering)
+            self.assertIn(f"{topic.id}:{self.enrollment.id}", cmap)
+            # Geri al → təhvil 0-a qayıdır, correction itir (sarı gedir).
+            self.assertTrue(
+                item_corrections.revert_last_selfwork_correction(
+                    topic=topic, enrollment=self.enrollment, by_user=self.admin
+                )
+            )
+            self.assertFalse(SelfWorkMark.objects.get(topic=topic, enrollment=self.enrollment).done)
+            self.assertFalse(SelfWorkCorrection.objects.filter(topic=topic, enrollment=self.enrollment).exists())
+
+    def test_coursework_correction_applies_and_reverts(self):
+        from decimal import Decimal as D
+
+        from apps.registrar import item_corrections, journal_extras
+        from apps.registrar.models import CourseWork, CourseWorkCorrection
+
+        with bypass_rls():
+            journal_extras.save_course_work(
+                enrollment=self.enrollment,
+                topic="İlk",
+                score="50",
+                submitted_on=datetime.date(2024, 10, 1),
+                by_user=self.teacher,
+            )
+            corr = item_corrections.apply_coursework_correction(
+                enrollment=self.enrollment,
+                new_score="88",
+                new_topic="Düzəliş",
+                new_date=None,
+                reason=CorrectionReason.APPEAL,
+                note="Apellyasiya",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            self.assertEqual(CourseWork.objects.get(enrollment=self.enrollment).score, D("88"))
+            self.assertEqual(corr.old_score, D("50"))
+            self.assertEqual(corr.new_score, D("88"))
+            self.assertTrue(
+                item_corrections.revert_last_coursework_correction(enrollment=self.enrollment, by_user=self.admin)
+            )
+            self.assertEqual(CourseWork.objects.get(enrollment=self.enrollment).score, D("50"))
+            self.assertFalse(CourseWorkCorrection.objects.filter(enrollment=self.enrollment).exists())
+
+    def test_component_kollokvium_correction_applies_and_reverts(self):
+        from decimal import Decimal as D
+
+        from apps.registrar import item_corrections, journal_extras
+        from apps.registrar.models import ComponentScore, ComponentScoreCorrection
+
+        with bypass_rls():
+            comp = list(journal_extras.ensure_kollokviums(self.offering))[0]
+            corr = item_corrections.apply_component_correction(
+                component=comp,
+                enrollment=self.enrollment,
+                new_score="7",
+                reason=CorrectionReason.TECHNICAL,
+                note="Səhv kollokvium balı",
+                document=_pdf(),
+                by_user=self.admin,
+            )
+            self.assertEqual(ComponentScore.objects.get(component=comp, enrollment=self.enrollment).score, D("7"))
+            self.assertIsNone(corr.old_score)
+            self.assertEqual(corr.new_score, D("7"))
+            self.assertIn(f"{comp.id}:{self.enrollment.id}", item_corrections.component_corrections_map(self.offering))
+            # Sənədsiz → rədd.
+            with self.assertRaises(ValidationError):
+                item_corrections.apply_component_correction(
+                    component=comp,
+                    enrollment=self.enrollment,
+                    new_score="9",
+                    reason=CorrectionReason.TECHNICAL,
+                    note="x",
+                    document=None,
+                    by_user=self.admin,
+                )
+            # Geri al → köhnə (yox) dəyər → ComponentScore silinir, sarı gedir.
+            self.assertTrue(
+                item_corrections.revert_last_component_correction(
+                    component=comp, enrollment=self.enrollment, by_user=self.admin
+                )
+            )
+            self.assertFalse(ComponentScore.objects.filter(component=comp, enrollment=self.enrollment).exists())
+            self.assertFalse(
+                ComponentScoreCorrection.objects.filter(component=comp, enrollment=self.enrollment).exists()
+            )
