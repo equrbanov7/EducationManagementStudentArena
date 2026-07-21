@@ -81,8 +81,13 @@ correction_reasons.
             </label>
 
             <label class="corr-field" data-corr-score-wrap hidden>
-                <span class="corr-field-label">{% trans "Yeni bal (tam ədəd)" context "registrar.correction" %}</span>
-                <input type="number" name="new_score" min="0" max="10" step="1" class="corr-input">
+                <span class="corr-field-label">{% trans "Yeni bal" context "registrar.correction" %}</span>
+                {# Seminar xanası kimi 0–10 seçim — sərbəst ədəd (məs. 23213) yazmaq olmaz. #}
+                <div class="bootstrap-single-select">
+                    <select name="new_score" class="bootstrap-single-select__native" data-corr-score data-bootstrap-select>
+                        {% for s in seminar_score_options %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+                    </select>
+                </div>
             </label>
 
             <label class="corr-field">
