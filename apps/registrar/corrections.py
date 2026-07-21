@@ -352,6 +352,66 @@ def apply_lesson_correction(
 
 
 @transaction.atomic
+def apply_lesson_deletion(*, lesson, reason, note, document, by_user, request=None) -> LessonCorrection:
+    """Kilidlənmiş dərsi SİL — bal düzəlişi ilə eyni müqavilə: səbəb + qeyd + PDF
+    MƏCBURİ. Silmədən əvvəl sənədli qeyd yaradılır (SET_NULL FK → dərs silinsə də
+    qeyd + PDF qalır), sonra dərs (və bütün işarələri) silinir; audit yazılır."""
+    from .gradebook import delete_lesson
+
+    if reason not in CorrectionReason.values:
+        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
+    note = (note or "").strip()
+    if not note:
+        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
+    if not document:
+        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+
+    _k = {k: str(v) for k, v in dict(LessonKind.choices).items()}
+    label = f"{lesson.date} · {_k.get(lesson.kind, lesson.kind)}"
+    correction = LessonCorrection(
+        organization=lesson.organization,
+        lesson=lesson,
+        lesson_label=label,
+        is_deletion=True,
+        old_date=lesson.date,
+        new_date=None,
+        old_kind=lesson.kind,
+        old_hours=lesson.hours,
+        old_time=_lesson_time_str(lesson),
+        old_topic=lesson.topic or "",
+        old_instructor=lesson.instructor,
+        reason=reason,
+        note=note,
+        document=document,
+        corrected_by=by_user,
+        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+    )
+    correction.full_clean()
+    correction.save()
+    offering = lesson.offering
+    changes = [
+        {"student": label, "item": str(pgettext("registrar.correction", "Lesson deleted")), "old": label, "new": "—"}
+    ]
+    try:
+        with transaction.atomic():
+            grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="lesson-deletion", changes=changes)
+            log_action(
+                action=AuditAction.DELETE,
+                user=by_user,
+                organization=offering.organization,
+                obj=correction,
+                reason=f"lesson deletion: {reason}",
+                request=request,
+                changes=[{"field": c["item"], "old": c["old"], "new": c["new"]} for c in changes],
+            )
+    except Exception:  # audit heç vaxt axını sındırmır
+        pass
+    # Dərsi sil — SET_NULL sayəsində yuxarıdakı correction (PDF ilə) qalır.
+    delete_lesson(lesson=lesson, by_user=by_user, allow_locked=True)
+    return correction
+
+
+@transaction.atomic
 def revert_last_grade_correction(*, mark, by_user, request=None) -> bool:
     """Bir xananın SON düzəlişini geri al: dəyəri köhnəyə qaytar, qeydi sil.
 

@@ -107,7 +107,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-corr-fields" data-jd-corr-fields hidden>
                     <p class="jd2-corr-banner">
                         <i class="fas fa-lock"></i>
-                        {% trans "Bu dərs kilidlənib (2 saat keçib). Tarix/tip/saat dəyişikliyi rəsmi sənədlə (təqdimat) audit olunur." context "registrar.journal" %}
+                        {% trans "Bu dərs kilidlənib (2 saat keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur." context "registrar.journal" %}
                     </p>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "DÜZƏLİŞ SƏBƏBİ" context "registrar.journal" %}</span>
@@ -133,21 +133,18 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 </p>
             </div>
             <div class="jd-modal-foot">
+                {% comment %} Silmə düyməsi redaktə formasının İÇİNDƏDİR — beləcə kilidli
+                dərs silinəndə eyni MƏCBURİ sənəd (correction_document) göndərilir.
+                Təsdiq + silmə confirm-i journal_grid.js-dədir (data-jd-confirm-* button-da).{% endcomment %}
+                <button type="submit" class="jd-danger-btn" name="do_delete" value="1" data-jd-lesson-delete hidden
+                        data-confirm-title="{% trans 'Dərsi silmək?' context 'registrar.journal' %}"
+                        data-confirm-body="{% trans 'Bu dərs sütunu və ona aid bütün bal/qayıb qeydləri birlikdə silinəcək. Kilidlənmiş dərs üçün səbəb + qeyd + PDF sənəd MƏCBURİDİR.' context 'registrar.journal' %}"
+                        data-confirm-ok="{% trans 'Sil' context 'registrar.journal' %}">
+                    <i class="fas fa-trash-can"></i> {% trans "Dərsi sil" context "registrar.journal" %}
+                </button>
                 <button type="button" class="jd2-cancel-btn" data-jd-modal-close>{% trans "İmtina et" context "registrar.journal" %}</button>
                 <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
             </div>
-        </form>
-        {% comment %} Silmə — redaktə rejimində görünür; ayrıca form (nested form olmaz).
-           Native confirm() əvəzinə səliqəli təsdiq modalı (data-jd-confirm →
-           journal_grid.js showJdConfirm). CSP-safe: inline handler yox. {% endcomment %}
-        <form method="post" class="jd-lesson-delete-form" data-jd-lesson-delete hidden
-              data-jd-confirm
-              data-confirm-title="{% trans 'Dərsi silmək?' context 'registrar.journal' %}"
-              data-confirm-body="{% trans 'Bu dərs sütunu və ona aid bütün bal/qayıb qeydləri birlikdə silinəcək. Yalnız dərs yaradıldıqdan 2 saat ərzində mümkündür və geri qaytarıla bilməz.' context 'registrar.journal' %}"
-              data-confirm-ok="{% trans 'Sil' context 'registrar.journal' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="delete_lesson">
-            <button type="submit" class="jd-danger-btn"><i class="fas fa-trash-can"></i> {% trans "Dərsi sil" context "registrar.journal" %}</button>
         </form>
     </div>
 </div>
