@@ -83,11 +83,15 @@ def lesson_action(request, offering_id, lesson_id):
     # İKT Rəhbəri / superuser: 2 saatlıq pəncərəni + keçmiş-tarix qadağasını keçir
     # (dərsi istənilən tarixə/saata dəyişə, silə bilər). Yayımlanmış jurnal yenə kilidli.
     override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
+    # Korrektor-only (İKT — birbaşa redaktor DEYİL): dərs redaktəsi/silməsi HƏR lock
+    # vəziyyətində sənədli (PDF) audited yoldan keçir. Müəllim/sahib/superuser (birbaşa
+    # redaktor) 2 saat pəncərəsində birbaşa (PDF-siz) dəyişir.
+    corrector_only = not _is_direct_editor(request.user, offering)
 
     if action == "delete_lesson":
-        # İKT + kilidlənmiş dərs → silmə də bal/redaktə düzəlişi kimi rəsmi
-        # sənəd (səbəb + qeyd + PDF) tələb edir; sənədsiz silmək OLMAZ.
-        if override and not gradebook.can_edit_lesson(lesson):
+        # Korrektor (İKT): silmə də bal/redaktə düzəlişi kimi rəsmi sənəd (səbəb +
+        # qeyd + PDF) tələb edir; sənədsiz silmək OLMAZ.
+        if corrector_only:
             from django.core.exceptions import ValidationError
 
             from apps.registrar import corrections as corrections_service
@@ -124,10 +128,9 @@ def lesson_action(request, offering_id, lesson_id):
         kind = posted_kind if override else (_locked_lesson_kind(offering) or posted_kind)
         instructor = _resolve_instructor(offering, request.POST.get("lesson_instructor"))
 
-        # İKT + kilidlənmiş dərs (2 saat keçib) → sənədli düzəliş yolu: tarix/tip/
-        # saat/mövzu/müəllim — hamısı səbəb + qeyd + PDF MƏCBURİ və audit olunur.
-        locked = not gradebook.can_edit_lesson(lesson)
-        if override and locked:
+        # Korrektor (İKT): tarix/tip/saat/mövzu/müəllim dəyişikliyi — HƏR lock
+        # vəziyyətində səbəb + qeyd + PDF MƏCBURİ və audit olunur.
+        if corrector_only:
             from django.core.exceptions import ValidationError
 
             from apps.registrar import corrections as corrections_service
