@@ -35,6 +35,14 @@ def lesson_correction_document_path(instance, filename: str) -> str:
     return f"journal_lesson_corrections/{instance.organization_id}/{filename}"
 
 
+def selfwork_correction_document_path(instance, filename: str) -> str:
+    return f"journal_selfwork_corrections/{instance.organization_id}/{filename}"
+
+
+def coursework_correction_document_path(instance, filename: str) -> str:
+    return f"journal_coursework_corrections/{instance.organization_id}/{filename}"
+
+
 class CorrectionField(models.TextChoices):
     """Xananın hansı hissəsi düzəldilir."""
 
@@ -143,3 +151,88 @@ class LessonCorrection(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"lesson-correction<{self.lesson_id}> ({self.reason})"
+
+
+class SelfWorkCorrection(UUIDModel, TimeStampedModel):
+    """Sərbəst iş xanasına (topic × tələbə: təhvil 0↔1) sənədli düzəliş.
+
+    Bal xanası düzəlişi ilə eyni müqavilə: səbəb + qeyd + PDF məcburi, audit
+    olunur, xana sarı işarələnir, geri alına bilər."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="selfwork_corrections"
+    )
+    topic = models.ForeignKey("registrar.SelfWorkTopic", on_delete=models.CASCADE, related_name="corrections")
+    enrollment = models.ForeignKey(
+        "registrar.Enrollment", on_delete=models.CASCADE, related_name="selfwork_corrections"
+    )
+    old_done = models.BooleanField(default=False)
+    new_done = models.BooleanField(default=False)
+    reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
+    note = models.TextField(help_text="Düzəlişin izahı (məcburi).")
+    document = models.FileField(
+        upload_to=selfwork_correction_document_path,
+        validators=[FileUploadValidator(allowed_extensions={".pdf"}, max_size_mb=_MAX_DOCUMENT_MB)],
+        help_text="Əsas sənəd — yalnız PDF (məcburi).",
+    )
+    corrected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="selfwork_corrections"
+    )
+    corrected_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.selfwork_correction.meta", "self-work correction")
+        verbose_name_plural = pgettext_lazy("registrar.model.selfwork_correction.meta", "self-work corrections")
+        indexes = [
+            models.Index(fields=["organization", "topic", "enrollment"]),
+            models.Index(fields=["organization", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"selfwork-correction<{self.topic_id}/{self.enrollment_id}> ({self.reason})"
+
+
+class CourseWorkCorrection(UUIDModel, TimeStampedModel):
+    """Kurs işi xanasına (tələbə: bal / mövzu / tarix) sənədli düzəliş — bal
+    xanası ilə eyni müqavilə (səbəb + qeyd + PDF, audit, sarı, geri alına bilər)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="coursework_corrections"
+    )
+    enrollment = models.ForeignKey(
+        "registrar.Enrollment", on_delete=models.CASCADE, related_name="coursework_corrections"
+    )
+    old_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    new_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    old_topic = models.CharField(max_length=255, blank=True, default="")
+    new_topic = models.CharField(max_length=255, blank=True, default="")
+    old_date = models.DateField(null=True, blank=True)
+    new_date = models.DateField(null=True, blank=True)
+    reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
+    note = models.TextField(help_text="Düzəlişin izahı (məcburi).")
+    document = models.FileField(
+        upload_to=coursework_correction_document_path,
+        validators=[FileUploadValidator(allowed_extensions={".pdf"}, max_size_mb=_MAX_DOCUMENT_MB)],
+        help_text="Əsas sənəd — yalnız PDF (məcburi).",
+    )
+    corrected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="coursework_corrections"
+    )
+    corrected_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.coursework_correction.meta", "course-work correction")
+        verbose_name_plural = pgettext_lazy("registrar.model.coursework_correction.meta", "course-work corrections")
+        indexes = [
+            models.Index(fields=["organization", "enrollment"]),
+            models.Index(fields=["organization", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"coursework-correction<{self.enrollment_id}> ({self.reason})"

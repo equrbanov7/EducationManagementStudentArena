@@ -15,11 +15,12 @@ from django.core.exceptions import ValidationError
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.dateparse import parse_date
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from . import corrections, gradebook
-from .models import AttendanceStatus, CorrectionReason, CourseOffering, Lesson, LessonMark
+from .models import AttendanceStatus, CorrectionReason, CourseOffering, Enrollment, Lesson, LessonMark, SelfWorkTopic
 
 
 def _require_corrector(request):
@@ -49,9 +50,20 @@ def build_correction_context(offering, request) -> dict:
     ``correction_journal`` səhifəsi, HƏM DƏ ``journal_detail``-in yerində düzəliş
     rejimi (``?correct=1``) eyni audited editoru göstərsin deyə. Bütün yazma
     ``corrections.apply_correction`` (audit + sənəd) üzərindəndir."""
+    from . import item_corrections, journal_extras
+
+    sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True)
+    cw_map = item_corrections.coursework_corrections_map(offering, include_document=True)
     return {
         "journal": gradebook.get_offering_journal(offering=offering, newest_first=True),
         "corrections_map": corrections.corrections_map_for_offering(offering, include_document=True),
+        # Sərbəst iş / kurs işi düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
+        "selfwork_board": item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map),
+        "coursework_rows": item_corrections.annotate_coursework_rows(
+            journal_extras.get_course_work_rows(offering), cw_map
+        ),
+        "selfwork_corrections_map": sw_map,
+        "coursework_corrections_map": cw_map,
         "correction_reasons": CorrectionReason.choices,
         "attendance_choices": [
             (AttendanceStatus.PRESENT, pgettext("registrar.correction", "İştirak (iə)")),
@@ -74,6 +86,39 @@ def correction_journal(request, offering_id):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
 
 
+def _apply_item_correction(request, offering):
+    """Sərbəst iş / kurs işi xanasına sənədli düzəliş (bal xanası ilə eyni prosedur)."""
+    from . import item_corrections
+
+    target = (request.POST.get("target") or "").strip()
+    common = dict(
+        reason=request.POST.get("reason"),
+        note=request.POST.get("note"),
+        document=request.FILES.get("document"),
+        by_user=request.user,
+        request=request,
+    )
+    if target == "selfwork":
+        topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
+        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        item_corrections.apply_selfwork_correction(
+            offering=offering,
+            topic=topic,
+            enrollment=enrollment,
+            new_done=request.POST.get("new_done") == "1",
+            **common,
+        )
+    else:  # coursework
+        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        item_corrections.apply_coursework_correction(
+            enrollment=enrollment,
+            new_score=request.POST.get("new_score_cw"),
+            new_topic=request.POST.get("new_topic") or "",
+            new_date=parse_date(request.POST.get("new_date") or "") or None,
+            **common,
+        )
+
+
 @login_required
 @require_POST
 def correction_apply(request, offering_id):
@@ -82,24 +127,27 @@ def correction_apply(request, offering_id):
     org = _active_org(request)
     offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
 
-    mark = get_object_or_404(
-        LessonMark.objects.select_related("lesson", "enrollment", "organization"),
-        pk=request.POST.get("mark_id"),
-        lesson__offering=offering,
-    )
-    field = request.POST.get("field")
+    target = (request.POST.get("target") or "grade").strip()
     try:
-        corrections.apply_correction(
-            mark=mark,
-            field=field,
-            new_status=request.POST.get("new_status"),
-            new_score=request.POST.get("new_score"),
-            reason=request.POST.get("reason"),
-            note=request.POST.get("note"),
-            document=request.FILES.get("document"),
-            by_user=request.user,
-            request=request,
-        )
+        if target in ("selfwork", "coursework"):
+            _apply_item_correction(request, offering)
+        else:
+            mark = get_object_or_404(
+                LessonMark.objects.select_related("lesson", "enrollment", "organization"),
+                pk=request.POST.get("mark_id"),
+                lesson__offering=offering,
+            )
+            corrections.apply_correction(
+                mark=mark,
+                field=request.POST.get("field"),
+                new_status=request.POST.get("new_status"),
+                new_score=request.POST.get("new_score"),
+                reason=request.POST.get("reason"),
+                note=request.POST.get("note"),
+                document=request.FILES.get("document"),
+                by_user=request.user,
+                request=request,
+            )
     except ValidationError as exc:
         message = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -125,6 +173,19 @@ def correction_delete(request, offering_id):
     if ctype == "lesson":
         lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
         ok = corrections.revert_last_lesson_correction(lesson=lesson, by_user=request.user, request=request)
+    elif ctype in ("selfwork", "coursework"):
+        from . import item_corrections
+
+        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        if ctype == "selfwork":
+            topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
+            ok = item_corrections.revert_last_selfwork_correction(
+                topic=topic, enrollment=enrollment, by_user=request.user, request=request
+            )
+        else:
+            ok = item_corrections.revert_last_coursework_correction(
+                enrollment=enrollment, by_user=request.user, request=request
+            )
     else:  # grade (davamiyyət/bal xanası)
         mark = get_object_or_404(
             LessonMark.objects.select_related("lesson", "enrollment", "organization"),
