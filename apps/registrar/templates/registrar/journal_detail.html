@@ -209,7 +209,7 @@
     {% include "partials/_empty_state.html" with empty_icon="fa-user-slash" empty_title=jd_nostudent_title %}
     {% endif %}
 
-    {% if can_edit %}
+    {% if can_edit or correction_mode and can_override_lessons %}
     {% include "registrar/partials/_jd_lesson_modal.html" %}
 
     {% comment %}Çıxış təsdiqi: yadda saxlanılmamış dəyişikliklər varsa soruşulur.

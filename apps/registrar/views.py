@@ -41,20 +41,11 @@ def _current_period(organization):
     )
 
 
-def _can_edit_journal(user, offering) -> bool:
-    """Offering müəllimi, org sahibi, superuser — və İKT Rəhbəri jurnalı redaktə edə bilər.
-
-    İKT Rəhbəri texniki/akademik super-operatordur: pəncərə daxili xanaları
-    birbaşa yaza bilər, kilidlənmiş (2 saat keçmiş) xanaları isə sənədli düzəliş
-    (correction + PDF) ilə düzəldir. Hər iki yol audit olunur.
-    """
-    if not getattr(user, "is_authenticated", False):
-        return False
-    if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
-        return True
-    if offering.instructor_id and offering.instructor_id == user.id:
-        return True
-    return offering.organization.owner_id == user.id
+# Redaktə/giriş hüquq köməkçiləri ayrıca modulda (modul-ölçü limiti). Köhnə
+# `_can_edit_journal` / `_is_direct_editor` adları geriyə-uyğunluq üçün saxlanılır
+# (journal_actions + pdf_views bunları views-dan idxal edir).
+from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
+from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
 
 
 @login_required
@@ -85,6 +76,9 @@ def journal_detail(request, offering_id):
 
     appr = approval.approval_context(offering=offering, user=request.user)
     can_edit_perm = _can_edit_journal(request.user, offering)
+    # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL: İKT
+    # yalnız düzəliş rejimində audited dəyişir, normal görünüşdə read-only.
+    is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
     can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
         request.user, offering.organization
@@ -109,8 +103,10 @@ def journal_detail(request, offering_id):
             )
         if action == "return_revision":
             return _handle_return(request, offering)
-        # Editing actions require instructor/owner edit rights.
-        if not can_edit_perm:
+        # Birbaşa redaktə əməliyyatları YALNIZ müəllim/sahib/superuser üçün. Korrektor
+        # (İKT) buradan keçə bilməz — dəyişikliyi düzəliş rejimi (correction_apply,
+        # sənədli) ilə edir. Beləcə düzəliş rejimi aktiv olmadan heç nə dəyişmir.
+        if not is_direct_editor:
             raise Http404
         if action == "add_lesson":
             return _handle_add_lesson(request, offering)
@@ -154,7 +150,7 @@ def journal_detail(request, offering_id):
         "selfwork_board": journal_extras.get_selfwork_board(offering),
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
-        "can_edit": can_edit_perm and not appr["is_locked"],
+        "can_edit": is_direct_editor and not appr["is_locked"],
         "approval": appr,
         "grade_history": grade_audit.get_grade_history(offering=offering),
         "lesson_kinds": LessonKind.choices,
@@ -174,6 +170,8 @@ def journal_detail(request, offering_id):
         "can_override_lessons": bool(
             getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
         ),
+        # Korrektor-only (İKT): dərs modalında PDF sahələri HƏMİŞƏ tələb olunur.
+        "is_corrector_only": can_correct and not is_direct_editor,
         "correction_reasons": CorrectionReason.choices,
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
@@ -209,7 +207,9 @@ def rubric_grade_view(request, offering_id, component_id):
         CourseOffering.objects.select_related("subject", "period", "group", "organization"),
         pk=offering_id,
     )
-    if not _can_edit_journal(request.user, offering):
+    # Rubrik kriteriya balları ComponentScore-u yenidən hesablayır → yalnız birbaşa
+    # redaktor; korrektor (İKT) audited component-correction (PDF) yolunu işlədir.
+    if not _is_direct_editor(request.user, offering):
         raise Http404
     component = get_object_or_404(AssessmentComponent, pk=component_id, offering=offering)
     grid = rubrics_service.get_rubric_grid(component)
@@ -519,8 +519,8 @@ def _handle_add_slot(request, organization, period):
         .select_related("organization")
         .first()
     )
-    if offering is None or not _can_edit_journal(request.user, offering):
-        raise Http404  # only the teaching instructor / org owner may schedule
+    if offering is None or not _is_direct_editor(request.user, offering):
+        raise Http404  # only the teaching instructor / org owner may schedule (NOT the corrector)
 
     from django.utils.dateparse import parse_time
 
@@ -569,7 +569,7 @@ def _handle_add_slot(request, organization, period):
 def schedule_slot_delete(request, slot_id):
     """Delete a slot (only the teaching instructor / org owner / superuser)."""
     slot = get_object_or_404(ScheduleSlot.objects.select_related("offering", "offering__organization"), pk=slot_id)
-    if request.method == "POST" and _can_edit_journal(request.user, slot.offering):
+    if request.method == "POST" and _is_direct_editor(request.user, slot.offering):
         slot.delete()
         messages.success(request, _("Slot silindi."))
     return _redirect_after_schedule(request)
