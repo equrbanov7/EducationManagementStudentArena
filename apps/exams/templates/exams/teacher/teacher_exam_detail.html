@@ -369,65 +369,66 @@
 {% endblock %}
 
 {% block extraJs %}
-<script nonce="{{ request.csp_nonce }}">
-window.EXAM_CREATE_EDIT_MODAL_I18N = {
-    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
-    createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
-    editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
-    submitError: "{% trans 'retry_error' context 'courses.common.js' %}",
-    saving: "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
-    saved: "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
-};
-window.EXAM_WIZARD_I18N = {
-    step: "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
-    errorsTitle: "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
-    titleRequired: "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
-};
-window.TEACHER_EXAM_DETAIL_I18N = {
-    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
-    questionCreateTitle: "{% trans 'question_create_title' context 'exams.template.teacher_exam_detail' %}",
-    questionEditTitle: "{% trans 'question_edit_title' context 'exams.template.teacher_exam_detail' %}",
-    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
-};
-</script>
-<script src="{% static 'exams/js/question_form.js' %}"></script>
-<script nonce="{{ request.csp_nonce }}">
-window.MODAL_SUPERVISION_TPL_INFO = {
-    "light": {
-        title: "{% filter escapejs %}{% trans 'tpl_info_light_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'tpl_info_light_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        features: [
-            "{% filter escapejs %}{% trans 'tpl_info_light_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_light_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_light_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_light_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}"
-        ]
+<script id="teacher-exam-detail-data" type="application/json">
+{
+    "createEditModalI18n": {
+        "loadingForm": "{% filter escapejs %}{% trans 'loading_form' context 'exams.template.create_exam_modal' %}{% endfilter %}",
+        "createTitle": "{% filter escapejs %}{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        "editTitle": "{% filter escapejs %}{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        "submitError": "{% filter escapejs %}{% trans 'retry_error' context 'courses.common.js' %}{% endfilter %}",
+        "saving": "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
+        "saved": "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
     },
-    "medium": {
-        title: "{% filter escapejs %}{% trans 'tpl_info_medium_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'tpl_info_medium_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        features: [
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}"
-        ]
+    "wizardI18n": {
+        "step": "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
+        "errorsTitle": "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
+        "titleRequired": "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
     },
-    "strict": {
-        title: "{% filter escapejs %}{% trans 'tpl_info_strict_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'tpl_info_strict_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        features: [
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f6' context 'exams.template.create_edit_exam' %}{% endfilter %}"
-        ]
+    "teacherExamDetailI18n": {
+        "loadingForm": "{% filter escapejs %}{% trans 'loading_form' context 'exams.template.create_exam_modal' %}{% endfilter %}",
+        "questionCreateTitle": "{% filter escapejs %}{% trans 'question_create_title' context 'exams.template.teacher_exam_detail' %}{% endfilter %}",
+        "questionEditTitle": "{% filter escapejs %}{% trans 'question_edit_title' context 'exams.template.teacher_exam_detail' %}{% endfilter %}",
+        "submitError": "{% filter escapejs %}{% trans 'retry_error' context 'courses.common.js' %}{% endfilter %}"
+    },
+    "modalSupervisionTplInfo": {
+        "light": {
+            "title": "{% filter escapejs %}{% trans 'tpl_info_light_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "desc": "{% filter escapejs %}{% trans 'tpl_info_light_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "features": [
+                "{% filter escapejs %}{% trans 'tpl_info_light_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_light_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_light_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_light_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+            ]
+        },
+        "medium": {
+            "title": "{% filter escapejs %}{% trans 'tpl_info_medium_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "desc": "{% filter escapejs %}{% trans 'tpl_info_medium_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "features": [
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+            ]
+        },
+        "strict": {
+            "title": "{% filter escapejs %}{% trans 'tpl_info_strict_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "desc": "{% filter escapejs %}{% trans 'tpl_info_strict_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "features": [
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f6' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+            ]
+        }
     }
-};
+}
 </script>
+<script src="{% static 'exams/js/teacher_exam_detail_i18n_bootstrap.js' %}"></script>
+<script src="{% static 'exams/js/question_form.js' %}"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20260709-access-fix"></script>

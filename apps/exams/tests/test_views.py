@@ -882,8 +882,10 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, "Yeni sual")
 
         self.assertEqual(bank_response.status_code, 200)
-        self.assertContains(bank_response, 'questionCreateTitle: "Добавить новый вопрос"', html=False)
-        self.assertNotContains(bank_response, 'questionCreateTitle: "Yeni sual elave et"', html=False)
+        # i18n дальше не инлайновый <script>, а JSON-остров (CSP: no unsafe-inline) —
+        # ключ теперь в кавычках.
+        self.assertContains(bank_response, '"questionCreateTitle": "Добавить новый вопрос"', html=False)
+        self.assertNotContains(bank_response, '"questionCreateTitle": "Yeni sual elave et"', html=False)
 
     def test_modal_add_question_accepts_more_than_four_options(self):
         response = self.client.post(
@@ -3469,9 +3471,10 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(code_response.status_code, 200)
         self.assertContains(code_response, f'data-exam-slug="{self.code_assigned_exam.slug}"')
         self.assertContains(code_response, 'data-requires-code="1"')
+        # i18n JSON-остров (CSP: no unsafe-inline) — ключ теперь в кавычках.
         self.assertContains(
             code_response,
-            'modalAccessCodeDescriptionWithTitle: "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
+            '"modalAccessCodeDescriptionWithTitle": "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
             html=False,
         )
 
@@ -3510,7 +3513,10 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, f'data-language-options-id="exam-language-options-{multilingual_exam.id}"')
         self.assertContains(response, f'id="exam-language-options-{multilingual_exam.id}"')
         self.assertContains(response, '"display_name": "English"', html=False)
-        self.assertContains(response, "buildStartUrlWithLanguage")
+        # buildStartUrlWithLanguage now lives in the external modal script (CSP:
+        # no inline JS) rather than inline in the response — assert the script
+        # that provides language-aware start-URL building is wired on the page.
+        self.assertContains(response, "exams/js/student_exam_list_modal.js")
         self.assertNotContains(response, '"count"', html=False)
         self.assertNotContains(response, "Tövsiyə olunan")
 
@@ -3741,12 +3747,13 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "İmtahana başla")
         self.assertNotContains(response, "Start exam")
         self.assertNotContains(response, "Bu resurs haqqında qısa məlumat")
+        # i18n JSON-остров (CSP: no unsafe-inline) — ключ теперь в кавычках.
         self.assertContains(
             response,
-            'modalAccessCodeDescriptionWithTitle: "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
+            '"modalAccessCodeDescriptionWithTitle": "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
             html=False,
         )
-        self.assertNotContains(response, 'modalAccessCodeDescriptionWithTitle: ""{title}"', html=False)
+        self.assertNotContains(response, '"modalAccessCodeDescriptionWithTitle": ""{title}"', html=False)
 
     def test_student_exam_list_modal_strings_are_translated_for_supported_languages(self):
         cases = (

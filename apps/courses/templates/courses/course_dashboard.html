@@ -23,6 +23,7 @@
     <script src="{% static 'courses/js/course_panel_tabs.js' %}?v=20260630-2" defer></script>
     <script src="{% static 'courses/js/course_modals_enhance.js' %}?v=20260630-2" defer></script>
     <script src="{% static 'courses/js/course_ai_drawer.js' %}?v=20260630-2" defer></script>
+    <script src="{% static 'courses/js/course_dashboard.js' %}?v=20260630-2" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -250,60 +251,10 @@
     {% include "exams/components/_exam_modals.html" %}
 {% endif %}
 
-<script nonce="{{ request.csp_nonce }}">
-    const MSG_COURSE_DELETE_CONFIRM = "{% trans 'confirm_delete_course' context 'courses.dashboard' %}";
-    const MSG_MEMBER_DELETE_SUFFIX = "{% trans 'confirm_delete_member_suffix' context 'courses.dashboard' %}";
-    const MSG_GENERIC_ERROR = "{% trans 'generic_error' context 'courses.dashboard' %}";
-    const COURSE_ID = {{ course.id }};
-    const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-    const PROFILE_RETURN_URL = "{{ profile_return_url|escapejs }}";
-
-    function deleteCourse(courseId) {
-        if (confirm(MSG_COURSE_DELETE_CONFIRM)) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/courses/${courseId}/delete/`;
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrfmiddlewaretoken';
-            csrfInput.value = CSRF_TOKEN;
-            form.appendChild(csrfInput);
-
-            if (PROFILE_RETURN_URL) {
-                const returnToInput = document.createElement('input');
-                returnToInput.type = 'hidden';
-                returnToInput.name = 'return_to';
-                returnToInput.value = PROFILE_RETURN_URL;
-                form.appendChild(returnToInput);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-
-    document.addEventListener('click', function(event) {
-        const deleteCourseButton = event.target.closest('[data-delete-course-id]');
-        if (!deleteCourseButton) return;
-
-        event.preventDefault();
-        deleteCourse(deleteCourseButton.dataset.deleteCourseId);
-    });
-
-    window.deleteMember = function(memberId, userName) {
-        if (!confirm(userName + MSG_MEMBER_DELETE_SUFFIX)) return;
-        fetch("{% url 'courses:delete_member' course.id 0 %}".replace('0', memberId), {
-            method: 'POST',
-            headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': CSRF_TOKEN}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert(d.error))
-        .catch(() => alert(MSG_GENERIC_ERROR));
-    };
-</script>
-
-<style nonce="{{ request.csp_nonce }}">
-    .accordion-item { border: 1px solid #dee2e6; margin-bottom: 1rem; border-radius: 8px; }
-    .accordion-button:not(.collapsed) { background-color: #f8f9fa; }
-</style>
+<div id="courseDashboardRoot"
+     data-i18n-course-delete="{% trans 'confirm_delete_course' context 'courses.dashboard' %}"
+     data-i18n-member-delete-suffix="{% trans 'confirm_delete_member_suffix' context 'courses.dashboard' %}"
+     data-i18n-generic-error="{% trans 'generic_error' context 'courses.dashboard' %}"
+     data-profile-return-url="{{ profile_return_url }}"
+     data-delete-member-url-tpl="{% url 'courses:delete_member' course.id 0 %}"></div>
 {% endblock %}

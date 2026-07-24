@@ -1,7 +1,12 @@
 {% load i18n %}
+{% load static %}
 
 <!-- MODAL: Resurs Əlavə Etmə (Updated with Topic Context) -->
 <!-- courses/templates/courses/partials/_resource_form_modal.html -->
+
+<div id="resourceFormModalConfig" hidden
+     data-i18n-loading="{% trans 'loading' context 'courses.partial.resource_modal' %}"
+     data-i18n-error-retry="{% trans 'error_retry' context 'courses.partial.resource_modal' %}"></div>
 
 <div class="modal fade" id="resourceFormModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -135,90 +140,4 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-// Toggle file/url sections based on resource type
-document.querySelectorAll('input[name="resource_type"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const fileSection = document.getElementById('fileUploadSection');
-        const urlSection = document.getElementById('urlInputSection');
-        const fileInput = document.getElementById('resourceFile');
-        const urlInput = document.getElementById('resourceUrl');
-        
-        if (this.value === 'file' || this.value === 'document' || this.value === 'video') {
-            fileSection.classList.remove('d-none');
-            urlSection.classList.add('d-none');
-            fileInput.required = true;
-            urlInput.required = false;
-        } else {
-            fileSection.classList.add('d-none');
-            urlSection.classList.remove('d-none');
-            fileInput.required = false;
-            urlInput.required = true;
-        }
-    });
-});
-
-// Resource Form Submit
-document.getElementById('resourceForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const actionUrl = this.action;
-    
-    // Loading state
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "loading" context "courses.partial.resource_modal" %}';
-    
-    fetch(actionUrl, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Close modal
-            bootstrap.Modal.getInstance(document.getElementById('resourceFormModal')).hide();
-            
-            // Clear form
-            document.getElementById('resourceForm').reset();
-            if (window.EMSBootstrapSelect) {
-                window.EMSBootstrapSelect.sync(document.getElementById('resourceTopic'));
-            }
-            document.getElementById('resourceModalTopicName').textContent = '';
-
-            // Show success message
-            notify(data.message, 'success');
-            
-            // Reload page
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            showFormErrors('resourceErrors', data.errors);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        notify('{% trans "error_retry" context "courses.partial.resource_modal" %}', 'error');
-    })
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-    });
-});
-
-// Clear modal on close
-document.getElementById('resourceFormModal').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('resourceForm').reset();
-    if (window.EMSBootstrapSelect) {
-        window.EMSBootstrapSelect.sync(document.getElementById('resourceTopic'));
-    }
-    document.getElementById('resourceModalTopicName').textContent = '';
-    document.getElementById('resourceErrors').classList.add('d-none');
-});
-</script>
+<script src="{% static 'courses/js/resource_form_modal.js' %}"></script>

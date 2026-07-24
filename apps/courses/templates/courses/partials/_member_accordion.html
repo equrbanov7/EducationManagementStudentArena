@@ -4,6 +4,13 @@
 <!-- ════════════════════════════════════════════════════════════════ -->
 <!-- ACCORDION 6: ÜZVLƏR (Members)                                   -->
 <!-- ════════════════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="{% static 'courses/css/member_accordion.css' %}">
+
+<div id="memberAccordionConfig" hidden
+     data-i18n-confirm-delete-user="{% trans 'confirm_delete_user' context 'courses.partial.member_accordion' %}"
+     data-i18n-error-delete-failed="{% trans 'error_delete_failed' context 'courses.partial.member_accordion' %}"
+     data-i18n-error-network="{% trans 'error_network' context 'courses.partial.member_accordion' %}"></div>
+
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" 
@@ -99,92 +106,5 @@
     </div>
 </div>
 
-<style nonce="{{ request.csp_nonce }}">
-.avatar-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
-</style>
+<script src="{% static 'courses/js/member_accordion.js' %}"></script>
 
-<script nonce="{{ request.csp_nonce }}">
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-    const csrftoken = getCookie('csrftoken');
-  
-    document.addEventListener("click", async function(e) {
-      const btn = e.target.closest(".js-delete-member");
-      if (!btn) return;
-  
-      const url = btn.dataset.url;
-      const memberId = btn.dataset.memberId;
-  
-      if (!confirm("{% trans 'confirm_delete_user' context 'courses.partial.member_accordion' %}")) return;
-  
-      btn.disabled = true;
-  
-      try {
-        const resp = await fetch(url, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": csrftoken,
-            "X-Requested-With": "XMLHttpRequest",
-          }
-        });
-  
-        const data = await resp.json();
-  
-        if (!resp.ok || !data.success) {
-          alert(data.error || "{% trans 'error_delete_failed' context 'courses.partial.member_accordion' %}");
-          btn.disabled = false;
-          return;
-        }
-  
-        // ✅ DOM-dan sil
-        const row = document.getElementById(`member-row-${memberId}`);
-        if (row) row.remove();
-
-        function decCountElement(el) {
-            if (!el) return;
-            const n = parseInt(el.textContent || "0", 10);
-            el.textContent = Math.max(0, n - 1);
-        }
-
-        function decCountById(id) {
-            decCountElement(document.getElementById(id));
-        }
-
-        function decCountBySelector(selector) {
-            document.querySelectorAll(selector).forEach(decCountElement);
-        }
-
-        // DOM-dan siləndən sonra:
-        decCountById("sidebar-members-count");
-        decCountById("accordion-members-count");
-        decCountBySelector('.snav-item[data-key="members"] .snav-count');
-          
-      } catch (err) {
-        console.error(err);
-        alert("{% trans 'error_network' context 'courses.partial.member_accordion' %}");
-        btn.disabled = false;
-      }
-    });
-  </script>
-  

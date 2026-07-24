@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% trans "label_assigned_teachers" context "profile.groups" as groups_label_assigned_teachers %}
 {% trans "placeholder_search_teacher" context "profile.groups" as groups_search_teacher %}
 {% trans "help_assigned_teachers" context "profile.groups" as groups_help_assigned_teachers %}
@@ -259,7 +259,8 @@
     </div>
 </div>
 
-<div class="modal fade" id="profileGroupRemoveStudentModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="profileGroupRemoveStudentModal" tabindex="-1" aria-hidden="true"
+     data-confirm-body-template="{% trans 'remove_student_confirm_body' context 'profile.groups' %}">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -281,91 +282,7 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    function initProfileGroupDetailModals() {
-        if (typeof window.bootstrap === "undefined") { return; }
-        var activeGroupsPanel = document.querySelector('[data-profile-section-panel="groups"]');
-        var detailModalEl = activeGroupsPanel
-            ? activeGroupsPanel.querySelector("#profileGroupDetailModal")
-            : document.getElementById("profileGroupDetailModal");
-        var removeModalEl = activeGroupsPanel
-            ? activeGroupsPanel.querySelector("#profileGroupRemoveStudentModal")
-            : document.getElementById("profileGroupRemoveStudentModal");
-        var removeBodyEl = null;
-        var removeFormEl = null;
-        var removeNextEl = null;
-        var removeConfirmText = "{% filter escapejs %}{% trans 'remove_student_confirm_body' context 'profile.groups' %}{% endfilter %}";
-
-        if (detailModalEl) {
-            Array.from(document.querySelectorAll("#profileGroupDetailModal")).forEach(function (node) {
-                if (node !== detailModalEl && node.parentNode) {
-                    node.parentNode.removeChild(node);
-                }
-            });
-            if (detailModalEl.parentElement !== document.body) {
-                document.body.appendChild(detailModalEl);
-            }
-            var detailModal = window.bootstrap.Modal.getOrCreateInstance(detailModalEl);
-            detailModal.show();
-
-            if (detailModalEl.getAttribute("data-profile-group-detail-ready") !== "1") {
-                detailModalEl.setAttribute("data-profile-group-detail-ready", "1");
-                detailModalEl.addEventListener("hide.bs.modal", function () {
-                    var closeUrl = detailModalEl.getAttribute("data-close-url");
-                    if (closeUrl) {
-                        if (typeof window.EMSProfileLoadSection === "function") {
-                            window.EMSProfileLoadSection("groups", closeUrl, { updateUrl: true });
-                        } else {
-                            window.location.href = closeUrl;
-                        }
-                    }
-                });
-                detailModalEl.addEventListener("hidden.bs.modal", function () {
-                    if (detailModalEl.parentNode) {
-                        detailModalEl.parentNode.removeChild(detailModalEl);
-                    }
-                });
-            }
-        }
-
-        if (removeModalEl) {
-            Array.from(document.querySelectorAll("#profileGroupRemoveStudentModal")).forEach(function (node) {
-                if (node !== removeModalEl && node.parentNode) {
-                    node.parentNode.removeChild(node);
-                }
-            });
-            if (removeModalEl.parentElement !== document.body) {
-                document.body.appendChild(removeModalEl);
-            }
-            removeBodyEl = removeModalEl.querySelector("#profileGroupRemoveStudentBody");
-            removeFormEl = removeModalEl.querySelector("#profileGroupRemoveStudentForm");
-            removeNextEl = removeModalEl.querySelector("#profileGroupRemoveStudentNext");
-            var removeModal = window.bootstrap.Modal.getOrCreateInstance(removeModalEl);
-
-            window.EMSDelegate.on("click", ".jsOpenRemoveStudentFromGroup", function (event, btn) {
-                event.preventDefault();
-                var studentName = btn.getAttribute("data-student-name") || "";
-                var removeUrl = btn.getAttribute("data-remove-url") || "";
-                var nextUrl = btn.getAttribute("data-next-url") || "";
-
-                if (removeBodyEl) {
-                    removeBodyEl.textContent = removeConfirmText.replace("{student}", studentName);
-                }
-                if (removeFormEl) {
-                    removeFormEl.setAttribute("action", removeUrl);
-                }
-                if (removeNextEl) {
-                    removeNextEl.value = nextUrl;
-                }
-                removeModal.show();
-            });
-        }
-    }
-
-    initProfileGroupDetailModals();
-})();
-</script>
+<script src="{% static 'accounts/js/groups_overview.js' %}"></script>
 {% endif %}
 
 {% if group_form %}

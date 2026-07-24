@@ -5,15 +5,11 @@
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
 <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/assigned_exams.css' %}">
 {% endblock %}
 
 {% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-width: 1000px; margin: 0 auto; }
-  .c3-2 { margin-top:.4rem;color:#b91c1c;font-size:.84rem;font-weight:600; }
-</style>
-
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (external css — assigned_exams.css).{% endcomment %}
 <div class="profile-page">
     <div class="profile-main c3-1">
         <div class="profile-header">
@@ -75,7 +71,11 @@
     </div>
 </div>
 
-<div id="exam-code-backdrop" class="exam-code-backdrop" style="display:none;">
+<div id="exam-code-backdrop" class="exam-code-backdrop c3-hidden"
+     data-i18n-modal-title="{% trans 'modal_title' context 'accounts.assigned_exams_page' %}"
+     data-i18n-prompt-template="{% trans 'modal_prompt_template' context 'accounts.assigned_exams_page' %}"
+     data-i18n-code-required="{% trans 'access_code_required' context 'exams.model.access' %}"
+     data-i18n-start-failed="{% trans 'exam_start_failed' context 'exams.view.access.message' %}">
     <div class="exam-code-modal">
         <button type="button" class="exam-code-close-btn" data-close-exam-code-modal>
             <i class="fas fa-times"></i>
@@ -108,118 +108,5 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-    const backdrop = document.getElementById("exam-code-backdrop");
-    const titleEl = document.getElementById("exam-code-title");
-    const textEl = document.getElementById("exam-code-text");
-    const slugInput = document.getElementById("exam-code-exam-slug");
-    const codeInput = document.getElementById("exam-code-input");
-    const codeError = document.getElementById("exam-code-error");
-    const codeForm = document.getElementById("exam-code-form");
-    const codeModalTitle = "{% trans 'modal_title' context 'accounts.assigned_exams_page' %}";
-    const codeModalPromptTemplate = "{% trans 'modal_prompt_template' context 'accounts.assigned_exams_page' %}";
-    const codeRequiredText = "{% filter escapejs %}{% trans 'access_code_required' context 'exams.model.access' %}{% endfilter %}";
-    const startFailedText = "{% filter escapejs %}{% trans 'exam_start_failed' context 'exams.view.access.message' %}{% endfilter %}";
-    let codeSubmitInFlight = false;
-
-    function setExamCodeError(message) {
-        if (codeInput) {
-            codeInput.classList.toggle("is-invalid", Boolean(message));
-        }
-        if (codeError) {
-            codeError.textContent = message || "";
-            codeError.hidden = !message;
-        }
-    }
-
-    function openExamCodeModal(button) {
-        const slug = button.getAttribute("data-exam-slug");
-        const title = button.getAttribute("data-exam-title");
-
-        slugInput.value = slug;
-        titleEl.textContent = codeModalTitle;
-        textEl.textContent = "";
-        const textParts = codeModalPromptTemplate.split("{title}");
-        textEl.appendChild(document.createTextNode(textParts[0] || ""));
-        const strongEl = document.createElement("strong");
-        strongEl.textContent = `"${title || ""}"`;
-        textEl.appendChild(strongEl);
-        if (textParts[1]) {
-            textEl.appendChild(document.createTextNode(textParts[1]));
-        }
-        codeInput.value = "";
-        setExamCodeError("");
-        codeSubmitInFlight = false;
-
-        backdrop.style.display = "flex";
-        setTimeout(() => {
-            backdrop.classList.add("show");
-            codeInput.focus();
-        }, 10);
-    }
-
-    function closeExamCodeModal() {
-        backdrop.classList.remove("show");
-        setTimeout(() => {
-            backdrop.style.display = "none";
-        }, 300);
-    }
-
-    if (backdrop) {
-        backdrop.addEventListener("click", function(e) {
-            if (e.target === backdrop) closeExamCodeModal();
-        });
-    }
-
-    if (codeInput) {
-        codeInput.addEventListener("input", function() {
-            this.value = this.value.replace(/[^0-9]/g, "");
-            setExamCodeError("");
-        });
-    }
-
-    if (codeForm) {
-        codeForm.addEventListener("submit", async function(event) {
-            event.preventDefault();
-            if (!codeInput || !(codeInput.value || "").trim()) {
-                setExamCodeError(codeRequiredText);
-                if (codeInput) codeInput.focus();
-                return;
-            }
-            if (codeSubmitInFlight) {
-                return;
-            }
-
-            codeSubmitInFlight = true;
-            try {
-                const response = await fetch(codeForm.getAttribute("action"), {
-                    method: "POST",
-                    body: new FormData(codeForm),
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
-                const contentType = response.headers.get("content-type") || "";
-                if (contentType.indexOf("application/json") !== -1) {
-                    const payload = await response.json();
-                    if (response.ok && payload.success) {
-                        window.location.href = payload.redirect_url || window.location.href;
-                        return;
-                    }
-                    setExamCodeError(payload.error || startFailedText);
-                    return;
-                }
-                if (response.redirected && response.url) {
-                    window.location.href = response.url;
-                    return;
-                }
-                setExamCodeError(startFailedText);
-            } catch (error) {
-                setExamCodeError(startFailedText);
-            } finally {
-                codeSubmitInFlight = false;
-            }
-        });
-    }
-</script>
+<script src="{% static 'accounts/js/assigned_exams.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,8 @@
+/*
+ * trial_exam_noscript.css
+ * Source: apps/trial_exams/templates/trial_exams/trial_exam_request.html
+ * No-JS fallback: loaded ONLY via <link> inside <noscript> so it never affects
+ * JS-enabled users (who see the skeleton until JS marks the page ready).
+ */
+[data-trial-root] [data-trial-skeleton] { display: none !important; }
+[data-trial-root] [data-trial-content] { display: block !important; }

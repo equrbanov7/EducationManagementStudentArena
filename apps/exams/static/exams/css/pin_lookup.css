@@ -1,0 +1,45 @@
+/* Source: exams/exam_center/_pin_lookup_body.html
+   Extracted from an inline <style> for CSP (no unsafe-inline).
+   Tətbiqin öz açıq (ağ + göy) token-ləri ilə — TÜND yox (app həmişə açıqdır). */
+.pl2 { --pl-line:var(--ems-neutral-200); --pl-muted:var(--ems-neutral-500); --pl-bg:#ffffff; --pl-soft:var(--ems-neutral-50);
+       --pl-primary:var(--ems-primary-600); --pl-primary-d:var(--ems-primary-700); --pl-blue-soft:var(--ems-primary-50);
+       --pl-text:var(--ems-neutral-900); --pl-shadow:0 1px 2px rgba(15,23,42,.05); }
+.pl2 { color: var(--pl-text); }
+.pl2-head h2 { margin:0; font-size:1.4rem; font-weight:800; display:flex; align-items:center; gap:.55rem; }
+.pl2-head p { margin:.3rem 0 0; color:var(--pl-muted); font-size:.92rem; }
+.pl2-grid { display:grid; grid-template-columns: minmax(320px, 400px) 1fr; gap:1.1rem; margin-top:1.1rem; align-items:start; }
+@media (max-width: 900px){ .pl2-grid { grid-template-columns: 1fr; } }
+.pl2-panel { border:1px solid var(--pl-line); border-radius:16px; background:var(--pl-bg); box-shadow:var(--pl-shadow); overflow:hidden; }
+.pl2-searchbar { position:relative; padding:.9rem; border-bottom:1px solid var(--pl-line); }
+.pl2-searchbar i { position:absolute; left:1.6rem; top:50%; transform:translateY(-50%); color:var(--pl-muted); }
+.pl2-searchbar input { width:100%; padding:.75rem .9rem .75rem 2.5rem; border:1px solid var(--pl-line); border-radius:12px; background:var(--pl-soft); color:inherit; font-size:1rem; }
+.pl2-searchbar input:focus { outline:none; border-color:var(--pl-primary); box-shadow:0 0 0 3px rgba(37,99,235,.15); background:var(--pl-bg); }
+.pl2-results { max-height:62vh; overflow-y:auto; }
+.pl2-row { display:flex; align-items:center; gap:.75rem; padding:.75rem .9rem; border-bottom:1px solid var(--pl-line); cursor:pointer; transition:background .12s; }
+.pl2-row:last-child{ border-bottom:0; }
+.pl2-row:hover{ background:var(--pl-soft); }
+.pl2-row.is-active{ background:rgba(37,99,235,.10); box-shadow:inset 3px 0 0 var(--pl-primary); }
+.pl2-avatar { width:2.3rem; height:2.3rem; border-radius:50%; background:#e0e7ff; color:#3730a3; display:flex; align-items:center; justify-content:center; font-weight:800; flex:0 0 auto; font-size:.85rem; }
+.pl2-who { min-width:0; }
+.pl2-name { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pl2-user { color:var(--pl-muted); font-size:.78rem; font-family:ui-monospace,monospace; }
+.pl2-tail { margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:.25rem; }
+.pl2-kaf { color:#2563eb; font-size:.72rem; background:#eff6ff; padding:.1rem .5rem; border-radius:999px; white-space:nowrap; max-width:11rem; overflow:hidden; text-overflow:ellipsis; }
+.pl2-cnt { background:#dcfce7; color:#166534; font-size:.7rem; font-weight:700; border-radius:999px; padding:.05rem .45rem; }
+.pl2-state { padding:2.4rem 1.2rem; text-align:center; color:var(--pl-muted); }
+.pl2-state i { font-size:1.9rem; display:block; margin-bottom:.55rem; opacity:.55; }
+/* Detail (sağ panel) */
+.pl2-detail { padding:1.2rem 1.3rem 1.4rem; min-height:200px; }
+.pl2-detail__head { display:flex; align-items:center; gap:.7rem; padding-bottom:.9rem; margin-bottom:.9rem; border-bottom:1px solid var(--pl-line); }
+.pl2-detail__name { font-weight:800; font-size:1.12rem; }
+.pl2-detail__user { color:var(--pl-muted); font-size:.82rem; font-family:ui-monospace,monospace; }
+.pl2-exam { border:1px solid var(--pl-line); border-radius:14px; padding:1rem 1.1rem; margin-bottom:.85rem; background:var(--pl-soft); }
+.pl2-exam__top { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+.pl2-exam__title { font-weight:800; font-size:1.02rem; }
+.pl2-exam__subject { color:var(--pl-muted); font-size:.85rem; margin-top:.15rem; }
+.pl2-pinbox { display:flex; flex-direction:column; align-items:center; gap:.1rem; background:var(--pl-bg); border:1px dashed var(--pl-primary); border-radius:12px; padding:.5rem 1rem; }
+.pl2-pinbox__label { font-size:.64rem; text-transform:uppercase; letter-spacing:.06em; color:var(--pl-muted); }
+.pl2-pin { font-family:ui-monospace,monospace; font-size:1.7rem; font-weight:800; letter-spacing:.14em; color:var(--pl-primary); }
+.pl2-pin--none { color:var(--pl-muted); font-size:.95rem; letter-spacing:0; font-weight:600; }
+.pl2-meta { display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; color:var(--pl-muted); font-size:.83rem; margin-top:.7rem; align-items:center; }
+.pl2-status { font-size:.72rem; font-weight:700; border-radius:999px; padding:.1rem .55rem; background:#e5e7eb; color:#374151; }

@@ -162,36 +162,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script nonce="{{ request.csp_nonce }}">
-(function() {
-    var modal = document.getElementById("saDeleteModal");
-    var form = document.getElementById("saDeleteForm");
-    var titleSpan = document.getElementById("saDeletePostTitle");
-    var cancelBtn = document.getElementById("saDeleteCancel");
-    var reasonInput = document.getElementById("saDeleteReason");
-
-    document.querySelectorAll(".js-sa-delete-post").forEach(function(btn) {
-        btn.addEventListener("click", function() {
-            titleSpan.textContent = this.dataset.postTitle;
-            form.action = this.dataset.deleteUrl;
-            reasonInput.value = "";
-            modal.classList.add("active");
-            document.body.classList.add("modal-open");
-        });
-    });
-
-    function closeModal() {
-        modal.classList.remove("active");
-        document.body.classList.remove("modal-open");
-    }
-
-    cancelBtn.addEventListener("click", closeModal);
-    modal.addEventListener("click", function(e) {
-        if (e.target === modal) closeModal();
-    });
-    document.addEventListener("keydown", function(e) {
-        if (e.key === "Escape" && modal.classList.contains("active")) closeModal();
-    });
-})();
-</script>
+<script src="{% static 'blog/js/superadmin_post_management.js' %}"></script>
 {% endblock %}

@@ -1,12 +1,9 @@
 {% load i18n static %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-width:200px; }
-  .c3-2 { max-width:220px; }
-</style>
-
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 <section class="profile-section-panel profile-section--statistics {% if active_section == 'statistics' %}is-active{% endif %}"
-         data-profile-section-panel="statistics">
+         data-profile-section-panel="statistics"
+         data-stats-role="{% if role_capabilities.is_superadmin %}superadmin{% elif role_capabilities.is_org_admin or statistics_unit_layout %}org_admin{% elif role_capabilities.is_teacher %}teacher{% else %}student{% endif %}">
+  <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/statistics_c3.css' %}">
 
   {% if 'statistics' not in allowed_sections %}
   <div class="stats-empty-state">
@@ -439,27 +436,6 @@
     "ai_remaining": "{% trans 'ai_remaining' context 'profile.statistics' %}"
   }
   </script>
-  <script nonce="{{ request.csp_nonce }}">
-  (function() {
-      var raw = document.getElementById("stats-data-json");
-      if (raw) {
-          try {
-              var parsed = JSON.parse(raw.textContent);
-              parsed.role = "{% if role_capabilities.is_superadmin %}superadmin{% elif role_capabilities.is_org_admin or statistics_unit_layout %}org_admin{% elif role_capabilities.is_teacher %}teacher{% else %}student{% endif %}";
-              window.STATS_DATA = parsed;
-          } catch(e) {
-              window.STATS_DATA = null;
-          }
-      }
-      var i18nEl = document.getElementById("stats-i18n-json");
-      if (i18nEl) {
-          try {
-              window.STATS_I18N = JSON.parse(i18nEl.textContent);
-          } catch(e) {
-              window.STATS_I18N = {};
-          }
-      }
-  })();
-  </script>
+  <script src="{% static 'accounts/js/profile/statistics_bootstrap.js' %}?v=20260725-csp"></script>
   {% endif %}
 </section>

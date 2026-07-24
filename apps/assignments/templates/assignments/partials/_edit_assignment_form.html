@@ -1,8 +1,7 @@
 {% load i18n %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-height: 160px; overflow:auto; }
-</style>
+{% load static %}
+{% comment %}C3 mikro inline-stil-lər edit_assignment_form.css-ə köçürüldü.{% endcomment %}
+<link rel="stylesheet" href="{% static 'assignment/css/edit_assignment_form.css' %}">
 
 <div id="editFormData"
      data-members-bulk-url="{% url 'assignments:course_group_members_bulk' course.id %}">
