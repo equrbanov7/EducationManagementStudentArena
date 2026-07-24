@@ -120,13 +120,8 @@
   </div>
   {% endif %}
 </div>
+{% endblock %}
 
-<script nonce="{{ request.csp_nonce }}">
-  // Filtr select-i dəyişəndə formu avtomatik göndər (CSP-safe, inline onchange yox).
-  document.querySelectorAll(".js-fxc-autosubmit").forEach(function (sel) {
-    sel.addEventListener("change", function () {
-      if (sel.form) { sel.form.submit(); }
-    });
-  });
-</script>
+{% block extraJs %}
+    <script src="{% static 'exams/js/room_list.js' %}"></script>
 {% endblock %}

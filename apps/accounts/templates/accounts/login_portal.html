@@ -77,32 +77,5 @@
 {% block extraJs %}
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'js/bootstrap_select.js' %}?v=20260705-1"></script>
-<script nonce="{{ request.csp_nonce }}">
-    (function () {
-        "use strict";
-        var form = document.querySelector("[data-auth-language-form]");
-        if (!form) {
-            return;
-        }
-        var select = form.querySelector("[data-auth-language-select]");
-        var nextInput = form.querySelector('input[name="next"]');
-        if (!select) {
-            return;
-        }
-        function currentRelativeUrl() {
-            try {
-                var url = new URL(window.location.href);
-                return url.pathname + url.search + url.hash;
-            } catch (err) {
-                return window.location.pathname + window.location.search + window.location.hash;
-            }
-        }
-        select.addEventListener("change", function () {
-            if (nextInput) {
-                nextInput.value = currentRelativeUrl();
-            }
-            form.submit();
-        });
-    })();
-</script>
+<script src="{% static 'accounts/js/auth_language_form.js' %}"></script>
 {% endblock %}

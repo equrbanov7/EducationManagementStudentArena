@@ -1,7 +1,15 @@
 {% load i18n %}
+{% load static %}
 
 <!-- MODAL: Mövzu Əlavə Etmə -->
 <!-- courses/templates/courses/partials/_topic_form_modal.html -->
+
+<link rel="stylesheet" href="{% static 'courses/css/topic_form_modal.css' %}">
+
+<div id="topicFormModalConfig" hidden
+     data-i18n-adding="{% trans 'msg_adding' context 'courses.partial.topic_modal' %}"
+     data-i18n-error-retry="{% trans 'msg_error_retry' context 'courses.partial.topic_modal' %}"
+     data-i18n-errors-header="{% trans 'msg_errors_header' context 'courses.partial.topic_modal' %}"></div>
 
 <div class="modal fade" id="topicFormModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -65,94 +73,4 @@
 </div>
 
 <!-- Topic Form AJAX Handler -->
-<script nonce="{{ request.csp_nonce }}">
-const MSG_ADDING = "{% trans 'msg_adding' context 'courses.partial.topic_modal' %}";
-const MSG_ERROR_RETRY = "{% trans 'msg_error_retry' context 'courses.partial.topic_modal' %}";
-const MSG_ERRORS_HEADER = "{% trans 'msg_errors_header' context 'courses.partial.topic_modal' %}";
-
-document.getElementById('topicForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const actionUrl = this.action;
-    
-    // Loading state
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + MSG_ADDING;
-    
-    fetch(actionUrl, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Close modal
-            bootstrap.Modal.getInstance(document.getElementById('topicFormModal')).hide();
-            
-            // Clear form
-            document.getElementById('topicForm').reset();
-            
-            // Show success message
-            showNotification(data.message, 'success');
-            
-            // Reload page after 1 second
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            // Show errors
-            showFormErrors('topicErrors', data.errors);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification(MSG_ERROR_RETRY, 'error');
-    })
-    .finally(() => {
-        // Reset button
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-    });
-});
-
-// Helper functions (in shared forms.js)
-function showFormErrors(containerId, errors) {
-    const container = document.getElementById(containerId);
-    let errorHtml = '<strong>' + MSG_ERRORS_HEADER + ':</strong><ul class="mb-0">';
-    
-    for (const [field, messages] of Object.entries(errors)) {
-        errorHtml += `<li>${messages[0]}</li>`;
-    }
-    
-    errorHtml += '</ul>';
-    container.innerHTML = errorHtml;
-    container.classList.remove('d-none');
-}
-
-function showNotification(message, type = 'info') {
-    // See notifications.js
-    notify(message, type);
-}
-</script>
-
-<style nonce="{{ request.csp_nonce }}">
-    #topicForm .form-label {
-        font-weight: 600;
-        color: #333;
-    }
-    
-    #topicForm .form-control {
-        border-radius: 6px;
-    }
-    
-    #topicForm .form-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
-    }
-</style>
+<script src="{% static 'courses/js/topic_form_modal.js' %}"></script>

@@ -1,0 +1,6 @@
+/*
+ * questions_i_can_see.css
+ * Source: apps/blog/templates/blog/questions_i_can_see.html
+ * c3 (2026-07-03): micro inline style moved from the template <style> block.
+ */
+.c3-1 { max-width: 960px; }

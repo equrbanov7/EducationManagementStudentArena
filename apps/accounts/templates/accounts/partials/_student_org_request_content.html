@@ -1,9 +1,6 @@
-{% load i18n %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-width: 240px; }
-  .c3-2 { width: 48px; }
-</style>
+{% load i18n static %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (external CSS).{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/student_org_request.css' %}">
 
 <div class="section-card">
     <div class="section-title">
@@ -236,20 +233,4 @@
     </form>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function () {
-    var messageInput = document.getElementById("studentOrgRequestMessage");
-    if (!messageInput) return;
-    var counterId = messageInput.getAttribute("data-char-count-target");
-    if (!counterId) return;
-    var counter = document.getElementById(counterId);
-    if (!counter) return;
-
-    function syncCounter() {
-        counter.textContent = String((messageInput.value || "").length);
-    }
-
-    messageInput.addEventListener("input", syncCounter);
-    syncCounter();
-});
-</script>
+<script src="{% static 'accounts/js/student_org_request.js' %}"></script>

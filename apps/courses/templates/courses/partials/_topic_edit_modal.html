@@ -1,6 +1,21 @@
 {% load i18n %}
+{% load static %}
 
 <!-- MODAL: Mövzu Redaktə Etmə -->
+<link rel="stylesheet" href="{% static 'courses/css/topic_edit_modal.css' %}">
+
+<div id="topicEditModalConfig" hidden
+     data-i18n-topic-id-not-found="{% trans 'msg_topic_id_not_found' context 'courses.partial.topic_edit_modal' %}"
+     data-i18n-updating="{% trans 'msg_updating' context 'courses.partial.topic_edit_modal' %}"
+     data-i18n-topic-updated="{% trans 'msg_topic_updated' context 'courses.partial.topic_edit_modal' %}"
+     data-i18n-error-retry="{% trans 'msg_error_retry' context 'courses.partial.topic_edit_modal' %}"
+     data-i18n-error="{% trans 'msg_error' context 'courses.partial.topic_edit_modal' %}"
+     data-i18n-errors-header="{% trans 'msg_errors_header' context 'courses.partial.topic_edit_modal' %}"
+     data-log-modal-not-found="{% trans '⚠️ topicEditModal və ya topicEditForm tapılmadı!' %}"
+     data-log-modal-opened="{% trans '✓ Modal açıldı, data yazılır:' %}"
+     data-log-edit-topic-called="{% trans '→ editTopic çağırıldı:' %}"
+     data-log-error="{% trans 'Xəta:' %}"></div>
+
 <div class="modal fade" id="topicEditModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -57,170 +72,4 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-(function() {
-    'use strict';
-
-    // Pending data storage
-    let pendingTopicData = null;
-    const MSG_TOPIC_ID_NOT_FOUND = "{% trans 'msg_topic_id_not_found' context 'courses.partial.topic_edit_modal' %}";
-    const MSG_UPDATING = "{% trans 'msg_updating' context 'courses.partial.topic_edit_modal' %}";
-    const MSG_TOPIC_UPDATED = "{% trans 'msg_topic_updated' context 'courses.partial.topic_edit_modal' %}";
-    const MSG_ERROR_RETRY = "{% trans 'msg_error_retry' context 'courses.partial.topic_edit_modal' %}";
-    const MSG_ERROR = "{% trans 'msg_error' context 'courses.partial.topic_edit_modal' %}";
-    const MSG_ERRORS_HEADER = "{% trans 'msg_errors_header' context 'courses.partial.topic_edit_modal' %}";
-
-    // Modal element
-    const modalEl = document.getElementById('topicEditModal');
-    const form = document.getElementById('topicEditForm');
-
-    if (!modalEl || !form) {
-        console.error("{% trans '⚠️ topicEditModal və ya topicEditForm tapılmadı!' %}");
-        return;
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // MODAL SHOWN EVENT - Data yazılır
-    // ═══════════════════════════════════════════════════════════
-    
-    modalEl.addEventListener('shown.bs.modal', function() {
-        if (pendingTopicData) {
-            console.log("{% trans '✓ Modal açıldı, data yazılır:' %}", pendingTopicData);
-            
-            document.getElementById('editTopicId').value = pendingTopicData.id || '';
-            document.getElementById('editTopicTitle').value = pendingTopicData.title || '';
-            document.getElementById('editTopicDescription').value = pendingTopicData.description || '';
-            
-            // Error container-i təmizlə
-            const errContainer = document.getElementById('topicEditErrors');
-            if (errContainer) {
-                errContainer.classList.add('d-none');
-                errContainer.innerHTML = '';
-            }
-            
-            // Focus title input
-            setTimeout(() => {
-                document.getElementById('editTopicTitle').focus();
-            }, 100);
-            
-            pendingTopicData = null;
-        }
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // GLOBAL FUNCTION - editTopic()
-    // ═══════════════════════════════════════════════════════════
-    
-    window.editTopic = function(topicId, title, description) {
-        console.log("{% trans '→ editTopic çağırıldı:' %}", {topicId, title, description});
-        
-        // Data-nı pending storage-ə saxla
-        pendingTopicData = {
-            id: topicId,
-            title: title,
-            description: description
-        };
-        
-        // Modalı aç
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.show();
-    };
-
-    // ═══════════════════════════════════════════════════════════
-    // FORM SUBMIT
-    // ═══════════════════════════════════════════════════════════
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const topicId = document.getElementById('editTopicId').value;
-        
-        if (!topicId) {
-            alert(MSG_TOPIC_ID_NOT_FOUND);
-            return;
-        }
-        
-        const formData = new FormData(this);
-        const actionUrl = `/courses/topic/${topicId}/edit/`;
-
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + MSG_UPDATING;
-
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                // Modalı bağla
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-
-                // Notification
-                if (typeof notify === 'function') {
-                    notify(data.message || MSG_TOPIC_UPDATED, 'success');
-                }
-
-                // Reload
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                // Xətaları göstər
-                showFormErrors('topicEditErrors', data.errors || {});
-            }
-        })
-        .catch(err => {
-            console.error("{% trans 'Xəta:' %}", err);
-            if (typeof notify === 'function') {
-                notify(MSG_ERROR_RETRY, 'error');
-            } else {
-                alert(MSG_ERROR);
-            }
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        });
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // HELPER: Show Form Errors
-    // ═══════════════════════════════════════════════════════════
-    
-    function showFormErrors(containerId, errors) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-
-        let errorHtml = '<strong>' + MSG_ERRORS_HEADER + ':</strong><ul class="mb-0">';
-        for (const [field, messages] of Object.entries(errors)) {
-            const msg = (Array.isArray(messages) && messages[0]) ? messages[0] : MSG_ERROR;
-            errorHtml += `<li>${msg}</li>`;
-        }
-        errorHtml += '</ul>';
-
-        container.innerHTML = errorHtml;
-        container.classList.remove('d-none');
-    }
-
-    console.log('✓ Topic Edit Modal initialized');
-})();
-</script>
-
-<style nonce="{{ request.csp_nonce }}">
-    #topicEditForm .form-label {
-        font-weight: 600;
-        color: #333;
-    }
-    
-    #topicEditForm .form-control {
-        border-radius: 6px;
-    }
-    
-    #topicEditForm .form-control:focus {
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
-    }
-</style>
+<script src="{% static 'courses/js/topic_edit_modal.js' %}"></script>

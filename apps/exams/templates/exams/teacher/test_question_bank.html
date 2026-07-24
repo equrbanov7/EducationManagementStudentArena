@@ -20,25 +20,7 @@
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
 <script src="{% static 'exams/js/examBankPicker.js' %}?v=20260607-picker-modal"></script>
 
-<script nonce="{{ request.csp_nonce }}">
-function syncBankSettings(){
-    const rq = document.getElementById("rqInput");
-    const dp = document.getElementById("dpInput");
-
-    const rqVal = rq && rq.value ? rq.value : "{{ rq_value|default:10 }}";
-    const dpVal = dp && dp.value ? dp.value : "{{ dp_value|default:1 }}";
-
-    const a = document.getElementById("rqHiddenPreview");
-    const b = document.getElementById("dpHiddenPreview");
-    const c = document.getElementById("rqHiddenSave");
-    const d = document.getElementById("dpHiddenSave");
-
-    if(a) a.value = rqVal;
-    if(b) b.value = dpVal;
-    if(c) c.value = rqVal;
-    if(d) d.value = dpVal;
-
-    return true;
-}
-</script>
+{{ rq_value|default:10|json_script:"bankRqDefault" }}
+{{ dp_value|default:1|json_script:"bankDpDefault" }}
+<script src="{% static 'exams/js/test_question_bank.js' %}"></script>
 {% endblock %}

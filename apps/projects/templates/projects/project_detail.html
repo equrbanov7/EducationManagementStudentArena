@@ -142,7 +142,16 @@
             <i class="fa-solid fa-upload me-2"></i> {% trans "submit_project" context "projects.detail" %}
         </div>
         <div class="card-body">
-            <form id="submitForm" enctype="multipart/form-data">
+            <form id="submitForm" enctype="multipart/form-data"
+                  data-submit-url="{% url 'projects:submit_project' project.id %}"
+                  data-i18n-sending="{% trans 'sending' context 'projects.detail.js' %}"
+                  data-i18n-submit="{% trans 'submit' context 'projects.detail.js' %}"
+                  data-i18n-error-prefix="{% trans 'error_prefix' context 'projects.detail.js' %}"
+                  data-i18n-unknown-error="{% trans 'unknown_error' context 'projects.detail.js' %}"
+                  data-i18n-server-error="{% trans 'server_error' context 'projects.detail.js' %}"
+                  data-i18n-confirm-title="{% trans 'Göndərməni təsdiqləyin' context 'projects.detail' %}"
+                  data-i18n-confirm-message="{% trans 'Bu kurs işini göndərmək istədiyinizə əminsiniz?' context 'projects.detail' %}"
+                  data-i18n-confirm-submit="{% trans 'submit' context 'projects.detail.js' %}">
                 {% csrf_token %}
 
                 <div class="mb-3">
@@ -154,7 +163,7 @@
                 <div class="mb-3">
                     <label class="form-label">{% trans "label_file" context "projects.detail" %}</label>
                     <input type="file" name="file" id="fileInput" class="form-control">
-                    <div id="fileNameDisplay" class="mt-2 text-muted small project-file-name" style="display: none;">
+                    <div id="fileNameDisplay" class="mt-2 text-muted small project-file-name d-none">
                         <i class="fa-solid fa-file me-1"></i>
                         <span id="fileName"></span>
                         <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2" id="clearFile">
@@ -192,22 +201,6 @@
         {% include "courses/partials/_action_confirm_modal.html" %}
     {% endif %}
 </div>
-<script nonce="{{ request.csp_nonce }}">
-window.projectDetailConfig = {
-    submitUrl: '{% url "projects:submit_project" project.id %}',
-    csrfToken: '{{ csrf_token }}',
-    i18n: {
-        sending: `{% trans "sending" context "projects.detail.js" %}`,
-        submit: `{% trans "submit" context "projects.detail.js" %}`,
-        errorPrefix: `{% trans "error_prefix" context "projects.detail.js" %}`,
-        unknownError: `{% trans "unknown_error" context "projects.detail.js" %}`,
-        serverError: `{% trans "server_error" context "projects.detail.js" %}`,
-        confirmTitle: `{% trans "Göndərməni təsdiqləyin" context "projects.detail" %}`,
-        confirmMessage: `{% trans "Bu kurs işini göndərmək istədiyinizə əminsiniz?" context "projects.detail" %}`,
-        confirmSubmit: `{% trans "submit" context "projects.detail.js" %}`
-    }
-};
-</script>
 {% endblock %}
 {% block extraJs %}
 <script src="{% static 'js/review_countdown.js' %}"></script>

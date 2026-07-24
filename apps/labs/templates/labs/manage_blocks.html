@@ -372,33 +372,26 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-    window.LAB_CONFIG = {
-        labId: {{ lab.id }},
-        csrf: '{{ csrf_token }}'
-    };
-
-    window.LAB_I18N = {
-        fileExisting: '{% trans "file_existing" context "labs.js.manage_blocks" %}',
-        stateCreating: '{% trans "state_creating" context "labs.js.manage_blocks" %}',
-        stateSaving: '{% trans "state_saving" context "labs.js.manage_blocks" %}',
-        stateAdding: '{% trans "state_adding" context "labs.js.manage_blocks" %}',
-        stateImporting: '{% trans "state_importing" context "labs.js.manage_blocks" %}',
-        actionCreate: '{% trans "action_create" context "labs.js.manage_blocks" %}',
-        actionSave: '{% trans "action_save" context "labs.js.manage_blocks" %}',
-        actionAdd: '{% trans "action_add" context "labs.js.manage_blocks" %}',
-        actionImport: '{% trans "action_import" context "labs.js.manage_blocks" %}',
-        successImportDefault: '{% trans "success_import_default" context "labs.js.manage_blocks" %}',
-        errorPrefix: '{% trans "error_prefix" context "labs.js.manage_blocks" %}',
-        errorUnknown: '{% trans "error_unknown" context "labs.js.manage_blocks" %}',
-        errorServer: '{% trans "error_server" context "labs.js.manage_blocks" %}',
-        confirmDeleteBlock: '{% trans "confirm_delete_block" context "labs.js.manage_blocks" %}',
-        confirmDeleteQuestion: '{% trans "confirm_delete_question" context "labs.js.manage_blocks" %}'
-    };
-</script>
+<div id="manageBlocksConfig" hidden
+     data-lab-id="{{ lab.id }}"
+     data-i18n-file-existing="{% trans 'file_existing' context 'labs.js.manage_blocks' %}"
+     data-i18n-state-creating="{% trans 'state_creating' context 'labs.js.manage_blocks' %}"
+     data-i18n-state-saving="{% trans 'state_saving' context 'labs.js.manage_blocks' %}"
+     data-i18n-state-adding="{% trans 'state_adding' context 'labs.js.manage_blocks' %}"
+     data-i18n-state-importing="{% trans 'state_importing' context 'labs.js.manage_blocks' %}"
+     data-i18n-action-create="{% trans 'action_create' context 'labs.js.manage_blocks' %}"
+     data-i18n-action-save="{% trans 'action_save' context 'labs.js.manage_blocks' %}"
+     data-i18n-action-add="{% trans 'action_add' context 'labs.js.manage_blocks' %}"
+     data-i18n-action-import="{% trans 'action_import' context 'labs.js.manage_blocks' %}"
+     data-i18n-success-import-default="{% trans 'success_import_default' context 'labs.js.manage_blocks' %}"
+     data-i18n-error-prefix="{% trans 'error_prefix' context 'labs.js.manage_blocks' %}"
+     data-i18n-error-unknown="{% trans 'error_unknown' context 'labs.js.manage_blocks' %}"
+     data-i18n-error-server="{% trans 'error_server' context 'labs.js.manage_blocks' %}"
+     data-i18n-confirm-delete-block="{% trans 'confirm_delete_block' context 'labs.js.manage_blocks' %}"
+     data-i18n-confirm-delete-question="{% trans 'confirm_delete_question' context 'labs.js.manage_blocks' %}"></div>
+<script src="{% static 'labs/js/manage_blocks_template.js' %}"></script>
 <script src="{% static 'labs/js/manage_blocks.js' %}"></script>
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'labs/js/manage_blocks_template.js' %}"></script>
 {% endblock %}

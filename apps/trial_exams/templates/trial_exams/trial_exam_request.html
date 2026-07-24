@@ -6,12 +6,10 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'trial_exams/css/trial_exam.css' %}?v=20260616">
-    {# No-JS fallback: never trap the user behind a skeleton. #}
+    {# No-JS fallback: never trap the user behind a skeleton. External stylesheet
+       loaded only inside <noscript> so it never affects JS-enabled users. #}
     <noscript>
-        <style>
-            [data-trial-root] [data-trial-skeleton] { display: none !important; }
-            [data-trial-root] [data-trial-content] { display: block !important; }
-        </style>
+        <link rel="stylesheet" href="{% static 'trial_exams/css/trial_exam_noscript.css' %}">
     </noscript>
 {% endblock %}
 
