@@ -7,7 +7,9 @@
 <div class="export-waiting-page">
     <div class="export-waiting-card" id="exportWaitingCard"
          data-status-url="{{ status_url }}"
-         data-download-url="{{ download_url }}">
+         data-download-url="{{ download_url }}"
+         data-i18n-failed="{% trans 'export_failed_body' context 'exams.template.export_waiting' %}"
+         data-i18n-timeout="{% trans 'export_timeout_body' context 'exams.template.export_waiting' %}">
         <i class="fas fa-file-arrow-down export-waiting-icon" aria-hidden="true"></i>
         <h1 class="export-waiting-title">{% trans "export_preparing_title" context "exams.template.export_waiting" %}</h1>
         <p class="export-waiting-text" data-waiting-text>
@@ -20,58 +22,8 @@
         <a class="export-waiting-back" href="javascript:history.back()">{% trans "export_back_link" context "exams.template.export_waiting" %}</a>
     </div>
 </div>
+{% endblock %}
 
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    "use strict";
-    var card = document.getElementById("exportWaitingCard");
-    if (!card) return;
-    var statusUrl = card.getAttribute("data-status-url");
-    var downloadUrl = card.getAttribute("data-download-url");
-    var errorEl = card.querySelector("[data-waiting-error]");
-    var spinnerEl = card.querySelector("[data-waiting-spinner]");
-    var attempts = 0;
-
-    function fail(message) {
-        if (spinnerEl) spinnerEl.hidden = true;
-        if (errorEl) {
-            errorEl.textContent = message;
-            errorEl.hidden = false;
-        }
-    }
-
-    function poll() {
-        attempts += 1;
-        fetch(statusUrl, {
-            headers: { "X-Requested-With": "XMLHttpRequest" },
-            credentials: "same-origin"
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (json) {
-                if (json.status === "success") {
-                    window.location.href = downloadUrl;
-                    return;
-                }
-                if (json.status === "failed") {
-                    fail(json.error || "{% trans 'export_failed_body' context 'exams.template.export_waiting' %}");
-                    return;
-                }
-                if (attempts >= 240) {
-                    fail("{% trans 'export_timeout_body' context 'exams.template.export_waiting' %}");
-                    return;
-                }
-                setTimeout(poll, 2500);
-            })
-            .catch(function () {
-                if (attempts >= 240) {
-                    fail("{% trans 'export_timeout_body' context 'exams.template.export_waiting' %}");
-                    return;
-                }
-                setTimeout(poll, 4000);
-            });
-    }
-
-    poll();
-})();
-</script>
+{% block extraJs %}
+<script src="{% static 'exams/js/export_waiting.js' %}"></script>
 {% endblock %}

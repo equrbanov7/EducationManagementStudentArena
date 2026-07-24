@@ -1,0 +1,13 @@
+/* project_modals.css
+ * Source: apps/projects/templates/projects/partials/_project_modals.html
+ * Add/Edit project modallarının group/student seçim siyahısı stilləri.
+ */
+.chk-row { display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+.chk-row:hover { background: #f5f9ff; }
+.chk-row:last-child { border-bottom: none; }
+.chk-row input { width: 18px; height: 18px; margin-right: 10px; }
+.chk-row label { margin: 0; flex: 1; cursor: pointer; }
+.chk-row .badge { margin-left: auto; }
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+.c3-1 { max-height: 250px; overflow-y: auto; }

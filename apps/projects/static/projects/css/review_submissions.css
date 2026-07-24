@@ -3,6 +3,15 @@
     flex-wrap: wrap;
 }
 
+/* Source: review_submissions.html inline <style> (köçürülüb) */
+.results-modal-answer {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.9rem;
+    background: #f8fafc;
+    white-space: pre-wrap;
+}
+
 .project-review-card {
     border: 0;
     border-radius: 14px;

@@ -111,21 +111,8 @@
         </section>
     </div>
 </div>
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    Array.prototype.slice.call(document.querySelectorAll(".review-answer-toggle")).forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            var id = btn.getAttribute("data-review-toggle");
-            var card = document.getElementById("review-answer-" + id);
-            if (!card) return;
-            var collapsed = card.classList.toggle("is-collapsed");
-            var icon = btn.querySelector("i");
-            if (icon) {
-                icon.classList.toggle("fa-chevron-down", collapsed);
-                icon.classList.toggle("fa-chevron-up", !collapsed);
-            }
-        });
-    });
-})();
-</script>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'accounts/js/review_result_detail.js' %}"></script>
 {% endblock %}

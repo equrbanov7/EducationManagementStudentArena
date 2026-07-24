@@ -156,3 +156,8 @@
     justify-content: center;
     line-height: 1;
 }
+
+/* Bulk-actions bar hidden until JS reveals it (was inline style="display:none !important") */
+.notifications-bulk-actions--hidden {
+    display: none !important;
+}

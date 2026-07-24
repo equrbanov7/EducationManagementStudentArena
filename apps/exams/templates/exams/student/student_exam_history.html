@@ -7,16 +7,6 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'exams/css/student_exam_history.css' %}">
-<style nonce="{{ request.csp_nonce }}">
-    .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:99998; justify-content:center; align-items:center; }
-    .loading-overlay.show { display:flex; }
-    .loading-spinner { text-align:center; color:#007bff; }
-    .loading-spinner i { font-size:2.5rem; }
-    .loading-spinner p { margin-top:0.75rem; font-size:0.95rem; color:#555; font-weight:600; }
-    .history-search-bar { max-width: 400px; }
-    .history-search-bar .form-control { border-radius: 8px; border: 1px solid #dee2e6; padding: 0.6rem 0.85rem 0.6rem 2.5rem; font-size: 0.9rem; }
-    .history-search-bar .search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none; }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -264,32 +254,5 @@
 
 {% block extraJs %}
 <script src="{% static 'js/review_countdown.js' %}"></script>
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-    var loadingOverlay = document.getElementById('loadingOverlay');
-    var searchInput = document.getElementById('historySearchInput');
-    var searchForm = document.getElementById('historySearchForm');
-    var debounceTimer = null;
-
-    function showLoading() {
-        if (loadingOverlay) loadingOverlay.classList.add('show');
-    }
-
-    // Debounced search (500ms delay)
-    if (searchInput && searchForm) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(function() {
-                showLoading();
-                searchForm.submit();
-            }, 500);
-        });
-    }
-
-    // Show loading on pagination clicks
-    document.querySelectorAll('.pagination-wrapper a').forEach(function(el) {
-        el.addEventListener('click', showLoading);
-    });
-});
-</script>
+<script src="{% static 'exams/js/student_exam_history.js' %}"></script>
 {% endblock %}

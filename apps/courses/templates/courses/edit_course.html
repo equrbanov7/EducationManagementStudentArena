@@ -57,7 +57,7 @@
                             </label>
                             
                             <div class="image-upload-container">
-                                <div id="imageDisplayArea">
+                                <div id="imageDisplayArea" data-file-input-id="{{ form.cover_image.id_for_label }}">
                                     {% with cover_image_url=course.cover_image_url %}
                                         {% if cover_image_url %}
                                             <div id="currentImageBlock" class="current-image-wrapper">
@@ -67,7 +67,7 @@
                                         {% endif %}
                                     {% endwith %}
 
-                                    <div id="imagePreviewBlock" class="preview-wrapper" style="display: none;">
+                                    <div id="imagePreviewBlock" class="preview-wrapper d-none">
                                         <img id="previewImg" src="#" alt="{% trans 'alt_new_preview' context 'courses.edit_page' %}">
                                         <span class="image-label-tag c3-2">{% trans "label_new_selection" context "courses.edit_page" %}</span>
                                     </div>
@@ -125,37 +125,9 @@
         </div>
     </div>
 </div>
-
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-    const fileInput = document.getElementById('{{ form.cover_image.id_for_label }}');
-    const currentImageBlock = document.getElementById('currentImageBlock');
-    const imagePreviewBlock = document.getElementById('imagePreviewBlock');
-    const previewImg = document.getElementById('previewImg');
-
-    if (fileInput) {
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    // Yeni şəkli göstər
-                    previewImg.src = event.target.result;
-                    imagePreviewBlock.style.display = 'inline-block';
-                    
-                    // Mövcud şəkli gizlət (əgər varsa)
-                    if (currentImageBlock) {
-                        currentImageBlock.style.display = 'none';
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-});
-</script>
 {% endblock %}
 
 {% block extraJs %}
     {% include "courses/partials/_courses_assets_js.html" %}
+    <script src="{% static 'courses/js/edit_course.js' %}"></script>
 {% endblock %}

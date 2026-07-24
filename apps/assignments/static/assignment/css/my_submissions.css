@@ -150,3 +150,8 @@
 .empty-state-card:hover {
     background-color: #e0f2fe;
 }
+
+/* C3: mikro inline-stil köçürmələri (my_submissions.html) */
+.c3-1 { letter-spacing: 0.5px; }
+.c3-2 { white-space: pre-wrap; }
+.c3-3 { width: 80px; height: 80px; }

@@ -1,10 +1,8 @@
-{% load i18n %}
+{% load i18n static %}
 
 
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { background:#fceaea;color:#a32d2d;border:1px solid #e24b4a; }
-</style>
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (external CSS).{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/pending_review.css' %}">
 
 <div class="pr-filter-card">
     <form method="get" class="js-auto-filter-form" data-auto-filter-form>
@@ -183,89 +181,11 @@
     </div>
 {% endif %}
 
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    function setupAutoFilterForm(form) {
-        if (!form || form.dataset.autoFilterBound === "1") {
-            return;
-        }
-        form.dataset.autoFilterBound = "1";
-
-        var debounceHandle = null;
-        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
-        var selects = form.querySelectorAll("select");
-
-        function submitForm() {
-            if (typeof form.requestSubmit === "function") {
-                form.requestSubmit();
-                return;
-            }
-            form.submit();
-        }
-
-        textFields.forEach(function (field) {
-            field.addEventListener("input", function () {
-                window.clearTimeout(debounceHandle);
-                debounceHandle = window.setTimeout(submitForm, 350);
-            });
-            field.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    window.clearTimeout(debounceHandle);
-                    submitForm();
-                }
-            });
-        });
-
-        selects.forEach(function (select) {
-            select.addEventListener("change", submitForm);
-        });
-    }
-
-    function setupReviewQueueCountdowns() {
-        var countdownNodes = document.querySelectorAll("[data-review-queue-countdown]");
-        if (!countdownNodes.length) {
-            return;
-        }
-
-        var shouldReload = false;
-        countdownNodes.forEach(function (node) {
-            var secondsLeft = parseInt(node.getAttribute("data-seconds"), 10);
-            if (Number.isNaN(secondsLeft)) {
-                node.textContent = "";
-                return;
-            }
-
-            function render() {
-                if (secondsLeft <= 0) {
-                    node.textContent = "{% trans 'Vaxt bitdi.' %}";
-                    shouldReload = true;
-                    return;
-                }
-                var minutes = Math.floor(secondsLeft / 60);
-                var seconds = secondsLeft % 60;
-                if (node.textContent.indexOf("Anonim") !== -1) {
-                    node.textContent = "{% trans 'Anonimliyin bitməsinə qalan vaxt:' %} " + minutes + " {% trans 'dəq' %} " + seconds + " {% trans 'san.' %}";
-                    return;
-                }
-                node.textContent = "{% trans 'Yenidən yoxlama üçün qalan vaxt:' %} " + minutes + " {% trans 'dəq' %} " + seconds + " {% trans 'san.' %}";
-            }
-
-            render();
-            window.setInterval(function () {
-                secondsLeft = Math.max(0, secondsLeft - 1);
-                render();
-            }, 1000);
-        });
-
-        window.setInterval(function () {
-            if (shouldReload) {
-                window.location.reload();
-            }
-        }, 1500);
-    }
-
-    document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
-    setupReviewQueueCountdowns();
-})();
-</script>
+<div id="pendingReviewCountdownI18n" class="d-none"
+     data-time-up="{% trans 'Vaxt bitdi.' %}"
+     data-anon-prefix="{% trans 'Anonimliyin bitməsinə qalan vaxt:' %}"
+     data-recheck-prefix="{% trans 'Yenidən yoxlama üçün qalan vaxt:' %}"
+     data-min="{% trans 'dəq' %}"
+     data-sec="{% trans 'san.' %}"></div>
+<script src="{% static 'accounts/js/profile_auto_filter_form.js' %}"></script>
+<script src="{% static 'accounts/js/pending_review_countdown.js' %}"></script>
