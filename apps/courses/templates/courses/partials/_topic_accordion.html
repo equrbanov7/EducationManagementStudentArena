@@ -1,7 +1,13 @@
 {% load i18n %}
+{% load static %}
 
 <!-- ACCORDION 1: MÖVZULAR (Topics) -->
 <!-- courses/templates/courses/partials/_topic_accordion.html -->
+
+<div id="topicAccordionConfig" hidden
+     data-i18n-confirm-delete-topic="{% trans 'confirm_delete_topic' context 'courses.partial.topic_accordion' %}"
+     data-i18n-confirm-delete-resource="{% trans 'confirm_delete_resource' context 'courses.partial.topic_accordion' %}"
+     data-i18n-resource-modal-not-found="{% trans 'resourceFormModal tapılmadı!' %}"></div>
 
 <div class="accordion-item">
     <h2 class="accordion-header">
@@ -171,120 +177,4 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-    document.querySelectorAll('[data-stop-propagation]').forEach(function (element) {
-        element.addEventListener('click', function (event) {
-            event.stopPropagation();
-        });
-    });
-
-    // Delete Topic
-    function deleteTopic(courseId, topicId) {
-        if (confirm("{% trans 'confirm_delete_topic' context 'courses.partial.topic_accordion' %}")) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/courses/${courseId}/topic/${topicId}/delete/`;
-            
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-            if (csrfToken) {
-                form.appendChild(csrfToken.cloneNode(true));
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-    
-   
-    
-    // Delete Resource
-    function deleteResource(courseId, resourceId) {
-        if (confirm("{% trans 'confirm_delete_resource' context 'courses.partial.topic_accordion' %}")) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/courses/${courseId}/resource/${resourceId}/delete/`;
-            
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-            if (csrfToken) {
-                form.appendChild(csrfToken.cloneNode(true));
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-    
-    // Open Resource Modal with Topic Context
-    function openResourceModal(topicId, topicTitle) {
-        const modalEl = document.getElementById('resourceFormModal');
-        if (!modalEl) {
-            console.error("{% trans 'resourceFormModal tapılmadı!' %}");
-            return;
-        }
-
-        const applyTopicContext = function() {
-            const topicSelect = document.getElementById('resourceTopic');
-            if (topicSelect) {
-                topicSelect.value = topicId;
-                if (window.EMSBootstrapSelect) {
-                    window.EMSBootstrapSelect.sync(topicSelect);
-                }
-            }
-
-            const topicName = document.getElementById('resourceModalTopicName');
-            if (topicName) topicName.textContent = ` - ${topicTitle}`;
-        };
-    
-        modalEl.addEventListener('shown.bs.modal', applyTopicContext, { once: true });
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-
-        if (modalEl.classList.contains('show')) {
-            applyTopicContext();
-        }
-    }
-
-    document.addEventListener('click', function(event) {
-        const editTopicButton = event.target.closest('[data-edit-topic-id]');
-        if (editTopicButton) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (typeof window.editTopic === 'function') {
-                window.editTopic(
-                    editTopicButton.dataset.editTopicId,
-                    editTopicButton.dataset.editTopicTitle || '',
-                    editTopicButton.dataset.editTopicDescription || ''
-                );
-            }
-            return;
-        }
-
-        const deleteTopicButton = event.target.closest('[data-delete-topic-course-id][data-delete-topic-id]');
-        if (deleteTopicButton) {
-            event.preventDefault();
-            event.stopPropagation();
-            deleteTopic(deleteTopicButton.dataset.deleteTopicCourseId, deleteTopicButton.dataset.deleteTopicId);
-            return;
-        }
-
-        const deleteResourceButton = event.target.closest('[data-delete-resource-course-id][data-delete-resource-id]');
-        if (deleteResourceButton) {
-            event.preventDefault();
-            event.stopPropagation();
-            deleteResource(
-                deleteResourceButton.dataset.deleteResourceCourseId,
-                deleteResourceButton.dataset.deleteResourceId
-            );
-            return;
-        }
-
-        const openResourceButton = event.target.closest('[data-open-resource-modal-topic-id]');
-        if (openResourceButton) {
-            event.preventDefault();
-            event.stopPropagation();
-            openResourceModal(
-                openResourceButton.dataset.openResourceModalTopicId,
-                openResourceButton.dataset.openResourceModalTitle || ''
-            );
-        }
-    }, true);
-</script>
+<script src="{% static 'courses/js/topic_accordion.js' %}"></script>

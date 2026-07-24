@@ -1,10 +1,7 @@
 {% load i18n %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-height: 250px; }
-  .c3-2 { font-size: 0.6rem; }
-  .c3-3 { min-height: 200px; }
-</style>
+{% load static %}
+{% comment %}C3 mikro inline-stil-lər modals.css-ə köçürüldü.{% endcomment %}
+<link rel="stylesheet" href="{% static 'assignment/css/modals.css' %}">
 
 <div class="modal fade" id="addAssignmentModal" tabindex="-1" >
     <div class="modal-dialog modal-xl">

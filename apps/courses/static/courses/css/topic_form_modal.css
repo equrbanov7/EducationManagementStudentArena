@@ -1,0 +1,16 @@
+/* topic_form_modal.css
+ * Source: apps/courses/templates/courses/partials/_topic_form_modal.html (inline stil)
+ */
+#topicForm .form-label {
+    font-weight: 600;
+    color: #333;
+}
+
+#topicForm .form-control {
+    border-radius: 6px;
+}
+
+#topicForm .form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}

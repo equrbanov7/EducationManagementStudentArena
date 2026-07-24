@@ -1,0 +1,12 @@
+/* assignment_modals.css
+ * Source: apps/assignments/templates/assignments/partials/_assignment_modals.html (inline stil)
+ */
+.asn-chk-row { display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+.asn-chk-row:hover { background: #f5f9ff; }
+.asn-chk-row:last-child { border-bottom: none; }
+.asn-chk-row input { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; }
+.asn-chk-row label { margin: 0; flex: 1; cursor: pointer; font-weight: 500; }
+.asn-chk-row .badge { margin-left: auto; flex-shrink: 0; }
+
+/* C3 (2026-07-03): mikro inline-stil köçürmələri */
+.c3-1 { max-height: 250px; overflow-y: auto; }

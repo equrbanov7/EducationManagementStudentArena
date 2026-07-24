@@ -103,6 +103,12 @@
 .jd2-th-lesson--locked { opacity: 0.95; }
 .jd-day-stat { background: #f5f8ff; border: 1px solid #e2e8f5; border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; color: #33415c; }
 .jd-day-stat b { color: #0f2a5e; font-size: 1.05rem; }
+/* Gün özəti modal gövdəsi (journal_detail #jdDayModal) — köhnə inline style-lardan. */
+.jd-day-body { padding: 1rem 1.25rem; }
+.jd-day-topic { margin-bottom: 0.75rem; color: #33415c; }
+.jd-day-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.jd-day-stat--full { grid-column: 1 / -1; }
+.jd-day-note { margin-top: 0.9rem; font-size: 0.82rem; color: #94a3b8; }
 
 /* ── Yerində düzəliş rejimi (journal_detail ?correct=1) ────────────────────── */
 /* Correction rejimi NORMAL grid-in ÖZÜNDƏ işləyir (ayrı editor yox) — xanalar

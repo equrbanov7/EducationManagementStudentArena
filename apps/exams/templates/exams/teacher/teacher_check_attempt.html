@@ -359,25 +359,28 @@
 
 {% block extraJs %}
     <script src="{% static 'js/review_countdown.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}">
-        window.TEACHER_CHECK_I18N = {
-            modalTitleDetails: "{% filter escapejs %}{% trans 'modal_title_question_details' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            noAnswer: "{% filter escapejs %}{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            pointsUnit: "{% filter escapejs %}{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            statusNotChecked: "{% filter escapejs %}{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            saveButtonDirty: "{% filter escapejs %}{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            confirmTitle: "{% filter escapejs %}{% trans 'confirm_save_review_title' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            confirmMessage: "{% filter escapejs %}{% trans 'confirm_save_review_message' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiGrading: "{% filter escapejs %}{% trans 'ai_grading_in_progress' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiGradeBtn: "{% filter escapejs %}{% trans 'action_ai_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiError: "{% filter escapejs %}{% trans 'ai_grade_error' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiCached: "{% filter escapejs %}{% trans 'ai_cached' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiQuotaInfo: "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiNoAnswer: "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            uploadedFilesLabel: "{% filter escapejs %}{% trans 'label_uploaded_files' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            answeredWithPaint: "{% filter escapejs %}{% trans 'status_answered_with_paint' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
-        };
-        window.AI_GRADE_URL = "{% url 'exams:ai_grade_answer' slug=exam.slug attempt_id=attempt.id %}";
+    <script id="teacher-check-data" type="application/json">
+    {
+        "aiGradeUrl": "{% url 'exams:ai_grade_answer' slug=exam.slug attempt_id=attempt.id %}",
+        "i18n": {
+            "modalTitleDetails": "{% filter escapejs %}{% trans 'modal_title_question_details' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "noAnswer": "{% filter escapejs %}{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "pointsUnit": "{% filter escapejs %}{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "statusNotChecked": "{% filter escapejs %}{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "saveButtonDirty": "{% filter escapejs %}{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "confirmTitle": "{% filter escapejs %}{% trans 'confirm_save_review_title' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "confirmMessage": "{% filter escapejs %}{% trans 'confirm_save_review_message' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "aiGrading": "{% filter escapejs %}{% trans 'ai_grading_in_progress' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "aiGradeBtn": "{% filter escapejs %}{% trans 'action_ai_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "aiError": "{% filter escapejs %}{% trans 'ai_grade_error' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "aiCached": "{% filter escapejs %}{% trans 'ai_cached' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "aiQuotaInfo": "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "aiNoAnswer": "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "uploadedFilesLabel": "{% filter escapejs %}{% trans 'label_uploaded_files' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "answeredWithPaint": "{% filter escapejs %}{% trans 'status_answered_with_paint' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
+        }
+    }
     </script>
+    <script src="{% static 'exams/js/teacher_check_attempt_bootstrap.js' %}"></script>
     <script src="{% static 'exams/js/teacher_check_attempt.js' %}"></script>
 {% endblock %}

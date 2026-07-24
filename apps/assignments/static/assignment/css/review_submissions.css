@@ -1,0 +1,10 @@
+/* review_submissions.css
+ * Source: apps/assignments/templates/assignments/review_submissions.html (inline stil)
+ */
+.results-modal-answer {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.9rem;
+    background: #f8fafc;
+    white-space: pre-wrap;
+}

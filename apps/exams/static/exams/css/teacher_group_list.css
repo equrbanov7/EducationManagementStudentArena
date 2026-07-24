@@ -597,3 +597,8 @@
    Daimi-gizli widget wrapper-ləri (searchable-multi-select xam selectləri) və
    JS-submit forması üçün. JS bunları heç vaxt göstərmir. */
 .tgl-hidden { display: none; }
+
+/* Extracted from inline style="" attributes (CSP: no style-src-attr).
+   The JS toggles element.style.display at runtime, which overrides these. */
+.tgl-empty-msg { display: none; text-align: center; padding: 20px; color: #64748b; }
+.tgl-warning-modal { z-index: 10000; display: none; }

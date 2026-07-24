@@ -88,7 +88,7 @@
         <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="bulk-delete-form">
             {% csrf_token %}
             <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
-            <div class="notifications-bulk-actions mb-2 d-flex align-items-center gap-2" id="bulk-actions-bar" style="display:none !important">
+            <div class="notifications-bulk-actions notifications-bulk-actions--hidden mb-2 d-flex align-items-center gap-2" id="bulk-actions-bar">
                 <input type="checkbox" id="select-all-notifications" title="{% trans 'Select all' %}">
                 <label for="select-all-notifications" class="mb-0 me-2">{% trans "Select all" %}</label>
                 <button type="submit" class="btn btn-sm btn-outline-danger" id="bulk-delete-btn" disabled>
@@ -189,36 +189,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    'use strict';
-
-    var selectAll = document.getElementById('select-all-notifications');
-    var bulkBar = document.getElementById('bulk-actions-bar');
-    var bulkDeleteBtn = document.getElementById('bulk-delete-btn');
-    var checkboxes = document.querySelectorAll('.notification-checkbox');
-
-    if (selectAll && bulkBar) {
-        // Show the bulk bar when there are items
-        bulkBar.style.removeProperty('display');
-
-        function updateBulkBar() {
-            var checkedCount = document.querySelectorAll('.notification-checkbox:checked').length;
-            bulkDeleteBtn.disabled = checkedCount === 0;
-        }
-
-        selectAll.addEventListener('change', function () {
-            checkboxes.forEach(function (cb) { cb.checked = selectAll.checked; });
-            updateBulkBar();
-        });
-
-        checkboxes.forEach(function (cb) {
-            cb.addEventListener('change', function () {
-                selectAll.checked = document.querySelectorAll('.notification-checkbox:checked').length === checkboxes.length;
-                updateBulkBar();
-            });
-        });
-    }
-})();
-</script>
+<script src="{% static 'notifications/js/notification_list.js' %}"></script>
 {% endblock %}

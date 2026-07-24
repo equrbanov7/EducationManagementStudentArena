@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% trans "not_set" context "profile.info" as profile_not_set %}
 {% trans "default_role" context "profile.info" as profile_default_role %}
 {% trans "default_org" context "profile.info" as profile_default_org %}
@@ -322,52 +322,4 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function () {
-    function showAvatarFallback(imageNode, fallbackNode) {
-        if (imageNode) {
-            imageNode.style.display = 'none';
-        }
-        if (fallbackNode) {
-            fallbackNode.style.display = 'flex';
-        }
-    }
-
-    var identityAvatarImage = document.getElementById("profileIdentityAvatarImage");
-    var identityAvatarFallback = document.getElementById("profileIdentityAvatarFallback");
-    if (identityAvatarImage) {
-        identityAvatarImage.addEventListener("error", function () {
-            showAvatarFallback(identityAvatarImage, identityAvatarFallback);
-        });
-        if (identityAvatarImage.complete && !identityAvatarImage.naturalWidth) {
-            showAvatarFallback(identityAvatarImage, identityAvatarFallback);
-        }
-    }
-
-    var avatarInput = document.getElementById("profileAvatarInput");
-    var avatarPreviewImage = document.getElementById("profileAvatarPreviewImage");
-    var avatarPreviewFallback = document.getElementById("profileAvatarPreviewFallback");
-    if (avatarPreviewImage) {
-        avatarPreviewImage.addEventListener("error", function () {
-            showAvatarFallback(avatarPreviewImage, avatarPreviewFallback);
-        });
-        if (avatarPreviewImage.complete && !avatarPreviewImage.naturalWidth) {
-            showAvatarFallback(avatarPreviewImage, avatarPreviewFallback);
-        }
-    }
-
-    if (avatarInput && avatarPreviewImage) {
-        avatarInput.addEventListener("change", function () {
-            var file = avatarInput.files && avatarInput.files.length ? avatarInput.files[0] : null;
-            if (!file) {
-                return;
-            }
-            if (avatarPreviewFallback) {
-                avatarPreviewFallback.style.display = 'none';
-            }
-            avatarPreviewImage.src = URL.createObjectURL(file);
-            avatarPreviewImage.style.display = '';
-        });
-    }
-});
-</script>
+<script src="{% static 'accounts/js/profile/profile_info_identity.js' %}"></script>

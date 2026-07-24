@@ -90,3 +90,9 @@
         width: 100%;
     }
 }
+
+/* Hidden container for the assigned_teachers field when multi-assign is off.
+   Appended by CSS/JS externalization refactor (source: create_student_group.html). */
+.csg-hidden {
+    display: none;
+}

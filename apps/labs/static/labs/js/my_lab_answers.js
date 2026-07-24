@@ -16,7 +16,8 @@
         });
     });
 
-    const preopenModalId = window.LAB_ANSWERS_PREOPEN_MODAL;
+    const cfgEl = document.getElementById('labAnswersConfig');
+    const preopenModalId = (cfgEl && cfgEl.dataset.preopenModal) || window.LAB_ANSWERS_PREOPEN_MODAL;
     if (preopenModalId && window.bootstrap) {
         const modalEl = document.getElementById(preopenModalId);
         if (modalEl) {

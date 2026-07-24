@@ -33,16 +33,6 @@ Uşaq şablon təmin edir:
 
 {% block extraJs %}
     {% comment %}Mobil sidebar açar düyməsi — SPA yükləmədən yüngül toggle.{% endcomment %}
-    <script nonce="{{ request.csp_nonce }}">
-      (function () {
-        var btn = document.querySelector('[data-profile-sidebar-toggle], .profile-hamburger, #profileSidebarToggle');
-        var sidebar = document.querySelector('.profile-sidebar');
-        var backdrop = document.getElementById('profileSidebarBackdrop');
-        function open() { if (sidebar) sidebar.classList.add('is-open'); if (backdrop) backdrop.classList.add('is-visible'); }
-        function close() { if (sidebar) sidebar.classList.remove('is-open'); if (backdrop) backdrop.classList.remove('is-visible'); }
-        if (btn) btn.addEventListener('click', function (e) { e.preventDefault(); (sidebar && sidebar.classList.contains('is-open')) ? close() : open(); });
-        if (backdrop) backdrop.addEventListener('click', close);
-      })();
-    </script>
+    <script src="{% static 'accounts/js/profile_embed_base.js' %}"></script>
     {% block embed_extra_js %}{% endblock %}
 {% endblock %}
