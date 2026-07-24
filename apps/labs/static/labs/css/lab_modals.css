@@ -1,0 +1,12 @@
+/* lab_modals.css
+ * Source: labs/partials/lab_modals/_scripts.html + _add_lab_modal.html + _edit_lab_modal.html (inline stil)
+ */
+.lab-chk-row { display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+.lab-chk-row:hover { background: #f5f9ff; }
+.lab-chk-row:last-child { border-bottom: none; }
+.lab-chk-row input { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; }
+.lab-chk-row label { margin: 0; flex: 1; cursor: pointer; font-weight: 500; }
+.lab-chk-row .badge { margin-left: auto; flex-shrink: 0; }
+
+/* C3: add/edit lab modal list container */
+.c3-1 { max-height: 200px; overflow-y: auto; }

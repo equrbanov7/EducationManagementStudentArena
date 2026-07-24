@@ -7,15 +7,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results/_part1.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results/_part2.css' %}">
     <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
-    <style nonce="{{ request.csp_nonce }}">
-        .results-modal-answer {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0.9rem;
-            background: #f8fafc;
-            white-space: pre-wrap;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'assignment/css/review_submissions.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -297,7 +289,7 @@
                     <div id="modal-content" class="results-modal-answer"></div>
                 </div>
 
-                <div class="mb-3" id="modal-file-container" style="display: none;">
+                <div class="mb-3 d-none" id="modal-file-container">
                     <strong>{% trans "file" context "assignment.review_submissions" %}:</strong>
                     <div class="mt-2">
                         <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-primary">

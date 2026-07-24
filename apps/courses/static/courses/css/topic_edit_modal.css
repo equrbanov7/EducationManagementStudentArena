@@ -1,0 +1,16 @@
+/* topic_edit_modal.css
+ * Source: apps/courses/templates/courses/partials/_topic_edit_modal.html (inline stil)
+ */
+#topicEditForm .form-label {
+    font-weight: 600;
+    color: #333;
+}
+
+#topicEditForm .form-control {
+    border-radius: 6px;
+}
+
+#topicEditForm .form-control:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+}

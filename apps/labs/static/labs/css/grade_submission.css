@@ -44,3 +44,8 @@
     background: var(--ems-neutral-50);
     color: var(--ems-neutral-600);
 }
+
+/* C3: mikro inline-stil köçürmələri (grade_submission.html) */
+.c3-1 { background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%); }
+.c3-2 { width: 40px; height: 40px; }
+.c3-3 { top: 20px; }

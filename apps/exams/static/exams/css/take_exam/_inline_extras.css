@@ -1,0 +1,16 @@
+/* _inline_extras.css — moved verbatim from inline <style> in exams/student/take_exam.html
+   (CSP: no unsafe-inline for style-src; external stylesheet needs no nonce). */
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+.c3-1 { width: 0%; }

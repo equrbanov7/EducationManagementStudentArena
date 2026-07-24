@@ -10,10 +10,7 @@
 {% endblock %}
 
 {% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { width: 0%; }
-</style>
+{% comment %}C3 mikro inline-stil lab_detail.css-ə köçürüldü.{% endcomment %}
 
 <div class="container py-5">
     
@@ -388,27 +385,21 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-    window.LAB_CONFIG = {
-        labId: {{ lab.id }},
-        csrf: '{{ csrf_token }}',
-        endTime: '{{ lab.end_datetime|date:"c" }}',
-        totalQuestions: {{ questions|length }}
-    };
-
-    window.LAB_I18N = {
-        statusSaved: '{% trans "status_saved" context "labs.js.lab_detail" %}',
-        statusSaving: '{% trans "status_saving" context "labs.js.lab_detail" %}',
-        statusError: '{% trans "status_error" context "labs.js.lab_detail" %}',
-        confirmUnanswered: '{% trans "confirm_unanswered" context "labs.js.lab_detail" %}',
-        confirmFinishDescription: '{% trans "confirm_finish_description" context "labs.template.lab_detail" %}',
-        actionSubmitting: '{% trans "action_submitting" context "labs.js.lab_detail" %}',
-        errorPrefix: '{% trans "error_prefix" context "labs.js.lab_detail" %}',
-        errorUnknown: '{% trans "error_unknown" context "labs.js.lab_detail" %}',
-        errorServer: '{% trans "error_server" context "labs.js.lab_detail" %}',
-        actionFinishLab: '{% trans "action_finish_lab" context "labs.js.lab_detail" %}'
-    };
-</script>
+<div id="labDetailConfig" hidden
+     data-lab-id="{{ lab.id }}"
+     data-end-time="{{ lab.end_datetime|date:'c' }}"
+     data-total-questions="{{ questions|length }}"
+     data-i18n-status-saved="{% trans 'status_saved' context 'labs.js.lab_detail' %}"
+     data-i18n-status-saving="{% trans 'status_saving' context 'labs.js.lab_detail' %}"
+     data-i18n-status-error="{% trans 'status_error' context 'labs.js.lab_detail' %}"
+     data-i18n-confirm-unanswered="{% trans 'confirm_unanswered' context 'labs.js.lab_detail' %}"
+     data-i18n-confirm-finish-description="{% trans 'confirm_finish_description' context 'labs.template.lab_detail' %}"
+     data-i18n-action-submitting="{% trans 'action_submitting' context 'labs.js.lab_detail' %}"
+     data-i18n-error-prefix="{% trans 'error_prefix' context 'labs.js.lab_detail' %}"
+     data-i18n-error-unknown="{% trans 'error_unknown' context 'labs.js.lab_detail' %}"
+     data-i18n-error-server="{% trans 'error_server' context 'labs.js.lab_detail' %}"
+     data-i18n-action-finish-lab="{% trans 'action_finish_lab' context 'labs.js.lab_detail' %}"></div>
+<script src="{% static 'labs/js/lab_detail_template.js' %}"></script>
 <script src="{% static 'labs/js/lab_detail.js' %}"></script>
 {% endif %}
 
@@ -416,5 +407,4 @@
 
 {% block extraJs %}
 <script src="{% static 'js/review_countdown.js' %}"></script>
-<script src="{% static 'labs/js/lab_detail_template.js' %}"></script>
 {% endblock %}

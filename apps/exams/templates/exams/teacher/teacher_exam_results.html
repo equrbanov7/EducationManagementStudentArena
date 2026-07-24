@@ -562,58 +562,10 @@
 {% block extraJs %}
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-    const rows = document.querySelectorAll('tr[data-seconds-remaining]');
-
-    rows.forEach(row => {
-        let secondsLeft = parseInt(row.dataset.secondsRemaining, 10) || 0;
-        if (secondsLeft <= 0) return;
-        const timerDisplay = row.querySelector('.timer-display');
-        if (!timerDisplay) return;
-
-        const updateTimer = () => {
-            if (secondsLeft <= 0) {
-                window.location.reload();
-                return;
-            }
-            const minutes = Math.floor(secondsLeft / 60);
-            const seconds = secondsLeft % 60;
-            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            secondsLeft--;
-        };
-
-        updateTimer();
-        const interval = setInterval(updateTimer, 1000);
-        window.addEventListener('beforeunload', () => clearInterval(interval));
-    });
-
-    {% if can_delete_attempts %}
-    window.initResultsBulkActions({
-        checkboxSelector: '.js-attempt-checkbox',
-        selectedCountSelector: '#selectedAttemptCount',
-        selectAllSelector: '#selectAllAttemptsBtn',
-        clearSelector: '#clearAttemptsBtn',
-        deleteSelectedSelector: '#deleteSelectedAttemptsBtn',
-        singleDeleteSelector: '.js-single-delete-attempt',
-        deleteFormSelector: '#deleteAttemptsForm',
-        deleteInputsSelector: '#deleteAttemptsInputs',
-        confirmButtonSelector: '#confirmDeleteAttemptsBtn',
-        confirmModalSelector: '#deleteAttemptsConfirmModal',
-        inputName: 'attempt_ids',
-        singleDeleteDataAttribute: 'attemptId'
-    });
-    {% endif %}
-
-    var loadingOverlay = document.getElementById("loadingOverlay");
-    function showLoading() { if (loadingOverlay) loadingOverlay.classList.add("show"); }
-    document.querySelectorAll(".ter-sort-link, .pagination-wrapper a").forEach(function(el) {
-        el.addEventListener("click", showLoading);
-    });
-    var filtersForm = document.getElementById("resultsFiltersForm");
-    if (filtersForm) {
-        filtersForm.addEventListener("submit", showLoading);
-    }
-});
+<script id="ter-results-config" type="application/json">
+{
+    "canDeleteAttempts": {% if can_delete_attempts %}true{% else %}false{% endif %}
+}
 </script>
+<script src="{% static 'exams/js/teacher_exam_results.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,293 @@
+/* Source template: apps/exams/templates/exams/teacher/partials/_exam_section_js.html
+ * (included by exams/teacher/exam_section.html)
+ * Drives the "course exam info" modal: open/close, language choice, and access-code submit.
+ * i18n strings are bridged via the #examSectionI18n JSON block in the partial.
+ */
+(function () {
+    var i18nEl = document.getElementById("examSectionI18n");
+    var I18N = {};
+    if (i18nEl) {
+        try { I18N = JSON.parse(i18nEl.textContent || "{}") || {}; } catch (e) { I18N = {}; }
+    }
+
+    var backdrop = document.getElementById("courseExamInfoBackdrop");
+    var closeBtn = document.getElementById("courseExamInfoClose");
+    var cancelBtn = document.getElementById("courseExamInfoCancelBtn");
+    var startBtn = document.getElementById("courseExamInfoStartBtn");
+    var titleEl = document.getElementById("courseExamInfoExamName");
+    var typeEl = document.getElementById("courseExamInfoType");
+    var durationEl = document.getElementById("courseExamInfoDuration");
+    var startEl = document.getElementById("courseExamInfoStart");
+    var endEl = document.getElementById("courseExamInfoEnd");
+    var noteEl = document.getElementById("courseExamInfoNote");
+    var codeForm = document.getElementById("courseExamCodeForm");
+    var codeSlug = document.getElementById("courseExamCodeSlug");
+    var codeLanguage = document.getElementById("courseExamCodeLanguage");
+    var codeInput = document.getElementById("courseExamAccessCodeInput");
+    var codeError = document.getElementById("courseExamCodeError");
+    var languageBlock = document.getElementById("courseExamLanguageBlock");
+    var languageSelect = document.getElementById("courseExamLanguageSelect");
+    var startUrl = "";
+    var requiresCode = false;
+    var codeSubmitInFlight = false;
+    var selectedLanguage = "";
+    var emptyNoteText = I18N.modal_note_empty || "";
+    var directStartText = I18N.modal_action_start || "";
+    var confirmCodeText = I18N.modal_action_confirm_code || "";
+    var codeRequiredText = I18N.access_code_required || "";
+    var startFailedText = I18N.exam_start_failed || "";
+
+    function setCodeError(message) {
+        if (codeInput) {
+            codeInput.classList.toggle("is-invalid", Boolean(message));
+        }
+        if (codeError) {
+            codeError.textContent = message || "";
+            codeError.hidden = !message;
+        }
+    }
+
+    function getLanguageOptions(trigger) {
+        var optionsId = trigger.getAttribute("data-language-options-id") || "";
+        var optionsScript = optionsId ? document.getElementById(optionsId) : null;
+        if (!optionsScript) {
+            return [];
+        }
+
+        try {
+            var parsed = JSON.parse(optionsScript.textContent || "[]");
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function setSelectedLanguage(language) {
+        selectedLanguage = language || "";
+        if (codeLanguage) {
+            codeLanguage.value = selectedLanguage;
+        }
+    }
+
+    function buildStartUrlWithLanguage(rawUrl) {
+        if (!rawUrl || !selectedLanguage) {
+            return rawUrl;
+        }
+
+        try {
+            var url = new URL(rawUrl, window.location.origin);
+            url.searchParams.set("language", selectedLanguage);
+            return url.pathname + url.search + url.hash;
+        } catch (error) {
+            var separator = rawUrl.indexOf("?") === -1 ? "?" : "&";
+            return rawUrl + separator + "language=" + encodeURIComponent(selectedLanguage);
+        }
+    }
+
+    function refreshLanguageSelect() {
+        if (!languageSelect) {
+            return;
+        }
+        if (window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.refresh(languageSelect);
+        }
+    }
+
+    function configureLanguageChoice(trigger) {
+        var options = getLanguageOptions(trigger);
+        var defaultLanguage = trigger.getAttribute("data-default-language") || "";
+        var defaultOption = options.find(function (option) {
+            return option.language === defaultLanguage;
+        }) || options[0] || null;
+
+        if (!languageBlock || !languageSelect) {
+            setSelectedLanguage(defaultOption ? defaultOption.language : "");
+            return;
+        }
+
+        languageSelect.innerHTML = "";
+        options.forEach(function (option) {
+            var optionEl = document.createElement("option");
+            optionEl.value = option.language || "";
+            optionEl.textContent = option.display_name || option.language || "";
+            languageSelect.appendChild(optionEl);
+        });
+
+        if (defaultOption) {
+            languageSelect.value = defaultOption.language;
+            setSelectedLanguage(defaultOption.language);
+        } else {
+            setSelectedLanguage("");
+        }
+
+        languageBlock.classList.toggle("is-hidden", options.length <= 1);
+        languageSelect.required = options.length > 1;
+        refreshLanguageSelect();
+    }
+
+    function closeModal() {
+        if (!backdrop) {
+            return;
+        }
+        backdrop.classList.remove("is-open");
+        backdrop.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function openModal(trigger) {
+        if (!backdrop || !trigger) {
+            return;
+        }
+
+        startUrl = trigger.getAttribute("data-start-url") || "";
+        requiresCode = trigger.getAttribute("data-requires-code") === "1";
+        configureLanguageChoice(trigger);
+
+        if (titleEl) {
+            titleEl.textContent = trigger.getAttribute("data-exam-title") || "";
+        }
+        if (typeEl) {
+            typeEl.textContent = trigger.getAttribute("data-exam-type") || "-";
+        }
+        if (durationEl) {
+            durationEl.textContent = trigger.getAttribute("data-exam-duration") || "-";
+        }
+        if (startEl) {
+            startEl.textContent = trigger.getAttribute("data-exam-start") || "-";
+        }
+        if (endEl) {
+            endEl.textContent = trigger.getAttribute("data-exam-end") || "-";
+        }
+        if (noteEl) {
+            noteEl.textContent = trigger.getAttribute("data-exam-note") || emptyNoteText;
+        }
+        if (codeSlug) {
+            codeSlug.value = trigger.getAttribute("data-exam-slug") || "";
+        }
+        if (codeForm) {
+            codeForm.classList.toggle("is-hidden", !requiresCode);
+        }
+        if (codeInput) {
+            codeInput.value = "";
+            setCodeError("");
+        }
+        if (startBtn) {
+            startBtn.textContent = requiresCode ? confirmCodeText : directStartText;
+            startBtn.disabled = false;
+        }
+        codeSubmitInFlight = false;
+
+        backdrop.classList.add("is-open");
+        backdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        if (requiresCode && codeInput) {
+            window.setTimeout(function () {
+                codeInput.focus();
+            }, 40);
+        }
+    }
+
+    document.addEventListener("click", function (event) {
+        var trigger = event.target.closest(".js-open-course-exam-modal");
+        if (!trigger) {
+            return;
+        }
+        event.preventDefault();
+        openModal(trigger);
+    });
+
+    if (backdrop) {
+        backdrop.addEventListener("click", function (event) {
+            if (event.target === backdrop) {
+                closeModal();
+            }
+        });
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeModal);
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", closeModal);
+    }
+    if (codeInput) {
+        codeInput.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "");
+            setCodeError("");
+        });
+    }
+    if (languageSelect) {
+        languageSelect.addEventListener("change", function () {
+            setSelectedLanguage(this.value || "");
+        });
+    }
+
+    async function submitCodeForm() {
+        if (!codeForm || !codeInput) {
+            return;
+        }
+        if (!(codeInput.value || "").trim()) {
+            setCodeError(codeRequiredText);
+            codeInput.focus();
+            return;
+        }
+        if (codeSubmitInFlight) {
+            return;
+        }
+        codeSubmitInFlight = true;
+        if (startBtn) {
+            startBtn.disabled = true;
+        }
+        try {
+            var response = await fetch(codeForm.getAttribute("action"), {
+                method: "POST",
+                body: new FormData(codeForm),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            var contentType = response.headers.get("content-type") || "";
+            if (contentType.indexOf("application/json") !== -1) {
+                var payload = await response.json();
+                if (response.ok && payload.success) {
+                    window.location.href = payload.redirect_url || buildStartUrlWithLanguage(startUrl) || window.location.href;
+                    return;
+                }
+                setCodeError(payload.error || startFailedText);
+                return;
+            }
+            if (response.redirected && response.url) {
+                window.location.href = response.url;
+                return;
+            }
+            setCodeError(startFailedText);
+        } catch (error) {
+            setCodeError(startFailedText);
+        } finally {
+            codeSubmitInFlight = false;
+            if (startBtn) {
+                startBtn.disabled = false;
+            }
+        }
+    }
+
+    if (codeForm) {
+        codeForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            submitCodeForm();
+        });
+    }
+
+    if (startBtn) {
+        startBtn.addEventListener("click", function () {
+            if (requiresCode) {
+                submitCodeForm();
+                return;
+            }
+
+            if (startUrl) {
+                window.location.href = buildStartUrlWithLanguage(startUrl);
+            }
+        });
+    }
+})();

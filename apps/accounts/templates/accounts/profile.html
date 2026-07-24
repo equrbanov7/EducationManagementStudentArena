@@ -208,59 +208,62 @@
 {% endblock %}
 
 {% block extraJs %}
-<script nonce="{{ request.csp_nonce }}">
-window.MODAL_SUPERVISION_TPL_INFO = {
-    "light": {
-        title: "{% filter escapejs %}{% trans 'tpl_info_light_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'tpl_info_light_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        features: [
-            "{% filter escapejs %}{% trans 'tpl_info_light_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_light_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_light_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_light_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}"
-        ]
+<script id="profile-modal-i18n" type="application/json">
+{
+    "MODAL_SUPERVISION_TPL_INFO": {
+        "light": {
+            "title": "{% filter escapejs %}{% trans 'tpl_info_light_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "desc": "{% filter escapejs %}{% trans 'tpl_info_light_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "features": [
+                "{% filter escapejs %}{% trans 'tpl_info_light_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_light_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_light_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_light_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+            ]
+        },
+        "medium": {
+            "title": "{% filter escapejs %}{% trans 'tpl_info_medium_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "desc": "{% filter escapejs %}{% trans 'tpl_info_medium_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "features": [
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_medium_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+            ]
+        },
+        "strict": {
+            "title": "{% filter escapejs %}{% trans 'tpl_info_strict_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "desc": "{% filter escapejs %}{% trans 'tpl_info_strict_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "features": [
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                "{% filter escapejs %}{% trans 'tpl_info_strict_f6' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+            ]
+        }
     },
-    "medium": {
-        title: "{% filter escapejs %}{% trans 'tpl_info_medium_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'tpl_info_medium_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        features: [
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_medium_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}"
-        ]
+    "EXAM_CREATE_EDIT_MODAL_I18N": {
+        "loadingForm": "{% filter escapejs %}{% trans 'loading_form' context 'exams.template.create_exam_modal' %}{% endfilter %}",
+        "createTitle": "{% filter escapejs %}{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        "editTitle": "{% filter escapejs %}{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        "submitError": "{% filter escapejs %}{% trans 'retry_error' context 'courses.common.js' %}{% endfilter %}",
+        "saving": "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
+        "saved": "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
     },
-    "strict": {
-        title: "{% filter escapejs %}{% trans 'tpl_info_strict_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'tpl_info_strict_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-        features: [
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}",
-            "{% filter escapejs %}{% trans 'tpl_info_strict_f6' context 'exams.template.create_edit_exam' %}{% endfilter %}"
-        ]
+    "MY_EXAMS_I18N": {
+        "codeCopied": "{% filter escapejs %}{% trans 'code_copied' context 'exams.dashboard' %}{% endfilter %}"
+    },
+    "EXAM_WIZARD_I18N": {
+        "step": "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
+        "errorsTitle": "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
+        "titleRequired": "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
     }
-};
-window.EXAM_CREATE_EDIT_MODAL_I18N = {
-    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
-    createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
-    editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
-    submitError: "{% trans 'retry_error' context 'courses.common.js' %}",
-    saving: "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
-    saved: "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
-};
-window.MY_EXAMS_I18N = {
-    codeCopied: "{% filter escapejs %}{% trans 'code_copied' context 'exams.dashboard' %}{% endfilter %}"
-};
-window.EXAM_WIZARD_I18N = {
-    step: "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
-    errorsTitle: "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
-    titleRequired: "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
-};
+}
 </script>
+<script src="{% static 'accounts/js/profile/modal_i18n.js' %}?v=20260725-csp"></script>
 <script src="{% static 'accounts/js/profile/namespace.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/ui.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260713-spa-progress"></script>

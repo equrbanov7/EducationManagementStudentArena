@@ -114,24 +114,7 @@
 {% block extra_js %}
 <script src="{% static 'assignment/js/assignment_modal.js' %}"></script>
 {{ all_groups|json_script:"all-groups-data" }}
-<script nonce="{{ request.csp_nonce }}">
-    const COURSE_ID = {{ course.id }};
-    let ALL_GROUPS = [];
-    try {
-        const allGroupsPayload = JSON.parse(document.getElementById("all-groups-data").textContent);
-        ALL_GROUPS = typeof allGroupsPayload === "string" ? JSON.parse(allGroupsPayload) : allGroupsPayload;
-    } catch (error) {
-        console.warn("Unable to parse group payload.", error);
-    }
-    const COURSE_STUDENTS = [
-        {% for m in course_students %}
-        {
-            id: {{ m.user.id }},
-            username: "{{ m.user.username }}",
-            full_name: "{{ m.user.get_full_name|default:m.user.username }}",
-            group: "{{ m.group_name|default:'' }}"
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ];
-</script>
+<div id="review-page-config" hidden data-course-id="{{ course.id }}"></div>
+<script type="application/json" id="course-students-data">[{% for m in course_students %}{"id": {{ m.user.id }}, "username": "{{ m.user.username|escapejs }}", "full_name": "{{ m.user.get_full_name|default:m.user.username|escapejs }}", "group": "{{ m.group_name|default:''|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
+<script src="{% static 'assignment/js/review_page.js' %}"></script>
 {% endblock %}

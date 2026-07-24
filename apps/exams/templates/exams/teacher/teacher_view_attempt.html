@@ -9,11 +9,7 @@
 {% endblock %}
 
 {% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-height:360px; }
-</style>
-
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara (teacher_view_attempt.css) köçürüldü.{% endcomment %}
 <div class="container my-4 view-attempt-container">
     <div class="page-header">
         <div class="page-header-top">
@@ -392,28 +388,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    document.querySelectorAll('[data-review-countdown]').forEach(function (node) {
-        let secondsLeft = parseInt(node.getAttribute('data-review-countdown'), 10);
-        if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
-            node.textContent = '00:00:00';
-            return;
-        }
-
-        function render() {
-            const hours = Math.floor(secondsLeft / 3600);
-            const minutes = Math.floor((secondsLeft % 3600) / 60);
-            const seconds = secondsLeft % 60;
-            node.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        render();
-        window.setInterval(function () {
-            secondsLeft = Math.max(0, secondsLeft - 1);
-            render();
-        }, 1000);
-    });
-})();
-</script>
+<script src="{% static 'exams/js/teacher_view_attempt.js' %}"></script>
 {% endblock %}

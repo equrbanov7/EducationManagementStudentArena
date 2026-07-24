@@ -1,11 +1,8 @@
-{% load i18n %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { border-radius: 8px; }
-</style>
-
+{% load i18n static %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_c3.css' %}">
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-user-edit"></i>

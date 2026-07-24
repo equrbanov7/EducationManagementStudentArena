@@ -50,6 +50,7 @@
                                         type="text"
                                         id="primaryTeacherSearch"
                                         class="custom-search-input"
+                                        data-teacher-select-id="{{ form.primary_teacher.id_for_label }}"
                                         placeholder="{% trans 'placeholder_search_primary_teacher' context 'exams.template.create_student_group' %}"
                                     >
                                 </div>
@@ -124,7 +125,7 @@
                                 </div>
                             </div>
                         {% else %}
-                            <div style="display:none;">
+                            <div class="csg-hidden">
                                 {{ form.assigned_teachers }}
                             </div>
                         {% endif %}
@@ -151,29 +152,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-  const searchInput = document.getElementById("primaryTeacherSearch");
-  const teacherSelect = document.getElementById("{{ form.primary_teacher.id_for_label }}");
-
-  if (!searchInput || !teacherSelect) return;
-
-  searchInput.addEventListener("input", function () {
-    const filter = (this.value || "").toLowerCase();
-    const options = Array.from(teacherSelect.options);
-
-    options.forEach((option) => {
-      option.hidden = !(option.text || "").toLowerCase().includes(filter);
-    });
-
-    const selectedVisible = options.find((option) => option.selected && !option.hidden);
-    if (!selectedVisible) {
-      const firstVisible = options.find((option) => !option.hidden);
-      if (firstVisible) {
-        firstVisible.selected = true;
-      }
-    }
-  });
-})();
-</script>
+<script src="{% static 'exams/js/create_student_group.js' %}"></script>
 {% endblock %}

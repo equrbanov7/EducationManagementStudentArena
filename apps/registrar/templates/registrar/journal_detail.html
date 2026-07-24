@@ -244,17 +244,17 @@
                 <h2 data-jd-day-title>{% trans "Gün özəti" context "registrar.journal" %}</h2>
                 <button type="button" class="corr-modal-x" data-jd-day-close aria-label="{% trans 'Bağla' context 'registrar.journal' %}">&times;</button>
             </div>
-            <div style="padding:1rem 1.25rem;">
+            <div class="jd-day-body">
                 <div class="corr-modal-meta" data-jd-day-kind></div>
-                <div class="jd-day-topic" data-jd-day-topic style="margin-bottom:0.75rem;color:#33415c;"></div>
-                <div class="jd-day-stats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                <div class="jd-day-topic" data-jd-day-topic></div>
+                <div class="jd-day-stats">
                     <div class="jd-day-stat"><b data-jd-day-ie></b> <span>{% trans "iştirak (i/e)" context "registrar.journal" %}</span></div>
                     <div class="jd-day-stat"><b data-jd-day-qb></b> <span>{% trans "qayıb (q/b)" context "registrar.journal" %}</span></div>
                     <div class="jd-day-stat"><b data-jd-day-uq></b> <span>{% trans "üzrlü (üq)" context "registrar.journal" %}</span></div>
                     <div class="jd-day-stat"><b data-jd-day-scored></b> <span>{% trans "bal yazılıb" context "registrar.journal" %}</span></div>
-                    <div class="jd-day-stat" style="grid-column:1/-1;"><b data-jd-day-marked></b>/<b data-jd-day-total></b> <span>{% trans "qeyd edilib" context "registrar.journal" %}</span></div>
+                    <div class="jd-day-stat jd-day-stat--full"><b data-jd-day-marked></b>/<b data-jd-day-total></b> <span>{% trans "qeyd edilib" context "registrar.journal" %}</span></div>
                 </div>
-                <p style="margin-top:0.9rem;font-size:0.82rem;color:#94a3b8;">{% trans "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir." context "registrar.journal" %}</p>
+                <p class="jd-day-note">{% trans "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir." context "registrar.journal" %}</p>
             </div>
         </div>
     </div>

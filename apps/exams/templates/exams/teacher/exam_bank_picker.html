@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% blocktrans with title=exam.title %}Bankdan sual əlavə et — {{ title }}{% endblocktrans %}{% endblock %}
 
-{% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-width: 1040px; }
-</style>
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/exam_bank_picker.css' %}">
+{% endblock %}
 
+{% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara (exam_bank_picker.css) köçürüldü.{% endcomment %}
 <div class="container py-4 c3-1">
 
     <div class="d-flex justify-content-between align-items-start mb-3">

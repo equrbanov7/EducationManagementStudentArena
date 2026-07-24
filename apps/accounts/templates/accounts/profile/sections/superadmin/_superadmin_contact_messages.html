@@ -173,31 +173,6 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
             {% endif %}
         </div>
 
-        <script nonce="{{ request.csp_nonce }}">
-        (function () {
-            'use strict';
-            document.querySelectorAll('[data-contact-reply-from]').forEach(function (picker) {
-                var row = picker.closest('.contact-form-row');
-                var input = row ? row.querySelector('[data-contact-reply-from-input]') : null;
-                var label = picker.querySelector('[data-contact-reply-from-label]');
-                if (!input || !label) {
-                    return;
-                }
-                picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (option) {
-                    option.addEventListener('click', function () {
-                        input.value = option.getAttribute('data-value') || '';
-                        label.textContent = option.getAttribute('data-label') || option.textContent.trim();
-                        picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (item) {
-                            var isActive = item === option;
-                            item.classList.toggle('is-active', isActive);
-                            item.setAttribute('aria-selected', isActive ? 'true' : 'false');
-                        });
-                    });
-                });
-            });
-        })();
-        </script>
-
     {% elif trial_selected_request %}
         <div class="contact-msg-detail">
             <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
@@ -367,31 +342,6 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
             {% endif %}
         </div>
 
-        <script nonce="{{ request.csp_nonce }}">
-        (function () {
-            'use strict';
-            document.querySelectorAll('[data-contact-reply-from]').forEach(function (picker) {
-                var row = picker.closest('.contact-form-row');
-                var input = row ? row.querySelector('[data-contact-reply-from-input]') : null;
-                var label = picker.querySelector('[data-contact-reply-from-label]');
-                if (!input || !label) {
-                    return;
-                }
-                picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (option) {
-                    option.addEventListener('click', function () {
-                        input.value = option.getAttribute('data-value') || '';
-                        label.textContent = option.getAttribute('data-label') || option.textContent.trim();
-                        picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (item) {
-                            var isActive = item === option;
-                            item.classList.toggle('is-active', isActive);
-                            item.setAttribute('aria-selected', isActive ? 'true' : 'false');
-                        });
-                    });
-                });
-            });
-        })();
-        </script>
-
     {# ---------- List view ---------- #}
     {% else %}
         <div class="contact-msg-toolbar">
@@ -462,5 +412,7 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
         </div>
         {% endif %}
     {% endif %}
+
+    <script src="{% static 'accounts/js/profile/superadmin_contact_messages.js' %}"></script>
 </section>
 {% endif %}

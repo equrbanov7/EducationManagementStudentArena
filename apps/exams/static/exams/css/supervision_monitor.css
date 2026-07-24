@@ -1,3 +1,9 @@
+    /* ===== C3 micro utility classes (moved from inline <style> in supervision_monitor.html) ===== */
+    .c3-1 { flex:1;min-width:200px; }
+    .c3-2 { font-size:0.72rem; }
+    .c3-3 { white-space:nowrap;color:var(--sm-text-muted); }
+    .c3-4 { opacity:0.5;cursor:not-allowed; }
+
     /* ===== Design tokens (scoped to supervision monitor) ===== */
     .monitor-wrapper {
         --sm-bg: #f5f7fa;

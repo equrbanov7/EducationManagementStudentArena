@@ -51,7 +51,10 @@
                     {% trans "draft_answer_title" context "assignment.legacy.detail" %}
                 </h5>
                 
-                <form id="submitForm" method="post" action="{% url 'assignments:submit_assignment' assignment.id %}">
+                <form id="submitForm" method="post" action="{% url 'assignments:submit_assignment' assignment.id %}"
+                      data-i18n-submitting="{% trans 'Göndərilir...' %}"
+                      data-i18n-error-prefix="{% trans 'error_prefix' context 'assignment.legacy.detail' %}"
+                      data-i18n-generic-error="{% trans 'Xəta baş verdi. Zəhmət olmasa bir daha yoxlayın.' %}">
                     {% csrf_token %}
                     
                     <div class="mb-4">
@@ -158,47 +161,8 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-    const submitForm = document.getElementById('submitForm');
-    const submitBtn = submitForm ? submitForm.querySelector('button[type="submit"]') : null;
+{% endblock %}
 
-    if (submitForm) {
-        submitForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // UX improvement: Button loading state
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> {% trans "Göndərilir..." %}';
-            submitBtn.disabled = true;
-
-            const formData = new FormData(this);
-            
-            fetch("{% url 'assignments:submit_assignment' assignment.id %}", {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Success flash message UX can be added here, currently just reload
-                    location.reload();
-                } else {
-                    alert('{% trans "error_prefix" context "assignment.legacy.detail" %}: ' + JSON.stringify(data.errors));
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                alert("{% trans 'Xəta baş verdi. Zəhmət olmasa bir daha yoxlayın.' %}");
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            });
-        });
-    }
-});
-</script>
+{% block extraJs %}
+<script src="{% static 'assignment/js/detail.js' %}"></script>
 {% endblock %}

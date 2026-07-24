@@ -1,0 +1,47 @@
+/* Source: exams/student/exam_starting.html — stampede/retry splash while an exam start is throttled. */
+
+.exam-starting-wrap {
+    max-width: 520px;
+    margin: 12vh auto;
+    padding: 2rem;
+    text-align: center;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.exam-starting-spinner {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1.25rem;
+    border: 5px solid #dbe4ff;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: exam-starting-sp 0.9s linear infinite;
+}
+
+.exam-starting-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f2a5e;
+    margin: 0 0 0.5rem;
+}
+
+.exam-starting-text {
+    color: #5b6b8c;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 1.25rem;
+}
+
+.exam-starting-btn {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background: #2563eb;
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@keyframes exam-starting-sp {
+    to { transform: rotate(360deg); }
+}

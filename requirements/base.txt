@@ -86,7 +86,7 @@ django-csp==4.0
 # ═══════════════════════════════════════════════════════════════════════════
 python-docx==1.2.0
 lxml==6.1.0
-pypdf==6.13.3          # PDF mətn çıxarışı (imtahan suallarının PDF-dən import edilməsi) — 6.x: pip-audit CVE-lərini qapadır
+pypdf==6.14.2          # PDF mətn çıxarışı (imtahan suallarının PDF-dən import edilməsi) — 6.x: pip-audit CVE-lərini qapadır
 PyMuPDF==1.24.14       # PDF highlight (annotation) oxuması — mark olunmuş variantın düz cavab kimi tanınması
 
 # ═══════════════════════════════════════════════════════════════════════════

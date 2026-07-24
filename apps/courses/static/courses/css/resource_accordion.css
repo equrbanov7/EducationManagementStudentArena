@@ -1,0 +1,20 @@
+/* resource_accordion.css
+ * Source: apps/courses/templates/courses/partials/_resource_accordion.html (inline stil)
+ */
+.border-left-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+.c3-1 {
+    border-left: 4px solid #28a745;
+}

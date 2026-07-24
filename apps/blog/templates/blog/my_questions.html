@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}My Questions{% endblock %}
 
-{% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { max-width: 960px; }
-</style>
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'blog/css/my_questions.css' %}">
+{% endblock %}
 
+{% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-stil klasa köçürüldü (blog/css/my_questions.css).{% endcomment %}
 <div class="container py-4 c3-1">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
