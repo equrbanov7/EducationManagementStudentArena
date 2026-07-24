@@ -546,9 +546,15 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertContains(response, 'data-delete-topic-id="')
         self.assertContains(response, 'data-open-resource-modal-topic-id="')
         self.assertContains(response, 'data-delete-resource-id="')
-        self.assertContains(response, "shown.bs.modal")
+        # shown.bs.modal wiring now lives in the external topic-edit-modal script
+        # (CSP: no inline JS) rather than inline in the response — assert the
+        # script that wires the topic edit modal is present on the page.
+        self.assertContains(response, "courses/js/topic_edit_modal.js")
         self.assertContains(response, 'id="sidebar-members-count"')
-        self.assertContains(response, '.snav-item[data-key="members"] .snav-count')
+        # The '.snav-item[data-key="members"] .snav-count' selector now lives in
+        # the external member-accordion script (CSP: no inline JS) — assert that
+        # script is wired on the page instead of the literal selector text.
+        self.assertContains(response, "courses/js/member_accordion.js")
 
 
 class StudentUserQuerysetRoleSourceTests(TestCase):

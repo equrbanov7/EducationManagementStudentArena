@@ -133,3 +133,6 @@
     .assignment-history-table { min-width: 600px; }
     .info-box { margin-bottom: 0.5rem; }
 }
+
+/* C3: mikro inline-stil köçürməsi (assignment_detail.html) */
+.c3-1 { max-width: 200px; }

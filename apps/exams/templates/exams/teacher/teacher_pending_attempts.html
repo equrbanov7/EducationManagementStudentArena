@@ -92,8 +92,7 @@
                                 {% endif %}
                                 {% if data.attempt.supervision_status == "removed" %}
                                     <span class="badge-proctor-flag"
-                                          title="{% trans 'Bu cəhd imtahan nəzarəti tərəfindən pozuntuya görə dayandırılıb' %}"
-                                          style="display:inline-flex;align-items:center;gap:0.3rem;background:#fceaea;color:#a32d2d;border:1px solid #e24b4a;border-radius:12px;padding:0.15rem 0.6rem;font-size:0.78rem;font-weight:600;margin-left:0.35rem;">
+                                          title="{% trans 'Bu cəhd imtahan nəzarəti tərəfindən pozuntuya görə dayandırılıb' %}">
                                         <i class="fas fa-shield-alt"></i> {% trans 'Nəzarətçi atıb' %}
                                     </span>
                                 {% endif %}
@@ -142,55 +141,10 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
 
+{% block extraJs %}
 {% if pending_attempts %}
-<script nonce="{{ request.csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-    const tabs = document.querySelectorAll('.filter-tab');
-    const rows = document.querySelectorAll('#attemptsTableBody tr');
-    
-    // Tab filtering
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            const filter = this.dataset.filter;
-            
-            rows.forEach(row => {
-                if (filter === 'all') {
-                    row.style.display = '';
-                } else {
-                    row.style.display = row.dataset.type === filter ? '' : 'none';
-                }
-            });
-        });
-    });
-    
-    // ✅ Real-time countdown timer
-    rows.forEach(row => {
-        let secondsLeft = parseInt(row.dataset.secondsRemaining) || 0;
-        if (secondsLeft <= 0) return;
-        
-        const timerDisplay = row.querySelector('.timer-display');
-        
-        const updateTimer = () => {
-            if (secondsLeft <= 0) {
-                window.location.reload();  // Auto-refresh
-                return;
-            }
-            
-            const minutes = Math.floor(secondsLeft / 60);
-            const seconds = secondsLeft % 60;
-            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            secondsLeft--;
-        };
-        
-        updateTimer();
-        setInterval(updateTimer, 1000);
-    });
-});
-</script>
+    <script src="{% static 'exams/js/teacher_pending_attempts.js' %}"></script>
 {% endif %}
 {% endblock %}

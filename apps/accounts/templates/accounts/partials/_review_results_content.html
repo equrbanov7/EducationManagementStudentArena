@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 <div class="section-card pending-review-results-card">
     <div class="section-title">
         <i class="fas fa-table"></i>
@@ -139,45 +139,4 @@
     {% endif %}
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    function setupAutoFilterForm(form) {
-        if (!form || form.dataset.autoFilterBound === "1") {
-            return;
-        }
-        form.dataset.autoFilterBound = "1";
-
-        var debounceHandle = null;
-        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
-        var selects = form.querySelectorAll("select");
-
-        function submitForm() {
-            if (typeof form.requestSubmit === "function") {
-                form.requestSubmit();
-                return;
-            }
-            form.submit();
-        }
-
-        textFields.forEach(function (field) {
-            field.addEventListener("input", function () {
-                window.clearTimeout(debounceHandle);
-                debounceHandle = window.setTimeout(submitForm, 350);
-            });
-            field.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    window.clearTimeout(debounceHandle);
-                    submitForm();
-                }
-            });
-        });
-
-        selects.forEach(function (select) {
-            select.addEventListener("change", submitForm);
-        });
-    }
-
-    document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
-})();
-</script>
+<script src="{% static 'accounts/js/profile_auto_filter_form.js' %}"></script>

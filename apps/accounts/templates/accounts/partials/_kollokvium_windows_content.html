@@ -1,81 +1,11 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri (kabinet).
-Full-page-nav bölmə (exam-rooms pattern-i) → inline <style>/<script> CSP-nonce
-ilə təhlükəsizdir. Formlar accounts:kollokvium_windows-a POST edir, action +
+Full-page-nav bölmə (exam-rooms pattern-i) → stil/skript xarici fayllara
+köçürülüb (CSP: no inline). Formlar accounts:kollokvium_windows-a POST edir, action +
 next ilə; view redirect edir. Səhifə açıq-mənbəli (light-only) — --ems-* token.
 Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
 {% endcomment %}
-<style nonce="{{ request.csp_nonce }}">
-  .kw { max-width: 1040px; }
-  .kw-sub { color: var(--ems-neutral-500); font-size: .82rem; margin: .3rem 0 1rem; }
-  .kw-sub--lead { margin-top: 0; }
-  .kw-toolbar { display: flex; flex-wrap: wrap; gap: .9rem; align-items: flex-end; margin-bottom: 1.2rem; }
-  .kw-toolbar form { margin: 0; }
-  .kw-field label { display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: var(--ems-neutral-500); margin-bottom: .3rem; }
-  .kw-field > input { padding: .5rem .7rem; border: 1px solid var(--ems-neutral-300); border-radius: 10px; background: #fff; font-size: .85rem; width: 100%; }
-  .kw-toolbar .kw-field { min-width: 190px; }
-
-  /* Kompakt bootstrap-select (global toggle böyükdür — kartlara sığdırırıq) */
-  .kw .bootstrap-single-select { width: 100%; }
-  .kw .bootstrap-single-select__toggle { min-height: 2.6rem; padding: .5rem .75rem; border-radius: 10px; font-size: .85rem; font-weight: 600; background: #fff; border-color: var(--ems-neutral-300); }
-  .kw .bootstrap-single-select__menu { font-size: .85rem; }
-
-  .kw-btn { border: 1px solid transparent; border-radius: 10px; padding: .5rem .9rem; font-weight: 700; font-size: .82rem; cursor: pointer; display: inline-flex; align-items: center; gap: .35rem; }
-  .kw-btn--primary { background: var(--ems-primary-600); color: #fff; }
-  .kw-btn--ghost { background: #fff; color: var(--ems-neutral-700); border-color: var(--ems-neutral-300); }
-  .kw-btn--danger { background: #fee2e2; color: #b91c1c; }
-  .kw-btn--on { background: #dcfce7; color: #15803d; }
-  .kw-btn--off { background: #fef3c7; color: #a16207; }
-  .kw-btn:disabled { opacity: .55; cursor: not-allowed; }
-
-  .kw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
-  .kw-card { border: 1px solid var(--ems-neutral-200); border-radius: 16px; background: #fff; padding: 1rem 1.1rem; box-shadow: 0 6px 22px rgba(18,39,78,.05); display: flex; flex-direction: column; }
-  .kw-card__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .7rem; }
-  .kw-card__k { font-size: 1.05rem; font-weight: 800; color: var(--ems-neutral-900); }
-  .kw-chip { font-size: .68rem; font-weight: 800; padding: .18rem .6rem; border-radius: 999px; display: inline-flex; align-items: center; gap: .25rem; }
-  .kw-chip--open { background: #dcfce7; color: #15803d; }
-  .kw-chip--closed { background: #fee2e2; color: #b91c1c; }
-  .kw-chip--scheduled { background: #dbeafe; color: #1d4ed8; }
-  .kw-chip--inactive { background: #f1f5f9; color: #64748b; }
-  .kw-chip--not-set { background: #f8fafc; color: #94a3b8; border: 1px dashed #cbd5e1; }
-
-  .kw-dates { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-bottom: .55rem; }
-  .kw-dates .kw-field > input { min-width: 0; }
-  .kw-cardbtns { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; margin-top: .2rem; }
-
-  .kw-grants { margin-top: .85rem; border-top: 1px dashed var(--ems-neutral-200); padding-top: .75rem; }
-  .kw-grants__title { font-size: .7rem; font-weight: 800; text-transform: uppercase; color: var(--ems-neutral-500); margin-bottom: .45rem; }
-  .kw-grant { display: flex; align-items: center; justify-content: space-between; gap: .5rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: .4rem .6rem; margin-bottom: .4rem; font-size: .8rem; }
-  .kw-grant form { margin: 0; }
-  .kw-grant__main b { color: #1d4ed8; }
-  .kw-grant__date { display: inline-flex; align-items: center; gap: .3rem; margin-left: .1rem; color: #0f766e; font-weight: 700; }
-  .kw-grant__date i { font-size: .72rem; }
-  .kw-grant__actions { display: inline-flex; align-items: center; gap: .3rem; flex-shrink: 0; }
-  .kw-grant__actions form { display: inline-flex; }
-  .kw-btn--icon { padding: .3rem .48rem; }
-  .kw-grantbtn { margin-top: .5rem; }
-
-  .kw-empty { padding: 2rem; text-align: center; color: var(--ems-neutral-500); background: #f8fafc; border-radius: 14px; }
-  .kw-locked { display: flex; align-items: center; gap: .5rem; padding: .8rem 1rem; background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; border-radius: 10px; font-size: .82rem; font-weight: 600; }
-  .kw-pastbanner { display: flex; align-items: center; gap: .55rem; padding: .85rem 1.1rem; margin-bottom: 1rem; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 12px; font-size: .85rem; font-weight: 700; }
-  .kw-pastbanner i { color: #64748b; }
-
-  /* ── Modal (təsdiq + əlavə gün) ── */
-  .kw-modal { position: fixed; inset: 0; z-index: 1200; display: none; align-items: center; justify-content: center; padding: 1rem; }
-  .kw-modal.is-open { display: flex; }
-  .kw-modal__backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.5); }
-  .kw-modal__box { position: relative; background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.28); width: 100%; max-width: 440px; padding: 1.3rem 1.4rem; }
-  .kw-modal__title { font-size: 1.05rem; font-weight: 800; color: var(--ems-neutral-900); margin: 0 0 .5rem; display: flex; align-items: center; gap: .5rem; }
-  .kw-modal__title i { color: var(--ems-primary-600); }
-  .kw-modal__body { font-size: .86rem; color: var(--ems-neutral-700); line-height: 1.5; }
-  .kw-modal__info { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: .6rem .75rem; margin: .7rem 0; font-size: .8rem; color: #1e3a8a; }
-  .kw-modal__note { display: flex; gap: .45rem; align-items: flex-start; background: #fef9c3; border: 1px solid #fde68a; border-radius: 10px; padding: .55rem .7rem; margin: .6rem 0 0; font-size: .78rem; color: #854d0e; }
-  .kw-modal__preview { margin-top: .7rem; font-size: .9rem; font-weight: 700; color: #0f766e; display: flex; align-items: center; gap: .4rem; }
-  .kw-modal__field { margin-top: .7rem; }
-  .kw-modal__field label { display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: var(--ems-neutral-500); margin-bottom: .3rem; }
-  .kw-modal__field input[type=number] { padding: .5rem .7rem; border: 1px solid var(--ems-neutral-300); border-radius: 10px; font-size: .9rem; width: 100%; }
-  .kw-modal__actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.1rem; }
-</style>
+<link rel="stylesheet" href="{% static 'accounts/css/kollokvium_windows.css' %}">
 
 {% if s.is_head %}
   {{ s.faculties|json_script:"kw-faculties-data" }}
@@ -255,7 +185,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
           {% endif %}
         </div>
         {% empty %}
-        <p class="kw-sub" style="margin:0">{% trans "Əlavə gün verilməyib." context "registrar.kollokvium_window" %}</p>
+        <p class="kw-sub kw-sub--m0">{% trans "Əlavə gün verilməyib." context "registrar.kollokvium_window" %}</p>
         {% endfor %}
 
         {% if s.is_head and not s.period_is_past %}
@@ -340,222 +270,14 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
 </div>
 {% endif %}
 
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-  // ── bootstrap-select (bu bölmə full-page render olunur; açıq re-init) ──
-  try { if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.init(document); } catch (e) {}
-
-  // Alət panelindəki seçimlər dəyişəndə avtomatik submit.
-  document.querySelectorAll("[data-autosubmit]").forEach(function (sel) {
-    sel.addEventListener("change", function () { if (sel.form) sel.form.submit(); });
-  });
-
-  function fmtDate(d) {
-    var dd = String(d.getDate()).padStart(2, "0");
-    var mm = String(d.getMonth() + 1).padStart(2, "0");
-    return dd + "." + mm + "." + d.getFullYear();
-  }
-  function addDays(iso, days) {
-    if (!iso) return null;
-    var parts = iso.split("-");
-    if (parts.length !== 3) return null;
-    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    d.setDate(d.getDate() + (Number(days) || 0));
-    return d;
-  }
-
-  // ── Ümumi təsdiq modalı ──
-  var confirmModal = document.getElementById("kw-confirm-modal");
-  var confirmTitle = document.getElementById("kw-confirm-title");
-  var confirmBody = document.getElementById("kw-confirm-body");
-  var confirmOk = document.getElementById("kw-confirm-ok");
-  var pendingForm = null;
-
-  function openModal(m) { if (m) { m.classList.add("is-open"); m.setAttribute("aria-hidden", "false"); } }
-  function closeModal(m) { if (m) { m.classList.remove("is-open"); m.setAttribute("aria-hidden", "true"); } }
-  function closeAll() { document.querySelectorAll(".kw-modal.is-open").forEach(closeModal); pendingForm = null; }
-
-  document.querySelectorAll(".js-kw-close").forEach(function (el) {
-    el.addEventListener("click", closeAll);
-  });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(); });
-
-  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      pendingForm = form;
-      confirmTitle.textContent = form.getAttribute("data-confirm-title") || "{% trans 'Təsdiq' context 'registrar.kollokvium_window' %}";
-      var body = form.getAttribute("data-confirm-body") || "";
-      if (form.getAttribute("data-confirm-kind") === "save") {
-        var opens = form.querySelector("input[name=opens_on]");
-        var closes = form.querySelector("input[name=closes_on]");
-        var kl = form.getAttribute("data-confirm-klabel") || "";
-        var od = opens && opens.value ? fmtDate(addDays(opens.value, 0)) : "—";
-        var cd = closes && closes.value ? fmtDate(addDays(closes.value, 0)) : "—";
-        body = "{% trans 'Bu tarixləri təsdiqləyirsiniz?' context 'registrar.kollokvium_window' %}<br><br>" +
-               "<b>" + kl + "</b>: " + od + " – " + cd +
-               "<div class='kw-modal__note' style='margin-top:.7rem'><i class='fas fa-circle-info'></i> <span>{% trans 'Yadda saxladıqdan sonra tarixləri dəyişə bilərsiniz; müəllimlərə son tarixi uzatmaq üçün əlavə gün verin.' context 'registrar.kollokvium_window' %}</span></div>";
-      }
-      confirmBody.innerHTML = body;
-      confirmOk.className = "kw-btn " + (form.getAttribute("data-confirm-variant") === "danger" ? "kw-btn--danger" : "kw-btn--primary");
-      openModal(confirmModal);
-    });
-  });
-
-  confirmOk.addEventListener("click", function () {
-    if (pendingForm) {
-      var f = pendingForm;
-      pendingForm = null;
-      closeAll();
-      f.submit(); // native submit → data-confirm listener-i işə düşmür (loop yox)
-    }
-  });
-
-  // ── Əlavə gün modalı ──
-  var grantModal = document.getElementById("kw-grant-modal");
-  if (grantModal) {
-    var grantForm = document.getElementById("kw-grant-form");
-    var grantTitle = document.getElementById("kw-grant-title");
-    var grantWindowId = document.getElementById("kw-grant-window-id");
-    var grantScope = document.getElementById("kw-grant-scope");
-    var grantUnitWrap = document.getElementById("kw-grant-unit-wrap");
-    var grantUnit = document.getElementById("kw-grant-unit");
-    var grantUnitLabel = document.getElementById("kw-grant-unit-label");
-    var grantDays = document.getElementById("kw-grant-days");
-    var grantPreview = document.getElementById("kw-grant-preview");
-    var grantAction = document.getElementById("kw-grant-action");
-    var grantGrantId = document.getElementById("kw-grant-grant-id");
-    var grantSubmit = document.getElementById("kw-grant-submit");
-    var currentCloses = null;
-    var ADD_TITLE = "{% trans 'Əlavə gün ver' context 'registrar.kollokvium_window' %}";
-    var EDIT_TITLE = "{% trans 'Əlavə günü redaktə et' context 'registrar.kollokvium_window' %}";
-    var ADD_SUBMIT = '<i class="fas fa-check"></i> {% trans "Təsdiqlə və ver" context "registrar.kollokvium_window" %}';
-    var EDIT_SUBMIT = '<i class="fas fa-check"></i> {% trans "Dəyişikliyi yadda saxla" context "registrar.kollokvium_window" %}';
-
-    function readJson(id) {
-      var node = document.getElementById(id);
-      if (!node) return [];
-      try { return JSON.parse(node.textContent) || []; } catch (e) { return []; }
-    }
-    var faculties = readJson("kw-faculties-data");
-    var departments = readJson("kw-departments-data");
-
-    function fillUnit(items) {
-      grantUnit.innerHTML = "";
-      var ph = document.createElement("option");
-      ph.value = ""; ph.textContent = "—";
-      grantUnit.appendChild(ph);
-      items.forEach(function (it) {
-        var o = document.createElement("option");
-        o.value = it.id; o.textContent = it.name;
-        grantUnit.appendChild(o);
-      });
-      grantUnit.value = "";
-      try { if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(grantUnit); } catch (e) {}
-    }
-
-    function syncScope() {
-      var v = grantScope.value;
-      if (v === "organization") {
-        grantUnitWrap.style.display = "none";
-      } else {
-        grantUnitWrap.style.display = "";
-        if (v === "faculty") {
-          grantUnitLabel.textContent = "{% trans 'Fakültə' context 'registrar.kollokvium_window' %}";
-          fillUnit(faculties);
-        } else {
-          grantUnitLabel.textContent = "{% trans 'Kafedra' context 'registrar.kollokvium_window' %}";
-          fillUnit(departments);
-        }
-      }
-    }
-
-    function daysValue() {
-      // Tam ədədə çevir (1–30). parseInt "2.5"→2, "1.0"→1 — rəqəmləri
-      // BİRLƏŞDİRMİR (əvvəlki replace(/[^0-9]/) "2.5"→25 səhvi düzəldilib).
-      var n = parseInt(grantDays.value, 10);
-      return Math.min(30, Math.max(1, isNaN(n) ? 1 : n));
-    }
-    function syncPreview() {
-      var d = addDays(currentCloses, daysValue());
-      grantPreview.textContent = d ? fmtDate(d) : "—";
-    }
-
-    grantScope.addEventListener("change", function () { syncScope(); });
-    // Mənfi/onluq gün QADAĞANDIR: klaviatura + yapışdırma + blur — hər səviyyədə.
-    grantDays.addEventListener("keydown", function (e) {
-      if (["-", "+", "e", "E", ".", ","].indexOf(e.key) !== -1) e.preventDefault();
-    });
-    grantDays.addEventListener("input", function () {
-      // Yapışdırma "2.5"/"-3" üçün: tam ədədə kəs (parseInt), rəqəmləri birləşdirmə.
-      var n = parseInt(grantDays.value, 10);
-      var clean = isNaN(n) ? "" : String(Math.abs(n)); // boş yazmağa icazə (yenidən yığmaq)
-      if (clean !== grantDays.value) grantDays.value = clean;
-      syncPreview();
-    });
-    grantDays.addEventListener("change", function () {
-      grantDays.value = daysValue(); // blur-da 1–30 aralığına gətir
-      syncPreview();
-    });
-
-    function openGrantModal(opts) {
-      var isEdit = opts.mode === "edit";
-      grantAction.value = isEdit ? "edit_extra_days" : "grant_extra_days";
-      grantGrantId.value = opts.grantId || "";
-      grantWindowId.value = opts.windowId || "";
-      currentCloses = opts.closes || null;
-      var kl = opts.kLabel || "";
-      grantTitle.textContent = (isEdit ? EDIT_TITLE : ADD_TITLE) + (kl ? " — " + kl : "");
-      grantSubmit.innerHTML = isEdit ? EDIT_SUBMIT : ADD_SUBMIT;
-      // Əhatə seçimi + bölmə options-larını qur (scope-a görə).
-      grantScope.value = opts.scope || "organization";
-      try { if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.sync(grantScope); } catch (e) {}
-      syncScope();
-      // Redaktədə mövcud bölməni öncədən seç (fillUnit options-ları qurdu).
-      if (isEdit && opts.scope && opts.scope !== "organization" && opts.orgUnitId) {
-        // Bölmə deaktiv edilibsə aktiv siyahıda yoxdur — sintetik option əlavə et
-        // ki, öncədən dolma boşalmasın (server də bu bölməni qəbul edir).
-        if (!grantUnit.querySelector('option[value="' + opts.orgUnitId + '"]')) {
-          var synth = document.createElement("option");
-          synth.value = opts.orgUnitId;
-          synth.textContent = opts.orgUnitName || opts.orgUnitId;
-          grantUnit.appendChild(synth);
-          try { if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(grantUnit); } catch (e) {}
-        }
-        grantUnit.value = opts.orgUnitId;
-        try { if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.sync(grantUnit); } catch (e) {}
-      }
-      grantDays.value = opts.days != null && opts.days !== "" ? String(opts.days) : "2";
-      syncPreview();
-      openModal(grantModal);
-    }
-
-    document.querySelectorAll(".js-kw-grantopen").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        openGrantModal({
-          mode: "add",
-          windowId: btn.getAttribute("data-window-id"),
-          closes: btn.getAttribute("data-closes"),
-          kLabel: btn.getAttribute("data-k-label"),
-        });
-      });
-    });
-
-    document.querySelectorAll(".js-kw-grantedit").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        openGrantModal({
-          mode: "edit",
-          grantId: btn.getAttribute("data-grant-id"),
-          windowId: btn.getAttribute("data-window-id"),
-          closes: btn.getAttribute("data-closes"),
-          kLabel: btn.getAttribute("data-k-label"),
-          scope: btn.getAttribute("data-scope"),
-          orgUnitId: btn.getAttribute("data-org-unit-id"),
-          orgUnitName: btn.getAttribute("data-org-unit-name"),
-          days: btn.getAttribute("data-extra-days"),
-        });
-      });
-    });
-  }
-})();
-</script>
+<div id="kwI18n" class="d-none"
+     data-confirm-fallback="{% trans 'Təsdiq' context 'registrar.kollokvium_window' %}"
+     data-confirm-dates="{% trans 'Bu tarixləri təsdiqləyirsiniz?' context 'registrar.kollokvium_window' %}"
+     data-save-note="{% trans 'Yadda saxladıqdan sonra tarixləri dəyişə bilərsiniz; müəllimlərə son tarixi uzatmaq üçün əlavə gün verin.' context 'registrar.kollokvium_window' %}"
+     data-add-title="{% trans 'Əlavə gün ver' context 'registrar.kollokvium_window' %}"
+     data-edit-title="{% trans 'Əlavə günü redaktə et' context 'registrar.kollokvium_window' %}"
+     data-add-submit="{% trans 'Təsdiqlə və ver' context 'registrar.kollokvium_window' %}"
+     data-edit-submit="{% trans 'Dəyişikliyi yadda saxla' context 'registrar.kollokvium_window' %}"
+     data-faculty="{% trans 'Fakültə' context 'registrar.kollokvium_window' %}"
+     data-department="{% trans 'Kafedra' context 'registrar.kollokvium_window' %}"></div>
+<script src="{% static 'accounts/js/kollokvium_windows.js' %}"></script>

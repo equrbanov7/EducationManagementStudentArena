@@ -311,22 +311,6 @@
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
 <script src="{% static 'js/review_countdown.js' %}"></script>
-<script nonce="{{ request.csp_nonce }}">
-{% if can_delete_submissions %}
-window.initResultsBulkActions({
-    checkboxSelector: '.js-lab-submission-checkbox',
-    selectedCountSelector: '#selectedLabCount',
-    selectAllSelector: '#selectAllLabsBtn',
-    clearSelector: '#clearLabsBtn',
-    deleteSelectedSelector: '#deleteSelectedLabsBtn',
-    singleDeleteSelector: '.js-single-delete-lab-submission',
-    deleteFormSelector: '#deleteLabsForm',
-    deleteInputsSelector: '#deleteLabsInputs',
-    confirmButtonSelector: '#confirmDeleteLabsBtn',
-    confirmModalSelector: '#deleteLabsConfirmModal',
-    inputName: 'submission_ids',
-    singleDeleteDataAttribute: 'submissionId'
-});
-{% endif %}
-</script>
+<div id="labSubmissionsConfig" hidden data-can-delete="{% if can_delete_submissions %}1{% else %}0{% endif %}"></div>
+<script src="{% static 'labs/js/lab_submissions_template.js' %}"></script>
 {% endblock %}

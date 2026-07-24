@@ -2,6 +2,18 @@
 {% load custom_filters %}
 {% load i18n %}
 
+<div id="memberFormModalConfig" hidden
+     data-delete-member-url="{% url 'courses:delete_member' course.id 0 %}"
+     data-i18n-min-one-student="{% trans 'msg_min_one_student' context 'courses.partial.member_modal' %}"
+     data-i18n-min-one-group="{% trans 'msg_min_one_group' context 'courses.partial.member_modal' %}"
+     data-i18n-adding="{% trans 'msg_adding' context 'courses.partial.member_modal' %}"
+     data-i18n-error-prefix="{% trans 'msg_error_prefix' context 'courses.partial.member_modal' %}"
+     data-i18n-unknown-error="{% trans 'msg_unknown_error' context 'courses.partial.member_modal' %}"
+     data-i18n-server-error="{% trans 'msg_server_error' context 'courses.partial.member_modal' %}"
+     data-i18n-delete-member-confirm-suffix="{% trans 'msg_delete_member_confirm_suffix' context 'courses.partial.member_modal' %}"
+     data-i18n-delete-failed-prefix="{% trans 'msg_delete_failed_prefix' context 'courses.partial.member_modal' %}"
+     data-i18n-error="{% trans 'msg_error' context 'courses.partial.member_modal' %}"></div>
+
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -9,32 +21,32 @@
                 <h5 class="modal-title">
                     <i class="fas fa-user-plus"></i> {% trans "student_modal_title" context "courses.partial.member_modal" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" 
+                <button type="button" class="btn-close btn-close-white"
                         data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
-            <form id="addStudentForm" method="post" 
+
+            <form id="addStudentForm" method="post"
                   action="{% url 'courses:add_member' course.id %}">
                 {% csrf_token %}
-                
+
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="groupNameInput" class="form-label">
                             <i class="fas fa-users"></i> {% trans "field_group_name_optional" context "courses.partial.member_modal" %}
                         </label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="groupNameInput" 
+                        <input type="text"
+                               class="form-control"
+                               id="groupNameInput"
                                name="group_name"
                                placeholder="{% trans 'placeholder_group_name' context 'courses.partial.member_modal' %}">
                     </div>
 
                     <div class="custom-selector-wrapper">
                         <label class="form-label fw-bold mb-2">{% trans "label_students" context "courses.partial.member_modal" %}</label>
-                        
+
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="student_search_input" class="custom-search-input" 
+                            <input type="text" id="student_search_input" class="custom-search-input"
                                    placeholder="{% trans 'placeholder_search_students' context 'courses.partial.member_modal' %}">
                         </div>
 
@@ -42,13 +54,13 @@
                             {% if all_users %}
                                 {% for user in all_users %}
                                 <div class="list-item-row" data-search="{{ user.username|lower }} {{ user.get_full_name|lower }}">
-                                    <input type="checkbox" 
-                                           id="user_{{ user.id }}" 
-                                           name="user_ids" 
-                                           value="{{ user.id }}" 
+                                    <input type="checkbox"
+                                           id="user_{{ user.id }}"
+                                           name="user_ids"
+                                           value="{{ user.id }}"
                                            class="custom-item-checkbox">
                                     <label for="user_{{ user.id }}" class="custom-item-label">
-                                        {{ user.username }} 
+                                        {{ user.username }}
                                         {% if user.get_full_name %}
                                             <span class="text-muted">({{ user.get_full_name }})</span>
                                         {% endif %}
@@ -64,8 +76,8 @@
                             {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="student_counter">0</span>
                         </div>
                     </div>
-                    
-                    <div id="studentLoadingIndicator" class="text-center mt-3" style="display: none;">
+
+                    <div id="studentLoadingIndicator" class="text-center mt-3 d-none">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">{% trans "loading" context "courses.partial.member_modal" %}</span>
                         </div>
@@ -93,22 +105,22 @@
                 <h5 class="modal-title">
                     <i class="fas fa-users-cog"></i> {% trans "group_modal_title" context "courses.partial.member_modal" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" 
+                <button type="button" class="btn-close btn-close-white"
                         data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
-            <form id="addGroupForm" method="post" 
+
+            <form id="addGroupForm" method="post"
                   action="{% url 'courses:add_members_bulk' course.id %}">
                 {% csrf_token %}
-                
+
                 <div class="modal-body">
-                    
+
                     <div class="custom-selector-wrapper">
                         <label class="form-label fw-bold mb-2">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
-                        
+
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="group_search_input" class="custom-search-input" 
+                            <input type="text" id="group_search_input" class="custom-search-input"
                                    placeholder="{% trans 'placeholder_search_groups' context 'courses.partial.member_modal' %}">
                         </div>
 
@@ -116,10 +128,10 @@
                             {% if all_groups %}
                                 {% for group in all_groups %}
                                 <div class="list-item-row" data-search="{{ group.name|lower }}">
-                                    <input type="checkbox" 
-                                           id="group_{{ group.id }}" 
-                                           name="group_ids" 
-                                           value="{{ group.id }}" 
+                                    <input type="checkbox"
+                                           id="group_{{ group.id }}"
+                                           name="group_ids"
+                                           value="{{ group.id }}"
                                            class="custom-item-checkbox">
                                     <label for="group_{{ group.id }}" class="custom-item-label">
                                         {{ group.name }}
@@ -140,7 +152,7 @@
                         {% trans "groups_info_text" context "courses.partial.member_modal" %}
                     </div>
 
-                    <div id="groupLoadingIndicator" class="text-center mt-3" style="display: none;">
+                    <div id="groupLoadingIndicator" class="text-center mt-3 d-none">
                         <div class="spinner-border text-secondary" role="status">
                             <span class="visually-hidden">{% trans "loading" context "courses.partial.member_modal" %}</span>
                         </div>
@@ -161,210 +173,4 @@
     </div>
 </div>
 
-<script nonce="{{ request.csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', function() {
-        const MSG_MIN_ONE_STUDENT = "{% trans 'msg_min_one_student' context 'courses.partial.member_modal' %}";
-        const MSG_MIN_ONE_GROUP = "{% trans 'msg_min_one_group' context 'courses.partial.member_modal' %}";
-        const MSG_ADDING = "{% trans 'msg_adding' context 'courses.partial.member_modal' %}";
-        const MSG_ERROR_PREFIX = "{% trans 'msg_error_prefix' context 'courses.partial.member_modal' %}";
-        const MSG_UNKNOWN_ERROR = "{% trans 'msg_unknown_error' context 'courses.partial.member_modal' %}";
-        const MSG_SERVER_ERROR = "{% trans 'msg_server_error' context 'courses.partial.member_modal' %}";
-        const MSG_DELETE_MEMBER_CONFIRM_SUFFIX = "{% trans 'msg_delete_member_confirm_suffix' context 'courses.partial.member_modal' %}";
-        const MSG_DELETE_FAILED_PREFIX = "{% trans 'msg_delete_failed_prefix' context 'courses.partial.member_modal' %}";
-        const MSG_ERROR = "{% trans 'msg_error' context 'courses.partial.member_modal' %}";
-    
-        // ==========================================================
-        // 1. SELECTOR LOGIC (Axtarış, Seçim və Sayğac)
-        // ==========================================================
-        function initSelectorLogic(containerId, searchInputId, counterId) {
-            const container = document.getElementById(containerId);
-            const searchInput = document.getElementById(searchInputId);
-            const counter = document.getElementById(counterId);
-          
-            if (!container) return;
-          
-            function updateCount() {
-              const count = container.querySelectorAll('input[type="checkbox"]:checked').length;
-              if (counter) counter.innerText = count;
-            }
-          
-            // Live search
-            if (searchInput) {
-              searchInput.addEventListener('keyup', function (e) {
-                const term = e.target.value.toLowerCase();
-                const rows = container.querySelectorAll('.list-item-row');
-          
-                rows.forEach(row => {
-                  const searchData = row.getAttribute('data-search') || "";
-                  row.style.display = searchData.includes(term) ? 'flex' : 'none';
-                });
-              });
-            }
-          
-            // Row click -> toggle (amma checkbox/label daxilində klikdirsə qarışma!)
-            container.addEventListener('click', function (e) {
-              const row = e.target.closest('.list-item-row');
-              if (!row) return;
-          
-              // checkbox-un özünə klik -> browser özü toggle edir
-              if (e.target.closest('input[type="checkbox"]')) return;
-          
-              // label və label-in içi -> browser özü toggle edir, biz qarışmırıq
-              if (e.target.closest('label')) {
-                // toggle sonrası sayğac yenilənsin
-                setTimeout(updateCount, 0);
-                return;
-              }
-          
-              // row-un boş yerinə klik -> biz toggle edirik
-              const checkbox = row.querySelector('input[type="checkbox"]');
-              if (checkbox) {
-                checkbox.checked = !checkbox.checked;
-                updateCount();
-              }
-            });
-          
-            // checkbox change -> sayğac yenilə
-            container.addEventListener('change', function (e) {
-              if (e.target.type === 'checkbox') updateCount();
-            });
-          
-            // init
-            updateCount();
-          }
-          
-    
-        // Funksiyaları başlat
-        initSelectorLogic('student_list_container', 'student_search_input', 'student_counter');
-        initSelectorLogic('group_list_container', 'group_search_input', 'group_counter');
-    
-    
-        // ==========================================================
-        // 2. TƏLƏBƏ ƏLAVƏ ET (AJAX + RELOAD)
-        // ==========================================================
-        const studentForm = document.getElementById('addStudentForm');
-        
-        if (studentForm) {
-            studentForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const btn = this.querySelector('button[type="submit"]');
-                const formData = new FormData(this);
-                const userIds = formData.getAll('user_ids'); // Bütün seçimləri al
-    
-                if (userIds.length === 0) {
-                    alert(MSG_MIN_ONE_STUDENT);
-                    return;
-                }
-    
-                // Düyməni deaktiv et
-                const originalText = btn.innerText;
-                btn.innerText = MSG_ADDING;
-                btn.disabled = true;
-    
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Uğurludursa, SƏHİFƏNİ YENİLƏ (Bu vacibdir!)
-                        location.reload(); 
-                    } else {
-                        alert(MSG_ERROR_PREFIX + (data.error || MSG_UNKNOWN_ERROR));
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert(MSG_SERVER_ERROR);
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                });
-            });
-        }
-    
-        // ==========================================================
-        // 3. QRUP ƏLAVƏ ET (AJAX + RELOAD)
-        // ==========================================================
-        const groupForm = document.getElementById('addGroupForm');
-        
-        if (groupForm) {
-            groupForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const btn = this.querySelector('button[type="submit"]');
-                const formData = new FormData(this);
-                const groupIds = formData.getAll('group_ids');
-    
-                if (groupIds.length === 0) {
-                    alert(MSG_MIN_ONE_GROUP);
-                    return;
-                }
-    
-                const originalText = btn.innerText;
-                btn.innerText = MSG_ADDING;
-                btn.disabled = true;
-    
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Səhifəni yenilə
-                    } else {
-                        alert(MSG_ERROR_PREFIX + (data.error || MSG_UNKNOWN_ERROR));
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                });
-            });
-        }
-    
-        // ==========================================================
-        // 4. SİLMƏ FUNKSİYASI (DELETE MEMBER)
-        // ==========================================================
-        // Bu funksiyanı qlobal edirik ki, data-attribute event binder onu çağıra bilsin.
-        window.deleteMember = function(memberId, name) {
-            if(!confirm(name + MSG_DELETE_MEMBER_CONFIRM_SUFFIX)) return;
-    
-            // CSRF Tokeni tap
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
-            // URL-i dinamik düzəlt
-            const url = "{% url 'courses:delete_member' course.id 0 %}".replace('0', memberId);
-    
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // VACİB: Silinəndən sonra səhifəni yeniləyirik.
-                    // Beləliklə, silinən tələbə avtomatik olaraq "Tələbə Əlavə Et" modalına düşəcək.
-                    location.reload();
-                } else {
-                    alert(MSG_DELETE_FAILED_PREFIX + (data.error || MSG_ERROR));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(MSG_SERVER_ERROR);
-            });
-        };
-    });
-</script>
+<script src="{% static 'courses/js/_member_form_modal.js' %}"></script>

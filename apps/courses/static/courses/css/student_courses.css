@@ -1,0 +1,20 @@
+/* courses/css/student_courses.css
+ * Source: courses/student_courses.html (extracted inline <style>)
+ */
+.course-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+.course-cover {
+    position: relative;
+    overflow: hidden;
+}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+.c3-1 { height: 150px; background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%); }
+.c3-2 { object-fit: cover; }

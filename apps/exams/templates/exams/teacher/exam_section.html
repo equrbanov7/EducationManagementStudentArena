@@ -1,9 +1,6 @@
-{% load i18n %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { font-size: 2rem; color: #ccc; }
-  .c3-2 { margin-top:.4rem;color:#b91c1c;font-size:.84rem;font-weight:600; }
-</style>
+{% load i18n static %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
+<link rel="stylesheet" href="{% static 'exams/css/exam_section.css' %}">
 
 <div class="accordion-item">
     <h2 class="accordion-header" id="examHeading">

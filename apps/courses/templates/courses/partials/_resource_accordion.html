@@ -1,7 +1,13 @@
 {% load i18n %}
+{% load static %}
 
 <!-- ACCORDION 5: RESURSLAR (Resources) -->
 <!-- courses/templates/courses/partials/_resource_accordion.html -->
+
+<link rel="stylesheet" href="{% static 'courses/css/resource_accordion.css' %}">
+
+<div id="resourceAccordionConfig" hidden
+     data-i18n-confirm-delete-resource="{% trans 'confirm_delete_resource' context 'courses.partial.resource_accordion' %}"></div>
 
 <div class="accordion-item">
     <h2 class="accordion-header">
@@ -109,38 +115,4 @@
 </div>
 
 <!-- Delete Resource Script -->
-<script nonce="{{ request.csp_nonce }}">
-function deleteResource(courseId, resourceId) {
-    if (confirm("{% trans 'confirm_delete_resource' context 'courses.partial.resource_accordion' %}")) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/courses/${courseId}/resource/${resourceId}/delete/`;
-        
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfToken) {
-            form.appendChild(csrfToken.cloneNode(true));
-        }
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-</script>
-
-<style nonce="{{ request.csp_nonce }}">
-    .border-left-success {
-        border-left: 4px solid #28a745 !important;
-    }
-    
-    .card {
-        transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
-
-/* C3 (2026-07-03): mikro inline-style köçürmələri */
-  .c3-1 { border-left: 4px solid #28a745; }
-</style>
+<script src="{% static 'courses/js/resource_accordion.js' %}"></script>

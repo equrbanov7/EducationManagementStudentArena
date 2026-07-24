@@ -36,7 +36,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <div class="bootstrap-single-select">
                         <select name="lesson_topic" class="bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                            {% for t in topic_choices_meta %}<option value="{{ t.title }}"{% if t.covered %} class="jd-topic-covered" style="color:#15803d"{% endif %}>{{ t.title }}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
+                            {% for t in topic_choices_meta %}<option value="{{ t.title }}"{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
                         </select>
                     </div>
                     {% else %}

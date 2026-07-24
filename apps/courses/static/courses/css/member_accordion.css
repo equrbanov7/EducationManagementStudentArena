@@ -1,0 +1,13 @@
+/* member_accordion.css
+ * Source: apps/courses/templates/courses/partials/_member_accordion.html (inline stil)
+ */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}

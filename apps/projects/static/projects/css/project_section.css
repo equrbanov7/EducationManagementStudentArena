@@ -1,0 +1,6 @@
+/* project_section.css
+ * Source: apps/projects/templates/projects/project_section.html
+ * C3 mikro utility klassları (inline <style>-dan köçürülüb).
+ */
+.c3-1 { color: #17a2b8; }
+.c3-2 { font-size: 2rem; color: #ccc; }

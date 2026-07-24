@@ -1,0 +1,401 @@
+/* teacher_group_list_modals.css
+ * Split out of teacher_group_list.css (module-size budget) — modal system
+ * (add/edit group modal, student picker, warning modal) for
+ * apps/exams/templates/exams/teacher/teacher_group_list.html.
+ * Loaded alongside teacher_group_list.css; no standalone selectors here
+ * depend on it, so file boundary is purely organizational.
+ */
+
+/* ================= MODAL SİSTEMİ (TAM) ================= */
+
+/* 1. Arxa Fon (Overlay) */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6); /* Tünd fon */
+    backdrop-filter: blur(4px); /* Arxanı bulanıqlaşdırır */
+    z-index: 9999;
+    display: none; /* JS ilə flex olur */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.custom-modal-overlay.active {
+    opacity: 1;
+}
+
+/* 2. Əsas Modal Qutusu */
+.custom-modal-content {
+    background: var(--ems-neutral-0);
+    width: 90%;
+    max-width: 550px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Ekran dolarsa scroll üçün */
+}
+
+.custom-modal-overlay.active .custom-modal-content {
+    transform: scale(1);
+}
+
+/* Header */
+.modal-header-custom {
+    padding: 18px 24px;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header-custom h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--ems-neutral-400);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+.close-modal-btn:hover { color: var(--ems-danger-500); }
+
+/* Body */
+.modal-body-custom {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Footer */
+.modal-footer-custom {
+    padding: 16px 24px;
+    border-top: 1px solid var(--ems-neutral-200);
+    display: flex;
+    justify-content: space-between; /* Delete solda, digərləri sağda */
+    align-items: center;
+    background: var(--ems-neutral-0);
+}
+
+/* Form Label Custom */
+.form-label-custom {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--ems-neutral-700);
+}
+.modal-body-custom input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* ================= AXTARIŞ EDİLƏ BİLƏN SİYAHI (YENİ) ================= */
+
+.student-search-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-400);
+}
+
+.student-search-input {
+    width: 100%;
+    padding: 10px 10px 10px 38px !important; /* İkon üçün yer */
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.student-search-input:focus {
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.student-list-container {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 8px;
+    max-height: 250px; /* Siyahı uzanarsa scroll olur */
+    overflow-y: auto;
+    background: var(--ems-neutral-50);
+}
+
+.student-item-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.student-item-row:last-child {
+    border-bottom: none;
+}
+
+.student-item-row:hover {
+    background-color: var(--ems-primary-50);
+}
+
+.student-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    cursor: pointer;
+    accent-color: var(--ems-primary-500);
+}
+
+.student-label {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--ems-neutral-700);
+    flex: 1;
+    min-width: 0;
+    user-select: none;
+}
+
+.student-label__name {
+    flex: 1 1 180px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.student-label__group {
+    flex: 0 1 auto;
+    max-width: 100%;
+    padding: 2px 8px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 0.76rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.selection-counter {
+    font-size: 0.85rem;
+    color: var(--ems-neutral-500);
+    margin-top: 8px;
+    text-align: right;
+    font-weight: 500;
+}
+
+/* ================= DÜYMƏLƏR (YENİ) ================= */
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-action {
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background-color: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+}
+.btn-cancel:hover {
+    background-color: var(--ems-neutral-200);
+    color: var(--ems-neutral-600);
+}
+
+.btn-save {
+    background-color: var(--ems-primary-500);
+    color: var(--ems-neutral-0);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+.btn-save:hover {
+    background-color: var(--ems-primary-600);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px -1px rgba(59, 130, 246, 0.4);
+}
+
+.btn-delete-custom {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background-color: var(--ems-danger-100);
+    color: var(--ems-danger-500);
+    text-decoration: none;
+    transition: all 0.2s;
+    font-size: 1.1rem;
+}
+.btn-delete-custom:hover {
+    background-color: var(--ems-danger-200);
+    color: var(--ems-danger-strong);
+}
+
+/* ================= XƏBƏRDARLIQ MODALI (WARNING) ================= */
+
+.warning-modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s;
+}
+
+.custom-modal-overlay.active .warning-modal-box {
+    transform: scale(1);
+}
+
+.warning-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-600);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin: 0 auto 20px;
+}
+
+.warning-modal-box h3 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+    font-size: 1.4rem;
+}
+
+.warning-modal-box p {
+    color: var(--ems-neutral-500);
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.warning-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-warning-action {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-stay {
+    background: var(--ems-primary-500);
+    color: white;
+}
+.btn-stay:hover { background: var(--ems-primary-600); }
+
+.btn-discard {
+    background: white;
+    color: var(--ems-danger-500);
+    border: 1px solid var(--ems-danger-200);
+}
+.btn-discard:hover {
+    background: var(--ems-danger-100);
+}
+
+
+
+/* Responsive */
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .page-header-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .header-actions-toolbar {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .group-search-box {
+        width: 100%;
+    }
+    .group-search-input:focus {
+        width: 100%; /* Mobildə uzanmasın */
+    }
+
+    .btn-create-new {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+
+@media (max-width: 576px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .create-group-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .group-card {
+        padding: 14px;
+    }
+}
+
+/* ═══ Faza 6.4 Sprint-4 (2026-07-02) ═══
+   Daimi-gizli widget wrapper-ləri (searchable-multi-select xam selectləri) və
+   JS-submit forması üçün. JS bunları heç vaxt göstərmir. */
+.tgl-hidden { display: none; }
+
+/* Extracted from inline style="" attributes (CSP: no style-src-attr).
+   The JS toggles element.style.display at runtime, which overrides these. */
+.tgl-empty-msg { display: none; text-align: center; padding: 20px; color: #64748b; }
+.tgl-warning-modal { z-index: 10000; display: none; }
