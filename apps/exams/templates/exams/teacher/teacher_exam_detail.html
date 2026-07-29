@@ -185,8 +185,14 @@
                         <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
-                    {# Canlı nəticələri izlə #}
-                    {% if exam.exam_type == "test" %}
+                    {% comment %}
+                        Canlı nəticələr — yalnız canlı sessiya ilə keçirilən
+                        imtahanlar üçün. FİNAL və MİDTERM bu axından keçmir:
+                        onlar İmtahan Mərkəzinin zal/PIN axını ilə aparılır və
+                        nəticələr orada toplanır, ona görə burada kart mənasız
+                        (və işləməyən) idi.
+                    {% endcomment %}
+                    {% if exam.exam_type == "test" and exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
                     <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                        class="action-card action-card--slate">
                         <span class="action-card__icon"><i class="fas fa-broadcast-tower"></i></span>
