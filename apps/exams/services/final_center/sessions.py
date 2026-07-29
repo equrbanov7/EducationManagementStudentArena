@@ -115,18 +115,29 @@ def start_room(session, by, *, request=None, override=False) -> bool:
        GÖNDƏRİLMİR; hər tələbə öz attempt-ini autentifikasiyalı HTTP ilə açır.
     """
     now = timezone.now()
+    # Mesajlar QƏSDƏN özü-izahlıdır: əvvəl yalnız "override tələb olunur"
+    # yazılırdı və istifadəçi nə vaxtın nəzərdə tutulduğunu (imtahanın tarixi
+    # yox, ZAL OTURUMUNUN pəncərəsi) və override-ın harada olduğunu bilmirdi.
     if not override and now < session.scheduled_start - START_EARLY_TOLERANCE:
         raise RoomSessionStateError(
             pgettext(
                 "exams.final_center.error",
-                "Oturum planlaşdırılan vaxtdan çox tez başladıla bilməz (override tələb olunur).",
+                "Bu zal oturumu {start} tarixində başlamalıdır — ondan {tolerance} dəqiqə əvvəldən tez "
+                "başladıla bilməz. Yenə də başlatmaq üçün təsdiq pəncərəsində “Vaxt pəncərəsindən asılı "
+                "olmayaraq məcburi başlat” seçimini işarələyin.",
+            ).format(
+                start=timezone.localtime(session.scheduled_start).strftime("%d.%m.%Y %H:%M"),
+                tolerance=int(START_EARLY_TOLERANCE.total_seconds() // 60),
             )
         )
     if not override and now > session.scheduled_end:
         raise RoomSessionStateError(
             pgettext(
-                "exams.final_center.error", "Oturumun planlaşdırılan sonu keçib — start üçün override tələb olunur."
-            )
+                "exams.final_center.error",
+                "Bu zal oturumunun vaxtı {end} tarixində bitib (söhbət imtahanın tarixindən yox, oturumun "
+                "planlaşdırılan pəncərəsindən gedir). Yenə də başlatmaq üçün təsdiq pəncərəsində “Vaxt "
+                "pəncərəsindən asılı olmayaraq məcburi başlat” seçimini işarələyin.",
+            ).format(end=timezone.localtime(session.scheduled_end).strftime("%d.%m.%Y %H:%M"))
         )
 
     connected = connected_count(session.pk, _live_ticket_ids(session))
