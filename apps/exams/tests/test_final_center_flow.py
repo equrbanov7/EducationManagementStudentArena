@@ -552,22 +552,14 @@ class PermissionAndTenantTests(_FlowBase):
         response = client.get(reverse("accounts:superadmin_exam_rooms"))
         self.assertEqual(response.status_code, 403)
 
-    def test_session_list_hides_manage_buttons_for_invigilator(self):
-        # Nəzarətçi 403 alacağı idarə düymələrini (Yeni oturum / Hesabatlar /
-        # Yeni zal) görməməlidir. Zallar hub-ı (room_list) isə onun GİRİŞ
-        # səhifəsidir — breadcrumb ilə əlçatandır, ona görə gizlədilmir.
+    def test_room_list_hides_manage_buttons_for_invigilator(self):
+        # Nəzarətçi 403 alacağı idarə düymələrini (Hesabatlar / Zal idarəetmə)
+        # görməməlidir. Zallar hub-ı onun GİRİŞ səhifəsidir — özü gizlədilmir.
         client = self._client_for(self.invigilator)
-        response = client.get(reverse("exams:exam_center_session_list"))
+        response = client.get(reverse("exams:exam_center_room_list"))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["can_manage"])
-        self.assertNotContains(response, reverse("exams:exam_center_session_create"))
         self.assertNotContains(response, reverse("exams:exam_center_reports"))
-
-    def test_session_list_shows_manage_buttons_for_center(self):
-        client = self._client_for(self.center)
-        response = client.get(reverse("exams:exam_center_session_list"))
-        self.assertTrue(response.context["can_manage"])
-        self.assertContains(response, reverse("exams:exam_center_room_list"))
 
     def test_room_list_shows_only_assigned_rooms_for_invigilator(self):
         # İmtahan Nəzarət Sisteminin girişi: nəzarətçi YALNIZ təyin olunduğu
@@ -954,7 +946,7 @@ class RoomControlButtonsAlwaysAvailableTests(_FlowBase):
         self.assertContains(response, "data-rma-computers")
         # details/summary + toggle + daxildə axtarış qalır.
         self.assertContains(response, "rma-panel__summary")
-        self.assertContains(response, "data-rma-csearch-input")
+        self.assertContains(response, "data-panel-search-input")
 
     def test_second_cycle_start_works_after_new_session_opens(self):
         """Bitirdikdən sonra yeni oturum açılanda başlat YENİDƏN işləyir."""
@@ -1044,11 +1036,11 @@ class CenterPageRenderTests(_FlowBase):
         response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "data-rma-cscroll")
-        self.assertContains(response, "data-rma-csearch-input")
+        self.assertContains(response, "data-panel-search-scope")
+        self.assertContains(response, "data-panel-search-input")
         # Süzgəc klient tərəflidir: hər kart axtarış açarlarını daşıyır.
         self.assertContains(response, "data-search=")
-        self.assertContains(response, "room_computer_search.js")
+        self.assertContains(response, "panel_search.js")
 
     def test_room_monitor_has_no_inline_style_block(self):
         """CLAUDE.md: template-də internal CSS olmamalıdır (CSP: SELF + NONCE)."""
@@ -1067,34 +1059,6 @@ class CenterPageRenderTests(_FlowBase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.room.invigilators.filter(pk=self.teacher.pk).exists())
 
-    def test_session_list_state_chips_show_counts_and_meaning(self):
-        """Çiplər sayğac göstərir və "giriş açıq" ilə "aktiv" fərqi izah olunur."""
-        response = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
-
-        self.assertEqual(response.status_code, 200)
-        counts = response.context["state_counts"]
-        # Sayğaclar status filtri TƏTBİQ OLUNMADAN hesablanır.
-        self.assertIn("total", counts)
-        self.assertEqual(counts["total"], sum(v for k, v in counts.items() if k != "total"))
-        self.assertContains(response, "fxc-tab__n")
-        self.assertContains(response, "fxc-state-legend")
-        # "Hazırlanır" oturumun BAŞLANĞIC vəziyyətidir — filtr silinməməlidir.
-        self.assertContains(response, "state=prepared")
-
-    def test_session_list_counts_ignore_active_filter(self):
-        """Filtr seçiləndə də çip sayğacları bütün oturumları göstərməlidir."""
-        unfiltered = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
-        filtered = self._client_for(self.center).get(reverse("exams:exam_center_session_list") + "?state=cancelled")
-
-        self.assertEqual(filtered.status_code, 200)
-        self.assertEqual(filtered.context["state_counts"], unfiltered.context["state_counts"])
-
-    def test_session_list_renders(self):
-        response = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
-        self.assertEqual(response.status_code, 200)
-        # Oturum siyahısı imtahandan yox, ZALDAN asılıdır — zal adı görünür.
-        self.assertContains(response, "Zal A")
-
     def test_session_detail_renders_with_tickets(self):
         response = self._client_for(self.center).get(
             reverse("exams:exam_center_session_detail", args=[self.session.pk])
@@ -1102,21 +1066,36 @@ class CenterPageRenderTests(_FlowBase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.student.username)
 
-    def test_session_create_form_renders(self):
-        response = self._client_for(self.center).get(reverse("exams:exam_center_session_create"))
-        self.assertEqual(response.status_code, 200)
-
     def test_reports_render_both_tabs(self):
         client = self._client_for(self.center)
         self.assertEqual(client.get(reverse("exams:exam_center_reports")).status_code, 200)
         self.assertEqual(client.get(reverse("exams:exam_center_reports"), {"tab": "tickets"}).status_code, 200)
 
-    def test_reports_csv_export(self):
+    def test_reports_xlsx_export(self):
+        """Eksport çoxvərəqli Excel-dir: hər zal öz vərəqində + xülasə."""
+        import io
+
+        from openpyxl import load_workbook
+
         response = self._client_for(self.center).get(
-            reverse("exams:exam_center_reports"), {"tab": "sessions", "export": "csv"}
+            reverse("exams:exam_center_reports"), {"tab": "sessions", "export": "xlsx"}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("text/csv", response["Content-Type"])
+        self.assertIn("spreadsheetml", response["Content-Type"])
+        self.assertIn(".xlsx", response["Content-Disposition"])
+
+        workbook = load_workbook(io.BytesIO(response.content))
+        # Xülasə həmişə var; zal vərəqi biletli zal üçün yaranır.
+        self.assertIn("Xülasə", workbook.sheetnames)
+        self.assertIn(self.room.code, workbook.sheetnames)
+
+    def test_reports_xlsx_export_is_audited(self):
+        """Hesabat şəxsi data daşıyır — çıxarılması audit-ə düşməlidir."""
+        from apps.audit.models import AuditLog
+
+        self._client_for(self.center).get(reverse("exams:exam_center_reports"), {"export": "xlsx"})
+
+        self.assertTrue(AuditLog.objects.filter(reason="final_center_report_export[xlsx]").exists())
 
     def test_snapshot_endpoint_returns_json(self):
         response = self._client_for(self.invigilator).get(
