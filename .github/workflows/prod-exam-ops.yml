@@ -42,6 +42,14 @@ on:
         required: false
         type: string
         default: ""
+      script:
+        description: "İşlədiləcək yalnız-oxu skript"
+        required: false
+        type: choice
+        default: exam_day_probe
+        options:
+          - exam_day_probe
+          - exam_day_probe2
 
 concurrency:
   group: production-deploy
@@ -58,6 +66,7 @@ jobs:
       STUDENTS: ${{ inputs.students }}
       GROUPS: ${{ inputs.groups }}
       SUBJECTS: ${{ inputs.subjects }}
+      SCRIPT_NAME: ${{ inputs.script }}
     steps:
       - name: 📥 Checkout (skript mənbəyi)
         uses: actions/checkout@v6
@@ -65,7 +74,12 @@ jobs:
       - name: 🔍 exam_day_probe
         run: |
           set -euo pipefail
-          script="$GITHUB_WORKSPACE/scripts/prod_ops/exam_day_probe.py"
+          # Yalnız icazəli adlar — ixtiyari yol ötürülə bilməz.
+          case "${SCRIPT_NAME:-exam_day_probe}" in
+            exam_day_probe|exam_day_probe2) ;;
+            *) echo "İcazəsiz skript: $SCRIPT_NAME" >&2; exit 1 ;;
+          esac
+          script="$GITHUB_WORKSPACE/scripts/prod_ops/${SCRIPT_NAME:-exam_day_probe}.py"
           test -f "$script" || { echo "Skript tapılmadı: $script" >&2; exit 1; }
 
           cd "$APP_DIR"
