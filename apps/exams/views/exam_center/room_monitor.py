@@ -98,7 +98,6 @@ def _monitor_labels():
             "title": _("İmtahanı başlat"),
             "confirm": _("Başlat"),
             "failed": _("Başlatmaq mümkün olmadı."),
-            "override": _("Vaxt pəncərəsindən asılı olmayaraq məcburi başlat"),
         },
         "end": {
             "title": _("İmtahanı bitir"),
@@ -285,23 +284,28 @@ def exam_center_room_start_all(request, room_id):
     varsa hamısı eyni anda başlayır. Hər oturum idempotent şəkildə işlənir.
     """
     _organization, room, sessions = _get_room_and_sessions(request, room_id)
-    # Override yalnız imtahan mərkəzi üçün (vaxt pəncərəsindən kənar məcburi start).
-    override = request.POST.get("override") == "1" and can_manage_final_center(request.user)
     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
     started = 0
     last_error = ""
     for session in sessions:
         if session.state == "entry_open":
             try:
-                if start_room(session, request.user, request=request, override=override):
+                if start_room(session, request.user, request=request):
                     started += 1
             except RoomSessionStateError as exc:
-                # Vaxt pəncərəsi (tez/gec) — 500 vermə, mesaj göstər.
+                # State yarışı (paralel idarə) — 500 vermə, mesaj göstər.
                 last_error = str(exc)
     if is_ajax:
-        payload = {"success": started > 0, "started": started, "can_override": can_manage_final_center(request.user)}
+        payload = {"success": started > 0, "started": started}
         if last_error and not started:
             payload["error"] = last_error
+        elif not started:
+            # Düymə daimi görünür (2026-07-29) — boş halda istifadəçi NİYƏ heç
+            # nə başlamadığını bilməlidir.
+            payload["error"] = pgettext(
+                "exams.final_center.message",
+                "Başladılacaq oturum yoxdur — tələbə qeydli kompüterdən PIN ilə girəndə oturum avtomatik yaranır.",
+            )
         return JsonResponse(payload, status=200 if started or not last_error else 409)
     if started:
         messages.success(
@@ -333,7 +337,12 @@ def exam_center_room_end_all(request, room_id):
         if session.state == "active" and end_room(session, request.user, request=request):
             ended += 1
     if is_ajax:
-        return JsonResponse({"success": ended > 0, "ended": ended})
+        payload = {"success": ended > 0, "ended": ended}
+        if not ended:
+            payload["error"] = pgettext(
+                "exams.final_center.message", "Bitiriləcək aktiv imtahan yoxdur — zalda gedən oturum tapılmadı."
+            )
+        return JsonResponse(payload)
     if ended:
         messages.success(
             request,

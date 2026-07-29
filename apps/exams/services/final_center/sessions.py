@@ -6,7 +6,6 @@ basması, təkrar kliklər və çoxlu app instansı təhlükəsizdir.
 """
 
 import logging
-from datetime import timedelta
 
 from django.db import transaction
 from django.utils import timezone
@@ -33,10 +32,6 @@ from .events import broadcast_to_staff, broadcast_to_students
 from .presence import connected_count
 
 logger = logging.getLogger("exams.final_center")
-
-# Oturum planlaşdırılan başlanğıcdan bu qədər ƏVVƏL başladıla bilməz
-# (override qeydə alınmadan) — bax start_room(override=...).
-START_EARLY_TOLERANCE = timedelta(minutes=15)
 
 
 class RoomSessionStateError(ValueError):
@@ -104,42 +99,25 @@ def open_entry(session, by, *, request=None) -> bool:
     return True
 
 
-def start_room(session, by, *, request=None, override=False) -> bool:
+def start_room(session, by, *, request=None) -> bool:
     """
     entry_open → active. Sinxron start:
 
-    1. İcazə view qatında yoxlanılıb; burada state + vaxt pəncərəsi yoxlanır.
+    1. İcazə view qatında yoxlanılıb; burada yalnız STATE yoxlanır.
     2. Şərti UPDATE — təkrar start / paralel start təhlükəsizdir.
     3. Rəsmi server start vaxtı yazılır; qoşulu tələbə sayı snapshot alınır.
     4. Tələbələrə YÜNGÜL "room_started" eventi yayılır — sual seti WS ilə
        GÖNDƏRİLMİR; hər tələbə öz attempt-ini autentifikasiyalı HTTP ilə açır.
+
+    QEYD (2026-07-29): planlaşdırılan vaxt pəncərəsinə görə start BLOKLANMIR.
+    Əməliyyat modeli belədir: zal yaradılır, kompüterlər əlavə olunur, nəzarətçi
+    hazır olanda "başlat" deyir, bitirəndə "bitir" deyir. Vaxt pəncərəsi yalnız
+    planlaşdırma/hesabat məlumatıdır. Təhlükəsizlik şəbəkəsi ikidir:
+    hər cəhd öz imtahan müddətində avtomatik bitir (`expire_overdue_attempts`)
+    və gün sonu 22:00 süpürgəsi açıq qalmış oturumları bağlayır
+    (`auto_close_stale_room_sessions`).
     """
     now = timezone.now()
-    # Mesajlar QƏSDƏN özü-izahlıdır: əvvəl yalnız "override tələb olunur"
-    # yazılırdı və istifadəçi nə vaxtın nəzərdə tutulduğunu (imtahanın tarixi
-    # yox, ZAL OTURUMUNUN pəncərəsi) və override-ın harada olduğunu bilmirdi.
-    if not override and now < session.scheduled_start - START_EARLY_TOLERANCE:
-        raise RoomSessionStateError(
-            pgettext(
-                "exams.final_center.error",
-                "Bu zal oturumu {start} tarixində başlamalıdır — ondan {tolerance} dəqiqə əvvəldən tez "
-                "başladıla bilməz. Yenə də başlatmaq üçün təsdiq pəncərəsində “Vaxt pəncərəsindən asılı "
-                "olmayaraq məcburi başlat” seçimini işarələyin.",
-            ).format(
-                start=timezone.localtime(session.scheduled_start).strftime("%d.%m.%Y %H:%M"),
-                tolerance=int(START_EARLY_TOLERANCE.total_seconds() // 60),
-            )
-        )
-    if not override and now > session.scheduled_end:
-        raise RoomSessionStateError(
-            pgettext(
-                "exams.final_center.error",
-                "Bu zal oturumunun vaxtı {end} tarixində bitib (söhbət imtahanın tarixindən yox, oturumun "
-                "planlaşdırılan pəncərəsindən gedir). Yenə də başlatmaq üçün təsdiq pəncərəsində “Vaxt "
-                "pəncərəsindən asılı olmayaraq məcburi başlat” seçimini işarələyin.",
-            ).format(end=timezone.localtime(session.scheduled_end).strftime("%d.%m.%Y %H:%M"))
-        )
-
     connected = connected_count(session.pk, _live_ticket_ids(session))
     updated = ExamRoomSession.objects.filter(pk=session.pk, state=ROOM_SESSION_STATE_ENTRY_OPEN).update(
         state=ROOM_SESSION_STATE_ACTIVE,
@@ -157,7 +135,7 @@ def start_room(session, by, *, request=None, override=False) -> bool:
         action=AuditAction.UPDATE,
         user=by,
         request=request,
-        reason="final_room_started" + ("_override" if override else ""),
+        reason="final_room_started",
         changes={
             "state": [ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE],
             "connected_students": [None, connected],
@@ -265,19 +243,6 @@ def cancel_session(session, by, *, request=None, reason="") -> bool:
     return True
 
 
-def maybe_auto_end(session) -> bool:
-    """
-    Rəsmi server deadline-ı: aktiv oturum planlaşdırılan sonu keçibsə
-    avtomatik bitirilir. Monitor snapshot-ı və tələbə state endpoint-i
-    tərəfindən "lazy" çağırılır — ayrıca yüksək tezlikli cron tələb olunmur.
-    """
-    if session.state != ROOM_SESSION_STATE_ACTIVE:
-        return False
-    if timezone.now() < session.scheduled_end:
-        return False
-    return end_room(session, None, auto=True)
-
-
 def auto_close_stale_room_sessions(*, now=None) -> dict:
     """Gün sonu təhlükəsizlik süpürgəsi (22:00 cron): hələ açıq qalmış zal
     oturumlarını avtomatik bağlayır ki, heç bir imtahan gecəyə qalmasın.
@@ -326,11 +291,9 @@ def auto_close_stale_room_sessions(*, now=None) -> dict:
 
 __all__ = [
     "RoomSessionStateError",
-    "START_EARLY_TOLERANCE",
     "auto_close_stale_room_sessions",
     "cancel_session",
     "end_room",
-    "maybe_auto_end",
     "open_entry",
     "start_room",
     "validate_session_plan",

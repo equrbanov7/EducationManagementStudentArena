@@ -347,15 +347,15 @@ class RoomLifecycleTests(_FlowBase):
         # Təkrar start (təkrar klik / ikinci nəzarətçi) təsirsizdir.
         self.assertFalse(start_room(self.session, self.center))
 
-    def test_start_too_early_requires_override(self):
+    def test_start_ignores_scheduled_window(self):
+        # 2026-07-29: vaxt pəncərəsi start-ı BLOKLAMIR deyil — nəzarətçi hazır
+        # olanda başladır (override anlayışı silindi).
         ExamRoomSession.objects.filter(pk=self.session.pk).update(
             scheduled_start=timezone.now() + timedelta(hours=3),
             scheduled_end=timezone.now() + timedelta(hours=5),
         )
         self.session.refresh_from_db()
-        with self.assertRaises(RoomSessionStateError):
-            start_room(self.session, self.center)
-        self.assertTrue(start_room(self.session, self.center, override=True))
+        self.assertTrue(start_room(self.session, self.center))
 
     def test_synchronized_start_then_begin_creates_attempt(self):
         enter_waiting(self.ticket, language="")
@@ -683,6 +683,39 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertEqual(snap["counts"]["completed"], 1)
         self.assertNotIn(self.ticket.pk, [r["ticket_id"] for r in snap["students"]])
 
+    def test_removed_ticket_hidden_after_retention_window(self):
+        """Çıxarılmış tələbə 15 dəq görünür, sonra xəritədən düşür (sayğac qalır).
+
+        Eyni gündə yüzlərlə imtahanda çıxarılmışlar yığılıb görüntünü
+        zibilləməsin (2026-07-29).
+        """
+        from apps.exams.models import FinalExamTicket
+        from apps.exams.services.final_center import room_monitor_snapshot
+        from apps.exams.services.final_center.monitor import REMOVED_VISIBLE_SECONDS
+
+        self.ticket.status = TICKET_STATUS_REMOVED
+        self.ticket.save(update_fields=["status"])
+        # updated_at auto_now-dır — köhnəltmək üçün birbaşa UPDATE.
+        FinalExamTicket.objects.filter(pk=self.ticket.pk).update(
+            updated_at=timezone.now() - timedelta(seconds=REMOVED_VISIBLE_SECONDS + 60)
+        )
+
+        snap = room_monitor_snapshot(self.room)
+
+        self.assertEqual(snap["counts"]["removed"], 1)
+        self.assertNotIn(self.ticket.pk, [r["ticket_id"] for r in snap["students"]])
+
+    def test_recently_removed_ticket_still_visible(self):
+        """Operator bərpa/əlavə şans qərarı üçün təzə çıxarılmışı görməlidir."""
+        from apps.exams.services.final_center import room_monitor_snapshot
+
+        self.ticket.status = TICKET_STATUS_REMOVED
+        self.ticket.save(update_fields=["status"])
+
+        snap = room_monitor_snapshot(self.room)
+
+        self.assertIn(self.ticket.pk, [r["ticket_id"] for r in snap["students"]])
+
     def test_recent_completed_result_still_visible(self):
         from apps.exams.services.final_center import room_monitor_snapshot
 
@@ -732,8 +765,9 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertIn(new_ticket.pk, ids)
         self.assertNotIn(self.ticket.pk, ids)
 
-    def test_room_start_all_time_window_error_is_graceful(self):
-        # Vaxt pəncərəsindən kənar (çox tez) oturum → 500 YOX, 409 + xəta mesajı.
+    def test_room_start_all_ignores_time_window(self):
+        # 2026-07-29: vaxt pəncərəsi start-ı bloklamır — "çox tez" halında da
+        # endpoint uğurla başladır (override plumbing-i silindi).
         self.session.scheduled_start = timezone.now() + timedelta(hours=1)
         self.session.save(update_fields=["scheduled_start"])
         client = self._client_for(self.invigilator)
@@ -741,12 +775,10 @@ class PermissionAndTenantTests(_FlowBase):
             reverse("exams:exam_center_room_start_all", args=[self.room.pk]),
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
-        self.assertEqual(response.status_code, 409)
-        data = response.json()
-        self.assertFalse(data["success"])
-        self.assertIn("error", data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
         self.session.refresh_from_db()
-        self.assertEqual(self.session.state, "entry_open")
+        self.assertEqual(self.session.state, "active")
 
     def test_ticket_resume_with_extra_chance_flag(self):
         from apps.exams.models import SupervisionIncident
@@ -825,54 +857,133 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertIn("connected", row)
 
 
-class StartRoomGuardMessageTests(_FlowBase):
-    """Start bloklananda mesaj NƏ vaxtın nəzərdə tutulduğunu və NƏ etmək
-    lazım olduğunu deməlidir — əvvəl yalnız "override tələb olunur" yazırdı."""
+class StartRoomNoTimeWindowTests(_FlowBase):
+    """Start artıq planlaşdırılan vaxt pəncərəsi ilə BLOKLANMIR (2026-07-29).
 
-    def test_late_start_message_names_the_session_window_and_the_fix(self):
-        from apps.exams.services.final_center import RoomSessionStateError, start_room
+    Əməliyyat modeli: nəzarətçi hazır olanda başladır, bitirəndə bitirir.
+    Təhlükəsizlik şəbəkəsi: cəhdlər öz imtahan müddətində avtomatik bitir,
+    22:00 süpürgəsi açıq qalmış oturumları bağlayır.
+    """
 
+    def _shift_window(self, *, start_delta, end_delta):
         now = timezone.now()
-        self.session.scheduled_start = now - timedelta(hours=5)
-        self.session.scheduled_end = now - timedelta(hours=3)
+        self.session.scheduled_start = now + start_delta
+        self.session.scheduled_end = now + end_delta
         self.session.save(update_fields=["scheduled_start", "scheduled_end"])
 
-        with self.assertRaises(RoomSessionStateError) as ctx:
-            start_room(self.session, self.center)
-
-        message = str(ctx.exception)
-        # Faktiki bitmə vaxtı görünür (istifadəçi hansı vaxtı axtaracağını bilsin).
-        self.assertIn(timezone.localtime(self.session.scheduled_end).strftime("%d.%m.%Y"), message)
-        # İmtahanın tarixi ilə qarışdırmasın.
-        self.assertIn("imtahanın tarixindən yox", message)
-        # Nə etmək lazım olduğu yazılır.
-        self.assertIn("məcburi başlat", message)
-
-    def test_early_start_message_names_the_tolerance(self):
-        from apps.exams.services.final_center import RoomSessionStateError, start_room
-
-        now = timezone.now()
-        self.session.scheduled_start = now + timedelta(hours=5)
-        self.session.scheduled_end = now + timedelta(hours=7)
-        self.session.save(update_fields=["scheduled_start", "scheduled_end"])
-
-        with self.assertRaises(RoomSessionStateError) as ctx:
-            start_room(self.session, self.center)
-
-        message = str(ctx.exception)
-        self.assertIn("15 dəqiqə", message)
-        self.assertIn("məcburi başlat", message)
-
-    def test_override_actually_starts_a_late_session(self):
-        """Reqristiya: override hələ də işləyir (mesaj dəyişdi, məntiq yox)."""
+    def test_start_works_after_scheduled_end(self):
         from apps.exams.services.final_center import start_room
 
-        now = timezone.now()
-        self.session.scheduled_start = now - timedelta(hours=5)
-        self.session.scheduled_end = now - timedelta(hours=3)
-        self.session.save(update_fields=["scheduled_start", "scheduled_end"])
+        self._shift_window(start_delta=timedelta(hours=-5), end_delta=timedelta(hours=-3))
+        self.assertTrue(start_room(self.session, self.center))
 
-        self.assertTrue(start_room(self.session, self.center, override=True))
+    def test_start_works_before_scheduled_start(self):
+        from apps.exams.services.final_center import start_room
+
+        self._shift_window(start_delta=timedelta(hours=5), end_delta=timedelta(hours=7))
+        self.assertTrue(start_room(self.session, self.center))
+
+    def test_active_session_is_not_auto_ended_by_scheduled_end(self):
+        """Monitor snapshot-ı oturumu scheduled_end keçəndə ÖZBAŞINA bitirməsin."""
+        from apps.exams.services.final_center import session_monitor_snapshot, start_room
+
+        self.assertTrue(start_room(self.session, self.center))
+        self._shift_window(start_delta=timedelta(hours=-5), end_delta=timedelta(hours=-3))
+
+        session_monitor_snapshot(self.session)
+
+        self.session.refresh_from_db(fields=["state"])
+        self.assertEqual(self.session.state, ROOM_SESSION_STATE_ACTIVE)
+
+
+class RoomControlButtonsAlwaysAvailableTests(_FlowBase):
+    """Başlat/bitir idarəsi bir dövrədən sonra da işlək qalmalıdır.
+
+    Şikayət (2026-07-29): başlat+bitir edildikdən sonra "başlat" düyməsi
+    itirdi. İndi düymələr daimi görünür; boş halda server izahlı mesaj verir.
+    """
+
+    def test_start_all_with_no_open_session_explains_why(self):
+        from apps.exams.services.final_center import end_room, start_room
+
+        start_room(self.session, self.center)
+        self.session.refresh_from_db()
+        end_room(self.session, self.center)
+
+        response = self._client_for(self.center).post(
+            reverse("exams:exam_center_room_start_all", args=[self.room.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertIn("avtomatik yaranır", data["error"])
+
+    def test_end_all_with_no_active_session_explains_why(self):
+        response = self._client_for(self.center).post(
+            reverse("exams:exam_center_room_end_all", args=[self.room.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertIn("aktiv imtahan yoxdur", data["error"])
+
+    def test_buttons_are_mutually_exclusive_on_first_render(self):
+        """İlk renderdə "başlat" görünür, "bitir" gizlidir — ikisi eyni anda yox.
+
+        Snapshot gələndən sonra JS aktiv oturum varsa yerlərini dəyişir
+        (room_aggregate.js: hasActive → bitir, əks halda başlat).
+        """
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="fxc-start-all-btn">')
+        self.assertContains(response, 'id="fxc-end-all-btn" hidden>')
+
+    def test_computers_panel_uses_collapsible_design(self):
+        """Kompüterlər paneli nəzarətçilər panelinin dizayn axınındadır."""
+        from apps.exams.services.final_center import add_computer
+
+        add_computer(room=self.room, label="PC-77", mac="AA:BB:CC:DD:EE:77", ip_address="10.0.0.77", seat_number=7)
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data-rma-computers")
+        # details/summary + toggle + daxildə axtarış qalır.
+        self.assertContains(response, "rma-panel__summary")
+        self.assertContains(response, "data-rma-csearch-input")
+
+    def test_second_cycle_start_works_after_new_session_opens(self):
+        """Bitirdikdən sonra yeni oturum açılanda başlat YENİDƏN işləyir."""
+        from apps.exams.models import ExamRoomSession
+        from apps.exams.services.final_center import end_room, open_entry, start_room
+
+        start_room(self.session, self.center)
+        self.session.refresh_from_db()
+        end_room(self.session, self.center)
+
+        second = ExamRoomSession.objects.create(
+            organization=self.org,
+            room=self.room,
+            invigilator=self.invigilator,
+            scheduled_start=timezone.now(),
+            scheduled_end=timezone.now() + timedelta(hours=2),
+            created_by=self.center,
+        )
+        open_entry(second, self.center)
+
+        response = self._client_for(self.center).post(
+            reverse("exams:exam_center_room_start_all", args=[self.room.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        second.refresh_from_db()
+        self.assertEqual(second.state, "active")
 
 
 class CenterPageRenderTests(_FlowBase):

@@ -51,8 +51,6 @@ a.rma-chip-sel__name:hover { text-decoration: underline; }
 .rma-result__add:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
 .rma-loading, .rma-hint { padding: .7rem; text-align: center; color: #6b7280; font-size: .82rem; }
 .rma-form__foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.rma-computers { margin: 0 0 1.25rem; }
-.rma-computers__title { font-size: 1.05rem; font-weight: 800; margin: 0 0 .6rem; display: flex; align-items: center; gap: .5rem; }
 .rma-cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
 .rma-comp { border: 1px solid var(--border-color, #e5e7eb); border-radius: 10px; padding: .6rem .7rem; background: var(--card-bg, #fff); border-left: 4px solid #cbd5e1; }
 .rma-comp--busy { border-left-color: #94a3b8; }
