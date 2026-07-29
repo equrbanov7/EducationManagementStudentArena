@@ -4,83 +4,115 @@ name: 🎓 Prod İmtahan Əməliyyatları
 # self-hosted runner (serverin özü) üzərindən DAR əhatəli imtahan-hazırlığı
 # skriptlərini işlədir.
 #
-# NİYƏ `manage.py shell` + STDIN (əmr yox):
+# NİYƏ `manage.py shell` + STDIN (management command yox):
 #   Skript runner-in CHECKOUT-undan konteynerə stdin ilə ötürülür, yəni kodun
 #   konteyner image-inə DEPLOY olunması tələb olunmur. Beləliklə imtahan
 #   hazırlığı CI/deploy növbəsindən asılı qalmır (deploy bloklananda da işləyir).
 #
 # TƏHLÜKƏSİZLİK:
-#   * Açıq shell YOXDUR — yalnız repo-dakı yoxlanmış skript işlədilir.
+#   * Açıq shell YOXDUR — yalnız repo-dakı, review olunmuş skriptlər işləyir və
+#     skript adı AĞ SİYAHI ilə yoxlanır (ixtiyari yol ötürülə bilmir).
 #   * İstifadəçi girişləri `env:` ilə ötürülür və shell-də sitatlanmış dəyişən
 #     kimi işlənir (`run:` bloğuna interpolasiya yoxdur → script injection yox).
-#   * `probe` YALNIZ-OXU-dur. Yazı skriptləri ayrıca əlavə olunacaq.
+#   * Yazan skript (`exam_day_seed`) DEFAULT DRY-RUN-dır; faktiki yazma üçün
+#     `apply` girişi açıq şəkildə seçilməlidir.
+#   * Parol `secrets.EXAM_TEMP_PASSWORD`-dandır — nə input, nə də logda görünür.
 #   * Deploy ilə eyni concurrency qrupu — canlı deploy-la toqquşmur.
-#
-# DİQQƏT: input dəyərləri run logunda GÖRÜNÜR. Parol kimi gizli dəyər input
-# kimi YAZILMIR — repo secret-i işlədilir.
 
 on:
   workflow_dispatch:
     inputs:
-      org:
-        description: "Təşkilat slug-ı (boş = bütün təşkilatları sadala)"
-        required: false
-        type: string
-        default: ""
-      students:
-        description: "Axtarılacaq tələbə adları — hər sətirdə bir"
-        required: false
-        type: string
-        default: ""
-      groups:
-        description: "Axtarılacaq qrup adları — hər sətirdə bir"
-        required: false
-        type: string
-        default: ""
-      subjects:
-        description: "Axtarılacaq fənn adları — hər sətirdə bir"
-        required: false
-        type: string
-        default: ""
       script:
-        description: "İşlədiləcək yalnız-oxu skript"
-        required: false
+        description: "İşlədiləcək skript"
+        required: true
         type: choice
         default: exam_day_probe
         options:
           - exam_day_probe
           - exam_day_probe2
+          - exam_day_seed
+      apply:
+        description: "YALNIZ exam_day_seed üçün: faktiki yaz (işarələnməsə dry-run)"
+        required: false
+        type: boolean
+        default: false
+      org:
+        description: "Təşkilat slug-ı"
+        required: false
+        type: string
+        default: "qerbi-kaspi-universiteti"
+      students:
+        description: "probe: axtarılacaq tələbə adları — hər sətirdə bir"
+        required: false
+        type: string
+        default: ""
+      groups:
+        description: "probe: axtarılacaq qrup adları — hər sətirdə bir"
+        required: false
+        type: string
+        default: ""
+      subjects:
+        description: "probe: axtarılacaq fənn adları — hər sətirdə bir"
+        required: false
+        type: string
+        default: ""
+      group_teacher:
+        description: "seed: qrup sahibi olacaq müəllimin username-i (boş = ilk müəllim)"
+        required: false
+        type: string
+        default: ""
+      az_exam_id:
+        description: "seed: Az dili imtahanının id-si"
+        required: false
+        type: string
+        default: "8"
+      window_days:
+        description: "seed: imtahan pəncərəsi neçə gün"
+        required: false
+        type: string
+        default: "7"
 
 concurrency:
   group: production-deploy
   cancel-in-progress: false
 
 jobs:
-  probe:
-    name: 🔍 Vəziyyət hesabatı (yalnız-oxu)
+  run-script:
+    name: 🎓 prod-exam-ops
     runs-on: [self-hosted]
     environment: production
     env:
       APP_DIR: /home/wcu/EducationManagementStudentArena
+      SCRIPT_NAME: ${{ inputs.script }}
       ORG: ${{ inputs.org }}
       STUDENTS: ${{ inputs.students }}
       GROUPS: ${{ inputs.groups }}
       SUBJECTS: ${{ inputs.subjects }}
-      SCRIPT_NAME: ${{ inputs.script }}
+      GROUP_TEACHER: ${{ inputs.group_teacher }}
+      AZ_EXAM_ID: ${{ inputs.az_exam_id }}
+      WINDOW_DAYS: ${{ inputs.window_days }}
+      APPLY_FLAG: ${{ inputs.apply && 'yes' || 'no' }}
+      TEMP_PASSWORD: ${{ secrets.EXAM_TEMP_PASSWORD }}
     steps:
       - name: 📥 Checkout (skript mənbəyi)
         uses: actions/checkout@v6
 
-      - name: 🔍 exam_day_probe
+      - name: 🎓 İşlət
         run: |
           set -euo pipefail
-          # Yalnız icazəli adlar — ixtiyari yol ötürülə bilməz.
-          case "${SCRIPT_NAME:-exam_day_probe}" in
-            exam_day_probe|exam_day_probe2) ;;
+
+          # Ağ siyahı — ixtiyari yol/skript ötürülə bilməz.
+          case "$SCRIPT_NAME" in
+            exam_day_probe|exam_day_probe2|exam_day_seed) ;;
             *) echo "İcazəsiz skript: $SCRIPT_NAME" >&2; exit 1 ;;
           esac
-          script="$GITHUB_WORKSPACE/scripts/prod_ops/${SCRIPT_NAME:-exam_day_probe}.py"
+
+          script="$GITHUB_WORKSPACE/scripts/prod_ops/${SCRIPT_NAME}.py"
           test -f "$script" || { echo "Skript tapılmadı: $script" >&2; exit 1; }
+
+          if [ "$SCRIPT_NAME" = "exam_day_seed" ] && [ "$APPLY_FLAG" = "yes" ]; then
+            echo "⚠️  FAKTİKİ YAZMA rejimi — prod verilənlər bazasına yazılacaq."
+          fi
 
           cd "$APP_DIR"
           docker compose -f docker-compose.prod.yml exec -T \
@@ -88,4 +120,10 @@ jobs:
             -e PROBE_STUDENTS="$STUDENTS" \
             -e PROBE_GROUPS="$GROUPS" \
             -e PROBE_SUBJECTS="$SUBJECTS" \
+            -e SEED_ORG="$ORG" \
+            -e SEED_APPLY="$APPLY_FLAG" \
+            -e SEED_GROUP_TEACHER="$GROUP_TEACHER" \
+            -e SEED_AZ_EXAM_ID="$AZ_EXAM_ID" \
+            -e SEED_WINDOW_DAYS="$WINDOW_DAYS" \
+            -e EXAM_TEMP_PASSWORD="$TEMP_PASSWORD" \
             --index 1 app python manage.py shell < "$script"
