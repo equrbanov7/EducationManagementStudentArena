@@ -146,16 +146,8 @@ from .teacher.submission_media import (
     question_submission_visual_preview,
 )
 from .teacher.supervision import (
-    attempt_live_snapshot_api,
-    exam_live_monitor,
-    exam_live_monitor_poll_api,
     log_incident_api,
-    supervision_detail,
-    supervision_monitor,
     supervision_status_api,
-    teacher_lock_api,
-    teacher_resume_api,
-    teacher_stop_api,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -243,14 +235,6 @@ __all__ = [
     "bank_question_edit",
     "exam_bank_picker",
     # Teacher - Supervision
-    "supervision_monitor",
-    "supervision_detail",
-    "exam_live_monitor",
-    "exam_live_monitor_poll_api",
-    "attempt_live_snapshot_api",
-    "teacher_lock_api",
-    "teacher_resume_api",
-    "teacher_stop_api",
     "log_incident_api",
     "supervision_status_api",
     # Student - Results
