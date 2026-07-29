@@ -15,7 +15,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_GET
 
 from apps.exams.models import ExamAttempt
@@ -38,6 +38,30 @@ def _academic_year_start(dt):
     """datetime → tədris ilinin başlanğıc təqvim ili (lokal vaxta görə)."""
     local = timezone.localtime(dt)
     return local.year if local.month >= _ACADEMIC_YEAR_START_MONTH else local.year - 1
+
+
+# Semestr ay qrupları — apellyasiya statistikası ilə eyni bölgü (bax
+# apps/appeals/views/teacher/statistics.py), ona görə iki panel eyni cavabı verir.
+_SEMESTERS = {
+    "fall": (9, 10, 11, 12, 1),
+    "spring": (2, 3, 4, 5, 6),
+    "summer": (7, 8),
+}
+# DİQQƏT: modul səviyyəsində `pgettext` dili İMPORT anına dondurur (apellyasiya
+# tərəfindəki mövcud tələ). `pgettext_lazy` sorğunun dilinə görə həll olunur.
+_SEMESTER_LABELS = {
+    "fall": pgettext_lazy("exams.center.stats.semester", "Payız semestri"),
+    "spring": pgettext_lazy("exams.center.stats.semester", "Yaz semestri"),
+    "summer": pgettext_lazy("exams.center.stats.semester", "Yay semestri"),
+}
+
+# Cəhd statusları — yalnız bitmiş cəhdlər statistikaya düşdüyü üçün siyahı
+# `_FINISHED` ilə uyğun saxlanılır.
+_ATTEMPT_STATUS_LABELS = {
+    "submitted": pgettext_lazy("exams.center.stats.status", "Təhvil verilib"),
+    "expired": pgettext_lazy("exams.center.stats.status", "Vaxtı bitib"),
+}
+_ATTEMPT_STATUS_VALUES = set(_ATTEMPT_STATUS_LABELS)
 
 
 # Sütun → DB order ifadəsi (klik-sıralama üçün). "score" xam düzgün cavab sayı
@@ -137,6 +161,17 @@ def _filtered_attempts(request, organization):
     if exam_type:
         qs = qs.filter(exam__exam_type_extended=exam_type)
 
+    # İMTAHAN FORMASI (test/yazılı/praktik) — apellyasiya statistikasındakı
+    # `format` filtri ilə eyni parametr adı və eyni sahə.
+    exam_format = (request.GET.get("format") or "").strip()
+    if exam_format:
+        qs = qs.filter(exam__exam_type=exam_format)
+
+    # STATUS: burada cəhdin statusudur (apellyasiyada müraciətin statusu idi).
+    status = (request.GET.get("status") or "").strip()
+    if status in _ATTEMPT_STATUS_VALUES:
+        qs = qs.filter(status=status)
+
     # TƏDRİS İLİ filtri: `year` tədris ilinin başlanğıc təqvim ilidir (məs. 2025 =
     # 2025/2026). Sentyabr–avqust aralığına görə süzülür.
     year = (request.GET.get("year") or "").strip()
@@ -147,6 +182,11 @@ def _filtered_attempts(request, organization):
         lo = timezone.make_aware(datetime(start, _ACADEMIC_YEAR_START_MONTH, 1))
         hi = timezone.make_aware(datetime(start + 1, _ACADEMIC_YEAR_START_MONTH, 1))
         qs = qs.filter(started_at__gte=lo, started_at__lt=hi)
+
+    # SEMESTR: təqvim ayı qruplarına görə (tədris ili filtri ilə birləşə bilir).
+    semester = (request.GET.get("semester") or "").strip()
+    if semester in _SEMESTERS:
+        qs = qs.filter(started_at__month__in=_SEMESTERS[semester])
 
     return qs.distinct()
 
@@ -445,6 +485,10 @@ def exam_center_stats_filters(request):
             "departments": departments,
             "teachers": teachers,
             "types": [{"value": v, "label": str(lbl)} for v, lbl in exam_type_choices],
+            # Apellyasiya statistikası ilə paritet: forma/status/semestr.
+            "formats": [{"value": v, "label": str(lbl)} for v, lbl in Exam.EXAM_TYPE_CHOICES],
+            "statuses": [{"value": v, "label": str(lbl)} for v, lbl in _ATTEMPT_STATUS_LABELS.items()],
+            "semesters": [{"value": k, "label": str(_SEMESTER_LABELS[k])} for k in ("fall", "spring", "summer")],
         }
     )
 

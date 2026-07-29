@@ -21,6 +21,8 @@
             view:root.dataset.viewUrlTemplate };
   var q = root.querySelector(".js-ecs-q"),
       typeSel = root.querySelector(".js-ecs-type"), yearSel = root.querySelector(".js-ecs-year"),
+      formatSel = root.querySelector(".js-ecs-format"), statusSel = root.querySelector(".js-ecs-status"),
+      semesterSel = root.querySelector(".js-ecs-semester"),
       cards = root.querySelector(".js-ecs-cards"), rows = root.querySelector(".js-ecs-rows"),
       pager = root.querySelector(".js-ecs-pager"), thead = root.querySelector(".js-ecs-thead");
   var T = (function () {
@@ -56,6 +58,9 @@
     if (deptPick.value()) p.set("departments", deptPick.value());
     if (teacherPick.value()) p.set("teachers", teacherPick.value());
     if (typeSel.value) p.set("type", typeSel.value);
+    if (formatSel && formatSel.value) p.set("format", formatSel.value);
+    if (statusSel && statusSel.value) p.set("status", statusSel.value);
+    if (semesterSel && semesterSel.value) p.set("semester", semesterSel.value);
     if (yearSel.value) p.set("year", yearSel.value);
     if (sort) p.set("sort", sort);
     if (extra) Object.keys(extra).forEach(function(k){ p.set(k, extra[k]); });
@@ -122,7 +127,9 @@
     });
   });
   q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
-  [typeSel, yearSel].forEach(function(s){ s.addEventListener("change", reload); });
+  [typeSel, yearSel, formatSel, statusSel, semesterSel].forEach(function(s){
+    if (s) { s.addEventListener("change", reload); }
+  });
   root.querySelector(".js-ecs-export").addEventListener("click", function(e){ e.preventDefault(); window.location.href = U.export + "?" + params().toString(); });
 
   // Fakültə/kafedra/müəllim artıq lazy axtarışlı seçicilərdir → filters yalnız
@@ -132,8 +139,15 @@
     .then(function(d){ if(!d) return;
       (d.academic_years||[]).forEach(function(y){ var o=document.createElement("option"); o.value=y.value; o.textContent=y.label; yearSel.appendChild(o); });
       (d.types||[]).forEach(function(t){ var o=document.createElement("option"); o.value=t.value; o.textContent=t.label; typeSel.appendChild(o); });
+      // Apellyasiya statistikası ilə paritet: forma / status / semestr.
+      function fill(sel, list){ (list||[]).forEach(function(i){ var o=document.createElement("option"); o.value=i.value; o.textContent=i.label; sel.appendChild(o); }); }
+      if (formatSel) { fill(formatSel, d.formats); }
+      if (statusSel) { fill(statusSel, d.statuses); }
+      if (semesterSel) { fill(semesterSel, d.semesters); }
       // Bootstrap select-lər dinamik option-lardan sonra yenilənməlidir.
-      [typeSel, yearSel].forEach(function(s){ if (typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); } });
+      [typeSel, yearSel, formatSel, statusSel, semesterSel].forEach(function(s){
+        if (s && typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); }
+      });
     });
   load();
 })();
