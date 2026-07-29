@@ -11,13 +11,7 @@ from .actions import (  # noqa: F401
 from .constants import EVENT_SEVERITY_MAP, NON_COUNTING_EVENT_TYPES, VIOLATION_EVENT_TYPES  # noqa: F401
 from .incidents import log_supervision_incident  # noqa: F401
 from .interventions import attach_attempt_interventions, get_attempt_intervention  # noqa: F401
-from .monitor import (  # noqa: F401
-    get_attempt_supervision_status,
-    get_exam_live_monitor_data,
-    get_exam_session_dates,
-    get_flagged_students_for_exam,
-    get_supervision_monitor_data,
-)
+from .monitor import get_attempt_supervision_status  # noqa: F401
 from .snapshot import get_attempt_live_snapshot  # noqa: F401
 
 __all__ = [
@@ -28,11 +22,7 @@ __all__ = [
     "get_attempt_live_snapshot",
     "get_attempt_intervention",
     "get_attempt_supervision_status",
-    "get_exam_live_monitor_data",
-    "get_exam_session_dates",
-    "get_flagged_students_for_exam",
     "get_supervision_config",
-    "get_supervision_monitor_data",
     "log_supervision_incident",
     "mark_student_returned",
     "notify_attempt_student",

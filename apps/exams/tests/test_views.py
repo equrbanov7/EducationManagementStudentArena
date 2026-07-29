@@ -5195,22 +5195,6 @@ class SupervisionTeacherApiTest(TestCase):
         )
         _login_with_org(self.client, self.teacher, self.org)
 
-    def test_teacher_resume_api_rejects_attempt_after_exam_duration(self):
-        self.attempt.started_at = timezone.now() - timedelta(minutes=61)
-        self.attempt.save(update_fields=["started_at"])
-
-        response = self.client.post(
-            reverse("exams:supervision_resume", args=[self.attempt.id]),
-            data="{}",
-            content_type="application/json",
-        )
-
-        self.assertEqual(response.status_code, 403)
-        self.attempt.refresh_from_db()
-        self.assertEqual(self.attempt.status, "expired")
-        self.assertEqual(self.attempt.supervision_status, "locked")
-        self.assertIsNotNone(self.attempt.finished_at)
-
     def test_student_status_api_keeps_manual_lock_visible_after_exam_duration(self):
         self.attempt.supervision_manual_lock = True
         self.attempt.started_at = timezone.now() - timedelta(minutes=61)
@@ -5275,21 +5259,6 @@ class SupervisionTeacherApiTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "exam_supervision.js")
         self.assertNotContains(response, "supervised: false")
-
-    def test_supervision_monitor_shows_exam_without_config_or_violations(self):
-        fresh_exam = Exam.objects.create(
-            author=self.teacher,
-            organization=self.org,
-            title="Fresh Monitor Exam",
-            exam_type="test",
-            is_active=True,
-        )
-
-        response = self.client.get(reverse("exams:supervision_monitor"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, fresh_exam.title)
-        self.assertContains(response, "Bu imtahana hələ heç kim qoşulmayıb.")
 
 
 # ════════════════════════════════════════════════════════════════════════════

@@ -38,7 +38,6 @@ from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.supervision import (
     get_attempt_live_snapshot,
     get_attempt_supervision_status,
-    get_supervision_monitor_data,
     log_supervision_incident,
     save_supervision_config_from_form,
     sweep_expired_resume_windows,
@@ -647,26 +646,6 @@ class ExamSupervisionServicesTest(TestCase):
         self.assertEqual(attempt.supervision_status, "removed")
         self.assertTrue(attempt.is_finished)
         self.assertIsNotNone(attempt.finished_at)
-
-    def test_monitor_data_includes_exam_without_supervision_config_or_attempts(self):
-        data = get_supervision_monitor_data(self.org)
-
-        self.assertIn((self.exam.id, self.exam.title), data["supervised_exams"])
-        self.assertIn(self.exam.id, list(data["monitor_exams"].values_list("id", flat=True)))
-        self.assertFalse(data["monitor_attempts"].exists())
-
-    def test_monitor_data_includes_attempt_without_violations(self):
-        attempt = ExamAttempt.objects.create(
-            user=self.student,
-            exam=self.exam,
-            attempt_number=1,
-            status="in_progress",
-            supervision_violation_count=0,
-        )
-
-        data = get_supervision_monitor_data(self.org)
-
-        self.assertTrue(data["monitor_attempts"].filter(id=attempt.id).exists())
 
     @override_settings(EXAM_SUPERVISION_ENABLED=False)
     def test_disabled_supervision_does_not_log_lock_or_keep_config_enabled(self):

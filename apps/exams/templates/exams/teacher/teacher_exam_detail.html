@@ -166,16 +166,13 @@
                         <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
-                    {# Canlı nəzarət — imtahanı verən tələbələri real vaxtda izlə #}
-                    <a href="{% url 'exams:exam_live_monitor' exam.id %}"
-                       class="action-card action-card--slate">
-                        <span class="action-card__icon"><i class="fas fa-eye"></i></span>
-                        <span class="action-card__body">
-                            <span class="action-card__title">{% trans 'Canlı nəzarət' %}</span>
-                            <span class="action-card__desc">{% trans 'İmtahanı verən tələbələri real vaxtda izləyin' %}</span>
-                        </span>
-                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
-                    </a>
+                    {% comment %}
+                        "Canlı nəzarət" kartı silindi (2026-07-29): köhnə
+                        attempt-əsaslı nəzarət UI-ı tamamilə götürüldü. Canlı
+                        izləmə artıq İmtahan Nəzarət Sistemindəki zal oturumu
+                        monitorundadır. Pozuntu qeydi və avtomatik kilid
+                        arxa planda əvvəlki kimi işləyir.
+                    {% endcomment %}
 
                     {# Statistikaya bax #}
                     <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ exam_navigation_query }}"
