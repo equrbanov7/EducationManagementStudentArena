@@ -266,6 +266,7 @@ class ExamQuestion(models.Model):
         null=True,
         verbose_name=pgettext_lazy("exams.model.question.field", "image"),
     )
+    image_replaces_text = models.BooleanField(default=False)
     video = models.FileField(
         pgettext_lazy("exams.model.question.field", "video"),
         upload_to=question_media_path,
@@ -396,13 +397,14 @@ class ExamQuestionOption(models.Model):
         verbose_name=pgettext_lazy("exams.model.question_option.field", "text"),
     )
     # Düstur/şəkil variantları üçün: PDF idxalında 2D riyazi region (matris,
-    # kəsr, kök) bu sahəyə PNG kimi yazılır. Mətnlə birlikdə göstərilir.
+    # kəsr, kök) bu sahəyə PNG kimi yazılır və canonical render mətni əvəz edir.
     image = models.ImageField(
         upload_to=option_media_path,
         blank=True,
         null=True,
         verbose_name=pgettext_lazy("exams.model.question_option.field", "image"),
     )
+    image_replaces_text = models.BooleanField(default=False)
     is_correct = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy("exams.model.question_option.field", "is_correct"),

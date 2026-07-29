@@ -3,19 +3,13 @@
 import random
 from types import SimpleNamespace
 
-from django.core.files.storage import default_storage
-
 from apps.exams.constants import LABELS
 from apps.exams.services.question_snapshot import delivered_question_view
+from core.media_urls import protected_media_url
 
 
 def _storage_url(name):
-    if not name:
-        return ""
-    try:
-        return default_storage.url(name)
-    except (ValueError, NotImplementedError):
-        return ""
+    return protected_media_url(name)
 
 
 def delivered_selected_option_ids(answer) -> set[int]:
@@ -57,6 +51,7 @@ def safe_delivered_question(answer):
                 label=LABELS[index] if index < len(LABELS) else "",
                 text=option.get("text", "") or "",
                 image_url=_storage_url(option.get("image", "")),
+                image_replaces_text=bool(option.get("image_replaces_text", False)),
                 is_selected=option_id in selected_ids,
             )
         )
@@ -64,6 +59,7 @@ def safe_delivered_question(answer):
     return SimpleNamespace(
         text=delivered.get("text", "") or "",
         image_url=_storage_url(delivered.get("image", "")),
+        image_replaces_text=bool(delivered.get("image_replaces_text", False)),
         video_url=_storage_url(delivered.get("video", "")),
         answer_mode=delivered.get("answer_mode", "") or "",
         options=safe_options,

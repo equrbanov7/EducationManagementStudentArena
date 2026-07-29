@@ -13,7 +13,7 @@
 {% block ai_assistant_js %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260710-verdict">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20260729-source-render">
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20260707-final">
 {% endblock %}
 
@@ -273,12 +273,12 @@
                             {% trans "Apellyasiya rədd edildi" context "exams.template.student_exam_result" %}
                         </div>
                         {% endif %}
-                        <div class="q-text">
-                            {{ delivered.text|linebreaks }}
-                        </div>
+                        {% if not delivered.image_replaces_text or not delivered.image_url %}
+                        <div class="q-text">{{ delivered.text|linebreaks }}</div>
+                        {% endif %}
                         {% if delivered.image_url %}
                             <div class="question-media">
-                            <img src="{{ delivered.image_url }}" alt="{% trans 'alt_question_image' context 'exams.template.student_exam_result' %}">
+                            <img src="{{ delivered.image_url }}" alt="{% if delivered.image_replaces_text %}{{ delivered.text }}{% else %}{% trans 'alt_question_image' context 'exams.template.student_exam_result' %}{% endif %}"{% if delivered.image_replaces_text %} class="source-rendered-image"{% endif %}>
                             </div>
                         {% endif %}
 
@@ -315,9 +315,9 @@
                                         {% else %}
                                             <i class="far fa-circle option-icon"></i>
                                         {% endif %}
-                                        <span class="option-text">{{ opt.text }}</span>
+                                        <span class="option-text">{% if opt.label %}<strong>{{ opt.label }}.</strong>{% endif %}{% if not opt.image_replaces_text or not opt.image_url %} {{ opt.text }}{% endif %}</span>
                                         {% if opt.image_url %}
-                                            <img src="{{ opt.image_url }}" alt="" loading="lazy" class="img-fluid mt-2">
+                                            <img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" loading="lazy" class="img-fluid mt-2">
                                         {% endif %}
                                     </div>
 

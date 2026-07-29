@@ -18,9 +18,9 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
-from apps.exams.services.import_media import clear_stash, stash_math_images
-from apps.exams.services.parsing import extract_text_from_upload
+from apps.exams.services.import_media import bind_import_manifest, clear_stash
 from apps.exams.services.question_bank_attach import _question_fingerprint, accessible_banks
+from apps.exams.services.visual_import_upload import prepare_question_upload
 from core.tenancy import get_request_organization
 
 from ._shared import (
@@ -50,18 +50,21 @@ def question_bank_bulk_add(request, bank_id):
     math_token = (request.POST.get("math_token") or "").strip()
     if request.method == "POST":
         action = (request.POST.get("action") or "preview").strip()
+        upload_failed = False
         if action in ("preview", "save"):
             raw_text = request.POST.get("raw_text", "")
             uploaded = request.FILES.get("upload_file")
             if uploaded:
                 try:
-                    raw_text = extract_text_from_upload(uploaded)
-                    # Düstur/şəkil regionlarını müvəqqəti yığ (save addımında bağlanacaq).
-                    new_token = stash_math_images(uploaded)
-                    if new_token:
-                        clear_stash(math_token)  # köhnə yığını təmizlə
-                        math_token = new_token
+                    raw_text, math_token = prepare_question_upload(
+                        uploaded,
+                        previous_token=math_token,
+                        owner_id=request.user.pk,
+                        organization_id=bank.organization_id,
+                        preserve_visual=q_format == "test",
+                    )
                 except Exception as exc:  # noqa: BLE001
+                    upload_failed = True
                     messages.error(
                         request, pgettext("exams.view.bank.message", "Fayl oxunmadı: {error}").format(error=exc)
                     )
@@ -75,6 +78,22 @@ def question_bank_bulk_add(request, bank_id):
                     raw_text, existing_fp_map=bank_question_fp_map(bank, language=selected_language)
                 )
             parsed = analysis["parsed"]
+
+            if math_token:
+                try:
+                    bind_import_manifest(
+                        math_token,
+                        parsed,
+                        owner_id=request.user.pk,
+                        organization_id=bank.organization_id,
+                    )
+                except (OSError, ValueError) as exc:
+                    messages.error(request, str(exc))
+                    if action == "save":
+                        action = "preview"
+
+            if upload_failed and action == "save":
+                action = "preview"
 
             selected_from_request = parse_selected_indices(request.POST)
             selected = set(range(1, len(parsed) + 1)) if selected_from_request is None else selected_from_request

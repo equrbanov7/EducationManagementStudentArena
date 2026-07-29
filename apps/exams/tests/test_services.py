@@ -1381,11 +1381,24 @@ class ExamParsingServicesTest(TestCase):
         fake_page = Mock()
         fake_page.extract_text.return_value = "1) Sual A) Bir B) Iki C) Uc D) Dord Cavab: B"
 
-        with patch.object(parsing, "PdfReader", return_value=SimpleNamespace(pages=[fake_page])) as pdf_reader:
+        with (
+            patch.object(parsing, "PdfReader", return_value=SimpleNamespace(pages=[fake_page])) as pdf_reader,
+            patch("apps.exams.services.parsing.extraction.pipeline._pdf_safety_check") as safety_check,
+        ):
             text = parsing.extract_text_from_upload(uploaded)
 
         self.assertEqual(text, "1) Sual\nA) Bir\nB) Iki\nC) Uc\nD) Dord\nCavab: B")
+        safety_check.assert_called_once_with(uploaded)
         pdf_reader.assert_called_once_with(uploaded)
+
+    def test_extract_text_from_upload_maps_malformed_pdf_to_safe_error(self):
+        uploaded = SimpleUploadedFile("broken.pdf", b"%PDF-1.4 fake", content_type="application/pdf")
+
+        with self.assertRaises(ValueError) as captured:
+            parsing.extract_text_from_upload(uploaded)
+
+        self.assertTrue(str(captured.exception))
+        self.assertNotIn("Stream has ended", str(captured.exception))
 
     def test_extract_text_from_upload_fails_without_pypdf(self):
         uploaded = SimpleUploadedFile("questions.pdf", b"%PDF-1.4 fake", content_type="application/pdf")

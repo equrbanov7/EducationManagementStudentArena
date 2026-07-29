@@ -156,6 +156,11 @@ urlpatterns = [
     # P3: asinxron mətn-çıxarma (OCR-lı PDF importu üçün status-poll axını)
     path("import/extract-jobs/", views.start_text_extraction, name="start_text_extraction"),
     path("import/extract-jobs/<uuid:job_id>/", views.text_extraction_status, name="text_extraction_status"),
+    path(
+        "question-imports/<str:token>/visual/<int:source_index>.png",
+        views.question_import_visual_preview,
+        name="question_import_visual_preview",
+    ),
     path("export-jobs/<uuid:job_id>/waiting/", views.export_job_waiting, name="export_job_waiting"),
     path("export-jobs/<uuid:job_id>/download/", views.export_job_download, name="export_job_download"),
     # Müəllim → İmtahan mərkəzi sual göndərişi (elektron axın)
@@ -180,6 +185,11 @@ urlpatterns = [
         "question-submissions/<int:submission_id>/review/",
         views.question_submission_review,
         name="question_submission_review",
+    ),
+    path(
+        "question-submissions/<int:submission_id>/visual/<int:source_index>.png",
+        views.question_submission_visual_preview,
+        name="question_submission_visual_preview",
     ),
     path(
         "question-submissions/<int:submission_id>/decide/",

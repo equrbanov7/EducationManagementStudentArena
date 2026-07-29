@@ -42,6 +42,13 @@ Stil: exams/css/question_submission.css (qsubp-* / qsubs-stats).
             <span class="qsubp-card__text">{{ q.text }}</span>
         </div>
 
+        {% if submission.import_token and q.has_visual_source %}
+        <img class="qsubp-source-preview"
+             src="{% url 'exams:question_submission_visual_preview' submission.id q.source_index %}"
+             alt="{{ q.text }}"
+             loading="lazy">
+        {% endif %}
+
         {% if q.options %}
         <div class="qsubp-options">
             {% for label, opt_text in q.options.items %}

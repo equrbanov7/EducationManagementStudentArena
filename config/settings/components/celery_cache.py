@@ -110,6 +110,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.reap_stuck_extraction_jobs",
         "schedule": 300.0,  # seconds
     },
+    "exams-purge-expired-import-stashes": {
+        "task": "exams.purge_expired_import_stashes",
+        "schedule": 3600.0,  # seconds
+    },
     # Sistem Monitorinqi: worker/queue statistikası cache-ə → /metrics/
     # gauge-ları (CeleryWorkersDown/CeleryBeatStale alert-lərinin mənbəyi).
     "monitoring-collect-celery-stats": {

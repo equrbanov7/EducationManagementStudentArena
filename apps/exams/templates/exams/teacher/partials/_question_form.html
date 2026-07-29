@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static exam_filters %}
 
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/question_form.css' %}">
@@ -83,7 +83,7 @@
                     {% if editing and form.instance.image %}
                         <div class="media-preview" data-current-image-preview>
                             <span class="media-preview-label">{% trans "label_current_image" context "exams.template.add_exam_question" %}:</span>
-                            <img src="{{ form.instance.image.url }}" alt="{% trans 'alt_question_image' context 'exams.template.add_exam_question' %}" data-current-image>
+                            <img src="{{ form.instance.image|protected_media_url }}" alt="{% trans 'alt_question_image' context 'exams.template.add_exam_question' %}" data-current-image>
                             <button type="button" class="clear-media-btn" data-question-clear-media="image">
                                 {% trans "action_remove_image" context "exams.template.add_exam_question" %}
                             </button>
@@ -110,7 +110,7 @@
                         <div class="media-preview" data-current-video-preview>
                             <span class="media-preview-label">{% trans "label_current_video" context "exams.template.add_exam_question" %}:</span>
                             <video controls class="c3-1" data-current-video>
-                                <source src="{{ form.instance.video.url }}">
+                                <source src="{{ form.instance.video|protected_media_url }}">
                             </video>
                             <button type="button" class="clear-media-btn" data-question-clear-media="video">
                                 {% trans "action_remove_video" context "exams.template.add_exam_question" %}
