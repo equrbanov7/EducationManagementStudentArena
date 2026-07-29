@@ -419,15 +419,9 @@
     var startConfirm = document.getElementById("fxc-start-confirm");
     if (startConfirm) {
         startConfirm.addEventListener("click", function () {
-            var override = document.getElementById("fxc-override-check");
-            var body = override && override.checked ? "override=1" : "";
-            postAction(startUrl, body, "fxc-start-error", startConfirm).then(function (ok) {
-                if (!ok) {
-                    // Vaxt pəncərəsi xətasında override seçimini göstər.
-                    var wrap = document.getElementById("fxc-override-wrap");
-                    if (wrap) wrap.hidden = false;
-                }
-            });
+            // Vaxt pəncərəsi yoxlaması yoxdur (2026-07-29) — nəzarətçi
+            // hazır olanda başladır; override seçiminə ehtiyac qalmadı.
+            postAction(startUrl, "", "fxc-start-error", startConfirm);
         });
     }
 
