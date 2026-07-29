@@ -217,11 +217,12 @@
                 examFilter._refreshBootstrapSelect();
             }
         }
-        // Düymə görünürlüyü: hazır (entry_open) oturum varsa "başlat", aktiv
-        // oturum varsa "bitir" göstər.
-        var hasEntryOpen = sessions.some(function (s) { return s.state === "entry_open"; });
+        // Qarşılıqlı-istisna idarə (2026-07-29): zalda AKTİV imtahan gedirsə
+        // yalnız "bitir", getmirsə yalnız "başlat" görünür. Beləliklə düymə
+        // heç vaxt tamam itmir (bitirdikdən sonra "başlat" qayıdır), amma
+        // ikisi eyni anda da durmur.
         var hasActive = sessions.some(function (s) { return s.state === "active"; });
-        if (startAllBtn) startAllBtn.hidden = !hasEntryOpen;
+        if (startAllBtn) startAllBtn.hidden = hasActive;
         if (endAllBtn) endAllBtn.hidden = !hasActive;
         if (openAllBtn) openAllBtn.hidden = true; // prepared oturumlar snapshot-da deyil; server yoxlayır
     }
@@ -230,7 +231,12 @@
         var text = (filterInput && filterInput.value || "").trim().toLowerCase();
         var status = statusFilter && statusFilter.value;
         var exam = examFilter && examFilter.value;
-        if (status && s.status !== status) return false;
+        if (status) {
+            // "Gözləyir" filtri texniki waiting+ready statuslarının İKİSİNİ də
+            // tutur — operator üçün fərqləri yoxdur (ikisi də start gözləyir).
+            var effective = s.status === "ready" ? "waiting" : s.status;
+            if (effective !== status) return false;
+        }
         if (exam && String(s.session_id) !== String(exam)) return false;
         if (text) {
             var hay = (s.name + " " + s.username + " " + (s.exam_title || "")).toLowerCase();
@@ -384,10 +390,9 @@
     function doStartAll(modalUi) {
         modalUi.setLoading(true);
         modalUi.showError("");
-        post(startAllUrl, modalUi.override ? "override=1" : "").then(function (d) {
+        post(startAllUrl, "").then(function (d) {
             if (d && d.success) { modalUi.close(); fetchSnapshot(); return; }
             modalUi.showError((d && d.error) || t("start.failed", "Başlatmaq mümkün olmadı."));
-            if (d && d.can_override) modalUi.showOverride(t("start.override", "Vaxt pəncərəsindən asılı olmayaraq məcburi başlat"));
             modalUi.setLoading(false);
         }).catch(function () { modalUi.showError(t("start.failed", "Başlatmaq mümkün olmadı.")); modalUi.setLoading(false); });
     }
@@ -404,7 +409,7 @@
                 message: t("confirmStartAll", "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"),
                 confirmText: t("start.confirm", "Başlat"),
                 confirmClass: "fxc-btn-success",
-                onConfirm: function (state, modalUi) { modalUi.override = state.override; doStartAll(modalUi); }
+                onConfirm: function (state, modalUi) { doStartAll(modalUi); }
             });
         });
     }

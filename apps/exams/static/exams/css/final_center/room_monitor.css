@@ -1,0 +1,133 @@
+/* Zal nəzarəti (room monitor) — panel, kompüter şəbəkəsi və nəzarətçi siyahısı.
+
+   2026-07-29: bu üslublar template içində `<style nonce>` blokunda idi.
+   Layihə qaydası inline/internal CSS-ə icazə vermir (CSP: SELF + NONCE) —
+   ona görə xarici fayla çıxarıldı. */
+
+.rma-panel { border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; margin: 0 0 1rem; background: var(--card-bg, #fff); }
+.rma-panel__summary { cursor: pointer; list-style: none; padding: .85rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-weight: 700; }
+.rma-panel__summary::-webkit-details-marker { display: none; }
+.rma-panel__summary:hover { background: rgba(37,99,235,.04); }
+.rma-panel__right { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.rma-toggle { display: inline-flex; align-items: center; gap: .4rem; color: #2563eb; font-size: .82rem; font-weight: 700; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 999px; padding: .25rem .7rem; white-space: nowrap; }
+.rma-chevron { transition: transform .2s ease; }
+.rma-panel[open] .rma-chevron { transform: rotate(180deg); }
+.rma-toggle__close { display: none; }
+.rma-panel[open] .rma-toggle__open { display: none; }
+.rma-panel[open] .rma-toggle__close { display: inline; }
+/* Toolbar Bootstrap select-ləri — kompakt (böyük default toggle yox) */
+.fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 1 210px; width: auto; min-width: 180px; }
+.fxc-toolbar .fxc-toolbar-select .bootstrap-single-select__toggle { min-height: 0; padding: 9px 13px; border-radius: 10px; font-size: .92rem; font-weight: 500; background: #fff; border-color: #CBD5E1; box-shadow: none; }
+@media (max-width: 640px) { .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 0 auto; width: 100%; } }
+.rma-chip { display: inline-flex; min-width: 1.4rem; justify-content: center; padding: 0 .4rem; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: .78rem; margin-left: .35rem; }
+.rma-current { display: flex; gap: .3rem; flex-wrap: wrap; font-weight: 500; }
+.rma-tag { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .12rem .55rem; font-size: .78rem; }
+.rma-muted { color: #6b7280; font-size: .85rem; }
+.rma-form { padding: 0 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .65rem; }
+.rma-search { position: relative; }
+.rma-search i { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+.rma-search__input { width: 100%; padding: .5rem .6rem .5rem 2rem; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; background: transparent; color: inherit; }
+.rma-list { max-height: 260px; overflow-y: auto; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; }
+.rma-item { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-color, #f1f1f1); cursor: pointer; }
+.rma-item:last-child { border-bottom: 0; }
+.rma-item:hover { background: rgba(37,99,235,.06); }
+.rma-item__name { font-weight: 600; }
+.rma-item__user { color: #6b7280; font-size: .8rem; font-family: ui-monospace, monospace; margin-left: auto; }
+.rma-item__kaf { color: #2563eb; font-size: .76rem; margin-left: auto; background: #eff6ff; padding: .1rem .5rem; border-radius: 999px; white-space: nowrap; }
+.rma-item__kaf--none { color: #9ca3af; background: transparent; }
+.rma-item__namelink { color: inherit; text-decoration: none; }
+.rma-item__namelink:hover { color: #2563eb; text-decoration: underline; }
+.rma-chip-sel__name { color: inherit; text-decoration: none; }
+a.rma-chip-sel__name:hover { text-decoration: underline; }
+.rma-empty { padding: 1rem; text-align: center; }
+.rma-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .2rem; min-height: .5rem; }
+.rma-chip-sel { display: inline-flex; align-items: center; gap: .4rem; background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .25rem .5rem .25rem .7rem; font-size: .82rem; font-weight: 600; }
+.rma-chip-sel__x { border: 0; background: transparent; color: #6366f1; font-size: 1.05rem; line-height: 1; cursor: pointer; padding: 0 .1rem; }
+.rma-chip-sel__x:hover { color: #b91c1c; }
+.rma-result { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-color, #f1f1f1); cursor: pointer; }
+.rma-result:last-child { border-bottom: 0; }
+.rma-result:hover { background: rgba(37,99,235,.06); }
+.rma-result__add { color: #16a34a; font-weight: 700; border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: 8px; width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; }
+.rma-result__add:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+.rma-loading, .rma-hint { padding: .7rem; text-align: center; color: #6b7280; font-size: .82rem; }
+.rma-form__foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.rma-cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
+.rma-comp { border: 1px solid var(--border-color, #e5e7eb); border-radius: 10px; padding: .6rem .7rem; background: var(--card-bg, #fff); border-left: 4px solid #cbd5e1; }
+.rma-comp--busy { border-left-color: #94a3b8; }
+.rma-comp--active { border-left-color: #16a34a; }
+.rma-comp--ready { border-left-color: #0ea5e9; }
+.rma-comp--waiting { border-left-color: #f59e0b; }
+.rma-comp--completed { border-left-color: #6366f1; }
+.rma-comp--removed { border-left-color: #ef4444; }
+.rma-comp__head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.rma-comp__label { font-weight: 700; display: flex; align-items: center; gap: .35rem; }
+.rma-comp__seat { color: #6b7280; font-size: .78rem; }
+.rma-comp__meta { margin: .3rem 0; display: flex; flex-direction: column; gap: .1rem; }
+.rma-mac { font-family: ui-monospace, monospace; font-size: .72rem; color: #6b7280; }
+.rma-comp__live { margin-top: .3rem; display: flex; flex-direction: column; }
+.rma-comp__exam { font-size: .8rem; font-weight: 700; }
+.rma-comp__student { font-size: .8rem; color: #374151; }
+.rma-comp__idle { margin-top: .3rem; font-size: .78rem; color: #9ca3af; }
+</style>
+
+/* ── Çoxlu kompüter: sabit hündürlük + öz daxili scroll ──────────────────
+   25+ kompüterli zalda şəbəkə bütün səhifəni uzadıb görüntünü dağıdırdı.
+   İndi siyahı öz sahəsində sürüşür, səhifə isə qısa qalır. */
+.rma-cscroll {
+    max-height: 420px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    padding: .6rem;
+    background: #fbfdff;
+}
+
+.rma-cscroll::-webkit-scrollbar { width: 10px; }
+.rma-cscroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+.rma-cscroll::-webkit-scrollbar-track { background: transparent; }
+
+.rma-csearch {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: .1rem 0 .6rem;
+}
+
+.rma-csearch__input {
+    flex: 1 1 auto;
+    max-width: 320px;
+    padding: .45rem .7rem;
+    font-size: .86rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.rma-csearch__input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.rma-csearch__count {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.rma-comp[hidden] { display: none; }
+
+.rma-cempty {
+    padding: 1rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: .86rem;
+}
+
+@media (max-width: 640px) {
+    .rma-cscroll { max-height: 320px; }
+    .rma-csearch__input { max-width: none; }
+}

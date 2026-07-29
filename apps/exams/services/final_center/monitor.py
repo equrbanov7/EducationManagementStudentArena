@@ -19,7 +19,6 @@ from apps.exams.domain.final_center import (
 )
 
 from .presence import presence_map
-from .sessions import maybe_auto_end
 from .tickets import sync_ticket_completion
 
 # Bitmiş tələbənin nəticəsi kompüter xəritəsində maks bu qədər saniyə görünür,
@@ -28,8 +27,9 @@ from .tickets import sync_ticket_completion
 FINAL_RESULT_VISIBLE_SECONDS = 180
 
 # Biletsiz (ExamStudentPin) cəhdin bitmiş nəticəsi zal monitorunda bu qədər
-# saat görünür (canlı cəhdlər həmişə görünür).
-ROOM_ATTEMPT_FINISHED_VISIBLE_HOURS = 8
+# Çıxarılmış tələbə operator reaksiyası üçün bir müddət görünür, sonra düşür
+# (eyni gündə yüzlərlə imtahanda xəritə zibillənməsin).
+REMOVED_VISIBLE_SECONDS = 900
 
 
 def _visible_grid_tickets(tickets):
@@ -54,6 +54,11 @@ def _visible_grid_tickets(tickets):
             if ticket.seat_number is not None and ticket.seat_number in occupied_seats:
                 continue
             if ticket.completed_at and (now - ticket.completed_at).total_seconds() > FINAL_RESULT_VISIBLE_SECONDS:
+                continue
+        elif ticket.status == TICKET_STATUS_REMOVED:
+            # Operator bir müddət görsün (bərpa/əlavə şans qərarı üçün), sonra
+            # sətir düşsün — günboyu yığılan çıxarılmışlar xəritəni doldurmasın.
+            if ticket.updated_at and (now - ticket.updated_at).total_seconds() > REMOVED_VISIBLE_SECONDS:
                 continue
         visible.append(ticket)
     return visible
@@ -100,9 +105,6 @@ def _ticket_row(ticket, presence, exam_title=None):
 
 def session_monitor_snapshot(session):
     """Oturumun canlı vəziyyəti: sayğaclar + tələbə sətirləri (kompakt)."""
-    # Rəsmi server deadline-ı lazily tətbiq olunur.
-    maybe_auto_end(session)
-
     tickets = list(
         session.tickets.select_related("student", "attempt", "exam").order_by(
             "seat_number", "student__first_name", "id"
@@ -161,9 +163,8 @@ def room_live_sessions(room):
             room=room, state__in=(ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)
         ).order_by("scheduled_start", "id")
     )
-    # Rəsmi deadline-ı lazily tətbiq et, sonra hələ canlı qalanları saxla.
-    for session in sessions:
-        maybe_auto_end(session)
+    # Planlaşdırılan sona görə avtomatik bitirmə YOXDUR (2026-07-29): oturum
+    # yalnız nəzarətçinin "bitir"i və ya 22:00 süpürgəsi ilə bağlanır.
     return [s for s in sessions if s.state in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE)]
 
 
@@ -172,14 +173,15 @@ def _room_attempt_rows(room):
     Biletsiz (ExamStudentPin) canlı cəhdlər — zal kompüterindən girişdə cəhd
     ``room``/``room_computer`` ilə möhürlənir (bax final_center view). Oturum/
     bilet sistemi işlədilməyən imtahanlar da zal monitorunda görünsün deyə
-    snapshot-a bu sətirlər əlavə olunur. Bitmiş cəhdlər son
-    ``ROOM_ATTEMPT_FINISHED_VISIBLE_HOURS`` saat ərzində göstərilir.
+    snapshot-a bu sətirlər əlavə olunur. Bitmiş cəhdlər biletlərlə EYNİ qısa
+    pəncərədə (``FINAL_RESULT_VISIBLE_SECONDS``) görünüb düşür — əvvəlki 8 saat
+    eyni gündə çoxlu imtahan olanda xəritəni zibilləyirdi.
     """
     from datetime import timedelta
 
     from apps.exams.models import ExamAttempt
 
-    since = timezone.now() - timedelta(hours=ROOM_ATTEMPT_FINISHED_VISIBLE_HOURS)
+    since = timezone.now() - timedelta(seconds=FINAL_RESULT_VISIBLE_SECONDS)
     attempts = (
         ExamAttempt.objects.filter(room=room, is_trial=False)
         .filter(Q(status="in_progress") | Q(finished_at__gte=since))

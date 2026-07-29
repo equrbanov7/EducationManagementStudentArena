@@ -43,6 +43,7 @@ from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
 from django.core.files.storage import default_storage
+from django.db.models import Q
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import redirect
 from django.utils._os import safe_join
@@ -64,6 +65,9 @@ _PRIVATE_PREFIXES: tuple[str, ...] = (
     "exam_paints/",
     "labs/",
     "question_media/",
+    "bank_media/",
+    "question_imports/",
+    "import_jobs/",
     "trial_exams/",
     "journal_corrections/",
 )
@@ -221,65 +225,160 @@ def _check_lab_file_access(user, path: str) -> bool:
 
 
 def _check_question_media_access(user, path: str) -> bool:
-    """
-    Verify access to ``question_media/`` files.
+    """Verify access to an exam question or option media file.
 
-    Question images and videos belong to an ``Exam`` that is scoped to an
-    ``Organization``.  Access is granted to any user who holds an **active
-    membership** in that organization (students, teachers, and admins alike).
-
-    Path format: ``question_media/exam_{exam_id}/q_{question_id}/{filename}``
-    The ``exam_{exam_id}`` segment is used to resolve the owning Exam and its
-    Organization; all other path segments are ignored for access purposes.
-
-    Returns ``False`` (deny) when:
-    * the path does not contain a recognisable ``exam_*`` segment, or
-    * the exam does not exist in the database, or
-    * the user has no active membership in the exam's organization.
+    Valid paths identify both the owning exam and the concrete question or
+    option. Authors and teacher-level members may manage any valid target in
+    that exam. A student may access a target only after an ``ExamAnswer`` for
+    the target question has been created in one of their attempts on the same
+    exam; an attempt alone must not expose undelivered random-pool questions.
     """
     clean = path.lstrip("/")
-    # Expected format: question_media/exam_{exam_id}/...
     parts = clean.split("/")
-    if len(parts) < 2:
+    if len(parts) < 4 or parts[0] != "question_media":
         return False
-    exam_segment = parts[1]  # e.g. "exam_42"
+
+    exam_segment = parts[1]
     if not exam_segment.startswith("exam_"):
         return False
     exam_id_str = exam_segment[len("exam_") :]
-    if not exam_id_str.isdigit():
+    if not exam_id_str.isascii() or not exam_id_str.isdigit():
+        return False
+
+    target_segment = parts[2]
+    target_kind, separator, target_id_str = target_segment.partition("_")
+    if (
+        separator != "_"
+        or target_kind not in {"q", "opt"}
+        or (target_id_str != "new" and (not target_id_str.isascii() or not target_id_str.isdigit()))
+    ):
+        return False
+
+    exam_id = int(exam_id_str)
+    ExamQuestion = django_apps.get_model("exams", "ExamQuestion")
+
+    if target_kind == "q":
+        questions = ExamQuestion.objects.select_related("exam__organization").filter(exam_id=exam_id)
+        if target_id_str == "new":
+            questions = questions.filter(Q(image=clean) | Q(video=clean))
+        else:
+            questions = questions.filter(pk=int(target_id_str))
+        try:
+            question = questions.get()
+        except (ExamQuestion.DoesNotExist, ExamQuestion.MultipleObjectsReturned):
+            return False
+        media_names = {
+            str(question.image.name or ""),
+            str(question.video.name or ""),
+        }
+    else:
+        ExamQuestionOption = django_apps.get_model("exams", "ExamQuestionOption")
+        options = ExamQuestionOption.objects.select_related("question__exam__organization").filter(
+            question__exam_id=exam_id
+        )
+        if target_id_str == "new":
+            options = options.filter(image=clean)
+        else:
+            options = options.filter(pk=int(target_id_str))
+        try:
+            option = options.get()
+        except (ExamQuestionOption.DoesNotExist, ExamQuestionOption.MultipleObjectsReturned):
+            return False
+        question = option.question
+        media_names = {str(option.image.name or "")}
+    if clean not in media_names:
+        return False
+
+    exam = question.exam
+    if exam.organization_id is None:
+        return False
+
+    # The exam's author and teacher-level tenant members manage its media, but
+    # only after the path target has been proven to belong to this exact exam.
+    if getattr(exam, "author_id", None) == user.id:
+        return True
+    if _user_has_org_membership(user, exam.organization, min_level=_TEACHER_MIN_LEVEL):
+        return True
+
+    ExamAnswer = django_apps.get_model("exams", "ExamAnswer")
+    return ExamAnswer.objects.filter(
+        attempt__exam_id=exam.pk,
+        attempt__user_id=user.id,
+        question_id=question.pk,
+    ).exists()
+
+
+def _check_bank_media_access(user, path: str) -> bool:
+    """Verify access to ``bank_media/bank_<id>/...`` files.
+
+    The bank creator always has access. Tenant-owned banks are also visible to
+    active teacher-level members of the same organization. Legacy banks
+    without an organization remain private to their creator.
+    """
+    clean = path.lstrip("/")
+    parts = clean.split("/")
+    if len(parts) < 3 or parts[0] != "bank_media":
+        return False
+
+    bank_segment = parts[1]
+    if not bank_segment.startswith("bank_"):
+        return False
+    bank_id = bank_segment[len("bank_") :]
+    if not bank_id.isdigit():
         return False
 
     try:
-        Exam = django_apps.get_model("exams", "Exam")
-        ExamAttempt = django_apps.get_model("exams", "ExamAttempt")
-
-        exam = Exam.objects.select_related("organization").get(pk=int(exam_id_str))
-        if exam.organization is None:
-            return False
-
-        # Active org members (teachers, admins, enrolled students) may view.
-        if _user_has_org_membership(user, exam.organization, min_level=0):
-            return True
-
-        # The exam's author always has access to its own question media.
-        if getattr(exam, "author_id", None) == user.id:
-            return True
-
-        # A student legitimately tied to THIS exam — even without a formal
-        # Membership row — must be able to see the question's image/video:
-        #   * they have (or had) an attempt on the exam, or
-        #   * they are individually allowed, or in an allowed group.
-        # Scope stays strict: access is bound to this one exam, not the org.
-        if ExamAttempt.objects.filter(exam=exam, user=user).exists():
-            return True
-        if exam.allowed_users.filter(pk=user.id).exists():
-            return True
-        if exam.allowed_groups.filter(students=user).exists():
-            return True
-
+        QuestionBank = django_apps.get_model("exams", "QuestionBank")
+        bank = QuestionBank.objects.select_related("organization").get(pk=int(bank_id))
+    except (QuestionBank.DoesNotExist, ValueError):
         return False
-    except (Exam.DoesNotExist, ValueError):
+
+    if bank.created_by_id == user.id:
+        return True
+    if bank.organization_id is None or not bank.is_shared:
         return False
+    # `accessible_banks()` imtahan mərkəzi istifadəçilərinə başqa müəllimin
+    # shared bankını göstərmir; media endpoint-i də həmin görünürlükdən geniş
+    # olmamalıdır. Property mərkəzləşdirilmiş rol həllindən gəlir.
+    if getattr(user, "is_exam_center", False):
+        return False
+    # Bank sualları tələbəyə təqdim olunan imtahan mediası deyil; cavabları da
+    # ehtiva edə bilər. Ona görə eyni tenant daxilində belə teacher-level RBAC
+    # tələb olunur. Tələbə üçün seçilən sual ayrıca ``question_media/``-ya
+    # köçürülür və onun öz imtahan/attempt icazəsi ilə qorunur.
+    return _user_has_org_membership(
+        user,
+        bank.organization,
+        min_level=_TEACHER_MIN_LEVEL,
+    )
+
+
+def _check_question_import_access(user, path: str) -> bool:  # noqa: ARG001
+    """Deny direct HTTP access to temporary ``question_imports/`` files."""
+    return False
+
+
+def _check_import_job_access(user, path: str) -> bool:
+    """Verify access to ``TextExtractionJob.file`` and ``result_file``.
+
+    **Yalnız job sahibi.** Yüklənən fayl xam sual mənbəyidir (düzgün cavabları
+    da daşıya bilər), ona görə eyni tenant daxilində belə paylaşılmır.
+    Tapılmayan və dublikat uyğunluqlar da rədd olunur.
+    """
+    clean = path.lstrip("/")
+    if not clean.startswith("import_jobs/") or clean == "import_jobs/":
+        return False
+
+    try:
+        TextExtractionJob = django_apps.get_model("exams", "TextExtractionJob")
+        job = TextExtractionJob.objects.get(Q(file=clean) | Q(result_file=clean))
+    except (
+        TextExtractionJob.DoesNotExist,
+        TextExtractionJob.MultipleObjectsReturned,
+    ):
+        return False
+
+    return job.user_id == user.id
 
 
 def _check_course_resource_access(user, path: str) -> bool:
@@ -362,6 +461,9 @@ _ACCESS_CHECKERS: dict[str, object] = {
     "labs/": _check_lab_file_access,
     "course_resources/": _check_course_resource_access,
     "question_media/": _check_question_media_access,
+    "bank_media/": _check_bank_media_access,
+    "question_imports/": _check_question_import_access,
+    "import_jobs/": _check_import_job_access,
     "trial_exams/": _check_trial_exam_access,
     "journal_corrections/": _check_journal_correction_access,
 }
@@ -405,30 +507,33 @@ def protected_media(request, path: str):
     Supports X-Accel-Redirect for nginx: set ``MEDIA_ACCEL_REDIRECT_URL``
     in settings to the internal location prefix (e.g. ``/internal_media``).
     """
-    # Sanitize to prevent path traversal
+    # Normalize before classifying the prefix.  Otherwise a path such as
+    # ``post_images/../bank_media/...`` could be classified as public but
+    # resolve to a private file inside MEDIA_ROOT.
+    clean_path = posixpath.normpath(path).lstrip("/")
+    if clean_path == ".." or clean_path.startswith("../"):
+        raise Http404("Invalid media path.")
+
     try:
-        abs_path = safe_join(str(settings.MEDIA_ROOT), path)
+        abs_path = safe_join(str(settings.MEDIA_ROOT), clean_path)
     except SuspiciousFileOperation:
         raise Http404("Invalid media path.")
 
-    if _is_private(path):
+    is_private = _is_private(clean_path)
+    if is_private:
         if not request.user.is_authenticated:
             from django.contrib.auth.views import redirect_to_login
 
             return redirect_to_login(request.get_full_path())
-        if not _check_private_media_access(request, path):
+        if not _check_private_media_access(request, clean_path):
             raise PermissionDenied
-
-    clean_path = posixpath.normpath(path).lstrip("/")
-    if clean_path == ".." or clean_path.startswith("../"):
-        raise Http404("Invalid media path.")
 
     if getattr(settings, "OBJECT_STORAGE_ENABLED", False):
         if not default_storage.exists(clean_path):
             raise Http404("Media file not found.")
 
         response = redirect(default_storage.url(clean_path))
-        if _is_private(path):
+        if is_private:
             response["Cache-Control"] = "private, no-store"
         else:
             response["Cache-Control"] = "public, max-age=3600"
@@ -443,7 +548,7 @@ def protected_media(request, path: str):
         response["X-Accel-Redirect"] = f"{accel_url}/{clean_path}"
         response["Content-Type"] = mimetypes.guess_type(path)[0] or "application/octet-stream"
         response["X-Content-Type-Options"] = "nosniff"
-        if _is_private(path):
+        if is_private:
             response["Cache-Control"] = "private, no-store"
         return response
 
@@ -456,7 +561,7 @@ def protected_media(request, path: str):
     content_type = mimetypes.guess_type(abs_path)[0] or "application/octet-stream"
     response = FileResponse(open(abs_path, "rb"), content_type=content_type)
     response["X-Content-Type-Options"] = "nosniff"
-    if _is_private(path):
+    if is_private:
         response["Cache-Control"] = "private, no-store"
     else:
         response["Cache-Control"] = "public, max-age=3600"

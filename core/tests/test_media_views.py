@@ -160,6 +160,9 @@ class ProtectedMediaViewTest(TestCase):
         self.assertTrue(_is_private("labs/submissions/sub.zip"))
         self.assertTrue(_is_private("avatars/photo.png"))
         self.assertTrue(_is_private("course_resources/lecture.pdf"))
+        self.assertTrue(_is_private("bank_media/bank_1/q_1/image.png"))
+        self.assertTrue(_is_private("question_imports/token/q_1.png"))
+        self.assertTrue(_is_private("import_jobs/2026/07/source.pdf"))
 
         self.assertFalse(_is_private("post_images/cover.jpg"))
         self.assertFalse(_is_private("course_covers/cover.png"))
@@ -628,6 +631,8 @@ class QuestionMediaAccessTest(TestCase):
         )
 
         self.file_path = f"question_media/exam_{self.exam.pk}/q_{self.question.pk}/img.jpg"
+        self.question.image = self.file_path
+        self.question.save(update_fields=["image"])
 
         # Create the physical file
         file_dir = os.path.join(self.media_tmp, "question_media", f"exam_{self.exam.pk}", f"q_{self.question.pk}")
@@ -753,12 +758,14 @@ class QuestionMediaAccessCheckerRegistryTest(TestCase):
 
     Success criteria:
     * ``question_media/`` has a dedicated entry in ``_ACCESS_CHECKERS``.
-    * Access is granted only to active members of the exam's organization.
-    * Non-members and unauthenticated users are strictly denied.
+    * A student's attempt alone does not expose random-pool question media.
+    * Only questions represented by ``ExamAnswer`` rows, and their options,
+      are available to that student.
+    * A path target must belong to the exam encoded in the same path.
     """
 
     def setUp(self):
-        from apps.exams.models import Exam
+        from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
         from apps.organizations.models import Membership, Organization
         from core.constants import OrganizationType
 
@@ -772,11 +779,16 @@ class QuestionMediaAccessCheckerRegistryTest(TestCase):
             email="checker_outsider@example.com",
             password="StrongPass123!",
         )
+        self.author = User.objects.create_user(
+            username="checker_author",
+            email="checker_author@example.com",
+            password="StrongPass123!",
+        )
 
         self.org = Organization.objects.create(
             name="Checker Registry Org",
             org_type=OrganizationType.SCHOOL,
-            owner=self.allowed_user,
+            owner=self.author,
             status="active",
             is_active=True,
         )
@@ -791,11 +803,47 @@ class QuestionMediaAccessCheckerRegistryTest(TestCase):
 
         self.exam = Exam.objects.create(
             title="Registry Test Exam",
-            author=self.allowed_user,
+            author=self.author,
             organization=self.org,
             is_active=True,
         )
-        self.path = f"question_media/exam_{self.exam.pk}/q_1/test.png"
+        self.q1 = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Delivered question",
+            order=1,
+            points=1,
+        )
+        self.q2 = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Undelivered random-pool question",
+            order=2,
+            points=1,
+        )
+        self.q1_option = ExamQuestionOption.objects.create(
+            question=self.q1,
+            label="A",
+            text="Delivered option",
+        )
+        self.q2_option = ExamQuestionOption.objects.create(
+            question=self.q2,
+            label="A",
+            text="Undelivered option",
+        )
+
+        prefix = f"question_media/exam_{self.exam.pk}"
+        self.q1_path = f"{prefix}/q_{self.q1.pk}/question.png"
+        self.q2_path = f"{prefix}/q_{self.q2.pk}/question.png"
+        self.q1_option_path = f"{prefix}/opt_{self.q1_option.pk}/option.png"
+        self.q2_option_path = f"{prefix}/opt_{self.q2_option.pk}/option.png"
+        self.q1.image = self.q1_path
+        self.q2.image = self.q2_path
+        self.q1.save(update_fields=["image"])
+        self.q2.save(update_fields=["image"])
+        self.q1_option.image = self.q1_option_path
+        self.q2_option.image = self.q2_option_path
+        self.q1_option.save(update_fields=["image"])
+        self.q2_option.save(update_fields=["image"])
+        self.path = self.q1_path
 
     def test_question_media_access_checker_exists(self):
         """
@@ -811,26 +859,75 @@ class QuestionMediaAccessCheckerRegistryTest(TestCase):
         checker = _ACCESS_CHECKERS["question_media/"]
         self.assertTrue(callable(checker), "_ACCESS_CHECKERS['question_media/'] must be callable")
 
-    def test_question_media_access_only_for_allowed_org_members(self):
-        """
-        Only active members of the exam's organization may access question_media files.
-        Non-members are denied regardless of authentication status.
-        """
+    def test_student_can_access_only_delivered_question_and_its_options(self):
+        """An ExamAnswer grants only its question and option media."""
+        from apps.exams.models import ExamAnswer, ExamAttempt
         from core.media_views import _ACCESS_CHECKERS
 
         checker = _ACCESS_CHECKERS["question_media/"]
 
-        # Allowed: user is an active member of the exam's org
-        self.assertTrue(
-            checker(self.allowed_user, self.path),
-            "Active org member must be granted access to question_media",
-        )
+        # Sadə same-org membership sual məzmununa giriş vermir.
+        self.assertFalse(checker(self.allowed_user, self.q1_path))
+
+        attempt = ExamAttempt.objects.create(user=self.allowed_user, exam=self.exam, status="in_progress")
+
+        # Attempt-in özü random pool-dakı heç bir sualı açmır.
+        self.assertFalse(checker(self.allowed_user, self.q1_path))
+        self.assertFalse(checker(self.allowed_user, self.q1_option_path))
+
+        ExamAnswer.objects.create(attempt=attempt, question=self.q1)
+
+        self.assertTrue(checker(self.allowed_user, self.q1_path))
+        self.assertTrue(checker(self.allowed_user, self.q1_option_path))
+        self.assertFalse(checker(self.allowed_user, self.q2_path))
+        self.assertFalse(checker(self.allowed_user, self.q2_option_path))
+
+        # Müəllif idarəetmə zamanı hələ çatdırılmamış sualı da görə bilər.
+        self.assertTrue(checker(self.author, self.q2_path))
+        self.assertTrue(checker(self.author, self.q2_option_path))
 
         # Denied: user has no membership in the exam's org
         self.assertFalse(
-            checker(self.denied_user, self.path),
+            checker(self.denied_user, self.q1_path),
             "Non-member must be denied access to question_media",
         )
+
+    def test_question_and_option_targets_must_belong_to_path_exam(self):
+        """Author bypass does not authorize a target from a different exam."""
+        from apps.exams.models import Exam
+        from core.media_views import _ACCESS_CHECKERS
+
+        other_exam = Exam.objects.create(
+            title="Other Registry Test Exam",
+            author=self.author,
+            organization=self.org,
+            is_active=True,
+        )
+        checker = _ACCESS_CHECKERS["question_media/"]
+
+        wrong_question_path = f"question_media/exam_{other_exam.pk}/q_{self.q1.pk}/question.png"
+        wrong_option_path = f"question_media/exam_{other_exam.pk}/opt_{self.q1_option.pk}/option.png"
+
+        self.assertFalse(checker(self.author, wrong_question_path))
+        self.assertFalse(checker(self.author, wrong_option_path))
+
+    def test_legacy_new_paths_resolve_only_by_exact_field_name(self):
+        """ModelForm create zamanı yaranan q_new/opt_new yolları da scope-ludur."""
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+        prefix = f"question_media/exam_{self.exam.pk}"
+        question_path = f"{prefix}/q_new/manual-question.png"
+        option_path = f"{prefix}/opt_new/manual-option.png"
+        self.q1.image = question_path
+        self.q1.save(update_fields=["image"])
+        self.q1_option.image = option_path
+        self.q1_option.save(update_fields=["image"])
+
+        self.assertTrue(checker(self.author, question_path))
+        self.assertTrue(checker(self.author, option_path))
+        self.assertFalse(checker(self.author, f"{prefix}/q_new/not-the-field.png"))
+        self.assertFalse(checker(self.author, f"{prefix}/opt_new/not-the-field.png"))
 
     def test_question_media_checker_denies_nonexistent_exam(self):
         """
@@ -857,3 +954,207 @@ class QuestionMediaAccessCheckerRegistryTest(TestCase):
             checker(self.allowed_user, malformed),
             "Malformed question_media path must be denied",
         )
+
+
+class ImportAndBankMediaAccessTest(TestCase):
+    """Tenant and ownership checks for import and question-bank media."""
+
+    def setUp(self):
+        from apps.exams.models import QuestionBank, TextExtractionJob
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        self.creator = User.objects.create_user(
+            username="private_media_creator",
+            email="private_media_creator@example.com",
+            password="StrongPass123!",
+        )
+        self.member = User.objects.create_user(
+            username="private_media_member",
+            email="private_media_member@example.com",
+            password="StrongPass123!",
+        )
+        self.teacher = User.objects.create_user(
+            username="private_media_teacher",
+            email="private_media_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.inactive_teacher = User.objects.create_user(
+            username="private_media_inactive_teacher",
+            email="private_media_inactive_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.outsider = User.objects.create_user(
+            username="private_media_outsider",
+            email="private_media_outsider@example.com",
+            password="StrongPass123!",
+        )
+
+        self.org = Organization.objects.create(
+            name="Private Media Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.creator,
+            status="active",
+            is_active=True,
+        )
+        self.other_org = Organization.objects.create(
+            name="Private Media Other Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.outsider,
+            status="active",
+            is_active=True,
+        )
+
+        Membership.objects.create(
+            user=self.member,
+            organization=self.org,
+            role=self.org.roles.get(name="student"),
+            is_active=True,
+            is_primary=True,
+        )
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_active=True,
+            is_primary=True,
+        )
+        Membership.objects.create(
+            user=self.inactive_teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_active=False,
+            is_primary=True,
+        )
+        Membership.objects.create(
+            user=self.outsider,
+            organization=self.other_org,
+            role=self.other_org.roles.get(name="teacher"),
+            is_active=True,
+            is_primary=True,
+        )
+
+        self.bank = QuestionBank.objects.create(
+            name="Organization Bank",
+            created_by=self.creator,
+            organization=self.org,
+            is_shared=True,
+        )
+        self.private_bank = QuestionBank.objects.create(
+            name="Private Organization Bank",
+            created_by=self.creator,
+            organization=self.org,
+            is_shared=False,
+        )
+        self.legacy_bank = QuestionBank.objects.create(
+            name="Legacy Personal Bank",
+            created_by=self.creator,
+            organization=None,
+        )
+        self.bank_path = f"bank_media/bank_{self.bank.pk}/q_1/image.png"
+        self.legacy_bank_path = f"bank_media/bank_{self.legacy_bank.pk}/q_1/image.png"
+
+        self.job_file_path = "import_jobs/2026/07/source.pdf"
+        self.job_result_path = "import_jobs/2026/07/result.docx"
+        self.job = TextExtractionJob.objects.create(
+            user=self.creator,
+            organization=self.org,
+            file=self.job_file_path,
+            result_file=self.job_result_path,
+        )
+        self.legacy_job_path = "import_jobs/2026/07/legacy.pdf"
+        self.legacy_job = TextExtractionJob.objects.create(
+            user=self.creator,
+            organization=None,
+            file=self.legacy_job_path,
+        )
+
+    def test_private_prefixes_have_exactly_one_registered_checker(self):
+        """Every private prefix must retain an explicit checker."""
+        from core.media_views import _ACCESS_CHECKERS, _PRIVATE_PREFIXES
+
+        self.assertEqual(set(_PRIVATE_PREFIXES), set(_ACCESS_CHECKERS))
+        self.assertTrue(all(callable(checker) for checker in _ACCESS_CHECKERS.values()))
+
+    def test_bank_media_allows_creator_and_active_same_org_teacher(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["bank_media/"]
+        self.assertTrue(checker(self.creator, self.bank_path))
+        self.assertTrue(checker(self.teacher, self.bank_path))
+        self.assertFalse(checker(self.member, self.bank_path))
+
+    def test_bank_media_denies_inactive_cross_org_and_malformed_access(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["bank_media/"]
+        self.assertFalse(checker(self.inactive_teacher, self.bank_path))
+        self.assertFalse(checker(self.outsider, self.bank_path))
+        self.assertFalse(checker(self.member, "bank_media/bank_bad/q_1/image.png"))
+        self.assertFalse(checker(self.member, "bank_media/bank_999999/q_1/image.png"))
+
+    def test_private_bank_media_is_creator_only_inside_same_tenant(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["bank_media/"]
+        path = f"bank_media/bank_{self.private_bank.pk}/q_1/image.png"
+        self.assertTrue(checker(self.creator, path))
+        self.assertFalse(checker(self.teacher, path))
+
+    def test_legacy_bank_media_is_creator_only(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["bank_media/"]
+        self.assertTrue(checker(self.creator, self.legacy_bank_path))
+        self.assertFalse(checker(self.member, self.legacy_bank_path))
+        self.assertFalse(checker(self.teacher, self.legacy_bank_path))
+
+    def test_import_job_owner_can_access_source_and_result(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["import_jobs/"]
+        self.assertTrue(checker(self.creator, self.job_file_path))
+        self.assertTrue(checker(self.creator, self.job_result_path))
+
+    def test_import_job_is_owner_only_even_inside_same_organization(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["import_jobs/"]
+        self.assertFalse(checker(self.teacher, self.job_file_path))
+        self.assertFalse(checker(self.member, self.job_file_path))
+        self.assertFalse(checker(self.inactive_teacher, self.job_file_path))
+        self.assertFalse(checker(self.outsider, self.job_file_path))
+
+    def test_organizationless_import_job_is_owner_only(self):
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["import_jobs/"]
+        self.assertTrue(checker(self.creator, self.legacy_job_path))
+        self.assertFalse(checker(self.teacher, self.legacy_job_path))
+        self.assertFalse(checker(self.outsider, "import_jobs/2026/07/missing.pdf"))
+
+    def test_question_imports_are_denied_over_http(self):
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        path = "question_imports/token/question.png"
+        request = RequestFactory().get(f"/media/{path}")
+        request.user = self.creator
+
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=path)
+
+    def test_path_normalization_cannot_disguise_private_import_as_public(self):
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        path = "post_images/../question_imports/token/question.png"
+        request = RequestFactory().get(f"/media/{path}")
+        request.user = self.creator
+
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=path)

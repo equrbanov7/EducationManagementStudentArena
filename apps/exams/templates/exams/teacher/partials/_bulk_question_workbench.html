@@ -487,7 +487,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     <div class="q-content">
                         <div class="q-header">
                             <span class="q-num">#{{ forloop.counter }}</span>
-                            <span class="q-text">{{ q.text }}</span>
+                            <span class="q-text{% if math_token and q.has_visual_source %} sr-only{% endif %}">{{ q.text }}</span>
 
                             {% if q.meta.total_count %}
                             <span class="q-badges">
@@ -503,7 +503,26 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                             {% endif %}
                         </div>
 
+                        {% if math_token and q.has_visual_source %}
+                        <img class="q-source-preview"
+                             src="{% url 'exams:question_import_visual_preview' math_token q.source_index %}"
+                             alt=""
+                             aria-hidden="true"
+                             loading="lazy">
+                        {% endif %}
+
                         {% if q.options %}
+                        {% if math_token and q.has_visual_source %}
+                        <div class="q-visual-answer">
+                            <span class="q-visual-answer__label">{% trans "Düzgün cavab" context "exams.template.test_question_bank" %}:</span>
+                            {% for lab in q.correct %}
+                            <span class="q-visual-answer__choice">{{ lab }}</span>
+                            {% endfor %}
+                            <span class="sr-only">
+                                {% for lab, txt in q.options.items %}{{ lab }}: {{ txt }}. {% endfor %}
+                            </span>
+                        </div>
+                        {% else %}
                         <div class="options-grid">
                             {% for lab, txt in q.options.items %}
                             <div class="opt-box {% if lab in q.correct %}correct{% endif %}">
@@ -512,6 +531,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                             </div>
                             {% endfor %}
                         </div>
+                        {% endif %}
                         {% endif %}
 
                         {% if q.warnings %}

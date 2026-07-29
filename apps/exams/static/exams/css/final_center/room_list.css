@@ -1,0 +1,97 @@
+/* Zallar səhifəsi — "Hazırda gedən imtahanlar" bölməsi.
+   Köhnə "Oturumlar" keçidinin yerinə: hansı fənnin imtahanı hansı zalda
+   gedir, klik birbaşa zal monitoruna aparır (2026-07-29). */
+
+.fxc-live-exams {
+    margin: 4px 0 18px;
+    padding: 14px 16px;
+    border: 1px solid #BBF7D0;
+    border-left: 4px solid #16A34A;
+    border-radius: 12px;
+    background: #F0FDF4;
+}
+
+.fxc-live-exams__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #14532D;
+}
+
+.fxc-chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: #16A34A;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.fxc-live-exams__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fxc-live-exam {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    border: 1px solid #DCFCE7;
+    border-radius: 10px;
+    background: #fff;
+    text-decoration: none;
+    color: #0F172A;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.fxc-live-exam:hover {
+    border-color: #16A34A;
+    box-shadow: 0 2px 10px rgba(22, 163, 74, .12);
+    color: #0F172A;
+}
+
+.fxc-live-exam__exam {
+    flex: 1 1 240px;
+    font-weight: 700;
+}
+
+.fxc-live-exam__room {
+    color: #475569;
+    font-size: .9rem;
+}
+
+.fxc-live-exam__room code {
+    font-size: .8rem;
+    color: #16A34A;
+}
+
+.fxc-live-exam__count {
+    font-weight: 700;
+    color: #14532D;
+    font-size: .88rem;
+    white-space: nowrap;
+}
+
+.fxc-live-exam__go {
+    margin-left: auto;
+    color: #16A34A;
+    font-weight: 700;
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .fxc-live-exam__go { margin-left: 0; }
+}

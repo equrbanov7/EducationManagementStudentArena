@@ -50,8 +50,8 @@ def _ocr_pdf_text(uploaded_file) -> str:
     Konfiqurasiya (settings):
       - EXAM_PDF_OCR_ENABLED            (default True)
       - EXAM_PDF_OCR_LANG               (default "aze") — Tesseract dili; işləməsə "eng"
-      - EXAM_PDF_OCR_DPI                (default 160)
-      - EXAM_PDF_OCR_MAX_PAGES          (default 40) — request timeout-dan qoruyan limit
+      - EXAM_PDF_OCR_DPI                (default 300)
+      - EXAM_PDF_OCR_MAX_PAGES          (default 100) — request timeout-dan qoruyan limit
       - EXAM_PDF_OCR_HIGHLIGHT          (default True) — sarı→düz cavab aşkarı
       - EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO(default 0.10) — sətrin sarı örtük həddi
 
@@ -65,11 +65,11 @@ def _ocr_pdf_text(uploaded_file) -> str:
     lang = getattr(settings, "EXAM_PDF_OCR_LANG", "aze")
     detect_highlight = getattr(settings, "EXAM_PDF_OCR_HIGHLIGHT", True)
     try:
-        dpi = int(getattr(settings, "EXAM_PDF_OCR_DPI", 160))
-        max_pages = int(getattr(settings, "EXAM_PDF_OCR_MAX_PAGES", 40))
+        dpi = max(300, int(getattr(settings, "EXAM_PDF_OCR_DPI", 300)))
+        max_pages = int(getattr(settings, "EXAM_PDF_OCR_MAX_PAGES", 100))
         min_ratio = float(getattr(settings, "EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10))
     except (TypeError, ValueError):
-        dpi, max_pages, min_ratio = 160, 40, 0.10
+        dpi, max_pages, min_ratio = 300, 100, 0.10
 
     try:
         uploaded_file.seek(0)
@@ -144,9 +144,9 @@ def _ocr_image_text(uploaded_file) -> str:
         return ""
 
     try:
-        dpi = max(72, int(getattr(settings, "EXAM_PDF_OCR_DPI", 160)))
+        dpi = max(300, int(getattr(settings, "EXAM_PDF_OCR_DPI", 300)))
     except (TypeError, ValueError):
-        dpi = 160
+        dpi = 300
 
     image = image.convert("RGB")
     width, height = image.size

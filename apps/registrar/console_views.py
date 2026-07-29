@@ -43,7 +43,12 @@ from .models import (
 from .views import _current_period
 
 # Roles that may manage the registrar catalogue (besides superuser + org owner).
-_REGISTRAR_ADMIN_ROLES = ("org_admin", "org_owner", "rector", "vice_rector", "dean")
+# QEYD (2026-07-29): `ikt_rehber` burada YOX idi, halbuki sidebar-dakı
+# `role_capabilities.can_manage_registrar` onu buraxırdı — nəticədə link
+# görünürdü, açanda isə view 404 verirdi. Rolun öz tərifində `unit.*` və
+# `member.*` səlahiyyəti var (organizations/default_roles.py), yəni struktur
+# kataloqunu idarə etmək onun təyinatına daxildir.
+_REGISTRAR_ADMIN_ROLES = ("org_admin", "org_owner", "rector", "vice_rector", "dean", "ikt_rehber")
 
 
 def _can_manage_registrar(user, organization) -> bool:

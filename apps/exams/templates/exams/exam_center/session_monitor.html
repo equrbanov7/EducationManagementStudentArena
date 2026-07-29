@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260716-live-snapshot">
 {% endblock %}
 
@@ -161,12 +162,10 @@
       <div><dt>{% trans "Planlaşdırılan başlanğıc" %}</dt><dd>{{ session.scheduled_start|date:"d.m.Y H:i" }}</dd></div>
       <div><dt>{% trans "Server vaxtı" %}</dt><dd data-fact="server_now">—</dd></div>
     </dl>
-    {% if can_manage %}
-    <label class="fxc-check" id="fxc-override-wrap" hidden>
-      <input type="checkbox" id="fxc-override-check">
-      <span>{% trans "Vaxt pəncərəsindən kənar başlatmanı təsdiqləyirəm (override audit-ə yazılır)" %}</span>
-    </label>
-    {% endif %}
+    {% comment %}
+      Override seçimi silindi (2026-07-29): start artıq vaxt pəncərəsi ilə
+      bloklanmır — nəzarətçi hazır olanda başladır.
+    {% endcomment %}
     <p class="fxc-modal-error" id="fxc-start-error" hidden></p>
     <div class="fxc-actions">
       <button type="button" class="fxc-btn fxc-btn-ghost" data-close-modal>{% trans "İmtina" %}</button>

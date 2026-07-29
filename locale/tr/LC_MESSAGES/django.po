@@ -15094,6 +15094,14 @@ msgid "supervision_threshold_title"
 msgstr "⚠️ Dikkat!"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_title"
+msgstr "Deneme modu — sınav durdurulmadı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_msg"
+msgstr "Gerçek sınavda bu ihlaller nedeniyle sınavdan çıkarılırdınız. Deneme yalnızca kontrol amaçlıdır, devam edebilirsiniz."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr ""
 "İhlal limitinin %75'ine ulaştınız! Sadece {remaining} ihlal hakkınız kaldı. "
@@ -19085,6 +19093,10 @@ msgstr "ZIP içinde engellenen dosya tespit edildi: {filename}"
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
 msgstr "Bu sınava henüz soru atanmadı."
+
+msgctxt "exams.view.access.message"
+msgid "exam_inactive_trial_blocked"
+msgstr "Sınav henüz pasif (taslak), bu yüzden deneme çalıştırılamaz. Önce sınavı etkinleştirin."
 
 #, python-brace-format
 msgctxt "exams.view.validation"
@@ -28149,6 +28161,22 @@ msgid "trial_run"
 msgstr "Deneme çalıştır"
 
 msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_hint"
+msgstr "Deneme çalıştırmak için en az bir aktif soru gerekir"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_title"
+msgstr "Deneme çalıştırma mümkün değil"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_body"
+msgstr "Bu sınavda henüz soru yok, bu yüzden deneme çalıştırılamaz. Önce soru ekleyin veya PDF'den içe aktarın."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_cta"
+msgstr "Soru ekle"
+
+msgctxt "exams.template.teacher_exam_detail"
 msgid "trial_run_hint"
 msgstr "Sınavı öğrenci gibi deneyin — bu deneme sonuçlara sayılmaz."
 
@@ -30175,3 +30203,35 @@ msgstr "öğretmen ara…"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Geçer"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import"
+msgstr "#{index} numaralı soru bu dosyada #{previous_index} ile aynı: “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import_first"
+msgstr "#{index} numaralı soru bu dosyada {count} soruyla daha tekrarlanıyor (ilk: #{next_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "already_in_exam"
+msgstr "#{index} numaralı soru bankada zaten var (sıra {db_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_long"
+msgstr "Testin yüzde {ratio} kadarında doğru cevap diğerlerinden uzun."
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_short"
+msgstr "Testin yüzde {ratio} kadarında doğru cevap diğerlerinden kısa."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Bu bir deneme çalıştırmasıdır — sonuç kaydedilmez"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "Gerçek sınavda öğrenci bu aşamada sınavdan çıkarılır ve giriş sayfasına yönlendirilir. Deneme yalnızca sınavı kontrol etmek içindir, bu yüzden burada böyle bir yönlendirme yoktur."
+
+msgctxt "appeals.view.message"
+msgid "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."
+msgstr "Bu itiraz artık mevcut değil — büyük olasılıkla silindi. Bildirimdeki bağlantı güncel değil."

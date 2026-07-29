@@ -31,6 +31,7 @@ from apps.exams.services.question_submission import (
     resubmit_question_set,
     submit_question_set,
 )
+from apps.exams.services.visual_import_upload import prepare_question_upload
 from core.tenancy import get_request_organization
 
 
@@ -114,6 +115,7 @@ def annotate_preview_flags(questions):
         severities = {(w.get("severity") or "warning") for w in (question.get("warnings") or [])}
         question["has_error"] = "error" in severities
         question["has_warning"] = bool(severities - {"error"})
+        question["has_visual_source"] = isinstance(question.get("source_index"), int)
     return questions
 
 
@@ -138,6 +140,7 @@ def question_submission_create(request):
     groups = list(_teacher_groups(request, organization))
 
     raw_text = ""
+    math_token = (request.POST.get("math_token") or "").strip()
     parsed = []
     selected = set()
     from apps.exams.views.teacher.question_library._shared import _empty_analysis
@@ -162,13 +165,18 @@ def question_submission_create(request):
         if action in ("preview", "save"):
             raw_text = form_state["raw_text"]
             uploaded = request.FILES.get("upload_file")
+            upload_failed = False
             if uploaded:
-                from apps.exams.services.parsing import extract_text_from_upload
-
                 try:
-                    raw_text = extract_text_from_upload(uploaded)
+                    raw_text, math_token = prepare_question_upload(
+                        uploaded,
+                        previous_token=math_token,
+                        owner_id=request.user.pk,
+                        organization_id=organization.pk,
+                    )
                     form_state["raw_text"] = raw_text
                 except Exception as exc:  # noqa: BLE001
+                    upload_failed = True
                     messages.error(
                         request,
                         pgettext("exams.view.question_submission.message", "Fayl oxunmadı: {error}").format(error=exc),
@@ -176,6 +184,21 @@ def question_submission_create(request):
 
             analysis = analyze_mcq_bulk(raw_text)
             parsed = analysis["parsed"]
+            if math_token:
+                from apps.exams.services.import_media import bind_import_manifest
+
+                try:
+                    bind_import_manifest(
+                        math_token,
+                        parsed,
+                        owner_id=request.user.pk,
+                        organization_id=organization.pk,
+                    )
+                except (OSError, ValueError) as exc:
+                    messages.error(request, str(exc))
+                    action = "preview"
+            if upload_failed:
+                action = "preview"
 
             selected_from_request = parse_selected_indices(request.POST)
             selected = set(range(1, len(parsed) + 1)) if selected_from_request is None else selected_from_request
@@ -220,6 +243,7 @@ def question_submission_create(request):
                             raw_text=raw_text,
                             parsed=chosen,
                             teacher_note=form_state["teacher_note"],
+                            import_token=math_token,
                         )
                         submission.student_groups.set(chosen_groups)
                     except ValidationError as exc:
@@ -248,7 +272,7 @@ def question_submission_create(request):
         "test_level_warnings": analysis["test_level_warnings"],
         "rq_value": "",
         "dp_value": "1",
-        "math_token": "",
+        "math_token": math_token,
         # Meta sahələri (workbench-dən kənar kart)
         "teacher_groups": groups,
         "teacher_group_subjects": {
@@ -430,7 +454,12 @@ def question_submission_delete(request, submission_id):
             ),
         )
         return redirect("exams:question_submission_detail", submission_id=submission.id)
+    import_token = submission.import_token
     submission.delete()
+    if import_token:
+        from apps.exams.services.import_media import clear_stash
+
+        clear_stash(import_token)
     messages.success(
         request,
         pgettext("exams.view.question_submission.message", "Göndəriş silindi."),
