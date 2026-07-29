@@ -109,13 +109,13 @@
                         {# ---- SUALIN MEDİASI (şəkil / video) ---- #}
                         {% if q.image %}
                             <div class="question-media mb-2">
-                                <img src="{{ q.image.url }}" alt="" class="img-fluid rounded tca-media-capped">
+                                <img src="{{ q.image|protected_media_url }}" alt="" class="img-fluid rounded tca-media-capped">
                             </div>
                         {% endif %}
                         {% if q.video %}
                             <div class="question-media mb-2">
                                 <video controls preload="metadata" playsinline class="img-fluid rounded tca-media-capped">
-                                    <source src="{{ q.video.url }}">
+                                    <source src="{{ q.video|protected_media_url }}">
                                 </video>
                             </div>
                         {% endif %}

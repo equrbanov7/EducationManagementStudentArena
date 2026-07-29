@@ -195,9 +195,11 @@ def _role_capabilities(user, profile):
         from apps.exams.public import user_supervises_final_sessions
 
         can_access_final_center = user_supervises_final_sessions(user)
-    # İmtahan zalı + kompüter/MAC idarəsi: yalnız superadmin, YAXUD superadminin
-    # per-user bayraqla həvalə etdiyi istifadəçi. Yalnız naviqasiya görünürlüyü;
-    # icazə view qatında (``ensure_can_manage_exam_rooms``) yenidən yoxlanır.
+    # İmtahan zalı + kompüter/MAC idarəsi: superadmin, İKT Rəhbəri (rolun öz
+    # tərifində `exam.*` var), YAXUD superadminin per-user bayraqla həvalə
+    # etdiyi istifadəçi. Yalnız naviqasiya görünürlüyü; icazə view qatında
+    # (``ensure_can_manage_exam_rooms``) EYNİ funksiya ilə yenidən yoxlanır —
+    # ona görə nav ilə view arasında uyğunsuzluq yaranmır.
     from apps.exams.public import can_manage_exam_rooms as _can_manage_exam_rooms
 
     can_manage_exam_rooms = _can_manage_exam_rooms(user)

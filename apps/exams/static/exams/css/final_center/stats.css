@@ -1,0 +1,54 @@
+/* İmtahan mərkəzi — PAYLAŞILAN stat kartı komponenti.
+   Əvvəl yalnız `monitor.css`-də idi, ona görə `session_history.html`
+   (monitor.css yükləmir) rəqəmləri tamamilə üslubsuz, alt-alta düzülmüş
+   mətn kimi göstərirdi. Komponent həm monitor, həm tarixçə tərəfindən
+   istifadə olunduğu üçün ayrıca fayla çıxarıldı. */
+
+.fxc-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+    margin: 6px 0 16px;
+}
+
+.fxc-stat {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: center;
+}
+
+.fxc-stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0F172A;
+    font-variant-numeric: tabular-nums;
+}
+
+.fxc-stat-label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #94A3B8;
+    margin-top: 2px;
+}
+
+.fxc-stat--connected .fxc-stat-value { color: #15803D; }
+.fxc-stat--active .fxc-stat-value { color: #2C5BFF; }
+.fxc-stat--participated .fxc-stat-value { color: #7C3AED; }
+.fxc-stat--offline .fxc-stat-value { color: #B45309; }
+.fxc-stat--removed .fxc-stat-value { color: #B91C1C; }
+
+/* ── Responsivlik (planşet / mobil) ── */
+@media (max-width: 900px) {
+    .fxc-stats { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .fxc-stats { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+    .fxc-stat { padding: 10px 8px; }
+    .fxc-stat-value { font-size: 1.15rem; }
+    .fxc-stat-label { font-size: .64rem; }
+}

@@ -60,10 +60,15 @@ EXAM_START_LOCK_LEASE_SECONDS = _env_int_setting("EXAM_START_LOCK_LEASE_SECONDS"
 EXAM_RANDOMIZER_USAGE_CACHE_SECONDS = _env_int_setting("EXAM_RANDOMIZER_USAGE_CACHE_SECONDS", 30, minimum=0)
 EXAM_PDF_OCR_ENABLED = _env_bool_setting("EXAM_PDF_OCR_ENABLED", True)
 EXAM_PDF_OCR_LANG = os.getenv("EXAM_PDF_OCR_LANG", "aze").strip() or "aze"
-EXAM_PDF_OCR_DPI = _env_int_setting("EXAM_PDF_OCR_DPI", 160, minimum=72)
-EXAM_PDF_OCR_MAX_PAGES = _env_int_setting("EXAM_PDF_OCR_MAX_PAGES", 40, minimum=1)
+# Tesseract-in rəsmi tövsiyəsi ən azı 300 DPI-dir. OCR yalnız axtarış/anchor
+# metadata-sı üçündür; tələbəyə göstərilən vizual ayrıca source-render olunur.
+EXAM_PDF_OCR_DPI = _env_int_setting("EXAM_PDF_OCR_DPI", 300, minimum=300)
+# Real bank faylları (o cümlədən 52 səhifəlik regression nümunəsi) səssiz
+# kəsilməsin. Worker time-limit-i və upload byte limiti ayrıca DoS sərhədidir.
+EXAM_PDF_OCR_MAX_PAGES = _env_int_setting("EXAM_PDF_OCR_MAX_PAGES", 100, minimum=1)
 EXAM_PDF_OCR_HIGHLIGHT = _env_bool_setting("EXAM_PDF_OCR_HIGHLIGHT", True)
 EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO = _env_float_setting("EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10, minimum=0.0)
+EXAM_IMPORT_STASH_RETENTION_HOURS = _env_int_setting("EXAM_IMPORT_STASH_RETENTION_HOURS", 48, minimum=1)
 
 # --- Final imtahan mərkəzi (/exams/final/) giriş siyahısı --------------------
 # Vergüllə ayrılmış IP və ya CIDR (məs. "10.0.0.5,192.168.10.0/24").

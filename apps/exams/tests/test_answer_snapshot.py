@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
-from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.randomizer import build_shuffled_options, generate_random_questions_for_attempt
 from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -165,9 +165,13 @@ class TestAnswerSnapshotIntegrity(TestCase):
 
     def test_randomizer_populates_question_snapshot(self):
         q1 = self._question(order=1)
+        q1.image = "question_media/exam_1/question_1/source.png"
+        q1.image_replaces_text = True
+        q1.save(update_fields=["image", "image_replaces_text"])
         a1 = self._option(q1, text="A", is_correct=True)
         a1.image = "question_media/exam_1/opt_1/formula.png"
-        a1.save(update_fields=["image"])
+        a1.image_replaces_text = True
+        a1.save(update_fields=["image", "image_replaces_text"])
         self._option(q1, text="B", is_correct=False)
         q2 = self._question(order=2)
         a2 = self._option(q2, text="A", is_correct=True)
@@ -190,7 +194,11 @@ class TestAnswerSnapshotIntegrity(TestCase):
             self.assertEqual(snapshot_correct, {correct_by_qid[ans.question_id]})
         first_snapshot = attempt.answers.get(question=q1).question_snapshot
         first_option_snapshot = next(option for option in first_snapshot["options"] if option["id"] == a1.id)
+        self.assertTrue(first_snapshot["image_replaces_text"])
         self.assertEqual(first_option_snapshot["image"], a1.image.name)
+        self.assertTrue(first_option_snapshot["image_replaces_text"])
+        shuffled_option = next(option for option in build_shuffled_options(attempt.id, q1) if option["id"] == a1.id)
+        self.assertTrue(shuffled_option["image_replaces_text"])
 
     def test_v2_snapshot_freezes_question_text_and_option_text(self):
         """EXAM-P0-03 (v2): mətn/variant mətni dondurulur; sual redaktəsi
@@ -294,6 +302,33 @@ class TestAnswerSnapshotIntegrity(TestCase):
             "question_media/exam_1/opt_1/original.png",
         )
         self.assertTrue(rendered.options[0].image_url.endswith("/question_media/exam_1/opt_1/original.png"))
+
+    def test_v2_snapshot_freezes_image_replaces_text_flags(self):
+        from apps.exams.services.question_snapshot import build_question_snapshot, delivered_question_render
+
+        q = self._question(order=1)
+        q.image = "question_media/exam_1/question_1/source.png"
+        q.image_replaces_text = True
+        q.save(update_fields=["image", "image_replaces_text"])
+        option = self._option(q, text="Source-rendered option", is_correct=True)
+        option.image = "question_media/exam_1/opt_1/source.png"
+        option.image_replaces_text = True
+        option.save(update_fields=["image", "image_replaces_text"])
+        answer = ExamAnswer.objects.create(
+            attempt=self._attempt(),
+            question=q,
+            question_snapshot=build_question_snapshot(q, [option]),
+        )
+
+        q.image_replaces_text = False
+        q.save(update_fields=["image_replaces_text"])
+        option.image_replaces_text = False
+        option.save(update_fields=["image_replaces_text"])
+
+        rendered = delivered_question_render(answer, {option.id})
+        self.assertTrue(rendered.from_snapshot)
+        self.assertTrue(rendered.image_replaces_text)
+        self.assertTrue(rendered.options[0].image_replaces_text)
 
     def test_delivered_render_legacy_uses_live_and_marks_selection(self):
         """Snapshot-suz cavab canlı suala düşür, is_selected yenə də işləyir."""

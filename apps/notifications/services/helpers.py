@@ -110,6 +110,34 @@ def _membership_request_management_link(request_obj: StudentOrganizationRequest)
     return f"{reverse('organizations:switch', kwargs={'slug': request_obj.organization.slug})}?{urlencode({'next': next_url})}"
 
 
+def org_scoped_link(link, organization) -> str:
+    """Org-scoped hədəfi ``organizations:switch`` sıçrayışına sarı.
+
+    Bildirişin keçidi yaradılan anda donur, amma hədəf view-lar obyekti
+    SESSİYADAKI aktiv təşkilata görə scope-lanmış queryset-də axtarır
+    (``tenant_scoped_exams`` → başqa org-da ``.none()``). Nəticədə çox-org
+    istifadəçisi (və ya aktiv org-u sürüşmüş sessiya) tamamilə etibarlı
+    keçiddə 404 alırdı.
+
+    Üzvlük müraciəti bildirişləri bunu ARTIQ düzgün edir (yuxarıdakı
+    ``_membership_request_management_link``) — burada həmin nümunə bütün
+    bildirişlər üçün ümumiləşdirilir. ``organizations:switch`` özü üzvlüyü
+    yoxlayır (üzv olmayan org seçiminə yönləndirilir, içəri buraxılmır) və
+    ``next``-i same-origin kimi doğrulayır, yəni nə səlahiyyət artımı,
+    nə də open-redirect yaranır.
+    """
+
+    slug = getattr(organization, "slug", None)
+    if not link or not slug or not str(link).startswith("/"):
+        return link
+    if str(link).startswith("/organizations/switch/"):
+        return link  # artıq sarınıb (üzvlük müraciətləri)
+    return "{}?{}".format(
+        reverse("organizations:switch", kwargs={"slug": slug}),
+        urlencode({"next": link}),
+    )
+
+
 def _membership_request_notification_message(request_obj: StudentOrganizationRequest) -> str:
     profile = getattr(request_obj.user, "profile", None)
     role_label = get_membership_request_role_label(request_obj.role_type)

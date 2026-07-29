@@ -15128,6 +15128,14 @@ msgid "supervision_threshold_title"
 msgstr "⚠️ Внимание!"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_title"
+msgstr "Пробный режим — экзамен не приостановлен"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_msg"
+msgstr "На настоящем экзамене эти нарушения привели бы к отстранению. Пробный запуск нужен только для проверки, поэтому можно продолжать."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr ""
 "Вы достигли 75% лимита нарушений! Осталось только {remaining} нарушение(й). "
@@ -19124,6 +19132,10 @@ msgstr "В ZIP обнаружен запрещенный файл: {filename}"
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
 msgstr "К этому экзамену пока не назначены вопросы."
+
+msgctxt "exams.view.access.message"
+msgid "exam_inactive_trial_blocked"
+msgstr "Экзамен ещё неактивен (черновик), поэтому пробный запуск невозможен. Сначала активируйте экзамен."
 
 #, python-brace-format
 msgctxt "exams.view.validation"
@@ -28877,6 +28889,22 @@ msgid "trial_run"
 msgstr "Пробный запуск"
 
 msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_hint"
+msgstr "Для пробного запуска нужен хотя бы один активный вопрос"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_title"
+msgstr "Пробный запуск недоступен"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_body"
+msgstr "В этом экзамене пока нет вопросов, поэтому пробный запуск невозможен. Сначала добавьте вопрос или импортируйте их из PDF."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_cta"
+msgstr "Добавить вопрос"
+
+msgctxt "exams.template.teacher_exam_detail"
 msgid "trial_run_hint"
 msgstr ""
 "Пройдите экзамен как студент — эта попытка не учитывается в результатах."
@@ -30917,3 +30945,35 @@ msgstr "поиск преподавателя…"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Проходит"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import"
+msgstr "Вопрос #{index} дублирует #{previous_index} в этом файле: «{preview}»"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import_first"
+msgstr "Вопрос #{index} повторяется ещё в {count} вопросе(ах) этого файла (первый: #{next_index}): «{preview}»"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "already_in_exam"
+msgstr "Вопрос #{index} уже есть в банке (строка {db_index}): «{preview}»"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_long"
+msgstr "В {ratio} процентах теста правильный ответ длиннее остальных."
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_short"
+msgstr "В {ratio} процентах теста правильный ответ короче остальных."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Это пробный запуск — результат нигде не сохраняется"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "На настоящем экзамене студент на этом этапе удаляется с экзамена и возвращается на страницу входа. Пробный запуск нужен только для проверки, поэтому здесь такого перенаправления нет."
+
+msgctxt "appeals.view.message"
+msgid "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."
+msgstr "Эта апелляция больше не существует — скорее всего, она была удалена. Ссылка в уведомлении устарела."

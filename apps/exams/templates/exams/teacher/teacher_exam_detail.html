@@ -166,16 +166,13 @@
                         <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
-                    {# Canlı nəzarət — imtahanı verən tələbələri real vaxtda izlə #}
-                    <a href="{% url 'exams:exam_live_monitor' exam.id %}"
-                       class="action-card action-card--slate">
-                        <span class="action-card__icon"><i class="fas fa-eye"></i></span>
-                        <span class="action-card__body">
-                            <span class="action-card__title">{% trans 'Canlı nəzarət' %}</span>
-                            <span class="action-card__desc">{% trans 'İmtahanı verən tələbələri real vaxtda izləyin' %}</span>
-                        </span>
-                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
-                    </a>
+                    {% comment %}
+                        "Canlı nəzarət" kartı silindi (2026-07-29): köhnə
+                        attempt-əsaslı nəzarət UI-ı tamamilə götürüldü. Canlı
+                        izləmə artıq İmtahan Nəzarət Sistemindəki zal oturumu
+                        monitorundadır. Pozuntu qeydi və avtomatik kilid
+                        arxa planda əvvəlki kimi işləyir.
+                    {% endcomment %}
 
                     {# Statistikaya bax #}
                     <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ exam_navigation_query }}"
@@ -188,8 +185,14 @@
                         <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
-                    {# Canlı nəticələri izlə #}
-                    {% if exam.exam_type == "test" %}
+                    {% comment %}
+                        Canlı nəticələr — yalnız canlı sessiya ilə keçirilən
+                        imtahanlar üçün. FİNAL və MİDTERM bu axından keçmir:
+                        onlar İmtahan Mərkəzinin zal/PIN axını ilə aparılır və
+                        nəticələr orada toplanır, ona görə burada kart mənasız
+                        (və işləməyən) idi.
+                    {% endcomment %}
+                    {% if exam.exam_type == "test" and exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
                     <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                        class="action-card action-card--slate">
                         <span class="action-card__icon"><i class="fas fa-broadcast-tower"></i></span>
@@ -245,13 +248,25 @@
                         <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                     </a>
 
-                    {# Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır). #}
+                    {% comment %}
+                        Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır).
+                        Sual yoxdursa start_exam-a getmirik: qaralama imtahanda bu 404 verirdi.
+                        Əvəzinə izahlı modal açılır (bax teacher_exam_detail.js).
+                    {% endcomment %}
                     {% if can_manage_exam_questions %}
-                        <a href="{% url 'exams:start_exam' exam.slug %}?trial=1"
-                           class="action-btn outline-btn"
-                           title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
-                            <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}
-                        </a>
+                        {% if active_questions_count %}
+                            <a href="{% url 'exams:start_exam' exam.slug %}?trial=1"
+                               class="action-btn outline-btn"
+                               title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
+                                <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}
+                            </a>
+                        {% else %}
+                            <button type="button"
+                                    class="action-btn outline-btn js-trial-run-blocked"
+                                    title="{% trans 'trial_run_blocked_hint' context 'exams.template.teacher_exam_detail' %}">
+                                <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}
+                            </button>
+                        {% endif %}
                     {% endif %}
 
                     <a href="{% url 'exams:delete_exam' exam.slug %}"
@@ -330,6 +345,40 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{% comment %}
+    Sual yüklənmədən "Sınaq keç" — 404 əvəzinə izah + sual əlavə etmə yolu.
+{% endcomment %}
+<div class="modal fade" id="examDetailTrialRunBlockedModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="examDetailTrialRunBlockedTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="examDetailTrialRunBlockedTitle">
+                    <i class="fas fa-vial me-2"></i>
+                    {% trans "trial_run_blocked_title" context "exams.template.teacher_exam_detail" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">{% trans "trial_run_blocked_body" context "exams.template.teacher_exam_detail" %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "action_cancel" context "exams.template.add_exam_question" %}
+                </button>
+                <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+                   class="btn btn-primary js-open-question-form-modal"
+                   data-question-modal-mode="create"
+                   data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+                    <i class="fas fa-plus me-1"></i>
+                    {% trans "trial_run_blocked_cta" context "exams.template.teacher_exam_detail" %}
+                </a>
+            </div>
         </div>
     </div>
 </div>

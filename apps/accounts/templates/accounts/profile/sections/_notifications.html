@@ -8,11 +8,12 @@
          data-in-app-unread-count="{{ in_app_unread_count }}"
          data-total-unread-count="{{ notifications_unread_count }}">
     <div class="section-card">
-        <div class="section-title">
-            <i class="fas fa-bell"></i>
-            <span>{% trans "notifications" context "profile.section" %}</span>
-            {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-2" data-profile-notif-unread-badge>{{ in_app_unread_count }}</span>{% endif %}
-        </div>
+        {% comment %}
+            Bölmə başlığı QƏSDƏN yoxdur: səhifənin öz H1-i (profile/_header.html →
+            `active_section_title`) eyni "Bildirişlər" mətnini verirdi, yəni ekranda
+            iki eyni başlıq üst-üstə düşürdü. Oxunmamış sayğac sidebar naviqasiyasında
+            qalır; `notifications.js` badge-in olmamasına null-safe-dir.
+        {% endcomment %}
 
         {% if pending_student_join_requests %}
             {% for pending_request in pending_student_join_requests %}
@@ -68,7 +69,12 @@
         </div>
         {% endif %}
 
-        <hr class="my-3">
+        {% comment %}
+            Ayırıcı yalnız YUXARIDA məzmun (gözləyən sorğu/dəvət) olanda lazımdır.
+            Bölmə başlığı silindikdən sonra şərtsiz `hr` kartın ilk elementi olub
+            boş üfüqi xətt kimi görünürdü.
+        {% endcomment %}
+        {% if pending_student_join_requests or pending_student_invites %}<hr class="my-3">{% endif %}
 
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <nav class="nav notif-filter-tabs" role="tablist">

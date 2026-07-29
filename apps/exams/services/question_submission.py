@@ -41,7 +41,16 @@ def analyze_submission_text(raw_text):
     return parsed, counts
 
 
-_SNAPSHOT_KEYS = ("q_no", "text", "options", "correct", "answer_mode", "warnings", "points")
+_SNAPSHOT_KEYS = (
+    "q_no",
+    "text",
+    "options",
+    "correct",
+    "answer_mode",
+    "warnings",
+    "points",
+    "source_index",
+)
 
 
 def clean_snapshot_entries(parsed):
@@ -109,6 +118,7 @@ def submit_question_set(
     student_group=None,
     parsed=None,
     teacher_note="",
+    import_token="",
 ):
     """Yeni göndəriş yaradır (pending) və mərkəz üzvlərinə bildiriş göndərir."""
     title = (title or "").strip()
@@ -134,6 +144,7 @@ def submit_question_set(
         group_label=group_label,
         language=language,
         teacher_note=(teacher_note or "").strip(),
+        import_token=(import_token or "").strip(),
     )
     _apply_snapshot(submission, raw_text, parsed=parsed)
     submission.save()
@@ -153,6 +164,7 @@ def resubmit_question_set(
     student_group=...,
     parsed=None,
     teacher_note=None,
+    import_token=None,
 ):
     """
     Müəllim pending/rejected göndərişi düzəldib yenidən göndərir: snapshot
@@ -164,6 +176,8 @@ def resubmit_question_set(
         )
 
     was_rejected = submission.status == QuestionSubmission.STATUS_REJECTED
+    previous_token = submission.import_token
+    raw_text_changed = raw_text is not None and raw_text != submission.raw_text
     if title is not None and title.strip():
         submission.title = title.strip()
     if subject is not None and subject.strip():
@@ -176,7 +190,22 @@ def resubmit_question_set(
         submission.teacher_note = teacher_note.strip()
     if language:
         submission.language = language
-    _apply_snapshot(submission, raw_text if raw_text is not None else submission.raw_text, parsed=parsed)
+    if import_token is not None:
+        submission.import_token = (import_token or "").strip()
+    elif raw_text_changed:
+        # Mətn əl ilə dəyişdirilibsə köhnə PDF crop-ları artıq həmin məzmuna
+        # uyğun deyil; qəbul zamanı yanlış vizual bağlanmasın.
+        submission.import_token = ""
+    snapshot_parsed = parsed
+    if snapshot_parsed is None and submission.import_token and not raw_text_changed:
+        # Eyni visual manifestlə yenidən göndərişdə əvvəlki source_index-lər
+        # saxlanmalıdır; raw mətni yenidən parse etmək binding-i itirərdi.
+        snapshot_parsed = submission.parsed_snapshot
+    _apply_snapshot(
+        submission,
+        raw_text if raw_text is not None else submission.raw_text,
+        parsed=snapshot_parsed,
+    )
 
     submission.status = QuestionSubmission.STATUS_PENDING
     if was_rejected:
@@ -188,6 +217,10 @@ def resubmit_question_set(
     submission.reviewer_note = ""
     submission.accepted_bank = None
     submission.save()
+    if previous_token and previous_token != submission.import_token:
+        from apps.exams.services.import_media import clear_stash
+
+        transaction.on_commit(lambda token=previous_token: clear_stash(token))
     _notify_exam_center_new_submission(submission, resubmitted=was_rejected)
     return submission
 
@@ -234,15 +267,26 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
     # Müəllimin workbench-də təyin etdiyi ballar snapshot-da saxlanır — banka
     # eyni ballarla yazılır (boş/qeyri-müəyyən → 1).
     points_payload = {str(index): str(question.get("points") or "") for index, question in enumerate(parsed, start=1)}
-    created_count = _save_bank_questions(
-        bank=bank,
-        parsed=parsed,
-        selected=set(range(1, len(parsed) + 1)),
-        language=submission.language,
-        q_format="test",
-        points_payload=points_payload,
-        created_by=reviewer,
-    )
+    try:
+        created_count = _save_bank_questions(
+            bank=bank,
+            parsed=parsed,
+            selected=set(range(1, len(parsed) + 1)),
+            language=submission.language,
+            q_format="test",
+            points_payload=points_payload,
+            created_by=reviewer,
+            math_token=submission.import_token,
+            media_owner_id=submission.teacher_id,
+        )
+    except (OSError, PermissionDenied, ValueError) as exc:
+        logger.warning("Göndərişin visual media binding-i alınmadı: submission=%s", submission.pk, exc_info=True)
+        raise ValidationError(
+            pgettext(
+                "exams.service.question_submission.error",
+                "Vizual mənbə artıq əlçatan deyil və ya məzmunla uyğun gəlmir. Müəllim faylı yenidən yükləməlidir.",
+            )
+        ) from exc
     if created_count == 0:
         raise ValidationError(
             pgettext(
@@ -256,7 +300,23 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
     submission.reviewed_at = timezone.now()
     submission.reviewer_note = (note or "").strip()
     submission.accepted_bank = bank
-    submission.save(update_fields=["status", "reviewer", "reviewed_at", "reviewer_note", "accepted_bank", "updated_at"])
+    import_token = submission.import_token
+    submission.import_token = ""
+    submission.save(
+        update_fields=[
+            "status",
+            "reviewer",
+            "reviewed_at",
+            "reviewer_note",
+            "accepted_bank",
+            "import_token",
+            "updated_at",
+        ]
+    )
+    if import_token:
+        from apps.exams.services.import_media import clear_stash
+
+        transaction.on_commit(lambda token=import_token: clear_stash(token))
     _notify_teacher_decision(submission)
     return bank, created_count
 

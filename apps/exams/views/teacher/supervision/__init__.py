@@ -1,29 +1,22 @@
-"""teacher supervision — geriyə-uyğun fasad paketi."""
+"""teacher supervision — geriyə-uyğun fasad paketi.
 
-from .live import (  # noqa: F401
-    attempt_live_snapshot_api,
-    exam_live_monitor,
-    exam_live_monitor_poll_api,
-)
+QEYD (2026-07-29): köhnə müəllim nəzarət UI-ı (supervision_monitor,
+supervision_detail, exam_live_monitor + onların poll/snapshot/müdaxilə
+API-ləri) tamamilə silindi. Canlı nəzarət artıq İmtahan Mərkəzinin zal
+oturumu monitorundadır (``exams/exam_center/``); müdaxilə orada
+session/ticket üzərindən aparılır (``exam_center_ticket_resume``).
+
+Burada YALNIZ tələbənin imtahan səhifəsinin çağırdığı iki endpoint qalır —
+onlar proctoring-in özəyidir (pozuntu qeydi + status yoxlaması) və
+silinsəydi tam ekran/tab nəzarəti tamamilə sıradan çıxardı.
+"""
+
 from .monitor import (  # noqa: F401
     log_incident_api,
-    supervision_detail,
-    supervision_monitor,
     supervision_status_api,
-    teacher_lock_api,
-    teacher_resume_api,
-    teacher_stop_api,
 )
 
 __all__ = [
-    "attempt_live_snapshot_api",
-    "exam_live_monitor",
-    "exam_live_monitor_poll_api",
     "log_incident_api",
-    "supervision_detail",
-    "supervision_monitor",
     "supervision_status_api",
-    "teacher_lock_api",
-    "teacher_resume_api",
-    "teacher_stop_api",
 ]

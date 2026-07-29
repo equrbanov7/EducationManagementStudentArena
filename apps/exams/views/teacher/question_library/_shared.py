@@ -10,7 +10,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.models import BankQuestion, BankQuestionOption, QuestionBlock
-from apps.exams.services.import_media import attach_math_images
+from apps.exams.services.import_media import attach_import_media_batch
 from apps.exams.services.question_bank_attach import _question_fingerprint, bank_questions_queryset
 
 logger = logging.getLogger(__name__)
@@ -93,17 +93,27 @@ def _empty_analysis():
     }
 
 
-def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_payload, created_by, math_token=""):
+def _save_bank_questions(
+    *,
+    bank,
+    parsed,
+    selected,
+    language,
+    q_format,
+    points_payload,
+    created_by,
+    math_token="",
+    media_owner_id=None,
+):
     rows = []
     option_payloads = []
-    q_numbers = []  # hər yaradılan sualın çap nömrəsi (düstur şəkillərini bağlamaq üçün)
+    source_indices = []
     for index, question in enumerate(parsed, start=1):
         if index not in selected:
             continue
         text = (question.get("text") or "").strip()
         if not text:
             continue
-        q_no = str(question.get("q_no") or index)
         raw_points = str(points_payload.get(str(index)) or "").strip()
         points = int(raw_points) if raw_points.isdigit() and int(raw_points) > 0 else 1
 
@@ -122,7 +132,7 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
                 )
             )
             option_payloads.append(None)
-            q_numbers.append(q_no)
+            source_indices.append(question.get("source_index"))
         else:
             options = question.get("options") or {}
             if any(label not in options for label in ("A", "B", "C", "D")):
@@ -141,7 +151,7 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
                 )
             )
             option_payloads.append((options, set(question.get("correct") or [])))
-            q_numbers.append(q_no)
+            source_indices.append(question.get("source_index"))
 
     if not rows:
         return 0
@@ -162,10 +172,14 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
         if option_rows:
             BankQuestionOption.objects.bulk_create(option_rows, batch_size=500)
 
-        # Düstur/şəkil regionlarını sual+variantlara bağla (varsa).
+        # Mənbə PDF-in canonical vizual segmentlərini sual+variantlara bağla.
         if math_token:
-            for bank_question, q_no in zip(created, q_numbers):
-                attach_math_images(math_token, q_no, bank_question)
+            attach_import_media_batch(
+                math_token,
+                list(zip(source_indices, created)),
+                owner_id=media_owner_id or created_by.pk,
+                organization_id=bank.organization_id,
+            )
     return len(created)
 
 

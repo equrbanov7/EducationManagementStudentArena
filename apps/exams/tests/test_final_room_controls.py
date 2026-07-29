@@ -25,7 +25,7 @@ class RoomEndAllViewTests(_FlowBase):
     def _activate_session(self):
         open_entry(self.session, self.center)
         self.session.refresh_from_db()
-        start_room(self.session, self.invigilator, override=True)
+        start_room(self.session, self.invigilator)
         self.session.refresh_from_db()
         self.assertEqual(self.session.state, ROOM_SESSION_STATE_ACTIVE)
 
@@ -50,7 +50,11 @@ class RoomEndAllViewTests(_FlowBase):
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"success": False, "ended": 0})
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertEqual(data["ended"], 0)
+        # 2026-07-29: boş halda izahlı mesaj da qaytarılır (düymə daimi görünür).
+        self.assertIn("error", data)
 
 
 class AutoCloseDailyCutoffTests(_FlowBase):
@@ -58,7 +62,7 @@ class AutoCloseDailyCutoffTests(_FlowBase):
         # Aktiv oturum.
         open_entry(self.session, self.center)
         self.session.refresh_from_db()
-        start_room(self.session, self.invigilator, override=True)
+        start_room(self.session, self.invigilator)
 
         # İkinci otaq + giriş açıq (başlamamış) oturum.
         from apps.exams.models import ExamRoom

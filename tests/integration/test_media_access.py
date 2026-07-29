@@ -239,6 +239,10 @@ class QuestionMediaProtectionIntegrationTest(TestCase):
 
         # Physical file
         self.file_path = f"question_media/exam_{self.exam.pk}/q_{self.question.pk}/sample.jpg"
+        # Yol yalnız DB qeydi ilə uyğun gələndə açılır: checker path-i konkret
+        # sualın media sahəsi ilə tutuşdurur (bax `_check_question_media_access`).
+        self.question.image = self.file_path
+        self.question.save(update_fields=["image"])
         file_dir = os.path.join(
             self.media_tmp,
             "question_media",
@@ -265,7 +269,11 @@ class QuestionMediaProtectionIntegrationTest(TestCase):
         MEDIA_ACCEL_REDIRECT_URL="/internal_media",
     )
     def test_org_member_can_access_question_media(self):
-        """An authenticated org member can access question media (X-Accel path)."""
+        """İmtahan müəllifi öz sualının mediasını ala bilir (X-Accel yolu).
+
+        Sırf org üzvlüyü artıq kifayət deyil — tələbə üçün çatdırılmış
+        ``ExamAnswer`` tələb olunur (bax `core/tests/test_media_views.py`).
+        """
         request = self.factory.get(f"/media/{self.file_path}")
         request.user = self.member
 

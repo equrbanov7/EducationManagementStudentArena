@@ -23,11 +23,13 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
         </button>
     </div>
 
-    <div class="q-text">{{ delivered.text|linebreaks }}</div>
+    {% if not delivered.image_replaces_text or not delivered.image_url %}
+        <div class="q-text">{{ delivered.text|linebreaks }}</div>
+    {% endif %}
 
     {% if delivered.image_url %}
         <div class="question-media">
-            <img src="{{ delivered.image_url }}" alt="{% trans 'alt_question_image' context 'exams.template.take_exam' %}">
+            <img src="{{ delivered.image_url }}" alt="{% if delivered.image_replaces_text %}{{ delivered.text }}{% else %}{% trans 'alt_question_image' context 'exams.template.take_exam' %}{% endif %}"{% if delivered.image_replaces_text %} class="source-rendered-image"{% endif %}>
         </div>
     {% endif %}
 
@@ -50,7 +52,7 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
                            data-question-id="{{ question_id }}"
                            {% if opt.is_selected %}checked{% endif %}>
                     <span class="option-letter box-mark">{{ opt.label }}</span>
-                    <span class="opt-text">{{ opt.text }}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                    <span class="opt-text">{% if not opt.image_replaces_text or not opt.image_url %}{{ opt.text }}{% endif %}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
                 </label>
             {% endfor %}
         </div>
@@ -64,7 +66,7 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
                            data-question-id="{{ question_id }}"
                            {% if opt.is_selected %}checked{% endif %}>
                     <span class="option-letter circle-mark">{{ opt.label }}</span>
-                    <span class="opt-text">{{ opt.text }}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                    <span class="opt-text">{% if not opt.image_replaces_text or not opt.image_url %}{{ opt.text }}{% endif %}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
                 </label>
             {% endfor %}
         </div>
