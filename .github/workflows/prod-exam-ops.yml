@@ -2,24 +2,28 @@ name: 🎓 Prod İmtahan Əməliyyatları
 
 # Prod LAN-dadır (10.0.2.42) — kənardan SSH mümkün deyil. Bu workflow
 # self-hosted runner (serverin özü) üzərindən DAR əhatəli imtahan-hazırlığı
-# əmrlərini işlədir.
+# skriptlərini işlədir.
 #
-# TƏHLÜKƏSİZLİK PRİNSİPLƏRİ:
-#   * Açıq shell YOXDUR — yalnız aşağıdakı `manage.py` əmrləri çağırılır.
-#     İstifadəçi girişləri əmr sətrinə DƏYİŞƏN kimi (env → "$VAR") ötürülür,
-#     heç vaxt `run:` bloğuna interpolasiya edilmir (script injection qarşısı).
-#   * `probe` YALNIZ-OXU-dur: heç nə yazmır. Yazı əməliyyatları ayrıca əlavə
-#     olunacaq və ayrıca təsdiq tələb edəcək.
+# NİYƏ `manage.py shell` + STDIN (əmr yox):
+#   Skript runner-in CHECKOUT-undan konteynerə stdin ilə ötürülür, yəni kodun
+#   konteyner image-inə DEPLOY olunması tələb olunmur. Beləliklə imtahan
+#   hazırlığı CI/deploy növbəsindən asılı qalmır (deploy bloklananda da işləyir).
+#
+# TƏHLÜKƏSİZLİK:
+#   * Açıq shell YOXDUR — yalnız repo-dakı yoxlanmış skript işlədilir.
+#   * İstifadəçi girişləri `env:` ilə ötürülür və shell-də sitatlanmış dəyişən
+#     kimi işlənir (`run:` bloğuna interpolasiya yoxdur → script injection yox).
+#   * `probe` YALNIZ-OXU-dur. Yazı skriptləri ayrıca əlavə olunacaq.
 #   * Deploy ilə eyni concurrency qrupu — canlı deploy-la toqquşmur.
 #
-# DİQQƏT: input dəyərləri run logunda GÖRÜNÜR. Gizli dəyər (parol) buraya
-# input kimi YAZILMIR — repo secret-i işlədilir.
+# DİQQƏT: input dəyərləri run logunda GÖRÜNÜR. Parol kimi gizli dəyər input
+# kimi YAZILMIR — repo secret-i işlədilir.
 
 on:
   workflow_dispatch:
     inputs:
       org:
-        description: "Təşkilat slug-ı (boş buraxsanız bütün təşkilatlar sadalanır)"
+        description: "Təşkilat slug-ı (boş = bütün təşkilatları sadala)"
         required: false
         type: string
         default: ""
@@ -55,39 +59,19 @@ jobs:
       GROUPS: ${{ inputs.groups }}
       SUBJECTS: ${{ inputs.subjects }}
     steps:
+      - name: 📥 Checkout (skript mənbəyi)
+        uses: actions/checkout@v6
+
       - name: 🔍 exam_day_probe
         run: |
           set -euo pipefail
+          script="$GITHUB_WORKSPACE/scripts/prod_ops/exam_day_probe.py"
+          test -f "$script" || { echo "Skript tapılmadı: $script" >&2; exit 1; }
+
           cd "$APP_DIR"
-
-          # Girişlər massivə yığılır — hər dəyər ayrıca arqumentdir, shell
-          # onları TƏKRAR PARSE ETMİR (boşluqlu adlar, məs. "532 Bİ", qorunur).
-          args=()
-          if [ -n "${ORG// /}" ]; then
-            args+=(--org "$ORG")
-          fi
-          append_repeated() {
-            local flag="$1" blob="$2" line
-            while IFS= read -r line; do
-              line="${line%$'\r'}"
-              if [ -n "${line// /}" ]; then
-                args+=("$flag" "$line")
-              fi
-            done <<< "$blob"
-          }
-          # `set -e` altında `[ … ] && cmd` boş dəyərdə bütün siyahını 1 qaytarır
-          # və job-u səssizcə öldürür — ona görə açıq `if` bloklarıdır.
-          if [ -n "${STUDENTS// /}" ]; then append_repeated --student "$STUDENTS"; fi
-          if [ -n "${GROUPS// /}" ];   then append_repeated --group   "$GROUPS";   fi
-          if [ -n "${SUBJECTS// /}" ]; then append_repeated --subject "$SUBJECTS"; fi
-
-          echo "── işlədilir: manage.py exam_day_probe (${#args[@]} arqument) ──"
-          # `set -u` altında BOŞ massivin "${args[@]}" genişlənməsi köhnə bash-da
-          # "unbound variable" verir — arqumentsiz hal ayrıca çağırılır.
-          if [ "${#args[@]}" -eq 0 ]; then
-            docker compose -f docker-compose.prod.yml exec -T --index 1 app \
-              python manage.py exam_day_probe
-          else
-            docker compose -f docker-compose.prod.yml exec -T --index 1 app \
-              python manage.py exam_day_probe "${args[@]}"
-          fi
+          docker compose -f docker-compose.prod.yml exec -T \
+            -e PROBE_ORG="$ORG" \
+            -e PROBE_STUDENTS="$STUDENTS" \
+            -e PROBE_GROUPS="$GROUPS" \
+            -e PROBE_SUBJECTS="$SUBJECTS" \
+            --index 1 app python manage.py shell < "$script"
