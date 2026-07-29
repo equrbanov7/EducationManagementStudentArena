@@ -79,6 +79,54 @@ class TrialRunStartGuardTests(TestCase):
         self.assertEqual(response["Location"], reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
 
+class TrialResultExitBarTests(TestCase):
+    """Sınaq nəticəsi final-mərkəz çıxış zolağını GÖSTƏRMİR."""
+
+    def _finished_attempt(self, *, is_trial):
+        from apps.exams.models import ExamAttempt, ExamQuestion
+
+        teacher, _other, org = _fixture(f"-res{int(is_trial)}")
+        exam = Exam.objects.create(
+            title="Final sınaq",
+            author=teacher,
+            organization=org,
+            is_active=True,
+            exam_type="test",
+            exam_type_extended="final",
+        )
+        ExamQuestion.objects.create(exam=exam, text="Sual?", order=1, points=1)
+        attempt = ExamAttempt.objects.create(
+            user=teacher,
+            exam=exam,
+            attempt_number=1,
+            status="submitted",
+            is_trial=is_trial,
+        )
+        return teacher, exam, attempt
+
+    def test_trial_result_shows_note_instead_of_exit_bar(self):
+        teacher, exam, attempt = self._finished_attempt(is_trial=True)
+        self.client.force_login(teacher)
+
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["is_final_exam_result"])
+        self.assertTrue(response.context["is_trial_result"])
+        self.assertNotContains(response, "final-result-exitbar")
+        self.assertContains(response, "trial-result-note")
+
+    def test_real_final_attempt_keeps_exit_bar(self):
+        """Reqressiya qoruması: real final cəhdində zolaq QALIR."""
+        teacher, exam, attempt = self._finished_attempt(is_trial=False)
+        self.client.force_login(teacher)
+
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["is_trial_result"])
+
+
 class ExamDefaultDurationTests(TestCase):
     def test_new_exam_defaults_to_60_minutes(self):
         teacher, _other, org = _fixture("-dur")

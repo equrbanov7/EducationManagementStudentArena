@@ -30223,3 +30223,11 @@ msgstr "Testin yüzde {ratio} kadarında doğru cevap diğerlerinden uzun."
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "Testin yüzde {ratio} kadarında doğru cevap diğerlerinden kısa."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Bu bir deneme çalıştırmasıdır — sonuç kaydedilmez"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "Gerçek sınavda öğrenci bu aşamada sınavdan çıkarılır ve giriş sayfasına yönlendirilir. Deneme yalnızca sınavı kontrol etmek içindir, bu yüzden burada böyle bir yönlendirme yoktur."

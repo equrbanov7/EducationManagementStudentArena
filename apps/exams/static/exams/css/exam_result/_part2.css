@@ -540,3 +540,35 @@
 .journal-result-card .jr-note--pass { color: #15803d; background: #f0fdf4; }
 .journal-result-card .jr-note--fail,
 .journal-result-card .jr-note--barred { color: #b42318; background: #fef3f2; }
+
+/* Sınaq (trial) nəticəsi: final-mərkəz çıxış zolağının əvəzinə məlumat qeydi.
+   Müəllim sınaqda /exams/final/ PIN səhifəsinə atılmır. */
+.trial-result-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 18px auto 0;
+    max-width: 900px;
+    padding: 14px 18px;
+    border: 1px solid #99f6e4;
+    border-left: 4px solid #0f766e;
+    border-radius: 10px;
+    background: #f0fdfa;
+    color: #134e4a;
+}
+
+.trial-result-note__icon {
+    font-size: 1.1rem;
+    margin-top: 2px;
+    color: #0f766e;
+}
+
+.trial-result-note__title {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.trial-result-note__text {
+    font-size: 0.92rem;
+    opacity: 0.9;
+}

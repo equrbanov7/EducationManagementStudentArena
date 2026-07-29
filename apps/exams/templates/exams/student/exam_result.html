@@ -583,6 +583,8 @@
         </a>
     </div>
     {% endif %}
+
+    {% if is_trial_result %}{% include "exams/student/partials/_trial_result_note.html" %}{% endif %}
     {% comment %}"İmtahanlara qayıt" / "Cavablarım" alt paneli silindi —
     naviqasiya yalnız yuxarıdakı "Profilə qayıt" düyməsi ilə.{% endcomment %}
 
