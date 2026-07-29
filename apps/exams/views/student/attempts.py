@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -40,7 +40,8 @@ from ._helpers import (
     ensure_student_exam_tenant_context,
     finish_skips_absent_question,
     posted_autosave_question_ids,
-    safe_same_origin_redirect_path,
+    resolve_author_failure_redirect,
+    resolve_exam_failure_redirect,
     selected_option_ids_from_request,
 )
 from ._timer_write_guard import reject_unstarted_timed_write
@@ -252,29 +253,22 @@ def _previous_attempts_for_context(request, exam, attempt):
     return previous_attempts
 
 
-def _resolve_exam_failure_redirect(request):
-    explicit_next = safe_same_origin_redirect_path(request, request.GET.get("next") or request.POST.get("next"))
-    if explicit_next:
-        return explicit_next
-
-    source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
-    if source_section == "assigned-exams":
-        assigned_type = (request.GET.get("assigned_type") or request.POST.get("assigned_type") or "all").strip().lower()
-        allowed_types = {"all", "exams", "courses", "assignments", "labs", "independent"}
-        if assigned_type not in allowed_types:
-            assigned_type = "all"
-        return f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type={assigned_type}"
-
-    return reverse("exams:student_exam_list")
-
-
 @login_required
 def start_exam(request, slug):
     """
     İmtahan başlatma view-ı
     """
     ensure_student_exam_tenant_context(request)
-    exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.filter(is_active=True)), slug=slug)
+    # Deaktiv (qaralama) imtahan hamı üçün 404 olaraq qalır — YALNIZ imtahanın
+    # öz müəllifi istisnadır: o, "Sınaq keç" düyməsindən bura gəlir və boş 404
+    # əvəzinə səbəbi izah edən mesaj almalıdır. Tenant scope-u və soft-delete
+    # filtri `tenant_scoped_exams`-də olduğu kimi qalır.
+    exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.all()), slug=slug)
+    if not exam.is_active:
+        if exam.author_id != request.user.id:
+            raise Http404("Exam is not active.")
+        messages.error(request, pgettext("exams.view.access.message", "exam_inactive_trial_blocked"))
+        return redirect(resolve_author_failure_redirect(request, exam))
 
     # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None)
@@ -289,11 +283,13 @@ def start_exam(request, slug):
             )
             return redirect(attempt_limit_result_url)
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_not_allowed"))
-        return redirect(_resolve_exam_failure_redirect(request))
+        return redirect(resolve_exam_failure_redirect(request))
 
     if not exam.questions.filter(is_active=True).exists():
         messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
-        return redirect(_resolve_exam_failure_redirect(request))
+        # Müəllimi tələbə siyahısına atmaq mənasızdır — o, sualı elə imtahanın
+        # öz səhifəsindən əlavə edir.
+        return redirect(resolve_author_failure_redirect(request, exam))
 
     # Elektron jurnal buraxılış qapısı: qayıb limiti keçilibsə start olmaz (no-op if unlinked).
     from apps.exams.services.journal_sync import registrar_block_reason
@@ -301,7 +297,7 @@ def start_exam(request, slug):
     block_reason = registrar_block_reason(request, exam)
     if block_reason:
         messages.error(request, block_reason)
-        return redirect(_resolve_exam_failure_redirect(request))
+        return redirect(resolve_exam_failure_redirect(request))
     return _start_or_resume_attempt(request, exam)
 
 
@@ -350,7 +346,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                 "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
             )
             messages.error(request, pgettext("exams.view.access.message", message_key))
-            return redirect(_resolve_exam_failure_redirect(request))
+            return redirect(resolve_exam_failure_redirect(request))
 
         questions = [a.question for a in answers]
         answers_by_qid = {
@@ -475,7 +471,7 @@ def take_exam(request, slug, attempt_id):
 
     if exam.exam_type == "coding" and not practical_exams_enabled():
         messages.error(request, practical_exam_disabled_message())
-        return redirect(_resolve_exam_failure_redirect(request))
+        return redirect(resolve_exam_failure_redirect(request))
 
     is_manual_supervision_lock = bool(
         supervision_feature_enabled and attempt.supervision_manual_lock and attempt.supervision_status == "locked"
@@ -531,7 +527,7 @@ def take_exam(request, slug, attempt_id):
             "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         )
         messages.error(request, pgettext("exams.view.access.message", message_key))
-        return redirect(_resolve_exam_failure_redirect(request))
+        return redirect(resolve_exam_failure_redirect(request))
 
     # Server tərəfli Vaxt Hesablaması
     remaining_seconds = None

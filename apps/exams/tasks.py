@@ -211,42 +211,29 @@ def run_text_extraction_job(job_id):
             (".pdf", ".png", ".jpg", ".jpeg")
         )
         if visual_import:
-            token = None
-            try:
-                from apps.exams.services.import_media import (
-                    clear_stash,
-                    get_stashed_import_text,
-                    stash_math_images,
-                )
+            from apps.exams.services.visual_import_upload import try_visual_import
 
-                with job.file.open("rb") as fh:
-                    wrapped = File(fh, name=job.source_name)
-                    token = stash_math_images(
-                        wrapped,
-                        owner_id=job.user_id,
-                        organization_id=job.organization_id,
-                    )
-                if not token:
-                    raise ValueError("visual import token-i yaranmadı")
-                text_value = get_stashed_import_text(
-                    token,
+            with job.file.open("rb") as fh:
+                wrapped = File(fh, name=job.source_name)
+                visual = try_visual_import(
+                    wrapped,
                     owner_id=job.user_id,
                     organization_id=job.organization_id,
                 )
-            except Exception:
-                logger.exception("run_text_extraction_job: job %s math stash xətası", job_id)
-                if token:
-                    clear_stash(token)
-                from django.utils.translation import pgettext
-
-                status, text_value = TextExtractionJob.STATUS_FAILED, ""
-                error_value = pgettext(
-                    "exams.task.extract.error",
-                    "PDF-dəki şəkil və düsturlar təhlükəsiz hazırlana bilmədi. Faylı yoxlayıb yenidən cəhd edin.",
-                )
-            else:
+            if visual is not None:
+                text_value, token = visual
                 status, error_value = TextExtractionJob.STATUS_SUCCESS, ""
                 meta["math_token"] = token
+            else:
+                # Vizual layout çıxmadı (məs. bank PDF-ində sual nömrələri
+                # ardıcıl deyil) — idxalı dayandırmırıq, adi mətnlə davam edir.
+                # Media bağlanmır, mətn isə tam işlək qalır.
+                logger.info("run_text_extraction_job: job %s vizual deyil, mətn çıxarışına keçildi", job_id)
+                with job.file.open("rb") as fh:
+                    wrapped = File(fh, name=job.source_name or _os.path.basename(job.file.name))
+                    text_value = extract_text_from_upload(wrapped)
+                status, error_value = TextExtractionJob.STATUS_SUCCESS, ""
+                meta["visual_import_skipped"] = True
         else:
             with job.file.open("rb") as fh:
                 # FieldFile adını dəyişmədən orijinal uzantını wrapper-də saxla.

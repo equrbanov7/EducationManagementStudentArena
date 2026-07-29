@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils import timezone
 
 # Faza 5 (audit 2026-07-02): URL/redirect köməkçiləri apps/exams/navigation-a
@@ -19,6 +20,30 @@ def ensure_student_exam_tenant_context(request):
     if request_has_active_organization_context(request):
         return True
     return restore_request_organization_from_profile(request, profile=getattr(request.user, "profile", None))
+
+
+def resolve_exam_failure_redirect(request):
+    """İmtahan başlamayanda tələbəni gəldiyi siyahıya qaytarır."""
+    explicit_next = safe_same_origin_redirect_path(request, request.GET.get("next") or request.POST.get("next"))
+    if explicit_next:
+        return explicit_next
+
+    source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        assigned_type = (request.GET.get("assigned_type") or request.POST.get("assigned_type") or "all").strip().lower()
+        allowed_types = {"all", "exams", "courses", "assignments", "labs", "independent"}
+        if assigned_type not in allowed_types:
+            assigned_type = "all"
+        return f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type={assigned_type}"
+
+    return reverse("exams:student_exam_list")
+
+
+def resolve_author_failure_redirect(request, exam):
+    """İmtahanın müəllifini öz idarəetmə səhifəsinə, tələbəni siyahıya qaytarır."""
+    if exam.author_id == request.user.id:
+        return reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
+    return resolve_exam_failure_redirect(request)
 
 
 def are_exam_results_hidden_from_student(exam):

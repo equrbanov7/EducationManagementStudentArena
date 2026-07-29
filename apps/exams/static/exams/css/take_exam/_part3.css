@@ -1,1 +1,60 @@
+/* Sınaq (trial) rejimi: pozuntu limiti aşılanda imtahan dayandırılmır —
+   müəllimə yalnız "real imtahanda nə olardı" xəbərdarlığı göstərilir.
+   Bax: exam_supervision/ui.js → _showTrialViolationNotice. */
 
+.supervision-trial-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100000;
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    color: #fff;
+    text-align: center;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(15, 118, 110, 0.32);
+}
+
+.supervision-trial-banner__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.supervision-trial-banner__icon {
+    font-size: 1.5rem;
+}
+
+.supervision-trial-banner__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.supervision-trial-banner__text {
+    font-size: 0.9rem;
+    font-weight: 400;
+    opacity: 0.95;
+    margin-top: 0.2rem;
+}
+
+.supervision-trial-banner__count {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.supervision-trial-banner__btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+}

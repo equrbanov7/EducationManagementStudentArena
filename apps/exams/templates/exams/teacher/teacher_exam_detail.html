@@ -245,13 +245,25 @@
                         <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                     </a>
 
-                    {# Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır). #}
+                    {% comment %}
+                        Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır).
+                        Sual yoxdursa start_exam-a getmirik: qaralama imtahanda bu 404 verirdi.
+                        Əvəzinə izahlı modal açılır (bax teacher_exam_detail.js).
+                    {% endcomment %}
                     {% if can_manage_exam_questions %}
-                        <a href="{% url 'exams:start_exam' exam.slug %}?trial=1"
-                           class="action-btn outline-btn"
-                           title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
-                            <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}
-                        </a>
+                        {% if active_questions_count %}
+                            <a href="{% url 'exams:start_exam' exam.slug %}?trial=1"
+                               class="action-btn outline-btn"
+                               title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
+                                <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}
+                            </a>
+                        {% else %}
+                            <button type="button"
+                                    class="action-btn outline-btn js-trial-run-blocked"
+                                    title="{% trans 'trial_run_blocked_hint' context 'exams.template.teacher_exam_detail' %}">
+                                <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}
+                            </button>
+                        {% endif %}
                     {% endif %}
 
                     <a href="{% url 'exams:delete_exam' exam.slug %}"
@@ -330,6 +342,40 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{% comment %}
+    Sual yüklənmədən "Sınaq keç" — 404 əvəzinə izah + sual əlavə etmə yolu.
+{% endcomment %}
+<div class="modal fade" id="examDetailTrialRunBlockedModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="examDetailTrialRunBlockedTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="examDetailTrialRunBlockedTitle">
+                    <i class="fas fa-vial me-2"></i>
+                    {% trans "trial_run_blocked_title" context "exams.template.teacher_exam_detail" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">{% trans "trial_run_blocked_body" context "exams.template.teacher_exam_detail" %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "action_cancel" context "exams.template.add_exam_question" %}
+                </button>
+                <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+                   class="btn btn-primary js-open-question-form-modal"
+                   data-question-modal-mode="create"
+                   data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+                    <i class="fas fa-plus me-1"></i>
+                    {% trans "trial_run_blocked_cta" context "exams.template.teacher_exam_detail" %}
+                </a>
+            </div>
         </div>
     </div>
 </div>

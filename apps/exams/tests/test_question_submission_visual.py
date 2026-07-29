@@ -202,6 +202,10 @@ class QuestionSubmissionVisualViewTests(_Base):
             reverse("exams:question_submission_review", kwargs={"submission_id": submission.pk})
         )
         self.assertContains(review, url)
+        self.assertContains(review, 'class="qsubp-source-preview"', count=1)
+        self.assertContains(review, 'class="qsubp-answer"', count=1)
+        self.assertContains(review, 'class="qsubp-card__text sr-only"', count=1)
+        self.assertNotContains(review, 'class="qsubp-options"')
 
     def test_visual_preview_rejects_source_index_not_selected_in_snapshot(self):
         submission = submit_question_set(

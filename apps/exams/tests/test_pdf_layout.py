@@ -162,6 +162,24 @@ def _previous_segment_descender_pdf() -> bytes:
     return data
 
 
+def _postfix_option_labels_pdf() -> bytes:
+    document = fitz.open()
+    page = document.new_page(width=420, height=430)
+    page.insert_text((36, 30), "1. Postfix labels", fontsize=12)
+    page.insert_text((36, 65), "A) alpha", fontsize=12)
+    page.insert_text((36, 95), "B) beta C)", fontsize=12)
+    page.insert_text((36, 125), "gamma D)", fontsize=12)
+    page.insert_text((36, 155), "delta E)", fontsize=12)
+    page.insert_text((36, 185), "epsilon", fontsize=12)
+    page.insert_text((36, 207), "Section 3 Functions", fontsize=12)
+    page.insert_text((36, 235), "2. Next stem", fontsize=12)
+    for index, label in enumerate(("A", "B", "C", "D"), start=1):
+        page.insert_text((36, 235 + index * 35), f"{label}) next {label}", fontsize=12)
+    data = document.tobytes()
+    document.close()
+    return data
+
+
 def _image(payload: bytes) -> Image.Image:
     return Image.open(BytesIO(payload)).convert("RGB")
 
@@ -549,6 +567,35 @@ class PdfLayoutAnalysisTests(SimpleTestCase):
         self.assertEqual(question["options"]["A"]["text"], "value")
         self.assertLess(option_a.width, 150)
 
+    def test_postfix_option_labels_keep_following_row_content(self):
+        data = _postfix_option_labels_pdf()
+        questions = analyze_pdf(data)["questions"]
+        question = questions[0]
+
+        self.assertEqual(
+            {label: option["text"] for label, option in question["options"].items()},
+            {
+                "A": "alpha",
+                "B": "beta",
+                "C": "gamma",
+                "D": "delta",
+                "E": "epsilon",
+            },
+        )
+        for label in ("C", "D"):
+            rendered = _image(render_segment(data, question["options"][label]))
+            self.assertGreater(rendered.width, 50)
+            self.assertGreater(
+                sum(1 for pixel in rendered.convert("L").getdata() if pixel < 180),
+                20,
+            )
+        option_e = _image(render_segment(data, question["options"]["E"]))
+        self.assertEqual(question["options"]["E"]["text"], "epsilon")
+        self.assertNotIn("Section", analyze_pdf(data)["canonical_text"])
+        self.assertLess(option_e.height, 70)
+        next_stem = _image(render_segment(data, questions[1]["stem"]))
+        self.assertLess(next_stem.height, 70)
+
     def test_adjacent_near_duplicate_fragment_is_removed_conservatively(self):
         previous = Image.new("RGB", (220, 100), "white")
         current = Image.new("RGB", (220, 50), "white")
@@ -570,10 +617,15 @@ class PdfLayoutAnalysisTests(SimpleTestCase):
         data = _REAL_SAMPLE.read_bytes()
         manifest = analyze_pdf(data)
         q3 = manifest["questions"][2]
+        q4 = manifest["questions"][3]
+        q138 = manifest["questions"][137]
         q38 = manifest["questions"][37]
         q270 = manifest["questions"][269]
 
         q3_stem = _image(render_segment(data, q3["stem"]))
+        q4_options = [_image(render_segment(data, q4["options"][label])) for label in ("C", "D")]
+        q138_e = _image(render_segment(data, q138["options"]["E"]))
+        q5_stem = _image(render_segment(data, manifest["questions"][4]["stem"]))
         q38_stem = _image(render_segment(data, q38["stem"]))
         q38_options = [_image(render_segment(data, q38["options"][label])) for label in ("A", "B", "C", "D", "E")]
         q270_b = _image(render_segment(data, q270["options"]["B"]))
@@ -581,6 +633,20 @@ class PdfLayoutAnalysisTests(SimpleTestCase):
         q121_e = _image(render_segment(data, manifest["questions"][120]["options"]["E"]))
 
         self.assertGreaterEqual(q3_stem.height, 165)
+        self.assertEqual(
+            {label: " ".join(q4["options"][label]["text"].split()) for label in ("A", "B", "C", "D", "E")},
+            {
+                "A": 'plot(" y"," z")',
+                "B": "plot(z, y)",
+                "C": "plot(z, ' y')",
+                "D": "plot(' z', ' y')",
+                "E": "hist(x, y)",
+            },
+        )
+        self.assertTrue(all(image.width > 100 for image in q4_options))
+        self.assertLess(q5_stem.height, 80)
+        self.assertEqual(q138["options"]["E"]["text"], "Sq(x)")
+        self.assertLess(q138_e.height, 80)
         self.assertGreaterEqual(q38_stem.height, 138)
         self.assertLessEqual(q38_stem.height, 150)
         self.assertTrue(all(image.height >= 105 for image in q38_options))

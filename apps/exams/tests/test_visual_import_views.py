@@ -116,6 +116,10 @@ class VisualImportViewIntegrationTests(TestCase):
             kwargs={"token": self.token, "source_index": 0},
         )
         self.assertContains(response, expected)
+        self.assertContains(response, 'class="q-source-preview"', count=1)
+        self.assertContains(response, 'class="q-visual-answer"', count=1)
+        self.assertContains(response, 'class="q-text sr-only"', count=1)
+        self.assertNotContains(response, 'class="options-grid"')
 
     def test_exam_selected_subset_keeps_original_source_index_for_media(self):
         captured = {}

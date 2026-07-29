@@ -53,6 +53,12 @@ class SlicePlan:
             interval_bottom,
             text_boxes,
         )
+        if getattr(start, "is_postfix", False):
+            interval_bottom = self._include_postfix_content(
+                start.line.page_index,
+                interval_bottom,
+                text_boxes,
+            )
         neighbor_bottom = self._lower_neighbor_boundary(text_boxes, exclude_boxes)
         if neighbor_bottom is not None:
             interval_bottom = min(interval_bottom, neighbor_bottom)
@@ -105,11 +111,19 @@ class SlicePlan:
                 # Hündür düstur əvvəlki segmentin midpoint sərhədini keçəndə
                 # crop böyüyür. Növbəti row-un anchor/inline mətnini bu böyümə
                 # daxilində ağart ki, məsələn A variantı stem-ə sızmasın.
+                #
+                # Label əvvəlki məzmunun sonunda yerləşirsə (``formula D)``),
+                # həmin məzmun cari varianta aiddir. Bu halda bütün sətri yox,
+                # yalnız postfix label və ondan sonrakı hissəni maskalamaq
+                # lazımdır.
+                is_postfix_end = bool(getattr(end, "is_postfix", False))
+                mask_x0 = end.rect.x0 - _LABEL_MASK_MARGIN if is_postfix_end else end.line.rect.x0 - _LABEL_MASK_MARGIN
+                mask_x1 = page_rect.x1 if is_postfix_end else end.line.rect.x1 + _LABEL_MASK_MARGIN
                 masks.append(
                     Rect(
-                        max(page_rect.x0, end.line.rect.x0 - _LABEL_MASK_MARGIN),
+                        max(page_rect.x0, mask_x0),
                         max(top, end.line.rect.y0 - _ROW_MASK_MARGIN),
-                        min(page_rect.x1, end.line.rect.x1 + _LABEL_MASK_MARGIN),
+                        min(page_rect.x1, mask_x1),
                         min(bottom, end.line.rect.y1 + _ROW_MASK_MARGIN),
                     )
                 )
@@ -197,6 +211,21 @@ class SlicePlan:
         expanded_top = _connected_edge(top, boxes, upward=True)
         expanded_bottom = _connected_edge(bottom, boxes, upward=False)
         return expanded_top, expanded_bottom
+
+    def _include_postfix_content(
+        self,
+        page_index: int,
+        bottom: float,
+        text_boxes: Sequence[Any],
+    ) -> float:
+        """Postfix label-dən sonrakı fiziki sətiri midpoint crop-a daxil et."""
+
+        page_top = self.page_offsets[page_index]
+        page_rect = self.page_rects[page_index]
+        owned_bottoms = [
+            page_top + box.rect.y1 - page_rect.y0 + _CONTENT_PAD for box in text_boxes if box.page_index == page_index
+        ]
+        return max([bottom, *owned_bottoms])
 
 
 def build_slice_plan(anchors: Sequence[Any], page_rects: Sequence[Rect]) -> SlicePlan:

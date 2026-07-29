@@ -21,6 +21,7 @@ from .manifest import (
     Rect,
     Segment,
 )
+from .noise import is_section_heading
 from .ocr import page_text_result
 from .ownership import TextPart, segment_content
 from .slicing import SlicePlan, build_slice_plan
@@ -61,6 +62,12 @@ class _DetectedAnchor:
     @property
     def position(self) -> tuple[int, int, int]:
         return (self.line.page_index, self.line.page_order, self.start)
+
+    @property
+    def is_postfix(self) -> bool:
+        """Öz məzmunundan əvvəl yox, əvvəlki sətrin sonunda qalmış option label-i."""
+
+        return self.kind == "option" and self.start > 0 and not self.line.text[self.content_start :].strip()
 
     def public(self) -> Anchor:
         return Anchor(
@@ -338,6 +345,9 @@ def _build_questions(
     questions: list[Question] = []
     issues: list[str] = []
     slice_plan = build_slice_plan([*question_anchors, *option_anchors], page_rects)
+    section_heading_boxes = tuple(
+        PageRect(line.page_index, line.rect) for line in lines if is_section_heading(line.text)
+    )
     pending_prefixes: dict[int, tuple[TextPart, ...]] = {}
     for index, question_anchor in enumerate(question_anchors):
         next_question = question_anchors[index + 1] if index + 1 < len(question_anchors) else None
@@ -358,13 +368,23 @@ def _build_questions(
             if stem_end is not None and stem_end.kind == "option"
             else ()
         )
+        previous_option_boxes = (
+            questions[-1].options[-1].segment.text_boxes if questions and questions[-1].options else ()
+        )
         stem, stem_spill = _make_segment(
             question_anchor,
             stem_end,
             lines,
             slice_plan,
             prefix=pending_prefixes.pop(id(question_anchor), ()),
-            exclude_boxes=stem_excludes,
+            # Postfix E label-i öz məzmunundan yuxarıda qala bilər. Anchor
+            # midpoint-i həmin məzmunu növbəti sualın crop-una da salanda
+            # əvvəlki son variantı növbəti stem-dən ağart.
+            exclude_boxes=(
+                *section_heading_boxes,
+                *previous_option_boxes,
+                *stem_excludes,
+            ),
         )
         if stem_spill and stem_end is not None:
             pending_prefixes[id(stem_end)] = stem_spill
@@ -391,7 +411,11 @@ def _build_questions(
                 # midpoint sərhədini keçə bilər. İlk variantda stem qutularını
                 # maskala; sonrakı variantlar üçün mövcud neighbor maskı daha
                 # təhlükəsizdir (əlaqəsiz annotation-ları qoruyur).
-                exclude_boxes=(*(stem.text_boxes if option_index == 0 else ()), *next_boxes),
+                exclude_boxes=(
+                    *section_heading_boxes,
+                    *(stem.text_boxes if option_index == 0 else ()),
+                    *next_boxes,
+                ),
             )
             if spill and option_end is not None:
                 pending_prefixes[id(option_end)] = spill
