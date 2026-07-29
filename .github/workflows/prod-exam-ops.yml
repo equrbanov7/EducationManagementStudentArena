@@ -31,6 +31,7 @@ on:
           - exam_day_probe
           - exam_day_probe2
           - exam_day_probe3
+          - exam_day_import_questions
           - exam_day_seed
       apply:
         description: "YALNIZ exam_day_seed üçün: faktiki yaz (işarələnməsə dry-run)"
@@ -72,6 +73,11 @@ on:
         required: false
         type: string
         default: "7"
+      mm_exam_title:
+        description: "import: sualların yazılacağı imtahanın adı"
+        required: false
+        type: string
+        default: "Mülki müdafiə"
 
 concurrency:
   group: production-deploy
@@ -92,6 +98,7 @@ jobs:
       GROUP_TEACHER: ${{ inputs.group_teacher }}
       AZ_EXAM_ID: ${{ inputs.az_exam_id }}
       WINDOW_DAYS: ${{ inputs.window_days }}
+      MM_EXAM_TITLE: ${{ inputs.mm_exam_title }}
       APPLY_FLAG: ${{ inputs.apply && 'yes' || 'no' }}
       TEMP_PASSWORD: ${{ secrets.EXAM_TEMP_PASSWORD }}
     steps:
@@ -104,14 +111,27 @@ jobs:
 
           # Ağ siyahı — ixtiyari yol/skript ötürülə bilməz.
           case "$SCRIPT_NAME" in
-            exam_day_probe|exam_day_probe2|exam_day_probe3|exam_day_seed) ;;
+            exam_day_probe|exam_day_probe2|exam_day_probe3|exam_day_seed|exam_day_import_questions) ;;
             *) echo "İcazəsiz skript: $SCRIPT_NAME" >&2; exit 1 ;;
           esac
 
-          script="$GITHUB_WORKSPACE/scripts/prod_ops/${SCRIPT_NAME}.py"
+          ops="$GITHUB_WORKSPACE/scripts/prod_ops"
+          script="$ops/${SCRIPT_NAME}.py"
           test -f "$script" || { echo "Skript tapılmadı: $script" >&2; exit 1; }
 
-          if [ "$SCRIPT_NAME" = "exam_day_seed" ] && [ "$APPLY_FLAG" = "yes" ]; then
+          # Sual idxalı data faylı ilə birlikdə gedir: `manage.py shell` stdin-i
+          # bütöv exec etdiyi üçün iki faylı birləşdirmək kifayətdir — data
+          # konteynerə köçürülməli deyil.
+          payload="$script"
+          if [ "$SCRIPT_NAME" = "exam_day_import_questions" ]; then
+            data="$ops/data/mm_questions.py"
+            test -f "$data" || { echo "Data tapılmadı: $data" >&2; exit 1; }
+            payload="$RUNNER_TEMP/payload.py"
+            cat "$data" "$script" > "$payload"
+            echo "── data ($(wc -l < "$data") sətir) + skript birləşdirildi ──"
+          fi
+
+          if [ "$APPLY_FLAG" = "yes" ]; then
             echo "⚠️  FAKTİKİ YAZMA rejimi — prod verilənlər bazasına yazılacaq."
           fi
 
@@ -126,5 +146,6 @@ jobs:
             -e SEED_GROUP_TEACHER="$GROUP_TEACHER" \
             -e SEED_AZ_EXAM_ID="$AZ_EXAM_ID" \
             -e SEED_WINDOW_DAYS="$WINDOW_DAYS" \
+            -e MM_EXAM_TITLE="$MM_EXAM_TITLE" \
             -e EXAM_TEMP_PASSWORD="$TEMP_PASSWORD" \
-            --index 1 app python manage.py shell < "$script"
+            --index 1 app python manage.py shell < "$payload"
