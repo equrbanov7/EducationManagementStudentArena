@@ -30231,3 +30231,7 @@ msgstr "Bu bir deneme çalıştırmasıdır — sonuç kaydedilmez"
 msgctxt "exams.template.student_exam_result"
 msgid "trial_result_note_body"
 msgstr "Gerçek sınavda öğrenci bu aşamada sınavdan çıkarılır ve giriş sayfasına yönlendirilir. Deneme yalnızca sınavı kontrol etmek içindir, bu yüzden burada böyle bir yönlendirme yoktur."
+
+msgctxt "appeals.view.message"
+msgid "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."
+msgstr "Bu itiraz artık mevcut değil — büyük olasılıkla silindi. Bildirimdeki bağlantı güncel değil."

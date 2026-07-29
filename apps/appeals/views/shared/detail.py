@@ -4,8 +4,9 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from ...constants import (
     APPEAL_ITEM_STATUS_ACCEPTED,
@@ -66,14 +67,34 @@ def _appeal_positive_bonus(items):
     return bonus
 
 
+def _missing_appeal_redirect(request, *, section):
+    """Silinmiş (və ya artıq əlçatmaz) müraciət → siyahı + izahlı mesaj."""
+    from django.contrib import messages
+
+    messages.info(
+        request,
+        pgettext(
+            "appeals.view.message",
+            "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib.",
+        ),
+    )
+    return redirect(reverse("accounts:profile") + "?section=" + section)
+
+
 @login_required
 def appeal_detail(request, appeal_id):
-    appeal = get_object_or_404(
-        Appeal.objects.select_related("exam", "attempt", "reviewed_by", "student").prefetch_related(
-            "items__question", "items__score_adjustment"
-        ),
-        id=appeal_id,
+    # Bildirişlər müraciətin ID-sini dondurur; müraciət sonradan silinsə köhnə
+    # bildirişdəki keçid boş 404 səhifəsi verirdi. Belə "ölü" keçid indi
+    # siyahıya, izahlı mesajla qaytarılır. Mesaj İCAZƏSİZ hal üçün də eynidir —
+    # beləliklə silinmiş/özgə müraciət arasında fərq sızmır.
+    appeal = (
+        Appeal.objects.select_related("exam", "attempt", "reviewed_by", "student")
+        .prefetch_related("items__question", "items__score_adjustment")
+        .filter(id=appeal_id)
+        .first()
     )
+    if appeal is None:
+        return _missing_appeal_redirect(request, section="my-appeals")
 
     is_owner = appeal.student_id == request.user.id
     if not is_owner and not can_review_appeal(request, appeal):

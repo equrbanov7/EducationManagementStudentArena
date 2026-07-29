@@ -30829,3 +30829,7 @@ msgstr "This is a trial run — nothing is recorded"
 msgctxt "exams.template.student_exam_result"
 msgid "trial_result_note_body"
 msgstr "In a real exam the student is removed from the exam at this point and sent back to the entry page. A trial run is only for checking the exam, so no such redirect happens here."
+
+msgctxt "appeals.view.message"
+msgid "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."
+msgstr "This appeal no longer exists — it was most likely deleted. The link in the notification is out of date."
