@@ -41,7 +41,7 @@ class StrictQuestionContentDeliveryTests(TestCase):
         )
         _login_with_org(self.client, self.student, self.org)
 
-    def _question(self, *, order=1, time_limit=60, option_count=2):
+    def _question(self, *, order=1, time_limit=60, option_count=2, image_replaces_text=False):
         question = ExamQuestion.objects.create(
             exam=self.exam,
             order=order,
@@ -52,6 +52,7 @@ class StrictQuestionContentDeliveryTests(TestCase):
             answer_mode="single",
             time_limit_seconds=time_limit,
             image=f"exam_questions/private-question-{order}.png",
+            image_replaces_text=image_replaces_text,
             video=f"exam_questions/private-question-{order}.mp4",
         )
         for index in range(option_count):
@@ -59,6 +60,7 @@ class StrictQuestionContentDeliveryTests(TestCase):
                 question=question,
                 text=f"STRICT_OPTION_{order}_{index}_SENTINEL",
                 image=f"exam_options/private-option-{order}-{index}.png",
+                image_replaces_text=image_replaces_text,
                 is_correct=index == 0,
             )
         return question
@@ -151,6 +153,38 @@ class StrictQuestionContentDeliveryTests(TestCase):
         self.assertEqual(repeat.status_code, 200)
         attempt.refresh_from_db()
         self.assertEqual(attempt.question_timing[str(question.id)], first_started_at)
+
+    def test_source_rendered_delivery_keeps_text_only_as_accessible_image_name(self):
+        question = self._question(image_replaces_text=True)
+        attempt = self._attempt(question)
+
+        response = self.client.post(self._delivery_url(attempt), {"question_id": question.id})
+
+        self.assertEqual(response.status_code, 200)
+        delivered_html = response.json()["html"]
+        self.assertNotIn('<div class="q-text">', delivered_html)
+        self.assertIn(f'alt="{question.text}"', delivered_html)
+        self.assertIn('class="source-rendered-image"', delivered_html)
+        self.assertEqual(delivered_html.count(question.text), 1)
+        for option in question.options.all():
+            self.assertIn(f'alt="{option.text}"', delivered_html)
+            self.assertEqual(delivered_html.count(option.text), 1)
+        self.assertIn('<span class="option-letter', delivered_html)
+
+    def test_untimed_source_render_keeps_accessible_text_without_visible_duplicate(self):
+        question = self._question(time_limit=None, image_replaces_text=True)
+        attempt = self._attempt(question)
+
+        response = self.client.get(self._take_url(attempt))
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertNotIn('<div class="q-text">', html)
+        self.assertIn(f'alt="{question.text}"', html)
+        self.assertEqual(html.count(question.text), 1)
+        for option in question.options.all():
+            self.assertIn(f'alt="{option.text}"', html)
+            self.assertEqual(html.count(option.text), 1)
 
     def test_expired_delivery_returns_zero_without_resetting_start(self):
         question = self._question(time_limit=30)

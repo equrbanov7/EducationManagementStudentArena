@@ -481,6 +481,8 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+.question-media img.source-rendered-image { max-height: none; }
+
 .q-body {
     padding: 25px;
 }
@@ -528,4 +530,3 @@
     border-color: #34d399;
     font-weight: 600;
 }
-

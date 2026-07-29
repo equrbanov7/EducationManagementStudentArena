@@ -1,0 +1,66 @@
+/* İmtahan oturumları siyahısı — vəziyyət çipləri (sayğaclı) və izah sətri.
+
+   Baza `.fxc-tabs` / `.fxc-tab` üslubları `center.css`-dədir; burada yalnız
+   bu səhifəyə aid modifikatorlar var (center.css modul-ölçü limitinə yaxındır). */
+
+.fxc-tabs--states {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Çipin sağındakı sayğac — hansı vəziyyətdə oturum olduğu klikləmədən görünsün. */
+.fxc-tab__n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    margin-left: 6px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #E2E8F0;
+    color: #475569;
+    font-size: .72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.fxc-tab.is-active .fxc-tab__n {
+    background: rgba(255, 255, 255, .24);
+    color: #fff;
+}
+
+/* Boş vəziyyət: gizlətmirik (filtr yeri sabit qalsın), sadəcə solğunlaşdırırıq. */
+.fxc-tab.is-empty {
+    opacity: .5;
+}
+
+.fxc-tab.is-empty:hover {
+    opacity: 1;
+}
+
+.fxc-state-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: -4px 0 14px;
+    padding: 8px 12px;
+    border-left: 3px solid #2C5BFF;
+    border-radius: 8px;
+    background: #F1F5FF;
+    color: #334155;
+    font-size: .82rem;
+}
+
+.fxc-state-legend i {
+    color: #2C5BFF;
+}
+
+@media (max-width: 640px) {
+    .fxc-state-legend {
+        font-size: .78rem;
+        line-height: 1.5;
+    }
+}

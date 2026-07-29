@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/sessions.css' %}?v=20260729-states">
 {% endblock %}
 
 {% block content %}
@@ -35,14 +36,45 @@
     </div>
   </header>
 
-  <nav class="fxc-tabs" aria-label="{% trans 'Status filtri' %}">
-    <a href="?" class="fxc-tab {% if not active_state %}is-active{% endif %}">{% trans "Hamısı" %}</a>
-    <a href="?state=entry_open" class="fxc-tab {% if active_state == 'entry_open' %}is-active{% endif %}">{% trans "Giriş açıq" %}</a>
-    <a href="?state=active" class="fxc-tab {% if active_state == 'active' %}is-active{% endif %}">{% trans "Aktiv" %}</a>
-    <a href="?state=prepared" class="fxc-tab {% if active_state == 'prepared' %}is-active{% endif %}">{% trans "Hazırlanır" %}</a>
-    <a href="?state=ended" class="fxc-tab {% if active_state == 'ended' %}is-active{% endif %}">{% trans "Bitmiş" %}</a>
-    <a href="?state=cancelled" class="fxc-tab {% if active_state == 'cancelled' %}is-active{% endif %}">{% trans "Ləğv edilmiş" %}</a>
+  {% comment %}
+    Vəziyyət çipləri: hər biri öz sayğacını göstərir (klikləmədən harada
+    oturum olduğu görünsün) və title-da nə demək olduğunu izah edir.
+    Sıra oturumun HƏYAT DÖVRÜNƏ uyğundur: hazırlanır → giriş açıq → aktiv →
+    bitmiş. Boş çiplər solğunlaşır, amma gizlədilmir ki, filtr yeri sabit qalsın.
+  {% endcomment %}
+  <nav class="fxc-tabs fxc-tabs--states" aria-label="{% trans 'Status filtri' %}">
+    <a href="?" class="fxc-tab {% if not active_state %}is-active{% endif %}"
+       title="{% trans 'Bütün oturumlar' %}">
+      {% trans "Hamısı" %}<span class="fxc-tab__n">{{ state_counts.total|default:0 }}</span>
+    </a>
+    <a href="?state=prepared" class="fxc-tab {% if active_state == 'prepared' %}is-active{% endif %}{% if not state_counts.prepared %} is-empty{% endif %}"
+       title="{% trans 'Oturum cədvəldədir, amma giriş hələ açılmayıb — tələbə PIN ilə girə bilmir.' %}">
+      {% trans "Hazırlanır" %}<span class="fxc-tab__n">{{ state_counts.prepared|default:0 }}</span>
+    </a>
+    <a href="?state=entry_open" class="fxc-tab {% if active_state == 'entry_open' %}is-active{% endif %}{% if not state_counts.entry_open %} is-empty{% endif %}"
+       title="{% trans 'Giriş açıqdır: tələbələr PIN ilə zala qoşulur, amma imtahan hələ başlamayıb.' %}">
+      {% trans "Giriş açıq" %}<span class="fxc-tab__n">{{ state_counts.entry_open|default:0 }}</span>
+    </a>
+    <a href="?state=active" class="fxc-tab {% if active_state == 'active' %}is-active{% endif %}{% if not state_counts.active %} is-empty{% endif %}"
+       title="{% trans 'İmtahan gedir: nəzarətçi başladıb, taymer işləyir.' %}">
+      {% trans "Aktiv" %}<span class="fxc-tab__n">{{ state_counts.active|default:0 }}</span>
+    </a>
+    <a href="?state=ended" class="fxc-tab {% if active_state == 'ended' %}is-active{% endif %}{% if not state_counts.ended %} is-empty{% endif %}"
+       title="{% trans 'Oturum bitib — nəticələr hesabatlardadır.' %}">
+      {% trans "Bitmiş" %}<span class="fxc-tab__n">{{ state_counts.ended|default:0 }}</span>
+    </a>
+    <a href="?state=cancelled" class="fxc-tab {% if active_state == 'cancelled' %}is-active{% endif %}{% if not state_counts.cancelled %} is-empty{% endif %}"
+       title="{% trans 'Oturum keçirilmədən ləğv edilib.' %}">
+      {% trans "Ləğv edilmiş" %}<span class="fxc-tab__n">{{ state_counts.cancelled|default:0 }}</span>
+    </a>
   </nav>
+
+  {% comment %}Vəziyyətlərin mənası — "giriş açıq"la "aktiv" qarışdırılmasın.{% endcomment %}
+  <p class="fxc-state-legend">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    {% trans "Giriş açıq" %} = {% trans "tələbələr yerlərini tutur" %} ·
+    {% trans "Aktiv" %} = {% trans "imtahan yazılır" %}
+  </p>
 
   {% if page_obj.object_list %}
   <div class="fxc-session-grid">

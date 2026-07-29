@@ -200,7 +200,7 @@ class FinalSessionExclusivityTests(_FlowBase):
         self.assertEqual(response.status_code, 302)
 
         # İmtahan hələ gedir (oturum aktiv), tələbə isə imtahanını bitirib.
-        start_room(self.session, self.invigilator, override=True)
+        start_room(self.session, self.invigilator)
         self.session.refresh_from_db()
         self.assertEqual(self.session.state, ROOM_SESSION_STATE_ACTIVE)
         self.ticket.refresh_from_db()

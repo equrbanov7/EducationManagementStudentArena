@@ -10,6 +10,7 @@ from apps.exams.constants import LABELS
 from apps.exams.models import ExamAnswer, ExamQuestionOption
 from apps.exams.services.language_variants import effective_needed_count_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer
+from core.media_urls import protected_media_url
 
 _DIFFICULTY_ORDER = ("easy", "medium", "hard")
 _QUESTION_SOFT_USAGE_CAP = 4
@@ -68,7 +69,8 @@ def build_shuffled_options(attempt_id, question):
                 "label": LABELS[i] if i < len(LABELS) else "",
                 "text": opt.text,
                 # Düstur/şəkil variantı (PDF idxalından) — varsa URL, yoxdursa None.
-                "image": opt.image.url if getattr(opt, "image", None) else None,
+                "image": protected_media_url(opt.image) if getattr(opt, "image", None) else None,
+                "image_replaces_text": bool(getattr(opt, "image_replaces_text", False)),
             }
         )
     return packed
@@ -387,7 +389,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
 
         options_by_qid: dict[int, list] = {}
         for opt in ExamQuestionOption.objects.filter(question_id__in=[q.id for q in selected_qs]).only(
-            "id", "question_id", "is_correct", "text", "label", "image"
+            "id", "question_id", "is_correct", "text", "label", "image", "image_replaces_text"
         ):
             options_by_qid.setdefault(opt.question_id, []).append(
                 {
@@ -396,6 +398,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                     "text": opt.text or "",
                     "label": opt.label or "",
                     "image": opt.image.name if opt.image else "",
+                    "image_replaces_text": bool(opt.image_replaces_text),
                 }
             )
 

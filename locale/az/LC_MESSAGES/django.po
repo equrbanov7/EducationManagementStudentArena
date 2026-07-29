@@ -15126,6 +15126,14 @@ msgid "supervision_threshold_title"
 msgstr "⚠️ Diqqət!"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_title"
+msgstr "Sınaq rejimi — imtahan dayandırılmadı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_msg"
+msgstr "Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr ""
 "Siz artıq pozuntu limitinin 75%-inə çatmısınız! Yalnız {remaining} pozuntuya"
@@ -19117,6 +19125,10 @@ msgstr "ZIP içində təhlükəli fayl aşkarlandı: {filename}"
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
 msgstr "Bu imtahana hələ sual təyin olunmayıb."
+
+msgctxt "exams.view.access.message"
+msgid "exam_inactive_trial_blocked"
+msgstr "İmtahan hələ deaktivdir (qaralama), ona görə sınaq keçmək mümkün deyil. Əvvəlcə imtahanı aktivləşdirin."
 
 #, python-brace-format
 msgctxt "exams.view.validation"
@@ -28173,6 +28185,22 @@ msgid "trial_run"
 msgstr "Sınaq keç"
 
 msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_hint"
+msgstr "Sınaq keçmək üçün ən azı bir aktiv sual lazımdır"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_title"
+msgstr "Sınaq keçmək mümkün deyil"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_body"
+msgstr "Bu imtahanda hələ sual yoxdur, ona görə sınaq keçmək mümkün deyil. Əvvəlcə sual əlavə edin və ya PDF-dən yükləyin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_cta"
+msgstr "Sual əlavə et"
+
+msgctxt "exams.template.teacher_exam_detail"
 msgid "trial_run_hint"
 msgstr "İmtahanı tələbə kimi yoxlayın — bu cəhd nəticələrə sayılmır."
 
@@ -30166,3 +30194,35 @@ msgstr "müəllim axtar…"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Keçir"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import"
+msgstr "#{index} sualı bu faylda #{previous_index} ilə eynidir: “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import_first"
+msgstr "#{index} sualı bu faylda daha {count} sualla təkrarlanır (ilk: #{next_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "already_in_exam"
+msgstr "#{index} sualı bankda artıq var (sıra {db_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_long"
+msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan uzundur."
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_short"
+msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan qısadır."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Bu sınaq keçididir — nəticə heç yerə yazılmır"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "Real imtahanda tələbə bu mərhələdə imtahandan çıxarılır və giriş səhifəsinə yönləndirilir. Sınaq yalnız imtahanı yoxlamaq üçündür, ona görə burada belə bir yönləndirmə yoxdur."
+
+msgctxt "appeals.view.message"
+msgid "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."
+msgstr "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."

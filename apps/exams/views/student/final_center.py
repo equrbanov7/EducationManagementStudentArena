@@ -54,7 +54,6 @@ from apps.exams.services.final_center import (
     enter_waiting,
     entry_session_matches,
     entry_ticket_id,
-    maybe_auto_end,
     store_entry_session,
     student_cancel_waiting,
     sync_ticket_completion,
@@ -524,7 +523,6 @@ def final_ticket_state(request, ticket_id):
     session = ticket.session
     if session is None:
         return JsonResponse({"error": "entry_required", "ticket_status": ticket.status}, status=409)
-    maybe_auto_end(session)
     session.refresh_from_db(fields=["state", "started_at", "ended_at"])
     if ticket.status == TICKET_STATUS_ACTIVE:
         sync_ticket_completion(ticket)

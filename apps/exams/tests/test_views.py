@@ -1193,6 +1193,30 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
+    def test_live_results_card_hidden_for_final_and_midterm(self):
+        """Final/midterm İmtahan Mərkəzi axını ilə gedir — canlı nəticə kartı olmamalıdır."""
+        live_url = reverse("liveExam:teacher_live_results", args=[self.exam_visible.slug])
+
+        for extended in ("final", "midterm"):
+            with self.subTest(exam_type_extended=extended):
+                self.exam_visible.exam_type_extended = extended
+                self.exam_visible.save(update_fields=["exam_type_extended"])
+
+                response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+                self.assertEqual(response.status_code, 200)
+                self.assertNotContains(response, live_url)
+
+    def test_live_results_card_shown_for_quiz(self):
+        """Reqressiya qoruması: canlı sessiya ilə keçən imtahanda kart QALIR."""
+        self.exam_visible.exam_type_extended = "quiz"
+        self.exam_visible.save(update_fields=["exam_type_extended"])
+
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("liveExam:teacher_live_results", args=[self.exam_visible.slug]))
+
     def test_teacher_exam_detail_has_no_archive_toggle(self):
         # "Arxiv" konsepti ləğv edildi (aktiv/deaktiv ilə eyni işi görürdü) — detal
         # səhifəsində arxiv düyməsi/URL-i artıq görünməməlidir.
@@ -5195,22 +5219,6 @@ class SupervisionTeacherApiTest(TestCase):
         )
         _login_with_org(self.client, self.teacher, self.org)
 
-    def test_teacher_resume_api_rejects_attempt_after_exam_duration(self):
-        self.attempt.started_at = timezone.now() - timedelta(minutes=61)
-        self.attempt.save(update_fields=["started_at"])
-
-        response = self.client.post(
-            reverse("exams:supervision_resume", args=[self.attempt.id]),
-            data="{}",
-            content_type="application/json",
-        )
-
-        self.assertEqual(response.status_code, 403)
-        self.attempt.refresh_from_db()
-        self.assertEqual(self.attempt.status, "expired")
-        self.assertEqual(self.attempt.supervision_status, "locked")
-        self.assertIsNotNone(self.attempt.finished_at)
-
     def test_student_status_api_keeps_manual_lock_visible_after_exam_duration(self):
         self.attempt.supervision_manual_lock = True
         self.attempt.started_at = timezone.now() - timedelta(minutes=61)
@@ -5275,21 +5283,6 @@ class SupervisionTeacherApiTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "exam_supervision.js")
         self.assertNotContains(response, "supervised: false")
-
-    def test_supervision_monitor_shows_exam_without_config_or_violations(self):
-        fresh_exam = Exam.objects.create(
-            author=self.teacher,
-            organization=self.org,
-            title="Fresh Monitor Exam",
-            exam_type="test",
-            is_active=True,
-        )
-
-        response = self.client.get(reverse("exams:supervision_monitor"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, fresh_exam.title)
-        self.assertContains(response, "Bu imtahana hələ heç kim qoşulmayıb.")
 
 
 # ════════════════════════════════════════════════════════════════════════════

@@ -44,6 +44,12 @@ regexes = [
     '''^AIzaSyBvgGTd3zRxAuuymMcOSYZyCOB1uWf_7A0$''',
     '''^abcd1234efgh5678$''',
 
+    # test_import_retention retention testi: `_bundle(token, age_hours=72 ...)`
+    # sətrində `token` sözü `age_hours=72`-nin yanında durduğu üçün
+    # generic-api-key qaydası tetiklənir. Tutulan dəyər sadəcə keyword
+    # arqumentinin özüdür — credential deyil.
+    '''^age_hours=72$''',
+
     # provision_student_credentials._PASSWORD_ALPHABET — readable (no-lookalike)
     # character set for random password generation, NOT a credential. The
     # generic-api-key rule matches on its length/entropy; explicitly allowlisted.

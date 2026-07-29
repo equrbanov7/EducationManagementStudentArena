@@ -100,6 +100,21 @@ def reap_stuck_extraction_jobs(lease_seconds: int = 1200):
     return reaped
 
 
+@shared_task(name="exams.purge_expired_import_stashes")
+def purge_expired_import_stashes():
+    """İstifadə olunmamış visual-import source/manifest bundle-larını sil."""
+
+    from apps.exams.services.import_retention import purge_expired_import_stashes as _purge
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    with rls_worker_atomic(), bypass_rls():
+        purged = _purge()
+    if purged:
+        logger.info("purge_expired_import_stashes: %d bundle silindi", purged)
+    return purged
+
+
 @shared_task(name="exams.notify_upcoming_final_exams")
 def notify_upcoming_final_exams():
     """
@@ -187,28 +202,44 @@ def run_text_extraction_job(job_id):
 
         from django.core.files.base import File
 
-        with job.file.open("rb") as fh:
-            # extract_text_from_upload `.name`/`.size` gözləyir. FieldFile-ın
-            # `.name`-ini DƏYİŞMƏK OLMAZ (storage yolunu sındırır) — əvəzinə
-            # açılmış handle-ı orijinal adla File-a sarıyırıq ki, uzantı
-            # yoxlamaları düzgün işləsin.
-            wrapped = File(fh, name=job.source_name or _os.path.basename(job.file.name))
-            text = extract_text_from_upload(wrapped)
-        status, text_value, error_value = TextExtractionJob.STATUS_SUCCESS, text, ""
+        # Workbench üçün PDF və standalone şəkillər visual-first idxal olunur:
+        # canonical manifest həm preview mətnini, həm son render-i verir. Bu
+        # branch-də generic extraction-u əvvəlcədən işlətmirik: böyük/OCR PDF
+        # iki dəfə parse olunmur.
+        visual_name = (job.source_name or "").lower()
+        visual_import = (job.payload or {}).get("stash_math") and visual_name.endswith(
+            (".pdf", ".png", ".jpg", ".jpeg")
+        )
+        if visual_import:
+            from apps.exams.services.visual_import_upload import try_visual_import
 
-        # P3-b: workbench import yolu üçün düstur-şəkil stash-ı (yalnız PDF).
-        # Uğursuzluq qeyri-fatal-dır — mətn yenə də istifadəyə yararlıdır.
-        if (job.payload or {}).get("stash_math") and (job.source_name or "").lower().endswith(".pdf"):
-            try:
-                from apps.exams.services.import_media import stash_math_images
-
-                with job.file.open("rb") as fh2:
-                    wrapped2 = File(fh2, name=job.source_name)
-                    token = stash_math_images(wrapped2)
-                if token:
-                    meta["math_token"] = token
-            except Exception:
-                logger.warning("run_text_extraction_job: job %s math stash alınmadı", job_id)
+            with job.file.open("rb") as fh:
+                wrapped = File(fh, name=job.source_name)
+                visual = try_visual_import(
+                    wrapped,
+                    owner_id=job.user_id,
+                    organization_id=job.organization_id,
+                )
+            if visual is not None:
+                text_value, token = visual
+                status, error_value = TextExtractionJob.STATUS_SUCCESS, ""
+                meta["math_token"] = token
+            else:
+                # Vizual layout çıxmadı (məs. bank PDF-ində sual nömrələri
+                # ardıcıl deyil) — idxalı dayandırmırıq, adi mətnlə davam edir.
+                # Media bağlanmır, mətn isə tam işlək qalır.
+                logger.info("run_text_extraction_job: job %s vizual deyil, mətn çıxarışına keçildi", job_id)
+                with job.file.open("rb") as fh:
+                    wrapped = File(fh, name=job.source_name or _os.path.basename(job.file.name))
+                    text_value = extract_text_from_upload(wrapped)
+                status, error_value = TextExtractionJob.STATUS_SUCCESS, ""
+                meta["visual_import_skipped"] = True
+        else:
+            with job.file.open("rb") as fh:
+                # FieldFile adını dəyişmədən orijinal uzantını wrapper-də saxla.
+                wrapped = File(fh, name=job.source_name or _os.path.basename(job.file.name))
+                text_value = extract_text_from_upload(wrapped)
+            status, error_value = TextExtractionJob.STATUS_SUCCESS, ""
     except ValueError as exc:
         # extract_text_from_upload-un lokalizə olunmuş, istifadəçiyə uyğun xətaları.
         logger.info("run_text_extraction_job: job %s istifadəçi xətası: %s", job_id, exc)

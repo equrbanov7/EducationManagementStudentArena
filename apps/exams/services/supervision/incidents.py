@@ -70,8 +70,17 @@ def log_supervision_incident(attempt, event_type, metadata=None):
     limit_exceeded = is_violation and violation_count >= max_violations
     action_taken = ""
 
+    # Müəllimin "Sınaq keç" cəhdi nəzarət qaydalarını YOXLAMAQ üçündür — orada
+    # kilid/uzaqlaşdırma tətbiq olunmur (əks halda sınaq cəhdi "suspended"
+    # vəziyyətində ilişib qalır və onu bərpa edəcək müəllim elə özüdür).
+    # İncident yenə yazılır, amma cavabda yalnız xəbərdarlıq qaytarılır.
+    is_trial_attempt = bool(getattr(attempt, "is_trial", False))
+
     if limit_exceeded and attempt.supervision_status not in ("locked", "removed"):
-        action_taken = _apply_violation_action(attempt, config, violation_count)
+        if is_trial_attempt:
+            action_taken = "trial_warning"
+        else:
+            action_taken = _apply_violation_action(attempt, config, violation_count)
 
     return {
         "incident_id": incident.id,
@@ -80,6 +89,7 @@ def log_supervision_incident(attempt, event_type, metadata=None):
         "limit_exceeded": limit_exceeded,
         "action_taken": action_taken,
         "supervision_status": attempt.supervision_status,
+        "is_trial": is_trial_attempt,
     }
 
 

@@ -132,6 +132,7 @@ urlpatterns += [
     re_path(
         rf"^{re.escape(media_prefix)}(?P<path>.*)$",
         protected_media,
+        name="protected_media",
     )
 ]
 

@@ -273,6 +273,9 @@
     font-size: 0.78rem;
 }
 .qb-opt__text { flex: 1 1 auto; min-width: 0; }
+.qb-question-media { margin: 8px 0; }
+.qb-source-image { display: block; width: auto; max-width: 100%; height: auto; }
+.qb-opt__image { display: block; max-width: calc(100% - 60px); height: auto; }
 .qb-opt__tick { color: #16a34a; }
 .qb-opt.is-correct {
     border-color: #bbf7d0;
@@ -457,4 +460,3 @@
 }
 .qb-edit-switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--ems-neutral-700); cursor: pointer; }
 @media (max-width: 560px) { .qb-edit-row { grid-template-columns: 1fr; } }
-

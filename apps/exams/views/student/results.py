@@ -143,7 +143,11 @@ def exam_result(request, slug, attempt_id):
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
     is_profile_results = _is_profile_results_request(request, return_to)
     is_final_exam_result = _is_final_exam(exam)
-    is_final_center_result = is_final_exam_result and not is_profile_results
+    # Müəllimin "Sınaq keç" cəhdi final-mərkəz axınının bir hissəsi DEYİL: geri
+    # sayan zolaq onu /exams/final/ PIN səhifəsinə atırdı. Sınaqda yalnız
+    # məlumat xarakterli qeyd göstərilir.
+    is_trial_result = bool(getattr(attempt, "is_trial", False))
+    is_final_center_result = is_final_exam_result and not is_profile_results and not is_trial_result
     answers_release_locked = exam_answers_release_locked(exam)
     hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(
         exam, is_profile_results=is_profile_results
@@ -343,6 +347,7 @@ def exam_result(request, slug, attempt_id):
             "history_url": history_url,
             "back_url": back_url,
             "is_final_exam_result": is_final_center_result,
+            "is_trial_result": is_trial_result,
             "hide_test_answer_correctness": hide_test_answer_correctness,
             "answers_release_locked": answers_release_locked,
             "final_result_remaining_seconds": final_result_remaining_seconds,

@@ -91,14 +91,21 @@ def is_exam_center_user(user):
 def can_manage_exam_rooms(user):
     """İmtahan zalı və zaldakı kompüter/MAC qeydlərini kim idarə edə bilər?
 
-    Universitet qaydası: zal/kompüter qeydiyyatı yalnız SUPERADMIN səlahiyyətidir.
+    Universitet qaydası: zal/kompüter qeydiyyatı SUPERADMIN səlahiyyətidir.
     Superadmin bunu ayrıca istifadəçiyə ``UserProfile.can_manage_exam_rooms``
     bayrağı ilə həvalə edə bilər (imtahan mərkəzi rolu TƏK BAŞINA kifayət
     etmir — mərkəz oturum/tələbə/PIN idarə edir, zal infrastrukturunu yox).
+
+    İKT Rəhbəri (lvl 88) istisnadır: rolun öz tərifində ``exam.*`` səlahiyyəti
+    var (bax organizations/default_roles.py) — o, imtahan mərkəzinin TAM
+    səlahiyyətini daşıyan texniki super-operatordur, ona görə zal/kompüter
+    infrastrukturunu da idarə edir. Bütün əməlləri onsuz da audit olunur.
     """
     if not getattr(user, "is_authenticated", False):
         return False
     if user.is_superuser or getattr(user, "is_superadmin", False):
+        return True
+    if getattr(user, "is_ikt_rehber", False):
         return True
     profile = getattr(user, "profile", None)
     return bool(profile is not None and getattr(profile, "can_manage_exam_rooms", False))
