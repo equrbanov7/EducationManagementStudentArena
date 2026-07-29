@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260717-vio-modal">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/vio_modal.css' %}?v=20260717-vio-modal">
@@ -106,7 +107,7 @@
     Default bağlıdır — çoxlu kompüter səhifəni uzatmasın.
   {% endcomment %}
   {% if room_computers %}
-  <details class="rma-panel" data-rma-computers>
+  <details class="rma-panel" data-rma-computers data-panel-search-root>
     <summary class="rma-panel__summary">
       <span class="rma-panel__label"><i class="fas fa-desktop"></i> {% trans "Zaldakı kompüterlər" %}
         <span class="rma-chip">{{ room_computers|length }}</span></span>
@@ -119,19 +120,18 @@
       </span>
     </summary>
     <div class="rma-form">
-    <div class="rma-csearch" data-rma-csearch>
-      <input type="search" class="rma-csearch__input" data-rma-csearch-input
+    <div class="rma-csearch" data-panel-search>
+      <input type="search" class="rma-csearch__input" data-panel-search-input
              placeholder="{% trans 'Kompüter axtar (ad, MAC, IP, yer)…' %}"
              aria-label="{% trans 'Kompüter axtarışı' %}"
              autocomplete="off">
-      <span class="rma-csearch__count" data-rma-csearch-count></span>
+      <span class="rma-csearch__count" data-panel-search-count></span>
     </div>
 
-    <div class="rma-cscroll" data-rma-cscroll tabindex="0">
+    <div class="rma-cscroll" data-panel-search-scope tabindex="0">
     <div class="rma-cgrid">
       {% for item in room_computers %}
       <div class="rma-comp{% if item.occupant %} rma-comp--busy rma-comp--{{ item.occupant.status }}{% endif %}"
-           data-rma-comp
            data-search="{{ item.computer.label|lower }} {{ item.computer.mac_address|lower }} {{ item.computer.ip_address|default:''|lower }} {{ item.computer.seat_number|default:'' }} {% if item.occupant %}{{ item.occupant.name|lower }} {{ item.occupant.exam_title|lower }}{% endif %}">
         <div class="rma-comp__head">
           <span class="rma-comp__label"><i class="fas fa-desktop"></i> {{ item.computer.label }}</span>
@@ -152,7 +152,7 @@
       </div>
       {% endfor %}
     </div>
-    <div class="rma-cempty" data-rma-csearch-empty hidden>{% trans "Uyğun kompüter tapılmadı." %}</div>
+    <div class="rma-cempty" data-panel-search-empty hidden>{% trans "Uyğun kompüter tapılmadı." %}</div>
     </div>
     </div>
   </details>
@@ -240,7 +240,7 @@
     <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20260717-score-bal" defer></script>
     <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20260717-vio-modal" defer></script>
-    <script src="{% static 'exams/js/final_center/room_computer_search.js' %}?v=20260729-cscroll" defer></script>
+    <script src="{% static 'exams/js/final_center/panel_search.js' %}?v=20260730-shared" defer></script>
     <script nonce="{{ request.csp_nonce }}">
     // Zala nəzarətçi təyini — AJAX (debounced) axtarış + çip seçimi.
     // Bütün istifadəçilər eyni anda YÜKLƏNMİR: yalnız yazılan sorğuya uyğun 10-luq

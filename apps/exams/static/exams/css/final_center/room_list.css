@@ -1,39 +1,41 @@
 /* Zallar səhifəsi — "Hazırda gedən imtahanlar" bölməsi.
    Köhnə "Oturumlar" keçidinin yerinə: hansı fənnin imtahanı hansı zalda
-   gedir, klik birbaşa zal monitoruna aparır (2026-07-29). */
+   gedir, klik birbaşa zal monitoruna aparır (2026-07-29).
+   2026-07-30: bölmə zal monitorundakı açılıb-bağlanan panelə çevrildi
+   (gövdə `panel.css`-dədir) — burada yalnız "canlı" yaşıl vurğusu və
+   sətir üslubları qalır. */
 
-.fxc-live-exams {
-    margin: 4px 0 18px;
-    padding: 14px 16px;
-    border: 1px solid #BBF7D0;
+.fxc-live-panel {
+    border-color: #BBF7D0;
     border-left: 4px solid #16A34A;
-    border-radius: 12px;
     background: #F0FDF4;
 }
 
-.fxc-live-exams__title {
+.fxc-live-panel .rma-panel__summary { color: #14532D; }
+.fxc-live-panel .rma-panel__summary:hover { background: rgba(22, 163, 74, .06); }
+
+.fxc-live-panel .rma-panel__label {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0 0 10px;
-    font-size: 1rem;
-    font-weight: 800;
-    color: #14532D;
 }
 
-.fxc-chip-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 7px;
-    border-radius: 999px;
+.fxc-live-panel .rma-chip {
     background: #16A34A;
     color: #fff;
-    font-size: .75rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
+}
+
+.fxc-live-panel .rma-toggle {
+    color: #15803D;
+    background: #DCFCE7;
+    border-color: #BBF7D0;
+}
+
+.fxc-live-panel .rma-cscroll {
+    border-color: #DCFCE7;
+    background: #fff;
 }
 
 .fxc-live-exams__list {
@@ -91,6 +93,9 @@
     font-size: .85rem;
     white-space: nowrap;
 }
+
+/* Axtarış süzgəci sətri gizlədəndə flex sütununda boşluq qalmasın. */
+.fxc-live-exam[hidden] { display: none; }
 
 @media (max-width: 640px) {
     .fxc-live-exam__go { margin-left: 0; }

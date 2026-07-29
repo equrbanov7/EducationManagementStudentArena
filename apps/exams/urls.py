@@ -46,8 +46,6 @@ urlpatterns = [
     path("center/rooms/<int:room_id>/start-all/", views.exam_center_room_start_all, name="exam_center_room_start_all"),
     path("center/rooms/<int:room_id>/end-all/", views.exam_center_room_end_all, name="exam_center_room_end_all"),
     path("center/rooms/<int:room_id>/open-all/", views.exam_center_room_open_all, name="exam_center_room_open_all"),
-    path("center/sessions/", views.exam_center_session_list, name="exam_center_session_list"),
-    path("center/sessions/create/", views.exam_center_session_create, name="exam_center_session_create"),
     path("center/sessions/<int:session_id>/", views.exam_center_session_detail, name="exam_center_session_detail"),
     path(
         "center/sessions/<int:session_id>/history/",

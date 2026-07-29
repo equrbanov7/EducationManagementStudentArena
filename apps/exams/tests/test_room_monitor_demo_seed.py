@@ -90,8 +90,8 @@ class RoomMonitorDemoSeedTests(TestCase):
         response = client.get(reverse("exams:exam_center_room_list"))
 
         self.assertEqual(response.status_code, 200)
-        # Köhnə "Oturumlar" düyməsi yoxdur.
-        self.assertNotContains(response, reverse("exams:exam_center_session_list"))
+        # Köhnə "Oturumlar" səhifəsi tamamilə silinib — URL adı belə qalmayıb.
+        self.assertNotContains(response, "/exams/center/sessions/?")
         # Canlı siyahı: hər üç fənn görünür, zal adı ilə.
         live = response.context["live_exams"]
         self.assertEqual(len(live), 3)

@@ -1,0 +1,42 @@
+/* Hesabat səhifəsi — skeleton yükləmə və sətir üzrə hesabat sütunu.
+
+   Shimmer effekti paylaşılan `static/css/skeleton.css`-dədir; burada yalnız
+   cədvəl formasına uyğun ölçü/yerləşmə var. */
+
+.fxc-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 4px 0 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    background: var(--card-bg, #fff);
+}
+
+.fxc-skel-row {
+    height: 34px;
+    border-radius: 8px;
+}
+
+.fxc-skel-row--head {
+    height: 42px;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Sətirdəki "Günü yüklə" sütunu — cədvəli sıxmasın, sətir hündürlüyünü artırmasın. */
+.fxc-col-action {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.fxc-col-action .fxc-btn {
+    padding: .3rem .6rem;
+    font-size: .78rem;
+}
+
+@media (max-width: 900px) {
+    .fxc-col-action .fxc-btn i { margin: 0; }
+    .fxc-col-action .fxc-btn span { display: none; }
+}
