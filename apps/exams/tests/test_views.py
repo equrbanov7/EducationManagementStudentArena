@@ -1193,6 +1193,30 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
+    def test_live_results_card_hidden_for_final_and_midterm(self):
+        """Final/midterm İmtahan Mərkəzi axını ilə gedir — canlı nəticə kartı olmamalıdır."""
+        live_url = reverse("liveExam:teacher_live_results", args=[self.exam_visible.slug])
+
+        for extended in ("final", "midterm"):
+            with self.subTest(exam_type_extended=extended):
+                self.exam_visible.exam_type_extended = extended
+                self.exam_visible.save(update_fields=["exam_type_extended"])
+
+                response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+                self.assertEqual(response.status_code, 200)
+                self.assertNotContains(response, live_url)
+
+    def test_live_results_card_shown_for_quiz(self):
+        """Reqressiya qoruması: canlı sessiya ilə keçən imtahanda kart QALIR."""
+        self.exam_visible.exam_type_extended = "quiz"
+        self.exam_visible.save(update_fields=["exam_type_extended"])
+
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("liveExam:teacher_live_results", args=[self.exam_visible.slug]))
+
     def test_teacher_exam_detail_has_no_archive_toggle(self):
         # "Arxiv" konsepti ləğv edildi (aktiv/deaktiv ilə eyni işi görürdü) — detal
         # səhifəsində arxiv düyməsi/URL-i artıq görünməməlidir.
