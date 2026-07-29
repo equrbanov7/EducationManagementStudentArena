@@ -101,6 +101,9 @@ class QuestionSubmission(models.Model):
     # Göndəriş anındakı parse nəticəsi: [{q_no, text, options, correct,
     # answer_mode, warnings: [{type, msg, severity}]}, ...]
     parsed_snapshot = models.JSONField(default=list, blank=True)
+    # Visual-first PDF/image import bundle-ının private, 128-bit token-i.
+    # Qəbul zamanı canonical crop-lar banka köçürülür, sonra bundle silinir.
+    import_token = models.CharField(max_length=32, blank=True, default="", editable=False)
     question_count = models.PositiveIntegerField(default=0)
     error_count = models.PositiveIntegerField(default=0)
     warning_count = models.PositiveIntegerField(default=0)

@@ -503,6 +503,13 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                             {% endif %}
                         </div>
 
+                        {% if math_token and q.has_visual_source %}
+                        <img class="q-source-preview"
+                             src="{% url 'exams:question_import_visual_preview' math_token q.source_index %}"
+                             alt="{{ q.text }}"
+                             loading="lazy">
+                        {% endif %}
+
                         {% if q.options %}
                         <div class="options-grid">
                             {% for lab, txt in q.options.items %}

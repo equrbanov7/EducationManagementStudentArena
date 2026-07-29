@@ -23,13 +23,14 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
+from apps.exams.services.import_media import bind_import_manifest, clear_stash
 from apps.exams.services.language_variants import (
     create_questions_for_variant,
     create_variant,
     language_label,
     set_variant_active,
 )
-from apps.exams.services.parsing import extract_text_from_upload
+from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
@@ -96,6 +97,7 @@ def exam_language_manager(request, slug):
     parsed = []
     selected = set()
     analysis = _empty_analysis()
+    math_token = (request.POST.get("math_token") or "").strip()
 
     if request.method == "POST":
         action = (request.POST.get("action") or "").strip()
@@ -118,6 +120,7 @@ def exam_language_manager(request, slug):
             return redirect(_manager_url(exam))
 
         if action in ("preview", "save") and is_test_exam:
+            upload_failed = False
             selected_language = (request.POST.get("language") or "").strip().lower()
             if selected_language not in EXAM_LANGUAGE_VALUES:
                 messages.error(request, pgettext("exams.view.language.message", "Düzgün dil seçin."))
@@ -127,8 +130,14 @@ def exam_language_manager(request, slug):
             uploaded = request.FILES.get("upload_file")
             if uploaded:
                 try:
-                    raw_text = extract_text_from_upload(uploaded)
+                    raw_text, math_token = prepare_question_upload(
+                        uploaded,
+                        previous_token=math_token,
+                        owner_id=request.user.pk,
+                        organization_id=exam.organization_id,
+                    )
                 except Exception as exc:  # noqa: BLE001 — fayl oxunmasa textarea mətni qalır
+                    upload_failed = True
                     messages.error(
                         request, pgettext("exams.view.language.message", "Fayl oxunmadı: {error}").format(error=exc)
                     )
@@ -137,6 +146,22 @@ def exam_language_manager(request, slug):
                 raw_text, existing_fp_map=exam_question_fp_map(exam, language=selected_language)
             )
             parsed = analysis["parsed"]
+
+            if math_token:
+                try:
+                    bind_import_manifest(
+                        math_token,
+                        parsed,
+                        owner_id=request.user.pk,
+                        organization_id=exam.organization_id,
+                    )
+                except (OSError, ValueError) as exc:
+                    messages.error(request, str(exc))
+                    if action == "save":
+                        action = "preview"
+
+            if upload_failed and action == "save":
+                action = "preview"
 
             selected_from_request = parse_selected_indices(request.POST)
             selected = set(range(1, len(parsed) + 1)) if selected_from_request is None else selected_from_request
@@ -154,8 +179,14 @@ def exam_language_manager(request, slug):
                     selected_parsed.append(question)
 
                 created = create_questions_for_variant(
-                    exam, selected_language, selected_parsed, default_points=default_points
+                    exam,
+                    selected_language,
+                    selected_parsed,
+                    default_points=default_points,
+                    math_token=math_token,
+                    media_owner_id=request.user.pk,
                 )
+                clear_stash(math_token)
                 messages.success(
                     request,
                     pgettext("exams.view.language.message", "{count} sual əlavə olundu.").format(count=len(created)),
@@ -187,6 +218,7 @@ def exam_language_manager(request, slug):
         "test_level_warnings": analysis["test_level_warnings"],
         "rq_value": "",
         "dp_value": str(getattr(exam, "default_question_points", None) or 1),
+        "math_token": math_token,
         **_language_workbench_context(exam, variant_rows, selected_language),
     }
     return render(request, "exams/teacher/exam_language_manager.html", context)

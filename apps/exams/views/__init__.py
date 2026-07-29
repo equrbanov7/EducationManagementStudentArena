@@ -141,6 +141,10 @@ from .teacher.submission_inbox import (
     question_submission_inbox,
     question_submission_review,
 )
+from .teacher.submission_media import (
+    question_import_visual_preview,
+    question_submission_visual_preview,
+)
 from .teacher.supervision import (
     attempt_live_snapshot_api,
     exam_live_monitor,
@@ -225,6 +229,8 @@ __all__ = [
     "question_submission_detail",
     "question_submission_inbox",
     "question_submission_review",
+    "question_submission_visual_preview",
+    "question_import_visual_preview",
     "question_bank_detail",
     "question_bank_update",
     "question_bank_delete",

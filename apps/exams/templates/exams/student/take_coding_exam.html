@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n exam_filters %}
 {% block title %}{{ exam.title }} - {% trans "Practical Coding Exam" context "exams.template.coding_exam" %}{% endblock %}
 
 {% block route_progress %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
@@ -110,13 +110,13 @@
                 <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
                 {% if coding_question.question.image %}
                     <div class="question-media c3-1" id="codingQuestionImage">
-                        <img src="{{ coding_question.question.image.url }}" alt="" class="c3-2">
+                        <img src="{{ coding_question.question.image|protected_media_url }}" alt="" class="c3-2">
                     </div>
                 {% endif %}
                 {% if coding_question.question.video %}
                     <div class="question-media c3-1" id="codingQuestionVideo">
                         <video controls preload="metadata" playsinline class="c3-2">
-                            <source src="{{ coding_question.question.video.url }}">
+                            <source src="{{ coding_question.question.video|protected_media_url }}">
                         </video>
                     </div>
                 {% endif %}

@@ -2,7 +2,10 @@
 Sual bankı kitabxanası + snapshot attach testləri (Faza 6).
 """
 
+import tempfile
+
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.test import TestCase
 
 from apps.exams.models import Exam, ExamLanguageVariant, QuestionBank
@@ -102,6 +105,50 @@ class QuestionBankLibraryTests(TestCase):
 
         exam_question = self.exam.questions.first()
         self.assertEqual(exam_question.text, "Original")
+
+    def test_attach_snapshots_question_flag_and_every_option_image(self):
+        with tempfile.TemporaryDirectory() as media_root, self.settings(MEDIA_ROOT=media_root):
+            bank_question = create_bank_questions_from_parsed(self.bank, [_parsed("Visual question")], language="az")[0]
+            bank_question.image_replaces_text = True
+            bank_question.image.save(
+                "bank-question.png",
+                ContentFile(b"question-image"),
+                save=False,
+            )
+            bank_question.save(update_fields=["image", "image_replaces_text"])
+
+            bank_options = list(bank_question.options.order_by("label"))
+            for index, bank_option in enumerate(bank_options):
+                bank_option.image_replaces_text = index % 2 == 0
+                bank_option.image.save(
+                    f"bank-option-{bank_option.label}.png",
+                    ContentFile(f"option-{bank_option.label}".encode()),
+                    save=False,
+                )
+                bank_option.save(update_fields=["image", "image_replaces_text"])
+
+            exam_question = attach_bank_questions_to_exam(self.exam, [bank_question.id])[0]
+            exam_options = list(exam_question.options.order_by("label"))
+
+            self.assertTrue(exam_question.image_replaces_text)
+            self.assertEqual(len(exam_options), len(bank_options))
+            for bank_option, exam_option in zip(bank_options, exam_options):
+                self.assertEqual(exam_option.image_replaces_text, bank_option.image_replaces_text)
+                self.assertTrue(exam_option.image)
+                self.assertNotEqual(exam_option.image.name, bank_option.image.name)
+                with bank_option.image.open("rb"), exam_option.image.open("rb"):
+                    self.assertEqual(exam_option.image.read(), bank_option.image.read())
+
+    def test_attach_fails_closed_when_source_render_image_is_missing(self):
+        bank_question = create_bank_questions_from_parsed(self.bank, [_parsed("Missing visual")], language="az")[0]
+        bank_question.image_replaces_text = True
+        bank_question.save(update_fields=["image_replaces_text"])
+        before = self.exam.questions.count()
+
+        with self.assertRaisesRegex(ValueError, "Canonical"):
+            attach_bank_questions_to_exam(self.exam, [bank_question.id])
+
+        self.assertEqual(self.exam.questions.count(), before)
 
 
 class AccessibleBanksTests(TestCase):

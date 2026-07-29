@@ -140,14 +140,17 @@ def create_bank_questions_from_parsed(
 # ---------------------------------------------------------------------------
 # Snapshot köçürmə
 # ---------------------------------------------------------------------------
-def _duplicate_filefield(source_fieldfile, target_instance, target_field_name):
+def _duplicate_filefield(source_fieldfile, target_instance, target_field_name, *, required=False):
     """
     Mənbə fayl sahəsinin məzmununu hədəf instansiyaya kopyalayır (snapshot).
 
-    Uğursuzluq attach-i pozmasın deyə xəta tutulur və loglanır — sual mediasız
-    yaradılır.
+    Adi əlavə media üçün uğursuzluq loglanır. Mətnin yerini tutan canonical
+    source-render üçün isə ``required=True`` fail-closed işləyir: şəkilsiz,
+    oxunaqsız snapshot yaradılmır.
     """
     if not source_fieldfile:
+        if required:
+            raise ValueError("Canonical sual mediası mənbədə yoxdur.")
         return
     try:
         source_fieldfile.open("rb")
@@ -157,13 +160,15 @@ def _duplicate_filefield(source_fieldfile, target_instance, target_field_name):
             source_fieldfile.close()
         name = os.path.basename(source_fieldfile.name)
         getattr(target_instance, target_field_name).save(name, ContentFile(content), save=True)
-    except Exception:
+    except Exception as exc:
         logger.warning(
             "Bank sualı mediası kopyalana bilmədi (q=%s, field=%s).",
             getattr(target_instance, "id", None),
             target_field_name,
             exc_info=True,
         )
+        if required:
+            raise ValueError("Canonical sual mediası kopyalana bilmədi.") from exc
 
 
 @transaction.atomic
@@ -224,23 +229,32 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
             explanation=bank_question.explanation,
             fingerprint=bank_question.fingerprint or "",
             order=last_order + offset,
+            image_replaces_text=bank_question.image_replaces_text,
             is_active=True,
         )
 
-        options = [
-            ExamQuestionOption(
+        for bank_option in bank_question.options.all():
+            exam_option = ExamQuestionOption.objects.create(
                 question=exam_question,
-                label=option.label,
-                text=option.text,
-                is_correct=option.is_correct,
+                label=bank_option.label,
+                text=bank_option.text,
+                image_replaces_text=bank_option.image_replaces_text,
+                is_correct=bank_option.is_correct,
             )
-            for option in bank_question.options.all()
-        ]
-        if options:
-            ExamQuestionOption.objects.bulk_create(options)
+            _duplicate_filefield(
+                bank_option.image,
+                exam_option,
+                "image",
+                required=bank_option.image_replaces_text,
+            )
 
         # Media-nı snapshot kimi DUBLİKAT et (mənbə silinsə imtahan qorunsun).
-        _duplicate_filefield(bank_question.image, exam_question, "image")
+        _duplicate_filefield(
+            bank_question.image,
+            exam_question,
+            "image",
+            required=bank_question.image_replaces_text,
+        )
         _duplicate_filefield(bank_question.video, exam_question, "video")
 
         created_questions.append(exam_question)

@@ -19,6 +19,7 @@ def _option_snapshot(opt):
         "text": getattr(opt, "text", "") or "",
         "label": getattr(opt, "label", "") or "",
         "image": image.name if image else "",
+        "image_replaces_text": bool(getattr(opt, "image_replaces_text", False)),
     }
 
 
@@ -35,6 +36,7 @@ def build_question_snapshot(question, options=None):
         "text": getattr(question, "text", "") or "",
         "correct_answer": getattr(question, "correct_answer", "") or "",
         "image": image.name if image else "",
+        "image_replaces_text": bool(getattr(question, "image_replaces_text", False)),
         "video": video.name if video else "",
         "options": [
             {
@@ -45,12 +47,14 @@ def build_question_snapshot(question, options=None):
                         "text": opt.get("text", ""),
                         "label": opt.get("label", ""),
                         "image": opt.get("image", ""),
+                        "image_replaces_text": bool(opt.get("image_replaces_text", False)),
                     }
                     if isinstance(opt, dict)
                     else {
                         "text": getattr(opt, "text", "") or "",
                         "label": getattr(opt, "label", "") or "",
                         "image": opt.image.name if getattr(opt, "image", None) else "",
+                        "image_replaces_text": bool(getattr(opt, "image_replaces_text", False)),
                     }
                 ),
             }
@@ -72,6 +76,7 @@ def delivered_question_view(answer):
             "text": snapshot.get("text", ""),
             "correct_answer": snapshot.get("correct_answer", ""),
             "image": snapshot.get("image", ""),
+            "image_replaces_text": bool(snapshot.get("image_replaces_text", False)),
             "video": snapshot.get("video", ""),
             "points": snapshot.get("points", getattr(question, "points", 1)),
             "answer_mode": snapshot.get("answer_mode", getattr(question, "answer_mode", "")),
@@ -82,6 +87,7 @@ def delivered_question_view(answer):
         "text": getattr(question, "text", "") or "",
         "correct_answer": getattr(question, "correct_answer", "") or "",
         "image": question.image.name if getattr(question, "image", None) else "",
+        "image_replaces_text": bool(getattr(question, "image_replaces_text", False)),
         "video": question.video.name if getattr(question, "video", None) else "",
         "points": getattr(question, "points", 1),
         "answer_mode": getattr(question, "answer_mode", "") or "",
@@ -91,15 +97,10 @@ def delivered_question_view(answer):
 
 
 def _media_url(name):
-    """Storage-relativ ad → tam URL (canlı `FieldFile.url` ilə eyni backend)."""
-    if not name:
-        return ""
-    from django.core.files.storage import default_storage
+    """Storage-relativ ad → tətbiqin auth/RBAC media route-u."""
+    from core.media_urls import protected_media_url
 
-    try:
-        return default_storage.url(name)
-    except (ValueError, NotImplementedError):
-        return ""
+    return protected_media_url(name)
 
 
 def delivered_question_render(answer, selected_ids):
@@ -120,6 +121,7 @@ def delivered_question_render(answer, selected_ids):
             text=opt.get("text", ""),
             label=opt.get("label", ""),
             image_url=_media_url(opt.get("image", "")),
+            image_replaces_text=bool(opt.get("image_replaces_text", False)),
             is_correct=bool(opt.get("is_correct")),
             is_selected=opt["id"] in selected_ids,
         )
@@ -129,6 +131,7 @@ def delivered_question_render(answer, selected_ids):
         text=view["text"],
         correct_answer=view["correct_answer"],
         image_url=_media_url(view["image"]),
+        image_replaces_text=view["image_replaces_text"],
         video_url=_media_url(view["video"]),
         points=view["points"],
         answer_mode=view["answer_mode"],

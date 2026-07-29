@@ -174,7 +174,15 @@ def ensure_default_variant(exam, language=DEFAULT_EXAM_LANGUAGE):
 
 
 @transaction.atomic
-def create_questions_for_variant(exam, language, parsed_questions, *, default_points=1):
+def create_questions_for_variant(
+    exam,
+    language,
+    parsed_questions,
+    *,
+    default_points=1,
+    math_token="",
+    media_owner_id=None,
+):
     """
     ``parse_bulk_mcq`` nəticəsindən bu dil üçün test sualları (ExamQuestion +
     variantlar) yaradır. Suallar avtomatik olaraq dilin variantına bağlanır.
@@ -190,6 +198,7 @@ def create_questions_for_variant(exam, language, parsed_questions, *, default_po
 
     rows = []
     option_payloads = []
+    source_indices = []
     for question in parsed_questions or []:
         options = question.get("options") or {}
         # Minimum A–D variant şərti (process_question_bank ilə eyni qayda).
@@ -208,6 +217,7 @@ def create_questions_for_variant(exam, language, parsed_questions, *, default_po
             )
         )
         option_payloads.append((options, set(question.get("correct") or [])))
+        source_indices.append(question.get("source_index"))
         start_order += 1
 
     created = ExamQuestion.objects.bulk_create(rows, batch_size=100)
@@ -226,6 +236,16 @@ def create_questions_for_variant(exam, language, parsed_questions, *, default_po
                 )
     if option_rows:
         ExamQuestionOption.objects.bulk_create(option_rows, batch_size=500)
+
+    if math_token:
+        from apps.exams.services.import_media import attach_import_media_batch
+
+        attach_import_media_batch(
+            math_token,
+            list(zip(source_indices, created)),
+            owner_id=media_owner_id,
+            organization_id=exam.organization_id,
+        )
 
     return created
 

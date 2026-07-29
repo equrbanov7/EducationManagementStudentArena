@@ -29,6 +29,33 @@ from .safety import (
 )
 
 
+def _geometry_mcq_text(uploaded_file) -> str:
+    """Etibarlı MCQ layout-u varsa vizual manifestin canonical mətnini qaytar."""
+
+    try:
+        uploaded_file.seek(0)
+        data = uploaded_file.read()
+    except Exception:
+        return ""
+    finally:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+
+    try:
+        from apps.exams.services.pdf_layout import LayoutConfidenceError, extract_pdf_layout
+
+        return extract_pdf_layout(data, fail_closed=True).canonical_text
+    except LayoutConfidenceError:
+        # Sənəd MCQ olmaya bilər (məsələn, AI üçün yüklənən mühazirə PDF-i).
+        # Bu halda mövcud ümumi mətn çıxarışı işləməyə davam edir.
+        return ""
+    except Exception as exc:
+        logger.warning("PDF geometry extraction failed: %s", exc)
+        return ""
+
+
 def extract_text_from_upload(uploaded_file) -> str:
     """
     Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .pdf, .png, .jpg.
@@ -112,17 +139,22 @@ def extract_text_from_upload(uploaded_file) -> str:
             if getattr(reader, "is_encrypted", False):
                 raise ValueError(pgettext("exams.service.parsing.error", "file_pdf_encrypted"))
 
-            parts = []
-            for page in reader.pages:
-                try:
-                    txt = page.extract_text() or ""
-                except Exception:
-                    continue
-                txt = txt.strip()
-                if txt:
-                    parts.append(txt)
+            # Etibarlı test layout-u tapıldıqda canonical mətn də eyni
+            # geometriya manifestindən gəlir. Beləliklə düstur içindəki rəqəm və
+            # A–E simvolları saxta sual/variant sərhədi yaratmır.
+            normalized = _geometry_mcq_text(uploaded_file)
+            if not normalized:
+                parts = []
+                for page in reader.pages:
+                    try:
+                        txt = page.extract_text() or ""
+                    except Exception:
+                        continue
+                    txt = txt.strip()
+                    if txt:
+                        parts.append(txt)
 
-            normalized = normalize_pdf_extracted_text("\n\n".join(parts))
+                normalized = normalize_pdf_extracted_text("\n\n".join(parts))
 
         # Mətn qatı tapılmadısa (skan edilmiş PDF) — OCR fallback.
         if not normalized.strip():

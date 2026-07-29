@@ -370,16 +370,40 @@ class ExamQuestionCreateForm(forms.ModelForm):
         """
         Yeni sual yaradılanda variantları yarat
         """
-        for option in self._get_cleaned_options(self.cleaned_data):
+        labels = ["A", "B", "C", "D", "E"]
+        for position, option in enumerate(self._get_cleaned_options(self.cleaned_data)):
             ExamQuestionOption.objects.create(
                 question=question_instance,
+                label=labels[position] if position < len(labels) else None,
                 text=option["text"],
                 is_correct=option["is_correct"],
             )
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if "image" in self.changed_data:
+            # Manual replace/clear source-render semantikasını daşımır.
+            instance.image_replaces_text = False
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
     def save_options(self, question_instance: ExamQuestion):
         """
-        Edit zamanı köhnə variantları sil və yenilərini yarat
+        Edit zamanı mövcud variant media-sını qoruyaraq sahələri yenilə.
         """
-        question_instance.options.all().delete()
-        self.create_options(question_instance)
+        existing = list(question_instance.options.all().order_by("id"))
+        retained_ids = set()
+        labels = ["A", "B", "C", "D", "E"]
+        for position, option in enumerate(self._get_cleaned_options(self.cleaned_data)):
+            source_index = option["index"] - 1
+            current = existing[source_index] if source_index < len(existing) else None
+            if current is None:
+                current = ExamQuestionOption(question=question_instance)
+            current.label = labels[position] if position < len(labels) else None
+            current.text = option["text"]
+            current.is_correct = option["is_correct"]
+            current.save()
+            retained_ids.add(current.pk)
+        question_instance.options.exclude(pk__in=retained_ids).delete()

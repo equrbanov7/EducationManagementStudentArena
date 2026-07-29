@@ -2,7 +2,14 @@ from django import template
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core.media_urls import protected_media_url as _protected_media_url
+
 register = template.Library()
+
+
+@register.filter
+def protected_media_url(value):
+    return _protected_media_url(value)
 
 
 @register.filter

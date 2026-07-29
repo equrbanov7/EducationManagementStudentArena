@@ -1,10 +1,11 @@
-{% load i18n %}
+{% load i18n exam_filters %}
 
 {% for q in questions %}
 <li class="question-item">
     <div class="question-content">
         <span class="question-order">{{ q.order }}.</span>
-        <p class="question-text">{{ q.text }}</p>
+        {% if not q.image_replaces_text or not q.image %}<p class="question-text">{{ q.text }}</p>{% endif %}
+        {% if q.image %}<img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" class="question-source-image" loading="lazy">{% endif %}
 
         {% if exam.exam_type == "test" %}
             <ul class="options-list">
@@ -13,7 +14,9 @@
                         <span class="option-indicator">
                             {% if opt.is_correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}
                         </span>
-                        <span class="option-text">{{ opt.text }}</span>
+                        <span class="option-label">{{ opt.label|default:"•" }}</span>
+                        {% if not opt.image_replaces_text or not opt.image %}<span class="option-text">{{ opt.text }}</span>{% endif %}
+                            {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="option-source-image" loading="lazy">{% endif %}
                     </li>
                 {% endfor %}
             </ul>

@@ -240,16 +240,15 @@ class TestStashMathFlag:
         assert job.payload == {"stash_math": True}
         assert "math_token" not in job.result_meta
 
-    def test_pdf_stash_failure_is_non_fatal(self, teacher_client, monkeypatch):
-        # stash xətası mətni bloklamamalıdır (qeyri-fatal) — PDF-i real parse
-        # etməmək üçün extract-i də mock-layırıq.
+    def test_pdf_stash_exception_fails_closed(self, teacher_client, monkeypatch):
+        # PDF-i real parse etmədən natamam mətnin saxlanmadığını yoxlayırıq.
         import apps.exams.services.parsing as parsing_facade
 
         monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "PDF mətni")
 
         import apps.exams.services.import_media as import_media
 
-        def boom(f):
+        def boom(f, **kwargs):
             raise RuntimeError("stash down")
 
         monkeypatch.setattr(import_media, "stash_math_images", boom)
@@ -259,9 +258,28 @@ class TestStashMathFlag:
             {"source_file": _upload(name="notes.pdf", content=b"%PDF-1.4 fake"), "stash_math": "1"},
         )
         job = TextExtractionJob.objects.get(pk=resp.json()["job_id"])
-        assert job.status == TextExtractionJob.STATUS_SUCCESS
-        assert job.text == "PDF mətni"
+        assert job.status == TextExtractionJob.STATUS_FAILED
+        assert job.text == ""
         assert "math_token" not in job.result_meta
+        assert "stash down" not in job.error
+        assert "şəkil və düsturlar" in job.error
+
+    def test_pdf_stash_without_token_fails_closed(self, teacher_client, monkeypatch):
+        import apps.exams.services.import_media as import_media
+        import apps.exams.services.parsing as parsing_facade
+
+        monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "Natamam PDF mətni")
+        monkeypatch.setattr(import_media, "stash_math_images", lambda f, **kwargs: None)
+
+        resp = teacher_client.post(
+            reverse("exams:start_text_extraction"),
+            {"source_file": _upload(name="notes.pdf", content=b"%PDF-1.4 fake"), "stash_math": "1"},
+        )
+        job = TextExtractionJob.objects.get(pk=resp.json()["job_id"])
+        assert job.status == TextExtractionJob.STATUS_FAILED
+        assert job.text == ""
+        assert job.result_meta == {}
+        assert job.error
 
 
 class TestExportJobs:
@@ -425,12 +443,19 @@ class TestCasClaim:
 class TestMathTokenPropagation:
     """P3-b: stash token status meta-sına düşür (Codex smoke-da formula-suz PDF ilə görünməmişdi)."""
 
-    def test_token_reaches_status_meta(self, teacher_client, monkeypatch):
+    def test_token_reaches_status_meta(self, teacher_client, teacher, org, monkeypatch):
         import apps.exams.services.import_media as import_media
         import apps.exams.services.parsing as parsing_facade
 
         monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "PDF mətni")
-        monkeypatch.setattr(import_media, "stash_math_images", lambda f: "tok123")
+        seen = {}
+
+        def stash(f, **kwargs):
+            seen.update(kwargs)
+            return "tok123"
+
+        monkeypatch.setattr(import_media, "stash_math_images", stash)
+        monkeypatch.setattr(import_media, "get_stashed_import_text", lambda token, **kwargs: "Canonical PDF mətni")
 
         start = teacher_client.post(
             reverse("exams:start_text_extraction"),
@@ -440,6 +465,8 @@ class TestMathTokenPropagation:
         data = resp.json()
         assert data["status"] == TextExtractionJob.STATUS_SUCCESS
         assert data["meta"]["math_token"] == "tok123"
+        assert seen == {"owner_id": teacher.id, "organization_id": org.id}
+        assert TextExtractionJob.objects.get(pk=start["job_id"]).text == "Canonical PDF mətni"
 
 
 class TestStuckJobReaper:
