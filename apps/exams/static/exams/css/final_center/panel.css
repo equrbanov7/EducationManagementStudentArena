@@ -1,0 +1,89 @@
+/* Açılıb-bağlanan panel — PAYLAŞILAN komponent.
+
+   Əvvəl yalnız zal monitorunda idi (ona görə `rma-` prefiksi qaldı), 2026-07-30-dan
+   zallar siyahısındakı "Hazırda gedən imtahanlar" bölməsi də eyni gövdəni işlədir:
+   <details> başlıq + sayğac çipi + Aç/Bağla düyməsi, içəridə debounce-lu axtarış və
+   öz sahəsində sürüşən siyahı. Bir yerdə dəyişəndə hər iki səhifə eyni görünür.
+
+   Markup nümunəsi:
+     <details class="rma-panel">
+       <summary class="rma-panel__summary">… <span class="rma-toggle">…</span></summary>
+       <div class="rma-form">
+         <div class="rma-csearch" data-panel-search>…</div>
+         <div class="rma-cscroll" data-panel-search-scope>… [data-search] elementləri …</div>
+       </div>
+     </details>
+*/
+
+.rma-panel { border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; margin: 0 0 1rem; background: var(--card-bg, #fff); }
+.rma-panel__summary { cursor: pointer; list-style: none; padding: .85rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-weight: 700; }
+.rma-panel__summary::-webkit-details-marker { display: none; }
+.rma-panel__summary:hover { background: rgba(37,99,235,.04); }
+.rma-panel__right { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.rma-toggle { display: inline-flex; align-items: center; gap: .4rem; color: #2563eb; font-size: .82rem; font-weight: 700; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 999px; padding: .25rem .7rem; white-space: nowrap; }
+.rma-chevron { transition: transform .2s ease; }
+.rma-panel[open] .rma-chevron { transform: rotate(180deg); }
+.rma-toggle__close { display: none; }
+.rma-panel[open] .rma-toggle__open { display: none; }
+.rma-panel[open] .rma-toggle__close { display: inline; }
+.rma-chip { display: inline-flex; min-width: 1.4rem; justify-content: center; padding: 0 .4rem; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: .78rem; margin-left: .35rem; }
+.rma-form { padding: 0 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .65rem; }
+
+/* ── Çoxlu sətir: sabit hündürlük + öz daxili scroll ─────────────────────
+   25+ elementli siyahı bütün səhifəni uzadıb görüntünü dağıdırdı.
+   İndi siyahı öz sahəsində sürüşür, səhifə isə qısa qalır. */
+.rma-cscroll {
+    max-height: 420px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    padding: .6rem;
+    background: #fbfdff;
+}
+
+.rma-cscroll::-webkit-scrollbar { width: 10px; }
+.rma-cscroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+.rma-cscroll::-webkit-scrollbar-track { background: transparent; }
+
+.rma-csearch {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: .1rem 0 .6rem;
+}
+
+.rma-csearch__input {
+    flex: 1 1 auto;
+    max-width: 320px;
+    padding: .45rem .7rem;
+    font-size: .86rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.rma-csearch__input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.rma-csearch__count {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.rma-cempty {
+    padding: 1rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: .86rem;
+}
+
+@media (max-width: 640px) {
+    .rma-cscroll { max-height: 320px; }
+    .rma-csearch__input { max-width: none; }
+}

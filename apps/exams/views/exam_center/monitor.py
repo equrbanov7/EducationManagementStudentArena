@@ -259,7 +259,7 @@ def exam_center_session_cancel(request, session_id):
         )
     else:
         messages.warning(request, pgettext("exams.final_center.message", "Oturum bu mərhələdə ləğv oluna bilməz."))
-    return redirect("exams:exam_center_session_list")
+    return redirect("exams:exam_center_room_list")
 
 
 @login_required

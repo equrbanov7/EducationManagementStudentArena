@@ -5,7 +5,8 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260729-live">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260730-live-panel">
 {% endblock %}
 
 {% block content %}
@@ -60,25 +61,52 @@
   {% comment %}
     Hazırda gedən imtahanlar — hansı fənnin imtahanı hansı zalda gedir.
     Zal axtarış/status filtrindən asılı deyil; klik birbaşa zal monitoruna aparır.
+    Zal monitorundakı panel komponenti ilə eynidir (panel.css + panel_search.js):
+    açılıb-bağlanır, içəridə debounce-lu axtarış var və siyahı öz sahəsində
+    sürüşür — eyni gündə onlarla imtahan olanda səhifə uzanmasın.
+    Default AÇIQ: bu bölmə səhifənin əsas məlumatıdır.
   {% endcomment %}
   {% if live_exams %}
-  <section class="fxc-live-exams" aria-label="{% trans 'Hazırda gedən imtahanlar' %}">
-    <h2 class="fxc-live-exams__title">
-      <span class="fxc-live-pulse" aria-hidden="true"></span>
-      {% trans "Hazırda gedən imtahanlar" %}
-      <span class="fxc-chip-count">{{ live_exams|length }}</span>
-    </h2>
-    <div class="fxc-live-exams__list">
-      {% for row in live_exams %}
-      <a class="fxc-live-exam" href="{% url 'exams:exam_center_room_monitor' room_id=row.room_id %}">
-        <span class="fxc-live-exam__exam"><i class="fas fa-file-pen" aria-hidden="true"></i> {{ row.exam_title }}</span>
-        <span class="fxc-live-exam__room"><i class="fas fa-door-open" aria-hidden="true"></i> {{ row.room_name }} <code>{{ row.room_code }}</code></span>
-        <span class="fxc-live-exam__count">{{ row.students }} {% trans "tələbə" %}</span>
-        <span class="fxc-live-exam__go">{% trans "Canlı nəzarət" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
-      </a>
-      {% endfor %}
+  <details class="rma-panel fxc-live-panel" data-panel-search-root open>
+    <summary class="rma-panel__summary">
+      <span class="rma-panel__label">
+        <span class="fxc-live-pulse" aria-hidden="true"></span>
+        {% trans "Hazırda gedən imtahanlar" %}
+        <span class="rma-chip">{{ live_exams|length }}</span>
+      </span>
+      <span class="rma-panel__right">
+        <span class="rma-toggle">
+          <span class="rma-toggle__open">{% trans "Aç" %}</span>
+          <span class="rma-toggle__close">{% trans "Bağla" %}</span>
+          <i class="fas fa-chevron-down rma-chevron" aria-hidden="true"></i>
+        </span>
+      </span>
+    </summary>
+    <div class="rma-form">
+      <div class="rma-csearch" data-panel-search>
+        <input type="search" class="rma-csearch__input" data-panel-search-input
+               placeholder="{% trans 'Fənn, zal və ya kod üzrə axtar…' %}"
+               aria-label="{% trans 'Gedən imtahan axtarışı' %}"
+               autocomplete="off">
+        <span class="rma-csearch__count" data-panel-search-count></span>
+      </div>
+
+      <div class="rma-cscroll" data-panel-search-scope tabindex="0">
+        <div class="fxc-live-exams__list">
+          {% for row in live_exams %}
+          <a class="fxc-live-exam" href="{% url 'exams:exam_center_room_monitor' room_id=row.room_id %}"
+             data-search="{{ row.exam_title|lower }} {{ row.room_name|lower }} {{ row.room_code|lower }}">
+            <span class="fxc-live-exam__exam"><i class="fas fa-file-pen" aria-hidden="true"></i> {{ row.exam_title }}</span>
+            <span class="fxc-live-exam__room"><i class="fas fa-door-open" aria-hidden="true"></i> {{ row.room_name }} <code>{{ row.room_code }}</code></span>
+            <span class="fxc-live-exam__count">{{ row.students }} {% trans "tələbə" %}</span>
+            <span class="fxc-live-exam__go">{% trans "Canlı nəzarət" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
+          </a>
+          {% endfor %}
+        </div>
+        <div class="rma-cempty" data-panel-search-empty hidden>{% trans "Uyğun imtahan tapılmadı." %}</div>
+      </div>
     </div>
-  </section>
+  </details>
   {% endif %}
 
   {% if page_obj.object_list %}
@@ -150,4 +178,5 @@
 
 {% block extraJs %}
     <script src="{% static 'exams/js/room_list.js' %}"></script>
+    <script src="{% static 'exams/js/final_center/panel_search.js' %}?v=20260730-shared" defer></script>
 {% endblock %}

@@ -22,7 +22,7 @@
 
   {% csrf_token %}
 
-  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% url 'exams:exam_center_room_list' as sessions_url %}
   {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.room.name %}
 
   <header class="fxc-head">
@@ -64,7 +64,7 @@
   </header>
 
   <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Oturum statistikası' %}">
-    {# JS doldurur — açarlar: total, connected, waiting, ready, active, completed, removed, absent, offline #}
+    {# JS doldurur — açarlar: total, participated, waiting (ready daxil), active, completed, removed, absent #}
   </section>
 
   <div class="fxc-toolbar">
@@ -84,7 +84,6 @@
         <option value="">{% trans "Bütün statuslar" %}</option>
         <option value="assigned">{% trans "Təyin olunub" %}</option>
         <option value="waiting">{% trans "Gözləyir" %}</option>
-        <option value="ready">{% trans "Hazır" %}</option>
         <option value="active">{% trans "İmtahanda" %}</option>
         <option value="completed">{% trans "Bitirib" %}</option>
         <option value="removed">{% trans "Çıxarılıb" %}</option>
@@ -97,12 +96,10 @@
   <section class="fxc-map-panel" id="fxc-map-view">
     <div class="fxc-map-legend" aria-hidden="false">
       <span><i class="fxc-sw fxc-sw--active"></i> {% trans "İmtahanda" %}</span>
-      <span><i class="fxc-sw fxc-sw--ready"></i> {% trans "Hazır" %}</span>
       <span><i class="fxc-sw fxc-sw--waiting"></i> {% trans "Gözləyir" %}</span>
       <span><i class="fxc-sw fxc-sw--warn"></i> {% trans "Pozuntu" %}</span>
       <span><i class="fxc-sw fxc-sw--completed"></i> {% trans "Bitirib" %}</span>
       <span><i class="fxc-sw fxc-sw--removed"></i> {% trans "Çıxarılıb" %}</span>
-      <span><i class="fxc-sw fxc-sw--idle"></i> {% trans "Oflayn / gəlməyib" %}</span>
     </div>
     <div class="fxc-computer-map" id="fxc-computer-map" aria-live="polite"></div>
     <p class="fxc-map-hint">
@@ -156,9 +153,6 @@
     <dl class="fxc-modal-facts" id="fxc-start-facts">
       <div><dt>{% trans "Zal" %}</dt><dd>{{ session.room.name }}</dd></div>
       <div><dt>{% trans "Təyin olunmuş" %}</dt><dd data-fact="total">—</dd></div>
-      <div><dt>{% trans "Qoşulu" %}</dt><dd data-fact="connected">—</dd></div>
-      <div><dt>{% trans "Hazır" %}</dt><dd data-fact="ready">—</dd></div>
-      <div><dt>{% trans "Oflayn" %}</dt><dd data-fact="offline">—</dd></div>
       <div><dt>{% trans "Planlaşdırılan başlanğıc" %}</dt><dd>{{ session.scheduled_start|date:"d.m.Y H:i" }}</dd></div>
       <div><dt>{% trans "Server vaxtı" %}</dt><dd data-fact="server_now">—</dd></div>
     </dl>
@@ -187,7 +181,6 @@
     <dl class="fxc-modal-facts" id="fxc-end-facts">
       <div><dt>{% trans "İmtahanda" %}</dt><dd data-fact="active">—</dd></div>
       <div><dt>{% trans "Bitirib" %}</dt><dd data-fact="completed">—</dd></div>
-      <div><dt>{% trans "Oflayn" %}</dt><dd data-fact="offline">—</dd></div>
       <div><dt>{% trans "Gözləyir / hazır" %}</dt><dd data-fact="waiting_ready">—</dd></div>
     </dl>
     <p class="fxc-modal-error" id="fxc-end-error" hidden></p>
