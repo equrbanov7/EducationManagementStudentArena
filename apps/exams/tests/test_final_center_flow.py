@@ -906,6 +906,28 @@ class CenterPageRenderTests(_FlowBase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.room.invigilators.filter(pk=self.teacher.pk).exists())
 
+    def test_session_list_state_chips_show_counts_and_meaning(self):
+        """Çiplər sayğac göstərir və "giriş açıq" ilə "aktiv" fərqi izah olunur."""
+        response = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
+
+        self.assertEqual(response.status_code, 200)
+        counts = response.context["state_counts"]
+        # Sayğaclar status filtri TƏTBİQ OLUNMADAN hesablanır.
+        self.assertIn("total", counts)
+        self.assertEqual(counts["total"], sum(v for k, v in counts.items() if k != "total"))
+        self.assertContains(response, "fxc-tab__n")
+        self.assertContains(response, "fxc-state-legend")
+        # "Hazırlanır" oturumun BAŞLANĞIC vəziyyətidir — filtr silinməməlidir.
+        self.assertContains(response, "state=prepared")
+
+    def test_session_list_counts_ignore_active_filter(self):
+        """Filtr seçiləndə də çip sayğacları bütün oturumları göstərməlidir."""
+        unfiltered = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
+        filtered = self._client_for(self.center).get(reverse("exams:exam_center_session_list") + "?state=cancelled")
+
+        self.assertEqual(filtered.status_code, 200)
+        self.assertEqual(filtered.context["state_counts"], unfiltered.context["state_counts"])
+
     def test_session_list_renders(self):
         response = self._client_for(self.center).get(reverse("exams:exam_center_session_list"))
         self.assertEqual(response.status_code, 200)
