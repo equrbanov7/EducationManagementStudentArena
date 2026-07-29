@@ -159,31 +159,51 @@ def main():
             membership.save()
 
     # ── 3. Qrup ────────────────────────────────────────────────────────────
+    # StudentGroup.save() full_clean() çağırır və primary müəllimin TEACHER
+    # rolunda olmasını tələb edir (access_policy.py) — exam_center kimi digər
+    # rollar qəbul edilmir. Ona görə rol burada əvvəlcədən yoxlanır.
     out(f"\n3) QRUP — {GROUP_NAME}")
-    teacher = None
-    if GROUP_TEACHER:
-        teacher = User.objects.filter(username=GROUP_TEACHER).first()
-    if teacher is None:
-        teacher_membership = (
+
+    def _teacher_role_users():
+        return (
             Membership.objects.filter(organization=organization, is_active=True, role__name="teacher")
             .select_related("user")
-            .first()
+            .order_by("user__username")
         )
-        teacher = teacher_membership.user if teacher_membership else None
-    if teacher is None:
-        out("    !! müəllim tapılmadı — qrup yaradıla bilmir (StudentGroup müəllim tələb edir)")
-    else:
-        out(f"    qrup sahibi (müəllim): {teacher.username}")
-        group = StudentGroup.objects.filter(organization=organization, name=GROUP_NAME).first()
-        if group is None:
-            if act(f"StudentGroup yaradılır: {GROUP_NAME}"):
-                group = StudentGroup.objects.create(organization=organization, name=GROUP_NAME, teacher=teacher)
+
+    teacher = None
+    if GROUP_TEACHER:
+        candidate = _teacher_role_users().filter(user__username=GROUP_TEACHER).first()
+        if candidate:
+            teacher = candidate.user
         else:
-            out(f"    mövcuddur: {group.name}")
-        if group is not None and act(f"{GROUP_NAME}: hər iki tələbə qrupa əlavə olunur"):
-            for user in created_users.values():
-                if user is not None:
-                    group.students.add(user)
+            out(f"    !! '{GROUP_TEACHER}' bu org-da TEACHER rolunda deyil — model onu qəbul etmir.")
+    if teacher is None:
+        first = _teacher_role_users().first()
+        teacher = first.user if first else None
+        if teacher is not None:
+            out(f"    (avtomatik seçildi: {teacher.username})")
+
+    if teacher is None:
+        out("    !! teacher rollu istifadəçi tapılmadı — qrup buraxılır (imtahanlara təsiri yoxdur)")
+    else:
+        out(f"    qrup sahibi (müəllim): {teacher.username} — {teacher.get_full_name() or '—'}")
+        group = StudentGroup.objects.filter(organization=organization, name=GROUP_NAME).first()
+        try:
+            if group is None:
+                if act(f"StudentGroup yaradılır: {GROUP_NAME}"):
+                    group = StudentGroup.objects.create(organization=organization, name=GROUP_NAME, teacher=teacher)
+            else:
+                out(f"    mövcuddur: {group.name}")
+            if group is not None and act(f"{GROUP_NAME}: hər iki tələbə qrupa əlavə olunur"):
+                for user in created_users.values():
+                    if user is not None:
+                        group.students.add(user)
+        except Exception as exc:  # noqa: BLE001
+            # Qrup köməkçi metadatadır — imtahan təyinatı allowed_users ilə
+            # işləyir. Buradakı nasazlıq kritik addımları dayandırmamalıdır.
+            out(f"    !! qrup yaradıla bilmədi: {exc}")
+            out("    (imtahan təyinatı allowed_users ilə gedir — imtahana təsiri yoxdur)")
 
     # ── 4. Az dili imtahanı (mövcud #8) ────────────────────────────────────
     now = timezone.now()
