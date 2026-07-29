@@ -1050,6 +1050,46 @@ class CenterPageRenderTests(_FlowBase):
         self.assertNotContains(response, "<style")
         self.assertContains(response, "final_center/room_monitor.css")
 
+    def test_room_monitor_template_has_no_inline_script_block(self):
+        """CLAUDE.md: template-də internal JS də olmamalıdır — yalnız `src` ilə.
+
+        Nəzarətçi təyini kodu uzun müddət `<script nonce>` blokunda qalmışdı;
+        bu test onun geri qayıtmasının qarşısını alır.
+
+        Yoxlama RENDER olunmuş HTML-ə yox, ŞABLON MƏNBƏYİNƏ baxır: `base.html`
+        öz partial-larından (dil seçici, multi-select …) nonce-lu bloklar gətirir
+        və onlar bu şablonun məsuliyyəti deyil. `json_script` blokları isə
+        qaydanın icazə verdiyi DATA daşıyıcılarıdır (icra olunan kod deyil).
+        """
+        import re
+        from pathlib import Path
+
+        from django.template.loader import get_template
+
+        source = Path(get_template("exams/exam_center/room_monitor.html").origin.name).read_text(encoding="utf-8")
+        inline = [
+            tag
+            for tag in re.findall(r"<script\b[^>]*>", source)
+            if "src=" not in tag and 'type="application/json"' not in tag
+        ]
+
+        self.assertEqual(inline, [], msg=f"room_monitor.html-də inline <script> qalıb: {inline}")
+
+    def test_room_monitor_loads_invigilator_script_externally(self):
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+
+        self.assertContains(response, "final_center/room_invigilators.js")
+
+    def test_invigilator_panel_is_selectable_without_document_order(self):
+        """Səhifədə bir neçə `.rma-panel` var — JS öz atributu ilə seçməlidir."""
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+
+        self.assertContains(response, "data-rma-invigilators")
+        # Tərcümələr xarici JS-ə data-atributla ötürülür (fayl template-dən keçmir).
+        self.assertContains(response, "data-i18n-no-result")
+        self.assertContains(response, "data-i18n-view-profile")
+        self.assertContains(response, "data-i18n-add")
+
     def test_assign_room_invigilators(self):
         client = self._client_for(self.center)
         response = client.post(
