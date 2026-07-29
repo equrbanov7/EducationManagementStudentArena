@@ -867,6 +867,36 @@ class CenterPageRenderTests(_FlowBase):
         # İmtahan mərkəzi üçün nəzarətçi təyin paneli görünür.
         self.assertContains(response, reverse("exams:exam_center_room_assign_invigilators", args=[self.room.pk]))
 
+    def test_room_monitor_computer_list_is_scrollable_and_searchable(self):
+        """Çoxlu kompüterdə siyahı öz sahəsində sürüşür + debounce-lu axtarış."""
+        from apps.exams.services.final_center import add_computer
+
+        for index in range(1, 4):
+            add_computer(
+                room=self.room,
+                label=f"PC-{index:02d}",
+                mac=f"AA:BB:CC:DD:EE:{index:02d}",
+                ip_address=f"10.0.0.{index}",
+                seat_number=index,
+            )
+
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data-rma-cscroll")
+        self.assertContains(response, "data-rma-csearch-input")
+        # Süzgəc klient tərəflidir: hər kart axtarış açarlarını daşıyır.
+        self.assertContains(response, "data-search=")
+        self.assertContains(response, "room_computer_search.js")
+
+    def test_room_monitor_has_no_inline_style_block(self):
+        """CLAUDE.md: template-də internal CSS olmamalıdır (CSP: SELF + NONCE)."""
+        response = self._client_for(self.center).get(reverse("exams:exam_center_room_monitor", args=[self.room.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "<style")
+        self.assertContains(response, "final_center/room_monitor.css")
+
     def test_assign_room_invigilators(self):
         client = self._client_for(self.center)
         response = client.post(
