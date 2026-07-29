@@ -825,6 +825,56 @@ class PermissionAndTenantTests(_FlowBase):
         self.assertIn("connected", row)
 
 
+class StartRoomGuardMessageTests(_FlowBase):
+    """Start bloklananda mesaj NƏ vaxtın nəzərdə tutulduğunu və NƏ etmək
+    lazım olduğunu deməlidir — əvvəl yalnız "override tələb olunur" yazırdı."""
+
+    def test_late_start_message_names_the_session_window_and_the_fix(self):
+        from apps.exams.services.final_center import RoomSessionStateError, start_room
+
+        now = timezone.now()
+        self.session.scheduled_start = now - timedelta(hours=5)
+        self.session.scheduled_end = now - timedelta(hours=3)
+        self.session.save(update_fields=["scheduled_start", "scheduled_end"])
+
+        with self.assertRaises(RoomSessionStateError) as ctx:
+            start_room(self.session, self.center)
+
+        message = str(ctx.exception)
+        # Faktiki bitmə vaxtı görünür (istifadəçi hansı vaxtı axtaracağını bilsin).
+        self.assertIn(timezone.localtime(self.session.scheduled_end).strftime("%d.%m.%Y"), message)
+        # İmtahanın tarixi ilə qarışdırmasın.
+        self.assertIn("imtahanın tarixindən yox", message)
+        # Nə etmək lazım olduğu yazılır.
+        self.assertIn("məcburi başlat", message)
+
+    def test_early_start_message_names_the_tolerance(self):
+        from apps.exams.services.final_center import RoomSessionStateError, start_room
+
+        now = timezone.now()
+        self.session.scheduled_start = now + timedelta(hours=5)
+        self.session.scheduled_end = now + timedelta(hours=7)
+        self.session.save(update_fields=["scheduled_start", "scheduled_end"])
+
+        with self.assertRaises(RoomSessionStateError) as ctx:
+            start_room(self.session, self.center)
+
+        message = str(ctx.exception)
+        self.assertIn("15 dəqiqə", message)
+        self.assertIn("məcburi başlat", message)
+
+    def test_override_actually_starts_a_late_session(self):
+        """Reqristiya: override hələ də işləyir (mesaj dəyişdi, məntiq yox)."""
+        from apps.exams.services.final_center import start_room
+
+        now = timezone.now()
+        self.session.scheduled_start = now - timedelta(hours=5)
+        self.session.scheduled_end = now - timedelta(hours=3)
+        self.session.save(update_fields=["scheduled_start", "scheduled_end"])
+
+        self.assertTrue(start_room(self.session, self.center, override=True))
+
+
 class CenterPageRenderTests(_FlowBase):
     """İmtahan mərkəzi səhifələrinin render smoke-testləri (şablon xətaları)."""
 
