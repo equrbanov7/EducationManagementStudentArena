@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n exam_filters %}
 {% comment %}
 ================================================================================
 ORTAQ SUAL İDARƏETMƏ PARTIAL
@@ -275,7 +275,7 @@ Kontekst (view-dən):
                             <div class="qb-card__top">
                                 <div class="qb-card__heading">
                                     <span class="qb-card__num">{% if qm_context == 'exam' %}#{{ q.order }}{% else %}#{{ forloop.counter0|add:page_obj.start_index }}{% endif %}</span>
-                                    <p class="qb-question-text">{{ q.text }}</p>
+                                    {% if not q.image_replaces_text or not q.image %}<p class="qb-question-text">{{ q.text }}</p>{% endif %}
                                 </div>
                                 <div class="qb-card__badges">
                                     {% if q.is_active %}
@@ -296,6 +296,12 @@ Kontekst (view-dən):
                                 </div>
                             </div>
 
+                            {% if q.image %}
+                                <div class="qb-question-media">
+                                    <img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" class="qb-source-image" loading="lazy">
+                                </div>
+                            {% endif %}
+
                             <div class="qb-card__meta">
                                 {% if qm_context == 'exam' %}
                                     {% if q.block %}<span class="qb-chip-tag">{{ q.block.name }}</span>{% else %}<span class="qb-chip-tag qb-chip-tag--muted">{% trans "label_no_block" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
@@ -314,7 +320,8 @@ Kontekst (view-dən):
                                     {% for opt in opts %}
                                         <div class="qb-opt {% if opt.is_correct %}is-correct{% endif %}">
                                             <span class="qb-opt__label">{{ opt.label|default:"•" }}</span>
-                                            <span class="qb-opt__text">{{ opt.text }}</span>
+                                            {% if not opt.image_replaces_text or not opt.image %}<span class="qb-opt__text">{{ opt.text }}</span>{% endif %}
+                                            {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="qb-opt__image" loading="lazy">{% endif %}
                                             {% if opt.is_correct %}<i class="fas fa-check qb-opt__tick"></i>{% endif %}
                                         </div>
                                     {% endfor %}

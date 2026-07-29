@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}
+    Sınaq keçidi: müəllim final-mərkəz çıxış axınına DÜŞMÜR (geri sayan zolaq
+    onu /exams/final/ PIN səhifəsinə atırdı). Əvəzinə real imtahanda nə olacağı
+    barədə məlumat qeydi. Bax: views/student/results.py → is_trial_result.
+{% endcomment %}
+<div class="trial-result-note" role="note">
+    <i class="fas fa-vial trial-result-note__icon" aria-hidden="true"></i>
+    <div>
+        <div class="trial-result-note__title">{% trans "trial_result_note_title" context "exams.template.student_exam_result" %}</div>
+        <div class="trial-result-note__text">{% trans "trial_result_note_body" context "exams.template.student_exam_result" %}</div>
+    </div>
+</div>

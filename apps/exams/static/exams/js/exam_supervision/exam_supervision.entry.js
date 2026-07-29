@@ -1,5 +1,6 @@
 import ExamSupervision from "./state.js?v=20260716-intervention";
 import "./ui.js?v=20260716-intervention";
+import "./trial_notice.js?v=20260716-intervention";
 import "./event_capture.js?v=20260716-intervention";
 import "./scoring.js?v=20260716-intervention";
 import "./api.js?v=20260716-intervention";

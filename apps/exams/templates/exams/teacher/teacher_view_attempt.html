@@ -5,7 +5,7 @@
 {% block extraCss %}
     {# Yeni CSS faylını qoşuruq #}
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt.css' %}?v=20260729-source-render">
 {% endblock %}
 
 {% block content %}
@@ -167,7 +167,7 @@
                 <div class="card-header question-header">
                     <h5 class="mb-0">
                         <span class="q-number">{{ qa_page.start_index|add:forloop.counter0 }}</span>
-                        <span class="q-text">{{ item.question.text }}</span>
+                        {% if not item.question.image_replaces_text or not item.question.image %}<span class="q-text">{{ item.question.text }}</span>{% endif %}
                         <span class="q-points badge bg-light text-dark float-end">
                             {{ item.question.points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %}
                         </span>
@@ -183,13 +183,13 @@
                     {# ================== SUALIN MEDİASI (şəkil / video) ================== #}
                     {% if item.question.image %}
                         <div class="question-media mb-3">
-                            <img src="{{ item.question.image.url }}" alt="{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}" class="img-fluid rounded c3-1">
+                            <img src="{{ item.question.image|protected_media_url }}" alt="{% if item.question.image_replaces_text %}{{ item.question.text }}{% else %}{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}{% endif %}" class="img-fluid rounded c3-1{% if item.question.image_replaces_text %} source-rendered-image{% endif %}">
                         </div>
                     {% endif %}
                     {% if item.question.video %}
                         <div class="question-media mb-3">
                             <video controls preload="metadata" playsinline class="img-fluid rounded c3-1">
-                                <source src="{{ item.question.video.url }}">
+                                <source src="{{ item.question.video|protected_media_url }}">
                             </video>
                         </div>
                     {% endif %}
@@ -203,7 +203,9 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" disabled checked>
                                     <label class="form-check-label">
-                                        {{ opt.text }}
+                                        <span class="attempt-option-label">{{ opt.label|default:"•" }}</span>
+                                        {% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}
+                                        {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="attempt-option-image" loading="lazy">{% endif %}
                                     </label>
                                 </div>
                                 <div class="status-icon">
@@ -219,7 +221,9 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" disabled>
                                     <label class="form-check-label">
-                                        {{ opt.text }}
+                                        <span class="attempt-option-label">{{ opt.label|default:"•" }}</span>
+                                        {% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}
+                                        {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="attempt-option-image" loading="lazy">{% endif %}
                                     </label>
                                 </div>
                                 <div class="status-icon">

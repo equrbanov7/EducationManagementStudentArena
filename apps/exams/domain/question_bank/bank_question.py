@@ -92,6 +92,7 @@ class BankQuestion(models.Model):
         null=True,
         verbose_name=pgettext_lazy("exams.model.bank_question.field", "image"),
     )
+    image_replaces_text = models.BooleanField(default=False)
     video = models.FileField(
         upload_to=bank_question_media_path,
         blank=True,
@@ -156,6 +157,7 @@ class BankQuestionOption(models.Model):
         null=True,
         verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "image"),
     )
+    image_replaces_text = models.BooleanField(default=False)
     is_correct = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "is_correct"),

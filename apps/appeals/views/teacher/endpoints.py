@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -207,12 +207,18 @@ def manage_appeals(request):
 @login_required
 def review_appeal(request, appeal_id):
     """Müəllim/reviewer apellyasiya detalı + qərar (per-sual accept/reject)."""
-    appeal = get_object_or_404(
-        Appeal.objects.select_related("exam", "attempt", "student", "reviewed_by").prefetch_related(
-            "items__question", "items__score_adjustment"
-        ),
-        id=appeal_id,
+    # Silinmiş müraciətə işarə edən köhnə bildiriş keçidi boş 404 yox, izahlı
+    # mesajla idarəetmə siyahısına qayıtsın (bax shared/detail.py-dakı eyni davranış).
+    appeal = (
+        Appeal.objects.select_related("exam", "attempt", "student", "reviewed_by")
+        .prefetch_related("items__question", "items__score_adjustment")
+        .filter(id=appeal_id)
+        .first()
     )
+    if appeal is None:
+        from apps.appeals.views.shared.detail import _missing_appeal_redirect
+
+        return _missing_appeal_redirect(request, section="manage-appeals")
     review_can_decide = can_review_appeal(request, appeal)
     if not review_can_decide:
         # Yalnız təşkilatın imtahan mərkəzi istifadəçisi (və superadmin) apellyasiyanı

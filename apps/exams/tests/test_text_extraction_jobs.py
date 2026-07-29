@@ -240,19 +240,23 @@ class TestStashMathFlag:
         assert job.payload == {"stash_math": True}
         assert "math_token" not in job.result_meta
 
-    def test_pdf_stash_failure_is_non_fatal(self, teacher_client, monkeypatch):
-        # stash xətası mətni bloklamamalıdır (qeyri-fatal) — PDF-i real parse
-        # etməmək üçün extract-i də mock-layırıq.
+    def test_pdf_stash_exception_degrades_to_text(self, teacher_client, monkeypatch):
+        """Vizual axın çökəndə idxal ölmür — TAM mətn çıxarışına düşür.
+
+        Əvvəl bu hal fail-closed idi ("natamam mətn saxlanmasın"). Real bank
+        PDF-lərində (ardıcıl olmayan sual nömrələri) bu, bütün idxalı bloklayırdı.
+        İndi fallback generic `extract_text_from_upload`-u YENİDƏN çağırır, yəni
+        mətn .txt idxalı ilə eyni tamlıqdadır — natamam manifest qalığı deyil.
+        """
         import apps.exams.services.parsing as parsing_facade
+        import apps.exams.services.visual_import_upload as visual_upload
 
         monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "PDF mətni")
 
-        import apps.exams.services.import_media as import_media
-
-        def boom(f):
+        def boom(f, **kwargs):
             raise RuntimeError("stash down")
 
-        monkeypatch.setattr(import_media, "stash_math_images", boom)
+        monkeypatch.setattr(visual_upload, "stash_math_images", boom)
 
         resp = teacher_client.post(
             reverse("exams:start_text_extraction"),
@@ -261,7 +265,52 @@ class TestStashMathFlag:
         job = TextExtractionJob.objects.get(pk=resp.json()["job_id"])
         assert job.status == TextExtractionJob.STATUS_SUCCESS
         assert job.text == "PDF mətni"
+        assert job.error == ""
+        # Media bağlanmır, amma istifadəçi bunu xəta kimi görmür.
         assert "math_token" not in job.result_meta
+        assert job.result_meta.get("visual_import_skipped") is True
+        # Daxili xəta mətni istifadəçiyə sızmır.
+        assert "stash down" not in job.text
+
+    def test_pdf_stash_without_token_degrades_to_text(self, teacher_client, monkeypatch):
+        import apps.exams.services.parsing as parsing_facade
+        import apps.exams.services.visual_import_upload as visual_upload
+
+        monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "Tam PDF mətni")
+        monkeypatch.setattr(visual_upload, "stash_math_images", lambda f, **kwargs: None)
+
+        resp = teacher_client.post(
+            reverse("exams:start_text_extraction"),
+            {"source_file": _upload(name="notes.pdf", content=b"%PDF-1.4 fake"), "stash_math": "1"},
+        )
+        job = TextExtractionJob.objects.get(pk=resp.json()["job_id"])
+        assert job.status == TextExtractionJob.STATUS_SUCCESS
+        assert job.text == "Tam PDF mətni"
+        assert job.result_meta.get("visual_import_skipped") is True
+        assert job.error == ""
+
+    def test_scope_violation_still_fails_closed(self, teacher_client, monkeypatch):
+        """PermissionDenied fallback-a DÜŞMÜR — scope pozuntusu udulmamalıdır."""
+        from django.core.exceptions import PermissionDenied
+
+        import apps.exams.services.parsing as parsing_facade
+        import apps.exams.services.visual_import_upload as visual_upload
+
+        monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "PDF mətni")
+
+        def denied(f, **kwargs):
+            raise PermissionDenied("owner_id scope-u uyğun deyil")
+
+        monkeypatch.setattr(visual_upload, "stash_math_images", denied)
+
+        resp = teacher_client.post(
+            reverse("exams:start_text_extraction"),
+            {"source_file": _upload(name="notes.pdf", content=b"%PDF-1.4 fake"), "stash_math": "1"},
+        )
+        job = TextExtractionJob.objects.get(pk=resp.json()["job_id"])
+        assert job.status == TextExtractionJob.STATUS_FAILED
+        assert job.text == ""
+        assert "scope" not in job.error
 
 
 class TestExportJobs:
@@ -425,12 +474,21 @@ class TestCasClaim:
 class TestMathTokenPropagation:
     """P3-b: stash token status meta-sına düşür (Codex smoke-da formula-suz PDF ilə görünməmişdi)."""
 
-    def test_token_reaches_status_meta(self, teacher_client, monkeypatch):
-        import apps.exams.services.import_media as import_media
+    def test_token_reaches_status_meta(self, teacher_client, teacher, org, monkeypatch):
+        # Vizual axın `visual_import_upload`-dakı adlara bağlanır (modul səviyyəli
+        # import), ona görə patch hədəfi də oradadır.
         import apps.exams.services.parsing as parsing_facade
+        import apps.exams.services.visual_import_upload as visual_upload
 
         monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "PDF mətni")
-        monkeypatch.setattr(import_media, "stash_math_images", lambda f: "tok123")
+        seen = {}
+
+        def stash(f, **kwargs):
+            seen.update(kwargs)
+            return "tok123"
+
+        monkeypatch.setattr(visual_upload, "stash_math_images", stash)
+        monkeypatch.setattr(visual_upload, "get_stashed_import_text", lambda token, **kwargs: "Canonical PDF mətni")
 
         start = teacher_client.post(
             reverse("exams:start_text_extraction"),
@@ -440,6 +498,8 @@ class TestMathTokenPropagation:
         data = resp.json()
         assert data["status"] == TextExtractionJob.STATUS_SUCCESS
         assert data["meta"]["math_token"] == "tok123"
+        assert seen == {"owner_id": teacher.id, "organization_id": org.id}
+        assert TextExtractionJob.objects.get(pk=start["job_id"]).text == "Canonical PDF mətni"
 
 
 class TestStuckJobReaper:

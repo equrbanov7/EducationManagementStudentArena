@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260729-live">
 {% endblock %}
 
 {% block content %}
@@ -22,9 +23,10 @@
     </div>
     <div class="fxc-head-actions">
       {% if can_manage %}
-      <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-calendar-days"></i> {% trans "Oturumlar" %}
-      </a>
+      {% comment %}
+        "Oturumlar" keçidi silindi (2026-07-29): istifadəçi üçün texniki və
+        çaşdırıcı idi. Yerində aşağıdakı "Hazırda gedən imtahanlar" bölməsi var.
+      {% endcomment %}
       <a href="{% url 'exams:exam_center_reports' %}" class="fxc-btn fxc-btn-ghost">
         <i class="fas fa-chart-column"></i> {% trans "Hesabatlar" %}
       </a>
@@ -54,6 +56,30 @@
       </select>
     </div>
   </form>
+
+  {% comment %}
+    Hazırda gedən imtahanlar — hansı fənnin imtahanı hansı zalda gedir.
+    Zal axtarış/status filtrindən asılı deyil; klik birbaşa zal monitoruna aparır.
+  {% endcomment %}
+  {% if live_exams %}
+  <section class="fxc-live-exams" aria-label="{% trans 'Hazırda gedən imtahanlar' %}">
+    <h2 class="fxc-live-exams__title">
+      <span class="fxc-live-pulse" aria-hidden="true"></span>
+      {% trans "Hazırda gedən imtahanlar" %}
+      <span class="fxc-chip-count">{{ live_exams|length }}</span>
+    </h2>
+    <div class="fxc-live-exams__list">
+      {% for row in live_exams %}
+      <a class="fxc-live-exam" href="{% url 'exams:exam_center_room_monitor' room_id=row.room_id %}">
+        <span class="fxc-live-exam__exam"><i class="fas fa-file-pen" aria-hidden="true"></i> {{ row.exam_title }}</span>
+        <span class="fxc-live-exam__room"><i class="fas fa-door-open" aria-hidden="true"></i> {{ row.room_name }} <code>{{ row.room_code }}</code></span>
+        <span class="fxc-live-exam__count">{{ row.students }} {% trans "tələbə" %}</span>
+        <span class="fxc-live-exam__go">{% trans "Canlı nəzarət" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   {% if page_obj.object_list %}
   <div class="fxc-room-grid">

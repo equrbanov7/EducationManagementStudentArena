@@ -172,6 +172,10 @@
     color: #047857;
 }
 
+.question-source-image { display: block; max-width: 100%; height: auto; margin: 10px 0; }
+.option-label { font-weight: 700; }
+.option-source-image { display: block; max-width: calc(100% - 70px); height: auto; }
+
 /* Suallar üçün hərəkət düymələri (Edit/Delete) */
 .question-actions {
     display: flex;

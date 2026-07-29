@@ -268,8 +268,10 @@
         var deleteModalMessage = document.getElementById("examDetailDeleteConfirmMessage");
         var deleteModalTarget = document.getElementById("examDetailDeleteConfirmTarget");
         var deleteConfirmForm = document.getElementById("examDetailDeleteConfirmForm");
+        var trialBlockedModalElement = document.getElementById("examDetailTrialRunBlockedModal");
         var questionModal = null;
         var deleteModal = null;
+        var trialBlockedModal = null;
         var submitInFlight = false;
 
         if (questionModalElement && questionModalBody) {
@@ -277,6 +279,9 @@
         }
         if (deleteModalElement) {
             deleteModal = bootstrap.Modal.getOrCreateInstance(deleteModalElement);
+        }
+        if (trialBlockedModalElement) {
+            trialBlockedModal = bootstrap.Modal.getOrCreateInstance(trialBlockedModalElement);
         }
 
         function buildModalUrl(rawUrl) {
@@ -419,6 +424,16 @@
         }
 
         document.addEventListener("click", function (event) {
+            // Sual yüklənməyib: "Sınaq keç" imtahanı başlatmır, izahlı modal açır.
+            var trialBlockedTrigger = event.target.closest(".js-trial-run-blocked");
+            if (trialBlockedTrigger) {
+                event.preventDefault();
+                if (trialBlockedModal) {
+                    trialBlockedModal.show();
+                }
+                return;
+            }
+
             var deleteTrigger = event.target.closest(".js-open-delete-confirm-modal");
             if (deleteTrigger) {
                 event.preventDefault();
@@ -449,6 +464,11 @@
             }
 
             event.preventDefault();
+            // CTA "sual yoxdur" modalının içindədirsə, iki modal üst-üstə
+            // qalmasın — əvvəlcə onu bağlayırıq.
+            if (trialBlockedModalElement && trialBlockedModalElement.contains(questionTrigger)) {
+                trialBlockedModal.hide();
+            }
             openQuestionModal(
                 questionTrigger.getAttribute("data-question-modal-url") || questionTrigger.getAttribute("href"),
                 questionTrigger.getAttribute("data-question-modal-mode") || "edit"

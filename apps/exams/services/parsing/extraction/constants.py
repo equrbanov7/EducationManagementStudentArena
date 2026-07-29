@@ -21,7 +21,10 @@ FILE_SIGNATURES = {
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 
 
-END_QUESTION_RE = re.compile(r"^\s*END_QUESTION\s*$", re.IGNORECASE)
+# İstifadəçi marker-i əl ilə yazır və tez-tez alt-xətti təkrarlayır
+# ("END__QUESTION"). Bir və ya bir neçə alt-xətt qəbul olunur ki, belə yazılış
+# blok sərhədi kimi tanınsın və mətnə sızmasın.
+END_QUESTION_RE = re.compile(r"^\s*END_+QUESTION\s*$", re.IGNORECASE)
 
 
 JOINED_OPTION_BOUNDARY_RE = re.compile(r"(?<=[a-zəöüğışçа-яё])(?=[A-ZƏÖÜĞİŞÇА-ЯЁ])")

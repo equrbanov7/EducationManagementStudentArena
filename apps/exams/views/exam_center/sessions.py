@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
@@ -38,6 +39,17 @@ User = get_user_model()
 def exam_center_session_list(request):
     organization = supervisor_org_or_403(request)
     sessions = session_list_annotations(visible_sessions_qs(request, organization)).order_by("-scheduled_start", "-id")
+
+    # Filtr çipləri üçün vəziyyət sayğacları — status filtri TƏTBİQ OLUNMAMIŞ
+    # queryset üzərindən hesablanır ki, hər çip öz faktiki sayını göstərsin
+    # (istifadəçi hansı vəziyyətdə oturum olduğunu klikləmədən görsün).
+    state_counts = dict(
+        visible_sessions_qs(request, organization).values_list("state").annotate(total=Count("id")).order_by()
+    )
+    # Açar adı şablon üçün "total"-dır: Django alt-xətlə başlayan
+    # dəyişən adını oxumur (__all__ TemplateSyntaxError verir).
+    state_counts["total"] = sum(state_counts.values())
+
     state = (request.GET.get("state") or "").strip()
     if state:
         sessions = sessions.filter(state=state)
@@ -51,6 +63,7 @@ def exam_center_session_list(request):
         {
             "page_obj": page_obj,
             "active_state": state,
+            "state_counts": state_counts,
             "organization": organization,
             # İmtahan mərkəzi zal/oturum/hesabatı idarə edir; nəzarətçi yalnız
             # monitor edir — idarə düymələri gizlədilir ki, 403 alınmasın.

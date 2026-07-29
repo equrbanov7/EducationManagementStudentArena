@@ -41,3 +41,61 @@ class KollokviumPastBypassTests(SimpleTestCase):
         user = SimpleNamespace(is_superuser=False, is_superadmin=False, is_ikt_rehber=True)
         # Heç bir exception atmamalıdır (İKT Rəhbəri bitmiş semestri düzəldə bilər).
         _reject_if_period_past(self._past_period(), user)
+
+
+class IktRehberExamRoomPermissionTests(SimpleTestCase):
+    """İKT Rəhbəri zal/kompüter infrastrukturunu idarə edə bilməlidir.
+
+    Rolun öz tərifində `exam.*` var (organizations/default_roles.py), yəni
+    imtahan mərkəzinin TAM səlahiyyətini daşıyır.
+    """
+
+    def _user(self, **flags):
+        base = {
+            "is_authenticated": True,
+            "is_superuser": False,
+            "is_superadmin": False,
+            "is_ikt_rehber": False,
+            "profile": SimpleNamespace(can_manage_exam_rooms=False),
+        }
+        base.update(flags)
+        return SimpleNamespace(**base)
+
+    def test_ikt_rehber_can_manage_exam_rooms(self):
+        from apps.exams.services.access_policy import can_manage_exam_rooms
+
+        self.assertTrue(can_manage_exam_rooms(self._user(is_ikt_rehber=True)))
+
+    def test_plain_user_still_cannot(self):
+        """Reqressiya qoruması: icazə genişlənməyib."""
+        from apps.exams.services.access_policy import can_manage_exam_rooms
+
+        self.assertFalse(can_manage_exam_rooms(self._user()))
+
+    def test_per_user_delegation_flag_still_works(self):
+        from apps.exams.services.access_policy import can_manage_exam_rooms
+
+        user = self._user(profile=SimpleNamespace(can_manage_exam_rooms=True))
+        self.assertTrue(can_manage_exam_rooms(user))
+
+    def test_anonymous_denied(self):
+        from apps.exams.services.access_policy import can_manage_exam_rooms
+
+        self.assertFalse(can_manage_exam_rooms(self._user(is_authenticated=False, is_ikt_rehber=True)))
+
+
+class IktRehberRegistrarConsoleTests(SimpleTestCase):
+    """Sidebar linki ilə view icazəsi uyğunlaşmalıdır (əks halda link 404 verir)."""
+
+    def test_ikt_rehber_is_in_registrar_admin_roles(self):
+        from apps.registrar.console_views import _REGISTRAR_ADMIN_ROLES
+
+        self.assertIn("ikt_rehber", _REGISTRAR_ADMIN_ROLES)
+
+    def test_registrar_admin_roles_do_not_include_plain_teacher_or_student(self):
+        """İcazə genişlənməsi olmasın."""
+        from apps.registrar.console_views import _REGISTRAR_ADMIN_ROLES
+
+        self.assertNotIn("teacher", _REGISTRAR_ADMIN_ROLES)
+        self.assertNotIn("student", _REGISTRAR_ADMIN_ROLES)
+        self.assertNotIn("exam_center_staff", _REGISTRAR_ADMIN_ROLES)

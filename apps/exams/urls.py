@@ -156,6 +156,11 @@ urlpatterns = [
     # P3: asinxron mətn-çıxarma (OCR-lı PDF importu üçün status-poll axını)
     path("import/extract-jobs/", views.start_text_extraction, name="start_text_extraction"),
     path("import/extract-jobs/<uuid:job_id>/", views.text_extraction_status, name="text_extraction_status"),
+    path(
+        "question-imports/<str:token>/visual/<int:source_index>.png",
+        views.question_import_visual_preview,
+        name="question_import_visual_preview",
+    ),
     path("export-jobs/<uuid:job_id>/waiting/", views.export_job_waiting, name="export_job_waiting"),
     path("export-jobs/<uuid:job_id>/download/", views.export_job_download, name="export_job_download"),
     # Müəllim → İmtahan mərkəzi sual göndərişi (elektron axın)
@@ -180,6 +185,11 @@ urlpatterns = [
         "question-submissions/<int:submission_id>/review/",
         views.question_submission_review,
         name="question_submission_review",
+    ),
+    path(
+        "question-submissions/<int:submission_id>/visual/<int:source_index>.png",
+        views.question_submission_visual_preview,
+        name="question_submission_visual_preview",
     ),
     path(
         "question-submissions/<int:submission_id>/decide/",
@@ -380,31 +390,6 @@ urlpatterns = [
     # SUPERVISION API & MONITORING
     # ==========================
     path(
-        "supervision/monitor/",
-        views.supervision_monitor,
-        name="supervision_monitor",
-    ),
-    path(
-        "supervision/detail/<int:attempt_id>/",
-        views.supervision_detail,
-        name="supervision_detail",
-    ),
-    path(
-        "supervision/live/<int:exam_id>/",
-        views.exam_live_monitor,
-        name="exam_live_monitor",
-    ),
-    path(
-        "supervision/live/<int:exam_id>/poll/",
-        views.exam_live_monitor_poll_api,
-        name="exam_live_monitor_poll",
-    ),
-    path(
-        "supervision/api/snapshot/<int:attempt_id>/",
-        views.attempt_live_snapshot_api,
-        name="attempt_live_snapshot",
-    ),
-    path(
         "supervision/api/log/<int:attempt_id>/",
         views.log_incident_api,
         name="supervision_log_incident",
@@ -413,21 +398,6 @@ urlpatterns = [
         "supervision/api/status/<int:attempt_id>/",
         views.supervision_status_api,
         name="supervision_status_api",
-    ),
-    path(
-        "supervision/api/resume/<int:attempt_id>/",
-        views.teacher_resume_api,
-        name="supervision_resume",
-    ),
-    path(
-        "supervision/api/lock/<int:attempt_id>/",
-        views.teacher_lock_api,
-        name="supervision_lock",
-    ),
-    path(
-        "supervision/api/stop/<int:attempt_id>/",
-        views.teacher_stop_api,
-        name="supervision_stop",
     ),
     # ✅ ƏN AXIRDA: Teacher exam detail (generic)
     path("<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),

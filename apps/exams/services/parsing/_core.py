@@ -26,12 +26,14 @@ logger = logging.getLogger(__name__)
 # ("...işləyir. END_QUESTION"). END_QUESTION_RE yalnız müstəqil sətri tanıyır,
 # ona görə markerlər əvvəlcə ayrıca sətrə çıxarılmalıdır — əks halda bloklar
 # heç vaxt bağlanmır və sənədin böyük hissəsi bir "sual"a yapışıb itir.
-_INLINE_END_QUESTION_RE = re.compile(r"[ \t]*\bEND_QUESTION\b[ \t]*", re.IGNORECASE)
+# Alt-xətt sayı sərbəstdir: istifadəçi "END__QUESTION" yazsa da marker tanınır.
+_INLINE_END_QUESTION_RE = re.compile(r"[ \t]*\bEND_+QUESTION\b[ \t]*", re.IGNORECASE)
 
 
 def _isolate_end_question_markers(raw_text: str) -> str:
-    if "END_QUESTION" not in raw_text.upper():
+    if not _INLINE_END_QUESTION_RE.search(raw_text or ""):
         return raw_text
+    # Normallaşdırma: bütün variantlar tək kanonik forma kimi ayrıca sətrə çıxır.
     return _INLINE_END_QUESTION_RE.sub("\nEND_QUESTION\n", raw_text)
 
 
@@ -252,6 +254,20 @@ def _parse_labeled_end_question_block(lines: list[str], fallback_no: int) -> dic
     return _finish_question(current)
 
 
+def _drop_correct_defaulted_warning(question: dict) -> dict:
+    """END_QUESTION formatında ilk variant (A) razılaşdırılmış düzgün cavabdır.
+
+    Bu formatda müəllim ulduz/`Answer:` işarəsi yazmır — konvensiya budur ki,
+    düzgün cavab A-dır. Ona görə "düzgün cavab tapılmadı, müvəqqəti A seçildi"
+    xəbərdarlığı yanlış həyəcandır və workbench-i 299 saxta ERROR-la doldurur.
+    """
+
+    warnings = question.get("warnings")
+    if warnings:
+        question["warnings"] = [w for w in warnings if w.get("type") != "correct_defaulted"]
+    return question
+
+
 def _parse_end_question_blocks(raw_text: str) -> list[dict]:
     questions = []
     block: list[str] = []
@@ -269,7 +285,7 @@ def _parse_end_question_blocks(raw_text: str) -> list[dict]:
         )
         parsed = parser(block, fallback_no)
         if parsed:
-            questions.append(parsed)
+            questions.append(_drop_correct_defaulted_warning(parsed))
         block = []
 
     def _block_has_option(current_block):

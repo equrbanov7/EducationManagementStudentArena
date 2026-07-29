@@ -5,79 +5,13 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260717-vio-modal">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/vio_modal.css' %}?v=20260717-vio-modal">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_monitor.css' %}?v=20260729-cscroll">
 {% endblock %}
 
 {% block content %}
-<style nonce="{{ request.csp_nonce }}">
-  .rma-panel { border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; margin: 0 0 1rem; background: var(--card-bg, #fff); }
-  .rma-panel__summary { cursor: pointer; list-style: none; padding: .85rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-weight: 700; }
-  .rma-panel__summary::-webkit-details-marker { display: none; }
-  .rma-panel__summary:hover { background: rgba(37,99,235,.04); }
-  .rma-panel__right { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
-  .rma-toggle { display: inline-flex; align-items: center; gap: .4rem; color: #2563eb; font-size: .82rem; font-weight: 700; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 999px; padding: .25rem .7rem; white-space: nowrap; }
-  .rma-chevron { transition: transform .2s ease; }
-  .rma-panel[open] .rma-chevron { transform: rotate(180deg); }
-  .rma-toggle__close { display: none; }
-  .rma-panel[open] .rma-toggle__open { display: none; }
-  .rma-panel[open] .rma-toggle__close { display: inline; }
-  /* Toolbar Bootstrap select-ləri — kompakt (böyük default toggle yox) */
-  .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 1 210px; width: auto; min-width: 180px; }
-  .fxc-toolbar .fxc-toolbar-select .bootstrap-single-select__toggle { min-height: 0; padding: 9px 13px; border-radius: 10px; font-size: .92rem; font-weight: 500; background: #fff; border-color: #CBD5E1; box-shadow: none; }
-  @media (max-width: 640px) { .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 0 auto; width: 100%; } }
-  .rma-chip { display: inline-flex; min-width: 1.4rem; justify-content: center; padding: 0 .4rem; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: .78rem; margin-left: .35rem; }
-  .rma-current { display: flex; gap: .3rem; flex-wrap: wrap; font-weight: 500; }
-  .rma-tag { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .12rem .55rem; font-size: .78rem; }
-  .rma-muted { color: #6b7280; font-size: .85rem; }
-  .rma-form { padding: 0 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .65rem; }
-  .rma-search { position: relative; }
-  .rma-search i { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
-  .rma-search__input { width: 100%; padding: .5rem .6rem .5rem 2rem; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; background: transparent; color: inherit; }
-  .rma-list { max-height: 260px; overflow-y: auto; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; }
-  .rma-item { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-color, #f1f1f1); cursor: pointer; }
-  .rma-item:last-child { border-bottom: 0; }
-  .rma-item:hover { background: rgba(37,99,235,.06); }
-  .rma-item__name { font-weight: 600; }
-  .rma-item__user { color: #6b7280; font-size: .8rem; font-family: ui-monospace, monospace; margin-left: auto; }
-  .rma-item__kaf { color: #2563eb; font-size: .76rem; margin-left: auto; background: #eff6ff; padding: .1rem .5rem; border-radius: 999px; white-space: nowrap; }
-  .rma-item__kaf--none { color: #9ca3af; background: transparent; }
-  .rma-item__namelink { color: inherit; text-decoration: none; }
-  .rma-item__namelink:hover { color: #2563eb; text-decoration: underline; }
-  .rma-chip-sel__name { color: inherit; text-decoration: none; }
-  a.rma-chip-sel__name:hover { text-decoration: underline; }
-  .rma-empty { padding: 1rem; text-align: center; }
-  .rma-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .2rem; min-height: .5rem; }
-  .rma-chip-sel { display: inline-flex; align-items: center; gap: .4rem; background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .25rem .5rem .25rem .7rem; font-size: .82rem; font-weight: 600; }
-  .rma-chip-sel__x { border: 0; background: transparent; color: #6366f1; font-size: 1.05rem; line-height: 1; cursor: pointer; padding: 0 .1rem; }
-  .rma-chip-sel__x:hover { color: #b91c1c; }
-  .rma-result { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-color, #f1f1f1); cursor: pointer; }
-  .rma-result:last-child { border-bottom: 0; }
-  .rma-result:hover { background: rgba(37,99,235,.06); }
-  .rma-result__add { color: #16a34a; font-weight: 700; border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: 8px; width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; }
-  .rma-result__add:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
-  .rma-loading, .rma-hint { padding: .7rem; text-align: center; color: #6b7280; font-size: .82rem; }
-  .rma-form__foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .rma-computers { margin: 0 0 1.25rem; }
-  .rma-computers__title { font-size: 1.05rem; font-weight: 800; margin: 0 0 .6rem; display: flex; align-items: center; gap: .5rem; }
-  .rma-cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
-  .rma-comp { border: 1px solid var(--border-color, #e5e7eb); border-radius: 10px; padding: .6rem .7rem; background: var(--card-bg, #fff); border-left: 4px solid #cbd5e1; }
-  .rma-comp--busy { border-left-color: #94a3b8; }
-  .rma-comp--active { border-left-color: #16a34a; }
-  .rma-comp--ready { border-left-color: #0ea5e9; }
-  .rma-comp--waiting { border-left-color: #f59e0b; }
-  .rma-comp--completed { border-left-color: #6366f1; }
-  .rma-comp--removed { border-left-color: #ef4444; }
-  .rma-comp__head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
-  .rma-comp__label { font-weight: 700; display: flex; align-items: center; gap: .35rem; }
-  .rma-comp__seat { color: #6b7280; font-size: .78rem; }
-  .rma-comp__meta { margin: .3rem 0; display: flex; flex-direction: column; gap: .1rem; }
-  .rma-mac { font-family: ui-monospace, monospace; font-size: .72rem; color: #6b7280; }
-  .rma-comp__live { margin-top: .3rem; display: flex; flex-direction: column; }
-  .rma-comp__exam { font-size: .8rem; font-weight: 700; }
-  .rma-comp__student { font-size: .8rem; color: #374151; }
-  .rma-comp__idle { margin-top: .3rem; font-size: .78rem; color: #9ca3af; }
-</style>
 <div class="container py-4 fxc-page"
      id="fxc-room-root"
      data-snapshot-url="{% url 'exams:exam_center_room_snapshot' room_id=room.pk %}"
@@ -107,7 +41,7 @@
       <button type="button" class="fxc-btn fxc-btn-primary" id="fxc-open-all-btn" hidden>
         <i class="fas fa-door-open"></i> {% trans "Hamısında girişi aç" %}
       </button>
-      <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-all-btn" hidden>
+      <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-all-btn">
         <i class="fas fa-play"></i> {% trans "Zalda hamısını başlat" %}
       </button>
       <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-end-all-btn" hidden>
@@ -166,13 +100,39 @@
   {% endif %}
 
   {# ── Zaldakı kompüterlər (qeydli MAC/IP + canlı imtahan overlay) ── #}
+  {% comment %}
+    Nəzarətçilər paneli ilə EYNİ dizayn axını: açılıb-bağlanan panel, başlıqda
+    sayğac, içəridə debounce-lu axtarış + öz sahəsində sürüşən şəbəkə.
+    Default bağlıdır — çoxlu kompüter səhifəni uzatmasın.
+  {% endcomment %}
   {% if room_computers %}
-  <section class="rma-computers" aria-label="{% trans 'Zaldakı kompüterlər' %}">
-    <h2 class="rma-computers__title"><i class="fas fa-desktop"></i> {% trans "Zaldakı kompüterlər" %}
-      <span class="rma-chip">{{ room_computers|length }}</span></h2>
+  <details class="rma-panel" data-rma-computers>
+    <summary class="rma-panel__summary">
+      <span class="rma-panel__label"><i class="fas fa-desktop"></i> {% trans "Zaldakı kompüterlər" %}
+        <span class="rma-chip">{{ room_computers|length }}</span></span>
+      <span class="rma-panel__right">
+        <span class="rma-toggle">
+          <span class="rma-toggle__open">{% trans "Aç" %}</span>
+          <span class="rma-toggle__close">{% trans "Bağla" %}</span>
+          <i class="fas fa-chevron-down rma-chevron" aria-hidden="true"></i>
+        </span>
+      </span>
+    </summary>
+    <div class="rma-form">
+    <div class="rma-csearch" data-rma-csearch>
+      <input type="search" class="rma-csearch__input" data-rma-csearch-input
+             placeholder="{% trans 'Kompüter axtar (ad, MAC, IP, yer)…' %}"
+             aria-label="{% trans 'Kompüter axtarışı' %}"
+             autocomplete="off">
+      <span class="rma-csearch__count" data-rma-csearch-count></span>
+    </div>
+
+    <div class="rma-cscroll" data-rma-cscroll tabindex="0">
     <div class="rma-cgrid">
       {% for item in room_computers %}
-      <div class="rma-comp{% if item.occupant %} rma-comp--busy rma-comp--{{ item.occupant.status }}{% endif %}">
+      <div class="rma-comp{% if item.occupant %} rma-comp--busy rma-comp--{{ item.occupant.status }}{% endif %}"
+           data-rma-comp
+           data-search="{{ item.computer.label|lower }} {{ item.computer.mac_address|lower }} {{ item.computer.ip_address|default:''|lower }} {{ item.computer.seat_number|default:'' }} {% if item.occupant %}{{ item.occupant.name|lower }} {{ item.occupant.exam_title|lower }}{% endif %}">
         <div class="rma-comp__head">
           <span class="rma-comp__label"><i class="fas fa-desktop"></i> {{ item.computer.label }}</span>
           {% if item.computer.seat_number %}<span class="rma-comp__seat">#{{ item.computer.seat_number }}</span>{% endif %}
@@ -192,7 +152,10 @@
       </div>
       {% endfor %}
     </div>
-  </section>
+    <div class="rma-cempty" data-rma-csearch-empty hidden>{% trans "Uyğun kompüter tapılmadı." %}</div>
+    </div>
+    </div>
+  </details>
   {% endif %}
 
   <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Zal statistikası' %}"></section>
@@ -210,8 +173,8 @@
       <select id="fxc-status-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select"
               data-bootstrap-select aria-label="{% trans 'Status filtri' %}">
         <option value="">{% trans "Bütün statuslar" %}</option>
+        {# "waiting" filtri ready-ni də tutur (JS): operator üçün ikisi də "Gözləyir"dir. #}
         <option value="waiting">{% trans "Gözləyir" %}</option>
-        <option value="ready">{% trans "Hazır" %}</option>
         <option value="active">{% trans "İmtahanda" %}</option>
         <option value="completed">{% trans "Bitirib" %}</option>
         <option value="removed">{% trans "Çıxarılıb" %}</option>
@@ -223,12 +186,10 @@
     <section class="fxc-map-panel">
       <div class="fxc-map-legend">
         <span><i class="fxc-sw fxc-sw--active"></i> {% trans "İmtahanda" %}</span>
-        <span><i class="fxc-sw fxc-sw--ready"></i> {% trans "Hazır" %}</span>
         <span><i class="fxc-sw fxc-sw--waiting"></i> {% trans "Gözləyir" %}</span>
         <span><i class="fxc-sw fxc-sw--warn"></i> {% trans "Pozuntu" %}</span>
         <span><i class="fxc-sw fxc-sw--completed"></i> {% trans "Bitirib" %}</span>
         <span><i class="fxc-sw fxc-sw--removed"></i> {% trans "Çıxarılıb" %}</span>
-        <span><i class="fxc-sw fxc-sw--idle"></i> {% trans "Oflayn / gəlməyib" %}</span>
       </div>
       <div class="fxc-computer-map" id="fxc-computer-map" aria-live="polite"></div>
       <p class="fxc-map-hint">
@@ -254,8 +215,6 @@
 {# Standart təsdiq modalı (window.confirm əvəzinə) #}
 {% include "exams/exam_center/_confirm_modal.html" %}
 
-{# Pozuntu detalları modalı — tələbə xanasına və ya "Bax"a klikdə açılır:
-   hansı qaydalar, nə vaxt pozulub + varsa uzaqlaşdırma səbəbi. #}
 <div class="fxc-vio-modal" id="fxc-vio-modal" hidden role="dialog" aria-modal="true"
      aria-labelledby="fxc-vio-modal-title">
   <div class="fxc-vio-modal__backdrop" data-vio-close></div>
@@ -281,6 +240,7 @@
     <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20260717-score-bal" defer></script>
     <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20260717-vio-modal" defer></script>
+    <script src="{% static 'exams/js/final_center/room_computer_search.js' %}?v=20260729-cscroll" defer></script>
     <script nonce="{{ request.csp_nonce }}">
     // Zala nəzarətçi təyini — AJAX (debounced) axtarış + çip seçimi.
     // Bütün istifadəçilər eyni anda YÜKLƏNMİR: yalnız yazılan sorğuya uyğun 10-luq

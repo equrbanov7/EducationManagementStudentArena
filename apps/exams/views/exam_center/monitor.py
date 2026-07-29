@@ -207,9 +207,8 @@ def exam_center_session_start(request, session_id):
     audit-də qeyd olunur.
     """
     _organization, session = get_center_session_or_404(request, session_id, for_supervision=True)
-    override = request.POST.get("override") == "1" and can_manage_final_center(request.user)
     try:
-        started = start_room(session, request.user, request=request, override=override)
+        started = start_room(session, request.user, request=request)
     except RoomSessionStateError as exc:
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": False, "error": str(exc)}, status=409)
