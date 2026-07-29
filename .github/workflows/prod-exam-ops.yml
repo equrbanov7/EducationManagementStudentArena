@@ -1,0 +1,93 @@
+name: 🎓 Prod İmtahan Əməliyyatları
+
+# Prod LAN-dadır (10.0.2.42) — kənardan SSH mümkün deyil. Bu workflow
+# self-hosted runner (serverin özü) üzərindən DAR əhatəli imtahan-hazırlığı
+# əmrlərini işlədir.
+#
+# TƏHLÜKƏSİZLİK PRİNSİPLƏRİ:
+#   * Açıq shell YOXDUR — yalnız aşağıdakı `manage.py` əmrləri çağırılır.
+#     İstifadəçi girişləri əmr sətrinə DƏYİŞƏN kimi (env → "$VAR") ötürülür,
+#     heç vaxt `run:` bloğuna interpolasiya edilmir (script injection qarşısı).
+#   * `probe` YALNIZ-OXU-dur: heç nə yazmır. Yazı əməliyyatları ayrıca əlavə
+#     olunacaq və ayrıca təsdiq tələb edəcək.
+#   * Deploy ilə eyni concurrency qrupu — canlı deploy-la toqquşmur.
+#
+# DİQQƏT: input dəyərləri run logunda GÖRÜNÜR. Gizli dəyər (parol) buraya
+# input kimi YAZILMIR — repo secret-i işlədilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: "Təşkilat slug-ı (boş buraxsanız bütün təşkilatlar sadalanır)"
+        required: false
+        type: string
+        default: ""
+      students:
+        description: "Axtarılacaq tələbə adları — hər sətirdə bir"
+        required: false
+        type: string
+        default: ""
+      groups:
+        description: "Axtarılacaq qrup adları — hər sətirdə bir"
+        required: false
+        type: string
+        default: ""
+      subjects:
+        description: "Axtarılacaq fənn adları — hər sətirdə bir"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: 🔍 Vəziyyət hesabatı (yalnız-oxu)
+    runs-on: [self-hosted]
+    environment: production
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      ORG: ${{ inputs.org }}
+      STUDENTS: ${{ inputs.students }}
+      GROUPS: ${{ inputs.groups }}
+      SUBJECTS: ${{ inputs.subjects }}
+    steps:
+      - name: 🔍 exam_day_probe
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+
+          # Girişlər massivə yığılır — hər dəyər ayrıca arqumentdir, shell
+          # onları TƏKRAR PARSE ETMİR (boşluqlu adlar, məs. "532 Bİ", qorunur).
+          args=()
+          if [ -n "${ORG// /}" ]; then
+            args+=(--org "$ORG")
+          fi
+          append_repeated() {
+            local flag="$1" blob="$2" line
+            while IFS= read -r line; do
+              line="${line%$'\r'}"
+              if [ -n "${line// /}" ]; then
+                args+=("$flag" "$line")
+              fi
+            done <<< "$blob"
+          }
+          # `set -e` altında `[ … ] && cmd` boş dəyərdə bütün siyahını 1 qaytarır
+          # və job-u səssizcə öldürür — ona görə açıq `if` bloklarıdır.
+          if [ -n "${STUDENTS// /}" ]; then append_repeated --student "$STUDENTS"; fi
+          if [ -n "${GROUPS// /}" ];   then append_repeated --group   "$GROUPS";   fi
+          if [ -n "${SUBJECTS// /}" ]; then append_repeated --subject "$SUBJECTS"; fi
+
+          echo "── işlədilir: manage.py exam_day_probe (${#args[@]} arqument) ──"
+          # `set -u` altında BOŞ massivin "${args[@]}" genişlənməsi köhnə bash-da
+          # "unbound variable" verir — arqumentsiz hal ayrıca çağırılır.
+          if [ "${#args[@]}" -eq 0 ]; then
+            docker compose -f docker-compose.prod.yml exec -T --index 1 app \
+              python manage.py exam_day_probe
+          else
+            docker compose -f docker-compose.prod.yml exec -T --index 1 app \
+              python manage.py exam_day_probe "${args[@]}"
+          fi
