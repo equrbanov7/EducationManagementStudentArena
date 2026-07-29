@@ -52,11 +52,20 @@
   </header>
 
   {% if can_assign_invigilators %}
-  {# ── Zala nəzarətçi təyini (yalnız imtahan mərkəzi RƏHBƏRİ) — AJAX axtarış ── #}
+  {% comment %}
+    Zala nəzarətçi təyini (yalnız imtahan mərkəzi RƏHBƏRİ) — AJAX axtarış.
+    Davranış `room_invigilators.js`-dədir. Xarici JS Django template engine-dən
+    keçmir, ona görə URL-lər və tərcümə mətnləri data-atributla ötürülür
+    (CLAUDE.md). `data-rma-invigilators` paneli sənəd sırasına güvənmədən seçir.
+  {% endcomment %}
   <details class="rma-panel"
+           data-rma-invigilators
            data-search-url="{{ invigilator_search_url }}"
            data-profile-url-template="{% url 'accounts:public_profile' username='__U__' %}"
-           data-assigned-field="invigilators">
+           data-assigned-field="invigilators"
+           data-i18n-no-result="{% trans 'Namizəd tapılmadı.' %}"
+           data-i18n-view-profile="{% trans 'Profili aç' %}"
+           data-i18n-add="{% trans 'Nəzarətçi əlavə et' %}">
     <summary class="rma-panel__summary">
       <span class="rma-panel__label"><i class="fas fa-user-shield"></i> {% trans "Zal nəzarətçiləri" %}
         <span class="rma-chip js-rma-count">{{ room_invigilators|length }}</span></span>
@@ -241,148 +250,5 @@
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20260717-score-bal" defer></script>
     <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20260717-vio-modal" defer></script>
     <script src="{% static 'exams/js/final_center/panel_search.js' %}?v=20260730-shared" defer></script>
-    <script nonce="{{ request.csp_nonce }}">
-    // Zala nəzarətçi təyini — AJAX (debounced) axtarış + çip seçimi.
-    // Bütün istifadəçilər eyni anda YÜKLƏNMİR: yalnız yazılan sorğuya uyğun 10-luq
-    // səhifə gətirilir (sistemi yükləməmək üçün). Kafedra adı sağda göstərilir.
-    (function () {
-      var panel = document.querySelector(".rma-panel");
-      if (!panel) { return; }
-      var searchUrl = panel.getAttribute("data-search-url") || "";
-      var profileTpl = panel.getAttribute("data-profile-url-template") || "";
-      function profileUrl(username){ return profileTpl ? profileTpl.replace("__U__", encodeURIComponent(username)) : ""; }
-      var search = panel.querySelector(".js-rma-search");
-      var results = panel.querySelector(".js-rma-results");
-      var chipsWrap = panel.querySelector(".js-rma-chips");
-      var countEl = panel.querySelector(".js-rma-count");
-      var totalEl = panel.querySelector(".js-rma-total");
-      if (!search || !results || !chipsWrap) { return; }
-
-      var DEBOUNCE = 300;
-      var timer = null;
-      var seq = 0;
-      var PAGE_SIZE = 10, offset = 0, hasMore = false, loadingMore = false, currentQuery = "", opened = false;
-      var noResultText = "{% trans 'Namizəd tapılmadı.' %}";
-      var T = { viewProfile: "{% trans 'Profili aç' %}", add: "{% trans 'Nəzarətçi əlavə et' %}" };
-
-      function selectedIds() {
-        return Array.prototype.map.call(
-          chipsWrap.querySelectorAll(".rma-chip-sel"),
-          function (c) { return c.getAttribute("data-id"); }
-        );
-      }
-      function updateCounts() {
-        var n = chipsWrap.querySelectorAll(".rma-chip-sel").length;
-        if (countEl) { countEl.textContent = n; }
-        if (totalEl) { totalEl.textContent = n; }
-      }
-      function addChip(id, name, username) {
-        if (selectedIds().indexOf(String(id)) !== -1) { return; }
-        var chip = document.createElement("span");
-        chip.className = "rma-chip-sel";
-        chip.setAttribute("data-id", id);
-        var url = profileUrl(username);
-        var nameEl = url
-          ? '<a class="rma-chip-sel__name" href="' + url + '" target="_blank" rel="noopener"></a>'
-          : '<span class="rma-chip-sel__name"></span>';
-        chip.innerHTML = nameEl +
-          '<button type="button" class="rma-chip-sel__x js-rma-remove" data-id="' + id + '">×</button>' +
-          '<input type="hidden" name="invigilators" value="' + id + '">';
-        chip.querySelector(".rma-chip-sel__name").textContent = name;
-        chipsWrap.appendChild(chip);
-        updateCounts();
-      }
-      chipsWrap.addEventListener("click", function (e) {
-        var btn = e.target.closest && e.target.closest(".js-rma-remove");
-        if (!btn) { return; }
-        var chip = btn.closest(".rma-chip-sel");
-        if (chip) { chip.parentNode.removeChild(chip); updateCounts(); }
-      });
-
-      // Bütün indiyə qədər yüklənmiş namizədlər (səhifə-səhifə toplanır) —
-      // "+" ilə əlavə edildikdə tam siyahı yenidən çəkilir ki, əvvəlki
-      // səhifələrin sətirləri itməsin.
-      var loadedItems = [];
-
-      function renderResults(items) {
-        results.innerHTML = "";
-        var chosen = selectedIds();
-        var shown = 0;
-        items.forEach(function (it) {
-          if (chosen.indexOf(String(it.id)) !== -1) { return; }
-          shown++;
-          var row = document.createElement("div");
-          row.className = "rma-result";
-          row.setAttribute("role", "option");
-          var kaf = it.kafedra
-            ? '<span class="rma-item__kaf">' + escapeHtml(it.kafedra) + "</span>"
-            : '<span class="rma-item__kaf rma-item__kaf--none">—</span>';
-          var url = profileUrl(it.username);
-          var nameHtml = url
-            ? '<a class="rma-item__name rma-item__namelink" href="' + url + '" target="_blank" rel="noopener" title="' + T.viewProfile + '"></a>'
-            : '<span class="rma-item__name"></span>';
-          row.innerHTML = nameHtml + kaf +
-            '<button type="button" class="rma-result__add js-rma-add" title="' + T.add + '"><i class="fas fa-plus"></i></button>';
-          row.querySelector(".rma-item__name").textContent = it.text + " · " + it.username;
-          // Ada klik → profil (yeni tab); "+" düyməsi → nəzarətçi əlavə et.
-          row.querySelector(".js-rma-add").addEventListener("click", function (ev) {
-            ev.preventDefault(); ev.stopPropagation();
-            addChip(it.id, it.text, it.username); renderResults(loadedItems); search.focus();
-          });
-          results.appendChild(row);
-        });
-        if (!shown) {
-          results.innerHTML = '<div class="rma-empty rma-muted">' + noResultText + "</div>";
-        }
-      }
-      function escapeHtml(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
-
-      // `reset`=true → yeni axtarış (panel açılanda da ilk səhifə); `reset`=false
-      // → aşağı sürüşdürdükcə növbəti səhifə (bütün namizədlər bir dəfəyə
-      // yüklənmir).
-      function doSearch(q, reset) {
-        if (!searchUrl) { return; }
-        if (reset) { offset = 0; hasMore = false; currentQuery = q; loadedItems = []; }
-        if (!reset) { if (loadingMore || !hasMore) { return; } loadingMore = true; }
-        var mine = reset ? ++seq : seq;
-        if (reset) { results.innerHTML = '<div class="rma-loading">…</div>'; }
-        var url = searchUrl + (searchUrl.indexOf("?") === -1 ? "?" : "&") +
-          "q=" + encodeURIComponent(q) + "&offset=" + offset + "&limit=" + PAGE_SIZE;
-        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-          .then(function (r) { return r.ok ? r.json() : { results: [], has_more: false }; })
-          .then(function (data) {
-            if (reset && mine !== seq) { return; }
-            var items = (data && data.results) || [];
-            loadedItems = loadedItems.concat(items);
-            offset += items.length;
-            hasMore = Boolean(data && data.has_more);
-            if (!reset) { loadingMore = false; }
-            renderResults(loadedItems);
-          })
-          .catch(function () {
-            if (reset) { if (mine === seq) { results.innerHTML = ""; } }
-            else { loadingMore = false; }
-          });
-      }
-
-      results.addEventListener("scroll", function () {
-        if (loadingMore || !hasMore) { return; }
-        if (results.scrollTop + results.clientHeight >= results.scrollHeight - 40) {
-          doSearch(currentQuery, false);
-        }
-      });
-      search.addEventListener("input", function () {
-        if (timer) { clearTimeout(timer); }
-        var q = search.value.trim();
-        timer = setTimeout(function () { doSearch(q, true); }, DEBOUNCE);
-      });
-      // Panel açılanda (klik) ilk səhifə dərhal yüklənir — "yazın" ipucu yerinə.
-      function ensureOpened() {
-        if (!opened) { opened = true; doSearch("", true); }
-      }
-      panel.addEventListener("toggle", function () { if (panel.open) { ensureOpened(); } });
-      search.addEventListener("focus", ensureOpened);
-      updateCounts();
-    })();
-    </script>
+    <script src="{% static 'exams/js/final_center/room_invigilators.js' %}?v=20260730-extract" defer></script>
 {% endblock %}
