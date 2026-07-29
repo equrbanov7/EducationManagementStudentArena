@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="container py-4 fxc-page">
-  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% url 'exams:exam_center_room_list' as sessions_url %}
   {% trans "PIN axtarışı" as cur_label %}
   {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
   {% include "exams/exam_center/_pin_lookup_body.html" %}

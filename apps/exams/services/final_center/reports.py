@@ -46,12 +46,26 @@ def filter_sessions(organization, params):
 def filter_tickets(organization, params):
     """
     Bilet (tələbə iştirakı) hesabatı. Filtrlər: status, exam, session, room,
-    language, removal (removal_action), axtarış (q — tələbə adı/username).
+    language, removal (removal_action), tarix aralığı (date_from/date_to),
+    axtarış (q — tələbə adı/username).
+
+    Tarix "imtahan günü" mənasındadır: tələbə zala nə vaxt girib. Giriş hələ
+    baş verməyibsə (təyin olunub, amma gəlməyib) oturumun planlaşdırılan günü
+    götürülür — əks halda "gəlməyib" sətirləri gün hesabatından düşərdi.
     """
     qs = (
         FinalExamTicket.objects.filter(organization=organization)
-        .select_related("student", "exam", "session", "session__room", "attempt", "removed_by")
-        .order_by("-created_at")
+        .select_related(
+            "student",
+            "exam",
+            "exam__subject",
+            "session",
+            "session__room",
+            "session__invigilator",
+            "attempt",
+            "removed_by",
+        )
+        .order_by("session__room__name", "seat_number", "student__last_name", "id")
     )
     status = (params.get("status") or "").strip()
     if status:
@@ -71,12 +85,27 @@ def filter_tickets(organization, params):
     removal = (params.get("removal") or "").strip()
     if removal:
         qs = qs.filter(removal_action=removal)
+    date_from = (params.get("date_from") or "").strip()
+    if date_from:
+        qs = qs.filter(
+            Q(entry_validated_at__date__gte=date_from)
+            | Q(entry_validated_at__isnull=True, session__scheduled_start__date__gte=date_from)
+        )
+    date_to = (params.get("date_to") or "").strip()
+    if date_to:
+        qs = qs.filter(
+            Q(entry_validated_at__date__lte=date_to)
+            | Q(entry_validated_at__isnull=True, session__scheduled_start__date__lte=date_to)
+        )
     query = (params.get("q") or "").strip()
     if query:
         qs = qs.filter(
             Q(student__username__icontains=query)
             | Q(student__first_name__icontains=query)
             | Q(student__last_name__icontains=query)
+            | Q(exam__title__icontains=query)
+            | Q(session__room__name__icontains=query)
+            | Q(session__room__code__icontains=query)
         )
     return qs
 

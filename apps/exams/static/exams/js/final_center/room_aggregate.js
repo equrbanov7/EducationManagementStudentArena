@@ -166,10 +166,14 @@
             });
     }
 
+    // Sayğac plitələri (2026-07-29 sadələşməsi): 10 plitə operatoru boğurdu.
+    // * "Hazır" ayrıca plitə deyil — "Gözləyir"ə əlavə olunur (bax renderStats);
+    // * "Oflayn" silindi — texniki bağlantı vəziyyətidir, əməliyyat qərarı vermir;
+    // * "Qoşulu" silindi — eyni məlumatın əks tərəfi.
     var STAT_CARDS = [
-        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"], ["connected", "Qoşulu"],
-        ["waiting", "Gözləyir"], ["ready", "Hazır"], ["active", "İmtahanda"], ["completed", "Bitirib"],
-        ["offline", "Oflayn"], ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
+        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"],
+        ["waiting", "Gözləyir"], ["active", "İmtahanda"], ["completed", "Bitirib"],
+        ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
     ];
 
     function cellStateClass(s) {
@@ -186,8 +190,11 @@
         if (!snapshot || !statsEl) return;
         var c = snapshot.counts || {};
         statsEl.innerHTML = STAT_CARDS.map(function (p) {
+            var value = c[p[0]] != null ? c[p[0]] : 0;
+            // "Gözləyir" texniki waiting + ready-nin cəmidir (filtrlə eyni məntiq).
+            if (p[0] === "waiting") value += (c.ready != null ? c.ready : 0);
             return '<div class="fxc-stat fxc-stat--' + p[0] + '">' +
-                '<div class="fxc-stat-value">' + esc(c[p[0]] != null ? c[p[0]] : 0) + "</div>" +
+                '<div class="fxc-stat-value">' + esc(value) + "</div>" +
                 '<div class="fxc-stat-label">' + esc(t("stat." + p[0], p[1])) + "</div></div>";
         }).join("");
     }
