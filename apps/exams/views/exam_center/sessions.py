@@ -1,117 +1,34 @@
-"""exam_center paketi — oturum idarəsi (siyahı / yaratma / detal / təyinat)."""
+"""exam_center paketi — oturum detalı, tarixçəsi və bilet əməliyyatları.
+
+Oturum SİYAHISI və ƏLLƏ YARATMA səhifələri 2026-07-30-da silindi: oturum artıq
+istifadəçinin idarə etdiyi obyekt deyil — zal yaradılır, kompüterlər əlavə olunur,
+oturum isə ilk giriş anında avtomatik açılır. Canlı mənzərə zal monitorunda,
+tarixi kəsim isə hesabatlardadır.
+"""
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import pgettext
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_POST
 
-from apps.exams.forms import ExamRoomSessionForm
 from apps.exams.models import ExamRoomSession
 from apps.exams.services.final_center import (
-    RoomSessionStateError,
     can_view_final_history,
     ensure_can_view_final_history,
     readmit_student,
     session_history,
-    session_list_annotations,
     set_seat,
-    validate_session_plan,
 )
-from core.audit import log_action
-from core.constants import AuditAction
 
 from ._shared import (
-    center_org_or_403,
     get_center_session_or_404,
     get_session_ticket_or_404,
     supervisor_org_or_403,
-    visible_sessions_qs,
 )
 
 User = get_user_model()
-
-
-@login_required
-def exam_center_session_list(request):
-    organization = supervisor_org_or_403(request)
-    sessions = session_list_annotations(visible_sessions_qs(request, organization)).order_by("-scheduled_start", "-id")
-
-    # Filtr çipləri üçün vəziyyət sayğacları — status filtri TƏTBİQ OLUNMAMIŞ
-    # queryset üzərindən hesablanır ki, hər çip öz faktiki sayını göstərsin
-    # (istifadəçi hansı vəziyyətdə oturum olduğunu klikləmədən görsün).
-    state_counts = dict(
-        visible_sessions_qs(request, organization).values_list("state").annotate(total=Count("id")).order_by()
-    )
-    # Açar adı şablon üçün "total"-dır: Django alt-xətlə başlayan
-    # dəyişən adını oxumur (__all__ TemplateSyntaxError verir).
-    state_counts["total"] = sum(state_counts.values())
-
-    state = (request.GET.get("state") or "").strip()
-    if state:
-        sessions = sessions.filter(state=state)
-
-    from apps.exams.services.final_center import can_manage_final_center
-
-    page_obj = Paginator(sessions, 20).get_page(request.GET.get("page"))
-    return render(
-        request,
-        "exams/exam_center/session_list.html",
-        {
-            "page_obj": page_obj,
-            "active_state": state,
-            "state_counts": state_counts,
-            "organization": organization,
-            # İmtahan mərkəzi zal/oturum/hesabatı idarə edir; nəzarətçi yalnız
-            # monitor edir — idarə düymələri gizlədilir ki, 403 alınmasın.
-            "can_manage": can_manage_final_center(request.user),
-        },
-    )
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def exam_center_session_create(request):
-    organization = center_org_or_403(request)
-    form = ExamRoomSessionForm(
-        request.POST or None,
-        organization=organization,
-    )
-    if request.method == "POST" and form.is_valid():
-        session = form.save(commit=False)
-        try:
-            validate_session_plan(
-                room=session.room,
-                scheduled_start=session.scheduled_start,
-                scheduled_end=session.scheduled_end,
-            )
-        except RoomSessionStateError as exc:
-            form.add_error(None, str(exc))
-        else:
-            session.organization = organization
-            session.created_by = request.user
-            session.save()
-            form.save_m2m()
-            log_action(
-                AuditAction.CREATE,
-                user=request.user,
-                organization=organization,
-                obj=session,
-                reason="final_session_created",
-                request=request,
-                resource_type="exam_room_session",
-                resource_id=str(session.pk),
-            )
-            messages.success(request, pgettext("exams.final_center.message", "Zal oturumu yaradıldı."))
-            return redirect("exams:exam_center_session_detail", session_id=session.pk)
-    return render(
-        request,
-        "exams/exam_center/session_form.html",
-        {"form": form, "organization": organization},
-    )
 
 
 @login_required
@@ -207,10 +124,8 @@ def exam_center_ticket_readmit(request, session_id, ticket_id):
 
 
 __all__ = [
-    "exam_center_session_create",
     "exam_center_session_detail",
     "exam_center_session_history",
-    "exam_center_session_list",
     "exam_center_ticket_readmit",
     "exam_center_ticket_seat",
 ]
