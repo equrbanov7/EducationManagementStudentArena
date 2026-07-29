@@ -10,7 +10,7 @@ from django.utils import timezone
 from apps.notifications.models import InAppNotification, NotificationType
 from core.rls import bypass_rls
 
-from .helpers import _assert_owner, _resolve_organization_id, _serialize_metadata
+from .helpers import _assert_owner, _resolve_organization_id, _serialize_metadata, org_scoped_link
 
 
 def create_notification(
@@ -47,7 +47,7 @@ def create_notification(
             organization_id=_resolve_organization_id(organization, metadata),
             title=title,
             message=message,
-            link=link,
+            link=org_scoped_link(link, organization),
             notification_type=notification_type,
             metadata=_serialize_metadata(metadata or {}),
         )
@@ -88,7 +88,7 @@ def create_notification_for_users(
             organization_id=org_id,
             title=title,
             message=message,
-            link=link,
+            link=org_scoped_link(link, organization),
             notification_type=notification_type,
             metadata=payload,
         )
