@@ -30,6 +30,7 @@ on:
         options:
           - exam_day_probe
           - exam_day_probe2
+          - exam_day_probe3
           - exam_day_seed
       apply:
         description: "YALNIZ exam_day_seed üçün: faktiki yaz (işarələnməsə dry-run)"
@@ -103,7 +104,7 @@ jobs:
 
           # Ağ siyahı — ixtiyari yol/skript ötürülə bilməz.
           case "$SCRIPT_NAME" in
-            exam_day_probe|exam_day_probe2|exam_day_seed) ;;
+            exam_day_probe|exam_day_probe2|exam_day_probe3|exam_day_seed) ;;
             *) echo "İcazəsiz skript: $SCRIPT_NAME" >&2; exit 1 ;;
           esac
 
