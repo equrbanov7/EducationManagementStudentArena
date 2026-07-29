@@ -15093,6 +15093,14 @@ msgid "supervision_threshold_title"
 msgstr "⚠️ Warning!"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_title"
+msgstr "Trial mode — the exam was not suspended"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_trial_violation_msg"
+msgstr "In a real exam these violations would have removed you from the exam. A trial run is only for checking, so you can continue."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr ""
 "You have reached 75% of the violation limit! Only {remaining} violation(s) "
@@ -19083,6 +19091,10 @@ msgstr "Blocked file detected inside ZIP: {filename}"
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
 msgstr "No questions have been assigned to this exam yet."
+
+msgctxt "exams.view.access.message"
+msgid "exam_inactive_trial_blocked"
+msgstr "This exam is still inactive (draft), so a trial run is not possible. Activate the exam first."
 
 #, python-brace-format
 msgctxt "exams.view.validation"
@@ -28763,6 +28775,22 @@ msgid "trial_run"
 msgstr "Trial run"
 
 msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_hint"
+msgstr "A trial run needs at least one active question"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_title"
+msgstr "Trial run is not available"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_body"
+msgstr "This exam has no questions yet, so a trial run is not possible. Add a question first, or import them from a PDF."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "trial_run_blocked_cta"
+msgstr "Add a question"
+
+msgctxt "exams.template.teacher_exam_detail"
 msgid "trial_run_hint"
 msgstr "Take the exam as a student — this attempt is not counted in results."
 
@@ -30773,3 +30801,23 @@ msgstr "search teacher…"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Passes"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import"
+msgstr "Question #{index} duplicates #{previous_index} in this file: “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import_first"
+msgstr "Question #{index} is repeated by {count} more question(s) in this file (first: #{next_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "already_in_exam"
+msgstr "Question #{index} already exists in the bank (row {db_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_long"
+msgstr "In {ratio} percent of the test the correct answer is longer than the others."
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_short"
+msgstr "In {ratio} percent of the test the correct answer is shorter than the others."

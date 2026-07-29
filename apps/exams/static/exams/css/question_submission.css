@@ -399,6 +399,13 @@
 .qsubp-opt--correct { border-color: #6ee7b7; background: #ecfdf5; color: #065f46; }
 .qsubp-opt--correct .qsubp-opt__label { background: #34d399; color: #fff; }
 
+.qsubp-answer { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.qsubp-answer__label { color: #475569; font-size: .8rem; font-weight: 700; }
+.qsubp-answer__choice {
+    min-width: 28px; padding: 4px 9px; border-radius: 999px;
+    background: #d1fae5; color: #065f46; font-size: .8rem; font-weight: 800; text-align: center;
+}
+
 .qsubp-warnings { margin-top: 12px; border-radius: 10px; overflow: hidden; }
 
 .qsubp-warnings summary {

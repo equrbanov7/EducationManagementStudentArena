@@ -151,6 +151,9 @@ def log_incident_api(request, attempt_id):
             "action_taken": result["action_taken"],
             "supervision_status": result["supervision_status"],
             "manual_lock": bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked"),
+            # Sınaq cəhdində limit aşılsa da kilid yoxdur — klient bunu görüb
+            # dayandırma overlay-i əvəzinə xəbərdarlıq banneri göstərir.
+            "is_trial": result.get("is_trial", False),
         }
     )
 

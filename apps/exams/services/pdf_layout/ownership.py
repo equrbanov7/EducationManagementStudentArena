@@ -8,11 +8,40 @@ from typing import Any, Sequence
 
 from ..pdf_math import remap_symbol_pua
 from .manifest import PageRect, Rect
+from .noise import is_section_heading
 from .slicing import SlicePlan
 
 _SPACE_RE = re.compile(r"\s+")
 _JOIN_GAP = 2.5
 _SPILL_ROW_GAP = 64.0
+
+# END_QUESTION yalnız blok sərhədi işarəsidir, sualın məzmunu deyil. PDF mətn
+# qatında çox vaxt sonuncu variantın SONUNA yapışır ("D) Dörd END_QUESTION") —
+# həm mətndən, həm də seqmentin qutusundan çıxarılmalıdır, əks halda marker
+# tələbəyə göstərilən source-render şəklinin İÇİNDƏ görünür.
+# Alt-xətt sayı sərbəstdir ("END__QUESTION" da tutulur) — `parsing.extraction.
+# constants.END_QUESTION_RE` ilə eyni qayda. Qəsdən lokal saxlanılır: pdf_layout
+# paketi parsing-i modul səviyyəsində import etsə idxal dövrü yaranardı.
+_END_QUESTION_TOKEN_RE = re.compile(r"END_+QUESTION", re.IGNORECASE)
+
+
+def _without_end_question(chars: Sequence[Any]) -> list:
+    """END_QUESTION marker-ini təşkil edən simvolları seqmentdən çıxarır."""
+
+    text = "".join(str(char.value) for char in chars)
+    if not _END_QUESTION_TOKEN_RE.search(text):
+        return list(chars)
+
+    # Simvol dəyəri çox-hərfli ola bilər — mövqe→indeks xəritəsi qururuq.
+    owner_index: list[int] = []
+    for index, char in enumerate(chars):
+        owner_index.extend([index] * len(str(char.value)))
+
+    dropped: set[int] = set()
+    for match in _END_QUESTION_TOKEN_RE.finditer(text):
+        for position in range(match.start(), min(match.end(), len(owner_index))):
+            dropped.add(owner_index[position])
+    return [char for index, char in enumerate(chars) if index not in dropped]
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,11 +71,13 @@ def _line_parts(start: Any, end: Any | None, lines: Sequence[Any]) -> list[TextP
     end_order = end.line.global_order if end else len(lines) - 1
     parts: list[TextPart] = []
     for line in lines[start.line.global_order : end_order + 1]:
+        if is_section_heading(line.text):
+            continue
         low = start.content_start if line.global_order == start.line.global_order else 0
         high = end.start if end and line.global_order == end.line.global_order else len(line.chars)
         if high <= low:
             continue
-        selected = line.chars[low:high]
+        selected = _without_end_question(line.chars[low:high])
         visible = [char.rect for char in selected if not char.value.isspace()]
         if not visible:
             continue
@@ -76,6 +107,17 @@ def _partition(
 ) -> tuple[list[TextPart], list[TextPart]]:
     if end is None:
         return list(parts), []
+    if _is_postfix_anchor(start) and end.kind == "option":
+        # Bəzi PDF generatorləri növbəti variantın label-ini əvvəlki sətrin
+        # sonuna yazır:
+        #
+        #   B) plot(z, y) C)
+        #   plot(z, 'y') D)
+        #
+        # Belə halda C-nin real məzmunu növbəti sətirdə, D label-indən
+        # əvvəldir. Midpoint partition onu D-yə spill etsə variantlar bir
+        # pillə sürüşür. Anchor-dan sonrakı cari intervalın hamısı C-yə aiddir.
+        return list(parts), []
     boundary = slice_plan.anchor_bounds[id(start)].bottom
     owned = [part for part in parts if _global_center(part.box, slice_plan) <= boundary]
     remaining = [part for part in parts if part not in owned]
@@ -104,6 +146,12 @@ def _partition(
         [part for part in parts if id(part) in owned_ids],
         [part for part in parts if id(part) not in owned_ids],
     )
+
+
+def _is_postfix_anchor(anchor: Any) -> bool:
+    """Sətirin məzmunundan sonra gələn və özündən sonra yalnız boşluq saxlayan label."""
+
+    return bool(getattr(anchor, "is_postfix", False))
 
 
 def _near_end_line(box: PageRect, end: Any) -> bool:

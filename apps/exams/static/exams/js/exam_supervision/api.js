@@ -59,6 +59,9 @@ Object.assign(ExamSupervision, {
                             } else {
                                 ExamSupervision._onLimitExceeded();
                             }
+                        } else if (data.is_trial && data.limit_exceeded) {
+                            // Sınaqda kilid yoxdur — yalnız məlumat xarakterli xəbərdarlıq.
+                            ExamSupervision._showTrialViolationNotice();
                         }
                         if (data.violation_count !== undefined) {
                             ExamSupervision.violationCount = data.violation_count;

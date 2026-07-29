@@ -89,6 +89,10 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         pgettext_lazy("exams.model.exam.field", "total_duration_minutes"),
         blank=True,
         null=True,
+        # Yeni imtahanlar defolt olaraq 60 dəqiqəlik açılır (forma da bu dəyəri
+        # öncədən doldurur). Boş buraxmaq hələ də mümkündür = müddət limiti yox.
+        # Mövcud imtahanlara toxunmur: köhnə NULL sətirlər NULL qalır.
+        default=60,
         help_text=pgettext_lazy("exams.model.exam.help", "total_duration_minutes"),
     )
     default_question_time_seconds = models.PositiveIntegerField(
