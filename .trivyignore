@@ -1,0 +1,30 @@
+# Trivy istisnaları — hər sətir ƏSASLANDIRILMALIDIR.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# pip-in ÖZ vendor edilmiş asılılıqları (bizim requirements-dən deyil)
+# ─────────────────────────────────────────────────────────────────────────────
+# Trivy `/usr/local/lib/python3.12/site-packages/pip/_vendor/vendor.txt`
+# faylını oxuyur və orada elan olunanları "quraşdırılmış paket" kimi sayır:
+#
+#     msgpack==1.1.2
+#     setuptools==70.3.0
+#
+# Bunlar pip-in daxili nüsxələridir, tətbiqin asılılıqları DEYİL:
+#   * `requirements/base.txt`-də msgpack==1.2.1 pinlənib və site-packages-də
+#     məhz 1.2.1 quraşdırılıb (Trivy onu 0 zəifliklə görür);
+#   * setuptools site-packages-də 83.0.0-dır; 70.3.0 fiziki olaraq image-də
+#     YOXDUR — yalnız pip-in vendor manifestində adı keçir (təsdiqləndi:
+#     baza image-də `find / -iname "*setuptools*"` heç nə qaytarmır).
+#   * Bizim tərəfdən düzəldilə bilməz: Dockerfile artıq `pip install --upgrade pip`
+#     edir və ən son pip (26.2) hələ də bu versiyaları vendor edir.
+#   * Tətbiq kodu `pip._vendor.*` idxal etmir — istismar yolu yoxdur.
+#
+# KÖKLÜ HƏLL (imtahan mövsümündən sonra planlanır): asılılıqlar quraşdırıldıqdan
+# sonra pip-i son image-dən tamamilə çıxarmaq — runtime-da işlədilmir
+# (`docker/release.sh` və `prod-entrypoint.sh` yoxlanılıb: pip çağırışı yoxdur).
+# Bu, həm bu tapıntıları, həm də gələcək pip-vendor CVE-lərini birdəfəlik
+# aradan qaldırır. İmtahan günündə runtime image-ini dəyişməmək üçün təxirə salınıb.
+#
+# Yenidən baxış: 2026-08-15
+GHSA-6v7p-g79w-8964
+CVE-2025-47273
