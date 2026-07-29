@@ -30214,3 +30214,11 @@ msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan uzundur."
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan qısadır."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Bu sınaq keçididir — nəticə heç yerə yazılmır"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "Real imtahanda tələbə bu mərhələdə imtahandan çıxarılır və giriş səhifəsinə yönləndirilir. Sınaq yalnız imtahanı yoxlamaq üçündür, ona görə burada belə bir yönləndirmə yoxdur."

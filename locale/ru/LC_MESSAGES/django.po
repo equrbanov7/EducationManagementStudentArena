@@ -30965,3 +30965,11 @@ msgstr "В {ratio} процентах теста правильный ответ
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "В {ratio} процентах теста правильный ответ короче остальных."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Это пробный запуск — результат нигде не сохраняется"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "На настоящем экзамене студент на этом этапе удаляется с экзамена и возвращается на страницу входа. Пробный запуск нужен только для проверки, поэтому здесь такого перенаправления нет."

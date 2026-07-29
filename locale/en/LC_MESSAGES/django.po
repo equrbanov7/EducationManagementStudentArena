@@ -30821,3 +30821,11 @@ msgstr "In {ratio} percent of the test the correct answer is longer than the oth
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "In {ratio} percent of the test the correct answer is shorter than the others."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "This is a trial run — nothing is recorded"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr "In a real exam the student is removed from the exam at this point and sent back to the entry page. A trial run is only for checking the exam, so no such redirect happens here."
