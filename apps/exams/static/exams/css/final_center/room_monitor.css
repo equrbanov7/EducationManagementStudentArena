@@ -1,29 +1,21 @@
-/* Zal nəzarəti (room monitor) — panel, kompüter şəbəkəsi və nəzarətçi siyahısı.
+/* Zal nəzarəti (room monitor) — kompüter şəbəkəsi və nəzarətçi siyahısı.
 
    2026-07-29: bu üslublar template içində `<style nonce>` blokunda idi.
    Layihə qaydası inline/internal CSS-ə icazə vermir (CSP: SELF + NONCE) —
-   ona görə xarici fayla çıxarıldı. */
+   ona görə xarici fayla çıxarıldı.
+   2026-07-30: açılıb-bağlanan panelin ÜMUMİ gövdəsi (`.rma-panel`, `.rma-toggle`,
+   `.rma-csearch`, `.rma-cscroll` …) `panel.css`-ə köçürüldü — zallar siyahısı da
+   eyni komponenti işlədir. Burada yalnız monitora məxsus hissələr qalır. */
 
-.rma-panel { border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; margin: 0 0 1rem; background: var(--card-bg, #fff); }
-.rma-panel__summary { cursor: pointer; list-style: none; padding: .85rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-weight: 700; }
-.rma-panel__summary::-webkit-details-marker { display: none; }
-.rma-panel__summary:hover { background: rgba(37,99,235,.04); }
-.rma-panel__right { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
-.rma-toggle { display: inline-flex; align-items: center; gap: .4rem; color: #2563eb; font-size: .82rem; font-weight: 700; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 999px; padding: .25rem .7rem; white-space: nowrap; }
-.rma-chevron { transition: transform .2s ease; }
-.rma-panel[open] .rma-chevron { transform: rotate(180deg); }
-.rma-toggle__close { display: none; }
-.rma-panel[open] .rma-toggle__open { display: none; }
-.rma-panel[open] .rma-toggle__close { display: inline; }
 /* Toolbar Bootstrap select-ləri — kompakt (böyük default toggle yox) */
 .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 1 210px; width: auto; min-width: 180px; }
 .fxc-toolbar .fxc-toolbar-select .bootstrap-single-select__toggle { min-height: 0; padding: 9px 13px; border-radius: 10px; font-size: .92rem; font-weight: 500; background: #fff; border-color: #CBD5E1; box-shadow: none; }
 @media (max-width: 640px) { .fxc-toolbar .bootstrap-single-select.fxc-toolbar-select { flex: 0 0 auto; width: 100%; } }
-.rma-chip { display: inline-flex; min-width: 1.4rem; justify-content: center; padding: 0 .4rem; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: .78rem; margin-left: .35rem; }
+
+/* ── Nəzarətçi təyini (axtarış + çip seçimi) ───────────────────────────── */
 .rma-current { display: flex; gap: .3rem; flex-wrap: wrap; font-weight: 500; }
 .rma-tag { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: .12rem .55rem; font-size: .78rem; }
 .rma-muted { color: #6b7280; font-size: .85rem; }
-.rma-form { padding: 0 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .65rem; }
 .rma-search { position: relative; }
 .rma-search i { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
 .rma-search__input { width: 100%; padding: .5rem .6rem .5rem 2rem; border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; background: transparent; color: inherit; }
@@ -51,6 +43,8 @@ a.rma-chip-sel__name:hover { text-decoration: underline; }
 .rma-result__add:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
 .rma-loading, .rma-hint { padding: .7rem; text-align: center; color: #6b7280; font-size: .82rem; }
 .rma-form__foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+/* ── Zaldakı kompüterlər ────────────────────────────────────────────────── */
 .rma-cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
 .rma-comp { border: 1px solid var(--border-color, #e5e7eb); border-radius: 10px; padding: .6rem .7rem; background: var(--card-bg, #fff); border-left: 4px solid #cbd5e1; }
 .rma-comp--busy { border-left-color: #94a3b8; }
@@ -68,66 +62,4 @@ a.rma-chip-sel__name:hover { text-decoration: underline; }
 .rma-comp__exam { font-size: .8rem; font-weight: 700; }
 .rma-comp__student { font-size: .8rem; color: #374151; }
 .rma-comp__idle { margin-top: .3rem; font-size: .78rem; color: #9ca3af; }
-</style>
-
-/* ── Çoxlu kompüter: sabit hündürlük + öz daxili scroll ──────────────────
-   25+ kompüterli zalda şəbəkə bütün səhifəni uzadıb görüntünü dağıdırdı.
-   İndi siyahı öz sahəsində sürüşür, səhifə isə qısa qalır. */
-.rma-cscroll {
-    max-height: 420px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 4px;
-    border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 10px;
-    padding: .6rem;
-    background: #fbfdff;
-}
-
-.rma-cscroll::-webkit-scrollbar { width: 10px; }
-.rma-cscroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-.rma-cscroll::-webkit-scrollbar-track { background: transparent; }
-
-.rma-csearch {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    margin: .1rem 0 .6rem;
-}
-
-.rma-csearch__input {
-    flex: 1 1 auto;
-    max-width: 320px;
-    padding: .45rem .7rem;
-    font-size: .86rem;
-    border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 8px;
-    background: #fff;
-}
-
-.rma-csearch__input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
-}
-
-.rma-csearch__count {
-    font-size: .78rem;
-    font-weight: 700;
-    color: #64748b;
-    white-space: nowrap;
-}
-
 .rma-comp[hidden] { display: none; }
-
-.rma-cempty {
-    padding: 1rem;
-    text-align: center;
-    color: #94a3b8;
-    font-size: .86rem;
-}
-
-@media (max-width: 640px) {
-    .rma-cscroll { max-height: 320px; }
-    .rma-csearch__input { max-width: none; }
-}

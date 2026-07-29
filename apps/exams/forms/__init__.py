@@ -9,14 +9,13 @@ stable: ``from apps.exams.forms import ExamForm`` still works.
 from .bank_question import BankQuestionCreateForm
 from .coding import CodingExamQuestionForm
 from .exam import ExamForm
-from .final_center import ExamRoomForm, ExamRoomSessionForm
+from .final_center import ExamRoomForm
 from .group import StudentGroupForm
 from .question import ExamQuestionCreateForm
 
 __all__ = [
     "ExamForm",
     "ExamRoomForm",
-    "ExamRoomSessionForm",
     "BankQuestionCreateForm",
     "CodingExamQuestionForm",
     "ExamQuestionCreateForm",

@@ -98,6 +98,7 @@ from .tickets import (
     sync_ticket_completion,
     transition_ticket,
 )
+from .xlsx_build import build_final_report_workbook
 
 __all__ = [
     "ENTRY_SESSION_KEY",
@@ -141,6 +142,7 @@ __all__ = [
     "entry_session_matches",
     "entry_session_values_match",
     "entry_ticket_id",
+    "build_final_report_workbook",
     "filter_sessions",
     "filter_tickets",
     "final_attempt_entry_session_valid",

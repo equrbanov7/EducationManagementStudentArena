@@ -144,6 +144,8 @@ class Command(UsersSeedMixin, BaseCommand):
                 seat_number=computer.seat_number if computer else None,
                 started_at=attempt.started_at,
             )
+            if violated:
+                self._seed_incidents(org, attempt, student, exam, count=attempt.supervision_violation_count)
             counters["active"] += 1
             counters["violated"] += int(violated)
 
@@ -207,9 +209,12 @@ class Command(UsersSeedMixin, BaseCommand):
                 student=student,
                 attempt=attempt,
                 status=TICKET_STATUS_REMOVED,
-                removal_action="remove",
+                removal_action="removed",
+                removal_reason="Təkrar tam ekran pozuntusu — nəzarətçi qərarı ilə imtahandan çıxarıldı.",
+                removed_at=attempt.finished_at,
                 started_at=attempt.started_at,
             )
+            self._seed_incidents(org, attempt, student, exam, count=6)
             counters["removed"] += 1
 
         self.stdout.write(self.style.SUCCESS(f"Zal: {room.name} [{room.code}] — oturum #{session.pk} (active)"))
@@ -220,6 +225,39 @@ class Command(UsersSeedMixin, BaseCommand):
         self.stdout.write(f"Fənlər: {', '.join(e.title for e in exams)}")
         self.stdout.write("Bax: /exams/center/rooms/ (canlı siyahı) və zal monitoru.")
         self.stdout.write("QEYD: bitirənlər ~3 dəq, çıxarılanlar ~15 dəq sonra xəritədən düşür (sayğaclar qalır).")
+
+    # Pozuntu ssenarisi: tam ekrandan çıxma → tab dəyişmə → kopyalama cəhdi …
+    # Hesabatın "Pozuntular" vərəqi məhz bu qeydlərdən qurulur.
+    INCIDENT_SCRIPT = [
+        ("fullscreen_exited", "high", {"reason": "Escape"}),
+        ("tab_switched", "high", {"detail": "başqa tab-a keçdi"}),
+        ("copy_attempt", "medium", {"key": "Ctrl+C"}),
+        ("window_blurred", "medium", {"detail": "pəncərə fokusu itdi"}),
+        ("paste_attempt", "critical", {"key": "Ctrl+V"}),
+        ("keyboard_shortcut", "low", {"key": "Alt+Tab"}),
+    ]
+
+    def _seed_incidents(self, org, attempt, student, exam, *, count):
+        from datetime import timedelta
+
+        from apps.exams.models import SupervisionIncident
+
+        for index in range(min(count, len(self.INCIDENT_SCRIPT))):
+            event_type, severity, metadata = self.INCIDENT_SCRIPT[index]
+            incident = SupervisionIncident.objects.create(
+                organization=org,
+                exam=exam,
+                attempt=attempt,
+                student=student,
+                event_type=event_type,
+                severity=severity,
+                metadata=metadata,
+                violation_count_at_time=index + 1,
+            )
+            # `timestamp` auto_now_add-dır — demo üçün imtahan gedişinə yay.
+            SupervisionIncident.objects.filter(pk=incident.pk).update(
+                timestamp=attempt.started_at + timedelta(minutes=3 * (index + 1))
+            )
 
     def _ensure_demo_exam(self, org, author, title):
         exam, created = Exam.objects.get_or_create(

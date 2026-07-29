@@ -4,12 +4,14 @@
 {% block title %}{% trans "Final hesabatları" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
 
 {% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/reports.css' %}?v=20260730-xlsx">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4 fxc-page">
-  {% url 'exams:exam_center_session_list' as sessions_url %}
+  {% url 'exams:exam_center_room_list' as sessions_url %}
   {% trans "Hesabatlar" as cur_label %}
   {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
   <header class="fxc-head">
@@ -17,8 +19,8 @@
       <h1><i class="fas fa-chart-column"></i> {% trans "Final imtahan hesabatları" %}</h1>
       <p class="fxc-sub">{% trans "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri" %}</p>
     </div>
-    <a href="{% url 'exams:exam_center_session_list' %}" class="fxc-btn fxc-btn-ghost">
-      <i class="fas fa-arrow-left"></i> {% trans "Oturumlar" %}
+    <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
+      <i class="fas fa-arrow-left"></i> {% trans "Zallar" %}
     </a>
   </header>
 
@@ -27,7 +29,12 @@
     <a href="?tab=tickets" class="fxc-tab {% if tab == 'tickets' %}is-active{% endif %}">{% trans "Tələbə iştirakı" %}</a>
   </nav>
 
-  <form method="get" class="fxc-card fxc-filterbar">
+  {% comment %}
+    Filtr avtomatikdir: seçim dəyişən kimi forma göndərilir (rpt_filter.js),
+    ona görə "Filtrlə" düyməsi yoxdur. Göndəriş anında cədvəl skeleton-a
+    çevrilir ki, boş ekran gözləmə hissi yaratmasın.
+  {% endcomment %}
+  <form method="get" class="fxc-card fxc-filterbar" data-rpt-filter>
     <input type="hidden" name="tab" value="{{ tab }}">
     <div class="fxc-form-grid fxc-form-grid--filters">
       {% if tab == "sessions" %}
@@ -73,6 +80,17 @@
         </div>
       </div>
       <div class="fxc-field">
+        <label for="fxc-f-exam">{% trans "İmtahan" %}</label>
+        <div class="bootstrap-single-select">
+        <select id="fxc-f-exam" name="exam" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+          <option value="">{% trans "Hamısı" %}</option>
+          {% for exam in exams %}
+          <option value="{{ exam.pk }}" {% if params.exam == exam.pk|stringformat:"s" %}selected{% endif %}>{{ exam.title }}</option>
+          {% endfor %}
+        </select>
+        </div>
+      </div>
+      <div class="fxc-field">
         <label for="fxc-f-from">{% trans "Tarixdən" %}</label>
         <input type="date" id="fxc-f-from" name="date_from" value="{{ params.date_from }}" class="fxc-input">
       </div>
@@ -83,17 +101,35 @@
       <div class="fxc-field">
         <label for="fxc-f-q">{% trans "Axtarış" %}</label>
         <input type="search" id="fxc-f-q" name="q" value="{{ params.q }}" class="fxc-input"
-               placeholder="{% if tab == 'sessions' %}{% trans 'imtahan / zal' %}{% else %}{% trans 'tələbə' %}{% endif %}">
+               placeholder="{% if tab == 'sessions' %}{% trans 'imtahan / zal' %}{% else %}{% trans 'tələbə / imtahan / zal' %}{% endif %}">
       </div>
     </div>
     <div class="fxc-actions">
-      <button type="submit" class="fxc-btn fxc-btn-primary"><i class="fas fa-filter"></i> {% trans "Filtrlə" %}</button>
-      <button type="submit" name="export" value="csv" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-file-csv"></i> {% trans "CSV export" %}
+      {% if has_filters %}
+      <a href="?tab={{ tab }}" class="fxc-btn fxc-btn-ghost" data-rpt-reset>
+        <i class="fas fa-rotate-left"></i> {% trans "Sıfırla" %}
+      </a>
+      {% endif %}
+      {% comment %}
+        Yuxarıdakı düymə: cari filtrə uyğun BÜTÜN nəticələri yükləyir.
+        Sətirdəki düymə isə yalnız həmin günü — aşağıdakı cədvələ bax.
+      {% endcomment %}
+      <button type="submit" name="export" value="xlsx" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-file-excel"></i> {% trans "Excel hesabatı yüklə" %}
       </button>
     </div>
   </form>
 
+  {% comment %}
+    Skeleton: filtr göndəriləndə JS bunu göstərib nəticə blokunu gizlədir.
+    Sırf gözləmə hissini azaldan vizual əvəzdir — data daşımır.
+  {% endcomment %}
+  <div class="fxc-skeleton" data-rpt-skeleton hidden aria-hidden="true">
+    <div class="skeleton fxc-skel-row fxc-skel-row--head"></div>
+    {% for _ in "12345678" %}<div class="skeleton fxc-skel-row"></div>{% endfor %}
+  </div>
+
+  <div data-rpt-results>
   {% if page_obj.object_list %}
   <div class="fxc-table-wrap">
     {% if tab == "sessions" %}
@@ -110,6 +146,7 @@
           <th class="fxc-num">{% trans "Çıxarılıb" %}</th>
           <th class="fxc-num">{% trans "Gəlməyib" %}</th>
           <th>{% trans "Vəziyyət" %}</th>
+          <th class="fxc-col-action">{% trans "Hesabat" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -130,6 +167,18 @@
           <td class="fxc-num">{{ s.ticket_removed }}</td>
           <td class="fxc-num">{{ s.ticket_absent }}</td>
           <td><span class="fxc-pill fxc-pill--state-{{ s.state }}">{{ s.get_state_display }}</span></td>
+          <td class="fxc-col-action">
+            {% comment %}
+              Sətrin günü: həmin tarixin BÜTÜN zallarını və imtahanlarını əhatə
+              edən tam hesabat (yalnız bu oturum yox) — "o gün nə baş verdi"
+              sualının cavabı budur.
+            {% endcomment %}
+            <a class="fxc-btn fxc-btn-sm fxc-btn-ghost"
+               href="?tab=tickets&amp;export=xlsx&amp;date_from={{ s.scheduled_start|date:'Y-m-d' }}&amp;date_to={{ s.scheduled_start|date:'Y-m-d' }}"
+               title="{% blocktrans with day=s.scheduled_start|date:'d.m.Y' %}{{ day }} tarixli tam hesabatı yüklə{% endblocktrans %}">
+              <i class="fas fa-file-excel"></i> {% trans "Günü yüklə" %}
+            </a>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -147,6 +196,7 @@
           <th>{% trans "Başlayıb" %}</th>
           <th>{% trans "Bitirib" %}</th>
           <th>{% trans "Çıxarılma səbəbi" %}</th>
+          <th class="fxc-col-action">{% trans "Hesabat" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -162,6 +212,17 @@
           <td>{% if t.started_at %}{{ t.started_at|time:"H:i" }}{% else %}—{% endif %}</td>
           <td>{% if t.completed_at %}{{ t.completed_at|time:"H:i" }}{% else %}—{% endif %}</td>
           <td class="fxc-reason">{{ t.removal_reason|truncatechars:60|default:"—" }}</td>
+          <td class="fxc-col-action">
+            {% with day=t.entry_validated_at|default:t.session.scheduled_start %}
+            {% if day %}
+            <a class="fxc-btn fxc-btn-sm fxc-btn-ghost"
+               href="?tab=tickets&amp;export=xlsx&amp;date_from={{ day|date:'Y-m-d' }}&amp;date_to={{ day|date:'Y-m-d' }}"
+               title="{% blocktrans with d=day|date:'d.m.Y' %}{{ d }} tarixli tam hesabatı yüklə{% endblocktrans %}">
+              <i class="fas fa-file-excel"></i> {% trans "Günü yüklə" %}
+            </a>
+            {% else %}—{% endif %}
+            {% endwith %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -173,7 +234,15 @@
   <div class="fxc-empty">
     <i class="far fa-chart-bar"></i>
     <p>{% trans "Bu filtrlərə uyğun qeyd tapılmadı." %}</p>
+    {% if has_filters %}
+    <a href="?tab={{ tab }}" class="fxc-btn fxc-btn-ghost"><i class="fas fa-rotate-left"></i> {% trans "Filtrləri sıfırla" %}</a>
+    {% endif %}
   </div>
   {% endif %}
+  </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/final_center/rpt_filter.js' %}?v=20260730-auto" defer></script>
 {% endblock %}

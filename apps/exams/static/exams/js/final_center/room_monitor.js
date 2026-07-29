@@ -57,10 +57,12 @@
         assigned: "Təyin olunub", waiting: "Gözləyir", ready: "Hazır",
         active: "İmtahanda", completed: "Bitirib", removed: "Çıxarılıb", absent: "Gəlməyib"
     };
+    // Zal monitoru ilə EYNİ sadələşdirilmiş dəst (2026-07-29): "Hazır" ayrıca
+    // plitə deyil (Gözləyir-ə əlavə olunur), "Oflayn"/"Qoşulu" silinib.
     var STAT_CARDS = [
-        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"], ["connected", "Qoşulu"],
-        ["waiting", "Gözləyir"], ["ready", "Hazır"], ["active", "İmtahanda"], ["completed", "Bitirib"],
-        ["offline", "Oflayn"], ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
+        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"],
+        ["waiting", "Gözləyir"], ["active", "İmtahanda"], ["completed", "Bitirib"],
+        ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
     ];
 
     function esc(text) {
@@ -86,8 +88,10 @@
         var counts = snapshot.counts || {};
         var html = STAT_CARDS.map(function (pair) {
             var key = pair[0], label = pair[1];
+            var value = counts[key] != null ? counts[key] : 0;
+            if (key === "waiting") value += (counts.ready != null ? counts.ready : 0);
             return '<div class="fxc-stat fxc-stat--' + key + '">' +
-                '<div class="fxc-stat-value">' + esc(counts[key] != null ? counts[key] : 0) + "</div>" +
+                '<div class="fxc-stat-value">' + esc(value) + "</div>" +
                 '<div class="fxc-stat-label">' + esc(label) + "</div></div>";
         }).join("");
         statsEl.innerHTML = html;
