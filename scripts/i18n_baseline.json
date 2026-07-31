@@ -6,34 +6,34 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8580,
+   "total": 8588,
    "untranslated": 3
   },
   "en": {
    "bad_placeholder": 0,
    "extra_vs_source": 58,
-   "identity": 844,
+   "identity": 248,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8638,
+   "total": 8646,
    "untranslated": 3
   },
   "ru": {
    "bad_placeholder": 0,
    "extra_vs_source": 58,
-   "identity": 167,
+   "identity": 140,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8638,
+   "total": 8646,
    "untranslated": 3
   },
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 12,
-   "identity": 293,
+   "identity": 273,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8592,
+   "total": 8600,
    "untranslated": 3
   }
  },

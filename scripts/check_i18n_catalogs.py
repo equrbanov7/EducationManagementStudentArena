@@ -74,8 +74,17 @@ def _measure(domain: str) -> dict:
             if not msgstr:
                 untranslated.append(key)
                 continue
+            # `identity` YALNIZ msgid-in özü Azərbaycan mətni olanda borcdur.
+            # Kataloqda mənbə dili qarışıqdır: bir sıra msgid-lər (Django-nun öz
+            # sətirləri — «January», «This field is required.» — və bəzi tətbiq
+            # sətirləri) ingiliscədir. Onlar üçün EN msgstr-in msgid ilə eyni
+            # olması DÜZGÜNDÜR, borc deyil. Ayırd etmə meyarı AZ kataloqudur:
+            # AZ həmin girişi tərcümə edibsə (az_msgstr != msgid), msgid
+            # ingilis mənbədir.
             if lang != SOURCE_LANG and msgstr == entry.msgid:
-                identity.append(key)
+                az_entry = catalogs[SOURCE_LANG].get(key)
+                if az_entry is None or az_entry.msgstr == entry.msgid or not az_entry.msgstr:
+                    identity.append(key)
             # Placeholder etalonu: msgid-də placeholder varsa msgid, yoxsa AZ mətni.
             source_entry = catalogs[SOURCE_LANG].get(key)
             reference = entry.msgid
