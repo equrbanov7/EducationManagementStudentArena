@@ -172,6 +172,9 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     Qaydalar:
     - yalnız org-un aktiv üzvləri, aktiv hesablar;
     - superuser hədəf OLA BİLMƏZ, aktor özü siyahıda yoxdur;
+    - ilk-girişini TAMAMLAMAMIŞ hesab (``password_change_required``) hədəf ola
+      bilməz — həmin hesabda hər sorğu parol-təyini axınına yönləndirilir və
+      aktor hədəfin parolunu qura bilərdi (hesab ələ keçirmə);
     - qeyri-superadmin üçün ciddi iyerarxiya: hədəfin maksimum rol səviyyəsi
       aktorunkundan AŞAĞI olmalıdır;
     - unit-scoped rollar (tyutor/dekan/kafedra müdürü) yalnız öz alt-ağacını görür.
@@ -185,6 +188,7 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
             memberships__is_active=True,
         )
         .exclude(is_superuser=True)
+        .exclude(profile__password_change_required=True)
         .exclude(pk=getattr(actor, "pk", None))
         .annotate(_max_org_level=Max("memberships__role__level", filter=Q(memberships__organization=organization)))
         .distinct()

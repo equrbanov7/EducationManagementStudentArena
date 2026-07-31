@@ -240,21 +240,46 @@ class ViewAsMiddleware:
     SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
     #: Hər iki rejimdə bloklanan həssas `profile_form` POST dəyərləri.
     BLOCKED_PROFILE_FORMS = {"change-password", "update-avatar", "edit-profile"}
+    #: Hesab ələ keçirmə yolları — view-as altında HƏR İKİ rejimdə bloklanır.
+    #: İlk-giriş axını (parol təyini + e-poçt OTP) hədəfin kimlik sübutudur:
+    #: aktor onu keçsə, hədəfin parolunu təyin edib hesabı tam ələ keçirə bilər.
+    #: Bax: ViewAsMiddleware FirstLoginPasswordMiddleware-dən ƏVVƏL işləyir, ona
+    #: görə `password_change_required=True` hədəfdə hər sorğu set-password-a
+    #: yönləndirilir və POST orada açıq qalırdı.
+    BLOCKED_URL_NAMES = frozenset(
+        {
+            "accounts:set_initial_password",
+            "accounts:send_otp_api",
+            "accounts:verify_otp_api",
+            "accounts:resend_otp_api",
+            "accounts:resend_code",
+            "accounts:delete_account",
+        }
+    )
 
     def __init__(self, get_response):
         self.get_response = get_response
         self._exit_path = None
         self._logout_path = None
         self._delete_account_path = None
+        self._blocked_paths = None
 
     def _resolve_paths(self):
         # URLConf yüklənəndən sonra bir dəfə cache-lənir.
         if self._exit_path is None:
-            from django.urls import reverse
+            from django.urls import NoReverseMatch, reverse
 
             self._exit_path = reverse("accounts:view_as_stop")
             self._logout_path = reverse("accounts:logout")
             self._delete_account_path = reverse("accounts:delete_account")
+
+            blocked = set()
+            for name in self.BLOCKED_URL_NAMES:
+                try:
+                    blocked.add(reverse(name))
+                except NoReverseMatch:  # pragma: no cover — route silinərsə sükutla keç
+                    continue
+            self._blocked_paths = frozenset(blocked)
 
     @staticmethod
     def _wants_json(request):
@@ -321,6 +346,15 @@ class ViewAsMiddleware:
             return self.get_response(request)
 
         if request.method not in self.SAFE_METHODS:
+            # Kimlik-sübutu axınları (ilk-giriş parolu, e-poçt OTP, hesab silmə)
+            # rejimdən ASILI OLMAYARAQ bloklanır — aktor hədəfin parolunu təyin
+            # edib hesabı ələ keçirə bilməməlidir.
+            if request.path in (self._blocked_paths or ()):
+                return self._reject(
+                    request,
+                    pgettext("accounts.view_as", "action_blocked_sensitive"),
+                )
+
             if mode == MODE_READONLY:
                 return self._reject(
                     request,

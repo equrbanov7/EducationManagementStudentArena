@@ -46,6 +46,7 @@ def _current_period(organization):
 # (journal_actions + pdf_views bunları views-dan idxal edir).
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
+from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
 
 
 @login_required
@@ -68,10 +69,7 @@ def journal_detail(request, offering_id):
     Access: the offering instructor / org owner / superuser may edit; a chair
     (kafedra müdiri) or dean (dekan) may *review* a submitted journal (read-only)
     to approve or return it via the grade-approval chain (U7.2)."""
-    offering = get_object_or_404(
-        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
-        pk=offering_id,
-    )
+    offering = _offering_or_404(request, offering_id)
     from apps.registrar import corrections as corrections_service
 
     appr = approval.approval_context(offering=offering, user=request.user)
