@@ -165,12 +165,46 @@ uğursuzluq**.
 tutumu yox, **həmin bir sətrin** üzərindəki yarışma olur (`last_login` UPDATE-i,
 sessiya yazısı, throttle sayğacı eyni açarı döyür) — süni darboğaz.
 
-**Prod-da 20 000 VU** — `.github/workflows/load-test.yml` hazırdır (self-hosted
-runner, paylanmış locust, 20 000 sərt tavan, ssenari ağ siyahısı, məcburi
-təsdiq mətni). İŞLƏDİLMƏYİB: `workflow_dispatch` faylın `main`-də olmasını
-tələb edir, `main`-ə push isə tam prod deploy tetikləyir — bu, ayrıca qərardır.
-Etimadnamə tələb edən ssenarilər üçün əlavə olaraq `LOAD_TEST_PASSWORD`
-secret-i və prod-da `seed_stress_test` lazımdır.
+#### Prod-da ölçmə — və nəyin ölçüldüyünü bilməyin əhəmiyyəti
+
+`.github/workflows/load-test.yml` prod-a qarşı işlədildi (self-hosted runner,
+paylanmış locust, 20 000 sərt tavan, ssenari ağ siyahısı, məcburi təsdiq).
+
+**Birinci ölçmə yanıldıcı idi və bunu yazmaq vacibdir.** 500 VU-luq baza
+`PingUser` testi **%86.9 uğursuzluq** verdi (143 361 / 164 962). Bu rəqəm
+«prod 500 istifadəçidə çökür» kimi oxuna bilərdi. Xətaların hamısı `429`-dur:
+
+```
+143361   GET /ping/: 'Expected 200, got 429'
+```
+
+Səbəb tətbiq deyil — `docker/nginx/nginx.conf:16`:
+
+```
+limit_req_zone $binary_remote_addr zone=emsarena_general:20m rate=200r/s;
+```
+
+Limit **mənbə IP-yə görədir**. Yük generatoru self-hosted runner-də, yəni
+**tək IP-dən** işləyir; real 20 000 istifadəçi min ayrı IP-dən gəlir. Keçən
+sorğular ~180 RPS idi — 200 r/s həddi ilə tam üst-üstə. Yəni ölçdüyümüz şey
+limiterin **düzgün işi** idi, tutum deyil.
+
+Ona görə workflow-a ikinci hədəf əlavə olundu. İki hədəf iki fərqli sual
+cavablandırır və ikisinin də cavabı lazımdır:
+
+| Hədəf | Nəyi ölçür | Nəticə |
+|---|---|---|
+| `prod` (nginx üzərindən) | Edge rate-limiti | ~200 r/s / IP, `burst=1000` — qoruma işləyir |
+| `prod-app-direct` (nginx keçilir) | Tətbiqin öz tutumu | 20 000 VU ölçməsi |
+
+`prod-app-direct` app konteynerinin IP-sini `docker inspect` ilə tapıb
+`http://<ip>:8000`-ə vurur. Bu, təhlükəsizliyin zəiflədilməsi deyil —
+konfiqurasiyaya toxunulmur, sadəcə ölçmə nöqtəsi dəyişir.
+
+**Girişli ssenarilər** (`StudentUser`) üçün `LOAD_TEST_PASSWORD` secret-i və
+prod-da `seed_stress_test` lazımdır; parolun repo-ya yazılması həm layihə
+qaydasını pozar, həm də gitleaks qapısını qırar. `PingUser`/`AnonymousUser`
+heç bir hesab tələb etmir.
 
 #### Təhlükəsizlik testi — birbaşa URL bypass süpürgəsi
 
