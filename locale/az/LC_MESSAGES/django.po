@@ -11858,7 +11858,7 @@ msgstr "Qaralama"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "in_progress"
-msgstr "Yoxlanılır"
+msgstr "Davam edir"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "submitted"
@@ -11866,7 +11866,7 @@ msgstr "Təqdim edilib"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "expired"
-msgstr "Müddəti keçib"
+msgstr "Müddəti bitib"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "active"
@@ -11874,19 +11874,19 @@ msgstr "Aktiv"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "warned"
-msgstr "Xəbərdarlıq"
+msgstr "Xəbərdarlıq edilib"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "locked"
-msgstr "Bloklanmış tələbə yoxdur."
+msgstr "Bloklanıb"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "removed"
-msgstr "Sil"
+msgstr "Uzaqlaşdırılıb"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "resumed"
-msgstr "Bərpa et"
+msgstr "Davam etdirilib"
 
 msgctxt "exams.model.attempt.field"
 msgid "checked_by_teacher"
