@@ -1,8 +1,0 @@
-Əsas mənbə: G_nc__Aqrar_Universitetin__imtahan_sistemi.pptx
-Slayd sayı: 25, 16:9 geniş ekran.
-Vizual sistem: tünd lacivərd bölmə slaydları; ağ məzmun slaydları; mavi vurğular; yaşıl status rəngləri; qırmızı yalnız risk və xəbərdarlıq üçün.
-Tipoqrafiya: mənbənin Calibri/Calibri Light iyerarxiyası və ölçüləri saxlanılır.
-Təkrar istifadə olunan tiplər: minimal açılış, mündəricat, problem, icmal/metrik, proses, bölmə ayırıcısı, mətn+ekran görüntüsü, yekun yol xəritəsi.
-İrs alınmış boş placeholder müşahidə edilmədi. Bütün 25 slayd birbaşa dublikat kimi istifadə olunur.
-Məzmun EMSArena və GAU üçün artıq uyğun olduğuna görə yalnız açılış tarix/müəllif və yekun əlaqə sətri redaktə edilir.
-
