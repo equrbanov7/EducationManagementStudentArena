@@ -43,7 +43,7 @@ PUBLIC_ALLOWLIST = {
     "liveExam:pin_entry",  # /live/
     # ── Operativ problar (monitorinq autentifikasiyasız vurur) ──────────────
     "ping",
-    "health",
+    "health_check",  # DİQQƏT: marşrutun adı `health` DEYİL
     # ── İctimai marketinq/məzmun səthləri ───────────────────────────────────
     "home",
     "about",
@@ -114,6 +114,24 @@ class AnonymousUrlSweepTest(TestCase):
             leaked,
             "Aşağıdakı marşrutlar ANONİM sorğuya 200 qaytardı. Ya autentifikasiya "
             "əlavə edin, ya da qəsdən açıqdırsa PUBLIC_ALLOWLIST-ə yazın:\n" + "\n".join(leaked),
+        )
+
+    def test_allowlist_has_no_phantom_entries(self):
+        """Ağ siyahıdakı hər ad REAL marşruta uyğun olmalıdır.
+
+        Bu qapı olmadan siyahıdakı yazı səhvi SƏSSİZ qalır: `health` yazılıb,
+        marşrutun adı isə `health_check` idi — yəni `/health/` faktiki olaraq
+        siyahıda deyildi. Lokal mühitdə Redis işləmədiyi üçün `/health/` 503
+        qaytarırdı və süpürgə heç nə görmürdü; CI-da Redis olduğundan 200 gəldi
+        və test orada düşdü. Yəni yazı səhvi mühitdən asılı gizli nasazlığa
+        çevrilmişdi.
+        """
+        known = set(_collect_argless_routes())
+        phantom = sorted(PUBLIC_ALLOWLIST - known)
+        self.assertFalse(
+            phantom,
+            "PUBLIC_ALLOWLIST-də mövcud olmayan marşrut adları var — yazı səhvi "
+            "səbəbindən həmin səthlər əslində yoxlanılmır:\n  " + "\n  ".join(phantom),
         )
 
     def test_the_sweep_actually_covers_something(self):
