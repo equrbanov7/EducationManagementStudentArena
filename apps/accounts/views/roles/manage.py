@@ -145,9 +145,12 @@ def manage_roles(request):
             target_profile.role = primary_role
             target_profile.save(update_fields=["role", "updated_at"])
 
-        assigned_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(effective_roles)]
-        added_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(added_roles)]
-        removed_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(removed_roles)]
+        # DİQQƏT: rol etiketləri `pgettext_lazy` proxy-siləri qaytarır (ProfileRole.CHOICES).
+        # `", ".join(...)` proxy qəbul etmir və mesaj audit JSONField-inə də düşür —
+        # ona görə burada dərhal `str()` ilə həll olunur (bax `roles.display_name`).
+        assigned_labels = [str(PROFILE_ROLE_LABELS.get(role_name, role_name)) for role_name in sorted(effective_roles)]
+        added_labels = [str(PROFILE_ROLE_LABELS.get(role_name, role_name)) for role_name in sorted(added_roles)]
+        removed_labels = [str(PROFILE_ROLE_LABELS.get(role_name, role_name)) for role_name in sorted(removed_roles)]
         diff_parts = []
         if added_labels:
             diff_parts.append("Əlavə edildi: " + ", ".join(added_labels))

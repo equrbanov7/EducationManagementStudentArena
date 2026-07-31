@@ -35346,6 +35346,62 @@ msgctxt "profile.sidebar"
 msgid "group_university_management"
 msgstr "University management"
 
+msgctxt "roles.display_name"
+msgid "superadmin"
+msgstr "Super Admin"
+
+msgctxt "roles.display_name"
+msgid "org_owner"
+msgstr "Organization Owner"
+
+msgctxt "roles.display_name"
+msgid "org_admin"
+msgstr "Organization Admin"
+
+msgctxt "roles.display_name"
+msgid "member"
+msgstr "Member"
+
+msgctxt "roles.display_name"
+msgid "hr"
+msgstr "HR"
+
+msgctxt "roles.display_name"
+msgid "exam_center_head"
+msgstr "Head of Examination Centre"
+
+msgctxt "roles.display_name"
+msgid "exam_center_staff"
+msgstr "Examination Centre Staff"
+
+msgctxt "roles.display_name"
+msgid "exam_center"
+msgstr "Examination Centre"
+
+msgctxt "roles.display_name"
+msgid "ikt_rehber"
+msgstr "ICT Manager"
+
+msgctxt "roles.display_name"
+msgid "teacher"
+msgstr "Teacher"
+
+msgctxt "roles.display_name"
+msgid "assistant_teacher"
+msgstr "Assistant Teacher"
+
+msgctxt "roles.display_name"
+msgid "lead_student"
+msgstr "Lead Student"
+
+msgctxt "roles.display_name"
+msgid "student"
+msgstr "Student"
+
+msgctxt "accounts.profile"
+msgid "individual_no_organization"
+msgstr "Individual"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"
