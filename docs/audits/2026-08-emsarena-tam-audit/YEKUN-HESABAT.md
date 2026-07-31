@@ -172,6 +172,36 @@ tələb edir, `main`-ə push isə tam prod deploy tetikləyir — bu, ayrıca q�
 Etimadnamə tələb edən ssenarilər üçün əlavə olaraq `LOAD_TEST_PASSWORD`
 secret-i və prod-da `seed_stress_test` lazımdır.
 
+#### Təhlükəsizlik testi — birbaşa URL bypass süpürgəsi
+
+Audit tələbi «birbaşa URL bypass-ının qarşısı alınsın» idi. Bu, əl ilə
+qorunan bir şey deyil: layihədə **180 arqumentsiz marşrut** var və hər yeni
+`path()` potensial açıq qapıdır. Bir view-da `@login_required` unudulsa kod
+review-da görünmür — səhifə brauzerdə işləyir, çünki developer artıq daxil olub.
+
+`tests/test_url_auth_sweep.py` marşrut cədvəlini avtomatik gəzir və hər
+arqumentsiz URL-i **anonim** vurur. 200 qaytaran URL sənədləşdirilmiş açıq
+siyahıda olmalıdır.
+
+| Ölçü | Nəticə |
+|---|---|
+| Yoxlanan qorunan marşrut | **160** |
+| Anonim sızma | **0** |
+| 200 qaytaran səth (araşdırıldı) | 21 — hamısı qəsdən açıq |
+
+200 qaytaranlar: login səhifələri (rol seçici + müəllim + tələbə), PIN/biletlə
+qorunan imtahan girişləri (`/exams/final/`, `/live/` — bunlar qəsdən anonimdir,
+qorunma PIN + kompüter/MAC qapısındadır), monitorinq probları, rate-limitli
+blog abunəsi, robots/sitemap/manifest.
+
+**Əhatə sərhədi (dürüstlük üçün):** arqumentli marşrutlar bu süpürgədən
+kənardadır — uydurma ID ilə vurmaq 404 verir və 404 «qorunur» demək deyil.
+Obyekt və tenant səviyyəli əhatə ayrıca testlərdədir (P0 düzəlişləri, view-as
+LIMITED, tenant izolyasiyası).
+
+**Prod-a qarşı penetrasiya testi işlədilməyib** — bax Faza 7-dəki eyni səbəb
+(`main`-ə push tam deploy tetikləyir).
+
 ### Faza 8 — Testlər ✅
 
 Yeni: rol × bölmə matrisi (10), **dil × rol matrisi (3, 6 rol × 4 dil)**, SPA
