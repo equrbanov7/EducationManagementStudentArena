@@ -33563,7 +33563,7 @@ msgstr "blog"
 
 msgctxt "profile.sidebar"
 msgid "group_blog"
-msgstr "Qrup bloqu"
+msgstr "Bloq və məzmun"
 
 msgctxt "profile.sidebar"
 msgid "Ümumi tədris məlumatı"
@@ -35253,6 +35253,18 @@ msgstr "Tələbə"
 msgctxt "accounts.profile"
 msgid "individual_no_organization"
 msgstr "Fərdi"
+
+msgctxt "profile.sidebar"
+msgid "group_my_studies"
+msgstr "Tədrisim"
+
+msgctxt "profile.sidebar"
+msgid "group_teaching"
+msgstr "Tədris işi"
+
+msgctxt "profile.sidebar"
+msgid "group_exam_center"
+msgstr "İmtahan mərkəzi"
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
