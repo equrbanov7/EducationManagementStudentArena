@@ -455,7 +455,7 @@ msgstr ""
 "perform this action, please ignore this email."
 
 msgid "Yeni post yayımlandı"
-msgstr "New trial exam"
+msgstr "A new post has been published"
 
 msgid "EMSArena blogunda yeni bir post yayımlandı:"
 msgstr "A new post has been published on the EMSArena blog:"
@@ -468,13 +468,13 @@ msgstr ""
 "unsubscribe, sign in to the site."
 
 msgid "Email təsdiqi"
-msgstr "Confirm deletion"
+msgstr "Email confirmation"
 
 msgid "hesabınızı aktivləşdirmək"
 msgstr "activate your account"
 
 msgid "Emaili təsdiqlə"
-msgstr "Confirm deletion"
+msgstr "Confirm email"
 
 #, python-format
 msgid ""
@@ -759,7 +759,7 @@ msgid "label_uploaded_file"
 msgstr "Uploaded file"
 
 msgid "Yüklə"
-msgstr "loading..."
+msgstr "Download"
 
 msgctxt "labs.template.my_lab_answers"
 msgid "empty_no_answer_for_question"
@@ -879,7 +879,7 @@ msgid "Başlıq, müəllif, məzmun..."
 msgstr "Title, author, content..."
 
 msgid "Rol"
-msgstr "Rol"
+msgstr "Role"
 
 msgid "Hamısı"
 msgstr "All"
@@ -888,16 +888,16 @@ msgid "Yayımlanmış"
 msgstr "Published"
 
 msgid "Qaralama"
-msgstr "Hello"
+msgstr "Draft"
 
 msgid "Təsdiq gözləyir"
-msgstr "Send confirmation"
+msgstr "Pending approval"
 
 msgid "Düzəliş tələb olunur"
-msgstr "No correction required."
+msgstr "Correction required"
 
 msgid "Tarixdən"
-msgstr "Date"
+msgstr "From date"
 
 msgid "Tarixə qədər"
 msgstr "Until date"
@@ -919,7 +919,7 @@ msgid "Müəllif"
 msgstr "Author"
 
 msgid "Əməliyyatlar"
-msgstr "Action"
+msgstr "Actions"
 
 msgid "Gözləyir"
 msgstr "Pending"
@@ -928,10 +928,10 @@ msgid "Düzəliş"
 msgstr "Correction"
 
 msgid "Düzəliş tələb et"
-msgstr "No correction required."
+msgstr "Request correction"
 
 msgid "Heç bir post tapılmadı."
-msgstr "Text field was not found."
+msgstr "No posts were found."
 
 msgid "Post Silinməsi"
 msgstr "Post Deletion"
@@ -946,7 +946,7 @@ msgid "Ləğv et"
 msgstr "Cancel"
 
 msgid "Düzəliş Tələbi"
-msgstr "No correction required."
+msgstr "Correction Request"
 
 msgid "postuna feedback göndəriləcək."
 msgstr "feedback will be sent to the post."
@@ -1180,10 +1180,10 @@ msgid "delete"
 msgstr "Delete"
 
 msgid "Rolları idarə et"
-msgstr "Search questions"
+msgstr "Manage roles"
 
 msgid "Rolları idarə et haqqında"
-msgstr "Search questions"
+msgstr "About managing roles"
 
 msgid "Profil rolları (multi-role / checkbox)"
 msgstr "Profile roles (multi-role / checkbox)"
@@ -1229,7 +1229,7 @@ msgid "search_user_placeholder"
 msgstr "Search user placeholder"
 
 msgid "Axtarışı təmizlə"
-msgstr "Search"
+msgstr "Clear search"
 
 msgctxt "profile.manage_roles"
 msgid "table_user"
@@ -1386,13 +1386,13 @@ msgid "status_late"
 msgstr "Status late"
 
 msgid "Bütün qruplar"
-msgstr "All statuses"
+msgstr "All groups"
 
 msgid "Ən tez göndərilən"
-msgstr "Sender"
+msgstr "Earliest sent"
 
 msgid "Ən son göndərilən"
-msgstr "Sender"
+msgstr "Most recently sent"
 
 msgctxt "profile.pending_review"
 msgid "filter_button"
@@ -1414,10 +1414,10 @@ msgid "Yenidən yoxla"
 msgstr "Review again"
 
 msgid "Anonim"
-msgstr "Anonim"
+msgstr "Anonymous"
 
 msgid "Anonim tələbə"
-msgstr "Student"
+msgstr "Anonymous student"
 
 msgid "Müəllim:"
 msgstr "Teacher:"
@@ -1427,7 +1427,7 @@ msgid "group_prefix"
 msgstr "Group prefix"
 
 msgid "Göndərilib:"
-msgstr "Submitted"
+msgstr "Submitted:"
 
 msgid "Yenidən yoxlama vaxtı hesablanır..."
 msgstr "Calculating re-review time..."
@@ -1436,7 +1436,7 @@ msgid "Bax"
 msgstr "View"
 
 msgid "Yoxla"
-msgstr "Yoxla"
+msgstr "Review"
 
 msgid "Gözləyən yoxlama yoxdur"
 msgstr "No pending reviews"
@@ -1446,16 +1446,16 @@ msgid "empty_not_found"
 msgstr "Empty not found"
 
 msgid "Vaxt bitdi."
-msgstr "Vaxt bitdi."
+msgstr "Time is up."
 
 msgid "Anonimliyin bitməsinə qalan vaxt:"
 msgstr "Time remaining until anonymity ends:"
 
 msgid "san."
-msgstr "san."
+msgstr "sec."
 
 msgid "Yenidən yoxlama üçün qalan vaxt:"
-msgstr "Time left to change"
+msgstr "Time left for re-review:"
 
 msgctxt "profile.permission_editor"
 msgid "organization_not_found"
@@ -1477,7 +1477,7 @@ msgid "İcazə axtar (məs: view, edit, member)"
 msgstr "Search permission (e.g. view, edit, member)"
 
 msgid "İstifadə qaydası"
-msgstr "User"
+msgstr "Usage rules"
 
 msgid "Bu bölmə nə üçündür?"
 msgstr "What is this section for?"
@@ -1511,23 +1511,23 @@ msgid "Aktiv icazələr: %(count)s"
 msgstr "Active permissions: %(count)s"
 
 msgid "Bütün icazələr (*)"
-msgstr "All languages"
+msgstr "All permissions (*)"
 
 msgctxt "profile.permission_editor"
 msgid "permissions_not_found"
 msgstr "Permissions not found"
 
 msgid "Nəticə tapılmadı."
-msgstr "Text field was not found."
+msgstr "No results found."
 
 msgid "Təşkilat"
-msgstr "Share in organization"
+msgstr "Organization"
 
 msgid "Üzvlər"
 msgstr "Members"
 
 msgid "Qiymətləndirmə"
-msgstr "Exams and assessment"
+msgstr "Assessment"
 
 msgid "İmtahanlar"
 msgstr "Exams"
@@ -1557,10 +1557,10 @@ msgid "Qiymətləndirmə və nəticə axınları"
 msgstr "Grading and result flows"
 
 msgid "İmtahan idarəetməsi və nəzarət"
-msgstr "Exams and assessment"
+msgstr "Exam management and monitoring"
 
 msgid "Apellyasiya müraciətləri"
-msgstr "Appeal center"
+msgstr "Appeal requests"
 
 msgid "Analitik hesabat və göstəricilər"
 msgstr "Analytical reports and metrics"
@@ -1575,19 +1575,19 @@ msgid "Bu bölmə üçün icazələr"
 msgstr "Permissions for this section"
 
 msgid "Hamısını seç"
-msgstr "All"
+msgstr "Select all"
 
 msgid "Seçimi sıfırla"
 msgstr "Reset"
 
 msgid "Seçilənləri əlavə et"
-msgstr "New contact message"
+msgstr "Add selected"
 
 msgid "Seçilənləri sil"
 msgstr "Delete selected"
 
 msgid "Permission seç"
-msgstr "Permissions"
+msgstr "Select permission"
 
 msgid "Əlavə et"
 msgstr "Add"
@@ -1599,7 +1599,7 @@ msgstr ""
 "delegation."
 
 msgid "Delegasiyanı al"
-msgstr "Review appeal"
+msgstr "Take the delegation"
 
 msgid "Bu rola icazəni daha aşağı rollara paylamaq hüququ ver."
 msgstr "Grant this role the right to delegate the permission to lower roles."
@@ -1672,10 +1672,10 @@ msgid "Rolu yenilə"
 msgstr "Update role"
 
 msgid "Nəticə tapılmadı"
-msgstr "Text field was not found."
+msgstr "No results found"
 
 msgid "Filtri təmizlə"
-msgstr "Confirm deletion"
+msgstr "Clear filter"
 
 msgctxt "profile.role_assignment"
 msgid "pending_users_title"
@@ -1701,24 +1701,24 @@ msgid "data-old-role=\"Üzvlük yoxdur\""
 msgstr "data-old-role=\"No membership\""
 
 msgid "Təşkilata əlavə et"
-msgstr "Share in organization"
+msgstr "Add to organization"
 
 msgctxt "profile.role_assignment"
 msgid "pending_users_not_found"
 msgstr "Pending users not found"
 
 msgid "Əməliyyatı təsdiqlə"
-msgstr "Confirm deletion"
+msgstr "Confirm the action"
 
 msgid "Təşkilat:"
-msgstr "Share in organization"
+msgstr "Organization:"
 
 msgctxt "staff.management"
 msgid "Target role"
 msgstr "Target group"
 
 msgid "Təsdiqlə"
-msgstr "Send confirmation"
+msgstr "Confirm"
 
 msgid "təşkilat üzvlüyünün rolunu dəyişir."
 msgstr "changes the role of the organization membership."
@@ -2242,7 +2242,7 @@ msgid "Rollarım"
 msgstr "My roles"
 
 msgid "Üzv sayı"
-msgstr "Question count"
+msgstr "Member count"
 
 msgid "Keçidlər"
 msgstr "Links"
@@ -2339,17 +2339,17 @@ msgstr "Showing %(filtered)s results. Total number of users: %(total)s."
 
 #, python-format
 msgid "Aktiv: %(count)s"
-msgstr "Aktiv: %(count)s"
+msgstr "Active: %(count)s"
 
 # --- Export documents ---
 #, python-format
 msgid "Bloklanmış: %(count)s"
-msgstr "Question count: %(count)s"
+msgstr "Blocked: %(count)s"
 
 # --- Export documents ---
 #, python-format
 msgid "Silinmiş: %(count)s"
-msgstr "Question count: %(count)s"
+msgstr "Deleted: %(count)s"
 
 msgid "Axtarış"
 msgstr "Search"
@@ -2365,7 +2365,7 @@ msgid "Məs: Riyaziyyat"
 msgstr "E.g.: Mathematics"
 
 msgid "Sıralama"
-msgstr "Hello"
+msgstr "Sorting"
 
 msgid "Filterlə"
 msgstr "Filter"
@@ -2407,7 +2407,7 @@ msgstr "Never logged in"
 
 #, python-format
 msgid "Qeydiyyat: %(joined_at)s"
-msgstr "Qeydiyyat: %(joined_at)s"
+msgstr "Registered: %(joined_at)s"
 
 msgid "Müvəqqəti blokla"
 msgstr "Block temporarily"
@@ -2420,7 +2420,7 @@ msgid "restore"
 msgstr "Restore"
 
 msgid "Hesabı sil"
-msgstr "Delete bank"
+msgstr "Delete account"
 
 msgid ""
 "data-modal-description=\"Bu hesab silinmiş istifadəçilər siyahısına "
@@ -2447,7 +2447,7 @@ msgid "Məhdud"
 msgstr "Limited"
 
 msgid "Seçilmiş filterlərə uyğun istifadəçi tapılmadı."
-msgstr "Text field was not found."
+msgstr "No users found matching the selected filters."
 
 msgid ""
 "<strong id=\"superadminUserDeleteName\"></strong> üçün seçilən əməliyyat "
@@ -2538,7 +2538,7 @@ msgid "institution_search_placeholder"
 msgstr "Search institution..."
 
 msgid "Seçimi təmizlə"
-msgstr "Confirm deletion"
+msgstr "Clear selection"
 
 msgid ""
 "Davam etmək üçün siyahıdan təşkilat seçin və ya “Heç bir təşkilata aid "
@@ -2615,16 +2615,16 @@ msgid "Xəta baş verdi. Yenidən cəhd edin."
 msgstr "Something went wrong. Please try again."
 
 msgid "Əməliyyat təsdiqi hazırlanmadı."
-msgstr "Text field was not found."
+msgstr "The operation confirmation could not be prepared."
 
 msgid "Əməliyyat tamamlanmadı."
 msgstr "The operation was not completed."
 
 msgid "Əlavə olunur..."
-msgstr "✓ Added"
+msgstr "Adding..."
 
 msgid "Yenilənir..."
-msgstr "loading..."
+msgstr "Refreshing..."
 
 msgid "Əməliyyat uğurla tamamlandı."
 msgstr "The operation was completed successfully."
@@ -3503,7 +3503,7 @@ msgid "Anonim yoxlama pəncərəsi aktivdir."
 msgstr "The anonymous review window is active."
 
 msgid "Yoxlama bağlanıb."
-msgstr "Closed without reply"
+msgstr "The review is closed."
 
 msgid "Bu cavab artıq yalnız baxış üçündür. Bal və rəy dəyişdirilə bilməz."
 msgstr ""
@@ -3548,7 +3548,7 @@ msgid "save_grade"
 msgstr "Save grade"
 
 msgid "Qiymətləndirməni təsdiqləyin"
-msgstr "Confirm delivery"
+msgstr "Confirm the assessment"
 
 msgid "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
 msgstr "Are you sure you want to save this score and feedback?"
@@ -3695,7 +3695,7 @@ msgid "toggle_open_or_close"
 msgstr "Open or close sidebar"
 
 msgid "Təşkilat təsdiqi gözlənilir."
-msgstr "Send confirmation"
+msgstr "Awaiting organization approval."
 
 msgid "Təşkilatınız hələ superadmin tərəfindən təsdiqlənməyib."
 msgstr "Your organization has not yet been approved by a superadmin."
@@ -3787,7 +3787,7 @@ msgid "my_exams"
 msgstr "My exams"
 
 msgid "İmtahan Nəzarəti"
-msgstr "Exams"
+msgstr "Exam Supervision"
 
 msgid "Sual Bankı"
 msgstr "Question Bank"
@@ -4235,7 +4235,7 @@ msgstr ""
 " is created; if a parent is selected, a subcategory is created."
 
 msgid "Kateqoriyaları idarə et"
-msgstr "Search questions"
+msgstr "Manage categories"
 
 msgctxt "profile.shortcut"
 msgid "create_post_description"
@@ -4565,7 +4565,7 @@ msgid "tab_independent"
 msgstr "Coursework"
 
 msgid "Nəticə axtar..."
-msgstr "Back to result"
+msgstr "Search results..."
 
 msgctxt "profile.results"
 msgid "score_label"
@@ -4874,22 +4874,22 @@ msgstr ""
 "cannot be undone."
 
 msgid "Postların idarəetməsi ("
-msgstr "Education management platform"
+msgstr "Post management ("
 
 msgid "Post, tələbə və məzmun üzrə axtar"
 msgstr "Search by post, student, or content"
 
 msgid "Təsdiq gözləyən"
-msgstr "Send confirmation"
+msgstr "Awaiting approval"
 
 msgid "Düzəliş tələb olunan"
-msgstr "No correction required."
+msgstr "Requiring correction"
 
 msgid "Təsdiqlənənlər"
-msgstr "Send confirmation"
+msgstr "Approved"
 
 msgid "Bütün təşkilatlar"
-msgstr "All statuses"
+msgstr "All organizations"
 
 msgid "Feedback (müsbət və ya düzəliş üçün)"
 msgstr "Feedback (positive or for corrections)"
@@ -4898,43 +4898,43 @@ msgid "Rəyini yaz..."
 msgstr "Write your review..."
 
 msgid "Düzəliş istənilsin?"
-msgstr "No correction required."
+msgstr "Request a correction?"
 
 msgid "Bu posta düzəliş tələbi göndəriləcək."
 msgstr "A revision request will be sent for this post."
 
 msgid "Düzəliş istə"
-msgstr "No correction required."
+msgstr "Request correction"
 
 msgid "Post təsdiqlənsin?"
-msgstr "Confirm deletion"
+msgstr "Approve the post?"
 
 msgid "Post təsdiqlənib paylaşılacaq."
 msgstr "The post will be approved and published."
 
 msgid "Təsdiqlə və paylaş"
-msgstr "Share in organization"
+msgstr "Confirm and share"
 
 msgid "Silmə səbəbi"
-msgstr "Confirm deletion"
+msgstr "Deletion reason"
 
 msgid "Niyə silirsiniz? Tələbəyə izah edin..."
 msgstr "Why are you deleting it? Explain to the student..."
 
 msgid "Post silinsin?"
-msgstr "Post silinsin?"
+msgstr "Delete the post?"
 
 msgid "Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz."
 msgstr "This post will be deleted. This action cannot be undone."
 
 msgid "Sil"
-msgstr "Language"
+msgstr "Delete"
 
 msgid "Bu post artıq təsdiqlənib və paylaşılıb."
 msgstr "This post has already been approved and published."
 
 msgid "Səbəb"
-msgstr "Reason type"
+msgstr "Reason"
 
 msgid "(məcburi — tələbəyə bildiriş göndəriləcək)"
 msgstr "(required — a notification will be sent to the student)"
@@ -4954,19 +4954,19 @@ msgid "Post yenidən paylaşılacaq. Tələbə görə biləcək."
 msgstr "The post will be published again. The student will be able to see it."
 
 msgid "Filtrə uyğun post tapılmadı."
-msgstr "Text field was not found."
+msgstr "No posts match the filter."
 
 msgid "Əminsiniz?"
 msgstr "Are you sure?"
 
 msgid "Zəhmət olmasa səbəbi yazın."
-msgstr "Please enter your message."
+msgstr "Please enter the reason."
 
 msgid "Postu redaktə et"
-msgstr "Edit bank"
+msgstr "Edit post"
 
 msgid "Redaktə et"
-msgstr "Edit bank"
+msgstr "Edit"
 
 msgctxt "profile.posts"
 msgid "modal_edit_title"
@@ -5052,7 +5052,7 @@ msgid "title"
 msgstr "Title"
 
 msgid "Müəllim təsdiqi gözləyir"
-msgstr "Confirm deletion"
+msgstr "Awaiting teacher approval"
 
 msgctxt "profile.posts"
 msgid "published"
@@ -5074,13 +5074,13 @@ msgid "Müəllim baxışı gözlənilir."
 msgstr "Teacher review is pending."
 
 msgid "Hələ feedback yoxdur."
-msgstr "No appeals yet"
+msgstr "No feedback yet."
 
 msgid "Təsdiqləndi"
-msgstr "Send confirmation"
+msgstr "Approved"
 
 msgid "Düzəliş tələb olundu"
-msgstr "No correction required."
+msgstr "Correction requested"
 
 msgid "Müəllim \"düzəliş tələb olunur\" seçib, amma əlavə mətn yazmayıb."
 msgstr ""
@@ -5089,7 +5089,8 @@ msgstr ""
 
 msgid ""
 "Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək."
-msgstr "Confirmation to be sent to the student. Shown as plain text."
+msgstr ""
+"This post is still under review. The feedback will appear after approval."
 
 msgid "Bu post üçün hələ feedback paylaşılmayıb."
 msgstr "No feedback has been shared for this post yet."
@@ -5121,7 +5122,7 @@ msgid "Şəklin üzərinə klik edin, böyüdülmüş önizləmə ilə dəyişin
 msgstr "Click on the image and change it with an enlarged preview."
 
 msgid "Təşkilat təsdiqi gözlənilir"
-msgstr "Send confirmation"
+msgstr "Awaiting organization approval"
 
 msgid "üzv"
 msgstr "member"
@@ -5135,10 +5136,10 @@ msgstr ""
 "submitted and is currently awaiting approval."
 
 msgid "Mesajınız:"
-msgstr "Reply to your message"
+msgstr "Your message:"
 
 msgid "Təşkilat girişləri"
-msgstr "Share in organization"
+msgstr "Organization access"
 
 #, python-format
 msgid "%(org_type)s · Owner: %(owner)s · Üzv sayı: %(count)s"
@@ -5286,8 +5287,7 @@ msgid "Dəvət edən:"
 msgstr "Invited by:"
 
 msgid "Əvvəlcə mövcud təşkilatdan çıxın"
-msgstr ""
-"Leave your current organization first, then accept the new invitation."
+msgstr "Leave your current organization first"
 
 msgid "Qəbul et"
 msgstr "Accept"
@@ -5448,13 +5448,13 @@ msgid "chart_grading_status"
 msgstr "Grading status"
 
 msgid "Təşkilat fəaliyyəti"
-msgstr "Share in organization"
+msgstr "Organization activity"
 
 msgid "Müəllim yükü"
 msgstr "Teacher workload"
 
 msgid "Kurs performansı"
-msgstr "Question count"
+msgstr "Course performance"
 
 msgctxt "profile.statistics"
 msgid "chart_avg_by_content"
@@ -5595,7 +5595,7 @@ msgstr ""
 "subtree (read-only view)."
 
 msgid "İmtahan, müəllif və ya kurs axtar"
-msgstr "Search by exam name"
+msgstr "Search exam, author or course"
 
 msgid "Başlama"
 msgstr "Start"
@@ -5607,7 +5607,7 @@ msgid "Səhifələmə"
 msgstr "Pagination"
 
 msgid "Axtarışa uyğun imtahan tapılmadı."
-msgstr "Text field was not found."
+msgstr "No exam matching your search was found."
 
 msgid ""
 "Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) "
@@ -5910,13 +5910,13 @@ msgid "Trial exam request"
 msgstr "Trial exam request"
 
 msgid "Uploaded PDF"
-msgstr "Uploaded files"
+msgstr "Uploaded PDF"
 
 msgid "Download PDF"
-msgstr "Download ZIP"
+msgstr "Download PDF"
 
 msgid "Student note"
-msgstr "Student"
+msgstr "Student note"
 
 msgid "Confirmation"
 msgstr "Confirm"
@@ -5925,13 +5925,13 @@ msgid "This marks the request as added and emails the student."
 msgstr "This marks the request as added and emails the student."
 
 msgid "Send confirmation"
-msgstr "Open notifications"
+msgstr "Send confirmation"
 
 msgid "Total"
 msgstr "Total"
 
 msgid "Search name, email, message, file..."
-msgstr "Search name, email, message..."
+msgstr "Search name, email, message, file..."
 
 msgid "Trial"
 msgstr "Trial"
@@ -5946,7 +5946,7 @@ msgid "Bu bölmə yalnız superadmin üçündür."
 msgstr "This section is for superadmins only."
 
 msgid "Təşkilat axtar"
-msgstr "Share in organization"
+msgstr "Search organization"
 
 msgid "Ad və ya slug"
 msgstr "Name or slug"
@@ -5955,13 +5955,13 @@ msgid "— Təşkilat seçin —"
 msgstr "— Select an organization —"
 
 msgid "Nəticələr"
-msgstr "Back to result"
+msgstr "Results"
 
 msgid "Sual bankları"
-msgstr "Question Bank"
+msgstr "Question banks"
 
 msgid "Yaradılma"
-msgstr "Generating..."
+msgstr "Created"
 
 msgid "Düz / Səhv"
 msgstr "Correct / Incorrect"
@@ -5976,7 +5976,7 @@ msgid "Bu tabda məlumat yoxdur."
 msgstr "There is no data in this tab."
 
 msgid "Başlamaq üçün yuxarıdan təşkilat seçin."
-msgstr "Select an organization for the request."
+msgstr "To get started, select an organization above."
 
 msgctxt "profile.sidebar"
 msgid "group_management"
@@ -6071,13 +6071,13 @@ msgstr "Query: %(query)s"
 
 #, python-format
 msgid "Kateqoriya: %(category)s"
-msgstr "Kateqoriya: %(category)s"
+msgstr "Category: %(category)s"
 
 msgid "Filtrləri sıfırla"
 msgstr "Reset"
 
 msgid "Paylaşımlar"
-msgstr "Reviewed"
+msgstr "Posts"
 
 msgid ""
 "Search və pagination yalnız bu istifadəçinin published postları üzərində "
@@ -6088,7 +6088,7 @@ msgid "Oxumağa davam et"
 msgstr "Continue reading"
 
 msgid "Göstəriləcək açıq paylaşım tapılmadı"
-msgstr "No active request was found to cancel."
+msgstr "No open share found to display"
 
 msgid "Filtrləri dəyişin və ya sıfırlayıb yenidən yoxlayın."
 msgstr "Change the filters and try again."
@@ -6100,10 +6100,10 @@ msgid "Açıq məlumatlar"
 msgstr "Public information"
 
 msgid "İstifadəçi adı"
-msgstr "User"
+msgstr "Username"
 
 msgid "Qoşulma tarixi"
-msgstr "Start date"
+msgstr "Join date"
 
 msgid "Haqqında"
 msgstr "About"
@@ -6406,7 +6406,7 @@ msgid "Müəllim rəyi"
 msgstr "Teacher feedback"
 
 msgid "Rəy əlavə edilməyib."
-msgstr "Feedback and suggestion"
+msgstr "No feedback added."
 
 msgctxt "accounts.student_dashboard"
 msgid "title"
@@ -6489,7 +6489,7 @@ msgid "empty_recent_grades"
 msgstr "Empty recent grades"
 
 msgid "Post İdarəetmə"
-msgstr "Education management platform"
+msgstr "Post Management"
 
 msgid "Post İdarəetmə (Superadmin)"
 msgstr "Post Management (Superadmin)"
@@ -6746,7 +6746,7 @@ msgid "Silinmiş hesabı blokdan çıxarmaq üçün əvvəlcə bərpa edin."
 msgstr "To unblock a deleted account, restore it first."
 
 msgid "Öz hesabınızın blokunu bu bölmədən aça bilməzsiniz."
-msgstr "Log in to your account and start from the “Exams” section."
+msgstr "You cannot unblock your own account from this section."
 
 msgid "Superadmin hesabının blokunu açmaq olmaz."
 msgstr "A superadmin account cannot be unblocked."
@@ -7020,10 +7020,10 @@ msgid "Bu əməliyyat üçün icazəniz yoxdur."
 msgstr "You do not have permission for this operation."
 
 msgid "Mesaj tapılmadı."
-msgstr "Text field was not found."
+msgstr "Message not found."
 
 msgid "Cavab mətni ən azı 10 simvol olmalıdır."
-msgstr "Message must be at least 10 characters."
+msgstr "The reply text must be at least 10 characters."
 
 msgid "Cavab mətni 10000 simvoldan uzun ola bilməz."
 msgstr "The answer text cannot be longer than 10000 characters."
@@ -7036,11 +7036,12 @@ msgid "Cavab qeyd edildi və %(email)s ünvanına göndərilməyə çalışılı
 msgstr "The reply was saved and delivery to %(email)s is being attempted."
 
 msgid "Sınaq imtahanı sorğusu tapılmadı."
-msgstr "Trial exam requests"
+msgstr "Trial exam request not found."
 
 #, python-format
 msgid "Təsdiq qeyd edildi və %(email)s ünvanına göndərilməyə çalışılır."
-msgstr "The reply was saved and delivery to %(email)s is being attempted."
+msgstr ""
+"The confirmation was saved and delivery to %(email)s is being attempted."
 
 msgid "target_all_users"
 msgstr "All users (system)"
@@ -8319,7 +8320,7 @@ msgid "verbose_name_plural"
 msgstr "Verbose name plural"
 
 msgid "Cavablarım"
-msgstr "Replied"
+msgstr "My answers"
 
 msgctxt "assignment.detail"
 msgid "back"
@@ -8501,7 +8502,7 @@ msgid "attempts_finished"
 msgstr "Attempts finished"
 
 msgid "Cavablarım ("
-msgstr "Replied"
+msgstr "My answers ("
 
 msgctxt "assignment.section"
 msgid "submit_answer"
@@ -8540,7 +8541,7 @@ msgid "label_answer_required"
 msgstr "Answer *"
 
 msgid "Cavabınızı buraya yazın..."
-msgstr "Write your message..."
+msgstr "Write your answer here..."
 
 msgctxt "assignment.legacy.detail"
 msgid "label_files"
@@ -9036,10 +9037,10 @@ msgstr ""
 "anonymous."
 
 msgid "Yoxla və yadda saxla"
-msgstr "Save"
+msgstr "Review and save"
 
 msgid "Yenidən yoxla və yadda saxla"
-msgstr "Save decisions"
+msgstr "Review again and save"
 
 msgctxt "assignment.legacy.review"
 msgid "page_title_suffix"
@@ -9130,19 +9131,19 @@ msgid "table_status"
 msgstr "Status"
 
 msgid "Tələbə və ya cavab mətni axtar"
-msgstr "Reply to student"
+msgstr "Search student or answer text"
 
 msgid "Bütün statuslar"
 msgstr "All statuses"
 
 msgid "Təqdim edilib"
-msgstr "Rejected"
+msgstr "Submitted"
 
 msgid "Yoxlanır"
 msgstr "Under review"
 
 msgid "Geri qaytarılıb"
-msgstr "Reviewed"
+msgstr "Returned"
 
 msgid "Başlanğıc tarix"
 msgstr "Start date"
@@ -9151,7 +9152,7 @@ msgid "Tətbiq et"
 msgstr "Apply"
 
 msgid "Seçilib:"
-msgstr "No file selected"
+msgstr "Selected:"
 
 msgctxt "assignment.review_submissions"
 msgid "table_student"
@@ -9794,14 +9795,14 @@ msgid "Yaratdığınız suallar burada görünür."
 msgstr "Questions you create appear here."
 
 msgid "Hələ sual yaratmamısınız."
-msgstr "AI question generation failed."
+msgstr "You have not created any questions yet."
 
 msgctxt "blog.post_detail_page"
 msgid "title_suffix"
 msgstr "My Blog"
 
 msgid "Geri qayıt"
-msgstr "Bank name"
+msgstr "Go back"
 
 #, python-format
 msgid "%(count)s baxış"
@@ -9852,7 +9853,7 @@ msgid "submit_comment"
 msgstr "Submit comment"
 
 msgid "Görə bildiyiniz bütün sualların siyahısı."
-msgstr "Delete all questions in this language"
+msgstr "A list of all the questions you can see."
 
 msgid "Hazırda görə biləcəyiniz sual yoxdur."
 msgstr "There are currently no questions you can view."
@@ -10346,7 +10347,7 @@ msgid "Cavabsız bağlandı"
 msgstr "Closed without reply"
 
 msgid "Yeni"
-msgstr "Yeni"
+msgstr "New"
 
 msgid "✓ Cavablandı — yenidən göndər"
 msgstr "✓ Replied — send again"
@@ -11087,7 +11088,7 @@ msgid "action_create_first_course"
 msgstr "Create a New Course"
 
 msgid "Təsdiq edin"
-msgstr "Send confirmation"
+msgstr "Confirm"
 
 msgctxt "exams.partial.exam_modals"
 msgid "action_close"
@@ -11519,7 +11520,7 @@ msgid "confirm_delete_resource"
 msgstr "Did you want to delete this resource?"
 
 msgid "resourceFormModal tapılmadı!"
-msgstr "Text field was not found."
+msgstr "resourceFormModal not found!"
 
 msgctxt "courses.partial.topic_edit_modal"
 msgid "title_edit_topic"
@@ -14074,7 +14075,7 @@ msgid "Form yüklənmədi. Yenidən cəhd edin."
 msgstr "Loading failed, please try again."
 
 msgid "Yadda saxlanılır..."
-msgstr "Save"
+msgstr "Saving..."
 
 msgctxt "exams.partial.exam_modals"
 msgid "heading_link_exam_to_course"
@@ -14376,7 +14377,7 @@ msgid "action_my_answers"
 msgstr "My answers"
 
 msgid "Mənim cavablarım"
-msgstr "Student's answer"
+msgstr "My answers"
 
 msgid "Yüklənir..."
 msgstr "loading..."
@@ -14397,10 +14398,10 @@ msgid "İmtahan adına görə axtar..."
 msgstr "Search by exam name"
 
 msgid "Göndərdiyim cavablar"
-msgstr "Sending"
+msgstr "My submitted answers"
 
 msgid "İmtahan cəhdlərim"
-msgstr "Exams"
+msgstr "My exam attempts"
 
 #, python-format
 msgid "%(count)s nəticə"
@@ -14423,13 +14424,13 @@ msgstr "Written"
 
 #, python-format
 msgid "Cəhd #%(number)s"
-msgstr "Question #%(number)s"
+msgstr "Attempt #%(number)s"
 
 msgid "Qiymətləndirildi"
 msgstr "Graded"
 
 msgid "Yoxlanılır"
-msgstr "Reviewed"
+msgstr "Under review"
 
 #, python-format
 msgid "\"%(query)s\" üçün nəticə tapılmadı"
@@ -14439,7 +14440,7 @@ msgid "Axtarış sorğusunu dəyişdirməyə çalışın."
 msgstr "Try changing your search query."
 
 msgid "Hələ nəticə yoxdur"
-msgstr "No appeals yet"
+msgstr "No results yet"
 
 msgctxt "exams.template.student_exam_history"
 msgid "empty_no_exam_attempt"
@@ -15214,7 +15215,7 @@ msgid "action_save"
 msgstr "Save"
 
 msgid "Suallar bankından seç"
-msgstr "Delete question bank"
+msgstr "Select from question bank"
 
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_all_questions"
@@ -15227,7 +15228,7 @@ msgstr ""
 "questions."
 
 msgid "Sualların dili"
-msgstr "Search questions"
+msgstr "Question language"
 
 msgid "Bu bölmələrdəki suallar tələbə həmin dili seçəndə görünəcək."
 msgstr ""
@@ -15465,25 +15466,25 @@ msgstr "Group not selected."
 
 #, python-format
 msgid "Bankdan sual əlavə et — %(title)s"
-msgstr "Exam questions — %(title)s"
+msgstr "Add question from bank — %(title)s"
 
 msgid "Mövcud bankdan sual əlavə et"
-msgstr "Append to the end of the text"
+msgstr "Add a question from the existing bank"
 
 msgid "İmtahana qayıt"
-msgstr "Exams"
+msgstr "Back to exam"
 
 msgid "— Bank seçin —"
 msgstr "— Select a bank —"
 
 msgid "Sual mətnində axtar"
-msgstr "Question text"
+msgstr "Search in question text"
 
 msgid "Çətinlik"
 msgstr "Difficulty"
 
 msgid "Bütün çətinliklər"
-msgstr "All languages"
+msgstr "All difficulty levels"
 
 msgid "Bütün dillər"
 msgstr "All languages"
@@ -15492,7 +15493,7 @@ msgid "Göstər"
 msgstr "Show"
 
 msgid "Tapılan suallar:"
-msgstr "Written"
+msgstr "Questions found:"
 
 msgid "(ilk 300 göstərilir)"
 msgstr "(showing first 300)"
@@ -15501,16 +15502,16 @@ msgid "Seçilmişləri imtahana əlavə et"
 msgstr "Add selected to exam"
 
 msgid "Filtrlərə uyğun sual tapılmadı."
-msgstr "Text field was not found."
+msgstr "No questions match the filters."
 
 msgid "Sual əlavə etmək üçün yuxarıdan bank seçin."
 msgstr "To add a question, select a bank above."
 
 msgid "Dil idarəetməsi"
-msgstr "Education management platform"
+msgstr "Language management"
 
 msgid "Dil variantları"
-msgstr "Options"
+msgstr "Language variants"
 
 msgid ""
 "Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. "
@@ -15522,7 +15523,7 @@ msgstr ""
 " that language's questions are loaded."
 
 msgid "Mövcud dillər"
-msgstr "Current password"
+msgstr "Available languages"
 
 msgid "Dil"
 msgstr "Language"
@@ -15534,16 +15535,16 @@ msgid "Deaktiv"
 msgstr "Inactive"
 
 msgid "Deaktiv et"
-msgstr "Yes, deactivate"
+msgstr "Deactivate"
 
 msgid "Aktiv et"
 msgstr "Yes, activate"
 
 msgid "Hələ heç bir dil variantı yoxdur."
-msgstr "No appeals yet"
+msgstr "There are no language variants yet."
 
 msgid "Yeni dil əlavə et"
-msgstr "New contact message"
+msgstr "Add a new language"
 
 msgid "Göstəriş adı (opsional)"
 msgstr "Instruction name (optional)"
@@ -16105,7 +16106,7 @@ msgid "Kitabxanadan sual seçib bu imtahana birbaşa əlavə et."
 msgstr "Select questions from the library and add them directly to this exam."
 
 msgid "Suallar bankına bax"
-msgstr "Search questions"
+msgstr "View question bank"
 
 msgid "Seçilmişləri yadda saxla"
 msgstr "Save selected"
@@ -16168,7 +16169,7 @@ msgid ""
 msgstr "Example: create applied-level test questions about Python functions"
 
 msgid "Sual formatı"
-msgstr "Question count"
+msgstr "Question format"
 
 msgid "Test (variantlı)"
 msgstr "Test (multiple choice)"
@@ -16265,7 +16266,7 @@ msgid "PDF-dən gələn bullet formatı da dəstəklənir"
 msgstr "Bullet format from PDFs is also supported"
 
 msgid "Qayda"
-msgstr "Qayda"
+msgstr "Rule"
 
 msgid "hər sual nömrə ilə başlayır"
 msgstr "each question starts with a number"
@@ -16813,16 +16814,16 @@ msgid "Başlamaq üçün yuxarıdan bir sual bankı seçin."
 msgstr "To get started, select a question bank above."
 
 msgid "yazılı sual"
-msgstr "Written"
+msgstr "written question"
 
 msgid "test sualı"
-msgstr "Create test questions with AI"
+msgstr "test question"
 
 msgid "dil"
 msgstr "Language"
 
 msgid "Dil üzrə"
-msgstr "Delete by language"
+msgstr "By language"
 
 msgid "Bu bankda uyğun sual yoxdur"
 msgstr "There are no matching questions in this bank"
@@ -16837,7 +16838,7 @@ msgid "Sualı seç"
 msgstr "Select a question"
 
 msgid "Variant yoxdur"
-msgstr "Options"
+msgstr "No options"
 
 msgid "Bank"
 msgstr "Bank"
@@ -16846,7 +16847,7 @@ msgid "Sual mətnində axtar..."
 msgstr "Search in question text..."
 
 msgid "seçilib"
-msgstr "No file selected"
+msgstr "selected"
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_edit"
@@ -16895,7 +16896,7 @@ msgid "Sualların standart dili (sonra dəyişə bilərsiniz)."
 msgstr "Default language of the questions (you can change it later)."
 
 msgid "İmtahan növü / format"
-msgstr "Exam types"
+msgstr "Exam type / format"
 
 msgid "Default sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
 msgstr "Default question format (you can change it when adding a question)."
@@ -16907,16 +16908,16 @@ msgid "Eyni təşkilatdakı digər müəllimlər bu bankı görə bilər."
 msgstr "Other teachers in the same organization can see this bank."
 
 msgid "Bank yarat"
-msgstr "Bank yarat"
+msgstr "Create bank"
 
 msgid "Bank adı və ya fənn üzrə axtar..."
-msgstr "Search by exam name"
+msgstr "Search by bank name or subject..."
 
 msgid "Sualları Word kimi yüklə"
-msgstr "Upload questions as PDF"
+msgstr "Upload questions as Word"
 
 msgid "Paylaşılıb"
-msgstr "Reviewed"
+msgstr "Published"
 
 msgid "sual"
 msgstr "question"
@@ -17573,7 +17574,7 @@ msgid "ai_error"
 msgstr "Failed to generate AI summary. Please try again."
 
 msgid "Toplu sual əlavə et"
-msgstr "Append to the end of the text"
+msgstr "Bulk add questions"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "selected_count"
@@ -17922,7 +17923,7 @@ msgid "heading_review"
 msgstr "Pending review"
 
 msgid "Tələbə:"
-msgstr "Student"
+msgstr "Student:"
 
 msgid "İmtahanı yaradan müəllim:"
 msgstr "Teacher who created the exam:"
@@ -17952,7 +17953,7 @@ msgid "Başlayıb"
 msgstr "Started"
 
 msgid "Ümumi müddət"
-msgstr "General note"
+msgstr "Total duration"
 
 #, python-format
 msgid ""
@@ -18382,7 +18383,7 @@ msgid "Düzgün / Verilmiş sual"
 msgstr "Correct / Delivered questions"
 
 msgid "Düzgün / Sual"
-msgstr "Correct answer"
+msgstr "Correct / Questions"
 
 msgid "Səhv / Verilmiş sual"
 msgstr "Errors / Questions asked"
@@ -18391,7 +18392,7 @@ msgid "Səhv / Sual"
 msgstr "Errors / Questions"
 
 msgid "Cavabsız"
-msgstr "Reply"
+msgstr "Unanswered"
 
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score"
@@ -18998,7 +18999,7 @@ msgid "status_not_checked"
 msgstr "Status archived"
 
 msgid "Sual və ya cavab üzrə axtar"
-msgstr "Search by exam name"
+msgstr "Search by question or answer"
 
 # --- Export documents ---
 #, python-format
@@ -19082,7 +19083,7 @@ msgid "status_not_graded"
 msgstr "Graded"
 
 msgid "Axtarışa uyğun sual tapılmadı."
-msgstr "Text field was not found."
+msgstr "No question matching your search was found."
 
 msgctxt "exams.template.test_question_bank"
 msgid "title_question_bank"
@@ -19747,7 +19748,7 @@ msgid "empty_no_answers_found"
 msgstr "No answers found"
 
 msgid "Baxış"
-msgstr "Reviewed"
+msgstr "View"
 
 msgctxt "labs.template.grade_submission"
 msgid "heading_grading"
@@ -20092,13 +20093,13 @@ msgid "heading_student_answers"
 msgstr "Student Answers"
 
 msgid "Kurs:"
-msgstr "Kurs:"
+msgstr "Course:"
 
 msgid "Status:"
-msgstr "Status"
+msgstr "Status:"
 
 msgid "Nəticələr:"
-msgstr "Back to result"
+msgstr "Results:"
 
 #, python-format
 msgid "Cəmi %(total)s"
@@ -20140,7 +20141,7 @@ msgid "status_graded"
 msgstr "Graded"
 
 msgid "Qaytarılıb"
-msgstr "Reviewed"
+msgstr "Returned"
 
 msgctxt "labs.template.lab_submissions"
 msgid "filter_by_group"
@@ -20726,7 +20727,7 @@ msgid "empty_no_questions"
 msgstr "No questions for this lab"
 
 msgid "Bu tələbə üçün seçiləcək heç bir sual tapılmadı."
-msgstr "No appealable questions were found for this attempt."
+msgstr "No questions were found to select for this student."
 
 msgctxt "labs.template.preview_randomization"
 msgid "empty_select_student_title"
@@ -24019,7 +24020,7 @@ msgid "Yalnız PDF · maksimum 25 MB"
 msgstr "PDF only · max 25 MB"
 
 msgid "Faylı sil"
-msgstr "Open file"
+msgstr "Delete file"
 
 msgid "könüllü"
 msgstr "optional"
@@ -24240,7 +24241,7 @@ msgid "Sorğu xətası"
 msgstr "Request error"
 
 msgid "Yanlış sorğu göndərildi"
-msgstr "Your message has been sent!"
+msgstr "An invalid request was sent"
 
 msgid ""
 "Sorğu emal olunmadı. Daxil etdiyiniz məlumatlardan biri düzgün formatda "
@@ -24253,13 +24254,13 @@ msgid "və ya keçid artıq etibarsızdır."
 msgstr "or the link is no longer valid."
 
 msgid "Məlumatı yenidən yoxlayın"
-msgstr "Change the filters and try again."
+msgstr "Check the information again"
 
 msgid "Keçidin tam açıldığını təsdiqləyin"
 msgstr "Confirm that the link has opened completely"
 
 msgid "Ana səhifəyə qayıt"
-msgstr "Back to result"
+msgstr "Back to home page"
 
 msgid "Əvvəlki səhifəyə dön"
 msgstr "Go back to the previous page"
@@ -24294,7 +24295,7 @@ msgstr ""
 "administrator if necessary."
 
 msgid "Hesabınızı yenidən yoxlayın"
-msgstr "Write your message..."
+msgstr "Check your account again"
 
 msgid "Təşkilat icazələri tətbiq oluna bilər"
 msgstr "Organization permissions can be applied"
@@ -24309,7 +24310,7 @@ msgid "404 – Səhifə Tapılmadı | EMSArena"
 msgstr "404 – Page Not Found | EMSArena"
 
 msgid "Səhifə tapılmadı"
-msgstr "Text field was not found."
+msgstr "Page not found"
 
 msgid "Axtardığınız səhifə burada deyil"
 msgstr "The page you are looking for is not here"
@@ -24322,7 +24323,7 @@ msgid ""
 msgstr "You can go back one step or continue from the home page."
 
 msgid "URL-ni yenidən yoxlayın"
-msgstr "Change the filters and try again."
+msgstr "Check the URL again"
 
 msgid ""
 "Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni"
@@ -24340,7 +24341,7 @@ msgid "500 – Server Xətası | EMSArena"
 msgstr "500 – Server Error | EMSArena"
 
 msgid "Server xətası"
-msgstr "Reply email error"
+msgstr "Server error"
 
 msgid "Sistem gözlənilməz xətaya düşdü"
 msgstr "The system encountered an unexpected error"
@@ -24356,13 +24357,13 @@ msgid "əməliyyatı təkrarlaya bilərsiniz."
 msgstr "you can retry the operation."
 
 msgid "Bir neçə saniyə sonra yenidən yoxlayın"
-msgstr "Change the filters and try again."
+msgstr "Check again in a few seconds"
 
 msgid "Sistem hazırda cavab verə bilmir"
 msgstr "The system is currently unable to respond"
 
 msgid "Geri qayıt və yenidən cəhd et"
-msgstr "Try again"
+msgstr "Go back and try again"
 
 msgid ""
 "Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha "
@@ -24504,7 +24505,7 @@ msgid "page_title"
 msgstr "Members"
 
 msgid "Aktiv təşkilat tapılmadı."
-msgstr "Text field was not found."
+msgstr "No active organization found."
 
 msgid ""
 "Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar "
@@ -24521,10 +24522,10 @@ msgstr "faculty"
 
 #, python-format
 msgid "<strong>%(count)s</strong> kafedra"
-msgstr "<strong>%(count)s</strong> kafedra"
+msgstr "<strong>%(count)s</strong> departments"
 
 msgid "Ad və ya kod üzrə axtar"
-msgstr "Search by exam name"
+msgstr "Search by name or code"
 
 msgid "Ən yeni"
 msgstr "Newest"
@@ -24533,7 +24534,7 @@ msgid "Ən köhnə"
 msgstr "Oldest"
 
 msgid "Yeni fakültə"
-msgstr "New password"
+msgstr "New faculty"
 
 msgid "Fakültə"
 msgstr "Faculty"
@@ -24542,16 +24543,16 @@ msgid "Kod"
 msgstr "Code"
 
 msgid "Kafedra"
-msgstr "Kafedra"
+msgstr "Department"
 
 msgid "Rəhbər (dekan)"
 msgstr "Head (dean)"
 
 msgid "Yaradılıb"
-msgstr "Generating..."
+msgstr "Created"
 
 msgid "Təyin edilməyib"
-msgstr "No file selected"
+msgstr "Not assigned"
 
 msgid "Rəhbər təyin et"
 msgstr "Assign head"
@@ -24567,25 +24568,25 @@ msgid "“Yeni fakültə” düyməsi ilə ilk fakültəni yaradın."
 msgstr "Create the first faculty using the “New faculty” button."
 
 msgid "Yeni fakültə yarat"
-msgstr "Generate with AI"
+msgstr "Create a new faculty"
 
 msgid "Fakültə adı"
-msgstr "Subject name"
+msgstr "Faculty name"
 
 msgid "Məs: İnformasiya texnologiyaları fakültəsi"
 msgstr "E.g.: Faculty of Information Technology"
 
 msgid "Kod (opsional)"
-msgstr "optional"
+msgstr "Code (optional)"
 
 msgid "Məs: ITF"
 msgstr "E.g.: ITF"
 
 msgid "Fakültə yarat"
-msgstr "Generate with AI"
+msgstr "Create faculty"
 
 msgid "Fakültəni redaktə et"
-msgstr "Edit bank"
+msgstr "Edit faculty"
 
 msgid "Rəhbər (dekan) təyin et"
 msgstr "Assign head (dean)"
@@ -24635,10 +24636,10 @@ msgid "təyinatsız müəllim"
 msgstr "unassigned teacher"
 
 msgid "Bütün fakültələr"
-msgstr "All languages"
+msgstr "All faculties"
 
 msgid "Yeni kafedra"
-msgstr "Yeni kafedra"
+msgstr "New department"
 
 msgid "Fakültəsiz"
 msgstr "No faculty"
@@ -24679,10 +24680,10 @@ msgid "Kafedra yaratmaq üçün əvvəlcə fakültə yaradılmalıdır."
 msgstr "To create a department, a faculty must be created first."
 
 msgid "Yeni kafedra yarat"
-msgstr "Yeni kafedra yarat"
+msgstr "Create a new department"
 
 msgid "Fakültə seçin"
-msgstr "Choose file"
+msgstr "Select faculty"
 
 msgid "Kafedra adı"
 msgstr "Department name"
@@ -24694,13 +24695,13 @@ msgid "Məs: CS"
 msgstr "E.g.: CS"
 
 msgid "Kafedra yarat"
-msgstr "Kafedra yarat"
+msgstr "Create department"
 
 msgid "Kafedranı redaktə et"
-msgstr "Edit bank"
+msgstr "Edit department"
 
 msgid "Kafedra:"
-msgstr "Kafedra:"
+msgstr "Department:"
 
 msgid "Müdir"
 msgstr "Head"
@@ -24712,7 +24713,7 @@ msgid "Müəllim seçin"
 msgstr "Select a teacher"
 
 msgid "hazırda:"
-msgstr "Built by"
+msgstr "currently:"
 
 msgid "təyinatsız"
 msgstr "unassigned"
@@ -24724,10 +24725,10 @@ msgstr ""
 "moved to this department."
 
 msgid "Təşkilatda aktiv müəllim üzvü tapılmadı."
-msgstr "No suitable membership role was found in the organization."
+msgstr "No active teacher member found in the organization."
 
 msgid "Kafedranı sil"
-msgstr "Delete bank"
+msgstr "Delete department"
 
 msgid ""
 "<strong data-org-field=\"unit_name\"></strong> kafedrasını silmək "
@@ -24823,7 +24824,7 @@ msgid "Struktur statistikası"
 msgstr "Structure statistics"
 
 msgid "Root struktur"
-msgstr "Structure"
+msgstr "Root structure"
 
 msgid ""
 "Fakültə yaratmaq üçün bütün təşkilat scope-u və `unit.create` icazəsi "
@@ -24845,7 +24846,7 @@ msgid "Hələ fakültə yaradılmayıb."
 msgstr "No faculties have been created yet."
 
 msgid "Hələ kafedra yaradılmayıb."
-msgstr "No active request was found to cancel."
+msgstr "No departments have been created yet."
 
 msgctxt "organizations.roles"
 msgid "page_title"
@@ -25154,7 +25155,7 @@ msgid "action_next"
 msgstr "Next"
 
 msgid "Məlumat tapılmadı."
-msgstr "Text field was not found."
+msgstr "No data found."
 
 # --- "View as" (istifadəçi profilinə baxış) ---
 msgctxt "accounts.view_as"
@@ -25187,10 +25188,9 @@ msgctxt "accounts.view_as"
 msgid "exit_view"
 msgstr "Exit"
 
-#, fuzzy
 #| msgid "Ad"
 msgid "d"
-msgstr "Name"
+msgstr "d"
 
 #, python-brace-format
 msgid "{editor}: Editing failed"
@@ -25204,17 +25204,15 @@ msgstr "{editor}: Editing failed: {e}"
 msgid "Windows error: {error}"
 msgstr "Windows error: {error}"
 
-#, fuzzy
 #| msgctxt "blog.post.message"
 #| msgid "created"
 msgid "deprecated"
-msgstr "Post created successfully."
+msgstr "deprecated"
 
-#, fuzzy
 #| msgctxt "profile.publish_notification"
 #| msgid "optional"
 msgid "Options"
-msgstr "optional"
+msgstr "Options"
 
 #, python-brace-format
 msgid "Got unexpected extra argument ({args})"
@@ -25229,10 +25227,9 @@ msgstr ""
 msgid "Aborted!"
 msgstr "Aborted!"
 
-#, fuzzy
 #| msgid "Komanda"
 msgid "Commands"
-msgstr "Team"
+msgstr "Commands"
 
 msgid "Missing command."
 msgstr "Missing command."
@@ -25327,16 +25324,14 @@ msgstr "Invalid value: {message}"
 msgid "Invalid value for {param_hint}: {message}"
 msgstr "Invalid value for {param_hint}: {message}"
 
-#, fuzzy
 #| msgid "Assignment"
 msgid "Missing argument"
-msgstr "Assignment"
+msgstr "Missing argument"
 
-#, fuzzy
 #| msgctxt "exams.service.parsing.warning"
 #| msgid "missing_option"
 msgid "Missing option"
-msgstr "Option {option} was not found."
+msgstr "Missing option"
 
 msgid "Missing parameter"
 msgstr "Missing parameter"
@@ -25364,11 +25359,10 @@ msgstr "Unknown error"
 msgid "Could not open file {filename!r}: {message}"
 msgstr "Could not open file {filename!r}: {message}"
 
-#, fuzzy
 #| msgctxt "profile.notifications"
 #| msgid "message"
 msgid "Usage:"
-msgstr "Message"
+msgstr "Usage:"
 
 #, python-brace-format
 msgid "Invalid start character for option ({option})"
@@ -25391,19 +25385,17 @@ msgstr "Shell completion is not supported for Bash versions older than 4.4."
 msgid "Couldn't detect Bash version, shell completion is not supported."
 msgstr "Couldn't detect Bash version, shell completion is not supported."
 
-#, fuzzy
 #| msgid "Send confirmation"
 msgid "Repeat for confirmation"
-msgstr "Open notifications"
+msgstr "Repeat for confirmation"
 
 msgid "Error: The two entered values do not match."
 msgstr "Error: The two entered values do not match."
 
-#, fuzzy
 #| msgctxt "exams.template.coding_exam"
 #| msgid "Program input"
 msgid "Error: invalid input"
-msgstr "Program input"
+msgstr "Error: invalid input"
 
 msgid "Unknown color {colour!r}"
 msgstr "Unknown color {colour!r}"
@@ -25452,11 +25444,10 @@ msgstr "{value!r} is not a valid UUID."
 msgid "file"
 msgstr "File"
 
-#, fuzzy
 #| msgctxt "organizations.unit_type"
 #| msgid "directorate"
 msgid "directory"
-msgstr "Directorate"
+msgstr "directory"
 
 msgid "path"
 msgstr "path"
@@ -25489,26 +25480,23 @@ msgstr[1] "{len_type} values are required, but {len_value} were given."
 msgid "Unknown standard stream '{name}'"
 msgstr "Unknown standard stream '{name}'"
 
-#, fuzzy
 #| msgctxt "staff.management"
 #| msgid "Message"
 msgid "Messages"
-msgstr "Message"
+msgstr "Messages"
 
 msgid "Site Maps"
 msgstr "Site Maps"
 
-#, fuzzy
 #| msgctxt "exams.template.coding_exam"
 #| msgid "Main File"
 msgid "Static Files"
-msgstr "Main File"
+msgstr "Static Files"
 
-#, fuzzy
 #| msgctxt "nav"
 #| msgid "education"
 msgid "Syndication"
-msgstr "Education"
+msgstr "Syndication"
 
 #. Translators: String used to replace omitted page numbers in elided page
 #. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
@@ -25656,11 +25644,10 @@ msgstr ""
 msgid "Null characters are not allowed."
 msgstr "Null characters are not allowed."
 
-#, fuzzy
 #| msgctxt "assignment.modals"
 #| msgid "add"
 msgid "and"
-msgstr "Add"
+msgstr "and"
 
 #, python-format
 msgid "%(model_name)s with this %(field_labels)s already exists."
@@ -25711,11 +25698,10 @@ msgstr "Boolean (Either True or False)"
 msgid "String (up to %(max_length)s)"
 msgstr "String (up to %(max_length)s)"
 
-#, fuzzy
 #| msgctxt "exams.dashboard"
 #| msgid "meta_unlimited"
 msgid "String (unlimited)"
-msgstr "Unlimited"
+msgstr "String (unlimited)"
 
 msgid "Comma-separated integers"
 msgstr "Comma-separated integers"
@@ -25779,27 +25765,24 @@ msgstr ""
 msgid "Duration"
 msgstr "Duration"
 
-#, fuzzy
 #| msgctxt "organizations.settings"
 #| msgid "address"
 msgid "Email address"
-msgstr "Address"
+msgstr "Email address"
 
-#, fuzzy
 #| msgctxt "exams.template.coding_exam"
 #| msgid "File name"
 msgid "File path"
-msgstr "File name"
+msgstr "File path"
 
 #, python-format
 msgid "“%(value)s” value must be a float."
 msgstr "“%(value)s” value must be a float."
 
-#, fuzzy
 #| msgctxt "exams.template.supervision_detail"
 #| msgid "label_violation_number"
 msgid "Floating point number"
-msgstr "Violation"
+msgstr "Floating point number"
 
 #, python-format
 msgid "“%(value)s” value must be an integer."
@@ -25814,17 +25797,15 @@ msgstr "Big (8 byte) integer"
 msgid "Small integer"
 msgstr "Small integer"
 
-#, fuzzy
 #| msgctxt "organizations.settings"
 #| msgid "address"
 msgid "IPv4 address"
-msgstr "Address"
+msgstr "IPv4 address"
 
-#, fuzzy
 #| msgctxt "organizations.settings"
 #| msgid "address"
 msgid "IP address"
-msgstr "Address"
+msgstr "IP address"
 
 #, python-format
 msgid "“%(value)s” value must be either None, True or False."
@@ -25878,23 +25859,20 @@ msgstr "Raw binary data"
 msgid "“%(value)s” is not a valid UUID."
 msgstr "“%(value)s” is not a valid UUID."
 
-#, fuzzy
 #| msgctxt "accounts.register.js"
 #| msgid "label_university_identifier"
 msgid "Universally unique identifier"
-msgstr "University code / identifier"
+msgstr "Universally unique identifier"
 
-#, fuzzy
 #| msgctxt "exams.template.coding_exam"
 #| msgid "Files"
 msgid "File"
-msgstr "Files"
+msgstr "File"
 
-#, fuzzy
 #| msgctxt "exams.model.bank_question.field"
 #| msgid "image"
 msgid "Image"
-msgstr "Question image (optional)"
+msgstr "Image"
 
 msgid "A JSON object"
 msgstr "A JSON object"
@@ -25929,11 +25907,10 @@ msgstr "Many-to-many relationship"
 msgid ":?.!"
 msgstr ":?.!"
 
-#, fuzzy
 #| msgctxt "exams.view.extract_job.error"
 #| msgid "file_required"
 msgid "This field is required."
-msgstr "File is required."
+msgstr "This field is required."
 
 msgid "Enter a whole number."
 msgstr "Enter a whole number."
@@ -25947,11 +25924,10 @@ msgstr "Enter a valid time."
 msgid "Enter a valid date/time."
 msgstr "Enter a valid date/time."
 
-#, fuzzy
 #| msgctxt "live_exam.view.message"
 #| msgid "invalid_reaction"
 msgid "Enter a valid duration."
-msgstr "Select a valid reaction."
+msgstr "Enter a valid duration."
 
 #, python-brace-format
 msgid "The number of days must be between {min_days} and {max_days}."
@@ -25960,11 +25936,10 @@ msgstr "The number of days must be between {min_days} and {max_days}."
 msgid "No file was submitted. Check the encoding type on the form."
 msgstr "No file was submitted. Check the encoding type on the form."
 
-#, fuzzy
 #| msgctxt "exams.template.teacher_exam_results"
 #| msgid "filter_status_submitted"
 msgid "No file was submitted."
-msgstr "Submitted"
+msgstr "No file was submitted."
 
 msgid "The submitted file is empty."
 msgstr "The submitted file is empty."
@@ -26147,11 +26122,10 @@ msgstr "PM"
 msgid "AM"
 msgstr "AM"
 
-#, fuzzy
 #| msgctxt "supervision.config.choice.template"
 #| msgid "light"
 msgid "midnight"
-msgstr "Weight"
+msgstr "midnight"
 
 msgid "noon"
 msgstr "noon"
@@ -26192,30 +26166,26 @@ msgstr "Thu"
 msgid "Fri"
 msgstr "Fri"
 
-#, fuzzy
 #| msgid "Status"
 msgid "Sat"
-msgstr "Status"
+msgstr "Sat"
 
-#, fuzzy
 #| msgid "Student"
 msgid "Sun"
-msgstr "Student"
+msgstr "Sun"
 
-#, fuzzy
 #| msgctxt "exams.model.question.choice.difficulty_source"
 #| msgid "manual"
 msgid "January"
-msgstr "manual"
+msgstr "January"
 
 msgid "February"
 msgstr "February"
 
-#, fuzzy
 #| msgctxt "accounts.my_results_page"
 #| msgid "search"
 msgid "March"
-msgstr "Search"
+msgstr "March"
 
 msgid "April"
 msgstr "April"
@@ -26232,26 +26202,23 @@ msgstr "July"
 msgid "August"
 msgstr "August"
 
-#, fuzzy
 #| msgctxt "courses.partial.member_accordion"
 #| msgid "empty_members"
 msgid "September"
-msgstr "No member added yet."
+msgstr "September"
 
 msgid "October"
 msgstr "October"
 
-#, fuzzy
 #| msgctxt "membership_request.role"
 #| msgid "Member"
 msgid "November"
-msgstr "Member"
+msgstr "November"
 
-#, fuzzy
 #| msgctxt "membership_request.role"
 #| msgid "Member"
 msgid "December"
-msgstr "Member"
+msgstr "December"
 
 msgid "jan"
 msgstr "jan"
@@ -26271,25 +26238,22 @@ msgstr "may"
 msgid "jun"
 msgstr "jun"
 
-#, fuzzy
 #| msgctxt "courses.form.resource.placeholder"
 #| msgid "url"
 msgid "jul"
-msgstr "https://example.com/..."
+msgstr "jul"
 
-#, fuzzy
 #| msgid "ago"
 msgid "aug"
-msgstr "ago"
+msgstr "aug"
 
 msgid "sep"
 msgstr "sep"
 
-#, fuzzy
 #| msgctxt "blog.email.welcome_email"
 #| msgid "cta"
 msgid "oct"
-msgstr "Visit blog"
+msgstr "oct"
 
 msgid "nov"
 msgstr "nov"
@@ -26462,11 +26426,10 @@ msgid_plural "%(num)d minutes"
 msgstr[0] "%(num)d minute"
 msgstr[1] "%(num)d minutes"
 
-#, fuzzy
 #| msgctxt "exams.model.coding_test_case.choice.visibility"
 #| msgid "hidden"
 msgid "Forbidden"
-msgstr "Hidden"
+msgstr "Forbidden"
 
 msgid "CSRF verification failed. Request aborted."
 msgstr "CSRF verification failed. Request aborted."
@@ -26643,20 +26606,18 @@ msgstr[1] "No student has been selected."
 msgid "Search"
 msgstr "Search"
 
-#, fuzzy
 #| msgctxt "staff.management"
 #| msgid "Search"
 msgid "Search In"
-msgstr "Search"
+msgstr "Search In"
 
 msgid "Haystack"
 msgstr "Haystack"
 
-#, fuzzy
 #| msgctxt "staff.management"
 #| msgid "Search invites..."
 msgid "Search Queries"
-msgstr "Search teacher invites..."
+msgstr "Search Queries"
 
 msgid "Query"
 msgstr "Query"
@@ -26664,11 +26625,10 @@ msgstr "Query"
 msgid "Backend Alias"
 msgstr "Backend Alias"
 
-#, fuzzy
 #| msgctxt "assignment.notification.choice.type"
 #| msgid "deadline"
 msgid "Timeline"
-msgstr "Deadline"
+msgstr "Timeline"
 
 msgid "Kwargs"
 msgstr "Kwargs"
@@ -26726,17 +26686,15 @@ msgstr ""
 "Package name prefix, such as Maven groupid, Docker image owner, GitHub user "
 "or organization, etc."
 
-#, fuzzy
 #| msgctxt "core.errors.csrf"
 #| msgid "Refresh the page"
 msgid "Name of the package."
-msgstr "Refresh the page"
+msgstr "Name of the package."
 
-#, fuzzy
 #| msgctxt "core.errors.csrf"
 #| msgid "Refresh the page"
 msgid "Version of the package."
-msgstr "Refresh the page"
+msgstr "Version of the package."
 
 msgid ""
 "Extra qualifying data for a package such as the name of an OS, architecture,"
@@ -26752,11 +26710,10 @@ msgstr "Extra subpath within a package, relative to the package root."
 msgid "Value too long for field \"{field_name}\"."
 msgstr "Value too long for field \"{field_name}\"."
 
-#, fuzzy
 #| msgctxt "exams.form.group.error"
 #| msgid "org_required"
 msgid "required"
-msgstr "Cannot create/update a group without an active organization."
+msgstr "required"
 
 #, fuzzy
 #| msgid "Assignment"
@@ -26766,26 +26723,23 @@ msgstr "Assignment"
 msgid "(deprecated) "
 msgstr "(deprecated) "
 
-#, fuzzy
 #| msgctxt "profile.category_management"
 #| msgid "default"
 msgid "[default: {}]"
-msgstr "Default"
+msgstr "[default: {}]"
 
 msgid "[env var: {}]"
 msgstr "[env var: {}]"
 
-#, fuzzy
 #| msgctxt "exams.form.group.error"
 #| msgid "org_required"
 msgid "[required]"
-msgstr "Cannot create/update a group without an active organization."
+msgstr "[required]"
 
-#, fuzzy
 #| msgctxt "exams.template.coding_exam"
 #| msgid "Errors"
 msgid "Error"
-msgstr "Errors"
+msgstr "Error"
 
 msgid "Aborted."
 msgstr "Aborted."
@@ -27435,7 +27389,7 @@ msgid "Jurnal təsdiqə göndərildi."
 msgstr "The journal has been submitted for approval."
 
 msgid "Kafedra təsdiqi verildi."
-msgstr "Chair approval granted."
+msgstr "Department approval granted."
 
 msgid "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
 msgstr "Dean approval granted — grades are now official."
@@ -30347,7 +30301,7 @@ msgstr "Get to know %(site_brand_name)s"
 
 #. white-label brand rebrand (auto-appended, source-mirrored)
 msgid "%(site_brand_name)s loqo"
-msgstr "%(site_brand_name)s loqo"
+msgstr "%(site_brand_name)s logo"
 
 #. white-label brand rebrand (auto-appended, source-mirrored)
 msgid "%(site_brand_name)s platform xüsusiyyətləri"
@@ -31664,7 +31618,7 @@ msgid "imtahan / zal"
 msgstr "exam / hall"
 
 msgid "ixtisas axtar…"
-msgstr "search specialty…"
+msgstr "search specialization…"
 
 msgid "keşdən"
 msgstr "from cache"
@@ -31755,7 +31709,7 @@ msgid "İmtahanınız texniki səbəblə dayandırılıb"
 msgstr "Your exam has been stopped due to a technical reason"
 
 msgid "İxtisas"
-msgstr "Specialty"
+msgstr "Specialization"
 
 msgid "Əməliyyat audit jurnalına yazılır və tələbəyə dərhal bildirilir."
 msgstr ""

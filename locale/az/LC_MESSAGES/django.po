@@ -25321,7 +25321,7 @@ msgstr "Sərbəst iş"
 #| msgctxt "exams.service.parsing.warning"
 #| msgid "missing_option"
 msgid "Missing option"
-msgstr "{option} variantı tapılmadı."
+msgstr "Variant çatışmır"
 
 msgid "Missing parameter"
 msgstr "Missing parameter"

@@ -1,0 +1,2224 @@
+[
+{
+"i": 47,
+"az": "%(site_brand_name)s loqo",
+"en": "%(site_brand_name)s logo",
+"ru": "Логотип %(site_brand_name)s",
+"tr": "%(site_brand_name)s logosu",
+"reason": "untranslated"
+},
+{
+"i": 84,
+"az": "<strong>%(count)s</strong> kafedra",
+"en": "<strong>%(count)s</strong> departments",
+"ru": "<strong>%(count)s</strong> кафедр",
+"tr": "<strong>%(count)s</strong> bölüm",
+"reason": "untranslated"
+},
+{
+"i": 104,
+"az": "Ad və ya kod üzrə axtar",
+"en": "Search by name or code",
+"ru": "Поиск по названию или коду",
+"tr": "Ad veya koda göre ara",
+"reason": "shifted"
+},
+{
+"i": 124,
+"az": "Aktiv təşkilat tapılmadı.",
+"en": "No active organization found.",
+"ru": "Активная организация не найдена.",
+"tr": "Aktif kurum bulunamadı.",
+"reason": "shifted"
+},
+{
+"i": 126,
+"az": "Aktiv: %(count)s",
+"en": "Active: %(count)s",
+"ru": "Активные: %(count)s",
+"tr": "Aktif: %(count)s",
+"reason": "untranslated"
+},
+{
+"i": 131,
+"az": "Ana səhifəyə qayıt",
+"en": "Back to home page",
+"ru": "Вернуться на главную",
+"tr": "Ana sayfaya dön",
+"reason": "shifted"
+},
+{
+"i": 135,
+"az": "Anonim",
+"en": "Anonymous",
+"ru": "Аноним",
+"reason": "untranslated"
+},
+{
+"i": 136,
+"az": "Anonim tələbə",
+"en": "Anonymous student",
+"ru": "Анонимный студент",
+"tr": "Anonim öğrenci",
+"reason": "shifted"
+},
+{
+"i": 141,
+"az": "Apellyasiya müraciətləri",
+"en": "Appeal requests",
+"ru": "Заявки на апелляцию",
+"tr": "İtiraz başvuruları",
+"reason": "shifted"
+},
+{
+"i": 164,
+"az": "Axtarışa uyğun imtahan tapılmadı.",
+"en": "No exam matching your search was found.",
+"ru": "Экзамен, соответствующий поиску, не найден.",
+"tr": "Aramaya uygun sınav bulunamadı.",
+"reason": "shifted — hazırkı tərcümələr \"Text field was not found.\" deyir; istifadə yeri _unit_exams.html boş-axtarış mesajıdır"
+},
+{
+"i": 166,
+"az": "Axtarışa uyğun sual tapılmadı.",
+"en": "No question matching your search was found.",
+"ru": "Вопрос, соответствующий поиску, не найден.",
+"tr": "Aramaya uygun soru bulunamadı.",
+"reason": "shifted — eyni yanlış \"Text field was not found.\"; teacher_view_attempt.html sual axtarışı boş nəticəsi"
+},
+{
+"i": 168,
+"az": "Axtarışı təmizlə",
+"en": "Clear search",
+"ru": "Очистить поиск",
+"tr": "Aramayı temizle",
+"reason": "shifted — \"Axtarış\" (Search) tərcüməsi düşüb; bu, təmizləmə düyməsinin aria-label-ıdır"
+},
+{
+"i": 183,
+"az": "Bank",
+"ru": "Банк",
+"tr": "Banka",
+"reason": "untranslated — RU/TR latın \"Bank\" qalıb (TR-də \"bank\" = skamya); mövcud \"— Banka seçin —\" ilə uyğunlaşır"
+},
+{
+"i": 184,
+"az": "Bank adı və ya fənn üzrə axtar...",
+"en": "Search by bank name or subject...",
+"ru": "Поиск по названию банка или предмету...",
+"tr": "Banka adı veya derse göre ara...",
+"reason": "shifted — tərcümələr \"imtahan adı ilə axtar\" deyir və üç nöqtəni itirir"
+},
+{
+"i": 185,
+"az": "Bank yarat",
+"en": "Create bank",
+"ru": "Создать банк",
+"tr": "Banka oluştur",
+"reason": "untranslated — hər üç msgstr Azərbaycan dilində qalıb"
+},
+{
+"i": 186,
+"az": "Bankdan sual əlavə et — %(title)s",
+"en": "Add question from bank — %(title)s",
+"ru": "Добавить вопрос из банка — %(title)s",
+"tr": "Bankadan soru ekle — %(title)s",
+"reason": "shifted — tərcümələr \"Exam questions\" deyir; %(title)s placeholder-i qorunur"
+},
+{
+"i": 193,
+"az": "Baxış",
+"en": "View",
+"ru": "Просмотр",
+"tr": "Görüntüleme",
+"reason": "wrong-sense — yeganə istifadə labs/grade_submission.html:142 kilidli (read-only) başlığıdır, status \"Rassmotreno\" deyil; djangojs.po-dakı eyni açarla uyğunlaşır"
+},
+{
+"i": 197,
+"az": "Başlama vaxtı",
+"ru": "Время начала",
+"tr": "Başlangıç zamanı",
+"reason": "shifted — RU/TR \"hesabat vaxtı\" deyir; TR qonşu \"Son təhvil vaxtı\" = \"Son teslim zamanı\" ilə uyğun \"zamanı\" saxlandı (sahə tam datetime göstərir)"
+},
+{
+"i": 199,
+"az": "Başlamaq üçün yuxarıdan təşkilat seçin.",
+"en": "To get started, select an organization above.",
+"ru": "Чтобы начать, выберите организацию выше.",
+"tr": "Başlamak için yukarıdan bir kuruluş seçin.",
+"reason": "shifted — tərcümələr \"sorğu üçün təşkilat seçin\" deyir; superadmin org inspector boş vəziyyət qeydidir"
+},
+{
+"i": 202,
+"az": "Başlıq",
+"ru": "Заголовок",
+"tr": "Başlık",
+"reason": "shifted — RU/TR \"tərəfdaşlıq/əməkdaşlıq\" deyir; blog post idarəetmə cədvəlinin sütun adıdır (EN artıq \"Title\")"
+},
+{
+"i": 211,
+"az": "Bir neçə saniyə sonra yenidən yoxlayın",
+"en": "Check again in a few seconds",
+"ru": "Проверьте снова через несколько секунд",
+"tr": "Birkaç saniye sonra tekrar kontrol edin",
+"reason": "shifted — tərcümələr \"filtrləri dəyişin\" deyir; templates/errors/500.html retry pill-idir"
+},
+{
+"i": 218,
+"az": "Bloklanmış: %(count)s",
+"en": "Blocked: %(count)s",
+"ru": "Заблокировано: %(count)s",
+"tr": "Engellenen: %(count)s",
+"reason": "shifted — tərcümələr \"sual sayı\" deyir; _superadmin_user_management_content.html bloklanmış istifadəçi pill-idir, %(count)s qorunur"
+},
+{
+"i": 259,
+"az": "Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.",
+"en": "This post is still under review. The feedback will appear after approval.",
+"ru": "Этот пост ещё на стадии рассмотрения. Отзыв появится после одобрения.",
+"tr": "Bu gönderi hâlâ inceleme aşamasında. Geri bildirim onaydan sonra görünecek.",
+"reason": "shifted — tərcümələr tələbəyə göndərilən təsdiq mətnindən danışır; profil _posts.html moderasiya qeydidir"
+},
+{
+"i": 281,
+"az": "Bu tələbə üçün seçiləcək heç bir sual tapılmadı.",
+"en": "No questions were found to select for this student.",
+"ru": "Для этого студента не найдено ни одного вопроса для выбора.",
+"tr": "Bu öğrenci için seçilecek hiçbir soru bulunamadı.",
+"reason": "shifted — tərcümələr \"bu cəhd üçün apellyasiya olunacaq sual yoxdur\" deyir; labs/preview_randomization.html təsadüfi seçim önizləməsidir"
+},
+{
+"i": 292,
+"az": "Bölmə imtahanları",
+"tr": "Birim sınavları",
+"reason": "shifted (tr = 'Tüm sınavlar' = All exams)"
+},
+{
+"i": 297,
+"az": "Bütün fakültələr",
+"en": "All faculties",
+"ru": "Все факультеты",
+"tr": "Tüm fakülteler",
+"reason": "shifted (got 'All languages' from i=296)"
+},
+{
+"i": 299,
+"az": "Bütün icazələr (*)",
+"en": "All permissions (*)",
+"ru": "Все разрешения (*)",
+"tr": "Tüm izinler (*)",
+"reason": "shifted (got 'All languages')"
+},
+{
+"i": 304,
+"az": "Bütün qruplar",
+"en": "All groups",
+"ru": "Все группы",
+"tr": "Tüm gruplar",
+"reason": "shifted (got 'All statuses' from i=305)"
+},
+{
+"i": 306,
+"az": "Bütün təşkilatlar",
+"en": "All organizations",
+"ru": "Все организации",
+"tr": "Tüm kuruluşlar",
+"reason": "shifted (got 'All statuses')"
+},
+{
+"i": 308,
+"az": "Bütün çətinliklər",
+"en": "All difficulty levels",
+"ru": "Все уровни сложности",
+"tr": "Tüm zorluk seviyeleri",
+"reason": "shifted (got 'All languages')"
+},
+{
+"i": 334,
+"az": "Cavab mətni ən azı 10 simvol olmalıdır.",
+"en": "The reply text must be at least 10 characters.",
+"ru": "Текст ответа должен содержать не менее 10 символов.",
+"tr": "Cevap metni en az 10 karakter olmalıdır.",
+"reason": "wrong-sense (said 'Message', source is reply-text validation in contact_inbox.py)"
+},
+{
+"i": 345,
+"az": "Cavablarım",
+"en": "My answers",
+"ru": "Мои ответы",
+"tr": "Cevaplarım",
+"reason": "shifted (got 'Replied' from i=340); used in labs/assignments = student's own answers"
+},
+{
+"i": 346,
+"az": "Cavablarım (",
+"en": "My answers (",
+"ru": "Мои ответы (",
+"tr": "Cevaplarım (",
+"reason": "shifted (got 'Replied'); trailing ' (' preserved"
+},
+{
+"i": 347,
+"az": "Cavabsız",
+"en": "Unanswered",
+"ru": "Без ответа",
+"tr": "Cevapsız",
+"reason": "shifted (got 'Reply'); it is an exam-results column for unanswered questions"
+},
+{
+"i": 350,
+"az": "Cavabınızı buraya yazın...",
+"en": "Write your answer here...",
+"ru": "Напишите здесь свой ответ...",
+"tr": "Cevabınızı buraya yazın...",
+"reason": "wrong-sense (placeholder of assignment text_answer textarea, not a message box)"
+},
+{
+"i": 356,
+"az": "Commands",
+"en": "Commands",
+"ru": "Команды",
+"tr": "Komutlar",
+"reason": "wrong-sense (translated as 'Team' via AZ 'komanda'; msgid is the CLI section header)"
+},
+{
+"i": 373,
+"az": "Cəhd #%(number)s",
+"en": "Attempt #%(number)s",
+"ru": "Попытка №%(number)s",
+"tr": "Deneme #%(number)s",
+"reason": "wrong-sense (said 'Question'; cəhd = attempt)"
+},
+{
+"i": 383,
+"az": "Deaktiv et",
+"en": "Deactivate",
+"ru": "Деактивировать",
+"tr": "Devre dışı bırak",
+"reason": "shifted (had extra 'Yes,' from a confirm-button entry)"
+},
+{
+"i": 386,
+"az": "December",
+"en": "December",
+"ru": "Декабрь",
+"tr": "Aralık",
+"reason": "shifted (got 'Member')"
+},
+{
+"i": 391,
+"az": "Delegasiyanı al",
+"en": "Take the delegation",
+"ru": "Принять делегирование",
+"tr": "Delegasyonu al",
+"reason": "shifted (got 'Review appeal'; it is a permission-editor delegation button)"
+},
+{
+"i": 405,
+"az": "Dil idarəetməsi",
+"en": "Language management",
+"ru": "Управление языками",
+"tr": "Dil yönetimi",
+"reason": "shifted (got 'Education management platform'; it is the exam language manager title)"
+},
+{
+"i": 406,
+"az": "Dil variantları",
+"en": "Language variants",
+"ru": "Языковые варианты",
+"tr": "Dil varyantları",
+"reason": "shifted (got bare 'Options')"
+},
+{
+"i": 407,
+"az": "Dil üzrə",
+"en": "By language",
+"ru": "По языку",
+"tr": "Dile göre",
+"reason": "shifted (got 'Delete by language'; used as a stat label 'Dil üzrə:')"
+},
+{
+"i": 414,
+"az": "Download PDF",
+"en": "Download PDF",
+"ru": "Скачать PDF",
+"tr": "PDF indir",
+"reason": "shifted (says ZIP instead of PDF)"
+},
+{
+"i": 417,
+"az": "Düzgün / Sual",
+"en": "Correct / Questions",
+"ru": "Правильные / Вопросы",
+"tr": "Doğru / Soru",
+"reason": "shifted (got 'Correct answer'; it is a ratio column header)"
+},
+{
+"i": 421,
+"az": "Düzəliş Tələbi",
+"en": "Correction Request",
+"ru": "Запрос на исправление",
+"tr": "Düzeltme Talebi",
+"reason": "shifted (got 'No correction required.')"
+},
+{
+"i": 422,
+"az": "Düzəliş istə",
+"en": "Request correction",
+"ru": "Запросить исправление",
+"tr": "Düzeltme iste",
+"reason": "shifted (got 'No correction required.')"
+},
+{
+"i": 423,
+"az": "Düzəliş istənilsin?",
+"en": "Request a correction?",
+"ru": "Запросить исправление?",
+"tr": "Düzeltme istensin mi?",
+"reason": "shifted (got 'No correction required.'; it is a confirm-dialog title)"
+},
+{
+"i": 424,
+"az": "Düzəliş tələb et",
+"en": "Request correction",
+"ru": "Запросить исправление",
+"tr": "Düzeltme talep et",
+"reason": "shifted (got 'No correction required.')"
+},
+{
+"i": 425,
+"az": "Düzəliş tələb olunan",
+"en": "Requiring correction",
+"ru": "Требующие исправления",
+"tr": "Düzeltme gerekenler",
+"reason": "shifted (got 'No correction required.'; it is a filter option)"
+},
+{
+"i": 426,
+"az": "Düzəliş tələb olundu",
+"en": "Correction requested",
+"ru": "Исправление запрошено",
+"tr": "Düzeltme talep edildi",
+"reason": "shifted (got 'No correction required.'; it is a past-tense audit log action)"
+},
+{
+"i": 427,
+"az": "Düzəliş tələb olunur",
+"en": "Correction required",
+"ru": "Требуется исправление",
+"tr": "Düzeltme gerekiyor",
+"reason": "shifted (got 'No correction required.'; it is the NEEDS_CHANGES status label)"
+},
+{
+"i": 458,
+"az": "Elektron jurnal",
+"tr": "Elektronik yoklama defteri",
+"reason": "wrong-sense — TR \"jurnal\" lüğətə zidd; jurnal → TR yoklama defteri"
+},
+{
+"i": 460,
+"az": "Email address",
+"en": "Email address",
+"ru": "Адрес электронной почты",
+"tr": "E-posta adresi",
+"reason": "shifted — msgid \"Email address\", tərcümə isə sadəcə \"Address/Адрес/Adres\""
+},
+{
+"i": 462,
+"az": "Email təsdiqi",
+"en": "Email confirmation",
+"ru": "Подтверждение эл. почты",
+"tr": "E-posta doğrulama",
+"reason": "shifted — \"Confirm deletion\" tamam başqa mətndir"
+},
+{
+"i": 464,
+"az": "Emaili təsdiqlə",
+"en": "Confirm email",
+"ru": "Подтвердить эл. почту",
+"tr": "E-postayı doğrula",
+"reason": "shifted — \"Confirm deletion\" qonşu yazının tərcüməsidir"
+},
+{
+"i": 487,
+"az": "Enter a valid duration.",
+"en": "Enter a valid duration.",
+"ru": "Введите правильную продолжительность.",
+"tr": "Geçerli bir süre girin.",
+"reason": "shifted — \"Select a valid reaction.\" başqa mətndir"
+},
+{
+"i": 496,
+"az": "Error",
+"en": "Error",
+"ru": "Ошибка",
+"tr": "Hata",
+"reason": "shifted — cəm formaya (Errors/Ошибки/Hatalar) sürüşüb"
+},
+{
+"i": 497,
+"az": "Error: The two entered values do not match.",
+"ru": "Ошибка: два введённых значения не совпадают.",
+"tr": "Hata: Girilen iki değer eşleşmiyor.",
+"reason": "untranslated — RU/TR ingiliscə qalıb"
+},
+{
+"i": 498,
+"az": "Error: invalid input",
+"en": "Error: invalid input",
+"ru": "Ошибка: неверный ввод",
+"tr": "Hata: geçersiz girdi",
+"reason": "shifted — \"Program input\" başqa yazının tərcüməsidir"
+},
+{
+"i": 512,
+"az": "Fakültə adı",
+"en": "Faculty name",
+"ru": "Название факультета",
+"tr": "Fakülte adı",
+"reason": "shifted — \"Subject name/Название предмета\" fənn adıdır, fakültə deyil"
+},
+{
+"i": 513,
+"az": "Fakültə seçin",
+"en": "Select faculty",
+"ru": "Выберите факультет",
+"tr": "Fakülte seçin",
+"reason": "shifted — \"Choose file/Выбрать файл\""
+},
+{
+"i": 516,
+"az": "Fakültə yarat",
+"en": "Create faculty",
+"ru": "Создать факультет",
+"tr": "Fakülte oluştur",
+"reason": "shifted — \"Generate with AI\" tamamilə başqa mətndir"
+},
+{
+"i": 523,
+"az": "Fakültəni redaktə et",
+"en": "Edit faculty",
+"ru": "Редактировать факультет",
+"tr": "Fakülteyi düzenle",
+"reason": "shifted — \"Edit bank\" sual bankı yazısının tərcüməsidir"
+},
+{
+"i": 530,
+"az": "Faylı sil",
+"en": "Delete file",
+"ru": "Удалить файл",
+"tr": "Dosyayı sil",
+"reason": "shifted — \"Open file/Открыть файл\" qonşu yazıdır (dağıdıcı: sil düyməsi \"aç\" kimi görünür)"
+},
+{
+"i": 535,
+"az": "File",
+"en": "File",
+"ru": "Файл",
+"tr": "Dosya",
+"reason": "shifted — cəm formaya (Files/Файлы/Dosyalar) sürüşüb"
+},
+{
+"i": 537,
+"az": "File path",
+"en": "File path",
+"ru": "Путь к файлу",
+"tr": "Dosya yolu",
+"reason": "shifted — \"File name/Имя файла\" başqa mətndir"
+},
+{
+"i": 540,
+"az": "Filtri təmizlə",
+"en": "Clear filter",
+"ru": "Очистить фильтр",
+"tr": "Filtreyi temizle",
+"reason": "shifted — \"Confirm deletion\" tamamilə başqa mətndir"
+},
+{
+"i": 544,
+"az": "Filtrlərə uyğun sual tapılmadı.",
+"en": "No questions match the filters.",
+"ru": "Вопросы, соответствующие фильтрам, не найдены.",
+"tr": "Filtrelere uygun soru bulunamadı.",
+"reason": "shifted — \"Text field was not found.\""
+},
+{
+"i": 547,
+"az": "Filtrə uyğun post tapılmadı.",
+"en": "No posts match the filter.",
+"ru": "Посты, соответствующие фильтру, не найдены.",
+"tr": "Filtreye uygun gönderi bulunamadı.",
+"reason": "shifted — \"Text field was not found.\""
+},
+{
+"i": 550,
+"az": "Floating point number",
+"en": "Floating point number",
+"ru": "Число с плавающей точкой",
+"tr": "Kayan noktalı sayı",
+"reason": "shifted — \"Violation/Нарушение/İhlal\" başqa mətndir"
+},
+{
+"i": 551,
+"az": "Forbidden",
+"en": "Forbidden",
+"ru": "Запрещено",
+"tr": "Yasak",
+"reason": "shifted — \"Hidden/Скрыто/Gizli\" qonşu yazının tərcüməsidir"
+},
+{
+"i": 573,
+"az": "Geri qaytarılıb",
+"en": "Returned",
+"ru": "Возвращено",
+"tr": "İade edildi",
+"reason": "shifted — 'Reviewed/Рассмотрено' belongs to another msgid (also on i=903)"
+},
+{
+"i": 574,
+"az": "Geri qayıt",
+"en": "Go back",
+"ru": "Вернуться",
+"tr": "Geri dön",
+"reason": "shifted — translated as 'Bank name'"
+},
+{
+"i": 575,
+"az": "Geri qayıt və yenidən cəhd et",
+"en": "Go back and try again",
+"ru": "Вернитесь и попробуйте снова",
+"tr": "Geri dön ve tekrar dene",
+"reason": "shifted — 'Try again' is i=1381's translation"
+},
+{
+"i": 591,
+"az": "Göndərdiyim cavablar",
+"en": "My submitted answers",
+"ru": "Мои отправленные ответы",
+"tr": "Gönderdiğim cevaplar",
+"reason": "shifted — translated as 'Sending' (i=596)"
+},
+{
+"i": 595,
+"az": "Göndərilib:",
+"en": "Submitted:",
+"ru": "Отправлено:",
+"tr": "Gönderildi:",
+"reason": "placeholder — trailing colon of source missing in all targets"
+},
+{
+"i": 603,
+"az": "Görə bildiyiniz bütün sualların siyahısı.",
+"en": "A list of all the questions you can see.",
+"ru": "Список всех вопросов, которые вы можете видеть.",
+"tr": "Görebildiğiniz tüm soruların listesi.",
+"reason": "shifted — translated as 'Delete all questions in this language'"
+},
+{
+"i": 605,
+"az": "Göstəriləcək açıq paylaşım tapılmadı",
+"en": "No open share found to display",
+"ru": "Не найдено открытой публикации для отображения",
+"tr": "Gösterilecek açık paylaşım bulunamadı",
+"reason": "shifted — translated as 'No active request was found to cancel.'"
+},
+{
+"i": 618,
+"az": "Hamısını seç",
+"en": "Select all",
+"ru": "Выбрать все",
+"tr": "Tümünü seç",
+"reason": "shifted — got i=616 'Hamısı' → All/Все/Hepsi"
+},
+{
+"i": 636,
+"az": "Hesabı sil",
+"en": "Delete account",
+"ru": "Удалить аккаунт",
+"tr": "Hesabı sil",
+"reason": "shifted — 'Delete bank' (hesab = account here, cf. i=637)"
+},
+{
+"i": 639,
+"az": "Hesabınızı yenidən yoxlayın",
+"en": "Check your account again",
+"ru": "Проверьте свой аккаунт ещё раз",
+"tr": "Hesabınızı tekrar kontrol edin",
+"reason": "shifted — translated as 'Write your message...'"
+},
+{
+"i": 641,
+"az": "Heç bir post tapılmadı.",
+"en": "No posts were found.",
+"ru": "Записи не найдены.",
+"tr": "Hiç gönderi bulunamadı.",
+"reason": "shifted — translated as 'Text field was not found.'"
+},
+{
+"i": 646,
+"az": "Hələ feedback yoxdur.",
+"en": "No feedback yet.",
+"ru": "Отзывов пока нет.",
+"tr": "Henüz geri bildirim yok.",
+"reason": "shifted — translated as 'No appeals yet' (also missing final period)"
+},
+{
+"i": 647,
+"az": "Hələ heç bir dil variantı yoxdur.",
+"en": "There are no language variants yet.",
+"ru": "Языковых вариантов пока нет.",
+"tr": "Henüz hiçbir dil varyantı yok.",
+"reason": "shifted — translated as 'No appeals yet'"
+},
+{
+"i": 651,
+"az": "Hələ kafedra yaradılmayıb.",
+"en": "No departments have been created yet.",
+"ru": "Кафедры ещё не созданы.",
+"tr": "Henüz bölüm oluşturulmadı.",
+"reason": "shifted — translated as 'No active request was found to cancel.'"
+},
+{
+"i": 652,
+"az": "Hələ nəticə yoxdur",
+"en": "No results yet",
+"ru": "Результатов пока нет",
+"tr": "Henüz sonuç yok",
+"reason": "shifted — translated as 'No appeals yet'"
+},
+{
+"i": 653,
+"az": "Hələ sual yaratmamısınız.",
+"en": "You have not created any questions yet.",
+"ru": "Вы ещё не создали ни одного вопроса.",
+"tr": "Henüz hiç soru oluşturmadınız.",
+"reason": "shifted — translated as 'AI question generation failed.'"
+},
+{
+"i": 660,
+"az": "IP address",
+"en": "IP address",
+"ru": "IP-адрес",
+"tr": "IP adresi",
+"reason": "shifted — translated as plain 'Address'"
+},
+{
+"i": 663,
+"az": "IPv4 address",
+"en": "IPv4 address",
+"ru": "IPv4-адрес",
+"tr": "IPv4 adresi",
+"reason": "shifted — translated as plain 'Address'"
+},
+{
+"i": 669,
+"az": "Image",
+"en": "Image",
+"ru": "Изображение",
+"tr": "Görsel",
+"reason": "shifted — translated as 'Question image (optional)'"
+},
+{
+"i": 677,
+"az": "January",
+"en": "January",
+"ru": "Январь",
+"tr": "Ocak",
+"reason": "shifted — translated as 'manual' in all three languages"
+},
+{
+"i": 680,
+"az": "Jurnal düzəliş üçün geri qaytarıldı.",
+"tr": "Yoklama defteri düzeltilmek üzere iade edildi.",
+"reason": "untranslated — TR keeps AZ 'Jurnal'; glossary: jurnal → TR yoklama defteri"
+},
+{
+"i": 681,
+"az": "Jurnal təsdiqə göndərildi.",
+"tr": "Yoklama defteri onaya gönderildi.",
+"reason": "untranslated — TR keeps AZ 'Jurnal'"
+},
+{
+"i": 682,
+"az": "Jurnal yadda saxlanıldı (%(n)s xana).",
+"tr": "Yoklama defteri kaydedildi (%(n)s hücre).",
+"reason": "untranslated — TR keeps AZ 'Jurnal'"
+},
+{
+"i": 683,
+"az": "Jurnal yekunlaşdırıldı.",
+"tr": "Yoklama defteri sonuçlandırıldı.",
+"reason": "untranslated — TR keeps AZ 'Jurnal'"
+},
+{
+"i": 684,
+"az": "Jurnal yekunlaşdırılıb — dərs əlavə etmək olmaz.",
+"tr": "Yoklama defteri sonuçlandırıldı — ders eklenemez.",
+"reason": "untranslated — TR keeps AZ 'Jurnal'"
+},
+{
+"i": 685,
+"az": "Jurnal yekunlaşdırılıb — komponent redaktəsi bağlıdır.",
+"tr": "Yoklama defteri sonuçlandırıldı — bileşen düzenleme kapalı.",
+"reason": "untranslated — TR keeps AZ 'Jurnal'"
+},
+{
+"i": 686,
+"az": "Jurnal yekunlaşdırılıb — nəticə redaktəsi bağlıdır.",
+"tr": "Yoklama defteri sonuçlandırıldı — sonuç düzenleme kapalı.",
+"reason": "untranslated — TR keeps AZ 'Jurnal'"
+},
+{
+"i": 687,
+"az": "Jurnallarım",
+"tr": "Yoklama defterlerim",
+"reason": "wrong-sense — 'Not defterlerim' = my notebooks; glossary: jurnal → TR yoklama defteri"
+},
+{
+"i": 688,
+"az": "Kafedra",
+"en": "Department",
+"ru": "Кафедра",
+"tr": "Bölüm",
+"reason": "untranslated — msgstr left as AZ 'Kafedra' in all three"
+},
+{
+"i": 692,
+"az": "Kafedra təsdiqi verildi.",
+"en": "Department approval granted.",
+"reason": "wrong-sense — glossary: kafedra → EN department, not 'chair'"
+},
+{
+"i": 693,
+"az": "Kafedra yarat",
+"en": "Create department",
+"ru": "Создать кафедру",
+"tr": "Bölüm oluştur",
+"reason": "untranslated — msgstr left as AZ 'Kafedra yarat'"
+},
+{
+"i": 696,
+"az": "Kafedra:",
+"en": "Department:",
+"ru": "Кафедра:",
+"tr": "Bölüm:",
+"reason": "untranslated — msgstr left as AZ 'Kafedra:'"
+},
+{
+"i": 699,
+"az": "Kafedranı redaktə et",
+"en": "Edit department",
+"ru": "Редактировать кафедру",
+"tr": "Bölümü düzenle",
+"reason": "shifted — translated as 'Edit bank'"
+},
+{
+"i": 700,
+"az": "Kafedranı sil",
+"en": "Delete department",
+"ru": "Удалить кафедру",
+"tr": "Bölümü sil",
+"reason": "shifted — translated as 'Delete bank'"
+},
+{
+"i": 702,
+"az": "Kateqoriya: %(category)s",
+"en": "Category: %(category)s",
+"ru": "Категория: %(category)s",
+"tr": "Kategori: %(category)s",
+"reason": "untranslated — msgstr left as AZ in all three"
+},
+{
+"i": 703,
+"az": "Kateqoriyaları idarə et",
+"en": "Manage categories",
+"ru": "Управление категориями",
+"tr": "Kategorileri yönet",
+"reason": "shifted — translated as 'Search questions'"
+},
+{
+"i": 710,
+"az": "Kod",
+"ru": "Код",
+"tr": "Kod",
+"reason": "shifted — RU/TR say 'Team' (Команда / Ekip); EN 'Code' is correct"
+},
+{
+"i": 712,
+"az": "Kod (opsional)",
+"en": "Code (optional)",
+"ru": "Код (необязательно)",
+"tr": "Kod (isteğe bağlı)",
+"reason": "shifted — translated only as 'optional'"
+},
+{
+"i": 726,
+"az": "Kurs performansı",
+"en": "Course performance",
+"ru": "Успеваемость по курсу",
+"tr": "Kurs performansı",
+"reason": "shifted"
+},
+{
+"i": 729,
+"az": "Kurs:",
+"en": "Course:",
+"ru": "Курс:",
+"reason": "untranslated"
+},
+{
+"i": 745,
+"az": "March",
+"en": "March",
+"ru": "Март",
+"tr": "Mart",
+"reason": "shifted"
+},
+{
+"i": 753,
+"az": "Mesaj tapılmadı.",
+"en": "Message not found.",
+"ru": "Сообщение не найдено.",
+"tr": "Mesaj bulunamadı.",
+"reason": "shifted"
+},
+{
+"i": 759,
+"az": "Mesajınız:",
+"en": "Your message:",
+"ru": "Ваше сообщение:",
+"tr": "Mesajınız:",
+"reason": "shifted"
+},
+{
+"i": 763,
+"az": "Messages",
+"en": "Messages",
+"ru": "Сообщения",
+"tr": "Mesajlar",
+"reason": "shifted"
+},
+{
+"i": 765,
+"az": "Missing argument",
+"en": "Missing argument",
+"ru": "Отсутствует аргумент",
+"tr": "Eksik argüman",
+"reason": "shifted"
+},
+{
+"i": 767,
+"az": "Missing option",
+"en": "Missing option",
+"ru": "Отсутствует опция",
+"tr": "Eksik seçenek",
+"reason": "placeholder"
+},
+{
+"i": 777,
+"az": "Mövcud bankdan sual əlavə et",
+"en": "Add a question from the existing bank",
+"ru": "Добавить вопрос из существующего банка",
+"tr": "Mevcut bankadan soru ekle",
+"reason": "shifted"
+},
+{
+"i": 778,
+"az": "Mövcud dillər",
+"en": "Available languages",
+"ru": "Доступные языки",
+"tr": "Mevcut diller",
+"reason": "shifted"
+},
+{
+"i": 804,
+"az": "Müəllim təsdiqi gözləyir",
+"en": "Awaiting teacher approval",
+"ru": "Ожидает подтверждения преподавателя",
+"tr": "Öğretmen onayı bekliyor",
+"reason": "shifted"
+},
+{
+"i": 815,
+"az": "Məlumat tapılmadı.",
+"en": "No data found.",
+"ru": "Данные не найдены.",
+"tr": "Veri bulunamadı.",
+"reason": "shifted"
+},
+{
+"i": 818,
+"az": "Məlumatı yenidən yoxlayın",
+"en": "Check the information again",
+"ru": "Проверьте данные ещё раз",
+"tr": "Bilgiyi tekrar kontrol edin",
+"reason": "shifted"
+},
+{
+"i": 819,
+"az": "Mənim cavablarım",
+"en": "My answers",
+"ru": "Мои ответы",
+"tr": "Cevaplarım",
+"reason": "shifted"
+},
+{
+"i": 832,
+"az": "Name of the package.",
+"en": "Name of the package.",
+"ru": "Название пакета.",
+"tr": "Paketin adı.",
+"reason": "shifted"
+},
+{
+"i": 846,
+"az": "No file was submitted.",
+"en": "No file was submitted.",
+"ru": "Ни одного файла не было отправлено.",
+"tr": "Hiç dosya gönderilmedi.",
+"reason": "shifted"
+},
+{
+"i": 858,
+"az": "November",
+"en": "November",
+"ru": "Ноябрь",
+"tr": "Kasım",
+"reason": "shifted"
+},
+{
+"i": 860,
+"az": "Növ",
+"ru": "Тип",
+"tr": "Tür",
+"reason": "shifted"
+},
+{
+"i": 861,
+"az": "Nəticə axtar...",
+"en": "Search results...",
+"ru": "Поиск по результатам...",
+"tr": "Sonuç ara...",
+"reason": "shifted"
+},
+{
+"i": 862,
+"az": "Nəticə tapılmadı",
+"en": "No results found",
+"ru": "Результатов не найдено",
+"tr": "Sonuç bulunamadı",
+"reason": "shifted"
+},
+{
+"i": 863,
+"az": "Nəticə tapılmadı.",
+"en": "No results found.",
+"ru": "Результатов не найдено.",
+"tr": "Sonuç bulunamadı.",
+"reason": "shifted"
+},
+{
+"i": 867,
+"az": "Nəticələr",
+"en": "Results",
+"ru": "Результаты",
+"tr": "Sonuçlar",
+"reason": "shifted"
+},
+{
+"i": 868,
+"az": "Nəticələr:",
+"en": "Results:",
+"ru": "Результаты:",
+"tr": "Sonuçlar:",
+"reason": "shifted"
+},
+{
+"i": 881,
+"az": "Options",
+"en": "Options",
+"ru": "Параметры",
+"tr": "Seçenekler",
+"reason": "shifted"
+},
+{
+"i": 902,
+"az": "Paylaşılıb",
+"en": "Published",
+"ru": "Опубликовано",
+"tr": "Paylaşıldı",
+"reason": "shifted"
+},
+{
+"i": 903,
+"az": "Paylaşımlar",
+"en": "Posts",
+"ru": "Публикации",
+"tr": "Paylaşımlar",
+"reason": "shifted"
+},
+{
+"i": 907,
+"az": "Permission seç",
+"en": "Select permission",
+"ru": "Выберите разрешение",
+"tr": "İzin seçin",
+"reason": "shifted"
+},
+{
+"i": 927,
+"az": "Post silinsin?",
+"en": "Delete the post?",
+"ru": "Удалить пост?",
+"tr": "Gönderi silinsin mi?",
+"reason": "untranslated"
+},
+{
+"i": 929,
+"az": "Post təsdiqlənsin?",
+"en": "Approve the post?",
+"ru": "Утвердить пост?",
+"tr": "Gönderi onaylansın mı?",
+"reason": "shifted"
+},
+{
+"i": 931,
+"az": "Post İdarəetmə",
+"en": "Post Management",
+"ru": "Управление постами",
+"tr": "Gönderi Yönetimi",
+"reason": "shifted"
+},
+{
+"i": 937,
+"az": "Postların idarəetməsi (",
+"en": "Post management (",
+"ru": "Управление постами (",
+"tr": "Gönderi yönetimi (",
+"reason": "shifted"
+},
+{
+"i": 938,
+"az": "Postu redaktə et",
+"en": "Edit post",
+"ru": "Редактировать пост",
+"tr": "Gönderiyi düzenle",
+"reason": "shifted"
+},
+{
+"i": 959,
+"az": "Qaralama",
+"en": "Draft",
+"ru": "Черновик",
+"tr": "Taslak",
+"reason": "shifted"
+},
+{
+"i": 960,
+"az": "Qayda",
+"en": "Rule",
+"ru": "Правило",
+"tr": "Kural",
+"reason": "untranslated"
+},
+{
+"i": 963,
+"az": "Qaytarılıb",
+"en": "Returned",
+"ru": "Возвращено",
+"tr": "İade edildi",
+"reason": "shifted"
+},
+{
+"i": 968,
+"az": "Qeydiyyat: %(joined_at)s",
+"en": "Registered: %(joined_at)s",
+"ru": "Регистрация: %(joined_at)s",
+"tr": "Kayıt: %(joined_at)s",
+"reason": "untranslated"
+},
+{
+"i": 975,
+"az": "Qiymətləndirmə",
+"en": "Assessment",
+"ru": "Оценивание",
+"tr": "Değerlendirme",
+"reason": "shifted"
+},
+{
+"i": 978,
+"az": "Qiymətləndirməni təsdiqləyin",
+"en": "Confirm the assessment",
+"ru": "Подтвердите оценивание",
+"tr": "Değerlendirmeyi onaylayın",
+"reason": "shifted"
+},
+{
+"i": 979,
+"az": "Qoşulma tarixi",
+"en": "Join date",
+"ru": "Дата присоединения",
+"tr": "Katılma tarihi",
+"reason": "shifted"
+},
+{
+"i": 995,
+"az": "Redaktə et",
+"en": "Edit",
+"ru": "Редактировать",
+"tr": "Düzenle",
+"reason": "shifted"
+},
+{
+"i": 1000,
+"az": "Repeat for confirmation",
+"en": "Repeat for confirmation",
+"ru": "Повторите для подтверждения",
+"tr": "Onay için tekrarlayın",
+"reason": "shifted"
+},
+{
+"i": 1004,
+"az": "Review public contact form messages and reply from the official %(site_brand_name)s mailboxes.",
+"ru": "Просматривайте сообщения из публичной контактной формы и отвечайте с официальных почтовых ящиков %(site_brand_name)s.",
+"tr": "Herkese açık iletişim formu mesajlarını inceleyin ve resmi %(site_brand_name)s posta kutularından yanıtlayın.",
+"reason": "untranslated"
+},
+{
+"i": 1006,
+"az": "Rol",
+"en": "Role",
+"reason": "untranslated"
+},
+{
+"i": 1012,
+"az": "Rolları idarə et",
+"en": "Manage roles",
+"ru": "Управление ролями",
+"tr": "Rolleri yönet",
+"reason": "shifted"
+},
+{
+"i": 1013,
+"az": "Rolları idarə et haqqında",
+"en": "About managing roles",
+"ru": "Об управлении ролями",
+"tr": "Rol yönetimi hakkında",
+"reason": "shifted"
+},
+{
+"i": 1016,
+"az": "Root struktur",
+"en": "Root structure",
+"ru": "Корневая структура",
+"tr": "Kök yapı",
+"reason": "shifted"
+},
+{
+"i": 1029,
+"az": "Rəy əlavə edilməyib.",
+"en": "No feedback added.",
+"ru": "Отзыв не добавлен.",
+"tr": "Geri bildirim eklenmedi.",
+"reason": "shifted"
+},
+{
+"i": 1036,
+"az": "Sat",
+"en": "Sat",
+"ru": "Сб",
+"tr": "Cmt",
+"reason": "shifted"
+},
+{
+"i": 1042,
+"az": "Search In",
+"en": "Search In",
+"ru": "Искать в",
+"tr": "Şurada ara",
+"reason": "shifted"
+},
+{
+"i": 1043,
+"az": "Search Queries",
+"en": "Search Queries",
+"ru": "Поисковые запросы",
+"tr": "Arama sorguları",
+"reason": "shifted"
+},
+{
+"i": 1044,
+"az": "Search name, email, message, file...",
+"en": "Search name, email, message, file...",
+"ru": "Поиск по имени, email, сообщению, файлу...",
+"tr": "Ad, e-posta, mesaj, dosya ara...",
+"reason": "shifted"
+},
+{
+"i": 1051,
+"az": "Send confirmation",
+"en": "Send confirmation",
+"ru": "Отправить подтверждение",
+"tr": "Onay gönder",
+"reason": "shifted"
+},
+{
+"i": 1056,
+"az": "September",
+"en": "September",
+"ru": "Сентябрь",
+"tr": "Eylül",
+"reason": "shifted"
+},
+{
+"i": 1059,
+"az": "Server xətası",
+"en": "Server error",
+"ru": "Ошибка сервера",
+"tr": "Sunucu hatası",
+"reason": "shifted"
+},
+{
+"i": 1060,
+"az": "Seçilib:",
+"en": "Selected:",
+"ru": "Выбрано:",
+"tr": "Seçildi:",
+"reason": "shifted"
+},
+{
+"i": 1062,
+"az": "Seçilmiş filterlərə uyğun istifadəçi tapılmadı.",
+"en": "No users found matching the selected filters.",
+"ru": "Пользователи, соответствующие выбранным фильтрам, не найдены.",
+"tr": "Seçilen filtrelere uygun kullanıcı bulunamadı.",
+"reason": "shifted"
+},
+{
+"i": 1069,
+"az": "Seçilənləri əlavə et",
+"en": "Add selected",
+"ru": "Добавить выбранные",
+"tr": "Seçilenleri ekle",
+"reason": "shifted"
+},
+{
+"i": 1071,
+"az": "Seçimi təmizlə",
+"en": "Clear selection",
+"ru": "Очистить выбор",
+"tr": "Seçimi temizle",
+"reason": "shifted"
+},
+{
+"i": 1075,
+"az": "Sil",
+"en": "Delete",
+"ru": "Удалить",
+"tr": "Sil",
+"reason": "shifted"
+},
+{
+"i": 1077,
+"az": "Silinmiş: %(count)s",
+"en": "Deleted: %(count)s",
+"ru": "Удалено: %(count)s",
+"tr": "Silinen: %(count)s",
+"reason": "shifted"
+},
+{
+"i": 1080,
+"az": "Silmə səbəbi",
+"en": "Deletion reason",
+"ru": "Причина удаления",
+"tr": "Silme nedeni",
+"reason": "shifted"
+},
+{
+"i": 1112,
+"az": "Static Files",
+"en": "Static Files",
+"ru": "Статические файлы",
+"tr": "Statik dosyalar",
+"reason": "shifted"
+},
+{
+"i": 1116,
+"az": "Status:",
+"en": "Status:",
+"ru": "Статус:",
+"tr": "Durum:",
+"reason": "shifted"
+},
+{
+"i": 1117,
+"az": "String (unlimited)",
+"en": "String (unlimited)",
+"ru": "Строка (без ограничений)",
+"tr": "Dizgi (sınırsız)",
+"reason": "shifted"
+},
+{
+"i": 1123,
+"az": "Student note",
+"en": "Student note",
+"ru": "Заметка студента",
+"tr": "Öğrenci notu",
+"reason": "shifted"
+},
+{
+"i": 1126,
+"az": "Sual bankları",
+"en": "Question banks",
+"ru": "Банки вопросов",
+"tr": "Soru bankaları",
+"reason": "shifted"
+},
+{
+"i": 1128,
+"az": "Sual formatı",
+"en": "Question format",
+"ru": "Формат вопроса",
+"tr": "Soru formatı",
+"reason": "shifted"
+},
+{
+"i": 1129,
+"az": "Sual mətnində axtar",
+"en": "Search in question text",
+"ru": "Поиск по тексту вопроса",
+"tr": "Soru metninde ara",
+"reason": "shifted"
+},
+{
+"i": 1132,
+"az": "Sual və ya cavab üzrə axtar",
+"en": "Search by question or answer",
+"ru": "Поиск по вопросу или ответу",
+"tr": "Soru veya cevaba göre ara",
+"reason": "shifted"
+},
+{
+"i": 1136,
+"az": "Suallar bankına bax",
+"en": "View question bank",
+"ru": "Просмотреть банк вопросов",
+"tr": "Soru bankasını görüntüle",
+"reason": "shifted"
+},
+{
+"i": 1137,
+"az": "Suallar bankından seç",
+"en": "Select from question bank",
+"ru": "Выбрать из банка вопросов",
+"tr": "Soru bankasından seç",
+"reason": "shifted"
+},
+{
+"i": 1143,
+"az": "Sualları Word kimi yüklə",
+"en": "Upload questions as Word",
+"ru": "Загрузите вопросы в Word",
+"tr": "Soruları Word olarak yükle",
+"reason": "shifted"
+},
+{
+"i": 1144,
+"az": "Sualların dili",
+"en": "Question language",
+"ru": "Язык вопросов",
+"tr": "Soru dili",
+"reason": "shifted"
+},
+{
+"i": 1150,
+"az": "Sun",
+"en": "Sun",
+"ru": "Вс",
+"tr": "Paz",
+"reason": "shifted"
+},
+{
+"i": 1156,
+"az": "Syndication",
+"en": "Syndication",
+"ru": "Синдикация",
+"tr": "Yayın akışı",
+"reason": "shifted"
+},
+{
+"i": 1162,
+"az": "Sınaq imtahanı sorğusu tapılmadı.",
+"en": "Trial exam request not found.",
+"ru": "Запрос на пробный экзамен не найден.",
+"tr": "Deneme sınavı talebi bulunamadı.",
+"reason": "shifted"
+},
+{
+"i": 1167,
+"az": "Sıralama",
+"en": "Sorting",
+"ru": "Сортировка",
+"tr": "Sıralama",
+"reason": "shifted"
+},
+{
+"i": 1168,
+"az": "Səbəb",
+"en": "Reason",
+"ru": "Причина",
+"tr": "Neden",
+"reason": "shifted"
+},
+{
+"i": 1171,
+"az": "Səhifə tapılmadı",
+"en": "Page not found",
+"ru": "Страница не найдена",
+"tr": "Sayfa bulunamadı",
+"reason": "shifted"
+},
+{
+"i": 1178,
+"az": "Tapılan suallar:",
+"en": "Questions found:",
+"ru": "Найденные вопросы:",
+"tr": "Bulunan sorular:",
+"reason": "shifted"
+},
+{
+"i": 1181,
+"az": "Tarixdən",
+"en": "From date",
+"ru": "С даты",
+"tr": "Başlangıç tarihi",
+"reason": "shifted"
+},
+{
+"i": 1212,
+"az": "This field is required.",
+"en": "This field is required.",
+"ru": "Это поле обязательно.",
+"tr": "Bu alan zorunludur.",
+"reason": "shifted"
+},
+{
+"i": 1218,
+"az": "Timeline",
+"en": "Timeline",
+"ru": "Хронология",
+"tr": "Zaman çizelgesi",
+"reason": "shifted"
+},
+{
+"i": 1222,
+"az": "Toplu sual əlavə et",
+"en": "Bulk add questions",
+"ru": "Массовое добавление вопросов",
+"tr": "Toplu soru ekle",
+"reason": "shifted"
+},
+{
+"i": 1255,
+"az": "Tələbə və ya cavab mətni axtar",
+"en": "Search student or answer text",
+"ru": "Поиск по студенту или тексту ответа",
+"tr": "Öğrenci veya yanıt metni ara",
+"reason": "shifted"
+},
+{
+"i": 1260,
+"az": "Tələbə:",
+"en": "Student:",
+"ru": "Студент:",
+"tr": "Öğrenci:",
+"reason": "shifted"
+},
+{
+"i": 1265,
+"az": "Təqdim edilib",
+"en": "Submitted",
+"ru": "Отправлено",
+"tr": "Gönderildi",
+"reason": "shifted"
+},
+{
+"i": 1267,
+"az": "Təsdiq edin",
+"en": "Confirm",
+"ru": "Подтвердите",
+"tr": "Onaylayın",
+"reason": "shifted"
+},
+{
+"i": 1269,
+"az": "Təsdiq gözləyir",
+"en": "Pending approval",
+"ru": "Ожидает подтверждения",
+"tr": "Onay bekliyor",
+"reason": "shifted"
+},
+{
+"i": 1270,
+"az": "Təsdiq gözləyən",
+"en": "Awaiting approval",
+"ru": "Ожидающие подтверждения",
+"tr": "Onay bekleyen",
+"reason": "shifted"
+},
+{
+"i": 1271,
+"az": "Təsdiq qeyd edildi və %(email)s ünvanına göndərilməyə çalışılır.",
+"en": "The confirmation was saved and delivery to %(email)s is being attempted.",
+"ru": "Подтверждение сохранено, выполняется попытка отправки на %(email)s.",
+"tr": "Onay kaydedildi ve %(email)s adresine gönderilmeye çalışılıyor.",
+"reason": "wrong-sense"
+},
+{
+"i": 1273,
+"az": "Təsdiqlə",
+"en": "Confirm",
+"ru": "Подтвердить",
+"tr": "Onayla",
+"reason": "shifted"
+},
+{
+"i": 1274,
+"az": "Təsdiqlə və paylaş",
+"en": "Confirm and share",
+"ru": "Подтвердить и поделиться",
+"tr": "Onayla ve paylaş",
+"reason": "shifted"
+},
+{
+"i": 1276,
+"az": "Təsdiqləndi",
+"en": "Approved",
+"ru": "Подтверждено",
+"tr": "Onaylandı",
+"reason": "shifted"
+},
+{
+"i": 1277,
+"az": "Təsdiqlənənlər",
+"en": "Approved",
+"ru": "Подтверждённые",
+"tr": "Onaylananlar",
+"reason": "shifted"
+},
+{
+"i": 1279,
+"az": "Təyin edilməyib",
+"en": "Not assigned",
+"ru": "Не назначено",
+"tr": "Atanmamış",
+"reason": "shifted"
+},
+{
+"i": 1284,
+"az": "Təşkilat",
+"en": "Organization",
+"ru": "Организация",
+"tr": "Kuruluş",
+"reason": "shifted"
+},
+{
+"i": 1285,
+"az": "Təşkilat axtar",
+"en": "Search organization",
+"ru": "Поиск организации",
+"tr": "Kuruluş ara",
+"reason": "shifted"
+},
+{
+"i": 1289,
+"az": "Təşkilat fəaliyyəti",
+"en": "Organization activity",
+"ru": "Активность организации",
+"tr": "Kuruluş etkinliği",
+"reason": "shifted"
+},
+{
+"i": 1290,
+"az": "Təşkilat girişləri",
+"en": "Organization access",
+"ru": "Доступ к организациям",
+"tr": "Kuruluş erişimleri",
+"reason": "shifted"
+},
+{
+"i": 1294,
+"az": "Təşkilat təsdiqi gözlənilir",
+"en": "Awaiting organization approval",
+"ru": "Ожидается подтверждение организации",
+"tr": "Kuruluş onayı bekleniyor",
+"reason": "shifted"
+},
+{
+"i": 1295,
+"az": "Təşkilat təsdiqi gözlənilir.",
+"en": "Awaiting organization approval.",
+"ru": "Ожидается подтверждение организации.",
+"tr": "Kuruluş onayı bekleniyor.",
+"reason": "shifted"
+},
+{
+"i": 1297,
+"az": "Təşkilat:",
+"en": "Organization:",
+"ru": "Организация:",
+"tr": "Kuruluş:",
+"reason": "shifted"
+},
+{
+"i": 1298,
+"az": "Təşkilata əlavə et",
+"en": "Add to organization",
+"ru": "Добавить в организацию",
+"tr": "Kuruluşa ekle",
+"reason": "shifted"
+},
+{
+"i": 1299,
+"az": "Təşkilatda aktiv müəllim üzvü tapılmadı.",
+"en": "No active teacher member found in the organization.",
+"ru": "В организации не найден активный участник-преподаватель.",
+"tr": "Kuruluşta aktif öğretmen üyesi bulunamadı.",
+"reason": "wrong-sense"
+},
+{
+"i": 1301,
+"az": "Təşkilatdan çıx",
+"tr": "Kuruluştan ayrıl",
+"reason": "shifted"
+},
+{
+"i": 1305,
+"az": "URL-ni yenidən yoxlayın",
+"en": "Check the URL again",
+"ru": "Проверьте URL ещё раз",
+"tr": "URL'yi tekrar kontrol edin",
+"reason": "shifted"
+},
+{
+"i": 1307,
+"az": "Universally unique identifier",
+"en": "Universally unique identifier",
+"ru": "Универсальный уникальный идентификатор",
+"tr": "Evrensel benzersiz tanımlayıcı",
+"reason": "shifted"
+},
+{
+"i": 1319,
+"az": "Uploaded PDF",
+"en": "Uploaded PDF",
+"ru": "Загруженный PDF",
+"tr": "Yüklenen PDF",
+"reason": "shifted"
+},
+{
+"i": 1320,
+"az": "Usage:",
+"en": "Usage:",
+"ru": "Использование:",
+"tr": "Kullanım:",
+"reason": "shifted"
+},
+{
+"i": 1329,
+"az": "Variant yoxdur",
+"en": "No options",
+"ru": "Вариантов нет",
+"tr": "Seçenek yok",
+"reason": "shifted"
+},
+{
+"i": 1331,
+"az": "Vaxt bitdi.",
+"en": "Time is up.",
+"ru": "Время вышло.",
+"tr": "Süre doldu.",
+"reason": "untranslated"
+},
+{
+"i": 1332,
+"az": "Version of the package.",
+"en": "Version of the package.",
+"ru": "Версия пакета.",
+"tr": "Paketin sürümü.",
+"reason": "shifted"
+},
+{
+"i": 1349,
+"az": "Yadda saxlanılır...",
+"en": "Saving...",
+"ru": "Сохранение...",
+"tr": "Kaydediliyor...",
+"reason": "wrong-sense"
+},
+{
+"i": 1353,
+"az": "Yanlış sorğu göndərildi",
+"en": "An invalid request was sent",
+"ru": "Отправлен неверный запрос",
+"tr": "Geçersiz istek gönderildi",
+"reason": "shifted"
+},
+{
+"i": 1354,
+"az": "Yaradılma",
+"en": "Created",
+"ru": "Создано",
+"tr": "Oluşturulma",
+"reason": "shifted"
+},
+{
+"i": 1355,
+"az": "Yaradılıb",
+"en": "Created",
+"ru": "Создано",
+"tr": "Oluşturuldu",
+"reason": "shifted"
+},
+{
+"i": 1362,
+"az": "Yeni",
+"en": "New",
+"ru": "Новое",
+"reason": "untranslated"
+},
+{
+"i": 1363,
+"az": "Yeni dil əlavə et",
+"en": "Add a new language",
+"ru": "Добавить новый язык",
+"tr": "Yeni dil ekle",
+"reason": "shifted"
+},
+{
+"i": 1364,
+"az": "Yeni fakültə",
+"en": "New faculty",
+"ru": "Новый факультет",
+"tr": "Yeni fakülte",
+"reason": "shifted"
+},
+{
+"i": 1365,
+"az": "Yeni fakültə yarat",
+"en": "Create a new faculty",
+"ru": "Создать новый факультет",
+"tr": "Yeni fakülte oluştur",
+"reason": "shifted"
+},
+{
+"i": 1367,
+"az": "Yeni kafedra",
+"en": "New department",
+"ru": "Новая кафедра",
+"tr": "Yeni bölüm",
+"reason": "untranslated"
+},
+{
+"i": 1368,
+"az": "Yeni kafedra yarat",
+"en": "Create a new department",
+"ru": "Создать новую кафедру",
+"tr": "Yeni bölüm oluştur",
+"reason": "untranslated"
+},
+{
+"i": 1371,
+"az": "Yeni post yayımlandı",
+"en": "A new post has been published",
+"ru": "Опубликован новый пост",
+"tr": "Yeni gönderi yayımlandı",
+"reason": "shifted"
+},
+{
+"i": 1388,
+"az": "Yenidən yoxla və yadda saxla",
+"en": "Review again and save",
+"ru": "Проверить снова и сохранить",
+"tr": "Yeniden incele ve kaydet",
+"reason": "shifted"
+},
+{
+"i": 1392,
+"az": "Yenidən yoxlama üçün qalan vaxt:",
+"en": "Time left for re-review:",
+"ru": "Осталось времени для повторной проверки:",
+"tr": "Yeniden inceleme için kalan süre:",
+"reason": "shifted"
+},
+{
+"i": 1394,
+"az": "Yenilənir...",
+"en": "Refreshing...",
+"ru": "Обновляется...",
+"tr": "Yenileniyor...",
+"reason": "wrong-sense"
+},
+{
+"i": 1401,
+"az": "Yoxla",
+"en": "Review",
+"ru": "Проверить",
+"tr": "İncele",
+"reason": "untranslated"
+},
+{
+"i": 1402,
+"az": "Yoxla və yadda saxla",
+"en": "Review and save",
+"ru": "Проверить и сохранить",
+"tr": "İncele ve kaydet",
+"reason": "shifted"
+},
+{
+"i": 1403,
+"az": "Yoxlama bağlanıb.",
+"en": "The review is closed.",
+"ru": "Проверка закрыта.",
+"tr": "İnceleme kapatılmıştır.",
+"reason": "shifted"
+},
+{
+"i": 1408,
+"az": "Yoxlanılır",
+"en": "Under review",
+"ru": "Проверяется",
+"tr": "İnceleniyor",
+"reason": "wrong-sense"
+},
+{
+"i": 1411,
+"az": "Yüklə",
+"en": "Download",
+"ru": "Скачать",
+"tr": "İndir",
+"reason": "shifted"
+},
+{
+"i": 1435,
+"az": "Zəhmət olmasa səbəbi yazın.",
+"en": "Please enter the reason.",
+"ru": "Пожалуйста, укажите причину.",
+"tr": "Lütfen nedeni yazın.",
+"reason": "shifted"
+},
+{
+"i": 1440,
+"az": "[default: {}]",
+"en": "[default: {}]",
+"ru": "[по умолчанию: {}]",
+"tr": "[varsayılan: {}]",
+"reason": "placeholder"
+},
+{
+"i": 1442,
+"az": "[required]",
+"en": "[required]",
+"ru": "[обязательно]",
+"tr": "[zorunlu]",
+"reason": "shifted"
+},
+{
+"i": 1445,
+"az": "and",
+"en": "and",
+"ru": "и",
+"tr": "ve",
+"reason": "shifted"
+},
+{
+"i": 1447,
+"az": "aug",
+"en": "aug",
+"ru": "авг",
+"tr": "ağu",
+"reason": "shifted"
+},
+{
+"i": 1453,
+"az": "d",
+"en": "d",
+"ru": "д",
+"tr": "g",
+"reason": "shifted"
+},
+{
+"i": 1464,
+"az": "deprecated",
+"en": "deprecated",
+"ru": "устарело",
+"tr": "kullanımdan kaldırıldı",
+"reason": "shifted"
+},
+{
+"i": 1466,
+"az": "directory",
+"en": "directory",
+"ru": "каталог",
+"tr": "dizin",
+"reason": "wrong-sense"
+},
+{
+"i": 1476,
+"az": "hazırda:",
+"en": "currently:",
+"ru": "сейчас:",
+"tr": "şu anda:",
+"reason": "shifted"
+},
+{
+"i": 1485,
+"az": "ixtisas axtar…",
+"en": "search specialization…",
+"tr": "uzmanlık ara…",
+"reason": "wrong-sense"
+},
+{
+"i": 1487,
+"az": "jul",
+"en": "jul",
+"ru": "июл",
+"tr": "tem",
+"reason": "shifted"
+},
+{
+"i": 1497,
+"az": "midnight",
+"en": "midnight",
+"ru": "полночь",
+"tr": "gece yarısı",
+"reason": "shifted"
+},
+{
+"i": 1504,
+"az": "oct",
+"en": "oct",
+"ru": "окт",
+"tr": "eki",
+"reason": "shifted"
+},
+{
+"i": 1513,
+"az": "required",
+"en": "required",
+"ru": "обязательно",
+"tr": "zorunlu",
+"reason": "shifted"
+},
+{
+"i": 1514,
+"az": "resourceFormModal tapılmadı!",
+"en": "resourceFormModal not found!",
+"ru": "resourceFormModal не найден!",
+"tr": "resourceFormModal bulunamadı!",
+"reason": "shifted"
+},
+{
+"i": 1517,
+"az": "san.",
+"en": "sec.",
+"ru": "сек.",
+"tr": "sn.",
+"reason": "untranslated"
+},
+{
+"i": 1519,
+"az": "seçilib",
+"en": "selected",
+"ru": "выбрано",
+"tr": "seçildi",
+"reason": "shifted"
+},
+{
+"i": 1529,
+"az": "test sualı",
+"en": "test question",
+"ru": "тестовый вопрос",
+"tr": "test sorusu",
+"reason": "shifted"
+},
+{
+"i": 1544,
+"az": "yazılı sual",
+"en": "written question",
+"ru": "письменный вопрос",
+"tr": "yazılı soru",
+"reason": "shifted"
+},
+{
+"i": 1573,
+"az": "Öz hesabınızın blokunu bu bölmədən aça bilməzsiniz.",
+"en": "You cannot unblock your own account from this section.",
+"ru": "Вы не можете разблокировать собственную учётную запись в этом разделе.",
+"tr": "Kendi hesabınızın engelini bu bölümden kaldıramazsınız.",
+"reason": "Cari tərcümə tamamilə başqa sətrindir (\"Log in to your account and start from the Exams section\"). Mənbə apps/accounts/views/account_management.py:376 — blokun açılması xətası; təklif mənbəyə uyğundur."
+},
+{
+"i": 1577,
+"az": "Ümumi müddət",
+"en": "Total duration",
+"ru": "Общая продолжительность",
+"tr": "Toplam süre",
+"reason": "Cari dəyər \"General note / Общее примечание / Genel not\" — sürüşmüş. Mənbə exams/teacher/teacher_check_attempt.html:57 vaxt kartının etiketidir → müddət."
+},
+{
+"i": 1581,
+"az": "Üzv sayı",
+"en": "Member count",
+"ru": "Количество участников",
+"tr": "Üye sayısı",
+"reason": "Cari dəyər \"Question count / Количество вопросов\" — sürüşmüş. Mənbə _superadmin_organizations_content.html:25 cədvəl başlığıdır (təşkilat üzvləri)."
+},
+{
+"i": 1591,
+"az": "İmtahan Nəzarəti",
+"en": "Exam Supervision",
+"ru": "Наблюдение за экзаменом",
+"tr": "Sınav Gözetimi",
+"reason": "Cari dəyər sadəcə \"Exams/Экзамены/Sınavlar\" — sürüşmüş. Sətir supervision_monitor linkidir; lüğətin nəzarətçi→invigilator/наблюдатель/gözetmen ailəsinə uyğundur."
+},
+{
+"i": 1595,
+"az": "İmtahan cəhdlərim",
+"en": "My exam attempts",
+"ru": "Мои экзаменационные попытки",
+"tr": "Sınav denemelerim",
+"reason": "Cari dəyər \"Exams\" — sürüşmüş. Mənbə exams/student/student_exam_history.html:119 səhifə başlığıdır; cəhd→attempt/попытка/deneme lüğətə uyğun."
+},
+{
+"i": 1598,
+"az": "İmtahan idarəetməsi və nəzarət",
+"en": "Exam management and monitoring",
+"ru": "Управление экзаменами и контроль",
+"tr": "Sınav yönetimi ve izleme",
+"reason": "django.po-dakı cari dəyər \"Exams and assessment\" — sürüşmüş. Eyni etiket həm _permission_editor_content.html:179, həm də permission_editor/labels.js:94 vasitəsilə göstərilir; təklifdəki \"supervision/наблюдение/gözetim\" əvəzinə artıq düzgün olan djangojs variantına uyğunlaşdırdım ki, eyni etiket iki cür görünməsin."
+},
+{
+"i": 1599,
+"az": "İmtahan məlumatı",
+"ru": "Информация об экзамене",
+"tr": "Sınav bilgisi",
+"reason": "ru/tr cari dəyər \"Экзамены/Sınavlar\" — sürüşmüş; en artıq düzgündür (\"Exam information\") və təklifdə də toxunulmayıb."
+},
+{
+"i": 1602,
+"az": "İmtahan növü / format",
+"en": "Exam type / format",
+"ru": "Тип экзамена / формат",
+"tr": "Sınav türü / format",
+"reason": "Cari dəyərlərdə \"/ format\" hissəsi tamamilə itib (\"Exam types\", \"Типов экзаменов\", \"Sınav türü\"); təklif mənbənin hər iki komponentini saxlayır."
+},
+{
+"i": 1607,
+"az": "İmtahan, müəllif və ya kurs axtar",
+"en": "Search exam, author or course",
+"ru": "Поиск экзамена, автора или курса",
+"tr": "Sınav, yazar veya kurs ara",
+"reason": "Cari \"Search by exam name\" axtarışın yalnız bir ölçüsünü göstərir; mənbə (_unit_exams.html:28 placeholder) üç sahəni sadalayır."
+},
+{
+"i": 1608,
+"az": "İmtahana başla",
+"ru": "Начать экзамен",
+"tr": "Sınava başla",
+"reason": "Kontekstsiz yazının ru/tr dəyəri \"Экзамены/Sınavlar\" — sürüşmüş; en artıq \"Start exam\" olduğu üçün təklifdə yoxdur. Digər kontekstli variantlarla da uzlaşır."
+},
+{
+"i": 1609,
+"az": "İmtahana qayıt",
+"en": "Back to exam",
+"ru": "Вернуться к экзамену",
+"tr": "Sınava dön",
+"reason": "Cari dəyər \"Exams\" — sürüşmüş. Mənbə exam_language_manager.html:24 və exam_bank_picker.html:20 — geri ox ikonlu qayıdış linki."
+},
+{
+"i": 1622,
+"az": "İstifadə qaydası",
+"en": "Usage rules",
+"ru": "Правила использования",
+"tr": "Kullanım kuralları",
+"reason": "Cari dəyər \"User/Пользователь/Kullanıcı\" — sürüşmüş. Mənbə _permission_editor_content.html:72 — istifadə təlimatı blokunun aria-label-ı."
+},
+{
+"i": 1624,
+"az": "İstifadəçi adı",
+"en": "Username",
+"ru": "Имя пользователя",
+"tr": "Kullanıcı adı",
+"reason": "Kontekstsiz yazı \"User\" kimi qalıb (sürüşmə); exams.template.final_entry kontekstli eyni sətir artıq \"Username\"dir — təklif onunla uzlaşır."
+},
+{
+"i": 1631,
+"az": "İxtisas",
+"en": "Specialization",
+"tr": "Uzmanlık",
+"reason": "Lüğət məcburidir: ixtisas→specialization/uzmanlık. Cari \"Specialty\" və xüsusilə tr \"Program\" lüğətə ziddir; ru artıq \"Специальность\" olduğu üçün toxunulmayıb."
+},
+{
+"i": 1652,
+"az": "Əlavə olunur...",
+"en": "Adding...",
+"ru": "Добавляется...",
+"tr": "Ekleniyor...",
+"reason": "Cari dəyər \"✓ Added/Добавлено/Eklendi\" — bitmiş hal, halbuki mənbə role_assignment/_scripts.html:10 data-adding, yəni davam edən proses göstəricisidir. Üç nöqtə mənbədəki kimi ASCII saxlanılıb."
+},
+{
+"i": 1661,
+"az": "Əməliyyat təsdiqi hazırlanmadı.",
+"en": "The operation confirmation could not be prepared.",
+"ru": "Не удалось подготовить подтверждение операции.",
+"tr": "İşlem onayı hazırlanamadı.",
+"reason": "Cari dəyər \"Text field was not found.\" — tamamilə başqa mesaj (sürüşmə). Mənbə role_assignment/_scripts.html:8 data-prepare-error."
+},
+{
+"i": 1663,
+"az": "Əməliyyatlar",
+"en": "Actions",
+"ru": "Действия",
+"tr": "İşlemler",
+"reason": "Cari dəyər tək haldadır (\"Action/Действие/İşlem\"), mənbə cəm haldadır — cədvəl sütunu başlığı üçün düzgün forma cəmdir."
+},
+{
+"i": 1664,
+"az": "Əməliyyatı təsdiqlə",
+"en": "Confirm the action",
+"ru": "Подтвердить операцию",
+"tr": "İşlemi onayla",
+"reason": "Cari \"Confirm deletion\" mənbədə olmayan \"silmə\" mənasını daşıyır; mənbə _role_assignment_content.html:267 ümumi əməliyyat təsdiqi modalının başlığıdır (yalnız silmə üçün deyil)."
+},
+{
+"i": 1668,
+"az": "Ən son göndərilən",
+"en": "Most recently sent",
+"ru": "Сначала недавно отправленные",
+"tr": "En son gönderilen",
+"reason": "Cari dəyər \"Sender/Отправитель/Gönderen\" — sürüşmüş. Mənbə _review_results_content.html:54 sıralama seçimidir (value=\"newest\")."
+},
+{
+"i": 1669,
+"az": "Ən tez göndərilən",
+"en": "Earliest sent",
+"ru": "Сначала ранее отправленные",
+"tr": "En erken gönderilen",
+"reason": "Cari dəyər \"Sender\" — sürüşmüş və 1668 ilə eynidir. Mənbə _review_results_content.html:55 sıralama seçimidir (value=\"oldest\")."
+},
+{
+"i": 1673,
+"az": "Əvvəlcə mövcud təşkilatdan çıxın",
+"en": "Leave your current organization first",
+"ru": "Сначала покиньте текущую организацию",
+"tr": "Önce mevcut kuruluşunuzdan ayrılın",
+"reason": "Cari tərcümədə mənbədə olmayan \", then accept the new invitation\" əlavəsi var — o, ayrıca msgid-dir (invitations.py:78). Bu yazı _profile_org_invites.html:38-də qısa tooltip-dir. tr-də lüğətə uyğun \"kuruluş\"."
+},
+{
+"i": 1679,
+"az": "— Təşkilat seçin —",
+"tr": "— Kuruluş seçin —",
+"reason": "Lüğət məcburidir: təşkilat→kuruluş; cari tr \"Kurum\" ziddir. en/ru artıq düzgündür. Em-tire simvolları mənbədəki kimi saxlanılıb."
+}
+]
