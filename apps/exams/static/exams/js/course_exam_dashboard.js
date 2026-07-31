@@ -20,6 +20,21 @@
     var submitInFlight = false;
     var config = configElement.dataset;
 
+    // Fon sürüşməsini bloklamaq — Bootstrap-ın `body.modal-open` kilidi bəzi
+    // SPA-scroll kontekstlərində fonu tam saxlamır (bax exam_wizard.css:109
+    // `html.exam-modal-open`). `examCreateEditModal`-ın öz JS-i (entry.js) bu
+    // kilidi qoyur, bu modal isə QOYMURDU — nəticədə sehrbaz açıq olanda
+    // arxa səhifə hələ də scroll oluna bilirdi (2026-08-01 hesabatı: "çöldən
+    // scroll edəndə fərqli davranır").
+    if (editorModalElement) {
+      editorModalElement.addEventListener("shown.bs.modal", function () {
+        document.documentElement.classList.add("exam-modal-open");
+      });
+      editorModalElement.addEventListener("hidden.bs.modal", function () {
+        document.documentElement.classList.remove("exam-modal-open");
+      });
+    }
+
     function loadingMarkup() {
       return '<div class="create-exam-modal-loading">' + (config.loadingText || "Yuklenir...") + "</div>";
     }

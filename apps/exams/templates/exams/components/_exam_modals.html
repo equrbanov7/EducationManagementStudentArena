@@ -1,6 +1,18 @@
 {% load i18n static %}
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/exam_modals.css' %}">
+{% comment %}
+  2026-08-01 fix: bu partial `#createExamModalForm`-u (sehrbaz markası,
+  _create_exam_modal_form.html) `#courseExamEditorModal`-a yükləyir, amma
+  sehrbazın YERLƏŞMƏ CSS-ini (rail/pane/footer, .exam-wizard { height:
+  min(680px,86vh) }) heç vaxt bağlamırdı — yalnız `profile.html` və bəzi digər
+  səhifələr bu iki faylı öz-özlərinə bağlayırdı. Nəticə: bu modaldan açılan
+  sehrbazda `.exam-wizard` sadə blok kimi render olunur (display:grid YOX),
+  hündürlüyü MƏHDUDLAŞDIRILMIR və alt naviqasiya paneli (Növbəti/Ləğv et)
+  səhifənin sonuna düşüb görünmür idi.
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
+<link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260707-wizard2">
 
 {% if is_owner or user_role == 'teacher' %}
 
@@ -80,16 +92,25 @@
 </div>
 {% endif %}
 
-<div class="modal fade" id="courseExamEditorModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content course-exam-editor-modal">
-            <div class="modal-header course-exam-editor-modal__header">
-                <h5 class="modal-title" id="courseExamEditorModalTitle">
-                    {% trans "heading_create_exam" context "exams.template.create_exam_modal" %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body course-exam-editor-modal__body" id="courseExamEditorModalBody">
+{% comment %}
+  DİQQƏT (2026-08-01 fix): bu modal `examCreateEditModal`-la EYNİ sehrbaz formunu
+  (_create_exam_modal_form.html) yükləyir, amma öz köhnə (pre-wizard) qabığını
+  saxlamışdı — `modal-dialog-scrollable` + `.course-exam-editor-modal__body`-nin
+  `max-height: calc(100vh - 180px)` qaydası sehrbazın öz `.exam-wizard { height:
+  min(680px, 86vh) }` + daxili `.ew-pane-body` scroll-u ilə TOQQUŞURDU: iki iç-içə
+  scroll konteyneri yaranırdı və "Növbəti/Ləğv et" alt paneli (.ew-pane-foot)
+  DAXİLİ scroll-dan kənarda qalıb görünmür idi — real pəncərə hündürlüyü ~860px-dən
+  az olan demək olar bütün hallarda (adi noutbuk ekranları). Həll: `examCreateEditModal`-ın
+  artıq sübut olunmuş qabığını təkrarla (`exam-wizard-modal` + `modal-dialog-centered`
+  + `modal-body p-0`, ayrıca modal-header yox — sehrbazın öz rail başlığı/bağlama
+  düyməsi kifayətdir). Başlıq elementi JS-in gözlədiyi guard üçün DOM-da qalır
+  (course_exam_dashboard.js:493 `!editorModalTitle` yoxlanışı), sadəcə görünməz.
+{% endcomment %}
+<div class="modal fade exam-create-edit-modal exam-wizard-modal" id="courseExamEditorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <h5 class="modal-title visually-hidden" id="courseExamEditorModalTitle"></h5>
+            <div class="modal-body p-0" id="courseExamEditorModalBody">
                 <div class="create-exam-modal-loading">
                     {% trans "loading_form" context "exams.template.create_exam_modal" %}
                 </div>
