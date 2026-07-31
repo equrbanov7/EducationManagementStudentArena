@@ -79,6 +79,12 @@ _USER_PAD: int = int(os.environ.get("LOAD_USER_PAD", "4") or 4)
 #: worker başına fərqli verilir (workflow bunu avtomatik edir).
 _user_cursor = itertools.count(int(os.environ.get("LOAD_USER_OFFSET", "0") or 0))
 
+#: `nginx`-i keçib app konteynerinə birbaşa vuranda `--host` xam konteyner IP-si
+#: olur. Django `ALLOWED_HOSTS` xam IP-ni tanımır və `DisallowedHost` → 400
+#: qaytarır. Bu, `Host` başlığını ayrıca ötürməklə həll olunur — `--host` yalnız
+#: TCP bağlantısı üçün ünvandır, `Host` başlığı isə Django-nun gördüyü addır.
+_HOST_HEADER: str = os.environ.get("LOAD_HOST_HEADER", "")
+
 #: LAN prod-u SAN self-signed sertifikatla işləyir. Sertifikat yoxlaması yalnız
 #: `localhost`-a vuranda söndürülür (trafik maşından çıxmır) — kənar hədəfə
 #: heç vaxt yoxlamasız vurmuruq.
@@ -98,6 +104,8 @@ class _TlsAwareHttpUser(HttpUser):
     def on_start(self):
         if _INSECURE_TLS:
             self.client.verify = False
+        if _HOST_HEADER:
+            self.client.headers.update({"Host": _HOST_HEADER})
 
 
 # ---------------------------------------------------------------------------
@@ -162,7 +170,11 @@ class PingUser(FastHttpUser):
 
     @task
     def ping(self):
-        with self.client.get("/ping/", catch_response=True) as resp:
+        # `FastHttpSession`-in (geventhttpclient əsaslı) `HttpUser`-in
+        # `requests.Session`-dan fərqli olaraq `.headers` atributu YOXDUR —
+        # sabit başlıq hər sorğuya ayrıca ötürülməlidir.
+        extra = {"Host": _HOST_HEADER} if _HOST_HEADER else None
+        with self.client.get("/ping/", catch_response=True, headers=extra) as resp:
             if resp.status_code != 200:
                 resp.failure(f"Expected 200, got {resp.status_code}")
 
