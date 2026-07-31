@@ -4,36 +4,78 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}
+        Bölmə CSS-i İCAZƏLİ bölmələrə bağlanıb (aktiv bölməyə YOX): SPA panel
+        səhifə yeniləmədən istənilən icazəli bölməyə keçə bilər, ona görə şərt
+        `allowed_sections` üzərindədir. Əvvəllər bu blokdakı 31 faylın hamısı
+        rolundan asılı olmayaraq HƏR istifadəçiyə göndərilirdi — tələbə
+        superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
+        yükləyirdi (2026-07-31 auditi).
+    {% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260621-section-ui">
-    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+    {% if 'statistics' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
+    {% endif %}
+    {% if 'superadmin-users' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
+    {% endif %}
+    {% if 'superadmin-ai' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
+    {% endif %}
+    {% if 'assigned-exams' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+    {% endif %}
+    {% if 'my-courses' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
+    {% endif %}
+    {% if 'groups' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}?v=20260517-1">
+    {% endif %}
+    {% if 'my-exams' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260707-wizard2">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260710-appeals-ux">
+    {% endif %}
+    {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
+    {% endif %}
+    {% if 'my-subjects' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260705-1">
+    {% endif %}
+    {% if 'my-transcript' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260704-1">
+    {% endif %}
+    {% if 'overall-academic' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-4">
+    {% endif %}
+    {% if 'academic-records' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260720-2">
+    {% endif %}
+    {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260715-appeal-batch">
+    {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
+    {% if 'my-journal' in allowed_sections or 'grade-approvals' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
-    <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-teach">
+    {% endif %}
+    {% if 'my-schedule' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
+    {% endif %}
+    {% if 'academic-calendar' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
+    {% endif %}
+    {% if 'analytics' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
+    {% endif %}
 {% endblock %}
 
 {% block content %}
