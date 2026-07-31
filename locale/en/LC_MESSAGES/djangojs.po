@@ -2213,3 +2213,658 @@ msgstr "Your exam has been paused."
 
 msgid "%(message)s Səbəb: %(reason)s"
 msgstr "%(message)s Reason: %(reason)s"
+
+msgid "Disk"
+msgstr "Disk"
+
+msgid "Uptime"
+msgstr "Uptime"
+
+msgid "Konteynerlər"
+msgstr "Containers"
+
+msgid "işlək"
+msgstr "running"
+
+msgid "Sorğu axını"
+msgstr "Request rate"
+
+msgid "5xx nisbəti"
+msgstr "5xx rate"
+
+msgid "p95 gecikmə"
+msgstr "p95 latency"
+
+msgid "işləyir"
+msgstr "running"
+
+msgid "DAYANIB"
+msgstr "STOPPED"
+
+msgid "Endpoint yoxlamaları"
+msgstr "Endpoint probes"
+
+msgid "PROBLEM"
+msgstr "PROBLEM"
+
+msgid "Son backup"
+msgstr "Last backup"
+
+msgid "əvvəl"
+msgstr "ago"
+
+msgid "Aktiv imtahanlar"
+msgstr "Active exams"
+
+msgid "İmtahandakı tələbələr"
+msgstr "Students in exam"
+
+msgid "Açıq insidentlər"
+msgstr "Open incidents"
+
+msgid "Təhlükəsizlik (24s)"
+msgstr "Security (24h)"
+
+msgid "Monitorinq hədəfləri (Prometheus job-ları)"
+msgstr "Monitoring targets (Prometheus jobs)"
+
+msgid "CPU nüvələri"
+msgstr "CPU cores"
+
+msgid "Load 1/5/15"
+msgstr "Load 1/5/15"
+
+msgid "Load doluluğu"
+msgstr "Load saturation"
+
+msgid "Disk boş"
+msgstr "Disk free"
+
+msgid "Inode boş"
+msgstr "Inode free"
+
+msgid "Proseslər"
+msgstr "Processes"
+
+msgid "Fayl deskriptorları"
+msgstr "File descriptors"
+
+msgid "Load (1 dəq)"
+msgstr "Load (1 min)"
+
+msgid "Disk istifadəsi %"
+msgstr "Disk usage %"
+
+msgid "Node exporter şəbəkəsi (B/s) — RX/TX"
+msgstr "Node exporter network (B/s) — RX/TX"
+
+msgid "Konteyner məlumatı yoxdur (cAdvisor işə düşməyib?)"
+msgstr "No container data (cAdvisor not started?)"
+
+msgid "Konteyner"
+msgstr "Container"
+
+msgid "Limit"
+msgstr "Limit"
+
+msgid "Restart (24s)"
+msgstr "Restarts (24h)"
+
+msgid "Image"
+msgstr "Image"
+
+msgid "Məlumat yoxdur"
+msgstr "No data"
+
+msgid "(15 dəq)"
+msgstr "(15 min)"
+
+msgid "Sorğu axını (req/s)"
+msgstr "Request rate (req/s)"
+
+msgid "5xx nisbəti %"
+msgstr "5xx rate %"
+
+msgid "p95 gecikmə (s)"
+msgstr "p95 latency (s)"
+
+msgid "p99 gecikmə (s)"
+msgstr "p99 latency (s)"
+
+msgid "Ən yavaş endpoint-lər (orta, 30 dəq)"
+msgstr "Slowest endpoints (avg, 30 min)"
+
+msgid "Ən çox 5xx verən endpoint-lər (30 dəq)"
+msgstr "Endpoints with most 5xx (30 min)"
+
+msgid "xəta"
+msgstr "errors"
+
+msgid "Bağlantılar"
+msgstr "Connections"
+
+msgid "Aktiv / Boşda"
+msgstr "Active / Idle"
+
+msgid "Cache hit"
+msgstr "Cache hit"
+
+msgid "Baza ölçüsü"
+msgstr "Database size"
+
+msgid "Deadlock (1s)"
+msgstr "Deadlocks (1h)"
+
+msgid "Temp fayllar (1s)"
+msgstr "Temp files (1h)"
+
+msgid "Backup yaşı"
+msgstr "Backup age"
+
+msgid "PgBouncer (session mode — RLS üçün dəyişdirilmir)"
+msgstr "PgBouncer (session mode — not changed, required by RLS)"
+
+msgid "Aktiv klientlər"
+msgstr "Active clients"
+
+msgid "Gözləyən klientlər"
+msgstr "Waiting clients"
+
+msgid "Aktiv server bağlantıları"
+msgstr "Active server connections"
+
+msgid "Boş server bağlantıları"
+msgstr "Idle server connections"
+
+msgid "Max gözləmə"
+msgstr "Max wait"
+
+msgid "Bağlantı sayı"
+msgstr "Connection count"
+
+msgid "Tranzaksiya/s"
+msgstr "Transactions/s"
+
+msgid "Yaddaş"
+msgstr "Memory"
+
+msgid "Klientlər"
+msgstr "Clients"
+
+msgid "Bloklanmış"
+msgstr "Blocked"
+
+msgid "Hit nisbəti"
+msgstr "Hit ratio"
+
+msgid "Evicted (cəmi)"
+msgstr "Evicted (total)"
+
+msgid "Aktiv / Reserved"
+msgstr "Active / Reserved"
+
+msgid "Növbə uzunluğu"
+msgstr "Queue length"
+
+msgid "Statistika yaşı"
+msgstr "Stats age"
+
+msgid "Redis yaddaş (B)"
+msgstr "Redis memory (B)"
+
+msgid "Redis əmr/s"
+msgstr "Redis ops/s"
+
+msgid "Celery növbəsi"
+msgstr "Celery queue"
+
+msgid "Metrik servisi əlçatmazdır — yalnız baza sayğacları göstərilir."
+msgstr "Metrics service is unavailable — only database counters are shown."
+
+msgid "Hazırda imtahanda"
+msgstr "Currently in exam"
+
+msgid "Bu gün təhvil verilən"
+msgstr "Submitted today"
+
+msgid "PIN cəhdləri (1s)"
+msgstr "PIN attempts (1h)"
+
+msgid "Uğursuz PIN (1s)"
+msgstr "Failed PIN (1h)"
+
+msgid "Autosave xətaları (1s)"
+msgstr "Autosave errors (1h)"
+
+msgid "Nəzarət insidentləri (1s)"
+msgstr "Invigilation incidents (1h)"
+
+msgid "Cəhd başlanğıcları (15 dəq pəncərə)"
+msgstr "Attempt starts (15 min window)"
+
+msgid "Təhvillər"
+msgstr "Submissions"
+
+msgid "Autosave xətaları"
+msgstr "Autosave errors"
+
+msgid "Uğursuz PIN cəhdləri"
+msgstr "Failed PIN attempts"
+
+msgid ""
+"Yalnız aqreqat statistika göstərilir — sual, cavab, PIN və şəxsi məlumat bu "
+"modulda YOXDUR."
+msgstr ""
+"Only aggregate statistics are shown — questions, answers, PINs and personal "
+"data are NOT in this module."
+
+msgid "Bütün hadisələr"
+msgstr "All events"
+
+msgid "Uğursuz giriş"
+msgstr "Failed login"
+
+msgid "Superadmin girişi"
+msgstr "Superadmin login"
+
+msgid "Superadmin uğursuz girişi"
+msgstr "Failed superadmin login"
+
+msgid "İcazəsiz monitorinq"
+msgstr "Unauthorized monitoring access"
+
+msgid "Təhlükəsizlik hadisəsi yoxdur"
+msgstr "No security events"
+
+msgid "Vaxt"
+msgstr "Time"
+
+msgid "Hadisə"
+msgstr "Event"
+
+msgid "Önəm"
+msgstr "Severity"
+
+msgid "İstifadəçi"
+msgstr "User"
+
+msgid "Say"
+msgstr "Count"
+
+msgid "Mesaj"
+msgstr "Message"
+
+msgid "Bütün konteynerlər"
+msgstr "All containers"
+
+msgid "Bütün səviyyələr"
+msgstr "All levels"
+
+msgid "Mətn axtarışı…"
+msgstr "Text search…"
+
+msgid "Axtar"
+msgstr "Search"
+
+msgid "Log tapılmadı"
+msgstr "No logs found"
+
+msgid "Aktiv alert yoxdur"
+msgstr "No active alerts"
+
+msgid "Alert"
+msgstr "Alert"
+
+msgid "Vəziyyət"
+msgstr "State"
+
+msgid "Başlayıb"
+msgstr "Started"
+
+msgid "Xülasə"
+msgstr "Summary"
+
+msgid "susdurulub"
+msgstr "silenced"
+
+msgid "Açıq olanlar"
+msgstr "Open"
+
+msgid "Hamısı"
+msgstr "All"
+
+msgid "Həll olunub"
+msgstr "Resolved"
+
+msgid "Susdurulub"
+msgstr "Silenced"
+
+msgid "İnsident yoxdur"
+msgstr "No incidents"
+
+msgid "Başlıq"
+msgstr "Title"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Servis"
+msgstr "Service"
+
+msgid "Müddət"
+msgstr "Duration"
+
+msgid "Əməliyyat"
+msgstr "Action"
+
+msgid "Qəbul et"
+msgstr "Acknowledge"
+
+msgid "Həll olundu"
+msgstr "Resolve"
+
+msgid "Susdur"
+msgstr "Silence"
+
+msgid "Təyin olunmuş"
+msgstr "Assigned"
+
+msgid "İmtahan verib"
+msgstr "Took the exam"
+
+msgid "Gözləyir"
+msgstr "Waiting"
+
+msgid "İmtahanda"
+msgstr "In exam"
+
+msgid "Bitirib"
+msgstr "Finished"
+
+msgid "Gəlməyib"
+msgstr "Absent"
+
+msgid "Zalda canlı imtahan yoxdur."
+msgstr "No live exams in the hall."
+
+msgid "Bütün imtahanlar"
+msgstr "All exams"
+
+msgid "Nəticə yoxdur"
+msgstr "No results"
+
+msgid "Canlı"
+msgstr "Live"
+
+msgid "Bağlantı kəsildi"
+msgstr "Connection lost"
+
+msgid "Yeniləndi"
+msgstr "Updated"
+
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgid "Məlumat yüklənmədi."
+msgstr "Data could not be loaded."
+
+msgid "İmtahandan uzaqlaşdırılıb"
+msgstr "Removed from the exam"
+
+msgid "Qeydə alınmış qayda pozuntusu yoxdur."
+msgstr "No recorded rule violations."
+
+msgid "pozuntu"
+msgstr "violation(s)"
+
+msgid "Qayda pozan yoxdur"
+msgstr "No rule violators"
+
+msgid "Bax"
+msgstr "View"
+
+msgid "Şans ver"
+msgstr "Grant another chance"
+
+msgid "Blokla"
+msgstr "Block"
+
+msgid "Bloklama səbəbi:"
+msgstr "Reason for blocking:"
+
+msgid "Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"
+msgstr "Grant the student an extra chance and resume the exam?"
+
+msgid "İmtahanı başlat"
+msgstr "Start the exam"
+
+msgid "Başlat"
+msgstr "Start"
+
+msgid "Başlatmaq mümkün olmadı."
+msgstr "Could not start."
+
+msgid "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"
+msgstr "Start all ready exams in the hall at once?"
+
+msgid "İmtahanı bitir"
+msgstr "End the exam"
+
+msgid "Bitir"
+msgstr "End"
+
+msgid "Bitirmək mümkün olmadı."
+msgstr "Could not end."
+
+msgid ""
+"Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla "
+"bilməz."
+msgstr "End all active exams in the hall? This action cannot be undone."
+
+msgid "Hazırlanır"
+msgstr "Preparing"
+
+msgid "Giriş açıq"
+msgstr "Entry open"
+
+msgid "Aktiv"
+msgstr "Active"
+
+msgid "Bitib"
+msgstr "Ended"
+
+msgid "Ləğv edilib"
+msgstr "Cancelled"
+
+msgid "Təyin olunub"
+msgstr "Assigned"
+
+msgid "Hazır"
+msgstr "Ready"
+
+msgid "PIN kilidli"
+msgstr "PIN locked"
+
+msgid "%(count)s pozuntu"
+msgstr "Violations: %(count)s"
+
+msgid "Qoşulu"
+msgstr "Connected"
+
+msgid "Oflayn"
+msgstr "Offline"
+
+msgid "Oflayn — polling"
+msgstr "Offline — polling"
+
+msgid "Əməliyyat mümkün olmadı."
+msgstr "The operation could not be completed."
+
+msgid "Şəbəkə xətası — yenidən cəhd edin."
+msgstr "Network error — please try again."
+
+msgid "Səbəb qeyd olunmalıdır."
+msgstr "A reason must be provided."
+
+msgid "Kompüter %(seat)s"
+msgstr "Computer %(seat)s"
+
+msgid "%(answered)s / %(total)s cavab"
+msgstr "%(answered)s / %(total)s answers"
+
+msgid "Cari bal: %(score)s bal"
+msgstr "Current score: %(score)s"
+
+msgid "Səbəb: %(reason)s"
+msgstr "Reason: %(reason)s"
+
+msgid "Tələbə hələ imtahana başlamayıb."
+msgstr "The student has not started the exam yet."
+
+msgid "Hələ heç bir sual cavablanmayıb."
+msgstr "No question has been answered yet."
+
+msgid "Tələbənin cavabı"
+msgstr "Student's answer"
+
+msgid "%(count)s fayl yükləyib"
+msgstr "Files uploaded: %(count)s"
+
+msgid "Rəsm / şəkil cavabı"
+msgstr "Drawing / image answer"
+
+msgid "Sual %(no)s"
+msgstr "Question %(no)s"
+
+msgid ""
+"Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam "
+"edəcək."
+msgstr ""
+"Issue a new entry PIN to this student? They will continue the exam from "
+"where they left off."
+
+msgid "Dayandırma səbəbi:"
+msgstr "Reason for suspension:"
+
+msgid "İmtahandan çıxarma səbəbi:"
+msgstr "Reason for removal from the exam:"
+
+msgid "Yenidən giriş mümkün olmadı."
+msgstr "Re-entry could not be granted."
+
+msgid "%(days)s gün %(hours)s saat"
+msgstr "%(days)s d %(hours)s h"
+
+msgid "%(hours)s saat %(minutes)s dəq"
+msgstr "%(hours)s h %(minutes)s min"
+
+msgid "%(minutes)s dəq %(seconds)s san"
+msgstr "%(minutes)s min %(seconds)s s"
+
+msgid "seriya"
+msgstr "series"
+
+msgid "Qrafik hazırlanır…"
+msgstr "Preparing chart…"
+
+msgid "Sətir"
+msgstr "Rows"
+
+msgid "Əvvəlki səhifə"
+msgstr "Previous page"
+
+msgid "Növbəti səhifə"
+msgstr "Next page"
+
+msgid "Monitorinq asılılığı əlçatmazdır"
+msgstr "Monitoring dependency is unavailable"
+
+msgid "son uğurlu yenilənmə: %(time)s"
+msgstr "last successful update: %(time)s"
+
+msgid "Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur."
+msgstr "No data is available until the monitoring dependency is restored."
+
+msgid "Yeniləndi: %(time)s"
+msgstr "Updated: %(time)s"
+
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "You do not have permission to access this section."
+
+msgid "Server xətası: %(status)s"
+msgstr "Server error: %(status)s"
+
+msgid "Yeniləmə alınmadı"
+msgstr "Refresh failed"
+
+msgid "Həll qeydi (istəyə bağlı):"
+msgstr "Resolution note (optional):"
+
+msgid "Əməliyyat icra olunmadı."
+msgstr "The operation could not be completed."
+
+msgid "%(student)s — kurs işi"
+msgstr "%(student)s — coursework"
+
+msgid "Mövzunu silmək?"
+msgstr "Delete the topic?"
+
+msgid "Bu mövzu silinəcək və"
+msgstr "This topic will be deleted and"
+
+msgid "tələbələrin bu mövzu üzrə balları da silinəcək"
+msgstr "the students' scores for this topic will also be deleted"
+
+msgid "Bu əməliyyat geri qaytarıla bilməz."
+msgstr "This action cannot be undone."
+
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgid "Sil"
+msgstr "Delete"
+
+msgid "Təsdiqlə"
+msgstr "Confirm"
+
+msgid "ÜST HƏFTƏ"
+msgstr "ODD WEEK"
+
+msgid "ALT HƏFTƏ"
+msgstr "EVEN WEEK"
+
+msgid "Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır."
+msgstr "The question timer is not in sync with the server; rechecking."
+
+msgid "Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin."
+msgstr "This exam was updated in another tab. Please refresh the page."
+
+msgid "Düzəlişi sil"
+msgstr "Delete correction"
+
+msgid "Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq."
+msgstr ""
+"Do you want to undo this correction? The cell will revert to its previous "
+"value."
+
+msgid "Sınaq rejimi — imtahan dayandırılmadı"
+msgstr "Trial mode — the exam was not stopped"
+
+msgid ""
+"Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq "
+"yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
+msgstr ""
+"In a real exam you would have been removed for these violations. The trial "
+"is for checking purposes only, so you may continue."
+
+msgid "Pozuntu"
+msgstr "Violation"
+
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Loading failed, please try again."
+
+msgid "Bağla"
+msgstr "Close"
+
+msgid "Yadda saxla"
+msgstr "Save"

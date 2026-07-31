@@ -2214,3 +2214,658 @@ msgstr "Ваш экзамен временно приостановлен."
 
 msgid "%(message)s Səbəb: %(reason)s"
 msgstr "%(message)s Причина: %(reason)s"
+
+msgid "Disk"
+msgstr "Диск"
+
+msgid "Uptime"
+msgstr "Время работы"
+
+msgid "Konteynerlər"
+msgstr "Контейнеры"
+
+msgid "işlək"
+msgstr "запущено"
+
+msgid "Sorğu axını"
+msgstr "Частота запросов"
+
+msgid "5xx nisbəti"
+msgstr "Доля 5xx"
+
+msgid "p95 gecikmə"
+msgstr "p95 задержка"
+
+msgid "işləyir"
+msgstr "работает"
+
+msgid "DAYANIB"
+msgstr "ОСТАНОВЛЕН"
+
+msgid "Endpoint yoxlamaları"
+msgstr "Проверки эндпоинтов"
+
+msgid "PROBLEM"
+msgstr "ПРОБЛЕМА"
+
+msgid "Son backup"
+msgstr "Последний бэкап"
+
+msgid "əvvəl"
+msgstr "назад"
+
+msgid "Aktiv imtahanlar"
+msgstr "Активные экзамены"
+
+msgid "İmtahandakı tələbələr"
+msgstr "Студенты на экзамене"
+
+msgid "Açıq insidentlər"
+msgstr "Открытые инциденты"
+
+msgid "Təhlükəsizlik (24s)"
+msgstr "Безопасность (24ч)"
+
+msgid "Monitorinq hədəfləri (Prometheus job-ları)"
+msgstr "Цели мониторинга (задания Prometheus)"
+
+msgid "CPU nüvələri"
+msgstr "Ядра CPU"
+
+msgid "Load 1/5/15"
+msgstr "Нагрузка 1/5/15"
+
+msgid "Load doluluğu"
+msgstr "Насыщение нагрузки"
+
+msgid "Disk boş"
+msgstr "Свободно на диске"
+
+msgid "Inode boş"
+msgstr "Свободно inode"
+
+msgid "Proseslər"
+msgstr "Процессы"
+
+msgid "Fayl deskriptorları"
+msgstr "Файловые дескрипторы"
+
+msgid "Load (1 dəq)"
+msgstr "Нагрузка (1 мин)"
+
+msgid "Disk istifadəsi %"
+msgstr "Использование диска %"
+
+msgid "Node exporter şəbəkəsi (B/s) — RX/TX"
+msgstr "Сеть Node exporter (Б/с) — RX/TX"
+
+msgid "Konteyner məlumatı yoxdur (cAdvisor işə düşməyib?)"
+msgstr "Нет данных о контейнерах (cAdvisor не запущен?)"
+
+msgid "Konteyner"
+msgstr "Контейнер"
+
+msgid "Limit"
+msgstr "Лимит"
+
+msgid "Restart (24s)"
+msgstr "Перезапуски (24ч)"
+
+msgid "Image"
+msgstr "Образ"
+
+msgid "Məlumat yoxdur"
+msgstr "Нет данных"
+
+msgid "(15 dəq)"
+msgstr "(15 мин)"
+
+msgid "Sorğu axını (req/s)"
+msgstr "Частота запросов (req/s)"
+
+msgid "5xx nisbəti %"
+msgstr "Доля 5xx %"
+
+msgid "p95 gecikmə (s)"
+msgstr "p95 задержка (с)"
+
+msgid "p99 gecikmə (s)"
+msgstr "p99 задержка (с)"
+
+msgid "Ən yavaş endpoint-lər (orta, 30 dəq)"
+msgstr "Самые медленные эндпоинты (среднее, 30 мин)"
+
+msgid "Ən çox 5xx verən endpoint-lər (30 dəq)"
+msgstr "Эндпоинты с наибольшим числом 5xx (30 мин)"
+
+msgid "xəta"
+msgstr "ошибок"
+
+msgid "Bağlantılar"
+msgstr "Соединения"
+
+msgid "Aktiv / Boşda"
+msgstr "Активные / Простаивающие"
+
+msgid "Cache hit"
+msgstr "Попадания в кэш"
+
+msgid "Baza ölçüsü"
+msgstr "Размер базы"
+
+msgid "Deadlock (1s)"
+msgstr "Взаимоблокировки (1ч)"
+
+msgid "Temp fayllar (1s)"
+msgstr "Временные файлы (1ч)"
+
+msgid "Backup yaşı"
+msgstr "Возраст бэкапа"
+
+msgid "PgBouncer (session mode — RLS üçün dəyişdirilmir)"
+msgstr "PgBouncer (session mode — не меняется, требуется для RLS)"
+
+msgid "Aktiv klientlər"
+msgstr "Активные клиенты"
+
+msgid "Gözləyən klientlər"
+msgstr "Ожидающие клиенты"
+
+msgid "Aktiv server bağlantıları"
+msgstr "Активные серверные соединения"
+
+msgid "Boş server bağlantıları"
+msgstr "Простаивающие серверные соединения"
+
+msgid "Max gözləmə"
+msgstr "Макс. ожидание"
+
+msgid "Bağlantı sayı"
+msgstr "Количество соединений"
+
+msgid "Tranzaksiya/s"
+msgstr "Транзакции/с"
+
+msgid "Yaddaş"
+msgstr "Память"
+
+msgid "Klientlər"
+msgstr "Клиенты"
+
+msgid "Bloklanmış"
+msgstr "Заблокировано"
+
+msgid "Hit nisbəti"
+msgstr "Доля попаданий"
+
+msgid "Evicted (cəmi)"
+msgstr "Вытеснено (всего)"
+
+msgid "Aktiv / Reserved"
+msgstr "Активные / Зарезервированные"
+
+msgid "Növbə uzunluğu"
+msgstr "Длина очереди"
+
+msgid "Statistika yaşı"
+msgstr "Возраст статистики"
+
+msgid "Redis yaddaş (B)"
+msgstr "Память Redis (Б)"
+
+msgid "Redis əmr/s"
+msgstr "Команды Redis/с"
+
+msgid "Celery növbəsi"
+msgstr "Очередь Celery"
+
+msgid "Metrik servisi əlçatmazdır — yalnız baza sayğacları göstərilir."
+msgstr "Сервис метрик недоступен — показаны только счётчики базы данных."
+
+msgid "Hazırda imtahanda"
+msgstr "Сейчас на экзамене"
+
+msgid "Bu gün təhvil verilən"
+msgstr "Отправлено сегодня"
+
+msgid "PIN cəhdləri (1s)"
+msgstr "Попытки PIN (1ч)"
+
+msgid "Uğursuz PIN (1s)"
+msgstr "Неудачные PIN (1ч)"
+
+msgid "Autosave xətaları (1s)"
+msgstr "Ошибки автосохранения (1ч)"
+
+msgid "Nəzarət insidentləri (1s)"
+msgstr "Инциденты наблюдения (1ч)"
+
+msgid "Cəhd başlanğıcları (15 dəq pəncərə)"
+msgstr "Начала попыток (окно 15 мин)"
+
+msgid "Təhvillər"
+msgstr "Отправки"
+
+msgid "Autosave xətaları"
+msgstr "Ошибки автосохранения"
+
+msgid "Uğursuz PIN cəhdləri"
+msgstr "Неудачные попытки PIN"
+
+msgid ""
+"Yalnız aqreqat statistika göstərilir — sual, cavab, PIN və şəxsi məlumat bu "
+"modulda YOXDUR."
+msgstr ""
+"Показывается только агрегированная статистика — вопросов, ответов, PIN и "
+"персональных данных в этом модуле НЕТ."
+
+msgid "Bütün hadisələr"
+msgstr "Все события"
+
+msgid "Uğursuz giriş"
+msgstr "Неудачный вход"
+
+msgid "Superadmin girişi"
+msgstr "Вход суперадмина"
+
+msgid "Superadmin uğursuz girişi"
+msgstr "Неудачный вход суперадмина"
+
+msgid "İcazəsiz monitorinq"
+msgstr "Несанкционированный доступ к мониторингу"
+
+msgid "Təhlükəsizlik hadisəsi yoxdur"
+msgstr "Событий безопасности нет"
+
+msgid "Vaxt"
+msgstr "Время"
+
+msgid "Hadisə"
+msgstr "Событие"
+
+msgid "Önəm"
+msgstr "Важность"
+
+msgid "İstifadəçi"
+msgstr "Пользователь"
+
+msgid "Say"
+msgstr "Количество"
+
+msgid "Mesaj"
+msgstr "Сообщение"
+
+msgid "Bütün konteynerlər"
+msgstr "Все контейнеры"
+
+msgid "Bütün səviyyələr"
+msgstr "Все уровни"
+
+msgid "Mətn axtarışı…"
+msgstr "Поиск по тексту…"
+
+msgid "Axtar"
+msgstr "Найти"
+
+msgid "Log tapılmadı"
+msgstr "Логи не найдены"
+
+msgid "Aktiv alert yoxdur"
+msgstr "Активных оповещений нет"
+
+msgid "Alert"
+msgstr "Оповещение"
+
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgid "Başlayıb"
+msgstr "Начало"
+
+msgid "Xülasə"
+msgstr "Сводка"
+
+msgid "susdurulub"
+msgstr "заглушено"
+
+msgid "Açıq olanlar"
+msgstr "Открытые"
+
+msgid "Hamısı"
+msgstr "Все"
+
+msgid "Həll olunub"
+msgstr "Решено"
+
+msgid "Susdurulub"
+msgstr "Заглушено"
+
+msgid "İnsident yoxdur"
+msgstr "Инцидентов нет"
+
+msgid "Başlıq"
+msgstr "Заголовок"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Servis"
+msgstr "Сервис"
+
+msgid "Müddət"
+msgstr "Длительность"
+
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgid "Qəbul et"
+msgstr "Принять"
+
+msgid "Həll olundu"
+msgstr "Решить"
+
+msgid "Susdur"
+msgstr "Заглушить"
+
+msgid "Təyin olunmuş"
+msgstr "Назначено"
+
+msgid "İmtahan verib"
+msgstr "Сдавали экзамен"
+
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgid "İmtahanda"
+msgstr "На экзамене"
+
+msgid "Bitirib"
+msgstr "Завершил(а)"
+
+msgid "Gəlməyib"
+msgstr "Не явился(-ась)"
+
+msgid "Zalda canlı imtahan yoxdur."
+msgstr "В зале нет идущих экзаменов."
+
+msgid "Bütün imtahanlar"
+msgstr "Все экзамены"
+
+msgid "Nəticə yoxdur"
+msgstr "Нет результатов"
+
+msgid "Canlı"
+msgstr "Онлайн"
+
+msgid "Bağlantı kəsildi"
+msgstr "Соединение потеряно"
+
+msgid "Yeniləndi"
+msgstr "Обновлено"
+
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgid "Məlumat yüklənmədi."
+msgstr "Не удалось загрузить данные."
+
+msgid "İmtahandan uzaqlaşdırılıb"
+msgstr "Удалён с экзамена"
+
+msgid "Qeydə alınmış qayda pozuntusu yoxdur."
+msgstr "Зарегистрированных нарушений нет."
+
+msgid "pozuntu"
+msgstr "нарушений"
+
+msgid "Qayda pozan yoxdur"
+msgstr "Нарушителей нет"
+
+msgid "Bax"
+msgstr "Просмотр"
+
+msgid "Şans ver"
+msgstr "Дать шанс"
+
+msgid "Blokla"
+msgstr "Заблокировать"
+
+msgid "Bloklama səbəbi:"
+msgstr "Причина блокировки:"
+
+msgid "Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"
+msgstr "Дать студенту дополнительный шанс и возобновить экзамен?"
+
+msgid "İmtahanı başlat"
+msgstr "Запустить экзамен"
+
+msgid "Başlat"
+msgstr "Запустить"
+
+msgid "Başlatmaq mümkün olmadı."
+msgstr "Не удалось запустить."
+
+msgid "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"
+msgstr "Запустить все готовые экзамены в зале одновременно?"
+
+msgid "İmtahanı bitir"
+msgstr "Завершить экзамен"
+
+msgid "Bitir"
+msgstr "Завершить"
+
+msgid "Bitirmək mümkün olmadı."
+msgstr "Не удалось завершить."
+
+msgid ""
+"Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla "
+"bilməz."
+msgstr "Завершить все активные экзамены в зале? Это действие нельзя отменить."
+
+msgid "Hazırlanır"
+msgstr "Готовится"
+
+msgid "Giriş açıq"
+msgstr "Вход открыт"
+
+msgid "Aktiv"
+msgstr "Активный"
+
+msgid "Bitib"
+msgstr "Завершён"
+
+msgid "Ləğv edilib"
+msgstr "Отменён"
+
+msgid "Təyin olunub"
+msgstr "Назначен"
+
+msgid "Hazır"
+msgstr "Готов"
+
+msgid "PIN kilidli"
+msgstr "PIN заблокирован"
+
+msgid "%(count)s pozuntu"
+msgstr "Нарушений: %(count)s"
+
+msgid "Qoşulu"
+msgstr "Подключён"
+
+msgid "Oflayn"
+msgstr "Офлайн"
+
+msgid "Oflayn — polling"
+msgstr "Офлайн — опрос сервера"
+
+msgid "Əməliyyat mümkün olmadı."
+msgstr "Не удалось выполнить операцию."
+
+msgid "Şəbəkə xətası — yenidən cəhd edin."
+msgstr "Ошибка сети — повторите попытку."
+
+msgid "Səbəb qeyd olunmalıdır."
+msgstr "Необходимо указать причину."
+
+msgid "Kompüter %(seat)s"
+msgstr "Компьютер %(seat)s"
+
+msgid "%(answered)s / %(total)s cavab"
+msgstr "%(answered)s / %(total)s ответов"
+
+msgid "Cari bal: %(score)s bal"
+msgstr "Текущий балл: %(score)s"
+
+msgid "Səbəb: %(reason)s"
+msgstr "Причина: %(reason)s"
+
+msgid "Tələbə hələ imtahana başlamayıb."
+msgstr "Студент ещё не начал экзамен."
+
+msgid "Hələ heç bir sual cavablanmayıb."
+msgstr "Пока не отвечено ни на один вопрос."
+
+msgid "Tələbənin cavabı"
+msgstr "Ответ студента"
+
+msgid "%(count)s fayl yükləyib"
+msgstr "Загружено файлов: %(count)s"
+
+msgid "Rəsm / şəkil cavabı"
+msgstr "Ответ в виде рисунка / изображения"
+
+msgid "Sual %(no)s"
+msgstr "Вопрос %(no)s"
+
+msgid ""
+"Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam "
+"edəcək."
+msgstr ""
+"Выдать этому студенту новый PIN для входа? Он продолжит экзамен с того "
+"места, где остановился."
+
+msgid "Dayandırma səbəbi:"
+msgstr "Причина приостановки:"
+
+msgid "İmtahandan çıxarma səbəbi:"
+msgstr "Причина удаления с экзамена:"
+
+msgid "Yenidən giriş mümkün olmadı."
+msgstr "Не удалось разрешить повторный вход."
+
+msgid "%(days)s gün %(hours)s saat"
+msgstr "%(days)s д %(hours)s ч"
+
+msgid "%(hours)s saat %(minutes)s dəq"
+msgstr "%(hours)s ч %(minutes)s мин"
+
+msgid "%(minutes)s dəq %(seconds)s san"
+msgstr "%(minutes)s мин %(seconds)s с"
+
+msgid "seriya"
+msgstr "серия"
+
+msgid "Qrafik hazırlanır…"
+msgstr "Подготовка графика…"
+
+msgid "Sətir"
+msgstr "Строк"
+
+msgid "Əvvəlki səhifə"
+msgstr "Предыдущая страница"
+
+msgid "Növbəti səhifə"
+msgstr "Следующая страница"
+
+msgid "Monitorinq asılılığı əlçatmazdır"
+msgstr "Зависимость мониторинга недоступна"
+
+msgid "son uğurlu yenilənmə: %(time)s"
+msgstr "последнее успешное обновление: %(time)s"
+
+msgid "Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur."
+msgstr "Данные недоступны до восстановления зависимости мониторинга."
+
+msgid "Yeniləndi: %(time)s"
+msgstr "Обновлено: %(time)s"
+
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "У вас нет прав доступа к этому разделу."
+
+msgid "Server xətası: %(status)s"
+msgstr "Ошибка сервера: %(status)s"
+
+msgid "Yeniləmə alınmadı"
+msgstr "Не удалось обновить"
+
+msgid "Həll qeydi (istəyə bağlı):"
+msgstr "Примечание к решению (необязательно):"
+
+msgid "Əməliyyat icra olunmadı."
+msgstr "Операция не выполнена."
+
+msgid "%(student)s — kurs işi"
+msgstr "%(student)s — курсовая работа"
+
+msgid "Mövzunu silmək?"
+msgstr "Удалить тему?"
+
+msgid "Bu mövzu silinəcək və"
+msgstr "Эта тема будет удалена, и"
+
+msgid "tələbələrin bu mövzu üzrə balları da silinəcək"
+msgstr "баллы студентов по этой теме также будут удалены"
+
+msgid "Bu əməliyyat geri qaytarıla bilməz."
+msgstr "Это действие нельзя отменить."
+
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgid "Sil"
+msgstr "Удалить"
+
+msgid "Təsdiqlə"
+msgstr "Подтвердить"
+
+msgid "ÜST HƏFTƏ"
+msgstr "ВЕРХНЯЯ НЕДЕЛЯ"
+
+msgid "ALT HƏFTƏ"
+msgstr "НИЖНЯЯ НЕДЕЛЯ"
+
+msgid "Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır."
+msgstr ""
+"Таймер вопроса не синхронизирован с сервером; выполняется повторная "
+"проверка."
+
+msgid "Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin."
+msgstr "Этот экзамен был обновлён в другой вкладке. Обновите страницу."
+
+msgid "Düzəlişi sil"
+msgstr "Удалить исправление"
+
+msgid "Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq."
+msgstr "Отменить это исправление? Ячейка вернётся к прежнему значению."
+
+msgid "Sınaq rejimi — imtahan dayandırılmadı"
+msgstr "Пробный режим — экзамен не остановлен"
+
+msgid ""
+"Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq "
+"yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
+msgstr ""
+"На настоящем экзамене за эти нарушения вас бы удалили с экзамена. Пробный "
+"режим предназначен только для проверки, поэтому вы можете продолжить."
+
+msgid "Pozuntu"
+msgstr "Нарушение"
+
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Не удалось загрузить, попробуйте снова."
+
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgid "Yadda saxla"
+msgstr "Сохранить"

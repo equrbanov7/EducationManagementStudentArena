@@ -2207,3 +2207,660 @@ msgstr "Sınavınız geçici olarak durduruldu."
 
 msgid "%(message)s Səbəb: %(reason)s"
 msgstr "%(message)s Neden: %(reason)s"
+
+msgid "Disk"
+msgstr "Disk"
+
+msgid "Uptime"
+msgstr "Çalışma süresi"
+
+msgid "Konteynerlər"
+msgstr "Konteynerler"
+
+msgid "işlək"
+msgstr "çalışıyor"
+
+msgid "Sorğu axını"
+msgstr "İstek hızı"
+
+msgid "5xx nisbəti"
+msgstr "5xx oranı"
+
+msgid "p95 gecikmə"
+msgstr "p95 gecikme"
+
+msgid "işləyir"
+msgstr "çalışıyor"
+
+msgid "DAYANIB"
+msgstr "DURDU"
+
+msgid "Endpoint yoxlamaları"
+msgstr "Uç nokta kontrolleri"
+
+msgid "PROBLEM"
+msgstr "SORUN"
+
+msgid "Son backup"
+msgstr "Son yedek"
+
+msgid "əvvəl"
+msgstr "önce"
+
+msgid "Aktiv imtahanlar"
+msgstr "Aktif sınavlar"
+
+msgid "İmtahandakı tələbələr"
+msgstr "Sınavdaki öğrenciler"
+
+msgid "Açıq insidentlər"
+msgstr "Açık olaylar"
+
+msgid "Təhlükəsizlik (24s)"
+msgstr "Güvenlik (24 saat)"
+
+msgid "Monitorinq hədəfləri (Prometheus job-ları)"
+msgstr "İzleme hedefleri (Prometheus job'ları)"
+
+msgid "CPU nüvələri"
+msgstr "CPU çekirdekleri"
+
+msgid "Load 1/5/15"
+msgstr "Yük 1/5/15"
+
+msgid "Load doluluğu"
+msgstr "Yük doygunluğu"
+
+msgid "Disk boş"
+msgstr "Boş disk alanı"
+
+msgid "Inode boş"
+msgstr "Boş inode"
+
+msgid "Proseslər"
+msgstr "Süreçler"
+
+msgid "Fayl deskriptorları"
+msgstr "Dosya tanımlayıcıları"
+
+msgid "Load (1 dəq)"
+msgstr "Yük (1 dk)"
+
+msgid "Disk istifadəsi %"
+msgstr "Disk kullanımı %"
+
+msgid "Node exporter şəbəkəsi (B/s) — RX/TX"
+msgstr "Node exporter ağı (B/s) — RX/TX"
+
+msgid "Konteyner məlumatı yoxdur (cAdvisor işə düşməyib?)"
+msgstr "Konteyner verisi yok (cAdvisor başlatılmadı mı?)"
+
+msgid "Konteyner"
+msgstr "Konteyner"
+
+msgid "Limit"
+msgstr "Limit"
+
+msgid "Restart (24s)"
+msgstr "Yeniden başlatma (24 saat)"
+
+msgid "Image"
+msgstr "İmaj"
+
+msgid "Məlumat yoxdur"
+msgstr "Veri yok"
+
+msgid "(15 dəq)"
+msgstr "(15 dk)"
+
+msgid "Sorğu axını (req/s)"
+msgstr "İstek hızı (req/s)"
+
+msgid "5xx nisbəti %"
+msgstr "5xx oranı %"
+
+msgid "p95 gecikmə (s)"
+msgstr "p95 gecikme (sn)"
+
+msgid "p99 gecikmə (s)"
+msgstr "p99 gecikme (sn)"
+
+msgid "Ən yavaş endpoint-lər (orta, 30 dəq)"
+msgstr "En yavaş uç noktalar (ort., 30 dk)"
+
+msgid "Ən çox 5xx verən endpoint-lər (30 dəq)"
+msgstr "En çok 5xx veren uç noktalar (30 dk)"
+
+msgid "xəta"
+msgstr "hata"
+
+msgid "Bağlantılar"
+msgstr "Bağlantılar"
+
+msgid "Aktiv / Boşda"
+msgstr "Aktif / Boşta"
+
+msgid "Cache hit"
+msgstr "Önbellek isabeti"
+
+msgid "Baza ölçüsü"
+msgstr "Veritabanı boyutu"
+
+msgid "Deadlock (1s)"
+msgstr "Kilitlenme (1 saat)"
+
+msgid "Temp fayllar (1s)"
+msgstr "Geçici dosyalar (1 saat)"
+
+msgid "Backup yaşı"
+msgstr "Yedek yaşı"
+
+msgid "PgBouncer (session mode — RLS üçün dəyişdirilmir)"
+msgstr "PgBouncer (session mode — RLS için değiştirilmiyor)"
+
+msgid "Aktiv klientlər"
+msgstr "Aktif istemciler"
+
+msgid "Gözləyən klientlər"
+msgstr "Bekleyen istemciler"
+
+msgid "Aktiv server bağlantıları"
+msgstr "Aktif sunucu bağlantıları"
+
+msgid "Boş server bağlantıları"
+msgstr "Boştaki sunucu bağlantıları"
+
+msgid "Max gözləmə"
+msgstr "Maks. bekleme"
+
+msgid "Bağlantı sayı"
+msgstr "Bağlantı sayısı"
+
+msgid "Tranzaksiya/s"
+msgstr "İşlem/sn"
+
+msgid "Yaddaş"
+msgstr "Bellek"
+
+msgid "Klientlər"
+msgstr "İstemciler"
+
+msgid "Bloklanmış"
+msgstr "Engellenen"
+
+msgid "Hit nisbəti"
+msgstr "İsabet oranı"
+
+msgid "Evicted (cəmi)"
+msgstr "Çıkarılan (toplam)"
+
+msgid "Aktiv / Reserved"
+msgstr "Aktif / Rezerve"
+
+msgid "Növbə uzunluğu"
+msgstr "Kuyruk uzunluğu"
+
+msgid "Statistika yaşı"
+msgstr "İstatistik yaşı"
+
+msgid "Redis yaddaş (B)"
+msgstr "Redis belleği (B)"
+
+msgid "Redis əmr/s"
+msgstr "Redis komut/sn"
+
+msgid "Celery növbəsi"
+msgstr "Celery kuyruğu"
+
+msgid "Metrik servisi əlçatmazdır — yalnız baza sayğacları göstərilir."
+msgstr ""
+"Metrik servisi erişilemez durumda — yalnızca veritabanı sayaçları "
+"gösteriliyor."
+
+msgid "Hazırda imtahanda"
+msgstr "Şu anda sınavda"
+
+msgid "Bu gün təhvil verilən"
+msgstr "Bugün gönderilen"
+
+msgid "PIN cəhdləri (1s)"
+msgstr "PIN denemeleri (1 saat)"
+
+msgid "Uğursuz PIN (1s)"
+msgstr "Başarısız PIN (1 saat)"
+
+msgid "Autosave xətaları (1s)"
+msgstr "Otomatik kayıt hataları (1 saat)"
+
+msgid "Nəzarət insidentləri (1s)"
+msgstr "Gözetim olayları (1 saat)"
+
+msgid "Cəhd başlanğıcları (15 dəq pəncərə)"
+msgstr "Deneme başlangıçları (15 dk'lık pencere)"
+
+msgid "Təhvillər"
+msgstr "Gönderimler"
+
+msgid "Autosave xətaları"
+msgstr "Otomatik kayıt hataları"
+
+msgid "Uğursuz PIN cəhdləri"
+msgstr "Başarısız PIN denemeleri"
+
+msgid ""
+"Yalnız aqreqat statistika göstərilir — sual, cavab, PIN və şəxsi məlumat bu "
+"modulda YOXDUR."
+msgstr ""
+"Yalnızca toplu istatistikler gösterilir — soru, cevap, PIN ve kişisel veri "
+"bu modülde YOKTUR."
+
+msgid "Bütün hadisələr"
+msgstr "Tüm olaylar"
+
+msgid "Uğursuz giriş"
+msgstr "Başarısız giriş"
+
+msgid "Superadmin girişi"
+msgstr "Süperadmin girişi"
+
+msgid "Superadmin uğursuz girişi"
+msgstr "Başarısız süperadmin girişi"
+
+msgid "İcazəsiz monitorinq"
+msgstr "Yetkisiz izleme erişimi"
+
+msgid "Təhlükəsizlik hadisəsi yoxdur"
+msgstr "Güvenlik olayı yok"
+
+msgid "Vaxt"
+msgstr "Zaman"
+
+msgid "Hadisə"
+msgstr "Olay"
+
+msgid "Önəm"
+msgstr "Önem"
+
+msgid "İstifadəçi"
+msgstr "Kullanıcı"
+
+msgid "Say"
+msgstr "Sayı"
+
+msgid "Mesaj"
+msgstr "Mesaj"
+
+msgid "Bütün konteynerlər"
+msgstr "Tüm konteynerler"
+
+msgid "Bütün səviyyələr"
+msgstr "Tüm seviyeler"
+
+msgid "Mətn axtarışı…"
+msgstr "Metinde ara…"
+
+msgid "Axtar"
+msgstr "Ara"
+
+msgid "Log tapılmadı"
+msgstr "Log bulunamadı"
+
+msgid "Aktiv alert yoxdur"
+msgstr "Aktif uyarı yok"
+
+msgid "Alert"
+msgstr "Uyarı"
+
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgid "Başlayıb"
+msgstr "Başladı"
+
+msgid "Xülasə"
+msgstr "Özet"
+
+msgid "susdurulub"
+msgstr "susturuldu"
+
+msgid "Açıq olanlar"
+msgstr "Açık olanlar"
+
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgid "Həll olunub"
+msgstr "Çözüldü"
+
+msgid "Susdurulub"
+msgstr "Susturuldu"
+
+msgid "İnsident yoxdur"
+msgstr "Olay yok"
+
+msgid "Başlıq"
+msgstr "Başlık"
+
+msgid "Status"
+msgstr "Durum"
+
+msgid "Servis"
+msgstr "Servis"
+
+msgid "Müddət"
+msgstr "Süre"
+
+msgid "Əməliyyat"
+msgstr "İşlem"
+
+msgid "Qəbul et"
+msgstr "Kabul et"
+
+msgid "Həll olundu"
+msgstr "Çözüldü olarak işaretle"
+
+msgid "Susdur"
+msgstr "Sustur"
+
+msgid "Təyin olunmuş"
+msgstr "Atanmış"
+
+msgid "İmtahan verib"
+msgstr "Sınava giren"
+
+msgid "Gözləyir"
+msgstr "Bekliyor"
+
+msgid "İmtahanda"
+msgstr "Sınavda"
+
+msgid "Bitirib"
+msgstr "Bitirdi"
+
+msgid "Gəlməyib"
+msgstr "Gelmedi"
+
+msgid "Zalda canlı imtahan yoxdur."
+msgstr "Salonda canlı sınav yok."
+
+msgid "Bütün imtahanlar"
+msgstr "Tüm sınavlar"
+
+msgid "Nəticə yoxdur"
+msgstr "Sonuç yok"
+
+msgid "Canlı"
+msgstr "Canlı"
+
+msgid "Bağlantı kəsildi"
+msgstr "Bağlantı kesildi"
+
+msgid "Yeniləndi"
+msgstr "Güncellendi"
+
+msgid "Yüklənir…"
+msgstr "Yükleniyor…"
+
+msgid "Məlumat yüklənmədi."
+msgstr "Veriler yüklenemedi."
+
+msgid "İmtahandan uzaqlaşdırılıb"
+msgstr "Sınavdan çıkarıldı"
+
+msgid "Qeydə alınmış qayda pozuntusu yoxdur."
+msgstr "Kayıtlı kural ihlali yok."
+
+msgid "pozuntu"
+msgstr "ihlal"
+
+msgid "Qayda pozan yoxdur"
+msgstr "Kural ihlali yapan yok"
+
+msgid "Bax"
+msgstr "Görüntüle"
+
+msgid "Şans ver"
+msgstr "Şans ver"
+
+msgid "Blokla"
+msgstr "Engelle"
+
+msgid "Bloklama səbəbi:"
+msgstr "Engelleme nedeni:"
+
+msgid "Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"
+msgstr "Öğrenciye ek bir şans verilip sınav devam ettirilsin mi?"
+
+msgid "İmtahanı başlat"
+msgstr "Sınavı başlat"
+
+msgid "Başlat"
+msgstr "Başlat"
+
+msgid "Başlatmaq mümkün olmadı."
+msgstr "Başlatılamadı."
+
+msgid "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"
+msgstr "Salondaki tüm hazır sınavlar aynı anda başlatılsın mı?"
+
+msgid "İmtahanı bitir"
+msgstr "Sınavı bitir"
+
+msgid "Bitir"
+msgstr "Bitir"
+
+msgid "Bitirmək mümkün olmadı."
+msgstr "Bitirilemedi."
+
+msgid ""
+"Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla "
+"bilməz."
+msgstr "Salondaki tüm aktif sınavlar bitirilsin mi? Bu işlem geri alınamaz."
+
+msgid "Hazırlanır"
+msgstr "Hazırlanıyor"
+
+msgid "Giriş açıq"
+msgstr "Giriş açık"
+
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgid "Bitib"
+msgstr "Bitti"
+
+msgid "Ləğv edilib"
+msgstr "İptal edildi"
+
+msgid "Təyin olunub"
+msgstr "Atandı"
+
+msgid "Hazır"
+msgstr "Hazır"
+
+msgid "PIN kilidli"
+msgstr "PIN kilitli"
+
+msgid "%(count)s pozuntu"
+msgstr "%(count)s ihlal"
+
+msgid "Qoşulu"
+msgstr "Bağlı"
+
+msgid "Oflayn"
+msgstr "Çevrimdışı"
+
+msgid "Oflayn — polling"
+msgstr "Çevrimdışı — sunucu sorgulanıyor"
+
+msgid "Əməliyyat mümkün olmadı."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgid "Şəbəkə xətası — yenidən cəhd edin."
+msgstr "Ağ hatası — tekrar deneyin."
+
+msgid "Səbəb qeyd olunmalıdır."
+msgstr "Gerekçe belirtilmelidir."
+
+msgid "Kompüter %(seat)s"
+msgstr "Bilgisayar %(seat)s"
+
+msgid "%(answered)s / %(total)s cavab"
+msgstr "%(answered)s / %(total)s cevap"
+
+msgid "Cari bal: %(score)s bal"
+msgstr "Mevcut puan: %(score)s"
+
+msgid "Səbəb: %(reason)s"
+msgstr "Sebep: %(reason)s"
+
+msgid "Tələbə hələ imtahana başlamayıb."
+msgstr "Öğrenci sınava henüz başlamadı."
+
+msgid "Hələ heç bir sual cavablanmayıb."
+msgstr "Henüz hiçbir soru cevaplanmadı."
+
+msgid "Tələbənin cavabı"
+msgstr "Öğrencinin cevabı"
+
+msgid "%(count)s fayl yükləyib"
+msgstr "%(count)s dosya yükledi"
+
+msgid "Rəsm / şəkil cavabı"
+msgstr "Çizim / görsel cevabı"
+
+msgid "Sual %(no)s"
+msgstr "Soru %(no)s"
+
+msgid ""
+"Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam "
+"edəcək."
+msgstr ""
+"Bu öğrenciye yeni bir giriş PIN'i verilsin mi? Sınava kaldığı yerden devam "
+"edecek."
+
+msgid "Dayandırma səbəbi:"
+msgstr "Durdurma sebebi:"
+
+msgid "İmtahandan çıxarma səbəbi:"
+msgstr "Sınavdan çıkarma sebebi:"
+
+msgid "Yenidən giriş mümkün olmadı."
+msgstr "Yeniden giriş sağlanamadı."
+
+msgid "%(days)s gün %(hours)s saat"
+msgstr "%(days)s g %(hours)s sa"
+
+msgid "%(hours)s saat %(minutes)s dəq"
+msgstr "%(hours)s sa %(minutes)s dk"
+
+msgid "%(minutes)s dəq %(seconds)s san"
+msgstr "%(minutes)s dk %(seconds)s sn"
+
+msgid "seriya"
+msgstr "seri"
+
+msgid "Qrafik hazırlanır…"
+msgstr "Grafik hazırlanıyor…"
+
+msgid "Sətir"
+msgstr "Satır"
+
+msgid "Əvvəlki səhifə"
+msgstr "Önceki sayfa"
+
+msgid "Növbəti səhifə"
+msgstr "Sonraki sayfa"
+
+msgid "Monitorinq asılılığı əlçatmazdır"
+msgstr "İzleme bağımlılığına erişilemiyor"
+
+msgid "son uğurlu yenilənmə: %(time)s"
+msgstr "son başarılı yenileme: %(time)s"
+
+msgid "Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur."
+msgstr "İzleme bağımlılığı geri yüklenene kadar veri yok."
+
+msgid "Yeniləndi: %(time)s"
+msgstr "Yenilendi: %(time)s"
+
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "Bu bölüme erişim yetkiniz yok."
+
+msgid "Server xətası: %(status)s"
+msgstr "Sunucu hatası: %(status)s"
+
+msgid "Yeniləmə alınmadı"
+msgstr "Yenileme başarısız"
+
+msgid "Həll qeydi (istəyə bağlı):"
+msgstr "Çözüm notu (isteğe bağlı):"
+
+msgid "Əməliyyat icra olunmadı."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgid "%(student)s — kurs işi"
+msgstr "%(student)s — dönem ödevi"
+
+msgid "Mövzunu silmək?"
+msgstr "Konu silinsin mi?"
+
+msgid "Bu mövzu silinəcək və"
+msgstr "Bu konu silinecek ve"
+
+msgid "tələbələrin bu mövzu üzrə balları da silinəcək"
+msgstr "öğrencilerin bu konuya ait puanları da silinecek"
+
+msgid "Bu əməliyyat geri qaytarıla bilməz."
+msgstr "Bu işlem geri alınamaz."
+
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgid "Sil"
+msgstr "Sil"
+
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+msgid "ÜST HƏFTƏ"
+msgstr "TEK HAFTA"
+
+msgid "ALT HƏFTƏ"
+msgstr "ÇİFT HAFTA"
+
+msgid "Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır."
+msgstr ""
+"Soru zamanlayıcısı sunucuyla senkronize değil; yeniden kontrol ediliyor."
+
+msgid "Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin."
+msgstr "Bu sınav başka bir sekmede güncellendi. Sayfayı yenileyin."
+
+msgid "Düzəlişi sil"
+msgstr "Düzeltmeyi sil"
+
+msgid "Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq."
+msgstr ""
+"Bu düzeltmeyi geri almak istiyor musunuz? Hücre önceki değerine dönecek."
+
+msgid "Sınaq rejimi — imtahan dayandırılmadı"
+msgstr "Deneme modu — sınav durdurulmadı"
+
+msgid ""
+"Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq "
+"yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
+msgstr ""
+"Gerçek bir sınavda bu ihlaller nedeniyle sınavdan çıkarılırdınız. Deneme "
+"yalnızca kontrol amaçlıdır, bu yüzden devam edebilirsiniz."
+
+msgid "Pozuntu"
+msgstr "İhlal"
+
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Yükleme başarısız, tekrar deneyin."
+
+msgid "Bağla"
+msgstr "Kapat"
+
+msgid "Yadda saxla"
+msgstr "Kaydet"
