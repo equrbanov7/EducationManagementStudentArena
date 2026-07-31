@@ -35326,6 +35326,22 @@ msgstr ""
 "This exam has attempts — it cannot be deleted permanently because academic "
 "history is protected."
 
+msgctxt "accounts.view_as"
+msgid "action_blocked_out_of_scope"
+msgstr ""
+"This action is outside your area of authority. While acting as another user "
+"you may only make changes that belong to your own area."
+
+msgctxt "accounts.view_as"
+msgid "mode_limited"
+msgstr "Limited changes"
+
+msgctxt "accounts.view_as"
+msgid "mode_limited_hint"
+msgstr ""
+"You can only perform operations that belong to your own area; everything "
+"else is read-only."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

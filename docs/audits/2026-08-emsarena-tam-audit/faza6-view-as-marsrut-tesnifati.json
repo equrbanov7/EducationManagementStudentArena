@@ -1,0 +1,343 @@
+{
+ "total": 128,
+ "by_bucket": {
+  "confidential": 25,
+  "other": 62,
+  "exam_operation": 41
+ },
+ "exam_operation": [
+  {
+   "url_name": "accounts:exam_chance",
+   "bucket": "exam_operation",
+   "why": "SƏBƏT SAXLANILIR, amma şərtlə. Məzmun imtahan sahəsindədir (StudentExamAttemptGrant + fərdi PIN + final bileti) və tələbənin balına birbaşa yazmır. Enabling-dən ƏVVƏL bağlanmalı 4 risk: (a) Atribusiya yuyulması — exam_chance.py:110 granted_by=request.user (=HƏDƏF) və second_chance.py:136-138 log_action(user=granted_by); aktorun yeganə izi middleware-in ümumi 'view_as_action' audit sətridir, o da hazırda yalnız FULL budağında işləyir (LIMITED üçün ayrıca bağlanmalı, real_user domen qeydində saxlanmalı). (b) second_chance.py:47-77 _reset_final_ticket removed_at/removed_by/removal_action/removal_reason, entry_validated_at, started_at/completed_at, reconnect_count sahələrini snapshot-suz SİLİR — yəni imtahandan çıxarılma/proktorinq sübutu itir; apps/registrar/exam_bridge.py körpüsü ilə (nəticə avtomatik FinalGrade-ə, expelled → 0/F) bu, F-i təmiz təkrar-oturuşla əvəzləmə kanalına çevrilir. (c) _upsert_grant kumulyativdir (extra_attempts += extra); MAX_EXTRA_ATTEMPTS=10 yalnız BİR çağırışa aiddir, ümumi limit yoxdur. (d) _collect_students bütöv StudentGroup qəbul edir — tək POST bütöv qrupun finalını yenidən açır. Bu şərtlər ödənilməsə səbət 'confidential'ə endirilməlidir."
+  },
+  {
+   "url_name": "exams:exam_center_room_start_all",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. room_monitor.py:280 — yalnız `state == 'entry_open'` oturumlarda start_room(); idempotent, effekt imtahan zalı ilə məhdudlaşır. Xalis imtahan əməliyyatı."
+  },
+  {
+   "url_name": "exams:exam_center_room_end_all",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, AMMA yan təsiri qeyd olunmalıdır: end_room() aktiv cəhdləri avtomatik təhvil verir → attempts.py:322 `transaction.on_commit(sync_attempt_to_journal)` → registrar FinalGrade.exam_score yazılır. Yəni vaxtından əvvəl bir POST bütün zalın yarımçıq işini yekun imtahan balı kimi jurnala yazır. Endirmədim, çünki (a) yazılan bal tələbənin ÖZ işindən çıxır, (b) yazı yalnız FinalGrade-in imtahan komponentinə düşür və `set_exam_score` kilidli jurnalda heç nə yazmır, (c) oturumu bitirmək imtahan mərkəzinin ayrılmaz funksiyasıdır."
+  },
+  {
+   "url_name": "exams:exam_center_room_open_all",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. room_monitor.py:358 — `state='prepared'` oturumlarda `can_supervise_session` yoxlaması ilə open_entry(). Yalnız giriş qapısını açır, akademik yazı yoxdur."
+  },
+  {
+   "url_name": "exams:exam_center_session_open_entry",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. monitor.py:186 — oturumun state-ini entry_open edir. Xalis zal əməliyyatı, akademik/HR təsiri yoxdur."
+  },
+  {
+   "url_name": "exams:exam_center_session_start",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. monitor.py:199 — start_room(); vaxt pəncərəsi override-ı auditə yazılır. Xalis imtahan əməliyyatı."
+  },
+  {
+   "url_name": "exams:exam_center_session_end",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı — exam_center_room_end_all ilə eyni əsaslandırma və EYNİ xəbərdarlıq: aktiv cəhdlər submit olunur və nəticə sync_attempt_to_journal ilə FinalGrade.exam_score-a düşür."
+  },
+  {
+   "url_name": "exams:exam_center_session_cancel",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. cancel_session() — oturumu ləğv edir, PIN-ləri etibarsızlaşdırır. Akademik nəticə yazmır (cəhdlər submit olunmur), effekt zal oturumu ilə məhduddur."
+  },
+  {
+   "url_name": "exams:exam_center_ticket_resume",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, lakin nəzarətdə saxlanmalıdır: supervision/actions.py:63-66 `grant_extra_chance` verildikdə `supervision_violation_count = max(0, count-1)` — yəni nəzarət POZUNTU SÜBUTUNU bir vahid azaldır. Bu, proktorinq bərpa axınının qanuni hissəsidir, ona görə endirmədim; amma təqlid altında sübut dəyişikliyi hədəfin adına yazılır."
+  },
+  {
+   "url_name": "exams:exam_center_ticket_reentry",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, lakin unutmayın: monitor.py cavabda `{'pin': raw_pin}` XAM PIN-i aktora qaytarır — yəni bu, kimlik vəsiqəsi (credential) buraxılışıdır. Girişin MAC/kompüter qapısı (exam_center_gate) əlavə müdafiə verdiyi və proktor bərpası imtahan mərkəzinin öz funksiyası olduğu üçün endirmədim."
+  },
+  {
+   "url_name": "exams:exam_center_ticket_seat",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. sessions.py:95 set_seat() — yalnız `seat_number` sahəsi + audit. Ən aşağı riskli marşrutlardan biri."
+  },
+  {
+   "url_name": "exams:exam_center_ticket_readmit",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. tickets.py:469 readmit_student() — bileti ASSIGNED-ə qaytarır + yeni PIN. Bərpaedici (restorativ) əməliyyatdır. QEYD: çıxarılma zamanı yazılmış FinalGrade=0 yazısını GERİ QAYTARMIR — bu, exam_center_ticket_remove-un niyə confidential-a endirildiyini gücləndirir."
+  },
+  {
+   "url_name": "exams:create_exam",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. list_detail.py:51 createAndEditExamView, POST → ExamForm.save(). Yeni imtahan konfiqurasiyası — imtahan mərkəzinin nüvə funksiyası."
+  },
+  {
+   "url_name": "exams:edit_exam",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, AMMA forma sahələri diqqət tələb edir (forms/exam.py:39): `subject` — jurnal körpüsünün hədəfidir (record_exam_result bu subject_id ilə enrollment tapır), yəni dəyişdirilməsi imtahan balının HANSI fənn qeydiyyatına düşəcəyini dəyişir; `allowed_users`/`excluded_users`/`allowed_groups` — kimin imtahana girə biləcəyini idarə edir. Hər ikisi imtahan konfiqurasiyası sayılır, ona görə saxladım."
+  },
+  {
+   "url_name": "exams:toggle_exam_active",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. actions.py:29 publish_exam/unpublish_exam. QEYD: dərc `notify_task_assignment(...)` ilə bütün təyinatlı tələbələrə bildiriş göndərir — yəni view-as altında hədəfin adından toplu mesaj çıxır. İmtahan həyat dövrünün ayrılmaz hissəsi olduğu üçün endirmədim."
+  },
+  {
+   "url_name": "exams:toggle_exam_results_visibility",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. actions.py:71 set_results_hidden() — yalnız dərc rejimi, bal MƏZMUNUNU dəyişmir. `grade.publish` icazəsi onsuz da exam_center rolunda var (default_roles.py)."
+  },
+  {
+   "url_name": "exams:toggle_exam_archive",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. actions.py:247 — is_archived/archived_at; yumşaq vəziyyət, nəticələr toxunulmur."
+  },
+  {
+   "url_name": "exams:duplicate_exam",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. actions.py:296 duplicate_exam_service() — qaralama kopya yaradır (suallar kopyalanmır). Destruktiv deyil."
+  },
+  {
+   "url_name": "exams:delete_exam",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. actions.py:146 — `is_deleted=True, deleted_at, is_active=False`; cəhd/nəticə sətirləri qorunur, restore_exam ilə geri dönür. Yumşaq silmə."
+  },
+  {
+   "url_name": "exams:restore_exam",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. actions.py:341 — `is_deleted=False`; `is_active` toxunulmur (bərpa olunan imtahan qaralama qalır). Bərpaedici əməliyyat."
+  },
+  {
+   "url_name": "exams:permanent_delete_exam",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı — təklifdəki iddia KODLA TƏSDİQLƏNDİ. retention.py:99 permanently_delete_exam_without_history(): `if locked_exam.attempts.select_for_update().exists(): raise _protected_history_error()`. Yəni bircə cəhdi olan imtahan fiziki silinə bilmir; üstəlik ORM/DB səviyyəsində PROTECT FK backstop var. Yalnız boş qaralama silinir."
+  },
+  {
+   "url_name": "exams:add_exam_question",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. crud.py:35 — `ensure_can_manage_exam_questions` final imtahanda onsuz da imtahan mərkəzi tələb edir. Yeni sual əlavəsi keçmiş balları dəyişmir."
+  },
+  {
+   "url_name": "exams:edit_exam_question",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, lakin RETROAKTİV BAL RİSKİ var: result_calculation.py:104-111 — cavabda `question_snapshot` varsa bal snapshot-dan hesablanır (mig 0044), AMMA snapshot boş olan KÖHNƏ cəhdlərdə canlı `question.options`-a düşür. Yəni pre-0044 cəhdlər üçün düzgün variantın redaktəsi artıq qiymətləndirilmiş nəticəni geriyə dönük dəyişir (nəticə səhifəsi/eksport canlı hesablanır). Endirmədim, çünki bu köhnə data üçün mövcud, ümumi problemdir — view-as-a xas deyil."
+  },
+  {
+   "url_name": "exams:delete_exam_question",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. crud.py:276 → delete_exam_questions() + aktiv-sual invariantı (`active_exam_question_invariant_message`) sonuncu aktiv sualı silməyə qoymur. edit_exam_question ilə eyni pre-0044 snapshot xəbərdarlığı keçərlidir."
+  },
+  {
+   "url_name": "exams:teacher_questions_bank",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. bank.py:40 — POST-da `ensure_can_manage_exam_questions(request.user, exam)`. `delete_all` YALNIZ `exam.questions`-a təsir edir (müəllimin kitabxanasına yox), yəni əhatə bir imtahanla məhduddur və invariant qapısından keçir."
+  },
+  {
+   "url_name": "exams:test_question_bank",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. _views_misc.py:98 — yalnız `exam_type == 'test'`; action=save ExamQuestion/ExamQuestionOption bulk_create. İmtahan məzmunu."
+  },
+  {
+   "url_name": "exams:process_question_bank",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. _views_create.py:120 — QuestionBlock silmə/yaratma + random_question_count. Struktur konfiqurasiyası, akademik nəticə yazmır."
+  },
+  {
+   "url_name": "exams:exam_language_manager",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. languages.py:89 — `ensure_can_manage_exam_questions` qapısı; add_variant/toggle_variant/save. Çoxdilli imtahan konfiqurasiyası."
+  },
+  {
+   "url_name": "exams:exam_bank_picker",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. picker.py:31 — `ensure_can_manage_exam_questions` + `accessible_banks` skopu; attach yalnız imtahan tipinə uyğun banklardan. select_all rejimi topludur, amma effekt imtahanın sual dəstidir."
+  },
+  {
+   "url_name": "exams:ai_generate_question_bank",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. _views_create.py:32 — `ensure_can_manage_exam_questions` qapısı arxasında. QEYD: job hədəfin adına yaradılır (`user=request.user`, payload['user_id']) — AI xərci/izi hədəfə yazılır."
+  },
+  {
+   "url_name": "exams:question_bank_list",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. crud.py:87 — POST action=create_bank `ensure_can_create_question_bank(request.user)` ilə qorunur (kodda bank yaratmaq onsuz da yalnız imtahan mərkəzinə açıqdır). Yaradıcı əməliyyatdır, destruktiv deyil."
+  },
+  {
+   "url_name": "exams:question_bank_update",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, lakin iki qeydlə: (1) crud.py:130 sahib-yoxlaması var, yəni yalnız sahibi təqlid etməklə keçir; (2) `source_teacher` sahəsini yenidən yazır — bankın MƏNBƏ MÜƏLLİMİ (provenans) dəyişdirilə bilər. Destruktiv olmadığı və geri qaytarıla bildiyi üçün question_bank_delete-dən fərqli olaraq endirmədim."
+  },
+  {
+   "url_name": "exams:question_bank_detail",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı, amma `delete_language` budağı diqqət tələb edir: crud.py:203 sahib-yoxlaması ilə bankdakı həmin dilin BÜTÜN suallarını `qs.delete()` ilə geri dönüşsüz silir (dil boş göndərilsə bütün bank sualları). Digər budaqlar (activate/deactivate/seçilmişi sil) daha dardır. LIMITED tətbiq olunarsa bulk_action-lar dəyər səviyyəsində məhdudlaşdırılmalıdır."
+  },
+  {
+   "url_name": "exams:question_bank_bulk_add",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. Banka toplu sual yazır — additiv əməliyyat, mövcud məzmunu məhv etmir."
+  },
+  {
+   "url_name": "exams:bank_question_add",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. questions.py — `accessible_banks` skopunda tək sual əlavəsi. Additiv."
+  },
+  {
+   "url_name": "exams:bank_question_edit",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. Bank kitabxanası sualının redaktəsi; artıq keçirilmiş cəhdlərin ballarına təsir etmir (imtahan sualı ExamQuestion ayrı sətirdir)."
+  },
+  {
+   "url_name": "exams:ai_generate_bank_questions",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. questions.py:167 — `accessible_banks` skopu; job yaradır, banka avtomatik yazmır (nəticə workbench-də seçilir). AI xərci hədəfin adına düşür."
+  },
+  {
+   "url_name": "exams:question_submission_decide",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı — bu, imtahan mərkəzinin ÖZ iş axınıdır (submission_review.py:160, `ensure_can_review_submission`). KRİTİK ŞƏRT: yalnız göndərişin müəllim tərəfi (create/detail/delete/ai-generate) icazə siyahısından ÇIXARILDIĞI halda saxlanmalıdır — əks halda eyni aktor həm göndərişi uydurur, həm də qəbul edir."
+  },
+  {
+   "url_name": "exams:start_text_extraction",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. extract_jobs.py — `_ensure_teacher` + MAX_UPLOAD_BYTES limiti + `randomize_uploaded_filename` (upload təhlükəsizliyi). Sual importu üçün OCR: imtahan məzmunu hazırlığıdır. QEYD: job hədəfin adına yazılır və broker ölü olanda sinxron inline fallback var (resurs istehlakı hədəfin sessiyasında)."
+  },
+  {
+   "url_name": "exams:grant_extra_attempt",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı — StudentExamAttemptGrant yalnız cəhd limitini artırır, balı ÖZÜ dəyişmir. QEYD (ayrıca düzəliş tələb edir): attempt_grants.py:61 `User.objects.filter(id=..., is_active=True).first()` — namizəd tələbə imtahanın təyinat siyahısı və ya org üzvlüyü ilə DARALDILMIR, yalnız RLS-ə güvənir."
+  },
+  {
+   "url_name": "exams:grant_extra_attempt_group",
+   "bucket": "exam_operation",
+   "why": "Saxlanıldı. attempt_grants.py:123 — qrup `organization` ilə skoplanır, hər aktiv üzvə fərdi grant sətri yazılır. Toplu, amma additiv və akademik bal yazmır."
+  }
+ ],
+ "technical_support": [],
+ "confidential": [
+  {
+   "url_name": "registrar:correction_apply",
+   "bucket": "confidential",
+   "why": "ENDİRİLDİ (technical_support → confidential). 1) MÖVZU ÜZRƏ KƏNAR: bu marşrut imtahan əməliyyatı deyil — LessonMark.status/score (davamiyyət+jurnal balı), SelfWorkTopic icrası, CourseWork balı və AssessmentComponent (kollokvium) balını dəyişir (correction_views.py:103-204). Bu, birbaşa «imtahandan kənar akademik nəticə»dir → istifadəçi qaydasına görə avtomatik endirmə. Downstream: corrections.apply_correction → recompute_absence_hours → services.get_exam_eligibility (services.py:196-207) → exam_bridge.exam_eligibility «barred» → tələbənin imtahana buraxılıb-buraxılmaması. Yəni bir davamiyyət xanası ilə tələbəni imtahandan kəsmək və ya kəsilmişi buraxmaq olur. 2) ATRIBUSİYA SAXTAKARLIĞI (həlledici): ViewAsMiddleware `request.user = target` edir (middleware.py:395), view sonra `by_user=request.user` ötürür (correction_views.py:190). Nəticədə JournalCorrection.corrected_by / corrected_by_name, grade_audit.log_grade_changes(by_user=...) və core.audit log_action(user=...) — HAMISI HƏDƏFİN adına yazılır, aktorun deyil. corrections.py:5 sənədləşdirir: «Düzəldənin adı avtomatik profildən götürülür və dəyişdirilə bilməz» — impersonasiya altında bu zəmanət saxtakarlıq alətinə çevrilir: aktor dekanın adına, dekanın imzası ilə, PDF əsaslandırma sənədi yükləyib bal dəyişir; jurnal UI-da sarı xananın «by» sahəsi (item_corrections.py:364) hədəfin adını göstərir. Middleware-in öz auditi yalnız path+method saxlayır — hansı tələbənin hansı balının dəyişdiyini göstərmir, yəni təklifin əsas arqumenti olan «audit» məhz burada sınır. 3) İCAZƏ QAPISI HƏDƏFDƏ YOXLANIR: can_correct_journal(request) (corrections.py:47-58) və request_has_permission org_permissions-u hədəfdən oxuyur (ViewAsMiddleware OrganizationMiddleware-dən ƏVVƏL işləyir). Yəni qapı aktorun İKT olduğunu heç yoxlamır; hədəfdə journal.correct varsa istənilən icazəli aktor yazır. Əlavə olaraq bu qrantı İKT üçün praktiki olaraq mənasız edir: view_as.py:198 hədəfi `_max_org_level < actor_level` ilə məhdudlaşdırır, ikt_rehber lvl 88-dir, ondan aşağı rollarda (dean 80 «grade.*», chair 70, hr 65, teacher 50) journal.correct YOXDUR → 404. Yəni marşrut ya işləmir, ya da yalnız superadmin (lvl 999) səviyyəsində işləyib məhz ən təhlükəli halı açır. İKT Rəhbəri bu səlahiyyəti ÖZ adından saxlayır (qanuni dizayn) — sadəcə impersonasiya ilə istifadə edilməməlidir."
+  },
+  {
+   "url_name": "registrar:correction_delete",
+   "bucket": "confidential",
+   "why": "ENDİRİLDİ (technical_support → confidential). Təklifin «eyni sənədli axının ayrılmaz hissəsi» əsaslandırması koda uyğun deyil: revert YOLU HEÇ BİR ƏSASLANDIRMA TƏLƏB ETMİR. correction_views.py:207-251-də yalnız obyekt id-ləri oxunur — reason yox, note yox, PDF sənəd YOX. Yəni apply-ı «sənədli olduğu üçün təhlükəsiz» sayan arqument delete-ə ümumiyyətlə şamil olunmur. Dağıdıcı təsir: corrections.revert_last_grade_correction (corrections.py:427-457) JournalCorrection sətrini `correction.delete()` ilə SİLİR; created_mark halında isə `mark.delete()` ilə LessonMark-ın özünü silir (CASCADE düzəlişi də aparır). Sənədləşməsi bunu açıq deyir: «sonuncu da silinsə əsl dəyər qayıdır və sarı işarə itir» — yəni başqa vəzifəli şəxsin (dekan/rektor) PDF-li rəsmi düzəlişinin görünən izi jurnaldan yox olur, ardıcıl çağırışlarla bütün zəncir sökülə bilər. Eyni model selfwork/coursework/component (kollokvium) üçün də təkrarlanır (item_corrections.py:122,216,314). Bu, həm akademik nəticənin dəyişməsi, həm də sübutun məhvidir. Üstəlik atribusiya problemi burada da var: revert `by_user=request.user` = HƏDƏF (middleware.py:395), ona görə qalan yeganə iz olan grade_audit «correction-revert» sətri də səhv adama yazılır. Nəhayət, geri qaytarılan dəyər absence_hours-u yenidən hesablayır → imtahana buraxılış statusunu dəyişir. Nə imtahan əməliyyatı, nə də texniki dəstək çərçivəsinə girmir."
+  },
+  {
+   "url_name": "accounts:kollokvium_windows",
+   "bucket": "confidential",
+   "why": "ENDİRİLDİ (exam_operation → confidential). (1) Bu, imtahan əməliyyatı deyil — JURNAL bal-yazma açarıdır: apps/registrar/journal_actions.py:186 kollokvium_save yalnız kw.is_open() olduqda yazır və AÇIQ pəncərədə gradebook.save_component_scores(..., bypass_edit_window=True) ilə standart 2 saatlıq düzəliş kilidini BYPASS edir. Deməli save_window/toggle_window_active/grant|edit_extra_days bütün universitet (və ya fakültə/kafedra) üzrə jurnal ballarının retroaktiv yenidən yazılmasını açır — 'imtahandan kənar akademik nəticəyə (jurnal balı) təsir' meyarı birbaşa dolur. (2) Qapılar hədəf-tərəflidir: _can_manage/_is_head/_reject_if_period_past hamısı request.user = HƏDƏF-i oxuyur; is_exam_center_head IKT_REHBER-i də əhatə edir (apps/accounts/roles.py:246-256) və _reject_if_period_past is_ikt_rehber-i istisna edir (kollokvium_windows.py:53-60) → İKT Rəhbəri (və ya exam-center head) kimliyini geyinən aktor 'yalnız rəhbərə məxsus' əlavə-gün əməliyyatlarını və BİTMİŞ semestr qadağasının bypass-ını miras alır. (3) Səbət ayrımı praktikada işləmir: is_exam_center/is_exam_center_head ikisi də ikt_rehber üçün True qaytarır, ona görə 'yalnız İmtahan Mərkəzi' qapısı bu predikatlarla qurulsa İKT də keçir. (4) Atribusiya yuyulması + audit boşluğu: created_by/granted_by və log_action(user=user) HƏDƏFİ yazır; delete_window isə heç bir audit qeydi olmadan hard-delete edir və KollokviumExtraGrant sətirlərini CASCADE ilə aparır."
+  },
+  {
+   "url_name": "organizations:structure_kafedras",
+   "bucket": "confidential",
+   "why": "apps/organizations/structure_views/endpoints.py:33 → _structure_page_view → _handle_kafedra_action (structure_views/_shared.py:235). POST action=create (OrgUnit.objects.create), update (unit.save()), delete (unit.is_active=False), assign_head (_assign_unit_head → unit.head=user, unit.save()), assign_teacher / remove_teacher (membership.scope_unit=unit / None + membership.save()). Yəni bu marşrut KADR (HR) əməliyyatıdır: kafedra müdiri təyin/ləğv və müəllimin kafedra təyinatı. View-as altında icazə verilsə, aktor hədəfin (rektor/dekan) adından kadr strukturunu dəyişə bilər. Nə imtahan əməliyyatı, nə də texniki dəstək mandatına düşür → hər iki rol üçün YALNIZ-OXU."
+  },
+  {
+   "url_name": "organizations:structure_faculties",
+   "bucket": "confidential",
+   "why": "apps/organizations/structure_views/endpoints.py:17 → _handle_faculty_action (structure_views/_shared.py:168). POST action=create (OrgUnit.objects.create), update (unit.save(name/code)), delete (soft-delete is_active=False), assign_head → _assign_unit_head dekan təyinatı (unit.head=membership.user, unit.save()). Dekan təyinatı kadr/HR aktıdır; qalan hissə akademik struktur CRUD-dur. İmtahan əməliyyatı da deyil, texniki dəstək də deyil → hər iki rol üçün YALNIZ-OXU."
+  },
+  {
+   "url_name": "admin:<app>_<model>_add",
+   "bucket": "confidential",
+   "why": "config/urls.py `path(_admin_prefix, admin.site.urls)` ilə 339 admin marşrutu layihə kökünə mount olunur. Hər model üçün _add POST → tam ORM INSERT (auth.User, accounts.UserProfile, HR/kadr, imtahan, audit modelləri daxil). ViewAsMiddleware hədəflər üçün yalnız is_superuser-i istisna edir, is_staff-i YOX — yəni staff hədəf seçilsə FULL rejimdə bütün admin yazma səthi açılır. Nə İmtahan Mərkəzi, nə İKT üçün icazəli deyil."
+  },
+  {
+   "url_name": "admin:<app>_<model>_change",
+   "bucket": "confidential",
+   "why": "Hər model üçün _change POST → istənilən qeydin sahələrinin yenilənməsi (o cümlədən auth_user.is_staff/is_superuser/groups, məxfi HR və akademik data, imtahan nəticələri). Məhdudiyyətsiz yazma; view-as altında dəyişiklik hədəf staff-ın adına düşür və LogEntry də ona yazılır."
+  },
+  {
+   "url_name": "admin:<app>_<model>_delete",
+   "bucket": "confidential",
+   "why": "Hər model üçün _delete POST → təsdiqlə birgə HARD DELETE (cascade). Akademik nəticələr, audit qeydləri və şəxsi məlumatlar geri dönməz silinə bilər. Hər iki mərkəz üçün qadağan."
+  },
+  {
+   "url_name": "admin:<app>_<model>_changelist",
+   "bucket": "confidential",
+   "why": "Changelist GET görünsə də, POST ilə toplu admin action-ları (default `delete_selected`, həmçinin custom action-lar) icra olunur və list_editable sahələri toplu save edilir. Yəni changelist mutasiya edən POST səthidir — kütləvi silmə/dəyişmə."
+  },
+  {
+   "url_name": "admin:password_change",
+   "bucket": "confidential",
+   "why": "Admin şifrə dəyişmə formu (POST → set_password + save). View-as altında hədəfin parolunun dəyişdirilməsi = hesabın tam ələ keçirilməsi. ViewAsMiddleware yalnız accounts:* parol/OTP yollarını bloklayır, admin qarşılığını YOX."
+  },
+  {
+   "url_name": "admin:verify-otp",
+   "bucket": "confidential",
+   "why": "core/admin_site.py verify_otp_view — `if request.method == \"POST\"` ilə admin 2FA challenge-ni təsdiqləyir və sessiyanı `admin_2fa_verified` edir. Kimlik-sübutu axınıdır: view-as altında keçilməsi hədəf staff-ın admin panelinə tam giriş deməkdir (bütün məxfi HR/akademik dataya). accounts:verify_otp_api artıq bloklanıb, bu isə açıqdır."
+  },
+  {
+   "url_name": "admin:resend-otp",
+   "bucket": "confidential",
+   "why": "core/admin_site.py resend_otp_view — hədəfin e-poçtuna yeni admin OTP kodu göndərir (mesaj göndərmə + challenge state mutasiyası). verify-otp ilə birlikdə admin 2FA-nın keçilməsi zənciridir; hər iki mərkəz üçün qadağan."
+  },
+  {
+   "url_name": "exams:exam_center_ticket_remove",
+   "bucket": "confidential",
+   "why": "ENDİRİLDİ — siyahıda YEGANƏ marşrutdur ki, tələbənin işindən ASILI OLMAYAN cəza balını akademik registra yazır. remove_student(action='removed') → attempt.supervision_status='removed' → supervision/actions.py:234 sync_attempt_to_journal → journal_sync.py: `percent = 0 if is_expelled` → registrar/exam_bridge.py:111 `exam_score = 0` → FinalGrade = avtomatik F. Bu, qaydadakı «jurnal balı/qiymət» triggeridir. readmit_student bu FinalGrade yazısını GERİ QAYTARMIR. Üstəlik `ticket.removed_by = by` = HƏDƏF, yəni qovulma qərarı təqlid edilən əməkdaşın adına daimi yazılır. İmtahan mərkəzi bu səlahiyyəti öz kimliyi ilə saxlamalıdır; borc alınmış kimliklə YOX."
+  },
+  {
+   "url_name": "labs:delete_submissions",
+   "bucket": "confidential",
+   "why": "@require_POST; submissions_qs.delete() — TƏLƏBƏLƏRİN göndərdiyi akademik işləri (fayl/cavab) həmişəlik silir. Aktor müəllimin adından akademik sübutu məhv edə bilər; `lab.delete`/`course.delete` yoxlaması view-as-da hədəf müəllimdə keçir. Hər iki rol üçün qadağan."
+  },
+  {
+   "url_name": "labs:grade_submission_page",
+   "bucket": "confidential",
+   "why": "request.method=='POST' budağı grade_lab_answer() + grade_lab_submission(..., request.user) çağırır — bal və `graded_by` HƏDƏF müəllim kimi yazılır (atribusiya saxtakarlığı). `grade.input` icazəsi də hədəfdən gəlir. Akademik məxfi: aktor müəllimin adından tələbənin balını dəyişə bilər."
+  },
+  {
+   "url_name": "labs:submit_lab",
+   "bucket": "confidential",
+   "why": "@require_POST; LabSubmission.objects.create(assignment=...) + finalize_submission_answers() — TƏLƏBƏ kimi view-as-da aktor tələbənin adından işini rəsmi göndərir (cəhdini yandırır). Şəxsi/akademik qeyd."
+  },
+  {
+   "url_name": "labs:auto_save_answer",
+   "bucket": "confidential",
+   "why": "@require_POST; LabAnswer get_or_create/save + fayl yükləməsi — tələbənin cavab mətnini/faylını onun adından yazır və ya əvəzləyir."
+  },
+  {
+   "url_name": "assignments:submit_assignment",
+   "bucket": "confidential",
+   "why": "@require_http_methods(['POST']); create_assignment_submission() — tələbənin adından fayl/mətn göndərişi (cəhd sayı azalır). Şəxsi akademik iş."
+  },
+  {
+   "url_name": "assignments:delete_assignment_submissions",
+   "bucket": "confidential",
+   "why": "@require_http_methods(['POST']); submissions_qs.delete() — tələbələrin təhvil verdiyi işlərin toplu silinməsi."
+  },
+  {
+   "url_name": "assignments:grade_submission",
+   "bucket": "confidential",
+   "why": "@require_http_methods(['POST']); apply_grade(submission, request.POST['grade'], ..., request.user) — bal və graded_by hədəf müəllim kimi yazılır. `grade.input` yoxlaması da hədəfin icazəsindən keçir. Akademik məxfi qeyd."
+  },
+  {
+   "url_name": "projects:submit_project",
+   "bucket": "confidential",
+   "why": "@require_http_methods(['POST']); create_project_submission() — tələbənin adından layihə işi göndərilir."
+  },
+  {
+   "url_name": "projects:delete_project_submissions",
+   "bucket": "confidential",
+   "why": "@require_http_methods(['POST']); submissions_qs.delete() — tələbə işlərinin toplu silinməsi."
+  },
+  {
+   "url_name": "projects:grade_submission",
+   "bucket": "confidential",
+   "why": "@require_http_methods(['POST']); apply_grade(..., request.user) — bal + graded_by hədəf müəllim kimi. Akademik məxfi."
+  },
+  {
+   "url_name": "notifications:notification_delete",
+   "bucket": "confidential",
+   "why": "@require_POST; delete_notification() — hədəf istifadəçinin ŞƏXSİ mesajını (soft-delete) qutusundan yox edir. `_get_own_notification_or_404` bypass_rls() ilə işləyir və yeganə sərhəd recipient=request.user-dir → view-as-da hədəfin bütün inbox-u açılır."
+  },
+  {
+   "url_name": "notifications:notification_bulk_delete",
+   "bucket": "confidential",
+   "why": "@require_POST; ids[] üzrə bulk_delete_notifications() — bir sorğu ilə hədəfin şəxsi bildirişlərini toplu yox edir (imtahan/tapşırıq xəbərdarlıqları daxil)."
+  }
+ ]
+}

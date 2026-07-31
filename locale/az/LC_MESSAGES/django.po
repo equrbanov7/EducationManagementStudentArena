@@ -35178,6 +35178,22 @@ msgstr ""
 "Bu imtahanın cəhdləri var — akademik tarixçə qorunduğu üçün birdəfəlik "
 "silinə bilməz."
 
+msgctxt "accounts.view_as"
+msgid "action_blocked_out_of_scope"
+msgstr ""
+"Bu əməliyyat sizin səlahiyyət sahənizdən kənardır. Başqa istifadəçinin "
+"adından yalnız öz sahənizə aid dəyişiklikləri edə bilərsiniz."
+
+msgctxt "accounts.view_as"
+msgid "mode_limited"
+msgstr "Məhdud dəyişiklik"
+
+msgctxt "accounts.view_as"
+msgid "mode_limited_hint"
+msgstr ""
+"Yalnız öz sahənizə aid əməliyyatları edə bilərsiniz; qalan hər şey yalnız-"
+"oxudur."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

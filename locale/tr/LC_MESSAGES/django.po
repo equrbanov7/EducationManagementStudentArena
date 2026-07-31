@@ -35115,6 +35115,22 @@ msgstr ""
 "Bu sınavın denemeleri var — akademik geçmiş korunduğu için kalıcı olarak "
 "silinemez."
 
+msgctxt "accounts.view_as"
+msgid "action_blocked_out_of_scope"
+msgstr ""
+"Bu işlem yetki alanınızın dışındadır. Başka bir kullanıcı adına yalnızca "
+"kendi alanınıza ait değişiklikleri yapabilirsiniz."
+
+msgctxt "accounts.view_as"
+msgid "mode_limited"
+msgstr "Sınırlı değişiklik"
+
+msgctxt "accounts.view_as"
+msgid "mode_limited_hint"
+msgstr ""
+"Yalnızca kendi alanınıza ait işlemleri yapabilirsiniz; geri kalan her şey "
+"salt okunurdur."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

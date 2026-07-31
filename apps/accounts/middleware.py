@@ -228,12 +228,18 @@ class ViewAsMiddleware:
     Request atributları (hər sorğuda mövcuddur):
     - ``request.real_user``     — autentifikasiya olunmuş ƏSL istifadəçi
     - ``request.is_view_as``    — aktiv view-as sessiyası varmı
-    - ``request.view_as_mode``  — "full" | "readonly" | None
+    - ``request.view_as_mode``  — "full" | "limited" | "readonly" | None
 
     Təhlükəsizlik:
     - READONLY: bütün unsafe metodlar bloklanır (yalnız çıxış endpoint-i istisna).
+    - LIMITED: unsafe metod YALNIZ aktorun rolu üçün açıq şəkildə icazəli olan
+      marşrutlarda keçir (bax ``view_as.LIMITED_WRITE_ALLOWLIST``); qalanı
+      bloklanır. Həm icazə verilən, həm bloklanan cəhd audit-ə yazılır.
     - FULL: unsafe əməliyyatlar audit jurnalına yazılır; şifrə dəyişmə və
-      hesab silmə kimi həssas əməliyyatlar HƏR İKİ rejimdə bloklanır.
+      hesab silmə kimi həssas əməliyyatlar BÜTÜN rejimlərdə bloklanır.
+    - Django admin səthi view-as altında rejimdən asılı olmayaraq TAM bağlıdır
+      (GET daxil): admin 2FA təsdiqi, `password_change` və bütün model CRUD
+      marşrutları oradadır və hədəf `is_staff` olduqda hamısı açılırdı.
     - Logout view-as sessiyasını bitirir (əsl istifadəçi sistemdən çıxmır).
     """
 
@@ -263,6 +269,7 @@ class ViewAsMiddleware:
         self._logout_path = None
         self._delete_account_path = None
         self._blocked_paths = None
+        self._admin_prefix = None
 
     def _resolve_paths(self):
         # URLConf yüklənəndən sonra bir dəfə cache-lənir.
@@ -280,6 +287,68 @@ class ViewAsMiddleware:
                 except NoReverseMatch:  # pragma: no cover — route silinərsə sükutla keç
                     continue
             self._blocked_paths = frozenset(blocked)
+
+            try:
+                self._admin_prefix = reverse("admin:index")
+            except NoReverseMatch:  # pragma: no cover — admin bağlıdırsa
+                self._admin_prefix = None
+
+    @staticmethod
+    def _resolved_url_name(request):
+        """``namespace:name`` — middleware URL həllindən ƏVVƏL işlədiyi üçün əl ilə."""
+        from django.urls import Resolver404, resolve
+
+        try:
+            match = resolve(request.path_info)
+        except Resolver404:
+            return ""
+        return match.view_name or ""
+
+    @staticmethod
+    def _view_as_organization(request):
+        """View-as sessiyasının təşkilatı (LIMITED icazə siyahısını həll etmək üçün)."""
+        from core.rls import bypass_rls
+
+        from .services.view_as import get_view_as_state
+
+        state = get_view_as_state(request) or {}
+        org_id = state.get("org_id")
+        if not org_id:
+            return None
+        from apps.organizations.models import Organization
+
+        with bypass_rls():
+            return Organization.objects.filter(pk=org_id).first()
+
+    def _audit_view_as_write(self, request, target, mode, url_name, *, allowed, profile_form=""):
+        """Rollararası hər yazma cəhdini (icazəli və bloklanmış) audit-ə yazır.
+
+        ƏSL istifadəçinin adına yazılır — domen qatındakı qeydlər isə
+        ``request.user``-i, yəni HƏDƏFİ görür (bax ``core.audit.log_action``
+        impersonasiya damğasına).
+        """
+        try:
+            from apps.audit.public import log_action
+            from core.constants import AuditAction
+
+            log_action(
+                action=AuditAction.UPDATE,
+                user=request.real_user,
+                organization=None,
+                obj=target,
+                reason="view_as_action" if allowed else "view_as_action_blocked",
+                changes={
+                    "path": request.path[:255],
+                    "method": request.method,
+                    "url_name": (url_name or "")[:120],
+                    "mode": mode,
+                    "allowed": bool(allowed),
+                    "profile_form": (profile_form or "")[:64],
+                },
+                request=request,
+            )
+        except Exception:  # noqa: BLE001 — audit xətası əməliyyatı bloklamamalıdır
+            logger.exception("view_as action audit log failed")
 
     @staticmethod
     def _wants_json(request):
@@ -315,8 +384,10 @@ class ViewAsMiddleware:
         from django.utils.translation import pgettext
 
         from .services.view_as import (
+            MODE_LIMITED,
             MODE_READONLY,
             VIEW_AS_SESSION_KEY,
+            actor_limited_write_url_names,
             resolve_view_as_request,
             stop_view_as,
         )
@@ -345,50 +416,69 @@ class ViewAsMiddleware:
             )
             return self.get_response(request)
 
+        # Django admin view-as altında TAM bağlıdır (GET daxil). Admin-də həm
+        # `password_change`, həm admin 2FA təsdiqi, həm də bütün modellərin CRUD
+        # marşrutları var; hədəf `is_staff` olduqda bu səth bütövlükdə açılırdı
+        # (middleware yalnız `is_superuser` hədəfləri istisna edir).
+        if self._admin_prefix and request.path.startswith(self._admin_prefix):
+            return self._reject(
+                request,
+                pgettext("accounts.view_as", "action_blocked_sensitive"),
+            )
+
         if request.method not in self.SAFE_METHODS:
+            url_name = self._resolved_url_name(request)
+
             # Kimlik-sübutu axınları (ilk-giriş parolu, e-poçt OTP, hesab silmə)
             # rejimdən ASILI OLMAYARAQ bloklanır — aktor hədəfin parolunu təyin
             # edib hesabı ələ keçirə bilməməlidir.
             if request.path in (self._blocked_paths or ()):
+                self._audit_view_as_write(request, target, mode, url_name, allowed=False)
                 return self._reject(
                     request,
                     pgettext("accounts.view_as", "action_blocked_sensitive"),
                 )
 
             if mode == MODE_READONLY:
+                self._audit_view_as_write(request, target, mode, url_name, allowed=False)
                 return self._reject(
                     request,
                     pgettext("accounts.view_as", "action_blocked_readonly"),
                 )
 
-            # FULL rejim: həssas əməliyyatlar yenə də bloklanır.
+            if mode == MODE_LIMITED:
+                # Yalnız aktorun rolu üçün açıq siyahıdakı marşrutlar. Siyahı
+                # aktorun ROLUNDAN çıxarılır (hədəfin icazələrindən DEYİL) —
+                # hədəf-tərəfli yoxlama aktorun kim olduğunu heç görmür.
+                organization = self._view_as_organization(request)
+                allowed_names = (
+                    actor_limited_write_url_names(request.real_user, organization) if organization else frozenset()
+                )
+                if url_name not in allowed_names:
+                    self._audit_view_as_write(request, target, mode, url_name, allowed=False)
+                    return self._reject(
+                        request,
+                        pgettext("accounts.view_as", "action_blocked_out_of_scope"),
+                    )
+
+            # Həssas profil əməliyyatları FULL rejimdə də bloklanır.
             profile_form = (request.POST.get("profile_form") or "").strip()
             if request.path == self._delete_account_path or profile_form in self.BLOCKED_PROFILE_FORMS:
+                self._audit_view_as_write(request, target, mode, url_name, allowed=False)
                 return self._reject(
                     request,
                     pgettext("accounts.view_as", "action_blocked_sensitive"),
                 )
 
-            # FULL rejimdə hər unsafe əməliyyat audit-ə yazılır (əsl istifadəçi adından).
-            try:
-                from apps.audit.public import log_action
-                from core.constants import AuditAction
-
-                log_action(
-                    action=AuditAction.UPDATE,
-                    user=request.real_user,
-                    organization=None,
-                    obj=target,
-                    reason="view_as_action",
-                    changes={
-                        "path": request.path[:255],
-                        "method": request.method,
-                        "profile_form": profile_form[:64],
-                    },
-                    request=request,
-                )
-            except Exception:  # noqa: BLE001 — audit xətası əməliyyatı bloklamamalıdır
-                logger.exception("view_as action audit log failed")
+            # İcazə verilən hər unsafe əməliyyat ƏSL istifadəçinin adına yazılır.
+            self._audit_view_as_write(
+                request,
+                target,
+                mode,
+                url_name,
+                allowed=True,
+                profile_form=profile_form,
+            )
 
         request.is_view_as = True
         request.view_as_mode = mode
