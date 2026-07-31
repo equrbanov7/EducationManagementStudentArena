@@ -1,0 +1,765 @@
+{"kind":"deck","id":"pr/0am7pd","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"subtitle","type":"subtitle","textPreview":"Click to edit Master subtitle style"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout2.xml","name":"Title and Content","type":"obj","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"content placeholder 2","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout3.xml","name":"Section Header","type":"secHead","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout4.xml","name":"Two Content","type":"twoObj","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"content placeholder 2","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"content placeholder 3","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout5.xml","name":"Comparison","type":"twoTxTwoObj","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles"},{"name":"content placeholder 3","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles"},{"name":"content placeholder 5","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout6.xml","name":"Title Only","type":"titleOnly","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout7.xml","name":"Blank","type":"blank","placeholders":[{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout8.xml","name":"Content with Caption","type":"objTx","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"content placeholder 2","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout9.xml","name":"Picture with Caption","type":"picTx","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"picture","type":"picture"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout10.xml","name":"Title and Vertical Text","type":"vertTx","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout11.xml","name":"Vertical Title and Text","type":"vertTitleAndTx","placeholders":[{"name":"title","type":"title","textPreview":"Click to edit Master title style"},{"name":"body","type":"body","textPreview":"Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level"},{"name":"dateTime","type":"dateTime","textPreview":"7/26/26"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber","textPreview":"‹#›"}]}
+{"kind":"slide","id":"sl/g7cx1k","slide":1,"title":"✓","textShapes":9}
+{"kind":"shape","id":"sh/idgja507","slide":1,"name":"Rectangle 1","bbox":[0,23.04,1279.97,720]}
+{"kind":"shape","id":"sh/jepkja1c","slide":1,"name":"Rectangle 2","bbox":[0,0,26.88,720]}
+{"kind":"shape","id":"sh/s3i1gzi9","slide":1,"name":"Rounded Rectangle 3","bbox":[91.2,100.8,59.52,59.52]}
+{"kind":"textbox","id":"sh/t4r2p4ju","slide":1,"name":"TextBox 4","text":"✓","textPreview":"✓","textChars":1,"textLines":1,"bbox":[100.8,113.28,48,38.4]}
+{"kind":"textbox","id":"sh/6h0jep03","slide":1,"name":"TextBox 5","text":"EMS ARENA","textPreview":"EMS ARENA","textChars":9,"textLines":1,"bbox":[168,109.44,576,30.72]}
+{"kind":"textbox","id":"sh/7i9knu1o","slide":1,"name":"TextBox 6","text":"İmtahan İdarəetmə Sistemi","textPreview":"İmtahan İdarəetmə Sistemi","textChars":25,"textLines":1,"bbox":[168,138.24,576,26.88]}
+{"kind":"textbox","id":"sh/g72lkzi5","slide":1,"name":"TextBox 7","text":"İmtahan İdarəetmə\nSistemi","textPreview":"İmtahan İdarəetmə | Sistemi","textChars":25,"textLines":2,"bbox":[91.2,232.32,1094.4,163.2]}
+{"kind":"shape","id":"sh/h8b2t4jq","slide":1,"name":"Rectangle 8","bbox":[94.08,410.88,144,4.32]}
+{"kind":"textbox","id":"sh/tgbeps72","slide":1,"name":"TextBox 9","text":"İmtahanın yaradılmasından apellyasiyaya qədər — tam elektron imtahan dövrü","textPreview":"İmtahanın yaradılmasından apellyasiyaya qədər — tam elektron imtahan dövrü","textChars":74,"textLines":1,"bbox":[91.2,443.52,1008,57.6]}
+{"kind":"textbox","id":"sh/8f2xgnqh","slide":1,"name":"TextBox 10","text":"Təqdimat:  Gəncə Aqrar Universiteti","textPreview":"Təqdimat:  Gəncə Aqrar Universiteti","textChars":35,"textLines":1,"bbox":[91.2,532.8,1008,30.72]}
+{"kind":"textbox","id":"sh/7etwnipw","slide":1,"name":"TextBox 11","text":"Sistem:  EMS Arena  ·  universitetin öz serverində quraşdırılır","textPreview":"Sistem:  EMS Arena  ·  universitetin öz serverində quraşdırılır","textChars":63,"textLines":1,"bbox":[91.2,567.36,1008,30.72]}
+{"kind":"textbox","id":"sh/6d0fed8r","slide":1,"name":"TextBox 12","text":"Bütün ekran görüntüləri işlək sistemdən — demo mühitində çəkilib","textPreview":"Bütün ekran görüntüləri işlək sistemdən — demo mühitində çəkilib","textChars":64,"textLines":1,"bbox":[91.2,601.92,1008,30.72]}
+{"kind":"textbox","id":"sh/hkbyts7e","slide":1,"name":"TextBox 13","text":"Hazırladı:  Elvin Qurbanov","textPreview":"Hazırladı:  Elvin Qurbanov","textChars":26,"textLines":1,"bbox":[91.2,664.32,1094.4,32.64]}
+{"kind":"notes","id":"nt/g7cx1k","slide":1,"text":""}
+{"kind":"slide","id":"sl/hgb0c0","slide":2,"title":"GÜNDƏLIK","textShapes":29}
+{"kind":"shape","id":"sh/tobuxsbu","slide":2,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/832donu9","slide":2,"name":"TextBox 2","text":"GÜNDƏLIK","textPreview":"GÜNDƏLIK","textChars":8,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/jy9critc","slide":2,"name":"TextBox 3","text":"Təqdimatın gedişatı","textPreview":"Təqdimatın gedişatı","textChars":19,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/yx0bidc7","slide":2,"name":"TextBox 4","text":"Sistem imtahanın bütün mərhələlərini əhatə edir — hər mərhələ ayrıca göstəriləcək","textPreview":"Sistem imtahanın bütün mərhələlərini əhatə edir — hər mərhələ ayrıca göstəriləcək","textChars":81,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/l0rutsbi","slide":2,"name":"TextBox 5","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/kzitknux","slide":2,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/bu9cnitg","slide":2,"name":"Rounded Rectangle 7","bbox":[59.52,188.16,352.64,101.76]}
+{"kind":"shape","id":"sh/at0bedcv","slide":2,"name":"Rectangle 8","bbox":[59.52,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/cjm1c7mx","slide":2,"name":"TextBox 9","text":"1 · Sistem və arxitektura","textPreview":"1 · Sistem və arxitektura","textChars":25,"textLines":1,"bbox":[80.64,197.76,323.84,28.8]}
+{"kind":"textbox","id":"sh/d4v2lc3i","slide":2,"name":"TextBox 10","text":"Nə üçün qurulub, hansı texnologiya ilə işləyir, kim nəyi görür","textPreview":"Nə üçün qurulub, hansı texnologiya ilə işləyir, kim nəyi görür","textChars":62,"textLines":1,"bbox":[80.64,222.72,323.84,61.44]}
+{"kind":"shape","id":"sh/qh4jah47","slide":2,"name":"Rounded Rectangle 11","bbox":[59.52,303.36,352.64,101.76]}
+{"kind":"shape","id":"sh/bid0j2lc","slide":2,"name":"Rectangle 12","bbox":[59.52,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/ofm187m1","slide":2,"name":"TextBox 13","text":"2 · İmtahanın yaradılması","textPreview":"2 · İmtahanın yaradılması","textChars":25,"textLines":1,"bbox":[80.64,312.96,323.84,28.8]}
+{"kind":"textbox","id":"sh/pgvihc3m","slide":2,"name":"TextBox 14","text":"4 addımlı sehrbaz, sual bankı, toplu idxal, çoxdillilik","textPreview":"4 addımlı sehrbaz, sual bankı, toplu idxal, çoxdillilik","textChars":55,"textLines":1,"bbox":[80.64,337.92,323.84,61.44]}
+{"kind":"shape","id":"sh/2d4j6x4v","slide":2,"name":"Rounded Rectangle 15","bbox":[59.52,418.56,352.64,101.76]}
+{"kind":"shape","id":"sh/3ed0f2lg","slide":2,"name":"Rectangle 16","bbox":[59.52,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/8b61kr25","slide":2,"name":"TextBox 17","text":"3 · İmtahan formatları","textPreview":"3 · İmtahan formatları","textChars":22,"textLines":1,"bbox":[80.64,428.16,323.84,28.8]}
+{"kind":"textbox","id":"sh/9cz2tw3q","slide":2,"name":"TextBox 18","text":"Test · yazılı · praktiki kod × sınaq / kollokvium / final","textPreview":"Test · yazılı · praktiki kod × sınaq / kollokvium / final","textChars":57,"textLines":1,"bbox":[80.64,453.12,323.84,61.44]}
+{"kind":"shape","id":"sh/hsvixwvu","slide":2,"name":"Rounded Rectangle 19","bbox":[59.52,533.76,352.64,101.76]}
+{"kind":"shape","id":"sh/wrm14ru9","slide":2,"name":"Rectangle 20","bbox":[59.52,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/vqt0vmdo","slide":2,"name":"TextBox 21","text":"4 · Tələbənin imtahan axını","textPreview":"4 · Tələbənin imtahan axını","textChars":27,"textLines":1,"bbox":[80.64,543.36,323.84,28.8]}
+{"kind":"textbox","id":"sh/upkj2hcj","slide":2,"name":"TextBox 22","text":"Girişdən nəticəyə: imtahan ekranı, taymer, avtomatik yaddaş","textPreview":"Girişdən nəticəyə: imtahan ekranı, taymer, avtomatik yaddaş","textChars":59,"textLines":1,"bbox":[80.64,568.32,323.84,61.44]}
+{"kind":"shape","id":"sh/94bitwvy","slide":2,"name":"Rounded Rectangle 23","bbox":[446.72,188.16,352.64,101.76]}
+{"kind":"shape","id":"sh/83210rud","slide":2,"name":"Rectangle 24","bbox":[446.72,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/72t0rmds","slide":2,"name":"TextBox 25","text":"5 · Final İmtahan Mərkəzi","textPreview":"5 · Final İmtahan Mərkəzi","textChars":25,"textLines":1,"bbox":[467.84,197.76,323.84,28.8]}
+{"kind":"textbox","id":"sh/m1kjyhc7","slide":2,"name":"TextBox 26","text":"Zal, sessiya, fərdi PIN, kompüterə bağlanma, nəzarətçi","textPreview":"Zal, sessiya, fərdi PIN, kompüterə bağlanma, nəzarətçi","textChars":54,"textLines":1,"bbox":[467.84,222.72,323.84,61.44]}
+{"kind":"shape","id":"sh/l0bipcvm","slide":2,"name":"Rounded Rectangle 27","bbox":[446.72,303.36,352.64,101.76]}
+{"kind":"shape","id":"sh/kzi1w7u1","slide":2,"name":"Rectangle 28","bbox":[446.72,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/a5gf6dsz","slide":2,"name":"TextBox 29","text":"6 · Canlı nəzarət (proctoring)","textPreview":"6 · Canlı nəzarət (proctoring)","textChars":30,"textLines":1,"bbox":[467.84,312.96,323.84,28.8]}
+{"kind":"textbox","id":"sh/b6pgzitk","slide":2,"name":"TextBox 30","text":"Tab dəyişmə, tam ekran, pozuntu siyasəti, müdaxilə","textPreview":"Tab dəyişmə, tam ekran, pozuntu siyasəti, müdaxilə","textChars":50,"textLines":1,"bbox":[467.84,337.92,323.84,61.44]}
+{"kind":"shape","id":"sh/c7yh8na5","slide":2,"name":"Rounded Rectangle 31","bbox":[446.72,418.56,352.64,101.76]}
+{"kind":"shape","id":"sh/x8ry1sbq","slide":2,"name":"Rectangle 32","bbox":[446.72,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/21gf2ts3","slide":2,"name":"TextBox 33","text":"7 · Qiymətləndirmə və nəticələr","textPreview":"7 · Qiymətləndirmə və nəticələr","textChars":31,"textLines":1,"bbox":[467.84,428.16,323.84,28.8]}
+{"kind":"textbox","id":"sh/n2pgvyto","slide":2,"name":"TextBox 34","text":"Avtomatik + əl ilə yoxlama, elektron jurnala keçid","textPreview":"Avtomatik + əl ilə yoxlama, elektron jurnala keçid","textChars":50,"textLines":1,"bbox":[467.84,453.12,323.84,61.44]}
+{"kind":"shape","id":"sh/o3yx43at","slide":2,"name":"Rounded Rectangle 35","bbox":[446.72,533.76,352.64,101.76]}
+{"kind":"shape","id":"sh/p47yx8be","slide":2,"name":"Rectangle 36","bbox":[446.72,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/edwfytcr","slide":2,"name":"TextBox 37","text":"8 · Statistika və hesabatlar","textPreview":"8 · Statistika və hesabatlar","textChars":28,"textLines":1,"bbox":[467.84,543.36,323.84,28.8]}
+{"kind":"textbox","id":"sh/fe5grytc","slide":2,"name":"TextBox 38","text":"Müəllim, kafedra və universitet səviyyəsində analitika","textPreview":"Müəllim, kafedra və universitet səviyyəsində analitika","textChars":54,"textLines":1,"bbox":[467.84,568.32,323.84,61.44]}
+{"kind":"shape","id":"sh/rqpc3ux8","slide":2,"name":"Rounded Rectangle 39","bbox":[833.92,188.16,352.64,101.76]}
+{"kind":"shape","id":"sh/6pgvapwn","slide":2,"name":"Rectangle 40","bbox":[833.92,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/ts7u54fy","slide":2,"name":"TextBox 41","text":"9 · Apellyasiya","textPreview":"9 · Apellyasiya","textChars":15,"textLines":1,"bbox":[855.04,197.76,323.84,28.8]}
+{"kind":"textbox","id":"sh/srydczet","slide":2,"name":"TextBox 42","text":"3 günlük pəncərə, sual-üzrə müraciət, auditli bal düzəlişi","textPreview":"3 günlük pəncərə, sual-üzrə müraciət, auditli bal düzəlişi","textChars":58,"textLines":1,"bbox":[855.04,222.72,323.84,61.44]}
+{"kind":"shape","id":"sh/jmpczuxw","slide":2,"name":"Rounded Rectangle 43","bbox":[833.92,303.36,352.64,101.76]}
+{"kind":"shape","id":"sh/i1wb6pwb","slide":2,"name":"Rectangle 44","bbox":[833.92,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/5o7u14f2","slide":2,"name":"TextBox 45","text":"10 · Təhlükəsizlik","textPreview":"10 · Təhlükəsizlik","textChars":18,"textLines":1,"bbox":[855.04,312.96,323.84,28.8]}
+{"kind":"textbox","id":"sh/4nyd8zeh","slide":2,"name":"TextBox 46","text":"6 müstəqil qorunma təbəqəsi","textPreview":"6 müstəqil qorunma təbəqəsi","textChars":27,"textLines":1,"bbox":[855.04,337.92,323.84,61.44]}
+{"kind":"shape","id":"sh/vy5cvax0","slide":2,"name":"Rounded Rectangle 47","bbox":[833.92,418.56,352.64,101.76]}
+{"kind":"shape","id":"sh/axwb25wf","slide":2,"name":"Rectangle 48","bbox":[833.92,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/03u9wbud","slide":2,"name":"TextBox 49","text":"11 · Server tutumu","textPreview":"11 · Server tutumu","textChars":18,"textLines":1,"bbox":[855.04,428.16,323.84,28.8]}
+{"kind":"textbox","id":"sh/l43a5gvy","slide":2,"name":"TextBox 50","text":"Neçə tələbə eyni anda? — ölçülmüş yük testi nəticələri","textPreview":"Neçə tələbə eyni anda? — ölçülmüş yük testi nəticələri","textChars":54,"textLines":1,"bbox":[855.04,453.12,323.84,61.44]}
+{"kind":"shape","id":"sh/y1sru1c7","slide":2,"name":"Rounded Rectangle 51","bbox":[833.92,533.76,352.64,101.76]}
+{"kind":"shape","id":"sh/z21s36ds","slide":2,"name":"Rectangle 52","bbox":[833.92,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/87u90vu9","slide":2,"name":"TextBox 53","text":"12 · Tətbiq və yol xəritəsi","textPreview":"12 · Tətbiq və yol xəritəsi","textChars":27,"textLines":1,"bbox":[855.04,543.36,323.84,28.8]}
+{"kind":"textbox","id":"sh/9s3a90vu","slide":2,"name":"TextBox 54","text":"Quraşdırma modeli, aqrar universitetə uyğunluq, hədlər","textPreview":"Quraşdırma modeli, aqrar universitetə uyğunluq, hədlər","textChars":54,"textLines":1,"bbox":[855.04,568.32,323.84,61.44]}
+{"kind":"notes","id":"nt/hgb0c0","slide":2,"text":""}
+{"kind":"slide","id":"sl/p40376","slide":3,"title":"BIR BAXIŞDA","textShapes":30}
+{"kind":"shape","id":"sh/dw3il0ve","slide":3,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/cva1svut","slide":3,"name":"TextBox 2","text":"BIR BAXIŞDA","textPreview":"BIR BAXIŞDA","textChars":11,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/zyl0nqd4","slide":3,"name":"TextBox 3","text":"Sistem nəyi əhatə edir","textPreview":"Sistem nəyi əhatə edir","textChars":22,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/yxcju5cz","slide":3,"name":"TextBox 4","text":"Rəqəmlər işlək koddan və ölçülmüş yük testi nəticələrindən götürülüb","textPreview":"Rəqəmlər işlək koddan və ölçülmüş yük testi nəticələrindən götürülüb","textChars":68,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/l03ip0va","slide":3,"name":"TextBox 5","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/0zu1wvup","slide":3,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/n2l0radg","slide":3,"name":"Rounded Rectangle 7","bbox":[59.52,192,261.6,184.32]}
+{"kind":"textbox","id":"sh/m1cjy5cv","slide":3,"name":"TextBox 8","text":"3 × 5","textPreview":"3 × 5","textChars":5,"textLines":1,"bbox":[80.64,205.44,223.2,63.36]}
+{"kind":"textbox","id":"sh/4zm1g321","slide":3,"name":"TextBox 9","text":"format × kateqoriya","textPreview":"format × kateqoriya","textChars":19,"textLines":1,"bbox":[80.64,268.8,223.2,26.88]}
+{"kind":"textbox","id":"sh/50v2983m","slide":3,"name":"TextBox 10","text":"Test / yazılı / praktiki kod\n× sınaq, kollokvium, final,\nyerləşdirmə, məşq","textPreview":"Test / yazılı / praktiki kod | × sınaq, kollokvium, final, | yerləşdirmə, məşq","textChars":74,"textLines":3,"bbox":[80.64,293.76,223.2,78.72]}
+{"kind":"shape","id":"sh/ix4jetkb","slide":3,"name":"Rounded Rectangle 11","bbox":[349.92,192,261.6,184.32]}
+{"kind":"textbox","id":"sh/jydk7ylw","slide":3,"name":"TextBox 12","text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[371.04,205.44,223.2,63.36]}
+{"kind":"textbox","id":"sh/s361kn2d","slide":3,"name":"TextBox 13","text":"hazır rol şablonu","textPreview":"hazır rol şablonu","textChars":17,"textLines":1,"bbox":[371.04,268.8,223.2,26.88]}
+{"kind":"textbox","id":"sh/tof2d83y","slide":3,"name":"TextBox 14","text":"Rektordan tələbəyə qədər,\nfakültə–kafedra–ixtisas–qrup\nsəviyyəli əhatə","textPreview":"Rektordan tələbəyə qədər, | fakültə–kafedra–ixtisas–qrup | səviyyəli əhatə","textChars":70,"textLines":3,"bbox":[371.04,293.76,223.2,78.72]}
+{"kind":"shape","id":"sh/614jidk7","slide":3,"name":"Rounded Rectangle 15","bbox":[640.32,192,261.6,184.32]}
+{"kind":"textbox","id":"sh/r2dkbils","slide":3,"name":"TextBox 16","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[661.44,205.44,223.2,63.36]}
+{"kind":"textbox","id":"sh/gr6lon29","slide":3,"name":"TextBox 17","text":"imtahan dili","textPreview":"imtahan dili","textChars":12,"textLines":1,"bbox":[661.44,268.8,223.2,26.88]}
+{"kind":"textbox","id":"sh/1sf2hs3u","slide":3,"name":"TextBox 18","text":"AZ · EN · RU · TR —\nbir imtahan, paralel dil\nvariantları","textPreview":"AZ · EN · RU · TR — | bir imtahan, paralel dil | variantları","textChars":56,"textLines":3,"bbox":[661.44,293.76,223.2,78.72]}
+{"kind":"shape","id":"sh/98b21sby","slide":3,"name":"Rounded Rectangle 19","bbox":[930.72,192,261.6,184.32]}
+{"kind":"textbox","id":"sh/on21snud","slide":3,"name":"TextBox 20","text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[951.84,205.44,223.2,63.36]}
+{"kind":"textbox","id":"sh/nmtkzit8","slide":3,"name":"TextBox 21","text":"apellyasiya səbəb tipi","textPreview":"apellyasiya səbəb tipi","textChars":22,"textLines":1,"bbox":[951.84,268.8,223.2,26.88]}
+{"kind":"textbox","id":"sh/2lkjqdcn","slide":3,"name":"TextBox 22","text":"Hər sual üçün ayrıca\nmüraciət və ayrıca qərar","textPreview":"Hər sual üçün ayrıca | müraciət və ayrıca qərar","textChars":45,"textLines":2,"bbox":[951.84,293.76,223.2,78.72]}
+{"kind":"shape","id":"sh/xcv25sba","slide":3,"name":"Rounded Rectangle 23","bbox":[59.52,397.44,261.6,184.32]}
+{"kind":"textbox","id":"sh/wbm1wnup","slide":3,"name":"TextBox 24","text":"500","textPreview":"500","textChars":3,"textLines":1,"bbox":[80.64,410.88,223.2,63.36]}
+{"kind":"textbox","id":"sh/badk32t4","slide":3,"name":"TextBox 25","text":"eyni-anlı tələbə","textPreview":"eyni-anlı tələbə","textChars":16,"textLines":1,"bbox":[80.64,474.24,223.2,26.88]}
+{"kind":"textbox","id":"sh/a94juxcj","slide":3,"name":"TextBox 26","text":"Tam imtahan axınında\nsübutlu — 0% HTTP xətası","textPreview":"Tam imtahan axınında | sübutlu — 0% HTTP xətası","textChars":45,"textLines":2,"bbox":[80.64,499.2,223.2,78.72]}
+{"kind":"shape","id":"sh/dgr2t8vq","slide":3,"name":"Rounded Rectangle 27","bbox":[349.92,397.44,261.6,184.32]}
+{"kind":"textbox","id":"sh/sfi1k3ul","slide":3,"name":"TextBox 28","text":"0.00%","textPreview":"0.00%","textChars":5,"textLines":1,"bbox":[371.04,410.88,223.2,63.36]}
+{"kind":"textbox","id":"sh/ilgzu9s3","slide":3,"name":"TextBox 29","text":"məlumat itkisi","textPreview":"məlumat itkisi","textChars":14,"textLines":1,"bbox":[371.04,474.24,223.2,26.88]}
+{"kind":"textbox","id":"sh/3mpg3eto","slide":3,"name":"TextBox 30","text":"200 eyni-anlı tələbə testində\n1325 yazının hamısı qeydə alındı","textPreview":"200 eyni-anlı tələbə testində | 1325 yazının hamısı qeydə alındı","textChars":62,"textLines":2,"bbox":[371.04,499.2,223.2,78.72]}
+{"kind":"shape","id":"sh/4nyhwza9","slide":3,"name":"Rounded Rectangle 31","bbox":[640.32,397.44,261.6,184.32]}
+{"kind":"textbox","id":"sh/5o7y54ru","slide":3,"name":"TextBox 32","text":"10 094","textPreview":"10 094","textChars":6,"textLines":1,"bbox":[661.44,410.88,223.2,63.36]}
+{"kind":"textbox","id":"sh/qpgzy9sf","slide":3,"name":"TextBox 33","text":"sorğu / saniyə","textPreview":"sorğu / saniyə","textChars":14,"textLines":1,"bbox":[661.44,474.24,223.2,26.88]}
+{"kind":"textbox","id":"sh/rq9g7e90","slide":3,"name":"TextBox 34","text":"10 000 virtual istifadəçi\naltında ölçülmüş ötürmə","textPreview":"10 000 virtual istifadəçi | altında ölçülmüş ötürmə","textChars":49,"textLines":2,"bbox":[661.44,499.2,223.2,78.72]}
+{"kind":"shape","id":"sh/srih0ja5","slide":3,"name":"Rounded Rectangle 35","bbox":[930.72,397.44,261.6,184.32]}
+{"kind":"textbox","id":"sh/dsri9orq","slide":3,"name":"TextBox 36","text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[951.84,410.88,223.2,63.36]}
+{"kind":"textbox","id":"sh/6twzmpsv","slide":3,"name":"TextBox 37","text":"təhlükəsizlik təbəqəsi","textPreview":"təhlükəsizlik təbəqəsi","textChars":22,"textLines":1,"bbox":[951.84,474.24,223.2,26.88]}
+{"kind":"textbox","id":"sh/7u5gvutg","slide":3,"name":"TextBox 38","text":"Şəbəkədən bal düzəlişinin\nauditinə qədər","textPreview":"Şəbəkədən bal düzəlişinin | auditinə qədər","textChars":40,"textLines":2,"bbox":[951.84,499.2,223.2,78.72]}
+{"kind":"shape","id":"sh/nedo3mh8","slide":3,"name":"Rounded Rectangle 39","bbox":[59.52,616.32,1161.6,48]}
+{"kind":"textbox","id":"sh/md4nahgn","slide":3,"name":"TextBox 40","text":"Bütün rəqəmlər bu təqdimatda mənbəyi ilə birlikdə göstərilir. Ölçülməmiş dəyərlər açıq şəkildə «hesablanmış təxmin» kimi işarələnib.","textPreview":"Bütün rəqəmlər bu təqdimatda mənbəyi ilə birlikdə göstərilir. Ölçülməmiş dəyərlər açıq şəkildə «hesablanmış təxmin» kimi işarələnib.","textChars":132,"textLines":1,"bbox":[88.32,628.8,1104,28.8]}
+{"kind":"notes","id":"nt/p40376","slide":3,"text":""}
+{"kind":"slide","id":"sl/v1wfsb","slide":4,"title":"ARXITEKTURA","textShapes":6}
+{"kind":"shape","id":"sh/qdsn6xkb","slide":4,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/re1of2lw","slide":4,"name":"TextBox 2","text":"ARXITEKTURA","textPreview":"ARXITEKTURA","textChars":11,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/0ju5c72d","slide":4,"name":"TextBox 3","text":"Texnoloji quruluş","textPreview":"Texnoloji quruluş","textChars":17,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/1436lc3y","slide":4,"name":"TextBox 4","text":"Sistem universitetin daxili şəbəkəsində (on-premise) işləyir — məlumat kampusdan çıxmır","textPreview":"Sistem universitetin daxili şəbəkəsində (on-premise) işləyir — məlumat kampusdan çıxmır","textChars":87,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/ehcnahkn","slide":4,"name":"TextBox 5","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/ziloj2l8","slide":4,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/gnq50nm9","slide":4,"name":"Rectangle 7","bbox":[218.71,179.04,843.23,443.52]}
+{"kind":"shape","id":"sh/lwvqtkfa","slide":4,"name":"Rounded Rectangle 9","bbox":[59.52,625.92,1161.6,40.32]}
+{"kind":"textbox","id":"sh/kv2pkfep","slide":4,"name":"TextBox 10","text":"12 tətbiq replikası · hər biri 12 paralel iş sapı · pgbouncer hovuzu 200 bağlantı · Redis 3 GB · avtomatik şifrələnmiş yedəkləmə","textPreview":"12 tətbiq replikası · hər biri 12 paralel iş sapı · pgbouncer hovuzu 200 bağlantı · Redis 3 GB · avtomatik şifrələnmiş yedəkləmə","textChars":128,"textLines":1,"bbox":[81.6,635.52,1123.2,28.8]}
+{"kind":"image","id":"im/s725gj2t","slide":4,"name":"Picture 8","bbox":[222.07,182.4,836.51,436.8]}
+{"kind":"notes","id":"nt/v1wfsb","slide":4,"text":""}
+{"kind":"slide","id":"sl/ky8ydp","slide":5,"title":"ROLLAR","textShapes":25}
+{"kind":"shape","id":"sh/s7q1s3mh","slide":5,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/d8z218n2","slide":5,"name":"TextBox 2","text":"ROLLAR","textPreview":"ROLLAR","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/e98jud4n","slide":5,"name":"TextBox 3","text":"Kim nəyi görür","textPreview":"Kim nəyi görür","textChars":14,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/fahk3i58","slide":5,"name":"TextBox 4","text":"İcazə iki oxdan ibarətdir: ROL (nə edə bilər) və SCOPE (harada edə bilər — fakültə / kafedra / ixtisas / qrup)","textPreview":"İcazə iki oxdan ibarətdir: ROL (nə edə bilər) və SCOPE (harada edə bilər — fakültə / kafedra / ixtisas / qrup)","textChars":110,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/0bq1wnmt","slide":5,"name":"TextBox 5","text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/1cz25sny","slide":5,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/2ds3yd4j","slide":5,"name":"Rounded Rectangle 7","bbox":[59.52,188.16,546.24,83.71]}
+{"kind":"shape","id":"sh/ne1k7i54","slide":5,"name":"Rectangle 8","bbox":[59.52,188.16,5.28,83.71]}
+{"kind":"textbox","id":"sh/f69orelo","slide":5,"name":"TextBox 9","text":"Rektor · Prorektor","textPreview":"Rektor · Prorektor","textChars":18,"textLines":1,"bbox":[80.64,197.76,517.44,28.8]}
+{"kind":"textbox","id":"sh/e50nitk3","slide":5,"name":"TextBox 10","text":"Bütün universitet üzrə analitika və nəzarət","textPreview":"Bütün universitet üzrə analitika və nəzarət","textChars":43,"textLines":1,"bbox":[80.64,222.72,517.44,43.39]}
+{"kind":"shape","id":"sh/18b6to3e","slide":5,"name":"Rounded Rectangle 11","bbox":[59.52,285.31,546.24,83.71]}
+{"kind":"shape","id":"sh/07ipkj2t","slide":5,"name":"Rectangle 12","bbox":[59.52,285.31,5.28,83.71]}
+{"kind":"textbox","id":"sh/r29onelc","slide":5,"name":"TextBox 13","text":"İKT rəhbəri","textPreview":"İKT rəhbəri","textChars":11,"textLines":1,"bbox":[80.64,294.91,517.44,28.8]}
+{"kind":"textbox","id":"sh/qh0ne94r","slide":5,"name":"TextBox 14","text":"Kilidləri auditli düzəliş axını ilə keçmə səlahiyyəti","textPreview":"Kilidləri auditli düzəliş axını ilə keçmə səlahiyyəti","textChars":53,"textLines":1,"bbox":[80.64,319.87,517.44,43.39]}
+{"kind":"shape","id":"sh/d4r6po3i","slide":5,"name":"Rounded Rectangle 15","bbox":[59.52,382.46,546.24,83.71]}
+{"kind":"shape","id":"sh/s3i5gj2x","slide":5,"name":"Rectangle 16","bbox":[59.52,382.46,5.28,83.71]}
+{"kind":"textbox","id":"sh/bytozylg","slide":5,"name":"TextBox 17","text":"İmtahan Mərkəzi","textPreview":"İmtahan Mərkəzi","textChars":15,"textLines":1,"bbox":[80.64,392.06,517.44,28.8]}
+{"kind":"textbox","id":"sh/adk7qdkb","slide":5,"name":"TextBox 18","text":"Final və kollokvium yaradır, zal/sessiya idarə edir, apellyasiyaya qərar verir","textPreview":"Final və kollokvium yaradır, zal/sessiya idarə edir, apellyasiyaya qərar verir","textChars":78,"textLines":1,"bbox":[80.64,417.02,517.44,43.39]}
+{"kind":"shape","id":"sh/mtorix4j","slide":5,"name":"Rounded Rectangle 19","bbox":[59.52,479.62,546.24,83.71]}
+{"kind":"shape","id":"sh/7uxsr254","slide":5,"name":"Rectangle 20","bbox":[59.52,479.62,5.28,83.71]}
+{"kind":"textbox","id":"sh/8v69k7m9","slide":5,"name":"TextBox 21","text":"Dekan · Kafedra müdiri","textPreview":"Dekan · Kafedra müdiri","textChars":22,"textLines":1,"bbox":[80.64,489.22,517.44,28.8]}
+{"kind":"textbox","id":"sh/9wfatcnu","slide":5,"name":"TextBox 22","text":"Öz fakültə/kafedra alt-ağacı üzrə imtahan və nəticə görünüşü","textPreview":"Öz fakültə/kafedra alt-ağacı üzrə imtahan və nəticə görünüşü","textChars":60,"textLines":1,"bbox":[80.64,514.18,517.44,43.39]}
+{"kind":"shape","id":"sh/uxormh4f","slide":5,"name":"Rounded Rectangle 23","bbox":[59.52,576.77,546.24,83.71]}
+{"kind":"shape","id":"sh/vyhsvm50","slide":5,"name":"Rectangle 24","bbox":[59.52,576.77,5.28,83.71]}
+{"kind":"textbox","id":"sh/wzq9orml","slide":5,"name":"TextBox 25","text":"Müəllim","textPreview":"Müəllim","textChars":7,"textLines":1,"bbox":[80.64,586.37,517.44,28.8]}
+{"kind":"textbox","id":"sh/h0zaxwn6","slide":5,"name":"TextBox 26","text":"Öz fənləri üzrə imtahan yaradır, sual bankı, yoxlama, statistika","textPreview":"Öz fənləri üzrə imtahan yaradır, sual bankı, yoxlama, statistika","textChars":64,"textLines":1,"bbox":[80.64,611.33,517.44,43.39]}
+{"kind":"shape","id":"sh/a14rad4b","slide":5,"name":"Rounded Rectangle 27","bbox":[640.32,188.16,546.24,83.71]}
+{"kind":"shape","id":"sh/b2d8ji5w","slide":5,"name":"Rectangle 28","bbox":[640.32,188.16,5.28,83.71]}
+{"kind":"textbox","id":"sh/d8325kba","slide":5,"name":"TextBox 29","text":"Assistent · Laborant","textPreview":"Assistent · Laborant","textChars":20,"textLines":1,"bbox":[661.44,197.76,517.44,28.8]}
+{"kind":"textbox","id":"sh/c7ulcfa5","slide":5,"name":"TextBox 30","text":"Kurs səviyyəsində köməkçi əməliyyatlar, laboratoriya işləri","textPreview":"Kurs səviyyəsində köməkçi əməliyyatlar, laboratoriya işləri","textChars":59,"textLines":1,"bbox":[661.44,222.72,517.44,43.39]}
+{"kind":"shape","id":"sh/r6lk3atk","slide":5,"name":"Rounded Rectangle 31","bbox":[640.32,285.31,546.24,83.71]}
+{"kind":"shape","id":"sh/q5c3a5sz","slide":5,"name":"Rectangle 32","bbox":[640.32,285.31,5.28,83.71]}
+{"kind":"textbox","id":"sh/1wnm94bm","slide":5,"name":"TextBox 33","text":"Nəzarətçi (invigilator)","textPreview":"Nəzarətçi (invigilator)","textChars":23,"textLines":1,"bbox":[661.44,294.91,517.44,28.8]}
+{"kind":"textbox","id":"sh/0velgza1","slide":5,"name":"TextBox 34","text":"Zalda sessiyanı başladır/bitirir, canlı monitor, müdaxilə","textPreview":"Zalda sessiyanı başladır/bitirir, canlı monitor, müdaxilə","textChars":57,"textLines":1,"bbox":[661.44,319.87,517.44,43.39]}
+{"kind":"shape","id":"sh/zul47utg","slide":5,"name":"Rounded Rectangle 35","bbox":[640.32,382.46,546.24,83.71]}
+{"kind":"shape","id":"sh/etc3epsv","slide":5,"name":"Rectangle 36","bbox":[640.32,382.46,5.28,83.71]}
+{"kind":"textbox","id":"sh/h0j2x0bi","slide":5,"name":"TextBox 37","text":"Tyutor · Proqram koordinatoru","textPreview":"Tyutor · Proqram koordinatoru","textChars":29,"textLines":1,"bbox":[661.44,392.06,517.44,28.8]}
+{"kind":"textbox","id":"sh/gzal4vax","slide":5,"name":"TextBox 38","text":"Qrup və ixtisas səviyyəsində izləmə","textPreview":"Qrup və ixtisas səviyyəsində izləmə","textChars":35,"textLines":1,"bbox":[661.44,417.02,517.44,43.39]}
+{"kind":"shape","id":"sh/kvi5c3u5","slide":5,"name":"Rounded Rectangle 39","bbox":[640.32,479.62,546.24,83.71]}
+{"kind":"shape","id":"sh/lwr658vq","slide":5,"name":"Rectangle 40","bbox":[640.32,479.62,5.28,83.71]}
+{"kind":"textbox","id":"sh/ytgnatcf","slide":5,"name":"TextBox 41","text":"Tələbə","textPreview":"Tələbə","textChars":6,"textLines":1,"bbox":[661.44,489.22,517.44,28.8]}
+{"kind":"textbox","id":"sh/ju9o3yd0","slide":5,"name":"TextBox 42","text":"Öz imtahanları, nəticələri, apellyasiyaları, transkripti","textPreview":"Öz imtahanları, nəticələri, apellyasiyaları, transkripti","textChars":56,"textLines":1,"bbox":[661.44,514.18,517.44,43.39]}
+{"kind":"shape","id":"sh/wry583u9","slide":5,"name":"Rounded Rectangle 43","bbox":[640.32,576.77,546.24,83.71]}
+{"kind":"shape","id":"sh/xs761ovu","slide":5,"name":"Rectangle 44","bbox":[640.32,576.77,5.28,83.71]}
+{"kind":"textbox","id":"sh/apgn6tc3","slide":5,"name":"TextBox 45","text":"Vacib qayda","textPreview":"Vacib qayda","textChars":11,"textLines":1,"bbox":[661.44,586.37,517.44,28.8]}
+{"kind":"textbox","id":"sh/bqpozydo","slide":5,"name":"TextBox 46","text":"Rol yalnız AKTİV üzvlük vasitəsilə işləyir — üzvlük bağlananda çıxış dərhal kəsilir","textPreview":"Rol yalnız AKTİV üzvlük vasitəsilə işləyir — üzvlük bağlananda çıxış dərhal kəsilir","textChars":83,"textLines":1,"bbox":[661.44,611.33,517.44,43.39]}
+{"kind":"notes","id":"nt/ky8ydp","slide":5,"text":""}
+{"kind":"slide","id":"sl/5z2wh8","slide":6,"title":"HƏYAT DÖVRÜ","textShapes":6}
+{"kind":"shape","id":"sh/t8rmhkz6","slide":6,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/87ilofi1","slide":6,"name":"TextBox 2","text":"HƏYAT DÖVRÜ","textPreview":"HƏYAT DÖVRÜ","textChars":11,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/va94juhc","slide":6,"name":"TextBox 3","text":"İmtahanın həyat dövrü","textPreview":"İmtahanın həyat dövrü","textChars":21,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/u903qp0r","slide":6,"name":"TextBox 4","text":"Status bazada saxlanmır — imtahanın öz məlumatlarından hesablanır, ona görə heç vaxt həqiqətdən ayrılmır","textPreview":"Status bazada saxlanmır — imtahanın öz məlumatlarından hesablanır, ona görə heç vaxt həqiqətdən ayrılmır","textChars":104,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/hcrml4zi","slide":6,"name":"TextBox 5","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/gbilszix","slide":6,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/be5k7q18","slide":6,"name":"Rectangle 7","bbox":[62.36,179.04,1155.92,443.52]}
+{"kind":"shape","id":"sh/4jap8nih","slide":6,"name":"Rounded Rectangle 9","bbox":[59.52,625.92,1161.6,40.32]}
+{"kind":"textbox","id":"sh/54j6hszm","slide":6,"name":"TextBox 10","text":"Dərc qapısı: imtahan ən azı bir aktiv sual olmadan tələbələrə AÇILMIR — «boş imtahan» səhvi mümkün deyil","textPreview":"Dərc qapısı: imtahan ən azı bir aktiv sual olmadan tələbələrə AÇILMIR — «boş imtahan» səhvi mümkün deyil","textChars":104,"textLines":1,"bbox":[81.6,635.52,1123.2,28.8]}
+{"kind":"image","id":"im/58n6hsbq","slide":6,"name":"Picture 8","bbox":[65.72,182.4,1149.2,436.8]}
+{"kind":"notes","id":"nt/5z2wh8","slide":6,"text":""}
+{"kind":"slide","id":"sl/xm8m6w","slide":7,"title":"MÜƏLLIM","textShapes":13}
+{"kind":"shape","id":"sh/s32p47e1","slide":7,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/tobqxcvm","slide":7,"name":"TextBox 2","text":"MÜƏLLIM","textPreview":"MÜƏLLIM","textChars":7,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/ep476hw7","slide":7,"name":"TextBox 3","text":"Müəllim kabineti","textPreview":"Müəllim kabineti","textChars":16,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/fqd8z2ds","slide":7,"name":"TextBox 4","text":"Bir giriş — rola görə açılan vahid kabinet","textPreview":"Bir giriş — rola görə açılan vahid kabinet","textChars":42,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/grmp87ed","slide":7,"name":"TextBox 5","text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/1svq1cvy","slide":7,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/ut07udw3","slide":7,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/3up0jy5s","slide":7,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/itgzqto7","slide":7,"name":"TextBox 10","text":"Vahid kabinet","textPreview":"Vahid kabinet","textChars":13,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/5w7il8ny","slide":7,"name":"TextBox 11","text":"Müəllim, tələbə, dekan, imtahan mərkəzi — hamı eyni ünvandan girir, öz bölmələrini görür","textPreview":"Müəllim, tələbə, dekan, imtahan mərkəzi — hamı eyni ünvandan girir, öz bölmələrini görür","textChars":88,"textLines":1,"bbox":[77.76,217.92,292.8,70.56]}
+{"kind":"shape","id":"sh/4vy1s36d","slide":7,"name":"Rectangle 12","bbox":[59.52,301.92,5.28,24.96]}
+{"kind":"textbox","id":"sh/vq50fe5w","slide":7,"name":"TextBox 13","text":"Sol menyu bölmələri","textPreview":"Sol menyu bölmələri","textChars":19,"textLines":1,"bbox":[77.76,300,295.68,35.52]}
+{"kind":"textbox","id":"sh/upwzm9ob","slide":7,"name":"TextBox 14","text":"Statistika, İmtahanlarım, İmtahan Nəzarət Sistemi, Sual Bankı, Sual göndərişləri","textPreview":"Statistika, İmtahanlarım, İmtahan Nəzarət Sistemi, Sual Bankı, Sual göndərişləri","textChars":80,"textLines":1,"bbox":[77.76,331.68,292.8,70.56]}
+{"kind":"shape","id":"sh/hs7ihonm","slide":7,"name":"Rectangle 15","bbox":[59.52,415.68,5.28,24.96]}
+{"kind":"textbox","id":"sh/gryhoj6h","slide":7,"name":"TextBox 16","text":"Universitet bloku","textPreview":"Universitet bloku","textChars":17,"textLines":1,"bbox":[77.76,413.76,295.68,35.52]}
+{"kind":"textbox","id":"sh/7m50be5k","slide":7,"name":"TextBox 17","text":"Dərs cədvəli, akademik təqvim, elektron jurnal — imtahan təcrid olunmuş modul deyil","textPreview":"Dərs cədvəli, akademik təqvim, elektron jurnal — imtahan təcrid olunmuş modul deyil","textChars":83,"textLines":1,"bbox":[77.76,445.44,292.8,70.56]}
+{"kind":"shape","id":"sh/61wzi9oz","slide":7,"name":"Rectangle 18","bbox":[59.52,529.44,5.28,24.96]}
+{"kind":"textbox","id":"sh/axcju987","slide":7,"name":"TextBox 19","text":"Dil dəyişikliyi","textPreview":"Dil dəyişikliyi","textChars":15,"textLines":1,"bbox":[77.76,527.52,295.68,35.52]}
+{"kind":"textbox","id":"sh/byl03e9c","slide":7,"name":"TextBox 20","text":"İnterfeys 4 dildə: Azərbaycan, İngilis, Rus, Türk","textPreview":"İnterfeys 4 dildə: Azərbaycan, İngilis, Rus, Türk","textChars":49,"textLines":1,"bbox":[77.76,559.2,292.8,50.88]}
+{"kind":"image","id":"im/zi9of2pw","slide":7,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/xm8m6w","slide":7,"text":""}
+{"kind":"slide","id":"sl/7w0fx5","slide":8,"title":"MÜƏLLIM","textShapes":13}
+{"kind":"shape","id":"sh/gvmhozed","slide":8,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/hwvyx4vy","slide":8,"name":"TextBox 2","text":"MÜƏLLIM","textPreview":"MÜƏLLIM","textChars":7,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/65kfipwb","slide":8,"name":"TextBox 3","text":"İmtahanlarım","textPreview":"İmtahanlarım","textChars":12,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/76tgrudw","slide":8,"name":"TextBox 4","text":"Status üzrə qruplaşdırılmış siyahı — aktiv, planlaşdırılmış, qaralama","textPreview":"Status üzrə qruplaşdırılmış siyahı — aktiv, planlaşdırılmış, qaralama","textChars":69,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/87mxkzeh","slide":8,"name":"TextBox 5","text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/t8vyt4v2","slide":8,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/q1ozutwf","slide":8,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/fmds7ips","slide":8,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/ul4rydo7","slide":8,"name":"TextBox 10","text":"Status sayğacları","textPreview":"Status sayğacları","textChars":17,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/hovats7i","slide":8,"name":"TextBox 11","text":"Yuxarıda hər statusun sayı; kartda tarix, sual sayı, müddət, cəhd limiti","textPreview":"Yuxarıda hər statusun sayı; kartda tarix, sual sayı, müddət, cəhd limiti","textChars":72,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/gnm90n6x","slide":8,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/3qdsvipo","slide":8,"name":"TextBox 13","text":"Filtr və kateqoriya","textPreview":"Filtr və kateqoriya","textChars":19,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/2p4r2do3","slide":8,"name":"TextBox 14","text":"Növ (test/yazılı/praktiki) və kateqoriya (final/kollokvium/sınaq) çipləri","textPreview":"Növ (test/yazılı/praktiki) və kateqoriya (final/kollokvium/sınaq) çipləri","textChars":73,"textLines":1,"bbox":[77.76,312,292.8,70.56]}
+{"kind":"shape","id":"sh/psfaxs7u","slide":8,"name":"Rectangle 15","bbox":[59.52,396,5.28,24.96]}
+{"kind":"textbox","id":"sh/orm94n69","slide":8,"name":"TextBox 16","text":"Zibil qutusu","textPreview":"Zibil qutusu","textChars":12,"textLines":1,"bbox":[77.76,394.08,295.68,35.52]}
+{"kind":"textbox","id":"sh/bexsz2pk","slide":8,"name":"TextBox 17","text":"Silinən imtahan itmir — nəticələri ilə birlikdə bərpa oluna bilir","textPreview":"Silinən imtahan itmir — nəticələri ilə birlikdə bərpa oluna bilir","textChars":65,"textLines":1,"bbox":[77.76,425.76,292.8,50.88]}
+{"kind":"shape","id":"sh/qdob6xof","slide":8,"name":"Rectangle 18","bbox":[59.52,490.08,5.28,24.96]}
+{"kind":"textbox","id":"sh/mls3elcj","slide":8,"name":"TextBox 19","text":"Kart üzərindən əməliyyat","textPreview":"Kart üzərindən əməliyyat","textChars":24,"textLines":1,"bbox":[77.76,488.16,295.68,35.52]}
+{"kind":"textbox","id":"sh/7m14nqd4","slide":8,"name":"TextBox 20","text":"Nəticələr, statistika, redaktə, dublikat, qruplara açma","textPreview":"Nəticələr, statistika, redaktə, dublikat, qruplara açma","textChars":55,"textLines":1,"bbox":[77.76,519.84,292.8,50.88]}
+{"kind":"image","id":"im/rixgvqt0","slide":8,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/7w0fx5","slide":8,"text":""}
+{"kind":"slide","id":"sl/bsqxwu","slide":9,"title":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textShapes":13}
+{"kind":"shape","id":"sh/zmd0f2hs","slide":9,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/ylkj6xg7","slide":9,"name":"TextBox 2","text":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textPreview":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textChars":38,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/xkbidszm","slide":9,"name":"TextBox 3","text":"Addım 1 — Əsaslar","textPreview":"Addım 1 — Əsaslar","textChars":17,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/cj2h4nyh","slide":9,"name":"TextBox 4","text":"Ad, izah, imtahan tipi, kateqoriya və fənn","textPreview":"Ad, izah, imtahan tipi, kateqoriya və fənn","textChars":42,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/bit0bihw","slide":9,"name":"TextBox 5","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/ahkz2dgb","slide":9,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/pgbi98zq","slide":9,"name":"Rectangle 7","bbox":[444.08,180.96,743.83,479.04]}
+{"kind":"shape","id":"sh/y5ozelgz","slide":9,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/j6x07qxk","slide":9,"name":"TextBox 10","text":"İmtahan tipi","textPreview":"İmtahan tipi","textChars":12,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/k761gvy5","slide":9,"name":"TextBox 11","text":"Test (avtomatik ballanan) · Yazılı (əl ilə yoxlanan) · Praktiki kod","textPreview":"Test (avtomatik ballanan) · Yazılı (əl ilə yoxlanan) · Praktiki kod","textChars":67,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/58fi90fa","slide":9,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/a14zalgn","slide":9,"name":"TextBox 13","text":"Kateqoriya","textPreview":"Kateqoriya","textChars":10,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/b2d03qx8","slide":9,"name":"TextBox 14","text":"Sınaq / Kollokvium / Final. Final və kollokviumu YALNIZ İmtahan Mərkəzi yarada bilər","textPreview":"Sınaq / Kollokvium / Final. Final və kollokviumu YALNIZ İmtahan Mərkəzi yarada bilər","textChars":84,"textLines":1,"bbox":[77.76,312,292.8,70.56]}
+{"kind":"shape","id":"sh/w3mhcvyt","slide":9,"name":"Rectangle 15","bbox":[59.52,396,5.28,24.96]}
+{"kind":"textbox","id":"sh/x4vi5gfe","slide":9,"name":"TextBox 16","text":"Fənn bağlantısı","textPreview":"Fənn bağlantısı","textChars":15,"textLines":1,"bbox":[77.76,394.08,295.68,35.52]}
+{"kind":"textbox","id":"sh/md4z61gr","slide":9,"name":"TextBox 17","text":"Fənn axtarışlı siyahıdan seçilir — nəticə birbaşa elektron jurnala bağlanır","textPreview":"Fənn axtarışlı siyahıdan seçilir — nəticə birbaşa elektron jurnala bağlanır","textChars":75,"textLines":1,"bbox":[77.76,425.76,292.8,70.56]}
+{"kind":"shape","id":"sh/ned0z6xc","slide":9,"name":"Rectangle 18","bbox":[59.52,509.76,5.28,24.96]}
+{"kind":"textbox","id":"sh/ri9w72d4","slide":9,"name":"TextBox 19","text":"Yalnız ad məcburidir","textPreview":"Yalnız ad məcburidir","textChars":20,"textLines":1,"bbox":[77.76,507.84,295.68,35.52]}
+{"kind":"textbox","id":"sh/qh0fyxwj","slide":9,"name":"TextBox 20","text":"Qalanı sonra redaktədən doldurula bilər — müəllim işini yarımçıq saxlaya bilir","textPreview":"Qalanı sonra redaktədən doldurula bilər — müəllim işini yarımçıq saxlaya bilir","textChars":78,"textLines":1,"bbox":[77.76,539.52,292.8,70.56]}
+{"kind":"image","id":"im/qhsz21cr","slide":9,"name":"Picture 8","bbox":[447.44,184.32,737.11,472.32]}
+{"kind":"notes","id":"nt/bsqxwu","slide":9,"text":""}
+{"kind":"slide","id":"sl/f3nwuo","slide":10,"title":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textShapes":13}
+{"kind":"shape","id":"sh/9crqd8bu","slide":10,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/8rip43u9","slide":10,"name":"TextBox 2","text":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textPreview":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textChars":38,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/vet8fyt0","slide":10,"name":"TextBox 3","text":"Addım 2 — Vaxt və suallar","textPreview":"Addım 2 — Vaxt və suallar","textChars":25,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/ud0r6tcf","slide":10,"name":"TextBox 4","text":"Cədvəl, müddət, sual sayı və paylanma qaydaları","textPreview":"Cədvəl, müddət, sual sayı və paylanma qaydaları","textChars":47,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/hgbqh8bq","slide":10,"name":"TextBox 5","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/wf2983u5","slide":10,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/jit8jitw","slide":10,"name":"Rectangle 7","bbox":[444.08,180.96,743.83,479.04]}
+{"kind":"shape","id":"sh/4bixozy9","slide":10,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/5cryx4fu","slide":10,"name":"TextBox 10","text":"Cədvəl","textPreview":"Cədvəl","textChars":6,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/i90fm9g3","slide":10,"name":"TextBox 11","text":"Başlama və bitmə tarixi/saatı — imtahan yalnız bu pəncərədə açılır","textPreview":"Başlama və bitmə tarixi/saatı — imtahan yalnız bu pəncərədə açılır","textChars":66,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/ja9wvexo","slide":10,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/sfixsjy5","slide":10,"name":"TextBox 13","text":"İki səviyyəli taymer","textPreview":"İki səviyyəli taymer","textChars":20,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/dgby1ofq","slide":10,"name":"TextBox 14","text":"Ümumi imtahan müddəti + istəyə görə hər sual üçün ayrıca vaxt","textPreview":"Ümumi imtahan müddəti + istəyə görə hər sual üçün ayrıca vaxt","textChars":61,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/qd0fq9gf","slide":10,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/re9gzexk","slide":10,"name":"TextBox 16","text":"Tələbəyə düşən sual sayı","textPreview":"Tələbəyə düşən sual sayı","textChars":24,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/0j2xwjyh","slide":10,"name":"TextBox 17","text":"Bankdan təsadüfi seçim — hər tələbəyə fərqli variant düşür","textPreview":"Bankdan təsadüfi seçim — hər tələbəyə fərqli variant düşür","textChars":58,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"shape","id":"sh/14by5of2","slide":10,"name":"Rectangle 18","bbox":[59.52,470.4,5.28,24.96]}
+{"kind":"textbox","id":"sh/907e9o76","slide":10,"name":"TextBox 19","text":"Sual təkrarını azalt","textPreview":"Sual təkrarını azalt","textChars":20,"textLines":1,"bbox":[77.76,468.48,295.68,35.52]}
+{"kind":"textbox","id":"sh/ozyxgjql","slide":10,"name":"TextBox 20","text":"Sistem sualları tələbələr arasında bərabər paylayır (default açıq)","textPreview":"Sistem sualları tələbələr arasında bərabər paylayır (default açıq)","textChars":66,"textLines":1,"bbox":[77.76,500.16,292.8,50.88]}
+{"kind":"image","id":"im/w7y1wrqt","slide":10,"name":"Picture 8","bbox":[447.44,184.32,737.11,472.32]}
+{"kind":"notes","id":"nt/f3nwuo","slide":10,"text":""}
+{"kind":"slide","id":"sl/pw5q6y","slide":11,"title":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textShapes":13}
+{"kind":"shape","id":"sh/fylobido","slide":11,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/exc7idw3","slide":11,"name":"TextBox 2","text":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textPreview":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textChars":38,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/tw369svi","slide":11,"name":"TextBox 3","text":"Addım 3 — Giriş","textPreview":"Addım 3 — Giriş","textChars":15,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/svupgnex","slide":11,"name":"TextBox 4","text":"İmtahanı kim görəcək və kim girə biləcək","textPreview":"İmtahanı kim görəcək və kim girə biləcək","textChars":40,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/rulo7ids","slide":11,"name":"TextBox 5","text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/6tcnedw7","slide":11,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/ds76lcv2","slide":11,"name":"Rectangle 7","bbox":[444.08,180.96,743.83,479.04]}
+{"kind":"shape","id":"sh/2xsfyt8f","slide":11,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/ny1w7yp0","slide":11,"name":"TextBox 10","text":"Qrup əsaslı icazə","textPreview":"Qrup əsaslı icazə","textChars":17,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/ozax0jql","slide":11,"name":"TextBox 11","text":"Bir və ya bir neçə tələbə qrupu seçilir","textPreview":"Bir və ya bir neçə tələbə qrupu seçilir","textChars":39,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/p0jy9o76","slide":11,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/et8fu98j","slide":11,"name":"TextBox 13","text":"Fərdi icazə","textPreview":"Fərdi icazə","textChars":11,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/fu1w3e94","slide":11,"name":"TextBox 14","text":"Ayrıca tələbələr əlavə edilə, seçilmiş qrupdan ayrı-ayrı tələbələr istisna edilə bilər","textPreview":"Ayrıca tələbələr əlavə edilə, seçilmiş qrupdan ayrı-ayrı tələbələr istisna edilə bilər","textChars":86,"textLines":1,"bbox":[77.76,312,292.8,70.56]}
+{"kind":"shape","id":"sh/0vaxwjqp","slide":11,"name":"Rectangle 15","bbox":[59.52,396,5.28,24.96]}
+{"kind":"textbox","id":"sh/1wje5ora","slide":11,"name":"TextBox 16","text":"Cəhd limiti","textPreview":"Cəhd limiti","textChars":11,"textLines":1,"bbox":[77.76,394.08,295.68,35.52]}
+{"kind":"textbox","id":"sh/ypcf6d8n","slide":11,"name":"TextBox 17","text":"Bir tələbə üçün maksimum cəhd sayı; İmtahan Mərkəzi sonradan fərdi əlavə şans verə bilir","textPreview":"Bir tələbə üçün maksimum cəhd sayı; İmtahan Mərkəzi sonradan fərdi əlavə şans verə bilir","textChars":88,"textLines":1,"bbox":[77.76,425.76,292.8,70.56]}
+{"kind":"shape","id":"sh/zqlgfip8","slide":11,"name":"Rectangle 18","bbox":[59.52,509.76,5.28,24.96]}
+{"kind":"textbox","id":"sh/vydkb6lo","slide":11,"name":"TextBox 19","text":"Rəsm cavabı","textPreview":"Rəsm cavabı","textChars":11,"textLines":1,"bbox":[77.76,507.84,295.68,35.52]}
+{"kind":"textbox","id":"sh/uxk3i1k3","slide":11,"name":"TextBox 20","text":"Yazılı imtahanlarda tələbə kətan üzərində sxem/qrafik çəkə bilər","textPreview":"Yazılı imtahanlarda tələbə kətan üzərində sxem/qrafik çəkə bilər","textChars":64,"textLines":1,"bbox":[77.76,539.52,292.8,50.88]}
+{"kind":"image","id":"im/qt8z6p8n","slide":11,"name":"Picture 8","bbox":[447.44,184.32,737.11,472.32]}
+{"kind":"notes","id":"nt/pw5q6y","slide":11,"text":""}
+{"kind":"slide","id":"sl/rwbg3b","slide":12,"title":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textShapes":13}
+{"kind":"shape","id":"sh/uhsbqtcn","slide":12,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/vi1czyd8","slide":12,"name":"TextBox 2","text":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textPreview":"YENI IMTAHAN YARAT — 4 ADDIMLI SEHRBAZ","textChars":38,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/4nutwnu5","slide":12,"name":"TextBox 3","text":"Addım 4 — Nəzarət","textPreview":"Addım 4 — Nəzarət","textChars":17,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/5o3u58va","slide":12,"name":"TextBox 4","text":"Köçürməyə qarşı qorunma — hazır şablon və ya fərdi ayar","textPreview":"Köçürməyə qarşı qorunma — hazır şablon və ya fərdi ayar","textChars":55,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/ilsbudcz","slide":12,"name":"TextBox 5","text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/3mlc3idk","slide":12,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/krqtkjul","slide":12,"name":"Rectangle 7","bbox":[444.08,180.96,743.83,479.04]}
+{"kind":"shape","id":"sh/1wjaxwv6","slide":12,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/0vatobel","slide":12,"name":"TextBox 10","text":"3 hazır şablon","textPreview":"3 hazır şablon","textChars":14,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/fa1sv6dg","slide":12,"name":"TextBox 11","text":"Yüngül · Orta · Ciddi — bir kliklə tam nəzarət paketi","textPreview":"Yüngül · Orta · Ciddi — bir kliklə tam nəzarət paketi","textChars":53,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/e9sbm1wv","slide":12,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/p03u1gvi","slide":12,"name":"TextBox 13","text":"İzlənən hadisələr","textPreview":"İzlənən hadisələr","textChars":17,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/ozatsbex","slide":12,"name":"TextBox 14","text":"Tam ekrandan çıxma, tab dəyişmə, pəncərə fokusunun itməsi, kopyala/yapışdır, sağ klik","textPreview":"Tam ekrandan çıxma, tab dəyişmə, pəncərə fokusunun itməsi, kopyala/yapışdır, sağ klik","textChars":85,"textLines":1,"bbox":[77.76,312,292.8,70.56]}
+{"kind":"shape","id":"sh/ny1sz6dc","slide":12,"name":"Rectangle 15","bbox":[59.52,396,5.28,24.96]}
+{"kind":"textbox","id":"sh/2xsbq1wr","slide":12,"name":"TextBox 16","text":"Avtomatik reaksiya","textPreview":"Avtomatik reaksiya","textChars":18,"textLines":1,"bbox":[77.76,394.08,295.68,35.52]}
+{"kind":"textbox","id":"sh/x43u5gve","slide":12,"name":"TextBox 17","text":"Limit aşılanda: kilidlə · avtomatik təhvil · tələbəni çıxar · şübhəli işarələ","textPreview":"Limit aşılanda: kilidlə · avtomatik təhvil · tələbəni çıxar · şübhəli işarələ","textChars":77,"textLines":1,"bbox":[77.76,425.76,292.8,70.56]}
+{"kind":"shape","id":"sh/c3utwvet","slide":12,"name":"Rectangle 18","bbox":[59.52,509.76,5.28,24.96]}
+{"kind":"textbox","id":"sh/gjm5oj6h","slide":12,"name":"TextBox 19","text":"Bərpa siyasəti","textPreview":"Bərpa siyasəti","textChars":14,"textLines":1,"bbox":[77.76,507.84,295.68,35.52]}
+{"kind":"textbox","id":"sh/hkvmho72","slide":12,"name":"TextBox 20","text":"İkinci şans yoxdur / bir əlavə şans / müəllim tərəfindən idarə olunan","textPreview":"İkinci şans yoxdur / bir əlavə şans / müəllim tərəfindən idarə olunan","textChars":69,"textLines":1,"bbox":[77.76,539.52,292.8,50.88]}
+{"kind":"image","id":"im/dw76lcfe","slide":12,"name":"Picture 8","bbox":[447.44,184.32,737.11,472.32]}
+{"kind":"notes","id":"nt/rwbg3b","slide":12,"text":""}
+{"kind":"slide","id":"sl/qf6t6x","slide":13,"title":"MÜƏLLIM","textShapes":13}
+{"kind":"shape","id":"sh/k3u50za5","slide":13,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/l43mt4bq","slide":13,"name":"TextBox 2","text":"MÜƏLLIM","textPreview":"MÜƏLLIM","textChars":7,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/ads3ups3","slide":13,"name":"TextBox 3","text":"İmtahan detalı","textPreview":"İmtahan detalı","textChars":14,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/bel4nuto","slide":13,"name":"TextBox 4","text":"İmtahanın idarə mərkəzi — bütün əməliyyatlar bir ekranda","textPreview":"İmtahanın idarə mərkəzi — bütün əməliyyatlar bir ekranda","textChars":56,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/wfulwfa9","slide":13,"name":"TextBox 5","text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/xg3mpkbu","slide":13,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/u9wn69s7","slide":13,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/ve18ruts","slide":13,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/udsrips7","slide":13,"name":"TextBox 10","text":"Vəziyyət kartları","textPreview":"Vəziyyət kartları","textChars":17,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/hgjqt4by","slide":13,"name":"TextBox 11","text":"Növ, status, müddət, sual vaxtı, cəhd sayı, nəticə görünüşü","textPreview":"Növ, status, müddət, sual vaxtı, cəhd sayı, nəticə görünüşü","textChars":59,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/gfa9kzad","slide":13,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/3i1svut4","slide":13,"name":"TextBox 13","text":"Sual idarəetməsi","textPreview":"Sual idarəetməsi","textChars":16,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/ihsrm9sj","slide":13,"name":"TextBox 14","text":"Əlavə et, bankdan seç, toplu idxal, sıra dəyiş, dil variantları","textPreview":"Əlavə et, bankdan seç, toplu idxal, sıra dəyiş, dil variantları","textChars":63,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/543ax4ba","slide":13,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/4ja9ozap","slide":13,"name":"TextBox 16","text":"Nəticə əməliyyatları","textPreview":"Nəticə əməliyyatları","textChars":20,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/r6lszet0","slide":13,"name":"TextBox 17","text":"Nəticələr, statistika, Excel ixracı, nəticələrin tələbədən gizlədilməsi","textPreview":"Nəticələr, statistika, Excel ixracı, nəticələrin tələbədən gizlədilməsi","textChars":71,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"shape","id":"sh/q5crq9sf","slide":13,"name":"Rectangle 18","bbox":[59.52,470.4,5.28,24.96]}
+{"kind":"textbox","id":"sh/21wbidcn","slide":13,"name":"TextBox 19","text":"Sınaq keçidi","textPreview":"Sınaq keçidi","textChars":12,"textLines":1,"bbox":[77.76,468.48,295.68,35.52]}
+{"kind":"textbox","id":"sh/n25crid8","slide":13,"name":"TextBox 20","text":"Müəllim öz imtahanını tələbə gözü ilə keçə bilir — bu cəhd statistikaya düşmür","textPreview":"Müəllim öz imtahanını tələbə gözü ilə keçə bilir — bu cəhd statistikaya düşmür","textChars":78,"textLines":1,"bbox":[77.76,500.16,292.8,70.56]}
+{"kind":"image","id":"im/budczmh8","slide":13,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/qf6t6x","slide":13,"text":""}
+{"kind":"slide","id":"sl/z16f1w","slide":14,"title":"SUALLAR","textShapes":21}
+{"kind":"shape","id":"sh/e9k3m50n","slide":14,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/fatkfah8","slide":14,"name":"TextBox 2","text":"SUALLAR","textPreview":"SUALLAR","textChars":7,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/s72lkvih","slide":14,"name":"TextBox 3","text":"Suallar imtahana 3 yolla əlavə olunur","textPreview":"Suallar imtahana 3 yolla əlavə olunur","textChars":37,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/d8b2d0z2","slide":14,"name":"TextBox 4","text":"Hər üç yol eyni nəticəyə gətirir — seçim müəllimin əlindəki materialdan asılıdır","textPreview":"Hər üç yol eyni nəticəyə gətirir — seçim müəllimin əlindəki materialdan asılıdır","textChars":80,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/q50jil0r","slide":14,"name":"TextBox 5","text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/r69kbqhw","slide":14,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/43i1gbil","slide":14,"name":"Rounded Rectangle 7","bbox":[59.52,188.16,546.24,101.76]}
+{"kind":"shape","id":"sh/54r29gz6","slide":14,"name":"Rectangle 8","bbox":[59.52,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/h432ds72","slide":14,"name":"TextBox 9","text":"1 · Tək-tək yazmaqla","textPreview":"1 · Tək-tək yazmaqla","textChars":20,"textLines":1,"bbox":[80.64,197.76,517.44,28.8]}
+{"kind":"textbox","id":"sh/w3u14n6x","slide":14,"name":"TextBox 10","text":"Modal formada sual mətni, variantlar, düz cavab(lar), çətinlik, bal, şəkil/video","textPreview":"Modal formada sual mətni, variantlar, düz cavab(lar), çətinlik, bal, şəkil/video","textChars":80,"textLines":1,"bbox":[80.64,222.72,517.44,61.44]}
+{"kind":"shape","id":"sh/v2lkbipc","slide":14,"name":"Rounded Rectangle 11","bbox":[59.52,303.36,546.24,101.76]}
+{"kind":"shape","id":"sh/u1sj2xor","slide":14,"name":"Rectangle 12","bbox":[59.52,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/90j29s76","slide":14,"name":"TextBox 13","text":"2 · Sual bankından seçməklə","textPreview":"2 · Sual bankından seçməklə","textChars":27,"textLines":1,"bbox":[80.64,312.96,517.44,28.8]}
+{"kind":"textbox","id":"sh/8za10n6l","slide":14,"name":"TextBox 14","text":"Kitabxanadakı hazır suallar imtahana surət (snapshot) kimi köçürülür","textPreview":"Kitabxanadakı hazır suallar imtahana surət (snapshot) kimi köçürülür","textChars":68,"textLines":1,"bbox":[80.64,337.92,517.44,61.44]}
+{"kind":"shape","id":"sh/7y1k7ip0","slide":14,"name":"Rounded Rectangle 15","bbox":[59.52,418.56,546.24,101.76]}
+{"kind":"shape","id":"sh/mxsjydof","slide":14,"name":"Rectangle 16","bbox":[59.52,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/lwj2587u","slide":14,"name":"TextBox 17","text":"3 · Toplu idxalla","textPreview":"3 · Toplu idxalla","textChars":17,"textLines":1,"bbox":[80.64,428.16,517.44,28.8]}
+{"kind":"textbox","id":"sh/kva1w36p","slide":14,"name":"TextBox 18","text":"PDF / TXT / PNG / JPG faylı yüklənir, sistem sualları özü tanıyır və siyahılayır","textPreview":"PDF / TXT / PNG / JPG faylı yüklənir, sistem sualları özü tanıyır və siyahılayır","textChars":80,"textLines":1,"bbox":[80.64,453.12,517.44,61.44]}
+{"kind":"shape","id":"sh/cret872h","slide":14,"name":"Rounded Rectangle 19","bbox":[59.52,533.76,546.24,101.76]}
+{"kind":"shape","id":"sh/xsna1cj2","slide":14,"name":"Rectangle 20","bbox":[59.52,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/apwb6xkr","slide":14,"name":"TextBox 21","text":"Snapshot prinsipi","textPreview":"Snapshot prinsipi","textChars":17,"textLines":1,"bbox":[80.64,543.36,517.44,28.8]}
+{"kind":"textbox","id":"sh/bq5sz21w","slide":14,"name":"TextBox 22","text":"Bankdakı sual sonradan redaktə olunsa belə, keçmiş imtahanların nəticəsi dəyişmir","textPreview":"Bankdakı sual sonradan redaktə olunsa belə, keçmiş imtahanların nəticəsi dəyişmir","textChars":81,"textLines":1,"bbox":[80.64,568.32,517.44,61.44]}
+{"kind":"shape","id":"sh/onet472l","slide":14,"name":"Rounded Rectangle 23","bbox":[640.32,188.16,546.24,101.76]}
+{"kind":"shape","id":"sh/ponaxsj6","slide":14,"name":"Rectangle 24","bbox":[640.32,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/2lwb2xkf","slide":14,"name":"TextBox 25","text":"Test sualı","textPreview":"Test sualı","textChars":10,"textLines":1,"bbox":[661.44,197.76,517.44,28.8]}
+{"kind":"textbox","id":"sh/nm5sv210","slide":14,"name":"TextBox 26","text":"Tək düz cavablı və ya çox düz cavablı (çoxseçimli) — sistem cavab sayına görə özü təyin edir","textPreview":"Tək düz cavablı və ya çox düz cavablı (çoxseçimli) — sistem cavab sayına görə özü təyin edir","textChars":92,"textLines":1,"bbox":[661.44,222.72,517.44,61.44]}
+{"kind":"shape","id":"sh/8jytgrip","slide":14,"name":"Rounded Rectangle 27","bbox":[640.32,303.36,546.24,101.76]}
+{"kind":"shape","id":"sh/9kru9wja","slide":14,"name":"Rectangle 28","bbox":[640.32,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/jetwfqlc","slide":14,"name":"TextBox 29","text":"Yazılı sual","textPreview":"Yazılı sual","textChars":11,"textLines":1,"bbox":[661.44,312.96,517.44,28.8]}
+{"kind":"textbox","id":"sh/idkv6l4r","slide":14,"name":"TextBox 30","text":"Variantsız, sərbəst cavab; müəllim üçün nümunə cavab saxlanıla bilər","textPreview":"Variantsız, sərbəst cavab; müəllim üçün nümunə cavab saxlanıla bilər","textChars":68,"textLines":1,"bbox":[661.44,337.92,517.44,61.44]}
+{"kind":"shape","id":"sh/5gbeh03i","slide":14,"name":"Rounded Rectangle 31","bbox":[640.32,418.56,546.24,101.76]}
+{"kind":"shape","id":"sh/4f2d8v2x","slide":14,"name":"Rectangle 32","bbox":[640.32,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/ritwjalo","slide":14,"name":"TextBox 33","text":"Şəkil və video","textPreview":"Şəkil və video","textChars":14,"textLines":1,"bbox":[661.44,428.16,517.44,28.8]}
+{"kind":"textbox","id":"sh/6hkva5k3","slide":14,"name":"TextBox 34","text":"Sualın özünə şəkil (10 MB-a qədər) və video (30 MB-a qədər) əlavə oluna bilər","textPreview":"Sualın özünə şəkil (10 MB-a qədər) və video (30 MB-a qədər) əlavə oluna bilər","textChars":77,"textLines":1,"bbox":[661.44,453.12,517.44,61.44]}
+{"kind":"shape","id":"sh/tkvel03e","slide":14,"name":"Rounded Rectangle 35","bbox":[640.32,533.76,546.24,101.76]}
+{"kind":"shape","id":"sh/sjmxcf29","slide":14,"name":"Rectangle 36","bbox":[640.32,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/7m9w76l4","slide":14,"name":"TextBox 37","text":"Praktiki kod sualı","textPreview":"Praktiki kod sualı","textChars":18,"textLines":1,"bbox":[661.44,543.36,517.44,28.8]}
+{"kind":"textbox","id":"sh/ml0vy14z","slide":14,"name":"TextBox 38","text":"Starter kod + görünən/gizli test-case-lər; 5 dil: Python, JavaScript, C++, Java, HTML","textPreview":"Starter kod + görünən/gizli test-case-lər; 5 dil: Python, JavaScript, C++, Java, HTML","textChars":85,"textLines":1,"bbox":[661.44,568.32,517.44,61.44]}
+{"kind":"notes","id":"nt/z16f1w","slide":14,"text":""}
+{"kind":"slide","id":"sl/s761uz","slide":15,"title":"SUALLAR","textShapes":13}
+{"kind":"shape","id":"sh/xw7qpwfa","slide":15,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/wvy9wre5","slide":15,"name":"TextBox 2","text":"SUALLAR","textPreview":"SUALLAR","textChars":7,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/n658j2x8","slide":15,"name":"TextBox 3","text":"Tək-tək sual əlavəsi","textPreview":"Tək-tək sual əlavəsi","textChars":20,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/m5wrqxgn","slide":15,"name":"TextBox 4","text":"Sual mətni, variantlar, düz cavab, çətinlik və bal","textPreview":"Sual mətni, variantlar, düz cavab, çətinlik və bal","textChars":50,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/98nqlcfe","slide":15,"name":"TextBox 5","text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/87e9s7yt","slide":15,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/72p8v6xs","slide":15,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/c325s76x","slide":15,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/d4b6lcni","slide":15,"name":"TextBox 10","text":"Çətinlik səviyyəsi","textPreview":"Çətinlik səviyyəsi","textChars":18,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/q1knqhor","slide":15,"name":"TextBox 11","text":"Asan / orta / çətin — statistikada sual analizi üçün istifadə olunur","textPreview":"Asan / orta / çətin — statistikada sual analizi üçün istifadə olunur","textChars":68,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/r2t4j25c","slide":15,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/4z25o76l","slide":15,"name":"TextBox 13","text":"Bal","textPreview":"Bal","textChars":3,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/p0bmxcn6","slide":15,"name":"TextBox 14","text":"Hər sual üçün ayrıca bal təyin oluna bilər","textPreview":"Hər sual üçün ayrıca bal təyin oluna bilər","textChars":42,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/2d0nmxov","slide":15,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/3y94v2p0","slide":15,"name":"TextBox 16","text":"Medya","textPreview":"Medya","textChars":5,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/gbi5kn6p","slide":15,"name":"TextBox 17","text":"Sual mətninə şəkil və ya video əlavə etmək mümkündür","textPreview":"Sual mətninə şəkil və ya video əlavə etmək mümkündür","textChars":52,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"shape","id":"sh/hcrmts7a","slide":15,"name":"Rectangle 18","bbox":[59.52,470.4,5.28,24.96]}
+{"kind":"textbox","id":"sh/xgzu1kvm","slide":15,"name":"TextBox 19","text":"Sual üçün vaxt","textPreview":"Sual üçün vaxt","textChars":14,"textLines":1,"bbox":[77.76,468.48,295.68,35.52]}
+{"kind":"textbox","id":"sh/wvqt8fu1","slide":15,"name":"TextBox 20","text":"İstəyə görə həmin sual üçün ayrıca vaxt limiti","textPreview":"İstəyə görə həmin sual üçün ayrıca vaxt limiti","textChars":46,"textLines":1,"bbox":[77.76,500.16,292.8,50.88]}
+{"kind":"image","id":"im/47mpsryp","slide":15,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/s761uz","slide":15,"text":""}
+{"kind":"slide","id":"sl/tdnfj6","slide":16,"title":"SUAL BANKI","textShapes":13}
+{"kind":"shape","id":"sh/5g7ud47u","slide":16,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/4fyd4zq9","slide":16,"name":"TextBox 2","text":"SUAL BANKI","textPreview":"SUAL BANKI","textChars":10,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/vq5c7ups","slide":16,"name":"TextBox 3","text":"Sual bankı — kitabxana","textPreview":"Sual bankı — kitabxana","textChars":22,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/upwbyp87","slide":16,"name":"TextBox 4","text":"İmtahandan asılı olmayan, təkrar istifadə olunan sual toplusu","textPreview":"İmtahandan asılı olmayan, təkrar istifadə olunan sual toplusu","textChars":61,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/hsnu947i","slide":16,"name":"TextBox 5","text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/gret0zqx","slide":16,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/fmpcjepw","slide":16,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/g7udg7ex","slide":16,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/h83epcv2","slide":16,"name":"TextBox 10","text":"Fənn və mövzu üzrə","textPreview":"Fənn və mövzu üzrə","textChars":18,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/u5cvehwr","slide":16,"name":"TextBox 11","text":"Bank fənnə və mövzuya bağlanır, kafedra daxilində paylaşıla bilər","textPreview":"Bank fənnə və mövzuya bağlanır, kafedra daxilində paylaşıla bilər","textChars":65,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/v6lwn2dc","slide":16,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/83udc7el","slide":16,"name":"TextBox 13","text":"Bir dəfə yaz, çox dəfə istifadə et","textPreview":"Bir dəfə yaz, çox dəfə istifadə et","textChars":34,"textLines":1,"bbox":[77.76,280.32,295.68,61.44]}
+{"kind":"textbox","id":"sh/t43elcv6","slide":16,"name":"TextBox 14","text":"Eyni sual bir neçə imtahanda, bir neçə semestrdə işlənə bilər","textPreview":"Eyni sual bir neçə imtahanda, bir neçə semestrdə işlənə bilər","textChars":61,"textLines":1,"bbox":[77.76,337.92,292.8,50.88]}
+{"kind":"shape","id":"sh/61svaxwf","slide":16,"name":"Rectangle 15","bbox":[59.52,402.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/72lwj2x0","slide":16,"name":"TextBox 16","text":"Çətinlik balansı","textPreview":"Çətinlik balansı","textChars":16,"textLines":1,"bbox":[77.76,400.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/kfad8nep","slide":16,"name":"TextBox 17","text":"Sistem asan/orta/çətin bölgüsünə görə imtahan tərtib edə bilir","textPreview":"Sistem asan/orta/çətin bölgüsünə görə imtahan tərtib edə bilir","textChars":62,"textLines":1,"bbox":[77.76,432,292.8,50.88]}
+{"kind":"shape","id":"sh/lgjehsfa","slide":16,"name":"Rectangle 18","bbox":[59.52,496.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/1kr2pk3m","slide":16,"name":"TextBox 19","text":"Word ixracı","textPreview":"Word ixracı","textChars":11,"textLines":1,"bbox":[77.76,494.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/0jilwf21","slide":16,"name":"TextBox 20","text":"Bankın tam məzmunu çap üçün .docx faylı kimi endirilə bilər","textPreview":"Bankın tam məzmunu çap üçün .docx faylı kimi endirilə bilər","textChars":59,"textLines":1,"bbox":[77.76,526.08,292.8,50.88]}
+{"kind":"image","id":"im/o36p4ne5","slide":16,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/tdnfj6","slide":16,"text":""}
+{"kind":"slide","id":"sl/b5yqj2","slide":17,"title":"SUAL BANKI","textShapes":13}
+{"kind":"shape","id":"sh/k7m1kfyt","slide":17,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/58vidkfe","slide":17,"name":"TextBox 2","text":"SUAL BANKI","textPreview":"SUAL BANKI","textChars":10,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/ah4je5gr","slide":17,"name":"TextBox 3","text":"Toplu idxal — PDF, şəkil, OCR","textPreview":"Toplu idxal — PDF, şəkil, OCR","textChars":29,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/vid07axc","slide":17,"name":"TextBox 4","text":"Mövcud sual fayllarını sistemə köçürmək üçün emal masası","textPreview":"Mövcud sual fayllarını sistemə köçürmək üçün emal masası","textChars":56,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/wjm1gfyh","slide":17,"name":"TextBox 5","text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/x4vi9kf2","slide":17,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/mdkja5gf","slide":17,"name":"Rectangle 7","bbox":[417.27,180.96,797.47,479.04]}
+{"kind":"shape","id":"sh/b2p4ju58","slide":17,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/a1gnapon","slide":17,"name":"TextBox 10","text":"Qəbul olunan formatlar","textPreview":"Qəbul olunan formatlar","textChars":22,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/x4rmlkne","slide":17,"name":"TextBox 11","text":"PDF, TXT, PNG, JPG. Word və icra olunan fayllar təhlükəsizlik səbəbi ilə qəsdən bloklanıb","textPreview":"PDF, TXT, PNG, JPG. Word və icra olunan fayllar təhlükəsizlik səbəbi ilə qəsdən bloklanıb","textChars":89,"textLines":1,"bbox":[77.76,217.92,292.8,70.56]}
+{"kind":"shape","id":"sh/w3i5cf6t","slide":17,"name":"Rectangle 12","bbox":[59.52,301.92,5.28,24.96]}
+{"kind":"textbox","id":"sh/j694nu5k","slide":17,"name":"TextBox 13","text":"Skan edilmiş PDF","textPreview":"Skan edilmiş PDF","textChars":16,"textLines":1,"bbox":[77.76,300,295.68,35.52]}
+{"kind":"textbox","id":"sh/y50nepoz","slide":17,"name":"TextBox 14","text":"Mətn qatı olmayan sənəddə avtomatik OCR işə düşür (Azərbaycan dili dəstəklənir)","textPreview":"Mətn qatı olmayan sənəddə avtomatik OCR işə düşür (Azərbaycan dili dəstəklənir)","textChars":79,"textLines":1,"bbox":[77.76,331.68,292.8,70.56]}
+{"kind":"shape","id":"sh/l8rmp4na","slide":17,"name":"Rectangle 15","bbox":[59.52,415.68,5.28,24.96]}
+{"kind":"textbox","id":"sh/k7i5gz6p","slide":17,"name":"TextBox 16","text":"Düstur və şəkil","textPreview":"Düstur və şəkil","textChars":15,"textLines":1,"bbox":[77.76,413.76,295.68,35.52]}
+{"kind":"textbox","id":"sh/za54ba50","slide":17,"name":"TextBox 17","text":"Riyazi düsturlar tanınır; mürəkkəb 2 ölçülü düsturlar variant altına şəkil kimi yerləşdirilir","textPreview":"Riyazi düsturlar tanınır; mürəkkəb 2 ölçülü düsturlar variant altına şəkil kimi yerləşdirilir","textChars":93,"textLines":1,"bbox":[77.76,445.44,292.8,70.56]}
+{"kind":"shape","id":"sh/e9w325of","slide":17,"name":"Rectangle 18","bbox":[59.52,529.44,5.28,24.96]}
+{"kind":"textbox","id":"sh/i547qd83","slide":17,"name":"TextBox 19","text":"3 səviyyəli yoxlama","textPreview":"3 səviyyəli yoxlama","textChars":19,"textLines":1,"bbox":[77.76,527.52,295.68,35.52]}
+{"kind":"textbox","id":"sh/36d8jipo","slide":17,"name":"TextBox 20","text":"Xəta / xəbərdarlıq / məlumat — çatışmayan variant, dublikat sual, düz cavabsız sual göstərilir","textPreview":"Xəta / xəbərdarlıq / məlumat — çatışmayan variant, dublikat sual, düz cavabsız sual göstərilir","textChars":94,"textLines":1,"bbox":[77.76,559.2,292.8,70.56]}
+{"kind":"image","id":"im/72pormpg","slide":17,"name":"Picture 8","bbox":[420.63,184.32,790.75,472.32]}
+{"kind":"notes","id":"nt/b5yqj2","slide":17,"text":""}
+{"kind":"slide","id":"sl/rxb5ml","slide":18,"title":"SUAL BANKI","textShapes":11}
+{"kind":"shape","id":"sh/zmxgnml8","slide":18,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/ylofe14n","slide":18,"name":"TextBox 2","text":"SUAL BANKI","textPreview":"SUAL BANKI","textChars":10,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/tczytg3a","slide":18,"name":"TextBox 3","text":"Bankdan imtahana sual seçimi","textPreview":"Bankdan imtahana sual seçimi","textChars":28,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/8rqhkb2p","slide":18,"name":"TextBox 4","text":"Süzgəclə axtar, işarələ, imtahana köçür","textPreview":"Süzgəclə axtar, işarələ, imtahana köçür","textChars":39,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/7qhgr6l4","slide":18,"name":"TextBox 5","text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/6p8zi14j","slide":18,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/hgjyxg36","slide":18,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/yh8zad0f","slide":18,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/zih0ji10","slide":18,"name":"TextBox 10","text":"Süzgəclər","textPreview":"Süzgəclər","textChars":9,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/0jqhcni5","slide":18,"name":"TextBox 11","text":"Fənn, mövzu, çətinlik və dil üzrə axtarış","textPreview":"Fənn, mövzu, çətinlik və dil üzrə axtarış","textChars":41,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/lkjilsjq","slide":18,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/mlszex0b","slide":18,"name":"TextBox 13","text":"Toplu seçim","textPreview":"Toplu seçim","textChars":11,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/nm10n21w","slide":18,"name":"TextBox 14","text":"Bir neçə sual eyni anda işarələnib imtahana əlavə olunur","textPreview":"Bir neçə sual eyni anda işarələnib imtahana əlavə olunur","textChars":56,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/8nahg7ih","slide":18,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/9ojipcj2","slide":18,"name":"TextBox 16","text":"Surət kimi köçürülür","textPreview":"Surət kimi köçürülür","textChars":20,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/2poz2t07","slide":18,"name":"TextBox 17","text":"İmtahandakı nüsxə banka bağlı qalmır — sonrakı redaktə keçmişi dəyişmir","textPreview":"İmtahandakı nüsxə banka bağlı qalmır — sonrakı redaktə keçmişi dəyişmir","textChars":71,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"image","id":"im/03mx8ny1","slide":18,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/rxb5ml","slide":18,"text":""}
+{"kind":"slide","id":"sl/twbulv","slide":19,"title":"ELEKTRON AXIN","textShapes":13}
+{"kind":"shape","id":"sh/vihsbelg","slide":19,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/uh8bi9kv","slide":19,"name":"TextBox 2","text":"ELEKTRON AXIN","textPreview":"ELEKTRON AXIN","textChars":13,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/9gza943a","slide":19,"name":"TextBox 3","text":"Müəllim → İmtahan Mərkəzi sual göndərişi","textPreview":"Müəllim → İmtahan Mərkəzi sual göndərişi","textChars":40,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/8fqtgz2p","slide":19,"name":"TextBox 4","text":"Final və kollokvium sualları kağızla deyil, sistem daxilində təhvil verilir","textPreview":"Final və kollokvium sualları kağızla deyil, sistem daxilində təhvil verilir","textChars":75,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/7ehs7ul4","slide":19,"name":"TextBox 5","text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/md8repkj","slide":19,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/lcza5k3e","slide":19,"name":"Rectangle 7","bbox":[503.31,180.96,625.38,479.04]}
+{"kind":"shape","id":"sh/u90ve9sb","slide":19,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/va9w7etw","slide":19,"name":"TextBox 10","text":"Kağız təhvilin əvəzi","textPreview":"Kağız təhvilin əvəzi","textChars":20,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/wbidgzah","slide":19,"name":"TextBox 11","text":"Müəllim sual dəstini fənn, qrup və imtahan növü ilə birlikdə elektron göndərir","textPreview":"Müəllim sual dəstini fənn, qrup və imtahan növü ilə birlikdə elektron göndərir","textChars":78,"textLines":1,"bbox":[77.76,217.92,292.8,70.56]}
+{"kind":"shape","id":"sh/hcre94b2","slide":19,"name":"Rectangle 12","bbox":[59.52,301.92,5.28,24.96]}
+{"kind":"textbox","id":"sh/mlgvapsf","slide":19,"name":"TextBox 13","text":"Mərkəzdə baxış","textPreview":"Mərkəzdə baxış","textChars":14,"textLines":1,"bbox":[77.76,300,295.68,35.52]}
+{"kind":"textbox","id":"sh/7m9c3utk","slide":19,"name":"TextBox 14","text":"İmtahan Mərkəzi göndərişi açır, sualları yoxlayır, qəbul və ya geri qaytarır","textPreview":"İmtahan Mərkəzi göndərişi açır, sualları yoxlayır, qəbul və ya geri qaytarır","textChars":76,"textLines":1,"bbox":[77.76,331.68,292.8,70.56]}
+{"kind":"shape","id":"sh/8nidcza5","slide":19,"name":"Rectangle 15","bbox":[59.52,415.68,5.28,24.96]}
+{"kind":"textbox","id":"sh/98ru54bq","slide":19,"name":"TextBox 16","text":"İz qalır","textPreview":"İz qalır","textChars":8,"textLines":1,"bbox":[77.76,413.76,295.68,35.52]}
+{"kind":"textbox","id":"sh/yhgv6ps3","slide":19,"name":"TextBox 17","text":"Kim nə vaxt göndərdi, kim nə vaxt qərar verdi — hamısı qeydə alınır","textPreview":"Kim nə vaxt göndərdi, kim nə vaxt qərar verdi — hamısı qeydə alınır","textChars":67,"textLines":1,"bbox":[77.76,445.44,292.8,50.88]}
+{"kind":"shape","id":"sh/zipczuto","slide":19,"name":"Rectangle 18","bbox":[59.52,509.76,5.28,24.96]}
+{"kind":"textbox","id":"sh/3m5s7q9g","slide":19,"name":"TextBox 19","text":"Məxfilik","textPreview":"Məxfilik","textChars":8,"textLines":1,"bbox":[77.76,507.84,295.68,35.52]}
+{"kind":"textbox","id":"sh/2lcrel8v","slide":19,"name":"TextBox 20","text":"Suallar imtahana qədər tələbə tərəfinə heç bir şəkildə düşmür","textPreview":"Suallar imtahana qədər tələbə tərəfinə heç bir şəkildə düşmür","textChars":61,"textLines":1,"bbox":[77.76,539.52,292.8,50.88]}
+{"kind":"image","id":"im/yl4nm9oj","slide":19,"name":"Picture 8","bbox":[506.67,184.32,618.66,472.32]}
+{"kind":"notes","id":"nt/twbulv","slide":19,"text":""}
+{"kind":"slide","id":"sl/hx4uja","slide":20,"title":"ÇOXDILLILIK","textShapes":13}
+{"kind":"shape","id":"sh/7eh4re54","slide":20,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/md8ny9oj","slide":20,"name":"TextBox 2","text":"ÇOXDILLILIK","textPreview":"ÇOXDILLILIK","textChars":11,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/h4zmxon6","slide":20,"name":"TextBox 3","text":"Çoxdilli imtahan (AZ / EN / RU / TR)","textPreview":"Çoxdilli imtahan (AZ / EN / RU / TR)","textChars":36,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/w3q54jm1","slide":20,"name":"TextBox 4","text":"AZ və EN bölmələri olan fakültələr üçün — bir imtahan, paralel dil variantları","textPreview":"AZ və EN bölmələri olan fakültələr üçün — bir imtahan, paralel dil variantları","textChars":78,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/v2h4ve5g","slide":20,"name":"TextBox 5","text":"21","textPreview":"21","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/uh8n294v","slide":20,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/x8fmlkn2","slide":20,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/uh8fetsb","slide":20,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/fihg7y9w","slide":20,"name":"TextBox 10","text":"Bir imtahan konteyner","textPreview":"Bir imtahan konteyner","textChars":21,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/gjqxgjah","slide":20,"name":"TextBox 11","text":"Hər dil ayrıca variantdır; tələbə girişdə dilini seçir","textPreview":"Hər dil ayrıca variantdır; tələbə girişdə dilini seçir","textChars":54,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/1kzy9or2","slide":20,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/2l8fits7","slide":20,"name":"TextBox 13","text":"Parite qapısı","textPreview":"Parite qapısı","textChars":13,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/3mhgby9s","slide":20,"name":"TextBox 14","text":"2 və daha çox aktiv dil olduqda hər variantın SUAL SAYI və ÜMUMİ BALI bərabər olmalıdır","textPreview":"2 və daha çox aktiv dil olduqda hər variantın SUAL SAYI və ÜMUMİ BALI bərabər olmalıdır","textChars":87,"textLines":1,"bbox":[77.76,312,292.8,70.56]}
+{"kind":"shape","id":"sh/onaxk3qd","slide":20,"name":"Rectangle 15","bbox":[59.52,396,5.28,24.96]}
+{"kind":"textbox","id":"sh/pojyd8ry","slide":20,"name":"TextBox 16","text":"Bərabər olmasa dərc olunmur","textPreview":"Bərabər olmasa dərc olunmur","textChars":27,"textLines":1,"bbox":[77.76,394.08,295.68,35.52]}
+{"kind":"textbox","id":"sh/qpszmd8j","slide":20,"name":"TextBox 17","text":"Sistem konkret fərqi göstərir — «AZ 20 sual / EN 18 sual» kimi","textPreview":"Sistem konkret fərqi göstərir — «AZ 20 sual / EN 18 sual» kimi","textChars":62,"textLines":1,"bbox":[77.76,425.76,292.8,50.88]}
+{"kind":"shape","id":"sh/bq1gfi94","slide":20,"name":"Rectangle 18","bbox":[59.52,490.08,5.28,24.96]}
+{"kind":"textbox","id":"sh/nulw3ipc","slide":20,"name":"TextBox 19","text":"Ədalət zəmanəti","textPreview":"Ədalət zəmanəti","textChars":15,"textLines":1,"bbox":[77.76,488.16,295.68,35.52]}
+{"kind":"textbox","id":"sh/mtsfador","slide":20,"name":"TextBox 20","text":"Bir bölmənin daha asan imtahan alması struktur olaraq mümkün deyil","textPreview":"Bir bölmənin daha asan imtahan alması struktur olaraq mümkün deyil","textChars":66,"textLines":1,"bbox":[77.76,519.84,292.8,50.88]}
+{"kind":"image","id":"im/mhcj6t8n","slide":20,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/hx4uja","slide":20,"text":""}
+{"kind":"slide","id":"sl/ddwmk7","slide":21,"title":"FORMATLAR","textShapes":36}
+{"kind":"shape","id":"sh/bap0b29k","slide":21,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/q9gz2x8z","slide":21,"name":"TextBox 2","text":"FORMATLAR","textPreview":"FORMATLAR","textChars":9,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/p87i9sre","slide":21,"name":"TextBox 3","text":"Format × kateqoriya matrisi","textPreview":"Format × kateqoriya matrisi","textChars":27,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/o7yh07qt","slide":21,"name":"TextBox 4","text":"Sistemdə iki müstəqil təsnifat var — onların birləşməsi imtahanın davranışını təyin edir","textPreview":"Sistemdə iki müstəqil təsnifat var — onların birləşməsi imtahanın davranışını təyin edir","textChars":88,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/36p07298","slide":21,"name":"TextBox 5","text":"23","textPreview":"23","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/25gzyx8n","slide":21,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/94bilwri","slide":21,"name":"Rounded Rectangle 7","bbox":[59.52,192,1161.6,53.76]}
+{"kind":"textbox","id":"sh/83i1crqd","slide":21,"name":"TextBox 8","text":"Kateqoriya","textPreview":"Kateqoriya","textChars":10,"textLines":1,"bbox":[76.8,206.4,215.75,28.8]}
+{"kind":"textbox","id":"sh/upgfulwv","slide":21,"name":"TextBox 9","text":"Kim yaradır","textPreview":"Kim yaradır","textChars":11,"textLines":1,"bbox":[321.35,206.4,174.99,28.8]}
+{"kind":"textbox","id":"sh/vqpw3qdg","slide":21,"name":"TextBox 10","text":"Haradan başlayır","textPreview":"Haradan başlayır","textChars":16,"textLines":1,"bbox":[525.14,206.4,256.51,28.8]}
+{"kind":"textbox","id":"sh/wryxwvu1","slide":21,"name":"TextBox 11","text":"PIN","textPreview":"PIN","textChars":3,"textLines":1,"bbox":[810.44,206.4,215.75,28.8]}
+{"kind":"textbox","id":"sh/hc7e50vm","slide":21,"name":"TextBox 12","text":"Nəzarətçi","textPreview":"Nəzarətçi","textChars":9,"textLines":1,"bbox":[1054.99,206.4,154.61,28.8]}
+{"kind":"shape","id":"sh/mlwfqlwz","slide":21,"name":"Rectangle 13","bbox":[59.52,245.76,1161.6,59.52]}
+{"kind":"textbox","id":"sh/7mpwzqdk","slide":21,"name":"TextBox 14","text":"Sınaq (quiz)","textPreview":"Sınaq (quiz)","textChars":12,"textLines":1,"bbox":[76.8,261.12,215.75,32.64]}
+{"kind":"textbox","id":"sh/8nyxsbe5","slide":21,"name":"TextBox 15","text":"Müəllim","textPreview":"Müəllim","textChars":7,"textLines":1,"bbox":[321.35,261.12,174.99,32.64]}
+{"kind":"textbox","id":"sh/9o7e1gvq","slide":21,"name":"TextBox 16","text":"Tələbə kabinetindən","textPreview":"Tələbə kabinetindən","textChars":19,"textLines":1,"bbox":[525.14,261.12,256.51,32.64]}
+{"kind":"textbox","id":"sh/qh0f25c3","slide":21,"name":"TextBox 17","text":"yox","textPreview":"yox","textChars":3,"textLines":1,"bbox":[810.44,261.12,215.75,32.64]}
+{"kind":"textbox","id":"sh/ri9gbado","slide":21,"name":"TextBox 18","text":"istəyə görə","textPreview":"istəyə görə","textChars":11,"textLines":1,"bbox":[1054.99,261.12,154.61,32.64]}
+{"kind":"textbox","id":"sh/3q1k7ip4","slide":21,"name":"TextBox 19","text":"Kollokvium (midterm)","textPreview":"Kollokvium (midterm)","textChars":20,"textLines":1,"bbox":[76.8,320.64,215.75,32.64]}
+{"kind":"textbox","id":"sh/2ps3ed8j","slide":21,"name":"TextBox 20","text":"İmtahan Mərkəzi","textPreview":"İmtahan Mərkəzi","textChars":15,"textLines":1,"bbox":[321.35,320.64,174.99,32.64]}
+{"kind":"textbox","id":"sh/pcj2987u","slide":21,"name":"TextBox 21","text":"Tələbə kabinetindən","textPreview":"Tələbə kabinetindən","textChars":19,"textLines":1,"bbox":[525.14,320.64,256.51,32.64]}
+{"kind":"textbox","id":"sh/obalg3q9","slide":21,"name":"TextBox 22","text":"fərdi PIN","textPreview":"fərdi PIN","textChars":9,"textLines":1,"bbox":[810.44,320.64,215.75,32.64]}
+{"kind":"textbox","id":"sh/be1kbip0","slide":21,"name":"TextBox 23","text":"istəyə görə","textPreview":"istəyə görə","textChars":11,"textLines":1,"bbox":[1054.99,320.64,154.61,32.64]}
+{"kind":"shape","id":"sh/qds3id8f","slide":21,"name":"Rectangle 24","bbox":[59.52,364.8,1161.6,59.52]}
+{"kind":"textbox","id":"sh/dgjmds76","slide":21,"name":"TextBox 25","text":"Final imtahan","textPreview":"Final imtahan","textChars":13,"textLines":1,"bbox":[76.8,380.16,215.75,32.64]}
+{"kind":"textbox","id":"sh/cfalkn6l","slide":21,"name":"TextBox 26","text":"İmtahan Mərkəzi","textPreview":"İmtahan Mərkəzi","textChars":15,"textLines":1,"bbox":[321.35,380.16,174.99,32.64]}
+{"kind":"textbox","id":"sh/zil4f2pw","slide":21,"name":"TextBox 27","text":"Zal girişi /exams/final/","textPreview":"Zal girişi /exams/final/","textChars":24,"textLines":1,"bbox":[525.14,380.16,256.51,32.64]}
+{"kind":"textbox","id":"sh/yhc3mxor","slide":21,"name":"TextBox 28","text":"fərdi PIN + zal kompüteri","textPreview":"fərdi PIN + zal kompüteri","textChars":25,"textLines":1,"bbox":[810.44,380.16,215.75,32.64]}
+{"kind":"textbox","id":"sh/wnu1c7mp","slide":21,"name":"TextBox 29","text":"MƏCBURİ","textPreview":"MƏCBURİ","textChars":7,"textLines":1,"bbox":[1054.99,380.16,154.61,32.64]}
+{"kind":"textbox","id":"sh/xon25cna","slide":21,"name":"TextBox 30","text":"Yerləşdirmə","textPreview":"Yerləşdirmə","textChars":11,"textLines":1,"bbox":[76.8,439.68,215.75,32.64]}
+{"kind":"textbox","id":"sh/alcjax4j","slide":21,"name":"TextBox 31","text":"İmtahan Mərkəzi","textPreview":"İmtahan Mərkəzi","textChars":15,"textLines":1,"bbox":[321.35,439.68,174.99,32.64]}
+{"kind":"textbox","id":"sh/vmlk3254","slide":21,"name":"TextBox 32","text":"Təyinat üzrə","textPreview":"Təyinat üzrə","textChars":12,"textLines":1,"bbox":[525.14,439.68,256.51,32.64]}
+{"kind":"textbox","id":"sh/8ju18nmt","slide":21,"name":"TextBox 33","text":"fərdi PIN","textPreview":"fərdi PIN","textChars":9,"textLines":1,"bbox":[810.44,439.68,215.75,32.64]}
+{"kind":"textbox","id":"sh/9k321sne","slide":21,"name":"TextBox 34","text":"istəyə görə","textPreview":"istəyə görə","textChars":11,"textLines":1,"bbox":[1054.99,439.68,154.61,32.64]}
+{"kind":"shape","id":"sh/mhcj6d4n","slide":21,"name":"Rectangle 35","bbox":[59.52,483.84,1161.6,59.52]}
+{"kind":"textbox","id":"sh/nilkzi58","slide":21,"name":"TextBox 36","text":"Məşq / sınaq keçidi","textPreview":"Məşq / sınaq keçidi","textChars":19,"textLines":1,"bbox":[76.8,499.2,215.75,32.64]}
+{"kind":"textbox","id":"sh/0fa14nmh","slide":21,"name":"TextBox 37","text":"Müəllim","textPreview":"Müəllim","textChars":7,"textLines":1,"bbox":[321.35,499.2,174.99,32.64]}
+{"kind":"textbox","id":"sh/lg32xsn2","slide":21,"name":"TextBox 38","text":"Kabinet · nəticəyə təsir etmir","textPreview":"Kabinet · nəticəyə təsir etmir","textChars":30,"textLines":1,"bbox":[525.14,499.2,256.51,32.64]}
+{"kind":"textbox","id":"sh/pkzy5o3u","slide":21,"name":"TextBox 39","text":"yox","textPreview":"yox","textChars":3,"textLines":1,"bbox":[810.44,499.2,215.75,32.64]}
+{"kind":"textbox","id":"sh/ojqhcj29","slide":21,"name":"TextBox 40","text":"yox","textPreview":"yox","textChars":3,"textLines":1,"bbox":[1054.99,499.2,154.61,32.64]}
+{"kind":"shape","id":"sh/3yhg3elo","slide":21,"name":"Rounded Rectangle 41","bbox":[59.52,620.16,1161.6,48]}
+{"kind":"textbox","id":"sh/2x8za9k3","slide":21,"name":"TextBox 42","text":"Format oxu (ayrıca): TEST — avtomatik ballanır · YAZILI — müəllim əl ilə yoxlayır · PRAKTİKİ KOD — test-case-lərlə avtomatik icra olunur","textPreview":"Format oxu (ayrıca): TEST — avtomatik ballanır · YAZILI — müəllim əl ilə yoxlayır · PRAKTİKİ KOD — test-case-lərlə avtomatik icra olunur","textChars":136,"textLines":1,"bbox":[88.32,632.64,1104,28.8]}
+{"kind":"notes","id":"nt/ddwmk7","slide":21,"text":""}
+{"kind":"slide","id":"sl/xb8sgp","slide":22,"title":"FORMAT","textShapes":13}
+{"kind":"shape","id":"sh/p8rmtwre","slide":22,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/o7il0rat","slide":22,"name":"TextBox 2","text":"FORMAT","textPreview":"FORMAT","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/fi94nm9c","slide":22,"name":"TextBox 3","text":"Praktiki kod imtahanı","textPreview":"Praktiki kod imtahanı","textChars":21,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/ehg3uhsr","slide":22,"name":"TextBox 4","text":"Tələbə kod redaktorunda yazır, sistem test-case-lərlə avtomatik yoxlayır","textPreview":"Tələbə kod redaktorunda yazır, sistem test-case-lərlə avtomatik yoxlayır","textChars":72,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/14rmpcri","slide":22,"name":"TextBox 5","text":"24","textPreview":"24","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/03ilwrax","slide":22,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/repkj29g","slide":22,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/sje5kna5","slide":22,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/dkn6dsbq","slide":22,"name":"TextBox 10","text":"5 proqramlaşdırma dili","textPreview":"5 proqramlaşdırma dili","textChars":22,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/qhwnidsz","slide":22,"name":"TextBox 11","text":"Python, JavaScript, C++, Java, HTML/CSS/JS","textPreview":"Python, JavaScript, C++, Java, HTML/CSS/JS","textChars":42,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/ri5obitk","slide":22,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/4fu5g3at","slide":22,"name":"TextBox 13","text":"Görünən + gizli testlər","textPreview":"Görünən + gizli testlər","textChars":23,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/5g3m98be","slide":22,"name":"TextBox 14","text":"Tələbə nümunə testi görür; qiymət gizli testlərlə hesablanır","textPreview":"Tələbə nümunə testi görür; qiymət gizli testlərlə hesablanır","textChars":60,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/idcneds3","slide":22,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/3el47yto","slide":22,"name":"TextBox 16","text":"Starter kod","textPreview":"Starter kod","textChars":11,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/oby5s7ad","slide":22,"name":"TextBox 17","text":"Müəllim başlanğıc şablonu verə bilir","textPreview":"Müəllim başlanğıc şablonu verə bilir","textChars":36,"textLines":1,"bbox":[77.76,406.08,292.8,31.2]}
+{"kind":"shape","id":"sh/pc76lcby","slide":22,"name":"Rectangle 18","bbox":[59.52,450.72,5.28,24.96]}
+{"kind":"textbox","id":"sh/xs365c32","slide":22,"name":"TextBox 19","text":"Qeyd","textPreview":"Qeyd","textChars":4,"textLines":1,"bbox":[77.76,448.8,295.68,35.52]}
+{"kind":"textbox","id":"sh/wru5w72h","slide":22,"name":"TextBox 20","text":"Bu modul hazırdır, lakin cari istismar konfiqurasiyasında bayraq arxasında bağlıdır — tələb olunarsa aktivləşdirilir","textPreview":"Bu modul hazırdır, lakin cari istismar konfiqurasiyasında bayraq arxasında bağlıdır — tələb olunarsa aktivləşdirilir","textChars":116,"textLines":1,"bbox":[77.76,480.48,292.8,90.24]}
+{"kind":"image","id":"im/0ve1c36t","slide":22,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/xb8sgp","slide":22,"text":""}
+{"kind":"slide","id":"sl/e8aci2","slide":23,"title":"FORMAT","textShapes":13}
+{"kind":"shape","id":"sh/jedon2t8","slide":23,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/id4nexcn","slide":23,"name":"TextBox 2","text":"FORMAT","textPreview":"FORMAT","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/hcvmlsb2","slide":23,"name":"TextBox 3","text":"Yazılı (esse) imtahan","textPreview":"Yazılı (esse) imtahan","textChars":21,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/wbm5cnuh","slide":23,"name":"TextBox 4","text":"Açıq suallar — müəllim oxuyur və bal verir","textPreview":"Açıq suallar — müəllim oxuyur və bal verir","textChars":42,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/vad4jitw","slide":23,"name":"TextBox 5","text":"25","textPreview":"25","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/u94naxcb","slide":23,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/98vmhsbq","slide":23,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/ip43ahsb","slide":23,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/jqdk3m9w","slide":23,"name":"TextBox 10","text":"Sərbəst mətn cavabı","textPreview":"Sərbəst mətn cavabı","textChars":19,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/krmlcrah","slide":23,"name":"TextBox 11","text":"Uzun cavablar, avtomatik yaddaşla","textPreview":"Uzun cavablar, avtomatik yaddaşla","textChars":33,"textLines":1,"bbox":[77.76,217.92,292.8,31.2]}
+{"kind":"shape","id":"sh/5sv25wrm","slide":23,"name":"Rectangle 12","bbox":[59.52,262.56,5.28,24.96]}
+{"kind":"textbox","id":"sh/a1436hsz","slide":23,"name":"TextBox 13","text":"Fayl əlavəsi","textPreview":"Fayl əlavəsi","textChars":12,"textLines":1,"bbox":[77.76,260.64,295.68,35.52]}
+{"kind":"textbox","id":"sh/v2dkz29k","slide":23,"name":"TextBox 14","text":"Tələbə cavabına fayl yükləyə bilər","textPreview":"Tələbə cavabına fayl yükləyə bilər","textChars":34,"textLines":1,"bbox":[77.76,292.32,292.8,31.2]}
+{"kind":"shape","id":"sh/w3ml87a5","slide":23,"name":"Rectangle 15","bbox":[59.52,336.96,5.28,24.96]}
+{"kind":"textbox","id":"sh/xov21crq","slide":23,"name":"TextBox 16","text":"Rəsm kətanı","textPreview":"Rəsm kətanı","textChars":11,"textLines":1,"bbox":[77.76,335.04,295.68,35.52]}
+{"kind":"textbox","id":"sh/mxkj2xs3","slide":23,"name":"TextBox 17","text":"Sxem, qrafik, torpaq kəsiyi və s. birbaşa ekranda çəkilə bilər","textPreview":"Sxem, qrafik, torpaq kəsiyi və s. birbaşa ekranda çəkilə bilər","textChars":62,"textLines":1,"bbox":[77.76,366.72,292.8,50.88]}
+{"kind":"shape","id":"sh/nytkv29o","slide":23,"name":"Rectangle 18","bbox":[59.52,431.04,5.28,24.96]}
+{"kind":"textbox","id":"sh/b2903ypg","slide":23,"name":"TextBox 19","text":"Əl ilə qiymətləndirmə","textPreview":"Əl ilə qiymətləndirmə","textChars":21,"textLines":1,"bbox":[77.76,429.12,295.68,35.52]}
+{"kind":"textbox","id":"sh/q1gzat8v","slide":23,"name":"TextBox 20","text":"Hər sual üçün ayrıca bal və rəy; qismən bal mümkündür","textPreview":"Hər sual üçün ayrıca bal və rəy; qismən bal mümkündür","textChars":53,"textLines":1,"bbox":[77.76,460.8,292.8,50.88]}
+{"kind":"image","id":"im/2dkru9wb","slide":23,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/e8aci2","slide":23,"text":""}
+{"kind":"slide","id":"sl/488cnk","slide":24,"title":"TƏLƏBƏ","textShapes":13}
+{"kind":"shape","id":"sh/f694j214","slide":24,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/u503axkj","slide":24,"name":"TextBox 2","text":"TƏLƏBƏ","textPreview":"TƏLƏBƏ","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/pwbmpcj6","slide":24,"name":"TextBox 3","text":"Tələbə kabineti","textPreview":"Tələbə kabineti","textChars":15,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/4v2lgr2l","slide":24,"name":"TextBox 4","text":"Tələbə üçün vahid giriş nöqtəsi","textPreview":"Tələbə üçün vahid giriş nöqtəsi","textChars":31,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/3ut4nm10","slide":24,"name":"TextBox 5","text":"27","textPreview":"27","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/2tk3ehkv","slide":24,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/50r2ds32","slide":24,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/u9w3yhk3","slide":24,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/fa547m1o","slide":24,"name":"TextBox 10","text":"İmtahanlarım","textPreview":"İmtahanlarım","textChars":12,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/gbel0r29","slide":24,"name":"TextBox 11","text":"Təyin olunmuş və açıq imtahanlar, tarix və müddət ilə","textPreview":"Təyin olunmuş və açıq imtahanlar, tarix və müddət ilə","textChars":53,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/hcnm9cju","slide":24,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/2dw32hkf","slide":24,"name":"TextBox 13","text":"Nəticələrim","textPreview":"Nəticələrim","textChars":11,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/3e54bm10","slide":24,"name":"TextBox 14","text":"Keçmiş imtahanların balı və detallı cavab təhlili","textPreview":"Keçmiş imtahanların balı və detallı cavab təhlili","textChars":49,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/4fyl4r2l","slide":24,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/pg7mdwjq","slide":24,"name":"TextBox 16","text":"Apellyasiyalarım","textPreview":"Apellyasiyalarım","textChars":16,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/qhgn61kb","slide":24,"name":"TextBox 17","text":"Açılmış müraciətlərin statusu","textPreview":"Açılmış müraciətlərin statusu","textChars":29,"textLines":1,"bbox":[77.76,406.08,292.8,31.2]}
+{"kind":"shape","id":"sh/rip4f61w","slide":24,"name":"Rectangle 18","bbox":[59.52,450.72,5.28,24.96]}
+{"kind":"textbox","id":"sh/nm9k36h4","slide":24,"name":"TextBox 19","text":"Akademik qeydlər","textPreview":"Akademik qeydlər","textChars":16,"textLines":1,"bbox":[77.76,448.8,295.68,35.52]}
+{"kind":"textbox","id":"sh/mlg3u1gj","slide":24,"name":"TextBox 20","text":"Jurnal, dərs cədvəli, transkript","textPreview":"Jurnal, dərs cədvəli, transkript","textChars":32,"textLines":1,"bbox":[77.76,480.48,292.8,31.2]}
+{"kind":"image","id":"im/e90r294z","slide":24,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/488cnk","slide":24,"text":""}
+{"kind":"slide","id":"sl/omu3rn","slide":25,"title":"TƏLƏBƏ","textShapes":11}
+{"kind":"shape","id":"sh/twja94ru","slide":25,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/svat0za9","slide":25,"name":"TextBox 2","text":"TƏLƏBƏ","textPreview":"TƏLƏBƏ","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/jqhs3u9s","slide":25,"name":"TextBox 3","text":"Açıq imtahanlar siyahısı","textPreview":"Açıq imtahanlar siyahısı","textChars":24,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/i58bups7","slide":25,"name":"TextBox 4","text":"Axtarış, tip üzrə süzgəc, kart görünüşü","textPreview":"Axtarış, tip üzrə süzgəc, kart görünüşü","textChars":39,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/5sza54ri","slide":25,"name":"TextBox 5","text":"28","textPreview":"28","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/krqtwzad","slide":25,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/3mlcfe9w","slide":25,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/0n2h8zy5","slide":25,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/1ovy14zq","slide":25,"name":"TextBox 10","text":"Kartda hər şey","textPreview":"Kartda hər şey","textChars":14,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/elkz6pgz","slide":25,"name":"TextBox 11","text":"Fənn, tarix, müddət, sual sayı, qalan cəhd","textPreview":"Fənn, tarix, müddət, sual sayı, qalan cəhd","textChars":42,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/fmtgzuhk","slide":25,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/sj2h4zy9","slide":25,"name":"TextBox 13","text":"Final burada GÖRÜNMÜR","textPreview":"Final burada GÖRÜNMÜR","textChars":21,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/dkbyx4zu","slide":25,"name":"TextBox 14","text":"Final imtahanı yalnız zal giriş səhifəsindən verilir — siyahıya düşmür","textPreview":"Final imtahanı yalnız zal giriş səhifəsindən verilir — siyahıya düşmür","textChars":70,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/qxkz2pg3","slide":25,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/ritgvuho","slide":25,"name":"TextBox 16","text":"Başlama qapıları","textPreview":"Başlama qapıları","textChars":16,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/4vix0fix","slide":25,"name":"TextBox 17","text":"Aktivlik, tarix pəncərəsi, cəhd limiti, jurnal qayıb limiti — hamısı serverdə yoxlanılır","textPreview":"Aktivlik, tarix pəncərəsi, cəhd limiti, jurnal qayıb limiti — hamısı serverdə yoxlanılır","textChars":88,"textLines":1,"bbox":[77.76,406.08,292.8,70.56]}
+{"kind":"image","id":"im/ixg76lkj","slide":25,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/omu3rn","slide":25,"text":""}
+{"kind":"slide","id":"sl/fvcb0v","slide":26,"title":"TƏLƏBƏ","textShapes":13}
+{"kind":"shape","id":"sh/sfq5sza5","slide":26,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/dgzm1kbq","slide":26,"name":"TextBox 2","text":"TƏLƏBƏ","textPreview":"TƏLƏBƏ","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/iponm5s3","slide":26,"name":"TextBox 3","text":"İmtahan ekranı","textPreview":"İmtahan ekranı","textChars":14,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/3qh4vato","slide":26,"name":"TextBox 4","text":"Sual xəritəsi, taymer, işarələmə və avtomatik yaddaş","textPreview":"Sual xəritəsi, taymer, işarələmə və avtomatik yaddaş","textChars":52,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/4rq5ofa9","slide":26,"name":"TextBox 5","text":"29","textPreview":"29","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/5szmxkbu","slide":26,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/mlsny9s7","slide":26,"name":"Rectangle 7","bbox":[444.08,180.96,743.83,479.04]}
+{"kind":"shape","id":"sh/fm10bm9c","slide":26,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/elszihsr","slide":26,"name":"TextBox 10","text":"Sual xəritəsi","textPreview":"Sual xəritəsi","textChars":13,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/18jidwr2","slide":26,"name":"TextBox 11","text":"Cari · cavablanmış · işarələnmiş · cavabsız — rənglə real vaxtda","textPreview":"Cari · cavablanmış · işarələnmiş · cavabsız — rənglə real vaxtda","textChars":64,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/g7ahkrax","slide":26,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/3al0fm98","slide":26,"name":"TextBox 13","text":"«Sonra qayıdım» işarəsi","textPreview":"«Sonra qayıdım» işarəsi","textChars":23,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/29szmhsn","slide":26,"name":"TextBox 14","text":"İşarələnən suallar həm brauzerdə, həm serverdə saxlanılır","textPreview":"İşarələnən suallar həm brauzerdə, həm serverdə saxlanılır","textChars":57,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/pc3ihwre","slide":26,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/obu1orat","slide":26,"name":"TextBox 16","text":"Taymer","textPreview":"Taymer","textChars":6,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/bel0j69k","slide":26,"name":"TextBox 17","text":"Server-avtoritativ: səhifə yenilənsə də vaxt sıfırlanmır","textPreview":"Server-avtoritativ: səhifə yenilənsə də vaxt sıfırlanmır","textChars":56,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"shape","id":"sh/qdcjq1sz","slide":26,"name":"Rectangle 18","bbox":[59.52,470.4,5.28,24.96]}
+{"kind":"textbox","id":"sh/m9w3i5c7","slide":26,"name":"TextBox 19","text":"Avtomatik yaddaş","textPreview":"Avtomatik yaddaş","textChars":16,"textLines":1,"bbox":[77.76,468.48,295.68,35.52]}
+{"kind":"textbox","id":"sh/napkrats","slide":26,"name":"TextBox 20","text":"Yalnız dəyişən sual göndərilir — şəbəkə yükü minimuma enir","textPreview":"Yalnız dəyişən sual göndərilir — şəbəkə yükü minimuma enir","textChars":58,"textLines":1,"bbox":[77.76,500.16,292.8,50.88]}
+{"kind":"image","id":"im/ry5w36t8","slide":26,"name":"Picture 8","bbox":[447.44,184.32,737.11,472.32]}
+{"kind":"notes","id":"nt/fvcb0v","slide":26,"text":""}
+{"kind":"slide","id":"sl/2hofcz","slide":27,"title":"TƏLƏBƏ","textShapes":21}
+{"kind":"shape","id":"sh/fqpcby9o","slide":27,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/epgb2t83","slide":27,"name":"TextBox 2","text":"TƏLƏBƏ","textPreview":"TƏLƏBƏ","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/pgruh87q","slide":27,"name":"TextBox 3","text":"İmtahan ekranının texniki qorumaları","textPreview":"İmtahan ekranının texniki qorumaları","textChars":36,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/ofid83q5","slide":27,"name":"TextBox 4","text":"«İnternet kəsildi», «brauzer bağlandı», «iki tab açdım» — bu hallar əvvəlcədən həll edilib","textPreview":"«İnternet kəsildi», «brauzer bağlandı», «iki tab açdım» — bu hallar əvvəlcədən həll edilib","textChars":90,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/3e9cfy9k","slide":27,"name":"TextBox 5","text":"30","textPreview":"30","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/2d0v6t8f","slide":27,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/5k7u54rm","slide":27,"name":"Rounded Rectangle 7","bbox":[59.52,188.16,546.24,101.76]}
+{"kind":"shape","id":"sh/4jetwjq1","slide":27,"name":"Rectangle 8","bbox":[59.52,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/m1ozylsn","slide":27,"name":"TextBox 9","text":"Avtomatik yaddaş","textPreview":"Avtomatik yaddaş","textChars":16,"textLines":1,"bbox":[80.64,197.76,517.44,28.8]}
+{"kind":"textbox","id":"sh/n2h07q98","slide":27,"name":"TextBox 10","text":"Test seçimində 1 saniyə, yazılı mətndə 3 saniyə gecikmə ilə serverə yazılır","textPreview":"Test seçimində 1 saniyə, yazılı mətndə 3 saniyə gecikmə ilə serverə yazılır","textChars":75,"textLines":1,"bbox":[80.64,222.72,517.44,61.44]}
+{"kind":"shape","id":"sh/o3qh0vad","slide":27,"name":"Rounded Rectangle 11","bbox":[59.52,303.36,546.24,101.76]}
+{"kind":"shape","id":"sh/9ozi90ry","slide":27,"name":"Rectangle 12","bbox":[59.52,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/ap8j25sj","slide":27,"name":"TextBox 13","text":"Lokal ehtiyat nüsxə","textPreview":"Lokal ehtiyat nüsxə","textChars":19,"textLines":1,"bbox":[80.64,312.96,517.44,28.8]}
+{"kind":"textbox","id":"sh/bqh0bq94","slide":27,"name":"TextBox 14","text":"Cavab dərhal brauzerin yaddaşına da yazılır — səhifə çökərsə bərpa olunur","textPreview":"Cavab dərhal brauzerin yaddaşına da yazılır — səhifə çökərsə bərpa olunur","textChars":73,"textLines":1,"bbox":[80.64,337.92,517.44,61.44]}
+{"kind":"shape","id":"sh/wrq14vap","slide":27,"name":"Rounded Rectangle 15","bbox":[59.52,418.56,546.24,101.76]}
+{"kind":"shape","id":"sh/xszid0ra","slide":27,"name":"Rectangle 16","bbox":[59.52,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/yt8j65sv","slide":27,"name":"TextBox 17","text":"İki tab qoruması","textPreview":"İki tab qoruması","textChars":16,"textLines":1,"bbox":[80.64,428.16,517.44,28.8]}
+{"kind":"textbox","id":"sh/ju10fa9g","slide":27,"name":"TextBox 18","text":"Köhnə tabdan gələn yazı rədd edilir, tələbəyə «başqa tabda yeniləndi» xəbərdarlığı gedir","textPreview":"Köhnə tabdan gələn yazı rədd edilir, tələbəyə «başqa tabda yeniləndi» xəbərdarlığı gedir","textChars":88,"textLines":1,"bbox":[80.64,453.12,517.44,61.44]}
+{"kind":"shape","id":"sh/vy10nap8","slide":27,"name":"Rounded Rectangle 19","bbox":[59.52,533.76,546.24,101.76]}
+{"kind":"shape","id":"sh/uxszu5on","slide":27,"name":"Rectangle 20","bbox":[59.52,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/h0jipk7e","slide":27,"name":"TextBox 21","text":"Vaxt xəbərdarlığı","textPreview":"Vaxt xəbərdarlığı","textChars":17,"textLines":1,"bbox":[80.64,543.36,517.44,28.8]}
+{"kind":"textbox","id":"sh/gzahwf6t","slide":27,"name":"TextBox 22","text":"Son 5 dəqiqədə avtomatik xəbərdarlıq modalı çıxır","textPreview":"Son 5 dəqiqədə avtomatik xəbərdarlıq modalı çıxır","textChars":49,"textLines":1,"bbox":[80.64,568.32,517.44,61.44]}
+{"kind":"shape","id":"sh/7u1gjapc","slide":27,"name":"Rounded Rectangle 23","bbox":[640.32,188.16,546.24,101.76]}
+{"kind":"shape","id":"sh/6t8zq5or","slide":27,"name":"Rectangle 24","bbox":[640.32,188.16,5.28,101.76]}
+{"kind":"textbox","id":"sh/twjyl07i","slide":27,"name":"TextBox 25","text":"Vaxt bitəndə","textPreview":"Vaxt bitəndə","textChars":12,"textLines":1,"bbox":[661.44,197.76,517.44,28.8]}
+{"kind":"textbox","id":"sh/8vahsv6x","slide":27,"name":"TextBox 26","text":"Cavablar saxlanır və cəhd avtomatik bağlanır — brauzer bağlı olsa belə server özü bağlayır","textPreview":"Cavablar saxlanır və cəhd avtomatik bağlanır — brauzer bağlı olsa belə server özü bağlayır","textChars":90,"textLines":1,"bbox":[661.44,222.72,517.44,61.44]}
+{"kind":"shape","id":"sh/jqhgfqp0","slide":27,"name":"Rounded Rectangle 27","bbox":[640.32,303.36,546.24,101.76]}
+{"kind":"shape","id":"sh/yp8zmlov","slide":27,"name":"Rectangle 28","bbox":[640.32,303.36,5.28,101.76]}
+{"kind":"textbox","id":"sh/ov6xwrmd","slide":27,"name":"TextBox 29","text":"Sual-başına gizli çatdırılma","textPreview":"Sual-başına gizli çatdırılma","textChars":28,"textLines":1,"bbox":[661.44,312.96,517.44,28.8]}
+{"kind":"textbox","id":"sh/9wfepwny","slide":27,"name":"TextBox 30","text":"Vaxt limitli sualın mətni taymer serverdə başlamamış səhifə mənbəyinə düşmür","textPreview":"Vaxt limitli sualın mətni taymer serverdə başlamamış səhifə mənbəyinə düşmür","textChars":76,"textLines":1,"bbox":[661.44,337.92,517.44,61.44]}
+{"kind":"shape","id":"sh/m94vuh4n","slide":27,"name":"Rounded Rectangle 31","bbox":[640.32,418.56,546.24,101.76]}
+{"kind":"shape","id":"sh/naxwnm5s","slide":27,"name":"Rectangle 32","bbox":[640.32,418.56,5.28,101.76]}
+{"kind":"textbox","id":"sh/wz6x0bmp","slide":27,"name":"TextBox 33","text":"Kütləvi başlama dalğası","textPreview":"Kütləvi başlama dalğası","textChars":23,"textLines":1,"bbox":[661.44,428.16,517.44,28.8]}
+{"kind":"textbox","id":"sh/x0fetwna","slide":27,"name":"TextBox 34","text":"Eyni anda minlərlə start olanda tələbə çökmə deyil, özü-yenilənən «başladılır» səhifəsi görür","textPreview":"Eyni anda minlərlə start olanda tələbə çökmə deyil, özü-yenilənən «başladılır» səhifəsi görür","textChars":93,"textLines":1,"bbox":[661.44,453.12,517.44,61.44]}
+{"kind":"shape","id":"sh/axofy14j","slide":27,"name":"Rounded Rectangle 35","bbox":[640.32,533.76,546.24,101.76]}
+{"kind":"shape","id":"sh/byxwr654","slide":27,"name":"Rectangle 36","bbox":[640.32,533.76,5.28,101.76]}
+{"kind":"textbox","id":"sh/c3mdo7m5","slide":27,"name":"TextBox 37","text":"Düz cavab heç vaxt göndərilmir","textPreview":"Düz cavab heç vaxt göndərilmir","textChars":30,"textLines":1,"bbox":[661.44,543.36,517.44,28.8]}
+{"kind":"textbox","id":"sh/d4vehcnq","slide":27,"name":"TextBox 38","text":"Səhifənin mənbəyində düz cavab olmur — «kodu aç, cavabı gör» mümkün deyil","textPreview":"Səhifənin mənbəyində düz cavab olmur — «kodu aç, cavabı gör» mümkün deyil","textChars":73,"textLines":1,"bbox":[661.44,568.32,517.44,61.44]}
+{"kind":"notes","id":"nt/2hofcz","slide":27,"text":""}
+{"kind":"slide","id":"sl/xrrumw","slide":28,"title":"TƏLƏBƏ","textShapes":11}
+{"kind":"shape","id":"sh/w7idkfmh","slide":28,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/x8retk32","slide":28,"name":"TextBox 2","text":"TƏLƏBƏ","textPreview":"TƏLƏBƏ","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/y90vm54n","slide":28,"name":"TextBox 3","text":"Təhvil təsdiqi","textPreview":"Təhvil təsdiqi","textChars":14,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/jutwvals","slide":28,"name":"TextBox 4","text":"Təsadüfi təhvilin qarşısını alan iki mərhələli təsdiq","textPreview":"Təsadüfi təhvilin qarşısını alan iki mərhələli təsdiq","textChars":53,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/kv2xofmd","slide":28,"name":"TextBox 5","text":"31","textPreview":"31","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/lwbexk3y","slide":28,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/6xkfqp4j","slide":28,"name":"Rectangle 7","bbox":[444.08,180.96,743.83,479.04]}
+{"kind":"shape","id":"sh/76dsnel4","slide":28,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/654ru9kj","slide":28,"name":"TextBox 10","text":"Cavabsız sual xəbərdarlığı","textPreview":"Cavabsız sual xəbərdarlığı","textChars":26,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/tsfapo3a","slide":28,"name":"TextBox 11","text":"Modal neçə sualın cavabsız qaldığını göstərir","textPreview":"Modal neçə sualın cavabsız qaldığını göstərir","textChars":45,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/87m9wj2p","slide":28,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/j2dsjel8","slide":28,"name":"TextBox 13","text":"Geri dönüş yoxdur","textPreview":"Geri dönüş yoxdur","textChars":17,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/y14rq9kn","slide":28,"name":"TextBox 14","text":"Təsdiqdən sonra cəhd bağlanır və cavablar dondurulur","textPreview":"Təsdiqdən sonra cəhd bağlanır və cavablar dondurulur","textChars":52,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/l4val43y","slide":28,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/k3m9sz2t","slide":28,"name":"TextBox 16","text":"Təkrar göndərmə bloku","textPreview":"Təkrar göndərmə bloku","textChars":21,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/3yxsvylc","slide":28,"name":"TextBox 17","text":"Düymə bir dəfə işləyir — ikiqat təhvil mümkün deyil","textPreview":"Düymə bir dəfə işləyir — ikiqat təhvil mümkün deyil","textChars":51,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"image","id":"im/hcjedgri","slide":28,"name":"Picture 8","bbox":[447.44,184.32,737.11,472.32]}
+{"kind":"notes","id":"nt/xrrumw","slide":28,"text":""}
+{"kind":"slide","id":"sl/bdwcxk","slide":29,"title":"TƏLƏBƏ","textShapes":13}
+{"kind":"shape","id":"sh/yhsj2dsz","slide":29,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/zilkbi9k","slide":29,"name":"TextBox 2","text":"TƏLƏBƏ","textPreview":"TƏLƏBƏ","textChars":6,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/cfa10na9","slide":29,"name":"TextBox 3","text":"Nəticə ekranı","textPreview":"Nəticə ekranı","textChars":13,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/dgj29sru","slide":29,"name":"TextBox 4","text":"Bal, düzgün/səhv bölgüsü və sual-üzrə cavab təhlili","textPreview":"Bal, düzgün/səhv bölgüsü və sual-üzrə cavab təhlili","textChars":51,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/qdsjyds3","slide":29,"name":"TextBox 5","text":"32","textPreview":"32","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/be1k7i9o","slide":29,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/oba1w3ax","slide":29,"name":"Rectangle 7","bbox":[407.52,181.06,816.96,478.84]}
+{"kind":"shape","id":"sh/d8nex83i","slide":29,"name":"Rectangle 9","bbox":[59.52,188.16,5.28,24.96]}
+{"kind":"textbox","id":"sh/c7ed432x","slide":29,"name":"TextBox 10","text":"Dərhal nəticə","textPreview":"Dərhal nəticə","textChars":13,"textLines":1,"bbox":[77.76,186.24,295.68,35.52]}
+{"kind":"textbox","id":"sh/b65cvilc","slide":29,"name":"TextBox 11","text":"Test imtahanında bal təhvildən dərhal sonra hesablanır","textPreview":"Test imtahanında bal təhvildən dərhal sonra hesablanır","textChars":54,"textLines":1,"bbox":[77.76,217.92,292.8,50.88]}
+{"kind":"shape","id":"sh/q5wv2dkr","slide":29,"name":"Rectangle 12","bbox":[59.52,282.24,5.28,24.96]}
+{"kind":"textbox","id":"sh/pknut836","slide":29,"name":"TextBox 13","text":"Cavab təhlili","textPreview":"Cavab təhlili","textChars":13,"textLines":1,"bbox":[77.76,280.32,295.68,35.52]}
+{"kind":"textbox","id":"sh/ojed032l","slide":29,"name":"TextBox 14","text":"Hər sual üzrə tələbənin cavabı və düz cavab (müəllim icazə verərsə)","textPreview":"Hər sual üzrə tələbənin cavabı və düz cavab (müəllim icazə verərsə)","textChars":67,"textLines":1,"bbox":[77.76,312,292.8,50.88]}
+{"kind":"shape","id":"sh/3i5cryl0","slide":29,"name":"Rectangle 15","bbox":[59.52,376.32,5.28,24.96]}
+{"kind":"textbox","id":"sh/2hwvytkv","slide":29,"name":"TextBox 16","text":"Nəticənin gizlədilməsi","textPreview":"Nəticənin gizlədilməsi","textChars":22,"textLines":1,"bbox":[77.76,374.4,295.68,35.52]}
+{"kind":"textbox","id":"sh/1g3upo3a","slide":29,"name":"TextBox 17","text":"Müəllim/mərkəz nəticəni müvəqqəti gizlədə bilər","textPreview":"Müəllim/mərkəz nəticəni müvəqqəti gizlədə bilər","textChars":47,"textLines":1,"bbox":[77.76,406.08,292.8,50.88]}
+{"kind":"shape","id":"sh/gfudwj2p","slide":29,"name":"Rectangle 18","bbox":[59.52,470.4,5.28,24.96]}
+{"kind":"textbox","id":"sh/sbi5snyh","slide":29,"name":"TextBox 19","text":"Apellyasiya girişi","textPreview":"Apellyasiya girişi","textChars":18,"textLines":1,"bbox":[77.76,468.48,295.68,35.52]}
+{"kind":"textbox","id":"sh/twrm1sf2","slide":29,"name":"TextBox 20","text":"Nəticə ekranından birbaşa müraciət açıla bilir","textPreview":"Nəticə ekranından birbaşa müraciət açıla bilir","textChars":46,"textLines":1,"bbox":[77.76,500.16,292.8,50.88]}
+{"kind":"image","id":"im/14jqhkry","slide":29,"name":"Picture 8","bbox":[410.88,184.42,810.24,472.12]}
+{"kind":"notes","id":"nt/bdwcxk","slide":29,"text":""}
+{"kind":"slide","id":"sl/qvj2o9","slide":30,"title":"FINAL","textShapes":6}
+{"kind":"shape","id":"sh/c3u9wr29","slide":30,"name":"Rectangle 1","bbox":[0,0,1279.97,15.36]}
+{"kind":"textbox","id":"sh/d4nq5wje","slide":30,"name":"TextBox 2","text":"FINAL","textPreview":"FINAL","textChars":5,"textLines":1,"bbox":[59.52,34.56,1056,24.96]}
+{"kind":"textbox","id":"sh/2dcrqhkr","slide":30,"name":"TextBox 3","text":"Final imtahan günü — 12 addım","textPreview":"Final imtahan günü — 12 addım","textChars":29,"textLines":1,"bbox":[59.52,60.48,1161.6,59.52]}
+{"kind":"textbox","id":"sh/3el8zm1c","slide":30,"name":"TextBox 4","text":"Rollar arasında dəqiq bölünmüş, hər addımı sistemdə qeydə alınan prosedur","textPreview":"Rollar arasında dəqiq bölünmüş, hər addımı sistemdə qeydə alınan prosedur","textChars":73,"textLines":1,"bbox":[59.52,120.96,1161.6,48]}
+{"kind":"textbox","id":"sh/4fu9sr2x","slide":30,"name":"TextBox 5","text":"34","textPreview":"34","textChars":2,"textLines":1,"bbox":[1142.4,673.92,81.6,28.8]}
+{"kind":"textbox","id":"sh/pg3q1wji","slide":30,"name":"TextBox 6","text":"EMS ARENA · İmtahan İdarəetmə Sistemi","textPreview":"EMS ARENA · İmtahan İdarəetmə Sistemi","textChars":37,"textLines":1,"bbox":[59.52,673.92,576,28.8]}
+{"kind":"shape","id":"sh/u9srmhkv","slide":30,"name":"Rectangle 7","bbox":[238.06,179.04,804.51,443.52]}
+{"kind":"shape","id":"sh/re90n2xo","slide":30,"name":"Rounded Rectangle 9","bbox":[59.52,625.92,1161.6,40.32]}
+{"kind":"textbox","id":"sh/6d0zexwj","slide":30,"name":"TextBox 10","text":"Tələbə imtahanı YALNIZ öz PIN-i ilə və YALNIZ qeydiyyatdan keçmiş zal kompüterindən başlada bilir","textPreview":"Tələbə imtahanı YALNIZ öz PIN-i ilə və YALNIZ qeydiyyatdan keçmiş zal kompüterindən başlada bilir","textChars":97,"textLines":1,"bbox":[81.6,635.52,1123.2,28.8]}
+{"kind":"image","id":"im/edsze5sn","slide":30,"name":"Picture 8","bbox":[241.42,182.4,797.79,436.8]}
+{"kind":"notes","id":"nt/qvj2o9","slide":30,"text":""}

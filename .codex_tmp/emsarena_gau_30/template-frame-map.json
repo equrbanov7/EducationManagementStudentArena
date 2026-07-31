@@ -1,0 +1,41 @@
+{
+  "outputSlides": [
+    {"outputSlide":1,"sourceSlide":1,"narrativeRole":"opening","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":2,"sourceSlide":2,"narrativeRole":"agenda","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":3,"sourceSlide":3,"narrativeRole":"system metrics","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":4,"sourceSlide":5,"narrativeRole":"architecture visual","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":5,"sourceSlide":6,"narrativeRole":"roles overview","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":6,"sourceSlide":8,"narrativeRole":"exam lifecycle","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":7,"sourceSlide":9,"narrativeRole":"teacher dashboard","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":8,"sourceSlide":10,"narrativeRole":"exam list","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":9,"sourceSlide":11,"narrativeRole":"exam creation basics","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":10,"sourceSlide":12,"narrativeRole":"time and questions","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":11,"sourceSlide":13,"narrativeRole":"access setup","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":12,"sourceSlide":14,"narrativeRole":"monitoring setup","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":13,"sourceSlide":15,"narrativeRole":"exam detail","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":14,"sourceSlide":16,"narrativeRole":"question creation methods","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":15,"sourceSlide":17,"narrativeRole":"single question visual","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":16,"sourceSlide":18,"narrativeRole":"question bank","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":17,"sourceSlide":19,"narrativeRole":"bulk import","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":18,"sourceSlide":20,"narrativeRole":"bank selection","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":19,"sourceSlide":21,"narrativeRole":"exam center transfer","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":20,"sourceSlide":22,"narrativeRole":"multilingual exam","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":21,"sourceSlide":24,"narrativeRole":"format matrix","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":22,"sourceSlide":25,"narrativeRole":"practical exam","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":23,"sourceSlide":26,"narrativeRole":"written exam","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":24,"sourceSlide":28,"narrativeRole":"student dashboard","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":25,"sourceSlide":29,"narrativeRole":"open exams","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":26,"sourceSlide":30,"narrativeRole":"exam interface","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":27,"sourceSlide":31,"narrativeRole":"technical safeguards","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":28,"sourceSlide":32,"narrativeRole":"submit confirmation","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":29,"sourceSlide":33,"narrativeRole":"result screen","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":30,"sourceSlide":35,"narrativeRole":"exam day","reuseMode":"duplicate-slide","editTargets":[]}
+  ],
+  "omittedSourceSlides": [
+    {"sourceSlide":4,"reason":"mətn əsaslı bölmə slaydı"},
+    {"sourceSlide":7,"reason":"mətn əsaslı bölmə slaydı"},
+    {"sourceSlide":23,"reason":"mətn əsaslı bölmə slaydı"},
+    {"sourceSlide":27,"reason":"mətn əsaslı bölmə slaydı"},
+    {"sourceSlide":34,"reason":"mətn əsaslı bölmə slaydı"}
+  ]
+}

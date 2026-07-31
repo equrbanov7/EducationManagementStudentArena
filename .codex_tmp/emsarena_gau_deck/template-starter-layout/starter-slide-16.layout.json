@@ -1,0 +1,941 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/3hfe7e",
+    "id": "3hfe7e",
+    "slide": 16,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#F2F2F3",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Arial",
+      "Calibri",
+      "Calibri Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bqlgvqx8",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        110,
+        87.99,
+        1870,
+        41.19
+      ],
+      "geometry": "rect",
+      "text": "EKRAN · TƏLƏBƏ",
+      "textPreview": "EKRAN · TƏLƏBƏ",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "EKRAN · TƏLƏBƏ"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "EKRAN · TƏLƏBƏ",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "EKRAN · TƏLƏBƏ",
+              "fontSize": 24,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/apcfm5gn",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        110,
+        139.19,
+        1870,
+        86
+      ],
+      "geometry": "rect",
+      "text": "Tələbənin imtahan interfeysi",
+      "textPreview": "Tələbənin imtahan interfeysi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tələbənin imtahan interfeysi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tələbənin imtahan interfeysi",
+          "lineSpacingPercent": 87080,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tələbənin imtahan interfeysi",
+              "fontSize": 82,
+              "typeface": "Arial",
+              "color": "#1D1F20",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/po3yt0f2",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        110,
+        257.18,
+        1700,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/onuxkvyh",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        110,
+        319.88,
+        28.27,
+        84.99
+      ],
+      "geometry": "rect",
+      "text": "01",
+      "textPreview": "01",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "0"
+          },
+          {
+            "index": 2,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01",
+              "fontSize": 28,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nmlgrqxc",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        150.27,
+        319.88,
+        549.86,
+        84.99
+      ],
+      "geometry": "rect",
+      "text": "Taymer və qalan vaxt daim görünür; vaxt bitdikdə imtahan avtomatik təhvil verilir.",
+      "textPreview": "Taymer və qalan vaxt daim görünür; vaxt bitdikdə imtahan avtomatik təhvil verilir.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Taymer və qalan vaxt daim görünür; vaxt"
+          },
+          {
+            "index": 2,
+            "text": "bitdikdə imtahan avtomatik təhvil verilir."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Taymer və qalan vaxt daim görünür; vaxt bitdikdə imtahan avtomatik təhvil verilir.",
+          "lineSpacingPercent": 118537,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Taymer və qalan vaxt daim görünür; vaxt bitdikdə imtahan avtomatik təhvil verilir.",
+              "fontSize": 30,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2lcfilgr",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        110,
+        432.86,
+        32.51,
+        125.48
+      ],
+      "geometry": "rect",
+      "text": "02",
+      "textPreview": "02",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "0"
+          },
+          {
+            "index": 2,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02",
+              "fontSize": 28,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9k7y5kfm",
+      "id": "8",
+      "name": "Text 6",
+      "bbox": [
+        154.51,
+        432.86,
+        545.5,
+        125.48
+      ],
+      "geometry": "rect",
+      "text": "Sual naviqasiyası cavablanmış, işarələnmiş və cavabsız sualları fərqləndirir.",
+      "textPreview": "Sual naviqasiyası cavablanmış, işarələnmiş və cavabsız sualları fərqləndirir.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sual naviqasiyası cavablanmış,"
+          },
+          {
+            "index": 2,
+            "text": "işarələnmiş və cavabsız sualları"
+          },
+          {
+            "index": 3,
+            "text": "fərqləndirir."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sual naviqasiyası cavablanmış, işarələnmiş və cavabsız sualları fərqləndirir.",
+          "lineSpacingPercent": 118537,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sual naviqasiyası cavablanmış, işarələnmiş və cavabsız sualları fərqləndirir.",
+              "fontSize": 30,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jyhwfy1",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        110,
+        586.35,
+        32.53,
+        84.99
+      ],
+      "geometry": "rect",
+      "text": "03",
+      "textPreview": "03",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "0"
+          },
+          {
+            "index": 2,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "03",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03",
+              "fontSize": 28,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/69gf2pob",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        154.53,
+        586.35,
+        545.48,
+        84.99
+      ],
+      "geometry": "rect",
+      "text": "Cavablar seçilən kimi və müntəzəm intervallarla serverə yazılır.",
+      "textPreview": "Cavablar seçilən kimi və müntəzəm intervallarla serverə yazılır.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Cavablar seçilən kimi və müntəzəm"
+          },
+          {
+            "index": 2,
+            "text": "intervallarla serverə yazılır."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Cavablar seçilən kimi və müntəzəm intervallarla serverə yazılır.",
+          "lineSpacingPercent": 118537,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Cavablar seçilən kimi və müntəzəm intervallarla serverə yazılır.",
+              "fontSize": 30,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rapgvu5w",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        110,
+        699.34,
+        33.46,
+        125.48
+      ],
+      "geometry": "rect",
+      "text": "04",
+      "textPreview": "04",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "0"
+          },
+          {
+            "index": 2,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "04",
+              "fontSize": 28,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sbyx4z6h",
+      "id": "12",
+      "name": "Text 10",
+      "bbox": [
+        155.46,
+        699.34,
+        544.53,
+        125.48
+      ],
+      "geometry": "rect",
+      "text": "İnternet qısa müddətə kəsilsə cavablar itmir; bağlantı bərpa olunanda sinxronlaşır.",
+      "textPreview": "İnternet qısa müddətə kəsilsə cavablar itmir; bağlantı bərpa olunanda sinxronlaşır.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "İnternet qısa müddətə kəsilsə cavablar"
+          },
+          {
+            "index": 2,
+            "text": "itmir; bağlantı bərpa olunanda"
+          },
+          {
+            "index": 3,
+            "text": "sinxronlaşır."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "İnternet qısa müddətə kəsilsə cavablar itmir; bağlantı bərpa olunanda sinxronlaşır.",
+          "lineSpacingPercent": 118537,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "İnternet qısa müddətə kəsilsə cavablar itmir; bağlantı bərpa olunanda sinxronlaşır.",
+              "fontSize": 30,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tc7yx4n2",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        110,
+        852.82,
+        32.59,
+        125.48
+      ],
+      "geometry": "rect",
+      "text": "05",
+      "textPreview": "05",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "0"
+          },
+          {
+            "index": 2,
+            "text": "5"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "05",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "05",
+              "fontSize": 28,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ilwfypof",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        154.59,
+        852.82,
+        545.42,
+        125.48
+      ],
+      "geometry": "rect",
+      "text": "Tam ekran rejimi, tab dəyişmənin qeydə alınması və kopyalama bloku — imtahan parametrindən asılı olaraq.",
+      "textPreview": "Tam ekran rejimi, tab dəyişmənin qeydə alınması və kopyalama bloku — imtahan parametrindən asılı olaraq.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tam ekran rejimi, tab dəyişmənin qeydə"
+          },
+          {
+            "index": 2,
+            "text": "alınması və kopyalama bloku — imtahan"
+          },
+          {
+            "index": 3,
+            "text": "parametrindən asılı olaraq."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tam ekran rejimi, tab dəyişmənin qeydə alınması və kopyalama bloku — imtahan parametrindən asılı olaraq.",
+          "lineSpacingPercent": 118537,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tam ekran rejimi, tab dəyişmənin qeydə alınması və kopyalama bloku — imtahan parametrindən asılı olaraq.",
+              "fontSize": 30,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jm5gru50",
+      "id": "15",
+      "name": "Shape 13",
+      "bbox": [
+        748.12,
+        311.26,
+        1061.88,
+        671.67
+      ],
+      "geometry": "rect",
+      "lineColor": "rgba(31, 31, 31, 0.16)",
+      "lineWidth": 0.83
+    },
+    {
+      "order": 15,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/zulszmpw",
+      "id": "16",
+      "name": "Image 0",
+      "bbox": [
+        748.95,
+        312.09,
+        1060.21,
+        670
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image4.png",
+        "contentType": "image/png",
+        "byteLength": 363532
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image4.png",
+        "contentType": "image/png",
+        "byteLength": 363532
+      }
+    }
+  ],
+  "composeRuns": []
+}

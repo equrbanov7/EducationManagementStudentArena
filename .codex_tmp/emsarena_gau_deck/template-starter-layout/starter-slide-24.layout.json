@@ -1,0 +1,1754 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/wx2zly",
+    "id": "wx2zly",
+    "slide": 24,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#F2F2F3",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Arial",
+      "Calibri",
+      "Calibri Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lg7610ny",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        110,
+        87.99,
+        1870,
+        41.19
+      ],
+      "geometry": "rect",
+      "text": "STATUS",
+      "textPreview": "STATUS",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "STATUS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "STATUS",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "STATUS",
+              "fontSize": 24,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kfypsvmd",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        110,
+        139.19,
+        1870,
+        86
+      ],
+      "geometry": "rect",
+      "text": "Hazırlıq səviyyəsi və yol xəritəsi",
+      "textPreview": "Hazırlıq səviyyəsi və yol xəritəsi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Hazırlıq səviyyəsi və yol xəritəsi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Hazırlıq səviyyəsi və yol xəritəsi",
+          "lineSpacingPercent": 87080,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Hazırlıq səviyyəsi və yol xəritəsi",
+              "fontSize": 82,
+              "typeface": "Arial",
+              "color": "#1D1F20",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7ipo3a54",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        110,
+        265.18,
+        1700,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mhg7u54j",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        110,
+        313.93,
+        153.28,
+        33.17
+      ],
+      "geometry": "rect",
+      "text": "TAM QURULUB",
+      "textPreview": "TAM QURULUB",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TAM"
+          },
+          {
+            "index": 2,
+            "text": "QURULUB"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TAM QURULUB",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "TAM QURULUB",
+              "fontSize": 24,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tk765kna",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        110,
+        373.37,
+        463.68,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Rollar və icazə sistemi",
+      "textPreview": "Rollar və icazə sistemi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Rollar və icazə sistemi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Rollar və icazə sistemi",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Rollar və icazə sistemi",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jypwfmp",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        563.53,
+        373.37,
+        463.69,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Final imtahanı və PIN",
+      "textPreview": "Final imtahanı və PIN",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Final imtahanı və PIN"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Final imtahanı və PIN",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Final imtahanı və PIN",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nmlorq50",
+      "id": "8",
+      "name": "Text 6",
+      "bbox": [
+        110,
+        425.06,
+        463.68,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Sual bankı və toplu idxal",
+      "textPreview": "Sual bankı və toplu idxal",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sual bankı və toplu idxal"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sual bankı və toplu idxal",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sual bankı və toplu idxal",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2lcnil4f",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        563.53,
+        425.06,
+        463.69,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Tələbə imtahan interfeysi",
+      "textPreview": "Tələbə imtahan interfeysi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tələbə imtahan interfeysi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tələbə imtahan interfeysi",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tələbə imtahan interfeysi",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/graxwfmx",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        110,
+        476.75,
+        463.68,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "İmtahan həyat dövrü",
+      "textPreview": "İmtahan həyat dövrü",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "İmtahan həyat dövrü"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "İmtahan həyat dövrü",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "İmtahan həyat dövrü",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cjypkni",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        563.53,
+        476.75,
+        463.69,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Avtomatik qiymətləndirmə",
+      "textPreview": "Avtomatik qiymətləndirmə",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Avtomatik qiymətləndirmə"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Avtomatik qiymətləndirmə",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Avtomatik qiymətləndirmə",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/epsfup47",
+      "id": "12",
+      "name": "Text 10",
+      "bbox": [
+        110,
+        528.44,
+        463.68,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Apellyasiya sistemi",
+      "textPreview": "Apellyasiya sistemi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Apellyasiya sistemi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Apellyasiya sistemi",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Apellyasiya sistemi",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fq1gnu5s",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        563.53,
+        528.44,
+        463.69,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Təhlükəsizlik və audit",
+      "textPreview": "Təhlükəsizlik və audit",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Təhlükəsizlik və audit"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Təhlükəsizlik və audit",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Təhlükəsizlik və audit",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ofux0zm9",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        110,
+        580.14,
+        463.68,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "İnfrastruktur və monitorinq",
+      "textPreview": "İnfrastruktur və monitorinq",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "İnfrastruktur və monitorinq"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "İnfrastruktur və monitorinq",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "İnfrastruktur və monitorinq",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pg3yt4nu",
+      "id": "15",
+      "name": "Text 13",
+      "bbox": [
+        563.53,
+        580.14,
+        463.69,
+        41.7
+      ],
+      "geometry": "rect",
+      "text": "Test örtüyü",
+      "textPreview": "Test örtüyü",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Test örtüyü"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Test örtüyü",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Test örtüyü",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2dsfyp43",
+      "id": "16",
+      "name": "Shape 14",
+      "bbox": [
+        110,
+        657.83,
+        875.07,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3e1gru5o",
+      "id": "17",
+      "name": "Text 15",
+      "bbox": [
+        110,
+        690.83,
+        126.32,
+        41.19
+      ],
+      "geometry": "rect",
+      "text": "DAVAM EDIR",
+      "textPreview": "DAVAM EDIR",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DAVAM"
+          },
+          {
+            "index": 2,
+            "text": "EDIR"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DAVAM EDIR",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "DAVAM EDIR",
+              "fontSize": 24,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4jqxov65",
+      "id": "18",
+      "name": "Text 16",
+      "bbox": [
+        110,
+        754.02,
+        434.18,
+        79.39
+      ],
+      "geometry": "rect",
+      "text": "Canlı monitorinqin dərinləşdirilməsi",
+      "textPreview": "Canlı monitorinqin dərinləşdirilməsi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Canlı monitorinqin"
+          },
+          {
+            "index": 2,
+            "text": "dərinləşdirilməsi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Canlı monitorinqin dərinləşdirilməsi",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Canlı monitorinqin dərinləşdirilməsi",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5kzyh0na",
+      "id": "19",
+      "name": "Text 17",
+      "bbox": [
+        563.53,
+        754.02,
+        434.18,
+        79.39
+      ],
+      "geometry": "rect",
+      "text": "Hesabat mərkəzinin genişlənməsi",
+      "textPreview": "Hesabat mərkəzinin genişlənməsi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Hesabat mərkəzinin"
+          },
+          {
+            "index": 2,
+            "text": "genişlənməsi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Hesabat mərkəzinin genişlənməsi",
+          "lineSpacingPercent": 113100,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Hesabat mərkəzinin genişlənməsi",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lgrelwfe",
+      "id": "20",
+      "name": "Shape 18",
+      "bbox": [
+        1049.06,
+        310.18,
+        760.93,
+        647.07
+      ],
+      "geometry": "rect",
+      "lineColor": "rgba(31, 31, 31, 0.16)",
+      "lineWidth": 0.83
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kfidsryt",
+      "id": "21",
+      "name": "Text 19",
+      "bbox": [
+        1089.9,
+        346.76,
+        183.03,
+        33.17
+      ],
+      "geometry": "rect",
+      "text": "PLANLAŞDIRILIR",
+      "textPreview": "PLANLAŞDIRILIR",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "PLANLAŞDIRIL"
+          },
+          {
+            "index": 2,
+            "text": "IR"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "PLANLAŞDIRILIR",
+          "lineSpacingPercent": 135273,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "PLANLAŞDIRILIR",
+              "fontSize": 24,
+              "typeface": "Arial",
+              "color": "#5980A6",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ze9wjmx8",
+      "id": "22",
+      "name": "Shape 20",
+      "bbox": [
+        1089.9,
+        400.2,
+        679.26,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yd0vqhgn",
+      "id": "23",
+      "name": "Text 21",
+      "bbox": [
+        1089.9,
+        413.04,
+        699.64,
+        48.94
+      ],
+      "geometry": "rect",
+      "text": "Kamera əsaslı proktorinq və şəxsiyyət yoxlaması",
+      "textPreview": "Kamera əsaslı proktorinq və şəxsiyyət yoxlaması",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Kamera əsaslı proktorinq və şəxsiyyət yoxlaması"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Kamera əsaslı proktorinq və şəxsiyyət yoxlaması",
+          "lineSpacingPercent": 134850,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Kamera əsaslı proktorinq və şəxsiyyət yoxlaması",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9kbepgfa",
+      "id": "24",
+      "name": "Shape 22",
+      "bbox": [
+        1089.9,
+        469.97,
+        679.26,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8j2dwbyp",
+      "id": "25",
+      "name": "Text 23",
+      "bbox": [
+        1089.9,
+        482.81,
+        699.64,
+        48.94
+      ],
+      "geometry": "rect",
+      "text": "Mobil tətbiq və SMS bildiriş",
+      "textPreview": "Mobil tətbiq və SMS bildiriş",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mobil tətbiq və SMS bildiriş"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mobil tətbiq və SMS bildiriş",
+          "lineSpacingPercent": 134850,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mobil tətbiq və SMS bildiriş",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7i9wn6x4",
+      "id": "26",
+      "name": "Shape 24",
+      "bbox": [
+        1089.9,
+        539.75,
+        679.26,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mh0vu1gz",
+      "id": "27",
+      "name": "Text 25",
+      "bbox": [
+        1089.9,
+        552.58,
+        699.64,
+        48.94
+      ],
+      "geometry": "rect",
+      "text": "Vahid giriş (SSO) dəstəyi",
+      "textPreview": "Vahid giriş (SSO) dəstəyi",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Vahid giriş (SSO) dəstəyi"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Vahid giriş (SSO) dəstəyi",
+          "lineSpacingPercent": 134850,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Vahid giriş (SSO) dəstəyi",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h8betgfm",
+      "id": "28",
+      "name": "Shape 26",
+      "bbox": [
+        1089.9,
+        609.52,
+        679.26,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/g72d0by1",
+      "id": "29",
+      "name": "Text 27",
+      "bbox": [
+        1089.9,
+        622.35,
+        699.64,
+        48.94
+      ],
+      "geometry": "rect",
+      "text": "İmtahan protokollarının elektron imzası",
+      "textPreview": "İmtahan protokollarının elektron imzası",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "İmtahan protokollarının elektron imzası"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "İmtahan protokollarının elektron imzası",
+          "lineSpacingPercent": 134850,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "İmtahan protokollarının elektron imzası",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/etwbedwj",
+      "id": "30",
+      "name": "Shape 28",
+      "bbox": [
+        1089.9,
+        679.29,
+        679.26,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fu5snid4",
+      "id": "31",
+      "name": "Text 29",
+      "bbox": [
+        1089.9,
+        692.12,
+        699.64,
+        48.94
+      ],
+      "geometry": "rect",
+      "text": "Plagiat aşkarlama modulu",
+      "textPreview": "Plagiat aşkarlama modulu",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Plagiat aşkarlama modulu"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Plagiat aşkarlama modulu",
+          "lineSpacingPercent": 134850,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Plagiat aşkarlama modulu",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0fetgne9",
+      "id": "32",
+      "name": "Shape 30",
+      "bbox": [
+        1089.9,
+        749.06,
+        679.26,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(29, 31, 32, 0.16)"
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1gnapsvu",
+      "id": "33",
+      "name": "Text 31",
+      "bbox": [
+        1089.9,
+        761.9,
+        699.64,
+        48.94
+      ],
+      "geometry": "rect",
+      "text": "Universitetin digər sistemləri ilə inteqrasiya",
+      "textPreview": "Universitetin digər sistemləri ilə inteqrasiya",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Universitetin digər sistemləri ilə inteqrasiya"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Universitetin digər sistemləri ilə inteqrasiya",
+          "lineSpacingPercent": 134850,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Universitetin digər sistemləri ilə inteqrasiya",
+              "fontSize": 29,
+              "typeface": "Arial",
+              "color": "#1D1F20"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2hwbixwf",
+      "id": "34",
+      "name": "Text 32",
+      "bbox": [
+        1089.9,
+        844.83,
+        699.64,
+        79.59
+      ],
+      "geometry": "rect",
+      "text": "Hamısı mövcud modulyar arxitektura üzərində, əsas sistemə toxunmadan mərhələli əlavə oluna bilər.",
+      "textPreview": "Hamısı mövcud modulyar arxitektura üzərində, əsas sistemə toxunmadan mərhələli əlavə oluna bilər.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 2.67,
+          "right": 2.67,
+          "bottom": 2.67,
+          "left": 2.67
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Hamısı mövcud modulyar arxitektura üzərində, əsas"
+          },
+          {
+            "index": 2,
+            "text": "sistemə toxunmadan mərhələli əlavə oluna bilər."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Hamısı mövcud modulyar arxitektura üzərində, əsas sistemə toxunmadan mərhələli əlavə oluna bilər.",
+          "lineSpacingPercent": 120960,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Hamısı mövcud modulyar arxitektura üzərində, əsas sistemə toxunmadan mərhələli əlavə oluna bilər.",
+              "fontSize": 27,
+              "typeface": "Arial",
+              "color": "#5D5D60"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

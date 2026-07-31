@@ -201,6 +201,34 @@ cavablandırır və ikisinin də cavabı lazımdır:
 `http://<ip>:8000`-ə vurur. Bu, təhlükəsizliyin zəiflədilməsi deyil —
 konfiqurasiyaya toxunulmur, sadəcə ölçmə nöqtəsi dəyişir.
 
+#### Faktiki ölçmə (2026-07-31, `PingUser`, `prod-app-direct`)
+
+| VU | Nəticə |
+|---|---|
+| 500 | %0 uğursuzluq, lakin latensiya yüksək (orta ~4.2s, p95 ~5s) |
+| 5 000 | **%77.65 uğursuzluq** — hamısı bağlantı vaxtı bitməsi (`Expected 200, got 0`), p50 60s, sonda RPS demək olar sıfır |
+| 20 000 | başlaya bilmədi — hədəf ön-yoxlamaya belə cavab vermədi (5000 VU-dan sonra deqradasiya) |
+
+**Bu rəqəmləri «prod 5000 istifadəçidə çökür» kimi oxumaq YANLIŞ olardı.**
+Səbəb aşkarlandı: `scripts/deploy/remote_deploy.sh:58` — prod **8 replika**
+ilə (`APP_REPLICAS=8`) deploy olunur, nginx isə Docker DNS vasitəsilə onların
+arasında round-robin edir. `prod-app-direct` skripti isə `docker compose ps -q
+app | head -1` ilə YALNIZ BİR replikanı seçir — yəni ölçülən app qatının
+1/8-idir, tam tutum deyil. Üstəlik `daphne` `--workers` bayrağı olmadan
+işə salınır (tək prosesli ASGI), bu da tək replikanın həqiqi tavanını
+aşağı salır.
+
+Köhnə `APP_CPU_LIMIT=1.5` darboğazı (əvvəlki auditda tapılmışdı) yoxlanıldı və
+**artıq mövcud deyil** — 2026-07-18-də silinib (`84f81da5`); cari
+`docker-compose.prod.yml` app-a heç bir CPU limiti qoymur.
+
+**Dürüst nəticə:** nə `prod-app-direct` (1/8 tutum göstərir), nə də `prod`
+(nginx üzərindən, amma tək mənbə IP-dən gəldiyi üçün 200 r/s limitinə dəyir)
+tək başına «prod 20 000 istifadəçini qaldırır, ya yox» sualına dürüst cavab
+vermir. Bunun üçün ya bir neçə mənbə IP-dən paylanmış yük, ya da locust-un
+bütün 8 replikanı round-robin vurduğu ayrıca hazırlıq lazımdır — bu, ayrı bir
+mühəndislik qərarıdır və qəsdən bu auditin əhatəsinə salınmadı.
+
 **Girişli ssenarilər** (`StudentUser`) üçün `LOAD_TEST_PASSWORD` secret-i və
 prod-da `seed_stress_test` lazımdır; parolun repo-ya yazılması həm layihə
 qaydasını pozar, həm də gitleaks qapısını qırar. `PingUser`/`AnonymousUser`
