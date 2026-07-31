@@ -20,737 +20,742 @@ msgstr ""
 
 #: apps/accounts/static/accounts/js/category_management.js:99
 msgid "Kateqoriyanı redaktə et"
-msgstr "Kateqoriyanı redaktə et"
+msgstr "Edit category"
 
 #: apps/accounts/static/accounts/js/category_management.js:124
 msgid "Kateqoriyanı redaktə et: "
-msgstr "Kateqoriyanı redaktə et: "
+msgstr "Edit category:"
 
 #: apps/accounts/static/accounts/js/category_management.js:191
 msgid "Alt kateqoriyaları göstər"
-msgstr "Alt kateqoriyaları göstər"
+msgstr "Show subcategories"
 
 #: apps/accounts/static/accounts/js/category_management.js:192
 msgid "Alt kateqoriyaları gizlət"
-msgstr "Alt kateqoriyaları gizlət"
+msgstr "Hide subcategories"
 
 #: apps/accounts/static/accounts/js/category_management.js:234
 msgid "Bu kateqoriyanı"
-msgstr "Bu kateqoriyanı"
+msgstr "This category"
 
 #: apps/accounts/static/accounts/js/category_management.js:235
 msgid "kateqoriyanı"
-msgstr "kateqoriyanı"
+msgstr "category"
 
 #: apps/accounts/static/accounts/js/category_management.js:239
 msgid " silmək istədiyinizə əminsiniz?"
-msgstr " silmək istədiyinizə əminsiniz?"
+msgstr "are you sure you want to delete?"
 
 #: apps/accounts/static/accounts/js/my_exams_dashboard.js:376
 msgid "Kod kopyalandı"
-msgstr "Kod kopyalandı"
+msgstr "Code copied"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:21
 msgid "Təşkilat"
-msgstr "Təşkilat"
+msgstr "Organization"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:23
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:161
 #: apps/courses/static/courses/js/course_ai_drawer.js:78
 msgid "Üzvlər"
-msgstr "Üzvlər"
+msgstr "Members"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:26
 #: apps/courses/static/courses/js/course_ai_drawer.js:75
 msgid "Sərbəst işlər"
-msgstr "Sərbəst işlər"
+msgstr "Independent work"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:27
 msgid "Kurs işləri"
-msgstr "Kurs işləri"
+msgstr "Coursework"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:28
 #: apps/courses/static/courses/js/course_ai_drawer.js:76
 msgid "Lab işləri"
-msgstr "Lab işləri"
+msgstr "Lab works"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:29
 msgid "Qiymətləndirmə"
-msgstr "Qiymətləndirmə"
+msgstr "Assessment"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:30
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:167
 #: apps/courses/static/courses/js/course_ai_drawer.js:77
 msgid "İmtahanlar"
-msgstr "İmtahanlar"
+msgstr "Exams"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:33
 msgid "Keyfiyyət"
-msgstr "Keyfiyyət"
+msgstr "Quality"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:70
 msgid "Yapı"
-msgstr "Yapı"
+msgstr "Structure"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:71
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:248
 #: apps/courses/static/courses/js/course_ai_drawer.js:78
 msgid "Üyeler"
-msgstr "Üyeler"
+msgstr "Members"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:74
 #: apps/courses/static/courses/js/course_ai_drawer.js:75
 msgid "Ödevler"
-msgstr "Ödevler"
+msgstr "Assignments"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:76
 msgid "Laboratuvar çalışmaları"
-msgstr "Laboratuvar çalışmaları"
+msgstr "Lab works"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:77
 msgid "Değerlendirme"
-msgstr "Değerlendirme"
+msgstr "Assessment"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:78
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:254
 #: apps/courses/static/courses/js/course_ai_drawer.js:77
 msgid "Sınavlar"
-msgstr "Sınavlar"
+msgstr "Exams"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:79
 msgid "İtirazlar"
-msgstr "İtirazlar"
+msgstr "Appeals"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:88
 msgid "Təşkilat ayarları və idarəetmə əməliyyatları"
-msgstr "Təşkilat ayarları və idarəetmə əməliyyatları"
+msgstr "Organization settings and management operations"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:89
 msgid "Fakültə, şöbə və struktur vahidləri"
-msgstr "Fakültə, şöbə və struktur vahidləri"
+msgstr "Faculties, departments and structural units"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:90
 msgid "İstifadəçilər və üzvlüklə bağlı əməliyyatlar"
-msgstr "İstifadəçilər və üzvlüklə bağlı əməliyyatlar"
+msgstr "User and membership related operations"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:91
 msgid "Rol təyini və rol səviyyələri"
-msgstr "Rol təyini və rol səviyyələri"
+msgstr "Role assignment and role levels"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:92
 msgid "Kurs yaradılması və kurs idarəetməsi"
-msgstr "Kurs yaradılması və kurs idarəetməsi"
+msgstr "Course creation and course management"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:93
 msgid "Qiymətləndirmə və nəticə axınları"
-msgstr "Qiymətləndirmə və nəticə axınları"
+msgstr "Assessment and result flows"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:94
 msgid "İmtahan idarəetməsi və nəzarət"
-msgstr "İmtahan idarəetməsi və nəzarət"
+msgstr "Exam management and monitoring"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:95
 msgid "Apellyasiya müraciətləri"
-msgstr "Apellyasiya müraciətləri"
+msgstr "Appeal requests"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:96
 msgid "Analitik hesabat və göstəricilər"
-msgstr "Analitik hesabat və göstəricilər"
+msgstr "Analytical reports and metrics"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:97
 msgid "Keyfiyyət yoxlaması əməliyyatları"
-msgstr "Keyfiyyət yoxlaması əməliyyatları"
+msgstr "Quality control operations"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:98
 msgid "Tarixçə və audit log baxışı"
-msgstr "Tarixçə və audit log baxışı"
+msgstr "History and audit log access"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:127
 msgid "Organizasyon ayarları ve yönetim işlemleri"
-msgstr "Organizasyon ayarları ve yönetim işlemleri"
+msgstr "Organization settings and management operations"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:128
 msgid "Fakülte, bölüm ve yapısal birimler"
-msgstr "Fakülte, bölüm ve yapısal birimler"
+msgstr "Faculties, departments and structural units"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:129
 msgid "Kullanıcı ve üyelik işlemleri"
-msgstr "Kullanıcı ve üyelik işlemleri"
+msgstr "User and membership operations"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:131
 msgid "Kurs oluşturma ve kurs yönetimi"
-msgstr "Kurs oluşturma ve kurs yönetimi"
+msgstr "Course creation and course management"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:132
 msgid "Değerlendirme ve sonuç akışları"
-msgstr "Değerlendirme ve sonuç akışları"
+msgstr "Assessment and result flows"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:133
 msgid "Sınav yönetimi ve izleme"
-msgstr "Sınav yönetimi ve izleme"
+msgstr "Exam management and monitoring"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:134
 msgid "İtiraz başvuruları"
-msgstr "İtiraz başvuruları"
+msgstr "Appeal requests"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:136
 msgid "Kalite kontrol işlemleri"
-msgstr "Kalite kontrol işlemleri"
+msgstr "Quality control operations"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:137
 msgid "Geçmiş ve denetim logu erişimi"
-msgstr "Geçmiş ve denetim logu erişimi"
+msgstr "History and audit log access"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:143
 msgid "Baxış"
-msgstr "Baxış"
+msgstr "View"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:144
 msgid "Siyahı"
-msgstr "Siyahı"
+msgstr "List"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:146
 msgid "Redaktə"
-msgstr "Redaktə"
+msgstr "Edit"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:147
 msgid "Yeniləmə"
-msgstr "Yeniləmə"
+msgstr "Update"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:148
 msgid "Silmə"
-msgstr "Silmə"
+msgstr "Delete"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:150
 msgid "İdarəetmə"
-msgstr "İdarəetmə"
+msgstr "Manage"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:151
 msgid "Təyin etmə"
-msgstr "Təyin etmə"
+msgstr "Assign"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:152
 msgid "Geri çəkmə"
-msgstr "Geri çəkmə"
+msgstr "Revoke"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:153
 msgid "Təsdiq"
-msgstr "Təsdiq"
+msgstr "Approve"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:154
 msgid "Rədd etmə"
-msgstr "Rədd etmə"
+msgstr "Reject"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:155
 msgid "İxrac"
-msgstr "İxrac"
+msgstr "Export"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:156
 msgid "İdxal"
-msgstr "İdxal"
+msgstr "Import"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:157
 msgid "Yayımlama"
-msgstr "Yayımlama"
+msgstr "Publish"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:158
 msgid "Arxivləmə"
-msgstr "Arxivləmə"
+msgstr "Archive"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:159
 msgid "İcazələr"
-msgstr "İcazələr"
+msgstr "Permissions"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:160
 msgid "İcazə"
-msgstr "İcazə"
+msgstr "Permission"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:164
 msgid "Qiymətlər"
-msgstr "Qiymətlər"
+msgstr "Grades"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:165
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:199
 msgid "Qiymət"
-msgstr "Qiymət"
+msgstr "Grade"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:166
 #: apps/accounts/static/accounts/js/statistics/charts.js:275
 #: apps/accounts/static/accounts/js/statistics/charts.js:288
 msgid "İmtahan"
-msgstr "İmtahan"
+msgstr "Exam"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:230
 msgid "Görüntüleme"
-msgstr "Görüntüleme"
+msgstr "View"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:232
 msgid "Oluşturma"
-msgstr "Oluşturma"
+msgstr "Creation"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:233
 msgid "Düzenleme"
-msgstr "Düzenleme"
+msgstr "Editing"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:234
 msgid "Güncelleme"
-msgstr "Güncelleme"
+msgstr "Updating"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:237
 msgid "Yönetim"
-msgstr "Yönetim"
+msgstr "Management"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:239
 msgid "Geri çekme"
-msgstr "Geri çekme"
+msgstr "Withdrawal"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:242
 msgid "Dışa aktarma"
-msgstr "Dışa aktarma"
+msgstr "Export"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:243
 msgid "İçe aktarma"
-msgstr "İçe aktarma"
+msgstr "Import"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:244
 msgid "Yayınlama"
-msgstr "Yayınlama"
+msgstr "Publishing"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:245
 msgid "Arşivleme"
-msgstr "Arşivleme"
+msgstr "Archiving"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:246
 msgid "İzinler"
-msgstr "İzinler"
+msgstr "Permissions"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:247
 msgid "İzin"
-msgstr "İzin"
+msgstr "Permission"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:253
 msgid "Sınav"
-msgstr "Sınav"
+msgstr "Exam"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:262
 msgid "Bu bölmə nə üçündür?"
-msgstr "Bu bölmə nə üçündür?"
+msgstr "What is this section for?"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:263
 msgid "Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz."
-msgstr "Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz."
+msgstr "Here you manage which features are enabled for this role."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:265
 msgid "Bölməni açın (məs: Təşkilat, Üzvlər)"
-msgstr "Bölməni açın (məs: Təşkilat, Üzvlər)"
+msgstr "Open a section (e.g. Organization, Members)"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:266
 msgid "“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün"
-msgstr "“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün"
+msgstr "Enable with “Add”, disable with “Delete”"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:267
 msgid "Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin"
-msgstr "Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin"
+msgstr "For multiple selection use the checkboxes and the bulk buttons"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:269
 msgid "Aktiv: icazə açıqdır, funksiya işləyir."
-msgstr "Aktiv: icazə açıqdır, funksiya işləyir."
+msgstr "Active: the permission is on, the feature works."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:270
 msgid "Deaktiv: icazə bağlıdır, funksiya məhduddur."
-msgstr "Deaktiv: icazə bağlıdır, funksiya məhduddur."
+msgstr "Inactive: the permission is off, the feature is restricted."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:271
 msgid "Bulk: birdən çox icazəni eyni anda dəyişir."
-msgstr "Bulk: birdən çox icazəni eyni anda dəyişir."
+msgstr "Bulk: changes multiple permissions at once."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:272
 msgid "Bütün icazələr (*)"
-msgstr "Bütün icazələr (*)"
+msgstr "All permissions (*)"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:273
 msgid "Bu rol üçün bütün icazələr aktivdir."
-msgstr "Bu rol üçün bütün icazələr aktivdir."
+msgstr "All permissions are active for this role."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:276
 msgid "Əlavə et"
-msgstr "Əlavə et"
+msgstr "Add"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:278
 msgid "İcazə axtar (məs: view, edit, member)"
-msgstr "İcazə axtar (məs: view, edit, member)"
+msgstr "Search permission (e.g. view, edit, member)"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:280
 msgid "Nəticə tapılmadı."
-msgstr "Nəticə tapılmadı."
+msgstr "No results found."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:281
 msgid "Aktiv icazələr: {count}"
-msgstr "Aktiv icazələr: {count}"
+msgstr "Active permissions: {count}"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:282
 msgid "Hamısını seç"
-msgstr "Hamısını seç"
+msgstr "Select all"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:283
 msgid "Seçimi sıfırla"
-msgstr "Seçimi sıfırla"
+msgstr "Clear selection"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:284
 msgid "Seçilənləri əlavə et"
-msgstr "Seçilənləri əlavə et"
+msgstr "Add selected"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:285
 msgid "Seçilənləri sil"
-msgstr "Seçilənləri sil"
+msgstr "Remove selected"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:286
 msgid "əməliyyat"
-msgstr "əməliyyat"
+msgstr "operation"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:287
 msgid "Bu bölmə üçün icazələr"
-msgstr "Bu bölmə üçün icazələr"
+msgstr "Permissions for this section"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:346
 msgid "Bu bölüm ne içindir?"
-msgstr "Bu bölüm ne içindir?"
+msgstr "What is this section for?"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:347
 msgid "Bu rol için hangi özelliklerin açık olacağını buradan yönetirsiniz."
-msgstr "Bu rol için hangi özelliklerin açık olacağını buradan yönetirsiniz."
+msgstr "Here you manage which features are enabled for this role."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:349
 msgid "Bir modül açın (örnek: Organizasyon, Üyeler)"
-msgstr "Bir modül açın (örnek: Organizasyon, Üyeler)"
+msgstr "Open a module (e.g. Organization, Members)"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:350
 msgid "Etkinleştirmek için “Ekle”, kapatmak için “Sil” kullanın"
-msgstr "Etkinleştirmek için “Ekle”, kapatmak için “Sil” kullanın"
+msgstr "Use “Add” to enable and “Delete” to disable"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:351
 msgid "Çoklu işlem için checkbox + toplu butonları kullanın"
-msgstr "Çoklu işlem için checkbox + toplu butonları kullanın"
+msgstr "For bulk actions use the checkboxes and the bulk buttons"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:353
 msgid "Aktif: izin açık, özellik kullanılabilir."
-msgstr "Aktif: izin açık, özellik kullanılabilir."
+msgstr "Active: the permission is on, the feature is available."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:354
 msgid "Pasif: izin kapalı, özellik kısıtlı."
-msgstr "Pasif: izin kapalı, özellik kısıtlı."
+msgstr "Inactive: the permission is off, the feature is restricted."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:355
 msgid "Bulk: birden fazla izni aynı anda değiştirir."
-msgstr "Bulk: birden fazla izni aynı anda değiştirir."
+msgstr "Bulk: changes multiple permissions at once."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:356
 msgid "Tüm izinler (*)"
-msgstr "Tüm izinler (*)"
+msgstr "All permissions (*)"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:357
 msgid "Bu rol için tüm izinler aktiftir."
-msgstr "Bu rol için tüm izinler aktiftir."
+msgstr "All permissions are active for this role."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:362
 msgid "İzin ara (ör: view, edit, member)"
-msgstr "İzin ara (ör: view, edit, member)"
+msgstr "Search permission (e.g. view, edit, member)"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:364
 msgid "Sonuç bulunamadı."
-msgstr "Sonuç bulunamadı."
+msgstr "No results found."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:366
 msgid "Tümünü seç"
-msgstr "Tümünü seç"
+msgstr "Select all"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:367
 msgid "Seçimi temizle"
-msgstr "Seçimi temizle"
+msgstr "Clear selection"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:368
 msgid "Seçilenleri ekle"
-msgstr "Seçilenleri ekle"
+msgstr "Add selected"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:369
 msgid "Seçilenleri sil"
-msgstr "Seçilenleri sil"
+msgstr "Remove selected"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:370
 msgid "işlem"
-msgstr "işlem"
+msgstr "operation"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:371
 msgid "Bu modül için izinler"
-msgstr "Bu modül için izinler"
+msgstr "Permissions for this module"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:476
 msgid "\" bölümünde \""
-msgstr "\" bölümünde \""
+msgstr "\" section — allows the \""
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:476
 msgid "\" işlemini yapmaya izin verir."
-msgstr "\" işlemini yapmaya izin verir."
+msgstr "\" operation."
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:478
 msgid "\" bölməsində \""
-msgstr "\" bölməsində \""
+msgstr "\" section — allows the \""
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:478
 msgid "\" əməliyyatını etməyə icazə verir."
-msgstr "\" əməliyyatını etməyə icazə verir."
+msgstr "\" operation."
 
 #: apps/accounts/static/accounts/js/profile/assigned_exam.js:93
 msgid "Kodu təsdiqlə və başla"
-msgstr "Kodu təsdiqlə və başla"
+msgstr "Confirm code and start"
 
 #: apps/accounts/static/accounts/js/profile/assigned_exam.js:94
 msgid "İmtahana başla"
-msgstr "İmtahana başla"
+msgstr "Start exam"
 
 #: apps/accounts/static/accounts/js/profile/assigned_exam.js:129
 msgid "İmtahan kodu tələb olunur."
-msgstr "İmtahan kodu tələb olunur."
+msgstr "The exam code is required."
 
 #: apps/accounts/static/accounts/js/profile/assigned_exam.js:158
 #: apps/accounts/static/accounts/js/profile/assigned_exam.js:165
 #: apps/accounts/static/accounts/js/profile/assigned_exam.js:167
 msgid "İmtahana başlamaq mümkün olmadı."
-msgstr "İmtahana başlamaq mümkün olmadı."
+msgstr "The exam could not be started."
 
 #: apps/accounts/static/accounts/js/profile/create_exam_modal.js:7
 msgid "<div class=\"create-exam-modal-loading\">Form yüklənir...</div>"
-msgstr "<div class=\"create-exam-modal-loading\">Form yüklənir...</div>"
+msgstr "<div class=\"create-exam-modal-loading\">Loading form...</div>"
 
 #: apps/accounts/static/accounts/js/profile/create_exam_modal.js:234
 #: apps/exams/static/exams/js/aiQuestionBank.js:37
 msgid "Yaradılır..."
-msgstr "Yaradılır..."
+msgstr "Creating..."
 
 #: apps/accounts/static/accounts/js/profile/create_exam_modal.js:281
 msgid ""
 "<div class=\"create-exam-modal-error\">Form yenilənmədi. Yenidən cəhd "
 "edin.</div>"
 msgstr ""
-"<div class=\"create-exam-modal-error\">Form yenilənmədi. Yenidən cəhd "
-"edin.</div>"
+"<div class=\"create-exam-modal-error\">The form was not refreshed. Please "
+"try again.</div>"
 
 #: apps/accounts/static/accounts/js/profile/create_exam_modal.js:285
 msgid ""
 "<div class=\"create-exam-modal-error\">Xəta baş verdi. Yenidən cəhd "
 "edin.</div>"
 msgstr ""
-"<div class=\"create-exam-modal-error\">Xəta baş verdi. Yenidən cəhd "
-"edin.</div>"
+"<div class=\"create-exam-modal-error\">An error occurred. Please try "
+"again.</div>"
 
 #: apps/accounts/static/accounts/js/profile/create_exam_modal.js:344
 msgid ""
 "<div class=\"create-exam-modal-error\">Form yüklənmədi. Yenidən cəhd "
 "edin.</div>"
 msgstr ""
-"<div class=\"create-exam-modal-error\">Form yüklənmədi. Yenidən cəhd "
-"edin.</div>"
+"<div class=\"create-exam-modal-error\">The form could not be loaded. Please "
+"try again.</div>"
 
 #: apps/accounts/static/accounts/js/profile/create_exam_selects.js:79
 msgid "<div class=\"create-exam-list-empty\">Məlumat tapılmadı.</div>"
-msgstr "<div class=\"create-exam-list-empty\">Məlumat tapılmadı.</div>"
+msgstr "<div class=\"create-exam-list-empty\">No data found.</div>"
 
 #: apps/accounts/static/accounts/js/profile/ui.js:305
 msgid "Giriş Kodu"
-msgstr "Giriş Kodu"
+msgstr "Entry Code"
 
 #: apps/accounts/static/accounts/js/profile/ui.js:308
 msgid "\"</strong> imtahanına keçid üçün kodu yazın."
-msgstr "\"</strong> imtahanına keçid üçün kodu yazın."
+msgstr "\"</strong> — enter the code to access this exam."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:98
 msgid "Universitet adı (Siyahıda yoxdur / Digər)"
-msgstr "Universitet adı (Siyahıda yoxdur / Digər)"
+msgstr "University name (Not in the list / Other)"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:100
 msgid "Universitet adını daxil edin..."
-msgstr "Universitet adını daxil edin..."
+msgstr "Enter the university name..."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:102
 msgid "Universitet üçün bu sahə məcburidir."
-msgstr "Universitet üçün bu sahə məcburidir."
+msgstr "This field is required for a university."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:104
 msgid "Məktəb adı (Siyahıda yoxdur / Digər)"
-msgstr "Məktəb adı (Siyahıda yoxdur / Digər)"
+msgstr "School name (Not in the list / Other)"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:107
 msgid "Məktəb siyahıda yoxdursa adını daxil edin..."
-msgstr "Məktəb siyahıda yoxdursa adını daxil edin..."
+msgstr "If the school is not in the list, enter its name..."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:109
 msgid "Məktəb kodu / identifikatoru"
-msgstr "Məktəb kodu / identifikatoru"
+msgstr "School code / identifier"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:110
 msgid "Məktəb üçün bu sahə məcburidir."
-msgstr "Məktəb üçün bu sahə məcburidir."
+msgstr "This field is required for a school."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:114
 msgid "Kurs mərkəzi adı (Siyahıda yoxdur / Digər)"
-msgstr "Kurs mərkəzi adı (Siyahıda yoxdur / Digər)"
+msgstr "Course centre name (Not in the list / Other)"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:118
 msgid "Kurs mərkəzi siyahıda yoxdursa adını daxil edin..."
-msgstr "Kurs mərkəzi siyahıda yoxdursa adını daxil edin..."
+msgstr "If the course centre is not in the list, enter its name..."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:120
 msgid "Kurs mərkəzi kodu / identifikatoru"
-msgstr "Kurs mərkəzi kodu / identifikatoru"
+msgstr "Course centre code / identifier"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:121
 msgid "Kurs mərkəzi üçün bu sahə məcburidir."
-msgstr "Kurs mərkəzi üçün bu sahə məcburidir."
+msgstr "This field is required for a course centre."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:125
 msgid "Müəssisə adı (Siyahıda yoxdur / Digər)"
-msgstr "Müəssisə adı (Siyahıda yoxdur / Digər)"
+msgstr "Institution name (Not in the list / Other)"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:127
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:247
 msgid "Müəssisə axtar..."
-msgstr "Müəssisə axtar..."
+msgstr "Search institution..."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:128
 msgid "Rəsmi identifikator / kod"
-msgstr "Rəsmi identifikator / kod"
+msgstr "Official identifier / code"
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:129
 msgid "Bu sahə məcburidir."
-msgstr "Bu sahə məcburidir."
+msgstr "This field is required."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:146
 msgid "Lisenziya identifikatoru məcburidir."
-msgstr "Lisenziya identifikatoru məcburidir."
+msgstr "The licence identifier is required."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:227
 msgid "Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq."
-msgstr "Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq."
+msgstr ""
+"For an individual account, the role will automatically be set to "
+"organisation admin."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:231
 msgid "Email təsdiqindən sonra təşkilata tələbə kimi qoşulacaqsınız."
-msgstr "Email təsdiqindən sonra təşkilata tələbə kimi qoşulacaqsınız."
+msgstr ""
+"After email confirmation, you will join the organisation as a student."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:234
 msgid ""
 "Email təsdiqindən sonra təşkilata müəllim kimi qoşulacaqsınız (təsdiq "
 "gözlənilir)."
 msgstr ""
-"Email təsdiqindən sonra təşkilata müəllim kimi qoşulacaqsınız (təsdiq "
-"gözlənilir)."
+"After email confirmation, you will join the organisation as a teacher "
+"(pending approval)."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:237
 msgid ""
 "Email təsdiqindən sonra təşkilata işçi kimi qoşulacaqsınız (təsdiq "
 "gözlənilir)."
 msgstr ""
-"Email təsdiqindən sonra təşkilata işçi kimi qoşulacaqsınız (təsdiq "
-"gözlənilir)."
+"After email confirmation, you will join the organisation as a staff member "
+"(pending approval)."
 
 #: apps/accounts/static/accounts/js/register_wizard/step2.js:241
 msgid "Seçilən qurum tipi üçün rol avtomatik olaraq təşkilat admini olacaq."
-msgstr "Seçilən qurum tipi üçün rol avtomatik olaraq təşkilat admini olacaq."
+msgstr ""
+"For the selected institution type, the role will automatically be set to "
+"organisation admin."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:28
 msgid "Zəhmət olmasa siyahıdan təşkilat seçin."
-msgstr "Zəhmət olmasa siyahıdan təşkilat seçin."
+msgstr "Please select an organisation from the list."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:164
 msgid "Nəticə tapılmadı"
-msgstr "Nəticə tapılmadı"
+msgstr "No results found"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:221
 msgid "Universitet seçin"
-msgstr "Universitet seçin"
+msgstr "Select a university"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:226
 msgid "Azərbaycandakı universitetləri siyahıdan seçə bilərsiniz."
-msgstr "Azərbaycandakı universitetləri siyahıdan seçə bilərsiniz."
+msgstr "You can select universities located in Azerbaijan from the list."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:227
 msgid "Ölkənizə uyğun universitet siyahısından seçim edin."
-msgstr "Ölkənizə uyğun universitet siyahısından seçim edin."
+msgstr "Choose from the list of universities for your country."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:229
 msgid "Məktəb seçin"
-msgstr "Məktəb seçin"
+msgstr "Select a school"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:230
 msgid "Məktəb axtar (ad və ya nömrə)"
-msgstr "Məktəb axtar (ad və ya nömrə)"
+msgstr "Search school (name or number)"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:233
 msgid "Məktəb adı və ya nömrəsi axtar..."
-msgstr "Məktəb adı və ya nömrəsi axtar..."
+msgstr "Search by school name or number..."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:235
 msgid "Məktəbinizi siyahıdan seçin və ya əl ilə daxil edin."
-msgstr "Məktəbinizi siyahıdan seçin və ya əl ilə daxil edin."
+msgstr "Select your school from the list or enter it manually."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:237
 msgid "Kurs mərkəzi seçin"
-msgstr "Kurs mərkəzi seçin"
+msgstr "Select a course centre"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:238
 msgid "Kurs mərkəzi axtar"
-msgstr "Kurs mərkəzi axtar"
+msgstr "Search course centre"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:239
 msgid "Kurs mərkəzi axtar..."
-msgstr "Kurs mərkəzi axtar..."
+msgstr "Search course centre..."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:242
 msgid "Kurs mərkəzini siyahıdan seçin və ya əl ilə daxil edin."
-msgstr "Kurs mərkəzini siyahıdan seçin və ya əl ilə daxil edin."
+msgstr "Select the course centre from the list or enter it manually."
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:245
 msgid "Təşkilat seçin"
-msgstr "Təşkilat seçin"
+msgstr "Select an organisation"
 
 #: apps/accounts/static/accounts/js/register_wizard/step3.js:246
 msgid "Müəssisə axtar"
-msgstr "Müəssisə axtar"
+msgstr "Search institution"
 
 #: apps/accounts/static/accounts/js/register_wizard/submit.js:84
 msgid "Davam etmək üçün məxfilik siyasətini qəbul edin."
-msgstr "Davam etmək üçün məxfilik siyasətini qəbul edin."
+msgstr "Accept the privacy policy to continue."
 
 #: apps/accounts/static/accounts/js/register_wizard/ui.js:162
 msgid "Hazırda heç bir təşkilata aid deyiləm"
-msgstr "Hazırda heç bir təşkilata aid deyiləm"
+msgstr "I do not currently belong to any organisation"
 
 #: apps/accounts/static/accounts/js/statistics/ai_summary.js:32
 msgid "<span class=\"stats-ai-meta__pill\">Cari filtrlər tətbiq olunur</span>"
-msgstr "<span class=\"stats-ai-meta__pill\">Cari filtrlər tətbiq olunur</span>"
+msgstr "<span class=\"stats-ai-meta__pill\">Current filters applied</span>"
 
 #: apps/accounts/static/accounts/js/statistics/ai_summary.js:33
 msgid "<span class=\"stats-ai-meta__pill\">AI cavabı hazırlanır</span>"
-msgstr "<span class=\"stats-ai-meta__pill\">AI cavabı hazırlanır</span>"
+msgstr "<span class=\"stats-ai-meta__pill\">AI response is being prepared</span>"
 
 #: apps/accounts/static/accounts/js/statistics/ai_summary.js:49
 msgid "<span class=\"stats-ai-meta__pill\">Filtr üzrə AI xülasə</span>"
-msgstr "<span class=\"stats-ai-meta__pill\">Filtr üzrə AI xülasə</span>"
+msgstr "<span class=\"stats-ai-meta__pill\">AI summary by filter</span>"
 
 #: apps/accounts/static/accounts/js/statistics/ai_summary.js:58
 msgid ""
 "<span class=\"stats-ai-meta__pill stats-ai-meta__pill--success\">Keşdən "
 "cavab</span>"
 msgstr ""
-"<span class=\"stats-ai-meta__pill stats-ai-meta__pill--success\">Keşdən "
-"cavab</span>"
+"<span class=\"stats-ai-meta__pill stats-ai-meta__pill--success\">Cached "
+"response</span>"
 
 #: apps/accounts/static/accounts/js/statistics/ai_summary.js:68
 msgid ""
 "<span class=\"stats-ai-meta__pill stats-ai-meta__pill--warning\">AI xülasə "
 "alınmadı</span>"
 msgstr ""
-"<span class=\"stats-ai-meta__pill stats-ai-meta__pill--warning\">AI xülasə "
-"alınmadı</span>"
+"<span class=\"stats-ai-meta__pill stats-ai-meta__pill--warning\">AI summary "
+"could not be generated</span>"
 
 #: apps/accounts/static/accounts/js/statistics/ai_summary.js:78
 msgid ""
@@ -758,621 +763,622 @@ msgid ""
 "xətası</span>"
 msgstr ""
 "<span class=\"stats-ai-meta__pill stats-ai-meta__pill--danger\">AI "
-"xətası</span>"
+"error</span>"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:221
 msgid "Keçid"
-msgstr "Keçid"
+msgstr "Pass"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:221
 msgid "Vaxtında"
-msgstr "Vaxtında"
+msgstr "On time"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:229
 msgid "İmtahan yoxlama"
-msgstr "İmtahan yoxlama"
+msgstr "Exam review"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:229
 msgid "Tapşırıq yoxlama"
-msgstr "Tapşırıq yoxlama"
+msgstr "Assignment review"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:229
 msgid "Layihə yoxlama"
-msgstr "Layihə yoxlama"
+msgstr "Project review"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:229
 msgid "Təqdimetmə"
-msgstr "Təqdimetmə"
+msgstr "Submission"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:276
 #: apps/accounts/static/accounts/js/statistics/charts.js:300
 msgid "Cəhd"
-msgstr "Cəhd"
+msgstr "Attempt"
 
 #: apps/accounts/static/accounts/js/statistics/charts.js:302
 msgid "Keçid %"
-msgstr "Keçid %"
+msgstr "Pass %"
 
 #: apps/accounts/static/accounts/js/superadmin_user_management.js:13
 msgid "Hesabı sil"
-msgstr "Hesabı sil"
+msgstr "Delete account"
 
 #: apps/accounts/static/accounts/js/superadmin_user_management.js:16
 msgid "Seçilmiş istifadəçi hesabı üçün bu əməliyyat tətbiq ediləcək."
-msgstr "Seçilmiş istifadəçi hesabı üçün bu əməliyyat tətbiq ediləcək."
+msgstr "This action will be applied to the selected user account."
 
 #: apps/appeals/static/appeals/js/appeals_form.js:39
 #: apps/exams/static/exams/js/teacher_questions_bank.js:227
 msgid "Ən azı bir sual seçin."
-msgstr "Ən azı bir sual seçin."
+msgstr "Select at least one question."
 
 #: apps/appeals/static/appeals/js/appeals_form.js:40
 msgid "Səbəb tipini seçin."
-msgstr "Səbəb tipini seçin."
+msgstr "Select the reason type."
 
 #: apps/appeals/static/appeals/js/appeals_form.js:41
 msgid "Daha {n} simvol yazın."
-msgstr "Daha {n} simvol yazın."
+msgstr "Enter {n} more characters."
 
 #: apps/appeals/static/appeals/js/appeals_form.js:42
 msgid "{n} sual seçildi"
-msgstr "{n} sual seçildi"
+msgstr "{n} questions selected"
 
 #: apps/appeals/static/appeals/js/appeals_review.js:39
 msgid "Cavab/izah mətni yazın."
-msgstr "Cavab/izah mətni yazın."
+msgstr "Enter the answer/explanation text."
 
 #: apps/appeals/static/appeals/js/appeals_review.js:40
 msgid "{n} qərar verildi"
-msgstr "{n} qərar verildi"
+msgstr "{n} decisions made"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:135
 msgid "Bu sərbəst işi silmək istədiyinizə əminsiniz?"
-msgstr "Bu sərbəst işi silmək istədiyinizə əminsiniz?"
+msgstr "Are you sure you want to delete this self-study assignment?"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:156
 msgid "Silinmə zamanı xəta baş verdi"
-msgstr "Silinmə zamanı xəta baş verdi"
+msgstr "An error occurred while deleting"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:170
 #: apps/assignments/static/assignment/js/assignment_modal.js:234
 #: apps/assignments/static/assignment/js/assignment_modal.js:264
 msgid "Xəta: "
-msgstr "Xəta: "
+msgstr "Error:"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:206
 #: apps/assignments/static/assignment/js/assignment_modal.js:243
 #: apps/blog/static/js/search.js:85
 msgid "Xəta:"
-msgstr "Xəta:"
+msgstr "Error:"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:234
 msgid "Yadda saxlamaq olmadı"
-msgstr "Yadda saxlamaq olmadı"
+msgstr "Could not save"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:270
 msgid "Sistem xətası"
-msgstr "Sistem xətası"
+msgstr "System error"
 
 #: apps/blog/static/js/user_profile/context.js:23
 msgid "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları dəstəklənir."
-msgstr "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları dəstəklənir."
+msgstr "Only JPG, JPEG, JFIF, PNG, GIF and WEBP formats are supported."
 
 #: apps/blog/static/js/user_profile/context.js:27
 msgid "Şəkil ölçüsü maksimum 25 MB ola bilər."
-msgstr "Şəkil ölçüsü maksimum 25 MB ola bilər."
+msgstr "The image size can be at most 25 MB."
 
 #: apps/blog/static/js/user_profile/create.js:9
 #: apps/courses/static/courses/js/_member_form_modal.js:180
 #: apps/exams/static/exams/js/examBankPicker.js:325
 msgid "Xəta baş verdi."
-msgstr "Xəta baş verdi."
+msgstr "An error occurred."
 
 #: apps/blog/static/js/user_profile/create.js:92
 msgid "Post yaradılmadı."
-msgstr "Post yaradılmadı."
+msgstr "The post was not created."
 
 #: apps/blog/static/js/user_profile/create.js:96
 msgid "Əlaqə xətası baş verdi."
-msgstr "Əlaqə xətası baş verdi."
+msgstr "A connection error occurred."
 
 #: apps/blog/static/js/user_profile/delete.js:39
 #: apps/blog/static/js/user_profile/edit.js:213
 msgid "Xəta baş verdi: "
-msgstr "Xəta baş verdi: "
+msgstr "An error occurred:"
 
 #: apps/blog/static/js/user_profile/delete.js:39
 #: apps/blog/static/js/user_profile/edit.js:213
 msgid "Naməlum xəta"
-msgstr "Naməlum xəta"
+msgstr "Unknown error"
 
 #: apps/blog/static/js/user_profile/delete.js:43
 #: apps/blog/static/js/user_profile/edit.js:217
 msgid "Əlaqə xətası baş verdi"
-msgstr "Əlaqə xətası baş verdi"
+msgstr "A connection error occurred"
 
 #: apps/blog/static/js/user_profile/edit.js:41
 msgid "Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək."
-msgstr "Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək."
+msgstr "Once saved, this post will again await teacher approval."
 
 #: apps/courses/static/courses/js/_member_form_modal.js:139
 msgid "İstifadəçi tapılmadı."
-msgstr "İstifadəçi tapılmadı."
+msgstr "User not found."
 
 #: apps/courses/static/courses/js/_member_form_modal.js:171
 #: apps/exams/static/exams/js/teacher_questions_bank.js:262
 msgid "Yüklənir..."
-msgstr "Yüklənir..."
+msgstr "Loading..."
 
 #: apps/courses/static/courses/js/_member_form_modal.js:193
 msgid "Şəbəkə xətası."
-msgstr "Şəbəkə xətası."
+msgstr "Network error."
 
 #: apps/courses/static/courses/js/_member_form_modal.js:265
 msgid "Ən azı bir tələbə seçin!"
-msgstr "Ən azı bir tələbə seçin!"
+msgstr "Select at least one student!"
 
 #: apps/courses/static/courses/js/_member_form_modal.js:282
 msgid "Tələbələr əlavə olundu"
-msgstr "Tələbələr əlavə olundu"
+msgstr "Students added"
 
 #: apps/courses/static/courses/js/_member_form_modal.js:295
 #: apps/courses/static/courses/js/_member_form_modal.js:344
 msgid "Xəta baş verdi"
-msgstr "Xəta baş verdi"
+msgstr "An error occurred"
 
 #: apps/courses/static/courses/js/_member_form_modal.js:299
 msgid "❌ Server xətası. Yenidən cəhd edin."
-msgstr "❌ Server xətası. Yenidən cəhd edin."
+msgstr "❌ Server error. Please try again."
 
 #: apps/courses/static/courses/js/_member_form_modal.js:319
 msgid "Ən azı bir qrup seçin!"
-msgstr "Ən azı bir qrup seçin!"
+msgstr "Select at least one group!"
 
 #: apps/courses/static/courses/js/_member_form_modal.js:336
 msgid "Qruplar əlavə olundu"
-msgstr "Qruplar əlavə olundu"
+msgstr "Groups added"
 
 #: apps/courses/static/courses/js/_member_form_modal.js:348
 msgid "❌ Xəta baş verdi."
-msgstr "❌ Xəta baş verdi."
+msgstr "❌ An error occurred."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:48
 msgid "AI Kurs Köməkçisi"
-msgstr "AI Kurs Köməkçisi"
+msgstr "AI Course Assistant"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:48
 msgid "AI Kurs Asistanı"
-msgstr "AI Kurs Asistanı"
+msgstr "AI Course Assistant"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:49
 msgid "Hər addımı siz təsdiqləyirsiniz"
-msgstr "Hər addımı siz təsdiqləyirsiniz"
+msgstr "You approve every step"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:49
 msgid "Her adımı siz onaylarsınız"
-msgstr "Her adımı siz onaylarsınız"
+msgstr "You approve every step"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:50
 msgid "Addım-addım"
-msgstr "Addım-addım"
+msgstr "Step by step"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:50
 msgid "Adım adım"
-msgstr "Adım adım"
+msgstr "Step by step"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:52
 msgid "Hansı kursu qurmaq istəyirsiniz?"
-msgstr "Hansı kursu qurmaq istəyirsiniz?"
+msgstr "Which course would you like to build?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:53
 msgid "Məs: “Veb texnologiyaları, 2-ci kurs, 14 həftə. Praktiki yönümlü.”"
-msgstr "Məs: “Veb texnologiyaları, 2-ci kurs, 14 həftə. Praktiki yönümlü.”"
+msgstr "E.g.: “Web technologies, 2nd year, 14 weeks. Practice-oriented.”"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:53
 msgid "Örn: “Web teknolojileri, 2. sınıf, 14 hafta”"
-msgstr "Örn: “Web teknolojileri, 2. sınıf, 14 hafta”"
+msgstr "E.g.: “Web technologies, 2nd year, 14 weeks”"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:54
 msgid "NÜMUNƏLƏR"
-msgstr "NÜMUNƏLƏR"
+msgstr "EXAMPLES"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:54
 msgid "ÖRNEKLER"
-msgstr "ÖRNEKLER"
+msgstr "EXAMPLES"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:55
 msgid ""
 "AI mövzulardan tutmuş qruplara kimi hər şeyi təklif edir. Heç nə avtomatik "
 "tətbiq olunmur — hər addımı siz təsdiqləyirsiniz."
 msgstr ""
-"AI mövzulardan tutmuş qruplara kimi hər şeyi təklif edir. Heç nə avtomatik "
-"tətbiq olunmur — hər addımı siz təsdiqləyirsiniz."
+"AI suggests everything from topics to groups. Nothing is applied "
+"automatically — you approve every step."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:55
 msgid ""
 "AI konulardan gruplara kadar her şeyi önerir. Hiçbir şey otomatik "
 "uygulanmaz."
 msgstr ""
-"AI konulardan gruplara kadar her şeyi önerir. Hiçbir şey otomatik "
-"uygulanmaz."
+"AI suggests everything from topics to groups. Nothing is applied "
+"automatically."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:56
 msgid "Oluştur"
-msgstr "Oluştur"
+msgstr "Create"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:57
 msgid "AI kursu hazırlayır…"
-msgstr "AI kursu hazırlayır…"
+msgstr "AI is preparing the course…"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:57
 msgid "AI kursu hazırlıyor…"
-msgstr "AI kursu hazırlıyor…"
+msgstr "AI is preparing the course…"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:58
 msgid "Sillabus, resurslar və tapşırıqlar planlanır"
-msgstr "Sillabus, resurslar və tapşırıqlar planlanır"
+msgstr "The syllabus, resources and assignments are being planned"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:58
 msgid "Müfredat, kaynaklar ve görevler planlanıyor"
-msgstr "Müfredat, kaynaklar ve görevler planlanıyor"
+msgstr "The syllabus, resources and assignments are being planned"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:59
 msgid "Təsdiqlə və davam et"
-msgstr "Təsdiqlə və davam et"
+msgstr "Approve and continue"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:60
 #: apps/live_exam/static/js/host_lobby_shell.js:61
 msgid "Keç"
-msgstr "Keç"
+msgstr "Skip"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:61
 msgid "Təsdiqləndi"
-msgstr "Təsdiqləndi"
+msgstr "Approved"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:61
 msgid "Onaylandı"
-msgstr "Onaylandı"
+msgstr "Approved"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:62
 msgid "Plan hazırdır"
-msgstr "Plan hazırdır"
+msgstr "The plan is ready"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:62
 msgid "Plan hazır"
-msgstr "Plan hazır"
+msgstr "The plan is ready"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:63
 msgid "element təklif olunur"
-msgstr "element təklif olunur"
+msgstr "items suggested"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:63
 msgid "önerilen öğe"
-msgstr "önerilen öğe"
+msgstr "items suggested"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:64
 msgid "Hamısını qəbul et"
-msgstr "Hamısını qəbul et"
+msgstr "Accept all"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:65
 #: apps/exams/static/exams/js/exam_wizard.js:72
 msgid "Addım"
-msgstr "Addım"
+msgstr "Step"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:65
 msgid "Adım"
-msgstr "Adım"
+msgstr "Step"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:66
 msgid "aşağıdakıları təsdiqləyim?"
-msgstr "aşağıdakıları təsdiqləyim?"
+msgstr "shall I approve the following?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:66
 msgid "aşağıdakileri onaylayayım mı?"
-msgstr "aşağıdakileri onaylayayım mı?"
+msgstr "shall I approve the following?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:67
 msgid "Plan hazırdır 🎓"
-msgstr "Plan hazırdır 🎓"
+msgstr "The plan is ready 🎓"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:67
 msgid "Plan hazır 🎓"
-msgstr "Plan hazır 🎓"
+msgstr "The plan is ready 🎓"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:68
 msgid ""
 "AI təklifləri seçdiniz. İndi bölmələrdən “Əlavə et” ilə onları kursa daxil "
 "edə bilərsiniz."
 msgstr ""
-"AI təklifləri seçdiniz. İndi bölmələrdən “Əlavə et” ilə onları kursa daxil "
-"edə bilərsiniz."
+"You have selected the AI suggestions. You can now add them to the course "
+"from the sections using “Add”."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:68
 msgid "AI önerilerini seçtiniz. Şimdi “Ekle” ile kursa ekleyin."
-msgstr "AI önerilerini seçtiniz. Şimdi “Ekle” ile kursa ekleyin."
+msgstr ""
+"You have selected the AI suggestions. Now add them to the course with “Add”."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:69
 msgid "bölmə"
-msgstr "bölmə"
+msgstr "section"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:69
 msgid "bölüm"
-msgstr "bölüm"
+msgstr "section"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:70
 msgid "öğe"
-msgstr "öğe"
+msgstr "item"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:71
 msgid "Kursa qayıt"
-msgstr "Kursa qayıt"
+msgstr "Back to course"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:71
 msgid "Kursa dön"
-msgstr "Kursa dön"
+msgstr "Back to course"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:73
 msgid "Mövzular"
-msgstr "Mövzular"
+msgstr "Topics"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:83
 msgid "Veb texnologiyaları · 2-ci kurs · 14 həftə"
-msgstr "Veb texnologiyaları · 2-ci kurs · 14 həftə"
+msgstr "Web technologies · Year 2 · 14 weeks"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:83
 msgid "Verilənlər bazası (SQL) · praktiki"
-msgstr "Verilənlər bazası (SQL) · praktiki"
+msgstr "Databases (SQL) · practical"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:83
 msgid "Python proqramlaşdırma · başlanğıc"
-msgstr "Python proqramlaşdırma · başlanğıc"
+msgstr "Python programming · beginner"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:85
 msgid "Web teknolojileri · 2. sınıf · 14 hafta"
-msgstr "Web teknolojileri · 2. sınıf · 14 hafta"
+msgstr "Web technologies · Year 2 · 14 weeks"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:85
 msgid "Veritabanı (SQL) · pratik"
-msgstr "Veritabanı (SQL) · pratik"
+msgstr "Databases (SQL) · practical"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:85
 msgid "Python · başlangıç"
-msgstr "Python · başlangıç"
+msgstr "Python · beginner"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:90
 msgid "8 mövzu (14 həftəlik sillabus)"
-msgstr "8 mövzu (14 həftəlik sillabus)"
+msgstr "8 topics (14-week syllabus)"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:91
 msgid "Giriş: veb texnologiyalarına baxış"
-msgstr "Giriş: veb texnologiyalarına baxış"
+msgstr "Introduction: overview of web technologies"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:91
 msgid "1-ci həftə"
-msgstr "1-ci həftə"
+msgstr "Week 1"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:92
 msgid "HTML5 — semantik struktur və formalar"
-msgstr "HTML5 — semantik struktur və formalar"
+msgstr "HTML5 — semantic structure and forms"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:92
 msgid "2–3-cü həftə"
-msgstr "2–3-cü həftə"
+msgstr "Weeks 2–3"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:93
 msgid "CSS əsasları: seçicilər və qutu modeli"
-msgstr "CSS əsasları: seçicilər və qutu modeli"
+msgstr "CSS basics: selectors and the box model"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:93
 msgid "4-cü həftə"
-msgstr "4-cü həftə"
+msgstr "Week 4"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:94
 msgid "Flexbox və Grid ilə layout"
-msgstr "Flexbox və Grid ilə layout"
+msgstr "Layout with Flexbox and Grid"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:94
 msgid "5–6-cı həftə"
-msgstr "5–6-cı həftə"
+msgstr "Weeks 5–6"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:95
 msgid "Responsiv dizayn və media-sorğular"
-msgstr "Responsiv dizayn və media-sorğular"
+msgstr "Responsive design and media queries"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:95
 msgid "7-ci həftə"
-msgstr "7-ci həftə"
+msgstr "Week 7"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:96
 msgid "JavaScript əsasları"
-msgstr "JavaScript əsasları"
+msgstr "JavaScript basics"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:96
 msgid "8–10-cu həftə"
-msgstr "8–10-cu həftə"
+msgstr "Weeks 8–10"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:97
 msgid "DOM manipulyasiyası və hadisələr"
-msgstr "DOM manipulyasiyası və hadisələr"
+msgstr "DOM manipulation and events"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:97
 msgid "11–12-ci həftə"
-msgstr "11–12-ci həftə"
+msgstr "Weeks 11–12"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:98
 msgid "Fetch API və əsas backend əlaqəsi"
-msgstr "Fetch API və əsas backend əlaqəsi"
+msgstr "Fetch API and basic backend communication"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:98
 msgid "13–14-cü həftə"
-msgstr "13–14-cü həftə"
+msgstr "Weeks 13–14"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:100
 msgid "5 resurs təklifi"
-msgstr "5 resurs təklifi"
+msgstr "5 suggested resources"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:101
 msgid "MDN Web Docs — HTML referansı"
-msgstr "MDN Web Docs — HTML referansı"
+msgstr "MDN Web Docs — HTML reference"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:102
 msgid "Flexbox Froggy — interaktiv məşq"
-msgstr "Flexbox Froggy — interaktiv məşq"
+msgstr "Flexbox Froggy — interactive practice"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:103
 msgid "Mühazirə slaydları — CSS layout"
-msgstr "Mühazirə slaydları — CSS layout"
+msgstr "Lecture slides — CSS layout"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:104
 msgid "Video: JavaScript 100 dəqiqədə"
-msgstr "Video: JavaScript 100 dəqiqədə"
+msgstr "Video: JavaScript in 100 minutes"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:105
 msgid "Nümunə kod deposu (starter)"
-msgstr "Nümunə kod deposu (starter)"
+msgstr "Sample code repository (starter)"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:107
 msgid "3 sərbəst iş"
-msgstr "3 sərbəst iş"
+msgstr "3 assignments"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:107
 msgid "3 ödev"
-msgstr "3 ödev"
+msgstr "3 assignments"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:108
 msgid "Şəxsi portfolio (HTML + CSS)"
-msgstr "Şəxsi portfolio (HTML + CSS)"
+msgstr "Personal portfolio (HTML + CSS)"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:108
 msgid "Fərdi · 100 xal"
-msgstr "Fərdi · 100 xal"
+msgstr "Individual · 100 points"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:109
 msgid "Fərdi · 50 xal"
-msgstr "Fərdi · 50 xal"
+msgstr "Individual · 50 points"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:110
 msgid "Cüt iş · 80 xal"
-msgstr "Cüt iş · 80 xal"
+msgstr "Pair work · 80 points"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:115
 msgid "Blok B — Əlçatanlıq (a11y)"
-msgstr "Blok B — Əlçatanlıq (a11y)"
+msgstr "Block B — Accessibility (a11y)"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:118
 msgid "1 sınav"
-msgstr "1 sınav"
+msgstr "1 exam"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:119
 msgid "Test · 6 sual · 60 dəq"
-msgstr "Test · 6 sual · 60 dəq"
+msgstr "Test · 6 questions · 60 min"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:120
 msgid "Semantik etiketlərin rolu?"
-msgstr "Semantik etiketlərin rolu?"
+msgstr "The role of semantic tags?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:120
 #: apps/courses/static/courses/js/course_ai_drawer.js:121
 #: apps/courses/static/courses/js/course_ai_drawer.js:122
 msgid "Çoxseçimli"
-msgstr "Çoxseçimli"
+msgstr "Multiple choice"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:121
 msgid "Box-model qatları?"
-msgstr "Box-model qatları?"
+msgstr "Box model layers?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:122
 msgid "Flex vs Grid — fərq?"
-msgstr "Flex vs Grid — fərq?"
+msgstr "Flex vs Grid — the difference?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:124
 msgid "2 qrup təyini"
-msgstr "2 qrup təyini"
+msgstr "2 group assignments"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:125
 msgid "24 tələbə"
-msgstr "24 tələbə"
+msgstr "24 students"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:126
 msgid "21 tələbə"
-msgstr "21 tələbə"
+msgstr "21 students"
 
 #: apps/courses/static/courses/js/course_modals_enhance.js:32
 msgid "AI ilə doldur"
-msgstr "AI ilə doldur"
+msgstr "Fill with AI"
 
 #: apps/courses/static/courses/js/course_modals_enhance.js:32
 msgid "Sahələri AI ilə doldur"
-msgstr "Sahələri AI ilə doldur"
+msgstr "Fill fields with AI"
 
 #: apps/courses/static/courses/js/course_modals_enhance.js:34
 msgid "Alanları AI ile doldur"
-msgstr "Alanları AI ile doldur"
+msgstr "Fill fields with AI"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:25
 msgid "Kursun sillabusu və həftəlik strukturu"
-msgstr "Kursun sillabusu və həftəlik strukturu"
+msgstr "Course syllabus and weekly structure"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:25
 msgid "Müfredat ve haftalık yapı"
-msgstr "Müfredat ve haftalık yapı"
+msgstr "Syllabus and weekly structure"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:26
 msgid "Mühazirələr, fayllar, video və linklər"
-msgstr "Mühazirələr, fayllar, video və linklər"
+msgstr "Lectures, files, video and links"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:26
 msgid "Dersler, dosyalar, video ve bağlantılar"
-msgstr "Dersler, dosyalar, video ve bağlantılar"
+msgstr "Lessons, files, video and links"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Tələbələr üçün tapşırıqlar və təqdimatlar"
-msgstr "Tələbələr üçün tapşırıqlar və təqdimatlar"
+msgstr "Tasks and submissions for students"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Öğrenciler için görevler ve teslimler"
-msgstr "Öğrenciler için görevler ve teslimler"
+msgstr "Tasks and submissions for students"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:28
 msgid "Bloklar və suallarla praktiki laboratoriyalar"
-msgstr "Bloklar və suallarla praktiki laboratoriyalar"
+msgstr "Practical labs with blocks and questions"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:29
 msgid "Test və yazılı imtahanlar, nəzarət"
-msgstr "Test və yazılı imtahanlar, nəzarət"
+msgstr "Test and written exams, proctoring"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:29
 msgid "Test ve yazılı sınavlar, gözetim"
-msgstr "Test ve yazılı sınavlar, gözetim"
+msgstr "Test and written exams, proctoring"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:30
 msgid "Genişmiqyaslı kurs layihələri"
-msgstr "Genişmiqyaslı kurs layihələri"
+msgstr "Large-scale course projects"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:30
 msgid "Büyük ölçekli kurs projeleri"
-msgstr "Büyük ölçekli kurs projeleri"
+msgstr "Large-scale course projects"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:31
 msgid "Tələbələr və qruplar"
-msgstr "Tələbələr və qruplar"
+msgstr "Students and groups"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:31
 msgid "Öğrenciler ve gruplar"
-msgstr "Öğrenciler ve gruplar"
+msgstr "Students and groups"
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:104
 msgid "Mətn sahəsi tapılmadı."
-msgstr "Mətn sahəsi tapılmadı."
+msgstr "Text field not found."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:110
 msgid "AI boş cavab qaytardı."
-msgstr "AI boş cavab qaytardı."
+msgstr "AI returned an empty response."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:150
 #: apps/exams/static/exams/js/testQuestionBank.js:418
 msgid "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."
-msgstr "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."
+msgstr "Text extraction took too long. Please try again."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:161
 #: apps/exams/static/exams/js/aiQuestionBank.js:192
@@ -1381,58 +1387,59 @@ msgstr "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."
 #: apps/exams/static/exams/js/testQuestionBank.js:448
 #: apps/exams/static/exams/js/testQuestionBank.js:522
 msgid "Fayldan mətn çıxarıla bilmədi."
-msgstr "Fayldan mətn çıxarıla bilmədi."
+msgstr "Text could not be extracted from the file."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:175
 msgid "Fayldan mətn çıxarılır..."
-msgstr "Fayldan mətn çıxarılır..."
+msgstr "Extracting text from the file..."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:206
 #: apps/exams/static/exams/js/aiQuestionBank.js:230
 msgid "Gemini 2.5 Pro sualları hazırlayır..."
-msgstr "Gemini 2.5 Pro sualları hazırlayır..."
+msgstr "Gemini 2.5 Pro is preparing the questions..."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:215
 msgid "AI endpoint tapılmadı."
-msgstr "AI endpoint tapılmadı."
+msgstr "AI endpoint not found."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:225
 msgid "Prompt yazın və ya fayl yükləyin."
-msgstr "Prompt yazın və ya fayl yükləyin."
+msgstr "Enter a prompt or upload a file."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:247
 #: apps/exams/static/exams/js/aiQuestionBank.js:250
 #: apps/exams/static/exams/js/aiQuestionBank.js:262
 #: apps/exams/static/exams/js/aiQuestionBank.js:291
 msgid "AI sual yaratma alınmadı."
-msgstr "AI sual yaratma alınmadı."
+msgstr "AI question generation failed."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:281
 msgid "Qalan sorğu"
-msgstr "Qalan sorğu"
+msgstr "Requests remaining"
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:285
 msgid "{count} sual hazırdır. Önizləmə ilə yoxlayın."
-msgstr "{count} sual hazırdır. Önizləmə ilə yoxlayın."
+msgstr "{count} questions are ready. Check them in the preview."
 
 #: apps/exams/static/exams/js/aiQuestionBank.js:317
 msgid "Fayl seçilməyib"
-msgstr "Fayl seçilməyib"
+msgstr "No file selected"
 
 #: apps/exams/static/exams/js/bankManagement.js:34
 msgid "Bankı sil"
-msgstr "Bankı sil"
+msgstr "Delete bank"
 
 #: apps/exams/static/exams/js/bankManagement.js:35
 msgid ""
 "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
 msgstr ""
-"Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
+"The entire question bank and all questions in it will be permanently "
+"deleted. Continue?"
 
 #: apps/exams/static/exams/js/bankManagement.js:36
 #: apps/exams/static/exams/js/teacher_questions_bank.js:42
 msgid "Bəli, sil"
-msgstr "Bəli, sil"
+msgstr "Yes, delete"
 
 #: apps/exams/static/exams/js/examBankPicker.js:64
 #: apps/exams/static/exams/js/examBankPicker.js:100
@@ -1441,7 +1448,7 @@ msgid ""
 "hidden=\"true\"></span> Yüklənir...</div>"
 msgstr ""
 "<div class=\"bankpicker-loading\"><span class=\"bankpicker-spinner\" aria-"
-"hidden=\"true\"></span> Yüklənir...</div>"
+"hidden=\"true\"></span> Loading...</div>"
 
 #: apps/exams/static/exams/js/examBankPicker.js:82
 msgid ""
@@ -1449,7 +1456,7 @@ msgid ""
 "exclamation\"></i><p>Yüklənmə xətası. Yenidən cəhd edin.</p></div>"
 msgstr ""
 "<div class=\"bankpicker-empty\"><i class=\"fas fa-triangle-"
-"exclamation\"></i><p>Yüklənmə xətası. Yenidən cəhd edin.</p></div>"
+"exclamation\"></i><p>Loading error. Please try again.</p></div>"
 
 #: apps/exams/static/exams/js/examBankPicker.js:111
 msgid ""
@@ -1457,294 +1464,294 @@ msgid ""
 "exclamation\"></i><p>Yüklənmə xətası.</p></div>"
 msgstr ""
 "<div class=\"bankpicker-empty\"><i class=\"fas fa-triangle-"
-"exclamation\"></i><p>Yüklənmə xətası.</p></div>"
+"exclamation\"></i><p>Loading error.</p></div>"
 
 #: apps/exams/static/exams/js/examBankPicker.js:177
 msgid " seçilib"
-msgstr " seçilib"
+msgstr "selected"
 
 #: apps/exams/static/exams/js/examBankPicker.js:331
 msgid "Şəbəkə xətası. Yenidən cəhd edin."
-msgstr "Şəbəkə xətası. Yenidən cəhd edin."
+msgstr "Network error. Please try again."
 
 #: apps/exams/static/exams/js/exam_create_edit_modal/markup.js:16
 msgid "Saxlanılır…"
-msgstr "Saxlanılır…"
+msgstr "Saving…"
 
 #: apps/exams/static/exams/js/exam_create_edit_modal/markup.js:20
 msgid "Yadda saxlanıldı"
-msgstr "Yadda saxlanıldı"
+msgstr "Saved"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:47
 msgid "Əməliyyat alınmadı"
-msgstr "Əməliyyat alınmadı"
+msgstr "The operation failed"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:50
 msgid "Bağlantı xətası"
-msgstr "Bağlantı xətası"
+msgstr "Connection error"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:71
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:126
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:82
 msgid "İmtahandan uzaqlaşdır"
-msgstr "İmtahandan uzaqlaşdır"
+msgstr "Remove from exam"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:72
 msgid ""
 "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal "
 "təslim ediləcək və geri qaytarıla bilməyəcək."
 msgstr ""
-"Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal "
-"təslim ediləcək və geri qaytarıla bilməyəcək."
+"Do you want to stop the student's exam permanently? The exam will be "
+"submitted immediately and cannot be restored."
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:73
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:128
 msgid "Bəli, uzaqlaşdır"
-msgstr "Bəli, uzaqlaşdır"
+msgstr "Yes, remove"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:75
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:130
 msgid "Tələbə imtahandan uzaqlaşdırıldı"
-msgstr "Tələbə imtahandan uzaqlaşdırıldı"
+msgstr "The student was removed from the exam"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:82
 msgid "Müvəqqəti blokla"
-msgstr "Müvəqqəti blokla"
+msgstr "Block temporarily"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:83
 msgid ""
 "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa "
 "edə bilərsiniz."
 msgstr ""
-"Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa "
-"edə bilərsiniz."
+"The student's screen will be locked. The exam will not be stopped — you can "
+"restore access later."
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:84
 msgid "Bəli, blokla"
-msgstr "Bəli, blokla"
+msgstr "Yes, block"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:86
 msgid "Tələbə müvəqqəti bloklandı"
-msgstr "Tələbə müvəqqəti bloklandı"
+msgstr "The student was temporarily blocked"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:93
 msgid ""
 "Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək."
 msgstr ""
-"Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək."
+"Allow the student to continue the exam? The violation count will not change."
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:94
 msgid ""
 "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da "
 "veriləcək."
 msgstr ""
-"Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da "
-"veriləcək."
+"Do you want to allow the student to continue the exam? An extra chance will "
+"also be granted."
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:97
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:113
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:81
 msgid "Bərpa et"
-msgstr "Bərpa et"
+msgstr "Restore"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:99
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:115
 msgid "Bəli, bərpa et"
-msgstr "Bəli, bərpa et"
+msgstr "Yes, restore"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:101
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:117
 msgid "Tələbə bərpa edildi"
-msgstr "Tələbə bərpa edildi"
+msgstr "The student was restored"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:114
 msgid "Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?"
-msgstr "Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?"
+msgstr "Do you want to allow this student to continue the exam?"
 
 #: apps/exams/static/exams/js/exam_live_monitor/actions.js:127
 msgid ""
 "Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri "
 "alına bilməz."
 msgstr ""
-"Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri "
-"alına bilməz."
+"Do you want to remove this student from the exam permanently? This action "
+"cannot be undone."
 
 #: apps/exams/static/exams/js/exam_live_monitor/polling.js:17
 msgid "Avtomatik yenilənir"
-msgstr "Avtomatik yenilənir"
+msgstr "Auto-refreshing"
 
 #: apps/exams/static/exams/js/exam_live_monitor/polling.js:18
 msgid "Dayandır"
-msgstr "Dayandır"
+msgstr "Pause"
 
 #: apps/exams/static/exams/js/exam_live_monitor/polling.js:26
 msgid "Dayandırılıb"
-msgstr "Dayandırılıb"
+msgstr "Paused"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:7
 msgid "Xəbərdarlıq"
-msgstr "Xəbərdarlıq"
+msgstr "Warning"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:7
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:75
 msgid "Çıxarılıb"
-msgstr "Çıxarılıb"
+msgstr "Removed"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:7
 msgid "Bərpa olunub"
-msgstr "Bərpa olunub"
+msgstr "Restored"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:13
 msgid "tələbə"
-msgstr "tələbə"
+msgstr "student"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:15
 msgid "Təslim edib"
-msgstr "Təslim edib"
+msgstr "Submitted"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:15
 msgid "Tamamlanmış sessiya"
-msgstr "Tamamlanmış sessiya"
+msgstr "Completed session"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:45
 msgid " tələbə · "
-msgstr " tələbə · "
+msgstr "students ·"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:45
 msgid "sn-də bir yenilənir"
-msgstr "sn-də bir yenilənir"
+msgstr "s refresh interval"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:53
 msgid "Bütün tələbələr daxil olub."
-msgstr "Bütün tələbələr daxil olub."
+msgstr "All students have logged in."
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:60
 msgid "Hələ giriş etməyib"
-msgstr "Hələ giriş etməyib"
+msgstr "Has not logged in yet"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:71
 msgid "Bloklanmış tələbə yoxdur."
-msgstr "Bloklanmış tələbə yoxdur."
+msgstr "There are no blocked students."
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:75
 msgid "Müvəqqəti bloklu"
-msgstr "Müvəqqəti bloklu"
+msgstr "Temporarily blocked"
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:91
 msgid "Şübhəli hadisə yoxdur."
-msgstr "Şübhəli hadisə yoxdur."
+msgstr "There are no suspicious events."
 
 #: apps/exams/static/exams/js/exam_live_monitor/render.js:153
 msgid "Tələbə sayı"
-msgstr "Tələbə sayı"
+msgstr "Number of students"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:28
 msgid "<div class=\"tip-row\"><span>Cavablanıb</span><b>"
-msgstr "<div class=\"tip-row\"><span>Cavablanıb</span><b>"
+msgstr "<div class=\"tip-row\"><span>Answered</span><b>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:29
 msgid "<div class=\"tip-row\"><span>Qalıb</span><b>"
-msgstr "<div class=\"tip-row\"><span>Qalıb</span><b>"
+msgstr "<div class=\"tip-row\"><span>Remaining</span><b>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:30
 msgid "<div class=\"tip-row\"><span>Tərəqqi</span><b>"
-msgstr "<div class=\"tip-row\"><span>Tərəqqi</span><b>"
+msgstr "<div class=\"tip-row\"><span>Progress</span><b>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:33
 msgid "<div class=\"tip-row\"><span>Nəticə</span><b>"
-msgstr "<div class=\"tip-row\"><span>Nəticə</span><b>"
+msgstr "<div class=\"tip-row\"><span>Result</span><b>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:34
 msgid "<div class=\"tip-row\"><span>Başlama</span><b>"
-msgstr "<div class=\"tip-row\"><span>Başlama</span><b>"
+msgstr "<div class=\"tip-row\"><span>Start</span><b>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:63
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:149
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:162
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:174
 msgid "Hələ cavab yoxdur"
-msgstr "Hələ cavab yoxdur"
+msgstr "No answers yet"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:72
 msgid "boş"
-msgstr "boş"
+msgstr "blank"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:72
 msgid "sətir"
-msgstr "sətir"
+msgstr "row"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:96
 msgid "Seçilib"
-msgstr "Seçilib"
+msgstr "Selected"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:97
 msgid "Düz"
-msgstr "Düz"
+msgstr "Correct"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:105
 msgid "Yazılı"
-msgstr "Yazılı"
+msgstr "Written"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:106
 msgid "Çəkim"
-msgstr "Çəkim"
+msgstr "Drawing"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:111
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:213
 msgid "Cavablanıb"
-msgstr "Cavablanıb"
+msgstr "Answered"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:111
 msgid "Boş"
-msgstr "Boş"
+msgstr "Blank"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:144
 msgid "Düzgün cavab"
-msgstr "Düzgün cavab"
+msgstr "Correct answer"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:157
 msgid "Çəkim cavabı verilib"
-msgstr "Çəkim cavabı verilib"
+msgstr "Drawing answer submitted"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:180
 msgid "Hələ heç bir suala cavab verilməyib."
-msgstr "Hələ heç bir suala cavab verilməyib."
+msgstr "No question has been answered yet."
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:196
 msgid "Müəllim balı"
-msgstr "Müəllim balı"
+msgstr "Teacher score"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:199
 msgid "Avtomatik nəticə"
-msgstr "Avtomatik nəticə"
+msgstr "Automatic result"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:207
 msgid "Pozuntu qeydə alınmayıb."
-msgstr "Pozuntu qeydə alınmayıb."
+msgstr "No violations recorded."
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:208
 msgid "İmtahan tarixi"
-msgstr "İmtahan tarixi"
+msgstr "Exam date"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:209
 msgid "Bitmə"
-msgstr "Bitmə"
+msgstr "End"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:211
 msgid "Bu, yalnız izləmə rejimidir — tələbə bloklanmır."
-msgstr "Bu, yalnız izləmə rejimidir — tələbə bloklanmır."
+msgstr "This is monitoring mode only — the student is not blocked."
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:214
 msgid "Qalıb"
-msgstr "Qalıb"
+msgstr "Remaining"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:217
 msgid "Pozuntu jurnalı"
-msgstr "Pozuntu jurnalı"
+msgstr "Violation log"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:223
 msgid "sual cavablanıb"
-msgstr "sual cavablanıb"
+msgstr "questions answered"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:229
 msgid ""
@@ -1752,424 +1759,430 @@ msgid ""
 "spin\"></i><p>Yüklənir…</p></div>"
 msgstr ""
 "<div class=\"modal-loading\"><i class=\"fas fa-circle-notch fa-"
-"spin\"></i><p>Yüklənir…</p></div>"
+"spin\"></i><p>Loading…</p></div>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/snapshot_modal.js:235
 msgid "<div class=\"modal-loading\">Məlumat yüklənmədi.</div>"
-msgstr "<div class=\"modal-loading\">Məlumat yüklənmədi.</div>"
+msgstr "<div class=\"modal-loading\">Data could not be loaded.</div>"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:48
 msgid " san əvvəl"
-msgstr " san əvvəl"
+msgstr "sec ago"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:51
 msgid " dəq əvvəl"
-msgstr " dəq əvvəl"
+msgstr "min ago"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:70
 msgid " bal (müəllim)"
-msgstr " bal (müəllim)"
+msgstr "score (teacher)"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:80
 msgid "Tam ekrandan çıxış"
-msgstr "Tam ekrandan çıxış"
+msgstr "Exited full screen"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:81
 msgid "Tam ekran bərpa edildi"
-msgstr "Tam ekran bərpa edildi"
+msgstr "Full screen restored"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:82
 msgid "Tab dəyişdirildi"
-msgstr "Tab dəyişdirildi"
+msgstr "Tab switched"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:83
 msgid "Pəncərə fokusu itdi"
-msgstr "Pəncərə fokusu itdi"
+msgstr "Window lost focus"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:84
 msgid "Pəncərə fokusa qayıtdı"
-msgstr "Pəncərə fokusa qayıtdı"
+msgstr "Window regained focus"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:85
 msgid "Kopyalama cəhdi"
-msgstr "Kopyalama cəhdi"
+msgstr "Copy attempt"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:86
 msgid "Yapışdırma cəhdi"
-msgstr "Yapışdırma cəhdi"
+msgstr "Paste attempt"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:87
 msgid "Kəsmə cəhdi"
-msgstr "Kəsmə cəhdi"
+msgstr "Cut attempt"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:88
 msgid "Sağ klik cəhdi"
-msgstr "Sağ klik cəhdi"
+msgstr "Right-click attempt"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:89
 msgid "Klaviatura qısayolu"
-msgstr "Klaviatura qısayolu"
+msgstr "Keyboard shortcut"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:90
 msgid "Mətn seçmə cəhdi"
-msgstr "Mətn seçmə cəhdi"
+msgstr "Text selection attempt"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:91
 msgid "Şübhəli təkrar"
-msgstr "Şübhəli təkrar"
+msgstr "Suspicious repetition"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:92
 msgid "Möhlət bitdi"
-msgstr "Möhlət bitdi"
+msgstr "Grace period expired"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:93
 msgid "Avtomatik kilidləndi"
-msgstr "Avtomatik kilidləndi"
+msgstr "Automatically locked"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:94
 msgid "Avtomatik təslim"
-msgstr "Avtomatik təslim"
+msgstr "Automatic submission"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:95
 msgid "Bərpa müddəti bitdi"
-msgstr "Bərpa müddəti bitdi"
+msgstr "Restore period expired"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:96
 msgid "Müəllim bərpa etdi"
-msgstr "Müəllim bərpa etdi"
+msgstr "Teacher restored access"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:97
 msgid "Əlavə şans verildi"
-msgstr "Əlavə şans verildi"
+msgstr "Extra attempt granted"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:104
 msgid "xəbərdarlıq"
-msgstr "xəbərdarlıq"
+msgstr "warning"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:106
 msgid "çıxarılıb"
-msgstr "çıxarılıb"
+msgstr "removed"
 
 #: apps/exams/static/exams/js/exam_live_monitor/utils.js:107
 msgid "bərpa olunub"
-msgstr "bərpa olunub"
+msgstr "restored"
 
 #: apps/exams/static/exams/js/exam_supervision/ui.js:311
 msgid "Müəllim tərəfindən müvəqqəti bloklandınız"
-msgstr "Müəllim tərəfindən müvəqqəti bloklandınız"
+msgstr "You have been temporarily blocked by the teacher"
 
 #: apps/exams/static/exams/js/exam_supervision/ui.js:313
 msgid "Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib."
-msgstr "Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib."
+msgstr "The teacher has temporarily blocked your exam. Your screen is locked."
 
 #: apps/exams/static/exams/js/exam_supervision/ui.js:315
 msgid ""
 "Müəllim imtahanı bərpa edənə qədər zəhmət olmasa gözləyin. Səhifəni "
 "bağlamayın."
 msgstr ""
-"Müəllim imtahanı bərpa edənə qədər zəhmət olmasa gözləyin. Səhifəni "
-"bağlamayın."
+"Please wait until the teacher restores the exam. Do not close the page."
 
 #: apps/exams/static/exams/js/exam_supervision/ui.js:381
 msgid "Müəllim bərpa etməsə, imtahan avtomatik bitəcək"
-msgstr "Müəllim bərpa etməsə, imtahan avtomatik bitəcək"
+msgstr "If the teacher does not restore it, the exam will end automatically"
 
 #: apps/exams/static/exams/js/exam_wizard.js:128
 msgid "İmtahan adı mütləqdir."
-msgstr "İmtahan adı mütləqdir."
+msgstr "The exam name is required."
 
 #: apps/exams/static/exams/js/exam_wizard.js:205
 msgid "Zəhmət olmasa aşağıdakı xətaları düzəldin:"
-msgstr "Zəhmət olmasa aşağıdakı xətaları düzəldin:"
+msgstr "Please correct the following errors:"
 
 #: apps/exams/static/exams/js/questionBankList.js:56
 msgid "\" bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
-msgstr "\" bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
+msgstr ""
+"\" bank and all the questions in it will be permanently deleted. Continue?"
 
 #: apps/exams/static/exams/js/question_form.js:79
 #: apps/exams/static/exams/js/question_form.js:80
 msgid "cü"
-msgstr "cü"
+msgstr "th"
 
 #: apps/exams/static/exams/js/question_form.js:82
 msgid "cı"
-msgstr "cı"
+msgstr "th"
 
 #: apps/exams/static/exams/js/question_form.js:114
 msgid "Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır."
-msgstr "Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır."
+msgstr ""
+"The answer mode must be changed from single choice to multiple choice."
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:38
 msgid "İmtina"
-msgstr "İmtina"
+msgstr "Cancel"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:39
 msgid "Silməyi təsdiqlə"
-msgstr "Silməyi təsdiqlə"
+msgstr "Confirm deletion"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:40
 msgid "Deaktiv etməyi təsdiqlə"
-msgstr "Deaktiv etməyi təsdiqlə"
+msgstr "Confirm deactivation"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:41
 msgid "Aktiv etməyi təsdiqlə"
-msgstr "Aktiv etməyi təsdiqlə"
+msgstr "Confirm activation"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:43
 msgid "Bəli, deaktiv et"
-msgstr "Bəli, deaktiv et"
+msgstr "Yes, deactivate"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:44
 msgid "Bəli, aktiv et"
-msgstr "Bəli, aktiv et"
+msgstr "Yes, activate"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:45
 msgid "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"
-msgstr "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr "The selected {count} questions will be permanently deleted. Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:46
 msgid "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"
-msgstr "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"
+msgstr "{count} selected questions will be deactivated. Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:47
 msgid "Seçilmiş {count} sual aktiv ediləcək. Davam edək?"
-msgstr "Seçilmiş {count} sual aktiv ediləcək. Davam edək?"
+msgstr "{count} selected questions will be activated. Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:48
 msgid "Bu sual silinəcək: {question}"
-msgstr "Bu sual silinəcək: {question}"
+msgstr "This question will be deleted: {question}"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:49
 msgid "Bu sual deaktiv ediləcək. Davam edək?"
-msgstr "Bu sual deaktiv ediləcək. Davam edək?"
+msgstr "This question will be deactivated. Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:50
 msgid "Bu sual aktiv ediləcək. Davam edək?"
-msgstr "Bu sual aktiv ediləcək. Davam edək?"
+msgstr "This question will be activated. Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:51
 msgid "Sual bankını sil"
-msgstr "Sual bankını sil"
+msgstr "Delete question bank"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:52
 msgid ""
 "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
 msgstr ""
-"Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
+"The entire question bank and the {count} questions in it will be permanently"
+" deleted. Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:53
 msgid "Dil üzrə sil"
-msgstr "Dil üzrə sil"
+msgstr "Delete by language"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:54
 msgid "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"
-msgstr "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr ""
+"{count} questions in the selected language will be permanently deleted. "
+"Continue?"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:154
 msgid "0 seçilib"
-msgstr "0 seçilib"
+msgstr "0 selected"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:155
 msgid "{count} seçilib"
-msgstr "{count} seçilib"
+msgstr "{count} selected"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:265
 msgid "Yenidən cəhd edin."
-msgstr "Yenidən cəhd edin."
+msgstr "Please try again."
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:270
 msgid "Sualı redaktə et"
-msgstr "Sualı redaktə et"
+msgstr "Edit question"
 
 #: apps/exams/static/exams/js/teacher_questions_bank.js:270
 msgid "Sual əlavə et"
-msgstr "Sual əlavə et"
+msgstr "Add question"
 
 #: apps/exams/static/exams/js/testQuestionBank.js:371
 msgid ""
 "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / "
 ".png / .jpg yükləyin."
 msgstr ""
-"Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / "
-".png / .jpg yükləyin."
+"This file type is not accepted for security reasons. Please upload only .pdf"
+" / .txt / .png / .jpg."
 
 #: apps/exams/static/exams/js/testQuestionBank.js:377
 msgid "Fayl ölçüsü 45MB-dan böyükdür."
-msgstr "Fayl ölçüsü 45MB-dan böyükdür."
+msgstr "The file size is larger than 45MB."
 
 #: apps/exams/static/exams/js/testQuestionBank.js:434
 msgid "<i class=\"fas fa-circle-notch fa-spin\"></i> Mətn çıxarılır..."
-msgstr "<i class=\"fas fa-circle-notch fa-spin\"></i> Mətn çıxarılır..."
+msgstr "<i class=\"fas fa-circle-notch fa-spin\"></i> Extracting text..."
 
 #: apps/exams/static/exams/js/testQuestionBank.js:534
 msgid "<i class=\"fas fa-circle-notch fa-spin\"></i> Yüklənir..."
-msgstr "<i class=\"fas fa-circle-notch fa-spin\"></i> Yüklənir..."
+msgstr "<i class=\"fas fa-circle-notch fa-spin\"></i> Loading..."
 
 #: apps/exams/static/exams/js/testQuestionBank.js:550
 msgid "Yuxarı qayıt"
-msgstr "Yuxarı qayıt"
+msgstr "Back to top"
 
 #: apps/labs/static/labs/js/grade_submission.js:111
 msgid "Qiymətləndirməni təsdiqləyin"
-msgstr "Qiymətləndirməni təsdiqləyin"
+msgstr "Confirm the assessment"
 
 #: apps/labs/static/labs/js/grade_submission.js:112
 msgid "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
-msgstr "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
+msgstr "Are you sure you want to save this score and feedback?"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:202
 msgid "Qoşulmaq üçün"
-msgstr "Qoşulmaq üçün"
+msgstr "To join"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:203
 msgid "Tələbələr link, PIN və ya QR kod ilə qoşula bilər."
-msgstr "Tələbələr link, PIN və ya QR kod ilə qoşula bilər."
+msgstr "Students can join via link, PIN or QR code."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:204
 #: apps/live_exam/static/js/host_lobby/utils.js:249
 msgid "Canlı PIN"
-msgstr "Canlı PIN"
+msgstr "Live PIN"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:205
 msgid "İştirakçılar gözlənilir"
-msgstr "İştirakçılar gözlənilir"
+msgstr "Waiting for participants"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:206
 msgid "Müəllim Başla düyməsini sıxan kimi ilk sual yayımlanacaq."
-msgstr "Müəllim Başla düyməsini sıxan kimi ilk sual yayımlanacaq."
+msgstr ""
+"The first question will be shown as soon as the teacher presses Start."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:207
 msgid "{count} iştirakçı qoşulub"
-msgstr "{count} iştirakçı qoşulub"
+msgstr "{count} participants joined"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:208
 msgid "Hələ heç kim qoşulmayıb"
-msgstr "Hələ heç kim qoşulmayıb"
+msgstr "No one has joined yet"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:209
 msgid "Qoşulan iştirakçılar"
-msgstr "Qoşulan iştirakçılar"
+msgstr "Joined participants"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:210
 msgid "İştirakçılar burada görünəcək."
-msgstr "İştirakçılar burada görünəcək."
+msgstr "Participants will appear here."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:211
 msgid "Qoşulma bağlanıb"
-msgstr "Qoşulma bağlanıb"
+msgstr "Joining is closed"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:212
 msgid "Yeni iştirakçılar artıq bu lobby-yə daxil ola bilməz."
-msgstr "Yeni iştirakçılar artıq bu lobby-yə daxil ola bilməz."
+msgstr "New participants can no longer enter this lobby."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:213
 msgid "İştirakçını çıxar"
-msgstr "İştirakçını çıxar"
+msgstr "Remove participant"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:247
 msgid "Canli sinava katıl"
-msgstr "Canli sinava katıl"
+msgstr "Join the live exam"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:248
 msgid "Öğrenciler bağlantı, PIN veya QR kod ile katılabilir."
-msgstr "Öğrenciler bağlantı, PIN veya QR kod ile katılabilir."
+msgstr "Students can join via link, PIN or QR code."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:250
 msgid "Katılımcılar bekleniyor"
-msgstr "Katılımcılar bekleniyor"
+msgstr "Waiting for participants"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:251
 msgid "Öğretmen Başlat'a basar basmaz ilk soru gösterilecek."
-msgstr "Öğretmen Başlat'a basar basmaz ilk soru gösterilecek."
+msgstr ""
+"The first question will be shown as soon as the teacher presses Start."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:252
 msgid "{count} katılımcı bağlandı"
-msgstr "{count} katılımcı bağlandı"
+msgstr "{count} participants joined"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:253
 msgid "Henüz kimse bağlanmadı"
-msgstr "Henüz kimse bağlanmadı"
+msgstr "No one has joined yet"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:254
 msgid "Katılan katılımcılar"
-msgstr "Katılan katılımcılar"
+msgstr "Joined participants"
 
 #: apps/live_exam/static/js/host_lobby/utils.js:255
 msgid "Katılımcılar burada görünecek."
-msgstr "Katılımcılar burada görünecek."
+msgstr "Participants will appear here."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:257
 msgid "Öğretmen yeniden açana kadar yeni katılımcı giremez."
-msgstr "Öğretmen yeniden açana kadar yeni katılımcı giremez."
+msgstr "No new participants can join until the teacher reopens it."
 
 #: apps/live_exam/static/js/host_lobby/utils.js:258
 msgid "Katılımcıyı çıkar"
-msgstr "Katılımcıyı çıkar"
+msgstr "Remove participant"
 
 #: apps/live_exam/static/js/host_lobby_shell.js:59
 msgid "Lobbi açıqdır"
-msgstr "Lobbi açıqdır"
+msgstr "The lobby is open"
 
 #: apps/live_exam/static/js/host_lobby_shell.js:62
 msgid "Növbəti"
-msgstr "Növbəti"
+msgstr "Next"
 
 #: apps/live_exam/static/js/host_lobby_shell.js:77
 msgid "Lobi açık"
-msgstr "Lobi açık"
+msgstr "The lobby is open"
 
 #: apps/projects/static/projects/js/project_detail.js:38
 msgid "Göndərməni təsdiqləyin"
-msgstr "Göndərməni təsdiqləyin"
+msgstr "Confirm the submission"
 
 #: apps/projects/static/projects/js/project_detail.js:39
 msgid "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
-msgstr "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
+msgstr "Are you sure you want to submit this coursework?"
 
 #: apps/projects/static/projects/js/project_detail.js:40
 msgid "Göndər"
-msgstr "Göndər"
+msgstr "Submit"
 
 #: apps/trial_exams/static/trial_exams/js/trial_exam.js:21
 msgid "Yalnız PDF formatı qəbul olunur."
-msgstr "Yalnız PDF formatı qəbul olunur."
+msgstr "Only PDF format is accepted."
 
 #: apps/trial_exams/static/trial_exams/js/trial_exam.js:22
 msgid "Fayl ölçüsü 25 MB-dan çox ola bilməz."
-msgstr "Fayl ölçüsü 25 MB-dan çox ola bilməz."
+msgstr "The file size cannot exceed 25 MB."
 
 #: apps/trial_exams/static/trial_exams/js/trial_exam.js:23
 msgid "Zəhmət olmasa sualları PDF formatında yükləyin."
-msgstr "Zəhmət olmasa sualları PDF formatında yükləyin."
+msgstr "Please upload the questions in PDF format."
 
 #: static/js/ai_assistant.js:27
 msgid "Sorğular"
-msgstr "Sorğular"
+msgstr "Requests"
 
 #: static/js/ai_assistant.js:28
 msgid "yüklənir..."
-msgstr "yüklənir..."
+msgstr "loading..."
 
 #: static/js/ai_assistant.js:30
 msgid ""
 "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
 " bilərəm?"
 msgstr ""
-"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
-" bilərəm?"
+"Hello! I am EMSArena AI. I am ready to answer your questions. How can I help"
+" you?"
 
 #: static/js/ai_assistant.js:31
 msgid "AI sorğu limiti hazırda aktiv deyil."
-msgstr "AI sorğu limiti hazırda aktiv deyil."
+msgstr "The AI request limit is not active at the moment."
 
 #: static/js/ai_assistant.js:32
 msgid "Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."
-msgstr "Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "The request was not sent. Refresh the page and try again."
 
 #: static/js/ai_assistant.js:33
 msgid "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
-msgstr "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
+msgstr "An error occurred. Please try again."
 
 #: static/js/ai_assistant.js:34
 msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
-msgstr "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
+msgstr "Network error. Please try again."
