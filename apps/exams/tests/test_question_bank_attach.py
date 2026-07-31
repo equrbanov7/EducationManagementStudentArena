@@ -52,30 +52,44 @@ class QuestionBankLibraryTests(TestCase):
         self.assertEqual(first.options.count(), 4)
         self.assertEqual(set(first.options.filter(is_correct=True).values_list("label", flat=True)), {"B"})
 
-    def test_exam_center_user_sees_only_own_banks(self):
-        """#10: imtahan mərkəzi istifadəçisi YALNIZ öz yaratdığı bankları görür —
-        başqa istifadəçinin eyni təşkilatda paylaşdığı bankı yox."""
+    def test_exam_center_user_sees_all_org_banks(self):
+        """İmtahan mərkəzi bank hovuzunun idarəçisidir: təşkilatın BÜTÜN aktiv
+        banklarını görür (başqa mərkəz üzvünün paylaşılmamış bankı daxil) —
+        amma başqa təşkilatın bankını yox. (Köhnə "yalnız öz bankları" qaydası
+        qəbul edilən bankın linkini 404 edirdi.)"""
         from unittest.mock import patch
 
         other = User.objects.create_user("qb_other", "qb_other@example.com", "pw")
-        shared_by_other = QuestionBank.objects.create(
-            name="Shared", created_by=other, organization=self.org, language="az", is_shared=True
+        private_by_other = QuestionBank.objects.create(
+            name="Private-other", created_by=other, organization=self.org, language="az", is_shared=False
         )
         own_shared = QuestionBank.objects.create(
             name="Own", created_by=self.teacher, organization=self.org, language="az", is_shared=True
         )
+        foreign_owner = User.objects.create_user("qb_foreign", "qb_foreign@example.com", "pw")
+        foreign_org = Organization.objects.create(
+            name="Foreign Org QBX",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=foreign_owner,
+            status="active",
+            is_active=True,
+        )
+        foreign_bank = QuestionBank.objects.create(
+            name="Foreign", created_by=foreign_owner, organization=foreign_org, language="az", is_shared=True
+        )
 
-        # Adi istifadəçi (teacher rolu): öz + paylaşılan hamısını görür.
+        # Adi istifadəçi (teacher rolu): öz + paylaşılan; başqasının gizli bankı yox.
         seen = set(accessible_banks(self.teacher, self.org).values_list("id", flat=True))
-        self.assertIn(shared_by_other.id, seen)
         self.assertIn(own_shared.id, seen)
+        self.assertNotIn(private_by_other.id, seen)
 
-        # İmtahan mərkəzi istifadəçisi: yalnız öz banklarını görür.
+        # İmtahan mərkəzi istifadəçisi: təşkilatın bütün bankları, yad org yox.
         with patch("apps.exams.services.access_policy.is_exam_center_user", return_value=True):
             ec_seen = set(accessible_banks(self.teacher, self.org).values_list("id", flat=True))
         self.assertIn(own_shared.id, ec_seen)
         self.assertIn(self.bank.id, ec_seen)
-        self.assertNotIn(shared_by_other.id, ec_seen)
+        self.assertIn(private_by_other.id, ec_seen)
+        self.assertNotIn(foreign_bank.id, ec_seen)
 
     def test_attach_snapshots_questions_into_exam(self):
         bank_questions = create_bank_questions_from_parsed(

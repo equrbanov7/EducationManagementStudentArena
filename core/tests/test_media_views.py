@@ -105,6 +105,36 @@ class ProtectedMediaViewTest(TestCase):
             response = protected_media(request, path="projects/submissions/sample.txt")
             self.assertEqual(response.status_code, 200)
 
+    def test_private_file_denied_for_plain_staff_user(self):
+        """P0 reqressiya: ``is_staff`` private media-ya çıxış VERMƏMƏLİDİR.
+
+        ``is_staff`` Django-nun admin-panel bayrağıdır — tenant daşımır və
+        provision/seed yolları onu adi istifadəçilərə verir. Əvvəl bu bayraq
+        bütün tenant-ların bütün private fayllarına şərtsiz giriş verirdi
+        (cross-tenant sızma: jurnal, cavab vərəqi, apellyasiya sənədi).
+        """
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        staff_user = User.objects.create_user("plain_staff", "plain_staff@example.com", "pw")
+        staff_user.is_staff = True
+        staff_user.save(update_fields=["is_staff"])
+
+        factory = RequestFactory()
+        request = factory.get("/media/projects/submissions/sample.txt")
+        request.user = staff_user
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path="projects/submissions/sample.txt")
+
     def test_labs_submission_redirects_unauthenticated(self):
         """Labs submission files must not be publicly accessible."""
         from django.contrib.auth.models import AnonymousUser

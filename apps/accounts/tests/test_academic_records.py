@@ -331,3 +331,88 @@ class RecordsEndpointTest(_RecordsBase):
         self.assertEqual(resp.status_code, 200)
         html = resp.content.decode()
         self.assertNotIn("profile-section--academic-records", html)
+
+
+class RecordsRoleGateTest(_RecordsBase):
+    """Endpoint-lər rol qapısından keçməlidir — scope tək başına hüquq deyil.
+
+    2026-07-31 auditi: `_scope()` yalnız `scope.has_structure_access` yoxlayırdı,
+    `_resolve_unit_scope` isə rolun adına baxmadan HƏR üzvlüyün `scope_unit`-ini
+    scope-a əlavə edir. «Müəllimi kafedraya təyin et» əməliyyatı məhz onu
+    doldurur — yəni adi müəllim öz kafedra alt-ağacındakı bütün tələbələrin GPA
+    və transkriptini oxuya bilirdi. Sidebar ona bu bölməni vermir, yəni endpoint
+    UI-dan geniş idi.
+    """
+
+    def _client(self, user):
+        client = Client()
+        client.force_login(user)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        return client
+
+    def _assign_teacher_to_chair(self):
+        membership = Membership.objects.get(user=self.teacher, organization=self.org)
+        membership.scope_unit = self.chair_a
+        membership.save(update_fields=["scope_unit"])
+        return membership
+
+    def test_teacher_with_unit_scope_still_has_no_records_access(self):
+        self._assign_teacher_to_chair()
+
+        resp = self._client(self.teacher).get(reverse("accounts:records_overview_data"))
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(resp.json()["has_access"])
+
+    def test_teacher_with_unit_scope_cannot_read_a_student_transcript(self):
+        """Ən həssas endpoint: bir tələbənin semestr detalı + transkripti."""
+        self._assign_teacher_to_chair()
+        student = self.students_a[0]
+
+        resp = self._client(self.teacher).get(
+            reverse("accounts:records_student_detail"),
+            {"student": student.id},
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(resp.json().get("has_access", False))
+
+    def test_teacher_with_unit_scope_cannot_enumerate_structure(self):
+        """Axtarış seçiciləri də struktur/PII sızdırır — eyni qapıdan keçir."""
+        self._assign_teacher_to_chair()
+        client = self._client(self.teacher)
+
+        for route in ("accounts:records_faculty_search", "accounts:records_department_search"):
+            with self.subTest(route=route):
+                resp = client.get(reverse(route))
+                self.assertEqual(resp.status_code, 200)
+                self.assertFalse(resp.json().get("has_access", True) and resp.json().get("results"))
+
+    def test_dean_with_unit_scope_keeps_access(self):
+        """Qapı idarəetmə rollarını kəsmir — dekan öz alt-ağacını görməyə davam edir."""
+        resp = self._client(self.dean).get(reverse("accounts:records_overview_data"))
+
+        self.assertEqual(resp.status_code, 200)
+        payload = resp.json()
+        self.assertTrue(payload["has_access"])
+        self.assertEqual(payload["total"], 3)  # yalnız fakültə A
+
+    def test_role_gate_matches_the_sidebar_section_grant(self):
+        """Endpoint UI-dan geniş olmamalıdır.
+
+        Sidebar `academic-records` bölməsini superadmin / org_admin /
+        unit_manager (dekan, kafedra müdiri) / imtahan mərkəzinə verir — rol
+        qapısı da eyni dəsti tanımalıdır.
+        """
+        from apps.accounts.views.academic_records import ACADEMIC_RECORDS_ROLES
+
+        self.assertIn("dean", ACADEMIC_RECORDS_ROLES)
+        self.assertIn("department_head", ACADEMIC_RECORDS_ROLES)
+        self.assertIn("exam_center", ACADEMIC_RECORDS_ROLES)
+        self.assertIn("ikt_rehber", ACADEMIC_RECORDS_ROLES)
+        self.assertNotIn("teacher", ACADEMIC_RECORDS_ROLES)
+        self.assertNotIn("assistant_teacher", ACADEMIC_RECORDS_ROLES)
+        self.assertNotIn("student", ACADEMIC_RECORDS_ROLES)
+        self.assertNotIn("tutor", ACADEMIC_RECORDS_ROLES)

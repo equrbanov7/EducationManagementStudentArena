@@ -48,8 +48,9 @@
         <input type="hidden" name="deleted_block_ids" id="deleted_block_ids">
 
         <div class="settings-card">
-            <label><i class="fas fa-random"></i> {% trans "random_question_count" context "exams.form.exam.label" %}:</label>
+            <label for="random-question-count"><i class="fas fa-random"></i> {% trans "random_question_count" context "exams.form.exam.label" %}:</label>
             <input type="number"
+                   id="random-question-count"
                    name="random_question_count"
                    class="form-control-custom"
                    min="0"
@@ -61,9 +62,9 @@
         </div>
 
         <div class="settings-card">
-            <label><i class="fas fa-globe"></i> {% trans "Sualların dili" %}:</label>
+            <label for="question-bank-language"><i class="fas fa-globe"></i> {% trans "Sualların dili" %}:</label>
             <div class="bootstrap-single-select">
-                <select name="language" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                <select id="question-bank-language" name="language" class="form-select bootstrap-single-select__native" data-bootstrap-select>
                     {% for code, label in language_choices %}
                     <option value="{{ code }}" {% if code == selected_language %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -90,8 +91,9 @@
 
                     <div class="block-body">
                         <div class="form-group">
-                            <label>{% trans "label_block_name" context "exams.template.create_question_bank" %}:</label>
+                            <label for="block-name-{{ forloop.counter }}">{% trans "label_block_name" context "exams.template.create_question_bank" %}:</label>
                             <input type="text"
+                                   id="block-name-{{ forloop.counter }}"
                                    name="block_name_{{ forloop.counter }}"
                                    value="{{ item.obj.name }}"
                                    class="form-control-custom block-name-input"
@@ -99,8 +101,9 @@
                         </div>
 
                         <div class="form-group time-input-group">
-                            <label><i class="far fa-clock"></i> {% trans "label_block_time_minutes" context "exams.template.create_question_bank" %}:</label>
+                            <label for="block-time-{{ forloop.counter }}"><i class="far fa-clock"></i> {% trans "label_block_time_minutes" context "exams.template.create_question_bank" %}:</label>
                             <input type="number"
+                                   id="block-time-{{ forloop.counter }}"
                                    name="block_time_{{ forloop.counter }}"
                                    value="{{ item.obj.time_limit_minutes|default:'' }}"
                                    class="form-control-custom"
@@ -184,8 +187,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
-                            <textarea name="block_content_{{ forloop.counter }}" class="form-control-custom" data-written-question-textarea placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}">{{ item.text_content }}</textarea>
+                            <label for="block-content-{{ forloop.counter }}">{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
+                            <textarea id="block-content-{{ forloop.counter }}" name="block_content_{{ forloop.counter }}" class="form-control-custom" data-written-question-textarea placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}">{{ item.text_content }}</textarea>
                             <small class="form-help-text">{% trans "help_question_formats" context "exams.template.create_question_bank" %}</small>
                         </div>
                     </div>
@@ -203,13 +206,13 @@
 
                     <div class="block-body">
                         <div class="form-group">
-                            <label>{% trans "label_block_name" context "exams.template.create_question_bank" %}:</label>
-                            <input type="text" name="block_name_1" value="{% trans 'block_default' context 'exams.template.create_question_bank' %} 1" class="form-control-custom block-name-input" required>
+                            <label for="block-name-1">{% trans "label_block_name" context "exams.template.create_question_bank" %}:</label>
+                            <input type="text" id="block-name-1" name="block_name_1" value="{% trans 'block_default' context 'exams.template.create_question_bank' %} 1" class="form-control-custom block-name-input" required>
                         </div>
 
                         <div class="form-group time-input-group">
-                            <label><i class="far fa-clock"></i> {% trans "label_block_time_minutes" context "exams.template.create_question_bank" %}:</label>
-                            <input type="number" name="block_time_1" class="form-control-custom" placeholder="{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}">
+                            <label for="block-time-1"><i class="far fa-clock"></i> {% trans "label_block_time_minutes" context "exams.template.create_question_bank" %}:</label>
+                            <input type="number" id="block-time-1" name="block_time_1" class="form-control-custom" placeholder="{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}">
                         </div>
 
                         {% if exam.exam_type == "written" %}
@@ -289,8 +292,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
-                            <textarea name="block_content_1" class="form-control-custom" data-written-question-textarea placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}"></textarea>
+                            <label for="block-content-1">{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
+                            <textarea id="block-content-1" name="block_content_1" class="form-control-custom" data-written-question-textarea placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}"></textarea>
                             <small class="form-help-text">{% trans "help_question_formats" context "exams.template.create_question_bank" %}</small>
                         </div>
                     </div>

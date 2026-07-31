@@ -9,11 +9,12 @@ Object.assign(ExamSupervision, {
         if (document.getElementById("supervision-trial-banner")) return;
 
         var i18n = window.SUPERVISION_ACK_I18N || {};
-        var title = i18n.trialViolationTitle || "Sınaq rejimi — imtahan dayandırılmadı";
+        var title = i18n.trialViolationTitle || gettext("Sınaq rejimi — imtahan dayandırılmadı");
         var message =
             i18n.trialViolationMsg ||
-            "Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. " +
-                "Sınaq yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz.";
+            gettext(
+                "Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
+            );
 
         var banner = document.createElement("div");
         banner.id = "supervision-trial-banner";
@@ -33,7 +34,7 @@ Object.assign(ExamSupervision, {
         banner.querySelector(".supervision-trial-banner__title").textContent = title;
         banner.querySelector(".supervision-trial-banner__text").textContent = message;
         banner.querySelector(".supervision-trial-banner__count").textContent =
-            (this._violationLabel || "Pozuntu") + ": " + this.violationCount + " / " + this.maxViolations;
+            (this._violationLabel || gettext("Pozuntu")) + ": " + this.violationCount + " / " + this.maxViolations;
         document.body.appendChild(banner);
 
         document.getElementById("supervision-trial-dismiss").addEventListener("click", function () {

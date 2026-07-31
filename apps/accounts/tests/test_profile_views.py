@@ -2655,7 +2655,14 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'id="categoryEditModal"', html=False)
         self.assertContains(response, 'id="categoryDeleteModal"', html=False)
 
-    def test_superadmin_category_management_link_is_positioned_with_education_items(self):
+    def test_blog_and_category_links_stay_together_in_the_content_group(self):
+        """Bloq bəndləri öz qrupunda və məntiqi sırada qalır.
+
+        2026-07-31 sidebar yenidənqurması: əvvəllər `posts`, `create-post`,
+        `create-category`, `category-management` «Təhsil» qrupunda, moderasiya
+        isə «Müəllim» qrupunda idi — başlıq məzmuna uyğun gəlmirdi. İndi hamısı
+        «Bloq və məzmun» qrupundadır və imtahan bəndlərindən SONRA gəlir.
+        """
         superuser = User.objects.create_superuser(
             username="profile_superadmin_category_sidebar",
             email="profile_superadmin_category_sidebar@example.com",
@@ -2686,7 +2693,9 @@ class ProfileViewTest(TestCase):
 
         self.assertLess(create_post_index, create_category_index)
         self.assertLess(create_category_index, manage_categories_index)
-        self.assertLess(manage_categories_index, my_exams_index)
+        # Bloq bəndləri artıq imtahan bəndləri ilə qarışmır — öz qrupunda,
+        # tədris bəndlərindən sonra gəlir.
+        self.assertLess(my_exams_index, create_post_index)
 
     def test_profile_create_post_section_renders_inline_form(self):
         superuser = User.objects.create_superuser(

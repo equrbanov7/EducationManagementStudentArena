@@ -24,7 +24,7 @@
     </div>
 
     <div class="container">
-        <h1 class="c3-1">{% trans "heading" context "organizations.dashboard" %}</h1>
+        <h1 class="dashboard-1">{% trans "heading" context "organizations.dashboard" %}</h1>
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -99,7 +99,7 @@
             {% if user_memberships %}
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     {% for membership in user_memberships %}
-                    <span class="c3-2">
+                    <span class="dashboard-2">
                         {{ membership.role.display_name }}
                         {% if membership.scope_unit %}
                         ({{ membership.scope_unit.name }})

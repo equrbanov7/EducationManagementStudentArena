@@ -87,6 +87,16 @@ class _Base(TestCase):
         kwargs.update(overrides)
         return submit_question_set(**kwargs)
 
+    def _subject(self, name="İnformatika", code="INF101", group=None):
+        """Registrar fənni yaradır; verilərsə qrupa bağlayır (müəllim fənləri
+        qrup fənlərinin birləşməsindən gəlir)."""
+        from apps.registrar.models import Subject
+
+        subject = Subject.objects.create(organization=self.org, code=code, name=name)
+        if group is not None:
+            group.subjects.add(subject)
+        return subject
+
 
 class SubmissionServiceTests(_Base):
     def test_submit_builds_snapshot_and_counts(self):
@@ -142,6 +152,20 @@ class SubmissionServiceTests(_Base):
         # Müəllimə qərar bildirişi.
         self.assertTrue(InAppNotification.objects.filter(recipient=self.teacher).exists())
 
+    def test_accept_carries_submission_meta_to_new_bank(self):
+        # Fənn (kataloq bağlantısı), imtahan növü və mənbə müəllim yeni banka köçür.
+        subject = self._subject(name="Riyazi analiz", code="RIY201")
+        submission = self._submission(
+            title="Meta daşıma", subject=subject.name, subject_ref=subject, exam_kind="midterm"
+        )
+        bank, _created = accept_submission(submission, reviewer=self.exam_center)
+        self.assertEqual(bank.subject_ref, subject)
+        self.assertEqual(bank.subject, "Riyazi analiz")
+        self.assertEqual(bank.exam_kind, "midterm")
+        self.assertEqual(bank.source_teacher, self.teacher)
+        # Banklar default gizlidir — paylaşım UI-dan çıxarılıb.
+        self.assertFalse(bank.is_shared)
+
     def test_accept_into_existing_bank(self):
         existing = QuestionBank.objects.create(
             name="Mövcud bank",
@@ -188,13 +212,15 @@ class SubmissionViewTests(_Base):
         from apps.exams.models import StudentGroup
 
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="842A1")
+        subject = self._subject(name="Riyaziyyat", code="RIY101", group=group)
         client = self._client_for(self.teacher)
         response = client.post(
             reverse("exams:question_submission_create"),
             {
                 "action": "save",
                 "title": "View testi",
-                "subject": "Riyaziyyat",
+                "subject": str(subject.pk),
+                "exam_kind": "final",
                 "group_id": str(group.id),
                 "language": "az",
                 "raw_text": VALID_TEXT,
@@ -205,6 +231,8 @@ class SubmissionViewTests(_Base):
         self.assertEqual(submission.teacher, self.teacher)
         self.assertEqual(submission.question_count, 2)
         self.assertEqual(submission.subject, "Riyaziyyat")
+        self.assertEqual(submission.subject_ref, subject)
+        self.assertEqual(submission.exam_kind, "final")
         self.assertEqual(submission.group_label, "842A1")
 
     def test_preview_shows_warnings_without_creating(self):
@@ -281,13 +309,15 @@ class SubmissionViewTests(_Base):
         from apps.exams.models import StudentGroup
 
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="Dropdown qrupu")
+        subject = self._subject(name="Fizika", code="FIZ101", group=group)
         client = self._client_for(self.teacher)
         client.post(
             reverse("exams:question_submission_create"),
             {
                 "action": "save",
                 "title": "Dropdown testi",
-                "subject": "Fizika",
+                "subject": str(subject.pk),
+                "exam_kind": "quiz",
                 "group_id": str(group.id),
                 "group_label": "",
                 "language": "az",
@@ -301,11 +331,9 @@ class SubmissionViewTests(_Base):
     def test_view_subject_scoped_to_group_subjects(self):
         # Bənd 4-5: qrupa təyin olunmuş fənn seçiləndə göndəriş uğurludur.
         from apps.exams.models import StudentGroup
-        from apps.registrar.models import Subject
 
-        subject = Subject.objects.create(organization=self.org, code="INF101", name="İnformatika")
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-fenn")
-        group.subjects.add(subject)
+        subject = self._subject(group=group)
 
         client = self._client_for(self.teacher)
         response = client.post(
@@ -313,7 +341,8 @@ class SubmissionViewTests(_Base):
             {
                 "action": "save",
                 "title": "Fənn skoplu",
-                "subject": "İnformatika",
+                "subject": str(subject.pk),
+                "exam_kind": "final",
                 "group_id": str(group.id),
                 "language": "az",
                 "raw_text": VALID_TEXT,
@@ -322,6 +351,7 @@ class SubmissionViewTests(_Base):
         self.assertEqual(response.status_code, 302)
         submission = QuestionSubmission.objects.get(title="Fənn skoplu")
         self.assertEqual(submission.subject, "İnformatika")
+        self.assertEqual(submission.subject_ref, subject)
         self.assertEqual(submission.student_group, group)
 
     def test_create_page_renders_subject_dropdown_and_map(self):
@@ -342,13 +372,12 @@ class SubmissionViewTests(_Base):
         self.assertContains(response, "question_submission_subjects.js")  # skoplama skripti
 
     def test_view_rejects_subject_not_in_group(self):
-        # Bənd 5: qrupun fənlərinə aid olmayan fənn rədd edilir.
+        # Bənd 5: müəllimin fənləri arasında olmayan fənn rədd edilir.
         from apps.exams.models import StudentGroup
-        from apps.registrar.models import Subject
 
-        subject = Subject.objects.create(organization=self.org, code="INF101", name="İnformatika")
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-fenn2")
-        group.subjects.add(subject)
+        self._subject(group=group)
+        foreign_subject = self._subject(name="Kimya", code="KIM101")  # heç bir qrupa bağlı deyil
 
         client = self._client_for(self.teacher)
         response = client.post(
@@ -356,7 +385,8 @@ class SubmissionViewTests(_Base):
             {
                 "action": "save",
                 "title": "Yanlış fənn",
-                "subject": "Kimya",  # qrupun fənni deyil
+                "subject": str(foreign_subject.pk),  # müəllimin fənni deyil
+                "exam_kind": "final",
                 "group_id": str(group.id),
                 "language": "az",
                 "raw_text": VALID_TEXT,
@@ -365,17 +395,41 @@ class SubmissionViewTests(_Base):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(QuestionSubmission.objects.filter(title="Yanlış fənn").exists())
 
+    def test_view_requires_exam_kind(self):
+        # İmtahan növü məcburidir — seçilməyibsə göndəriş yaranmır.
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-novsuz")
+        subject = self._subject(group=group)
+
+        client = self._client_for(self.teacher)
+        response = client.post(
+            reverse("exams:question_submission_create"),
+            {
+                "action": "save",
+                "title": "Növsüz göndəriş",
+                "subject": str(subject.pk),
+                "group_id": str(group.id),
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(QuestionSubmission.objects.filter(title="Növsüz göndəriş").exists())
+
     def test_view_save_respects_selection_and_points(self):
         from apps.exams.models import StudentGroup
 
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i")
+        subject = self._subject(group=group)
         client = self._client_for(self.teacher)
         client.post(
             reverse("exams:question_submission_create"),
             {
                 "action": "save",
                 "title": "Seçim testi",
-                "subject": "İnformatika",
+                "subject": str(subject.pk),
+                "exam_kind": "final",
                 "group_id": str(group.id),
                 "language": "az",
                 "raw_text": VALID_TEXT,
@@ -393,13 +447,15 @@ class SubmissionViewTests(_Base):
         from apps.exams.models import StudentGroup
 
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i")
+        subject = self._subject(group=group)
         client = self._client_for(self.teacher)
         client.post(
             reverse("exams:question_submission_create"),
             {
                 "action": "save",
                 "title": "Qeydli göndəriş",
-                "subject": "İnformatika",
+                "subject": str(subject.pk),
+                "exam_kind": "final",
                 "group_id": str(group.id),
                 "teacher_note": "5-8-ci suallar mühazirə 3-ə aiddir.",
                 "language": "az",
@@ -414,14 +470,54 @@ class SubmissionViewTests(_Base):
         )
         self.assertContains(response, "mühazirə 3-ə aiddir")
 
+    def test_detail_edit_uses_workbench_and_resubmits(self):
+        # Detal redaktəsi yeni-göndəriş workbench-i ilə eynidir: GET-də workbench
+        # render olunur, action=save yenidən göndərmə (resubmit) deməkdir.
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-resubmit")
+        subject = self._subject(group=group)
+        submission = self._submission(title="Workbench redaktə", raw_text=TEXT_WITH_PROBLEM)
+        reject_submission(submission, reviewer=self.exam_center, note="Düzəldin.")
+
+        client = self._client_for(self.teacher)
+        url = reverse("exams:question_submission_detail", kwargs={"submission_id": submission.id})
+        response = client.get(url)
+        self.assertContains(response, 'id="saveForm"')
+        self.assertContains(response, "q-card")  # workbench sual kartları
+
+        response = client.post(
+            url,
+            {
+                "action": "save",
+                "title": "Workbench redaktə 2",
+                "subject": str(subject.pk),
+                "exam_kind": "final",
+                "group_id": str(group.id),
+                "language": "az",
+                "raw_text": VALID_TEXT,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        submission.refresh_from_db()
+        self.assertEqual(submission.status, QuestionSubmission.STATUS_PENDING)
+        self.assertEqual(submission.title, "Workbench redaktə 2")
+        self.assertEqual(submission.resubmission_count, 1)
+        self.assertEqual(submission.error_count, 0)
+
     def test_view_submit_requires_group(self):
+        from apps.exams.models import StudentGroup
+
+        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-qrupsuz")
+        subject = self._subject(group=group)
         client = self._client_for(self.teacher)
         response = client.post(
             reverse("exams:question_submission_create"),
             {
                 "action": "save",
                 "title": "Qrupsuz",
-                "subject": "Fizika",
+                "subject": str(subject.pk),
+                "exam_kind": "final",
                 "group_id": "",
                 "group_label": "",
                 "language": "az",
@@ -564,3 +660,186 @@ class ProfileSectionTests(_Base):
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
         # İcazəsiz bölmə default bölməyə düşür — göndəriş paneli görünmür.
         self.assertNotContains(response, "Yeni göndəriş", status_code=200)
+
+    def test_teacher_sees_accepted_bank_name_in_list(self):
+        # Qəbul edilən göndərişdə mərkəzin yazdığı bankın adı müəllimə görünür.
+        submission = self._submission(title="Bank izi toplusu")
+        accept_submission(submission, reviewer=self.exam_center, new_bank_name="İz bankı 2026")
+        client = self._client_for(self.teacher)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
+        self.assertContains(response, "İz bankı 2026")
+        self.assertContains(response, "bankına əlavə olunub")
+
+
+class QuestionBankCatalogTests(_Base):
+    """Bank yaratma kartının yeni sahələri: kataloq fənni, imtahan növü,
+    mənbə müəllim; siyahı filtri və müəllim axtarışı endpoint-i."""
+
+    def test_center_creates_bank_with_catalog_fields(self):
+        subject = self._subject(name="Aqrokimya", code="AQR201")
+        client = self._client_for(self.exam_center)
+        response = client.post(
+            reverse("exams:question_bank_list"),
+            {
+                "action": "create_bank",
+                "name": "Aqrokimya final bankı",
+                "subject_id": str(subject.pk),
+                "exam_kind": "final",
+                "source_teacher_id": str(self.teacher.pk),
+                "language": "az",
+                "default_question_type": "test",
+                # Köhnə formadan gələ biləcək paylaşım parametri nəzərə alınmır.
+                "is_shared": "1",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        bank = QuestionBank.objects.get(name="Aqrokimya final bankı")
+        self.assertEqual(bank.subject_ref, subject)
+        self.assertEqual(bank.subject, "Aqrokimya")
+        self.assertEqual(bank.exam_kind, "final")
+        self.assertEqual(bank.source_teacher, self.teacher)
+        self.assertFalse(bank.is_shared)
+
+    def test_bank_update_keeps_legacy_subject_text(self):
+        bank = QuestionBank.objects.create(
+            name="Köhnə bank",
+            subject="Köhnə fənn",
+            organization=self.org,
+            created_by=self.exam_center,
+        )
+        client = self._client_for(self.exam_center)
+        client.post(
+            reverse("exams:question_bank_update", kwargs={"bank_id": bank.id}),
+            {
+                "name": "Köhnə bank",
+                "subject_id": "text:Köhnə fənn",
+                "exam_kind": "quiz",
+                "language": "az",
+                "default_question_type": "test",
+            },
+        )
+        bank.refresh_from_db()
+        self.assertEqual(bank.subject, "Köhnə fənn")
+        self.assertIsNone(bank.subject_ref)
+        self.assertEqual(bank.exam_kind, "quiz")
+
+    def test_bank_section_kind_filter(self):
+        QuestionBank.objects.create(
+            name="Final toplusu QBX", organization=self.org, created_by=self.exam_center, exam_kind="final"
+        )
+        QuestionBank.objects.create(
+            name="Quiz toplusu QBX", organization=self.org, created_by=self.exam_center, exam_kind="quiz"
+        )
+        client = self._client_for(self.exam_center)
+        response = client.get(f"{reverse('accounts:profile')}?section=question-bank&bank_kind=final")
+        self.assertContains(response, "Final toplusu QBX")
+        self.assertNotContains(response, "Quiz toplusu QBX")
+
+    def test_bank_section_search_matches_teacher_and_subject_code(self):
+        subject = self._subject(name="Bitki mühafizəsi", code="BM203")
+        QuestionBank.objects.create(
+            name="Axtarış bankı QBX",
+            organization=self.org,
+            created_by=self.exam_center,
+            subject_ref=subject,
+            source_teacher=self.teacher,
+        )
+        client = self._client_for(self.exam_center)
+        # Fənn kodu üzrə tapılır.
+        response = client.get(f"{reverse('accounts:profile')}?section=question-bank&bank_search=BM203")
+        self.assertContains(response, "Axtarış bankı QBX")
+        # Müəllim istifadəçi adı üzrə tapılır.
+        response = client.get(f"{reverse('accounts:profile')}?section=question-bank&bank_search=qs_teacher")
+        self.assertContains(response, "Axtarış bankı QBX")
+
+    def test_bank_teacher_search_endpoint(self):
+        client = self._client_for(self.exam_center)
+        response = client.get(reverse("exams:bank_teacher_search"), {"q": "qs_teacher"})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(any(item["id"] == str(self.teacher.pk) for item in payload["results"]))
+
+    def test_center_member_can_open_colleague_bank(self):
+        # Mərkəz bank hovuzunun idarəçisidir: başqa mərkəz üzvünün yaratdığı
+        # (paylaşılmamış) org bankı da açılmalıdır — əvvəl 404 idi.
+        other_center = User.objects.create_user("qs_center2", "qs_center2@test.az", PASSWORD)
+        _assign_user_to_org(other_center, self.org, ProfileRole.MEMBER, "exam_center")
+        bank = QuestionBank.objects.create(
+            name="Kolleqa bankı QBX", organization=self.org, created_by=other_center, is_shared=False
+        )
+        response = self._client_for(self.exam_center).get(
+            reverse("exams:question_bank_detail", kwargs={"bank_id": bank.id})
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_center_cannot_open_foreign_org_bank(self):
+        foreign_owner = User.objects.create_user("qs_foreign", "qs_foreign@test.az", PASSWORD)
+        foreign_org = Organization.objects.create(
+            name="Foreign University",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=foreign_owner,
+            status="active",
+            is_active=True,
+        )
+        bank = QuestionBank.objects.create(name="Yad bank", organization=foreign_org, created_by=foreign_owner)
+        response = self._client_for(self.exam_center).get(
+            reverse("exams:question_bank_detail", kwargs={"bank_id": bank.id})
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class SubmissionQuestionsEndpointTests(_Base):
+    """Review sual siyahısının lazy fraqment endpoint-i: səhifələmə, filtr,
+    axtarış və icazələr."""
+
+    def _payload(self, client, submission, **params):
+        response = client.get(
+            reverse("exams:question_submission_questions", kwargs={"submission_id": submission.id}), params
+        )
+        self.assertEqual(response.status_code, 200)
+        return response.json()
+
+    def test_endpoint_paginates_with_stable_numbers(self):
+        submission = self._submission(title="Lazy səhifələmə")
+        client = self._client_for(self.exam_center)
+        first = self._payload(client, submission, offset=0, limit=1)
+        self.assertEqual(first["returned"], 1)
+        self.assertTrue(first["has_more"])
+        self.assertIn("#1", first["html"])
+        second = self._payload(client, submission, offset=1, limit=1)
+        self.assertEqual(second["returned"], 1)
+        self.assertFalse(second["has_more"])
+        # Nömrə dilimdə də tam siyahıdakı yerini saxlayır.
+        self.assertIn("#2", second["html"])
+        self.assertEqual(second["counts"]["all"], 2)
+
+    def test_endpoint_filters_and_search(self):
+        submission = self._submission(raw_text=TEXT_WITH_PROBLEM, title="Lazy filtr")
+        client = self._client_for(self.exam_center)
+        self.assertEqual(self._payload(client, submission, flag="error")["filtered_total"], 1)
+        self.assertEqual(self._payload(client, submission, flag="clean")["filtered_total"], 0)
+        self.assertEqual(self._payload(client, submission, q="Problemli")["filtered_total"], 1)
+        # Variant mətnində də axtarır.
+        self.assertEqual(self._payload(client, submission, q="Dördüncü")["filtered_total"], 1)
+        self.assertEqual(self._payload(client, submission, q="tapılmayan-söz")["filtered_total"], 0)
+
+    def test_endpoint_permission(self):
+        submission = self._submission(title="Lazy icazə")
+        other_teacher = User.objects.create_user("qs_lazy_other", "qs_lazy_other@test.az", PASSWORD)
+        _assign_user_to_org(other_teacher, self.org, ProfileRole.TEACHER, "teacher")
+        response = self._client_for(other_teacher).get(
+            reverse("exams:question_submission_questions", kwargs={"submission_id": submission.id})
+        )
+        self.assertEqual(response.status_code, 404)
+        # Sahib müəllim və mərkəz görə bilir.
+        self._payload(self._client_for(self.teacher), submission)
+        self._payload(self._client_for(self.exam_center), submission)
+
+    def test_review_page_renders_lazy_shell(self):
+        submission = self._submission(title="Lazy shell")
+        response = self._client_for(self.exam_center).get(
+            reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
+        )
+        self.assertContains(response, "js-qsubq")
+        self.assertContains(response, "data-questions-url")
+        self.assertContains(response, "question_submission_review_questions.js")

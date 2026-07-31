@@ -52,21 +52,21 @@
 
     <div class="reply-card">
         <h2>{% trans "Suallar əlavə olundu — tələbəyə təsdiq göndər" %}</h2>
-        <p class="help c3-1">
+        <p class="help reply-1">
             {% trans "Göndərdikdə sorğu “sistemə əlavə olundu” statusuna keçəcək." %}
         </p>
 
         <form method="post" class="reply-form" novalidate>
             {% csrf_token %}
 
-            <div class="c3-2">
+            <div class="reply-2">
                 <label for="{{ form.reply_from.id_for_label }}">{{ form.reply_from.label }}</label>
                 {{ form.reply_from }}
                 {{ form.reply_from.errors }}
                 <p class="help">{% trans "Tələbə bu ünvandan təsdiq gəldiyini görəcək." %}</p>
             </div>
 
-            <div class="c3-2">
+            <div class="reply-2">
                 <label for="{{ form.reply_body.id_for_label }}">{{ form.reply_body.label }}</label>
                 {{ form.reply_body }}
                 {{ form.reply_body.errors }}
@@ -103,7 +103,7 @@
         {% if trial_request.reply_delivery_error %}
         <div class="reply-error">{{ trial_request.reply_delivery_error }}</div>
         {% endif %}
-        <div class="original-msg c3-3">{{ trial_request.reply_body }}</div>
+        <div class="original-msg reply-3">{{ trial_request.reply_body }}</div>
     </div>
     {% endif %}
 

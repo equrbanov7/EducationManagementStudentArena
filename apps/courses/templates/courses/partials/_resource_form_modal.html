@@ -27,11 +27,11 @@
                     
                     <!-- Resource Type Selection -->
                     <div class="mb-3">
-                        <label class="form-label">
+                        <label class="form-label" id="resource-type-label">
                             <strong>{% trans "field_resource_type" context "courses.partial.resource_modal" %}</strong>
                             <span class="text-danger">*</span>
                         </label>
-                        <div class="btn-group w-100" role="group">
+                        <div class="btn-group w-100" role="group" aria-labelledby="resource-type-label">
                             <input type="radio" class="btn-check" name="resource_type" 
                                    id="typeFile" value="file" checked>
                             <label class="btn btn-outline-primary" for="typeFile">

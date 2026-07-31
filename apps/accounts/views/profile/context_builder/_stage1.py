@@ -160,6 +160,8 @@ class _Stage1Mixin:
         self.my_exams_search_query = ""
         self.my_exams_filter_type = ""
         self.my_exams_list = []
+        self.my_exams_page_obj = None
+        self.my_exams_pagination_query = ""
         self.my_exams_dashboard = None
         self.question_bank_banks = []
         self.question_bank_page_obj = None
@@ -169,6 +171,9 @@ class _Stage1Mixin:
         self.question_bank_back_url = self.question_bank_create_next_url
         self.question_bank_language_choices = []
         self.question_bank_default_type_choices = []
+        self.question_bank_exam_kind_choices = []
+        self.question_bank_kind_filter = ""
+        self.question_bank_kind_pills = []
         self.question_bank_can_create = False
         if self.capabilities["can_view_owned_learning"]:
             self.my_created_courses_count = self.created_courses_qs.count()
@@ -183,6 +188,8 @@ class _Stage1Mixin:
             self.my_exams_dashboard = self._my_exams_ctx["my_exams_dashboard"]
             self.my_exams_search_query = self._my_exams_ctx["my_exams_search_query"]
             self.my_exams_filter_type = self._my_exams_ctx["my_exams_filter_type"]
+            self.my_exams_page_obj = self._my_exams_ctx["my_exams_page_obj"]
+            self.my_exams_pagination_query = self._my_exams_ctx["my_exams_pagination_query"]
         self._unit_exams_ctx = build_unit_exams_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
@@ -203,6 +210,9 @@ class _Stage1Mixin:
         self.question_bank_back_url = self._qb_ctx["question_bank_back_url"]
         self.question_bank_language_choices = self._qb_ctx["question_bank_language_choices"]
         self.question_bank_default_type_choices = self._qb_ctx["question_bank_default_type_choices"]
+        self.question_bank_exam_kind_choices = self._qb_ctx["question_bank_exam_kind_choices"]
+        self.question_bank_kind_filter = self._qb_ctx["question_bank_kind_filter"]
+        self.question_bank_kind_pills = self._qb_ctx["question_bank_kind_pills"]
         self.question_bank_can_create = self._qb_ctx["question_bank_can_create"]
         self._posts_ctx = profile_hooks.posts_section(
             self.request, capabilities=self.capabilities, active_section=self.active_section

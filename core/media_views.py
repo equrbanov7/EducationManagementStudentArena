@@ -484,8 +484,15 @@ def _check_private_media_access(request, path: str) -> bool:
     if not user.is_authenticated:
         return False
 
-    # Superusers and Django staff have unrestricted access to private files.
-    if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
+    # Only superadmins get unrestricted access to private files.
+    #
+    # SECURITY: ``is_staff`` used to grant the same bypass, but it is Django's
+    # admin-site flag — it carries no tenant scope and provisioning/seed paths
+    # hand it to ordinary users. That let any staff-flagged member of tenant A
+    # read tenant B's private uploads (journals, answer sheets, appeal files).
+    from core.permissions import is_superadmin_user
+
+    if is_superadmin_user(user):
         return True
 
     clean = path.lstrip("/")

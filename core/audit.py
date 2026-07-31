@@ -71,8 +71,47 @@ def log_action(
         request_id = getattr(request, "request_id", None)
         if request_id:
             log_data["request_id"] = request_id
+        _stamp_impersonation(log_data, request)
 
     return AuditLog.objects.create(**log_data)
+
+
+#: View-as altında yazılan qeydlərə əlavə olunan açar.
+IMPERSONATION_KEY = "impersonated_by"
+
+
+def _stamp_impersonation(log_data, request):
+    """View-as aktivdirsə ƏSL aktoru qeydə damğalayır.
+
+    NƏ ÜÇÜN: ``ViewAsMiddleware`` ``request.user``-i HƏDƏFLƏ əvəz edir, ona görə
+    domen qatındakı hər çağırış (``by_user=request.user``, ``granted_by=...``,
+    ``corrected_by=...``) hədəfin adını yazır. Sənədli düzəliş axını üçün bu
+    xüsusilə təhlükəlidir: «düzəldənin adı avtomatik profildən götürülür və
+    dəyişdirilə bilməz» zəmanəti impersonasiya altında əks işləyir — qeyd
+    təqlid edilən şəxsin adına düşür.
+
+    Domen çağırışlarının hamısını dəyişmək əvəzinə damğa MƏRKƏZDƏ vurulur:
+    ``request`` ötürülən hər audit qeydi əsl aktoru daşıyır.
+
+    DİQQƏT: dəyərlər ``str()`` ilə yazılır — JSONField-ə lazy translation proxy
+    düşsə INSERT sınır və çağıran `except` bloku transaksiyanı səssizcə geri
+    qaytara bilir (bax `project_jsonfield_lazy_proxy_tx_poison`).
+    """
+    if not getattr(request, "is_view_as", False):
+        return
+    real_user = getattr(request, "real_user", None)
+    if real_user is None or not getattr(real_user, "is_authenticated", False):
+        return
+
+    changes = log_data.get("changes")
+    if not isinstance(changes, dict):
+        changes = {} if changes is None else {"_original": str(changes)}
+    changes[IMPERSONATION_KEY] = {
+        "id": str(getattr(real_user, "pk", "")),
+        "username": str(getattr(real_user, "username", ""))[:150],
+        "mode": str(getattr(request, "view_as_mode", "") or ""),
+    }
+    log_data["changes"] = changes
 
 
 def log_superadmin_cross_org_action(request, action: str, *, target_org=None, obj=None, reason: str = "") -> None:

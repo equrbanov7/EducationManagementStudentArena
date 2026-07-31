@@ -302,7 +302,7 @@
                     <input type="hidden" id="submission-id" name="submission_id">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "grade_label" context "projects.review" %} (0-{{ project.max_score }}):</label>
+                        <label class="form-label fw-bold" for="grade-input">{% trans "grade_label" context "projects.review" %} (0-{{ project.max_score }}):</label>
                         <input type="number"
                                id="grade-input"
                                name="grade"
@@ -315,7 +315,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "feedback_label" context "projects.review" %}</label>
+                        <label class="form-label fw-bold" for="feedback-input">{% trans "feedback_label" context "projects.review" %}</label>
                         <textarea id="feedback-input"
                                   name="feedback"
                                   class="form-control"

@@ -19,7 +19,7 @@
                         <i class="fas fa-pen-to-square"></i>
                     </div>
                     <h2 class="header-title">
-                        {% trans "header_edit_course" context "courses.edit_page" %}: <span class="c3-1">{{ course.title }}</span>
+                        {% trans "header_edit_course" context "courses.edit_page" %}: <span class="edit-course-1">{{ course.title }}</span>
                     </h2>
                 </div>
                 
@@ -52,7 +52,7 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label class="modern-label mb-3">
+                            <label for="{{ form.cover_image.id_for_label }}" class="modern-label mb-3">
                                 <i class="fas fa-image"></i> {% trans "field_course_cover" context "courses.edit_page" %}
                             </label>
                             
@@ -69,7 +69,7 @@
 
                                     <div id="imagePreviewBlock" class="preview-wrapper d-none">
                                         <img id="previewImg" src="#" alt="{% trans 'alt_new_preview' context 'courses.edit_page' %}">
-                                        <span class="image-label-tag c3-2">{% trans "label_new_selection" context "courses.edit_page" %}</span>
+                                        <span class="image-label-tag edit-course-2">{% trans "label_new_selection" context "courses.edit_page" %}</span>
                                     </div>
                                 </div>
 

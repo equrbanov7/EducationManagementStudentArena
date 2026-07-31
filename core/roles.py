@@ -9,6 +9,8 @@ QAYDA: bu fayl heç bir app modulunu import edə bilməz (core→apps qadağand�
 yalnız sabitlər və istifadəçi obyektinin attribute-ları üzərində pure məntiq.
 """
 
+from django.utils.translation import pgettext_lazy
+
 
 class ProfileRole:
     """Role constants for UserProfile.role field."""
@@ -33,20 +35,25 @@ class ProfileRole:
     LEAD_STUDENT = "lead_student"
     STUDENT = "student"
 
+    # DİQQƏT: etiketlər `pgettext_lazy` ilə sarınıb — bu adlar profil başlığında,
+    # üzv siyahılarında və rol seçicilərində göstərilir. Əvvəllər sabit
+    # azərbaycanca sətir idi, yəni EN/RU/TR interfeysdə də «Müəllim»/«Tələbə»
+    # çıxırdı (2026-07-31 auditi). `lazy` variantı vacibdir: modul import
+    # vaxtında dil hələ seçilməyib.
     CHOICES = [
-        (SUPERADMIN, "Super Admin"),
-        (ORG_OWNER, "Təşkilat Sahibi"),
-        (ORG_ADMIN, "Təşkilat Admini"),
-        (MEMBER, "Üzv"),
-        (HR, "HR"),
-        (EXAM_CENTER_HEAD, "İmtahan Mərkəzi Rəhbəri"),
-        (EXAM_CENTER_STAFF, "İmtahan Mərkəzi İşçisi"),
-        (EXAM_CENTER, "İmtahan Mərkəzi"),
-        (IKT_REHBER, "İKT Rəhbəri"),
-        (TEACHER, "Müəllim"),
-        (ASSISTANT_TEACHER, "Müəllim Köməkçisi"),
-        (LEAD_STUDENT, "Baş Tələbə"),
-        (STUDENT, "Tələbə"),
+        (SUPERADMIN, pgettext_lazy("roles.display_name", "superadmin")),
+        (ORG_OWNER, pgettext_lazy("roles.display_name", "org_owner")),
+        (ORG_ADMIN, pgettext_lazy("roles.display_name", "org_admin")),
+        (MEMBER, pgettext_lazy("roles.display_name", "member")),
+        (HR, pgettext_lazy("roles.display_name", "hr")),
+        (EXAM_CENTER_HEAD, pgettext_lazy("roles.display_name", "exam_center_head")),
+        (EXAM_CENTER_STAFF, pgettext_lazy("roles.display_name", "exam_center_staff")),
+        (EXAM_CENTER, pgettext_lazy("roles.display_name", "exam_center")),
+        (IKT_REHBER, pgettext_lazy("roles.display_name", "ikt_rehber")),
+        (TEACHER, pgettext_lazy("roles.display_name", "teacher")),
+        (ASSISTANT_TEACHER, pgettext_lazy("roles.display_name", "assistant_teacher")),
+        (LEAD_STUDENT, pgettext_lazy("roles.display_name", "lead_student")),
+        (STUDENT, pgettext_lazy("roles.display_name", "student")),
     ]
 
     # Level mapping for hierarchy checks

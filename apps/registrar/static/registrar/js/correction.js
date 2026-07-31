@@ -146,7 +146,7 @@
       // Yalnız ƏN SON düzəliş geri alına bilər (zəncir pozulmasın) — sonuncu element.
       var delBtn =
         idx === list.length - 1
-          ? '<button type="button" class="corr-hist-del" data-corr-del>Düzəlişi sil</button>'
+          ? '<button type="button" class="corr-hist-del" data-corr-del>' + gettext("Düzəlişi sil") + "</button>"
           : "";
       item.innerHTML =
         '<div class="corr-hist-top"><span class="corr-hist-date">' + esc(c.date) + "</span>" + doc + "</div>" +
@@ -164,7 +164,7 @@
   root.addEventListener("click", function (ev) {
     var del = ev.target.closest("[data-corr-del]");
     if (!del || !root.dataset.deleteUrl) return;
-    if (!window.confirm("Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq.")) return;
+    if (!window.confirm(gettext("Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq."))) return;
     del.disabled = true;
     var fd = new FormData();
     fd.append("type", histCtx.type || "grade");
@@ -208,13 +208,13 @@
         if (res.ok && res.j.ok) {
           window.location.reload();
         } else {
-          errBox.textContent = (res.j && res.j.error) || "Xəta baş verdi.";
+          errBox.textContent = (res.j && res.j.error) || gettext("Xəta baş verdi.");
           errBox.hidden = false;
           submitBtn.disabled = false;
         }
       })
       .catch(function () {
-        errBox.textContent = "Şəbəkə xətası.";
+        errBox.textContent = gettext("Şəbəkə xətası.");
         errBox.hidden = false;
         submitBtn.disabled = false;
       });

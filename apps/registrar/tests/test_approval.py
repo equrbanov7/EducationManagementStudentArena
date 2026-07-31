@@ -235,3 +235,91 @@ class ApprovalViewTest(_ApprovalBase):
     def test_approvals_inbox_forbidden_for_teacher(self):
         resp = self._client(self.teacher).get(reverse("registrar:approvals_inbox"))
         self.assertEqual(resp.status_code, 404)
+
+
+class ApprovalUnitScopeTest(_ApprovalBase):
+    """Təsdiq unit alt-ağacı ilə məhdudlaşır (2026-07-31 auditi).
+
+    ``can_chair_approve`` / ``can_dean_approve`` yalnız rol ADINA baxırdı və
+    offering-in hansı kafedraya aid olduğunu yoxlamırdı — yəni A kafedrasının
+    müdiri B kafedrasının jurnalını təsdiqləyə və dekan təsdiqi ilə ƏBƏDİ
+    kilidləyə bilirdi.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with bypass_rls():
+            cls.chair_a_unit = OrgUnit.objects.create(
+                organization=cls.org, name="Kafedra A", slug="ap-ka", unit_type=OrgUnitType.CHAIR
+            )
+            cls.chair_b_unit = OrgUnit.objects.create(
+                organization=cls.org, name="Kafedra B", slug="ap-kb", unit_type=OrgUnitType.CHAIR
+            )
+            # Fixture-dəki `group` A kafedrasının altına salınır — offering ona bağlıdır.
+            cls.group.parent = cls.chair_a_unit
+            # `path` materiallaşdırılmış yoldur — save() onu yenidən hesablayır,
+            # update_fields ilə saxlansa köhnə qalar və subtree filtri tutmaz.
+            cls.group.save()
+
+            cls.chair_b = User.objects.create_user("ap_chair_b", "ap_chair_b@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.chair_b,
+                organization=cls.org,
+                role=cls.org.roles.get(name="chair_head"),
+                scope_unit=cls.chair_b_unit,
+                is_primary=True,
+                is_active=True,
+            )
+            cls.chair_a = User.objects.create_user("ap_chair_a", "ap_chair_a@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.chair_a,
+                organization=cls.org,
+                role=cls.org.roles.get(name="chair_head"),
+                scope_unit=cls.chair_a_unit,
+                is_primary=True,
+                is_active=True,
+            )
+
+    def _submit(self):
+        approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
+
+    def test_chair_of_another_unit_cannot_approve(self):
+        self._submit()
+
+        self.assertFalse(approval.can_chair_approve(self.chair_b, self.org, offering=self.offering))
+        with self.assertRaises(PermissionDenied):
+            approval.chair_approve(offering=self.offering, by_user=self.chair_b)
+
+    def test_chair_of_the_owning_unit_can_approve(self):
+        self._submit()
+
+        self.assertTrue(approval.can_chair_approve(self.chair_a, self.org, offering=self.offering))
+        scheme = approval.chair_approve(offering=self.offering, by_user=self.chair_a)
+        self.assertEqual(scheme.approval_status, ApprovalStatus.CHAIR_APPROVED)
+
+    def test_chair_of_another_unit_cannot_return_for_revision(self):
+        """Geri qaytarma da eyni qapıdan keçir — kilidi açmaq da səlahiyyətdir."""
+        self._submit()
+
+        with self.assertRaises(PermissionDenied):
+            approval.return_for_revision(offering=self.offering, by_user=self.chair_b, reason="test")
+
+    def test_action_bar_hides_buttons_for_out_of_scope_chair(self):
+        """Backend qapısı UI ilə uyğun olmalıdır — düymə də görünməməlidir."""
+        self._submit()
+
+        context = approval.approval_context(offering=self.offering, user=self.chair_b)
+
+        self.assertFalse(context["can_chair_approve"])
+        self.assertFalse(context["can_return"])
+
+    def test_unscoped_chair_keeps_previous_behaviour(self):
+        """Scope təyin edilməmiş üzvlük köhnə davranışı saxlayır (regressiya yox).
+
+        Yoxlama yalnız `scope_unit` verilmiş idarəetmə üzvlükləri üçün işləyir;
+        əks halda strukturu hələ qurmamış təşkilatlarda təsdiq zənciri dayanardı.
+        """
+        self._submit()
+
+        self.assertTrue(approval.can_chair_approve(self.chair, self.org, offering=self.offering))

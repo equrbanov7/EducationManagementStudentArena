@@ -37,9 +37,23 @@ _STATUS_HINTS = {
 }
 
 
-def build_teacher_exam_dashboard(exams, *, include_empty_categories: bool = True) -> dict:
+def build_teacher_exam_dashboard(
+    exams,
+    *,
+    include_empty_categories: bool = True,
+    status_counts: dict | None = None,
+    category_counts_override: dict | None = None,
+    total: int | None = None,
+) -> dict:
     """
-    `exams`: filtrlənmiş Exam iterable (annotate/prefetch artıq tətbiq olunub).
+    `exams`: göstəriləcək Exam iterable (annotate/prefetch artıq tətbiq olunub).
+
+    SƏHİFƏLƏMƏ İLƏ İSTİFADƏ: `exams` yalnız CARİ SƏHİFƏ olduqda KPI kartları və
+    kateqoriya çipləri səhifə üzrə deyil, BÜTÜN filtrlənmiş dəst üzrə
+    göstərilməlidir — əks halda «Aktiv: 12» yazılar, halbuki 150-dir. Ona görə
+    çağıran tərəf `status_counts` / `category_counts` / `total` dəyərlərini
+    SQL aqreqatı ilə hesablayıb ötürür; verilmədikdə köhnə davranış (siyahıdan
+    hesablama) qalır.
 
     Qaytarır::
 
@@ -62,8 +76,15 @@ def build_teacher_exam_dashboard(exams, *, include_empty_categories: bool = True
         if exam.exam_type_extended in category_counts:
             category_counts[exam.exam_type_extended] += 1
 
-    status_counts = {key: len(grouped.get(key, [])) for key in EXAM_STATUS_ORDER}
-    status_counts["all"] = len(exam_list)
+    if status_counts is None:
+        status_counts = {key: len(grouped.get(key, [])) for key in EXAM_STATUS_ORDER}
+        status_counts["all"] = len(exam_list)
+    else:
+        status_counts = {key: status_counts.get(key, 0) for key in EXAM_STATUS_ORDER} | {
+            "all": status_counts.get("all", sum(status_counts.get(k, 0) for k in EXAM_STATUS_ORDER))
+        }
+    if category_counts_override is not None:
+        category_counts = {key: category_counts_override.get(key, 0) for key in EXAM_CATEGORY_FILTER_ORDER}
 
     def _descriptor(key):
         meta = EXAM_STATUS_META.get(key, {})
@@ -114,5 +135,5 @@ def build_teacher_exam_dashboard(exams, *, include_empty_categories: bool = True
         "status_groups": status_groups,
         "status_counts": status_counts,
         "category_filters": category_filters,
-        "total": len(exam_list),
+        "total": len(exam_list) if total is None else total,
     }

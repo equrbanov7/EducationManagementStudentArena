@@ -188,12 +188,12 @@ class CustomLoginView(LoginView):
         password = request.POST.get("password", "")
         limit_keys = _login_limit_keys(request, username)
 
-        for scope, *key_parts in limit_keys:
-            is_limited, retry_after = is_rate_limited(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
+        for rate_spec, scope, *key_parts in limit_keys:
+            is_limited, retry_after = is_rate_limited(scope, rate_spec, *key_parts)
             if is_limited:
                 superadmin_user = _authenticate_superadmin_for_rate_limit_reset(request, username, password)
                 if superadmin_user is not None:
-                    for reset_scope, *reset_key_parts in limit_keys:
+                    for _reset_rate, reset_scope, *reset_key_parts in limit_keys:
                         clear_rate_limit(reset_scope, *reset_key_parts)
                     form.user_cache = superadmin_user
                     logger.warning(
@@ -213,12 +213,12 @@ class CustomLoginView(LoginView):
                 return response
 
         if form.is_valid():
-            for scope, *key_parts in limit_keys:
+            for _rate_spec, scope, *key_parts in limit_keys:
                 clear_rate_limit(scope, *key_parts)
             return self.form_valid(form)
 
-        for scope, *key_parts in limit_keys:
-            record_rate_limit_hit(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
+        for rate_spec, scope, *key_parts in limit_keys:
+            record_rate_limit_hit(scope, rate_spec, *key_parts)
         return self.form_invalid(form)
 
     def _wrong_portal_message(self):

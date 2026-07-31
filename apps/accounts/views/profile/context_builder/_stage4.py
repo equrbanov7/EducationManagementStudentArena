@@ -1,6 +1,5 @@
 """build_profile_response — stage 4 (god-file refaktoru, FAZA 4)."""
 
-from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
@@ -13,7 +12,8 @@ from ..contact_inbox import build_contact_inbox_context
 
 class _Stage4Mixin:
 
-    def _stage_4(self):
+    def _stage_4_context(self):
+        """``self.context``-i yığır (render ETMİR — bax builder.run_context)."""
         self.section_titles = build_section_titles()
         self.shortcut_sections = []
         if self.capabilities["can_view_blog"]:
@@ -64,6 +64,8 @@ class _Stage4Mixin:
             "my_exams_count": self.my_exams_count,
             "my_exams_search_query": self.my_exams_search_query,
             "my_exams_filter_type": self.my_exams_filter_type,
+            "my_exams_page_obj": self.my_exams_page_obj,
+            "my_exams_pagination_query": self.my_exams_pagination_query,
             "question_bank_banks": self.question_bank_banks,
             "question_bank_page_obj": self.question_bank_page_obj,
             "question_bank_search_query": self.question_bank_search_query,
@@ -72,6 +74,9 @@ class _Stage4Mixin:
             "question_bank_back_url": self.question_bank_back_url,
             "question_bank_language_choices": self.question_bank_language_choices,
             "question_bank_default_type_choices": self.question_bank_default_type_choices,
+            "question_bank_exam_kind_choices": self.question_bank_exam_kind_choices,
+            "question_bank_kind_filter": self.question_bank_kind_filter,
+            "question_bank_kind_pills": self.question_bank_kind_pills,
             "question_bank_can_create": self.question_bank_can_create,
             **self._qsub_ctx,
             "unit_exams_page_obj": self.unit_exams_page_obj,
@@ -309,4 +314,3 @@ class _Stage4Mixin:
                     self.request, organization=self.active_organization, section=self.active_section
                 )
             )
-        return render(self.request, "accounts/profile.html", self.context)
