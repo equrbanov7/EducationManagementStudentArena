@@ -5,6 +5,18 @@
    sehrbaz karkasını (rail, addımlar, pane, footer) verir.
    =========================================================================== */
 
+/* Bootstrap-ın xarici `.modal` konteyneri default olaraq `overflow-y: auto`-dur
+   (dialoq viewport-dan hündür olsa BÜTÖV kartı sürüşdürmək üçün). Sehrbazın
+   `.exam-wizard { height: min(680px, 86vh) }` qaydası dialoqun HEÇ VAXT
+   viewport-dan hündür olmayacağını zəmanətləndirir, ona görə bu xarici scroll
+   heç vaxt lazım deyil — amma mövcud olduğu üçün TƏSADÜFƏN işə düşə bilər
+   (məs. sub-piksel yuvarlaqlaşdırma) və `.ew-pane-body`-nin daxili scroll-u
+   ilə İKİNCİ, TOQQUŞAN scroll qatı yaradır: siçan responsuz sahə (rail,
+   pane-head) üzərindəykən fərqli davranış göstərir. Söndürülür ki, modalda
+   YALNIZ BİR scroll konteyner (`.ew-pane-body`) qalsın.
+   (2026-08-01: istifadəçi «çöldən scroll edəndə fərqli gəlir» şikayəti.) */
+.exam-wizard-modal.modal { overflow-y: hidden; }
+
 .exam-wizard-modal .modal-content {
   --ew-ink: #0B1437; --ew-accent: #2C5BFF; --ew-accent-deep: var(--ems-primary-800); --ew-accent-soft: #EEF2FF;
   --ew-teal: #14B8A6; --ew-border: #E5E8F0; --ew-border-soft: #EFF1F5;
@@ -126,7 +138,13 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard .ew-callout i { flex-shrink: 0; margin-top: 2px; }
 
 /* ── footer ── */
-.exam-wizard .ew-pane-foot { display: flex; align-items: center; gap: 12px; padding: 14px 26px; border-top: 1px solid var(--ew-border-soft); background: var(--ew-surface); }
+/* `sticky` — flex-sibling mövqeyi normalda kifayətdir (.ew-pane-body scroll
+   olanda .ew-pane-foot ondan kənarda qalıb yerində durur), amma bu, əlavə
+   müdafiə xəttidir: .exam-wizard-modal sinfi olmayan konteksdə (məs.
+   `.ew-pane`-in flex/height zənciri hardasa qırılarsa) footer yenə də ÖZ
+   scroll konteynerinin (`.ew-pane`) altına "yapışıq" qalır və itmir.
+   (2026-08-01: kurs modalında məhz bu zəncir qırılmışdı — bax _exam_modals.html.) */
+.exam-wizard .ew-pane-foot { display: flex; align-items: center; gap: 12px; padding: 14px 26px; border-top: 1px solid var(--ew-border-soft); background: var(--ew-surface); position: sticky; bottom: 0; z-index: 3; }
 .exam-wizard .ew-prog { font-size: 12.5px; color: var(--ew-subtle); font-weight: 600; }
 .exam-wizard .ew-foot-right { margin-left: auto; display: flex; gap: 10px; }
 .exam-wizard .ew-btn,
