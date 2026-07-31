@@ -35342,6 +35342,10 @@ msgstr ""
 "You can only perform operations that belong to your own area; everything "
 "else is read-only."
 
+msgctxt "profile.sidebar"
+msgid "group_university_management"
+msgstr "University management"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

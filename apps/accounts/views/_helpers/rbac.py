@@ -345,7 +345,22 @@ def _role_capabilities(user, profile):
                 allowed_sections.add("my-transcript")
                 allowed_sections.add("overall-academic")
 
-        if not (is_student or is_teacher or is_org_admin):
+        # ADİ ÜZV səthləri: «Kurslarım», «Təyin edilmiş tapşırıqlar», qruplar.
+        #
+        # TARİXÇƏ (2026-07-31 auditi): bu qayda NEGATİV idi —
+        # ``if not (is_student or is_teacher or is_org_admin)`` — yəni
+        # «sadalanmayan hər kəs» alırdı: HR, imtahan mərkəzi, dekan, kafedra
+        # müdiri, tyutor, İKT rəhbəri. Nəticədə əməkdaş menyusunda tələbə
+        # bölmələri («Mənə təyin edilmiş imtahanlar») çıxırdı, ``groups`` isə
+        # sidebar-da **«Müəllim»** qrup başlığının şərti olduğu üçün HR-ın
+        # menyusunda «Müəllim» bölməsi görünürdü.
+        #
+        # İndi qayda müsbətdir və YALNIZ ``member`` roluna aiddir. Tələbə öz
+        # bölmələrini yuxarıdakı ``if is_student`` blokundan alır — ona ``courses``
+        # QƏSDƏN verilmir, əks halda «Kurslarım» sidebar-da iki dəfə çıxardı
+        # (bax ``test_student_profile_keeps_single_assigned_courses_sidebar_entry``).
+        # Matris: ``apps/accounts/tests/test_sidebar_role_matrix.py``.
+        if _user_has_any_role(user, {ProfileRole.MEMBER}):
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
 
     has_admin_control_role = (

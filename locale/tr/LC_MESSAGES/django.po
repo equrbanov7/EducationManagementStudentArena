@@ -35131,6 +35131,10 @@ msgstr ""
 "Yalnızca kendi alanınıza ait işlemleri yapabilirsiniz; geri kalan her şey "
 "salt okunurdur."
 
+msgctxt "profile.sidebar"
+msgid "group_university_management"
+msgstr "Üniversite yönetimi"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"
