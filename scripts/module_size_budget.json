@@ -6,7 +6,7 @@
     "apps/accounts/static/accounts/js/monitoring/system_monitoring.js": 612,
     "apps/appeals/static/appeals/css/appeals/_part3.css": 643,
     "apps/exams/domain/final_center.py": 625,
-    "apps/exams/static/exams/js/course_exam_dashboard.js": 642,
+    "apps/exams/static/exams/js/course_exam_dashboard.js": 657,
     "apps/exams/static/exams/js/testQuestionBank.js": 613,
     "apps/organizations/management/commands/seed_western_caspian.py": 602,
     "apps/registrar/static/registrar/js/journal_grid.js": 672,
