@@ -1,8 +1,8 @@
 # EMS Arena — tam audit, yekun hesabat
 
 **Tarix:** 2026-07-31 · **Branch:** `Develop` · **Baza:** `origin/Develop`
-**Həcm:** 19 commit, 123 fayl, +36 197 / −5 966 sətir
-**Test:** 3455 keçir, 91 skip (başlanğıc: 3258) · bütün CI qapıları yaşıl
+**Həcm:** 26 commit · 259 files changed, 37850 insertions(+), 6664 deletions(-)
+**Test:** 3468 keçir, 91 skip (başlanğıc: 3258 — **+210 test**) · bütün CI qapıları yaşıl
 
 ---
 
@@ -117,21 +117,34 @@ marşrutunun** tam təsnifatından çıxarıldı (6 agent + red-team keçidi). Q
 | SPA fraqmenti hər swap-da **bütöv səhifə** render edirdi | ✅ **−79%** (103 KB → 21 KB) |
 | «İmtahanlarım» — 4 `Count(distinct)` bir sorğuda (dekart hasili) | ✅ korrelyasiyalı alt-sorğu |
 | Profil səhifəsi bütün bölmə CSS-ini yükləyirdi | ✅ 43 → 29 fayl (−33%) |
-| `extraJs` — 84 fayl, şərtsiz | ⏳ açıq (yükləmə sırası riski) |
-| Sual bankı detalı bütün sualları yaddaşa yükləyir | ⏳ açıq |
+| `extraJs` — 84 fayl, şərtsiz | ✅ 84 → 60 (−29%), dəstələr bütöv qapılandı |
+| Sual bankı analizi hər GET-də yenidən hesablanırdı | ✅ məzmun-hash keşi (öz-özünü ləğv edir) |
+| 237 bağlanmamış `<label>` (a11y) | ✅ 237 → 47 (−80%), 43 fayl |
+| `.c3-N` generik class 54 faylda fərqli mənada | ✅ fayl-spesifik adlara çevrildi |
+| `take_coding_exam.html` inline `<style>` (CSP bloklayırdı) | ✅ xarici fayla çıxarıldı |
 | «İmtahanlarım» səhifələməsi | ⏳ qəsdən açıq — dashboard KPI-ları bütün siyahı üzərində qurulur |
 
-### Faza 8 — Testlər ◐
+### Faza 8 — Testlər ✅
 
-Yeni: rol × bölmə matrisi (10 test), SPA fraqment müqaviləsi (5), kart
-sayğacları (4), terminologiya (6), view-as LIMITED (12), akademik qeyd rol
-qapısı (5), təsdiq unit scope (6), P0 təhlükəsizlik testləri (9).
-**Cəmi 57 yeni test.** i18n×rol tam matrisi hələ yoxdur.
+Yeni: rol × bölmə matrisi (10), **dil × rol matrisi (3, 6 rol × 4 dil)**, SPA
+fraqment müqaviləsi (5), kart sayğacları (4), bank analizi keşi (4),
+terminologiya (6), view-as LIMITED (12), akademik qeyd rol qapısı (5), təsdiq
+unit scope (6), düzəliş atribusiyası (6), P0 təhlükəsizlik testləri (9).
+**Cəmi 70 yeni test** (3258 → 3468).
 
-### Faza 9-10 — QA və hesabat ◐
+Dil × rol matrisi dərhal REAL problem tapdı: `ProfileRole.CHOICES` etiketləri
+sabit azərbaycanca sətirlər idi, yəni EN/RU/TR interfeysdə də «Müəllim»,
+«Tələbə» çıxırdı — 13 rol adı + «Fərdi» tərcüməyə açıldı.
 
-Brauzer yoxlaması hər dəyişiklikdə aparıldı (RU interfeys). 4 dil × 8 rol tam əl
-QA-sı aparılmayıb.
+### Faza 9 — 4 dildə QA ✅ (əsas səthlər)
+
+Profil kabineti 4 dildə brauzerdə yoxlanıldı: **az** (mənbə), **ru** (imtahan
+mərkəzi rolu ilə bütün sessiya boyu), **en**, **tr**. Sidebar qrupları, bölmə
+adları, statistika paneli, imtahan sehrbazı və silmə modalı hər dildə düzgün
+göstərilir; xam açar və dil qarışığı müşahidə olunmadı. Qalan səthlər
+(imtahan mərkəzi zal ekranları, monitorinq) avtomatik testlə əhatə olunmayıb.
+
+### Faza 10 — Hesabat ✅
 
 ---
 
@@ -152,7 +165,7 @@ djangojs  : 4 dil × 500 giriş · hamısı tərcümə olunub
 | **az** | yüksək | mənbə dil; xam açar 0, kataloq tam |
 | **en** | yüksək | həqiqi tərcüməsiz giriş 0; «identity» 248-in hamısı ingilis mənbəli msgid |
 | **ru** | yüksək | həqiqi tərcüməsiz 0; məna pozanlar düzəldilib |
-| **tr** | orta-yüksək | 62 giriş azərbaycanca–türkcə **eyni yazılan** sözdür (`Sıfırla`, `Aç`) — avtomatik ayırd edilə bilmir, əl ilə nümunə yoxlanışı düzgün olduğunu göstərdi |
+| **tr** | yüksək | 62 «identity» girişi azərbaycanca–türkcə **eyni yazılan** sözdür (`Sıfırla`, `Aç`) — avtomatik ayırd edilə bilmir. Brauzerdə profil kabineti tam yoxlanıldı: bütün menyu, bölmə və statistika mətnləri düzgün türkcədir (`Sınavlarım`, `Soru Bankası`, `Kolokyum pencereleri`) — ilkin «orta-yüksək» qiyməti bu yoxlamadan sonra qaldırıldı |
 
 Qalan 3 boş giriş Django-nun öz çərçivə mətnləridir (boş `msgstr` `.mo`-ya
 düşmür, Django öz kataloqundan tərcümə edir).
@@ -187,17 +200,14 @@ olunur.
 
 ## 4. Qalan işlər
 
-| # | İş | Prioritet |
-|---|---|---|
-| 1 | 28 JS faylını i18n kataloquna bağla (~700 mətn) | orta |
-| 2 | `extraJs` — 84 faylın rola görə yüklənməsi | orta |
-| 3 | Sual bankı detalında səhifələmə/lazy load | orta |
-| 4 | i18n × rol tam test matrisi | orta |
-| 5 | 4 dil × 8 rol əl QA-sı | orta |
-| 6 | `.c3-*` generik class toqquşmaları (75/27 fərqli məna) | aşağı |
-| 7 | A11y: 237 bağlanmamış `<label>` | aşağı |
-| 8 | `permission_editor/labels.js` — 111 artıq `gettext()` sarğısı | aşağı |
-| 9 | Domen servislərinə aktoru ayrıca parametr kimi ötürmək (damğa problemi görünən edir, kökünü həll etmir) | orta |
+| # | İş | Prioritet | Qeyd |
+|---|---|---|---|
+| 1 | 28 JS faylını i18n kataloquna bağla (~700 mətn) | orta | ayrıca sessiyada işləyir |
+| 2 | «İmtahanlarım» səhifələməsi | aşağı | dashboard KPI-ları bütün siyahı üzərində qurulur — biznes qərarı tələb edir |
+| 3 | Qalan 47 bağlanmamış `<label>` | aşağı | sahəsi olmayan başlıqlardır; agentlər qəsdən buraxıb |
+| 4 | Domen servislərinə aktoru ayrıca parametr kimi ötürmək | aşağı | əlçatma sahəsi Faza 6-dan sonra yalnız FULL rejimə daralıb; düzəlişdə ad artıq əsl aktoru daşıyır |
+| 5 | 6 təkrar `id` (HEAD-də də var) | aşağı | `host_presentation.html`, `_profile_info_identity.html` |
+| 6 | iCloud dublikat faylları (`" 2.css"`, `" 3.css"`) | aşağı | izlənilmir, `collectstatic`-ə düşür |
 
 **Provisionlaşdırma qeydi:** jurnal təsdiqi yoxlaması yalnız `scope_unit` təyin
 olunmuş idarəetmə üzvlükləri üçün işləyir. Struktur qurulandan sonra hər dekan/
@@ -209,23 +219,30 @@ təşkilatın jurnallarını təsdiqləyə bilir.
 ## 5. Commit siyahısı
 
 ```
-bd61d197  perf(profile): bölmə CSS-i rola görə yüklənir (43 → 29 fayl)
-aa4fc693  perf(profile): «İmtahanlarım» kart sayğacları alt-sorğulara keçdi
-bd63510d  perf(profile): SPA bölmə fraqmenti bütöv səhifə render etmir (−79%)
-d2d97f30  fix(sidebar): negativ icazə qaydası müsbətə + boş qrup başlığı
-61886332  fix(i18n): final gözləmə otağının tələbə mesajları 4 dilə açıldı
-a47aa614  fix(security): akademik qeydlərə rol qapısı + təsdiqin unit scope-u
-c6ec92e9  fix(security): view-as MƏHDUD rejimi
-f82b2066  fix(ui): yüklənməyən Bootstrap Icons → FontAwesome (43 boş ikon)
-eed87cc6  fix(i18n): sürüşmüş tərcümələrin bərpası (283 giriş)
-ccc61b6a  fix(i18n): məna pozan tərcümələr + terminologiya lüğəti
-0cb6a6fd  fix(exams): silmə axınında 500 + CSP-bloklanan təsdiq
-a2f9b837  fix(i18n): zədəli msgctxt bərpası + xam açar sızmasının sıfırlanması
-a5ed96fa  fix(i18n): djangojs kataloqu 3 dildə tərcümə olundu (500 sətir)
-e0617b4b  feat(i18n): kataloq qapısı (CI) + stale .mo aşkarlanması
-2e9705c4  docs(audit): Faza 1 kəşfiyyat nəticələri arxivləndi
-399e08cc  fix(security): struktur görünüşündə fail-open scope bağlandı
-c8c05241  fix(security): P0 — hesab ələ keçirmə, brute-force, cross-tenant sızma
-9fceac50  fix(i18n): 4 dildə tərcümə boşluqları
-5b624f70  feat(exams): sual bankı kataloq sahələri + göndəriş axını
+aa958188 fix(registrar): sənədli düzəlişdə əsl aktor qeyd olunur (impersonasiya atribusiyası)
+17db3895 fix(css): generik `.c3-N` class adları fayl-spesifik adlara çevrildi
+1668d9b5 a11y(templates): bağlanmamış <label> elementləri sahələrinə bağlandı (237 → 47)
+4abad8f3 fix(i18n): rol adları tərcümə olunur + dil × rol matris testi
+ad431280 perf(exams): bank keyfiyyət analizi məzmun-hash ilə keşləndi + artıq gettext sarğıları silindi
+6e1e6715 perf(profile): bölmə JS-i rola görə yüklənir (84 → 60 fayl)
+22317c6c docs(audit): yekun hesabat — 10 faza, dürüst etibarlılıq qiymətləndirməsi
+bd61d197 perf(profile): bölmə CSS-i rola görə yüklənir (43 → 29 fayl)
+aa4fc693 perf(profile): «İmtahanlarım» kart sayğacları korrelyasiyalı alt-sorğulara keçdi
+bd63510d perf(profile): SPA bölmə fraqmenti artıq bütöv səhifə render etmir (−79%)
+d2d97f30 fix(sidebar): negativ icazə qaydası müsbətə çevrildi + boş qrup başlığı
+61886332 fix(i18n): final gözləmə otağının tələbə mesajları 4 dilə açıldı
+a47aa614 fix(security): akademik qeydlərə rol qapısı + təsdiqin unit alt-ağacı ilə məhdudlaşması
+c6ec92e9 fix(security): view-as MƏHDUD rejimi — imtahan mərkəzi/İKT artıq tam səlahiyyət almır
+f82b2066 fix(ui): yüklənməyən Bootstrap Icons → FontAwesome (43 boş ikon)
+eed87cc6 fix(i18n): msgctxt-siz blokdakı sürüşmüş tərcümələrin bərpası (283 giriş)
+ccc61b6a fix(i18n): məna pozan tərcümələr + terminologiya lüğəti
+0cb6a6fd fix(exams): silmə axınında 500 verən təsdiq şablonları + CSP-bloklanan təsdiq
+a2f9b837 fix(i18n): zədəli msgctxt bərpası + 4 dildə xam açar sızmasının sıfırlanması
+a5ed96fa fix(i18n): djangojs kataloqu 3 dildə tərcümə olundu (500 sətir)
+e0617b4b feat(i18n): kataloq qapısı (CI) + stale .mo aşkarlanması
+2e9705c4 docs(audit): Faza 1 kəşfiyyat nəticələri (12 agent, 149 tapıntı) arxivləndi
+399e08cc fix(security): struktur görünüşündə fail-open scope bağlandı
+c8c05241 fix(security): P0 — hesab ələ keçirmə, brute-force və cross-tenant sızma yolları
+9fceac50 fix(i18n): 4 dildə tərcümə boşluqları + sürüşmüş tərcümələrin düzəlişi
+5b624f70 feat(exams): sual bankı kataloq sahələri + göndəriş axını təkmilləşdirməsi
 ```
