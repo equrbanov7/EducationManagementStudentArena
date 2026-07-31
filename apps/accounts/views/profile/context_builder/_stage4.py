@@ -1,6 +1,5 @@
 """build_profile_response — stage 4 (god-file refaktoru, FAZA 4)."""
 
-from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
@@ -13,7 +12,8 @@ from ..contact_inbox import build_contact_inbox_context
 
 class _Stage4Mixin:
 
-    def _stage_4(self):
+    def _stage_4_context(self):
+        """``self.context``-i yığır (render ETMİR — bax builder.run_context)."""
         self.section_titles = build_section_titles()
         self.shortcut_sections = []
         if self.capabilities["can_view_blog"]:
@@ -312,4 +312,3 @@ class _Stage4Mixin:
                     self.request, organization=self.active_organization, section=self.active_section
                 )
             )
-        return render(self.request, "accounts/profile.html", self.context)
