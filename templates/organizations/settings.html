@@ -10,7 +10,7 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="c3-1">{{ organization.name }}</div>
+            <div class="settings-1">{{ organization.name }}</div>
             <nav class="nav-menu">
                 <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
                 <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
@@ -22,7 +22,7 @@
     </div>
 
     <div class="container">
-        <h1 class="c3-2">{% trans "heading" context "organizations.settings" %}</h1>
+        <h1 class="settings-2">{% trans "heading" context "organizations.settings" %}</h1>
 
         {% if messages %}
         <div class="messages">
@@ -39,44 +39,44 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label>{% trans "organization_name" context "organizations.settings" %}</label>
-                    <input type="text" value="{{ organization.name }}" disabled>
+                    <label for="org-name">{% trans "organization_name" context "organizations.settings" %}</label>
+                    <input type="text" id="org-name" value="{{ organization.name }}" disabled>
                     <div class="info-text">{% trans "organization_name_help" context "organizations.settings" %}</div>
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "organization_type" context "organizations.settings" %}</label>
-                    <input type="text" value="{{ organization.get_org_type_display }}" disabled>
+                    <label for="org-type">{% trans "organization_type" context "organizations.settings" %}</label>
+                    <input type="text" id="org-type" value="{{ organization.get_org_type_display }}" disabled>
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "description" context "organizations.settings" %}</label>
-                    <textarea name="description">{{ organization.description }}</textarea>
+                    <label for="org-description">{% trans "description" context "organizations.settings" %}</label>
+                    <textarea id="org-description" name="description">{{ organization.description }}</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "email" context "organizations.settings" %}</label>
-                    <input type="email" name="email" value="{{ organization.email }}">
+                    <label for="org-email">{% trans "email" context "organizations.settings" %}</label>
+                    <input type="email" id="org-email" name="email" value="{{ organization.email }}">
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "phone" context "organizations.settings" %}</label>
-                    <input type="text" name="phone" value="{{ organization.phone }}">
+                    <label for="org-phone">{% trans "phone" context "organizations.settings" %}</label>
+                    <input type="text" id="org-phone" name="phone" value="{{ organization.phone }}">
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "address" context "organizations.settings" %}</label>
-                    <textarea name="address">{{ organization.address }}</textarea>
+                    <label for="org-address">{% trans "address" context "organizations.settings" %}</label>
+                    <textarea id="org-address" name="address">{{ organization.address }}</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "website" context "organizations.settings" %}</label>
-                    <input type="url" name="website" value="{{ organization.website }}">
+                    <label for="org-website">{% trans "website" context "organizations.settings" %}</label>
+                    <input type="url" id="org-website" name="website" value="{{ organization.website }}">
                 </div>
 
                 <div class="form-group">
-                    <label>{% trans "owner" context "organizations.settings" %}</label>
-                    <input type="text" value="{{ organization.owner.get_full_name|default:organization.owner.username }}" disabled>
+                    <label for="org-owner">{% trans "owner" context "organizations.settings" %}</label>
+                    <input type="text" id="org-owner" value="{{ organization.owner.get_full_name|default:organization.owner.username }}" disabled>
                     <div class="info-text">{{ organization.owner.email }}</div>
                 </div>
 

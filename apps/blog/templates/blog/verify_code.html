@@ -16,8 +16,8 @@
     <form method="post" class="register-form">
       {% csrf_token %}
       <div class="register-form-field">
-        <label>{% trans "code_label" context "blog.verify_code_page" %}</label>
-        <input name="code" class="form-control" placeholder="{% trans 'code_placeholder' context 'blog.verify_code_page' %}" />
+        <label for="verify-code">{% trans "code_label" context "blog.verify_code_page" %}</label>
+        <input id="verify-code" name="code" class="form-control" placeholder="{% trans 'code_placeholder' context 'blog.verify_code_page' %}" />
       </div>
       <button class="register-submit-btn" type="submit">{% trans "submit" context "blog.verify_code_page" %}</button>
     </form>

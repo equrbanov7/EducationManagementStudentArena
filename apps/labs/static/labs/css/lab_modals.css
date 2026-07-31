@@ -9,4 +9,4 @@
 .lab-chk-row .badge { margin-left: auto; flex-shrink: 0; }
 
 /* C3: add/edit lab modal list container */
-.c3-1 { max-height: 200px; overflow-y: auto; }
+.lab-modals-1 { max-height: 200px; overflow-y: auto; }

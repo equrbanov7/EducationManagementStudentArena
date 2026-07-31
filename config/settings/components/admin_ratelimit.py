@@ -35,6 +35,15 @@ ADMIN_OTP_RESEND_RATE_LIMIT = os.getenv("ADMIN_OTP_RESEND_RATE_LIMIT", "3/10m")
 RATELIMIT_ENABLE = True  # Can be set to False in development if needed
 RATELIMIT_USE_CACHE = "default"
 LOGIN_RATE_LIMIT = os.getenv("LOGIN_RATE_LIMIT", "5/10m")
+
+# İP-əsaslı login limiti (cihaz cookie-sindən ASILI OLMAYAN qapı).
+#
+# Cihaz limiti (`LOGIN_RATE_LIMIT`) yalnız imzalanmış cookie üzərində işləyir —
+# cookie göndərməyən klient hər sorğuda təzə vedrə alır, yəni brute-force açıq
+# qalır. İP vedrəsi bunu bağlayır. Hədd QƏSDƏN daha genişdir: universitet NAT-ı
+# arxasında yüzlərlə istifadəçi eyni İP-dən gəlir, ona görə normal səhv-parol
+# trafiki bloklanmamalı, amma seriyalı hücum dayandırılmalıdır.
+LOGIN_IP_RATE_LIMIT = os.getenv("LOGIN_IP_RATE_LIMIT", "60/10m")
 OTP_VERIFY_RATE_LIMIT = os.getenv("OTP_VERIFY_RATE_LIMIT", "5/10m")
 OTP_RESEND_RATE_LIMIT = os.getenv("OTP_RESEND_RATE_LIMIT", "3/10m")
 SUBSCRIBE_RATE_LIMIT = os.getenv("SUBSCRIBE_RATE_LIMIT", "3/10m")

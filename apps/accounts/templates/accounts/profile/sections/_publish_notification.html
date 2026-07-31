@@ -22,11 +22,12 @@
 
             {# Target group — multi-select checkboxes #}
             <div class="mb-4">
-                <label class="form-label fw-semibold mb-2">
+                <label class="form-label fw-semibold mb-2" id="pnTargetGroupLabel">
                     <i class="fas fa-users me-1 text-primary"></i>{% trans "target_group_label" context "profile.publish_notification" %} <span class="text-danger">*</span>
                 </label>
 
-                <div class="pn-target-list" id="pnTargetList">
+                <div class="pn-target-list" id="pnTargetList"
+                     role="group" aria-labelledby="pnTargetGroupLabel">
                     {# Search bar — always visible so users can quickly filter targets #}
                     <div class="pn-target-search-wrap">
                         <input type="text" class="form-control form-control-sm"

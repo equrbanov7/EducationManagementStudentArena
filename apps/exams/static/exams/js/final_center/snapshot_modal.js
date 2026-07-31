@@ -113,7 +113,9 @@
             })
             .catch(function () {
                 if (mine !== requestSerial) return;
-                if (body && !silent) body.innerHTML = '<p class="fxc-modal-error">Məlumat yüklənmədi.</p>';
+                if (body && !silent) {
+                    body.innerHTML = '<p class="fxc-modal-error">' + gettext("Məlumat yüklənmədi.") + "</p>";
+                }
             });
     }
 
@@ -130,10 +132,15 @@
 
         if (metaEl) {
             var meta = [];
-            if (d.seat != null) meta.push('<span><i class="fas fa-desktop"></i> Kompüter ' + esc(d.seat) + "</span>");
+            if (d.seat != null) {
+                meta.push('<span><i class="fas fa-desktop"></i> ' +
+                    interpolate(gettext("Kompüter %(seat)s"), { seat: esc(d.seat) }, true) + "</span>");
+            }
             meta.push('<span><i class="fas fa-user"></i> ' + esc(d.student_username || "") + "</span>");
             if (d.has_attempt) {
-                meta.push('<span><i class="fas fa-list-check"></i> ' + esc(d.answered) + " / " + esc(d.total_questions) + " cavab</span>");
+                meta.push('<span><i class="fas fa-list-check"></i> ' +
+                    interpolate(gettext("%(answered)s / %(total)s cavab"),
+                        { answered: esc(d.answered), total: esc(d.total_questions) }, true) + "</span>");
                 // Bal: bitmiş cəhd üçün yekun faiz, davam edən test üçün canlı
                 // (müvəqqəti) faiz — imtahan indi bitsəydi neçə bal olardı.
                 if (d.is_finished && d.score_percent != null) {
@@ -143,16 +150,23 @@
                     // qırmızı, ondan yuxarı yaşıl — nəzarətçi bir baxışda görsün.
                     var lv = parseFloat(d.live_score);
                     var lvCls = (!isNaN(lv) && lv >= 17) ? "fxc-pill--score-pass" : "fxc-pill--score-low";
-                    meta.push('<span class="fxc-pill ' + lvCls + '"><i class="fas fa-gauge-high"></i> Cari bal: ' + esc(d.live_score) + " bal</span>");
+                    meta.push('<span class="fxc-pill ' + lvCls + '"><i class="fas fa-gauge-high"></i> ' +
+                        interpolate(gettext("Cari bal: %(score)s bal"), { score: esc(d.live_score) }, true) + "</span>");
                 }
                 if (d.supervision_status && d.supervision_status !== "active") {
                     meta.push('<span class="fxc-pill fxc-pill--warn">' + esc(supLabel(d.supervision_status)) + "</span>");
                 }
                 if (d.intervention_reason) {
-                    meta.push('<span class="fxc-pill fxc-pill--warn"><i class="fas fa-circle-info"></i> Səbəb: ' +
-                        esc(d.intervention_reason) + "</span>");
+                    // Səbəb nəzarətçinin sərbəst mətnidir — tərcümə olunmur, yalnız çərçivə.
+                    meta.push('<span class="fxc-pill fxc-pill--warn"><i class="fas fa-circle-info"></i> ' +
+                        interpolate(gettext("Səbəb: %(reason)s"),
+                            { reason: esc(d.intervention_reason) }, true) + "</span>");
                 }
-                if (d.violation_count) meta.push('<span class="fxc-pill fxc-pill--warn">' + esc(d.violation_count) + " pozuntu</span>");
+                if (d.violation_count) {
+                    meta.push('<span class="fxc-pill fxc-pill--warn">' +
+                        interpolate(gettext("%(count)s pozuntu"),
+                            { count: esc(d.violation_count) }, true) + "</span>");
+                }
             }
             metaEl.innerHTML = meta.join("");
         }
@@ -170,13 +184,13 @@
         if (!body) return;
         if (!d.has_attempt) {
             body.innerHTML = '<div class="fxc-snapshot-empty"><i class="fas fa-hourglass-half"></i>' +
-                "<p>Tələbə hələ imtahana başlamayıb.</p></div>";
+                "<p>" + gettext("Tələbə hələ imtahana başlamayıb.") + "</p></div>";
             return;
         }
         var answers = d.answers || [];
         if (!answers.length) {
             body.innerHTML = '<div class="fxc-snapshot-empty"><i class="far fa-file"></i>' +
-                "<p>Hələ heç bir sual cavablanmayıb.</p></div>";
+                "<p>" + gettext("Hələ heç bir sual cavablanmayıb.") + "</p></div>";
             return;
         }
         body.innerHTML = '<ol class="fxc-snapshot-answers">' + answers.map(renderQuestion).join("") + "</ol>";
@@ -194,8 +208,14 @@
                 if (o.is_correct) oc += " correct";
                 if (o.is_selected && !o.is_correct) oc += " wrong";
                 var badges = "";
-                if (o.is_selected) badges += '<span class="fxc-snap-badge fxc-snap-badge--selected">Tələbənin cavabı</span>';
-                if (o.is_correct) badges += '<span class="fxc-snap-badge fxc-snap-badge--correct">Düzgün cavab</span>';
+                if (o.is_selected) {
+                    badges += '<span class="fxc-snap-badge fxc-snap-badge--selected">' +
+                        gettext("Tələbənin cavabı") + "</span>";
+                }
+                if (o.is_correct) {
+                    badges += '<span class="fxc-snap-badge fxc-snap-badge--correct">' +
+                        gettext("Düzgün cavab") + "</span>";
+                }
                 return '<div class="fxc-snap-opt' + oc + '">' +
                     '<span class="fxc-snap-opt-lbl">' + esc(o.label || "") + "</span>" +
                     '<span class="fxc-snap-opt-txt">' + esc(o.text || "") + "</span>" +
@@ -205,19 +225,28 @@
         } else if (a.text_answer) {
             inner = '<div class="fxc-snap-q-ans">' + esc(a.text_answer) + "</div>";
         } else if (a.files && a.files.length) {
-            inner = '<div class="fxc-snap-q-ans">' + a.files.length + " fayl yükləyib</div>";
+            inner = '<div class="fxc-snap-q-ans">' +
+                interpolate(gettext("%(count)s fayl yükləyib"), { count: a.files.length }, true) + "</div>";
         } else if (a.has_paint) {
-            inner = '<div class="fxc-snap-q-ans">Rəsm / şəkil cavabı</div>';
+            inner = '<div class="fxc-snap-q-ans">' + gettext("Rəsm / şəkil cavabı") + "</div>";
         }
+        var fallbackTitle = interpolate(gettext("Sual %(no)s"), { no: i + 1 }, true);
         return '<li class="fxc-snap-q fxc-snap-q--' + cls + '">' +
             '<div class="fxc-snap-q-head"><span class="fxc-snap-q-no">' + (i + 1) + "</span>" +
-            '<span class="fxc-snap-q-text">' + esc(a.question_text || ("Sual " + (i + 1))) + "</span>" +
+            '<span class="fxc-snap-q-text">' + esc(a.question_text || fallbackTitle) + "</span>" +
             (a.is_answered ? '<i class="fas fa-check fxc-snap-ok"></i>' : '<i class="far fa-circle fxc-snap-none"></i>') +
             "</div>" + inner + "</li>";
     }
 
     function supLabel(s) {
-        return { locked: "Dayandırılıb", removed: "Çıxarılıb", warned: "Xəbərdarlıq", resumed: "Bərpa olunub" }[s] || s;
+        // Etiketlər hər çağırışda qurulur — gettext çağırış anında (kataloq
+        // yüklənəndən sonra) icra olunsun deyə obyekt modul səviyyəsində deyil.
+        return {
+            locked: gettext("Dayandırılıb"),
+            removed: gettext("Çıxarılıb"),
+            warned: gettext("Xəbərdarlıq"),
+            resumed: gettext("Bərpa olunub")
+        }[s] || s;
     }
 
     // ── Əməliyyatlar ──
@@ -240,16 +269,16 @@
             postAction(fillUrl(resumeTpl, current.sessionId, current.ticketId), "")
                 .then(afterAction).catch(netErr);
         } else if (action === "reentry") {
-            if (!window.confirm("Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam edəcək.")) return;
+            if (!window.confirm(gettext("Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam edəcək."))) return;
             postAction(fillUrl(reentryTpl, current.sessionId, current.ticketId), "")
                 .then(afterReentry).catch(netErr);
         } else if (action === "suspend") {
-            var reason = window.prompt("Dayandırma səbəbi:");
+            var reason = window.prompt(gettext("Dayandırma səbəbi:"));
             if (!reason) return;
             postAction(fillUrl(removeTpl, current.sessionId, current.ticketId),
                 "action=suspended&reason=" + encodeURIComponent(reason)).then(afterAction).catch(netErr);
         } else if (action === "remove") {
-            var rReason = window.prompt("İmtahandan çıxarma səbəbi:");
+            var rReason = window.prompt(gettext("İmtahandan çıxarma səbəbi:"));
             if (!rReason) return;
             postAction(fillUrl(removeTpl, current.sessionId, current.ticketId),
                 "action=removed&reason=" + encodeURIComponent(rReason)).then(afterAction).catch(netErr);
@@ -262,7 +291,7 @@
             startPolling();
             if (typeof onChange === "function") onChange();
         } else {
-            setError((result.data && result.data.error) || "Əməliyyat mümkün olmadı.");
+            setError((result.data && result.data.error) || gettext("Əməliyyat mümkün olmadı."));
         }
     }
 
@@ -276,11 +305,11 @@
             if (box) box.hidden = false;
             if (typeof onChange === "function") onChange();
         } else {
-            setError((result.data && result.data.error) || "Yenidən giriş mümkün olmadı.");
+            setError((result.data && result.data.error) || gettext("Yenidən giriş mümkün olmadı."));
         }
     }
 
-    function netErr() { setError("Şəbəkə xətası — yenidən cəhd edin."); }
+    function netErr() { setError(gettext("Şəbəkə xətası — yenidən cəhd edin.")); }
 
     var refreshBtn = document.getElementById("fxc-snapshot-refresh");
     if (refreshBtn) refreshBtn.addEventListener("click", function () { load(false); startPolling(); });

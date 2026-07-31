@@ -31,6 +31,20 @@ DEFAULT_EXAM_LANGUAGE = LANGUAGE_AZ
 
 EXAM_LANGUAGE_VALUES = frozenset(code for code, _label in EXAM_LANGUAGE_CHOICES)
 
+# ---------------------------------------------------------------------------
+# Sual bankı / sual göndərişi — imtahan növü (təyinat)
+#
+# Universitet axını: bank hansı imtahan növü üçün toplanır. Display adları
+# beynəlmiləl terminlərdir (statistika filtrləri ilə eyni), tərcümə olunmur ki,
+# migration-lar settings/i18n-dən asılı olmasın.
+# ---------------------------------------------------------------------------
+QUESTION_EXAM_KIND_CHOICES = (
+    ("final", "Final"),
+    ("midterm", "Midterm"),
+    ("quiz", "Quiz"),
+)
+QUESTION_EXAM_KIND_VALUES = frozenset(code for code, _label in QUESTION_EXAM_KIND_CHOICES)
+
 # Sualların, variantların və cavab sətrlərinin tanınması üçün regex-lər
 QUESTION_RE = re.compile(r"^\s*(\d+)\s*(?:\)\s*|\.(?!\d)\s*)(.+)\s*$")
 

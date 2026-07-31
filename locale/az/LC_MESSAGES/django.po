@@ -495,11 +495,10 @@ msgctxt "accounts.first_login"
 msgid "İlk giriş — parol təyini"
 msgstr "İlk giriş — parol təyini"
 
-#, fuzzy
 #| msgid "Xoş gəldiniz!"
 msgctxt "accounts.first_login"
 msgid "Xoş gəlmisiniz"
-msgstr "Xoş gəldiniz!"
+msgstr "Xoş gəlmisiniz"
 
 msgctxt "accounts.first_login"
 msgid ""
@@ -509,54 +508,49 @@ msgstr ""
 "İlk giriş üçün email ünvanınızı təsdiqləyin və öz parolunuzu təyin edin. Bu "
 "email parol bərpası üçün də istifadə olunacaq."
 
-#, fuzzy
 #| msgid "IP ünvan"
 msgctxt "accounts.first_login"
 msgid "Email ünvanı"
-msgstr "IP ünvan"
+msgstr "Email ünvanı"
 
 msgctxt "accounts.first_login"
 msgid "ad.soyad@qku.edu.az"
 msgstr "ad.soyad@qku.edu.az"
 
-#, fuzzy
 #| msgid "Təsdiqi göndər"
 msgctxt "accounts.first_login"
 msgid "Təsdiq kodu göndər"
-msgstr "Təsdiqi göndər"
+msgstr "Təsdiq kodu göndər"
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Mesajınız göndərildi!"
 msgctxt "accounts.first_login"
 msgid "Kod %(email)s ünvanına göndərildi."
-msgstr "Mesajınız göndərildi!"
+msgstr "Kod %(email)s ünvanına göndərildi."
 
 msgctxt "accounts.first_login"
 msgid "Təsdiq kodu (6 rəqəm)"
 msgstr "Təsdiq kodu (6 rəqəm)"
 
-#, fuzzy
 #| msgid "Yeni kafedra"
 msgctxt "accounts.first_login"
 msgid "Yeni parol"
-msgstr "Yeni kafedra"
+msgstr "Yeni parol"
 
-#, fuzzy
 #| msgctxt "appeals.template"
 #| msgid "Yeni bal (təxmini)"
 msgctxt "accounts.first_login"
 msgid "Yeni parol (təkrar)"
-msgstr "Yeni bal (təxmini)"
+msgstr "Yeni parol (təkrar)"
 
 msgctxt "accounts.first_login"
 msgid "Parolu təyin et və davam et"
 msgstr "Parolu təyin et və davam et"
 
-#, fuzzy
 #| msgid "Yenidən göndər"
 msgctxt "accounts.first_login"
 msgid "Kodu yenidən göndər"
-msgstr "Yenidən göndər"
+msgstr "Kodu yenidən göndər"
 
 msgctxt "accounts.first_login"
 msgid "Çıxış"
@@ -9257,7 +9251,7 @@ msgstr "Təqdimat tapılmadı"
 
 msgctxt "assignments.views.message"
 msgid "submissions_deleted"
-msgstr "Göndərdiyim layihələr"
+msgstr "{count} göndəriş silindi."
 
 msgctxt "assignment.message"
 msgid "grade_given_successfully"
@@ -11864,7 +11858,7 @@ msgstr "Qaralama"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "in_progress"
-msgstr "Yoxlanılır"
+msgstr "Davam edir"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "submitted"
@@ -11872,7 +11866,7 @@ msgstr "Təqdim edilib"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "expired"
-msgstr "Müddəti keçib"
+msgstr "Müddəti bitib"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "active"
@@ -11880,19 +11874,19 @@ msgstr "Aktiv"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "warned"
-msgstr "Xəbərdarlıq"
+msgstr "Xəbərdarlıq edilib"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "locked"
-msgstr "Bloklanmış tələbə yoxdur."
+msgstr "Bloklanıb"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "removed"
-msgstr "Sil"
+msgstr "Uzaqlaşdırılıb"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "resumed"
-msgstr "Bərpa et"
+msgstr "Davam etdirilib"
 
 msgctxt "exams.model.attempt.field"
 msgid "checked_by_teacher"
@@ -12188,7 +12182,7 @@ msgstr "Tələbə qrupları"
 
 msgctxt "exams.model.coding_test_case.choice.visibility"
 msgid "visible"
-msgstr "visible"
+msgstr "Görünən"
 
 msgctxt "exams.model.coding_test_case.choice.visibility"
 msgid "hidden"
@@ -12200,7 +12194,7 @@ msgstr "Sual"
 
 msgctxt "exams.model.coding_test_case.field"
 msgid "input_data"
-msgstr "input_data"
+msgstr "Giriş məlumatı"
 
 msgctxt "exams.model.coding_test_case.field"
 msgid "expected_output"
@@ -12277,7 +12271,7 @@ msgstr "Sual"
 
 msgctxt "exams.model.coding_submission.field"
 msgid "selected_language"
-msgstr "Dillər"
+msgstr "Seçilmiş dil"
 
 msgctxt "exams.model.coding_submission.field"
 msgid "submitted_code"
@@ -12313,7 +12307,7 @@ msgstr "Büdcə Təxminləri"
 
 msgctxt "exams.model.coding_submission.field"
 msgid "memory_usage_kb"
-msgstr "memory_usage_kb"
+msgstr "Yaddaş istifadəsi (KB)"
 
 msgctxt "exams.model.coding_submission.field"
 msgid "is_final"
@@ -12505,11 +12499,11 @@ msgstr ""
 
 msgctxt "exams.model.exam.field"
 msgid "ai_difficulty_balance_enabled"
-msgstr "ai_difficulty_balance_enabled"
+msgstr "AI çətinlik balansı aktivdir"
 
 msgctxt "exams.model.exam.help"
 msgid "ai_difficulty_balance_enabled"
-msgstr "ai_difficulty_balance_enabled"
+msgstr "Sual seçimində çətinlik səviyyələri avtomatik balanslaşdırılır."
 
 msgctxt "exams.model.exam.field"
 msgid "course"
@@ -12909,7 +12903,7 @@ msgstr "Çətin"
 
 msgctxt "exams.model.question.choice.difficulty_source"
 msgid "manual"
-msgstr "manual"
+msgstr "Əl ilə"
 
 msgctxt "exams.model.question.choice.difficulty_source"
 msgid "ai"
@@ -13105,7 +13099,7 @@ msgstr "Müəllim"
 
 msgctxt "supervision.config.choice.template"
 msgid "custom"
-msgstr "custom"
+msgstr "Fərdi"
 
 msgctxt "supervision.config.choice.template"
 msgid "light"
@@ -13355,7 +13349,7 @@ msgstr "Hadisə növü"
 
 msgctxt "supervision.incident.field"
 msgid "severity"
-msgstr "severity"
+msgstr "Ciddilik dərəcəsi"
 
 msgctxt "supervision.incident.field"
 msgid "timestamp"
@@ -13455,7 +13449,7 @@ msgstr "Tək cavab rejimində ən azı 1 düzgün variant seçilməlidir."
 
 msgctxt "exams.form.coding.error"
 msgid "test_cases_must_be_json"
-msgstr "test_cases_must_be_json"
+msgstr "Test halları düzgün JSON olmalıdır."
 
 msgctxt "exams.form.coding.error"
 msgid "test_cases_must_be_list"
@@ -13463,7 +13457,7 @@ msgstr "Bal tam ədəd olmalıdır."
 
 msgctxt "exams.form.coding.error"
 msgid "test_case_must_be_object"
-msgstr "test_case_must_be_object"
+msgstr "Hər test halı obyekt olmalıdır."
 
 msgctxt "exams.form.coding.error"
 msgid "test_case_points_must_be_integer"
@@ -13471,19 +13465,20 @@ msgstr "Bal tam ədəd olmalıdır."
 
 msgctxt "exams.form.coding.label"
 msgid "visible_test_cases"
-msgstr "visible_test_cases"
+msgstr "Görünən test halları"
 
 msgctxt "exams.form.coding.help"
 msgid "visible_test_cases"
-msgstr "visible_test_cases"
+msgstr "Tələbəyə nümunə kimi göstərilən test halları."
 
 msgctxt "exams.form.coding.label"
 msgid "hidden_test_cases"
-msgstr "hidden_test_cases"
+msgstr "Gizli test halları"
 
 msgctxt "exams.form.coding.help"
 msgid "hidden_test_cases"
-msgstr "hidden_test_cases"
+msgstr ""
+"Tələbəyə göstərilməyən, yalnız qiymətləndirmədə işlədilən test halları."
 
 msgctxt "exams.form.coding.label"
 msgid "language"
@@ -15131,7 +15126,9 @@ msgstr "Sınaq rejimi — imtahan dayandırılmadı"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_trial_violation_msg"
-msgstr "Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
+msgstr ""
+"Real imtahanda bu pozuntulara görə imtahandan uzaqlaşdırılardınız. Sınaq "
+"yalnız yoxlama məqsədilidir, ona görə davam edə bilərsiniz."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
@@ -19128,7 +19125,9 @@ msgstr "Bu imtahana hələ sual təyin olunmayıb."
 
 msgctxt "exams.view.access.message"
 msgid "exam_inactive_trial_blocked"
-msgstr "İmtahan hələ deaktivdir (qaralama), ona görə sınaq keçmək mümkün deyil. Əvvəlcə imtahanı aktivləşdirin."
+msgstr ""
+"İmtahan hələ deaktivdir (qaralama), ona görə sınaq keçmək mümkün deyil. "
+"Əvvəlcə imtahanı aktivləşdirin."
 
 #, python-brace-format
 msgctxt "exams.view.validation"
@@ -19636,7 +19635,7 @@ msgstr "Yoxlanılacaq iş tapılmadı."
 
 msgctxt "exams.view.results.message"
 msgid "attempts_deleted"
-msgstr "Qalan cəhd"
+msgstr "{count} cəhd silindi."
 
 msgctxt "exams.view.results.message"
 msgid "cannot_edit_after_five_minutes"
@@ -21712,7 +21711,7 @@ msgstr "Bu təşkilata girişin yoxdur."
 
 msgctxt "live_exam.view.permission"
 msgid "org_suspended_or_inactive"
-msgstr "org_suspended_or_inactive"
+msgstr "Təşkilat dayandırılıb və ya aktiv deyil."
 
 msgctxt "live_exam.view.permission"
 msgid "exam_manage_required"
@@ -22401,12 +22400,11 @@ msgctxt "organizations.unit_type"
 msgid "department"
 msgstr "Şöbə"
 
-#, fuzzy
 #| msgctxt "accounts.form.register.label"
 #| msgid "specialization"
 msgctxt "organizations.unit_type"
 msgid "specialty"
-msgstr "İxtisas / Fakültə"
+msgstr "İxtisas"
 
 msgctxt "organizations.unit_type"
 msgid "group"
@@ -23243,17 +23241,16 @@ msgstr "Təqdimat tapılmadı"
 
 msgctxt "projects.views.message"
 msgid "submissions_deleted"
-msgstr "Göndərdiyim layihələr"
+msgstr "{count} göndəriş silindi."
 
 msgctxt "projects.views.message"
 msgid "grade_given"
 msgstr "Qiymət uğurla verildi."
 
-#, fuzzy
 #| msgid "Teacher"
 msgctxt "registrar.degree"
 msgid "Bachelor"
-msgstr "Müəllim"
+msgstr "Bakalavr"
 
 msgctxt "registrar.degree"
 msgid "Master"
@@ -23267,26 +23264,23 @@ msgctxt "registrar.model.program.meta"
 msgid "program"
 msgstr "proqram"
 
-#, fuzzy
 #| msgctxt "exams.model.attempt.choice.status"
 #| msgid "in_progress"
 msgctxt "registrar.model.program.meta"
 msgid "programs"
-msgstr "Yoxlanılır"
+msgstr "proqramlar"
 
-#, fuzzy
 #| msgctxt "blog.subscribe.email"
 #| msgid "subject"
 msgctxt "registrar.model.subject.meta"
 msgid "subject"
-msgstr "Abunəliyə xoş gəlmisiniz! [Sənin Blog Adın]"
+msgstr "fənn"
 
-#, fuzzy
 #| msgctxt "blog.subscribe.email"
 #| msgid "subject"
 msgctxt "registrar.model.subject.meta"
 msgid "subjects"
-msgstr "Abunəliyə xoş gəlmisiniz! [Sənin Blog Adın]"
+msgstr "fənlər"
 
 msgctxt "registrar.model.curriculum.meta"
 msgid "curriculum"
@@ -23304,19 +23298,17 @@ msgctxt "registrar.model.curriculum_subject.meta"
 msgid "curriculum subjects"
 msgstr "tədris planı fənləri"
 
-#, fuzzy
 #| msgctxt "organizations.unit_type"
 #| msgid "laboratory"
 msgctxt "registrar.enrollment_kind"
 msgid "Mandatory"
-msgstr "Laboratoriya"
+msgstr "Məcburi"
 
-#, fuzzy
 #| msgctxt "staff.management"
 #| msgid "Active"
 msgctxt "registrar.enrollment_kind"
 msgid "Elective"
-msgstr "Aktiv"
+msgstr "Seçmə"
 
 msgctxt "registrar.enrollment_kind"
 msgid "Retake"
@@ -23334,41 +23326,37 @@ msgctxt "registrar.model.offering.meta"
 msgid "course offering"
 msgstr "fənn açılışı"
 
-#, fuzzy
 #| msgctxt "accounts.teacher_dashboard"
 #| msgid "courses"
 msgctxt "registrar.model.offering.meta"
 msgid "course offerings"
-msgstr "Courses"
+msgstr "fənn açılışları"
 
 msgctxt "registrar.enrollment_status"
 msgid "Enrolled"
 msgstr "Qeydiyyatda"
 
-#, fuzzy
 #| msgctxt "exams.template.exam_live_monitor"
 #| msgid "stat_completed"
 msgctxt "registrar.enrollment_status"
 msgid "Completed"
-msgstr "Tamamlanmış sessiya"
+msgstr "Tamamlanıb"
 
-#, fuzzy
 #| msgctxt "accounts.view_as"
 #| msgid "stopped"
 msgctxt "registrar.enrollment_status"
 msgid "Dropped"
-msgstr "Öz profilinizə qayıtdınız."
+msgstr "İmtina edilib"
 
 msgctxt "registrar.model.enrollment.meta"
 msgid "enrollment"
 msgstr "fənn qeydiyyatı"
 
-#, fuzzy
 #| msgctxt "blog.post_detail_page"
 #| msgid "no_comments"
 msgctxt "registrar.model.enrollment.meta"
 msgid "enrollments"
-msgstr "Hələ şərh yoxdur. İlk şərh yazan sən ol."
+msgstr "fənnə yazılmalar"
 
 msgctxt "registrar.model.group_elective.meta"
 msgid "group elective choice"
@@ -24214,10 +24202,10 @@ msgctxt "admin.verify_otp"
 msgid "resend"
 msgstr "Kodu yenidən göndər"
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
 msgid "%(brand)s – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
-msgstr "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
+msgstr "%(brand)s – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
 
 msgid "EMSArena | Xoş gəldiniz"
 msgstr "EMSArena | Xoş gəldiniz"
@@ -25270,10 +25258,10 @@ msgstr ""
 msgid "env var: {var}"
 msgstr "env var: {var}"
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 #| msgid "Default format"
 msgid "default: {default}"
-msgstr "Standart format"
+msgstr ""
 
 msgid "(dynamic)"
 msgstr "(dynamic)"
@@ -25306,11 +25294,11 @@ msgid_plural "(Did you mean one of: {possibilities}?)"
 msgstr[0] "Did you mean {possibility}?"
 msgstr[1] "(Did you mean one of: {possibilities}?)"
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 #| msgctxt "exams.model.coding_submission.field"
 #| msgid "error_message"
 msgid "Error: {message}"
-msgstr "Mesaj"
+msgstr ""
 
 #, python-brace-format
 msgid "Try '{command} {option}' for help."
@@ -25333,7 +25321,7 @@ msgstr "Sərbəst iş"
 #| msgctxt "exams.service.parsing.warning"
 #| msgid "missing_option"
 msgid "Missing option"
-msgstr "{option} variantı tapılmadı."
+msgstr "Variant çatışmır"
 
 msgid "Missing parameter"
 msgstr "Missing parameter"
@@ -26542,11 +26530,11 @@ msgstr "Gün göstərilməyib"
 msgid "No week specified"
 msgstr "Həftə göstərilməyib"
 
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "assignment.model.meta"
 #| msgid "verbose_name_plural"
 msgid "No %(verbose_name_plural)s available"
-msgstr "Sərbəst işlər"
+msgstr ""
 
 #, python-format
 msgid ""
@@ -28194,7 +28182,9 @@ msgstr "Sınaq keçmək mümkün deyil"
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "trial_run_blocked_body"
-msgstr "Bu imtahanda hələ sual yoxdur, ona görə sınaq keçmək mümkün deyil. Əvvəlcə sual əlavə edin və ya PDF-dən yükləyin."
+msgstr ""
+"Bu imtahanda hələ sual yoxdur, ona görə sınaq keçmək mümkün deyil. Əvvəlcə "
+"sual əlavə edin və ya PDF-dən yükləyin."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "trial_run_blocked_cta"
@@ -28282,8 +28272,8 @@ msgstr "Birdəfəlik sil"
 msgctxt "exams.template.deleted_exams"
 msgid "confirm_permanent_delete"
 msgstr ""
-"Bu imtahan və bütün nəticələri birdəfəlik silinəcək. Bu əməliyyat geri "
-"qaytarıla bilməz. Davam edilsin?"
+"Bu imtahan bazadan birdəfəlik silinəcək. Cəhdi olmadığı üçün heç bir "
+"akademik nəticə itmir. Əməliyyat geri qaytarıla bilməz."
 
 msgctxt "exams.template.deleted_exams"
 msgid "empty_state"
@@ -29846,177 +29836,179 @@ msgstr "Bal 0 ilə %(max)s arasında olmalıdır."
 
 msgctxt "registrar.notify"
 msgid "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
-msgstr ""
+msgstr "Jurnalınızda rəsmi düzəliş edildi — detallar üçün jurnala baxın"
 
 msgctxt "registrar.journal"
 msgid "Fənlər"
-msgstr ""
+msgstr "Fənlər"
 
 msgctxt "registrar.journal"
 msgid "Semestr"
-msgstr ""
+msgstr "Semestr"
 
 msgctxt "registrar.journal"
 msgid "Müəllim təyin edilməyib"
-msgstr ""
+msgstr "Müəllim təyin edilməyib"
 
 msgctxt "registrar.journal"
 msgid "Buraxılır"
-msgstr ""
+msgstr "Buraxılır"
 
 msgctxt "registrar.journal"
 msgid "TİP"
-msgstr ""
+msgstr "TİP"
 
 msgctxt "registrar.journal"
 msgid "Hamısı"
-msgstr ""
+msgstr "Hamısı"
 
 msgctxt "registrar.journal"
 msgid "Dərs tipinə görə süz"
-msgstr ""
+msgstr "Dərs tipinə görə süz"
 
 msgctxt "registrar.journal"
 msgid "Dərs tipi"
-msgstr ""
+msgstr "Dərs tipi"
 
 msgctxt "registrar.journal"
 msgid "Müəllim"
-msgstr ""
+msgstr "Müəllim"
 
 msgctxt "registrar.journal"
 msgid "Bal"
-msgstr ""
+msgstr "Bal"
 
 msgctxt "registrar.correction"
 msgid "Fənlər"
-msgstr ""
+msgstr "Fənlər"
 
 msgctxt "registrar.correction"
 msgid "Bağla"
-msgstr ""
+msgstr "Bağla"
 
 msgctxt "registrar.correction"
 msgid "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
-msgstr ""
+msgstr "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın."
 
 msgctxt "registrar.correction"
 msgid "Axtar"
-msgstr ""
+msgstr "Axtar"
 
 msgctxt "registrar.correction"
 msgid "Bal"
-msgstr ""
+msgstr "Bal"
 
 msgctxt "registrar.correction"
 msgid "Bu fənndə hələ tələbə/dərs yoxdur."
-msgstr ""
+msgstr "Bu fənndə hələ tələbə/dərs yoxdur."
 
 msgctxt "registrar.correction"
 msgid "Bütün semestrlər"
-msgstr ""
+msgstr "Bütün semestrlər"
 
 msgctxt "registrar.correction"
 msgid "Davamiyyət"
-msgstr ""
+msgstr "Davamiyyət"
 
 msgctxt "registrar.correction"
 msgid "Düzəliş olunmuş xana"
-msgstr ""
+msgstr "Düzəliş olunmuş xana"
 
 msgctxt "registrar.correction"
 msgid "Düzəliş tarixçəsi"
-msgstr ""
+msgstr "Düzəliş tarixçəsi"
 
 msgctxt "registrar.correction"
 msgid "Düzəlişi edən"
-msgstr ""
+msgstr "Düzəlişi edən"
 
 msgctxt "registrar.correction"
 msgid "Dəyişmək üçün istənilən xananın üzərinə klikləyin."
-msgstr ""
+msgstr "Dəyişmək üçün istənilən xananın üzərinə klikləyin."
 
 msgctxt "registrar.correction"
 msgid "Fənn siyahısı"
-msgstr ""
+msgstr "Fənn siyahısı"
 
 msgctxt "registrar.correction"
 msgid "Jurnal düzəlişi"
-msgstr ""
+msgstr "Jurnal düzəlişi"
 
 msgctxt "registrar.correction"
 msgid ""
 "Müəllim və fənn seçin — jurnalı düzəliş rejimində açın. Hər düzəliş sənəd "
 "(PDF), səbəb və qeyd tələb edir; kim nəyi dəyişdi audit olunur."
 msgstr ""
+"Müəllim və fənn seçin — jurnalı düzəliş rejimində açın. Hər düzəliş sənəd "
+"(PDF), səbəb və qeyd tələb edir; kim nəyi dəyişdi audit olunur."
 
 msgctxt "registrar.correction"
 msgid "Müəllim təyin edilməyib"
-msgstr ""
+msgstr "Müəllim təyin edilməyib"
 
 msgctxt "registrar.correction"
 msgid "Nəyi düzəldirsiniz?"
-msgstr ""
+msgstr "Nəyi düzəldirsiniz?"
 
 msgctxt "registrar.correction"
 msgid "QAYIB"
-msgstr ""
+msgstr "QAYIB"
 
 msgctxt "registrar.correction"
 msgid "Qeyd"
-msgstr ""
+msgstr "Qeyd"
 
 msgctxt "registrar.correction"
 msgid "Səbəb"
-msgstr ""
+msgstr "Səbəb"
 
 msgctxt "registrar.correction"
 msgid "Sənəd (PDF)"
-msgstr ""
+msgstr "Sənəd (PDF)"
 
 msgctxt "registrar.correction"
 msgid "Təsdiqlə"
-msgstr ""
+msgstr "Təsdiqlə"
 
 msgctxt "registrar.correction"
 msgid "Uyğun fənn açılışı tapılmadı."
-msgstr ""
+msgstr "Uyğun fənn açılışı tapılmadı."
 
 msgctxt "registrar.correction"
 msgid "Yalnız cari semestr"
-msgstr ""
+msgstr "Yalnız cari semestr"
 
 msgctxt "registrar.correction"
 msgid "Yeni bal (tam ədəd)"
-msgstr ""
+msgstr "Yeni bal (tam ədəd)"
 
 msgctxt "registrar.correction"
 msgid "Yeni davamiyyət"
-msgstr ""
+msgstr "Yeni davamiyyət"
 
 msgctxt "registrar.correction"
 msgid "İmtina"
-msgstr ""
+msgstr "İmtina"
 
 msgctxt "registrar.correction"
 msgid "№ · SOYAD AD"
-msgstr ""
+msgstr "№ · SOYAD AD"
 
 msgctxt "registrar.correction"
 msgid "İştirak (iə)"
-msgstr ""
+msgstr "İştirak (iə)"
 
 msgctxt "registrar.correction"
 msgid "Qayıb (qb)"
-msgstr ""
+msgstr "Qayıb (qb)"
 
 msgctxt "registrar.correction"
 msgid "Üzrlü qayıb (üq)"
-msgstr ""
+msgstr "Üzrlü qayıb (üq)"
 
 msgctxt "registrar.correction"
 msgid "Düzəliş yadda saxlanıldı."
-msgstr ""
+msgstr "Düzəliş yadda saxlanıldı."
 
 #, python-format
 msgid ""
@@ -30139,6 +30131,5141 @@ msgstr "kafedra axtar…"
 msgid "müəllim axtar…"
 msgstr "müəllim axtar…"
 
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import"
+msgstr "#{index} sualı bu faylda #{previous_index} ilə eynidir: “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import_first"
+msgstr ""
+"#{index} sualı bu faylda daha {count} sualla təkrarlanır (ilk: "
+"#{next_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "already_in_exam"
+msgstr "#{index} sualı bankda artıq var (sıra {db_index}): “{preview}”"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_long"
+msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan uzundur."
+
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_short"
+msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan qısadır."
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_title"
+msgstr "Bu sınaq keçididir — nəticə heç yerə yazılmır"
+
+msgctxt "exams.template.student_exam_result"
+msgid "trial_result_note_body"
+msgstr ""
+"Real imtahanda tələbə bu mərhələdə imtahandan çıxarılır və giriş səhifəsinə "
+"yönləndirilir. Sınaq yalnız imtahanı yoxlamaq üçündür, ona görə burada belə "
+"bir yönləndirmə yoxdur."
+
+msgctxt "appeals.view.message"
+msgid ""
+"Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid "
+"köhnəlib."
+msgstr ""
+"Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid "
+"köhnəlib."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "exams.template.question_bank_list"
+msgid "fənn axtar…"
+msgstr "fənn axtar…"
+
+msgctxt "exams.template.question_bank_list"
+msgid "Kataloqdakı fənlərdən axtarıb seçin (opsional)."
+msgstr "Kataloqdakı fənlərdən axtarıb seçin (opsional)."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Sualı göndərən müəllim"
+msgstr "Sualı göndərən müəllim"
+
+msgctxt "exams.template.question_bank_list"
+msgid "müəllim axtar…"
+msgstr "müəllim axtar…"
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank hansı müəllimin suallarından yaranır (opsional)."
+msgstr "Bank hansı müəllimin suallarından yaranır (opsional)."
+
+msgctxt "exams.template.question_bank_list"
+msgid "İmtahan növü"
+msgstr "İmtahan növü"
+
+msgctxt "exams.template.question_bank_list"
+msgid "Ümumi (təyinatsız)"
+msgstr "Ümumi (təyinatsız)"
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank hansı imtahan üçün toplanır: Final, Midterm və ya Quiz."
+msgstr "Bank hansı imtahan üçün toplanır: Final, Midterm və ya Quiz."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Sual formatı"
+msgstr "Sual formatı"
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank yalnız imtahan mərkəzinə görünür."
+msgstr "Bank yalnız imtahan mərkəzinə görünür."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank adı, fənn və ya müəllim üzrə axtar..."
+msgstr "Bank adı, fənn və ya müəllim üzrə axtar..."
+
+msgctxt "exams.template.question_bank_list"
+msgid "İmtahan növü filtri"
+msgstr "İmtahan növü filtri"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Suallar «%(bank)s» bankına əlavə olunub"
+msgstr "Suallar «%(bank)s» bankına əlavə olunub"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "fakültə axtar…"
+msgstr "fakültə axtar…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "kafedra axtar…"
+msgstr "kafedra axtar…"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "müəllim axtar…"
+msgstr "müəllim axtar…"
+
+msgctxt "exams.template.question_submission"
+msgid ""
+"Boş saxlasanız suallar göndərişin fənni və imtahan növü ilə yeni banka "
+"yazılacaq. ★ — fənnə/növə uyğun banklar."
+msgstr ""
+"Boş saxlasanız suallar göndərişin fənni və imtahan növü ilə yeni banka "
+"yazılacaq. ★ — fənnə/növə uyğun banklar."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu bank artıq mövcud deyil."
+msgstr "Bu bank artıq mövcud deyil."
+
+msgctxt "exams.template.question_submission"
+msgid "Bu qrup üçün fənn yoxdur"
+msgstr "Bu qrup üçün fənn yoxdur"
+
+msgctxt "exams.template.question_submission"
+msgid "Bu şərtlərə uyğun sual tapılmadı."
+msgstr "Bu şərtlərə uyğun sual tapılmadı."
+
+msgctxt "exams.template.question_submission"
+msgid "Bəli, sil"
+msgstr "Bəli, sil"
+
+msgctxt "exams.template.question_submission"
+msgid "Daha çox yüklənir…"
+msgstr "Daha çox yüklənir…"
+
+msgctxt "exams.template.question_submission"
+msgid "Dil, fənn, imtahan növü və qrup mütləqdir"
+msgstr "Dil, fənn, imtahan növü və qrup mütləqdir"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzgün cavab"
+msgstr "Düzgün cavab"
+
+msgctxt "exams.template.question_submission"
+msgid "Göndərişi redaktə et"
+msgstr "Göndərişi redaktə et"
+
+msgctxt "exams.template.question_submission"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "exams.template.question_submission"
+msgid "Növü seçin…"
+msgstr "Növü seçin…"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual filtri"
+msgstr "Sual filtri"
+
+msgctxt "exams.template.question_submission"
+msgid "Sual və ya variant mətnində axtar…"
+msgstr "Sual və ya variant mətnində axtar…"
+
+msgctxt "exams.template.question_submission"
+msgid "Suallar hansı imtahan üçündür — mərkəz bankı bu təyinatla yaradır."
+msgstr "Suallar hansı imtahan üçündür — mərkəz bankı bu təyinatla yaradır."
+
+msgctxt "exams.template.question_submission"
+msgid "Suallarda axtar"
+msgstr "Suallarda axtar"
+
+msgctxt "exams.template.question_submission"
+msgid ""
+"Sualları düzəldin və ya yenidən yükləyin, önizləyin — sonra təkrar göndərin."
+msgstr ""
+"Sualları düzəldin və ya yenidən yükləyin, önizləyin — sonra təkrar göndərin."
+
+msgctxt "exams.template.question_submission"
+msgid "Təmiz"
+msgstr "Təmiz"
+
+msgctxt "exams.template.question_submission"
+msgid "məs. 5–8-ci suallar mühazirə 3-ə aiddir; final üçün nəzərdə tutulub…"
+msgstr "məs. 5–8-ci suallar mühazirə 3-ə aiddir; final üçün nəzərdə tutulub…"
+
+msgctxt "exams.template.question_submission"
+msgid "məs. İnformatika — Final sual toplusu"
+msgstr "məs. İnformatika — Final sual toplusu"
+
+msgctxt "exams.template.question_submission"
+msgid "silinib"
+msgstr "silinib"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan növü"
+msgstr "İmtahan növü"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "exams.view.question_submission.error"
+msgid "Fənni öz fənləriniz arasından seçin (məcburidir)."
+msgstr "Fənni öz fənləriniz arasından seçin (məcburidir)."
+
+msgctxt "exams.view.question_submission.error"
+msgid "İmtahan növünü seçin (məcburidir)."
+msgstr "İmtahan növünü seçin (məcburidir)."
+
+msgctxt "exams.service.question_submission.error"
+msgid ""
+"Vizual mənbə artıq əlçatan deyil və ya məzmunla uyğun gəlmir. Müəllim faylı "
+"yenidən yükləməlidir."
+msgstr ""
+"Vizual mənbə artıq əlçatan deyil və ya məzmunla uyğun gəlmir. Müəllim faylı "
+"yenidən yükləməlidir."
+
+msgid ""
+"\n"
+"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
+"                                "
+msgstr ""
+"\n"
+"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
+"                                "
+
+msgid "%(d)s tarixli tam hesabatı yüklə"
+msgstr "%(d)s tarixli tam hesabatı yüklə"
+
+msgid "%(day)s tarixli tam hesabatı yüklə"
+msgstr "%(day)s tarixli tam hesabatı yüklə"
+
+msgctxt "exams.center.stats"
+msgid "AI analiz hazırlanır…"
+msgstr "AI analiz hazırlanır…"
+
+msgid "AI analizi alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "AI analizi alınmadı. Bir az sonra yenidən cəhd edin."
+
+msgctxt "exams.center.stats"
+msgid "AI analizi alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "AI analizi alınmadı. Bir az sonra yenidən cəhd edin."
+
+msgid "AI ilə analiz et"
+msgstr "AI ilə analiz et"
+
+msgid "AI xülasə"
+msgstr "AI xülasə"
+
+msgid "AI xülasə hazırlanır…"
+msgstr "AI xülasə hazırlanır…"
+
+msgid "Ad, soyad və ya istifadəçi adı…"
+msgstr "Ad, soyad və ya istifadəçi adı…"
+
+msgid "Ad, soyad, istifadəçi adı…"
+msgstr "Ad, soyad, istifadəçi adı…"
+
+msgid "Akademik məlumatlar"
+msgstr "Akademik məlumatlar"
+
+msgid "Akademik struktur"
+msgstr "Akademik struktur"
+
+msgid "Akademik tarixçə qorunur"
+msgstr "Akademik tarixçə qorunur"
+
+msgid "Akademik vahid"
+msgstr "Akademik vahid"
+
+msgid ""
+"Aktiv cəhdlər avtomatik təhvil veriləcək. Bu əməliyyat geri qaytarıla "
+"bilməz."
+msgstr ""
+"Aktiv cəhdlər avtomatik təhvil veriləcək. Bu əməliyyat geri qaytarıla "
+"bilməz."
+
+msgid "Analitik qrafiklər"
+msgstr "Analitik qrafiklər"
+
+msgid "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır."
+msgstr "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır."
+
+msgid "Apellyasiya statistikası"
+msgstr "Apellyasiya statistikası"
+
+msgid "Apellyasiya tapılmadı."
+msgstr "Apellyasiya tapılmadı."
+
+msgid "Axtarmağa başlayın."
+msgstr "Axtarmağa başlayın."
+
+msgid "Axtarış (tələbə)"
+msgstr "Axtarış (tələbə)"
+
+msgid "Axtarışa uyğun qeyd yoxdur."
+msgstr "Axtarışa uyğun qeyd yoxdur."
+
+msgid "Axtarışa uyğun zal tapılmadı."
+msgstr "Axtarışa uyğun zal tapılmadı."
+
+msgid "Aylıq dinamika"
+msgstr "Aylıq dinamika"
+
+msgid "Bal"
+msgstr "Bal"
+
+msgctxt "registrar.records"
+msgid "Bax"
+msgstr "Bax"
+
+msgid "Bağlantı"
+msgstr "Bağlantı"
+
+msgid "Bilet statusu"
+msgstr "Bilet statusu"
+
+msgid "Bitirib"
+msgstr "Bitirib"
+
+msgid "Bitmiş"
+msgstr "Bitmiş"
+
+msgid "Boş"
+msgstr "Boş"
+
+msgid "Boş zallar"
+msgstr "Boş zallar"
+
+msgid ""
+"Bu PIN yalnız sizə aiddir. İmtahana başlamaq üçün onu aşağıdakı xanaya daxil"
+" edin."
+msgstr ""
+"Bu PIN yalnız sizə aiddir. İmtahana başlamaq üçün onu aşağıdakı xanaya daxil"
+" edin."
+
+msgid ""
+"Bu PIN-i tələbəyə deyin — /exams/final/ səhifəsindən daxil olub imtahana "
+"OLDUĞU YERDƏN davam edəcək. Yalnız bir dəfə göstərilir."
+msgstr ""
+"Bu PIN-i tələbəyə deyin — /exams/final/ səhifəsindən daxil olub imtahana "
+"OLDUĞU YERDƏN davam edəcək. Yalnız bir dəfə göstərilir."
+
+msgctxt "registrar.records"
+msgid "Bu bölmə üçün struktur icazəniz yoxdur."
+msgstr "Bu bölmə üçün struktur icazəniz yoxdur."
+
+msgid "Bu filtrlərə uyğun qeyd tapılmadı."
+msgstr "Bu filtrlərə uyğun qeyd tapılmadı."
+
+msgid "Bu fənnə hələ qrup təyin olunmayıb."
+msgstr "Bu fənnə hələ qrup təyin olunmayıb."
+
+msgid ""
+"Bu oturuma hələ tələbə qoşulmayıb. Tələbə qeydli kompüterdən PIN ilə girəndə"
+" burada görünəcək."
+msgstr ""
+"Bu oturuma hələ tələbə qoşulmayıb. Tələbə qeydli kompüterdən PIN ilə girəndə"
+" burada görünəcək."
+
+msgid "Bu qrupun fənləri"
+msgstr "Bu qrupun fənləri"
+
+msgctxt "registrar.records"
+msgid "Bu tələbənin hələ tədris qeydi yoxdur."
+msgstr "Bu tələbənin hələ tədris qeydi yoxdur."
+
+msgid "Bu tələbəyə PIN təyin olunmuş imtahan tapılmadı."
+msgstr "Bu tələbəyə PIN təyin olunmuş imtahan tapılmadı."
+
+msgid ""
+"Bu əməliyyat otaqdakı BÜTÜN gözləyən tələbələr üçün imtahanı eyni anda "
+"başladır."
+msgstr ""
+"Bu əməliyyat otaqdakı BÜTÜN gözləyən tələbələr üçün imtahanı eyni anda "
+"başladır."
+
+msgid ""
+"Bu, final imtahanıdır. İmtahan yalnız təyin olunmuş vaxt aralığında, imtahan"
+" giriş səhifəsindən istifadəçi adı və PIN ilə verilir. Kabinetdən birbaşa "
+"başlamaq mümkün deyil."
+msgstr ""
+"Bu, final imtahanıdır. İmtahan yalnız təyin olunmuş vaxt aralığında, imtahan"
+" giriş səhifəsindən istifadəçi adı və PIN ilə verilir. Kabinetdən birbaşa "
+"başlamaq mümkün deyil."
+
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgid ""
+"Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status, "
+"semestr və tədris ili üzrə süzün. Sütun başlığına klik = sırala. Yüksək "
+"qəbul faizi qiymətləndirmə/cavab açarı problemlərinə işarə ola bilər."
+msgstr ""
+"Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status, "
+"semestr və tədris ili üzrə süzün. Sütun başlığına klik = sırala. Yüksək "
+"qəbul faizi qiymətləndirmə/cavab açarı problemlərinə işarə ola bilər."
+
+msgid ""
+"Bütün imtahan nəticələri — fənn, qrup, kafedra, tip və tədris ili üzrə "
+"süzün. Sütun başlığına klik = sırala. «Bax» ilə tələbənin tam nəticəsi "
+"(apellyasiya düzəlişləri daxil) açılır."
+msgstr ""
+"Bütün imtahan nəticələri — fənn, qrup, kafedra, tip və tədris ili üzrə "
+"süzün. Sütun başlığına klik = sırala. «Bax» ilə tələbənin tam nəticəsi "
+"(apellyasiya düzəlişləri daxil) açılır."
+
+msgid "Bütün imtahanlar"
+msgstr "Bütün imtahanlar"
+
+msgid "Bütün zallar"
+msgstr "Bütün zallar"
+
+msgid "Bəli, başlat"
+msgstr "Bəli, başlat"
+
+msgid "Bəli, bitir"
+msgstr "Bəli, bitir"
+
+msgid "Bərpa et"
+msgstr "Bərpa et"
+
+msgid "Canlı"
+msgstr "Canlı"
+
+msgid "Canlı izləmə"
+msgstr "Canlı izləmə"
+
+msgid "Canlı monitor"
+msgstr "Canlı monitor"
+
+msgid "Canlı nəzarət"
+msgstr "Canlı nəzarət"
+
+msgid "Canlı zallar"
+msgstr "Canlı zallar"
+
+msgid "Cədvəl"
+msgstr "Cədvəl"
+
+msgctxt "exams.center.stats"
+msgid "Cəhd sayı"
+msgstr "Cəhd sayı"
+
+msgctxt "registrar.records"
+msgid "Davam edir"
+msgstr "Davam edir"
+
+msgid "Dayandır"
+msgstr "Dayandır"
+
+msgid "Deaktiv zallar"
+msgstr "Deaktiv zallar"
+
+msgid "Detal"
+msgstr "Detal"
+
+msgctxt "registrar.records"
+msgid "Detal yüklənmədi."
+msgstr "Detal yüklənmədi."
+
+msgid "Detalları görmək üçün soldan tələbə seçin."
+msgstr "Detalları görmək üçün soldan tələbə seçin."
+
+msgctxt "registrar.records"
+msgid "Dərəcə"
+msgstr "Dərəcə"
+
+msgid "Excel hesabatı yüklə"
+msgstr "Excel hesabatı yüklə"
+
+msgid "Excel yüklə"
+msgstr "Excel yüklə"
+
+msgid "Faiz"
+msgstr "Faiz"
+
+msgid "Faktiki"
+msgstr "Faktiki"
+
+msgid "Fakültə / dekanlıq"
+msgstr "Fakültə / dekanlıq"
+
+msgid ""
+"Filtrə uyğun bütün apellyasiyaları süni intellekt ümumiləşdirir — harada "
+"cəmləşir, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir, limit"
+" sərf olunmur."
+msgstr ""
+"Filtrə uyğun bütün apellyasiyaları süni intellekt ümumiləşdirir — harada "
+"cəmləşir, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir, limit"
+" sərf olunmur."
+
+msgid "Final hesabatları"
+msgstr "Final hesabatları"
+
+msgid "Final imtahan hesabatları"
+msgstr "Final imtahan hesabatları"
+
+msgid "Fənn qrupu"
+msgstr "Fənn qrupu"
+
+msgid "Fənn üzrə (ən çox 10)"
+msgstr "Fənn üzrə (ən çox 10)"
+
+msgctxt "registrar.records"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgid "Fənn, zal və ya kod üzrə axtar…"
+msgstr "Fənn, zal və ya kod üzrə axtar…"
+
+msgid "Fərdi tələbələrə açıq"
+msgstr "Fərdi tələbələrə açıq"
+
+msgid "Gedən imtahan axtarışı"
+msgstr "Gedən imtahan axtarışı"
+
+msgid "Giriş"
+msgstr "Giriş"
+
+msgid "Giriş açıq"
+msgstr "Giriş açıq"
+
+msgctxt "registrar.records"
+msgid "Giriş balı"
+msgstr "Giriş balı"
+
+msgid "Giriş kodu / PIN"
+msgstr "Giriş kodu / PIN"
+
+msgid "Giriş kodu və ya PIN"
+msgstr "Giriş kodu və ya PIN"
+
+msgid "Girişi aç"
+msgstr "Girişi aç"
+
+msgid "Girişlər"
+msgstr "Girişlər"
+
+msgid "Görünüş"
+msgstr "Görünüş"
+
+msgid "Gözləyir / hazır"
+msgstr "Gözləyir / hazır"
+
+msgid "Günü yüklə"
+msgstr "Günü yüklə"
+
+msgid "Gəlməyib"
+msgstr "Gəlməyib"
+
+msgid "Hamı üçün açıq"
+msgstr "Hamı üçün açıq"
+
+msgid "Hamısında girişi aç"
+msgstr "Hamısında girişi aç"
+
+msgid "Hazır"
+msgstr "Hazır"
+
+msgid "Hazırda canlı imtahan yoxdur"
+msgstr "Hazırda canlı imtahan yoxdur"
+
+msgid "Hazırda gedən imtahanlar"
+msgstr "Hazırda gedən imtahanlar"
+
+msgid "Hesabat"
+msgstr "Hesabat"
+
+msgid "Hesabat növü"
+msgstr "Hesabat növü"
+
+msgid "Hesabatlar"
+msgstr "Hesabatlar"
+
+msgid "Hələ zal yaradılmayıb. Zallar superadmin bölməsində idarə olunur."
+msgstr "Hələ zal yaradılmayıb. Zallar superadmin bölməsində idarə olunur."
+
+msgid "Hələ zal yaradılmayıb. Zallar superadmin tərəfindən yaradılır."
+msgstr "Hələ zal yaradılmayıb. Zallar superadmin tərəfindən yaradılır."
+
+msgid "Hələ əməliyyat qeydi yoxdur."
+msgstr "Hələ əməliyyat qeydi yoxdur."
+
+msgctxt "registrar.records"
+msgid "Keçdi"
+msgstr "Keçdi"
+
+msgctxt "exams.center.stats"
+msgid "Keçib"
+msgstr "Keçib"
+
+msgid "Kollokvium pəncərələri"
+msgstr "Kollokvium pəncərələri"
+
+msgid "Kompüter"
+msgstr "Kompüter"
+
+msgid "Kompüter axtar (ad, MAC, IP, yer)…"
+msgstr "Kompüter axtar (ad, MAC, IP, yer)…"
+
+msgid "Kompüter axtarışı"
+msgstr "Kompüter axtarışı"
+
+msgid "Kompüter dəyişmə"
+msgstr "Kompüter dəyişmə"
+
+msgid ""
+"Kompüterin üzərinə klik edərək tələbənin hansı fənndə olduğunu və nə "
+"etdiyini görün."
+msgstr ""
+"Kompüterin üzərinə klik edərək tələbənin hansı fənndə olduğunu və nə "
+"etdiyini görün."
+
+msgid "Kompüterin üzərinə klik edərək tələbənin hazırda nə etdiyini görün."
+msgstr "Kompüterin üzərinə klik edərək tələbənin hazırda nə etdiyini görün."
+
+msgid "Kompüterlər"
+msgstr "Kompüterlər"
+
+msgctxt "registrar.records"
+msgid "Kredit"
+msgstr "Kredit"
+
+msgctxt "registrar.records"
+msgid "Kəsildi"
+msgstr "Kəsildi"
+
+msgctxt "exams.center.stats"
+msgid "Kəsilib"
+msgstr "Kəsilib"
+
+msgid "Ləğv edilmiş"
+msgstr "Ləğv edilmiş"
+
+msgid "Müvəqqəti dayandır (ekran kilidlənir, davam etdirilə bilər)"
+msgstr "Müvəqqəti dayandır (ekran kilidlənir, davam etdirilə bilər)"
+
+msgid "Müəllim / işçi / kafedra axtar…"
+msgstr "Müəllim / işçi / kafedra axtar…"
+
+msgid "Müəllim üzrə (ən çox 10)"
+msgstr "Müəllim üzrə (ən çox 10)"
+
+msgctxt "registrar.records"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "exams.center.stats"
+msgid "Məlumat yoxdur"
+msgstr "Məlumat yoxdur"
+
+msgid "Namizəd tapılmadı."
+msgstr "Namizəd tapılmadı."
+
+msgid "Namizədlər"
+msgstr "Namizədlər"
+
+msgctxt "registrar.records"
+msgid "Nəticə tapılmadı."
+msgstr "Nəticə tapılmadı."
+
+msgctxt "registrar.records"
+msgid "Nəticə"
+msgstr "Nəticə"
+
+msgid "Nəzarətçi"
+msgstr "Nəzarətçi"
+
+msgid "Nəzarətçi axtarışı"
+msgstr "Nəzarətçi axtarışı"
+
+msgid "Nəzarətçi əlavə et"
+msgstr "Nəzarətçi əlavə et"
+
+msgid "Nəzarətçiləri yadda saxla"
+msgstr "Nəzarətçiləri yadda saxla"
+
+msgctxt "exams.center.stats"
+msgid "Orta nəticə"
+msgstr "Orta nəticə"
+
+msgctxt "registrar.records"
+msgid "Orta ÜOMG"
+msgstr "Orta ÜOMG"
+
+msgid "Otaq"
+msgstr "Otaq"
+
+msgid "Oturum ləğv olunacaq. Davam edilsin?"
+msgstr "Oturum ləğv olunacaq. Davam edilsin?"
+
+msgid "Oturum statistikası"
+msgstr "Oturum statistikası"
+
+msgid "Oturum tarixçəsi"
+msgstr "Oturum tarixçəsi"
+
+msgid "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri"
+msgstr "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri"
+
+msgid "Oturuma qoşulmuş tələbələr"
+msgstr "Oturuma qoşulmuş tələbələr"
+
+msgid "Oturumlar"
+msgstr "Oturumlar"
+
+msgid "Oturumu bitir"
+msgstr "Oturumu bitir"
+
+msgid "Oturumu ləğv et"
+msgstr "Oturumu ləğv et"
+
+msgid "PIN"
+msgstr "PIN"
+
+msgid "PIN yoxdur"
+msgstr "PIN yoxdur"
+
+msgid "PIN əməliyyatı"
+msgstr "PIN əməliyyatı"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Planlaşdırılan başlanğıc"
+msgstr "Planlaşdırılan başlanğıc"
+
+msgid "Pozuntu"
+msgstr "Pozuntu"
+
+msgid "Profili aç"
+msgstr "Profili aç"
+
+msgctxt "registrar.records"
+msgid "Q/b-dan kəsilib — imtahana buraxılmayıb"
+msgstr "Q/b-dan kəsilib — imtahana buraxılmayıb"
+
+msgctxt "registrar.records"
+msgid "Q/b-dan kəsr"
+msgstr "Q/b-dan kəsr"
+
+msgid "Qalan AI limiti"
+msgstr "Qalan AI limiti"
+
+msgctxt "exams.center.stats"
+msgid "Qalan AI limiti"
+msgstr "Qalan AI limiti"
+
+msgid "Qalan vaxt"
+msgstr "Qalan vaxt"
+
+msgid "Qayda pozanlar"
+msgstr "Qayda pozanlar"
+
+msgid "Qayda pozuntuları"
+msgstr "Qayda pozuntuları"
+
+msgid "Qeyd yoxdur."
+msgstr "Qeyd yoxdur."
+
+msgid "Qoşulur…"
+msgstr "Qoşulur…"
+
+msgid ""
+"Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş "
+"apellyasiyalar üzrə hesablanır."
+msgstr ""
+"Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş "
+"apellyasiyalar üzrə hesablanır."
+
+msgid "Qrup"
+msgstr "Qrup"
+
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgid "Qruplara açıq"
+msgstr "Qruplara açıq"
+
+msgid "Semestr"
+msgstr "Semestr"
+
+msgid "Server vaxtı"
+msgstr "Server vaxtı"
+
+msgid "Siz imtahandan çıxarılmısınız"
+msgstr "Siz imtahandan çıxarılmısınız"
+
+msgid "Sizə hələ zal təyin edilməyib."
+msgstr "Sizə hələ zal təyin edilməyib."
+
+msgid "Sizə təyin olunmuş zallar — daxil olub canlı nəzarəti başladın"
+msgstr "Sizə təyin olunmuş zallar — daxil olub canlı nəzarəti başladın"
+
+msgid ""
+"Soldan tələbəni tapıb seçin — təyin olunmuş imtahan, PIN və fənn məlumatları"
+" sağda görünür. Nəticələr yazdıqca dərhal gəlir."
+msgstr ""
+"Soldan tələbəni tapıb seçin — təyin olunmuş imtahan, PIN və fənn məlumatları"
+" sağda görünür. Nəticələr yazdıqca dərhal gəlir."
+
+msgid "Son aktivlik"
+msgstr "Son aktivlik"
+
+msgid "Sonrakı"
+msgstr "Sonrakı"
+
+msgctxt "registrar.records"
+msgid "Sonrakı"
+msgstr "Sonrakı"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Status filtri"
+msgstr "Status filtri"
+
+msgid "Status üzrə bölgü"
+msgstr "Status üzrə bölgü"
+
+msgctxt "registrar.records"
+msgid "Status"
+msgstr "Status"
+
+msgid "Struktur məlumatı"
+msgstr "Struktur məlumatı"
+
+msgid "Sual"
+msgstr "Sual"
+
+msgid "Səbəb (məcburi)"
+msgstr "Səbəb (məcburi)"
+
+msgid "Səhifə"
+msgstr "Səhifə"
+
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgid "Tarixçə xülasəsi"
+msgstr "Tarixçə xülasəsi"
+
+msgid "Tarixə"
+msgstr "Tarixə"
+
+msgid "Texniki fasilə kimi qeyd et (çıxarılır, qeyd texniki)"
+msgstr "Texniki fasilə kimi qeyd et (çıxarılır, qeyd texniki)"
+
+msgid "Tip"
+msgstr "Tip"
+
+msgctxt "registrar.records"
+msgid "Toplanmış kredit"
+msgstr "Toplanmış kredit"
+
+msgid "Tutum"
+msgstr "Tutum"
+
+msgid "Tədris etdiyi fənlər"
+msgstr "Tədris etdiyi fənlər"
+
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgid "Tələbə / fənn üzrə süz…"
+msgstr "Tələbə / fənn üzrə süz…"
+
+msgid "Tələbə adı və ya istifadəçi adı üzrə süz…"
+msgstr "Tələbə adı və ya istifadəçi adı üzrə süz…"
+
+msgid "Tələbə adı üzrə süz…"
+msgstr "Tələbə adı üzrə süz…"
+
+msgid "Tələbə axtarışı"
+msgstr "Tələbə axtarışı"
+
+msgid "Tələbə iştirakı"
+msgstr "Tələbə iştirakı"
+
+msgid "Tələbə tapılmadı."
+msgstr "Tələbə tapılmadı."
+
+msgid "Tələbə və ya imtahan adı…"
+msgstr "Tələbə və ya imtahan adı…"
+
+msgid "Tələbə üzrə axtarış"
+msgstr "Tələbə üzrə axtarış"
+
+msgid "Tələbə üzrə əməliyyat"
+msgstr "Tələbə üzrə əməliyyat"
+
+msgctxt "registrar.records"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgid "Təyin olunmayıb"
+msgstr "Təyin olunmayıb"
+
+msgid "Təyin olunmuş"
+msgstr "Təyin olunmuş"
+
+msgid "Təyin olunub"
+msgstr "Təyin olunub"
+
+msgid "Uyğun imtahan tapılmadı."
+msgstr "Uyğun imtahan tapılmadı."
+
+msgid "Uyğun kompüter tapılmadı."
+msgstr "Uyğun kompüter tapılmadı."
+
+msgid "Vaxt"
+msgstr "Vaxt"
+
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgid "Xəbərdarlıq"
+msgstr "Xəbərdarlıq"
+
+msgid "Yeni giriş PIN-i:"
+msgstr "Yeni giriş PIN-i:"
+
+msgid "Yenidən burax"
+msgstr "Yenidən burax"
+
+msgid "Yenidən giriş"
+msgstr "Yenidən giriş"
+
+msgid "Yenidən giriş ver"
+msgstr "Yenidən giriş ver"
+
+msgid "Yenidən girişə icazə ver (PIN qüvvədə qalır)"
+msgstr "Yenidən girişə icazə ver (PIN qüvvədə qalır)"
+
+msgid "Yenidən qoşulma sayı"
+msgstr "Yenidən qoşulma sayı"
+
+msgid "Yenilə"
+msgstr "Yenilə"
+
+msgid "Yer"
+msgstr "Yer"
+
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgid "Zal"
+msgstr "Zal"
+
+msgid "Zal adı, kodu və ya bina üzrə axtar…"
+msgstr "Zal adı, kodu və ya bina üzrə axtar…"
+
+msgid "Zal axtarışı"
+msgstr "Zal axtarışı"
+
+msgid "Zal idarəetmə"
+msgstr "Zal idarəetmə"
+
+msgid "Zal idarəetməsinə keç"
+msgstr "Zal idarəetməsinə keç"
+
+msgid "Zal nəzarəti"
+msgstr "Zal nəzarəti"
+
+msgid "Zal nəzarəti (bütün imtahanlar)"
+msgstr "Zal nəzarəti (bütün imtahanlar)"
+
+msgid "Zal nəzarətçiləri"
+msgstr "Zal nəzarətçiləri"
+
+msgid "Zal oturumu"
+msgstr "Zal oturumu"
+
+msgid "Zal statistikası"
+msgstr "Zal statistikası"
+
+msgid "Zala daxil ol"
+msgstr "Zala daxil ol"
+
+msgid "Zala daxil ol — canlı"
+msgstr "Zala daxil ol — canlı"
+
+msgid ""
+"Zala təyin olunan nəzarətçilər zaldakı bütün imtahanları idarə edə bilər. "
+"Ad, soyad və ya kafedra üzrə axtarın."
+msgstr ""
+"Zala təyin olunan nəzarətçilər zaldakı bütün imtahanları idarə edə bilər. "
+"Ad, soyad və ya kafedra üzrə axtarın."
+
+msgid "Zalda canlı oturum:"
+msgstr "Zalda canlı oturum:"
+
+msgid "Zalda hamısını başlat"
+msgstr "Zalda hamısını başlat"
+
+msgid "Zalda hamısını bitir"
+msgstr "Zalda hamısını bitir"
+
+msgid "Zaldakı canlı imtahanlar"
+msgstr "Zaldakı canlı imtahanlar"
+
+msgid "Zaldakı kompüterlər"
+msgstr "Zaldakı kompüterlər"
+
+msgid "Zallar"
+msgstr "Zallar"
+
+msgid "Zalı seçin — canlı imtahanları izləyin və idarə edin"
+msgstr "Zalı seçin — canlı imtahanları izləyin və idarə edin"
+
+msgid "canlı"
+msgstr "canlı"
+
+msgid "icra:"
+msgstr "icra:"
+
+msgid "imtahan"
+msgstr "imtahan"
+
+msgid "imtahan / zal"
+msgstr "imtahan / zal"
+
+msgid "ixtisas axtar…"
+msgstr "ixtisas axtar…"
+
+msgid "keşdən"
+msgstr "keşdən"
+
+msgctxt "exams.center.stats"
+msgid "keşdən"
+msgstr "keşdən"
+
+msgid "komp."
+msgstr "komp."
+
+msgid "kompüter"
+msgstr "kompüter"
+
+msgctxt "registrar.records"
+msgid "kredit"
+msgstr "kredit"
+
+msgid "oturum"
+msgstr "oturum"
+
+msgid "tələbə"
+msgstr "tələbə"
+
+msgid "tələbə / imtahan / zal"
+msgstr "tələbə / imtahan / zal"
+
+msgid "tələbə axtar…"
+msgstr "tələbə axtar…"
+
+msgid "yer"
+msgstr "yer"
+
+msgid "Çıxar"
+msgstr "Çıxar"
+
+msgid "Çıxarılma səbəbi"
+msgstr "Çıxarılma səbəbi"
+
+msgid "Çıxarılıb"
+msgstr "Çıxarılıb"
+
+msgctxt "registrar.records"
+msgid "Çıxış balı"
+msgstr "Çıxış balı"
+
+msgid "Ümumi"
+msgstr "Ümumi"
+
+msgid "Ümumi hadisə"
+msgstr "Ümumi hadisə"
+
+msgctxt "registrar.records"
+msgid "Ümumi kəsr"
+msgstr "Ümumi kəsr"
+
+msgid "Ümumi oturum"
+msgstr "Ümumi oturum"
+
+msgid "Üzvlüyə qoşulma"
+msgstr "Üzvlüyə qoşulma"
+
+msgid "İcazə seçilməyib"
+msgstr "İcazə seçilməyib"
+
+msgid "İmtahan"
+msgstr "İmtahan"
+
+msgid "İmtahan PIN-i"
+msgstr "İmtahan PIN-i"
+
+msgid "İmtahan PIN-iniz"
+msgstr "İmtahan PIN-iniz"
+
+msgid "İmtahan filtri"
+msgstr "İmtahan filtri"
+
+msgid "İmtahan forması"
+msgstr "İmtahan forması"
+
+msgid "İmtahan mərkəzi"
+msgstr "İmtahan mərkəzi"
+
+msgid "İmtahan tipi"
+msgstr "İmtahan tipi"
+
+msgid "İmtahan tipi üzrə"
+msgstr "İmtahan tipi üzrə"
+
+msgid "İmtahan zalları"
+msgstr "İmtahan zalları"
+
+msgctxt "registrar.records"
+msgid "İmtahana buraxılmır"
+msgstr "İmtahana buraxılmır"
+
+msgid "İmtahanda"
+msgstr "İmtahanda"
+
+msgctxt "registrar.records"
+msgid "İmtahandan (25%)"
+msgstr "İmtahandan (25%)"
+
+msgctxt "registrar.records"
+msgid "İmtahandan kəsilib (25% təkrar imtahan)"
+msgstr "İmtahandan kəsilib (25% təkrar imtahan)"
+
+msgid "İmtahandan çıxar"
+msgstr "İmtahandan çıxar"
+
+msgid "İmtahandan çıxar (cəhd təhvil verilir)"
+msgstr "İmtahandan çıxar (cəhd təhvil verilir)"
+
+msgid "İmtahandan çıxarılıb"
+msgstr "İmtahandan çıxarılıb"
+
+msgid "İmtahanı başlat"
+msgstr "İmtahanı başlat"
+
+msgid "İmtahanınız texniki səbəblə dayandırılıb"
+msgstr "İmtahanınız texniki səbəblə dayandırılıb"
+
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgid "Əməliyyat audit jurnalına yazılır və tələbəyə dərhal bildirilir."
+msgstr "Əməliyyat audit jurnalına yazılır və tələbəyə dərhal bildirilir."
+
+msgid "Əməliyyat növü"
+msgstr "Əməliyyat növü"
+
+msgid "Əməliyyatın səbəbini qeyd edin…"
+msgstr "Əməliyyatın səbəbini qeyd edin…"
+
+msgid "Ətraflı bax"
+msgstr "Ətraflı bax"
+
+msgid "Əvvəlki"
+msgstr "Əvvəlki"
+
+msgctxt "registrar.records"
+msgid "Əvvəlki"
+msgstr "Əvvəlki"
+
+msgctxt "accounts.first_login"
+msgid ""
+"\n"
+"            Təsdiq kodu <strong>%(email)s</strong> ünvanına göndərildi.\n"
+"            "
+msgstr ""
+"\n"
+"            Təsdiq kodu <strong>%(email)s</strong> ünvanına göndərildi.\n"
+"            "
+
+msgctxt "accounts.first_login"
+msgid "Email"
+msgstr "Email"
+
+msgctxt "accounts.first_login"
+msgid "Kod və parol"
+msgstr "Kod və parol"
+
+msgctxt "accounts.first_login"
+msgid "Parolu göstər/gizlət"
+msgstr "Parolu göstər/gizlət"
+
+msgctxt "accounts.first_login"
+msgid "parolu təkrar yazın"
+msgstr "parolu təkrar yazın"
+
+msgctxt "accounts.first_login"
+msgid "ən azı 8 simvol"
+msgstr "ən azı 8 simvol"
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Bitmiş akademik dövr (köhnə il/semestr) üçün dəyişiklik edilə bilməz."
+msgstr "Bitmiş akademik dövr (köhnə il/semestr) üçün dəyişiklik edilə bilməz."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Bu bölmə yalnız İmtahan Mərkəzi üçündür."
+msgstr "Bu bölmə yalnız İmtahan Mərkəzi üçündür."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Bu əhatə üçün artıq əlavə gün mövcuddur."
+msgstr "Bu əhatə üçün artıq əlavə gün mövcuddur."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Form məlumatları düzgün deyil."
+msgstr "Form məlumatları düzgün deyil."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Naməlum əməliyyat."
+msgstr "Naməlum əməliyyat."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Pəncərə silindi."
+msgstr "Pəncərə silindi."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Pəncərə statusu dəyişdirildi."
+msgstr "Pəncərə statusu dəyişdirildi."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Pəncərə yadda saxlanıldı."
+msgstr "Pəncərə yadda saxlanıldı."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Təşkilat konteksti tapılmadı."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Əlavə gün silindi."
+msgstr "Əlavə gün silindi."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Əlavə gün verildi."
+msgstr "Əlavə gün verildi."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Əlavə gün yalnız İmtahan Mərkəzi rəhbərinə məxsusdur."
+msgstr "Əlavə gün yalnız İmtahan Mərkəzi rəhbərinə məxsusdur."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Əlavə gün yeniləndi."
+msgstr "Əlavə gün yeniləndi."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Əvvəlcə K%(n)s təyin edilməlidir."
+msgstr "Əvvəlcə K%(n)s təyin edilməlidir."
+
+msgctxt "accounts.login.audience"
+msgid ""
+"Müəllim və əməkdaş kabinetinə daxil olmaq üçün universitet hesabınızla giriş"
+" edin."
+msgstr ""
+"Müəllim və əməkdaş kabinetinə daxil olmaq üçün universitet hesabınızla giriş"
+" edin."
+
+msgctxt "accounts.login.audience"
+msgid "Tələbə kabinetinə daxil olmaq üçün universitet hesabınızla giriş edin."
+msgstr ""
+"Tələbə kabinetinə daxil olmaq üçün universitet hesabınızla giriş edin."
+
+msgctxt "accounts.login.language"
+msgid "Dil"
+msgstr "Dil"
+
+msgctxt "accounts.login.language"
+msgid "Dil seçimi"
+msgstr "Dil seçimi"
+
+msgctxt "accounts.login.portal"
+msgid "Daxil ol"
+msgstr "Daxil ol"
+
+msgctxt "accounts.login.portal"
+msgid "Kabinetə daxil olmaq üçün rolunuzu seçin."
+msgstr "Kabinetə daxil olmaq üçün rolunuzu seçin."
+
+msgctxt "accounts.login.portal"
+msgid "Müəllim və əməkdaş girişi"
+msgstr "Müəllim və əməkdaş girişi"
+
+msgctxt "accounts.login.portal"
+msgid "Müəllim, imtahan mərkəzi və idarəetmə hesabları üçün."
+msgstr "Müəllim, imtahan mərkəzi və idarəetmə hesabları üçün."
+
+msgctxt "accounts.login.portal"
+msgid "Tələbə girişi"
+msgstr "Tələbə girişi"
+
+msgctxt "accounts.login.portal"
+msgid "Tələbə kabineti: nəticələr, imtahanlar və apellyasiyalar."
+msgstr "Tələbə kabineti: nəticələr, imtahanlar və apellyasiyalar."
+
+msgctxt "accounts.password_reset_done_page"
+msgid ""
+"\n"
+"            OTP code is valid for %(minutes)s minutes.\n"
+"          "
+msgstr ""
+"\n"
+"            OTP code is valid for %(minutes)s minutes.\n"
+"          "
+
+msgctxt "accounts.password_reset_done_page"
+msgid ""
+"\n"
+"          OTP code is valid for %(minutes)s minutes.\n"
+"        "
+msgstr ""
+"\n"
+"          OTP code is valid for %(minutes)s minutes.\n"
+"        "
+
+msgctxt "accounts.password_reset_page"
+msgid ""
+"\n"
+"        We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes.\n"
+"      "
+msgstr ""
+"\n"
+"        We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes.\n"
+"      "
+
+msgctxt "appeals.service.create.error"
+msgid "Apellyasiya müddəti bitib."
+msgstr "Apellyasiya müddəti bitib."
+
+msgctxt "appeals.service.create.error"
+msgid ""
+"{question_no}-ci sual üçün apellyasiya artıq göndərilib. Eyni sualı ikinci "
+"dəfə göndərə bilməzsiniz."
+msgstr ""
+"{question_no}-ci sual üçün apellyasiya artıq göndərilib. Eyni sualı ikinci "
+"dəfə göndərə bilməzsiniz."
+
+msgctxt "appeals.stats.permission"
+msgid "Bu bölmə yalnız imtahan mərkəzi üçündür."
+msgstr "Bu bölmə yalnız imtahan mərkəzi üçündür."
+
+msgctxt "appeals.stats.semester"
+msgid "Payız semestri"
+msgstr "Payız semestri"
+
+msgctxt "appeals.stats.semester"
+msgid "Yay semestri"
+msgstr "Yay semestri"
+
+msgctxt "appeals.stats.semester"
+msgid "Yaz semestri"
+msgstr "Yaz semestri"
+
+msgctxt "appeals.template"
+msgid ""
+"\n"
+"                        %(count)s sual üzrə apellyasiya\n"
+"                    "
+msgstr ""
+"\n"
+"                        %(count)s sual üzrə apellyasiya\n"
+"                    "
+
+msgctxt "appeals.template"
+msgid ""
+"\n"
+"                        Son tarix: %(deadline)s.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Son tarix: %(deadline)s.\n"
+"                    "
+
+msgctxt "appeals.template"
+msgid ""
+"\n"
+"                    Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən azı %(min)s simvol izah yazın.\n"
+"                "
+msgstr ""
+"\n"
+"                    Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən azı %(min)s simvol izah yazın.\n"
+"                "
+
+msgctxt "appeals.template"
+msgid ""
+"\n"
+"                    Apellyasiya yalnız imtahan bitdikdən sonra %(days)s gün ərzində göndərilə bilər.\n"
+"                    Bu müddət keçdiyi üçün yeni apellyasiya göndərmək mümkün deyil.\n"
+"                "
+msgstr ""
+"\n"
+"                    Apellyasiya yalnız imtahan bitdikdən sonra %(days)s gün ərzində göndərilə bilər.\n"
+"                    Bu müddət keçdiyi üçün yeni apellyasiya göndərmək mümkün deyil.\n"
+"                "
+
+msgctxt "appeals.template"
+msgid ""
+"\n"
+"            Bu apellyasiya nəticəsində +%(bonus)s bal əlavə olundu\n"
+"        "
+msgstr ""
+"\n"
+"            Bu apellyasiya nəticəsində +%(bonus)s bal əlavə olundu\n"
+"        "
+
+msgctxt "appeals.template"
+msgid "Anladım"
+msgstr "Anladım"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar "
+"verilməmiş suallar:"
+msgstr ""
+"Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar "
+"verilməmiş suallar:"
+
+msgctxt "appeals.template"
+msgid "Apellyasiya müddəti bitib"
+msgstr "Apellyasiya müddəti bitib"
+
+msgctxt "appeals.template"
+msgid "Apellyasiyanızın nəticəsi"
+msgstr "Apellyasiyanızın nəticəsi"
+
+msgctxt "appeals.template"
+msgid "Apellyasiyaya ver"
+msgstr "Apellyasiyaya ver"
+
+msgctxt "appeals.template"
+msgid "Artıq göndərilib"
+msgstr "Artıq göndərilib"
+
+msgctxt "appeals.template"
+msgid "Bu imtahan üçün apellyasiya göndərməmisiniz"
+msgstr "Bu imtahan üçün apellyasiya göndərməmisiniz"
+
+msgctxt "appeals.template"
+msgid "Bu sual üzrə apellyasiya artıq göndərilib"
+msgstr "Bu sual üzrə apellyasiya artıq göndərilib"
+
+msgctxt "appeals.template"
+msgid "Bütün apellyasiyalarım"
+msgstr "Bütün apellyasiyalarım"
+
+msgctxt "appeals.template"
+msgid "Bütün suallara qərar verin"
+msgstr "Bütün suallara qərar verin"
+
+msgctxt "appeals.template"
+msgid "Bəli, göndər"
+msgstr "Bəli, göndər"
+
+msgctxt "appeals.template"
+msgid "Cavab yazılmayıb"
+msgstr "Cavab yazılmayıb"
+
+msgctxt "appeals.template"
+msgid "Cavabınız: düzgün"
+msgstr "Cavabınız: düzgün"
+
+msgctxt "appeals.template"
+msgid "Cavabınız: səhv"
+msgstr "Cavabınız: səhv"
+
+msgctxt "appeals.template"
+msgid "Filtrləri sıfırla"
+msgstr "Filtrləri sıfırla"
+
+msgctxt "appeals.template"
+msgid ""
+"Hazırda apellyasiya verə biləcəyiniz final və ya midterm imtahanı yoxdur."
+msgstr ""
+"Hazırda apellyasiya verə biləcəyiniz final və ya midterm imtahanı yoxdur."
+
+msgctxt "appeals.template"
+msgid "Nəticənizi aşağıdakı düymə ilə yenidən görə bilərsiniz."
+msgstr "Nəticənizi aşağıdakı düymə ilə yenidən görə bilərsiniz."
+
+msgctxt "appeals.template"
+msgid "Nəticəyə bax"
+msgstr "Nəticəyə bax"
+
+msgctxt "appeals.template"
+msgid "Qəbul olunanda tələbəyə"
+msgstr "Qəbul olunanda tələbəyə"
+
+msgctxt "appeals.template"
+msgid "Qərar gözlənilir — imtahan mərkəzi baxacaq"
+msgstr "Qərar gözlənilir — imtahan mərkəzi baxacaq"
+
+msgctxt "appeals.template"
+msgid ""
+"Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — imtahanın "
+"müəllifi/qiymətləndirəni öz işinə qərar verə bilməz."
+msgstr ""
+"Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — imtahanın "
+"müəllifi/qiymətləndirəni öz işinə qərar verə bilməz."
+
+msgctxt "appeals.template"
+msgid ""
+"Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra "
+"dəyişiklik edə bilməyəcəksiniz."
+msgstr ""
+"Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra "
+"dəyişiklik edə bilməyəcəksiniz."
+
+msgctxt "appeals.template"
+msgid "Yalnız baxış rejimi"
+msgstr "Yalnız baxış rejimi"
+
+msgctxt "appeals.template"
+msgid "Yeni apellyasiya müraciəti"
+msgstr "Yeni apellyasiya müraciəti"
+
+msgctxt "appeals.template"
+msgid "Yeni bal"
+msgstr "Yeni bal"
+
+msgctxt "appeals.template"
+msgid "son tarix: %(deadline)s"
+msgstr "son tarix: %(deadline)s"
+
+msgctxt "appeals.template"
+msgid ""
+"{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et”"
+" düyməsini söndürməlisiniz."
+msgstr ""
+"{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et”"
+" düyməsini söndürməlisiniz."
+
+msgctxt "appeals.template"
+msgid ""
+"{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya "
+"da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr ""
+"{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya "
+"da “Apellyasiya et” düyməsini söndürməlisiniz."
+
+msgctxt "appeals.template"
+msgid ""
+"{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini "
+"söndürməlisiniz."
+msgstr ""
+"{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini "
+"söndürməlisiniz."
+
+msgctxt "appeals.template"
+msgid "İmtahan balı"
+msgstr "İmtahan balı"
+
+msgctxt "appeals.template"
+msgid ""
+"İmtahan bitdikdən sonra %(days)s gün ərzində apellyasiya verə bilərsiniz."
+msgstr ""
+"İmtahan bitdikdən sonra %(days)s gün ərzində apellyasiya verə bilərsiniz."
+
+msgctxt "appeals.template"
+msgid "əlavə olunur."
+msgstr "əlavə olunur."
+
+msgctxt "appeals.view.message"
+msgid ""
+"+{points} bal əlavə olundu. Tələbə nəticəni 5 dəqiqədən sonra görəcək; bu 5 "
+"dəqiqə ərzində qərarı dəyişə bilərsiniz."
+msgstr ""
+"+{points} bal əlavə olundu. Tələbə nəticəni 5 dəqiqədən sonra görəcək; bu 5 "
+"dəqiqə ərzində qərarı dəyişə bilərsiniz."
+
+msgctxt "appeals.view.message"
+msgid "Bu apellyasiyaya baxmaq icazəniz yoxdur."
+msgstr "Bu apellyasiyaya baxmaq icazəniz yoxdur."
+
+msgctxt "appeals.view.message"
+msgid "Bütün suallara qərar verməlisiniz — bəzi suallar qərarsız qalıb."
+msgstr "Bütün suallara qərar verməlisiniz — bəzi suallar qərarsız qalıb."
+
+msgctxt "appeals.view.message"
+msgid ""
+"Qərarlar yadda saxlanıldı. Tələbə nəticəni 5 dəqiqədən sonra görəcək; bu 5 "
+"dəqiqə ərzində qərarı dəyişə bilərsiniz."
+msgstr ""
+"Qərarlar yadda saxlanıldı. Tələbə nəticəni 5 dəqiqədən sonra görəcək; bu 5 "
+"dəqiqə ərzində qərarı dəyişə bilərsiniz."
+
+msgctxt "exams.center.stats"
+msgid "AI analizi"
+msgstr "AI analizi"
+
+msgctxt "exams.center.stats"
+msgid "AI ilə analiz et"
+msgstr "AI ilə analiz et"
+
+msgctxt "exams.center.stats"
+msgid "Analitik qrafiklər"
+msgstr "Analitik qrafiklər"
+
+msgctxt "exams.center.stats"
+msgid "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır."
+msgstr "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır."
+
+msgctxt "exams.center.stats"
+msgid "Aylıq dinamika"
+msgstr "Aylıq dinamika"
+
+msgctxt "exams.center.stats"
+msgid ""
+"Filtrə uyğun bütün nəticələri süni intellekt ümumiləşdirir — güclü və zəif "
+"sahələr, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir və "
+"limit sərf olunmur."
+msgstr ""
+"Filtrə uyğun bütün nəticələri süni intellekt ümumiləşdirir — güclü və zəif "
+"sahələr, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir və "
+"limit sərf olunmur."
+
+msgctxt "exams.center.stats"
+msgid "Fənn üzrə orta nəticə"
+msgstr "Fənn üzrə orta nəticə"
+
+msgctxt "exams.center.stats"
+msgid "Keçmə nisbəti"
+msgstr "Keçmə nisbəti"
+
+msgctxt "exams.center.stats"
+msgid "Nəticə paylanması"
+msgstr "Nəticə paylanması"
+
+msgctxt "exams.center.stats"
+msgid ""
+"Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş "
+"nəticələr üzrə hesablanır. Faiz metrikaları test tipli imtahanlara aiddir."
+msgstr ""
+"Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş "
+"nəticələr üzrə hesablanır. Faiz metrikaları test tipli imtahanlara aiddir."
+
+msgctxt "exams.center.stats"
+msgid "cəhd sayı və orta nəticə"
+msgstr "cəhd sayı və orta nəticə"
+
+msgctxt "exams.center.stats"
+msgid "faiz aralıqları üzrə cəhd sayı"
+msgstr "faiz aralıqları üzrə cəhd sayı"
+
+msgctxt "exams.center.stats"
+msgid "İmtahan tipi üzrə cəhdlər"
+msgstr "İmtahan tipi üzrə cəhdlər"
+
+msgctxt "exams.center.stats"
+msgid "ən çox cəhd olunan 10 fənn"
+msgstr "ən çox cəhd olunan 10 fənn"
+
+msgctxt "exams.center.stats.semester"
+msgid "Payız semestri"
+msgstr "Payız semestri"
+
+msgctxt "exams.center.stats.semester"
+msgid "Yay semestri"
+msgstr "Yay semestri"
+
+msgctxt "exams.center.stats.semester"
+msgid "Yaz semestri"
+msgstr "Yaz semestri"
+
+msgctxt "exams.center.stats.status"
+msgid "Təhvil verilib"
+msgstr "Təhvil verilib"
+
+msgctxt "exams.center.stats.status"
+msgid "Vaxtı bitib"
+msgstr "Vaxtı bitib"
+
+msgctxt "exams.final_center.entry"
+msgid "Bu imtahanı artıq bitirmisiniz."
+msgstr "Bu imtahanı artıq bitirmisiniz."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"Bu kompüterdən imtahana giriş icazəsi yoxdur. Zəhmət olmasa zaldakı təyin "
+"olunmuş kompüterdən daxil olun."
+msgstr ""
+"Bu kompüterdən imtahana giriş icazəsi yoxdur. Zəhmət olmasa zaldakı təyin "
+"olunmuş kompüterdən daxil olun."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını"
+" gözləyin."
+msgstr ""
+"Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını"
+" gözləyin."
+
+msgctxt "exams.final_center.entry"
+msgid "Məlumatlar yanlışdır və ya aktiv final imtahanınız yoxdur."
+msgstr "Məlumatlar yanlışdır və ya aktiv final imtahanınız yoxdur."
+
+msgctxt "exams.final_center.entry"
+msgid "Oturum hazırda giriş üçün açıq deyil."
+msgstr "Oturum hazırda giriş üçün açıq deyil."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"Təhlükəsizlik səbəbindən giriş müvəqqəti kilidlənib. Nəzarətçiyə müraciət "
+"edin."
+msgstr ""
+"Təhlükəsizlik səbəbindən giriş müvəqqəti kilidlənib. Nəzarətçiyə müraciət "
+"edin."
+
+msgctxt "exams.final_center.entry"
+msgid "Zal oturumuna qoşulmayıb — yenidən daxil olun."
+msgstr "Zal oturumuna qoşulmayıb — yenidən daxil olun."
+
+msgctxt "exams.final_center.entry"
+msgid "Çox sayda cəhd — bir dəqiqə sonra yenidən yoxlayın."
+msgstr "Çox sayda cəhd — bir dəqiqə sonra yenidən yoxlayın."
+
+msgctxt "exams.final_center.entry"
+msgid "İmtahana girişiniz bağlanıb — imtahan mərkəzinə müraciət edin."
+msgstr "İmtahana girişiniz bağlanıb — imtahan mərkəzinə müraciət edin."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"İmtahana hələ sual əlavə olunmayıb. Zəhmət olmasa imtahan mərkəzi ilə əlaqə "
+"saxlayın."
+msgstr ""
+"İmtahana hələ sual əlavə olunmayıb. Zəhmət olmasa imtahan mərkəzi ilə əlaqə "
+"saxlayın."
+
+msgctxt "exams.final_center.error"
+msgid "Bu kompüter aktiv zal oturumuna qoşulmayıb — yenidən daxil olun."
+msgstr "Bu kompüter aktiv zal oturumuna qoşulmayıb — yenidən daxil olun."
+
+msgctxt "exams.final_center.error"
+msgid "Davam etmək üçün imtahan dilini seçin."
+msgstr "Davam etmək üçün imtahan dilini seçin."
+
+msgctxt "exams.final_center.error"
+msgid ""
+"Dayandırma yalnız aktiv imtahan cəhdi olan tələbəyə tətbiq oluna bilər."
+msgstr ""
+"Dayandırma yalnız aktiv imtahan cəhdi olan tələbəyə tətbiq oluna bilər."
+
+msgctxt "exams.final_center.error"
+msgid "Oturum hazırda giriş üçün açıq deyil."
+msgstr "Oturum hazırda giriş üçün açıq deyil."
+
+msgctxt "exams.final_center.error"
+msgid "Oturumun bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Oturumun bitmə vaxtı başlama vaxtından sonra olmalıdır."
+
+msgctxt "exams.final_center.error"
+msgid "Səbəb qeyd olunmadan tələbə çıxarıla bilməz."
+msgstr "Səbəb qeyd olunmadan tələbə çıxarıla bilməz."
+
+msgctxt "exams.final_center.error"
+msgid "İmtahan hələ başladılmayıb — nəzarətçinin startını gözləyin."
+msgstr "İmtahan hələ başladılmayıb — nəzarətçinin startını gözləyin."
+
+msgctxt "exams.final_center.error"
+msgid "İmtahana başlamaq üçün əvvəlcə gözləmə otağına daxil olun."
+msgstr "İmtahana başlamaq üçün əvvəlcə gözləmə otağına daxil olun."
+
+msgctxt "exams.final_center.gate"
+msgid "Davam etmək üçün imtahan qaydalarını təsdiqləyin."
+msgstr "Davam etmək üçün imtahan qaydalarını təsdiqləyin."
+
+msgctxt "exams.final_center.invigilators"
+msgid "Seçilmiş nəzarətçi:"
+msgstr "Seçilmiş nəzarətçi:"
+
+msgctxt "exams.final_center.message"
+msgid "Aktiv cəhd yoxdur."
+msgstr "Aktiv cəhd yoxdur."
+
+msgctxt "exams.final_center.message"
+msgid "Başladılacaq hazır oturum tapılmadı."
+msgstr "Başladılacaq hazır oturum tapılmadı."
+
+msgctxt "exams.final_center.message"
+msgid ""
+"Başladılacaq oturum yoxdur — tələbə qeydli kompüterdən PIN ilə girəndə "
+"oturum avtomatik yaranır."
+msgstr ""
+"Başladılacaq oturum yoxdur — tələbə qeydli kompüterdən PIN ilə girəndə "
+"oturum avtomatik yaranır."
+
+msgctxt "exams.final_center.message"
+msgid "Bitiriləcək aktiv imtahan yoxdur — zalda gedən oturum tapılmadı."
+msgstr "Bitiriləcək aktiv imtahan yoxdur — zalda gedən oturum tapılmadı."
+
+msgctxt "exams.final_center.message"
+msgid "Bitiriləcək aktiv oturum tapılmadı."
+msgstr "Bitiriləcək aktiv oturum tapılmadı."
+
+msgctxt "exams.final_center.message"
+msgid "Bu yer nömrəsi artıq başqa tələbəyə verilib."
+msgstr "Bu yer nömrəsi artıq başqa tələbəyə verilib."
+
+msgctxt "exams.final_center.message"
+msgid "Giriş artıq açıqdır və ya oturum bu mərhələdə deyil."
+msgstr "Giriş artıq açıqdır və ya oturum bu mərhələdə deyil."
+
+msgctxt "exams.final_center.message"
+msgid "Giriş açılacaq oturum tapılmadı."
+msgstr "Giriş açılacaq oturum tapılmadı."
+
+msgctxt "exams.final_center.message"
+msgid "Giriş açıldı — tələbələr PIN ilə daxil ola bilər."
+msgstr "Giriş açıldı — tələbələr PIN ilə daxil ola bilər."
+
+msgctxt "exams.final_center.message"
+msgid "Oturum aktiv deyil — bitirmə tətbiq olunmadı."
+msgstr "Oturum aktiv deyil — bitirmə tətbiq olunmadı."
+
+msgctxt "exams.final_center.message"
+msgid "Oturum artıq başladılıb və ya start üçün uyğun mərhələdə deyil."
+msgstr "Oturum artıq başladılıb və ya start üçün uyğun mərhələdə deyil."
+
+msgctxt "exams.final_center.message"
+msgid "Oturum bitirildi — aktiv cəhdlər avtomatik təhvil verildi."
+msgstr "Oturum bitirildi — aktiv cəhdlər avtomatik təhvil verildi."
+
+msgctxt "exams.final_center.message"
+msgid "Oturum bu mərhələdə ləğv oluna bilməz."
+msgstr "Oturum bu mərhələdə ləğv oluna bilməz."
+
+msgctxt "exams.final_center.message"
+msgid "Oturum ləğv edildi və PIN-lər etibarsızlaşdırıldı."
+msgstr "Oturum ləğv edildi və PIN-lər etibarsızlaşdırıldı."
+
+msgctxt "exams.final_center.message"
+msgid "Tələbə yenidən buraxıldı və yeni PIN yaradıldı."
+msgstr "Tələbə yenidən buraxıldı və yeni PIN yaradıldı."
+
+msgctxt "exams.final_center.message"
+msgid "Tələbə üzrə əməliyyat tətbiq olundu və qeydə alındı."
+msgstr "Tələbə üzrə əməliyyat tətbiq olundu və qeydə alındı."
+
+msgctxt "exams.final_center.message"
+msgid "Yenidən buraxma mümkün olmadı (bilet çıxarılmış statusda deyil)."
+msgstr "Yenidən buraxma mümkün olmadı (bilet çıxarılmış statusda deyil)."
+
+msgctxt "exams.final_center.message"
+msgid "Yenidən giriş yalnız imtahanda olan tələbəyə verilir."
+msgstr "Yenidən giriş yalnız imtahanda olan tələbəyə verilir."
+
+msgctxt "exams.final_center.message"
+msgid "Zala {count} nəzarətçi təyin olundu."
+msgstr "Zala {count} nəzarətçi təyin olundu."
+
+msgctxt "exams.final_center.message"
+msgid "Zaldakı {count} imtahan birlikdə başladıldı."
+msgstr "Zaldakı {count} imtahan birlikdə başladıldı."
+
+msgctxt "exams.final_center.message"
+msgid "Zaldakı {count} imtahan birlikdə bitirildi."
+msgstr "Zaldakı {count} imtahan birlikdə bitirildi."
+
+msgctxt "exams.final_center.message"
+msgid "Zaldakı {count} oturumda giriş açıldı."
+msgstr "Zaldakı {count} oturumda giriş açıldı."
+
+msgctxt "exams.final_center.message"
+msgid "İmtahan artıq bitib."
+msgstr "İmtahan artıq bitib."
+
+msgctxt "exams.final_center.message"
+msgid "İmtahan bütün hazır tələbələr üçün başladıldı."
+msgstr "İmtahan bütün hazır tələbələr üçün başladıldı."
+
+msgctxt "exams.final_center.message"
+msgid "Əməliyyat tətbiq olunmadı — bilet vəziyyəti artıq dəyişib."
+msgstr "Əməliyyat tətbiq olunmadı — bilet vəziyyəti artıq dəyişib."
+
+msgctxt "exams.final_center.notification"
+msgid "Final imtahanına təyin olundunuz"
+msgstr "Final imtahanına təyin olundunuz"
+
+msgctxt "exams.final_center.error"
+msgid "Yekun statuslu bilet üçün PIN yenilənə bilməz."
+msgstr "Yekun statuslu bilet üçün PIN yenilənə bilməz."
+
+msgctxt "exams.final_center.permission"
+msgid "Aktiv təşkilat konteksti tapılmadı."
+msgstr "Aktiv təşkilat konteksti tapılmadı."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu bilet sizə aid deyil."
+msgstr "Bu bilet sizə aid deyil."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu bölmə yalnız imtahan mərkəzi üçündür."
+msgstr "Bu bölmə yalnız imtahan mərkəzi üçündür."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu otağa təyin olunmamısınız."
+msgstr "Bu otağa təyin olunmamısınız."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu zala təyin olunmamısınız."
+msgstr "Bu zala təyin olunmamısınız."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu əməliyyat yalnız imtahan mərkəzi üçündür."
+msgstr "Bu əməliyyat yalnız imtahan mərkəzi üçündür."
+
+msgctxt "exams.final_center.permission"
+msgid "Tarixçəyə baxış üçün icazəniz yoxdur."
+msgstr "Tarixçəyə baxış üçün icazəniz yoxdur."
+
+msgctxt "exams.final_center.permission"
+msgid "Zala nəzarətçi təyini yalnız imtahan mərkəzi rəhbəri üçündür."
+msgstr "Zala nəzarətçi təyini yalnız imtahan mərkəzi rəhbəri üçündür."
+
+msgctxt "exams.final_center.reminder"
+msgid "Final imtahanınız sabah keçiriləcək"
+msgstr "Final imtahanınız sabah keçiriləcək"
+
+msgctxt "exams.final_center.reminder"
+msgid "Final imtahanınız yaxınlaşır"
+msgstr "Final imtahanınız yaxınlaşır"
+
+msgctxt "exams.final_center.report"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "exams.final_center.report"
+msgid "Bitirib"
+msgstr "Bitirib"
+
+msgctxt "exams.final_center.report"
+msgid "Bütün tarixlər"
+msgstr "Bütün tarixlər"
+
+msgctxt "exams.final_center.report"
+msgid "Dayandırılıb"
+msgstr "Dayandırılıb"
+
+msgctxt "exams.final_center.report"
+msgid "Final imtahan hesabatı"
+msgstr "Final imtahan hesabatı"
+
+msgctxt "exams.final_center.report"
+msgid "Göstəricilər"
+msgstr "Göstəricilər"
+
+msgctxt "exams.final_center.report"
+msgid "Gözləyir"
+msgstr "Gözləyir"
+
+msgctxt "exams.final_center.report"
+msgid "Gəlməyib"
+msgstr "Gəlməyib"
+
+msgctxt "exams.final_center.report"
+msgid "Hazır"
+msgstr "Hazır"
+
+msgctxt "exams.final_center.report"
+msgid "Hesabat yaradıldı"
+msgstr "Hesabat yaradıldı"
+
+msgctxt "exams.final_center.report"
+msgid "Hesabatı çıxaran"
+msgstr "Hesabatı çıxaran"
+
+msgctxt "exams.final_center.report"
+msgid "Pozuntular"
+msgstr "Pozuntular"
+
+msgctxt "exams.final_center.report"
+msgid "Qeydə alınan hadisə"
+msgstr "Qeydə alınan hadisə"
+
+msgctxt "exams.final_center.report"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "exams.final_center.report"
+msgid "Tarix aralığı"
+msgstr "Tarix aralığı"
+
+msgctxt "exams.final_center.report"
+msgid "Texniki səbəb"
+msgstr "Texniki səbəb"
+
+msgctxt "exams.final_center.report"
+msgid "Tələbə sayı"
+msgstr "Tələbə sayı"
+
+msgctxt "exams.final_center.report"
+msgid "Təyin olunub"
+msgstr "Təyin olunub"
+
+msgctxt "exams.final_center.report"
+msgid "Xülasə"
+msgstr "Xülasə"
+
+msgctxt "exams.final_center.report"
+msgid "Zal"
+msgstr "Zal"
+
+msgctxt "exams.final_center.report"
+msgid "Zal sayı"
+msgstr "Zal sayı"
+
+msgctxt "exams.final_center.report"
+msgid "Zalsız"
+msgstr "Zalsız"
+
+msgctxt "exams.final_center.report"
+msgid "Çıxarılıb"
+msgstr "Çıxarılıb"
+
+msgctxt "exams.final_center.report"
+msgid "İmtahan"
+msgstr "İmtahan"
+
+msgctxt "exams.final_center.report"
+msgid "İmtahan sayı"
+msgstr "İmtahan sayı"
+
+msgctxt "exams.final_center.report"
+msgid "İmtahanda"
+msgstr "İmtahanda"
+
+msgctxt "exams.final_center.report"
+msgid "İmtahandan çıxarılıb"
+msgstr "İmtahandan çıxarılıb"
+
+msgctxt "exams.final_center.report"
+msgid "İmtahanı bitirib"
+msgstr "İmtahanı bitirib"
+
+msgctxt "exams.form.exam.label"
+msgid "excluded_users"
+msgstr "İstisna edilən tələbələr"
+
+msgctxt "exams.form.group.error"
+msgid "tenant_subjects_only"
+msgstr "Qrupa yalnız eyni təşkilatın fənləri əlavə oluna bilər."
+
+msgctxt "exams.form.group.help"
+msgid "org_unit"
+msgstr "Qrupun aid olduğu akademik bölmə (fakültə/kafedra/ixtisas)."
+
+msgctxt "exams.form.group.help"
+msgid "subjects"
+msgstr "Bu qrupa tədris olunan fənlər."
+
+msgctxt "exams.form.group.label"
+msgid "org_unit"
+msgstr "Struktur bölmə"
+
+msgctxt "exams.form.group.label"
+msgid "subjects"
+msgstr "Fənlər"
+
+msgctxt "exams.model.attempt.field"
+msgid "graded_by"
+msgstr "Qiymətləndirən"
+
+msgctxt "exams.model.attempt.field"
+msgid "room"
+msgstr "Zal"
+
+msgctxt "exams.model.attempt.field"
+msgid "room_computer"
+msgstr "Zal kompüteri"
+
+msgctxt "exams.model.attempt_grant.field"
+msgid "exam"
+msgstr "İmtahan"
+
+msgctxt "exams.model.attempt_grant.field"
+msgid "extra_attempts"
+msgstr "Əlavə cəhdlər"
+
+msgctxt "exams.model.attempt_grant.field"
+msgid "granted_by"
+msgstr "Hüququ verən"
+
+msgctxt "exams.model.attempt_grant.field"
+msgid "student"
+msgstr "Tələbə"
+
+msgctxt "exams.model.attempt_grant.meta"
+msgid "extra attempt grant"
+msgstr "extra attempt grant"
+
+msgctxt "exams.model.attempt_grant.meta"
+msgid "extra attempt grants"
+msgstr "extra attempt grants"
+
+msgctxt "exams.model.exam.field"
+msgid "excluded_users"
+msgstr "İstisna edilən tələbələr"
+
+msgctxt "exams.model.exam.help"
+msgid "excluded_users"
+msgstr "Qrupunun girişi olsa belə, bu tələbələr imtahanda iştirak edə bilməz."
+
+msgctxt "exams.model.exam_room.field"
+msgid "building"
+msgstr "Bina"
+
+msgctxt "exams.model.exam_room.field"
+msgid "capacity"
+msgstr "Tutum"
+
+msgctxt "exams.model.exam_room.field"
+msgid "code"
+msgstr "Kod"
+
+msgctxt "exams.model.exam_room.field"
+msgid "computer_count"
+msgstr "Kompüter sayı"
+
+msgctxt "exams.model.exam_room.field"
+msgid "created_by"
+msgstr "Yaradan"
+
+msgctxt "exams.model.exam_room.field"
+msgid "floor"
+msgstr "Mərtəbə"
+
+msgctxt "exams.model.exam_room.field"
+msgid "invigilators"
+msgstr "Nəzarətçilər"
+
+msgctxt "exams.model.exam_room.field"
+msgid "is_active"
+msgstr "Aktiv"
+
+msgctxt "exams.model.exam_room.field"
+msgid "name"
+msgstr "Ad"
+
+msgctxt "exams.model.exam_room.field"
+msgid "notes"
+msgstr "Qeydlər"
+
+msgctxt "exams.model.exam_room.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.exam_room.help"
+msgid "capacity"
+msgstr "Zalın ümumi yer tutumu."
+
+msgctxt "exams.model.exam_room.help"
+msgid "code"
+msgstr "Zalın qısa kodu (təşkilat daxilində unikal)."
+
+msgctxt "exams.model.exam_room.help"
+msgid "invigilators"
+msgstr ""
+"Bu zala təyin olunan işçilər zalda keçirilən bütün oturumları izləyə və "
+"idarə edə bilər."
+
+msgctxt "exams.model.exam_room.meta"
+msgid "plural"
+msgstr "plural"
+
+msgctxt "exams.model.exam_room.meta"
+msgid "singular"
+msgstr "singular"
+
+msgctxt "exams.model.final_ticket.choice.removal"
+msgid "removed"
+msgstr "Çıxarılıb"
+
+msgctxt "exams.model.final_ticket.choice.removal"
+msgid "suspended"
+msgstr "Dayandırılıb"
+
+msgctxt "exams.model.final_ticket.choice.removal"
+msgid "technical"
+msgstr "Texniki problem"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "absent"
+msgstr "İştirak etməyib"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "active"
+msgstr "Aktiv"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "assigned"
+msgstr "Təyin edilib"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "completed"
+msgstr "Tamamlanıb"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "ready"
+msgstr "Hazır"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "removed"
+msgstr "Çıxarılıb"
+
+msgctxt "exams.model.final_ticket.choice.status"
+msgid "waiting"
+msgstr "Gözləyir"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "attempt"
+msgstr "Cəhd"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "exam"
+msgstr "İmtahan"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "language"
+msgstr "Dil"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "seat_number"
+msgstr "Yer nömrəsi"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "session"
+msgstr "Sessiya"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "status"
+msgstr "Status"
+
+msgctxt "exams.model.final_ticket.field"
+msgid "student"
+msgstr "Tələbə"
+
+msgctxt "exams.model.final_ticket.help"
+msgid "language"
+msgstr "Tələbənin imtahanı verəcəyi dil (boş = imtahanın standart dili)."
+
+msgctxt "exams.model.final_ticket.meta"
+msgid "plural"
+msgstr "plural"
+
+msgctxt "exams.model.final_ticket.meta"
+msgid "singular"
+msgstr "singular"
+
+msgctxt "exams.model.grade_event.error"
+msgid ""
+"Qiymətləndirmə tarixçəsi append-only-dir və dəyişdirilə/silinilə bilməz."
+msgstr ""
+"Qiymətləndirmə tarixçəsi append-only-dir və dəyişdirilə/silinilə bilməz."
+
+msgctxt "exams.model.grade_event.field"
+msgid "attempt"
+msgstr "Cəhd"
+
+msgctxt "exams.model.grade_event.field"
+msgid "grader"
+msgstr "Qiymətləndirən"
+
+msgctxt "exams.model.grade_event.field"
+msgid "question"
+msgstr "Sual"
+
+msgctxt "exams.model.grade_event.meta"
+msgid "plural"
+msgstr "plural"
+
+msgctxt "exams.model.grade_event.meta"
+msgid "singular"
+msgstr "singular"
+
+msgctxt "exams.model.question_bank.field"
+msgid "exam_kind"
+msgstr "İmtahan növü"
+
+msgctxt "exams.model.question_bank.field"
+msgid "source_teacher"
+msgstr "Sualı göndərən müəllim"
+
+msgctxt "exams.model.question_bank.field"
+msgid "subject_ref"
+msgstr "Fənn (bazadan)"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "accepted"
+msgstr "Qəbul edilib"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "pending"
+msgstr "Gözləyir"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "rejected"
+msgstr "Rədd edilib"
+
+msgctxt "exams.model.question_submission.field"
+msgid "accepted_bank"
+msgstr "Hədəf sual bankı"
+
+msgctxt "exams.model.question_submission.field"
+msgid "exam_kind"
+msgstr "İmtahan növü"
+
+msgctxt "exams.model.question_submission.field"
+msgid "group_label"
+msgstr "Qrup (sərbəst mətn)"
+
+msgctxt "exams.model.question_submission.field"
+msgid "language"
+msgstr "Dil"
+
+msgctxt "exams.model.question_submission.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.question_submission.field"
+msgid "raw_text"
+msgstr "Xam sual mətni"
+
+msgctxt "exams.model.question_submission.field"
+msgid "reviewer"
+msgstr "Yoxlayan"
+
+msgctxt "exams.model.question_submission.field"
+msgid "reviewer_note"
+msgstr "Yoxlayanın qeydi"
+
+msgctxt "exams.model.question_submission.field"
+msgid "status"
+msgstr "Status"
+
+msgctxt "exams.model.question_submission.field"
+msgid "student_group"
+msgstr "Tələbə qrupu"
+
+msgctxt "exams.model.question_submission.field"
+msgid "student_groups"
+msgstr "Tələbə qrupları"
+
+msgctxt "exams.model.question_submission.field"
+msgid "subject"
+msgstr "Fənn"
+
+msgctxt "exams.model.question_submission.field"
+msgid "subject_ref"
+msgstr "Fənn (bazadan)"
+
+msgctxt "exams.model.question_submission.field"
+msgid "teacher"
+msgstr "Müəllim"
+
+msgctxt "exams.model.question_submission.field"
+msgid "teacher_note"
+msgstr "Müəllimin qeydi"
+
+msgctxt "exams.model.question_submission.field"
+msgid "title"
+msgstr "Başlıq"
+
+msgctxt "exams.model.question_submission.help"
+msgid "title"
+msgstr "Göndəriş üçün qısa başlıq (məs. mövzu və ya fəsil adı)."
+
+msgctxt "exams.model.question_submission.meta"
+msgid "plural"
+msgstr "plural"
+
+msgctxt "exams.model.question_submission.meta"
+msgid "singular"
+msgstr "singular"
+
+msgctxt "exams.model.room_computer.field"
+msgid "ip_address"
+msgstr "IP ünvan"
+
+msgctxt "exams.model.room_computer.field"
+msgid "is_active"
+msgstr "Aktiv"
+
+msgctxt "exams.model.room_computer.field"
+msgid "label"
+msgstr "Etiket"
+
+msgctxt "exams.model.room_computer.field"
+msgid "mac_address"
+msgstr "MAC ünvan"
+
+msgctxt "exams.model.room_computer.field"
+msgid "notes"
+msgstr "Qeydlər"
+
+msgctxt "exams.model.room_computer.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.room_computer.field"
+msgid "room"
+msgstr "Zal"
+
+msgctxt "exams.model.room_computer.field"
+msgid "seat_number"
+msgstr "Yer nömrəsi"
+
+msgctxt "exams.model.room_computer.help"
+msgid "ip_address"
+msgstr "Kompüterin IP ünvanı (məcburi deyil)."
+
+msgctxt "exams.model.room_computer.help"
+msgid "label"
+msgstr "Zal planında görünən kompüter etiketi (məs. PC-01)."
+
+msgctxt "exams.model.room_computer.help"
+msgid "mac_address"
+msgstr ""
+"İmtahan girişində kompüteri tanımaq üçün MAC ünvan (məs. AA:BB:CC:DD:EE:FF)."
+
+msgctxt "exams.model.room_computer.help"
+msgid "seat_number"
+msgstr "Bu kompüterə zalda ayrılmış yer nömrəsi (məcburi deyil)."
+
+msgctxt "exams.model.room_computer.meta"
+msgid "plural"
+msgstr "plural"
+
+msgctxt "exams.model.room_computer.meta"
+msgid "singular"
+msgstr "singular"
+
+msgctxt "exams.model.room_session.choice.state"
+msgid "active"
+msgstr "Aktiv"
+
+msgctxt "exams.model.room_session.choice.state"
+msgid "cancelled"
+msgstr "Ləğv edilib"
+
+msgctxt "exams.model.room_session.choice.state"
+msgid "ended"
+msgstr "Bitib"
+
+msgctxt "exams.model.room_session.choice.state"
+msgid "entry_open"
+msgstr "Giriş açıqdır"
+
+msgctxt "exams.model.room_session.choice.state"
+msgid "prepared"
+msgstr "Hazırlanıb"
+
+msgctxt "exams.model.room_session.field"
+msgid "ended_at"
+msgstr "Bitmə vaxtı"
+
+msgctxt "exams.model.room_session.field"
+msgid "ended_by"
+msgstr "Bitirən"
+
+msgctxt "exams.model.room_session.field"
+msgid "invigilator"
+msgstr "Nəzarətçi"
+
+msgctxt "exams.model.room_session.field"
+msgid "notes"
+msgstr "Qeydlər"
+
+msgctxt "exams.model.room_session.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.room_session.field"
+msgid "room"
+msgstr "Zal"
+
+msgctxt "exams.model.room_session.field"
+msgid "scheduled_end"
+msgstr "Planlaşdırılan bitmə"
+
+msgctxt "exams.model.room_session.field"
+msgid "scheduled_start"
+msgstr "Planlaşdırılan başlama"
+
+msgctxt "exams.model.room_session.field"
+msgid "staff"
+msgstr "İşçilər"
+
+msgctxt "exams.model.room_session.field"
+msgid "started_at"
+msgstr "Başlama vaxtı"
+
+msgctxt "exams.model.room_session.field"
+msgid "started_by"
+msgstr "Başladan"
+
+msgctxt "exams.model.room_session.field"
+msgid "state"
+msgstr "Vəziyyət"
+
+msgctxt "exams.model.room_session.help"
+msgid "staff"
+msgstr "Bu sessiyaya təyin olunan əlavə imtahan mərkəzi işçiləri."
+
+msgctxt "exams.model.room_session.meta"
+msgid "plural"
+msgstr "plural"
+
+msgctxt "exams.model.room_session.meta"
+msgid "singular"
+msgstr "singular"
+
+msgctxt "exams.model.student_group.field"
+msgid "org_unit"
+msgstr "Akademik bölmə"
+
+msgctxt "exams.model.student_group.field"
+msgid "subjects"
+msgstr "Fənlər"
+
+msgctxt "exams.model.student_pin.field"
+msgid "exam"
+msgstr "İmtahan"
+
+msgctxt "exams.model.student_pin.field"
+msgid "expires_at"
+msgstr "Etibarlıdır"
+
+msgctxt "exams.model.student_pin.field"
+msgid "revoked_at"
+msgstr "Ləğv edilmə vaxtı"
+
+msgctxt "exams.model.student_pin.field"
+msgid "student"
+msgstr "Tələbə"
+
+msgctxt "exams.model.student_pin.meta"
+msgid "student exam PIN"
+msgstr "student exam PIN"
+
+msgctxt "exams.model.student_pin.meta"
+msgid "student exam PINs"
+msgstr "student exam PINs"
+
+msgctxt "exams.partial.exam_section"
+msgid ""
+"\n"
+"                                            label_question_count_short %(question_count)s\n"
+"                                        "
+msgstr ""
+"\n"
+"                                            label_question_count_short %(question_count)s\n"
+"                                        "
+
+msgctxt "exams.partial.exam_section"
+msgid ""
+"\n"
+"                                        label_attempt_count_short %(attempts)s\n"
+"                                    "
+msgstr ""
+"\n"
+"                                        label_attempt_count_short %(attempts)s\n"
+"                                    "
+
+msgctxt "exams.partial.exam_section"
+msgid ""
+"\n"
+"                                        label_attempt_progress %(attempt_count)s %(max_attempts)s\n"
+"                                    "
+msgstr ""
+"\n"
+"                                        label_attempt_progress %(attempt_count)s %(max_attempts)s\n"
+"                                    "
+
+msgctxt "exams.partial.exam_section"
+msgid ""
+"\n"
+"                                        label_duration_minutes_full %(minutes)s\n"
+"                                    "
+msgstr ""
+"\n"
+"                                        label_duration_minutes_full %(minutes)s\n"
+"                                    "
+
+msgctxt "exams.partial.exam_section"
+msgid ""
+"\n"
+"                                        label_duration_minutes_short %(minutes)s\n"
+"                                    "
+msgstr ""
+"\n"
+"                                        label_duration_minutes_short %(minutes)s\n"
+"                                    "
+
+msgctxt "exams.partial.exam_section"
+msgid ""
+"\n"
+"                                        label_question_count_short %(question_count)s\n"
+"                                    "
+msgstr ""
+"\n"
+"                                        label_question_count_short %(question_count)s\n"
+"                                    "
+
+msgctxt "exams.service.access.permission"
+msgid "exam_rooms_manage_superadmin_only"
+msgstr "İmtahan zallarını yalnız superadmin idarə edə bilər."
+
+msgctxt "exams.service.language_parity"
+msgid ""
+"'{lang}' variantında {count} aktiv sual var, '{ref}' variantında isə "
+"{ref_count}."
+msgstr ""
+"'{lang}' variantında {count} aktiv sual var, '{ref}' variantında isə "
+"{ref_count}."
+
+msgctxt "exams.service.language_parity"
+msgid ""
+"'{lang}' variantının ümumi balı {points}, '{ref}' variantınınkı isə "
+"{ref_points}."
+msgstr ""
+"'{lang}' variantının ümumi balı {points}, '{ref}' variantınınkı isə "
+"{ref_points}."
+
+msgctxt "exams.service.language_parity"
+msgid ""
+"Dil variantları eyni aktiv sual sayına və ümumi bala malik olmalıdır: "
+"{issue}"
+msgstr ""
+"Dil variantları eyni aktiv sual sayına və ümumi bala malik olmalıdır: "
+"{issue}"
+
+msgctxt "exams.service.lifecycle"
+msgid ""
+"Aktiv imtahanın son aktiv sualı silinə və ya deaktiv edilə bilməz. Əvvəl "
+"imtahanı deaktiv edin."
+msgstr ""
+"Aktiv imtahanın son aktiv sualı silinə və ya deaktiv edilə bilməz. Əvvəl "
+"imtahanı deaktiv edin."
+
+msgctxt "exams.service.lifecycle"
+msgid "Silinmiş imtahan dərc edilə bilməz."
+msgstr "Silinmiş imtahan dərc edilə bilməz."
+
+msgctxt "exams.service.lifecycle"
+msgid ""
+"İmtahanda heç bir aktiv sual yoxdur — dərc etməzdən əvvəl sual əlavə edin."
+msgstr ""
+"İmtahanda heç bir aktiv sual yoxdur — dərc etməzdən əvvəl sual əlavə edin."
+
+msgctxt "exams.service.retention"
+msgid ""
+"Akademik cəhd tarixçəsi daimi silinə bilməz. İmtahanı arxivdə saxlayın."
+msgstr ""
+"Akademik cəhd tarixçəsi daimi silinə bilməz. İmtahanı arxivdə saxlayın."
+
+msgctxt "exams.starting"
+msgid ""
+"Hazırda çox sayda tələbə eyni anda bu imtahana başlayır. Növbəniz bir neçə "
+"saniyəyə çatacaq — bu səhifə avtomatik yenilənir, heç nə etməyinizə ehtiyac "
+"yoxdur."
+msgstr ""
+"Hazırda çox sayda tələbə eyni anda bu imtahana başlayır. Növbəniz bir neçə "
+"saniyəyə çatacaq — bu səhifə avtomatik yenilənir, heç nə etməyinizə ehtiyac "
+"yoxdur."
+
+msgctxt "exams.starting"
+msgid "İmtahan başladılır"
+msgstr "İmtahan başladılır"
+
+msgctxt "exams.starting"
+msgid "İmtahan başladılır…"
+msgstr "İmtahan başladılır…"
+
+msgctxt "exams.starting"
+msgid "İndi yoxla"
+msgstr "İndi yoxla"
+
+msgctxt "exams.task.extract.error"
+msgid ""
+"Fayl emal edilərkən texniki xəta baş verdi. Yenidən cəhd edin — problem "
+"davam edərsə inzibatçıya bildirin."
+msgstr ""
+"Fayl emal edilərkən texniki xəta baş verdi. Yenidən cəhd edin — problem "
+"davam edərsə inzibatçıya bildirin."
+
+msgctxt "exams.template.create_student_group"
+msgid ""
+"\n"
+"                                        help_multi_teacher_limit_with_count %(max_multi_teachers)s\n"
+"                                    "
+msgstr ""
+"\n"
+"                                        help_multi_teacher_limit_with_count %(max_multi_teachers)s\n"
+"                                    "
+
+msgctxt "exams.template.final_entry"
+msgid "Final imtahan girişi"
+msgstr "Final imtahan girişi"
+
+msgctxt "exams.template.final_entry"
+msgid "Giriş cəhdləri qeydə alınır. PIN-inizi heç kimlə bölüşməyin."
+msgstr "Giriş cəhdləri qeydə alınır. PIN-inizi heç kimlə bölüşməyin."
+
+msgctxt "exams.template.final_entry"
+msgid "PIN yalnız sizə aiddir və yalnız bir imtahana keçərlidir."
+msgstr "PIN yalnız sizə aiddir və yalnız bir imtahana keçərlidir."
+
+msgctxt "exams.template.final_entry"
+msgid "tələbə istifadəçi adı"
+msgstr "tələbə istifadəçi adı"
+
+msgctxt "exams.template.final_entry"
+msgid "İmtahan PIN-i"
+msgstr "İmtahan PIN-i"
+
+msgctxt "exams.template.final_entry"
+msgid "İmtahana daxil ol"
+msgstr "İmtahana daxil ol"
+
+msgctxt "exams.template.final_entry"
+msgid "İnterfeys dili"
+msgstr "İnterfeys dili"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adınızı və şəxsi imtahan PIN-inizi daxil edin"
+msgstr "İstifadəçi adınızı və şəxsi imtahan PIN-inizi daxil edin"
+
+msgctxt "exams.template.final_entry"
+msgid "••••••••"
+msgstr "••••••••"
+
+msgctxt "exams.template.final_gate"
+msgid "Davam et"
+msgstr "Davam et"
+
+msgctxt "exams.template.final_gate"
+msgid "Dil seçimi imtahan başladıqdan sonra dəyişdirilə bilməz."
+msgstr "Dil seçimi imtahan başladıqdan sonra dəyişdirilə bilməz."
+
+msgctxt "exams.template.final_gate"
+msgid "Final imtahanı"
+msgstr "Final imtahanı"
+
+msgctxt "exams.template.final_gate"
+msgid "Geri"
+msgstr "Geri"
+
+msgctxt "exams.template.final_gate"
+msgid "Müddət"
+msgstr "Müddət"
+
+msgctxt "exams.template.final_gate"
+msgid "Nəzarətçi"
+msgstr "Nəzarətçi"
+
+msgctxt "exams.template.final_gate"
+msgid "Qayda pozuntusu halında nəzarətçi sizi imtahandan çıxara bilər."
+msgstr "Qayda pozuntusu halında nəzarətçi sizi imtahandan çıxara bilər."
+
+msgctxt "exams.template.final_gate"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "exams.template.final_gate"
+msgid "Vaxt"
+msgstr "Vaxt"
+
+msgctxt "exams.template.final_gate"
+msgid "Yer"
+msgstr "Yer"
+
+msgctxt "exams.template.final_gate"
+msgid "Zal"
+msgstr "Zal"
+
+msgctxt "exams.template.final_gate"
+msgid "dəqiqə"
+msgstr "dəqiqə"
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İcazə verilməyən vəsaitlərdən (telefon, konspekt, digər cihazlar) istifadə "
+"qadağandır."
+msgstr ""
+"İcazə verilməyən vəsaitlərdən (telefon, konspekt, digər cihazlar) istifadə "
+"qadağandır."
+
+msgctxt "exams.template.final_gate"
+msgid "İmtahan dili"
+msgstr "İmtahan dili"
+
+msgctxt "exams.template.final_gate"
+msgid "İmtahan dilini seçin"
+msgstr "İmtahan dilini seçin"
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan prosesi real vaxt rejimində monitorinq olunur və bütün hərəkətlər "
+"qeydə alınır."
+msgstr ""
+"İmtahan prosesi real vaxt rejimində monitorinq olunur və bütün hərəkətlər "
+"qeydə alınır."
+
+msgctxt "exams.template.final_gate"
+msgid "İmtahan qaydaları"
+msgstr "İmtahan qaydaları"
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan qaydaları ilə tanış oldum və onlara əməl edəcəyimi təsdiqləyirəm."
+msgstr ""
+"İmtahan qaydaları ilə tanış oldum və onlara əməl edəcəyimi təsdiqləyirəm."
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan tam ekran rejimində keçirilir; rejimdən çıxış pozuntu sayıla bilər."
+msgstr ""
+"İmtahan tam ekran rejimində keçirilir; rejimdən çıxış pozuntu sayıla bilər."
+
+msgctxt "exams.template.final_gate"
+msgid ""
+"İmtahan zamanı səhifəni tərk etmək, tab dəyişmək və pəncərəni kiçiltmək "
+"qadağandır."
+msgstr ""
+"İmtahan zamanı səhifəni tərk etmək, tab dəyişmək və pəncərəni kiçiltmək "
+"qadağandır."
+
+msgctxt "exams.template.final_waiting"
+msgid "Gözləmə otağı"
+msgstr "Gözləmə otağı"
+
+msgctxt "exams.template.final_waiting"
+msgid ""
+"Gözləmə otağından çıxmaq istədiyinizə əminsiniz? İmtahan cəhdiniz "
+"yanmayacaq."
+msgstr ""
+"Gözləmə otağından çıxmaq istədiyinizə əminsiniz? İmtahan cəhdiniz "
+"yanmayacaq."
+
+msgctxt "exams.template.final_waiting"
+msgid "Nəzarətçinin imtahanı başlatması gözlənilir…"
+msgstr "Nəzarətçinin imtahanı başlatması gözlənilir…"
+
+msgctxt "exams.template.final_waiting"
+msgid "Qoşulur…"
+msgstr "Qoşulur…"
+
+msgctxt "exams.template.final_waiting"
+msgid "Server bağlantısı"
+msgstr "Server bağlantısı"
+
+msgctxt "exams.template.final_waiting"
+msgid "Seçdiyiniz imtahan dili"
+msgstr "Seçdiyiniz imtahan dili"
+
+msgctxt "exams.template.final_waiting"
+msgid ""
+"Texniki problem yaranarsa, əlinizi qaldıraraq zal nəzarətçisinə müraciət "
+"edin."
+msgstr ""
+"Texniki problem yaranarsa, əlinizi qaldıraraq zal nəzarətçisinə müraciət "
+"edin."
+
+msgctxt "exams.template.final_waiting"
+msgid "Yer"
+msgstr "Yer"
+
+msgctxt "exams.template.final_waiting"
+msgid "İmtahana başla"
+msgstr "İmtahana başla"
+
+msgctxt "exams.template.final_waiting"
+msgid "İmtina et və çıx"
+msgstr "İmtina et və çıx"
+
+msgctxt "exams.template.student_exam_result"
+msgid ""
+"\n"
+"                                Apellyasiya qəbul edildi — +%(bonus)s bal\n"
+"                            "
+msgstr ""
+"\n"
+"                                Apellyasiya qəbul edildi — +%(bonus)s bal\n"
+"                            "
+
+msgctxt "exams.template.student_exam_result"
+msgid ""
+"\n"
+"                            %(pending)s sual apellyasiyadadır — cavab gözlənilir.\n"
+"                        "
+msgstr ""
+"\n"
+"                            %(pending)s sual apellyasiyadadır — cavab gözlənilir.\n"
+"                        "
+
+msgctxt "exams.template.student_exam_result"
+msgid ""
+"\n"
+"                            Apellyasiya ilə +%(bonus)s bal əlavə olundu.\n"
+"                        "
+msgstr ""
+"\n"
+"                            Apellyasiya ilə +%(bonus)s bal əlavə olundu.\n"
+"                        "
+
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiya qəbul edildi"
+msgstr "Apellyasiya qəbul edildi"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiya rədd edildi"
+msgstr "Apellyasiya rədd edildi"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiyaya göndərilib — cavab gözlənilir"
+msgstr "Apellyasiyaya göndərilib — cavab gözlənilir"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Giriş səhifəsinə qayıt"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Nəticə vaxtı və çıxış"
+msgstr "Nəticə vaxtı və çıxış"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Profilə qayıt"
+msgstr "Profilə qayıt"
+
+msgctxt "exams.template.student_exam_result"
+msgid "Vaxt bitəndə giriş səhifəsinə qayıdacaqsınız"
+msgstr "Vaxt bitəndə giriş səhifəsinə qayıdacaqsınız"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid ""
+"İmtahanın aktivləşməsi (tələbələrə açılması) üçün ən azı bir sual əlavə "
+"edin."
+msgstr ""
+"İmtahanın aktivləşməsi (tələbələrə açılması) üçün ən azı bir sual əlavə "
+"edin."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrup seçin…"
+msgstr "Qrup seçin…"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupa ikinci şans"
+msgstr "Qrupa ikinci şans"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Seçilmiş qrupun bütün tələbələrinə bu imtahan üçün əlavə cəhd verir."
+msgstr "Seçilmiş qrupun bütün tələbələrinə bu imtahan üçün əlavə cəhd verir."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Əlavə cəhd ver"
+msgstr "Əlavə cəhd ver"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Balans problemlilərini seç"
+msgstr "Balans problemlilərini seç"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün dublikatları seç"
+msgstr "Bütün dublikatları seç"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün xəbərdarlıqları seç"
+msgstr "Bütün xəbərdarlıqları seç"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün xətalıları seç"
+msgstr "Bütün xətalıları seç"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Təmizləri seç"
+msgstr "Təmizləri seç"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Variant problemlilərini seç"
+msgstr "Variant problemlilərini seç"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düzgün cavab"
+msgstr "Düzgün cavab"
+
+msgctxt "exams.view.access.message"
+msgid ""
+"Bu imtahan başqa bir tab/pəncərədə yenilənib. Ən son cavabları görmək üçün "
+"səhifəni yeniləyin."
+msgstr ""
+"Bu imtahan başqa bir tab/pəncərədə yenilənib. Ən son cavabları görmək üçün "
+"səhifəni yeniləyin."
+
+msgctxt "exams.view.access.message"
+msgid ""
+"Sual taymeri serverlə sinxronlaşmayıb. Cavabınız lokal saxlanılıb; səhifəni "
+"yeniləyin."
+msgstr ""
+"Sual taymeri serverlə sinxronlaşmayıb. Cavabınız lokal saxlanılıb; səhifəni "
+"yeniləyin."
+
+msgctxt "exams.view.exams.message"
+msgid "{count} tələbəyə əlavə cəhd verildi."
+msgstr "{count} tələbəyə əlavə cəhd verildi."
+
+msgctxt "exams.view.final_center.permission"
+msgid ""
+"Bu giriş sessiyası artıq etibarlı deyil. Nəzarətçinin verdiyi yeni PIN ilə "
+"daxil olun."
+msgstr ""
+"Bu giriş sessiyası artıq etibarlı deyil. Nəzarətçinin verdiyi yeni PIN ilə "
+"daxil olun."
+
+msgctxt "exams.view.results.message"
+msgid ""
+"{count} akademik cəhd retention qaydasına görə silinmədi; yalnız trial "
+"cəhdləri silinə bilər."
+msgstr ""
+"{count} akademik cəhd retention qaydasına görə silinmədi; yalnız trial "
+"cəhdləri silinə bilər."
+
+msgctxt "monitoring"
+msgid "Alertlər"
+msgstr "Alertlər"
+
+msgctxt "monitoring"
+msgid "Avto"
+msgstr "Avto"
+
+msgctxt "monitoring"
+msgid "Baza"
+msgstr "Baza"
+
+msgctxt "monitoring"
+msgid "Konteynerlər"
+msgstr "Konteynerlər"
+
+msgctxt "monitoring"
+msgid "Loglar"
+msgstr "Loglar"
+
+msgctxt "monitoring"
+msgid "Server"
+msgstr "Server"
+
+msgctxt "monitoring"
+msgid "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət"
+msgstr "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət"
+
+msgctxt "monitoring"
+msgid "Sistem Monitorinqi"
+msgstr "Sistem Monitorinqi"
+
+msgctxt "monitoring"
+msgid "Təhlükəsizlik"
+msgstr "Təhlükəsizlik"
+
+msgctxt "monitoring"
+msgid "Tətbiq"
+msgstr "Tətbiq"
+
+msgctxt "monitoring"
+msgid "Vaxt aralığı"
+msgstr "Vaxt aralığı"
+
+msgctxt "monitoring"
+msgid "Yenilə"
+msgstr "Yenilə"
+
+msgctxt "monitoring"
+msgid "İcmal"
+msgstr "İcmal"
+
+msgctxt "monitoring"
+msgid "İmtahanlar"
+msgstr "İmtahanlar"
+
+msgctxt "monitoring"
+msgid "İnsidentlər"
+msgstr "İnsidentlər"
+
+msgctxt "profile.courses"
+msgid "explore_courses"
+msgstr "Kurslara bax"
+
+msgctxt "profile.groups"
+msgid ""
+"\n"
+"                    filtered_group_count %(filtered_count)s %(total_count)s\n"
+"                "
+msgstr ""
+"\n"
+"                    filtered_group_count %(filtered_count)s %(total_count)s\n"
+"                "
+
+msgctxt "profile.groups"
+msgid ""
+"\n"
+"                    total_group_count %(count)s\n"
+"                "
+msgstr ""
+"\n"
+"                    total_group_count %(count)s\n"
+"                "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"                                %(role_label)s request sent\n"
+"                                "
+msgstr ""
+"\n"
+"                                %(role_label)s request sent\n"
+"                                "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"                    %(role_label)s request message\n"
+"                    "
+msgstr ""
+"\n"
+"                    %(role_label)s request message\n"
+"                    "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"                Send %(role_label)s request\n"
+"                "
+msgstr ""
+"\n"
+"                Send %(role_label)s request\n"
+"                "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"            You currently have <strong>%(count)s</strong> organization requests awaiting approval.\n"
+"            "
+msgstr ""
+"\n"
+"            You currently have <strong>%(count)s</strong> organization requests awaiting approval.\n"
+"            "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"            You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s.\n"
+"            "
+msgstr ""
+"\n"
+"            You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s.\n"
+"            "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"        Join organization as %(role_label)s\n"
+"        "
+msgstr ""
+"\n"
+"        Join organization as %(role_label)s\n"
+"        "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"        Search current organizations, choose one, and send a short message to join as %(role_label)s.\n"
+"        "
+msgstr ""
+"\n"
+"        Search current organizations, choose one, and send a short message to join as %(role_label)s.\n"
+"        "
+
+msgctxt "profile.join_org"
+msgid ""
+"\n"
+"        You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites.\n"
+"        "
+msgstr ""
+"\n"
+"        You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites.\n"
+"        "
+
+msgctxt "profile.notifications"
+msgid ""
+"\n"
+"                            Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response.\n"
+"                            "
+msgstr ""
+"\n"
+"                            Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response.\n"
+"                            "
+
+msgctxt "profile.notifications"
+msgid ""
+"\n"
+"                    %(organization_name)s has invited you as %(role_label)s.\n"
+"                    "
+msgstr ""
+"\n"
+"                    %(organization_name)s has invited you as %(role_label)s.\n"
+"                    "
+
+msgctxt "profile.overall_academic"
+msgid "A — aldığım"
+msgstr "A — aldığım"
+
+msgctxt "profile.overall_academic"
+msgid "B — aldığım"
+msgstr "B — aldığım"
+
+msgctxt "profile.overall_academic"
+msgid "Bu semestrdə toplanmış kredit (keçilmiş fənlər)"
+msgstr "Bu semestrdə toplanmış kredit (keçilmiş fənlər)"
+
+msgctxt "profile.overall_academic"
+msgid ""
+"Bütün semestrlər üzrə keçdiyin fənlər — kredit, müəllim, giriş+çıxış balı və"
+" nəticə. Kəsilən fənlər qırmızı, səbəbi ilə göstərilir."
+msgstr ""
+"Bütün semestrlər üzrə keçdiyin fənlər — kredit, müəllim, giriş+çıxış balı və"
+" nəticə. Kəsilən fənlər qırmızı, səbəbi ilə göstərilir."
+
+msgctxt "profile.overall_academic"
+msgid "C — aldığım"
+msgstr "C — aldığım"
+
+msgctxt "profile.overall_academic"
+msgid "D — aldığım"
+msgstr "D — aldığım"
+
+msgctxt "profile.overall_academic"
+msgid "Davam edir"
+msgstr "Davam edir"
+
+msgctxt "profile.overall_academic"
+msgid "Dərəcə"
+msgstr "Dərəcə"
+
+msgctxt "profile.overall_academic"
+msgid "Dərəcə (qiymət)"
+msgstr "Dərəcə (qiymət)"
+
+msgctxt "profile.overall_academic"
+msgid "E — aldığım"
+msgstr "E — aldığım"
+
+msgctxt "profile.overall_academic"
+msgid "F — aldığım"
+msgstr "F — aldığım"
+
+msgctxt "profile.overall_academic"
+msgid "Filtərə uyğun fənn tapılmadı."
+msgstr "Filtərə uyğun fənn tapılmadı."
+
+msgctxt "profile.overall_academic"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "profile.overall_academic"
+msgid "Fənn və ya müəllim axtar…"
+msgstr "Fənn və ya müəllim axtar…"
+
+msgctxt "profile.overall_academic"
+msgid "Giriş balı"
+msgstr "Giriş balı"
+
+msgctxt "profile.overall_academic"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "profile.overall_academic"
+msgid "Hələ tədris qeydiyyatı üzrə fənn qeydi yoxdur."
+msgstr "Hələ tədris qeydiyyatı üzrə fənn qeydi yoxdur."
+
+msgctxt "profile.overall_academic"
+msgid "Keçdi"
+msgstr "Keçdi"
+
+msgctxt "profile.overall_academic"
+msgid "Kredit"
+msgstr "Kredit"
+
+msgctxt "profile.overall_academic"
+msgid "Kumulyativ ÜOMG (100 bal)"
+msgstr "Kumulyativ ÜOMG (100 bal)"
+
+msgctxt "profile.overall_academic"
+msgid "Kəsildi"
+msgstr "Kəsildi"
+
+msgctxt "profile.overall_academic"
+msgid "Kəsildiyim fənlər"
+msgstr "Kəsildiyim fənlər"
+
+msgctxt "profile.overall_academic"
+msgid "Kəsilir"
+msgstr "Kəsilir"
+
+msgctxt "profile.overall_academic"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "profile.overall_academic"
+msgid "Nəticə"
+msgstr "Nəticə"
+
+msgctxt "profile.overall_academic"
+msgid "Q/b-dan kəsildiyim (imtahana buraxılmadığım)"
+msgstr "Q/b-dan kəsildiyim (imtahana buraxılmadığım)"
+
+msgctxt "profile.overall_academic"
+msgid "Q/b-dan kəsilib — imtahana buraxılmayıb (fənn yenidən keçilməli)"
+msgstr "Q/b-dan kəsilib — imtahana buraxılmayıb (fənn yenidən keçilməli)"
+
+msgctxt "profile.overall_academic"
+msgid "Rəsmi kredit-çəkili transkriptə bax"
+msgstr "Rəsmi kredit-çəkili transkriptə bax"
+
+msgctxt "profile.overall_academic"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "profile.overall_academic"
+msgid "Semestr ÜOMG — 100 bal üzərində kredit-çəkili orta"
+msgstr "Semestr ÜOMG — 100 bal üzərində kredit-çəkili orta"
+
+msgctxt "profile.overall_academic"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "profile.overall_academic"
+msgid "Süzgəclər"
+msgstr "Süzgəclər"
+
+msgctxt "profile.overall_academic"
+msgid "Sıfırla"
+msgstr "Sıfırla"
+
+msgctxt "profile.overall_academic"
+msgid "Toplanmış kredit"
+msgstr "Toplanmış kredit"
+
+msgctxt "profile.overall_academic"
+msgid "Transkriptə bax"
+msgstr "Transkriptə bax"
+
+msgctxt "profile.overall_academic"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "profile.overall_academic"
+msgid "fənn"
+msgstr "fənn"
+
+msgctxt "profile.overall_academic"
+msgid "kredit"
+msgstr "kredit"
+
+msgctxt "profile.overall_academic"
+msgid "nəticə göstərilir"
+msgstr "nəticə göstərilir"
+
+msgctxt "profile.overall_academic"
+msgid "Çıxış balı"
+msgstr "Çıxış balı"
+
+msgctxt "profile.overall_academic"
+msgid "ÜOMG"
+msgstr "ÜOMG"
+
+msgctxt "profile.overall_academic"
+msgid "Ümumi baldan kəsilib"
+msgstr "Ümumi baldan kəsilib"
+
+msgctxt "profile.overall_academic"
+msgid "İmtahandan kəsildiyim (25%)"
+msgstr "İmtahandan kəsildiyim (25%)"
+
+msgctxt "profile.overall_academic"
+msgid "İmtahandan kəsilib (25% ilə təkrar imtahan hüququ)"
+msgstr "İmtahandan kəsilib (25% ilə təkrar imtahan hüququ)"
+
+msgctxt "profile.section"
+msgid "Apellyasiya statistikası"
+msgstr "Apellyasiya statistikası"
+
+msgctxt "profile.section"
+msgid "Kollokvium pəncərələri"
+msgstr "Kollokvium pəncərələri"
+
+msgctxt "profile.section"
+msgid "blog"
+msgstr "blog"
+
+msgctxt "profile.section"
+msgid "overall_academic"
+msgstr "Ümumi akademik məlumat"
+
+msgctxt "profile.sidebar"
+msgid "Akademik qeydlər"
+msgstr "Akademik qeydlər"
+
+msgctxt "profile.sidebar"
+msgid "Sistem Monitorinqi"
+msgstr "Sistem Monitorinqi"
+
+msgctxt "profile.sidebar"
+msgid "blog"
+msgstr "blog"
+
+msgctxt "profile.sidebar"
+msgid "group_blog"
+msgstr "Bloq və məzmun"
+
+msgctxt "profile.sidebar"
+msgid "Ümumi tədris məlumatı"
+msgstr "Ümumi tədris məlumatı"
+
+msgctxt "profile.transcript"
+msgid "AKADEMİK TRANSKRİPT"
+msgstr "AKADEMİK TRANSKRİPT"
+
+msgctxt "profile.transcript"
+msgid "Akademik il %(year_label)s"
+msgstr "Akademik il %(year_label)s"
+
+msgctxt "profile.transcript"
+msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
+msgstr "Azərbaycan Respublikası Təhsil Nazirliyi"
+
+msgctxt "profile.transcript"
+msgid "Bal"
+msgstr "Bal"
+
+msgctxt "profile.transcript"
+msgid "Dərəcə"
+msgstr "Dərəcə"
+
+msgctxt "profile.transcript"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "profile.transcript"
+msgid "Fakültə dekanı"
+msgstr "Fakültə dekanı"
+
+msgctxt "profile.transcript"
+msgid "Fənnin şifri və adı"
+msgstr "Fənnin şifri və adı"
+
+msgctxt "profile.transcript"
+msgid "Kumulyativ ÜOMG"
+msgstr "Kumulyativ ÜOMG"
+
+msgctxt "profile.transcript"
+msgid "PUBLİK HÜQUQİ ŞƏXS / PUBLIC LEGAL ENTITY"
+msgstr "PUBLİK HÜQUQİ ŞƏXS / PUBLIC LEGAL ENTITY"
+
+msgctxt "profile.transcript"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "profile.transcript"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "profile.transcript"
+msgid "Semestrin sonu"
+msgstr "Semestrin sonu"
+
+msgctxt "profile.transcript"
+msgid "Soyadı, adı"
+msgstr "Soyadı, adı"
+
+msgctxt "profile.transcript"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "profile.transcript"
+msgid "Təhsil pilləsi"
+msgstr "Təhsil pilləsi"
+
+msgctxt "profile.transcript"
+msgid "Tələbə №"
+msgstr "Tələbə №"
+
+msgctxt "profile.transcript"
+msgid "Verilmə tarixi"
+msgstr "Verilmə tarixi"
+
+msgctxt "profile.transcript"
+msgid "semestri"
+msgstr "semestri"
+
+msgctxt "profile.transcript"
+msgid ""
+"ÜOMG kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ "
+"qiymətlənməyən fənlər sonra əlavə olunur."
+msgstr ""
+"ÜOMG kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ "
+"qiymətlənməyən fənlər sonra əlavə olunur."
+
+msgctxt "profile.transcript"
+msgid "ÜOMG-a daxil kredit"
+msgstr "ÜOMG-a daxil kredit"
+
+msgctxt "profile.transcript"
+msgid "Ümumi"
+msgstr "Ümumi"
+
+msgctxt "profile.transcript"
+msgid "İlin sonu"
+msgstr "İlin sonu"
+
+msgctxt "profile.transcript"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "registrar.component_kind"
+msgid "Generic"
+msgstr "Generic"
+
+msgctxt "registrar.component_kind"
+msgid "Independent work"
+msgstr "Independent work"
+
+msgctxt "registrar.component_kind"
+msgid "Kollokvium"
+msgstr "Kollokvium"
+
+msgctxt "registrar.console"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "registrar.correction"
+msgid "Course work"
+msgstr "Course work"
+
+msgctxt "registrar.correction"
+msgid "Date"
+msgstr "Date"
+
+msgctxt "registrar.correction"
+msgid "Düzəliş geri alındı."
+msgstr "Düzəliş geri alındı."
+
+msgctxt "registrar.correction"
+msgid "Düzəliş olunub — tarixçəni gör"
+msgstr "Düzəliş olunub — tarixçəni gör"
+
+msgctxt "registrar.correction"
+msgid ""
+"Düzəliş rejimi açıqdır — xanaya klikləyib balı/davamiyyəti dəyişin. Hər "
+"dəyişiklik səbəb + qeyd + PDF sənədlə loglanır. Bitirmək üçün yuxarıdan "
+"«kilidlə»."
+msgstr ""
+"Düzəliş rejimi açıqdır — xanaya klikləyib balı/davamiyyəti dəyişin. Hər "
+"dəyişiklik səbəb + qeyd + PDF sənədlə loglanır. Bitirmək üçün yuxarıdan "
+"«kilidlə»."
+
+msgctxt "registrar.correction"
+msgid "Düzəlişi bitir (kilidlə)"
+msgstr "Düzəlişi bitir (kilidlə)"
+
+msgctxt "registrar.correction"
+msgid "Düzəlişin izahı (tələbə və müəllim görür)"
+msgstr "Düzəlişin izahı (tələbə və müəllim görür)"
+
+msgctxt "registrar.correction"
+msgid "Geri alınacaq düzəliş tapılmadı."
+msgstr "Geri alınacaq düzəliş tapılmadı."
+
+msgctxt "registrar.correction"
+msgid "Hours"
+msgstr "Hours"
+
+msgctxt "registrar.correction"
+msgid "Instructor"
+msgstr "Instructor"
+
+msgctxt "registrar.correction"
+msgid "Kollokvium"
+msgstr "Kollokvium"
+
+msgctxt "registrar.correction"
+msgid "Lesson deleted"
+msgstr "Lesson deleted"
+
+msgctxt "registrar.correction"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "registrar.correction"
+msgid "Nothing changed — adjust a field before saving."
+msgstr "Nothing changed — adjust a field before saving."
+
+msgctxt "registrar.correction"
+msgid "Self-work"
+msgstr "Self-work"
+
+msgctxt "registrar.correction"
+msgid "The journal is published — it can't be changed."
+msgstr "The journal is published — it can't be changed."
+
+msgctxt "registrar.correction"
+msgid "The journal is published — the lesson can't be changed."
+msgstr "The journal is published — the lesson can't be changed."
+
+msgctxt "registrar.correction"
+msgid "Time"
+msgstr "Time"
+
+msgctxt "registrar.correction"
+msgid "Topic"
+msgstr "Topic"
+
+msgctxt "registrar.correction"
+msgid "Type"
+msgstr "Type"
+
+msgctxt "registrar.correction"
+msgid "Təhvil (sərbəst iş)"
+msgstr "Təhvil (sərbəst iş)"
+
+msgctxt "registrar.correction"
+msgid "Təhvil tarixi"
+msgstr "Təhvil tarixi"
+
+msgctxt "registrar.correction"
+msgid "Verilib (1)"
+msgstr "Verilib (1)"
+
+msgctxt "registrar.correction"
+msgid "Verilməyib (0)"
+msgstr "Verilməyib (0)"
+
+msgctxt "registrar.correction"
+msgid "Yeni bal"
+msgstr "Yeni bal"
+
+msgctxt "registrar.correction"
+msgid "Yeni bal (0-100)"
+msgstr "Yeni bal (0-100)"
+
+msgctxt "registrar.correction"
+msgid "Yeni kollokvium balı"
+msgstr "Yeni kollokvium balı"
+
+msgctxt "registrar.correction"
+msgid "correction reverted"
+msgstr "correction reverted"
+
+msgctxt "registrar.journal"
+msgid "%(count_all)s jurnal · %(total)s səhifə"
+msgstr "%(count_all)s jurnal · %(total)s səhifə"
+
+msgctxt "registrar.journal"
+msgid "2 saat pəncərəsi bağlanıb"
+msgstr "2 saat pəncərəsi bağlanıb"
+
+msgctxt "registrar.journal"
+msgid "ALT həftə"
+msgstr "ALT həftə"
+
+msgctxt "registrar.journal"
+msgid "AXTARIŞ"
+msgstr "AXTARIŞ"
+
+msgctxt "registrar.journal"
+msgid "Aktiv deyil"
+msgstr "Aktiv deyil"
+
+msgctxt "registrar.journal"
+msgid "Açılır"
+msgstr "Açılır"
+
+msgctxt "registrar.journal"
+msgid "Açıq"
+msgstr "Açıq"
+
+msgctxt "registrar.journal"
+msgid "BAL"
+msgstr "BAL"
+
+msgctxt "registrar.journal"
+msgid "BAL (0–100)"
+msgstr "BAL (0–100)"
+
+msgctxt "registrar.journal"
+msgid "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR"
+msgstr "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR"
+
+msgctxt "registrar.journal"
+msgid "BU GÜN"
+msgstr "BU GÜN"
+
+msgctxt "registrar.journal"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "registrar.journal"
+msgid "Bağlanıb"
+msgstr "Bağlanıb"
+
+msgctxt "registrar.journal"
+msgid ""
+"Bu dərs kilidlənib (2 saat keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi "
+"VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+msgstr ""
+"Bu dərs kilidlənib (2 saat keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi "
+"VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+
+msgctxt "registrar.journal"
+msgid ""
+"Bu dərs sütunu və ona aid bütün bal/qayıb qeydləri birlikdə silinəcək. "
+"Kilidlənmiş dərs üçün səbəb + qeyd + PDF sənəd MƏCBURİDİR."
+msgstr ""
+"Bu dərs sütunu və ona aid bütün bal/qayıb qeydləri birlikdə silinəcək. "
+"Kilidlənmiş dərs üçün səbəb + qeyd + PDF sənəd MƏCBURİDİR."
+
+msgctxt "registrar.journal"
+msgid "Bu filtrlərlə tədris fənni (offering) tapılmadı."
+msgstr "Bu filtrlərlə tədris fənni (offering) tapılmadı."
+
+msgctxt "registrar.journal"
+msgid "Bu günün dərs qeydləri sabah görünəcək."
+msgstr "Bu günün dərs qeydləri sabah görünəcək."
+
+msgctxt "registrar.journal"
+msgid "Bu semestr üçün fənn qeydiyyatı tapılmadı."
+msgstr "Bu semestr üçün fənn qeydiyyatı tapılmadı."
+
+msgctxt "registrar.journal"
+msgid "Bütün filtrləri sıfırla"
+msgstr "Bütün filtrləri sıfırla"
+
+msgctxt "registrar.journal"
+msgid "Bütün ixtisas"
+msgstr "Bütün ixtisas"
+
+msgctxt "registrar.journal"
+msgid "Bütün semestrlər"
+msgstr "Bütün semestrlər"
+
+msgctxt "registrar.journal"
+msgid "CARİ"
+msgstr "CARİ"
+
+msgctxt "registrar.journal"
+msgid "CƏMİ"
+msgstr "CƏMİ"
+
+msgctxt "registrar.journal"
+msgid "DAVAMİYYƏT"
+msgstr "DAVAMİYYƏT"
+
+msgctxt "registrar.journal"
+msgid "Davamiyyət"
+msgstr "Davamiyyət"
+
+msgctxt "registrar.journal"
+msgid ""
+"Davamiyyət yalnız cari gün üzrə qeyd edilə bilər · yazılmış qeyd 2 saatdan "
+"sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr ""
+"Davamiyyət yalnız cari gün üzrə qeyd edilə bilər · yazılmış qeyd 2 saatdan "
+"sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+
+msgctxt "registrar.journal"
+msgid "DÜZƏLİŞ SƏBƏBİ"
+msgstr "DÜZƏLİŞ SƏBƏBİ"
+
+msgctxt "registrar.journal"
+msgid "Düzəlişin izahı…"
+msgstr "Düzəlişin izahı…"
+
+msgctxt "registrar.journal"
+msgid "DƏRS SAATI"
+msgstr "DƏRS SAATI"
+
+msgctxt "registrar.journal"
+msgid "DƏRS TARİXÇƏSİ"
+msgstr "DƏRS TARİXÇƏSİ"
+
+msgctxt "registrar.journal"
+msgid "DƏRS TİPİ"
+msgstr "DƏRS TİPİ"
+
+msgctxt "registrar.journal"
+msgid "DƏRSİN MÜƏLLİMİ"
+msgstr "DƏRSİN MÜƏLLİMİ"
+
+msgctxt "registrar.journal"
+msgid "Dərs balları"
+msgstr "Dərs balları"
+
+msgctxt "registrar.journal"
+msgid "Dərs saatı seçilməlidir — standart saatlardan birini seçin."
+msgstr "Dərs saatı seçilməlidir — standart saatlardan birini seçin."
+
+msgctxt "registrar.journal"
+msgid "Dərs saatına görə icazə verilən maksimum q/b (25% həddi)"
+msgstr "Dərs saatına görə icazə verilən maksimum q/b (25% həddi)"
+
+msgctxt "registrar.journal"
+msgid ""
+"Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və "
+"qeydlər həmin gün aparılır. Səhv açılmış dərsi 2 saat içində "
+"silmək/düzəltmək olar."
+msgstr ""
+"Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və "
+"qeydlər həmin gün aparılır. Səhv açılmış dərsi 2 saat içində "
+"silmək/düzəltmək olar."
+
+msgctxt "registrar.journal"
+msgid "Dərsi redaktə et"
+msgstr "Dərsi redaktə et"
+
+msgctxt "registrar.journal"
+msgid "Dərsi sil"
+msgstr "Dərsi sil"
+
+msgctxt "registrar.journal"
+msgid "Dərsi silmək?"
+msgstr "Dərsi silmək?"
+
+msgctxt "registrar.journal"
+msgid "Export"
+msgstr "Export"
+
+msgctxt "registrar.journal"
+msgid "FAKÜLTƏ"
+msgstr "FAKÜLTƏ"
+
+msgctxt "registrar.journal"
+msgid ""
+"Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu "
+"dərsin müəllimini seçin."
+msgstr ""
+"Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu "
+"dərsin müəllimini seçin."
+
+msgctxt "registrar.journal"
+msgid "Geri alma pəncərəsi bağlanıb"
+msgstr "Geri alma pəncərəsi bağlanıb"
+
+msgctxt "registrar.journal"
+msgid "Hamısına i/e"
+msgstr "Hamısına i/e"
+
+msgctxt "registrar.journal"
+msgid "Hamısına q/b"
+msgstr "Hamısına q/b"
+
+msgctxt "registrar.journal"
+msgid ""
+"Hazırda açıq kollokvium pəncərəsi yoxdur — bal yazmaq üçün İmtahan "
+"Mərkəzinin aralığı aktivləşdirməsini gözləyin."
+msgstr ""
+"Hazırda açıq kollokvium pəncərəsi yoxdur — bal yazmaq üçün İmtahan "
+"Mərkəzinin aralığı aktivləşdirməsini gözləyin."
+
+msgctxt "registrar.journal"
+msgid "HƏFTƏ"
+msgstr "HƏFTƏ"
+
+msgctxt "registrar.journal"
+msgid "Hələ mövzu/dərs yoxdur."
+msgstr "Hələ mövzu/dərs yoxdur."
+
+msgctxt "registrar.journal"
+msgid "Hələ qeyd yoxdur."
+msgstr "Hələ qeyd yoxdur."
+
+msgctxt "registrar.journal"
+msgid "Hər sərbəst iş 1 balla qiymətləndirilir — cəmi maksimum 10 bal."
+msgstr "Hər sərbəst iş 1 balla qiymətləndirilir — cəmi maksimum 10 bal."
+
+msgctxt "registrar.journal"
+msgid ""
+"Jurnalda hələ yadda saxlanılmamış dəyişikliklər var. Narahat olmayın — "
+"qaralama brauzerdə saxlanılır və geri qayıdanda bərpa olunacaq. Yenə də "
+"çıxmaq istəyirsiniz?"
+msgstr ""
+"Jurnalda hələ yadda saxlanılmamış dəyişikliklər var. Narahat olmayın — "
+"qaralama brauzerdə saxlanılır və geri qayıdanda bərpa olunacaq. Yenə də "
+"çıxmaq istəyirsiniz?"
+
+msgctxt "registrar.journal"
+msgid "Jurnalı aç"
+msgstr "Jurnalı aç"
+
+msgctxt "registrar.journal"
+msgid "KAFEDRA"
+msgstr "KAFEDRA"
+
+msgctxt "registrar.journal"
+msgid "KOLLOKVİUM ORTA BALI"
+msgstr "KOLLOKVİUM ORTA BALI"
+
+msgctxt "registrar.journal"
+msgid "KURS İŞLƏRİ — QEYDİYYAT"
+msgstr "KURS İŞLƏRİ — QEYDİYYAT"
+
+msgctxt "registrar.journal"
+msgid "KURS İŞİ"
+msgstr "KURS İŞİ"
+
+msgctxt "registrar.journal"
+msgid "Keçirilmiş"
+msgstr "Keçirilmiş"
+
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs açmaq olmaz."
+msgstr "Keçmiş tarixə dərs açmaq olmaz."
+
+msgctxt "registrar.journal"
+msgid "Kollokvium"
+msgstr "Kollokvium"
+
+msgctxt "registrar.journal"
+msgid ""
+"Kollokvium bal-yazma aralığını İmtahan Mərkəzi təyin edir. Pəncərə açıq "
+"olduqca balı sərbəst yaza/dəyişə bilərsiniz; bağlanandan sonra kilidlənir. "
+"Boş buraxılan bal 0 sayılır."
+msgstr ""
+"Kollokvium bal-yazma aralığını İmtahan Mərkəzi təyin edir. Pəncərə açıq "
+"olduqca balı sərbəst yaza/dəyişə bilərsiniz; bağlanandan sonra kilidlənir. "
+"Boş buraxılan bal 0 sayılır."
+
+msgctxt "registrar.journal"
+msgid "Kollokvium orta balı"
+msgstr "Kollokvium orta balı"
+
+msgctxt "registrar.journal"
+msgid "Kurs işi"
+msgstr "Kurs işi"
+
+msgctxt "registrar.journal"
+msgid ""
+"Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd 2 saat "
+"sonra kilidlənir."
+msgstr ""
+"Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd 2 saat "
+"sonra kilidlənir."
+
+msgctxt "registrar.journal"
+msgid "Kurs işinin mövzusu…"
+msgstr "Kurs işinin mövzusu…"
+
+msgctxt "registrar.journal"
+msgid "Kursun mövzu siyahısı yoxdur — mövzunu əl ilə yazın."
+msgstr "Kursun mövzu siyahısı yoxdur — mövzunu əl ilə yazın."
+
+msgctxt "registrar.journal"
+msgid "Kəsilir — imtahana buraxılmır"
+msgstr "Kəsilir — imtahana buraxılmır"
+
+msgctxt "registrar.journal"
+msgid "LAB. İŞİ"
+msgstr "LAB. İŞİ"
+
+msgctxt "registrar.journal"
+msgid "Limit keçib — kəsilir"
+msgstr "Limit keçib — kəsilir"
+
+msgctxt "registrar.journal"
+msgid "Limitə yaxın"
+msgstr "Limitə yaxın"
+
+msgctxt "registrar.journal"
+msgid "MAGİSTRATURA"
+msgstr "MAGİSTRATURA"
+
+msgctxt "registrar.journal"
+msgid "MÖVZU"
+msgstr "MÖVZU"
+
+msgctxt "registrar.journal"
+msgid "MÖVZU — TƏQVİM PLANINDAN"
+msgstr "MÖVZU — TƏQVİM PLANINDAN"
+
+msgctxt "registrar.journal"
+msgid "MÖVZUNUN ADI"
+msgstr "MÖVZUNUN ADI"
+
+msgctxt "registrar.journal"
+msgid "MÜƏLLİM"
+msgstr "MÜƏLLİM"
+
+msgctxt "registrar.journal"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "registrar.journal"
+msgid "Mövzu hələ əlavə olunmayıb"
+msgstr "Mövzu hələ əlavə olunmayıb"
+
+msgctxt "registrar.journal"
+msgid "Mövzunu seçin…"
+msgstr "Mövzunu seçin…"
+
+msgctxt "registrar.journal"
+msgid "Mövzunu yazın…"
+msgstr "Mövzunu yazın…"
+
+msgctxt "registrar.journal"
+msgid "QAYIB"
+msgstr "QAYIB"
+
+msgctxt "registrar.journal"
+msgid "QAYIB (LİMİT"
+msgstr "QAYIB (LİMİT"
+
+msgctxt "registrar.journal"
+msgid "QEYD"
+msgstr "QEYD"
+
+msgctxt "registrar.journal"
+msgid "QEYD (məcburi)"
+msgstr "QEYD (məcburi)"
+
+msgctxt "registrar.journal"
+msgid "QRUP"
+msgstr "QRUP"
+
+msgctxt "registrar.journal"
+msgid "QRUPLAR"
+msgstr "QRUPLAR"
+
+msgctxt "registrar.journal"
+msgid "Qal"
+msgstr "Qal"
+
+msgctxt "registrar.journal"
+msgid "Qalan tələbələr üçün kurs işi hələ daxil edilməyib."
+msgstr "Qalan tələbələr üçün kurs işi hələ daxil edilməyib."
+
+msgctxt "registrar.journal"
+msgid "Qayıb (q/b)"
+msgstr "Qayıb (q/b)"
+
+msgctxt "registrar.journal"
+msgid "Qayıb limiti keçib — imtahana buraxılmır"
+msgstr "Qayıb limiti keçib — imtahana buraxılmır"
+
+msgctxt "registrar.journal"
+msgid "Qayıb limitinə yaxın"
+msgstr "Qayıb limitinə yaxın"
+
+msgctxt "registrar.journal"
+msgid "Qiymətləndirmə"
+msgstr "Qiymətləndirmə"
+
+msgctxt "registrar.journal"
+msgid "Qrup seçimi"
+msgstr "Qrup seçimi"
+
+msgctxt "registrar.journal"
+msgid "Qrupun sətrinə klikləməklə həmin qrupun elektron jurnalı açılır."
+msgstr "Qrupun sətrinə klikləməklə həmin qrupun elektron jurnalı açılır."
+
+msgctxt "registrar.journal"
+msgid "Redaktə (2 saat pəncərəsi)"
+msgstr "Redaktə (2 saat pəncərəsi)"
+
+msgctxt "registrar.journal"
+msgid "Redaktə / sil (2 saat pəncərəsi)"
+msgstr "Redaktə / sil (2 saat pəncərəsi)"
+
+msgctxt "registrar.journal"
+msgid "SAAT"
+msgstr "SAAT"
+
+msgctxt "registrar.journal"
+msgid "SAAT)"
+msgstr "SAAT)"
+
+msgctxt "registrar.journal"
+msgid "SEMİNAR"
+msgstr "SEMİNAR"
+
+msgctxt "registrar.journal"
+msgid "SOYAD AD ATA ADI"
+msgstr "SOYAD AD ATA ADI"
+
+msgctxt "registrar.journal"
+msgid "STATUS"
+msgstr "STATUS"
+
+msgctxt "registrar.journal"
+msgid "Seminarın orta balı"
+msgstr "Seminarın orta balı"
+
+msgctxt "registrar.journal"
+msgid "Seçilməyib"
+msgstr "Seçilməyib"
+
+msgctxt "registrar.journal"
+msgid "Seçin…"
+msgstr "Seçin…"
+
+msgctxt "registrar.journal"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "registrar.journal"
+msgid "Soyad, ad"
+msgstr "Soyad, ad"
+
+msgctxt "registrar.journal"
+msgid "Sıfırla"
+msgstr "Sıfırla"
+
+msgctxt "registrar.journal"
+msgid "SƏNƏD — PDF (məcburi)"
+msgstr "SƏNƏD — PDF (məcburi)"
+
+msgctxt "registrar.journal"
+msgid "SƏRBƏST İŞ"
+msgstr "SƏRBƏST İŞ"
+
+msgctxt "registrar.journal"
+msgid "SƏRBƏST İŞ MÖVZULARI"
+msgstr "SƏRBƏST İŞ MÖVZULARI"
+
+msgctxt "registrar.journal"
+msgid "Sənədli düzəliş"
+msgstr "Sənədli düzəliş"
+
+msgctxt "registrar.journal"
+msgid "Sərbəst iş"
+msgstr "Sərbəst iş"
+
+msgctxt "registrar.journal"
+msgid "Sərbəst işi yadda saxla"
+msgstr "Sərbəst işi yadda saxla"
+
+msgctxt "registrar.journal"
+msgid "TARİX"
+msgstr "TARİX"
+
+msgctxt "registrar.journal"
+msgid "TƏDRİS İLİ"
+msgstr "TƏDRİS İLİ"
+
+msgctxt "registrar.journal"
+msgid "TƏHVİL TARİXİ"
+msgstr "TƏHVİL TARİXİ"
+
+msgctxt "registrar.journal"
+msgid "TƏLƏBƏ"
+msgstr "TƏLƏBƏ"
+
+msgctxt "registrar.journal"
+msgid "TƏLƏBƏ SAYI"
+msgstr "TƏLƏBƏ SAYI"
+
+msgctxt "registrar.journal"
+msgid "TƏQVİM PLANI — MÖVZULAR"
+msgstr "TƏQVİM PLANI — MÖVZULAR"
+
+msgctxt "registrar.journal"
+msgid "Tətbiq et"
+msgstr "Tətbiq et"
+
+msgctxt "registrar.journal"
+msgid "Təyin olunmayıb"
+msgstr "Təyin olunmayıb"
+
+msgctxt "registrar.journal"
+msgid "Universitetin standart dərs saatlarından biri seçilir."
+msgstr "Universitetin standart dərs saatlarından biri seçilir."
+
+msgctxt "registrar.journal"
+msgid "YARIM İL"
+msgstr "YARIM İL"
+
+msgctxt "registrar.journal"
+msgid "Yadda saxlanılmamış dəyişikliklər"
+msgstr "Yadda saxlanılmamış dəyişikliklər"
+
+msgctxt "registrar.journal"
+msgid "Yekun qiymət"
+msgstr "Yekun qiymət"
+
+msgctxt "registrar.journal"
+msgid "Yeni dərs"
+msgstr "Yeni dərs"
+
+msgctxt "registrar.journal"
+msgid "Yeni dərs əlavə et"
+msgstr "Yeni dərs əlavə et"
+
+msgctxt "registrar.journal"
+msgid "Yeni kurs işi"
+msgstr "Yeni kurs işi"
+
+msgctxt "registrar.journal"
+msgid "Yeni mövzu daxil edin…"
+msgstr "Yeni mövzu daxil edin…"
+
+msgctxt "registrar.journal"
+msgid "axşam (21:30-dək)"
+msgstr "axşam (21:30-dək)"
+
+msgctxt "registrar.journal"
+msgid "balını"
+msgstr "balını"
+
+msgctxt "registrar.journal"
+msgid "fənn və ya müəllim…"
+msgstr "fənn və ya müəllim…"
+
+msgctxt "registrar.journal"
+msgid "hədd keçilib!"
+msgstr "hədd keçilib!"
+
+msgctxt "registrar.journal"
+msgid "imtahana buraxılmır"
+msgstr "imtahana buraxılmır"
+
+msgctxt "registrar.journal"
+msgid "iştirak edib"
+msgstr "iştirak edib"
+
+msgctxt "registrar.journal"
+msgid "keçirilib"
+msgstr "keçirilib"
+
+msgctxt "registrar.journal"
+msgid "limit"
+msgstr "limit"
+
+msgctxt "registrar.journal"
+msgid "qalan"
+msgstr "qalan"
+
+msgctxt "registrar.journal"
+msgid "qayıb"
+msgstr "qayıb"
+
+msgctxt "registrar.journal"
+msgid "qayıb limiti"
+msgstr "qayıb limiti"
+
+msgctxt "registrar.journal"
+msgid "son tarix"
+msgstr "son tarix"
+
+msgctxt "registrar.journal"
+msgid "tarixinə kimi yazın"
+msgstr "tarixinə kimi yazın"
+
+msgctxt "registrar.journal"
+msgid "təhvil verilib"
+msgstr "təhvil verilib"
+
+msgctxt "registrar.journal"
+msgid "tələbə"
+msgstr "tələbə"
+
+msgctxt "registrar.journal"
+msgid "verilməyib"
+msgstr "verilməyib"
+
+msgctxt "registrar.journal"
+msgid ""
+"«+ Yeni dərs» düyməsi ilə bu günün dərsini açın — sonra iştirak/qayıb və bal"
+" yazın."
+msgstr ""
+"«+ Yeni dərs» düyməsi ilə bu günün dərsini açın — sonra iştirak/qayıb və bal"
+" yazın."
+
+msgctxt "registrar.journal"
+msgid "Çıx"
+msgstr "Çıx"
+
+msgctxt "registrar.journal"
+msgid "ÜST həftə"
+msgstr "ÜST həftə"
+
+msgctxt "registrar.journal"
+msgid "üzrə qayıb limiti keçilib — imtahana buraxılmırsınız"
+msgstr "üzrə qayıb limiti keçilib — imtahana buraxılmırsınız"
+
+msgctxt "registrar.journal"
+msgid "üzrə qayıb limitinə yaxınlaşırsınız"
+msgstr "üzrə qayıb limitinə yaxınlaşırsınız"
+
+msgctxt "registrar.journal"
+msgid "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
+msgstr "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
+
+msgctxt "registrar.journal"
+msgid "İMTAHANA QƏDƏR BAL"
+msgstr "İMTAHANA QƏDƏR BAL"
+
+msgctxt "registrar.journal"
+msgid "İmtahana buraxılmır"
+msgstr "İmtahana buraxılmır"
+
+msgctxt "registrar.journal"
+msgid "İmtahana buraxılır"
+msgstr "İmtahana buraxılır"
+
+msgctxt "registrar.journal"
+msgid ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + "
+"kollokvium + sərbəst iş, tavan"
+msgstr ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + "
+"kollokvium + sərbəst iş, tavan"
+
+msgctxt "registrar.journal"
+msgid "İmtina et"
+msgstr "İmtina et"
+
+msgctxt "registrar.journal"
+msgid "— boş —"
+msgstr "— boş —"
+
+msgctxt "registrar.journal"
+msgid "№ · SOYAD AD ATA ADI"
+msgstr "№ · SOYAD AD ATA ADI"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Aktivləşdir"
+msgstr "Aktivləşdir"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Açılış"
+msgstr "Açılış"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bağlanış"
+msgstr "Bağlanış"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bağlanış tarixi açılışdan sonra olmalıdır."
+msgstr "Bağlanış tarixi açılışdan sonra olmalıdır."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bitmiş semestr — tarix dəyişmək mümkün deyil"
+msgstr "Bitmiş semestr — tarix dəyişmək mümkün deyil"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu pəncərəni aktivləşdirsəniz, aralıq açıq olduqda müəllimlər bal yaza "
+"biləcək. Davam edilsin?"
+msgstr ""
+"Bu pəncərəni aktivləşdirsəniz, aralıq açıq olduqda müəllimlər bal yaza "
+"biləcək. Davam edilsin?"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu pəncərəni deaktiv etsəniz, müəllimlər bu kollokvium üzrə bal yaza "
+"bilməyəcək. Davam edilsin?"
+msgstr ""
+"Bu pəncərəni deaktiv etsəniz, müəllimlər bu kollokvium üzrə bal yaza "
+"bilməyəcək. Davam edilsin?"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu semestr bitib — tarixləri dəyişmək mümkün deyil (yalnız baxış). Redaktə "
+"üçün yuxarıdan cari/gələcək tədris ili və semestri seçin."
+msgstr ""
+"Bu semestr bitib — tarixləri dəyişmək mümkün deyil (yalnız baxış). Redaktə "
+"üçün yuxarıdan cari/gələcək tədris ili və semestri seçin."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bu tarixləri təsdiqləyirsiniz?"
+msgstr "Bu tarixləri təsdiqləyirsiniz?"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bu təşkilat üçün akademik semestr yoxdur — əvvəlcə semestr yaradın."
+msgstr "Bu təşkilat üçün akademik semestr yoxdur — əvvəlcə semestr yaradın."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu təşkilat üçün cari və ya gələcək semestr yoxdur — aşağıdakı bitmiş "
+"semestr yalnız baxış üçündür. Tarixləri təyin etmək üçün əvvəlcə Akademik "
+"təqvimdə yeni tədris ili/semestr yaradın."
+msgstr ""
+"Bu təşkilat üçün cari və ya gələcək semestr yoxdur — aşağıdakı bitmiş "
+"semestr yalnız baxış üçündür. Tarixləri təyin etmək üçün əvvəlcə Akademik "
+"təqvimdə yeni tədris ili/semestr yaradın."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu əlavə gün silinsin? Müəllimlər üçün son tarix əvvəlki bağlanış tarixinə "
+"qayıdacaq."
+msgstr ""
+"Bu əlavə gün silinsin? Müəllimlər üçün son tarix əvvəlki bağlanış tarixinə "
+"qayıdacaq."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bütün universitet"
+msgstr "Bütün universitet"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Deaktiv et"
+msgstr "Deaktiv et"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Dəyişikliyi yadda saxla"
+msgstr "Dəyişikliyi yadda saxla"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Fakültə əhatəsi üçün fakültə seçilməlidir."
+msgstr "Fakültə əhatəsi üçün fakültə seçilməlidir."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Fakültə/kafedra əhatəsi üçün bölmə seçilməlidir."
+msgstr "Fakültə/kafedra əhatəsi üçün bölmə seçilməlidir."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"K1/K2/K3 üçün müəllimlərin bal yaza biləcəyi tarix aralığını təyin edin və "
+"aktivləşdirin. Rəhbər əlavə gün verə bilər."
+msgstr ""
+"K1/K2/K3 üçün müəllimlərin bal yaza biləcəyi tarix aralığını təyin edin və "
+"aktivləşdirin. Rəhbər əlavə gün verə bilər."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kafedra əhatəsi üçün kafedra seçilməlidir."
+msgstr "Kafedra əhatəsi üçün kafedra seçilməlidir."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kollokvium"
+msgstr "Kollokvium"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kollokvium pəncərələri"
+msgstr "Kollokvium pəncərələri"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kollokvium pəncərəsi"
+msgstr "Kollokvium pəncərəsi"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kollokvium əlavə gün"
+msgstr "Kollokvium əlavə gün"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Kollokvium əlavə günlər"
+msgstr "Kollokvium əlavə günlər"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Pəncərə tarixləri sonradan dəyişdirilə bilməz; yalnız əlavə gün verilə "
+"bilər."
+msgstr ""
+"Pəncərə tarixləri sonradan dəyişdirilə bilməz; yalnız əlavə gün verilə "
+"bilər."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Pəncərəni aktivləşdir"
+msgstr "Pəncərəni aktivləşdir"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Pəncərəni deaktiv et"
+msgstr "Pəncərəni deaktiv et"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Tarixləri təsdiqləyin"
+msgstr "Tarixləri təsdiqləyin"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Təsdiq"
+msgstr "Təsdiq"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Təsdiqlə"
+msgstr "Təsdiqlə"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Təsdiqlə və ver"
+msgstr "Təsdiqlə və ver"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Təşkilat"
+msgstr "Təşkilat"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Təşkilat tapılmadı."
+msgstr "Təşkilat tapılmadı."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Yadda saxladıqdan sonra tarixləri dəyişə bilərsiniz; müəllimlərə son tarixi "
+"uzatmaq üçün əlavə gün verin."
+msgstr ""
+"Yadda saxladıqdan sonra tarixləri dəyişə bilərsiniz; müəllimlərə son tarixi "
+"uzatmaq üçün əlavə gün verin."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Yeni son tarix:"
+msgstr "Yeni son tarix:"
+
+msgctxt "registrar.kollokvium_window"
+msgid "açılış tarixi"
+msgstr "açılış tarixi"
+
+msgctxt "registrar.kollokvium_window"
+msgid "bağlanış tarixi"
+msgstr "bağlanış tarixi"
+
+msgctxt "registrar.kollokvium_window"
+msgid "gün"
+msgstr "gün"
+
+msgctxt "registrar.kollokvium_window"
+msgid "kollokvium indeksi (0=K1)"
+msgstr "kollokvium indeksi (0=K1)"
+
+msgctxt "registrar.kollokvium_window"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əhatə"
+msgstr "Əhatə"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Əlavə gün müəllimlərin bal yazma son tarixini uzadır. Pəncərə tarixləri "
+"dəyişmir — yalnız son tarix uzanır. Sonradan yenidən əlavə gün verə "
+"bilərsiniz."
+msgstr ""
+"Əlavə gün müəllimlərin bal yazma son tarixini uzadır. Pəncərə tarixləri "
+"dəyişmir — yalnız son tarix uzanır. Sonradan yenidən əlavə gün verə "
+"bilərsiniz."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əlavə gün sayı"
+msgstr "Əlavə gün sayı"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əlavə gün ver"
+msgstr "Əlavə gün ver"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əlavə gün verilməyib."
+msgstr "Əlavə gün verilməyib."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əlavə günlər"
+msgstr "Əlavə günlər"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əlavə günü redaktə et"
+msgstr "Əlavə günü redaktə et"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əlavə günü sil"
+msgstr "Əlavə günü sil"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Ən azı 1 gün olmalıdır."
+msgstr "Ən azı 1 gün olmalıdır."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Ən çox 30 gün ola bilər."
+msgstr "Ən çox 30 gün ola bilər."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Əvvəlcə əvvəlki kollokvium təyin edilməlidir."
+msgstr "Əvvəlcə əvvəlki kollokvium təyin edilməlidir."
+
+msgctxt "registrar.model.component_correction.meta"
+msgid "component-score correction"
+msgstr "component-score correction"
+
+msgctxt "registrar.model.component_correction.meta"
+msgid "component-score corrections"
+msgstr "component-score corrections"
+
+msgctxt "registrar.model.correction.meta"
+msgid "journal correction"
+msgstr "journal correction"
+
+msgctxt "registrar.model.correction.meta"
+msgid "journal corrections"
+msgstr "journal corrections"
+
+msgctxt "registrar.model.coursework.meta"
+msgid "course work"
+msgstr "course work"
+
+msgctxt "registrar.model.coursework.meta"
+msgid "course works"
+msgstr "course works"
+
+msgctxt "registrar.model.coursework_correction.meta"
+msgid "course-work correction"
+msgstr "course-work correction"
+
+msgctxt "registrar.model.coursework_correction.meta"
+msgid "course-work corrections"
+msgstr "course-work corrections"
+
+msgctxt "registrar.model.criterion_score.meta"
+msgid "criterion score"
+msgstr "criterion score"
+
+msgctxt "registrar.model.criterion_score.meta"
+msgid "criterion scores"
+msgstr "criterion scores"
+
+msgctxt "registrar.model.lesson_correction.meta"
+msgid "lesson correction"
+msgstr "lesson correction"
+
+msgctxt "registrar.model.lesson_correction.meta"
+msgid "lesson corrections"
+msgstr "lesson corrections"
+
+msgctxt "registrar.model.rubric.meta"
+msgid "rubric"
+msgstr "rubric"
+
+msgctxt "registrar.model.rubric.meta"
+msgid "rubrics"
+msgstr "rubrics"
+
+msgctxt "registrar.model.rubric_criterion.meta"
+msgid "rubric criteria"
+msgstr "rubric criteria"
+
+msgctxt "registrar.model.rubric_criterion.meta"
+msgid "rubric criterion"
+msgstr "rubric criterion"
+
+msgctxt "registrar.model.selfwork_correction.meta"
+msgid "self-work correction"
+msgstr "self-work correction"
+
+msgctxt "registrar.model.selfwork_correction.meta"
+msgid "self-work corrections"
+msgstr "self-work corrections"
+
+msgctxt "registrar.model.selfwork_mark.meta"
+msgid "independent work mark"
+msgstr "independent work mark"
+
+msgctxt "registrar.model.selfwork_mark.meta"
+msgid "independent work marks"
+msgstr "independent work marks"
+
+msgctxt "registrar.model.selfwork_topic.meta"
+msgid "independent work topic"
+msgstr "independent work topic"
+
+msgctxt "registrar.model.selfwork_topic.meta"
+msgid "independent work topics"
+msgstr "independent work topics"
+
+msgctxt "registrar.notify"
+msgid "Diqqət: qayıb limitinə yaxınlaşırsınız (%(hours)s saat)"
+msgstr "Diqqət: qayıb limitinə yaxınlaşırsınız (%(hours)s saat)"
+
+msgctxt "registrar.notify"
+msgid "Dərs balı yazıldı: %(score)s"
+msgstr "Dərs balı yazıldı: %(score)s"
+
+msgctxt "registrar.notify"
+msgid "Elektron jurnal — %(subject)s"
+msgstr "Elektron jurnal — %(subject)s"
+
+msgctxt "registrar.notify"
+msgid "Kollokvium balı yazıldı: %(score)s"
+msgstr "Kollokvium balı yazıldı: %(score)s"
+
+msgctxt "registrar.notify"
+msgid "Kurs işi balı yazıldı: %(score)s"
+msgstr "Kurs işi balı yazıldı: %(score)s"
+
+msgctxt "registrar.notify"
+msgid "Qayıb (q/b) qeyd edildi"
+msgstr "Qayıb (q/b) qeyd edildi"
+
+msgctxt "registrar.notify"
+msgid "Qayıb limiti keçildi — imtahana buraxılmırsınız"
+msgstr "Qayıb limiti keçildi — imtahana buraxılmırsınız"
+
+msgctxt "registrar.records"
+msgid "25%"
+msgstr "25%"
+
+msgctxt "registrar.records"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "registrar.records"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "registrar.records"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.records"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "registrar.records"
+msgid "Kəsr"
+msgstr "Kəsr"
+
+msgctxt "registrar.records"
+msgid "Payız"
+msgstr "Payız"
+
+msgctxt "registrar.records"
+msgid "Q/b"
+msgstr "Q/b"
+
+msgctxt "registrar.records"
+msgid "Q/b-dan — imtahana buraxılmayıb"
+msgstr "Q/b-dan — imtahana buraxılmayıb"
+
+msgctxt "registrar.records"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "registrar.records"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "registrar.records"
+msgid "Sıfırla"
+msgstr "Sıfırla"
+
+msgctxt "registrar.records"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "registrar.records"
+msgid "Yay"
+msgstr "Yay"
+
+msgctxt "registrar.records"
+msgid "Yaz"
+msgstr "Yaz"
+
+msgctxt "registrar.records"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "registrar.records"
+msgid ""
+"Öz strukturunuzdakı tələbələrin akademik nəticələri — fakültə, kafedra, "
+"ixtisas, qrup üzrə süzün və ya tələbə axtarın. Aşağıdakı box-lar seçilmiş "
+"süzgəc üzrə ümumi mənzərəni göstərir. Hər kəs yalnız öz strukturunun altını "
+"görür."
+msgstr ""
+"Öz strukturunuzdakı tələbələrin akademik nəticələri — fakültə, kafedra, "
+"ixtisas, qrup üzrə süzün və ya tələbə axtarın. Aşağıdakı box-lar seçilmiş "
+"süzgəc üzrə ümumi mənzərəni göstərir. Hər kəs yalnız öz strukturunun altını "
+"görür."
+
+msgctxt "registrar.records"
+msgid "ÜOMG"
+msgstr "ÜOMG"
+
+msgctxt "registrar.records"
+msgid "İmtahandan kəsilib — 25% təkrar imtahan"
+msgstr "İmtahandan kəsilib — 25% təkrar imtahan"
+
+msgctxt "registrar.records"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "registrar.schedule"
+msgid "Auditoriya"
+msgstr "Auditoriya"
+
+msgctxt "registrar.schedule"
+msgid "Axşam təhsili — dərslər 21:30-da bitir"
+msgstr "Axşam təhsili — dərslər 21:30-da bitir"
+
+msgctxt "registrar.schedule"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "registrar.schedule"
+msgid "Bu həftə — ALT"
+msgstr "Bu həftə — ALT"
+
+msgctxt "registrar.schedule"
+msgid "Bu həftə — ÜST"
+msgstr "Bu həftə — ÜST"
+
+msgctxt "registrar.schedule"
+msgid "Bu semestr üçün hələ cədvəl slotu yoxdur."
+msgstr "Bu semestr üçün hələ cədvəl slotu yoxdur."
+
+msgctxt "registrar.schedule"
+msgid "Cədvələ slot əlavə et"
+msgstr "Cədvələ slot əlavə et"
+
+msgctxt "registrar.schedule"
+msgid "Dərs növü"
+msgstr "Dərs növü"
+
+msgctxt "registrar.schedule"
+msgid "Dərs saatı"
+msgstr "Dərs saatı"
+
+msgctxt "registrar.schedule"
+msgid "Gələn həftə — ALT"
+msgstr "Gələn həftə — ALT"
+
+msgctxt "registrar.schedule"
+msgid "Gələn həftə — ÜST"
+msgstr "Gələn həftə — ÜST"
+
+msgctxt "registrar.schedule"
+msgid "Jurnalı aç"
+msgstr "Jurnalı aç"
+
+msgctxt "registrar.schedule"
+msgid "Kəsilir"
+msgstr "Kəsilir"
+
+msgctxt "registrar.schedule"
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgctxt "registrar.schedule"
+msgid "Magistratura"
+msgstr "Magistratura"
+
+msgctxt "registrar.schedule"
+msgid "Mühazirə"
+msgstr "Mühazirə"
+
+msgctxt "registrar.schedule"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "registrar.schedule"
+msgid "Məşğələ"
+msgstr "Məşğələ"
+
+msgctxt "registrar.schedule"
+msgid "Normal"
+msgstr "Normal"
+
+msgctxt "registrar.schedule"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "registrar.schedule"
+msgid "SAAT"
+msgstr "SAAT"
+
+msgctxt "registrar.schedule"
+msgid "Slotu sil"
+msgstr "Slotu sil"
+
+msgctxt "registrar.schedule"
+msgid "Tələbə sayı"
+msgstr "Tələbə sayı"
+
+msgctxt "registrar.schedule"
+msgid "Vaxt"
+msgstr "Vaxt"
+
+msgctxt "registrar.schedule"
+msgid "Yuxarıdan slot əlavə edin."
+msgstr "Yuxarıdan slot əlavə edin."
+
+msgctxt "registrar.schedule"
+msgid "boş"
+msgstr "boş"
+
+msgctxt "registrar.schedule"
+msgid "bu gün"
+msgstr "bu gün"
+
+msgctxt "registrar.schedule"
+msgid "giriş balı"
+msgstr "giriş balı"
+
+msgctxt "registrar.schedule"
+msgid "gün"
+msgstr "gün"
+
+msgctxt "registrar.schedule"
+msgid "həftə fərqi olan dərslər hüceyrədə bölünmüş göstərilir"
+msgstr "həftə fərqi olan dərslər hüceyrədə bölünmüş göstərilir"
+
+msgctxt "registrar.schedule"
+msgid "kurs"
+msgstr "kurs"
+
+msgctxt "registrar.schedule"
+msgid "qayıb saatı"
+msgstr "qayıb saatı"
+
+msgctxt "registrar.schedule"
+msgid "status"
+msgstr "status"
+
+msgctxt "registrar.schedule"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "registrar.slot_kind"
+msgid "Laboratory"
+msgstr "Laboratory"
+
+msgctxt "registrar.slot_kind"
+msgid "Lecture"
+msgstr "Lecture"
+
+msgctxt "registrar.slot_kind"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "staff.management"
+msgid ""
+"\n"
+"                Choose which group you want to view inside %(organization_name)s.\n"
+"                "
+msgstr ""
+"\n"
+"                Choose which group you want to view inside %(organization_name)s.\n"
+"                "
+
+msgctxt "staff.management"
+msgid ""
+"\n"
+"                Manage student invitations in %(organization_name)s. You can send and withdraw invites.\n"
+"                "
+msgstr ""
+"\n"
+"                Manage student invitations in %(organization_name)s. You can send and withdraw invites.\n"
+"                "
+
+msgctxt "staff.management"
+msgid ""
+"\n"
+"                Manage students in %(organization_name)s. You can accept requests and send invitations.\n"
+"                "
+msgstr ""
+"\n"
+"                Manage students in %(organization_name)s. You can accept requests and send invitations.\n"
+"                "
+
+msgctxt "staff.management"
+msgid ""
+"\n"
+"                Manage students in %(organization_name)s. You can review requests and active memberships.\n"
+"                "
+msgstr ""
+"\n"
+"                Manage students in %(organization_name)s. You can review requests and active memberships.\n"
+"                "
+
+msgctxt "exams.view.exams.confirm"
+msgid "delete_exam_title"
+msgstr "İmtahanı silmək istəyirsiniz?"
+
+msgctxt "exams.view.exams.confirm"
+msgid "delete_exam_message"
+msgstr ""
+"İmtahan Zibil qutusuna keçəcək. Nəticələr silinmir — imtahanı sonra bərpa "
+"edə bilərsiniz."
+
+msgctxt "exams.view.questions.confirm"
+msgid "delete_question_title"
+msgstr "Sualı silmək istəyirsiniz?"
+
+msgctxt "exams.view.questions.confirm"
+msgid "delete_question_message"
+msgstr ""
+"Sual imtahandan silinəcək və qalan sualların nömrələri yenidən sıralanacaq."
+
+msgctxt "exams.template.confirm_delete"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.confirm_delete"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.template.deleted_exams"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.deleted_exams"
+msgid "permanent_delete_blocked_hint"
+msgstr ""
+"Bu imtahanın cəhdləri var — akademik tarixçə qorunduğu üçün birdəfəlik "
+"silinə bilməz."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_out_of_scope"
+msgstr ""
+"Bu əməliyyat sizin səlahiyyət sahənizdən kənardır. Başqa istifadəçinin "
+"adından yalnız öz sahənizə aid dəyişiklikləri edə bilərsiniz."
+
+msgctxt "accounts.view_as"
+msgid "mode_limited"
+msgstr "Məhdud dəyişiklik"
+
+msgctxt "accounts.view_as"
+msgid "mode_limited_hint"
+msgstr ""
+"Yalnız öz sahənizə aid əməliyyatları edə bilərsiniz; qalan hər şey yalnız-"
+"oxudur."
+
+msgctxt "profile.sidebar"
+msgid "group_university_management"
+msgstr "Universitet idarəetməsi"
+
+msgctxt "roles.display_name"
+msgid "superadmin"
+msgstr "Super Admin"
+
+msgctxt "roles.display_name"
+msgid "org_owner"
+msgstr "Təşkilat Sahibi"
+
+msgctxt "roles.display_name"
+msgid "org_admin"
+msgstr "Təşkilat Admini"
+
+msgctxt "roles.display_name"
+msgid "member"
+msgstr "Üzv"
+
+msgctxt "roles.display_name"
+msgid "hr"
+msgstr "HR"
+
+msgctxt "roles.display_name"
+msgid "exam_center_head"
+msgstr "İmtahan Mərkəzi Rəhbəri"
+
+msgctxt "roles.display_name"
+msgid "exam_center_staff"
+msgstr "İmtahan Mərkəzi İşçisi"
+
+msgctxt "roles.display_name"
+msgid "exam_center"
+msgstr "İmtahan Mərkəzi"
+
+msgctxt "roles.display_name"
+msgid "ikt_rehber"
+msgstr "İKT Rəhbəri"
+
+msgctxt "roles.display_name"
+msgid "teacher"
+msgstr "Müəllim"
+
+msgctxt "roles.display_name"
+msgid "assistant_teacher"
+msgstr "Müəllim Köməkçisi"
+
+msgctxt "roles.display_name"
+msgid "lead_student"
+msgstr "Baş Tələbə"
+
+msgctxt "roles.display_name"
+msgid "student"
+msgstr "Tələbə"
+
+msgctxt "accounts.profile"
+msgid "individual_no_organization"
+msgstr "Fərdi"
+
+msgctxt "profile.sidebar"
+msgid "group_my_studies"
+msgstr "Tədrisim"
+
+msgctxt "profile.sidebar"
+msgid "group_teaching"
+msgstr "Tədris işi"
+
+msgctxt "profile.sidebar"
+msgid "group_exam_center"
+msgstr "İmtahan mərkəzi"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"
@@ -30146,10 +35273,6 @@ msgstr "müəllim axtar…"
 #~ msgctxt "profile.subjects"
 #~ msgid "Keçir"
 #~ msgstr "Keçir"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Independent work"
-#~ msgstr "Sərbəst iş"
 
 #~ msgctxt "registrar.component_kind"
 #~ msgid "Colloquium"
@@ -30194,35 +35317,3 @@ msgstr "müəllim axtar…"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Keçir"
-
-msgctxt "exams.view.question_bank.warning"
-msgid "duplicate_in_import"
-msgstr "#{index} sualı bu faylda #{previous_index} ilə eynidir: “{preview}”"
-
-msgctxt "exams.view.question_bank.warning"
-msgid "duplicate_in_import_first"
-msgstr "#{index} sualı bu faylda daha {count} sualla təkrarlanır (ilk: #{next_index}): “{preview}”"
-
-msgctxt "exams.view.question_bank.warning"
-msgid "already_in_exam"
-msgstr "#{index} sualı bankda artıq var (sıra {db_index}): “{preview}”"
-
-msgctxt "exams.view.question_bank.warning"
-msgid "bulk_correct_too_long"
-msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan uzundur."
-
-msgctxt "exams.view.question_bank.warning"
-msgid "bulk_correct_too_short"
-msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan qısadır."
-
-msgctxt "exams.template.student_exam_result"
-msgid "trial_result_note_title"
-msgstr "Bu sınaq keçididir — nəticə heç yerə yazılmır"
-
-msgctxt "exams.template.student_exam_result"
-msgid "trial_result_note_body"
-msgstr "Real imtahanda tələbə bu mərhələdə imtahandan çıxarılır və giriş səhifəsinə yönləndirilir. Sınaq yalnız imtahanı yoxlamaq üçündür, ona görə burada belə bir yönləndirmə yoxdur."
-
-msgctxt "appeals.view.message"
-msgid "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."
-msgstr "Bu müraciət artıq mövcud deyil — yəqin ki silinib. Bildirişdəki keçid köhnəlib."

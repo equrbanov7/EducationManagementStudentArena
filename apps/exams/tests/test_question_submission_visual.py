@@ -57,6 +57,7 @@ class QuestionSubmissionVisualViewTests(_Base):
             organization=self.org,
             name="Vizual qrup",
         )
+        subject = self._subject(name="Riyaziyyat", code="RIY101", group=group)
         client = self._client_for(self.teacher)
 
         with patch(
@@ -68,7 +69,8 @@ class QuestionSubmissionVisualViewTests(_Base):
                 {
                     "action": "save",
                     "title": "Vizual göndəriş",
-                    "subject": "Riyaziyyat",
+                    "subject": str(subject.pk),
+                    "exam_kind": "final",
                     "group_id": str(group.pk),
                     "language": "az",
                     "raw_text": VALID_TEXT,
@@ -120,12 +122,13 @@ class QuestionSubmissionVisualViewTests(_Base):
             organization=self.org,
             name="Upload qrup",
         )
+        subject = self._subject(name="Riyaziyyat", code="RIY101", group=group)
         client = self._client_for(self.teacher)
         uploaded = SimpleUploadedFile("questions.png", b"not-decoded-in-view", content_type="image/png")
 
         with (
             patch(
-                "apps.exams.views.teacher.submission_inbox.prepare_question_upload",
+                "apps.exams.views.teacher.submission_workbench.prepare_question_upload",
                 return_value=(VALID_TEXT, self.token),
             ) as prepare,
             patch(
@@ -138,7 +141,8 @@ class QuestionSubmissionVisualViewTests(_Base):
                 {
                     "action": "save",
                     "title": "Upload göndərişi",
-                    "subject": "Riyaziyyat",
+                    "subject": str(subject.pk),
+                    "exam_kind": "final",
                     "group_id": str(group.pk),
                     "language": "az",
                     "raw_text": "köhnə mətn",

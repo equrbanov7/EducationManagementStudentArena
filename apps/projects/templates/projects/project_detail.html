@@ -155,13 +155,13 @@
                 {% csrf_token %}
 
                 <div class="mb-3">
-                    <label class="form-label">{% trans "label_content" context "projects.detail" %}</label>
-                    <textarea name="content" class="form-control" rows="4"
+                    <label class="form-label" for="project-content">{% trans "label_content" context "projects.detail" %}</label>
+                    <textarea name="content" id="project-content" class="form-control" rows="4"
                               placeholder="{% trans 'placeholder_content' context 'projects.detail' %}"></textarea>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">{% trans "label_file" context "projects.detail" %}</label>
+                    <label class="form-label" for="fileInput">{% trans "label_file" context "projects.detail" %}</label>
                     <input type="file" name="file" id="fileInput" class="form-control">
                     <div id="fileNameDisplay" class="mt-2 text-muted small project-file-name d-none">
                         <i class="fa-solid fa-file me-1"></i>

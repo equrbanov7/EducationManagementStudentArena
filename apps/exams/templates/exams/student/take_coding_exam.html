@@ -21,14 +21,10 @@
     <link rel="stylesheet" href="{% static 'exams/css/coding_exam/_part2.css' %}?v=20260528-1">
     <link rel="stylesheet" href="{% static 'exams/css/coding_exam/_part3.css' %}?v=20260528-1">
     <link rel="stylesheet" href="{% static 'exams/css/exam_time_warning.css' %}?v=20260519-1">
+    <link rel="stylesheet" href="{% static 'exams/css/coding_exam_media.css' %}?v=20260731-c3">
 {% endblock %}
 
 {% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
-<style>
-  .c3-1 { margin-top:0.75rem; }
-  .c3-2 { max-width:100%;max-height:320px;border-radius:8px; }
-</style>
 
 {{ initial_files|json_script:"coding-initial-files" }}
 {{ starter_files|json_script:"coding-starter-files" }}
@@ -109,13 +105,13 @@
                 <div class="coding-question-label" id="codingQuestionLabel">{% trans "label_question" context "exams.template.take_exam" %} 1</div>
                 <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
                 {% if coding_question.question.image %}
-                    <div class="question-media c3-1" id="codingQuestionImage">
-                        <img src="{{ coding_question.question.image|protected_media_url }}" alt="" class="c3-2">
+                    <div class="question-media coding-exam-media-block" id="codingQuestionImage">
+                        <img src="{{ coding_question.question.image|protected_media_url }}" alt="" class="coding-exam-media-asset">
                     </div>
                 {% endif %}
                 {% if coding_question.question.video %}
-                    <div class="question-media c3-1" id="codingQuestionVideo">
-                        <video controls preload="metadata" playsinline class="c3-2">
+                    <div class="question-media coding-exam-media-block" id="codingQuestionVideo">
+                        <video controls preload="metadata" playsinline class="coding-exam-media-asset">
                             <source src="{{ coding_question.question.video|protected_media_url }}">
                         </video>
                     </div>

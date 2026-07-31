@@ -1,6 +1,6 @@
 /* Source: exams/teacher/partials/_teacher_exam_statistics_js.html
    Extracted from an inline <style> for CSP (no unsafe-inline).
-   Classes were renamed from the generic .c3-1/.c3-2 to page-scoped names; the
+   Classes were renamed from the generic .teacher-exam-statistics-charts-1/.teacher-exam-statistics-charts-2 to page-scoped names; the
    JS that emits them (teacher_exam_statistics_charts.js) was updated to match. */
 .sd-ai-quota-box { margin-top:12px; padding:8px 12px; background:#f0f9ff; border-radius:6px; font-size:13px; color:#1e40af; }
 .sd-ai-cached-bolt { color:#059669; }

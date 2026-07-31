@@ -109,7 +109,7 @@
                     {% if editing and form.instance.video %}
                         <div class="media-preview" data-current-video-preview>
                             <span class="media-preview-label">{% trans "label_current_video" context "exams.template.add_exam_question" %}:</span>
-                            <video controls class="c3-1" data-current-video>
+                            <video controls class="question-form-1" data-current-video>
                                 <source src="{{ form.instance.video|protected_media_url }}">
                             </video>
                             <button type="button" class="clear-media-btn" data-question-clear-media="video">
@@ -120,7 +120,7 @@
 
                     <div class="media-preview" data-new-video-preview hidden>
                         <span class="media-preview-label">{% trans "label_selected_video_preview" context "exams.template.add_exam_question" %}:</span>
-                        <video controls class="c3-1" data-new-video>
+                        <video controls class="question-form-1" data-new-video>
                             <source src="" data-new-video-source>
                         </video>
                     </div>

@@ -3,6 +3,7 @@
 import json
 import secrets
 
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature
@@ -75,16 +76,49 @@ def _ensure_auth_device_cookie(request, response):
 
 
 def _login_limit_keys(request, username):
+    """Login rate-limit vedrələri: ``(rate_spec, scope, *key_parts)`` siyahısı.
+
+    İKİ QAT:
+
+    * **Cihaz qatı** (`LOGIN_RATE_LIMIT`, dar — 5/10m) — imzalanmış cihaz
+      cookie-si üzərində. Universitet NAT-ı arxasındakı istifadəçilər bir-birini
+      bloklamasın deyə əsas qat budur.
+    * **İP qatı** (`LOGIN_IP_RATE_LIMIT`, geniş — 60/10m) — cookie-dən ASILI
+      DEYİL.
+
+    TƏHLÜKƏSİZLİK: yalnız cihaz qatı olsaydı, cookie göndərməyən klient üçün
+    ``_get_auth_device_id`` hər sorğuda təzə id yaradırdı → hər cəhd öz
+    vedrəsinə düşür və limit heç vaxt işə düşmür (brute-force tam açıq).
+    İP qatı bu yolu bağlayır, geniş həddi isə paylaşılan İP-ni qorumaqda davam
+    edir.
+    """
     device_id = _get_auth_device_id(request)
     normalized_username = normalize_rate_identity(username)
+    client_ip = (get_client_ip(request) or "unknown").strip().lower()
+    ip_key = f"ip:{client_ip}"
+    device_rate = settings.LOGIN_RATE_LIMIT
+    ip_rate = getattr(settings, "LOGIN_IP_RATE_LIMIT", device_rate)
     return [
-        (LOGIN_LIMIT_SCOPE_DEVICE, device_id),
-        (LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized_username),
+        # Dar: cihaz cookie-si (mövcud davranış — paylaşılan İP-də izolyasiya).
+        (device_rate, LOGIN_LIMIT_SCOPE_DEVICE, device_id),
+        (device_rate, LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized_username),
+        # Geniş: cookie-siz hücumu dayandıran İP qapısı.
+        (ip_rate, LOGIN_LIMIT_SCOPE_DEVICE, ip_key),
+        (ip_rate, LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized_username),
     ]
 
 
 def _clear_login_rate_limits_after_password_reset(request, user):
+    """Parol sıfırlandıqdan sonra hər iki açar ailəsini (İP + cihaz) təmizlə.
+
+    ``_login_limit_keys`` ilə simmetrik olmalıdır, əks halda istifadəçi parolu
+    sıfırlasa belə İP vedrəsi dolu qalıb girişi bloklayardı.
+    """
     device_id = _get_auth_device_id(request)
+    client_ip = (get_client_ip(request) or "unknown").strip().lower()
+    ip_key = f"ip:{client_ip}"
+
+    clear_rate_limit(LOGIN_LIMIT_SCOPE_DEVICE, ip_key)
     clear_rate_limit(LOGIN_LIMIT_SCOPE_DEVICE, device_id)
 
     identities = {
@@ -93,7 +127,9 @@ def _clear_login_rate_limits_after_password_reset(request, user):
     }
     for identity in identities:
         if identity:
-            clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalize_rate_identity(identity))
+            normalized = normalize_rate_identity(identity)
+            clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized)
+            clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized)
 
 
 def _authenticate_superadmin_for_rate_limit_reset(request, username, password):

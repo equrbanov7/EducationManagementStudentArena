@@ -79,18 +79,15 @@ def journal_xlsx(request, offering_id):
 
     Giriş jurnal detalı ilə eynidir: müəllim/org sahibi/superuser; kafedra/dekan
     yalnız təsdiqə göndərilmiş jurnalı görə bilər (DRAFT sızdırılmır)."""
-    from apps.registrar import approval, finals, gradebook, journal_export
-    from apps.registrar.models import ApprovalStatus, CourseOffering
+    from apps.registrar import approval, finals, gradebook, journal_access, journal_export
+    from apps.registrar.models import ApprovalStatus
     from apps.registrar.views import _can_edit_journal
 
-    offering = get_object_or_404(
-        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
-        pk=offering_id,
-    )
+    offering = journal_access.offering_or_404(request, offering_id)
     appr = approval.approval_context(offering=offering, user=request.user)
-    can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
-        request.user, offering.organization
-    )
+    can_review = approval.can_chair_approve(
+        request.user, offering.organization, offering=offering
+    ) or approval.can_dean_approve(request.user, offering.organization, offering=offering)
     if not _can_edit_journal(request.user, offering) and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
         raise Http404
 

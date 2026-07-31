@@ -23,9 +23,9 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
     <form method="get" action="{{ profile_base_url }}">
       <input type="hidden" name="section" value="kollokvium-windows">
       <div class="kw-field">
-        <label>{% trans "Təşkilat" context "registrar.kollokvium_window" %}</label>
+        <label for="kw-org-select">{% trans "Təşkilat" context "registrar.kollokvium_window" %}</label>
         <div class="bootstrap-single-select">
-          <select name="win_org" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+          <select id="kw-org-select" name="win_org" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
             {% for o in s.org_options %}
             <option value="{{ o.id }}" {% if s.selected_org and s.selected_org.id == o.id %}selected{% endif %}>{{ o.name }}</option>
             {% endfor %}
@@ -40,9 +40,9 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
       <input type="hidden" name="section" value="kollokvium-windows">
       {% if s.is_superadmin and s.selected_org %}<input type="hidden" name="win_org" value="{{ s.selected_org.id }}">{% endif %}
       <div class="kw-field">
-        <label>{% trans "Tədris ili" context "registrar.kollokvium_window" %}</label>
+        <label for="kw-year-select">{% trans "Tədris ili" context "registrar.kollokvium_window" %}</label>
         <div class="bootstrap-single-select">
-          <select name="win_year" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+          <select id="kw-year-select" name="win_year" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
             {% for y in s.years %}
             <option value="{{ y }}" {% if s.selected_year == y %}selected{% endif %}>{{ y }}</option>
             {% endfor %}
@@ -56,9 +56,9 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
       {% if s.is_superadmin and s.selected_org %}<input type="hidden" name="win_org" value="{{ s.selected_org.id }}">{% endif %}
       {% if s.selected_year %}<input type="hidden" name="win_year" value="{{ s.selected_year }}">{% endif %}
       <div class="kw-field">
-        <label>{% trans "Semestr" context "registrar.kollokvium_window" %}</label>
+        <label for="kw-period-select">{% trans "Semestr" context "registrar.kollokvium_window" %}</label>
         <div class="bootstrap-single-select">
-          <select name="period" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+          <select id="kw-period-select" name="period" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
             {% for p in s.periods %}
             <option value="{{ p.id }}" {% if s.period and s.period.id == p.id %}selected{% endif %}>{{ p.season_label }}{% if p.needs_disambig %} — {{ p.name }}{% endif %}</option>
             {% endfor %}
@@ -111,12 +111,12 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
         <div class="kw-dates">
           {% trans "Bitmiş semestr — tarix dəyişmək mümkün deyil" context "registrar.kollokvium_window" as kw_locked_title %}
           <div class="kw-field">
-            <label>{% trans "Açılış" context "registrar.kollokvium_window" %}</label>
-            <input type="date" name="opens_on" value="{% if kr.window %}{{ kr.window.opens_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
+            <label for="kw-opens-{{ kr.k_index }}">{% trans "Açılış" context "registrar.kollokvium_window" %}</label>
+            <input type="date" id="kw-opens-{{ kr.k_index }}" name="opens_on" value="{% if kr.window %}{{ kr.window.opens_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
           </div>
           <div class="kw-field">
-            <label>{% trans "Bağlanış" context "registrar.kollokvium_window" %}</label>
-            <input type="date" name="closes_on" value="{% if kr.window %}{{ kr.window.closes_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
+            <label for="kw-closes-{{ kr.k_index }}">{% trans "Bağlanış" context "registrar.kollokvium_window" %}</label>
+            <input type="date" id="kw-closes-{{ kr.k_index }}" name="closes_on" value="{% if kr.window %}{{ kr.window.closes_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
           </div>
         </div>
       </form>
@@ -233,7 +233,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
       <div class="kw-modal__info">{% trans "Əlavə gün müəllimlərin bal yazma son tarixini uzadır. Pəncərə tarixləri dəyişmir — yalnız son tarix uzanır. Sonradan yenidən əlavə gün verə bilərsiniz." context "registrar.kollokvium_window" %}</div>
 
       <div class="kw-modal__field">
-        <label>{% trans "Əhatə" context "registrar.kollokvium_window" %}</label>
+        <label for="kw-grant-scope">{% trans "Əhatə" context "registrar.kollokvium_window" %}</label>
         <div class="bootstrap-single-select">
           <select name="scope" id="kw-grant-scope" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
             <option value="organization">{% trans "Bütün universitet" context "registrar.kollokvium_window" %}</option>
@@ -244,7 +244,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
       </div>
 
       <div class="kw-modal__field" id="kw-grant-unit-wrap" style="display:none">
-        <label id="kw-grant-unit-label">{% trans "Bölmə" context "registrar.kollokvium_window" %}</label>
+        <label id="kw-grant-unit-label" for="kw-grant-unit">{% trans "Bölmə" context "registrar.kollokvium_window" %}</label>
         <div class="bootstrap-single-select">
           <select name="org_unit" id="kw-grant-unit" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
             <option value="">—</option>
@@ -253,7 +253,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
       </div>
 
       <div class="kw-modal__field">
-        <label>{% trans "Əlavə gün sayı" context "registrar.kollokvium_window" %}</label>
+        <label for="kw-grant-days">{% trans "Əlavə gün sayı" context "registrar.kollokvium_window" %}</label>
         <input type="number" name="extra_days" id="kw-grant-days" min="1" max="30" value="2">
       </div>
 

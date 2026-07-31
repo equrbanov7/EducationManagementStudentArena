@@ -35,11 +35,11 @@
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100 shadow-sm course-card">
                 <!-- Cover Image -->
-                <div class="course-cover c3-1">
+                <div class="course-cover student-courses-1">
                     {% with cover_image_url=item.course.cover_image_url %}
                         {% if cover_image_url %}
                             <img src="{{ cover_image_url }}" alt="{{ item.course.title }}" 
-                                 class="w-100 h-100 c3-2">
+                                 class="w-100 h-100 student-courses-2">
                         {% else %}
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center">
                                 <i class="fas fa-book fa-4x text-white opacity-50"></i>

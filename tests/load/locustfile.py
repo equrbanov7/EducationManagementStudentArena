@@ -47,6 +47,7 @@ Environment variables
 
 from __future__ import annotations
 
+import itertools
 import os
 import re
 
@@ -61,6 +62,43 @@ _PASSWORD: str = os.environ.get("LOAD_PASSWORD", "testpass123")
 _LIVE_PIN: str = os.environ.get("LOAD_LIVE_PIN", "AAAA111111")
 _COURSE_ID: str = os.environ.get("LOAD_COURSE_ID", "1")
 
+#: Hesab hovuzu. Boş olsa köhnə davranış qalır (hamı `LOAD_USERNAME` ilə girir).
+#:
+#: NİYƏ HOVUZ: minlərlə VU eyni hesabla girəndə ölçdüyümüz şey tətbiqin tutumu
+#: yox, HƏMİN BİR SƏTRİN üzərindəki yarışma olur — `last_login` UPDATE-i,
+#: sessiya yazısı və login throttle sayğacı eyni açarı döyür. Nəticə süni
+#: darboğazdır: server sağlam olsa belə rəqəmlər pisləşir. Hovuzla hər VU
+#: `stress0001…stressNNNN` kimi ayrıca hesab götürür — real imtahan günü
+#: mənzərəsi budur.
+_USER_PREFIX: str = os.environ.get("LOAD_USER_PREFIX", "")
+_USER_COUNT: int = int(os.environ.get("LOAD_USER_COUNT", "0") or 0)
+_USER_PAD: int = int(os.environ.get("LOAD_USER_PAD", "4") or 4)
+
+#: Hovuzdan növbəti hesabı verən sayğac. Locust worker-ləri AYRI prosesdir,
+#: ona görə hər worker öz hovuz zolağından başlasın deyə `LOAD_USER_OFFSET`
+#: worker başına fərqli verilir (workflow bunu avtomatik edir).
+_user_cursor = itertools.count(int(os.environ.get("LOAD_USER_OFFSET", "0") or 0))
+
+#: LAN prod-u SAN self-signed sertifikatla işləyir. Sertifikat yoxlaması yalnız
+#: `localhost`-a vuranda söndürülür (trafik maşından çıxmır) — kənar hədəfə
+#: heç vaxt yoxlamasız vurmuruq.
+_INSECURE_TLS: bool = os.environ.get("LOAD_INSECURE_TLS", "") == "1"
+
+if _INSECURE_TLS:
+    import urllib3
+
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+class _TlsAwareHttpUser(HttpUser):
+    """Sertifikat yoxlamasını `LOAD_INSECURE_TLS` ilə idarə edən baza sinfi."""
+
+    abstract = True
+
+    def on_start(self):
+        if _INSECURE_TLS:
+            self.client.verify = False
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -71,6 +109,41 @@ def _extract_csrf(html: str) -> str:
     """Extract the CSRF token value from a Django HTML form."""
     match = re.search(r'csrfmiddlewaretoken.*?value="([^"]+)"', html)
     return match.group(1) if match else ""
+
+
+def _next_credentials() -> tuple[str, str]:
+    """Bu VU üçün istifadəçi adı/parol — hovuz varsa növbəti hesab."""
+    if not (_USER_PREFIX and _USER_COUNT):
+        return _USERNAME, _PASSWORD
+    index = next(_user_cursor) % _USER_COUNT
+    return f"{_USER_PREFIX}{index + 1:0{_USER_PAD}d}", _PASSWORD
+
+
+def _login(user, label: str) -> None:
+    """Login axını — CSRF al, POST et, nəticəni AÇIQ yoxla.
+
+    `catch_response` olmadan Django login POST-u 200 qaytarır (formu səhv
+    etimadnamə ilə yenidən göstərir) və locust bunu UĞUR sayır. Onda yük testi
+    «hər şey yaşıl» deyir, halbuki heç kim daxil ola bilməyib. Ona görə
+    yönləndirmə olub-olmadığını yoxlayırıq.
+    """
+    username, password = _next_credentials()
+    resp = user.client.get("/accounts/login/", name=f"{label} Login GET")
+    csrf = _extract_csrf(resp.text)
+    with user.client.post(
+        "/accounts/login/",
+        data={"username": username, "password": password, "csrfmiddlewaretoken": csrf},
+        headers={"Referer": user.host + "/accounts/login/"},
+        name=f"{label} Login POST",
+        catch_response=True,
+        allow_redirects=False,
+    ) as post:
+        if post.status_code in (301, 302):
+            post.success()
+        elif post.status_code == 200:
+            post.failure("giriş formu geri qayıtdı — etimadnamə qəbul edilmədi")
+        else:
+            post.failure(f"gözlənilməz status: {post.status_code}")
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +167,7 @@ class PingUser(FastHttpUser):
                 resp.failure(f"Expected 200, got {resp.status_code}")
 
 
-class AnonymousUser(HttpUser):
+class AnonymousUser(_TlsAwareHttpUser):
     """Simulates an unauthenticated visitor browsing public pages."""
 
     wait_time = between(1, 3)
@@ -114,26 +187,14 @@ class AnonymousUser(HttpUser):
                 resp.failure(f"Health check failed: {resp.status_code}")
 
 
-class StudentUser(HttpUser):
+class StudentUser(_TlsAwareHttpUser):
     """Simulates an authenticated student: login → dashboard → courses."""
 
     wait_time = between(1, 4)
 
     def on_start(self):
-        """Log in before running tasks."""
-        # Fetch login page to obtain CSRF token
-        resp = self.client.get("/accounts/login/")
-        csrf = _extract_csrf(resp.text)
-        self.client.post(
-            "/accounts/login/",
-            data={
-                "username": _USERNAME,
-                "password": _PASSWORD,
-                "csrfmiddlewaretoken": csrf,
-            },
-            headers={"Referer": self.host + "/accounts/login/"},
-            name="[student] Login POST",
-        )
+        super().on_start()
+        _login(self, "[student]")
 
     @task(5)
     def dashboard(self):
@@ -141,42 +202,41 @@ class StudentUser(HttpUser):
 
     @task(3)
     def course_list(self):
-        self.client.get("/courses/", name="[student] Course list")
+        # `/courses/` marşrutu YOXDUR (kök URL təyin olunmayıb) — siyahı
+        # `/courses/my-courses/`-dadır. Köhnə yazılış hər sorğuda 404 alırdı və
+        # yük testi «%88 uğursuz» göstərirdi: rəqəm tətbiqin deyil, ssenarinin
+        # qüsuru idi.
+        self.client.get("/courses/my-courses/", name="[student] Course list")
 
     @task(2)
     def course_dashboard(self):
-        self.client.get(f"/courses/{_COURSE_ID}/", name="[student] Course detail")
+        if not _COURSE_ID or _COURSE_ID == "0":
+            return  # kurs ID verilməyibsə bu addımı buraxırıq (saxta 404 yaratmasın)
+        self.client.get(f"/courses/{_COURSE_ID}/dashboard/", name="[student] Course detail")
 
     @task(1)
     def notifications(self):
         self.client.get("/notifications/", name="[student] Notifications")
 
     def on_stop(self):
+        # CSRF cookie-dən oxunur. Boş token göndərmək 403 verirdi — Django
+        # cookie ilə YANAŞI formada da token tələb edir.
         self.client.post(
             "/accounts/logout/",
-            data={"csrfmiddlewaretoken": ""},  # CSRF handled by cookie
+            data={"csrfmiddlewaretoken": self.client.cookies.get("csrftoken", "")},
+            headers={"Referer": self.host + "/"},
             name="[student] Logout",
         )
 
 
-class LiveExamJoiner(HttpUser):
+class LiveExamJoiner(_TlsAwareHttpUser):
     """Simulates a student joining a live exam session by PIN."""
 
     wait_time = between(0.5, 2)
 
     def on_start(self):
-        resp = self.client.get("/accounts/login/")
-        csrf = _extract_csrf(resp.text)
-        self.client.post(
-            "/accounts/login/",
-            data={
-                "username": _USERNAME,
-                "password": _PASSWORD,
-                "csrfmiddlewaretoken": csrf,
-            },
-            headers={"Referer": self.host + "/accounts/login/"},
-            name="[live] Login",
-        )
+        super().on_start()
+        _login(self, "[live]")
 
     @task(10)
     def join_session(self):
@@ -198,7 +258,7 @@ class LiveExamJoiner(HttpUser):
         )
 
 
-class LiveExamPlayer(HttpUser):
+class LiveExamPlayer(_TlsAwareHttpUser):
     """Simulates a player already in a live session polling for state updates.
 
     Models the JavaScript polling loop that calls /api/v1/live/<pin>/state/
@@ -209,18 +269,8 @@ class LiveExamPlayer(HttpUser):
     wait_time = between(0.5, 1.0)  # ~60–120 req/min per user
 
     def on_start(self):
-        resp = self.client.get("/accounts/login/")
-        csrf = _extract_csrf(resp.text)
-        self.client.post(
-            "/accounts/login/",
-            data={
-                "username": _USERNAME,
-                "password": _PASSWORD,
-                "csrfmiddlewaretoken": csrf,
-            },
-            headers={"Referer": self.host + "/accounts/login/"},
-            name="[player] Login",
-        )
+        super().on_start()
+        _login(self, "[player]")
 
     @task
     def poll_state(self):
@@ -238,7 +288,7 @@ class LiveExamPlayer(HttpUser):
                 resp.failure(f"Unexpected status {resp.status_code}")
 
 
-class AnswerSubmitter(HttpUser):
+class AnswerSubmitter(_TlsAwareHttpUser):
     """Simulates a player submitting answers during a live exam.
 
     The live exam answer endpoint is WebSocket-based in production; this
@@ -250,13 +300,18 @@ class AnswerSubmitter(HttpUser):
     wait_time = between(10, 30)  # Players answer every 10–30 s per question
 
     def on_start(self):
+        super().on_start()
+        # Bu sinif `_login()`-dən istifadə ETMİR: sonrakı mutasiya sorğuları
+        # üçün login CAVABININ gövdəsindən CSRF çıxarır, `_login()` isə
+        # `allow_redirects=False` ilə işləyir və gövdə boş qalır.
+        username, password = _next_credentials()
         resp = self.client.get("/accounts/login/")
         csrf = _extract_csrf(resp.text)
         login_resp = self.client.post(
             "/accounts/login/",
             data={
-                "username": _USERNAME,
-                "password": _PASSWORD,
+                "username": username,
+                "password": password,
                 "csrfmiddlewaretoken": csrf,
             },
             headers={"Referer": self.host + "/accounts/login/"},
@@ -303,3 +358,38 @@ def _print_summary(environment, **kwargs):
         f"  p95_ms={stats.get_response_time_percentile(0.95)}"
         f"  rps={stats.total_rps:.1f}"
     )
+
+
+class ProfileSpaUser(_TlsAwareHttpUser):
+    """Profil SPA — müəllim/imtahan mərkəzi işçisinin əsl gündəlik axını.
+
+    Bu sinif audit zamanı əlavə olundu: «İmtahanlarım» bölməsi səhifələndi və
+    KPI kartları ayrıca aqreqat sorğulara keçirildi. Həmin dəyişikliyin yük
+    altında da qazanc verdiyini görmək üçün fraqment endpoint-i birbaşa vurulur
+    — istifadəçi bölmələr arasında keçəndə brauzer məhz bunu çağırır.
+    """
+
+    wait_time = between(1, 3)
+
+    def on_start(self):
+        super().on_start()
+        _login(self, "[profile]")
+
+    @task(4)
+    def my_exams(self):
+        self.client.get("/accounts/profile/api/sections/my-exams/", name="[profile] my-exams fraqment")
+
+    @task(2)
+    def my_exams_page_two(self):
+        self.client.get(
+            "/accounts/profile/api/sections/my-exams/?exam_page=2",
+            name="[profile] my-exams səhifə 2",
+        )
+
+    @task(2)
+    def my_courses(self):
+        self.client.get("/accounts/profile/api/sections/my-courses/", name="[profile] my-courses fraqment")
+
+    @task(1)
+    def full_page(self):
+        self.client.get("/accounts/profile/", name="[profile] tam səhifə")

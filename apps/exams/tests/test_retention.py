@@ -137,3 +137,60 @@ class ExamRetentionTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Exam.objects.filter(pk=self.exam.pk).exists())
         self.assertTrue(AuditLog.objects.filter(reason="empty_exam_permanently_deleted").exists())
+
+    def test_delete_exam_get_renders_confirmation_instead_of_500(self):
+        """Silmə linki `<a href>`-dir: JS sınsa/yeni tabda açılsa GET gəlir.
+
+        Əvvəllər view mövcud olmayan ``confirm_delete_exam.html`` şablonunu
+        render etməyə çalışırdı və istifadəçi TemplateDoesNotExist (500) alırdı.
+        """
+        response = self.client.get(reverse("exams:delete_exam", args=[self.exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "exams/teacher/confirm_delete.html")
+        # Təsdiq POST-a getməlidir — GET heç nə silməməlidir.
+        self.exam.refresh_from_db()
+        self.assertFalse(self.exam.is_deleted)
+
+    def test_delete_question_get_renders_confirmation_instead_of_500(self):
+        response = self.client.get(reverse("exams:delete_exam_question", args=[self.exam.slug, self.question.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "exams/teacher/confirm_delete.html")
+        self.assertTrue(ExamQuestion.objects.filter(pk=self.question.pk).exists())
+
+    def _trash_page(self):
+        self.exam.is_deleted = True
+        self.exam.deleted_at = self.exam.created_at
+        self.exam.save(update_fields=["is_deleted", "deleted_at"])
+        return self.client.get(reverse("exams:deleted_exams_list"))
+
+    def test_trash_offers_permanent_delete_only_for_exam_without_attempts(self):
+        response = self._trash_page()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "js-purge-exam")
+
+    def test_trash_hides_permanent_delete_when_attempt_history_exists(self):
+        """UI backend qaydası ilə uyğun olmalıdır.
+
+        ``permanently_delete_exam_without_history`` bir cəhd varsa
+        ``AcademicHistoryProtected`` atır — düymə şərtsiz göstərilsəydi,
+        istifadəçi «hamısı silinəcək» təsdiqindən sonra anlaşılmaz xəta alardı.
+        """
+        self._attempt()
+
+        response = self._trash_page()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "js-purge-exam")
+
+    def test_trash_page_has_no_csp_blocked_inline_confirm(self):
+        """Təsdiq inline `onsubmit` ilə deyil, xarici JS + modalla olmalıdır.
+
+        CSP `script-src` üçün `unsafe-inline`/`unsafe-hashes` vermir, ona görə
+        inline atribut icra olunmur və silmə təsdiqsiz gedirdi.
+        """
+        response = self._trash_page()
+
+        self.assertNotContains(response, "onsubmit=")

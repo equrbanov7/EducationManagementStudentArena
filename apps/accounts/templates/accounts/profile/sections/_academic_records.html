@@ -23,38 +23,38 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
     </div>
 
     <div class="acr-filters">
-      <div class="acr-field">
-        <label>{% trans "Fakültə" context "registrar.records" %}</label>
+      <div class="acr-field" role="group" aria-labelledby="acr-faculty-label">
+        <label id="acr-faculty-label">{% trans "Fakültə" context "registrar.records" %}</label>
         {% trans "fakültə axtar…" as acr_faculty_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-faculty" placeholder=acr_faculty_ph %}
       </div>
-      <div class="acr-field">
-        <label>{% trans "Kafedra" context "registrar.records" %}</label>
+      <div class="acr-field" role="group" aria-labelledby="acr-department-label">
+        <label id="acr-department-label">{% trans "Kafedra" context "registrar.records" %}</label>
         {% trans "kafedra axtar…" as acr_dept_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-department" placeholder=acr_dept_ph %}
       </div>
-      <div class="acr-field">
-        <label>{% trans "İxtisas" context "registrar.records" %}</label>
+      <div class="acr-field" role="group" aria-labelledby="acr-program-label">
+        <label id="acr-program-label">{% trans "İxtisas" context "registrar.records" %}</label>
         {% trans "ixtisas axtar…" as acr_program_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-program" placeholder=acr_program_ph %}
       </div>
-      <div class="acr-field">
-        <label>{% trans "Qrup" context "registrar.records" %}</label>
+      <div class="acr-field" role="group" aria-labelledby="acr-group-label">
+        <label id="acr-group-label">{% trans "Qrup" context "registrar.records" %}</label>
         {% trans "qrup axtar…" as acr_group_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-group" placeholder=acr_group_ph %}
       </div>
       <div class="acr-field">
-        <label>{% trans "Tədris ili" context "registrar.records" %}</label>
+        <label for="acr-year">{% trans "Tədris ili" context "registrar.records" %}</label>
         <div class="bootstrap-single-select">
-          <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-year" data-bootstrap-select>
+          <select id="acr-year" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-year" data-bootstrap-select>
             <option value="">{% trans "Hamısı" context "registrar.records" %}</option>
           </select>
         </div>
       </div>
       <div class="acr-field">
-        <label>{% trans "Semestr" context "registrar.records" %}</label>
+        <label for="acr-season">{% trans "Semestr" context "registrar.records" %}</label>
         <div class="bootstrap-single-select">
-          <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-season" data-bootstrap-select>
+          <select id="acr-season" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-season" data-bootstrap-select>
             <option value="">{% trans "Hamısı" context "registrar.records" %}</option>
             <option value="Payız">{% trans "Payız" context "registrar.records" %}</option>
             <option value="Yaz">{% trans "Yaz" context "registrar.records" %}</option>
@@ -62,13 +62,15 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
           </select>
         </div>
       </div>
-      <div class="acr-field acr-field--student">
-        <label>{% trans "Tələbə" context "registrar.records" %}</label>
+      <div class="acr-field acr-field--student" role="group" aria-labelledby="acr-student-label">
+        <label id="acr-student-label">{% trans "Tələbə" context "registrar.records" %}</label>
         {% trans "tələbə axtar…" as acr_student_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-student" placeholder=acr_student_ph %}
       </div>
       <div class="acr-field acr-field--reset">
-        <label>&nbsp;</label>
+        {% comment %}Yalnız düymənin şaquli düzülüşü üçün boş yer saxlayıcı — mətn
+        daşımır, ona görə ekran oxuyucudan gizlədilir.{% endcomment %}
+        <label aria-hidden="true">&nbsp;</label>
         <button type="button" class="acr-reset js-acr-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" context "registrar.records" %}</button>
       </div>
     </div>

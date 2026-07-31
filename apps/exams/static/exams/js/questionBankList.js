@@ -35,10 +35,59 @@
     });
   }
 
+  // Axtarışlı fənn/müəllim seçiciləri (EMSSearchableSelect) — yaratma kartı və
+  // edit modalı. Hər seçici yanındakı hidden inputa dəyərini yazır; komponent
+  // ikiqat init-ə qarşı özü qorunur (rootEl._emsSearchable).
+  function bindPicker(pickerEl, url, hiddenInput) {
+    if (!pickerEl || !url || !hiddenInput || !window.EMSSearchableSelect) return null;
+    var pick = window.EMSSearchableSelect.create(pickerEl, { url: url });
+    if (!pick) return null;
+    pick.on("change", function () { hiddenInput.value = pick.value(); });
+    return pick;
+  }
+
+  function initCreateCardPickers(root) {
+    var card = root.querySelector(".js-qb-create-card");
+    if (!card) return;
+    var form = card.querySelector(".js-qb-create-form");
+    if (!form) return;
+    bindPicker(card.querySelector(".js-qbk-subject"), card.getAttribute("data-subject-url"),
+      form.querySelector("[data-qbk-subject-input]"));
+    bindPicker(card.querySelector(".js-qbk-teacher"), card.getAttribute("data-teacher-url"),
+      form.querySelector("[data-qbk-teacher-input]"));
+  }
+
+  function initEditModalPickers() {
+    var editForm = document.getElementById("editBankForm");
+    if (!editForm) return { subject: null, teacher: null };
+    return {
+      subject: bindPicker(editForm.querySelector(".js-qbk-edit-subject"),
+        editForm.getAttribute("data-subject-url"), editForm.querySelector("[data-qbk-subject-input]")),
+      teacher: bindPicker(editForm.querySelector(".js-qbk-edit-teacher"),
+        editForm.getAttribute("data-teacher-url"), editForm.querySelector("[data-qbk-teacher-input]"))
+    };
+  }
+
+  // Modal açılanda seçicini bankın cari dəyəri ilə doldur. Köhnə sərbəst-mətn
+  // fənn (kataloq id-siz) "text:<ad>" xüsusi id-si ilə saxlanır — server bu
+  // dəyəri mətn kimi qoruyur (bax crud._resolve_bank_subject).
+  function presetPicker(pick, hiddenInput, id, label, legacyPrefix) {
+    if (!pick || !hiddenInput) return;
+    pick.reset();
+    hiddenInput.value = "";
+    if (id) {
+      pick.setValue(id, label || id);
+    } else if (label && legacyPrefix) {
+      pick.setValue(legacyPrefix + label, label);
+    }
+  }
+
   function initQuestionBankList(root) {
     root = root && typeof root.querySelectorAll === "function" ? root : document;
 
     initQuestionBankSearch(root);
+    initCreateCardPickers(root);
+    var editPickers = initEditModalPickers();
 
     root.querySelectorAll(".js-edit-bank").forEach(function (btn) {
       if (btn.getAttribute("data-qb-list-ready") === "1") return;
@@ -61,12 +110,14 @@
         };
 
         set("editBankName2", btn.getAttribute("data-name") || "");
-        set("editBankSubject2", btn.getAttribute("data-subject") || "");
+        set("editBankKind2", btn.getAttribute("data-kind") || "");
         set("editBankLanguage2", btn.getAttribute("data-language") || "");
         set("editBankFormat2", btn.getAttribute("data-format") || "test");
 
-        var shared = document.getElementById("editBankShared2");
-        if (shared) shared.checked = btn.getAttribute("data-shared") === "1";
+        presetPicker(editPickers.subject, editForm.querySelector("[data-qbk-subject-input]"),
+          btn.getAttribute("data-subject-id") || "", btn.getAttribute("data-subject-label") || "", "text:");
+        presetPicker(editPickers.teacher, editForm.querySelector("[data-qbk-teacher-input]"),
+          btn.getAttribute("data-teacher-id") || "", btn.getAttribute("data-teacher-label") || "", "");
 
         var modalEl = document.getElementById("editBankModal");
         if (typeof bootstrap !== "undefined" && modalEl) {

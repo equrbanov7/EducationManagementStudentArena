@@ -231,48 +231,41 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     request.path_info = _canonical_profile_path
     request.META["QUERY_STRING"] = mutable_get.urlencode()
 
-    # Import lazily to avoid circular import (sections_api -> main -> sections_api).
-    from .main import user_profile
-
-    # We want user_profile to run its context builder, then we render only
-    # the partial. Easiest way: monkey-render. user_profile returns a
-    # TemplateResponse-like HttpResponse from `render(...)` (already rendered).
-    # We instead intercept by capturing the context — but `render(...)` does
-    # not expose the context. So we re-implement just the part we need:
+    # Context yığımı tam profil view-i ilə EYNİ kod yolundan keçir (icazə,
+    # tenant, RLS, axtarış, filtr, səhifələmə davranışı dəyişmir), lakin render
+    # YALNIZ bölmənin öz partial-ına tətbiq olunur.
     #
-    # Call user_profile and let it produce the full HttpResponse, then
-    # we re-render the partial with the request context that includes the
-    # same template variables. Simplest robust approach: re-execute the
-    # context builder via the same code path by calling user_profile and
-    # discarding its rendered HTML, while reusing the request state it
-    # mutates. However that costs the full render time.
-    #
-    # The cleanest, lowest-risk approach for P3.1: render the partial through
-    # `render_to_string` after running user_profile's context builder by
-    # invoking it once with a sentinel. To keep the change minimal we add a
-    # public hook in `main`: `build_profile_context(request)` (see comment in
-    # main.py). For backward safety, until that hook exists we fall back to
-    # calling user_profile and returning its full HTML — the JS will swap
-    # only the relevant DOM node.
-    response = user_profile(request)
+    # ƏVVƏL: bu endpoint `user_profile(request)` çağırıb BÜTÜN səhifəni
+    # (navbar + sidebar + footer + ~90 asset teqi) render edir, JSON-a bükür və
+    # frontend oradan bir DOM node-u çıxarırdı — yəni hər bölmə dəyişməsində tam
+    # səhifə render olunurdu. Kodun öz şərhi bunu müvəqqəti geri düşmə kimi
+    # qeyd edib və `build_profile_context` hook-unu tələb edirdi; hook indi var.
+    from django.template.loader import render_to_string
 
-    # If user_profile produced an HttpResponseRedirect (POST-redirect-get flow
-    # is impossible here because we require GET, but defensive).
-    if getattr(response, "status_code", 200) >= 300 and getattr(response, "status_code", 200) < 400:
-        return JsonResponse(
-            {"ok": False, "error": "redirect_required", "location": response.get("Location", "")},
-            status=409,
-        )
+    from .context_builder.builder import build_profile_context
 
-    # The full-page response already contains only the active section partial
-    # because P1's profile.html switch statement renders just one panel.
-    # The frontend's job is to extract `[data-profile-section-panel="<section>"]`
-    # from the response body. For a cleaner API we wrap it in JSON.
+    early_response, context = build_profile_context(request)
+
+    if early_response is not None:
+        status = getattr(early_response, "status_code", 200)
+        if 300 <= status < 400:
+            return JsonResponse(
+                {"ok": False, "error": "redirect_required", "location": early_response.get("Location", "")},
+                status=409,
+            )
+        return JsonResponse({"ok": False, "error": "unavailable"}, status=status if status >= 400 else 409)
+
+    # Bölmə context yığıldıqdan sonra da icazəli olmalıdır: `allowed_sections`
+    # aktiv təşkilat kontekstindən asılıdır və `_ensure_section_allowed`
+    # yoxlaması ondan ƏVVƏL işləyir.
+    if section not in set(context.get("allowed_sections") or ()):
+        return JsonResponse({"ok": False, "error": "forbidden_or_unknown_section"}, status=403)
+
     try:
-        html_bytes = response.content
-        html = html_bytes.decode(response.charset or "utf-8")
+        html = render_to_string(SECTION_PARTIALS[section], context, request=request)
     except Exception:  # noqa: BLE001 — defensive
-        html = ""
+        logger.exception("profile section fragment render failed: %s", section)
+        return JsonResponse({"ok": False, "error": "render_failed"}, status=500)
 
     return JsonResponse(
         {

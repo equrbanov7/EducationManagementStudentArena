@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part2.css' %}?v=20260607-management">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
 {% endblock %}
 
 {% block content %}
@@ -19,6 +20,7 @@
             <p>
                 <i class="fas fa-user"></i> {{ submission.teacher.get_full_name|default:submission.teacher.username }}
                 &nbsp;·&nbsp; <i class="fas fa-book"></i> {{ submission.subject }}
+                {% if submission.exam_kind %}&nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> {{ submission.get_exam_kind_display }}{% endif %}
                 &nbsp;·&nbsp; <i class="fas fa-users"></i> {{ submission.group_label }}
                 &nbsp;·&nbsp; <i class="fas fa-globe"></i> {{ submission.get_language_display }}
                 &nbsp;·&nbsp; <i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}
@@ -29,9 +31,18 @@
                 <i class="fas fa-arrow-left"></i> {% trans "Göndərişlərə qayıt" context "exams.template.question_submission" %}
             </a>
             {% if submission.accepted_bank %}
+            {% if submission.accepted_bank.is_active %}
             <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="qb-btn qb-btn-teal">
                 <i class="fas fa-layer-group"></i> {{ submission.accepted_bank.name }}
             </a>
+            {% else %}
+            {# Bank sonradan silinib/deaktiv edilib — link 404 verməsin. #}
+            <span class="qb-btn qb-btn-light qsubd-bank-gone"
+                  title="{% trans 'Bu bank artıq mövcud deyil.' context 'exams.template.question_submission' %}">
+                <i class="fas fa-layer-group"></i> {{ submission.accepted_bank.name }}
+                <em>({% trans "silinib" context "exams.template.question_submission" %})</em>
+            </span>
+            {% endif %}
             {% endif %}
         </div>
     </header>
@@ -150,11 +161,11 @@
                                 class="form-select bootstrap-single-select__native js-qsubr-bank" data-bootstrap-select>
                             <option value="">{% trans "— Yeni bank yaradılsın —" context "exams.template.question_submission" %}</option>
                             {% for bank in banks %}
-                            <option value="{{ bank.id }}">{{ bank.name }}{% if bank.subject %} ({{ bank.subject }}){% endif %}</option>
+                            <option value="{{ bank.id }}">{% if bank.match_rank < 3 %}★ {% endif %}{{ bank.name }}{% if bank.subject_label %} ({{ bank.subject_label }}{% if bank.exam_kind %} · {{ bank.get_exam_kind_display }}{% endif %}){% elif bank.exam_kind %} ({{ bank.get_exam_kind_display }}){% endif %}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <span class="qsubm-hint">{% trans "Boş saxlasanız suallar yeni banka yazılacaq." context "exams.template.question_submission" %}</span>
+                    <span class="qsubm-hint">{% trans "Boş saxlasanız suallar göndərişin fənni və imtahan növü ilə yeni banka yazılacaq. ★ — fənnə/növə uyğun banklar." context "exams.template.question_submission" %}</span>
                 </div>
                 <div class="qsubm-field qsubm-field--title js-qsubr-newbank">
                     <label for="qsubNewBank">{% trans "Yeni bankın adı" context "exams.template.question_submission" %} <span class="qsubm-optional">{% trans "(boşdursa başlıq götürülür)" context "exams.template.question_submission" %}</span></label>
@@ -199,11 +210,55 @@
     {% endif %}
 
     <h2 class="qsubd-section-title"><i class="fas fa-list-check"></i> {% trans "Suallar və xəbərdarlıqlar" context "exams.template.question_submission" %}</h2>
-    {% include "exams/teacher/partials/_question_submission_preview.html" with questions=parsed_questions counts=None %}
+    {# Lazy siyahı: ilkin səhifə server-render, qalanı fraqment endpoint-dən. #}
+    <div class="qsubq js-qsubq"
+         data-questions-url="{% url 'exams:question_submission_questions' submission.id %}"
+         data-page-size="{{ questions_page_size }}"
+         data-has-more="{% if questions_has_more %}1{% else %}0{% endif %}">
+        <div class="qsubq-toolbar">
+            <div class="qsubq-search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search" class="js-qsubq-search"
+                       placeholder="{% trans 'Sual və ya variant mətnində axtar…' context 'exams.template.question_submission' %}"
+                       aria-label="{% trans 'Suallarda axtar' context 'exams.template.question_submission' %}"
+                       autocomplete="off">
+            </div>
+            <div class="qsubq-pills" role="group" aria-label="{% trans 'Sual filtri' context 'exams.template.question_submission' %}">
+                <button type="button" class="qsubq-pill is-active" data-flag="" aria-pressed="true">
+                    {% trans "Hamısı" context "exams.template.question_submission" %}
+                    <span class="qsubq-pill__count" data-count-key="all">{{ question_flag_counts.all }}</span>
+                </button>
+                <button type="button" class="qsubq-pill qsubq-pill--error" data-flag="error" aria-pressed="false">
+                    <i class="fas fa-circle-xmark"></i> {% trans "Xətalı" context "exams.template.question_submission" %}
+                    <span class="qsubq-pill__count" data-count-key="error">{{ question_flag_counts.error }}</span>
+                </button>
+                <button type="button" class="qsubq-pill qsubq-pill--warning" data-flag="warning" aria-pressed="false">
+                    <i class="fas fa-triangle-exclamation"></i> {% trans "Xəbərdarlıq" context "exams.template.question_submission" %}
+                    <span class="qsubq-pill__count" data-count-key="warning">{{ question_flag_counts.warning }}</span>
+                </button>
+                <button type="button" class="qsubq-pill qsubq-pill--clean" data-flag="clean" aria-pressed="false">
+                    <i class="fas fa-circle-check"></i> {% trans "Təmiz" context "exams.template.question_submission" %}
+                    <span class="qsubq-pill__count" data-count-key="clean">{{ question_flag_counts.clean }}</span>
+                </button>
+            </div>
+        </div>
+        <ol class="qsubp-list js-qsubq-list">
+            {% include "exams/teacher/partials/_question_submission_preview_items.html" with questions=parsed_questions %}
+        </ol>
+        <div class="qsubq-empty js-qsubq-empty" hidden>
+            <i class="fas fa-filter-circle-xmark"></i>
+            {% trans "Bu şərtlərə uyğun sual tapılmadı." context "exams.template.question_submission" %}
+        </div>
+        <button type="button" class="qsubq-more js-qsubq-sentinel"{% if not questions_has_more %} hidden{% endif %}>
+            <span class="qsubq-spinner" aria-hidden="true"></span>
+            {% trans "Daha çox yüklənir…" context "exams.template.question_submission" %}
+        </button>
+    </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
 <script src="{% static 'exams/js/question_submission_review.js' %}?v=20260717-decision" defer></script>
+<script src="{% static 'exams/js/question_submission_review_questions.js' %}?v=20260731-lazy" defer></script>
 {% endblock %}

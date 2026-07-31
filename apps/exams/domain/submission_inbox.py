@@ -20,7 +20,11 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
-from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
+from apps.exams.constants import (
+    DEFAULT_EXAM_LANGUAGE,
+    EXAM_LANGUAGE_CHOICES,
+    QUESTION_EXAM_KIND_CHOICES,
+)
 
 User = settings.AUTH_USER_MODEL
 
@@ -58,6 +62,25 @@ class QuestionSubmission(models.Model):
         max_length=200,
         default="",
         verbose_name=pgettext_lazy("exams.model.question_submission.field", "subject"),
+    )
+    # Fənn kataloq bağlantısı (registrar.Subject) — müəllimin ÖZ fənlərindən
+    # seçilir; `subject` (ad) görünüş/geriyə-uyğunluq üçün sinxron saxlanır.
+    subject_ref = models.ForeignKey(
+        "registrar.Subject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="question_submissions",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "subject_ref"),
+    )
+    # Suallar hansı imtahan növü üçün göndərilir (final/midterm/quiz) — qəbul
+    # zamanı bank bu təyinatla yaradılır. Yeni göndərişlərdə view məcburi edir.
+    exam_kind = models.CharField(
+        max_length=20,
+        choices=QUESTION_EXAM_KIND_CHOICES,
+        blank=True,
+        default="",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "exam_kind"),
     )
     # Hansı qrup üçündür. FK müəllimin seçdiyi qrupdursa dolur; qrup siyahıda
     # yoxdursa sərbəst mətn `group_label`-də saxlanır (akademik struktur

@@ -9,6 +9,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion
@@ -319,11 +320,22 @@ def delete_exam_question(request, slug, question_id):
             )
         )
 
+    # JS-siz geri düşmə (bax exams/teacher/confirm_delete.html şərhinə).
+    detail_url = _append_navigation_query(
+        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+        navigation_query,
+    )
     return render(
         request,
-        "exams/teacher/confirm_delete_question.html",
+        "exams/teacher/confirm_delete.html",
         {
-            "exam": exam,
-            "question": question,
+            "confirm_title": pgettext("exams.view.questions.confirm", "delete_question_title"),
+            "confirm_message": pgettext("exams.view.questions.confirm", "delete_question_message"),
+            "confirm_target": question.text,
+            "confirm_action": reverse(
+                "exams:delete_exam_question",
+                kwargs={"slug": exam.slug, "question_id": question.id},
+            ),
+            "cancel_url": detail_url,
         },
     )

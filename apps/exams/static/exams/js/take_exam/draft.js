@@ -346,7 +346,7 @@
                             }
                             if (data.error === "question_timer_not_started") {
                                 ns.notifications.show(
-                                    data.message || "Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır.",
+                                    data.message || gettext("Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır."),
                                     "error",
                                     8000
                                 );
@@ -376,7 +376,7 @@
                                 });
                             }
                             ns.notifications.show(
-                                data.message || ctx.i18n.autosaveConflict || "Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin.",
+                                data.message || ctx.i18n.autosaveConflict || gettext("Bu imtahan başqa tabda yenilənib. Səhifəni yeniləyin."),
                                 "error",
                                 8000
                             );

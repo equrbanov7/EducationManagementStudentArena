@@ -97,8 +97,8 @@
                 {% endif %}
                 {% if teacher_groups %}
                 <div class="sd-filter-field sd-filter-field--full">
-                    <label>{% trans "filter_compare_groups" context "exams.template.exam_statistics" %}</label>
-                    <div class="sd-check-row">
+                    <label id="filter-compare-groups-label">{% trans "filter_compare_groups" context "exams.template.exam_statistics" %}</label>
+                    <div class="sd-check-row" role="group" aria-labelledby="filter-compare-groups-label">
                         {% for g in teacher_groups %}
                             <label class="sd-check-label">
                                 <input type="checkbox" name="compare_groups" value="{{ g.id }}"

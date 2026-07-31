@@ -229,4 +229,4 @@
 .lab-alert-danger-soft { background-color: var(--ems-danger-100); border: 2px dashed var(--ems-danger-200); }
 
 /* C3: mikro inline-stil köçürməsi (lab_detail.html progress bar) */
-.c3-1 { width: 0%; }
+.lab-detail-1 { width: 0%; }

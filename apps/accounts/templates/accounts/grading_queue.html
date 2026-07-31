@@ -162,7 +162,7 @@
                                         step="0.01"
                                         required
                                     >
-                                    <span class="c3-1">/ {{ submission.assignment.max_score|default:100 }}</span>
+                                    <span class="grading-queue-1">/ {{ submission.assignment.max_score|default:100 }}</span>
                                 </div>
                                 <textarea 
                                     class="feedback-input" 
@@ -212,7 +212,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <pre id="submissionPreviewContent" class="mb-0 c3-2"></pre>
+                <pre id="submissionPreviewContent" class="mb-0 grading-queue-2"></pre>
             </div>
         </div>
     </div>

@@ -240,6 +240,8 @@ class LoginViewTest(TestCase):
     CACHES=LOCMEM_CACHE_SETTINGS,
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     LOGIN_RATE_LIMIT="2/1m",
+    # İP qatı qəsdən daha genişdir (kampus NAT-ı) — testdə də bu nisbət saxlanılır.
+    LOGIN_IP_RATE_LIMIT="10/1m",
 )
 class LoginRateLimitTest(TestCase):
     def setUp(self):
@@ -306,6 +308,48 @@ class LoginRateLimitTest(TestCase):
         )
         self.assertEqual(peer_response.status_code, 302)
         self.assertTrue(peer_response.wsgi_request.user.is_authenticated)
+
+    def test_cookieless_client_cannot_bypass_login_throttle(self):
+        """P0 reqressiya: cookie GÖNDƏRMƏYƏN klient limitə düşməlidir.
+
+        Əvvəl hər iki vedrə yalnız cihaz cookie-si üzərində qurulurdu; cookie
+        yoxdursa `_get_auth_device_id` hər sorğuda TƏZƏ id yaradırdı, yəni hər
+        cəhd öz vedrəsinə düşür və limit heç vaxt işə düşmürdü (brute-force
+        tam açıq). İndi İP qatı bunu bağlayır.
+        """
+        attacker_ip = "203.0.113.77"
+        statuses = []
+        for _ in range(12):
+            # Hər cəhd üçün TƏMİZ klient = cookie saxlanılmır (real hücum modeli).
+            fresh_client = Client()
+            response = fresh_client.post(
+                self.login_url,
+                {"username": "limiteduser", "password": "wrongpassword"},
+                REMOTE_ADDR=attacker_ip,
+            )
+            statuses.append(response.status_code)
+
+        self.assertIn(429, statuses, "cookie-siz klient heç vaxt bloklanmadı — throttle keçilir")
+
+    def test_ip_throttle_does_not_block_legitimate_shared_ip_login(self):
+        """Kampus NAT-ı: eyni İP-dən bir neçə səhv cəhd düzgün girişi bloklamamalıdır."""
+        shared_ip = "198.51.100.44"
+        noisy = Client()
+        for _ in range(3):
+            noisy.post(
+                self.login_url,
+                {"username": "limiteduser", "password": "wrongpassword"},
+                REMOTE_ADDR=shared_ip,
+            )
+
+        peer = Client()
+        response = peer.post(
+            self.login_url,
+            {"username": "limiteduser", "password": "StrongPass123!"},
+            REMOTE_ADDR=shared_ip,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_superadmin_correct_login_clears_limit_and_allows_access(self):
         for _ in range(2):

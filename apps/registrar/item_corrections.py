@@ -22,6 +22,7 @@ from core.constants import AuditAction
 from core.rls import journal_unlock
 
 from . import grade_audit, journal_extras
+from .corrections import correction_author_name
 from .models import (
     ComponentScore,
     ComponentScoreCorrection,
@@ -96,7 +97,7 @@ def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, 
         note=note,
         document=document,
         corrected_by=by_user,
-        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+        corrected_by_name=correction_author_name(by_user, request),
     )
     correction.full_clean()
     correction.save()
@@ -190,7 +191,7 @@ def apply_coursework_correction(
         note=note,
         document=document,
         corrected_by=by_user,
-        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+        corrected_by_name=correction_author_name(by_user, request),
     )
     correction.full_clean()
     correction.save()
@@ -288,7 +289,7 @@ def apply_component_correction(*, component, enrollment, new_score, reason, note
         note=note,
         document=document,
         corrected_by=by_user,
-        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+        corrected_by_name=correction_author_name(by_user, request),
     )
     correction.full_clean()
     correction.save()
