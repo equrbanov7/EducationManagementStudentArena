@@ -1,6 +1,25 @@
 """Profil "my-exams" bölməsi üçün context-fragment qurucusu."""
 
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, IntegerField, OuterRef, Prefetch, Subquery
+from django.db.models.functions import Coalesce
+
+
+def _related_count(queryset, *, group_by):
+    """Korrelyasiyalı ``COUNT`` alt-sorğusu.
+
+    NƏ ÜÇÜN: eyni sorğuda bir neçə çoxdəyərli əlaqə üzrə ``Count(distinct=True)``
+    yazmaq dekart hasili yaradır — hər JOIN sətirləri çoxaldır, `DISTINCT` isə
+    şişmiş aralıq nəticəni sonradan təmizləyir. 4 belə sayğac (suallar,
+    apellyasiyalar, icazəli qruplar, icazəli istifadəçilər) bir sorğuda idi.
+    Korrelyasiyalı alt-sorğu hər sayğacı öz cədvəlində, indeks üzərində hesablayır.
+    """
+    return Coalesce(
+        Subquery(
+            queryset.order_by().values(group_by).annotate(_c=Count("pk")).values("_c")[:1],
+            output_field=IntegerField(),
+        ),
+        0,
+    )
 
 
 def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
@@ -36,14 +55,26 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     if filter_type:
         my_exams_qs = my_exams_qs.filter(exam_type=filter_type)
 
-    # Kart redizaynı: sual sayı + apellyasiya sayı (annotate) və aktiv dil
-    # variantları (prefetch). Səhifələmə yoxdur — qruplaşma/KPI servisdə Python
-    # tərəfdə hesablanır.
+    # Kart redizaynı: sual sayı + apellyasiya sayı və aktiv dil variantları
+    # (prefetch). Səhifələmə yoxdur — qruplaşma/KPI servisdə Python tərəfdə
+    # hesablanır (dashboard bütün siyahı üzərində qurulur).
+    from apps.appeals.models import Appeal
+    from apps.exams.models import Exam, ExamQuestion
+
+    allowed_users_through = Exam.allowed_users.through
+    allowed_groups_through = Exam.allowed_groups.through
+
     display_qs = my_exams_qs.annotate(
-        card_question_count=Count("questions", filter=Q(questions__is_active=True), distinct=True),
-        card_appeal_count=Count("appeals", distinct=True),
-        card_allowed_group_count=Count("allowed_groups", distinct=True),
-        card_allowed_user_count=Count("allowed_users", distinct=True),
+        card_question_count=_related_count(
+            ExamQuestion.objects.filter(exam=OuterRef("pk"), is_active=True), group_by="exam"
+        ),
+        card_appeal_count=_related_count(Appeal.objects.filter(exam=OuterRef("pk")), group_by="exam"),
+        card_allowed_group_count=_related_count(
+            allowed_groups_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+        ),
+        card_allowed_user_count=_related_count(
+            allowed_users_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+        ),
     ).prefetch_related(
         Prefetch(
             "language_variants",
