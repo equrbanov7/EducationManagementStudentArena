@@ -35515,6 +35515,62 @@ msgctxt "profile.sidebar"
 msgid "group_university_management"
 msgstr "Управление университетом"
 
+msgctxt "roles.display_name"
+msgid "superadmin"
+msgstr "Суперадмин"
+
+msgctxt "roles.display_name"
+msgid "org_owner"
+msgstr "Владелец организации"
+
+msgctxt "roles.display_name"
+msgid "org_admin"
+msgstr "Администратор организации"
+
+msgctxt "roles.display_name"
+msgid "member"
+msgstr "Участник"
+
+msgctxt "roles.display_name"
+msgid "hr"
+msgstr "HR"
+
+msgctxt "roles.display_name"
+msgid "exam_center_head"
+msgstr "Руководитель экзаменационного центра"
+
+msgctxt "roles.display_name"
+msgid "exam_center_staff"
+msgstr "Сотрудник экзаменационного центра"
+
+msgctxt "roles.display_name"
+msgid "exam_center"
+msgstr "Экзаменационный центр"
+
+msgctxt "roles.display_name"
+msgid "ikt_rehber"
+msgstr "Руководитель ИКТ"
+
+msgctxt "roles.display_name"
+msgid "teacher"
+msgstr "Преподаватель"
+
+msgctxt "roles.display_name"
+msgid "assistant_teacher"
+msgstr "Ассистент преподавателя"
+
+msgctxt "roles.display_name"
+msgid "lead_student"
+msgstr "Староста"
+
+msgctxt "roles.display_name"
+msgid "student"
+msgstr "Студент"
+
+msgctxt "accounts.profile"
+msgid "individual_no_organization"
+msgstr "Индивидуальный"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

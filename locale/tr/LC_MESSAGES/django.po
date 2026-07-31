@@ -35135,6 +35135,62 @@ msgctxt "profile.sidebar"
 msgid "group_university_management"
 msgstr "Üniversite yönetimi"
 
+msgctxt "roles.display_name"
+msgid "superadmin"
+msgstr "Süper Yönetici"
+
+msgctxt "roles.display_name"
+msgid "org_owner"
+msgstr "Kuruluş Sahibi"
+
+msgctxt "roles.display_name"
+msgid "org_admin"
+msgstr "Kuruluş Yöneticisi"
+
+msgctxt "roles.display_name"
+msgid "member"
+msgstr "Üye"
+
+msgctxt "roles.display_name"
+msgid "hr"
+msgstr "İK"
+
+msgctxt "roles.display_name"
+msgid "exam_center_head"
+msgstr "Sınav Merkezi Müdürü"
+
+msgctxt "roles.display_name"
+msgid "exam_center_staff"
+msgstr "Sınav Merkezi Personeli"
+
+msgctxt "roles.display_name"
+msgid "exam_center"
+msgstr "Sınav Merkezi"
+
+msgctxt "roles.display_name"
+msgid "ikt_rehber"
+msgstr "BİT Yöneticisi"
+
+msgctxt "roles.display_name"
+msgid "teacher"
+msgstr "Öğretmen"
+
+msgctxt "roles.display_name"
+msgid "assistant_teacher"
+msgstr "Öğretmen Yardımcısı"
+
+msgctxt "roles.display_name"
+msgid "lead_student"
+msgstr "Sınıf Temsilcisi"
+
+msgctxt "roles.display_name"
+msgid "student"
+msgstr "Öğrenci"
+
+msgctxt "accounts.profile"
+msgid "individual_no_organization"
+msgstr "Bireysel"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

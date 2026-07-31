@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import check_password, identify_hasher
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare, salted_hmac
+from django.utils.translation import pgettext
 
 from core.constants import OrganizationType
 
@@ -404,10 +405,15 @@ class UserProfile(models.Model):
 
     @property
     def organization_name(self):
-        """Get organization name or 'Fərdi' for individual users."""
+        """Təşkilat adı, təşkilatsız istifadəçi üçün «Fərdi».
+
+        Etiket tərcümə olunur: profil başlığında göstərilir və sabit
+        azərbaycanca sətir olanda EN/RU/TR interfeysdə də azərbaycanca çıxırdı
+        (2026-07-31 auditi).
+        """
         if self.organization:
             return self.organization.name
-        return "Fərdi"
+        return pgettext("accounts.profile", "individual_no_organization")
 
     @property
     def role_level(self):
