@@ -44,6 +44,46 @@ def _has_role(user, organization, role_names) -> bool:
     ).exists()
 
 
+def offering_in_actor_scope(user, organization, offering) -> bool:
+    """Təsdiqləyənin unit alt-ağacı bu dərs açılışını əhatə edirmi.
+
+    TƏHLÜKƏSİZLİK (2026-07-31 auditi): ``can_chair_approve`` / ``can_dean_approve``
+    yalnız rol ADINA baxırdı və offering-in hansı kafedraya/fakültəyə aid
+    olduğunu yoxlamırdı. Nəticədə A kafedrasının müdiri B kafedrasının jurnalını
+    təsdiqləyə (və dekan təsdiqi ilə ƏBƏDİ kilidləyə) bilirdi.
+
+    Org-wide rollar (owner/admin/rektorat/superuser) həmişə keçir — onların
+    səlahiyyəti onsuz da bütün təşkilatı əhatə edir.
+
+    QAYDA: yoxlama YALNIZ istifadəçiyə unit scope-u TƏYİN OLUNUBSA tətbiq edilir.
+    Scope-u olmayan kafedra müdiri/dekan köhnə davranışı saxlayır — əks halda
+    strukturu hələ qurmamış təşkilatlarda bütün təsdiq zənciri dayanardı. Yəni
+    bu, mövcud icazəni daraltmır, düzgün qurulmuş iyerarxiyada isə kənar unitin
+    jurnalını bağlayır.
+
+    QALIQ RİSK (sənədləşdirilir): ``scope_unit`` təyin edilməmiş kafedra müdiri
+    hələ də bütün təşkilatın jurnallarını təsdiqləyə bilir. Bu, provisionlaşdırma
+    məsələsidir — struktur qurulandan sonra hər idarəetmə üzvlüyünə ``scope_unit``
+    verilməlidir.
+    """
+    from apps.organizations.models import OrgUnit
+    from apps.organizations.scoping import get_unit_scope
+
+    if getattr(user, "is_superuser", False) or organization.owner_id == getattr(user, "pk", None):
+        return True
+    if _has_role(user, organization, _ADMIN_ROLES):
+        return True
+
+    scope = get_unit_scope(user, organization)
+    if scope.is_org_wide or not scope.has_structure_access:
+        return True
+    # Qrupu olmayan (bütün ixtisas üzrə) açılışı unit-scope təsdiqləyən üçün
+    # aidiyyəti müəyyən deyil — org-wide səlahiyyət tələb olunur.
+    if getattr(offering, "group_id", None) is None:
+        return False
+    return OrgUnit.objects.filter(scope.unit_subtree_q()).filter(pk=offering.group_id).exists()
+
+
 def can_submit(user, offering) -> bool:
     """Instructor (or org owner/superuser) may submit for approval."""
     return (
@@ -53,12 +93,26 @@ def can_submit(user, offering) -> bool:
     )
 
 
-def can_chair_approve(user, organization) -> bool:
-    return _has_role(user, organization, _CHAIR_ROLES)
+def can_chair_approve(user, organization, offering=None) -> bool:
+    """Kafedra müdiri təsdiqi.
+
+    ``offering`` verilirsə unit aidiyyəti də yoxlanılır (bax
+    :func:`offering_in_actor_scope`). Səhifə-səviyyə görünürlük yoxlamaları
+    (məs. analitika paneli) offering-siz çağırır — orada konkret jurnal yoxdur.
+    """
+    if not _has_role(user, organization, _CHAIR_ROLES):
+        return False
+    if offering is None:
+        return True
+    return offering_in_actor_scope(user, organization, offering)
 
 
-def can_dean_approve(user, organization) -> bool:
-    return _has_role(user, organization, _DEAN_ROLES)
+def can_dean_approve(user, organization, offering=None) -> bool:
+    if not _has_role(user, organization, _DEAN_ROLES):
+        return False
+    if offering is None:
+        return True
+    return offering_in_actor_scope(user, organization, offering)
 
 
 def _audit(offering, by_user, action_label, reason):
@@ -102,7 +156,7 @@ def submit_for_approval(*, offering, by_user):
 def chair_approve(*, offering, by_user):
     """Kafedra müdiri approves → CHAIR_APPROVED (awaiting dean)."""
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    if not can_chair_approve(by_user, offering.organization):
+    if not can_chair_approve(by_user, offering.organization, offering=offering):
         raise PermissionDenied("Kafedra təsdiqi üçün icazəniz yoxdur.")
     if scheme.approval_status != ApprovalStatus.SUBMITTED:
         return scheme
@@ -117,7 +171,7 @@ def chair_approve(*, offering, by_user):
 def dean_approve(*, offering, by_user):
     """Dekan gives final approval → APPROVED + publishes (locks permanently)."""
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    if not can_dean_approve(by_user, offering.organization):
+    if not can_dean_approve(by_user, offering.organization, offering=offering):
         raise PermissionDenied("Dekan təsdiqi üçün icazəniz yoxdur.")
     if scheme.approval_status != ApprovalStatus.CHAIR_APPROVED:
         return scheme
@@ -133,7 +187,7 @@ def dean_approve(*, offering, by_user):
 def return_for_revision(*, offering, by_user, reason=""):
     """Chair/dean returns the journal to the teacher → RETURNED (edits re-open)."""
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    if not can_chair_approve(by_user, offering.organization):
+    if not can_chair_approve(by_user, offering.organization, offering=offering):
         raise PermissionDenied("Jurnalı geri qaytarmaq üçün icazəniz yoxdur.")
     if scheme.approval_status not in (ApprovalStatus.SUBMITTED, ApprovalStatus.CHAIR_APPROVED):
         return scheme
@@ -154,16 +208,18 @@ def approval_context(*, offering, user):
     """Status + capability flags for the journal-detail action bar."""
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
     status = scheme.approval_status
+    # Scope yoxlaması bir dəfə hesablanır (üç bayraq eyni nəticəni paylaşır).
+    chair_ok = can_chair_approve(user, offering.organization, offering=offering)
+    dean_ok = can_dean_approve(user, offering.organization, offering=offering)
     return {
         "status": status,
         "status_label": ApprovalStatus(status).label,
         "is_locked": gradebook.journal_is_locked(offering),
         "returned_reason": scheme.returned_reason,
         "can_submit": can_submit(user, offering) and status in (ApprovalStatus.DRAFT, ApprovalStatus.RETURNED),
-        "can_chair_approve": can_chair_approve(user, offering.organization) and status == ApprovalStatus.SUBMITTED,
-        "can_dean_approve": can_dean_approve(user, offering.organization) and status == ApprovalStatus.CHAIR_APPROVED,
-        "can_return": can_chair_approve(user, offering.organization)
-        and status in (ApprovalStatus.SUBMITTED, ApprovalStatus.CHAIR_APPROVED),
+        "can_chair_approve": chair_ok and status == ApprovalStatus.SUBMITTED,
+        "can_dean_approve": dean_ok and status == ApprovalStatus.CHAIR_APPROVED,
+        "can_return": chair_ok and status in (ApprovalStatus.SUBMITTED, ApprovalStatus.CHAIR_APPROVED),
         "submitted_at": scheme.updated_at if status != ApprovalStatus.DRAFT else None,
         "now": timezone.now(),
     }
