@@ -326,6 +326,16 @@ class ViewAsMiddleware:
         ƏSL istifadəçinin adına yazılır — domen qatındakı qeydlər isə
         ``request.user``-i, yəni HƏDƏFİ görür (bax ``core.audit.log_action``
         impersonasiya damğasına).
+
+        TƏŞKİLAT MÜTLƏQ ÖTÜRÜLMƏLİDİR. Əvvəllər ``organization=None`` yazılırdı
+        və nəticə bu idi: qeyd bazada var, amma TENANT AUDİT JURNALINDA YOXDUR —
+        ``apps/audit/views.py`` superadmin olmayan hər kəs üçün sorğunu
+        ``organization``-a görə filtrləyir. Yəni təşkilatın öz idarəçisi
+        «view-as başladı» sətrini görürdü (o, org damğalıdır), amma impersonasiya
+        altında NƏ EDİLDİYİNİ və hansı cəhdin BLOKLANDIĞINI görə bilmirdi.
+        Bloklanmış cəhd qeydləri xüsusilə vacibdir: onlar başqa heç bir yerdə
+        yaranmır (sorğu view-a çatmır), yəni pozuntu siqnalı yalnız platforma
+        superadmininə görünürdü.
         """
         try:
             from apps.audit.public import log_action
@@ -334,7 +344,7 @@ class ViewAsMiddleware:
             log_action(
                 action=AuditAction.UPDATE,
                 user=request.real_user,
-                organization=None,
+                organization=self._view_as_organization(request),
                 obj=target,
                 reason="view_as_action" if allowed else "view_as_action_blocked",
                 changes={
@@ -386,6 +396,7 @@ class ViewAsMiddleware:
         from .services.view_as import (
             MODE_LIMITED,
             MODE_READONLY,
+            MUTATING_GET_URL_NAMES,
             VIEW_AS_SESSION_KEY,
             actor_limited_write_url_names,
             resolve_view_as_request,
@@ -426,8 +437,13 @@ class ViewAsMiddleware:
                 pgettext("accounts.view_as", "action_blocked_sensitive"),
             )
 
-        if request.method not in self.SAFE_METHODS:
-            url_name = self._resolved_url_name(request)
+        # Qapı YALNIZ metoda bağlı ola bilməz: bəzi marşrutlar GET ilə də
+        # vəziyyət dəyişir (bax `MUTATING_GET_URL_NAMES`). Onlar da yazma kimi
+        # işlənməlidir — həm rejim yoxlaması, həm audit üçün.
+        url_name = self._resolved_url_name(request)
+        is_write = request.method not in self.SAFE_METHODS or url_name in MUTATING_GET_URL_NAMES
+
+        if is_write:
 
             # Kimlik-sübutu axınları (ilk-giriş parolu, e-poçt OTP, hesab silmə)
             # rejimdən ASILI OLMAYARAQ bloklanır — aktor hədəfin parolunu təyin

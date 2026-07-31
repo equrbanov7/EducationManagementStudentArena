@@ -1,14 +1,22 @@
 {% load i18n exams_ui %}
 {% comment %}
-  Axtarış + növ filtri (seqment, dizayn) + görünüş keçidi — hamısı klient-tərəf
-  instant (server-reload yox). Gizli native <select name="exam_type"> dərin link
-  və mövcud server filtrini (deep-link) saxlayır; növ düymələri onu sinxron edir.
+  Axtarış + növ filtri (seqment, dizayn) + görünüş keçidi.
+
+  DAVRANIŞ İKİ CÜRDÜR (bax `data-tx-paginated`):
+    * Siyahı bir səhifəyə sığırsa — klient-tərəf ani filtr (server-reload yox).
+    * Səhifələmə aktivdirsə — filtrlər SERVERƏ göndərilir. DOM-da yalnız cari
+      səhifənin kartları olduğu üçün klient filtri qalan sətirləri görə bilmir.
+
+  Ona görə bu, əsl `<form method="get">`-dir: JS-siz də işləyir, `exam_q`,
+  `exam_type` və `exam_status` server filtrlərinə birbaşa uyğun gəlir.
 {% endcomment %}
 {% exam_type_meta 'test' as m_test %}
 {% exam_type_meta 'written' as m_written %}
 {% exam_type_meta 'coding' as m_coding %}
 <form method="get" class="tx-toolbar" data-tx-toolbar>
   <input type="hidden" name="section" value="my-exams">
+  {# Status filtri KPI kartına klikdən gəlir; formda saxlanılır ki, axtarış onu sıfırlamasın. #}
+  <input type="hidden" name="exam_status" value="{{ my_exams_filter_status|default:'' }}" data-tx-status-field>
 
   <div class="tx-search">
     <i class="fas fa-search tx-search-ic" aria-hidden="true"></i>

@@ -399,6 +399,62 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
         self.assertIsNone(target)
         self.assertIsNone(mode)
 
+    def test_limited_actor_cannot_target_admin_equivalent_roles(self):
+        """Blok siyahısının ada görə olması real boşluq idi (2026-07-31 audit).
+
+        `ProfileRole` `org_admin` aliasını `ADMIN_EQUIVALENT_ROLE_NAMES` üzvlüyünə
+        VƏ ya `level >= 80` şərtinə görə verir. Əl ilə yazılmış beş adlıq siyahı
+        isə `department_head` (80), `senior_instructor` (80) və `vice_dean` (85)
+        rollarını buraxırdı — yəni imtahan mərkəzi (85) kafedra müdirinə keçib
+        org-üzvləri, rollar və icazə redaktoru bölmələrini aça bilirdi.
+
+        Test hər admin-ekvivalent rolu ayrıca yoxlayır ki, siyahı yenidən
+        daralsa dərhal düşsün.
+        """
+        for role_name, level in (("department_head", 80), ("senior_instructor", 80), ("vice_dean", 85)):
+            with self.subTest(role=role_name):
+                role = _make_role(self.org, role_name, level)
+                victim = User.objects.create_user(f"victim_{role_name}", f"{role_name}@example.com", PASSWORD)
+                _add_member(victim, self.org, role)
+
+                target, mode = validate_target(self.ikt, self.org, victim.pk)
+
+                self.assertIsNone(target, f"{role_name} hədəf ola bilməməlidir")
+                self.assertIsNone(mode)
+
+    def test_limited_actor_cannot_target_a_custom_role_at_admin_level(self):
+        """Tenant öz adı ilə rol yarada bilər — alias səviyyəyə görə verilir."""
+        role = _make_role(self.org, "kadrlar_uzre_prorektor", 90)
+        victim = User.objects.create_user("victim_custom", "custom@example.com", PASSWORD)
+        _add_member(victim, self.org, role)
+
+        target, mode = validate_target(self.ikt, self.org, victim.pk)
+
+        self.assertIsNone(target)
+        self.assertIsNone(mode)
+
+    def test_forbidden_target_set_is_derived_not_hand_written(self):
+        """Siyahı mənbədən törəməlidir ki, mənbə dəyişəndə sürüşməsin."""
+        from apps.accounts.services.view_as import LIMITED_FORBIDDEN_TARGET_ROLES
+
+        missing = ProfileRole.ADMIN_EQUIVALENT_ROLE_NAMES - set(LIMITED_FORBIDDEN_TARGET_ROLES)
+        self.assertFalse(missing, f"admin-ekvivalent rollar blok siyahısında yoxdur: {sorted(missing)}")
+
+    def test_limited_actor_can_still_target_exam_center_staff(self):
+        """Muaf rollar istisnadan KƏNARDADIR — İKT müşahidə imkanını itirməməlidir.
+
+        `exam_center` səviyyəsi 85-dir, yəni sırf səviyyə filtri onu da kəsərdi;
+        amma o, alias-muafdır və org_admin səthini ALMIR.
+        """
+        staff_role = _make_role(self.org, "exam_center_staff", 70)
+        staff = User.objects.create_user("ec_staff", "ecstaff@example.com", PASSWORD)
+        _add_member(staff, self.org, staff_role)
+
+        target, mode = validate_target(self.ikt, self.org, staff.pk)
+
+        self.assertEqual(target, staff)
+        self.assertEqual(mode, MODE_LIMITED)
+
     def test_limited_actor_can_target_teacher(self):
         target, mode = validate_target(self.exam_center, self.org, self.teacher.pk)
 
@@ -612,3 +668,71 @@ class ViewAsBannerModeTests(ViewAsTestBase):
                     self.assertIn(rule, css, f"{rule} üçün qayda yoxdur")
                     tail = css.split(rule, 1)[1].split("}", 1)[0]
                     self.assertIn("background", tail, f"{rule} fon təyin etmir — ağ fonda ağ mətn riski")
+
+
+class MutatingGetRouteScanTests(TestCase):
+    """`MUTATING_GET_URL_NAMES` siyahısı köhnəlməməlidir.
+
+    View-as qapısı HTTP metoduna bağlıdır: `GET` təhlükəsiz sayılır. Amma bəzi
+    marşrutlar GET ilə də server vəziyyətini dəyişir — məsələn
+    `live_create_session_by_slug` əvvəlcə işləyən sessiyaları bitirir. Belə
+    marşrut siyahıda olmasa, READONLY aktor sadəcə linkə keçməklə canlı imtahanı
+    dayandıra bilər və audit-də iz qalmaz.
+
+    Bu test marşrut cədvəlini skan edir: metod qapısı olmayan və mutasiya edən
+    hər funksiya-view ya siyahıda, ya da təsdiqlənmiş istisnalarda olmalıdır.
+    Yeni belə view əlavə olunanda test düşür və adam qərar verməli olur.
+    """
+
+    #: Skanın tutduğu, lakin view-as üçün TƏHLÜKƏSİZ sayılan marşrutlar.
+    #: Hər biri yalnız yan-təsir yazır (sayğac, ixrac qeydi, QR keşi) və
+    #: istifadəçinin görə biləcəyi vəziyyəti dəyişmir.
+    REVIEWED_SAFE = {
+        "accounts:profile_badges_api",
+        "accounts:public_profile",
+        "accounts:statistics_export_csv",
+        "exams:exam_center_stats_export",
+        "liveExam:qr_png",
+    }
+
+    def test_no_unreviewed_mutating_get_route_exists(self):
+        import inspect
+        import re
+
+        from django.urls import URLPattern, URLResolver, get_resolver
+
+        from apps.accounts.services.view_as import MUTATING_GET_URL_NAMES
+
+        mutation = re.compile(r"\.(save|delete|create|bulk_create|get_or_create|update_or_create)\(")
+        guard = re.compile(r"request\.method|require_POST|require_http_methods|http_method_names")
+
+        def walk(patterns, namespace=""):
+            for entry in patterns:
+                if isinstance(entry, URLResolver):
+                    yield from walk(entry.url_patterns, entry.namespace or namespace)
+                elif isinstance(entry, URLPattern) and entry.name:
+                    yield (f"{namespace}:{entry.name}" if namespace else entry.name), entry.callback
+
+        unreviewed = []
+        for name, callback in walk(get_resolver().url_patterns):
+            if name.startswith(("admin:", "django")):
+                continue
+            view = getattr(callback, "view_class", callback)
+            if inspect.isclass(view):
+                continue  # CBV — GET və POST ayrı metodlardır
+            try:
+                source = inspect.getsource(view)
+            except (OSError, TypeError):
+                continue
+            if not mutation.search(source) or guard.search(source):
+                continue
+            if name in MUTATING_GET_URL_NAMES or name in self.REVIEWED_SAFE:
+                continue
+            unreviewed.append(name)
+
+        self.assertFalse(
+            unreviewed,
+            "Bu marşrutlar GET ilə mutasiya edir və view-as qapısında nəzərə "
+            "alınmayıb. Vəziyyəti dəyişirsə MUTATING_GET_URL_NAMES-ə, yalnız "
+            "yan-təsir yazırsa REVIEWED_SAFE-ə əlavə edin:\n  " + "\n  ".join(sorted(unreviewed)),
+        )
