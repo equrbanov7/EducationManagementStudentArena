@@ -50,7 +50,7 @@
   "en": {
    "bad_placeholder": 0,
    "extra_vs_source": 0,
-   "identity": 500,
+   "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "total": 500,
@@ -59,7 +59,7 @@
   "ru": {
    "bad_placeholder": 0,
    "extra_vs_source": 0,
-   "identity": 500,
+   "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "total": 500,
@@ -68,7 +68,7 @@
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 0,
-   "identity": 500,
+   "identity": 94,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "total": 500,
