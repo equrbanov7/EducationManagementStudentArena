@@ -2173,3 +2173,30 @@ msgstr "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
 #: static/js/ai_assistant.js:34
 msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
 msgstr "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
+
+msgid "Bağlantı quruldu"
+msgstr "Bağlantı quruldu"
+
+msgid "Yenidən qoşulur…"
+msgstr "Yenidən qoşulur…"
+
+msgid "Bağlantı yoxdur — fallback rejimi"
+msgstr "Bağlantı yoxdur — fallback rejimi"
+
+msgid "İmtahan başlayır — yönləndirilirsiniz…"
+msgstr "İmtahan başlayır — yönləndirilirsiniz…"
+
+msgid "Oturum bitdi. Nəzarətçiyə müraciət edin."
+msgstr "Oturum bitdi. Nəzarətçiyə müraciət edin."
+
+msgid "İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin."
+msgstr "İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin."
+
+msgid "Oturum ləğv edildi."
+msgstr "Oturum ləğv edildi."
+
+msgid "İmtahanınız müvəqqəti dayandırıldı."
+msgstr "İmtahanınız müvəqqəti dayandırıldı."
+
+msgid "%(message)s Səbəb: %(reason)s"
+msgstr "%(message)s Səbəb: %(reason)s"

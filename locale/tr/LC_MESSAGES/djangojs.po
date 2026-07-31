@@ -2180,3 +2180,30 @@ msgstr "Bir hata oluştu. Lütfen tekrar deneyin."
 #: static/js/ai_assistant.js:34
 msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
 msgstr "Ağ hatası. Lütfen tekrar deneyin."
+
+msgid "Bağlantı quruldu"
+msgstr "Bağlantı kuruldu"
+
+msgid "Yenidən qoşulur…"
+msgstr "Yeniden bağlanıyor…"
+
+msgid "Bağlantı yoxdur — fallback rejimi"
+msgstr "Bağlantı yok — yedek mod"
+
+msgid "İmtahan başlayır — yönləndirilirsiniz…"
+msgstr "Sınav başlıyor — yönlendiriliyorsunuz…"
+
+msgid "Oturum bitdi. Nəzarətçiyə müraciət edin."
+msgstr "Oturum sona erdi. Lütfen gözetmene başvurun."
+
+msgid "İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin."
+msgstr "Sınavdan çıkarıldınız. Lütfen gözetmene başvurun."
+
+msgid "Oturum ləğv edildi."
+msgstr "Oturum iptal edildi."
+
+msgid "İmtahanınız müvəqqəti dayandırıldı."
+msgstr "Sınavınız geçici olarak durduruldu."
+
+msgid "%(message)s Səbəb: %(reason)s"
+msgstr "%(message)s Neden: %(reason)s"
