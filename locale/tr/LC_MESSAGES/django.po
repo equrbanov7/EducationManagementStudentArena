@@ -33501,7 +33501,7 @@ msgstr "Blog"
 
 msgctxt "profile.sidebar"
 msgid "group_blog"
-msgstr "Grup blogu"
+msgstr "Blog ve içerik"
 
 msgctxt "profile.sidebar"
 msgid "Ümumi tədris məlumatı"
@@ -35190,6 +35190,18 @@ msgstr "Öğrenci"
 msgctxt "accounts.profile"
 msgid "individual_no_organization"
 msgstr "Bireysel"
+
+msgctxt "profile.sidebar"
+msgid "group_my_studies"
+msgstr "Eğitimim"
+
+msgctxt "profile.sidebar"
+msgid "group_teaching"
+msgstr "Öğretim"
+
+msgctxt "profile.sidebar"
+msgid "group_exam_center"
+msgstr "Sınav merkezi"
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"

@@ -33874,7 +33874,7 @@ msgstr "Блог"
 
 msgctxt "profile.sidebar"
 msgid "group_blog"
-msgstr "Блог группы"
+msgstr "Блог и контент"
 
 msgctxt "profile.sidebar"
 msgid "Ümumi tədris məlumatı"
@@ -35570,6 +35570,18 @@ msgstr "Студент"
 msgctxt "accounts.profile"
 msgid "individual_no_organization"
 msgstr "Индивидуальный"
+
+msgctxt "profile.sidebar"
+msgid "group_my_studies"
+msgstr "Моя учёба"
+
+msgctxt "profile.sidebar"
+msgid "group_teaching"
+msgstr "Преподавание"
+
+msgctxt "profile.sidebar"
+msgid "group_exam_center"
+msgstr "Экзаменационный центр"
 
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
