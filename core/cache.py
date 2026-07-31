@@ -290,3 +290,39 @@ def invalidate_profile_badge_counts_cache(user_id, org_id=None) -> None:
         cache.delete(_profile_badge_counts_key(user_id, org_id))
     except Exception:
         logger.warning("Redis unavailable; could not invalidate profile badge counts for user %s", user_id)
+
+
+# --------------------------------------------------------------------------- #
+# Sual bankı keyfiyyət analizi
+# --------------------------------------------------------------------------- #
+
+BANK_ANALYSIS_TTL = 900  # saniyə — barmaq izi onsuz da təzəliyi təmin edir
+
+
+def _bank_analysis_key(bank_id, language: str, fingerprint: str) -> str:
+    return f"{_PREFIX}:exams:bank_analysis:{bank_id}:{language or 'all'}:{fingerprint}"
+
+
+def get_or_set_cached_bank_analysis(*, bank_id, language: str, fingerprint: str, compute):
+    """Sual bankı analizinin nəticəsini MƏZMUN barmaq izi ilə keşləyir.
+
+    Analiz bankın bütün test suallarını variantları ilə yaddaşa yükləyib
+    dublikat/struktur/balans yoxlaması aparır — bahalıdır və detal səhifəsinin
+    hər GET-ində (səhifələmə, filtr, sıralama, dil dəyişmə) təkrarlanırdı.
+
+    Açar ``fingerprint``-i (sual sayı + ən son ``updated_at``) daşıyır: dəst
+    dəyişən kimi açar da dəyişir, yəni ayrıca invalidasiya çağırışı lazım deyil
+    və köhnəlmiş nəticə göstərilmir. TTL yalnız keşin şişməməsi üçündür.
+
+    Redis əlçatmaz olsa birbaşa ``compute()``-a düşür.
+    """
+    key = _bank_analysis_key(bank_id, language, fingerprint)
+    cached = _safe_cache_get(key)
+    if cached is not None:
+        return cached
+    payload = compute()
+    try:
+        cache.set(key, payload, timeout=BANK_ANALYSIS_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; bank analysis cache not populated for %s", key)
+    return payload

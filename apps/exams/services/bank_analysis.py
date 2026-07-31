@@ -291,9 +291,42 @@ def analyze_question_bank(exam, *, language=None) -> QuestionBankAnalysis:
     return _run_analysis(questions)
 
 
-def analyze_bank_questions(bank, *, language=None) -> QuestionBankAnalysis:
-    """Müstəqil bankın test suallarını analiz edir (opsional dil üzrə)."""
-    queryset = bank.library_questions.filter(question_type="test").prefetch_related("options")
+def _analysis_fingerprint(bank, language) -> str:
+    """Bankın MƏZMUN barmaq izi — dəyişəndə keş açarı da dəyişir.
+
+    Ucuz aqreqat (say + ən son dəyişmə) kifayətdir: sual əlavə/silinsə say,
+    redaktə olunsa ``updated_at`` dəyişir. Beləcə ayrıca invalidasiya çağırışına
+    ehtiyac qalmır — köhnə açar sadəcə istifadə olunmur.
+    """
+    from django.db.models import Count, Max
+
+    queryset = bank.library_questions.filter(question_type="test")
     if language:
         queryset = queryset.filter(language=language)
-    return _run_analysis(list(queryset.order_by("-created_at", "id")))
+    stamp = queryset.aggregate(total=Count("pk"), last=Max("updated_at"))
+    return f"{stamp['total'] or 0}:{stamp['last'].timestamp() if stamp['last'] else 0}"
+
+
+def analyze_bank_questions(bank, *, language=None) -> QuestionBankAnalysis:
+    """Müstəqil bankın test suallarını analiz edir (opsional dil üzrə).
+
+    Nəticə məzmun barmaq izi ilə keşlənir. Səbəb: analiz BÜTÜN sualları
+    variantları ilə birlikdə yaddaşa yükləyib dublikat/struktur/balans
+    yoxlamasını aparır və detal səhifəsinin HƏR GET-ində (səhifələmə, filtr,
+    dil dəyişmə, sıralama) təkrarlanırdı — halbuki sual dəsti dəyişməyibsə
+    nəticə eynidir (2026-07-31 auditi).
+    """
+    from core.cache import get_or_set_cached_bank_analysis
+
+    def _compute():
+        queryset = bank.library_questions.filter(question_type="test").prefetch_related("options")
+        if language:
+            queryset = queryset.filter(language=language)
+        return _run_analysis(list(queryset.order_by("-created_at", "id")))
+
+    return get_or_set_cached_bank_analysis(
+        bank_id=bank.pk,
+        language=language or "",
+        fingerprint=_analysis_fingerprint(bank, language),
+        compute=_compute,
+    )
