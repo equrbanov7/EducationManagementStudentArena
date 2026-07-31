@@ -519,3 +519,62 @@ class ViewAsAuditAttributionTests(ViewAsTestBase):
         self.assertIsNotNone(stamp, "impersonasiya damğası yoxdur")
         self.assertEqual(stamp["username"], self.admin.username)
         self.assertEqual(stamp["mode"], MODE_FULL)
+
+
+class ViewAsBannerModeTests(ViewAsTestBase):
+    """Banner ÜÇ rejimi də düzgün göstərməlidir.
+
+    `MODE_LIMITED` əlavə olunanda banner şablonu və CSS-i yenilənməmişdi:
+    * `view-as-banner--limited` class-ının heç bir qaydası yox idi, baza qayda
+      isə `color: var(--ems-neutral-0)` (ağ) verir → ağ üzərində ağ mətn;
+    * etiket `{% if readonly %}…{% else %}FULL{% endif %}` idi, yəni məhdud
+      səlahiyyətli istifadəçiyə «tam səlahiyyət» yazılırdı — yanlış məlumat.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.exam_center_role = _make_role(self.org, ProfileRole.EXAM_CENTER, 85)
+        self.exam_center = User.objects.create_user("banner_ec", "banner_ec@example.com", PASSWORD)
+        _add_member(self.exam_center, self.org, self.exam_center_role)
+
+    def _banner_html(self, actor, target):
+        self._login(actor)
+        self._start(target)
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def test_limited_mode_uses_its_own_banner_class(self):
+        html = self._banner_html(self.exam_center, self.teacher)
+
+        self.assertIn("view-as-banner--limited", html)
+        self.assertIn("view-as-pill--limited", html)
+        self.assertIn("view-as-frame--limited", html)
+
+    def test_limited_mode_is_not_labelled_as_full_control(self):
+        from django.utils.translation import pgettext
+
+        html = self._banner_html(self.exam_center, self.teacher)
+
+        self.assertIn(pgettext("accounts.view_as", "mode_limited"), html)
+        self.assertNotIn(pgettext("accounts.view_as", "mode_full"), html)
+
+    def test_full_mode_still_labelled_as_full(self):
+        from django.utils.translation import pgettext
+
+        html = self._banner_html(self.admin, self.teacher)
+
+        self.assertIn("view-as-banner--full", html)
+        self.assertIn(pgettext("accounts.view_as", "mode_full"), html)
+
+    def test_every_mode_class_has_css_rules(self):
+        """Şablon `--{{ mode }}` yazır: hər rejim üçün qayda OLMALIDIR."""
+        import pathlib
+
+        from apps.accounts.services.view_as import MODE_FULL, MODE_LIMITED, MODE_READONLY
+
+        css = pathlib.Path("static/css/view_as.css").read_text(encoding="utf-8")
+        for mode in (MODE_FULL, MODE_LIMITED, MODE_READONLY):
+            for block in ("banner", "pill", "frame"):
+                with self.subTest(mode=mode, block=block):
+                    self.assertIn(f".view-as-{block}--{mode}", css)
