@@ -20,7 +20,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="info-badge">
-                            <i class="bi bi-calendar-event fs-5 as-ic"></i>
+                            <i class="fas fa-calendar-day fs-5 as-ic"></i>
                             <div>
                                 <small class="d-block text-muted">{% trans "label_duration" context "assignment.legacy.detail" %}</small>
                                 <strong class="mb-0">{{ assignment.deadline|date:"d.m.Y H:i" }}</strong>
@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="info-badge">
-                            <i class="bi bi-repeat fs-5 as-ic"></i>
+                            <i class="fas fa-repeat fs-5 as-ic"></i>
                             <div>
                                 <small class="d-block text-muted">{% trans "label_attempts" context "assignment.legacy.detail" %}</small>
                                 <strong class="mb-0">{{ submissions.count }} / {{ assignment.max_attempts }}</strong>
@@ -47,7 +47,7 @@
             {% if current_submission %}
             <div class="card card-modern p-4 mb-4">
                 <h5 class="fw-bold mb-4 as-text-dark">
-                    <i class="bi bi-pencil-square me-2 as-ic"></i>
+                    <i class="fas fa-pen-to-square me-2 as-ic"></i>
                     {% trans "draft_answer_title" context "assignment.legacy.detail" %}
                 </h5>
                 
@@ -65,24 +65,24 @@
                     <div class="mb-4">
                         <label class="form-label fw-semibold text-secondary">{% trans "label_files" context "assignment.legacy.detail" %}</label>
                         <input type="file" name="files" class="form-control form-control-custom" multiple>
-                        <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>{% trans "files_help" context "assignment.legacy.detail" %}</div>
+                        <div class="form-text mt-2"><i class="fas fa-circle-info me-1"></i>{% trans "files_help" context "assignment.legacy.detail" %}</div>
                     </div>
                     
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-success-custom" {% if assignment.is_deadline_passed %}disabled{% endif %}>
-                            <i class="bi bi-send-check me-2"></i> {% trans "send" context "assignment.legacy.detail" %}
+                            <i class="fas fa-paper-plane me-2"></i> {% trans "send" context "assignment.legacy.detail" %}
                         </button>
                     </div>
                 </form>
             </div>
             {% elif can_submit %}
             <div class="alert alert-info rounded-4 border-0 d-flex align-items-center p-4 shadow-sm as-alert-info">
-                <i class="bi bi-info-circle-fill fs-3 me-3 as-ic"></i>
+                <i class="fas fa-circle-info fs-3 me-3 as-ic"></i>
                 <div>{% trans "start_new_attempt_info" context "assignment.legacy.detail" %}</div>
             </div>
             {% else %}
             <div class="alert alert-warning rounded-4 border-0 d-flex align-items-center p-4 shadow-sm">
-                <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+                <i class="fas fa-triangle-exclamation fs-3 me-3 text-warning"></i>
                 <div>{% trans "attempt_limit_exceeded" context "assignment.legacy.detail" %}</div>
             </div>
             {% endif %}
@@ -104,7 +104,7 @@
                         <p class="text-muted fw-medium mb-0">{% trans 'Əla nəticə!' %}</p>
                     {% else %}
                         <div class="score-circle as-score-circle--empty">
-                            <i class="bi bi-hourglass-split"></i>
+                            <i class="fas fa-hourglass-half"></i>
                         </div>
                         <p class="text-muted fw-medium mb-0">{% trans "waiting" context "assignment.legacy.detail" %}</p>
                     {% endif %}
@@ -114,7 +114,7 @@
             {% if submissions %}
             <div class="card card-modern p-4">
                 <h6 class="fw-bold mb-4 as-text-dark">
-                    <i class="bi bi-clock-history me-2"></i>{% trans "previous_answers_title" context "assignment.legacy.detail" %}
+                    <i class="fas fa-clock-rotate-left me-2"></i>{% trans "previous_answers_title" context "assignment.legacy.detail" %}
                 </h6>
                 
                 <div class="mt-2">
@@ -130,7 +130,7 @@
                         </div>
                         
                         <small class="text-muted d-block mb-2">
-                            <i class="bi bi-calendar3 me-1"></i> {{ submission.submitted_at|date:"d.m.Y H:i" }}
+                            <i class="fas fa-calendar me-1"></i> {{ submission.submitted_at|date:"d.m.Y H:i" }}
                         </small>
                         
                         <p class="text-secondary small mb-2 bg-light p-2 rounded-3">
@@ -147,7 +147,7 @@
 
                         {% if submission.feedback %}
                         <div class="mt-2 p-3 rounded-3 as-feedback">
-                            <strong class="as-text-dark"><i class="bi bi-chat-left-text me-1"></i>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong><br>
+                            <strong class="as-text-dark"><i class="fas fa-comment-dots me-1"></i>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong><br>
                             <span class="text-secondary">{{ submission.feedback }}</span>
                         </div>
                         {% endif %}

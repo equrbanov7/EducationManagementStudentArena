@@ -5,7 +5,7 @@
     <div class="d-flex w-100 justify-content-between align-items-start mb-2">
         <div class="flex-grow-1">
             <h6 class="mb-1 fw-bold">
-                <i class="bi bi-file-text text-warning"></i> {{ a.title }}
+                <i class="fas fa-file-lines text-warning"></i> {{ a.title }}
             </h6>
 
             {% if a.description %}
@@ -14,7 +14,7 @@
 
             <div class="d-flex flex-wrap gap-3 mb-3">
                 <small class="text-muted">
-                    <i class="bi bi-calendar-event"></i>
+                    <i class="fas fa-calendar-day"></i>
                     <strong>{% trans "duration" context "assignment.legacy.item" %}:</strong> {{ a.deadline|date:"d.m.Y H:i" }}
                     {% if a.is_deadline_passed %}
                         <span class="badge bg-danger ms-1">❌ {% trans "deadline_passed" context "assignment.legacy.item" %}</span>
@@ -27,7 +27,7 @@
                 {% if not request.user.is_teacher %}
                     {% user_attempts a request.user as attempts %}
                     <small class="text-muted">
-                        <i class="bi bi-arrow-repeat"></i>
+                        <i class="fas fa-arrows-rotate"></i>
                         <strong>{% trans "attempts" context "assignment.legacy.item" %}:</strong> {{ attempts }} / {{ a.max_attempts }}
                     </small>
                 {% endif %}
@@ -38,12 +38,12 @@
         {% if request.user.is_teacher %}
         <div class="ms-2 text-end">
             <span class="badge bg-info-subtle text-info">
-                <i class="bi bi-chat-left-text"></i> {{ a.get_submissions_count }} {% trans "answers" context "assignment.legacy.item" %}
+                <i class="fas fa-comment-dots"></i> {{ a.get_submissions_count }} {% trans "answers" context "assignment.legacy.item" %}
             </span>
             {% if a.get_pending_submissions > 0 %}
                 <br>
                 <span class="badge bg-warning text-dark mt-1">
-                    <i class="bi bi-hourglass-split"></i> {{ a.get_pending_submissions }} {% trans "pending" context "assignment.legacy.item" %}
+                    <i class="fas fa-hourglass-half"></i> {{ a.get_pending_submissions }} {% trans "pending" context "assignment.legacy.item" %}
                 </span>
             {% endif %}
         </div>
@@ -54,17 +54,17 @@
         {% if request.user.is_teacher %}
             <a href="{% url 'assignments:review_assignment_submissions' a.id %}"
                class="btn btn-sm btn-info">
-                <i class="bi bi-eye"></i> {% trans "view_answers" context "assignment.legacy.item" %}
+                <i class="fas fa-eye"></i> {% trans "view_answers" context "assignment.legacy.item" %}
             </a>
             <button type="button"
                     class="btn btn-sm btn-warning js-edit-assignment"
                     data-url="{% url 'assignments:edit_assignment' a.id %}">
-                <i class="bi bi-pencil"></i> {% trans "edit" context "assignment.legacy.item" %}
+                <i class="fas fa-pencil"></i> {% trans "edit" context "assignment.legacy.item" %}
             </button>
             <button type="button"
                     class="btn btn-sm btn-danger js-delete-assignment"
                     data-url="{% url 'assignments:delete_assignment' a.id %}">
-                <i class="bi bi-trash"></i> {% trans "delete" context "assignment.legacy.item" %}
+                <i class="fas fa-trash"></i> {% trans "delete" context "assignment.legacy.item" %}
             </button>
         {% else %}
             {# Tələbə üçün #}
@@ -75,7 +75,7 @@
             {% if attempts > 0 %}
                 <a href="{% url 'assignments:my_submissions' a.id %}"
                    class="btn btn-sm btn-outline-info">
-                    <i class="bi bi-list-check"></i> {% trans "my_answers" context "assignment.legacy.item" %} ({{ attempts }})
+                    <i class="fas fa-list-check"></i> {% trans "my_answers" context "assignment.legacy.item" %} ({{ attempts }})
                 </a>
             {% endif %}
             
@@ -83,11 +83,11 @@
             {% if can_submit_now %}
                 <a href="{% url 'assignments:assignment_detail' a.id %}"
                    class="btn btn-sm btn-primary">
-                    <i class="bi bi-arrow-right"></i> {% trans "answer" context "assignment.legacy.item" %}
+                    <i class="fas fa-arrow-right"></i> {% trans "answer" context "assignment.legacy.item" %}
                 </a>
             {% elif attempts >= a.max_attempts %}
                 <span class="btn btn-sm btn-secondary disabled">
-                    <i class="bi bi-x-circle"></i> {% trans "attempts_finished" context "assignment.legacy.item" %}
+                    <i class="fas fa-circle-xmark"></i> {% trans "attempts_finished" context "assignment.legacy.item" %}
                 </span>
             {% endif %}
         {% endif %}

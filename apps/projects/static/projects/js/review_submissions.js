@@ -75,14 +75,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     alert(`${i18n.errorPrefix}${data.error || i18n.unknownError}`);
                     btn.disabled = false;
-                    btn.innerHTML = `<i class="bi bi-check-circle"></i> ${i18n.gradeButton}`;
+                    btn.innerHTML = `<i class="fas fa-circle-check"></i> ${i18n.gradeButton}`;
                 }
             })
             .catch(err => {
                 console.error(err);
                 alert(i18n.serverError);
                 btn.disabled = false;
-                btn.innerHTML = `<i class="bi bi-check-circle"></i> ${i18n.gradeButton}`;
+                btn.innerHTML = `<i class="fas fa-circle-check"></i> ${i18n.gradeButton}`;
             });
     });
 });

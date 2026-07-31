@@ -75,7 +75,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
         <div class="stats-container">
             {% if wb_show_settings %}
             <div class="stat-card settings-card">
-                <div class="stat-icon blue"><i class="bi bi-gear-fill"></i></div>
+                <div class="stat-icon blue"><i class="fas fa-gear"></i></div>
                 <div class="card-content-wrapper">
                     <div class="quick-settings">
                         <div class="qs-item">
@@ -96,7 +96,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
             </div>
             {% else %}
             <div class="stat-card">
-                <div class="stat-icon blue"><i class="bi bi-list-check"></i></div>
+                <div class="stat-icon blue"><i class="fas fa-list-check"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">{% trans "stat_total_questions" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value">{{ parsed|length }}</span>
@@ -105,7 +105,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
             {% endif %}
 
             <div class="stat-card stat-card--clickable" data-filter-trigger="has-error" title="{% trans 'Yalnız xətalı sualları göstər' context 'exams.template.test_question_bank' %}">
-                <div class="stat-icon red"><i class="bi bi-x-octagon-fill"></i></div>
+                <div class="stat-icon red"><i class="fas fa-circle-xmark"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">{% trans "Xətalar" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value" id="totalErrors">{{ error_count|default:0 }}</span>
@@ -113,7 +113,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
             </div>
 
             <div class="stat-card stat-card--clickable" data-filter-trigger="has-warning" title="{% trans 'Yalnız xəbərdarlıqlı sualları göstər' context 'exams.template.test_question_bank' %}">
-                <div class="stat-icon yellow"><i class="bi bi-exclamation-triangle"></i></div>
+                <div class="stat-icon yellow"><i class="fas fa-triangle-exclamation"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">{% trans "stat_warnings" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
@@ -121,7 +121,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
             </div>
 
             <div class="stat-card stat-card--clickable" data-filter-trigger="has-dup" title="{% trans 'Yalnız dublikatları göstər' context 'exams.template.test_question_bank' %}">
-                <div class="stat-icon red"><i class="bi bi-layers"></i></div>
+                <div class="stat-icon red"><i class="fas fa-layer-group"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">{% trans "stat_duplicates" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span>
@@ -292,7 +292,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     <div class="template-download__actions">
                         {% for tpl in wb_templates %}
                         <a class="template-download__btn template-download__btn--{{ tpl.kind }}" href="{{ tpl.url }}" download>
-                            <i class="bi bi-file-earmark-{% if tpl.kind == 'docx' %}word{% else %}text{% endif %}-fill"></i> {{ tpl.label }}
+                            <i class="fas fa-file{% if tpl.kind == 'docx' %}word{% else %}text{% endif %}-fill"></i> {{ tpl.label }}
                         </a>
                         {% endfor %}
                     </div>
@@ -367,13 +367,13 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
         {% if test_level_warnings %}
         <div class="bulk-warning-panel" id="warningsPanel" role="alert" aria-live="polite">
             <div class="bulk-warning-panel__head">
-                <i class="bi bi-exclamation-octagon-fill"></i>
+                <i class="fas fa-circle-exclamation"></i>
                 <h5>{% trans "Testdə diqqət edilməli pattern aşkarlandı" context "exams.template.test_question_bank" %}</h5>
             </div>
             <ul class="bulk-warning-panel__list">
                 {% for w in test_level_warnings %}
                 <li class="bulk-warning-panel__item bulk-warning-panel__item--{{ w.severity|default:'warning' }}">
-                    <i class="bi bi-info-circle-fill"></i>
+                    <i class="fas fa-circle-info"></i>
                     <span>{{ w.msg }}</span>
                 </li>
                 {% endfor %}
