@@ -71,6 +71,36 @@ def subject_search(request):
     return JsonResponse({"results": results, "has_more": has_more})
 
 
+@login_required
+@require_GET
+def bank_teacher_search(request):
+    """Müəllim axtarışı (sual bankı atribusiyası) — təşkilatın müəllim-rol üzvləri.
+
+    Bank yaratma kartındakı "sualı göndərən müəllim" axtarışlı seçicisi üçün:
+    ad/soyad/istifadəçi adı üzrə, səhifələnən (lazy).
+    """
+    _ensure_teacher(request.user)
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return JsonResponse({"results": [], "has_more": False})
+
+    query = (request.GET.get("q") or "").strip()
+    qs = organization_role_user_queryset(
+        organization,
+        {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
+        queryset=User.objects.filter(is_active=True),
+    )
+    if query:
+        qs = qs.filter(Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query))
+    qs = qs.distinct().order_by("first_name", "last_name", "username")
+
+    offset, limit = _page_bounds(request)
+    results, has_more = _paginate(
+        qs, offset, limit, lambda u: {"id": str(u.id), "text": u.get_full_name() or u.username}
+    )
+    return JsonResponse({"results": results, "has_more": has_more})
+
+
 def _org_user_queryset(request, organization):
     """İmtahan formasındakı `allowed_users` queryset-i ilə eyni scope."""
     qs = User.objects.filter(is_active=True).exclude(id=request.user.id)
