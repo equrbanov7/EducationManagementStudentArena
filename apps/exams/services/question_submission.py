@@ -116,6 +116,8 @@ def submit_question_set(
     language,
     raw_text,
     student_group=None,
+    subject_ref=None,
+    exam_kind="",
     parsed=None,
     teacher_note="",
     import_token="",
@@ -140,6 +142,8 @@ def submit_question_set(
         organization=organization,
         title=title,
         subject=subject,
+        subject_ref=subject_ref,
+        exam_kind=(exam_kind or "").strip().lower(),
         student_group=student_group,
         group_label=group_label,
         language=language,
@@ -158,6 +162,8 @@ def resubmit_question_set(
     *,
     title=None,
     subject=None,
+    subject_ref=...,
+    exam_kind=None,
     group_label=None,
     language=None,
     raw_text=None,
@@ -182,6 +188,10 @@ def resubmit_question_set(
         submission.title = title.strip()
     if subject is not None and subject.strip():
         submission.subject = subject.strip()
+    if subject_ref is not ...:
+        submission.subject_ref = subject_ref
+    if exam_kind is not None:
+        submission.exam_kind = (exam_kind or "").strip().lower()
     if group_label is not None and group_label.strip():
         submission.group_label = group_label.strip()
     if student_group is not ...:
@@ -249,14 +259,20 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
 
     if bank is None:
         bank_name = (new_bank_name or "").strip() or submission.title
+        # Bank göndərişin meta-sı ilə yaradılır: fənn (kataloq bağlantısı ilə),
+        # imtahan növü və mənbə müəllim — mərkəz sonra filtr/atribusiya üçün
+        # istifadə edir. Banklar default gizlidir (paylaşım UI-dan çıxarılıb).
         bank = QuestionBank.objects.create(
             name=bank_name,
             subject=submission.subject or submission.title,
+            subject_ref=submission.subject_ref,
+            exam_kind=submission.exam_kind,
+            source_teacher=submission.teacher,
             language=submission.language,
             default_question_type="test",
             organization=submission.organization,
             created_by=reviewer,
-            is_shared=True,
+            is_shared=False,
         )
     elif bank.organization_id != submission.organization_id:
         raise ValidationError(pgettext("exams.service.question_submission.error", "Bank başqa təşkilata aiddir."))

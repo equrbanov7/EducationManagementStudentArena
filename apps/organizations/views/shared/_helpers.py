@@ -3,6 +3,7 @@
 from django.utils.text import slugify
 
 from ...models import OrgUnit
+from ...scoping import scope_org_units
 from ...services import can_user_manage_org, is_tenant_accessible_organization
 
 
@@ -63,7 +64,13 @@ def _can_view_structure(request, organization, scope):
 
 
 def _visible_units_queryset(organization, scope):
+    """Scope-a görə görünən OrgUnit-lər — FAIL-CLOSED.
+
+    TƏHLÜKƏSİZLİK: əvvəl scope nə org-wide, nə unit-scoped olanda (yəni
+    ``EMPTY_SCOPE`` — məs. scope_unit təyin edilməmiş dekan) HEÇ BİR filtr
+    tətbiq olunmurdu və istifadəçi bütün təşkilat strukturunu görüb redaktə edə
+    bilirdi. Kanonik :func:`scope_org_units` bu halda ``none()`` qaytarır — ona
+    delegate edirik ki, iki fərqli davranış qalmasın.
+    """
     units = OrgUnit.objects.filter(organization=organization, is_active=True)
-    if scope.is_unit_scoped:
-        units = units.filter(scope.unit_subtree_q())
-    return units
+    return scope_org_units(units, scope)

@@ -185,3 +185,29 @@ __all__ = [
     "scope_memberships_by_unit",
     "scope_org_units",
 ]
+
+
+def user_scope_covers_unit(user, organization, unit_id) -> bool:
+    """İstifadəçinin unit alt-ağacı verilmiş bölməni əhatə edirmi.
+
+    MODUL SƏRHƏDİ: bu yoxlama registrar-dan (jurnal təsdiqi) lazımdır, lakin
+    registrar ``apps.organizations``-u Python səviyyəsində İMPORT ETMİR — əks
+    halda ``organizations ↔ registrar`` dövrü yaranır (organizations seed əmri
+    registrar-ı import edir). Registrar organizations modellərini yalnız app
+    registry ilə həll edir (bax ``apps/registrar/public.py`` şərhinə), ona görə
+    məntiq burada, öz modulunda qalır və modeldən nazik delegator ilə çağırılır.
+
+    ``unit_id`` ``None``-dursa ``False`` — unit-scope istifadəçi üçün aidiyyəti
+    müəyyən deyil, org-wide səlahiyyət tələb olunur.
+
+    Scope ÜMUMİYYƏTLƏ təyin edilməyibsə ``True`` qaytarılır: qərar çağırana
+    qalır. Bu, strukturu hələ qurmamış təşkilatlarda mövcud davranışı saxlayır.
+    """
+    from .models import OrgUnit
+
+    scope = get_unit_scope(user, organization)
+    if scope.is_org_wide or not scope.has_structure_access:
+        return True
+    if unit_id is None:
+        return False
+    return OrgUnit.objects.filter(scope.unit_subtree_q()).filter(pk=unit_id).exists()

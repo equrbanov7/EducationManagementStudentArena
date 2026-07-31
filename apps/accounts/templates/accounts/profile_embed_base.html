@@ -23,6 +23,9 @@ Uşaq şablon təmin edir:
     {% profile_sidebar embed_active_section %}
     <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
     <main class="profile-main">
+        {% comment %}SPA ilə eyni header: mobil sidebar açma düyməsi + başlıq +
+        view-as paneli. `embed_section_title` view kontekstindən gəlir.{% endcomment %}
+        {% include "accounts/profile/_header.html" with active_section_title=embed_section_title %}
         {% include "accounts/profile/_messages.html" %}
         <div class="profile-sections profile-sections--embed">
             {% block embed_content %}{% endblock %}
@@ -32,7 +35,13 @@ Uşaq şablon təmin edir:
 {% endblock %}
 
 {% block extraJs %}
-    {% comment %}Mobil sidebar açar düyməsi — SPA yükləmədən yüngül toggle.{% endcomment %}
-    <script src="{% static 'accounts/js/profile_embed_base.js' %}"></script>
+    {% comment %}SPA sidebar stack-inin minimal hissəsi: akkordeon qruplar,
+    collapse chevron (localStorage ilə), mobil collapse + backdrop. init.js /
+    section_loader.js YÜKLƏNMİR — bu səhifə SPA deyil, ui.js null-guard-ları
+    ilə yalnız sidebar davranışını qurur.{% endcomment %}
+    <script src="{% static 'accounts/js/profile/namespace.js' %}"></script>
+    <script src="{% static 'accounts/js/profile/ui.js' %}?v=20260730-embed"></script>
+    <script src="{% static 'accounts/js/profile/embed_init.js' %}?v=20260730-embed"></script>
+    <script src="{% static 'accounts/js/profile/profile.entry.js' %}"></script>
     {% block embed_extra_js %}{% endblock %}
 {% endblock %}

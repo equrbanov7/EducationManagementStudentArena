@@ -62,7 +62,7 @@
         <form method="post" class="reply-form" novalidate>
             {% csrf_token %}
 
-            <div class="c3-1">
+            <div class="reply-1">
                 <label for="{{ form.reply_from.id_for_label }}">{{ form.reply_from.label }}</label>
                 {{ form.reply_from }}
                 {{ form.reply_from.errors }}
@@ -71,7 +71,7 @@
                 </p>
             </div>
 
-            <div class="c3-1">
+            <div class="reply-1">
                 <label for="{{ form.reply_body.id_for_label }}">{{ form.reply_body.label }}</label>
                 {{ form.reply_body }}
                 {{ form.reply_body.errors }}
@@ -112,7 +112,7 @@
         {% if message.reply_delivery_error %}
         <div class="reply-error">{{ message.reply_delivery_error }}</div>
         {% endif %}
-        <div class="original-msg c3-2">{{ message.reply_body }}</div>
+        <div class="original-msg reply-2">{{ message.reply_body }}</div>
     </div>
     {% endif %}
 

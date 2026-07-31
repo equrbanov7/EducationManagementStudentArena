@@ -11,6 +11,11 @@
     --view-as-full: #7c2d92;
     --view-as-full-bg: linear-gradient(90deg, #fdf4ff, #fae8ff);
     --view-as-full-border: #c026d3;
+    /* LIMITED — imtahan mərkəzi / İKT: yalnız öz sahəsində dəyişiklik.
+       Rəng qəsdən readonly (amber) və full (bənövşəyi) arasında fərqlidir. */
+    --view-as-limited: #0e7490;
+    --view-as-limited-bg: linear-gradient(90deg, #ecfeff, #cffafe);
+    --view-as-limited-border: #0891b2;
 }
 
 /* --- Viewport çərçivəsi (scroll zamanı da görünür) ----------------------- */
@@ -22,6 +27,7 @@
 }
 .view-as-frame--readonly { box-shadow: inset 0 0 0 4px var(--view-as-readonly-border); }
 .view-as-frame--full { box-shadow: inset 0 0 0 4px var(--view-as-full-border); }
+.view-as-frame--limited { box-shadow: inset 0 0 0 4px var(--view-as-limited-border); }
 
 /* --- Yuxarı banner -------------------------------------------------------- */
 .view-as-banner {
@@ -35,6 +41,10 @@
     background: var(--view-as-full-bg);
     border-bottom-color: var(--view-as-full-border);
 }
+.view-as-banner--limited {
+    background: var(--view-as-limited-bg);
+    border-bottom-color: var(--view-as-limited-border);
+}
 .view-as-banner__inner {
     max-width: 1320px;
     margin: 0 auto;
@@ -47,6 +57,7 @@
 }
 .view-as-banner--readonly .view-as-banner__inner { color: var(--view-as-readonly); }
 .view-as-banner--full .view-as-banner__inner { color: var(--view-as-full); }
+.view-as-banner--limited .view-as-banner__inner { color: var(--view-as-limited); }
 
 .view-as-banner__icon {
     width: 30px;
@@ -90,6 +101,7 @@
 }
 .view-as-banner--readonly .view-as-banner__chip { background: var(--view-as-readonly-border); }
 .view-as-banner--full .view-as-banner__chip { background: var(--view-as-full-border); }
+.view-as-banner--limited .view-as-banner__chip { background: var(--view-as-limited-border); }
 
 .view-as-banner__warning {
     flex: 1 1 280px;
@@ -113,6 +125,7 @@
 }
 .view-as-banner--readonly .view-as-banner__exit { background: var(--view-as-readonly-border); }
 .view-as-banner--full .view-as-banner__exit { background: var(--view-as-full-border); }
+.view-as-banner--limited .view-as-banner__exit { background: var(--view-as-limited-border); }
 .view-as-banner__exit:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18); }
 
 /* --- Üzən pill (aşağıda, həmişə görünür) ---------------------------------- */
@@ -135,6 +148,7 @@
 }
 .view-as-pill--readonly { background: var(--view-as-readonly-border); }
 .view-as-pill--full { background: var(--view-as-full-border); }
+.view-as-pill--limited { background: var(--view-as-limited-border); }
 .view-as-pill form { margin: 0; display: inline-flex; }
 .view-as-pill__name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .view-as-pill__exit {
@@ -148,6 +162,7 @@
 }
 .view-as-pill--readonly .view-as-pill__exit { color: var(--view-as-readonly); }
 .view-as-pill--full .view-as-pill__exit { color: var(--view-as-full); }
+.view-as-pill--limited .view-as-pill__exit { color: var(--view-as-limited); }
 .view-as-pill__exit:hover { background: var(--ems-neutral-0); }
 
 @keyframes viewAsPillIn {

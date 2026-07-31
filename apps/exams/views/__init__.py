@@ -58,6 +58,7 @@ from .student.question_timer import question_seen
 from .student.results import exam_result, student_exam_history
 from .teacher.exams import (
     assigned_student_count,
+    bank_teacher_search,
     createAndEditExamView,
     delete_exam,
     deleted_exams_list,
@@ -133,15 +134,18 @@ from .teacher.statistics import teacher_exam_statistics
 from .teacher.submission_inbox import (
     ai_generate_submission_questions,
     question_submission_create,
-    question_submission_decide,
     question_submission_delete,
     question_submission_detail,
-    question_submission_inbox,
-    question_submission_review,
 )
 from .teacher.submission_media import (
     question_import_visual_preview,
     question_submission_visual_preview,
+)
+from .teacher.submission_review import (
+    question_submission_decide,
+    question_submission_inbox,
+    question_submission_questions,
+    question_submission_review,
 )
 from .teacher.supervision import (
     log_incident_api,
@@ -185,6 +189,7 @@ __all__ = [
     "grant_extra_attempt_group",
     "group_search",
     "invigilator_search",
+    "bank_teacher_search",
     "subject_search",
     "user_search",
     # Teacher - Questions
@@ -218,6 +223,7 @@ __all__ = [
     "question_submission_delete",
     "question_submission_detail",
     "question_submission_inbox",
+    "question_submission_questions",
     "question_submission_review",
     "question_submission_visual_preview",
     "question_import_visual_preview",

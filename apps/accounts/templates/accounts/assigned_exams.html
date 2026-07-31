@@ -11,7 +11,7 @@
 {% block content %}
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (external css — assigned_exams.css).{% endcomment %}
 <div class="profile-page">
-    <div class="profile-main c3-1">
+    <div class="profile-main assigned-exams-1">
         <div class="profile-header">
             <h1 class="profile-title">
                 <i class="fas fa-file-alt"></i> {% trans "heading" context "accounts.assigned_exams_page" %}
@@ -71,7 +71,7 @@
     </div>
 </div>
 
-<div id="exam-code-backdrop" class="exam-code-backdrop c3-hidden"
+<div id="exam-code-backdrop" class="exam-code-backdrop assigned-exams-hidden"
      data-i18n-modal-title="{% trans 'modal_title' context 'accounts.assigned_exams_page' %}"
      data-i18n-prompt-template="{% trans 'modal_prompt_template' context 'accounts.assigned_exams_page' %}"
      data-i18n-code-required="{% trans 'access_code_required' context 'exams.model.access' %}"
@@ -98,7 +98,7 @@
                        autocomplete="off"
                        inputmode="numeric"
                        required>
-                <div id="exam-code-error" class="c3-2" hidden></div>
+                <div id="exam-code-error" class="assigned-exams-2" hidden></div>
             </div>
             <div class="exam-code-actions">
                 <button type="button" class="btn-modal btn-cancel" data-close-exam-code-modal>{% trans "modal_cancel" context "accounts.assigned_exams_page" %}</button>

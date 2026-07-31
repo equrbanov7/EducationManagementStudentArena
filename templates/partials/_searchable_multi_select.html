@@ -10,8 +10,8 @@
 {% load i18n %}
 {% trans "student_registered_group_number" context "profile.groups" as student_group_label %}
 
-<div class="form-group custom-selector-group">
-    <label class="form-label-custom">{{ label }}</label>
+<div class="form-group custom-selector-group" role="group" aria-labelledby="{{ container_id }}_label">
+    <div class="form-label-custom" id="{{ container_id }}_label">{{ label }}</div>
     
     <div class="search-wrapper">
         <i class="fas fa-search search-icon"></i>

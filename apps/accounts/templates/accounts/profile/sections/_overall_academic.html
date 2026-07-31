@@ -55,9 +55,10 @@ decoration over the same enrollment aggregation the "Transkript" section uses
             </div>
 
             <div class="oa-filter-select">
-                <label class="oa-filter-label">{% trans "Tədris ili" context "profile.overall_academic" %}</label>
+                <label class="oa-filter-label" for="oa-year-filter">{% trans "Tədris ili" context "profile.overall_academic" %}</label>
                 <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                    <select id="oa-year-filter"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                             data-bootstrap-select data-oa-year-filter>
                         <option value="">{% trans "Hamısı" context "profile.overall_academic" %}</option>
                         {% for y in oa.year_options %}
@@ -68,9 +69,10 @@ decoration over the same enrollment aggregation the "Transkript" section uses
             </div>
 
             <div class="oa-filter-select">
-                <label class="oa-filter-label">{% trans "Semestr" context "profile.overall_academic" %}</label>
+                <label class="oa-filter-label" for="oa-season-filter">{% trans "Semestr" context "profile.overall_academic" %}</label>
                 <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                    <select id="oa-season-filter"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                             data-bootstrap-select data-oa-season-filter>
                         <option value="">{% trans "Hamısı" context "profile.overall_academic" %}</option>
                         {% for s in oa.season_options %}
@@ -81,9 +83,10 @@ decoration over the same enrollment aggregation the "Transkript" section uses
             </div>
 
             <div class="oa-filter-select">
-                <label class="oa-filter-label">{% trans "Dərəcə (qiymət)" context "profile.overall_academic" %}</label>
+                <label class="oa-filter-label" for="oa-letter-filter">{% trans "Dərəcə (qiymət)" context "profile.overall_academic" %}</label>
                 <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                    <select id="oa-letter-filter"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                             data-bootstrap-select data-oa-letter-filter>
                         <option value="">{% trans "Hamısı" context "profile.overall_academic" %}</option>
                         <option value="A">{% trans "A — aldığım" context "profile.overall_academic" %}</option>

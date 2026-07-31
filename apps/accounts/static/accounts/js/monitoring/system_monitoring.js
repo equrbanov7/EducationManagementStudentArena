@@ -85,9 +85,13 @@
             var days = Math.floor(seconds / 86400);
             var hours = Math.floor(seconds % 86400 / 3600);
             var minutes = Math.floor(seconds % 3600 / 60);
-            if (days > 0) return days + " gün " + hours + " saat";
-            if (hours > 0) return hours + " saat " + minutes + " dəq";
-            return minutes + " dəq " + (seconds % 60) + " san";
+            if (days > 0) {
+                return interpolate(gettext("%(days)s gün %(hours)s saat"), { days: days, hours: hours }, true);
+            }
+            if (hours > 0) {
+                return interpolate(gettext("%(hours)s saat %(minutes)s dəq"), { hours: hours, minutes: minutes }, true);
+            }
+            return interpolate(gettext("%(minutes)s dəq %(seconds)s san"), { minutes: minutes, seconds: seconds % 60 }, true);
         }
 
         function percent(value) {
@@ -124,7 +128,8 @@
         function chartPanel(title, id) {
             return '<div class="smx-panel"><h4>' + escapeHtml(title) + '</h4><div class="smx-chart">' +
                 '<canvas id="' + id + '"></canvas>' +
-                '<div class="smx-chart-empty" hidden>Məlumat yoxdur</div></div></div>';
+                '<div class="smx-chart-empty" hidden>' + escapeHtml(gettext("Məlumat yoxdur")) +
+                "</div></div></div>";
         }
 
         function chartGrid(items) {
@@ -161,7 +166,7 @@
                     return left.x - right.x;
                 });
                 return {
-                    label: item.label || Object.values(item.labels || {}).join(" ") || "seriya",
+                    label: item.label || Object.values(item.labels || {}).join(" ") || gettext("seriya"),
                     data: points,
                     borderColor: colors[index % colors.length],
                     backgroundColor: colors[index % colors.length] + "12",
@@ -182,7 +187,7 @@
             }
             if (typeof window.Chart !== "function") {
                 empty.hidden = false;
-                empty.textContent = "Qrafik hazırlanır…";
+                empty.textContent = gettext("Qrafik hazırlanır…");
                 if ((retry || 0) < 20) {
                     window.setTimeout(function () {
                         lineChart(id, series, options, (retry || 0) + 1);
@@ -265,23 +270,26 @@
             var end = Math.min(meta.total, start + count - 1);
             return '<div class="smx-pagination"><span class="smx-page-summary">' +
                 start + "–" + end + " / " + meta.total +
-                '</span><label>Sətir <select data-smx-page-size>' +
+                "</span><label>" + escapeHtml(gettext("Sətir")) + ' <select data-smx-page-size>' +
                 '<option value="10"' + selected(10, meta.pageSize) + '>10</option>' +
                 '<option value="20"' + selected(20, meta.pageSize) + '>20</option>' +
                 '<option value="50"' + selected(50, meta.pageSize) + '>50</option></select></label>' +
                 '<button class="smx-btn" data-smx-page="' + (meta.page - 1) + '"' +
-                (meta.hasPrevious ? "" : " disabled") + ' aria-label="Əvvəlki səhifə">‹</button>' +
+                (meta.hasPrevious ? "" : " disabled") + ' aria-label="' +
+                escapeHtml(gettext("Əvvəlki səhifə")) + '">‹</button>' +
                 "<span>" + meta.page + " / " + meta.pages + "</span>" +
                 '<button class="smx-btn" data-smx-page="' + (meta.page + 1) + '"' +
-                (meta.hasNext ? "" : " disabled") + ' aria-label="Növbəti səhifə">›</button></div>';
+                (meta.hasNext ? "" : " disabled") + ' aria-label="' +
+                escapeHtml(gettext("Növbəti səhifə")) + '">›</button></div>';
         }
 
         function setDegraded(payload) {
             if (payload && payload.status === "degraded") {
                 degradedBox.hidden = false;
-                degradedText.textContent = (payload.message || "Monitorinq asılılığı əlçatmazdır") +
+                degradedText.textContent =
+                    (payload.message || gettext("Monitorinq asılılığı əlçatmazdır")) +
                     (payload.last_successful_update ?
-                        " · son uğurlu yenilənmə: " + payload.last_successful_update : "");
+                        " · " + interpolate(gettext("son uğurlu yenilənmə: %(time)s"), { time: payload.last_successful_update }, true) : "");
                 return true;
             }
             degradedBox.hidden = true;
@@ -335,7 +343,8 @@
                 if (!preserveOnDegraded) {
                     destroyCharts();
                     body.innerHTML = '<div class="smx-empty">' +
-                        "Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur.</div>";
+                        escapeHtml(gettext("Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur.")) +
+                        "</div>";
                 }
                 return;
             }
@@ -347,7 +356,7 @@
             }
             renderers[tab](data);
             lastLoadedAt = Date.now();
-            updated.textContent = "Yeniləndi: " + new Date().toLocaleTimeString("az");
+            updated.textContent = interpolate(gettext("Yeniləndi: %(time)s"), { time: new Date().toLocaleTimeString("az") }, true);
         }
 
         function load(tab, options) {
@@ -379,8 +388,12 @@
             if (controller) fetchOptions.signal = controller.signal;
             var promise = fetch(api + tab + "/?" + new URLSearchParams(params), fetchOptions)
                 .then(function (response) {
-                    if (response.status === 403) throw new Error("Bu bölməyə icazəniz yoxdur.");
-                    if (!response.ok) throw new Error("Server xətası: " + response.status);
+                    if (response.status === 403) {
+                        throw new Error(gettext("Bu bölməyə icazəniz yoxdur."));
+                    }
+                    if (!response.ok) {
+                        throw new Error(interpolate(gettext("Server xətası: %(status)s"), { status: response.status }, true));
+                    }
                     return response.json();
                 })
                 .then(function (payload) {
@@ -396,7 +409,7 @@
                     if (error.name === "AbortError") return null;
                     if (!destroyed && sequence === requestSequence && tab === activeTab) {
                         if (options.silent) {
-                            updated.textContent = "Yeniləmə alınmadı";
+                            updated.textContent = gettext("Yeniləmə alınmadı");
                         } else {
                             body.innerHTML = '<div class="smx-error">' +
                                 '<i class="fas fa-circle-exclamation"></i> ' +
@@ -521,7 +534,7 @@
             var actionButton = event.target.closest("[data-inc]");
             if (!actionButton) return;
             var note = actionButton.dataset.act === "resolve" ?
-                (window.prompt("Həll qeydi (istəyə bağlı):") || "") : "";
+                (window.prompt(gettext("Həll qeydi (istəyə bağlı):")) || "") : "";
             fetch(api + "incidents/" + actionButton.dataset.inc + "/action/", {
                 method: "POST",
                 credentials: "same-origin",
@@ -534,7 +547,7 @@
                     note: note,
                 }).toString(),
             }).then(function (response) {
-                if (!response.ok) throw new Error("Əməliyyat icra olunmadı.");
+                if (!response.ok) throw new Error(gettext("Əməliyyat icra olunmadı."));
                 invalidate("incidents");
                 return load("incidents", { force: true });
             }).catch(function (error) {

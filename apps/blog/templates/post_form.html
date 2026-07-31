@@ -15,7 +15,7 @@
             {% trans "subheading" context "blog.post_form_page" %}
         </p>
         {% if requires_approval %}
-            <div class="c3-1">
+            <div class="post-form-1">
                 {% trans 'Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq.' %}
             </div>
         {% endif %}
@@ -62,15 +62,15 @@
                 {% endif %}
             </div>
 
-            <div class="post-form-group">
-                <label>{% trans "image_selection_label" context "blog.post_form_page" %}</label>
+            <div class="post-form-group" role="group" aria-labelledby="post-image-selection-label">
+                <label id="post-image-selection-label">{% trans "image_selection_label" context "blog.post_form_page" %}</label>
 
                 {{ form.image_url }}
                 {% if form.image_url.errors %}
                     <div class="post-form-field-error">{{ form.image_url.errors.0 }}</div>
                 {% endif %}
 
-                <div class="c3-2">
+                <div class="post-form-2">
                     {% trans "or_upload_from_device" context "blog.post_form_page" %}
                 </div>
 

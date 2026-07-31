@@ -91,7 +91,7 @@
         form.querySelector("[data-jd-cw-date]").value = btn.getAttribute("data-date") || "";
         var title = document.querySelector("[data-jd-cw-formtitle]");
         if (title && btn.getAttribute("data-student")) {
-            title.textContent = btn.getAttribute("data-student") + " — kurs işi";
+            title.textContent = interpolate(gettext("%(student)s — kurs işi"), { student: btn.getAttribute("data-student") }, true);
         }
         form.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
@@ -391,13 +391,12 @@
         overlay.innerHTML =
             '<div class="jd-sw-del__box" role="alertdialog" aria-modal="true">' +
             '<div class="jd-sw-del__icon"><i class="fas fa-triangle-exclamation"></i></div>' +
-            '<h3 class="jd-sw-del__title">Mövzunu silmək?</h3>' +
+            '<h3 class="jd-sw-del__title">' + gettext("Mövzunu silmək?") + '</h3>' +
             (title ? '<div class="jd-sw-del__topic">“' + escapeHtml(title) + '”</div>' : '') +
-            '<p class="jd-sw-del__body">Bu mövzu silinəcək və <b>tələbələrin bu mövzu üzrə balları da silinəcək</b>. ' +
-            'Bu əməliyyat geri qaytarıla bilməz.</p>' +
+            '<p class="jd-sw-del__body">' + gettext("Bu mövzu silinəcək və") + ' <b>' + gettext("tələbələrin bu mövzu üzrə balları da silinəcək") + '</b>. ' + gettext("Bu əməliyyat geri qaytarıla bilməz.") + '</p>' +
             '<div class="jd-sw-del__actions">' +
-            '<button type="button" class="jd-sw-del__cancel">Ləğv et</button>' +
-            '<button type="button" class="jd-sw-del__ok">Sil</button>' +
+            '<button type="button" class="jd-sw-del__cancel">' + gettext("Ləğv et") + '</button>' +
+            '<button type="button" class="jd-sw-del__ok">' + gettext("Sil") + '</button>' +
             '</div></div>';
         function close() { if (overlay.parentNode) { overlay.parentNode.removeChild(overlay); } }
         overlay.addEventListener("click", function (e) { if (e.target === overlay) { close(); } });
@@ -427,10 +426,10 @@
     // mətn/düymə mətni forma data-confirm-* atributlarından oxunur. z-index 2000 →
     // dərs modalının (1080) üstündə görünür.
     function showJdConfirm(triggerForm, onOk) {
-        var title = triggerForm.getAttribute("data-confirm-title") || "Təsdiq";
+        var title = triggerForm.getAttribute("data-confirm-title") || gettext("Təsdiq");
         var body = triggerForm.getAttribute("data-confirm-body") || "";
         var detail = triggerForm.getAttribute("data-confirm-detail") || "";
-        var okLabel = triggerForm.getAttribute("data-confirm-ok") || "Təsdiqlə";
+        var okLabel = triggerForm.getAttribute("data-confirm-ok") || gettext("Təsdiqlə");
         var existing = document.querySelector(".jd-sw-del-overlay");
         if (existing) { existing.parentNode.removeChild(existing); }
         var overlay = document.createElement("div");
@@ -442,7 +441,7 @@
             (detail ? '<div class="jd-sw-del__topic">' + escapeHtml(detail) + '</div>' : '') +
             (body ? '<p class="jd-sw-del__body">' + escapeHtml(body) + '</p>' : '') +
             '<div class="jd-sw-del__actions">' +
-            '<button type="button" class="jd-sw-del__cancel">Ləğv et</button>' +
+            '<button type="button" class="jd-sw-del__cancel">' + gettext("Ləğv et") + '</button>' +
             '<button type="button" class="jd-sw-del__ok">' + escapeHtml(okLabel) + '</button>' +
             '</div></div>';
         function close() { if (overlay.parentNode) { overlay.parentNode.removeChild(overlay); } }
@@ -501,7 +500,7 @@
         // Backend qaydası ilə eyni: semestr başlanğıc həftəsi = 1 (ÜST/odd).
         var weeks = Math.floor((mondayOf(dateInput.value) - mondayOf(periodStart)) / 604800000) + 1;
         var isUst = weeks % 2 === 1;
-        parityBadge.textContent = isUst ? "ÜST HƏFTƏ" : "ALT HƏFTƏ";
+        parityBadge.textContent = isUst ? gettext("ÜST HƏFTƏ") : gettext("ALT HƏFTƏ");
         parityBadge.classList.toggle("is-ust", isUst);
         parityBadge.classList.toggle("is-alt", !isUst);
         parityBadge.hidden = false;

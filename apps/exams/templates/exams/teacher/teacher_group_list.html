@@ -176,14 +176,14 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label-custom">{% trans "label_select_students" context "exams.template.teacher_group_list" %}</label>
+          <label class="form-label-custom" id="group-students-label">{% trans "label_select_students" context "exams.template.teacher_group_list" %}</label>
 
           <div class="student-search-wrapper">
             <i class="fas fa-search search-icon"></i>
             <input type="text" id="studentSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_name_or_username' context 'exams.template.teacher_group_list' %}">
           </div>
 
-          <div id="studentListContainer" class="student-list-container">
+          <div id="studentListContainer" class="student-list-container" role="group" aria-labelledby="group-students-label">
             <div class="text-center text-muted p-3">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
           </div>
 
@@ -219,14 +219,14 @@
 
         {% if can_multi_assign_teachers %}
           <div class="mb-3">
-            <label class="form-label-custom">{% trans "label_additional_teachers_multi" context "exams.template.teacher_group_list" %}</label>
+            <label class="form-label-custom" id="group-assigned-teachers-label">{% trans "label_additional_teachers_multi" context "exams.template.teacher_group_list" %}</label>
 
             <div class="student-search-wrapper">
               <i class="fas fa-search search-icon"></i>
               <input type="text" id="assignedTeacherSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
             </div>
 
-            <div id="assignedTeacherListContainer" class="student-list-container">
+            <div id="assignedTeacherListContainer" class="student-list-container" role="group" aria-labelledby="group-assigned-teachers-label">
               <div class="text-center text-muted p-3">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
             </div>
 

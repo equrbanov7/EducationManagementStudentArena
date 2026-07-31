@@ -1,0 +1,298 @@
+name: 📈 Yük Testi (Locust)
+
+# Prod LAN-dadır (10.0.2.42) — kənardan çatmaq mümkün deyil. Bu workflow
+# self-hosted runner-də (serverin özündə) paylanmış locust işlədir və tətbiqə
+# LOKAL şəbəkə üzərindən vurur.
+#
+# NİYƏ SERVERİN ÖZÜNDƏ:
+#   20 000 virtual istifadəçi tək prosesə sığmır — locust FastHttpUser ilə
+#   nüvə başına ~1500 VU aparır. Serverdə 80 nüvə var, tətbiq isə cgroup
+#   limitiylə bir neçəsinə həbsdir; qalan nüvələr yük generatoru üçün boşdur.
+#   Yükü kənardan versək, ölçdüyümüz şey internet kanalı olardı, tətbiq yox.
+#
+# TƏHLÜKƏSİZLİK VƏ ZƏRƏR MƏHDUDLAŞDIRMASI:
+#   * `users` SƏRT tavanla (20 000) yoxlanılır — daha böyük dəyər rədd edilir.
+#   * Yalnız AĞ SİYAHIDAKI ssenari sinifləri işlədilə bilər (ixtiyari kod yox).
+#   * Test hesabları `seed_stress_test` ilə yaradılan `stress*` prefiksli
+#     hesablardır; parol `secrets.LOAD_TEST_PASSWORD`-dandır və logda görünmür.
+#   * `--stop-timeout` və `run-time` məcburidir: test öz-özünə bitir, unudulmuş
+#     yük serveri saatlarla döyə bilməz.
+#   * Deploy ilə eyni concurrency qrupu — canlı deploy-la toqquşmur.
+#   * `confirm` girişi: prod-a vurmaq üçün istifadəçi açıq şəkildə təsdiq
+#     yazmalıdır. Təsadüfi «Run workflow» klikləməsi prod-u yükləmir.
+#
+# ÖN ŞƏRTLƏR (yalnız etimadnamə tələb edən ssenarilər üçün):
+#   1. `LOAD_TEST_PASSWORD` repo secret-i yaradılmalıdır.
+#   2. Hədəf mühitdə test hesabları seed olunmalıdır:
+#        python manage.py seed_stress_test --students 500 --groups 20 \
+#          --password '<LOAD_TEST_PASSWORD ilə eyni>' --prefix stress
+#      Təmizləmə: `seed_stress_test --purge --prefix stress`.
+#   `PingUser` və `AnonymousUser` HEÇ BİR hesab tələb etmir — xam tutum ölçmək
+#   üçün onlarla başlayın.
+#
+# NƏTİCƏ: CSV + HTML hesabat artefakt kimi yüklənir; xülasə job summary-də.
+
+on:
+  workflow_dispatch:
+    inputs:
+      users:
+        description: "Virtual istifadəçi sayı (maksimum 20000)"
+        required: true
+        type: string
+        default: "500"
+      spawn_rate:
+        description: "Saniyədə neçə istifadəçi əlavə olunsun (ramp)"
+        required: true
+        type: string
+        default: "50"
+      run_time:
+        description: "Test müddəti (məs. 3m, 10m)"
+        required: true
+        type: string
+        default: "3m"
+      scenario:
+        description: "Ssenari sinfi"
+        required: true
+        type: choice
+        default: PingUser
+        options:
+          - PingUser
+          - AnonymousUser
+          - StudentUser
+          - ProfileSpaUser
+          - LiveExamJoiner
+          - LiveExamPlayer
+      target:
+        description: "Hədəf"
+        required: true
+        type: choice
+        default: local
+        options:
+          - local
+          - prod
+      confirm:
+        description: "prod üçün MƏCBURİ: «YUKLE» yazın"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: prod-ops
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  load-test:
+    name: 📈 ${{ inputs.scenario }} — ${{ inputs.users }} VU
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 45
+
+    steps:
+      - name: 🧾 Girişləri yoxla
+        env:
+          USERS: ${{ inputs.users }}
+          SPAWN: ${{ inputs.spawn_rate }}
+          RUN_TIME: ${{ inputs.run_time }}
+          TARGET: ${{ inputs.target }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+
+          # Rəqəm olub-olmadığını yoxla (shell-ə interpolasiya YOXDUR — env ilə gəlir)
+          case "$USERS" in ''|*[!0-9]*) echo "::error::users rəqəm olmalıdır"; exit 1;; esac
+          case "$SPAWN" in ''|*[!0-9]*) echo "::error::spawn_rate rəqəm olmalıdır"; exit 1;; esac
+          case "$RUN_TIME" in *[!0-9smh]*|'') echo "::error::run_time formatı: 90s / 3m / 1h"; exit 1;; esac
+
+          if [ "$USERS" -gt 20000 ]; then
+            echo "::error::SƏRT TAVAN: maksimum 20000 VU (istənilən: $USERS)"
+            exit 1
+          fi
+          if [ "$USERS" -lt 1 ]; then
+            echo "::error::users ən azı 1 olmalıdır"; exit 1
+          fi
+          if [ "$SPAWN" -gt "$USERS" ]; then
+            echo "::error::spawn_rate users-dən böyük ola bilməz"; exit 1
+          fi
+
+          if [ "$TARGET" = "prod" ] && [ "$CONFIRM" != "YUKLE" ]; then
+            echo "::error::prod hədəfi üçün confirm sahəsinə tam olaraq «YUKLE» yazın"
+            exit 1
+          fi
+
+          echo "✓ Giriş yoxlaması keçdi: $USERS VU, ramp $SPAWN/s, $RUN_TIME, hədəf $TARGET"
+
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Locust mühiti
+        run: |
+          set -euo pipefail
+          python3 -m venv /tmp/loadenv
+          /tmp/loadenv/bin/pip install --quiet --upgrade pip
+          /tmp/loadenv/bin/pip install --quiet "locust==2.43.3"
+          /tmp/loadenv/bin/locust --version
+
+      - name: 📈 Yükü işə sal
+        env:
+          USERS: ${{ inputs.users }}
+          SPAWN: ${{ inputs.spawn_rate }}
+          RUN_TIME: ${{ inputs.run_time }}
+          SCENARIO: ${{ inputs.scenario }}
+          TARGET: ${{ inputs.target }}
+          LOAD_PASSWORD: ${{ secrets.LOAD_TEST_PASSWORD }}
+          # `seed_stress_test` hesabları `stress_student_001` formatında yaradır
+          # (prefiks + 3 rəqəm). Format uyğun olmasa hər giriş uğursuz olar və
+          # test «tətbiq çökdü» kimi görünər — halbuki hesab adı səhvdir.
+          LOAD_USER_PREFIX: stress_student_
+          LOAD_USER_PAD: "3"
+          LOAD_USER_COUNT: ${{ vars.LOAD_TEST_USER_COUNT || '500' }}
+          LOAD_COURSE_ID: "0"
+        run: |
+          set -euo pipefail
+
+          if [ "$TARGET" = "prod" ]; then
+            # Kənar proxy (nginx) LAN rejimindədir və SAN self-signed sertifikat
+            # işlədir — locust sertifikatı yoxlaya bilməz, ona görə yoxlama
+            # söndürülür. Bu, YALNIZ localhost-a vurduğumuz üçün təhlükəsizdir:
+            # trafik maşından çıxmır.
+            HOST="https://localhost"
+            export LOAD_INSECURE_TLS=1
+          else
+            HOST="http://127.0.0.1:8000"
+          fi
+
+          # ÖN YOXLAMA: host cavab vermirsə 20 000 VU buraxmaq mənasızdır —
+          # hesabat «%100 uğursuz» yazar və bu, tətbiqin çökməsi kimi oxunar.
+          # Ona görə əvvəlcə bir sorğu ilə hədəfin ayaqda olduğunu təsdiqləyirik.
+          PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "$HOST/ping/" || echo 000)"
+          if [ "$PROBE_CODE" != "200" ]; then
+            echo "::error::Hədəf cavab vermir: $HOST/ping/ → HTTP $PROBE_CODE"
+            echo "  prod üçün: tətbiq ayaqdadırmı? (docker compose ps)"
+            echo "  local üçün: 127.0.0.1:8000-də server işləyirmi?"
+            exit 1
+          fi
+          echo "✓ hədəf cavab verir: $HOST/ping/ → 200"
+
+          # Worker sayı: hər worker ~1500 VU aparır, amma tətbiqin nüvələrini
+          # yeməmək üçün maşının yarısından çoxunu götürmürük.
+          CORES="$(nproc)"
+          NEED=$(( (USERS + 1499) / 1500 ))
+          MAX=$(( CORES / 2 ))
+          [ "$MAX" -lt 1 ] && MAX=1
+          WORKERS=$NEED
+          [ "$WORKERS" -gt "$MAX" ] && WORKERS=$MAX
+          [ "$WORKERS" -lt 1 ] && WORKERS=1
+          echo "nüvə=$CORES, lazım=$NEED, tavan=$MAX → worker=$WORKERS"
+
+          mkdir -p /tmp/loadreport
+          cd "$GITHUB_WORKSPACE"
+
+          /tmp/loadenv/bin/locust \
+            -f tests/load/locustfile.py \
+            --headless \
+            --host "$HOST" \
+            --users "$USERS" \
+            --spawn-rate "$SPAWN" \
+            --run-time "$RUN_TIME" \
+            --stop-timeout 30 \
+            --master --expect-workers "$WORKERS" \
+            --csv /tmp/loadreport/result \
+            --html /tmp/loadreport/report.html \
+            --exit-code-on-error 0 \
+            "$SCENARIO" &
+          MASTER=$!
+
+          for i in $(seq 1 "$WORKERS"); do
+            # Hər worker hovuzun ayrı zolağından başlasın — eyni hesabla
+            # paralel giriş süni kilid yarışması yaradır.
+            LOAD_USER_OFFSET=$(( (i - 1) * (LOAD_USER_COUNT / WORKERS) )) \
+            /tmp/loadenv/bin/locust \
+              -f tests/load/locustfile.py \
+              --worker --master-host 127.0.0.1 &
+          done
+
+          # Master bitəndə worker-lər asılı qalmasın — runner-də zombi proses
+          # qoymuruq (növbəti işlətmə onların portuna ilişər).
+          trap 'pkill -f "locustfile.py --worker" 2>/dev/null || true' EXIT
+
+          wait "$MASTER"
+
+      - name: 📊 Xülasə
+        if: always()
+        env:
+          SCENARIO: ${{ inputs.scenario }}
+          USERS: ${{ inputs.users }}
+          SPAWN: ${{ inputs.spawn_rate }}
+          RUN_TIME: ${{ inputs.run_time }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          STATS=/tmp/loadreport/result_stats.csv
+          if [ ! -f "$STATS" ]; then
+            echo "⚠️ Statistika faylı yaranmadı — test başlamadı." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Xülasə skripti ayrıca fayla yazılır: YAML blok skalyarının içində
+          # heredoc/girinti qarışdığı üçün inline python etibarsızdır.
+          cat > /tmp/loadreport/summarise.py <<'PYSCRIPT'
+          import csv
+          import os
+          import sys
+
+          path = sys.argv[1]
+          rows = list(csv.DictReader(open(path)))
+          raw = list(csv.reader(open(path)))
+
+          out = []
+          out.append("## 📈 Yük testi nəticəsi")
+          out.append("")
+          out.append(
+              "**{}** · {} VU · ramp {}/s · {} · hədəf `{}`".format(
+                  os.environ["SCENARIO"], os.environ["USERS"],
+                  os.environ["SPAWN"], os.environ["RUN_TIME"], os.environ["TARGET"],
+              )
+          )
+          out.append("")
+          out.append("```")
+          if raw:
+              width = [max(len(r[i]) if i < len(r) else 0 for r in raw) for i in range(len(raw[0]))]
+              for r in raw:
+                  out.append("  ".join((r[i] if i < len(r) else "").ljust(width[i]) for i in range(len(width))))
+          out.append("```")
+
+          agg = next((r for r in rows if r.get("Name") == "Aggregated"), None)
+          if agg:
+              total = float(agg.get("Request Count") or 0)
+              fails = float(agg.get("Failure Count") or 0)
+              ratio = (fails / total * 100) if total else 0.0
+              out.append("")
+              out.append("**Xəta nisbəti: {:.2f}%** ({:.0f}/{:.0f})".format(ratio, fails, total))
+              out.append("")
+              out.append(
+                  "**p95: {} ms · median: {} ms · RPS: {}**".format(
+                      agg.get("95%", "?"),
+                      agg.get("Median Response Time", "?"),
+                      agg.get("Requests/s", "?"),
+                  )
+              )
+              if ratio > 1.0:
+                  out.append("")
+                  out.append("> ⚠️ Xəta nisbəti 1%-i keçdi — tutum həddi tapılıb.")
+
+          print("\n".join(out))
+          PYSCRIPT
+
+          python3 /tmp/loadreport/summarise.py "$STATS" >> "$GITHUB_STEP_SUMMARY"
+
+
+      - name: 📎 Hesabatı yüklə
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-report-${{ inputs.scenario }}-${{ inputs.users }}vu
+          path: /tmp/loadreport/
+          retention-days: 14

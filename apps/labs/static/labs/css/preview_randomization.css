@@ -127,6 +127,6 @@
 }
 
 /* C3: mikro inline-stil köçürmələri (preview_randomization.html) */
-.c3-1 { width: 80px; height: 80px; }
-.c3-2 { background-color: var(--light-blue); color: var(--primary-blue); }
-.c3-3 { background-color: #fef3c7; color: #d97706; }
+.preview-randomization-1 { width: 80px; height: 80px; }
+.preview-randomization-2 { background-color: var(--light-blue); color: var(--primary-blue); }
+.preview-randomization-3 { background-color: #fef3c7; color: #d97706; }

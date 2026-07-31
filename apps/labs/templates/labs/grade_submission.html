@@ -64,7 +64,7 @@
     <div class="row">
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header text-white c3-1">
+                <div class="card-header text-white grade-submission-1">
                     <i class="fas fa-list-ol me-2"></i> <strong>{% trans "heading_student_answers" context "labs.template.grade_submission" %}</strong>
                     <span class="badge bg-white text-primary float-end">{% blocktrans trimmed context "labs.template.grade_submission" with answer_count=answers|length %}label_question_count {{ answer_count }}{% endblocktrans %}</span>
                 </div>
@@ -72,7 +72,7 @@
                     {% for answer in answers %}
                     <div class="p-4 answer-card {% if not forloop.last %}border-bottom{% endif %}" id="grade-answer-{{ answer.id }}">
                         <div class="d-flex align-items-start gap-3">
-                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 c3-2">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 grade-submission-2">
                                 {{ forloop.counter }}
                             </span>
                             <div class="flex-grow-1">
@@ -106,13 +106,14 @@
                                 {% endif %}
 
                                 <div class="mt-3 p-3 border rounded bg-light-subtle">
-                                    <label class="form-label fw-semibold mb-2">Bu suala bal (0{% if answer.question.points > 0 %} - {{ answer.question.points }}{% endif %})</label>
+                                    <label class="form-label fw-semibold mb-2" for="answer-score-{{ answer.id }}">Bu suala bal (0{% if answer.question.points > 0 %} - {{ answer.question.points }}{% endif %})</label>
                                     <input
                                         type="number"
                                         step="1"
                                         min="0"
                                         {% if answer.question.points > 0 %}max="{{ answer.question.points }}"{% endif %}
                                         name="answer_score_{{ answer.id }}"
+                                        id="answer-score-{{ answer.id }}"
                                         class="form-control answer-score-input"
                                         value="{{ answer.score_input_value }}"
                                         data-question-max="{% if answer.question.points > 0 %}{{ answer.question.points }}{% else %}0{% endif %}"
@@ -136,7 +137,7 @@
         </div>
         
         <div class="col-lg-4">
-            <div class="card shadow-sm sticky-top c3-3">
+            <div class="card shadow-sm sticky-top grade-submission-3">
                 <div class="card-header {% if is_locked %}bg-secondary{% else %}bg-success{% endif %} text-white">
                     <i class="fas {% if is_locked %}fa-eye{% else %}fa-star{% endif %} me-2"></i>
                     <strong>{% if is_locked %}{% trans 'Baxış' %}{% else %}{% trans "heading_grading" context "labs.template.grade_submission" %}{% endif %}</strong>
@@ -146,7 +147,7 @@
                         {% csrf_token %}
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold">{% trans "label_score" context "labs.template.grade_submission" %}</label>
+                            <label class="form-label fw-bold" for="totalScoreInput">{% trans "label_score" context "labs.template.grade_submission" %}</label>
                             <div class="input-group input-group-lg">
                                 <input type="number" name="score" class="form-control text-center fs-3" 
                                        value="{% if submission_score_input_value %}{{ submission_score_input_value }}{% else %}{{ auto_total_score_input_value }}{% endif %}"
@@ -162,8 +163,8 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold">{% trans "label_feedback" context "labs.template.grade_submission" %}</label>
-                            <textarea name="feedback" class="form-control" rows="5" 
+                            <label class="form-label fw-bold" for="grade-feedback">{% trans "label_feedback" context "labs.template.grade_submission" %}</label>
+                            <textarea name="feedback" id="grade-feedback" class="form-control" rows="5"
                                       placeholder="{% trans 'placeholder_feedback' context 'labs.template.grade_submission' %}"
                                       {% if is_locked %}disabled{% endif %}>{{ submission.feedback|default:'' }}</textarea>
                         </div>

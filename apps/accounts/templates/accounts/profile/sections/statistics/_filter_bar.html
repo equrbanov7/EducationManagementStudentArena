@@ -5,21 +5,21 @@
         <input type="hidden" name="section" value="statistics">
 
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">{% trans "filter_date_from" context "profile.statistics" %}</label>
-          <input type="date" class="form-control form-control-sm" name="stat_date_from"
+          <label class="form-label form-label-sm mb-0" for="stats-filter-date-from">{% trans "filter_date_from" context "profile.statistics" %}</label>
+          <input type="date" class="form-control form-control-sm" id="stats-filter-date-from" name="stat_date_from"
                  value="{{ statistics_filters.date_from|default:'' }}">
         </div>
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">{% trans "filter_date_to" context "profile.statistics" %}</label>
-          <input type="date" class="form-control form-control-sm" name="stat_date_to"
+          <label class="form-label form-label-sm mb-0" for="stats-filter-date-to">{% trans "filter_date_to" context "profile.statistics" %}</label>
+          <input type="date" class="form-control form-control-sm" id="stats-filter-date-to" name="stat_date_to"
                  value="{{ statistics_filters.date_to|default:'' }}">
         </div>
 
         {% if statistics_courses %}
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">{% trans "filter_course" context "profile.statistics" %}</label>
+          <label class="form-label form-label-sm mb-0" for="stats-filter-course">{% trans "filter_course" context "profile.statistics" %}</label>
           <div class="bootstrap-single-select">
-            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_course" data-bootstrap-select>
+            <select class="form-select form-select-sm bootstrap-single-select__native" id="stats-filter-course" name="stat_course" data-bootstrap-select>
               <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
               {% for c in statistics_courses %}
               <option value="{{ c.id }}" {% if statistics_filters.course == c.id|stringformat:"s" %}selected{% endif %}>
@@ -33,9 +33,9 @@
 
         {% if statistics_groups %}
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">{% trans "filter_group" context "profile.statistics" %}</label>
+          <label class="form-label form-label-sm mb-0" for="stats-filter-group">{% trans "filter_group" context "profile.statistics" %}</label>
           <div class="bootstrap-single-select">
-            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_group" data-bootstrap-select>
+            <select class="form-select form-select-sm bootstrap-single-select__native" id="stats-filter-group" name="stat_group" data-bootstrap-select>
               <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
               {% for g in statistics_groups %}
               <option value="{{ g.id }}" {% if statistics_filters.group == g.id|stringformat:"s" %}selected{% endif %}>
@@ -49,9 +49,9 @@
 
         {% if is_superadmin %}
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">{% trans "filter_organization_id" context "profile.statistics" %}</label>
+          <label class="form-label form-label-sm mb-0" for="stats-filter-organization">{% trans "filter_organization_id" context "profile.statistics" %}</label>
           <div class="bootstrap-single-select">
-            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_organization" data-bootstrap-select>
+            <select class="form-select form-select-sm bootstrap-single-select__native" id="stats-filter-organization" name="stat_organization" data-bootstrap-select>
               <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
               {% for org in statistics_organizations %}
               <option value="{{ org.id }}" {% if statistics_filters.organization == org.id|stringformat:"s" %}selected{% endif %}>
@@ -64,9 +64,9 @@
         {% endif %}
 
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">{% trans "filter_content_type" context "profile.statistics" %}</label>
+          <label class="form-label form-label-sm mb-0" for="stats-filter-content-type">{% trans "filter_content_type" context "profile.statistics" %}</label>
           <div class="bootstrap-single-select">
-            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_content_type" data-bootstrap-select>
+            <select class="form-select form-select-sm bootstrap-single-select__native" id="stats-filter-content-type" name="stat_content_type" data-bootstrap-select>
               <option value="all" {% if statistics_filters.content_type == "all" %}selected{% endif %}>{% trans "filter_all" context "profile.statistics" %}</option>
               <option value="exam" {% if statistics_filters.content_type == "exam" %}selected{% endif %}>{% trans "content_exam" context "profile.statistics" %}</option>
               <option value="assignment" {% if statistics_filters.content_type == "assignment" %}selected{% endif %}>{% trans "content_assignment" context "profile.statistics" %}</option>

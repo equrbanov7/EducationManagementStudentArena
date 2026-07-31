@@ -43,7 +43,7 @@
         <div class="col-md-4">
             <div class="stat-card blue">
                 <h2 class="fw-bold text-dark-blue mb-1">{{ user_attempts }} <span class="fs-5 text-muted fw-normal">/ {{ assignment.max_attempts }}</span></h2>
-                <span class="text-muted fw-medium text-uppercase small c3-1">{% trans "attempts_used" context "assignment.my_submissions" %}</span>
+                <span class="text-muted fw-medium text-uppercase small my-submissions-1">{% trans "attempts_used" context "assignment.my_submissions" %}</span>
             </div>
         </div>
         <div class="col-md-4">
@@ -51,7 +51,7 @@
                 <h2 class="fw-bold mb-1 {% if attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">
                     {{ attempts_left }}
                 </h2>
-                <span class="text-muted fw-medium text-uppercase small c3-1">{% trans "attempts_left" context "assignment.my_submissions" %}</span>
+                <span class="text-muted fw-medium text-uppercase small my-submissions-1">{% trans "attempts_left" context "assignment.my_submissions" %}</span>
             </div>
         </div>
         <div class="col-md-4">
@@ -155,7 +155,7 @@
                     {% if sub.content %}
                     <div class="mb-4">
                         <strong class="text-dark-blue d-block mb-2">{% trans "text_answer" context "assignment.my_submissions" %}:</strong>
-                        <div class="bg-light p-3 rounded-3 border text-secondary c3-2">{{ sub.content }}</div>
+                        <div class="bg-light p-3 rounded-3 border text-secondary my-submissions-2">{{ sub.content }}</div>
                     </div>
                     {% endif %}
 
@@ -210,7 +210,7 @@
     {% else %}
     <div class="empty-state-card mt-4">
         <div class="mb-4">
-            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm c3-3">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm my-submissions-3">
                 <i class="fa-solid fa-folder-open fa-2x text-primary-blue"></i>
             </div>
         </div>

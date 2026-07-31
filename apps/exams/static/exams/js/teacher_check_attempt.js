@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.openActionConfirmModal({
                 title: t.confirmTitle,
                 message: t.confirmMessage,
-                confirmLabel: mainSaveBtn ? mainSaveBtn.textContent.trim() : 'Yadda saxla',
+                confirmLabel: mainSaveBtn ? mainSaveBtn.textContent.trim() : gettext('Yadda saxla'),
                 confirmButtonClass: 'btn btn-success',
                 onConfirm: function () {
                     submitConfirmed = true;
