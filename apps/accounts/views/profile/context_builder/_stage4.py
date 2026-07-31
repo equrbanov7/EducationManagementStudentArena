@@ -64,6 +64,8 @@ class _Stage4Mixin:
             "my_exams_count": self.my_exams_count,
             "my_exams_search_query": self.my_exams_search_query,
             "my_exams_filter_type": self.my_exams_filter_type,
+            "my_exams_page_obj": self.my_exams_page_obj,
+            "my_exams_pagination_query": self.my_exams_pagination_query,
             "question_bank_banks": self.question_bank_banks,
             "question_bank_page_obj": self.question_bank_page_obj,
             "question_bank_search_query": self.question_bank_search_query,
