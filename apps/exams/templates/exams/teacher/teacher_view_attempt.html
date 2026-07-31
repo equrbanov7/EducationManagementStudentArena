@@ -201,8 +201,8 @@
                             {% if opt in item.answer.selected_options.all %}
                             <div class="option-item selected {% if opt.is_correct %}correct-option{% else %}wrong-option{% endif %}">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" disabled checked>
-                                    <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="attempt-opt-{{ item.question.id }}-{{ opt.id }}" disabled checked>
+                                    <label class="form-check-label" for="attempt-opt-{{ item.question.id }}-{{ opt.id }}">
                                         <span class="attempt-option-label">{{ opt.label|default:"•" }}</span>
                                         {% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}
                                         {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="attempt-option-image" loading="lazy">{% endif %}
@@ -219,8 +219,8 @@
                         {% else %}
                             <div class="option-item {% if opt.is_correct %}correct-option{% endif %}">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" disabled>
-                                    <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="attempt-opt-{{ item.question.id }}-{{ opt.id }}" disabled>
+                                    <label class="form-check-label" for="attempt-opt-{{ item.question.id }}-{{ opt.id }}">
                                         <span class="attempt-option-label">{{ opt.label|default:"•" }}</span>
                                         {% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}
                                         {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="attempt-option-image" loading="lazy">{% endif %}

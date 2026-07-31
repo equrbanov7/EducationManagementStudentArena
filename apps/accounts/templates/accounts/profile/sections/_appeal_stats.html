@@ -40,53 +40,53 @@
 
   <div class="aps-filters">
     <div class="aps-field">
-      <label>{% trans "Axtarış" %}</label>
-      <input type="search" class="js-aps-q" placeholder="{% trans 'Tələbə və ya imtahan adı…' %}" autocomplete="off">
+      <label for="aps-search">{% trans "Axtarış" %}</label>
+      <input type="search" id="aps-search" class="js-aps-q" placeholder="{% trans 'Tələbə və ya imtahan adı…' %}" autocomplete="off">
     </div>
-    <div class="aps-field">
-      <label>{% trans "Fənn" %}</label>
+    <div class="aps-field" role="group" aria-labelledby="aps-subject-label">
+      <label id="aps-subject-label">{% trans "Fənn" %}</label>
       {% trans "fənn axtar…" as aps_subject_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-subject" placeholder=aps_subject_ph %}
     </div>
-    <div class="aps-field">
-      <label>{% trans "Qrup" %}</label>
+    <div class="aps-field" role="group" aria-labelledby="aps-group-label">
+      <label id="aps-group-label">{% trans "Qrup" %}</label>
       {% trans "qrup axtar…" as aps_group_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-group" placeholder=aps_group_ph %}
     </div>
-    <div class="aps-field">
-      <label>{% trans "Fakültə" %}</label>
+    <div class="aps-field" role="group" aria-labelledby="aps-faculty-label">
+      <label id="aps-faculty-label">{% trans "Fakültə" %}</label>
       {% trans "fakültə axtar…" as aps_faculty_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-faculty" placeholder=aps_faculty_ph %}
     </div>
-    <div class="aps-field">
-      <label>{% trans "Kafedra" %}</label>
+    <div class="aps-field" role="group" aria-labelledby="aps-department-label">
+      <label id="aps-department-label">{% trans "Kafedra" %}</label>
       {% trans "kafedra axtar…" as aps_dept_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-department" placeholder=aps_dept_ph %}
     </div>
-    <div class="aps-field">
-      <label>{% trans "Müəllim" %}</label>
+    <div class="aps-field" role="group" aria-labelledby="aps-teacher-label">
+      <label id="aps-teacher-label">{% trans "Müəllim" %}</label>
       {% trans "müəllim axtar…" as aps_teacher_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-teacher" placeholder=aps_teacher_ph %}
     </div>
     <div class="aps-field">
-      <label>{% trans "İmtahan tipi" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      <label for="aps-exam-type-filter">{% trans "İmtahan tipi" %}</label>
+      <div class="bootstrap-single-select"><select id="aps-exam-type-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
     <div class="aps-field">
-      <label>{% trans "İmtahan forması" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      <label for="aps-exam-format-filter">{% trans "İmtahan forması" %}</label>
+      <div class="bootstrap-single-select"><select id="aps-exam-format-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
     <div class="aps-field">
-      <label>{% trans "Status" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      <label for="aps-appeal-status-filter">{% trans "Status" %}</label>
+      <div class="bootstrap-single-select"><select id="aps-appeal-status-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
     <div class="aps-field">
-      <label>{% trans "Semestr" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      <label for="aps-semester-filter">{% trans "Semestr" %}</label>
+      <div class="bootstrap-single-select"><select id="aps-semester-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
     <div class="aps-field">
-      <label>{% trans "Tədris ili" %}</label>
-      <div class="bootstrap-single-select"><select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+      <label for="aps-academic-year-filter">{% trans "Tədris ili" %}</label>
+      <div class="bootstrap-single-select"><select id="aps-academic-year-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
   </div>
 

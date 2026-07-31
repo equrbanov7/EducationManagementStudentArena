@@ -188,13 +188,13 @@ Zal və kompüter redaktəsi mərkəzdə açılan modallarla aparılır (sarm-*)
               <input type="hidden" name="room_id" value="{{ room.id }}">
               <input type="hidden" name="next" value="{{ s.post_next_url }}">
               <div class="sar-form">
-                <div class="sar-field"><label>{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" name="name" value="{{ room.name }}" required maxlength="120"></div>
-                <div class="sar-field"><label>{% trans "Kod" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" name="code" value="{{ room.code }}" required maxlength="32"></div>
-                <div class="sar-field"><label>{% trans "Bina" context "accounts.superadmin_exam_rooms" %}</label><input type="text" name="building" value="{{ room.building }}" maxlength="120"></div>
-                <div class="sar-field"><label>{% trans "Mərtəbə" context "accounts.superadmin_exam_rooms" %}</label><input type="text" name="floor" value="{{ room.floor }}" maxlength="32"></div>
-                <div class="sar-field"><label>{% trans "Tutum (yer)" context "accounts.superadmin_exam_rooms" %}</label><input type="number" name="capacity" min="0" value="{{ room.capacity }}"></div>
-                <div class="sar-field"><label>{% trans "Planlaşdırılan kompüter" context "accounts.superadmin_exam_rooms" %}</label><input type="number" name="computer_count" min="0" value="{{ room.computer_count }}"></div>
-                <div class="sar-field sar-field--full"><label>{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><textarea name="notes" rows="2">{{ room.notes }}</textarea></div>
+                <div class="sar-field"><label for="sar-room-edit-name-{{ room.id }}">{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" id="sar-room-edit-name-{{ room.id }}" name="name" value="{{ room.name }}" required maxlength="120"></div>
+                <div class="sar-field"><label for="sar-room-edit-code-{{ room.id }}">{% trans "Kod" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" id="sar-room-edit-code-{{ room.id }}" name="code" value="{{ room.code }}" required maxlength="32"></div>
+                <div class="sar-field"><label for="sar-room-edit-building-{{ room.id }}">{% trans "Bina" context "accounts.superadmin_exam_rooms" %}</label><input type="text" id="sar-room-edit-building-{{ room.id }}" name="building" value="{{ room.building }}" maxlength="120"></div>
+                <div class="sar-field"><label for="sar-room-edit-floor-{{ room.id }}">{% trans "Mərtəbə" context "accounts.superadmin_exam_rooms" %}</label><input type="text" id="sar-room-edit-floor-{{ room.id }}" name="floor" value="{{ room.floor }}" maxlength="32"></div>
+                <div class="sar-field"><label for="sar-room-edit-capacity-{{ room.id }}">{% trans "Tutum (yer)" context "accounts.superadmin_exam_rooms" %}</label><input type="number" id="sar-room-edit-capacity-{{ room.id }}" name="capacity" min="0" value="{{ room.capacity }}"></div>
+                <div class="sar-field"><label for="sar-room-edit-computer-count-{{ room.id }}">{% trans "Planlaşdırılan kompüter" context "accounts.superadmin_exam_rooms" %}</label><input type="number" id="sar-room-edit-computer-count-{{ room.id }}" name="computer_count" min="0" value="{{ room.computer_count }}"></div>
+                <div class="sar-field sar-field--full"><label for="sar-room-edit-notes-{{ room.id }}">{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><textarea id="sar-room-edit-notes-{{ room.id }}" name="notes" rows="2">{{ room.notes }}</textarea></div>
                 <div class="sar-field sar-field--full"><label class="sar-check"><input type="checkbox" name="is_active" {% if room.is_active %}checked{% endif %}> {% trans "Aktiv" context "accounts.superadmin_exam_rooms" %}</label></div>
               </div>
             </div>
@@ -224,11 +224,11 @@ Zal və kompüter redaktəsi mərkəzdə açılan modallarla aparılır (sarm-*)
               <input type="hidden" name="room_id" value="{{ room.id }}">
               <input type="hidden" name="next" value="{{ s.post_next_url }}">
               <div class="sar-form">
-                <div class="sar-field"><label>{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" name="label" placeholder="PC-01" required maxlength="64"></div>
-                <div class="sar-field"><label>{% trans "Yer nömrəsi" context "accounts.superadmin_exam_rooms" %}</label><input type="number" name="seat_number" min="1"></div>
-                <div class="sar-field"><label>MAC <span class="sar-req">*</span></label><input type="text" name="mac_address" class="sar-mono" placeholder="AA:BB:CC:DD:EE:FF" required data-mac-input maxlength="17" autocomplete="off"></div>
-                <div class="sar-field"><label>IP</label><input type="text" name="ip_address" class="sar-mono" placeholder="10.0.0.11" autocomplete="off"></div>
-                <div class="sar-field sar-field--full"><label>{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><input type="text" name="notes" maxlength="255"></div>
+                <div class="sar-field"><label for="sar-comp-add-label-{{ room.id }}">{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" id="sar-comp-add-label-{{ room.id }}" name="label" placeholder="PC-01" required maxlength="64"></div>
+                <div class="sar-field"><label for="sar-comp-add-seat-{{ room.id }}">{% trans "Yer nömrəsi" context "accounts.superadmin_exam_rooms" %}</label><input type="number" id="sar-comp-add-seat-{{ room.id }}" name="seat_number" min="1"></div>
+                <div class="sar-field"><label for="sar-comp-add-mac-{{ room.id }}">MAC <span class="sar-req">*</span></label><input type="text" id="sar-comp-add-mac-{{ room.id }}" name="mac_address" class="sar-mono" placeholder="AA:BB:CC:DD:EE:FF" required data-mac-input maxlength="17" autocomplete="off"></div>
+                <div class="sar-field"><label for="sar-comp-add-ip-{{ room.id }}">IP</label><input type="text" id="sar-comp-add-ip-{{ room.id }}" name="ip_address" class="sar-mono" placeholder="10.0.0.11" autocomplete="off"></div>
+                <div class="sar-field sar-field--full"><label for="sar-comp-add-notes-{{ room.id }}">{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><input type="text" id="sar-comp-add-notes-{{ room.id }}" name="notes" maxlength="255"></div>
               </div>
               <p class="sar-note"><i class="fas fa-info-circle"></i> {% trans "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)." context "accounts.superadmin_exam_rooms" %}</p>
             </div>
@@ -259,8 +259,8 @@ Zal və kompüter redaktəsi mərkəzdə açılan modallarla aparılır (sarm-*)
               <input type="hidden" name="next" value="{{ s.post_next_url }}">
               <div class="sar-form sar-form--single">
                 <div class="sar-field">
-                  <label>{% trans "Hər sətir: Ad, MAC[, Yer][, IP]" context "accounts.superadmin_exam_rooms" %}</label>
-                  <textarea name="bulk_text" rows="6" class="sar-mono" placeholder="PC-01, AA:BB:CC:DD:EE:01, 1&#10;PC-02, AA:BB:CC:DD:EE:02, 2, 10.0.0.12"></textarea>
+                  <label for="sar-comp-bulk-text-{{ room.id }}">{% trans "Hər sətir: Ad, MAC[, Yer][, IP]" context "accounts.superadmin_exam_rooms" %}</label>
+                  <textarea id="sar-comp-bulk-text-{{ room.id }}" name="bulk_text" rows="6" class="sar-mono" placeholder="PC-01, AA:BB:CC:DD:EE:01, 1&#10;PC-02, AA:BB:CC:DD:EE:02, 2, 10.0.0.12"></textarea>
                   <span class="sar-hint">{% trans "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)." context "accounts.superadmin_exam_rooms" %}</span>
                 </div>
               </div>
@@ -293,11 +293,11 @@ Zal və kompüter redaktəsi mərkəzdə açılan modallarla aparılır (sarm-*)
               <input type="hidden" name="computer_id" value="{{ c.id }}">
               <input type="hidden" name="next" value="{{ s.post_next_url }}">
               <div class="sar-form">
-                <div class="sar-field"><label>{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" name="label" value="{{ c.label }}" required maxlength="64"></div>
-                <div class="sar-field"><label>{% trans "Yer nömrəsi" context "accounts.superadmin_exam_rooms" %}</label><input type="number" name="seat_number" min="1" value="{{ c.seat_number|default:'' }}"></div>
-                <div class="sar-field"><label>MAC <span class="sar-req">*</span></label><input type="text" name="mac_address" class="sar-mono" value="{{ c.mac_address }}" required data-mac-input maxlength="17" autocomplete="off"></div>
-                <div class="sar-field"><label>IP</label><input type="text" name="ip_address" class="sar-mono" value="{{ c.ip_address|default:'' }}" autocomplete="off"></div>
-                <div class="sar-field sar-field--full"><label>{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><input type="text" name="notes" value="{{ c.notes }}" maxlength="255"></div>
+                <div class="sar-field"><label for="sar-comp-edit-label-{{ c.id }}">{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" id="sar-comp-edit-label-{{ c.id }}" name="label" value="{{ c.label }}" required maxlength="64"></div>
+                <div class="sar-field"><label for="sar-comp-edit-seat-{{ c.id }}">{% trans "Yer nömrəsi" context "accounts.superadmin_exam_rooms" %}</label><input type="number" id="sar-comp-edit-seat-{{ c.id }}" name="seat_number" min="1" value="{{ c.seat_number|default:'' }}"></div>
+                <div class="sar-field"><label for="sar-comp-edit-mac-{{ c.id }}">MAC <span class="sar-req">*</span></label><input type="text" id="sar-comp-edit-mac-{{ c.id }}" name="mac_address" class="sar-mono" value="{{ c.mac_address }}" required data-mac-input maxlength="17" autocomplete="off"></div>
+                <div class="sar-field"><label for="sar-comp-edit-ip-{{ c.id }}">IP</label><input type="text" id="sar-comp-edit-ip-{{ c.id }}" name="ip_address" class="sar-mono" value="{{ c.ip_address|default:'' }}" autocomplete="off"></div>
+                <div class="sar-field sar-field--full"><label for="sar-comp-edit-notes-{{ c.id }}">{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><input type="text" id="sar-comp-edit-notes-{{ c.id }}" name="notes" value="{{ c.notes }}" maxlength="255"></div>
                 <div class="sar-field sar-field--full"><label class="sar-check"><input type="checkbox" name="is_active" value="1" {% if c.is_active %}checked{% endif %}> {% trans "Aktiv" context "accounts.superadmin_exam_rooms" %}</label></div>
               </div>
             </div>
@@ -374,13 +374,13 @@ Zal və kompüter redaktəsi mərkəzdə açılan modallarla aparılır (sarm-*)
           <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
           <input type="hidden" name="next" value="{{ s.post_next_url }}">
           <div class="sar-form">
-            <div class="sar-field"><label>{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" name="name" required maxlength="120"></div>
-            <div class="sar-field"><label>{% trans "Kod" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" name="code" required placeholder="ZAL-101" maxlength="32"></div>
-            <div class="sar-field"><label>{% trans "Bina" context "accounts.superadmin_exam_rooms" %}</label><input type="text" name="building" maxlength="120"></div>
-            <div class="sar-field"><label>{% trans "Mərtəbə" context "accounts.superadmin_exam_rooms" %}</label><input type="text" name="floor" maxlength="32"></div>
-            <div class="sar-field"><label>{% trans "Tutum (yer)" context "accounts.superadmin_exam_rooms" %}</label><input type="number" name="capacity" min="0" value="0"></div>
-            <div class="sar-field"><label>{% trans "Planlaşdırılan kompüter" context "accounts.superadmin_exam_rooms" %}</label><input type="number" name="computer_count" min="0" value="0"></div>
-            <div class="sar-field sar-field--full"><label>{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><textarea name="notes" rows="2"></textarea></div>
+            <div class="sar-field"><label for="sar-room-new-name">{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" id="sar-room-new-name" name="name" required maxlength="120"></div>
+            <div class="sar-field"><label for="sar-room-new-code">{% trans "Kod" context "accounts.superadmin_exam_rooms" %} <span class="sar-req">*</span></label><input type="text" id="sar-room-new-code" name="code" required placeholder="ZAL-101" maxlength="32"></div>
+            <div class="sar-field"><label for="sar-room-new-building">{% trans "Bina" context "accounts.superadmin_exam_rooms" %}</label><input type="text" id="sar-room-new-building" name="building" maxlength="120"></div>
+            <div class="sar-field"><label for="sar-room-new-floor">{% trans "Mərtəbə" context "accounts.superadmin_exam_rooms" %}</label><input type="text" id="sar-room-new-floor" name="floor" maxlength="32"></div>
+            <div class="sar-field"><label for="sar-room-new-capacity">{% trans "Tutum (yer)" context "accounts.superadmin_exam_rooms" %}</label><input type="number" id="sar-room-new-capacity" name="capacity" min="0" value="0"></div>
+            <div class="sar-field"><label for="sar-room-new-computer-count">{% trans "Planlaşdırılan kompüter" context "accounts.superadmin_exam_rooms" %}</label><input type="number" id="sar-room-new-computer-count" name="computer_count" min="0" value="0"></div>
+            <div class="sar-field sar-field--full"><label for="sar-room-new-notes">{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label><textarea id="sar-room-new-notes" name="notes" rows="2"></textarea></div>
             <div class="sar-field sar-field--full"><label class="sar-check"><input type="checkbox" name="is_active" checked> {% trans "Aktiv" context "accounts.superadmin_exam_rooms" %}</label></div>
           </div>
         </div>

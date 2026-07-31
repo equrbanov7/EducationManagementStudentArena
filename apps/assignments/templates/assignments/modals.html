@@ -19,34 +19,34 @@
                             <h6 class="fw-bold mb-3">{% trans "basic_information" context "assignment.legacy.modals" %}</h6>
                             
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_title" context "assignment.legacy.modals" %}</label>
-                                <input type="text" name="title" class="form-control" required placeholder="{% trans 'placeholder_title' context 'assignment.legacy.modals' %}">
+                                <label class="form-label" for="add-assignment-title">{% trans "label_title" context "assignment.legacy.modals" %}</label>
+                                <input type="text" id="add-assignment-title" name="title" class="form-control" required placeholder="{% trans 'placeholder_title' context 'assignment.legacy.modals' %}">
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_description" context "assignment.legacy.modals" %}</label>
-                                <textarea name="description" class="form-control" rows="3"></textarea>
+                                <label class="form-label" for="add-assignment-description">{% trans "label_description" context "assignment.legacy.modals" %}</label>
+                                <textarea id="add-assignment-description" name="description" class="form-control" rows="3"></textarea>
                             </div>
 
                             <div class="row">
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">{% trans "label_start_date" context "assignment.legacy.modals" %}</label>
-                                    <input type="datetime-local" name="start_date" class="form-control">
+                                    <label class="form-label" for="add-assignment-start-date">{% trans "label_start_date" context "assignment.legacy.modals" %}</label>
+                                    <input type="datetime-local" id="add-assignment-start-date" name="start_date" class="form-control">
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">{% trans "label_due_date" context "assignment.legacy.modals" %}</label>
-                                    <input type="datetime-local" name="deadline" class="form-control" required>
+                                    <label class="form-label" for="add-assignment-deadline">{% trans "label_due_date" context "assignment.legacy.modals" %}</label>
+                                    <input type="datetime-local" id="add-assignment-deadline" name="deadline" class="form-control" required>
                                 </div>
                             </div>
-                            
+
                             <div class="row">
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">{% trans "label_attempt_limit" context "assignment.legacy.modals" %}</label>
-                                    <input type="number" name="max_attempts" class="form-control" value="1">
+                                    <label class="form-label" for="add-assignment-max-attempts">{% trans "label_attempt_limit" context "assignment.legacy.modals" %}</label>
+                                    <input type="number" id="add-assignment-max-attempts" name="max_attempts" class="form-control" value="1">
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">{% trans "label_max_score" context "assignment.legacy.modals" %}</label>
-                                    <input type="number" name="max_score" class="form-control" value="10">
+                                    <label class="form-label" for="add-assignment-max-score">{% trans "label_max_score" context "assignment.legacy.modals" %}</label>
+                                    <input type="number" id="add-assignment-max-score" name="max_score" class="form-control" value="10">
                                 </div>
                             </div>
                         </div>

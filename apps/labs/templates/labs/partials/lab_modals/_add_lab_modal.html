@@ -32,22 +32,22 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="addLabTabInfo">
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_lab_title" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
-                                <input type="text" name="title" class="form-control" required>
+                                <label class="form-label" for="add-lab-title">{% trans "label_lab_title" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
+                                <input type="text" name="title" id="add-lab-title" class="form-control" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">{% trans "label_max_score" context "labs.template.lab_modals" %}</label>
-                                    <input type="number" name="max_score" class="form-control" value="100" min="1">
+                                    <label class="form-label" for="add-lab-max-score">{% trans "label_max_score" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" name="max_score" id="add-lab-max-score" class="form-control" value="100" min="1">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">{% trans "label_attempt_count" context "labs.template.lab_modals" %}</label>
-                                    <input type="number" name="max_attempts" class="form-control" value="1" min="1">
+                                    <label class="form-label" for="add-lab-max-attempts">{% trans "label_attempt_count" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" name="max_attempts" id="add-lab-max-attempts" class="form-control" value="1" min="1">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">{% trans "label_status" context "labs.template.lab_modals" %}</label>
+                                    <label class="form-label" for="add-lab-status">{% trans "label_status" context "labs.template.lab_modals" %}</label>
                                     <div class="bootstrap-single-select">
-                                        <select name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                        <select name="status" id="add-lab-status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                             <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
                                             <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
                                         </select>
@@ -55,31 +55,31 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_description" context "labs.template.lab_modals" %}</label>
-                                <textarea name="description" class="form-control" rows="2"></textarea>
+                                <label class="form-label" for="add-lab-description">{% trans "label_description" context "labs.template.lab_modals" %}</label>
+                                <textarea name="description" id="add-lab-description" class="form-control" rows="2"></textarea>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{% trans "label_start" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" name="start_datetime" class="form-control" required>
+                                    <label class="form-label" for="add-lab-start">{% trans "label_start" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="start_datetime" id="add-lab-start" class="form-control" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" name="end_datetime" class="form-control" required>
+                                    <label class="form-label" for="add-lab-end">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="end_datetime" id="add-lab-end" class="form-control" required>
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</label>
+                                    <label class="form-label fw-bold" id="add-lab-groups-label">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</label>
                                     <input type="text" class="form-control mb-2" id="addLabGroupSearch" placeholder="{% trans 'placeholder_search_group' context 'labs.template.lab_modals' %}">
-                                    <div id="addLabGroupList" class="border rounded c3-1"></div>
+                                    <div id="addLabGroupList" class="border rounded c3-1" role="group" aria-labelledby="add-lab-groups-label"></div>
                                     <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="addLabGroupCount">0</span></small>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</label>
+                                    <label class="form-label fw-bold" id="add-lab-students-label">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</label>
                                     <input type="text" class="form-control mb-2" id="addLabStudentSearch" placeholder="{% trans 'placeholder_search_student' context 'labs.template.lab_modals' %}">
-                                    <div id="addLabStudentList" class="border rounded c3-1">
+                                    <div id="addLabStudentList" class="border rounded c3-1" role="group" aria-labelledby="add-lab-students-label">
                                         <p class="text-muted text-center py-3">{% trans "hint_select_group_first" context "labs.template.lab_modals" %}</p>
                                     </div>
                                     <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="addLabStudentCount">0</span></small>
@@ -90,8 +90,8 @@
                         <div class="tab-pane fade" id="addLabTabSettings">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{% trans "label_questions_per_student" context "labs.template.lab_modals" %}</label>
-                                    <input type="number" name="questions_per_student" class="form-control" value="0" min="0">
+                                    <label class="form-label" for="add-lab-questions-per-student">{% trans "label_questions_per_student" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" name="questions_per_student" id="add-lab-questions-per-student" class="form-control" value="0" min="0">
                                     <small class="text-muted">{% trans "hint_zero_all_questions" context "labs.template.lab_modals" %}</small>
                                 </div>
                             </div>
@@ -104,43 +104,43 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{% trans "label_late_penalty_percent" context "labs.template.lab_modals" %}</label>
-                                    <input type="number" name="late_penalty_percent" class="form-control" value="0" min="0" max="100">
+                                    <label class="form-label" for="add-lab-late-penalty">{% trans "label_late_penalty_percent" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" name="late_penalty_percent" id="add-lab-late-penalty" class="form-control" value="0" min="0" max="100">
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="allow_file_upload" checked>
-                                        <label class="form-check-label">{% trans "label_allow_file_upload" context "labs.template.lab_modals" %}</label>
+                                        <input class="form-check-input" type="checkbox" name="allow_file_upload" id="add-lab-allow-file-upload" checked>
+                                        <label class="form-check-label" for="add-lab-allow-file-upload">{% trans "label_allow_file_upload" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="allow_link_submission" checked>
-                                        <label class="form-check-label">{% trans "label_allow_link_submission" context "labs.template.lab_modals" %}</label>
+                                        <input class="form-check-input" type="checkbox" name="allow_link_submission" id="add-lab-allow-link-submission" checked>
+                                        <label class="form-check-label" for="add-lab-allow-link-submission">{% trans "label_allow_link_submission" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">{% trans "label_max_file_size_mb" context "labs.template.lab_modals" %}</label>
-                                    <input type="number" name="max_file_size_mb" class="form-control" value="50" min="1">
+                                    <label class="form-label" for="add-lab-max-file-size">{% trans "label_max_file_size_mb" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" name="max_file_size_mb" id="add-lab-max-file-size" class="form-control" value="50" min="1">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_allowed_file_types" context "labs.template.lab_modals" %}</label>
-                                <input type="text" name="allowed_extensions" class="form-control" value="zip,pdf,docx,png,jpg,txt,py,java,cpp">
+                                <label class="form-label" for="add-lab-allowed-extensions">{% trans "label_allowed_file_types" context "labs.template.lab_modals" %}</label>
+                                <input type="text" name="allowed_extensions" id="add-lab-allowed-extensions" class="form-control" value="zip,pdf,docx,png,jpg,txt,py,java,cpp">
                             </div>
                         </div>
                         
                         <div class="tab-pane fade" id="addLabTabMaterials">
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_teacher_file" context "labs.template.lab_modals" %}</label>
-                                <input type="file" name="teacher_files" class="form-control">
+                                <label class="form-label" for="add-lab-teacher-files">{% trans "label_teacher_file" context "labs.template.lab_modals" %}</label>
+                                <input type="file" name="teacher_files" id="add-lab-teacher-files" class="form-control">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">{% trans "label_teacher_instructions" context "labs.template.lab_modals" %}</label>
-                                <textarea name="teacher_instructions" class="form-control" rows="6"></textarea>
+                                <label class="form-label" for="add-lab-teacher-instructions">{% trans "label_teacher_instructions" context "labs.template.lab_modals" %}</label>
+                                <textarea name="teacher_instructions" id="add-lab-teacher-instructions" class="form-control" rows="6"></textarea>
                             </div>
                         </div>
                     </div>

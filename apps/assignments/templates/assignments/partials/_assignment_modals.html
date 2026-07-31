@@ -28,13 +28,13 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_title" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control" required>
+                            <label class="form-label" for="addAsnTitle">{% trans "label_title" context "assignment.modals" %} <span class="text-danger">*</span></label>
+                            <input type="text" id="addAsnTitle" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_status" context "assignment.modals" %}</label>
+                            <label class="form-label" for="addAsnStatus">{% trans "label_status" context "assignment.modals" %}</label>
                             <div class="bootstrap-single-select">
-                                <select name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                <select id="addAsnStatus" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                     <option value="active">{% trans "status_active" context "assignment.modals" %}</option>
                                     <option value="inactive">{% trans "status_inactive" context "assignment.modals" %}</option>
                                     <option value="archived">{% trans "status_archived" context "assignment.modals" %}</option>
@@ -43,21 +43,21 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{% trans "label_description" context "assignment.modals" %}</label>
-                        <textarea name="description" class="form-control" rows="2"></textarea>
+                        <label class="form-label" for="addAsnDescription">{% trans "label_description" context "assignment.modals" %}</label>
+                        <textarea id="addAsnDescription" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">{% trans "label_start" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="start_date" class="form-control" required>
+                            <label class="form-label" for="addAsnStartDate">{% trans "label_start" context "assignment.modals" %} <span class="text-danger">*</span></label>
+                            <input type="datetime-local" id="addAsnStartDate" name="start_date" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">{% trans "label_deadline" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="deadline" class="form-control" required>
+                            <label class="form-label" for="addAsnDeadline">{% trans "label_deadline" context "assignment.modals" %} <span class="text-danger">*</span></label>
+                            <input type="datetime-local" id="addAsnDeadline" name="deadline" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">{% trans "label_max_attempts" context "assignment.modals" %}</label>
-                            <input type="number" name="max_attempts" class="form-control" value="3" min="1">
+                            <label class="form-label" for="addAsnMaxAttempts">{% trans "label_max_attempts" context "assignment.modals" %}</label>
+                            <input type="number" id="addAsnMaxAttempts" name="max_attempts" class="form-control" value="3" min="1">
                         </div>
                     </div>
 
@@ -65,13 +65,13 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_groups" context "assignment.modals" %}</label>
+                            <label class="form-label fw-bold" for="addAsnGroupSearch">{% trans "label_allowed_groups" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="addAsnGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'assignment.modals' %}">
                             <div id="addAsnGroupList" class="border rounded c3-1"></div>
                             <small class="text-muted">{% trans "selected_count" context "assignment.modals" %}: <span id="addAsnGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_students" context "assignment.modals" %}</label>
+                            <label class="form-label fw-bold" for="addAsnStudentSearch">{% trans "label_allowed_students" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="addAsnStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'assignment.modals' %}">
                             <div id="addAsnStudentList" class="border rounded c3-1">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "assignment.modals" %}</p>
@@ -102,11 +102,11 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_title" context "assignment.modals" %} <span class="text-danger">*</span></label>
+                            <label class="form-label" for="editAsnTitle">{% trans "label_title" context "assignment.modals" %} <span class="text-danger">*</span></label>
                             <input type="text" id="editAsnTitle" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_status" context "assignment.modals" %}</label>
+                            <label class="form-label" for="editAsnStatus">{% trans "label_status" context "assignment.modals" %}</label>
                             <div class="bootstrap-single-select">
                                 <select id="editAsnStatus" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                     <option value="active">{% trans "status_active" context "assignment.modals" %}</option>
@@ -117,20 +117,20 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{% trans "label_description" context "assignment.modals" %}</label>
+                        <label class="form-label" for="editAsnDescription">{% trans "label_description" context "assignment.modals" %}</label>
                         <textarea id="editAsnDescription" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">{% trans "label_start" context "assignment.modals" %} <span class="text-danger">*</span></label>
+                            <label class="form-label" for="editAsnStartDate">{% trans "label_start" context "assignment.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="editAsnStartDate" name="start_date" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">{% trans "label_deadline" context "assignment.modals" %} <span class="text-danger">*</span></label>
+                            <label class="form-label" for="editAsnDeadline">{% trans "label_deadline" context "assignment.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="editAsnDeadline" name="deadline" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">{% trans "label_max_attempts" context "assignment.modals" %}</label>
+                            <label class="form-label" for="editAsnMaxAttempts">{% trans "label_max_attempts" context "assignment.modals" %}</label>
                             <input type="number" id="editAsnMaxAttempts" name="max_attempts" class="form-control" min="1">
                         </div>
                     </div>
@@ -139,13 +139,13 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_groups" context "assignment.modals" %}</label>
+                            <label class="form-label fw-bold" for="editAsnGroupSearch">{% trans "label_allowed_groups" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="editAsnGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'assignment.modals' %}">
                             <div id="editAsnGroupList" class="border rounded c3-1"></div>
                             <small class="text-muted">{% trans "selected_count" context "assignment.modals" %}: <span id="editAsnGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_students" context "assignment.modals" %}</label>
+                            <label class="form-label fw-bold" for="editAsnStudentSearch">{% trans "label_allowed_students" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="editAsnStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'assignment.modals' %}">
                             <div id="editAsnStudentList" class="border rounded c3-1">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "assignment.modals" %}</p>

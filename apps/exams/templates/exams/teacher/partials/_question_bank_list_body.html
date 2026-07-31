@@ -46,16 +46,16 @@ Kontekst:
                 <span class="qb-field__hint">{% trans "Bankı tanımaq üçün ad. İmtahan adı deyil." %}</span>
             </div>
 
-            <div class="qb-field">
-                <label class="qb-field__label">{% trans "Fənn" context "exams.template.question_bank_list" %}</label>
+            <div class="qb-field" role="group" aria-labelledby="qb-subject-label">
+                <label class="qb-field__label" id="qb-subject-label">{% trans "Fənn" context "exams.template.question_bank_list" %}</label>
                 <input type="hidden" name="subject_id" data-qbk-subject-input>
                 {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_subject_ph %}
                 {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-subject" placeholder=qbk_subject_ph %}
                 <span class="qb-field__hint">{% trans "Kataloqdakı fənlərdən axtarıb seçin (opsional)." context "exams.template.question_bank_list" %}</span>
             </div>
 
-            <div class="qb-field">
-                <label class="qb-field__label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
+            <div class="qb-field" role="group" aria-labelledby="qb-teacher-label">
+                <label class="qb-field__label" id="qb-teacher-label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
                 <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
                 {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_teacher_ph %}
                 {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-teacher" placeholder=qbk_teacher_ph %}
@@ -224,14 +224,14 @@ Kontekst:
                         <input type="text" id="editBankName2" name="name" required>
                     </div>
                     <div class="qb-edit-row">
-                        <div class="qb-edit-field">
-                            <label>{% trans "Fənn" context "exams.template.question_bank_list" %}</label>
+                        <div class="qb-edit-field" role="group" aria-labelledby="qb-edit-subject-label">
+                            <label id="qb-edit-subject-label">{% trans "Fənn" context "exams.template.question_bank_list" %}</label>
                             <input type="hidden" name="subject_id" data-qbk-subject-input>
                             {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_edit_subject_ph %}
                             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-subject" placeholder=qbk_edit_subject_ph %}
                         </div>
-                        <div class="qb-edit-field">
-                            <label>{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
+                        <div class="qb-edit-field" role="group" aria-labelledby="qb-edit-teacher-label">
+                            <label id="qb-edit-teacher-label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
                             <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
                             {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_edit_teacher_ph %}
                             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-teacher" placeholder=qbk_edit_teacher_ph %}

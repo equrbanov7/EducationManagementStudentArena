@@ -62,8 +62,8 @@
                 {% endif %}
             </div>
 
-            <div class="post-form-group">
-                <label>{% trans "image_selection_label" context "blog.post_form_page" %}</label>
+            <div class="post-form-group" role="group" aria-labelledby="post-image-selection-label">
+                <label id="post-image-selection-label">{% trans "image_selection_label" context "blog.post_form_page" %}</label>
 
                 {{ form.image_url }}
                 {% if form.image_url.errors %}

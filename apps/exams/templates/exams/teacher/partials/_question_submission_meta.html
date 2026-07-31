@@ -80,10 +80,10 @@ azı bir qrup MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənl�
         </div>
 
         <div class="qsubm-field qsubm-field--groups">
-            <label>{% trans "Qrup(lar)" context "exams.template.question_submission" %} <span class="qsubm-req">*</span>
+            <label id="qsub-groups-label">{% trans "Qrup(lar)" context "exams.template.question_submission" %} <span class="qsubm-req">*</span>
                 <span class="qsubm-optional">{% trans "(bir və ya bir neçə)" context "exams.template.question_submission" %}</span></label>
             {% if teacher_groups %}
-            <div class="qsubm-chips" role="group" aria-label="{% trans 'Qruplar' context "exams.template.question_submission" %}">
+            <div class="qsubm-chips" role="group" aria-labelledby="qsub-groups-label">
                 {% for g in teacher_groups %}
                 <label class="qsubm-chip">
                     <input type="checkbox" name="group_ids" value="{{ g.id }}" form="saveForm"
