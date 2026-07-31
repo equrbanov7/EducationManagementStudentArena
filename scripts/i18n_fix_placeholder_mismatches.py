@@ -174,10 +174,12 @@ FIXES = {
         "tr": "Sınav henüz başlamadı. Başlangıç tarihi: {start_str}",
     },
     # Kitabxana (click / Django admin) sətirləri — səhv tərcümə boşaldılır ki,
-    # Django öz core kataloqundakı düzgün mətnə geri düşsün.
-    ("", "default: {default}"): {"en": "", "ru": "", "tr": ""},
-    ("", "Error: {message}"): {"en": "", "ru": "", "tr": ""},
-    ("", "No %(verbose_name_plural)s available"): {"en": "", "ru": "", "tr": ""},
+    # Django öz core kataloqundakı düzgün mətnə geri düşsün. AZ da daxildir:
+    # orada da tərcümə sürüşmüşdü («Error: {message}» → «Mesaj»,
+    # «No %(verbose_name_plural)s available» → «Sərbəst işlər»).
+    ("", "default: {default}"): {"az": "", "en": "", "ru": "", "tr": ""},
+    ("", "Error: {message}"): {"az": "", "en": "", "ru": "", "tr": ""},
+    ("", "No %(verbose_name_plural)s available"): {"az": "", "en": "", "ru": "", "tr": ""},
 }
 
 

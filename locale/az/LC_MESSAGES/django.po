@@ -25230,10 +25230,10 @@ msgstr ""
 msgid "env var: {var}"
 msgstr "env var: {var}"
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 #| msgid "Default format"
 msgid "default: {default}"
-msgstr "Standart format"
+msgstr ""
 
 msgid "(dynamic)"
 msgstr "(dynamic)"
@@ -25266,11 +25266,11 @@ msgid_plural "(Did you mean one of: {possibilities}?)"
 msgstr[0] "Did you mean {possibility}?"
 msgstr[1] "(Did you mean one of: {possibilities}?)"
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 #| msgctxt "exams.model.coding_submission.field"
 #| msgid "error_message"
 msgid "Error: {message}"
-msgstr "Mesaj"
+msgstr ""
 
 #, python-brace-format
 msgid "Try '{command} {option}' for help."
@@ -26502,11 +26502,11 @@ msgstr "Gün göstərilməyib"
 msgid "No week specified"
 msgstr "Həftə göstərilməyib"
 
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "assignment.model.meta"
 #| msgid "verbose_name_plural"
 msgid "No %(verbose_name_plural)s available"
-msgstr "Sərbəst işlər"
+msgstr ""
 
 #, python-format
 msgid ""
