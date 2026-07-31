@@ -416,7 +416,14 @@
         yalnız öz alt-ağacını görür (backend-də unit scoping tətbiq olunur).
         Fakültələr və kafedralar ayrı bölmələrdə idarə olunur.
         {% endcomment %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans 'Universitet idarəetməsi' %}</span></li>
+        {% comment %}
+            Qrup başlığı yalnız içində ən azı bir bənd olanda render olunur.
+            Əvvəllər şərtsiz idi — tələbə də boş «Universitet idarəetməsi»
+            başlığı görürdü (2026-07-31 auditi).
+        {% endcomment %}
+        {% if role_capabilities.can_manage_registrar or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections or 'org-members' in allowed_sections or 'unit-exams' in allowed_sections or 'org-roles' in allowed_sections or 'audit-log' in allowed_sections %}
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_university_management" context "profile.sidebar" %}</span></li>
+        {% endif %}
         {% if role_capabilities.can_manage_registrar %}
         <li class="sidebar-menu-item">
             <a href="{% url 'registrar:console' %}"

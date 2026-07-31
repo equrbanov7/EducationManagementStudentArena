@@ -35194,6 +35194,10 @@ msgstr ""
 "Yalnız öz sahənizə aid əməliyyatları edə bilərsiniz; qalan hər şey yalnız-"
 "oxudur."
 
+msgctxt "profile.sidebar"
+msgid "group_university_management"
+msgstr "Universitet idarəetməsi"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

@@ -35511,6 +35511,10 @@ msgstr ""
 "Вы можете выполнять только операции, относящиеся к вашей области; всё "
 "остальное — только чтение."
 
+msgctxt "profile.sidebar"
+msgid "group_university_management"
+msgstr "Управление университетом"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
