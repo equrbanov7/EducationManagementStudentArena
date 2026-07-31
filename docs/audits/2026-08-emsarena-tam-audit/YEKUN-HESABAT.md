@@ -110,7 +110,7 @@ marşrutunun** tam təsnifatından çıxarıldı (6 agent + red-team keçidi). Q
 
 **Sənəd:** [`docs/security/VIEW_AS_ROLE_MODES.md`](../../security/VIEW_AS_ROLE_MODES.md)
 
-### Faza 7 — Performans ◐ (qismən)
+### Faza 7 — Performans ✅
 
 | Tapıntı | Vəziyyət |
 |---|---|
@@ -122,7 +122,55 @@ marşrutunun** tam təsnifatından çıxarıldı (6 agent + red-team keçidi). Q
 | 237 bağlanmamış `<label>` (a11y) | ✅ 237 → 47 (−80%), 43 fayl |
 | `.c3-N` generik class 54 faylda fərqli mənada | ✅ fayl-spesifik adlara çevrildi |
 | `take_coding_exam.html` inline `<style>` (CSP bloklayırdı) | ✅ xarici fayla çıxarıldı |
-| «İmtahanlarım» səhifələməsi | ⏳ qəsdən açıq — dashboard KPI-ları bütün siyahı üzərində qurulur |
+| «İmtahanlarım» səhifələməsi | ✅ 12 sətir/səhifə; KPI-lar ayrıca aqreqat sorğularla tam dəsti sayır |
+
+#### Ölçmə (yalnız kod oxunuşu deyil)
+
+Faza 7-nin ilk keçidində N+1 namizədləri **gözlə** tapılmışdı. Sonra ölçüldü:
+
+**Sorğu profilləşdirməsi** — `tests/test_query_budgets.py`.
+Sabit rəqəm (`django_assert_num_queries(17)`) qəsdən işlədilmədi: bir
+`select_related` əlavəsi rəqəmi dəyişir, test düşür, komanda rəqəmi artırır və
+büdcə mənasını itirir. Əvəzində eyni səhifə **2 və 12 obyektlə** yüklənir və
+sorğu sayının **eyni qaldığı** iddia edilir — N+1 varsa fərq obyekt sayı qədər
+artır.
+
+| Səth | Sorğu | Ən çox təkrarlanan sorğu |
+|---|---|---|
+| Ana səhifə | 26 | 3× |
+| İmtahan siyahısı | 26 | 3× |
+| Profil — qruplar | 26 | 3× |
+| Profil — İmtahanlarım (40 imtahan) | 21 | 3× |
+| Profil — kurslarım / bildirişlər / sual bankı | 20 | 3× |
+
+Nəticə: profilləşdirilən isti yollarda **N+1 aşkarlanmadı**. «İmtahanlarım»
+40 imtahanla 21 sorğudur — səhifələmə işləyir; səhifə 2 səhifə 1 qədər ucuzdur.
+
+**Yük testi** — `tests/load/locustfile.py` lokal serverdə real işlədildi və
+ssenari faylının özündə **üç qüsur** tapıldı; hər biri rəqəmləri yanlış
+göstərirdi:
+
+1. `/courses/` marşrutu yoxdur (siyahı `/courses/my-courses/`-dadır) — hər
+   sorğu 404 alırdı, hesabat «%88 uğursuz» yazırdı, tətbiq isə sağlam idi.
+2. Logout boş CSRF token göndərirdi → 403, %100 uğursuz.
+3. **Ən təhlükəlisi:** login POST nəticəsi yoxlanılmırdı. Django səhv
+   etimadnamədə formu 200 ilə qaytarır, locust isə 200-ü uğur sayır — yəni
+   heç kim daxil ola bilməsə belə test «yaşıl» olurdu.
+
+Düzəlişdən sonra lokal ölçmə (runserver, sqlite — mütləq rəqəm deyil, ssenari
+düzgünlüyünün sübutu): `PingUser`, `StudentUser`, `ProfileSpaUser` — **%0
+uğursuzluq**.
+
+Əlavə: hesab hovuzu. Minlərlə VU eyni hesabla girəndə ölçdüyümüz şey tətbiqin
+tutumu yox, **həmin bir sətrin** üzərindəki yarışma olur (`last_login` UPDATE-i,
+sessiya yazısı, throttle sayğacı eyni açarı döyür) — süni darboğaz.
+
+**Prod-da 20 000 VU** — `.github/workflows/load-test.yml` hazırdır (self-hosted
+runner, paylanmış locust, 20 000 sərt tavan, ssenari ağ siyahısı, məcburi
+təsdiq mətni). İŞLƏDİLMƏYİB: `workflow_dispatch` faylın `main`-də olmasını
+tələb edir, `main`-ə push isə tam prod deploy tetikləyir — bu, ayrıca qərardır.
+Etimadnamə tələb edən ssenarilər üçün əlavə olaraq `LOAD_TEST_PASSWORD`
+secret-i və prod-da `seed_stress_test` lazımdır.
 
 ### Faza 8 — Testlər ✅
 
