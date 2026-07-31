@@ -107,3 +107,110 @@ class MyExamsCardCountsTest(TestCase):
         self.assertEqual(exam.card_allowed_user_count, self.exam.allowed_users.count())
         self.assertEqual(exam.card_allowed_group_count, self.exam.allowed_groups.count())
         self.assertEqual(exam.card_appeal_count, self.exam.appeals.count())
+
+
+class MyExamsPaginationTest(TestCase):
+    """Səhifələmə KPI rəqəmlərini pozmamalıdır.
+
+    Bu, səhifələmənin əsas riski idi: dashboard qruplaşması Python tərəfdə,
+    göstərilən siyahı üzərində qurulur. Səhifələmə əlavə edilib sayğaclar da
+    həmin siyahıdan hesablansaydı, 150 aktiv imtahanı olan müəllim «Aktiv: 12»
+    görərdi. Ona görə sayğaclar SQL aqreqatı ilə BÜTÜN dəst üzrə hesablanır.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.teacher = User.objects.create_user("pg_teacher", "pg_teacher@qku.edu.az", PASSWORD)
+        cls.org = Organization.objects.create(
+            name="Pagination Univ",
+            slug="pagination-univ",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=cls.teacher,
+            status="active",
+            is_active=True,
+        )
+        role, _ = Role.objects.update_or_create(
+            organization=cls.org,
+            name="teacher",
+            defaults={
+                "display_name": "Teacher",
+                "level": 60,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "permissions": [],
+                "is_system": False,
+                "is_active": True,
+            },
+        )
+        Membership.objects.create(user=cls.teacher, organization=cls.org, role=role, is_primary=True, is_active=True)
+        # 20 aktiv + 5 qaralama = 25; səhifə ölçüsü 12.
+        cls.active_total = 20
+        cls.draft_total = 5
+        for index in range(cls.active_total):
+            Exam.objects.create(
+                title=f"Aktiv {index}",
+                author=cls.teacher,
+                organization=cls.org,
+                exam_type="written",
+                is_active=True,
+            )
+        for index in range(cls.draft_total):
+            Exam.objects.create(
+                title=f"Qaralama {index}",
+                author=cls.teacher,
+                organization=cls.org,
+                exam_type="written",
+                is_active=False,
+            )
+
+    def _page(self, number=None):
+        client = Client()
+        client.force_login(self.teacher)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        url = reverse("accounts:profile") + "?section=my-exams"
+        if number:
+            url += f"&exam_page={number}"
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        return response
+
+    def test_first_page_shows_only_page_size_items(self):
+        from apps.accounts.views.profile._sections.exams import MY_EXAMS_PAGE_SIZE
+
+        response = self._page()
+
+        self.assertEqual(len(response.context["my_exams"]), MY_EXAMS_PAGE_SIZE)
+
+    def test_kpi_counts_cover_the_whole_set_not_just_the_page(self):
+        dashboard = self._page().context["my_exams_dashboard"]
+
+        self.assertEqual(dashboard["status_counts"]["active"], self.active_total)
+        self.assertEqual(dashboard["status_counts"]["draft"], self.draft_total)
+        self.assertEqual(dashboard["status_counts"]["all"], self.active_total + self.draft_total)
+        self.assertEqual(dashboard["total"], self.active_total + self.draft_total)
+
+    def test_second_page_reports_the_same_totals(self):
+        first = self._page().context["my_exams_dashboard"]["status_counts"]
+        second = self._page(2).context["my_exams_dashboard"]["status_counts"]
+
+        self.assertEqual(first, second)
+
+    def test_pagination_object_is_exposed_with_filters_preserved(self):
+        response = self._page()
+        page_obj = response.context["my_exams_page_obj"]
+
+        self.assertTrue(page_obj.has_next())
+        self.assertIn("section=my-exams", response.context["my_exams_pagination_query"])
+
+    def test_search_filter_narrows_counts_too(self):
+        client = Client()
+        client.force_login(self.teacher)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        response = client.get(reverse("accounts:profile") + "?section=my-exams&exam_q=Qaralama")
+
+        counts = response.context["my_exams_dashboard"]["status_counts"]
+        self.assertEqual(counts["all"], self.draft_total)
+        self.assertEqual(counts["active"], 0)

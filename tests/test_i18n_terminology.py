@@ -15,7 +15,7 @@ Bu testlər `docs/i18n/GLOSSARY.md`-dəki məcburi qarşılıqları **runtime-da
 sızmasını tutur, lakin **mənanı** yoxlaya bilmir. Məna qorunması buradadır.
 """
 
-from django.test import SimpleTestCase
+from django.test import TestCase
 from django.utils import translation
 from django.utils.translation import gettext, pgettext
 
@@ -65,7 +65,12 @@ FORBIDDEN_SENSES = {
 }
 
 
-class StructureTerminologyTests(SimpleTestCase):
+# QEYD: `SimpleTestCase` OLMAZ. Layihənin `conftest.py`-ında autouse
+# `_rls_bypass_for_tests` fixture-ı var; postgres-də o, SQL icra edir və
+# `SimpleTestCase` DB sorğularını qadağan etdiyi üçün `DatabaseOperationForbidden`
+# atılır. sqlite-da RLS no-op olduğundan xəta lokal olaraq görünmür (CI-də
+# tutuldu).
+class StructureTerminologyTests(TestCase):
     """«Kafedranı sil» → «Delete bank» sinfindən sürüşmələr qayıtmasın."""
 
     def test_structure_buttons_keep_their_meaning(self):
@@ -86,7 +91,7 @@ class StructureTerminologyTests(SimpleTestCase):
                     self.assertNotIn("банк", rendered)
 
 
-class AmbiguousWordTests(SimpleTestCase):
+class AmbiguousWordTests(TestCase):
     """«Qiymət» = grade (price DEYİL), «bal» = score (arı balı DEYİL)."""
 
     def test_grade_and_score_use_the_correct_sense(self):
@@ -106,7 +111,7 @@ class AmbiguousWordTests(SimpleTestCase):
                         self.assertNotIn(forbidden, rendered)
 
 
-class StatusLabelTests(SimpleTestCase):
+class StatusLabelTests(TestCase):
     """Status etiketi ilə əməliyyat düyməsi eyni mətni paylaşmasın."""
 
     def test_status_choices_describe_state_not_action(self):

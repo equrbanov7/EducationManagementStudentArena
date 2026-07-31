@@ -442,9 +442,11 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
 
         self._login(self.exam_center)
         self._start(self.teacher)
-        AuditLog.objects.filter(reason="view_as_action_blocked").delete()
+        before = AuditLog.objects.filter(reason="view_as_action_blocked").count()
 
         self.client.post(reverse("accounts:profile"), {"profile_form": "some-other-form"})
+
+        self.assertEqual(AuditLog.objects.filter(reason="view_as_action_blocked").count(), before + 1)
 
         entry = AuditLog.objects.filter(reason="view_as_action_blocked").order_by("-id").first()
         self.assertIsNotNone(entry)
@@ -496,9 +498,10 @@ class ViewAsAuditAttributionTests(ViewAsTestBase):
 
         self._login(self.admin)
         self._start(self.teacher)
-        AuditLog.objects.all().delete()
 
-        # İxtiyari domen yazısı: middleware-in özü deyil, log_action(request=...).
+        # QEYD: audit cədvəli APPEND-ONLY-dir (postgres trigger-i DELETE-i
+        # bloklayır), ona görə təmizləmək olmaz — unikal `reason` ilə süzürük.
+        # sqlite-da trigger yoxdur, yəni bu tələ yalnız CI-də görünürdü.
         from core.audit import log_action
         from core.constants import AuditAction
 
@@ -512,7 +515,7 @@ class ViewAsAuditAttributionTests(ViewAsTestBase):
             request=request,
         )
 
-        entry = AuditLog.objects.filter(reason="domain_write").first()
+        entry = AuditLog.objects.filter(reason="domain_write").order_by("-id").first()
         self.assertIsNotNone(entry)
         self.assertEqual(entry.user, self.teacher)  # domen qatı hədəfi yazır
         stamp = entry.changes.get("impersonated_by")
