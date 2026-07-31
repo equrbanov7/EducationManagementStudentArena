@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.exams.services.access_policy import _ensure_teacher
@@ -172,7 +172,19 @@ def delete_exam(request, slug):
         )
         return redirect(_teacher_profile_my_exams_url())
 
-    return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})
+    # JS-siz geri düşmə: silmə düymələri `<a href>` olduğu üçün GET gələ bilər
+    # (yeni tabda aç / orta klik / JS sınıb). Ümumi təsdiq səhifəsi göstərilir.
+    return render(
+        request,
+        "exams/teacher/confirm_delete.html",
+        {
+            "confirm_title": pgettext("exams.view.exams.confirm", "delete_exam_title"),
+            "confirm_message": pgettext("exams.view.exams.confirm", "delete_exam_message"),
+            "confirm_target": exam.title,
+            "confirm_action": reverse("exams:delete_exam", kwargs={"slug": exam.slug}),
+            "cancel_url": reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+        },
+    )
 
 
 @login_required
