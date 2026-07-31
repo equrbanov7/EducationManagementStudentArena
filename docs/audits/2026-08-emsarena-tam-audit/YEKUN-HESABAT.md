@@ -1,7 +1,7 @@
 # EMS Arena — tam audit, yekun hesabat
 
 **Tarix:** 2026-07-31 · **Branch:** `Develop` · **Baza:** `origin/Develop`
-**Həcm:** 26 commit · 259 files changed, 37850 insertions(+), 6664 deletions(-)
+**Həcm:** 28 commit · 272 files changed, 40898 insertions(+), 6887 deletions(-)
 **Test:** 3468 keçir, 91 skip (başlanğıc: 3258 — **+210 test**) · bütün CI qapıları yaşıl
 
 ---
@@ -170,9 +170,10 @@ djangojs  : 4 dil × 500 giriş · hamısı tərcümə olunub
 Qalan 3 boş giriş Django-nun öz çərçivə mətnləridir (boş `msgstr` `.mo`-ya
 düşmür, Django öz kataloqundan tərcümə edir).
 
-**Bilinən boşluq:** 28 JS faylı `gettext` işlətmir (~700 azərbaycanca literal) —
-əsasən sistem monitorinqi (superadmin) və imtahan mərkəzi otaq ekranları.
-Tələbə üzü (`waiting_room.js`) bağlanıb. Ayrıca tapşırıq açılıb.
+**JS kataloqu tam bağlandı.** Əvvəl 27 JS faylı `gettext` ümumiyyətlə
+işlətmirdi (242 sabit azərbaycanca mətn) — sistem monitorinqi, imtahan mərkəzi
+zal ekranları, jurnal şəbəkəsi. 12 fayl çevrildi, **213 yeni msgid** 4 dildə
+əlavə olundu; şərhləri istisna edən ölçmədə qalıq **0**-dır.
 
 ---
 
@@ -202,12 +203,17 @@ olunur.
 
 | # | İş | Prioritet | Qeyd |
 |---|---|---|---|
-| 1 | 28 JS faylını i18n kataloquna bağla (~700 mətn) | orta | ayrıca sessiyada işləyir |
-| 2 | «İmtahanlarım» səhifələməsi | aşağı | dashboard KPI-ları bütün siyahı üzərində qurulur — biznes qərarı tələb edir |
-| 3 | Qalan 47 bağlanmamış `<label>` | aşağı | sahəsi olmayan başlıqlardır; agentlər qəsdən buraxıb |
-| 4 | Domen servislərinə aktoru ayrıca parametr kimi ötürmək | aşağı | əlçatma sahəsi Faza 6-dan sonra yalnız FULL rejimə daralıb; düzəlişdə ad artıq əsl aktoru daşıyır |
-| 5 | 6 təkrar `id` (HEAD-də də var) | aşağı | `host_presentation.html`, `_profile_info_identity.html` |
-| 6 | iCloud dublikat faylları (`" 2.css"`, `" 3.css"`) | aşağı | izlənilmir, `collectstatic`-ə düşür |
+| 1 | «İmtahanlarım» səhifələməsi | aşağı | dashboard KPI-ları bütün siyahı üzərində qurulur — biznes qərarı tələb edir |
+| 2 | Domen servislərinə aktoru ayrıca parametr kimi ötürmək | aşağı | əlçatma sahəsi Faza 6-dan sonra yalnız FULL rejimə daralıb; sənədli düzəlişdə ad artıq əsl aktoru daşıyır |
+| 3 | 85 iCloud dublikat faylı (`" 2.css"`, `" 3.js"`) | aşağı | git izləmir, ölçüsü 0 bayt, amma `collectstatic`-ə düşür — silinməsi istifadəçi qərarıdır |
+
+**Bağlanmış saxta tapıntılar** (statik analizin məhdudiyyəti, real problem deyil):
+
+* «Qalan 47 bağlanmamış `<label>`» — 39-u `aria-labelledby` ilə bağlanıb (qrup
+  etiketi üçün düzgün naxış), qalan 8-i isə `{{ form.x }}` ilə input-u render
+  edir və ya `aria-hidden` boşluqdur. Həqiqi qalıq **0**.
+* «6 təkrar `id`» — hamısı bir-birini istisna edən `{% if %}/{% else %}`
+  budaqlarındadır, render zamanı yalnız biri çıxır.
 
 **Provisionlaşdırma qeydi:** jurnal təsdiqi yoxlaması yalnız `scope_unit` təyin
 olunmuş idarəetmə üzvlükləri üçün işləyir. Struktur qurulandan sonra hər dekan/
@@ -219,6 +225,8 @@ təşkilatın jurnallarını təsdiqləyə bilir.
 ## 5. Commit siyahısı
 
 ```
+a785f9ae fix(i18n): qalan 27 JS faylı tərcümə kataloquna bağlandı (242 → 0 sabit mətn)
+d3bc294f docs(audit): yekun hesabat yeniləndi — Faza 7/8/9 bağlandı
 aa958188 fix(registrar): sənədli düzəlişdə əsl aktor qeyd olunur (impersonasiya atribusiyası)
 17db3895 fix(css): generik `.c3-N` class adları fayl-spesifik adlara çevrildi
 1668d9b5 a11y(templates): bağlanmamış <label> elementləri sahələrinə bağlandı (237 → 47)
