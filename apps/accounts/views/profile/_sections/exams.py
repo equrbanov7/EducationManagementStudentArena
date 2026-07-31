@@ -63,6 +63,8 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
             "my_exams_dashboard": None,
             "my_exams_search_query": "",
             "my_exams_filter_type": "",
+            "my_exams_filter_status": "",
+            "my_exams_is_paginated": False,
             "my_exams_page_obj": None,
             "my_exams_pagination_query": "",
         }
@@ -83,9 +85,20 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     if filter_type:
         my_exams_qs = my_exams_qs.filter(exam_type=filter_type)
 
+    # --- Status filtri (KPI kartlarına klik) ---
+    # Səhifələmədən əvvəl bu filtr YALNIZ klient-tərəfdə vardı: JS DOM-dakı
+    # kartları gizlədirdi. Səhifələmə ilə DOM-da cəmi 12 kart olur, yəni klient
+    # filtri qalan sətirləri heç vaxt görmür. Ona görə status da serverə
+    # daşınır — eyni `Case/When` ifadəsi ilə, KPI sayğacları ilə tam uyğun.
+    filter_status = (request.GET.get("exam_status", "") or "").strip()
+    if filter_status not in {"", "draft", "scheduled", "active"}:
+        filter_status = ""
+    if filter_status:
+        my_exams_qs = my_exams_qs.annotate(_status_f=_lifecycle_status_expression()).filter(_status_f=filter_status)
+
     # Kart redizaynı: sual sayı + apellyasiya sayı və aktiv dil variantları
-    # (prefetch). Səhifələmə yoxdur — qruplaşma/KPI servisdə Python tərəfdə
-    # hesablanır (dashboard bütün siyahı üzərində qurulur).
+    # (prefetch). Səhifələmə VAR; KPI/kateqoriya sayğacları isə ayrıca aqreqat
+    # sorğulardan gəlir, yəni kartlar səhifə üzrə, saylar tam dəst üzrədir.
     from apps.appeals.models import Appeal
     from apps.exams.models import Exam, ExamQuestion
 
@@ -136,6 +149,8 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         pagination_params["exam_q"] = search_query
     if filter_type:
         pagination_params["exam_type"] = filter_type
+    if filter_status:
+        pagination_params["exam_status"] = filter_status
     pagination_params["section"] = "my-exams"
 
     return {
@@ -150,6 +165,8 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         ),
         "my_exams_search_query": search_query,
         "my_exams_filter_type": filter_type,
+        "my_exams_filter_status": filter_status,
+        "my_exams_is_paginated": page_obj.has_other_pages(),
         "my_exams_page_obj": page_obj,
         "my_exams_pagination_query": urlencode(pagination_params),
     }

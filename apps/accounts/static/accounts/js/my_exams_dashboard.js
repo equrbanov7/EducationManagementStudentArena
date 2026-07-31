@@ -66,6 +66,12 @@
             }
         });
 
+        // Səhifələnəndə server sayları AVTORİTETDİR: onlar tam dəst üzərində
+        // aqreqat sorğu ilə hesablanır, buradakı say isə yalnız DOM-dakı 12
+        // kartı görür. Üzərinə yazsaq eyni səhifədə «25» və «12» görünür.
+        if (isPaginated(root)) {
+            return;
+        }
         root.querySelectorAll("[data-tx-catfilter] [data-cat]").forEach(function (chip) {
             var key = chip.getAttribute("data-cat") || "all";
             var countEl = chip.querySelector(".tx-cat-n");
@@ -73,6 +79,30 @@
                 countEl.textContent = String(counts[key] || 0);
             }
         });
+    }
+
+
+    // ── Səhifələmə rejimi ────────────────────────────────────────────────────
+    // Siyahı səhifələnəndə DOM-da yalnız cari səhifənin kartları olur. Klient
+    // tərəfdə filtr etmək o deməkdir ki, axtarış qalan sətirləri HEÇ VAXT
+    // görmür — mövcud imtahan üçün «tapılmadı» yazılır. Bu rejimdə filtrləri
+    // serverə göndəririk (toolbar əsl GET formudur).
+    function isPaginated(root) {
+        return root && root.getAttribute("data-tx-paginated") === "1";
+    }
+
+    function submitToolbar(root) {
+        var form = root.querySelector("[data-tx-toolbar]");
+        if (!form) {
+            return false;
+        }
+        var statusField = form.querySelector("[data-tx-status-field]");
+        if (statusField) {
+            statusField.value = root.dataset.txStatus || "";
+        }
+        // `exam_page` ötürülmür: filtr dəyişəndə 1-ci səhifəyə qayıtmaq düzgündür.
+        form.submit();
+        return true;
     }
 
     function applyFilters(root) {
@@ -251,6 +281,9 @@
                     target.classList.remove("is-collapsed");
                 }
             }
+            if (isPaginated(root) && submitToolbar(root)) {
+                return;
+            }
             applyFilters(root);
         });
 
@@ -277,9 +310,12 @@
             showSkeleton(root, true);
             clearTimeout(searchTimer);
             searchTimer = setTimeout(function () {
+                if (isPaginated(root) && submitToolbar(root)) {
+                    return;  // skeleton qalır — səhifə yenilənir
+                }
                 applyFilters(root);
                 showSkeleton(root, false);
-            }, 200);
+            }, 400);
         });
 
         // növ filtri (seqment) — klient-tərəf instant + gizli select sinxron
@@ -297,6 +333,9 @@
             if (native) {
                 native.value = type === "all" ? "" : type;
             }
+            if (isPaginated(root) && submitToolbar(root)) {
+                return;
+            }
             applyFilters(root);
         });
 
@@ -311,8 +350,17 @@
             }
         });
 
-        // toolbar formu reload etməsin — filtrlər klient-tərəfdir
-        D.on("submit", "[data-tx-toolbar]", function (event) {
+        // Toolbar submit: filtr klient-tərəf olanda reload etməsin. SƏHİFƏLƏNƏNDƏ
+        // isə əksinə — serverə getməlidir, çünki DOM-da bütün siyahı yoxdur.
+        D.on("submit", "[data-tx-toolbar]", function (event, form) {
+            var root = form.closest("[data-my-exams-root]");
+            if (isPaginated(root)) {
+                var statusField = form.querySelector("[data-tx-status-field]");
+                if (statusField) {
+                    statusField.value = (root && root.dataset.txStatus) || "";
+                }
+                return;  // normal GET submit
+            }
             event.preventDefault();
         });
 

@@ -5,10 +5,16 @@
   Status üzrə qruplaşdırılmış imtahanlar + KPI zolağı + kateqoriya çipləri.
   Bütün vizual tokenlər servisdən/constants-dan gəlir; davranış (filtr, kebab,
   silmə təsdiqi, arxiv/dublikat) my_exams_dashboard.js-də (AJAX-safe).
+
+  `data-tx-paginated`: səhifələmə aktivdirsə filtrlər SERVERƏ getməlidir —
+  DOM-da yalnız cari səhifənin kartları var, klient-tərəf filtr qalan sətirləri
+  görmür və mövcud imtahan üçün «tapılmadı» yazır.
 {% endcomment %}
 <section class="profile-section-panel profile-section--my-exams {% if active_section == 'my-exams' %}is-active{% endif %}"
          data-profile-section-panel="my-exams"
-         data-my-exams-root>
+         data-my-exams-root
+         data-tx-paginated="{% if my_exams_is_paginated %}1{% else %}0{% endif %}"
+         data-tx-status="{{ my_exams_filter_status|default:'' }}">
 
   <div class="tx-shell">
     <header class="tx-head tx-head--compact">

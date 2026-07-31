@@ -70,6 +70,7 @@ on:
         options:
           - local
           - prod
+          - prod-app-direct
       confirm:
         description: "prod üçün MƏCBURİ: «YUKLE» yazın"
         required: false
@@ -117,7 +118,8 @@ jobs:
             echo "::error::spawn_rate users-dən böyük ola bilməz"; exit 1
           fi
 
-          if [ "$TARGET" = "prod" ] && [ "$CONFIRM" != "YUKLE" ]; then
+          case "$TARGET" in prod|prod-app-direct) NEEDS_CONFIRM=yes;; *) NEEDS_CONFIRM=no;; esac
+          if [ "$NEEDS_CONFIRM" = "yes" ] && [ "$CONFIRM" != "YUKLE" ]; then
             echo "::error::prod hədəfi üçün confirm sahəsinə tam olaraq «YUKLE» yazın"
             exit 1
           fi
@@ -150,10 +152,35 @@ jobs:
           LOAD_USER_PAD: "3"
           LOAD_USER_COUNT: ${{ vars.LOAD_TEST_USER_COUNT || '500' }}
           LOAD_COURSE_ID: "0"
+          PROD_DIR: /home/wcu/EducationManagementStudentArena
         run: |
           set -euo pipefail
 
-          if [ "$TARGET" = "prod" ]; then
+          if [ "$TARGET" = "prod-app-direct" ]; then
+            # NGINX-İ KEÇİRİK. Səbəb ölçmə metodologiyasıdır, təhlükəsizliyin
+            # zəiflədilməsi deyil: `docker/nginx/nginx.conf` mənbə IP-yə görə
+            # 200 r/s limit qoyur (`limit_req_zone $binary_remote_addr`). Yük
+            # generatoru TƏK IP-dən gəldiyi üçün 20 000 VU dərhal həmin limitə
+            # dəyir və hesabat «%87 uğursuz» yazır — halbuki bu, limiterin
+            # DÜZGÜN işidir. Real 20 000 istifadəçi min ayrı IP-dən gəlir.
+            #
+            # Tətbiqin öz tutumunu ölçmək üçün konteynerə birbaşa vururuq.
+            # Edge limiti ayrıca, `prod` hədəfi ilə ölçülür.
+            # `docker compose ps` compose faylının yanında işləməlidir; runner-in
+            # checkout-u deyil, CANLI deploy qovluğu lazımdır.
+            APP_CID="$(cd "$PROD_DIR" && docker compose -f docker-compose.prod.yml ps -q app 2>/dev/null | head -1)"
+            if [ -z "$APP_CID" ]; then
+              echo "::error::app konteyneri tapılmadı — prod ayaqdadırmı?"
+              exit 1
+            fi
+            APP_IP="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' "$APP_CID" | awk '{print $1}')"
+            if [ -z "$APP_IP" ]; then
+              echo "::error::app konteynerinin IP-si alınmadı"
+              exit 1
+            fi
+            HOST="http://$APP_IP:8000"
+            echo "nginx keçildi → $HOST"
+          elif [ "$TARGET" = "prod" ]; then
             # Kənar proxy (nginx) LAN rejimindədir və SAN self-signed sertifikat
             # işlədir — locust sertifikatı yoxlaya bilməz, ona görə yoxlama
             # söndürülür. Bu, YALNIZ localhost-a vurduğumuz üçün təhlükəsizdir:

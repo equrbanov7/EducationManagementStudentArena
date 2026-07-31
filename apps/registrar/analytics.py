@@ -300,12 +300,26 @@ def evaluate_enrollment(enrollment, maps) -> dict:
     return _evaluate(enrollment, maps)
 
 
-def build_period_analytics(*, organization, period) -> dict:
-    """Full dashboard payload for one org + period (fixed query count)."""
+def build_period_analytics(*, organization, period, scope_q=None) -> dict:
+    """Full dashboard payload for one org + period (fixed query count).
+
+    ``scope_q`` — aktorun unit alt-ağacı üzrə filtr (``None`` = org-səviyyəli
+    aktor, filtr yoxdur).
+
+    NİYƏ VAR (2026-07-31 auditi): panel bütün təşkilat üzrə aqreqasiya edirdi,
+    giriş qapısı isə yalnız «kafedra müdiri/dekan/admin?» sualını verirdi. Yəni
+    20 nəfərlik bir kafedranın müdiri bütün universitetin keçid faizini, orta
+    GPA-sını və fənn üzrə kəsr statistikasını görürdü. Təsdiq axını artıq
+    offering-səviyyəli scope-la məhdudlaşdırılmışdı; panel isə həmin
+    məhdudiyyətdən kənarda qalmışdı.
+    """
+    enrollment_qs = Enrollment.objects.filter(organization=organization, offering__period=period)
+    if scope_q is not None:
+        enrollment_qs = enrollment_qs.filter(scope_q)
     enrollments = list(
-        Enrollment.objects.filter(organization=organization, offering__period=period)
-        .exclude(status=Enrollment.Status.DROPPED)
-        .select_related("offering", "offering__subject", "offering__group")
+        enrollment_qs.exclude(status=Enrollment.Status.DROPPED).select_related(
+            "offering", "offering__subject", "offering__group"
+        )
     )
     if not enrollments:
         return {"has_data": False, "period": period, "totals": None, "programs": [], "groups": [], "at_risk": []}
