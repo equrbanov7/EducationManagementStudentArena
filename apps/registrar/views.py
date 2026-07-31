@@ -77,9 +77,9 @@ def journal_detail(request, offering_id):
     # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
-    can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
-        request.user, offering.organization
-    )
+    can_review = approval.can_chair_approve(
+        request.user, offering.organization, offering=offering
+    ) or approval.can_dean_approve(request.user, offering.organization, offering=offering)
     # Do not leak existence: only editors, correctors (İKT rəhbəri/admin), or
     # reviewers of an already-submitted journal, may open the page.
     if not can_edit_perm and not can_correct and not (can_review and appr["status"] != ApprovalStatus.DRAFT):

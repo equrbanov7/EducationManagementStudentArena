@@ -35,8 +35,43 @@ _PAGE_MAX = 50
 # Dekan/kafedra müdiri unit-scope ilə qalır; adi müəllim/tələbə giriş almır.
 _CENTRAL_ROLES = frozenset({"exam_center", "exam_center_head", "exam_center_staff", "ikt_rehber"})
 
+#: Unit-scope ilə akademik qeydlərə baxa bilən İDARƏETMƏ rolları.
+_UNIT_MANAGER_ROLES = frozenset({"dean", "vice_dean", "department_head"})
+
+#: Org-səviyyə idarəetmə.
+_ORG_ADMIN_ROLES = frozenset({"org_admin", "org_owner"})
+
+#: Bu endpoint-lərə giriş hüququ olan bütün rollar.
+#:
+#: TƏHLÜKƏSİZLİK (2026-07-31 auditi): əvvəllər burada rol qapısı ÜMUMİYYƏTLƏ yox
+#: idi — endpoint-lər yalnız ``scope.has_structure_access`` yoxlayırdı.
+#: ``_resolve_unit_scope`` isə rolun adına/səviyyəsinə baxmadan HƏR üzvlüyün
+#: ``scope_unit_id``-sini scope-a əlavə edir, «Müəllimi kafedraya təyin et»
+#: əməliyyatı isə məhz onu doldurur. Nəticədə adi müəllim öz kafedra
+#: alt-ağacındakı BÜTÜN tələbələrin GPA, semestr detalı və transkriptini oxuya
+#: bilirdi. Sidebar ona ``academic-records`` bölməsini vermirdi — yəni endpoint
+#: UI-dan geniş idi (gizli PII sızması). Siyahı sidebar qapısı ilə eyni
+#: saxlanılır (``views/_helpers/rbac.py``: is_superadmin / is_org_admin /
+#: is_unit_manager / is_exam_center).
+ACADEMIC_RECORDS_ROLES = _CENTRAL_ROLES | _UNIT_MANAGER_ROLES | _ORG_ADMIN_ROLES
+
 
 # ── Ortaq köməkçilər ─────────────────────────────────────────────────────────
+
+
+def can_view_academic_records(user, organization) -> bool:
+    """Akademik qeyd endpoint-lərinə rol qapısı (scope-dan ƏVVƏL).
+
+    Scope «nəyi görürsən» sualına cavab verir, «görməyə haqqın varmı» sualına
+    yox. Qapı fail-closed-dur: rol tanınmırsa giriş yoxdur.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    if organization is not None and getattr(organization, "owner_id", None) == getattr(user, "pk", None):
+        return True
+    return user_has_any_role(user, ACADEMIC_RECORDS_ROLES)
 
 
 def _scope(request):
@@ -45,9 +80,15 @@ def _scope(request):
     Superadmin/owner/rektorat org-wide, dekan/kafedra müdiri unit-subtree
     (:func:`get_unit_scope`). Mərkəzi rollar (imtahan mərkəzi / İKT rəhbəri) unit
     scope-ları olmadığından org-wide-a yüksəldilir — beləcə bütün tələbələri görürlər.
+
+    Rol qapısından keçməyən istifadəçi üçün ``(None, None)`` qaytarılır: bütün
+    çağıran endpoint-lər ``organization is None`` şərtini yoxlayır, yəni cavab
+    ``has_access: False`` olur.
     """
     organization = getattr(request, "organization", None)
     if organization is None:
+        return None, None
+    if not can_view_academic_records(request.user, organization):
         return None, None
     scope = get_unit_scope(request.user, organization, request=request)
     if not scope.has_structure_access and user_has_any_role(request.user, _CENTRAL_ROLES):
