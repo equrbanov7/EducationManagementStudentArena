@@ -4569,7 +4569,7 @@ msgstr "Sonuca dön"
 
 msgctxt "profile.results"
 msgid "score_label"
-msgstr "Bal"
+msgstr "Puan"
 
 msgctxt "profile.results"
 msgid "pending_submitted"
@@ -8027,7 +8027,7 @@ msgstr "Yanıt metni"
 
 msgctxt "assignment.form.placeholder"
 msgid "grade_range"
-msgstr "0-100 arası bir puan"
+msgstr "0-100 arası not"
 
 msgctxt "assignment.form.placeholder"
 msgid "feedback"
@@ -8035,7 +8035,7 @@ msgstr "Yorumunuzu yazın..."
 
 msgctxt "assignment.form.label"
 msgid "grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.form.label"
 msgid "feedback"
@@ -8223,7 +8223,7 @@ msgstr "Durum"
 
 msgctxt "assignment.submission.field"
 msgid "grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.submission.field"
 msgid "feedback"
@@ -8255,7 +8255,7 @@ msgstr "Yeni teslimat"
 
 msgctxt "assignment.notification.choice.type"
 msgid "grade"
-msgstr "Fiyat verildi"
+msgstr "Not verildi"
 
 msgctxt "assignment.notification.choice.type"
 msgid "system"
@@ -8342,7 +8342,7 @@ msgstr "Durum"
 
 msgctxt "assignment.detail"
 msgid "table_grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.detail"
 msgid "status_pending"
@@ -8616,7 +8616,7 @@ msgstr "Deneme sınırı"
 
 msgctxt "assignment.legacy.modals"
 msgid "label_max_score"
-msgstr "Maks. Bal"
+msgstr "Maks. puan"
 
 msgctxt "assignment.legacy.modals"
 msgid "assign_to"
@@ -8704,7 +8704,7 @@ msgstr "Durum"
 
 msgctxt "assignment.my_submissions"
 msgid "table_grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.my_submissions"
 msgid "table_action"
@@ -8740,7 +8740,7 @@ msgstr "Dosya"
 
 msgctxt "assignment.my_submissions"
 msgid "grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.my_submissions"
 msgid "teacher_feedback"
@@ -8997,7 +8997,7 @@ msgstr "Sunucu hatası"
 
 msgctxt "assignment.review_submissions"
 msgid "grade_submit"
-msgstr "Fiyat ver"
+msgstr "Not ver"
 
 msgid "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
 msgstr "İnceleme kapatılmıştır. Bu cevap yalnızca görüntüleme içindir."
@@ -9140,7 +9140,7 @@ msgstr "Gönderim tarihi"
 
 msgctxt "assignment.review_submissions"
 msgid "table_grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.review_submissions"
 msgid "table_actions"
@@ -9193,7 +9193,7 @@ msgstr "Dosya"
 
 msgctxt "assignment.review_submissions"
 msgid "grade"
-msgstr "Fiyat"
+msgstr "Not"
 
 msgctxt "assignment.review_submissions"
 msgid "grade_placeholder"
@@ -11851,7 +11851,7 @@ msgstr "Taslak"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "in_progress"
-msgstr "Kontrol ediliyor"
+msgstr "Devam ediyor"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "submitted"
@@ -11859,7 +11859,7 @@ msgstr "Gönderildi"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "expired"
-msgstr "Günü geçmiş"
+msgstr "Süresi doldu"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "active"
@@ -11871,15 +11871,15 @@ msgstr "Uyarıldı"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "locked"
-msgstr "Engellenen öğrenci yok."
+msgstr "Kilitlendi"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "removed"
-msgstr "Sil"
+msgstr "Sınavdan çıkarıldı"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "resumed"
-msgstr "Geri yükle"
+msgstr "Devam ettirildi"
 
 msgctxt "exams.model.attempt.field"
 msgid "checked_by_teacher"
@@ -19736,7 +19736,7 @@ msgstr "Notlandırma"
 
 msgctxt "labs.template.grade_submission"
 msgid "label_score"
-msgstr "Gol"
+msgstr "Puan"
 
 msgctxt "labs.template.grade_submission"
 msgid "label_feedback"
@@ -20149,7 +20149,7 @@ msgstr "Durum"
 
 msgctxt "labs.template.lab_submissions"
 msgid "table_score"
-msgstr "Gol"
+msgstr "Puan"
 
 msgctxt "labs.template.lab_submissions"
 msgid "table_action"
@@ -20458,7 +20458,7 @@ msgstr "Durum"
 
 msgctxt "labs.template.my_lab_answers"
 msgid "label_score"
-msgstr "Gol"
+msgstr "Puan"
 
 msgid "Bu cəhd üçün cavab yoxdur"
 msgstr "Bu deneme için cevap yok"

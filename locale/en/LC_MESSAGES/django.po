@@ -8276,7 +8276,7 @@ msgstr "Submission"
 
 msgctxt "assignment.notification.choice.type"
 msgid "grade"
-msgstr "Grade"
+msgstr "Grade posted"
 
 msgctxt "assignment.notification.choice.type"
 msgid "system"
@@ -11868,7 +11868,7 @@ msgstr "Draft"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "in_progress"
-msgstr "Pending processing"
+msgstr "In progress"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "submitted"
@@ -11876,7 +11876,7 @@ msgstr "Submitted"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "expired"
-msgstr "Status expired"
+msgstr "Expired"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "active"
@@ -11888,15 +11888,15 @@ msgstr "Warned"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "locked"
-msgstr "No blocked students."
+msgstr "Locked"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "removed"
-msgstr "Remove"
+msgstr "Removed"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "resumed"
-msgstr "Resume"
+msgstr "Resumed"
 
 msgctxt "exams.model.attempt.field"
 msgid "checked_by_teacher"

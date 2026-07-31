@@ -4584,7 +4584,7 @@ msgstr "Вернуться к результату"
 
 msgctxt "profile.results"
 msgid "score_label"
-msgstr "Мед"
+msgstr "Балл"
 
 msgctxt "profile.results"
 msgid "pending_submitted"
@@ -8078,7 +8078,7 @@ msgstr "Текст ответа"
 
 msgctxt "assignment.form.placeholder"
 msgid "grade_range"
-msgstr "Счет от 0 до 100"
+msgstr "Оценка от 0 до 100"
 
 msgctxt "assignment.form.placeholder"
 msgid "feedback"
@@ -8086,7 +8086,7 @@ msgstr "Напишите свой отзыв..."
 
 msgctxt "assignment.form.label"
 msgid "grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.form.label"
 msgid "feedback"
@@ -8274,7 +8274,7 @@ msgstr "Статус"
 
 msgctxt "assignment.submission.field"
 msgid "grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.submission.field"
 msgid "feedback"
@@ -8306,7 +8306,7 @@ msgstr "Новая поставка"
 
 msgctxt "assignment.notification.choice.type"
 msgid "grade"
-msgstr "Цена была указана"
+msgstr "Оценка выставлена"
 
 msgctxt "assignment.notification.choice.type"
 msgid "system"
@@ -8393,7 +8393,7 @@ msgstr "Статус"
 
 msgctxt "assignment.detail"
 msgid "table_grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.detail"
 msgid "status_pending"
@@ -8667,7 +8667,7 @@ msgstr "Лимит попыток"
 
 msgctxt "assignment.legacy.modals"
 msgid "label_max_score"
-msgstr "Макс. Мед"
+msgstr "Макс. балл"
 
 msgctxt "assignment.legacy.modals"
 msgid "assign_to"
@@ -8755,7 +8755,7 @@ msgstr "Статус"
 
 msgctxt "assignment.my_submissions"
 msgid "table_grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.my_submissions"
 msgid "table_action"
@@ -8791,7 +8791,7 @@ msgstr "Файл"
 
 msgctxt "assignment.my_submissions"
 msgid "grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.my_submissions"
 msgid "teacher_feedback"
@@ -9048,7 +9048,7 @@ msgstr "Ошибка сервера"
 
 msgctxt "assignment.review_submissions"
 msgid "grade_submit"
-msgstr "Назовите цену"
+msgstr "Выставить оценку"
 
 msgid "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
 msgstr "Проверка закрыта. Этот ответ доступен только для просмотра."
@@ -9190,7 +9190,7 @@ msgstr "Дата подачи"
 
 msgctxt "assignment.review_submissions"
 msgid "table_grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.review_submissions"
 msgid "table_actions"
@@ -9245,7 +9245,7 @@ msgstr "Файл"
 
 msgctxt "assignment.review_submissions"
 msgid "grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 msgctxt "assignment.review_submissions"
 msgid "grade_placeholder"
@@ -11897,15 +11897,15 @@ msgstr "Черновик"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "in_progress"
-msgstr "Проверка"
+msgstr "В процессе"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "submitted"
-msgstr "Поданный"
+msgstr "Отправлена"
 
 msgctxt "exams.model.attempt.choice.status"
 msgid "expired"
-msgstr "Истекший"
+msgstr "Истекла"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "active"
@@ -11917,15 +11917,15 @@ msgstr "Предупреждён"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "locked"
-msgstr "Нет заблокированных студентов."
+msgstr "Заблокирован"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "removed"
-msgstr "Удалить"
+msgstr "Удалён с экзамена"
 
 msgctxt "exams.model.attempt.choice.supervision_status"
 msgid "resumed"
-msgstr "Восстановить"
+msgstr "Возобновлён"
 
 msgctxt "exams.model.attempt.field"
 msgid "checked_by_teacher"
@@ -19801,7 +19801,7 @@ msgstr "Оценка"
 
 msgctxt "labs.template.grade_submission"
 msgid "label_score"
-msgstr "Счет"
+msgstr "Балл"
 
 msgctxt "labs.template.grade_submission"
 msgid "label_feedback"
@@ -20216,7 +20216,7 @@ msgstr "Статус"
 
 msgctxt "labs.template.lab_submissions"
 msgid "table_score"
-msgstr "Счет"
+msgstr "Балл"
 
 msgctxt "labs.template.lab_submissions"
 msgid "table_action"
@@ -20526,7 +20526,7 @@ msgstr "Статус"
 
 msgctxt "labs.template.my_lab_answers"
 msgid "label_score"
-msgstr "Счет"
+msgstr "Балл"
 
 msgid "Bu cəhd üçün cavab yoxdur"
 msgstr "Для этой попытки нет ответов"
