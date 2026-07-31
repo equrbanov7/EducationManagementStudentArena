@@ -179,7 +179,11 @@ jobs:
               exit 1
             fi
             HOST="http://$APP_IP:8000"
-            echo "nginx keçildi → $HOST"
+            # Django `ALLOWED_HOSTS` xam konteyner IP-sini tanımır (`.env`-də
+            # `localhost,127.0.0.1` var) — `DisallowedHost` → 400. `--host`
+            # yalnız TCP ünvanıdır, `Host` başlığını ayrıca ötürürük.
+            export LOAD_HOST_HEADER="localhost"
+            echo "nginx keçildi → $HOST (Host: $LOAD_HOST_HEADER)"
           elif [ "$TARGET" = "prod" ]; then
             # Kənar proxy (nginx) LAN rejimindədir və SAN self-signed sertifikat
             # işlədir — locust sertifikatı yoxlaya bilməz, ona görə yoxlama
@@ -194,7 +198,12 @@ jobs:
           # ÖN YOXLAMA: host cavab vermirsə 20 000 VU buraxmaq mənasızdır —
           # hesabat «%100 uğursuz» yazar və bu, tətbiqin çökməsi kimi oxunar.
           # Ona görə əvvəlcə bir sorğu ilə hədəfin ayaqda olduğunu təsdiqləyirik.
-          PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "$HOST/ping/" || echo 000)"
+          PROBE_HOST_HEADER="${LOAD_HOST_HEADER:-}"
+          if [ -n "$PROBE_HOST_HEADER" ]; then
+            PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 -H "Host: $PROBE_HOST_HEADER" "$HOST/ping/" || echo 000)"
+          else
+            PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "$HOST/ping/" || echo 000)"
+          fi
           if [ "$PROBE_CODE" != "200" ]; then
             echo "::error::Hədəf cavab vermir: $HOST/ping/ → HTTP $PROBE_CODE"
             echo "  prod üçün: tətbiq ayaqdadırmı? (docker compose ps)"
