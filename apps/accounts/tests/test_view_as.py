@@ -581,3 +581,34 @@ class ViewAsBannerModeTests(ViewAsTestBase):
             for block in ("banner", "pill", "frame"):
                 with self.subTest(mode=mode, block=block):
                     self.assertIn(f".view-as-{block}--{mode}", css)
+
+    def test_every_mode_defines_a_coloured_surface(self):
+        """Rejimin RƏNG PALİTRASI da olmalıdır, təkcə class adı yox.
+
+        `MODE_LIMITED` əlavə olunanda məhz bu sındı: class adı şablondan
+        gəlirdi, amma `--view-as-limited-*` dəyişənləri yox idi. Baza qaydası
+        mətni ağ (`--ems-neutral-0`) edir, fon isə rejim qaydasından gəlir —
+        fon olmayanda istifadəçi AĞ FONDA AĞ MƏTN görürdü: «Öz profilimə qayıt»
+        düyməsi və «TAM SƏLAHİYYƏT» nişanı tamamilə oxunmaz idi.
+
+        Class adını yoxlamaq bunu tutmurdu, çünki `.view-as-banner--limited`
+        yalnız bir alt-element qaydasında iştirak etsə belə mətndə görünür.
+        """
+        import pathlib
+
+        from apps.accounts.services.view_as import MODE_FULL, MODE_LIMITED, MODE_READONLY
+
+        css = pathlib.Path("static/css/view_as.css").read_text(encoding="utf-8")
+        for mode in (MODE_FULL, MODE_LIMITED, MODE_READONLY):
+            for suffix in ("", "-bg", "-border"):
+                variable = f"--view-as-{mode}{suffix}"
+                with self.subTest(mode=mode, variable=variable):
+                    self.assertIn(f"{variable}:", css, f"{variable} təyin olunmayıb")
+
+            # Çıxış düyməsi və nişan üçün fon MÜTLƏQ verilməlidir.
+            for element in ("__exit", "__chip"):
+                with self.subTest(mode=mode, element=element):
+                    rule = f".view-as-banner--{mode} .view-as-banner{element}"
+                    self.assertIn(rule, css, f"{rule} üçün qayda yoxdur")
+                    tail = css.split(rule, 1)[1].split("}", 1)[0]
+                    self.assertIn("background", tail, f"{rule} fon təyin etmir — ağ fonda ağ mətn riski")
