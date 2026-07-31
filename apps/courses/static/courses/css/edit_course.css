@@ -287,5 +287,5 @@
     }
 
 /* C3 (2026-07-03): mikro inline-style köçürmələri */
-  .c3-1 { color: var(--edit-primary); }
-  .c3-2 { background: var(--edit-primary); }
+  .edit-course-1 { color: var(--edit-primary); }
+  .edit-course-2 { background: var(--edit-primary); }

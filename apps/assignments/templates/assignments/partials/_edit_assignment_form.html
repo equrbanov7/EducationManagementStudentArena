@@ -58,7 +58,7 @@
               <input type="text" class="form-control js-group-search-edit" placeholder="{% trans 'search_group' context 'assignment.legacy.edit_form' %}">
             </div>
 
-            <div class="js-group-list-edit c3-1">
+            <div class="js-group-list-edit edit-assignment-form-1">
               {% for g in assignment_groups %}
                 <label class="d-flex align-items-center gap-2 border rounded p-2 mb-2">
                   <input type="checkbox"
@@ -76,7 +76,7 @@
               <input type="text" class="form-control js-student-search-edit" placeholder="{% trans 'search_student' context 'assignment.legacy.edit_form' %}">
             </div>
 
-            <div class="js-student-list-edit c3-1">
+            <div class="js-student-list-edit edit-assignment-form-1">
               {% for m in course.memberships.all %}
                 {% if m.role == "student" %}
                   <label class="d-flex align-items-center gap-2 border rounded p-2 mb-2">

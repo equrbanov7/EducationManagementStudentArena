@@ -1,0 +1,20 @@
+/* Kodlaşdırma imtahanı — sual media bloku.
+ *
+ * Bu qaydalar əvvəllər şablonun içində `<style>` bloku idi. Layihənin CSP-si
+ * `style-src` üçün `unsafe-inline` vermir (config/settings/components/csp.py),
+ * yəni həmin blok brauzer tərəfindən BLOKLANIRDI və üslublar heç vaxt tətbiq
+ * olunmurdu — şəkil/video ölçü limiti işləmirdi (2026-07-31 auditi).
+ *
+ * Class adları da ümumi `.c3-N` sxemindən çıxarıldı: eyni ad layihənin 50-dən
+ * çox CSS faylında fərqli mənalarla təyin olunmuşdu.
+ */
+
+.coding-exam-media-block {
+    margin-top: 0.75rem;
+}
+
+.coding-exam-media-asset {
+    max-width: 100%;
+    max-height: 320px;
+    border-radius: 8px;
+}

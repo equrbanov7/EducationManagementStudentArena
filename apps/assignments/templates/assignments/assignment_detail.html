@@ -115,7 +115,7 @@
                                 {% if sub.file %}
                                 <a href="{{ sub.file.url }}" target="_blank" class="text-primary text-decoration-none fw-medium d-flex align-items-center">
                                     <i class="fa-solid fa-file-lines fs-5 me-2 text-primary-blue"></i> 
-                                    <span class="text-truncate c3-1">{{ sub.file.name|cut:"assignments/submissions/" }}</span>
+                                    <span class="text-truncate assignment-detail-1">{{ sub.file.name|cut:"assignments/submissions/" }}</span>
                                 </a>
                                 {% else %}
                                 <span class="text-muted"><i class="fa-solid fa-minus"></i></span>
