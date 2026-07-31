@@ -79,11 +79,26 @@ _USER_PAD: int = int(os.environ.get("LOAD_USER_PAD", "4") or 4)
 #: worker başına fərqli verilir (workflow bunu avtomatik edir).
 _user_cursor = itertools.count(int(os.environ.get("LOAD_USER_OFFSET", "0") or 0))
 
-#: `nginx`-i keçib app konteynerinə birbaşa vuranda `--host` xam konteyner IP-si
-#: olur. Django `ALLOWED_HOSTS` xam IP-ni tanımır və `DisallowedHost` → 400
-#: qaytarır. Bu, `Host` başlığını ayrıca ötürməklə həll olunur — `--host` yalnız
-#: TCP bağlantısı üçün ünvandır, `Host` başlığı isə Django-nun gördüyü addır.
+#: `nginx`-i keçib app konteynerinə birbaşa vuranda iki başlıq lazımdır:
+#:
+#:   * `Host` — `--host` yalnız TCP ünvanıdır, Django `ALLOWED_HOSTS`-u bu
+#:     başlıqla yoxlayır (xam konteyner IP-si orada yoxdur → `DisallowedHost`).
+#:   * `X-Forwarded-Proto: https` — `SECURE_SSL_REDIRECT=True` + normalda
+#:     nginx-in qoyduğu bu başlıq olmadan Django hər sorğunu HTTPS-ə 301
+#:     yönləndirir (`SECURE_PROXY_SSL_HEADER`). nginx-i keçəndə bu simulyasiya
+#:     edilməlidir, əks halda ölçdüyümüz «301» olur, tətbiqin tutumu yox.
 _HOST_HEADER: str = os.environ.get("LOAD_HOST_HEADER", "")
+_FORWARDED_PROTO: str = os.environ.get("LOAD_FORWARDED_PROTO", "")
+
+
+def _extra_headers() -> dict | None:
+    headers = {}
+    if _HOST_HEADER:
+        headers["Host"] = _HOST_HEADER
+    if _FORWARDED_PROTO:
+        headers["X-Forwarded-Proto"] = _FORWARDED_PROTO
+    return headers or None
+
 
 #: LAN prod-u SAN self-signed sertifikatla işləyir. Sertifikat yoxlaması yalnız
 #: `localhost`-a vuranda söndürülür (trafik maşından çıxmır) — kənar hədəfə
@@ -104,8 +119,9 @@ class _TlsAwareHttpUser(HttpUser):
     def on_start(self):
         if _INSECURE_TLS:
             self.client.verify = False
-        if _HOST_HEADER:
-            self.client.headers.update({"Host": _HOST_HEADER})
+        extra = _extra_headers()
+        if extra:
+            self.client.headers.update(extra)
 
 
 # ---------------------------------------------------------------------------
@@ -173,8 +189,7 @@ class PingUser(FastHttpUser):
         # `FastHttpSession`-in (geventhttpclient əsaslı) `HttpUser`-in
         # `requests.Session`-dan fərqli olaraq `.headers` atributu YOXDUR —
         # sabit başlıq hər sorğuya ayrıca ötürülməlidir.
-        extra = {"Host": _HOST_HEADER} if _HOST_HEADER else None
-        with self.client.get("/ping/", catch_response=True, headers=extra) as resp:
+        with self.client.get("/ping/", catch_response=True, headers=_extra_headers()) as resp:
             if resp.status_code != 200:
                 resp.failure(f"Expected 200, got {resp.status_code}")
 

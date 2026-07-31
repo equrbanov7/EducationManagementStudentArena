@@ -183,7 +183,11 @@ jobs:
             # `localhost,127.0.0.1` var) — `DisallowedHost` → 400. `--host`
             # yalnız TCP ünvanıdır, `Host` başlığını ayrıca ötürürük.
             export LOAD_HOST_HEADER="localhost"
-            echo "nginx keçildi → $HOST (Host: $LOAD_HOST_HEADER)"
+            # `SECURE_SSL_REDIRECT=True` + `SECURE_PROXY_SSL_HEADER` normalda
+            # nginx-in qoyduğu bu başlığı tələb edir; olmasa Django hər
+            # sorğunu HTTPS-ə 301 yönləndirir və ölçdüyümüz «301» olur.
+            export LOAD_FORWARDED_PROTO="https"
+            echo "nginx keçildi → $HOST (Host: $LOAD_HOST_HEADER, X-Forwarded-Proto: $LOAD_FORWARDED_PROTO)"
           elif [ "$TARGET" = "prod" ]; then
             # Kənar proxy (nginx) LAN rejimindədir və SAN self-signed sertifikat
             # işlədir — locust sertifikatı yoxlaya bilməz, ona görə yoxlama
@@ -198,12 +202,10 @@ jobs:
           # ÖN YOXLAMA: host cavab vermirsə 20 000 VU buraxmaq mənasızdır —
           # hesabat «%100 uğursuz» yazar və bu, tətbiqin çökməsi kimi oxunar.
           # Ona görə əvvəlcə bir sorğu ilə hədəfin ayaqda olduğunu təsdiqləyirik.
-          PROBE_HOST_HEADER="${LOAD_HOST_HEADER:-}"
-          if [ -n "$PROBE_HOST_HEADER" ]; then
-            PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 -H "Host: $PROBE_HOST_HEADER" "$HOST/ping/" || echo 000)"
-          else
-            PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "$HOST/ping/" || echo 000)"
-          fi
+          PROBE_HEADERS=()
+          [ -n "${LOAD_HOST_HEADER:-}" ] && PROBE_HEADERS+=(-H "Host: $LOAD_HOST_HEADER")
+          [ -n "${LOAD_FORWARDED_PROTO:-}" ] && PROBE_HEADERS+=(-H "X-Forwarded-Proto: $LOAD_FORWARDED_PROTO")
+          PROBE_CODE="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "${PROBE_HEADERS[@]}" "$HOST/ping/" || echo 000)"
           if [ "$PROBE_CODE" != "200" ]; then
             echo "::error::Hədəf cavab vermir: $HOST/ping/ → HTTP $PROBE_CODE"
             echo "  prod üçün: tətbiq ayaqdadırmı? (docker compose ps)"
