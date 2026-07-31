@@ -136,3 +136,47 @@ class JournalExportTest(TestCase):
                     resource_type="registrar.journal_export", resource_id=str(self.offering.pk)
                 ).exists()
             )
+
+
+class JournalTenantIsolationTest(JournalExportTest):
+    """P0 reqressiya: jurnal səthləri AKTİV TƏŞKİLATA bağlı olmalıdır.
+
+    Əvvəl ``get_object_or_404(CourseOffering, pk=...)`` org filtri OLMADAN
+    işləyirdi — tenant sərhədi tamamilə RLS-ə qalırdı (non-Postgres backend-də
+    no-op, ``rolbypassrls`` daşıyan DB rolunda isə mühərrik səviyyəsində keçilir).
+    """
+
+    def _foreign_actor_client(self):
+        """Başqa təşkilatın sahibi + öz org kontekstində sessiya."""
+        with bypass_rls():
+            other_owner = User.objects.create_user("je_other_owner", "je_other@qku.edu.az", "pw")
+            other_org = Organization.objects.create(
+                name="Other Univ",
+                slug="je-other-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=other_owner,
+                status="active",
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=other_owner,
+                organization=other_org,
+                role=other_org.roles.order_by("-level").first(),
+                is_primary=True,
+                is_active=True,
+            )
+
+        client = Client()
+        client.force_login(other_owner)
+        session = client.session
+        session["active_organization"] = other_org.slug
+        session.save()
+        return client
+
+    def test_foreign_org_cannot_open_journal_detail(self):
+        response = self._foreign_actor_client().get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_foreign_org_cannot_export_journal_xlsx(self):
+        response = self._foreign_actor_client().get(self._url())
+        self.assertEqual(response.status_code, 404)

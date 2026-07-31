@@ -4,36 +4,78 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}
+        Bölmə CSS-i İCAZƏLİ bölmələrə bağlanıb (aktiv bölməyə YOX): SPA panel
+        səhifə yeniləmədən istənilən icazəli bölməyə keçə bilər, ona görə şərt
+        `allowed_sections` üzərindədir. Əvvəllər bu blokdakı 31 faylın hamısı
+        rolundan asılı olmayaraq HƏR istifadəçiyə göndərilirdi — tələbə
+        superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
+        yükləyirdi (2026-07-31 auditi).
+    {% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260621-section-ui">
-    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+    {% if 'statistics' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
+    {% endif %}
+    {% if 'superadmin-users' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
+    {% endif %}
+    {% if 'superadmin-ai' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
+    {% endif %}
+    {% if 'assigned-exams' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+    {% endif %}
+    {% if 'my-courses' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
+    {% endif %}
+    {% if 'groups' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}?v=20260517-1">
+    {% endif %}
+    {% if 'my-exams' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260707-wizard2">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260710-appeals-ux">
+    {% endif %}
+    {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
+    {% endif %}
+    {% if 'my-subjects' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260705-1">
+    {% endif %}
+    {% if 'my-transcript' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260704-1">
+    {% endif %}
+    {% if 'overall-academic' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-4">
+    {% endif %}
+    {% if 'academic-records' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260720-2">
+    {% endif %}
+    {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260715-appeal-batch">
+    {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
+    {% if 'my-journal' in allowed_sections or 'grade-approvals' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
-    <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-teach">
+    {% endif %}
+    {% if 'my-schedule' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
+    {% endif %}
+    {% if 'academic-calendar' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
+    {% endif %}
+    {% if 'analytics' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -267,14 +309,24 @@
 <script src="{% static 'accounts/js/profile/namespace.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/ui.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260713-spa-progress"></script>
+{% if 'my-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260709-access-fix"></script>
 <script src="{% static 'accounts/js/profile/create_exam_modal.js' %}?v=20260612-org-ajax"></script>
+{% endif %}
 <script src="{% static 'accounts/js/profile/ajax.js' %}?v=20260612-org-ajax"></script>
+{% if 'overall-academic' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260720-3"></script>
+{% endif %}
+{% if 'academic-records' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/academic_records.js' %}?v=20260720-2"></script>
+{% endif %}
+{% if 'assigned-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/assigned_exam.js' %}?v=20260707-wizard2"></script>
+{% endif %}
 <script src="{% static 'accounts/js/profile/init.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/profile.entry.js' %}?v=20260612-org-ajax"></script>
+{% if 'statistics' in allowed_sections %}
+    {# Chart.js YALNIZ statistika qrafiklərində işlənir #}
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 <script src="{% static 'accounts/js/statistics/namespace.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/utils.js' %}?v=20260613-1"></script>
@@ -283,19 +335,32 @@
 <script src="{% static 'accounts/js/statistics/tables.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/ai_summary.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/entry.js' %}?v=20260613-1"></script>
+{% endif %}
+{% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
+{% endif %}
+{% if 'my-journal' in allowed_sections or 'my-schedule' in allowed_sections or 'grade-approvals' in allowed_sections %}
 <script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260720-bsperiod" nonce="{{ request.csp_nonce }}"></script>
+{% endif %}
+{% if 'role-assignment' in allowed_sections %}
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
+{% endif %}
+{% if 'permission-editor' in allowed_sections %}
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/labels.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/matrix.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/interactions.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/save_state.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/permission_editor.entry.js' %}"></script>
+{% endif %}
+{% if 'manage-roles' in allowed_sections %}
 <script src="{% static 'accounts/js/manage_roles.js' %}"></script>
+{% endif %}
+{% if 'superadmin-users' in allowed_sections %}
+    {# istifadəçi CRUD modalı superadmin idarəetməsinə aiddir #}
 <script src="{% static 'accounts/js/superadmin_user_management.js' %}"></script>
 <script src="{% static 'js/post_category_picker.js' %}"></script>
 <script src="{% static 'js/user_profile/namespace.js' %}?v=20260604-ajaxinit2"></script>
@@ -305,12 +370,18 @@
 <script src="{% static 'js/user_profile/edit.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'js/user_profile/delete.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'js/user_profile/entry.js' %}?v=20260604-ajaxinit2"></script>
+{% endif %}
+{% if 'my-courses' in allowed_sections %}
 <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
+{% endif %}
+{% if 'groups' in allowed_sections %}
 <script src="{% static 'exams/js/profile_group_modal/namespace.js' %}?v=20260612-detail-ajax"></script>
 <script src="{% static 'exams/js/profile_group_modal/checklist.js' %}?v=20260612-detail-ajax"></script>
 <script src="{% static 'exams/js/profile_group_modal/controller.js' %}?v=20260612-detail-ajax"></script>
 <script src="{% static 'exams/js/profile_group_modal/entry.js' %}?v=20260612-detail-ajax"></script>
+{% endif %}
+{% if 'my-exams' in allowed_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20260709-access-fix"></script>
@@ -321,7 +392,12 @@
 <script src="{% static 'exams/js/exam_wizard.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260618-1"></script>
 <script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
+{% endif %}
+{% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
 <script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260715-appeal-batch"></script>
+{% endif %}
+{% if 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections %}
 <script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>
+{% endif %}
 {% endblock %}

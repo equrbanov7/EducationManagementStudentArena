@@ -19,6 +19,7 @@ from .list_detail import (  # noqa: F401
 )
 from .lookups import (  # noqa: F401
     assigned_student_count,
+    bank_teacher_search,
     exam_available_question_count,
     group_search,
     invigilator_search,
@@ -28,6 +29,7 @@ from .lookups import (  # noqa: F401
 
 __all__ = [
     "assigned_student_count",
+    "bank_teacher_search",
     "invigilator_search",
     "createAndEditExamView",
     "delete_exam",

@@ -106,7 +106,7 @@
             if (d.removal && d.removal.is_terminal) {
                 vioModalRemoved.hidden = false;
                 vioModalRemoved.innerHTML = '<i class="fas fa-user-slash"></i> ' +
-                    esc(t("violations.removedBanner", "İmtahandan uzaqlaşdırılıb")) +
+                    esc(t("violations.removedBanner", gettext("İmtahandan uzaqlaşdırılıb"))) +
                     (d.removal.reason ? " — " + esc(d.removal.reason) : "");
             } else {
                 vioModalRemoved.hidden = true;
@@ -117,12 +117,12 @@
         var incidents = d.incidents || [];
         if (!incidents.length) {
             vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' +
-                esc(t("violations.noRules", "Qeydə alınmış qayda pozuntusu yoxdur.")) + "</p>";
+                esc(t("violations.noRules", gettext("Qeydə alınmış qayda pozuntusu yoxdur."))) + "</p>";
             return;
         }
         vioModalBody.innerHTML =
             '<div class="fxc-vio-modal__count">' + esc(d.violation_count || incidents.length) + " " +
-                esc(t("violations.word", "pozuntu")) + "</div>" +
+                esc(t("violations.word", gettext("pozuntu"))) + "</div>" +
             '<ul class="fxc-vio-modal__list">' +
             incidents.map(function (inc) {
                 var when = inc.at || "";
@@ -143,7 +143,7 @@
         if (vioModalSub) vioModalSub.textContent = "";
         if (vioModalRemoved) { vioModalRemoved.hidden = true; vioModalRemoved.innerHTML = ""; }
         if (vioModalBody) {
-            vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' + esc(t("loading", "Yüklənir…")) + "</p>";
+            vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' + esc(t("loading", gettext("Yüklənir…"))) + "</p>";
         }
         var url = violationsTpl.replace("attempts/0/", "attempts/" + attemptId + "/");
         fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" })
@@ -152,7 +152,7 @@
                 if (!d) {
                     if (vioModalBody) {
                         vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' +
-                            esc(t("violations.loadError", "Məlumat yüklənmədi.")) + "</p>";
+                            esc(t("violations.loadError", gettext("Məlumat yüklənmədi."))) + "</p>";
                     }
                     return;
                 }
@@ -161,7 +161,7 @@
             .catch(function () {
                 if (vioModalBody) {
                     vioModalBody.innerHTML = '<p class="fxc-vio-modal__empty">' +
-                        esc(t("violations.loadError", "Məlumat yüklənmədi.")) + "</p>";
+                        esc(t("violations.loadError", gettext("Məlumat yüklənmədi."))) + "</p>";
                 }
             });
     }
@@ -171,9 +171,9 @@
     // * "Oflayn" silindi — texniki bağlantı vəziyyətidir, əməliyyat qərarı vermir;
     // * "Qoşulu" silindi — eyni məlumatın əks tərəfi.
     var STAT_CARDS = [
-        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"],
-        ["waiting", "Gözləyir"], ["active", "İmtahanda"], ["completed", "Bitirib"],
-        ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
+        ["total", gettext("Təyin olunmuş")], ["participated", gettext("İmtahan verib")],
+        ["waiting", gettext("Gözləyir")], ["active", gettext("İmtahanda")], ["completed", gettext("Bitirib")],
+        ["removed", gettext("Çıxarılıb")], ["absent", gettext("Gəlməyib")]
     ];
 
     function cellStateClass(s) {
@@ -208,14 +208,14 @@
                     return '<span class="fxc-room-exam-chip fxc-room-exam-chip--' + esc(s.state) + '">' +
                         esc(s.exam_title) + "</span>";
                 }).join(" ")
-                : esc(t("noLiveExams", "Zalda canlı imtahan yoxdur."));
+                : esc(t("noLiveExams", gettext("Zalda canlı imtahan yoxdur.")));
         }
         // İmtahan filtri seçimlərini yalnız dəyişəndə yenilə.
         var key = sessions.map(function (s) { return s.session_id; }).join(",");
         if (examFilter && key !== examOptionsKey) {
             examOptionsKey = key;
             var cur = examFilter.value;
-            examFilter.innerHTML = '<option value="">' + esc(t("allExams", "Bütün imtahanlar")) + "</option>" + sessions.map(function (s) {
+            examFilter.innerHTML = '<option value="">' + esc(t("allExams", gettext("Bütün imtahanlar"))) + "</option>" + sessions.map(function (s) {
                 return '<option value="' + esc(s.session_id) + '">' + esc(s.exam_title) + "</option>";
             }).join("");
             examFilter.value = cur;
@@ -256,7 +256,7 @@
         if (!snapshot || !mapEl) return;
         var students = (snapshot.students || []).filter(matchesFilters);
         if (!students.length) {
-            mapEl.innerHTML = '<p class="fxc-muted fxc-center">' + esc(t("noResults", "Nəticə yoxdur")) + "</p>";
+            mapEl.innerHTML = '<p class="fxc-muted fxc-center">' + esc(t("noResults", gettext("Nəticə yoxdur"))) + "</p>";
             return;
         }
         mapEl.innerHTML = students.map(function (s, i) {
@@ -299,7 +299,7 @@
         }
         lastVioCount = list.length;
         if (!list.length) {
-            vioListEl.innerHTML = '<p class="fxc-vio-empty">' + esc(t("violations.empty", "Qayda pozan yoxdur")) + "</p>";
+            vioListEl.innerHTML = '<p class="fxc-vio-empty">' + esc(t("violations.empty", gettext("Qayda pozan yoxdur"))) + "</p>";
             return;
         }
         vioListEl.innerHTML = list.map(function (s) {
@@ -312,7 +312,7 @@
                 ? '<div class="fxc-vio-actions">' +
                     '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
                         'data-attempt="' + esc(s.attempt_id) + '">' +
-                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", "Bax")) + "</button></div>"
+                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", gettext("Bax"))) + "</button></div>"
                 : "";
             if (!s.ticket_id) {
                 // Biletsiz (PIN) cəhd — bilet əməliyyatı yoxdur, amma "Bax" ilə
@@ -321,32 +321,32 @@
                     '<div class="fxc-vio-top">' +
                         '<span class="fxc-vio-name">' + esc(s.name) + "</span>" +
                         '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
-                            esc(t("violations.word", "pozuntu")) + "</span>" +
+                            esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
                     "</div>" +
                     '<div class="fxc-vio-sub">' + esc(subj) +
-                        (locked ? ' · <b>' + esc(t("violations.locked", "Dayandırılıb")) + "</b>" : "") + "</div>" +
+                        (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
                     detailBtn +
                     "</div>";
             }
             var mainBtn = locked
                 ? '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-vio-act="grant" ' +
                     'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
-                    '<i class="fas fa-rotate-left"></i> ' + esc(t("violations.grantChance", "Şans ver")) + "</button>"
+                    '<i class="fas fa-rotate-left"></i> ' + esc(t("violations.grantChance", gettext("Şans ver"))) + "</button>"
                 : '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-vio-act="block" ' +
                     'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
-                    '<i class="fas fa-ban"></i> ' + esc(t("violations.block", "Blokla")) + "</button>";
+                    '<i class="fas fa-ban"></i> ' + esc(t("violations.block", gettext("Blokla"))) + "</button>";
             return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") + '">' +
                 '<div class="fxc-vio-top">' +
                     '<span class="fxc-vio-name">' + esc(s.name) + "</span>" +
                     '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
-                        esc(t("violations.word", "pozuntu")) + "</span>" +
+                        esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
                 "</div>" +
                 '<div class="fxc-vio-sub">' + esc(subj) +
-                    (locked ? ' · <b>' + esc(t("violations.locked", "Dayandırılıb")) + "</b>" : "") + "</div>" +
+                    (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
                 '<div class="fxc-vio-actions">' +
                     '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
                         'data-attempt="' + esc(s.attempt_id || "") + '">' +
-                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", "Bax")) + "</button>" +
+                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", gettext("Bax"))) + "</button>" +
                     mainBtn +
                 "</div></div>";
         }).join("");
@@ -362,10 +362,10 @@
     function setConn(ok) {
         if (wsEl) {
             wsEl.dataset.state = ok ? "online" : "offline";
-            wsEl.textContent = ok ? t("live", "Canlı") : t("disconnected", "Bağlantı kəsildi");
+            wsEl.textContent = ok ? t("live", gettext("Canlı")) : t("disconnected", gettext("Bağlantı kəsildi"));
         }
         if (ok && updatedEl) {
-            updatedEl.textContent = t("updatedAt", "Yeniləndi") + " " + new Date().toLocaleTimeString();
+            updatedEl.textContent = t("updatedAt", gettext("Yeniləndi")) + " " + new Date().toLocaleTimeString();
         }
     }
 
@@ -399,9 +399,9 @@
         modalUi.showError("");
         post(startAllUrl, "").then(function (d) {
             if (d && d.success) { modalUi.close(); fetchSnapshot(); return; }
-            modalUi.showError((d && d.error) || t("start.failed", "Başlatmaq mümkün olmadı."));
+            modalUi.showError((d && d.error) || t("start.failed", gettext("Başlatmaq mümkün olmadı.")));
             modalUi.setLoading(false);
-        }).catch(function () { modalUi.showError(t("start.failed", "Başlatmaq mümkün olmadı.")); modalUi.setLoading(false); });
+        }).catch(function () { modalUi.showError(t("start.failed", gettext("Başlatmaq mümkün olmadı."))); modalUi.setLoading(false); });
     }
 
     if (startAllBtn) {
@@ -412,9 +412,9 @@
                 return;
             }
             window.FXCConfirm.open({
-                title: t("start.title", "İmtahanı başlat"),
-                message: t("confirmStartAll", "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"),
-                confirmText: t("start.confirm", "Başlat"),
+                title: t("start.title", gettext("İmtahanı başlat")),
+                message: t("confirmStartAll", gettext("Zaldakı bütün hazır imtahanlar eyni anda başladılsın?")),
+                confirmText: t("start.confirm", gettext("Başlat")),
                 confirmClass: "fxc-btn-success",
                 onConfirm: function (state, modalUi) { doStartAll(modalUi); }
             });
@@ -425,23 +425,23 @@
         modalUi.showError("");
         post(endAllUrl).then(function (d) {
             if (d && d.success) { modalUi.close(); fetchSnapshot(); return; }
-            modalUi.showError((d && d.error) || t("end.failed", "Bitirmək mümkün olmadı."));
+            modalUi.showError((d && d.error) || t("end.failed", gettext("Bitirmək mümkün olmadı.")));
             modalUi.setLoading(false);
-        }).catch(function () { modalUi.showError(t("end.failed", "Bitirmək mümkün olmadı.")); modalUi.setLoading(false); });
+        }).catch(function () { modalUi.showError(t("end.failed", gettext("Bitirmək mümkün olmadı."))); modalUi.setLoading(false); });
     }
 
     if (endAllBtn) {
         endAllBtn.addEventListener("click", function () {
             if (!window.FXCConfirm) {
-                if (!window.confirm(t("confirmEndAll", "Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz."))) return;
+                if (!window.confirm(t("confirmEndAll", gettext("Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz.")))) return;
                 endAllBtn.disabled = true;
                 post(endAllUrl).then(function () { fetchSnapshot(); }).finally(function () { endAllBtn.disabled = false; });
                 return;
             }
             window.FXCConfirm.open({
-                title: t("end.title", "İmtahanı bitir"),
-                message: t("confirmEndAll", "Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz."),
-                confirmText: t("end.confirm", "Bitir"),
+                title: t("end.title", gettext("İmtahanı bitir")),
+                message: t("confirmEndAll", gettext("Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz.")),
+                confirmText: t("end.confirm", gettext("Bitir")),
                 confirmClass: "fxc-btn-danger",
                 onConfirm: function (state, modalUi) { doEndAll(modalUi); }
             });
@@ -477,13 +477,13 @@
             if (act === "detail") {
                 openViolationsModal(btn.dataset.attempt);
             } else if (act === "grant") {
-                if (!window.confirm(t("violations.confirmGrant", "Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"))) return;
+                if (!window.confirm(t("violations.confirmGrant", gettext("Tələbəyə əlavə şans verilib imtahan bərpa edilsin?")))) return;
                 btn.disabled = true;
                 post(fillUrl(resumeTpl, sid, tid), "grant_extra_chance=1")
                     .then(function () { fetchSnapshot(); })
                     .catch(function () { btn.disabled = false; });
             } else if (act === "block") {
-                var reason = window.prompt(t("violations.blockReason", "Bloklama səbəbi:"));
+                var reason = window.prompt(t("violations.blockReason", gettext("Bloklama səbəbi:")));
                 if (!reason) return;
                 btn.disabled = true;
                 post(fillUrl(removeTpl, sid, tid), "action=suspended&reason=" + encodeURIComponent(reason))

@@ -114,7 +114,7 @@
                value="{{ search_query }}"
                placeholder="{% trans 'search_placeholder' context 'profile.join_org' %}"
                class="form-control">
-        <div class="bootstrap-single-select c3-1">
+        <div class="bootstrap-single-select student-org-request-1">
             <select name="student_org_request_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                 <option value="">{% trans "all_org_types" context "profile.join_org" %}</option>
                 <option value="university" {% if org_type_filter == 'university' %}selected{% endif %}>{% trans "university" context "organization.type" %}</option>
@@ -175,7 +175,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="c3-2">{% trans "select" context "profile.join_org" %}</th>
+                        <th class="student-org-request-2">{% trans "select" context "profile.join_org" %}</th>
                         <th>{% trans "organization" context "profile.join_org" %}</th>
                         <th>{% trans "type" context "profile.join_org" %}</th>
                         <th>{% trans "country" context "profile.join_org" %}</th>

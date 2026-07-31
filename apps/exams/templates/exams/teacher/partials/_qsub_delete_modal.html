@@ -1,0 +1,26 @@
+{% load i18n %}
+{% comment %}
+Göndərişi silmə təsdiqi — mərkəzləşmiş bootstrap modalı (deleteBankModal
+dizaynı ilə eyni). Native window.confirm əvəzidir: .js-qsub-delete-form
+submit-i və .js-qsub-confirm klikləri question_submission_list.js tərəfindən
+tutulub bu modala yönləndirilir (form action JS ilə təyin olunur).
+Siyahı bölməsində və detal səhifəsində include olunur.
+{% endcomment %}
+<div class="modal fade" id="qsubDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="qb-confirm-icon qb-confirm-icon--danger"><i class="fas fa-trash-alt"></i></div>
+                <h5>{% trans "Göndərişi sil" context "exams.template.question_submission" %}</h5>
+                <p class="text-muted mb-0">{% trans "Bu göndəriş həmişəlik silinəcək. Davam edilsin?" context "exams.template.question_submission" %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="qbx-btn qbx-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" context "exams.template.question_submission" %}</button>
+                <form method="post" id="qsubDeleteModalForm" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="qbx-btn qbx-btn--danger">{% trans "Bəli, sil" context "exams.template.question_submission" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

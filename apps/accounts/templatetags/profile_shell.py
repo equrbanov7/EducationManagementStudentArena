@@ -7,6 +7,7 @@ verilmirsə şablonda sadəcə göstərilmir (Django yoxdur → boş).
 """
 
 from django import template
+from django.conf import settings
 from django.urls import reverse
 
 from apps.accounts.models import UserProfile
@@ -34,6 +35,11 @@ def profile_sidebar(context, active_section=""):
     except Exception:  # noqa: BLE001 — bildiriş sayğacı sidebar-ı bloklamamalıdır
         unread = 0
 
+    # Inclusion tag TƏZƏ kontekstdə render olunur — context processor-lar
+    # (university_mode, current_organization) və SPA-nın düzləşdirdiyi bayraqlar
+    # burada YOXDUR. Onları özümüz veririk ki, standalone (embed) səhifələrdə
+    # sidebar menyusu SPA ilə struktur olaraq eyni olsun (bax _sidebar.html-dəki
+    # `not university_mode` / `current_organization` şərtləri).
     return {
         "request": request,
         "role_capabilities": capabilities,
@@ -41,4 +47,8 @@ def profile_sidebar(context, active_section=""):
         "active_section": active_section,
         "profile_base_url": reverse("accounts:profile"),
         "notifications_unread_count": unread,
+        "university_mode": bool(getattr(settings, "UNIVERSITY_MODE", True)),
+        "current_organization": getattr(request, "organization", None),
+        "can_manage_org": capabilities.get("can_manage_org"),
+        "can_view_student_assignments": capabilities.get("can_view_student_assignments"),
     }

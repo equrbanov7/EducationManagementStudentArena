@@ -41,8 +41,8 @@
                                placeholder="{% trans 'placeholder_group_name' context 'courses.partial.member_modal' %}">
                     </div>
 
-                    <div class="custom-selector-wrapper">
-                        <label class="form-label fw-bold mb-2">{% trans "label_students" context "courses.partial.member_modal" %}</label>
+                    <div class="custom-selector-wrapper" role="group" aria-labelledby="student-selector-label">
+                        <label class="form-label fw-bold mb-2" id="student-selector-label">{% trans "label_students" context "courses.partial.member_modal" %}</label>
 
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
@@ -115,8 +115,8 @@
 
                 <div class="modal-body">
 
-                    <div class="custom-selector-wrapper">
-                        <label class="form-label fw-bold mb-2">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
+                    <div class="custom-selector-wrapper" role="group" aria-labelledby="group-selector-label">
+                        <label class="form-label fw-bold mb-2" id="group-selector-label">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
 
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>

@@ -2,6 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Lower
@@ -10,7 +11,11 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.utils.translation import pgettext
 
-from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
+from apps.exams.constants import (
+    DEFAULT_EXAM_LANGUAGE,
+    EXAM_LANGUAGE_CHOICES,
+    QUESTION_EXAM_KIND_VALUES,
+)
 from apps.exams.models import QuestionBank
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_create_question_bank
 from apps.exams.services.bank_analysis import analyze_bank_questions
@@ -22,6 +27,55 @@ from ._shared import (
     _ALLOWED_STATUSES,
     _normalize_format,
 )
+
+
+def _resolve_bank_subject(organization, raw_subject_id):
+    """Axtarışlı seçicidən gələn fənn id-sini təşkilat daxilində həll edir.
+
+    Qaytarır: (subject_ref, subject_text). Tapılmasa (None, "").
+    Xüsusi hal: "text:<ad>" — köhnə sərbəst-mətn fənni olan bankın redaktəsində
+    seçim dəyişdirilməyibsə mətn olduğu kimi saxlanır (kataloq bağlantısı yox).
+    """
+    raw_subject_id = (raw_subject_id or "").strip()
+    if not raw_subject_id or organization is None:
+        return None, ""
+    if raw_subject_id.startswith("text:"):
+        return None, raw_subject_id[len("text:") :].strip()[:100]
+    from apps.registrar.models import Subject
+
+    try:
+        subject = Subject.objects.filter(organization=organization, pk=raw_subject_id).first()
+    except (ValueError, ValidationError):
+        subject = None
+    if subject is None:
+        return None, ""
+    return subject, subject.name
+
+
+def _resolve_bank_teacher(organization, raw_teacher_id):
+    """ "Sualı göndərən müəllim" seçimini təşkilatın müəllim üzvləri içində həll edir."""
+    raw_teacher_id = (raw_teacher_id or "").strip()
+    if not raw_teacher_id.isdigit() or organization is None:
+        return None
+    from django.contrib.auth import get_user_model
+
+    from apps.organizations.public import organization_role_user_queryset
+    from core.roles import ProfileRole
+
+    return (
+        organization_role_user_queryset(
+            organization,
+            {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
+            queryset=get_user_model().objects.filter(is_active=True),
+        )
+        .filter(pk=int(raw_teacher_id))
+        .first()
+    )
+
+
+def _normalize_exam_kind(raw_value):
+    value = (raw_value or "").strip().lower()
+    return value if value in QUESTION_EXAM_KIND_VALUES else ""
 
 
 @login_required
@@ -38,15 +92,20 @@ def question_bank_list(request):
         if not name:
             messages.error(request, pgettext("exams.view.bank.message", "Bank adı boş ola bilməz."))
         else:
+            subject_ref, subject_text = _resolve_bank_subject(organization, request.POST.get("subject_id"))
             QuestionBank.objects.create(
                 name=name,
-                subject=(request.POST.get("subject") or "").strip(),
+                subject=subject_text,
+                subject_ref=subject_ref,
+                exam_kind=_normalize_exam_kind(request.POST.get("exam_kind")),
+                source_teacher=_resolve_bank_teacher(organization, request.POST.get("source_teacher_id")),
                 description=(request.POST.get("description") or "").strip(),
                 language=(request.POST.get("language") or DEFAULT_EXAM_LANGUAGE).strip().lower(),
                 default_question_type=_normalize_format(request.POST.get("default_question_type")),
                 organization=organization,
                 created_by=request.user,
-                is_shared=bool(request.POST.get("is_shared")),
+                # Banklar default olaraq GİZLİDİR — "Təşkilatda paylaş" UI-dan çıxarılıb.
+                is_shared=False,
             )
             messages.success(request, pgettext("exams.view.bank.message", "Sual bankı yaradıldı."))
         next_url = (request.POST.get("next") or "").strip()
@@ -61,7 +120,10 @@ def question_bank_list(request):
 
 @login_required
 def question_bank_update(request, bank_id):
-    """Bankın adını/fənnini/dilini/formatını/paylaşımını redaktə et (yalnız sahib)."""
+    """Bankın adını/fənnini/təyinatını/dilini/formatını redaktə et (yalnız sahib).
+
+    `is_shared` UI-dan çıxarılıb — redaktə mövcud paylaşım vəziyyətinə toxunmur.
+    """
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
@@ -75,13 +137,27 @@ def question_bank_update(request, bank_id):
             messages.error(request, pgettext("exams.view.bank.message", "Bank adı boş ola bilməz."))
         else:
             bank.name = name
-            bank.subject = (request.POST.get("subject") or "").strip()
+            subject_ref, subject_text = _resolve_bank_subject(organization, request.POST.get("subject_id"))
+            bank.subject_ref = subject_ref
+            bank.subject = subject_text
+            bank.exam_kind = _normalize_exam_kind(request.POST.get("exam_kind"))
+            bank.source_teacher = _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
             bank.language = (request.POST.get("language") or bank.language).strip().lower()
             bank.default_question_type = _normalize_format(
                 request.POST.get("default_question_type") or bank.default_question_type
             )
-            bank.is_shared = bool(request.POST.get("is_shared"))
-            bank.save(update_fields=["name", "subject", "language", "default_question_type", "is_shared", "updated_at"])
+            bank.save(
+                update_fields=[
+                    "name",
+                    "subject",
+                    "subject_ref",
+                    "exam_kind",
+                    "source_teacher",
+                    "language",
+                    "default_question_type",
+                    "updated_at",
+                ]
+            )
             messages.success(request, pgettext("exams.view.bank.message", "Bank yeniləndi."))
         next_url = (request.POST.get("next") or "").strip()
         if next_url and url_has_allowed_host_and_scheme(

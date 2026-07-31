@@ -19,15 +19,14 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from . import gradebook, journal_extras
-from .models import CourseOffering, Lesson, SelfWorkTopic
+from .journal_access import offering_or_404 as scoped_offering_or_404
+from .models import Lesson, SelfWorkTopic
 from .views import _can_edit_journal, _is_direct_editor
 
 
 def _offering_or_404(request, offering_id):
-    offering = get_object_or_404(
-        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
-        pk=offering_id,
-    )
+    """Tenant-scope-lu yükləmə + redaktə səlahiyyəti yoxlaması."""
+    offering = scoped_offering_or_404(request, offering_id)
     if not _can_edit_journal(request.user, offering):
         raise Http404
     return offering

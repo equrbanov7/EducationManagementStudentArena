@@ -24,63 +24,63 @@
 
   <div class="ecs-filters">
     <div class="ecs-field">
-      <label>{% trans "Axtarış (tələbə)" %}</label>
-      <input type="search" class="js-ecs-q" placeholder="{% trans 'Ad, soyad, istifadəçi adı…' %}" autocomplete="off">
+      <label for="ecs-student-search">{% trans "Axtarış (tələbə)" %}</label>
+      <input type="search" id="ecs-student-search" class="js-ecs-q" placeholder="{% trans 'Ad, soyad, istifadəçi adı…' %}" autocomplete="off">
     </div>
-    <div class="ecs-field">
-      <label>{% trans "Fənn" %}</label>
+    <div class="ecs-field" role="group" aria-labelledby="ecs-subject-label">
+      <label id="ecs-subject-label">{% trans "Fənn" %}</label>
       {% trans "fənn axtar…" as ecs_subject_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-subject" placeholder=ecs_subject_ph %}
     </div>
-    <div class="ecs-field">
-      <label>{% trans "Qrup" %}</label>
+    <div class="ecs-field" role="group" aria-labelledby="ecs-group-label">
+      <label id="ecs-group-label">{% trans "Qrup" %}</label>
       {% trans "qrup axtar…" as ecs_group_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-group" placeholder=ecs_group_ph %}
     </div>
-    <div class="ecs-field">
-      <label>{% trans "Fakültə" %}</label>
+    <div class="ecs-field" role="group" aria-labelledby="ecs-faculty-label">
+      <label id="ecs-faculty-label">{% trans "Fakültə" %}</label>
       {% trans "fakültə axtar…" as ecs_faculty_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-faculty" placeholder=ecs_faculty_ph %}
     </div>
-    <div class="ecs-field">
-      <label>{% trans "Kafedra" %}</label>
+    <div class="ecs-field" role="group" aria-labelledby="ecs-department-label">
+      <label id="ecs-department-label">{% trans "Kafedra" %}</label>
       {% trans "kafedra axtar…" as ecs_dept_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-department" placeholder=ecs_dept_ph %}
     </div>
-    <div class="ecs-field">
-      <label>{% trans "Müəllim" %}</label>
+    <div class="ecs-field" role="group" aria-labelledby="ecs-teacher-label">
+      <label id="ecs-teacher-label">{% trans "Müəllim" %}</label>
       {% trans "müəllim axtar…" as ecs_teacher_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-teacher" placeholder=ecs_teacher_ph %}
     </div>
     <div class="ecs-field">
-      <label>{% trans "İmtahan tipi" %}</label>
+      <label for="ecs-type">{% trans "İmtahan tipi" %}</label>
       <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+        <select id="ecs-type" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
     {% comment %}Apellyasiya statistikası ilə paritet: forma / status / semestr.{% endcomment %}
     <div class="ecs-field">
-      <label>{% trans "İmtahan forması" %}</label>
+      <label for="ecs-format">{% trans "İmtahan forması" %}</label>
       <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+        <select id="ecs-format" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
     <div class="ecs-field">
-      <label>{% trans "Status" %}</label>
+      <label for="ecs-status">{% trans "Status" %}</label>
       <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+        <select id="ecs-status" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
     <div class="ecs-field">
-      <label>{% trans "Semestr" %}</label>
+      <label for="ecs-semester">{% trans "Semestr" %}</label>
       <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+        <select id="ecs-semester" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
     <div class="ecs-field">
-      <label>{% trans "Tədris ili" %}</label>
+      <label for="ecs-year">{% trans "Tədris ili" %}</label>
       <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+        <select id="ecs-year" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
   </div>

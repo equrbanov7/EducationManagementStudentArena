@@ -9,7 +9,11 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
+from apps.exams.constants import (
+    DEFAULT_EXAM_LANGUAGE,
+    EXAM_LANGUAGE_CHOICES,
+    QUESTION_EXAM_KIND_CHOICES,
+)
 from apps.exams.domain.question_bank import (
     User,
     option_media_path,
@@ -39,6 +43,37 @@ class QuestionBank(models.Model):
         blank=True,
         verbose_name=pgettext_lazy("exams.model.question_bank.field", "subject"),
         help_text=pgettext_lazy("exams.model.question_bank.help", "subject"),
+    )
+    # Fənn kataloq bağlantısı (registrar.Subject) — axtarışlı seçimdən gəlir.
+    # `subject` (mətn) görünüş/geriyə-uyğunluq üçün qalır və seçimdə fənnin adı
+    # ilə sinxron doldurulur.
+    subject_ref = models.ForeignKey(
+        "registrar.Subject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="question_banks",
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "subject_ref"),
+    )
+    # Bankın təyinatı — hansı imtahan növü üçün toplanır (boş = ümumi).
+    EXAM_KIND_CHOICES = QUESTION_EXAM_KIND_CHOICES
+    exam_kind = models.CharField(
+        max_length=20,
+        choices=QUESTION_EXAM_KIND_CHOICES,
+        blank=True,
+        default="",
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "exam_kind"),
+    )
+    # Sualları göndərən/mənbə müəllim — mərkəz bankı hansı müəllimin suallarından
+    # yaradıbsa, atribusiya və filtr üçün saxlanır.
+    source_teacher = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sourced_question_banks",
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "source_teacher"),
     )
     topic = models.CharField(
         max_length=150,
@@ -132,6 +167,16 @@ class QuestionBank(models.Model):
     @property
     def question_count(self):
         return self.bank_questions.count()
+
+    @property
+    def subject_label(self):
+        """Görünüş üçün fənn etiketi: kataloq bağlantısı varsa "KOD — Ad",
+        yoxdursa köhnə sərbəst mətn."""
+        if self.subject_ref_id and self.subject_ref:
+            code = (self.subject_ref.code or "").strip()
+            name = (self.subject_ref.name or "").strip()
+            return f"{code} — {name}" if code else name
+        return self.subject
 
 
 class ExamQuestion(models.Model):

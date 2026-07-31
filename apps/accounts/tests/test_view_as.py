@@ -16,6 +16,7 @@ from django.urls import reverse
 from apps.accounts.models import ProfileRole
 from apps.accounts.services.view_as import (
     MODE_FULL,
+    MODE_LIMITED,
     MODE_READONLY,
     VIEW_AS_SESSION_KEY,
     resolve_actor_access,
@@ -286,3 +287,328 @@ class ViewAsFlowTests(ViewAsTestBase):
         self.assertEqual(response.context["user"].pk, self.other_student.pk)
         # Org konteksti hədəfin org-una keçir.
         self.assertEqual(self.client.session["active_organization"], self.other_org.slug)
+
+
+class ViewAsAccountTakeoverTests(ViewAsTestBase):
+    """P0 reqressiya: view-as altında hədəfin KİMLİK SÜBUTU axını bloklanmalıdır.
+
+    Tapıntı: ``ViewAsMiddleware`` ``FirstLoginPasswordMiddleware``-dən ƏVVƏL
+    işlədiyi üçün ``password_change_required=True`` olan hədəfdə hər sorğu
+    parol-təyini səhifəsinə yönləndirilirdi; blok siyahısında yalnız 3
+    ``profile_form`` dəyəri vardı, ona görə aktor hədəfin parolunu təyin edib
+    hesabı tam ələ keçirə bilərdi.
+    """
+
+    def _make_pending_first_login_target(self):
+        target = User.objects.create_user("pending_user", "pending@example.com", PASSWORD)
+        _add_member(target, self.org, self.teacher_role)
+        profile = target.profile
+        profile.password_change_required = True
+        profile.save(update_fields=["password_change_required"])
+        return target
+
+    def test_first_login_target_is_not_selectable(self):
+        """İlk-girişini tamamlamamış hesab hədəf siyahısında görünməməlidir."""
+        target = self._make_pending_first_login_target()
+        self._login(self.admin)
+
+        response = self.client.get(reverse("accounts:view_as_search"), {"type": "users"})
+        self.assertEqual(response.status_code, 200)
+        ids = {row["id"] for row in response.json()["results"]}
+        self.assertNotIn(target.pk, ids)
+
+    def test_start_view_as_on_first_login_target_is_rejected(self):
+        target = self._make_pending_first_login_target()
+        self._login(self.admin)
+
+        self._start(target)
+        self.assertNotIn(VIEW_AS_SESSION_KEY, self.client.session)
+
+    def test_set_initial_password_post_is_blocked_in_full_mode(self):
+        """FULL rejimdə belə parol-təyini POST-u bloklanır (hesab ələ keçirmə)."""
+        self._login(self.admin)
+        self._start(self.teacher)
+        self.assertIn(VIEW_AS_SESSION_KEY, self.client.session)
+
+        response = self.client.post(
+            reverse("accounts:set_initial_password"),
+            {"new_password1": "AttackerPass123!", "new_password2": "AttackerPass123!"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        # Hədəfin parolu DƏYİŞMƏMƏLİDİR.
+        self.teacher.refresh_from_db()
+        self.assertFalse(self.teacher.check_password("AttackerPass123!"))
+        self.assertTrue(self.teacher.check_password(PASSWORD))
+
+    def test_otp_endpoints_are_blocked_in_full_mode(self):
+        """E-poçt OTP axını da kimlik sübutudur — hər iki rejimdə bloklanır."""
+        self._login(self.admin)
+        self._start(self.teacher)
+
+        for url_name in ("accounts:send_otp_api", "accounts:verify_otp_api", "accounts:resend_otp_api"):
+            with self.subTest(url_name=url_name):
+                response = self.client.post(reverse(url_name), {}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+                self.assertEqual(response.status_code, 403)
+                self.assertTrue(response.json().get("view_as_blocked"))
+
+
+class ViewAsLimitedModeTests(ViewAsTestBase):
+    """İmtahan Mərkəzi / İKT üçün MƏHDUD dəyişiklik rejimi (2026-07-31 auditi).
+
+    İstifadəçi qaydası: başqa rolun səhifəsinə dəyişiklik səlahiyyəti ilə YALNIZ
+    İmtahan Mərkəzi və İKT Mərkəzi girə bilər; İmtahan Mərkəzinin dəyişikliyi
+    imtahan əməliyyatları ilə, İKT-ninki isə açıq şəkildə icazə verilmiş sistem
+    əməliyyatları ilə məhdudlaşır.
+    """
+
+    def setUp(self):
+        super().setUp()
+        # Səviyyələr real konfiqurasiyadakı kimidir: hər ikisi org_admin-dən (80)
+        # YUXARIDIR — məhz buna görə köhnə səviyyə-əsaslı şərt onlara tam
+        # səlahiyyət verirdi.
+        self.exam_center_role = _make_role(self.org, ProfileRole.EXAM_CENTER, 85)
+        self.ikt_role = _make_role(self.org, ProfileRole.IKT_REHBER, 88)
+        self.exam_center = User.objects.create_user("exam_center1", "ec@example.com", PASSWORD)
+        self.ikt = User.objects.create_user("ikt1", "ikt@example.com", PASSWORD)
+        _add_member(self.exam_center, self.org, self.exam_center_role)
+        _add_member(self.ikt, self.org, self.ikt_role)
+
+    def test_exam_center_gets_limited_not_full(self):
+        mode, _level, _m = resolve_actor_access(self.exam_center, self.org)
+        self.assertEqual(mode, MODE_LIMITED)
+
+    def test_ikt_gets_limited_not_full(self):
+        mode, _level, _m = resolve_actor_access(self.ikt, self.org)
+        self.assertEqual(mode, MODE_LIMITED)
+
+    def test_high_level_role_without_mapping_gets_no_access(self):
+        """Səviyyə tək başına səlahiyyət vermir — xəritədə olmayan rol girə bilməz."""
+        stranger_role = _make_role(self.org, "vice_rector_unmapped", 95)
+        stranger = User.objects.create_user("stranger1", "stranger@example.com", PASSWORD)
+        _add_member(stranger, self.org, stranger_role)
+
+        mode, _level, _m = resolve_actor_access(stranger, self.org)
+
+        self.assertIsNone(mode)
+
+    def test_limited_actor_cannot_target_org_admin(self):
+        """Məxfi HR/idarəçi məlumatı: admin hesabı hədəf ola bilməz."""
+        target, mode = validate_target(self.ikt, self.org, self.admin.pk)
+
+        self.assertIsNone(target)
+        self.assertIsNone(mode)
+
+    def test_limited_actor_can_target_teacher(self):
+        target, mode = validate_target(self.exam_center, self.org, self.teacher.pk)
+
+        self.assertEqual(target, self.teacher)
+        self.assertEqual(mode, MODE_LIMITED)
+
+    def test_limited_write_is_blocked_outside_the_allowlist(self):
+        """Siyahıda olmayan marşruta POST bloklanır (URL ilə birbaşa cəhd)."""
+        self._login(self.exam_center)
+        self._start(self.teacher)
+
+        response = self.client.post(
+            reverse("accounts:profile"),
+            {"profile_form": "some-other-form"},
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(VIEW_AS_SESSION_KEY, self.client.session)
+
+    def test_ikt_write_allowlist_is_empty_by_design(self):
+        """İKT üçün heç bir sistem əməliyyatı hələ açıq şəkildə icazəli deyil."""
+        from apps.accounts.services.view_as import actor_limited_write_url_names
+
+        self.assertEqual(actor_limited_write_url_names(self.ikt, self.org), frozenset())
+
+    def test_exam_center_allowlist_holds_only_exam_routes(self):
+        from apps.accounts.services.view_as import actor_limited_write_url_names
+
+        allowed = actor_limited_write_url_names(self.exam_center, self.org)
+
+        self.assertTrue(allowed)
+        self.assertTrue(all(name.startswith("exams:") for name in allowed), sorted(allowed)[:5])
+        # Auditdə açıq şəkildə istisna edilənlər siyahıya düşməməlidir.
+        self.assertNotIn("exams:exam_center_ticket_remove", allowed)
+        self.assertNotIn("accounts:exam_chance", allowed)
+        self.assertNotIn("registrar:correction_apply", allowed)
+
+    def test_blocked_write_is_recorded_in_audit(self):
+        from apps.audit.models import AuditLog
+
+        self._login(self.exam_center)
+        self._start(self.teacher)
+        before = AuditLog.objects.filter(reason="view_as_action_blocked").count()
+
+        self.client.post(reverse("accounts:profile"), {"profile_form": "some-other-form"})
+
+        self.assertEqual(AuditLog.objects.filter(reason="view_as_action_blocked").count(), before + 1)
+
+        entry = AuditLog.objects.filter(reason="view_as_action_blocked").order_by("-id").first()
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.user, self.exam_center)
+        self.assertFalse(entry.changes.get("allowed"))
+        self.assertEqual(entry.changes.get("mode"), MODE_LIMITED)
+
+
+class ViewAsAdminSurfaceTests(ViewAsTestBase):
+    """Django admin view-as altında tam bağlıdır.
+
+    Admin-də `password_change`, admin 2FA təsdiqi və bütün modellərin CRUD
+    marşrutları var. Middleware yalnız `is_superuser` HƏDƏFLƏRİNİ istisna edir,
+    `is_staff`-i yox — yəni staff hədəf seçilsə bütün admin səthi açılırdı.
+    """
+
+    def test_admin_is_blocked_under_view_as(self):
+        self.teacher.is_staff = True
+        self.teacher.save(update_fields=["is_staff"])
+        self._login(self.admin)
+        self._start(self.teacher)
+
+        response = self.client.get(reverse("admin:index"), follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn("/admin/", response.headers.get("Location", ""))
+
+    def test_admin_stays_reachable_without_view_as(self):
+        """Qadağa YALNIZ view-as sessiyasına aiddir — normal admin girişi qalır."""
+        self.admin.is_staff = True
+        self.admin.save(update_fields=["is_staff"])
+        self._login(self.admin)
+
+        response = self.client.get(reverse("admin:index"), follow=False)
+
+        self.assertNotEqual(response.status_code, 403)
+
+
+class ViewAsAuditAttributionTests(ViewAsTestBase):
+    """Domen audit qeydləri əsl aktoru daşımalıdır.
+
+    ``ViewAsMiddleware`` ``request.user``-i hədəflə əvəz edir, ona görə domen
+    qatındakı `by_user=request.user` çağırışları hədəfin adını yazır. Damğa
+    ``core.audit.log_action``-da mərkəzi qoyulur.
+    """
+
+    def test_domain_audit_records_carry_the_real_actor(self):
+        from apps.audit.models import AuditLog
+
+        self._login(self.admin)
+        self._start(self.teacher)
+
+        # QEYD: audit cədvəli APPEND-ONLY-dir (postgres trigger-i DELETE-i
+        # bloklayır), ona görə təmizləmək olmaz — unikal `reason` ilə süzürük.
+        # sqlite-da trigger yoxdur, yəni bu tələ yalnız CI-də görünürdü.
+        from core.audit import log_action
+        from core.constants import AuditAction
+
+        request = self.client.get(reverse("accounts:profile")).wsgi_request
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,  # = HƏDƏF (impersonasiya)
+            organization=self.org,
+            obj=self.teacher,
+            reason="domain_write",
+            request=request,
+        )
+
+        entry = AuditLog.objects.filter(reason="domain_write").order_by("-id").first()
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.user, self.teacher)  # domen qatı hədəfi yazır
+        stamp = entry.changes.get("impersonated_by")
+        self.assertIsNotNone(stamp, "impersonasiya damğası yoxdur")
+        self.assertEqual(stamp["username"], self.admin.username)
+        self.assertEqual(stamp["mode"], MODE_FULL)
+
+
+class ViewAsBannerModeTests(ViewAsTestBase):
+    """Banner ÜÇ rejimi də düzgün göstərməlidir.
+
+    `MODE_LIMITED` əlavə olunanda banner şablonu və CSS-i yenilənməmişdi:
+    * `view-as-banner--limited` class-ının heç bir qaydası yox idi, baza qayda
+      isə `color: var(--ems-neutral-0)` (ağ) verir → ağ üzərində ağ mətn;
+    * etiket `{% if readonly %}…{% else %}FULL{% endif %}` idi, yəni məhdud
+      səlahiyyətli istifadəçiyə «tam səlahiyyət» yazılırdı — yanlış məlumat.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.exam_center_role = _make_role(self.org, ProfileRole.EXAM_CENTER, 85)
+        self.exam_center = User.objects.create_user("banner_ec", "banner_ec@example.com", PASSWORD)
+        _add_member(self.exam_center, self.org, self.exam_center_role)
+
+    def _banner_html(self, actor, target):
+        self._login(actor)
+        self._start(target)
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def test_limited_mode_uses_its_own_banner_class(self):
+        html = self._banner_html(self.exam_center, self.teacher)
+
+        self.assertIn("view-as-banner--limited", html)
+        self.assertIn("view-as-pill--limited", html)
+        self.assertIn("view-as-frame--limited", html)
+
+    def test_limited_mode_is_not_labelled_as_full_control(self):
+        from django.utils.translation import pgettext
+
+        html = self._banner_html(self.exam_center, self.teacher)
+
+        self.assertIn(pgettext("accounts.view_as", "mode_limited"), html)
+        self.assertNotIn(pgettext("accounts.view_as", "mode_full"), html)
+
+    def test_full_mode_still_labelled_as_full(self):
+        from django.utils.translation import pgettext
+
+        html = self._banner_html(self.admin, self.teacher)
+
+        self.assertIn("view-as-banner--full", html)
+        self.assertIn(pgettext("accounts.view_as", "mode_full"), html)
+
+    def test_every_mode_class_has_css_rules(self):
+        """Şablon `--{{ mode }}` yazır: hər rejim üçün qayda OLMALIDIR."""
+        import pathlib
+
+        from apps.accounts.services.view_as import MODE_FULL, MODE_LIMITED, MODE_READONLY
+
+        css = pathlib.Path("static/css/view_as.css").read_text(encoding="utf-8")
+        for mode in (MODE_FULL, MODE_LIMITED, MODE_READONLY):
+            for block in ("banner", "pill", "frame"):
+                with self.subTest(mode=mode, block=block):
+                    self.assertIn(f".view-as-{block}--{mode}", css)
+
+    def test_every_mode_defines_a_coloured_surface(self):
+        """Rejimin RƏNG PALİTRASI da olmalıdır, təkcə class adı yox.
+
+        `MODE_LIMITED` əlavə olunanda məhz bu sındı: class adı şablondan
+        gəlirdi, amma `--view-as-limited-*` dəyişənləri yox idi. Baza qaydası
+        mətni ağ (`--ems-neutral-0`) edir, fon isə rejim qaydasından gəlir —
+        fon olmayanda istifadəçi AĞ FONDA AĞ MƏTN görürdü: «Öz profilimə qayıt»
+        düyməsi və «TAM SƏLAHİYYƏT» nişanı tamamilə oxunmaz idi.
+
+        Class adını yoxlamaq bunu tutmurdu, çünki `.view-as-banner--limited`
+        yalnız bir alt-element qaydasında iştirak etsə belə mətndə görünür.
+        """
+        import pathlib
+
+        from apps.accounts.services.view_as import MODE_FULL, MODE_LIMITED, MODE_READONLY
+
+        css = pathlib.Path("static/css/view_as.css").read_text(encoding="utf-8")
+        for mode in (MODE_FULL, MODE_LIMITED, MODE_READONLY):
+            for suffix in ("", "-bg", "-border"):
+                variable = f"--view-as-{mode}{suffix}"
+                with self.subTest(mode=mode, variable=variable):
+                    self.assertIn(f"{variable}:", css, f"{variable} təyin olunmayıb")
+
+            # Çıxış düyməsi və nişan üçün fon MÜTLƏQ verilməlidir.
+            for element in ("__exit", "__chip"):
+                with self.subTest(mode=mode, element=element):
+                    rule = f".view-as-banner--{mode} .view-as-banner{element}"
+                    self.assertIn(rule, css, f"{rule} üçün qayda yoxdur")
+                    tail = css.split(rule, 1)[1].split("}", 1)[0]
+                    self.assertIn("background", tail, f"{rule} fon təyin etmir — ağ fonda ağ mətn riski")

@@ -125,6 +125,7 @@ urlpatterns = [
     path("create/", views.createAndEditExamView, name="create_exam"),
     # Sehrbaz axtarışlı select-ləri üçün AJAX lookup endpoint-ləri.
     path("lookups/subjects/", views.subject_search, name="subject_search"),
+    path("lookups/bank-teachers/", views.bank_teacher_search, name="bank_teacher_search"),
     path("lookups/groups/", views.group_search, name="group_search"),
     path("lookups/faculties/", views.stats_faculty_search, name="stats_faculty_search"),
     path("lookups/departments/", views.stats_department_search, name="stats_department_search"),
@@ -183,6 +184,11 @@ urlpatterns = [
         "question-submissions/<int:submission_id>/review/",
         views.question_submission_review,
         name="question_submission_review",
+    ),
+    path(
+        "question-submissions/<int:submission_id>/questions/",
+        views.question_submission_questions,
+        name="question_submission_questions",
     ),
     path(
         "question-submissions/<int:submission_id>/visual/<int:source_index>.png",

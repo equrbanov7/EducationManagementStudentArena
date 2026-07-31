@@ -106,6 +106,15 @@
     {% endif %}
   </div>
 
+  {% comment %}
+    Səhifələmə: KPI kartları və kateqoriya çipləri BÜTÜN filtrlənmiş dəst üzrə
+    SQL aqreqatı ilə hesablanır (bax `_sections/exams.py`), siyahı isə səhifə-
+    səhifə gəlir — yəni «Aktiv: 150» yazılır, ekranda 12 kart olsa da.
+  {% endcomment %}
+  {% if my_exams_page_obj %}
+    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj extra_query=my_exams_pagination_query page_param="exam_page" %}
+  {% endif %}
+
   {% include "accounts/profile/sections/partials/_delete_exam_modal.html" %}
 </section>
 {% endif %}

@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         badge.className = `badge bg-${color} text-dark border d-flex align-items-center me-1 mb-1 p-2`;
         badge.innerHTML = `
           <span>${text}</span>
-          <i class="bi bi-x-circle-fill ms-2 text-danger" style="cursor:pointer"></i>
+          <i class="fas fa-circle-xmark ms-2 text-danger" style="cursor:pointer"></i>
         `;
         badge.querySelector("i").addEventListener("click", onRemove);
         container.appendChild(badge);

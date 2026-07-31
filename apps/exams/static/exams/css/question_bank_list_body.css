@@ -1,3 +1,42 @@
 /* Source: exams/teacher/partials/_question_bank_list_body.html
    Extracted from an inline <style> for CSP (no unsafe-inline). */
-.c3-1 { color:var(--danger,#e74c3c); }
+.question-bank-list-body-1 { color:var(--danger,#e74c3c); }
+
+/* ── Axtarışlı seçici (EMSSearchableSelect, prefiks: qbk) ─────────────────
+   DOM strukturu accounts/profile/sections/_searchable_picker.html-dən gəlir;
+   üslub exam_center_stats.css-dəki .ecs-ms nümunəsi ilə paritetdədir. */
+.qbk-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.35rem .5rem; position:relative; min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; }
+.qbk-ms:focus-within { border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
+.qbk-ms__chips { flex:1; min-width:0; display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; }
+.qbk-ms__search { border:0; outline:none; background:transparent; color:var(--ems-neutral-900); padding:.28rem; font-size:.88rem; min-width:100px; flex:1; }
+.qbk-ms__search::placeholder { color:var(--ems-neutral-400); }
+.qbk-ms__menu { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; box-shadow:0 12px 30px rgba(15,23,42,.14); max-height:300px; overflow-y:auto; z-index:1060; display:none; }
+.qbk-ms.is-open .qbk-ms__menu { display:block; }
+.qbk-ms__opt { padding:.55rem .8rem; cursor:pointer; font-size:.86rem; color:var(--ems-neutral-800); }
+.qbk-ms__opt:hover { background:var(--ems-primary-50); color:var(--ems-primary-700); }
+.qbk-ms__more { padding:.5rem .8rem; text-align:center; color:var(--ems-neutral-400); font-size:1rem; letter-spacing:.2em; }
+.qbk-chip { display:inline-flex; align-items:center; gap:.35rem; background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-200); border-radius:999px; padding:.15rem .3rem .15rem .6rem; font-size:.82rem; font-weight:600; max-width:100%; }
+.qbk-chip > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.qbk-chip__x { border:0; background:transparent; color:var(--ems-primary-600); font-size:.95rem; line-height:1; cursor:pointer; padding:0 .3rem; border-radius:50%; }
+.qbk-chip__x:hover { color:var(--ems-primary-800); background:var(--ems-primary-100); }
+
+/* ── İmtahan növü filtr pilləri ── */
+.qb-kind-pills { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
+.qb-kind-pill { display:inline-flex; align-items:center; padding:.35rem .9rem; border-radius:999px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-neutral-700); font-size:.85rem; font-weight:600; text-decoration:none; transition:all .15s ease; }
+.qb-kind-pill:hover { border-color:var(--ems-primary-400); color:var(--ems-primary-700); background:var(--ems-primary-50); }
+.qb-kind-pill.is-active { background:var(--ems-primary-600); border-color:var(--ems-primary-600); color:#fff; }
+
+/* ── Kart: imtahan növü çipi + mənbə müəllim sətri ── */
+.qb-chip--kind { background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-200); }
+.qb-chip--kind-final { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; }
+.qb-chip--kind-midterm { background:#ecfeff; color:#0e7490; border-color:#a5f3fc; }
+.qb-chip--kind-quiz { background:#fefce8; color:#a16207; border-color:#fde68a; }
+.qb-card__teacher { display:flex; align-items:center; gap:.45rem; margin-top:6px; color:var(--ems-neutral-600); font-size:.84rem; }
+.qb-card__teacher i { color:var(--ems-neutral-400); font-size:.8rem; }
+
+/* ── Yaratma kartı: alt qeyd (paylaşım gizlədilib) ── */
+.qb-form__footer-note { display:inline-flex; align-items:center; gap:.5rem; color:var(--ems-neutral-500); font-size:.84rem; }
+.qb-form__footer-note i { color:var(--ems-neutral-400); }
+
+/* Edit modalında seçici sahələri sıxılmasın */
+.qb-edit-field .qbk-ms { width:100%; }

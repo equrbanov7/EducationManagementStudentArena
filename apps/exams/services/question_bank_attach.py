@@ -46,17 +46,18 @@ def accessible_banks(user, organization, *, include_shared=True):
     paylaşılan banklar). Legacy (org=NULL) paylaşılan banklar tenant sızması
     olmasın deyə yalnız sahib vasitəsilə görünür.
 
-    İMTAHAN MƏRKƏZİ istifadəçiləri (super olmayan) YALNIZ öz yaratdıqları bankları
-    görüb idarə edir — paylaşılan (başqa istifadəçinin) banklarını yox.
+    İMTAHAN MƏRKƏZİ istifadəçiləri bank hovuzunun idarəçisidir: təşkilatın BÜTÜN
+    aktiv banklarını görür (qəbul axını istənilən org bankına yaza bilir; əvvəlki
+    "yalnız öz bankları" qaydası başqa mərkəz üzvünün qəbul etdiyi bankın
+    linkini 404 edirdi). Redaktə/silmə yenə yalnız sahibə açıqdır (view qatında).
     """
     from apps.exams.services.access_policy import is_exam_center_user
 
-    is_super = user.is_superuser or getattr(user, "is_superadmin", False)
-    if include_shared and not is_super and is_exam_center_user(user):
-        include_shared = False
-
     visibility = Q(created_by=user)
-    if include_shared and organization is not None:
+    if is_exam_center_user(user):
+        if organization is not None:
+            visibility |= Q(organization=organization)
+    elif include_shared and organization is not None:
         visibility |= Q(is_shared=True, organization=organization)
     return QuestionBank.objects.filter(is_active=True).filter(visibility).distinct()
 

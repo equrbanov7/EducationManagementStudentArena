@@ -43,7 +43,7 @@ jobs:
       - name: 📥 Install linting tools
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 flake8-bugbear black isort
+          pip install flake8 flake8-bugbear black isort polib
 
       - name: 🖤 Check code formatting with Black
         run: |
@@ -89,6 +89,15 @@ jobs:
           echo "::endgroup::"
       - name: 🧱 Module boundary gate (M1)
         run: python scripts/module_deps.py --check
+
+      - name: 🌐 i18n catalog gate (tərcümə borcu ratchet-i)
+        run: |
+          echo "::group::🌐 i18n kataloq vəziyyəti"
+          python scripts/check_i18n_catalogs.py || {
+            echo "::error::❌ i18n kataloq qapısı keçmədi — yeni tərcümə borcu əlavə olunub və ya placeholder uyğunsuzluğu var (runtime KeyError riski). Borcu azaltmaq üçün tərcüməni tamamlayın; şüurlu dəyişiklik üçün: python scripts/check_i18n_catalogs.py --update"
+            exit 1
+          }
+          echo "::endgroup::"
 
       - name: 🛡️ RLS worker-atomic coverage (FAZA 4/Task 1)
         run: |

@@ -13,6 +13,7 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
          data-profile-section-panel="question-submissions">
 <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
 <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
+<link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
 <div class="qsub-section">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <p class="text-muted mb-0">
@@ -48,7 +49,10 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
     </div>
 
     {# ── Axtarış + filtr çubuğu ── #}
-    <form method="get" class="qsubf-bar js-profile-debounce-search js-qsub-filter-form" data-debounce-ms="600" role="search">
+    <form method="get" class="qsubf-bar js-profile-debounce-search js-qsub-filter-form" data-debounce-ms="600" role="search"
+          data-faculty-url="{% url 'exams:stats_faculty_search' %}"
+          data-department-url="{% url 'exams:stats_department_search' %}"
+          data-teacher-url="{% url 'exams:bank_teacher_search' %}">
         <input type="hidden" name="section" value="question-submissions">
         <input type="hidden" name="qsub_status" value="{{ question_submissions_status }}">
         <div class="qsubf-search">
@@ -62,33 +66,22 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
         </div>
         {% if question_submissions_is_reviewer %}
         <div class="qsubf-selects">
-            <div class="bootstrap-single-select qsubf-select">
-                <select class="form-select bootstrap-single-select__native" name="qsub_faculty" data-bootstrap-select
-                        aria-label="{% trans 'Fakültə' context 'accounts.profile.question_submissions' %}">
-                    <option value="">{% trans "Bütün fakültələr" context "accounts.profile.question_submissions" %}</option>
-                    {% for unit in question_submissions_faculties %}
-                    <option value="{{ unit.pk }}" {% if question_submissions_filters.faculty == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="bootstrap-single-select qsubf-select">
-                <select class="form-select bootstrap-single-select__native" name="qsub_kafedra" data-bootstrap-select
-                        aria-label="{% trans 'Kafedra' context 'accounts.profile.question_submissions' %}">
-                    <option value="">{% trans "Bütün kafedralar" context "accounts.profile.question_submissions" %}</option>
-                    {% for unit in question_submissions_kafedras %}
-                    <option value="{{ unit.pk }}" {% if question_submissions_filters.kafedra == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="bootstrap-single-select qsubf-select">
-                <select class="form-select bootstrap-single-select__native" name="qsub_teacher" data-bootstrap-select
-                        aria-label="{% trans 'Müəllim' context 'accounts.profile.question_submissions' %}">
-                    <option value="">{% trans "Bütün müəllimlər" context "accounts.profile.question_submissions" %}</option>
-                    {% for t in question_submissions_teachers %}
-                    <option value="{{ t.pk }}" {% if question_submissions_filters.teacher == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.get_full_name|default:t.username }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            {% comment %}Uzun siyahılı filtrlər (fakültə/kafedra/müəllim) axtarışlı
+            seçicidir (EMSSearchableSelect) — select ilə uzun siyahıda tapmaq
+            çətindir. Dəyər hidden inputda saxlanır, seçimdə forma resubmit olunur;
+            qısa siyahılar (il/semestr/dil) adi select qalır.{% endcomment %}
+            <input type="hidden" name="qsub_faculty" value="{{ question_submissions_filters.faculty }}"
+                   data-label="{{ question_submissions_selected_labels.faculty }}">
+            {% trans "fakültə axtar…" context "accounts.profile.question_submissions" as qsf_faculty_ph %}
+            <div class="qsubf-picker">{% include "accounts/profile/sections/_searchable_picker.html" with prefix="qsf" hook="qsf-faculty" placeholder=qsf_faculty_ph %}</div>
+            <input type="hidden" name="qsub_kafedra" value="{{ question_submissions_filters.kafedra }}"
+                   data-label="{{ question_submissions_selected_labels.kafedra }}">
+            {% trans "kafedra axtar…" context "accounts.profile.question_submissions" as qsf_kafedra_ph %}
+            <div class="qsubf-picker">{% include "accounts/profile/sections/_searchable_picker.html" with prefix="qsf" hook="qsf-kafedra" placeholder=qsf_kafedra_ph %}</div>
+            <input type="hidden" name="qsub_teacher" value="{{ question_submissions_filters.teacher }}"
+                   data-label="{{ question_submissions_selected_labels.teacher }}">
+            {% trans "müəllim axtar…" context "accounts.profile.question_submissions" as qsf_teacher_ph %}
+            <div class="qsubf-picker">{% include "accounts/profile/sections/_searchable_picker.html" with prefix="qsf" hook="qsf-teacher" placeholder=qsf_teacher_ph %}</div>
             <div class="bootstrap-single-select qsubf-select qsubf-select--sm">
                 <select class="form-select bootstrap-single-select__native" name="qsub_year" data-bootstrap-select
                         aria-label="{% trans 'Tədris ili' context 'accounts.profile.question_submissions' %}">
@@ -156,11 +149,28 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
                 <div class="qsubs-item__meta">
                     {% if question_submissions_is_reviewer %}<span><i class="fas fa-user"></i>{{ s.teacher.get_full_name|default:s.teacher.username }}</span>{% endif %}
                     <span><i class="fas fa-book"></i>{{ s.subject }}</span>
+                    {% if s.exam_kind %}<span><i class="fas fa-flag-checkered"></i>{{ s.get_exam_kind_display }}</span>{% endif %}
                     <span><i class="fas fa-users"></i>{{ s.group_label }}</span>
                     <span><i class="fas fa-globe"></i>{{ s.get_language_display }}</span>
                     <span><i class="far fa-clock"></i>{{ s.created_at|date:"d.m.Y H:i" }}</span>
                     {% if s.resubmission_count %}<span><i class="fas fa-rotate-right"></i>×{{ s.resubmission_count }}</span>{% endif %}
                 </div>
+                {% if s.status == "accepted" and s.accepted_bank %}
+                <div class="qsubs-item__bank">
+                    {% if question_submissions_is_reviewer and s.accepted_bank.is_active %}
+                    <a href="{% url 'exams:question_bank_detail' s.accepted_bank_id %}" class="qsubs-bank-link js-profile-section-link-skip">
+                        <i class="fas fa-layer-group"></i>
+                        {% blocktrans with bank=s.accepted_bank.name context "accounts.profile.question_submissions" %}Suallar «{{ bank }}» bankına əlavə olunub{% endblocktrans %}
+                        <i class="fas fa-arrow-right qsubs-bank-link__arrow"></i>
+                    </a>
+                    {% else %}
+                    <span class="qsubs-bank-link qsubs-bank-link--static">
+                        <i class="fas fa-layer-group"></i>
+                        {% blocktrans with bank=s.accepted_bank.name context "accounts.profile.question_submissions" %}Suallar «{{ bank }}» bankına əlavə olunub{% endblocktrans %}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
             <div class="qsubs-item__badges">
                 <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{% blocktrans count counter=s.question_count context "accounts.profile.question_submissions" %}{{ counter }} sual{% plural %}{{ counter }} sual{% endblocktrans %}</span>
@@ -215,5 +225,6 @@ olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/gö
     </div>
     {% endif %}
 </div>
-<script src="{% static 'exams/js/question_submission_list.js' %}?v=20260717-filters" defer></script>
+{% include "exams/teacher/partials/_qsub_delete_modal.html" %}
+<script src="{% static 'exams/js/question_submission_list.js' %}?v=20260731-pickers" defer></script>
 </section>

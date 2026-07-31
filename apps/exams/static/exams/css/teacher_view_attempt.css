@@ -568,7 +568,7 @@
 }
 
 /* --- Appended from exams/teacher/teacher_view_attempt.html inline <style> (CSP) --- */
-.c3-1 { max-height:360px; }
+.teacher-view-attempt-1 { max-height:360px; }
 .question-media img.source-rendered-image { max-height: none; }
 .attempt-option-label { margin-right: 0.35rem; font-weight: 700; }
 .attempt-option-image { display: block; max-width: 100%; height: auto; margin-top: 0.35rem; }

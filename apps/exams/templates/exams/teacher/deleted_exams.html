@@ -59,13 +59,25 @@
                     <i class="fas fa-rotate-left me-1" aria-hidden="true"></i>{% trans "action_restore" context "exams.template.deleted_exams" %}
                   </button>
                 </form>
-                <form method="post" action="{% url 'exams:permanent_delete_exam' exam.slug %}" class="d-inline"
-                      onsubmit="return confirm('{% trans "confirm_permanent_delete" context "exams.template.deleted_exams" %}');">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-outline-danger">
+                {% comment %}
+                  Birdəfəlik silmə YALNIZ cəhdi olmayan imtahan üçün mümkündür:
+                  `permanently_delete_exam_without_history` bir dənə də cəhd
+                  varsa `AcademicHistoryProtected` atır. Əvvəllər düymə şərtsiz
+                  görünürdü və istifadəçi «hamısı silinəcək» təsdiqindən sonra
+                  anlaşılmaz xəta alırdı — indi qayda UI-da da görünür.
+                {% endcomment %}
+                {% if exam.attempts_total %}
+                  <button type="button" class="btn btn-outline-secondary" disabled
+                          title="{% trans "permanent_delete_blocked_hint" context "exams.template.deleted_exams" %}">
+                    <i class="fas fa-lock me-1" aria-hidden="true"></i>{% trans "action_permanent_delete" context "exams.template.deleted_exams" %}
+                  </button>
+                {% else %}
+                  <button type="button" class="btn btn-outline-danger js-purge-exam"
+                          data-purge-action="{% url 'exams:permanent_delete_exam' exam.slug %}"
+                          data-purge-target="{{ exam.title }}">
                     <i class="fas fa-trash me-1" aria-hidden="true"></i>{% trans "action_permanent_delete" context "exams.template.deleted_exams" %}
                   </button>
-                </form>
+                {% endif %}
               </div>
             </td>
           </tr>
@@ -82,4 +94,40 @@
   {% endif %}
 
 </div>
+
+<div class="modal fade" id="deletedExamsPurgeModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="deletedExamsPurgeTitle">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deletedExamsPurgeTitle">
+          <i class="fas fa-trash me-2" aria-hidden="true"></i>
+          {% trans "action_permanent_delete" context "exams.template.deleted_exams" %}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="{% trans "action_cancel" context "exams.template.deleted_exams" %}"></button>
+      </div>
+      <form method="post" id="deletedExamsPurgeForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="mb-2">{% trans "confirm_permanent_delete" context "exams.template.deleted_exams" %}</p>
+          <div id="deletedExamsPurgeTarget" class="small text-muted text-break"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            {% trans "action_cancel" context "exams.template.deleted_exams" %}
+          </button>
+          <button type="submit" class="btn btn-danger">
+            {% trans "action_permanent_delete" context "exams.template.deleted_exams" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+{{ block.super }}
+<script src="{% static 'exams/js/deleted_exams.js' %}"></script>
 {% endblock %}

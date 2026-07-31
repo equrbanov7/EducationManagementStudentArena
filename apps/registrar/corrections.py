@@ -72,6 +72,29 @@ def _clean_int_score(raw) -> int:
 
 
 @transaction.atomic
+def correction_author_name(by_user, request=None) -> str:
+    """Düzəlişdə göstəriləcək «düzəldən» adı.
+
+    View-as (impersonation) altında ``request.user`` HƏDƏFLƏ əvəzlənir, yəni
+    ``by_user`` təqlid edilən şəxsdir. Sənəd modulunun bütün zəmanəti
+    «düzəldənin adı avtomatik profildən götürülür və dəyişdirilə bilməz»
+    prinsipinə söykənir — impersonasiya altında bu, əksinə işləyir və rəsmi
+    düzəliş başqasının adına düşür (2026-07-31 auditi).
+
+    Ona görə view-as aktiv olanda ƏSL aktor da ada yazılır. Model sahəsi
+    dəyişmir (miqrasiya yoxdur), jurnal UI-da isə sarı xananın «kim» sahəsi
+    həqiqəti göstərir.
+    """
+    base = (by_user.get_full_name() or by_user.username) if by_user else ""
+    if request is None or not getattr(request, "is_view_as", False):
+        return base
+    actor = getattr(request, "real_user", None)
+    if actor is None or getattr(actor, "pk", None) == getattr(by_user, "pk", None):
+        return base
+    actor_name = actor.get_full_name() or actor.username
+    return f"{base} ({actor_name})"[:200]
+
+
 def apply_correction(
     *,
     mark: LessonMark,
@@ -110,7 +133,7 @@ def apply_correction(
         document=document,
         created_mark=was_empty,
         corrected_by=by_user,
-        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+        corrected_by_name=correction_author_name(by_user, request),
     )
 
     if field == CorrectionField.ATTENDANCE:
@@ -292,7 +315,7 @@ def apply_lesson_correction(
         note=note,
         document=document,
         corrected_by=by_user,
-        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+        corrected_by_name=correction_author_name(by_user, request),
     )
     correction.full_clean()  # PDF validatorları
     correction.save()
@@ -396,7 +419,7 @@ def apply_lesson_deletion(*, lesson, reason, note, document, by_user, request=No
         note=note,
         document=document,
         corrected_by=by_user,
-        corrected_by_name=(by_user.get_full_name() or by_user.username) if by_user else "",
+        corrected_by_name=correction_author_name(by_user, request),
     )
     correction.full_clean()
     correction.save()

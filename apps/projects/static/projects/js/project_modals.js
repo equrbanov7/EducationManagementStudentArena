@@ -255,7 +255,7 @@
         .catch(() => alert(I18N.serverError))
         .finally(() => {
             btn.disabled = false;
-            btn.innerHTML = `<i class="bi bi-check"></i> ${I18N.add}`;
+            btn.innerHTML = `<i class="fas fa-check"></i> ${I18N.add}`;
         });
     });
 
@@ -317,7 +317,7 @@
         .catch(() => alert(I18N.serverError))
         .finally(() => {
             btn.disabled = false;
-            btn.innerHTML = `<i class="bi bi-check"></i> ${I18N.save}`;
+            btn.innerHTML = `<i class="fas fa-check"></i> ${I18N.save}`;
         });
     });
 

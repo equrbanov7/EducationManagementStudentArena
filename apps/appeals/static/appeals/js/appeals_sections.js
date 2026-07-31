@@ -36,7 +36,7 @@
     }
 
     function loadErrorText(panel) {
-        return (panel && panel.getAttribute("data-i18n-load-error")) || "Yüklənmə alınmadı, yenidən cəhd edin.";
+        return (panel && panel.getAttribute("data-i18n-load-error")) || gettext("Yüklənmə alınmadı, yenidən cəhd edin.");
     }
 
     function withParam(url, extra) {
@@ -92,7 +92,8 @@
         toast.innerHTML =
             '<span class="app-toast__icon" aria-hidden="true"><i class="fas fa-check"></i></span>' +
             '<span class="app-toast__body"></span>' +
-            '<button type="button" class="app-toast__close" data-toast-dismiss data-bs-dismiss="alert" aria-label="Bağla">' +
+            '<button type="button" class="app-toast__close" data-toast-dismiss data-bs-dismiss="alert" aria-label="' +
+            gettext("Bağla") + '">' +
             '<i class="fas fa-xmark" aria-hidden="true"></i></button>';
         var body = toast.querySelector(".app-toast__body");
         if (body) { body.textContent = msg; }

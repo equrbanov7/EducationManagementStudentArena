@@ -10,36 +10,18 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import pgettext, pgettext_lazy
 
+# Rəy görünürlüyü sabitləri ayrıca moduldadır (modul-ölçü budcəsi);
+# mövcud `from .models import REVIEW_VISIBILITY_FEATURES` çağırışları üçün re-export.
+from apps.organizations.review_visibility import (  # noqa: F401
+    ASSIGNMENT_IDENTITY_REVEAL_SETTINGS_KEY,
+    LAB_IDENTITY_REVEAL_SETTINGS_KEY,
+    PROJECT_IDENTITY_REVEAL_SETTINGS_KEY,
+    REVIEW_VISIBILITY_FEATURES,
+    REVIEW_VISIBILITY_SETTINGS_KEY,
+    WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY,
+)
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
-
-REVIEW_VISIBILITY_SETTINGS_KEY = "review_visibility"
-WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY = "written_exam_identity_reveal_enabled"
-ASSIGNMENT_IDENTITY_REVEAL_SETTINGS_KEY = "assignment_identity_reveal_enabled"
-PROJECT_IDENTITY_REVEAL_SETTINGS_KEY = "project_identity_reveal_enabled"
-LAB_IDENTITY_REVEAL_SETTINGS_KEY = "lab_identity_reveal_enabled"
-REVIEW_VISIBILITY_FEATURES = {
-    "written_exam": {
-        "setting_key": WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY,
-        "label": "Yazılı imtahanda müəllimə tələbə adını göstər",
-        "short_label": "Yazılı imtahan",
-    },
-    "assignment": {
-        "setting_key": ASSIGNMENT_IDENTITY_REVEAL_SETTINGS_KEY,
-        "label": "Sərbəst işdə müəllimə tələbə adını göstər",
-        "short_label": "Sərbəst iş",
-    },
-    "project": {
-        "setting_key": PROJECT_IDENTITY_REVEAL_SETTINGS_KEY,
-        "label": "Kurs işində müəllimə tələbə adını göstər",
-        "short_label": "Kurs işi",
-    },
-    "lab": {
-        "setting_key": LAB_IDENTITY_REVEAL_SETTINGS_KEY,
-        "label": "Lab işində müəllimə tələbə adını göstər",
-        "short_label": "Lab işi",
-    },
-}
 
 
 class Country(models.Model):
@@ -357,6 +339,16 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
     def get_depth(self):
         """Get depth in hierarchy."""
         return self.level
+
+    @classmethod
+    def user_scope_covers(cls, user, organization, unit_id) -> bool:
+        """Model üzərindən çağırış nöqtəsi — məntiq ``scoping.user_scope_covers_unit``-dədir.
+
+        Registrar bunu app registry ilə (statik import olmadan) çağırır ki,
+        ``organizations ↔ registrar`` dövrü yaranmasın."""
+        from .scoping import user_scope_covers_unit
+
+        return user_scope_covers_unit(user, organization, unit_id)
 
 
 class AcademicPeriod(UUIDModel, TimeStampedModel):

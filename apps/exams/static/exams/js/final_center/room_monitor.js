@@ -49,20 +49,25 @@
         return input ? input.value : "";
     }
 
+    // Bu etiketlər NƏZARƏTÇİ/İMTAHAN MƏRKƏZİ ekranında göstərilir. Əvvəllər sabit
+    // azərbaycanca literal idi — EN/RU/TR istifadəçi canlı monitorda azərbaycanca
+    // status görürdü. `base.html` JS kataloqunu yüklədiyi üçün `gettext()` işləyir.
     var STATE_LABELS = {
-        prepared: "Hazırlanır", entry_open: "Giriş açıq", active: "Aktiv",
-        ended: "Bitib", cancelled: "Ləğv edilib"
+        prepared: gettext("Hazırlanır"), entry_open: gettext("Giriş açıq"), active: gettext("Aktiv"),
+        ended: gettext("Bitib"), cancelled: gettext("Ləğv edilib")
     };
     var STATUS_LABELS = {
-        assigned: "Təyin olunub", waiting: "Gözləyir", ready: "Hazır",
-        active: "İmtahanda", completed: "Bitirib", removed: "Çıxarılıb", absent: "Gəlməyib"
+        assigned: gettext("Təyin olunub"), waiting: gettext("Gözləyir"), ready: gettext("Hazır"),
+        active: gettext("İmtahanda"), completed: gettext("Bitirib"),
+        removed: gettext("Çıxarılıb"), absent: gettext("Gəlməyib")
     };
     // Zal monitoru ilə EYNİ sadələşdirilmiş dəst (2026-07-29): "Hazır" ayrıca
     // plitə deyil (Gözləyir-ə əlavə olunur), "Oflayn"/"Qoşulu" silinib.
     var STAT_CARDS = [
-        ["total", "Təyin olunmuş"], ["participated", "İmtahan verib"],
-        ["waiting", "Gözləyir"], ["active", "İmtahanda"], ["completed", "Bitirib"],
-        ["removed", "Çıxarılıb"], ["absent", "Gəlməyib"]
+        ["total", gettext("Təyin olunmuş")], ["participated", gettext("İmtahan verib")],
+        ["waiting", gettext("Gözləyir")], ["active", gettext("İmtahanda")],
+        ["completed", gettext("Bitirib")], ["removed", gettext("Çıxarılıb")],
+        ["absent", gettext("Gəlməyib")]
     ];
 
     function esc(text) {
@@ -128,18 +133,27 @@
         if (!snapshot || !rowsEl) return;
         var students = (snapshot.students || []).filter(rowMatchesFilters);
         if (!students.length) {
-            rowsEl.innerHTML = '<tr><td colspan="9" class="fxc-muted fxc-center">Nəticə yoxdur</td></tr>';
+            rowsEl.innerHTML = '<tr><td colspan="9" class="fxc-muted fxc-center">' +
+                gettext("Nəticə yoxdur") + "</td></tr>";
             return;
         }
         var live = snapshot.state === "entry_open" || snapshot.state === "active";
         rowsEl.innerHTML = students.map(function (s) {
             var warn = [];
-            if (s.pin_locked) warn.push('<span class="fxc-pill fxc-pill--warn">PIN kilidli</span>');
-            if (s.supervision_status === "locked") warn.push('<span class="fxc-pill fxc-pill--warn">Dayandırılıb</span>');
-            if (s.violation_count) warn.push('<span class="fxc-pill fxc-pill--warn">' + esc(s.violation_count) + " pozuntu</span>");
+            if (s.pin_locked) {
+                warn.push('<span class="fxc-pill fxc-pill--warn">' + gettext("PIN kilidli") + "</span>");
+            }
+            if (s.supervision_status === "locked") {
+                warn.push('<span class="fxc-pill fxc-pill--warn">' + gettext("Dayandırılıb") + "</span>");
+            }
+            if (s.violation_count) {
+                warn.push('<span class="fxc-pill fxc-pill--warn">' +
+                    interpolate(gettext("%(count)s pozuntu"), { count: esc(s.violation_count) }, true) +
+                    "</span>");
+            }
             if (s.removal_action) warn.push('<span class="fxc-pill fxc-pill--muted">' + esc(s.removal_action) + "</span>");
             var connCls = s.connected ? "online" : "offline";
-            var connTxt = s.connected ? "Qoşulu" : "Oflayn";
+            var connTxt = s.connected ? gettext("Qoşulu") : gettext("Oflayn");
             var actionable = live && (s.status === "waiting" || s.status === "ready" || s.status === "active");
             var actions = actionable
                 ? '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-remove-ticket="' +
@@ -177,14 +191,14 @@
         if (!snapshot || !mapEl) return;
         var students = (snapshot.students || []).filter(rowMatchesFilters);
         if (!students.length) {
-            mapEl.innerHTML = '<p class="fxc-muted fxc-center">Nəticə yoxdur</p>';
+            mapEl.innerHTML = '<p class="fxc-muted fxc-center">' + gettext("Nəticə yoxdur") + "</p>";
             return;
         }
         mapEl.innerHTML = students.map(function (s, i) {
             var label = s.seat != null ? s.seat : (i + 1);
             var badges = "";
             if (s.violation_count) badges += '<span class="fxc-cell-vio">' + esc(s.violation_count) + "</span>";
-            if (s.connected) badges += '<span class="fxc-cell-conn" title="Qoşulu"></span>';
+            if (s.connected) badges += '<span class="fxc-cell-conn" title="' + esc(gettext("Qoşulu")) + '"></span>';
             var initials = (s.name || "?").trim().charAt(0).toUpperCase();
             return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + '" ' +
                 'data-ticket="' + esc(s.ticket_id) + '" ' +
@@ -287,7 +301,7 @@
 
         socket.onopen = function () {
             reconnectAttempt = 0;
-            setWsState("online", "Canlı");
+            setWsState("online", gettext("Canlı"));
             stopPolling();
             scheduleRefresh();
         };
@@ -296,7 +310,7 @@
             scheduleRefresh();
         };
         socket.onclose = function () {
-            setWsState("offline", "Oflayn — polling");
+            setWsState("offline", gettext("Oflayn — polling"));
             reconnectAttempt += 1;
             var base = Math.min(1000 * Math.pow(2, reconnectAttempt - 1), 30000);
             window.setTimeout(connect, base / 2 + Math.random() * (base / 2));
@@ -402,7 +416,8 @@
                 }
                 var errEl = document.getElementById(errorElId);
                 if (errEl) {
-                    errEl.textContent = result.data.error || "Əməliyyat mümkün olmadı.";
+                    // `result.data.error` serverdən gəlir və orada tərcümə olunur.
+                    errEl.textContent = result.data.error || gettext("Əməliyyat mümkün olmadı.");
                     errEl.hidden = false;
                 }
                 return false;
@@ -410,7 +425,7 @@
             .catch(function () {
                 var errEl = document.getElementById(errorElId);
                 if (errEl) {
-                    errEl.textContent = "Şəbəkə xətası — yenidən cəhd edin.";
+                    errEl.textContent = gettext("Şəbəkə xətası — yenidən cəhd edin.");
                     errEl.hidden = false;
                 }
                 return false;
@@ -445,7 +460,7 @@
             if (!reason.trim()) {
                 var errEl = document.getElementById("fxc-remove-error");
                 if (errEl) {
-                    errEl.textContent = "Səbəb qeyd olunmalıdır.";
+                    errEl.textContent = gettext("Səbəb qeyd olunmalıdır.");
                     errEl.hidden = false;
                 }
                 return;
