@@ -480,8 +480,8 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     </div>
 
                     <div class="points-mini">
-                        <label>{% trans "label_points" context "exams.template.test_question_bank" %}:</label>
-                        <input type="number" name="points_{{ forloop.counter }}" min="1" value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}" class="c3-1">
+                        <label for="points-input-{{ forloop.counter }}">{% trans "label_points" context "exams.template.test_question_bank" %}:</label>
+                        <input type="number" id="points-input-{{ forloop.counter }}" name="points_{{ forloop.counter }}" min="1" value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}" class="c3-1">
                     </div>
 
                     <div class="q-content">

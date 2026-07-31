@@ -211,16 +211,16 @@
                 {% csrf_token %}
                 <div class="modal-body px-4 py-3">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
-                        <input type="text" name="title" class="form-control form-control-modern" required>
+                        <label for="add-block-title" class="form-label fw-semibold text-secondary">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
+                        <input type="text" id="add-block-title" name="title" class="form-control form-control-modern" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
-                        <textarea name="description" class="form-control form-control-modern" rows="3"></textarea>
+                        <label for="add-block-description" class="form-label fw-semibold text-secondary">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
+                        <textarea id="add-block-description" name="description" class="form-control form-control-modern" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
-                        <input type="number" name="questions_to_pick" class="form-control form-control-modern" value="0" min="0">
+                        <label for="add-block-questions-to-pick" class="form-label fw-semibold text-secondary">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
+                        <input type="number" id="add-block-questions-to-pick" name="questions_to_pick" class="form-control form-control-modern" value="0" min="0">
                         <div class="form-text"><i class="fas fa-info-circle me-1"></i>{% trans "help_zero_all_questions" context "labs.template.manage_blocks" %}</div>
                     </div>
                 </div>
@@ -245,15 +245,15 @@
                 <input type="hidden" id="editBlockId" name="block_id">
                 <div class="modal-body px-4 py-3">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
+                        <label for="editBlockTitle" class="form-label fw-semibold text-secondary">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
                         <input type="text" id="editBlockTitle" name="title" class="form-control form-control-modern" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
+                        <label for="editBlockDescription" class="form-label fw-semibold text-secondary">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
                         <textarea id="editBlockDescription" name="description" class="form-control form-control-modern" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
+                        <label for="editBlockQTP" class="form-label fw-semibold text-secondary">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
                         <input type="number" id="editBlockQTP" name="questions_to_pick" class="form-control form-control-modern" min="0">
                         <div class="form-text"><i class="fas fa-info-circle me-1"></i>{% trans "help_zero_all_questions" context "labs.template.manage_blocks" %}</div>
                     </div>
@@ -279,17 +279,17 @@
                 <input type="hidden" id="addQuestionBlockId" name="block_id">
                 <div class="modal-body px-4 py-3">
                     <div class="mb-4">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
-                        <textarea name="question_text" class="form-control form-control-modern" rows="5" required></textarea>
+                        <label for="add-question-text" class="form-label fw-semibold text-secondary">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
+                        <textarea id="add-question-text" name="question_text" class="form-control form-control-modern" rows="5" required></textarea>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold text-secondary">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
-                            <input type="number" name="points" class="form-control form-control-modern" value="0" min="0">
+                            <label for="add-question-points" class="form-label fw-semibold text-secondary">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
+                            <input type="number" id="add-question-points" name="points" class="form-control form-control-modern" value="0" min="0">
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label fw-semibold text-secondary">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
-                            <input type="file" name="attachment" class="form-control form-control-modern">
+                            <label for="add-question-attachment" class="form-label fw-semibold text-secondary">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
+                            <input type="file" id="add-question-attachment" name="attachment" class="form-control form-control-modern">
                         </div>
                     </div>
                 </div>
@@ -314,17 +314,17 @@
                 <input type="hidden" id="editQuestionId" name="question_id">
                 <div class="modal-body px-4 py-3">
                     <div class="mb-4">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
+                        <label for="editQuestionText" class="form-label fw-semibold text-secondary">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
                         <textarea id="editQuestionText" name="question_text" class="form-control form-control-modern" rows="5" required></textarea>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold text-secondary">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
+                            <label for="editQuestionPoints" class="form-label fw-semibold text-secondary">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
                             <input type="number" id="editQuestionPoints" name="points" class="form-control form-control-modern" min="0">
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label fw-semibold text-secondary">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
-                            <input type="file" name="attachment" class="form-control form-control-modern">
+                            <label for="edit-question-attachment" class="form-label fw-semibold text-secondary">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
+                            <input type="file" id="edit-question-attachment" name="attachment" class="form-control form-control-modern">
                             <div id="editQuestionCurrentFile" class="mt-2 text-primary-blue fw-medium small"></div>
                         </div>
                     </div>
@@ -358,8 +358,8 @@
                         </ul>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_paste_questions" context "labs.template.manage_blocks" %}</label>
-                        <textarea name="questions_text" class="form-control form-control-modern font-monospace" rows="10" required 
+                        <label for="import-questions-text" class="form-label fw-semibold text-secondary">{% trans "label_paste_questions" context "labs.template.manage_blocks" %}</label>
+                        <textarea id="import-questions-text" name="questions_text" class="form-control form-control-modern font-monospace" rows="10" required
                                   placeholder="{% trans 'placeholder_import_questions' context 'labs.template.manage_blocks' %}"></textarea>
                     </div>
                 </div>

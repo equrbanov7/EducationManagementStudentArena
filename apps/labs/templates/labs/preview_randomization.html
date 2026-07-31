@@ -38,12 +38,13 @@
         <div class="card-body p-4">
             <form method="GET" class="row g-4 align-items-center">
                 <div class="col-md-6  selectStudent ">
-                    <label class="form-label fw-bold text-dark-blue mb-2">
-                        <i class="fas fa-user-graduate me-1 text-primary-blue"></i> 
+                    <label class="form-label fw-bold text-dark-blue mb-2" for="preview-student-select">
+                        <i class="fas fa-user-graduate me-1 text-primary-blue"></i>
                         {% trans "label_select_student" context "labs.template.preview_randomization" %}
                     </label>
                     <div class="bootstrap-single-select">
-                        <select name="student"
+                        <select id="preview-student-select"
+                                name="student"
                                 class="form-select form-select-modern bootstrap-single-select__native js-bootstrap-single-select"
                                 data-bootstrap-select
                                 data-submit-on-change>

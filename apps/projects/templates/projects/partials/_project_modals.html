@@ -14,13 +14,13 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_title" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control" required>
+                            <label class="form-label" for="add-project-title">{% trans "label_title" context "projects.modals" %} <span class="text-danger">*</span></label>
+                            <input type="text" id="add-project-title" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_status" context "projects.modals" %}</label>
+                            <label class="form-label" for="add-project-status">{% trans "label_status" context "projects.modals" %}</label>
                             <div class="bootstrap-single-select">
-                                <select name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                <select id="add-project-status" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                     <option value="active">{% trans "status_active" context "projects.modals" %}</option>
                                     <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
                                     <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
@@ -29,39 +29,39 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{% trans "label_description" context "projects.modals" %}</label>
-                        <textarea name="description" class="form-control" rows="2"></textarea>
+                        <label class="form-label" for="add-project-description">{% trans "label_description" context "projects.modals" %}</label>
+                        <textarea id="add-project-description" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="start_date" class="form-control" required>
+                            <label class="form-label" for="add-project-start-date">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
+                            <input type="datetime-local" id="add-project-start-date" name="start_date" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="deadline" class="form-control" required>
+                            <label class="form-label" for="add-project-deadline">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
+                            <input type="datetime-local" id="add-project-deadline" name="deadline" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_max_attempts" context "projects.modals" %}</label>
-                            <input type="number" name="max_attempts" class="form-control" value="1" min="1">
+                            <label class="form-label" for="add-project-max-attempts">{% trans "label_max_attempts" context "projects.modals" %}</label>
+                            <input type="number" id="add-project-max-attempts" name="max_attempts" class="form-control" value="1" min="1">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_max_score" context "projects.modals" %}</label>
-                            <input type="number" name="max_score" class="form-control" value="100" min="1">
+                            <label class="form-label" for="add-project-max-score">{% trans "label_max_score" context "projects.modals" %}</label>
+                            <input type="number" id="add-project-max-score" name="max_score" class="form-control" value="100" min="1">
                         </div>
                     </div>
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_groups" context "projects.modals" %}</label>
-                            <input type="text" class="form-control mb-2" id="addGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
-                            <div id="addGroupList" class="border rounded c3-1"></div>
+                            <label class="form-label fw-bold" id="add-project-groups-label">{% trans "label_allowed_groups" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="addGroupSearch" aria-labelledby="add-project-groups-label" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
+                            <div id="addGroupList" class="border rounded c3-1" role="group" aria-labelledby="add-project-groups-label"></div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="addGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_students" context "projects.modals" %}</label>
-                            <input type="text" class="form-control mb-2" id="addStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
-                            <div id="addStudentList" class="border rounded c3-1">
+                            <label class="form-label fw-bold" id="add-project-students-label">{% trans "label_allowed_students" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="addStudentSearch" aria-labelledby="add-project-students-label" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
+                            <div id="addStudentList" class="border rounded c3-1" role="group" aria-labelledby="add-project-students-label">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "projects.modals" %}</p>
                             </div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="addStudentCount">0</span></small>
@@ -91,11 +91,11 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_title" context "projects.modals" %} <span class="text-danger">*</span></label>
+                            <label class="form-label" for="editTitle">{% trans "label_title" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="text" id="editTitle" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{% trans "label_status" context "projects.modals" %}</label>
+                            <label class="form-label" for="editStatus">{% trans "label_status" context "projects.modals" %}</label>
                             <div class="bootstrap-single-select">
                                 <select id="editStatus" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                     <option value="active">{% trans "status_active" context "projects.modals" %}</option>
@@ -106,39 +106,39 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{% trans "label_description" context "projects.modals" %}</label>
+                        <label class="form-label" for="editDescription">{% trans "label_description" context "projects.modals" %}</label>
                         <textarea id="editDescription" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
+                            <label class="form-label" for="editStartDate">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="editStartDate" name="start_date" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
+                            <label class="form-label" for="editDeadline">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="editDeadline" name="deadline" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_max_attempts" context "projects.modals" %}</label>
+                            <label class="form-label" for="editMaxAttempts">{% trans "label_max_attempts" context "projects.modals" %}</label>
                             <input type="number" id="editMaxAttempts" name="max_attempts" class="form-control" min="1">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">{% trans "label_max_score" context "projects.modals" %}</label>
+                            <label class="form-label" for="editMaxScore">{% trans "label_max_score" context "projects.modals" %}</label>
                             <input type="number" id="editMaxScore" name="max_score" class="form-control" min="1">
                         </div>
                     </div>
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_groups" context "projects.modals" %}</label>
-                            <input type="text" class="form-control mb-2" id="editGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
-                            <div id="editGroupList" class="border rounded c3-1"></div>
+                            <label class="form-label fw-bold" id="edit-project-groups-label">{% trans "label_allowed_groups" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="editGroupSearch" aria-labelledby="edit-project-groups-label" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
+                            <div id="editGroupList" class="border rounded c3-1" role="group" aria-labelledby="edit-project-groups-label"></div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="editGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{% trans "label_allowed_students" context "projects.modals" %}</label>
-                            <input type="text" class="form-control mb-2" id="editStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
-                            <div id="editStudentList" class="border rounded c3-1">
+                            <label class="form-label fw-bold" id="edit-project-students-label">{% trans "label_allowed_students" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="editStudentSearch" aria-labelledby="edit-project-students-label" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
+                            <div id="editStudentList" class="border rounded c3-1" role="group" aria-labelledby="edit-project-students-label">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "projects.modals" %}</p>
                             </div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="editStudentCount">0</span></small>

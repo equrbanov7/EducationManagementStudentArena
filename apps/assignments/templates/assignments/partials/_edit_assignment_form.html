@@ -16,33 +16,33 @@
 
       <div class="col-lg-8">
         <div class="mb-3">
-          <label class="form-label fw-semibold">{% trans "assignment_name" context "assignment.legacy.edit_form" %}</label>
+          <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">{% trans "assignment_name" context "assignment.legacy.edit_form" %}</label>
           {{ form.title }}
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">{% trans "description" context "assignment.legacy.edit_form" %}</label>
+          <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">{% trans "description" context "assignment.legacy.edit_form" %}</label>
           {{ form.description }}
         </div>
 
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">{% trans "start_date" context "assignment.legacy.edit_form" %}</label>
+            <label for="{{ form.start_date.id_for_label }}" class="form-label fw-semibold">{% trans "start_date" context "assignment.legacy.edit_form" %}</label>
             {{ form.start_date }}
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">{% trans "due_date" context "assignment.legacy.edit_form" %}</label>
+            <label for="{{ form.due_date.id_for_label }}" class="form-label fw-semibold">{% trans "due_date" context "assignment.legacy.edit_form" %}</label>
             {{ form.due_date }}
           </div>
         </div>
 
         <div class="row g-3 mt-2">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">{% trans "max_attempts" context "assignment.legacy.edit_form" %}</label>
+            <label for="{{ form.max_attempts.id_for_label }}" class="form-label fw-semibold">{% trans "max_attempts" context "assignment.legacy.edit_form" %}</label>
             {{ form.max_attempts }}
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">{% trans "status" context "assignment.legacy.edit_form" %}</label>
+            <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">{% trans "status" context "assignment.legacy.edit_form" %}</label>
             {{ form.status }}
           </div>
         </div>

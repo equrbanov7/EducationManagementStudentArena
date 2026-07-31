@@ -395,8 +395,8 @@
                                 </div>
 
                                 <div id="modalSupervisionCustomSettings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
-                                    <label class="ew-checks-label">{% trans "section_measures" context "exams.wizard" %}</label>
-                                    <div class="ew-checks">
+                                    <span class="ew-checks-label" id="ew-measures-label">{% trans "section_measures" context "exams.wizard" %}</span>
+                                    <div class="ew-checks" role="group" aria-labelledby="ew-measures-label">
                                     <div class="form-group">
                                         <label class="modal-check-label">
                                             <input type="checkbox" name="supervision_force_fullscreen"

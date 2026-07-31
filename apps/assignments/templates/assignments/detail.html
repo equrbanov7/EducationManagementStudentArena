@@ -58,13 +58,13 @@
                     {% csrf_token %}
                     
                     <div class="mb-4">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_answer_required" context "assignment.legacy.detail" %}</label>
-                        <textarea name="text_answer" class="form-control form-control-custom" rows="6" required placeholder="{% trans 'Cavabınızı buraya yazın...' %}">{{ current_submission.text_answer }}</textarea>
+                        <label for="assignment-text-answer" class="form-label fw-semibold text-secondary">{% trans "label_answer_required" context "assignment.legacy.detail" %}</label>
+                        <textarea id="assignment-text-answer" name="text_answer" class="form-control form-control-custom" rows="6" required placeholder="{% trans 'Cavabınızı buraya yazın...' %}">{{ current_submission.text_answer }}</textarea>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-semibold text-secondary">{% trans "label_files" context "assignment.legacy.detail" %}</label>
-                        <input type="file" name="files" class="form-control form-control-custom" multiple>
+                        <label for="assignment-files" class="form-label fw-semibold text-secondary">{% trans "label_files" context "assignment.legacy.detail" %}</label>
+                        <input type="file" id="assignment-files" name="files" class="form-control form-control-custom" multiple>
                         <div class="form-text mt-2"><i class="fas fa-circle-info me-1"></i>{% trans "files_help" context "assignment.legacy.detail" %}</div>
                     </div>
                     

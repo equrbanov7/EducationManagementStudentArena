@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="group-checklist" data-checkbox-select{% if show_student_group_number %} data-show-student-group-number="1"{% endif %}>
     <div class="group-checklist__top">
-        <label class="group-modal-label mb-0">{{ label }}</label>
+        <label class="group-modal-label mb-0" id="{{ container_id }}_label">{{ label }}</label>
         <div class="group-checklist__actions">
             <button type="button" class="btn btn-link p-0 js-select-all">{% trans "select_all" context "profile.checkbox_select" %}</button>
             <button type="button" class="btn btn-link p-0 js-clear-selected">{% trans "clear_selected" context "profile.checkbox_select" %}</button>
@@ -18,7 +18,8 @@
         >
     </div>
 
-    <div class="group-checklist__list js-select-list" id="{{ container_id }}_list"></div>
+    <div class="group-checklist__list js-select-list" id="{{ container_id }}_list"
+         role="group" aria-labelledby="{{ container_id }}_label"></div>
 
     <div class="group-checklist__meta">
         {% trans "selected_count" context "profile.checkbox_select" %}: <span class="js-selected-count">0</span>

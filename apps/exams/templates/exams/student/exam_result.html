@@ -347,9 +347,9 @@
                         {% with coding_submission=coding_submissions_by_qid|get_item:q.id %}
                         <div class="written-response-area">
                             <div class="mb-3">
-                                <label class="response-label text-primary mb-2">
+                                <span class="response-label text-primary mb-2">
                                     <i class="fas fa-code"></i> {% trans "Submitted code" context "exams.template.student_exam_result" %}:
-                                </label>
+                                </span>
                                 {% if coding_submission and coding_submission.file_items %}
                                     <div class="coding-files-review">
                                         {% for code_file in coding_submission.file_items %}
@@ -384,9 +384,9 @@
                     {% else %} 
                         <div class="written-response-area">
                             <div class="mb-3">
-                                <label class="response-label text-primary mb-2">
+                                <span class="response-label text-primary mb-2">
                                     <i class="fas fa-pen-alt"></i> {% trans "label_your_answer" context "exams.template.student_exam_result" %}:
-                                </label>
+                                </span>
                           
                                 {% if ans and ans.text_answer %}
                                      <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
@@ -408,9 +408,9 @@
                             {# ==== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ==== #}
                             {% if ans and ans.files.all %}
                                 <div class="answer-files mb-3">
-                                    <label class="response-label text-secondary mb-2">
+                                    <span class="response-label text-secondary mb-2">
                                         <i class="fas fa-paperclip"></i> {% trans "label_uploaded_files" context "exams.template.student_exam_result" %}:
-                                    </label>
+                                    </span>
                                     <ul class="file-list">
                                         {% for f in ans.files.all %}
                                             {% with name=f.filename|lower %}
@@ -450,12 +450,12 @@
                             {# ==== PAINT CAVABI (tələbə üçün) ==== #}
                             {% if ans and ans.paint_image %}
                                 <div class="paint-answer-box mb-3">
-                                    <label class="response-label text-secondary mb-2">
+                                    <span class="response-label text-secondary mb-2">
                                         <i class="fas fa-paint-brush"></i> {% trans "label_paint_answer" context "exams.template.student_exam_result" %}:
                                         {% if ans.paint_updated_at %}
                                             <small class="text-muted">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
                                         {% endif %}
-                                    </label>
+                                    </span>
 
                                     <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link">
                                         <img src="{{ ans.paint_image.url }}" alt="{% trans 'alt_paint_answer' context 'exams.template.student_exam_result' %}" class="paint-answer-img">
@@ -488,9 +488,9 @@
                                 {# EXAM-P0-05: ideal cavab imtahan pəncərəsi bağlanana qədər açılmır #}
                                 {% if delivered.correct_answer and not answers_release_locked %}
                                     <div class="mt-4">
-                                        <label class="response-label text-success mb-2">
+                                        <span class="response-label text-success mb-2">
                                             <i class="fas fa-check-double"></i> {% trans "label_ideal_answer_example" context "exams.template.student_exam_result" %}:
-                                        </label>
+                                        </span>
                                         <pre class="code-block correct-answer">{{ delivered.correct_answer }}</pre>
                                     </div>
                                 {% endif %}

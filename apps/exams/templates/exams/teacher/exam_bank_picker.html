@@ -40,9 +40,9 @@
                 <input type="text" id="pickerSearch" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="{% trans 'Sual mətnində axtar' %}">
             </div>
             <div class="col-md-2">
-                <label class="form-label small text-muted mb-1">{% trans 'Çətinlik' %}</label>
+                <label class="form-label small text-muted mb-1" for="picker-difficulty">{% trans 'Çətinlik' %}</label>
                 <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native" name="difficulty" data-bootstrap-select>
+                    <select class="form-select bootstrap-single-select__native" id="picker-difficulty" name="difficulty" data-bootstrap-select>
                         <option value="">{% trans 'Bütün çətinliklər' %}</option>
                         {% for value, label in difficulty_choices %}
                         <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -51,9 +51,9 @@
                 </div>
             </div>
             <div class="col-md-2">
-                <label class="form-label small text-muted mb-1">Dil</label>
+                <label class="form-label small text-muted mb-1" for="picker-language">Dil</label>
                 <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native" name="language" data-bootstrap-select>
+                    <select class="form-select bootstrap-single-select__native" id="picker-language" name="language" data-bootstrap-select>
                         <option value="">{% trans 'Bütün dillər' %}</option>
                         {% for code, label in language_choices %}
                         <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
