@@ -4,7 +4,9 @@
 1. Səhifənin yuxarısında rəngli banner (rejim + hədəf + çıxış).
 2. Viewport ətrafında fixed rəngli çərçivə — scroll zamanı da görünür.
 3. Aşağıda üzən "pill" — hər an bir kliklə çıxış.
-Rənglər: readonly → amber, full → bənövşəyi-qırmızı.
+Rənglər: readonly → amber, limited → firuzəyi, full → bənövşəyi-qırmızı.
+DİQQƏT: rejim ÜÇDÜR. Yalnız `readonly`/`else` şəklində yazmaq `limited`
+istifadəçisinə «tam səlahiyyət» yazısı göstərir — yəni yanlış məlumat.
 {% endcomment %}
 {% if view_as.active %}
 <div class="view-as-frame view-as-frame--{{ view_as.mode }}" aria-hidden="true"></div>
@@ -12,7 +14,7 @@ Rənglər: readonly → amber, full → bənövşəyi-qırmızı.
 <div class="view-as-banner view-as-banner--{{ view_as.mode }}" role="alert">
     <div class="view-as-banner__inner">
         <span class="view-as-banner__icon">
-            <i class="fas {% if view_as.mode == 'readonly' %}fa-eye{% else %}fa-user-shield{% endif %}" aria-hidden="true"></i>
+            <i class="fas {% if view_as.mode == 'readonly' %}fa-eye{% elif view_as.mode == 'limited' %}fa-user-pen{% else %}fa-user-shield{% endif %}" aria-hidden="true"></i>
         </span>
         <span class="view-as-banner__text">
             {% trans 'viewing_user_profile' context 'accounts.view_as' %}
@@ -20,6 +22,8 @@ Rənglər: readonly → amber, full → bənövşəyi-qırmızı.
             <span class="view-as-banner__chip">
                 {% if view_as.mode == 'readonly' %}
                     {% trans 'mode_readonly' context 'accounts.view_as' %}
+                {% elif view_as.mode == 'limited' %}
+                    {% trans 'mode_limited' context 'accounts.view_as' %}
                 {% else %}
                     {% trans 'mode_full' context 'accounts.view_as' %}
                 {% endif %}
@@ -28,6 +32,8 @@ Rənglər: readonly → amber, full → bənövşəyi-qırmızı.
         <span class="view-as-banner__warning">
             {% if view_as.mode == 'readonly' %}
                 {% trans 'readonly_warning' context 'accounts.view_as' %}
+            {% elif view_as.mode == 'limited' %}
+                {% trans 'mode_limited_hint' context 'accounts.view_as' %}
             {% else %}
                 {% trans 'full_warning' context 'accounts.view_as' %}
             {% endif %}
@@ -43,7 +49,7 @@ Rənglər: readonly → amber, full → bənövşəyi-qırmızı.
 </div>
 
 <div class="view-as-pill view-as-pill--{{ view_as.mode }}">
-    <i class="fas {% if view_as.mode == 'readonly' %}fa-eye{% else %}fa-user-shield{% endif %}" aria-hidden="true"></i>
+    <i class="fas {% if view_as.mode == 'readonly' %}fa-eye{% elif view_as.mode == 'limited' %}fa-user-pen{% else %}fa-user-shield{% endif %}" aria-hidden="true"></i>
     <span class="view-as-pill__name">{{ view_as.target_name }}</span>
     <form method="post" action="{% url 'accounts:view_as_stop' %}">
         {% csrf_token %}
