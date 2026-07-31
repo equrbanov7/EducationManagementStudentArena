@@ -187,6 +187,36 @@ __all__ = [
 ]
 
 
+def user_scope_subtree_q(user, organization, *, path_field, id_field):
+    """İstifadəçinin unit alt-ağacı üçün filtr Q-su — ixtiyari sahə prefiksi ilə.
+
+    `user_scope_covers_unit` bir unit üçün bool qaytarır; siyahı/aqreqat
+    sorğularını daraltmaq üçünsə QUERYSET filtri lazımdır. Məsələn analitika
+    `Enrollment`-ləri `offering__group` üzərindən daraldır:
+
+        user_scope_subtree_q(u, org,
+                             path_field="offering__group__path",
+                             id_field="offering__group__id")
+
+    ``None`` qaytarılır = «filtr tətbiq etmə». Bu, İKİ halda baş verir və hər
+    ikisi ``user_scope_covers_unit`` ilə EYNİ semantikadır — fərqli davransalar
+    eyni istifadəçi bir yerdə hər şeyi görər, başqa yerdə heç nə:
+
+      1. Scope org-səviyyəlidir (rektor, admin, org sahibi).
+      2. Scope ÜMUMİYYƏTLƏ təyin olunmayıb (``has_structure_access`` yalan) —
+         strukturu hələ qurmamış təşkilatlar. Burada bağlı davransaq, heç bir
+         ``Membership.scope_unit`` təyin etməmiş hər universitetdə dekan BOŞ
+         analitika paneli görərdi; yəni məhdudiyyət deyil, sıradan çıxma olardı.
+
+    Boş ``Q()`` əvəzinə ``None`` seçilib ki, çağıran niyyəti açıq yazsın və bu,
+    təsadüfən «heç nə uyğun gəlmir» (``Q(pk__in=[])``) ilə qarışmasın.
+    """
+    scope = get_unit_scope(user, organization)
+    if scope.is_org_wide or not scope.has_structure_access:
+        return None
+    return scope.unit_subtree_q(path_field=path_field, id_field=id_field)
+
+
 def user_scope_covers_unit(user, organization, unit_id) -> bool:
     """İstifadəçinin unit alt-ağacı verilmiş bölməni əhatə edirmi.
 

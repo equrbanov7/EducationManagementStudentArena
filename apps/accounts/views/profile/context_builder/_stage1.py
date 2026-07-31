@@ -160,6 +160,8 @@ class _Stage1Mixin:
         self.my_exams_search_query = ""
         self.my_exams_filter_type = ""
         self.my_exams_list = []
+        self.my_exams_filter_status = ""
+        self.my_exams_is_paginated = False
         self.my_exams_page_obj = None
         self.my_exams_pagination_query = ""
         self.my_exams_dashboard = None
@@ -188,6 +190,8 @@ class _Stage1Mixin:
             self.my_exams_dashboard = self._my_exams_ctx["my_exams_dashboard"]
             self.my_exams_search_query = self._my_exams_ctx["my_exams_search_query"]
             self.my_exams_filter_type = self._my_exams_ctx["my_exams_filter_type"]
+            self.my_exams_filter_status = self._my_exams_ctx["my_exams_filter_status"]
+            self.my_exams_is_paginated = self._my_exams_ctx["my_exams_is_paginated"]
             self.my_exams_page_obj = self._my_exams_ctx["my_exams_page_obj"]
             self.my_exams_pagination_query = self._my_exams_ctx["my_exams_pagination_query"]
         self._unit_exams_ctx = build_unit_exams_context(
