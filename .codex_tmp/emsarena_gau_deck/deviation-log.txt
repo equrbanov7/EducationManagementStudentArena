@@ -1,0 +1,2 @@
+Slayd 1: alt məlumat sətri “Elvin Qurbanov | Hazırladı | Avqust 2026” formasında yenilənir.
+Digər slaydlar mənbədəki dizayn və strukturla olduğu kimi saxlanılır.
