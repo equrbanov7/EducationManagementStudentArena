@@ -41,6 +41,7 @@ User = get_user_model()
 VIEW_AS_SESSION_KEY = "view_as_state"
 
 MODE_FULL = "full"
+MODE_LIMITED = "limited"
 MODE_READONLY = "readonly"
 
 #: FULL rejim — hədəfin adından hər şeyi etmək olar (audit ilə).
@@ -49,6 +50,128 @@ FULL_ACCESS_ROLE_NAMES = {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
 READONLY_ROLE_NAMES = {"tutor", "dean", "vice_dean", "department_head", ProfileRole.HR}
 #: Bu rollar üçün hədəflər öz unit alt-ağacı ilə məhdudlaşır.
 UNIT_SCOPED_ROLE_NAMES = {"tutor", "dean", "vice_dean", "department_head"}
+
+#: Rol → rejim. AÇIQ xəritə; səviyyə-əsaslı geri düşmə QƏSDƏN yoxdur.
+#:
+#: TƏHLÜKƏSİZLİK TARİXÇƏSİ (2026-07-31 auditi): əvvəllər rejim
+#: ``actor_level >= LEVELS[ORG_ADMIN]`` (=80) şərti ilə verilirdi. Rol
+#: səviyyələri isə exam_center=85, exam_center_head=85, ikt_rehber=88-dir —
+#: yəni bu üç rol SƏSSİZCƏ tam view-as alırdı və org_admin-i (80) impersonasiya
+#: edə bilirdi. Səviyyə iyerarxiyası hədəf seçimi üçündür, səlahiyyət
+#: qapısı üçün deyil.
+ROLE_MODE_MAP = {
+    ProfileRole.ORG_OWNER: MODE_FULL,
+    ProfileRole.ORG_ADMIN: MODE_FULL,
+    ProfileRole.EXAM_CENTER: MODE_LIMITED,
+    ProfileRole.EXAM_CENTER_HEAD: MODE_LIMITED,
+    ProfileRole.IKT_REHBER: MODE_LIMITED,
+    "tutor": MODE_READONLY,
+    "dean": MODE_READONLY,
+    "vice_dean": MODE_READONLY,
+    "department_head": MODE_READONLY,
+    ProfileRole.HR: MODE_READONLY,
+}
+
+#: Bir neçə rolu olan aktor üçün ən güclü rejim seçilir.
+MODE_PRIORITY = {MODE_FULL: 3, MODE_LIMITED: 2, MODE_READONLY: 1}
+
+#: İmtahan Mərkəzinin LIMITED rejimdə YAZA bildiyi marşrutlar.
+#:
+#: Siyahı təxminlə deyil, layihənin BÜTÜN mutasiya marşrutlarının (128 ədəd)
+#: təsnifatından çıxarılıb: hər marşrutun view-u oxunub, sonra ayrıca əks-yoxlama
+#: (red team) keçidində «imtahandan kənar akademik nəticəyə, HR/şəxsi məlumata
+#: və ya rol/icazəyə toxunanlar» geri endirilib. Təsnifat arxivi:
+#: ``docs/audits/2026-08-emsarena-tam-audit/faza6-view-as-marsrut-tesnifati.json``.
+#:
+#: Siyahıya DAXİL EDİLMƏYƏNLƏRDƏN bilinməli olanlar:
+#:  * ``exams:exam_center_ticket_remove`` — tələbəni imtahandan çıxarır və
+#:    ``sync_attempt_to_journal`` körpüsü ilə jurnala 0 (F) yazır; bu, imtahan
+#:    əməliyyatı deyil, akademik nəticədir.
+#:  * ``accounts:exam_chance`` — final biletinin proktorinq sübutunu (removed_by,
+#:    removal_reason, reconnect_count) snapshot-suz silir.
+#:  * ``exams:question_submission_*`` (müəllim tərəfi) — göndərişi qəbul edən
+#:    marşrutla birlikdə verilsə, eyni aktor həm göndərişi uydurar, həm qəbul edər.
+EXAM_OPERATION_URL_NAMES = frozenset(
+    {
+        "exams:add_exam_question",
+        "exams:ai_generate_bank_questions",
+        "exams:ai_generate_question_bank",
+        "exams:bank_question_add",
+        "exams:bank_question_edit",
+        "exams:create_exam",
+        "exams:delete_exam",
+        "exams:delete_exam_question",
+        "exams:duplicate_exam",
+        "exams:edit_exam",
+        "exams:edit_exam_question",
+        "exams:exam_bank_picker",
+        "exams:exam_center_room_end_all",
+        "exams:exam_center_room_open_all",
+        "exams:exam_center_room_start_all",
+        "exams:exam_center_session_cancel",
+        "exams:exam_center_session_end",
+        "exams:exam_center_session_open_entry",
+        "exams:exam_center_session_start",
+        "exams:exam_center_ticket_readmit",
+        "exams:exam_center_ticket_reentry",
+        "exams:exam_center_ticket_resume",
+        "exams:exam_center_ticket_seat",
+        "exams:exam_language_manager",
+        "exams:grant_extra_attempt",
+        "exams:grant_extra_attempt_group",
+        "exams:permanent_delete_exam",
+        "exams:process_question_bank",
+        "exams:question_bank_bulk_add",
+        "exams:question_bank_detail",
+        "exams:question_bank_list",
+        "exams:question_bank_update",
+        "exams:question_submission_decide",
+        "exams:restore_exam",
+        "exams:start_text_extraction",
+        "exams:teacher_questions_bank",
+        "exams:test_question_bank",
+        "exams:toggle_exam_active",
+        "exams:toggle_exam_archive",
+        "exams:toggle_exam_results_visibility",
+    }
+)
+
+#: İKT Rəhbərinin LIMITED rejimdə yaza bildiyi marşrutlar — QƏSDƏN BOŞ.
+#:
+#: Qayda «texniki dəstək və AÇIQ ŞƏKİLDƏ İCAZƏ VERİLMİŞ sistem əməliyyatları»
+#: deyir. Marşrut təsnifatında İKT üçün namizəd olan iki axın
+#: (``registrar:correction_apply`` / ``correction_delete``) əks-yoxlamada
+#: rədd olundu: hər ikisi jurnal balını və davamiyyəti dəyişir (yəni imtahandan
+#: kənar akademik nəticədir), üstəlik impersonasiya altında düzəliş HƏDƏFİN
+#: adına və imzası ilə yazılır — sənədli düzəlişin bütün zəmanəti itir.
+#: İKT Rəhbəri bu səlahiyyəti ÖZ kimliyi ilə saxlayır (``journal.correct``);
+#: view-as onun üçün müşahidə alətidir.
+#:
+#: Konkret sistem əməliyyatına icazə lazım olsa, marşrutun adı buraya əlavə
+#: olunur — mexanizm hazırdır, sadəcə hələ heç nə icazəli deyil.
+IKT_TECHNICAL_URL_NAMES = frozenset()
+
+#: LIMITED rejimdə rol → icazəli yazma marşrutları.
+LIMITED_WRITE_ALLOWLIST = {
+    ProfileRole.EXAM_CENTER: EXAM_OPERATION_URL_NAMES,
+    ProfileRole.EXAM_CENTER_HEAD: EXAM_OPERATION_URL_NAMES,
+    ProfileRole.IKT_REHBER: IKT_TECHNICAL_URL_NAMES,
+}
+
+#: LIMITED aktor bu rollardakı istifadəçini hədəf seçə bilməz.
+#:
+#: Qayda: «Heç biri avtomatik olaraq bütün məxfi akademik, HR və ya şəxsi
+#: məlumatlara məhdudiyyətsiz giriş almamalıdır.» İdarəçi və HR hesabları məhz
+#: o məlumatın toplandığı yerdir.
+LIMITED_FORBIDDEN_TARGET_ROLES = frozenset(
+    {
+        ProfileRole.ORG_OWNER,
+        ProfileRole.ORG_ADMIN,
+        ProfileRole.HR,
+        "rector",
+        "vice_rector",
+    }
+)
 
 #: İcazənin tam yenidən yoxlanma intervalı (saniyə). Aralıq sorğularda yalnız
 #: hədəf istifadəçi yüklənir — performans üçün hər sorğuda 3-4 əlavə sorğu yoxdur.
@@ -124,13 +247,32 @@ def resolve_actor_access(user, organization, *, memberships=None):
     if is_owner:
         actor_level = max(actor_level, ProfileRole.LEVELS[ProfileRole.ORG_OWNER])
 
-    if is_owner or (role_names & FULL_ACCESS_ROLE_NAMES) or actor_level >= ProfileRole.LEVELS[ProfileRole.ORG_ADMIN]:
+    if is_owner:
         return MODE_FULL, actor_level, memberships
 
-    if role_names & READONLY_ROLE_NAMES:
-        return MODE_READONLY, actor_level, memberships
+    # AÇIQ rol → rejim xəritəsi. Səviyyə-əsaslı geri düşmə YOXDUR (bax
+    # ROLE_MODE_MAP şərhinə): səviyyə hədəf iyerarxiyası üçündür, səlahiyyət
+    # qapısı üçün deyil.
+    modes = [ROLE_MODE_MAP[name] for name in role_names if name in ROLE_MODE_MAP]
+    if not modes:
+        return None, 0, []
 
-    return None, 0, []
+    mode = max(modes, key=lambda m: MODE_PRIORITY[m])
+    return mode, actor_level, memberships
+
+
+def limited_write_url_names(role_names) -> frozenset:
+    """LIMITED aktorun yaza bildiyi marşrut adlarının birləşməsi."""
+    allowed: set[str] = set()
+    for name in role_names:
+        allowed |= LIMITED_WRITE_ALLOWLIST.get(name, frozenset())
+    return frozenset(allowed)
+
+
+def actor_limited_write_url_names(user, organization) -> frozenset:
+    """Aktorun bu org üçün LIMITED yazma icazəsi (middleware üçün)."""
+    memberships = _active_memberships(user, organization)
+    return limited_write_url_names(_normalized_role_names(memberships))
 
 
 def actor_can_use_view_as(user, organization) -> bool:
@@ -204,6 +346,18 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
         scoped_ids = _unit_scope_user_ids(actor, organization, memberships)
         if scoped_ids is not None:
             users = users.filter(pk__in=scoped_ids)
+
+    # LIMITED aktor (imtahan mərkəzi / İKT) idarəçi və HR hesablarını hədəf seçə
+    # bilməz: qayda onlara «bütün məxfi akademik, HR və şəxsi məlumatlara
+    # məhdudiyyətsiz giriş» verilməməsini tələb edir, həmin məlumat isə məhz bu
+    # hesablarda toplanır. Səviyyə filtri tək başına kifayət deyil — ikt_rehber
+    # (88) org_admin-dən (80) yuxarıdır, yəni iyerarxiya onu buraxardı.
+    if mode == MODE_LIMITED:
+        users = users.exclude(
+            memberships__organization=organization,
+            memberships__is_active=True,
+            memberships__role__name__in=_expand_role_aliases(LIMITED_FORBIDDEN_TARGET_ROLES),
+        )
 
     q = (q or "").strip()[:120]
     if q:
@@ -375,7 +529,7 @@ def resolve_view_as_request(request):
         return None, None
 
     mode = state.get("mode")
-    if mode not in {MODE_FULL, MODE_READONLY}:
+    if mode not in {MODE_FULL, MODE_LIMITED, MODE_READONLY}:
         stop_view_as(request, reason="view_as_invalid_mode")
         return None, None
 

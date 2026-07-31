@@ -35494,6 +35494,23 @@ msgstr ""
 "У этого экзамена есть попытки — его нельзя удалить навсегда, так как учебная"
 " история защищена."
 
+msgctxt "accounts.view_as"
+msgid "action_blocked_out_of_scope"
+msgstr ""
+"Это действие вне вашей области полномочий. Действуя от имени другого "
+"пользователя, вы можете вносить только изменения, относящиеся к вашей "
+"области."
+
+msgctxt "accounts.view_as"
+msgid "mode_limited"
+msgstr "Ограниченные изменения"
+
+msgctxt "accounts.view_as"
+msgid "mode_limited_hint"
+msgstr ""
+"Вы можете выполнять только операции, относящиеся к вашей области; всё "
+"остальное — только чтение."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
