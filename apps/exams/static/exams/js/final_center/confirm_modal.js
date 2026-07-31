@@ -33,7 +33,7 @@
         if (titleText) titleText.textContent = current.title || "";
         if (messageEl) messageEl.textContent = current.message || "";
         if (okBtn) {
-            okBtn.textContent = current.confirmText || "Təsdiqlə";
+            okBtn.textContent = current.confirmText || gettext("Təsdiqlə");
             okBtn.className = "fxc-btn " + (current.confirmClass || "fxc-btn-primary");
         }
         showError("");
