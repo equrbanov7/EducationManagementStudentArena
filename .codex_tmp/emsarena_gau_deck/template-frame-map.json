@@ -1,0 +1,30 @@
+{
+  "outputSlides": [
+    {"outputSlide":1,"sourceSlide":1,"narrativeRole":"açılış və təqdimat tezisi","reuseMode":"duplicate-slide","editTargets":[{"sourceElementId":"sh/utg3698n","action":"rewrite"},{"sourceElementId":"sh/wn6dc7eh","action":"rewrite"},{"sourceElementId":"sh/hofulsf2","action":"rewrite"}]},
+    {"outputSlide":2,"sourceSlide":2,"narrativeRole":"mündəricat","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":3,"sourceSlide":3,"narrativeRole":"mövcud çətinliklər","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":4,"sourceSlide":4,"narrativeRole":"sistem icmalı","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":5,"sourceSlide":5,"narrativeRole":"tam həyat dövrü","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":6,"sourceSlide":6,"narrativeRole":"rollar bölməsi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":7,"sourceSlide":7,"narrativeRole":"səlahiyyət qrupları","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":8,"sourceSlide":8,"narrativeRole":"çıxış matrisi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":9,"sourceSlide":9,"narrativeRole":"hazırlıq bölməsi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":10,"sourceSlide":10,"narrativeRole":"mərkəzi sual bankı","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":11,"sourceSlide":11,"narrativeRole":"toplu idxal və keyfiyyət","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":12,"sourceSlide":12,"narrativeRole":"imtahan konfiqurasiyası","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":13,"sourceSlide":13,"narrativeRole":"imtahan günü bölməsi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":14,"sourceSlide":14,"narrativeRole":"zal və sessiya idarəetməsi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":15,"sourceSlide":15,"narrativeRole":"PIN ilə giriş","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":16,"sourceSlide":16,"narrativeRole":"tələbə interfeysi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":17,"sourceSlide":17,"narrativeRole":"canlı monitorinq","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":18,"sourceSlide":18,"narrativeRole":"nəticə və etibarlılıq bölməsi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":19,"sourceSlide":19,"narrativeRole":"qiymətləndirmə","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":20,"sourceSlide":20,"narrativeRole":"apellyasiya prosesi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":21,"sourceSlide":21,"narrativeRole":"təhlükəsizlik və audit","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":22,"sourceSlide":22,"narrativeRole":"texniki arxitektura","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":23,"sourceSlide":23,"narrativeRole":"universitet faydaları","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":24,"sourceSlide":24,"narrativeRole":"hazırlıq və yol xəritəsi","reuseMode":"duplicate-slide","editTargets":[]},
+    {"outputSlide":25,"sourceSlide":25,"narrativeRole":"mərhələli tətbiq təklifi","reuseMode":"duplicate-slide","editTargets":[]}
+  ],
+  "omittedSourceSlides": []
+}
