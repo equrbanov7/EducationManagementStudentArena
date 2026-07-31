@@ -5,35 +5,35 @@
    "extra_vs_source": 0,
    "identity": 0,
    "missing_vs_source": 0,
-   "raw_key_leak": 212,
-   "total": 8594,
+   "raw_key_leak": 0,
+   "total": 8580,
    "untranslated": 3
   },
   "en": {
    "bad_placeholder": 0,
    "extra_vs_source": 58,
-   "identity": 856,
+   "identity": 844,
    "missing_vs_source": 0,
-   "raw_key_leak": 117,
-   "total": 8652,
+   "raw_key_leak": 0,
+   "total": 8638,
    "untranslated": 3
   },
   "ru": {
    "bad_placeholder": 0,
    "extra_vs_source": 58,
-   "identity": 179,
+   "identity": 167,
    "missing_vs_source": 0,
-   "raw_key_leak": 13,
-   "total": 8652,
+   "raw_key_leak": 0,
+   "total": 8638,
    "untranslated": 3
   },
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 12,
-   "identity": 305,
+   "identity": 293,
    "missing_vs_source": 0,
-   "raw_key_leak": 92,
-   "total": 8606,
+   "raw_key_leak": 0,
+   "total": 8592,
    "untranslated": 3
   }
  },

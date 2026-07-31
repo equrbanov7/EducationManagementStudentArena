@@ -39,7 +39,10 @@ CATALOGS = ("django", "djangojs")
 BASELINE_PATH = os.path.join(BASE, "scripts", "i18n_baseline.json")
 
 PLACEHOLDER_RE = re.compile(r"%\([^)]+\)[sd]|\{[a-zA-Z_][a-zA-Z0-9_]*\}|%[sd]")
-RAW_KEY_RE = re.compile(r"^[a-z][a-z0-9_]{2,}$")
+#: Xam snake_case açar — alt xətt MƏCBURİDİR. Onsuz evristika «kredit», «saat»,
+#: «bal», «sual» kimi qanuni tək sözlü tərcümələri də sızma sayırdı (212 yalançı
+#: siqnaldan yalnız 60-ı həqiqi açar idi).
+RAW_KEY_RE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$")
 
 
 def _load_catalog(lang: str, domain: str):
