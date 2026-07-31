@@ -65,23 +65,20 @@ def offering_in_actor_scope(user, organization, offering) -> bool:
     hələ də bütün təşkilatın jurnallarını təsdiqləyə bilir. Bu, provisionlaşdırma
     məsələsidir — struktur qurulandan sonra hər idarəetmə üzvlüyünə ``scope_unit``
     verilməlidir.
+
+    MODUL SƏRHƏDİ: registrar ``apps.organizations``-u Python səviyyəsində import
+    ETMİR (dövr yaranardı) — model app registry ilə həll olunur, alt-ağac
+    yoxlaması isə ``OrgUnit.user_scope_covers`` daxilində, öz modulundadır.
     """
-    from apps.organizations.models import OrgUnit
-    from apps.organizations.scoping import get_unit_scope
+    from django.apps import apps as django_apps
 
     if getattr(user, "is_superuser", False) or organization.owner_id == getattr(user, "pk", None):
         return True
     if _has_role(user, organization, _ADMIN_ROLES):
         return True
 
-    scope = get_unit_scope(user, organization)
-    if scope.is_org_wide or not scope.has_structure_access:
-        return True
-    # Qrupu olmayan (bütün ixtisas üzrə) açılışı unit-scope təsdiqləyən üçün
-    # aidiyyəti müəyyən deyil — org-wide səlahiyyət tələb olunur.
-    if getattr(offering, "group_id", None) is None:
-        return False
-    return OrgUnit.objects.filter(scope.unit_subtree_q()).filter(pk=offering.group_id).exists()
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    return org_unit_model.user_scope_covers(user, organization, getattr(offering, "group_id", None))
 
 
 def can_submit(user, offering) -> bool:

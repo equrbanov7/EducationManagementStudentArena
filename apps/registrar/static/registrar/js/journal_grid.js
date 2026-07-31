@@ -91,11 +91,7 @@
         form.querySelector("[data-jd-cw-date]").value = btn.getAttribute("data-date") || "";
         var title = document.querySelector("[data-jd-cw-formtitle]");
         if (title && btn.getAttribute("data-student")) {
-            title.textContent = interpolate(
-                gettext("%(student)s — kurs işi"),
-                { student: btn.getAttribute("data-student") },
-                true
-            );
+            title.textContent = interpolate(gettext("%(student)s — kurs işi"), { student: btn.getAttribute("data-student") }, true);
         }
         form.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
@@ -397,9 +393,7 @@
             '<div class="jd-sw-del__icon"><i class="fas fa-triangle-exclamation"></i></div>' +
             '<h3 class="jd-sw-del__title">' + gettext("Mövzunu silmək?") + '</h3>' +
             (title ? '<div class="jd-sw-del__topic">“' + escapeHtml(title) + '”</div>' : '') +
-            '<p class="jd-sw-del__body">' + gettext("Bu mövzu silinəcək və") +
-            ' <b>' + gettext("tələbələrin bu mövzu üzrə balları da silinəcək") + '</b>. ' +
-            gettext("Bu əməliyyat geri qaytarıla bilməz.") + '</p>' +
+            '<p class="jd-sw-del__body">' + gettext("Bu mövzu silinəcək və") + ' <b>' + gettext("tələbələrin bu mövzu üzrə balları da silinəcək") + '</b>. ' + gettext("Bu əməliyyat geri qaytarıla bilməz.") + '</p>' +
             '<div class="jd-sw-del__actions">' +
             '<button type="button" class="jd-sw-del__cancel">' + gettext("Ləğv et") + '</button>' +
             '<button type="button" class="jd-sw-del__ok">' + gettext("Sil") + '</button>' +

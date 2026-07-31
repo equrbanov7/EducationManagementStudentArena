@@ -86,24 +86,12 @@
             var hours = Math.floor(seconds % 86400 / 3600);
             var minutes = Math.floor(seconds % 3600 / 60);
             if (days > 0) {
-                return interpolate(
-                    gettext("%(days)s gün %(hours)s saat"),
-                    { days: days, hours: hours },
-                    true
-                );
+                return interpolate(gettext("%(days)s gün %(hours)s saat"), { days: days, hours: hours }, true);
             }
             if (hours > 0) {
-                return interpolate(
-                    gettext("%(hours)s saat %(minutes)s dəq"),
-                    { hours: hours, minutes: minutes },
-                    true
-                );
+                return interpolate(gettext("%(hours)s saat %(minutes)s dəq"), { hours: hours, minutes: minutes }, true);
             }
-            return interpolate(
-                gettext("%(minutes)s dəq %(seconds)s san"),
-                { minutes: minutes, seconds: seconds % 60 },
-                true
-            );
+            return interpolate(gettext("%(minutes)s dəq %(seconds)s san"), { minutes: minutes, seconds: seconds % 60 }, true);
         }
 
         function percent(value) {
@@ -301,11 +289,7 @@
                 degradedText.textContent =
                     (payload.message || gettext("Monitorinq asılılığı əlçatmazdır")) +
                     (payload.last_successful_update ?
-                        " · " + interpolate(
-                            gettext("son uğurlu yenilənmə: %(time)s"),
-                            { time: payload.last_successful_update },
-                            true
-                        ) : "");
+                        " · " + interpolate(gettext("son uğurlu yenilənmə: %(time)s"), { time: payload.last_successful_update }, true) : "");
                 return true;
             }
             degradedBox.hidden = true;
@@ -372,11 +356,7 @@
             }
             renderers[tab](data);
             lastLoadedAt = Date.now();
-            updated.textContent = interpolate(
-                gettext("Yeniləndi: %(time)s"),
-                { time: new Date().toLocaleTimeString("az") },
-                true
-            );
+            updated.textContent = interpolate(gettext("Yeniləndi: %(time)s"), { time: new Date().toLocaleTimeString("az") }, true);
         }
 
         function load(tab, options) {
@@ -412,11 +392,7 @@
                         throw new Error(gettext("Bu bölməyə icazəniz yoxdur."));
                     }
                     if (!response.ok) {
-                        throw new Error(interpolate(
-                            gettext("Server xətası: %(status)s"),
-                            { status: response.status },
-                            true
-                        ));
+                        throw new Error(interpolate(gettext("Server xətası: %(status)s"), { status: response.status }, true));
                     }
                     return response.json();
                 })
