@@ -183,12 +183,12 @@
                     {# ================== SUALIN MEDİASI (şəkil / video) ================== #}
                     {% if item.question.image %}
                         <div class="question-media mb-3">
-                            <img src="{{ item.question.image|protected_media_url }}" alt="{% if item.question.image_replaces_text %}{{ item.question.text }}{% else %}{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}{% endif %}" class="img-fluid rounded c3-1{% if item.question.image_replaces_text %} source-rendered-image{% endif %}">
+                            <img src="{{ item.question.image|protected_media_url }}" alt="{% if item.question.image_replaces_text %}{{ item.question.text }}{% else %}{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}{% endif %}" class="img-fluid rounded teacher-view-attempt-1{% if item.question.image_replaces_text %} source-rendered-image{% endif %}">
                         </div>
                     {% endif %}
                     {% if item.question.video %}
                         <div class="question-media mb-3">
-                            <video controls preload="metadata" playsinline class="img-fluid rounded c3-1">
+                            <video controls preload="metadata" playsinline class="img-fluid rounded teacher-view-attempt-1">
                                 <source src="{{ item.question.video|protected_media_url }}">
                             </video>
                         </div>

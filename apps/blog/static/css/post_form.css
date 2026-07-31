@@ -223,7 +223,7 @@
 }
 
 /* c3 (2026-07-03): micro inline styles moved from post_form.html <style> block. */
-.c3-1 {
+.post-form-1 {
     margin-bottom: 16px;
     padding: 12px 14px;
     border-radius: 10px;
@@ -232,7 +232,7 @@
     color: #065f46;
     font-weight: 600;
 }
-.c3-2 {
+.post-form-2 {
     text-align: center;
     margin: 10px 0;
     color: #888;

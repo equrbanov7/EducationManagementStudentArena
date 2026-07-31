@@ -46,7 +46,7 @@
                 </div>
             </div>
             <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}{% if live_results_navigation_query %}?{{ live_results_navigation_query }}{% endif %}" class="lr-card__link">
-                <i class="fas fa-chart-bar c3-1"></i> {% trans "action_view_detailed_stats" context "liveExam.template.results" %} <i class="fas fa-arrow-right"></i>
+                <i class="fas fa-chart-bar teacher-live-results-1"></i> {% trans "action_view_detailed_stats" context "liveExam.template.results" %} <i class="fas fa-arrow-right"></i>
             </a>
         </div>
         {% endfor %}
