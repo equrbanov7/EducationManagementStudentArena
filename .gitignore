@@ -198,3 +198,6 @@ backups/
 k6/reports/
 k6/data/
 QKU_Stress_Test_Hesabat_*.docx
+
+# Scratch/temp build directories (codex agent working dirs — never repo content)
+.codex_tmp/
