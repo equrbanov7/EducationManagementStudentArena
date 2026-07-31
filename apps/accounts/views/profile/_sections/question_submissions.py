@@ -45,6 +45,7 @@ def _inactive_defaults() -> dict:
         "question_submissions_faculties": [],
         "question_submissions_kafedras": [],
         "question_submissions_teachers": [],
+        "question_submissions_selected_labels": {"faculty": "", "kafedra": "", "teacher": ""},
         "question_submissions_years": [],
         "question_submissions_periods": [],
         "question_submissions_languages": [],
@@ -290,6 +291,13 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         "question_submissions_faculties": faculties,
         "question_submissions_kafedras": kafedras,
         "question_submissions_teachers": teachers,
+        # Axtarışlı filtr seçicilərinin ilkin çipləri (id hidden inputda, etiket
+        # data-label-də) — siyahılar artıq template-də render olunmur.
+        "question_submissions_selected_labels": {
+            "faculty": faculty.name if faculty else "",
+            "kafedra": kafedra.name if kafedra else "",
+            "teacher": (teacher.get_full_name() or teacher.username) if teacher else "",
+        },
         "question_submissions_years": years,
         "question_submissions_periods": periods,
         "question_submissions_languages": EXAM_LANGUAGE_CHOICES,

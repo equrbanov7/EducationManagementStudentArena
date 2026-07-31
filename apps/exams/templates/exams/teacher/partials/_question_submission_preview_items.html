@@ -1,0 +1,65 @@
+{% load i18n %}
+{% comment %}
+Sual kartlarının (li) TƏK siyahısı — _question_submission_preview.html-in
+gövdəsi. Ayrıca saxlanır ki, lazy-load AJAX fraqmenti də EYNİ partialı render
+edib mövcud <ol>-a əlavə edə bilsin (nömrə `display_no` ilə sabitdir).
+Kontekst: questions (annotate_preview_flags [+ annotate_display_numbers]),
+submission (vizual mənbə preview-ları üçün).
+{% endcomment %}
+{% for q in questions %}
+<li class="qsubp-card{% if q.has_error %} qsubp-card--error{% elif q.has_warning %} qsubp-card--warn{% endif %}">
+    <div class="qsubp-card__head">
+        <span class="qsubp-card__num">#{{ q.display_no|default:forloop.counter }}</span>
+        <span class="qsubp-card__text{% if submission.import_token and q.has_visual_source %} sr-only{% endif %}">{{ q.text }}</span>
+    </div>
+
+    {% if submission.import_token and q.has_visual_source %}
+    <img class="qsubp-source-preview"
+         src="{% url 'exams:question_submission_visual_preview' submission.id q.source_index %}"
+         alt=""
+         aria-hidden="true"
+         loading="lazy">
+    {% endif %}
+
+    {% if q.options %}
+    {% if submission.import_token and q.has_visual_source %}
+    <div class="qsubp-answer">
+        <span class="qsubp-answer__label">{% trans "Düzgün cavab" context "exams.template.question_submission" %}:</span>
+        {% for label in q.correct %}
+        <span class="qsubp-answer__choice">{{ label }}</span>
+        {% endfor %}
+        <span class="sr-only">
+            {% for label, opt_text in q.options.items %}{{ label }}: {{ opt_text }}. {% endfor %}
+        </span>
+    </div>
+    {% else %}
+    <div class="qsubp-options">
+        {% for label, opt_text in q.options.items %}
+        <div class="qsubp-opt {% if label in q.correct %}qsubp-opt--correct{% endif %}">
+            <span class="qsubp-opt__label">{{ label }}</span>
+            <span>{{ opt_text }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if q.warnings %}
+    <details class="qsubp-warnings" {% if q.has_error %}data-severity="error" open{% endif %}>
+        <summary>
+            <i class="fas fa-list-check"></i>
+            {% trans "Xəbərdarlıqlar" context "exams.template.question_submission" %}
+            <span>({{ q.warnings|length }})</span>
+        </summary>
+        <div class="qsubp-warnings__body">
+            {% for w in q.warnings %}
+            <div class="qsubp-wmsg qsubp-wmsg--{{ w.severity|default:'warning' }}">
+                {% if w.severity == 'error' %}<i class="fas fa-circle-xmark"></i>{% elif w.severity == 'info' %}<i class="fas fa-circle-info"></i>{% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
+                <span>{{ w.msg }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+    {% endif %}
+</li>
+{% endfor %}

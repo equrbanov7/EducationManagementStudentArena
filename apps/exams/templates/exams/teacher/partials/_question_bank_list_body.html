@@ -23,7 +23,9 @@ Kontekst:
 
     {# ── Yeni bank yarat (yalnız imtahan mərkəzi) ── #}
     {% if qbl_can_create %}
-    <div class="qb-create-card">
+    <div class="qb-create-card js-qb-create-card"
+         data-subject-url="{% url 'exams:subject_search' %}"
+         data-teacher-url="{% url 'exams:bank_teacher_search' %}">
         <div class="qb-create-card__head">
             <div class="qb-create-card__icon"><i class="fas fa-layer-group"></i></div>
             <div>
@@ -32,7 +34,7 @@ Kontekst:
             </div>
         </div>
 
-        <form method="post" action="{% url 'exams:question_bank_list' %}" class="qb-form">
+        <form method="post" action="{% url 'exams:question_bank_list' %}" class="qb-form js-qb-create-form">
             {% csrf_token %}
             <input type="hidden" name="action" value="create_bank">
             {% if qbl_create_next %}<input type="hidden" name="next" value="{{ qbl_create_next }}">{% endif %}
@@ -45,10 +47,44 @@ Kontekst:
             </div>
 
             <div class="qb-field">
-                <label class="qb-field__label" for="bankSubject">{% trans "Fənn / Mövzu" %}</label>
-                <input type="text" class="qb-input" id="bankSubject" name="subject"
-                       placeholder="{% trans 'məs. İnformatika, Riyaziyyat...' %}">
-                <span class="qb-field__hint">{% trans "Hansı fənnə və ya mövzuya aiddir (opsional)." %}</span>
+                <label class="qb-field__label">{% trans "Fənn" context "exams.template.question_bank_list" %}</label>
+                <input type="hidden" name="subject_id" data-qbk-subject-input>
+                {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_subject_ph %}
+                {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-subject" placeholder=qbk_subject_ph %}
+                <span class="qb-field__hint">{% trans "Kataloqdakı fənlərdən axtarıb seçin (opsional)." context "exams.template.question_bank_list" %}</span>
+            </div>
+
+            <div class="qb-field">
+                <label class="qb-field__label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
+                <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
+                {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_teacher_ph %}
+                {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-teacher" placeholder=qbk_teacher_ph %}
+                <span class="qb-field__hint">{% trans "Bank hansı müəllimin suallarından yaranır (opsional)." context "exams.template.question_bank_list" %}</span>
+            </div>
+
+            <div class="qb-field">
+                <label class="qb-field__label" for="bankKind">{% trans "İmtahan növü" context "exams.template.question_bank_list" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" id="bankKind" name="exam_kind" data-bootstrap-select>
+                        {% for value, label in exam_kind_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                        <option value="">{% trans "Ümumi (təyinatsız)" context "exams.template.question_bank_list" %}</option>
+                    </select>
+                </div>
+                <span class="qb-field__hint">{% trans "Bank hansı imtahan üçün toplanır: Final, Midterm və ya Quiz." context "exams.template.question_bank_list" %}</span>
+            </div>
+
+            <div class="qb-field">
+                <label class="qb-field__label" for="bankFormat">{% trans "Sual formatı" context "exams.template.question_bank_list" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" id="bankFormat" name="default_question_type" data-bootstrap-select>
+                        {% for value, label in default_type_choices %}
+                        <option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı (sərbəst cavab)" %}{% else %}{% trans "Test (variantlı)" %}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <span class="qb-field__hint">{% trans "Default sual formatı (sual əlavə edərkən dəyişə bilərsiniz)." %}</span>
             </div>
 
             <div class="qb-field">
@@ -63,43 +99,37 @@ Kontekst:
                 <span class="qb-field__hint">{% trans "Sualların standart dili (sonra dəyişə bilərsiniz)." %}</span>
             </div>
 
-            <div class="qb-field">
-                <label class="qb-field__label" for="bankFormat">{% trans "İmtahan növü / format" %}</label>
-                <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native" id="bankFormat" name="default_question_type" data-bootstrap-select>
-                        {% for value, label in default_type_choices %}
-                        <option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı (sərbəst cavab)" %}{% else %}{% trans "Test (variantlı)" %}{% endif %}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <span class="qb-field__hint">{% trans "Default sual formatı (sual əlavə edərkən dəyişə bilərsiniz)." %}</span>
-            </div>
-
             <div class="qb-form__footer">
-                <label class="qb-switch">
-                    <input type="checkbox" name="is_shared" value="1">
-                    <span class="qb-switch__track"></span>
-                    <span class="qb-switch__text">
-                        <span class="qb-switch__title">{% trans "Təşkilatda paylaş" %}</span>
-                        <span class="qb-switch__hint">{% trans "Eyni təşkilatdakı digər müəllimlər bu bankı görə bilər." %}</span>
-                    </span>
-                </label>
+                <span class="qb-form__footer-note">
+                    <i class="fas fa-lock"></i>
+                    {% trans "Bank yalnız imtahan mərkəzinə görünür." context "exams.template.question_bank_list" %}
+                </span>
                 <button type="submit" class="qbx-btn"><i class="fas fa-plus"></i> {% trans "Bank yarat" %}</button>
             </div>
         </form>
     </div>
     {% endif %}
 
-    {# ── Axtarış (debounce ilə avtomatik — düymə yoxdur) ── #}
+    {# ── Axtarış (debounce ilə avtomatik — düymə yoxdur) + imtahan növü filtri ── #}
     <form method="get" class="qb-banklist-search"
           {% if qbl_section %}data-profile-ajax-form data-section="{{ qbl_section }}"{% endif %}
           data-debounce-ms="400">
         {% if qbl_section %}<input type="hidden" name="section" value="{{ qbl_section }}">{% endif %}
+        {% if qbl_kind_filter %}<input type="hidden" name="bank_kind" value="{{ qbl_kind_filter }}">{% endif %}
         <div class="qb-input-wrap">
             <i class="fas fa-search"></i>
-            <input type="text" name="bank_search" value="{{ search_query }}" placeholder="{% trans 'Bank adı və ya fənn üzrə axtar...' %}">
+            <input type="text" name="bank_search" value="{{ search_query }}" placeholder="{% trans 'Bank adı, fənn və ya müəllim üzrə axtar...' context "exams.template.question_bank_list" %}">
         </div>
     </form>
+
+    {% if qbl_kind_pills %}
+    <div class="qb-kind-pills" role="group" aria-label="{% trans 'İmtahan növü filtri' context "exams.template.question_bank_list" %}">
+        {% for pill in qbl_kind_pills %}
+        <a href="?{{ pill.query }}" class="qb-kind-pill {% if pill.is_active %}is-active{% endif %}"
+           aria-pressed="{% if pill.is_active %}true{% else %}false{% endif %}">{{ pill.label }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     {# ── Banklar ── #}
     {% if banks %}
@@ -123,9 +153,13 @@ Kontekst:
                 {% if bank.created_by_id == request.user.id %}
                     <button type="button" class="qb-icon-btn js-edit-bank" title="{% trans 'Redaktə et' %}"
                             data-update-url="{% url 'exams:question_bank_update' bank.id %}"
-                            data-name="{{ bank.name|escape }}" data-subject="{{ bank.subject|escape }}"
-                            data-language="{{ bank.language }}" data-format="{{ bank.default_question_type }}"
-                            data-shared="{% if bank.is_shared %}1{% else %}0{% endif %}">
+                            data-name="{{ bank.name|escape }}"
+                            data-subject-id="{{ bank.subject_ref_id|default:'' }}"
+                            data-subject-label="{{ bank.subject_label|escape }}"
+                            data-teacher-id="{{ bank.source_teacher_id|default:'' }}"
+                            data-teacher-label="{% if bank.source_teacher %}{{ bank.source_teacher.get_full_name|default:bank.source_teacher.username|escape }}{% endif %}"
+                            data-kind="{{ bank.exam_kind }}"
+                            data-language="{{ bank.language }}" data-format="{{ bank.default_question_type }}">
                         <i class="fas fa-pen"></i>
                     </button>
                     <button type="button" class="qb-icon-btn qb-icon-btn--danger js-delete-bank" title="{% trans 'Sil' %}"
@@ -136,12 +170,19 @@ Kontekst:
                 </div>
             </div>
             <div class="qb-card__meta">
-                {% if bank.subject %}<span>{{ bank.subject }}</span><span class="dot">·</span>{% endif %}
+                {% if bank.subject_label %}<span>{{ bank.subject_label }}</span><span class="dot">·</span>{% endif %}
                 <span>{{ bank.get_language_display }}</span>
                 <span class="dot">·</span>
                 <span>{% if bank.default_question_type == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</span>
+                {% if bank.exam_kind %}<span class="qb-chip qb-chip--kind qb-chip--kind-{{ bank.exam_kind }}"><i class="fas fa-flag-checkered"></i> {{ bank.get_exam_kind_display }}</span>{% endif %}
                 {% if bank.is_shared %}<span class="qb-chip qb-chip--shared"><i class="fas fa-users"></i> {% trans "Paylaşılıb" %}</span>{% endif %}
             </div>
+            {% if bank.source_teacher %}
+            <div class="qb-card__teacher">
+                <i class="fas fa-user-pen"></i>
+                <span>{{ bank.source_teacher.get_full_name|default:bank.source_teacher.username }}</span>
+            </div>
+            {% endif %}
             <div class="qb-card__foot">
                 <span class="qb-chip qb-chip--count"><i class="fas fa-list-check"></i> {{ bank.lib_count }} {% trans "sual" %}</span>
                 <span class="qb-card__created"><i class="far fa-clock"></i> {{ bank.created_at|date:"d.m.Y" }}</span>
@@ -172,7 +213,9 @@ Kontekst:
                 <h5 class="modal-title">{% trans "Bankı redaktə et" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
             </div>
-            <form method="post" id="editBankForm" action="">
+            <form method="post" id="editBankForm" action=""
+                  data-subject-url="{% url 'exams:subject_search' %}"
+                  data-teacher-url="{% url 'exams:bank_teacher_search' %}">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ qbl_back_url }}">
                 <div class="modal-body qb-edit-form">
@@ -180,16 +223,27 @@ Kontekst:
                         <label for="editBankName2">{% trans "Bankın adı" %}</label>
                         <input type="text" id="editBankName2" name="name" required>
                     </div>
-                    <div class="qb-edit-field">
-                        <label for="editBankSubject2">{% trans "Fənn / Mövzu" %}</label>
-                        <input type="text" id="editBankSubject2" name="subject">
+                    <div class="qb-edit-row">
+                        <div class="qb-edit-field">
+                            <label>{% trans "Fənn" context "exams.template.question_bank_list" %}</label>
+                            <input type="hidden" name="subject_id" data-qbk-subject-input>
+                            {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_edit_subject_ph %}
+                            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-subject" placeholder=qbk_edit_subject_ph %}
+                        </div>
+                        <div class="qb-edit-field">
+                            <label>{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
+                            <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
+                            {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_edit_teacher_ph %}
+                            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-teacher" placeholder=qbk_edit_teacher_ph %}
+                        </div>
                     </div>
                     <div class="qb-edit-row">
                         <div class="qb-edit-field">
-                            <label for="editBankLanguage2">{% trans "Əsas dil" %}</label>
+                            <label for="editBankKind2">{% trans "İmtahan növü" context "exams.template.question_bank_list" %}</label>
                             <div class="bootstrap-single-select">
-                                <select id="editBankLanguage2" name="language" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
-                                    {% for code, label in language_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+                                <select id="editBankKind2" name="exam_kind" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                    {% for value, label in exam_kind_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                    <option value="">{% trans "Ümumi (təyinatsız)" context "exams.template.question_bank_list" %}</option>
                                 </select>
                             </div>
                         </div>
@@ -202,10 +256,14 @@ Kontekst:
                             </div>
                         </div>
                     </div>
-                    <label class="qb-edit-switch">
-                        <input type="checkbox" id="editBankShared2" name="is_shared" value="1">
-                        <span>{% trans "Təşkilatda paylaş" %}</span>
-                    </label>
+                    <div class="qb-edit-field">
+                        <label for="editBankLanguage2">{% trans "Əsas dil" %}</label>
+                        <div class="bootstrap-single-select">
+                            <select id="editBankLanguage2" name="language" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                                {% for code, label in language_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="qbx-btn qbx-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" %}</button>

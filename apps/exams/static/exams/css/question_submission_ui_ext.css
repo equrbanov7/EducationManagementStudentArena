@@ -1,0 +1,182 @@
+/* question_submission_ui.css-in davamı (modul ölçü qapısı üçün ayrılıb):
+   qəbul-bank pill-i (siyahı) + statik qəbul CTA-sı (detal). */
+/* ── Qəbul edilən göndərişdə bank izi (siyahı kartında) ── */
+.qsubs-item__bank { margin-top: 8px; }
+.qsubs-bank-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--ems-success-50, #ecfdf5);
+    border: 1px solid var(--ems-success-200, #a7f3d0);
+    color: var(--ems-success-700, #047857);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    max-width: 100%;
+}
+.qsubs-bank-link i { font-size: 0.78rem; }
+a.qsubs-bank-link:hover {
+    background: var(--ems-success-100, #d1fae5);
+    color: var(--ems-success-800, #065f46);
+}
+.qsubs-bank-link__arrow { opacity: 0.7; }
+.qsubs-bank-link--static { cursor: default; }
+
+/* Statik (linksiz) qəbul-bank pill-i — müəllim mərkəz bankını aça bilmir. */
+.qsubd-verdict__cta--static { cursor: default; }
+.qsubd-verdict--accepted .qsubd-verdict__cta--static:hover { background: var(--ems-success-600, #059669); }
+
+/* ── Lazy sual siyahısı: toolbar (axtarış + filtr pilləri) ── */
+.qsubq-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 14px;
+}
+.qsubq-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 260px;
+    max-width: 420px;
+    border: 1px solid var(--ems-neutral-300, #cbd5e1);
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px 12px;
+}
+.qsubq-search:focus-within {
+    border-color: var(--ems-primary-500, #3b82f6);
+    box-shadow: 0 0 0 3px var(--ems-primary-100, #dbeafe);
+}
+.qsubq-search i { color: var(--ems-neutral-400, #94a3b8); font-size: 0.85rem; }
+.qsubq-search input {
+    border: 0;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+    color: var(--ems-neutral-900, #0f172a);
+}
+.qsubq-search input::placeholder { color: var(--ems-neutral-400, #94a3b8); }
+
+.qsubq-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.qsubq-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--ems-neutral-300, #cbd5e1);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.qsubq-pill i { font-size: 0.8rem; }
+.qsubq-pill--error i { color: var(--ems-danger-500, #ef4444); }
+.qsubq-pill--warning i { color: var(--ems-warning-500, #f59e0b); }
+.qsubq-pill--clean i { color: var(--ems-success-500, #10b981); }
+.qsubq-pill:hover { border-color: var(--ems-primary-400, #60a5fa); color: var(--ems-primary-700, #1d4ed8); }
+.qsubq-pill.is-active { background: var(--ems-primary-600, #2563eb); border-color: var(--ems-primary-600, #2563eb); color: #fff; }
+.qsubq-pill.is-active i { color: #fff; }
+.qsubq-pill__count {
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-600, #475569);
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 1px 8px;
+}
+.qsubq-pill.is-active .qsubq-pill__count { background: rgba(255, 255, 255, 0.22); color: #fff; }
+
+/* ── Lazy siyahı: sentinel + boş vəziyyət ── */
+.qsubq-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    border: 1px dashed var(--ems-neutral-300, #cbd5e1);
+    border-radius: 12px;
+    background: var(--ems-neutral-50, #f8fafc);
+    color: var(--ems-neutral-500, #64748b);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 12px;
+    margin-top: 12px;
+    cursor: pointer;
+}
+.qsubq-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--ems-primary-200, #bfdbfe);
+    border-top-color: var(--ems-primary-600, #2563eb);
+    border-radius: 50%;
+    animation: qsubq-spin 0.8s linear infinite;
+}
+@keyframes qsubq-spin { to { transform: rotate(360deg); } }
+.qsubq-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px dashed var(--ems-neutral-300, #cbd5e1);
+    border-radius: 12px;
+    color: var(--ems-neutral-500, #64748b);
+    font-size: 0.9rem;
+    padding: 26px 14px;
+    margin-top: 8px;
+}
+.qsubq-empty i { color: var(--ems-neutral-400, #94a3b8); }
+
+/* ── Başlıq ikonu + meta sətri: tünd qara əvəzinə yumşaq primary ton ── */
+.qb-header-titles h1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.qb-header-titles h1 > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--ems-primary-500, #3b82f6), var(--ems-primary-600, #2563eb));
+    color: #fff;
+    font-size: 1.05rem;
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.22);
+}
+.qb-header-titles p { color: var(--ems-neutral-500, #64748b); }
+.qb-header-titles p i { color: var(--ems-primary-400, #60a5fa); font-size: 0.85rem; }
+
+/* ── Göndəriş filtrləri: axtarışlı seçicilər (prefiks: qsf) ──
+   Fakültə/kafedra/müəllim uzun siyahılardır — select əvəzinə type-ahead.
+   Üslub _searchable_picker.html DOM-una uyğundur (bax .qbk-ms pariteti). */
+.qsubf-picker { flex: 1 1 180px; min-width: 160px; }
+.qsf-ms { border: 1px solid var(--ems-neutral-300, #cbd5e1); border-radius: 10px; background: #fff; padding: 0.3rem 0.5rem; position: relative; min-height: 42px; box-sizing: border-box; display: flex; align-items: center; }
+.qsf-ms:focus-within { border-color: var(--ems-primary-500, #3b82f6); box-shadow: 0 0 0 3px var(--ems-primary-100, #dbeafe); }
+.qsf-ms__chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.qsf-ms__search { border: 0; outline: none; background: transparent; color: var(--ems-neutral-900, #0f172a); padding: 0.24rem; font-size: 0.87rem; min-width: 80px; flex: 1; }
+.qsf-ms__search::placeholder { color: var(--ems-neutral-400, #94a3b8); }
+.qsf-ms__menu { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; background: #fff; border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 10px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14); max-height: 300px; overflow-y: auto; z-index: 1060; display: none; }
+.qsf-ms.is-open .qsf-ms__menu { display: block; }
+.qsf-ms__opt { padding: 0.55rem 0.8rem; cursor: pointer; font-size: 0.86rem; color: var(--ems-neutral-800, #1e293b); }
+.qsf-ms__opt:hover { background: var(--ems-primary-50, #eff6ff); color: var(--ems-primary-700, #1d4ed8); }
+.qsf-ms__more { padding: 0.5rem 0.8rem; text-align: center; color: var(--ems-neutral-400, #94a3b8); font-size: 1rem; letter-spacing: 0.2em; }
+.qsf-chip { display: inline-flex; align-items: center; gap: 0.35rem; background: var(--ems-primary-50, #eff6ff); color: var(--ems-primary-700, #1d4ed8); border: 1px solid var(--ems-primary-200, #bfdbfe); border-radius: 999px; padding: 0.12rem 0.3rem 0.12rem 0.55rem; font-size: 0.8rem; font-weight: 600; max-width: 100%; }
+.qsf-chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qsf-chip__x { border: 0; background: transparent; color: var(--ems-primary-600, #2563eb); font-size: 0.95rem; line-height: 1; cursor: pointer; padding: 0 0.3rem; border-radius: 50%; }
+.qsf-chip__x:hover { color: var(--ems-primary-800, #1e40af); background: var(--ems-primary-100, #dbeafe); }
+
+/* Silinmiş/deaktiv qəbul bankı — linksiz, sönük düymə görkəmi. */
+.qsubd-bank-gone { cursor: default; opacity: 0.75; }
+.qsubd-bank-gone em { font-style: normal; font-size: 0.8em; color: var(--ems-neutral-500, #64748b); }

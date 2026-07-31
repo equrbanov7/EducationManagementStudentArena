@@ -2,8 +2,9 @@
 {% comment %}
 Göndəriş məlumatları kartı — workbench header-dən dərhal sonra render olunur.
 Sahələr form="saveForm"-a bağlıdır; preview formuna dəyərləri səhifədəki script
-köçürür (data-qsub-meta / data-qsub-meta-multi). Dil, fənn və ən azı bir qrup
-MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir; qrup çox-seçimlidir.
+köçürür (data-qsub-meta / data-qsub-meta-multi). Dil, fənn, imtahan növü və ən
+azı bir qrup MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir
+(dəyər = registrar.Subject pk); qrup çox-seçimlidir.
 {% endcomment %}
 
 {{ teacher_group_subjects|json_script:"qsubGroupsSubjects" }}
@@ -15,7 +16,7 @@ MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir; q
             <h2 id="qsubmHeading">{% trans "Göndəriş məlumatları" context "exams.template.question_submission" %}</h2>
             <p>{% trans "İmtahan mərkəzi göndərişi bu məlumatlarla qəbul edəcək." context "exams.template.question_submission" %}</p>
         </div>
-        <span class="qsubm-card__badge"><i class="fas fa-asterisk"></i> {% trans "Dil, fənn və qrup mütləqdir" context "exams.template.question_submission" %}</span>
+        <span class="qsubm-card__badge"><i class="fas fa-asterisk"></i> {% trans "Dil, fənn, imtahan növü və qrup mütləqdir" context "exams.template.question_submission" %}</span>
     </div>
 
     <div class="qsubm-grid">
@@ -62,6 +63,20 @@ MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənlərindəndir; q
                 {% if teacher_subjects %}{% trans "Yalnız sizin fənləriniz görünür." context "exams.template.question_submission" %}
                 {% else %}{% trans "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir." context "exams.template.question_submission" %}{% endif %}
             </span>
+        </div>
+
+        <div class="qsubm-field">
+            <label for="qsubExamKind">{% trans "İmtahan növü" context "exams.template.question_submission" %} <span class="qsubm-req">*</span></label>
+            <div class="bootstrap-single-select qsubm-bs-select">
+                <select id="qsubExamKind" name="exam_kind" form="saveForm" data-qsub-meta required
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                    <option value="">{% trans "Növü seçin…" context "exams.template.question_submission" %}</option>
+                    {% for value, label in submission_exam_kinds %}
+                    <option value="{{ value }}" {% if form_state.exam_kind == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <span class="qsubm-hint">{% trans "Suallar hansı imtahan üçündür — mərkəz bankı bu təyinatla yaradır." context "exams.template.question_submission" %}</span>
         </div>
 
         <div class="qsubm-field qsubm-field--groups">
