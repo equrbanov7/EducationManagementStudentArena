@@ -34,6 +34,18 @@ from core.rls import bypass_rls
 
 from ..models import ProfileRole
 
+# Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
+# dəyişir və servis məntiqini oxumağı çətinləşdirirdi).
+# Re-export — mövcud `from .view_as import EXAM_OPERATION_URL_NAMES` işləyir.
+from .view_as_policy import (  # noqa: F401
+    ADMIN_ALIAS_LEVEL,
+    EXAM_OPERATION_URL_NAMES,
+    IKT_TECHNICAL_URL_NAMES,
+    LIMITED_FORBIDDEN_TARGET_ROLES,
+    LIMITED_WRITE_ALLOWLIST,
+    MUTATING_GET_URL_NAMES,
+)
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
@@ -74,104 +86,6 @@ ROLE_MODE_MAP = {
 
 #: Bir neçə rolu olan aktor üçün ən güclü rejim seçilir.
 MODE_PRIORITY = {MODE_FULL: 3, MODE_LIMITED: 2, MODE_READONLY: 1}
-
-#: İmtahan Mərkəzinin LIMITED rejimdə YAZA bildiyi marşrutlar.
-#:
-#: Siyahı təxminlə deyil, layihənin BÜTÜN mutasiya marşrutlarının (128 ədəd)
-#: təsnifatından çıxarılıb: hər marşrutun view-u oxunub, sonra ayrıca əks-yoxlama
-#: (red team) keçidində «imtahandan kənar akademik nəticəyə, HR/şəxsi məlumata
-#: və ya rol/icazəyə toxunanlar» geri endirilib. Təsnifat arxivi:
-#: ``docs/audits/2026-08-emsarena-tam-audit/faza6-view-as-marsrut-tesnifati.json``.
-#:
-#: Siyahıya DAXİL EDİLMƏYƏNLƏRDƏN bilinməli olanlar:
-#:  * ``exams:exam_center_ticket_remove`` — tələbəni imtahandan çıxarır və
-#:    ``sync_attempt_to_journal`` körpüsü ilə jurnala 0 (F) yazır; bu, imtahan
-#:    əməliyyatı deyil, akademik nəticədir.
-#:  * ``accounts:exam_chance`` — final biletinin proktorinq sübutunu (removed_by,
-#:    removal_reason, reconnect_count) snapshot-suz silir.
-#:  * ``exams:question_submission_*`` (müəllim tərəfi) — göndərişi qəbul edən
-#:    marşrutla birlikdə verilsə, eyni aktor həm göndərişi uydurar, həm qəbul edər.
-EXAM_OPERATION_URL_NAMES = frozenset(
-    {
-        "exams:add_exam_question",
-        "exams:ai_generate_bank_questions",
-        "exams:ai_generate_question_bank",
-        "exams:bank_question_add",
-        "exams:bank_question_edit",
-        "exams:create_exam",
-        "exams:delete_exam",
-        "exams:delete_exam_question",
-        "exams:duplicate_exam",
-        "exams:edit_exam",
-        "exams:edit_exam_question",
-        "exams:exam_bank_picker",
-        "exams:exam_center_room_end_all",
-        "exams:exam_center_room_open_all",
-        "exams:exam_center_room_start_all",
-        "exams:exam_center_session_cancel",
-        "exams:exam_center_session_end",
-        "exams:exam_center_session_open_entry",
-        "exams:exam_center_session_start",
-        "exams:exam_center_ticket_readmit",
-        "exams:exam_center_ticket_reentry",
-        "exams:exam_center_ticket_resume",
-        "exams:exam_center_ticket_seat",
-        "exams:exam_language_manager",
-        "exams:grant_extra_attempt",
-        "exams:grant_extra_attempt_group",
-        "exams:permanent_delete_exam",
-        "exams:process_question_bank",
-        "exams:question_bank_bulk_add",
-        "exams:question_bank_detail",
-        "exams:question_bank_list",
-        "exams:question_bank_update",
-        "exams:question_submission_decide",
-        "exams:restore_exam",
-        "exams:start_text_extraction",
-        "exams:teacher_questions_bank",
-        "exams:test_question_bank",
-        "exams:toggle_exam_active",
-        "exams:toggle_exam_archive",
-        "exams:toggle_exam_results_visibility",
-    }
-)
-
-#: İKT Rəhbərinin LIMITED rejimdə yaza bildiyi marşrutlar — QƏSDƏN BOŞ.
-#:
-#: Qayda «texniki dəstək və AÇIQ ŞƏKİLDƏ İCAZƏ VERİLMİŞ sistem əməliyyatları»
-#: deyir. Marşrut təsnifatında İKT üçün namizəd olan iki axın
-#: (``registrar:correction_apply`` / ``correction_delete``) əks-yoxlamada
-#: rədd olundu: hər ikisi jurnal balını və davamiyyəti dəyişir (yəni imtahandan
-#: kənar akademik nəticədir), üstəlik impersonasiya altında düzəliş HƏDƏFİN
-#: adına və imzası ilə yazılır — sənədli düzəlişin bütün zəmanəti itir.
-#: İKT Rəhbəri bu səlahiyyəti ÖZ kimliyi ilə saxlayır (``journal.correct``);
-#: view-as onun üçün müşahidə alətidir.
-#:
-#: Konkret sistem əməliyyatına icazə lazım olsa, marşrutun adı buraya əlavə
-#: olunur — mexanizm hazırdır, sadəcə hələ heç nə icazəli deyil.
-IKT_TECHNICAL_URL_NAMES = frozenset()
-
-#: LIMITED rejimdə rol → icazəli yazma marşrutları.
-LIMITED_WRITE_ALLOWLIST = {
-    ProfileRole.EXAM_CENTER: EXAM_OPERATION_URL_NAMES,
-    ProfileRole.EXAM_CENTER_HEAD: EXAM_OPERATION_URL_NAMES,
-    ProfileRole.IKT_REHBER: IKT_TECHNICAL_URL_NAMES,
-}
-
-#: LIMITED aktor bu rollardakı istifadəçini hədəf seçə bilməz.
-#:
-#: Qayda: «Heç biri avtomatik olaraq bütün məxfi akademik, HR və ya şəxsi
-#: məlumatlara məhdudiyyətsiz giriş almamalıdır.» İdarəçi və HR hesabları məhz
-#: o məlumatın toplandığı yerdir.
-LIMITED_FORBIDDEN_TARGET_ROLES = frozenset(
-    {
-        ProfileRole.ORG_OWNER,
-        ProfileRole.ORG_ADMIN,
-        ProfileRole.HR,
-        "rector",
-        "vice_rector",
-    }
-)
 
 #: İcazənin tam yenidən yoxlanma intervalı (saniyə). Aralıq sorğularda yalnız
 #: hədəf istifadəçi yüklənir — performans üçün hər sorğuda 3-4 əlavə sorğu yoxdur.
@@ -307,6 +221,30 @@ def _unit_scope_user_ids(user, organization, memberships):
     return scoped.values("user_id")
 
 
+def _admin_equivalent_user_ids(organization):
+    """Bu təşkilatda faktiki olaraq org-admin oxu səthinə sahib istifadəçilər.
+
+    `ProfileRole.aliases_for_membership_role` qaydasının DƏQİQ güzgüsüdür:
+    rol adı admin-ekvivalent siyahıdadırsa, VƏ ya səviyyəsi həddi keçirsə və rol
+    alias-muaf deyilsə — həmin istifadəçi `org_admin` aliasını alır. HR ayrıca
+    əlavə olunur: alias almasa da şəxsi/kadr məlumatı məhz onda toplanır.
+
+    Muaf rollar (imtahan mərkəzi) qəsdən istisnadan KƏNARDADIR — onlar org_admin
+    səthini almır, yəni İKT onları müşahidə edə bilər.
+    """
+    from apps.organizations.models import Membership
+
+    exempt = {ProfileRole.normalize_membership_role_name(n) for n in ProfileRole.ADMIN_ALIAS_EXEMPT_ROLE_NAMES}
+    by_name = _expand_role_aliases(LIMITED_FORBIDDEN_TARGET_ROLES)
+    by_level = Q(role__level__gte=ADMIN_ALIAS_LEVEL) & ~Q(role__name__in=exempt)
+
+    return (
+        Membership.objects.filter(organization=organization, is_active=True)
+        .filter(Q(role__name__in=by_name) | by_level)
+        .values("user_id")
+    )
+
+
 def build_target_queryset(actor, organization, *, mode, actor_level, memberships, q="", role_filter=""):
     """
     Aktorun baxa biləcəyi hədəf istifadəçilərin queryset-i.
@@ -353,11 +291,7 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     # hesablarda toplanır. Səviyyə filtri tək başına kifayət deyil — ikt_rehber
     # (88) org_admin-dən (80) yuxarıdır, yəni iyerarxiya onu buraxardı.
     if mode == MODE_LIMITED:
-        users = users.exclude(
-            memberships__organization=organization,
-            memberships__is_active=True,
-            memberships__role__name__in=_expand_role_aliases(LIMITED_FORBIDDEN_TARGET_ROLES),
-        )
+        users = users.exclude(pk__in=_admin_equivalent_user_ids(organization))
 
     q = (q or "").strip()[:120]
     if q:

@@ -214,3 +214,99 @@ class MyExamsPaginationTest(TestCase):
         counts = response.context["my_exams_dashboard"]["status_counts"]
         self.assertEqual(counts["all"], self.draft_total)
         self.assertEqual(counts["active"], 0)
+
+
+class MyExamsServerSideFilterTest(TestCase):
+    """Səhifələmə klient-tərəf filtri sındırmışdı — filtrlər serverdə olmalıdır.
+
+    Deploy-öncəsi əks-yoxlamanın tapdığı regressiya: səhifələmədən sonra DOM-da
+    yalnız 12 kart qalır, toolbar isə filtri klient tərəfdə tətbiq edirdi. Yəni
+    3-cü səhifədəki imtahanı axtaranda «tapılmadı» yazılırdı — imtahan mövcud
+    olsa belə. Server filtrləri (`exam_q`, `exam_type`) hələ də var idi, sadəcə
+    JS `preventDefault()` etdiyi üçün onlara heç vaxt çatmaq olmurdu.
+
+    Bu testlər server filtrlərinin — o cümlədən YENİ `exam_status` filtrinin —
+    tam dəst üzərində işlədiyini qoruyur.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.owner = User.objects.create_user("sf_owner", "sf_owner@qku.edu.az", PASSWORD)
+        cls.org = Organization.objects.create(
+            name="Filter Univ",
+            slug="filter-univ",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=cls.owner,
+            status="active",
+            is_active=True,
+        )
+        role, _ = Role.objects.update_or_create(
+            organization=cls.org,
+            name="teacher",
+            defaults={
+                "display_name": "Teacher",
+                "level": 60,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "permissions": [],
+                "is_system": False,
+                "is_active": True,
+            },
+        )
+        cls.teacher = User.objects.create_user("sf_teacher", "sf_teacher@qku.edu.az", PASSWORD)
+        Membership.objects.create(user=cls.teacher, organization=cls.org, role=role, is_primary=True, is_active=True)
+
+        # 20 aktiv + 5 qaralama → 25 imtahan, səhifə ölçüsü 12 (3 səhifə).
+        for i in range(20):
+            Exam.objects.create(
+                title=f"Aktiv {i:02d}",
+                author=cls.teacher,
+                organization=cls.org,
+                exam_type="written",
+                is_active=True,
+            )
+        for i in range(5):
+            Exam.objects.create(
+                title=f"Qaralama {i:02d}",
+                author=cls.teacher,
+                organization=cls.org,
+                exam_type="test",
+                is_active=False,
+            )
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="sf_teacher", password=PASSWORD)
+
+    def _get(self, query=""):
+        response = self.client.get(reverse("accounts:profile") + "?section=my-exams" + query)
+        self.assertEqual(response.status_code, 200)
+        return response.context
+
+    def test_section_reports_itself_as_paginated(self):
+        """Şablon bu bayraqla filtri serverə yönləndirir — yoxdursa JS köhnə yolla gedər."""
+        self.assertTrue(self._get()["my_exams_is_paginated"])
+
+    def test_search_finds_an_exam_that_is_not_on_the_first_page(self):
+        """Regressiyanın özü: 3-cü səhifədəki imtahan tapılmalıdır."""
+        ctx = self._get("&exam_q=Aktiv 00")
+        titles = [exam.title for exam in ctx["my_exams"]]
+        self.assertIn("Aktiv 00", titles)
+        self.assertEqual(ctx["my_exams_count"], 1)
+
+    def test_status_filter_narrows_the_whole_set_on_the_server(self):
+        ctx = self._get("&exam_status=draft")
+        self.assertEqual(ctx["my_exams_count"], 5)
+        self.assertTrue(all(not exam.is_active for exam in ctx["my_exams"]))
+
+    def test_status_filter_rejects_unknown_values_instead_of_erroring(self):
+        ctx = self._get("&exam_status=; DROP TABLE")
+        self.assertEqual(ctx["my_exams_count"], 25)
+        self.assertEqual(ctx["my_exams_filter_status"], "")
+
+    def test_status_filter_is_preserved_in_pagination_links(self):
+        ctx = self._get("&exam_status=active")
+        self.assertIn("exam_status=active", ctx["my_exams_pagination_query"])
+
+    def test_type_and_status_combine(self):
+        ctx = self._get("&exam_type=test&exam_status=draft")
+        self.assertEqual(ctx["my_exams_count"], 5)

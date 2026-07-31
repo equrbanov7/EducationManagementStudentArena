@@ -341,6 +341,17 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
         return self.level
 
     @classmethod
+    def user_scope_subtree_q(cls, user, organization, *, path_field, id_field):
+        """Bax :func:`apps.organizations.scoping.user_scope_subtree_q`.
+
+        Modul sərhədi: `registrar` `organizations`-u import edə bilməz (dövr
+        yaranır), ona görə app registry vasitəsilə bu classmethod çağırılır.
+        """
+        from apps.organizations.scoping import user_scope_subtree_q
+
+        return user_scope_subtree_q(user, organization, path_field=path_field, id_field=id_field)
+
+    @classmethod
     def user_scope_covers(cls, user, organization, unit_id) -> bool:
         """Model üzərindən çağırış nöqtəsi — məntiq ``scoping.user_scope_covers_unit``-dədir.
 

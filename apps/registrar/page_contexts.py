@@ -13,6 +13,7 @@ Performans: hər kontekst yalnız aktiv bölmə üçün qurulur (lazy, stage4 ga
 from __future__ import annotations
 
 from django.apps import apps as django_apps
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -298,9 +299,20 @@ def approvals_context(user, organization) -> dict:
         statuses.append(ApprovalStatus.SUBMITTED)
     if approval.can_dean_approve(user, organization):
         statuses.append(ApprovalStatus.CHAIR_APPROVED)
+    # Gələnlər qutusu da alt-ağacla daraldılır: təsdiq düyməsi onsuz da
+    # offering-səviyyəli yoxlamadan keçir, amma filtrsiz siyahı BAŞQA
+    # kafedraların jurnallarını (fənn, qrup, müəllim adı) göstərirdi — yəni
+    # səlahiyyət artımı yox, məlumat sızması idi.
+    inbox_scope_q = django_apps.get_model("organizations", "OrgUnit").user_scope_subtree_q(
+        user,
+        organization,
+        path_field="offering__group__path",
+        id_field="offering__group__id",
+    )
     schemes = (
         AssessmentScheme.objects.filter(organization=organization, approval_status__in=statuses)
         .select_related("offering__subject", "offering__group", "offering__period", "offering__instructor")
+        .filter(inbox_scope_q if inbox_scope_q is not None else Q())
         .order_by("offering__subject__code")
         if statuses
         else AssessmentScheme.objects.none()
@@ -320,8 +332,18 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
     if period is None:
         period = next((p for p in periods if p.is_current), periods[0] if periods else None)
 
+    # Aktorun alt-ağacı: modul sərhədi səbəbindən `organizations` app registry
+    # ilə çağırılır (registrar onu birbaşa import edə bilməz — dövr yaranır).
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    scope_q = org_unit_model.user_scope_subtree_q(
+        request.user,
+        organization,
+        path_field="offering__group__path",
+        id_field="offering__group__id",
+    )
+
     data = (
-        analytics.build_period_analytics(organization=organization, period=period)
+        analytics.build_period_analytics(organization=organization, period=period, scope_q=scope_q)
         if period is not None
         else {"has_data": False, "period": None, "totals": None, "programs": [], "groups": [], "at_risk": []}
     )
