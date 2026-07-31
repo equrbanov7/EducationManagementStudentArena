@@ -286,3 +286,67 @@ class ViewAsFlowTests(ViewAsTestBase):
         self.assertEqual(response.context["user"].pk, self.other_student.pk)
         # Org konteksti hədəfin org-una keçir.
         self.assertEqual(self.client.session["active_organization"], self.other_org.slug)
+
+
+class ViewAsAccountTakeoverTests(ViewAsTestBase):
+    """P0 reqressiya: view-as altında hədəfin KİMLİK SÜBUTU axını bloklanmalıdır.
+
+    Tapıntı: ``ViewAsMiddleware`` ``FirstLoginPasswordMiddleware``-dən ƏVVƏL
+    işlədiyi üçün ``password_change_required=True`` olan hədəfdə hər sorğu
+    parol-təyini səhifəsinə yönləndirilirdi; blok siyahısında yalnız 3
+    ``profile_form`` dəyəri vardı, ona görə aktor hədəfin parolunu təyin edib
+    hesabı tam ələ keçirə bilərdi.
+    """
+
+    def _make_pending_first_login_target(self):
+        target = User.objects.create_user("pending_user", "pending@example.com", PASSWORD)
+        _add_member(target, self.org, self.teacher_role)
+        profile = target.profile
+        profile.password_change_required = True
+        profile.save(update_fields=["password_change_required"])
+        return target
+
+    def test_first_login_target_is_not_selectable(self):
+        """İlk-girişini tamamlamamış hesab hədəf siyahısında görünməməlidir."""
+        target = self._make_pending_first_login_target()
+        self._login(self.admin)
+
+        response = self.client.get(reverse("accounts:view_as_search"), {"type": "users"})
+        self.assertEqual(response.status_code, 200)
+        ids = {row["id"] for row in response.json()["results"]}
+        self.assertNotIn(target.pk, ids)
+
+    def test_start_view_as_on_first_login_target_is_rejected(self):
+        target = self._make_pending_first_login_target()
+        self._login(self.admin)
+
+        self._start(target)
+        self.assertNotIn(VIEW_AS_SESSION_KEY, self.client.session)
+
+    def test_set_initial_password_post_is_blocked_in_full_mode(self):
+        """FULL rejimdə belə parol-təyini POST-u bloklanır (hesab ələ keçirmə)."""
+        self._login(self.admin)
+        self._start(self.teacher)
+        self.assertIn(VIEW_AS_SESSION_KEY, self.client.session)
+
+        response = self.client.post(
+            reverse("accounts:set_initial_password"),
+            {"new_password1": "AttackerPass123!", "new_password2": "AttackerPass123!"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        # Hədəfin parolu DƏYİŞMƏMƏLİDİR.
+        self.teacher.refresh_from_db()
+        self.assertFalse(self.teacher.check_password("AttackerPass123!"))
+        self.assertTrue(self.teacher.check_password(PASSWORD))
+
+    def test_otp_endpoints_are_blocked_in_full_mode(self):
+        """E-poçt OTP axını da kimlik sübutudur — hər iki rejimdə bloklanır."""
+        self._login(self.admin)
+        self._start(self.teacher)
+
+        for url_name in ("accounts:send_otp_api", "accounts:verify_otp_api", "accounts:resend_otp_api"):
+            with self.subTest(url_name=url_name):
+                response = self.client.post(reverse(url_name), {}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+                self.assertEqual(response.status_code, 403)
+                self.assertTrue(response.json().get("view_as_blocked"))
