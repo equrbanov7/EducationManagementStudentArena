@@ -2187,3 +2187,30 @@ msgstr "Произошла ошибка. Пожалуйста, попробуй�
 #: static/js/ai_assistant.js:34
 msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
 msgstr "Ошибка сети. Пожалуйста, попробуйте ещё раз."
+
+msgid "Bağlantı quruldu"
+msgstr "Соединение установлено"
+
+msgid "Yenidən qoşulur…"
+msgstr "Переподключение…"
+
+msgid "Bağlantı yoxdur — fallback rejimi"
+msgstr "Нет соединения — резервный режим"
+
+msgid "İmtahan başlayır — yönləndirilirsiniz…"
+msgstr "Экзамен начинается — вас перенаправляют…"
+
+msgid "Oturum bitdi. Nəzarətçiyə müraciət edin."
+msgstr "Сессия завершена. Обратитесь к наблюдателю."
+
+msgid "İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin."
+msgstr "Вы удалены с экзамена. Обратитесь к наблюдателю."
+
+msgid "Oturum ləğv edildi."
+msgstr "Сессия отменена."
+
+msgid "İmtahanınız müvəqqəti dayandırıldı."
+msgstr "Ваш экзамен временно приостановлен."
+
+msgid "%(message)s Səbəb: %(reason)s"
+msgstr "%(message)s Причина: %(reason)s"

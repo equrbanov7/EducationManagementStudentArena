@@ -63,19 +63,24 @@
         if (checkEl) checkEl.textContent = String(checkCount);
     }
 
+    // Bu mətnlər TƏLƏBƏYƏ final imtahanı gözləmə otağında göstərilir. Əvvəllər
+    // sabit azərbaycanca literal idi — yəni EN/RU/TR tələbə imtahanın ən kritik
+    // anında azərbaycanca mesaj görürdü. `base.html` JS kataloqunu yüklədiyi
+    // üçün `gettext()` burada işləyir.
     var i18n = {
-        connected: connEl ? connEl.dataset.labelConnected || "Bağlantı quruldu" : "",
-        reconnecting: "Yenidən qoşulur…",
-        offline: "Bağlantı yoxdur — fallback rejimi",
-        starting: "İmtahan başlayır — yönləndirilirsiniz…",
-        ended: "Oturum bitdi. Nəzarətçiyə müraciət edin.",
-        removed: "İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin.",
-        cancelled: "Oturum ləğv edildi."
+        connected: connEl ? connEl.dataset.labelConnected || gettext("Bağlantı quruldu") : "",
+        reconnecting: gettext("Yenidən qoşulur…"),
+        offline: gettext("Bağlantı yoxdur — fallback rejimi"),
+        starting: gettext("İmtahan başlayır — yönləndirilirsiniz…"),
+        ended: gettext("Oturum bitdi. Nəzarətçiyə müraciət edin."),
+        removed: gettext("İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin."),
+        cancelled: gettext("Oturum ləğv edildi.")
     };
 
     function interventionMessage(base, reason) {
         reason = String(reason || "").trim();
-        return reason ? base + " Səbəb: " + reason : base;
+        // Səbəb nəzarətçinin sərbəst mətnidir — tərcümə olunmur, yalnız çərçivə.
+        return reason ? interpolate(gettext("%(message)s Səbəb: %(reason)s"), { message: base, reason: reason }, true) : base;
     }
 
     function showManualStart() {
@@ -153,7 +158,7 @@
                 setMessage(interventionMessage(i18n.removed, data.reason));
                 break;
             case "suspended":
-                setMessage(interventionMessage("İmtahanınız müvəqqəti dayandırıldı.", data.reason));
+                setMessage(interventionMessage(gettext("İmtahanınız müvəqqəti dayandırıldı."), data.reason));
                 break;
             case "credential_rotated":
                 finished = true;

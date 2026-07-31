@@ -2186,3 +2186,30 @@ msgstr "An error occurred. Please try again."
 #: static/js/ai_assistant.js:34
 msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
 msgstr "Network error. Please try again."
+
+msgid "Bağlantı quruldu"
+msgstr "Connected"
+
+msgid "Yenidən qoşulur…"
+msgstr "Reconnecting…"
+
+msgid "Bağlantı yoxdur — fallback rejimi"
+msgstr "No connection — fallback mode"
+
+msgid "İmtahan başlayır — yönləndirilirsiniz…"
+msgstr "The exam is starting — you are being redirected…"
+
+msgid "Oturum bitdi. Nəzarətçiyə müraciət edin."
+msgstr "The session has ended. Please contact the invigilator."
+
+msgid "İmtahandan çıxarıldınız. Nəzarətçiyə müraciət edin."
+msgstr "You have been removed from the exam. Please contact the invigilator."
+
+msgid "Oturum ləğv edildi."
+msgstr "The session has been cancelled."
+
+msgid "İmtahanınız müvəqqəti dayandırıldı."
+msgstr "Your exam has been paused."
+
+msgid "%(message)s Səbəb: %(reason)s"
+msgstr "%(message)s Reason: %(reason)s"
