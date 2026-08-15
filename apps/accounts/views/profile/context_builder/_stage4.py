@@ -5,9 +5,11 @@ from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import NotificationType
 
+from ....models import UserProfile
 from .._sections.labels import DIRECT_PROFILE_SECTION_TEMPLATES, build_section_titles
 from ..constants import PROFILE_EXAM_NAV_SECTIONS
 from ..contact_inbox import build_contact_inbox_context
+from ..password_otp import mask_email
 
 
 class _Stage4Mixin:
@@ -133,6 +135,14 @@ class _Stage4Mixin:
             "academic_units": self.academic_units,
             "teacher_subjects": self.teacher_subjects,
             "student_records": self.student_records,
+            # «Akademik fəaliyyət» qeydləri + elmi ad/dərəcə seçimləri (redaktə).
+            "academic_item_groups": self.academic_item_groups,
+            "academic_item_display_groups": self.academic_item_display_groups,
+            "academic_title_choices": UserProfile.AcademicTitle.choices,
+            "academic_degree_choices": UserProfile.AcademicDegree.choices,
+            # OTP ilə şifrə dəyişmə («mövcud şifrəni unutdum» axını).
+            "password_otp_form": self.password_otp_form,
+            "password_otp_masked_email": mask_email(self.request.user.email),
             "group_form": self.group_form,
             "can_multi_assign_group_teachers": self.can_multi_assign_group_teachers,
             "groups_section_return_url": self.groups_section_return_url,

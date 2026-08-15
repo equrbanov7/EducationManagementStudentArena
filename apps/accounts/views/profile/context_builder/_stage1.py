@@ -10,7 +10,7 @@ from apps.exams.models import Exam, StudentGroup
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 
-from ....forms import CustomPasswordChangeForm
+from ....forms import CustomPasswordChangeForm, OTPPasswordResetConfirmForm
 from ....models import UserProfile
 from ....services.profile_actions import validate_profile_avatar_upload
 from ..._dashboard_helpers import _collect_assigned_tasks, _collect_my_results, _collect_pending_answer_items
@@ -91,6 +91,9 @@ class _Stage1Mixin:
         if self.active_section == "delete-account":
             self.active_section = "profile-info"
         self.password_change_form = CustomPasswordChangeForm(self.request.user)
+        # OTP ilə şifrə dəyişmə (mövcud şifrə unudulub) — unbound default;
+        # POST xətasında post_handler bağlanmış formanı geri qaytarır.
+        self.password_otp_form = OTPPasswordResetConfirmForm(self.request.user)
         self.category_management_create_form = None
         self.category_management_edit_form = None
         self.category_management_edit_item = None
@@ -111,6 +114,7 @@ class _Stage1Mixin:
                 return self.post_result["response"]
             self.active_section = self.post_result["active_section"]
             self.password_change_form = self.post_result["password_change_form"]
+            self.password_otp_form = self.post_result.get("password_otp_form") or self.password_otp_form
             self.category_management_create_form = self.post_result["category_management_create_form"]
             self.category_management_edit_form = self.post_result["category_management_edit_form"]
             self.category_management_edit_item = self.post_result["category_management_edit_item"]
@@ -359,7 +363,17 @@ class _Stage1Mixin:
         self.academic_units = []
         self.teacher_subjects = []
         self.student_records = []
-        if self.active_organization is not None and self.active_section == "profile-info":
+        # «Akademik fəaliyyət» qeydləri (özü idarə edir) — profil məlumatı və
+        # redaktə bölmələrində göstərilir; digər bölmələrdə əlavə sorğu olmasın.
+        self.academic_item_groups = []
+        self.academic_item_display_groups = []
+        if self.active_section in {"profile-info", "edit-profile"}:
+            from ....services import academic_profile
+
+            self.academic_item_groups = academic_profile.items_grouped_for(self.request.user, self.capabilities)
+            # Görünüş (profil məlumatı) üçün boş qruplar gizlədilir.
+            self.academic_item_display_groups = [group for group in self.academic_item_groups if group["items"]]
+        if self.active_organization is not None and self.active_section in {"profile-info", "edit-profile"}:
             caps = self.capabilities
             if caps.get("is_teacher") or caps.get("is_unit_manager"):
                 from apps.organizations.models import Membership

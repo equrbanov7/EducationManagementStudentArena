@@ -35465,3 +35465,339 @@ msgstr "Examination centre"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Passes"
+
+msgctxt "accounts.academic_title"
+msgid "Assistent"
+msgstr "Assistant"
+
+msgctxt "accounts.academic_title"
+msgid "Müəllim"
+msgstr "Lecturer"
+
+msgctxt "accounts.academic_title"
+msgid "Baş müəllim"
+msgstr "Senior lecturer"
+
+msgctxt "accounts.academic_title"
+msgid "Dosent"
+msgstr "Associate professor"
+
+msgctxt "accounts.academic_title"
+msgid "Professor"
+msgstr "Professor"
+
+msgctxt "accounts.academic_degree"
+msgid "Fəlsəfə doktoru (PhD)"
+msgstr "PhD"
+
+msgctxt "accounts.academic_degree"
+msgid "Elmlər doktoru"
+msgstr "Doctor of Sciences"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Tədris etdiyi fənn"
+msgstr "Subject taught"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Sertifikat"
+msgstr "Certificate"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Məqalə"
+msgstr "Article"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Konfrans materialı"
+msgstr "Conference paper"
+
+msgctxt "profile.edit_v2"
+msgid "Şəxsi məlumatlar"
+msgstr "Personal information"
+
+msgctxt "profile.edit_v2"
+msgid "Akademik məlumat"
+msgstr "Academic information"
+
+msgctxt "profile.edit_v2"
+msgid "Bu məlumatlar universitet tərəfindən idarə olunur və buradan dəyişdirilə bilməz."
+msgstr "This information is managed by the university and cannot be changed here."
+
+msgctxt "profile.edit_v2"
+msgid "Elmi ad / vəzifə"
+msgstr "Academic title"
+
+msgctxt "profile.edit_v2"
+msgid "Elmi dərəcə"
+msgstr "Academic degree"
+
+msgctxt "profile.edit_v2"
+msgid "Seçilməyib"
+msgstr "Not selected"
+
+msgctxt "profile.edit_v2"
+msgid "Akademik fəaliyyət"
+msgstr "Academic activity"
+
+msgctxt "profile.edit_v2"
+msgid "Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək."
+msgstr "Add the subjects you teach, your certificates, articles and conference papers — they will appear on your profile page."
+
+msgctxt "profile.edit_v2"
+msgid "Nömrələr yalnız əməkdaş səviyyəli baxanlara görünür, tələbələrə yox."
+msgstr "Phone numbers are visible only to staff-level viewers, not to students."
+
+msgctxt "profile.edit_v2"
+msgid "Əlavə telefon"
+msgstr "Additional phone"
+
+msgctxt "profile.edit_v2"
+msgid "Yadda saxlanmamış dəyişikliklər var"
+msgstr "You have unsaved changes"
+
+msgctxt "profile.edit_v2"
+msgid "Önizləmə"
+msgstr "Preview"
+
+msgctxt "profile.edit_v2"
+msgid "Dəyişikliklər yadda saxlanmayıb"
+msgstr "Changes are not saved"
+
+msgctxt "profile.edit_v2"
+msgid "Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?"
+msgstr "If you leave this page, your changes will be lost. What would you like to do?"
+
+msgctxt "profile.edit_v2"
+msgid "Saxlamadan çıx"
+msgstr "Leave without saving"
+
+msgctxt "profile.edit_v2"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "profile.academic_items"
+msgid "Yeni qeyd"
+msgstr "New entry"
+
+msgctxt "profile.academic_items"
+msgid "Qeydi redaktə et"
+msgstr "Edit entry"
+
+msgctxt "profile.academic_items"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "The operation failed. Please try again."
+
+msgctxt "profile.academic_items"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "profile.academic_items"
+msgid "Başlıq"
+msgstr "Title"
+
+msgctxt "profile.academic_items"
+msgid "Məs.: Verilənlər bazası sistemləri"
+msgstr "E.g.: Database systems"
+
+msgctxt "profile.academic_items"
+msgid "Ətraflı"
+msgstr "Details"
+
+msgctxt "profile.academic_items"
+msgid "Jurnal / konfrans / qurum adı və s."
+msgstr "Journal / conference / issuing body, etc."
+
+msgctxt "profile.academic_items"
+msgid "İl"
+msgstr "Year"
+
+msgctxt "profile.academic_items"
+msgid "Keçid (URL)"
+msgstr "Link (URL)"
+
+msgctxt "profile.academic_items"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "profile.academic_items"
+msgid "Qeydi sil"
+msgstr "Delete entry"
+
+msgctxt "profile.academic_items"
+msgid "Bu qeyd silinsin?"
+msgstr "Delete this entry?"
+
+msgctxt "profile.academic_items"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "profile.academic_items"
+msgid "Əlavə et"
+msgstr "Add"
+
+msgctxt "profile.academic_items"
+msgid "Redaktə et"
+msgstr "Edit"
+
+msgctxt "profile.academic_items"
+msgid "Keçidi aç"
+msgstr "Open link"
+
+msgctxt "profile.academic_items"
+msgid "Hələ qeyd əlavə edilməyib."
+msgstr "No entries added yet."
+
+msgctxt "profile.academic_items"
+msgid "Qeydlərdə axtar..."
+msgstr "Search entries..."
+
+msgctxt "profile.academic_items"
+msgid "Qeydlərdə axtar"
+msgstr "Search entries"
+
+msgctxt "profile.academic_items"
+msgid "Daha çox göstər"
+msgstr "Show more"
+
+msgctxt "profile.academic_items"
+msgid "Daha az göstər"
+msgstr "Show less"
+
+msgctxt "profile.academic_items"
+msgid "Axtarışa uyğun qeyd tapılmadı."
+msgstr "No entries match your search."
+
+msgctxt "profile.password_otp"
+msgid "Şifrə dəyişmə üsulu"
+msgstr "Password change method"
+
+msgctxt "profile.password_otp"
+msgid "Mövcud şifrə ilə"
+msgstr "With current password"
+
+msgctxt "profile.password_otp"
+msgid "Email kodu ilə"
+msgstr "With email code"
+
+msgctxt "profile.password_otp"
+msgid "Mövcud şifrənizi unutmusunuz?"
+msgstr "Forgot your current password?"
+
+msgctxt "profile.password_otp"
+msgid "Email kodu ilə dəyişin"
+msgstr "Change it with an email code"
+
+msgctxt "profile.password_otp"
+msgid "Kodu göndər"
+msgstr "Send code"
+
+msgctxt "profile.password_otp"
+msgid "Yenidən göndər"
+msgstr "Resend"
+
+msgctxt "profile.password_otp"
+msgid "Kod göndərilə bilmədi. Yenidən cəhd edin."
+msgstr "The code could not be sent. Please try again."
+
+msgctxt "profile.password_otp"
+msgid "Emailə gələn kod"
+msgstr "Code from email"
+
+msgctxt "profile.password_otp"
+msgid "Birdəfəlik kod <strong>%(email)s</strong> ünvanına göndəriləcək."
+msgstr "A one-time code will be sent to <strong>%(email)s</strong>."
+
+msgctxt "accounts.password_otp"
+msgid "Hesabınızda email ünvanı yoxdur. Əvvəlcə profilə email əlavə edin."
+msgstr "Your account has no email address. Add an email to your profile first."
+
+msgctxt "accounts.password_otp"
+msgid "Yeni kod üçün bir az gözləyin."
+msgstr "Please wait a moment before requesting a new code."
+
+msgctxt "accounts.password_otp"
+msgid "Bu email üçün saatlıq kod limiti dolub. Daha sonra yenidən cəhd edin."
+msgstr "The hourly code limit for this email has been reached. Try again later."
+
+msgctxt "accounts.password_otp"
+msgid "Kod göndərilə bilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "The code could not be sent. Try again shortly."
+
+msgctxt "accounts.password_otp"
+msgid "Kod %(email)s ünvanına göndərildi."
+msgstr "The code was sent to %(email)s."
+
+msgctxt "accounts.academic_items.error"
+msgid "Qeyd tapılmadı."
+msgstr "Entry not found."
+
+msgctxt "accounts.academic_items.error"
+msgid "Bu qeyd növü sizin rolunuz üçün mövcud deyil."
+msgstr "This entry type is not available for your role."
+
+msgctxt "accounts.academic_items.error"
+msgid "Başlıq boş ola bilməz."
+msgstr "The title cannot be empty."
+
+msgctxt "accounts.academic_items.error"
+msgid "Başlıq %(limit)s simvoldan uzun ola bilməz."
+msgstr "The title cannot exceed %(limit)s characters."
+
+msgctxt "accounts.academic_items.error"
+msgid "Ətraflı sahəsi %(limit)s simvoldan uzun ola bilməz."
+msgstr "The details field cannot exceed %(limit)s characters."
+
+msgctxt "accounts.academic_items.error"
+msgid "İl rəqəmlə yazılmalıdır."
+msgstr "The year must be a number."
+
+msgctxt "accounts.academic_items.error"
+msgid "İl %(low)s–%(high)s aralığında olmalıdır."
+msgstr "The year must be between %(low)s and %(high)s."
+
+msgctxt "accounts.academic_items.error"
+msgid "Keçid %(limit)s simvoldan uzun ola bilməz."
+msgstr "The link cannot exceed %(limit)s characters."
+
+msgctxt "accounts.academic_items.error"
+msgid "Keçid http:// və ya https:// ilə başlamalıdır."
+msgstr "The link must start with http:// or https://."
+
+msgctxt "accounts.academic_items.error"
+msgid "Bu növ üzrə maksimum %(limit)s qeyd əlavə etmək olar."
+msgstr "You can add at most %(limit)s entries of this type."
+
+msgctxt "accounts.academic_items.error"
+msgid "Naməlum əməliyyat."
+msgstr "Unknown operation."
+
+msgctxt "accounts.public_profile"
+msgid "Önizləmə rejimi: profiliniz kənar baxana məhz belə görünür."
+msgstr "Preview mode: this is exactly how your profile looks to an outside viewer."
+
+msgctxt "accounts.public_profile"
+msgid "Redaktəyə qayıt"
+msgstr "Back to editing"
+
+msgctxt "accounts.public_profile"
+msgid "Əlaqə"
+msgstr "Contact"
+
+msgctxt "accounts.public_profile"
+msgid "Telefon"
+msgstr "Phone"
+
+msgctxt "accounts.public_profile"
+msgid "Nömrələr yalnız əməkdaş səviyyəli istifadəçilərə görünür."
+msgstr "Phone numbers are visible only to staff-level users."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Şəxsi müəllim bankı yalnız Quiz təyinatı ilə yaradılır."
+msgstr "A personal teacher bank is created with the Quiz designation only."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank yalnız sizə görünür — şəxsi istifadəniz üçündür."
+msgstr "The bank is visible only to you — for your personal use."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
+msgstr "The bank is not visible to other teachers — only you and the exam centre can see it."

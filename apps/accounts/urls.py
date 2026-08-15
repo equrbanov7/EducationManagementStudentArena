@@ -115,6 +115,17 @@ urlpatterns = [
         views.profile_badges_api,
         name="profile_badges_api",
     ),
+    # «Akademik fəaliyyət» qeydləri (profil redaktəsi) + şifrə-dəyişmə OTP.
+    path(
+        "profile/api/academic-items/",
+        views.academic_items_api,
+        name="academic_items_api",
+    ),
+    path(
+        "profile/api/password-otp/",
+        views.change_password_otp_request,
+        name="change_password_otp_request",
+    ),
     path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
     # "View as" — səlahiyyətli rolların başqa istifadəçinin profilinə baxışı
     path("view-as/search/", views.view_as_search, name="view_as_search"),

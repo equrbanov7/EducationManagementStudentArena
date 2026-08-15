@@ -78,6 +78,8 @@ from .post_management import (
 
 # Profile views
 from .profile import (
+    academic_items_api,
+    change_password_otp_request,
     profile_avatar,
     profile_badges_api,
     profile_section_fragment,
@@ -124,6 +126,8 @@ __all__ = [
     "logout_view",
     # Profile
     "user_profile",
+    "academic_items_api",
+    "change_password_otp_request",
     "public_user_profile",
     "profile_avatar",
     "statistics_export_csv",

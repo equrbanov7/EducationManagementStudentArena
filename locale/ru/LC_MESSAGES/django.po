@@ -35634,3 +35634,339 @@ msgstr "Экзаменационный центр"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Проходит"
+
+msgctxt "accounts.academic_title"
+msgid "Assistent"
+msgstr "Ассистент"
+
+msgctxt "accounts.academic_title"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.academic_title"
+msgid "Baş müəllim"
+msgstr "Старший преподаватель"
+
+msgctxt "accounts.academic_title"
+msgid "Dosent"
+msgstr "Доцент"
+
+msgctxt "accounts.academic_title"
+msgid "Professor"
+msgstr "Профессор"
+
+msgctxt "accounts.academic_degree"
+msgid "Fəlsəfə doktoru (PhD)"
+msgstr "Доктор философии (PhD)"
+
+msgctxt "accounts.academic_degree"
+msgid "Elmlər doktoru"
+msgstr "Доктор наук"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Tədris etdiyi fənn"
+msgstr "Преподаваемый предмет"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Sertifikat"
+msgstr "Сертификат"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Məqalə"
+msgstr "Статья"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Konfrans materialı"
+msgstr "Материал конференции"
+
+msgctxt "profile.edit_v2"
+msgid "Şəxsi məlumatlar"
+msgstr "Личные данные"
+
+msgctxt "profile.edit_v2"
+msgid "Akademik məlumat"
+msgstr "Академические данные"
+
+msgctxt "profile.edit_v2"
+msgid "Bu məlumatlar universitet tərəfindən idarə olunur və buradan dəyişdirilə bilməz."
+msgstr "Эти данные управляются университетом и не могут быть изменены здесь."
+
+msgctxt "profile.edit_v2"
+msgid "Elmi ad / vəzifə"
+msgstr "Учёное звание / должность"
+
+msgctxt "profile.edit_v2"
+msgid "Elmi dərəcə"
+msgstr "Учёная степень"
+
+msgctxt "profile.edit_v2"
+msgid "Seçilməyib"
+msgstr "Не выбрано"
+
+msgctxt "profile.edit_v2"
+msgid "Akademik fəaliyyət"
+msgstr "Академическая деятельность"
+
+msgctxt "profile.edit_v2"
+msgid "Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək."
+msgstr "Добавьте преподаваемые предметы, сертификаты, статьи и материалы конференций — они появятся на странице вашего профиля."
+
+msgctxt "profile.edit_v2"
+msgid "Nömrələr yalnız əməkdaş səviyyəli baxanlara görünür, tələbələrə yox."
+msgstr "Номера видны только сотрудникам, студентам они не показываются."
+
+msgctxt "profile.edit_v2"
+msgid "Əlavə telefon"
+msgstr "Дополнительный телефон"
+
+msgctxt "profile.edit_v2"
+msgid "Yadda saxlanmamış dəyişikliklər var"
+msgstr "Есть несохранённые изменения"
+
+msgctxt "profile.edit_v2"
+msgid "Önizləmə"
+msgstr "Предпросмотр"
+
+msgctxt "profile.edit_v2"
+msgid "Dəyişikliklər yadda saxlanmayıb"
+msgstr "Изменения не сохранены"
+
+msgctxt "profile.edit_v2"
+msgid "Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?"
+msgstr "Если вы покинете страницу, изменения будут потеряны. Что вы хотите сделать?"
+
+msgctxt "profile.edit_v2"
+msgid "Saxlamadan çıx"
+msgstr "Выйти без сохранения"
+
+msgctxt "profile.edit_v2"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "profile.academic_items"
+msgid "Yeni qeyd"
+msgstr "Новая запись"
+
+msgctxt "profile.academic_items"
+msgid "Qeydi redaktə et"
+msgstr "Редактировать запись"
+
+msgctxt "profile.academic_items"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Операция не удалась. Попробуйте ещё раз."
+
+msgctxt "profile.academic_items"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "profile.academic_items"
+msgid "Başlıq"
+msgstr "Название"
+
+msgctxt "profile.academic_items"
+msgid "Məs.: Verilənlər bazası sistemləri"
+msgstr "Напр.: Системы баз данных"
+
+msgctxt "profile.academic_items"
+msgid "Ətraflı"
+msgstr "Подробности"
+
+msgctxt "profile.academic_items"
+msgid "Jurnal / konfrans / qurum adı və s."
+msgstr "Журнал / конференция / организация и т.д."
+
+msgctxt "profile.academic_items"
+msgid "İl"
+msgstr "Год"
+
+msgctxt "profile.academic_items"
+msgid "Keçid (URL)"
+msgstr "Ссылка (URL)"
+
+msgctxt "profile.academic_items"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "profile.academic_items"
+msgid "Qeydi sil"
+msgstr "Удалить запись"
+
+msgctxt "profile.academic_items"
+msgid "Bu qeyd silinsin?"
+msgstr "Удалить эту запись?"
+
+msgctxt "profile.academic_items"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "profile.academic_items"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+msgctxt "profile.academic_items"
+msgid "Redaktə et"
+msgstr "Редактировать"
+
+msgctxt "profile.academic_items"
+msgid "Keçidi aç"
+msgstr "Открыть ссылку"
+
+msgctxt "profile.academic_items"
+msgid "Hələ qeyd əlavə edilməyib."
+msgstr "Записей пока нет."
+
+msgctxt "profile.academic_items"
+msgid "Qeydlərdə axtar..."
+msgstr "Поиск по записям..."
+
+msgctxt "profile.academic_items"
+msgid "Qeydlərdə axtar"
+msgstr "Поиск по записям"
+
+msgctxt "profile.academic_items"
+msgid "Daha çox göstər"
+msgstr "Показать ещё"
+
+msgctxt "profile.academic_items"
+msgid "Daha az göstər"
+msgstr "Показать меньше"
+
+msgctxt "profile.academic_items"
+msgid "Axtarışa uyğun qeyd tapılmadı."
+msgstr "По запросу записей не найдено."
+
+msgctxt "profile.password_otp"
+msgid "Şifrə dəyişmə üsulu"
+msgstr "Способ смены пароля"
+
+msgctxt "profile.password_otp"
+msgid "Mövcud şifrə ilə"
+msgstr "С текущим паролем"
+
+msgctxt "profile.password_otp"
+msgid "Email kodu ilə"
+msgstr "По коду из email"
+
+msgctxt "profile.password_otp"
+msgid "Mövcud şifrənizi unutmusunuz?"
+msgstr "Забыли текущий пароль?"
+
+msgctxt "profile.password_otp"
+msgid "Email kodu ilə dəyişin"
+msgstr "Смените по коду из email"
+
+msgctxt "profile.password_otp"
+msgid "Kodu göndər"
+msgstr "Отправить код"
+
+msgctxt "profile.password_otp"
+msgid "Yenidən göndər"
+msgstr "Отправить снова"
+
+msgctxt "profile.password_otp"
+msgid "Kod göndərilə bilmədi. Yenidən cəhd edin."
+msgstr "Не удалось отправить код. Попробуйте ещё раз."
+
+msgctxt "profile.password_otp"
+msgid "Emailə gələn kod"
+msgstr "Код из письма"
+
+msgctxt "profile.password_otp"
+msgid "Birdəfəlik kod <strong>%(email)s</strong> ünvanına göndəriləcək."
+msgstr "Одноразовый код будет отправлен на <strong>%(email)s</strong>."
+
+msgctxt "accounts.password_otp"
+msgid "Hesabınızda email ünvanı yoxdur. Əvvəlcə profilə email əlavə edin."
+msgstr "У вашей учётной записи нет email. Сначала добавьте email в профиль."
+
+msgctxt "accounts.password_otp"
+msgid "Yeni kod üçün bir az gözləyin."
+msgstr "Подождите немного перед запросом нового кода."
+
+msgctxt "accounts.password_otp"
+msgid "Bu email üçün saatlıq kod limiti dolub. Daha sonra yenidən cəhd edin."
+msgstr "Часовой лимит кодов для этого email исчерпан. Попробуйте позже."
+
+msgctxt "accounts.password_otp"
+msgid "Kod göndərilə bilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Не удалось отправить код. Попробуйте чуть позже."
+
+msgctxt "accounts.password_otp"
+msgid "Kod %(email)s ünvanına göndərildi."
+msgstr "Код отправлен на %(email)s."
+
+msgctxt "accounts.academic_items.error"
+msgid "Qeyd tapılmadı."
+msgstr "Запись не найдена."
+
+msgctxt "accounts.academic_items.error"
+msgid "Bu qeyd növü sizin rolunuz üçün mövcud deyil."
+msgstr "Этот тип записи недоступен для вашей роли."
+
+msgctxt "accounts.academic_items.error"
+msgid "Başlıq boş ola bilməz."
+msgstr "Название не может быть пустым."
+
+msgctxt "accounts.academic_items.error"
+msgid "Başlıq %(limit)s simvoldan uzun ola bilməz."
+msgstr "Название не может быть длиннее %(limit)s символов."
+
+msgctxt "accounts.academic_items.error"
+msgid "Ətraflı sahəsi %(limit)s simvoldan uzun ola bilməz."
+msgstr "Поле подробностей не может быть длиннее %(limit)s символов."
+
+msgctxt "accounts.academic_items.error"
+msgid "İl rəqəmlə yazılmalıdır."
+msgstr "Год должен быть числом."
+
+msgctxt "accounts.academic_items.error"
+msgid "İl %(low)s–%(high)s aralığında olmalıdır."
+msgstr "Год должен быть в диапазоне %(low)s–%(high)s."
+
+msgctxt "accounts.academic_items.error"
+msgid "Keçid %(limit)s simvoldan uzun ola bilməz."
+msgstr "Ссылка не может быть длиннее %(limit)s символов."
+
+msgctxt "accounts.academic_items.error"
+msgid "Keçid http:// və ya https:// ilə başlamalıdır."
+msgstr "Ссылка должна начинаться с http:// или https://."
+
+msgctxt "accounts.academic_items.error"
+msgid "Bu növ üzrə maksimum %(limit)s qeyd əlavə etmək olar."
+msgstr "Можно добавить не более %(limit)s записей этого типа."
+
+msgctxt "accounts.academic_items.error"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестная операция."
+
+msgctxt "accounts.public_profile"
+msgid "Önizləmə rejimi: profiliniz kənar baxana məhz belə görünür."
+msgstr "Режим предпросмотра: именно так ваш профиль видят посторонние."
+
+msgctxt "accounts.public_profile"
+msgid "Redaktəyə qayıt"
+msgstr "Вернуться к редактированию"
+
+msgctxt "accounts.public_profile"
+msgid "Əlaqə"
+msgstr "Контакты"
+
+msgctxt "accounts.public_profile"
+msgid "Telefon"
+msgstr "Телефон"
+
+msgctxt "accounts.public_profile"
+msgid "Nömrələr yalnız əməkdaş səviyyəli istifadəçilərə görünür."
+msgstr "Номера видны только пользователям уровня сотрудника."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Şəxsi müəllim bankı yalnız Quiz təyinatı ilə yaradılır."
+msgstr "Личный банк преподавателя создаётся только с назначением «Quiz»."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank yalnız sizə görünür — şəxsi istifadəniz üçündür."
+msgstr "Банк виден только вам — для личного использования."
+
+msgctxt "exams.template.question_bank_list"
+msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
+msgstr "Банк не виден другим преподавателям — его видите только вы и экзаменационный центр."
