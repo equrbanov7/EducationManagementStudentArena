@@ -21,7 +21,7 @@ Kontekst:
         </div>
     </div>
 
-    {# ── Yeni bank yarat (yalnız imtahan mərkəzi) ── #}
+    {# ── Yeni bank yarat: mərkəz tam, müəllim yalnız şəxsi Quiz bankı ── #}
     {% if qbl_can_create %}
     <div class="qb-create-card js-qb-create-card"
          data-subject-url="{% url 'exams:subject_search' %}"
@@ -54,6 +54,7 @@ Kontekst:
                 <span class="qb-field__hint">{% trans "Kataloqdakı fənlərdən axtarıb seçin (opsional)." context "exams.template.question_bank_list" %}</span>
             </div>
 
+            {% if qbl_is_center %}
             <div class="qb-field" role="group" aria-labelledby="qb-teacher-label">
                 <label class="qb-field__label" id="qb-teacher-label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
                 <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
@@ -61,6 +62,7 @@ Kontekst:
                 {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-teacher" placeholder=qbk_teacher_ph %}
                 <span class="qb-field__hint">{% trans "Bank hansı müəllimin suallarından yaranır (opsional)." context "exams.template.question_bank_list" %}</span>
             </div>
+            {% endif %}
 
             <div class="qb-field">
                 <label class="qb-field__label" for="bankKind">{% trans "İmtahan növü" context "exams.template.question_bank_list" %}</label>
@@ -69,10 +71,16 @@ Kontekst:
                         {% for value, label in exam_kind_choices %}
                         <option value="{{ value }}">{{ label }}</option>
                         {% endfor %}
+                        {% if qbl_is_center %}
                         <option value="">{% trans "Ümumi (təyinatsız)" context "exams.template.question_bank_list" %}</option>
+                        {% endif %}
                     </select>
                 </div>
+                {% if qbl_is_center %}
                 <span class="qb-field__hint">{% trans "Bank hansı imtahan üçün toplanır: Final, Midterm və ya Quiz." context "exams.template.question_bank_list" %}</span>
+                {% else %}
+                <span class="qb-field__hint">{% trans "Şəxsi müəllim bankı yalnız Quiz təyinatı ilə yaradılır." context "exams.template.question_bank_list" %}</span>
+                {% endif %}
             </div>
 
             <div class="qb-field">
@@ -102,7 +110,11 @@ Kontekst:
             <div class="qb-form__footer">
                 <span class="qb-form__footer-note">
                     <i class="fas fa-lock"></i>
+                    {% if qbl_is_center %}
                     {% trans "Bank yalnız imtahan mərkəzinə görünür." context "exams.template.question_bank_list" %}
+                    {% else %}
+                    {% trans "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir." context "exams.template.question_bank_list" %}
+                    {% endif %}
                 </span>
                 <button type="submit" class="qbx-btn"><i class="fas fa-plus"></i> {% trans "Bank yarat" %}</button>
             </div>
@@ -230,12 +242,14 @@ Kontekst:
                             {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_edit_subject_ph %}
                             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-subject" placeholder=qbk_edit_subject_ph %}
                         </div>
+                        {% if qbl_is_center %}
                         <div class="qb-edit-field" role="group" aria-labelledby="qb-edit-teacher-label">
                             <label id="qb-edit-teacher-label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</label>
                             <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
                             {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_edit_teacher_ph %}
                             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-teacher" placeholder=qbk_edit_teacher_ph %}
                         </div>
+                        {% endif %}
                     </div>
                     <div class="qb-edit-row">
                         <div class="qb-edit-field">
@@ -243,7 +257,9 @@ Kontekst:
                             <div class="bootstrap-single-select">
                                 <select id="editBankKind2" name="exam_kind" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                     {% for value, label in exam_kind_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                    {% if qbl_is_center %}
                                     <option value="">{% trans "Ümumi (təyinatsız)" context "exams.template.question_bank_list" %}</option>
+                                    {% endif %}
                                 </select>
                             </div>
                         </div>

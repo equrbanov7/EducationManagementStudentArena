@@ -1,0 +1,103 @@
+/* Profil məlumat bölməsi — «Akademik fəaliyyət» görünüş kartları + elmi ad.
+   Yalnız işıqlı tema — --ems-* tokenləri. */
+
+.user-academic-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 4px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-700);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.profile-academic-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.profile-academic-group {
+    border: 1px solid var(--profile-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: var(--profile-bg);
+}
+
+.profile-academic-group__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--profile-muted);
+    margin-bottom: 10px;
+}
+
+.profile-academic-group__label i {
+    color: var(--ems-primary-600);
+}
+
+.profile-academic-group__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-size: 0.72rem;
+}
+
+.profile-academic-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.profile-academic-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--ems-neutral-0, #fff);
+    border: 1px solid var(--profile-border);
+}
+
+.profile-academic-item__title {
+    font-weight: 600;
+    color: var(--profile-text);
+    word-break: break-word;
+}
+
+.profile-academic-item__title a {
+    color: var(--ems-link);
+    text-decoration: none;
+}
+
+.profile-academic-item__title a:hover {
+    text-decoration: underline;
+}
+
+.profile-academic-item__title a i {
+    font-size: 0.7rem;
+    margin-left: 4px;
+}
+
+.profile-academic-item__meta {
+    font-size: 0.8rem;
+    color: var(--profile-muted);
+    word-break: break-word;
+}

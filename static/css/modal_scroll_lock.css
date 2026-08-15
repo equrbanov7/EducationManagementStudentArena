@@ -1,0 +1,13 @@
+/* Qlobal modal arxa-fon scroll kilidi — bax static/js/modal_scroll_lock.js.
+   Yalnız SƏHİFƏ scroll-u bağlanır; .modal konteynerinin öz daxili scroll-u
+   (overflow-y:auto) aşağıda açıq şəkildə qorunur ki, uzun modallar içəridə
+   sərbəst sürüşsün. */
+
+html.ems-modal-open,
+html.ems-modal-open body {
+    overflow: hidden !important;
+}
+
+html.ems-modal-open .modal {
+    overflow-y: auto;
+}

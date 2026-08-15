@@ -538,27 +538,23 @@ class ProfileViewTest(TestCase):
         self.assertTrue(owner.is_active)
         self.assertFalse(owner.profile.is_deleted)
 
-    def test_edit_profile_organization_type_uses_translated_bootstrap_select(self):
+    def test_edit_profile_drops_org_type_and_school_code_fields(self):
+        """2026-08-15 redesign: org-tipi seçimi, məktəb kodu və qrup/sinif
+        sahələri redaktə formasından çıxarılıb."""
         self.client.login(username="testuser", password="testpass123")
-        self.client.cookies["django_language"] = "en"
 
-        response = self.client.get(
-            reverse("accounts:profile") + "?section=edit-profile",
-            HTTP_ACCEPT_LANGUAGE="en",
-        )
+        response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
 
         self.assertEqual(response.status_code, 200)
-        # Bootstrap-single-select komponentinə çevrilib (data-bootstrap-select +
-        # native select saxlanılır); yenə də disabled, tərcümə olunmuş etiket/dəyər.
-        self.assertContains(response, 'id="organization_type"', html=False)
-        self.assertContains(response, "bootstrap-single-select__native", html=False)
-        self.assertContains(response, "data-bootstrap-select", html=False)
-        self.assertContains(response, 'disabled aria-disabled="true"', html=False)
-        self.assertContains(response, "Organization Type")
-        self.assertContains(response, "University")
-        self.assertNotContains(response, "org_type_university")
+        self.assertNotContains(response, 'id="organization_type"', html=False)
+        self.assertNotContains(response, 'name="student_school_identifier"', html=False)
+        self.assertNotContains(response, 'name="student_group_number"', html=False)
+        # «Akademik fəaliyyət» idarəetməsi görünür (AJAX endpoint data-atributu).
+        self.assertContains(response, 'id="academicItemsManager"', html=False)
 
-    def test_edit_profile_organization_type_links_to_join_flow_for_teacher_without_org(self):
+    def test_edit_profile_teacher_without_org_gets_free_text_institution_no_join_link(self):
+        """Fərdi (təşkilatsız) müəllim: sərbəst müəssisə/ixtisas mətni + elmi ad
+        bootstrap-select-i var; «Təşkilata qoşul» linki redaktə formasında yoxdur."""
         teacher_user = User.objects.create_user(
             username="teacher_edit_profile",
             email="teacher_edit_profile@example.com",
@@ -574,7 +570,12 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "?section=student-organization-request")
+        self.assertNotContains(response, "?section=student-organization-request")
+        self.assertContains(response, 'name="student_university_name"', html=False)
+        self.assertContains(response, 'name="student_specialization"', html=False)
+        self.assertContains(response, 'id="academic_title"', html=False)
+        self.assertContains(response, "bootstrap-single-select__native", html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
 
     def test_profile_change_password_section_renders(self):
         self.client.login(username="testuser", password="testpass123")
@@ -847,9 +848,11 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'value="elvin@example.com"')
         self.assertContains(response, 'value="+994501112233"')
         self.assertContains(response, 'value="Baku"')
-        self.assertContains(response, 'value="ADA University"')
-        self.assertContains(response, 'value="AZ-123"')
         self.assertContains(response, "Bio test text")
+        # 2026-08-15 redesign: təşkilat üzvündə müəssisə sahəsi sərbəst mətn
+        # deyil — təşkilat adı yalnız-oxu göstərilir.
+        self.assertNotContains(response, 'name="student_university_name"', html=False)
+        self.assertContains(response, "Profile Edit Test Org")
 
     def test_non_profile_post_does_not_overwrite_profile_fields(self):
         from apps.accounts.models import UserProfile

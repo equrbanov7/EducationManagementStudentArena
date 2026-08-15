@@ -12,7 +12,7 @@ from django.contrib.auth.hashers import check_password, identify_hasher
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare, salted_hmac
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 
 from core.constants import OrganizationType
 
@@ -290,6 +290,39 @@ class UserProfile(models.Model):
         help_text="Müəllim və ya işçinin departamenti/kafedrası",
     )
 
+    class AcademicTitle(models.TextChoices):
+        """Elmi ad / vəzifə — müəllim və akademik heyət üçün."""
+
+        ASSISTANT = "assistant", pgettext_lazy("accounts.academic_title", "Assistent")
+        TEACHER = "teacher", pgettext_lazy("accounts.academic_title", "Müəllim")
+        SENIOR_TEACHER = "senior_teacher", pgettext_lazy("accounts.academic_title", "Baş müəllim")
+        DOCENT = "docent", pgettext_lazy("accounts.academic_title", "Dosent")
+        PROFESSOR = "professor", pgettext_lazy("accounts.academic_title", "Professor")
+
+    class AcademicDegree(models.TextChoices):
+        """Elmi dərəcə."""
+
+        PHD = "phd", pgettext_lazy("accounts.academic_degree", "Fəlsəfə doktoru (PhD)")
+        DSC = "dsc", pgettext_lazy("accounts.academic_degree", "Elmlər doktoru")
+
+    academic_title = models.CharField(
+        max_length=30,
+        choices=AcademicTitle.choices,
+        blank=True,
+        default="",
+        verbose_name="Elmi ad / vəzifə",
+        help_text="Müəllim/akademik heyət üçün: assistent → professor",
+    )
+
+    academic_degree = models.CharField(
+        max_length=30,
+        choices=AcademicDegree.choices,
+        blank=True,
+        default="",
+        verbose_name="Elmi dərəcə",
+        help_text="Fəlsəfə doktoru (PhD) və ya elmlər doktoru",
+    )
+
     staff_position = models.CharField(
         max_length=255,
         blank=True,
@@ -331,6 +364,14 @@ class UserProfile(models.Model):
     )
 
     phone = models.CharField(max_length=20, blank=True, verbose_name="Telefon", help_text="Əlaqə nömrəsi")
+
+    phone_secondary = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Əlavə telefon",
+        help_text="İkinci əlaqə nömrəsi. Nömrələr yalnız əməkdaş səviyyəli baxanlara göstərilir.",
+    )
 
     bio = models.TextField(blank=True, verbose_name="Haqqında", help_text="Qısa məlumat")
 
@@ -419,3 +460,79 @@ class UserProfile(models.Model):
     def role_level(self):
         """Numeric level for the current role."""
         return ProfileRole.LEVELS.get(self.role, 0)
+
+    @property
+    def is_academics_locked(self):
+        """Akademik sahələr (müəssisə/ixtisas/qrup) qurum tərəfindən idarə olunurmu?
+
+        Yalnız həqiqi qurum üzvlüyündə (universitet/məktəb/kurs mərkəzi) True —
+        şəxsi (INDIVIDUAL tipli) təşkilatda istifadəçi öz təhsil məlumatını
+        sərbəst mətnlə redaktə edə bilər.
+        """
+        organization = self.organization
+        return organization is not None and organization.org_type != OrganizationType.INDIVIDUAL
+
+    @property
+    def academic_title_display(self):
+        """«Professor · Elmlər doktoru» kimi birləşmiş etiket (boş ola bilər)."""
+        parts = []
+        if self.academic_title:
+            parts.append(self.get_academic_title_display())
+        if self.academic_degree:
+            parts.append(self.get_academic_degree_display())
+        return " · ".join(parts)
+
+
+class AcademicProfileItem(models.Model):
+    """İstifadəçinin özü idarə etdiyi akademik fəaliyyət qeydi.
+
+    Müəllim profilində məqalə/konfrans materialı/sertifikat/tədris etdiyi fənn
+    kimi bəndlər; tələbə və digər rollar da öz nailiyyətlərini (sertifikat,
+    məqalə və s.) əlavə edə bilir. Yalnız sahibinə redaktə icazəsi var —
+    yoxlama servis qatındadır (apps.accounts.services.academic_profile).
+    """
+
+    class Kind(models.TextChoices):
+        SUBJECT = "subject", pgettext_lazy("accounts.academic_item_kind", "Tədris etdiyi fənn")
+        CERTIFICATE = "certificate", pgettext_lazy("accounts.academic_item_kind", "Sertifikat")
+        PUBLICATION = "publication", pgettext_lazy("accounts.academic_item_kind", "Məqalə")
+        CONFERENCE = "conference", pgettext_lazy("accounts.academic_item_kind", "Konfrans materialı")
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="academic_items",
+        verbose_name="İstifadəçi",
+    )
+    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name="Növ")
+    title = models.CharField(max_length=200, verbose_name="Başlıq")
+    detail = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Ətraflı",
+        help_text="Jurnal/konfrans adı, verən qurum, kafedra və s.",
+    )
+    year = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="İl",
+    )
+    link = models.URLField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name="Keçid",
+        help_text="DOI / sertifikat / nəşr keçidi (http-https)",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Akademik fəaliyyət qeydi"
+        verbose_name_plural = "Akademik fəaliyyət qeydləri"
+        ordering = ["kind", "-year", "-id"]
+        indexes = [models.Index(fields=["user", "kind"])]
+
+    def __str__(self):
+        return f"{self.user_id} · {self.get_kind_display()} · {self.title[:40]}"

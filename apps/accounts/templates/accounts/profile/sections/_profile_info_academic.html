@@ -1,0 +1,43 @@
+{% load i18n static %}
+{% comment %}
+Profil məlumat bölməsində «Akademik fəaliyyət» görünüşü (yalnız-oxu).
+Qeydlər istifadəçinin özü tərəfindən redaktə bölməsində idarə olunur
+(_academic_items_manage.html). ``academic_item_display_groups`` yalnız
+dolu qrupları saxlayır (bax context_builder._stage1).
+{% endcomment %}
+{# CSS həmişə yüklənir: .user-academic-title nişanı qeydlər olmayanda da görünür. #}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info_academic.css' %}?v=20260815-1">
+{% if academic_item_display_groups %}
+<div class="section-title profile-section-title--academic">
+    <i class="fas fa-award"></i>
+    <span>{% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}</span>
+</div>
+<div class="profile-academic-groups">
+    {% for group in academic_item_display_groups %}
+    <div class="profile-academic-group">
+        <div class="profile-academic-group__label">
+            <i class="fas {{ group.icon }}"></i>
+            {{ group.label }}
+            <span class="profile-academic-group__count">{{ group.items|length }}</span>
+        </div>
+        <ul class="profile-academic-list">
+            {% for item in group.items %}
+            <li class="profile-academic-item">
+                <span class="profile-academic-item__title">
+                    {% if item.link %}
+                    <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer">{{ item.title }}
+                        <i class="fas fa-arrow-up-right-from-square"></i></a>
+                    {% else %}
+                    {{ item.title }}
+                    {% endif %}
+                </span>
+                {% if item.detail or item.year %}
+                <span class="profile-academic-item__meta">{{ item.detail }}{% if item.detail and item.year %} · {% endif %}{% if item.year %}{{ item.year }}{% endif %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

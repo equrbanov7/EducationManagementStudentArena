@@ -277,7 +277,7 @@ def _detail_workbench_context(request, organization, groups, submission, form_st
         save_label = pgettext("exams.template.question_submission", "Düzəlt və yenidən göndər")
     else:
         save_label = pgettext("exams.template.question_submission", "Yenidən göndər")
-    return build_workbench_context(
+    context = build_workbench_context(
         request,
         organization,
         groups,
@@ -294,6 +294,11 @@ def _detail_workbench_context(request, organization, groups, submission, form_st
         ),
         save_label=save_label,
     )
+    # Detal səhifəsinin öz qb-header-i (üst sağda «Göndərişlərə qayıt») var —
+    # workbench-in daxili header-i eyni linki TƏKRARLAYIRDI. Yalnız geri-link
+    # gizlədilir (wb_hide_header YOX: o, canlı parse statistikalarını da aparardı).
+    context["wb_hide_back_link"] = True
+    return context
 
 
 @login_required

@@ -17,7 +17,7 @@ from apps.exams.constants import (
     QUESTION_EXAM_KIND_VALUES,
 )
 from apps.exams.models import QuestionBank
-from apps.exams.services.access_policy import _ensure_teacher, ensure_can_create_question_bank
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_create_question_bank, is_exam_center_user
 from apps.exams.services.bank_analysis import analyze_bank_questions
 from apps.exams.services.question_bank_attach import accessible_banks
 from core.tenancy import get_request_organization
@@ -73,7 +73,12 @@ def _resolve_bank_teacher(organization, raw_teacher_id):
     )
 
 
-def _normalize_exam_kind(raw_value):
+def _normalize_exam_kind(raw_value, user=None):
+    """Bank təyinatını yoxlayır. İmtahan mərkəzi olmayan istifadəçi (müəllim)
+    üçün nəticə HƏMİŞƏ «quiz»-dir — şəxsi bank final/midterm ola bilməz
+    (UI yalnız quiz göstərir; bu, birbaşa POST-a qarşı server müdafiəsidir)."""
+    if user is not None and not is_exam_center_user(user):
+        return "quiz"
     value = (raw_value or "").strip().lower()
     return value if value in QUESTION_EXAM_KIND_VALUES else ""
 
@@ -85,9 +90,10 @@ def question_bank_list(request):
     profile_bank_url = f"{reverse('accounts:profile')}?section=question-bank"
 
     if request.method == "POST" and (request.POST.get("action") == "create_bank"):
-        # Sual bankını yalnız imtahan mərkəzi yarada bilər (müəllim mövcud
-        # banklardan istifadə edə bilər, amma yenisini aça bilməz).
+        # İmtahan mərkəzi tam səlahiyyətli; müəllim yalnız ÖZÜ üçün Quiz bankı
+        # yarada bilər (_normalize_exam_kind «quiz»-ə bağlayır, mənbə müəllim özüdür).
         ensure_can_create_question_bank(request.user)
+        creator_is_center = is_exam_center_user(request.user)
         name = (request.POST.get("name") or "").strip()
         if not name:
             messages.error(request, pgettext("exams.view.bank.message", "Bank adı boş ola bilməz."))
@@ -97,8 +103,12 @@ def question_bank_list(request):
                 name=name,
                 subject=subject_text,
                 subject_ref=subject_ref,
-                exam_kind=_normalize_exam_kind(request.POST.get("exam_kind")),
-                source_teacher=_resolve_bank_teacher(organization, request.POST.get("source_teacher_id")),
+                exam_kind=_normalize_exam_kind(request.POST.get("exam_kind"), user=request.user),
+                source_teacher=(
+                    _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
+                    if creator_is_center
+                    else request.user
+                ),
                 description=(request.POST.get("description") or "").strip(),
                 language=(request.POST.get("language") or DEFAULT_EXAM_LANGUAGE).strip().lower(),
                 default_question_type=_normalize_format(request.POST.get("default_question_type")),
@@ -140,8 +150,12 @@ def question_bank_update(request, bank_id):
             subject_ref, subject_text = _resolve_bank_subject(organization, request.POST.get("subject_id"))
             bank.subject_ref = subject_ref
             bank.subject = subject_text
-            bank.exam_kind = _normalize_exam_kind(request.POST.get("exam_kind"))
-            bank.source_teacher = _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
+            bank.exam_kind = _normalize_exam_kind(request.POST.get("exam_kind"), user=request.user)
+            # source_teacher yalnız imtahan mərkəzi tərəfindən dəyişdirilə bilər:
+            # müəllim formasında sahə yoxdur (boş POST mövcud dəyəri silərdi) və
+            # müəllim başqasının adına atribusiya saxtalaşdıra bilməməlidir.
+            if is_exam_center_user(request.user):
+                bank.source_teacher = _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
             bank.language = (request.POST.get("language") or bank.language).strip().lower()
             bank.default_question_type = _normalize_format(
                 request.POST.get("default_question_type") or bank.default_question_type

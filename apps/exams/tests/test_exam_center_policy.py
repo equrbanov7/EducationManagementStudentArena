@@ -122,8 +122,9 @@ class ExamCenterPolicyUnitTests(_Base):
         untyped = Exam.objects.create(title="Adi imtahan", author=self.teacher, organization=self.org, exam_type="test")
         self.assertTrue(can_manage_exam_questions(self.teacher, untyped))
 
-    def test_question_bank_creation_only_exam_center(self):
-        self.assertFalse(can_create_question_bank(self.teacher))
+    def test_question_bank_creation_teacher_and_exam_center(self):
+        """2026-08-15: müəllim də yarada bilər (view qatı təyinatı «quiz»-ə bağlayır)."""
+        self.assertTrue(can_create_question_bank(self.teacher))
         self.assertTrue(can_create_question_bank(self.exam_center))
 
     def test_superuser_bypasses(self):
@@ -177,23 +178,46 @@ class FinalExamQuestionViewTests(_Base):
 
 
 class QuestionBankCreationViewTests(_Base):
-    def test_teacher_cannot_create_bank(self):
+    def test_teacher_creates_personal_quiz_bank_only(self):
+        """2026-08-15: müəllim ŞƏXSİ bank yarada bilər — təyinat məcburi «quiz»,
+        final/midterm göndərsə belə server «quiz»-ə bağlayır; bank paylaşılmır,
+        mənbə müəllim özüdür."""
         client = self._client_for(self.teacher)
         response = client.post(
             reverse("exams:question_bank_list"),
-            {"action": "create_bank", "name": "Müəllim bankı"},
+            {"action": "create_bank", "name": "Müəllim bankı", "exam_kind": "final"},
         )
-        self.assertEqual(response.status_code, 403)
-        self.assertFalse(QuestionBank.objects.filter(name="Müəllim bankı").exists())
+        self.assertEqual(response.status_code, 302)
+        bank = QuestionBank.objects.get(name="Müəllim bankı")
+        self.assertEqual(bank.exam_kind, "quiz")
+        self.assertFalse(bank.is_shared)
+        self.assertEqual(bank.created_by_id, self.teacher.id)
+        self.assertEqual(bank.source_teacher_id, self.teacher.id)
+
+    def test_teacher_cannot_edit_own_bank_to_final(self):
+        client = self._client_for(self.teacher)
+        client.post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "Müəllim quiz bankı"},
+        )
+        bank = QuestionBank.objects.get(name="Müəllim quiz bankı")
+        response = client.post(
+            reverse("exams:question_bank_update", args=[bank.id]),
+            {"name": "Müəllim quiz bankı", "exam_kind": "midterm"},
+        )
+        self.assertEqual(response.status_code, 302)
+        bank.refresh_from_db()
+        self.assertEqual(bank.exam_kind, "quiz")
 
     def test_exam_center_can_create_bank(self):
         client = self._client_for(self.exam_center)
         response = client.post(
             reverse("exams:question_bank_list"),
-            {"action": "create_bank", "name": "Mərkəz bankı"},
+            {"action": "create_bank", "name": "Mərkəz bankı", "exam_kind": "final"},
         )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(QuestionBank.objects.filter(name="Mərkəz bankı").exists())
+        bank = QuestionBank.objects.get(name="Mərkəz bankı")
+        self.assertEqual(bank.exam_kind, "final")
 
 
 class ExamFormFinalCategoryTests(_Base):
