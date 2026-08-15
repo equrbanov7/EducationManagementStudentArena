@@ -59,7 +59,7 @@ Incremental==24.11.0
 pyasn1==0.6.4
 pyasn1_modules==0.4.2
 pycparser==2.23
-pyOpenSSL==26.3.0
+pyOpenSSL==26.4.0
 service-identity==24.2.0
 Twisted==26.4.0
 txaio==25.9.2
