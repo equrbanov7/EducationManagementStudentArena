@@ -12,7 +12,7 @@
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260815-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260816-1">
 
     <form method="post" enctype="multipart/form-data" id="editProfileForm" class="edit-profile-form">
         {% csrf_token %}
@@ -171,26 +171,6 @@
             </div>
         </div>
 
-        {# ── Sticky «Yadda saxla» paneli: hər an klik olunur, scroll tələb etmir. ── #}
-        <div class="edit-profile-savebar" id="editProfileSavebar">
-            <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
-                <i class="fas fa-circle-exclamation"></i>
-                {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
-            </span>
-            <div class="edit-profile-savebar__actions">
-                <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
-                   class="btn btn-outline-primary" target="_blank" rel="noopener">
-                    <i class="fas fa-eye"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
-                </a>
-                <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
-                   data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
-                    <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
-                </button>
-            </div>
-        </div>
     </form>
 
     <div class="section-card" id="academicItemsManager"
@@ -215,6 +195,28 @@
              data-label-show-less="{% trans 'Daha az göstər' context 'profile.academic_items' %}"
              data-label-no-match="{% trans 'Axtarışa uyğun qeyd tapılmadı.' context 'profile.academic_items' %}">
             {% include "accounts/profile/sections/_academic_items_manage.html" %}
+        </div>
+    </div>
+
+    {# ── Sticky «Yadda saxla» paneli — bölmənin SONUNDA (form xaricində): bütün
+       bölmə boyu viewport altına yapışır; submit form= atributu ilə bağlıdır. ── #}
+    <div class="edit-profile-savebar" id="editProfileSavebar">
+        <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
+            <i class="fas fa-circle-exclamation"></i>
+            {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
+        </span>
+        <div class="edit-profile-savebar__actions">
+            <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
+               class="btn btn-outline-primary" target="_blank" rel="noopener">
+                <i class="fas fa-eye"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
+            </a>
+            <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
+               data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
+                <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
+            </a>
+            <button type="submit" form="editProfileForm" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
+            </button>
         </div>
     </div>
 
