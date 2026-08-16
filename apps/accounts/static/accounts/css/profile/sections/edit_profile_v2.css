@@ -228,21 +228,53 @@
     font-size: 0.72rem;
 }
 
+/* Üzən əməliyyat paneli: .profile-main overflow:auto olduğundan sticky
+   window-a görə işləmir — fixed + mərkəzləşmiş pill (modern floating bar).
+   Bölmə gizli olanda (display:none valideyn) fixed element də gizlənir. */
 .edit-profile-savebar {
-    position: sticky;
-    bottom: 0;
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 40; /* modal (1055) və backdrop-dan aşağı */
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 14px;
     flex-wrap: wrap;
+    width: min(760px, calc(100vw - 32px));
+    box-sizing: border-box;
     padding: 12px 18px;
-    margin-top: 4px;
-    background: var(--ems-neutral-0, #fff);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--profile-border);
-    border-radius: 14px;
-    box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.08);
+    border-radius: 999px;
+    box-shadow: 0 10px 34px rgba(15, 23, 42, 0.18);
+}
+
+/* Fixed panel son kartı örtməsin deyə bölmənin sonunda nəfəslik. */
+.profile-section--edit-profile {
+    padding-bottom: 96px;
+}
+
+.edit-profile-savebar .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 575px) {
+    .edit-profile-savebar {
+        justify-content: stretch;
+        border-radius: 16px;
+        bottom: 8px;
+    }
+
+    .edit-profile-savebar__actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+    }
 }
 
 .edit-profile-savebar__status {
