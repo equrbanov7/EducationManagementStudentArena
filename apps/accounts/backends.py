@@ -4,7 +4,8 @@ Authentication backends for accounts app.
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-from django.db.models import Q
+
+from .identity import canonical_identity, canonical_identity_queryset, user_access_is_staged
 
 
 class EmailOrUsernameBackend(ModelBackend):
@@ -23,13 +24,42 @@ class EmailOrUsernameBackend(ModelBackend):
             return None
 
         user_model = get_user_model()
-        lookup = Q(username__iexact=username) | Q(email__iexact=username)
-        user = user_model._default_manager.filter(lookup).first()
+        key = canonical_identity(username)
+        manager = user_model._default_manager
+        username_candidates = canonical_identity_queryset(
+            manager.all(),
+            "username",
+            key,
+            alias="_login_username_key",
+        ).order_by("pk")[:2]
+        email_candidates = canonical_identity_queryset(
+            manager.all(),
+            "email",
+            key,
+            alias="_login_email_key",
+        ).order_by(
+            "pk"
+        )[:2]
+        candidates_by_id = {candidate.pk: candidate for candidate in (*username_candidates, *email_candidates)}
+        candidates = [candidates_by_id[pk] for pk in sorted(candidates_by_id)[:2]]
 
-        if user is None:
+        # Keep the absent/ambiguous-user path close to the password-hash cost of
+        # an existing account and never pick an arbitrary canonical collision.
+        if len(candidates) != 1:
+            user_model().set_password(password)
             return None
+        user = candidates[0]
         if not user.check_password(password):
             return None
         if not self.user_can_authenticate(user):
+            return None
+        return user
+
+    def user_can_authenticate(self, user):
+        return super().user_can_authenticate(user) and not user_access_is_staged(user)
+
+    def get_user(self, user_id):
+        user = super().get_user(user_id)
+        if user is None or not self.user_can_authenticate(user):
             return None
         return user

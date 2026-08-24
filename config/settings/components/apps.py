@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "apps.labs",
     "apps.organizations.apps.OrganizationsConfig",
     "apps.registrar.apps.RegistrarConfig",
+    "apps.legacy_import.apps.LegacyImportConfig",
     "apps.audit.apps.AuditConfig",
     "apps.monitoring.apps.MonitoringConfig",
     "apps.ai_assistant.apps.AIAssistantConfig",

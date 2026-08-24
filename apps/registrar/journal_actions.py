@@ -64,8 +64,21 @@ def _resolve_instructor(offering, raw_id):
     if not raw_id:
         return None
     from django.contrib.auth import get_user_model
+    from django.core.exceptions import ValidationError
 
-    return get_user_model().objects.filter(pk=raw_id).first()
+    from apps.registrar.integrity import validate_instructor_assignment
+
+    instructor = get_user_model().objects.filter(pk=raw_id).first()
+    if instructor is None:
+        raise Http404
+    try:
+        validate_instructor_assignment(
+            organization=offering.organization,
+            instructor=instructor,
+        )
+    except ValidationError as exc:
+        raise Http404 from exc
+    return instructor
 
 
 @login_required

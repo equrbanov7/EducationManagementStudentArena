@@ -19,7 +19,7 @@ from apps.registrar import approval, page_contexts
 def analytics_dashboard(request):
     """Faculty analytics: pass rate, avg GPA, attendance per program/group."""
     organization = getattr(request, "organization", None)
-    if organization is None or not approval.can_chair_approve(request.user, organization):
+    if organization is None or not approval.can_view_analytics(request.user, organization):
         raise Http404  # dean/chair/admin only — do not leak the URL
 
     context = page_contexts.analytics_context(request, organization)

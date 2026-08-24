@@ -196,6 +196,11 @@ def restore_account(user, *, request=None):
         user: The User instance to restore
         request: Optional HTTP request (for audit logging)
     """
+    from ..identity import user_access_is_staged
+
+    if user_access_is_staged(user):
+        raise AccountDeletionError("staged_account_activation_forbidden")
+
     with transaction.atomic():
         profile = getattr(user, "profile", None)
 
@@ -265,6 +270,10 @@ def unblock_account(user, *, request=None):
     """
     Restore a temporarily blocked account back to active state.
     """
+    from ..identity import user_access_is_staged
+
+    if user_access_is_staged(user):
+        raise AccountDeletionError("staged_account_activation_forbidden")
     if user.is_active:
         return
 

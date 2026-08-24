@@ -7,7 +7,9 @@ Records *who* changed *which* grade, *when*, and *old → new* into the shared
 * **Low noise** — one aggregated entry per save operation, not per cell.
 * **Only real changes** — a cell is logged only when ``old != new`` (re-saving an
   unchanged grid produces zero audit entries).
-* **Never blocks the domain action** — audit failures are swallowed.
+* **Configurable failure policy** — ordinary grade entry remains best-effort,
+  while formal correction workflows opt into fail-closed auditing so their
+  domain mutation and audit evidence commit or roll back together.
 
 The trail is queryable by ``resource_type`` (``registrar.grade.*``) +
 ``resource_id`` (the offering id) and is surfaced on the journal page
@@ -38,12 +40,15 @@ def score_repr(score) -> str:
     return str(score)
 
 
-def log_grade_changes(*, offering, by_user, kind, changes):
-    """Write one aggregated grade-change audit entry (best-effort).
+def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False):
+    """Write one aggregated grade-change audit entry.
 
     ``kind``  — short slug (``mark`` / ``component`` / ``final`` / ``resit``).
     ``changes`` — list of ``{"student", "item", "old", "new"}`` (already filtered
-    to actual changes; all values JSON-serialisable strings)."""
+    to actual changes; all values JSON-serialisable strings).
+    ``fail_closed`` — re-raise storage errors for formal, transaction-bound
+    workflows such as documented corrections.
+    """
     if not changes:
         return
     try:
@@ -63,8 +68,9 @@ def log_grade_changes(*, offering, by_user, kind, changes):
             new_values={"count": len(changes)},
             reason=f"{len(changes)} qiymət dəyişikliyi ({kind}).",
         )
-    except Exception:  # noqa: BLE001 — audit must never block the grade save
-        pass
+    except Exception:  # noqa: BLE001 — caller chooses the transaction policy
+        if fail_closed:
+            raise
 
 
 _KIND_LABELS = {

@@ -125,8 +125,13 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
             return student_context
         return page_contexts.journal_list_context(request.user, request=request)
     if section == "grade-approvals":
-        return page_contexts.approvals_context(request.user, organization)
+        context = page_contexts.approvals_context(request.user, organization)
+        return context if context["is_approver"] else {"has_context": False, "is_approver": False}
     if section == "analytics":
+        from apps.registrar import approval
+
+        if not approval.can_view_analytics(request.user, organization):
+            return {"has_context": False}
         return page_contexts.analytics_context(request, organization, embedded=True)
     return {}
 

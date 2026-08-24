@@ -1,0 +1,812 @@
+[
+    {
+        "old_table": "alerts_workers",
+        "exact_rows": 629,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "notifications_inappnotification",
+        "compatibility_pct": 50,
+        "status": "migrate-partial",
+        "problem": "Alert m\u0259nb\u0259 c\u0259dv\u0259li sxemd\u0259 yoxdur; yaln\u0131z worker_id, alert_id v\u0259 seen_date var. Recipient/read_at \u00e7evril\u0259 bil\u0259r, ba\u015fl\u0131q/m\u0259tn v\u0259 yarad\u0131lma vaxt\u0131 b\u0259rpa olunmur.",
+        "method": "worker_id-ni legacy user x\u0259rit\u0259si il\u0259 recipient-\u0259 ba\u011fla; m\u00f6vcud alert m\u0259zmunu tap\u0131larsa h\u0259r recipient \u00fc\u00e7\u00fcn InAppNotification yarat, seen_date-ni read_at et; tap\u0131lmayan alert_id-ni metadata-da arxivl\u0259."
+    },
+    {
+        "old_table": "allowed_qb",
+        "exact_rows": 2964,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_lessonmark + registrar_journalcorrection",
+        "compatibility_pct": 70,
+        "status": "migrate-partial+archive",
+        "problem": "Bu QuestionBank deyil: student_id, allowed_date_start/end, file v\u0259 desc s\u0259n\u0259dli \u00fczrl\u00fc i\u015ftirak icaz\u0259sidir. Yeni sxemd\u0259 interval icaz\u0259si ayr\u0131ca model deyil; korreksiya konkret LessonMark-a ba\u011fl\u0131d\u0131r.",
+        "method": "Student+interval \u00fczr\u0259 h\u0259min d\u00f6vrd\u0259ki LessonMark-lar\u0131 tap, status=excused et v\u0259 h\u0259r t\u0259sirl\u0259n\u0259n xana \u00fc\u00e7\u00fcn JournalCorrection yarat; fayl\u0131 t\u0259hl\u00fck\u0259siz PDF-\u0259 \u00e7evir/yoxla, uniq v\u0259 orijinal interval\u0131 audit metadata-da saxla."
+    },
+    {
+        "old_table": "balvereqi_logs",
+        "exact_rows": 52386,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "audit_auditlog (v\u0259 raw archive)",
+        "compatibility_pct": 50,
+        "status": "migrate-partial+archive",
+        "problem": "Bal v\u0259r\u0259qi export hadis\u0259si v\u0259 longtext data snapshotudur; AuditLog hadis\u0259ni/JSON-u saxlaya bil\u0259r, lakin ayr\u0131ca export s\u0259n\u0259di/version modeli yoxdur.",
+        "method": "data parse olunursa JSONB new_values-\u0259, owner_id user-\u0259, uniqid resource_id-y\u0259, export_time created_at-a x\u0259rit\u0259l\u0259; parse olunmayan payload-u immutable raw archive-da saxla."
+    },
+    {
+        "old_table": "books",
+        "exact_rows": 0,
+        "domain": "Kitabxana",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "empty-skip",
+        "problem": "Kitabxana kataloquna uy\u011fun EMSArena modeli yoxdur; c\u0259dv\u0259l faktiki bo\u015fdur.",
+        "method": "He\u00e7 bir canl\u0131 s\u0259tir yaratma; yaln\u0131z sxem manifestind\u0259 bo\u015f m\u0259nb\u0259 kimi qeyd et."
+    },
+    {
+        "old_table": "books_order",
+        "exact_rows": 0,
+        "domain": "Kitabxana",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "empty-skip",
+        "problem": "Kitab sifari\u015fi/borc/geri qaytarma workflow modeli yoxdur; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; g\u0259l\u0259c\u0259k kitabxana modulu yarad\u0131larsa yaln\u0131z DDL referens kimi saxlan\u0131ls\u0131n."
+    },
+    {
+        "old_table": "curricula",
+        "exact_rows": 126,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_curriculum + registrar_program",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Program/cohort m\u0259zmunu uy\u011fundur, amma from_date/to_date, \u0259yani-qiyabi, kollec/universitet v\u0259 bak/mag \u00f6l\u00e7\u00fcl\u0259ri Curriculum-da ayr\u0131ca saxlanm\u0131r; admission_year yaln\u0131z bir ildir.",
+        "method": "speciality_id-ni Program-a ba\u011fla, from_date-ni admission_year et, bak_or_mag-ni Program.degree_level-\u0259 normalla\u015fd\u0131r; qalan rejim v\u0259 legacy id-l\u0259ri kontrollu metadata/arxiv x\u0259rit\u0259sind\u0259 saxla."
+    },
+    {
+        "old_table": "curricula_plan",
+        "exact_rows": 3424,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_curriculumsubject + registrar_subject",
+        "compatibility_pct": 60,
+        "status": "migrate-partial+archive",
+        "problem": "F\u0259nn+semestr plan s\u0259tri uy\u011fundur, lakin saat_aks/as/muh/sem/lab/prak, lesson_before_id v\u0259 s\u0259tir\u0259 m\u0259xsus kredit \u00fc\u00e7\u00fcn cari target sah\u0259l\u0259ri yoxdur; lesson_id m\u0259tn/\u00e7ox-ID ola bil\u0259r.",
+        "method": "lesson_id-ni parse edib Subject-l\u0259r\u0259 resolve et, semester roman/m\u0259tnini r\u0259q\u0259m\u0259 \u00e7evir, CurriculumSubject yarat; kredit konfliktini qaydaya sal, saat b\u00f6lg\u00fcs\u00fc v\u0259 prerequisite-i raw structured archive-da saxla."
+    },
+    {
+        "old_table": "curricula_plan_patok",
+        "exact_rows": 1,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_courseoffering + organizations_orgunit (qism\u0259n)",
+        "compatibility_pct": 40,
+        "status": "sparse-migrate-partial",
+        "problem": "Birl\u0259\u015fmi\u015f qruplu patok/stream \u00fc\u00e7\u00fcn birinci-sinif target yoxdur; joined_groups longtext v\u0259 main_group semantikas\u0131n\u0131 t\u0259k CourseOffering.group ifad\u0259 etmir.",
+        "method": "joined_groups-i parse et, h\u0259r qrup \u00fc\u00e7\u00fcn eyni subject/period \u00fczr\u0259 offering yarat v\u0259 ortaq legacy stream a\u00e7ar\u0131n\u0131 audit metadata-da saxla; 1 s\u0259tri manual t\u0259sdiql\u0259."
+    },
+    {
+        "old_table": "curricula_tam",
+        "exact_rows": 170,
+        "domain": "Akademik struktur/plan",
+        "new_target": "no direct target / archive-only; organizations_academicperiod qism\u0259n",
+        "compatibility_pct": 30,
+        "status": "archive-only",
+        "problem": "nt, imtahan, t\u0259cr\u00fcb\u0259, t\u0259til \u00e7oxillik JSON-m\u0259tn h\u0259ft\u0259 bloklar\u0131d\u0131r; AcademicPeriod faktiki tarix interval\u0131d\u0131r v\u0259 curriculum-scoped normativ h\u0259ft\u0259 plan\u0131n\u0131 saxlam\u0131r.",
+        "method": "JSON massivl\u0259rini validasiya edib curriculum calendar archive obyektin\u0259 \u00e7evir; yaln\u0131z etibarl\u0131 real tarixl\u0259r \u00e7\u0131xar\u0131la bilirs\u0259 AcademicPeriod-lar\u0131n qurulmas\u0131nda referens kimi istifad\u0259 et."
+    },
+    {
+        "old_table": "curricula_tasks",
+        "exact_rows": 1,
+        "domain": "Akademik struktur/plan",
+        "new_target": "no target / audit_auditlog qism\u0259n",
+        "compatibility_pct": 20,
+        "status": "sparse-archive-only",
+        "problem": "Kafedraya plan/t\u0259yinat task workflow-u v\u0259 status modeli EMSArena-da yoxdur; yaln\u0131z bir s\u0259tir var.",
+        "method": "Hadis\u0259 kimi AuditLog-a v\u0259 raw archive-a k\u00f6\u00e7\u00fcr; aktiv workflow obyektin\u0259 \u00e7evirm\u0259."
+    },
+    {
+        "old_table": "curricula_tasks_content",
+        "exact_rows": 5,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_courseoffering",
+        "compatibility_pct": 60,
+        "status": "sparse-migrate-partial",
+        "problem": "Plan s\u0259tri+f\u0259nn+qrup kombinasiyas\u0131 offering \u00fc\u00e7\u00fcn uy\u011fundur, amma period v\u0259 m\u00fc\u0259llim bu c\u0259dv\u0259ld\u0259 yoxdur; plan_patok alternativ yolu qeyri-m\u00fc\u0259yy\u0259ndir.",
+        "method": "uniqid task, curricula_plan v\u0259 group join-lar\u0131 il\u0259 Subject/Period/Group resolve et; 5 s\u0259tri manual conflict queue-dan ke\u00e7ir\u0259r\u0259k CourseOffering yarat."
+    },
+    {
+        "old_table": "curricula_tasks_content_teachers",
+        "exact_rows": 0,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_courseoffering.instructor + exams_studentgroup_teachers",
+        "compatibility_pct": 60,
+        "status": "empty-skip",
+        "problem": "M\u00fc\u0259llim t\u0259yinat\u0131 target-larda m\u00fcmk\u00fcnd\u00fcr, lakin bird\u0259n \u00e7ox m\u00fc\u0259llimi t\u0259k offering.instructor tam da\u015f\u0131m\u0131r; m\u0259nb\u0259 bo\u015fdur.",
+        "method": "Skip; schema dry-run qaydas\u0131nda teacher_id-ni user-\u0259 v\u0259 content-i offering-\u0259 ba\u011flama x\u0259rit\u0259sini test et."
+    },
+    {
+        "old_table": "departments",
+        "exact_rows": 31,
+        "domain": "Akademik struktur/plan",
+        "new_target": "organizations_orgunit + organizations_organization",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Ad v\u0259 self-parent iyerarxiya yax\u015f\u0131 \u00f6rt\u00fcl\u00fcr; department_types_id ayr\u0131ca kod l\u00fc\u011f\u0259ti olmadan unit_type-a \u00e7evrilm\u0259lidir, phone/address/image/note/text birinci-sinif OrgUnit sah\u0259l\u0259ri deyil.",
+        "method": "\u018fvv\u0259l k\u00f6kl\u0259ri, sonra parent_id s\u0131ras\u0131 il\u0259 OrgUnit yarat; type mapping-i t\u0259sdiql\u0259; \u0259lav\u0259 atributlar\u0131 OrgUnit.settings JSON-da saxla; 0/\u00f6z\u00fcn\u0259/orphan parent-l\u0259ri conflict queue-a ver."
+    },
+    {
+        "old_table": "ders_cedveli",
+        "exact_rows": 433,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_scheduleslot + registrar_courseoffering",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Vaxt, m\u00fc\u0259llim, f\u0259nn, qrup, otaq v\u0259 odd/even h\u0259ft\u0259 uy\u011fundur; group_id m\u0259tn siyah\u0131s\u0131d\u0131r, from/to tarixl\u0259ri v\u0259 teams_link ScheduleSlot-da yoxdur, weekday weeks m\u0259tnind\u0259n \u00e7\u0131xar\u0131lmal\u0131d\u0131r.",
+        "method": "group_id/weeks parse et, h\u0259r qrup+weekday \u00fc\u00e7\u00fcn offering/slot yarat, alt_or_ust_hefte-ni week_type-a \u00e7evir; tarix s\u0259rh\u0259di v\u0259 Teams linkini archive metadata-da saxla."
+    },
+    {
+        "old_table": "exam_answers",
+        "exact_rows": 1306373,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_examanswer + exams_examanswer_selected_options + exams_examattempt",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Cavab, d\u00fczg\u00fcnl\u00fck v\u0259 point uy\u011fun g\u0259lir; old exam_list/student/question d\u00fcz \u0259laq\u0259l\u0259ri yeni attempt vasit\u0259sil\u0259 getm\u0259lidir, verilmis_cavab h\u0259m variant h\u0259m m\u0259tn ola bil\u0259r v\u0259 snapshot yoxdur.",
+        "method": "(exam_list_id,student_id) \u00fczr\u0259 attempt x\u0259rit\u0259si qur, question/option variantlar\u0131n\u0131 resolve et, text_answer v\u0259 selected_options yaz; old correct/netice/point-ni question_snapshot v\u0259 audit s\u00fcbutu kimi saxla, orphan-l\u0259ri karantin\u0259 al."
+    },
+    {
+        "old_table": "exam_list",
+        "exact_rows": 5848,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_exam + exams_exam_allowed_groups",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "F\u0259nn, m\u00fc\u0259llim, qrup, ba\u015flan\u011f\u0131c, m\u00fcdd\u0259t, sual say\u0131 v\u0259 tip yax\u015f\u0131 \u00f6rt\u00fcl\u00fcr; title/end_datetime/timezone/org v\u0259 yeni n\u0259zar\u0259t siyas\u0259tl\u0259ri m\u0259nb\u0259d\u0259 yoxdur.",
+        "method": "date+time-ni timezone-aware start et, duration-dan end hesabla, group-u allowed_groups-a, teacher-i author-a, lesson-i Subject/Course-a ba\u011fla; tarixi imtahanlar\u0131 inactive/archived et."
+    },
+    {
+        "old_table": "exam_question_topics",
+        "exact_rows": 853,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_questionbank (v\u0259 ya exams_questionblock)",
+        "compatibility_pct": 50,
+        "status": "migrate-partial",
+        "problem": "C\u0259dv\u0259ld\u0259 topic ad\u0131 yoxdur; yaln\u0131z lesson, teacher, sector, owner var. Buna g\u00f6r\u0259 semantik topic itkindir, lakin sual konteyneri kimi bank yaratmaq olar.",
+        "method": "Lesson+teacher+sector natural key il\u0259 QuestionBank yarat, sintetik v\u0259 a\u00e7\u0131q legacy etiket ver; ad\u0131n b\u0259rpa edil\u0259 bilm\u0259diyini metadata-da qeyd et v\u0259 dublikat banklar\u0131 birl\u0259\u015fdirm\u0259zd\u0259n \u0259vv\u0259l review et."
+    },
+    {
+        "old_table": "exam_questions",
+        "exact_rows": 294702,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_bankquestion + exams_bankquestionoption; istifad\u0259 edil\u0259nl\u0259r \u00fc\u00e7\u00fcn exams_examquestion snapshot",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Sual, A-E variantlar\u0131 v\u0259 do\u011fru variant yax\u015f\u0131 \u00f6rt\u00fcl\u00fcr; points/difficulty/language yoxdur v\u0259 topic konkret exam-a ba\u011flanm\u0131r.",
+        "method": "topic_id \u00fczr\u0259 banka import et, A-E-ni ayr\u0131 options-a a\u00e7, true_answer-ni is_correct et; exam_students_start.questions_id vasit\u0259sil\u0259 faktiki t\u0259qdim edilmi\u015f suallar\u0131 h\u0259r Exam-a snapshotla, default points/language q\u0259rar\u0131n\u0131 manifestl\u0259\u015fdir."
+    },
+    {
+        "old_table": "exam_students_start",
+        "exact_rows": 29263,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_examattempt + exams_proctoringlog (qism\u0259n)",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Start/end/yekun bal v\u0259 exam/student \u0259laq\u0259si attempt-\u0259 uy\u011fundur; questions_id m\u0259tn siyah\u0131s\u0131, end/stopped_date varchar, IP/how \u00fc\u00e7\u00fcn birba\u015fa attempt sah\u0259si yoxdur.",
+        "method": "Tarixl\u0259ri strict parse et, status/duration hesabla, questions_id-ni delivered snapshot kimi audit JSON-a yaz, user_ip/how/stopped_date-ni ProctoringLog/details v\u0259 raw archive-da saxla; eyni exam/student dublikatlar\u0131n\u0131 attempt_number il\u0259 s\u0131rala."
+    },
+    {
+        "old_table": "ferdi_plan",
+        "exact_rows": 0,
+        "domain": "Akademik struktur/plan",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 20,
+        "status": "empty-skip",
+        "problem": "Qrup \u00fczr\u0259 s\u0259rb\u0259st full_information f\u0259rdi plan s\u0259n\u0259di \u00fc\u00e7\u00fcn birinci-sinif model yoxdur; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; g\u0259l\u0259c\u0259k plan versiya modeli \u00fc\u00e7\u00fcn DDL referensini saxla."
+    },
+    {
+        "old_table": "groups",
+        "exact_rows": 766,
+        "domain": "Akademik struktur/plan",
+        "new_target": "organizations_orgunit(unit_type=group) + exams_studentgroup + registrar_studentacademicrecord.group",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Qrup identikliyi/iyerarxiyas\u0131 \u00f6rt\u00fcl\u00fcr, lakin eyni qrup iki target s\u0259thind\u0259 t\u0259msil olunur; sector, t\u0259hsil formas\u0131, d\u0259r\u0259c\u0259, curriculum v\u0259 start_year \u0259laq\u0259l\u0259ri bir ne\u00e7\u0259 model\u0259 par\u00e7alan\u0131r.",
+        "method": "Canonical OrgUnit group yarat; exam StudentGroup-u org_unit FK il\u0259 ba\u011fla; speciality/curriculum/start_year-i StudentAcademicRecord yarad\u0131lmas\u0131nda istifad\u0259 et; sector v\u0259 t\u0259hsil formas\u0131n\u0131 settings-d\u0259 normalla\u015fd\u0131r."
+    },
+    {
+        "old_table": "holidays",
+        "exact_rows": 18,
+        "domain": "Akademik struktur/plan",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "archive-only-gap",
+        "problem": "AcademicPeriod var, lakin ayr\u0131ca Holiday/closure modeli yoxdur; 18 tarix canl\u0131 c\u0259dv\u0259l v\u0259 jurnal generasiyas\u0131na t\u0259sir ed\u0259 bilm\u0259z.",
+        "method": "Raw calendar archive-da saxla; production-dan \u0259vv\u0259l tenant-scoped Holiday modeli \u0259lav\u0259 edilm\u0259d\u0259n avtomatik d\u0259rs silm\u0259/generasiya etm\u0259."
+    },
+    {
+        "old_table": "imthngrscxsblr",
+        "exact_rows": 12544,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_finalgrade + registrar_resitrecord + registrar_enrollment",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Bu PIN/ticket deyil: giris_point v\u0259 cixis_point giri\u015f/imtahan bal\u0131 c\u0259hdl\u0259ridir; type \u00e7oxsayl\u0131 c\u0259hd semantikas\u0131n\u0131 da\u015f\u0131y\u0131r. New FinalGrade yaln\u0131z bir \u0259sas exam_score, ResitRecord is\u0259 bir resit saxlay\u0131r.",
+        "method": "student+lesson-i Enrollment-a resolve et, type=\u0259sas c\u0259hdi FinalGrade.exam_score-a, uy\u011fun t\u0259krar c\u0259hdi ResitRecord-a yaz; giris_point-i hesablanm\u0131\u015f jurnal n\u0259tic\u0259si il\u0259 reconciliation et, art\u0131q c\u0259hdl\u0259ri tarix\u00e7\u0259 archive-da saxla."
+    },
+    {
+        "old_table": "journal_exam_joint",
+        "exact_rows": 5041,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "exams_exam.subject_id/course_id \u2194 registrar_courseoffering (dolay\u0131); no exact bridge",
+        "compatibility_pct": 40,
+        "status": "migrate-partial+archive",
+        "problem": "Cari sxemd\u0259 Exam il\u0259 CourseOffering/FinalGrade aras\u0131nda explicit FK bridge yoxdur; subject/course vasit\u0259sil\u0259 yaln\u0131z dolay\u0131 \u0259laq\u0259 qurulur.",
+        "method": "journal_id-ni offering-\u0259, exam_id-ni Exam-a x\u0259rit\u0259l\u0259; Exam.subject/course-u uy\u011funla\u015fd\u0131r v\u0259 exact legacy pair-i immutable crosswalk/audit archive-da saxla; qeyri-m\u00fc\u0259yy\u0259n \u00e7ox-to-\u00e7ox \u0259laq\u0259ni avtomatik merge etm\u0259."
+    },
+    {
+        "old_table": "journals",
+        "exact_rows": 13875,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_courseoffering + registrar_enrollment + registrar_assessmentscheme",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Jurnal\u0131n f\u0259nn/m\u00fc\u0259llim/qrup/period mahiyy\u0259ti offering-dir; groups_id v\u0259 students_id text siyah\u0131lar\u0131d\u0131r, name/note/status flags v\u0259 uniqid target-da eyni sah\u0259 deyil.",
+        "method": "lesson/group/teacher/semester join-lar\u0131 il\u0259 CourseOffering yarat, students_id-ni parse edib Enrollment-lara a\u00e7, hours v\u0259 credit-i yoxla, active/status-u tarixi read-only scheme-\u0259 \u00e7evir; uniqid-ni crosswalk-da saxla."
+    },
+    {
+        "old_table": "journals_dates",
+        "exact_rows": 44268,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_lesson (staging source)",
+        "compatibility_pct": 70,
+        "status": "transform-deduplicate",
+        "problem": "dates/times longtext massivl\u0259ri bir s\u0259tr\u0259 y\u0131\u011f\u0131l\u0131b; atomic Lesson-a a\u00e7\u0131lmal\u0131d\u0131r v\u0259 parsed/teacher-added/rooms m\u0259nb\u0259l\u0259ri il\u0259 dublikatd\u0131r.",
+        "method": "Massivl\u0259ri strict parse edib (journal,date,time,kind) canonical key-l\u0259r\u0259 a\u00e7; journals_dates_parsed v\u0259 teacher-added il\u0259 source precedence/dedupe t\u0259tbiq et; yaln\u0131z final canonical set-d\u0259n Lesson yarat."
+    },
+    {
+        "old_table": "journals_dates_added_by_teacher",
+        "exact_rows": 379215,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_lesson",
+        "compatibility_pct": 80,
+        "status": "transform-deduplicate",
+        "problem": "Atomik ay/g\u00fcn/saat d\u0259rs\u0259 yax\u0131nd\u0131r, lakin il yoxdur v\u0259 sem_muh kodu kind-\u0259 \u00e7evrilm\u0259lidir; parsed/rooms il\u0259 dublikat riski y\u00fcks\u0259kdir.",
+        "method": "Jurnal\u0131n AcademicPeriod-ind\u0259n ili infer et, invalid dates-i conflict queue-a ver, sem_muh\u2192kind mapping et v\u0259 canonical Lesson key \u00fczr\u0259 dedupe et."
+    },
+    {
+        "old_table": "journals_dates_parsed",
+        "exact_rows": 34178,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_lesson (normalized staging source)",
+        "compatibility_pct": 80,
+        "status": "transform-deduplicate",
+        "problem": "\u018fvv\u0259lki dates massivinin t\u00f6r\u0259m\u0259/parsed ke\u015fidir; ayr\u0131ca import edil\u0259rs\u0259 d\u0259rsl\u0259ri ikiqat yaradar.",
+        "method": "journals_dates_id lineage il\u0259 raw m\u0259nb\u0259y\u0259 ba\u011fla, key/date parse n\u0259tic\u0259sini yoxlama m\u0259nb\u0259yi kimi istifad\u0259 et; source precedence-d\u0259 t\u0259k canonical Lesson yarat."
+    },
+    {
+        "old_table": "journals_dates_points",
+        "exact_rows": 5135289,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_lessonmark + registrar_journalcorrection + registrar_enrollment",
+        "compatibility_pct": 80,
+        "status": "migrate-critical",
+        "problem": "\u018fn b\u00f6y\u00fck c\u0259dv\u0259l jurnal xanas\u0131na semantik uy\u011fundur; date par\u00e7alar\u0131 v\u0259 point varchar kodlan\u0131b, journal FK uniqid/j_id qar\u0131\u015f\u0131qd\u0131r, excusable/why/update_counter/ga tarix\u00e7\u0259si tam normalla\u015fmay\u0131b.",
+        "method": "Canonical Lesson v\u0259 Enrollment crosswalk qur, point kodunu attendance/decimal score qaydas\u0131 il\u0259 \u00e7evir, excusable-ni status=excused et; update m\u0259lumat\u0131n\u0131 JournalCorrection/AuditLog-a da\u015f\u0131; orphan v\u0259 collision-lar\u0131 he\u00e7 vaxt s\u0259ssiz atma."
+    },
+    {
+        "old_table": "journals_dates_points_archive",
+        "exact_rows": 776033,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "no live target by default / immutable archive; se\u00e7ilmi\u015f lineage \u00fc\u00e7\u00fcn registrar_journalcorrection",
+        "compatibility_pct": 40,
+        "status": "historical-archive",
+        "problem": "Aktiv c\u0259dv\u0259lin k\u00f6hn\u0259 snapshot/versiya sur\u0259tidir; hans\u0131 s\u0259trin superseded oldu\u011fu explicit version/FK il\u0259 g\u00f6st\u0259rilmir. Birba\u015fa LessonMark-a import cari v\u0259 arxiv d\u0259y\u0259rl\u0259rini toqqu\u015fdurar.",
+        "method": "Tam raw checksum-lu archive saxla; active table il\u0259 natural key+timestamp/update_counter \u00fczr\u0259 lineage s\u00fcbut edil\u0259n d\u0259yi\u015fiklikl\u0259ri yaln\u0131z JournalCorrection tarix\u00e7\u0259sin\u0259 \u00e7evir; qalan\u0131n\u0131 live grade kimi yazma."
+    },
+    {
+        "old_table": "journals_dates_rooms",
+        "exact_rows": 291509,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_lesson + registrar_scheduleslot.room (qism\u0259n)",
+        "compatibility_pct": 60,
+        "status": "migrate-partial+archive",
+        "problem": "Faktiki tarix/saat/otaq/saatl\u0131q d\u0259rs m\u0259lumat\u0131 var, amma Lesson-da room yoxdur; ScheduleSlot t\u0259krarlanan h\u0259ft\u0259lik plan, bu is\u0259 date-specific tarix\u00e7\u0259dir.",
+        "method": "date/time/kind/hours-u canonical Lesson yaratmaq/yoxlamaq \u00fc\u00e7\u00fcn istifad\u0259 et; stabil pattern-l\u0259ri ScheduleSlot-a \u00e7\u0131xar, h\u0259r tarix\u0259 m\u0259xsus room/sillabus/fake d\u0259y\u0259rini raw history-d\u0259 saxla."
+    },
+    {
+        "old_table": "journals_files",
+        "exact_rows": 23837,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "courses_courseresource (qism\u0259n)",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Offering/kurs \u0259lav\u0259si kimi CourseResource uy\u011fundur; k\u00f6hn\u0259 fayl yolunun m\u00f6vcudlu\u011fu, MIME/t\u0259hl\u00fck\u0259sizlik v\u0259 type kodu bilinmir, journal-level provenance ayr\u0131ca sah\u0259 deyil.",
+        "method": "journal\u2192offering\u2192course x\u0259rit\u0259l\u0259, fayllar\u0131 t\u0259hl\u00fck\u0259sizlik skan\u0131ndan ke\u00e7ir\u0259r\u0259k CourseResource yarat, note-ni description-a, type-ni resource_type-a \u00e7evir; \u00e7at\u0131\u015fmayan/corrupt fayllar\u0131 manifestl\u0259."
+    },
+    {
+        "old_table": "lessons",
+        "exact_rows": 2521,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_subject + courses_course",
+        "compatibility_pct": 90,
+        "status": "migrate",
+        "problem": "Ad, kod, department v\u0259 tip f\u0259nn kataloquna \u00e7ox yax\u0131nd\u0131r; ECTS v\u0259 description m\u0259nb\u0259d\u0259 yoxdur, lesson_code dublikat/bo\u015f ola bil\u0259r.",
+        "method": "Organization daxilind\u0259 normalla\u015fd\u0131r\u0131lm\u0131\u015f lesson_code natural key qur, Subject yarat, laz\u0131m olanlar \u00fc\u00e7\u00fcn LMS Course yarat v\u0259 department-i OrgUnit il\u0259 ba\u011fla; kod konfliktl\u0259rini manual queue-a ver."
+    },
+    {
+        "old_table": "level_exams",
+        "exact_rows": 12,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_exam",
+        "compatibility_pct": 70,
+        "status": "migrate-partial",
+        "problem": "Ad v\u0259 start tarixi uy\u011fundur, lakin ayr\u0131ca level exam tipi, duration/end, org/author v\u0259 siyas\u0259t sah\u0259l\u0259ri yoxdur.",
+        "method": "Archived Exam yarat, exam_type_extended \u00fc\u00e7\u00fcn t\u0259sdiqli legacy/other se\u00e7imi et, author/org-u owner kontekstind\u0259n infer et v\u0259 bilinm\u0259y\u0259n policy-l\u0259ri t\u0259hl\u00fck\u0259siz defaultla."
+    },
+    {
+        "old_table": "level_exams_questions",
+        "exact_rows": 496,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_examquestion + exams_examquestionoption",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Sual, A-E, d\u00fczg\u00fcn cavab, \u015f\u0259kil v\u0259 point birba\u015fa uy\u011funla\u015f\u0131r; dil/answer_mode v\u0259 media fayl b\u00fct\u00f6vl\u00fcy\u00fc yoxdur.",
+        "method": "Topic\u2192Exam/Block ba\u011fla, variantlar\u0131 ayr\u0131 option-lara a\u00e7, duzgun_cavab variant\u0131n\u0131 is_correct et, image-i skan/relocate et; HTML entity-l\u0259ri bir d\u0259f\u0259 decode et."
+    },
+    {
+        "old_table": "level_exams_topics",
+        "exact_rows": 113,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_questionblock + exams_questionbank (qism\u0259n)",
+        "compatibility_pct": 60,
+        "status": "migrate-partial",
+        "problem": "Topic ad\u0131 v\u0259 exam FK uy\u011fundur; file v\u0259 icaz\u0259 veril\u0259n bax\u0131\u015f say\u0131 QuestionBlock-da qar\u015f\u0131lanm\u0131r.",
+        "method": "H\u0259r topic \u00fc\u00e7\u00fcn QuestionBlock yarat, fayl\u0131 course/question resource archive-a k\u00f6\u00e7\u00fcr, view-count qaydas\u0131n\u0131 metadata-da saxla v\u0259 yeni max-attempt siyas\u0259ti il\u0259 qar\u0131\u015fd\u0131rma."
+    },
+    {
+        "old_table": "level_results",
+        "exact_rows": 1598,
+        "domain": "\u0130mtahan",
+        "new_target": "exams_examattempt + exams_examanswer (JSON-dan m\u00fcmk\u00fcn olduqda)",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Student/exam/total_point/date attempt-\u0259 uy\u011fundur; json-un format\u0131 z\u0259man\u0259tli deyil v\u0259 n\u0259tic\u0259d\u0259n do\u011fru/wrong say\u0131n\u0131 b\u0259rpa etm\u0259k laz\u0131m ola bil\u0259r.",
+        "method": "JSON schema-versiyalar\u0131n\u0131 profil et, ExamAttempt-i finished/archived yarat, parse olunan cavablar\u0131 ExamAnswer-a a\u00e7; parse olunmayan JSON-u snapshot kimi saxla v\u0259 score checksum yoxlamas\u0131 et."
+    },
+    {
+        "old_table": "niq",
+        "exact_rows": 1,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "sparse-blank-archive",
+        "problem": "Yegan\u0259 s\u0259tird\u0259 metn bo\u015fdur; entity semantikas\u0131 m\u00fc\u0259yy\u0259n deyil v\u0259 uy\u011fun model yoxdur.",
+        "method": "Raw s\u0259tir+DDL-ni arxivl\u0259, canl\u0131 obyekt yaratma."
+    },
+    {
+        "old_table": "notifications",
+        "exact_rows": 15,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "notifications_inappnotification",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Ba\u015fl\u0131q/m\u0259tn/tarix v\u0259 t\u0259k recipient yax\u015f\u0131 \u00f6rt\u00fcl\u00fcr; group broadcast ayr\u0131ca recipient s\u0259tirl\u0259rin\u0259 a\u00e7\u0131lmal\u0131d\u0131r, creator/IP target-da yaln\u0131z metadata kimi qala bil\u0259r.",
+        "method": "single v\u0259 group h\u0259d\u0259fl\u0259ri user crosswalk il\u0259 resolve et, h\u0259r recipient \u00fc\u00e7\u00fcn InAppNotification yarat, notification_type=system v\u0259 metadata-da old id/creator/IP saxla; HTML entity/sanitization t\u0259tbiq et."
+    },
+    {
+        "old_table": "notifications_groups",
+        "exact_rows": 1,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "notifications_inappnotification recipient expansion",
+        "compatibility_pct": 50,
+        "status": "sparse-transform",
+        "problem": "Yeni sxemd\u0259 persistent notification group yoxdur; users_id text siyah\u0131s\u0131 v\u0259 user_type parse edilm\u0259lidir.",
+        "method": "1 qrupun user siyah\u0131s\u0131n\u0131 canonical users-a a\u00e7 v\u0259 aid notifications \u00fc\u00e7\u00fcn recipient fan-out et; qrup t\u0259rifini raw metadata kimi saxla, ayr\u0131ca canl\u0131 group yaratma."
+    },
+    {
+        "old_table": "notifications_logs",
+        "exact_rows": 11,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "notifications_inappnotification.is_read/read_at",
+        "compatibility_pct": 80,
+        "status": "fold-into-parent",
+        "problem": "Read receipt birba\u015fa uy\u011fun g\u0259lir; user_ip ayr\u0131ca notification sah\u0259sind\u0259 yoxdur v\u0259 eyni notification bird\u0259n \u00e7ox recipient \u00fc\u00e7\u00fcn split olunacaq.",
+        "method": "(notifications_id,user_type,user_id) il\u0259 yarad\u0131lm\u0131\u015f recipient notification-u tap, is_read=true/read_at=seen_date yaz; IP-ni metadata/audit\u0259 \u0259lav\u0259 et."
+    },
+    {
+        "old_table": "ntg",
+        "exact_rows": 41,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "unknown-archive-only",
+        "problem": "Yaln\u0131z id v\u0259 car_id var; FK, izah v\u0259 \u0259laq\u0259li car c\u0259dv\u0259li yoxdur. Semantika faktla m\u00fc\u0259yy\u0259n edil\u0259 bilmir.",
+        "method": "41 s\u0259tri raw archive v\u0259 unknown-entity register-d\u0259 saxla; car_id-ni he\u00e7 bir yeni FK-y\u0259 t\u0259xminl\u0259 ba\u011flama."
+    },
+    {
+        "old_table": "room_types",
+        "exact_rows": 4,
+        "domain": "Akademik struktur/plan",
+        "new_target": "no direct target; exams_examroom.notes/settings qism\u0259n",
+        "compatibility_pct": 30,
+        "status": "lookup-archive",
+        "problem": "ExamRoom-da room_type FK yoxdur; \u00fcmumi auditoriya kataloqu da yoxdur.",
+        "method": "4 lookup-u mapping dictionary kimi saxla, rooms importunda type ad\u0131n\u0131 notes metadata-ya yaz; ayr\u0131ca saxta model yaratma."
+    },
+    {
+        "old_table": "rooms",
+        "exact_rows": 158,
+        "domain": "Akademik struktur/plan",
+        "new_target": "exams_examroom + registrar_scheduleslot.room (qism\u0259n)",
+        "compatibility_pct": 60,
+        "status": "migrate-partial",
+        "problem": "Ad, bina, tutum exam room-a uy\u011fundur; k\u00f6hn\u0259 otaqlar \u00fcmumi auditoriyad\u0131r, target is\u0259 imtahan y\u00f6n\u00fcml\u00fcd\u00fcr; department/type v\u0259 2-r\u0259q\u0259mli char capacity t\u0259mizl\u0259nm\u0259lidir.",
+        "method": "Yaln\u0131z exam \u00fc\u00e7\u00fcn yararl\u0131 otaqlar\u0131 ExamRoom-a \u00e7evir, ham\u0131s\u0131 \u00fc\u00e7\u00fcn canonical room label-i ScheduleSlot-da istifad\u0259 et; type/department-i metadata-da saxla, invalid capacity-ni manual review et."
+    },
+    {
+        "old_table": "semestr_jurnal",
+        "exact_rows": 13,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "organizations_academicperiod",
+        "compatibility_pct": 80,
+        "status": "migrate",
+        "problem": "Ad, autumn/spring/summer v\u0259 current flag uy\u011fun g\u0259lir; start/end v\u0259 exam/registration tarixl\u0259ri yoxdur v\u0259 ad m\u0259tnind\u0259n academic_year \u00e7\u0131xar\u0131lmal\u0131d\u0131r.",
+        "method": "Name-d\u0259n YYYY/YYYY parse et, period_type map et, r\u0259smi akademik t\u0259qvimd\u0259n tarixl\u0259ri doldur; yaln\u0131z bir current period constraint-i \u00fczr\u0259 is_current t\u0259mizl\u0259."
+    },
+    {
+        "old_table": "sillabus",
+        "exact_rows": 8248,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "registrar_courseoffering + courses_course (qism\u0259n; no Syllabus model)",
+        "compatibility_pct": 50,
+        "status": "migrate-partial+archive",
+        "problem": "Root f\u0259nn/m\u00fc\u0259llim/qrup/saat/dil \u0259laq\u0259l\u0259rini verir, lakin period/version/approval v\u0259 birinci-sinif Syllabus entity yoxdur; birl\u0259\u015f\u0259n qruplar varchar-d\u0131r.",
+        "method": "Journal/period il\u0259 birl\u0259\u015fdirib Offering/Course-a ba\u011fla, birlesen_qruplar parse et, hours/instructor/language metadata-s\u0131n\u0131 da\u015f\u0131; uniqid-ni b\u00fct\u00fcn child-lar\u0131n crosswalk a\u00e7ar\u0131 kimi v\u0259 tam root snapshotu archive-da saxla."
+    },
+    {
+        "old_table": "sillabus_certificates",
+        "exact_rows": 9846,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "accounts_academicprofileitem(kind=certificate) (qism\u0259n)",
+        "compatibility_pct": 60,
+        "status": "migrate-partial-deduplicate",
+        "problem": "M\u0259tnl\u0259r m\u00fc\u0259llim nailiyy\u0259tin\u0259 b\u0259nz\u0259yir, lakin syllabus uniqid-y\u0259 ba\u011fl\u0131d\u0131r, il/link/ver\u0259n qurum strukturla\u015fd\u0131r\u0131lmay\u0131b v\u0259 eyni sertifikat \u00e7ox syllabusda t\u0259krarlana bil\u0259r.",
+        "method": "uniqid\u2192sillabus.teacher resolve et, HTML decode+normalize edilmi\u015f text hash il\u0259 m\u00fc\u0259llim \u00fczr\u0259 dedupe et, AcademicProfileItem yarat; qeyri-sertifikat m\u0259tnl\u0259rini review queue-a ver."
+    },
+    {
+        "old_table": "sillabus_dersin_islenme_formasi",
+        "exact_rows": 8261,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "courses_course.settings/description qism\u0259n; otherwise archive-only",
+        "compatibility_pct": 30,
+        "status": "migrate-metadata+archive",
+        "problem": "T\u0259dris metodikas\u0131 \u00fc\u00e7\u00fcn ayr\u0131ca struktur/model yoxdur; Course description-a qar\u0131\u015fd\u0131rmaq semantikan\u0131 v\u0259 versiyan\u0131 itirir, \u00e7oxlu bo\u015f m\u0259tn ehtimal\u0131 var.",
+        "method": "Bo\u015f/HTML-only s\u0259trl\u0259ri atma hesabat\u0131na yaz, qalan\u0131n\u0131 course settings i\u00e7ind\u0259 namespaced legacy_syllabus.teaching_methods kimi saxla; raw source-u arxivl\u0259."
+    },
+    {
+        "old_table": "sillabus_derslikler",
+        "exact_rows": 16476,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "courses_courseresource(resource_type=document)",
+        "compatibility_pct": 60,
+        "status": "migrate-partial",
+        "problem": "D\u0259rslik ad\u0131 resource title-a uy\u011fundur, lakin ISBN, m\u00fc\u0259llif, fayl/URL yoxdur v\u0259 syllabus version \u0259laq\u0259si target-da yoxdur.",
+        "method": "HTML decode/trim/dedupe et, uniqid\u2192Course ba\u011fla v\u0259 title-only document resource yarat; bo\u015f v\u0259 yaln\u0131z placeholder s\u0259trl\u0259ri import etm\u0259, provenance metadata saxla."
+    },
+    {
+        "old_table": "sillabus_eldeolunacaq_tecrubeler",
+        "exact_rows": 8261,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "courses_course.settings qism\u0259n / archive-only",
+        "compatibility_pct": 30,
+        "status": "migrate-metadata+archive",
+        "problem": "Learning outcomes/kompetensiya \u00fc\u00e7\u00fcn ayr\u0131ca model yoxdur; s\u0259rb\u0259st text CourseTopic v\u0259 ya description deyil.",
+        "method": "T\u0259miz m\u0259tnl\u0259ri namespaced course settings legacy_syllabus.outcomes massivin\u0259 da\u015f\u0131; bo\u015flar\u0131 say v\u0259 raw archive saxla; production curriculum outcome kimi istifad\u0259 etm\u0259."
+    },
+    {
+        "old_table": "sillabus_elmi_maraq",
+        "exact_rows": 10739,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "accounts_academicprofileitem(kind=publication/conference) (qism\u0259n)",
+        "compatibility_pct": 60,
+        "status": "migrate-partial-deduplicate",
+        "problem": "Elmi maraq/n\u0259\u015fr m\u0259tnl\u0259ri teacher profile-a uy\u011fun ola bil\u0259r, amma b\u0259zisi aqreqat narrativdir; il/link/n\u00f6v yox v\u0259 syllabus \u00fczr\u0259 dublikat ola bil\u0259r.",
+        "method": "Teacher \u00fczr\u0259 normalize+dedupe et, t\u0259snif edil\u0259nl\u0259ri Publication/Conference item-a \u00e7evir, narrativl\u0259ri bio/archive-a y\u00f6n\u0259lt; avtomatik uydurma il/link yaratma."
+    },
+    {
+        "old_table": "sillabus_imtahan_suallari",
+        "exact_rows": 20835,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "exams_questionsubmission; review-dan sonra exams_questionbank/bankquestion",
+        "compatibility_pct": 50,
+        "status": "migrate-to-review-inbox",
+        "problem": "Yaln\u0131z sual m\u0259tni var; d\u00fczg\u00fcn cavab, points, type v\u0259 options yoxdur, buna g\u00f6r\u0259 birba\u015fa aktiv BankQuestion yaratmaq t\u0259hl\u00fck\u0259lidir.",
+        "method": "uniqid \u00fczr\u0259 teacher/subject/language il\u0259 QuestionSubmission snapshotlar\u0131 yarat, HTML decode et; insan review-u cavab/point/type tamamlad\u0131qdan sonra banka q\u0259bul et."
+    },
+    {
+        "old_table": "sillabus_qarsilama_mesaji",
+        "exact_rows": 4676,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "courses_course.description (qism\u0259n)",
+        "compatibility_pct": 70,
+        "status": "migrate-partial-deduplicate",
+        "problem": "Welcome/course introduction Course description-a yax\u0131nd\u0131r, amma bir Course \u00fc\u00e7\u00fcn \u00e7ox syllabus/version/language ola bil\u0259r v\u0259 description yaln\u0131z bir m\u0259tndir.",
+        "method": "Aktiv/canonical syllabus se\u00e7imi il\u0259 description yaz, dig\u0259r dil/version m\u0259tnl\u0259rini settings/archive-da saxla; HTML entity-ni sanitizasiya edib decode et."
+    },
+    {
+        "old_table": "sillabus_sem_muh",
+        "exact_rows": 131056,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "courses_coursetopic (qism\u0259n); registrar_lesson yaln\u0131z faktiki ke\u00e7irilmi\u015f tarix s\u00fcbutu varsa",
+        "compatibility_pct": 60,
+        "status": "migrate-partial",
+        "problem": "M\u00f6vzu s\u0131ras\u0131 uy\u011fundur, lakin muh/sem/praktiki/lab saat b\u00f6lg\u00fcs\u00fc v\u0259 plan tarixi CourseTopic-da yoxdur; plan s\u0259trini ke\u00e7irilmi\u015f Lesson kimi q\u0259bul etm\u0259k tarix saxtala\u015fd\u0131rar.",
+        "method": "uniqid+id s\u0131ras\u0131 il\u0259 CourseTopic yarat, saat bucketl\u0259rini namespaced metadata/archive-da saxla; tarix yaln\u0131z jurnal/faktiki d\u0259rsl\u0259 t\u0259sdiql\u0259n\u0259nd\u0259 Lesson.topic il\u0259 linkl\u0259."
+    },
+    {
+        "old_table": "sillabus_serbest_is",
+        "exact_rows": 60878,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "registrar_selfworktopic",
+        "compatibility_pct": 90,
+        "status": "migrate",
+        "problem": "S\u0259rb\u0259st i\u015f m\u00f6vzu siyah\u0131s\u0131 yeni model\u0259 birba\u015fa uy\u011fundur; \u0259sas risk uniqid\u2192Offering ba\u011f\u0131n\u0131n period/version \u00fczr\u0259 qeyri-m\u00fc\u0259yy\u0259nliyi v\u0259 \u00e7oxlu bo\u015f/dublikat s\u0259tirdir.",
+        "method": "HTML decode/trim et, bo\u015flar\u0131 \u00e7\u0131xar, syllabus\u2192Offering resolve et, m\u0259nb\u0259 s\u0131ras\u0131 il\u0259 SelfWorkTopic yarat; normalized title hash il\u0259 yaln\u0131z eyni offering daxilind\u0259 dedupe et."
+    },
+    {
+        "old_table": "sillabus_tesviri_ve_meqsedi",
+        "exact_rows": 6491,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "registrar_subject.description + courses_course.description (qism\u0259n)",
+        "compatibility_pct": 70,
+        "status": "migrate-partial-versioned",
+        "problem": "T\u0259svir/m\u0259qs\u0259d semantik uy\u011fun g\u0259lir, lakin Subject description qlobal, syllabus is\u0259 teacher/group/language/version s\u0259viyy\u0259lidir; sonuncu il\u0259 overwrite tarix itir\u0259r.",
+        "method": "Canonical m\u0259zmunu Course.description-a, yaln\u0131z \u00fcmumi sabit hiss\u0259ni Subject.description-a yaz; b\u00fct\u00fcn version/language m\u0259tnl\u0259rini archive/settings-d\u0259 saxla v\u0259 overwrite etm\u0259."
+    },
+    {
+        "old_table": "sillabus_yoxlama_formasi",
+        "exact_rows": 8261,
+        "domain": "Sillabus/kurs m\u0259zmunu",
+        "new_target": "registrar_assessmentcomponent/rubric qism\u0259n; courses_course.settings",
+        "compatibility_pct": 40,
+        "status": "migrate-metadata+manual-modeling",
+        "problem": "Yoxlama formas\u0131 s\u0259rb\u0259st m\u0259tnidir; AssessmentComponent \u00fc\u00e7\u00fcn max_score/kind/order, Rubric \u00fc\u00e7\u00fcn meyarlar \u00e7atm\u0131r.",
+        "method": "M\u0259tnl\u0259ri parse/classify edib yaln\u0131z t\u0259sdiql\u0259n\u0259n komponent adlar\u0131n\u0131 manual max-score siyas\u0259ti il\u0259 yarat; qalan\u0131n\u0131 course settings/archive-da saxla, avtomatik bal qaydas\u0131 uydurma."
+    },
+    {
+        "old_table": "smestr",
+        "exact_rows": 9,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_curriculumsubject.semester_number (lookup; no row target)",
+        "compatibility_pct": 60,
+        "status": "lookup-transform",
+        "problem": "I-IX semestr kataloqu konkret tarixli AcademicPeriod deyil; yeni sxemd\u0259 semester_number d\u0259y\u0259ri kimi ya\u015fay\u0131r, ayr\u0131ca c\u0259dv\u0259l yoxdur.",
+        "method": "Roman numeral/name\u21921..9 deterministic lookup qur v\u0259 curricula_plan semestr sah\u0259sini \u00e7evirm\u0259k \u00fc\u00e7\u00fcn istifad\u0259 et; ayr\u0131ca target row yaratma."
+    },
+    {
+        "old_table": "speciality",
+        "exact_rows": 83,
+        "domain": "Akademik struktur/plan",
+        "new_target": "registrar_program + organizations_orgunit(unit_type=specialty)",
+        "compatibility_pct": 90,
+        "status": "migrate",
+        "problem": "Ad, kod v\u0259 department \u0259laq\u0259si birba\u015fa uy\u011fundur; degree_level/ECTS yoxdur v\u0259 legacy code dublikat/bo\u015f ola bil\u0259r.",
+        "method": "Department OrgUnit alt\u0131nda specialty OrgUnit v\u0259 h\u0259min kodla Program yarat, specialty_unit FK ba\u011fla; degree/ECTS-ni curricula/group s\u00fcbutundan infer et v\u0259 qeyri-m\u00fc\u0259yy\u0259nliyi manual review et."
+    },
+    {
+        "old_table": "students",
+        "exact_rows": 7816,
+        "domain": "\u015e\u0259xsiyy\u0259t/RBAC",
+        "new_target": "auth_user + accounts_userprofile + organizations_membership + registrar_studentacademicrecord + exams_studentgroup_students",
+        "compatibility_pct": 70,
+        "status": "migrate-critical+archive",
+        "problem": "Ad/email/phone/avatar/group/program/status \u00f6rt\u00fcl\u00fcr, lakin FIN, ata ad\u0131, do\u011fum tarixi, gender, order/payment/entry_score/freeze sah\u0259l\u0259rinin \u00e7oxuna birinci-sinif target v\u0259 legacy_id yoxdur; plaintext show_password t\u0259hl\u00fck\u0259lidir.",
+        "method": "FIN \u0259sas match a\u00e7ar\u0131, sonra card/email/phone weighted match; h\u0259r user \u00fc\u00e7\u00fcn crosswalk saxla, password-lar\u0131 import etm\u0259 v\u0259 m\u0259cburi reset et; academic status/year/group/program par\u00e7ala, maliyy\u0259/q\u0259bul PII-ni \u015fifr\u0259li archive v\u0259 conflict report-da saxla."
+    },
+    {
+        "old_table": "students_login_logs",
+        "exact_rows": 0,
+        "domain": "\u015e\u0259xsiyy\u0259t/RBAC",
+        "new_target": "audit_auditlog",
+        "compatibility_pct": 70,
+        "status": "empty-skip",
+        "problem": "Login user/date/IP audit\u0259 uy\u011fundur, MAC \u00fc\u00e7\u00fcn ayr\u0131ca sah\u0259 yoxdur; m\u0259nb\u0259 bo\u015fdur.",
+        "method": "Skip; dry-run mapping-d\u0259 MAC-\u0131 restricted changes JSON-a salan qaydan\u0131 saxla."
+    },
+    {
+        "old_table": "students_telegram",
+        "exact_rows": 48974,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "no target / restricted archive-only",
+        "compatibility_pct": 0,
+        "status": "archive-only-sensitive",
+        "problem": "Telegram inteqrasiyas\u0131 v\u0259 chat-message modeli yoxdur; chat_id v\u0259 mesajlar y\u00fcks\u0259k h\u0259ssas PII-dir, InAppNotification-a semantik uy\u011fun deyil.",
+        "method": "Canl\u0131 sistem\u0259 import etm\u0259; h\u00fcquqi retention q\u0259rar\u0131 varsa \u015fifr\u0259li, access-controlled archive v\u0259 checksum saxla, yoxdursa t\u0259sdiqli m\u0259hv plan\u0131 t\u0259tbiq et."
+    },
+    {
+        "old_table": "students_tg_reply",
+        "exact_rows": 106,
+        "domain": "Bildiri\u015fl\u0259r/kommunikasiya",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "archive-only",
+        "problem": "Telegram bot reply-rule konfiqurasiyas\u0131n\u0131n yeni bot/automation target\u0131 yoxdur.",
+        "method": "Rule textl\u0259rini raw archive-a saxla; InAppNotification v\u0259 AI assistant promptlar\u0131na avtomatik \u00e7evirm\u0259."
+    },
+    {
+        "old_table": "track_student",
+        "exact_rows": 1003,
+        "domain": "\u0130mtahan",
+        "new_target": "no exact target; audit_auditlog/exams_proctoringlog yaln\u0131z s\u00fcbutlu halda",
+        "compatibility_pct": 20,
+        "status": "archive-only-by-default",
+        "problem": "IP/page/json/date var, lakin student_id v\u0259 exam_attempt FK yoxdur; ad\u0131na \u0259sas\u0259n t\u0259l\u0259b\u0259 telemetriyas\u0131 say\u0131lsa da target-a etibarl\u0131 ba\u011f qurmaq m\u00fcmk\u00fcn deyil.",
+        "method": "JSON daxilind\u0259 do\u011frulanm\u0131\u015f user/attempt a\u00e7ar\u0131 varsa uy\u011fun Audit/ProctoringLog-a k\u00f6\u00e7\u00fcr; \u0259ks halda PII-ni restricted raw telemetry archive-da saxla."
+    },
+    {
+        "old_table": "turnir_results",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "exams_examattempt v\u0259 ya live_exam_liveplayer",
+        "compatibility_pct": 70,
+        "status": "empty-skip",
+        "problem": "N\u0259tic\u0259 say\u011faclar\u0131 targetlana bil\u0259r, lakin LivePlayer user FK da\u015f\u0131m\u0131r; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; yaln\u0131z schema mapping test et."
+    },
+    {
+        "old_table": "turnir_schedule",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "exams_exam start/end + live_exam_livesession (qism\u0259n)",
+        "compatibility_pct": 50,
+        "status": "empty-skip",
+        "problem": "Schedule start/period/min-max person var, LiveSession is\u0259 planned start/min-max saxlam\u0131r; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; g\u0259l\u0259c\u0259k turnir data olarsa h\u0259r schedule \u00fc\u00e7\u00fcn Exam/session policy dizayn\u0131 t\u0259l\u0259b olunur."
+    },
+    {
+        "old_table": "turnir_students_answers",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "exams_examanswer v\u0259 ya live_exam_liveanswer",
+        "compatibility_pct": 80,
+        "status": "empty-skip",
+        "problem": "Answer/correct/timing uy\u011fun g\u0259lir, lakin session/player/attempt crosswalk laz\u0131md\u0131r; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; dry-run transform variant\u0131 option-a, answer_second-i answer_ms-\u0259 \u00e7evirm\u0259yi yoxlas\u0131n."
+    },
+    {
+        "old_table": "turnirs",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "exams_exam + live_exam_livesession (qism\u0259n)",
+        "compatibility_pct": 60,
+        "status": "empty-skip",
+        "problem": "Ad/description/owner \u0259sas exam definition-a uy\u011fundur, image v\u0259 turnir lifecycle tam uy\u011fun deyil; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; aktiv data olmad\u0131\u011f\u0131 \u00fc\u00e7\u00fcn saxta Exam yaratma."
+    },
+    {
+        "old_table": "turnirs_joined_students",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "live_exam_liveplayer (qism\u0259n)",
+        "compatibility_pct": 40,
+        "status": "empty-skip",
+        "problem": "LivePlayer-da user_id yoxdur v\u0259 nickname/client_id t\u0259l\u0259b olunur; m\u0259nb\u0259 bo\u015fdur.",
+        "method": "Skip; g\u0259l\u0259c\u0259kd\u0259 identity-preserving LivePlayer schema d\u0259yi\u015fikliksiz import etm\u0259."
+    },
+    {
+        "old_table": "turnirs_questions",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "exams_examquestion + exams_examquestionoption",
+        "compatibility_pct": 80,
+        "status": "empty-skip",
+        "problem": "Sual/variant/do\u011fru variant yax\u015f\u0131 \u00f6rt\u00fcl\u00fcr, lakin schedule\u2192Exam transformu laz\u0131md\u0131r; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip; schema fixture il\u0259 option normalization test et."
+    },
+    {
+        "old_table": "turnirs_starts",
+        "exact_rows": 0,
+        "domain": "Canl\u0131 turnir",
+        "new_target": "no historical event target / archive-only",
+        "compatibility_pct": 20,
+        "status": "empty-skip",
+        "problem": "Per-question show/hide event tarix\u00e7\u0259sini LiveSession saxlam\u0131r; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip."
+    },
+    {
+        "old_table": "umumi_orta_bal",
+        "exact_rows": 1570,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "no stored target; derived validation against registrar_finalgrade",
+        "compatibility_pct": 20,
+        "status": "validation-only",
+        "problem": "Cached overall average-dir; StudentAcademicRecord-da GPA sah\u0259si yoxdur v\u0259 yeni n\u0259tic\u0259l\u0259rd\u0259n hesablanmal\u0131d\u0131r. Birba\u015fa import source-of-truth dublikat\u0131 yaradar.",
+        "method": "student \u00fczr\u0259 yekun n\u0259tic\u0259l\u0259rd\u0259n yeni average/GPA hesabla v\u0259 old point il\u0259 tolerance reconciliation report ver; s\u0259tirl\u0259ri canl\u0131 model\u0259 yazma, yaln\u0131z migration evidence-d\u0259 saxla."
+    },
+    {
+        "old_table": "update_log",
+        "exact_rows": 253334,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "audit_auditlog; s\u00fcbutlu xanalarda registrar_journalcorrection",
+        "compatibility_pct": 60,
+        "status": "migrate-partial+archive",
+        "problem": "Old/new value, student, j_id v\u0259 vaxt audit\u0259 uy\u011fundur; actor/reason/document/lesson FK \u00e7ox vaxt yoxdur, buna g\u00f6r\u0259 JournalCorrection-in m\u0259cburi kontrakt\u0131n\u0131 tam \u00f6d\u0259mir.",
+        "method": "j_id+student+time il\u0259 LessonMark lineage resolve et; actor/s\u0259n\u0259d yoxdursa generic AuditLog yarat v\u0259 raw row saxla, yaln\u0131z tam s\u00fcbutlu d\u0259yi\u015fiklikl\u0259ri JournalCorrection-a \u00e7evir."
+    },
+    {
+        "old_table": "workers",
+        "exact_rows": 729,
+        "domain": "\u015e\u0259xsiyy\u0259t/RBAC",
+        "new_target": "auth_user + accounts_userprofile + organizations_membership + organizations_orgunit",
+        "compatibility_pct": 70,
+        "status": "migrate-critical+archive",
+        "problem": "Ad/email/phone/department/staff rol m\u0259lumat\u0131 \u00f6rt\u00fcl\u00fcr; ata ad\u0131, birthday, gender, pin, teacher_type/inzibati \u00fc\u00e7\u00fcn tam target yoxdur v\u0259 password k\u00f6hn\u0259/etibars\u0131z formatdad\u0131r.",
+        "method": "Email+phone+ad weighted dedupe v\u0259 manual conflict queue et, department-i scope_unit-a, rol/v\u0259zif\u0259ni Membership/Profile-a \u00e7evir; password/pin import etm\u0259, password reset t\u0259l\u0259b et; \u0259lav\u0259 PII-ni restricted archive-da saxla."
+    },
+    {
+        "old_table": "workers_login_logs",
+        "exact_rows": 0,
+        "domain": "\u015e\u0259xsiyy\u0259t/RBAC",
+        "new_target": "audit_auditlog",
+        "compatibility_pct": 70,
+        "status": "empty-skip",
+        "problem": "Login audit mapping-i m\u00fcmk\u00fcnd\u00fcr, MAC ayr\u0131ca deyil; c\u0259dv\u0259l bo\u015fdur.",
+        "method": "Skip."
+    },
+    {
+        "old_table": "workers_permits",
+        "exact_rows": 914,
+        "domain": "\u015e\u0259xsiyy\u0259t/RBAC",
+        "new_target": "organizations_role.permissions + organizations_membership.role",
+        "compatibility_pct": 60,
+        "status": "migrate-security-review",
+        "problem": "Permits free text-dir v\u0259 legacy f\u0259rdi icaz\u0259l\u0259ri yeni m\u0259rk\u0259zl\u0259\u015fdirilmi\u015f role bundle-lar\u0131na \u00e7evirm\u0259k laz\u0131md\u0131r; s\u0259hv parse privilege escalation yarada bil\u0259r.",
+        "method": "Permit token l\u00fc\u011f\u0259ti \u00e7\u0131xar, yaln\u0131z allowlist \u00fczr\u0259 canonical permissions-a map et, unikal bundle-lar\u0131 t\u0259hl\u00fck\u0259sizlik review-u il\u0259 Role-a \u00e7evir v\u0259 Membership-\u0259 ba\u011fla; nam\u0259lum tokeni deny-by-default et."
+    },
+    {
+        "old_table": "xidmeti_muraciet",
+        "exact_rows": 2,
+        "domain": "Xidm\u0259ti m\u00fcraci\u0259t",
+        "new_target": "contact_contactmessage (qism\u0259n)",
+        "compatibility_pct": 50,
+        "status": "sparse-migrate-partial",
+        "problem": "Head/body/status/date generic support message-a uy\u011fundur; assignee, protocol, group, star/rating v\u0259 owner user \u0259laq\u0259l\u0259ri ContactMessage-d\u0259 eyni deyil; Appeals imtahan-spesifikdir v\u0259 yanl\u0131\u015f targetd\u0131r.",
+        "method": "2 s\u0259tri ContactMessage kimi import et, owner email/name-ni user-d\u0259n \u00e7\u0131xar, handled/handled_at/reply fields-\u0259 statusu map et; protocol/assignee/rating-i audit metadata/raw archive-da saxla."
+    },
+    {
+        "old_table": "xidmeti_muraciet_files",
+        "exact_rows": 3,
+        "domain": "Xidm\u0259ti m\u00fcraci\u0259t",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 10,
+        "status": "sparse-archive-only-gap",
+        "problem": "ContactMessage attachment modeli yoxdur; protocol il\u0259 loose join v\u0259 filename var.",
+        "method": "Fayllar\u0131 t\u0259hl\u00fck\u0259siz skan edib protocol \u00fczr\u0259 restricted attachment archive-da saxla v\u0259 ContactMessage audit metadata-s\u0131nda manifest linki g\u00f6st\u0259r; DB-y\u0259 saxta URL yazma."
+    },
+    {
+        "old_table": "yekun",
+        "exact_rows": 17194,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "registrar_finalgrade + registrar_resitrecord + registrar_enrollment + audit_auditlog",
+        "compatibility_pct": 80,
+        "status": "migrate-historical",
+        "problem": "Giri\u015f/imtahan/yekun/bonus/k\u0259sr semantikas\u0131 yax\u015f\u0131 \u00f6rt\u00fcl\u00fcr, amma new total hesablan\u0131r, saxlanm\u0131r; journal/lesson/group join-lar\u0131 il\u0259 enrollment b\u0259rpas\u0131 v\u0259 g\u00fcz\u0259\u015ft semantikas\u0131 laz\u0131md\u0131r.",
+        "method": "student+lesson+journal+group natural key il\u0259 Enrollment tap, imtahanda\u2192exam_score, g\u00fcz\u0259\u015ft art\u0131m\u0131n\u0131 bonus, k\u0259sri ResitRecord-a map et; girish v\u0259 yekun r\u0259q\u0259ml\u0259rini yeni hesabla reconciliation et v\u0259 original snapshotu AuditLog-da saxla; tarixi qaydalara yenid\u0259n grade etm\u0259."
+    },
+    {
+        "old_table": "yekun_24_02_2023",
+        "exact_rows": 0,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "historical-empty-skip",
+        "problem": "Tarixli manual snapshot c\u0259dv\u0259lidir v\u0259 faktiki bo\u015fdur; canl\u0131 FinalGrade-a import edilm\u0259m\u0259lidir.",
+        "method": "DDL v\u0259 zero-count s\u00fcbutunu migration manifestind\u0259 saxla, row yaratma."
+    },
+    {
+        "old_table": "yekun_old",
+        "exact_rows": 0,
+        "domain": "Jurnal/qiym\u0259tl\u0259ndirm\u0259",
+        "new_target": "no target / archive-only",
+        "compatibility_pct": 0,
+        "status": "historical-empty-skip",
+        "problem": "Manual old snapshot c\u0259dv\u0259lidir v\u0259 bo\u015fdur.",
+        "method": "DDL v\u0259 zero-count s\u00fcbutunu saxla, row yaratma."
+    }
+]

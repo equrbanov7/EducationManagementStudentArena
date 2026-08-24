@@ -19,6 +19,9 @@ typing_extensions==4.15.0
 # ═══════════════════════════════════════════════════════════════════════════
 dj-database-url==2.0.0
 
+# Legacy migration source (pure-Python MariaDB/MySQL client)
+PyMySQL==1.2.0  # read-only legacy MariaDB/MySQL source adapter
+
 # ═══════════════════════════════════════════════════════════════════════════
 # ENVIRONMENT VARIABLES
 # ═══════════════════════════════════════════════════════════════════════════

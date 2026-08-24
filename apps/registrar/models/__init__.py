@@ -25,6 +25,7 @@ from .corrections import (
     ComponentScoreCorrection,
     CorrectionField,
     CorrectionReason,
+    CorrectionReversal,
     CourseWorkCorrection,
     JournalCorrection,
     LessonCorrection,
@@ -56,6 +57,7 @@ from .kollokvium_window import (
     KollokviumExtraGrant,
     KollokviumWindow,
 )
+from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
     "AcademicStatus",
@@ -75,6 +77,7 @@ __all__ = [
     "SelfWorkCorrection",
     "CourseWorkCorrection",
     "ComponentScoreCorrection",
+    "CorrectionReversal",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",
@@ -82,6 +85,7 @@ __all__ = [
     "EnrollmentKind",
     "FinalGrade",
     "GroupElectiveChoice",
+    "GroupTransferEvidence",
     "KOLLOKVIUM_WINDOW_COUNT",
     "KollokviumExtraGrant",
     "KollokviumWindow",

@@ -32,6 +32,7 @@ from django.db.models import Max, Q
 
 from core.rls import bypass_rls
 
+from ..identity import user_access_is_staged
 from ..models import ProfileRole
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
@@ -145,7 +146,12 @@ def resolve_actor_access(user, organization, *, memberships=None):
     Aktorun bu org üçün view-as səlahiyyətini qaytarır:
     ``(mode, actor_level, memberships)`` və ya icazə yoxdursa ``(None, 0, [])``.
     """
-    if user is None or organization is None or not getattr(user, "is_authenticated", False):
+    if (
+        user is None
+        or organization is None
+        or not getattr(user, "is_authenticated", False)
+        or user_access_is_staged(user)
+    ):
         return None, 0, []
 
     if _is_superadmin(user):
@@ -191,7 +197,7 @@ def actor_limited_write_url_names(user, organization) -> frozenset:
 
 def actor_can_use_view_as(user, organization) -> bool:
     """Panelin görünürlüyü üçün ucuz yoxlama (superadmin org-suz da görür)."""
-    if user is None or not getattr(user, "is_authenticated", False):
+    if user is None or not getattr(user, "is_authenticated", False) or user_access_is_staged(user):
         return False
     if _is_superadmin(user):
         return True
@@ -264,6 +270,7 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     users = (
         User.objects.filter(
             is_active=True,
+            profile__access_state="active",
             memberships__organization=organization,
             memberships__is_active=True,
         )
@@ -377,6 +384,9 @@ def start_view_as(request, target_user, organization, mode):
     from apps.audit.public import log_action
     from core.constants import AuditAction
 
+    if user_access_is_staged(request.user) or user_access_is_staged(target_user):
+        raise PermissionError("view_as_staged_account_denied")
+
     # QEYD: pk-lar str kimi saxlanılır — Organization UUID pk istifadə edir və
     # sessiya JSON serializer-i UUID obyektini qəbul etmir.
     now_iso = datetime.now(dt_timezone.utc).isoformat()
@@ -454,6 +464,9 @@ def resolve_view_as_request(request):
         return None, None
 
     real_user = request.user
+    if user_access_is_staged(real_user):
+        stop_view_as(request, reason="view_as_staged_real_user")
+        return None, None
     # Sessiya başqa istifadəçiyə keçibsə (qorunma) və ya org konteksti dəyişibsə → bitir.
     if str(state.get("real_id")) != str(getattr(real_user, "pk", None)):
         stop_view_as(request, reason="view_as_invalid_real_user")
@@ -493,7 +506,15 @@ def resolve_view_as_request(request):
         request.session[VIEW_AS_SESSION_KEY] = state
     else:
         with bypass_rls():
-            target = User.objects.filter(pk=state.get("target_id"), is_active=True).exclude(is_superuser=True).first()
+            target = (
+                User.objects.filter(
+                    pk=state.get("target_id"),
+                    is_active=True,
+                    profile__access_state="active",
+                )
+                .exclude(is_superuser=True)
+                .first()
+            )
         if target is None:
             stop_view_as(request, reason="view_as_target_unavailable")
             return None, None

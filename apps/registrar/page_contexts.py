@@ -294,30 +294,35 @@ def calendar_context(organization) -> dict:
 
 def approvals_context(user, organization) -> dict:
     """Chair/dean inbox: journals awaiting the current user's approval step."""
-    statuses = []
+    inbox_filter = Q(pk__in=[])
+    is_approver = False
     if approval.can_chair_approve(user, organization):
-        statuses.append(ApprovalStatus.SUBMITTED)
+        inbox_filter |= Q(approval_status=ApprovalStatus.SUBMITTED) & approval.permission_scope_q(
+            user,
+            organization,
+            approval.CHAIR_APPROVAL_PERMISSION,
+            path_field="offering__group__path",
+            id_field="offering__group__id",
+        )
+        is_approver = True
     if approval.can_dean_approve(user, organization):
-        statuses.append(ApprovalStatus.CHAIR_APPROVED)
-    # Gələnlər qutusu da alt-ağacla daraldılır: təsdiq düyməsi onsuz da
-    # offering-səviyyəli yoxlamadan keçir, amma filtrsiz siyahı BAŞQA
-    # kafedraların jurnallarını (fənn, qrup, müəllim adı) göstərirdi — yəni
-    # səlahiyyət artımı yox, məlumat sızması idi.
-    inbox_scope_q = django_apps.get_model("organizations", "OrgUnit").user_scope_subtree_q(
-        user,
-        organization,
-        path_field="offering__group__path",
-        id_field="offering__group__id",
-    )
+        inbox_filter |= Q(approval_status=ApprovalStatus.CHAIR_APPROVED) & approval.permission_scope_q(
+            user,
+            organization,
+            approval.FINAL_APPROVAL_PERMISSION,
+            path_field="offering__group__path",
+            id_field="offering__group__id",
+        )
+        is_approver = True
     schemes = (
-        AssessmentScheme.objects.filter(organization=organization, approval_status__in=statuses)
+        AssessmentScheme.objects.filter(organization=organization)
+        .filter(inbox_filter)
         .select_related("offering__subject", "offering__group", "offering__period", "offering__instructor")
-        .filter(inbox_scope_q if inbox_scope_q is not None else Q())
         .order_by("offering__subject__code")
-        if statuses
+        if is_approver
         else AssessmentScheme.objects.none()
     )
-    return {"has_context": True, "schemes": schemes, "is_approver": bool(statuses)}
+    return {"has_context": True, "schemes": schemes, "is_approver": is_approver}
 
 
 def analytics_context(request, organization, *, embedded=False) -> dict:
@@ -332,10 +337,7 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
     if period is None:
         period = next((p for p in periods if p.is_current), periods[0] if periods else None)
 
-    # Aktorun alt-ağacı: modul sərhədi səbəbindən `organizations` app registry
-    # ilə çağırılır (registrar onu birbaşa import edə bilməz — dövr yaranır).
-    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    scope_q = org_unit_model.user_scope_subtree_q(
+    scope_q = approval.analytics_scope_q(
         request.user,
         organization,
         path_field="offering__group__path",
@@ -469,7 +471,10 @@ def _student_offering_stats(user, organization, record, period) -> dict:
     limit_percent = record.program.absence_limit_percent if record.program else 25
     stats: dict = {}
     enrollments = Enrollment.objects.filter(
-        organization=organization, student=user, offering__period=period
+        organization=organization,
+        student=user,
+        offering__period=period,
+        status=Enrollment.Status.ENROLLED,
     ).select_related("offering", "offering__assessment_scheme")
     for enrollment in enrollments:
         offering = enrollment.offering

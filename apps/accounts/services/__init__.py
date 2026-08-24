@@ -42,6 +42,14 @@ from .auth import (
     verify_email_otp,
     verify_otp_code,
 )
+from .identity_access import (
+    AccountActivationResult,
+    IdentityAccessError,
+    IdentityCollisionError,
+    StagedAccountResult,
+    activate_staged_account,
+    stage_imported_account,
+)
 from .organization_requests import (
     activate_verified_membership,
     activate_verified_student_membership,
@@ -63,6 +71,11 @@ from .registration import create_user_with_organization, purge_stale_pending_reg
 
 __all__ = [
     "AccountDeletionError",
+    "AccountActivationResult",
+    "IdentityAccessError",
+    "IdentityCollisionError",
+    "StagedAccountResult",
+    "activate_staged_account",
     "activate_user_account",
     "OTPRateLimitError",
     "OTPResendCooldownError",
@@ -100,6 +113,7 @@ __all__ = [
     "set_student_org_request_status",
     "soft_delete_account",
     "store_pending_registration",
+    "stage_imported_account",
     "sync_profile_pending_request_snapshot",
     "update_user_profile",
     "update_user_role",

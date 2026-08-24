@@ -9,10 +9,13 @@ scoped (``organization`` FK) və RLS-qorumalıdır. Qiymətləndirmə/jurnal mod
 from __future__ import annotations
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
+
+from ..reference_identity import ReferenceIdentityValidationMixin
 
 
 class DegreeLevel(models.TextChoices):
@@ -92,7 +95,7 @@ class Subject(UUIDModel, TimeStampedModel):
         return f"{self.code} — {self.name}"
 
 
-class Curriculum(UUIDModel, TimeStampedModel):
+class Curriculum(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """A study plan (Tədris planı) for one program and admission cohort year.
 
     The set of ``CurriculumSubject`` rows defines, per semester, which subjects
@@ -182,7 +185,7 @@ class AcademicStatus(models.TextChoices):
     GRADUATED = "graduated", pgettext_lazy("registrar.academic_status", "Graduated")
 
 
-class StudentAcademicRecord(UUIDModel, TimeStampedModel):
+class StudentAcademicRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """A student's academic profile within a program: which curriculum + group
     they belong to. Drives the mandatory/elective enrollment flow (roadmap §2)."""
 
@@ -225,7 +228,7 @@ class StudentAcademicRecord(UUIDModel, TimeStampedModel):
         return f"{self.student_id} · {self.program.code}"
 
 
-class CourseOffering(UUIDModel, TimeStampedModel):
+class CourseOffering(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """A subject taught in a specific semester for a specific group (a section).
 
     Optionally links to the LMS ``courses.Course`` so the subject's content
@@ -282,7 +285,7 @@ class CourseOffering(UUIDModel, TimeStampedModel):
         return f"{self.subject.code} @ {self.period_id}"
 
 
-class Enrollment(UUIDModel, TimeStampedModel):
+class Enrollment(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """A student's enrollment in one course offering (mandatory / elective / retake)."""
 
     class Status(models.TextChoices):
@@ -299,6 +302,14 @@ class Enrollment(UUIDModel, TimeStampedModel):
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="enrollments")
     kind = models.CharField(max_length=16, choices=EnrollmentKind.choices, default=EnrollmentKind.MANDATORY)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.ENROLLED, db_index=True)
+    superseded_by = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="superseded_enrollments",
+        help_text="Qrup köçürməsində bu qeydiyyatı əvəz edən cari qeydiyyat.",
+    )
     absence_hours = models.PositiveSmallIntegerField(
         default=0, help_text="Bu fənn üzrə toplanmış üzrsüz qayıb saatı (qayıb limiti üçün)."
     )
@@ -309,12 +320,56 @@ class Enrollment(UUIDModel, TimeStampedModel):
         verbose_name = pgettext_lazy("registrar.model.enrollment.meta", "enrollment")
         verbose_name_plural = pgettext_lazy("registrar.model.enrollment.meta", "enrollments")
         constraints = [
-            models.UniqueConstraint(fields=["organization", "student", "offering"], name="uniq_student_offering"),
+            models.UniqueConstraint(
+                fields=["organization", "student", "offering"],
+                name="uniq_student_offering",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(superseded_by__isnull=True) | models.Q(status="dropped"),
+                name="superseded_enrollment_is_dropped",
+            ),
         ]
         indexes = [
             models.Index(fields=["organization", "student"]),
             models.Index(fields=["offering", "status"]),
         ]
+
+    def clean(self):
+        """Validate transfer lineage in Python; PostgreSQL repeats it in a trigger."""
+        super().clean()
+        if self.superseded_by_id is None:
+            return
+
+        errors = {}
+        successor = self.superseded_by
+        if self.status != self.Status.DROPPED:
+            errors["status"] = "Əvəzlənmiş qeydiyyat tarixçə statusunda olmalıdır."
+        if self.pk is not None and successor.pk == self.pk:
+            errors["superseded_by"] = "Qeydiyyat özünü əvəz edə bilməz."
+        elif successor.organization_id != self.organization_id:
+            errors["superseded_by"] = "Əvəz edən qeydiyyat eyni təşkilata aid olmalıdır."
+        elif successor.student_id != self.student_id:
+            errors["superseded_by"] = "Əvəz edən qeydiyyat eyni tələbəyə aid olmalıdır."
+        elif self.offering_id and successor.offering_id:
+            source_offering = self.offering
+            target_offering = successor.offering
+            if source_offering.subject_id != target_offering.subject_id:
+                errors["superseded_by"] = "Əvəz edən qeydiyyat eyni fənnə aid olmalıdır."
+            elif source_offering.period_id != target_offering.period_id:
+                errors["superseded_by"] = "Əvəz edən qeydiyyat eyni akademik dövrə aid olmalıdır."
+
+        if "superseded_by" not in errors and self.pk is not None:
+            seen = {self.pk}
+            cursor = successor
+            while cursor is not None:
+                if cursor.pk in seen:
+                    errors["superseded_by"] = "Qeydiyyat əvəzləmə zəncirində dövr yarana bilməz."
+                    break
+                seen.add(cursor.pk)
+                cursor = cursor.superseded_by
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
         return f"{self.student_id} → {self.offering_id} ({self.kind})"
@@ -382,7 +437,7 @@ class SlotKind(models.TextChoices):
     LAB = "lab", pgettext_lazy("registrar.slot_kind", "Laboratory")
 
 
-class ScheduleSlot(UUIDModel, TimeStampedModel):
+class ScheduleSlot(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """One weekly recurring class slot (a timetable row)."""
 
     organization = models.ForeignKey(

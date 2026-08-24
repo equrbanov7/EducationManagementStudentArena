@@ -29,8 +29,25 @@ class JournalExportTest(TestCase):
                 status="active",
                 is_active=True,
             )
+            cls.faculty = OrgUnit.objects.create(
+                organization=cls.org,
+                name="Fakültə",
+                slug="je-faculty",
+                unit_type=OrgUnitType.FACULTY,
+            )
+            cls.chair_unit = OrgUnit.objects.create(
+                organization=cls.org,
+                name="Kafedra",
+                slug="je-chair",
+                unit_type=OrgUnitType.CHAIR,
+                parent=cls.faculty,
+            )
             cls.group = OrgUnit.objects.create(
-                organization=cls.org, name="G1", slug="je-g1", unit_type=OrgUnitType.GROUP
+                organization=cls.org,
+                name="G1",
+                slug="je-g1",
+                unit_type=OrgUnitType.GROUP,
+                parent=cls.chair_unit,
             )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
@@ -53,9 +70,17 @@ class JournalExportTest(TestCase):
                 "je_student", "je_student@qku.edu.az", "pw", first_name="Əli", last_name="Vəliyev"
             )
             Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
                 user=cls.chair,
                 organization=cls.org,
                 role=cls.org.roles.get(name="chair_head"),
+                scope_unit=cls.chair_unit,
                 is_primary=True,
                 is_active=True,
             )

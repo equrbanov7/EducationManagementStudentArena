@@ -11,6 +11,7 @@ from django.utils.translation import pgettext_lazy
 
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
+from ...identity import user_access_is_staged
 from ...models import EmailOTP
 from ...services import issue_email_otp
 
@@ -47,7 +48,7 @@ class CustomLoginForm(AuthenticationForm):
         Extend default active-user check with organization suspension guard.
         Pending organizations allow login so users can see their approval status.
         """
-        if not user.is_active:
+        if not user.is_active or user_access_is_staged(user):
             raise forms.ValidationError(
                 pgettext_lazy("accounts.form.login.error", "account_inactive"),
                 code="inactive",
@@ -78,6 +79,11 @@ class CustomPasswordResetForm(PasswordResetForm):
             }
         ),
     )
+
+    def get_users(self, email):
+        for user in super().get_users(email):
+            if not user_access_is_staged(user):
+                yield user
 
     def save(
         self,

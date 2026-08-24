@@ -155,9 +155,13 @@ def global_search(request):
         if journals:
             groups.append({"key": "journals", "label": _("Jurnallarım"), "items": journals})
 
-        can_manage = caps.get("can_manage_registrar") or caps.get("teacher_can_manage_students")
-        if organization is not None and can_manage:
-            if caps.get("can_manage_registrar"):
+        can_search_people = (
+            caps.get("can_search_directory")
+            or caps.get("can_manage_registrar")
+            or caps.get("teacher_can_manage_students")
+        )
+        if organization is not None and can_search_people:
+            if caps.get("can_search_directory") or caps.get("can_manage_registrar"):
                 subjects = _subject_group(organization, query)
                 if subjects:
                     groups.append({"key": "subjects", "label": _("Fənlər"), "items": subjects})

@@ -32,8 +32,9 @@ from apps.exams.models import (
     FinalExamTicket,
     StudentGroup,
 )
-from apps.exams.services.final_center import assign_students, decrypt_ticket_pin, open_entry, set_ticket_pin
+from apps.exams.services.final_center import assign_students, open_entry, set_ticket_pin
 from core.constants import OrganizationType, OrgUnitType, RoleScopeType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -69,7 +70,8 @@ _STAFF_PERMS = [
 ]
 
 
-class Command(UsersSeedMixin, BaseCommand):
+class Command(ProductionCommandSafetyMixin, UsersSeedMixin, BaseCommand):
+    safety_command_name = "seed_demo_hierarchy"
     help = "Tam iyerarxiyalı demo (superadmin + struktur + imtahan mərkəzi rəhbər/işçi + müəllim/tələbə + final)."
 
     def add_arguments(self, parser):
@@ -199,7 +201,6 @@ class Command(UsersSeedMixin, BaseCommand):
                 p.save(update_fields=["email_verified", "password_change_required", "updated_at"])
 
         self._report(
-            pw,
             superadmin,
             org,
             rector,
@@ -402,7 +403,6 @@ class Command(UsersSeedMixin, BaseCommand):
 
     def _report(
         self,
-        pw,
         superadmin,
         org,
         rector,
@@ -418,7 +418,7 @@ class Command(UsersSeedMixin, BaseCommand):
     ):
         out, ok, sub = self.stdout, self.style.SUCCESS, self.style.HTTP_INFO
         out.write(ok("\n══════════════════════════════════════════════════════════════"))
-        out.write(ok("  DEMO İYERARXİYA HAZIRDIR — şifrə: " + pw))
+        out.write(ok("  DEMO İYERARXİYA HAZIRDIR — credential dəyərləri loglanmır"))
         out.write(ok("══════════════════════════════════════════════════════════════"))
         out.write(sub(f"Təşkilat: {org.name}\n"))
         out.write(f"  SUPERADMIN            : {superadmin.username}")
@@ -431,11 +431,8 @@ class Command(UsersSeedMixin, BaseCommand):
         for t in teachers:
             out.write(f"    {t.username:20} {t.get_full_name()}")
         out.write(sub("\n  TƏLƏBƏLƏR (PIN axtarışı üçün):"))
-        by_id = {t.student_id: t for t in FinalExamTicket.objects.filter(exam=exam).select_related("student")}
         for s in students:
-            ticket = by_id.get(s.id)
-            pin = decrypt_ticket_pin(ticket) if ticket else "—"
-            out.write(f"    {s.username:20} PIN={pin}")
+            out.write(f"    {s.username:20}")
         out.write(
             ok(f"\n  Zal: {room.name} · Oturum vəziyyəti: {session.state} · PIN axtarışı: /exams/center/pin-lookup/\n")
         )

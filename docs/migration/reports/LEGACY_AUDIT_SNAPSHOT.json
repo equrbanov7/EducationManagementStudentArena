@@ -1,0 +1,79 @@
+{
+  "snapshot_type": "sanitized_legacy_audit_summary",
+  "generated_at": "2026-08-22T22:14:28Z",
+  "source_dump": {
+    "sha256": "177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0",
+    "size_bytes": 2142912818,
+    "table_count": 81,
+    "row_count": 9044531,
+    "empty_table_count": 15,
+    "column_count": 647,
+    "declared_foreign_key_count": 0,
+    "declared_unique_secondary_constraint_count": 0,
+    "trigger_count": 2
+  },
+  "source_artifacts": [
+    {
+      "name": "legacy_sql_audit.json",
+      "sha256": "e03decda34afc07527e151591e22ebc0df85e5a2b79fa8ce5a014dc76f898975"
+    },
+    {
+      "name": "legacy_mapping_81.json",
+      "sha256": "067154ee9a66ed04d0d85cfe8c54e166325ba6532acec11fa003459be9635ecd"
+    }
+  ],
+  "reconciliation_workload": [
+    {
+      "category": "Orphan type-1 exam cavabı",
+      "affected_rows": 575715,
+      "denominator_rows": 1306274,
+      "rate_fraction": 0.440731,
+      "rate_label": "44.07%",
+      "denominator_label": "Bütün type-1 exam answer sətirləri",
+      "rule": "exam_answers.question_id -> exam_questions"
+    },
+    {
+      "category": "Orphan aktiv jurnal balı",
+      "affected_rows": 23979,
+      "denominator_rows": 5135289,
+      "rate_fraction": 0.004669,
+      "rate_label": "0.47%",
+      "denominator_label": "Bütün aktiv jurnal bal sətirləri",
+      "rule": "journals_dates_points.student_id -> students"
+    },
+    {
+      "category": "speciality_id=0 tələbə",
+      "affected_rows": 7816,
+      "denominator_rows": 7816,
+      "rate_fraction": 1.0,
+      "rate_label": "100.00%",
+      "denominator_label": "Bütün legacy tələbələr",
+      "rule": "students.speciality_id = 0"
+    },
+    {
+      "category": "FIN-i boş tələbə",
+      "affected_rows": 7225,
+      "denominator_rows": 7816,
+      "rate_fraction": 0.924386,
+      "rate_label": "92.44%",
+      "denominator_label": "Bütün legacy tələbələr",
+      "rule": "students.fincode is blank"
+    }
+  ],
+  "interpretation": {
+    "grain": "Kateqoriya üzrə reconciliation tələb edən legacy sətir sayı",
+    "comparison_warning": "Kateqoriyaların denominator-ları fərqlidir və tələbə kateqoriyaları üst-üstə düşə bilər.",
+    "not_a_measure_of": [
+      "risk severity",
+      "migration success rate",
+      "mutually exclusive issue total"
+    ]
+  },
+  "safety": {
+    "contains_raw_rows": false,
+    "contains_personal_data": false,
+    "contains_credentials": false,
+    "contains_connection_strings": false,
+    "contains_local_absolute_paths": false
+  }
+}

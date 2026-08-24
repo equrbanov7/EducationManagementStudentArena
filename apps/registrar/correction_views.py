@@ -26,6 +26,7 @@ from .models import (
     CorrectionReason,
     CourseOffering,
     Enrollment,
+    JournalCorrection,
     Lesson,
     LessonMark,
     SelfWorkTopic,
@@ -207,40 +208,18 @@ def correction_apply(request, offering_id):
 @login_required
 @require_POST
 def correction_delete(request, offering_id):
-    """Səhvən edilmiş SON düzəlişi geri al (revert): dəyər köhnəyə qayıdır, sarı itir."""
+    """Append-only ledger ilə seçilmiş son düzəlişi geri al."""
     _require_corrector(request)
     org = _active_org(request)
     offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
-    ctype = (request.POST.get("type") or "grade").strip()
-
-    if ctype == "lesson":
-        lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
-        ok = corrections.revert_last_lesson_correction(lesson=lesson, by_user=request.user, request=request)
-    elif ctype in ("selfwork", "coursework", "component"):
-        from . import item_corrections
-
-        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
-        if ctype == "selfwork":
-            topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
-            ok = item_corrections.revert_last_selfwork_correction(
-                topic=topic, enrollment=enrollment, by_user=request.user, request=request
-            )
-        elif ctype == "component":
-            component = get_object_or_404(AssessmentComponent, pk=request.POST.get("component_id"), offering=offering)
-            ok = item_corrections.revert_last_component_correction(
-                component=component, enrollment=enrollment, by_user=request.user, request=request
-            )
-        else:
-            ok = item_corrections.revert_last_coursework_correction(
-                enrollment=enrollment, by_user=request.user, request=request
-            )
-    else:  # grade (davamiyyət/bal xanası)
-        mark = get_object_or_404(
-            LessonMark.objects.select_related("lesson", "enrollment", "organization"),
-            pk=request.POST.get("mark_id"),
-            lesson__offering=offering,
-        )
-        ok = corrections.revert_last_grade_correction(mark=mark, by_user=request.user, request=request)
+    try:
+        ok = _revert_requested_correction(request, offering)
+    except ValidationError as exc:
+        message = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"ok": False, "error": message}, status=409)
+        messages.error(request, message)
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"ok": ok})
@@ -249,3 +228,61 @@ def correction_delete(request, offering_id):
     else:
         messages.error(request, pgettext("registrar.correction", "Geri alınacaq düzəliş tapılmadı."))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
+
+
+def _revert_requested_correction(request, offering):
+    ctype = (request.POST.get("type") or "grade").strip()
+    correction_id = (request.POST.get("correction_id") or "").strip() or None
+    if correction_id is None:
+        raise ValidationError(
+            pgettext(
+                "registrar.correction",
+                "Select the exact correction to reverse and reload the journal if it changed.",
+            )
+        )
+    common = {"by_user": request.user, "request": request, "correction_id": correction_id}
+    if ctype == "lesson":
+        lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
+        return corrections.revert_last_lesson_correction(lesson=lesson, **common)
+    if ctype in ("selfwork", "coursework", "component"):
+        from . import item_corrections
+
+        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        if ctype == "selfwork":
+            topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
+            return item_corrections.revert_last_selfwork_correction(
+                topic=topic,
+                enrollment=enrollment,
+                **common,
+            )
+        if ctype == "component":
+            component = get_object_or_404(
+                AssessmentComponent,
+                pk=request.POST.get("component_id"),
+                offering=offering,
+            )
+            return item_corrections.revert_last_component_correction(
+                component=component,
+                enrollment=enrollment,
+                **common,
+            )
+        return item_corrections.revert_last_coursework_correction(enrollment=enrollment, **common)
+
+    if correction_id:
+        expected = get_object_or_404(
+            JournalCorrection.objects.select_related("lesson_mark", "lesson_mark__lesson", "lesson_mark__enrollment"),
+            pk=correction_id,
+            organization=offering.organization,
+        )
+        get_object_or_404(Lesson, pk=expected.lesson_ref, offering=offering)
+        return corrections.revert_last_grade_correction(
+            mark=expected.lesson_mark,
+            offering=offering,
+            **common,
+        )
+    mark = get_object_or_404(
+        LessonMark.objects.select_related("lesson", "enrollment", "organization"),
+        pk=request.POST.get("mark_id"),
+        lesson__offering=offering,
+    )
+    return corrections.revert_last_grade_correction(mark=mark, offering=offering, **common)
