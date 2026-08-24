@@ -1,0 +1,42 @@
+# EMS Arena — Staging Inspection PostgreSQL
+#
+# Dedicated PostgreSQL instance for browsing legacy-migration rehearsal data
+# through the real EMS Arena UI (see scripts/staging_inspect.sh and
+# config/settings/staging_inspect.py).
+#
+# Deliberately a SEPARATE compose project from docker-compose.agent.yml:
+# the agent sandbox's `clean` command runs `docker compose down -v` and must
+# never be able to wipe rehearsal data. It also stays away from the repository
+# .env contract by using STAGING_* variables with safe local defaults.
+#
+# The port is bound to 127.0.0.1 only — this database is never reachable from
+# the LAN.
+
+name: emsarena-staging
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: emsarena-staging-pg
+    environment:
+      POSTGRES_DB: ${STAGING_POSTGRES_DB:-emsarena_staging}
+      POSTGRES_USER: ${STAGING_POSTGRES_USER:-emsarena_staging}
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:-emsarena_staging_password}
+    ports:
+      - "127.0.0.1:${STAGING_POSTGRES_PORT:-55433}:5432"
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - emsarena-staging-network
+
+networks:
+  emsarena-staging-network:
+    driver: bridge
+
+volumes:
+  staging_postgres_data:

@@ -6,6 +6,12 @@
       "runtimeExecutable": "venv/bin/python",
       "runtimeArgs": ["manage.py", "runserver", "8010", "--noreload"],
       "port": 8010
+    },
+    {
+      "name": "emsarena-staging-inspect",
+      "runtimeExecutable": "scripts/staging_inspect.sh",
+      "runtimeArgs": ["serve"],
+      "port": 8100
     }
   ]
 }
