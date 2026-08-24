@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals, gradebook, services
 from apps.registrar.models import (
     AssessmentComponent,
@@ -56,6 +56,20 @@ class AssessmentComponentTest(TestCase):
             )
             self.teacher = User.objects.create_user("cmp_teacher", "cmp_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("cmp_student", "cmp_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,
@@ -134,10 +148,15 @@ class AssessmentComponentTest(TestCase):
             self.assertEqual(AssessmentComponent.objects.get(offering=self.offering).max_score, 25)
 
     def test_publish_locks_component_scores(self):
+        from apps.registrar.models import ApprovalStatus
+
         with bypass_rls():
             self._components(("Seminar", 20))
             seminar = gradebook.get_components(self.offering)[0]
-            finals.publish_offering(offering=self.offering, by_user=self.teacher)
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+            scheme.approval_status = ApprovalStatus.APPROVED
+            scheme.is_published = True
+            scheme.save(update_fields=["approval_status", "is_published"])
             written = gradebook.save_component_scores(
                 offering=self.offering,
                 entries=[{"component_id": seminar.id, "enrollment_id": self.enrollment.id, "score": "10"}],

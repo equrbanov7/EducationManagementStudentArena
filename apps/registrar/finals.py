@@ -4,18 +4,24 @@ Yekun bal = jurnaldan "giriş balı" (semestr fəaliyyəti, ≈50) + yekun imtah
 balı (≈50). Tələbə kəsilir (qayıb limitini keçib, VƏ YA ümumi bal < keçid həddi,
 VƏ YA imtahan < minimum) → ``ResitRecord`` (təkrar imtahan hüququ). Təkrar
 imtahan balı daxil ediləndə yekun yenidən hesablanır (resit balı imtahan balını
-əvəz edir və qayıb bloku aradan qalxır). Jurnal finalizasiyası (``is_published``)
-audit-ə yazılır.
+əvəz edir və qayıb bloku aradan qalxır). Jurnal finalizasiyası yalnız təsdiq
+zəncirində edilir və həmin tranzaksiyada auditə yazılır.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
 from apps.registrar import grade_audit, gradebook, grading_scale, services
-from apps.registrar.models import FinalGrade, ResitReason, ResitRecord, ResitStatus
+from apps.registrar.models import ApprovalStatus, Enrollment, FinalGrade, ResitReason, ResitRecord, ResitStatus
+
+
+def _is_current_enrollment(enrollment) -> bool:
+    """Check persisted state so a stale pre-transfer instance cannot write."""
+    return Enrollment.objects.filter(pk=enrollment.pk, status=Enrollment.Status.ENROLLED).exists()
 
 
 def score_to_letter(total, organization=None) -> tuple[str, Decimal]:
@@ -121,6 +127,8 @@ def evaluate_resit(*, enrollment, by_user=None):
 
     Creates/keeps an ``eligible`` resit when the student is failing; removes a
     still-unused eligible resit once they pass."""
+    if not _is_current_enrollment(enrollment):
+        return enrollment.resit_records.first()
     result = compute_final_result(enrollment=enrollment)
     existing = enrollment.resit_records.first()
 
@@ -151,6 +159,8 @@ def set_exam_score(*, enrollment, score, by_user=None):
     """Record the final-exam score (teacher/exam centre), then re-evaluate resit.
 
     Blocked when the offering's journal is locked (finalised / under approval)."""
+    if not _is_current_enrollment(enrollment):
+        return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     if gradebook.journal_is_locked(enrollment.offering):
         return None
@@ -183,6 +193,8 @@ def set_exam_score(*, enrollment, score, by_user=None):
 @transaction.atomic
 def set_resit_score(*, enrollment, score, by_user=None):
     """Record a resit exam score → mark the resit completed + recompute."""
+    if not _is_current_enrollment(enrollment):
+        return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     if gradebook.journal_is_locked(enrollment.offering):
         return None
@@ -220,7 +232,7 @@ def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
 
     Bonus bal düzəlişidir → dəyişikliyi qiymət audit izinə yazılır; rəy bal
     deyil, audit olunmur. Jurnal kilidlidirsə heç nə yazılmır.""" % {"limit": _BONUS_LIMIT}
-    if gradebook.journal_is_locked(enrollment.offering):
+    if not _is_current_enrollment(enrollment) or gradebook.journal_is_locked(enrollment.offering):
         return None
     final_grade, _created = FinalGrade.objects.get_or_create(
         organization=enrollment.organization, enrollment=enrollment
@@ -257,35 +269,12 @@ def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
     return final_grade
 
 
-def _audit_publish(offering, by_user):
-    """Best-effort audit entry for journal finalisation (never breaks publish)."""
-    try:
-        from django.apps import apps as django_apps
-
-        from core.constants import AuditAction
-
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=offering.organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.journal",
-            resource_id=str(offering.pk),
-            resource_repr=f"{offering.subject.code} jurnalı",
-            reason="Jurnal yekunlaşdırıldı (finalised).",
-        )
-    except Exception:  # noqa: BLE001 — audit must never block the domain action
-        pass
-
-
 @transaction.atomic
 def publish_offering(*, offering, by_user=None):
-    """Finalise (lock) the offering's journal + write an audit entry."""
+    """Compatibility guard: only the full approval chain may publish."""
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    if not scheme.is_published:
-        scheme.is_published = True
-        scheme.save(update_fields=["is_published"])
-        _audit_publish(offering, by_user)
+    if scheme.approval_status != ApprovalStatus.APPROVED or not scheme.is_published:
+        raise PermissionDenied("Jurnal yalnız tam təsdiq zənciri ilə rəsmiləşdirilə bilər.")
     return scheme
 
 

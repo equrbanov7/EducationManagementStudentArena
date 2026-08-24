@@ -28,13 +28,16 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.crypto import get_random_string
 
+from core.management.command_safety import ProductionCommandSafetyMixin
+
 User = get_user_model()
 
 # Oxunaqlı, oxşar simvolsuz (0/O, 1/l/I yox) generasiya əlifbası.
 _PASSWORD_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "provision_student_credentials"
     help = "Təşkilatın tələbələrinə default parol verir və ilk-giriş (email OTP + yeni parol) axınına salır."
 
     def add_arguments(self, parser):

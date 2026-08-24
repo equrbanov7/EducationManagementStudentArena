@@ -176,6 +176,7 @@ DEFAULT_ROLES = {
                 "course.*",
                 "grade.view",
                 "grade.input",
+                "grade.approve_chair",
                 "exam.*",
                 "analytics.view_unit",
             ],

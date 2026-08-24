@@ -7,9 +7,12 @@ hesablanması və komponent CRUD-u buradadır. Bütün ictimai adlar
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
 from apps.registrar import grade_audit
@@ -17,6 +20,7 @@ from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
     ComponentScore,
+    CriterionScore,
     LessonMark,
     SelfWorkMark,
 )
@@ -96,7 +100,7 @@ def save_components(*, offering, definitions, by_user=None):
     from apps.registrar.models import Rubric
 
     org_rubrics = {str(r.id): r for r in Rubric.objects.filter(organization=offering.organization, is_active=True)}
-    existing = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
+    existing = {str(c.id): c for c in AssessmentComponent.objects.select_for_update().filter(offering=offering)}
     existing_by_name = {c.name.strip().lower(): c for c in existing.values()}
     seen: set = set()
     for order, defn in enumerate(definitions):
@@ -109,6 +113,19 @@ def save_components(*, offering, definitions, by_user=None):
         rubric = org_rubrics.get(str(defn.get("rubric_id") or ""))  # U22: meyar şablonu (opsional)
         component = existing.get(str(defn.get("id") or "")) or existing_by_name.get(name.lower())
         if component is not None and str(component.id) not in seen:
+            has_evidence = (
+                CriterionScore.objects.filter(component=component).exists()
+                or ComponentScore.objects.filter(component=component).exists()
+            )
+            if has_evidence and (
+                component.name != name
+                or component.rubric_id != getattr(rubric, "id", None)
+                or component.max_score != max_score
+            ):
+                raise ValidationError(
+                    "Qiymətləndirmə sübutu olan komponentin adı, rubriki və tavanı dəyişdirilə bilməz.",
+                    code="component_evidence_protected",
+                )
             component.name = name
             component.max_score = max_score
             component.order = order
@@ -128,45 +145,128 @@ def save_components(*, offering, definitions, by_user=None):
     # Drop components the teacher removed from the form.
     for cid, component in existing.items():
         if cid not in seen:
-            component.delete()
+            if (
+                CriterionScore.objects.filter(component=component).exists()
+                or ComponentScore.objects.filter(component=component).exists()
+            ):
+                # Köhnə forma çağıranları silinməyən sətri nəticədə görür;
+                # qiymət/correction sübutunu qorumaq üçün onu səssiz saxla.
+                continue
+            try:
+                component.delete()
+            except ProtectedError:
+                # Sənədli correction evidence komponentin silinməsinə üstün gəlir.
+                continue
     return get_components(offering)
 
 
 @transaction.atomic
-def save_component_scores(*, offering, entries, by_user=None, bypass_edit_window=False):
+def save_component_scores(
+    *,
+    offering,
+    entries,
+    by_user=None,
+    bypass_edit_window=False,
+    require_all=False,
+    fail_closed_audit=False,
+):
     """Persist per-(component, enrollment) scores. ``entries`` = list of
     ``{"component_id", "enrollment_id", "score"}``. Lock-aware + tenant-safe.
 
     ``bypass_edit_window``: kollokvium İmtahan Mərkəzi pəncərəsi AÇIQ olduqda True
     verilir — 2 saat kilidini HƏM servis-səviyyəsində, HƏM DB trigger-ində
     (``journal_unlock`` GUC) bypass edir ki, müəllim aralıq boyu balı dəyişsin.
+
+    ``require_all`` rubrik roll-up kimi atomik çağıranlar üçündür: hər entry
+    qəbul edilməzsə bütün transaction ``ValidationError`` ilə geri qaytarılır.
+    Mövcud UI çağıranları üçün default best-effort davranış dəyişmir.
     """
     from contextlib import nullcontext
 
     from core.rls import journal_unlock
 
+    try:
+        entries = list(entries or [])
+    except (TypeError, ValueError):
+        if require_all:
+            raise ValidationError(
+                "Komponent balı paketi siyahı olmalıdır.",
+                code="component_score_batch_rejected",
+            ) from None
+        return 0
     if journal_is_locked(offering):
+        if require_all:
+            raise ValidationError(
+                "Jurnal kilidli olduğu üçün komponent balları tam yazılmadı.",
+                code="component_score_batch_rejected",
+            )
         return 0
 
-    valid_components = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
-    valid_enrollments = {str(e.id): e for e in offering.enrollments.all()}
+    component_query = AssessmentComponent.objects.filter(offering=offering)
+    enrollment_query = offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
+    if require_all:
+        component_query = component_query.select_for_update()
+        enrollment_query = enrollment_query.select_for_update()
+    valid_components = {str(c.id): c for c in component_query}
+    valid_enrollments = {str(e.id): e for e in enrollment_query}
+    if require_all:
+        list(
+            ComponentScore.objects.select_for_update()
+            .filter(component__in=valid_components.values(), enrollment__in=valid_enrollments.values())
+            .values_list("pk", flat=True)
+        )
     written = 0
+    processed = 0
+    seen_targets = set()
     audit_changes = []
     notify_events = []
     now = timezone.now()
     with journal_unlock() if bypass_edit_window else nullcontext():
         for entry in entries:
+            if not isinstance(entry, Mapping):
+                if require_all:
+                    raise ValidationError(
+                        "Komponent balı sətri açar-dəyər formatında olmalıdır.",
+                        code="component_score_batch_rejected",
+                    )
+                continue
             component = valid_components.get(str(entry.get("component_id")))
             enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
             if component is None or enrollment is None:
+                if require_all:
+                    raise ValidationError(
+                        "Komponent balı sətrinin hədəfi bu jurnal üçün etibarlı deyil.",
+                        code="component_score_batch_rejected",
+                    )
                 continue
+            target = (component.id, enrollment.id)
+            if require_all:
+                if target in seen_targets:
+                    raise ValidationError(
+                        "Eyni komponent balı sətri paketdə təkrarlana bilməz.",
+                        code="component_score_batch_rejected",
+                    )
+                seen_targets.add(target)
             # Kollokvium YALNIZ pəncərə-yoxlanışlı yolla (journal_actions.kollokvium_save,
             # bypass_edit_window=True) yazıla bilər — generic cscore__/rubrik yolları
             # İmtahan Mərkəzi pəncərəsini YAN KEÇMƏMƏLİDİR.
             if component.kind == ComponentKind.KOLLOKVIUM and not bypass_edit_window:
+                if require_all:
+                    raise ValidationError(
+                        "Kollokvium balı yalnız açıq imtahan pəncərəsindən yazıla bilər.",
+                        code="component_score_batch_rejected",
+                    )
                 continue
-            existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
+            existing_query = ComponentScore.objects.filter(component=component, enrollment=enrollment)
+            if require_all:
+                existing_query = existing_query.select_for_update()
+            existing = existing_query.first()
             if not bypass_edit_window and existing is not None and (now - existing.created_at) > MARK_EDIT_WINDOW:
+                if require_all:
+                    raise ValidationError(
+                        "Komponent balının redaktə müddəti bitib.",
+                        code="component_score_batch_rejected",
+                    )
                 continue  # komponent balı da 2 saatdan sonra toxunulmazdır (kollokvium istisna — pəncərə)
             old_score = existing.score if existing else None
             raw = entry.get("score")
@@ -174,8 +274,23 @@ def save_component_scores(*, offering, entries, by_user=None, bypass_edit_window
                 if existing is not None:
                     existing.delete()
                     audit_changes.append(_component_change(component, enrollment, old_score, None))
+                processed += 1
                 continue
-            score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
+            if require_all:
+                try:
+                    score = Decimal(str(raw))
+                except (ArithmeticError, TypeError, ValueError):
+                    raise ValidationError(
+                        "Komponent balı ədəd olmalıdır.",
+                        code="component_score_batch_rejected",
+                    ) from None
+                if not score.is_finite() or score < 0 or score > Decimal(component.max_score):
+                    raise ValidationError(
+                        "Komponent balı 0 ilə komponentin maksimum balı arasında olmalıdır.",
+                        code="component_score_batch_rejected",
+                    )
+            else:
+                score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
             ComponentScore.objects.update_or_create(
                 organization=offering.organization,
                 component=component,
@@ -189,7 +304,19 @@ def save_component_scores(*, offering, entries, by_user=None, bypass_edit_window
                 kind = jn.EVENT_KOLLOKVIUM if component.kind == ComponentKind.KOLLOKVIUM else jn.EVENT_SCORE
                 notify_events.append({"enrollment": enrollment, "kind": kind, "score": score})
             written += 1
-    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="component", changes=audit_changes)
+            processed += 1
+    if require_all and processed != len(entries):
+        raise ValidationError(
+            "Komponent balları paketinin hamısı yazılmadı.",
+            code="component_score_batch_rejected",
+        )
+    grade_audit.log_grade_changes(
+        offering=offering,
+        by_user=by_user,
+        kind="component",
+        changes=audit_changes,
+        fail_closed=fail_closed_audit,
+    )
 
     if notify_events:
         from django.db import transaction as _tx

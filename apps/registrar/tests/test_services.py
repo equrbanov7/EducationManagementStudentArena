@@ -3,7 +3,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import services
 from apps.registrar.models import (
     Curriculum,
@@ -81,6 +81,12 @@ class EnrollmentFlowTest(TestCase):
             self.students = []
             for i in range(3):
                 u = User.objects.create_user(f"svc_student{i}", f"svc_student{i}@qku.edu.az", "pw")
+                Membership.objects.create(
+                    organization=self.org,
+                    user=u,
+                    role=self.org.roles.get(name="student"),
+                    is_active=True,
+                )
                 rec = StudentAcademicRecord.objects.create(
                     organization=self.org,
                     student=u,
@@ -138,6 +144,12 @@ class EnrollmentFlowTest(TestCase):
             )
             # A new student joins the group after the decision.
             late = User.objects.create_user("svc_late", "svc_late@qku.edu.az", "pw")
+            Membership.objects.create(
+                organization=self.org,
+                user=late,
+                role=self.org.roles.get(name="student"),
+                is_active=True,
+            )
             StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=late,

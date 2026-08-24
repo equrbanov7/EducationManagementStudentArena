@@ -13,6 +13,11 @@ from django import forms
 from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar.integrity import (
+    eligible_instructor_user_ids,
+    validate_instructor_assignment,
+    validate_student_record_target,
+)
 from apps.registrar.models import (
     CourseOffering,
     Curriculum,
@@ -221,13 +226,7 @@ class OfferingForm(_OrgScopedModelForm):
         instructor_field = self.fields["instructor"]
         instructor_field.required = False
         instructor_field.queryset = (
-            user_model.objects.filter(
-                memberships__organization=org,
-                memberships__role__name__in=["teacher", "assistant_teacher"],
-                memberships__is_active=True,
-            )
-            .distinct()
-            .order_by("username")
+            user_model.objects.filter(pk__in=eligible_instructor_user_ids(organization=org)).order_by("username")
             if org
             else user_model.objects.none()
         )
@@ -237,6 +236,12 @@ class OfferingForm(_OrgScopedModelForm):
         subject = cleaned.get("subject")
         period = cleaned.get("period")
         group = cleaned.get("group")
+        instructor = cleaned.get("instructor")
+        if instructor is not None and self.organization is not None:
+            validate_instructor_assignment(
+                organization=self.organization,
+                instructor=instructor,
+            )
         if subject and period:
             qs = CourseOffering.objects.filter(
                 organization=self.organization, subject=subject, period=period, group=group
@@ -318,6 +323,15 @@ class StudentRecordForm(_OrgScopedModelForm):
         student = cleaned.get("student")
         program = cleaned.get("program")
         curriculum = cleaned.get("curriculum")
+        group = cleaned.get("group")
+        if student and program and curriculum and self.organization is not None:
+            validate_student_record_target(
+                organization=self.organization,
+                student=student,
+                program=program,
+                curriculum=curriculum,
+                group=group,
+            )
         if curriculum and program and curriculum.program_id != program.id:
             self.add_error(
                 "curriculum",

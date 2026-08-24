@@ -7,7 +7,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import SESSION_KEY, logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -38,7 +38,18 @@ class SessionTimeoutMiddleware:
         self.write_interval = getattr(settings, "SESSION_ACTIVITY_WRITE_INTERVAL", 300)
 
     def __call__(self, request):
+        # Backend siyahısından çıxarılmış köhnə/bypass backend sessiyası Django
+        # tərəfindən anonymous kimi yüklənir, amma auth açarları sessiyada qala
+        # bilər. Onları request view-a çatmamış tam sil.
+        if not request.user.is_authenticated and SESSION_KEY in request.session:
+            logout(request)
+            return self.get_response(request)
         if request.user.is_authenticated:
+            from .identity import user_access_is_staged
+
+            if user_access_is_staged(request.user):
+                logout(request)
+                return self.get_response(request)
             now = timezone.now()
             last_activity = request.session.get("last_activity")
 

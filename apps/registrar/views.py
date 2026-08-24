@@ -24,7 +24,6 @@ from .models import (
     CorrectionReason,
     CourseOffering,
     LessonKind,
-    ScheduleSlot,
     SlotKind,
     WeekType,
 )
@@ -47,6 +46,7 @@ def _current_period(organization):
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
 from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
+from .journal_access import schedule_slot_or_404 as _schedule_slot_or_404  # noqa: E402
 
 
 @login_required
@@ -114,9 +114,7 @@ def journal_detail(request, offering_id):
         if action == "save_component_scores":
             return _handle_save_component_scores(request, offering)
         if action == "publish":
-            finals.publish_offering(offering=offering, by_user=request.user)
-            messages.success(request, _("Jurnal yekunlaşdırıldı."))
-            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+            raise Http404
         return _handle_save_marks(request, offering)
 
     import datetime as _dt
@@ -202,10 +200,7 @@ def rubric_grade_view(request, offering_id, component_id):
     from apps.registrar import rubrics as rubrics_service
     from apps.registrar.models import AssessmentComponent
 
-    offering = get_object_or_404(
-        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
-        pk=offering_id,
-    )
+    offering = _offering_or_404(request, offering_id)
     # Rubrik kriteriya balları ComponentScore yazır → yalnız birbaşa redaktor (İKT yox).
     if not _is_direct_editor(request.user, offering):
         raise Http404
@@ -216,6 +211,8 @@ def rubric_grade_view(request, offering_id, component_id):
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "#tab-components")
 
     if request.method == "POST":
+        from django.core.exceptions import ValidationError
+
         entries = []
         for key, raw in request.POST.items():
             if not key.startswith("rpoints__"):
@@ -225,7 +222,11 @@ def rubric_grade_view(request, offering_id, component_id):
                 continue
             _prefix, criterion_id, enrollment_id = parts
             entries.append({"criterion_id": criterion_id, "enrollment_id": enrollment_id, "points": raw})
-        written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
+        try:
+            written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
+        except ValidationError as exc:
+            messages.error(request, " ".join(exc.messages))
+            return redirect(reverse("registrar:rubric_grade", args=[offering.pk, component.pk]))
         if written or entries:
             messages.success(request, _("Rubrik balları yadda saxlanıldı."))
         return redirect(reverse("registrar:rubric_grade", args=[offering.pk, component.pk]))
@@ -566,7 +567,7 @@ def _handle_add_slot(request, organization, period):
 @login_required
 def schedule_slot_delete(request, slot_id):
     """Delete a slot (only the teaching instructor / org owner / superuser)."""
-    slot = get_object_or_404(ScheduleSlot.objects.select_related("offering", "offering__organization"), pk=slot_id)
+    slot = _schedule_slot_or_404(request, slot_id)
     if request.method == "POST" and _is_direct_editor(request.user, slot.offering):
         slot.delete()
         messages.success(request, _("Slot silindi."))

@@ -12,6 +12,7 @@ from apps.organizations.permissions import (  # noqa: F401
     strip_grant_prefix,
 )
 from apps.organizations.scoping import (  # noqa: F401
+    get_permission_scope,
     get_unit_scope,
     scope_memberships_by_unit,
 )
@@ -46,6 +47,7 @@ __all__ = [
     "ensure_owner_membership",
     "get_active_memberships",
     "get_all_permissions",
+    "get_permission_scope",
     "get_unit_scope",
     "get_user_org_role_level",
     "is_grant_entry",

@@ -12,7 +12,7 @@ from django.db import connection
 
 import pytest
 
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
 from core.constants import OrganizationType, OrgUnitType
 
@@ -138,6 +138,12 @@ def two_org_enrollments(two_org_curricula):
             end_date="2025-01-31",
         )
         student = User.objects.create_user(f"enr_{code}", f"enr_{code}@x.test", "pw")
+        Membership.objects.create(
+            organization=org,
+            user=student,
+            role=org.roles.get(name="student"),
+            is_active=True,
+        )
         StudentAcademicRecord.objects.create(
             organization=org,
             student=student,

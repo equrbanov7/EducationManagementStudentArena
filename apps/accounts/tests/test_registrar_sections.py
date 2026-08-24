@@ -27,7 +27,9 @@ class RegistrarProfileSectionsTest(TestCase):
                 status="active",
                 is_active=True,
             )
-            OrgUnit.objects.create(organization=cls.org, name="G1", slug="ps-g1", unit_type=OrgUnitType.GROUP)
+            cls.group = OrgUnit.objects.create(
+                organization=cls.org, name="G1", slug="ps-g1", unit_type=OrgUnitType.GROUP
+            )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
                 name="2024/2025 Payız",
@@ -40,11 +42,18 @@ class RegistrarProfileSectionsTest(TestCase):
             cls.teacher = User.objects.create_user("ps_teacher", "ps_teacher@qku.edu.az", "pw")
             cls.student = User.objects.create_user("ps_student", "ps_student@qku.edu.az", "pw")
             cls.dean = User.objects.create_user("ps_dean", "ps_dean@qku.edu.az", "pw")
-            for user, role in ((cls.teacher, "teacher"), (cls.student, "student"), (cls.dean, "dean")):
+            cls.hr_user = User.objects.create_user("ps_hr", "ps_hr@qku.edu.az", "pw")
+            for user, role in (
+                (cls.teacher, "teacher"),
+                (cls.student, "student"),
+                (cls.dean, "dean"),
+                (cls.hr_user, "hr"),
+            ):
                 Membership.objects.create(
                     user=user,
                     organization=cls.org,
                     role=cls.org.roles.get(name=role),
+                    scope_unit=cls.group if role == "dean" else None,
                     is_primary=True,
                     is_active=True,
                 )
@@ -107,6 +116,15 @@ class RegistrarProfileSectionsTest(TestCase):
         resp = self._fragment(self.dean, "analytics")
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(json.loads(resp.content)["ok"])
+
+    def test_org_scoped_view_unit_role_has_matching_nav_and_view_access(self):
+        page = self._client(self.hr_user).get(reverse("accounts:profile"))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'data-section="analytics"')
+
+        fragment = self._fragment(self.hr_user, "analytics")
+        self.assertEqual(fragment.status_code, 200)
+        self.assertTrue(json.loads(fragment.content)["ok"])
 
     # ── Sidebar shows the Universitet group links per role ───────────────────
     def test_sidebar_links_per_role(self):

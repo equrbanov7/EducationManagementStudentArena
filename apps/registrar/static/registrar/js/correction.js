@@ -34,7 +34,7 @@
   var swWrap = form.querySelector("[data-corr-sw-wrap]");
   var cwWrap = form.querySelector("[data-corr-cw-wrap]");
   var cmWrap = form.querySelector("[data-corr-cm-wrap]");
-  var histCtx = { type: "grade" }; // tarixçə modalında "Düzəlişi sil" üçün kontekst
+  var histCtx = { type: "grade" }; // tarixçə modalında "Düzəlişi geri al" üçün kontekst
 
   function open(el) { el.hidden = false; document.body.style.overflow = "hidden"; }
   function close(el) { el.hidden = true; document.body.style.overflow = ""; }
@@ -146,7 +146,8 @@
       // Yalnız ƏN SON düzəliş geri alına bilər (zəncir pozulmasın) — sonuncu element.
       var delBtn =
         idx === list.length - 1
-          ? '<button type="button" class="corr-hist-del" data-corr-del>' + gettext("Düzəlişi sil") + "</button>"
+          ? '<button type="button" class="corr-hist-del" data-corr-del data-corr-id="' +
+            esc(String(c.id || "")) + '">' + gettext("Düzəlişi geri al") + "</button>"
           : "";
       item.innerHTML =
         '<div class="corr-hist-top"><span class="corr-hist-date">' + esc(c.date) + "</span>" + doc + "</div>" +
@@ -160,7 +161,7 @@
     });
   }
 
-  // "Düzəlişi sil" → son düzəlişi geri al (dəyər köhnəyə qayıdır, sarı itir).
+  // "Düzəlişi geri al" → dəyəri köhnəyə qaytar, audit sübutunu isə saxla.
   root.addEventListener("click", function (ev) {
     var del = ev.target.closest("[data-corr-del]");
     if (!del || !root.dataset.deleteUrl) return;
@@ -168,6 +169,7 @@
     del.disabled = true;
     var fd = new FormData();
     fd.append("type", histCtx.type || "grade");
+    if (del.dataset.corrId) fd.append("correction_id", del.dataset.corrId);
     if (histCtx.markId) fd.append("mark_id", histCtx.markId);
     if (histCtx.topicId) fd.append("topic_id", histCtx.topicId);
     if (histCtx.componentId) fd.append("component_id", histCtx.componentId);

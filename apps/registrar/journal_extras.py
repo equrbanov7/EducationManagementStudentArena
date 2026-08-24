@@ -19,6 +19,7 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -193,7 +194,10 @@ def delete_selfwork_topic(*, topic) -> bool:
     (topic FK CASCADE) — UI silmədən əvvəl bal itkisi barədə xəbərdarlıq göstərir."""
     if journal_is_locked(topic.offering):
         return False
-    topic.delete()  # SelfWorkMark-lar FK cascade ilə birlikdə silinir (bal da gedir)
+    try:
+        topic.delete()  # Correction evidence varsa PROTECT akademik tarixi saxlayır.
+    except ProtectedError:
+        return False
     return True
 
 
@@ -282,6 +286,8 @@ def get_selfwork_board(offering):
 @transaction.atomic
 def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=None, allow_locked=False) -> bool:
     """Kurs işini yaz/yenilə — mövcud qeyd yalnız 2 saat içində (İKT keçir)."""
+    if not Enrollment.objects.filter(pk=enrollment.pk, status=Enrollment.Status.ENROLLED).exists():
+        return False
     offering = enrollment.offering
     if journal_is_locked(offering):
         return False

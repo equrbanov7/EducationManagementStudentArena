@@ -10,6 +10,7 @@ from django.urls import reverse
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import analytics, finals, gradebook, services
 from apps.registrar.models import (
+    CourseOffering,
     Curriculum,
     CurriculumSubject,
     Enrollment,
@@ -37,8 +38,15 @@ class _AnalyticsBase(TestCase):
                 status="active",
                 is_active=True,
             )
+            cls.faculty = OrgUnit.objects.create(
+                organization=cls.org, name="AN Fakültə", slug="an-faculty", unit_type=OrgUnitType.FACULTY
+            )
             cls.group = OrgUnit.objects.create(
-                organization=cls.org, name="KE-101", slug="an-g1", unit_type=OrgUnitType.GROUP
+                organization=cls.org,
+                name="KE-101",
+                slug="an-g1",
+                unit_type=OrgUnitType.GROUP,
+                parent=cls.faculty,
             )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
@@ -58,9 +66,17 @@ class _AnalyticsBase(TestCase):
             cls.teacher = User.objects.create_user("an_teacher", "an_teacher@qku.edu.az", "pw")
             cls.dean = User.objects.create_user("an_dean", "an_dean@qku.edu.az", "pw")
             Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
                 user=cls.dean,
                 organization=cls.org,
                 role=cls.org.roles.get(name="dean"),
+                scope_unit=cls.faculty,
                 is_primary=True,
                 is_active=True,
             )
@@ -68,6 +84,13 @@ class _AnalyticsBase(TestCase):
             cls.students = []
             for i in range(3):
                 student = User.objects.create_user(f"an_student{i}", f"an_student{i}@qku.edu.az", "pw")
+                Membership.objects.create(
+                    user=student,
+                    organization=cls.org,
+                    role=cls.org.roles.get(name="student"),
+                    is_primary=True,
+                    is_active=True,
+                )
                 record = StudentAcademicRecord.objects.create(
                     organization=cls.org,
                     student=student,
@@ -215,6 +238,65 @@ class AnalyticsViewTest(_AnalyticsBase):
     def test_teacher_gets_404(self):
         resp = self._client(self.teacher).get(reverse("registrar:analytics"))
         self.assertEqual(resp.status_code, 404)
+
+    def test_unscoped_dean_gets_404(self):
+        with bypass_rls():
+            unscoped = User.objects.create_user("an_unscoped", "an_unscoped@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=unscoped,
+                organization=self.org,
+                role=self.org.roles.get(name="dean"),
+                is_active=True,
+            )
+        self.assertEqual(self._client(unscoped).get(reverse("registrar:analytics")).status_code, 404)
+
+    def test_org_scoped_role_with_view_unit_permission_sees_dashboard(self):
+        with bypass_rls():
+            hr_user = User.objects.create_user("an_hr", "an_hr@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=hr_user,
+                organization=self.org,
+                role=self.org.roles.get(name="hr"),
+                is_active=True,
+            )
+        response = self._client(hr_user).get(reverse("registrar:analytics"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "KE-101")
+
+    def test_dean_does_not_see_other_faculty_group(self):
+        with bypass_rls():
+            other_faculty = OrgUnit.objects.create(
+                organization=self.org, name="Başqa fakültə", slug="an-other-f", unit_type=OrgUnitType.FACULTY
+            )
+            other_group = OrgUnit.objects.create(
+                organization=self.org,
+                name="OUT-OF-SCOPE",
+                slug="an-other-g",
+                unit_type=OrgUnitType.GROUP,
+                parent=other_faculty,
+            )
+            other_student = User.objects.create_user("an_other_student", "an_other_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=other_student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_active=True,
+            )
+            other_offering = CourseOffering.objects.create(
+                organization=self.org,
+                subject=self.subject,
+                period=self.period,
+                group=other_group,
+            )
+            Enrollment.objects.create(
+                organization=self.org,
+                student=other_student,
+                offering=other_offering,
+            )
+
+        resp = self._client(self.dean).get(reverse("registrar:analytics"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, "OUT-OF-SCOPE")
 
     def test_period_param_switches_semester(self):
         with bypass_rls():

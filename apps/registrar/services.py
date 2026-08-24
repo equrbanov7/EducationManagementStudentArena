@@ -18,6 +18,11 @@ from __future__ import annotations
 
 from django.db import transaction
 
+from .integrity import (
+    validate_group_elective_target,
+    validate_offering_target,
+    validate_same_organization,
+)
 from .models import (
     CourseOffering,
     CurriculumSubject,
@@ -30,6 +35,13 @@ from .models import (
 
 def get_or_create_offering(*, organization, subject, period, group, course=None):
     """The section for (subject, semester, group). Reuses the LMS course if given."""
+    validate_offering_target(
+        organization=organization,
+        subject=subject,
+        period=period,
+        group=group,
+        course=course,
+    )
     offering, created = CourseOffering.objects.get_or_create(
         organization=organization,
         subject=subject,
@@ -44,7 +56,17 @@ def get_or_create_offering(*, organization, subject, period, group, course=None)
 
 
 def enroll_student_in_subject(*, record, subject, period, kind):
-    """Ensure the student is enrolled in *subject* for *period* (their group section)."""
+    """Ensure the student is enrolled in *subject* for *period* (their group section).
+
+    Existing rows, including historical ones, are never reactivated implicitly;
+    callers that require a current enrollment must inspect ``status``.
+    """
+    validate_same_organization(
+        organization=record.organization,
+        record=record,
+        subject=subject,
+        period=period,
+    )
     offering = get_or_create_offering(
         organization=record.organization, subject=subject, period=period, group=record.group
     )
@@ -97,6 +119,15 @@ def choose_group_elective(
     Akademik təqvim (U11/U14): period qeydiyyat pəncərəsi konfiqurasiya edibsə,
     qərar yalnız pəncərə AÇIQ olanda verilə bilər (staff ``enforce_window=False``
     ilə keçə bilər)."""
+    validate_group_elective_target(
+        organization=organization,
+        group=group,
+        curriculum=curriculum,
+        period=period,
+        elective_group=elective_group,
+        subject=subject,
+        decided_by=decided_by,
+    )
     if enforce_window:
         state = getattr(period, "registration_state", None)
         if state is not None and state != "open":
@@ -140,9 +171,9 @@ def get_student_semester_plan(*, record, period, semester_number):
         }
     """
     enrollments = list(
-        Enrollment.objects.filter(
-            organization=record.organization, student=record.student, offering__period=period
-        ).select_related("offering__subject", "offering__course", "offering__assessment_scheme")
+        Enrollment.objects.filter(organization=record.organization, student=record.student, offering__period=period)
+        .exclude(status=Enrollment.Status.DROPPED)
+        .select_related("offering__subject", "offering__course", "offering__assessment_scheme")
     )
 
     elective_rows = CurriculumSubject.objects.filter(

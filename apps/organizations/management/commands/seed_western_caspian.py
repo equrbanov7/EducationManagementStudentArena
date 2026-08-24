@@ -12,10 +12,8 @@ Usage::
 
     python manage.py seed_western_caspian --password "DemoPass123!"
 
-The password is required so seeded credentials are always explicit (never a
-baked-in default). Every sample user shares that password and (per the
-e-university provisioning model) is flagged to set their own password + verify
-their email on first login when that flow is enabled.
+The required password is explicit and shared by sample users; the first-login
+flow replaces it and verifies email when enabled.
 """
 
 from __future__ import annotations
@@ -39,6 +37,7 @@ from apps.registrar.models import (
     Subject,
 )
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -46,7 +45,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "seed_western_caspian"
     help = "Seed the Qərbi Kaspi Universiteti demo tenant with all university roles and the academic hierarchy."
 
     ORG_NAME = "Qərbi Kaspi Universiteti"

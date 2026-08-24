@@ -18,7 +18,7 @@ from apps.accounts.models import ProfileRole
 from core.constants import OrganizationType, OrgUnitType
 
 from ..models import Membership, Organization, OrgUnit
-from ..scoping import get_unit_scope
+from ..scoping import get_permission_scope, get_unit_scope
 
 User = get_user_model()
 
@@ -79,6 +79,10 @@ class UniversityDefaultRolesTest(TestCase):
         aliases = ProfileRole.aliases_for_membership_role("dean", level=80)
         self.assertIn(ProfileRole.ORG_ADMIN, aliases)
 
+    def test_chair_role_has_explicit_approval_permission(self):
+        role = self.org.roles.get(name="chair_head")
+        self.assertIn("grade.approve_chair", role.permissions)
+
 
 class UnitScopingTest(TestCase):
     """Dekan/kafedra müdürü unit scope-u və view scoping-i."""
@@ -127,6 +131,23 @@ class UnitScopingTest(TestCase):
         self.assertIn(self.faculty_a, visible_units)
         self.assertIn(self.chair_a1, visible_units)  # alt-ağac daxildir
         self.assertNotIn(self.faculty_b, visible_units)
+
+    def test_permission_scope_ignores_unrelated_membership_unit(self):
+        unscoped_chair = User.objects.create_user("unscoped_chair", "uc@test.az", "StrongPass123!")
+        Membership.objects.create(
+            user=unscoped_chair,
+            organization=self.org,
+            role=self.org.roles.get(name="chair_head"),
+        )
+        Membership.objects.create(
+            user=unscoped_chair,
+            organization=self.org,
+            role=self.org.roles.get(name="student"),
+            scope_unit=self.faculty_a,
+        )
+
+        scope = get_permission_scope(unscoped_chair, self.org, "grade.approve_chair")
+        self.assertFalse(scope.has_structure_access)
 
     def test_owner_scope_is_org_wide(self):
         scope = get_unit_scope(self.owner, self.org)

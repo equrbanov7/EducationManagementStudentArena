@@ -22,6 +22,11 @@ from core.constants import AuditAction
 from core.rls import journal_unlock
 
 from . import grade_audit, journal_extras
+from .correction_reversals import (  # noqa: F401 — public compatibility facade
+    revert_last_component_correction,
+    revert_last_coursework_correction,
+    revert_last_selfwork_correction,
+)
 from .corrections import correction_author_name
 from .models import (
     ComponentScore,
@@ -30,7 +35,6 @@ from .models import (
     CourseWork,
     CourseWorkCorrection,
     SelfWorkCorrection,
-    SelfWorkMark,
 )
 
 
@@ -46,23 +50,23 @@ def _validate(reason, note, document):
 
 
 def _audit(offering, by_user, kind, changes, correction, request):
-    """Audit best-effort — savepoint-də ki, xəta domain dəyişikliyini sındırmasın."""
-    try:
-        with transaction.atomic():
-            grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind=kind, changes=changes)
-            log_action(
-                action=AuditAction.UPDATE,
-                user=by_user,
-                organization=offering.organization,
-                obj=correction,
-                reason=f"{kind}",
-                request=request,
-                changes=[
-                    {"field": c.get("item", ""), "old": c.get("old", ""), "new": c.get("new", "")} for c in changes
-                ],
-            )
-    except Exception:  # audit heç vaxt axını sındırmır
-        pass
+    """Write both audit records; the caller's atomic block is fail-closed."""
+    grade_audit.log_grade_changes(
+        offering=offering,
+        by_user=by_user,
+        kind=kind,
+        changes=changes,
+        fail_closed=True,
+    )
+    log_action(
+        action=AuditAction.UPDATE,
+        user=by_user,
+        organization=offering.organization,
+        obj=correction,
+        reason=f"{kind}",
+        request=request,
+        changes=[{"field": c.get("item", ""), "old": c.get("old", ""), "new": c.get("new", "")} for c in changes],
+    )
 
 
 # ── Sərbəst iş ───────────────────────────────────────────────────────────────
@@ -72,7 +76,9 @@ def _audit(offering, by_user, kind, changes, correction, request):
 def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, note, document, by_user, request=None):
     """Sərbəst iş xanasına (topic × tələbə) sənədli düzəliş: təhvil 0↔1."""
     note = _validate(reason, note, document)
-    mark = SelfWorkMark.objects.filter(topic=topic, enrollment=enrollment).first()
+    from .correction_target_locks import lock_selfwork
+
+    topic, enrollment, mark = lock_selfwork(topic, enrollment)
     old_done = bool(mark and mark.done)
     new_done = bool(new_done)
     if old_done == new_done:
@@ -119,38 +125,6 @@ def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, 
     return correction
 
 
-@transaction.atomic
-def revert_last_selfwork_correction(*, topic, enrollment, by_user, request=None) -> bool:
-    correction = SelfWorkCorrection.objects.filter(topic=topic, enrollment=enrollment).order_by("-created_at").first()
-    if correction is None:
-        return False
-    journal_extras.set_selfwork_mark(
-        offering=topic.offering,
-        topic_id=topic.id,
-        enrollment_id=enrollment.id,
-        done=correction.old_done,
-        by_user=by_user,
-        allow_locked=True,
-    )
-    correction.delete()
-    _audit(
-        topic.offering,
-        by_user,
-        "selfwork-correction-revert",
-        [
-            {
-                "student": grade_audit.student_label(enrollment),
-                "item": "sərbəst iş",
-                "old": "düzəliş",
-                "new": "geri alındı",
-            }
-        ],
-        None,
-        request,
-    )
-    return True
-
-
 # ── Kurs işi ─────────────────────────────────────────────────────────────────
 
 
@@ -160,8 +134,10 @@ def apply_coursework_correction(
 ):
     """Kurs işi xanasına (tələbə) sənədli düzəliş: bal / mövzu / tarix."""
     note = _validate(reason, note, document)
+    from .correction_target_locks import lock_coursework
+
+    enrollment, existing = lock_coursework(enrollment)
     offering = enrollment.offering
-    existing = CourseWork.objects.filter(enrollment=enrollment).first()
     old_score = existing.score if existing else None
     old_topic = existing.topic if existing else ""
     old_date = existing.submitted_on if existing else None
@@ -213,43 +189,6 @@ def apply_coursework_correction(
     return correction
 
 
-@transaction.atomic
-def revert_last_coursework_correction(*, enrollment, by_user, request=None) -> bool:
-    correction = CourseWorkCorrection.objects.filter(enrollment=enrollment).order_by("-created_at").first()
-    if correction is None:
-        return False
-    empty = correction.old_score is None and not correction.old_topic and correction.old_date is None
-    if empty:
-        # Düzəliş kurs işini YARADIB → geri alma onu tam silir.
-        CourseWork.objects.filter(enrollment=enrollment).delete()
-    else:
-        journal_extras.save_course_work(
-            enrollment=enrollment,
-            topic=correction.old_topic,
-            score=correction.old_score,
-            submitted_on=correction.old_date,
-            by_user=by_user,
-            allow_locked=True,
-        )
-    correction.delete()
-    _audit(
-        enrollment.offering,
-        by_user,
-        "coursework-correction-revert",
-        [
-            {
-                "student": grade_audit.student_label(enrollment),
-                "item": "kurs işi",
-                "old": "düzəliş",
-                "new": "geri alındı",
-            }
-        ],
-        None,
-        request,
-    )
-    return True
-
-
 # ── Kollokvium / komponent balı ──────────────────────────────────────────────
 
 
@@ -257,10 +196,12 @@ def revert_last_coursework_correction(*, enrollment, by_user, request=None) -> b
 def apply_component_correction(*, component, enrollment, new_score, reason, note, document, by_user, request=None):
     """Komponent balına (Kollokvium K1/K2/K3) sənədli düzəliş — 2 saat + pəncərə keçilir."""
     note = _validate(reason, note, document)
+    from .correction_target_locks import lock_component
+
+    component, enrollment, existing = lock_component(component, enrollment)
     offering = component.offering
     if journal_extras.journal_is_locked(offering):
         raise ValidationError(pgettext("registrar.correction", "The journal is published — it can't be changed."))
-    existing = ComponentScore.objects.filter(component=component, enrollment=enrollment).first()
     old_score = existing.score if existing else None
     if new_score in (None, ""):
         new_val = None
@@ -311,44 +252,6 @@ def apply_component_correction(*, component, enrollment, new_score, reason, note
     return correction
 
 
-@transaction.atomic
-def revert_last_component_correction(*, component, enrollment, by_user, request=None) -> bool:
-    correction = (
-        ComponentScoreCorrection.objects.filter(component=component, enrollment=enrollment)
-        .order_by("-created_at")
-        .first()
-    )
-    if correction is None:
-        return False
-    with journal_unlock():
-        if correction.old_score is None:
-            ComponentScore.objects.filter(component=component, enrollment=enrollment).delete()
-        else:
-            ComponentScore.objects.update_or_create(
-                organization=component.offering.organization,
-                component=component,
-                enrollment=enrollment,
-                defaults={"score": correction.old_score, "entered_by": by_user},
-            )
-    correction.delete()
-    _audit(
-        component.offering,
-        by_user,
-        "component-correction-revert",
-        [
-            {
-                "student": grade_audit.student_label(enrollment),
-                "item": "kollokvium",
-                "old": "düzəliş",
-                "new": "geri alındı",
-            }
-        ],
-        None,
-        request,
-    )
-    return True
-
-
 def _to_decimal(raw):
     return journal_extras._to_decimal(raw)
 
@@ -372,7 +275,10 @@ def _cm_entry(c, include_document):
 def component_corrections_map(offering, *, include_document=False):
     """{"<component_id>:<enrollment_id>": [düzəliş qeydləri]} — sarı xana + tarixçə."""
     result: dict[str, list[dict]] = {}
-    qs = ComponentScoreCorrection.objects.filter(component__offering=offering).order_by("created_at")
+    qs = ComponentScoreCorrection.objects.filter(
+        component__offering=offering,
+        reversal__isnull=True,
+    ).order_by("created_at")
     for c in qs:
         result.setdefault(f"{c.component_id}:{c.enrollment_id}", []).append(_cm_entry(c, include_document))
     return result
@@ -449,7 +355,10 @@ def annotate_coursework_rows(rows, cmap):
 def selfwork_corrections_map(offering, *, include_document=False):
     """{"<topic_id>:<enrollment_id>": [düzəliş qeydləri]} — sarı xana + tarixçə."""
     result: dict[str, list[dict]] = {}
-    qs = SelfWorkCorrection.objects.filter(topic__offering=offering).order_by("created_at")
+    qs = SelfWorkCorrection.objects.filter(
+        topic__offering=offering,
+        reversal__isnull=True,
+    ).order_by("created_at")
     for c in qs:
         result.setdefault(f"{c.topic_id}:{c.enrollment_id}", []).append(_sw_entry(c, include_document))
     return result
@@ -458,7 +367,10 @@ def selfwork_corrections_map(offering, *, include_document=False):
 def coursework_corrections_map(offering, *, include_document=False):
     """{"<enrollment_id>": [düzəliş qeydləri]} — sarı sətir + tarixçə."""
     result: dict[str, list[dict]] = {}
-    qs = CourseWorkCorrection.objects.filter(enrollment__offering=offering).order_by("created_at")
+    qs = CourseWorkCorrection.objects.filter(
+        enrollment__offering=offering,
+        reversal__isnull=True,
+    ).order_by("created_at")
     for c in qs:
         result.setdefault(str(c.enrollment_id), []).append(_cw_entry(c, include_document))
     return result

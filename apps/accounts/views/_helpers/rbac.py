@@ -203,11 +203,34 @@ def _role_capabilities(user, profile):
     from apps.exams.public import can_manage_exam_rooms as _can_manage_exam_rooms
 
     can_manage_exam_rooms = _can_manage_exam_rooms(user)
-    # Registrar console (K3): who may manage the academic catalogue (programs /
-    # subjects). Org-admin (rector/vice-rector/owner) + dekan/kafedra müdürü.
-    # The actual authorisation is re-checked in registrar.views (defence in depth);
-    # this flag only drives nav visibility.
-    can_manage_registrar = is_superadmin or is_org_admin or is_unit_manager
+    # View qapısı ilə eyni permission-specific, fail-closed scope semantikası.
+    if active_organization is not None:
+        from apps.organizations.public import get_permission_scope
+
+        can_manage_registrar = get_permission_scope(user, active_organization, "course.edit").is_org_wide
+        can_approve_grades = any(
+            get_permission_scope(user, active_organization, permission).has_structure_access
+            for permission in ("grade.approve_chair", "grade.approve_final")
+        )
+        analytics_all_scope = get_permission_scope(user, active_organization, "analytics.view_all")
+        analytics_unit_scope = get_permission_scope(user, active_organization, "analytics.view_unit")
+        can_view_unit_analytics = analytics_all_scope.has_structure_access or analytics_unit_scope.has_structure_access
+        # Kataloq axtarışı (⌘K, U8): struktur heyəti imzası — member.view + unit.view.
+        # Burada QƏSDƏN scope (`get_permission_scope`) yox, rol icazəsi yoxlanır:
+        # axtarış naviqasiya rahatlığıdır və scope_unit hələ təyin edilməmiş
+        # dekan/kafedra müdiri onu itirməməlidir (təsdiq əməliyyatlarından fərqli).
+        # Tək `member.view` kifayət etmir — lead_student/tutor da daşıyır; `unit.view`
+        # cütlüyü auditoriyanı köhnə is_unit_manager dairəsinə yaxın saxlayır.
+        from core.permissions import has_permission as _has_search_perm
+
+        _actor_perms_all, _ = _collect_actor_permissions(user, active_organization)
+        _actor_perm_list = list(_actor_perms_all)
+        can_search_directory = is_superadmin or (
+            _has_search_perm(_actor_perm_list, "member.view") and _has_search_perm(_actor_perm_list, "unit.view")
+        )
+    else:
+        can_manage_registrar = can_approve_grades = can_view_unit_analytics = False
+        can_search_directory = False
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
@@ -398,8 +421,12 @@ def _role_capabilities(user, profile):
         # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
         if is_teacher or is_org_admin or is_superadmin or is_student:
             allowed_sections.add("my-journal")
+        if can_approve_grades:
+            allowed_sections.add("grade-approvals")
+        if can_view_unit_analytics:
+            allowed_sections.add("analytics")
         if is_superadmin or is_org_admin or is_unit_manager:
-            allowed_sections.update({"grade-approvals", "analytics", "academic-records"})
+            allowed_sections.add("academic-records")
 
     # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
     # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API
@@ -499,8 +526,10 @@ def _role_capabilities(user, profile):
         "can_manage_registrar": can_manage_registrar,
         "can_access_final_center": can_access_final_center,
         "can_manage_exam_rooms": can_manage_exam_rooms,
-        # Grade-approval chain (U7.2): chairs/deans/admins review submitted journals.
-        "can_approve_grades": is_superadmin or is_org_admin or is_unit_manager,
+        # Grade-approval chain (U7.2): permission-scope əsaslı (yuxarıda hesablanır);
+        # köhnə rol-əsaslı ifadə nav↔view uyğunsuzluğu yaradırdı.
+        "can_approve_grades": can_approve_grades,
+        "can_search_directory": can_search_directory,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,
         "can_view_student_assignments": can_view_student_assignments,

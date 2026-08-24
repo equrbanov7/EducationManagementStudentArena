@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals, gradebook, services
 from apps.registrar.models import (
     Curriculum,
@@ -61,6 +61,20 @@ class FinalsTest(TestCase):
             )
             self.teacher = User.objects.create_user("fn_teacher", "fn_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("fn_student", "fn_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,
@@ -175,11 +189,14 @@ class FinalsTest(TestCase):
 
     # ── publish lock ──────────────────────────────────────────────────────────
     def test_publish_locks_exam_entry(self):
-        from apps.registrar.models import AssessmentScheme
+        from apps.registrar.models import ApprovalStatus, AssessmentScheme
 
         with bypass_rls():
             self._set_entry(40)
-            finals.publish_offering(offering=self.offering, by_user=self.teacher)
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+            scheme.approval_status = ApprovalStatus.APPROVED
+            scheme.is_published = True
+            scheme.save(update_fields=["approval_status", "is_published"])
             self.assertTrue(AssessmentScheme.objects.get(offering=self.offering).is_published)
             self.assertIsNone(finals.set_exam_score(enrollment=self.enrollment, score=40))
 

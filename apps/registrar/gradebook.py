@@ -263,7 +263,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     from .models import JournalCorrection
 
     corrected_ids = set(
-        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).values_list(
+        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering, reversal__isnull=True).values_list(
             "lesson_mark_id", flat=True
         )
     )
@@ -418,7 +418,7 @@ def get_offering_journal(*, offering, newest_first=False):
     from .models import JournalCorrection
 
     corrected_mark_ids = set(
-        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).values_list(
+        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering, reversal__isnull=True).values_list(
             "lesson_mark_id", flat=True
         )
     )

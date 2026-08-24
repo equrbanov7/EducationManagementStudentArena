@@ -25,6 +25,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.crypto import get_random_string
 
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.roles import ProfileRole
 
 User = get_user_model()
@@ -51,7 +52,8 @@ _ROLE_TO_PROFILE = {
 _COLUMNS = ("username", "ad_soyad", "rol", "teskilat_slug", "vahid", "ilkin_parol", "qeyd")
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "import_users_from_excel"
     help = "Excel faylından istifadəçiləri toplu yaradır (rol + vahid + ilk-giriş axını)."
 
     def add_arguments(self, parser):

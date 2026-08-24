@@ -203,6 +203,25 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
 
+    class AccessState(models.TextChoices):
+        """Hesabın tətbiq səthlərinə buraxılma vəziyyəti.
+
+        ``STAGED`` yalnız idarə olunan import üçün kilidli keçid vəziyyətidir;
+        adi qeydiyyatların mövcud davranışı ``ACTIVE`` olaraq qalır.
+        """
+
+        ACTIVE = "active", "Aktiv giriş"
+        STAGED = "staged", "Mərhələlənmiş (giriş bağlıdır)"
+
+    access_state = models.CharField(
+        max_length=16,
+        choices=AccessState.choices,
+        default=AccessState.ACTIVE,
+        db_index=True,
+        verbose_name="Giriş vəziyyəti",
+        help_text="Legacy import hesabları ayrıca təsdiqlənənədək staged qalır.",
+    )
+
     # Organization linkage for multi-tenant support
     organization = models.ForeignKey(
         "organizations.Organization",
@@ -264,6 +283,20 @@ class UserProfile(models.Model):
         default="",
         verbose_name="Məktəb nömrəsi/identifikatoru",
         help_text="Tələbə üçün məktəb nömrəsi və ya rəsmi identifikator",
+    )
+
+    # ``student_school_identifier`` tarixən məktəbin öz təşkilat kodunu daşıya
+    # bilir və tələbələr arasında unikal deyil. Ona görə legacy cutover üçün
+    # həmin biznes sahəsinin mənası dəyişdirilmir; təsdiqlənmiş, tələbəyə aid
+    # institusional açar ayrıca və boş/null semantikasını qoruyaraq saxlanılır.
+    institutional_identifier = models.CharField(
+        max_length=120,
+        null=True,
+        blank=True,
+        default=None,
+        editable=False,
+        verbose_name="İnstitusional tələbə identifikatoru",
+        help_text="Yalnız təsdiqlənmiş import mapping-i ilə doldurulan tələbə açarı.",
     )
 
     student_specialization = models.CharField(
@@ -536,3 +569,7 @@ class AcademicProfileItem(models.Model):
 
     def __str__(self):
         return f"{self.user_id} · {self.get_kind_display()} · {self.title[:40]}"
+
+
+# Separate module keeps this already-large model module below the size budget.
+from .identity_models import AccountActivationEvidence  # noqa: E402,F401

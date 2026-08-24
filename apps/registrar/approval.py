@@ -24,27 +24,20 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.registrar import gradebook
-from apps.registrar.models import ApprovalStatus
+from apps.registrar.models import ApprovalStatus, AssessmentScheme
 
-# Roles that may act as chair (kafedra müdiri) / dean (dekan). Organisation
-# owner + admin roles can always act (small-org / bootstrap convenience).
-_ADMIN_ROLES = frozenset({"org_admin", "org_owner", "rector", "vice_rector"})
-_CHAIR_ROLES = _ADMIN_ROLES | {"department_head", "chair_head", "dean"}
-_DEAN_ROLES = _ADMIN_ROLES | {"dean"}
+CHAIR_APPROVAL_PERMISSION = "grade.approve_chair"
+FINAL_APPROVAL_PERMISSION = "grade.approve_final"
 
 
-def _has_role(user, organization, role_names) -> bool:
+def _permission_scope(user, organization, permission):
     from django.apps import apps as django_apps
 
-    if getattr(user, "is_superuser", False) or organization.owner_id == getattr(user, "pk", None):
-        return True
-    Membership = django_apps.get_model("organizations", "Membership")
-    return Membership.objects.filter(
-        organization=organization, user=user, is_active=True, role__name__in=list(role_names)
-    ).exists()
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    return org_unit_model.user_permission_scope(user, organization, permission)
 
 
-def offering_in_actor_scope(user, organization, offering) -> bool:
+def offering_in_actor_scope(user, organization, offering, *, permission=CHAIR_APPROVAL_PERMISSION) -> bool:
     """Təsdiqləyənin unit alt-ağacı bu dərs açılışını əhatə edirmi.
 
     TƏHLÜKƏSİZLİK (2026-07-31 auditi): ``can_chair_approve`` / ``can_dean_approve``
@@ -52,33 +45,62 @@ def offering_in_actor_scope(user, organization, offering) -> bool:
     olduğunu yoxlamırdı. Nəticədə A kafedrasının müdiri B kafedrasının jurnalını
     təsdiqləyə (və dekan təsdiqi ilə ƏBƏDİ kilidləyə) bilirdi.
 
-    Org-wide rollar (owner/admin/rektorat/superuser) həmişə keçir — onların
-    səlahiyyəti onsuz da bütün təşkilatı əhatə edir.
-
-    QAYDA: yoxlama YALNIZ istifadəçiyə unit scope-u TƏYİN OLUNUBSA tətbiq edilir.
-    Scope-u olmayan kafedra müdiri/dekan köhnə davranışı saxlayır — əks halda
-    strukturu hələ qurmamış təşkilatlarda bütün təsdiq zənciri dayanardı. Yəni
-    bu, mövcud icazəni daraltmır, düzgün qurulmuş iyerarxiyada isə kənar unitin
-    jurnalını bağlayır.
-
-    QALIQ RİSK (sənədləşdirilir): ``scope_unit`` təyin edilməmiş kafedra müdiri
-    hələ də bütün təşkilatın jurnallarını təsdiqləyə bilir. Bu, provisionlaşdırma
-    məsələsidir — struktur qurulandan sonra hər idarəetmə üzvlüyünə ``scope_unit``
-    verilməlidir.
+    İcazə rol adından deyil, rolun mərkəzi permission tərifindən gəlir. UNIT
+    rolunda etibarlı ``scope_unit`` yoxdursa nəticə fail-closed-dur.
 
     MODUL SƏRHƏDİ: registrar ``apps.organizations``-u Python səviyyəsində import
     ETMİR (dövr yaranardı) — model app registry ilə həll olunur, alt-ağac
     yoxlaması isə ``OrgUnit.user_scope_covers`` daxilində, öz modulundadır.
     """
+    scope = _permission_scope(user, organization, permission)
+    if not scope.has_structure_access:
+        return False
+    if scope.is_org_wide:
+        return True
+    group_id = getattr(offering, "group_id", None)
+    if group_id is None:
+        return False
     from django.apps import apps as django_apps
 
-    if getattr(user, "is_superuser", False) or organization.owner_id == getattr(user, "pk", None):
-        return True
-    if _has_role(user, organization, _ADMIN_ROLES):
-        return True
-
     org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    return org_unit_model.user_scope_covers(user, organization, getattr(offering, "group_id", None))
+    return org_unit_model.objects.filter(organization=organization, pk=group_id).filter(scope.unit_subtree_q()).exists()
+
+
+def permission_scope_q(user, organization, permission, *, path_field, id_field):
+    """Fail-closed queryset filter for one permission's structural scope."""
+    return _permission_scope(user, organization, permission).unit_subtree_q(
+        path_field=path_field,
+        id_field=id_field,
+    )
+
+
+def can_view_analytics(user, organization) -> bool:
+    return bool(_analytics_scopes(user, organization))
+
+
+def _analytics_scopes(user, organization):
+    all_scope = _permission_scope(user, organization, "analytics.view_all")
+    unit_scope = _permission_scope(user, organization, "analytics.view_unit")
+    scopes = [all_scope] if all_scope.has_structure_access else []
+    if unit_scope.has_structure_access:
+        scopes.append(unit_scope)
+    return scopes
+
+
+def analytics_scope_q(user, organization, *, path_field, id_field):
+    scopes = _analytics_scopes(user, organization)
+    if any(scope.is_org_wide for scope in scopes):
+        from django.db.models import Q
+
+        return Q()
+    if not scopes:
+        from django.db.models import Q
+
+        return Q(pk__in=[])
+    query = scopes[0].unit_subtree_q(path_field=path_field, id_field=id_field)
+    for scope in scopes[1:]:
+        query |= scope.unit_subtree_q(path_field=path_field, id_field=id_field)
+    return query
 
 
 def can_submit(user, offering) -> bool:
@@ -97,40 +119,38 @@ def can_chair_approve(user, organization, offering=None) -> bool:
     :func:`offering_in_actor_scope`). Səhifə-səviyyə görünürlük yoxlamaları
     (məs. analitika paneli) offering-siz çağırır — orada konkret jurnal yoxdur.
     """
-    if not _has_role(user, organization, _CHAIR_ROLES):
-        return False
     if offering is None:
-        return True
-    return offering_in_actor_scope(user, organization, offering)
+        return _permission_scope(user, organization, CHAIR_APPROVAL_PERMISSION).has_structure_access
+    return offering_in_actor_scope(user, organization, offering, permission=CHAIR_APPROVAL_PERMISSION)
 
 
 def can_dean_approve(user, organization, offering=None) -> bool:
-    if not _has_role(user, organization, _DEAN_ROLES):
-        return False
     if offering is None:
-        return True
-    return offering_in_actor_scope(user, organization, offering)
+        return _permission_scope(user, organization, FINAL_APPROVAL_PERMISSION).has_structure_access
+    return offering_in_actor_scope(user, organization, offering, permission=FINAL_APPROVAL_PERMISSION)
+
+
+def _locked_scheme(offering):
+    scheme = gradebook.ensure_assessment_scheme(offering=offering)
+    return AssessmentScheme.objects.select_for_update().get(pk=scheme.pk)
 
 
 def _audit(offering, by_user, action_label, reason):
-    """Best-effort audit trail entry (never blocks the domain action)."""
-    try:
-        from django.apps import apps as django_apps
+    """Write the mandatory audit row in the transition's transaction."""
+    from django.apps import apps as django_apps
 
-        from core.constants import AuditAction
+    from core.constants import AuditAction
 
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=offering.organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.journal_approval",
-            resource_id=str(offering.pk),
-            resource_repr=f"{offering.subject.code} jurnalı — {action_label}",
-            reason=reason,
-        )
-    except Exception:  # noqa: BLE001 — audit must never block the domain action
-        pass
+    AuditLog = django_apps.get_model("audit", "AuditLog")
+    AuditLog.objects.create(
+        user=by_user if getattr(by_user, "pk", None) else None,
+        organization=offering.organization,
+        action=AuditAction.UPDATE,
+        resource_type="registrar.journal_approval",
+        resource_id=str(offering.pk),
+        resource_repr=f"{offering.subject.code} jurnalı — {action_label}",
+        reason=reason,
+    )
 
 
 @transaction.atomic
@@ -138,13 +158,26 @@ def submit_for_approval(*, offering, by_user):
     """Teacher submits the journal → SUBMITTED (awaiting chair). Locks edits."""
     if not can_submit(by_user, offering):
         raise PermissionDenied("Bu jurnalı təqdim etmək icazəniz yoxdur.")
-    scheme = gradebook.ensure_assessment_scheme(offering=offering)
+    scheme = _locked_scheme(offering)
     if scheme.is_published or scheme.approval_status not in (ApprovalStatus.DRAFT, ApprovalStatus.RETURNED):
         return scheme
     scheme.approval_status = ApprovalStatus.SUBMITTED
     scheme.submitted_by = by_user
+    scheme.chair_approved_by = None
+    scheme.dean_approved_by = None
+    scheme.is_published = False
     scheme.returned_reason = ""
-    scheme.save(update_fields=["approval_status", "submitted_by", "returned_reason", "updated_at"])
+    scheme.save(
+        update_fields=[
+            "approval_status",
+            "submitted_by",
+            "chair_approved_by",
+            "dean_approved_by",
+            "is_published",
+            "returned_reason",
+            "updated_at",
+        ]
+    )
     _audit(offering, by_user, "təqdim edildi", "Jurnal təsdiq üçün təqdim olundu (kafedra gözlənilir).")
     return scheme
 
@@ -152,7 +185,7 @@ def submit_for_approval(*, offering, by_user):
 @transaction.atomic
 def chair_approve(*, offering, by_user):
     """Kafedra müdiri approves → CHAIR_APPROVED (awaiting dean)."""
-    scheme = gradebook.ensure_assessment_scheme(offering=offering)
+    scheme = _locked_scheme(offering)
     if not can_chair_approve(by_user, offering.organization, offering=offering):
         raise PermissionDenied("Kafedra təsdiqi üçün icazəniz yoxdur.")
     if scheme.approval_status != ApprovalStatus.SUBMITTED:
@@ -167,7 +200,7 @@ def chair_approve(*, offering, by_user):
 @transaction.atomic
 def dean_approve(*, offering, by_user):
     """Dekan gives final approval → APPROVED + publishes (locks permanently)."""
-    scheme = gradebook.ensure_assessment_scheme(offering=offering)
+    scheme = _locked_scheme(offering)
     if not can_dean_approve(by_user, offering.organization, offering=offering):
         raise PermissionDenied("Dekan təsdiqi üçün icazəniz yoxdur.")
     if scheme.approval_status != ApprovalStatus.CHAIR_APPROVED:
@@ -183,15 +216,26 @@ def dean_approve(*, offering, by_user):
 @transaction.atomic
 def return_for_revision(*, offering, by_user, reason=""):
     """Chair/dean returns the journal to the teacher → RETURNED (edits re-open)."""
-    scheme = gradebook.ensure_assessment_scheme(offering=offering)
+    scheme = _locked_scheme(offering)
     if not can_chair_approve(by_user, offering.organization, offering=offering):
         raise PermissionDenied("Jurnalı geri qaytarmaq üçün icazəniz yoxdur.")
     if scheme.approval_status not in (ApprovalStatus.SUBMITTED, ApprovalStatus.CHAIR_APPROVED):
         return scheme
     scheme.approval_status = ApprovalStatus.RETURNED
     scheme.returned_reason = (reason or "").strip()[:1000]
+    scheme.chair_approved_by = None
+    scheme.dean_approved_by = None
     scheme.is_published = False
-    scheme.save(update_fields=["approval_status", "returned_reason", "is_published", "updated_at"])
+    scheme.save(
+        update_fields=[
+            "approval_status",
+            "returned_reason",
+            "chair_approved_by",
+            "dean_approved_by",
+            "is_published",
+            "updated_at",
+        ]
+    )
     _audit(
         offering,
         by_user,

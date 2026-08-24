@@ -1,14 +1,16 @@
 """Tests for the grade-approval chain (U7.2): teacher → chair → dean → official."""
 
 import datetime
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError, transaction
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar import approval, gradebook, services
+from apps.registrar import approval, finals, gradebook, services
 from apps.registrar.models import (
     ApprovalStatus,
     Curriculum,
@@ -37,8 +39,22 @@ class _ApprovalBase(TestCase):
                 status="active",
                 is_active=True,
             )
+            cls.faculty = OrgUnit.objects.create(
+                organization=cls.org, name="Fakültə", slug="ap-faculty", unit_type=OrgUnitType.FACULTY
+            )
+            cls.chair_unit = OrgUnit.objects.create(
+                organization=cls.org,
+                name="Kafedra",
+                slug="ap-chair",
+                unit_type=OrgUnitType.CHAIR,
+                parent=cls.faculty,
+            )
             cls.group = OrgUnit.objects.create(
-                organization=cls.org, name="G1", slug="ap-g1", unit_type=OrgUnitType.GROUP
+                organization=cls.org,
+                name="G1",
+                slug="ap-g1",
+                unit_type=OrgUnitType.GROUP,
+                parent=cls.chair_unit,
             )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
@@ -58,6 +74,7 @@ class _ApprovalBase(TestCase):
             cls.teacher = User.objects.create_user("ap_teacher", "ap_teacher@qku.edu.az", "pw")
             cls.chair = User.objects.create_user("ap_chair", "ap_chair@qku.edu.az", "pw")
             cls.dean = User.objects.create_user("ap_dean", "ap_dean@qku.edu.az", "pw")
+            cls.admin = User.objects.create_user("ap_admin", "ap_admin@qku.edu.az", "pw")
             cls.student = User.objects.create_user("ap_student", "ap_student@qku.edu.az", "pw")
             Membership.objects.create(
                 user=cls.teacher,
@@ -70,6 +87,7 @@ class _ApprovalBase(TestCase):
                 user=cls.chair,
                 organization=cls.org,
                 role=cls.org.roles.get(name="chair_head"),
+                scope_unit=cls.chair_unit,
                 is_primary=True,
                 is_active=True,
             )
@@ -77,6 +95,21 @@ class _ApprovalBase(TestCase):
                 user=cls.dean,
                 organization=cls.org,
                 role=cls.org.roles.get(name="dean"),
+                scope_unit=cls.faculty,
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=cls.admin,
+                organization=cls.org,
+                role=cls.org.roles.get(name="rector"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=cls.student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
                 is_primary=True,
                 is_active=True,
             )
@@ -130,6 +163,14 @@ class ApprovalServiceTest(_ApprovalBase):
             self.assertEqual(scheme.dean_approved_by_id, self.dean.id)
             self.assertTrue(scheme.is_published)
 
+    def test_org_wide_admin_can_complete_approval_chain(self):
+        with bypass_rls():
+            approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
+            approval.chair_approve(offering=self.offering, by_user=self.admin)
+            scheme = approval.dean_approve(offering=self.offering, by_user=self.admin)
+        self.assertEqual(scheme.approval_status, ApprovalStatus.APPROVED)
+        self.assertTrue(scheme.is_published)
+
     def test_dean_cannot_skip_chair(self):
         with bypass_rls():
             approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
@@ -169,6 +210,46 @@ class ApprovalServiceTest(_ApprovalBase):
             approval.chair_approve(offering=self.offering, by_user=self.chair)
             with self.assertRaises(PermissionDenied):
                 approval.dean_approve(offering=self.offering, by_user=self.teacher)
+
+    def test_direct_publish_service_is_denied(self):
+        with bypass_rls(), self.assertRaises(PermissionDenied):
+            finals.publish_offering(offering=self.offering, by_user=self.teacher)
+        with bypass_rls():
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+        self.assertEqual(scheme.approval_status, ApprovalStatus.DRAFT)
+        self.assertFalse(scheme.is_published)
+
+    def test_database_rejects_draft_published_pair(self):
+        with bypass_rls():
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                type(scheme).objects.filter(pk=scheme.pk).update(is_published=True)
+            scheme.refresh_from_db()
+        self.assertFalse(scheme.is_published)
+
+    def test_audit_failure_rolls_back_transition(self):
+        with (
+            bypass_rls(),
+            patch("apps.audit.models.AuditLog.objects.create", side_effect=RuntimeError("audit unavailable")),
+            self.assertRaises(RuntimeError),
+        ):
+            approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
+        with bypass_rls():
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+        self.assertEqual(scheme.approval_status, ApprovalStatus.DRAFT)
+
+    def test_final_approval_audit_failure_rolls_back_official_state(self):
+        with bypass_rls():
+            approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
+            approval.chair_approve(offering=self.offering, by_user=self.chair)
+            with (
+                patch("apps.audit.models.AuditLog.objects.create", side_effect=RuntimeError("audit unavailable")),
+                self.assertRaises(RuntimeError),
+            ):
+                approval.dean_approve(offering=self.offering, by_user=self.dean)
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+        self.assertEqual(scheme.approval_status, ApprovalStatus.CHAIR_APPROVED)
+        self.assertFalse(scheme.is_published)
 
 
 class ApprovalViewTest(_ApprovalBase):
@@ -235,6 +316,16 @@ class ApprovalViewTest(_ApprovalBase):
     def test_approvals_inbox_forbidden_for_teacher(self):
         resp = self._client(self.teacher).get(reverse("registrar:approvals_inbox"))
         self.assertEqual(resp.status_code, 404)
+
+    def test_teacher_cannot_direct_publish_via_post(self):
+        resp = self._client(self.teacher).post(
+            reverse("registrar:journal_detail", args=[self.offering.id]), {"action": "publish"}
+        )
+        self.assertEqual(resp.status_code, 404)
+        with bypass_rls():
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+            self.assertEqual(scheme.approval_status, ApprovalStatus.DRAFT)
+            self.assertFalse(scheme.is_published)
 
 
 class ApprovalUnitScopeTest(_ApprovalBase):
@@ -314,12 +405,79 @@ class ApprovalUnitScopeTest(_ApprovalBase):
         self.assertFalse(context["can_chair_approve"])
         self.assertFalse(context["can_return"])
 
-    def test_unscoped_chair_keeps_previous_behaviour(self):
-        """Scope təyin edilməmiş üzvlük köhnə davranışı saxlayır (regressiya yox).
-
-        Yoxlama yalnız `scope_unit` verilmiş idarəetmə üzvlükləri üçün işləyir;
-        əks halda strukturu hələ qurmamış təşkilatlarda təsdiq zənciri dayanardı.
-        """
+    def test_unscoped_chair_is_denied(self):
+        unscoped = User.objects.create_user("ap_unscoped", "ap_unscoped@qku.edu.az", "pw")
+        Membership.objects.create(
+            user=unscoped,
+            organization=self.org,
+            role=self.org.roles.get(name="chair_head"),
+            is_active=True,
+        )
         self._submit()
 
-        self.assertTrue(approval.can_chair_approve(self.chair, self.org, offering=self.offering))
+        self.assertFalse(approval.can_chair_approve(unscoped, self.org, offering=self.offering))
+        with self.assertRaises(PermissionDenied):
+            approval.chair_approve(offering=self.offering, by_user=unscoped)
+
+        client = Client()
+        client.force_login(unscoped)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        self.assertEqual(client.get(reverse("registrar:approvals_inbox")).status_code, 404)
+
+    def test_unscoped_dean_is_denied_final_approval_and_inbox(self):
+        unscoped = User.objects.create_user("ap_unscoped_dean", "ap_unscoped_dean@qku.edu.az", "pw")
+        Membership.objects.create(
+            user=unscoped,
+            organization=self.org,
+            role=self.org.roles.get(name="dean"),
+            is_active=True,
+        )
+        self._submit()
+        approval.chair_approve(offering=self.offering, by_user=self.chair_a)
+
+        self.assertFalse(approval.can_dean_approve(unscoped, self.org, offering=self.offering))
+        with self.assertRaises(PermissionDenied):
+            approval.dean_approve(offering=self.offering, by_user=unscoped)
+
+        client = Client()
+        client.force_login(unscoped)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        self.assertEqual(client.get(reverse("registrar:approvals_inbox")).status_code, 404)
+
+    def test_other_unit_inbox_does_not_leak_journal(self):
+        self._submit()
+        client = Client()
+        client.force_login(self.chair_b)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+
+        response = client.get(reverse("registrar:approvals_inbox"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "CS101")
+
+    def test_other_organization_scope_cannot_approve(self):
+        other_owner = User.objects.create_user("ap_other_owner", "ap_other_owner@qku.edu.az", "pw")
+        other_actor = User.objects.create_user("ap_other_chair", "ap_other_chair@qku.edu.az", "pw")
+        other_org = Organization.objects.create(
+            name="AP Other", slug="ap-other", org_type=OrganizationType.UNIVERSITY, owner=other_owner
+        )
+        other_unit = OrgUnit.objects.create(
+            organization=other_org, name="Other", slug="ap-other-unit", unit_type=OrgUnitType.CHAIR
+        )
+        Membership.objects.create(
+            user=other_actor,
+            organization=other_org,
+            role=other_org.roles.get(name="chair_head"),
+            scope_unit=other_unit,
+            is_active=True,
+        )
+        self._submit()
+
+        self.assertFalse(approval.can_chair_approve(other_actor, self.org, offering=self.offering))
+        with self.assertRaises(PermissionDenied):
+            approval.chair_approve(offering=self.offering, by_user=other_actor)
