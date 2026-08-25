@@ -230,6 +230,7 @@ class RehearsalPolicy:
     max_staged_accounts: int
     student_role_name: str
     worker_role_name: str
+    stage_contact_pending: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "phase_keys", _validated_phase_keys(self.phase_keys))
@@ -257,6 +258,11 @@ class RehearsalPolicy:
                 raise LegacyRehearsalConfigError("legacy_rehearsal_policy_role_name_invalid")
         if self.max_staged_accounts > 0 and not (self.student_role_name and self.worker_role_name):
             raise LegacyRehearsalConfigError("legacy_rehearsal_policy_role_name_required")
+        if type(self.stage_contact_pending) is not bool:
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_invalid")
+        if self.stage_contact_pending and self.max_staged_accounts == 0:
+            # Düymə açıqdırsa blast-radius qapağı da açıq şəkildə verilməlidir.
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_contact_pending_invalid")
 
     def _digest_payload(self) -> dict[str, object]:
         return {
@@ -266,6 +272,7 @@ class RehearsalPolicy:
             "max_staged_accounts": self.max_staged_accounts,
             "phase_keys": list(self.phase_keys),
             "source_chunk_size": self.source_chunk_size,
+            "stage_contact_pending": self.stage_contact_pending,
             "student_identifier_policy": self.student_identifier_policy.value,
             "student_role_name": self.student_role_name,
             "username_policy": self.username_policy.value,

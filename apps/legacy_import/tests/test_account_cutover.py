@@ -467,3 +467,78 @@ def test_accounts_module_has_no_reverse_dependency_on_legacy_import():
     dependencies, _core_dependencies = build_graph()
 
     assert "legacy_import" not in dependencies.get("accounts", set())
+
+
+@pytest.mark.django_db
+def test_contact_pending_staging_requires_explicit_flag_and_clean_rules(django_user_model):
+    """allow_contact_pending: yalnız email_untrusted qaydalı sətir, yalnız açıq bayraqla."""
+    from apps.legacy_import.services.account_cutover import CONTACT_PENDING_STAGEABLE_RULES
+
+    assert CONTACT_PENDING_STAGEABLE_RULES == frozenset({"legacy_account_email_untrusted"})
+
+    actor = django_user_model.objects.create_superuser(
+        username="cutover_cp_actor",
+        email="cutover-cp-actor@example.com",
+        password="test-only",
+    )
+    organization = Organization.objects.create(
+        name="Cutover contact-pending organization",
+        slug="cutover-cp-organization",
+        org_type=OrganizationType.UNIVERSITY,
+        owner=actor,
+        status="active",
+        is_active=True,
+    )
+    role = organization.roles.get(name="student")
+    identity = _identity(email="cp-user@example.com", username="cp_user")
+    # deny_all siyasəti altında nəticə CONTACT_VERIFICATION_REQUIRED + email_untrusted olur.
+    classification = classify_projected_account_cutover([identity], authoritative_email_policy=deny_all_email_trust)[0]
+    assert classification.outcome is AccountCutoverOutcome.CONTACT_VERIFICATION_REQUIRED
+    assert classification.rule_codes == ("legacy_account_email_untrusted",)
+
+    # 1) Bayraqsız — default fail-closed rədd.
+    with pytest.raises(LegacyAccountCutoverError) as exc_info:
+        stage_classified_account_cutover(
+            identity=identity,
+            classification=classification,
+            organization=organization,
+            role=role,
+            actor=actor,
+            student_identifier="CP-1001",
+        )
+    assert exc_info.value.code == "legacy_account_staging_not_approved"
+
+    # 2) Əlavə qayda (mənbə-dublikat) varsa bayraqla da rədd.
+    duplicate = _identity(email="cp-dup@example.com", username="cp_dup", source_id=2)
+    duplicate_twin = _identity(email="cp-dup@example.com", username="cp_dup_twin", source_id=3)
+    dirty = classify_projected_account_cutover(
+        [duplicate, duplicate_twin], authoritative_email_policy=deny_all_email_trust
+    )[0]
+    assert "legacy_account_email_duplicate_source" in dirty.rule_codes
+    with pytest.raises(LegacyAccountCutoverError):
+        stage_classified_account_cutover(
+            identity=duplicate,
+            classification=dirty,
+            organization=organization,
+            role=role,
+            actor=actor,
+            student_identifier="CP-1002",
+            allow_contact_pending=True,
+        )
+
+    # 3) Təmiz contact-pending + bayraq — locked hesab yaranır, email authority yoxdur.
+    result = stage_classified_account_cutover(
+        identity=identity,
+        classification=classification,
+        organization=organization,
+        role=role,
+        actor=actor,
+        student_identifier="CP-1001",
+        allow_contact_pending=True,
+    )
+    result.user.refresh_from_db()
+    assert result.user.is_active is False
+    assert result.user.has_usable_password() is False
+    assert result.user.profile.access_state == UserProfile.AccessState.STAGED
+    assert result.user.profile.email_verified is False
+    assert result.user.memberships.get(organization=organization).is_active is False

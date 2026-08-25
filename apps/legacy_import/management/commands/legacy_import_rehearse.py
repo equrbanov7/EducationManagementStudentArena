@@ -114,6 +114,11 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         parser.add_argument("--email-trust-policy", choices=("deny_all", "evidence_manifest"), default="deny_all")
         parser.add_argument("--email-trust-manifest", default="")
         parser.add_argument(
+            "--stage-contact-pending",
+            action="store_true",
+            help="Yalnız email_untrusted qaydalı contact-pending sətirləri də locked hesab kimi stage et.",
+        )
+        parser.add_argument(
             "--max-staged-accounts",
             default=0,
             type=_bounded_integer(
@@ -179,6 +184,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             batch_rows=options["batch_rows"],
             source_chunk_size=options["source_chunk_size"],
             max_staged_accounts=options["max_staged_accounts"],
+            stage_contact_pending=bool(options.get("stage_contact_pending")),
             student_role_name=options["student_role_name"],
             worker_role_name=options["worker_role_name"],
         )
