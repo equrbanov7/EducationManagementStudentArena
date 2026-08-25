@@ -202,6 +202,10 @@ class FirstLoginPasswordMiddleware:
             user is not None
             and user.is_authenticated
             and not user.is_superuser
+            # View-as sessiyası hədəfin ilk-giriş axınına DÜŞMÜR: axının özü
+            # (set_initial_password + OTP) ViewAsMiddleware-in BLOCKED_URL_NAMES
+            # siyahısındadır, yönləndirmə isə baxışı sonsuz 403 dövrəsinə salardı.
+            and not getattr(request, "is_view_as", False)
             and self._requires_first_login(user)
             and not self._is_exempt(request)
         ):

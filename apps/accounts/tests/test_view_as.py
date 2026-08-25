@@ -307,22 +307,48 @@ class ViewAsAccountTakeoverTests(ViewAsTestBase):
         profile.save(update_fields=["password_change_required"])
         return target
 
-    def test_first_login_target_is_not_selectable(self):
-        """İlk-girişini tamamlamamış hesab hədəf siyahısında görünməməlidir."""
+    def test_first_login_target_is_selectable(self):
+        """İlk-girişini tamamlamamış hesab hədəf siyahısında GÖRÜNÜR.
+
+        Legacy idxal hesablarının hamısı ``password_change_required=True``
+        vəziyyətindədir; ələ-keçirmə vektoru siyahı filtri ilə deyil, axının
+        özünün view-as altında bloklanması ilə bağlanır (aşağıdakı testlər).
+        """
         target = self._make_pending_first_login_target()
         self._login(self.admin)
 
         response = self.client.get(reverse("accounts:view_as_search"), {"type": "users"})
         self.assertEqual(response.status_code, 200)
         ids = {row["id"] for row in response.json()["results"]}
-        self.assertNotIn(target.pk, ids)
+        self.assertIn(target.pk, ids)
 
-    def test_start_view_as_on_first_login_target_is_rejected(self):
+    def test_view_as_on_first_login_target_does_not_redirect_to_password_flow(self):
+        """View-as hədəfi pending olsa belə profil AÇILIR, parol səhifəsinə yönləndirmə YOXDUR."""
         target = self._make_pending_first_login_target()
         self._login(self.admin)
 
         self._start(target)
-        self.assertNotIn(VIEW_AS_SESSION_KEY, self.client.session)
+        self.assertIn(VIEW_AS_SESSION_KEY, self.client.session)
+
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["user"].pk, target.pk)
+
+    def test_set_initial_password_blocked_on_pending_target(self):
+        """Pending hədəfdə parol-təyini axını view-as altında bloklu qalır."""
+        target = self._make_pending_first_login_target()
+        self._login(self.admin)
+        self._start(target)
+
+        response = self.client.post(
+            reverse("accounts:set_initial_password"),
+            {"action": "set_password", "new_password1": "AttackerPass123!", "new_password2": "AttackerPass123!"},
+        )
+        self.assertIn(response.status_code, (302, 403))
+        target.refresh_from_db()
+        self.assertFalse(target.check_password("AttackerPass123!"))
+        # Bayraq da təmizlənməməlidir — axın ümumiyyətlə işləməyib.
+        self.assertTrue(target.profile.password_change_required)
 
     def test_set_initial_password_post_is_blocked_in_full_mode(self):
         """FULL rejimdə belə parol-təyini POST-u bloklanır (hesab ələ keçirmə)."""
