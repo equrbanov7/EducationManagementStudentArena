@@ -7,7 +7,9 @@ burada yalnız org-domain xidmətləri təqdim olunur.
 
 from apps.organizations.permissions import (  # noqa: F401
     PERMISSION_CATEGORIES,
+    PERMISSION_LABELS,
     get_all_permissions,
+    get_permission_label,
     is_grant_entry,
     strip_grant_prefix,
 )
@@ -38,6 +40,7 @@ from apps.organizations.views import (  # noqa: F401
 
 __all__ = [
     "PERMISSION_CATEGORIES",
+    "PERMISSION_LABELS",
     "build_organization_faculties_context",
     "build_organization_kafedras_context",
     "build_organization_members_context",
@@ -47,6 +50,7 @@ __all__ = [
     "ensure_owner_membership",
     "get_active_memberships",
     "get_all_permissions",
+    "get_permission_label",
     "get_permission_scope",
     "get_unit_scope",
     "get_user_org_role_level",

@@ -26,6 +26,10 @@ DEFAULT_ROLES = {
                 "member.*",
                 "course.*",
                 "grade.*",
+                # Qrup açarları — DAVRANIŞ QORUNMASI: rol əvvəl org_admin-alias
+                # (ADMIN_EQUIVALENT ad / level>=80, core/roles.py) ilə qrup yaradırdı.
+                "group.view",
+                "group.manage",
                 "exam.*",
                 "analytics.view_all",
                 "audit.view",
@@ -97,6 +101,9 @@ DEFAULT_ROLES = {
                 "course.*",
                 "exam.*",
                 "grade.*",
+                # org_admin-alias davranış qorunması (level 88 >= 80).
+                "group.view",
+                "group.manage",
                 "journal.correct",
                 "appeal.respond",
                 "appeal.decide",
@@ -160,6 +167,9 @@ DEFAULT_ROLES = {
                 "member.edit",
                 "course.*",
                 "grade.*",
+                # org_admin-alias davranış qorunması ("dean" ADMIN_EQUIVALENT-də).
+                "group.view",
+                "group.manage",
                 "exam.*",
                 "analytics.view_unit",
             ],
@@ -177,6 +187,10 @@ DEFAULT_ROLES = {
                 "grade.view",
                 "grade.input",
                 "grade.approve_chair",
+                # org_admin-alias davranış qorunması: "chair_head" →
+                # "department_head" normallaşır (ADMIN_EQUIVALENT).
+                "group.view",
+                "group.manage",
                 "exam.*",
                 "analytics.view_unit",
             ],
@@ -333,6 +347,9 @@ DEFAULT_ROLES = {
                 "member.*",
                 "course.*",
                 "grade.*",
+                # org_admin-alias davranış qorunması (level 90 >= 80).
+                "group.view",
+                "group.manage",
                 "exam.*",
                 "analytics.view_all",
             ],
@@ -348,6 +365,10 @@ DEFAULT_ROLES = {
                 "member.view",
                 "course.*",
                 "grade.*",
+                # org_admin-alias davranış qorunması: "section_head" →
+                # "department_head" normallaşır (ADMIN_EQUIVALENT).
+                "group.view",
+                "group.manage",
                 "exam.*",
                 "analytics.view_unit",
             ],
@@ -431,6 +452,9 @@ DEFAULT_ROLES = {
                 "member.*",
                 "course.*",
                 "grade.*",
+                # org_admin-alias davranış qorunması (level 80 >= 80).
+                "group.view",
+                "group.manage",
                 "exam.*",
                 "analytics.view_unit",
             ],

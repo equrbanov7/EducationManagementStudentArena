@@ -4,6 +4,8 @@ Permission definitions and checking functions for the organizations app.
 
 from typing import List, Set
 
+from django.utils.translation import pgettext_lazy
+
 # DEPRECATED (FAZA 10) — legacy permission-prefix aliases.
 #
 # Canonical names are: grade.*, course.*, exam.*, member.*, role.*, unit.*.
@@ -74,6 +76,13 @@ PERMISSION_CATEGORIES = {
         "journal.view",
         "journal.correct",
     ],
+    # Tələbə qrupları (exams.StudentGroup) — qrup yaratmaq/idarə etmək açarı
+    # permission-editordan istənilən rola (dekan, koordinator…) verilə bilər.
+    # `group.manage` qapısı: apps/exams/views/teacher/groups.py.
+    "groups": [
+        "group.view",
+        "group.manage",
+    ],
     "exams": [
         "exam.view",
         "exam.create",
@@ -102,6 +111,95 @@ PERMISSION_CATEGORIES = {
         "audit.export",
     ],
 }
+
+
+# ---------------------------------------------------------------------------
+# İnsan-oxunaqlı icazə etiketləri (permission-editor üçün).
+#
+# Hər kataloq açarının AZ etiketi — editor UI-da açar kodu ilə YANAŞI göstərilir
+# (məs. «Qrup yaratmaq/idarə etmək (group.manage)»). msgid toqquşmalarından
+# qaçmaq üçün kontekstli pgettext_lazy istifadə olunur; default dil AZ olduğundan
+# msgid-in özü ekranda görünən mətndir. Yeni açar əlavə edəndə buraya da etiket
+# yazılmalıdır — testlə qorunur (test_permissions.py: kataloq ↔ etiket tam üst-üstə).
+# ---------------------------------------------------------------------------
+_PERM_CTX = "organizations.permission.label"
+
+PERMISSION_LABELS = {
+    # organization
+    "org.view": pgettext_lazy(_PERM_CTX, "Təşkilat məlumatına baxış"),
+    "org.edit": pgettext_lazy(_PERM_CTX, "Təşkilat məlumatını redaktə etmək"),
+    "org.settings": pgettext_lazy(_PERM_CTX, "Təşkilat ayarlarını idarə etmək"),
+    "org.manage_members": pgettext_lazy(_PERM_CTX, "Təşkilat üzvlərini idarə etmək"),
+    "org.admin.assign": pgettext_lazy(_PERM_CTX, "Təşkilat administratoru təyin etmək"),
+    "org.owner.assign": pgettext_lazy(_PERM_CTX, "Təşkilat sahibi təyin etmək"),
+    "org.delete": pgettext_lazy(_PERM_CTX, "Təşkilatı silmək"),
+    # structure
+    "unit.view": pgettext_lazy(_PERM_CTX, "Struktur vahidlərinə baxış"),
+    "unit.create": pgettext_lazy(_PERM_CTX, "Struktur vahidi yaratmaq"),
+    "unit.edit": pgettext_lazy(_PERM_CTX, "Struktur vahidini redaktə etmək"),
+    "unit.delete": pgettext_lazy(_PERM_CTX, "Struktur vahidini silmək"),
+    # members
+    "member.view": pgettext_lazy(_PERM_CTX, "Üzvlərə baxış"),
+    "member.invite": pgettext_lazy(_PERM_CTX, "Üzv dəvət etmək"),
+    "member.edit": pgettext_lazy(_PERM_CTX, "Üzv məlumatını redaktə etmək"),
+    "member.remove": pgettext_lazy(_PERM_CTX, "Üzvü təşkilatdan çıxarmaq"),
+    "member.student_manage": pgettext_lazy(_PERM_CTX, "Tələbə üzvlüyünü idarə etmək"),
+    # roles
+    "role.view": pgettext_lazy(_PERM_CTX, "Rollara baxış"),
+    "role.create": pgettext_lazy(_PERM_CTX, "Rol yaratmaq"),
+    "role.edit": pgettext_lazy(_PERM_CTX, "Rolu redaktə etmək"),
+    "role.assign": pgettext_lazy(_PERM_CTX, "Rol təyin etmək"),
+    "role.delete": pgettext_lazy(_PERM_CTX, "Rolu silmək"),
+    # courses
+    "course.view": pgettext_lazy(_PERM_CTX, "Kurslara baxış"),
+    "course.create": pgettext_lazy(_PERM_CTX, "Kurs yaratmaq"),
+    "course.edit": pgettext_lazy(_PERM_CTX, "Kursu redaktə etmək"),
+    "course.delete": pgettext_lazy(_PERM_CTX, "Kursu silmək"),
+    "assignment.delete": pgettext_lazy(_PERM_CTX, "Sərbəst işi silmək"),
+    "project.delete": pgettext_lazy(_PERM_CTX, "Kurs işini silmək"),
+    "lab.delete": pgettext_lazy(_PERM_CTX, "Lab işini silmək"),
+    # grading
+    "grade.view": pgettext_lazy(_PERM_CTX, "Qiymətlərə baxış"),
+    "grade.input": pgettext_lazy(_PERM_CTX, "Qiymət yazmaq"),
+    "grade.publish": pgettext_lazy(_PERM_CTX, "Qiymətləri dərc etmək"),
+    "grade.override": pgettext_lazy(_PERM_CTX, "Qiyməti məcburi dəyişmək"),
+    "grade.approve_chair": pgettext_lazy(_PERM_CTX, "Qiyməti kafedra səviyyəsində təsdiqləmək"),
+    "grade.approve_final": pgettext_lazy(_PERM_CTX, "Qiymətin yekun təsdiqi"),
+    # journal
+    "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
+    "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
+    # groups
+    "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
+    "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),
+    # exams
+    "exam.view": pgettext_lazy(_PERM_CTX, "İmtahanlara baxış"),
+    "exam.create": pgettext_lazy(_PERM_CTX, "İmtahan yaratmaq"),
+    "exam.edit": pgettext_lazy(_PERM_CTX, "İmtahanı redaktə etmək"),
+    "exam.manage": pgettext_lazy(_PERM_CTX, "İmtahan prosesini idarə etmək"),
+    "exam.host": pgettext_lazy(_PERM_CTX, "İmtahan keçirmək"),
+    "exam.delete": pgettext_lazy(_PERM_CTX, "İmtahanı silmək"),
+    # appeal
+    "appeal.create": pgettext_lazy(_PERM_CTX, "Apellyasiya yaratmaq"),
+    "appeal.respond": pgettext_lazy(_PERM_CTX, "Apellyasiyaya cavab vermək"),
+    "appeal.decide": pgettext_lazy(_PERM_CTX, "Apellyasiya qərarı vermək"),
+    # analytics
+    "analytics.view_own": pgettext_lazy(_PERM_CTX, "Öz analitikasına baxış"),
+    "analytics.view_unit": pgettext_lazy(_PERM_CTX, "Struktur üzrə analitikaya baxış"),
+    "analytics.view_all": pgettext_lazy(_PERM_CTX, "Bütün analitikaya baxış"),
+    # qa
+    "qa.view": pgettext_lazy(_PERM_CTX, "Keyfiyyət yoxlamalarına baxış"),
+    "qa.review": pgettext_lazy(_PERM_CTX, "Keyfiyyət rəyi vermək"),
+    "qa.flag": pgettext_lazy(_PERM_CTX, "Keyfiyyət işarəsi qoymaq"),
+    # audit
+    "audit.view": pgettext_lazy(_PERM_CTX, "Audit jurnalına baxış"),
+    "audit.export": pgettext_lazy(_PERM_CTX, "Audit jurnalını ixrac etmək"),
+}
+
+
+def get_permission_label(permission: str) -> str:
+    """İcazənin insan-oxunaqlı etiketi; kataloqda yoxdursa boş sətir."""
+    label = PERMISSION_LABELS.get(permission)
+    return str(label) if label is not None else ""
 
 
 def get_all_permissions() -> List[str]:

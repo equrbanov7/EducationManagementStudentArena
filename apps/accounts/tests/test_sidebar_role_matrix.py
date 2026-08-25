@@ -167,6 +167,33 @@ class SidebarRoleMatrixTest(TestCase):
             with self.subTest(role=role):
                 self.assertTrue(common <= self._sections(role), role)
 
+    # ── Permission-əsaslı «Qruplar» görünürlüyü (2026-08) ───────────────────
+
+    def test_group_permission_opens_groups_section(self):
+        """`group.view` / `group.manage` icazəsi olan rol «Qruplar» bölməsini görür.
+
+        Rol bayraqları (org_admin/teacher/exam_center/member) toxunulmazdır —
+        bu, permission-editordan verilən açarın ƏLAVƏ qoludur.
+        """
+        # Tyutor default-da qrup bölməsini görmür.
+        self.assertNotIn("groups", self._sections("tutor"))
+
+        tutor_role = Role.objects.get(organization=self.org, name="tutor")
+        tutor_role.permissions = ["group.view"]
+        tutor_role.save(update_fields=["permissions", "updated_at"])
+        self.assertIn("groups", self._sections("tutor"))
+
+        # `group.manage` də bölməni açır (məs. yalnız idarə açarı verilibsə).
+        tutor_role.permissions = ["group.manage"]
+        tutor_role.save(update_fields=["permissions", "updated_at"])
+        self.assertIn("groups", self._sections("tutor"))
+
+    def test_role_flag_based_groups_visibility_is_preserved(self):
+        """Mövcud qollar qalır: org_admin/teacher/exam_center/member `groups` görür."""
+        for role in ("org_admin", "teacher", "exam_center", "member", "dean", "department_head"):
+            with self.subTest(role=role):
+                self.assertIn("groups", self._sections(role))
+
 
 class SidebarGroupHeadingTest(TestCase):
     """Qrup başlığı boş qalmamalıdır.
