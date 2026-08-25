@@ -258,6 +258,10 @@ if LEGACY_MARIADB_SOURCE_ATTEST_ENABLED:
     LEGACY_MARIADB_SOURCE_READ_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_READ_TIMEOUT", "60")
     LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT", "10")
 
+# Rehearsal targets are disposable local databases only; production can never
+# opt in, so this is a hard constant rather than an environment lookup.
+LEGACY_REHEARSAL_TARGET_DISPOSABLE = False
+
 # Heavy exam features are disabled in production to protect server resources.
 # This keeps practical/coding exams, Piston-backed code execution, WebSockets,
 # and teacher-side lock controls off.

@@ -207,6 +207,54 @@ Bütün control-plane cədvəlləri tenant-scoped və PostgreSQL `ENABLE/FORCE R
 ilə qorunur. Run-map-observation-version-issue organization uyğunluğu,
 lifecycle və append-only tarixçə DB səviyyəsində məcbur edilir.
 
+### Faza registry seam-i (adapterlərin yeganə giriş nöqtəsi)
+
+Rehearsal orkestratoru heç bir adapteri birbaşa tanımır. `RehearsalPhase`
+protokolunu (`phase_key`, artan `order`, `source_tables`, `entity_types`,
+`declared_source_rows(plan)`, `run(context)`) həyata keçirən fazalar kod-sahibli
+registry-yə daxil olur və registry `load_legacy_table_plan` kimi barmaq izi ilə
+attestasiya olunur. Validator fail-closed-dur:
+
+- `phase_key` unikal, token-formalı və ≤ 32 simvol;
+- `order` ciddi artan və unikal;
+- hər `source_table` fixed plan-da qeydiyyatdan keçmiş olmalıdır;
+- **bir cədvəl iki faza tərəfindən iddia edilə bilməz**;
+- yalnız `TRANSFORM_CANDIDATE` / `REVIEW_GATED` / `VALIDATE_ONLY` iddia edilə
+  bilər — `DESIGN_GATED` (12 sillabus cədvəli), `SECURITY_GATED`,
+  `UNKNOWN_GATED`, `ARCHIVE_GATED`, `EMPTY_GATED` **strukturca** əlçatmazdır;
+- iddia edilən hər sətirdə `adapter_key is None` invariantı;
+- `declared_source_rows(plan)` iddia edilən cədvəllərin `expected_rows` cəminə
+  bərabər olmalıdır;
+- registry barmaq izi pinlənmiş dəyərlə üst-üstə düşməlidir.
+
+Faza kontraktı: `PhaseBatchRecord`-lar hər `source_table` üçün artan
+`first_legacy_pk` sırasında və 1-dən başlayan bitişik `sequence` ilə verilir;
+ledger sətirləri (`upsert_entity_map` → `upsert_issue`) onları sayan batch-dən
+**əvvəl** yazılır; eyni anda `policy.batch_rows`-dan çox source sətri saxlanmır
+(böyük cədvəllər `compile_pk_chunk_query` ilə pəncərələnir); faza öz MariaDB
+bağlantısını açmır və `finish_run` çağırmır.
+
+### Disposable hədəf provisioning kontraktı
+
+Rehearsal yalnız təsdiqlənmiş şəkildə birdəfəlik bir PostgreSQL bazasına
+aparılır. On müstəqil interlock-un hamısı tələb olunur: açıq settings opt-in
+(`LEGACY_REHEARSAL_TARGET_DISPOSABLE is True`), `local`/`test` mühiti,
+`postgresql` vendor-u, `emsarena_rehearsal_<12 hex>` ad şablonu, loopback host,
+5432-dən fərqli port (1024-65535), baza səviyyəli marker, `rolsuper=false`,
+`rolbypassrls=false`, aktiv `app.bypass_rls` olmaması və tətbiq edilmiş migration
+başlığı. Marker DBA-nın həmin bazada apardığı qəsdli əməliyyatdır:
+
+```sql
+CREATE DATABASE emsarena_rehearsal_ab12cd34ef56;
+ALTER DATABASE emsarena_rehearsal_ab12cd34ef56
+    SET emsarena.rehearsal_target = 'disposable';
+```
+
+Orkestrator bütün sessiya boyu `core.rls.set_rls_tenant(org.pk, local=False)`
+işlədir və `bypass_rls()` **heç vaxt** çağırmır. Attestasiya real baza adını
+deyil, yalnız `emsarena_rehearsal_<12hex>` şablon token-ini raportlayır, çünki
+hesabat artifakt-ı repoya commit olunur.
+
 ## 5. Mərhələli icra planı
 
 ### M0 — Baseline, custody və plan
@@ -319,6 +367,15 @@ Hər adapter üçün:
 - source/target count və digest;
 - rollback/forward-fix qaydası.
 
+Adapter kod olaraq `legacy_import_rehearse` faza registry-sinə **əlavə bir
+faza** kimi qoşulur; ayrı komanda yazılmır. Fazalar registry sırasında
+(`order` artan) icra olunur, hər biri öz `source_tables` çoxluğunu iddia edir və
+iddia edilmiş cədvəl başqa faza tərəfindən götürülə bilmir. Gated cədvəllər
+(bütün sillabus dəsti, `students_telegram`, `workers_permits`, `ntg`,
+archive/empty sətirlər) validator səviyyəsində iddia edilə bilmədiyi üçün
+"yanlışlıqla import" ssenarisi struktur olaraq mümkün deyil. Registry barmaq izi
+dəyişdikdə pinlənmiş dəyər yenilənmədən heç bir rehearsal başlamır.
+
 ### M5 — Pilot
 
 Əvvəl bir məhdud akademik period + fakültə/kafedra seçilir. Pilotda:
@@ -350,6 +407,39 @@ Məcburi müqayisələr:
 
 Rehearsal 1 mapping və performans düzəlişləri üçündür. Rehearsal 2 eyni source SHA və
 transform version ilə yekun determinism sübutudur.
+
+Determinizm mexanizmi konkretdir. Hər rehearsal
+`docs/migration/reports/LEGACY_REHEARSAL_V1_RUN{1,2}.json` artifakt-ı yazır;
+artifakt iki bölmədən ibarətdir və **yalnız** `deterministic` bölməsi
+`determinism_digest = sha256(canonical_json(deterministic))` ilə möhürlənir:
+
+| Digest mənbəyi | Cross-run stabil? |
+|---|---|
+| `plan_fingerprint`, `phase_registry_fingerprint` | bəli |
+| `snapshot_sha256` / `snapshot_size_bytes` | bəli |
+| `source_attestation` bloku | bəli |
+| `target_guard` bloku (`migration_head_digest` daxil) | eyni migration başlığında bəli |
+| `target_identity_baseline.digest` (pre-run canonical açarlar) | eyni provisioning-də bəli |
+| batch üzrə `source_digest` / `classification_digest` / `target_digest` | bəli |
+| `phase_digest`, `determinism_digest` | bəli |
+
+`provenance` bölməsi (run/org UUID-ləri, vaxt möhürləri, `chain_digest` uçları)
+qəsdən **digest-dən kənardadır**, çünki `LegacyImportBatch.chain_digest` run və
+organization identity-sini zəncirə qatır — o yalnız run-daxili bütövlük sübutudur.
+`target_digest` heç vaxt target UUID-i deyil, canonical username‖email açarlarının
+hash-idir. 8.5k sətirlik kohort üçün per-row digest brute-force edilə bildiyindən
+artifakt-a **per-row digest yazılmır**; onlar RLS ilə qorunan ledger-də qalır.
+
+Gate əmri:
+
+```bash
+python manage.py legacy_import_rehearse --mode apply --rehearsal-ordinal 1 …
+python manage.py legacy_import_rehearse --mode apply --rehearsal-ordinal 2 \
+    --compare-report docs/migration/reports/LEGACY_REHEARSAL_V1_RUN1.json …
+```
+
+İkinci icra digest fərqli olarsa `legacy_rehearsal_determinism_mismatch` ilə
+fail-closed dayanır; run FAILED kimi bağlanır.
 
 ### M7 — Production cutover
 
@@ -394,6 +484,8 @@ verilir.
 | Advisory lock/concurrency | Xeyr | Bəli | Məcburi |
 | Batch resume və performance | Xeyr | Bəli | Məcburi |
 | Backup/restore rehearsal | Xeyr | Bəli | Məcburi |
+| Rehearsal orkestratoru (attestasiya→faza→reconciliation) | Bəli | Bəli | PostgreSQL nəticəsi |
+| İki təmiz hədəfdə determinizm digest bərabərliyi | Xeyr | Bəli | Məcburi |
 
 ## 7. Production GO/NO-GO gate-ləri
 
@@ -405,6 +497,13 @@ Production yalnız aşağıdakıların hamısında GO olduqda açılır:
 - **Tenant integrity:** cross-FK negative matrix yaşıl, violation sayı 0-dır.
 - **Identity:** legacy credential daşınmayıb, mövcud parol overwrite sayı 0-dır.
 - **Determinism:** iki full rehearsal count və digest-lərdə eyni nəticə verib.
+  Maşınla yoxlanan forma: `LEGACY_REHEARSAL_V1_RUN1.json` və
+  `LEGACY_REHEARSAL_V1_RUN2.json` fayllarının `determinism_digest` sahələri
+  bayt-bayt eynidir və hər iki fayl saxlanmış digest-i öz `deterministic`
+  məzmunundan yenidən sübut edir (tamper aşkarlanır). İkinci icra
+  `--compare-report` ilə aparılır; fərq halında komanda `exit 1` və
+  `legacy_rehearsal_determinism_mismatch` verir. Bu gate insan gözü ilə deyil,
+  komanda çıxış kodu ilə qiymətləndirilir.
 - **Completeness:** bütün sətirlər izahlı son status alıb, səbəbsiz exception 0-dır.
 - **History:** transfer/delete/cascade regression-ları tarixi və provenance-i qoruyur.
 - **Recovery:** backup scratch DB-yə uğurla restore edilib.

@@ -1,7 +1,7 @@
 # EMSArena legacy miqrasiyası — status ledger
 
 Son yenilənmə: 25 avqust 2026  
-Cari mərhələ: `M3/M4 — Control plane tamamlanır, rehearsal orkestratoru hazırlanır`  
+Cari mərhələ: `M4 — Rehearsal orkestratoru kodlandı, PostgreSQL/real-source sübutu gözləyir`  
 Ümumi qərar: `NO-GO for production`, lokal hazırlıq davam edir.  
 İcraçı qeydi: 25 avqustdan iş Claude tərəfindən davam etdirilir (əvvəlki icraçı
 Codex usage limitinə çatdı); mənbə snapshot SHA-256 eyni təsdiqləndi, custody bütövdür.
@@ -28,6 +28,11 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
   activation flow-u hələ açıqdır.
 - Strict read-only preflight real 2.14 GB source snapshot-da hash, ölçü, mode və
   81 cədvəli eyni təsdiqləyib. Transform və domain-write adapterləri hələ yoxdur.
+- Rehearsal orkestratoru kodlanıb: attestasiya → identity cohort (ledger + batch
+  zənciri + issue taksonomiyası) → reconciliation + PII-siz determinizm hesabatı.
+  Hədəf yalnız 10 interlock-dan keçən disposable PostgreSQL ola bilər; sessiya
+  boyu `set_rls_tenant` işlədilir, `bypass_rls` heç vaxt çağırılmır. İki təmiz
+  hədəfdə real digest sübutu hələ icra edilməyib (PENDING-PG-VERIFY).
 - Heç bir legacy domain sətri target modellərə yazılmayıb.
 
 ## Görülən işlər
@@ -80,6 +85,9 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M3.23 | Production komanda qapısı | VERIFIED | `core/management/command_safety.py` — default mühit production sayılır və rədd edilir; 12 seed/import komandası mixin-lə qorunur |
 | M3.24 | Müstəqil adversarial təhlükəsizlik baxışı | VERIFIED | 2026-08-25: app səthindən P0/P1 bypass yoxdur; 4 qalıq P2 → `SECURITY_BASELINE.md` MIG-SEC-012 |
 | M3.25 | Guard↔test-infra uzlaşması və reqressiya düzəlişləri | VERIFIED | Superuser-only TRUNCATE keçidi (flush bloklaması həlli), accounts 0013 asılılığı exams zəncirindən qopardıldı, dean qlobal axtarışı `can_search_directory` (member.view+unit.view) ilə bərpa, rbac `can_approve_grades` dict override bug-ı düzəldildi |
+| M4.1 | Rehearsal orkestratoru (`legacy_import_rehearse`) | PENDING-PG-VERIFY | Faza A attestasiya (10 interlock + source attestation) → attested phase registry → Faza C reconciliation; SQLite 22 orkestrator/komanda testi yaşıl, `-m postgres` və real-source sübutu növbəti addımdadır |
+| M4.2 | İdempotent resume və interrupt semantikası | PENDING-PG-VERIFY | Durable checkpoint = `LegacyImportBatch`; kəsilmiş run `RUNNING` qalır (exit 3), resume eyni pəncərələri kəsir, artıq müşahidə olunmuş sətir yenidən stage edilmir; scope uyğunsuzluğu fail-closed |
+| M4.3 | Determinizm artifakt-ı | PENDING-PG-VERIFY | `deterministic` bölməsi run/org/vaxt/path daşımır; `--compare-report` digest fərqində `legacy_rehearsal_determinism_mismatch` verir; atomik yazı yalnız eyni digest-i overwrite edir |
 
 ## Qorunan mövcud user materialları
 
@@ -99,6 +107,8 @@ Yeni miqrasiya planı ayrıca `docs/migration/` altında yaradılır.
 | Legacy SQL dump | `177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0` |
 | Dəqiq SQL audit JSON | `e03decda34afc07527e151591e22ebc0df85e5a2b79fa8ce5a014dc76f898975` |
 | 81-table mapping JSON | `067154ee9a66ed04d0d85cfe8c54e166325ba6532acec11fa003459be9635ecd` |
+| Rehearsal 1 hesabatı (`LEGACY_REHEARSAL_V1_RUN1.json`) | PENDING-PG-VERIFY — iki təmiz PostgreSQL hədəfdə icra edildikdən sonra yazılacaq |
+| Rehearsal 2 hesabatı (`LEGACY_REHEARSAL_V1_RUN2.json`) | PENDING-PG-VERIFY — `--compare-report` ilə eyni `determinism_digest` sübutu |
 
 Audit JSON-ları hazırda temp artifact-dir; kod pipeline-ı onları source-of-truth kimi
 hardcode etməyəcək. Preflight gözlənilən manifest faktlarını parametr kimi qəbul edir
@@ -114,16 +124,18 @@ və yalnız sanitizasiya edilmiş nəticə çıxarır.
 | R3 | Scope-suz chair/dean fail-open ola bilir | Lokal permission-specific fail-closed fix VERIFIED |
 | R4 | Registrar cross-tenant FK DB-də tam qorunmur | BAĞLANDI (M3.19, mig 0042) — qalan relation matrisi PostgreSQL trigger-ləri ilə örtüldü |
 | R5 | Runtime DB rolu RLS bypass edə bilər | Real runtime role attestasiya olmadan cutover STOP |
-| R6 | Legacy provenance/idempotency ledger tələb olunur | Canonical identity + observation + lifecycle + reviewed versioning VERIFIED; domain adapteri və iki full rehearsal açıqdır |
-| R7 | Legacy credential üçün təhlükəsiz activation yoxdur | BAĞLANDI (M3.12/M3.18) — real read-only extractor + staged hesab / evidence-li aktivasiya; qalıq P2-lər MIG-SEC-012-də |
+| R6 | Legacy provenance/idempotency ledger tələb olunur | Canonical identity + observation + lifecycle + reviewed versioning VERIFIED; rehearsal orkestratoru kodlanıb (M4.1-M4.3, PENDING-PG-VERIFY); domain adapterləri və iki təmiz hədəfdə real determinizm sübutu açıqdır |
+| R7 | Legacy credential üçün təhlükəsiz activation yoxdur | BAĞLANDI (M3.12/M3.18) — real read-only extractor + staged hesab / evidence-li aktivasiya; qalıq P2-lər MIG-SEC-012-də. Rehearsal-da email səlahiyyəti default-deny-dir; stage yalnız reviewer-in imzaladığı digest manifest-i + açıq `--max-staged-accounts` limiti ilə mümkündür |
 | R8 | 9M ETL deploy migration-na düşə bilər | Schema migration və explicit ETL ayrılır |
 | R9 | Syllabus target lifecycle yoxdur | Dizayn inkişaf backlog-udur; yekun UX/business acceptance-dan sonra versioned/approved target qurulana qədər live syllabus import bloklanır |
 
 ## Növbəti icra sırası
 
-1. Rehearsal orkestratoru (`legacy_import_rehearse`): attestasiya → identity cohort
-   (real target collision probe + ledger + staged hesab) → reconciliation hesabatı;
-   iki təmiz PostgreSQL hədəfdə deterministik digest sübutu.
+1. Rehearsal orkestratorunun PostgreSQL və real-source sübutu: `-m postgres`
+   (`test_rehearsal_postgres.py`, 8 test) və disposable MariaDB + PostgreSQL
+   konformans testi (`test_rehearsal_source_integration.py`); sonra iki təmiz
+   hədəfdə `--compare-report` ilə eyni `determinism_digest`. M4.1-M4.3 yalnız
+   bundan sonra `PENDING-PG-VERIFY` → `VERIFIED` olur.
 2. Lokal müşahidə mühiti: staging PG konteyneri + app-in həmin bazaya qoşulan
    inspection rejimi (sahib datanı UI-da yoxlaya bilsin) + bir-komandalı reset.
 3. Domain adapterləri M4 sırası ilə (org struktur → proqram/fənn/kurikulum →
@@ -131,8 +143,12 @@ və yalnız sanitizasiya edilmiş nəticə çıxarır.
    `table_plan` registry-dən açılır, ledger/batch/issue kontraktı ilə.
 4. MIG-SEC-012 P2 hardening-i (profil INSERT gate, DB-də digest recompute,
    generik kolliziya kodu) — rehearsal-lara paralel.
-5. Syllabus version/approval modeli yekun dizayn və biznes acceptance-dan sonra
-   (DESIGN_GATED qalır); runbook + yekun hesabat cutover-dən əvvəl.
+5. İlk akademik-referens adapteri phase registry-yə **ikinci faza** kimi əlavə
+   olunur (`RehearsalPhase` protokolu, artan `order`, `source_tables` iddiası);
+   registry barmaq izi yenidən pinlənir və gated cədvəllər strukturca iddia
+   edilə bilmir. Syllabus version/approval modeli yekun dizayn və biznes
+   acceptance-dan sonra (DESIGN_GATED qalır); runbook + yekun hesabat
+   cutover-dən əvvəl.
 
 ## Bu mərhələnin çıxış şərti
 
@@ -146,6 +162,26 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - domain adapteri aktiv deyil və mövcud domen datasına yazı edilməyib.
 
 ## Dəyişiklik jurnalı
+
+### 25 avqust 2026 — M4 rehearsal orkestratoru
+
+- `legacy_import_rehearse` komandası və 7 modullu servis slice-i əlavə olundu:
+  `rehearsal_contracts` (digest primitivləri, `RehearsalPolicy`, barmaq izi ilə
+  attestasiya olunan faza registry-si), `rehearsal_target_guard` (10 interlock),
+  `rehearsal_authorizer`, `rehearsal_identity_phase` (Faza B), `rehearsal_phase_a`,
+  `rehearsal_reconciliation`, `rehearsal_orchestrator` və `rehearsal_report`.
+- Faza registry barmaq izi pinləndi
+  (`160216a1051ff24af2252df8dd88144fba2c4079d0fcb33c1c6df59d4aff5e70`); gated
+  cədvəllər (12 sillabus + security/unknown/archive/empty) strukturca iddia
+  edilə bilmir.
+- Default `--mode plan`-dır və heç nə yazmır; `--apply` operatordan hədəf baza
+  adını hərfi-hərfinə yazmağı tələb edir.
+- `docs/migration/reports/` altındakı artifakt PII-siz saxlanılır: raw dəyər,
+  username/email, per-row digest, path, host və baza adı daxil edilmir.
+- SQLite yoxlaması: `apps/legacy_import/tests` 395 pass / 57 skip; modul ölçü,
+  modul-sərhəd və flake8 qapıları yaşıl.
+- `-m postgres` və mariadb inteqrasiya testləri yazıldı, lakin bu addımda
+  **icra edilmədi** — M4.1-M4.3 ona görə `PENDING-PG-VERIFY` statusundadır.
 
 ### 23 avqust 2026 — ilkin baseline
 
