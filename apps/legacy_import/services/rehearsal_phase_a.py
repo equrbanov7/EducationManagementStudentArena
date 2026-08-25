@@ -179,7 +179,7 @@ def attest_phase_a(
     )
 
 
-def attestation_payload(attested: PhaseAAttestation) -> dict[str, object]:
+def attestation_payload(attested: PhaseAAttestation, *, baseline=None) -> dict[str, object]:
     """Assemble the PII-free Phase A evidence bound into the ledger by B3."""
 
     return {
@@ -199,8 +199,8 @@ def attestation_payload(attested: PhaseAAttestation) -> dict[str, object]:
         "source_table_count": len(attested.plan.entries),
         "target_guard": attested.guard.to_safe_log_dict(),
         "target_identity_baseline": {
-            "digest": target_identity_baseline_digest(attested.baseline),
-            "row_count": attested.baseline.row_count,
+            "digest": target_identity_baseline_digest(baseline if baseline is not None else attested.baseline),
+            "row_count": (baseline if baseline is not None else attested.baseline).row_count,
         },
         "transform_version": attested.policy.transform_version(),
     }
