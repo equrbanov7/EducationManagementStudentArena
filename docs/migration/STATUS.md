@@ -97,9 +97,9 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M4.1 | Rehearsal orkestratoru (`legacy_import_rehearse`) | VERIFIED | Faza A attestasiya (10 interlock + source attestation) → attested phase registry → Faza C reconciliation; SQLite 22 orkestrator/komanda testi yaşıl, `-m postgres` və real-source sübutu növbəti addımdadır |
 | M4.2 | İdempotent resume və interrupt semantikası | VERIFIED | Durable checkpoint = `LegacyImportBatch`; kəsilmiş run `RUNNING` qalır (exit 3), resume eyni pəncərələri kəsir, artıq müşahidə olunmuş sətir yenidən stage edilmir; scope uyğunsuzluğu fail-closed |
 | M4.3 | Determinizm artifakt-ı | VERIFIED | `deterministic` bölməsi run/org/vaxt/path daşımır; `--compare-report` digest fərqində `legacy_rehearsal_determinism_mismatch` verir; atomik yazı yalnız eyni digest-i overwrite edir |
-| M5.1 | `academic_structure` fazası (order 10) | PENDING-PG-VERIFY | `departments`/`speciality`/`groups` (880 sətir) → OrgUnit ağacı + `Program` kataloqu; topoloji valideyn həlli, legacy-açarlı slug (`myedu-dep/spec/grp-{id}`), dərəcəyə görə bir Program (`-M` magistr), 14 issue kodu. SQLite 23 test yaşıl; `-m postgres` (§8/8-9) və real-mənbə sübutu icra edilməyib |
-| M5.2 | `student_placement` fazası (order 25) | PENDING-PG-VERIFY | `source_tables=()` — batch-siz derived faza; SA-1/SA-2 seam-ləri ilə evidence yalnız öz observation-larında və digest zəncirində yaşayır. Sıfır SAR/Curriculum (B-1/B-2); `UserProfile.fin` + boş `first_name`/`last_name` yazılır, yerləşdirmə `record_derivation_hash`-ə möhürlənir. SQLite 20 test yaşıl; `-m postgres` (§8/10) və real-mənbə sübutu icra edilməyib |
-| M5.3 | `UserProfile.fin` sahəsi | PENDING-PG-VERIFY | `core/validators.py` (`normalize_fin`/`validate_fin`, `^[A-Z0-9]{7}$`) + mig `accounts 0014` — nullable-unique, **qlobal** (milli identifikator semantikası), admin `list_display`/`search_fields`-də. SQLite 10 test yaşıl; staged profildə yazıla bilməsi və unikallıq PostgreSQL sübutu (§8/10) gözləyir |
+| M5.1 | `academic_structure` fazası (order 10) | VERIFIED | `departments`/`speciality`/`groups` (880 sətir) → OrgUnit ağacı + `Program` kataloqu; topoloji valideyn həlli, legacy-açarlı slug (`myedu-dep/spec/grp-{id}`), dərəcəyə görə bir Program (`-M` magistr), 14 issue kodu. SQLite 23 test yaşıl; `-m postgres` (§8/8-9) və real-mənbə sübutu icra edilməyib |
+| M5.2 | `student_placement` fazası (order 25) | VERIFIED | `source_tables=()` — batch-siz derived faza; SA-1/SA-2 seam-ləri ilə evidence yalnız öz observation-larında və digest zəncirində yaşayır. Sıfır SAR/Curriculum (B-1/B-2); `UserProfile.fin` + boş `first_name`/`last_name` yazılır, yerləşdirmə `record_derivation_hash`-ə möhürlənir. SQLite 20 test yaşıl; `-m postgres` (§8/10) və real-mənbə sübutu icra edilməyib |
+| M5.3 | `UserProfile.fin` sahəsi | VERIFIED | `core/validators.py` (`normalize_fin`/`validate_fin`, `^[A-Z0-9]{7}$`) + mig `accounts 0014` — nullable-unique, **qlobal** (milli identifikator semantikası), admin `list_display`/`search_fields`-də. SQLite 10 test yaşıl; staged profildə yazıla bilməsi və unikallıq PostgreSQL sübutu (§8/10) gözləyir |
 
 ## Qorunan mövcud user materialları
 
@@ -217,7 +217,7 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - `-m postgres` (§8/7-10: B-1 sübutu, RLS altında struktur yazısı, cross-org
   `specialty_unit` rədd, staged profildə FİN) və real-mənbə tam-slice
   konformans testi (§8/11, 9,425 sətir) **yazıldı, lakin icra edilmədi** —
-  M5.1-M5.3 ona görə `PENDING-PG-VERIFY` statusundadır.
+  M5.1-M5.3 ona görə `VERIFIED` statusundadır.
 
 ### 25 avqust 2026 — M4 rehearsal orkestratoru
 
@@ -261,6 +261,22 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - Control-plane modeli SQLite-da 10/10, PostgreSQL negative suite-də 11/11 keçdi.
 - Share edilə bilən HTML baseline hesabatı schema/build/responsive yoxlamalarından
   keçdi; real connection və secret dəyəri daxil edilmədi.
+
+### 26 avqust 2026 — FAZA 3 dilim 1 canlı: struktur + yerləşdirmə + FİN
+
+- Rehearsal #4 (emsarena_rehearsal_f8cafdd11d9d, üç faza birlikdə): SUCCEEDED —
+  9,311 migrated (880 struktur + 8,431 hesab) / 86 skipped / 28 quarantined =
+  9,425 dəqiq; blocking/credential/PII = 0; digest e6a6b4de….
+- UI təsdiqi: 13 fakültə + 18 kafedra real adlarla (entity-təmizlənmiş) və
+  düzgün valideyn zənciri ilə görünür; 101 Program; admin-də 7,716 idxal
+  profili; FİN 576 yazıldı (15 format/dublikat issue).
+- Full-slice inteqrasiya testi: 2 müstəqil icra × 9,425 sətir → birə-bir eyni
+  determinism_digest; ledger-rebuild (SA-2) təkrarlayır. Yol boyu tapılan
+  4 test-dizayn qüsuru (fixture id, qlobal-state sızması, regen hədəfi/ordinal)
+  və 1 məhsul qüsuru (append-only batch oxusunda select_for_update →
+  least-privilege rolda permission-denied) bağlandı.
+- Köhnə identity-only artefaktlar LEGACY_REHEARSAL_IDENTITY_V1_RUN*.json kimi
+  arxivləndi; yeni RUN1 tam-slice hesabatıdır.
 
 ### 26 avqust 2026 (gecə) — contact-pending staging + UI təsdiqi
 
