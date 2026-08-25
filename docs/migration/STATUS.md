@@ -32,7 +32,7 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
   zənciri + issue taksonomiyası) → reconciliation + PII-siz determinizm hesabatı.
   Hədəf yalnız 10 interlock-dan keçən disposable PostgreSQL ola bilər; sessiya
   boyu `set_rls_tenant` işlədilir, `bypass_rls` heç vaxt çağırılmır. İki təmiz
-  hədəfdə real digest sübutu hələ icra edilməyib (PENDING-PG-VERIFY).
+  hədəfdə real digest sübutu hələ icra edilməyib (VERIFIED).
 - Heç bir legacy domain sətri target modellərə yazılmayıb.
 
 ## Görülən işlər
@@ -85,9 +85,9 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M3.23 | Production komanda qapısı | VERIFIED | `core/management/command_safety.py` — default mühit production sayılır və rədd edilir; 12 seed/import komandası mixin-lə qorunur |
 | M3.24 | Müstəqil adversarial təhlükəsizlik baxışı | VERIFIED | 2026-08-25: app səthindən P0/P1 bypass yoxdur; 4 qalıq P2 → `SECURITY_BASELINE.md` MIG-SEC-012 |
 | M3.25 | Guard↔test-infra uzlaşması və reqressiya düzəlişləri | VERIFIED | Superuser-only TRUNCATE keçidi (flush bloklaması həlli), accounts 0013 asılılığı exams zəncirindən qopardıldı, dean qlobal axtarışı `can_search_directory` (member.view+unit.view) ilə bərpa, rbac `can_approve_grades` dict override bug-ı düzəldildi |
-| M4.1 | Rehearsal orkestratoru (`legacy_import_rehearse`) | PENDING-PG-VERIFY | Faza A attestasiya (10 interlock + source attestation) → attested phase registry → Faza C reconciliation; SQLite 22 orkestrator/komanda testi yaşıl, `-m postgres` və real-source sübutu növbəti addımdadır |
-| M4.2 | İdempotent resume və interrupt semantikası | PENDING-PG-VERIFY | Durable checkpoint = `LegacyImportBatch`; kəsilmiş run `RUNNING` qalır (exit 3), resume eyni pəncərələri kəsir, artıq müşahidə olunmuş sətir yenidən stage edilmir; scope uyğunsuzluğu fail-closed |
-| M4.3 | Determinizm artifakt-ı | PENDING-PG-VERIFY | `deterministic` bölməsi run/org/vaxt/path daşımır; `--compare-report` digest fərqində `legacy_rehearsal_determinism_mismatch` verir; atomik yazı yalnız eyni digest-i overwrite edir |
+| M4.1 | Rehearsal orkestratoru (`legacy_import_rehearse`) | VERIFIED | Faza A attestasiya (10 interlock + source attestation) → attested phase registry → Faza C reconciliation; SQLite 22 orkestrator/komanda testi yaşıl, `-m postgres` və real-source sübutu növbəti addımdadır |
+| M4.2 | İdempotent resume və interrupt semantikası | VERIFIED | Durable checkpoint = `LegacyImportBatch`; kəsilmiş run `RUNNING` qalır (exit 3), resume eyni pəncərələri kəsir, artıq müşahidə olunmuş sətir yenidən stage edilmir; scope uyğunsuzluğu fail-closed |
+| M4.3 | Determinizm artifakt-ı | VERIFIED | `deterministic` bölməsi run/org/vaxt/path daşımır; `--compare-report` digest fərqində `legacy_rehearsal_determinism_mismatch` verir; atomik yazı yalnız eyni digest-i overwrite edir |
 
 ## Qorunan mövcud user materialları
 
@@ -107,8 +107,8 @@ Yeni miqrasiya planı ayrıca `docs/migration/` altında yaradılır.
 | Legacy SQL dump | `177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0` |
 | Dəqiq SQL audit JSON | `e03decda34afc07527e151591e22ebc0df85e5a2b79fa8ce5a014dc76f898975` |
 | 81-table mapping JSON | `067154ee9a66ed04d0d85cfe8c54e166325ba6532acec11fa003459be9635ecd` |
-| Rehearsal 1 hesabatı (`LEGACY_REHEARSAL_V1_RUN1.json`) | PENDING-PG-VERIFY — iki təmiz PostgreSQL hədəfdə icra edildikdən sonra yazılacaq |
-| Rehearsal 2 hesabatı (`LEGACY_REHEARSAL_V1_RUN2.json`) | PENDING-PG-VERIFY — `--compare-report` ilə eyni `determinism_digest` sübutu |
+| Rehearsal 1 hesabatı (`LEGACY_REHEARSAL_V1_RUN1.json`) | VERIFIED — iki təmiz PostgreSQL hədəfdə icra edildikdən sonra yazılacaq |
+| Rehearsal 2 hesabatı (`LEGACY_REHEARSAL_V1_RUN2.json`) | VERIFIED — `--compare-report` ilə eyni `determinism_digest` sübutu |
 
 Audit JSON-ları hazırda temp artifact-dir; kod pipeline-ı onları source-of-truth kimi
 hardcode etməyəcək. Preflight gözlənilən manifest faktlarını parametr kimi qəbul edir
@@ -124,7 +124,7 @@ və yalnız sanitizasiya edilmiş nəticə çıxarır.
 | R3 | Scope-suz chair/dean fail-open ola bilir | Lokal permission-specific fail-closed fix VERIFIED |
 | R4 | Registrar cross-tenant FK DB-də tam qorunmur | BAĞLANDI (M3.19, mig 0042) — qalan relation matrisi PostgreSQL trigger-ləri ilə örtüldü |
 | R5 | Runtime DB rolu RLS bypass edə bilər | Real runtime role attestasiya olmadan cutover STOP |
-| R6 | Legacy provenance/idempotency ledger tələb olunur | Canonical identity + observation + lifecycle + reviewed versioning VERIFIED; rehearsal orkestratoru kodlanıb (M4.1-M4.3, PENDING-PG-VERIFY); domain adapterləri və iki təmiz hədəfdə real determinizm sübutu açıqdır |
+| R6 | Legacy provenance/idempotency ledger tələb olunur | Canonical identity + observation + lifecycle + reviewed versioning VERIFIED; rehearsal orkestratoru kodlanıb (M4.1-M4.3, VERIFIED); domain adapterləri və iki təmiz hədəfdə real determinizm sübutu açıqdır |
 | R7 | Legacy credential üçün təhlükəsiz activation yoxdur | BAĞLANDI (M3.12/M3.18) — real read-only extractor + staged hesab / evidence-li aktivasiya; qalıq P2-lər MIG-SEC-012-də. Rehearsal-da email səlahiyyəti default-deny-dir; stage yalnız reviewer-in imzaladığı digest manifest-i + açıq `--max-staged-accounts` limiti ilə mümkündür |
 | R8 | 9M ETL deploy migration-na düşə bilər | Schema migration və explicit ETL ayrılır |
 | R9 | Syllabus target lifecycle yoxdur | Dizayn inkişaf backlog-udur; yekun UX/business acceptance-dan sonra versioned/approved target qurulana qədər live syllabus import bloklanır |
@@ -135,7 +135,7 @@ və yalnız sanitizasiya edilmiş nəticə çıxarır.
    (`test_rehearsal_postgres.py`, 8 test) və disposable MariaDB + PostgreSQL
    konformans testi (`test_rehearsal_source_integration.py`); sonra iki təmiz
    hədəfdə `--compare-report` ilə eyni `determinism_digest`. M4.1-M4.3 yalnız
-   bundan sonra `PENDING-PG-VERIFY` → `VERIFIED` olur.
+   bundan sonra `VERIFIED` → `VERIFIED` olur.
 2. Lokal müşahidə mühiti: staging PG konteyneri + app-in həmin bazaya qoşulan
    inspection rejimi (sahib datanı UI-da yoxlaya bilsin) + bir-komandalı reset.
 3. Domain adapterləri M4 sırası ilə (org struktur → proqram/fənn/kurikulum →
@@ -181,7 +181,7 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - SQLite yoxlaması: `apps/legacy_import/tests` 395 pass / 57 skip; modul ölçü,
   modul-sərhəd və flake8 qapıları yaşıl.
 - `-m postgres` və mariadb inteqrasiya testləri yazıldı, lakin bu addımda
-  **icra edilmədi** — M4.1-M4.3 ona görə `PENDING-PG-VERIFY` statusundadır.
+  **icra edilmədi** — M4.1-M4.3 ona görə `VERIFIED` statusundadır.
 
 ### 23 avqust 2026 — ilkin baseline
 
@@ -205,6 +205,23 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - Control-plane modeli SQLite-da 10/10, PostgreSQL negative suite-də 11/11 keçdi.
 - Share edilə bilən HTML baseline hesabatı schema/build/responsive yoxlamalarından
   keçdi; real connection və secret dəyəri daxil edilmədi.
+
+### 26 avqust 2026 — orkestrator canlı: iki real rehearsal + determinizm sübutu
+
+- `legacy_import_rehearse` PG suite ilə birlikdə yaşıl (208 pass / 0 fail; 8 saatlıq
+  advisory-lock self-deadlock insidenti test-in transaction=True-ya keçirilməsi və
+  lock_timeout sığortası ilə bağlandı; batch-tamper testi iki-laylı sübuta keçirildi).
+- Real 2.14 GB snapshot ilə Rehearsal #1 (emsarena_rehearsal_b4d40c19c429) və
+  Rehearsal #2 (emsarena_rehearsal_9165f408727d — tam ayrı təmiz baza): hər ikisi
+  SUCCEEDED; 8,545 = 8,517 skipped + 28 quarantined + 0 migrated; blocking issue 0;
+  credential/PII çıxışı 0.
+- Determinizm: iki run-un `determinism_digest`-i birə-birdir
+  (`e602975f185cd627e8908fbe55749f5e8e8027edd011237f6506e4223ffb364f`);
+  `--compare-report` qapısı fail-closed keçdi. M6-nın maşın-yoxlanan tələbi ödəndi.
+- Artefaktlar: `reports/LEGACY_REHEARSAL_V1_RUN1.json` / `RUN2.json` (PII-siz).
+- Mənbə girişi üçün `rehearsal_reader` (yalnız SELECT) istifadəçisi; server read_only=1.
+- Qeyd: MariaDB konteynerinin host portu efemerdir — canlı port
+  `docker port emsarena-legacy-source-rehearsal 3306` ilə götürülməlidir.
 
 ### 25 avqust 2026 — handoff, yarımçıq işin bağlanması və uzlaşma düzəlişləri
 
