@@ -386,6 +386,20 @@ def _role_capabilities(user, profile):
         if _user_has_any_role(user, {ProfileRole.MEMBER}):
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
 
+    # «Qruplar» bölməsi — permission-əsaslı görünürlük (rol bayraqlarına ƏLAVƏ,
+    # mövcud is_org_admin/is_teacher qolları qalır). Permission-editordan hər
+    # hansı rola verilmiş `group.view` / `group.manage` bölməni açır; faktiki
+    # icazə view qatında (`exams.views.teacher.groups`) yenidən yoxlanılır.
+    if "groups" not in allowed_sections and active_organization is not None:
+        from core.permissions import has_permission as _groups_has_permission
+
+        _groups_actor_perms, _ = _collect_actor_permissions(user, active_organization)
+        _groups_perm_list = list(_groups_actor_perms)
+        if _groups_has_permission(_groups_perm_list, "group.view") or _groups_has_permission(
+            _groups_perm_list, "group.manage"
+        ):
+            allowed_sections.add("groups")
+
     has_admin_control_role = (
         _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
     )
