@@ -468,6 +468,11 @@ def _process_window(
         observation = _existing_observation(context, row)
         if observation is not None:
             state, entity_map, extra_rules = observation.state, observation.entity_map, ()
+            if state == _STATE.MIGRATED:
+                # Resume replay: əvvəlki cəhddə staged olunmuş sətir bu run-un
+                # staged cəminə VƏ qapaq hesabına daxildir (2026-08-26 tapıntısı —
+                # canlı total ilə ledger-rekonstruksiya fərqlənirdi).
+                staged_delta += 1
         elif eligible and staged_so_far + staged_delta < context.policy.max_staged_accounts:
             state, entity_map, extra_rules = _stage_row(context, row=row, classification=classification, roles=roles)
             if state == _STATE.MIGRATED:

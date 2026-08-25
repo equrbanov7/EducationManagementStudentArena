@@ -220,10 +220,10 @@ def _drive_phases(
     email_trust_manifest_digests,
     cancellation_requested,
     stdout_note,
+    snapshot,
 ) -> tuple[PhaseReport, ...]:
-    """B4-B5: rebase the baseline, then drive the registry in its fixed order."""
+    """B5: drive the registry in its fixed order over the PRE-RUN (rebased) baseline."""
 
-    snapshot = rebase_target_snapshot_for_run(attested.baseline, run_id=run.pk)
     email_policy = build_email_trust_policy(attested.policy, email_trust_manifest_digests)
     target_validators = build_target_validators()
     reports: list[PhaseReport] = []
@@ -291,6 +291,7 @@ def _publish(
     authorize: Callable | None = None,
     status: str = "",
     failure_code: str = "",
+    baseline=None,
 ) -> RehearsalOutcome:
     """C5-C9: histogram, determinism digest, terminal transition, artifact."""
 
@@ -306,7 +307,7 @@ def _publish(
         policy=attested.policy,
         source_attestation=attested.source_attestation,
         target_guard=attested.guard.to_safe_log_dict(),
-        target_identity_snapshot=attested.baseline,
+        target_identity_snapshot=baseline if baseline is not None else attested.baseline,
         phase_reports=phase_reports,
         issue_histogram=histogram,
         blocking_issue_count=blocking,
@@ -408,6 +409,7 @@ def execute_rehearsal(
             compare_report_path=compare_report_path,
             status=run.status,
             failure_code=run.failure_code,
+            baseline=rebase_target_snapshot_for_run(attested.baseline, run_id=run.pk),
         )
 
     run = _resolve_run(
@@ -417,6 +419,9 @@ def execute_rehearsal(
         authorize=authorize,
         resume_run_id=resume_run_id,
     )
+    # B4 rebase B3 anchor-dan ƏVVƏL: resume-da anchor digest-i dəyişməməlidir
+    # (2026-08-26: legacy_issue_identity_conflict — inteqrasiya testinin tapıntısı).
+    rebased_baseline = rebase_target_snapshot_for_run(attested.baseline, run_id=run.pk)
     upsert_issue(
         run_id=run.pk,
         actor=actor,
@@ -426,7 +431,7 @@ def execute_rehearsal(
         legacy_pk=ATTESTATION_LEGACY_PK,
         rule_code=ATTESTATION_RULE_CODE,
         severity=ISSUE_SEVERITY[ATTESTATION_RULE_CODE],
-        payload_digest=attestation_digest(attestation_payload(attested)),
+        payload_digest=attestation_digest(attestation_payload(attested, baseline=rebased_baseline)),
         entity_map_id=None,
     )
     try:
@@ -439,6 +444,7 @@ def execute_rehearsal(
             email_trust_manifest_digests=email_trust_manifest_digests,
             cancellation_requested=cancellation_requested or (lambda: False),
             stdout_note=stdout_note or (lambda _note: None),
+            snapshot=rebased_baseline,
         )
         reconcile_run(run, phases=attested.phases, plan=attested.plan)
     except LegacyRehearsalEvidenceError as exc:
@@ -453,6 +459,7 @@ def execute_rehearsal(
         compare_report_path=compare_report_path,
         actor=actor,
         authorize=authorize,
+        baseline=rebased_baseline,
     )
 
 
