@@ -153,6 +153,26 @@ Production cutover hazırda bloklanır. Əsas səbəblər:
   ad, e-mail və telefon yalnız restricted migration mühitində işlənə bilər.
 - **Close gate:** import/log/export/quarantine-da credential dəyəri = 0; existing
   password overwrite = 0.
+- **2026-08-25 əlavəsi (FAZA 3 / SLICE 2 — aktivasiya körpüsü):** rehearsal indi
+  `signed_authoritative_export` səbəb kodlu `AccountActivationEvidence`-i
+  **proqramla** kəsə bilir. Evidence digest-i uydurulmur: o,
+  `sha256(transform_version ‖ snapshot_sha256 ‖ "student" ‖ legacy_pk)` təmiz
+  funksiyasıdır və `snapshot_sha256` 2.14 GB dump-ın `table_plan.SOURCE_SNAPSHOT_SHA256`-də
+  pinlənmiş, Faza A tərəfindən attestasiya olunan dəyəridir — **həmin pin imzanın
+  özüdür**. Təmiz funksiya olması eyni zamanda təkrar-aktivasiyanı
+  `identity_access`-in `evidence_digest`/`reason_code`/`role_ref` müqayisəsinə görə
+  konstruksiyaya görə uyğun edir, `accounts_activation_evidence_user_uniq` isə
+  ikiqat aktivasiyanı struktur olaraq mümkünsüz saxlayır. Aktivasiyadan **dərhal
+  sonra, eyni atomik blokda** `email_verified=False` + `password_change_required=True`
+  yazılır (E-11): aktivasiya «reyestr bu şəxsi tanıyır» deməkdir, «bu email
+  təsdiqlidir» yox — legacy ünvan bərpa üçün dərhal yararsız olur və hesab mövcud
+  ilk-giriş axınına (yeni email → OTP → yeni parol) düşür. Bütün bunlar
+  `--stage-and-activate` (default **bağlı**) + `--max-activated-accounts` (default
+  **0**) arxasındadır və hər ikisi `policy_digest`-dədir. Kredensial çatdırılması
+  bu dilimdə **implementasiya edilmir**: aktivləşdirilmiş hesabda parol hələ də
+  yararsızdır (`set_unusable_password()`), tövsiyə olunan yol isə mövcud
+  `provision_student_credentials --generate --csv` (çap olunmuş birdəfəlik parol)
+  və CSV-nin paylanmadan sonra məhv edilməsidir.
 
 ### MIG-SEC-006 — Böyük ETL owner Django migration/release yoluna düşə bilər
 

@@ -270,6 +270,9 @@ def _student_rows(context: RehearsalContext):
         raise LegacyRehearsalEvidenceError("legacy_rehearsal_source_row_count_mismatch")
 
 
+student_rows = _student_rows  # public alias: the SAR phase streams the same contract
+
+
 def fin_occurrences(context: RehearsalContext) -> Counter[str]:
     """Pass 1: the FİN histogram of the WHOLE cohort and nothing else."""
 

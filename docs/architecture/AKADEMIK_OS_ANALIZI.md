@@ -5764,3 +5764,49 @@ testi · yeni setting-lər `production.py` explicit import siyahısında.
 > sonrasını sıfır əl əməyi ilə icra edir, hər halqanı FK ilə geriyə izlənən edir və heç bir
 > dəyişikliyin izsiz qalmasına yol vermir.**
 
+
+---
+
+## Z. Legacy idxal (FAZA 3 / SLICE 2) — modelləşdirmə boşluqları
+
+> **Bu bölmə 2026-08-25-də ƏLAVƏ olundu; yuxarıdakı mətnin heç bir sətri
+> dəyişdirilməyib.** Mənbə: MyEdu legacy dump-ının `academic_catalog` (order 12)
+> rehearsal fazası — `lessons` (2,521) + `curricula` (126) + `curricula_plan`
+> (3,424). Aşağıdakılar «gələcəkdə gözəl olardı» siyahısı deyil: hər biri
+> **canlı mənbədə mövcud olan, hədəf modeldə saxlanacaq yeri olmayan** faktdır,
+> ona görə hər biri ölçülə bilən bir INFO issue kodu ilə işarələnir.
+
+### Z.1 Üç model artıq legacy-doldurulandır
+
+| Model | Vəziyyət | Qeyd |
+|---|---|---|
+| `registrar.Subject` | **legacy-doldurulan** | `code` HƏMİŞƏ `MYEDU-L{lessons.id}` sintez olunur (V-6: `lesson_code` şəxsiyyət deyil — 145 fərqli kod 2,521 sətri örtür, «37» tək başına 1,975 ad daşıyır). `(ad, department_id)` üzrə dedup, qalib ən kiçik id. |
+| `registrar.Curriculum` | **legacy-doldurulan** | `(organization, program, admission_year)` unikal açarı ilə `get_or_create`; qəbul ili `curricula.from_date`-dən (canlı dump-da 126/126 boş) yox, kurikuluma istinad edən qrupların `start_year` MIN-indən törəyir. |
+| `registrar.CurriculumSubject` | **legacy-doldurulan** | `curricula_plan.lesson_id` JSON massivinin **hər** elementi bir sətrə genişlənir (V-14; canlı 883/3,424 sətir çoxelementlidir). |
+
+Bu, F1 (`Tədris planı nüvəsi`) fazasının «boş cədvəldən başlayırıq» fərziyyəsini
+dəyişir: F1 gələndə bu üç cədvəldə **real legacy məzmun** olacaq və sahə
+genişlənmələri backfill strategiyası ilə birlikdə planlaşdırılmalıdır.
+
+### Z.2 Dörd modelləşdirmə boşluğu
+
+| # | Boşluq | Canlı mənbədə nə var | Hədəf modeldə nə yoxdur | İdxalda nə olur |
+|---|---|---|---|---|
+| **Z.2.1** | **Plan sətrində kredit və saat yoxdur** | `curricula_plan.kredit` (hər sətirdə, 0..10) və altı saat sütunu: `saat_muh`, `saat_sem`, `saat_lab`, `saat_prak`, `saat_aks`, `saat_as` | `CurriculumSubject`-də nə kredit, nə saat sütunu var (`curriculum, subject, semester_number, is_elective, elective_group, required_choices, order`) | `kredit` yalnız `Subject.ects` üçün **namizəd**dir və yalnız birmənalı olduqda işlədilir (birdən çox fərqli dəyər → `legacy_subject_ects_ambiguous`, model default-u 5). Saatlar heç yerə yazılmır: qeyri-sıfır dəyər `legacy_plan_hours_not_modelled` (info) verir və xam dəyər `source_row_hash`-ə qatlanır. **Bu, T0/T1-in `CurriculumSubject` sahə genişlənməsini normativ tələb yox, MİQRASİYA tələbi edir** — kredit fənnin deyil, plan sətrinin atributudur (eyni fənn iki ixtisasda fərqli kredit daşıya bilər). |
+| **Z.2.2** | **`Curriculum`-da `education_form` yoxdur** | `curricula.eyani_qiyabi` (əyani / qiyabi) | `Curriculum`: `organization, program, admission_year, name, is_active` | Yalnız qərar token-inə düşür; qeyri-boş dəyər `legacy_curriculum_education_form_not_modelled` (info). ⚠ **Nəticə:** yalnız əyani/qiyabi ilə fərqlənən iki legacy kurikulum bir `Curriculum` sətrinə **birləşir**. Canlı ölçü: 25 form-only toqquşma. Düzəlişi `Curriculum.education_form` + genişlənmiş unikal açar `(organization, program, admission_year, education_form)` olardı — real hədəf-model dəyişikliyidir və öz nəzərdən keçirilmiş dilimini istəyir. |
+| **Z.2.3** | **Prerekvizit əlaqəsi yoxdur** | `curricula_plan.lesson_before_id` (qeyri-sıfır olduqda əvvəlki fənn) | `CurriculumPrerequisite` modeli **hələ yoxdur** (F1-də planlaşdırılıb) | Qeyri-sıfır dəyər `legacy_plan_prerequisite_not_modelled` (info) verir və qərar token-inə düşür. F1-in `CurriculumPrerequisite` + DAG işi gələndə bu kod histoqramda **hazır ölçü** kimi durur: neçə sətir prerekvizit daşıyır. |
+| **Z.2.4** | **Üç modelin heç birində provenance yeri yoxdur** | Hər sətrin `lessons.id` / `curricula.id` / `curricula_plan.id` legacy açarı | `OrgUnit`-dən fərqli olaraq (`settings` JSONField) `Subject`/`Curriculum`/`CurriculumSubject`-də JSON slot yoxdur; yeganə boş sahələr `Subject.description` və `Curriculum.name`-dir, hər ikisi **istifadəçiyə görünən** | Heç nə yazılmır (E-8). Provenance mağazası RLS ilə qorunan ledger-in özüdür: `LegacyEntityMap(entity_type, legacy_pk) → (target_model_label, target_pk)`. `Curriculum.name=""` qalır və `__str__` `f"{program.code} {admission_year}"` göstərir — sıfır uydurma ilə düzgün nəticə. **Əgər gələcəkdə UI-da «bu sətir legacy-dən gəlib» rozetkası lazım olsa, o, ledger sorğusudur, yeni sütun yox.** |
+
+### Z.3 Beşinci, ayrıca izlənən boşluq: `curricula_plan.type` semantikası
+
+Paylanma: `3`→1,806 · `1`→438 · boş→58 · `2.1`/`2.2` · `4.01`…`4.24` · `5`/`6`/`8`
+nadir. `4.xx` ailəsi nömrələnmiş **seçmə bloklara** oxşayır və universitetin
+cavabı (V-21) da bunu təsdiqləyir: nazirlik fənləri məcburi, universitet fənləri
+seçmədir və seçimi **qrup** edir — bu, mövcud `GroupElectiveChoice` axını ilə
+üst-üstə düşür. Buna baxmayaraq **bu dilim heç bir seçmə blok icad etmir**: hər
+plan sətri `is_elective=False`, `elective_group=""`, `required_choices=1` alır və
+qeyri-boş token `legacy_plan_type_unmapped` (info) verir. Səbəb sadədir — səhv
+təxmin heç kimin seçmədiyi seçmə bloklar yaradardı və `uniq_curriculum_subject_semester`
+altında bunu geri qaytarmaq hədəfi yenidən qurmaqdan başqa yolla mümkün olmazdı.
+Seçmə blok modelləşdirməsi ayrıca dilimdir; `legacy_plan_type_unmapped`
+histoqramı onun ölçüsünü **indi** verir.

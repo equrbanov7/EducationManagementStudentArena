@@ -4,6 +4,9 @@ from dataclasses import replace
 import pytest
 
 from apps.legacy_import.services.field_contracts import (
+    CURRICULUM_CATALOG_FIELDS,
+    CURRICULUM_PLAN_FIELDS,
+    LESSON_CATALOG_FIELDS,
     STUDENT_IDENTITY_FIELDS,
     WORKER_IDENTITY_FIELDS,
     LegacyFieldContractError,
@@ -74,6 +77,62 @@ WORKER_SOURCE_FIELDS = (
     "teacher_type",
     "inzibati",
     "last_login_time",
+)
+
+# Verbatim from docs/db-compare/myedu_mysql_schema.sql: the catalogue tables
+# carry no authentication column at all, only archive bookkeeping.
+LESSON_SOURCE_FIELDS = (
+    "id",
+    "name",
+    "kollec_or_uni",
+    "lesson_code",
+    "who_is_added",
+    "added_date",
+    "updated_date",
+    "type",
+    "department_id",
+    "only_az",
+)
+
+CURRICULUM_SOURCE_FIELDS = (
+    "id",
+    "speciality_id",
+    "from_date",
+    "to_date",
+    "who_is_added",
+    "added_date",
+    "updated_date",
+    "kollec_or_uni",
+    "eyani_qiyabi",
+    "lesson_code",
+    "bak_or_mag",
+)
+
+CURRICULUM_PLAN_SOURCE_FIELDS = (
+    "id",
+    "curricula_id",
+    "lesson_code",
+    "lesson_id",
+    "type",
+    "lesson_before_id",
+    "semestr",
+    "kredit",
+    "saat_aks",
+    "saat_as",
+    "saat_muh",
+    "saat_sem",
+    "saat_lab",
+    "saat_prak",
+    "kollec_or_uni",
+    "who_is_added",
+    "added_date",
+    "updated_date",
+)
+
+CATALOG_CONTRACTS = (
+    (LESSON_CATALOG_FIELDS, LESSON_SOURCE_FIELDS),
+    (CURRICULUM_CATALOG_FIELDS, CURRICULUM_SOURCE_FIELDS),
+    (CURRICULUM_PLAN_FIELDS, CURRICULUM_PLAN_SOURCE_FIELDS),
 )
 
 
@@ -382,3 +441,85 @@ def test_compiled_projection_cannot_be_replaced_with_a_raw_select_fragment():
 
     assert exc_info.value.code == "legacy_projection_factory_required"
     assert "password" not in str(exc_info.value)
+
+
+# ---------------------------------------------------------------------------
+# Catalogue contracts (§3.1) — the hand audit of _CREDENTIAL_TOKENS made executable
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(("contract", "source_fields"), CATALOG_CONTRACTS)
+def test_catalogue_contracts_construct_and_allowlist_no_credential_column(contract, source_fields):
+    # ``LegacySourceFieldContract.__post_init__`` already refuses a credential
+    # field, so mere construction is half the proof; the loop is the other half
+    # and is what a future field addition has to survive.
+    assert contract.version == "catalog-v1"
+    assert contract.allowed_fields[0] == "id"
+    assert set(contract.allowed_fields) <= set(source_fields)
+    for field_name in contract.allowed_fields:
+        assert is_credential_field(field_name) is False
+
+
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "lesson_code",
+        "lesson_id",
+        "lesson_before_id",
+        "only_az",
+        "saat_aks",
+        "saat_as",
+        "saat_muh",
+        "saat_sem",
+        "saat_lab",
+        "saat_prak",
+        "curricula_id",
+        "kredit",
+        "semestr",
+        "type",
+        "from_date",
+        "to_date",
+        "eyani_qiyabi",
+        "bak_or_mag",
+        "department_id",
+        "speciality_id",
+    ],
+)
+def test_catalogue_identifiers_are_not_credential_lookalikes(field_name):
+    """``code`` is not a credential token; only the ``passcode``/``pincode`` compounds are."""
+
+    assert is_credential_field(field_name) is False
+
+
+def test_catalogue_contract_fingerprints_are_distinct():
+    fingerprints = {contract.fingerprint for contract, _source_fields in CATALOG_CONTRACTS}
+
+    assert len(fingerprints) == len(CATALOG_CONTRACTS)
+    assert all(len(fingerprint) == 64 for fingerprint in fingerprints)
+
+
+@pytest.mark.parametrize(("contract", "source_fields"), CATALOG_CONTRACTS)
+def test_catalogue_projections_default_deny_archive_columns(contract, source_fields):
+    projection = compile_safe_projection(contract, discovered_fields=source_fields)
+    sql = projection.mysql_select_statement()
+
+    assert projection.field_names == contract.allowed_fields
+    assert projection.credential_field_count == 0
+    assert projection.source_field_count == len(source_fields)
+    assert projection.excluded_field_count == len(source_fields) - len(contract.allowed_fields)
+    assert sql.startswith("SELECT `id`, ")
+    assert sql.endswith(f" FROM `{contract.source_table}`")
+    for archive_column in ("who_is_added", "added_date", "updated_date", "kollec_or_uni"):
+        assert archive_column not in contract.allowed_fields
+        assert f"`{archive_column}`" not in sql
+
+
+def test_curricula_lesson_code_is_never_projected_but_the_plan_row_one_is():
+    """E-5: ``curricula.lesson_code`` has unresolved semantics and stays in the source."""
+
+    assert "lesson_code" not in CURRICULUM_CATALOG_FIELDS.allowed_fields
+    assert "lesson_code" in CURRICULUM_PLAN_FIELDS.allowed_fields
+    assert "lesson_code" in LESSON_CATALOG_FIELDS.allowed_fields
+    assert "lesson_id" in CURRICULUM_PLAN_FIELDS.allowed_fields
+    # V-8: the subject link is ``curricula_plan.lesson_id``, never a lesson code.
+    assert "lesson_id" not in CURRICULUM_CATALOG_FIELDS.allowed_fields

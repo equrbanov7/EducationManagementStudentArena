@@ -410,3 +410,67 @@ GROUP_STRUCTURE_FIELDS = LegacySourceFieldContract(
         "kollec_or_uni",
     ),
 )
+
+# Catalogue contracts (academic_catalog phase).  Archive-only columns and
+# ``curricula.lesson_code`` (unresolved semantics, Q8) stay out: the projection
+# is default-deny, so a field that is not migrated never leaves the source.
+LESSON_CATALOG_FIELDS = LegacySourceFieldContract(
+    source_table="lessons",
+    version="catalog-v1",
+    allowed_fields=(
+        "id",
+        "name",
+        "lesson_code",
+        "type",
+        "department_id",
+        "only_az",
+    ),
+)
+
+CURRICULUM_CATALOG_FIELDS = LegacySourceFieldContract(
+    source_table="curricula",
+    version="catalog-v1",
+    allowed_fields=(
+        "id",
+        "speciality_id",
+        "from_date",
+        "to_date",
+        "eyani_qiyabi",
+        "bak_or_mag",
+    ),
+)
+
+CURRICULUM_PLAN_FIELDS = LegacySourceFieldContract(
+    source_table="curricula_plan",
+    version="catalog-v1",
+    allowed_fields=(
+        "id",
+        "curricula_id",
+        "lesson_id",
+        "lesson_code",
+        "type",
+        "semestr",
+        "kredit",
+        "lesson_before_id",
+        "saat_aks",
+        "saat_as",
+        "saat_muh",
+        "saat_sem",
+        "saat_lab",
+        "saat_prak",
+    ),
+)
+
+# Student status contract (sar_materialisation phase, V-18).  ``students`` is
+# claimed by ``identity_cohort``; this second, deliberately tiny contract exists
+# because widening ``STUDENT_IDENTITY_FIELDS`` would change its fingerprint and
+# therefore every identity ``source_row_hash`` ever recorded.  ``azadedildi`` is
+# the only usable release flag in the live dump (``status`` is 0 for every row).
+STUDENT_STATUS_FIELDS = LegacySourceFieldContract(
+    source_table="students",
+    version="status-v1",
+    allowed_fields=(
+        "id",
+        "azadedildi",
+    ),
+)

@@ -878,3 +878,53 @@ def test_phase_refuses_a_foreign_context_object():
         AcademicStructurePhase().run(object())
 
     assert exc_info.value.code == "legacy_rehearsal_context_invalid"
+
+
+# ---------------------------------------------------------------------------
+# Refactor pin: §3.5 extracted ``group_admission_year`` out of ``_group``
+# ---------------------------------------------------------------------------
+
+# Captured from the shipped fixture BEFORE the extraction.  ``group_admission_year``
+# is behaviour-preserving by contract, and the classification chain is exactly
+# ``(legacy_pk, state, decision_token)`` — the group token carries the derived
+# admission year — so these bytes must survive the refactor unchanged.
+_PINNED_CLASSIFICATION_DIGESTS = {
+    "departments": "4b4a20a999973d5d97eedd44dbbf868437e0ffbf894fa3c546a46d2f24e08d39",
+    "speciality": "002c415228e1701390b9c50a2040c1b49659f87f348f4dd205f887cdd8b22733",
+    "groups": "94278e4a58715159076e35474916a395113c00fc6a301afd4065bb8adb324c46",
+}
+
+
+@pytest.mark.django_db
+def test_classification_digests_are_pinned_across_the_group_year_refactor(structure_environment):
+    organization, actor = structure_environment
+    policy = _policy()
+    plan = _full_plan()
+    run = _running_run(organization, actor, policy=policy, plan=plan, source_row_count=14)
+    context = replace(_full_context(organization, actor, policy=policy, plan=plan), run_id=run.pk)
+
+    report = AcademicStructurePhase().run(context)
+
+    assert {
+        record.source_table: record.classification_digest for record in report.batches
+    } == _PINNED_CLASSIFICATION_DIGESTS
+
+
+def test_group_admission_year_classifies_the_year_sentinel_and_range():
+    assert source_module.group_admission_year(2019) == (2019, ())
+    assert source_module.group_admission_year(0) == (None, ())
+    assert source_module.group_admission_year(None) == (None, ())
+    assert source_module.group_admission_year(1800) == (None, ("legacy_group_start_year_invalid",))
+    assert source_module.group_admission_year(source_module.MIN_ADMISSION_YEAR) == (
+        source_module.MIN_ADMISSION_YEAR,
+        (),
+    )
+    assert source_module.group_admission_year(source_module.MAX_ADMISSION_YEAR + 1) == (
+        None,
+        ("legacy_group_start_year_invalid",),
+    )
+
+    with pytest.raises(LegacyRehearsalEvidenceError) as exc_info:
+        source_module.group_admission_year("2019")
+
+    assert exc_info.value.code == "legacy_rehearsal_source_value_type_unsupported"

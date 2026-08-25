@@ -10,6 +10,7 @@ plus the tenant guards its new targets live behind.
 """
 
 import json
+import uuid
 from dataclasses import replace
 from types import SimpleNamespace
 
@@ -18,8 +19,10 @@ from django.db import DatabaseError, IntegrityError, connection, connections, tr
 
 import pytest
 
+from apps.accounts.identity_models import AccountActivationEvidence
 from apps.accounts.models import UserProfile
-from apps.accounts.services.identity_access import stage_imported_account
+from apps.accounts.public import activate_staged_account
+from apps.accounts.services.identity_access import IdentityAccessError, stage_imported_account
 from apps.legacy_import.models import (
     LegacyEntityMap,
     LegacyEntityObservation,
@@ -40,18 +43,22 @@ from apps.legacy_import.services.ledger import (
 )
 from apps.legacy_import.services.ledger_locks import advisory_lock_key
 from apps.legacy_import.services.rehearsal_authorizer import USER_MODEL_LABEL, build_target_validators
+from apps.legacy_import.services.rehearsal_catalog_phase import AcademicCatalogPhase
 from apps.legacy_import.services.rehearsal_contracts import SOURCE_SYSTEM, EmailTrustPolicy
 from apps.legacy_import.services.rehearsal_identity_phase import (
     IdentityCohortPhase,
     build_email_trust_policy,
     email_evidence_digest,
 )
+from apps.legacy_import.services.rehearsal_sar_targets import ACTIVATION_REASON_CODE, activation_evidence_digest
 from apps.legacy_import.services.rehearsal_structure_phase import AcademicStructurePhase
 from apps.legacy_import.services.rehearsal_target_guard import (
     REHEARSAL_TARGET_GUC,
     REHEARSAL_TARGET_GUC_VALUE,
     assert_disposable_rehearsal_target,
 )
+from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256
+from apps.legacy_import.tests.test_rehearsal_catalog_phase import _structured_context as _catalog_context
 from apps.legacy_import.tests.test_rehearsal_identity_phase import (
     _allow,
     _context,
@@ -68,7 +75,7 @@ from apps.legacy_import.tests.test_rehearsal_structure_phase import _full_contex
 from apps.legacy_import.tests.test_rehearsal_structure_phase import _policy as _structure_policy
 from apps.legacy_import.tests.test_rehearsal_structure_phase import _running_run as _structure_run
 from apps.organizations.models import Membership, Organization, OrgUnit, Role
-from apps.registrar.models import Curriculum, Program
+from apps.registrar.models import Curriculum, CurriculumSubject, Program, StudentAcademicRecord, Subject
 from core.constants import OrganizationType, OrgUnitType, RoleScopeType
 
 pytestmark = [pytest.mark.postgres, pytest.mark.django_db]
@@ -675,3 +682,304 @@ def test_profile_fin_unique_and_staged_profile_writable():
 
     assert "accounts_staged_activation_service_required" in str(exc_info.value)
     assert UserProfile.objects.get(user=first).access_state == UserProfile.AccessState.STAGED
+
+
+# ---------------------------------------------------------------------------
+# FAZA 3 — SLICE 2 (SPEC §10 items 8-13): the activation bridge that discharges
+# B-1/B-3, the catalogue under RLS and the two curriculum guards that justify
+# the §5.5 matrix.  Written but NEVER run here (V-5): the integrating engineer
+# drives the ``postgres`` marker in the shared sandbox.
+# ---------------------------------------------------------------------------
+
+_ACTIVATION_TRANSFORM_VERSION = "rehearsal-identity-v1.000000000000"
+_ACTIVATION_FUNCTION = "SELECT public.accounts_activate_staged_identity(%s, %s, %s, %s, %s, %s, %s)"
+
+
+def _staged_pair(organization, actor, suffix, *, email=None):
+    """One staged account plus the role it was staged with (activation needs both)."""
+
+    role = _university_role(organization, name=f"student-{suffix}")
+    staged = stage_imported_account(
+        organization=organization,
+        role=role,
+        actor=actor,
+        username=f"myedu.student.{suffix}",
+        email=f"myedu-student-{suffix}@example.test" if email is None else email,
+        student_identifier=suffix,
+    ).user
+    return staged, role
+
+
+def _activate(staged, role, organization, actor, legacy_pk):
+    """The SAR phase's activation call, verbatim (E-10 / §3.10)."""
+
+    return activate_staged_account(
+        user=staged,
+        organization=organization,
+        expected_role=role,
+        actor=actor,
+        email_authoritative=True,
+        email_authority_evidence_digest=activation_evidence_digest(
+            transform_version=_ACTIVATION_TRANSFORM_VERSION,
+            snapshot_sha256=SOURCE_SNAPSHOT_SHA256,
+            legacy_pk=legacy_pk,
+        ),
+        email_authority_reason_code=ACTIVATION_REASON_CODE,
+    )
+
+
+def _speciality_program(organization, code):
+    speciality = OrgUnit.objects.create(
+        organization=organization,
+        slug=f"myedu-spec-{code.lower()}",
+        unit_type=OrgUnitType.SPECIALTY,
+        name=f"İxtisas {code}",
+    )
+    return Program.objects.create(
+        organization=organization,
+        specialty_unit=speciality,
+        code=code,
+        name=f"İxtisas {code}",
+        degree_level="bachelor",
+        ects_total=240,
+    )
+
+
+def test_staged_student_activation_unblocks_student_record():
+    """SPEC §10/8 — the executable B-1/B-3 discharge.
+
+    Nothing about ``registrar_member_has_permission`` is weakened: the SAME raw
+    insert that 0041/0042 refuse for a staged account is accepted the moment
+    ``activate_staged_account`` has run.  The precondition V-11 discovered is
+    asserted first — the staged cohort carries a non-blank (merely untrusted)
+    legacy email, so the ``BTRIM(email) <> ''`` gate is passed by construction.
+    """
+
+    organization, actor = _organization("sar-activation")
+    staged, role = _staged_pair(organization, actor, "b3")
+    assert staged.email.strip() != ""  # V-11's precondition, stated as an assertion
+
+    program = _speciality_program(organization, "B3-050620")
+    curriculum = Curriculum.objects.create(organization=organization, program=program, admission_year=2019)
+    arguments = [str(organization.pk), staged.pk, str(program.pk), str(curriculum.pk)]
+
+    with pytest.raises(DatabaseError) as exc_info:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(_SAR_INSERT, arguments)
+    assert "lacks an active authorized membership: student" in str(exc_info.value)
+
+    result = _activate(staged, role, organization, actor, 4711)
+
+    assert result.activated is True
+    staged.refresh_from_db()
+    assert staged.is_active is True
+    assert UserProfile.objects.get(user=staged).access_state == UserProfile.AccessState.ACTIVE
+    membership = Membership.objects.get(user=staged, organization=organization)
+    assert (membership.is_active, membership.is_primary) == (True, True)
+
+    # V-12: after activation every conjunct of the live predicate holds, so the
+    # very same statement now succeeds — with zero trigger changes.
+    with connection.cursor() as cursor:
+        cursor.execute(_SAR_INSERT, arguments)
+    assert StudentAcademicRecord.objects.filter(organization=organization, student=staged).count() == 1
+
+    # The append-only evidence row is committed AND consumed (never left NULL).
+    evidence = AccountActivationEvidence.objects.get(organization=organization, user_ref=str(staged.pk))
+    assert evidence.reason_code == ACTIVATION_REASON_CODE
+    assert evidence.role_ref == str(role.pk)
+    assert evidence.consumed_at is not None
+    assert evidence.evidence_digest == activation_evidence_digest(
+        transform_version=_ACTIVATION_TRANSFORM_VERSION,
+        snapshot_sha256=SOURCE_SNAPSHOT_SHA256,
+        legacy_pk=4711,
+    )
+
+
+def test_activation_requires_non_blank_email():
+    """SPEC §10/9 — pin V-11's precondition on BOTH sides of the seam.
+
+    The Python mirror refuses first; calling the SECURITY DEFINER surface
+    directly proves the database refuses the same row on its own, so a future
+    change to the staging path cannot silently unblock a blank-email account.
+    """
+
+    organization, actor = _organization("blank-email")
+    staged, role = _staged_pair(organization, actor, "blank", email="")
+    assert staged.email == ""
+
+    with pytest.raises(IdentityAccessError) as python_exc:
+        _activate(staged, role, organization, actor, 4712)
+    assert str(python_exc.value) == "identity_authoritative_email_missing"
+
+    with pytest.raises(DatabaseError) as database_exc:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                # Mirror apps/accounts/tests/test_identity_access_postgres.py:359-361 —
+                # the SECURITY DEFINER function's own actor-context guard (line 18 of
+                # its body) raises accounts_activation_actor_context_mismatch before
+                # the email check ever runs unless app.current_user_id matches the
+                # actor we're invoking it as.
+                cursor.execute("SELECT set_config('app.bypass_rls', 'off', true)")
+                cursor.execute("SELECT set_config('app.current_org_id', %s, true)", [str(organization.pk)])
+                cursor.execute("SELECT set_config('app.current_user_id', %s, true)", [str(actor.pk)])
+                cursor.execute(
+                    _ACTIVATION_FUNCTION,
+                    [
+                        str(uuid.uuid4()),
+                        staged.pk,
+                        str(organization.pk),
+                        str(role.pk),
+                        actor.pk,
+                        "a" * 64,
+                        ACTIVATION_REASON_CODE,
+                    ],
+                )
+    assert "accounts_activation_authoritative_email_missing" in str(database_exc.value)
+
+    staged.refresh_from_db()
+    assert staged.is_active is False
+    assert UserProfile.objects.get(user=staged).access_state == UserProfile.AccessState.STAGED
+    assert AccountActivationEvidence.objects.filter(organization=organization).exists() is False
+
+
+def test_catalog_phase_writes_under_rls():
+    """SPEC §10/10 — Subject/Curriculum/CurriculumSubject under a tenant context.
+
+    ``bypass_rls`` is never entered: the catalogue phase writes under the
+    restricted ``rls_app_role`` with ``app.current_org_id`` set, and a second
+    tenant's session then sees none of the rows it created.
+    """
+
+    organization, actor = _organization("catalog-rls")
+    foreign_organization, _foreign_actor = _organization("catalog-rls-foreign")
+    # The structure phase runs first in the SAME run: the catalogue resolves its
+    # Programs from THIS run's ``speciality_program`` maps and mints none itself.
+    context, _run = _catalog_context(organization, actor)
+
+    _rls_session(organization.pk)
+    report = AcademicCatalogPhase().run(context)
+
+    assert report.phase_key == "academic_catalog"
+    # V-20 moved curriculum 101 out of quarantine (to_date-minus-duration now
+    # resolves its admission year instead of giving up), so the shared fixture
+    # migrates one more row and quarantines one fewer than before.
+    assert dict(report.state_counts) == {"migrated": 14, "skipped": 0, "quarantined": 3}
+    assert report.staged_account_count == 14
+    assert Subject.objects.filter(organization=organization).count() == 4
+    assert Curriculum.objects.filter(organization=organization).count() == 1
+    assert CurriculumSubject.objects.filter(organization=organization).count() == 6
+
+    _rls_session(foreign_organization.pk)
+    assert Subject.objects.count() == 0
+    assert Curriculum.objects.count() == 0
+    assert CurriculumSubject.objects.count() == 0
+
+
+def test_curriculum_program_coherence_rejects_mismatch():
+    """SPEC §10/11 — the executable justification for the §5.5 M2 rule.
+
+    ``registrar_guard_student_record_coherence`` (0041) refuses a SAR whose
+    curriculum belongs to a different program, which is exactly why a legacy
+    curriculum whose program contradicts the placement may never be adopted.
+    """
+
+    organization, actor = _organization("sar-coherence")
+    student, role = _staged_pair(organization, actor, "m2")
+    _activate(student, role, organization, actor, 4713)
+
+    placement_program = _speciality_program(organization, "M2-050620")
+    other_program = _speciality_program(organization, "M2-060730")
+    foreign_curriculum = Curriculum.objects.create(
+        organization=organization, program=other_program, admission_year=2019
+    )
+
+    with pytest.raises(DatabaseError) as exc_info:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    _SAR_INSERT,
+                    [str(organization.pk), student.pk, str(placement_program.pk), str(foreign_curriculum.pk)],
+                )
+    assert "student record curriculum must belong to its program" in str(exc_info.value)
+    assert StudentAcademicRecord.objects.filter(organization=organization).exists() is False
+
+    # The fallback the matrix prescribes — a curriculum under the PLACEMENT
+    # program — is accepted, so ``synthesise`` can never write an incoherent row.
+    coherent = Curriculum.objects.create(organization=organization, program=placement_program, admission_year=2019)
+    with connection.cursor() as cursor:
+        cursor.execute(_SAR_INSERT, [str(organization.pk), student.pk, str(placement_program.pk), str(coherent.pk)])
+    assert StudentAcademicRecord.objects.filter(organization=organization).count() == 1
+
+
+def test_curriculum_program_immutable_after_dependents():
+    """SPEC §10/12 — 0045's conditional guard freezes ``Curriculum.program``.
+
+    This is why §5.1 warns that a wrong merge cannot be repaired in place: the
+    moment one plan row (or one SAR) references the curriculum, its program is
+    frozen and the only remedy is rebuilding the disposable target.
+    """
+
+    organization, _actor = _organization("curriculum-frozen")
+    first_program = _speciality_program(organization, "CF-050620")
+    second_program = _speciality_program(organization, "CF-060730")
+    curriculum = Curriculum.objects.create(organization=organization, program=first_program, admission_year=2019)
+
+    # With no dependent evidence the guard returns early and the move is allowed.
+    assert Curriculum.objects.filter(pk=curriculum.pk).update(program=second_program) == 1
+    assert Curriculum.objects.filter(pk=curriculum.pk).update(program=first_program) == 1
+
+    subject = Subject.objects.create(organization=organization, code="MYEDU-L1", name="Riyaziyyat", ects=6)
+    CurriculumSubject.objects.create(
+        organization=organization,
+        curriculum=curriculum,
+        subject=subject,
+        semester_number=1,
+        is_elective=False,
+        elective_group="",
+        required_choices=1,
+        order=0,
+    )
+
+    with pytest.raises(DatabaseError) as exc_info:
+        with transaction.atomic():
+            Curriculum.objects.filter(pk=curriculum.pk).update(program=second_program)
+
+    assert "registrar parent identity has dependent evidence" in str(exc_info.value)
+    curriculum.refresh_from_db()
+    assert curriculum.program_id == first_program.pk
+
+
+def test_activated_profile_flags_are_writable():
+    """SPEC §10/13 — E-11's two writes land on an already-active profile.
+
+    Activation asserts *the registry says this person exists*, never *this email
+    is verified*: both flags are flipped in the same atomic block so the legacy
+    address cannot be used for recovery and the account lands in the existing
+    first-login flow.  ``accounts_reject_active_staged_profile`` only guards the
+    staged→non-staged transition, which is asserted to still hold.
+    """
+
+    organization, actor = _organization("profile-flags")
+    active_user, role = _staged_pair(organization, actor, "e11")
+    _activate(active_user, role, organization, actor, 4714)
+
+    updated = UserProfile.objects.filter(user=active_user, organization=organization).update(
+        email_verified=False, password_change_required=True
+    )
+    assert updated == 1
+    profile = UserProfile.objects.get(user=active_user)
+    assert (profile.email_verified, profile.password_change_required) == (False, True)
+    assert profile.access_state == UserProfile.AccessState.ACTIVE
+
+    # The very same two writes on a STAGED row are unguarded too…
+    staged, _staged_role = _staged_pair(organization, actor, "e11b")
+    assert UserProfile.objects.filter(user=staged).update(email_verified=False, password_change_required=True) == 1
+
+    # …while flipping ``access_state`` outside the activation service still is not.
+    with pytest.raises(DatabaseError) as exc_info:
+        with transaction.atomic():
+            UserProfile.objects.filter(user=staged).update(access_state=UserProfile.AccessState.ACTIVE)
+
+    assert "accounts_staged_activation_service_required" in str(exc_info.value)
+    assert UserProfile.objects.get(user=staged).access_state == UserProfile.AccessState.STAGED
