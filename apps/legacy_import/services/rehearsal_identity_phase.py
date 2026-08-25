@@ -30,6 +30,7 @@ from django.db import transaction
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, LegacyImportBatch, LegacyMigrationIssue
 
 from .account_cutover import (
+    CONTACT_PENDING_STAGEABLE_RULES,
     TARGET_IDENTITY_SNAPSHOT_CHUNK_SIZE,
     AccountCutoverClassification,
     AccountCutoverOutcome,
@@ -403,6 +404,17 @@ def _write_map(context: RehearsalContext, row: _CohortRow, *, state: str, target
     )
 
 
+def _stageable(classification: AccountCutoverClassification, policy) -> bool:
+    """Bridge-in qəbul qaydası ilə EYNİ məntiq (drift olmasın deyə çoxluq oradandır)."""
+    if classification.outcome is AccountCutoverOutcome.LOCKED_STAGING_ELIGIBLE and not classification.rule_codes:
+        return True
+    return (
+        policy.stage_contact_pending is True
+        and classification.outcome is AccountCutoverOutcome.CONTACT_VERIFICATION_REQUIRED
+        and set(classification.rule_codes) <= CONTACT_PENDING_STAGEABLE_RULES
+    )
+
+
 def _stage_row(
     context: RehearsalContext,
     *,
@@ -421,6 +433,7 @@ def _stage_row(
                 role=roles[row.entity_type],
                 actor=context.actor,
                 student_identifier=_student_identifier(context.policy, row.entity_type, row.legacy_pk),
+                allow_contact_pending=context.policy.stage_contact_pending,
             )
             entity_map = _write_map(context, row, state=_STATE.MIGRATED, target_pk=str(staged.user.pk))
     except _staging_error_types():
@@ -451,9 +464,7 @@ def _process_window(
 
     for row, classification in window:
         legacy_pk_text = str(row.legacy_pk)
-        eligible = classification.outcome is AccountCutoverOutcome.LOCKED_STAGING_ELIGIBLE and (
-            not classification.rule_codes
-        )
+        eligible = _stageable(classification, context.policy)
         observation = _existing_observation(context, row)
         if observation is not None:
             state, entity_map, extra_rules = observation.state, observation.entity_map, ()

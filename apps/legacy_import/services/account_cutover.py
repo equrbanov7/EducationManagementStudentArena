@@ -442,6 +442,12 @@ def classify_projected_account_cutover(
     return tuple(results)
 
 
+# Yeganə "contact-pending" staging-ə icazəli qayda: email sintaktik düzgündür,
+# sadəcə etibarlı (authoritative) sayılmır. Boş/yararsız email, hər növ kolliziya
+# və dublikat qaydaları bu çoxluqda DEYİL — onlar staged edilə bilməz.
+CONTACT_PENDING_STAGEABLE_RULES = frozenset({"legacy_account_email_untrusted"})
+
+
 def stage_classified_account_cutover(
     *,
     identity: ProjectedAccountIdentity,
@@ -451,11 +457,18 @@ def stage_classified_account_cutover(
     actor,
     student_identifier: object = "",
     request=None,
+    allow_contact_pending: bool = False,
 ):
     """Bridge one approved classification into accounts' locked staging API.
 
     Mapping of the student identifier remains an explicit upstream decision;
     this adapter never guesses it from ``fincode`` or another legacy column.
+
+    ``allow_contact_pending`` (default OFF, fail-closed): açıq siyasət qərarı
+    ilə, YALNIZ ``CONTACT_PENDING_STAGEABLE_RULES``-dan kənar heç bir qaydası
+    olmayan contact-verification sətirləri də locked hesab kimi staged edilə
+    bilər. Email-ə heç bir authority verilmir — hesab ``is_active=False``,
+    parolsuz və STAGED qalır; aktivasiya yenə evidence-li ayrıca axındır.
     """
 
     normalized = _normalize_identity(identity)
@@ -463,7 +476,13 @@ def stage_classified_account_cutover(
         raise LegacyAccountCutoverError("legacy_account_classification_required")
     if classification.source_kind != identity.source_kind:
         raise LegacyAccountCutoverError("legacy_account_classification_mismatch")
-    if classification.outcome is not AccountCutoverOutcome.LOCKED_STAGING_ELIGIBLE or classification.rule_codes:
+    approved = classification.outcome is AccountCutoverOutcome.LOCKED_STAGING_ELIGIBLE and not classification.rule_codes
+    contact_pending = (
+        allow_contact_pending is True
+        and classification.outcome is AccountCutoverOutcome.CONTACT_VERIFICATION_REQUIRED
+        and set(classification.rule_codes) <= CONTACT_PENDING_STAGEABLE_RULES
+    )
+    if not (approved or contact_pending):
         raise LegacyAccountCutoverError("legacy_account_staging_not_approved")
     if normalized.username is None or normalized.email is None:
         raise LegacyAccountCutoverError("legacy_account_staging_identity_invalid")
@@ -498,6 +517,7 @@ __all__ = [
     "ProjectedAccountIdentity",
     "TARGET_IDENTITY_SNAPSHOT_CHUNK_SIZE",
     "TargetIdentitySnapshot",
+    "CONTACT_PENDING_STAGEABLE_RULES",
     "classify_projected_account_cutover",
     "deny_all_email_trust",
     "load_target_identity_snapshot",
