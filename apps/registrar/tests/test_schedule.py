@@ -5,7 +5,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import schedule, services
 from apps.registrar.models import ScheduleSlot, Subject, WeekType
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
@@ -48,6 +48,20 @@ class ScheduleServiceTest(TestCase):
             )
             self.teacher = User.objects.create_user("sc_teacher", "sc_teacher@qku.edu.az", "pw")
             self.teacher2 = User.objects.create_user("sc_teacher2", "sc_teacher2@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.teacher2,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
             self.math = Subject.objects.create(organization=self.org, code="MATH", name="Riyaziyyat")
             self.phys = Subject.objects.create(organization=self.org, code="PHYS", name="Fizika")
             self.off1 = services.get_or_create_offering(

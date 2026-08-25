@@ -50,6 +50,17 @@ class _RecordsBase(TestCase):
                 is_current=True,
             )
             cls.teacher = User.objects.create_user("rec_teacher", "rec_teacher@qku.edu.az", "pw")
+            # Adi müəllim — struktur scope-u yoxdur. Aşağıdakı _make_group()
+            # çağırışları offering.instructor=cls.teacher təyin edir, ona görə
+            # bu üzvlük qruplar yaradılmazdan ƏVVƏL mövcud olmalıdır (trigger
+            # instructor referansının aktiv grade.input üzvlüyünü tələb edir).
+            Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
             # İki fakültə → hər birində kafedra → ixtisas OrgUnit → qrup.
             cls.fac_a = OrgUnit.objects.create(
                 organization=cls.org, name="Fakültə A", slug="rec-fa", unit_type=OrgUnitType.FACULTY
@@ -84,14 +95,6 @@ class _RecordsBase(TestCase):
                 is_primary=True,
                 is_active=True,
             )
-            # Adi müəllim — struktur scope-u yoxdur.
-            Membership.objects.create(
-                user=cls.teacher,
-                organization=cls.org,
-                role=cls.org.roles.get(name="teacher"),
-                is_primary=True,
-                is_active=True,
-            )
             # İmtahan mərkəzi — MƏRKƏZİ rol, unit scope-u yoxdur (org-wide görməlidir).
             cls.exam_center = User.objects.create_user("rec_exam", "rec_exam@qku.edu.az", "pw")
             Membership.objects.create(
@@ -114,6 +117,13 @@ class _RecordsBase(TestCase):
         students = []
         for i in range(n):
             student = User.objects.create_user(f"rec_s_{tag}{i}", f"rec_s_{tag}{i}@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             record = StudentAcademicRecord.objects.create(
                 organization=cls.org,
                 student=student,

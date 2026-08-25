@@ -59,6 +59,13 @@ class TranscriptPdfTest(TestCase):
                     is_primary=True,
                     is_active=True,
                 )
+            Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
             cls.record = StudentAcademicRecord.objects.create(
                 organization=cls.org,
                 student=cls.student,

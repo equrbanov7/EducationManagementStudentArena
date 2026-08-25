@@ -17,7 +17,7 @@ from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.views._helpers.rbac import _role_capabilities
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals, gradebook, transcript
 from apps.registrar.models import (
     CourseOffering,
@@ -77,6 +77,20 @@ class BuildStudentTranscriptTest(TestCase):
             )
             self.teacher = User.objects.create_user("tr_teacher", "tr_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("tr_student", "tr_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,
