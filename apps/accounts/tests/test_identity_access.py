@@ -9,6 +9,8 @@ from django.db import IntegrityError, connection, transaction
 from django.test import TestCase
 from django.urls import reverse
 
+import pytest
+
 from apps.accounts.identity import StagedAccountAccessError
 from apps.accounts.models import AccountActivationEvidence, EmailOTP, UserProfile
 from apps.accounts.services import (
@@ -348,6 +350,15 @@ class IdentityAccessServiceTests(TestCase):
                 email_authority_reason_code=self.evidence_reason,
             )
 
+    @pytest.mark.skipif(
+        connection.vendor == "postgresql",
+        reason=(
+            "PostgreSQL writes the activation audit row inside the SECURITY DEFINER "
+            "transition, so patching log_action cannot fail it there; the same rollback "
+            "contract is covered by test_identity_access_postgres."
+            "IdentityPostgresGuardTests.test_activation_audit_failure_rolls_back_function_and_evidence."
+        ),
+    )
     def test_activation_audit_failure_rolls_back_user_profile_and_membership(self):
         staged = self._stage().user
         with patch("apps.accounts.services.identity_access.log_action", side_effect=RuntimeError("audit down")):
@@ -455,9 +466,18 @@ class StagedAuthenticationFlowTests(TestCase):
         ).user
         self.staged.set_password("Staged-Password-123!")
         self.staged.save(update_fields=["password"])
-        # SQLite has no PostgreSQL trigger; deliberately model a corrupted raw
-        # is_active flag to prove access_state remains an independent deny gate.
-        User.objects.filter(pk=self.staged.pk).update(is_active=True)
+        if connection.vendor == "sqlite":
+            # SQLite has no PostgreSQL trigger; deliberately model a corrupted
+            # raw is_active flag to prove access_state remains an independent
+            # deny gate.
+            User.objects.filter(pk=self.staged.pk).update(is_active=True)
+        else:
+            # PostgreSQL refuses to persist that corruption at all
+            # (accounts_reject_staged_user_activation_trg), so the staged row
+            # stays inactive here and access_state is still the gate every
+            # assertion below exercises.
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                User.objects.filter(pk=self.staged.pk).update(is_active=True)
         self.staged.refresh_from_db()
 
     def test_only_staged_aware_backend_is_configured_and_normal_auth_still_works(self):
@@ -635,37 +655,66 @@ class IdentitySchemaSQLiteTests(TestCase):
         )
         self.assertEqual(migration._collision_ids(rows, value_position=1), ((1, 3),))
 
-        user = User.objects.create_user("reverse_stop_user", is_active=False)
-        user.profile.access_state = UserProfile.AccessState.STAGED
-        user.profile.save(update_fields=["access_state", "updated_at"])
+        registry = import_module("django.apps").apps
+
+        staged_user = User.objects.create_user("reverse_stop_user", is_active=False)
+        staged_user.profile.access_state = UserProfile.AccessState.STAGED
+        staged_user.profile.save(update_fields=["access_state", "updated_at"])
         with self.assertRaisesRegex(RuntimeError, "accounts_identity_reverse_stop:staged_accounts_exist"):
-            migration.reverse_stop_if_staged(import_module("django.apps").apps, None)
-        user.profile.access_state = UserProfile.AccessState.ACTIVE
-        user.profile.institutional_identifier = "REVERSE-EVIDENCE"
-        user.profile.save(update_fields=["access_state", "institutional_identifier", "updated_at"])
+            migration.reverse_stop_if_staged(registry, None)
+
+        # Dropping the row is the only reverse-legal exit from STAGED: PostgreSQL
+        # rejects a direct staged -> active flip outside the activation service.
+        staged_user.delete()
+
+        identifier_user = User.objects.create_user(
+            "reverse_identifier_user",
+            email="reverse-identifier@example.com",
+        )
+        identifier_user.profile.institutional_identifier = "REVERSE-EVIDENCE"
+        identifier_user.profile.save(update_fields=["institutional_identifier", "updated_at"])
         with self.assertRaisesRegex(RuntimeError, "accounts_identity_reverse_stop:institutional_identifiers_exist"):
-            migration.reverse_stop_if_staged(import_module("django.apps").apps, None)
-        user.profile.institutional_identifier = None
-        user.profile.save(update_fields=["institutional_identifier", "updated_at"])
+            migration.reverse_stop_if_staged(registry, None)
+        identifier_user.profile.institutional_identifier = None
+        identifier_user.profile.save(update_fields=["institutional_identifier", "updated_at"])
+
+        owner = User.objects.create_superuser(
+            "reverse_evidence_owner",
+            "reverse-evidence-owner@example.com",
+            "Owner-Password-123!",
+        )
         organization = Organization.objects.create(
             name="Reverse Evidence Org",
             slug="reverse-evidence-org",
             org_type=OrganizationType.UNIVERSITY,
-            owner=user,
+            owner=owner,
             status="active",
             is_active=True,
         )
-        AccountActivationEvidence.objects.create(
+        role = organization.roles.get(name="student")
+        # The activation service is the only writer of the append-only evidence
+        # ledger (PostgreSQL rejects raw INSERTs into it), so mint the row the
+        # way production does.
+        evidence_target = stage_imported_account(
             organization=organization,
-            user_ref=str(user.pk),
-            role_ref="role-ref",
-            actor_ref=str(user.pk),
-            evidence_digest="e" * 64,
-            reason_code=AccountActivationEvidence.Reason.MANUAL_REGISTRY_VERIFICATION,
-            transaction_id=0,
+            role=role,
+            actor=owner,
+            username="reverse_evidence_target",
+            email="reverse-evidence-target@example.com",
+            student_identifier="REVERSE-EVIDENCE-TARGET",
+        ).user
+        activate_staged_account(
+            user=evidence_target,
+            organization=organization,
+            expected_role=role,
+            actor=owner,
+            email_authoritative=True,
+            email_authority_evidence_digest="e" * 64,
+            email_authority_reason_code=AccountActivationEvidence.Reason.MANUAL_REGISTRY_VERIFICATION,
         )
+        self.assertTrue(AccountActivationEvidence.objects.filter(user_ref=str(evidence_target.pk)).exists())
         with self.assertRaisesRegex(RuntimeError, "accounts_identity_reverse_stop:activation_evidence_exists"):
-            migration.reverse_stop_if_staged(import_module("django.apps").apps, None)
+            migration.reverse_stop_if_staged(registry, None)
 
     def test_expected_identity_indexes_are_installed(self):
         with connection.cursor() as cursor:

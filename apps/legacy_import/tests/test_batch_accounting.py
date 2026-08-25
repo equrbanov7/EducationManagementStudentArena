@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.db.models.signals import post_save
 
 import pytest
@@ -299,6 +299,14 @@ def test_success_requires_complete_batch_accounting(organization_actor):
 
 
 @pytest.mark.django_db
+@pytest.mark.skipif(
+    connection.vendor != "sqlite",
+    reason=(
+        "The raw tamper UPDATE is blocked by the PostgreSQL batch-immutability trigger; "
+        "PG-side chain tampering is covered by test_rehearsal_postgres."
+        "test_batch_chain_verifies_and_finish_run_is_fail_closed."
+    ),
+)
 def test_python_chain_verification_detects_tampering_on_sqlite(organization_actor):
     organization, actor = organization_actor
     run = _running_run(organization, actor, source_row_count=2)
