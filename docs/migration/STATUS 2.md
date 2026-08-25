@@ -33,16 +33,7 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
   Hədəf yalnız 10 interlock-dan keçən disposable PostgreSQL ola bilər; sessiya
   boyu `set_rls_tenant` işlədilir, `bypass_rls` heç vaxt çağırılmır. İki təmiz
   hədəfdə real digest sübutu hələ icra edilməyib (VERIFIED).
-- İlk domain adapteri (FAZA 3 — SLICE 1) kodlandı: `academic_structure` fazası
-  rehearsal hədəfində `organizations.OrgUnit` (fakültə/kafedra/ixtisas/qrup) və
-  `registrar.Program` sətirləri, `student_placement` fazası isə `UserProfile.fin`
-  ilə `auth_user.first_name/last_name` yazır. **Production və real tətbiq datası
-  hələ də toxunulmamışdır** — yazı yalnız 10 interlock-dan keçən disposable
-  PostgreSQL hədəfində baş verir. Bu slice qəsdən **sıfır**
-  `StudentAcademicRecord` və **sıfır** `Curriculum` sətri yaradır (B-1/B-2, bax
-  `MASTER_PLAN.md` → «Semantik düzəlişlər»); yerləşdirmə qərarı ledger-də
-  cross-run sabit derivation digest-i kimi saxlanılır və SAR materiallaşdırması
-  `curricula` + aktivasiya slice-inə qalır.
+- Heç bir legacy domain sətri target modellərə yazılmayıb.
 
 ## Görülən işlər
 
@@ -97,9 +88,6 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M4.1 | Rehearsal orkestratoru (`legacy_import_rehearse`) | VERIFIED | Faza A attestasiya (10 interlock + source attestation) → attested phase registry → Faza C reconciliation; SQLite 22 orkestrator/komanda testi yaşıl, `-m postgres` və real-source sübutu növbəti addımdadır |
 | M4.2 | İdempotent resume və interrupt semantikası | VERIFIED | Durable checkpoint = `LegacyImportBatch`; kəsilmiş run `RUNNING` qalır (exit 3), resume eyni pəncərələri kəsir, artıq müşahidə olunmuş sətir yenidən stage edilmir; scope uyğunsuzluğu fail-closed |
 | M4.3 | Determinizm artifakt-ı | VERIFIED | `deterministic` bölməsi run/org/vaxt/path daşımır; `--compare-report` digest fərqində `legacy_rehearsal_determinism_mismatch` verir; atomik yazı yalnız eyni digest-i overwrite edir |
-| M5.1 | `academic_structure` fazası (order 10) | PENDING-PG-VERIFY | `departments`/`speciality`/`groups` (880 sətir) → OrgUnit ağacı + `Program` kataloqu; topoloji valideyn həlli, legacy-açarlı slug (`myedu-dep/spec/grp-{id}`), dərəcəyə görə bir Program (`-M` magistr), 14 issue kodu. SQLite 23 test yaşıl; `-m postgres` (§8/8-9) və real-mənbə sübutu icra edilməyib |
-| M5.2 | `student_placement` fazası (order 25) | PENDING-PG-VERIFY | `source_tables=()` — batch-siz derived faza; SA-1/SA-2 seam-ləri ilə evidence yalnız öz observation-larında və digest zəncirində yaşayır. Sıfır SAR/Curriculum (B-1/B-2); `UserProfile.fin` + boş `first_name`/`last_name` yazılır, yerləşdirmə `record_derivation_hash`-ə möhürlənir. SQLite 20 test yaşıl; `-m postgres` (§8/10) və real-mənbə sübutu icra edilməyib |
-| M5.3 | `UserProfile.fin` sahəsi | PENDING-PG-VERIFY | `core/validators.py` (`normalize_fin`/`validate_fin`, `^[A-Z0-9]{7}$`) + mig `accounts 0014` — nullable-unique, **qlobal** (milli identifikator semantikası), admin `list_display`/`search_fields`-də. SQLite 10 test yaşıl; staged profildə yazıla bilməsi və unikallıq PostgreSQL sübutu (§8/10) gözləyir |
 
 ## Qorunan mövcud user materialları
 
@@ -119,17 +107,8 @@ Yeni miqrasiya planı ayrıca `docs/migration/` altında yaradılır.
 | Legacy SQL dump | `177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0` |
 | Dəqiq SQL audit JSON | `e03decda34afc07527e151591e22ebc0df85e5a2b79fa8ce5a014dc76f898975` |
 | 81-table mapping JSON | `067154ee9a66ed04d0d85cfe8c54e166325ba6532acec11fa003459be9635ecd` |
-| Rehearsal 1 hesabatı (`LEGACY_REHEARSAL_V1_RUN1.json`) | **STALE (2026-08-25)** — faza registry-si 3 fazaya genişləndi |
-| Rehearsal 2 hesabatı (`LEGACY_REHEARSAL_V1_RUN2.json`) | **STALE (2026-08-25)** — faza registry-si 3 fazaya genişləndi |
-
-> **Stale artifakt qeydi (FAZA 3 — SLICE 1).** `academic_structure` və
-> `student_placement` registry-yə qoşulduqda `_EXPECTED_PHASE_REGISTRY_FINGERPRINT`
-> yenidən pinləndi (`160216a1…` → `7d4dfddb…`) və `policy.phase_keys` böyüdü, yəni
-> `policy_digest` → `transform_version` → D5 scope açarı → `determinism_digest`
-> zənciri **konstruksiyaya görə** dəyişdi. `docs/migration/reports/` altındakı hər
-> iki mövcud hesabat bu səbəbdən köhnəlmişdir. Fayllar tarixi sübut kimi
-> **silinmir**; onlar iki yeni təmiz rehearsal-dan yenidən generasiya edilməlidir —
-> **əl ilə redaktə edilmir**.
+| Rehearsal 1 hesabatı (`LEGACY_REHEARSAL_V1_RUN1.json`) | VERIFIED — iki təmiz PostgreSQL hədəfdə icra edildikdən sonra yazılacaq |
+| Rehearsal 2 hesabatı (`LEGACY_REHEARSAL_V1_RUN2.json`) | VERIFIED — `--compare-report` ilə eyni `determinism_digest` sübutu |
 
 Audit JSON-ları hazırda temp artifact-dir; kod pipeline-ı onları source-of-truth kimi
 hardcode etməyəcək. Preflight gözlənilən manifest faktlarını parametr kimi qəbul edir
@@ -164,17 +143,12 @@ və yalnız sanitizasiya edilmiş nəticə çıxarır.
    `table_plan` registry-dən açılır, ledger/batch/issue kontraktı ilə.
 4. MIG-SEC-012 P2 hardening-i (profil INSERT gate, DB-də digest recompute,
    generik kolliziya kodu) — rehearsal-lara paralel.
-5. ~~İlk akademik-referens adapteri phase registry-yə əlavə olunur~~ — BAĞLANDI
-   (FAZA 3 / SLICE 1, M5.1-M5.3): `academic_structure` və `student_placement`
-   registry-dədir, barmaq izi yenidən pinlənib, gated cədvəllər strukturca
-   iddia edilə bilmir. Qalan: bu iki fazanın `-m postgres` + real-mənbə sübutu
-   (bax 1) və **iki yeni** rehearsal hesabatının generasiyası — köhnə RUN1/RUN2
-   artifakt-ları konstruksiyaya görə stale-dir.
-6. Növbəti dilim: `curricula` (126 sətir) + aktivasiya axını, yəni
-   `StudentAcademicRecord` materiallaşdırması. O dilim bu slice-in ledger-də
-   möhürlədiyi yerləşdirmə qərarlarını **hərfi-hərfinə** istehlak edir.
-   Syllabus version/approval modeli yekun dizayn və biznes acceptance-dan sonra
-   (DESIGN_GATED qalır); runbook + yekun hesabat cutover-dən əvvəl.
+5. İlk akademik-referens adapteri phase registry-yə **ikinci faza** kimi əlavə
+   olunur (`RehearsalPhase` protokolu, artan `order`, `source_tables` iddiası);
+   registry barmaq izi yenidən pinlənir və gated cədvəllər strukturca iddia
+   edilə bilmir. Syllabus version/approval modeli yekun dizayn və biznes
+   acceptance-dan sonra (DESIGN_GATED qalır); runbook + yekun hesabat
+   cutover-dən əvvəl.
 
 ## Bu mərhələnin çıxış şərti
 
@@ -188,36 +162,6 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - domain adapteri aktiv deyil və mövcud domen datasına yazı edilməyib.
 
 ## Dəyişiklik jurnalı
-
-### 25 avqust 2026 — FAZA 3 / SLICE 1: ilk domain adapteri (M5.1-M5.3)
-
-- Faza registry-si 1 fazadan **3 fazaya** genişləndi (ciddi artan `order`):
-  `academic_structure` (10) → `identity_cohort` (20) → `student_placement` (25).
-  Barmaq izi yenidən pinləndi:
-  `7d4dfddb9272d8473c50486482b874acd6bd0ac447e12eaf8d70077f7a4667ae`.
-  `--phase` verilməzsə siyasət artıq bütün registry-ni seçir.
-- İki seam düzəlişi (spec SA-1/SA-2), imza dəyişikliyi olmadan:
-  `reconcile_run`-un C4 çarpaz yoxlaması **batch ilə sayılan** entity type-larla
-  məhdudlaşdırıldı (derived hədəf sətri yanlış mismatch yaradırdı) və eyni anda
-  registry-nin elan etmədiyi entity type üçün fail-closed
-  `legacy_rehearsal_derived_entity_type_unregistered` gətirildi;
-  `phase_report_from_ledger` isə `source_tables=()` olan fazanı öz immutable
-  observation-larından bərpa edir, ona görə `--emit-report-only` reqressiya
-  vermir. Hər iki opsional hook (`derived_digest_namespace`,
-  `derived_state_key`) `getattr` ilə oxunur və barmaq izi payload-una **daxil
-  deyil** — onlar sübutun necə etiketləndiyini dəyişir, fazanın nə yaza
-  biləcəyini yox.
-- Yeni taksonomiya: 20 issue kodu (14 struktur + 6 yerləşdirmə) və 6 run-fatal
-  kod; `ISSUE_SEVERITY` dondurulmuşdur və naməlum kod INFO-ya **düşmür**.
-- B-1/B-2 tapıntıları `MASTER_PLAN.md` → «Semantik düzəlişlər» bölməsinə əlavə
-  edildi; bu slice qəsdən sıfır `StudentAcademicRecord`/`Curriculum` yaradır.
-- Yoxlama (yalnız SQLite, N5/V-5 qaydası ilə): `apps/legacy_import` +
-  `apps/accounts` = **1,220 pass / 72 skip**; `makemigrations --check`,
-  `check_module_size.py --check` və `module_deps.py --check` yaşıl.
-- `-m postgres` (§8/7-10: B-1 sübutu, RLS altında struktur yazısı, cross-org
-  `specialty_unit` rədd, staged profildə FİN) və real-mənbə tam-slice
-  konformans testi (§8/11, 9,425 sətir) **yazıldı, lakin icra edilmədi** —
-  M5.1-M5.3 ona görə `PENDING-PG-VERIFY` statusundadır.
 
 ### 25 avqust 2026 — M4 rehearsal orkestratoru
 

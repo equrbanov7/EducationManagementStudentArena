@@ -94,6 +94,38 @@ uğur faizi deyil. Böyük jurnal cədvəli bütün sətirlərin 56.78%-ni təş
   dedupe edilməlidir.
 - Archive point-lər birbaşa live `LessonMark` kimi yazılmamalıdır.
 
+Aşağıdakı iki tapıntı FAZA 3 / SLICE 1 dizaynında (2026-08-25) canlı mənbədə
+təsdiqləndi və `student_placement` fazasının **sıfır** `StudentAcademicRecord`
+yaratmasının bağlayıcı səbəbidir:
+
+- **B-1 — staged tələbə `StudentAcademicRecord` ala bilmir; trigger predikatı
+  ödənmir.** `apps/registrar/migrations/0041_migration_target_tenant_integrity.py`
+  `("registrar_studentacademicrecord", "student_id", "", "student")` sətrini
+  `_MEMBER_LINKS`-ə yazır və onu `BEFORE INSERT OR UPDATE OF student_id,
+  organization_id … registrar_guard_active_member` kimi quraşdırır. Həmin guard
+  `registrar_member_has_permission`-u çağırır, onun predikatı isə
+  `membership.is_active`-i **opsional saxlamır** (boş `required_permission`
+  yalnız icazə şərtini qısa-qapayır). `identity_access.stage_imported_account`
+  staged üzvlüyü `is_active=False` ilə yaradır → rehearsal-da stage edilmiş hər
+  tələbə üçün SAR insert-i `23514 'registrar user reference lacks an active
+  authorized membership: student'` verir.
+- **B-2 — `StudentAcademicRecord.curriculum` nullable DEYİL.**
+  `apps/registrar/models/academic.py` — `curriculum = models.ForeignKey(
+  Curriculum, on_delete=models.PROTECT, …)`, `null=True` yoxdur; üstəlik
+  `registrar_guard_student_record_coherence` `curriculum.program_id ==
+  NEW.program_id` tələb edir. `curricula` cədvəli (126 sətir) bu dilimin
+  əhatəsindən kənardır və indi sintetik `Curriculum(program, admission_year)`
+  sətirləri yaratmaq real curricula fazası gələndə
+  `uniq_curriculum_program_year` ilə toqquşardı.
+
+**Nəticə (briefə qarşı bağlayıcı dizayn dəyişikliyi):** heç bir trigger
+zəiflədilmir. `student_placement` fazası yerləşdirmə qərarını (program + qrup
+OrgUnit + qəbul ili + dərəcə + təhsil forması) cross-run sabit derivation
+digest-i ilə ledger-də **davamlı qeyd edir** və yalnız trigger asılılığı olmayan
+iki hədəf sahəni yazır: `UserProfile.fin` və boş olan
+`auth_user.first_name`/`last_name`. SAR materiallaşdırması `curricula` +
+aktivasiya dilimindədir və məhz bu ledger sətirlərini istehlak edəcək.
+
 ### Lokal mühit
 
 - `.env` mövcuddur, Git-də izlənmir və PostgreSQL URL konfiqurasiyası var;
@@ -233,6 +265,47 @@ ledger sətirləri (`upsert_entity_map` → `upsert_issue`) onları sayan batch-
 **əvvəl** yazılır; eyni anda `policy.batch_rows`-dan çox source sətri saxlanmır
 (böyük cədvəllər `compile_pk_chunk_query` ilə pəncərələnir); faza öz MariaDB
 bağlantısını açmır və `finish_run` çağırmır.
+
+#### «İddia etmək» = **saymaq**, oxumaq deyil (derived faza seam-i)
+
+Bir cədvəli *claim* etmək onu batch zəncirində **hesaba almaq** deməkdir, ona
+eksklüziv oxu hüququ vermək yox. Faza `context.source_connection_factory` ilə
+audit edilmiş istənilən kontraktı — başqa fazanın iddia etdiyi cədvəli də —
+oxuya bilər. Deməli `source_tables = ()` legal bir formadır: faza **heç nəyi
+saymır** və bütün sübutu öz observation-larında + öz digest zəncirindədir.
+FAZA 3 / SLICE 1-də `student_placement` məhz belədir — `students` artıq
+`identity_cohort` tərəfindən iddia edilib, onu ikinci dəfə iddia etmək həm
+validator-da (`legacy_rehearsal_phase_table_conflict`), həm də `record_batch`-in
+`first_legacy_pk <= predecessor.last_legacy_pk` qaydasında rədd olunardı.
+
+Bunu mümkün edən iki seam düzəlişi (2026-08-25, imza dəyişikliyi yoxdur):
+
+- **SA-1 — `reconcile_run` C4 yalnız batch ilə sayılan entity type-lara baxır.**
+  Batch zənciri *source* sətirlərini hesaba alır, *target* sətirlərini yox. Bir
+  ixtisas sətri həm `speciality_unit` (batch ilə sayılan), həm də dərəcə başına
+  bir `speciality_program` (derived) map sətri yaradır; derived sətri müstəqil
+  cəmə qarşı saymaq zəmanətli yalançı mismatch verərdi. Derived sətir bunun
+  əvəzinə (a) barmaq izi ilə pinlənmiş `entity_types` bəyanı və (b) onu yazan
+  fazanın öz digest zənciri ilə örtülür (struktur fazası hər ixtisasın program
+  tuple-larını həmin batch-in `target_digest`-inə qatlayır). Eyni yoxlama indi
+  fail-closed əks-tərəfi də gətirir: registry-nin **elan etmədiyi** entity type
+  altında yazılmış hər observation
+  `legacy_rehearsal_derived_entity_type_unregistered` verir.
+  *Qəbul edilən sübut azalması:* derived observation-lar artıq müstəqil şəkildə
+  hesablanmış cəmə qarşı sayılmır.
+- **SA-2 — `phase_report_from_ledger` batch-siz fazanı dəstəkləyir.**
+  `source_tables=()` olan faza heç bir batch sətri yaratmadığı üçün əvvəlki kod
+  `legacy_rehearsal_phase_row_count_mismatch` verirdi, yəni `--emit-report-only`
+  faza registry-yə qoşulan kimi reqressiya edərdi. Belə fazanın hesabatı indi
+  öz **immutable observation**-larından bərpa olunur (artan `legacy_pk` sırası
+  ilə). İki **opsional** faza atributu `getattr` ilə oxunur:
+  `derived_digest_namespace` (fazanın öz zəncir namespace-i, ona görə bərpa
+  canlı `phase_digest`-i bayt-bayt təkrarlayır) və `derived_state_key(state)`
+  (hər ledger state-inin `state_counts`-da hansı token altında sayıldığı; bu,
+  operator görən `totals.{migrated,skipped,quarantined}` proyeksiyasını
+  qarışdırmır). Heç biri `compute_phase_registry_fingerprint` payload-una daxil
+  **deyil** — onlar sübutun necə *etiketləndiyini* dəyişir, fazanın nə yaza
+  biləcəyini yox.
 
 ### Disposable hədəf provisioning kontraktı
 
@@ -376,7 +449,42 @@ archive/empty sətirlər) validator səviyyəsində iddia edilə bilmədiyi üç
 "yanlışlıqla import" ssenarisi struktur olaraq mümkün deyil. Registry barmaq izi
 dəyişdikdə pinlənmiş dəyər yenilənmədən heç bir rehearsal başlamır.
 
-### M5 — Pilot
+### M5 — İlk domain adapterləri və pilot
+
+#### M5 / SLICE 1 — `academic_structure` + `student_placement` + `UserProfile.fin`
+
+Registry-nin ilk domain dilimi (2026-08-25). Əhatə:
+
+- **`academic_structure` (order 10)** — `departments` (31), `speciality` (83),
+  `groups` (766) iddia edir; cəmi 880 sətir. `departments.department_types_id`
+  3 → `faculty`, 4 → `chair`, 0 → `faculty` + xəbərdarlıq (4 tipsiz kök görünən
+  qalır), digər hər dəyər → QUARANTINED + `error` (SUCCEEDED-i bloklayır).
+  Valideyn *daha böyük* id daşıya bildiyi üçün ağac əvvəlcə topoloji həll
+  olunur, batch zənciri isə həmişə artan `legacy_pk` ilə möhürlənir. Slug-lar
+  legacy açarlıdır (`myedu-dep/spec/grp-{id}`) — iki bölmə hərfən «Kollec»
+  adlanır, ad-törəmə slug `IntegrityError` verərdi. Hər ixtisas **iki** map
+  sətri yaradır: `speciality_unit` (batch ilə sayılan) və müşahidə olunan hər
+  dərəcə üçün bir derived `speciality_program`
+  (`legacy_pk = f"{id}:{degree}"`). Səviyyə/forma/sektor/qəbul ili **OrgUnit
+  deyil**, qrupun `settings` atributlarıdır.
+- **`student_placement` (order 25)** — `source_tables = ()`. `students`-i eyni
+  audit edilmiş kontraktla oxuyur (recompute edilən `source_row_hash` identity
+  fazasınınkı ilə bayt-bayt eynidir → pulsuz çarpaz yoxlama), yalnız **bu
+  run-un** stage etdiyi hesablar üçün yerləşdirmə qərarını ledger-ə yazır.
+  Sıfır `StudentAcademicRecord`, sıfır `Curriculum` (B-1/B-2).
+- **`UserProfile.fin`** — `core/validators.py` + mig `accounts 0014`;
+  nullable-unique və **qlobal** (FİN milli identifikatordur), `validate_fin`
+  ilə `^[A-Z0-9]{7}$`. Django admin bu dilimdəki yeganə UI səthidir.
+
+Tam rehearsal-dan sonra görünən olan: org ağacı (9 fakültə + 4 qeyri-standart
+kök + 18 kafedra + 83 ixtisas + 766 qrup), 83+ Program kataloqu, staged
+hesablarda ad/soyad və 591-ində FİN, hər struktur/yerləşdirmə qərarının ledger
+izi. **Görünməyən:** qrup içindəki tələbələr — `student_search`
+`StudentAcademicRecord` oxuyur, bu dilim isə onlardan sıfır yaradır. Rehearsal-ın
+dürüst vəziyyəti budur: heç kim aktivləşdirilməyib, deməli heç kim enrol
+olunmayıb.
+
+#### M5 / Pilot
 
 Əvvəl bir məhdud akademik period + fakültə/kafedra seçilir. Pilotda:
 

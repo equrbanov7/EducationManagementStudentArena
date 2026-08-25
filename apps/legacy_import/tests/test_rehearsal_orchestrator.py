@@ -6,7 +6,9 @@ replaced by the shrunken two-table plan the identity-phase tests already use.
 The real source attestation, ledger, batch chain and report writer all run.
 """
 
+import hashlib
 import json
+from collections import Counter
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
@@ -24,16 +26,22 @@ from apps.legacy_import.services import rehearsal_orchestrator as orchestrator
 from apps.legacy_import.services import rehearsal_phase_a as phase_a_module
 from apps.legacy_import.services.account_cutover import EmailTrustDecision
 from apps.legacy_import.services.field_contracts import STUDENT_IDENTITY_FIELDS, WORKER_IDENTITY_FIELDS
+from apps.legacy_import.services.ledger import upsert_entity_map
 from apps.legacy_import.services.rehearsal_contracts import (
     LegacyRehearsalConfigError,
+    LegacyRehearsalEvidenceError,
     LegacyRehearsalInterrupted,
     LegacyRehearsalResumeError,
+    OrderedDigest,
+    PhaseReport,
 )
+from apps.legacy_import.services.rehearsal_identity_phase import IdentityCohortPhase
 from apps.legacy_import.services.rehearsal_orchestrator import (
     cancel_rehearsal,
     execute_rehearsal,
     plan_rehearsal,
 )
+from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger, reconcile_run
 from apps.legacy_import.services.rehearsal_report import REPORT_NAME_TEMPLATE
 from apps.legacy_import.services.rehearsal_target_guard import TargetGuardAttestation
 from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256
@@ -504,3 +512,231 @@ def test_emit_report_only_requires_a_run_id(rehearsal_target):
         _run_rehearsal(rehearsal_target, organization, actor, emit_report_only=True)
 
     assert exc_info.value.code == "legacy_rehearsal_report_run_required"
+
+
+# ---------------------------------------------------------------------------
+# SA-1 / SA-2 — the derived (batch-less) phase seam
+# ---------------------------------------------------------------------------
+
+_DERIVED_PHASE_KEY = "stub_derived"
+_DERIVED_ENTITY_TYPE = "stub_derived_row"
+_STRAY_ENTITY_TYPE = "stub_stray_row"
+_DERIVED_DIGEST_NAMESPACE = "legacy-rehearsal-stub-derived-v1"
+_DERIVED_STATE_KEYS = {
+    str(LegacyEntityMap.State.MIGRATED): "record_created",
+    str(LegacyEntityMap.State.SKIPPED): "record_deferred",
+    str(LegacyEntityMap.State.QUARANTINED): "record_unresolved",
+}
+_DERIVED_ROWS = (
+    (1, LegacyEntityMap.State.SKIPPED),
+    (2, LegacyEntityMap.State.SKIPPED),
+    (3, LegacyEntityMap.State.QUARANTINED),
+)
+
+
+def _derivation_hash(legacy_pk) -> str:
+    """Stand in for the placement phase's cross-run-stable derivation hash."""
+
+    return hashlib.sha256(f"stub-derivation-v1\x00{legacy_pk}".encode()).hexdigest()
+
+
+class _StubDerivedPhase:
+    """A phase that accounts for no source table and owns no batch chain.
+
+    It is the smallest possible stand-in for ``student_placement``: it writes
+    one ledger observation per derived decision, chains them itself, and reports
+    ``observed_source_rows = 0`` with token state keys.
+    """
+
+    phase_key = _DERIVED_PHASE_KEY
+    order = 25
+    source_tables = ()
+    entity_types = (_DERIVED_ENTITY_TYPE,)
+    derived_digest_namespace = _DERIVED_DIGEST_NAMESPACE
+
+    def __init__(self, *, rows=_DERIVED_ROWS, written_entity_type=_DERIVED_ENTITY_TYPE):
+        self.rows = tuple(rows)
+        self.written_entity_type = written_entity_type
+        self.last_report = None
+
+    def declared_source_rows(self, plan) -> int:
+        return 0
+
+    def derived_state_key(self, state) -> str:
+        return _DERIVED_STATE_KEYS[str(state)]
+
+    def run(self, context):
+        chain = OrderedDigest(_DERIVED_DIGEST_NAMESPACE)
+        counts = Counter()
+        for legacy_pk, state in self.rows:
+            row_hash = _derivation_hash(legacy_pk)
+            upsert_entity_map(
+                run_id=context.run_id,
+                actor=context.actor,
+                authorize=context.authorize,
+                entity_type=self.written_entity_type,
+                legacy_pk=str(legacy_pk),
+                source_row_hash=row_hash,
+                state=state,
+                target_model_label="",
+                target_pk="",
+                target_validators=context.target_validators,
+            )
+            chain.advance(str(legacy_pk), str(state), row_hash, "")
+            counts[self.derived_state_key(state)] += 1
+        self.last_report = PhaseReport(
+            phase_key=self.phase_key,
+            order=self.order,
+            source_tables=(),
+            declared_source_rows=0,
+            observed_source_rows=0,
+            batches=(),
+            state_counts=dict(counts),
+            issue_counts={},
+            staged_account_count=0,
+            phase_digest=chain.hexdigest(),
+        )
+        return self.last_report
+
+
+def _register_derived_phase(monkeypatch, stub):
+    """Drive the real orchestrator over ``(identity_cohort, <stub>)``."""
+
+    registry = (IdentityCohortPhase(), stub)
+    monkeypatch.setattr(phase_a_module, "load_rehearsal_phase_registry", lambda: registry)
+    return _policy(batch_rows=2, phase_keys=("identity_cohort", _DERIVED_PHASE_KEY))
+
+
+def test_sa1_derived_observations_do_not_break_the_batch_cross_check(rehearsal_target, monkeypatch):
+    """SA-1: C4 counts only the observations the batch chain accounts for."""
+
+    organization, actor = _organization("derived-c4")
+    stub = _StubDerivedPhase()
+    policy = _register_derived_phase(monkeypatch, stub)
+
+    outcome = _run_rehearsal(rehearsal_target, organization, actor, policy=policy)
+
+    run = LegacyMigrationRun.objects.get(pk=outcome.run_id)
+    assert outcome.status == LegacyMigrationRun.Status.SUCCEEDED
+    # The batch chain still accounts for the identity rows and nothing else...
+    assert run.skipped_count == _STUDENT_ROWS + _WORKER_ROWS
+    assert run.quarantined_count == 0
+    assert LegacyImportBatch.objects.filter(run=run).count() == 3
+    # ...while the derived rows exist in the ledger beside them.
+    assert LegacyEntityObservation.objects.filter(run=run).count() == _STUDENT_ROWS + _WORKER_ROWS + len(_DERIVED_ROWS)
+    assert LegacyEntityObservation.objects.filter(run=run, entity_map__entity_type=_DERIVED_ENTITY_TYPE).count() == len(
+        _DERIVED_ROWS
+    )
+    # Re-running C4 against the sealed run is still clean.
+    reconcile_run(run, phases=(IdentityCohortPhase(), stub), plan=rehearsal_target.plan)
+
+    document = json.loads(open(outcome.report_path, encoding="ascii").read())
+    derived_entry = next(entry for entry in document["deterministic"]["phases"] if entry["phase_key"] == "stub_derived")
+    assert derived_entry["source_tables"] == [] and derived_entry["batches"] == []
+    assert derived_entry["state_counts"] == {"record_deferred": 2, "record_unresolved": 1}
+    # Token state keys stay out of the operator-facing rehearsal totals.
+    totals = document["deterministic"]["totals"]
+    assert totals["skipped"] == _STUDENT_ROWS + _WORKER_ROWS
+    assert totals["quarantined"] == 0
+    assert totals["source_rows"] == _STUDENT_ROWS + _WORKER_ROWS
+
+
+def test_sa1_observation_under_an_undeclared_entity_type_fails_closed(rehearsal_target, monkeypatch):
+    """SA-1 fail-closed half: relaxing C4 must not open an unaccounted lane."""
+
+    organization, actor = _organization("derived-stray")
+    stub = _StubDerivedPhase(written_entity_type=_STRAY_ENTITY_TYPE)
+    policy = _register_derived_phase(monkeypatch, stub)
+
+    with pytest.raises(LegacyRehearsalEvidenceError) as exc_info:
+        _run_rehearsal(rehearsal_target, organization, actor, policy=policy)
+
+    assert exc_info.value.code == "legacy_rehearsal_derived_entity_type_unregistered"
+    run = LegacyMigrationRun.objects.get(organization=organization)
+    assert run.status == LegacyMigrationRun.Status.FAILED
+    assert run.failure_code == "legacy_rehearsal_derived_entity_type_unregistered"
+
+
+def test_sa2_phase_report_from_ledger_rebuilds_a_batch_less_phase(rehearsal_target, monkeypatch):
+    """SA-2: the derived report is reproducible from the observations alone."""
+
+    organization, actor = _organization("derived-rebuild")
+    stub = _StubDerivedPhase()
+    policy = _register_derived_phase(monkeypatch, stub)
+
+    outcome = _run_rehearsal(rehearsal_target, organization, actor, policy=policy)
+    run = LegacyMigrationRun.objects.get(pk=outcome.run_id)
+
+    rebuilt = phase_report_from_ledger(run, phase=stub, plan=rehearsal_target.plan)
+
+    assert rebuilt == stub.last_report
+    assert rebuilt.phase_digest == stub.last_report.phase_digest
+    assert rebuilt.state_counts == {"record_deferred": 2, "record_unresolved": 1}
+    assert rebuilt.source_tables == () and rebuilt.batches == ()
+    assert rebuilt.observed_source_rows == 0 and rebuilt.staged_account_count == 0
+
+
+def test_sa2_emit_report_only_reproduces_a_run_containing_a_derived_phase(rehearsal_target, monkeypatch):
+    """The whole artifact — not just the phase entry — regenerates identically."""
+
+    organization, actor = _organization("derived-emit")
+    stub = _StubDerivedPhase()
+    policy = _register_derived_phase(monkeypatch, stub)
+
+    outcome = _run_rehearsal(rehearsal_target, organization, actor, policy=policy)
+    original = json.loads(open(outcome.report_path, encoding="ascii").read())
+
+    regenerated = _run_rehearsal(
+        rehearsal_target,
+        organization,
+        actor,
+        policy=policy,
+        resume_run_id=outcome.run_id,
+        emit_report_only=True,
+    )
+
+    assert regenerated.determinism_digest == outcome.determinism_digest
+    assert json.loads(open(regenerated.report_path, encoding="ascii").read())["deterministic"] == (
+        original["deterministic"]
+    )
+
+
+def test_sa2_derived_rebuild_defaults_when_the_optional_hooks_are_absent(rehearsal_target, monkeypatch):
+    """Both SA-2 hooks are optional; without them the shared defaults apply."""
+
+    organization, actor = _organization("derived-defaults")
+    stub = _StubDerivedPhase()
+    policy = _register_derived_phase(monkeypatch, stub)
+    outcome = _run_rehearsal(rehearsal_target, organization, actor, policy=policy)
+    run = LegacyMigrationRun.objects.get(pk=outcome.run_id)
+
+    plain = SimpleNamespace(
+        phase_key=_DERIVED_PHASE_KEY,
+        order=25,
+        source_tables=(),
+        entity_types=(_DERIVED_ENTITY_TYPE,),
+        declared_source_rows=lambda _plan: 0,
+    )
+
+    rebuilt = phase_report_from_ledger(run, phase=plain, plan=rehearsal_target.plan)
+
+    # Raw ledger states, not the phase's own tokens...
+    assert rebuilt.state_counts == {"skipped": 2, "quarantined": 1}
+    # ...and the shared phase namespace, so the digest deliberately differs.
+    assert rebuilt.phase_digest != stub.last_report.phase_digest
+
+
+def test_sa2_derived_rebuild_refuses_a_non_numeric_legacy_pk(rehearsal_target, monkeypatch):
+    """Ordering the rebuild numerically must fail closed, never fall back."""
+
+    organization, actor = _organization("derived-badpk")
+    stub = _StubDerivedPhase(rows=(("alpha", LegacyEntityMap.State.SKIPPED),))
+    policy = _register_derived_phase(monkeypatch, stub)
+
+    outcome = _run_rehearsal(rehearsal_target, organization, actor, policy=policy)
+    run = LegacyMigrationRun.objects.get(pk=outcome.run_id)
+
+    with pytest.raises(LegacyRehearsalEvidenceError) as exc_info:
+        phase_report_from_ledger(run, phase=stub, plan=rehearsal_target.plan)
+
+    assert exc_info.value.code == "legacy_rehearsal_derived_legacy_pk_invalid"

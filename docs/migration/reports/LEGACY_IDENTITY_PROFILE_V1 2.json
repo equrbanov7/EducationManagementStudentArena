@@ -1,0 +1,29 @@
+{
+  "snapshot_type": "legacy_identity_source_profile_v1",
+  "generated_at": "2026-08-25",
+  "source_snapshot_sha256": "177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0",
+  "source_rows": 8545,
+  "student_rows": 7816,
+  "worker_rows": 729,
+  "candidate_username_policy": "namespaced_source_kind_plus_legacy_integer_id",
+  "target_collision_probe": "empty_target_baseline_only",
+  "email_authority_policy": "default_deny",
+  "outcomes": {
+    "contact_verification_required": 8517,
+    "manual_review_required": 28,
+    "locked_staging_eligible": 0
+  },
+  "rule_counts": {
+    "legacy_account_email_blank": 1,
+    "legacy_account_email_duplicate_source": 28,
+    "legacy_account_email_invalid": 85,
+    "legacy_account_email_untrusted": 8431
+  },
+  "credential_output_count": 0,
+  "domain_write_count": 0,
+  "interpretation": [
+    "Bu yalnız source-cohort profilidir; real target istifadəçiləri ilə collision probe ayrıca rehearsal-da işləməlidir.",
+    "Default-deny email authority səbəbindən heç bir hesab avtomatik aktivləşdirilə və ya locked staging üçün təsdiqlənə bilməz.",
+    "Manual-review sayı source daxilində canonical email dublikatı olan sətirlərin sayıdır; raw email və legacy ID hesabatda saxlanmır."
+  ]
+}

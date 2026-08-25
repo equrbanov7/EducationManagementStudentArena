@@ -1,0 +1,156 @@
+{
+  "snapshot_type": "sanitized_legacy_date_coverage",
+  "version": "legacy-date-coverage-v1",
+  "source_snapshot_sha256": "177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0",
+  "selected_operational_min": "2021-10-15 13:29:46",
+  "selected_operational_min_source": "lessons.added_date",
+  "recorded_event_max": "2026-08-17 08:48:07",
+  "recorded_event_max_source": "journals_dates.added_date",
+  "scheduled_future_max": "2026-12-30",
+  "scheduled_future_max_source": "journals_dates_rooms.date",
+  "academic_reference_years": {
+    "normal_range": "2017-2026",
+    "suspicious_group_start_year": 2000,
+    "zero_group_start_year_rows": 248
+  },
+  "selected_ranges": {
+    "active_points": [
+      "2022-03-30 05:54:45",
+      "2026-08-17 08:30:33"
+    ],
+    "archive_points": [
+      "2021-11-03 15:41:57",
+      "2022-12-31 14:41:08"
+    ],
+    "exam_answers": [
+      "2022-05-31 16:33:01",
+      "2026-07-22 13:10:19"
+    ],
+    "students_added": [
+      "2021-10-15 13:49:53",
+      "2026-08-13 10:32:11"
+    ],
+    "journals": [
+      "2021-11-03 19:37:00",
+      "2026-08-13 10:37:39"
+    ],
+    "journal_date_containers": [
+      "2021-11-04 13:22:28",
+      "2026-08-17 08:48:07"
+    ],
+    "scheduled_journal_dates": [
+      "2022-02-21",
+      "2026-12-30"
+    ],
+    "subjects_added": [
+      "2021-10-15 13:29:46",
+      "2026-05-07 15:25:39"
+    ]
+  },
+  "annual_selected": [
+    {
+      "year": 2021,
+      "students_join_date": 0,
+      "students_added_date": 334,
+      "journal_headers": 9,
+      "journal_date_containers": 10,
+      "scheduled_journal_dates": 0,
+      "active_mark_attendance_cells": 0,
+      "archived_mark_attendance_cells": 3625,
+      "exam_answer_rows": 0,
+      "final_grade_rows_by_journal_year": 0,
+      "subjects_added": 46,
+      "syllabi_distinct_linked_to_journal_proxy": 0
+    },
+    {
+      "year": 2022,
+      "students_join_date": 1754,
+      "students_added_date": 3201,
+      "journal_headers": 2913,
+      "journal_date_containers": 10923,
+      "scheduled_journal_dates": 33621,
+      "active_mark_attendance_cells": 756039,
+      "archived_mark_attendance_cells": 772408,
+      "exam_answer_rows": 53109,
+      "final_grade_rows_by_journal_year": 17165,
+      "subjects_added": 2145,
+      "syllabi_distinct_linked_to_journal_proxy": 1184
+    },
+    {
+      "year": 2023,
+      "students_join_date": 968,
+      "students_added_date": 967,
+      "journal_headers": 3165,
+      "journal_date_containers": 9290,
+      "scheduled_journal_dates": 64241,
+      "active_mark_attendance_cells": 1013354,
+      "archived_mark_attendance_cells": 0,
+      "exam_answer_rows": 152810,
+      "final_grade_rows_by_journal_year": 29,
+      "subjects_added": 115,
+      "syllabi_distinct_linked_to_journal_proxy": 2119
+    },
+    {
+      "year": 2024,
+      "students_join_date": 1276,
+      "students_added_date": 1276,
+      "journal_headers": 3238,
+      "journal_date_containers": 9608,
+      "scheduled_journal_dates": 93945,
+      "active_mark_attendance_cells": 1433722,
+      "archived_mark_attendance_cells": 0,
+      "exam_answer_rows": 257859,
+      "final_grade_rows_by_journal_year": 0,
+      "subjects_added": 83,
+      "syllabi_distinct_linked_to_journal_proxy": 2183
+    },
+    {
+      "year": 2025,
+      "students_join_date": 1808,
+      "students_added_date": 1808,
+      "journal_headers": 3095,
+      "journal_date_containers": 9824,
+      "scheduled_journal_dates": 67271,
+      "active_mark_attendance_cells": 1243177,
+      "archived_mark_attendance_cells": 0,
+      "exam_answer_rows": 426331,
+      "final_grade_rows_by_journal_year": 0,
+      "subjects_added": 88,
+      "syllabi_distinct_linked_to_journal_proxy": 2110
+    },
+    {
+      "year": 2026,
+      "students_join_date": 230,
+      "students_added_date": 230,
+      "journal_headers": 1455,
+      "journal_date_containers": 4613,
+      "scheduled_journal_dates": 32431,
+      "active_mark_attendance_cells": 688997,
+      "archived_mark_attendance_cells": 0,
+      "exam_answer_rows": 416264,
+      "final_grade_rows_by_journal_year": 0,
+      "subjects_added": 44,
+      "syllabi_distinct_linked_to_journal_proxy": 1000
+    }
+  ],
+  "unknown_or_unusable_dates": {
+    "students.join_date_zero": 1780,
+    "students.entry_year_blank_or_null": 7179,
+    "groups.start_year_zero": 248,
+    "sillabus_sem_muh.tarix_blank": 131056
+  },
+  "caveats": [
+    "2021 is a partial startup/import period, not a complete academic year.",
+    "2026 recorded data ends on August 17; schedule rows extend to December 30.",
+    "yekun has no date; its year is proxied through linked journals and is concentrated in 2022.",
+    "sillabus has no created date; yearly counts are distinct syllabi linked to journals and can repeat across years.",
+    "archive points may overlap active/history and must not be added blindly to active points."
+  ],
+  "safety": {
+    "contains_raw_rows": false,
+    "contains_personal_data": false,
+    "contains_credentials": false,
+    "contains_connection_strings": false,
+    "contains_local_absolute_paths": false
+  }
+}

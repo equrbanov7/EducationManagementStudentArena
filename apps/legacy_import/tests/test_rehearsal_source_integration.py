@@ -1,14 +1,19 @@
-"""Real-source rehearsal conformance (SPEC §15.3/56).
+"""Real-source rehearsal conformance (SPEC §15.3/56 and FAZA 3 §8/11).
 
-Written but NEVER run by the implementer (coordination note N5).  It opts in
-only when the caller provides BOTH a guarded disposable MariaDB endpoint and a
-PostgreSQL target, and it drops everything it created in ``finally``.
+Written but NEVER run by the implementer (coordination note N5 / FAZA 3 V-5).
+It opts in only when the caller provides BOTH a guarded disposable MariaDB
+endpoint and a PostgreSQL target, and it drops everything it created in
+``finally``.
 
 Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 (the file is not part of the repository) and the disposable-target interlock
 (the CI PostgreSQL database carries no ``ALTER DATABASE … SET
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
+
+The second test drives the FULL FAZA 3 registry — ``academic_structure`` (31 +
+83 + 766 rows), ``identity_cohort`` (7 816 + 729) and ``student_placement`` —
+against the CANONICAL table plan, so ``totals.source_rows`` is the real 9 425.
 """
 
 import json
@@ -24,7 +29,13 @@ import pytest
 
 from apps.legacy_import.models import LegacyImportBatch, LegacyMigrationRun
 from apps.legacy_import.services import rehearsal_phase_a as phase_a_module
-from apps.legacy_import.services.field_contracts import STUDENT_IDENTITY_FIELDS, WORKER_IDENTITY_FIELDS
+from apps.legacy_import.services.field_contracts import (
+    DEPARTMENT_STRUCTURE_FIELDS,
+    GROUP_STRUCTURE_FIELDS,
+    SPECIALITY_STRUCTURE_FIELDS,
+    STUDENT_IDENTITY_FIELDS,
+    WORKER_IDENTITY_FIELDS,
+)
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
 from apps.legacy_import.services.rehearsal_contracts import (
     EmailTrustPolicy,
@@ -36,7 +47,7 @@ from apps.legacy_import.services.rehearsal_contracts import (
 from apps.legacy_import.services.rehearsal_identity_phase import email_evidence_digest
 from apps.legacy_import.services.rehearsal_orchestrator import execute_rehearsal
 from apps.legacy_import.services.rehearsal_target_guard import TargetGuardAttestation
-from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256
+from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256, load_legacy_table_plan
 from apps.legacy_import.tests.test_rehearsal_identity_phase import _plan
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -322,6 +333,377 @@ def test_disposable_mariadb_and_postgres_identity_rehearsal_conformance(monkeypa
         assert json.loads(document)["deterministic"]["totals"]["raw_pii_field_output_count"] == 0
 
         # 6) Every raw source transport was closed by the audited adapter.
+        assert opened
+        assert all(getattr(source, "closed", True) for source in opened)
+    finally:
+        _drop_source_fixture(port, database)
+
+
+# ---------------------------------------------------------------------------
+# FAZA 3 — SLICE 1 (SPEC §8/11): the full three-phase registry against the
+# CANONICAL plan, so the accounting totals are the real ones.
+# ---------------------------------------------------------------------------
+
+_CANONICAL_PLAN = load_legacy_table_plan()
+_DEPARTMENT_ROWS = _CANONICAL_PLAN.entry_for("departments").expected_rows  # 31
+_SPECIALITY_ROWS = _CANONICAL_PLAN.entry_for("speciality").expected_rows  # 83
+_GROUP_ROWS = _CANONICAL_PLAN.entry_for("groups").expected_rows  # 766
+_FULL_STUDENT_ROWS = _CANONICAL_PLAN.entry_for("students").expected_rows  # 7 816
+_FULL_WORKER_ROWS = _CANONICAL_PLAN.entry_for("workers").expected_rows  # 729
+_FULL_SOURCE_ROWS = _DEPARTMENT_ROWS + _SPECIALITY_ROWS + _GROUP_ROWS + _FULL_STUDENT_ROWS + _FULL_WORKER_ROWS
+_FULL_PHASE_KEYS = ("academic_structure", "identity_cohort", "student_placement")
+# Only this many identities are trusted, so exactly this many accounts stage and
+# exactly this many placement decisions are derived.  Keeping it small is what
+# makes a 9 425-row conformance pass finish in minutes rather than hours.
+_TRUSTED_STUDENTS = 40
+_TRUSTED_WORKERS = 10
+
+# Columns MariaDB hands back as Python ``int``; the transforms fail closed on a
+# string here (A-2), so the disposable fixture must reproduce the real types.
+_INT_COLUMNS = {
+    "departments": ("department_id", "department_types_id"),
+    "speciality": ("department_id",),
+    "groups": ("speciality_id", "department_id", "start_year", "curricula_id"),
+    "students": ("group_id", "speciality_id"),
+    "workers": ("department_id",),
+}
+
+
+def _full_email(table, index):
+    return f"rehearsal-{table}-{index}@example.test"
+
+
+def _typed_columns(table, contract, decoys):
+    integers = _INT_COLUMNS.get(table, ())
+    columns = ["`id` BIGINT NOT NULL AUTO_INCREMENT"]
+    for field_name in contract.allowed_fields:
+        if field_name == "id":
+            continue
+        sql_type = "BIGINT NULL" if field_name in integers else "VARCHAR(191) NULL"
+        columns.append(f"`{field_name}` {sql_type}")
+    columns.extend(f"`{decoy}` VARCHAR(191) NULL" for decoy in decoys)
+    columns.append("PRIMARY KEY (`id`)")
+    return columns
+
+
+def _insert_statement(database, table, fields):
+    return (
+        f"INSERT INTO `{database}`.`{table}` "
+        f"({', '.join(f'`{field}`' for field in fields)}) "
+        f"VALUES ({', '.join(['%s'] * len(fields))})"
+    )
+
+
+def _seed_table(cursor, *, database, table, contract, decoys, rows, values_for):
+    """Create one typed table and bulk-insert ``rows`` generated tuples."""
+
+    cursor.execute(
+        f"CREATE TABLE `{database}`.`{table}` ({', '.join(_typed_columns(table, contract, decoys))}) ENGINE=InnoDB"
+    )
+    fields = (*contract.allowed_fields, *decoys)
+    statement = _insert_statement(database, table, fields)
+    batch = []
+    for legacy_pk in range(1, rows + 1):
+        overrides = values_for(legacy_pk)
+        values = []
+        for position, field_name in enumerate(fields):
+            if field_name == "id":
+                values.append(legacy_pk)  # AUTO_INCREMENT-ə güvənmə: id == legacy_pk zəmanəti
+            elif field_name in overrides:
+                values.append(overrides[field_name])
+            elif field_name in decoys:
+                values.append(_CREDENTIAL_VALUE)
+            elif field_name in _INT_COLUMNS.get(table, ()):
+                values.append(0)
+            else:
+                values.append(f"{_PRIVATE_VALUE}-{table}-{legacy_pk}-{position}")
+        batch.append(tuple(values))
+        if len(batch) == 500:
+            cursor.executemany(statement, batch)
+            batch = []
+    if batch:
+        cursor.executemany(statement, batch)
+
+
+def _department_values(legacy_pk):
+    # 9 faculties, 18 chairs and 4 untyped roots — the live 31-row shape (§9).
+    if legacy_pk <= 9:
+        type_id, parent = 3, 0
+    elif legacy_pk <= 27:
+        type_id, parent = 4, ((legacy_pk - 10) % 9) + 1
+    else:
+        type_id, parent = 0, 0
+    return {
+        "name": "Kollec" if type_id == 0 else f"Bölmə {legacy_pk}",
+        "department_id": parent,
+        "department_types_id": type_id,
+        "kollec_or_uni": "k" if type_id == 0 else "uni",
+    }
+
+
+def _speciality_values(legacy_pk):
+    return {
+        # The trailing tab is the live pollution ``clean_code`` has to remove.
+        "speciality_code": f"{50000 + legacy_pk:06d}\t" if legacy_pk % 3 else "5555",
+        "name": f"İxtisas {legacy_pk}",
+        "department_id": ((legacy_pk - 1) % 27) + 1,
+    }
+
+
+def _group_values(legacy_pk):
+    speciality = ((legacy_pk - 1) % _SPECIALITY_ROWS) + 1
+    return {
+        "name": f"Qrup {legacy_pk}",
+        "speciality_id": speciality,
+        "department_id": ((speciality - 1) % 27) + 1,
+        "sector": ("az", "en", "ru")[legacy_pk % 3],
+        "eyani_qiyabi": "Əyani" if legacy_pk % 2 else "Qiyabi",
+        "bak_or_mag": "mag" if legacy_pk % 5 == 0 else "bak",
+        # A third of the live groups carry the NOT-NULL zero-date sentinel (A-8).
+        "start_year": 0 if legacy_pk % 3 == 0 else 2015 + (legacy_pk % 8),
+        "curricula_id": legacy_pk % 126,
+    }
+
+
+def _student_values(legacy_pk):
+    trusted = legacy_pk <= _TRUSTED_STUDENTS
+    return {
+        "email": _full_email("students", legacy_pk) if trusted else f"student-{legacy_pk}@untrusted.test",
+        "group_id": ((legacy_pk - 1) % _GROUP_ROWS) + 1,
+        "speciality_id": 0,  # every live row is 0 (§4.5)
+        "entry_year": "" if legacy_pk % 4 == 0 else str(2015 + (legacy_pk % 8)),
+        "fincode": f"{legacy_pk:07d}" if trusted else "",
+        "first_name": f"Ad{legacy_pk}",
+        "last_name": f"Soyad{legacy_pk}",
+    }
+
+
+def _worker_values(legacy_pk):
+    trusted = legacy_pk <= _TRUSTED_WORKERS
+    return {
+        "email": _full_email("workers", legacy_pk) if trusted else f"worker-{legacy_pk}@untrusted.test",
+        "department_id": ((legacy_pk - 1) % 27) + 1,
+        "first_name": f"İşçi{legacy_pk}",
+        "last_name": f"Soyad{legacy_pk}",
+    }
+
+
+_FULL_TABLES = (
+    ("departments", DEPARTMENT_STRUCTURE_FIELDS, (), _DEPARTMENT_ROWS, _department_values),
+    ("speciality", SPECIALITY_STRUCTURE_FIELDS, (), _SPECIALITY_ROWS, _speciality_values),
+    ("groups", GROUP_STRUCTURE_FIELDS, (), _GROUP_ROWS, _group_values),
+    ("students", STUDENT_IDENTITY_FIELDS, ("password", "show_password"), _FULL_STUDENT_ROWS, _student_values),
+    ("workers", WORKER_IDENTITY_FIELDS, ("password", "pin_for_lock"), _FULL_WORKER_ROWS, _worker_values),
+)
+
+
+def _create_full_source_fixture(port, database):
+    root = _root_connection(port)
+    try:
+        with root.cursor() as cursor:
+            cursor.execute("SET GLOBAL read_only = OFF")
+            cursor.execute(f"CREATE DATABASE `{database}` CHARACTER SET utf8mb4")
+            cursor.execute(f"CREATE USER IF NOT EXISTS '{_READER_USER}'@'%' IDENTIFIED BY '{_READER_PASSWORD}'")
+            for table, contract, decoys, rows, values_for in _FULL_TABLES:
+                _seed_table(
+                    cursor,
+                    database=database,
+                    table=table,
+                    contract=contract,
+                    decoys=decoys,
+                    rows=rows,
+                    values_for=values_for,
+                )
+            cursor.execute(f"GRANT SELECT ON `{database}`.* TO '{_READER_USER}'@'%'")
+            cursor.execute("FLUSH PRIVILEGES")
+            cursor.execute("SET GLOBAL read_only = ON")
+    finally:
+        root.close()
+
+
+def _full_policy():
+    return RehearsalPolicy(
+        phase_keys=_FULL_PHASE_KEYS,
+        username_policy=UsernamePolicy.LEGACY_KEY,
+        student_identifier_policy=StudentIdentifierPolicy.LEGACY_PK,
+        email_trust_policy=EmailTrustPolicy.EVIDENCE_MANIFEST,
+        email_trust_manifest_digest="d" * 64,
+        batch_rows=500,
+        source_chunk_size=1_000,
+        max_staged_accounts=_TRUSTED_STUDENTS + _TRUSTED_WORKERS,
+        student_role_name="student",
+        worker_role_name="teacher",
+    )
+
+
+def _full_manifest():
+    return frozenset(
+        {
+            *(email_evidence_digest(_full_email("students", index)) for index in range(1, _TRUSTED_STUDENTS + 1)),
+            *(email_evidence_digest(_full_email("workers", index)) for index in range(1, _TRUSTED_WORKERS + 1)),
+        }
+    )
+
+
+def _full_organization(code):
+    owner = get_user_model().objects.create_superuser(
+        username=f"rehearsal_full_{code}_actor",
+        email=f"rehearsal-full-{code}@example.test",
+        password="test-only",
+    )
+    return (
+        Organization.objects.create(
+            name=f"Rehearsal Full {code.title()} Organization",
+            slug=f"rehearsal-full-{code}-organization",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        ),
+        owner,
+    )
+
+
+def _phase_digests(document):
+    return {phase["phase_key"]: phase["phase_digest"] for phase in document["deterministic"]["phases"]}
+
+
+def _issue_histogram(document):
+    return {
+        (entry["rule_code"], entry["severity"]): entry["count"]
+        for entry in document["deterministic"]["issue_histogram"]
+    }
+
+
+def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, tmp_path):
+    """SPEC §8/11 — two full three-phase rehearsals agree byte for byte.
+
+    ``load_legacy_table_plan`` is deliberately NOT patched here: the disposable
+    source carries the canonical 31/83/766/7 816/729 shapes, so the run's own
+    ``source_row_count`` is the real 9 425 and every plan row-count gate is
+    exercised for real.
+
+    A second physical PostgreSQL database cannot be reached inside one test
+    transaction, so — exactly as
+    ``test_rehearsal_postgres.test_two_clean_targets_produce_the_same_determinism_digest``
+    documents — the two passes run under two INDEPENDENT tenants created before
+    either of them, which keeps the pre-run identity baseline identical while
+    everything the digest excludes (run pk, tenant pk, timestamps, chain
+    digests) still differs.
+    """
+
+    port, database = _guarded_endpoint()
+    _create_full_source_fixture(port, database)
+    opened = []
+    try:
+        monkeypatch.setattr(phase_a_module, "assert_disposable_rehearsal_target", lambda **_kwargs: _GUARD)
+        first_organization, first_actor = _full_organization("one")
+        second_organization, second_actor = _full_organization("two")
+        report_dir = tmp_path / "full-reports"
+        report_dir.mkdir()
+        arguments = {
+            "settings_object": SimpleNamespace(),
+            "policy": _full_policy(),
+            "report_dir": str(report_dir),
+            "apply_confirmation": connection.settings_dict["NAME"],
+            "source_path": _SOURCE_PATH,
+            "source_size_bytes": _SOURCE_SIZE_BYTES,
+            "email_trust_manifest_digests": _full_manifest(),
+            "source_preflight": _preflight,
+            "source_factory_builder": _source_factory_builder(port, database, opened),
+        }
+
+        first = execute_rehearsal(rehearsal_ordinal=1, organization=first_organization, actor=first_actor, **arguments)
+
+        # QLOBAL VƏZİYYƏTİN BƏRPASI (2026-08-26 determinizm insidenti): staging
+        # QLOBAL auth_user-ə yazır; iki-tenant-eyni-DB yaxınlaşması yalnız
+        # qlobal-yazısız siyasətlərdə keçərlidir.  Real istehsalda D5 hər
+        # rehearsal-a TƏZƏ disposable baza tələb edir — burada həmin təmizliyi
+        # 1-ci pasın staged istifadəçilərini silməklə emulyasiya edirik (adlar
+        # və FİN-lər yalnız həmin sətirlərdə idi, kaskadla gedir).
+        staged_total = _TRUSTED_STUDENTS + _TRUSTED_WORKERS
+        deleted, _detail = get_user_model().objects.filter(username__startswith="myedu.").delete()
+        assert deleted >= staged_total
+
+        second = execute_rehearsal(
+            rehearsal_ordinal=2, organization=second_organization, actor=second_actor, **arguments
+        )
+
+        assert first.status == LegacyMigrationRun.Status.SUCCEEDED
+        assert second.status == LegacyMigrationRun.Status.SUCCEEDED
+
+        first_document = json.loads(open(first.report_path, encoding="ascii").read())
+        second_document = json.loads(open(second.report_path, encoding="ascii").read())
+
+        # 1) The whole registry ran, in its fixed ascending order.
+        assert [phase["phase_key"] for phase in first_document["deterministic"]["phases"]] == list(_FULL_PHASE_KEYS)
+        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == [10, 20, 25]
+
+        # 2) The real accounting totals — 880 structure rows + 8 545 identity
+        #    rows; the batch-less placement phase contributes exactly 0.
+        assert first_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS == 9_425
+        observed = {
+            phase["phase_key"]: phase["observed_source_rows"] for phase in first_document["deterministic"]["phases"]
+        }
+        assert observed == {"academic_structure": 880, "identity_cohort": 8_545, "student_placement": 0}
+
+        # 3) Determinism across two independent targets.
+        assert second.determinism_digest == first.determinism_digest
+        assert _phase_digests(second_document) == _phase_digests(first_document)
+        assert _issue_histogram(second_document) == _issue_histogram(first_document)
+        assert first_document["provenance"]["run_id"] != second_document["provenance"]["run_id"]
+        assert first_document["provenance"]["organization_id"] != second_document["provenance"]["organization_id"]
+
+        # 4) The placement phase derived one decision per staged student, and
+        #    V-2's admission-year gap stays INFO-only (it never blocks SUCCEEDED).
+        placement = next(
+            phase for phase in first_document["deterministic"]["phases"] if phase["phase_key"] == "student_placement"
+        )
+        assert sum(placement["state_counts"].values()) == _TRUSTED_STUDENTS
+        assert set(placement["state_counts"]) <= {"record_created", "record_deferred", "record_unresolved"}
+        histogram = _issue_histogram(first_document)
+        assert first_document["deterministic"]["totals"]["blocking_issue_count"] == 0
+        assert all(severity not in ("error", "critical") for (_rule, severity) in histogram)
+        # V-2: the admission-year gap is the loudest INFO code and never blocks.
+        assert histogram.get(("legacy_record_admission_year_missing", "info"), 0) >= 1
+
+        # 5) Regenerating a report from the ledger reproduces its digest —
+        #    the batch-less phase's rebuild included (SA-2).  RUN 2 seçilir:
+        #    run 1-in staged istifadəçiləri qlobal-bərpa addımında silinib və
+        #    rebase düzgün olaraq resume_target_missing ilə fail-closed olur —
+        #    bu, evidence-qoruma davranışının özüdür, regen isə run 2-də tam
+        #    ekvivalent sübutdur (digest-lər bərabərdir).
+        regenerated = execute_rehearsal(
+            rehearsal_ordinal=2,  # {1,2} qapısı; eyni-digest overwrite idempotent yoldur
+            organization=second_organization,
+            actor=second_actor,
+            resume_run_id=second.run_id,
+            emit_report_only=True,
+            **arguments,
+        )
+        assert regenerated.determinism_digest == second.determinism_digest == first.determinism_digest
+
+        # 6) Zero credential or raw-value leakage anywhere in the artifacts.
+        document = open(first.report_path, encoding="ascii").read()
+        payload = json.dumps(first.payload, ensure_ascii=True, sort_keys=True)
+        for forbidden in (
+            _CREDENTIAL_VALUE,
+            _PRIVATE_VALUE,
+            _READER_USER,
+            _READER_PASSWORD,
+            database,
+            _HOST,
+            _SOURCE_PATH,
+            first_actor.username,
+            "password",
+            "pin_for_lock",
+            _full_email("students", 1),
+            "0000001",  # a seeded FİN
+        ):
+            assert forbidden not in document
+            assert forbidden not in payload
+
+        # 7) Every raw source transport was closed by the audited adapter.
         assert opened
         assert all(getattr(source, "closed", True) for source in opened)
     finally:

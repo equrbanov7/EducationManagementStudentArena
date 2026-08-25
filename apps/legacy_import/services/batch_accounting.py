@@ -163,16 +163,17 @@ def record_batch(
             raise LegacyBatchConflictError("legacy_batch_accounting_mode_required")
 
         predecessor = None
+        # QEYD (2026-08-26): LegacyImportBatch append-only-dur (DB trigger-ləri
+        # UPDATE/DELETE-i qadağan edir) və scope onsuz da advisory xact-lock ilə
+        # serialisə olunur — FOR UPDATE burada semantik cəhətdən artıqdır və
+        # least-privilege rolda (UPDATE qəsdən REVOKE olunub) permission-denied
+        # verirdi. Adi SELECT kifayətdir.
         if sequence > 1:
-            predecessor = (
-                LegacyImportBatch.objects.select_for_update()
-                .filter(
-                    run=run,
-                    source_table=source_table,
-                    sequence=sequence - 1,
-                )
-                .first()
-            )
+            predecessor = LegacyImportBatch.objects.filter(
+                run=run,
+                source_table=source_table,
+                sequence=sequence - 1,
+            ).first()
             if predecessor is None:
                 raise LegacyBatchConflictError("legacy_batch_predecessor_missing")
             if predecessor.entity_type != entity_type:
@@ -181,15 +182,11 @@ def record_batch(
                 raise LegacyBatchConflictError("legacy_batch_contract_changed")
             if first_legacy_pk <= predecessor.last_legacy_pk:
                 raise LegacyBatchConflictError("legacy_batch_pk_overlap")
-        elif (
-            LegacyImportBatch.objects.select_for_update()
-            .filter(
-                run=run,
-                source_table=source_table,
-                sequence__lt=sequence,
-            )
-            .exists()
-        ):
+        elif LegacyImportBatch.objects.filter(
+            run=run,
+            source_table=source_table,
+            sequence__lt=sequence,
+        ).exists():
             raise LegacyBatchConflictError("legacy_batch_sequence_conflict")
 
         previous_chain_digest = predecessor.chain_digest if predecessor else ""
@@ -212,15 +209,11 @@ def record_batch(
         values["chain_digest"] = _chain_digest(run=run, values=values)
         expected = values
 
-        existing = (
-            LegacyImportBatch.objects.select_for_update()
-            .filter(
-                run=run,
-                source_table=source_table,
-                sequence=sequence,
-            )
-            .first()
-        )
+        existing = LegacyImportBatch.objects.filter(
+            run=run,
+            source_table=source_table,
+            sequence=sequence,
+        ).first()
         if existing is not None:
             if _batch_snapshot(existing) == expected:
                 return existing

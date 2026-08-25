@@ -12,6 +12,8 @@ from apps.legacy_import.services import rehearsal_contracts as contracts
 from apps.legacy_import.services.field_contracts import STUDENT_IDENTITY_FIELDS, compile_safe_projection
 from apps.legacy_import.services.ledger import LedgerAction, TargetValidation
 from apps.legacy_import.services.rehearsal_authorizer import (
+    ORG_UNIT_MODEL_LABEL,
+    PROGRAM_MODEL_LABEL,
     USER_MODEL_LABEL,
     build_rehearsal_authorizer,
     build_target_validators,
@@ -156,7 +158,56 @@ def test_phase_registry_fingerprint_is_pinned():
     registry = load_rehearsal_phase_registry()
 
     assert compute_phase_registry_fingerprint(registry) == contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
-    assert [phase.phase_key for phase in registry] == ["identity_cohort"]
+    assert [phase.phase_key for phase in registry] == [
+        "academic_structure",
+        "identity_cohort",
+        "student_placement",
+    ]
+    # Structure before identity before placement, strictly ascending; placement
+    # accounts for no source table at all (D-2).
+    assert [phase.order for phase in registry] == [10, 20, 25]
+    assert [tuple(phase.source_tables) for phase in registry] == [
+        ("departments", "speciality", "groups"),
+        ("students", "workers"),
+        (),
+    ]
+
+
+def test_registry_rejects_a_second_claim_on_students_beside_the_identity_phase():
+    """A derived phase must not re-claim a table the identity phase accounts for."""
+
+    from apps.legacy_import.services.rehearsal_identity_phase import IdentityCohortPhase
+
+    plan = load_legacy_table_plan()
+    double_claim = _StubPhase(
+        phase_key="student_placement",
+        order=25,
+        source_tables=("students",),
+        entity_types=("student_placement",),
+    )
+
+    with pytest.raises(LegacyRehearsalConfigError) as exc_info:
+        validate_rehearsal_phases((IdentityCohortPhase(), double_claim), plan=plan)
+
+    assert exc_info.value.code == "legacy_rehearsal_phase_table_conflict"
+
+
+def test_registry_accepts_a_batch_less_phase():
+    """``source_tables = ()`` means ACCOUNTS FOR nothing, not READS nothing."""
+
+    plan = load_legacy_table_plan()
+    derived = _StubPhase(
+        phase_key="student_placement",
+        order=25,
+        source_tables=(),
+        entity_types=("student_placement",),
+        declared_rows=0,
+    )
+
+    validated = validate_rehearsal_phases((derived,), plan=plan)
+
+    assert validated == (derived,)
+    assert derived.declared_source_rows(plan) == 0
 
 
 @pytest.mark.parametrize(
@@ -509,12 +560,14 @@ def test_authorizer_allows_superadmin_without_membership(django_user_model):
 
 
 @pytest.mark.django_db
-def test_target_validators_expose_only_the_user_model_and_require_tenant_ownership(django_user_model):
+def test_target_validators_expose_only_allowlisted_models_and_require_tenant_ownership(django_user_model):
     organization, _owner = _make_organization(django_user_model, "target")
     other_organization, _other_owner = _make_organization(django_user_model, "target-foreign")
     validators = build_target_validators()
 
-    assert tuple(validators) == (USER_MODEL_LABEL,)
+    # The registry is a closed, code-owned allowlist: a target model that is not
+    # listed here can never be bound to a ledger row.
+    assert tuple(validators) == (USER_MODEL_LABEL, ORG_UNIT_MODEL_LABEL, PROGRAM_MODEL_LABEL)
 
     member = django_user_model.objects.create_user(
         username="rehearsal-target-member",

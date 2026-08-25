@@ -13,10 +13,14 @@ from django.apps import apps as django_apps
 
 from core.permissions import has_permission, is_superadmin_user
 
-from .ledger import LedgerAction, LedgerAuthorizer, TargetValidation, TargetValidatorRegistry
+from .ledger import LedgerAction, LedgerAuthorizer, TargetValidation, TargetValidator, TargetValidatorRegistry
 
 LEDGER_PERMISSION = "member.invite"  # the gate identity_access._assert_tenant_permission uses
+# Every label is lower-case app_label.model_name so it satisfies
+# ``models.MODEL_LABEL_PATTERN``; the ledger stores the label verbatim.
 USER_MODEL_LABEL = "auth.user"  # settings.AUTH_USER_MODEL default; matches MODEL_LABEL_PATTERN
+ORG_UNIT_MODEL_LABEL = "organizations.orgunit"
+PROGRAM_MODEL_LABEL = "registrar.program"
 
 
 def build_rehearsal_authorizer() -> LedgerAuthorizer:
@@ -47,8 +51,27 @@ def build_rehearsal_authorizer() -> LedgerAuthorizer:
     return authorize
 
 
+def _tenant_owned_validator(app_label: str, model_name: str) -> TargetValidator:
+    """Validator for a target that carries its own ``organization`` column.
+
+    A malformed primary key makes ``.filter()`` raise, which
+    ``ledger._target_validation`` converts into ``legacy_target_validation_failed``
+    — fail closed by design, never a silent "not found".
+    """
+
+    def validate(*, target_pk: str, organization: Any) -> TargetValidation:
+        model = django_apps.get_model(app_label, model_name)
+        row = model._default_manager.filter(pk=target_pk).values("organization_id").first()
+        return TargetValidation(
+            exists=row is not None,
+            organization_matches=row is not None and str(row["organization_id"]) == str(organization.pk),
+        )
+
+    return validate
+
+
 def build_target_validators() -> TargetValidatorRegistry:
-    """Return the single allowlisted target model and its tenant validator."""
+    """Return the allowlisted target models and their tenant validators."""
 
     def validate_user(*, target_pk: str, organization: Any) -> TargetValidation:
         user_model = django_apps.get_model("auth", "User")
@@ -61,4 +84,10 @@ def build_target_validators() -> TargetValidatorRegistry:
         )
         return TargetValidation(exists=exists, organization_matches=owned)
 
-    return MappingProxyType({USER_MODEL_LABEL: validate_user})
+    return MappingProxyType(
+        {
+            USER_MODEL_LABEL: validate_user,
+            ORG_UNIT_MODEL_LABEL: _tenant_owned_validator("organizations", "OrgUnit"),
+            PROGRAM_MODEL_LABEL: _tenant_owned_validator("registrar", "Program"),
+        }
+    )

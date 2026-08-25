@@ -107,7 +107,9 @@ def test_command_emits_single_line_sorted_json(command_environment, monkeypatch)
     document = json.loads(output)
     assert document == _PLAN_PAYLOAD
     assert output.strip() == json.dumps(document, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
-    assert captured["policy"].phase_keys == ("identity_cohort",)
+    # No ``--phase`` was passed, so the policy defaults to the WHOLE attested
+    # registry; ``RehearsalPolicy`` sorts the keys, hence the alphabetical order.
+    assert captured["policy"].phase_keys == ("academic_structure", "identity_cohort", "student_placement")
     assert captured["policy"].email_trust_manifest_digest == ""
     assert captured["organization"].slug == _SLUG
     assert captured["actor"].username == _ACTOR
