@@ -73,6 +73,7 @@ from .rehearsal_sar_targets import (
     write_issues,
 )
 from .rehearsal_structure_phase import STRUCTURE_PHASE_KEY, probe_cancellation
+from .rehearsal_worker_targets import WORKER_MATERIALISATION_ENTITY_TYPE, migrated_observation_count
 from .source_extraction import open_audited_source_stream
 
 SAR_PHASE_KEY = "sar_materialisation"
@@ -299,7 +300,10 @@ class SarMaterialisationPhase:
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
         state_counts: Counter[str] = Counter()
         issue_counts: Counter[tuple[str, str]] = Counter()
-        activated = 0
+        # V-25: ``max_activated_accounts`` worker+SAR aktivasiyalarının CƏMİNƏ
+        # şamildir — worker fazası (order 26) bu run-da nə istehlak edibsə,
+        # büdcə oradan başlayır (SA-5 semantikası pozulmur).
+        activated = migrated_observation_count(context, WORKER_MATERIALISATION_ENTITY_TYPE)
         for legacy_pk, row in student_rows(context):
             legacy_pk_text = str(legacy_pk)
             if legacy_pk_text not in indexes.students:

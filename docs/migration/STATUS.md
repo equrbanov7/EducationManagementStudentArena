@@ -102,6 +102,7 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M5.3 | `UserProfile.fin` sahəsi | VERIFIED | `core/validators.py` (`normalize_fin`/`validate_fin`, `^[A-Z0-9]{7}$`) + mig `accounts 0014` — nullable-unique, **qlobal** (milli identifikator semantikası), admin `list_display`/`search_fields`-də. SQLite 10 test yaşıl; staged profildə yazıla bilməsi və unikallıq PostgreSQL sübutu (§8/10) gözləyir |
 | M5.4 | `academic_catalog` fazası (order 12) | VERIFIED | `lessons` (2,521) + `curricula` (126) + `curricula_plan` (3,424) = **6,071 sətir** → `Subject`/`Curriculum`/`CurriculumSubject`. Fənn şəxsiyyəti `lessons.id`-dir (V-6: `lesson_code` 145 fərqli dəyərlə 2,521 sətri örtür, «37» tək başına 1,975 ad daşıyır) — `Subject.code` HƏMİŞƏ `MYEDU-L{id}` sintez olunur; dedup `(ad, department_id)` üzrə, qalib ən kiçik id, uduzan sətir yenə öz batch-sayılan map-ını alır (E-4, C4 dəqiq qalır). `curricula_plan.lesson_id` JSON massivdir (V-8) və **hər elementi genişlənir** (V-14: canlı 883/3,424 sətir çoxelementlidir) — hər uğurlu element üçün bir `CurriculumSubject`, map ilk sətrə baxır. Semestr sxemi siyasətdir və default **ORDINAL**-dır (V-13). 23 issue kodu, heç biri ERROR deyil (E-13). SQLite yaşıl; PG tam suite **4,415 pass / 0 fail** (§10/10 daxil) və real-mənbə beş-fazalı konformans (aşağıda) yaşıl |
 | M5.5 | `sar_materialisation` fazası (order 28) | VERIFIED | `source_tables=()` — ikinci batch-siz derived faza; `student_placement`-in möhürlədiyi qərarı `StudentAcademicRecord`-a çevirir. Aktivasiya körpüsü (`apps.accounts.public.activate_staged_account`, reason `signed_authoritative_export`) və SAR yazısı **bir `transaction.atomic()`** içindədir (P-B / E-9), açar isə `--stage-and-activate` (default **False**) + `--max-activated-accounts` (default **0**) — hər ikisi `policy_digest`-dədir, ona görə hesablara toxunan run heç vaxt toxunmayanla eyni `transform_version`-i paylaşa bilmir (SA-5). Aktivasiyadan dərhal sonra `email_verified=False` + `password_change_required=True` (E-11) — legacy email bərpa üçün yararsız olur. V-18: `students.azadedildi=1` (canlı ~200 nəfər) siyasətdən ASILI OLMAYARAQ `departed` → SKIPPED + `legacy_sar_departed_student`. 10 issue kodu. SQLite yaşıl; PG tam suite **4,415 pass / 0 fail** (§10/8-9, 11-13 daxil), real-mənbə determinizm testi yaşıl, Rehearsal #5 real dump-da SUCCEEDED |
+| M5.6 | `worker_materialisation` fazası (order 26) | VERIFIED | 715 staged işçi hesabı: Membership.scope_unit = öz kafedrasının OrgUnit-i (`myedu-dep-{id}`, yalnız NULL→dəyər) + aktivasiya körpüsü — scope+aktivasiya+E-11 bir `transaction.atomic()`-də; kap worker+SAR CƏMİnə şamil (SA-5). V-23: `teacher_type`/`inzibati` YALNIZ INFO — rol yüksəltmə yoxdur (RİM əl qərarı). Registry pin `71f2001f8e2f…` (6 faza). SQLite 1,605; PG tam suite 4,443/0; mariadb 6-fazalı determinizm yaşıl |
 
 ## Qorunan mövcud user materialları
 
@@ -194,6 +195,24 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - domain adapteri aktiv deyil və mövcud domen datasına yazı edilməyib.
 
 ## Dəyişiklik jurnalı
+
+### 27 avqust 2026 — DİLİM 3A: worker_materialisation + «Qruplar» icazə açarları
+
+- Yeni `worker_materialisation` fazası (order 26, derived) — M5.6 sətrinə bax.
+  Registry pin `964bd7a5…` → `71f2001f8e2f…` (6 faza; order 30 sillabusa rezerv).
+- Sübutlar: SQLite 1,605 pass; tam PG suite **4,443 pass / 0 fail**; mariadb
+  6-fazalı determinizm testi yaşıl. İlk mariadb icrasında tapılan «0 scoped»
+  uğursuzluğu MƏHSUL deyildi: testin Membership assert-i qlobal-vəziyyət
+  təmizliyindən (myedu.* silinməsi, kaskadla üzvlüklər) SONRA yerləşdirilmişdi —
+  imtina-tutucusuz diaqnostik keçid pipeline-ın qüsursuzluğunu sübut etdi,
+  assert run-1-dən dərhal sonraya köçürüldü (test-sıra insidenti sənədləşdi).
+- Paralel commit (b2a152c4): rol-əsaslı «Qruplar» icazə açarları —
+  `group.view`/`group.manage` kataloqda, bütün açarlara AZ etiket, qrup qapısı
+  icazə-əsaslı, 0028 seed miqrasiyası köhnə org_admin-ekvivalent davranışı
+  eynilə qoruyur (heç kim imkan itirmir/qazanmır). Fokus dəstlər 466 pass.
+- İstifadəçi jurnal qərarları (V1/V9/V10/V11/V14) qəbul edildi — ən önəmlisi:
+  legacy `ie` = «iştirak edir» (present), boş hüceyrə = qeyd yoxdur. J0–J3
+  alt-dilim speki yazıldı (dövr/açılış/yazılış/dərs).
 
 ### 26 avqust 2026 — SLICE 2 PG təsdiqi + Rehearsal #5 (aktivasiyalı)
 

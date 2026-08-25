@@ -55,7 +55,7 @@ from apps.legacy_import.services.rehearsal_orchestrator import execute_rehearsal
 from apps.legacy_import.services.rehearsal_target_guard import TargetGuardAttestation
 from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256, load_legacy_table_plan
 from apps.legacy_import.tests.test_rehearsal_identity_phase import _plan
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 pytestmark = [pytest.mark.mariadb, pytest.mark.postgres, pytest.mark.django_db]
@@ -363,12 +363,13 @@ _STRUCTURE_SOURCE_ROWS = _DEPARTMENT_ROWS + _SPECIALITY_ROWS + _GROUP_ROWS  # 88
 _CATALOG_SOURCE_ROWS = _LESSON_ROWS + _CURRICULUM_ROWS + _PLAN_ROWS  # 6 071
 _IDENTITY_SOURCE_ROWS = _FULL_STUDENT_ROWS + _FULL_WORKER_ROWS  # 8 545
 _FULL_SOURCE_ROWS = _STRUCTURE_SOURCE_ROWS + _CATALOG_SOURCE_ROWS + _IDENTITY_SOURCE_ROWS
-# Registry order, not alphabetical: 10 < 12 < 20 < 25 < 28.
+# Registry order, not alphabetical: 10 < 12 < 20 < 25 < 26 < 28.
 _FULL_PHASE_KEYS = (
     "academic_structure",
     "academic_catalog",
     "identity_cohort",
     "student_placement",
+    "worker_materialisation",
     "sar_materialisation",
 )
 # Only this many identities are trusted, so exactly this many accounts stage and
@@ -388,7 +389,8 @@ _INT_COLUMNS = {
     "curricula_plan": ("curricula_id", "lesson_before_id"),
     # V-18: ``azadedildi`` is read through STUDENT_STATUS_FIELDS with ``_legacy_int``.
     "students": ("group_id", "speciality_id", "azadedildi"),
-    "workers": ("department_id",),
+    # V-22..V-23: ``teacher_type``/``inzibati`` da canlı dump-da ``int``-dir.
+    "workers": ("department_id", "teacher_type", "inzibati"),
 }
 # C-2: ``kredit`` and every ``saat_*`` must arrive as a Python ``float`` — the
 # catalogue transform raises ``legacy_rehearsal_source_value_type_unsupported``
@@ -601,6 +603,10 @@ def _worker_values(legacy_pk):
         "department_id": ((legacy_pk - 1) % 27) + 1,
         "first_name": f"İşçi{legacy_pk}",
         "last_name": f"Soyad{legacy_pk}",
+        # V-23: rol qərarına çevrilməyən mənbə faktları — 1..3 həmişə tanınır,
+        # ``inzibati == 1`` yalnız INFO bayrağı doğurur.
+        "teacher_type": ((legacy_pk - 1) % 3) + 1,
+        "inzibati": 1 if legacy_pk % 5 == 0 else 0,
     }
 
 
@@ -742,6 +748,16 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
 
         first = execute_rehearsal(rehearsal_ordinal=1, organization=first_organization, actor=first_actor, **arguments)
 
+        # V-24 scope yazısı DB-də: bu assert MÜTLƏQ qlobal-vəziyyət bərpasından
+        # (aşağıdakı myedu.* silinməsi — kaskadla Membership-ləri də aparır)
+        # ƏVVƏL yoxlanmalıdır, əks halda həmişə 0 görər (2026-08-27 insidenti).
+        assert (
+            Membership.objects.filter(
+                organization=first_organization, user__username__startswith="myedu.worker.", scope_unit__isnull=False
+            ).count()
+            == _TRUSTED_WORKERS
+        )
+
         # QLOBAL VƏZİYYƏTİN BƏRPASI (2026-08-26 determinizm insidenti): staging
         # QLOBAL auth_user-ə yazır; iki-tenant-eyni-DB yaxınlaşması yalnız
         # qlobal-yazısız siyasətlərdə keçərlidir.  Real istehsalda D5 hər
@@ -764,10 +780,10 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
 
         # 1) The whole registry ran, in its fixed ascending order.
         assert [phase["phase_key"] for phase in first_document["deterministic"]["phases"]] == list(_FULL_PHASE_KEYS)
-        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == [10, 12, 20, 25, 28]
+        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == [10, 12, 20, 25, 26, 28]
 
         # 2) The real accounting totals — 880 structure rows + 6 071 catalogue
-        #    rows + 8 545 identity rows; the two batch-less derived phases
+        #    rows + 8 545 identity rows; the three batch-less derived phases
         #    contribute exactly 0 each.
         assert first_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS == 15_496
         observed = {
@@ -778,6 +794,7 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "academic_catalog": 6_071,
             "identity_cohort": 8_545,
             "student_placement": 0,
+            "worker_materialisation": 0,
             "sar_materialisation": 0,
         }
 
@@ -812,6 +829,21 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             phase for phase in first_document["deterministic"]["phases"] if phase["phase_key"] == "sar_materialisation"
         )
         assert sum(sar["state_counts"].values()) == _TRUSTED_STUDENTS
+        # V-22/V-25: the worker pass derived one decision per staged worker and,
+        # with the activation switch off, wrote ONLY the department scope —
+        # every decision is a deferral and no account was touched.
+        worker_phase = next(
+            phase
+            for phase in first_document["deterministic"]["phases"]
+            if phase["phase_key"] == "worker_materialisation"
+        )
+        assert sum(worker_phase["state_counts"].values()) == _TRUSTED_WORKERS
+        assert worker_phase["state_counts"].get("worker_materialised", 0) == 0
+        assert set(worker_phase["state_counts"]) <= {"worker_materialised", "worker_deferred", "worker_unresolved"}
+        # V-24: hazırkı dump-da hər worker department-i mövcuddur — 0 unresolved.
+        assert histogram.get(("legacy_worker_department_unresolved", "warning"), 0) == 0
+        # V-23: ``inzibati == 1`` yalnız INFO bayrağıdır, rol yüksəltmə yoxdur.
+        assert histogram.get(("legacy_worker_administrative_flag", "info"), 0) >= 1
         # ``stage_and_activate`` defaults to False, so nothing was created and
         # the deferral is silent by design — every decision is a deferral.
         assert sar["state_counts"].get("sar_created", 0) == 0
@@ -853,7 +885,9 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         activating_arguments = {
             **arguments,
             "report_dir": str(activation_report_dir),
-            "policy": _full_policy(stage_and_activate=True, max_activated_accounts=_TRUSTED_STUDENTS),
+            "policy": _full_policy(
+                stage_and_activate=True, max_activated_accounts=_TRUSTED_STUDENTS + _TRUSTED_WORKERS
+            ),
         }
         third = execute_rehearsal(
             rehearsal_ordinal=1, organization=third_organization, actor=third_actor, **activating_arguments
@@ -868,10 +902,22 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         )
         assert sum(third_sar["state_counts"].values()) == _TRUSTED_STUDENTS
         assert third_sar["state_counts"].get("sar_created", 0) >= 1
+        # V-25: worker fazası (order 26) EYNİ kap büdcəsindən əvvəl içir; kap
+        # cəmə bərabər olduğundan hər iki qrup tam aktivləşir.
+        third_worker = next(
+            phase
+            for phase in third_document["deterministic"]["phases"]
+            if phase["phase_key"] == "worker_materialisation"
+        )
+        assert sum(third_worker["state_counts"].values()) == _TRUSTED_WORKERS
+        assert third_worker["state_counts"].get("worker_materialised", 0) >= 1
         # E-11: activation asserts the registry, never the address — the legacy
         # email is neutralised in the very same transaction.
         activated = get_user_model().objects.filter(username__startswith="myedu.", is_active=True)
-        assert activated.count() == third_sar["state_counts"]["sar_created"]
+        assert (
+            activated.count()
+            == third_sar["state_counts"]["sar_created"] + third_worker["state_counts"]["worker_materialised"]
+        )
         assert activated.filter(profile__email_verified=True).exists() is False
         assert activated.filter(profile__password_change_required=False).exists() is False
         assert AccountActivationEvidence.objects.filter(organization=third_organization).count() == activated.count()
