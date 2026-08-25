@@ -20,7 +20,7 @@ from apps.legacy_import.services.field_contracts import (
     STUDENT_STATUS_FIELDS,
     is_credential_field,
 )
-from apps.legacy_import.services.ledger import create_run, start_run, upsert_entity_map
+from apps.legacy_import.services.ledger import TargetValidation, create_run, start_run, upsert_entity_map
 from apps.legacy_import.services.rehearsal_authorizer import (
     CURRICULUM_MODEL_LABEL,
     ORG_UNIT_MODEL_LABEL,
@@ -59,6 +59,7 @@ from apps.legacy_import.services.rehearsal_sar_targets import (
     sar_derivation_hash,
 )
 from apps.legacy_import.services.rehearsal_structure_phase import GROUP_ENTITY_TYPE
+from apps.legacy_import.services.rehearsal_worker_targets import WORKER_MATERIALISATION_ENTITY_TYPE
 from apps.legacy_import.services.source_extraction import (
     _AUDITED_CONTRACTS,
     LegacyDiscoveredTable,
@@ -826,6 +827,45 @@ def test_the_activation_cap_defers_every_row_beyond_it(sar_actor):
     assert StudentAcademicRecord.objects.count() == 2
     assert _issues(run)[("3", "legacy_sar_activation_cap_reached")] == "warning"
     assert _issues(run)[("4", "legacy_sar_activation_cap_reached")] == "warning"
+
+
+@pytest.mark.django_db
+def test_worker_activations_consume_the_shared_cap_before_any_student(sar_actor):
+    """V-25: ``max_activated_accounts`` worker+SAR aktivasiyalarının CƏMİdir.
+
+    Worker fazası (order 26) SAR-dan əvvəl işləyir; onun bu run-da istehlak
+    etdiyi büdcə SAR sayğacının başlanğıc nöqtəsidir.
+    """
+
+    actor = sar_actor
+    organization = _organization(actor, "sar-shared-cap")
+    policy = _policy(max_activated_accounts=2)
+    rows = _cohort_rows()
+    run = _running_run(organization, actor, policy=policy, plan=_plan(len(rows)))
+    _seed_structure(organization, actor, run.pk)
+    _stage_students(organization, actor, run.pk, _STAGED_PKS)
+    _seed_placements(organization, actor, run.pk)
+    # Worker fazasının aktivləşdirdiyi bir işçi — MIGRATED müşahidə
+    # validatordan keçməlidir, ona görə icazəli stub veririk.
+    upsert_entity_map(
+        run_id=run.pk,
+        actor=actor,
+        authorize=_allow,
+        entity_type=WORKER_MATERIALISATION_ENTITY_TYPE,
+        legacy_pk="901",
+        source_row_hash=_seed_hash("worker:901"),
+        state=LegacyEntityMap.State.MIGRATED,
+        target_model_label=USER_MODEL_LABEL,
+        target_pk="00000000-0000-0000-0000-000000000901",
+        target_validators={USER_MODEL_LABEL: lambda **_kwargs: TargetValidation(True, True)},
+    )
+
+    report = SarMaterialisationPhase().run(_seeded_context(organization, actor, run, policy=policy))
+
+    # 2 yerin 1-i worker tərəfindən içilib: yalnız 1 tələbə aktivləşir.
+    assert dict(report.state_counts) == {"sar_created": 1, "sar_deferred": 6}
+    assert StudentAcademicRecord.objects.count() == 1
+    assert _issues(run)[("2", "legacy_sar_activation_cap_reached")] == "warning"
 
 
 @pytest.mark.django_db

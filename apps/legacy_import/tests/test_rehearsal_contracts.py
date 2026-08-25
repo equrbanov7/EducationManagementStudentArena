@@ -166,26 +166,35 @@ def test_phase_registry_fingerprint_is_pinned():
     registry = load_rehearsal_phase_registry()
 
     assert compute_phase_registry_fingerprint(registry) == contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
+    # The pin is hardened HERE as a literal on purpose: a registry change must
+    # update BOTH the constant and this line consciously (SLICE 3A gate 5).
+    assert (
+        contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
+        == "71f2001f8e2f43cdb64c2a3f7a0d739deb7bef5aafd359171eda2d9d5ca9c0d8"
+    )
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
         "academic_catalog",
         "identity_cohort",
         "student_placement",
+        "worker_materialisation",
         "sar_materialisation",
     ]
     # Structure (supplies Program) before the catalogue that resolves against
-    # it, before identity, before placement, before the record that needs all
-    # four — strictly ascending, with 30 left free for the syllabus domain.
-    # Both derived phases account for no source table at all (D-2 / E-2).
-    assert [phase.order for phase in registry] == [10, 12, 20, 25, 28]
+    # it, before identity, before placement, before the worker scope pass, and
+    # before the record that needs all of them — strictly ascending, with 30
+    # left free for the syllabus domain.  Every derived phase accounts for no
+    # source table at all (D-2 / E-2 / V-22).
+    assert [phase.order for phase in registry] == [10, 12, 20, 25, 26, 28]
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
         ("lessons", "curricula", "curricula_plan"),
         ("students", "workers"),
         (),
         (),
+        (),
     ]
-    # The five-phase run accounts for exactly 880 + 6 071 + 8 545 source rows.
+    # The six-phase run accounts for exactly 880 + 6 071 + 8 545 source rows.
     assert sum(phase.declared_source_rows(load_legacy_table_plan()) for phase in registry) == 15_496
 
 
