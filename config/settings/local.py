@@ -237,6 +237,13 @@ if LEGACY_MARIADB_SOURCE_ATTEST_ENABLED:
     LEGACY_MARIADB_SOURCE_READ_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_READ_TIMEOUT", "60")
     LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT", "10")
 
+# The rehearsal orchestrator refuses to touch a target database without this
+# explicit opt-in; the sentinel string mirrors the MariaDB disposable flag.
+# Provision the target with:
+#   CREATE DATABASE emsarena_rehearsal_<12hex>;
+#   ALTER DATABASE emsarena_rehearsal_<12hex> SET emsarena.rehearsal_target = 'disposable';
+LEGACY_REHEARSAL_TARGET_DISPOSABLE = os.getenv("LEGACY_REHEARSAL_TARGET_DISPOSABLE", "") == "disposable-local-only"
+
 # Browsers silently ignore Cross-Origin-Opener-Policy when the page is served
 # over plain HTTP (the "untrustworthy origin" warning in DevTools), so we
 # drop the header in local dev to keep the console clean. Production still

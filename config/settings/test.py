@@ -145,6 +145,13 @@ if LEGACY_MARIADB_SOURCE_ATTEST_ENABLED:
     LEGACY_MARIADB_SOURCE_READ_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_READ_TIMEOUT", "60")
     LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT", "10")
 
+# The rehearsal orchestrator refuses to touch a target database without this
+# explicit opt-in; the sentinel string mirrors the MariaDB disposable flag.
+# Provision the target with:
+#   CREATE DATABASE emsarena_rehearsal_<12hex>;
+#   ALTER DATABASE emsarena_rehearsal_<12hex> SET emsarena.rehearsal_target = 'disposable';
+LEGACY_REHEARSAL_TARGET_DISPOSABLE = os.getenv("LEGACY_REHEARSAL_TARGET_DISPOSABLE", "") == "disposable-local-only"
+
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 # Use PostgreSQL for tests to match the production environment.
