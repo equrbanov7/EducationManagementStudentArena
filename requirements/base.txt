@@ -8,8 +8,8 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # CORE DJANGO
 # ═══════════════════════════════════════════════════════════════════════════
-Django==5.2.16  # security: PYSEC-2026-2090/2091/2092 (cache-vary cookie leak, header injection, GDALRaster over-read)
-sqlparse==0.5.4
+Django==5.2.17  # security: PYSEC-2026-3717 (+ əvvəlki 2090/2091/2092)
+sqlparse==0.6.0  # security: PYSEC-2026-3696..3699
 asgiref==3.11.0
 tzdata==2025.2
 typing_extensions==4.15.0
