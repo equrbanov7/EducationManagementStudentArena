@@ -166,6 +166,20 @@ def _legacy_int(value: object) -> int:
     return value
 
 
+def group_admission_year(value: object) -> tuple[int | None, tuple[str, ...]]:
+    """MySQL ``YEAR(4)``: 0 is the NOT-NULL "no value" sentinel (§4.4).
+
+    Public because the catalogue phase re-reads ``groups.start_year`` to back
+    ``Curriculum.admission_year``; one implementation is what keeps the two
+    phases from drifting apart on the same column.
+    """
+
+    year = _legacy_int(value) or None
+    if year is not None and not MIN_ADMISSION_YEAR <= year <= MAX_ADMISSION_YEAR:
+        return None, ("legacy_group_start_year_invalid",)
+    return year, ()
+
+
 def _named(value: object, legacy_pk: int, *, fallback: str, rule_codes: list[str]) -> str:
     name, truncated = clean_text(value, max_length=_NAME_MAX_LENGTH)
     if not name:
@@ -236,11 +250,8 @@ def _group(legacy_pk: int, row) -> SourceGroup:
     if not degree_level:
         degree_level = DEFAULT_DEGREE_LEVEL
         rule_codes.append("legacy_group_degree_level_defaulted")
-    # MySQL YEAR(4) arrives as int; 0 is the NOT-NULL "no value" sentinel.
-    admission_year = _legacy_int(row["start_year"]) or None
-    if admission_year is not None and not MIN_ADMISSION_YEAR <= admission_year <= MAX_ADMISSION_YEAR:
-        rule_codes.append("legacy_group_start_year_invalid")
-        admission_year = None
+    admission_year, year_rules = group_admission_year(row["start_year"])
+    rule_codes.extend(year_rules)
     return SourceGroup(
         legacy_pk=legacy_pk,
         source_row_hash=source_row_hash(contract=GROUP_STRUCTURE_FIELDS, legacy_pk=legacy_pk, projected_row=row),
@@ -337,4 +348,5 @@ __all__ = [
     "SourceSpeciality",
     "StructureCohort",
     "build_structure_cohort",
+    "group_admission_year",
 ]

@@ -21,6 +21,10 @@ LEDGER_PERMISSION = "member.invite"  # the gate identity_access._assert_tenant_p
 USER_MODEL_LABEL = "auth.user"  # settings.AUTH_USER_MODEL default; matches MODEL_LABEL_PATTERN
 ORG_UNIT_MODEL_LABEL = "organizations.orgunit"
 PROGRAM_MODEL_LABEL = "registrar.program"
+SUBJECT_MODEL_LABEL = "registrar.subject"
+CURRICULUM_MODEL_LABEL = "registrar.curriculum"
+CURRICULUM_SUBJECT_MODEL_LABEL = "registrar.curriculumsubject"
+STUDENT_RECORD_MODEL_LABEL = "registrar.studentacademicrecord"
 
 
 def build_rehearsal_authorizer() -> LedgerAuthorizer:
@@ -89,5 +93,9 @@ def build_target_validators() -> TargetValidatorRegistry:
             USER_MODEL_LABEL: validate_user,
             ORG_UNIT_MODEL_LABEL: _tenant_owned_validator("organizations", "OrgUnit"),
             PROGRAM_MODEL_LABEL: _tenant_owned_validator("registrar", "Program"),
+            SUBJECT_MODEL_LABEL: _tenant_owned_validator("registrar", "Subject"),
+            CURRICULUM_MODEL_LABEL: _tenant_owned_validator("registrar", "Curriculum"),
+            CURRICULUM_SUBJECT_MODEL_LABEL: _tenant_owned_validator("registrar", "CurriculumSubject"),
+            STUDENT_RECORD_MODEL_LABEL: _tenant_owned_validator("registrar", "StudentAcademicRecord"),
         }
     )

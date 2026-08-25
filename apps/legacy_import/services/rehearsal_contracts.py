@@ -64,10 +64,11 @@ _CLAIMABLE_ACTIONS = frozenset(
     }
 )
 # Pinned against the shipped registry: AcademicStructurePhase (order 10),
-# IdentityCohortPhase (20), StudentPlacementPhase (25).  Re-pin ONLY by running
+# AcademicCatalogPhase (12), IdentityCohortPhase (20), StudentPlacementPhase
+# (25) and SarMaterialisationPhase (28).  Re-pin ONLY by running
 # ``compute_phase_registry_fingerprint`` over the direct tuple — never over
 # ``load_rehearsal_phase_registry``, which checks itself against this constant.
-_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "7d4dfddb9272d8473c50486482b874acd6bd0ac447e12eaf8d70077f7a4667ae"
+_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "964bd7a537b41616b874c14c2f490435a72ef72d3a5d64fe7230912b49644bdc"
 
 
 class LegacyRehearsalError(Exception):
@@ -208,6 +209,16 @@ class EmailTrustPolicy(str, Enum):
     EVIDENCE_MANIFEST = "evidence_manifest"
 
 
+class SarCurriculumFallback(str, Enum):
+    STRICT = "strict"  # no legacy curriculum ⇒ no student record at all
+    SYNTHESISE = "synthesise"  # mint ``Curriculum(program, admission_year)`` on demand
+
+
+class PlanSemesterScheme(str, Enum):
+    TERM_PAIR = "term_pair"  # payiz_N -> 2N-1, yaz_N -> 2N
+    ORDINAL = "ordinal"  # payiz_N -> N,     yaz_N -> N
+
+
 def _bounded_int(value: object, *, minimum: int, maximum: int) -> bool:
     return type(value) is int and minimum <= value <= maximum
 
@@ -240,6 +251,12 @@ class RehearsalPolicy:
     student_role_name: str
     worker_role_name: str
     stage_contact_pending: bool = False
+    stage_and_activate: bool = False
+    max_activated_accounts: int = 0
+    sar_curriculum_fallback: SarCurriculumFallback = SarCurriculumFallback.SYNTHESISE
+    # V-13: in the live dump ``payiz_N``/``yaz_N`` are ordinal semester numbers,
+    # so ORDINAL is the default and TERM_PAIR stays an explicit operator choice.
+    plan_semester_scheme: PlanSemesterScheme = PlanSemesterScheme.ORDINAL
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "phase_keys", _validated_phase_keys(self.phase_keys))
@@ -272,15 +289,32 @@ class RehearsalPolicy:
         if self.stage_contact_pending and self.max_staged_accounts == 0:
             # Düymə açıqdırsa blast-radius qapağı da açıq şəkildə verilməlidir.
             raise LegacyRehearsalConfigError("legacy_rehearsal_policy_contact_pending_invalid")
+        if type(self.stage_and_activate) is not bool:
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_invalid")
+        if not _bounded_int(self.max_activated_accounts, minimum=0, maximum=IDENTITY_COHORT_MAX_ROWS):
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_activation_invalid")
+        if self.stage_and_activate and self.max_activated_accounts == 0:
+            # Düymə açıqdırsa blast-radius qapağı da açıq şəkildə verilməlidir.
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_activation_invalid")
+        if self.max_activated_accounts > self.max_staged_accounts:
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_activation_invalid")
+        if not isinstance(self.sar_curriculum_fallback, SarCurriculumFallback):
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_curriculum_fallback_invalid")
+        if not isinstance(self.plan_semester_scheme, PlanSemesterScheme):
+            raise LegacyRehearsalConfigError("legacy_rehearsal_policy_semester_scheme_invalid")
 
     def _digest_payload(self) -> dict[str, object]:
         return {
             "batch_rows": self.batch_rows,
             "email_trust_manifest_digest": self.email_trust_manifest_digest,
             "email_trust_policy": self.email_trust_policy.value,
+            "max_activated_accounts": self.max_activated_accounts,
             "max_staged_accounts": self.max_staged_accounts,
             "phase_keys": list(self.phase_keys),
+            "plan_semester_scheme": self.plan_semester_scheme.value,
+            "sar_curriculum_fallback": self.sar_curriculum_fallback.value,
             "source_chunk_size": self.source_chunk_size,
+            "stage_and_activate": self.stage_and_activate,
             "stage_contact_pending": self.stage_contact_pending,
             "student_identifier_policy": self.student_identifier_policy.value,
             "student_role_name": self.student_role_name,
@@ -484,14 +518,23 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     """Load and fully attest the code-owned phase registry."""
 
     # Lazy: every phase module imports its types from this module.
+    from .rehearsal_catalog_phase import AcademicCatalogPhase
     from .rehearsal_identity_phase import IdentityCohortPhase
     from .rehearsal_placement_phase import StudentPlacementPhase
+    from .rehearsal_sar_phase import SarMaterialisationPhase
     from .rehearsal_structure_phase import AcademicStructurePhase
 
     plan = load_legacy_table_plan()
-    # Strictly ascending ``order``: 10 (structure) < 20 (identity) < 25 (placement).
+    # Strictly ascending ``order``: 10 structure < 12 catalog < 20 identity
+    # < 25 placement < 28 sar (30 stays reserved for the syllabus domain).
     phases = validate_rehearsal_phases(
-        (AcademicStructurePhase(), IdentityCohortPhase(), StudentPlacementPhase()),
+        (
+            AcademicStructurePhase(),
+            AcademicCatalogPhase(),
+            IdentityCohortPhase(),
+            StudentPlacementPhase(),
+            SarMaterialisationPhase(),
+        ),
         plan=plan,
     )
     if compute_phase_registry_fingerprint(phases, plan=plan) != _EXPECTED_PHASE_REGISTRY_FINGERPRINT:

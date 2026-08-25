@@ -21,6 +21,8 @@ from apps.legacy_import.services.mariadb_gateway import MariaDBSourceGatewayErro
 from apps.legacy_import.services.rehearsal_contracts import (
     LegacyRehearsalConfigError,
     LegacyRehearsalInterrupted,
+    PlanSemesterScheme,
+    SarCurriculumFallback,
 )
 from apps.legacy_import.services.source_extraction import LegacySourceExtractionCancelled
 from apps.organizations.models import Organization
@@ -108,8 +110,15 @@ def test_command_emits_single_line_sorted_json(command_environment, monkeypatch)
     assert document == _PLAN_PAYLOAD
     assert output.strip() == json.dumps(document, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
     # No ``--phase`` was passed, so the policy defaults to the WHOLE attested
-    # registry; ``RehearsalPolicy`` sorts the keys, hence the alphabetical order.
-    assert captured["policy"].phase_keys == ("academic_structure", "identity_cohort", "student_placement")
+    # registry — now five phases; ``RehearsalPolicy`` sorts the keys, hence the
+    # alphabetical order rather than the registry's ascending ``order``.
+    assert captured["policy"].phase_keys == (
+        "academic_catalog",
+        "academic_structure",
+        "identity_cohort",
+        "sar_materialisation",
+        "student_placement",
+    )
     assert captured["policy"].email_trust_manifest_digest == ""
     assert captured["organization"].slug == _SLUG
     assert captured["actor"].username == _ACTOR
@@ -233,3 +242,122 @@ def test_command_requires_a_manifest_for_the_evidence_email_policy(command_envir
             )
 
     assert str(exc_info.value) == "legacy_rehearsal_email_manifest_invalid"
+
+
+# ---------------------------------------------------------------------------
+# FAZA 3 — SLICE 2 (§3.12 / §10 item 7): the four activation-policy flags.
+# ---------------------------------------------------------------------------
+
+
+def _capturing_plan(monkeypatch):
+    captured = {}
+
+    def fake_plan(**kwargs):
+        captured.update(kwargs)
+        return dict(_PLAN_PAYLOAD)
+
+    monkeypatch.setattr(command_module, "plan_rehearsal", fake_plan)
+    return captured
+
+
+def test_slice_two_flags_default_to_the_no_account_touching_rehearsal(command_environment, monkeypatch):
+    """The first slice-2 rehearsal must prove the catalogue without activating."""
+
+    captured = _capturing_plan(monkeypatch)
+
+    with override_settings(MANAGEMENT_COMMAND_ENVIRONMENT="test"):
+        call_command("legacy_import_rehearse", *_plan_arguments(), stdout=StringIO())
+
+    policy = captured["policy"]
+    assert policy.stage_and_activate is False
+    assert policy.max_activated_accounts == 0
+    assert policy.sar_curriculum_fallback is SarCurriculumFallback.SYNTHESISE
+    # V-13: ``payiz_N``/``yaz_N`` are ordinal semester numbers in the live dump.
+    assert policy.plan_semester_scheme is PlanSemesterScheme.ORDINAL
+
+
+def test_slice_two_flags_reach_the_policy_and_bind_the_run_identity(command_environment, monkeypatch):
+    """SA-5: the four values are policy, so they change ``transform_version``."""
+
+    captured = _capturing_plan(monkeypatch)
+
+    with override_settings(MANAGEMENT_COMMAND_ENVIRONMENT="test"):
+        call_command(
+            "legacy_import_rehearse",
+            *_plan_arguments(),
+            "--stage-and-activate",
+            "--max-staged-accounts=50",
+            "--max-activated-accounts=20",
+            "--student-role-name=student",
+            "--worker-role-name=teacher",
+            "--sar-curriculum-fallback=strict",
+            "--plan-semester-scheme=term_pair",
+            stdout=StringIO(),
+        )
+        activating = captured["policy"]
+
+        call_command(
+            "legacy_import_rehearse",
+            *_plan_arguments(),
+            "--max-staged-accounts=50",
+            "--student-role-name=student",
+            "--worker-role-name=teacher",
+            "--sar-curriculum-fallback=strict",
+            "--plan-semester-scheme=term_pair",
+            stdout=StringIO(),
+        )
+        disabled = captured["policy"]
+
+    assert activating.stage_and_activate is True
+    assert activating.max_activated_accounts == 20
+    assert activating.sar_curriculum_fallback is SarCurriculumFallback.STRICT
+    assert activating.plan_semester_scheme is PlanSemesterScheme.TERM_PAIR
+    # The four values are inside ``_digest_payload``: a run that touches accounts
+    # can never share a ledger scope with one that does not.
+    assert activating.transform_version() != disabled.transform_version()
+    assert len(activating.transform_version()) <= 64
+
+
+@pytest.mark.parametrize(
+    "extra, expected",
+    [
+        # The switch without a blast-radius cap is refused before any run row.
+        (("--stage-and-activate",), "legacy_rehearsal_policy_activation_invalid"),
+        # A cap larger than the staging cap could never be honoured.
+        (
+            (
+                "--stage-and-activate",
+                "--max-activated-accounts=20",
+                "--max-staged-accounts=10",
+                "--student-role-name=student",
+                "--worker-role-name=teacher",
+            ),
+            "legacy_rehearsal_policy_activation_invalid",
+        ),
+        # Out of the argparse bound (IDENTITY_COHORT_MAX_ROWS).
+        (("--max-activated-accounts=20001",), "legacy_rehearsal_activation_cap_invalid"),
+        (("--max-activated-accounts=-1",), "legacy_rehearsal_activation_cap_invalid"),
+    ],
+)
+def test_command_refuses_an_incoherent_activation_policy(command_environment, monkeypatch, extra, expected):
+    monkeypatch.setattr(command_module, "plan_rehearsal", lambda **_kwargs: dict(_PLAN_PAYLOAD))
+
+    with override_settings(MANAGEMENT_COMMAND_ENVIRONMENT="test"):
+        with pytest.raises(CommandError) as exc_info:
+            call_command("legacy_import_rehearse", *_plan_arguments(), *extra)
+
+    assert expected in str(exc_info.value)
+    # Exit 1, never 3: nothing is resumable — no run row was ever created.
+    assert getattr(exc_info.value, "returncode", 1) == 1
+
+
+@pytest.mark.parametrize(
+    "flag",
+    ["--sar-curriculum-fallback=guess", "--plan-semester-scheme=trimester"],
+)
+def test_command_refuses_an_unknown_enum_token(command_environment, monkeypatch, flag):
+    monkeypatch.setattr(command_module, "plan_rehearsal", lambda **_kwargs: dict(_PLAN_PAYLOAD))
+
+    with override_settings(MANAGEMENT_COMMAND_ENVIRONMENT="test"):
+        with pytest.raises(CommandError):
+            call_command("legacy_import_rehearse", *_plan_arguments(), flag)

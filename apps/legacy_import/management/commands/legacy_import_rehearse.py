@@ -21,7 +21,9 @@ from apps.legacy_import.services.rehearsal_contracts import (
     MAX_BATCH_ROWS,
     EmailTrustPolicy,
     LegacyRehearsalError,
+    PlanSemesterScheme,
     RehearsalPolicy,
+    SarCurriculumFallback,
     StudentIdentifierPolicy,
     UsernamePolicy,
     load_rehearsal_phase_registry,
@@ -129,6 +131,35 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         )
         parser.add_argument("--student-role-name", default="")
         parser.add_argument("--worker-role-name", default="")
+        parser.add_argument(
+            "--stage-and-activate",
+            action="store_true",
+            help=(
+                "Staged tələbə hesablarını aktivləşdir və StudentAcademicRecord yaz "
+                "(--max-activated-accounts məcburidir)."
+            ),
+        )
+        parser.add_argument(
+            "--max-activated-accounts",
+            default=0,
+            type=_bounded_integer(
+                code="legacy_rehearsal_activation_cap_invalid",
+                minimum=0,
+                maximum=IDENTITY_COHORT_MAX_ROWS,
+            ),
+        )
+        parser.add_argument(
+            "--sar-curriculum-fallback",
+            choices=tuple(member.value for member in SarCurriculumFallback),
+            default=SarCurriculumFallback.SYNTHESISE.value,
+        )
+        # V-13: the live ``payiz_N``/``yaz_N`` tokens are ordinal semester
+        # numbers, so ORDINAL is the default here exactly as it is on the policy.
+        parser.add_argument(
+            "--plan-semester-scheme",
+            choices=tuple(member.value for member in PlanSemesterScheme),
+            default=PlanSemesterScheme.ORDINAL.value,
+        )
         parser.add_argument("--resume-run-id", default="")
         parser.add_argument("--compare-report", default="")
         parser.add_argument("--report-dir", default="")
@@ -187,6 +218,13 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             stage_contact_pending=bool(options.get("stage_contact_pending")),
             student_role_name=options["student_role_name"],
             worker_role_name=options["worker_role_name"],
+            # SA-5: all four values are inside ``policy_digest``, so a run that
+            # touched accounts can never share a ``transform_version`` with one
+            # that did not.  ``__post_init__`` refuses the switch without a cap.
+            stage_and_activate=bool(options.get("stage_and_activate")),
+            max_activated_accounts=options["max_activated_accounts"],
+            sar_curriculum_fallback=SarCurriculumFallback(options["sar_curriculum_fallback"]),
+            plan_semester_scheme=PlanSemesterScheme(options["plan_semester_scheme"]),
         )
         if options["mode"] == "plan":
             return plan_rehearsal(

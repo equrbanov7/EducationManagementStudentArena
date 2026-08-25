@@ -307,6 +307,47 @@ Bunu mümkün edən iki seam düzəlişi (2026-08-25, imza dəyişikliyi yoxdur)
   **deyil** — onlar sübutun necə *etiketləndiyini* dəyişir, fazanın nə yaza
   biləcəyini yox.
 
+FAZA 3 / SLICE 2 həmin seam-i genişləndirmədən **istifadə edir** və iki əlavə
+düzəliş gətirir (2026-08-25):
+
+- **SA-4 — `source_extraction._AUDITED_CONTRACTS` allowlist-i genişləndi.**
+  `_validate_audited_contract` kod-sahibli siyahıda olmayan hər kontraktı rədd
+  edir; siyahıya `LESSON_CATALOG_FIELDS`, `CURRICULUM_CATALOG_FIELDS`,
+  `CURRICULUM_PLAN_FIELDS` və V-18-in `STUDENT_STATUS_FIELDS`-i
+  (`students.azadedildi`) `.fingerprint` açarı ilə əlavə olundu. Additiv
+  registry genişlənməsidir — davranış dəyişikliyi yoxdur, default-deny
+  proyeksiya olduğu kimi qalır.
+- **SA-5 — `RehearsalPolicy` dörd sahə aldı** (`stage_and_activate`,
+  `max_activated_accounts`, `sar_curriculum_fallback`, `plan_semester_scheme`)
+  və hər dördü `_digest_payload()`-dadır. SLICE 1 `RehearsalPolicy`-ni «toxunulmaz»
+  siyahısına salmışdı; bu qərar qəsdən geri alınır, çünki aktivasiya qərarı, onun
+  blast-radius qapağı, kurikulum fallback-i və semestr sxemi **run şəxsiyyəti
+  daşıyan** siyasətdir. Onları modul sabitinə gizlətmək iki fərqli davranışlı
+  rehearsal-a bir `transform_version` paylaşmağa icazə verərdi. Nəticə fail-closed
+  şəkildə arzuolunandır: `policy_digest` → `transform_version` → D5 ledger scope
+  açarı dəyişir, yəni **hər mövcud rehearsal bazası yararsızdır** və köhnə
+  `LEGACY_REHEARSAL_V1_RUN{1,2}.json` artifakt-ları konstruksiyaya görə stale-dir.
+  `__post_init__` fail-closed-dur: açıq düymə + sıfır qapaq, `max_staged_accounts`-dan
+  böyük qapaq, yaxud enum əvəzinə sətir → `legacy_rehearsal_policy_activation_invalid`
+  / `…_curriculum_fallback_invalid` / `…_semester_scheme_invalid`.
+
+Registry indi **beş** fazadır və `order` ciddi artandır:
+`academic_structure` (10) → `academic_catalog` (**12**) → `identity_cohort` (20)
+→ `student_placement` (25) → `sar_materialisation` (**28**); **30** sillabus
+domeni üçün ayrılmış qalır (D-1). Pinlənmiş barmaq izi:
+`964bd7a537b41616b874c14c2f490435a72ef72d3a5d64fe7230912b49644bdc`. Yenidən
+pinləmə HƏMİŞƏ birbaşa faza tuple-ı üzərində `compute_phase_registry_fingerprint`
+ilə aparılır — `load_rehearsal_phase_registry` özünü elə həmin sabitə qarşı
+yoxladığı üçün ondan istifadə etmək dairəvi olardı.
+
+«İddia etmək = saymaq» qaydasının ikinci canlı nümunəsi `academic_catalog`-dur:
+o, `groups` cədvəlini **iddia etmədən** oxuyur (`GROUP_STRUCTURE_FIELDS` ilə),
+çünki `Curriculum.admission_year` qrupların `start_year`-ından törəyir (V-7:
+`curricula.from_date` canlı dump-da 126 sətrin hamısında boşdur). `sar_materialisation`
+isə `source_tables=()` ilə `students`-i **iki** kontraktla oxuyur — kimlik
+kontraktı və V-18-in status kontraktı. Heç biri batch zəncirinə əlavə sətir
+gətirmir: cəm hər zaman 880 + 6,071 + 8,545 = **15,496**.
+
 ### Disposable hədəf provisioning kontraktı
 
 Rehearsal yalnız təsdiqlənmiş şəkildə birdəfəlik bir PostgreSQL bazasına
@@ -483,6 +524,79 @@ izi. **Görünməyən:** qrup içindəki tələbələr — `student_search`
 `StudentAcademicRecord` oxuyur, bu dilim isə onlardan sıfır yaradır. Rehearsal-ın
 dürüst vəziyyəti budur: heç kim aktivləşdirilməyib, deməli heç kim enrol
 olunmayıb.
+
+#### M5 / SLICE 2 — `academic_catalog` + `sar_materialisation`
+
+Registry-nin ikinci domain dilimi (2026-08-25). Əhatə:
+
+- **`academic_catalog` (order 12)** — `lessons` (2,521), `curricula` (126),
+  `curricula_plan` (3,424) iddia edir; cəmi **6,071** sətir. Üç cədvəl bir
+  törəmə vahididir (E-1): `Subject.ects` `curricula_plan.kredit`-dən,
+  `Curriculum.admission_year` isə kurikuluma istinad edən `groups` sətirlərindən
+  gəlir, ona görə onları iki fazaya bölmək hədəfə lüzumsuz gediş-gəliş yaradardı.
+  - **V-6 — `lesson_code` şəxsiyyət deyil.** 2,521 sətir / 145 fərqli kod; «37»
+    tək başına 1,975 fərqli ad daşıyır. `Subject.code` HƏMİŞƏ `MYEDU-L{id}`
+    sintez olunur; legacy kod heç bir hədəf sütununa çatmır (E-3).
+  - **E-4 dedup** `(clean_text(ad).casefold(), department_id)` üzrədir, qalib ən
+    kiçik `lessons.id`-dir; uduzan sətir yenə **öz** batch-sayılan map sətrini
+    alır və qalibin `Subject`-inə baxır, ona görə C4 dəqiq 1:1 qalır.
+  - **V-8/V-14 — `curricula_plan.lesson_id` JSON massividir** və fənn linki
+    məhz odur (`lesson_code` yox). Canlı dump-da 883/3,424 (26%) sətir
+    çoxelementlidir; onlar karantinə düşmür, **genişlənir**: hər həll olunan
+    element üçün bir `CurriculumSubject`, map isə ilk yaradılan sətrə baxır
+    (`legacy_plan_lesson_reference_expanded`, info). Heç bir element həll
+    olunmursa QUARANTINED; qismən həll olunursa əlavə xəbərdarlıq.
+  - **V-13 — semestr sxemi siyasətdir.** `payiz_N`/`yaz_N` token-ləri canlı
+    mənbədə **ordinal** semestr nömrələridir (payiz yalnız tək N, yaz yalnız cüt
+    N; cəmi 7 anomal sətir), ona görə `plan_semester_scheme` default-u
+    `ORDINAL`-dır və `TERM_PAIR` açıq operator seçimi kimi qalır.
+  - **V-21 — `type` semantikası istifadəçi tərəfindən cavablandı** (nazirlik
+    fənləri məcburi; universitet fənləri seçmədir və seçimi qrup rəhbəri edir —
+    mövcud `GroupElectiveChoice` axını ilə uyğun): `^\d+\.\d+$` tokenləri
+    (2.1, 4.01–4.24) seçmə blokdur → `is_elective=True`,
+    `elective_group=token`; tam ədəd və boş → məcburi. Yalnız heç bir
+    pattern-ə düşməyən token `legacy_plan_type_unmapped` (info) verir.
+  - **V-20 — il-çıxarış zənciri**: from_date → qrup-ili → to_date−müddət
+    (bak 4 / mag 2, warning) → dated qonşu-id (warning); il-quarantine yalnız
+    tam datasız kohortda (nəzəri).
+- **`sar_materialisation` (order 28)** — `source_tables=()`; SLICE 1-in
+  möhürlədiyi yerləşdirmə qərarını `StudentAcademicRecord`-a çevirən faza.
+  - **P-B (E-9)** seçildi: tələbə başına `activate → SAR` **bir**
+    `transaction.atomic()` içindədir. Ayrıca aktivasiya komandası (P-A) run
+    modelinə struktur olaraq uyğun gəlmir — fərqli `--phase` dəsti fərqli
+    `policy_digest` → fərqli `transform_version` → fərqli ledger scope deməkdir,
+    `student_index`/`group_index` isə `run_id` üzrə süzülür.
+  - Açar default **bağlıdır**: `stage_and_activate=False` + `max_activated_accounts=0`,
+    hər ikisi `__post_init__`-də fail-closed. İlk SLICE 2 rehearsal-ı kataloqu
+    **bir hesaba belə toxunmadan** sübut edir.
+  - **B-3** (bloklayıcı kəşfin bağlanması): staged hesabların hamısı (8,431)
+    qeyri-boş legacy email daşıyır, ona görə `accounts_activate_staged_identity`-nin
+    `BTRIM(email) <> ''` şərti keçilir — B-1 **heç bir trigger, heç bir SECURITY
+    DEFINER funksiyası və heç bir accounts servisi dəyişmədən** həll olunur.
+    Qalan sual texniki deyil, ETİBAR qərarıdır.
+  - **E-11** — aktivasiyadan dərhal sonra, eyni atomik blokda,
+    `email_verified=False` + `password_change_required=True`: aktivasiya
+    «reyestr bu şəxsi tanıyır» deyir, «bu email təsdiqlidir» yox.
+  - **V-18** — `students.azadedildi=1` (canlı ~200 nəfər) sətri siyasətdən
+    ASILI OLMAYARAQ `departed` sayılır: SAR yoxdur, state SKIPPED, issue
+    `legacy_sar_departed_student` (info). Bu, siyasət deyil, **mənbə faktıdır**.
+  - **E-15** — `SAR.admission_year` NOT NULL-dur, ona görə qəbul ili törədilə
+    bilməyən tələbə (Rehearsal #4-də 2,353 nəfər) SAR almır. Bir adamın qəbul
+    ilini default-lamaq akademik faktı uydurmaqdır.
+  - **E-12/§5.5** — kurikulum matrisi M1..M6; fallback default-u `synthesise`-dir.
+    Sintetik `Curriculum(program, admission_year)` `uniq_curriculum_program_year`
+    açarı ilə **eyni** sətrə yığılır, ona görə sonradan gələn legacy plan sətri
+    onunla toqquşmur, birləşir.
+
+Tam beş-fazalı rehearsal-dan sonra görünən: fənn kataloqu (`MYEDU-L{id}`
+kodları, birmənalı olduqda ECTS), kurikulum kataloqu və semestrlər üzrə plan
+sətirləri; `--stage-and-activate` ilə isə real `StudentAcademicRecord` sətirləri,
+yəni `student_search` nəhayət qrupun içindəki tələbələri göstərir.
+**Hələ də görünməyən:** enrollment, offering və cədvəl — onlar `AcademicPeriod`
+tələb edir, o isə `smestr` (9 sətirlik lookup) dilimini gözləyir (E-14).
+**Hələ də mümkün olmayan:** giriş — aktivləşdirilmiş hesabda parol yararsızdır
+(`set_unusable_password()`), kredensial çatdırılması ayrıca qərardır (o2:
+`provision_student_credentials --generate --csv`, bu dilimdə kod yoxdur).
 
 #### M5 / Pilot
 

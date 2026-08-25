@@ -100,12 +100,16 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M5.1 | `academic_structure` fazası (order 10) | VERIFIED | `departments`/`speciality`/`groups` (880 sətir) → OrgUnit ağacı + `Program` kataloqu; topoloji valideyn həlli, legacy-açarlı slug (`myedu-dep/spec/grp-{id}`), dərəcəyə görə bir Program (`-M` magistr), 14 issue kodu. SQLite 23 test yaşıl; `-m postgres` (§8/8-9) və real-mənbə sübutu icra edilməyib |
 | M5.2 | `student_placement` fazası (order 25) | VERIFIED | `source_tables=()` — batch-siz derived faza; SA-1/SA-2 seam-ləri ilə evidence yalnız öz observation-larında və digest zəncirində yaşayır. Sıfır SAR/Curriculum (B-1/B-2); `UserProfile.fin` + boş `first_name`/`last_name` yazılır, yerləşdirmə `record_derivation_hash`-ə möhürlənir. SQLite 20 test yaşıl; `-m postgres` (§8/10) və real-mənbə sübutu icra edilməyib |
 | M5.3 | `UserProfile.fin` sahəsi | VERIFIED | `core/validators.py` (`normalize_fin`/`validate_fin`, `^[A-Z0-9]{7}$`) + mig `accounts 0014` — nullable-unique, **qlobal** (milli identifikator semantikası), admin `list_display`/`search_fields`-də. SQLite 10 test yaşıl; staged profildə yazıla bilməsi və unikallıq PostgreSQL sübutu (§8/10) gözləyir |
+| M5.4 | `academic_catalog` fazası (order 12) | VERIFIED | `lessons` (2,521) + `curricula` (126) + `curricula_plan` (3,424) = **6,071 sətir** → `Subject`/`Curriculum`/`CurriculumSubject`. Fənn şəxsiyyəti `lessons.id`-dir (V-6: `lesson_code` 145 fərqli dəyərlə 2,521 sətri örtür, «37» tək başına 1,975 ad daşıyır) — `Subject.code` HƏMİŞƏ `MYEDU-L{id}` sintez olunur; dedup `(ad, department_id)` üzrə, qalib ən kiçik id, uduzan sətir yenə öz batch-sayılan map-ını alır (E-4, C4 dəqiq qalır). `curricula_plan.lesson_id` JSON massivdir (V-8) və **hər elementi genişlənir** (V-14: canlı 883/3,424 sətir çoxelementlidir) — hər uğurlu element üçün bir `CurriculumSubject`, map ilk sətrə baxır. Semestr sxemi siyasətdir və default **ORDINAL**-dır (V-13). 23 issue kodu, heç biri ERROR deyil (E-13). SQLite yaşıl; PG tam suite **4,415 pass / 0 fail** (§10/10 daxil) və real-mənbə beş-fazalı konformans (aşağıda) yaşıl |
+| M5.5 | `sar_materialisation` fazası (order 28) | VERIFIED | `source_tables=()` — ikinci batch-siz derived faza; `student_placement`-in möhürlədiyi qərarı `StudentAcademicRecord`-a çevirir. Aktivasiya körpüsü (`apps.accounts.public.activate_staged_account`, reason `signed_authoritative_export`) və SAR yazısı **bir `transaction.atomic()`** içindədir (P-B / E-9), açar isə `--stage-and-activate` (default **False**) + `--max-activated-accounts` (default **0**) — hər ikisi `policy_digest`-dədir, ona görə hesablara toxunan run heç vaxt toxunmayanla eyni `transform_version`-i paylaşa bilmir (SA-5). Aktivasiyadan dərhal sonra `email_verified=False` + `password_change_required=True` (E-11) — legacy email bərpa üçün yararsız olur. V-18: `students.azadedildi=1` (canlı ~200 nəfər) siyasətdən ASILI OLMAYARAQ `departed` → SKIPPED + `legacy_sar_departed_student`. 10 issue kodu. SQLite yaşıl; PG tam suite **4,415 pass / 0 fail** (§10/8-9, 11-13 daxil), real-mənbə determinizm testi yaşıl, Rehearsal #5 real dump-da SUCCEEDED |
 
 ## Qorunan mövcud user materialları
 
 İlkin iş ağacında aşağıdakılar untracked idi və dəyişdirilmədi:
 
-- `docs/architecture/AKADEMIK_OS_ANALIZI.md`
+- `docs/architecture/AKADEMIK_OS_ANALIZI.md` (2026-08-25-də yalnız **əlavə**
+  olunub: sonuna «Z. Legacy idxal — modelləşdirmə boşluqları» əlavəsi;
+  mövcud mətnin heç bir sətri dəyişdirilməyib)
 - `docs/db-compare/`
 - `docs/infrastructure/`
 - `docs/workload/`
@@ -170,9 +174,11 @@ və yalnız sanitizasiya edilmiş nəticə çıxarır.
    iddia edilə bilmir. Qalan: bu iki fazanın `-m postgres` + real-mənbə sübutu
    (bax 1) və **iki yeni** rehearsal hesabatının generasiyası — köhnə RUN1/RUN2
    artifakt-ları konstruksiyaya görə stale-dir.
-6. Növbəti dilim: `curricula` (126 sətir) + aktivasiya axını, yəni
-   `StudentAcademicRecord` materiallaşdırması. O dilim bu slice-in ledger-də
-   möhürlədiyi yerləşdirmə qərarlarını **hərfi-hərfinə** istehlak edir.
+6. ~~Növbəti dilim: `curricula` + aktivasiya axını~~ — BAĞLANDI (FAZA 3 /
+   SLICE 2, M5.4-M5.5): `academic_catalog` (12) və `sar_materialisation` (28)
+   registry-dədir, barmaq izi 5 faza üçün yenidən pinlənib. Qalan: bu iki
+   fazanın `-m postgres` (§10/8-13) + real-mənbə (§10/14-15, 15,496 sətir)
+   sübutu və **iki yeni** rehearsal hesabatı.
    Syllabus version/approval modeli yekun dizayn və biznes acceptance-dan sonra
    (DESIGN_GATED qalır); runbook + yekun hesabat cutover-dən əvvəl.
 
@@ -188,6 +194,87 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - domain adapteri aktiv deyil və mövcud domen datasına yazı edilməyib.
 
 ## Dəyişiklik jurnalı
+
+### 26 avqust 2026 — SLICE 2 PG təsdiqi + Rehearsal #5 (aktivasiyalı)
+
+- Tam PG suite (postgres, ayrı DB): **4,415 pass / 0 fail / 13 skip** — bütün
+  §10 slice-2 sübutları daxil. Real-mənbə mariadb dəsti: 3/3 (o cümlədən
+  beş-fazalı determinizm testi; ilk icrada SA-5 müqayisə keçidi qəsdən fərqli
+  digest-i EYNİ hesabat faylına yazdığı üçün overwrite-qoruma onu bloklamışdı —
+  test öz keçidinə ayrıca `activation-reports/` qovluğu verməklə düzəldildi;
+  məhsul kodu dəyişmədi).
+- **Rehearsal #5** (`emsarena_rehearsal_3db8d2727a55`, real 2.14GB dump,
+  `--stage-and-activate --max-activated-accounts 20000 --stage-contact-pending`):
+  SUCCEEDED, digest `2c471169d607430f25243baf2705e84122f8601ef0e6c988723255e814ea374a`.
+  15,496 mənbə sətri → 15,118 migrated / 292 quarantined / 86 skipped.
+  Fazalar: structure 880; catalog 5,807 migrated + 264 quarantined
+  (Subject 2,501 / Curriculum 168 / CurriculumSubject 4,681, onlardan
+  **2,433 elective** — V-21); identity 8,431 staged hesab (Membership 8,431);
+  placement 7,703 deferred + 13 unresolved; SAR fazası **5,213 sar_created +
+  2,503 sar_deferred**. V-18: 199 `azadedildi` tələbə siyasətdən asılı olmayaraq
+  bloklu qaldı (`legacy_sar_departed_student`).
+- Hesab vəziyyəti (DB-də təsdiqləndi): 5,213 hesab `access_state=active` +
+  SAR eyni tranzaksiyada; hamısında `password_change_required=True`,
+  `email_verified=False`, **usable parol yoxdur** (kredensial çatdırılması —
+  o2 addımı). 3,218 hesab staged qalır: 2,503 sar_deferred (əsas səbəb
+  `legacy_record_admission_year_missing` 2,291 — FİN/qəbul-ili backfill
+  kohortu) + 715 işçi hesabı (müəllim aktivasiyası kafedra yerləşdirməsi
+  tələb edir — növbəti dilim).
+- UI təsdiqi (staging serve, superadmin): «Akademik qeydlər» kaskadı 5,213
+  tələbə göstərir; qrup filtri (məs. 132T → 17 tələbə, ixtisas «Tarix») qrup
+  İÇİNDƏ real tələbə adları ilə işləyir — dilim-1-in B-1/B-2 boşluğu bağlandı.
+  Diaqnostika tələsi: 8100 portunda köhnə DB4 serveri qalmışdı (stale-server
+  tələsi) — öldürülüb DB5 ilə yenidən qaldırıldıqdan sonra data göründü.
+- Hesabat semantikası qeydi: `totals.staged_accounts` ledger-rebuild
+  məhdudiyyətinə görə batch-fazaların migrated sayının cəmidir (determinizm
+  digest-inə daxildir, dəyişdirilməsi `DETERMINISM_VERSION` bump tələb edir);
+  HƏQİQİ hesab sayı identity fazasının `staged_account_count`-u (8,431) və
+  DB `access_state` bölgüsüdür. Arxiv: köhnə aktivasiyasız hesabat
+  `LEGACY_REHEARSAL_STAGED_V1_RUN1.json` adına köçürüldü.
+
+### 25 avqust 2026 — FAZA 3 / SLICE 2: kataloq + akademik qeyd (M5.4-M5.5)
+
+- Faza registry-si 3 fazadan **5 fazaya** genişləndi (ciddi artan `order`):
+  `academic_structure` (10) → `academic_catalog` (**12**) → `identity_cohort`
+  (20) → `student_placement` (25) → `sar_materialisation` (**28**); 30 sillabus
+  domeni üçün ayrılmış qalır. Barmaq izi yenidən pinləndi:
+  `964bd7a537b41616b874c14c2f490435a72ef72d3a5d64fe7230912b49644bdc`.
+  Run-un cəmi mənbə sətri: 880 + 6,071 + 8,545 = **15,496**.
+- İki seam düzəlişi: **SA-4** — `source_extraction._AUDITED_CONTRACTS` üç
+  kataloq kontraktı (+ V-18-in `STUDENT_STATUS_FIELDS`-i) ilə genişləndi;
+  **SA-5** — `RehearsalPolicy` dörd yeni sahə aldı (`stage_and_activate`,
+  `max_activated_accounts`, `sar_curriculum_fallback`, `plan_semester_scheme`)
+  və hər dördü `_digest_payload()`-dadır. Nəticə qəsdəndir: `policy_digest` →
+  `transform_version` → D5 ledger scope açarı dəyişir, ona görə **mövcud hər
+  rehearsal bazası yararsızdır** və `docs/migration/reports/LEGACY_REHEARSAL_V1_RUN{1,2}.json`
+  konstruksiyaya görə stale-dir — əl ilə redaktə yox, iki təzə rehearsal-dan
+  yenidən generasiya.
+- **B-3 (bloklayıcı kəşfin bağlanması):** «staged hesabların hamısı (8,431)
+  qeyri-boş legacy email daşıyır (`legacy_account_email_untrusted`), buna görə
+  `accounts_activate_staged_identity`-nin `BTRIM(email) <> ''` şərti keçilir —
+  B-1 heç bir trigger dəyişikliyi olmadan həll olunur; qalan sual texniki
+  deyil, ETİBAR qərarıdır.» Yəni bu dilim heç bir trigger-i, heç bir
+  SECURITY DEFINER funksiyasını və heç bir accounts servisini dəyişmir.
+- Yeni CLI bayraqları (§3.12): `--stage-and-activate` (cap-siz verilməsi exit 1
+  ilə `legacy_rehearsal_policy_activation_invalid`), `--max-activated-accounts`
+  (0..20,000 və ≤ `--max-staged-accounts`), `--sar-curriculum-fallback
+  {strict,synthesise}` (default `synthesise`), `--plan-semester-scheme
+  {term_pair,ordinal}` (default **`ordinal`** — V-13 canlı mənbə faktı).
+- Yeni taksonomiya: **33** issue kodu (23 kataloq + 10 SAR), 1 yeni run-fatal
+  (`legacy_rehearsal_catalog_index_ambiguous`) və 6 yeni config kodu. Hər SAR
+  kodu `legacy_sar_` prefiksi daşıyır ki, `student_placement` ilə eyni
+  `source_table="students"` altında `(run, source_table, legacy_pk, rule_code)`
+  unikallığı pozulmasın.
+- Yoxlama (yalnız SQLite, N5/V-5 qaydası ilə): `apps/legacy_import` +
+  `apps/accounts` + `apps/registrar` = **1,782 pass / 153 skip**;
+  `makemigrations --check`, `check_module_size.py --check` (SOFT_CAP=600) və
+  `module_deps.py --check` (0 yeni dövr) yaşıl.
+- `-m postgres` (§10/8-13: aktivasiyanın SAR-ı açması, boş-email rədd,
+  RLS altında kataloq yazısı, kurikulum↔proqram koherensiyası, dependent
+  evidence sonrası `program_id` dondurulması, aktiv profildə E-11 bayraqları)
+  və real-mənbə beş-fazalı konformans testi (§10/14-15, 15,496 sətir + iki
+  digest-in fərqlənməsi sübutu) sonradan icra edildi və yaşıldır — M5.4-M5.5
+  `VERIFIED`-ə keçirildi (aşağıdakı 26 avqust girişinə bax).
 
 ### 25 avqust 2026 — FAZA 3 / SLICE 1: ilk domain adapteri (M5.1-M5.3)
 

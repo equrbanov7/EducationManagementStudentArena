@@ -12,8 +12,9 @@ emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
 The second test drives the FULL FAZA 3 registry — ``academic_structure`` (31 +
-83 + 766 rows), ``identity_cohort`` (7 816 + 729) and ``student_placement`` —
-against the CANONICAL table plan, so ``totals.source_rows`` is the real 9 425.
+83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424), ``identity_cohort``
+(7 816 + 729), ``student_placement`` and ``sar_materialisation`` — against the
+CANONICAL table plan, so ``totals.source_rows`` is the real 15 496.
 """
 
 import json
@@ -22,18 +23,23 @@ import re
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
-from django.db import connection
+from django.db import DatabaseError, connection, transaction
 
 import pymysql
 import pytest
 
+from apps.accounts.identity_models import AccountActivationEvidence
 from apps.legacy_import.models import LegacyImportBatch, LegacyMigrationRun
 from apps.legacy_import.services import rehearsal_phase_a as phase_a_module
 from apps.legacy_import.services.field_contracts import (
+    CURRICULUM_CATALOG_FIELDS,
+    CURRICULUM_PLAN_FIELDS,
     DEPARTMENT_STRUCTURE_FIELDS,
     GROUP_STRUCTURE_FIELDS,
+    LESSON_CATALOG_FIELDS,
     SPECIALITY_STRUCTURE_FIELDS,
     STUDENT_IDENTITY_FIELDS,
+    STUDENT_STATUS_FIELDS,
     WORKER_IDENTITY_FIELDS,
 )
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
@@ -340,18 +346,31 @@ def test_disposable_mariadb_and_postgres_identity_rehearsal_conformance(monkeypa
 
 
 # ---------------------------------------------------------------------------
-# FAZA 3 — SLICE 1 (SPEC §8/11): the full three-phase registry against the
-# CANONICAL plan, so the accounting totals are the real ones.
+# FAZA 3 — SLICE 1 + SLICE 2 (SPEC §8/11 and §10 items 14-15): the full FIVE
+# phase registry against the CANONICAL plan, so the accounting totals are real.
 # ---------------------------------------------------------------------------
 
 _CANONICAL_PLAN = load_legacy_table_plan()
 _DEPARTMENT_ROWS = _CANONICAL_PLAN.entry_for("departments").expected_rows  # 31
 _SPECIALITY_ROWS = _CANONICAL_PLAN.entry_for("speciality").expected_rows  # 83
 _GROUP_ROWS = _CANONICAL_PLAN.entry_for("groups").expected_rows  # 766
+_LESSON_ROWS = _CANONICAL_PLAN.entry_for("lessons").expected_rows  # 2 521
+_CURRICULUM_ROWS = _CANONICAL_PLAN.entry_for("curricula").expected_rows  # 126
+_PLAN_ROWS = _CANONICAL_PLAN.entry_for("curricula_plan").expected_rows  # 3 424
 _FULL_STUDENT_ROWS = _CANONICAL_PLAN.entry_for("students").expected_rows  # 7 816
 _FULL_WORKER_ROWS = _CANONICAL_PLAN.entry_for("workers").expected_rows  # 729
-_FULL_SOURCE_ROWS = _DEPARTMENT_ROWS + _SPECIALITY_ROWS + _GROUP_ROWS + _FULL_STUDENT_ROWS + _FULL_WORKER_ROWS
-_FULL_PHASE_KEYS = ("academic_structure", "identity_cohort", "student_placement")
+_STRUCTURE_SOURCE_ROWS = _DEPARTMENT_ROWS + _SPECIALITY_ROWS + _GROUP_ROWS  # 880
+_CATALOG_SOURCE_ROWS = _LESSON_ROWS + _CURRICULUM_ROWS + _PLAN_ROWS  # 6 071
+_IDENTITY_SOURCE_ROWS = _FULL_STUDENT_ROWS + _FULL_WORKER_ROWS  # 8 545
+_FULL_SOURCE_ROWS = _STRUCTURE_SOURCE_ROWS + _CATALOG_SOURCE_ROWS + _IDENTITY_SOURCE_ROWS
+# Registry order, not alphabetical: 10 < 12 < 20 < 25 < 28.
+_FULL_PHASE_KEYS = (
+    "academic_structure",
+    "academic_catalog",
+    "identity_cohort",
+    "student_placement",
+    "sar_materialisation",
+)
 # Only this many identities are trusted, so exactly this many accounts stage and
 # exactly this many placement decisions are derived.  Keeping it small is what
 # makes a 9 425-row conformance pass finish in minutes rather than hours.
@@ -364,9 +383,37 @@ _INT_COLUMNS = {
     "departments": ("department_id", "department_types_id"),
     "speciality": ("department_id",),
     "groups": ("speciality_id", "department_id", "start_year", "curricula_id"),
-    "students": ("group_id", "speciality_id"),
+    "lessons": ("department_id", "only_az"),
+    "curricula": ("speciality_id",),
+    "curricula_plan": ("curricula_id", "lesson_before_id"),
+    # V-18: ``azadedildi`` is read through STUDENT_STATUS_FIELDS with ``_legacy_int``.
+    "students": ("group_id", "speciality_id", "azadedildi"),
     "workers": ("department_id",),
 }
+# C-2: ``kredit`` and every ``saat_*`` must arrive as a Python ``float`` — the
+# catalogue transform raises ``legacy_rehearsal_source_value_type_unsupported``
+# for an ``int`` or a ``Decimal``, so the disposable fixture uses DOUBLE columns.
+_FLOAT_COLUMNS = {
+    "curricula_plan": ("kredit", "saat_aks", "saat_as", "saat_muh", "saat_sem", "saat_lab", "saat_prak"),
+}
+
+
+class _MergedSourceContract:
+    """The union of the two ``students`` contracts the five-phase run opens.
+
+    ``id`` appears in BOTH ``STUDENT_IDENTITY_FIELDS`` and
+    ``STUDENT_STATUS_FIELDS``; a column created twice would make
+    ``compile_safe_projection`` refuse the table with
+    ``legacy_source_schema_contract_mismatch``, so the union is de-duplicated
+    while keeping first-seen order.
+    """
+
+    def __init__(self, *contracts):
+        fields = [field_name for contract in contracts for field_name in contract.allowed_fields]
+        self.allowed_fields = tuple(dict.fromkeys(fields))
+
+
+_STUDENT_SOURCE_COLUMNS = _MergedSourceContract(STUDENT_IDENTITY_FIELDS, STUDENT_STATUS_FIELDS)
 
 
 def _full_email(table, index):
@@ -375,11 +422,17 @@ def _full_email(table, index):
 
 def _typed_columns(table, contract, decoys):
     integers = _INT_COLUMNS.get(table, ())
+    floats = _FLOAT_COLUMNS.get(table, ())
     columns = ["`id` BIGINT NOT NULL AUTO_INCREMENT"]
     for field_name in contract.allowed_fields:
         if field_name == "id":
             continue
-        sql_type = "BIGINT NULL" if field_name in integers else "VARCHAR(191) NULL"
+        if field_name in integers:
+            sql_type = "BIGINT NULL"
+        elif field_name in floats:
+            sql_type = "DOUBLE NULL"
+        else:
+            sql_type = "VARCHAR(191) NULL"
         columns.append(f"`{field_name}` {sql_type}")
     columns.extend(f"`{decoy}` VARCHAR(191) NULL" for decoy in decoys)
     columns.append("PRIMARY KEY (`id`)")
@@ -415,6 +468,8 @@ def _seed_table(cursor, *, database, table, contract, decoys, rows, values_for):
                 values.append(_CREDENTIAL_VALUE)
             elif field_name in _INT_COLUMNS.get(table, ()):
                 values.append(0)
+            elif field_name in _FLOAT_COLUMNS.get(table, ()):
+                values.append(0.0)
             else:
                 values.append(f"{_PRIVATE_VALUE}-{table}-{legacy_pk}-{position}")
         batch.append(tuple(values))
@@ -475,6 +530,67 @@ def _student_values(legacy_pk):
         "fincode": f"{legacy_pk:07d}" if trusted else "",
         "first_name": f"Ad{legacy_pk}",
         "last_name": f"Soyad{legacy_pk}",
+        # V-18(d): the live dump releases ~200 of 7 816 students.  Row 1 is
+        # deliberately BOTH trusted and released, so the departed rung is
+        # exercised on an account this run actually staged.
+        "azadedildi": 1 if legacy_pk == 1 or legacy_pk % 500 == 0 else 0,
+    }
+
+
+def _lesson_values(legacy_pk):
+    # V-6: ``lesson_code`` is a category label, not an identity — 145 distinct
+    # codes over 2 521 rows.  E-4: a repeated (name, department) pair dedups.
+    return {
+        "name": f"Fənn {((legacy_pk - 1) % 900) + 1}" if legacy_pk % 250 else "",
+        "lesson_code": "37" if legacy_pk % 2 else "01",
+        "type": str(legacy_pk % 4),
+        "department_id": ((legacy_pk - 1) % 27) + 1,
+        "only_az": legacy_pk % 2,
+    }
+
+
+def _curriculum_values(legacy_pk):
+    # V-7: ``from_date`` is empty for every live row, so the admission year is
+    # derived from the referencing groups; ``to_date`` is decision-token only.
+    return {
+        "speciality_id": ((legacy_pk - 1) % _SPECIALITY_ROWS) + 1,
+        "from_date": "",
+        "to_date": "2026" if legacy_pk % 2 else "",
+        "eyani_qiyabi": "Əyani" if legacy_pk % 3 else "Qiyabi",
+        "bak_or_mag": "mag" if legacy_pk % 7 == 0 else "bak",
+    }
+
+
+def _plan_row_values(legacy_pk):
+    lesson = ((legacy_pk - 1) % _LESSON_ROWS) + 1
+    # V-8/V-14: 26% of the live rows carry a MULTI-element JSON array, and each
+    # element is expanded into its own CurriculumSubject.
+    if legacy_pk % 97 == 0:
+        lesson_id = f'["{lesson}","{(lesson % _LESSON_ROWS) + 1}"]'
+    elif legacy_pk % 331 == 0:
+        lesson_id = ""  # the live blank ⇒ quarantined reference
+    else:
+        lesson_id = f'["{lesson}"]'
+    semester = ((legacy_pk - 1) % 7) + 1
+    return {
+        "curricula_id": ((legacy_pk - 1) % _CURRICULUM_ROWS) + 1,
+        "lesson_id": lesson_id,
+        "lesson_code": "37",
+        # V-9/V-21: the token is evidence only in this slice.
+        "type": ("3", "1", "2.1", "4.01", "")[legacy_pk % 5],
+        # V-10/V-13: ``payiz_N``/``yaz_N``; under ORDINAL an even ``payiz`` and an
+        # odd ``yaz`` contradict the scheme and raise the parity warning.
+        "semestr": f"payiz_{semester}" if legacy_pk % 2 else f"yaz_{semester}",
+        # V-16/§4: 0.0 contributes nothing and is NOT "unsupported"; 2.5 is never
+        # rounded; 6.0 is the only shape that can set an ECTS.
+        "kredit": (6.0, 4.0, 0.0, 2.5, 3.0)[legacy_pk % 5],
+        "lesson_before_id": lesson if legacy_pk % 11 == 0 else 0,
+        "saat_aks": 0.0,
+        "saat_as": 0.0,
+        "saat_muh": 30.0 if legacy_pk % 3 else 0.0,
+        "saat_sem": 0.0,
+        "saat_lab": 15.0 if legacy_pk % 5 == 0 else 0.0,
+        "saat_prak": 0.0,
     }
 
 
@@ -492,7 +608,12 @@ _FULL_TABLES = (
     ("departments", DEPARTMENT_STRUCTURE_FIELDS, (), _DEPARTMENT_ROWS, _department_values),
     ("speciality", SPECIALITY_STRUCTURE_FIELDS, (), _SPECIALITY_ROWS, _speciality_values),
     ("groups", GROUP_STRUCTURE_FIELDS, (), _GROUP_ROWS, _group_values),
-    ("students", STUDENT_IDENTITY_FIELDS, ("password", "show_password"), _FULL_STUDENT_ROWS, _student_values),
+    ("lessons", LESSON_CATALOG_FIELDS, (), _LESSON_ROWS, _lesson_values),
+    ("curricula", CURRICULUM_CATALOG_FIELDS, (), _CURRICULUM_ROWS, _curriculum_values),
+    ("curricula_plan", CURRICULUM_PLAN_FIELDS, (), _PLAN_ROWS, _plan_row_values),
+    # The union of the identity and status contracts: the SAR phase opens TWO
+    # ``students`` streams and ``id`` may only be created once (V-18(a)).
+    ("students", _STUDENT_SOURCE_COLUMNS, ("password", "show_password"), _FULL_STUDENT_ROWS, _student_values),
     ("workers", WORKER_IDENTITY_FIELDS, ("password", "pin_for_lock"), _FULL_WORKER_ROWS, _worker_values),
 )
 
@@ -521,19 +642,21 @@ def _create_full_source_fixture(port, database):
         root.close()
 
 
-def _full_policy():
-    return RehearsalPolicy(
-        phase_keys=_FULL_PHASE_KEYS,
-        username_policy=UsernamePolicy.LEGACY_KEY,
-        student_identifier_policy=StudentIdentifierPolicy.LEGACY_PK,
-        email_trust_policy=EmailTrustPolicy.EVIDENCE_MANIFEST,
-        email_trust_manifest_digest="d" * 64,
-        batch_rows=500,
-        source_chunk_size=1_000,
-        max_staged_accounts=_TRUSTED_STUDENTS + _TRUSTED_WORKERS,
-        student_role_name="student",
-        worker_role_name="teacher",
-    )
+def _full_policy(**overrides):
+    values = {
+        "phase_keys": _FULL_PHASE_KEYS,
+        "username_policy": UsernamePolicy.LEGACY_KEY,
+        "student_identifier_policy": StudentIdentifierPolicy.LEGACY_PK,
+        "email_trust_policy": EmailTrustPolicy.EVIDENCE_MANIFEST,
+        "email_trust_manifest_digest": "d" * 64,
+        "batch_rows": 500,
+        "source_chunk_size": 1_000,
+        "max_staged_accounts": _TRUSTED_STUDENTS + _TRUSTED_WORKERS,
+        "student_role_name": "student",
+        "worker_role_name": "teacher",
+    }
+    values.update(overrides)
+    return RehearsalPolicy(**values)
 
 
 def _full_manifest():
@@ -576,12 +699,13 @@ def _issue_histogram(document):
 
 
 def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, tmp_path):
-    """SPEC §8/11 — two full three-phase rehearsals agree byte for byte.
+    """SPEC §8/11 and §10 items 14-15 — two full FIVE-phase rehearsals agree
+    byte for byte, and a third one that touches accounts deliberately does not.
 
     ``load_legacy_table_plan`` is deliberately NOT patched here: the disposable
-    source carries the canonical 31/83/766/7 816/729 shapes, so the run's own
-    ``source_row_count`` is the real 9 425 and every plan row-count gate is
-    exercised for real.
+    source carries the canonical 31/83/766/2 521/126/3 424/7 816/729 shapes, so
+    the run's own ``source_row_count`` is the real 15 496 and every plan
+    row-count gate is exercised for real.
 
     A second physical PostgreSQL database cannot be reached inside one test
     transaction, so — exactly as
@@ -599,6 +723,9 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         monkeypatch.setattr(phase_a_module, "assert_disposable_rehearsal_target", lambda **_kwargs: _GUARD)
         first_organization, first_actor = _full_organization("one")
         second_organization, second_actor = _full_organization("two")
+        # The activating pass gets its OWN tenant, created up front like the
+        # other two, so its pre-run identity baseline is identical to theirs.
+        third_organization, third_actor = _full_organization("three")
         report_dir = tmp_path / "full-reports"
         report_dir.mkdir()
         arguments = {
@@ -637,15 +764,22 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
 
         # 1) The whole registry ran, in its fixed ascending order.
         assert [phase["phase_key"] for phase in first_document["deterministic"]["phases"]] == list(_FULL_PHASE_KEYS)
-        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == [10, 20, 25]
+        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == [10, 12, 20, 25, 28]
 
-        # 2) The real accounting totals — 880 structure rows + 8 545 identity
-        #    rows; the batch-less placement phase contributes exactly 0.
-        assert first_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS == 9_425
+        # 2) The real accounting totals — 880 structure rows + 6 071 catalogue
+        #    rows + 8 545 identity rows; the two batch-less derived phases
+        #    contribute exactly 0 each.
+        assert first_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS == 15_496
         observed = {
             phase["phase_key"]: phase["observed_source_rows"] for phase in first_document["deterministic"]["phases"]
         }
-        assert observed == {"academic_structure": 880, "identity_cohort": 8_545, "student_placement": 0}
+        assert observed == {
+            "academic_structure": 880,
+            "academic_catalog": 6_071,
+            "identity_cohort": 8_545,
+            "student_placement": 0,
+            "sar_materialisation": 0,
+        }
 
         # 3) Determinism across two independent targets.
         assert second.determinism_digest == first.determinism_digest
@@ -667,6 +801,27 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         # V-2: the admission-year gap is the loudest INFO code and never blocks.
         assert histogram.get(("legacy_record_admission_year_missing", "info"), 0) >= 1
 
+        # 4b) The catalogue accounted for every one of its 6 071 rows and the
+        #     SAR phase deferred every student without touching one account.
+        catalog = next(
+            phase for phase in first_document["deterministic"]["phases"] if phase["phase_key"] == "academic_catalog"
+        )
+        assert sum(catalog["state_counts"].values()) == _CATALOG_SOURCE_ROWS
+        assert set(catalog["state_counts"]) <= {"migrated", "skipped", "quarantined"}
+        sar = next(
+            phase for phase in first_document["deterministic"]["phases"] if phase["phase_key"] == "sar_materialisation"
+        )
+        assert sum(sar["state_counts"].values()) == _TRUSTED_STUDENTS
+        # ``stage_and_activate`` defaults to False, so nothing was created and
+        # the deferral is silent by design — every decision is a deferral.
+        assert sar["state_counts"].get("sar_created", 0) == 0
+        assert set(sar["state_counts"]) <= {"sar_created", "sar_deferred", "sar_unresolved"}
+        # V-18(b): the released-student rung is a SOURCE fact and fires even
+        # with the activation switch off.  Student 1 is trusted AND released.
+        assert histogram.get(("legacy_sar_departed_student", "info"), 0) >= 1
+        assert get_user_model().objects.filter(username__startswith="myedu.", is_active=True).exists() is False
+        assert AccountActivationEvidence.objects.count() == 0
+
         # 5) Regenerating a report from the ledger reproduces its digest —
         #    the batch-less phase's rebuild included (SA-2).  RUN 2 seçilir:
         #    run 1-in staged istifadəçiləri qlobal-bərpa addımında silinib və
@@ -683,7 +838,58 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         )
         assert regenerated.determinism_digest == second.determinism_digest == first.determinism_digest
 
-        # 6) Zero credential or raw-value leakage anywhere in the artifacts.
+        # 6) SA-5 — the activation decision IS the run identity.  A third pass
+        #    that differs from the first two ONLY by ``stage_and_activate`` and
+        #    its blast-radius cap must produce a different determinism digest;
+        #    otherwise two rehearsals with different behaviour could share one
+        #    ``transform_version`` and therefore one ledger scope.
+        deleted, _again = get_user_model().objects.filter(username__startswith="myedu.").delete()
+        assert deleted >= staged_total
+
+        # Ayrı qovluq: bu keçidin digest-i QƏSDƏN fərqlidir və eyni fayla
+        # yazılsaydı report-conflict qapısı (düzgün olaraq) bloklardı.
+        activation_report_dir = tmp_path / "activation-reports"
+        activation_report_dir.mkdir()
+        activating_arguments = {
+            **arguments,
+            "report_dir": str(activation_report_dir),
+            "policy": _full_policy(stage_and_activate=True, max_activated_accounts=_TRUSTED_STUDENTS),
+        }
+        third = execute_rehearsal(
+            rehearsal_ordinal=1, organization=third_organization, actor=third_actor, **activating_arguments
+        )
+
+        assert third.status == LegacyMigrationRun.Status.SUCCEEDED
+        assert third.determinism_digest != first.determinism_digest
+        third_document = json.loads(open(third.report_path, encoding="ascii").read())
+        assert third_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS
+        third_sar = next(
+            phase for phase in third_document["deterministic"]["phases"] if phase["phase_key"] == "sar_materialisation"
+        )
+        assert sum(third_sar["state_counts"].values()) == _TRUSTED_STUDENTS
+        assert third_sar["state_counts"].get("sar_created", 0) >= 1
+        # E-11: activation asserts the registry, never the address — the legacy
+        # email is neutralised in the very same transaction.
+        activated = get_user_model().objects.filter(username__startswith="myedu.", is_active=True)
+        assert activated.count() == third_sar["state_counts"]["sar_created"]
+        assert activated.filter(profile__email_verified=True).exists() is False
+        assert activated.filter(profile__password_change_required=False).exists() is False
+        assert AccountActivationEvidence.objects.filter(organization=third_organization).count() == activated.count()
+
+        # §10/15 — the third class of global state this emulation must respect.
+        # ``AccountActivationEvidence.organization`` is ``on_delete=PROTECT``, so
+        # a tenant that ever activated an account cannot be dropped while its
+        # evidence stands — and the evidence itself is APPEND-ONLY at the
+        # database level (``accounts_activation_evidence_row_guard_trg`` raises
+        # ``accounts_activation_evidence_append_only`` on DELETE).  The only
+        # lawful teardown is therefore this test's own transaction rollback; a
+        # manual delete-then-drop-tenant sequence is impossible by construction.
+        with pytest.raises(DatabaseError) as evidence_exc:
+            with transaction.atomic():
+                AccountActivationEvidence.objects.filter(organization=third_organization).delete()
+        assert "accounts_activation_evidence_append_only" in str(evidence_exc.value)
+
+        # 7) Zero credential or raw-value leakage anywhere in the artifacts.
         document = open(first.report_path, encoding="ascii").read()
         payload = json.dumps(first.payload, ensure_ascii=True, sort_keys=True)
         for forbidden in (
@@ -703,8 +909,12 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             assert forbidden not in document
             assert forbidden not in payload
 
-        # 7) Every raw source transport was closed by the audited adapter.
+        # 8) Every raw source transport was closed by the audited adapter.
         assert opened
         assert all(getattr(source, "closed", True) for source in opened)
     finally:
+        # Only the EXTERNAL fixture needs an explicit teardown: every PostgreSQL
+        # row — activation evidence included — goes away with the test
+        # transaction's rollback, which is the only way an append-only table can
+        # ever be cleaned up (see the §10/15 note above).
         _drop_source_fixture(port, database)

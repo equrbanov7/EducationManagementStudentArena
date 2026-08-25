@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import re
 from collections.abc import Mapping
 
 from django.core.exceptions import ValidationError
@@ -7,13 +8,17 @@ from django.db.models.signals import post_save
 
 import pytest
 
-from apps.legacy_import.models import token_validator
+from apps.legacy_import.models import MODEL_LABEL_PATTERN, token_validator
 from apps.legacy_import.services import rehearsal_contracts as contracts
 from apps.legacy_import.services.field_contracts import STUDENT_IDENTITY_FIELDS, compile_safe_projection
 from apps.legacy_import.services.ledger import LedgerAction, TargetValidation
 from apps.legacy_import.services.rehearsal_authorizer import (
+    CURRICULUM_MODEL_LABEL,
+    CURRICULUM_SUBJECT_MODEL_LABEL,
     ORG_UNIT_MODEL_LABEL,
     PROGRAM_MODEL_LABEL,
+    STUDENT_RECORD_MODEL_LABEL,
+    SUBJECT_MODEL_LABEL,
     USER_MODEL_LABEL,
     build_rehearsal_authorizer,
     build_target_validators,
@@ -25,7 +30,9 @@ from apps.legacy_import.services.rehearsal_contracts import (
     LegacyRehearsalConfigError,
     LegacyRehearsalEvidenceError,
     OrderedDigest,
+    PlanSemesterScheme,
     RehearsalPolicy,
+    SarCurriculumFallback,
     StudentIdentifierPolicy,
     UsernamePolicy,
     canonical_json_digest,
@@ -38,6 +45,7 @@ from apps.legacy_import.services.rehearsal_contracts import (
 from apps.legacy_import.services.table_plan import TABLE_PLAN_VERSION, load_legacy_table_plan
 from apps.organizations.models import Membership, Organization, Role
 from apps.organizations.signals import create_default_roles
+from apps.registrar.models import Subject
 from core.constants import OrganizationType, RoleScopeType
 
 
@@ -160,17 +168,25 @@ def test_phase_registry_fingerprint_is_pinned():
     assert compute_phase_registry_fingerprint(registry) == contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
+        "academic_catalog",
         "identity_cohort",
         "student_placement",
+        "sar_materialisation",
     ]
-    # Structure before identity before placement, strictly ascending; placement
-    # accounts for no source table at all (D-2).
-    assert [phase.order for phase in registry] == [10, 20, 25]
+    # Structure (supplies Program) before the catalogue that resolves against
+    # it, before identity, before placement, before the record that needs all
+    # four — strictly ascending, with 30 left free for the syllabus domain.
+    # Both derived phases account for no source table at all (D-2 / E-2).
+    assert [phase.order for phase in registry] == [10, 12, 20, 25, 28]
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
+        ("lessons", "curricula", "curricula_plan"),
         ("students", "workers"),
         (),
+        (),
     ]
+    # The five-phase run accounts for exactly 880 + 6 071 + 8 545 source rows.
+    assert sum(phase.declared_source_rows(load_legacy_table_plan()) for phase in registry) == 15_496
 
 
 def test_registry_rejects_a_second_claim_on_students_beside_the_identity_phase():
@@ -374,6 +390,114 @@ def test_policy_rejects_inconsistent_or_out_of_range_values():
     assert exc_info.value.code == "legacy_rehearsal_policy_email_trust_invalid"
 
 
+def _staging_policy(**overrides):
+    """A policy whose staging cap is open, so the activation knobs are reachable."""
+
+    values = {
+        "max_staged_accounts": 8,
+        "student_role_name": "student",
+        "worker_role_name": "teacher",
+    }
+    values.update(overrides)
+    return _policy(**values)
+
+
+def test_activation_and_catalogue_knobs_default_closed():
+    """SA-5: the first slice-2 rehearsal must touch no account and mint no plan."""
+
+    policy = _policy()
+
+    assert policy.stage_and_activate is False
+    assert policy.max_activated_accounts == 0
+    assert policy.sar_curriculum_fallback is SarCurriculumFallback.SYNTHESISE
+    # V-13: payiz_N/yaz_N are ordinal semester numbers in the live dump.
+    assert policy.plan_semester_scheme is PlanSemesterScheme.ORDINAL
+    assert policy.to_safe_log_dict()["plan_semester_scheme"] == "ordinal"
+    assert policy.to_safe_log_dict()["sar_curriculum_fallback"] == "synthesise"
+
+
+def test_activation_policy_fields_bind_into_the_run_identity():
+    """The activation decision is part of the run identity, not a module constant."""
+
+    disabled = _staging_policy()
+    enabled = _staging_policy(stage_and_activate=True, max_activated_accounts=8)
+
+    assert disabled.policy_digest() != enabled.policy_digest()
+    assert disabled.transform_version() != enabled.transform_version()
+
+    baseline = enabled.policy_digest()
+    variants = [
+        _staging_policy(stage_and_activate=True, max_activated_accounts=4),
+        _staging_policy(
+            stage_and_activate=True,
+            max_activated_accounts=8,
+            sar_curriculum_fallback=SarCurriculumFallback.STRICT,
+        ),
+        _staging_policy(
+            stage_and_activate=True,
+            max_activated_accounts=8,
+            plan_semester_scheme=PlanSemesterScheme.TERM_PAIR,
+        ),
+    ]
+    digests = {policy.policy_digest() for policy in variants}
+
+    assert baseline not in digests
+    assert len(digests) == len(variants)
+
+    payload = enabled.to_safe_log_dict()
+
+    # Tokens and ints only — the four values are committed to the report artifact.
+    assert payload["stage_and_activate"] is True
+    assert payload["max_activated_accounts"] == 8
+    assert payload["sar_curriculum_fallback"] == "synthesise"
+    assert payload["plan_semester_scheme"] == "ordinal"
+    for token in (payload["sar_curriculum_fallback"], payload["plan_semester_scheme"]):
+        token_validator(token)
+
+
+def test_transform_version_stays_bounded_with_the_activation_knobs():
+    transform_version = _staging_policy(
+        stage_and_activate=True,
+        max_activated_accounts=8,
+        sar_curriculum_fallback=SarCurriculumFallback.STRICT,
+        plan_semester_scheme=PlanSemesterScheme.TERM_PAIR,
+    ).transform_version()
+
+    assert transform_version.startswith("rehearsal-identity-v1.")
+    assert len(transform_version) == 34 <= 64
+    token_validator(transform_version)
+
+
+def test_policy_rejects_every_invalid_activation_or_catalogue_knob():
+    cases = {
+        "legacy_rehearsal_policy_invalid": {"stage_and_activate": 1},
+        "legacy_rehearsal_policy_curriculum_fallback_invalid": {"sar_curriculum_fallback": "synthesise"},
+        "legacy_rehearsal_policy_semester_scheme_invalid": {"plan_semester_scheme": "ordinal"},
+    }
+    for code, overrides in cases.items():
+        with pytest.raises(LegacyRehearsalConfigError) as exc_info:
+            _policy(**overrides)
+        assert exc_info.value.code == code
+
+    activation_cases = [
+        # An open button with a closed blast-radius cap is a configuration bug.
+        {"stage_and_activate": True, "max_activated_accounts": 0},
+        {"max_activated_accounts": -1},
+        {"max_activated_accounts": True},
+        {"max_activated_accounts": 20_001},
+        # The activation cap can never exceed the staging cap that feeds it.
+        {"max_activated_accounts": 1},
+    ]
+    for overrides in activation_cases:
+        with pytest.raises(LegacyRehearsalConfigError) as exc_info:
+            _policy(**overrides)
+        assert exc_info.value.code == "legacy_rehearsal_policy_activation_invalid"
+
+    with pytest.raises(LegacyRehearsalConfigError) as exc_info:
+        _staging_policy(stage_and_activate=True, max_activated_accounts=9)
+    assert exc_info.value.code == "legacy_rehearsal_policy_activation_invalid"
+
+
 def test_stable_source_value_covers_every_accepted_type_and_rejects_others():
     accepted = {
         "n:": None,
@@ -567,7 +691,16 @@ def test_target_validators_expose_only_allowlisted_models_and_require_tenant_own
 
     # The registry is a closed, code-owned allowlist: a target model that is not
     # listed here can never be bound to a ledger row.
-    assert tuple(validators) == (USER_MODEL_LABEL, ORG_UNIT_MODEL_LABEL, PROGRAM_MODEL_LABEL)
+    assert tuple(validators) == (
+        USER_MODEL_LABEL,
+        ORG_UNIT_MODEL_LABEL,
+        PROGRAM_MODEL_LABEL,
+        SUBJECT_MODEL_LABEL,
+        CURRICULUM_MODEL_LABEL,
+        CURRICULUM_SUBJECT_MODEL_LABEL,
+        STUDENT_RECORD_MODEL_LABEL,
+    )
+    assert all(re.fullmatch(MODEL_LABEL_PATTERN, label) for label in validators)
 
     member = django_user_model.objects.create_user(
         username="rehearsal-target-member",
@@ -591,3 +724,15 @@ def test_target_validators_expose_only_allowlisted_models_and_require_tenant_own
     assert owned == TargetValidation(exists=True, organization_matches=True)
     assert foreign == TargetValidation(exists=True, organization_matches=False)
     assert unowned == TargetValidation(exists=True, organization_matches=False)
+
+    # The four catalogue/record models all carry their own ``organization``
+    # column, so the generic tenant validator is exact for every one of them.
+    subject = Subject.objects.create(organization=organization, code="MYEDU-L1", name="Fənn", ects=5)
+    validate_subject = validators[SUBJECT_MODEL_LABEL]
+
+    assert validate_subject(target_pk=str(subject.pk), organization=organization) == TargetValidation(
+        exists=True, organization_matches=True
+    )
+    assert validate_subject(target_pk=str(subject.pk), organization=other_organization) == TargetValidation(
+        exists=True, organization_matches=False
+    )
