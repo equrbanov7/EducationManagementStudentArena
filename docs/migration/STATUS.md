@@ -206,6 +206,25 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - Share edilə bilən HTML baseline hesabatı schema/build/responsive yoxlamalarından
   keçdi; real connection və secret dəyəri daxil edilmədi.
 
+### 26 avqust 2026 (gecə) — contact-pending staging + UI təsdiqi
+
+- `stage_contact_pending` siyasət düyməsi (default OFF, fail-closed): yalnız
+  `email_untrusted`-dan başqa qaydası olmayan sətirlər açıq bayraq + açıq
+  blast-radius qapağı ilə locked hesab kimi stage edilir; email authority
+  verilmir, aktivasiya evidence-li axında qalır.
+- Rehearsal #3 (emsarena_rehearsal_96856e79a96c): SUCCEEDED — migrated/staged
+  8,431, skipped 86 (boş/yararsız email), quarantined 28 (dublikat); cəm 8,545.
+- Real-mənbə inteqrasiya testi (56) iki resume bug-ı tapdı və bağlandı:
+  anchor rebase sırası + replay-staged sayımı; kəsilmə+resume eyni digest verir.
+- UI təsdiqi (staging inspection, RLS-mirror emsarena_app rolu ilə):
+  staged idxal hesabı DÜZGÜN parolla belə login edə bilmir (generic xəta,
+  enumeration yox); superadmin admin-də 7,716 idxal tələbəsini real legacy
+  email-ləri ilə görür (hamısı qeyri-aktiv); müəllim/tələbə rol girişləri və
+  rol-məhdud sidebar-lar işləyir; standart üzv siyahısı yalnız aktiv üzvlükləri
+  göstərir — staged-lər aktivasiyaya qədər orada görünmür (dizayn üzrə).
+- Modul-ölçü büdcəsi üçün email-trust manifest köməkçiləri
+  `rehearsal_email_trust.py`-yə ayrıldı (re-export ilə, semantika dəyişməz).
+
 ### 26 avqust 2026 — orkestrator canlı: iki real rehearsal + determinizm sübutu
 
 - `legacy_import_rehearse` PG suite ilə birlikdə yaşıl (208 pass / 0 fail; 8 saatlıq
