@@ -14,6 +14,9 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from .field_contracts import (
+    DEPARTMENT_STRUCTURE_FIELDS,
+    GROUP_STRUCTURE_FIELDS,
+    SPECIALITY_STRUCTURE_FIELDS,
     STUDENT_IDENTITY_FIELDS,
     WORKER_IDENTITY_FIELDS,
     LegacyFieldContractError,
@@ -26,9 +29,14 @@ from .field_contracts import (
 DEFAULT_SOURCE_CHUNK_SIZE = 1_000
 MAX_SOURCE_CHUNK_SIZE = 10_000
 _COMPILED_SELECT_TOKEN = object()
+# Code-owned allowlist: ``_validate_audited_contract`` refuses every contract
+# that is not listed here, so a new phase joins by an explicit registry edit.
 _AUDITED_CONTRACTS = {
     STUDENT_IDENTITY_FIELDS.fingerprint: STUDENT_IDENTITY_FIELDS,
     WORKER_IDENTITY_FIELDS.fingerprint: WORKER_IDENTITY_FIELDS,
+    DEPARTMENT_STRUCTURE_FIELDS.fingerprint: DEPARTMENT_STRUCTURE_FIELDS,
+    SPECIALITY_STRUCTURE_FIELDS.fingerprint: SPECIALITY_STRUCTURE_FIELDS,
+    GROUP_STRUCTURE_FIELDS.fingerprint: GROUP_STRUCTURE_FIELDS,
 }
 
 
@@ -511,3 +519,9 @@ def _open_audited_identity_stream(
     except BaseException:
         _cleanup_source(connection, cursor)
         raise
+
+
+# The opener has always been contract-generic; only its name reads "identity".
+# New non-identity phases use this alias so the call site stays honest.  The
+# original name is deliberately kept for every existing caller.
+open_audited_source_stream = open_audited_identity_stream

@@ -20,6 +20,7 @@ from core.constants import OrganizationType
 # Köhnə `from apps.accounts.models import ProfileRole` import səthi qorunur (AGENTS §1).
 from core.roles import ProfileRole  # noqa: F401
 from core.utils import get_auth_otp_expiry_seconds, get_auth_otp_max_attempts
+from core.validators import validate_fin
 
 
 class EmailOTP(models.Model):
@@ -297,6 +298,17 @@ class UserProfile(models.Model):
         editable=False,
         verbose_name="İnstitusional tələbə identifikatoru",
         help_text="Yalnız təsdiqlənmiş import mapping-i ilə doldurulan tələbə açarı.",
+    )
+
+    fin = models.CharField(
+        max_length=7,
+        null=True,
+        blank=True,
+        default=None,
+        unique=True,
+        validators=[validate_fin],
+        verbose_name="FİN",
+        help_text="Şəxsiyyət vəsiqəsi FİN kodu (7 simvol, A-Z0-9) — idxal/uzlaşdırma açarı.",
     )
 
     student_specialization = models.CharField(

@@ -366,3 +366,47 @@ WORKER_IDENTITY_FIELDS = LegacySourceFieldContract(
         "inzibati",
     ),
 )
+
+# Structure contracts (academic_structure phase).  Every archive-only column of
+# these tables — phone, adress, img_url, note, text, who_is_added, added_date,
+# update_date — is deliberately left out: the projection is default-deny, so a
+# field that is not migrated is a field that never leaves the source.
+DEPARTMENT_STRUCTURE_FIELDS = LegacySourceFieldContract(
+    source_table="departments",
+    version="structure-v1",
+    allowed_fields=(
+        "id",
+        "name",
+        "department_id",
+        "department_types_id",
+        "kollec_or_uni",
+    ),
+)
+
+SPECIALITY_STRUCTURE_FIELDS = LegacySourceFieldContract(
+    source_table="speciality",
+    version="structure-v1",
+    allowed_fields=(
+        "id",
+        "department_id",
+        "name",
+        "speciality_code",
+    ),
+)
+
+GROUP_STRUCTURE_FIELDS = LegacySourceFieldContract(
+    source_table="groups",
+    version="structure-v1",
+    allowed_fields=(
+        "id",
+        "speciality_id",
+        "department_id",
+        "name",
+        "sector",
+        "eyani_qiyabi",
+        "bak_or_mag",
+        "start_year",
+        "curricula_id",
+        "kollec_or_uni",
+    ),
+)

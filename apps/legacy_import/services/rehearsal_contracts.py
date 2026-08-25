@@ -14,6 +14,12 @@ the batch that accounts for them; MUST NOT retain more than
 with ``compile_pk_chunk_query``); MUST NOT open a source connection outside
 ``context.source_connection_factory``; and MUST NOT call ``finish_run``.
 Gated plan tables are structurally unclaimable (see ``_CLAIMABLE_ACTIONS``).
+
+To *claim* a table means to ACCOUNT FOR it in the batch chain, not to hold an
+exclusive read on it: a phase may read any audited contract through
+``context.source_connection_factory``, including a table another phase claims.
+A phase therefore may declare ``source_tables = ()`` — it accounts for nothing
+and its evidence lives entirely in its own observations and digest chain.
 """
 
 from __future__ import annotations
@@ -57,8 +63,11 @@ _CLAIMABLE_ACTIONS = frozenset(
         LegacyTableAction.VALIDATE_ONLY,
     }
 )
-# Pinned in the Assembly step against the shipped IdentityCohortPhase registry.
-_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "160216a1051ff24af2252df8dd88144fba2c4079d0fcb33c1c6df59d4aff5e70"
+# Pinned against the shipped registry: AcademicStructurePhase (order 10),
+# IdentityCohortPhase (20), StudentPlacementPhase (25).  Re-pin ONLY by running
+# ``compute_phase_registry_fingerprint`` over the direct tuple — never over
+# ``load_rehearsal_phase_registry``, which checks itself against this constant.
+_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "7d4dfddb9272d8473c50486482b874acd6bd0ac447e12eaf8d70077f7a4667ae"
 
 
 class LegacyRehearsalError(Exception):
@@ -353,7 +362,22 @@ class RehearsalContext:
 
 
 class RehearsalPhase(Protocol):
-    """The extension seam; adapters join the registry by implementing it."""
+    """The extension seam; adapters join the registry by implementing it.
+
+    A batch-less phase (``source_tables = ()``) MAY additionally expose two
+    OPTIONAL attributes, both read with ``getattr`` by
+    ``rehearsal_reconciliation._derived_phase_report_from_ledger``:
+
+    * ``derived_digest_namespace: str`` — the ``OrderedDigest`` namespace the
+      phase itself chained its rows under, so the ledger rebuild reproduces the
+      live ``phase_digest`` byte for byte.
+    * ``derived_state_key(state) -> str`` — the token each ledger state is
+      counted under in ``state_counts``, keeping the operator-facing
+      ``totals.{migrated,skipped,quarantined}`` projection unambiguous.
+
+    Neither is part of ``compute_phase_registry_fingerprint``: they change how a
+    phase's evidence is LABELLED, never what the phase is allowed to write.
+    """
 
     phase_key: str
     order: int
@@ -459,11 +483,17 @@ def compute_phase_registry_fingerprint(
 def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     """Load and fully attest the code-owned phase registry."""
 
-    # Lazy: rehearsal_identity_phase imports its types from this module.
+    # Lazy: every phase module imports its types from this module.
     from .rehearsal_identity_phase import IdentityCohortPhase
+    from .rehearsal_placement_phase import StudentPlacementPhase
+    from .rehearsal_structure_phase import AcademicStructurePhase
 
     plan = load_legacy_table_plan()
-    phases = validate_rehearsal_phases((IdentityCohortPhase(),), plan=plan)
+    # Strictly ascending ``order``: 10 (structure) < 20 (identity) < 25 (placement).
+    phases = validate_rehearsal_phases(
+        (AcademicStructurePhase(), IdentityCohortPhase(), StudentPlacementPhase()),
+        plan=plan,
+    )
     if compute_phase_registry_fingerprint(phases, plan=plan) != _EXPECTED_PHASE_REGISTRY_FINGERPRINT:
         raise LegacyRehearsalConfigError("legacy_rehearsal_phase_registry_fingerprint_mismatch")
     return phases

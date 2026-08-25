@@ -9,10 +9,14 @@ orchestrator can emit a precise failure code first.
 
 ``phase_report_from_ledger`` rebuilds a phase report purely from the sealed
 batch rows, which is what ``--emit-report-only`` regenerates a report from.
+A phase that accounts for no source table (``source_tables = ()``) owns no
+batch chain at all, so its report is rebuilt from its immutable observations
+instead; see ``_derived_phase_report_from_ledger``.
 """
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import replace
 
 from django.db.models import Count, Sum
@@ -67,9 +71,56 @@ def _batch_records(run: LegacyMigrationRun, source_table: str) -> list[PhaseBatc
     ]
 
 
+def _derived_phase_report_from_ledger(run: LegacyMigrationRun, *, phase: RehearsalPhase, plan) -> PhaseReport:
+    """Rebuild a derived phase from its immutable observations (no batch chain).
+
+    Two optional phase attributes are honoured through ``getattr`` so the
+    ``RehearsalPhase`` protocol keeps a single mandatory shape:
+    ``derived_digest_namespace`` (the chain namespace the phase itself used) and
+    ``derived_state_key(state)`` (the token a ledger state is counted under).
+    Neither is part of the registry fingerprint: they change how evidence is
+    labelled, never what a phase may write.
+    """
+
+    namespace = getattr(phase, "derived_digest_namespace", PHASE_DIGEST_NAMESPACE)
+    key_for = getattr(phase, "derived_state_key", None)
+    rows = list(
+        run.entity_observations.filter(entity_map__entity_type__in=tuple(phase.entity_types)).values_list(
+            "entity_map__legacy_pk",
+            "state",
+            "source_row_hash",
+            "target_model_label",
+        )
+    )
+    try:
+        # ``legacy_pk`` is text in the ledger; the phase emitted it numerically.
+        ordered = sorted(rows, key=lambda row: int(row[0]))
+    except (TypeError, ValueError):
+        raise LegacyRehearsalEvidenceError("legacy_rehearsal_derived_legacy_pk_invalid") from None
+    chain = OrderedDigest(namespace)
+    counts: Counter[str] = Counter()
+    for legacy_pk, state, row_hash, target_label in ordered:
+        chain.advance(legacy_pk, str(state), row_hash, target_label)
+        counts[key_for(state) if callable(key_for) else str(state)] += 1
+    return PhaseReport(
+        phase_key=phase.phase_key,
+        order=phase.order,
+        source_tables=(),
+        declared_source_rows=phase.declared_source_rows(plan),
+        observed_source_rows=0,
+        batches=(),
+        state_counts=dict(counts),
+        issue_counts={},
+        staged_account_count=0,
+        phase_digest=chain.hexdigest(),
+    )
+
+
 def phase_report_from_ledger(run: LegacyMigrationRun, *, phase: RehearsalPhase, plan) -> PhaseReport:
     """Rebuild one phase report from the sealed batch chain, in phase order."""
 
+    if not tuple(phase.source_tables):
+        return _derived_phase_report_from_ledger(run, phase=phase, plan=plan)
     records: list[PhaseBatchRecord] = []
     for source_table in phase.source_tables:
         records.extend(_batch_records(run, source_table))
@@ -140,11 +191,34 @@ def reconcile_run(run: LegacyMigrationRun, *, phases, plan) -> None:
         for source_table in phase.source_tables:
             if per_table.get(source_table, 0) != plan.entry_for(source_table).expected_rows:
                 raise LegacyRehearsalEvidenceError("legacy_rehearsal_reconciliation_mismatch")
+    # C4 compares the batch aggregate with the observations it accounts for.  A
+    # derived target row (one that is 1:1 with an already-accounted source row)
+    # carries no batch of its own, so counting it here would guarantee a false
+    # mismatch; it stays covered by the emitting phase's own digest chain and by
+    # the fingerprint-pinned ``entity_types`` declaration checked just below.
+    accounted_types = set(LegacyImportBatch.objects.filter(run=run).values_list("entity_type", flat=True).distinct())
+    declared_types = {entity_type for phase in phases for entity_type in phase.entity_types}
     observed = dict.fromkeys(_STATES, 0)
-    for row in run.entity_observations.values("state").annotate(total=Count("id")):
+    for row in (
+        run.entity_observations.filter(entity_map__entity_type__in=accounted_types)
+        .values("state")
+        .annotate(total=Count("id"))
+    ):
         if row["state"] not in observed:
             raise LegacyRehearsalEvidenceError("legacy_rehearsal_observation_count_mismatch")
         observed[row["state"]] = row["total"]
+    # Fail closed: nothing may be written under an entity type the attested
+    # registry never declared.
+    stray = (
+        set(
+            run.entity_observations.exclude(entity_map__entity_type__in=accounted_types)
+            .values_list("entity_map__entity_type", flat=True)
+            .distinct()
+        )
+        - declared_types
+    )
+    if stray:
+        raise LegacyRehearsalEvidenceError("legacy_rehearsal_derived_entity_type_unregistered")
     derived = {
         LegacyEntityMap.State.MIGRATED: counts.migrated,
         LegacyEntityMap.State.SKIPPED: counts.skipped,
