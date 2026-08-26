@@ -398,6 +398,12 @@ class RehearsalContext:
     authoritative_email_policy: AuthoritativeEmailPolicy
     cancellation_requested: Callable[[], bool]
     stdout_note: Callable[[str], None]
+    # OPSİONAL sürət qatı (``ledger_batch``): etiket → "bu açarlar mövcuddur VƏ
+    # tenantındır" toplu validatoru.  Verilmirsə batch yolu sətir-başına
+    # ``target_validators``-a qayıdır — yəni davranış eynidir, yalnız sorğu sayı
+    # dəyişir.  Etiketin ``target_validators``-da qeydiyyatı HƏR İKİ yolda
+    # məcburi qalır (allowlist qapısı yumşalmır).
+    bulk_target_validators: Mapping[str, object] | None = None
 
 
 class RehearsalPhase(Protocol):

@@ -33,12 +33,10 @@ from collections import Counter
 from types import MappingProxyType
 
 from django.apps import apps as django_apps
-from django.db import transaction
 
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, LegacyMigrationIssue
 
 from .field_contracts import JOURNAL_FIELDS
-from .ledger import upsert_entity_map, upsert_issue
 from .rehearsal_authorizer import ENROLLMENT_MODEL_LABEL
 from .rehearsal_contracts import (
     LegacyRehearsalConfigError,
@@ -50,6 +48,7 @@ from .rehearsal_contracts import (
     source_row_hash,
 )
 from .rehearsal_identity_phase import STUDENT_ENTITY_TYPE
+from .rehearsal_journal_batch import Decision, JournalBatchWriter, TargetMaterialiser
 from .rehearsal_journal_offerings_phase import JOURNAL_OFFERINGS_PHASE_KEY
 from .rehearsal_journal_offerings_source import (
     JOURNAL_SOURCE_TABLE,
@@ -160,52 +159,31 @@ def enrollment_derivation_hash(
     return digest.hexdigest()
 
 
-def _recorded_decision(context: RehearsalContext, seal_key: str):
-    """Resume qısayolu: möhürlənmiş qərarı yenidən törətmək əvəzinə oxu."""
+def recorded_decisions(context: RehearsalContext) -> dict[str, tuple[str, str, str]]:
+    """Bu run-un BÜTÜN qeydiyyat möhürləri — resume üçün BİR sorğu.
 
-    return (
-        LegacyEntityObservation.objects.filter(
-            run_id=context.run_id,
-            entity_map__entity_type=JOURNAL_ENROLLMENT_ENTITY_TYPE,
-            entity_map__legacy_pk=seal_key,
-        )
-        .values_list("state", "source_row_hash", "target_model_label")
-        .first()
-    )
+    Əvvəl hər sətir üçün ayrıca ``.first()`` sorğusu gedirdi (172 471 sorğu);
+    açar sayı jurnal klasterinin ölçüsündədir, ona görə tam indeks yaddaşa
+    sığır (``JournalSealer.recorded_decisions`` ilə eyni prinsip).
+    """
 
-
-def _seal(context, *, seal_key: str, digest: str, state: str, label: str = "", target_pk: str = ""):
-    return upsert_entity_map(
-        run_id=context.run_id,
-        actor=context.actor,
-        authorize=context.authorize,
-        entity_type=JOURNAL_ENROLLMENT_ENTITY_TYPE,
-        legacy_pk=seal_key,
-        source_row_hash=digest,
-        state=state,
-        target_model_label=label,
-        target_pk=target_pk,
-        target_validators=context.target_validators,
-    )
+    rows = LegacyEntityObservation.objects.filter(
+        run_id=context.run_id, entity_map__entity_type=JOURNAL_ENROLLMENT_ENTITY_TYPE
+    ).values_list("entity_map__legacy_pk", "state", "source_row_hash", "target_model_label")
+    return {
+        legacy_pk: (state, row_hash, label) for legacy_pk, state, row_hash, label in rows.iterator(chunk_size=10_000)
+    }
 
 
-def _write_issue(context, *, seal_key: str, rule_code: str, digest: str, entity_map, issue_counts) -> None:
-    """Issue həmişə öz map-ından sonra: ledger əks sıranı rədd edir."""
-
-    severity = severity_for(rule_code)
-    upsert_issue(
-        run_id=context.run_id,
-        actor=context.actor,
-        authorize=context.authorize,
-        source_table=JOURNAL_SOURCE_TABLE,
-        entity_type=JOURNAL_ENROLLMENT_ENTITY_TYPE,
-        legacy_pk=seal_key,
-        rule_code=rule_code,
-        severity=severity,
-        payload_digest=digest,
-        entity_map_id=entity_map.pk,
-    )
-    issue_counts[(rule_code, severity)] += 1
+ENROLLMENT_MATERIALISER = TargetMaterialiser(
+    app_label="registrar",
+    model_name="Enrollment",
+    # V7 merge: modelin öz unikallıq açarı — eyni cüt EYNİ sətrə qatlanır.
+    key_fields=("student_id", "offering_id"),
+    # A.2: ``kind`` defoltu V-qərarsız ``mandatory``; status modelin öz
+    # defoltu (enrolled) qalır — J7-dən əvvəl heç nə bağlanmır.
+    defaults=MappingProxyType({"kind": "mandatory"}),
+)
 
 
 class JournalEnrollmentsPhase:
@@ -238,11 +216,18 @@ class JournalEnrollmentsPhase:
         # Aktiv üzvlük indeksi: hansı tələbə hesabı üçün ``Enrollment``
         # yazısı DB qapısından keçə bilər (bax ``active_member_ids``).
         active_students = active_member_ids(context)
+        recorded = recorded_decisions(context)
+        writer = JournalBatchWriter(
+            context,
+            entity_type=JOURNAL_ENROLLMENT_ENTITY_TYPE,
+            source_table=JOURNAL_SOURCE_TABLE,
+            severity_for=severity_for,
+            materialiser=ENROLLMENT_MATERIALISER,
+        )
 
         decisions: list[tuple[str, str, str, str]] = []
         seen_uniqids: set[str] = set()
         state_counts: Counter[str] = Counter()
-        issue_counts: Counter[tuple[str, str]] = Counter()
         for legacy_pk, row in journal_rows(context):
             probe_cancellation(context)
             uniqid = validated_uniqid(row["uniqid"])
@@ -250,18 +235,23 @@ class JournalEnrollmentsPhase:
                 # Mənbə attestasiyası "dublikatsız" deyir — ziddiyyət fataldır.
                 raise LegacyRehearsalEvidenceError("legacy_rehearsal_journal_uniqid_duplicate")
             seen_uniqids.add(uniqid)
-            for seal_key, state, digest, label in self._journal_decisions(
-                context,
+            for decision in self._journal_decisions(
                 legacy_pk=legacy_pk,
                 row=row,
                 uniqid=uniqid,
                 offerings=offerings,
                 students=students,
                 active_students=active_students,
-                issue_counts=issue_counts,
+                recorded=recorded,
             ):
-                decisions.append((seal_key, str(state), digest, label))
-                state_counts[self.derived_state_key(state)] += 1
+                if isinstance(decision, Decision):
+                    writer.add(decision)
+                    entry = (decision.seal_key, str(decision.state), decision.digest, decision.label)
+                else:
+                    entry = decision  # resume: möhür artıq bu run-dadır
+                decisions.append(entry)
+                state_counts[self.derived_state_key(entry[1])] += 1
+        writer.flush()
 
         # SA-2: zəncir seal açarının LEKSİKOQRAFİK sırasında — rebuild ilə eyni.
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
@@ -277,148 +267,101 @@ class JournalEnrollmentsPhase:
             observed_source_rows=0,
             batches=(),
             state_counts=dict(state_counts),
-            issue_counts=MappingProxyType(dict(issue_counts)),
+            issue_counts=MappingProxyType(dict(writer.issue_counts)),
             staged_account_count=0,
             phase_digest=chain.hexdigest(),
         )
 
-    def _journal_decisions(
-        self, context, *, legacy_pk, row, uniqid, offerings, students, active_students, issue_counts
-    ):
+    def _journal_decisions(self, *, legacy_pk, row, uniqid, offerings, students, active_students, recorded):
         """Bir jurnalın bütün qərarları: parse → jurnal-səviyyə → tələbə-səviyyə."""
 
         row_hash = source_row_hash(contract=JOURNAL_FIELDS, legacy_pk=legacy_pk, projected_row=row)
         members = parse_student_ids(row["students_id"])
         if members is None:
-            recorded = _recorded_decision(context, uniqid)
-            if recorded is not None:
-                yield (uniqid, *recorded)
+            previous = recorded.get(uniqid)
+            if previous is not None:
+                yield (uniqid, *previous)
                 return
-            digest = enrollment_derivation_hash(
+            yield Decision(
                 seal_key=uniqid,
-                row_hash=row_hash,
-                outcome_token="unresolved",
-                student_ref="",
-                offering_state="unread",
-                student_state="invalid",
+                state=_STATE.QUARANTINED,
+                digest=enrollment_derivation_hash(
+                    seal_key=uniqid,
+                    row_hash=row_hash,
+                    outcome_token="unresolved",
+                    student_ref="",
+                    offering_state="unread",
+                    student_state="invalid",
+                ),
+                rule_codes=("legacy_journal_students_invalid",),
             )
-            entity_map = _seal(context, seal_key=uniqid, digest=digest, state=_STATE.QUARANTINED)
-            _write_issue(
-                context,
-                seal_key=uniqid,
-                rule_code="legacy_journal_students_invalid",
-                digest=digest,
-                entity_map=entity_map,
-                issue_counts=issue_counts,
-            )
-            yield uniqid, _STATE.QUARANTINED, digest, ""
             return
 
         offering_pk = offerings.get(uniqid, "")
         for member in members:
             seal_key = f"{uniqid}:{member}"
-            recorded = _recorded_decision(context, seal_key)
-            if recorded is not None:
-                yield (seal_key, *recorded)
+            previous = recorded.get(seal_key)
+            if previous is not None:
+                yield (seal_key, *previous)
                 continue
             student_pk = students.get(str(member), "")
             yield self._decide_student(
-                context,
                 seal_key=seal_key,
                 row_hash=row_hash,
                 student_ref=str(member),
                 offering_pk=offering_pk,
                 student_pk=student_pk,
                 student_is_active=bool(student_pk) and student_pk in active_students,
-                issue_counts=issue_counts,
             )
 
-    def _decide_student(
-        self,
-        context,
-        *,
-        seal_key,
-        row_hash,
-        student_ref,
-        offering_pk,
-        student_pk,
-        student_is_active,
-        issue_counts,
-    ):
+    def _decide_student(self, *, seal_key, row_hash, student_ref, offering_pk, student_pk, student_is_active):
         """Bir tələbə sətrinin qərarı: orphan → unresolved → inactive → materialise."""
 
         if not offering_pk or not student_pk:
             rule_code = "legacy_journal_enrollment_orphan" if not offering_pk else "legacy_journal_student_unresolved"
-            digest = enrollment_derivation_hash(
+            return Decision(
                 seal_key=seal_key,
-                row_hash=row_hash,
-                outcome_token="orphan" if not offering_pk else "unresolved",
-                student_ref=student_ref,
-                offering_state="resolved" if offering_pk else "missing",
-                student_state="resolved" if student_pk else "missing",
+                state=_STATE.SKIPPED,
+                digest=enrollment_derivation_hash(
+                    seal_key=seal_key,
+                    row_hash=row_hash,
+                    outcome_token="orphan" if not offering_pk else "unresolved",
+                    student_ref=student_ref,
+                    offering_state="resolved" if offering_pk else "missing",
+                    student_state="resolved" if student_pk else "missing",
+                ),
+                rule_codes=(rule_code,),
             )
-            entity_map = _seal(context, seal_key=seal_key, digest=digest, state=_STATE.SKIPPED)
-            _write_issue(
-                context,
-                seal_key=seal_key,
-                rule_code=rule_code,
-                digest=digest,
-                entity_map=entity_map,
-                issue_counts=issue_counts,
-            )
-            return seal_key, _STATE.SKIPPED, digest, ""
 
         if not student_is_active:
             # Hesab map-dadır, amma hələ staged-dir: DB qapısı yazını rədd edərdi.
             # Sətir atlanır, jurnalın qalanı davam edir (fail-closed, itki yox).
-            digest = enrollment_derivation_hash(
+            return Decision(
                 seal_key=seal_key,
-                row_hash=row_hash,
-                outcome_token="inactive",
-                student_ref=student_ref,
-                offering_state="resolved",
-                student_state="inactive",
+                state=_STATE.SKIPPED,
+                digest=enrollment_derivation_hash(
+                    seal_key=seal_key,
+                    row_hash=row_hash,
+                    outcome_token="inactive",
+                    student_ref=student_ref,
+                    offering_state="resolved",
+                    student_state="inactive",
+                ),
+                rule_codes=("legacy_journal_student_inactive",),
             )
-            entity_map = _seal(context, seal_key=seal_key, digest=digest, state=_STATE.SKIPPED)
-            _write_issue(
-                context,
-                seal_key=seal_key,
-                rule_code="legacy_journal_student_inactive",
-                digest=digest,
-                entity_map=entity_map,
-                issue_counts=issue_counts,
-            )
-            return seal_key, _STATE.SKIPPED, digest, ""
 
-        enrollment_model = django_apps.get_model("registrar", "Enrollment")
-        with transaction.atomic():
-            # V7 merge: iki jurnal eyni offering-i bölüşəndə eyni (student,
-            # offering) cütü modelin öz unikallıq açarı ilə EYNİ Enrollment-ə
-            # qatlanır — heç vaxt çılpaq ``create`` yoxdur.
-            enrollment, _created = enrollment_model.objects.get_or_create(
-                organization=context.organization,
-                student_id=student_pk,
-                offering_id=offering_pk,
-                # A.2: ``kind`` defoltu V-qərarsız ``mandatory``; status modelin
-                # öz defoltu (enrolled) qalır — J7-dən əvvəl heç nə bağlanmır.
-                defaults={"kind": "mandatory"},
-            )
-            digest = enrollment_derivation_hash(
+        # Materialised sətrin issue-su yoxdur — map onsuz da hədəfi göstərir.
+        return Decision(
+            seal_key=seal_key,
+            state=_STATE.MIGRATED,
+            digest=enrollment_derivation_hash(
                 seal_key=seal_key,
                 row_hash=row_hash,
                 outcome_token="materialised",
                 student_ref=student_ref,
                 offering_state="resolved",
                 student_state="resolved",
-            )
-            entity_map = _seal(
-                context,
-                seal_key=seal_key,
-                digest=digest,
-                state=_STATE.MIGRATED,
-                label=ENROLLMENT_MODEL_LABEL,
-                target_pk=str(enrollment.pk),
-            )
-        # Materialised sətrin issue-su yoxdur — map onsuz da hədəfi göstərir.
-        del entity_map
-        return seal_key, _STATE.MIGRATED, digest, ENROLLMENT_MODEL_LABEL
+            ),
+            label=ENROLLMENT_MODEL_LABEL,
+            natural_key=(student_pk, offering_pk),
+        )

@@ -92,8 +92,14 @@ class JournalCellLedger:
         return sum(tally[key] for tally in self.tallies.values() for key in keys)
 
 
-def drive_cells(context, *, ledger: JournalCellLedger, domain, distill, decide, overlap_key: str) -> None:
-    """Əvvəl əsas cədvəl, sonra arxiv — J-V7 "əsas cədvəl udur" sırası."""
+def drive_cells(context, *, ledger: JournalCellLedger, domain, distill, decide, overlap_key: str, flush=None) -> None:
+    """Əvvəl əsas cədvəl, sonra arxiv — J-V7 "əsas cədvəl udur" sırası.
+
+    ``flush`` verilirsə hər cədvəl keçidinin SONUNDA çağırılır: buferli yazıcı
+    (məs. ``LessonMarkWriter``) arxiv keçidinə başlamazdan əvvəl əsas cədvəlin
+    bütün xanalarını hədəfə yazmış olmalıdır, əks halda "əsas cədvəl udur"
+    qaydası pozulardı.
+    """
 
     for from_archive in (False, True):
         _drive_table(
@@ -105,6 +111,8 @@ def drive_cells(context, *, ledger: JournalCellLedger, domain, distill, decide, 
             overlap_key=overlap_key,
             from_archive=from_archive,
         )
+        if flush is not None:
+            flush()
 
 
 def _drive_table(context, *, ledger, domain, distill, decide, overlap_key, from_archive) -> None:

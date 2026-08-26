@@ -16,7 +16,7 @@ Qərar nərdivanı (yuxarıdan aşağı, hər pillə öz sətrini möhürləyir)
 * Eyni jurnalda eyni (tarix, saat) slotu təkrarlanır → ilk sətir (ən kiçik id)
   udur, qalanları SKIPPED ``legacy_journal_lesson_duplicate`` (mənbədə 69,650
   belə artıq sətir var — V4 dedup qaydasının dərs analoqу).
-* Qalanı: ``materialise_lesson`` — kind=lecture, hours=2, instructor açılışın
+* Qalanı: ``lesson_decision`` + dəstə yazıcısı — kind=lecture, hours=2, instructor açılışın
   müəllimi, allow_past semantikası (bax targets modulunun güzgü qeydi).
 
 Ledger kimlik açarı dates sətrinin rəqəm id-sidir → zəncir J0 kimi artan id
@@ -44,14 +44,17 @@ from .rehearsal_contracts import (
     RehearsalContext,
     source_row_hash,
 )
+from .rehearsal_journal_batch import Decision, JournalBatchWriter
 from .rehearsal_journal_lessons_targets import (
     LESSON_ENTITY_TYPE,
     LESSON_SOURCE_TABLE,
     LessonRequest,
-    materialise_lesson,
-    recorded_decision,
-    seal_invalid,
-    seal_skipped,
+    invalid_decision,
+    lesson_decision,
+    lesson_materialiser,
+    recorded_decisions,
+    severity_for,
+    skipped_decision,
 )
 from .rehearsal_journal_offerings_phase import JOURNAL_OFFERINGS_PHASE_KEY
 from .rehearsal_journal_offerings_source import journal_rows, legacy_int, migrated_target_index, validated_uniqid
@@ -189,33 +192,41 @@ class JournalLessonsPhase:
         offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
         instructors = offering_instructor_index(context, offerings)
 
+        recorded = recorded_decisions(context)
+        writer = JournalBatchWriter(
+            context,
+            entity_type=LESSON_ENTITY_TYPE,
+            source_table=LESSON_SOURCE_TABLE,
+            severity_for=severity_for,
+            materialiser=lesson_materialiser(instructors),
+        )
+
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
         state_counts: Counter[str] = Counter()
-        issue_counts: Counter[tuple[str, str]] = Counter()
         claimed_slots: set[tuple[str, str, str]] = set()
         for legacy_pk, row in lesson_rows(context):
             probe_cancellation(context)
-            recorded = recorded_decision(context, str(legacy_pk))
-            if recorded is not None:
-                state, digest, label = recorded
+            previous = recorded.get(str(legacy_pk))
+            if previous is not None:
+                state, digest, label = previous
                 if state == _STATE.MIGRATED:
                     # Resume olunan MIGRATED sətir də slot açarını tutur ki,
                     # yarımçıq keçiddən sonrakı davam eyni dublikatı tanısın.
                     self._claim(claimed_slots, row=row, journals=journals, years=years)
             else:
-                state, digest, label = self._decide(
-                    context,
+                decision = self._decide(
                     legacy_pk=legacy_pk,
                     row=row,
                     journals=journals,
                     years=years,
                     offerings=offerings,
-                    instructors=instructors,
                     claimed_slots=claimed_slots,
-                    issue_counts=issue_counts,
                 )
+                writer.add(decision)
+                state, digest, label = decision.state, decision.digest, decision.label
             chain.advance(str(legacy_pk), str(state), digest, label)
             state_counts[self.derived_state_key(state)] += 1
+        writer.flush()
 
         context.stdout_note(f"{JOURNAL_LESSONS_PHASE_KEY}.records.{sum(state_counts.values())}")
         return PhaseReport(
@@ -226,7 +237,7 @@ class JournalLessonsPhase:
             observed_source_rows=0,
             batches=(),
             state_counts=dict(state_counts),
-            issue_counts=MappingProxyType(dict(issue_counts)),
+            issue_counts=MappingProxyType(dict(writer.issue_counts)),
             staged_account_count=0,
             phase_digest=chain.hexdigest(),
         )
@@ -254,7 +265,7 @@ class JournalLessonsPhase:
             lesson_date, lesson_time = schedule
             claimed_slots.add((uniqid, lesson_date.isoformat(), lesson_time.isoformat(timespec="minutes")))
 
-    def _decide(self, context, *, legacy_pk, row, journals, years, offerings, instructors, claimed_slots, issue_counts):
+    def _decide(self, *, legacy_pk, row, journals, years, offerings, claimed_slots) -> Decision:
         """Orphan → invalid → dublikat → materialise nərdivanı."""
 
         row_hash = source_row_hash(contract=JOURNAL_DATES_FIELDS, legacy_pk=legacy_pk, projected_row=row)
@@ -263,26 +274,21 @@ class JournalLessonsPhase:
         offering_pk = offerings.get(journal[0], "") if journal is not None else ""
         if journal is None or not offering_pk:
             # Spec J3: jurnal tapılmır VƏ YA V6/karantinlə süzülüb — orphan.
-            return seal_skipped(
-                context,
+            return skipped_decision(
                 legacy_pk=legacy_pk,
                 row_hash=row_hash,
                 rule_code="legacy_journal_lesson_orphan",
                 outcome_token="orphan",
                 journal_ref=journal_ref,
-                issue_counts=issue_counts,
             )
 
         uniqid, schedule = self._resolved_slot(row, journals=journals, years=years)
         if schedule is None:
-            return seal_invalid(
-                context, legacy_pk=legacy_pk, row_hash=row_hash, journal_ref=journal_ref, issue_counts=issue_counts
-            )
+            return invalid_decision(legacy_pk=legacy_pk, row_hash=row_hash, journal_ref=journal_ref)
         lesson_date, lesson_time = schedule
         slot = (uniqid, lesson_date.isoformat(), lesson_time.isoformat(timespec="minutes"))
         if slot in claimed_slots:
-            return seal_skipped(
-                context,
+            return skipped_decision(
                 legacy_pk=legacy_pk,
                 row_hash=row_hash,
                 rule_code="legacy_journal_lesson_duplicate",
@@ -290,16 +296,15 @@ class JournalLessonsPhase:
                 journal_ref=journal_ref,
                 date_text=slot[1],
                 time_text=slot[2],
-                issue_counts=issue_counts,
             )
         claimed_slots.add(slot)
-        request = LessonRequest(
-            legacy_pk=legacy_pk,
-            row_hash=row_hash,
-            offering_pk=offering_pk,
-            instructor_pk=instructors.get(offering_pk, ""),
-            journal_ref=journal_ref,
-            date=lesson_date,
-            start_time=lesson_time,
+        return lesson_decision(
+            request=LessonRequest(
+                legacy_pk=legacy_pk,
+                row_hash=row_hash,
+                offering_pk=offering_pk,
+                journal_ref=journal_ref,
+                date=lesson_date,
+                start_time=lesson_time,
+            )
         )
-        return materialise_lesson(context, request=request)

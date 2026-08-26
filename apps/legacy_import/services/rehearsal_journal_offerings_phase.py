@@ -31,7 +31,6 @@ from types import MappingProxyType
 from apps.legacy_import.models import LegacyEntityMap
 
 from .field_contracts import JOURNAL_FIELDS
-from .rehearsal_authorizer import COURSE_OFFERING_MODEL_LABEL
 from .rehearsal_catalog_phase import CATALOG_PHASE_KEY
 from .rehearsal_catalog_targets import SUBJECT_ENTITY_TYPE
 from .rehearsal_contracts import (
@@ -43,6 +42,7 @@ from .rehearsal_contracts import (
     source_row_hash,
 )
 from .rehearsal_identity_phase import IDENTITY_PHASE_KEY, WORKER_ENTITY_TYPE
+from .rehearsal_journal_batch import JournalBatchWriter
 from .rehearsal_journal_offerings_source import JOURNAL_SOURCE_TABLE  # noqa: F401 — §3.9 re-export (testlər üçün fasad)
 from .rehearsal_journal_offerings_source import (
     journal_rows,
@@ -55,11 +55,12 @@ from .rehearsal_journal_offerings_targets import ISSUE_SEVERITY  # noqa: F401 �
 from .rehearsal_journal_offerings_targets import (
     COURSE_OFFERING_ENTITY_TYPE,
     OfferingRequest,
-    materialise_offering,
-    recorded_decision,
-    seal_discarded,
-    seal_unresolved,
-    write_issues,
+    discarded_decision,
+    offering_decision,
+    offering_materialiser,
+    recorded_decisions,
+    severity_for,
+    unresolved_decision,
 )
 from .rehearsal_journal_periods_phase import ACADEMIC_PERIOD_ENTITY_TYPE, JOURNAL_PERIODS_PHASE_KEY
 from .rehearsal_structure_phase import STRUCTURE_PHASE_KEY, probe_cancellation
@@ -111,10 +112,21 @@ class JournalOfferingsPhase:
         groups = migrated_target_index(context, GROUP_ENTITY_TYPE)
         instructors = migrated_target_index(context, WORKER_ENTITY_TYPE)
 
+        recorded = recorded_decisions(context)
+        # V5: açılışın müəllimi qərar anında bəllidir, materialiser isə onu
+        # təbii açardan deyil, bu xəritədən oxuyur (açar (subject, period, group)).
+        instructor_for_key: dict[tuple, str] = {}
+        writer = JournalBatchWriter(
+            context,
+            entity_type=COURSE_OFFERING_ENTITY_TYPE,
+            source_table=JOURNAL_SOURCE_TABLE,
+            severity_for=severity_for,
+            materialiser=offering_materialiser(lambda key: instructor_for_key.get(key, "")),
+        )
+
         decisions: list[tuple[str, str, str, str]] = []
         seen_uniqids: set[str] = set()
         state_counts: Counter[str] = Counter()
-        issue_counts: Counter[tuple[str, str]] = Counter()
         claimed_keys: set[tuple[str, str, str]] = set()
         for legacy_pk, row in journal_rows(context):
             probe_cancellation(context)
@@ -123,16 +135,15 @@ class JournalOfferingsPhase:
                 # Mənbə attestasiyası "dublikatsız" deyir — ziddiyyət fataldır.
                 raise LegacyRehearsalEvidenceError("legacy_rehearsal_journal_uniqid_duplicate")
             seen_uniqids.add(uniqid)
-            recorded = recorded_decision(context, uniqid)
-            if recorded is not None:
-                state, digest, label = recorded
+            previous = recorded.get(uniqid)
+            if previous is not None:
+                state, digest, label = previous
                 if state == _STATE.MIGRATED:
                     # Resume olunan MIGRATED sətir də merge-açarını tutur ki,
                     # yarımçıq keçiddən sonrakı davam eyni İNFO-nu törətsin.
                     self._claim(claimed_keys, row=row, subjects=subjects, periods=periods, groups=groups)
             else:
-                state, digest, label = self._decide(
-                    context,
+                decision = self._decide(
                     legacy_pk=legacy_pk,
                     row=row,
                     uniqid=uniqid,
@@ -141,10 +152,13 @@ class JournalOfferingsPhase:
                     groups=groups,
                     instructors=instructors,
                     claimed_keys=claimed_keys,
-                    issue_counts=issue_counts,
+                    instructor_for_key=instructor_for_key,
                 )
+                writer.add(decision)
+                state, digest, label = decision.state, decision.digest, decision.label
             decisions.append((uniqid, str(state), digest, label))
             state_counts[self.derived_state_key(state)] += 1
+        writer.flush()
 
         # SA-2: zəncir uniqid-in LEKSİKOQRAFİK sırasında — rebuild ilə eyni.
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
@@ -160,7 +174,7 @@ class JournalOfferingsPhase:
             observed_source_rows=0,
             batches=(),
             state_counts=dict(state_counts),
-            issue_counts=MappingProxyType(dict(issue_counts)),
+            issue_counts=MappingProxyType(dict(writer.issue_counts)),
             staged_account_count=0,
             phase_digest=chain.hexdigest(),
         )
@@ -187,7 +201,6 @@ class JournalOfferingsPhase:
 
     def _decide(
         self,
-        context,
         *,
         legacy_pk,
         row,
@@ -197,14 +210,13 @@ class JournalOfferingsPhase:
         groups,
         instructors,
         claimed_keys,
-        issue_counts,
+        instructor_for_key,
     ):
         """V6 → V7 → istinad həlli → V5 nərdivanı; hər pillə öz sətrini möhürləyir."""
 
         row_hash = source_row_hash(contract=JOURNAL_FIELDS, legacy_pk=legacy_pk, projected_row=row)
         if legacy_int(row["fake"]) == 1 or legacy_int(row["sonra_sil"]) == 1:
-            outcome = seal_discarded(context, uniqid=uniqid, row_hash=row_hash)
-            return self._account(context, uniqid, outcome, issue_counts)
+            return discarded_decision(uniqid=uniqid, row_hash=row_hash)
 
         subject_pk, period_pk, members, group_pk = self._resolved_shape(
             row, subjects=subjects, periods=periods, groups=groups
@@ -247,8 +259,7 @@ class JournalOfferingsPhase:
             merged_text="0",
         )
         if quarantine_codes:
-            outcome = seal_unresolved(context, request=request, rule_codes=(*quarantine_codes, *info_codes))
-            return self._account(context, uniqid, outcome, issue_counts)
+            return unresolved_decision(request=request, rule_codes=(*quarantine_codes, *info_codes))
 
         key = (subject_pk, period_pk, group_pk)
         merged = key in claimed_keys
@@ -256,12 +267,7 @@ class JournalOfferingsPhase:
         if merged:
             info_codes.append("legacy_journal_offering_merged")
         request = replace(request, merged_text="1" if merged else "0")
-        outcome = materialise_offering(context, request=request, rule_codes=tuple(info_codes))
-        return self._account(context, uniqid, outcome, issue_counts)
-
-    def _account(self, context, uniqid, outcome, issue_counts):
-        """Issue-ları yaz və zəncirin gözlədiyi üçlüyü qaytar."""
-
-        write_issues(context, uniqid=uniqid, outcome=outcome, issue_counts=issue_counts)
-        label = COURSE_OFFERING_MODEL_LABEL if outcome.state == _STATE.MIGRATED else ""
-        return outcome.state, outcome.digest, label
+        # İlk qalib açılışın müəllimi qalır: merge olunan jurnal mövcud sətri
+        # dəyişmir (``get_or_create`` semantikasının eynisi).
+        instructor_for_key.setdefault((subject_pk, period_pk, group_pk or None), instructor_pk)
+        return offering_decision(request=request, rule_codes=tuple(info_codes))

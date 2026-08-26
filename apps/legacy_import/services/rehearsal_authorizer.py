@@ -81,6 +81,42 @@ def _tenant_owned_validator(app_label: str, model_name: str) -> TargetValidator:
     return validate
 
 
+def _tenant_owned_bulk_validator(app_label: str, model_name: str):
+    """Toplu variant: bir sorğu ilə "mövcud VƏ bu tenantındır" açarlar dəsti.
+
+    Sətir-başına validator ilə EYNİ şərti yoxlayır (``organization_id`` bərabərliyi),
+    sadəcə ``pk__in`` ilə — 2000 hədəf üçün 2000 sorğu yerinə BİRİ.  Pozuq açar
+    ``.filter()``-i çökdürürsə ``ledger_batch`` onu ``legacy_target_validation_failed``
+    kimi tərcümə edir (fail closed, səssiz "tapılmadı" yox).
+    """
+
+    def validate_bulk(*, target_pks, organization) -> set[str]:
+        model = django_apps.get_model(app_label, model_name)
+        rows = model._default_manager.filter(pk__in=list(target_pks), organization=organization).values_list(
+            "pk", flat=True
+        )
+        return {str(pk) for pk in rows}
+
+    return validate_bulk
+
+
+def build_bulk_target_validators():
+    """``ledger_batch.seal_entity_maps`` üçün etiket → toplu validator.
+
+    Yalnız jurnal fazalarının yazdığı hədəflər buradadır; qeydə alınmamış etiket
+    üçün ``ledger_batch`` avtomatik olaraq sətir-başına validatora qayıdır.
+    """
+
+    return MappingProxyType(
+        {
+            COURSE_OFFERING_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "CourseOffering"),
+            ENROLLMENT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "Enrollment"),
+            LESSON_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "Lesson"),
+            ASSESSMENT_SCHEME_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "AssessmentScheme"),
+        }
+    )
+
+
 def build_target_validators() -> TargetValidatorRegistry:
     """Return the allowlisted target models and their tenant validators."""
 
