@@ -48,6 +48,12 @@ def _nav_targets(caps):
         ("my-schedule", _("Dərs cədvəli"), "fa-calendar-week", "cədvəl schedule dərs vaxt"),
         ("academic-calendar", _("Akademik təqvim"), "fa-calendar-days", "təqvim calendar sessiya qeydiyyat"),
         ("journal-close", _("Jurnal bağlama"), "fa-lock", "jurnal bağla semestr rim"),
+        (
+            "exam-score-entry",
+            _("İmtahan balının daxil edilməsi"),
+            "fa-pen-to-square",
+            "imtahan bal yazılı praktiki kağız daxil",
+        ),
         ("analytics", _("Akademik analitika"), "fa-chart-line", "analitika statistika gpa keçid"),
         ("my-exams", _("İmtahanlarım"), "fa-clipboard-check", "imtahan exam test"),
         ("assigned-exams", _("İmtahanlar"), "fa-clipboard-check", "imtahan exam test"),

@@ -117,6 +117,19 @@
                         {% endfor %}
                     </div>
                     {% endif %}
+                    {% if row.attempts %}
+                    {% comment %}Çox cəhd — rəsmi SONUNCU cəhddir, əvvəlkilər ləğv olunub,
+                    amma balı itmir və burada açıq görünür (sahibin qərarı M2).{% endcomment %}
+                    <div class="subject-attempts">
+                        {% for attempt in row.attempts %}
+                        <span class="subject-attempt {% if attempt.is_official %}is-official{% else %}is-superseded{% endif %}">
+                            {{ attempt.label }} {% trans "cəhd" context "profile.subjects" %}:
+                            <strong>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</strong>
+                            · {% if attempt.is_official %}{% trans "rəsmi" context "profile.subjects" %}{% else %}{% trans "ləğv olundu" context "profile.subjects" %}{% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% if row.final.graded or row.final.resit %}
                     <div class="subject-final">
                         {% if row.final.graded %}

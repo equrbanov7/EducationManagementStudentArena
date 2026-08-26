@@ -88,6 +88,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "exam-center-stats": "accounts/profile/sections/_exam_center_stats.html",
     "appeal-stats": "accounts/profile/sections/_appeal_stats.html",
     "kollokvium-windows": "accounts/profile/sections/_kollokvium_windows.html",
+    "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
     "superadmin-contact-messages": "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
     "system-monitoring": "accounts/profile/sections/superadmin/_system_monitoring.html",
     "statistics": "accounts/profile/sections/_statistics.html",

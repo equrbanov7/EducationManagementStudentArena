@@ -158,7 +158,21 @@ def evaluate_resit(*, enrollment, by_user=None):
 def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     """Record the final-exam score (teacher/exam centre), then re-evaluate resit.
 
-    Blocked when the offering's journal is locked (finalised / under approval).
+    ⚠️ JURNAL KİLİDİ BURADA TƏTBİQ OLUNMUR (sahibin qərarı, 2026-08).
+
+    Jurnal semestr SONUNDA bağlanır, imtahan isə ondan SONRA keçir — yəni yekun
+    imtahan balı demək olar həmişə KİLİDLİ jurnala düşür. Əvvəllər bu yol kilidli
+    jurnalda sükutla ``None`` qaytarırdı və nəticə İTİRDİ (körpü tərəfdə yalnız
+    WARNING kimi loglanırdı). İndi bölgü belədir:
+
+    * GİRİŞ balı (jurnal xanaları: davamiyyət, dərs balı, kollokvium, sərbəst iş)
+      — kilidlidir; dəyişiklik yalnız sənədli düzəlişlə (``corrections``) olur;
+    * ÇIXIŞ balı (yekun imtahan) — kilidə TABE DEYİL, çünki imtahan jurnal
+      bağlandıqdan sonra keçir.
+
+    ``set_resit_score`` və ``set_final_extras`` kilid yoxlamasını SAXLAYIR —
+    onlar jurnal-daxili redaktədir.
+
     ``source_note`` — audit izində bal sətrinin yanına yazılan MƏNBƏ qeydi
     (məsələn "imtahan mərkəzi · avtomatik"): aktoru olmayan sistem yazılarının
     tarixçədə boş "kim?" xanası ilə qalmaması üçün (2026-08 auditi, G7).
@@ -166,8 +180,6 @@ def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     if not _is_current_enrollment(enrollment):
         return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
-    if gradebook.journal_is_locked(enrollment.offering):
-        return None
     final_grade, _created = FinalGrade.objects.get_or_create(
         organization=enrollment.organization, enrollment=enrollment
     )

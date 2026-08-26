@@ -89,6 +89,14 @@ PERMISSION_CATEGORIES = {
         "group.view",
         "group.manage",
     ],
+    # `final_score.entry` (2026-08): KAĞIZ üzərində keçən yazılı/praktiki imtahanın
+    # YEKUN balının sistemə əl ilə köçürülməsi (İmtahan Mərkəzi → «İmtahan balının
+    # daxil edilməsi»). Test imtahanı avtomatik körpü ilə gəlir.
+    # ⚠️ PREFİKS QƏSDƏN `exam.` DEYİL: sahibin qərarı ilə yekun imtahan balını
+    # YALNIZ İmtahan Mərkəzi yaza bilər — `exam.*` wildcard-ı daşıyan dekan,
+    # kafedra müdiri, prorektor və müəllim bu səlahiyyəti AVTOMATİK almamalıdır.
+    # Ayrıca prefiks wildcard əhatəsini struktur olaraq kəsir; lazım olan rola
+    # açar permission-editordan AÇIQ verilir (audit izi ilə).
     "exams": [
         "exam.view",
         "exam.create",
@@ -96,6 +104,7 @@ PERMISSION_CATEGORIES = {
         "exam.manage",
         "exam.host",
         "exam.delete",
+        "final_score.entry",
     ],
     "appeal": [
         "appeal.create",
@@ -225,6 +234,7 @@ PERMISSION_LABELS = {
     "exam.manage": pgettext_lazy(_PERM_CTX, "İmtahan prosesini idarə etmək"),
     "exam.host": pgettext_lazy(_PERM_CTX, "İmtahan keçirmək"),
     "exam.delete": pgettext_lazy(_PERM_CTX, "İmtahanı silmək"),
+    "final_score.entry": pgettext_lazy(_PERM_CTX, "İmtahan balını sistemə daxil etmək"),
     # appeal
     "appeal.create": pgettext_lazy(_PERM_CTX, "Apellyasiya yaratmaq"),
     "appeal.respond": pgettext_lazy(_PERM_CTX, "Apellyasiyaya cavab vermək"),

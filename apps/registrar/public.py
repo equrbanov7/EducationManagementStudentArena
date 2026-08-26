@@ -412,7 +412,9 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
         record=record, period=period, semester_number=semester_number
     )
     journal_by_enrollment = {row["enrollment"].id: row["journal"] for row in journal_summary["subjects"]}
-    from apps.registrar import finals
+    # Çox cəhdli imtahan (sahibin qərarı M2): rəsmi olan SONUNCU cəhddir, amma
+    # əvvəlkilərin balı itmir — tələbə kabinetində açıq göstərilir.
+    from apps.registrar import exam_attempt_history, finals
 
     for subject_row in data["subjects"]:
         subject_row["journal"] = journal_by_enrollment.get(subject_row["enrollment"].id)
@@ -420,6 +422,7 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
             enrollment=subject_row["enrollment"], organization=organization
         )
         subject_row["components"] = gradebook.get_component_breakdown(subject_row["enrollment"])
+        subject_row["attempts"] = exam_attempt_history.attempt_rows_for_enrollment(subject_row["enrollment"])
 
     # Pre-join each elective block with the group's decision so the template
     # renders without a dict-lookup filter (block name → chosen subject).

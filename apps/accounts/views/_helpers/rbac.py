@@ -211,6 +211,9 @@ def _role_capabilities(user, profile):
         # Semestr sonu TOPLU jurnal bağlama (RİM). Köhnə `grade.approve_chair` /
         # `grade.approve_final` cütünü əvəz edir — təsdiq zənciri ləğv olunub.
         can_close_journals = get_permission_scope(user, active_organization, "journal.close").has_structure_access
+        # Kağız (yazılı/praktiki) imtahan balının əl ilə daxil edilməsi — İmtahan
+        # Mərkəzi səthi. Rol ADINDAN deyil, `final_score.entry` açarından gəlir.
+        can_enter_exam_scores = get_permission_scope(user, active_organization, "final_score.entry").has_structure_access
         analytics_all_scope = get_permission_scope(user, active_organization, "analytics.view_all")
         analytics_unit_scope = get_permission_scope(user, active_organization, "analytics.view_unit")
         can_view_unit_analytics = analytics_all_scope.has_structure_access or analytics_unit_scope.has_structure_access
@@ -229,6 +232,7 @@ def _role_capabilities(user, profile):
         )
     else:
         can_manage_registrar = can_close_journals = can_view_unit_analytics = False
+        can_enter_exam_scores = False
         can_search_directory = False
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
@@ -279,6 +283,7 @@ def _role_capabilities(user, profile):
             "exam-center-stats",  # imtahan statistikaları / nəticələr
             "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "kollokvium-windows",  # kollokvium bal-yazma pəncərələri (imtahan mərkəzi)
+            "exam-score-entry",  # kağız imtahan balının daxil edilməsi (imtahan mərkəzi)
             "journal-close",  # semestr sonu toplu jurnal bağlaması (RİM)
             "exam-chance",  # imtahan şansı ver (ikinci şans — imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
@@ -437,6 +442,8 @@ def _role_capabilities(user, profile):
             allowed_sections.add("my-journal")
         if can_close_journals:
             allowed_sections.add("journal-close")
+        if can_enter_exam_scores:
+            allowed_sections.add("exam-score-entry")
         if can_view_unit_analytics:
             allowed_sections.add("analytics")
         if is_superadmin or is_org_admin or is_unit_manager:
@@ -563,6 +570,7 @@ def _role_capabilities(user, profile):
         # Grade-approval chain (U7.2): permission-scope əsaslı (yuxarıda hesablanır);
         # köhnə rol-əsaslı ifadə nav↔view uyğunsuzluğu yaradırdı.
         "can_close_journals": can_close_journals,
+        "can_enter_exam_scores": can_enter_exam_scores,
         "can_search_directory": can_search_directory,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,

@@ -289,7 +289,7 @@
             </a>
         </li>
         {% endif %}
-        {% if role_capabilities.can_access_final_center or 'exam-center-pins' in allowed_sections or 'exam-center-stats' in allowed_sections %}
+        {% if role_capabilities.can_access_final_center or 'exam-center-pins' in allowed_sections or 'exam-center-stats' in allowed_sections or 'exam-score-entry' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_exam_center" context "profile.sidebar" %}</span></li>
         {% endif %}
 

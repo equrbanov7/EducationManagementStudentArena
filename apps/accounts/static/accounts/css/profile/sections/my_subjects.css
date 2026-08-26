@@ -370,6 +370,22 @@
 }
 .my-subjects-schedule-link:hover { text-decoration: underline; }
 
+/* ── Çox cəhd: rəsmi sonuncu, əvvəlkilər ləğv olunub (M2) ─────────────────── */
+.subject-attempts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+}
+.subject-attempt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.subject-attempt.is-official { background: #dcfce7; color: #15803d; }
+.subject-attempt.is-superseded { background: var(--ems-neutral-100); color: var(--ems-neutral-500); text-decoration: line-through; }
+
 /* ── Final result + resit (U3+) ───────────────────────────────────────────── */
 .subject-final {
     display: flex;

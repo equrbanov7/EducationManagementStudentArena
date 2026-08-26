@@ -268,6 +268,25 @@ class _Stage2Mixin:
             "notices": [],
             "post_next_url": "",
         }
+        # İmtahan Mərkəzi — kağız imtahan balının əl ilə daxil edilməsi.
+        self.exam_score_entry_section = {
+            "is_superadmin": False,
+            "org_options": [],
+            "selected_org": None,
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "subjects": [],
+            "selected_subject_id": "",
+            "offerings": [],
+            "offering": None,
+            "rows": [],
+            "reasons": [],
+            "exam_score_max": 0,
+            "journal_locked": False,
+            "post_next_url": "",
+        }
         # «İmtahan şansı ver» (ikinci şans) bölməsi (İmtahan Mərkəzi).
         self.exam_chance_section = {
             "selected_org": None,

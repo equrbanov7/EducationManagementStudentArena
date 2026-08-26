@@ -116,8 +116,17 @@ def journal_detail(request, offering_id):
     coursework_rows = journal_extras.get_course_work_rows(offering)
     finals_data = finals.get_offering_results(offering=offering)
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
+    # Çox cəhd (sahibin qərarı M2): rəsmi SONUNCU cəhddir, əvvəlkilərin balı
+    # itmir — müəllim görünüşündə «Yekun» tabının QEYD sütununda açıq göstərilir.
+    from apps.registrar import exam_attempt_history
+
+    attempts_map = {
+        row["enrollment"].id: exam_attempt_history.attempt_rows_for_enrollment(row["enrollment"])
+        for row in finals_data["rows"]
+    }
     for row in finals_data["rows"]:
         row["coursework"] = work_by_enrollment.get(row["enrollment"].id)
+        row["attempts"] = attempts_map.get(row["enrollment"].id, [])
 
     today = _tz.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
@@ -127,7 +136,7 @@ def journal_detail(request, offering_id):
         "journal": journal,
         "corrections_map": corrections_map,
         "finals": finals_data,
-        "final_breakdown": journal_extras.get_final_breakdown(offering),
+        "final_breakdown": _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map),
         "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
         "selfwork_board": journal_extras.get_selfwork_board(offering),
         "coursework_rows": coursework_rows,
@@ -171,6 +180,16 @@ def journal_detail(request, offering_id):
 
         context.update(item_corrections.annotate_normal_view(offering, context))
     return render(request, "registrar/journal_detail.html", context)
+
+
+def _with_attempts(breakdown, attempts_map):
+    """«Yekun» tabının sətirlərinə rəqəmsal cəhd tarixçəsini qoş (M2).
+
+    ``journal_extras.get_final_breakdown`` modul-ölçü budcəsinin tam həddindədir,
+    ona görə qoşma burada — view qatında — edilir (hesablama dəyişmir)."""
+    for row in breakdown.get("rows", []):
+        row["attempts"] = attempts_map.get(row["enrollment"].id, [])
+    return breakdown
 
 
 def _org_rubrics(organization):

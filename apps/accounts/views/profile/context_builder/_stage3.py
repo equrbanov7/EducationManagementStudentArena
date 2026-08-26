@@ -322,6 +322,17 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "exam-score-entry" in self.allowed_sections and self.active_section == "exam-score-entry":
+            from .._sections.exam_score_entry import build_exam_score_entry_section
+
+            build_exam_score_entry_section(
+                self.request,
+                self.exam_score_entry_section,
+                is_superadmin=self.capabilities["is_superadmin"],
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-chance" in self.allowed_sections and self.active_section == "exam-chance":
             from .._sections.exam_chance import build_exam_chance_section
 

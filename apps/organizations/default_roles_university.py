@@ -54,6 +54,8 @@ UNIVERSITY_ROLES = [
             "member.view",
             "course.view",
             "exam.*",
+            # final_score.entry `exam.*`-a DAXİL DEYİL (ayrıca prefiks) — açıq verilir.
+            "final_score.entry",
             "grade.view",
             "grade.publish",
             "appeal.respond",
@@ -78,6 +80,8 @@ UNIVERSITY_ROLES = [
             "member.view",
             "course.view",
             "exam.*",
+            # final_score.entry `exam.*`-a DAXİL DEYİL (ayrıca prefiks) — açıq verilir.
+            "final_score.entry",
             "grade.view",
             "grade.publish",
             "appeal.respond",
