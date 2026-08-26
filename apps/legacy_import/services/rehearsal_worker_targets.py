@@ -95,10 +95,12 @@ class WorkerRequest:
     role: object
     evidence_digest: str
     needs_activation: bool
-    # Mənbədəki ad/soyad — YALNIZ boş sahəni doldurmaq üçün (bax
-    # ``write_worker_names``); tələbə tərəfindəki müqavilə ilə eynidir.
+    # Mənbədəki ad/soyad/ata adı — YALNIZ boş sahəni doldurmaq üçün (bax
+    # ``write_worker_names`` / ``write_worker_patronymic``); tələbə tərəfindəki
+    # müqavilə ilə eynidir.
     first_name: str = ""
     last_name: str = ""
+    patronymic: str = ""
 
 
 @dataclass(frozen=True)
@@ -169,6 +171,7 @@ def worker_derivation_hash(
     inzibati_text: str,
     activation_state: str,
     name_state: str = "unwritten",
+    patronymic_state: str = "unwritten",
 ) -> str:
     """Cross-run-sabit worker qərar kimliyi; heç bir UUID ona daxil olmur.
 
@@ -189,6 +192,7 @@ def worker_derivation_hash(
         inzibati_text,
         activation_state,
         name_state,
+        patronymic_state,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -229,6 +233,30 @@ def write_worker_names(target_pk: str, first_name: str, last_name: str) -> str:
         users.update(**updates)
         return "written"
     return "blank" if not first_name and not last_name else "preserved"
+
+
+def write_worker_patronymic(context, *, user_pk: str, patronymic: str) -> str:
+    """Boş ``UserProfile.patronymic``-i doldur; MÖVCUD dəyər pozulmur.
+
+    Ata adı Azərbaycanda kimliyin üçüncü hissəsidir və RİM axtarışı hesabı məhz
+    ad+soyad+ATA ADI üçlüyü ilə tapır (``auth_user``-də belə sütun yoxdur).
+    Profil ``_neutralise_legacy_email`` və ``_apply_fin`` ilə eyni cür tenant-a
+    bağlı seçilir: RLS altında yalnız öz təşkilatının sətri görünür.
+    """
+
+    if not patronymic:
+        return "blank"
+    profiles = django_apps.get_model("accounts", "UserProfile").objects.filter(
+        user_id=user_pk, organization=context.organization
+    )
+    row = profiles.values("patronymic").first()
+    if row is None:
+        raise LegacyRehearsalEvidenceError(_TARGET_MISSING)
+    if row["patronymic"]:
+        return "preserved"
+    if profiles.filter(patronymic="").update(patronymic=patronymic, updated_at=timezone.now()) != 1:
+        raise LegacyRehearsalEvidenceError(_TARGET_MISSING)
+    return "written"
 
 
 def apply_scope(context, *, user_pk: str, unit_pk: str) -> tuple[str, tuple[str, ...]]:
@@ -326,6 +354,7 @@ def materialise_worker(context, *, request: WorkerRequest, activate: bool, activ
             # Ad/soyad EYNİ vahid işdə: idxal edilən müəllim UI-da öz adı ilə
             # görünməlidir (yalnız boş sahə doldurulur — §4.5 müqaviləsi).
             name_state = write_worker_names(request.user_pk, request.first_name, request.last_name)
+            patronymic_state = write_worker_patronymic(context, user_pk=request.user_pk, patronymic=request.patronymic)
             if activate:
                 stage = "activation"
                 if request.needs_activation:
@@ -345,6 +374,7 @@ def materialise_worker(context, *, request: WorkerRequest, activate: bool, activ
                 inzibati_text=request.inzibati_text,
                 activation_state=activation_state,
                 name_state=name_state,
+                patronymic_state=patronymic_state,
             )
             entity_map = _seal(
                 context,

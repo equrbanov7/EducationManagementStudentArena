@@ -20,10 +20,33 @@
     };
 
     modals.closeAll = function closeAll() {
-        var all = document.querySelectorAll("[data-rim-detail-modal], [data-rim-confirm-modal], [data-rim-password-modal]");
+        var all = document.querySelectorAll(
+            "[data-rim-detail-modal], [data-rim-confirm-modal], [data-rim-password-modal], [data-rim-notice-modal]"
+        );
         Array.prototype.forEach.call(all, function (el) {
             el.hidden = true;
         });
+    };
+
+    /**
+     * Əməliyyatdan sonra ƏL MÜDAXİLƏSİ tələb edən qeydləri göstərir.
+     *
+     * Bərpa (restore) natamam ola bilər — məsələn qrup üzvlüyü avtomatik geri
+     * qaytarılmır. Operator «uğur» mesajı ilə kifayətlənməməlidir, ona görə
+     * qeydlər ayrıca modalda açıq göstərilir.
+     */
+    modals.showNotices = function showNotices(notices) {
+        var listEl = document.querySelector("[data-rim-notice-list]");
+        if (!listEl || !notices || !notices.length) {
+            return;
+        }
+        listEl.textContent = "";
+        Array.prototype.forEach.call(notices, function (notice) {
+            var item = document.createElement("li");
+            item.textContent = notice;
+            listEl.appendChild(item);
+        });
+        modals.open("[data-rim-notice-modal]");
     };
 
     /**

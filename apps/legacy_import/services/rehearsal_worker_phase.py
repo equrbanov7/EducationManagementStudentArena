@@ -27,6 +27,7 @@ CƏMİNƏ şamildir — sayğac bu run-un SAR MIGRATED müşahidələri ilə ba�
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import replace
 from types import MappingProxyType
 
 from django.apps import apps as django_apps
@@ -65,6 +66,8 @@ from .source_extraction import open_audited_source_stream
 WORKER_PHASE_KEY = "worker_materialisation"
 #: ``auth_user.first_name``/``last_name`` sütun limiti (placement ilə eyni).
 NAME_MAX_LENGTH = 150
+#: ``UserProfile.patronymic`` sütun limiti.
+PATRONYMIC_MAX_LENGTH = 100
 
 WORKER_PHASE_ORDER = 26  # placement-dən (25) sonra, SAR-dan (28) əvvəl
 DERIVED_DIGEST_NAMESPACE = "legacy-rehearsal-worker-phase-v1"
@@ -273,6 +276,7 @@ class WorkerMaterialisationPhase:
         row_hash = source_row_hash(contract=WORKER_IDENTITY_FIELDS, legacy_pk=legacy_pk, projected_row=row)
         first_name, _truncated_first = clean_text(row["first_name"], max_length=NAME_MAX_LENGTH)
         last_name, _truncated_last = clean_text(row["last_name"], max_length=NAME_MAX_LENGTH)
+        patronymic, _truncated_patronymic = clean_text(row["father_name"], max_length=PATRONYMIC_MAX_LENGTH)
         request = WorkerRequest(
             legacy_pk=legacy_pk,
             user_pk=user_pk,
@@ -286,6 +290,7 @@ class WorkerMaterialisationPhase:
             needs_activation=False,
             first_name=first_name,
             last_name=last_name,
+            patronymic=patronymic,
         )
 
         if not unit_pk:
@@ -311,15 +316,11 @@ class WorkerMaterialisationPhase:
             )
 
         needs_activation = not account_is_active(context, user_pk)
-        request = WorkerRequest(
-            legacy_pk=legacy_pk,
-            user_pk=user_pk,
-            row_hash=row_hash,
-            department_slug=department_slug,
-            unit_pk=unit_pk,
-            teacher_type_text=str(teacher_type),
-            inzibati_text=str(inzibati),
-            role=role,
+        # ``replace``, YENİDƏN QURMA DEYİL: sıfırdan qurulan sorğu ad/soyad/ata
+        # adını səssizcə itirirdi (aktivasiya yolunda hər üçü boş gedirdi) —
+        # yeni sahə əlavə olunanda eyni tələ təkrarlanmasın.
+        request = replace(
+            request,
             evidence_digest=worker_activation_evidence_digest(
                 transform_version=context.policy.transform_version(),
                 snapshot_sha256=context.plan.source_snapshot_sha256,

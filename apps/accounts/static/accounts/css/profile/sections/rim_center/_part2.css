@@ -227,6 +227,12 @@
     color: var(--ems-neutral-500);
 }
 
+/* Bərpa sonrası «əl ilə yoxla» qeydləri — reset list-style-ı sıfırlayır. */
+ul.rim-note {
+    padding-left: 18px;
+    list-style: disc outside;
+}
+
 .rim-actions-row {
     display: flex;
     flex-wrap: wrap;

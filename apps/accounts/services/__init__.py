@@ -26,6 +26,7 @@ from ..queries import (
 )
 from .account_deletion import (
     AccountDeletionError,
+    AccountRestoreResult,
     hard_delete_account,
     restore_account,
     soft_delete_account,
@@ -71,6 +72,7 @@ from .registration import create_user_with_organization, purge_stale_pending_reg
 
 __all__ = [
     "AccountDeletionError",
+    "AccountRestoreResult",
     "AccountActivationResult",
     "IdentityAccessError",
     "IdentityCollisionError",

@@ -322,6 +322,8 @@ def test_the_worker_derivation_hash_follows_the_documented_recipe():
         # 2026-08-28: ad yazısının vəziyyəti də qərarın kimliyinin bir
         # hissəsidir (boş adı doldurmaq ≠ mövcud adı qorumaq).
         "written",
+        # Ata adı AYRI qərardır (ayrı hədəf sütun, ayrı mənbə sahəsi).
+        "preserved",
     ):
         digest.update(encoded_part(part))
 
@@ -335,6 +337,7 @@ def test_the_worker_derivation_hash_follows_the_documented_recipe():
         inzibati_text="0",
         activation_state="activated",
         name_state="written",
+        patronymic_state="preserved",
     )
 
     assert computed == digest.hexdigest()
@@ -930,3 +933,61 @@ def test_the_worker_name_is_written_from_the_source(worker_actor):
     # Mənbədə ad yoxdursa heç nə yazılmır.
     blank = get_user_model().objects.create_user(username="myedu.worker.name.2", email="", password=None)
     assert write_worker_names(str(blank.pk), "", "") == "blank"
+
+
+@pytest.mark.django_db
+def test_the_worker_patronymic_is_written_from_the_source(worker_actor):
+    """2026-08-28 tapıntısı (B-1): 8 441 profildən heç birində ata adı yox idi.
+
+    RİM axtarışı hesabı ad+soyad+ATA ADI üçlüyü ilə tapır, ona görə boş
+    ``patronymic`` real datada «ata adı ilə tap» tələbini tamamilə sındırır.
+    Müqavilə ad/soyadla eynidir: yalnız BOŞ sahə doldurulur.
+    """
+
+    from types import SimpleNamespace
+
+    from apps.legacy_import.services.rehearsal_worker_targets import write_worker_patronymic
+
+    actor = worker_actor
+    organization = _organization(actor, "worker-patronymic")
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(1))
+    user = _stage_workers(organization, actor, run.pk, (1,))[1]
+    context = SimpleNamespace(organization=organization)
+
+    assert write_worker_patronymic(context, user_pk=str(user.pk), patronymic="Şahin") == "written"
+    assert UserProfile.objects.get(user=user).patronymic == "Şahin"
+
+    # Təkrar çağırış mövcud dəyəri QORUYUR (idempotent, üzərinə yazmır).
+    assert write_worker_patronymic(context, user_pk=str(user.pk), patronymic="Başqa") == "preserved"
+    assert UserProfile.objects.get(user=user).patronymic == "Şahin"
+
+    # Mənbədə ata adı yoxdursa heç nə yazılmır (hədəf sorğusu belə atılmır).
+    other = _stage_workers(organization, actor, run.pk, (2,))[2]
+    assert write_worker_patronymic(context, user_pk=str(other.pk), patronymic="") == "blank"
+    assert UserProfile.objects.get(user=other).patronymic == ""
+
+
+@pytest.mark.django_db
+def test_an_activating_run_writes_every_identity_field(worker_actor):
+    """Reqressiya: aktivasiya yolunda ad/soyad/ata adı SƏSSİZCƏ itirdi.
+
+    ``_decide`` aktivasiya pilləsində ``WorkerRequest``-i sıfırdan qururdu və
+    ``first_name``/``last_name`` default boşa düşürdü — yəni real
+    ``--stage-and-activate`` qaçışında (prod köçürməsi) 715 müəllim yenə adsız
+    qalırdı, halbuki «disabled» qaçışında ad yazılırdı.
+    """
+
+    actor = worker_actor
+    organization = _organization(actor, "worker-identity")
+    rows = [_worker_row(1, first_name="Elvin", last_name="Qurbanov", father_name="C&uuml;c&uuml;")]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_departments(organization)
+    user = _stage_workers(organization, actor, run.pk, (1,))[1]
+
+    report = WorkerMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert dict(report.state_counts) == {"worker_materialised": 1}
+    user.refresh_from_db()
+    assert (user.first_name, user.last_name) == ("Elvin", "Qurbanov")
+    # HTML entity mənbədə xam qalıb; ``clean_text`` onu hədəfə yazmazdan əvvəl açır.
+    assert UserProfile.objects.get(user=user).patronymic == "Cücü"

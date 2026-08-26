@@ -12,9 +12,10 @@ every SAR insert for it (B-1), while ``StudentAcademicRecord.curriculum`` is not
 nullable and the ``curricula`` table is out of this slice (B-2).  What the phase
 DOES produce is the placement decision itself — program, group unit, admission
 year, degree, form, sector — sealed into a cross-run-stable
-``record_derivation_hash`` that the SAR slice will consume verbatim, plus the two
-target fields that carry no trigger dependency: ``UserProfile.fin`` and
-``auth_user.first_name``/``last_name`` (written only when currently blank).
+``record_derivation_hash`` that the SAR slice will consume verbatim, plus the
+target fields that carry no trigger dependency: ``UserProfile.fin``,
+``UserProfile.patronymic`` and ``auth_user.first_name``/``last_name`` (each
+written only when currently blank).
 
 Evidence lives entirely in the phase's own observations and digest chain.  The
 chain is advanced with exactly ``(legacy_pk, state, derivation_hash, "")`` per
@@ -68,6 +69,7 @@ REQUIRED_PHASE_KEYS = frozenset({IDENTITY_PHASE_KEY, STRUCTURE_PHASE_KEY})
 ENTRY_YEAR_PATTERN = re.compile(r"\d{4}\Z")
 ENTRY_YEAR_MAX_LENGTH = 20  # students.entry_year is a varchar(20)
 NAME_MAX_LENGTH = 150  # auth_user.first_name / last_name
+PATRONYMIC_MAX_LENGTH = 100  # UserProfile.patronymic
 
 _SEVERITY = LegacyMigrationIssue.Severity
 _STATE = LegacyEntityMap.State
@@ -328,7 +330,13 @@ def resolve_placement(row, *, groups, programs) -> Placement:
 
 
 def record_derivation_hash(
-    *, legacy_pk: int, row_hash: str, placement: Placement, fin_state: str, name_state: str
+    *,
+    legacy_pk: int,
+    row_hash: str,
+    placement: Placement,
+    fin_state: str,
+    name_state: str,
+    patronymic_state: str = "unwritten",
 ) -> str:
     """The cross-run-stable placement identity; zero UUIDs ever enter it.
 
@@ -352,6 +360,7 @@ def record_derivation_hash(
         placement.admission_year_source,
         fin_state,
         name_state,
+        patronymic_state,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -377,6 +386,30 @@ def _write_names(target_pk: str, first_name: str, last_name: str) -> str:
         users.update(**updates)
         return "written"
     return "blank" if not first_name and not last_name else "preserved"
+
+
+def _write_patronymic(context: RehearsalContext, target_pk: str, patronymic: str) -> str:
+    """Fill a blank ``UserProfile.patronymic`` only; §4.5 contract as for names.
+
+    The patronymic is the third part of an Azerbaijani identity and the RİM
+    search resolves an account by name + surname + PATRONYMIC; ``auth_user`` has
+    no such column, so it lives on the profile.  Tenant-scoped exactly like
+    ``_apply_fin`` — under RLS only this organisation's row is visible.
+    """
+
+    if not patronymic:
+        return "blank"
+    profiles = django_apps.get_model("accounts", "UserProfile").objects.filter(
+        user_id=target_pk, organization=context.organization
+    )
+    row = profiles.values("patronymic").first()
+    if row is None:
+        raise LegacyRehearsalEvidenceError(_TARGET_MISSING)
+    if row["patronymic"]:
+        return "preserved"
+    if profiles.filter(patronymic="").update(patronymic=patronymic) != 1:
+        raise LegacyRehearsalEvidenceError(_TARGET_MISSING)
+    return "written"
 
 
 def _apply_fin(context: RehearsalContext, target_pk: str, fin: str, occurrences) -> tuple[str, tuple[str, ...]]:
@@ -518,10 +551,12 @@ class StudentPlacementPhase:
         row_hash = source_row_hash(contract=STUDENT_IDENTITY_FIELDS, legacy_pk=legacy_pk, projected_row=row)
         first_name, _truncated = clean_text(row["first_name"], max_length=NAME_MAX_LENGTH)
         last_name, _truncated = clean_text(row["last_name"], max_length=NAME_MAX_LENGTH)
+        patronymic, _truncated = clean_text(row["father_name"], max_length=PATRONYMIC_MAX_LENGTH)
         fin = _legacy_fin(row["fincode"])
         legacy_pk_text = str(legacy_pk)
         with transaction.atomic():
             name_state = _write_names(target_pk, first_name, last_name)
+            patronymic_state = _write_patronymic(context, target_pk, patronymic)
             fin_state, fin_rules = _apply_fin(context, target_pk, fin, occurrences)
             digest = record_derivation_hash(
                 legacy_pk=legacy_pk,
@@ -529,6 +564,7 @@ class StudentPlacementPhase:
                 placement=placement,
                 fin_state=fin_state,
                 name_state=name_state,
+                patronymic_state=patronymic_state,
             )
             entity_map = upsert_entity_map(
                 run_id=context.run_id,

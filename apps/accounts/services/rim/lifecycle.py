@@ -117,7 +117,12 @@ def soft_delete_user(actor: RimActor, target_user, *, reason, request=None):
 
 
 def restore_user(actor: RimActor, target_user, *, reason, request=None):
-    """Yumşaq silinmiş hesabı bərpa edir (giriş yenidən açılır)."""
+    """Yumşaq silinmiş hesabı bərpa edir (giriş + rol/təşkilat bağlantıları).
+
+    `AccountRestoreResult` qaytarır (digər lifecycle funksiyalarından fərqli
+    olaraq `reason` YOX): bərpa natamam ola bilər və səth qatı operatora
+    dəqiq nəyin əl müdaxiləsi istədiyini deməlidir (QA Y-1).
+    """
     require_permission(actor, PERM_SOFT_DELETE)
     assert_can_manage(actor, target_user)
     reason = normalize_reason(reason, required=False)
@@ -125,8 +130,7 @@ def restore_user(actor: RimActor, target_user, *, reason, request=None):
     if account_status(target_user) != STATUS_DELETED:
         raise RimAccessError("not_deleted", "Hesab silinməyib.", status=409)
 
-    restore_account(target_user, request=request, actor=actor.user, reason=reason)
-    return reason
+    return restore_account(target_user, request=request, actor=actor.user, reason=reason)
 
 
 __all__ = [
