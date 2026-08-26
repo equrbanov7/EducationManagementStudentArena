@@ -36,6 +36,7 @@ from .rehearsal_contracts import (
 )
 from .rehearsal_journal_components_phase import COMPONENTS_ENTITY_TYPE
 from .rehearsal_journal_enrollments_phase import JOURNAL_ENROLLMENT_ENTITY_TYPE
+from .rehearsal_journal_entry_scores_phase import ENTRY_SCORES_ENTITY_TYPE
 from .rehearsal_journal_finals_phase import FINALS_ENTITY_TYPE
 from .rehearsal_journal_lessons_phase import journal_index
 from .rehearsal_journal_lock_phase import JOURNAL_LOCK_PHASE_KEY, LOCK_ENTITY_TYPE
@@ -69,6 +70,7 @@ _SEVERITY = LegacyMigrationIssue.Severity
 _SUMMARISED_ENTITY_TYPES = (
     MARKS_ENTITY_TYPE,
     COMPONENTS_ENTITY_TYPE,
+    ENTRY_SCORES_ENTITY_TYPE,
     FINALS_ENTITY_TYPE,
     LOCK_ENTITY_TYPE,
 )

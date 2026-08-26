@@ -61,6 +61,7 @@ PHASE_KEYS = (
     "journal_lessons",
     "journal_marks",
     "journal_components",
+    "journal_entry_scores",
     "journal_finals",
     "journal_lock",
     "journal_reconcile",
