@@ -708,7 +708,9 @@ class RimPrivilegedGrantTests(TestCase):
         from apps.organizations.permissions import (
             PERMISSION_CATEGORIES,
             get_all_permissions,
-            get_permission_label as permission_label,
+        )
+        from apps.organizations.permissions import get_permission_label as permission_label
+        from apps.organizations.permissions import (
             validate_permissions,
         )
 
