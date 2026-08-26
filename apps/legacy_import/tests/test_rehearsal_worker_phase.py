@@ -3,6 +3,8 @@
 import hashlib
 from dataclasses import replace
 
+from django.contrib.auth import get_user_model
+
 import pytest
 
 from apps.accounts.models import UserProfile
@@ -317,6 +319,9 @@ def test_the_worker_derivation_hash_follows_the_documented_recipe():
         "1",
         "0",
         "activated",
+        # 2026-08-28: ad yazısının vəziyyəti də qərarın kimliyinin bir
+        # hissəsidir (boş adı doldurmaq ≠ mövcud adı qorumaq).
+        "written",
     ):
         digest.update(encoded_part(part))
 
@@ -329,6 +334,7 @@ def test_the_worker_derivation_hash_follows_the_documented_recipe():
         teacher_type_text="1",
         inzibati_text="0",
         activation_state="activated",
+        name_state="written",
     )
 
     assert computed == digest.hexdigest()
@@ -898,3 +904,29 @@ def test_the_source_row_hash_never_leaks_a_credential_column(worker_actor):
     assert len(statements) == 1  # tək qərar keçidi — ikinci kontrakt yoxdur
     assert all("password" not in statement and "pin_for_lock" not in statement for statement in statements)
     assert all(connection.rolled_back and connection.closed for connection in factory.connections)
+
+
+def test_the_worker_name_is_written_from_the_source(worker_actor):
+    """2026-08-28 reqressiyası: idxal edilən müəllim UI-da öz ADI ilə görünməlidir.
+
+    Tələbə tərəfində (``student_placement``) ad yazılırdı, işçi tərəfində YOX —
+    715 müəllimin hamısı ``myedu.worker.N`` kimi adsız qalırdı.  Müqavilə tələbə
+    ilə eynidir: yalnız BOŞ sahə doldurulur, mövcud ad üzərinə yazılmır.
+    """
+
+    from apps.legacy_import.services.rehearsal_worker_targets import write_worker_names
+
+    user = get_user_model().objects.create_user(username="myedu.worker.name.1", email="", password=None)
+
+    assert write_worker_names(str(user.pk), "Elvin", "Qurbanov") == "written"
+    user.refresh_from_db()
+    assert (user.first_name, user.last_name) == ("Elvin", "Qurbanov")
+
+    # Təkrar çağırış mövcud adı QORUYUR (idempotent, üzərinə yazmır).
+    assert write_worker_names(str(user.pk), "Başqa", "Ad") == "preserved"
+    user.refresh_from_db()
+    assert (user.first_name, user.last_name) == ("Elvin", "Qurbanov")
+
+    # Mənbədə ad yoxdursa heç nə yazılmır.
+    blank = get_user_model().objects.create_user(username="myedu.worker.name.2", email="", password=None)
+    assert write_worker_names(str(blank.pk), "", "") == "blank"

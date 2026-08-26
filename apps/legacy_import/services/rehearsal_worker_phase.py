@@ -34,7 +34,7 @@ from django.apps import apps as django_apps
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation
 
 from .field_contracts import WORKER_IDENTITY_FIELDS
-from .legacy_text import legacy_slug
+from .legacy_text import clean_text, legacy_slug
 from .pk_inventory_contracts import MAX_LEDGER_PRIMARY_KEY
 from .rehearsal_authorizer import USER_MODEL_LABEL
 from .rehearsal_contracts import (
@@ -63,6 +63,9 @@ from .rehearsal_worker_targets import (
 from .source_extraction import open_audited_source_stream
 
 WORKER_PHASE_KEY = "worker_materialisation"
+#: ``auth_user.first_name``/``last_name`` sütun limiti (placement ilə eyni).
+NAME_MAX_LENGTH = 150
+
 WORKER_PHASE_ORDER = 26  # placement-dən (25) sonra, SAR-dan (28) əvvəl
 DERIVED_DIGEST_NAMESPACE = "legacy-rehearsal-worker-phase-v1"
 REQUIRED_PHASE_KEYS = frozenset({STRUCTURE_PHASE_KEY, IDENTITY_PHASE_KEY})
@@ -268,6 +271,8 @@ class WorkerMaterialisationPhase:
         )
         unit_pk = units.get(department_slug, "") if department_slug else ""
         row_hash = source_row_hash(contract=WORKER_IDENTITY_FIELDS, legacy_pk=legacy_pk, projected_row=row)
+        first_name, _truncated_first = clean_text(row["first_name"], max_length=NAME_MAX_LENGTH)
+        last_name, _truncated_last = clean_text(row["last_name"], max_length=NAME_MAX_LENGTH)
         request = WorkerRequest(
             legacy_pk=legacy_pk,
             user_pk=user_pk,
@@ -279,6 +284,8 @@ class WorkerMaterialisationPhase:
             role=role,
             evidence_digest="",
             needs_activation=False,
+            first_name=first_name,
+            last_name=last_name,
         )
 
         if not unit_pk:
