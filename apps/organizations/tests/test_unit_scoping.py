@@ -79,9 +79,16 @@ class UniversityDefaultRolesTest(TestCase):
         aliases = ProfileRole.aliases_for_membership_role("dean", level=80)
         self.assertIn(ProfileRole.ORG_ADMIN, aliases)
 
-    def test_chair_role_has_explicit_approval_permission(self):
+    def test_approval_chain_permissions_are_gone(self):
+        """Təsdiq zənciri ləğv olundu — «approve_chair/final» açarları yoxdur."""
         role = self.org.roles.get(name="chair_head")
-        self.assertIn("grade.approve_chair", role.permissions)
+        self.assertNotIn("grade.approve_chair", role.permissions)
+        self.assertNotIn("grade.approve_final", role.permissions)
+
+    def test_rim_role_carries_journal_close_permission(self):
+        """Jurnalı semestr sonunda RİM bağlayır (`journal.close`)."""
+        role = self.org.roles.get(name="ikt_rehber")
+        self.assertIn("journal.close", role.permissions)
 
 
 class UnitScopingTest(TestCase):
@@ -134,10 +141,15 @@ class UnitScopingTest(TestCase):
 
     def test_permission_scope_ignores_unrelated_membership_unit(self):
         unscoped_chair = User.objects.create_user("unscoped_chair", "uc@test.az", "StrongPass123!")
+        # Rola jurnal-bağlama açarı verilir, amma üzvlüyün `scope_unit`-i YOXDUR →
+        # başqa (tələbə) üzvlüyün uniti ona borc verilməməlidir (fail-closed).
+        chair_role = self.org.roles.get(name="chair_head")
+        chair_role.permissions = list(chair_role.permissions or []) + ["journal.close"]
+        chair_role.save(update_fields=["permissions"])
         Membership.objects.create(
             user=unscoped_chair,
             organization=self.org,
-            role=self.org.roles.get(name="chair_head"),
+            role=chair_role,
         )
         Membership.objects.create(
             user=unscoped_chair,
@@ -146,7 +158,7 @@ class UnitScopingTest(TestCase):
             scope_unit=self.faculty_a,
         )
 
-        scope = get_permission_scope(unscoped_chair, self.org, "grade.approve_chair")
+        scope = get_permission_scope(unscoped_chair, self.org, "journal.close")
         self.assertFalse(scope.has_structure_access)
 
     def test_owner_scope_is_org_wide(self):

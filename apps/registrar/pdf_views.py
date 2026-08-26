@@ -77,18 +77,14 @@ def my_transcript_pdf(request):
 def journal_xlsx(request, offering_id):
     """Jurnalın xlsx ixracı (U14): davamiyyət+ballar vərəqi + yekun vərəqi.
 
-    Giriş jurnal detalı ilə eynidir: müəllim/org sahibi/superuser; kafedra/dekan
-    yalnız təsdiqə göndərilmiş jurnalı görə bilər (DRAFT sızdırılmır)."""
-    from apps.registrar import approval, finals, gradebook, journal_access, journal_export
-    from apps.registrar.models import ApprovalStatus
+    Giriş jurnal detalı ilə eynidir: müəllim/org sahibi/superuser + korrektor
+    (İKT/RİM rəhbəri). Təsdiq zənciri ləğv edildiyi üçün ayrıca «rəyçi» yolu
+    YOXDUR — kafedra/dekan jurnal faylını burdan almır."""
+    from apps.registrar import finals, gradebook, journal_access, journal_export
     from apps.registrar.views import _can_edit_journal
 
     offering = journal_access.offering_or_404(request, offering_id)
-    appr = approval.approval_context(offering=offering, user=request.user)
-    can_review = approval.can_chair_approve(
-        request.user, offering.organization, offering=offering
-    ) or approval.can_dean_approve(request.user, offering.organization, offering=offering)
-    if not _can_edit_journal(request.user, offering) and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
+    if not _can_edit_journal(request.user, offering):
         raise Http404
 
     payload = journal_export.build_journal_workbook(

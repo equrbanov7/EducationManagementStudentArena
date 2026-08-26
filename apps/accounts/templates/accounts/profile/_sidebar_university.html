@@ -1,6 +1,6 @@
 {% load i18n %}
 {# ── U12: Universitet bölmələri — SPA panel (sidebar itmir) ────────── #}
-{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "grade-approvals" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections %}
 <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Universitet" context "profile.sidebar" %}</span></li>
 {% endif %}
 {% if "overall-academic" in allowed_sections %}
@@ -62,15 +62,16 @@
     {% endif %}
 </li>
 {% endif %}
-{% if "grade-approvals" in allowed_sections %}
+{% comment %}RİM: semestr sonu jurnal bağlama. Form-heavy bölmədir (kollokvium
+pəncərələri kimi) — AJAX swap YOX, tam səhifə naviqasiyası.{% endcomment %}
+{% if "journal-close" in allowed_sections %}
 <li class="sidebar-menu-item">
-    <a href="{{ profile_base_url }}?section=grade-approvals"
-       data-section="grade-approvals"
-       data-title="{% trans 'Qiymət təsdiqləri' context 'profile.sidebar' %}"
-       data-source-url="{{ profile_base_url }}"
-       class="sidebar-menu-link js-profile-section-link {% if active_section == 'grade-approvals' %}active{% endif %}">
-        <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
-        <span class="sidebar-menu-text">{% trans "Qiymət təsdiqləri" context "profile.sidebar" %}</span>
+    <a href="{{ profile_base_url }}?section=journal-close"
+       data-section="journal-close"
+       data-title="{% trans 'Jurnal bağlama' context 'profile.sidebar' %}"
+       class="sidebar-menu-link {% if active_section == 'journal-close' %}active{% endif %}">
+        <i class="fas fa-lock sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Jurnal bağlama" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}

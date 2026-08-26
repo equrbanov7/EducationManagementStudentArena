@@ -251,6 +251,23 @@ class _Stage2Mixin:
             "departments": [],
             "post_next_url": "",
         }
+        # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı.
+        self.journal_close_section = {
+            "is_superadmin": False,
+            "org_options": [],
+            "selected_org": None,
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "faculties": [],
+            "departments": [],
+            "selected_scope": "organization",
+            "selected_unit_id": "",
+            "preview": None,
+            "notices": [],
+            "post_next_url": "",
+        }
         # «İmtahan şansı ver» (ikinci şans) bölməsi (İmtahan Mərkəzi).
         self.exam_chance_section = {
             "selected_org": None,

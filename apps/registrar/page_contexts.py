@@ -13,12 +13,11 @@ Performans: hər kontekst yalnız aktiv bölmə üçün qurulur (lazy, stage4 ga
 from __future__ import annotations
 
 from django.apps import apps as django_apps
-from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.registrar import analytics, approval, schedule
-from apps.registrar.models import ApprovalStatus, AssessmentScheme, CourseOffering, StudentAcademicRecord
+from apps.registrar import analytics, journal_scope, schedule
+from apps.registrar.models import CourseOffering, StudentAcademicRecord
 
 
 def _profile_section_prefix(section: str) -> str:
@@ -292,39 +291,6 @@ def calendar_context(organization) -> dict:
     return {"has_context": True, "periods": periods, "today": today}
 
 
-def approvals_context(user, organization) -> dict:
-    """Chair/dean inbox: journals awaiting the current user's approval step."""
-    inbox_filter = Q(pk__in=[])
-    is_approver = False
-    if approval.can_chair_approve(user, organization):
-        inbox_filter |= Q(approval_status=ApprovalStatus.SUBMITTED) & approval.permission_scope_q(
-            user,
-            organization,
-            approval.CHAIR_APPROVAL_PERMISSION,
-            path_field="offering__group__path",
-            id_field="offering__group__id",
-        )
-        is_approver = True
-    if approval.can_dean_approve(user, organization):
-        inbox_filter |= Q(approval_status=ApprovalStatus.CHAIR_APPROVED) & approval.permission_scope_q(
-            user,
-            organization,
-            approval.FINAL_APPROVAL_PERMISSION,
-            path_field="offering__group__path",
-            id_field="offering__group__id",
-        )
-        is_approver = True
-    schemes = (
-        AssessmentScheme.objects.filter(organization=organization)
-        .filter(inbox_filter)
-        .select_related("offering__subject", "offering__group", "offering__period", "offering__instructor")
-        .order_by("offering__subject__code")
-        if is_approver
-        else AssessmentScheme.objects.none()
-    )
-    return {"has_context": True, "schemes": schemes, "is_approver": is_approver}
-
-
 def analytics_context(request, organization, *, embedded=False) -> dict:
     """Analytics dashboard: period picker + batched aggregation."""
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
@@ -337,7 +303,7 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
     if period is None:
         period = next((p for p in periods if p.is_current), periods[0] if periods else None)
 
-    scope_q = approval.analytics_scope_q(
+    scope_q = journal_scope.analytics_scope_q(
         request.user,
         organization,
         path_field="offering__group__path",

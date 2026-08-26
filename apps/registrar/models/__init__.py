@@ -52,6 +52,10 @@ from .grading import (
     SelfWorkMark,
     SelfWorkTopic,
 )
+from .journal_close_notice import (
+    JournalCloseNotice,
+    JournalCloseScope,
+)
 from .kollokvium_window import (
     KOLLOKVIUM_WINDOW_COUNT,
     KollokviumExtraGrant,
@@ -72,6 +76,8 @@ __all__ = [
     "CourseWork",
     "CriterionScore",
     "CourseOffering",
+    "JournalCloseNotice",
+    "JournalCloseScope",
     "JournalCorrection",
     "LessonCorrection",
     "SelfWorkCorrection",

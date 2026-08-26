@@ -48,64 +48,15 @@
     {% include "registrar/partials/_correction_modal.html" %}
     {% endif %}
 
-    {% comment %}Qiymət təsdiq zənciri — YALNIZ təsdiq prosesi başlayıbsa görünür
-    (istifadəçi tələbi: draft rejimində bu blok səhifəni tutmasın).{% endcomment %}
-    {% with appr=approval %}
-    {% if appr.status != 'draft' %}
-    <div class="approval-bar approval-bar--{{ appr.status }}">
-        <div class="approval-bar-head">
-            <span class="approval-bar-title"><i class="fas fa-clipboard-check"></i> {% trans "Qiymət təsdiqi" context "registrar.approval" %}</span>
-            <span class="approval-badge approval-badge--{{ appr.status }}">{{ appr.status_label }}</span>
-        </div>
-        {% if appr.returned_reason %}
-        <p class="approval-returned"><i class="fas fa-undo"></i> <strong>{% trans "Geri qaytarılma səbəbi" context "registrar.approval" %}:</strong> {{ appr.returned_reason }}</p>
-        {% endif %}
-        {% if appr.can_submit or appr.can_chair_approve or appr.can_dean_approve or appr.can_return %}
-        <div class="approval-actions">
-            {% if appr.can_submit %}
-            <form method="post" class="approval-inline-form">
-                {% csrf_token %}
-                <button type="submit" name="action" value="submit_approval" class="approval-btn approval-btn--submit"
-                        onclick="return confirm('{% trans "Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır." context "registrar.approval" %}');">
-                    <i class="fas fa-paper-plane"></i> {% trans "Təsdiqə göndər" context "registrar.approval" %}
-                </button>
-            </form>
-            {% endif %}
-            {% if appr.can_chair_approve %}
-            <form method="post" class="approval-inline-form">
-                {% csrf_token %}
-                <button type="submit" name="action" value="chair_approve" class="approval-btn approval-btn--approve">
-                    <i class="fas fa-check"></i> {% trans "Kafedra təsdiqi" context "registrar.approval" %}
-                </button>
-            </form>
-            {% endif %}
-            {% if appr.can_dean_approve %}
-            <form method="post" class="approval-inline-form">
-                {% csrf_token %}
-                <button type="submit" name="action" value="dean_approve" class="approval-btn approval-btn--approve"
-                        onclick="return confirm('{% trans "Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. Davam edilsin?" context "registrar.approval" %}');">
-                    <i class="fas fa-user-tie"></i> {% trans "Dekan təsdiqi" context "registrar.approval" %}
-                </button>
-            </form>
-            {% endif %}
-            {% if appr.can_return %}
-            <form method="post" class="approval-return-form">
-                {% csrf_token %}
-                <input type="text" name="return_reason" maxlength="1000" class="approval-reason-input"
-                       placeholder="{% trans 'Geri qaytarma səbəbi (opsional)' context 'registrar.approval' %}">
-                <button type="submit" name="action" value="return_revision" class="approval-btn approval-btn--return">
-                    <i class="fas fa-undo"></i> {% trans "Geri qaytar" context "registrar.approval" %}
-                </button>
-            </form>
-            {% endif %}
-        </div>
-        {% endif %}
-        {% if appr.is_locked and not appr.can_chair_approve and not appr.can_dean_approve %}
-        <p class="approval-locked-note"><i class="fas fa-lock"></i> {% trans "Jurnal təsdiq mərhələsindədir — redaktə müvəqqəti bağlıdır." context "registrar.approval" %}</p>
-        {% endif %}
+    {% comment %}Jurnal bağlıdırsa (RİM semestr sonunda bağlayıb) müəllimə səbəbi
+    izah edən qısa lövhə. Təsdiq zənciri YOXDUR — sahibin qərarı (2026-08).{% endcomment %}
+    {% if journal_locked %}
+    <div class="jd2-closedbar">
+        <i class="fas fa-lock"></i>
+        {% trans "Jurnal bağlanıb — semestr yekunlaşıb, redaktə mümkün deyil. Düzəliş lazımdırsa RİM-ə (sənədli düzəliş) müraciət edin." context "registrar.journal_close" %}
     </div>
     {% endif %}
-    {% endwith %}
+
 
     {% if journal.rows %}
 
@@ -167,6 +118,17 @@
                 </a>
             </div>
         </nav>
+
+        {% comment %}RİM jurnal-bağlanma xəbərdarlığı — İmtahan Mərkəzinin kollokvium
+        lenti ilə EYNİ komponent (jd2-kmarquee class-ları təkrar istifadə olunur,
+        yeni dizayn icad EDİLMİR).{% endcomment %}
+        {% if journal_close_notice %}
+        <div class="jd2-kmarquee" role="status" aria-live="polite" data-journal-close-marquee>
+            <div class="jd2-kmarquee__track">
+                {% for half in "ab" %}{% for rep in "12345678" %}<span class="jd2-kmarquee__item"><i class="fas fa-triangle-exclamation"></i> {% if journal_close_notice.message %}{{ journal_close_notice.message }}{% else %}{% trans "Diqqət" context "registrar.journal_close" %} · {% trans "Jurnallar" context "registrar.journal_close" %} <b>{{ journal_close_notice.closes_on|date:"d.m.Y" }}</b> {% trans "tarixindən sonra bağlanacaq — ballarınızı bu tarixə kimi yazın" context "registrar.journal_close" %}{% endif %}</span>{% endfor %}{% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         {# ── Kollokvium son-tarix xəbərdarlıq lenti — HƏR tabda görünür (açıq pəncərə varsa) ── #}
         {% if kollokvium_grid.any_open %}

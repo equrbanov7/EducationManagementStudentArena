@@ -67,14 +67,20 @@ PERMISSION_CATEGORIES = {
         "grade.input",
         "grade.publish",
         "grade.override",
-        "grade.approve_chair",
-        "grade.approve_final",
     ],
     # Jurnal düzəlişi (correction) — 2 saat/bitmiş-semestr limitlərini sənədli
     # (PDF + audit) keçmə hüququ. İKT Rəhbəri rolunun açar icazəsi.
+    #
+    # `journal.close` (2026-08): SEMESTR SONU toplu jurnal bağlama/açma. Köhnə
+    # `grade.approve_chair` / `grade.approve_final` açarlarını əvəz edir —
+    # müəllim→kafedra→dekan təsdiq zənciri sahibin qərarı ilə LƏĞV olundu, ona
+    # görə "təsdiq" adlı açar saxlamaq mənasızdır. Yeni açar `journal` ailəsindədir
+    # (RİM-in digər açarı `journal.correct` ilə yanaşı) və istənilən rola
+    # permission-editordan verilə bilər.
     "journal": [
         "journal.view",
         "journal.correct",
+        "journal.close",
     ],
     # Tələbə qrupları (exams.StudentGroup) — qrup yaratmaq/idarə etmək açarı
     # permission-editordan istənilən rola (dekan, koordinator…) verilə bilər.
@@ -205,11 +211,10 @@ PERMISSION_LABELS = {
     "grade.input": pgettext_lazy(_PERM_CTX, "Qiymət yazmaq"),
     "grade.publish": pgettext_lazy(_PERM_CTX, "Qiymətləri dərc etmək"),
     "grade.override": pgettext_lazy(_PERM_CTX, "Qiyməti məcburi dəyişmək"),
-    "grade.approve_chair": pgettext_lazy(_PERM_CTX, "Qiyməti kafedra səviyyəsində təsdiqləmək"),
-    "grade.approve_final": pgettext_lazy(_PERM_CTX, "Qiymətin yekun təsdiqi"),
     # journal
     "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
     "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
+    "journal.close": pgettext_lazy(_PERM_CTX, "Semestr sonu jurnalları bağlamaq/açmaq"),
     # groups
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),

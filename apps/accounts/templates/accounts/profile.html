@@ -65,7 +65,7 @@
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260715-appeal-batch">
     {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
-    {% if 'my-journal' in allowed_sections or 'grade-approvals' in allowed_sections %}
+    {% if 'my-journal' in allowed_sections or 'journal-close' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
@@ -87,7 +87,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,grade-approvals,analytics,system-monitoring"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -156,8 +156,8 @@
                 {% include "accounts/profile/sections/_academic_calendar.html" %}
             {% elif active_section == "my-journal" %}
                 {% include "accounts/profile/sections/_my_journal.html" %}
-            {% elif active_section == "grade-approvals" %}
-                {% include "accounts/profile/sections/_grade_approvals.html" %}
+            {% elif active_section == "journal-close" and 'journal-close' in allowed_sections %}
+                {% include "accounts/profile/sections/_journal_close.html" %}
             {% elif active_section == "analytics" %}
                 {% include "accounts/profile/sections/_analytics.html" %}
             {% elif active_section == "academic-records" and 'academic-records' in allowed_sections %}
@@ -345,7 +345,7 @@
 {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
 {% endif %}
-{% if 'my-journal' in allowed_sections or 'my-schedule' in allowed_sections or 'grade-approvals' in allowed_sections %}
+{% if 'my-journal' in allowed_sections or 'my-schedule' in allowed_sections or 'journal-close' in allowed_sections %}
 <script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>

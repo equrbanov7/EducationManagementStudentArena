@@ -8,7 +8,6 @@ app_name = "registrar"
 
 urlpatterns = [
     path("", views.journal_list, name="journal_list"),
-    path("tesdiqler/", views.approvals_inbox, name="approvals_inbox"),
     # Admin jurnal düzəlişi (üzrlü qayıb / sənədli korreksiya) — literal prefiks,
     # uuid catch-all-dan əvvəl.
     path("duzelis/", correction_views.correction_offering_list, name="correction_list"),

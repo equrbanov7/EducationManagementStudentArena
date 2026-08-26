@@ -60,14 +60,15 @@ def ensure_assessment_scheme(*, offering):
     return scheme
 
 
-# Approval-chain statuses that freeze the journal (no mark/score edits) — U7.2.
-_APPROVAL_LOCK_STATUSES = frozenset({"submitted", "chair_approved", "approved"})
+# Jurnalı donduran YEGANƏ vəziyyət: RİM-in bağladığı jurnal. Ara statuslar
+# artıq yaradılmır — təsdiq zənciri ləğv edilib (registrar.0048 DRAFT-a endirir).
+_CLOSED_STATUSES = frozenset({"approved"})
 
 
 def journal_is_locked(offering) -> bool:
-    """The journal is locked once finalised OR while under grade approval."""
+    """Jurnal bağlıdırmı — RİM semestr sonunda bağlayıb (yaxud legacy import)."""
     scheme = ensure_assessment_scheme(offering=offering)
-    return scheme.is_published or scheme.approval_status in _APPROVAL_LOCK_STATUSES
+    return scheme.is_published or scheme.approval_status in _CLOSED_STATUSES
 
 
 def lesson_allows_score(lesson) -> bool:

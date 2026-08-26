@@ -58,6 +58,9 @@ from .dashboard import (
 
 # İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri
 from .exam_chance import exam_chance
+
+# RİM — semestr sonu jurnal bağlaması
+from .journal_close import journal_close
 from .kollokvium_windows import kollokvium_windows
 
 # Organization views
@@ -186,4 +189,5 @@ __all__ = [
     "superadmin_exam_rooms",
     "exam_chance",
     "kollokvium_windows",
+    "journal_close",
 ]

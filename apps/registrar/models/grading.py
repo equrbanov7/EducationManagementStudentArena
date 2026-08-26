@@ -1,6 +1,6 @@
 """Registrar qiymətləndirmə/jurnal modelləri (U3/U7).
 
-Elektron jurnal (Lesson/LessonMark), qiymətləndirmə sxemi + təsdiq zənciri
+Elektron jurnal (Lesson/LessonMark), qiymətləndirmə sxemi + kilid vəziyyəti
 (AssessmentScheme/ApprovalStatus), çəkili komponentlər, yekun qiymət və təkrar
 imtahan. Akademik-struktur modelləri :mod:`apps.registrar.models.academic`-dədir.
 """
@@ -43,23 +43,43 @@ class AttendanceStatus(models.TextChoices):
 
 
 class ApprovalStatus(models.TextChoices):
-    """Journal grade-approval chain (U7.2): teacher → chair → dean → official."""
+    """Jurnalın kilid vəziyyəti — indi YALNIZ İKİ məna daşıyır.
+
+    SAHİBİN QƏRARI (2026-08): müəllim → kafedra → dekan təsdiq zənciri LƏĞV
+    edildi. Müəllim balı yazır və bitir; semestr sonunda RİM jurnalları toplu
+    BAĞLAYIR (bax :mod:`apps.registrar.journal_close`).
+
+    * ``DRAFT``    — jurnal açıqdır (müəllim adi kilid qaydaları çərçivəsində yazır);
+    * ``APPROVED`` — jurnal BAĞLIDIR (``is_published=True`` ilə birlikdə —
+      CheckConstraint ``registrar_scheme_publish_state_valid`` bu cütü qoruyur).
+
+    ``SUBMITTED`` / ``CHAIR_APPROVED`` / ``RETURNED`` sahə dəyərləri QƏSDƏN
+    saxlanılır (köhnə sətirlərin oxunması + legacy import J7 fazası sxemə
+    bağlıdır), lakin YENİ heç bir kod onları yazmır; miqrasiya
+    ``registrar.0048`` mövcud sətirləri DRAFT-a endirir.
+    """
 
     DRAFT = "draft", pgettext_lazy("registrar.approval", "Draft")
+    #: LEGACY — artıq yaradılmır (təsdiq zənciri ləğv edilib).
     SUBMITTED = "submitted", pgettext_lazy("registrar.approval", "Submitted (awaiting chair)")
+    #: LEGACY — artıq yaradılmır.
     CHAIR_APPROVED = "chair_approved", pgettext_lazy("registrar.approval", "Chair approved (awaiting dean)")
     APPROVED = "approved", pgettext_lazy("registrar.approval", "Approved (official)")
+    #: LEGACY — artıq yaradılmır.
     RETURNED = "returned", pgettext_lazy("registrar.approval", "Returned for revision")
 
 
 class AssessmentScheme(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
-    """Per-offering journal config + grade-approval state (tenant-configurable).
+    """Per-offering journal config + kilid vəziyyəti (tenant-configurable).
 
     The electronic journal accumulates the semester "entry score" (giriş balı,
     max ``entry_score_max`` ≈ 50) from seminar/lab lesson scores; the final exam
-    is entered elsewhere. The grade-approval chain (``approval_status``) locks the
-    journal while under review and, on final dean approval, sets ``is_published``
-    (official / transcript-ready)."""
+    is entered elsewhere.
+
+    KİLİD: ``approval_status=APPROVED`` + ``is_published=True`` = jurnal bağlıdır
+    (RİM semestr sonunda toplu bağlayır — :mod:`apps.registrar.journal_close`).
+    Bağlı jurnalda tək-tək dəyişiklik YALNIZ sənədli düzəliş axını ilə mümkündür
+    (``journal.correct`` + PDF)."""
 
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="assessment_schemes"
@@ -78,6 +98,9 @@ class AssessmentScheme(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedM
     approval_status = models.CharField(
         max_length=20, choices=ApprovalStatus.choices, default=ApprovalStatus.DRAFT, db_index=True
     )
+    # LEGACY aktor sahələri — təsdiq zənciri ləğv edilib, yeni kod onları YAZMIR.
+    # Sxemdən çıxarılmır: köhnə sətirlərdəki iz + legacy import J7 fazası (jurnal
+    # kilidi) bu cədvələ bağlıdır, sütun silmək geri dönüşü çətinləşdirir.
     submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -87,7 +110,7 @@ class AssessmentScheme(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedM
     dean_approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
-    returned_reason = models.TextField(blank=True, help_text="Geri qaytarılma səbəbi (varsa).")
+    returned_reason = models.TextField(blank=True, help_text="LEGACY: geri qaytarılma səbəbi (köhnə təsdiq zənciri).")
 
     objects = models.Manager()
 
