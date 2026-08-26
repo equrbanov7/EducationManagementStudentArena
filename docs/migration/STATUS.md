@@ -107,6 +107,11 @@ arxitektura və mərhələlər üçün `MASTER_PLAN.md` əsas mənbədir.
 | M5.8 | `journal_offerings` fazası (order 34) | VERIFIED | `journals` → `registrar.CourseOffering` + `AssessmentScheme` (DRAFT). J-V6: `fake=1`/`sonra_sil=1` → SKIPPED `legacy_journal_discarded_source` (uniqid ledger-də qalır — mənbədə heç nə silinmir). J-V5: müəllim həll olunmazsa `instructor=NULL` + INFO (legacy `teacher_id` derivation hash-də saxlanılır). J-V7: çoxqruplu jurnal → `group=NULL` tək offering + INFO; parse xətası VƏ boş massiv → QUARANTINED. Run-daxili eyni açara düşən ikinci jurnal `legacy_journal_offering_merged` ilə birləşir |
 | M5.9 | `journal_enrollments` fazası (order 36) | VERIFIED | `journals.students_id` JSON → `registrar.Enrollment` (`kind=mandatory`), map açarı `uniqid:student_id`. Həll olunmayan tələbə YALNIZ öz sətrini atır (jurnal davam edir); offering MIGRATED deyilsə orphan SKIP; `students_id` parse xətası jurnal-səviyyə QUARANTINED |
 | M5.10 | `journal_lessons` fazası (order 38) | VERIFIED | `journals_dates_added_by_teacher` (379,215) → `registrar.Lesson`; `kind=lecture`, `hours=2`, `instructor=offering.instructor`; təqvim ili ay-nömrəsindən törədilir (9-12 → Y, 1-8 → Y+1); orphan/invalid/duplicate nərdivanı. Registry 10 faza, pin `59eac1c4b772…` |
+| M5.11 | `journal_marks` fazası (order 40) | VERIFIED | `journals_dates_points` təqvim ayları (~4.4M) → `registrar.LessonMark`. İstifadəçi qərarı (F/V1): `ie` = **İŞTİRAK EDİR** → `PRESENT` (score yox), `qb` → `ABSENT`, 0–10 rəqəm → `PRESENT` + score, boş → yazı yaradılmır. `excusable=1` və ya `allowed_qb` pəncərəsi → `EXCUSED` (F/V11). J-V4 dedup: qalib ən böyük `update_counter`, sonra `updated_at`, sonra id — yaddaş-hüdudlu **iki-keçidli seçki** (bit-array prefilter + dəqiq həll, deterministik blake2b, buffer aşımında fail-closed). J-V7 arxiv: yalnız 2022-03-30-dan ƏVVƏLKİ sətirlər, overlap INFO. Seal açarı **jurnaldır** (5M sətirlik map yaradılmır) |
+| M5.12 | `journal_components` fazası (order 42) | VERIFIED | `k1`/`k2`/`k3` → `AssessmentComponent(KOLLOKVIUM, k_index)` + `ComponentScore`; `si` (148,505) → `AssessmentComponent(self_work)` + `ComponentScore` (F/V12). **Qalıq risk:** `entry_score_for` SELF_WORK komponentində `SelfWorkMark` checklist-i oxuyur, `ComponentScore`-u yox — yəni `si` balları saxlanılır və komponent bölgüsündə görünür, LAKİN hesablanan giriş balına ƏLAVƏ OLUNMUR; cutover-dan əvvəl istifadəçi qərarı tələb edir |
+| M5.13 | `journal_finals` fazası (order 44) | VERIFIED | `im` (126,705) → `FinalGrade.exam_score` (`finals.set_exam_score` güzgüsü), `im2` (5,524) → `ResitRecord`. J-V2: **şkala çevrilmir** — 50-dən böyük 376 dəyər OLDUĞU KİMİ saxlanılır + INFO `legacy_journal_exam_score_above_scheme` (servis onları 50-yə clamp edərdi). Naməlum `month_id` kodları → QUARANTINED `legacy_journal_mark_code_unknown` |
+| M5.14 | `journal_lock` fazası (order 46) | VERIFIED | F/V10: dövrü BİTMİŞ semestrlərin `AssessmentScheme`-ləri `APPROVED` + `is_published=True` (CheckConstraint: publish ⟺ approved), cari semestr DRAFT qalır; **baxış açıq qalır** (kilid yalnız redaktəni bağlayır). Qeyd: qərar `localdate()`-ə baxdığı üçün gün-miqyaslıdır — dövr sərhədini keçmək digest-i AÇIQ dəyişir, səssiz yox |
+| M5.15 | `journal_reconcile` fazası (order 48) | VERIFIED | Say balansı (mənbə = yazılan + karantin + skip), `yekun` cədvəli ilə `compute_final_result` bulk güzgüsünün müqayisəsi (kənarlaşma INFO), karantin xülasəsi. Hədəf sətri YAZMIR — yalnız sübut. Registry 15 faza, pin `de3579c5e986…` |
 
 ## Qorunan mövcud user materialları
 
@@ -199,6 +204,33 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 - domain adapteri aktiv deyil və mövcud domen datasına yazı edilməyib.
 
 ## Dəyişiklik jurnalı
+
+### 28 avqust 2026 (gecə) — FAZA 3B / J4–J8: jurnal məzmunu + Rehearsal #7 tapıntısı
+
+- Beş yeni faza (M5.11–M5.15) — jurnalın **məzmunu**: 5.1M bal/qayıb hüceyrəsi,
+  kollokvium/sərbəst iş komponentləri, imtahan yekunları, semestr kilidi və
+  üzləşdirmə. Registry **15 faza**, pin `de3579c5e986…`.
+- **Servis qatı qəsdən güzgüləndi** (import edilmədi) — data qorunması qərarı:
+  `save_marks` EXCUSED statusunu ifadə edə bilmir və balı yalnız seminar/lab
+  dərsində saxlayır (J3 hər dərsi `lecture` yaratdığı üçün **250,588 bal** itərdi),
+  `set_exam_score` isə 50-yə clamp edir (**376 dəyər** təhriflənərdi). Bütün
+  invariantlar güzgülənib və hər targets modulunun docstring-ində sadalanıb.
+- **Rehearsal #7 real tapıntısı (düzəldildi):** `journal_enrollments` staged
+  (aktivləşməmiş) tələbə üçün `Enrollment` yaratmağa çalışırdı; PG
+  `registrar_guard_active_member` haqlı olaraq rədd edirdi və **tutulmamış**
+  `IntegrityError` bütün run-u dayandırırdı (ledger RUNNING qaldı, data itmədi).
+  DB-də probe ilə təsdiqləndi (staged bloklanır / aktiv keçir). Düzəliş: faza
+  aktiv-üzvlük indeksini ÖNCƏDƏN qurur, belə sətir SKIPPED +
+  `legacy_journal_student_inactive` (WARNING) — jurnalın qalanı davam edir.
+  Reqressiya testi əlavə olundu.
+- Rehearsal #7-nin (yarımçıq) verdiyi real rəqəmlər: **13,875 CourseOffering**,
+  2,262 birləşmiş, 1,866 süzülmüş (fake/sonra_sil), 1,426 çoxqruplu,
+  1,402 müəllimi həll olunmayan.
+- Qapılar: sqlite 966; PG `apps/legacy_import` **1,026 pass**; **tam PG suite
+  4,695 pass / 0 fail**; lint/module-size/module_deps təmiz; **CI Pipeline +
+  CodeQL yaşıl (c91bc7f3)**.
+- PG-yə xas 48 uğursuzluq yenə FIXTURE idi (ortaq `journal_points_harness`
+  tələbələri aktiv üzvlüksüz yaradırdı) — `activate_member` köməkçisi ilə həll.
 
 ### 28 avqust 2026 (gecə) — FAZA 3B / J0–J3: jurnal skeleti
 
