@@ -17,10 +17,17 @@ Qərar nərdivanı (yuxarıdan aşağı, hər pillə öz sətrini möhürləyir)
 * Tələbə EntityMap-da (bu run-un MIGRATED ``student`` müşahidələri) həll
   olunmasa → o TƏLƏBƏ sətri SKIPPED ``legacy_journal_student_unresolved``,
   jurnalın qalan tələbələri davam edir (spec J2).
+* 2026-08-28 (qrup-başına jurnal): tələbə ÖZ QRUPUNUN dilimə yazılır.
+  TƏK qruplu jurnalda seçim yoxdur — jurnal qrupu elan edir, siyahı olduğu kimi
+  köçür (``students.group_id`` bugünkü qrupdur, 2021 jurnalınınkı deyil).
+  ÇOX qruplu jurnalda uyğun dilim tapılmasa → sətir SKIPPED
+  ``legacy_journal_student_group_mismatch`` (fail-closed: bal yad qrupun
+  jurnalına yazılmır).  Real çıxarışda bu qayda 190 683 yazılış sətrinin
+  2.1 %-inə (4 016) toxunur; ciddi uyğunluq isə 12.3 %-ini atardı.
 * Qalanı: ``Enrollment`` get_or_create (org, student, offering) —
-  ``kind=mandatory`` (A.2, V-qərarsız defolt).  V7 merge nəticəsində iki
-  jurnal eyni offering-i bölüşürsə eyni (student, offering) cütü EYNİ
-  Enrollment-ə qatlanır — modelin öz unikallıq açarı qoruyucudur.
+  ``kind=mandatory`` (A.2, V-qərarsız defolt).  C6 birləşməsində iki jurnal
+  eyni offering-i bölüşürsə eyni (student, offering) cütü EYNİ Enrollment-ə
+  qatlanır — modelin öz unikallıq açarı qoruyucudur.
 
 Ledger kimlik açarı mətndir (``uniqid:student``), ona görə SA-2 zənciri J1
 kimi LEKSİKOQRAFİK sırada yeriyir (``derived_ledger_sort_key = str``).
@@ -58,6 +65,7 @@ from .rehearsal_journal_offerings_source import (
     validated_uniqid,
 )
 from .rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
+from .rehearsal_journal_slices import build_journal_slices
 from .rehearsal_placement_phase import PLACEMENT_PHASE_KEY
 from .rehearsal_sar_phase import SAR_PHASE_KEY
 from .rehearsal_structure_phase import probe_cancellation
@@ -99,6 +107,10 @@ ISSUE_SEVERITY = MappingProxyType(
                 # active_member`` belə ``Enrollment``-i rədd edir, ona görə sətir
                 # ÖNCƏDƏN atlanır: fail-closed, run çökmür, qeyd itmir.
                 "legacy_journal_student_inactive",
+                # 2026-08-28: tələbənin qrupu jurnalın qrup dilimlərindən heç
+                # birinə uyğun gəlmir (qrupsuz tələbə, siyahıdan kənar qrup və
+                # ya materiallaşmayan dilim) — fail-closed atlanır.
+                "legacy_journal_student_group_mismatch",
             ),
             _SEVERITY.WARNING,
         ),
@@ -211,7 +223,7 @@ class JournalEnrollmentsPhase:
             raise LegacyRehearsalEvidenceError("legacy_rehearsal_phase_dependency_missing")
         probe_cancellation(context)
 
-        offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
+        slices = build_journal_slices(context, migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE))
         students = migrated_target_index(context, STUDENT_ENTITY_TYPE)
         # Aktiv üzvlük indeksi: hansı tələbə hesabı üçün ``Enrollment``
         # yazısı DB qapısından keçə bilər (bax ``active_member_ids``).
@@ -239,7 +251,7 @@ class JournalEnrollmentsPhase:
                 legacy_pk=legacy_pk,
                 row=row,
                 uniqid=uniqid,
-                offerings=offerings,
+                slices=slices,
                 students=students,
                 active_students=active_students,
                 recorded=recorded,
@@ -272,7 +284,7 @@ class JournalEnrollmentsPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _journal_decisions(self, *, legacy_pk, row, uniqid, offerings, students, active_students, recorded):
+    def _journal_decisions(self, *, legacy_pk, row, uniqid, slices, students, active_students, recorded):
         """Bir jurnalın bütün qərarları: parse → jurnal-səviyyə → tələbə-səviyyə."""
 
         row_hash = source_row_hash(contract=JOURNAL_FIELDS, legacy_pk=legacy_pk, projected_row=row)
@@ -297,7 +309,7 @@ class JournalEnrollmentsPhase:
             )
             return
 
-        offering_pk = offerings.get(uniqid, "")
+        journal_has_offering = slices.has_offering(uniqid)
         for member in members:
             seal_key = f"{uniqid}:{member}"
             previous = recorded.get(seal_key)
@@ -305,32 +317,55 @@ class JournalEnrollmentsPhase:
                 yield (seal_key, *previous)
                 continue
             student_pk = students.get(str(member), "")
+            slice_key_text, reason = slices.resolve_student(uniqid, str(member))
             yield self._decide_student(
                 seal_key=seal_key,
                 row_hash=row_hash,
                 student_ref=str(member),
-                offering_pk=offering_pk,
+                journal_has_offering=journal_has_offering,
+                offering_pk=slices.offerings.get(slice_key_text, "") if slice_key_text else "",
+                slice_reason=reason,
                 student_pk=student_pk,
                 student_is_active=bool(student_pk) and student_pk in active_students,
             )
 
-    def _decide_student(self, *, seal_key, row_hash, student_ref, offering_pk, student_pk, student_is_active):
-        """Bir tələbə sətrinin qərarı: orphan → unresolved → inactive → materialise."""
+    def _decide_student(self, *, seal_key, row_hash, student_ref, student_pk, student_is_active, **shape):
+        """Qərar nərdivanı: orphan → unresolved → qrup uyğunsuzluğu → inactive → materialise."""
 
-        if not offering_pk or not student_pk:
-            rule_code = "legacy_journal_enrollment_orphan" if not offering_pk else "legacy_journal_student_unresolved"
+        journal_has_offering, offering_pk = shape["journal_has_offering"], shape["offering_pk"]
+        if not journal_has_offering or not student_pk:
+            rule_code = (
+                "legacy_journal_enrollment_orphan" if not journal_has_offering else "legacy_journal_student_unresolved"
+            )
             return Decision(
                 seal_key=seal_key,
                 state=_STATE.SKIPPED,
                 digest=enrollment_derivation_hash(
                     seal_key=seal_key,
                     row_hash=row_hash,
-                    outcome_token="orphan" if not offering_pk else "unresolved",
+                    outcome_token="orphan" if not journal_has_offering else "unresolved",
                     student_ref=student_ref,
-                    offering_state="resolved" if offering_pk else "missing",
+                    offering_state="resolved" if journal_has_offering else "missing",
                     student_state="resolved" if student_pk else "missing",
                 ),
                 rule_codes=(rule_code,),
+            )
+
+        if not offering_pk:
+            # Tələbənin qrupu bu jurnalın heç bir dilimini göstərmir: yazılış
+            # yaradılsaydı balı YAD qrupun jurnalına düşərdi (fail-closed).
+            return Decision(
+                seal_key=seal_key,
+                state=_STATE.SKIPPED,
+                digest=enrollment_derivation_hash(
+                    seal_key=seal_key,
+                    row_hash=row_hash,
+                    outcome_token="group_mismatch",
+                    student_ref=student_ref,
+                    offering_state=shape["slice_reason"],
+                    student_state="resolved",
+                ),
+                rule_codes=("legacy_journal_student_group_mismatch",),
             )
 
         if not student_is_active:

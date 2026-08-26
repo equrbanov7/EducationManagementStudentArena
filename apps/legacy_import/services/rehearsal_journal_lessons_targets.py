@@ -14,8 +14,10 @@ qərarı ilə eyni səbəb).  Servisin invariantları bunlardır və hamısı qo
 * keçmiş-tarix rəddi — import məhz ``allow_past=True`` semantikasıdır (spec);
 * eyni gün/saat toqquşması — servisdəki ``exists()`` yoxlaması burada
   ``(organization, offering, date, start_time)`` üzərində ``get_or_create``
-  açarıdır: V7 merge nəticəsində eyni offering-ə qatlanan jurnalların eyni
-  slotu EYNİ dərsə birləşir, dublikat yaranmır;
+  açarıdır: C6 birləşməsində eyni offering-ə qatlanan jurnalların eyni slotu
+  EYNİ dərsə birləşir, dublikat yaranmır;
+* 2026-08-28 (qrup-başına jurnal) — bir legacy dərs sətri jurnalın HƏR qrup
+  dilimə TƏKRARLANIR, ona görə möhür açarı ``<legacy_pk>:<qrup>``dur;
 * ``ensure_assessment_scheme`` — J1 hər offering üçün sxemi artıq yaradıb;
 * defoltlar — ``kind=lecture``, ``hours=2`` (spec J3), ``instructor`` açılışın
   müəllimi, ``created_by=None`` (import heç kimin adından yazmır).
@@ -67,6 +69,8 @@ class LessonRequest:
     """Bir dərs sətrinin yazısı üçün lazım olan hər şey — həll bitib."""
 
     legacy_pk: int
+    seal_key: str  # ``<legacy_pk>:<qrup>`` — dilim başına bir möhür
+    slice_ref: str  # dilimin legacy qrup pk-sı
     row_hash: str
     offering_pk: str
     journal_ref: str
@@ -97,6 +101,7 @@ def lesson_derivation_hash(
     journal_ref: str,
     date_text: str,
     time_text: str,
+    slice_ref: str = "",
 ) -> str:
     """Cross-run-sabit dərs qərar kimliyi; heç bir UUID/target pk daxil olmur."""
 
@@ -109,6 +114,7 @@ def lesson_derivation_hash(
         journal_ref,
         date_text,
         time_text,
+        slice_ref,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -157,11 +163,13 @@ def skipped_decision(
     journal_ref: str,
     date_text: str = "",
     time_text: str = "",
+    seal_key: str = "",
+    slice_ref: str = "",
 ) -> Decision:
     """Orphan/dublikat — SKIPPED; sətir ledger-də qalır, mənbədə heç nə silinmir."""
 
     return Decision(
-        seal_key=str(legacy_pk),
+        seal_key=seal_key or str(legacy_pk),
         state=_STATE.SKIPPED,
         digest=lesson_derivation_hash(
             legacy_pk=legacy_pk,
@@ -170,6 +178,7 @@ def skipped_decision(
             journal_ref=journal_ref,
             date_text=date_text,
             time_text=time_text,
+            slice_ref=slice_ref,
         ),
         rule_codes=(rule_code,),
     )
@@ -200,7 +209,7 @@ def lesson_decision(*, request: LessonRequest) -> Decision:
     """
 
     return Decision(
-        seal_key=str(request.legacy_pk),
+        seal_key=request.seal_key,
         state=_STATE.MIGRATED,
         digest=lesson_derivation_hash(
             legacy_pk=request.legacy_pk,
@@ -209,6 +218,7 @@ def lesson_decision(*, request: LessonRequest) -> Decision:
             journal_ref=request.journal_ref,
             date_text=request.date_text,
             time_text=request.time_text,
+            slice_ref=request.slice_ref,
         ),
         label=LESSON_MODEL_LABEL,
         natural_key=(request.offering_pk, request.date, request.start_time),

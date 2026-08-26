@@ -60,6 +60,7 @@ from .rehearsal_journal_offerings_phase import JOURNAL_OFFERINGS_PHASE_KEY
 from .rehearsal_journal_offerings_source import journal_rows, legacy_int, migrated_target_index, validated_uniqid
 from .rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from .rehearsal_journal_periods_phase import JOURNAL_PERIODS_PHASE_KEY, parse_period, period_rows
+from .rehearsal_journal_slices import build_offering_slices
 from .rehearsal_structure_phase import probe_cancellation
 from .source_extraction import open_audited_source_stream
 
@@ -171,7 +172,9 @@ class JournalLessonsPhase:
     source_tables = ()
     entity_types = (LESSON_ENTITY_TYPE,)
     derived_digest_namespace = DERIVED_DIGEST_NAMESPACE  # SA-2 hook
-    # Açar rəqəmdir: rebuild-in defolt ``int`` sıralaması stream sırası ilə eynidir.
+    # 2026-08-28: açar artıq ``<legacy_pk>:<qrup>`` mətnidir (dilim başına bir
+    # dərs), ona görə rebuild ``int`` deyil, LEKSİKOQRAFİK sıralayır.
+    derived_ledger_sort_key = staticmethod(str)
 
     def declared_source_rows(self, plan) -> int:
         return 0
@@ -190,6 +193,7 @@ class JournalLessonsPhase:
         years = semester_year_index(context)
         journals = journal_index(context)
         offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
+        slices = build_offering_slices(context, offerings)
         instructors = offering_instructor_index(context, offerings)
 
         recorded = recorded_decisions(context)
@@ -201,32 +205,33 @@ class JournalLessonsPhase:
             materialiser=lesson_materialiser(instructors),
         )
 
-        chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
+        decisions: list[tuple[str, str, str, str]] = []
         state_counts: Counter[str] = Counter()
         claimed_slots: set[tuple[str, str, str]] = set()
         for legacy_pk, row in lesson_rows(context):
             probe_cancellation(context)
-            previous = recorded.get(str(legacy_pk))
-            if previous is not None:
-                state, digest, label = previous
-                if state == _STATE.MIGRATED:
-                    # Resume olunan MIGRATED sətir də slot açarını tutur ki,
-                    # yarımçıq keçiddən sonrakı davam eyni dublikatı tanısın.
-                    self._claim(claimed_slots, row=row, journals=journals, years=years)
-            else:
-                decision = self._decide(
-                    legacy_pk=legacy_pk,
-                    row=row,
-                    journals=journals,
-                    years=years,
-                    offerings=offerings,
-                    claimed_slots=claimed_slots,
-                )
-                writer.add(decision)
-                state, digest, label = decision.state, decision.digest, decision.label
-            chain.advance(str(legacy_pk), str(state), digest, label)
-            state_counts[self.derived_state_key(state)] += 1
+            for seal_key, outcome in self._lesson_entries(
+                legacy_pk=legacy_pk,
+                row=row,
+                journals=journals,
+                years=years,
+                slices=slices,
+                claimed_slots=claimed_slots,
+                recorded=recorded,
+            ):
+                if isinstance(outcome, Decision):
+                    writer.add(outcome)
+                    entry = (seal_key, str(outcome.state), outcome.digest, outcome.label)
+                else:
+                    entry = (seal_key, *outcome)  # resume: möhür artıq bu run-dadır
+                decisions.append(entry)
+                state_counts[self.derived_state_key(entry[1])] += 1
         writer.flush()
+
+        # SA-2: zəncir möhür açarının LEKSİKOQRAFİK sırasında — rebuild ilə eyni.
+        chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
+        for seal_key, state, digest, label in sorted(decisions, key=lambda item: item[0]):
+            chain.advance(seal_key, state, digest, label)
 
         context.stdout_note(f"{JOURNAL_LESSONS_PHASE_KEY}.records.{sum(state_counts.values())}")
         return PhaseReport(
@@ -257,54 +262,84 @@ class JournalLessonsPhase:
         )
         return uniqid, schedule
 
-    def _claim(self, claimed_slots, *, row, journals, years) -> None:
-        """Resume yolunda slot açarını bərpa et (canlı qərarla eyni qayda)."""
+    def _lesson_entries(self, *, legacy_pk, row, journals, years, slices, claimed_slots, recorded):
+        """Bir legacy dərs sətri → jurnalın HƏR dilimə bir möhür (2026-08-28).
 
-        uniqid, schedule = self._resolved_slot(row, journals=journals, years=years)
-        if uniqid is not None and schedule is not None:
-            lesson_date, lesson_time = schedule
-            claimed_slots.add((uniqid, lesson_date.isoformat(), lesson_time.isoformat(timespec="minutes")))
-
-    def _decide(self, *, legacy_pk, row, journals, years, offerings, claimed_slots) -> Decision:
-        """Orphan → invalid → dublikat → materialise nərdivanı."""
+        Orphan/invalid hallar jurnal-səviyyədir (möhür açarı ``<legacy_pk>``),
+        materiallaşan dərs isə dilim başına ayrıca möhür alır
+        (``<legacy_pk>:<qrup>``).  Dublikat slotu artıq AÇILIŞ üzrə tutulur:
+        C6 birləşməsində iki jurnal eyni açılışı bölüşürsə ikincinin eyni
+        gün/saatı ``legacy_journal_lesson_duplicate`` olur — hədəfdə tək dərs.
+        """
 
         row_hash = source_row_hash(contract=JOURNAL_DATES_FIELDS, legacy_pk=legacy_pk, projected_row=row)
         journal_ref = str(legacy_int(row["journal_id"]))
         journal = journals.get(legacy_int(row["journal_id"]))
-        offering_pk = offerings.get(journal[0], "") if journal is not None else ""
-        if journal is None or not offering_pk:
+        pairs = slices.slice_pairs(journal[0]) if journal is not None else ()
+        journal_key = str(legacy_pk)
+        if not pairs:
             # Spec J3: jurnal tapılmır VƏ YA V6/karantinlə süzülüb — orphan.
-            return skipped_decision(
-                legacy_pk=legacy_pk,
-                row_hash=row_hash,
-                rule_code="legacy_journal_lesson_orphan",
-                outcome_token="orphan",
-                journal_ref=journal_ref,
+            previous = recorded.get(journal_key)
+            yield journal_key, (
+                previous
+                if previous is not None
+                else skipped_decision(
+                    legacy_pk=legacy_pk,
+                    row_hash=row_hash,
+                    rule_code="legacy_journal_lesson_orphan",
+                    outcome_token="orphan",
+                    journal_ref=journal_ref,
+                )
             )
+            return
 
-        uniqid, schedule = self._resolved_slot(row, journals=journals, years=years)
+        _uniqid, schedule = self._resolved_slot(row, journals=journals, years=years)
         if schedule is None:
-            return invalid_decision(legacy_pk=legacy_pk, row_hash=row_hash, journal_ref=journal_ref)
+            previous = recorded.get(journal_key)
+            yield journal_key, (
+                previous
+                if previous is not None
+                else invalid_decision(legacy_pk=legacy_pk, row_hash=row_hash, journal_ref=journal_ref)
+            )
+            return
+
         lesson_date, lesson_time = schedule
-        slot = (uniqid, lesson_date.isoformat(), lesson_time.isoformat(timespec="minutes"))
-        if slot in claimed_slots:
-            return skipped_decision(
-                legacy_pk=legacy_pk,
-                row_hash=row_hash,
-                rule_code="legacy_journal_lesson_duplicate",
-                outcome_token="duplicate",
-                journal_ref=journal_ref,
-                date_text=slot[1],
-                time_text=slot[2],
+        date_text = lesson_date.isoformat()
+        time_text = lesson_time.isoformat(timespec="minutes")
+        for group_ref, offering_pk in pairs:
+            seal_key = f"{legacy_pk}:{group_ref}"
+            slot = (offering_pk, date_text, time_text)
+            previous = recorded.get(seal_key)
+            if previous is not None:
+                if previous[0] == _STATE.MIGRATED:
+                    # Resume olunan MIGRATED sətir də slot açarını tutur ki,
+                    # yarımçıq keçiddən sonrakı davam eyni dublikatı tanısın.
+                    claimed_slots.add(slot)
+                yield seal_key, previous
+                continue
+            if slot in claimed_slots:
+                yield seal_key, skipped_decision(
+                    legacy_pk=legacy_pk,
+                    row_hash=row_hash,
+                    rule_code="legacy_journal_lesson_duplicate",
+                    outcome_token="duplicate",
+                    journal_ref=journal_ref,
+                    date_text=date_text,
+                    time_text=time_text,
+                    seal_key=seal_key,
+                    slice_ref=group_ref,
+                )
+                continue
+            claimed_slots.add(slot)
+            yield seal_key, lesson_decision(
+                request=LessonRequest(
+                    legacy_pk=legacy_pk,
+                    seal_key=seal_key,
+                    slice_ref=group_ref,
+                    row_hash=row_hash,
+                    offering_pk=offering_pk,
+                    journal_ref=journal_ref,
+                    date=lesson_date,
+                    start_time=lesson_time,
+                )
             )
-        claimed_slots.add(slot)
-        return lesson_decision(
-            request=LessonRequest(
-                legacy_pk=legacy_pk,
-                row_hash=row_hash,
-                offering_pk=offering_pk,
-                journal_ref=journal_ref,
-                date=lesson_date,
-                start_time=lesson_time,
-            )
-        )

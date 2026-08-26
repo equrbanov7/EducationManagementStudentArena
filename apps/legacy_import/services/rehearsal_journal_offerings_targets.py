@@ -55,7 +55,8 @@ ISSUE_SEVERITY = MappingProxyType(
             (
                 # V6: fake/sonra_sil süzgəci qərarlı siyasətdir, anomaliya deyil.
                 "legacy_journal_discarded_source",
-                # V7: çoxqruplu jurnal → group=NULL tək offering.
+                # V7 (2026-08-28): çoxqruplu jurnal → HƏR qrup üçün ayrı
+                # offering; kod qalır, mənası «N dilimə bölündü»dür.
                 "legacy_journal_multi_group",
                 # V5: instructor=NULL — legacy teacher_id qərar kimliyində qalır.
                 "legacy_journal_instructor_unresolved",
@@ -72,10 +73,12 @@ class OfferingRequest:
     """Bir jurnalın offering yazısı üçün lazım olan hər şey — həll bitib."""
 
     uniqid: str
+    seal_key: str  # dilim möhür açarı (``uniqid`` və ya ``uniqid:group``)
+    slice_ref: str  # bu dilimin legacy qrup pk-sı ("" → jurnal-səviyyə qərar)
     row_hash: str
     subject_pk: str
     period_pk: str
-    group_pk: str  # "" → group=NULL (V7 çoxqruplu forma)
+    group_pk: str  # "" → yalnız jurnal-səviyyə karantində (dilim həmişə qruplu)
     instructor_pk: str  # "" → instructor=NULL (V5)
     subject_ref: str
     period_ref: str
@@ -113,6 +116,7 @@ def offering_derivation_hash(
     group_state: str,
     instructor_state: str,
     merged_text: str,
+    slice_ref: str = "",
 ) -> str:
     """Cross-run-sabit offering qərar kimliyi; heç bir UUID ona daxil olmur.
 
@@ -133,6 +137,7 @@ def offering_derivation_hash(
         group_state,
         instructor_state,
         merged_text,
+        slice_ref,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -157,8 +162,8 @@ def recorded_decisions(context) -> dict[str, tuple[str, str, str]]:
 OFFERING_MATERIALISER = TargetMaterialiser(
     app_label="registrar",
     model_name="CourseOffering",
-    # V7: ``group_id=None`` legal açardır (çoxqruplu jurnal) — ``normalized_key``
-    # onu ayrıca sentinel ilə daşıyır, süzgəc isə ``isnull`` budağı ilə tapır.
+    # V7 (2026-08-28): dilim həmişə qruplu olduğundan ``group_id`` praktikada
+    # NULL deyil; ``isnull`` budağı köhnə (qrupsuz) sətirlər üçün qalır.
     key_fields=("subject_id", "period_id", "group_id"),
     defaults=_Frozen({"lesson_hours": 0, "is_active": True}),
     defaults_for=lambda key: {},
@@ -199,7 +204,7 @@ def unresolved_decision(*, request: OfferingRequest, rule_codes: tuple[str, ...]
     """Həll olunmayan istinad — jurnal bütövlükdə QUARANTINED, target yazısı yoxdur."""
 
     return Decision(
-        seal_key=request.uniqid,
+        seal_key=request.seal_key,
         state=_STATE.QUARANTINED,
         digest=offering_derivation_hash(
             uniqid=request.uniqid,
@@ -211,6 +216,7 @@ def unresolved_decision(*, request: OfferingRequest, rule_codes: tuple[str, ...]
             group_state=request.group_state,
             instructor_state=request.instructor_state,
             merged_text="0",
+            slice_ref=request.slice_ref,
         ),
         rule_codes=rule_codes,
     )
@@ -220,7 +226,7 @@ def offering_decision(*, request: OfferingRequest, rule_codes: tuple[str, ...]) 
     """Materialised açılış; hədəf açarı ``(subject, period, group)`` cütüdür."""
 
     return Decision(
-        seal_key=request.uniqid,
+        seal_key=request.seal_key,
         state=_STATE.MIGRATED,
         digest=offering_derivation_hash(
             uniqid=request.uniqid,
@@ -232,6 +238,7 @@ def offering_decision(*, request: OfferingRequest, rule_codes: tuple[str, ...]) 
             group_state=request.group_state,
             instructor_state=request.instructor_state,
             merged_text=request.merged_text,
+            slice_ref=request.slice_ref,
         ),
         label=COURSE_OFFERING_MODEL_LABEL,
         rule_codes=rule_codes,

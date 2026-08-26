@@ -63,6 +63,7 @@ from .rehearsal_journal_points_source import (
     parse_cell_score,
 )
 from .rehearsal_journal_seal import JournalSealEntry, JournalSealer, state_for, tally_parts
+from .rehearsal_journal_slices import build_offering_slices, enrollment_offering_index
 from .rehearsal_structure_phase import probe_cancellation
 
 JOURNAL_COMPONENTS_PHASE_KEY = "journal_components"
@@ -252,8 +253,10 @@ class JournalComponentsPhase:
             raise LegacyRehearsalEvidenceError("legacy_rehearsal_phase_dependency_missing")
         probe_cancellation(context)
 
-        offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
+        slices = build_offering_slices(context, migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE))
         enrollments = migrated_index(context, JOURNAL_ENROLLMENT_ENTITY_TYPE)
+        # Komponent TƏLƏBƏNİN öz dilimində yaradılır: açılış yazılışdan gəlir.
+        offerings = enrollment_offering_index(context)
         ledger = JournalCellLedger(recorded=COMPONENT_SEALER.recorded_decisions(context))
         components: dict[tuple[str, str], str] = {}
         drive_cells(
@@ -264,8 +267,9 @@ class JournalComponentsPhase:
             decide=lambda cell: self._decide(
                 context,
                 cell=cell,
-                offerings=offerings,
+                slices=slices,
                 enrollments=enrollments,
+                offerings=offerings,
                 components=components,
                 ledger=ledger,
             ),
@@ -290,7 +294,7 @@ class JournalComponentsPhase:
                     digest=digest,
                     state=state,
                     label=label,
-                    target_pk=offerings.get(uniqid, "") if label else "",
+                    target_pk=slices.primary_offering(uniqid) if label else "",
                     rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
                 )
             )
@@ -317,11 +321,10 @@ class JournalComponentsPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _decide(self, context, *, cell: ComponentCell, offerings, enrollments, components, ledger) -> None:
+    def _decide(self, context, *, cell: ComponentCell, slices, enrollments, offerings, components, ledger) -> None:
         """orphan → dəyər → qeydiyyat → komponent → yazı nərdivanı."""
 
-        offering_pk = offerings.get(cell.uniqid, "")
-        if not offering_pk:
+        if not slices.has_offering(cell.uniqid):
             ledger.count(cell.uniqid, "orphan")
             return
         outcome, score = classify_component_cell(cell.point)
@@ -330,6 +333,10 @@ class JournalComponentsPhase:
             return
         enrollment_pk = enrollments.get(f"{cell.uniqid}:{cell.student_id}", "")
         if not enrollment_pk:
+            ledger.count(cell.uniqid, "enrollment")
+            return
+        offering_pk = offerings.get(enrollment_pk, "")
+        if not offering_pk:
             ledger.count(cell.uniqid, "enrollment")
             return
         component_pk = ensure_component(context, offering_pk=offering_pk, month_id=cell.month_id, cache=components)

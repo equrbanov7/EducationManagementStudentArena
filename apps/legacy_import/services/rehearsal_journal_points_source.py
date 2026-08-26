@@ -248,14 +248,18 @@ def migrated_index(context: RehearsalContext, entity_type: str) -> dict[str, str
     return index
 
 
-def lesson_slot_index(context: RehearsalContext) -> dict[tuple[str, int, int, str], tuple[str, datetime.date]]:
-    """``(uniqid, ay, gün, "HH:MM")`` → ``(lesson_pk, dərs tarixi)``.
+def lesson_slot_index(context: RehearsalContext, slices) -> dict[tuple[str, int, int, str], tuple[str, datetime.date]]:
+    """``(açılış pk, ay, gün, "HH:MM")`` → ``(lesson_pk, dərs tarixi)``.
 
     J3-ün öz axını (``journals_dates_added_by_teacher``) və öz ledger xəritəsi
     birləşdirilir: beləliklə J4 registrar cədvəlinə heç bir sorğu vermir və
     dərsin TÖRƏDİLMİŞ ilini (J-V3 üzürlü qaib pəncərəsi üçün lazımdır) J3 ilə
     EYNİ funksiya ilə alır.  J3-də dublikat slot SKIPPED olduğundan xəritədə
     yalnız qalib sətir görünür — açar isə hər iki halda eynidir.
+
+    2026-08-28 (qrup-başına jurnal): açarın birinci hissəsi artıq ``uniqid``
+    deyil, AÇILIŞ pk-sıdır — tələbənin xanası öz qrupunun dərsinə bağlanmalıdır,
+    qonşu qrupun eyni gün/saatlı dərsinə yox.
     """
 
     from .rehearsal_journal_lessons_phase import journal_index, parse_lesson_schedule, semester_year_index
@@ -267,9 +271,6 @@ def lesson_slot_index(context: RehearsalContext) -> dict[tuple[str, int, int, st
     lessons = migrated_index(context, LESSON_ENTITY_TYPE)
     index: dict[tuple[str, int, int, str], tuple[str, datetime.date]] = {}
     for legacy_pk, row in attested_rows(context, contract=JOURNAL_DATES_FIELDS, source_table=LESSON_SOURCE_TABLE):
-        lesson_pk = lessons.get(str(legacy_pk), "")
-        if not lesson_pk:
-            continue  # orphan/invalid/dublikat — J3 onsuz da möhürləyib
         journal = journals.get(legacy_int(row["journal_id"]))
         if journal is None:
             continue
@@ -282,8 +283,13 @@ def lesson_slot_index(context: RehearsalContext) -> dict[tuple[str, int, int, st
         if schedule is None:
             continue
         lesson_date, lesson_time = schedule
-        key = (journal[0], lesson_date.month, lesson_date.day, lesson_time.isoformat(timespec="minutes"))
-        index.setdefault(key, (lesson_pk, lesson_date))
+        time_text = lesson_time.isoformat(timespec="minutes")
+        for group_ref, offering_pk in slices.slice_pairs(journal[0]):
+            lesson_pk = lessons.get(f"{legacy_pk}:{group_ref}", "")
+            if not lesson_pk:
+                continue  # orphan/invalid/dublikat — J3 onsuz da möhürləyib
+            key = (offering_pk, lesson_date.month, lesson_date.day, time_text)
+            index.setdefault(key, (lesson_pk, lesson_date))
     return index
 
 

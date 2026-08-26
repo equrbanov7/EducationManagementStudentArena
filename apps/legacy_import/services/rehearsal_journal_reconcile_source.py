@@ -69,7 +69,7 @@ def _outcome_of(domain: str, month_id: str, day_number: str, point_text: str) ->
     return "unreadable" if outcome in ("unknown", "range") else ""
 
 
-def tally_source_rows(context, *, offerings) -> dict[str, dict[str, int]]:
+def tally_source_rows(context, *, journal_uniqids) -> dict[str, dict[str, int]]:
     """Hər domen üçün mənbə sətirlərinin müstəqil təsnifat sayğacı."""
 
     tally = {domain: dict.fromkeys(BALANCE_KEYS, 0) for domain in BALANCE_DOMAINS}
@@ -88,7 +88,9 @@ def tally_source_rows(context, *, offerings) -> dict[str, dict[str, int]]:
                 if stamped is None or stamped >= ARCHIVE_CUTOFF:
                     bucket["overlap"] += 1
                     continue
-            if validated_uniqid(row["journal_uniqid"]) not in offerings:
+            # 2026-08-28: açılış artıq dilim açarı ilə indekslənir, ona görə
+            # orphan qapısı JURNAL dəsti ilə yoxlanılır (dilim açarı ilə yox).
+            if validated_uniqid(row["journal_uniqid"]) not in journal_uniqids:
                 bucket["orphan"] += 1
                 continue
             outcome = _outcome_of(domain, month_id, legacy_text(row["day_number"]), legacy_text(row["point"]))

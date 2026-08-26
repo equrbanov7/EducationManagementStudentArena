@@ -54,6 +54,7 @@ from .rehearsal_journal_reconcile_source import (
     tally_target_rows,
 )
 from .rehearsal_journal_seal import JournalSealer
+from .rehearsal_journal_slices import build_offering_slices
 from .rehearsal_structure_phase import probe_cancellation
 
 JOURNAL_RECONCILE_PHASE_KEY = "journal_reconcile"
@@ -141,13 +142,18 @@ class JournalReconcilePhase:
             raise LegacyRehearsalEvidenceError("legacy_rehearsal_phase_dependency_missing")
         probe_cancellation(context)
 
-        offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
+        slices = build_offering_slices(context, migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE))
+        journal_uniqids = slices.journal_uniqids()
         recorded = RECONCILE_SEALER.recorded_decisions(context)
         issue_counts: Counter[tuple[str, str]] = Counter()
         decisions = list(recorded.items())
 
-        decisions.extend(self._balance(context, offerings=offerings, recorded=recorded, issue_counts=issue_counts))
-        decisions.extend(self._finals(context, offerings=offerings, recorded=recorded, issue_counts=issue_counts))
+        decisions.extend(
+            self._balance(context, journal_uniqids=journal_uniqids, recorded=recorded, issue_counts=issue_counts)
+        )
+        decisions.extend(
+            self._finals(context, journal_uniqids=journal_uniqids, recorded=recorded, issue_counts=issue_counts)
+        )
         decisions.extend(self._summary(context, recorded=recorded, issue_counts=issue_counts))
 
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
@@ -172,11 +178,11 @@ class JournalReconcilePhase:
 
     # ── (a) say balansı ─────────────────────────────────────────────────────
 
-    def _balance(self, context, *, offerings, recorded, issue_counts):
+    def _balance(self, context, *, journal_uniqids, recorded, issue_counts):
         keys = {domain: f"a-balance-{domain}" for domain in BALANCE_DOMAINS}
         if all(key in recorded for key in keys.values()):
             return ()
-        source = tally_source_rows(context, offerings=offerings)
+        source = tally_source_rows(context, journal_uniqids=journal_uniqids)
         target = tally_target_rows(context)
         results = []
         for domain in BALANCE_DOMAINS:
@@ -208,7 +214,7 @@ class JournalReconcilePhase:
 
     # ── (b) ``yekun`` güzgüsü ───────────────────────────────────────────────
 
-    def _finals(self, context, *, offerings, recorded, issue_counts):
+    def _finals(self, context, *, journal_uniqids, recorded, issue_counts):
         journals = journal_index(context)
         enrollments = migrated_index(context, JOURNAL_ENROLLMENT_ENTITY_TYPE)
         mirror = FinalMirror(context)
@@ -222,7 +228,7 @@ class JournalReconcilePhase:
             uniqid = journal[0] if journal is not None else ""
             enrollment_pk = (
                 enrollments.get(f"{uniqid}:{legacy_int(row['student_id'])}", "")
-                if uniqid and uniqid in offerings
+                if uniqid and uniqid in journal_uniqids
                 else ""
             )
             expected = legacy_total(row)

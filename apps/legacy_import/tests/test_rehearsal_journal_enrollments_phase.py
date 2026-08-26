@@ -15,6 +15,8 @@ from apps.legacy_import.services.ledger import TargetValidation, create_run, sta
 from apps.legacy_import.services.rehearsal_authorizer import (
     COURSE_OFFERING_MODEL_LABEL,
     ENROLLMENT_MODEL_LABEL,
+    ORG_UNIT_MODEL_LABEL,
+    STUDENT_RECORD_MODEL_LABEL,
     USER_MODEL_LABEL,
     build_target_validators,
 )
@@ -43,10 +45,13 @@ from apps.legacy_import.services.rehearsal_journal_offerings_source import parse
 from apps.legacy_import.services.rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.services.source_extraction import LegacyDiscoveredTable
-from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
-from core.constants import AcademicPeriodType, OrganizationType
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 
 _STUDENT_ENTITY_TYPE = "student"
+_GROUP_ENTITY_TYPE = "group_unit"
+_SAR_ENTITY_TYPE = "student_record"
+_GROUP_REF = "2"  # ``_journal_row`` defoltu: ``groups_id = ["2"]``
 _PHASE_KEYS = (
     "academic_structure",
     "academic_catalog",
@@ -224,6 +229,7 @@ def test_issue_severity_map_covers_exactly_the_enrollment_taxonomy():
         "legacy_journal_students_invalid": "warning",
         "legacy_journal_student_unresolved": "warning",
         "legacy_journal_student_inactive": "warning",
+        "legacy_journal_student_group_mismatch": "warning",
         "legacy_journal_enrollment_orphan": "info",
     }
     assert set(ISSUE_SEVERITY.values()) <= set(LegacyMigrationIssue.Severity.values)
@@ -392,16 +398,102 @@ def _make_offering(organization):
     )
 
 
-def _seed_references(organization, actor, run_id, *, django_user_model, uniqids=("rooBx39tsK",), student_pks=(42, 43)):
-    """Əvvəlki fazaların (J1/identity) qoyub getdiyi map-lar."""
+def _seed_group(organization, actor, run_id, *, group_ref=_GROUP_REF):
+    """Struktur fazasının qoyub getdiyi qrup vahidi + onun ledger xəritəsi."""
+
+    # İdempotent: eyni qrup bir neçə yerdən (dilim + tələbə SAR-ı) toxunula bilər;
+    # slug (organization, slug) üzrə unikaldır, ona görə təkrar yaratma pozuntudur.
+    unit, _created = OrgUnit.objects.get_or_create(
+        organization=organization,
+        slug=f"qrup-{group_ref}",
+        defaults={"name": f"Qrup {group_ref}", "unit_type": OrgUnitType.GROUP},
+    )
+    _map(
+        run_id,
+        actor,
+        entity_type=_GROUP_ENTITY_TYPE,
+        legacy_pk=group_ref,
+        label=ORG_UNIT_MODEL_LABEL,
+        target_pk=unit.pk,
+        validators={ORG_UNIT_MODEL_LABEL: lambda **_kwargs: TargetValidation(True, True)},
+    )
+    return unit
+
+
+#: Test daxilində proqram/kurikulum təkrar yaradılmasın deyə org-üzrə keş.
+_SEED_RECORD_CACHE: dict = {}
+
+
+def _seed_record(organization, actor, run_id, *, student, legacy_pk, group, cache=None):
+    """SAR fazasının (order 28) qoyub getdiyi akademik qeyd — tələbənin qrupu."""
+
+    from django.apps import apps as django_apps
+
+    cache = _SEED_RECORD_CACHE if cache is None else cache
+    key = organization.pk
+    if key not in cache:
+        program = django_apps.get_model("registrar", "Program").objects.create(
+            organization=organization, code="P-1", name="Proqram", ects_total=240
+        )
+        cache[key] = (
+            program,
+            django_apps.get_model("registrar", "Curriculum").objects.create(
+                organization=organization, program=program, admission_year=2021
+            ),
+        )
+    program, curriculum = cache[key]
+    record = django_apps.get_model("registrar", "StudentAcademicRecord").objects.create(
+        organization=organization,
+        student=student,
+        program=program,
+        curriculum=curriculum,
+        group=group,
+        admission_year=2021,
+    )
+    _map(
+        run_id,
+        actor,
+        entity_type=_SAR_ENTITY_TYPE,
+        legacy_pk=legacy_pk,
+        label=STUDENT_RECORD_MODEL_LABEL,
+        target_pk=record.pk,
+        validators={STUDENT_RECORD_MODEL_LABEL: lambda **_kwargs: TargetValidation(True, True)},
+    )
+    return record
+
+
+def _seed_references(
+    organization,
+    actor,
+    run_id,
+    *,
+    django_user_model,
+    uniqids=("rooBx39tsK",),
+    student_pks=(42, 43),
+    group_ref=_GROUP_REF,
+    record_group_ref=None,
+    per_student_group_ref=None,
+):
+    """Əvvəlki fazaların (J1/identity/SAR) qoyub getdiyi map-lar.
+
+    2026-08-28: J1 açarı DİLİM açarıdır (``uniqid:<qrup>``) və tələbənin qrupu
+    SAR-dan oxunur; ``record_group_ref`` qəsdən başqa qrup verib uyğunsuzluq
+    ssenarisini qurmağa imkan verir.
+    """
 
     offering = _make_offering(organization)
+    group = _seed_group(organization, actor, run_id, group_ref=group_ref)
+    record_group = (
+        group
+        if record_group_ref in (None, group_ref)
+        else _seed_group(organization, actor, run_id, group_ref=record_group_ref)
+    )
     for uniqid in uniqids:
         _map(
             run_id,
             actor,
             entity_type=COURSE_OFFERING_ENTITY_TYPE,
-            legacy_pk=uniqid,
+            legacy_pk=f"{uniqid}:{group_ref}",
             label=COURSE_OFFERING_MODEL_LABEL,
             target_pk=offering.pk,
         )
@@ -425,8 +517,33 @@ def _seed_references(organization, actor, run_id, *, django_user_model, uniqids=
             target_pk=student.pk,
             validators={USER_MODEL_LABEL: lambda **_kwargs: TargetValidation(True, True)},
         )
+        # ``per_student_group_ref`` — tələbənin ÖZ qrupu (dilim ssenarisi):
+        # SAR ƏVVƏLDƏN doğru qrupla yaradılır, sonradan DƏYİŞDİRİLMİR (ledger
+        # append-only-dir və PG ``registrar_guard_student_group_transfer``
+        # rəsmi transfer olmadan qrup dəyişikliyini rədd edir).
+        student_group = record_group
+        if per_student_group_ref and legacy_pk in per_student_group_ref:
+            student_group = _seed_group(organization, actor, run_id, group_ref=per_student_group_ref[legacy_pk])
+        _seed_record(organization, actor, run_id, student=student, legacy_pk=legacy_pk, group=student_group)
         students[legacy_pk] = student
     return offering, students
+
+
+def _make_second_offering(organization, actor, run_id, *, group_ref="3"):
+    """İkinci qrup dilimi üçün açılış (fənn/dövr birincidən götürülür)."""
+
+    from django.apps import apps as django_apps
+
+    offering_model = django_apps.get_model("registrar", "CourseOffering")
+    first = offering_model.objects.filter(organization=organization).first()
+    return offering_model.objects.create(
+        organization=organization,
+        subject=first.subject,
+        period=first.period,
+        group=_seed_group(organization, actor, run_id, group_ref=group_ref),
+        lesson_hours=0,
+        is_active=True,
+    )
 
 
 def _seeded_context(organization, actor, run, *, rows, policy=None, notes=None, cancelled=None):
@@ -511,6 +628,98 @@ def test_students_of_an_unmaterialised_journal_are_skipped_as_orphans(enrollment
         ("fakeAAAAAA:43", "legacy_journal_enrollment_orphan"): "info",
     }
     assert _enrollments(organization).count() == 0
+
+
+@pytest.mark.django_db
+def test_a_single_group_journal_keeps_its_historical_roster(enrollment_actor, django_user_model):
+    """``students.group_id`` BUGÜNKÜ qrupdur — tək qruplu jurnal onu soruşmur."""
+
+    actor = enrollment_actor
+    organization = _organization(actor, "journal-enrollments-historical")
+    rows = [_journal_row(2, "rooBx39tsK")]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    # Jurnal "2" qrupunundur, tələbələr isə artıq "7" qrupuna keçib.
+    _seed_references(organization, actor, run.pk, django_user_model=django_user_model, record_group_ref="7")
+
+    report = JournalEnrollmentsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    # Jurnalın özü qrupu elan edir: tarixi siyahı olduğu kimi köçür.
+    assert dict(report.state_counts) == {"enrollment_materialised": 2}
+    assert _issues(run) == {}
+    assert _enrollments(organization).count() == 2
+
+
+@pytest.mark.django_db
+def test_a_multi_group_student_outside_every_slice_is_skipped_fail_closed(enrollment_actor, django_user_model):
+    """Çoxqruplu jurnalda seçim var: uyğun dilim tapılmasa sətir atlanır."""
+
+    actor = enrollment_actor
+    organization = _organization(actor, "journal-enrollments-group-mismatch")
+    rows = [_journal_row(2, "rooBx39tsK", groups_id='["2","3"]')]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    # Dilimlər "2" və "3" qruplarıdır, tələbələrin SAR-ı isə "7"-ni göstərir.
+    _seed_references(organization, actor, run.pk, django_user_model=django_user_model, record_group_ref="7")
+    _map(
+        run.pk,
+        actor,
+        entity_type=COURSE_OFFERING_ENTITY_TYPE,
+        legacy_pk="rooBx39tsK:3",
+        label=COURSE_OFFERING_MODEL_LABEL,
+        target_pk=_make_second_offering(organization, actor, run.pk).pk,
+    )
+
+    report = JournalEnrollmentsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert dict(report.state_counts) == {"enrollment_skipped": 2}
+    assert _issues(run) == {
+        ("rooBx39tsK:42", "legacy_journal_student_group_mismatch"): "warning",
+        ("rooBx39tsK:43", "legacy_journal_student_group_mismatch"): "warning",
+    }
+    # Fail-closed: bal yad qrupun jurnalına yazılmasın deyə yazılış yaranmır.
+    assert _enrollments(organization).count() == 0
+
+
+@pytest.mark.django_db
+def test_a_multi_group_journal_sends_each_student_to_its_own_slice(enrollment_actor, django_user_model):
+    """Sahibin qərarı: «hər qrupun bir jurnalı olsun» — yazılış da bölünür."""
+
+    from django.apps import apps as django_apps
+
+    actor = enrollment_actor
+    organization = _organization(actor, "journal-enrollments-split")
+    rows = [_journal_row(2, "rooBx39tsK", groups_id='["2","7"]')]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    # 43 nömrəli tələbə ƏVVƏLDƏN ikinci qrupdadır (SAR sonradan dəyişdirilmir).
+    offering_a, students = _seed_references(
+        organization,
+        actor,
+        run.pk,
+        django_user_model=django_user_model,
+        per_student_group_ref={43: "7"},
+    )
+    # İkinci qrupun dilimi öz açılışını alır.
+    unit_b = _seed_group(organization, actor, run.pk, group_ref="7")
+    offering_b = django_apps.get_model("registrar", "CourseOffering").objects.create(
+        organization=organization,
+        subject=offering_a.subject,
+        period=offering_a.period,
+        group=unit_b,
+        lesson_hours=0,
+        is_active=True,
+    )
+    _map(
+        run.pk,
+        actor,
+        entity_type=COURSE_OFFERING_ENTITY_TYPE,
+        legacy_pk="rooBx39tsK:7",
+        label=COURSE_OFFERING_MODEL_LABEL,
+        target_pk=offering_b.pk,
+    )
+    report = JournalEnrollmentsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert dict(report.state_counts) == {"enrollment_materialised": 2}
+    placement = {str(enrollment.student_id): str(enrollment.offering_id) for enrollment in _enrollments(organization)}
+    assert placement == {str(students[42].pk): str(offering_a.pk), str(students[43].pk): str(offering_b.pk)}
 
 
 @pytest.mark.django_db

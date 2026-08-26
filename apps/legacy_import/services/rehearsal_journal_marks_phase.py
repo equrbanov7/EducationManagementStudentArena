@@ -75,6 +75,7 @@ from .rehearsal_journal_points_source import (
     parse_cell_score,
 )
 from .rehearsal_journal_seal import state_for
+from .rehearsal_journal_slices import build_offering_slices, enrollment_offering_index
 from .rehearsal_structure_phase import probe_cancellation
 
 JOURNAL_MARKS_PHASE_KEY = "journal_marks"
@@ -188,17 +189,23 @@ def distill_mark_cell(legacy_pk: int, row, from_archive: bool) -> MarkCell:
 class MarkResolution:
     """Faza boyu dəyişməyən lookup keşləri (registrar-a sorğu vermədən)."""
 
-    offerings: dict
+    slices: object  # ``JournalSlices`` — jurnal → qrup dilimləri (orphan qapısı)
     enrollments: dict
+    offerings: dict  # ``Enrollment`` pk → ``CourseOffering`` pk
     lessons: dict
     windows: dict
 
 
 def build_resolution(context: RehearsalContext) -> MarkResolution:
+    slices = build_offering_slices(context, migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE))
     return MarkResolution(
-        offerings=migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE),
+        slices=slices,
         enrollments=migrated_index(context, JOURNAL_ENROLLMENT_ENTITY_TYPE),
-        lessons=lesson_slot_index(context),
+        # 2026-08-28: xananın açılışı YAZILIŞdan gəlir (J2 onu tələbənin öz qrup
+        # dilimə bağlayıb), dərs slotu isə həmin açılış üzrə indekslənir —
+        # tələbənin qaibi qonşu qrupun eyni saatlı dərsinə düşə bilməz.
+        offerings=enrollment_offering_index(context),
+        lessons=lesson_slot_index(context, slices),
         windows=allowed_absence_windows(context),
     )
 
@@ -254,7 +261,7 @@ class JournalMarksPhase:
             entry, outcome = journal_seal_entry(
                 uniqid=uniqid,
                 state=state,
-                offering_pk=resolution.offerings.get(uniqid, ""),
+                offering_pk=resolution.slices.primary_offering(uniqid),
                 tally=tally,
                 evidence=ledger.evidence_part(uniqid),
                 rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
@@ -288,8 +295,7 @@ class JournalMarksPhase:
     def _decide(self, *, cell: MarkCell, resolution: MarkResolution, ledger, writer) -> None:
         """Bir xananın qərarı — nərdivan modul qeydindəki sıradadır."""
 
-        offering_pk = resolution.offerings.get(cell.uniqid, "")
-        if not offering_pk:
+        if not resolution.slices.has_offering(cell.uniqid):
             ledger.count(cell.uniqid, "orphan")
             return
         outcome, status, score = classify_mark_cell(cell.point)
@@ -300,7 +306,8 @@ class JournalMarksPhase:
         if not enrollment_pk:
             ledger.count(cell.uniqid, "enrollment")
             return
-        slot = resolution.lessons.get((cell.uniqid, cell.month, cell.day, cell.time_text))
+        offering_pk = resolution.offerings.get(enrollment_pk, "")
+        slot = resolution.lessons.get((offering_pk, cell.month, cell.day, cell.time_text)) if offering_pk else None
         if slot is None:
             ledger.count(cell.uniqid, "lesson")
             return
