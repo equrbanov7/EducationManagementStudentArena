@@ -53,6 +53,10 @@ from apps.exams.services.final_center import (  # noqa: F401
 from apps.exams.services.grading import (  # noqa: F401
     calculate_attempt_score,
 )
+from apps.exams.services.journal_sync import (  # noqa: F401
+    schedule_journal_sync,
+    sync_attempt_to_journal,
+)
 from apps.exams.services.language_variants import (  # noqa: F401
     available_language_options,
 )
@@ -118,6 +122,8 @@ __all__ = [
     "get_live_session_model",
     "is_teacher_user",
     "resolve_exam_attempt_name_visibility",
+    "schedule_journal_sync",
+    "sync_attempt_to_journal",
     "resolve_exam_attempt_review_window_seconds",
     "student_final_exam_context",
     "tenant_scoped_exams",
