@@ -196,6 +196,27 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 
 ## Dəyişiklik jurnalı
 
+### 27 avqust 2026 (gecə) — Rehearsal #6: müəllimlər canlı dumpda aktiv
+
+- **Rehearsal #6** (`emsarena_rehearsal_10d2ae2b15d0`, 6 faza, transform
+  `rehearsal-identity-v1.84f118bcc319`, run `f8e38b7b-…`): status **succeeded**.
+  DB faktları: 8,431 hesab → **5,928 aktiv** (5,213 tələbə + **715 müəllim**),
+  **715/715 müəllim `Membership.scope_unit`-i öz kafedrasına yazılıb** (V-24),
+  SAR 5,213, staged qalan 2,503 (qəbul ili tapılmayan kohort).
+- UI təsdiqi (staging serve, superadmin): akademik qeydlər 5,213; view-as
+  seçicisində müəllimlər (`myedu.worker.*`, rol Teacher) və tələbələr görünür;
+  müəllim profili view-as ilə açılır (audit banneri ilə).
+- «Qruplar» icazə seed-i (0028) rehearsal tenantında yoxlandı: rector `*`,
+  vice_rector/ikt_rehber/dean/chair_head `group.view+group.manage`;
+  exam_center*/hr/teacher/program_coordinator ALMADI — köhnə davranışın
+  dəqiq güzgüsü (heç kim qazanmır/itirmir), koordinatora indi UI-dan verilə bilər.
+- **Yeni tapıntı (P2, cutover-dan əvvəl düzəlt):** `--emit-report-only`
+  identity rebase-inə girir və `auth.User` sorğusunu RLS-li tətbiq rolu altında
+  edir → `legacy_rehearsal_resume_target_missing`; owner DSN ilə cəhd guard
+  tərəfindən DÜZGÜN rədd edildi (`target_role_privileged` — guard yumşaldılmadı).
+  Nəticə: #6-nın JSON artefaktı çıxarılmadı, ledger isə tam möhürlüdür və
+  yuxarıdakı rəqəmlər ondan oxunub.
+
 ### 27 avqust 2026 — DİLİM 3A: worker_materialisation + «Qruplar» icazə açarları
 
 - Yeni `worker_materialisation` fazası (order 26, derived) — M5.6 sətrinə bax.
