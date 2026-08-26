@@ -175,7 +175,7 @@ def test_phase_registry_fingerprint_is_pinned():
     # update BOTH the constant and this line consciously (SLICE 3A gate 5).
     assert (
         contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
-        == "de3579c5e986776898caba3e6b0a670b5f85ec1995b108cb5d8cfb3f678a164e"
+        == "45cd3e7c088f97f7b106a90fe6f5ea2a3b967c3d82eac93adcc9f52d5af8709b"
     )
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
@@ -190,6 +190,7 @@ def test_phase_registry_fingerprint_is_pinned():
         "journal_lessons",
         "journal_marks",
         "journal_components",
+        "journal_entry_scores",
         "journal_finals",
         "journal_lock",
         "journal_reconcile",
@@ -203,15 +204,15 @@ def test_phase_registry_fingerprint_is_pinned():
     # reconcile) — strictly ascending, with 30 left free for the syllabus
     # domain.  Every derived phase accounts for no source table at all
     # (D-2 / E-2 / V-22 / FAZA 3B).
-    assert [phase.order for phase in registry] == [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 44, 46, 48]
+    assert [phase.order for phase in registry] == [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 48]
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
         ("lessons", "curricula", "curricula_plan"),
         ("students", "workers"),
-        *([()] * 12),
+        *([()] * 13),
     ]
     # The batch-accounted run still claims exactly 880 + 6 071 + 8 545 source
-    # rows — all NINE journal phases are derived and contribute 0 each.
+    # rows — all TEN journal phases are derived and contribute 0 each.
     assert sum(phase.declared_source_rows(load_legacy_table_plan()) for phase in registry) == 15_496
 
 

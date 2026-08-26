@@ -110,7 +110,7 @@ def test_command_emits_single_line_sorted_json(command_environment, monkeypatch)
     assert document == _PLAN_PAYLOAD
     assert output.strip() == json.dumps(document, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
     # No ``--phase`` was passed, so the policy defaults to the WHOLE attested
-    # registry — now fifteen phases; ``RehearsalPolicy`` sorts the keys, hence
+    # registry — now sixteen phases; ``RehearsalPolicy`` sorts the keys, hence
     # the alphabetical order rather than the registry's ascending ``order``.
     assert captured["policy"].phase_keys == (
         "academic_catalog",
@@ -118,6 +118,7 @@ def test_command_emits_single_line_sorted_json(command_environment, monkeypatch)
         "identity_cohort",
         "journal_components",
         "journal_enrollments",
+        "journal_entry_scores",
         "journal_finals",
         "journal_lessons",
         "journal_lock",

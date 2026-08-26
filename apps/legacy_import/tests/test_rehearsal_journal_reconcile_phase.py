@@ -237,6 +237,7 @@ def test_the_quarantine_summary_counts_every_journal_phase(actor):
     assert quarantine_summary(run.pk) == {
         "journal_marks": 1,
         "journal_components": 1,
+        "journal_entry_scores": 0,
         "journal_finals": 1,
         "journal_lock": 0,
     }

@@ -11,7 +11,7 @@ Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
-The second test drives the FULL FIFTEEN-phase registry — ``academic_structure``
+The second test drives the FULL SIXTEEN-phase registry — ``academic_structure``
 (31 + 83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424),
 ``identity_cohort`` (7 816 + 729), the three derived identity phases, and the
 FAZA 3B journal cluster (J0-J8) fed by seven synthetic journal tables
@@ -428,11 +428,12 @@ _FULL_PHASE_KEYS = (
     "journal_lessons",
     "journal_marks",
     "journal_components",
+    "journal_entry_scores",
     "journal_finals",
     "journal_lock",
     "journal_reconcile",
 )
-_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 44, 46, 48]
+_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 48]
 
 
 def _journal_scaled_plan():
@@ -1284,6 +1285,7 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "journal_lessons": 0,
             "journal_marks": 0,
             "journal_components": 0,
+            "journal_entry_scores": 0,
             "journal_finals": 0,
             "journal_lock": 0,
             "journal_reconcile": 0,
@@ -1356,6 +1358,9 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             # J5/J6: hər dörd MIGRATED jurnalda karantin kodu var; orphan
             # jurnal isə yalnız SKIPPED-dir.
             "journal_components": {"journal_components_skipped": 1, "journal_components_unresolved": 4},
+            # J5b: heç bir yazılış MIGRATED deyil (yuxarıdakı J2 qeydi) → 21
+            # materiallaşmış dilimin hamısı üzvsüz, yəni sırf SKIPPED möhürdür.
+            "journal_entry_scores": {"journal_entry_scores_skipped": 21},
             "journal_finals": {"journal_finals_skipped": 1, "journal_finals_unresolved": 4},
             # J7: 21 MIGRATED jurnalın hamısının dövrü bitib → hamısı kilidli.
             "journal_lock": {"journal_locked": 21},

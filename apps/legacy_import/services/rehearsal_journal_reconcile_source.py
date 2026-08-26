@@ -43,6 +43,10 @@ BALANCE_KEYS = ("source", "empty", "unreadable", "orphan", "overlap")
 DEVIATION_TOLERANCE = Decimal("0.5")
 DEFAULT_ENTRY_SCORE_MAX = 50
 KOLLOKVIUM_KIND = "kollokvium"
+SELF_WORK_KIND = "self_work"
+# J5b arxiv komponenti (``generic``) ``journals_dates_points`` sətrindən DOĞMUR —
+# say balansı yalnız mənbə xanasından gələn komponent ballarını üzləşdirir.
+SOURCED_COMPONENT_KINDS = (KOLLOKVIUM_KIND, SELF_WORK_KIND)
 
 
 def _domain_of(month_id: str) -> str:
@@ -109,7 +113,9 @@ def tally_target_rows(context) -> dict[str, int]:
     resit_model = django_apps.get_model("registrar", "ResitRecord")
     return {
         "marks": mark_model.objects.filter(organization=organization).count(),
-        "components": score_model.objects.filter(organization=organization).count(),
+        "components": score_model.objects.filter(
+            organization=organization, component__kind__in=SOURCED_COMPONENT_KINDS
+        ).count(),
         "finals": (
             final_model.objects.filter(organization=organization, exam_score__isnull=False).count()
             + resit_model.objects.filter(organization=organization, resit_score__isnull=False).count()
