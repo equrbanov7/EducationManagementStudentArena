@@ -7,11 +7,9 @@ pəncərəsi və DB trigger oraya da şamildir). Sərbəst iş mövzu-çeklistdi
 balına çevrilir (bax ``gradebook.entry_score_for``). Kurs işi giriş balından
 kənar ayrıca 0-100 qiymətdir.
 
-Kilid qaydaları:
-* jurnal kilidli (təsdiqdə/yekunlaşıb) → heç nə yazılmır;
-* sərbəst iş: "verilib" işarəsi hər zaman qoyulur, GERİ ALMA yalnız 2 saat
-  içində (bal silmə saxtakarlığına qarşı);
-* kurs işi: yazılışdan 2 saat sonra dondurulur.
+Kilid qaydaları: jurnal kilidli (təsdiqdə/yekunlaşıb) → heç nə yazılmır; sərbəst
+işdə "verilib" işarəsi hər zaman qoyulur, GERİ ALMA yalnız 2 saat içində (bal
+silmə saxtakarlığına qarşı); kurs işi yazılışdan 2 saat sonra dondurulur.
 """
 
 from __future__ import annotations
@@ -189,15 +187,18 @@ def add_selfwork_topic(*, offering, title) -> SelfWorkTopic | None:
 
 
 @transaction.atomic
-def delete_selfwork_topic(*, topic) -> bool:
-    """Mövzunu sil. Bu mövzu üzrə tələbə işarələri (SelfWorkMark) də silinir
-    (topic FK CASCADE) — UI silmədən əvvəl bal itkisi barədə xəbərdarlıq göstərir."""
+def delete_selfwork_topic(*, topic, by_user=None) -> bool:
+    """Mövzunu sil. İşarələr də silinir (CASCADE) → giriş balı düşür, yəni akademik
+    nəticə dəyişir; itən təhvillər audit izinə yazılır (2026-08 auditi)."""
     if journal_is_locked(topic.offering):
         return False
+    offering, title = topic.offering, topic.title
+    losing = list(SelfWorkMark.objects.filter(topic=topic, done=True).select_related("enrollment__student"))
     try:
         topic.delete()  # Correction evidence varsa PROTECT akademik tarixi saxlayır.
     except ProtectedError:
         return False
+    grade_audit.log_selfwork_topic_removal(offering=offering, topic_title=title, marks=losing, by_user=by_user)
     return True
 
 

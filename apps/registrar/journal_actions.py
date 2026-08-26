@@ -37,6 +37,17 @@ def _back(offering, tab=""):
     return redirect(f"{url}#{tab}" if tab else url)
 
 
+def _can_write_documented_correction(request) -> bool:
+    """Aktor sənədli (PDF + audit) düzəliş edə bilirmi — ``journal.correct``.
+
+    Kilid bağlananda dəyişikliyi yalnız bu icazə daşıyan aktor (RİM/İKT rəhbəri,
+    superadmin və ya icazə redaktorundan ``journal.correct`` almış istənilən rol)
+    apara bilər. Adi müəllim sadəcə «pəncərə bitib» cavabı alır."""
+    from apps.registrar import corrections as corrections_service
+
+    return corrections_service.can_correct_journal(request)
+
+
 def _corrector_direct_write_blocked(request, offering, tab=""):
     """Korrektor (İKT) birbaşa (audit-siz) yazmağa cəhd edirsə RƏDD et.
 
@@ -92,13 +103,25 @@ def lesson_action(request, offering_id, lesson_id):
     # do_delete=1 gələndə action-i silməyə çevir.
     if request.POST.get("do_delete") == "1":
         action = "delete_lesson"
-    # İKT Rəhbəri / superuser: 2 saatlıq pəncərəni + keçmiş-tarix qadağasını keçir
-    # (dərsi istənilən tarixə/saata dəyişə, silə bilər). Yayımlanmış jurnal yenə kilidli.
+    # İKT Rəhbəri / superuser: 2 saatlıq pəncərə DAXİLİNDƏ keçmiş-tarix qadağasını
+    # keçir (səhv açılmış dərsin tarixini/növünü düzəltmək üçün).
     override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
-    # Korrektor-only (İKT — birbaşa redaktor DEYİL): dərs redaktəsi/silməsi HƏR lock
-    # vəziyyətində sənədli (PDF) audited yoldan keçir. Müəllim/sahib/superuser (birbaşa
-    # redaktor) 2 saat pəncərəsində birbaşa (PDF-siz) dəyişir.
-    corrector_only = not _is_direct_editor(request.user, offering)
+    # Sənədli (PDF) yol MƏCBURİDİR, iki haldan biri varsa:
+    #   * aktor birbaşa redaktor DEYİL (korrektor/İKT — normal görünüş read-only), VƏ YA
+    #   * 2 saatlıq redaktə pəncərəsi bağlanıb / jurnal kilidlidir.
+    #
+    # 2026-08 auditi: əvvəl yalnız BİRİNCİ şərt vardı və `allow_locked=override`
+    # kilidi eyni anda həm superuser-ə, həm də İKT/RİM rəhbərinə SƏNƏDSİZ keçməyə
+    # imkan verirdi (məsələn, həm həmin fənnin müəllimi, həm də RİM rəhbəri olan
+    # istifadəçi «birbaşa redaktor» sayılırdı). İndi pəncərə bağlananda dəyişiklik
+    # yalnız səbəb + qeyd + PDF ilə — audited correction yolundan — keçir.
+    window_open = gradebook.can_edit_lesson(lesson) and not gradebook.journal_is_locked(offering)
+    corrector_only = (not _is_direct_editor(request.user, offering)) or (not window_open)
+    if corrector_only and not _can_write_documented_correction(request):
+        # Pəncərə bitib, sənədli düzəliş icazəsi (journal.correct) da yoxdur →
+        # mövcud davranışla eyni rədd mesajı.
+        messages.error(request, _("Dərs dəyişdirilmədi — 2 saatlıq düzəliş pəncərəsi bitib."))
+        return _back(offering)
 
     if action == "delete_lesson":
         # Korrektor (İKT): silmə də bal/redaktə düzəlişi kimi rəsmi sənəd (səbəb +
@@ -122,7 +145,8 @@ def lesson_action(request, offering_id, lesson_id):
                 return _back(offering)
             messages.success(request, _("Dərs sənədli əsasla silindi."))
             return _back(offering)
-        if gradebook.delete_lesson(lesson=lesson, by_user=request.user, allow_locked=override):
+        # Bura yalnız pəncərə AÇIQ olanda çatılır → `allow_locked` lazım deyil.
+        if gradebook.delete_lesson(lesson=lesson, by_user=request.user, allow_locked=False):
             messages.success(request, _("Dərs silindi."))
         else:
             messages.error(request, _("Dərs silinmədi — 2 saatlıq düzəliş pəncərəsi bitib."))
@@ -180,7 +204,8 @@ def lesson_action(request, offering_id, lesson_id):
                 end_time=end_time or "",
                 instructor=instructor,
                 allow_past=override,
-                allow_locked=override,
+                # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil.
+                allow_locked=False,
             )
         except gradebook.LessonRuleError as exc:
             messages.error(request, str(exc))
@@ -250,8 +275,10 @@ def selfwork_action(request, offering_id):
     if blocked:
         return blocked
     action = request.POST.get("action")
-    # İKT/superuser 2 saatlıq geri-alma pəncərəsini keçir (correction override).
-    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
+    # 2026-08 auditi: burada əvvəl `allow_locked = is_superuser or is_ikt_rehber`
+    # vardı — yəni RİM/İKT rəhbəri (və superuser) 2 saatlıq geri-alma pəncərəsini
+    # SƏNƏDSİZ keçirdi. Artıq keçmir: pəncərə bağlananda dəyişiklik yalnız
+    # «Jurnal düzəlişi» rejimindən (``correction_apply`` → PDF + audit) keçir.
 
     if action == "add_topic":
         topic = journal_extras.add_selfwork_topic(offering=offering, title=request.POST.get("topic_title"))
@@ -263,7 +290,7 @@ def selfwork_action(request, offering_id):
 
     if action == "delete_topic":
         topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
-        if journal_extras.delete_selfwork_topic(topic=topic):
+        if journal_extras.delete_selfwork_topic(topic=topic, by_user=request.user):
             messages.success(request, _("Mövzu (və üzrə balları) silindi."))
         else:
             messages.error(request, _("Mövzu silinmədi — jurnal bağlıdır."))
@@ -284,7 +311,7 @@ def selfwork_action(request, offering_id):
             enrollment_id=parts[2],
             done=raw == "1",
             by_user=request.user,
-            allow_locked=override,
+            allow_locked=False,  # pəncərə bitibsə → sənədli düzəliş rejimi
         )
         if ok:
             changed += 1
@@ -311,8 +338,8 @@ def coursework_save(request, offering_id):
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     saved = 0
     frozen = 0
-    # İKT/superuser 2 saatlıq pəncərəni keçir (correction override).
-    override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
+    # 2026-08 auditi: İKT/superuser üçün sənədsiz `allow_locked` güzəşti ləğv edildi —
+    # 2 saatlıq pəncərə bitibsə kurs işi yalnız sənədli düzəlişlə dəyişir.
 
     single = enrollments.get(request.POST.get("cw_enrollment") or "")
     if single is not None:
@@ -322,7 +349,7 @@ def coursework_save(request, offering_id):
             score=request.POST.get("cw_score"),
             submitted_on=parse_date(request.POST.get("cw_date") or ""),
             by_user=request.user,
-            allow_locked=override,
+            allow_locked=False,
         )
         if ok:
             messages.success(request, _("Kurs işi yadda saxlanıldı."))
@@ -348,7 +375,7 @@ def coursework_save(request, offering_id):
             score=score,
             submitted_on=submitted,
             by_user=request.user,
-            allow_locked=override,
+            allow_locked=False,
         ):
             saved += 1
         else:

@@ -73,6 +73,50 @@ def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False):
             raise
 
 
+def log_backdated_lesson(*, offering, lesson, by_user):
+    """Keçmiş tarixə açılan dərs sütununu audit izinə yaz (override əməliyyatı).
+
+    2026-08 auditi: İKT/RİM rəhbəri və superuser ``allow_past`` ilə geriyə-dönük
+    dərs aça bilir. Bu, qayıb limitinin MƏXRƏCİNİ (deməli imtahana buraxılışı)
+    dəyişir, amma heç bir iz qoymurdu. Cari gündən əvvəlki tarix üçün iz yazılır."""
+    from django.utils import timezone
+
+    if lesson is None or lesson.date >= timezone.localdate():
+        return
+    log_grade_changes(
+        offering=offering,
+        by_user=by_user,
+        kind="mark",
+        changes=[
+            {
+                "student": "—",
+                "item": f"{lesson.date} · {lesson.get_kind_display()}",
+                "old": "—",
+                "new": "keçmiş tarixə dərs açıldı (override)",
+            }
+        ],
+    )
+
+
+def log_selfwork_topic_removal(*, offering, topic_title, marks, by_user):
+    """Silinmiş sərbəst iş mövzusunun apardığı təhvilləri audit izinə yaz.
+
+    Mövzu silinəndə ``SelfWorkMark`` sətirləri CASCADE ilə gedir və tələbənin
+    giriş balı düşür — yəni akademik nəticə dəyişir, amma əvvəl heç bir iz
+    qalmırdı (2026-08 auditi). ``marks`` silmədən ƏVVƏL toplanır, qeyd isə
+    silmə uğurlu olandan sonra yazılır."""
+    title = (topic_title or "")[:60]
+    log_grade_changes(
+        offering=offering,
+        by_user=by_user,
+        kind="component",
+        changes=[
+            {"student": student_label(mark.enrollment), "item": f"Sərbəst iş · {title}", "old": "1", "new": "—"}
+            for mark in marks
+        ],
+    )
+
+
 _KIND_LABELS = {
     "mark": "Davamiyyət/bal",
     "component": "Komponent balı",

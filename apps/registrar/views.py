@@ -406,8 +406,10 @@ def _handle_add_lesson(request, offering):
 
         instructor = get_user_model().objects.filter(pk=_inst_id).first()
 
+    # İKT/RİM Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
+    allow_past = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
     try:
-        gradebook.create_lesson(
+        lesson = gradebook.create_lesson(
             offering=offering,
             date=date,
             kind=kind,
@@ -417,11 +419,10 @@ def _handle_add_lesson(request, offering):
             end_time=end_time,
             created_by=request.user,
             instructor=instructor,
-            # İKT Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
-            allow_past=bool(
-                getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
-            ),
+            allow_past=allow_past,
         )
+        if allow_past:  # geriyə-dönük sütun audit izinə düşür (2026-08 auditi)
+            grade_audit.log_backdated_lesson(offering=offering, lesson=lesson, by_user=request.user)
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:
         messages.error(request, str(exc))
