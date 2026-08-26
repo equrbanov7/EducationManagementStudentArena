@@ -81,6 +81,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "superadmin-org-features": "accounts/profile/sections/superadmin/_superadmin_org_features.html",
     "superadmin-organizations": "accounts/profile/sections/superadmin/_superadmin_organizations.html",
     "superadmin-users": "accounts/profile/sections/superadmin/_superadmin_user_management.html",
+    "rim-center": "accounts/profile/sections/_rim_center.html",
     "superadmin-ai": "accounts/profile/sections/superadmin/_superadmin_ai_settings.html",
     "superadmin-exam-rooms": "accounts/profile/sections/superadmin/_superadmin_exam_rooms.html",
     "exam-center-pins": "accounts/profile/sections/_exam_center_pins.html",
@@ -144,6 +145,9 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-members",
         "org-roles",
         "audit-log",
+        # RİM mərkəzi — panel oxu-only render olunur (bütün mutasiyalar ayrıca
+        # JSON POST endpoint-inə gedir), ona görə AJAX swap təhlükəsizdir.
+        "rim-center",
         # U12 — registrar kabinet bölmələri (read-mostly; formlar registrar
         # endpoint-lərinə POST edir və `next` ilə shell-ə qayıdır).
         "my-schedule",

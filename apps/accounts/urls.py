@@ -187,6 +187,12 @@ urlpatterns = [
     # Account management
     path("delete-account/", views.delete_account, name="delete_account"),
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),
+    # RİM mərkəzi — hesab idarəetməsi (icazə-qapılı: `user.*`, bax
+    # apps/organizations/permissions.py «users» kateqoriyası). Superadmin
+    # bölməsindən FƏRQLİ: burada rol icazəsi olan istənilən əməkdaş işləyir.
+    path("rim/search/", views.rim_user_search, name="rim_user_search"),
+    path("rim/user/<int:user_id>/", views.rim_user_detail, name="rim_user_detail"),
+    path("rim/action/", views.rim_action, name="rim_action"),
     # Post management
     path("superadmin/post-management/", views.superadmin_post_management, name="superadmin_post_management"),
     path(

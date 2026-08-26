@@ -35232,7 +35232,7 @@ msgstr "İmtahan Mərkəzi"
 
 msgctxt "roles.display_name"
 msgid "ikt_rehber"
-msgstr "İKT Rəhbəri"
+msgstr "Rəqəmsal İnkişaf Mərkəzi (RİM) rəhbəri"
 
 msgctxt "roles.display_name"
 msgid "teacher"

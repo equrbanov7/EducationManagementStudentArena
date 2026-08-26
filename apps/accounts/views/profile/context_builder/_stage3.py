@@ -280,6 +280,10 @@ class _Stage3Mixin:
                     self.request, base_url=reverse("accounts:profile"), include_section=True
                 )
             )
+        if "rim-center" in self.allowed_sections and self.active_section == "rim-center":
+            from ...rim import build_rim_center_section
+
+            self.rim_center_section.update(build_rim_center_section(self.request))
         if "superadmin-ai" in self.allowed_sections and self.active_section == "superadmin-ai":
             self.superadmin_ai_settings_section.update(build_superadmin_ai_settings_context())
             self.superadmin_ai_settings_section["post_next_url"] = _append_query_params(
