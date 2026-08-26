@@ -17,10 +17,13 @@ Bu modul exams tərəfindən ``apps.registrar.public`` fasadı vasitəsilə ça�
 
 from __future__ import annotations
 
+import logging
 from decimal import ROUND_HALF_UP, Decimal
 
 from apps.registrar import finals, gradebook, services
 from apps.registrar.models import Enrollment
+
+logger = logging.getLogger(__name__)
 
 
 def _current_period(organization):
@@ -96,20 +99,64 @@ def _to_exam_scale(percent, scheme) -> int:
     return int(scaled)
 
 
+def _actor_can_write(organization, user):
+    """PG ``registrar_guard_same_org_actor`` triggerinin Python güzgüsü.
+
+    ``FinalGrade.entered_by`` yalnız təşkilatın AKTİV üzvü (və ya sahibi /
+    superuser) ola bilər — əks halda INSERT trigger səviyyəsində düşür və
+    best-effort körpü bütün jurnal yazısını itirir. Uyğun olmayan aktoru
+    NULL-a (sistem) endiririk ki, bal hər halda jurnala düşsün."""
+    from django.apps import apps as django_apps
+
+    user_id = getattr(user, "pk", None)
+    if user_id is None or not getattr(user, "is_active", False):
+        return False
+    if getattr(user, "is_superuser", False):
+        return True
+    if getattr(organization, "owner_id", None) == user_id:
+        return True
+    Membership = django_apps.get_model("organizations", "Membership")
+    return Membership.objects.filter(
+        user_id=user_id,
+        organization=organization,
+        is_active=True,
+        role__organization=organization,
+        role__is_active=True,
+    ).exists()
+
+
 def record_exam_result(*, student, subject_id, organization, score_percent, is_expelled=False, by_user=None):
     """İmtahan nəticəsini jurnala yaz (``FinalGrade.exam_score``).
 
     ``score_percent`` — 0–100 xam faiz. ``is_expelled`` (proctordan qovulma) →
     0 bal (avtomatik F). Fənn qeydiyyatı tapılmasa no-op (``None``). Jurnal
-    kilidlidirsə ``set_exam_score`` özü yazmır (rəsmiləşmiş nəticəni qorumaq).
+    kilidlidirsə ``set_exam_score`` özü yazmır (rəsmiləşmiş nəticəni qorumaq)
+    — bu hal ops görünürlüyü üçün WARNING kimi loglanır.
+    ``by_user`` — yoxlayan müəllim / reviewer; ``None`` = avtomatik (sistem)
+    yazı, audit izində belə də işarələnir (2026-08 auditi, G7).
     Nəticə: yazılan ``FinalGrade`` və ya ``None``.
     """
     enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
     if enrollment is None:
         return None
+    if by_user is not None and not _actor_can_write(organization, by_user):
+        logger.warning(
+            "exam_bridge: actor %s cannot write for organization %s — falling back to system actor",
+            getattr(by_user, "pk", "?"),
+            getattr(organization, "pk", "?"),
+        )
+        by_user = None
+    if gradebook.journal_is_locked(enrollment.offering):
+        logger.warning(
+            "exam_bridge: journal locked for offering %s — exam result NOT written (student=%s)",
+            enrollment.offering_id,
+            getattr(student, "pk", "?"),
+        )
+        return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     exam_score = 0 if is_expelled else _to_exam_scale(score_percent, scheme)
-    return finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user)
+    note = "imtahan mərkəzi" if by_user is not None else "imtahan mərkəzi · avtomatik"
+    return finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
 
 
 def exam_result_summary(*, student, subject_id, organization):

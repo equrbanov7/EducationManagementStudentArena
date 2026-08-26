@@ -155,10 +155,14 @@ def evaluate_resit(*, enrollment, by_user=None):
 
 
 @transaction.atomic
-def set_exam_score(*, enrollment, score, by_user=None):
+def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     """Record the final-exam score (teacher/exam centre), then re-evaluate resit.
 
-    Blocked when the offering's journal is locked (finalised / under approval)."""
+    Blocked when the offering's journal is locked (finalised / under approval).
+    ``source_note`` — audit izində bal sətrinin yanına yazılan MƏNBƏ qeydi
+    (məsələn "imtahan mərkəzi · avtomatik"): aktoru olmayan sistem yazılarının
+    tarixçədə boş "kim?" xanası ilə qalmaması üçün (2026-08 auditi, G7).
+    İDEMPOTENT: ``get_or_create`` + yalnız real dəyişiklikdə audit."""
     if not _is_current_enrollment(enrollment):
         return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
@@ -180,7 +184,7 @@ def set_exam_score(*, enrollment, score, by_user=None):
             changes=[
                 {
                     "student": grade_audit.student_label(enrollment),
-                    "item": "Yekun imtahan",
+                    "item": f"Yekun imtahan ({source_note})" if source_note else "Yekun imtahan",
                     "old": grade_audit.score_repr(old_score),
                     "new": grade_audit.score_repr(new_score),
                 }
