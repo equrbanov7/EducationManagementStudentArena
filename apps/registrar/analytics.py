@@ -277,9 +277,24 @@ def build_evaluation_maps(organization, enrollments) -> dict:
     riyaziyyatı (``_evaluate``) bölüşsün deyə çıxarılıb — beləcə iki kod yolu
     ``compute_final_result``-dan fərqlənmir (``test_analytics.py`` konsistensiya
     testi ilə kilidlənib)."""
-    enrollment_ids = [e.id for e in enrollments]
-    offering_ids = list({e.offering_id for e in enrollments})
-    student_ids = list({e.student_id for e in enrollments})
+    return build_evaluation_maps_for(
+        organization,
+        enrollment_ids=[e.id for e in enrollments],
+        offering_ids=list({e.offering_id for e in enrollments}),
+        student_ids=list({e.student_id for e in enrollments}),
+    )
+
+
+def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, student_ids) -> dict:
+    """:func:`build_evaluation_maps`-in id-kolleksiyalı variantı — EYNİ map-lar.
+
+    Fərq yalnız girişdədir: id-lər hazır siyahı ƏVƏZİNƏ **queryset** (məs.
+    ``qs.values("id")``) kimi də verilə bilər. O zaman Django ``IN (SELECT …)``
+    alt-sorğusu yazır və 100 000+ elementli parametr siyahısı ümumiyyətlə
+    yaranmır — böyük miqyasda (universitet üzrə icmal) həm sorğu hazırlığı, həm
+    də PostgreSQL planlaması qat-qat ucuzlaşır. Riyaziyyat dəyişmir; map-ları
+    quran köməkçilər eynidir.
+    """
     return {
         "schemes": _scheme_map(offering_ids),
         "component_offerings": _component_offerings(offering_ids),

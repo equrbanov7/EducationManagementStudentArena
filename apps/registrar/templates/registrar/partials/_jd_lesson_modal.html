@@ -87,6 +87,42 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <small class="jd-field-hint">{% trans "Universitetin standart dərs saatlarından biri seçilir." context "registrar.journal" %}</small>
                     <small class="jd-field-error" data-jd-time-error hidden><i class="fas fa-triangle-exclamation"></i> {% trans "Dərs saatı seçilməlidir — standart saatlardan birini seçin." context "registrar.journal" %}</small>
                 </div>
+                {% comment %}
+                Korpus → otaq kaskadı. Korpus AYRICA model deyil — otağın öz "building"
+                sahəsidir, ona görə korpus seçimi yalnız otaq siyahısını daraldır və
+                POST-a YALNIZ otaq (lesson_room) gedir. Otaq siyahısı json_script ilə
+                ötürülür (xarici JS Django şablonundan keçmir).
+                MƏCBURİ DEYİL: hər ikisi boş qala bilər (köhnə dərslərdə otaq yoxdur).
+                {% endcomment %}
+                <div class="jd2-field-pair">
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "KORPUS" context "registrar.journal" %}</span>
+                        <div class="bootstrap-single-select">
+                            <select name="lesson_building" class="bootstrap-single-select__native" data-jd-lesson-building data-bootstrap-select>
+                                <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
+                                {% for building in lesson_buildings %}
+                                <option value="{{ building }}">{{ building }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="jd2-field">
+                        <span class="jd2-field-label">{% trans "OTAQ" context "registrar.journal" %}</span>
+                        <div class="bootstrap-single-select">
+                            <select name="lesson_room" class="bootstrap-single-select__native" data-jd-lesson-room data-bootstrap-select>
+                                <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="jd2-field">
+                    {% if lesson_rooms %}
+                    <small class="jd-field-hint" data-jd-room-hint>{% trans "Əvvəlcə korpus seçin — otaqlar həmin korpusa görə süzülür. Otaq məcburi deyil." context "registrar.journal" %}</small>
+                    {% else %}
+                    <small class="jd-field-hint" data-jd-room-hint>{% trans "Təşkilat üçün hələ otaq qeyd olunmayıb — otaqlar «İmtahan otaqları» bölməsində əlavə olunur." context "registrar.journal" %}</small>
+                    {% endif %}
+                </div>
+                {{ lesson_rooms|json_script:"jd-lesson-rooms" }}
                 {% if lesson_teacher_choices %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "DƏRSİN MÜƏLLİMİ" context "registrar.journal" %}</span>

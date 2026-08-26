@@ -13,7 +13,9 @@ tələbələr. Yoxlanılır:
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.db import connection
 from django.test import Client, TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.accounts import academic_records as records_overview
@@ -177,12 +179,107 @@ class RecordsAggregationTest(_RecordsBase):
         self.assertEqual(data["summary"]["qb"], 0)
         self.assertEqual(data["summary"]["fails"], 2)
 
-    def test_rows_sorted_by_fails_desc(self):
+    def test_rows_sorted_by_fails_desc_when_requested(self):
+        """``sort="fails"`` — kəsri olan tələbələr öndə (bahalı, tam keçidli yol)."""
         with bypass_rls():
-            data = records_overview.build_records_overview(
+            data = records_overview.build_records_page(
+                organization=self.org,
+                scope=ORG_WIDE_SCOPE,
+                filters={},
+                offset=0,
+                limit=100,
+                sort=records_overview.SORT_FAILS,
+            )
+        fails = [r["fails"] for r in data["results"]]
+        self.assertEqual(fails[0], 1)  # kəsri olan öndə
+        self.assertEqual(fails, sorted(fails, reverse=True))  # azalan sıra pozulmur
+
+    def test_default_sort_is_name_and_paginates_in_db(self):
+        """Standart sıralama AD üzrədir — yəni bazada səhifələnə bilir.
+
+        Səhifə-səhifə yığılan siyahı tam siyahı ilə eyni olmalıdır (offset
+        sürüşməsi/təkrar sətir olmamalıdır)."""
+        with bypass_rls():
+            full = records_overview.build_records_page(
                 organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
             )
-        self.assertEqual(data["results"][0]["fails"], 1)  # kəsri olan öndə
+            first = records_overview.build_records_page(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=2
+            )
+            second = records_overview.build_records_page(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=2, limit=2
+            )
+        names = [r["name"] for r in full["results"]]
+        self.assertEqual(names, sorted(names))
+        self.assertEqual([r["name"] for r in first["results"] + second["results"]], names[:4])
+        self.assertTrue(first["has_more"])
+
+    def test_page_query_count_does_not_grow_with_scope(self):
+        """PERFORMANS MÜQAVİLƏSİ: bir səhifənin sorğu sayı scope-un tələbə
+        sayından ASILI DEYİL.
+
+        Bu testin mənası: səhifə bazada kəsilir və yalnız görünən tələbələr
+        qiymətləndirilir. Əks halda (köhnə davranış) bütün scope hər səhifə
+        üçün yenidən hesablanırdı — 5 000 tələbəlik təşkilatda 13 saniyə."""
+        with bypass_rls():
+            with CaptureQueriesContext(connection) as one:
+                records_overview.build_records_page(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=1
+                )
+            with CaptureQueriesContext(connection) as many:
+                records_overview.build_records_page(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+                )
+        # 1 tələbə və bütün tələbələr — EYNİ sorğu sayı: per-student N+1 yoxdur,
+        # hər şey bulk map-lardan gəlir.
+        self.assertEqual(len(one.captured_queries), len(many.captured_queries))
+
+    def test_student_with_two_programs_appears_once(self):
+        """Unikallıq ``(org, student, program)`` üzrədir — ikinci ixtisası olan
+        tələbə cədvəldə İKİ dəfə görünməməlidir (sayım da təkrarsızdır)."""
+        student = self.students_a[0]
+        with bypass_rls():
+            base = StudentAcademicRecord.objects.get(organization=self.org, student=student)
+            second_program = Program.objects.create(
+                organization=self.org, code="PDUAL", name="İkinci ixtisas", specialty_unit=self.chair_a
+            )
+            # PG ``registrar_guard_student_record_coherence``: kurikulum ÖZ proqramına
+            # aid olmalıdır (sqlite-də belə trigger yoxdur) — ikinci ixtisas üçün
+            # ayrıca kurikulum yaradılır.
+            second_curriculum = Curriculum.objects.create(
+                organization=self.org, program=second_program, admission_year=2024, is_active=True
+            )
+            StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=student,
+                program=second_program,
+                curriculum=second_curriculum,
+                group=base.group,
+                admission_year=2024,
+            )
+            data = records_overview.build_records_page(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+            )
+            summary = records_overview.build_records_summary(organization=self.org, scope=ORG_WIDE_SCOPE, filters={})
+        ids = [r["student_id"] for r in data["results"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(data["total"], 5)
+        self.assertEqual(summary["summary"]["students"], 5)
+
+    def test_page_and_summary_match_combined_overview(self):
+        """Bölünmüş iki çağırış (səhifə + box) birləşmiş icmalla eyni nəticə verir."""
+        with bypass_rls():
+            combined = records_overview.build_records_overview(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=3
+            )
+            page = records_overview.build_records_page(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=3
+            )
+            summary = records_overview.build_records_summary(organization=self.org, scope=ORG_WIDE_SCOPE, filters={})
+        self.assertEqual(combined["results"], page["results"])
+        self.assertEqual(combined["total"], page["total"])
+        self.assertEqual(combined["summary"], summary["summary"])
+        self.assertEqual(combined["year_options"], summary["year_options"])
 
     def test_faculty_filter_narrows(self):
         with bypass_rls():

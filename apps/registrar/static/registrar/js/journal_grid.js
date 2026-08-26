@@ -581,18 +581,12 @@
             form.action = editData.actionUrl;
             actionInput.value = "update_lesson";
             // Təsdiq modalında hansı dərs silinir — tarix + mövzu göstər.
-            deleteBtn.setAttribute(
-                "data-confirm-detail",
-                (editData.date || "") + (editData.topic ? " · " + editData.topic : "")
-            );
+            deleteBtn.setAttribute("data-confirm-detail", (editData.date || "") + (editData.topic ? " · " + editData.topic : ""));
             dateInput.value = editData.date;
             if (kindField) setSelectValue(kindField, editData.kind);
             if (topicField) {
-                if (topicField.tagName === "SELECT") {
-                    setSelectValue(topicField, editData.topic || "");
-                } else {
-                    topicField.value = editData.topic || "";
-                }
+                if (topicField.tagName === "SELECT") setSelectValue(topicField, editData.topic || "");
+                else topicField.value = editData.topic || "";
             }
             setSelectValue(modal.querySelector("[data-jd-lesson-hours]"), String(editData.hours || 2));
             // Standart dərs saatı: mövcud start-end cütünü seçimdə tap.
@@ -604,6 +598,8 @@
             form.action = form.getAttribute("data-add-url");
             actionInput.value = "add_lesson";
         }
+        // Korpus → otaq kaskadı ayrı modula (journal_lesson_room.js) buradan xəbər verilir.
+        modal.dispatchEvent(new CustomEvent("jd:lesson-modal-open", { detail: editData || null, bubbles: true }));
         // Sənədli düzəliş sahələri (İKT): yalnız KİLİDLİ dərs redaktəsində — PDF
         // + qeyd məcburi olur; əlavə/kilidsiz redaktədə gizli və məcburiyyətsiz.
         var corrFields = modal.querySelector("[data-jd-corr-fields]");
@@ -659,6 +655,7 @@
                 start: editBtn.getAttribute("data-lesson-start"),
                 end: editBtn.getAttribute("data-lesson-end"),
                 instructor: editBtn.getAttribute("data-lesson-instructor"),
+                room: editBtn.getAttribute("data-lesson-room"),
                 locked: editBtn.getAttribute("data-lesson-locked") === "1",
             });
             return;

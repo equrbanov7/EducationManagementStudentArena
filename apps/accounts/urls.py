@@ -78,6 +78,11 @@ urlpatterns = [
     # endpoint-ləri accounts-dadır (modul-sərhəd dövrünü önləmək üçün).
     path("profile/academic-records/data/", academic_records_views.records_overview_data, name="records_overview_data"),
     path(
+        "profile/academic-records/summary/",
+        academic_records_views.records_overview_summary,
+        name="records_overview_summary",
+    ),
+    path(
         "profile/academic-records/student/",
         academic_records_views.records_student_detail,
         name="records_student_detail",

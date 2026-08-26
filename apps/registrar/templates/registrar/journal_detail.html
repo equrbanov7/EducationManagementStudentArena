@@ -225,7 +225,9 @@
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260721-jteach"></script>
+    {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
+    <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20260827-room"></script>
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260827-room"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
     {% if correction_mode %}

@@ -160,6 +160,26 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         help_text="Bu dərsi keçən müəllim — fənn 2 müəllim arasında bölünübsə (məs. mühazirə "
         "bir müəllim, seminar başqa). Boşdursa açılışın (CourseOffering) müəllimi götürülür.",
     )
+    #: Dərsin keçirildiyi otaq — korpus (bina) otağın ÖZ sahəsindən gəlir
+    #: (``ExamRoom.building``), ona görə ayrıca "korpus" sütunu saxlanmır: UI-da
+    #: korpus yalnız otaq siyahısını daraldan süzgəcdir.
+    #:
+    #: Niyə ``exams.ExamRoom``: təşkilatın YEGANƏ otaq reyestri odur (org-scoped,
+    #: ``building``/``floor``/``capacity`` sahələri və hazır CRUD ekranı ilə) —
+    #: yeni model yaratmaq əvəzinə mövcud olan təkrar istifadə olunur. Sətir-ref
+    #: ("exams.ExamRoom") işlədilir ki, registrar → exams Python idxal asılılığı
+    #: YARANMASIN (modul-sərhəd gate-i).
+    #:
+    #: MƏCBURİ DEYİL: köhnə dərslərdə otaq yoxdur və boş qala bilər. Otaq
+    #: reyestrdən silinsə dərs qalır, sahə NULL olur (SET_NULL).
+    room = models.ForeignKey(
+        "exams.ExamRoom",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="lessons",
+        help_text="Dərsin keçirildiyi otaq (opsional). Korpus otağın öz 'building' sahəsindədir.",
+    )
 
     objects = models.Manager()
 
