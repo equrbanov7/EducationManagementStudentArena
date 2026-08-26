@@ -187,8 +187,7 @@ DEFAULT_ROLES = {
                 "grade.view",
                 "grade.input",
                 "grade.approve_chair",
-                # org_admin-alias davranış qorunması: "chair_head" →
-                # "department_head" normallaşır (ADMIN_EQUIVALENT).
+                # org_admin-alias davranış qorunması (chair_head → department_head).
                 "group.view",
                 "group.manage",
                 "exam.*",
@@ -365,8 +364,7 @@ DEFAULT_ROLES = {
                 "member.view",
                 "course.*",
                 "grade.*",
-                # org_admin-alias davranış qorunması: "section_head" →
-                # "department_head" normallaşır (ADMIN_EQUIVALENT).
+                # org_admin-alias davranış qorunması (section_head → department_head).
                 "group.view",
                 "group.manage",
                 "exam.*",
