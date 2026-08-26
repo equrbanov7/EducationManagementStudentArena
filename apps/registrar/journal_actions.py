@@ -193,6 +193,14 @@ def lesson_action(request, offering_id, lesson_id):
             messages.success(request, _("Dərs sənədli düzəlişlə yeniləndi."))
             return _back(offering)
 
+        # Otaq — yalnız sahə POST-da varsa toxunulur (boş dəyər = "otağı təmizlə").
+        # Sahə ümumiyyətlə göndərilməyibsə mövcud otaq OLDUĞU KİMİ qalır.
+        room = gradebook.UNSET
+        if "lesson_room" in request.POST:
+            from apps.registrar.lesson_rooms import resolve_lesson_room
+
+            room = resolve_lesson_room(offering.organization, request.POST.get("lesson_room"))
+
         try:
             ok = gradebook.update_lesson(
                 lesson=lesson,
@@ -203,6 +211,7 @@ def lesson_action(request, offering_id, lesson_id):
                 start_time=start_time or "",
                 end_time=end_time or "",
                 instructor=instructor,
+                room=room,
                 allow_past=override,
                 # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil.
                 allow_locked=False,

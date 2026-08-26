@@ -12,6 +12,7 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
          data-source-url="{{ profile_base_url }}?section=academic-records">
   <div class="acr"
        data-data-url="{% url 'accounts:records_overview_data' %}"
+       data-summary-url="{% url 'accounts:records_overview_summary' %}"
        data-detail-url="{% url 'accounts:records_student_detail' %}"
        data-faculty-url="{% url 'accounts:records_faculty_search' %}"
        data-department-url="{% url 'accounts:records_department_search' %}"

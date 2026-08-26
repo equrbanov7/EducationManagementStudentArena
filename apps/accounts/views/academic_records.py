@@ -126,22 +126,44 @@ def _num(value):
 # ── Data endpoint-ləri ───────────────────────────────────────────────────────
 
 
+def _filters(request) -> dict:
+    return {key: (request.GET.get(key) or "").strip() or None for key in _FILTER_KEYS}
+
+
 @login_required
 @require_GET
 def records_overview_data(request):
-    """Xülasə box-ları + səhifələnmiş tələbə siyahısı (filtr + scope üzrə)."""
+    """Səhifələnmiş tələbə siyahısı (filtr + scope üzrə) — box-lar OLMADAN.
+
+    Box-lar qəsdən ayrılıb (:func:`records_overview_summary`): onlar bütün süzgəc
+    sahəsi üzrə aqreqatdır və səhifədən-səhifəyə dəyişmir, cədvəl isə yalnız
+    görünən ~25 tələbəni tələb edir. Ayırmasaq, cədvəl hər dəfə box-ların tam
+    keçidini gözləyirdi (5 000+ tələbəlik təşkilatda onlarla saniyə).
+    """
     organization, scope = _scope(request)
     if organization is None or scope is None or not scope.has_structure_access:
-        return JsonResponse({"has_access": False, "summary": None, "results": [], "has_more": False, "total": 0})
+        return JsonResponse({"has_access": False, "results": [], "has_more": False, "total": 0})
 
-    filters = {key: (request.GET.get(key) or "").strip() or None for key in _FILTER_KEYS}
-    payload = academic_records.build_records_overview(
+    payload = academic_records.build_records_page(
         organization=organization,
         scope=scope,
-        filters=filters,
+        filters=_filters(request),
         offset=_int_param(request, "offset", 0),
         limit=_int_param(request, "limit", academic_records.DEFAULT_PAGE_SIZE),
+        sort=(request.GET.get("sort") or "").strip() or None,
     )
+    return JsonResponse(payload)
+
+
+@login_required
+@require_GET
+def records_overview_summary(request):
+    """Xülasə box-ları + tədris ili seçimləri — cədvəldən AYRICA, gecikmiş sorğu."""
+    organization, scope = _scope(request)
+    if organization is None or scope is None or not scope.has_structure_access:
+        return JsonResponse({"has_access": False, "summary": None, "year_options": []})
+
+    payload = academic_records.build_records_summary(organization=organization, scope=scope, filters=_filters(request))
     return JsonResponse(payload)
 
 

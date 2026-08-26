@@ -140,34 +140,6 @@
    köhnə max-height:68vh burada ləğv olunur — bu fayl sonra yüklənir.) */
 .jd2-grid-wrap { overflow-x: auto; overflow-y: hidden; max-height: none; }
 
-/* ── Axtarışlı seçici (searchable_select.js, prefix "jl") — jurnal siyahı filtrləri.
-   İmtahan statistikasındakı picker ilə eyni davranış: type-ahead + lazy + chip.
-   KRİTİK: menyu default GİZLİ, yalnız .is-open-da görünür. ── */
-.jl-ms {
-    position: relative; display: flex; align-items: center; min-height: 40px;
-    box-sizing: border-box; border: 1px solid var(--j-line, #d9e2f2); border-radius: 10px;
-    background: #fff; padding: 2px 8px;
-}
-.jl-ms:focus-within { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
-.jl-ms__chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; flex: 1; min-width: 0; }
-.jl-chip {
-    display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #1d4ed8;
-    border: 1px solid #dbeafe; border-radius: 999px; padding: 2px 5px 2px 9px; font-size: 12px; font-weight: 700; max-width: 100%;
-}
-.jl-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 11rem; }
-.jl-chip__x { cursor: pointer; border: 0; background: transparent; color: #2563eb; font-size: 15px; line-height: 1; padding: 0 2px; }
-.jl-ms__search { border: 0; outline: none; background: transparent; color: #0f172a; padding: 4px; font-size: 13px; min-width: 80px; flex: 1; }
-.jl-ms__search::placeholder { color: #94a3b8; }
-.jl-ms__menu {
-    position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; background: #fff;
-    border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
-    max-height: 300px; overflow-y: auto; z-index: 1050; display: none;
-}
-.jl-ms.is-open .jl-ms__menu { display: block; }
-.jl-ms__opt { padding: 9px 12px; cursor: pointer; font-size: 13px; color: #1e293b; }
-.jl-ms__opt:hover { background: #eff6ff; color: #1d4ed8; }
-.jl-ms__more { padding: 8px 12px; text-align: center; color: #94a3b8; font-size: 15px; letter-spacing: 0.2em; }
-
 /* ── Grid cədvəli ───────────────────────────────────────────────────────── */
 .jd2-table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 12.5px; }
 .jd2-table thead th {
@@ -427,7 +399,6 @@ td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
 .jd2-leave-text { margin: 0; font-size: 13.5px; color: var(--j-mid); font-weight: 600; line-height: 1.55; }
 .jd2-leave-go { flex: 0 1 auto; text-decoration: none; text-align: center; }
 
-
 /* ═══ Sərbəst iş (mockup: sol mövzu paneli + 10-sütun grid + canlı cəm) ═══ */
 .jd-sw2-layout { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
 .jd-sw2-topics { background: #fff; border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
@@ -455,7 +426,6 @@ td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
 .jd-sw2-foot .jd2-ie { color: #15803d; } .jd-sw2-foot .jd2-qb { color: #dc2626; }
 .sw-chip--disabled { background: #f1f5f9; color: #b6c2d6; cursor: not-allowed; }
 @media (max-width: 900px) { .jd-sw2-layout { grid-template-columns: 1fr; } }
-
 
 /* ═══ Seminar/lab xanası: kompakt bootstrap-select (q/b · i/e · bal) ═══ */
 .jd2-semselect { width: 52px; margin: 0 auto; }

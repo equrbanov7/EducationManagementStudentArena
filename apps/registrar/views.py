@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import finals, grade_audit, gradebook, schedule
+from . import finals, grade_audit, gradebook, lesson_rooms, schedule
 from .models import (
     AttendanceStatus,
     CorrectionReason,
@@ -130,6 +130,7 @@ def journal_detail(request, offering_id):
 
     today = _tz.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
+    rooms = lesson_rooms.lesson_room_choices(offering)
 
     context = {
         "offering": offering,
@@ -167,6 +168,10 @@ def journal_detail(request, offering_id):
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
         "lesson_teacher_choices": journal_extras.lesson_teacher_choices(offering),
+        # Dərs otağı: korpus (bina) → otaq kaskadı. Korpus ayrıca model deyil,
+        # otağın öz sahəsidir; siyahı kiçik olduğu üçün modala JSON kimi düşür.
+        "lesson_rooms": rooms,
+        "lesson_buildings": lesson_rooms.lesson_building_choices(rooms),
     }
     if correction_mode:
         # Yerində düzəliş rejimi: audited correction editoru üçün kontekst
@@ -373,6 +378,10 @@ def _handle_add_lesson(request, offering):
 
         instructor = get_user_model().objects.filter(pk=_inst_id).first()
 
+    # Dərsin otağı (opsional) — korpus yalnız UI süzgəcidir, saxlanan dəyər otaqdır.
+    # Otaq təşkilat daxilində həll olunur: başqa tenant-ın otağı keçmir.
+    room = lesson_rooms.resolve_lesson_room(offering.organization, request.POST.get("lesson_room"))
+
     # İKT/RİM Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
     allow_past = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
     try:
@@ -386,6 +395,7 @@ def _handle_add_lesson(request, offering):
             end_time=end_time,
             created_by=request.user,
             instructor=instructor,
+            room=room,
             allow_past=allow_past,
         )
         if allow_past:  # geriyə-dönük sütun audit izinə düşür (2026-08 auditi)

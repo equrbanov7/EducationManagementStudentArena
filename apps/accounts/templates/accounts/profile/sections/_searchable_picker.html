@@ -1,7 +1,15 @@
 {% comment %}
-Təkrar-istifadəli axtarış-seçici (chips + type-ahead) — imtahan/apellyasiya
-statistikası filtrlərində fənn/qrup üçün. Sinif prefiksi (`prefix`) və JS-hook
-(`hook`) parametrlə verilir ki, hər səhifə öz mövcud CSS/JS-i ilə işləsin.
-Parametrlər: prefix (ecs|aps), hook (məs. ecs-subject), placeholder.
+Təkrar-istifadəli axtarış-seçici (chips + type-ahead) — filtrlərdə fənn/qrup/
+fakültə/kafedra/müəllim/tələbə seçimi üçün.
+
+İKİ SİNİF DƏSTİ var və hər ikisi LAZIMDIR:
+
+* `ems-ss*` — VAHİD komponent üslubu (static/css/searchable_select.css).
+  Görünüş buradan gəlir; düzəliş bir yerdə edilir.
+* `{{ prefix }}-ms*` — JS komponentin prefiksini məhz `{prefix}-ms__search`
+  sinif adından oxuyur (static/js/searchable_select.js), ona görə saxlanılır;
+  həm də səhifəyə-məxsus nadir override üçün qarmaq rolunu oynayır.
+
+Parametrlər: prefix (acr|ecs|aps|jl|qbk|qsf), hook (məs. acr-faculty), placeholder.
 {% endcomment %}
-<div class="{{ prefix }}-ms js-{{ hook }}"><div class="{{ prefix }}-ms__chips"><input type="text" class="{{ prefix }}-ms__search" placeholder="{{ placeholder }}" autocomplete="off"></div><div class="{{ prefix }}-ms__menu"></div></div>
+<div class="ems-ss {{ prefix }}-ms js-{{ hook }}"><div class="ems-ss__chips {{ prefix }}-ms__chips"><input type="text" class="ems-ss__search {{ prefix }}-ms__search" placeholder="{{ placeholder }}" autocomplete="off"></div><div class="ems-ss__menu {{ prefix }}-ms__menu"></div></div>

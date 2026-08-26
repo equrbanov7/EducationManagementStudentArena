@@ -22,6 +22,7 @@
 
         var U = {
             data: root.dataset.dataUrl,
+            summary: root.dataset.summaryUrl,
             detail: root.dataset.detailUrl,
             faculty: root.dataset.facultyUrl,
             department: root.dataset.departmentUrl,
@@ -231,7 +232,46 @@
             }
         }
 
+        // Box-lar süzgəc sahəsinin TAMI üzrə aqreqatdır (cədvəl isə yalnız görünən
+        // ~25 tələbə). Ona görə iki AYRI sorğu gedir: cədvəl dərhal gəlir, box-lar
+        // öz skeleton-u ilə sonra dolur — cədvəl box-ları gözləmir.
+        var summarySeq = 0;
+
+        function cardSkeleton() {
+            var html = "";
+            for (var i = 0; i < 6; i++) {
+                html += '<div class="acr-card acr-card--loading"><div class="acr-skel acr-skel--card"></div></div>';
+            }
+            cards.innerHTML = html;
+        }
+
+        function loadSummary() {
+            var seq = ++summarySeq;
+            cardSkeleton();
+            fetch(U.summary + "?" + params().toString(), {
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+            })
+                .then(function (r) {
+                    return r.ok ? r.json() : null;
+                })
+                .then(function (d) {
+                    if (seq !== summarySeq) return; // köhnəlmiş cavab — süzgəc dəyişib
+                    if (!d) {
+                        cards.innerHTML = "";
+                        return;
+                    }
+                    populateYears(d.year_options);
+                    renderCards(d.summary);
+                })
+                .catch(function () {
+                    if (seq === summarySeq) cards.innerHTML = "";
+                });
+        }
+
+        var rowsSeq = 0;
+
         function load() {
+            var seq = ++rowsSeq;
             skeleton();
             fetch(U.data + "?" + params({ offset: page, limit: LIMIT }).toString(), {
                 headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -240,9 +280,7 @@
                     return r.ok ? r.json() : null;
                 })
                 .then(function (d) {
-                    if (!d) return;
-                    populateYears(d.year_options);
-                    renderCards(d.summary);
+                    if (seq !== rowsSeq || !d) return;
                     renderRows(d);
                 });
         }
@@ -250,6 +288,7 @@
         function reload() {
             page = 0;
             load();
+            loadSummary();
         }
 
         [yearSel, seasonSel].forEach(function (sel) {
@@ -362,6 +401,7 @@
         });
 
         load();
+        loadSummary();
     }
 
     if (document.readyState === "loading") {

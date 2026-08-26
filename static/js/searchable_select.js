@@ -83,6 +83,11 @@
     var OPEN = "is-open";
 
     var multi = !!opts.multi;
+    // Vahid komponent üslubu (static/css/searchable_select.css) tək-seçim və
+    // çox-seçimi FƏRQLİ göstərir: tək-seçimdə çip «dəyər» kimi (bordersiz,
+    // sətir sınmadan), çox-seçimdə isə həb-token kimi. Rejimi yalnız JS bilir,
+    // ona görə sinfi burada qoyuruq.
+    rootEl.classList.add("ems-ss", multi ? "ems-ss--multi" : "ems-ss--single");
     var pageSize = opts.pageSize || 10;
     var basePlaceholder = opts.placeholder || search.getAttribute("placeholder") || "";
     var listeners = { change: [] };
@@ -117,7 +122,11 @@
     }
 
     function updatePlaceholder() {
-      search.setAttribute("placeholder", Object.keys(selected).length && !multi ? "" : basePlaceholder);
+      var hasValue = !!Object.keys(selected).length;
+      search.setAttribute("placeholder", hasValue && !multi ? "" : basePlaceholder);
+      // Seçim varkən input yer tələb etməsin — yoxsa çip + input çərçivəyə
+      // sığmayıb sətri sındırır (bax searchable_select.css: `.has-value`).
+      rootEl.classList.toggle("has-value", hasValue);
     }
 
     function renderChips() {
@@ -126,9 +135,10 @@
       });
       Object.keys(selected).forEach(function (id) {
         var chip = document.createElement("span");
-        chip.className = CHIP;
-        chip.innerHTML = '<span></span><button type="button" class="' + CHIP_X + '">×</button>';
+        chip.className = "ems-ss__chip " + CHIP;
+        chip.innerHTML = '<span></span><button type="button" class="ems-ss__chip-x ' + CHIP_X + '">×</button>';
         chip.querySelector("span").textContent = selected[id];
+        chip.setAttribute("title", selected[id]);
         chip.querySelector("." + CHIP_X).addEventListener("click", function (ev) {
           ev.preventDefault();
           delete selected[id];
@@ -158,7 +168,7 @@
         return;
       }
       var div = document.createElement("div");
-      div.className = OPT;
+      div.className = "ems-ss__opt " + OPT;
       div.textContent = o.text;
       div.addEventListener("mousedown", function (ev) {
         ev.preventDefault();
@@ -185,7 +195,7 @@
       if (state) {
         if (!moreEl) {
           moreEl = document.createElement("div");
-          moreEl.className = OPT_MORE;
+          moreEl.className = "ems-ss__more " + OPT_MORE;
           moreEl.textContent = "…";
           menu.appendChild(moreEl);
         }
