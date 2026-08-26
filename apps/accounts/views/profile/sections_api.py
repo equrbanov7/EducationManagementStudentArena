@@ -107,7 +107,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "my-schedule": "accounts/profile/sections/_my_schedule.html",
     "academic-calendar": "accounts/profile/sections/_academic_calendar.html",
     "my-journal": "accounts/profile/sections/_my_journal.html",
-    "grade-approvals": "accounts/profile/sections/_grade_approvals.html",
+    "journal-close": "accounts/profile/sections/_journal_close.html",
     "analytics": "accounts/profile/sections/_analytics.html",
     "academic-records": "accounts/profile/sections/_academic_records.html",
 }
@@ -153,7 +153,6 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "my-schedule",
         "academic-calendar",
         "my-journal",
-        "grade-approvals",
         "analytics",
     }
 )

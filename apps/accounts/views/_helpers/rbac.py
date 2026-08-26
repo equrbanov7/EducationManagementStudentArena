@@ -208,10 +208,9 @@ def _role_capabilities(user, profile):
         from apps.organizations.public import get_permission_scope
 
         can_manage_registrar = get_permission_scope(user, active_organization, "course.edit").is_org_wide
-        can_approve_grades = any(
-            get_permission_scope(user, active_organization, permission).has_structure_access
-            for permission in ("grade.approve_chair", "grade.approve_final")
-        )
+        # Semestr sonu TOPLU jurnal bağlama (RİM). Köhnə `grade.approve_chair` /
+        # `grade.approve_final` cütünü əvəz edir — təsdiq zənciri ləğv olunub.
+        can_close_journals = get_permission_scope(user, active_organization, "journal.close").has_structure_access
         analytics_all_scope = get_permission_scope(user, active_organization, "analytics.view_all")
         analytics_unit_scope = get_permission_scope(user, active_organization, "analytics.view_unit")
         can_view_unit_analytics = analytics_all_scope.has_structure_access or analytics_unit_scope.has_structure_access
@@ -229,7 +228,7 @@ def _role_capabilities(user, profile):
             _has_search_perm(_actor_perm_list, "member.view") and _has_search_perm(_actor_perm_list, "unit.view")
         )
     else:
-        can_manage_registrar = can_approve_grades = can_view_unit_analytics = False
+        can_manage_registrar = can_close_journals = can_view_unit_analytics = False
         can_search_directory = False
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
@@ -280,6 +279,7 @@ def _role_capabilities(user, profile):
             "exam-center-stats",  # imtahan statistikaları / nəticələr
             "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "kollokvium-windows",  # kollokvium bal-yazma pəncərələri (imtahan mərkəzi)
+            "journal-close",  # semestr sonu toplu jurnal bağlaması (RİM)
             "exam-chance",  # imtahan şansı ver (ikinci şans — imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
             "system-monitoring",  # Sistem Monitorinqi (yalnız superadmin; server-side qorunur)
@@ -435,8 +435,8 @@ def _role_capabilities(user, profile):
         # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
         if is_teacher or is_org_admin or is_superadmin or is_student:
             allowed_sections.add("my-journal")
-        if can_approve_grades:
-            allowed_sections.add("grade-approvals")
+        if can_close_journals:
+            allowed_sections.add("journal-close")
         if can_view_unit_analytics:
             allowed_sections.add("analytics")
         if is_superadmin or is_org_admin or is_unit_manager:
@@ -562,7 +562,7 @@ def _role_capabilities(user, profile):
         "can_manage_exam_rooms": can_manage_exam_rooms,
         # Grade-approval chain (U7.2): permission-scope əsaslı (yuxarıda hesablanır);
         # köhnə rol-əsaslı ifadə nav↔view uyğunsuzluğu yaradırdı.
-        "can_approve_grades": can_approve_grades,
+        "can_close_journals": can_close_journals,
         "can_search_directory": can_search_directory,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,

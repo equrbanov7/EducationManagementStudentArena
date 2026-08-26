@@ -102,15 +102,18 @@ def build_student_overall_academic_context(request, *, organization) -> dict:
 
 def build_profile_registrar_section(request, *, organization, section: str) -> dict:
     """Context for the registrar cabinet sections rendered INSIDE the profile
-    shell (U12): schedule, academic calendar, teacher journal list, grade
-    approvals and analytics. Access is already gated by ``allowed_sections``
-    (rbac) + the AJAX-safe section whitelist; data scoping stays in the
-    registrar service layer (RLS/tenant).
+    shell (U12): schedule, academic calendar, teacher journal list and analytics.
+    Access is already gated by ``allowed_sections`` (rbac) + the AJAX-safe section
+    whitelist; data scoping stays in the registrar service layer (RLS/tenant).
+
+    QEYD: köhnə «grade-approvals» (qiymət təsdiqləri) bölməsi LƏĞV edilib —
+    təsdiq zənciri yoxdur; onun yerini RİM-in «journal-close» bölməsi tutur
+    (apps/accounts/views/journal_close.py).
 
     Built lazily — only for the ACTIVE section (performance: no wasted queries)."""
     from apps.registrar import page_contexts
 
-    if section in ("my-schedule", "academic-calendar", "grade-approvals", "analytics") and organization is None:
+    if section in ("my-schedule", "academic-calendar", "analytics") and organization is None:
         return {"has_context": False}
 
     if section == "my-schedule":
@@ -124,13 +127,10 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
         if student_context is not None:
             return student_context
         return page_contexts.journal_list_context(request.user, request=request)
-    if section == "grade-approvals":
-        context = page_contexts.approvals_context(request.user, organization)
-        return context if context["is_approver"] else {"has_context": False, "is_approver": False}
     if section == "analytics":
-        from apps.registrar import approval
+        from apps.registrar import journal_scope
 
-        if not approval.can_view_analytics(request.user, organization):
+        if not journal_scope.can_view_analytics(request.user, organization):
             return {"has_context": False}
         return page_contexts.analytics_context(request, organization, embedded=True)
     return {}

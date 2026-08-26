@@ -43,11 +43,13 @@ class RegistrarProfileSectionsTest(TestCase):
             cls.student = User.objects.create_user("ps_student", "ps_student@qku.edu.az", "pw")
             cls.dean = User.objects.create_user("ps_dean", "ps_dean@qku.edu.az", "pw")
             cls.hr_user = User.objects.create_user("ps_hr", "ps_hr@qku.edu.az", "pw")
+            cls.rim = User.objects.create_user("ps_rim", "ps_rim@qku.edu.az", "pw")
             for user, role in (
                 (cls.teacher, "teacher"),
                 (cls.student, "student"),
                 (cls.dean, "dean"),
                 (cls.hr_user, "hr"),
+                (cls.rim, "ikt_rehber"),
             ):
                 Membership.objects.create(
                     user=user,
@@ -88,11 +90,21 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'data-profile-section-panel="my-journal"')
 
-    def test_dean_gets_analytics_and_approvals_sections(self):
-        for section in ("analytics", "grade-approvals"):
-            resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": section})
-            self.assertEqual(resp.status_code, 200)
-            self.assertContains(resp, f'data-profile-section-panel="{section}"')
+    def test_dean_gets_analytics_section(self):
+        resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": "analytics"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'data-profile-section-panel="analytics"')
+
+    def test_dean_has_no_journal_close_section(self):
+        """Təsdiq zənciri ləğv olundu; jurnalı RİM bağlayır, dekan yox."""
+        resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": "journal-close"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, 'data-profile-section-panel="journal-close"')
+
+    def test_rim_gets_journal_close_section(self):
+        resp = self._client(self.rim).get(reverse("accounts:profile"), {"section": "journal-close"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'data-profile-section-panel="journal-close"')
 
     # ── AJAX fragment API respects role gating ───────────────────────────────
     def test_fragment_api_returns_schedule_for_student(self):
@@ -142,4 +154,7 @@ class RegistrarProfileSectionsTest(TestCase):
 
         dean_page = self._client(self.dean).get(reverse("accounts:profile")).content.decode()
         self.assertIn('data-section="analytics"', dean_page)
-        self.assertIn('data-section="grade-approvals"', dean_page)
+        self.assertNotIn('data-section="journal-close"', dean_page)
+
+        rim_page = self._client(self.rim).get(reverse("accounts:profile")).content.decode()
+        self.assertIn('data-section="journal-close"', rim_page)

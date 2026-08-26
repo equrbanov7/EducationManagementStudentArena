@@ -17,9 +17,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import approval, finals, grade_audit, gradebook, schedule
+from . import finals, grade_audit, gradebook, schedule
 from .models import (
-    ApprovalStatus,
     AttendanceStatus,
     CorrectionReason,
     CourseOffering,
@@ -66,40 +65,29 @@ def journal_list(request):
 def journal_detail(request, offering_id):
     """Lesson-by-lesson journal for one offering: view (GET) + edit (POST).
 
-    Access: the offering instructor / org owner / superuser may edit; a chair
-    (kafedra müdiri) or dean (dekan) may *review* a submitted journal (read-only)
-    to approve or return it via the grade-approval chain (U7.2)."""
+    Access: the offering instructor / org owner / superuser may edit; the
+    corrector (İKT/RİM rəhbəri) may open it for a documented correction.
+
+    TƏSDİQ ZƏNCİRİ YOXDUR (sahibin qərarı, 2026-08): müəllim balı yazır və bitir.
+    Jurnalı semestr sonunda RİM toplu BAĞLAYIR — bax
+    :mod:`apps.registrar.journal_close`."""
     offering = _offering_or_404(request, offering_id)
     from apps.registrar import corrections as corrections_service
 
-    appr = approval.approval_context(offering=offering, user=request.user)
+    journal_locked = gradebook.journal_is_locked(offering)
     can_edit_perm = _can_edit_journal(request.user, offering)
     # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
-    can_review = approval.can_chair_approve(
-        request.user, offering.organization, offering=offering
-    ) or approval.can_dean_approve(request.user, offering.organization, offering=offering)
-    # Do not leak existence: only editors, correctors (İKT rəhbəri/admin), or
-    # reviewers of an already-submitted journal, may open the page.
-    if not can_edit_perm and not can_correct and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
+    # Do not leak existence: only editors or correctors (İKT/RİM rəhbəri) may
+    # open the page.
+    if not can_edit_perm and not can_correct:
         raise Http404
     # Yerində düzəliş rejimi (kilid-aç toggle) — yalnız korrektor + ?correct=1.
     correction_mode = request.method == "GET" and request.GET.get("correct") == "1" and can_correct
 
     if request.method == "POST":
         action = request.POST.get("action")
-        # Grade-approval chain actions (services enforce their own RBAC).
-        if action == "submit_approval":
-            return _handle_approval(request, offering, approval.submit_for_approval, _("Jurnal təsdiqə göndərildi."))
-        if action == "chair_approve":
-            return _handle_approval(request, offering, approval.chair_approve, _("Kafedra təsdiqi verildi."))
-        if action == "dean_approve":
-            return _handle_approval(
-                request, offering, approval.dean_approve, _("Dekan təsdiqi verildi — qiymətlər rəsmiləşdi.")
-            )
-        if action == "return_revision":
-            return _handle_return(request, offering)
         # Birbaşa redaktə əməliyyatları YALNIZ müəllim/sahib/superuser üçün. Korrektor
         # (İKT) buradan keçə bilməz — dəyişikliyi düzəliş rejimi (correction_apply,
         # sənədli) ilə edir. Beləcə düzəliş rejimi aktiv olmadan heç nə dəyişmir.
@@ -121,7 +109,7 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_extras
+    from apps.registrar import journal_close_notices, journal_extras
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections_service.corrections_map_for_offering(offering)
@@ -144,8 +132,10 @@ def journal_detail(request, offering_id):
         "selfwork_board": journal_extras.get_selfwork_board(offering),
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
-        "can_edit": is_direct_editor and not appr["is_locked"],
-        "approval": appr,
+        "can_edit": is_direct_editor and not journal_locked,
+        "journal_locked": journal_locked,
+        # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).
+        "journal_close_notice": journal_close_notices.journal_banner(offering, today),
         "grade_history": grade_audit.get_grade_history(offering=offering),
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
@@ -231,7 +221,6 @@ def rubric_grade_view(request, offering_id, component_id):
             messages.success(request, _("Rubrik balları yadda saxlanıldı."))
         return redirect(reverse("registrar:rubric_grade", args=[offering.pk, component.pk]))
 
-    appr = approval.approval_context(offering=offering, user=request.user)
     return render(
         request,
         "registrar/rubric_grade.html",
@@ -239,51 +228,10 @@ def rubric_grade_view(request, offering_id, component_id):
             "offering": offering,
             "component": component,
             "grid": grid,
-            "can_edit": not appr["is_locked"],
+            "can_edit": not gradebook.journal_is_locked(offering),
             "active_main_nav": "journal",
         },
     )
-
-
-def _handle_approval(request, offering, action_fn, success_msg):
-    """Run an approval-chain transition; surface a permission error as a message."""
-    from django.core.exceptions import PermissionDenied
-
-    try:
-        action_fn(offering=offering, by_user=request.user)
-        messages.success(request, success_msg)
-    except PermissionDenied as exc:
-        messages.error(request, str(exc) or _("Bu əməliyyat üçün icazəniz yoxdur."))
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-
-def _handle_return(request, offering):
-    """Chair/dean returns the journal to the teacher with an optional reason."""
-    from django.core.exceptions import PermissionDenied
-
-    reason = (request.POST.get("return_reason") or "").strip()
-    try:
-        approval.return_for_revision(offering=offering, by_user=request.user, reason=reason)
-        messages.success(request, _("Jurnal düzəliş üçün geri qaytarıldı."))
-    except PermissionDenied as exc:
-        messages.error(request, str(exc) or _("Bu əməliyyat üçün icazəniz yoxdur."))
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-
-@login_required
-def approvals_inbox(request):
-    """Chair/dean inbox: journals awaiting the current user's approval step."""
-    from apps.registrar import page_contexts
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/approvals_inbox.html", {"has_context": False, "active_main_nav": "approvals"})
-
-    context = page_contexts.approvals_context(request.user, organization)
-    if not context["is_approver"]:
-        raise Http404  # not an approver in this org
-    context["active_main_nav"] = "approvals"
-    return render(request, "registrar/approvals_inbox.html", context)
 
 
 def _handle_save_components(request, offering):

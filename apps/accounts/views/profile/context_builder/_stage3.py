@@ -311,6 +311,17 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "journal-close" in self.allowed_sections and self.active_section == "journal-close":
+            from .._sections.journal_close import build_journal_close_section
+
+            build_journal_close_section(
+                self.request,
+                self.journal_close_section,
+                is_superadmin=self.capabilities["is_superadmin"],
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-chance" in self.allowed_sections and self.active_section == "exam-chance":
             from .._sections.exam_chance import build_exam_chance_section
 

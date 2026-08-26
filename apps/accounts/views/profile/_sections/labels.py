@@ -62,7 +62,7 @@ def build_section_titles() -> dict:
         "my-schedule": pgettext_lazy("profile.sidebar", "Dərs cədvəli"),
         "academic-calendar": pgettext_lazy("profile.sidebar", "Akademik təqvim"),
         "my-journal": pgettext_lazy("profile.sidebar", "Elektron jurnal"),
-        "grade-approvals": pgettext_lazy("profile.sidebar", "Qiymət təsdiqləri"),
+        "journal-close": pgettext_lazy("profile.sidebar", "Jurnal bağlama"),
         "analytics": pgettext_lazy("profile.sidebar", "Akademik analitika"),
         "academic-records": pgettext_lazy("profile.sidebar", "Akademik qeydlər"),
         "pending-answers": pgettext_lazy("accounts.pending_answers", "section_title"),

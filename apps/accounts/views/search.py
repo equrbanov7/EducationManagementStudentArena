@@ -47,7 +47,7 @@ def _nav_targets(caps):
         ("my-journal", _("Elektron jurnal"), "fa-book-open", "jurnal journal qiymət davamiyyət"),
         ("my-schedule", _("Dərs cədvəli"), "fa-calendar-week", "cədvəl schedule dərs vaxt"),
         ("academic-calendar", _("Akademik təqvim"), "fa-calendar-days", "təqvim calendar sessiya qeydiyyat"),
-        ("grade-approvals", _("Qiymət təsdiqləri"), "fa-clipboard-check", "təsdiq approval"),
+        ("journal-close", _("Jurnal bağlama"), "fa-lock", "jurnal bağla semestr rim"),
         ("analytics", _("Akademik analitika"), "fa-chart-line", "analitika statistika gpa keçid"),
         ("my-exams", _("İmtahanlarım"), "fa-clipboard-check", "imtahan exam test"),
         ("assigned-exams", _("İmtahanlar"), "fa-clipboard-check", "imtahan exam test"),

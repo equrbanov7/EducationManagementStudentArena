@@ -111,6 +111,10 @@ UNIVERSITY_ROLES = [
             "group.view",
             "group.manage",
             "journal.correct",
+            # Semestr sonu jurnal bağlama/açma (sahibin qərarı, 2026-08) —
+            # təsdiq zəncirini əvəz edən yeganə açar. Başqa rola lazım olsa
+            # permission-editordan verilir.
+            "journal.close",
             # Əsasnamə 4.2 — «rol və səlahiyyət idarəetməsi» RİM-dədir.
             "role.*",
             # `user.grant_privileged` YOXDUR: yeni admin yaratmaq ayrıca açardır.
@@ -199,7 +203,6 @@ UNIVERSITY_ROLES = [
             "course.*",
             "grade.view",
             "grade.input",
-            "grade.approve_chair",
             # org_admin-alias davranış qorunması (chair_head → department_head).
             "group.view",
             "group.manage",

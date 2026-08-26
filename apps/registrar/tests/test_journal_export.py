@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar import approval, finals, gradebook, services
+from apps.registrar import finals, gradebook, services
 from apps.registrar.models import Curriculum, CurriculumSubject, LessonKind, Program, StudentAcademicRecord, Subject
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
@@ -145,11 +145,9 @@ class JournalExportTest(TestCase):
         resp = self._client(self.student).get(self._url())
         self.assertEqual(resp.status_code, 404)
 
-    def test_chair_cannot_export_draft_but_can_after_submit(self):
+    def test_chair_cannot_export(self):
+        """Təsdiq zənciri ləğv edildi — kafedra müdirinin «rəyçi» ixracı da yoxdur."""
         self.assertEqual(self._client(self.chair).get(self._url()).status_code, 404)
-        with bypass_rls():
-            approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
-        self.assertEqual(self._client(self.chair).get(self._url()).status_code, 200)
 
     def test_export_is_audited(self):
         from apps.audit.models import AuditLog
