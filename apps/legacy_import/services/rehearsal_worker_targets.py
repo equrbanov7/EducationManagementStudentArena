@@ -95,6 +95,10 @@ class WorkerRequest:
     role: object
     evidence_digest: str
     needs_activation: bool
+    # Mənbədəki ad/soyad — YALNIZ boş sahəni doldurmaq üçün (bax
+    # ``write_worker_names``); tələbə tərəfindəki müqavilə ilə eynidir.
+    first_name: str = ""
+    last_name: str = ""
 
 
 @dataclass(frozen=True)
@@ -164,6 +168,7 @@ def worker_derivation_hash(
     teacher_type_text: str,
     inzibati_text: str,
     activation_state: str,
+    name_state: str = "unwritten",
 ) -> str:
     """Cross-run-sabit worker qərar kimliyi; heç bir UUID ona daxil olmur.
 
@@ -183,6 +188,7 @@ def worker_derivation_hash(
         teacher_type_text,
         inzibati_text,
         activation_state,
+        name_state,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -199,6 +205,30 @@ def resolve_worker_role(context):
     if role is None:
         raise LegacyRehearsalConfigError("legacy_rehearsal_worker_role_unavailable")
     return role
+
+
+def write_worker_names(target_pk: str, first_name: str, last_name: str) -> str:
+    """Boş ad sahələrini doldur; MÖVCUD dəyər heç vaxt üzərinə yazılmır.
+
+    ``student_placement._write_names`` ilə eyni müqavilə (§4.5): idxal yalnız
+    boşluğu doldurur, əl ilə düzəldilmiş adı pozmur.  ``auth_user``-in bu
+    sütunlarında trigger yoxdur (0013 yalnız ``username``/``email``/``is_active``
+    üzərindədir), ona görə accounts servis qapısı tətbiq olunmur.
+    """
+
+    users = django_apps.get_model("auth", "User")._default_manager.filter(pk=target_pk)
+    row = users.values("first_name", "last_name").first()
+    if row is None:
+        raise LegacyRehearsalEvidenceError(_TARGET_MISSING)
+    updates = {}
+    if first_name and not row["first_name"]:
+        updates["first_name"] = first_name
+    if last_name and not row["last_name"]:
+        updates["last_name"] = last_name
+    if updates:
+        users.update(**updates)
+        return "written"
+    return "blank" if not first_name and not last_name else "preserved"
 
 
 def apply_scope(context, *, user_pk: str, unit_pk: str) -> tuple[str, tuple[str, ...]]:
@@ -293,6 +323,9 @@ def materialise_worker(context, *, request: WorkerRequest, activate: bool, activ
         with transaction.atomic():
             scope_state, scope_rules = apply_scope(context, user_pk=request.user_pk, unit_pk=request.unit_pk)
             rule_codes.extend(scope_rules)
+            # Ad/soyad EYNİ vahid işdə: idxal edilən müəllim UI-da öz adı ilə
+            # görünməlidir (yalnız boş sahə doldurulur — §4.5 müqaviləsi).
+            name_state = write_worker_names(request.user_pk, request.first_name, request.last_name)
             if activate:
                 stage = "activation"
                 if request.needs_activation:
@@ -311,6 +344,7 @@ def materialise_worker(context, *, request: WorkerRequest, activate: bool, activ
                 teacher_type_text=request.teacher_type_text,
                 inzibati_text=request.inzibati_text,
                 activation_state=activation_state,
+                name_state=name_state,
             )
             entity_map = _seal(
                 context,
