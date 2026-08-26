@@ -205,6 +205,58 @@ Cari lokal M2/M3 slice-i yalnız aşağıdakılar olduqda `VERIFIED` sayılır:
 
 ## Dəyişiklik jurnalı
 
+### 28 avqust 2026 — REHEARSAL #10: ilk TAM köçürmə (15 faza, 1s49d)
+
+**Nəticə: SUCCEEDED** — `emsarena_rehearsal_603f5e9f08e7`, digest
+`9f07ad73065c7e4366db6baf20dbd7b1f2b41b8c40d85be7038bd59547035501`,
+transform `rehearsal-identity-v1.f3d054260e15`. Optimallaşdırılmış pipeline
+(commit ddb8e41c) ilə ilk tam qaçış: **1 saat 49 dəqiqə** (əvvəlki tempi ilə 4+ gün).
+
+Köçürülən (real MyEdu dump):
+| Sahə | Say |
+|---|---|
+| OrgUnit / Proqram / Fənn / Kurikulum | 880 / 101 / 2,501 / 168 |
+| Hesab (aktiv 5,928; müəllim 715) | 8,431 |
+| Akademik qeyd (SAR) | 5,213 |
+| Dövr / fənn açılışı / yazılış / dərs | 13 / 9,599 / 106,870 / 243,923 |
+| **Qiymət-qayıb xanası** | **2,845,344** |
+| — present / absent / excused / ballı | 2,472,314 / 368,563 / 4,467 / 160,064 |
+| Komponent (kollokvium+SDF) / bal | 25,470 / 384,456 |
+| İmtahan nəticəsi / təkrar imtahan | 83,488 / 3,502 |
+| Semestr kilidi (bağlı / açıq) | 9,592 / 7 |
+
+MariaDB 15-fazalı determinizm dəsti: **3 pass** (38 dəq).
+
+**J8 üzləşdirmə diaqnozu (dərin araşdırma, ayrıca agent):**
+- `yekun` cədvəli YALNIZ 1 semestri (2022/2023 Payız, 17,194 sətir) əhatə edir —
+  hesabatdakı «17,077 deviation» BÜTÜN köçürməyə aid deyil, bir semestrin güzgüsüdür.
+- Bölgü: unresolved 12,379 (72%) · deviation 4,695 (27%) · match 120 (0.7%).
+- Unresolved-un **86.8%-i** (10,744) `legacy_journal_student_inactive` — 2,603 tələbənin
+  (33%) hesabı staged/deaktivdir, `registrar_guard_active_member` Enrollment yaratmağa
+  qoymur. Nəticə: **mənbə xanalarının 29.8%-i (1,530,468) köçmür**, içində 36,399 imtahan balı.
+- Deviation-un **73.5%-i düstur fərqidir**: legacy `girish` = davamiyyət(0-10) +
+  kollokvium(0-30) + sərbəst iş(0-10); bizim `entry_score_for` = gündəlik rəqəmli
+  balların CƏMİ + kollokvium, 50-yə clamp. Köhnə düstur BİZİM köçürdüyümüz dataya
+  tətbiq olunanda təmiz alt-çoxluqda **89.8% ±2** uyğunluq verir → data düzgündür,
+  hesablama qaydası fərqlidir. Xana səviyyəsində itki 2.5%-dən azdır.
+- 11.5% yazılışda `xana+kollokvium` onsuz da 50-ni keçir (tavan doyması); `si` də
+  sayılsa 24.9%.
+- Kiçik qalıqlar: 130 tələbənin imtahan balı yalnız `yekun.imtahanda`-dadır (`im`
+  xanası yoxdur); 383 sətirdə legacy şkalası 50/100 həddini aşır; 1,037 halda
+  birləşmiş+qrup jurnalı ayrı offering-lərə bölündüyü üçün toplama fərqlənir.
+
+**UI yoxlaması (staging serve, superadmin):** jurnal siyahısı real fənn/qruplarla
+açılır; ORTA ölçülü jurnal (20 dərs × 7 tələbə) **166 KB / 0.3 s** — tələbə adları,
+«ATA ADI» sütunu, kollokvium və yekun tabları, bağlı-semestr lövhəsi düzgün görünür.
+⚠️ NƏHƏNG birləşmiş jurnallar (ən böyüyü 352 dərs × 554 tələbə = 195,008 xana)
+**61 MB HTML** verir — brauzerdə praktiki deyil; səhifələmə/lazy yükləmə tələb olunur
+(median cəmi 140 xanadır, problem yalnız bir neçə birləşmiş jurnaldadır).
+
+**AÇIQ QƏRARLAR (sahibə verildi):** (1) məzun/xaric tələbələr üçün «arxiv üzvlüyü» —
+hesab girişə bağlı qalsın, akademik qeydləri köçsün; (2) tarixi semestrlərin giriş
+balı GENERIC «Giriş balı (arxiv)» komponenti kimi olduğu kimi yazılsın ki, tələbə
+məhz köhnə sistemdəki balını görsün.
+
 ### 28 avqust 2026 (gecə) — FAZA 3B / J4–J8: jurnal məzmunu + Rehearsal #7 tapıntısı
 
 - Beş yeni faza (M5.11–M5.15) — jurnalın **məzmunu**: 5.1M bal/qayıb hüceyrəsi,
