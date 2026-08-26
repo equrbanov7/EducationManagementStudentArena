@@ -51,10 +51,10 @@ from .rehearsal_journal_marks_targets import (
     MARK_SEALER,
     MARKS_ENTITY_TYPE,
     PRESENT_STATUS,
+    LessonMarkWriter,
     MarkWrite,
+    journal_seal_entry,
     recompute_absence_hours,
-    seal_journal,
-    write_lesson_mark,
 )
 from .rehearsal_journal_offerings_phase import JOURNAL_OFFERINGS_PHASE_KEY
 from .rehearsal_journal_offerings_source import migrated_target_index, validated_uniqid
@@ -230,38 +230,38 @@ class JournalMarksPhase:
 
         resolution = build_resolution(context)
         ledger = JournalCellLedger(recorded=MARK_SEALER.recorded_decisions(context))
+        writer = LessonMarkWriter(context, ledger)
         drive_cells(
             context,
             ledger=ledger,
             domain=is_calendar_month,
             distill=distill_mark_cell,
-            decide=lambda cell: self._decide(context, cell=cell, resolution=resolution, ledger=ledger),
+            decide=lambda cell: self._decide(cell=cell, resolution=resolution, ledger=ledger, writer=writer),
             overlap_key="archive_overlap",
+            # J-V7: arxiv keçidi başlamazdan əvvəl əsas cədvəl hədəfə düşməlidir.
+            flush=writer.flush,
         )
         recompute_absence_hours(context, ledger.touched_targets)
 
         issue_counts: Counter[tuple[str, str]] = Counter()
         decisions = list(ledger.recorded.items())
+        entries = []
         for uniqid, tally in sorted(ledger.tallies.items()):
             state = state_for(
                 written=sum(tally[key] for key in WRITTEN_KEYS),
                 quarantined=sum(tally[key] for key in QUARANTINE_KEYS),
             )
-            decisions.append(
-                (
-                    uniqid,
-                    seal_journal(
-                        context,
-                        uniqid=uniqid,
-                        state=state,
-                        offering_pk=resolution.offerings.get(uniqid, ""),
-                        tally=tally,
-                        evidence=ledger.evidence_part(uniqid),
-                        rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
-                        issue_counts=issue_counts,
-                    ),
-                )
+            entry, outcome = journal_seal_entry(
+                uniqid=uniqid,
+                state=state,
+                offering_pk=resolution.offerings.get(uniqid, ""),
+                tally=tally,
+                evidence=ledger.evidence_part(uniqid),
+                rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
             )
+            entries.append(entry)
+            decisions.append((uniqid, outcome))
+        MARK_SEALER.seal_many(context, entries, issue_counts=issue_counts)
 
         # SA-2: zəncir seal açarının LEKSİKOQRAFİK sırasında — rebuild ilə eyni.
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
@@ -285,7 +285,7 @@ class JournalMarksPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _decide(self, context, *, cell: MarkCell, resolution: MarkResolution, ledger) -> None:
+    def _decide(self, *, cell: MarkCell, resolution: MarkResolution, ledger, writer) -> None:
         """Bir xananın qərarı — nərdivan modul qeydindəki sıradadır."""
 
         offering_pk = resolution.offerings.get(cell.uniqid, "")
@@ -320,8 +320,9 @@ class JournalMarksPhase:
             # J-V5: J3 hər dərsi ``lecture`` yaradır, ona görə bu yalnız
             # qeyddir — davranışa təsiri yoxdur (bax modul qeydi).
             ledger.count(cell.uniqid, "lab")
-        result = write_lesson_mark(
-            context,
+        writer.enqueue(
+            uniqid=cell.uniqid,
+            from_archive=cell.from_archive,
             request=MarkWrite(
                 lesson_pk=lesson_pk,
                 enrollment_pk=enrollment_pk,
@@ -330,10 +331,3 @@ class JournalMarksPhase:
                 allow_existing=not cell.from_archive,
             ),
         )
-        if result == "written":
-            ledger.count(cell.uniqid, "archive_written" if cell.from_archive else "written")
-            ledger.touched_targets.add(enrollment_pk)
-        elif result == "superseded":
-            ledger.count(cell.uniqid, "archive_overlap")
-        else:
-            ledger.count(cell.uniqid, "conflict")

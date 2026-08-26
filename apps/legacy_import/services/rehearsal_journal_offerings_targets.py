@@ -22,17 +22,14 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 from types import MappingProxyType
-
-from django.apps import apps as django_apps
-from django.db import transaction
+from types import MappingProxyType as _Frozen
 
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, LegacyMigrationIssue
 
 from .field_contracts import JOURNAL_FIELDS
-from .ledger import upsert_entity_map, upsert_issue
 from .rehearsal_authorizer import COURSE_OFFERING_MODEL_LABEL
 from .rehearsal_contracts import LegacyRehearsalEvidenceError, encoded_part
-from .rehearsal_journal_offerings_source import JOURNAL_SOURCE_TABLE
+from .rehearsal_journal_batch import Decision, TargetMaterialiser
 
 COURSE_OFFERING_ENTITY_TYPE = "course_offering"
 
@@ -141,92 +138,91 @@ def offering_derivation_hash(
     return digest.hexdigest()
 
 
-def recorded_decision(context, uniqid: str):
-    """Resume qısayolu: möhürlənmiş qərarı yenidən törətmək əvəzinə oxu."""
+def recorded_decisions(context) -> dict[str, tuple[str, str, str]]:
+    """Bu run-un BÜTÜN offering möhürləri — resume üçün BİR sorğu.
 
-    return (
-        LegacyEntityObservation.objects.filter(
-            run_id=context.run_id,
-            entity_map__entity_type=COURSE_OFFERING_ENTITY_TYPE,
-            entity_map__legacy_pk=uniqid,
-        )
-        .values_list("state", "source_row_hash", "target_model_label")
-        .first()
-    )
+    Əvvəl hər jurnal üçün ayrıca ``.first()`` gedirdi (24 159 sorğu).
+    """
 
-
-def _seal(context, *, uniqid: str, digest: str, state: str, label: str = "", target_pk: str = ""):
-    return upsert_entity_map(
-        run_id=context.run_id,
-        actor=context.actor,
-        authorize=context.authorize,
-        entity_type=COURSE_OFFERING_ENTITY_TYPE,
-        legacy_pk=uniqid,
-        source_row_hash=digest,
-        state=state,
-        target_model_label=label,
-        target_pk=target_pk,
-        target_validators=context.target_validators,
-    )
+    rows = LegacyEntityObservation.objects.filter(
+        run_id=context.run_id, entity_map__entity_type=COURSE_OFFERING_ENTITY_TYPE
+    ).values_list("entity_map__legacy_pk", "state", "source_row_hash", "target_model_label")
+    return {
+        legacy_pk: (state, row_hash, label) for legacy_pk, state, row_hash, label in rows.iterator(chunk_size=10_000)
+    }
 
 
-def seal_discarded(context, *, uniqid: str, row_hash: str) -> OfferingOutcome:
+# ``gradebook.ensure_assessment_scheme`` güzgüsü: hər açılış üçün lazy/idempotent
+# DRAFT sxem (modul qeydinə bax) — toplu yolda "companion" kimi təmin olunur.
+OFFERING_MATERIALISER = TargetMaterialiser(
+    app_label="registrar",
+    model_name="CourseOffering",
+    # V7: ``group_id=None`` legal açardır (çoxqruplu jurnal) — ``normalized_key``
+    # onu ayrıca sentinel ilə daşıyır, süzgəc isə ``isnull`` budağı ilə tapır.
+    key_fields=("subject_id", "period_id", "group_id"),
+    defaults=_Frozen({"lesson_hours": 0, "is_active": True}),
+    defaults_for=lambda key: {},
+    companion=("registrar", "AssessmentScheme", "offering"),
+)
+
+
+def offering_materialiser(instructors_for) -> TargetMaterialiser:
+    """Açar → instructor defoltu bağlanmış materialiser (V5: "" → NULL)."""
+
+    from dataclasses import replace as _replace
+
+    return _replace(OFFERING_MATERIALISER, defaults_for=lambda key: {"instructor_id": instructors_for(key) or None})
+
+
+def discarded_decision(*, uniqid: str, row_hash: str) -> Decision:
     """V6: fake/sonra_sil — SKIPPED; uniqid ledger-də qalır, mənbədə heç nə silinmir."""
 
-    digest = offering_derivation_hash(
-        uniqid=uniqid,
-        row_hash=row_hash,
-        outcome_token="discarded",
-        subject_ref="",
-        period_ref="",
-        groups_token="",
-        group_state="unread",
-        instructor_state="unread",
-        merged_text="0",
+    return Decision(
+        seal_key=uniqid,
+        state=_STATE.SKIPPED,
+        digest=offering_derivation_hash(
+            uniqid=uniqid,
+            row_hash=row_hash,
+            outcome_token="discarded",
+            subject_ref="",
+            period_ref="",
+            groups_token="",
+            group_state="unread",
+            instructor_state="unread",
+            merged_text="0",
+        ),
+        rule_codes=("legacy_journal_discarded_source",),
     )
-    entity_map = _seal(context, uniqid=uniqid, digest=digest, state=_STATE.SKIPPED)
-    return OfferingOutcome(_STATE.SKIPPED, digest, entity_map, ("legacy_journal_discarded_source",))
 
 
-def seal_unresolved(context, *, request: OfferingRequest, rule_codes: tuple[str, ...]) -> OfferingOutcome:
+def unresolved_decision(*, request: OfferingRequest, rule_codes: tuple[str, ...]) -> Decision:
     """Həll olunmayan istinad — jurnal bütövlükdə QUARANTINED, target yazısı yoxdur."""
 
-    digest = offering_derivation_hash(
-        uniqid=request.uniqid,
-        row_hash=request.row_hash,
-        outcome_token="unresolved",
-        subject_ref=request.subject_ref,
-        period_ref=request.period_ref,
-        groups_token=request.groups_token,
-        group_state=request.group_state,
-        instructor_state=request.instructor_state,
-        merged_text="0",
+    return Decision(
+        seal_key=request.uniqid,
+        state=_STATE.QUARANTINED,
+        digest=offering_derivation_hash(
+            uniqid=request.uniqid,
+            row_hash=request.row_hash,
+            outcome_token="unresolved",
+            subject_ref=request.subject_ref,
+            period_ref=request.period_ref,
+            groups_token=request.groups_token,
+            group_state=request.group_state,
+            instructor_state=request.instructor_state,
+            merged_text="0",
+        ),
+        rule_codes=rule_codes,
     )
-    entity_map = _seal(context, uniqid=request.uniqid, digest=digest, state=_STATE.QUARANTINED)
-    return OfferingOutcome(_STATE.QUARANTINED, digest, entity_map, rule_codes)
 
 
-def materialise_offering(context, *, request: OfferingRequest, rule_codes: tuple[str, ...]) -> OfferingOutcome:
-    """Offering + draft sxem + ledger möhürü BİR unit of work içində."""
+def offering_decision(*, request: OfferingRequest, rule_codes: tuple[str, ...]) -> Decision:
+    """Materialised açılış; hədəf açarı ``(subject, period, group)`` cütüdür."""
 
-    offering_model = django_apps.get_model("registrar", "CourseOffering")
-    scheme_model = django_apps.get_model("registrar", "AssessmentScheme")
-    with transaction.atomic():
-        offering, _created = offering_model.objects.get_or_create(
-            organization=context.organization,
-            subject_id=request.subject_pk,
-            period_id=request.period_pk,
-            group_id=request.group_pk or None,
-            defaults={
-                "instructor_id": request.instructor_pk or None,
-                "lesson_hours": 0,
-                "is_active": True,
-            },
-        )
-        # ``gradebook.ensure_assessment_scheme`` güzgüsü: lazy/idempotent,
-        # DRAFT/kilidsiz qalır (modul qeydinə bax).
-        scheme_model.objects.get_or_create(organization=context.organization, offering=offering)
-        digest = offering_derivation_hash(
+    return Decision(
+        seal_key=request.uniqid,
+        state=_STATE.MIGRATED,
+        digest=offering_derivation_hash(
             uniqid=request.uniqid,
             row_hash=request.row_hash,
             outcome_token="materialised",
@@ -236,33 +232,8 @@ def materialise_offering(context, *, request: OfferingRequest, rule_codes: tuple
             group_state=request.group_state,
             instructor_state=request.instructor_state,
             merged_text=request.merged_text,
-        )
-        entity_map = _seal(
-            context,
-            uniqid=request.uniqid,
-            digest=digest,
-            state=_STATE.MIGRATED,
-            label=COURSE_OFFERING_MODEL_LABEL,
-            target_pk=str(offering.pk),
-        )
-    return OfferingOutcome(_STATE.MIGRATED, digest, entity_map, rule_codes)
-
-
-def write_issues(context, *, uniqid: str, outcome: OfferingOutcome, issue_counts) -> None:
-    """Issue-lar həmişə öz map-ından sonra: ledger əks sıranı rədd edir."""
-
-    for rule_code in outcome.rule_codes:
-        severity = severity_for(rule_code)
-        upsert_issue(
-            run_id=context.run_id,
-            actor=context.actor,
-            authorize=context.authorize,
-            source_table=JOURNAL_SOURCE_TABLE,
-            entity_type=COURSE_OFFERING_ENTITY_TYPE,
-            legacy_pk=uniqid,
-            rule_code=rule_code,
-            severity=severity,
-            payload_digest=outcome.digest,
-            entity_map_id=outcome.entity_map.pk,
-        )
-        issue_counts[(rule_code, severity)] += 1
+        ),
+        label=COURSE_OFFERING_MODEL_LABEL,
+        rule_codes=rule_codes,
+        natural_key=(request.subject_pk, request.period_pk, request.group_pk or None),
+    )

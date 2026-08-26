@@ -62,7 +62,7 @@ from .rehearsal_journal_points_source import (
     migrated_index,
     parse_cell_score,
 )
-from .rehearsal_journal_seal import JournalSealer, state_for, tally_parts
+from .rehearsal_journal_seal import JournalSealEntry, JournalSealer, state_for, tally_parts
 from .rehearsal_structure_phase import probe_cancellation
 
 JOURNAL_COMPONENTS_PHASE_KEY = "journal_components"
@@ -274,6 +274,7 @@ class JournalComponentsPhase:
 
         issue_counts: Counter[tuple[str, str]] = Counter()
         decisions = list(ledger.recorded.items())
+        entries = []
         for uniqid, tally in sorted(ledger.tallies.items()):
             state = state_for(
                 written=sum(tally[key] for key in WRITTEN_KEYS),
@@ -283,23 +284,18 @@ class JournalComponentsPhase:
                 seal_key=uniqid, outcome_token=str(state), parts=tally_parts(tally)
             )
             label = COURSE_OFFERING_MODEL_LABEL if state == _STATE.MIGRATED else ""
-            entity_map = COMPONENT_SEALER.seal(
-                context,
-                seal_key=uniqid,
-                digest=digest,
-                state=state,
-                label=label,
-                target_pk=offerings.get(uniqid, "") if label else "",
-            )
-            COMPONENT_SEALER.write_issues(
-                context,
-                seal_key=uniqid,
-                digest=digest,
-                entity_map=entity_map,
-                rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
-                issue_counts=issue_counts,
+            entries.append(
+                JournalSealEntry(
+                    seal_key=uniqid,
+                    digest=digest,
+                    state=state,
+                    label=label,
+                    target_pk=offerings.get(uniqid, "") if label else "",
+                    rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
+                )
             )
             decisions.append((uniqid, (state, digest, label)))
+        COMPONENT_SEALER.seal_many(context, entries, issue_counts=issue_counts)
 
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
         state_counts: Counter[str] = Counter()

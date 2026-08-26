@@ -50,6 +50,7 @@ PRESENT_STATUS = "present"
 ABSENT_STATUS = "absent"
 EXCUSED_STATUS = "excused"
 _ABSENCE_CHUNK = 2_000
+_MARK_BATCH = 2_000
 
 _SEVERITY = LegacyMigrationIssue.Severity
 
@@ -111,28 +112,100 @@ class MarkWrite:
     allow_existing: bool = True  # J-V7 arxiv yolunda False: əsas cədvəl udur
 
 
-def write_lesson_mark(context, *, request: MarkWrite) -> str:
-    """Xananı yaz; nəticə ``"written"`` / ``"conflict"`` / ``"superseded"``.
+def classify_mark_write(existing, request: MarkWrite) -> str:
+    """``get_or_create`` nərdivanının saf forması: xana varsa nə olur?
 
-    ``superseded`` yalnız arxiv yoludur: xana artıq əsas cədvəldən gəlib.
+    ``existing`` ``None``-dursa xana yenidir → ``"written"``.  Varsa: arxiv
+    yolunda (``allow_existing=False``) əsas cədvəl udur → ``"superseded"``;
+    əks halda eyni dəyər idempotent təkrardır (``"written"``), fərqli dəyər isə
+    hesabata düşən ``"conflict"``-dir.  Mövcud xana HEÇ VAXT üstündən yazılmır —
+    2 saat trigger-i yalnız ``UPDATE``-i tutur, import xalis INSERT axını qalır.
     """
 
-    model = django_apps.get_model("registrar", "LessonMark")
-    with transaction.atomic():
-        mark, created = model.objects.get_or_create(
-            organization=context.organization,
-            lesson_id=request.lesson_pk,
-            enrollment_id=request.enrollment_pk,
-            defaults={"status": request.status, "score": request.score, "entered_by": None},
-        )
-        if created:
-            return "written"
-        if not request.allow_existing:
-            return "superseded"
-        same = mark.status == request.status and _same_score(mark.score, request.score)
-        # Mövcud xana ÜSTÜNDƏN YAZILMIR: eyni dəyər idempotent təkrardır,
-        # fərqli dəyər isə hesabata düşən toqquşmadır (2h trigger qorunur).
-        return "written" if same else "conflict"
+    if existing is None:
+        return "written"
+    if not request.allow_existing:
+        return "superseded"
+    status, score = existing
+    return "written" if status == request.status and _same_score(score, request.score) else "conflict"
+
+
+class LessonMarkWriter:
+    """Xanaları dəstə ilə yazan bufer — sətir-başına ``get_or_create`` əvəzinə.
+
+    Niyə (Rehearsal #9): 4.4 milyon xananın hər biri üçün ayrıca
+    ``transaction.atomic()`` + ``SELECT`` + ``INSERT`` günlərlə vaxt deməkdir.
+    Bufer dəstə başına BİR axtarış sorğusu və BİR ``bulk_create`` işlədir.
+
+    Təsnifat SIRASI dəyişmir: bir dəstə içindəki xanalar mənbə axını sırasında
+    təsnif olunur, əvvəlki dəstələrin yazdıqları isə flush-un öz axtarış
+    sorğusunda görünür — yəni "əvvəl gələn udur" qaydası (J-V4/J-V7) qorunur.
+    Buna görə də ``drive_cells``-in əsas cədvəl → arxiv sərhədində flush ŞƏRTdir.
+    """
+
+    __slots__ = ("_batch_rows", "_context", "_ledger", "_pending")
+
+    def __init__(self, context, ledger, *, batch_rows: int | None = None) -> None:
+        self._context = context
+        self._ledger = ledger
+        # Defolt icra vaxtı oxunur ki, test dəstə sərhədini dəyişə bilsin.
+        self._batch_rows = max(1, int(_MARK_BATCH if batch_rows is None else batch_rows))
+        self._pending: list[tuple[str, bool, MarkWrite]] = []
+
+    def enqueue(self, *, uniqid: str, from_archive: bool, request: MarkWrite) -> None:
+        self._pending.append((uniqid, from_archive, request))
+        if len(self._pending) >= self._batch_rows:
+            self.flush()
+
+    def flush(self) -> None:
+        if not self._pending:
+            return
+        batch, self._pending = self._pending, []
+        model = django_apps.get_model("registrar", "LessonMark")
+        keys = {(request.lesson_pk, request.enrollment_pk) for _uniqid, _archive, request in batch}
+        known = self._existing(model, keys)
+        created = []
+        with transaction.atomic():
+            for uniqid, from_archive, request in batch:
+                key = (request.lesson_pk, request.enrollment_pk)
+                result = classify_mark_write(known.get(key), request)
+                if result == "written" and key not in known:
+                    known[key] = (request.status, request.score)
+                    created.append(
+                        model(
+                            organization=self._context.organization,
+                            lesson_id=request.lesson_pk,
+                            enrollment_id=request.enrollment_pk,
+                            status=request.status,
+                            score=request.score,
+                            # ``entered_by=None`` — import heç kimin adından yazmır.
+                            entered_by=None,
+                        )
+                    )
+                if result == "written":
+                    self._ledger.count(uniqid, "archive_written" if from_archive else "written")
+                    self._ledger.touched_targets.add(request.enrollment_pk)
+                elif result == "superseded":
+                    self._ledger.count(uniqid, "archive_overlap")
+                else:
+                    self._ledger.count(uniqid, "conflict")
+            if created:
+                model.objects.bulk_create(created)
+
+    def _existing(self, model, keys) -> dict[tuple[str, str], tuple[str, object]]:
+        """Dəstənin açarları üçün mövcud xanalar — BİR sorğu, dəqiq süzgəc."""
+
+        rows = model.objects.filter(
+            organization=self._context.organization,
+            lesson_id__in={lesson_pk for lesson_pk, _enrollment_pk in keys},
+            enrollment_id__in={enrollment_pk for _lesson_pk, enrollment_pk in keys},
+        ).values_list("lesson_id", "enrollment_id", "status", "score")
+        found: dict[tuple[str, str], tuple[str, object]] = {}
+        for lesson_id, enrollment_id, status, score in rows.iterator(chunk_size=5_000):
+            key = (str(lesson_id), str(enrollment_id))
+            if key in keys:
+                found[key] = (status, score)
+        return found
 
 
 def _same_score(stored, incoming) -> bool:
@@ -172,34 +245,24 @@ def recompute_absence_hours(context, enrollment_pks) -> int:
     return updated
 
 
-def seal_journal(
-    context, *, uniqid: str, state: str, offering_pk: str, tally, evidence=(), rule_codes=(), issue_counts=None
-):
-    """Jurnalın YEKUN möhürü + issue-ları (spec B.6: sətir-başına map YOX).
+def journal_seal_entry(*, uniqid: str, state: str, offering_pk: str, tally, evidence=(), rule_codes=()):
+    """Jurnalın YEKUN möhür qeydi (spec B.6: sətir-başına map YOX) — hələ yazılmır.
 
     ``evidence`` J-V3 sənəd qeydlərinin sıralı-sabit digest hissəsidir (bax
     ``JournalCellLedger.evidence_part``) — mətn ledger-ə DÜŞMÜR, yalnız qərarın
-    kimliyinə qatlanır.
+    kimliyinə qatlanır.  Yazı ``JournalSealer.seal_many`` ilə dəstə-dəstə gedir.
     """
 
-    from .rehearsal_journal_seal import tally_parts
+    from .rehearsal_journal_seal import JournalSealEntry, tally_parts
 
     digest = MARK_SEALER.derivation_hash(seal_key=uniqid, outcome_token=state, parts=(*tally_parts(tally), *evidence))
     label = COURSE_OFFERING_MODEL_LABEL if state == "migrated" else ""
-    entity_map = MARK_SEALER.seal(
-        context,
+    entry = JournalSealEntry(
         seal_key=uniqid,
         digest=digest,
         state=state,
         label=label,
         target_pk=offering_pk if label else "",
+        rule_codes=tuple(rule_codes),
     )
-    MARK_SEALER.write_issues(
-        context,
-        seal_key=uniqid,
-        digest=digest,
-        entity_map=entity_map,
-        rule_codes=rule_codes,
-        issue_counts=issue_counts,
-    )
-    return state, digest, label
+    return entry, (state, digest, label)

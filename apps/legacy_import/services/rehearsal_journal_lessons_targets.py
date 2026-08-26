@@ -27,16 +27,14 @@ import datetime
 import hashlib
 from dataclasses import dataclass
 from types import MappingProxyType
-
-from django.apps import apps as django_apps
-from django.db import transaction
+from typing import Mapping
 
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, LegacyMigrationIssue
 
 from .field_contracts import JOURNAL_DATES_FIELDS
-from .ledger import upsert_entity_map, upsert_issue
 from .rehearsal_authorizer import LESSON_MODEL_LABEL
 from .rehearsal_contracts import LegacyRehearsalEvidenceError, encoded_part
+from .rehearsal_journal_batch import Decision, TargetMaterialiser
 
 LESSON_ENTITY_TYPE = "lesson"
 LESSON_SOURCE_TABLE = "journals_dates_added_by_teacher"
@@ -71,7 +69,6 @@ class LessonRequest:
     legacy_pk: int
     row_hash: str
     offering_pk: str
-    instructor_pk: str  # "" → instructor=NULL (açılış müəlliminin güzgüsü)
     journal_ref: str
     date: datetime.date  # törədilmiş il daxil
     start_time: datetime.time
@@ -117,56 +114,41 @@ def lesson_derivation_hash(
     return digest.hexdigest()
 
 
-def recorded_decision(context, legacy_pk: str):
-    """Resume qısayolu: möhürlənmiş qərarı yenidən törətmək əvəzinə oxu."""
+def recorded_decisions(context) -> dict[str, tuple[str, str, str]]:
+    """Bu run-un BÜTÜN dərs möhürləri — resume üçün BİR sorğu.
 
-    return (
-        LegacyEntityObservation.objects.filter(
-            run_id=context.run_id,
-            entity_map__entity_type=LESSON_ENTITY_TYPE,
-            entity_map__legacy_pk=legacy_pk,
-        )
-        .values_list("state", "source_row_hash", "target_model_label")
-        .first()
+    Əvvəl hər sətir üçün ayrıca ``.first()`` gedirdi (379 215 sorğu); açar sayı
+    dərs cədvəlinin ölçüsündədir və indeks yaddaşa sığır.
+    """
+
+    rows = LegacyEntityObservation.objects.filter(
+        run_id=context.run_id, entity_map__entity_type=LESSON_ENTITY_TYPE
+    ).values_list("entity_map__legacy_pk", "state", "source_row_hash", "target_model_label")
+    return {
+        legacy_pk: (state, row_hash, label) for legacy_pk, state, row_hash, label in rows.iterator(chunk_size=10_000)
+    }
+
+
+def lesson_materialiser(instructors: Mapping[str, str]) -> TargetMaterialiser:
+    """``gradebook.create_lesson`` defoltlarının toplu güzgüsü (modul qeydi).
+
+    Açar ``(offering, tarix, saat)``-dır: V7 merge-də eyni offering-ə qatlanan
+    jurnalların eyni slotu EYNİ dərsə birləşir — servisdəki ``exists()``
+    yoxlamasının dəqiq qarşılığı.
+    """
+
+    return TargetMaterialiser(
+        app_label="registrar",
+        model_name="Lesson",
+        key_fields=("offering_id", "date", "start_time"),
+        # Spec J3: kind defolt lecture, hours defolt 2 (A.3, V2);
+        # ``created_by=None`` — import heç kimin adından yazmır.
+        defaults=MappingProxyType({"kind": "lecture", "hours": 2, "topic": "", "created_by": None}),
+        defaults_for=lambda key: {"instructor_id": instructors.get(str(key[0]), "") or None},
     )
 
 
-def _seal(context, *, legacy_pk: str, digest: str, state: str, label: str = "", target_pk: str = ""):
-    return upsert_entity_map(
-        run_id=context.run_id,
-        actor=context.actor,
-        authorize=context.authorize,
-        entity_type=LESSON_ENTITY_TYPE,
-        legacy_pk=legacy_pk,
-        source_row_hash=digest,
-        state=state,
-        target_model_label=label,
-        target_pk=target_pk,
-        target_validators=context.target_validators,
-    )
-
-
-def write_issue(context, *, legacy_pk: str, rule_code: str, digest: str, entity_map, issue_counts) -> None:
-    """Issue həmişə öz map-ından sonra: ledger əks sıranı rədd edir."""
-
-    severity = severity_for(rule_code)
-    upsert_issue(
-        run_id=context.run_id,
-        actor=context.actor,
-        authorize=context.authorize,
-        source_table=LESSON_SOURCE_TABLE,
-        entity_type=LESSON_ENTITY_TYPE,
-        legacy_pk=legacy_pk,
-        rule_code=rule_code,
-        severity=severity,
-        payload_digest=digest,
-        entity_map_id=entity_map.pk,
-    )
-    issue_counts[(rule_code, severity)] += 1
-
-
-def seal_skipped(
-    context,
+def skipped_decision(
     *,
     legacy_pk: int,
     row_hash: str,
@@ -175,86 +157,59 @@ def seal_skipped(
     journal_ref: str,
     date_text: str = "",
     time_text: str = "",
-    issue_counts,
-):
+) -> Decision:
     """Orphan/dublikat — SKIPPED; sətir ledger-də qalır, mənbədə heç nə silinmir."""
 
-    digest = lesson_derivation_hash(
-        legacy_pk=legacy_pk,
-        row_hash=row_hash,
-        outcome_token=outcome_token,
-        journal_ref=journal_ref,
-        date_text=date_text,
-        time_text=time_text,
+    return Decision(
+        seal_key=str(legacy_pk),
+        state=_STATE.SKIPPED,
+        digest=lesson_derivation_hash(
+            legacy_pk=legacy_pk,
+            row_hash=row_hash,
+            outcome_token=outcome_token,
+            journal_ref=journal_ref,
+            date_text=date_text,
+            time_text=time_text,
+        ),
+        rule_codes=(rule_code,),
     )
-    key = str(legacy_pk)
-    entity_map = _seal(context, legacy_pk=key, digest=digest, state=_STATE.SKIPPED)
-    write_issue(
-        context, legacy_pk=key, rule_code=rule_code, digest=digest, entity_map=entity_map, issue_counts=issue_counts
-    )
-    return _STATE.SKIPPED, digest, ""
 
 
-def seal_invalid(context, *, legacy_pk: int, row_hash: str, journal_ref: str, issue_counts):
+def invalid_decision(*, legacy_pk: int, row_hash: str, journal_ref: str) -> Decision:
     """Tarix/saat qurula bilmir — QUARANTINED, target yazısı yoxdur (data qorunur)."""
 
-    digest = lesson_derivation_hash(
-        legacy_pk=legacy_pk,
-        row_hash=row_hash,
-        outcome_token="invalid",
-        journal_ref=journal_ref,
-        date_text="",
-        time_text="",
+    return Decision(
+        seal_key=str(legacy_pk),
+        state=_STATE.QUARANTINED,
+        digest=lesson_derivation_hash(
+            legacy_pk=legacy_pk,
+            row_hash=row_hash,
+            outcome_token="invalid",
+            journal_ref=journal_ref,
+            date_text="",
+            time_text="",
+        ),
+        rule_codes=("legacy_journal_lesson_invalid",),
     )
-    key = str(legacy_pk)
-    entity_map = _seal(context, legacy_pk=key, digest=digest, state=_STATE.QUARANTINED)
-    write_issue(
-        context,
-        legacy_pk=key,
-        rule_code="legacy_journal_lesson_invalid",
-        digest=digest,
-        entity_map=entity_map,
-        issue_counts=issue_counts,
-    )
-    return _STATE.QUARANTINED, digest, ""
 
 
-def materialise_lesson(context, *, request: LessonRequest):
-    """Lesson + ledger möhürü BİR unit of work içində (modul qeydindəki güzgü).
+def lesson_decision(*, request: LessonRequest) -> Decision:
+    """Materialised dərs; hədəf açarı dəstə yazıcısına ötürülür.
 
     Materialised sətrin issue-su yoxdur — map onsuz da hədəfi göstərir.
     """
 
-    lesson_model = django_apps.get_model("registrar", "Lesson")
-    with transaction.atomic():
-        lesson, _created = lesson_model.objects.get_or_create(
-            organization=context.organization,
-            offering_id=request.offering_pk,
-            date=request.date,
-            start_time=request.start_time,
-            defaults={
-                # Spec J3: kind defolt lecture, hours defolt 2 (A.3, V2).
-                "kind": "lecture",
-                "hours": 2,
-                "topic": "",
-                "instructor_id": request.instructor_pk or None,
-                "created_by": None,
-            },
-        )
-        digest = lesson_derivation_hash(
+    return Decision(
+        seal_key=str(request.legacy_pk),
+        state=_STATE.MIGRATED,
+        digest=lesson_derivation_hash(
             legacy_pk=request.legacy_pk,
             row_hash=request.row_hash,
             outcome_token="materialised",
             journal_ref=request.journal_ref,
             date_text=request.date_text,
             time_text=request.time_text,
-        )
-        _seal(
-            context,
-            legacy_pk=str(request.legacy_pk),
-            digest=digest,
-            state=_STATE.MIGRATED,
-            label=LESSON_MODEL_LABEL,
-            target_pk=str(lesson.pk),
-        )
-    return _STATE.MIGRATED, digest, LESSON_MODEL_LABEL
+        ),
+        label=LESSON_MODEL_LABEL,
+        natural_key=(request.offering_pk, request.date, request.start_time),
+    )

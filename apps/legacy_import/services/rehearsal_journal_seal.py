@@ -24,9 +24,22 @@ from dataclasses import dataclass
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation
 
 from .ledger import upsert_entity_map, upsert_issue
+from .ledger_batch import BATCH_ROWS, IssueRequest, SealRequest, record_issues, seal_entity_maps
 from .rehearsal_contracts import LegacyRehearsalEvidenceError, encoded_part
 
 _STATE = LegacyEntityMap.State
+
+
+@dataclass(frozen=True)
+class JournalSealEntry:
+    """Bir jurnalın yekun möhürü + onun issue kodları (hesablanmış, yazılmamış)."""
+
+    seal_key: str
+    digest: str
+    state: str
+    label: str = ""
+    target_pk: str = ""
+    rule_codes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -89,6 +102,58 @@ class JournalSealer:
             target_pk=target_pk,
             target_validators=context.target_validators,
         )
+
+    def seal_many(self, context, entries: Sequence[JournalSealEntry], *, issue_counts) -> None:
+        """Jurnal möhürlərini DƏSTƏ ilə yaz (``ledger_batch``) — sətir-sətir yox.
+
+        Semantika ``seal`` + ``write_issues`` cütünün eynisidir: hər möhür öz
+        sətrini alır, issue həmişə öz map-ından SONRA yazılır, kimlik konflikti
+        eyni ``legacy_entity_identity_conflict`` kodu ilə fail-closed olur.
+        Fərq yalnız gediş-gəliş sayındadır (24 000 jurnal × ~60 sorğu → dəstə
+        başına ~10 sorğu).
+        """
+
+        for start in range(0, len(entries), BATCH_ROWS):
+            chunk = entries[start : start + BATCH_ROWS]
+            entity_maps = seal_entity_maps(
+                run_id=context.run_id,
+                actor=context.actor,
+                authorize=context.authorize,
+                entity_type=self.entity_type,
+                requests=[
+                    SealRequest(
+                        legacy_pk=entry.seal_key,
+                        source_row_hash=entry.digest,
+                        state=entry.state,
+                        target_model_label=entry.label,
+                        target_pk=entry.target_pk,
+                    )
+                    for entry in chunk
+                ],
+                target_validators=context.target_validators,
+                bulk_target_validators=getattr(context, "bulk_target_validators", None),
+            )
+            issues = [
+                IssueRequest(
+                    legacy_pk=entry.seal_key,
+                    rule_code=rule_code,
+                    severity=self.severity_for(rule_code),
+                    payload_digest=entry.digest,
+                )
+                for entry in chunk
+                for rule_code in entry.rule_codes
+            ]
+            record_issues(
+                run_id=context.run_id,
+                actor=context.actor,
+                authorize=context.authorize,
+                source_table=self.source_table,
+                entity_type=self.entity_type,
+                requests=issues,
+                entity_maps=entity_maps,
+            )
+            for issue in issues:
+                issue_counts[(issue.rule_code, issue.severity)] += 1
 
     def write_issues(self, context, *, seal_key: str, digest: str, entity_map, rule_codes, issue_counts) -> None:
         """Issue-lar həmişə öz map-ından sonra: ledger əks sıranı rədd edir."""

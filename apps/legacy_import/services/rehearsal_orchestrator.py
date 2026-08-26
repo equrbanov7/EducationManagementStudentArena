@@ -26,7 +26,7 @@ from core.rls import set_rls_tenant
 
 from .ledger import create_run, finish_run, start_run, upsert_issue
 from .preflight import inspect_legacy_source
-from .rehearsal_authorizer import build_rehearsal_authorizer, build_target_validators
+from .rehearsal_authorizer import build_bulk_target_validators, build_rehearsal_authorizer, build_target_validators
 from .rehearsal_contracts import (
     SOURCE_SYSTEM,
     LegacyRehearsalConfigError,
@@ -226,6 +226,7 @@ def _drive_phases(
 
     email_policy = build_email_trust_policy(attested.policy, email_trust_manifest_digests)
     target_validators = build_target_validators()
+    bulk_target_validators = build_bulk_target_validators()
     reports: list[PhaseReport] = []
     for phase in attested.phases:
         report = phase.run(
@@ -242,6 +243,7 @@ def _drive_phases(
                 authoritative_email_policy=email_policy,
                 cancellation_requested=cancellation_requested,
                 stdout_note=stdout_note,
+                bulk_target_validators=bulk_target_validators,
             )
         )
         if report.observed_source_rows != phase.declared_source_rows(attested.plan):
