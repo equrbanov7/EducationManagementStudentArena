@@ -17,10 +17,21 @@ Bu qol həmin qapını AÇIR, giriş qapısını isə BAĞLI SAXLAYIR:
 * giriş ``identity.user_access_is_login_blocked`` ilə bütün autentifikasiya
   səthlərində bağlanır — portal təsnifatı QAPI DEYİL.
 
-SAR OPSİYONALDIR. Arxiv üzvlüyü ``admission_year``/``program`` tələb etmir,
-``StudentAcademicRecord`` isə tələb edir. Ona görə ili/proqramı həll olunmayan
-məzun ÜZVLÜYÜ yenə də alır (jurnal datası köçür), sadəcə SAR yazılmır və sətir
-``SKIPPED`` möhürlənir — uydurulmuş akademik il yazılmır (fail-closed).
+Qəbul ili həll olunmayan hal (A2). ``StudentAcademicRecord.admission_year``
+``PositiveIntegerField()`` — NULL qəbul ETMİR; ``curriculum`` da NOT NULL-dur və
+``uniq_curriculum_program_year`` açarında qəbul ilinə bağlıdır. Yəni «ilsiz SAR»
+model səviyyəsində mümkün deyil. Ölçü isə göstərir ki, SAR-sız üzvlük tək başına
+kifayət etmir: ÇOX qruplu jurnalda ``rehearsal_journal_slices.student_unit_index``
+tələbənin qrupunu MƏHZ ``StudentAcademicRecord.group``-dan oxuyur, ona görə SAR
+yoxdursa həmin xanalar ``legacy_journal_student_group_mismatch`` ilə itir
+(Rehearsal ölçüsü: 8 922 sətir).
+
+Ona görə arxiv qolu ili UYDURMUR, ``ARCHIVE_FALLBACK_ADMISSION_YEAR``
+SENTİNELİNİ yazır: attestasiya olunmuş qəbul ili domeninin DÖŞƏMƏSİ (1950).
+Bu, real qəbul ili ilə qarışa bilməyəcək qədər açıq bir dəyərdir, deterministikdir
+və hər sətir ``legacy_sar_admission_year_fallback`` (WARNING) ilə işarələnir, ona
+görə sonradan həqiqi il tapılanda düzəliş üçün tam siyahı hazırdır. SAR yalnız
+proqram həll olunmayanda (``program_pk`` boş) buraxılır.
 
 Akademik status qəsdən ``enrolled`` qalır: legacy ``azadedildi`` bayrağı
 məzunla xaric edilməni AYIRMIR, ona görə burada ``graduated``/``expelled``
@@ -47,10 +58,17 @@ from .rehearsal_sar_targets import (
     _seal,
     sar_derivation_hash,
 )
+from .rehearsal_structure_source import MIN_ADMISSION_YEAR
 
 #: ``activation_evidence_digest`` üçün subyekt etiketi — arxiv qolu tələbə
 #: qolundan FƏRQLİ evidence üretir, beləcə iki qərar bir-birinə qarışa bilmir.
 ARCHIVE_EVIDENCE_SUBJECT = "alumni"
+
+#: Qəbul ili həll olunmayan ARXİV sətri üçün sentinel: attestasiya olunmuş
+#: domenin döşəməsi. Təxmin deyil — «bu il məlum deyil» sözünün model icazə
+#: verdiyi yeganə formasıdır və ``legacy_sar_admission_year_fallback`` ilə
+#: hesabatda açıq görünür.
+ARCHIVE_FALLBACK_ADMISSION_YEAR = MIN_ADMISSION_YEAR
 
 _STATE = LegacyEntityMap.State
 
@@ -191,6 +209,7 @@ def materialise_archive(context, *, request, role, write_record: bool) -> Record
 
 __all__ = [
     "ARCHIVE_EVIDENCE_SUBJECT",
+    "ARCHIVE_FALLBACK_ADMISSION_YEAR",
     "account_is_archived",
     "materialise_archive",
     "resolve_archive_role",

@@ -61,6 +61,7 @@ from .rehearsal_placement_phase import (
 )
 from .rehearsal_sar_archive import (
     ARCHIVE_EVIDENCE_SUBJECT,
+    ARCHIVE_FALLBACK_ADMISSION_YEAR,
     account_is_archived,
     materialise_archive,
     resolve_archive_role,
@@ -399,9 +400,26 @@ class SarMaterialisationPhase:
                 activated=activated,
                 issue_counts=issue_counts,
             )
+        if not year_text and context.policy.stage_and_activate:
+            # A2 (Rehearsal #11 tapıntısı): qəbul ili HEÇ bir mənbədən çıxmayan
+            # 2 340 tələbə burada `sar_deferred` olurdu — nə üzvlük, nə SAR, ona
+            # görə jurnalının 49 540 sətri `legacy_journal_student_inactive` ilə
+            # itirdi.  Belə sətir indi məzun sətri kimi ARXİVLƏNİR: giriş bağlı
+            # qalır, datası isə köçür.  «Nə üçün arxiv» sualının cavabı ayrıca
+            # INFO kodu ilə hesabatda görünür.
+            return self._decide_archive(
+                context,
+                request=request,
+                indexes=indexes,
+                role=archive_role,
+                activated=activated,
+                issue_counts=issue_counts,
+                extra_codes=("legacy_sar_archived_no_admission_year",),
+            )
         if not year_text or not program_pk:
             # M5.  ``program_pk`` is unreachable-empty for a SKIPPED placement
             # (its state already proves the program resolved), so no issue there.
+            # Açar bağlı olan run bu rungda qalır: heç bir hesaba toxunulmur.
             codes = ("legacy_sar_admission_year_missing",) if not year_text else ()
             return self._seal(context, request, "skipped", codes, issue_counts)
         if not context.policy.stage_and_activate:
@@ -432,12 +450,13 @@ class SarMaterialisationPhase:
         label = outcome.entity_map.target_model_label if outcome.state == _STATE.MIGRATED else ""
         return outcome.state, outcome.digest, label, 1 if outcome.state == _STATE.MIGRATED else 0
 
-    def _decide_archive(self, context, *, request, indexes, role, activated, issue_counts):
-        """A: məzun/xaric qolu — üzvlük MƏCBURİ, SAR isə şərtlidir.
+    def _decide_archive(self, context, *, request, indexes, role, activated, issue_counts, extra_codes=()):
+        """A: arxiv qolu — üzvlük MƏCBURİ, SAR isə proqram həll olunanda yazılır.
 
-        Arxiv üzvlüyü ``admission_year``/``program`` tələb ETMİR; ona görə ili
-        həll olunmayan məzun da üzvlüyünü alır (jurnal datası köçür) və sətir
-        ``SKIPPED`` möhürlənir — uydurulmuş akademik il yazılmır.
+        Qəbul ili həll olunmayanda ``ARCHIVE_FALLBACK_ADMISSION_YEAR`` sentineli
+        yazılır (bax ``rehearsal_sar_archive`` moduluna): model NULL qəbul etmir,
+        SAR olmadan isə çox qruplu jurnalın xanaları qrup uyğunsuzluğuna düşür.
+        Sentinel ``legacy_sar_admission_year_fallback`` ilə açıq işarələnir.
         """
 
         if not context.policy.stage_and_activate:
@@ -446,11 +465,12 @@ class SarMaterialisationPhase:
         if activated >= context.policy.max_activated_accounts:
             return self._seal(context, request, "capped", ("legacy_sar_activation_cap_reached",), issue_counts)
 
-        rule_codes: tuple[str, ...] = ()
+        rule_codes: tuple[str, ...] = tuple(extra_codes)
         decision = _NO_CURRICULUM
-        write_record = bool(request.admission_year and request.program_pk)
         if not request.admission_year:
-            rule_codes = ("legacy_sar_admission_year_missing",)
+            rule_codes = (*rule_codes, "legacy_sar_admission_year_missing", "legacy_sar_admission_year_fallback")
+            request = replace(request, admission_year=ARCHIVE_FALLBACK_ADMISSION_YEAR)
+        write_record = bool(request.program_pk)
         if write_record:
             decision = resolve_curriculum(
                 context,
