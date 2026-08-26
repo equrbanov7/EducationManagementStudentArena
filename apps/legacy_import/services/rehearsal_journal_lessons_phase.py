@@ -44,7 +44,8 @@ from .rehearsal_contracts import (
     RehearsalContext,
     source_row_hash,
 )
-from .rehearsal_journal_batch import Decision, JournalBatchWriter
+from .rehearsal_journal_batch import Decision, JournalBatchWriter, normalized_key
+from .rehearsal_journal_lesson_kinds import build_lesson_kind_index, slot_key
 from .rehearsal_journal_lessons_targets import (
     LESSON_ENTITY_TYPE,
     LESSON_SOURCE_TABLE,
@@ -197,12 +198,17 @@ class JournalLessonsPhase:
         instructors = offering_instructor_index(context, offerings)
 
         recorded = recorded_decisions(context)
+        kind_index = build_lesson_kind_index(context)
+        # Hədəf açarı → törədilmiş növ; ``lesson_materialiser`` yazı anında
+        # buradan oxuyur.  Açar dəstə yazılmazdan ƏVVƏL dolur, çünki qərar
+        # ``writer.add``-dan qabaq qurulur.
+        kinds: dict[tuple[str, ...], str] = {}
         writer = JournalBatchWriter(
             context,
             entity_type=LESSON_ENTITY_TYPE,
             source_table=LESSON_SOURCE_TABLE,
             severity_for=severity_for,
-            materialiser=lesson_materialiser(instructors),
+            materialiser=lesson_materialiser(instructors, kinds),
         )
 
         decisions: list[tuple[str, str, str, str]] = []
@@ -218,6 +224,8 @@ class JournalLessonsPhase:
                 slices=slices,
                 claimed_slots=claimed_slots,
                 recorded=recorded,
+                kind_index=kind_index,
+                kinds=kinds,
             ):
                 if isinstance(outcome, Decision):
                     writer.add(outcome)
@@ -262,7 +270,7 @@ class JournalLessonsPhase:
         )
         return uniqid, schedule
 
-    def _lesson_entries(self, *, legacy_pk, row, journals, years, slices, claimed_slots, recorded):
+    def _lesson_entries(self, *, legacy_pk, row, journals, years, slices, claimed_slots, recorded, kind_index, kinds):
         """Bir legacy dərs sətri → jurnalın HƏR dilimə bir möhür (2026-08-28).
 
         Orphan/invalid hallar jurnal-səviyyədir (möhür açarı ``<legacy_pk>``),
@@ -306,6 +314,16 @@ class JournalLessonsPhase:
         lesson_date, lesson_time = schedule
         date_text = lesson_date.isoformat()
         time_text = lesson_time.isoformat(timespec="minutes")
+        # Növ legacy SLOTUNDAN törəyir (jurnal + ay + gün + saat), ona görə
+        # jurnalın bütün dilimləri EYNİ növü alır — hədəfdə də eyni dərsdir.
+        kind, kind_rule_code = kind_index.resolve(
+            slot_key(
+                uniqid=journal[0],
+                month=legacy_int(row["month"]),
+                day=legacy_int(row["day"]),
+                time_text=time_text,
+            )
+        )
         for group_ref, offering_pk in pairs:
             seal_key = f"{legacy_pk}:{group_ref}"
             slot = (offering_pk, date_text, time_text)
@@ -331,6 +349,7 @@ class JournalLessonsPhase:
                 )
                 continue
             claimed_slots.add(slot)
+            kinds[normalized_key((offering_pk, lesson_date, lesson_time))] = kind
             yield seal_key, lesson_decision(
                 request=LessonRequest(
                     legacy_pk=legacy_pk,
@@ -341,5 +360,7 @@ class JournalLessonsPhase:
                     journal_ref=journal_ref,
                     date=lesson_date,
                     start_time=lesson_time,
+                    kind=kind,
+                    kind_rule_code=kind_rule_code,
                 )
             )

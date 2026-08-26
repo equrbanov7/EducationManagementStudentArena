@@ -133,12 +133,19 @@ class JournalOfferingsPhase:
         # V5: açılışın müəllimi qərar anında bəllidir, materialiser isə onu
         # təbii açardan deyil, bu xəritədən oxuyur (açar (subject, period, group)).
         instructor_for_key: dict[tuple, str] = {}
+        # Açar → açılışın dərs saatı (``journals.fenn_saati``); birləşmədə
+        # İLK QEYRİ-SIFIR dəyər qalır — sıfır saatlı jurnal dolu olanı
+        # üstələməsin, qərar isə mənbə sırasında deterministik olsun.
+        hours_for_key: dict[tuple, int] = {}
         writer = JournalBatchWriter(
             context,
             entity_type=COURSE_OFFERING_ENTITY_TYPE,
             source_table=JOURNAL_SOURCE_TABLE,
             severity_for=severity_for,
-            materialiser=offering_materialiser(lambda key: instructor_for_key.get(key, "")),
+            materialiser=offering_materialiser(
+                lambda key: instructor_for_key.get(key, ""),
+                lambda key: hours_for_key.get(key, 0),
+            ),
         )
 
         decisions: list[tuple[str, str, str, str]] = []
@@ -161,6 +168,7 @@ class JournalOfferingsPhase:
                 recorded=recorded,
                 claimed_keys=claimed_keys,
                 instructor_for_key=instructor_for_key,
+                hours_for_key=hours_for_key,
             ):
                 if isinstance(outcome, Decision):
                     writer.add(outcome)
@@ -190,7 +198,9 @@ class JournalOfferingsPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _journal_entries(self, *, legacy_pk, row, uniqid, indexes, recorded, claimed_keys, instructor_for_key):
+    def _journal_entries(
+        self, *, legacy_pk, row, uniqid, indexes, recorded, claimed_keys, instructor_for_key, hours_for_key
+    ):
         """Bir jurnalın BÜTÜN möhürləri: jurnal-səviyyə qərar VƏ YA dilimlər."""
 
         row_hash = source_row_hash(contract=JOURNAL_FIELDS, legacy_pk=legacy_pk, projected_row=row)
@@ -222,6 +232,7 @@ class JournalOfferingsPhase:
                 recorded=recorded,
                 claimed_keys=claimed_keys,
                 instructor_for_key=instructor_for_key,
+                hours_for_key=hours_for_key,
             )
 
     def _blocking_codes(self, *, members, subject_pk, period_pk) -> tuple[str, ...]:
@@ -257,13 +268,20 @@ class JournalOfferingsPhase:
             # V5: legacy teacher_id qərar kimliyində saxlanılır (İNFO payload-ı).
             instructor_state=f"resolved:{teacher_id}" if instructor_pk else f"unresolved:{teacher_id}",
             merged_text="0",
+            lesson_hours=max(0, legacy_int(row["fenn_saati"])),
         )
-        return request, () if instructor_pk else ("legacy_journal_instructor_unresolved",)
+        codes = () if instructor_pk else ("legacy_journal_instructor_unresolved",)
+        # Qayıb limitinin məxrəci: mənbədə 0/boşdursa TƏXMİN EDİLMİR, açılış
+        # 0 saatla qalır və sətir İNFO ilə işarələnir.
+        if legacy_int(row["fenn_saati"]) <= 0:
+            codes = (*codes, "legacy_journal_lesson_hours_missing")
+        return request, codes
 
     def _slice_entry(self, *, base, info_codes, uniqid, member, multi, indexes, recorded, claimed_keys, **rest):
         """Bir qrup dilimi: resume → qrup həlli → birləşmə → materialise."""
 
         instructor_for_key = rest["instructor_for_key"]
+        hours_for_key = rest["hours_for_key"]
         group_ref = str(member)
         seal_key = slice_key(uniqid, group_ref)
         group_pk = indexes["groups"].get(group_ref, "")
@@ -276,6 +294,7 @@ class JournalOfferingsPhase:
                 # yarımçıq keçiddən sonrakı davam eyni İNFO-nu törətsin.
                 claimed_keys.setdefault(key, uniqid)
                 instructor_for_key.setdefault(key, base.instructor_pk)
+                _claim_hours(hours_for_key, key, base.lesson_hours)
             return seal_key, previous
 
         request = replace(
@@ -302,4 +321,17 @@ class JournalOfferingsPhase:
         # İlk qalib açılışın müəllimi qalır: merge olunan jurnal mövcud sətri
         # dəyişmir (``get_or_create`` semantikasının eynisi).
         instructor_for_key.setdefault(key, base.instructor_pk)
+        _claim_hours(hours_for_key, key, base.lesson_hours)
         return seal_key, offering_decision(request=request, rule_codes=info_codes)
+
+
+def _claim_hours(hours_for_key, key, lesson_hours: int) -> None:
+    """Birləşmiş açılışın dərs saatı: İLK QEYRİ-SIFIR dəyər qalır.
+
+    C6-da eyni açara qatlanan jurnallardan biri 0 saatlıdırsa (mənbədə sütun
+    boşdur), o, dolu olanı ÜSTƏLƏMƏMƏLİDİR; mənbə sırası sabit olduğundan
+    qərar deterministikdir.
+    """
+
+    if lesson_hours > 0 and not hours_for_key.get(key):
+        hours_for_key[key] = lesson_hours

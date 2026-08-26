@@ -771,6 +771,7 @@ def _journal_values(legacy_pk):
         "teacher_id": 100 + legacy_pk,
         "fake": 0,
         "sonra_sil": 0,
+        "fenn_saati": 60,
         "active": 1,
     }
     overrides = {

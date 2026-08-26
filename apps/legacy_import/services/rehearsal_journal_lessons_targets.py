@@ -36,7 +36,8 @@ from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, 
 from .field_contracts import JOURNAL_DATES_FIELDS
 from .rehearsal_authorizer import LESSON_MODEL_LABEL
 from .rehearsal_contracts import LegacyRehearsalEvidenceError, encoded_part
-from .rehearsal_journal_batch import Decision, TargetMaterialiser
+from .rehearsal_journal_batch import Decision, TargetMaterialiser, normalized_key
+from .rehearsal_journal_lesson_kinds import ABSENT_RULE_CODE, CONFLICT_RULE_CODE, LECTURE
 
 LESSON_ENTITY_TYPE = "lesson"
 LESSON_SOURCE_TABLE = "journals_dates_added_by_teacher"
@@ -57,6 +58,11 @@ ISSUE_SEVERITY = MappingProxyType(
                 # Mənbədə eyni (jurnal, tarix, saat) slotu təkrarlanır —
                 # ilk sətir (ən kiçik id) udur, qalanları qeydli SKIPPED.
                 "legacy_journal_lesson_duplicate",
+                # Slotun HEÇ bir xanası yoxdur → növ törədilə bilmir, defolt
+                # ``lecture`` qalır (dərsin özü yenə materiallaşır).
+                ABSENT_RULE_CODE,
+                # Slotun xanaları qarışıq növ daşıyır → əksəriyyət qazanır.
+                CONFLICT_RULE_CODE,
             ),
             _SEVERITY.INFO,
         ),
@@ -76,6 +82,10 @@ class LessonRequest:
     journal_ref: str
     date: datetime.date  # törədilmiş il daxil
     start_time: datetime.time
+    # Xanalardan törədilmiş dərs növü + onu müşayiət edən INFO kodu (boş = təmiz
+    # əksəriyyət).  Bax ``rehearsal_journal_lesson_kinds``.
+    kind: str = LECTURE
+    kind_rule_code: str = ""
 
     @property
     def date_text(self) -> str:
@@ -102,8 +112,13 @@ def lesson_derivation_hash(
     date_text: str,
     time_text: str,
     slice_ref: str = "",
+    kind: str = "",
 ) -> str:
-    """Cross-run-sabit dərs qərar kimliyi; heç bir UUID/target pk daxil olmur."""
+    """Cross-run-sabit dərs qərar kimliyi; heç bir UUID/target pk daxil olmur.
+
+    ``kind`` də qərarın bir hissəsidir: eyni slot üçün törədilmiş növ dəyişsə,
+    möhür də dəyişməlidir — əks halda ledger köhnə qərarı təsdiqləmiş olardı.
+    """
 
     digest = hashlib.sha256(_DERIVATION_PREFIX)
     for part in (
@@ -115,6 +130,7 @@ def lesson_derivation_hash(
         date_text,
         time_text,
         slice_ref,
+        kind,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -135,22 +151,34 @@ def recorded_decisions(context) -> dict[str, tuple[str, str, str]]:
     }
 
 
-def lesson_materialiser(instructors: Mapping[str, str]) -> TargetMaterialiser:
+def lesson_materialiser(instructors: Mapping[str, str], kinds: Mapping[tuple[str, ...], str]) -> TargetMaterialiser:
     """``gradebook.create_lesson`` defoltlarının toplu güzgüsü (modul qeydi).
 
     Açar ``(offering, tarix, saat)``-dır: V7 merge-də eyni offering-ə qatlanan
     jurnalların eyni slotu EYNİ dərsə birləşir — servisdəki ``exists()``
     yoxlamasının dəqiq qarşılığı.
+
+    ``kinds`` həmin açar üzrə törədilmiş dərs növüdür (J3 fazası doldurur);
+    açar tapılmasa defolt ``lecture`` qalır.
     """
+
+    def _defaults(key):
+        normalized = normalized_key(key)
+        return {
+            "instructor_id": instructors.get(str(key[0]), "") or None,
+            "kind": kinds.get(normalized, LECTURE),
+        }
 
     return TargetMaterialiser(
         app_label="registrar",
         model_name="Lesson",
         key_fields=("offering_id", "date", "start_time"),
-        # Spec J3: kind defolt lecture, hours defolt 2 (A.3, V2);
-        # ``created_by=None`` — import heç kimin adından yazmır.
-        defaults=MappingProxyType({"kind": "lecture", "hours": 2, "topic": "", "created_by": None}),
-        defaults_for=lambda key: {"instructor_id": instructors.get(str(key[0]), "") or None},
+        # Spec J3: hours defolt 2 (A.3, V2); ``created_by=None`` — import heç
+        # kimin adından yazmır.  ``kind`` ARTIQ defolt deyil, xanalardan
+        # törədilir (bax ``rehearsal_journal_lesson_kinds``) — tapılmayan slot
+        # üçün ``_defaults`` yenə ``lecture`` verir.
+        defaults=MappingProxyType({"kind": LECTURE, "hours": 2, "topic": "", "created_by": None}),
+        defaults_for=_defaults,
     )
 
 
@@ -205,7 +233,8 @@ def invalid_decision(*, legacy_pk: int, row_hash: str, journal_ref: str) -> Deci
 def lesson_decision(*, request: LessonRequest) -> Decision:
     """Materialised dərs; hədəf açarı dəstə yazıcısına ötürülür.
 
-    Materialised sətrin issue-su yoxdur — map onsuz da hədəfi göstərir.
+    Materialised sətir yalnız dərs NÖVÜ təmiz törədilmədikdə issue daşıyır
+    (xana yoxdur / xanalar qarışıqdır) — dərsin özü hər halda yazılır.
     """
 
     return Decision(
@@ -219,7 +248,9 @@ def lesson_decision(*, request: LessonRequest) -> Decision:
             date_text=request.date_text,
             time_text=request.time_text,
             slice_ref=request.slice_ref,
+            kind=request.kind,
         ),
         label=LESSON_MODEL_LABEL,
+        rule_codes=(request.kind_rule_code,) if request.kind_rule_code else (),
         natural_key=(request.offering_pk, request.date, request.start_time),
     )

@@ -61,6 +61,9 @@ ISSUE_SEVERITY = MappingProxyType(
                 # V5: instructor=NULL — legacy teacher_id qərar kimliyində qalır.
                 "legacy_journal_instructor_unresolved",
                 "legacy_journal_offering_merged",
+                # ``journals.fenn_saati`` boş/0 — qayıb limitinin məxrəci
+                # törədilə bilmir, açılış 0 saatla qalır (TƏXMİN EDİLMİR).
+                "legacy_journal_lesson_hours_missing",
             ),
             _SEVERITY.INFO,
         ),
@@ -86,6 +89,10 @@ class OfferingRequest:
     group_state: str
     instructor_state: str
     merged_text: str
+    # ``journals.fenn_saati`` — qayıb limitinin məxrəci (0 = mənbədə yoxdur).
+    # Qərar kimliyinə AYRICA qatılmır: sütun artıq kontraktdadır, yəni
+    # ``row_hash`` onu onsuz da bağlayır.
+    lesson_hours: int = 0
 
 
 @dataclass(frozen=True)
@@ -171,12 +178,22 @@ OFFERING_MATERIALISER = TargetMaterialiser(
 )
 
 
-def offering_materialiser(instructors_for) -> TargetMaterialiser:
-    """Açar → instructor defoltu bağlanmış materialiser (V5: "" → NULL)."""
+def offering_materialiser(instructors_for, hours_for=None) -> TargetMaterialiser:
+    """Açar → instructor + dərs saatı defoltları bağlanmış materialiser.
+
+    V5: instructor "" → NULL.  ``hours_for`` isə ``journals.fenn_saati``
+    güzgüsüdür (qayıb limitinin məxrəci); verilməsə 0 qalır.
+    """
 
     from dataclasses import replace as _replace
 
-    return _replace(OFFERING_MATERIALISER, defaults_for=lambda key: {"instructor_id": instructors_for(key) or None})
+    def _defaults(key):
+        return {
+            "instructor_id": instructors_for(key) or None,
+            "lesson_hours": 0 if hours_for is None else hours_for(key),
+        }
+
+    return _replace(OFFERING_MATERIALISER, defaults_for=_defaults)
 
 
 def discarded_decision(*, uniqid: str, row_hash: str) -> Decision:
