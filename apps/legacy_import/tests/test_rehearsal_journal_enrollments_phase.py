@@ -40,7 +40,7 @@ from apps.legacy_import.services.rehearsal_journal_offerings_source import parse
 from apps.legacy_import.services.rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.services.source_extraction import LegacyDiscoveredTable
-from apps.organizations.models import AcademicPeriod, Organization
+from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
 from core.constants import AcademicPeriodType, OrganizationType
 
 _STUDENT_ENTITY_TYPE = "student"
@@ -306,6 +306,19 @@ def enrollment_actor(db, django_user_model):
     )
 
 
+def _activate_member(organization, user, role_name):
+    """Aktiv üzvlük (PG ``registrar_guard_active_member`` tələbi)."""
+
+    role, _created = Role.objects.get_or_create(
+        organization=organization,
+        name=role_name,
+        defaults={"display_name": role_name.title(), "level": 50, "permissions": []},
+    )
+    Role.objects.filter(pk=role.pk).update(is_active=True)
+    Membership.objects.get_or_create(organization=organization, user=user, role=role, defaults={"is_active": True})
+    return role
+
+
 def _organization(actor, slug):
     return Organization.objects.create(
         name=f"Journal {slug}",
@@ -393,8 +406,10 @@ def _seed_references(organization, actor, run_id, *, django_user_model, uniqids=
         student = django_user_model.objects.create_user(
             username=f"myedu.student.{organization.slug}.{legacy_pk}", email="", password=None
         )
-        student.is_active = False
-        student.save(update_fields=["is_active"])
+        # PG-də ``registrar_guard_active_member`` Enrollment.student üçün AKTİV
+        # üzvlük tələb edir; real axında bunu ``sar_materialisation`` (order 28)
+        # bu fazadan (36) ƏVVƏL verir, ona görə fixture həmin vəziyyəti qurur.
+        _activate_member(organization, student, "student")
         # Tələbə map-ı icazəli stub validatorla möhürlənir: identity fazası bu
         # run-da işləməyib, amma map onun buraxdığı formadadır (student → auth.user).
         _map(

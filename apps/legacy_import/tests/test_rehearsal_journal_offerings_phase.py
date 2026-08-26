@@ -43,7 +43,7 @@ from apps.legacy_import.services.rehearsal_journal_offerings_targets import (
 from apps.legacy_import.services.rehearsal_journal_periods_phase import ACADEMIC_PERIOD_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.services.source_extraction import LegacyDiscoveredTable
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 
 _SUBJECT_ENTITY_TYPE = "lesson_subject"
@@ -354,6 +354,19 @@ def offering_actor(db, django_user_model):
     )
 
 
+def _activate_member(organization, user, role_name):
+    """Aktiv üzvlük (PG ``registrar_guard_active_member`` tələbi)."""
+
+    role, _created = Role.objects.get_or_create(
+        organization=organization,
+        name=role_name,
+        defaults={"display_name": role_name.title(), "level": 50, "permissions": []},
+    )
+    Role.objects.filter(pk=role.pk).update(is_active=True)
+    Membership.objects.get_or_create(organization=organization, user=user, role=role, defaults={"is_active": True})
+    return role
+
+
 def _organization(actor, slug):
     return Organization.objects.create(
         name=f"Journal {slug}",
@@ -449,8 +462,10 @@ def _seed_references(organization, actor, run_id, *, django_user_model, group_pk
     instructor = django_user_model.objects.create_user(
         username=f"myedu.worker.{organization.slug}.17", email="", password=None
     )
-    instructor.is_active = False
-    instructor.save(update_fields=["is_active"])
+    # PG-də ``registrar_guard_active_member`` offering.instructor üçün AKTİV
+    # üzvlük tələb edir; real axında bunu ``worker_materialisation`` (order 26)
+    # bu fazadan (34) ƏVVƏL verir, ona görə fixture həmin vəziyyəti qurur.
+    _activate_member(organization, instructor, "teacher")
     # İşçi map-ı icazəli stub validatorla möhürlənir: identity fazası bu run-da
     # işləməyib, amma map onun buraxdığı formadadır (worker → auth.user).
     _map(
