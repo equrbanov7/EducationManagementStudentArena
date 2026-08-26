@@ -310,6 +310,7 @@ def test_the_offering_derivation_hash_follows_the_documented_recipe():
         "resolved",
         "resolved:17",
         "0",
+        "2",
     ):
         digest.update(encoded_part(part))
 
@@ -323,6 +324,7 @@ def test_the_offering_derivation_hash_follows_the_documented_recipe():
         group_state="resolved",
         instructor_state="resolved:17",
         merged_text="0",
+        slice_ref="2",
     )
 
     assert computed == digest.hexdigest()
@@ -337,6 +339,20 @@ def test_the_offering_derivation_hash_follows_the_documented_recipe():
         group_state="resolved",
         instructor_state="unresolved:99",
         merged_text="0",
+        slice_ref="2",
+    )
+    # 2026-08-28: DİLİM eyni jurnalın iki qərarını ayırır — açar da, digest də.
+    assert computed != offering_derivation_hash(
+        uniqid="rooBx39tsK",
+        row_hash="b" * 64,
+        outcome_token="materialised",
+        subject_ref="64",
+        period_ref="1",
+        groups_token="2,7",
+        group_state="split",
+        instructor_state="resolved:17",
+        merged_text="0",
+        slice_ref="7",
     )
 
 
@@ -534,7 +550,7 @@ def test_the_happy_path_creates_the_offering_and_a_draft_scheme(offering_actor, 
     report = JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows, notes=notes))
 
     assert dict(report.state_counts) == {"offering_materialised": 1}
-    assert _states(run) == {"rooBx39tsK": "migrated"}
+    assert _states(run) == {"rooBx39tsK:2": "migrated"}
     assert _issues(run) == {}
     assert notes == [f"{JOURNAL_OFFERINGS_PHASE_KEY}.records.1"]
     assert LegacyImportBatch.objects.filter(run=run).count() == 0
@@ -590,25 +606,57 @@ def test_v5_an_unresolved_teacher_leaves_the_instructor_null(offering_actor, dja
     report = JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
 
     assert dict(report.state_counts) == {"offering_materialised": 1}
-    assert _issues(run) == {("rooBx39tsK", "legacy_journal_instructor_unresolved"): "info"}
+    assert _issues(run) == {("rooBx39tsK:2", "legacy_journal_instructor_unresolved"): "info"}
     offering = _offerings(organization).get()
     assert offering.instructor_id is None
 
 
 @pytest.mark.django_db
-def test_v7_a_multi_group_journal_becomes_one_group_null_offering(offering_actor, django_user_model):
+def test_v7_a_multi_group_journal_splits_into_one_offering_per_group(offering_actor, django_user_model):
+    """Sahibin qərarı (2026-08-28): «hər qrupun bir jurnalı olsun»."""
+
     actor = offering_actor
     organization = _organization(actor, "journal-offerings-multi-group")
     rows = [_journal_row(2, "rooBx39tsK", groups_id='["2","7"]')]
     run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
-    _seed_references(organization, actor, run.pk, django_user_model=django_user_model, group_pks=(2, 7))
+    _, _, groups, _ = _seed_references(
+        organization, actor, run.pk, django_user_model=django_user_model, group_pks=(2, 7)
+    )
 
     report = JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
 
-    assert dict(report.state_counts) == {"offering_materialised": 1}
-    assert _issues(run) == {("rooBx39tsK", "legacy_journal_multi_group"): "info"}
-    offering = _offerings(organization).get()
-    assert offering.group_id is None
+    assert dict(report.state_counts) == {"offering_materialised": 2}
+    assert _states(run) == {"rooBx39tsK:2": "migrated", "rooBx39tsK:7": "migrated"}
+    # Köhnə İNFO kodu qalır, mənası dəyişir: «N dilimə bölündü».
+    assert _issues(run) == {
+        ("rooBx39tsK:2", "legacy_journal_multi_group"): "info",
+        ("rooBx39tsK:7", "legacy_journal_multi_group"): "info",
+    }
+    assert {offering.group_id for offering in _offerings(organization)} == {groups[2].pk, groups[7].pk}
+    # Hər dilim öz DRAFT sxemini alır — jurnal səhifəsi qrup-başına açılır.
+    assert _schemes(organization).count() == 2
+
+
+@pytest.mark.django_db
+def test_v7_an_unresolved_group_quarantines_only_its_own_slice(offering_actor, django_user_model):
+    """Fail-closed: bir qrup həll olunmasa jurnalın qalan dilimləri yaşayır."""
+
+    actor = offering_actor
+    organization = _organization(actor, "journal-offerings-partial-group")
+    rows = [_journal_row(2, "rooBx39tsK", groups_id='["2","55"]')]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_references(organization, actor, run.pk, django_user_model=django_user_model)
+
+    report = JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert dict(report.state_counts) == {"offering_materialised": 1, "offering_unresolved": 1}
+    assert _states(run) == {"rooBx39tsK:2": "migrated", "rooBx39tsK:55": "quarantined"}
+    assert _issues(run) == {
+        ("rooBx39tsK:2", "legacy_journal_multi_group"): "info",
+        ("rooBx39tsK:55", "legacy_journal_group_unresolved"): "warning",
+        ("rooBx39tsK:55", "legacy_journal_multi_group"): "info",
+    }
+    assert _offerings(organization).count() == 1
 
 
 @pytest.mark.django_db
@@ -651,7 +699,7 @@ def test_unresolved_references_quarantine_with_their_precise_codes(offering_acto
     assert _issues(run) == {
         ("noSubjAAAA", "legacy_journal_subject_unresolved"): "warning",
         ("noPerBBBBB", "legacy_journal_period_unresolved"): "warning",
-        ("noGrpCCCCC", "legacy_journal_group_unresolved"): "warning",
+        ("noGrpCCCCC:55", "legacy_journal_group_unresolved"): "warning",
     }
     assert _offerings(organization).count() == 0
     # Karantin müşahidəsi heç bir hədəf daşımır.
@@ -675,7 +723,7 @@ def test_two_journals_on_one_key_merge_into_a_single_offering(offering_actor, dj
     report = JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
 
     assert dict(report.state_counts) == {"offering_materialised": 2}
-    assert _issues(run) == {("secondBBBB", "legacy_journal_offering_merged"): "info"}
+    assert _issues(run) == {("secondBBBB:2", "legacy_journal_offering_merged"): "info"}
     assert _offerings(organization).count() == 1
     assert _schemes(organization).count() == 1
     # Hər iki uniqid EYNİ hədəfi göstərir.
@@ -685,6 +733,33 @@ def test_two_journals_on_one_key_merge_into_a_single_offering(offering_actor, dj
         )
     )
     assert len(target_pks) == 1
+
+
+@pytest.mark.django_db
+def test_a_split_journal_is_idempotent_and_deterministic(offering_actor, django_user_model):
+    """Dilimlərə bölünmüş jurnal təkrar çağırışda da, ayrı run-da da eynidir."""
+
+    actor = offering_actor
+    rows = [_journal_row(2, "rooBx39tsK", groups_id='["2","7"]')]
+    digests = []
+    for slug in ("journal-offerings-split-a", "journal-offerings-split-b"):
+        organization = _organization(actor, slug)
+        run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+        _seed_references(organization, actor, run.pk, django_user_model=django_user_model, group_pks=(2, 7))
+        phase = JournalOfferingsPhase()
+
+        first = phase.run(_seeded_context(organization, actor, run, rows=rows))
+        second = phase.run(_seeded_context(organization, actor, run, rows=rows))
+
+        # İdempotentlik: ikinci çağırış nə yeni hədəf, nə yeni möhür yaradır.
+        assert second.phase_digest == first.phase_digest
+        assert dict(second.state_counts) == {"offering_materialised": 2}
+        assert _offerings(organization).count() == 2
+        assert _schemes(organization).count() == 2
+        digests.append(first.phase_digest)
+
+    # Cross-run determinizm: zəncirə heç bir UUID və target kimliyi girmir.
+    assert digests[0] == digests[1]
 
 
 @pytest.mark.django_db

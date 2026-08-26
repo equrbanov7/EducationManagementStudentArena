@@ -230,15 +230,15 @@ def _context(*, plan, factory, policy=None, run_id=None, organization=None, acto
 # ---------------------------------------------------------------------------
 
 
-def test_the_phase_declares_a_batch_less_numeric_shape():
+def test_the_phase_declares_a_batch_less_lexicographic_shape():
     phase = JournalLessonsPhase()
 
     assert phase.phase_key == JOURNAL_LESSONS_PHASE_KEY and phase.order == 38
     assert phase.source_tables == () and phase.entity_types == (LESSON_ENTITY_TYPE,)
     assert phase.declared_source_rows(_plan(_tables())) == 0
     assert phase.derived_digest_namespace == DERIVED_DIGEST_NAMESPACE
-    # Açar rəqəmdir: rebuild-in DEFOLT ``int`` sıralaması stream sırası ilə eynidir.
-    assert not hasattr(phase, "derived_ledger_sort_key")
+    # 2026-08-28: açar ``<legacy_pk>:<qrup>`` mətnidir — rebuild leksikoqrafik sıralayır.
+    assert phase.derived_ledger_sort_key is str
     assert phase.derived_state_key(LegacyEntityMap.State.MIGRATED) == "lesson_materialised"
     assert phase.derived_state_key("skipped") == "lesson_skipped"
     assert phase.derived_state_key("quarantined") == "lesson_unresolved"
@@ -323,6 +323,7 @@ def test_the_lesson_derivation_hash_follows_the_documented_recipe():
         "2",
         "2021-12-30",
         "14:00",
+        "2",
     ):
         digest.update(encoded_part(part))
 
@@ -333,6 +334,7 @@ def test_the_lesson_derivation_hash_follows_the_documented_recipe():
         journal_ref="2",
         date_text="2021-12-30",
         time_text="14:00",
+        slice_ref="2",
     )
 
     assert computed == digest.hexdigest()
@@ -343,6 +345,17 @@ def test_the_lesson_derivation_hash_follows_the_documented_recipe():
         journal_ref="2",
         date_text="2021-12-30",
         time_text="14:00",
+        slice_ref="2",
+    )
+    # 2026-08-28: eyni dərs sətri hər qrup dilimə təkrarlanır — digest fərqlidir.
+    assert computed != lesson_derivation_hash(
+        legacy_pk=10,
+        row_hash="b" * 64,
+        outcome_token="materialised",
+        journal_ref="2",
+        date_text="2021-12-30",
+        time_text="14:00",
+        slice_ref="7",
     )
 
 
@@ -427,11 +440,15 @@ def _make_offering(organization, *, instructor=None, code="MYEDU-64"):
     )
 
 
-def _seed_offering_map(organization, actor, run_id, *, uniqids=("rooBx39tsK",), instructor=None):
-    """J1-in qoyub getdiyi offering map-ları (hamısı eyni real offering-i göstərir)."""
+def _seed_offering_map(organization, actor, run_id, *, uniqids=("rooBx39tsK",), instructor=None, group_ref="2"):
+    """J1-in qoyub getdiyi DİLİM map-ları (hamısı eyni real offering-i göstərir).
+
+    2026-08-28: J1 açarı artıq ``uniqid:<qrup>``dur; ``group_ref``
+    ``_journal_row``-un ``groups_id`` defoltu (``["2"]``) ilə eyni olmalıdır.
+    """
 
     offering = _make_offering(organization, instructor=instructor)
-    for uniqid in uniqids:
+    for uniqid in (f"{value}:{group_ref}" for value in uniqids):
         upsert_entity_map(
             run_id=run_id,
             actor=actor,
@@ -497,7 +514,7 @@ def test_the_happy_path_creates_the_lesson_with_the_derived_year(lesson_actor, d
     report = JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables, notes=notes))
 
     assert dict(report.state_counts) == {"lesson_materialised": 1}
-    assert _states(run) == {"10": "migrated"}
+    assert _states(run) == {"10:2": "migrated"}
     assert _issues(run) == {}
     assert notes == [f"{JOURNAL_LESSONS_PHASE_KEY}.records.1"]
     assert LegacyImportBatch.objects.filter(run=run).count() == 0
@@ -608,8 +625,8 @@ def test_a_repeated_slot_keeps_the_first_row_and_skips_the_rest(lesson_actor):
     report = JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
 
     assert dict(report.state_counts) == {"lesson_materialised": 2, "lesson_skipped": 1}
-    assert _states(run) == {"10": "migrated", "11": "skipped", "12": "migrated"}
-    assert _issues(run) == {("11", "legacy_journal_lesson_duplicate"): "info"}
+    assert _states(run) == {"10:2": "migrated", "11:2": "skipped", "12:2": "migrated"}
+    assert _issues(run) == {("11:2", "legacy_journal_lesson_duplicate"): "info"}
     assert _lessons(organization).count() == 2
 
 
@@ -634,13 +651,12 @@ def test_merged_journals_fold_the_same_slot_into_one_lesson(lesson_actor):
 
     report = JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
 
-    # Hər iki sətir MIGRATED-dir (öz jurnalının slotudur), amma hədəf TƏK dərsdir.
-    assert dict(report.state_counts) == {"lesson_materialised": 2}
+    # 2026-08-28: dublikat slotu artıq AÇILIŞ üzrə tutulur — birləşmiş açılışda
+    # ikinci jurnalın eyni gün/saatı SKIPPED-dir, hədəfdə isə tək dərs qalır.
+    assert dict(report.state_counts) == {"lesson_materialised": 1, "lesson_skipped": 1}
+    assert _states(run) == {"10:2": "migrated", "11:2": "skipped"}
+    assert _issues(run) == {("11:2", "legacy_journal_lesson_duplicate"): "info"}
     assert _lessons(organization).count() == 1
-    target_pks = set(
-        run.entity_observations.filter(entity_map__entity_type=LESSON_ENTITY_TYPE).values_list("target_pk", flat=True)
-    )
-    assert len(target_pks) == 1
 
 
 @pytest.mark.django_db

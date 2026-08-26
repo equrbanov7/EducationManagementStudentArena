@@ -392,8 +392,14 @@ def seed_journal_target(
     period_end=DEFAULT_PERIOD_END,
     code="MYEDU-64",
     offering=None,
+    group_ref="2",
 ):
-    """J1/J2/J3-ün qoyub getdiyi hədəflər + ledger xəritələri."""
+    """J1/J2/J3-ün qoyub getdiyi hədəflər + ledger xəritələri.
+
+    2026-08-28 (qrup-başına jurnal): J1/J3 möhür açarları artıq DİLİM
+    açarlarıdır (``uniqid:<qrup>`` və ``<dates_pk>:<qrup>``) — ``group_ref``
+    ``journal_row``-un ``groups_id`` defoltu (``["2"]``) ilə eyni olmalıdır.
+    """
 
     if offering is None:
         subject = django_apps.get_model("registrar", "Subject").objects.create(
@@ -417,7 +423,7 @@ def seed_journal_target(
         run_id,
         actor,
         entity_type=COURSE_OFFERING_ENTITY_TYPE,
-        legacy_pk=uniqid,
+        legacy_pk=f"{uniqid}:{group_ref}",
         label=COURSE_OFFERING_MODEL_LABEL,
         target_pk=offering.pk,
     )
@@ -460,7 +466,7 @@ def seed_journal_target(
             run_id,
             actor,
             entity_type=LESSON_ENTITY_TYPE,
-            legacy_pk=str(dates_pk),
+            legacy_pk=f"{dates_pk}:{group_ref}",
             label=LESSON_MODEL_LABEL,
             target_pk=lesson.pk,
         )

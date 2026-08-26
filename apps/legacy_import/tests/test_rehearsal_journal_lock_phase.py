@@ -105,7 +105,7 @@ def test_a_finished_period_is_approved_and_published(actor):
     scheme = _schemes(org).get()
     # CheckConstraint: publish ⟺ approved — hər iki sahə BİRGƏ yazılır.
     assert (scheme.approval_status, scheme.is_published) == ("approved", True)
-    assert _issues(run) == {(harness.UNIQID, "legacy_journal_lock_applied"): "info"}
+    assert _issues(run) == {(f"{harness.UNIQID}:2", "legacy_journal_lock_applied"): "info"}
     assert notes == [f"{JOURNAL_LOCK_PHASE_KEY}.records.1"]
     observation = run.entity_observations.get(entity_map__entity_type=LOCK_ENTITY_TYPE)
     assert observation.target_model_label == ASSESSMENT_SCHEME_MODEL_LABEL
@@ -119,7 +119,7 @@ def test_the_current_period_is_deliberately_left_open(actor):
     assert dict(report.state_counts) == {"journal_left_open": 1}
     scheme = _schemes(org).get()
     assert (scheme.approval_status, scheme.is_published) == ("draft", False)
-    assert _issues(run) == {(harness.UNIQID, "legacy_journal_lock_deferred"): "info"}
+    assert _issues(run) == {(f"{harness.UNIQID}:2", "legacy_journal_lock_deferred"): "info"}
 
 
 def test_a_period_boundary_today_still_leaves_the_journal_open(actor):

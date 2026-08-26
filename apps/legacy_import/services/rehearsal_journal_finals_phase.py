@@ -62,6 +62,7 @@ from .rehearsal_journal_points_source import (
     parse_cell_score,
 )
 from .rehearsal_journal_seal import JournalSealEntry, JournalSealer, state_for, tally_parts
+from .rehearsal_journal_slices import build_offering_slices
 from .rehearsal_structure_phase import probe_cancellation
 
 JOURNAL_FINALS_PHASE_KEY = "journal_finals"
@@ -255,7 +256,7 @@ class JournalFinalsPhase:
             raise LegacyRehearsalEvidenceError("legacy_rehearsal_phase_dependency_missing")
         probe_cancellation(context)
 
-        offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
+        slices = build_offering_slices(context, migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE))
         enrollments = migrated_index(context, JOURNAL_ENROLLMENT_ENTITY_TYPE)
         ledger = JournalCellLedger(recorded=FINALS_SEALER.recorded_decisions(context))
         drive_cells(
@@ -263,9 +264,7 @@ class JournalFinalsPhase:
             ledger=ledger,
             domain=is_final_month,
             distill=distill_final_cell,
-            decide=lambda cell: self._decide(
-                context, cell=cell, offerings=offerings, enrollments=enrollments, ledger=ledger
-            ),
+            decide=lambda cell: self._decide(context, cell=cell, slices=slices, enrollments=enrollments, ledger=ledger),
             overlap_key="archive_overlap",
         )
 
@@ -285,7 +284,7 @@ class JournalFinalsPhase:
                     digest=digest,
                     state=state,
                     label=label,
-                    target_pk=offerings.get(uniqid, "") if label else "",
+                    target_pk=slices.primary_offering(uniqid) if label else "",
                     rule_codes=tuple(OUTCOME_RULES[key][0] for key in sorted(OUTCOME_RULES) if tally[key]),
                 )
             )
@@ -312,10 +311,14 @@ class JournalFinalsPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _decide(self, context, *, cell: FinalCell, offerings, enrollments, ledger) -> None:
-        """orphan → kod/dəyər → qeydiyyat → yazı nərdivanı."""
+    def _decide(self, context, *, cell: FinalCell, slices, enrollments, ledger) -> None:
+        """orphan → kod/dəyər → qeydiyyat → yazı nərdivanı.
 
-        if not offerings.get(cell.uniqid, ""):
+        Yekun bal ``Enrollment``-ə yazılır (açılışa yox), ona görə burada dilim
+        həlli lazım deyil: yazılış onsuz da tələbənin öz dilimini göstərir.
+        """
+
+        if not slices.has_offering(cell.uniqid):
             ledger.count(cell.uniqid, "orphan")
             return
         outcome, score = classify_final_cell(cell.month_id, cell.point)
