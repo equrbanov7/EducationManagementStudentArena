@@ -526,3 +526,62 @@ JOURNAL_DATES_FIELDS = LegacySourceFieldContract(
         "time",
     ),
 )
+
+# J4-J8 (journal_marks / _components / _finals / _reconcile) kontraktları.
+# Sxem DESCRIBE ilə təsdiqlənib.  QƏSDƏN kənarda qalanlar (proyeksiya
+# default-deny-dir — köçməyən sahə mənbədən heç vaxt çıxmır):
+#   * ``sem_muh`` — semantikası təsdiqlənməyib; J-V5 onu "yalnız issue
+#     metadata-sı" kimi saxlayır, ledger-in isə sərbəst payload sahəsi yoxdur
+#     (issue yalnız ``payload_digest`` daşıyır), yəni sütun nə oxunaqlı, nə də
+#     audit edilə bilən formada saxlanıla bilməzdi;
+#   * ``ga`` — eyni səbəb (həm sütun, həm ``month_id='ga'`` psevdo-kodu kimi
+#     mənası naməlumdur; kod J-V13 üzrə onsuz da karantinə düşür).
+# ``added_date`` İSƏ DAXİLDİR: J-V7 arxiv kəsimi (2022-03-30) məhz bu
+# timestamp-in üzərində qurulur və eyni sərhəd əsas cədvəldə də sübut edilir.
+_JOURNAL_POINT_ALLOWED_FIELDS = (
+    "id",
+    "journal_uniqid",
+    "month_id",
+    "day_number",
+    "student_id",
+    "point",
+    "added_date",
+    "time",
+    "excusable",
+    "why",
+    "j_id",
+    "lab",
+    "description",
+    "update_counter",
+    "updated_at",
+)
+
+JOURNAL_POINT_FIELDS = LegacySourceFieldContract(
+    source_table="journals_dates_points",
+    version="journal-v1",
+    allowed_fields=_JOURNAL_POINT_ALLOWED_FIELDS,
+)
+
+# J-V7: arxiv eyni sxemdədir, ona görə eyni sahə dəsti — amma AYRI kontrakt,
+# çünki barmaq izi mənbə cədvəlinin adını da bağlayır.
+JOURNAL_POINT_ARCHIVE_FIELDS = LegacySourceFieldContract(
+    source_table="journals_dates_points_archive",
+    version="journal-v1",
+    allowed_fields=_JOURNAL_POINT_ALLOWED_FIELDS,
+)
+
+# J-V3 üzürlü qaib pəncərələri.  ``owner_id``/``file``/``desc``/``added_date``
+# kənarda: qərar yalnız (tələbə, tarix aralığı) üçlüyündən asılıdır.
+ALLOWED_QB_FIELDS = LegacySourceFieldContract(
+    source_table="allowed_qb",
+    version="journal-v1",
+    allowed_fields=("id", "student_id", "allowed_date_start", "allowed_date_end"),
+)
+
+# J8 çarpaz-yoxlama mənbəyi; heç bir hədəf yazısı yoxdur.  ``kesr``/``level``/
+# ``guzest_*``/``group_id`` semantikası təsdiqlənməyib → kənarda.
+YEKUN_FIELDS = LegacySourceFieldContract(
+    source_table="yekun",
+    version="journal-v1",
+    allowed_fields=("id", "student_id", "lesson_id", "journal_id", "girish", "imtahanda", "yekun"),
+)

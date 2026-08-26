@@ -94,6 +94,12 @@ ISSUE_SEVERITY = MappingProxyType(
                 "legacy_journal_students_invalid",
                 # Spec J2: tələbə EntityMap-da yoxdur — sətir SKIPPED, amma anomaliyadır.
                 "legacy_journal_student_unresolved",
+                # 2026-08-28 (Rehearsal #7): tələbə map-dadır, LAKİN hesabı hələ
+                # aktivləşməyib (``sar_materialisation`` onu deferred saxlayıb —
+                # məsələn qəbul ili tapılmayan kohort).  PG ``registrar_guard_
+                # active_member`` belə ``Enrollment``-i rədd edir, ona görə sətir
+                # ÖNCƏDƏN atlanır: fail-closed, run çökmür, qeyd itmir.
+                "legacy_journal_student_inactive",
             ),
             _SEVERITY.WARNING,
         ),
@@ -101,6 +107,25 @@ ISSUE_SEVERITY = MappingProxyType(
         "legacy_journal_enrollment_orphan": _SEVERITY.INFO,
     }
 )
+
+
+def active_member_ids(context) -> frozenset[str]:
+    """Bu tenantda AKTİV üzvlüyü olan istifadəçi açarları.
+
+    ``registrar_guard_active_member`` (PG) ``Enrollment.student`` üçün aktiv
+    üzvlük + aktiv rol + aktiv hesab tələb edir.  Staged (aktivləşməmiş) hesab
+    üçün yazı DB səviyyəsində rədd olunur — faza bunu ÖNCƏDƏN bilməlidir, əks
+    halda tutulmamış ``IntegrityError`` bütün run-u dayandırır (Rehearsal #7).
+    """
+
+    membership_model = django_apps.get_model("organizations", "Membership")
+    rows = membership_model.objects.filter(
+        organization=context.organization,
+        is_active=True,
+        role__is_active=True,
+        user__is_active=True,
+    ).values_list("user_id", flat=True)
+    return frozenset(str(pk) for pk in rows)
 
 
 def severity_for(rule_code: str) -> str:
@@ -210,6 +235,9 @@ class JournalEnrollmentsPhase:
 
         offerings = migrated_target_index(context, COURSE_OFFERING_ENTITY_TYPE)
         students = migrated_target_index(context, STUDENT_ENTITY_TYPE)
+        # Aktiv üzvlük indeksi: hansı tələbə hesabı üçün ``Enrollment``
+        # yazısı DB qapısından keçə bilər (bax ``active_member_ids``).
+        active_students = active_member_ids(context)
 
         decisions: list[tuple[str, str, str, str]] = []
         seen_uniqids: set[str] = set()
@@ -229,6 +257,7 @@ class JournalEnrollmentsPhase:
                 uniqid=uniqid,
                 offerings=offerings,
                 students=students,
+                active_students=active_students,
                 issue_counts=issue_counts,
             ):
                 decisions.append((seal_key, str(state), digest, label))
@@ -253,7 +282,9 @@ class JournalEnrollmentsPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _journal_decisions(self, context, *, legacy_pk, row, uniqid, offerings, students, issue_counts):
+    def _journal_decisions(
+        self, context, *, legacy_pk, row, uniqid, offerings, students, active_students, issue_counts
+    ):
         """Bir jurnalın bütün qərarları: parse → jurnal-səviyyə → tələbə-səviyyə."""
 
         row_hash = source_row_hash(contract=JOURNAL_FIELDS, legacy_pk=legacy_pk, projected_row=row)
@@ -290,18 +321,31 @@ class JournalEnrollmentsPhase:
             if recorded is not None:
                 yield (seal_key, *recorded)
                 continue
+            student_pk = students.get(str(member), "")
             yield self._decide_student(
                 context,
                 seal_key=seal_key,
                 row_hash=row_hash,
                 student_ref=str(member),
                 offering_pk=offering_pk,
-                student_pk=students.get(str(member), ""),
+                student_pk=student_pk,
+                student_is_active=bool(student_pk) and student_pk in active_students,
                 issue_counts=issue_counts,
             )
 
-    def _decide_student(self, context, *, seal_key, row_hash, student_ref, offering_pk, student_pk, issue_counts):
-        """Bir tələbə sətrinin qərarı: orphan → unresolved → materialise."""
+    def _decide_student(
+        self,
+        context,
+        *,
+        seal_key,
+        row_hash,
+        student_ref,
+        offering_pk,
+        student_pk,
+        student_is_active,
+        issue_counts,
+    ):
+        """Bir tələbə sətrinin qərarı: orphan → unresolved → inactive → materialise."""
 
         if not offering_pk or not student_pk:
             rule_code = "legacy_journal_enrollment_orphan" if not offering_pk else "legacy_journal_student_unresolved"
@@ -318,6 +362,28 @@ class JournalEnrollmentsPhase:
                 context,
                 seal_key=seal_key,
                 rule_code=rule_code,
+                digest=digest,
+                entity_map=entity_map,
+                issue_counts=issue_counts,
+            )
+            return seal_key, _STATE.SKIPPED, digest, ""
+
+        if not student_is_active:
+            # Hesab map-dadır, amma hələ staged-dir: DB qapısı yazını rədd edərdi.
+            # Sətir atlanır, jurnalın qalanı davam edir (fail-closed, itki yox).
+            digest = enrollment_derivation_hash(
+                seal_key=seal_key,
+                row_hash=row_hash,
+                outcome_token="inactive",
+                student_ref=student_ref,
+                offering_state="resolved",
+                student_state="inactive",
+            )
+            entity_map = _seal(context, seal_key=seal_key, digest=digest, state=_STATE.SKIPPED)
+            _write_issue(
+                context,
+                seal_key=seal_key,
+                rule_code="legacy_journal_student_inactive",
                 digest=digest,
                 entity_map=entity_map,
                 issue_counts=issue_counts,

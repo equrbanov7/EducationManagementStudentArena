@@ -67,12 +67,13 @@ _CLAIMABLE_ACTIONS = frozenset(
 # AcademicCatalogPhase (12), IdentityCohortPhase (20), StudentPlacementPhase
 # (25), WorkerMaterialisationPhase (26), SarMaterialisationPhase (28),
 # JournalPeriodsPhase (32), JournalOfferingsPhase (34),
-# JournalEnrollmentsPhase (36) and JournalLessonsPhase (38) — 30 sillabus
-# domeninə rezerv qalır.
+# JournalEnrollmentsPhase (36), JournalLessonsPhase (38), JournalMarksPhase
+# (40), JournalComponentsPhase (42), JournalFinalsPhase (44), JournalLockPhase
+# (46) and JournalReconcilePhase (48) — 30 sillabus domeninə rezerv qalır.
 # Re-pin ONLY by running ``compute_phase_registry_fingerprint`` over the direct
 # tuple — never over ``load_rehearsal_phase_registry``, which checks itself
 # against this constant.
-_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "59eac1c4b7729daf7ff32379a20c404e50f1673a907b0fadb951d543aa4bc11b"
+_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "de3579c5e986776898caba3e6b0a670b5f85ec1995b108cb5d8cfb3f678a164e"
 
 
 class LegacyRehearsalError(Exception):
@@ -524,10 +525,15 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     # Lazy: every phase module imports its types from this module.
     from .rehearsal_catalog_phase import AcademicCatalogPhase
     from .rehearsal_identity_phase import IdentityCohortPhase
+    from .rehearsal_journal_components_phase import JournalComponentsPhase
     from .rehearsal_journal_enrollments_phase import JournalEnrollmentsPhase
+    from .rehearsal_journal_finals_phase import JournalFinalsPhase
     from .rehearsal_journal_lessons_phase import JournalLessonsPhase
+    from .rehearsal_journal_lock_phase import JournalLockPhase
+    from .rehearsal_journal_marks_phase import JournalMarksPhase
     from .rehearsal_journal_offerings_phase import JournalOfferingsPhase
     from .rehearsal_journal_periods_phase import JournalPeriodsPhase
+    from .rehearsal_journal_reconcile_phase import JournalReconcilePhase
     from .rehearsal_placement_phase import StudentPlacementPhase
     from .rehearsal_sar_phase import SarMaterialisationPhase
     from .rehearsal_structure_phase import AcademicStructurePhase
@@ -537,6 +543,8 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     # Strictly ascending ``order``: 10 structure < 12 catalog < 20 identity
     # < 25 placement < 26 worker < 28 sar < 32 journal_periods
     # < 34 journal_offerings < 36 journal_enrollments < 38 journal_lessons
+    # < 40 journal_marks < 42 journal_components < 44 journal_finals
+    # < 46 journal_lock < 48 journal_reconcile
     # (30 stays reserved for the syllabus domain).
     phases = validate_rehearsal_phases(
         (
@@ -550,6 +558,11 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
             JournalOfferingsPhase(),
             JournalEnrollmentsPhase(),
             JournalLessonsPhase(),
+            JournalMarksPhase(),
+            JournalComponentsPhase(),
+            JournalFinalsPhase(),
+            JournalLockPhase(),
+            JournalReconcilePhase(),
         ),
         plan=plan,
     )

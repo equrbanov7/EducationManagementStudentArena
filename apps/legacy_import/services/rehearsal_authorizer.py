@@ -29,6 +29,9 @@ STUDENT_RECORD_MODEL_LABEL = "registrar.studentacademicrecord"
 COURSE_OFFERING_MODEL_LABEL = "registrar.courseoffering"
 ENROLLMENT_MODEL_LABEL = "registrar.enrollment"
 LESSON_MODEL_LABEL = "registrar.lesson"
+# J7 (journal_lock) hədəfi: kilid qərarı məhz sxemin üzərində yaşayır
+# (``approval_status`` + ``is_published`` CheckConstraint cütü).
+ASSESSMENT_SCHEME_MODEL_LABEL = "registrar.assessmentscheme"
 
 
 def build_rehearsal_authorizer() -> LedgerAuthorizer:
@@ -105,5 +108,6 @@ def build_target_validators() -> TargetValidatorRegistry:
             COURSE_OFFERING_MODEL_LABEL: _tenant_owned_validator("registrar", "CourseOffering"),
             ENROLLMENT_MODEL_LABEL: _tenant_owned_validator("registrar", "Enrollment"),
             LESSON_MODEL_LABEL: _tenant_owned_validator("registrar", "Lesson"),
+            ASSESSMENT_SCHEME_MODEL_LABEL: _tenant_owned_validator("registrar", "AssessmentScheme"),
         }
     )

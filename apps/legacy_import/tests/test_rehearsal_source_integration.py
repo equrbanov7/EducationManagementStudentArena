@@ -11,14 +11,25 @@ Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
-The second test drives the FULL TEN-phase registry — ``academic_structure``
+The second test drives the FULL FIFTEEN-phase registry — ``academic_structure``
 (31 + 83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424),
 ``identity_cohort`` (7 816 + 729), the three derived identity phases, and the
-FAZA 3B journal cluster (J0-J3) fed by three synthetic journal tables
-(``semestr_jurnal`` 13, ``journals`` 30, ``journals_dates_added_by_teacher``
-60).  Every batch-backed table keeps its canonical shape, so
-``totals.source_rows`` is still the real 15 496 — the derived journal phases
-declare 0 source rows by contract.
+FAZA 3B journal cluster (J0-J8) fed by seven synthetic journal tables
+(``semestr_jurnal`` 13, ``journals`` 30, ``journals_dates_added_by_teacher`` 60,
+``journals_dates_points`` 200, its archive 20, ``allowed_qb`` 5, ``yekun`` 10).
+Every batch-backed table keeps its canonical shape, so ``totals.source_rows`` is
+still the real 15 496 — the derived journal phases declare 0 source rows by
+contract.
+
+J4-J6 deliberately materialise NOTHING here: ``registrar_guard_active_member``
+refuses an ``Enrollment`` whose student is a staged (inactive) account, so the
+fixture carries only unresolved student references and every grade cell lands on
+the ``*_enrollment_unresolved`` rung.  That is exactly the J2 note above; the
+materialise paths are proven in the sqlite unit suite
+(``test_rehearsal_journal_marks_phase`` and friends).  What this conformance run
+proves for J4-J8 is the SOURCE side: the two-pass duplicate election, the
+archive cutoff, the classification ladder, the lock decision and the
+reconciliation balance — all of it byte-for-byte deterministic.
 """
 
 import json
@@ -38,18 +49,22 @@ from apps.accounts.identity_models import AccountActivationEvidence
 from apps.legacy_import.models import LegacyImportBatch, LegacyMigrationRun
 from apps.legacy_import.services import rehearsal_phase_a as phase_a_module
 from apps.legacy_import.services.field_contracts import (
+    ALLOWED_QB_FIELDS,
     CURRICULUM_CATALOG_FIELDS,
     CURRICULUM_PLAN_FIELDS,
     DEPARTMENT_STRUCTURE_FIELDS,
     GROUP_STRUCTURE_FIELDS,
     JOURNAL_DATES_FIELDS,
     JOURNAL_FIELDS,
+    JOURNAL_POINT_ARCHIVE_FIELDS,
+    JOURNAL_POINT_FIELDS,
     LESSON_CATALOG_FIELDS,
     SEMESTR_JURNAL_FIELDS,
     SPECIALITY_STRUCTURE_FIELDS,
     STUDENT_IDENTITY_FIELDS,
     STUDENT_STATUS_FIELDS,
     WORKER_IDENTITY_FIELDS,
+    YEKUN_FIELDS,
 )
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
 from apps.legacy_import.services.rehearsal_contracts import (
@@ -384,6 +399,18 @@ _FULL_SOURCE_ROWS = _STRUCTURE_SOURCE_ROWS + _CATALOG_SOURCE_ROWS + _IDENTITY_SO
 _SEMESTR_JURNAL_ROWS = _CANONICAL_PLAN.entry_for("semestr_jurnal").expected_rows  # 13
 _JOURNAL_ROWS = 30
 _JOURNAL_DATE_ROWS = 60
+# FAZA 3B J4-J8: qiymət klasterinin sintetik guşələri.  Canlı ölçülər
+# (5 135 289 / 776 033 / 2 964 / 17 194) burada axıdılsaydı konformans testi
+# saatlarla işləyərdi; heç bir faza bu cədvəlləri ``declared_source_rows``-a
+# saymır, ona görə ``totals.source_rows`` yenə 15 496 qalır.
+_JOURNAL_POINT_ROWS = 200
+_JOURNAL_ARCHIVE_ROWS = 20
+_ALLOWED_QB_ROWS = 5
+_YEKUN_ROWS = 10
+# Bal sətirləri yalnız BU dörd MIGRATED jurnala (və 3 nömrəli V6-süzülmüş
+# jurnala) toxunur — jurnal-səviyyə möhür sayları belə dəqiq hesablana bilir.
+_POINT_JOURNALS = (1, 2, 6, 7)
+_POINT_ORPHAN_JOURNAL = 3
 # J1 nəticəsi: bu 21 jurnal MIGRATED offering alır (aşağıdakı ``_journal_values``
 # xüsusi halları ilə birgə oxu); J3 defolt dərs sətirləri yalnız bunlara bağlanır.
 _JOURNAL_MIGRATED_IDS = (1, 2, 6, 7, *range(14, 31))
@@ -399,8 +426,13 @@ _FULL_PHASE_KEYS = (
     "journal_offerings",
     "journal_enrollments",
     "journal_lessons",
+    "journal_marks",
+    "journal_components",
+    "journal_finals",
+    "journal_lock",
+    "journal_reconcile",
 )
-_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38]
+_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 44, 46, 48]
 
 
 def _journal_scaled_plan():
@@ -412,7 +444,14 @@ def _journal_scaled_plan():
     sətir-sayı qapısıdır (axın ``expected_rows``-a TAM bərabərlik tələb edir).
     """
 
-    scaled = {"journals": _JOURNAL_ROWS, "journals_dates_added_by_teacher": _JOURNAL_DATE_ROWS}
+    scaled = {
+        "journals": _JOURNAL_ROWS,
+        "journals_dates_added_by_teacher": _JOURNAL_DATE_ROWS,
+        "journals_dates_points": _JOURNAL_POINT_ROWS,
+        "journals_dates_points_archive": _JOURNAL_ARCHIVE_ROWS,
+        "allowed_qb": _ALLOWED_QB_ROWS,
+        "yekun": _YEKUN_ROWS,
+    }
     entries = tuple(
         replace(entry, expected_rows=scaled[entry.source_table]) if entry.source_table in scaled else entry
         for entry in _CANONICAL_PLAN.entries
@@ -450,12 +489,31 @@ _INT_COLUMNS = {
     "semestr_jurnal": ("is_current",),
     "journals": ("lesson_id", "semestr", "teacher_id", "fake", "sonra_sil", "active"),
     "journals_dates_added_by_teacher": ("journal_id", "month", "day"),
+    # J4-J8: bal xanalarının rəqəm sütunları (``legacy_flag``/``student_id``
+    # mətn görəndə fail-closed olur, ona görə fixture real tipi saxlayır).
+    "journals_dates_points": ("student_id", "excusable", "j_id", "lab", "update_counter"),
+    "journals_dates_points_archive": ("student_id", "excusable", "j_id", "lab", "update_counter"),
+    "allowed_qb": ("student_id",),
+    "yekun": ("student_id", "lesson_id", "journal_id"),
+}
+# ``added_date``/``updated_at``/``allowed_date_*`` DATETIME, ``time`` isə TIME
+# olmalıdır: J-V7 kəsimi, J-V4 sıralaması və dərs slotu məhz bu tiplərə baxır.
+_DATETIME_COLUMNS = {
+    "journals_dates_points": ("added_date", "updated_at"),
+    "journals_dates_points_archive": ("added_date", "updated_at"),
+    "allowed_qb": ("allowed_date_start", "allowed_date_end"),
+}
+_TIME_COLUMNS = {
+    "journals_dates_points": ("time",),
+    "journals_dates_points_archive": ("time",),
 }
 # C-2: ``kredit`` and every ``saat_*`` must arrive as a Python ``float`` — the
 # catalogue transform raises ``legacy_rehearsal_source_value_type_unsupported``
 # for an ``int`` or a ``Decimal``, so the disposable fixture uses DOUBLE columns.
 _FLOAT_COLUMNS = {
     "curricula_plan": ("kredit", "saat_aks", "saat_as", "saat_muh", "saat_sem", "saat_lab", "saat_prak"),
+    # J8 çarpaz-yoxlaması: canlı ``yekun`` sütunları FLOAT-dur.
+    "yekun": ("girish", "imtahanda", "yekun"),
 }
 
 
@@ -484,6 +542,8 @@ def _full_email(table, index):
 def _typed_columns(table, contract, decoys):
     integers = _INT_COLUMNS.get(table, ())
     floats = _FLOAT_COLUMNS.get(table, ())
+    datetimes = _DATETIME_COLUMNS.get(table, ())
+    times = _TIME_COLUMNS.get(table, ())
     columns = ["`id` BIGINT NOT NULL AUTO_INCREMENT"]
     for field_name in contract.allowed_fields:
         if field_name == "id":
@@ -492,6 +552,10 @@ def _typed_columns(table, contract, decoys):
             sql_type = "BIGINT NULL"
         elif field_name in floats:
             sql_type = "DOUBLE NULL"
+        elif field_name in datetimes:
+            sql_type = "DATETIME NULL"
+        elif field_name in times:
+            sql_type = "TIME NULL"
         else:
             sql_type = "VARCHAR(191) NULL"
         columns.append(f"`{field_name}` {sql_type}")
@@ -531,6 +595,10 @@ def _seed_table(cursor, *, database, table, contract, decoys, rows, values_for):
                 values.append(0)
             elif field_name in _FLOAT_COLUMNS.get(table, ()):
                 values.append(0.0)
+            elif field_name in _DATETIME_COLUMNS.get(table, ()):
+                values.append(None)
+            elif field_name in _TIME_COLUMNS.get(table, ()):
+                values.append("00:00:00")
             else:
                 values.append(f"{_PRIVATE_VALUE}-{table}-{legacy_pk}-{position}")
         batch.append(tuple(values))
@@ -762,6 +830,193 @@ def _journal_date_values(legacy_pk):
     return overrides[legacy_pk]
 
 
+# ── FAZA 3B J4-J8: bal xanaları, arxiv, üzürlü qaib və ``yekun`` ────────────
+#
+# Sətir sayları QƏSDƏN dəqiq bölünür ki, jurnal-səviyyə möhür sayları əl ilə
+# yoxlana bilsin (aşağıdakı ``journal_states`` assert-i):
+#   marks   80 = 20 dublikat uduzanı + 2 boş + 3 diapazon + 3 naməlum
+#              + 32 qeydiyyat-həllsiz + 10 pozuq gün + 10 orphan
+#   comps   50 = 8 boş + 8 naməlum + 8 diapazon + 16 qeydiyyat-həllsiz + 10 orphan
+#   finals  70 = 2 boş + 35 naməlum kod + 1 diapazon + 22 qeydiyyat-həllsiz + 10 orphan
+_POINT_BEFORE_CUTOFF = "2022-01-05 09:00:00"  # J-V7 kəsimindən ƏVVƏL
+_POINT_AFTER_CUTOFF = "2022-06-05 09:00:00"  # kəsimdən SONRA → overlap
+_POINT_MAIN_ADDED = "2022-04-01 09:00:00"
+_MARK_POINT_CYCLE = ("ie", "qb", "8", "", "89", "wr", "0", "10")
+_COMPONENT_MONTHS = ("k1", "k2", "k3", "si")
+_COMPONENT_POINT_CYCLE = ("9", "", "qb", "11", "3")
+_FINAL_MONTHS = ("im", "im2", "pa", "wr", "ga")
+_FINAL_POINT_CYCLE = ("45", "30", "7", "5", "2")
+_FINAL_EDGE_ROWS = {
+    181: ("im", ""),
+    182: ("im", "l"),
+    183: ("im", "101"),
+    184: ("im2", ""),
+    185: ("im", "89"),
+    186: ("ss", "3"),
+    187: ("ww", "4"),
+    188: ("ll", "6"),
+    189: ("rr", "2"),
+    190: ("im2", "12"),
+}
+
+
+def _point_defaults(legacy_pk, *, journal, month_id, day_number, point, added_date, **overrides):
+    values = {
+        "journal_uniqid": f"jrn{journal:07d}",
+        "month_id": month_id,
+        "day_number": day_number,
+        "student_id": 1_000 + legacy_pk,
+        "point": point,
+        "added_date": added_date,
+        "time": "08:00:00",
+        "excusable": 0,
+        "why": "",
+        "j_id": journal,
+        "lab": 0,
+        "description": "",
+        "update_counter": 0,
+        "updated_at": None,
+    }
+    values.update(overrides)
+    return values
+
+
+def _journal_point_values(legacy_pk):
+    """200 sətir: dəyər nərdivanı, J-V4 dublikatı, pozuq gün, orphan, psevdo-kodlar."""
+
+    if legacy_pk <= 40:  # təqvim xanaları — bütün ``point`` formaları
+        offset = legacy_pk - 1
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_JOURNALS[offset % 4],
+            month_id="09",
+            day_number=f"{(offset % 4) + 1:02d}",
+            point=_MARK_POINT_CYCLE[offset % 8],
+            added_date=_POINT_MAIN_ADDED,
+        )
+    if legacy_pk <= 60:  # J-V4: 1-20 sətirlərinin xanalarını daha yüksək sayğacla təkrarlayır
+        base = legacy_pk - 40
+        offset = base - 1
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_JOURNALS[offset % 4],
+            month_id="09",
+            day_number=f"{(offset % 4) + 1:02d}",
+            point="6",
+            added_date=_POINT_MAIN_ADDED,
+            student_id=1_000 + base,
+            update_counter=5,
+        )
+    if legacy_pk <= 70:  # pozuq gün nömrəsi → dərs slotu həll olunmur (səssiz düşmür)
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_JOURNALS[(legacy_pk - 61) % 4],
+            month_id="09",
+            day_number="00",
+            point="ie",
+            added_date=_POINT_MAIN_ADDED,
+        )
+    if legacy_pk <= 80:  # V6-süzülmüş jurnalın sətirləri → orphan
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_ORPHAN_JOURNAL,
+            month_id="09",
+            day_number="01",
+            point="ie",
+            added_date=_POINT_MAIN_ADDED,
+        )
+    if legacy_pk <= 120:  # k1/k2/k3/si komponent xanaları
+        offset = legacy_pk - 81
+        month_id = _COMPONENT_MONTHS[offset % 4]
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_JOURNALS[(offset // 4) % 4],
+            month_id=month_id,
+            day_number=month_id,
+            point=_COMPONENT_POINT_CYCLE[offset % 5],
+            added_date=_POINT_MAIN_ADDED,
+            time="00:00:00",
+        )
+    if legacy_pk <= 130:  # orphan jurnalın komponent xanaları
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_ORPHAN_JOURNAL,
+            month_id="k1",
+            day_number="k1",
+            point="8",
+            added_date=_POINT_MAIN_ADDED,
+            time="00:00:00",
+        )
+    if legacy_pk <= 180:  # im/im2 + J-V13 naməlum kodları
+        offset = legacy_pk - 131
+        month_id = _FINAL_MONTHS[offset % 5]
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_JOURNALS[(offset // 5) % 4],
+            month_id=month_id,
+            day_number=month_id,
+            point=_FINAL_POINT_CYCLE[offset % 5],
+            added_date=_POINT_MAIN_ADDED,
+            time="00:00:00",
+        )
+    if legacy_pk <= 190:  # yekun/təkrar imtahanın kənar halları (hamısı 1-ci jurnalda)
+        month_id, point = _FINAL_EDGE_ROWS[legacy_pk]
+        return _point_defaults(
+            legacy_pk,
+            journal=_POINT_JOURNALS[0],
+            month_id=month_id,
+            day_number=month_id,
+            point=point,
+            added_date=_POINT_MAIN_ADDED,
+            time="00:00:00",
+        )
+    return _point_defaults(  # orphan jurnalın yekun xanaları
+        legacy_pk,
+        journal=_POINT_ORPHAN_JOURNAL,
+        month_id="im",
+        day_number="im",
+        point="40",
+        added_date=_POINT_MAIN_ADDED,
+        time="00:00:00",
+    )
+
+
+def _journal_point_archive_values(legacy_pk):
+    """J-V7: ilk 10 sətir kəsimdən ƏVVƏL, son 10 sətir SONRA (overlap)."""
+
+    offset = legacy_pk - 1
+    return _point_defaults(
+        legacy_pk,
+        journal=_POINT_JOURNALS[offset % 4],
+        month_id="09",
+        day_number="01",
+        point="ie",
+        added_date=_POINT_BEFORE_CUTOFF if legacy_pk <= 10 else _POINT_AFTER_CUTOFF,
+        student_id=2_000 + legacy_pk,
+    )
+
+
+def _allowed_qb_values(legacy_pk):
+    # Heç bir sətrin tələbəsi bu run-da həll olunmur — pəncərə axını yoxlanılır.
+    return {
+        "student_id": 9_000 + legacy_pk,
+        "allowed_date_start": "2021-12-30 08:30:00",
+        "allowed_date_end": "2021-12-31 23:59:00",
+    }
+
+
+def _yekun_values(legacy_pk):
+    # Jurnal həll olunur, qeydiyyat OLUNMUR → J8 sətri "unresolved" möhürləyir.
+    return {
+        "student_id": 1_000 + legacy_pk,
+        "lesson_id": 1,
+        "journal_id": _POINT_JOURNALS[(legacy_pk - 1) % 4],
+        "girish": 20.0,
+        "imtahanda": 30.0,
+        "yekun": 50.0,
+    }
+
+
 _FULL_TABLES = (
     ("departments", DEPARTMENT_STRUCTURE_FIELDS, (), _DEPARTMENT_ROWS, _department_values),
     ("speciality", SPECIALITY_STRUCTURE_FIELDS, (), _SPECIALITY_ROWS, _speciality_values),
@@ -778,6 +1033,17 @@ _FULL_TABLES = (
     ("semestr_jurnal", SEMESTR_JURNAL_FIELDS, (), _SEMESTR_JURNAL_ROWS, _semestr_jurnal_values),
     ("journals", JOURNAL_FIELDS, (), _JOURNAL_ROWS, _journal_values),
     ("journals_dates_added_by_teacher", JOURNAL_DATES_FIELDS, (), _JOURNAL_DATE_ROWS, _journal_date_values),
+    # FAZA 3B J4-J8: bal xanaları, arxivi, üzürlü qaib pəncərələri və ``yekun``.
+    ("journals_dates_points", JOURNAL_POINT_FIELDS, (), _JOURNAL_POINT_ROWS, _journal_point_values),
+    (
+        "journals_dates_points_archive",
+        JOURNAL_POINT_ARCHIVE_FIELDS,
+        (),
+        _JOURNAL_ARCHIVE_ROWS,
+        _journal_point_archive_values,
+    ),
+    ("allowed_qb", ALLOWED_QB_FIELDS, (), _ALLOWED_QB_ROWS, _allowed_qb_values),
+    ("yekun", YEKUN_FIELDS, (), _YEKUN_ROWS, _yekun_values),
 )
 
 
@@ -954,6 +1220,26 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         assert lessons.count() == 48
         assert lessons.filter(instructor__isnull=False).exists() is False
 
+        # J4-J6: qeydiyyat yoxdur (yuxarıdakı J2 qeydi) → HEÇ BİR bal xanası
+        # yazılmır; J7 isə bitmiş dövrlərin sxemlərini kilidləyir.  Bu assert-lər
+        # də MÜTLƏQ qlobal-vəziyyət bərpasından ƏVVƏL olmalıdır (2026-08-27
+        # insidenti ilə eyni sinif tələ).
+        mark_model = django_apps.get_model("registrar", "LessonMark")
+        component_model = django_apps.get_model("registrar", "AssessmentComponent")
+        component_score_model = django_apps.get_model("registrar", "ComponentScore")
+        final_model = django_apps.get_model("registrar", "FinalGrade")
+        resit_model = django_apps.get_model("registrar", "ResitRecord")
+        assert mark_model.objects.filter(organization=first_organization).count() == 0
+        assert component_model.objects.filter(organization=first_organization).count() == 0
+        assert component_score_model.objects.filter(organization=first_organization).count() == 0
+        assert final_model.objects.filter(organization=first_organization).count() == 0
+        assert resit_model.objects.filter(organization=first_organization).count() == 0
+        # J7/V10: hər 20 açılışın sxemi APPROVED + published-dir (bütün sintetik
+        # dövrlər 2021-2025-dədir, yəni artıq bitib); CheckConstraint cütü qorunur.
+        published = scheme_model.objects.filter(organization=first_organization, is_published=True)
+        assert published.count() == 20
+        assert published.exclude(approval_status="approved").exists() is False
+
         # QLOBAL VƏZİYYƏTİN BƏRPASI (2026-08-26 determinizm insidenti): staging
         # QLOBAL auth_user-ə yazır; iki-tenant-eyni-DB yaxınlaşması yalnız
         # qlobal-yazısız siyasətlərdə keçərlidir.  Real istehsalda D5 hər
@@ -996,6 +1282,11 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "journal_offerings": 0,
             "journal_enrollments": 0,
             "journal_lessons": 0,
+            "journal_marks": 0,
+            "journal_components": 0,
+            "journal_finals": 0,
+            "journal_lock": 0,
+            "journal_reconcile": 0,
         }
 
         # 3) Determinism across two independent targets.
@@ -1058,6 +1349,19 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "journal_offerings": {"offering_materialised": 21, "offering_discarded": 3, "offering_unresolved": 6},
             "journal_enrollments": {"enrollment_skipped": 56, "enrollment_unresolved": 1},
             "journal_lessons": {"lesson_materialised": 48, "lesson_skipped": 7, "lesson_unresolved": 5},
+            # J4: 5 jurnal toxunulur — 1 və 2 karantin kodu daşıyır, 6/7 və
+            # V6-süzülmüş 3 isə yalnız yazıla bilməyən sətirlər (spec B.6:
+            # möhür JURNAL səviyyəsindədir, sətir başına map yoxdur).
+            "journal_marks": {"journal_marks_skipped": 3, "journal_marks_unresolved": 2},
+            # J5/J6: hər dörd MIGRATED jurnalda karantin kodu var; orphan
+            # jurnal isə yalnız SKIPPED-dir.
+            "journal_components": {"journal_components_skipped": 1, "journal_components_unresolved": 4},
+            "journal_finals": {"journal_finals_skipped": 1, "journal_finals_unresolved": 4},
+            # J7: 21 MIGRATED jurnalın hamısının dövrü bitib → hamısı kilidli.
+            "journal_lock": {"journal_locked": 21},
+            # J8: 3 balans yoxlaması (hamısı delta ilə) + 10 ``yekun`` sətri
+            # (qeydiyyat həll olunmur) + 1 karantin xülasəsi.
+            "journal_reconcile": {"reconcile_balanced": 1, "reconcile_deviation": 13},
         }
         # J-V9(F) uyğunluq cədvəli sətir-başına İNFO kimi + tam issue taksonomiyası.
         assert histogram.get(("legacy_journal_period_created", "info"), 0) == 12
@@ -1080,6 +1384,39 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         assert histogram.get(("legacy_journal_lesson_orphan", "info"), 0) == 5
         assert histogram.get(("legacy_journal_lesson_duplicate", "info"), 0) == 2
         assert histogram.get(("legacy_journal_lesson_invalid", "warning"), 0) == 5
+        # J4 taksonomiyası — issue-lar JURNAL başınadır, sətir başına deyil.
+        assert histogram.get(("legacy_journal_mark_orphan", "info"), 0) == 1
+        assert histogram.get(("legacy_journal_mark_duplicate", "info"), 0) == 4
+        assert histogram.get(("legacy_journal_mark_empty", "info"), 0) == 1
+        assert histogram.get(("legacy_journal_mark_score_out_of_range", "warning"), 0) == 1
+        assert histogram.get(("legacy_journal_mark_point_unknown", "warning"), 0) == 1
+        assert histogram.get(("legacy_journal_mark_enrollment_unresolved", "warning"), 0) == 4
+        # Dərs-slot pilləsi bu fixture-də STRUKTUR OLARAQ çatılmazdır: nərdivan
+        # əvvəl qeydiyyatı yoxlayır, qeydiyyat isə heç vaxt həll olunmur (PG
+        # aktiv-üzvlük qeydi).  Pozuq gün nömrəsi daşıyan 10 sətir buna görə
+        # ``enrollment`` rungunda hesaba alınır — amma J8 onları müstəqil
+        # şəkildə "oxunmayan" kimi sayır, yəni heç bir sətir səssiz düşmür.
+        assert histogram.get(("legacy_journal_mark_lesson_unresolved", "warning"), 0) == 0
+        # J-V7: kəsimdən sonrakı 10 arxiv sətri dörd jurnalın üzərinə düşür.
+        assert histogram.get(("legacy_journal_archive_overlap", "info"), 0) == 4
+        # J5/J6 taksonomiyası.
+        assert histogram.get(("legacy_journal_component_orphan", "info"), 0) == 1
+        assert histogram.get(("legacy_journal_component_empty", "info"), 0) == 4
+        assert histogram.get(("legacy_journal_component_code_unknown", "warning"), 0) == 4
+        assert histogram.get(("legacy_journal_component_score_out_of_range", "warning"), 0) == 4
+        assert histogram.get(("legacy_journal_component_enrollment_unresolved", "warning"), 0) == 4
+        assert histogram.get(("legacy_journal_final_enrollment_unresolved", "warning"), 0) == 4
+        assert histogram.get(("legacy_journal_final_orphan", "info"), 0) == 1
+        assert histogram.get(("legacy_journal_final_empty", "info"), 0) == 1
+        assert histogram.get(("legacy_journal_final_score_out_of_range", "warning"), 0) == 1
+        # J-V13 catch-all: pa/wr/ga/ss/ww/ll/rr + ``im`` altındakı ``l``.
+        assert histogram.get(("legacy_journal_mark_code_unknown", "warning"), 0) == 4
+        # J7/J8 sübutları.
+        assert histogram.get(("legacy_journal_lock_applied", "info"), 0) == 21
+        assert histogram.get(("legacy_journal_lock_deferred", "info"), 0) == 0
+        assert histogram.get(("legacy_journal_reconcile_row_balance", "info"), 0) == 3
+        assert histogram.get(("legacy_journal_reconcile_final_unresolved", "warning"), 0) == 10
+        assert histogram.get(("legacy_journal_reconcile_quarantine_summary", "info"), 0) == 1
 
         # ``stage_and_activate`` defaults to False, so nothing was created and
         # the deferral is silent by design — every decision is a deferral.

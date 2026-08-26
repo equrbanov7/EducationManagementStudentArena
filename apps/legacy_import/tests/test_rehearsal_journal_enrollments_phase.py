@@ -3,6 +3,9 @@
 import datetime
 import hashlib
 from dataclasses import replace
+from types import SimpleNamespace
+
+from django.contrib.auth import get_user_model
 
 import pytest
 
@@ -220,6 +223,7 @@ def test_issue_severity_map_covers_exactly_the_enrollment_taxonomy():
     assert dict(ISSUE_SEVERITY) == {
         "legacy_journal_students_invalid": "warning",
         "legacy_journal_student_unresolved": "warning",
+        "legacy_journal_student_inactive": "warning",
         "legacy_journal_enrollment_orphan": "info",
     }
     assert set(ISSUE_SEVERITY.values()) <= set(LegacyMigrationIssue.Severity.values)
@@ -668,3 +672,27 @@ def test_the_phase_digest_is_identical_across_two_independent_runs(enrollment_ac
         digests.append(JournalEnrollmentsPhase().run(_seeded_context(organization, actor, run, rows=rows)).phase_digest)
 
     assert digests[0] == digests[1]
+
+
+def test_a_staged_student_is_skipped_before_the_database_gate(enrollment_actor):
+    """Rehearsal #7 reqressiyası: hesabı hələ aktivləşməmiş tələbə üçün
+    ``Enrollment`` DB qapısından (``registrar_guard_active_member``) keçmir.
+
+    Faza bunu ÖNCƏDƏN bilməlidir: sətir SKIPPED + ``legacy_journal_student_inactive``,
+    jurnalın qalanı davam edir və run çökmür (əvvəl tutulmamış IntegrityError idi).
+    """
+
+    from apps.legacy_import.services.rehearsal_journal_enrollments_phase import active_member_ids
+
+    organization = _organization(enrollment_actor, "enrollments-inactive")
+    student = get_user_model().objects.create_user(username="myedu.student.inactive.1", email="", password=None)
+    # Üzvlük var, amma HESAB aktiv deyil → indeksdə görünməməlidir.
+    _activate_member(organization, student, "student")
+    get_user_model().objects.filter(pk=student.pk).update(is_active=False)
+
+    context = SimpleNamespace(organization=organization)
+    assert str(student.pk) not in active_member_ids(context)
+
+    # Hesab aktivləşəndə indeks onu buraxır.
+    get_user_model().objects.filter(pk=student.pk).update(is_active=True)
+    assert str(student.pk) in active_member_ids(context)
