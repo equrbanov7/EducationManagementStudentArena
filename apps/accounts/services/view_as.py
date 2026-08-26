@@ -32,7 +32,7 @@ from django.db.models import Max, Q
 
 from core.rls import bypass_rls
 
-from ..identity import user_access_is_staged
+from ..identity import user_access_is_login_blocked
 from ..models import ProfileRole
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
@@ -150,7 +150,7 @@ def resolve_actor_access(user, organization, *, memberships=None):
         user is None
         or organization is None
         or not getattr(user, "is_authenticated", False)
-        or user_access_is_staged(user)
+        or user_access_is_login_blocked(user)
     ):
         return None, 0, []
 
@@ -197,7 +197,7 @@ def actor_limited_write_url_names(user, organization) -> frozenset:
 
 def actor_can_use_view_as(user, organization) -> bool:
     """Panelin görünürlüyü üçün ucuz yoxlama (superadmin org-suz da görür)."""
-    if user is None or not getattr(user, "is_authenticated", False) or user_access_is_staged(user):
+    if user is None or not getattr(user, "is_authenticated", False) or user_access_is_login_blocked(user):
         return False
     if _is_superadmin(user):
         return True
@@ -385,7 +385,7 @@ def start_view_as(request, target_user, organization, mode):
     from apps.audit.public import log_action
     from core.constants import AuditAction
 
-    if user_access_is_staged(request.user) or user_access_is_staged(target_user):
+    if user_access_is_login_blocked(request.user) or user_access_is_login_blocked(target_user):
         raise PermissionError("view_as_staged_account_denied")
 
     # QEYD: pk-lar str kimi saxlanılır — Organization UUID pk istifadə edir və
@@ -465,7 +465,7 @@ def resolve_view_as_request(request):
         return None, None
 
     real_user = request.user
-    if user_access_is_staged(real_user):
+    if user_access_is_login_blocked(real_user):
         stop_view_as(request, reason="view_as_staged_real_user")
         return None, None
     # Sessiya başqa istifadəçiyə keçibsə (qorunma) və ya org konteksti dəyişibsə → bitir.

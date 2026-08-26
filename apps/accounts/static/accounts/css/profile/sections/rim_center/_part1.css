@@ -317,6 +317,12 @@
     background: var(--ems-danger-100);
 }
 
+/* Arxiv (məzun/xaric): hesab «aktiv» görünür, amma girişi bağlıdır. */
+.rim-badge--archived {
+    color: var(--ems-neutral-700);
+    background: var(--ems-neutral-100);
+}
+
 .rim-flag {
     font-size: 0.74rem;
     color: var(--ems-neutral-500);

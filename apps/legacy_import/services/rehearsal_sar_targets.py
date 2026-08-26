@@ -73,6 +73,7 @@ ISSUE_SEVERITY = MappingProxyType(
                 "legacy_sar_admission_year_missing",
                 "legacy_sar_activation_cap_reached",
                 "legacy_sar_activation_refused",
+                "legacy_sar_archive_refused",
                 "legacy_sar_curriculum_program_conflict",
                 "legacy_sar_curriculum_unmapped",
                 "legacy_sar_curriculum_substituted",
@@ -83,6 +84,8 @@ ISSUE_SEVERITY = MappingProxyType(
         ),
         # V-18: ~200 released students are a SOURCE FACT, not an anomaly.
         "legacy_sar_departed_student": _SEVERITY.INFO,
+        # Arxiv qolu (A): məzun/xaric hesab üzvlüyü quruldu, giriş bağlı qaldı.
+        "legacy_sar_archived_student": _SEVERITY.INFO,
         "legacy_sar_group_missing": _SEVERITY.INFO,
     }
 )
@@ -147,7 +150,9 @@ def _refusal_types() -> tuple[type[BaseException], ...]:
     return _REFUSAL_TYPES
 
 
-def activation_evidence_digest(*, transform_version: str, snapshot_sha256: str, legacy_pk: int) -> str:
+def activation_evidence_digest(
+    *, transform_version: str, snapshot_sha256: str, legacy_pk: int, subject: str = "student"
+) -> str:
     """Mint the activation evidence deterministically from the pinned snapshot.
 
     The 2.14 GB dump is sha256-pinned in ``table_plan.SOURCE_SNAPSHOT_SHA256``
@@ -158,7 +163,10 @@ def activation_evidence_digest(*, transform_version: str, snapshot_sha256: str, 
     """
 
     digest = hashlib.sha256(_ACTIVATION_EVIDENCE_PREFIX)
-    for part in (transform_version, snapshot_sha256, "student", str(legacy_pk)):
+    # ``subject`` qolu ayırır: tələbə aktivasiyası "student", arxiv qolu
+    # "alumni" — eyni legacy sətir üçün iki fərqli qərar eyni evidence-i
+    # paylaşa bilməz.
+    for part in (transform_version, snapshot_sha256, subject, str(legacy_pk)):
         digest.update(encoded_part(part))
     return digest.hexdigest()
 

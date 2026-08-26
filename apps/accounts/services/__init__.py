@@ -51,6 +51,7 @@ from .identity_access import (
     activate_staged_account,
     stage_imported_account,
 )
+from .identity_archive import ARCHIVE_ROLE_NAME, AccountArchiveResult, archive_staged_account
 from .organization_requests import (
     activate_verified_membership,
     activate_verified_student_membership,
@@ -71,6 +72,8 @@ from .profile import update_user_profile, update_user_role
 from .registration import create_user_with_organization, purge_stale_pending_registration
 
 __all__ = [
+    "ARCHIVE_ROLE_NAME",
+    "AccountArchiveResult",
     "AccountDeletionError",
     "AccountRestoreResult",
     "AccountActivationResult",
@@ -79,6 +82,7 @@ __all__ = [
     "StagedAccountResult",
     "activate_staged_account",
     "activate_user_account",
+    "archive_staged_account",
     "OTPRateLimitError",
     "OTPResendCooldownError",
     "activate_verified_membership",

@@ -11,7 +11,7 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.accounts.identity import user_access_is_staged
+from apps.accounts.identity import user_access_is_login_blocked
 from apps.accounts.models import EmailOTP
 from core.utils import get_auth_otp_max_attempts
 
@@ -172,7 +172,7 @@ class OTPPasswordResetCodeForm(forms.Form):
             return cleaned_data
 
         user = getattr(matched_otp, "user", None)
-        if user is None or not user.is_active or user_access_is_staged(user) or not user.has_usable_password():
+        if user is None or not user.is_active or user_access_is_login_blocked(user) or not user.has_usable_password():
             self.add_error("otp_code", self.error_messages["otp_invalid"])
             return cleaned_data
 

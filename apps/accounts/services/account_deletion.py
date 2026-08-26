@@ -321,10 +321,11 @@ def restore_account(user, *, request=None, actor=None, reason=""):
         ``AccountRestoreResult`` — bərpa olunan üzvlük sayı, təşkilat bağlantısı
         və operatora göstəriləcək bildirişlər.
     """
-    from ..identity import user_access_is_staged
+    from ..identity import user_access_is_login_blocked
 
-    # Staged hesab bərpa yolu ilə aktivləşdirilə bilməz (mövcud qapı qorunur).
-    if user_access_is_staged(user):
+    # Girişi bağlı hesab (staged/archived) bərpa yolu ilə aktivləşdirilə bilməz
+    # — mövcud qapı qorunur; arxiv hesabın açılması ayrıca xidmət tələb edir.
+    if user_access_is_login_blocked(user):
         raise AccountDeletionError("staged_account_activation_forbidden")
 
     resolved_actor = _resolve_actor(actor, request)
@@ -462,9 +463,9 @@ def unblock_account(user, *, request=None, actor=None, reason=""):
     """
     Restore a temporarily blocked account back to active state.
     """
-    from ..identity import user_access_is_staged
+    from ..identity import user_access_is_login_blocked
 
-    if user_access_is_staged(user):
+    if user_access_is_login_blocked(user):
         raise AccountDeletionError("staged_account_activation_forbidden")
     if user.is_active:
         return

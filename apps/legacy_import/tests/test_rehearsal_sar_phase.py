@@ -252,12 +252,14 @@ def test_issue_severity_map_covers_exactly_the_sar_taxonomy():
         "legacy_sar_admission_year_missing": "warning",
         "legacy_sar_activation_cap_reached": "warning",
         "legacy_sar_activation_refused": "warning",
+        "legacy_sar_archive_refused": "warning",
         "legacy_sar_curriculum_program_conflict": "warning",
         "legacy_sar_curriculum_unmapped": "warning",
         "legacy_sar_curriculum_substituted": "warning",
         "legacy_sar_curriculum_synthesised": "warning",
         "legacy_sar_write_refused": "warning",
         "legacy_sar_departed_student": "info",
+        "legacy_sar_archived_student": "info",
         "legacy_sar_group_missing": "info",
     }
     assert set(ISSUE_SEVERITY.values()) <= set(LegacyMigrationIssue.Severity.values)
@@ -688,9 +690,9 @@ def test_the_full_curriculum_matrix_and_activation_ladder(seeded):
         "4": "migrated",  # M2 ⇒ substituted under ``synthesise``
         "5": "skipped",  # M5
         "6": "skipped",  # M6
-        "7": "skipped",  # V-18 departed
+        "7": "migrated",  # A — arxiv qolu: giriş bağlı, üzvlük aktiv
     }
-    assert dict(report.state_counts) == {"sar_created": 4, "sar_deferred": 3}
+    assert dict(report.state_counts) == {"sar_created": 5, "sar_deferred": 2}
     assert _issues(run) == {
         ("2", "legacy_sar_curriculum_unmapped"): "warning",
         ("2", "legacy_sar_curriculum_substituted"): "warning",
@@ -699,7 +701,7 @@ def test_the_full_curriculum_matrix_and_activation_ladder(seeded):
         ("4", "legacy_sar_curriculum_program_conflict"): "warning",
         ("4", "legacy_sar_curriculum_substituted"): "warning",
         ("5", "legacy_sar_admission_year_missing"): "warning",
-        ("7", "legacy_sar_departed_student"): "info",
+        ("7", "legacy_sar_archived_student"): "info",
     }
     # M1 binds the LEGACY curriculum; the fallbacks converge on the same row.
     bachelor_2019 = Curriculum.objects.get(organization=organization, program=programs["bachelor"], admission_year=2019)
@@ -707,7 +709,7 @@ def test_the_full_curriculum_matrix_and_activation_ladder(seeded):
         record.student_id: record
         for record in StudentAcademicRecord.objects.filter(organization=organization).select_related("curriculum")
     }
-    assert len(records) == 4
+    assert len(records) == 5  # 7 (arxiv) də öz tarixi qeydini alır
     assert records[users[1].pk].curriculum_id == bachelor_2019.pk
     assert records[users[2].pk].curriculum_id == bachelor_2019.pk
     assert records[users[4].pk].curriculum_id == bachelor_2019.pk
@@ -722,11 +724,34 @@ def test_a_deferred_row_never_activates_its_account(seeded):
 
     SarMaterialisationPhase().run(_seeded_context(organization, actor, run))
 
-    for legacy_pk in (5, 6, 7):
+    for legacy_pk in (5, 6):
         user = users[legacy_pk]
         user.refresh_from_db()
         assert user.is_active is False
         assert UserProfile.objects.get(user=user).access_state == UserProfile.AccessState.STAGED
+
+
+@pytest.mark.django_db
+def test_a_departed_student_gets_an_archive_membership_and_no_login(seeded):
+    """A: hesab məlumat üçün «var», giriş üçün «yoxdur»."""
+
+    organization, actor, run, users, _programs = seeded
+
+    SarMaterialisationPhase().run(_seeded_context(organization, actor, run))
+
+    user = users[7]
+    user.refresh_from_db()
+    # ``is_active`` QƏSDƏN True — ``registrar_guard_active_member`` bunu tələb edir.
+    assert user.is_active is True
+    assert UserProfile.objects.get(user=user).access_state == UserProfile.AccessState.ARCHIVED
+    membership = Membership.objects.get(user=user, organization=organization)
+    assert membership.is_active is True
+    assert membership.role.name == "alumni"
+    assert membership.role.permissions == []  # rol trigger qapısını açır, HÜQUQ vermir
+    # Adi tələbə (1) təsirlənmir.
+    users[1].refresh_from_db()
+    assert users[1].is_active is True
+    assert UserProfile.objects.get(user=users[1]).access_state == UserProfile.AccessState.ACTIVE
 
 
 @pytest.mark.django_db
@@ -778,10 +803,11 @@ def test_strict_refuses_every_row_without_a_coherent_legacy_curriculum(sar_actor
         "4": "skipped",
         "5": "skipped",
         "6": "skipped",
-        "7": "skipped",
+        # A: arxiv qolu strict-də də üzvlüyü qurur; 7-nin planı M1 kimi həll olunur.
+        "7": "migrated",
     }
-    assert dict(report.state_counts) == {"sar_created": 1, "sar_deferred": 6}
-    assert StudentAcademicRecord.objects.count() == 1
+    assert dict(report.state_counts) == {"sar_created": 2, "sar_deferred": 5}
+    assert StudentAcademicRecord.objects.count() == 2
     # No curriculum was minted: ``strict`` writes nothing it cannot justify.
     assert Curriculum.objects.filter(organization=organization).count() == 2
     assert _issues(run)[("4", "legacy_sar_curriculum_program_conflict")] == "warning"
@@ -912,7 +938,7 @@ def test_a_repeated_invocation_replays_the_sealed_decisions(seeded):
     assert second.phase_digest == first.phase_digest
     assert dict(second.state_counts) == dict(first.state_counts)
     assert LegacyEntityMap.objects.filter(entity_type=SAR_ENTITY_TYPE).count() == 7
-    assert StudentAcademicRecord.objects.count() == 4
+    assert StudentAcademicRecord.objects.count() == 5  # 4 tələbə + 1 arxiv
 
 
 @pytest.mark.django_db
@@ -1150,7 +1176,7 @@ def test_two_legacy_plans_pointing_at_one_curriculum_are_not_ambiguous(seeded):
 
     report = SarMaterialisationPhase().run(_seeded_context(organization, actor, run))
 
-    assert dict(report.state_counts) == {"sar_created": 4, "sar_deferred": 3}
+    assert dict(report.state_counts) == {"sar_created": 5, "sar_deferred": 2}
 
 
 @pytest.mark.django_db
@@ -1177,8 +1203,8 @@ def test_the_source_row_hash_never_leaks_a_credential_column(seeded):
 
 
 @pytest.mark.django_db
-def test_a_departed_student_is_blocked_whatever_the_policy_says(sar_actor):
-    """V-18(b): ``azadedildi`` is a source fact, not an activation policy knob."""
+def test_a_departed_student_is_archived_not_activated(sar_actor):
+    """V-18 + A: ``azadedildi`` mənbə faktıdır — hesab ARXİVLƏNİR, açılmır."""
 
     actor = sar_actor
     organization = _organization(actor, "sar-departed")
@@ -1194,12 +1220,66 @@ def test_a_departed_student_is_blocked_whatever_the_policy_says(sar_actor):
 
     report = SarMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows))
 
-    assert dict(report.state_counts) == {"sar_created": 1, "sar_deferred": 1}
+    assert dict(report.state_counts) == {"sar_created": 2}
+    assert _issues(run) == {("1", "legacy_sar_archived_student"): "info"}
+    users[1].refresh_from_db()
+    assert users[1].is_active is True  # trigger qapısı üçün
+    assert UserProfile.objects.get(user=users[1]).access_state == UserProfile.AccessState.ARCHIVED
+    assert Membership.objects.get(user=users[1], organization=organization).role.name == "alumni"
+    # Adi tələbə köhnə yolla gedir.
+    assert UserProfile.objects.get(user=users[2]).access_state == UserProfile.AccessState.ACTIVE
+    assert Membership.objects.get(user=users[2], organization=organization).role.name != "alumni"
+    assert StudentAcademicRecord.objects.filter(student=users[1]).count() == 1
+    assert StudentAcademicRecord.objects.filter(student=users[2]).count() == 1
+
+
+@pytest.mark.django_db
+def test_a_departed_student_without_an_admission_year_still_gets_the_membership(sar_actor):
+    """A: arxiv üzvlüyü SAR-dan ASILI DEYİL — jurnal datası yenə də köçə bilir."""
+
+    actor = sar_actor
+    organization = _organization(actor, "sar-departed-no-year")
+    rows = [_student_row(1, group_id=24, entry_year="", azadedildi=1)]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_structure(organization, actor, run.pk)
+    users = _stage_students(organization, actor, run.pk, (1,))
+    _map(run.pk, actor, entity_type=PLACEMENT_ENTITY_TYPE, legacy_pk=1, state=LegacyEntityMap.State.SKIPPED)
+
+    report = SarMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert dict(report.state_counts) == {"sar_deferred": 1}
+    assert _issues(run) == {
+        ("1", "legacy_sar_admission_year_missing"): "warning",
+        ("1", "legacy_sar_archived_student"): "info",
+    }
+    users[1].refresh_from_db()
+    assert users[1].is_active is True
+    assert UserProfile.objects.get(user=users[1]).access_state == UserProfile.AccessState.ARCHIVED
+    assert Membership.objects.get(user=users[1], organization=organization).is_active is True
+    # Uydurulmuş akademik il yazılmır.
+    assert StudentAcademicRecord.objects.filter(student=users[1]).count() == 0
+
+
+@pytest.mark.django_db
+def test_a_disabled_run_leaves_a_departed_student_untouched(sar_actor):
+    """V-18(b) qorunur: açar bağlıdırsa heç bir hesaba toxunulmur."""
+
+    actor = sar_actor
+    organization = _organization(actor, "sar-departed-off")
+    policy = _policy(stage_and_activate=False, max_activated_accounts=0)
+    rows = [_student_row(1, group_id=20, entry_year="2019", azadedildi=1)]
+    run = _running_run(organization, actor, policy=policy, plan=_plan(len(rows)))
+    _seed_structure(organization, actor, run.pk)
+    users = _stage_students(organization, actor, run.pk, (1,))
+    _map(run.pk, actor, entity_type=PLACEMENT_ENTITY_TYPE, legacy_pk=1, state=LegacyEntityMap.State.SKIPPED)
+
+    report = SarMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows, policy=policy))
+
+    assert dict(report.state_counts) == {"sar_deferred": 1}
     assert _issues(run) == {("1", "legacy_sar_departed_student"): "info"}
     users[1].refresh_from_db()
     assert users[1].is_active is False
-    assert StudentAcademicRecord.objects.filter(student=users[1]).count() == 0
-    assert StudentAcademicRecord.objects.filter(student=users[2]).count() == 1
+    assert UserProfile.objects.get(user=users[1]).access_state == UserProfile.AccessState.STAGED
 
 
 @pytest.mark.django_db
@@ -1211,4 +1291,4 @@ def test_the_semester_scheme_is_not_part_of_the_sar_decision(seeded):
 
     report = SarMaterialisationPhase().run(_seeded_context(organization, actor, run, policy=policy))
 
-    assert dict(report.state_counts) == {"sar_created": 4, "sar_deferred": 3}
+    assert dict(report.state_counts) == {"sar_created": 5, "sar_deferred": 2}

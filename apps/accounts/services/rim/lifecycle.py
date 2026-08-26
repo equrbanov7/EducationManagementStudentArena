@@ -30,7 +30,7 @@ from .policy import (
     assert_can_manage,
     require_permission,
 )
-from .search import STATUS_ACTIVE, STATUS_BLOCKED, STATUS_DELETED, account_status
+from .search import STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_BLOCKED, STATUS_DELETED, account_status
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +95,14 @@ def unblock_user(actor: RimActor, target_user, *, reason, request=None):
         )
     if status == STATUS_ACTIVE:
         raise RimAccessError("already_active", "Hesab onsuz da aktivdir.", status=409)
+    if status == STATUS_ARCHIVED:
+        # Arxiv hesab `is_active=True`-dur, amma girişi `access_state` bağlayır —
+        # blokdan çıxarma onu AÇMIR; səhv gözləntini burada kəsirik.
+        raise RimAccessError(
+            "archived_account",
+            "Arxiv (məzun/xaric) hesab bu yolla açıla bilməz — giriş qəsdən bağlıdır.",
+            status=409,
+        )
 
     unblock_account(target_user, request=request, actor=actor.user, reason=reason)
     return reason

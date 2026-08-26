@@ -6,7 +6,9 @@ core.auth_otp-dadır. Genişlənmə nöqtəsi: apps.accounts.profile_hooks
 """
 
 from apps.accounts.services import (  # noqa: F401
+    ARCHIVE_ROLE_NAME,
     activate_staged_account,
+    archive_staged_account,
     issue_email_otp,
     purge_stale_pending_registration,
     stage_imported_account,
@@ -21,8 +23,10 @@ from core.roles import (  # noqa: F401
 )
 
 __all__ = [
+    "ARCHIVE_ROLE_NAME",
     "ProfileRole",
     "activate_staged_account",
+    "archive_staged_account",
     "get_user_role_level",
     "is_superadmin_user",
     "issue_email_otp",

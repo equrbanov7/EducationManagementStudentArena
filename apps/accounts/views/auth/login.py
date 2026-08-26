@@ -36,7 +36,11 @@ LOGIN_AUDIENCE_STAFF = "staff"
 # Portal siniflənməsi: tələbə rolları vs əməkdaş (level >= moderator).
 # Tələbə (10) / lead_student (aşağı) yalnız TƏLƏBƏ portalına; müəllim (50),
 # imtahan mərkəzi (85), admin, owner və s. ƏMƏKDAŞ portalına düşür.
-STUDENT_PORTAL_ROLE_NAMES = {"student", "lead_student"}
+# ``alumni`` (arxiv, level 5) burada QAPI kimi deyil, yalnız TƏSNİFAT üçün var:
+# siyahıda olmasaydı, son fallback onu ƏMƏKDAŞ portalına yazardı. Arxiv hesabın
+# GİRİŞİ ``UserProfile.access_state='archived'`` ilə bağlanır (identity.py) —
+# portal təsnifatı heç vaxt təhlükəsizlik qapısı deyil.
+STUDENT_PORTAL_ROLE_NAMES = {"student", "lead_student", "alumni"}
 STAFF_PORTAL_MIN_LEVEL = 40
 
 
