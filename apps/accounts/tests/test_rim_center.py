@@ -788,9 +788,7 @@ class RimPrivilegedGrantTests(TestCase):
             get_all_permissions,
         )
         from apps.organizations.permissions import get_permission_label as permission_label
-        from apps.organizations.permissions import (
-            validate_permissions,
-        )
+        from apps.organizations.permissions import validate_permissions
 
         self.assertIn("user.grant_privileged", PERMISSION_CATEGORIES["users"])
         self.assertIn("user.grant_privileged", get_all_permissions())
