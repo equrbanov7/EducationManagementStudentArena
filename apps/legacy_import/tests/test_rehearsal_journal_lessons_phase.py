@@ -10,6 +10,8 @@ from apps.legacy_import.models import LegacyEntityMap, LegacyImportBatch, Legacy
 from apps.legacy_import.services.field_contracts import (
     JOURNAL_DATES_FIELDS,
     JOURNAL_FIELDS,
+    JOURNAL_POINT_ARCHIVE_FIELDS,
+    JOURNAL_POINT_FIELDS,
     SEMESTR_JURNAL_FIELDS,
     is_credential_field,
 )
@@ -45,6 +47,7 @@ from apps.legacy_import.services.rehearsal_journal_lessons_targets import (
 from apps.legacy_import.services.rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.services.source_extraction import LegacyDiscoveredTable
+from apps.legacy_import.tests.journal_points_harness import point_row
 from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
 from core.constants import AcademicPeriodType, OrganizationType
 
@@ -64,6 +67,8 @@ _COLUMNS_BY_TABLE = {
     SEMESTR_JURNAL_FIELDS.source_table: SEMESTR_JURNAL_FIELDS.allowed_fields,
     JOURNAL_FIELDS.source_table: JOURNAL_FIELDS.allowed_fields,
     JOURNAL_DATES_FIELDS.source_table: JOURNAL_DATES_FIELDS.allowed_fields,
+    JOURNAL_POINT_FIELDS.source_table: JOURNAL_POINT_FIELDS.allowed_fields,
+    JOURNAL_POINT_ARCHIVE_FIELDS.source_table: JOURNAL_POINT_ARCHIVE_FIELDS.allowed_fields,
 }
 
 
@@ -138,6 +143,19 @@ def _factory(rows_by_table):
     return build
 
 
+def _cell_row(legacy_pk, *, uniqid="rooBx39tsK", month_id="12", day_number="30", time_value="14:00", **overrides):
+    """Dərs NÖVÜ siqnalını daşıyan xana (``journals_dates_points`` sətri)."""
+
+    return point_row(
+        legacy_pk,
+        uniqid=uniqid,
+        month_id=month_id,
+        day_number=day_number,
+        time_value=time_value,
+        **overrides,
+    )
+
+
 def _semester_row(legacy_pk=1, name="2021/2022 Payız", type_token="autumn", is_current="0"):
     return {"id": legacy_pk, "name": name, "type": type_token, "is_current": is_current}
 
@@ -153,6 +171,7 @@ def _journal_row(legacy_pk, uniqid, **overrides):
         "teacher_id": 17,
         "fake": 0,
         "sonra_sil": 0,
+        "fenn_saati": 60,
         "active": 1,
     }
     values.update(overrides)
@@ -163,11 +182,16 @@ def _dates_row(legacy_pk, journal_id=2, month=12, day=30, time_value="14:00"):
     return {"id": legacy_pk, "journal_id": journal_id, "month": month, "day": day, "time": time_value}
 
 
-def _tables(*, semesters=None, journals=None, dates=None):
+def _tables(*, semesters=None, journals=None, dates=None, cells=None, archive_cells=None):
     return {
         SEMESTR_JURNAL_FIELDS.source_table: list(semesters if semesters is not None else [_semester_row()]),
         JOURNAL_FIELDS.source_table: list(journals if journals is not None else [_journal_row(2, "rooBx39tsK")]),
         JOURNAL_DATES_FIELDS.source_table: list(dates if dates is not None else []),
+        # J3 dərs NÖVÜNÜ xanalardan törədir (``rehearsal_journal_lesson_kinds``),
+        # ona görə xana cədvəlləri planda olmalıdır — boş qalsa hər dərs
+        # defolt ``lecture`` alır və ``..._kind_absent`` INFO-su yazılır.
+        JOURNAL_POINT_FIELDS.source_table: list(cells if cells is not None else []),
+        JOURNAL_POINT_ARCHIVE_FIELDS.source_table: list(archive_cells if archive_cells is not None else []),
     }
 
 
@@ -249,6 +273,8 @@ def test_issue_severity_map_covers_exactly_the_lesson_taxonomy():
         "legacy_journal_lesson_invalid": "warning",
         "legacy_journal_lesson_orphan": "info",
         "legacy_journal_lesson_duplicate": "info",
+        "legacy_journal_lesson_kind_absent": "info",
+        "legacy_journal_lesson_kind_conflict": "info",
     }
     assert set(ISSUE_SEVERITY.values()) <= set(LegacyMigrationIssue.Severity.values)
     assert all(rule_code.startswith("legacy_journal_") for rule_code in ISSUE_SEVERITY)
@@ -324,6 +350,8 @@ def test_the_lesson_derivation_hash_follows_the_documented_recipe():
         "2021-12-30",
         "14:00",
         "2",
+        # Dərs növü də qərarın hissəsidir — möhür onu da bağlayır.
+        "seminar",
     ):
         digest.update(encoded_part(part))
 
@@ -335,6 +363,7 @@ def test_the_lesson_derivation_hash_follows_the_documented_recipe():
         date_text="2021-12-30",
         time_text="14:00",
         slice_ref="2",
+        kind="seminar",
     )
 
     assert computed == digest.hexdigest()
@@ -506,7 +535,11 @@ def test_the_happy_path_creates_the_lesson_with_the_derived_year(lesson_actor, d
     # PG ``registrar_guard_active_member``: real axında müəllim fazası (26)
     # bu fazadan (38) əvvəl aktivləşdirir.
     _activate_member(organization, instructor, "teacher")
-    tables = _tables(dates=[_dates_row(10, month=12, day=30, time_value="14:00")])
+    tables = _tables(
+        dates=[_dates_row(10, month=12, day=30, time_value="14:00")],
+        # Slotun xanası ``sem_muh=0`` daşıyır → SEMİNAR (bal yazıla bilən növ).
+        cells=[_cell_row(1, sem_muh=0, point="7")],
+    )
     run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
     offering = _seed_offering_map(organization, actor, run.pk, instructor=instructor)
     notes = []
@@ -523,14 +556,132 @@ def test_the_happy_path_creates_the_lesson_with_the_derived_year(lesson_actor, d
     # Ay 12 → akademik ilin (2021/2022) birinci ili: 2021-12-30.
     assert lesson.date == datetime.date(2021, 12, 30)
     assert lesson.start_time == datetime.time(14, 0)
-    # Spec J3 defoltları: kind=lecture, hours=2, instructor açılışın müəllimi.
-    assert lesson.kind == "lecture"
+    # Növ ARTIQ xanadan törəyir: ``sem_muh=0`` → seminar (bal xanası açıq).
+    # hours=2 və instructor açılışın müəllimi — spec J3 defoltları.
+    assert lesson.kind == "seminar"
     assert lesson.hours == 2
     assert lesson.instructor_id == instructor.pk
     assert lesson.created_by_id is None
     observation = run.entity_observations.get(entity_map__entity_type=LESSON_ENTITY_TYPE)
     assert observation.target_model_label == LESSON_MODEL_LABEL
     assert observation.target_pk == str(lesson.pk)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "cell_overrides, expected_kind",
+    [
+        # Ölçülmüş semantika: 1 = mühazirə (bal xanası bağlı), 0/2/3 ballanan,
+        # ``lab`` isə müstəqil laboratoriya bayrağıdır.
+        ({"sem_muh": 1}, "lecture"),
+        ({"sem_muh": 0}, "seminar"),
+        ({"sem_muh": 2}, "seminar"),
+        ({"sem_muh": 3}, "seminar"),
+        ({"sem_muh": 0, "lab": 1}, "lab"),
+        ({"sem_muh": 1, "lab": 1}, "lab"),
+    ],
+)
+def test_the_lesson_kind_is_derived_from_the_source_cells(lesson_actor, cell_overrides, expected_kind):
+    actor = lesson_actor
+    organization = _organization(actor, f"journal-lessons-kind-{expected_kind}-{cell_overrides.get('sem_muh')}")
+    tables = _tables(
+        dates=[_dates_row(10, month=12, day=30, time_value="14:00")],
+        cells=[_cell_row(1, **cell_overrides)],
+    )
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
+    _seed_offering_map(organization, actor, run.pk)
+
+    JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
+
+    assert _lessons(organization).get().kind == expected_kind
+    # Təmiz əksəriyyət → növ üzrə heç bir issue yazılmır.
+    assert _issues(run) == {}
+
+
+@pytest.mark.django_db
+def test_an_unknown_cell_code_keeps_the_lecture_default_and_reports_it(lesson_actor):
+    """Naməlum ``sem_muh`` TƏXMİN EDİLMİR — defolt qalır, sətir INFO ilə işarələnir."""
+
+    actor = lesson_actor
+    organization = _organization(actor, "journal-lessons-kind-unknown")
+    tables = _tables(
+        dates=[_dates_row(10, month=12, day=30, time_value="14:00")],
+        cells=[_cell_row(1, sem_muh=7)],
+    )
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
+    _seed_offering_map(organization, actor, run.pk)
+
+    JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
+
+    assert _lessons(organization).get().kind == "lecture"
+    assert _issues(run) == {("10:2", "legacy_journal_lesson_kind_absent"): "info"}
+
+
+@pytest.mark.django_db
+def test_a_mixed_slot_takes_the_majority_and_is_flagged(lesson_actor):
+    actor = lesson_actor
+    organization = _organization(actor, "journal-lessons-kind-mixed")
+    tables = _tables(
+        dates=[_dates_row(10, month=12, day=30, time_value="14:00")],
+        cells=[
+            _cell_row(1, sem_muh=0, student_id=41),
+            _cell_row(2, sem_muh=0, student_id=42),
+            _cell_row(3, sem_muh=1, student_id=43),
+        ],
+    )
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
+    _seed_offering_map(organization, actor, run.pk)
+
+    JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
+
+    assert _lessons(organization).get().kind == "seminar"
+    assert _issues(run) == {("10:2", "legacy_journal_lesson_kind_conflict"): "info"}
+
+
+@pytest.mark.django_db
+def test_the_archive_supplies_the_kind_only_when_the_main_table_is_silent(lesson_actor):
+    """J-V7 "əsas cədvəl udur" qaydası növ törəməsində də keçərlidir."""
+
+    actor = lesson_actor
+    organization = _organization(actor, "journal-lessons-kind-archive")
+    tables = _tables(
+        dates=[
+            _dates_row(10, month=12, day=30, time_value="14:00"),
+            _dates_row(11, month=12, day=30, time_value="15:00"),
+        ],
+        # 14:00 slotu ƏSAS cədvəldə mühazirədir; arxivdəki seminar xanası onu
+        # ÜSTÜNDƏN YAZMIR.  15:00 slotunun isə yalnız arxiv xanası var.
+        cells=[_cell_row(1, sem_muh=1)],
+        archive_cells=[
+            _cell_row(2, sem_muh=0, added_date=datetime.datetime(2022, 1, 5, 9, 0, 0)),
+            _cell_row(3, sem_muh=0, time_value="15:00", added_date=datetime.datetime(2022, 1, 5, 9, 0, 0)),
+        ],
+    )
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
+    _seed_offering_map(organization, actor, run.pk)
+
+    JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
+
+    kinds = {lesson.start_time: lesson.kind for lesson in _lessons(organization)}
+    assert kinds == {datetime.time(14, 0): "lecture", datetime.time(15, 0): "seminar"}
+
+
+@pytest.mark.django_db
+def test_a_post_cutoff_archive_row_never_supplies_a_kind(lesson_actor):
+    actor = lesson_actor
+    organization = _organization(actor, "journal-lessons-kind-archive-late")
+    tables = _tables(
+        dates=[_dates_row(10, month=12, day=30, time_value="14:00")],
+        # Kəsimdən (2022-03-30) SONRAKI arxiv sətri mənbə deyil.
+        archive_cells=[_cell_row(1, sem_muh=0, added_date=datetime.datetime(2022, 6, 1, 9, 0, 0))],
+    )
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
+    _seed_offering_map(organization, actor, run.pk)
+
+    JournalLessonsPhase().run(_seeded_context(organization, actor, run, tables=tables))
+
+    assert _lessons(organization).get().kind == "lecture"
+    assert _issues(run) == {("10:2", "legacy_journal_lesson_kind_absent"): "info"}
 
 
 @pytest.mark.django_db
@@ -618,6 +769,10 @@ def test_a_repeated_slot_keeps_the_first_row_and_skips_the_rest(lesson_actor):
             _dates_row(11, month=12, day=30, time_value="14:00"),
             _dates_row(12, month=12, day=30, time_value="15:00"),  # fərqli saat — dublikat deyil
         ],
+        cells=[
+            _cell_row(1, sem_muh=0),
+            _cell_row(2, sem_muh=0, time_value="15:00"),
+        ],
     )
     run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
     _seed_offering_map(organization, actor, run.pk)
@@ -644,6 +799,10 @@ def test_merged_journals_fold_the_same_slot_into_one_lesson(lesson_actor):
         dates=[
             _dates_row(10, journal_id=2, month=12, day=30, time_value="14:00"),
             _dates_row(11, journal_id=3, month=12, day=30, time_value="14:00"),
+        ],
+        cells=[
+            _cell_row(1, uniqid="firstAAAAA", sem_muh=0),
+            _cell_row(2, uniqid="secondBBBB", sem_muh=0),
         ],
     )
     run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))

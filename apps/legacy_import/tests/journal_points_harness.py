@@ -195,6 +195,7 @@ def journal_row(legacy_pk, uniqid, **overrides):
         "teacher_id": 17,
         "fake": 0,
         "sonra_sil": 0,
+        "fenn_saati": 60,
         "active": 1,
     }
     values.update(overrides)
@@ -216,6 +217,7 @@ def point_row(
     time_value=DEFAULT_TIME,
     excusable=0,
     lab=0,
+    sem_muh=0,
     update_counter=0,
     updated_at=None,
     added_date=MAIN_ADDED,
@@ -236,6 +238,7 @@ def point_row(
         "why": why,
         "j_id": j_id,
         "lab": lab,
+        "sem_muh": sem_muh,
         "description": description,
         "update_counter": update_counter,
         "updated_at": updated_at,

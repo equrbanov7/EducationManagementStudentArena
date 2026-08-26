@@ -148,6 +148,7 @@ def _journal_row(legacy_pk, uniqid, **overrides):
         "teacher_id": 17,
         "fake": 0,
         "sonra_sil": 0,
+        "fenn_saati": 60,
         "active": 1,
     }
     values.update(overrides)

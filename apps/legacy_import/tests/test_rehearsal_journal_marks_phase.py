@@ -74,10 +74,12 @@ def test_issue_severity_map_covers_exactly_the_mark_taxonomy():
 
 
 def test_the_point_contracts_are_credential_free_and_default_deny():
-    # ``sem_muh`` və ``ga`` QƏSDƏN kənardadır (bax field_contracts qeydi);
-    # ``added_date`` isə J-V7 kəsimi üçün lazımdır.
+    # ``ga`` QƏSDƏN kənardadır (bax field_contracts qeydi); ``added_date`` isə
+    # J-V7 kəsimi üçün lazımdır.  ``sem_muh`` 2026-08-27-dən DAXİLDİR: semantikası
+    # canlı mənbədə ölçüldü və J3 dərs növünü məhz ondan törədir.
     assert JOURNAL_POINT_FIELDS.allowed_fields == JOURNAL_POINT_ARCHIVE_FIELDS.allowed_fields
-    assert "sem_muh" not in JOURNAL_POINT_FIELDS.allowed_fields
+    assert "sem_muh" in JOURNAL_POINT_FIELDS.allowed_fields
+    assert "lab" in JOURNAL_POINT_FIELDS.allowed_fields
     assert "ga" not in JOURNAL_POINT_FIELDS.allowed_fields
     assert "added_date" in JOURNAL_POINT_FIELDS.allowed_fields
     assert not any(is_credential_field(name) for name in JOURNAL_POINT_FIELDS.allowed_fields)

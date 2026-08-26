@@ -143,6 +143,7 @@ def _journal_row(legacy_pk, uniqid, **overrides):
         "teacher_id": 17,
         "fake": 0,
         "sonra_sil": 0,
+        "fenn_saati": 60,
         "active": 1,
     }
     values.update(overrides)
@@ -229,6 +230,7 @@ def test_issue_severity_map_covers_exactly_the_offering_taxonomy():
         "legacy_journal_multi_group": "info",
         "legacy_journal_instructor_unresolved": "info",
         "legacy_journal_offering_merged": "info",
+        "legacy_journal_lesson_hours_missing": "info",
     }
     assert set(ISSUE_SEVERITY.values()) <= set(LegacyMigrationIssue.Severity.values)
     assert all(rule_code.startswith("legacy_journal_") for rule_code in ISSUE_SEVERITY)
@@ -237,6 +239,8 @@ def test_issue_severity_map_covers_exactly_the_offering_taxonomy():
 def test_the_journal_contract_is_credential_free_and_carries_j2_fields():
     # ``students_id`` J2 üçün İNDİDƏN kontraktdadır: sonradan genişlətmə barmaq
     # izini və bütün yazılmış source_row_hash-ləri dəyişərdi.
+    # ``fenn_saati`` 2026-08-27-dən daxildir — ``CourseOffering.lesson_hours``
+    # qayıb limitinin məxrəcidir və onsuz hər açılış 0 saatla qalırdı.
     assert JOURNAL_FIELDS.allowed_fields == (
         "id",
         "uniqid",
@@ -248,6 +252,7 @@ def test_the_journal_contract_is_credential_free_and_carries_j2_fields():
         "fake",
         "sonra_sil",
         "active",
+        "fenn_saati",
     )
     assert not any(is_credential_field(field_name) for field_name in JOURNAL_FIELDS.allowed_fields)
 
@@ -537,6 +542,60 @@ def _schemes(organization):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("fenn_saati, expected_hours", [(45, 45), (15, 15), (150, 150)])
+def test_the_lesson_hours_come_from_the_source_column(offering_actor, django_user_model, fenn_saati, expected_hours):
+    actor = offering_actor
+    organization = _organization(actor, f"journal-offerings-hours-{fenn_saati}")
+    rows = [_journal_row(2, "rooBx39tsK", fenn_saati=fenn_saati)]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_references(organization, actor, run.pk, django_user_model=django_user_model)
+
+    JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert _offerings(organization).get().lesson_hours == expected_hours
+    assert _issues(run) == {}
+
+
+@pytest.mark.django_db
+def test_a_missing_lesson_hours_stays_zero_and_is_reported(offering_actor, django_user_model):
+    """Mənbədə saat yoxdursa TƏXMİN EDİLMİR — 0 qalır, sətir İNFO alır.
+
+    Canlı mənbədə 13,875 jurnaldan 2,593-ü (18.7 %) belədir.
+    """
+
+    actor = offering_actor
+    organization = _organization(actor, "journal-offerings-hours-missing")
+    rows = [_journal_row(2, "rooBx39tsK", fenn_saati=0)]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_references(organization, actor, run.pk, django_user_model=django_user_model)
+
+    JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    assert _offerings(organization).get().lesson_hours == 0
+    assert _issues(run) == {("rooBx39tsK:2", "legacy_journal_lesson_hours_missing"): "info"}
+
+
+@pytest.mark.django_db
+def test_a_merged_offering_keeps_the_first_non_zero_lesson_hours(offering_actor, django_user_model):
+    """C6 birləşməsi: 0 saatlı jurnal dolu olanı ÜSTƏLƏMİR."""
+
+    actor = offering_actor
+    organization = _organization(actor, "journal-offerings-hours-merge")
+    # Eyni (subject, period, group) açarı: birinci jurnal 0, ikinci 45 saatlıdır.
+    rows = [
+        _journal_row(2, "rooBx39tsK", fenn_saati=0),
+        _journal_row(3, "secondBBBB", fenn_saati=45),
+    ]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_references(organization, actor, run.pk, django_user_model=django_user_model)
+
+    JournalOfferingsPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    offering = _offerings(organization).get()
+    assert offering.lesson_hours == 45
+
+
+@pytest.mark.django_db
 def test_the_happy_path_creates_the_offering_and_a_draft_scheme(offering_actor, django_user_model):
     actor = offering_actor
     organization = _organization(actor, "journal-offerings-primary")
@@ -559,6 +618,8 @@ def test_the_happy_path_creates_the_offering_and_a_draft_scheme(offering_actor, 
     assert offering.period_id == period.pk
     assert offering.group_id == groups[2].pk
     assert offering.instructor_id == instructor.pk
+    # Qayıb limitinin məxrəci mənbədən (``journals.fenn_saati``) gəlir.
+    assert offering.lesson_hours == 60
     # E-qaydası: sxem yaranıb, amma DRAFT/kilidsizdir — kilid J7-nin işidir.
     scheme = _schemes(organization).get()
     assert scheme.offering_id == offering.pk

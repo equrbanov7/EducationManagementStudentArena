@@ -199,6 +199,7 @@ def build_rows():
                 "teacher_id": 17,
                 "fake": 0,
                 "sonra_sil": 0,
+                "fenn_saati": 60,
                 "active": 1,
             }
         )

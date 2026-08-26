@@ -492,6 +492,12 @@ SEMESTR_JURNAL_FIELDS = LegacySourceFieldContract(
     ),
 )
 
+# 2026-08-27 — ``fenn_saati`` ARTIQ DAXİLDİR (əvvəl "arxiv-only" sayılırdı):
+# ``CourseOffering.lesson_hours`` qayıb limitinin MƏXRƏCidir, doldurulmasa
+# ``analytics`` "qayıba görə kəsilmiş" tələbəni HEÇ VAXT tapmır (şərt
+# ``lesson_hours > 0``-dan qısa-qapanır).  Canlı ölçü: 13,875 jurnaldan
+# 11,282-də (81.3 %) doludur, dəyərlər 15-in qatıdır (maksimum 150) və
+# 10,631 müqayisədən 9,419-u (88.6 %) ``sillabus.ders_saati`` ilə üst-üstə düşür.
 JOURNAL_FIELDS = LegacySourceFieldContract(
     source_table="journals",
     version="journal-v1",
@@ -506,6 +512,7 @@ JOURNAL_FIELDS = LegacySourceFieldContract(
         "fake",
         "sonra_sil",
         "active",
+        "fenn_saati",
     ),
 )
 
@@ -530,14 +537,19 @@ JOURNAL_DATES_FIELDS = LegacySourceFieldContract(
 # J4-J8 (journal_marks / _components / _finals / _reconcile) kontraktları.
 # Sxem DESCRIBE ilə təsdiqlənib.  QƏSDƏN kənarda qalanlar (proyeksiya
 # default-deny-dir — köçməyən sahə mənbədən heç vaxt çıxmır):
-#   * ``sem_muh`` — semantikası təsdiqlənməyib; J-V5 onu "yalnız issue
-#     metadata-sı" kimi saxlayır, ledger-in isə sərbəst payload sahəsi yoxdur
-#     (issue yalnız ``payload_digest`` daşıyır), yəni sütun nə oxunaqlı, nə də
-#     audit edilə bilən formada saxlanıla bilməzdi;
-#   * ``ga`` — eyni səbəb (həm sütun, həm ``month_id='ga'`` psevdo-kodu kimi
-#     mənası naməlumdur; kod J-V13 üzrə onsuz da karantinə düşür).
+#   * ``ga`` — semantikası təsdiqlənməyib (həm sütun, həm ``month_id='ga'``
+#     psevdo-kodu kimi mənası naməlumdur; J-V13 üzrə onsuz da karantinə düşür),
+#     ledger-in isə sərbəst payload sahəsi yoxdur (issue yalnız
+#     ``payload_digest`` daşıyır) — sütun audit edilə bilən formada saxlanmazdı.
 # ``added_date`` İSƏ DAXİLDİR: J-V7 arxiv kəsimi (2022-03-30) məhz bu
 # timestamp-in üzərində qurulur və eyni sərhəd əsas cədvəldə də sübut edilir.
+#
+# 2026-08-27 — ``sem_muh`` ARTIQ DAXİLDİR (əvvəl "semantikası təsdiqlənməyib"
+# deyə kənarda idi).  Semantika canlı mənbədə ÖLÇÜLDÜ (bax
+# ``rehearsal_journal_lesson_kinds``): sütun ``lab`` bayrağı ilə birlikdə dərs
+# NÖVÜNÜ daşıyır, J3 isə onsuz hər dərsi ``lecture`` yazırdı — seminar balları
+# hədəfdə görünməz qalırdı.  Genişlətmə J4/J5/J6-nın bütün ``source_row_hash``
+# və faza digest-lərini dəyişir: sütunu açmağın qaçılmaz qiyməti.
 _JOURNAL_POINT_ALLOWED_FIELDS = (
     "id",
     "journal_uniqid",
@@ -551,6 +563,7 @@ _JOURNAL_POINT_ALLOWED_FIELDS = (
     "why",
     "j_id",
     "lab",
+    "sem_muh",
     "description",
     "update_counter",
     "updated_at",
