@@ -45,7 +45,7 @@ from apps.legacy_import.services.rehearsal_journal_lessons_targets import (
 from apps.legacy_import.services.rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.services.source_extraction import LegacyDiscoveredTable
-from apps.organizations.models import AcademicPeriod, Organization
+from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
 from core.constants import AcademicPeriodType, OrganizationType
 
 _PHASE_KEYS = (
@@ -395,6 +395,19 @@ def _seed_hash(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _activate_member(organization, user, role_name):
+    """Aktiv üzvlük (PG ``registrar_guard_active_member`` tələbi)."""
+
+    role, _created = Role.objects.get_or_create(
+        organization=organization,
+        name=role_name,
+        defaults={"display_name": role_name.title(), "level": 50, "permissions": []},
+    )
+    Role.objects.filter(pk=role.pk).update(is_active=True)
+    Membership.objects.get_or_create(organization=organization, user=user, role=role, defaults={"is_active": True})
+    return role
+
+
 def _make_offering(organization, *, instructor=None, code="MYEDU-64"):
     from django.apps import apps as django_apps
 
@@ -473,6 +486,9 @@ def test_the_happy_path_creates_the_lesson_with_the_derived_year(lesson_actor, d
     actor = lesson_actor
     organization = _organization(actor, "journal-lessons-primary")
     instructor = django_user_model.objects.create_user(username="myedu.worker.lessons.17", email="", password=None)
+    # PG ``registrar_guard_active_member``: real axında müəllim fazası (26)
+    # bu fazadan (38) əvvəl aktivləşdirir.
+    _activate_member(organization, instructor, "teacher")
     tables = _tables(dates=[_dates_row(10, month=12, day=30, time_value="14:00")])
     run = _running_run(organization, actor, policy=_policy(), plan=_plan(tables))
     offering = _seed_offering_map(organization, actor, run.pk, instructor=instructor)
