@@ -213,7 +213,9 @@ def _role_capabilities(user, profile):
         can_close_journals = get_permission_scope(user, active_organization, "journal.close").has_structure_access
         # Kağız (yazılı/praktiki) imtahan balının əl ilə daxil edilməsi — İmtahan
         # Mərkəzi səthi. Rol ADINDAN deyil, `final_score.entry` açarından gəlir.
-        can_enter_exam_scores = get_permission_scope(user, active_organization, "final_score.entry").has_structure_access
+        can_enter_exam_scores = get_permission_scope(
+            user, active_organization, "final_score.entry"
+        ).has_structure_access
         analytics_all_scope = get_permission_scope(user, active_organization, "analytics.view_all")
         analytics_unit_scope = get_permission_scope(user, active_organization, "analytics.view_unit")
         can_view_unit_analytics = analytics_all_scope.has_structure_access or analytics_unit_scope.has_structure_access
