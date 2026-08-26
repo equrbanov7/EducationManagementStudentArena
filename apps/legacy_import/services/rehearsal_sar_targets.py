@@ -71,6 +71,10 @@ ISSUE_SEVERITY = MappingProxyType(
         **dict.fromkeys(
             (
                 "legacy_sar_admission_year_missing",
+                # A2: SAR-ın ili UYDURULMADI, attestasiya olunmuş domenin DÖŞƏMƏ
+                # sentineli (``ARCHIVE_FALLBACK_ADMISSION_YEAR``) yazıldı — sətir
+                # sonradan düzəldilə bilsin deyə WARNING olaraq görünür.
+                "legacy_sar_admission_year_fallback",
                 "legacy_sar_activation_cap_reached",
                 "legacy_sar_activation_refused",
                 "legacy_sar_archive_refused",
@@ -86,6 +90,9 @@ ISSUE_SEVERITY = MappingProxyType(
         "legacy_sar_departed_student": _SEVERITY.INFO,
         # Arxiv qolu (A): məzun/xaric hesab üzvlüyü quruldu, giriş bağlı qaldı.
         "legacy_sar_archived_student": _SEVERITY.INFO,
+        # A2: sətir arxivə MƏHZ qəbul ili həll olunmadığı üçün düşdü — bu, «niyə
+        # arxivləndi» sualının cavabıdır və mənbə faktıdır, anomaliya deyil.
+        "legacy_sar_archived_no_admission_year": _SEVERITY.INFO,
         "legacy_sar_group_missing": _SEVERITY.INFO,
     }
 )
