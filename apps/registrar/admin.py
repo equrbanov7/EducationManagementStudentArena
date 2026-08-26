@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from core.admin_security import AcademicScoreReadOnlyAdminMixin
+
 from .models import (
     AssessmentScheme,
     CourseOffering,
@@ -95,7 +97,10 @@ class LessonAdmin(admin.ModelAdmin):
 
 
 @admin.register(LessonMark)
-class LessonMarkAdmin(admin.ModelAdmin):
+class LessonMarkAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    # Bal/davamiyyət yalnız jurnal servisləri (2 saat pəncərəsi) və ya sənədli
+    # düzəliş (PDF + audit) ilə dəyişir — admin formasından yox.
+    protected_score_fields = ("status", "score")
     list_display = ("lesson", "enrollment", "status", "score", "entered_by", "organization")
     list_filter = ("status",)
     search_fields = ("enrollment__student__username",)
@@ -111,7 +116,8 @@ class ScheduleSlotAdmin(admin.ModelAdmin):
 
 
 @admin.register(FinalGrade)
-class FinalGradeAdmin(admin.ModelAdmin):
+class FinalGradeAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    protected_score_fields = ("exam_score", "bonus", "is_published")
     list_display = ("enrollment", "exam_score", "is_published", "entered_by", "organization")
     list_filter = ("is_published",)
     search_fields = ("enrollment__student__username",)
@@ -119,7 +125,8 @@ class FinalGradeAdmin(admin.ModelAdmin):
 
 
 @admin.register(ResitRecord)
-class ResitRecordAdmin(admin.ModelAdmin):
+class ResitRecordAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    protected_score_fields = ("resit_score", "status")
     list_display = ("enrollment", "reason", "status", "resit_score", "decided_by", "organization")
     list_filter = ("reason", "status")
     search_fields = ("enrollment__student__username",)

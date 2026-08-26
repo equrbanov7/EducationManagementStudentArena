@@ -113,3 +113,26 @@ class AdminSecurityMiddleware:
                 return response
 
         return self.get_response(request)
+
+
+class AcademicScoreReadOnlyAdminMixin:
+    """Akademik nəticə sahələrini Django admin-də YALNIZ OXUNAN et.
+
+    2026-08 auditi: qiymət/bal daşıyan modellər (``LessonMark``, ``FinalGrade``,
+    ``ResitRecord``, ``ExamAttempt``, ``ExamAnswer``, ``CodingSubmission``) admin
+    dəyişiklik formasından heç bir sənəd, vaxt pəncərəsi, ``journal.correct``
+    icazəsi və audit izi olmadan redaktə edilə bilirdi — sistemdəki sənədli
+    düzəliş müqaviləsini bütövlükdə yan keçən səth.
+
+    Sahələr siyahıda/detalda GÖRÜNÜR (dəstək üçün lazımdır), amma yazıla bilmir;
+    dəyişiklik rəsmi yollardan (jurnal düzəlişi / imtahan qiymətləndirməsi)
+    aparılmalıdır. Alt sinif ``protected_score_fields`` təyin edir.
+    """
+
+    protected_score_fields: tuple[str, ...] = ()
+
+    def get_readonly_fields(self, request, obj=None):
+        base = tuple(super().get_readonly_fields(request, obj))
+        model_fields = {field.name for field in self.model._meta.get_fields()}
+        extra = tuple(name for name in self.protected_score_fields if name in model_fields and name not in base)
+        return base + extra
