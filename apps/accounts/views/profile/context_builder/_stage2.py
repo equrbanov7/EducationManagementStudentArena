@@ -188,6 +188,25 @@ class _Stage2Mixin:
             "deleted_count": 0,
             "embedded_in_profile": True,
         }
+        # «RİM mərkəzi» — panel SPA-dır, server yalnız icazə xəritəsini verir.
+        self.rim_center_section = {
+            "can_search": False,
+            "can_set_password": False,
+            "can_block": False,
+            "can_soft_delete": False,
+            "can_edit": False,
+            "is_superadmin": False,
+            "organization": None,
+            "granted_permissions": [],
+            "search_url": "",
+            "action_url": "",
+            "detail_url_template": "",
+            "role_assignment_url": "",
+            "editable_field_labels": {},
+            "min_reason_length": 3,
+            "max_reason_length": 300,
+            "access_denied_message": "",
+        }
         self.superadmin_ai_settings_section = {
             "config": None,
             "model_choices": [],

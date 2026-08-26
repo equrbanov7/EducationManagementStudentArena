@@ -23,7 +23,7 @@ ORGANIZATION_ROLES = {
         "vice_rector": {"level": 95, "label": "Prorektor"},
         "dean": {"level": 90, "label": "Dekan"},
         "vice_dean": {"level": 85, "label": "Dekan müavini"},
-        "ikt_rehber": {"level": 88, "label": "İKT Rəhbəri"},
+        "ikt_rehber": {"level": 88, "label": "Rəqəmsal İnkişaf Mərkəzi (RİM) rəhbəri"},
         "department_head": {"level": 80, "label": "Kafedra müdiri"},
         "professor": {"level": 75, "label": "Professor"},
         "associate_professor": {"level": 70, "label": "Dosent"},

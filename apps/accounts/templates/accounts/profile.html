@@ -21,6 +21,10 @@
     {% if 'superadmin-users' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     {% endif %}
+    {% if 'rim-center' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part1.css' %}?v=20260826-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part2.css' %}?v=20260826-1">
+    {% endif %}
     {% if 'superadmin-ai' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     {% endif %}
@@ -194,6 +198,8 @@
                 {% include "accounts/profile/sections/superadmin/_superadmin_organizations.html" %}
             {% elif active_section == "superadmin-users" %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_user_management.html" %}
+            {% elif active_section == "rim-center" and 'rim-center' in allowed_sections %}
+                {% include "accounts/profile/sections/_rim_center.html" %}
             {% elif active_section == "superadmin-ai" %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_ai_settings.html" %}
             {% elif active_section == "superadmin-exam-rooms" and 'superadmin-exam-rooms' in allowed_sections %}
@@ -370,6 +376,14 @@
 <script src="{% static 'js/user_profile/edit.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'js/user_profile/delete.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'js/user_profile/entry.js' %}?v=20260604-ajaxinit2"></script>
+{% endif %}
+{% if 'rim-center' in allowed_sections %}
+    {# RIM merkezi — hesab idareetmesi paneli (AJAX-safe, EMSReady/EMSDelegate) #}
+<script src="{% static 'accounts/js/rim_center/namespace.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/modals.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/render.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/actions.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/entry.js' %}?v=20260826-1"></script>
 {% endif %}
 {% if 'my-courses' in allowed_sections %}
 <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>

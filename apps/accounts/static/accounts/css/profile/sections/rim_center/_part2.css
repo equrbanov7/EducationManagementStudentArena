@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RİM mərkəzi — 2/2: modallar, detal paneli, redaktə formu, parol pəncərəsi.
+   Bax `rim_center/_part1.css`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Modallar ──────────────────────────────────────────────────────────── */
+
+.rim-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.rim-modal[hidden] {
+    display: none;
+}
+
+.rim-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.rim-modal__box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(680px, 100%);
+    max-height: 88vh;
+    background: var(--ems-neutral-0);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+
+.rim-modal__box--sm {
+    width: min(480px, 100%);
+}
+
+.rim-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.rim-modal__head h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.rim-modal__x {
+    width: 30px;
+    height: 30px;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--ems-neutral-500);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.rim-modal__x:hover {
+    background: var(--ems-neutral-100);
+}
+
+.rim-modal__body {
+    flex: 1;
+    padding: 18px 20px;
+    overflow-y: auto;
+}
+
+.rim-modal__foot {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+/* ── Detal paneli ──────────────────────────────────────────────────────── */
+
+.rim-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.rim-detail-item {
+    padding: 10px 12px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+}
+
+.rim-detail-key {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-neutral-500);
+}
+
+.rim-detail-value {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    word-break: break-word;
+}
+
+.rim-section-title {
+    margin: 18px 0 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Redaktə formu ─────────────────────────────────────────────────────── */
+
+.rim-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.rim-field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+}
+
+.rim-input,
+.rim-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: var(--ems-neutral-900);
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+}
+
+.rim-input {
+    height: 40px;
+}
+
+.rim-input:focus,
+.rim-textarea:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.rim-textarea {
+    resize: vertical;
+}
+
+.rim-error {
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-danger-strong);
+}
+
+.rim-confirm-text {
+    margin: 0 0 14px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ems-neutral-700);
+}
+
+/* ── Parol modalı ──────────────────────────────────────────────────────── */
+
+.rim-warning {
+    display: flex;
+    gap: 9px;
+    padding: 12px 14px;
+    margin: 0 0 14px;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+    border: 1px solid var(--ems-warning-500);
+    border-radius: 10px;
+}
+
+.rim-password-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--ems-neutral-900);
+    border-radius: 10px;
+}
+
+.rim-password-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ems-neutral-0);
+    user-select: all;
+}
+
+.rim-note {
+    margin: 12px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--ems-neutral-500);
+}
+
+.rim-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+@media (max-width: 640px) {
+    .rim-card-side {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .rim-card-actions {
+        justify-content: flex-start;
+    }
+}

@@ -91,6 +91,9 @@ from .profile import (
     view_as_stop,
 )
 
+# RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
+from .rim import rim_action, rim_user_detail, rim_user_search
+
 # Role management views
 from .roles import (
     manage_roles,
@@ -168,6 +171,10 @@ __all__ = [
     # Account management
     "delete_account",
     "superadmin_user_management",
+    # RİM mərkəzi — hesab idarəetməsi (axtarış/parol/blok/silmə/redaktə)
+    "rim_user_search",
+    "rim_user_detail",
+    "rim_action",
     # Post management
     "superadmin_post_management",
     "superadmin_delete_post",

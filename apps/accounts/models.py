@@ -268,6 +268,20 @@ class UserProfile(models.Model):
         help_text="Hansı təşkilat tipində qeydiyyatdan keçdiniz",
     )
 
+    # ── Şəxsiyyət (RİM axtarışı və identifikasiya üçün) ────────────────────
+    # Azərbaycanda insanlar rəsmi sənədlərdə "ad + soyad + ATA ADI" üçlüyü ilə
+    # tanınır; köhnə sistemdən idxal olunmuş hesabların username-i (myedu.*)
+    # istifadəçiyə məlum deyil, ona görə RİM hesabı məhz bu üçlüklə tapır.
+    # Django User modelində ata adı üçün yer yoxdur — profildə saxlanılır.
+    patronymic = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        db_index=True,
+        verbose_name="Ata adı",
+        help_text="Ad+soyad eyni olan hesabları ayırd etmək üçün (RİM axtarışı).",
+    )
+
     country = models.CharField(max_length=100, blank=True, default="", verbose_name="Ölkə")
 
     student_university_name = models.CharField(
@@ -472,6 +486,48 @@ class UserProfile(models.Model):
         help_text="Hesabın silinmə tarixi",
     )
 
+    # ── RİM əməliyyat izləri ───────────────────────────────────────────────
+    # Audit log (apps.audit) əməliyyatın TAM tarixçəsini saxlayır; buradakı
+    # sahələr isə hesabın CARİ vəziyyətinin səbəbini siyahıda göstərmək üçündür
+    # ("Bloklanıb — səbəb: ...") — hər sətir üçün audit sorğusu atmadan.
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="rim_deleted_profiles",
+        verbose_name="Silən",
+        help_text="Hesabı soft-delete edən RİM operatoru",
+    )
+    deletion_reason = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name="Silinmə səbəbi",
+        help_text="RİM operatorunun yazdığı səbəb",
+    )
+    blocked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Bloklanma tarixi",
+    )
+    blocked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="rim_blocked_profiles",
+        verbose_name="Bloklayan",
+        help_text="Hesabı bloklayan RİM operatoru",
+    )
+    block_reason = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name="Bloklanma səbəbi",
+        help_text="RİM operatorunun yazdığı səbəb",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma tarixi")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə tarixi")
 
@@ -484,6 +540,7 @@ class UserProfile(models.Model):
             models.Index(fields=["role"]),
             models.Index(fields=["requested_organization"]),
             models.Index(fields=["is_deleted", "deleted_at"]),
+            # RİM axtarışı: FİN ilə birbaşa tapma (dəqiq uyğunluq).
         ]
 
     def __str__(self):
@@ -527,61 +584,17 @@ class UserProfile(models.Model):
             parts.append(self.get_academic_degree_display())
         return " · ".join(parts)
 
-
-class AcademicProfileItem(models.Model):
-    """İstifadəçinin özü idarə etdiyi akademik fəaliyyət qeydi.
-
-    Müəllim profilində məqalə/konfrans materialı/sertifikat/tədris etdiyi fənn
-    kimi bəndlər; tələbə və digər rollar da öz nailiyyətlərini (sertifikat,
-    məqalə və s.) əlavə edə bilir. Yalnız sahibinə redaktə icazəsi var —
-    yoxlama servis qatındadır (apps.accounts.services.academic_profile).
-    """
-
-    class Kind(models.TextChoices):
-        SUBJECT = "subject", pgettext_lazy("accounts.academic_item_kind", "Tədris etdiyi fənn")
-        CERTIFICATE = "certificate", pgettext_lazy("accounts.academic_item_kind", "Sertifikat")
-        PUBLICATION = "publication", pgettext_lazy("accounts.academic_item_kind", "Məqalə")
-        CONFERENCE = "conference", pgettext_lazy("accounts.academic_item_kind", "Konfrans materialı")
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="academic_items",
-        verbose_name="İstifadəçi",
-    )
-    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name="Növ")
-    title = models.CharField(max_length=200, verbose_name="Başlıq")
-    detail = models.CharField(
-        max_length=255,
-        blank=True,
-        default="",
-        verbose_name="Ətraflı",
-        help_text="Jurnal/konfrans adı, verən qurum, kafedra və s.",
-    )
-    year = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="İl",
-    )
-    link = models.URLField(
-        max_length=300,
-        blank=True,
-        default="",
-        verbose_name="Keçid",
-        help_text="DOI / sertifikat / nəşr keçidi (http-https)",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Akademik fəaliyyət qeydi"
-        verbose_name_plural = "Akademik fəaliyyət qeydləri"
-        ordering = ["kind", "-year", "-id"]
-        indexes = [models.Index(fields=["user", "kind"])]
-
-    def __str__(self):
-        return f"{self.user_id} · {self.get_kind_display()} · {self.title[:40]}"
+    @property
+    def full_name_with_patronymic(self):
+        """«Ad Soyad Ata adı» — RİM siyahılarında rəsmi göstərim."""
+        parts = [
+            (getattr(self.user, "first_name", "") or "").strip(),
+            (getattr(self.user, "last_name", "") or "").strip(),
+            (self.patronymic or "").strip(),
+        ]
+        return " ".join(part for part in parts if part)
 
 
-# Separate module keeps this already-large model module below the size budget.
+# Ölçü budcəsi: akademik qeyd modeli ayrıca moduldadır, buradan yenidən ixrac olunur.
+from .academic_models import AcademicProfileItem  # noqa: E402,F401
 from .identity_models import AccountActivationEvidence  # noqa: E402,F401

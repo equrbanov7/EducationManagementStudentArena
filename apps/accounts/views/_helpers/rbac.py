@@ -499,6 +499,25 @@ def _role_capabilities(user, profile):
     if can_view_audit:
         allowed_sections.add("audit-log")
 
+    # «RİM mərkəzi» (hesab idarəetməsi) — `user.*` icazələrindən HƏR HANSI BİRİ
+    # bölməni açır; konkret düymələr (parol/blok/silmə/redaktə) öz icazəsi ilə
+    # AYRICA qapılıdır (bax `services/rim/policy.py`). Yəni yalnız `user.search`
+    # daşıyan operator bölməni görür, amma heç bir dağıdıcı düyməsi olmur.
+    #
+    # Bu bölmə superadmin-only DEYİL: köhnə sistemdən idxal olunmuş 8000+ hesabın
+    # parol bərpası cutover-da gündəlik əməliyyatdır və İKT/prorektor səviyyəli
+    # əməkdaş onu superadmin olmadan aparmalıdır.
+    can_use_rim_center = is_superadmin
+    if not can_use_rim_center and active_organization is not None:
+        from apps.accounts.services.rim.policy import RIM_PERMISSIONS
+        from core.permissions import has_permission as _rim_has_permission
+
+        _rim_actor_perms, _ = _collect_actor_permissions(user, active_organization)
+        _rim_perm_list = list(_rim_actor_perms)
+        can_use_rim_center = any(_rim_has_permission(_rim_perm_list, perm) for perm in RIM_PERMISSIONS)
+    if can_use_rim_center:
+        allowed_sections.add("rim-center")
+
     # "Sual Bankı" profil sidebar bölməsi (sağda AJAX açılır) — görünürlük flag-ı ilə eyni şərt.
     if can_use_question_bank:
         allowed_sections.add("question-bank")
@@ -533,6 +552,7 @@ def _role_capabilities(user, profile):
         "is_department_head": is_department_head,
         "is_unit_manager": is_unit_manager,
         "can_view_audit": can_view_audit,
+        "can_use_rim_center": can_use_rim_center,
         "can_use_question_bank": can_use_question_bank,
         "can_manage_appeals": can_manage_appeals,
         "can_view_my_appeals": can_view_my_appeals,

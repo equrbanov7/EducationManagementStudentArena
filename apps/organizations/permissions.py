@@ -110,8 +110,50 @@ PERMISSION_CATEGORIES = {
         "audit.view",
         "audit.export",
     ],
+    # RİM (hesab idarəetmə mərkəzi) — köhnə sistemdən idxal olunmuş hesabların
+    # kredensial/blok/silmə/redaktə əməliyyatları. Bu icazələr QƏSDƏN `member.*`
+    # dəstindən AYRIDIR: `member.edit` təşkilat üzvlüyünü (vəzifə, kafedra,
+    # scope_unit) idarə edir, `user.*` isə HESABIN ÖZÜNÜ (parol, giriş bloku,
+    # soft-delete, şəxsi məlumat). Birini verib digərini verməmək mümkün olmalıdır.
+    "users": [
+        "user.search",
+        "user.credentials",
+        "user.block",
+        "user.soft_delete",
+        "user.edit",
+        # Əsasnamə 5.5 («Təhlükəsizlik üzrə səlahiyyət ayrılığı») — YÜKSƏK RİSKLİ
+        # əməliyyat: hədəfə administrator-ekvivalent (level >= 80) səlahiyyət
+        # vermək. QƏSDƏN ayrıca açardır: `user.edit`/`user.credentials` daşıyan
+        # operator avtomatik olaraq admin YARADA bilməməlidir. Belə əməliyyat
+        # ayrıca icazə + ayrıca audit qeydi tələb edir.
+        "user.grant_privileged",
+    ],
 }
 
+# Kateqoriya və icazə açarlarının AZ etiketləri.
+#
+# Niyə server tərəfdə? İcazə redaktoru öz etiketlərini JS-də saxlayır
+# (`permission_editor/labels.js`), amma icazə adları həm də SERVER tərəfdə
+# render olunan səthlərdə (RİM mərkəzinin "sizin səlahiyyətləriniz" paneli,
+# audit izahatları) göstərilir. Orada JS xəritəsi əlçatan deyil.
+#
+# Xəritə natamam ola bilər — etiketi olmayan açar üçün çağıran tərəf açarın
+# özünü göstərir (`permission_label()` belə davranır).
+PERMISSION_CATEGORY_LABELS = {
+    "organization": "Təşkilat",
+    "structure": "Struktur",
+    "members": "Üzvlər",
+    "roles": "Rollar",
+    "courses": "Kurslar",
+    "grading": "Qiymətləndirmə",
+    "journal": "Jurnal",
+    "exams": "İmtahanlar",
+    "appeal": "Apellyasiya",
+    "analytics": "Analitika",
+    "qa": "Keyfiyyət",
+    "audit": "Audit jurnalı",
+    "users": "Hesab idarəetməsi (RİM)",
+}
 
 # ---------------------------------------------------------------------------
 # İnsan-oxunaqlı icazə etiketləri (permission-editor üçün).
@@ -193,6 +235,13 @@ PERMISSION_LABELS = {
     # audit
     "audit.view": pgettext_lazy(_PERM_CTX, "Audit jurnalına baxış"),
     "audit.export": pgettext_lazy(_PERM_CTX, "Audit jurnalını ixrac etmək"),
+    # users (RİM hesab idarəetməsi)
+    "user.search": pgettext_lazy(_PERM_CTX, "İstifadəçi axtarışı"),
+    "user.credentials": pgettext_lazy(_PERM_CTX, "Parol təyini / bərpası"),
+    "user.block": pgettext_lazy(_PERM_CTX, "Hesabı bloklamaq / blokdan çıxarmaq"),
+    "user.soft_delete": pgettext_lazy(_PERM_CTX, "Hesabı silmək / bərpa etmək"),
+    "user.edit": pgettext_lazy(_PERM_CTX, "Şəxsi məlumatların redaktəsi"),
+    "user.grant_privileged": pgettext_lazy(_PERM_CTX, "İmtiyazlı (administrator) səlahiyyət vermək"),
 }
 
 

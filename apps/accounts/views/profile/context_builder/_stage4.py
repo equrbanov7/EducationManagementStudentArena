@@ -203,6 +203,7 @@ class _Stage4Mixin:
             "audit_log_section": self.audit_log_section,
             "superadmin_org_inspector_section": self.superadmin_org_inspector_section,
             "superadmin_users_section": self.superadmin_users_section,
+            "rim_center_section": self.rim_center_section,
             "superadmin_ai_settings_section": self.superadmin_ai_settings_section,
             "superadmin_org_features_section": self.superadmin_org_features_section,
             "category_management_create_form": self.category_management_create_form,

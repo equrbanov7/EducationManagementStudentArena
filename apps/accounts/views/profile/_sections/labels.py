@@ -35,6 +35,7 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "org-members": "accounts/profile/sections/_org_members.html",
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
+    "rim-center": "accounts/profile/sections/_rim_center.html",
 }
 
 
@@ -77,6 +78,7 @@ def build_section_titles() -> dict:
         "superadmin-org-features": "Təşkilat özəllikləri",
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
         "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
+        "rim-center": pgettext_lazy("profile.section", "rim_center"),
         "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
         "superadmin-exam-rooms": pgettext_lazy("profile.section", "İmtahan zalları"),
         "exam-center-pins": pgettext_lazy("profile.section", "PIN axtarışı"),
