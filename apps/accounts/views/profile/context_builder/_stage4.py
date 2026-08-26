@@ -224,6 +224,7 @@ class _Stage4Mixin:
             "exam_rooms_section": self.exam_rooms_section,
             "kollokvium_windows_section": self.kollokvium_windows_section,
             "journal_close_section": self.journal_close_section,
+            "exam_score_entry_section": self.exam_score_entry_section,
             "exam_chance_section": self.exam_chance_section,
             "can_manage_exam_rooms": self.capabilities.get("can_manage_exam_rooms", False),
             "is_teacher": self.capabilities["is_teacher"],

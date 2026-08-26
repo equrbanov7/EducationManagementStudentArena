@@ -59,6 +59,11 @@ CABINET_MODULES: dict[str, dict] = {
         "sections": ("journal-close",),
         "default": True,
     },
+    "exam_score_entry": {
+        "label": pgettext_lazy("accounts.cabinet_modules", "İmtahan balının daxil edilməsi"),
+        "sections": ("exam-score-entry",),
+        "default": True,
+    },
     "analytics": {
         "label": pgettext_lazy("accounts.cabinet_modules", "Akademik analitika"),
         "sections": ("analytics",),

@@ -184,6 +184,8 @@ urlpatterns = [
     path("superadmin/exam-rooms/", views.superadmin_exam_rooms, name="superadmin_exam_rooms"),
     path("kollokvium-windows/", views.kollokvium_windows, name="kollokvium_windows"),
     path("exam-chance/", views.exam_chance, name="exam_chance"),
+    # İmtahan Mərkəzi — kağız (yazılı/praktiki) imtahan balının daxil edilməsi
+    path("imtahan-bali/", views.exam_score_entry, name="exam_score_entry"),
     # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı
     path("jurnal-baglama/", views.journal_close, name="journal_close"),
     # Account management

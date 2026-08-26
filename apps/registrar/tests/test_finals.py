@@ -188,17 +188,41 @@ class FinalsTest(TestCase):
             self.assertFalse(ResitRecord.objects.filter(enrollment=self.enrollment).exists())
 
     # ── publish lock ──────────────────────────────────────────────────────────
-    def test_publish_locks_exam_entry(self):
+    def _close_journal(self):
+        """Jurnalı semestr sonu vəziyyətinə gətir (RİM bağlaması)."""
         from apps.registrar.models import ApprovalStatus, AssessmentScheme
 
+        scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+        scheme.approval_status = ApprovalStatus.APPROVED
+        scheme.is_published = True
+        scheme.save(update_fields=["approval_status", "is_published"])
+        assert AssessmentScheme.objects.get(offering=self.offering).is_published
+        return scheme
+
+    def test_closed_journal_does_not_block_exam_score(self):
+        """ƏSAS REGRESİYA (sahibin qərarı E5): jurnal semestr sonunda BAĞLANIR,
+        imtahan ondan SONRA keçir → çıxış balı kilidli jurnalda da YAZILMALIDIR.
+        Əvvəl bu yol sükutla ``None`` qaytarırdı və bal İTİRDİ."""
         with bypass_rls():
             self._set_entry(40)
-            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            scheme.approval_status = ApprovalStatus.APPROVED
-            scheme.is_published = True
-            scheme.save(update_fields=["approval_status", "is_published"])
-            self.assertTrue(AssessmentScheme.objects.get(offering=self.offering).is_published)
-            self.assertIsNone(finals.set_exam_score(enrollment=self.enrollment, score=40))
+            self._close_journal()
+
+            final_grade = finals.set_exam_score(enrollment=self.enrollment, score=40, by_user=self.teacher)
+
+            self.assertIsNotNone(final_grade)
+            self.assertEqual(final_grade.exam_score, Decimal("40"))
+            res = finals.compute_final_result(enrollment=self.enrollment)
+            self.assertEqual(res["total"], Decimal("80"))  # giriş 40 + çıxış 40
+            self.assertTrue(res["passed"])
+
+    def test_closed_journal_still_locks_resit_and_extras(self):
+        """Giriş balı tərəfi kilidli QALIR — yalnız imtahan (çıxış) balı azaddır."""
+        with bypass_rls():
+            self._set_entry(40)
+            finals.set_exam_score(enrollment=self.enrollment, score=10, by_user=self.teacher)  # kəsilir → resit
+            self._close_journal()
+            self.assertIsNone(finals.set_resit_score(enrollment=self.enrollment, score=40))
+            self.assertIsNone(finals.set_final_extras(enrollment=self.enrollment, bonus=5))
 
     def test_offering_results_shape(self):
         with bypass_rls():

@@ -352,19 +352,30 @@ class ManualGradingBridgeTests(_JournalBridgeSetup):
 
 
 class LockedJournalTests(_JournalBridgeSetup):
-    """Kilidli jurnal: körpü SƏSSİZCƏ yazmır (rəsmiləşmiş nəticə qorunur)."""
+    """Bağlı jurnal imtahan nəticəsini BLOKLAMIR (sahibin qərarı, 2026-08).
 
-    def test_published_journal_is_not_overwritten(self):
+    Jurnal semestr SONUNDA bağlanır, imtahan isə ondan SONRA keçir — yəni yekun
+    imtahan balı demək olar həmişə bağlı jurnala düşür. Əvvəl körpü bu halda
+    sükutla no-op edir və nəticə İTİRDİ (yalnız WARNING loglanırdı). İndi giriş
+    balı (jurnal xanaları) kilidli qalır, çıxış balı (imtahan) yazılır.
+    """
+
+    def _close_journal(self):
         from apps.registrar import gradebook
 
+        scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+        scheme.approval_status = "approved"
+        scheme.is_published = True
+        scheme.save(update_fields=["approval_status", "is_published"])
+
+    def test_closed_journal_still_receives_exam_result(self):
         attempt = self._correct_test_attempt()
         with bypass_rls():
-            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
-            scheme.approval_status = "approved"
-            scheme.is_published = True
-            scheme.save(update_fields=["approval_status", "is_published"])
+            self._close_journal()
 
         with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
             attempt.mark_finished(status="submitted")
 
-        self.assertIsNone(self._final_grade())
+        final_grade = self._final_grade()
+        self.assertIsNotNone(final_grade)  # ƏSAS REGRESİYA: bal artıq itmir
+        self.assertEqual(final_grade.exam_score, Decimal("50"))

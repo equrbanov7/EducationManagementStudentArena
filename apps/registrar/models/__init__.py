@@ -31,6 +31,12 @@ from .corrections import (
     LessonCorrection,
     SelfWorkCorrection,
 )
+from .exam_score_entry import (
+    EVIDENCE_EXTENSIONS,
+    ExamScoreEntry,
+    ExamScoreEntryKind,
+    exam_score_evidence_path,
+)
 from .grading import (
     ApprovalStatus,
     AssessmentComponent,
@@ -89,6 +95,10 @@ __all__ = [
     "DegreeLevel",
     "Enrollment",
     "EnrollmentKind",
+    "EVIDENCE_EXTENSIONS",
+    "ExamScoreEntry",
+    "ExamScoreEntryKind",
+    "exam_score_evidence_path",
     "FinalGrade",
     "GroupElectiveChoice",
     "GroupTransferEvidence",

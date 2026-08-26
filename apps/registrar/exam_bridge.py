@@ -9,7 +9,8 @@ qalxır. İki istiqamət:
 * **Nəticə yazımı** — imtahan bitəndə xam faiz (0–100) fənnin imtahan
   şkalasına (``exam_score_max``, adətən 50, TAM ədəd) çevrilir və
   ``finals.set_exam_score`` ilə yazılır. İmtahandan qovulan (``expelled``)
-  tələbəyə 0 → avtomatik F.
+  tələbəyə 0 → avtomatik F. Jurnalın semestr-sonu kilidi bu yazını dayandırmır
+  (imtahan kiliddən SONRA keçir — bax ``finals.set_exam_score`` şərhi).
 
 Bu modul exams tərəfindən ``apps.registrar.public`` fasadı vasitəsilə çağırılır
 (model səviyyəsində birbaşa asılılıq yaranmır).
@@ -129,9 +130,14 @@ def record_exam_result(*, student, subject_id, organization, score_percent, is_e
     """İmtahan nəticəsini jurnala yaz (``FinalGrade.exam_score``).
 
     ``score_percent`` — 0–100 xam faiz. ``is_expelled`` (proctordan qovulma) →
-    0 bal (avtomatik F). Fənn qeydiyyatı tapılmasa no-op (``None``). Jurnal
-    kilidlidirsə ``set_exam_score`` özü yazmır (rəsmiləşmiş nəticəni qorumaq)
-    — bu hal ops görünürlüyü üçün WARNING kimi loglanır.
+    0 bal (avtomatik F). Fənn qeydiyyatı tapılmasa no-op (``None``).
+
+    JURNAL KİLİDİ (sahibin qərarı, 2026-08): imtahan jurnal bağlandıqdan SONRA
+    keçir, ona görə kilidli jurnal imtahan nəticəsinin yazılmasını BLOKLAMIR.
+    Əvvəl bu funksiya kilidi görüb no-op edir və nəticəni WARNING ilə itirirdi;
+    indi ``finals.set_exam_score`` çıxış balını hər halda yazır (giriş balı —
+    jurnal xanaları — kilidli qalır).
+
     ``by_user`` — yoxlayan müəllim / reviewer; ``None`` = avtomatik (sistem)
     yazı, audit izində belə də işarələnir (2026-08 auditi, G7).
     Nəticə: yazılan ``FinalGrade`` və ya ``None``.
@@ -146,13 +152,6 @@ def record_exam_result(*, student, subject_id, organization, score_percent, is_e
             getattr(organization, "pk", "?"),
         )
         by_user = None
-    if gradebook.journal_is_locked(enrollment.offering):
-        logger.warning(
-            "exam_bridge: journal locked for offering %s — exam result NOT written (student=%s)",
-            enrollment.offering_id,
-            getattr(student, "pk", "?"),
-        )
-        return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     exam_score = 0 if is_expelled else _to_exam_scale(score_percent, scheme)
     note = "imtahan mərkəzi" if by_user is not None else "imtahan mərkəzi · avtomatik"

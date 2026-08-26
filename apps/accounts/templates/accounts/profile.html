@@ -212,6 +212,8 @@
                 {% include "accounts/profile/sections/_appeal_stats.html" %}
             {% elif active_section == "kollokvium-windows" and 'kollokvium-windows' in allowed_sections %}
                 {% include "accounts/profile/sections/_kollokvium_windows.html" %}
+            {% elif active_section == "exam-score-entry" and 'exam-score-entry' in allowed_sections %}
+                {% include "accounts/profile/sections/_exam_score_entry.html" %}
             {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_chance.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
