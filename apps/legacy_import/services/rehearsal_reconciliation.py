@@ -84,6 +84,13 @@ def _derived_phase_report_from_ledger(run: LegacyMigrationRun, *, phase: Rehears
 
     namespace = getattr(phase, "derived_digest_namespace", PHASE_DIGEST_NAMESPACE)
     key_for = getattr(phase, "derived_state_key", None)
+    # Üçüncü opsional hook (SA-2 ailəsi): ``derived_ledger_sort_key`` fazanın
+    # zəncirini yeridiyi sıranı verir.  Defolt rəqəmsal qalır; ``journal_offerings``
+    # kimi mətn-açarlı (uniqid) fazalar leksikoqrafik sıra bildirir.  Fingerprint-ə
+    # daxil deyil: sübutun ETİKETLƏNMƏSİNİ dəyişir, yazıla bilənləri yox.
+    sort_key = getattr(phase, "derived_ledger_sort_key", None)
+    if not callable(sort_key):
+        sort_key = int
     rows = list(
         run.entity_observations.filter(entity_map__entity_type__in=tuple(phase.entity_types)).values_list(
             "entity_map__legacy_pk",
@@ -93,8 +100,8 @@ def _derived_phase_report_from_ledger(run: LegacyMigrationRun, *, phase: Rehears
         )
     )
     try:
-        # ``legacy_pk`` is text in the ledger; the phase emitted it numerically.
-        ordered = sorted(rows, key=lambda row: int(row[0]))
+        # ``legacy_pk`` is text in the ledger; the phase declares its own order.
+        ordered = sorted(rows, key=lambda row: sort_key(row[0]))
     except (TypeError, ValueError):
         raise LegacyRehearsalEvidenceError("legacy_rehearsal_derived_legacy_pk_invalid") from None
     chain = OrderedDigest(namespace)

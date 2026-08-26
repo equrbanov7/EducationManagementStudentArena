@@ -474,3 +474,55 @@ STUDENT_STATUS_FIELDS = LegacySourceFieldContract(
         "azadedildi",
     ),
 )
+
+# Jurnal kontraktları (journal_periods / journal_offerings fazaları, J0-J1).
+# Arxiv-only sütunlar (name, note, extra_note, owner_id, sillabus_id, sem_muh,
+# fenn_saati, kredit, …) QƏSDƏN kənarda: proyeksiya default-deny-dir — köçməyən
+# sahə mənbədən heç vaxt çıxmır.  ``students_id`` J2 (journal_enrollments)
+# fazası üçün İNDİDƏN daxildir: sonradan genişlətmə barmaq izini və dolayısı
+# ilə bütün yazılmış ``source_row_hash``-ləri dəyişərdi.
+SEMESTR_JURNAL_FIELDS = LegacySourceFieldContract(
+    source_table="semestr_jurnal",
+    version="journal-v1",
+    allowed_fields=(
+        "id",
+        "name",
+        "type",
+        "is_current",
+    ),
+)
+
+JOURNAL_FIELDS = LegacySourceFieldContract(
+    source_table="journals",
+    version="journal-v1",
+    allowed_fields=(
+        "id",
+        "uniqid",
+        "lesson_id",
+        "semestr",
+        "groups_id",
+        "students_id",
+        "teacher_id",
+        "fake",
+        "sonra_sil",
+        "active",
+    ),
+)
+
+# J3 (journal_lessons) kontraktı.  Real mənbə sxemi (DESCRIBE ilə təsdiqlənib):
+# id / journal_id / month / day / time / sem_muh / added_date — jurnala bağlantı
+# ``journal_id`` (rəqəm FK → journals.id) İLƏDİR, uniqid ilə deyil; il sütunu
+# YOXDUR (il jurnalın semestrindən törədilir: ay 9-12 → akademik ilin birinci
+# ili, ay 1-8 → ikinci ili).  ``sem_muh`` (semantikası naməlum) və ``added_date``
+# QƏSDƏN kənarda: proyeksiya default-deny-dir.
+JOURNAL_DATES_FIELDS = LegacySourceFieldContract(
+    source_table="journals_dates_added_by_teacher",
+    version="journal-v1",
+    allowed_fields=(
+        "id",
+        "journal_id",
+        "month",
+        "day",
+        "time",
+    ),
+)

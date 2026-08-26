@@ -11,17 +11,23 @@ Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
-The second test drives the FULL FAZA 3 registry — ``academic_structure`` (31 +
-83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424), ``identity_cohort``
-(7 816 + 729), ``student_placement`` and ``sar_materialisation`` — against the
-CANONICAL table plan, so ``totals.source_rows`` is the real 15 496.
+The second test drives the FULL TEN-phase registry — ``academic_structure``
+(31 + 83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424),
+``identity_cohort`` (7 816 + 729), the three derived identity phases, and the
+FAZA 3B journal cluster (J0-J3) fed by three synthetic journal tables
+(``semestr_jurnal`` 13, ``journals`` 30, ``journals_dates_added_by_teacher``
+60).  Every batch-backed table keeps its canonical shape, so
+``totals.source_rows`` is still the real 15 496 — the derived journal phases
+declare 0 source rows by contract.
 """
 
 import json
 import os
 import re
+from dataclasses import replace
 from types import SimpleNamespace
 
+from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.db import DatabaseError, connection, transaction
 
@@ -36,7 +42,10 @@ from apps.legacy_import.services.field_contracts import (
     CURRICULUM_PLAN_FIELDS,
     DEPARTMENT_STRUCTURE_FIELDS,
     GROUP_STRUCTURE_FIELDS,
+    JOURNAL_DATES_FIELDS,
+    JOURNAL_FIELDS,
     LESSON_CATALOG_FIELDS,
+    SEMESTR_JURNAL_FIELDS,
     SPECIALITY_STRUCTURE_FIELDS,
     STUDENT_IDENTITY_FIELDS,
     STUDENT_STATUS_FIELDS,
@@ -53,7 +62,7 @@ from apps.legacy_import.services.rehearsal_contracts import (
 from apps.legacy_import.services.rehearsal_identity_phase import email_evidence_digest
 from apps.legacy_import.services.rehearsal_orchestrator import execute_rehearsal
 from apps.legacy_import.services.rehearsal_target_guard import TargetGuardAttestation
-from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256, load_legacy_table_plan
+from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256, LegacyTablePlan, load_legacy_table_plan
 from apps.legacy_import.tests.test_rehearsal_identity_phase import _plan
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -346,8 +355,11 @@ def test_disposable_mariadb_and_postgres_identity_rehearsal_conformance(monkeypa
 
 
 # ---------------------------------------------------------------------------
-# FAZA 3 — SLICE 1 + SLICE 2 (SPEC §8/11 and §10 items 14-15): the full FIVE
-# phase registry against the CANONICAL plan, so the accounting totals are real.
+# FAZA 3 — SLICE 1 + SLICE 2 + FAZA 3B J0-J3 (SPEC §8/11, §10 items 14-15 and
+# FAZA3B qapı 3): the full TEN phase registry.  The batch-backed tables keep the
+# CANONICAL plan shapes so the accounting totals are real; only the two big
+# journal tables are narrowed to the synthetic fixture (see
+# ``_journal_scaled_plan`` — no phase declares them into ``source_rows``).
 # ---------------------------------------------------------------------------
 
 _CANONICAL_PLAN = load_legacy_table_plan()
@@ -363,7 +375,19 @@ _STRUCTURE_SOURCE_ROWS = _DEPARTMENT_ROWS + _SPECIALITY_ROWS + _GROUP_ROWS  # 88
 _CATALOG_SOURCE_ROWS = _LESSON_ROWS + _CURRICULUM_ROWS + _PLAN_ROWS  # 6 071
 _IDENTITY_SOURCE_ROWS = _FULL_STUDENT_ROWS + _FULL_WORKER_ROWS  # 8 545
 _FULL_SOURCE_ROWS = _STRUCTURE_SOURCE_ROWS + _CATALOG_SOURCE_ROWS + _IDENTITY_SOURCE_ROWS
-# Registry order, not alphabetical: 10 < 12 < 20 < 25 < 26 < 28.
+# FAZA 3B J0-J3: jurnal klasterinin sintetik guşələri.  ``semestr_jurnal``
+# kanonik 13-dür; ``journals``/``journals_dates_added_by_teacher`` isə YALNIZ
+# plan-patch ilə kiçildilir (canlı 13 875 / 379 215 sətri burada axıtmaq
+# konformans testini saatlara çevirərdi).  Heç bir faza bu cədvəlləri
+# ``declared_source_rows``-a saymır, ona görə ``totals.source_rows`` == 15 496
+# və registry barmaq izi kanonik qalır.
+_SEMESTR_JURNAL_ROWS = _CANONICAL_PLAN.entry_for("semestr_jurnal").expected_rows  # 13
+_JOURNAL_ROWS = 30
+_JOURNAL_DATE_ROWS = 60
+# J1 nəticəsi: bu 21 jurnal MIGRATED offering alır (aşağıdakı ``_journal_values``
+# xüsusi halları ilə birgə oxu); J3 defolt dərs sətirləri yalnız bunlara bağlanır.
+_JOURNAL_MIGRATED_IDS = (1, 2, 6, 7, *range(14, 31))
+# Registry order, not alphabetical: 10 < 12 < 20 < 25 < 26 < 28 < 32 < 34 < 36 < 38.
 _FULL_PHASE_KEYS = (
     "academic_structure",
     "academic_catalog",
@@ -371,7 +395,37 @@ _FULL_PHASE_KEYS = (
     "student_placement",
     "worker_materialisation",
     "sar_materialisation",
+    "journal_periods",
+    "journal_offerings",
+    "journal_enrollments",
+    "journal_lessons",
 )
+_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38]
+
+
+def _journal_scaled_plan():
+    """Kanonik plan, YALNIZ iki jurnal cədvəli sintetik ölçüyə endirilmiş.
+
+    Batch-backed cədvəllərin (structure/catalog/identity) girişləri toxunulmaz
+    qalır — ``declared_source_rows`` cəmi, ``schema_version`` və registry
+    barmaq izi kanonik dəyərlərində qalır; dəyişən yalnız J1/J2/J3 axınlarının
+    sətir-sayı qapısıdır (axın ``expected_rows``-a TAM bərabərlik tələb edir).
+    """
+
+    scaled = {"journals": _JOURNAL_ROWS, "journals_dates_added_by_teacher": _JOURNAL_DATE_ROWS}
+    entries = tuple(
+        replace(entry, expected_rows=scaled[entry.source_table]) if entry.source_table in scaled else entry
+        for entry in _CANONICAL_PLAN.entries
+    )
+    return LegacyTablePlan(
+        version=_CANONICAL_PLAN.version,
+        fingerprint=_CANONICAL_PLAN.fingerprint,
+        source_snapshot_sha256=_CANONICAL_PLAN.source_snapshot_sha256,
+        expected_row_count=sum(entry.expected_rows for entry in entries),
+        entries=entries,
+    )
+
+
 # Only this many identities are trusted, so exactly this many accounts stage and
 # exactly this many placement decisions are derived.  Keeping it small is what
 # makes a 9 425-row conformance pass finish in minutes rather than hours.
@@ -391,6 +445,11 @@ _INT_COLUMNS = {
     "students": ("group_id", "speciality_id", "azadedildi"),
     # V-22..V-23: ``teacher_type``/``inzibati`` da canlı dump-da ``int``-dir.
     "workers": ("department_id", "teacher_type", "inzibati"),
+    # J0-J3: canlı sxemdə (DESCRIBE ilə təsdiqli) bu sütunlar ``int``-dir və
+    # ``legacy_int`` mətn görəndə fail-closed olur — fixture real tipi saxlayır.
+    "semestr_jurnal": ("is_current",),
+    "journals": ("lesson_id", "semestr", "teacher_id", "fake", "sonra_sil", "active"),
+    "journals_dates_added_by_teacher": ("journal_id", "month", "day"),
 }
 # C-2: ``kredit`` and every ``saat_*`` must arrive as a Python ``float`` — the
 # catalogue transform raises ``legacy_rehearsal_source_value_type_unsupported``
@@ -610,6 +669,99 @@ def _worker_values(legacy_pk):
     }
 
 
+_SEASON_TOKENS = ("autumn", "spring", "summer")
+_SEASON_LABELS = {"autumn": "Payız", "spring": "Yaz", "summer": "Yay"}
+
+
+def _semestr_jurnal_values(legacy_pk):
+    # J-V9(F): 11 normal fəsil (2021..2024) + 1 parse-alınmaz sətir (12) +
+    # ``is_current=1`` bayraqlı 13-cü sətir.  12 fərqli (il, fəsil) cütü →
+    # J0 12 dövr yaradır, 12-ci sətir QUARANTINED ``legacy_journal_period_invalid``.
+    if legacy_pk == 12:
+        return {"name": "Qış semestri (ilsiz)", "type": "winter", "is_current": 0}
+    if legacy_pk == 13:
+        return {"name": "2025/2026 Payız", "type": "autumn", "is_current": 1}
+    year = 2021 + (legacy_pk - 1) // 3
+    season = _SEASON_TOKENS[(legacy_pk - 1) % 3]
+    return {"name": f"{year}/{year + 1} {_SEASON_LABELS[season]}", "type": season, "is_current": 0}
+
+
+def _journal_values(legacy_pk):
+    # PG qeydi (registrar_guard_active_member): rehearsal hesabları QEYRİ-AKTİV
+    # üzvlüklə stage edir, ona görə MIGRATED offering-ə çevrilən jurnallar
+    # QƏSDƏN yalnız həll olunmayan teacher_id (>100, untrusted) daşıyır (V5 →
+    # instructor=NULL) və yalnız naməlum tələbə istinadları daşıyır — trusted
+    # tələbələr (1..4) yalnız V6-süzülmüş/karantin jurnallardadır (J2 orphan
+    # yolu, DB yazısı yoxdur).  Materialise yolları sqlite unit dəstində sübutludur.
+    values = {
+        "uniqid": f"jrn{legacy_pk:07d}",
+        "lesson_id": ((legacy_pk - 1) % 20) + 1,
+        "semestr": ((legacy_pk - 1) % 11) + 1,
+        "groups_id": f'["{legacy_pk}"]',
+        "students_id": f'["{200 + legacy_pk}","{300 + legacy_pk}"]',
+        "teacher_id": 100 + legacy_pk,
+        "fake": 0,
+        "sonra_sil": 0,
+        "active": 1,
+    }
+    overrides = {
+        # J-V6 süzgəci: uniqid ledger-də qalır, target yazısı yoxdur.
+        3: {"fake": 1, "students_id": '["1","2"]'},
+        4: {"sonra_sil": 1, "students_id": '["3"]'},
+        # V6 + J2: boş students_id → jurnal-səviyyə ``legacy_journal_students_invalid``.
+        5: {"fake": 1, "sonra_sil": 1, "students_id": "[]"},
+        # J-V7 çoxqruplu cüt: eyni (fənn, dövr, group=NULL) açarı → 7-ci jurnal
+        # ``legacy_journal_offering_merged`` İNFO-su ilə 6-cının offering-inə qatlanır.
+        6: {"lesson_id": 3, "semestr": 2, "groups_id": '["3","4"]'},
+        7: {"lesson_id": 3, "semestr": 2, "groups_id": '["5","6"]'},
+        # J-V7 karantinləri: parse xətası / boş massiv / tapılmayan qrup.
+        8: {"groups_id": "not-json", "students_id": '["4"]'},
+        9: {"groups_id": "[]"},
+        10: {"groups_id": '["9999"]'},
+        # İstinad karantinləri: fənn (lesson 0), dövr (12 J0-da karantindədir),
+        # 13-cü sətirdə hər ikisi birgə.
+        11: {"lesson_id": 0},
+        12: {"semestr": 12},
+        13: {"lesson_id": 0, "semestr": 0},
+    }
+    values.update(overrides.get(legacy_pk, {}))
+    return values
+
+
+def _journal_date_values(legacy_pk):
+    # 1..48: MIGRATED jurnallar üzərində 3 dalğa (ay 9-11, saat 08-10) — hər
+    # slot jurnal daxilində unikaldır; 6/7 merge cütünün slotları da gün ilə
+    # fərqlənir, yəni 48 sətir 48 fərqli ``Lesson`` sətrinə düşür.
+    if legacy_pk <= 48:
+        wave = (legacy_pk - 1) // 21
+        return {
+            "journal_id": _JOURNAL_MIGRATED_IDS[(legacy_pk - 1) % 21],
+            "month": 9 + wave,
+            "day": ((legacy_pk - 1) % 27) + 1,
+            "time": f"{8 + wave:02d}:00",
+        }
+    overrides = {
+        # V4 analoqu: 1-ci və 2-ci sətirlərin slot dublikatları — ilk id udur.
+        49: {"journal_id": 1, "month": 9, "day": 1, "time": "08:00"},
+        50: {"journal_id": 2, "month": 9, "day": 2, "time": "08:00"},
+        # Orphan-lar: naməlum id, fake (3), dövr-karantinli (12), sonra_sil (4),
+        # qrup-karantinli (8) jurnal — hamısı SKIPPED ``legacy_journal_lesson_orphan``.
+        51: {"journal_id": 999, "month": 9, "day": 3, "time": "08:00"},
+        52: {"journal_id": 3, "month": 9, "day": 4, "time": "08:00"},
+        53: {"journal_id": 12, "month": 9, "day": 5, "time": "08:00"},
+        59: {"journal_id": 4, "month": 9, "day": 6, "time": "08:00"},
+        60: {"journal_id": 8, "month": 9, "day": 7, "time": "08:00"},
+        # Yararsızlar (canlı anomaliyaların güzgüsü): fevral 30, pozuq saat
+        # formaları ("83:0_", "1_:__"), ay 0 və ay 13 → QUARANTINED.
+        54: {"journal_id": 1, "month": 2, "day": 30, "time": "10:00"},
+        55: {"journal_id": 1, "month": 10, "day": 6, "time": "83:0_"},
+        56: {"journal_id": 2, "month": 10, "day": 7, "time": "1_:__"},
+        57: {"journal_id": 6, "month": 0, "day": 5, "time": "09:00"},
+        58: {"journal_id": 7, "month": 13, "day": 5, "time": "09:00"},
+    }
+    return overrides[legacy_pk]
+
+
 _FULL_TABLES = (
     ("departments", DEPARTMENT_STRUCTURE_FIELDS, (), _DEPARTMENT_ROWS, _department_values),
     ("speciality", SPECIALITY_STRUCTURE_FIELDS, (), _SPECIALITY_ROWS, _speciality_values),
@@ -621,6 +773,11 @@ _FULL_TABLES = (
     # ``students`` streams and ``id`` may only be created once (V-18(a)).
     ("students", _STUDENT_SOURCE_COLUMNS, ("password", "show_password"), _FULL_STUDENT_ROWS, _student_values),
     ("workers", WORKER_IDENTITY_FIELDS, ("password", "pin_for_lock"), _FULL_WORKER_ROWS, _worker_values),
+    # FAZA 3B J0-J3: jurnal klasteri (``journals`` J1/J2/J3-də, ``semestr_jurnal``
+    # J0/J3-də eyni audited kontraktla yenidən axıdılır — cədvəl bir dəfə yaranır).
+    ("semestr_jurnal", SEMESTR_JURNAL_FIELDS, (), _SEMESTR_JURNAL_ROWS, _semestr_jurnal_values),
+    ("journals", JOURNAL_FIELDS, (), _JOURNAL_ROWS, _journal_values),
+    ("journals_dates_added_by_teacher", JOURNAL_DATES_FIELDS, (), _JOURNAL_DATE_ROWS, _journal_date_values),
 )
 
 
@@ -705,13 +862,15 @@ def _issue_histogram(document):
 
 
 def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, tmp_path):
-    """SPEC §8/11 and §10 items 14-15 — two full FIVE-phase rehearsals agree
+    """SPEC §8/11 and §10 items 14-15 — two full TEN-phase rehearsals agree
     byte for byte, and a third one that touches accounts deliberately does not.
 
-    ``load_legacy_table_plan`` is deliberately NOT patched here: the disposable
-    source carries the canonical 31/83/766/2 521/126/3 424/7 816/729 shapes, so
-    the run's own ``source_row_count`` is the real 15 496 and every plan
-    row-count gate is exercised for real.
+    ``load_legacy_table_plan`` is patched ONLY with ``_journal_scaled_plan``:
+    the disposable source carries the canonical
+    31/83/766/2 521/126/3 424/7 816/729 shapes for every batch-backed table, so
+    the run's own ``source_row_count`` is still the real 15 496 and every plan
+    row-count gate is exercised for real; the narrowing touches nothing but the
+    two big journal tables, which no phase declares into ``source_rows``.
 
     A second physical PostgreSQL database cannot be reached inside one test
     transaction, so — exactly as
@@ -727,6 +886,7 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
     opened = []
     try:
         monkeypatch.setattr(phase_a_module, "assert_disposable_rehearsal_target", lambda **_kwargs: _GUARD)
+        monkeypatch.setattr(phase_a_module, "load_legacy_table_plan", _journal_scaled_plan)
         first_organization, first_actor = _full_organization("one")
         second_organization, second_actor = _full_organization("two")
         # The activating pass gets its OWN tenant, created up front like the
@@ -758,6 +918,42 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             == _TRUSTED_WORKERS
         )
 
+        # J0-J3 hədəf yazıları DB-də: bu assert-lər də MÜTLƏQ qlobal-vəziyyət
+        # bərpasından (aşağıdakı myedu.* silinməsi) ƏVVƏL yerləşməlidir —
+        # 2026-08-27 insidenti ilə eyni sinif tələ (sonra yoxlansaydı kaskad /
+        # sonrakı keçidlər şəkli dəyişə bilərdi).
+        period_model = django_apps.get_model("organizations", "AcademicPeriod")
+        offering_model = django_apps.get_model("registrar", "CourseOffering")
+        scheme_model = django_apps.get_model("registrar", "AssessmentScheme")
+        enrollment_model = django_apps.get_model("registrar", "Enrollment")
+        lesson_model = django_apps.get_model("registrar", "Lesson")
+        periods = period_model.objects.filter(organization=first_organization)
+        # J0: 12 fərqli (il, fəsil) cütü yaradılır (12-ci sətir karantindədir);
+        # V9: ``is_current`` HEÇ VAXT köçürülmür.
+        assert periods.count() == 12
+        assert periods.filter(is_current=True).exists() is False
+        offerings = offering_model.objects.filter(organization=first_organization)
+        # J1: 21 MIGRATED jurnal → 20 offering (6/7 cütü V7 merge ilə tək
+        # ``group=NULL`` offering-ə qatlanır); hər offering-in draft sxemi var.
+        assert offerings.count() == 20
+        assert offerings.filter(group__isnull=True).count() == 1
+        # V5/PG: staged üzvlüklər qeyri-aktivdir və ``registrar_guard_active_member``
+        # ``grade.input``-lu instructor istinadını rədd edərdi — fixture qəsdən
+        # yalnız həll olunmayan teacher_id daşıyır, instructor hər yerdə NULL.
+        assert offerings.filter(instructor__isnull=False).exists() is False
+        assert scheme_model.objects.filter(organization=first_organization).count() == 20
+        # J2: eyni trigger Enrollment-in ``student_id``-si üçün də aktiv üzvlük
+        # tələb edir, staged hesablar isə qeyri-aktivdir — ona görə sintetik
+        # jurnallar MIGRATED offering-lərdə yalnız naməlum tələbə istinadları
+        # daşıyır (42 × ``legacy_journal_student_unresolved``) və heç bir
+        # Enrollment yazılmır; materialise yolu sqlite unit dəstində sübutludur.
+        assert enrollment_model.objects.filter(organization=first_organization).count() == 0
+        lessons = lesson_model.objects.filter(organization=first_organization)
+        # J3: 60 sətirdən 48 dərs (2 dublikat + 5 orphan + 5 yararsız kənarda);
+        # instructor açılış müəlliminin güzgüsüdür — hamısı NULL.
+        assert lessons.count() == 48
+        assert lessons.filter(instructor__isnull=False).exists() is False
+
         # QLOBAL VƏZİYYƏTİN BƏRPASI (2026-08-26 determinizm insidenti): staging
         # QLOBAL auth_user-ə yazır; iki-tenant-eyni-DB yaxınlaşması yalnız
         # qlobal-yazısız siyasətlərdə keçərlidir.  Real istehsalda D5 hər
@@ -780,11 +976,11 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
 
         # 1) The whole registry ran, in its fixed ascending order.
         assert [phase["phase_key"] for phase in first_document["deterministic"]["phases"]] == list(_FULL_PHASE_KEYS)
-        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == [10, 12, 20, 25, 26, 28]
+        assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == _FULL_PHASE_ORDERS
 
         # 2) The real accounting totals — 880 structure rows + 6 071 catalogue
-        #    rows + 8 545 identity rows; the three batch-less derived phases
-        #    contribute exactly 0 each.
+        #    rows + 8 545 identity rows; the seven batch-less derived phases
+        #    (three identity-derived + four journal) contribute exactly 0 each.
         assert first_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS == 15_496
         observed = {
             phase["phase_key"]: phase["observed_source_rows"] for phase in first_document["deterministic"]["phases"]
@@ -796,6 +992,10 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "student_placement": 0,
             "worker_materialisation": 0,
             "sar_materialisation": 0,
+            "journal_periods": 0,
+            "journal_offerings": 0,
+            "journal_enrollments": 0,
+            "journal_lessons": 0,
         }
 
         # 3) Determinism across two independent targets.
@@ -844,6 +1044,43 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         assert histogram.get(("legacy_worker_department_unresolved", "warning"), 0) == 0
         # V-23: ``inzibati == 1`` yalnız INFO bayrağıdır, rol yüksəltmə yoxdur.
         assert histogram.get(("legacy_worker_administrative_flag", "info"), 0) >= 1
+        # 4c) FAZA 3B (J0-J3): dörd jurnal fazasının dəqiq state şəkli — 13
+        #     semestr sətri, 30 jurnal (21 MIGRATED / 3 V6 / 6 karantin), 57
+        #     qeydiyyat qərarı (56 SKIPPED + 1 karantin) və 60 dərs sətri
+        #     (48 + 7 SKIPPED + 5 karantin).
+        journal_states = {
+            phase["phase_key"]: phase["state_counts"]
+            for phase in first_document["deterministic"]["phases"]
+            if phase["phase_key"].startswith("journal_")
+        }
+        assert journal_states == {
+            "journal_periods": {"period_materialised": 12, "period_unresolved": 1},
+            "journal_offerings": {"offering_materialised": 21, "offering_discarded": 3, "offering_unresolved": 6},
+            "journal_enrollments": {"enrollment_skipped": 56, "enrollment_unresolved": 1},
+            "journal_lessons": {"lesson_materialised": 48, "lesson_skipped": 7, "lesson_unresolved": 5},
+        }
+        # J-V9(F) uyğunluq cədvəli sətir-başına İNFO kimi + tam issue taksonomiyası.
+        assert histogram.get(("legacy_journal_period_created", "info"), 0) == 12
+        assert histogram.get(("legacy_journal_period_matched_existing", "info"), 0) == 0
+        assert histogram.get(("legacy_journal_period_current_flag", "info"), 0) == 1
+        assert histogram.get(("legacy_journal_period_invalid", "warning"), 0) == 1
+        assert histogram.get(("legacy_journal_discarded_source", "info"), 0) == 3
+        assert histogram.get(("legacy_journal_multi_group", "info"), 0) == 2
+        assert histogram.get(("legacy_journal_offering_merged", "info"), 0) == 1
+        # V5: instructor həlli QƏSDƏN heç vaxt alınmır (PG active-member qeydi
+        # yuxarıda) — bütün 21 materialised + 6 karantin jurnalda İNFO yanır.
+        assert histogram.get(("legacy_journal_instructor_unresolved", "info"), 0) == 27
+        assert histogram.get(("legacy_journal_groups_invalid", "warning"), 0) == 2
+        assert histogram.get(("legacy_journal_group_unresolved", "warning"), 0) == 1
+        assert histogram.get(("legacy_journal_subject_unresolved", "warning"), 0) == 2
+        assert histogram.get(("legacy_journal_period_unresolved", "warning"), 0) == 2
+        assert histogram.get(("legacy_journal_students_invalid", "warning"), 0) == 1
+        assert histogram.get(("legacy_journal_student_unresolved", "warning"), 0) == 42
+        assert histogram.get(("legacy_journal_enrollment_orphan", "info"), 0) == 14
+        assert histogram.get(("legacy_journal_lesson_orphan", "info"), 0) == 5
+        assert histogram.get(("legacy_journal_lesson_duplicate", "info"), 0) == 2
+        assert histogram.get(("legacy_journal_lesson_invalid", "warning"), 0) == 5
+
         # ``stage_and_activate`` defaults to False, so nothing was created and
         # the deferral is silent by design — every decision is a deferral.
         assert sar["state_counts"].get("sar_created", 0) == 0

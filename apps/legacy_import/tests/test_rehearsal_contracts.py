@@ -13,8 +13,12 @@ from apps.legacy_import.services import rehearsal_contracts as contracts
 from apps.legacy_import.services.field_contracts import STUDENT_IDENTITY_FIELDS, compile_safe_projection
 from apps.legacy_import.services.ledger import LedgerAction, TargetValidation
 from apps.legacy_import.services.rehearsal_authorizer import (
+    ACADEMIC_PERIOD_MODEL_LABEL,
+    COURSE_OFFERING_MODEL_LABEL,
     CURRICULUM_MODEL_LABEL,
     CURRICULUM_SUBJECT_MODEL_LABEL,
+    ENROLLMENT_MODEL_LABEL,
+    LESSON_MODEL_LABEL,
     ORG_UNIT_MODEL_LABEL,
     PROGRAM_MODEL_LABEL,
     STUDENT_RECORD_MODEL_LABEL,
@@ -170,7 +174,7 @@ def test_phase_registry_fingerprint_is_pinned():
     # update BOTH the constant and this line consciously (SLICE 3A gate 5).
     assert (
         contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
-        == "71f2001f8e2f43cdb64c2a3f7a0d739deb7bef5aafd359171eda2d9d5ca9c0d8"
+        == "59eac1c4b7729daf7ff32379a20c404e50f1673a907b0fadb951d543aa4bc11b"
     )
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
@@ -179,13 +183,20 @@ def test_phase_registry_fingerprint_is_pinned():
         "student_placement",
         "worker_materialisation",
         "sar_materialisation",
+        "journal_periods",
+        "journal_offerings",
+        "journal_enrollments",
+        "journal_lessons",
     ]
     # Structure (supplies Program) before the catalogue that resolves against
-    # it, before identity, before placement, before the worker scope pass, and
-    # before the record that needs all of them — strictly ascending, with 30
-    # left free for the syllabus domain.  Every derived phase accounts for no
-    # source table at all (D-2 / E-2 / V-22).
-    assert [phase.order for phase in registry] == [10, 12, 20, 25, 26, 28]
+    # it, before identity, before placement, before the worker scope pass,
+    # before the record that needs all of them, and before the journal skeleton
+    # (J0 periods, then the J1 offerings that resolve against them, then the
+    # J2 enrollments and J3 lessons that resolve against the offerings) —
+    # strictly ascending, with 30 left free for the syllabus domain.  Every
+    # derived phase accounts for no source table at all (D-2 / E-2 / V-22 /
+    # FAZA 3B).
+    assert [phase.order for phase in registry] == [10, 12, 20, 25, 26, 28, 32, 34, 36, 38]
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
         ("lessons", "curricula", "curricula_plan"),
@@ -193,8 +204,13 @@ def test_phase_registry_fingerprint_is_pinned():
         (),
         (),
         (),
+        (),
+        (),
+        (),
+        (),
     ]
-    # The six-phase run accounts for exactly 880 + 6 071 + 8 545 source rows.
+    # The batch-accounted run still claims exactly 880 + 6 071 + 8 545 source
+    # rows — all four journal phases are derived and contribute 0 each.
     assert sum(phase.declared_source_rows(load_legacy_table_plan()) for phase in registry) == 15_496
 
 
@@ -703,11 +719,15 @@ def test_target_validators_expose_only_allowlisted_models_and_require_tenant_own
     assert tuple(validators) == (
         USER_MODEL_LABEL,
         ORG_UNIT_MODEL_LABEL,
+        ACADEMIC_PERIOD_MODEL_LABEL,
         PROGRAM_MODEL_LABEL,
         SUBJECT_MODEL_LABEL,
         CURRICULUM_MODEL_LABEL,
         CURRICULUM_SUBJECT_MODEL_LABEL,
         STUDENT_RECORD_MODEL_LABEL,
+        COURSE_OFFERING_MODEL_LABEL,
+        ENROLLMENT_MODEL_LABEL,
+        LESSON_MODEL_LABEL,
     )
     assert all(re.fullmatch(MODEL_LABEL_PATTERN, label) for label in validators)
 
