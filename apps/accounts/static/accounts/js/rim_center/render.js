@@ -10,7 +10,8 @@
         var labelKey = {
             active: "status_active",
             blocked: "status_blocked",
-            deleted: "status_deleted"
+            deleted: "status_deleted",
+            archived: "status_archived"
         }[user.status] || "status_active";
         return (
             '<span class="rim-badge rim-badge--' +

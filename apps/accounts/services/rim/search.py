@@ -17,7 +17,10 @@ from __future__ import annotations
 from django.core.paginator import Paginator
 from django.db.models import Q
 
+from ...models import UserProfile
 from .policy import PERM_SEARCH, RimActor, manageable_users_queryset, require_permission
+
+_ARCHIVED_ACCESS_STATE = UserProfile.AccessState.ARCHIVED
 
 #: Sorğu sözünün axtarıldığı sahələr.
 _SEARCH_FIELDS = (
@@ -39,7 +42,12 @@ STATUS_ALL = "all"
 STATUS_ACTIVE = "active"
 STATUS_BLOCKED = "blocked"
 STATUS_DELETED = "deleted"
-ALLOWED_STATUSES = (STATUS_ALL, STATUS_ACTIVE, STATUS_BLOCKED, STATUS_DELETED)
+#: Məzun/xaric arxiv hesabı. ``auth_user.is_active`` QƏSDƏN True-dur (registrar
+#: trigger-ləri üçün), ona görə «aktiv» kimi görünsəydi operator hesabın girə
+#: bildiyini zənn edərdi — ayrıca status olması təhlükəsizlik deyil, DOĞRULUQ
+#: məsələsidir.
+STATUS_ARCHIVED = "archived"
+ALLOWED_STATUSES = (STATUS_ALL, STATUS_ACTIVE, STATUS_BLOCKED, STATUS_DELETED, STATUS_ARCHIVED)
 
 
 def normalize_query(raw_query) -> str:
@@ -65,11 +73,17 @@ def apply_status_filter(queryset, status: str):
     olur, ona görə «bloklanmış» silinmişləri qəsdən çıxarır.
     """
     if status == STATUS_ACTIVE:
-        return queryset.filter(is_active=True).exclude(profile__is_deleted=True)
+        return (
+            queryset.filter(is_active=True)
+            .exclude(profile__is_deleted=True)
+            .exclude(profile__access_state=_ARCHIVED_ACCESS_STATE)
+        )
     if status == STATUS_BLOCKED:
         return queryset.filter(is_active=False).exclude(profile__is_deleted=True)
     if status == STATUS_DELETED:
         return queryset.filter(profile__is_deleted=True)
+    if status == STATUS_ARCHIVED:
+        return queryset.filter(profile__access_state=_ARCHIVED_ACCESS_STATE).exclude(profile__is_deleted=True)
     return queryset
 
 
@@ -113,11 +127,15 @@ def search_users(actor: RimActor, *, query="", status=STATUS_ALL, page=1, page_s
 
 
 def account_status(user) -> str:
-    """Hesabın RİM statusu: ``active`` / ``blocked`` / ``deleted``."""
+    """Hesabın RİM statusu: ``active`` / ``blocked`` / ``deleted`` / ``archived``."""
     profile = getattr(user, "profile", None)
     if profile is not None and getattr(profile, "is_deleted", False):
         return STATUS_DELETED
-    return STATUS_ACTIVE if getattr(user, "is_active", False) else STATUS_BLOCKED
+    if not getattr(user, "is_active", False):
+        return STATUS_BLOCKED
+    if profile is not None and getattr(profile, "access_state", "") == _ARCHIVED_ACCESS_STATE:
+        return STATUS_ARCHIVED
+    return STATUS_ACTIVE
 
 
 __all__ = [
@@ -127,6 +145,7 @@ __all__ = [
     "MAX_QUERY_TOKENS",
     "STATUS_ACTIVE",
     "STATUS_ALL",
+    "STATUS_ARCHIVED",
     "STATUS_BLOCKED",
     "STATUS_DELETED",
     "account_status",

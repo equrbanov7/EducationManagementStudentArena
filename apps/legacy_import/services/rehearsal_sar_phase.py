@@ -59,6 +59,12 @@ from .rehearsal_placement_phase import (
     student_index,
     student_rows,
 )
+from .rehearsal_sar_archive import (
+    ARCHIVE_EVIDENCE_SUBJECT,
+    account_is_archived,
+    materialise_archive,
+    resolve_archive_role,
+)
 from .rehearsal_sar_targets import (
     SAR_ENTITY_TYPE,
     CurriculumDecision,
@@ -291,11 +297,15 @@ class SarMaterialisationPhase:
         indexes = build_indexes(context)
         departed = departed_students(context)
         role = None
+        archive_role = None
         if context.policy.stage_and_activate:
             # Both pre-flights are skipped when the switch is off: a disabled run
             # must never fail on an under-privileged actor or a missing role.
             assert_activation_actor(context)
             role = resolve_student_role(context)
+            # A (arxiv üzvlüyü): məzun/xaric hesablar `alumni` rolu ilə aktiv
+            # üzvlük alır — rol yoxdursa run fail-closed dayanır.
+            archive_role = resolve_archive_role(context)
 
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
         state_counts: Counter[str] = Counter()
@@ -324,6 +334,7 @@ class SarMaterialisationPhase:
                     indexes=indexes,
                     departed=departed,
                     role=role,
+                    archive_role=archive_role,
                     activated=activated,
                     issue_counts=issue_counts,
                 )
@@ -347,7 +358,9 @@ class SarMaterialisationPhase:
             phase_digest=chain.hexdigest(),
         )
 
-    def _decide(self, context, *, legacy_pk, row, user_pk, indexes, departed, role, activated, issue_counts):
+    def _decide(
+        self, context, *, legacy_pk, row, user_pk, indexes, departed, role, archive_role, activated, issue_counts
+    ):
         """The §5.6 ladder, top to bottom; every rung seals its own ledger row."""
 
         legacy_pk_text = str(legacy_pk)
@@ -375,9 +388,17 @@ class SarMaterialisationPhase:
             # M6: the placement phase already issued whatever it had to say.
             return self._seal(context, request, "skipped", (), issue_counts)
         if legacy_pk_text in departed:
-            # V-18(b): a released student stays blocked whatever the policy says
-            # — this is a SOURCE fact, not an activation policy decision.
-            return self._seal(context, request, "departed", ("legacy_sar_departed_student",), issue_counts)
+            # V-18 + A: buraxılmış tələbə AYRI qola düşür — hesab girişə
+            # bağlı qalır, amma ARXİV üzvlüyü qurulur ki, tarixi jurnal datası
+            # `registrar_guard_active_member` qapısından keçə bilsin.
+            return self._decide_archive(
+                context,
+                request=request,
+                indexes=indexes,
+                role=archive_role,
+                activated=activated,
+                issue_counts=issue_counts,
+            )
         if not year_text or not program_pk:
             # M5.  ``program_pk`` is unreachable-empty for a SKIPPED placement
             # (its state already proves the program resolved), so no issue there.
@@ -411,6 +432,49 @@ class SarMaterialisationPhase:
         label = outcome.entity_map.target_model_label if outcome.state == _STATE.MIGRATED else ""
         return outcome.state, outcome.digest, label, 1 if outcome.state == _STATE.MIGRATED else 0
 
+    def _decide_archive(self, context, *, request, indexes, role, activated, issue_counts):
+        """A: məzun/xaric qolu — üzvlük MƏCBURİ, SAR isə şərtlidir.
+
+        Arxiv üzvlüyü ``admission_year``/``program`` tələb ETMİR; ona görə ili
+        həll olunmayan məzun da üzvlüyünü alır (jurnal datası köçür) və sətir
+        ``SKIPPED`` möhürlənir — uydurulmuş akademik il yazılmır.
+        """
+
+        if not context.policy.stage_and_activate:
+            # Açar bağlıdır: heç bir hesaba toxunulmur (V-18(b) davranışı).
+            return self._seal(context, request, "departed", ("legacy_sar_departed_student",), issue_counts)
+        if activated >= context.policy.max_activated_accounts:
+            return self._seal(context, request, "capped", ("legacy_sar_activation_cap_reached",), issue_counts)
+
+        rule_codes: tuple[str, ...] = ()
+        decision = _NO_CURRICULUM
+        write_record = bool(request.admission_year and request.program_pk)
+        if not request.admission_year:
+            rule_codes = ("legacy_sar_admission_year_missing",)
+        if write_record:
+            decision = resolve_curriculum(
+                context,
+                program_pk=request.program_pk,
+                group_curricula_pk=indexes.group_units.get(request.group_slug, _NO_GROUP).curricula_legacy_pk,
+                curriculum_index=indexes.curricula,
+            )
+            rule_codes = (*rule_codes, *decision.rule_codes)
+            if decision.blocked:
+                write_record = False
+        request = replace_request(request, decision=decision, context=context, subject=ARCHIVE_EVIDENCE_SUBJECT)
+        outcome = materialise_archive(context, request=request, role=role, write_record=write_record)
+        write_issues(
+            context,
+            legacy_pk=str(request.legacy_pk),
+            digest=outcome.digest,
+            entity_map=outcome.entity_map,
+            rule_codes=(*rule_codes, *outcome.rule_codes),
+            issue_counts=issue_counts,
+        )
+        label = outcome.entity_map.target_model_label if outcome.state == _STATE.MIGRATED else ""
+        # Arxivləşdirmə də HESABA toxunur → aktivasiya büdcəsindən sayılır (V-25).
+        return outcome.state, outcome.digest, label, 0 if outcome.state == _STATE.QUARANTINED else 1
+
     def _seal(self, context, request, activation_state, rule_codes, issue_counts):
         outcome = seal_deferred(context, request=request, activation_state=activation_state, rule_codes=rule_codes)
         write_issues(
@@ -424,16 +488,26 @@ class SarMaterialisationPhase:
         return outcome.state, outcome.digest, "", 0
 
 
-def replace_request(request: RecordRequest, *, decision, context) -> RecordRequest:
-    """Complete the request once the ladder decided the row really activates."""
+def replace_request(request: RecordRequest, *, decision, context, subject: str = "student") -> RecordRequest:
+    """Complete the request once the ladder decided the row really activates.
 
+    ``subject=ARCHIVE_EVIDENCE_SUBJECT`` arxiv qoludur: «keçid lazımdırmı?»
+    sualı «hesab artıq AKTİVDİRMİ?» yerinə «hesab artıq ARXİVLƏNİBMİ?» kimi
+    oxunur, evidence rəqəmi də ayrı subyektlə üretilir.
+    """
+
+    if subject == ARCHIVE_EVIDENCE_SUBJECT:
+        needs_transition = not account_is_archived(context, request.user_pk)
+    else:
+        needs_transition = not account_is_active(context, request.user_pk)
     return replace(
         request,
         decision=decision,
-        needs_activation=not account_is_active(context, request.user_pk),
+        needs_activation=needs_transition,
         evidence_digest=activation_evidence_digest(
             transform_version=context.policy.transform_version(),
             snapshot_sha256=context.plan.source_snapshot_sha256,
             legacy_pk=request.legacy_pk,
+            subject=subject,
         ),
     )

@@ -5,7 +5,7 @@ Authentication backends for accounts app.
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
-from .identity import canonical_identity, canonical_identity_queryset, user_access_is_staged
+from .identity import canonical_identity, canonical_identity_queryset, user_access_is_login_blocked
 
 
 class EmailOrUsernameBackend(ModelBackend):
@@ -56,7 +56,8 @@ class EmailOrUsernameBackend(ModelBackend):
         return user
 
     def user_can_authenticate(self, user):
-        return super().user_can_authenticate(user) and not user_access_is_staged(user)
+        # staged (import) VƏ archived (məzun/xaric) — hər ikisi girişi bağlayır.
+        return super().user_can_authenticate(user) and not user_access_is_login_blocked(user)
 
     def get_user(self, user_id):
         user = super().get_user(user_id)

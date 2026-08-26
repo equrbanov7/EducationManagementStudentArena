@@ -80,6 +80,9 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
         <button type="button" class="rim-status-tab" role="tab" data-rim-status="blocked">
           {% trans "Bloklanmış" context "profile.rim" %}
         </button>
+        <button type="button" class="rim-status-tab" role="tab" data-rim-status="archived">
+          {% trans "Arxiv" context "profile.rim" %}
+        </button>
         <button type="button" class="rim-status-tab" role="tab" data-rim-status="deleted">
           {% trans "Silinmiş" context "profile.rim" %}
         </button>
@@ -219,6 +222,7 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
       "status_active": "{% trans 'Aktiv'|escapejs context 'profile.rim' %}",
       "status_blocked": "{% trans 'Bloklanıb'|escapejs context 'profile.rim' %}",
       "status_deleted": "{% trans 'Silinib'|escapejs context 'profile.rim' %}",
+      "status_archived": "{% trans 'Arxiv (məzun/xaric)'|escapejs context 'profile.rim' %}",
       "open": "{% trans 'Aç'|escapejs context 'profile.rim' %}",
       "set_password": "{% trans 'Parol təyin et'|escapejs context 'profile.rim' %}",
       "block": "{% trans 'Blokla'|escapejs context 'profile.rim' %}",

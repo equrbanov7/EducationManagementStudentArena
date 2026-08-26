@@ -60,7 +60,7 @@ def canonical_identity_queryset(queryset, field_name: str, value: object, *, ali
     return queryset.annotate(**{alias: expression}).filter(**{alias: key})
 
 
-def user_access_is_staged(user) -> bool:
+def _access_state_in(user, states) -> bool:
     """Read the current DB state; never trust a stale related-object cache."""
 
     user_id = getattr(user, "pk", None)
@@ -69,14 +69,44 @@ def user_access_is_staged(user) -> bool:
 
     from .models import UserProfile
 
-    return UserProfile.objects.filter(
-        user_id=user_id,
-        access_state=UserProfile.AccessState.STAGED,
-    ).exists()
+    return UserProfile.objects.filter(user_id=user_id, access_state__in=list(states)).exists()
+
+
+def login_blocked_access_states() -> tuple[str, ...]:
+    """Girişi BAĞLAYAN ``access_state`` dəyərləri (tək mənbə).
+
+    ``STAGED`` — import hesabı hələ təsdiqlənməyib (``auth_user.is_active`` da
+    False-dur). ``ARCHIVED`` — məzun/xaric hesab: ``auth_user.is_active`` True
+    olmalıdır ki, ``registrar`` trigger-ləri tarixi jurnal sətirlərini qəbul
+    etsin, ona görə girişin YEGANƏ qapısı məhz bu vəziyyətdir.
+    """
+
+    from .models import UserProfile
+
+    return (UserProfile.AccessState.STAGED, UserProfile.AccessState.ARCHIVED)
+
+
+def user_access_is_staged(user) -> bool:
+    """YALNIZ ``staged`` — import mərhələsinə xas yoxlamalar üçün."""
+
+    from .models import UserProfile
+
+    return _access_state_in(user, (UserProfile.AccessState.STAGED,))
+
+
+def user_access_is_login_blocked(user) -> bool:
+    """Girişin bağlı olduğu HƏR vəziyyət (``staged`` ∪ ``archived``).
+
+    Bütün autentifikasiya səthləri (backend, login forması, middleware, parol
+    sıfırlama) məhz bunu çağırır — yeni bir bağlı vəziyyət əlavə etmək üçün
+    ``login_blocked_access_states``-i genişləndirmək kifayətdir.
+    """
+
+    return _access_state_in(user, login_blocked_access_states())
 
 
 def assert_account_access_allowed(user) -> None:
-    if user_access_is_staged(user):
+    if user_access_is_login_blocked(user):
         raise StagedAccountAccessError()
 
 
@@ -109,6 +139,8 @@ __all__ = [
     "assert_account_access_allowed",
     "canonical_identity",
     "canonical_identity_queryset",
+    "login_blocked_access_states",
     "staged_user_for_email",
+    "user_access_is_login_blocked",
     "user_access_is_staged",
 ]

@@ -16,7 +16,7 @@ from apps.audit.public import log_action
 from core.constants import AuditAction
 from core.permissions import has_permission, is_superadmin_user
 
-from ..identity import canonical_identity, canonical_identity_queryset, user_access_is_staged
+from ..identity import canonical_identity, canonical_identity_queryset, user_access_is_login_blocked
 from ..models import AccountActivationEvidence, UserProfile
 
 User = get_user_model()
@@ -59,7 +59,7 @@ def _real_actor(actor, request):
         raise PermissionDenied("identity_actor_mismatch")
     if actor is None or not getattr(actor, "is_authenticated", False) or not getattr(actor, "is_active", False):
         raise PermissionDenied("identity_actor_required")
-    if user_access_is_staged(actor):
+    if user_access_is_login_blocked(actor):
         raise PermissionDenied("identity_staged_actor_denied")
     return actor
 

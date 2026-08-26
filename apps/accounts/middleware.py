@@ -45,9 +45,9 @@ class SessionTimeoutMiddleware:
             logout(request)
             return self.get_response(request)
         if request.user.is_authenticated:
-            from .identity import user_access_is_staged
+            from .identity import user_access_is_login_blocked
 
-            if user_access_is_staged(request.user):
+            if user_access_is_login_blocked(request.user):
                 logout(request)
                 return self.get_response(request)
             now = timezone.now()

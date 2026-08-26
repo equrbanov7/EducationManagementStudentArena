@@ -205,14 +205,14 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
 
     class AccessState(models.TextChoices):
-        """Hesabın tətbiq səthlərinə buraxılma vəziyyəti.
-
-        ``STAGED`` yalnız idarə olunan import üçün kilidli keçid vəziyyətidir;
-        adi qeydiyyatların mövcud davranışı ``ACTIVE`` olaraq qalır.
-        """
+        """``STAGED`` import keçididir; ``ARCHIVED`` (məzun/xaric) hesabda
+        ``is_active`` QƏSDƏN True qalır ki, registrar trigger-ləri tarixi jurnal
+        sətirlərini qəbul etsin — giriş yalnız bu vəziyyətlə bağlanır
+        (bax ``services/identity_archive.py``)."""
 
         ACTIVE = "active", "Aktiv giriş"
         STAGED = "staged", "Mərhələlənmiş (giriş bağlıdır)"
+        ARCHIVED = "archived", "Arxiv — məzun/xaric (giriş bağlıdır)"
 
     access_state = models.CharField(
         max_length=16,
@@ -220,7 +220,7 @@ class UserProfile(models.Model):
         default=AccessState.ACTIVE,
         db_index=True,
         verbose_name="Giriş vəziyyəti",
-        help_text="Legacy import hesabları ayrıca təsdiqlənənədək staged qalır.",
+        help_text="Legacy import staged qalır; məzun/xaric archived olur (giriş bağlı, data qalır).",
     )
 
     # Organization linkage for multi-tenant support

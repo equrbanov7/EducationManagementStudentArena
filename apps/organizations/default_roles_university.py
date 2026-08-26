@@ -333,6 +333,20 @@ UNIVERSITY_ROLES = [
         "description": "Student with view and self-service permissions",
     },
     {
+        # ARXİV ROLU — məzun/xaric (legacy ``students.azadedildi=1``) hesablar.
+        # İcazə dəsti QƏSDƏN BOŞDUR: rol heç bir hüquq VERMİR, yalnız
+        # ``registrar_guard_active_member`` trigger-inin tələb etdiyi AKTİV
+        # üzvlüyü təmin edir ki, tarixi jurnal/qiymət sətirləri köçə bilsin.
+        # Giriş isə ``UserProfile.access_state='archived'`` ilə bağlanır
+        # (bax apps/accounts/services/identity_archive.py).
+        "name": "alumni",
+        "display_name": "Məzun / arxiv",
+        "level": 5,
+        "scope_type": RoleScopeType.UNIT,
+        "permissions": [],
+        "description": "Archived alumni/released student — no access, historical records only",
+    },
+    {
         "name": "member",
         "display_name": "Member",
         "level": 20,

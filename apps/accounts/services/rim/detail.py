@@ -73,6 +73,7 @@ def serialize_row(user, actor: RimActor):
             "active": "Aktiv",
             "blocked": "Bloklanıb",
             "deleted": "Silinib",
+            "archived": "Arxiv (məzun/xaric)",
         }.get(status, "Naməlum"),
         "organization": getattr(getattr(profile, "organization", None), "name", "") or "",
         "department": getattr(profile, "department", "") or "",
