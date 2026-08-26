@@ -650,6 +650,38 @@ def test_names_are_written_only_into_blank_target_fields(seeded):
 
 
 @pytest.mark.django_db
+def test_the_patronymic_is_written_only_into_a_blank_profile_field(seeded):
+    """2026-08-28 finding (B-1): not one of 8,441 profiles carried a patronymic.
+
+    RİM resolves an account by name + surname + PATRONYMIC, so a blank
+    ``UserProfile.patronymic`` breaks "find by patronymic" on the real data.
+    Same §4.5 contract as the names: fill a blank field, never overwrite.
+    """
+
+    organization, actor, run, users = seeded
+    UserProfile.objects.filter(user=users[2]).update(patronymic="Mövcud")
+    rows = [
+        _student_row(
+            1,
+            group_id=20,
+            entry_year="2019",
+            first_name="Elvin",
+            last_name="Qurbanov",
+            father_name="C&uuml;c&uuml;",
+        ),
+        _student_row(2, group_id=21, entry_year="2019", father_name="Şahin"),
+        _student_row(3, group_id=20, entry_year="2019"),
+    ]
+
+    StudentPlacementPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    # The dump stores HTML entities raw; ``clean_text`` unescapes on the way out.
+    assert UserProfile.objects.get(user=users[1]).patronymic == "Cücü"
+    assert UserProfile.objects.get(user=users[2]).patronymic == "Mövcud"
+    assert UserProfile.objects.get(user=users[3]).patronymic == ""
+
+
+@pytest.mark.django_db
 def test_the_live_phase_digest_equals_the_ledger_rebuild(seeded):
     """SA-2: ``--emit-report-only`` must reproduce a batch-less phase exactly."""
 
@@ -773,19 +805,31 @@ def test_record_derivation_hash_follows_the_documented_recipe():
         "student",
         "written",
         "preserved",
+        # The patronymic is a SEPARATE decision (own target column, own source field).
+        "written",
     ):
         digest.update(encoded_part(part))
 
     assert (
         record_derivation_hash(
-            legacy_pk=1, row_hash=row_hash, placement=placement, fin_state="written", name_state="preserved"
+            legacy_pk=1,
+            row_hash=row_hash,
+            placement=placement,
+            fin_state="written",
+            name_state="preserved",
+            patronymic_state="written",
         )
         == digest.hexdigest()
     )
     # No target primary key and no run identity may ever enter it.
     assert (
         record_derivation_hash(
-            legacy_pk=1, row_hash=row_hash, placement=placement, fin_state="blank", name_state="preserved"
+            legacy_pk=1,
+            row_hash=row_hash,
+            placement=placement,
+            fin_state="blank",
+            name_state="preserved",
+            patronymic_state="written",
         )
         != digest.hexdigest()
     )

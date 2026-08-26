@@ -160,6 +160,10 @@
                     // Parol YALNIZ BURADA görünür — heç yerdə saxlanılmır.
                     ns.modals.showPassword(payload.password);
                 }
+                if (action === "restore" && payload.restore_notices) {
+                    // Bərpa natamam ola bilər — «sakit uğur» qadağandır.
+                    ns.modals.showNotices(payload.restore_notices);
+                }
                 actions.search();
             })
             .catch(function (err) {

@@ -173,6 +173,34 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
       </div>
     </div>
 
+    {% comment %}
+      Bərpa qeydləri: əməliyyat «uğurlu» olsa da əl müdaxiləsi tələb edən
+      hissələr ola bilər (məs. qrup üzvlüyü). Operator bunu görməlidir.
+    {% endcomment %}
+    <div class="rim-modal" data-rim-notice-modal hidden>
+      <div class="rim-modal__backdrop" data-rim-notice-close></div>
+      <div class="rim-modal__box rim-modal__box--sm" role="dialog" aria-modal="true"
+           aria-labelledby="rim-notice-title">
+        <div class="rim-modal__head">
+          <h3 id="rim-notice-title">{% trans "Əl ilə yoxlanmalı" context "profile.rim" %}</h3>
+          <button type="button" class="rim-modal__x" data-rim-notice-close
+                  aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+        </div>
+        <div class="rim-modal__body">
+          <p class="rim-warning">
+            <i class="fas fa-triangle-exclamation"></i>
+            {% trans "Əməliyyat tamamlandı, lakin aşağıdakılar avtomatik bərpa olunmur." context "profile.rim" %}
+          </p>
+          <ul class="rim-note" data-rim-notice-list></ul>
+        </div>
+        <div class="rim-modal__foot">
+          <button type="button" class="rim-btn rim-btn--primary" data-rim-notice-close>
+            {% trans "Bağla" context "profile.rim" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script type="application/json" data-rim-i18n>{
       "loading": "{% trans 'Yüklənir…'|escapejs context 'profile.rim' %}",
       "empty": "{% trans 'Nəticə tapılmadı.'|escapejs context 'profile.rim' %}",

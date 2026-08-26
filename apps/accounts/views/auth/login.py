@@ -40,6 +40,40 @@ STUDENT_PORTAL_ROLE_NAMES = {"student", "lead_student"}
 STAFF_PORTAL_MIN_LEVEL = 40
 
 
+def _membership_role_pairs(memberships):
+    """``(normalizə olunmuş rol adı, level)`` cütləri — rolsuz sətirlər atılır."""
+    pairs = []
+    for membership in memberships:
+        role = getattr(membership, "role", None)
+        if role is None:
+            continue
+        name = ProfileRole.normalize_membership_role_name(role.name)
+        pairs.append((name, getattr(role, "level", 0) or 0))
+    return pairs
+
+
+def _portal_role_pairs(user):
+    """Portal təsnifatı üçün rol cütləri: əvvəlcə AKTİV, sonra bütün üzvlüklər.
+
+    Deaktiv üzvlük GİRİŞ HÜQUQU vermir (o, ayrıca qapılarla yoxlanılır) — burada
+    yalnız hesabın KİMLİYİ soruşulur: «bu, tələbədir, yoxsa əməkdaş?». Aktiv
+    üzvlük yoxdursa deaktiv iz oxunur, çünki əks halda soft-delete/bərpa dövrü
+    keçmiş TƏLƏBƏ rolsuz görünür və köhnə fallback onu ƏMƏKDAŞ portalına
+    buraxırdı (QA Y-1, «Əlavə 2»).
+    """
+    from apps.organizations.models import Membership
+    from apps.organizations.services import get_active_memberships
+    from core.rls import bypass_rls
+
+    with bypass_rls():
+        pairs = _membership_role_pairs(get_active_memberships(user))
+        if pairs:
+            return pairs
+        return _membership_role_pairs(
+            Membership.objects.filter(user=user).select_related("role").order_by("-is_primary", "-role__level", "id")
+        )
+
+
 def classify_user_portal(user):
     """Autentifikasiya olunmuş istifadəçini "student"/"staff" portalına ayırır.
 
@@ -56,18 +90,8 @@ def classify_user_portal(user):
     if getattr(profile, "role", None) == ProfileRole.SUPERADMIN:
         return LOGIN_AUDIENCE_STAFF
 
-    role_pairs = []
     try:
-        from apps.organizations.services import get_active_memberships
-        from core.rls import bypass_rls
-
-        with bypass_rls():
-            for membership in get_active_memberships(user):
-                role = getattr(membership, "role", None)
-                if role is None:
-                    continue
-                name = ProfileRole.normalize_membership_role_name(role.name)
-                role_pairs.append((name, getattr(role, "level", 0) or 0))
+        role_pairs = _portal_role_pairs(user)
     except Exception:  # noqa: BLE001 — siniflənmə heç vaxt login-i sındırmamalıdır.
         role_pairs = []
 

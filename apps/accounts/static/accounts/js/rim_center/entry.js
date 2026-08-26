@@ -57,6 +57,11 @@
             ns.modals.clearPassword();
         });
 
+        D.on("click", "[data-rim-notice-close]", function (event) {
+            event.preventDefault();
+            ns.modals.close("[data-rim-notice-modal]");
+        });
+
         D.on("click", "[data-rim-password-copy]", function (event, btn) {
             event.preventDefault();
             ns.modals.copyPassword(btn);

@@ -6,6 +6,7 @@ of related data (memberships, course enrollments, notifications, etc.).
 """
 
 import logging
+from dataclasses import dataclass
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -81,6 +82,75 @@ def _resolve_actor(actor, request):
     return None
 
 
+@dataclass(frozen=True)
+class AccountRestoreResult:
+    """Bərpanın AÇIQ nəticəsi — «sakit uğur» qadağandır.
+
+    QA Y-1: UI «Hesab bərpa edildi» deyirdi, hesab isə rolsuz/təşkilatsız
+    qalırdı. Operator artıq nəyin geri qayıtdığını və nəyin əl müdaxiləsi
+    istədiyini görür (``notices`` birbaşa RİM cavabına əlavə olunur).
+    """
+
+    memberships_restored: int = 0
+    organization_restored: bool = False
+    notices: tuple[str, ...] = ()
+
+
+# Bərpa üçün AYRICA snapshot sahəsi saxlanmır: ``soft_delete_account``
+# üzvlükləri məhz ``profile.deleted_at`` ilə EYNİ ``now`` damğası ilə deaktiv
+# edir, ona görə ``(is_active=False, updated_at == deleted_at)`` cütü silinmənin
+# öz izidir. Silinmədən ƏVVƏL də deaktiv olan üzvlük başqa damğa daşıyır və
+# bərpada TOXUNULMUR — yəni iz həm dəqiq, həm də miqrasiyasızdır (mövcud
+# soft-delete edilmiş hesablar üçün geriyə-uyğun işləyir).
+def _restore_deactivated_memberships(user, deleted_at, now):
+    """Silinmə anında deaktiv edilmiş üzvlükləri geri qaytarır; sayı qaytarır."""
+    from apps.organizations.models import Membership
+
+    if deleted_at is None:
+        return 0
+    trace = Membership.objects.filter(user=user, is_active=False, updated_at=deleted_at)
+    membership_ids = list(trace.values_list("pk", flat=True))
+    if not membership_ids:
+        return 0
+    return Membership.objects.filter(pk__in=membership_ids).update(is_active=True, updated_at=now)
+
+
+def _restore_profile_organization(profile, user):
+    """``profile.organization``-u bərpa olunmuş AKTİV üzvlükdən geri qaytarır."""
+    from apps.organizations.models import Membership
+
+    if profile is None or profile.organization_id:
+        return False
+    membership = (
+        Membership.objects.filter(
+            user=user,
+            is_active=True,
+            organization__is_active=True,
+            organization__status="active",
+        )
+        .select_related("organization")
+        .order_by("-is_primary", "-role__level", "pk")
+        .first()
+    )
+    if membership is None:
+        return False
+    profile.organization = membership.organization
+    return True
+
+
+def _restore_notices(profile, *, memberships_restored, organization_restored):
+    """Operatora göstəriləcək bildirişlər — bərpa nə qədər natamamdırsa, o qədər açıq."""
+    notices = []
+    if memberships_restored == 0:
+        notices.append("Deaktiv edilmiş üzvlük izi tapılmadı — rol/təşkilat əl ilə təyin edilməlidir.")
+    elif profile is not None and not profile.organization_id and not organization_restored:
+        notices.append("Təşkilat bağlantısı bərpa oluna bilmədi — profildə təşkilat əl ilə seçilməlidir.")
+    # Qrup üzvlüyü silinmədə m2m sətri kimi POZULUR; qrup sonradan silinmiş və ya
+    # dəyişmiş ola bilər, ona görə avtomatik bərpa QƏSDƏN edilmir.
+    notices.append("Tələbə qrupu üzvlükləri (varsa) avtomatik bərpa olunmur — əl ilə yoxlayın.")
+    return tuple(notices)
+
+
 def soft_delete_account(user, *, request=None, password=None, actor=None, reason=""):
     """
     Soft-delete a user account with cascade cleanup.
@@ -120,7 +190,10 @@ def soft_delete_account(user, *, request=None, password=None, actor=None, reason
         # 1. Deactivate all memberships
         from apps.organizations.models import Membership
 
-        Membership.objects.filter(user=user, is_active=True).update(
+        # ``updated_at=now`` TƏSADÜFİ deyil: eyni damğa aşağıda
+        # ``profile.deleted_at``-a da yazılır və ``restore_account`` məhz bu cütlə
+        # hansı üzvlüyün silinmə səbəbindən deaktiv olduğunu tapır.
+        deactivated_memberships = Membership.objects.filter(user=user, is_active=True).update(
             is_active=False,
             updated_at=now,
         )
@@ -128,10 +201,13 @@ def soft_delete_account(user, *, request=None, password=None, actor=None, reason
         # 2. Remove from student groups
         from apps.exams.models import StudentGroup
 
+        removed_group_links = 0
         for group in StudentGroup.objects.filter(students=user):
             group.students.remove(user)
+            removed_group_links += 1
         for group in StudentGroup.objects.filter(teachers=user):
             group.teachers.remove(user)
+            removed_group_links += 1
 
         # 3. Soft-delete notifications
         from apps.notifications.models import InAppNotification
@@ -190,6 +266,9 @@ def soft_delete_account(user, *, request=None, password=None, actor=None, reason
                 "target_user_id": str(user.pk),
                 "operation": "soft_delete",
                 "reason_text": str(reason or "")[:300],
+                # Bərpa auditi üçün: nə qədər bağlantı qopardıldı.
+                "deactivated_membership_count": str(deactivated_memberships),
+                "removed_group_link_count": str(removed_group_links),
             },
             request=request,
             resource_type="User",
@@ -223,14 +302,24 @@ def _delete_owned_organizations(user):
 
 
 def restore_account(user, *, request=None, actor=None, reason=""):
-    """
-    Restore a soft-deleted user account.
+    """Yumşaq silinmiş hesabı bərpa edir və NƏYİN bərpa olunduğunu qaytarır.
+
+    Silinmə TƏK bayraq dəyişikliyi deyil (üzvlüklər deaktiv olur,
+    ``profile.organization`` NULL-lanır, qrup üzvlükləri silinir), ona görə
+    bərpa da simmetrik olmalıdır — əks halda hesab «aktiv, amma rolsuz» qalır
+    (QA Y-1: sakit sınma). Qrup üzvlüyü İSTİSNADIR: qrup artıq silinmiş və ya
+    dəyişmiş ola bilər, ona görə avtomatik bərpa olunmur — bunun əvəzinə
+    ``notices`` operatoru açıq xəbərdar edir.
 
     Args:
         user: The User instance to restore
         request: Optional HTTP request (for audit logging)
         actor: The administrator performing the restore (audit attribution)
         reason: Free-text justification recorded in the audit log
+
+    Returns:
+        ``AccountRestoreResult`` — bərpa olunan üzvlük sayı, təşkilat bağlantısı
+        və operatora göstəriləcək bildirişlər.
     """
     from ..identity import user_access_is_staged
 
@@ -241,13 +330,20 @@ def restore_account(user, *, request=None, actor=None, reason=""):
     resolved_actor = _resolve_actor(actor, request)
 
     with transaction.atomic():
+        now = timezone.now()
         profile = getattr(user, "profile", None)
+        # İz bayraqlar təmizlənməmişdən ƏVVƏL oxunmalıdır.
+        deleted_at = getattr(profile, "deleted_at", None)
 
         # Reactivate user
         user.is_active = True
         user.save(update_fields=["is_active"])
 
-        # Clear soft-delete flags on profile
+        # 1. Silinmə anında deaktiv edilmiş üzvlükləri geri qaytar
+        memberships_restored = _restore_deactivated_memberships(user, deleted_at, now)
+
+        # Clear soft-delete flags on profile (+ təşkilat bağlantısı)
+        organization_restored = False
         if profile:
             profile.is_deleted = False
             profile.deleted_at = None
@@ -257,6 +353,7 @@ def restore_account(user, *, request=None, actor=None, reason=""):
             profile.blocked_at = None
             profile.blocked_by = None
             profile.block_reason = ""
+            organization_restored = _restore_profile_organization(profile, user)
             profile.save(
                 update_fields=[
                     "is_deleted",
@@ -266,9 +363,16 @@ def restore_account(user, *, request=None, actor=None, reason=""):
                     "blocked_at",
                     "blocked_by",
                     "block_reason",
+                    "organization",
                     "updated_at",
                 ]
             )
+
+        notices = _restore_notices(
+            profile,
+            memberships_restored=memberships_restored,
+            organization_restored=organization_restored,
+        )
 
         # Log the action
         log_action(
@@ -281,6 +385,8 @@ def restore_account(user, *, request=None, actor=None, reason=""):
                 "target_user_id": str(user.pk),
                 "operation": "restore",
                 "reason_text": str(reason or "")[:300],
+                "restored_membership_count": str(memberships_restored),
+                "organization_restored": str(bool(organization_restored)),
             },
             request=request,
             resource_type="User",
@@ -289,10 +395,18 @@ def restore_account(user, *, request=None, actor=None, reason=""):
         )
 
         logger.info(
-            "Account restored for user %s (pk=%s)",
+            "Account restored for user %s (pk=%s, memberships=%s, organization=%s)",
             user.username,
             user.pk,
+            memberships_restored,
+            organization_restored,
         )
+
+    return AccountRestoreResult(
+        memberships_restored=memberships_restored,
+        organization_restored=organization_restored,
+        notices=notices,
+    )
 
 
 def block_account(user, *, request=None, actor=None, reason=""):

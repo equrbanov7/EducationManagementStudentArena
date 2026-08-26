@@ -488,6 +488,84 @@ class RimSoftDeleteTests(RimCenterTestBase):
         self.assertNotIn("permanent_delete", ALLOWED_ACTIONS)
 
 
+class RimRestoreCompletenessTests(RimCenterTestBase):
+    """QA Y-1: bərpa silinmənin BÜTÜN geri-qaytarıla bilən təsirlərini açır.
+
+    Silinmə üzvlükləri deaktiv edir və `profile.organization`-u NULL-layır;
+    bərpa yalnız bayraqları təmizləsə, hesab «aktiv, amma rolsuz» qalır və UI
+    yalançı uğur göstərir (sakit sınma).
+    """
+
+    def test_restore_reactivates_memberships_and_organization(self):
+        self.login_operator()
+        self.act("soft_delete", self.teacher, reason="səhv qeyd")
+
+        membership = Membership.objects.get(user=self.teacher, organization=self.org)
+        self.assertFalse(membership.is_active)
+        self.assertIsNone(UserProfile.objects.get(user=self.teacher).organization_id)
+
+        response = self.act("restore", self.teacher, reason="səhv düzəldildi")
+        self.assertEqual(response.status_code, 200)
+
+        membership.refresh_from_db()
+        self.assertTrue(membership.is_active)
+        self.assertEqual(UserProfile.objects.get(user=self.teacher).organization_id, self.org.pk)
+
+    def test_restore_leaves_previously_inactive_membership_alone(self):
+        """Silinmədən ƏVVƏL deaktiv olan üzvlük bərpada «dirilməməlidir»."""
+        stale = Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.staff_role,
+            is_active=False,
+            is_primary=False,
+        )
+
+        self.login_operator()
+        self.act("soft_delete", self.teacher, reason="səhv qeyd")
+        self.act("restore", self.teacher, reason="səhv düzəldildi")
+
+        stale.refresh_from_db()
+        self.assertFalse(stale.is_active)
+        self.assertTrue(Membership.objects.get(user=self.teacher, role=self.teacher_role).is_active)
+
+    def test_restore_response_reports_manual_followup(self):
+        """Cavab «hər şey qaydasındadır» deməməlidir: qrup üzvlüyü əl işidir."""
+        self.login_operator()
+        self.act("soft_delete", self.teacher, reason="səhv qeyd")
+        payload = self.act("restore", self.teacher, reason="səhv düzəldildi").json()
+
+        self.assertTrue(payload["ok"])
+        notices = payload["restore_notices"]
+        self.assertTrue(any("qrup" in notice.lower() for notice in notices))
+        self.assertIn(notices[-1], payload["message"])
+
+    def test_restore_is_audited_with_what_was_recovered(self):
+        self.login_operator()
+        self.act("soft_delete", self.teacher, reason="səhv qeyd")
+        self.act("restore", self.teacher, reason="səhv düzəldildi")
+
+        entry = (
+            AuditLog.objects.filter(resource_id=str(self.teacher.pk), action="update").order_by("-created_at").first()
+        )
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.changes.get("operation"), "restore")
+        self.assertEqual(entry.changes.get("restored_membership_count"), "1")
+        self.assertEqual(entry.changes.get("organization_restored"), "True")
+
+    def test_restored_student_stays_on_the_student_portal(self):
+        """Rolsuz qalan hesab ƏMƏKDAŞ portalına düşməməlidir (QA Y-1 «Əlavə 2»)."""
+        from apps.accounts.views.auth.login import LOGIN_AUDIENCE_STUDENT, classify_user_portal
+
+        student = make_user("myedu.student.501", first="Aysel", last="Quliyeva", organization=self.org)
+        add_member(student, self.org, self.student_role)
+        self.assertEqual(classify_user_portal(student), LOGIN_AUDIENCE_STUDENT)
+
+        # Bərpa naqis qalsa belə (üzvlük deaktiv) portal təsnifatı dəyişməməlidir.
+        Membership.objects.filter(user=student).update(is_active=False)
+        self.assertEqual(classify_user_portal(student), LOGIN_AUDIENCE_STUDENT)
+
+
 class RimProfileEditTests(RimCenterTestBase):
     def test_edit_updates_fields_and_audits_old_and_new(self):
         self.login_operator()

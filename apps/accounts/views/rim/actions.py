@@ -124,8 +124,11 @@ def rim_action(request):
             soft_delete_user(actor, target, reason=reason, request=request)
             message = "Hesab silindi (tarixi qeydlər saxlanıldı)."
         elif action == "restore":
-            restore_user(actor, target, reason=reason, request=request)
-            message = "Hesab bərpa edildi."
+            result = restore_user(actor, target, reason=reason, request=request)
+            # Bərpa natamam ola bilər (qrup üzvlüyü, izsiz üzvlük) — operator
+            # «uğur» mesajı ilə aldadılmamalıdır (QA Y-1).
+            extra["restore_notices"] = list(result.notices)
+            message = " ".join(("Hesab bərpa edildi.", *result.notices))
         else:  # action == "edit"
             fields = {name: payload[name] for name in EDITABLE_FIELDS if name in payload}
             changes = update_user_fields(actor, target, data=fields, request=request, reason=reason)
