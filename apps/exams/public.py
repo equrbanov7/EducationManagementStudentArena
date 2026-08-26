@@ -38,9 +38,7 @@ from apps.exams.services.access_policy import (  # noqa: F401
     is_teacher_user,
 )
 from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit  # noqa: F401
-from apps.exams.services.ai_summary import (  # noqa: F401
-    generate_exam_statistics_summary,
-)
+from apps.exams.services.ai_summary import generate_exam_statistics_summary  # noqa: F401
 from apps.exams.services.final_center import (  # noqa: F401
     RoomAdminError,
     add_computer,
