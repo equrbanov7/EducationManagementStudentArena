@@ -197,20 +197,27 @@ def get_student_semester_plan(*, record, period, semester_number):
 # ── Bologna credits + absence (qayıb) eligibility (U2-UI) ────────────────────
 
 
-def get_credit_summary(*, record):
+def get_credit_summary(*, record, today=None):
     """Bologna ECTS graduation progress for a student's program.
 
-    Earned = ECTS of COMPLETED enrollments; in-progress = ECTS of currently
-    ENROLLED ones; required = ``program.ects_total``. ``can_graduate`` is True
-    once earned ≥ required (mandatory-pass checks live in the grading layer, U3)."""
-    completed = Enrollment.objects.filter(
-        organization=record.organization, student=record.student, status=Enrollment.Status.COMPLETED
-    ).select_related("offering__subject")
-    active = Enrollment.objects.filter(
-        organization=record.organization, student=record.student, status=Enrollment.Status.ENROLLED
-    ).select_related("offering__subject")
-    earned = sum(e.offering.subject.ects for e in completed)
-    in_progress = sum(e.offering.subject.ects for e in active)
+    Earned = ECTS of **passed** subjects, in-progress = ECTS of not-yet-passed
+    subjects in a period that has not ended; required = ``program.ects_total``.
+    ``can_graduate`` is True once earned ≥ required (mandatory-pass checks live
+    in the grading layer, U3).
+
+    Kredit ``Enrollment.status``-dan DEYİL, qiymətlərdən oxunur — transkript
+    qatı ilə eyni mənbədən, ona görə «Fənlərim» ECTS qutusu ilə «Ümumi tədris
+    məlumatı» bir daha ayrılmır (səbəb + performans qərarı:
+    :func:`transcript.student_credit_totals` docstring-i). Import funksiya
+    daxilindədir: ``transcript`` → ``analytics`` → ``finals`` → ``services``
+    zənciri modul səviyyəsində dövri import yaradardı."""
+    from apps.registrar import transcript as transcript_service
+
+    totals = transcript_service.student_credit_totals(
+        student=record.student, organization=record.organization, today=today
+    )
+    earned = totals["earned"]
+    in_progress = totals["in_progress"]
     required = record.program.ects_total or 0
     remaining = max(0, required - earned)
     percent = round(earned / required * 100, 1) if required else 0.0
