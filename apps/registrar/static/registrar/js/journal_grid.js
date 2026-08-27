@@ -216,17 +216,17 @@
     });
 
     // ── Sərbəst iş CƏMİ (canlı — 1/0 çipləri) ─────────────────────────────
+    // Çeklist boşdursa CƏMİ köçürülmüş "arxiv" balını göstərir — selfwork_board.effective_total güzgüsü.
     function recomputeSelfworkTotal(row) {
         if (!row) return;
         var total = 0;
-        row.querySelectorAll("[data-jd-sw]").forEach(function (input) {
-            if (input.value === "1") total += 1;
-        });
-        row.querySelectorAll("[data-jd-sw-ro]").forEach(function (ro) {
-            if (ro.getAttribute("data-jd-sw-ro") === "1") total += 1;
+        row.querySelectorAll("[data-jd-sw], [data-jd-sw-ro]").forEach(function (el) {
+            var v = el.value !== undefined ? el.value : el.getAttribute("data-jd-sw-ro");
+            if (v === "1") total += 1;
         });
         var out = row.querySelector("[data-jd-sw-total]");
-        if (out) out.textContent = String(total);
+        var archive = row.getAttribute("data-jd-sw-archive");
+        if (out) out.textContent = total === 0 && archive !== null ? archive : String(total);
     }
 
     // ── Kollokvium CƏMİ (canlı — K1+K2+K3) ────────────────────────────────

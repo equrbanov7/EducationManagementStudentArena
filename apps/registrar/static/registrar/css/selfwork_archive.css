@@ -1,0 +1,54 @@
+/* ═══ Sərbəst iş — ARXİV (köçürülmüş "si") sütunu ══════════════════════════
+   Köhnə sistemdən köçürülmüş sərbəst iş balı: oxu-only, çeklist sütunlarından
+   VİZUAL OLARAQ AYRILIR (kəsik-xətli "arxiv" nişanı) ki, müəllim onun canlı
+   çeklist deyil, arxiv dəyəri olduğunu bir baxışda görsün.
+   Yalnız işıqlı tema — jd2.css-in --j-* tokenləri + --ems-* fallback-ləri. */
+
+.jd-sw2-th-arch,
+.jd-sw2-arch {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.jd-sw2-th-arch {
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    color: var(--j-muted, #5b72a0);
+}
+
+.jd-sw2-arch-val {
+    display: inline-block;
+    min-width: 26px;
+    padding: 2px 9px;
+    border: 1px dashed var(--ems-primary-200, #bfdbfe);
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: help;
+}
+
+.jd-sw2-arch-empty {
+    color: var(--j-soft, #8aa0c8);
+    font-weight: 600;
+}
+
+.jd-sw2-foot-arch {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px dashed var(--ems-primary-200, #bfdbfe);
+    border-radius: 12px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.jd-sw2-foot-arch .fa-archive {
+    margin-top: 2px;
+    opacity: 0.75;
+}
