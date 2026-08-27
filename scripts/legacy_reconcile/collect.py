@@ -118,12 +118,28 @@ def build_ladders(source_facts: dict, target_facts: dict) -> dict[str, Ladder]:
     offerings = target_facts["offerings"]
     enrollments = target_facts["enrollments"]
 
+    # Açılış möhürünün açarı 2026-08-dən (qrup-başına bölgü) `uniqid:<qrup_pk>`
+    # formasındadır; ondan əvvəl sadəcə `uniqid` idi.  Nərdivan «bu jurnalın
+    # ÜMUMİYYƏTLƏ açılışı varmı» sualına cavab verdiyi üçün HƏR İKİ formanı
+    # tanımalıdır — əks halda bölünmüş run-da BÜTÜN xanalar «orphan jurnal»
+    # sayılır və nərdivan mənfi «izahsız fərq» verir (2026-08-27-də məhz belə
+    # oldu: 4.4 M xana səhvən orphan göstərildi).
+    #
+    # Tam açar da dəstə salınır ki, `uniqid`-in özündə «:» olsa belə (ledger
+    # OPAQUE_KEY_PATTERN buna icazə verir) dəqiq uyğunluq itməsin.
+    offering_journals: set[str] = set()
+    for key in offerings:
+        offering_journals.add(key)
+        head, separator, _ = key.partition(":")
+        if separator:
+            offering_journals.add(head)
+
     attribution = {domain: {"orphan": 0, "unresolved": 0, "expected": 0} for domain in DOMAINS}
     for uniqid, student_id, domain, count in source_facts["cells_by_enrollment"]:
         if domain not in attribution:
             continue
         bucket = attribution[domain]
-        if uniqid not in offerings:
+        if uniqid not in offering_journals:
             bucket["orphan"] += count
         elif f"{uniqid}:{student_id}" not in enrollments:
             bucket["unresolved"] += count
