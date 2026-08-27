@@ -90,12 +90,13 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
             <th class="acr-num">{% trans "Kəsr" context "registrar.records" %}</th>
             <th class="acr-num" title="{% trans 'Q/b-dan — imtahana buraxılmayıb' context 'registrar.records' %}">{% trans "Q/b" context "registrar.records" %}</th>
             <th class="acr-num" title="{% trans 'İmtahandan kəsilib — 25% təkrar imtahan' context 'registrar.records' %}">{% trans "25%" context "registrar.records" %}</th>
+            <th class="acr-num" title="{% trans 'İmtahan çıxış balı yoxdur — nə keçib, nə kəsilib' context 'registrar.records' %}">{% trans "Qiymətləndirilməyib" context "registrar.records" %}</th>
             <th class="acr-num">{% trans "ÜOMG" context "registrar.records" %}</th>
             <th></th>
           </tr>
         </thead>
         <tbody class="js-acr-rows">
-          <tr><td colspan="10"><div class="acr-state"><i class="fas fa-spinner fa-spin"></i> {% trans "Yüklənir…" context "registrar.records" %}</div></td></tr>
+          <tr><td colspan="11"><div class="acr-state"><i class="fas fa-spinner fa-spin"></i> {% trans "Yüklənir…" context "registrar.records" %}</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -119,6 +120,7 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
       "fails": "{% trans 'Ümumi kəsr'|escapejs context 'registrar.records' %}",
       "qb": "{% trans 'Q/b-dan kəsr'|escapejs context 'registrar.records' %}",
       "exam25": "{% trans 'İmtahandan (25%)'|escapejs context 'registrar.records' %}",
+      "ungraded": "{% trans 'Qiymətləndirilməyib'|escapejs context 'registrar.records' %}",
       "avg_gpa": "{% trans 'Orta ÜOMG'|escapejs context 'registrar.records' %}",
       "none": "{% trans 'Nəticə tapılmadı.'|escapejs context 'registrar.records' %}",
       "no_access": "{% trans 'Bu bölmə üçün struktur icazəniz yoxdur.'|escapejs context 'registrar.records' %}",
@@ -139,6 +141,7 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
       "progress": "{% trans 'Davam edir'|escapejs context 'registrar.records' %}",
       "qb_badge": "{% trans 'Q/b-dan kəsilib — imtahana buraxılmayıb'|escapejs context 'registrar.records' %}",
       "exam25_badge": "{% trans 'İmtahandan kəsilib (25% təkrar imtahan)'|escapejs context 'registrar.records' %}",
+      "ungraded_badge": "{% trans 'Qiymətləndirilməyib — imtahan çıxış balı yoxdur'|escapejs context 'registrar.records' %}",
       "sem_credit": "{% trans 'kredit'|escapejs context 'registrar.records' %}",
       "no_record": "{% trans 'Bu tələbənin hələ tədris qeydi yoxdur.'|escapejs context 'registrar.records' %}",
       "detail_error": "{% trans 'Detal yüklənmədi.'|escapejs context 'registrar.records' %}"

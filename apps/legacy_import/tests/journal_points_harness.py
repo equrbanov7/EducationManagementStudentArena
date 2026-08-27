@@ -44,6 +44,11 @@ from apps.legacy_import.services.rehearsal_journal_enrollments_phase import JOUR
 from apps.legacy_import.services.rehearsal_journal_lessons_targets import LESSON_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from apps.legacy_import.services.source_extraction import LegacyDiscoveredTable
+from apps.legacy_import.services.syllabus_field_contracts import (
+    JOURNAL_SYLLABUS_FIELDS,
+    SILLABUS_FIELDS,
+    SILLABUS_SELF_WORK_FIELDS,
+)
 from apps.legacy_import.services.table_plan import TABLE_PLAN_VERSION, LegacyTablePlan, load_legacy_table_plan
 from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
 from core.constants import AcademicPeriodType, OrganizationType
@@ -63,6 +68,7 @@ PHASE_KEYS = (
     "journal_components",
     "journal_entry_scores",
     "journal_finals",
+    "journal_selfwork",
     "journal_lock",
     "journal_reconcile",
 )
@@ -70,18 +76,38 @@ UNIQID = "rooBx39tsK"
 OTHER_UNIQID = "secondBBBB"
 STUDENT_A = 42
 STUDENT_B = 43
-COLUMNS_BY_TABLE = {
-    contract.source_table: contract.allowed_fields
-    for contract in (
-        SEMESTR_JURNAL_FIELDS,
-        JOURNAL_FIELDS,
-        JOURNAL_DATES_FIELDS,
-        JOURNAL_POINT_FIELDS,
-        JOURNAL_POINT_ARCHIVE_FIELDS,
-        ALLOWED_QB_FIELDS,
-        YEKUN_FIELDS,
-    )
-}
+SYLLABUS_ID = 5
+SYLLABUS_UNIQID = "sylBx39tsK"
+
+
+def _discovered_columns(*contracts):
+    """Bir cədvəlin DESCRIBE sütunları — ONA BAXAN BÜTÜN kontraktların birləşməsi.
+
+    ``journals`` iki kontraktla oxunur (``JOURNAL_FIELDS`` və J9-un kiçik
+    ``JOURNAL_SYLLABUS_FIELDS``-i), canlı ``DESCRIBE`` isə həmişə tam sütun
+    dəstini verir — fake mənbə də eynisini etməlidir ki, proyeksiya qapısı
+    real şəraiti sınasın."""
+
+    columns: dict[str, tuple[str, ...]] = {}
+    for contract in contracts:
+        merged = list(columns.get(contract.source_table, ()))
+        merged.extend(name for name in contract.allowed_fields if name not in merged)
+        columns[contract.source_table] = tuple(merged)
+    return columns
+
+
+COLUMNS_BY_TABLE = _discovered_columns(
+    SEMESTR_JURNAL_FIELDS,
+    JOURNAL_FIELDS,
+    JOURNAL_SYLLABUS_FIELDS,
+    JOURNAL_DATES_FIELDS,
+    JOURNAL_POINT_FIELDS,
+    JOURNAL_POINT_ARCHIVE_FIELDS,
+    ALLOWED_QB_FIELDS,
+    YEKUN_FIELDS,
+    SILLABUS_FIELDS,
+    SILLABUS_SELF_WORK_FIELDS,
+)
 # J-V7 kəsimindən əvvəl / sonra (2022-03-30).
 BEFORE_CUTOFF = datetime.datetime(2022, 1, 5, 9, 0, 0)
 AFTER_CUTOFF = datetime.datetime(2022, 6, 5, 9, 0, 0)
@@ -197,9 +223,18 @@ def journal_row(legacy_pk, uniqid, **overrides):
         "sonra_sil": 0,
         "fenn_saati": 60,
         "active": 1,
+        "sillabus_id": SYLLABUS_ID,
     }
     values.update(overrides)
     return values
+
+
+def sillabus_row(legacy_pk=SYLLABUS_ID, uniqid=SYLLABUS_UNIQID):
+    return {"id": legacy_pk, "uniqid": uniqid}
+
+
+def selfwork_topic_row(legacy_pk, *, uniqid=SYLLABUS_UNIQID, name="Sərbəst iş mövzusu"):
+    return {"id": legacy_pk, "uniqid": uniqid, "name": name}
 
 
 def dates_row(legacy_pk, journal_id=2, month=12, day=30, time_value="14:00"):
@@ -266,8 +301,23 @@ def yekun_row(legacy_pk, *, student_id=STUDENT_A, journal_id=2, girish=0.0, imta
     }
 
 
-def tables(*, semesters=None, journals=None, dates=None, points=None, archive=None, allowed=None, yekun=None):
-    """Yeddi cədvəlin tam dəsti — verilməyən hər biri məntiqli defolt alır."""
+def tables(
+    *,
+    semesters=None,
+    journals=None,
+    dates=None,
+    points=None,
+    archive=None,
+    allowed=None,
+    yekun=None,
+    syllabi=None,
+    topics=None,
+):
+    """Doqquz cədvəlin tam dəsti — verilməyən hər biri məntiqli defolt alır.
+
+    ``sillabus`` defolt olaraq bir sətirdir (jurnalın ``sillabus_id``-i ona
+    düşür), ``sillabus_serbest_is`` isə BOŞdur: mövzuları yalnız J9 testləri
+    verir, qalan fazalar onlardan asılı deyil."""
 
     return {
         SEMESTR_JURNAL_FIELDS.source_table: list(semesters if semesters is not None else [semester_row()]),
@@ -279,6 +329,8 @@ def tables(*, semesters=None, journals=None, dates=None, points=None, archive=No
         JOURNAL_POINT_ARCHIVE_FIELDS.source_table: list(archive or []),
         ALLOWED_QB_FIELDS.source_table: list(allowed or []),
         YEKUN_FIELDS.source_table: list(yekun or []),
+        SILLABUS_FIELDS.source_table: list(syllabi if syllabi is not None else [sillabus_row()]),
+        SILLABUS_SELF_WORK_FIELDS.source_table: list(topics or []),
     }
 
 

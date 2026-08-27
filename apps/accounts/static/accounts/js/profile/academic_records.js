@@ -139,6 +139,9 @@
                 card(s.fails, T.fails, "bad") +
                 card(s.qb, T.qb, "warn") +
                 card(s.exam25, T.exam25, "warn") +
+                // Nə keçib, nə kəsilib — imtahan çıxış balı yoxdur. Ayrıca qutu
+                // olmasa rəqəmlər cəmlənmir (tələbə × fənn sayı ilə uyğun gəlmir).
+                card(s.ungraded, T.ungraded, "muted") +
                 card(s.avg_gpa, T.avg_gpa);
         }
 
@@ -146,7 +149,7 @@
             var tr = "";
             for (var i = 0; i < 8; i++) {
                 tr += "<tr>";
-                for (var c = 0; c < 10; c++) {
+                for (var c = 0; c < 11; c++) {
                     tr += '<td><div class="acr-skel"></div></td>';
                 }
                 tr += "</tr>";
@@ -157,7 +160,7 @@
         function renderRows(d) {
             if (d.has_access === false) {
                 rows.innerHTML =
-                    '<tr><td colspan="10"><div class="acr-state"><i class="fas fa-lock"></i>' + esc(T.no_access) + "</div></td></tr>";
+                    '<tr><td colspan="11"><div class="acr-state"><i class="fas fa-lock"></i>' + esc(T.no_access) + "</div></td></tr>";
                 pager.innerHTML = "";
                 cards.innerHTML = "";
                 return;
@@ -165,7 +168,7 @@
             var list = d.results || [];
             if (!list.length) {
                 rows.innerHTML =
-                    '<tr><td colspan="10"><div class="acr-state"><i class="fas fa-folder-open"></i>' + esc(T.none) + "</div></td></tr>";
+                    '<tr><td colspan="11"><div class="acr-state"><i class="fas fa-folder-open"></i>' + esc(T.none) + "</div></td></tr>";
                 pager.innerHTML = "";
                 return;
             }
@@ -182,6 +185,7 @@
                         '<td class="acr-num' + (r.fails > 0 ? " acr-bad" : "") + '">' + esc(r.fails) + "</td>" +
                         '<td class="acr-num' + (r.qb > 0 ? " acr-warn" : "") + '">' + esc(r.qb) + "</td>" +
                         '<td class="acr-num' + (r.exam25 > 0 ? " acr-warn" : "") + '">' + esc(r.exam25) + "</td>" +
+                        '<td class="acr-num' + (r.ungraded > 0 ? " acr-muted" : "") + '">' + esc(r.ungraded) + "</td>" +
                         '<td class="acr-num">' + esc(r.gpa) + "</td>" +
                         '<td><button type="button" class="acr-view js-acr-view" data-sid="' + esc(r.student_id) +
                         '" data-name="' + esc(r.name) + '"><i class="fas fa-eye"></i> ' + esc(T.view) + "</button></td></tr>"
@@ -314,7 +318,13 @@
             if (row.barred) return '<span class="acr-status is-barred">' + esc(T.barred) + "</span>";
             if (row.passed) return '<span class="acr-status is-pass">' + esc(T.passed) + "</span>";
             if (row.failed) return '<span class="acr-status is-fail">' + esc(T.failed) + "</span>";
+            if (row.ungraded) return '<span class="acr-status is-ungraded">' + esc(T.ungraded) + "</span>";
             return '<span class="acr-status is-progress">' + esc(T.progress) + "</span>";
+        }
+
+        function ungradedBadge(row) {
+            if (!row.ungraded) return "";
+            return '<div class="acr-reason is-ungraded"><i class="fas fa-circle-question"></i> ' + esc(T.ungraded_badge) + "</div>";
         }
 
         function reasonBadge(row) {
@@ -350,8 +360,8 @@
                             return (
                                 '<tr class="' + cls.trim() + '">' +
                                 '<td class="acr-ta-left"><b>' + esc(row.code) + "</b><br><span class=\"acr-uname\">" + esc(row.name) + "</span>" +
-                                reasonBadge(row) + "</td>" +
-                                "<td>" + esc(row.credit) + "</td>" +
+                                reasonBadge(row) + ungradedBadge(row) + "</td>" +
+                                '<td class="' + (row.ungraded ? "acr-muted" : "") + '">' + esc(row.credit) + "</td>" +
                                 '<td class="acr-ta-left">' + esc(row.teacher) + "</td>" +
                                 "<td>" + esc(row.entry == null ? "—" : row.entry) + "</td>" +
                                 "<td>" + esc(row.exit == null ? "—" : row.exit) + "</td>" +

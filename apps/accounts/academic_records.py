@@ -5,7 +5,14 @@ tələbələrin akademik nəticələrini fakültə → kafedra → ixtisas → q
 süzgəcləri ilə görür: hər kəs yalnız özündən BİR ALT səviyyəni (və daha aşağını)
 görür (:mod:`apps.organizations.scoping`). Kiçik "box"-lar seçilmiş süzgəc üzrə
 ümumi mənzərəni verir (neçə tələbə, toplanmış kredit, neçə kəsr — q/b vs 25%
-ayrımı, orta ÜOMG).
+ayrımı, neçə QİYMƏTLƏNDİRİLMƏYİB, orta ÜOMG).
+
+**Qiymətləndirilməyib (2026-08).** Nə keçmiş, nə kəsilmiş yazılış — yəni nə
+``FinalGrade.exam_score``, nə ``ResitRecord.resit_score`` var — əvvəllər heç bir
+qutuya düşmürdü və rəqəmlər səssizcə "itirdi" (legacy köçürmə ölçüsündə 106 870
+yazılışın 23 382-si). İndi :func:`_is_ungraded` onları ayrıca sayır; sayğac
+mövcud tam keçidin İÇİNDƏ artırılır — YENİ SORĞU YOXDUR, səhifələmə müqaviləsi
+toxunulmazdır.
 
 **Performans müqaviləsi (2026-08 optimallaşdırması).** İcmal İKİ müstəqil işə
 bölünüb, çünki onların qiyməti kökündən fərqlidir:
@@ -75,13 +82,32 @@ def _fail_reason(result) -> str:
 
     ``qb``     → davamiyyətdən (barred) imtahana buraxılmayıb → fənn yenidən keçilir.
     ``exam25`` → imtahana girib, kəsilib → 25% ilə təkrar imtahan hüququ.
-    ``other``  → nadir/qeyri-müəyyən (imtahan qeyd olunmayıb, barred deyil).
+    ``other``  → STRUKTUR OLARAQ ƏLÇATMAZ (2026-08 auditi).  ``analytics._evaluate``
+                 ``failed = barred or (graded and not passed)`` yazır, yəni «kəsr»
+                 çoxluğunda ``barred`` deyilsə mütləq ``graded and not passed``
+                 olur.  Ona görə «kəsr = q/b + imtahandan 25%» eyniliyi tavtologiya
+                 deyil, düsturun özündən çıxır.  Qol qəsdən saxlanılır: analitika
+                 düsturu bir gün genişlənsə (məs. plagiat kəsri) susmaq əvəzinə
+                 buraya düşsün.
     """
     if result["barred"]:
         return "qb"
     if result["graded"] and not result["passed"]:
         return "exam25"
     return "other"
+
+
+def _is_ungraded(result) -> bool:
+    """Nə keçib, nə kəsilib — YƏNİ HEÇ BİR QUTUYA DÜŞMÜR.
+
+    Səbəb: ``analytics._evaluate``-də ``graded = effective is not None``, yəni
+    nə ``FinalGrade.exam_score``, nə də ``ResitRecord.resit_score`` var.  Belə
+    yazılış nə krediti sayılır, nə kəsrə düşür, nə də ÜOMG-yə girir — köçürmə
+    ölçüsündə 106,870 yazılışın 23,382-si (21.9 %) məhz belədir.  Onları ayrıca
+    saymasaq rəqəmlər «itir»: cəm sətir sayı ilə uyğun gəlmir.  ``barred``
+    tələbə ``failed=True`` olduğuna görə BURAYA DÜŞMÜR (o, q/b kəsridir)."""
+
+    return not result["passed"] and not result["failed"]
 
 
 def _scoped_records(organization, scope: UnitScope, filters: dict):
@@ -237,7 +263,15 @@ def _evaluate_all(organization, enrollment_qs):
 
 
 def _new_acc() -> dict:
-    return {"credits_earned": 0, "fails": 0, "qb": 0, "exam25": 0, "quality_points": Decimal("0"), "gpa_credits": 0}
+    return {
+        "credits_earned": 0,
+        "fails": 0,
+        "qb": 0,
+        "exam25": 0,
+        "ungraded": 0,
+        "quality_points": Decimal("0"),
+        "gpa_credits": 0,
+    }
 
 
 def _accumulate(acc, result) -> None:
@@ -255,6 +289,10 @@ def _accumulate(acc, result) -> None:
             acc["qb"] += 1
         elif reason == "exam25":
             acc["exam25"] += 1
+    else:
+        # Qiymətləndirilməyib: kəsrə QARIŞMIR, krediti sayılmır, ÜOMG-yə girmir —
+        # amma artıq GÖRÜNÜR ki, imtahan mərkəzi onları hədəfli düzəldə bilsin.
+        acc["ungraded"] += 1
 
 
 def _per_student(organization, student_ids, period_ids) -> dict:
@@ -283,6 +321,7 @@ def _row(record, acc) -> dict:
         "fails": acc["fails"],
         "qb": acc["qb"],
         "exam25": acc["exam25"],
+        "ungraded": acc["ungraded"],
         "gpa": str(gpa),
     }
 
@@ -311,6 +350,7 @@ def _empty_summary() -> dict:
         "fails": 0,
         "qb": 0,
         "exam25": 0,
+        "ungraded": 0,
         "quality_points": Decimal("0"),
         "gpa_credits": 0,
         "avg_gpa": "0.00",

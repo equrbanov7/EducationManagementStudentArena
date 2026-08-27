@@ -123,6 +123,35 @@ def tally_target_rows(context) -> dict[str, int]:
     }
 
 
+def final_coverage(context) -> dict[str, int]:
+    """Hədəfdə neçə yazılışın imtahan NƏTİCƏSİ var — və neçəsinin YOXDUR.
+
+    «Var» tərifi ``analytics._evaluate``-in ``graded`` tərifinin eynisidir:
+    ``FinalGrade.exam_score`` VƏ YA ``ResitRecord.resit_score``.  Belə nəticəsi
+    olmayan yazılış nə keçir, nə kəsilir — hesabatlarda görünməz qalır, ona görə
+    say AYRICA sübut kimi möhürlənir (B-tapşırığı, 2026-08).  Canlı köçürmə
+    ölçüsü: 106,870 yazılışdan 23,382-si (21.9 %) belədir.
+    """
+
+    organization = context.organization
+    enrollment_model = django_apps.get_model("registrar", "Enrollment")
+    final_model = django_apps.get_model("registrar", "FinalGrade")
+    resit_model = django_apps.get_model("registrar", "ResitRecord")
+    graded = set(
+        final_model.objects.filter(organization=organization, exam_score__isnull=False).values_list(
+            "enrollment_id", flat=True
+        )
+    )
+    graded.update(
+        resit_model.objects.filter(organization=organization, resit_score__isnull=False).values_list(
+            "enrollment_id", flat=True
+        )
+    )
+    enrollments = enrollment_model.objects.filter(organization=organization).count()
+    covered = len(graded)
+    return {"enrollments": enrollments, "covered": covered, "missing": max(0, enrollments - covered)}
+
+
 def balance_delta(bucket: dict[str, int], target: int) -> int:
     """``mənbə − (boş + oxunmayan + orphan + overlap) − hədəf``."""
 
