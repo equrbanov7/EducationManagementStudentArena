@@ -52,6 +52,22 @@ verən 10 bal alır.
 
 ---
 
+## Fərq 4 — Üzrlü qayıb
+
+| | Köhnə (MyEdu) | Yeni (EMS Arena) |
+|---|---|---|
+| Üzrlü qayıb | Adi qayıb kimi **sayılır** (düsturda `excusable` təsirsizdir) | Ayrıca `excused` statusu — qayıbdan **ayrılır** |
+
+Köçürülmüş datada bu, 4,467 xanaya toxunur (`registrar_lessonmark.status =
+'excused'`). Uzlaşdırma hesabatındakı bəzi «qayıb 6 → 5» fərqlərinin səbəbi
+məhz budur — xana itmir, **başqa statusa** düşür.
+
+Yeni davranış daha düzgündür (tələbə üzrlü səbəbdən qalanda cəzalandırılmır),
+amma davamiyyət balı bərpa olunarsa qərar lazımdır: üzrlü qayıb məxrəcdən
+çıxılsın, yoxsa köhnə kimi qayıb sayılsın?
+
+---
+
 ## Köçürülən data üçün bu NƏ demək deyil
 
 ⚠️ **Köçürülmüş tarixi ballar TOXUNULMAZDIR.** J5b fazası köhnə `girish`
