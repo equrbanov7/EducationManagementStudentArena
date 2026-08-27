@@ -122,6 +122,36 @@ def build_student_overall_academic_context(request, *, organization) -> dict:
     return {"overall_academic_section": data}
 
 
+def student_academic_record_rows(request, *, organization) -> dict:
+    """Tələbənin akademik (jurnal) fənn nəticələri — "Nəticələrim" səthi üçün.
+
+    ``build_student_overall_academic_context`` ilə EYNİ qurucunu çağırır, sadəcə
+    profil kontekst açarına bükmür — çağıran (accounts "Nəticələrim" kolleksiyaçısı)
+    xam strukturu kart sətirlərinə çevirir. Keçmə/kəsr/hərf/ÜOMG məntiqi burada
+    TƏKRARLANMIR; "Ümumi tədris məlumatı" bölməsi ilə eyni rəqəmlər çıxır.
+    """
+    if organization is None or not getattr(request.user, "is_authenticated", False):
+        return _empty_overall_academic()
+
+    from apps.registrar import transcript as transcript_service
+
+    return transcript_service.build_student_overall_record(student=request.user, organization=organization)
+
+
+def count_student_academic_record_rows(request, *, organization) -> int:
+    """Yuxarıdakı sətirlərin sayı — ağır aqreqasiyasız, tək ``COUNT(*)``.
+
+    Profil badge/tab sayğacları bunu çağırır (bax accounts ``cheap_counts``), ona
+    görə sayğac ilə siyahı eyni qeydiyyat çoxluğundan çıxır.
+    """
+    if organization is None or not getattr(request.user, "is_authenticated", False):
+        return 0
+
+    from apps.registrar import transcript as transcript_service
+
+    return transcript_service.count_student_record_rows(student=request.user, organization=organization)
+
+
 def build_profile_registrar_section(request, *, organization, section: str) -> dict:
     """Context for the registrar cabinet sections rendered INSIDE the profile
     shell (U12): schedule, academic calendar, teacher journal list and analytics.

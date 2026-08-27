@@ -130,6 +130,31 @@ def _group_by_year(semesters: list[dict]) -> list[dict]:
     return years
 
 
+def student_record_enrollments(*, student, organization):
+    """Akademik qeydə DAXİL OLAN qeydiyyatlar — TƏK mənbə.
+
+    Həm ağır transkript aqreqasiyası (``build_student_transcript``), həm də ucuz
+    sətir sayğacı (``count_student_record_rows``) məhz bu çoxluqdan çıxır. Beləcə
+    kabinetdə göstərilən sətir sayı ilə tab/badge sayğacı heç vaxt ayrılmır —
+    "hansı qeydiyyat sayılır?" qaydası tək yerdə yazılıb.
+    """
+    return Enrollment.objects.filter(organization=organization, student=student).exclude(
+        status=Enrollment.Status.DROPPED
+    )
+
+
+def count_student_record_rows(*, student, organization) -> int:
+    """``build_student_overall_record``-un qaytaracağı sətir sayı — tək ``COUNT(*)``.
+
+    Ağır hesablamanı (hər qeydiyyat üçün giriş balı + yekun + təkrar imtahan
+    sorğuları) işə salmadan sayğacı doldurmaq üçün; sətirlərin ÖZÜ lazım olanda
+    ``build_student_overall_record`` çağırılır.
+    """
+    if organization is None or student is None:
+        return 0
+    return student_record_enrollments(student=student, organization=organization).count()
+
+
 def build_student_transcript(*, student, organization, program=None):
     """Full transcript for one student: chronological semesters + cumulative GPA.
 
@@ -138,8 +163,7 @@ def build_student_transcript(*, student, organization, program=None):
     student has no enrollments yet so the cabinet renders a friendly placeholder.
     """
     enrollments = list(
-        Enrollment.objects.filter(organization=organization, student=student)
-        .exclude(status=Enrollment.Status.DROPPED)
+        student_record_enrollments(student=student, organization=organization)
         .select_related(
             "offering",
             "offering__subject",

@@ -23,8 +23,19 @@ from ...services.profile_actions import (  # noqa: F401
 signer = TimestampSigner()
 
 # --- Filter choices ---------------------------------------------------------
-RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
-PENDING_ANSWER_FILTER_CHOICES = RESULT_FILTER_CHOICES | {"written_exams", "practical_exams"}
+# "academic" = registrar/jurnal fənn nəticələri (köçürülmüş tələbənin tarixçəsi).
+RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent", "academic"}
+# Gözləyən cavablarda akademik anlayışı YOXDUR (yekun qiymət "gözləyən cavab" deyil),
+# ona görə siyahı RESULT_FILTER_CHOICES-dan törədilmir — açıq yazılır.
+PENDING_ANSWER_FILTER_CHOICES = {
+    "all",
+    "exams",
+    "courses",
+    "labs",
+    "independent",
+    "written_exams",
+    "practical_exams",
+}
 PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"}
 PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
 

@@ -13,7 +13,12 @@ from core.cache import get_or_set_cached_profile_badge_counts
 from ....forms import CustomPasswordChangeForm, OTPPasswordResetConfirmForm
 from ....models import UserProfile
 from ....services.profile_actions import validate_profile_avatar_upload
-from ..._dashboard_helpers import _collect_assigned_tasks, _collect_my_results, _collect_pending_answer_items
+from ..._dashboard_helpers import (
+    _collect_assigned_tasks,
+    _collect_my_results,
+    _collect_pending_answer_items,
+    academic_filter_options,
+)
 from ..._dashboard_helpers.cheap_counts import compute_profile_badge_counts
 from ..._helpers import (
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
@@ -248,8 +253,14 @@ class _Stage1Mixin:
         self.my_results_search_query = ""
         self.my_results_pagination_query = ""
         self.my_results_page_param = "results_page"
-        self.my_result_counts = {"all": 0, "exams": 0, "courses": 0, "labs": 0, "independent": 0}
+        self.my_result_counts = {"all": 0, "exams": 0, "courses": 0, "labs": 0, "independent": 0, "academic": 0}
         self.my_results_active_filter = "all"
+        # Akademik (jurnal) nəticələrinin il/semestr süzgəci — açılış siyahıları
+        # registrar qurucusundan (`year_options`/`season_options`) gəlir.
+        self.my_results_year = ""
+        self.my_results_season = ""
+        self.my_results_year_options = []
+        self.my_results_season_options = []
         self.pending_answer_items = []
         self.pending_answer_counts = {
             "all": 0,
@@ -291,11 +302,21 @@ class _Stage1Mixin:
                     )
                 self.assigned_courses = list(self.assigned_courses_qs[:20])
             if self.active_section == "my-results":
+                self.my_results_year = (self.request.GET.get("results_year", "") or "").strip()
+                self.my_results_season = (self.request.GET.get("results_season", "") or "").strip()
                 self.my_result_items, self.my_result_counts, self.my_results_active_filter = _collect_my_results(
                     self.request,
                     filter_type=self.request.GET.get("results_type"),
                     search=self.request.GET.get("results_search"),
+                    year=self.my_results_year,
+                    season=self.my_results_season,
                 )
+                # Açılış siyahıları qurucunun ÖZ verdiyi (il, semestr) dəyərləridir —
+                # burada yenidən çıxarılmır (drift olmasın). Yalnız süzgəcin GÖRÜNDÜYÜ
+                # tablarda oxunur: başqa tabda ağır qurucunu boş yerə işə salmasın
+                # (orada `_collect_my_results` akademik qolu ümumiyyətlə qurmur).
+                if self.my_results_active_filter in {"all", "academic"}:
+                    self.my_results_year_options, self.my_results_season_options = academic_filter_options(self.request)
                 self.my_results_search_query = (self.request.GET.get("results_search", "") or "").strip()
                 self.my_results_page_obj = Paginator(self.my_result_items, 6).get_page(
                     self.request.GET.get(self.my_results_page_param)
@@ -305,6 +326,8 @@ class _Stage1Mixin:
                     section="my-results",
                     results_type=self.my_results_active_filter,
                     results_search=self.my_results_search_query,
+                    results_year=self.my_results_year,
+                    results_season=self.my_results_season,
                 )
                 self.my_results_count = self.my_result_counts.get("all", 0)
             else:
