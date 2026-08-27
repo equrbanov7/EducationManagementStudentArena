@@ -10,6 +10,7 @@ Two layers:
 import datetime
 from decimal import Decimal
 from io import StringIO
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -18,7 +19,9 @@ from django.urls import reverse
 
 from apps.accounts.views._helpers.rbac import _role_capabilities
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar import finals, gradebook, transcript
+from apps.registrar import finals, gradebook
+from apps.registrar import public as registrar_public
+from apps.registrar import transcript
 from apps.registrar.models import (
     CourseOffering,
     Curriculum,
@@ -204,7 +207,12 @@ class BuildStudentTranscriptTest(TestCase):
 
 @override_settings(UNIVERSITY_MODE=True)
 class MyTranscriptRbacGatingTest(TestCase):
-    """``my-transcript`` is a university-mode student section."""
+    """``my-transcript`` tələbədən GİZLƏDİLİB (2026-08 sahib qərarı).
+
+    Transkript rəsmi sənəddir və müraciət (ərizə) pəncərəsindən keçməlidir;
+    axın hazır olana qədər səth bağlıdır. Tək mənbə:
+    ``registrar.public.STUDENT_TRANSCRIPT_SELF_SERVICE``.
+    """
 
     def _student(self):
         user = User.objects.create_user("trbac_s", "trbac_s@qku.edu.az", "pw")
@@ -213,9 +221,22 @@ class MyTranscriptRbacGatingTest(TestCase):
         profile.save(update_fields=["role"])
         return user, profile
 
-    def test_student_gets_my_transcript_in_university_mode(self):
+    def test_flag_is_off_by_default(self):
+        self.assertFalse(registrar_public.STUDENT_TRANSCRIPT_SELF_SERVICE)
+
+    def test_student_does_not_get_my_transcript(self):
         user, profile = self._student()
         caps = _role_capabilities(user, profile)
+        self.assertNotIn("my-transcript", caps["allowed_sections"])
+        # Qonşu tələbə bölmələri toxunulmaz qalır (regressiya qoruması).
+        self.assertIn("my-subjects", caps["allowed_sections"])
+        self.assertIn("overall-academic", caps["allowed_sections"])
+
+    def test_student_keeps_my_transcript_when_flag_reopened(self):
+        """Bayraq açılanda bölmə geri qayıdır — gizlətmə tək nöqtədədir."""
+        user, profile = self._student()
+        with mock.patch.object(registrar_public, "STUDENT_TRANSCRIPT_SELF_SERVICE", True):
+            caps = _role_capabilities(user, profile)
         self.assertIn("my-transcript", caps["allowed_sections"])
 
     @override_settings(UNIVERSITY_MODE=False)
@@ -254,10 +275,40 @@ class TranscriptCabinetIntegrationTest(TestCase):
         session.save()
         return client.get(reverse("accounts:profile") + "?section=my-transcript")
 
-    def test_student_sees_transcript_gpa_card(self):
+    def test_student_cannot_open_transcript_section_by_url(self):
+        """Birbaşa ``?section=my-transcript`` da bağlıdır — menyu gizlətmək azdır.
+
+        İcazəsiz bölmə ``profile-info``-ya düşür (bax context_builder._stage1),
+        ona görə nə bölmə context-i qurulur, nə də GPA kartı render olunur.
+        """
         resp = self._get_section("wcu_student_az1")
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("my-transcript", resp.context["allowed_sections"])
-        section = resp.context["student_transcript_section"]
-        self.assertTrue(section["has_record"])
-        self.assertContains(resp, "transcript-gpa-card")
+        self.assertNotIn("my-transcript", resp.context["allowed_sections"])
+        self.assertEqual(resp.context["active_section"], "profile-info")
+        self.assertNotIn("student_transcript_section", resp.context)
+        self.assertNotContains(resp, "transcript-gpa-card")
+
+    def test_student_section_api_refuses_transcript(self):
+        """AJAX bölmə API-si eyni siyahıya baxır → 403/404, 200 YOX."""
+        user = User.objects.get(username="wcu_student_az1")
+        client = Client()
+        client.force_login(user)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        resp = client.get(
+            reverse("accounts:profile_section_fragment", args=["my-transcript"]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertIn(resp.status_code, (403, 404))
+
+    def test_student_cannot_download_own_transcript_pdf(self):
+        """Bölmə gizlidirsə PDF də bağlı olmalıdır (fail-closed)."""
+        user = User.objects.get(username="wcu_student_az1")
+        client = Client()
+        client.force_login(user)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        resp = client.get(reverse("registrar:my_transcript_pdf"))
+        self.assertEqual(resp.status_code, 404)

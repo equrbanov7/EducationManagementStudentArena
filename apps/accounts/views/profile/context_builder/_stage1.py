@@ -34,7 +34,7 @@ from .._sections.question_submissions import build_question_submissions_context
 from .._sections.unit_exams import build_unit_exams_context
 from ..contact_inbox import handle_contact_reply_post
 from ..post_handler import handle_profile_post
-from ._helpers import _build_effective_user_roles, _restore_profile_org_context
+from ._helpers import _build_effective_user_roles, _restore_profile_org_context, build_teacher_subject_rows
 
 
 class _Stage1Mixin:
@@ -416,16 +416,9 @@ class _Stage1Mixin:
                         }
                     )
             if caps.get("is_teacher"):
-                seen_subjects = set()
-                for offering in (
-                    self.request.user.taught_offerings.filter(organization=self.active_organization)
-                    .select_related("subject", "group")
-                    .order_by("subject__name")
-                ):
-                    key = (offering.subject_id, offering.group_id)
-                    if key not in seen_subjects:
-                        seen_subjects.add(key)
-                        self.teacher_subjects.append(offering)
+                # FƏNN üzrə təkrarsız (qrup/semestr sayı ilə) — bax
+                # ``build_teacher_subject_rows`` doc-string-indəki ölçü.
+                self.teacher_subjects = build_teacher_subject_rows(self.request.user, self.active_organization)
             if caps.get("is_student"):
                 self.student_records = list(
                     self.request.user.academic_records.filter(

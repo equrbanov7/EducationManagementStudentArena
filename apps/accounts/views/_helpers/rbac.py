@@ -370,10 +370,19 @@ def _role_capabilities(user, profile):
             # (kredit tərəqqisi + qayıb/imtahan statusu + qrup-seçmə blokları).
             from django.conf import settings as _dj_settings
 
+            from apps.registrar import public as _registrar_public
+
             if getattr(_dj_settings, "UNIVERSITY_MODE", True):
                 allowed_sections.add("my-subjects")
-                allowed_sections.add("my-transcript")
                 allowed_sections.add("overall-academic")
+                # Transkript rəsmi sənəddir — tələbə onu kabinetdən birbaşa
+                # ALMIR, müraciət (ərizə) pəncərəsindən keçməlidir. Bayraq
+                # bağlı ikən bölmə siyahıya DÜŞMÜR, ona görə həm sidebar,
+                # həm də birbaşa `?section=my-transcript` / bölmə API-si
+                # bağlanır (hər ikisi bu siyahıya baxır). PDF endpoint-i
+                # eyni bayrağı ayrıca yoxlayır. Bax: registrar/public.py.
+                if _registrar_public.STUDENT_TRANSCRIPT_SELF_SERVICE:
+                    allowed_sections.add("my-transcript")
 
         # ADİ ÜZV səthləri: «Kurslarım», «Təyin edilmiş tapşırıqlar», qruplar.
         #

@@ -134,9 +134,13 @@
                     group.appendChild(toggle);
                 }
                 toggle.hidden = false;
+                // Ekran oxuyucusu üçün açıq/bağlı vəziyyət — düymə qeydlərin
+                // qalanını göstərib gizlədir, yalnız mətn dəyişməsi azdır.
+                toggle.setAttribute("aria-expanded", group.dataset.expanded === "1" ? "true" : "false");
                 toggle.innerHTML = "";
                 var icon = document.createElement("i");
                 icon.className = group.dataset.expanded === "1" ? "fas fa-chevron-up" : "fas fa-chevron-down";
+                icon.setAttribute("aria-hidden", "true");
                 toggle.appendChild(icon);
                 toggle.appendChild(
                     document.createTextNode(

@@ -21,10 +21,32 @@ from apps.registrar.models import StudentAcademicRecord
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
+    "STUDENT_TRANSCRIPT_SELF_SERVICE",
     "exam_eligibility",
     "exam_result_summary",
     "record_exam_result",
 ]
+
+#: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.
+#:
+#: 2026-08 qərarı (sahib): transkript tələbəyə birbaşa verilmir — rəsmi sənəd
+#: kimi MÜRACİƏT (ərizə) pəncərəsindən keçməlidir. Müraciət axını hələ
+#: qurulmayıb, ona görə səth tam bağlıdır.
+#:
+#: Bu bayraq İKİ qapının TƏK mənbəyidir və onların bir-birindən ayrılmasının
+#: qarşısını alır:
+#:   1) menyu/bölmə — ``apps.accounts.views._helpers.rbac`` ``my-transcript``
+#:      bölməsini yalnız bayraq açıq olanda ``allowed_sections``-a qoyur
+#:      (bölmə API-si də eyni siyahıya baxır → birbaşa URL də bağlıdır);
+#:   2) PDF — ``apps.registrar.pdf_views.my_transcript_pdf`` bayraq bağlı ikən
+#:      404 qaytarır (əks halda tələbə bölməni keçib faylı yükləyə bilərdi).
+#:
+#: DİQQƏT: bu YALNIZ tələbənin öz-özünə xidmətinə aiddir. Əməkdaş yolu
+#: (``registrar:student_transcript_pdf`` + RİM konsolu) toxunulmazdır —
+#: müəllim/dekan/RİM/imtahan mərkəzi transkripti əvvəlki kimi görür.
+#:
+#: Müraciət axını hazır olanda: burada ``True`` + müraciət təsdiqi yoxlaması.
+STUDENT_TRANSCRIPT_SELF_SERVICE = False
 
 # ``AcademicPeriod`` lives in the organizations module. Registrar already
 # references organizations models only via string FKs (no Python import), which

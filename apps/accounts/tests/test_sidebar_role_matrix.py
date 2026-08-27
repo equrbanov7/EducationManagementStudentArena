@@ -45,6 +45,11 @@ ROLE_LEVELS = {
 }
 
 #: TƏLƏBƏ səthləri — yalnız tələbədə olmalıdır.
+#:
+#: ``my-transcript`` qəsdən burada QALIR: 2026-08-dən o, TƏLƏBƏDƏ də yoxdur
+#: (bax registrar.public.STUDENT_TRANSCRIPT_SELF_SERVICE), ona görə bu sətir
+#: indi «heç bir əməkdaş roluna sızmasın» şərtini yoxlayır — müraciət axını
+#: qurulanda bölmə yenidən açılsa da əməkdaş menyusuna düşməməlidir.
 STUDENT_ONLY = frozenset({"assigned-exams", "assigned-courses", "my-subjects", "my-transcript"})
 
 #: İdarəetmə səthləri — adi üzv/tələbədə OLMAMALIDIR.

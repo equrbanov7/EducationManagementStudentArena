@@ -248,9 +248,15 @@
             <div class="info-item info-item--full">
                 <div class="info-label"><i class="fas fa-book"></i> {% trans 'Tədris etdiyi fənlər' %}</div>
                 <div class="info-value">
+                    {% comment %}
+                    Siyahı FƏNN üzrə təkrarsızdır (build_teacher_subject_rows) —
+                    əvvəl hər qrup/semestr ayrıca çip idi və eyni fənn onlarla
+                    dəfə təkrarlanırdı. Məlumat itmir: tək qrupda qrup adı,
+                    çoxunda qrup/semestr sayı + title tooltip-ində qrup adları.
+                    {% endcomment %}
                     <div class="profile-group-chip-list profile-group-chip-list--scroll">
-                        {% for offering in teacher_subjects %}
-                        <span class="profile-group-chip">{{ offering.subject.name }}{% if offering.group %} <small>· {{ offering.group.name }}</small>{% endif %}</span>
+                        {% for subject in teacher_subjects %}
+                        <span class="profile-group-chip"{% if subject.groups_tooltip %} title="{{ subject.groups_tooltip }}"{% endif %}>{{ subject.name }}{% if subject.single_group_name %} <small>· {{ subject.single_group_name }}</small>{% elif subject.group_count %} <small>· {{ subject.group_count }}&nbsp;{% trans 'qrup' context 'profile.info' %}{% if subject.period_count > 1 %} · {{ subject.period_count }}&nbsp;{% trans 'semestr' context 'profile.info' %}{% endif %}</small>{% endif %}</span>
                         {% endfor %}
                     </div>
                 </div>

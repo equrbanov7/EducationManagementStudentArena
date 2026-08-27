@@ -120,3 +120,72 @@ def _get_publish_notification_targets(user, capabilities):
                 }
             )
     return targets
+
+
+#: Çipin `title` tooltip-ində göstərilən qrup adlarının tavanı — bir fənn 40+
+#: qrupa oxuna bilər, tooltip-i sonsuz uzatmağın mənası yoxdur.
+TEACHER_SUBJECT_TOOLTIP_GROUPS = 12
+
+
+def build_teacher_subject_rows(user, organization):
+    """«Tədris etdiyi fənlər» — FƏNN üzrə TƏKRARSIZ siyahı.
+
+    PROBLEM (2026-08 sahib bildirişi: «eyni fənlər təkrarda düşüb»): siyahı
+    ``CourseOffering`` sətirlərindən qurulurdu və dedup açarı
+    ``(subject_id, group_id)`` idi. Bir fənn neçə qrupa/semestrə oxunursa, o
+    qədər çip çıxırdı — istifadəçi üçün bu, eyni fənnin təkrar düşməsidir.
+
+    ÖLÇÜ (rehearsal bazası; 8 515 instruktorlu offering, 543 müəllim×org):
+      * köhnə açarla render olunan çip:  8 341
+      * fənn (subject_id) üzrə təkrarsız: 4 082  → 4 259 ARTIQ çip (51%)
+      * müəllimlərin 383/543-ü (70%) təsirlənirdi
+      * ən pis hal: 152 çip → cəmi 5 fənn
+
+    HƏLL: qruplaşdırma açarı ``subject_id``-dir. AD üzrə birləşdirmək qəsdən
+    SEÇİLMƏYİB — ölçü göstərdi ki, eyni adı fərqli ``subject_id`` ilə daşıyan
+    yalnız 2 müəllim×org var (4 082 → 4 080): qazanc yox dərəcədə azdır, risk
+    isə real (fərqli kataloq fənlərini birləşdirmək).
+
+    MƏLUMAT İTMİR: qrup/semestr sayı çipin özündə, qrup adları isə ``title``
+    tooltip-ində qalır; tək qrup halında ad olduğu kimi göstərilir.
+
+    Əlavə fayda: ``values_list`` ilə yalnız lazım olan sütunlar çəkilir —
+    əvvəlki ``select_related`` ilə tam ORM obyektləri (ən pis halda 160 ədəd)
+    yüklənirdi.
+    """
+    rows = {}
+    offerings = user.taught_offerings.filter(organization=organization).values_list(
+        "subject_id", "subject__name", "subject__code", "group_id", "group__name", "period_id"
+    )
+    for subject_id, subject_name, subject_code, group_id, group_name, period_id in offerings:
+        row = rows.get(subject_id)
+        if row is None:
+            row = rows[subject_id] = {
+                "name": (subject_name or subject_code or "").strip(),
+                "code": (subject_code or "").strip(),
+                "groups": {},
+                "periods": set(),
+            }
+        if group_id is not None and group_id not in row["groups"]:
+            row["groups"][group_id] = (group_name or "").strip()
+        if period_id is not None:
+            row["periods"].add(period_id)
+
+    result = []
+    for row in sorted(rows.values(), key=lambda r: (r["name"].casefold(), r["code"])):
+        group_names = sorted(name for name in row["groups"].values() if name)
+        tooltip = ", ".join(group_names[:TEACHER_SUBJECT_TOOLTIP_GROUPS])
+        if len(group_names) > TEACHER_SUBJECT_TOOLTIP_GROUPS:
+            tooltip = f"{tooltip}…"
+        result.append(
+            {
+                "name": row["name"],
+                "code": row["code"],
+                "group_count": len(row["groups"]),
+                "period_count": len(row["periods"]),
+                # Tək qrupda köhnə görünüş qorunur: «Fənn · QRUP-101».
+                "single_group_name": group_names[0] if len(group_names) == 1 else "",
+                "groups_tooltip": tooltip,
+            }
+        )
+    return result
