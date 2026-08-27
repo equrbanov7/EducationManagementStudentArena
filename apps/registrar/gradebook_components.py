@@ -75,6 +75,17 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
             Decimal("0"),
         )
     if selfwork:
+        # ⚠️ SƏRBƏST İŞ BURADA YALNIZ ÇEKLİST SAYIDIR — SELF_WORK komponentinin
+        # ``ComponentScore`` BALINI BURAYA ƏLAVƏ ETMƏYİN. Köçürülmüş (legacy)
+        # datada həmin bal köhnə "si" xanasıdır və o, ARTIQ giriş balının
+        # içindədir: J5b fazası köhnə ``girish``-i
+        # ``residual = clamp(girish − Σkollokvium − çeklist, 0, cap)`` düsturu
+        # ilə GENERIC komponent kimi yazır, çeklist isə 0-dır. Yəni bura
+        # GENERIC(residual) + kollokvium + 0 = girish çıxır və DÜZGÜNDÜR.
+        # Arxiv balını üstəgəl etmək ``girish + si`` verər — İKİQAT SAYMA,
+        # hər tələbənin balı şişər. "Məntiqli görünür" tələsi budur.
+        # Arxiv balı YALNIZ görünmə üçündür: bax ``selfwork_board`` modulu.
+        # Eyni qayda güzgü hesablamaya da (``analytics._selfwork_map``) aiddir.
         done = SelfWorkMark.objects.filter(
             enrollment=enrollment, topic__offering=enrollment.offering, done=True
         ).count()

@@ -92,7 +92,12 @@ def _kollokvium_sum_map(enrollment_ids):
 
 
 def _selfwork_map(enrollment_ids):
-    """enrollment_id → təhvil verilmiş sərbəst iş sayı (hər biri 1 bal, ≤10)."""
+    """enrollment_id → təhvil verilmiş sərbəst iş sayı (hər biri 1 bal, ≤10).
+
+    ⚠️ SELF_WORK komponentinin ``ComponentScore`` balını (köçürülmüş köhnə "si")
+    BURAYA ƏLAVƏ ETMƏYİN — o, giriş balının içində artıq var; üstəgəl etmək
+    ikiqat sayma olar. Bax ``gradebook_components.entry_score_for`` və
+    ``selfwork_board`` modulu."""
     from django.db.models import Count
 
     from apps.registrar.models import SelfWorkMark

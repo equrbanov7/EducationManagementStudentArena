@@ -4,8 +4,9 @@ Kollokvium mövcud komponent mexanizmi üzərində işləyir (``AssessmentCompon
 kind=KOLLOKVIUM + ``held_on`` tarixi; ballar ``ComponentScore``-da — 2 saat
 pəncərəsi və DB trigger oraya da şamildir). Sərbəst iş mövzu-çeklistdir
 (``SelfWorkTopic``/``SelfWorkMark``): bal yazılmır, təhvil sayı avtomatik giriş
-balına çevrilir (bax ``gradebook.entry_score_for``). Kurs işi giriş balından
-kənar ayrıca 0-100 qiymətdir.
+balına çevrilir (bax ``gradebook.entry_score_for``); lövhənin özü —
+köçürülmüş "arxiv" balı da daxil — ``selfwork_board`` modulundadır. Kurs işi
+giriş balından kənar ayrıca 0-100 qiymətdir.
 
 Kilid qaydaları: jurnal kilidli (təsdiqdə/yekunlaşıb) → heç nə yazılmır; sərbəst
 işdə "verilib" işarəsi hər zaman qoyulur, GERİ ALMA yalnız 2 saat içində (bal
@@ -33,9 +34,15 @@ from apps.registrar.models import (
     SelfWorkTopic,
 )
 
+# Sərbəst iş lövhəsi modul-ölçü büdcəsinə görə ayrıca moduldadır; adlar
+# buradan re-eksport olunur — çağıranlar üçün API dəyişməyib.
+from apps.registrar.selfwork_board import (  # noqa: F401
+    SELF_WORK_MAX_TOPICS,
+    get_selfwork_board,
+)
+
 KOLLOKVIUM_COUNT = 3
 KOLLOKVIUM_MAX = 10
-SELF_WORK_MAX_TOPICS = 10
 COURSE_WORK_MAX = Decimal("100")
 
 
@@ -155,7 +162,10 @@ def get_kollokvium_grid(offering):
 def ensure_selfwork_component(offering):
     """Sərbəst iş komponentini idempotent yarat (kind=SELF_WORK, max 10).
 
-    Balı ComponentScore-da SAXLANMIR — entry_score_for çeklist cəmindən oxuyur."""
+    Yeni jurnalda bura bal YAZILMIR — ``entry_score_for`` çeklist cəmindən
+    oxuyur. Tək istisna: köçürmə köhnə ``si`` balını bu komponentə
+    ``ComponentScore`` kimi yazır; o bal YALNIZ lövhədə "arxiv" sütunu kimi
+    göstərilir və giriş balına əlavə OLUNMUR (bax ``selfwork_board``)."""
     component = AssessmentComponent.objects.filter(offering=offering, kind=ComponentKind.SELF_WORK).first()
     if component is None:
         component = AssessmentComponent.objects.create(
@@ -241,44 +251,6 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, 
         ],
     )
     return True
-
-
-def get_selfwork_board(offering):
-    """Sərbəst iş tabı: HƏMİŞƏ 10 sabit slot (mövzu sayından asılı deyil) ×
-    tələbələr, 1/0 + canlı cəm. Mövzu əlavə olunmamış slot boş/deaktivdir —
-    mockup kimi cədvəl həmişə 10 sütunlu görünür, cəmi maksimum 10 bal."""
-    topics = list(SelfWorkTopic.objects.filter(offering=offering).order_by("order", "created_at"))
-    # 10 slot: i-ci slotda mövzu varsa onu, yoxdursa None göstər.
-    slots = [{"index": i + 1, "topic": (topics[i] if i < len(topics) else None)} for i in range(SELF_WORK_MAX_TOPICS)]
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
-        .order_by("student__last_name", "student__username")
-    )
-    now = timezone.now()
-    mark_map = {}
-    for m in SelfWorkMark.objects.filter(topic__offering=offering):
-        mark_map[(m.enrollment_id, m.topic_id)] = m
-    rows = []
-    for e in enrollments:
-        cells = []
-        total = 0
-        for slot in slots:
-            topic = slot["topic"]
-            mark = mark_map.get((e.id, topic.id)) if topic else None
-            done = bool(mark and mark.done)
-            total += 1 if done else 0
-            cells.append(
-                {
-                    "index": slot["index"],
-                    "topic": topic,  # None → boş slot (mövzu hələ əlavə olunmayıb)
-                    "done": done,
-                    # geri alma kilidi: verilib və 2 saat keçib
-                    "locked": bool(mark and mark.done and (now - mark.updated_at) > MARK_EDIT_WINDOW),
-                }
-            )
-        rows.append({"enrollment": e, "student": e.student, "cells": cells, "total": total})
-    return {"topics": topics, "slots": slots, "rows": rows, "max_topics": SELF_WORK_MAX_TOPICS}
 
 
 # ── Kurs işi (0-100, giriş balından kənar) ───────────────────────────────────
