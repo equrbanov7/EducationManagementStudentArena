@@ -14,14 +14,16 @@ from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.db import connection
 from django.test import Client, RequestFactory, TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.accounts.views._helpers.rbac import _role_capabilities
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals, gradebook
 from apps.registrar import public as registrar_public
-from apps.registrar import transcript
+from apps.registrar import services, transcript
 from apps.registrar.models import (
     CourseOffering,
     Curriculum,
@@ -185,6 +187,81 @@ class BuildStudentTranscriptTest(TestCase):
         self.assertEqual(data["total_credits_earned"], 11)
         self.assertEqual(data["total_credits_gpa"], 16)
         self.assertEqual(data["ects_total"], 240)
+
+    def _two_semester_scenario(self):
+        """P1: CS101 5cr keçdi, CS102 5cr kəsildi · P2: CS201 6cr keçdi, CS202 4cr qiymətsiz."""
+        cs101 = self._offering(self._subject("CS101", 5), self.p1)
+        self._grade(cs101, self._enroll(cs101), entry=45, exam=40)  # 85 → keçdi
+        cs102 = self._offering(self._subject("CS102", 5), self.p1)
+        self._grade(cs102, self._enroll(cs102), entry=20, exam=25)  # 45 → kəsildi
+        cs201 = self._offering(self._subject("CS201", 6), self.p2)
+        self._grade(cs201, self._enroll(cs201), entry=48, exam=44)  # 92 → keçdi
+        cs202 = self._offering(self._subject("CS202", 4), self.p2)
+        self._grade(cs202, self._enroll(cs202), entry=30)  # imtahansız → davam edir
+
+    def test_credit_summary_earned_never_drifts_from_transcript(self):
+        """ECTS qutusu ilə transkript EYNİ toplanmış krediti verməlidir.
+
+        Bu, 2026-08-24 QA xətasının qapısıdır: ``get_credit_summary`` krediti
+        ``Enrollment.status``-dan oxuyurdu (``COMPLETED`` heç vaxt yazılmır) →
+        hər tələbədə ``earned=0``, «Ümumi tədris məlumatı» isə 91 deyirdi."""
+        with bypass_rls():
+            self._two_semester_scenario()
+            data = transcript.build_student_transcript(
+                student=self.student, organization=self.org, program=self.program
+            )
+            summary = services.get_credit_summary(record=self.record)
+
+        self.assertEqual(summary["earned"], data["total_credits_earned"])
+        self.assertEqual(summary["earned"], 11)  # CS101 (5) + CS201 (6)
+        self.assertEqual(summary["required"], 240)
+        self.assertEqual(summary["remaining"], 229)
+        self.assertFalse(summary["can_graduate"])
+
+    def test_credit_summary_ignores_enrollment_status(self):
+        """Status YAZI/GÖRÜNMƏ qapısıdır, kredit mənbəyi deyil.
+
+        Nə ``COMPLETED`` işarələmək krediti qazandırmalıdır, nə də ``ENROLLED``
+        qalmaq onu itirməlidir — kredit yalnız qiymətlərdən gəlir."""
+        with bypass_rls():
+            self._two_semester_scenario()
+            baseline = services.get_credit_summary(record=self.record)
+            Enrollment.objects.filter(student=self.student).update(status=Enrollment.Status.COMPLETED)
+            after = services.get_credit_summary(record=self.record)
+        self.assertEqual(after["earned"], baseline["earned"])
+        self.assertEqual(after["earned"], 11)
+
+    def test_in_progress_counts_only_unfinished_periods(self):
+        """«Davam edən» hərfi mənada: bitməmiş semestrdəki keçilməmiş fənlər."""
+        with bypass_rls():
+            self._two_semester_scenario()
+            # P2 (2025-02-01 → 2025-06-30) hələ gedir: yalnız CS202 (4cr) davam edir;
+            # P1 bitib, orada kəsilən CS102 nə toplanmışdır, nə də davam edən.
+            during_p2 = services.get_credit_summary(record=self.record, today=datetime.date(2025, 3, 1))
+            # Hər iki semestr bitdikdən sonra heç nə «davam etmir».
+            after_all = services.get_credit_summary(record=self.record, today=datetime.date(2025, 12, 1))
+        self.assertEqual(during_p2["in_progress"], 4)
+        self.assertEqual(during_p2["earned"], 11)
+        self.assertEqual(after_all["in_progress"], 0)
+        self.assertEqual(after_all["earned"], 11)
+
+    def test_credit_summary_query_count_does_not_grow_with_enrollments(self):
+        """Performans müqaviləsi: sorğu sayı qeydiyyat sayından ASILI DEYİL.
+
+        Kabinetin hər açılışında işlədiyi üçün bu funksiya bulk map-lardan
+        hesablayır (``analytics.build_evaluation_maps``); sətir-sətir
+        ``compute_final_result`` çağırışı geri qayıtsa bu test partlayır."""
+        with bypass_rls():
+            self._two_semester_scenario()
+            self.record.organization  # FK-nı isindir (ölçü yalnız aqreqatı saysın)
+            with CaptureQueriesContext(connection) as small:
+                services.get_credit_summary(record=self.record)
+            for index in range(8):
+                offering = self._offering(self._subject(f"EX{index}", 3), self.p2)
+                self._grade(offering, self._enroll(offering), entry=45, exam=40)
+            with CaptureQueriesContext(connection) as large:
+                services.get_credit_summary(record=self.record)
+        self.assertEqual(len(large), len(small), f"{len(small)} → {len(large)} sorğu (N+1 qayıdıb)")
 
     def test_no_enrollments_is_empty_state(self):
         with bypass_rls():

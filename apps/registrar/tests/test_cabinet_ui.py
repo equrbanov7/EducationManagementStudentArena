@@ -144,7 +144,8 @@ class StudentSubjectsCabinetIntegrationTest(TestCase):
         self.assertIn("my-subjects", resp.context["allowed_sections"])
         section = resp.context["student_subjects_section"]
         self.assertTrue(section["has_record"])
-        # MATH101 marked COMPLETED in the seed → earned credits on the bar.
+        # MATH101 is graded as a PASSED subject in the seed → earned credits on
+        # the bar. Kredit qiymətlərdən gəlir, ``Enrollment.status``-dan yox.
         self.assertGreater(section["credit_summary"]["earned"], 0)
         # Credit progress card + the AZ group's elective (EL-WEB) are rendered.
         self.assertContains(resp, "credit-progress-card")

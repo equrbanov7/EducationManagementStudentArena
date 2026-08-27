@@ -25,7 +25,9 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
 
-from apps.registrar import finals
+from django.utils import timezone
+
+from apps.registrar import analytics, finals
 from apps.registrar.models import Enrollment
 
 _TWO_PLACES = Decimal("0.01")
@@ -219,6 +221,64 @@ def build_student_transcript(*, student, organization, program=None):
         "total_credits_earned": overall["credits_earned"],
         "ects_total": int(getattr(program, "ects_total", 0) or 0) if program else 0,
     }
+
+
+def student_credit_totals(*, student, organization, today=None) -> dict:
+    """Boloniya kredit yekunu: TOPLANMIŞ (keçilmiş) + hazırda DAVAM EDƏN ECTS.
+
+    Niyə ayrıca funksiya (2026-08-24 QA): «Fənlərim» bölməsindəki ECTS qutusu
+    krediti ``Enrollment.status``-dan oxuyurdu — ``COMPLETED`` isə istehsal
+    kodunda heç vaxt təyin olunmur (yalnız demo seed yazır), ona görə *hər*
+    tələbədə ``earned=0`` çıxırdı, «davam edən» isə tələbənin İNDİYƏ QƏDƏR
+    keçdiyi bütün fənlərin cəmi olurdu (köçürülmüş tələbədə 294 kredit «davam
+    edir»). Status DƏYİŞDİRİLMİR — o, layihədə həm də yazı/görünmə qapısıdır
+    (``gradebook.save_marks``, ``journal_extras`` jurnal/sərbəst-iş siyahıları,
+    ``exam_bridge`` yalnız ``ENROLLED`` süzür), tarixi qeydiyyatları
+    ``COMPLETED`` etmək imtahan mərkəzinin doldurmalı olduğu köhnə jurnalları
+    gizlədər və redaktə olunmaz edərdi. Ona görə kredit
+    artıq QİYMƏTLƏRDƏN — transkriptlə EYNİ keçmə qaydası ilə — hesablanır.
+
+    Performans (seçilmiş yol və NİYƏ): sadəcə ``build_student_transcript``
+    çağırmaq olardı, amma o, sətir-sətir ``finals.compute_final_result``
+    işlədir (fənn başına ~7 sorğu; 59 fənnli real tələbədə 517 sorğu ölçüldü),
+    bu funksiya isə tələbə kabinetinin HƏR açılışında işləyir. Ona görə burada
+    ``analytics.build_evaluation_maps`` + ``analytics.evaluate_enrollment``
+    bulk yolu işlədilir: sabit ~10 sorğu, qeydiyyat sayından asılı deyil.
+    Bu, riyaziyyatı TƏKRAR YAZMAQ demək deyil — ``analytics._evaluate``
+    ``compute_final_result``-un rəsmi güzgüsüdür və ``test_analytics.py``
+    konsistensiya testi ilə ona kilidlənib; üstəlik staff tərəfdəki akademik-
+    qeyd icmalı (``apps.accounts.academic_records``) da eyni yolu işlədir.
+    Hesablanmış dəyəri saxlamaq (miqrasiya) düşünülmədi: 517 → ~10 sorğu
+    onsuz da kifayət qədər ucuzdur, denormallaşma isə yeni sinxronlaşma
+    borcu yaradardı (bax hesabat).
+
+    * ``earned``      — KEÇİLMİŞ fənlərin ECTS cəmi (``transcript``-in
+      ``total_credits_earned``-i ilə eyni qayda: ``result["passed"]``).
+    * ``in_progress`` — «davam edir» hərfi mənada: hələ BİTMƏMİŞ dövrdəki
+      (``period.end_date >= bugün``) və hələ keçilməmiş qeydiyyatların ECTS-i.
+      Bitmiş semestrdə kəsilmiş fənn nə toplanmışdır, nə də davam edən.
+    """
+    today = today or timezone.localdate()
+    enrollments = list(
+        Enrollment.objects.filter(organization=organization, student=student)
+        .exclude(status=Enrollment.Status.DROPPED)
+        .select_related("offering", "offering__subject", "offering__period")
+    )
+    if not enrollments:
+        return {"earned": 0, "in_progress": 0}
+
+    maps = analytics.build_evaluation_maps(organization, enrollments)
+    earned = 0
+    in_progress = 0
+    for enrollment in enrollments:
+        result = analytics.evaluate_enrollment(enrollment, maps)
+        if result["passed"]:
+            earned += result["credit"]
+            continue
+        end_date = getattr(enrollment.offering.period, "end_date", None)
+        if end_date is None or end_date >= today:
+            in_progress += result["credit"]
+    return {"earned": earned, "in_progress": in_progress}
 
 
 def _fail_reason_code(result) -> str:
