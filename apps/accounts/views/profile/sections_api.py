@@ -104,6 +104,14 @@ SECTION_PARTIALS: dict[str, str] = {
     "org-members": "accounts/profile/sections/_org_members.html",
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
+    # 2026-08-27: bu ikisi `profile.html`-in `data-ajax-sections` siyahısında
+    # VAR idi, amma burada YOX idi — yəni ön tərəf fraqment istəyirdi, backend
+    # isə `_ensure_section_allowed`-da 403 qaytarırdı.  Dekan/kafedra müdiri
+    # menyuda «Bölmə imtahanları»nı görür, klikləyəndə isə xəta alırdı.
+    # (Tam səhifə yolu `?section=` işləyirdi — ona görə problem yalnız QA
+    # süpürgəsində üzə çıxdı.)
+    "unit-exams": "accounts/profile/sections/_unit_exams.html",
+    "superadmin-org-inspector": "accounts/profile/sections/superadmin/_superadmin_org_inspector.html",
     # U12 — registrar kabinet bölmələri (profil shell-inin içində)
     "my-schedule": "accounts/profile/sections/_my_schedule.html",
     "academic-calendar": "accounts/profile/sections/_academic_calendar.html",
@@ -146,6 +154,9 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-members",
         "org-roles",
         "audit-log",
+        # Hər ikisi OXU-ONLY siyahıdır (form/admin vəziyyəti daşımır) — AJAX-safe.
+        "unit-exams",
+        "superadmin-org-inspector",
         # RİM mərkəzi — panel oxu-only render olunur (bütün mutasiyalar ayrıca
         # JSON POST endpoint-inə gedir), ona görə AJAX swap təhlükəsizdir.
         "rim-center",
