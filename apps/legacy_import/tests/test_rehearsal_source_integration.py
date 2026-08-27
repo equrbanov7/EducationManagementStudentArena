@@ -11,7 +11,12 @@ Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
-The second test drives the FULL SIXTEEN-phase registry — ``academic_structure``
+The second test drives SIXTEEN of the registry's SEVENTEEN phases —
+``journal_selfwork`` (J9, order 45) is DELIBERATELY not selected because the
+synthetic fixture carries no syllabus shapes (``journals.sillabus_id`` column,
+``sillabus`` and ``sillabus_serbest_is`` tables); ``select_phases`` accepts a
+subset, so a sixteen-key policy is legitimate, not stale.  The phases run are
+``academic_structure``
 (31 + 83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424),
 ``identity_cohort`` (7 816 + 729), the three derived identity phases, and the
 FAZA 3B journal cluster (J0-J8) fed by seven synthetic journal tables
@@ -1201,15 +1206,22 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         assert periods.count() == 12
         assert periods.filter(is_current=True).exists() is False
         offerings = offering_model.objects.filter(organization=first_organization)
-        # J1: 21 MIGRATED jurnal → 20 offering (6/7 cütü V7 merge ilə tək
-        # ``group=NULL`` offering-ə qatlanır); hər offering-in draft sxemi var.
-        assert offerings.count() == 20
-        assert offerings.filter(group__isnull=True).count() == 1
+        # J1 (qrup-başına bölgü, 2026-08): 21 MIGRATED jurnal → 23 offering.
+        # 19 jurnal tək qrupludur; 6 (``["3","4"]``) və 7 (``["5","6"]``) isə
+        # İKİ qrupludur və hər biri İKİ dilim verir: 19 + 2 + 2 = 23.
+        # Köhnə (bölgüsüz) davranışda 6 və 7 eyni (fənn, dövr, group=NULL)
+        # açarına düşüb TƏK offering-ə qatlanırdı, ona görə say 20 idi.
+        assert offerings.count() == 23
+        # Bölgünün ÖZ invariantı: hər dilim ÖZ qrupunu alır — heç iki dilim
+        # bir qrupa qatlanmır və qrupsuz (group=NULL) offering ümumiyyətlə
+        # yaranmır (``_slice_entry`` qrupu həll olunmayan dilimi karantinə atır).
+        assert offerings.values("group").distinct().count() == 23
+        assert offerings.filter(group__isnull=True).count() == 0
         # V5/PG: staged üzvlüklər qeyri-aktivdir və ``registrar_guard_active_member``
         # ``grade.input``-lu instructor istinadını rədd edərdi — fixture qəsdən
         # yalnız həll olunmayan teacher_id daşıyır, instructor hər yerdə NULL.
         assert offerings.filter(instructor__isnull=False).exists() is False
-        assert scheme_model.objects.filter(organization=first_organization).count() == 20
+        assert scheme_model.objects.filter(organization=first_organization).count() == 23
         # J2: eyni trigger Enrollment-in ``student_id``-si üçün də aktiv üzvlük
         # tələb edir, staged hesablar isə qeyri-aktivdir — ona görə sintetik
         # jurnallar MIGRATED offering-lərdə yalnız naməlum tələbə istinadları
@@ -1217,9 +1229,15 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         # Enrollment yazılmır; materialise yolu sqlite unit dəstində sübutludur.
         assert enrollment_model.objects.filter(organization=first_organization).count() == 0
         lessons = lesson_model.objects.filter(organization=first_organization)
-        # J3: 60 sətirdən 48 dərs (2 dublikat + 5 orphan + 5 yararsız kənarda);
+        # J3: 60 sətirdən 54 dərs.  Bir legacy tarix sətri jurnalın HƏR
+        # materiallaşmış diliminə təkrarlanır; 48 keçərli sətrin 6-sı çoxqruplu
+        # jurnala (6 və 7) düşür və 2 dilimə açılır: 42×1 + 6×2 = 54.
+        # Kənarda qalan 12 sətir bölgüdən ƏVVƏLKİ pillədə dayanır (2 dublikat +
+        # 5 orphan + 5 yararsız), ona görə jurnal-səviyyə TƏK möhür alır.
         # instructor açılış müəlliminin güzgüsüdür — hamısı NULL.
-        assert lessons.count() == 48
+        assert lessons.count() == 54
+        # Bölgünün ikinci invariantı: 23 açılışın HAMISINDA dərs var.
+        assert lessons.values("offering_id").distinct().count() == 23
         assert lessons.filter(instructor__isnull=False).exists() is False
 
         # J4-J6: qeydiyyat yoxdur (yuxarıdakı J2 qeydi) → HEÇ BİR bal xanası
@@ -1236,10 +1254,10 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         assert component_score_model.objects.filter(organization=first_organization).count() == 0
         assert final_model.objects.filter(organization=first_organization).count() == 0
         assert resit_model.objects.filter(organization=first_organization).count() == 0
-        # J7/V10: hər 20 açılışın sxemi APPROVED + published-dir (bütün sintetik
+        # J7/V10: hər 23 açılışın sxemi APPROVED + published-dir (bütün sintetik
         # dövrlər 2021-2025-dədir, yəni artıq bitib); CheckConstraint cütü qorunur.
         published = scheme_model.objects.filter(organization=first_organization, is_published=True)
-        assert published.count() == 20
+        assert published.count() == 23
         assert published.exclude(approval_status="approved").exists() is False
 
         # QLOBAL VƏZİYYƏTİN BƏRPASI (2026-08-26 determinizm insidenti): staging
@@ -1349,9 +1367,9 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         }
         assert journal_states == {
             "journal_periods": {"period_materialised": 12, "period_unresolved": 1},
-            "journal_offerings": {"offering_materialised": 21, "offering_discarded": 3, "offering_unresolved": 6},
+            "journal_offerings": {"offering_materialised": 23, "offering_discarded": 3, "offering_unresolved": 6},
             "journal_enrollments": {"enrollment_skipped": 56, "enrollment_unresolved": 1},
-            "journal_lessons": {"lesson_materialised": 48, "lesson_skipped": 7, "lesson_unresolved": 5},
+            "journal_lessons": {"lesson_materialised": 54, "lesson_skipped": 7, "lesson_unresolved": 5},
             # J4: 5 jurnal toxunulur — 1 və 2 karantin kodu daşıyır, 6/7 və
             # V6-süzülmüş 3 isə yalnız yazıla bilməyən sətirlər (spec B.6:
             # möhür JURNAL səviyyəsindədir, sətir başına map yoxdur).
@@ -1361,13 +1379,20 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "journal_components": {"journal_components_skipped": 1, "journal_components_unresolved": 4},
             # J5b: heç bir yazılış MIGRATED deyil (yuxarıdakı J2 qeydi) → 21
             # materiallaşmış dilimin hamısı üzvsüz, yəni sırf SKIPPED möhürdür.
-            "journal_entry_scores": {"journal_entry_scores_skipped": 21},
+            "journal_entry_scores": {"journal_entry_scores_skipped": 23},
             "journal_finals": {"journal_finals_skipped": 1, "journal_finals_unresolved": 4},
             # J7: 21 MIGRATED jurnalın hamısının dövrü bitib → hamısı kilidli.
-            "journal_lock": {"journal_locked": 21},
+            "journal_lock": {"journal_locked": 23},
             # J8: 3 balans yoxlaması (hamısı delta ilə) + 10 ``yekun`` sətri
             # (qeydiyyat həll olunmur) + 1 karantin xülasəsi.
-            "journal_reconcile": {"reconcile_balanced": 1, "reconcile_deviation": 13},
+            # J8 dörd mənbədən möhür yığır: _balance (3, hamısı QUARANTINED),
+            # _finals (10 ``yekun`` sətri, QUARANTINED), _coverage
+            # (``a-final-coverage``, SKIPPED) və _summary
+            # (``a-quarantine-summary``, SKIPPED).  SKIPPED → balanced = 2,
+            # QUARANTINED → deviation = 3 + 10 = 13.  Köhnə `1` rəqəmi
+            # ``a-final-coverage`` möhürü əlavə olunmamışdan əvvəlkidir
+            # (bu, qrup bölgüsü ilə ƏLAQƏSİZ ikinci köhnəlmədir).
+            "journal_reconcile": {"reconcile_balanced": 2, "reconcile_deviation": 13},
         }
         # J-V9(F) uyğunluq cədvəli sətir-başına İNFO kimi + tam issue taksonomiyası.
         assert histogram.get(("legacy_journal_period_created", "info"), 0) == 12
@@ -1375,11 +1400,18 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         assert histogram.get(("legacy_journal_period_current_flag", "info"), 0) == 1
         assert histogram.get(("legacy_journal_period_invalid", "warning"), 0) == 1
         assert histogram.get(("legacy_journal_discarded_source", "info"), 0) == 3
-        assert histogram.get(("legacy_journal_multi_group", "info"), 0) == 2
-        assert histogram.get(("legacy_journal_offering_merged", "info"), 0) == 1
+        # Bölgüdən sonra bu İNFO jurnal başına DEYİL, DİLİM başına yanır:
+        # 6 və 7-nin hər biri 2 dilim → 4.
+        assert histogram.get(("legacy_journal_multi_group", "info"), 0) == 4
+        # Bölgü birləşməni aradan qaldırdı: 6 və 7 artıq FƏRQLİ qruplara
+        # düşür, ona görə eyni açara qatlanmırlar.  ⚠️ Bu assert indi MƏNFİ
+        # sübutdur — ``.get(..., 0)`` forması C6 birləşmə yolu kodda tamamilə
+        # silinsə də yaşıl qalar; real birləşmə cütü fixture-ə əlavə edilməyib.
+        assert histogram.get(("legacy_journal_offering_merged", "info"), 0) == 0
         # V5: instructor həlli QƏSDƏN heç vaxt alınmır (PG active-member qeydi
         # yuxarıda) — bütün 21 materialised + 6 karantin jurnalda İNFO yanır.
-        assert histogram.get(("legacy_journal_instructor_unresolved", "info"), 0) == 27
+        # 23 MIGRATED dilim + 5 jurnal-səviyyə karantin + jurnal 10-un dilimi.
+        assert histogram.get(("legacy_journal_instructor_unresolved", "info"), 0) == 29
         assert histogram.get(("legacy_journal_groups_invalid", "warning"), 0) == 2
         assert histogram.get(("legacy_journal_group_unresolved", "warning"), 0) == 1
         assert histogram.get(("legacy_journal_subject_unresolved", "warning"), 0) == 2
@@ -1418,7 +1450,7 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         # J-V13 catch-all: pa/wr/ga/ss/ww/ll/rr + ``im`` altındakı ``l``.
         assert histogram.get(("legacy_journal_mark_code_unknown", "warning"), 0) == 4
         # J7/J8 sübutları.
-        assert histogram.get(("legacy_journal_lock_applied", "info"), 0) == 21
+        assert histogram.get(("legacy_journal_lock_applied", "info"), 0) == 23
         assert histogram.get(("legacy_journal_lock_deferred", "info"), 0) == 0
         assert histogram.get(("legacy_journal_reconcile_row_balance", "info"), 0) == 3
         assert histogram.get(("legacy_journal_reconcile_final_unresolved", "warning"), 0) == 10
