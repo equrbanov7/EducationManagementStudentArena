@@ -1,11 +1,15 @@
 """Tests for the official transcript PDF export (U9)."""
 
+from unittest import mock
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar import finals, services, transcript, transcript_pdf
+from apps.registrar import finals
+from apps.registrar import public as registrar_public
+from apps.registrar import services, transcript, transcript_pdf
 from apps.registrar.models import Curriculum, CurriculumSubject, Program, StudentAcademicRecord, Subject
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
@@ -106,15 +110,27 @@ class TranscriptPdfTest(TestCase):
         self.assertIn("CS101", text)
         self.assertIn("Qərbi Kaspi Universiteti", text)
 
-    def test_student_downloads_own_transcript(self):
+    def test_self_service_download_is_closed(self):
+        """2026-08: tələbənin öz transkriptini yükləməsi bağlıdır (müraciət yolu gələcək).
+
+        Kabinet bölməsi gizlədilib; PDF açıq qalsaydı gizlətmə mənasız olardı.
+        Bax: ``registrar.public.STUDENT_TRANSCRIPT_SELF_SERVICE``.
+        """
         resp = self._client(self.student).get(reverse("registrar:my_transcript_pdf"))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_self_service_download_works_when_flag_reopened(self):
+        """Bayraq açılanda köhnə davranış olduğu kimi qayıdır (məntiq silinməyib)."""
+        with mock.patch.object(registrar_public, "STUDENT_TRANSCRIPT_SELF_SERVICE", True):
+            resp = self._client(self.student).get(reverse("registrar:my_transcript_pdf"))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp["Content-Type"], "application/pdf")
         self.assertIn("transkript-tp_student.pdf", resp["Content-Disposition"])
         self.assertTrue(resp.content.startswith(b"%PDF"))
 
     def test_student_without_enrollments_gets_404(self):
-        resp = self._client(self.other_student).get(reverse("registrar:my_transcript_pdf"))
+        with mock.patch.object(registrar_public, "STUDENT_TRANSCRIPT_SELF_SERVICE", True):
+            resp = self._client(self.other_student).get(reverse("registrar:my_transcript_pdf"))
         self.assertEqual(resp.status_code, 404)
 
     def test_staff_downloads_student_transcript(self):
@@ -130,7 +146,9 @@ class TranscriptPdfTest(TestCase):
     def test_issuance_is_audited(self):
         from apps.audit.models import AuditLog
 
-        self._client(self.student).get(reverse("registrar:my_transcript_pdf"))
+        # Audit izi ƏMƏKDAŞ yolundan yoxlanılır — tələbənin öz-özünə yükləməsi
+        # bağlandığı üçün rəsmi sənəd artıq yalnız konsoldan verilir.
+        self._client(self.owner).get(reverse("registrar:student_transcript_pdf", args=[self.record.id]))
         with bypass_rls():
             self.assertTrue(
                 AuditLog.objects.filter(

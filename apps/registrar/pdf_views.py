@@ -59,7 +59,17 @@ def _render_response(*, organization, student, record) -> HttpResponse:
 
 @login_required
 def my_transcript_pdf(request):
-    """The requesting student's own transcript as PDF."""
+    """The requesting student's own transcript as PDF.
+
+    FAIL-CLOSED: ``public.STUDENT_TRANSCRIPT_SELF_SERVICE`` bağlı ikən 404 —
+    kabinetdə bölmə gizlədildiyi halda faylın birbaşa URL ilə yüklənməsi
+    gizlətməni mənasız edərdi. Əməkdaş yolu (``student_transcript_pdf``)
+    bu qapıdan KEÇMİR.
+    """
+    from apps.registrar.public import STUDENT_TRANSCRIPT_SELF_SERVICE
+
+    if not STUDENT_TRANSCRIPT_SELF_SERVICE:
+        raise Http404
     organization = getattr(request, "organization", None)
     if organization is None:
         raise Http404

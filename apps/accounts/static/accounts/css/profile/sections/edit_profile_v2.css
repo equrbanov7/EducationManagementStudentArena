@@ -153,30 +153,50 @@
     flex-shrink: 0;
 }
 
+/* Əməliyyat düymələri GÖRÜNƏN çərçivəlidir: əvvəl çərçivəsiz/solğun ikon idi
+   və dolu mavi «Əlavə et» düyməsinin yanında klik oluna bilən kimi oxunmurdu
+   (sahib: «qoyduğunu dəyişmək olmur kimidir»). Ölçü 32px hündürlükdə qalır. */
 .academic-item__action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    gap: 6px;
+    min-width: 32px;
     height: 32px;
-    border: none;
+    padding: 0 8px;
+    border: 1px solid var(--profile-border);
     border-radius: 8px;
-    background: transparent;
-    color: var(--profile-muted);
+    background: var(--ems-neutral-0, #fff);
+    color: var(--profile-text);
+    font-size: 0.82rem;
+    line-height: 1;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* «Redaktə» əsas əməliyyatdır — etiketi ilə birlikdə mavi vurğulanır. */
+.academic-item__action--edit {
+    border-color: var(--ems-primary-200, #bfdbfe);
+    color: var(--ems-primary-700);
+}
+
+.academic-item__action-label {
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .academic-item__action:hover,
 .academic-item__action:focus-visible {
     background: var(--ems-primary-50);
+    border-color: var(--ems-primary-600);
     color: var(--ems-primary-700);
 }
 
 .academic-item__action--danger:hover,
 .academic-item__action--danger:focus-visible {
     background: var(--ems-danger-100, #fee2e2);
+    border-color: #991b1b;
     color: #991b1b;
 }
 
@@ -242,7 +262,11 @@
     justify-content: flex-end;
     gap: 14px;
     flex-wrap: wrap;
-    width: min(760px, calc(100vw - 32px));
+    /* Məzmuna görə daralır: sabit 760px-də «Yadda saxlanmamış dəyişikliklər»
+       nişanı gizli olanda pilləkin sol yarısı BOŞ ağ zolaq kimi qalırdı.
+       max-width uzun status mətnində əvvəlki tavanı saxlayır. */
+    width: auto;
+    max-width: min(760px, calc(100vw - 32px));
     box-sizing: border-box;
     padding: 12px 18px;
     background: rgba(255, 255, 255, 0.94);
@@ -267,6 +291,9 @@
         justify-content: stretch;
         border-radius: 16px;
         bottom: 8px;
+        /* Mobil davranış DƏYİŞMİR: burada düymələr 3 sütunlu grid ilə tam eni
+           tutur, ona görə desktop-dakı «məzmuna görə daral» qaydası ləğv olunur. */
+        width: min(760px, calc(100vw - 32px));
     }
 
     .edit-profile-savebar__actions {

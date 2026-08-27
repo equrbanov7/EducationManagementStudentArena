@@ -1,5 +1,11 @@
 # EMSArena legacy miqrasiyası — status ledger
 
+> ⚠️ **Bu ledger 25 avqustda dayanıb.** 25-27 avqust arasında görülən iş —
+> 17 fazalıq registr, qrup-başına jurnal bölgüsü, arxiv üzvlüyü, J5b/J9
+> fazaları, RİM, imtahan balı girişi, jurnal bağlanması — və qalan açıq
+> qərarlar üçün **`HANDOFF_2026_08_27.md`** sənədinə baxın. Aşağıdakı
+> mərhələ cədvəli M5-ə qədər etibarlıdır, sonrası orada davam edir.
+
 Son yenilənmə: 25 avqust 2026  
 Cari mərhələ: `M4 — Rehearsal orkestratoru kodlandı, PostgreSQL/real-source sübutu gözləyir`  
 Ümumi qərar: `NO-GO for production`, lokal hazırlıq davam edir.  

@@ -12,7 +12,7 @@
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260816-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260827-1">
 
     <form method="post" enctype="multipart/form-data" id="editProfileForm" class="edit-profile-form">
         {% csrf_token %}
@@ -325,7 +325,7 @@
     </div>
 
     {# defer: EMSReady/EMSCore base.html sonunda yüklənir — sync script onlardan əvvəl işə düşərdi. #}
-    <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260815-2" defer></script>
+    <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260827-1" defer></script>
     <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260815-1" defer></script>
 </section>
 {% endif %}

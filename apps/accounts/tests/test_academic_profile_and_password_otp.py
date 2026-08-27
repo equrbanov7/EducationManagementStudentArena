@@ -128,6 +128,106 @@ class AcademicItemsApiTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.teacher.academic_items.count(), 0)
 
+    def test_update_keeps_every_editable_field(self):
+        """Bütün redaktə oluna bilən sahələr (başlıq/detal/il/keçid/növ) yenilənir."""
+        item = AcademicProfileItem.objects.create(
+            user=self.teacher,
+            kind=AcademicProfileItem.Kind.PUBLICATION,
+            title="Köhnə başlıq",
+            detail="Köhnə jurnal",
+            year=2020,
+            link="https://example.com/old",
+        )
+        response = self._post(
+            self.teacher,
+            action="update",
+            item_id=str(item.pk),
+            kind="conference",
+            title="Yeni başlıq",
+            detail="Yeni konfrans",
+            year="2024",
+            link="https://example.com/new",
+        )
+        self.assertEqual(response.status_code, 200)
+        item.refresh_from_db()
+        self.assertEqual(item.kind, AcademicProfileItem.Kind.CONFERENCE)
+        self.assertEqual(item.title, "Yeni başlıq")
+        self.assertEqual(item.detail, "Yeni konfrans")
+        self.assertEqual(item.year, 2024)
+        self.assertEqual(item.link, "https://example.com/new")
+        # Cavabdakı fraqment dərhal yenilənmiş dəyəri daşıyır (client swap edir).
+        self.assertIn("Yeni başlıq", response.json()["html"])
+        self.assertNotIn("Köhnə başlıq", response.json()["html"])
+
+    def test_update_rejects_blank_title(self):
+        item = AcademicProfileItem.objects.create(
+            user=self.teacher, kind=AcademicProfileItem.Kind.PUBLICATION, title="Qalmalı"
+        )
+        response = self._post(self.teacher, action="update", item_id=str(item.pk), kind="publication", title="   ")
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        item.refresh_from_db()
+        self.assertEqual(item.title, "Qalmalı")
+
+    def test_update_rejects_overlong_title_and_detail(self):
+        item = AcademicProfileItem.objects.create(
+            user=self.teacher, kind=AcademicProfileItem.Kind.PUBLICATION, title="Qalmalı", detail="Detal"
+        )
+        response = self._post(self.teacher, action="update", item_id=str(item.pk), kind="publication", title="a" * 201)
+        self.assertEqual(response.status_code, 400)
+
+        response = self._post(
+            self.teacher,
+            action="update",
+            item_id=str(item.pk),
+            kind="publication",
+            title="Normal",
+            detail="d" * 256,
+        )
+        self.assertEqual(response.status_code, 400)
+
+        item.refresh_from_db()
+        self.assertEqual(item.title, "Qalmalı")
+        self.assertEqual(item.detail, "Detal")
+
+    def test_update_rejects_unknown_item_id(self):
+        response = self._post(self.teacher, action="update", item_id="999999", kind="publication", title="X")
+        self.assertEqual(response.status_code, 404)
+
+        response = self._post(self.teacher, action="update", item_id="abc", kind="publication", title="X")
+        self.assertEqual(response.status_code, 404)
+
+
+class AcademicItemsEditAffordanceTest(TestCase):
+    """Redaktə düyməsi UI-da GÖRÜNƏN affordans kimi render olunur.
+
+    Funksiya əvvəl də işləyirdi; problem düymənin çərçivəsiz/etiketsiz solğun
+    ikon olması idi. Bu test etiketin və data-atributların itməməsini kilidləyir
+    (data-atributlar olmadan modal boş açılır — JS onları oxuyur).
+    """
+
+    def test_edit_button_is_labelled_and_carries_item_data(self):
+        teacher = _make_user("afford_teacher", ProfileRole.TEACHER)
+        AcademicProfileItem.objects.create(
+            user=teacher,
+            kind=AcademicProfileItem.Kind.SUBJECT,
+            title="Verilənlər bazası",
+            detail="KE kafedrası",
+            year=2025,
+        )
+        self.client.force_login(teacher)
+        response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+
+        self.assertIn("js-academic-item-edit", html)
+        self.assertIn("academic-item__action--edit", html)
+        self.assertIn("academic-item__action-label", html)
+        # Modalı dolduran data-atributlar (JS müqaviləsi).
+        for attribute in ("data-item-id=", "data-kind=", "data-title=", "data-detail=", "data-year="):
+            self.assertIn(attribute, html)
+        self.assertIn("Verilənlər bazası", html)
+
 
 class ChangePasswordOtpTest(TestCase):
     def setUp(self):

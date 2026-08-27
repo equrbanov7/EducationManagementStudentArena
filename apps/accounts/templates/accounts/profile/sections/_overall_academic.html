@@ -17,12 +17,19 @@ decoration over the same enrollment aggregation the "Transkript" section uses
             <p class="oa-subtitle">
                 {% trans "Bütün semestrlər üzrə keçdiyin fənlər — kredit, müəllim, giriş+çıxış balı və nəticə. Kəsilən fənlər qırmızı, səbəbi ilə göstərilir." context "profile.overall_academic" %}
             </p>
+            {% comment %}
+            Transkript keçidi YALNIZ bölmə icazəlidirsə göstərilir. 2026-08-dən
+            tələbədə «my-transcript» yoxdur (müraciət axını gələcək), ona görə
+            şərtsiz link ÖLÜ keçid olardı — istifadəçini profile-info-ya atardı.
+            {% endcomment %}
+            {% if 'my-transcript' in allowed_sections %}
             <a class="oa-transcript-link"
                href="{{ profile_base_url }}?section=my-transcript"
                data-section="my-transcript"
                title="{% trans 'Rəsmi kredit-çəkili transkriptə bax' context 'profile.overall_academic' %}">
                 <i class="fas fa-scroll"></i> {% trans "Transkriptə bax" context "profile.overall_academic" %}
             </a>
+            {% endif %}
         </div>
 
         {% if not oa.has_record %}
