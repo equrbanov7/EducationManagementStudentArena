@@ -36,6 +36,11 @@ from .field_contracts import (
     LegacySourceFieldContract,
     compile_safe_projection,
 )
+from .syllabus_field_contracts import (
+    JOURNAL_SYLLABUS_FIELDS,
+    SILLABUS_FIELDS,
+    SILLABUS_SELF_WORK_FIELDS,
+)
 
 DEFAULT_SOURCE_CHUNK_SIZE = 1_000
 MAX_SOURCE_CHUNK_SIZE = 10_000
@@ -59,6 +64,12 @@ _AUDITED_CONTRACTS = {
     JOURNAL_POINT_ARCHIVE_FIELDS.fingerprint: JOURNAL_POINT_ARCHIVE_FIELDS,
     ALLOWED_QB_FIELDS.fingerprint: ALLOWED_QB_FIELDS,
     YEKUN_FIELDS.fingerprint: YEKUN_FIELDS,
+    # J9 (journal_selfwork) — sillabus domeni.  Cədvəllər plan-da
+    # ``design_gated``-dir: onlar İDDİA edilə bilməz, amma audited
+    # kontraktla OXUNA bilər (bax ``rehearsal_contracts`` seam qeydi).
+    JOURNAL_SYLLABUS_FIELDS.fingerprint: JOURNAL_SYLLABUS_FIELDS,
+    SILLABUS_FIELDS.fingerprint: SILLABUS_FIELDS,
+    SILLABUS_SELF_WORK_FIELDS.fingerprint: SILLABUS_SELF_WORK_FIELDS,
 }
 
 

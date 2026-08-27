@@ -14,6 +14,7 @@ from apps.legacy_import.services.rehearsal_journal_finals_phase import JournalFi
 from apps.legacy_import.services.rehearsal_journal_marks_phase import JournalMarksPhase
 from apps.legacy_import.services.rehearsal_journal_reconcile_phase import (
     DERIVED_DIGEST_NAMESPACE,
+    FINAL_COVERAGE_KEY,
     ISSUE_SEVERITY,
     JOURNAL_RECONCILE_PHASE_KEY,
     QUARANTINE_SUMMARY_KEY,
@@ -21,7 +22,11 @@ from apps.legacy_import.services.rehearsal_journal_reconcile_phase import (
     JournalReconcilePhase,
     yekun_seal_key,
 )
-from apps.legacy_import.services.rehearsal_journal_reconcile_source import BALANCE_KEYS, balance_delta
+from apps.legacy_import.services.rehearsal_journal_reconcile_source import (
+    BALANCE_KEYS,
+    balance_delta,
+    final_coverage,
+)
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.tests import journal_points_harness as harness
 
@@ -45,6 +50,7 @@ def test_issue_severity_map_covers_exactly_the_reconcile_taxonomy():
         "legacy_journal_reconcile_row_balance": "info",
         "legacy_journal_reconcile_final_deviation": "info",
         "legacy_journal_reconcile_quarantine_summary": "info",
+        "legacy_journal_final_missing": "info",
         "legacy_journal_reconcile_final_unresolved": "warning",
     }
     assert set(ISSUE_SEVERITY.values()) <= set(LegacyMigrationIssue.Severity.values)
@@ -134,20 +140,25 @@ def test_a_fully_written_import_balances_on_every_domain(actor):
         harness.context(rows_by_table=rows, run=run, organization=org, actor=actor, notes=notes)
     )
 
-    assert dict(report.state_counts) == {"reconcile_balanced": 4}
+    # 5 möhür: 3 balans + imtahan nəticəsi örtüyü + karantin xülasəsi.
+    assert dict(report.state_counts) == {"reconcile_balanced": 5}
     assert _states(run) == {
         "a-balance-marks": "skipped",
         "a-balance-components": "skipped",
         "a-balance-finals": "skipped",
+        FINAL_COVERAGE_KEY: "skipped",
         QUARANTINE_SUMMARY_KEY: "skipped",
     }
     assert _issues(run) == {
         ("a-balance-marks", "legacy_journal_reconcile_row_balance"): "info",
         ("a-balance-components", "legacy_journal_reconcile_row_balance"): "info",
         ("a-balance-finals", "legacy_journal_reconcile_row_balance"): "info",
+        # Xanalar YALNIZ STUDENT_A üçündür → STUDENT_B-nin imtahan nəticəsi
+        # yoxdur, yəni örtük natamamdır və B-tapşırığının İNFO-su yazılır.
+        (FINAL_COVERAGE_KEY, "legacy_journal_final_missing"): "info",
         (QUARANTINE_SUMMARY_KEY, "legacy_journal_reconcile_quarantine_summary"): "info",
     }
-    assert notes == [f"{JOURNAL_RECONCILE_PHASE_KEY}.records.4"]
+    assert notes == [f"{JOURNAL_RECONCILE_PHASE_KEY}.records.5"]
 
 
 def test_a_duplicate_loser_shows_up_as_a_marks_balance_delta(actor):
@@ -162,7 +173,7 @@ def test_a_duplicate_loser_shows_up_as_a_marks_balance_delta(actor):
     org, run = _seeded(actor, "reconcile-delta", rows)
     report = JournalReconcilePhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
 
-    assert dict(report.state_counts) == {"reconcile_balanced": 3, "reconcile_deviation": 1}
+    assert dict(report.state_counts) == {"reconcile_balanced": 4, "reconcile_deviation": 1}
     assert _states(run)["a-balance-marks"] == "quarantined"
 
 
@@ -177,7 +188,7 @@ def test_the_empty_and_unreadable_rows_never_count_as_a_deviation(actor):
     org, run = _seeded(actor, "reconcile-unwritable", rows)
     report = JournalReconcilePhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
 
-    assert dict(report.state_counts) == {"reconcile_balanced": 4}
+    assert dict(report.state_counts) == {"reconcile_balanced": 5}
 
 
 def test_the_yekun_mirror_matches_a_written_journal(actor):
@@ -195,7 +206,7 @@ def test_the_yekun_mirror_matches_a_written_journal(actor):
     report = JournalReconcilePhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
 
     assert _states(run)[yekun_seal_key(1)] == "skipped"
-    assert dict(report.state_counts) == {"reconcile_balanced": 5}
+    assert dict(report.state_counts) == {"reconcile_balanced": 6}
 
 
 def test_a_yekun_deviation_is_reported_as_info_and_quarantined(actor):
@@ -270,7 +281,7 @@ def test_a_repeated_invocation_replays_the_sealed_checks(actor):
 
     assert second.phase_digest == first.phase_digest
     assert dict(second.state_counts) == dict(first.state_counts)
-    assert LegacyEntityMap.objects.filter(entity_type=RECONCILE_ENTITY_TYPE).count() == 5
+    assert LegacyEntityMap.objects.filter(entity_type=RECONCILE_ENTITY_TYPE).count() == 6
 
 
 def test_the_live_phase_digest_equals_the_ledger_rebuild(actor):
@@ -284,3 +295,48 @@ def test_the_live_phase_digest_equals_the_ledger_rebuild(actor):
 
     assert rebuilt.phase_digest == live.phase_digest
     assert dict(rebuilt.state_counts) == dict(live.state_counts)
+
+
+# ── (d) imtahan nəticəsi örtüyü (B-tapşırığı, 2026-08) ───────────────────────
+
+
+def test_the_coverage_seal_counts_enrollments_without_any_exam_result(actor):
+    """Hər iki tələbənin ``im`` xanası varsa örtük tamdır — İNFO yazılmır."""
+
+    rows = harness.tables(
+        points=[
+            _pseudo(1, "im", "40"),
+            _pseudo(2, "im", "45", student_id=harness.STUDENT_B),
+        ]
+    )
+    org, run = _seeded(actor, "reconcile-coverage-full", rows)
+    report = JournalReconcilePhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
+
+    assert final_coverage(_ctx(org)) == {"enrollments": 2, "covered": 2, "missing": 0}
+    assert _states(run)[FINAL_COVERAGE_KEY] == "skipped"
+    assert (FINAL_COVERAGE_KEY, "legacy_journal_final_missing") not in _issues(run)
+    assert "reconcile_deviation" not in report.state_counts
+
+
+def test_an_enrollment_without_an_exam_result_is_reported_but_never_blocks(actor):
+    """Nəticəsiz yazılış İNFO ilə görünür; möhür SKIPPED qalır (karantin DEYİL)."""
+
+    rows = harness.tables(points=[_pseudo(1, "im", "40")])
+    org, run = _seeded(actor, "reconcile-coverage-gap", rows)
+    JournalReconcilePhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
+
+    # STUDENT_B-nin imtahan nəticəsi yoxdur → nə keçir, nə kəsilir.
+    assert final_coverage(_ctx(org)) == {"enrollments": 2, "covered": 1, "missing": 1}
+    assert _states(run)[FINAL_COVERAGE_KEY] == "skipped"
+    assert _issues(run)[(FINAL_COVERAGE_KEY, "legacy_journal_final_missing")] == "info"
+
+
+class _Ctx:
+    """``final_coverage`` yalnız ``organization``-a baxır — minimal ikiüzlü."""
+
+    def __init__(self, organization):
+        self.organization = organization
+
+
+def _ctx(org):
+    return _Ctx(org)

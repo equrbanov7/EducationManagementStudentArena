@@ -488,12 +488,12 @@ _INT_COLUMNS = {
     # J0-J3: canlı sxemdə (DESCRIBE ilə təsdiqli) bu sütunlar ``int``-dir və
     # ``legacy_int`` mətn görəndə fail-closed olur — fixture real tipi saxlayır.
     "semestr_jurnal": ("is_current",),
-    "journals": ("lesson_id", "semestr", "teacher_id", "fake", "sonra_sil", "active"),
+    "journals": ("lesson_id", "semestr", "teacher_id", "fake", "sonra_sil", "active", "fenn_saati"),
     "journals_dates_added_by_teacher": ("journal_id", "month", "day"),
     # J4-J8: bal xanalarının rəqəm sütunları (``legacy_flag``/``student_id``
     # mətn görəndə fail-closed olur, ona görə fixture real tipi saxlayır).
-    "journals_dates_points": ("student_id", "excusable", "j_id", "lab", "update_counter"),
-    "journals_dates_points_archive": ("student_id", "excusable", "j_id", "lab", "update_counter"),
+    "journals_dates_points": ("student_id", "excusable", "j_id", "lab", "update_counter", "sem_muh"),
+    "journals_dates_points_archive": ("student_id", "excusable", "j_id", "lab", "update_counter", "sem_muh"),
     "allowed_qb": ("student_id",),
     "yekun": ("student_id", "lesson_id", "journal_id"),
 }

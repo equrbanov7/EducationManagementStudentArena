@@ -523,3 +523,97 @@ class RecordsRoleGateTest(_RecordsBase):
         self.assertNotIn("assistant_teacher", ACADEMIC_RECORDS_ROLES)
         self.assertNotIn("student", ACADEMIC_RECORDS_ROLES)
         self.assertNotIn("tutor", ACADEMIC_RECORDS_ROLES)
+
+
+class UngradedEnrollmentTest(_RecordsBase):
+    """«Qiymətləndirilməyib» (2026-08): nə keçən, nə kəsilən yazılış GÖRÜNÜR.
+
+    Legacy köçürmədə 106 870 yazılışın 23 382-sinin (21.9 %) imtahan çıxış balı
+    yoxdur — nə ``FinalGrade.exam_score``, nə ``ResitRecord.resit_score``. Belə
+    sətir əvvəllər heç bir qutuya düşmürdü: krediti sayılmır, kəsrə də girmir,
+    yəni ekranda sadəcə YOX idi. İndi öz qutusu və öz sütunu var.
+    """
+
+    def _drop_exam_score(self, student):
+        from apps.registrar.models import FinalGrade
+
+        with bypass_rls():
+            FinalGrade.objects.filter(enrollment__student=student).delete()
+
+    def test_an_enrollment_without_an_exam_score_is_counted_separately(self):
+        # students_a[1] normalda KEÇİR (45 bal) — imtahan nəticəsini silirik.
+        student = self.students_a[1]
+        self._drop_exam_score(student)
+
+        with bypass_rls():
+            data = records_overview.build_records_overview(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+            )
+
+        summary = data["summary"]
+        self.assertEqual(summary["ungraded"], 1)
+        # Kəsrə QARIŞMIR: cəm əvvəlki kimi 2-dir və q/b + 25% ilə tam örtülür.
+        self.assertEqual(summary["fails"], 2)
+        self.assertEqual(summary["qb"] + summary["exam25"], summary["fails"])
+        row = next(r for r in data["results"] if r["username"] == student.username)
+        self.assertEqual(row["ungraded"], 1)
+        self.assertEqual(row["credits_earned"], 0)  # krediti də sayılmır
+
+    def test_every_enrollment_lands_in_exactly_one_bucket(self):
+        """Rəqəmlər məntiqli cəmlənir: keçən + kəsr + qiymətləndirilməyib = hamısı."""
+        self._drop_exam_score(self.students_b[1])
+
+        with bypass_rls():
+            data = records_overview.build_records_overview(
+                organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+            )
+            enrollments = sum(s.enrollments.count() for s in self.students_a + self.students_b)
+            passed = sum(
+                1
+                for s in self.students_a + self.students_b
+                for sem in transcript.build_student_overall_record(student=s, organization=self.org)["semesters"]
+                for row in sem["rows"]
+                if row["result"]["passed"]
+            )
+
+        summary = data["summary"]
+        self.assertEqual(summary["ungraded"], 1)
+        self.assertEqual(passed + summary["fails"] + summary["ungraded"], enrollments)
+
+    def test_the_ungraded_counter_adds_no_query(self):
+        """PERFORMANS MÜQAVİLƏSİ: sayğac mövcud keçidin İÇİNDƏdir, yeni sorğu yox."""
+        with bypass_rls():
+            with CaptureQueriesContext(connection) as before:
+                records_overview.build_records_page(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+                )
+            self._drop_exam_score(self.students_a[1])
+            with CaptureQueriesContext(connection) as after:
+                records_overview.build_records_page(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=100
+                )
+
+        self.assertEqual(len(before.captured_queries), len(after.captured_queries))
+
+
+@override_settings(UNIVERSITY_MODE=True)
+class UngradedDetailEndpointTest(_RecordsBase):
+    """Drill-down: tələbənin fənn sətri «qiymətləndirilməyib» bayrağı daşıyır."""
+
+    def test_the_student_detail_row_is_flagged_ungraded(self):
+        from apps.registrar.models import FinalGrade
+
+        student = self.students_a[1]
+        with bypass_rls():
+            FinalGrade.objects.filter(enrollment__student=student).delete()
+        client = Client()
+        client.force_login(self.exam_center)
+
+        response = client.get(reverse("accounts:records_student_detail"), {"student": str(student.id)})
+
+        self.assertEqual(response.status_code, 200)
+        rows = [row for sem in response.json()["semesters"] for row in sem["rows"]]
+        flagged = [row for row in rows if row["ungraded"]]
+        self.assertEqual(len(flagged), 1)
+        self.assertFalse(flagged[0]["passed"] or flagged[0]["failed"])
+        self.assertIsNone(flagged[0]["total"])

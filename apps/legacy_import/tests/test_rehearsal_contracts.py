@@ -175,7 +175,7 @@ def test_phase_registry_fingerprint_is_pinned():
     # update BOTH the constant and this line consciously (SLICE 3A gate 5).
     assert (
         contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
-        == "45cd3e7c088f97f7b106a90fe6f5ea2a3b967c3d82eac93adcc9f52d5af8709b"
+        == "849adef50aa53db6875d2dd936bd409f217e0462277a8b2daa0b57c961cf8bde"
     )
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
@@ -192,6 +192,7 @@ def test_phase_registry_fingerprint_is_pinned():
         "journal_components",
         "journal_entry_scores",
         "journal_finals",
+        "journal_selfwork",
         "journal_lock",
         "journal_reconcile",
     ]
@@ -200,19 +201,23 @@ def test_phase_registry_fingerprint_is_pinned():
     # before the record that needs all of them, and before the journal skeleton
     # (J0 periods, then the J1 offerings that resolve against them, then the
     # J2 enrollments and J3 lessons that resolve against the offerings), and
-    # finally the J4-J8 grade cluster (marks → components → finals → lock →
-    # reconcile) — strictly ascending, with 30 left free for the syllabus
-    # domain.  Every derived phase accounts for no source table at all
+    # finally the J4-J9 grade cluster (marks → components → finals →
+    # selfwork → lock → reconcile) — strictly ascending, with 30 left free
+    # for syllabus work that does not depend on a journal offering.  Every derived phase accounts for no source table at all
     # (D-2 / E-2 / V-22 / FAZA 3B).
-    assert [phase.order for phase in registry] == [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 48]
+    assert [phase.order for phase in registry] == [
+        10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 45, 46, 48,
+    ]  # fmt: skip
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
         ("lessons", "curricula", "curricula_plan"),
         ("students", "workers"),
-        *([()] * 13),
+        *([()] * 14),
     ]
     # The batch-accounted run still claims exactly 880 + 6 071 + 8 545 source
-    # rows — all TEN journal phases are derived and contribute 0 each.
+    # rows — all ELEVEN journal phases are derived and contribute 0 each
+    # (J9 reads ``sillabus``/``sillabus_serbest_is`` without claiming them:
+    # both are ``design_gated`` and therefore structurally unclaimable).
     assert sum(phase.declared_source_rows(load_legacy_table_plan()) for phase in registry) == 15_496
 
 

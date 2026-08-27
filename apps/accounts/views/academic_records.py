@@ -184,6 +184,9 @@ def _serialize_semester(sem) -> dict:
                 "passed": bool(result.get("passed")),
                 "failed": bool(result.get("failed")),
                 "barred": bool(result.get("barred")),
+                # Nə keçib, nə kəsilib → «qiymətləndirilməyib» (imtahan çıxış
+                # balı yoxdur).  Sətir başqa cür görünməz qalırdı.
+                "ungraded": not (result.get("passed") or result.get("failed")),
                 "fail_reason": row["fail_reason"],
             }
         )

@@ -12,7 +12,12 @@ yalnız üç sübutu ledger-ə möhürləyir:
   güzgüsü ilə üzləşdirilir; kənarlaşma İNFO-dur (spec J-V9(b)) və sətir
   QUARANTINED möhürlənir ki, hesabatda sayı görünsün;
 * **(c) karantin xülasəsi** — jurnal klasterinin bütün fazalarının QUARANTINED
-  möhür sayı bir İNFO-da toplanır (``a-quarantine-summary``).
+  möhür sayı bir İNFO-da toplanır (``a-quarantine-summary``);
+* **(d) imtahan nəticəsi örtüyü** — nə ``FinalGrade.exam_score``, nə
+  ``ResitRecord.resit_score`` olan yazılışların sayı (``a-final-coverage``).
+  Belə yazılış nə keçir, nə kəsilir, krediti də sayılmır — yəni hesabatlarda
+  GÖRÜNMƏZ qalırdı.  İNFO-dur və möhür SKIPPED-dir: bu mənbənin sadiq əksidir,
+  ziddiyyət deyil (legacy jurnalda o tələbənin ``im`` xanası yoxdur).
 
 Möhür açarları qəsdən prefiksli və leksikoqrafik sıralanandır: ``a-…`` yoxlama
 sətirləri, ``y-<10 rəqəm>`` isə ``yekun`` sətirləridir — ledger rebuild-i eyni
@@ -50,6 +55,7 @@ from .rehearsal_journal_reconcile_source import (
     DEVIATION_TOLERANCE,
     FinalMirror,
     balance_delta,
+    final_coverage,
     legacy_total,
     tally_source_rows,
     tally_target_rows,
@@ -64,6 +70,7 @@ RECONCILE_ENTITY_TYPE = "journal_reconcile"
 DERIVED_DIGEST_NAMESPACE = "legacy-rehearsal-journal-reconcile-v1"
 REQUIRED_PHASE_KEYS = frozenset({JOURNAL_LOCK_PHASE_KEY})
 QUARANTINE_SUMMARY_KEY = "a-quarantine-summary"
+FINAL_COVERAGE_KEY = "a-final-coverage"
 
 _STATE = LegacyEntityMap.State
 _SEVERITY = LegacyMigrationIssue.Severity
@@ -89,6 +96,13 @@ ISSUE_SEVERITY = MappingProxyType(
         "legacy_journal_reconcile_row_balance": _SEVERITY.INFO,
         "legacy_journal_reconcile_final_deviation": _SEVERITY.INFO,
         "legacy_journal_reconcile_quarantine_summary": _SEVERITY.INFO,
+        # B-tapşırığı (2026-08): imtahan NƏTİCƏSİ olmayan yazılışların sayı.
+        # İNFO-dur, çünki mənbənin sadiq əksidir — legacy jurnalda həmin
+        # tələbənin ``im`` xanası ümumiyyətlə yoxdur, yəni köçürmə heç nə
+        # itirməyib.  Blokladıcı deyil, GÖRÜNƏNdir: hədəf tərəfdə eyni say
+        # «Akademik qeydlər»-in «Qiymətləndirilməyib» qutusunda oxunur və
+        # imtahan mərkəzi məhz o siyahını doldurur.
+        "legacy_journal_final_missing": _SEVERITY.INFO,
         # ``yekun`` sətri heç bir jurnala/qeydiyyata bağlanmır.
         "legacy_journal_reconcile_final_unresolved": _SEVERITY.WARNING,
     }
@@ -156,6 +170,7 @@ class JournalReconcilePhase:
         decisions.extend(
             self._finals(context, journal_uniqids=journal_uniqids, recorded=recorded, issue_counts=issue_counts)
         )
+        decisions.extend(self._coverage(context, recorded=recorded, issue_counts=issue_counts))
         decisions.extend(self._summary(context, recorded=recorded, issue_counts=issue_counts))
 
         chain = OrderedDigest(DERIVED_DIGEST_NAMESPACE)
@@ -267,6 +282,36 @@ class JournalReconcilePhase:
                 )
             )
         return results
+
+    # ── (d) imtahan nəticəsi olmayan yazılışlar ─────────────────────────────
+
+    def _coverage(self, context, *, recorded, issue_counts):
+        """Sayı möhürlə: nə keçən, nə kəsilən yazılış hesabatda GÖRÜNSÜN.
+
+        Möhür TƏKdir (say jurnal-başına deyil, tenant-başına aqreqatdır) —
+        23 382 yazılış üçün 23 382 ledger sətri qərar dəyəri olmayan yüklə
+        olardı.  Say ``derivation_hash``-ə qatlanır: növbəti run-da rəqəm
+        dəyişsə möhür kimliyi dəyişir və ``upsert_entity_map`` səssiz sürüşməni
+        ``legacy_entity_identity_conflict`` ilə tutur.
+        """
+
+        if FINAL_COVERAGE_KEY in recorded:
+            return ()
+        coverage = final_coverage(context)
+        return (
+            (
+                FINAL_COVERAGE_KEY,
+                self._seal_check(
+                    context,
+                    seal_key=FINAL_COVERAGE_KEY,
+                    outcome_token="complete" if not coverage["missing"] else "missing",
+                    parts=tuple(f"{name}={count}" for name, count in sorted(coverage.items())),
+                    state=_STATE.SKIPPED,
+                    rule_code="legacy_journal_final_missing" if coverage["missing"] else "",
+                    issue_counts=issue_counts,
+                ),
+            ),
+        )
 
     # ── (c) karantin xülasəsi ───────────────────────────────────────────────
 
