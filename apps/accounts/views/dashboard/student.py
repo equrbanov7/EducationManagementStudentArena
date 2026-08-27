@@ -13,7 +13,7 @@ from django.utils.translation import pgettext_lazy
 from apps.assignments.models import Assignment, Submission
 from core.tenancy import restore_request_organization_from_profile
 
-from .._dashboard_helpers import _collect_my_results
+from .._dashboard_helpers import _collect_my_results, academic_filter_options
 from .._helpers import (
     _assigned_courses_queryset,
     _assigned_exams_queryset,
@@ -142,8 +142,16 @@ def my_results(request):
     from django.core.paginator import Paginator
 
     search_query = (request.GET.get("q") or "").strip()
+    # İl/semestr süzgəci — yalnız akademik (jurnal) fənn nəticələrinə aiddir.
+    year = (request.GET.get("year") or "").strip()
+    season = (request.GET.get("season") or "").strip()
     items, counts, active_filter = _collect_my_results(
-        request, filter_type=request.GET.get("type"), search=search_query
+        request, filter_type=request.GET.get("type"), search=search_query, year=year, season=season
+    )
+    # Süzgəc açılışları yalnız onları GÖSTƏRƏN tablarda oxunur — başqa tabda ağır
+    # akademik qurucunu boş yerə işə salmasın.
+    year_options, season_options = (
+        academic_filter_options(request) if active_filter in {"all", "academic"} else ([], [])
     )
 
     paginator = Paginator(items, 15)
@@ -156,7 +164,11 @@ def my_results(request):
         "counts": counts,
         "active_filter": active_filter,
         "search_query": search_query,
-        "pagination_query": _query_string(type=active_filter, q=search_query),
+        "selected_year": year,
+        "selected_season": season,
+        "year_options": year_options,
+        "season_options": season_options,
+        "pagination_query": _query_string(type=active_filter, q=search_query, year=year, season=season),
     }
     return render(request, "accounts/my_results.html", context)
 

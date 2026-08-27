@@ -34,6 +34,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .academic_results import count_academic_items
 
 User = get_user_model()
 
@@ -186,11 +187,15 @@ def count_my_results(request, user) -> int:
     """
     Cheap aggregate matching `_collect_my_results` *all* filter:
     counts submitted/expired exam attempts (with results not hidden) plus
-    graded/in-review-window assignment/lab/project submissions.
+    graded/in-review-window assignment/lab/project submissions **plus** the
+    registrar's academic (journal) subject results.
 
     Mirrors the logic in `_collect_my_results` for `filter_type != "all"`
     which already used pure count() queries — we apply it for the badge
-    even when no specific filter is active.
+    even when no specific filter is active. The academic term is a single
+    `COUNT(*)` over the same enrollment set the heavy builder walks
+    (`transcript.student_record_enrollments`), so the badge can never drift
+    from the tab.
     """
     now = timezone.now()
     review_cutoff = now - REVIEW_EDIT_WINDOW
@@ -232,7 +237,9 @@ def count_my_results(request, user) -> int:
         .count()
     )
 
-    return exams + courses + labs + independent
+    academic = count_academic_items(request)
+
+    return exams + courses + labs + independent + academic
 
 
 def count_pending_answers(request, user) -> int:
