@@ -67,6 +67,15 @@ from .kollokvium_window import (
     KollokviumExtraGrant,
     KollokviumWindow,
 )
+from .legacy_grade import (
+    LegacyGradeArtifact,
+    LegacyGradeArtifactKind,
+    LegacyGradeEvidenceKind,
+    LegacyGradeFact,
+    LegacyGradeMappingStatus,
+    LegacyGradeReview,
+    LegacyGradeReviewDecision,
+)
 from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
@@ -108,6 +117,13 @@ __all__ = [
     "Lesson",
     "LessonKind",
     "LessonMark",
+    "LegacyGradeArtifact",
+    "LegacyGradeArtifactKind",
+    "LegacyGradeEvidenceKind",
+    "LegacyGradeFact",
+    "LegacyGradeMappingStatus",
+    "LegacyGradeReview",
+    "LegacyGradeReviewDecision",
     "Program",
     "ResitReason",
     "ResitRecord",

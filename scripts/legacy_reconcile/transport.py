@@ -24,16 +24,31 @@ import shutil
 import subprocess
 import time
 from dataclasses import dataclass, field
+from uuid import UUID
 
 from .analysis import unescape_batch_field
 
 _FORBIDDEN = ("insert", "update", "delete", "drop", "truncate", "alter", "create", "grant", "replace")
 _MARIADB_PREAMBLE = "SET SESSION TRANSACTION READ ONLY;\n"
 _NULL_SENTINEL = "NULL"
+_TARGET_ROLE_SQL = """
+SELECT current_user, rolsuper, rolbypassrls
+  FROM pg_catalog.pg_roles
+ WHERE rolname = current_user;
+"""
+_TARGET_CONTEXT_SQL = """
+SELECT current_setting('transaction_read_only'),
+       current_setting('app.bypass_rls', true),
+       current_setting('app.current_org_id', true);
+"""
 
 
 class ReadOnlyViolation(RuntimeError):
     """Skript yazı əməliyyatına bənzər SQL göndərməyə çalışdı."""
+
+
+class TargetSecurityViolation(RuntimeError):
+    """Hədəf sessiyası tenant/RLS oxu müqaviləsinə uyğun deyil."""
 
 
 def assert_read_only(sql: str) -> None:
@@ -172,15 +187,47 @@ def _stringify(value) -> str:
 class TargetReader:
     """Köçürülmüş PostgreSQL bazasından OXU (psycopg2, read-only tranzaksiya)."""
 
-    def __init__(self, *, dsn: dict, timer: Timer) -> None:
+    def __init__(self, *, dsn: dict, timer: Timer, organization_id: str | UUID) -> None:
         import psycopg2
 
         self.timer = timer
-        self.connection = psycopg2.connect(**dsn)
-        self.connection.set_session(readonly=True, autocommit=False)
+        self._stream_counter = 0
+        self.organization_id = _normalize_organization_id(organization_id)
+        self.connection = None
+        try:
+            self.connection = psycopg2.connect(**dsn)
+            self.connection.set_session(readonly=True, autocommit=False)
+            self._establish_tenant_read_only_context()
+        except Exception:
+            self._discard_connection()
+            raise
+
+    def _establish_tenant_read_only_context(self) -> None:
+        """Read-only tranzaksiyanı və məcburi tenant RLS kontekstini təsdiqlə."""
+
         with self.connection.cursor() as cursor:
+            # Bu ilk statement tranzaksiyanı yazıya qapadır; sonrakı bütün
+            # yoxlamalar və hesabat sorğuları eyni read-only snapshot-dadır.
             cursor.execute("SET TRANSACTION READ ONLY")
-            cursor.execute("SET statement_timeout = '600s'")
+            cursor.execute("SET LOCAL statement_timeout = '600s'")
+            cursor.execute(_TARGET_ROLE_SQL)
+            role = cursor.fetchone()
+            if role is None:
+                raise TargetSecurityViolation("legacy_reconcile_target_role_not_found")
+            role_name, is_superuser, bypasses_rls = role
+            if bool(is_superuser) or bool(bypasses_rls):
+                raise TargetSecurityViolation(f"legacy_reconcile_privileged_target_role_refused:{role_name}")
+
+            cursor.execute("SELECT set_config('app.bypass_rls', 'off', true)")
+            cursor.execute(
+                "SELECT set_config('app.current_org_id', %s, true)",
+                (self.organization_id,),
+            )
+            cursor.execute(_TARGET_CONTEXT_SQL)
+            context = cursor.fetchone()
+            expected = ("on", "off", self.organization_id)
+            if context is None or tuple(str(value) for value in context) != expected:
+                raise TargetSecurityViolation("legacy_reconcile_target_context_verification_failed")
 
     def query(self, label: str, sql: str, params=None) -> list[tuple]:
         assert_read_only(sql)
@@ -195,10 +242,49 @@ class TargetReader:
         rows = self.query(label, sql, params)
         return rows[0][0] if rows and rows[0][0] is not None else default
 
+    def iter_query(self, label: str, sql: str, params=None, *, chunk_size: int = 1_000):
+        """Böyük nəticəni server-side cursor ilə yaddaşda yığmadan axıt."""
+
+        assert_read_only(sql)
+        if type(chunk_size) is not int or not 1 <= chunk_size <= 10_000:
+            raise ValueError("legacy_reconcile_chunk_size_invalid")
+        self._stream_counter += 1
+        cursor = self.connection.cursor(name=f"legacy_reconcile_{self._stream_counter}")
+        cursor.itersize = chunk_size
+        started = time.monotonic()
+        rows = 0
+        try:
+            cursor.execute(sql, params)
+            while True:
+                batch = cursor.fetchmany(chunk_size)
+                if not batch:
+                    break
+                for row in batch:
+                    rows += 1
+                    yield row
+        finally:
+            cursor.close()
+            self.timer.record(f"hədəf · {label}", time.monotonic() - started, rows)
+
     def close(self) -> None:
         # Read-only tranzaksiya — commit yox, rollback: heç bir iz qalmır.
-        self.connection.rollback()
-        self.connection.close()
+        self._discard_connection()
+
+    def _discard_connection(self) -> None:
+        if self.connection is None:
+            return
+        try:
+            self.connection.rollback()
+        finally:
+            self.connection.close()
+            self.connection = None
+
+
+def _normalize_organization_id(value: str | UUID) -> str:
+    try:
+        return str(UUID(str(value)))
+    except (TypeError, ValueError, AttributeError) as exc:
+        raise ValueError("legacy_reconcile_organization_id_invalid") from exc
 
 
 def target_dsn(*, host: str, port: int, user: str, database: str, password: str | None) -> dict:

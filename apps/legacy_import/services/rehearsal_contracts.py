@@ -69,14 +69,15 @@ _CLAIMABLE_ACTIONS = frozenset(
 # JournalPeriodsPhase (32), JournalOfferingsPhase (34),
 # JournalEnrollmentsPhase (36), JournalLessonsPhase (38), JournalMarksPhase
 # (40), JournalComponentsPhase (42), JournalEntryScoresPhase (43),
-# JournalFinalsPhase (44), JournalSelfWorkPhase (45), JournalLockPhase (46)
-# and JournalReconcilePhase (48).  J9 (45) sillabus domeninin İLK fazasıdır;
+# JournalFinalsPhase (44), JournalSelfWorkPhase (45), JournalLockPhase (46),
+# LegacyGradeFactsPhase (47), JournalReconcilePhase (48) və
+# LegacyGradeArtifactsPhase (49). J9 (45) sillabus domeninin İLK fazasıdır;
 # 30 rezervi jurnaldan ASILI OLMAYAN sillabus işi üçün açıq qalır (J9 açılışa
 # bağlıdır, ona görə J1-dən sonra oturmalıdır).
 # Re-pin ONLY by running ``compute_phase_registry_fingerprint`` over the direct
 # tuple — never over ``load_rehearsal_phase_registry``, which checks itself
 # against this constant.
-_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "849adef50aa53db6875d2dd936bd409f217e0462277a8b2daa0b57c961cf8bde"
+_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "61fa24d9415a3c96473b16d19b33edf5cb4d5a9f797a5e643329e49c0e5dee5c"
 
 
 class LegacyRehearsalError(Exception):
@@ -545,6 +546,8 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     from .rehearsal_journal_periods_phase import JournalPeriodsPhase
     from .rehearsal_journal_reconcile_phase import JournalReconcilePhase
     from .rehearsal_journal_selfwork_phase import JournalSelfWorkPhase
+    from .rehearsal_legacy_grade_artifacts_phase import LegacyGradeArtifactsPhase
+    from .rehearsal_legacy_grade_facts_phase import LegacyGradeFactsPhase
     from .rehearsal_placement_phase import StudentPlacementPhase
     from .rehearsal_sar_phase import SarMaterialisationPhase
     from .rehearsal_structure_phase import AcademicStructurePhase
@@ -556,7 +559,8 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     # < 34 journal_offerings < 36 journal_enrollments < 38 journal_lessons
     # < 40 journal_marks < 42 journal_components < 43 journal_entry_scores
     # < 44 journal_finals < 45 journal_selfwork < 46 journal_lock
-    # < 48 journal_reconcile
+    # < 47 legacy_grade_facts < 48 journal_reconcile
+    # < 49 legacy_grade_artifacts
     # (30 stays reserved for the syllabus domain).
     phases = validate_rehearsal_phases(
         (
@@ -576,7 +580,9 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
             JournalFinalsPhase(),
             JournalSelfWorkPhase(),
             JournalLockPhase(),
+            LegacyGradeFactsPhase(),
             JournalReconcilePhase(),
+            LegacyGradeArtifactsPhase(),
         ),
         plan=plan,
     )

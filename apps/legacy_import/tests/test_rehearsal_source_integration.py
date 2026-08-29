@@ -11,17 +11,19 @@ Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
-The second test drives SIXTEEN of the registry's SEVENTEEN phases —
+The second test drives EIGHTEEN of the registry's NINETEEN phases —
 ``journal_selfwork`` (J9, order 45) is DELIBERATELY not selected because the
 synthetic fixture carries no syllabus shapes (``journals.sillabus_id`` column,
 ``sillabus`` and ``sillabus_serbest_is`` tables); ``select_phases`` accepts a
-subset, so a sixteen-key policy is legitimate, not stale.  The phases run are
+subset, so an eighteen-key policy is legitimate, not stale.  The phases run are
 ``academic_structure``
 (31 + 83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424),
 ``identity_cohort`` (7 816 + 729), the three derived identity phases, and the
-FAZA 3B journal cluster (J0-J8) fed by seven synthetic journal tables
+FAZA 3B journal cluster (J0-J8) and the immutable-evidence tail, fed by nine
+synthetic journal tables
 (``semestr_jurnal`` 13, ``journals`` 30, ``journals_dates_added_by_teacher`` 60,
-``journals_dates_points`` 200, its archive 20, ``allowed_qb`` 5, ``yekun`` 10).
+``journals_dates_points`` 200, its archive 20, ``allowed_qb`` 5, ``yekun`` 10,
+``imthngrscxsblr`` 3, ``balvereqi_logs`` 2).
 Every batch-backed table keeps its canonical shape, so ``totals.source_rows`` is
 still the real 15 496 — the derived journal phases declare 0 source rows by
 contract.
@@ -71,6 +73,10 @@ from apps.legacy_import.services.field_contracts import (
     WORKER_IDENTITY_FIELDS,
     YEKUN_FIELDS,
 )
+from apps.legacy_import.services.legacy_grade_field_contracts import (
+    EXAM_ENTRY_EXIT_FIELDS,
+    SCORE_SHEET_EXPORT_FIELDS,
+)
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
 from apps.legacy_import.services.rehearsal_contracts import (
     EmailTrustPolicy,
@@ -86,6 +92,7 @@ from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256, Legac
 from apps.legacy_import.tests.test_rehearsal_identity_phase import _plan
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
+from core.rls import set_rls_tenant
 
 pytestmark = [pytest.mark.mariadb, pytest.mark.postgres, pytest.mark.django_db]
 
@@ -412,6 +419,8 @@ _JOURNAL_POINT_ROWS = 200
 _JOURNAL_ARCHIVE_ROWS = 20
 _ALLOWED_QB_ROWS = 5
 _YEKUN_ROWS = 10
+_EXAM_ATTEMPT_ROWS = 3
+_SCORE_SHEET_EXPORT_ROWS = 2
 # Bal sətirləri yalnız BU dörd MIGRATED jurnala (və 3 nömrəli V6-süzülmüş
 # jurnala) toxunur — jurnal-səviyyə möhür sayları belə dəqiq hesablana bilir.
 _POINT_JOURNALS = (1, 2, 6, 7)
@@ -436,9 +445,11 @@ _FULL_PHASE_KEYS = (
     "journal_entry_scores",
     "journal_finals",
     "journal_lock",
+    "legacy_grade_facts",
     "journal_reconcile",
+    "legacy_grade_artifacts",
 )
-_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 48]
+_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 47, 48, 49]
 
 
 def _journal_scaled_plan():
@@ -457,6 +468,8 @@ def _journal_scaled_plan():
         "journals_dates_points_archive": _JOURNAL_ARCHIVE_ROWS,
         "allowed_qb": _ALLOWED_QB_ROWS,
         "yekun": _YEKUN_ROWS,
+        "imthngrscxsblr": _EXAM_ATTEMPT_ROWS,
+        "balvereqi_logs": _SCORE_SHEET_EXPORT_ROWS,
     }
     entries = tuple(
         replace(entry, expected_rows=scaled[entry.source_table]) if entry.source_table in scaled else entry
@@ -500,7 +513,21 @@ _INT_COLUMNS = {
     "journals_dates_points": ("student_id", "excusable", "j_id", "lab", "update_counter", "sem_muh"),
     "journals_dates_points_archive": ("student_id", "excusable", "j_id", "lab", "update_counter", "sem_muh"),
     "allowed_qb": ("student_id",),
-    "yekun": ("student_id", "lesson_id", "journal_id"),
+    # Canlı ``yekun`` DESCRIBE sübutu: bu beş metadata sütunu da INT-dir.
+    # Fixture onları VARCHAR yaratsa, sərt source parser real sxemdən fərqli
+    # sintetik tip drift-i haqlı olaraq rədd edir.
+    "yekun": (
+        "student_id",
+        "lesson_id",
+        "journal_id",
+        "group_id",
+        "kesr",
+        "guzest_girish",
+        "level",
+        "guzest_artim",
+    ),
+    "imthngrscxsblr": ("student_id", "lesson_id", "giris_point", "cixis_point", "type"),
+    "balvereqi_logs": ("owner_id",),
 }
 # ``added_date``/``updated_at``/``allowed_date_*`` DATETIME, ``time`` isə TIME
 # olmalıdır: J-V7 kəsimi, J-V4 sıralaması və dərs slotu məhz bu tiplərə baxır.
@@ -508,6 +535,8 @@ _DATETIME_COLUMNS = {
     "journals_dates_points": ("added_date", "updated_at"),
     "journals_dates_points_archive": ("added_date", "updated_at"),
     "allowed_qb": ("allowed_date_start", "allowed_date_end"),
+    "imthngrscxsblr": ("added_date",),
+    "balvereqi_logs": ("export_time",),
 }
 _TIME_COLUMNS = {
     "journals_dates_points": ("time",),
@@ -562,6 +591,8 @@ def _typed_columns(table, contract, decoys):
             sql_type = "DATETIME NULL"
         elif field_name in times:
             sql_type = "TIME NULL"
+        elif table == "balvereqi_logs" and field_name == "data":
+            sql_type = "LONGTEXT NULL"
         else:
             sql_type = "VARCHAR(191) NULL"
         columns.append(f"`{field_name}` {sql_type}")
@@ -1024,6 +1055,26 @@ def _yekun_values(legacy_pk):
     }
 
 
+def _exam_attempt_values(legacy_pk):
+    return {
+        "student_id": 9_500 + legacy_pk,
+        "lesson_id": legacy_pk,
+        "giris_point": 3010 if legacy_pk == 1 else 20 + legacy_pk,
+        "cixis_point": 2437 if legacy_pk == 1 else 30 + legacy_pk,
+        "type": legacy_pk % 4,
+        "added_date": f"2022-04-0{legacy_pk} 09:00:00",
+    }
+
+
+def _score_sheet_export_values(legacy_pk):
+    return {
+        "owner_id": legacy_pk,
+        "uniqid": f"jrn{legacy_pk:07d}",
+        "data": f"<table><tr><td>{_PRIVATE_VALUE}-{legacy_pk}</td><td>{40 + legacy_pk}</td></tr></table>",
+        "export_time": f"2023-08-{13 + legacy_pk:02d} 10:00:00",
+    }
+
+
 _FULL_TABLES = (
     ("departments", DEPARTMENT_STRUCTURE_FIELDS, (), _DEPARTMENT_ROWS, _department_values),
     ("speciality", SPECIALITY_STRUCTURE_FIELDS, (), _SPECIALITY_ROWS, _speciality_values),
@@ -1051,6 +1102,20 @@ _FULL_TABLES = (
     ),
     ("allowed_qb", ALLOWED_QB_FIELDS, (), _ALLOWED_QB_ROWS, _allowed_qb_values),
     ("yekun", YEKUN_FIELDS, (), _YEKUN_ROWS, _yekun_values),
+    (
+        "imthngrscxsblr",
+        EXAM_ENTRY_EXIT_FIELDS,
+        (),
+        _EXAM_ATTEMPT_ROWS,
+        _exam_attempt_values,
+    ),
+    (
+        "balvereqi_logs",
+        SCORE_SHEET_EXPORT_FIELDS,
+        (),
+        _SCORE_SHEET_EXPORT_ROWS,
+        _score_sheet_export_values,
+    ),
 )
 
 
@@ -1135,7 +1200,7 @@ def _issue_histogram(document):
 
 
 def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, tmp_path):
-    """SPEC §8/11 and §10 items 14-15 — two full TEN-phase rehearsals agree
+    """SPEC §8/11 and §10 items 14-15 — two eighteen-phase rehearsals agree
     byte for byte, and a third one that touches accounts deliberately does not.
 
     ``load_legacy_table_plan`` is patched ONLY with ``_journal_scaled_plan``:
@@ -1307,7 +1372,9 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "journal_entry_scores": 0,
             "journal_finals": 0,
             "journal_lock": 0,
+            "legacy_grade_facts": 0,
             "journal_reconcile": 0,
+            "legacy_grade_artifacts": 0,
         }
 
         # 3) Determinism across two independent targets.
@@ -1394,6 +1461,32 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             # (bu, qrup bölgüsü ilə ƏLAQƏSİZ ikinci köhnəlmədir).
             "journal_reconcile": {"reconcile_balanced": 2, "reconcile_deviation": 13},
         }
+        legacy_states = {
+            phase["phase_key"]: phase["state_counts"]
+            for phase in first_document["deterministic"]["phases"]
+            if phase["phase_key"].startswith("legacy_grade_")
+        }
+        assert legacy_states == {
+            "legacy_grade_facts": {"legacy_grade_facts_materialised": 83},
+            "legacy_grade_artifacts": {"legacy_grade_artifacts_materialised": 2},
+        }
+        legacy_fact_model = django_apps.get_model("registrar", "LegacyGradeFact")
+        legacy_artifact_model = django_apps.get_model("registrar", "LegacyGradeArtifact")
+        # İkinci rehearsal sessiya tenant-ını ikinci təşkilata keçirib.  FORCE
+        # RLS altında onun 83/2 sübutu görünür, birinci tenant-ın sübutu isə
+        # görünməz qalır — bu, data itkisi deyil, gözlənilən izolasiya sübutudur.
+        assert legacy_fact_model.objects.filter(organization=second_organization).count() == 83
+        assert legacy_artifact_model.objects.filter(organization=second_organization).count() == 2
+        assert legacy_fact_model.objects.filter(organization=first_organization).count() == 0
+        assert legacy_artifact_model.objects.filter(organization=first_organization).count() == 0
+
+        # Birinci tenant kontekstində simmetrik nəticə alınmalıdır: onun bütün
+        # immutable grade evidence-i görünür, ikinci tenant-dakı heç nə sızmır.
+        set_rls_tenant(first_organization.pk, local=False)
+        assert legacy_fact_model.objects.filter(organization=first_organization).count() == 83
+        assert legacy_artifact_model.objects.filter(organization=first_organization).count() == 2
+        assert legacy_fact_model.objects.filter(organization=second_organization).count() == 0
+        assert legacy_artifact_model.objects.filter(organization=second_organization).count() == 0
         # J-V9(F) uyğunluq cədvəli sətir-başına İNFO kimi + tam issue taksonomiyası.
         assert histogram.get(("legacy_journal_period_created", "info"), 0) == 12
         assert histogram.get(("legacy_journal_period_matched_existing", "info"), 0) == 0

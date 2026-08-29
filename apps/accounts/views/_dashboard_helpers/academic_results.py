@@ -211,6 +211,10 @@ def _build_item(row, *, period_label, sort_at) -> dict:
             "outcome_label": OUTCOME_LABELS[outcome],
             "fail_reason": row.get("fail_reason") or "",
             "fail_reason_label": FAIL_REASON_LABELS.get(row.get("fail_reason") or "", ""),
+            # Bunlar kanonik hesabın hissəsi deyil: registrar fasadı köhnə
+            # mənbə sətirlərini clamp-siz və çoxluq itirmədən ayrıca verir.
+            "legacy_grade_facts": list(row.get("legacy_grade_facts") or []),
+            "legacy_grade_review_required": bool(row.get("legacy_grade_review_required")),
         },
     }
 

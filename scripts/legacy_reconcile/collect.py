@@ -78,31 +78,64 @@ def collect_source_facts(source, *, deep: bool) -> dict:
     return facts
 
 
-def collect_target_facts(target) -> dict:
-    """PostgreSQL tərəfin sayları + ledger körpüləri."""
+def collect_target_facts(target, *, run_id) -> dict:
+    """PostgreSQL tərəfin tenant-məhdud sayları + ledger körpüləri.
 
-    facts: dict = {}
-    facts["entity_counts"] = {row[0]: _int(row[1]) for row in target.query("varlıq sayları", T.ENTITY_COUNTS_SQL)}
-    facts["quality"] = {row[0]: _int(row[1]) for row in target.query("keyfiyyət", T.QUALITY_SQL)}
+    Geniş registrar/auth sorğularından ƏVVƏL run, reader-də açıq verilmiş
+    təşkilat və ``succeeded`` statusu birlikdə attestasiya edilir. Beləliklə
+    səhv run UUID-si və ya başqa tenant-a aid run heç bir geniş sorğu aça
+    bilməz.
+    """
+
+    organization_id = str(getattr(target, "organization_id", "") or "")
+    if not organization_id:
+        raise RuntimeError("legacy_reconcile_target_organization_required")
+    run_key = str(run_id)
+    run_rows = target.query("run attestasiyası", T.RUN_SQL, (run_key, organization_id))
+    if len(run_rows) != 1:
+        raise RuntimeError("legacy_reconcile_run_attestation_failed")
+
+    facts: dict = {
+        "run": run_rows[0],
+        "organization_id": organization_id,
+        "attested": True,
+    }
+    facts["entity_counts"] = {
+        row[0]: _int(row[1]) for row in target.query("varlıq sayları", T.ENTITY_COUNTS_SQL, (organization_id,))
+    }
+    facts["quality"] = {row[0]: _int(row[1]) for row in target.query("keyfiyyət", T.QUALITY_SQL, (organization_id,))}
     facts["ledger_states"] = [
-        (entity_type, state, _int(count)) for entity_type, state, count in target.query("ledger", T.LEDGER_STATE_SQL)
+        (entity_type, state, _int(count))
+        for entity_type, state, count in target.query(
+            "ledger", T.LEDGER_STATE_SQL, (run_key, organization_id, organization_id)
+        )
     ]
-    facts["ledger_batches"] = target.query("ledger batch", T.LEDGER_BATCH_SQL)
-    facts["issues"] = target.query("ledger problemləri", T.LEDGER_ISSUE_SQL)
-    facts["roles"] = target.query("üzvlük rolları", T.MEMBERSHIP_BY_ROLE_SQL)
-    run_rows = target.query("run", T.RUN_SQL)
-    facts["run"] = run_rows[0] if run_rows else None
+    facts["ledger_batches"] = target.query("ledger batch", T.LEDGER_BATCH_SQL, (run_key, organization_id))
+    facts["issues"] = target.query("ledger problemləri", T.LEDGER_ISSUE_SQL, (run_key, organization_id))
+    facts["roles"] = target.query("üzvlük rolları", T.MEMBERSHIP_BY_ROLE_SQL, (organization_id,))
     facts["offerings"] = {
         legacy_pk: target_pk
-        for legacy_pk, target_pk in target.query("offering körpüsü", T.MIGRATED_MAP_SQL, ("course_offering",))
+        for legacy_pk, target_pk in target.query(
+            "offering körpüsü",
+            T.MIGRATED_MAP_SQL,
+            (run_key, "course_offering", organization_id, organization_id),
+        )
     }
     facts["enrollments"] = {
         legacy_pk: target_pk
-        for legacy_pk, target_pk in target.query("enrollment körpüsü", T.MIGRATED_MAP_SQL, ("journal_enrollment",))
+        for legacy_pk, target_pk in target.query(
+            "enrollment körpüsü",
+            T.MIGRATED_MAP_SQL,
+            (run_key, "journal_enrollment", organization_id, organization_id),
+        )
     }
     facts["students"] = {
         legacy_pk: target_pk
-        for legacy_pk, target_pk in target.query("tələbə körpüsü", T.MIGRATED_MAP_SQL, ("student",))
+        for legacy_pk, target_pk in target.query(
+            "tələbə körpüsü",
+            T.MIGRATED_MAP_SQL,
+            (run_key, "student", organization_id, organization_id),
+        )
     }
     return facts
 
@@ -211,7 +244,8 @@ def compare_finals(source_facts: dict, target_facts: dict, target) -> dict:
 
     mirror = {}
     if linked:
-        for row in target.query("yekun güzgüsü", T.FINAL_MIRROR_SQL, (list(linked),)):
+        params = (target_facts["organization_id"], list(linked))
+        for row in target.query("yekun güzgüsü", T.FINAL_MIRROR_SQL, params):
             mirror[row[0]] = row
 
     total_deltas, exam_deltas, entry_deltas, net_deltas = [], [], [], []

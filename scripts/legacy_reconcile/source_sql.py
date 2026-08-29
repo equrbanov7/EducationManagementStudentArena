@@ -28,6 +28,8 @@ ACCOUNTED_TABLES = (
     POINT_TABLE,
     ARCHIVE_TABLE,
     "yekun",
+    "imthngrscxsblr",
+    "balvereqi_logs",
 )
 
 # ``month_id`` → domen.  ``apps/legacy_import/.../points_source.py`` güzgüsü.

@@ -149,12 +149,18 @@ def rebase_target_snapshot_for_run(snapshot: TargetIdentitySnapshot, *, run_id) 
 
     if not isinstance(snapshot, TargetIdentitySnapshot):
         raise LegacyRehearsalEvidenceError("legacy_rehearsal_resume_snapshot_invalid")
+    # Bir istifadəçi run ərzində bir neçə törəmə ledger observation-u ala bilər
+    # (məsələn ``worker`` və ``worker_materialisation`` eyni ``auth.User``-ə
+    # möhürlənir). Snapshot isə fiziki target sətirlərini sayır; target PK-ləri
+    # dedup etməsək resume zamanı mövcud istifadəçi səhvən "missing" görünür.
     staged_pks = list(
-        LegacyEntityObservation.objects.filter(
-            run_id=run_id,
-            state=_STATE.MIGRATED,
-            target_model_label=USER_MODEL_LABEL,
-        ).values_list("target_pk", flat=True)
+        dict.fromkeys(
+            LegacyEntityObservation.objects.filter(
+                run_id=run_id,
+                state=_STATE.MIGRATED,
+                target_model_label=USER_MODEL_LABEL,
+            ).values_list("target_pk", flat=True)
+        )
     )
     if not staged_pks:
         return snapshot

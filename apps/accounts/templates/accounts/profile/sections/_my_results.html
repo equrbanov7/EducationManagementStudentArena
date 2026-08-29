@@ -156,6 +156,11 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
 
                 <div class="result-card-body">
                     {% if item.category == 'academic' %}
+                    <div class="result-academic-current" role="group" aria-label="{% trans 'Cari sistem üzrə hesablanmış nəticə' context 'profile.results.academic' %}">
+                    <h5 class="result-score-section-title">
+                        <i class="fas fa-calculator" aria-hidden="true"></i>
+                        {% trans "Cari sistem üzrə hesablanmış nəticə" context "profile.results.academic" %}
+                    </h5>
                     <dl class="result-academic-grid">
                         <div class="result-academic-cell">
                             <dt>{% trans "Kredit" context "profile.results.academic" %}</dt>
@@ -178,6 +183,66 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                             <dd>{% if item.academic.letter %}<span class="result-letter result-letter--{{ item.academic.letter }}">{{ item.academic.letter }}</span>{% else %}—{% endif %}</dd>
                         </div>
                     </dl>
+                    </div>
+                    {% if item.academic.legacy_grade_facts %}
+                    <details class="result-legacy-grade">
+                        <summary class="result-legacy-grade__summary">
+                            <span>
+                                <i class="fas fa-box-archive" aria-hidden="true"></i>
+                                {% trans "Köhnə sistemdən köçürülmüş xam mənbə balları" context "profile.results.academic" %}
+                                {% if item.academic.legacy_grade_review_required %}
+                                <strong class="result-legacy-grade__summary-warning">— {% trans "İmtahan Mərkəzi ilə dəqiqləşdirilsin" context "profile.results.academic" %}</strong>
+                                {% endif %}
+                            </span>
+                            <span class="result-legacy-grade__count" aria-label="{% trans 'Mənbə qeydlərinin sayı' context 'profile.results.academic' %}">{{ item.academic.legacy_grade_facts|length }}</span>
+                        </summary>
+                        <div class="result-legacy-grade__body">
+                            <p class="result-legacy-grade__explanation">
+                                {% trans "Aşağıdakı dəyərlər köhnə bazadakı mənbə sətirlərindən dəyişdirilmədən göstərilir; yuxarıdakı cari hesabla eyniləşdirilmir." context "profile.results.academic" %}
+                            </p>
+                            <ol class="result-legacy-fact-list">
+                                {% for fact in item.academic.legacy_grade_facts %}
+                                <li class="result-legacy-fact">
+                                    <div class="result-legacy-fact__header">
+                                        <strong>{{ fact.kind_label }}</strong>
+                                        <span>{{ fact.source_reference }}{% if fact.is_archive %} · {% trans "arxiv" context "profile.results.academic" %}{% endif %}</span>
+                                    </div>
+                                    <dl class="result-legacy-fact__scores">
+                                        {% if fact.entry_score %}
+                                        <div><dt>{% trans "Giriş" context "profile.results.academic" %}</dt><dd>{{ fact.entry_score }}</dd></div>
+                                        {% endif %}
+                                        {% if fact.exam_score %}
+                                        <div><dt>{% trans "Çıxış (imtahan)" context "profile.results.academic" %}</dt><dd>{{ fact.exam_score }}</dd></div>
+                                        {% endif %}
+                                        {% if fact.final_score %}
+                                        <div><dt>{% trans "Yekun" context "profile.results.academic" %}</dt><dd>{{ fact.final_score }}</dd></div>
+                                        {% endif %}
+                                        {% if fact.resit_score %}
+                                        <div><dt>{% trans "Təkrar imtahan" context "profile.results.academic" %}</dt><dd>{{ fact.resit_score }}</dd></div>
+                                        {% endif %}
+                                        {% if fact.kind == "other" and fact.raw_score %}
+                                        <div><dt>{{ fact.score_code }}</dt><dd>{{ fact.raw_score }}</dd></div>
+                                        {% endif %}
+                                    </dl>
+                                    {% if fact.kind == "exam_entry_exit" %}
+                                    <p class="result-legacy-fact__attempt">
+                                        {% trans "Cəhd tipi" context "profile.results.academic" %}: {{ fact.legacy_attempt_type }}
+                                        {% if fact.legacy_recorded_at %} · {% trans "Köhnə qeyd vaxtı" context "profile.results.academic" %}: {{ fact.legacy_recorded_at }}{% endif %}
+                                    </p>
+                                    {% endif %}
+                                    <div class="result-legacy-fact__meta">
+                                        <span>{{ fact.mapping_label }}</span>
+                                        <span class="result-legacy-fact__review result-legacy-fact__review--{{ fact.review_status }}">
+                                            {% if fact.review_required %}<i class="fas fa-circle-exclamation" aria-hidden="true"></i>{% else %}<i class="fas fa-circle-check" aria-hidden="true"></i>{% endif %}
+                                            {{ fact.review_label }}
+                                        </span>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </details>
+                    {% endif %}
                     {% if item.academic.fail_reason_label %}
                     <div class="result-feedback-box result-feedback-box--fail">
                         <div class="feedback-icon"><i class="fas fa-triangle-exclamation"></i></div>

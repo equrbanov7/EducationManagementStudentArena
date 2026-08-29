@@ -18,6 +18,8 @@
 --------
     python scripts/legacy_reconcile_report.py \\
         --db emsarena_rehearsal_603f5e9f08e7 \\
+        --run-id 137331f4-0d64-4a0b-b6bd-482a27624f60 \\
+        --organization-id a8a1a0f5-aeb7-43c5-848d-fcff008f7273 \\
         --output /tmp/RECONCILE.md
 
 Hədəf baza parolu **arqumentlə deyil**, mühit dəyişəni ilə verilir::
@@ -42,6 +44,7 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from uuid import UUID
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -51,16 +54,18 @@ from scripts.legacy_reconcile.collect import (  # noqa: E402
     collect_target_facts,
     compare_finals,
 )
+from scripts.legacy_reconcile.grade_artifacts import reconcile_grade_artifacts  # noqa: E402
+from scripts.legacy_reconcile.grade_facts import reconcile_grade_facts  # noqa: E402
+from scripts.legacy_reconcile.grade_source_hashes import collect_source_grade_hashes  # noqa: E402
 from scripts.legacy_reconcile.render import render_report  # noqa: E402
 from scripts.legacy_reconcile.sampling import SAMPLE_SEED, SAMPLE_SIZE, collect_sample  # noqa: E402
 from scripts.legacy_reconcile.transport import SourceReader, TargetReader, Timer, target_dsn  # noqa: E402
 
 DEFAULT_CONTAINER = "emsarena-legacy-source-rehearsal"
 DEFAULT_SOURCE_DB = "myedudb"
-DEFAULT_SOURCE_PORT = 56970  # repetisiya konteynerinin host portu (yoxlanılıb)
 DEFAULT_TARGET_HOST = "127.0.0.1"
 DEFAULT_TARGET_PORT = 55433
-DEFAULT_TARGET_USER = "emsarena_staging"
+DEFAULT_TARGET_USER = "emsarena_app"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -69,6 +74,13 @@ def build_parser() -> argparse.ArgumentParser:
         description="Mənbə MariaDB ilə köçürülmüş PostgreSQL bazasını tutuşduran OXU-ONLY hesabat.",
     )
     parser.add_argument("--db", required=True, help="Hədəf PostgreSQL baza adı (məs. emsarena_rehearsal_…).")
+    parser.add_argument("--run-id", required=True, help="Yalnız bu uğurlu repetisiya UUID-si uzlaşdırılır.")
+    parser.add_argument(
+        "--organization-id",
+        required=True,
+        type=UUID,
+        help="RLS üçün repetisiya təşkilatının UUID-si (yalnız həmin tenant oxunur).",
+    )
     parser.add_argument("--output", required=True, help="Markdown hesabatın yazılacağı fayl.")
     parser.add_argument("--target-host", default=DEFAULT_TARGET_HOST)
     parser.add_argument("--target-port", type=int, default=DEFAULT_TARGET_PORT)
@@ -81,8 +93,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--source-port",
         type=int,
-        default=DEFAULT_SOURCE_PORT,
-        help="Mənbənin host portu (repetisiya konteyneri 127.0.0.1:56970-ə bağlıdır).",
+        default=None,
+        help="TCP rejimində məcburi host portu; dinamik Docker portunu açıq verin.",
     )
     parser.add_argument("--source-user", default="root")
     parser.add_argument("--sample-size", type=int, default=SAMPLE_SIZE)
@@ -98,6 +110,8 @@ def build_parser() -> argparse.ArgumentParser:
 def _source_tcp(args) -> dict | None:
     if not args.source_host:
         return None
+    if args.source_port is None:
+        raise SystemExit("TCP rejimi üçün --source-port açıq verilməlidir.")
     password = os.environ.get("LEGACY_SOURCE_PASSWORD")
     if not password:
         raise SystemExit("TCP rejimi üçün LEGACY_SOURCE_PASSWORD mühit dəyişəni lazımdır.")
@@ -122,18 +136,34 @@ def main(argv=None) -> int:
             password=None,
         ),
         timer=timer,
+        organization_id=args.organization_id,
     )
     try:
         print("→ hədəf sayları və ledger körpüləri oxunur…", file=sys.stderr)
-        target_facts = collect_target_facts(target)
+        target_facts = collect_target_facts(target, run_id=args.run_id)
+        if not target_facts["run"]:
+            raise RuntimeError("legacy_reconcile_run_not_found")
         print("→ mənbə aqreqatları hesablanır (ən ağır addım bir neçə dəqiqə çəkə bilər)…", file=sys.stderr)
         source_facts = collect_source_facts(source, deep=not args.skip_deep)
         print("→ nərdivan və yekun müqayisəsi qurulur…", file=sys.stderr)
+        print("→ immutable legacy qiymət faktları sətir-səviyyəsində tutuşdurulur…", file=sys.stderr)
+        source_grade_hashes = collect_source_grade_hashes(source)
+        grade_facts = reconcile_grade_facts(
+            source,
+            target,
+            run_id=args.run_id,
+            source_hashes=source_grade_hashes,
+        )
+        print("→ çap olunmuş bal-vərəqi arxivi hash və sıxılma üzrə tutuşdurulur…", file=sys.stderr)
+        grade_artifacts = reconcile_grade_artifacts(source, target, run_id=args.run_id)
+        ladders = build_ladders(source_facts, target_facts)
         context = {
             "source": source_facts,
             "target": target_facts,
-            "ladders": build_ladders(source_facts, target_facts),
+            "ladders": ladders,
             "finals": compare_finals(source_facts, target_facts, target),
+            "grade_facts": grade_facts,
+            "grade_artifacts": grade_artifacts,
             "sample": collect_sample(source, target, target_facts, size=args.sample_size, seed=args.sample_seed),
             "sample_seed": args.sample_seed,
             "source_label": f"{args.source_container}:{args.source_db}",
@@ -149,6 +179,12 @@ def main(argv=None) -> int:
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(markdown, encoding="utf-8")
     print(f"✔ Hesabat yazıldı: {destination}  ({len(markdown):,} bayt)", file=sys.stderr)
+    run_succeeded = target_facts["run"][1] == "succeeded"
+    ladders_balanced = all(ladder.unexplained == 0 for ladder in ladders.values())
+    all_gates_passed = grade_facts.passed and grade_artifacts.passed and run_succeeded and ladders_balanced
+    if not all_gates_passed:
+        print("✖ Uzlaşdırmanın ən azı bir fail-closed qapısı keçmədi.", file=sys.stderr)
+        return 2
     return 0
 
 

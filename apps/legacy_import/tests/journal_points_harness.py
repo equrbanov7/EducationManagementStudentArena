@@ -25,6 +25,10 @@ from apps.legacy_import.services.field_contracts import (
     YEKUN_FIELDS,
 )
 from apps.legacy_import.services.ledger import create_run, start_run, upsert_entity_map
+from apps.legacy_import.services.legacy_grade_field_contracts import (
+    EXAM_ENTRY_EXIT_FIELDS,
+    SCORE_SHEET_EXPORT_FIELDS,
+)
 from apps.legacy_import.services.rehearsal_authorizer import (
     COURSE_OFFERING_MODEL_LABEL,
     ENROLLMENT_MODEL_LABEL,
@@ -70,7 +74,9 @@ PHASE_KEYS = (
     "journal_finals",
     "journal_selfwork",
     "journal_lock",
+    "legacy_grade_facts",
     "journal_reconcile",
+    "legacy_grade_artifacts",
 )
 UNIQID = "rooBx39tsK"
 OTHER_UNIQID = "secondBBBB"
@@ -105,6 +111,8 @@ COLUMNS_BY_TABLE = _discovered_columns(
     JOURNAL_POINT_ARCHIVE_FIELDS,
     ALLOWED_QB_FIELDS,
     YEKUN_FIELDS,
+    EXAM_ENTRY_EXIT_FIELDS,
+    SCORE_SHEET_EXPORT_FIELDS,
     SILLABUS_FIELDS,
     SILLABUS_SELF_WORK_FIELDS,
 )
@@ -289,8 +297,17 @@ def allowed_qb_row(legacy_pk, *, student_id=STUDENT_A, start="2021-12-30", end="
     }
 
 
-def yekun_row(legacy_pk, *, student_id=STUDENT_A, journal_id=2, girish=0.0, imtahanda=0.0, yekun=0.0):
-    return {
+def yekun_row(
+    legacy_pk,
+    *,
+    student_id=STUDENT_A,
+    journal_id=2,
+    girish=0.0,
+    imtahanda=0.0,
+    yekun=0.0,
+    **overrides,
+):
+    values = {
         "id": legacy_pk,
         "student_id": student_id,
         "lesson_id": 64,
@@ -298,6 +315,51 @@ def yekun_row(legacy_pk, *, student_id=STUDENT_A, journal_id=2, girish=0.0, imta
         "girish": girish,
         "imtahanda": imtahanda,
         "yekun": yekun,
+        "group_id": 2,
+        "kesr": 0,
+        "guzest_girish": 0.0,
+        "level": 0,
+        "guzest_artim": 0.0,
+    }
+    values.update(overrides)
+    return values
+
+
+def exam_attempt_row(
+    legacy_pk,
+    *,
+    student_id=STUDENT_A,
+    lesson_id=64,
+    entry=0,
+    exit=0,
+    attempt_type=0,
+    added_date=MAIN_ADDED,
+):
+    return {
+        "id": legacy_pk,
+        "student_id": student_id,
+        "lesson_id": lesson_id,
+        "giris_point": entry,
+        "cixis_point": exit,
+        "type": attempt_type,
+        "added_date": added_date,
+    }
+
+
+def score_sheet_export_row(
+    legacy_pk,
+    *,
+    owner_id=17,
+    uniqid=UNIQID,
+    data="<table><tr><td>test-only</td></tr></table>",
+    export_time=MAIN_ADDED,
+):
+    return {
+        "id": legacy_pk,
+        "owner_id": owner_id,
+        "uniqid": uniqid,
+        "data": data,
+        "export_time": export_time,
     }
 
 
@@ -312,6 +374,8 @@ def tables(
     yekun=None,
     syllabi=None,
     topics=None,
+    exam_attempts=None,
+    score_sheet_exports=None,
 ):
     """Doqquz cədvəlin tam dəsti — verilməyən hər biri məntiqli defolt alır.
 
@@ -331,6 +395,8 @@ def tables(
         YEKUN_FIELDS.source_table: list(yekun or []),
         SILLABUS_FIELDS.source_table: list(syllabi if syllabi is not None else [sillabus_row()]),
         SILLABUS_SELF_WORK_FIELDS.source_table: list(topics or []),
+        EXAM_ENTRY_EXIT_FIELDS.source_table: list(exam_attempts or []),
+        SCORE_SHEET_EXPORT_FIELDS.source_table: list(score_sheet_exports or []),
     }
 
 

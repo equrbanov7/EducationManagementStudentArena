@@ -114,6 +114,21 @@
     background: var(--ems-bg-subtle);
 }
 
+.result-academic-current {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.result-score-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
 .result-academic-cell {
     display: flex;
     flex-direction: column;
@@ -172,6 +187,135 @@
     color: var(--ems-danger-strong);
 }
 
+/* --- Legacy xam bal sübutu (cari hesabdan qəti ayrıdır) --- */
+.result-legacy-grade {
+    margin-top: 0.75rem;
+    border: 1px solid var(--ems-danger-200);
+    border-radius: 10px;
+    background: var(--ems-bg);
+    overflow: hidden;
+}
+
+.result-legacy-grade__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.result-legacy-grade__summary > span:first-child {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.result-legacy-grade__summary-warning {
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.result-legacy-grade__summary:focus-visible {
+    outline: 3px solid var(--ems-primary-300);
+    outline-offset: -3px;
+}
+
+.result-legacy-grade__count {
+    min-width: 1.6rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: var(--ems-bg);
+    text-align: center;
+}
+
+.result-legacy-grade__body {
+    padding: 0.75rem;
+}
+
+.result-legacy-grade__explanation {
+    margin: 0 0 0.65rem;
+    color: var(--ems-neutral-600);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.result-legacy-fact-list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.result-legacy-fact {
+    padding: 0.65rem;
+    border: 1px solid var(--ems-border);
+    border-radius: 8px;
+    background: var(--ems-bg-subtle);
+}
+
+.result-legacy-fact__header,
+.result-legacy-fact__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.35rem 0.75rem;
+}
+
+.result-legacy-fact__header {
+    color: var(--ems-text);
+    font-size: 0.78rem;
+}
+
+.result-legacy-fact__header span,
+.result-legacy-fact__meta {
+    color: var(--ems-neutral-500);
+    font-size: 0.7rem;
+}
+
+.result-legacy-fact__scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    gap: 0.4rem;
+    margin: 0.55rem 0;
+}
+
+.result-legacy-fact__scores > div {
+    padding: 0.45rem;
+    border-radius: 6px;
+    background: var(--ems-bg);
+}
+
+.result-legacy-fact__scores dt {
+    color: var(--ems-neutral-500);
+    font-size: 0.68rem;
+}
+
+.result-legacy-fact__scores dd {
+    margin: 0.1rem 0 0;
+    color: var(--ems-text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.result-legacy-fact__review {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--ems-danger-strong);
+    font-weight: 700;
+}
+
+.result-legacy-fact__review--verified {
+    color: var(--ems-success-600);
+}
+
 /* Akademik kartda detal düyməsi yoxdur (rəsmi sənəd deyil) — gövdə altdan boşluq alsın. */
 .modern-result-card--academic .result-card-body {
     padding-bottom: 0.9rem;
@@ -198,5 +342,13 @@
 
     .result-academic-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-legacy-fact__scores {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-legacy-fact__meta {
+        flex-direction: column;
     }
 }

@@ -127,6 +127,8 @@ def test_command_emits_single_line_sorted_json(command_environment, monkeypatch)
         "journal_periods",
         "journal_reconcile",
         "journal_selfwork",
+        "legacy_grade_artifacts",
+        "legacy_grade_facts",
         "sar_materialisation",
         "student_placement",
         "worker_materialisation",
