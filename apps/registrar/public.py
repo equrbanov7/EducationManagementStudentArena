@@ -133,9 +133,20 @@ def student_academic_record_rows(request, *, organization) -> dict:
     if organization is None or not getattr(request.user, "is_authenticated", False):
         return _empty_overall_academic()
 
+    from apps.registrar import legacy_grade_read
     from apps.registrar import transcript as transcript_service
 
-    return transcript_service.build_student_overall_record(student=request.user, organization=organization)
+    data = transcript_service.build_student_overall_record(student=request.user, organization=organization)
+    rows = [row for semester in data.get("semesters", ()) for row in semester.get("rows", ())]
+    facts_by_enrollment = legacy_grade_read.legacy_grade_facts_for_enrollments(
+        organization=organization,
+        enrollment_ids=(row.get("enrollment_id") for row in rows),
+    )
+    for row in rows:
+        facts = facts_by_enrollment.get(row.get("enrollment_id"), [])
+        row["legacy_grade_facts"] = facts
+        row["legacy_grade_review_required"] = any(fact["review_required"] for fact in facts)
+    return data
 
 
 def count_student_academic_record_rows(request, *, organization) -> int:

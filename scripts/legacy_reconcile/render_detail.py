@@ -28,7 +28,7 @@ SAMPLE_HEADERS = [
 
 
 def render_sample(context: dict) -> str:
-    """20 tələbənin köhnə/yeni yan-yana müqayisəsi."""
+    """20 tələbənin PII-siz köhnə/yeni yan-yana müqayisəsi."""
 
     students = context["sample"]
     lines = [
@@ -48,6 +48,8 @@ def render_sample(context: dict) -> str:
         "(«yeni» sütunu birləşmiş nəticəni göstərir, ona görə ayrıca müqayisə olunmur).",
         "«Giriş balı» və «Yekun» sütunlarında `—` o deməkdir ki, legacy `yekun`",
         "cədvəlində bu fənn üçün sətir yoxdur — bu, uyğunsuzluq DEYİL.",
+        "Paylaşım təhlükəsizliyi üçün adlar, legacy identifikatorları, hədəf user ID-ləri",
+        "və qrup/proqram dəyərləri göstərilmir; nümunələr deterministik sıra etiketi ilə verilir.",
     ]
     if not students:
         return "\n".join(lines + ["", "> Nümunə hovuzu boşdur."])
@@ -83,27 +85,27 @@ def _sample_overview(students: list) -> str:
             verdict = f"⚠️ {matched}/{total} fənn köçüb"
         rows.append(
             [
-                student["source_name"],
-                f"`#{student['legacy_id']}`",
-                student["source_group"] or "—",
+                student["sample_label"],
                 "aktiv" if student["membership_active"] else "arxiv",
                 f"{matched}/{total}",
                 verdict,
             ]
         )
-    return md_table(["Tələbə", "Legacy ID", "Qrup", "Üzvlük", "Fənn (köçən/cəmi)", "Nəticə"], rows)
+    return md_table(["Nümunə", "Üzvlük", "Fənn (köçən/cəmi)", "Nəticə"], rows)
 
 
 def _student_heading(student: dict) -> str:
     membership = "aktiv üzvlük" if student["membership_active"] else "**arxiv üzvlüyü** (qeyri-aktiv)"
-    name_flag = " 🔴" if student["source_name"] != student["target_name"] else ""
+    name_match = "✅ uyğun" if student["source_name"] == student["target_name"] else "🔴 fərqli"
+    group_match = "✅ uyğun" if student["source_group"] == student["target_group"] else "🔴 fərqli"
+    program_match = "✅ uyğun" if student["source_speciality"] == student["target_program"] else "🔴 fərqli"
     return (
-        f"### {student['source_name']} — legacy `#{student['legacy_id']}` → `auth.user #{student['user_id']}`{name_flag}\n\n"
-        f"| Sahə | Köhnə (MyEdu) | Yeni (EMS Arena) |\n|---|---|---|\n"
-        f"| Ad, soyad | {student['source_name'] or '—'} | {student['target_name'] or '—'} |\n"
-        f"| Qrup | {student['source_group'] or '—'} | {student['target_group'] or '—'} |\n"
-        f"| İxtisas / proqram | {student['source_speciality'] or '—'} | {student['target_program'] or '—'} |\n"
-        f"| Statusu | — | {student['target_status'] or '—'} ({membership}) |"
+        f"### {student['sample_label']}\n\n"
+        f"| Yoxlama | Nəticə |\n|---|---|\n"
+        f"| Ad/soyad uyğunluğu | {name_match} |\n"
+        f"| Qrup uyğunluğu | {group_match} |\n"
+        f"| İxtisas/proqram uyğunluğu | {program_match} |\n"
+        f"| Hədəf statusu | {student['target_status'] or '—'} ({membership}) |"
     )
 
 

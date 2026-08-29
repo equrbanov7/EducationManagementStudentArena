@@ -15,6 +15,8 @@ from .analysis import (
     md_table,
 )
 from .collect import out_of_scope_cells
+from .grade_artifacts import render_grade_artifact_reconciliation
+from .grade_facts import render_grade_fact_reconciliation
 from .render_detail import render_finals, render_quality, render_sample
 
 # §1.2 üçün: ledger varlığı → onu doğuran mənbə cədvəli (yoxsa törəmə varlıqdır).
@@ -139,6 +141,8 @@ def render_report(*, context: dict) -> str:
         _entity_matrix(context),
         render_sample(context),
         render_finals(context),
+        render_grade_fact_reconciliation(context["grade_facts"]),
+        render_grade_artifact_reconciliation(context["grade_artifacts"]),
         render_quality(context, QUALITY_LABELS_SOURCE, QUALITY_LABELS_TARGET),
         _issues(context),
         _timings(context),

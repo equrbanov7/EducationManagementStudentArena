@@ -19,6 +19,8 @@ from apps.legacy_import.services.rehearsal_authorizer import (
     CURRICULUM_MODEL_LABEL,
     CURRICULUM_SUBJECT_MODEL_LABEL,
     ENROLLMENT_MODEL_LABEL,
+    LEGACY_GRADE_ARTIFACT_MODEL_LABEL,
+    LEGACY_GRADE_FACT_MODEL_LABEL,
     LESSON_MODEL_LABEL,
     ORG_UNIT_MODEL_LABEL,
     PROGRAM_MODEL_LABEL,
@@ -175,7 +177,7 @@ def test_phase_registry_fingerprint_is_pinned():
     # update BOTH the constant and this line consciously (SLICE 3A gate 5).
     assert (
         contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
-        == "849adef50aa53db6875d2dd936bd409f217e0462277a8b2daa0b57c961cf8bde"
+        == "61fa24d9415a3c96473b16d19b33edf5cb4d5a9f797a5e643329e49c0e5dee5c"
     )
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
@@ -194,7 +196,9 @@ def test_phase_registry_fingerprint_is_pinned():
         "journal_finals",
         "journal_selfwork",
         "journal_lock",
+        "legacy_grade_facts",
         "journal_reconcile",
+        "legacy_grade_artifacts",
     ]
     # Structure (supplies Program) before the catalogue that resolves against
     # it, before identity, before placement, before the worker scope pass,
@@ -206,13 +210,13 @@ def test_phase_registry_fingerprint_is_pinned():
     # for syllabus work that does not depend on a journal offering.  Every derived phase accounts for no source table at all
     # (D-2 / E-2 / V-22 / FAZA 3B).
     assert [phase.order for phase in registry] == [
-        10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 45, 46, 48,
+        10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 45, 46, 47, 48, 49,
     ]  # fmt: skip
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
         ("lessons", "curricula", "curricula_plan"),
         ("students", "workers"),
-        *([()] * 14),
+        *([()] * 16),
     ]
     # The batch-accounted run still claims exactly 880 + 6 071 + 8 545 source
     # rows — all ELEVEN journal phases are derived and contribute 0 each
@@ -736,6 +740,8 @@ def test_target_validators_expose_only_allowlisted_models_and_require_tenant_own
         ENROLLMENT_MODEL_LABEL,
         LESSON_MODEL_LABEL,
         ASSESSMENT_SCHEME_MODEL_LABEL,
+        LEGACY_GRADE_FACT_MODEL_LABEL,
+        LEGACY_GRADE_ARTIFACT_MODEL_LABEL,
     )
     assert all(re.fullmatch(MODEL_LABEL_PATTERN, label) for label in validators)
 

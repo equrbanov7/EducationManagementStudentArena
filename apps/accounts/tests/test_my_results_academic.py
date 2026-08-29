@@ -19,7 +19,16 @@ from apps.organizations.models import AcademicPeriod, Membership, Organization, 
 from apps.registrar import finals, gradebook
 from apps.registrar import public as registrar_public
 from apps.registrar import services, transcript
-from apps.registrar.models import Curriculum, CurriculumSubject, LessonKind, Program, StudentAcademicRecord, Subject
+from apps.registrar.models import (
+    Curriculum,
+    CurriculumSubject,
+    LegacyGradeFact,
+    LegacyGradeReview,
+    LessonKind,
+    Program,
+    StudentAcademicRecord,
+    Subject,
+)
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -146,6 +155,31 @@ class MyResultsAcademicTest(TestCase):
         params.setdefault("section", "my-results")
         return self._client(user).get(reverse("accounts:profile"), params)
 
+    def _legacy_fact(self, *, source_pk, kind="summary", **scores):
+        enrollment = self.student.enrollments.get(offering__subject=self.subject_old)
+        defaults = {
+            "organization": self.org,
+            "enrollment": enrollment,
+            "source_system": "myedu_mariadb",
+            "source_table": "yekun" if kind == "summary" else "journals_dates_points",
+            "source_pk": source_pk,
+            "source_snapshot_sha256": "a" * 64,
+            "source_row_hash": f"{source_pk:064x}",
+            "materialization_digest": f"{source_pk + 100:064x}",
+            "transform_version": "rehearsal-v1",
+            "evidence_kind": kind,
+            "score_code": "yekun" if kind == "summary" else "im",
+            "mapping_status": "linked",
+            # «linked» fakt HƏR İKİ tərəfin açarını daşımalıdır — bunu həm
+            # `LegacyGradeFact.clean()`, həm də PG trigger-i
+            # (`registrar_guard_legacy_grade_fact_insert`) tələb edir.  Format
+            # köçürmə fazasının yazdığı ilə eynidir: `<jurnal uniqid>:<tələbə>`.
+            "source_enrollment_ref": f"jrn{source_pk:07d}:{source_pk}",
+        }
+        defaults.update(scores)
+        with bypass_rls():
+            return LegacyGradeFact.objects.create(**defaults)
+
     # ── Sətirlər görünür ────────────────────────────────────────────────────
     def test_academic_rows_appear_in_my_results(self):
         resp = self._results(self.student)
@@ -182,6 +216,98 @@ class MyResultsAcademicTest(TestCase):
         }
         self.assertEqual(outcomes["Riyaziyyat"], "pass")
         self.assertEqual(outcomes["Fizika"], "fail")
+
+    def test_exact_legacy_scores_are_separate_unclamped_and_all_preserved(self):
+        """Köhnə xam Giriş/Çıxış/Yekun/Təkrar cari hesabla qarışmır.
+
+        50/100 tavanından böyük dəyərlər də qəsdən seçilib: read/UI qatı onları
+        clamp və ya yenidən hesablaya bilməz. Eyni enrollment-in bütün mənbə
+        sətirləri saxlanmalıdır; dict last-wins regressiyası yolverilməzdir.
+        """
+        self._legacy_fact(
+            source_pk=9001,
+            entry_score_text="59",
+            exam_score_text="69",
+            final_score_text="117",
+        )
+        self._legacy_fact(
+            source_pk=9002,
+            entry_score_text="48.5",
+            exam_score_text="41.25",
+            final_score_text="89.75",
+        )
+        self._legacy_fact(
+            source_pk=9003,
+            kind="resit",
+            score_code="im2",
+            resit_score_text="37",
+            raw_score_text="37",
+        )
+
+        resp = self._results(self.student, results_type="academic")
+        item = next(item for item in resp.context["my_result_items"] if item["title"] == "Riyaziyyat")
+        facts = item["academic"]["legacy_grade_facts"]
+        self.assertEqual(len(facts), 3)
+        self.assertEqual([fact["source_pk"] for fact in facts], [9003, 9001, 9002])
+        summary = next(fact for fact in facts if fact["source_pk"] == 9001)
+        self.assertEqual((summary["entry_score"], summary["exam_score"], summary["final_score"]), ("59", "69", "117"))
+        self.assertTrue(item["academic"]["legacy_grade_review_required"])
+
+        self.assertContains(resp, "Cari sistem üzrə hesablanmış nəticə")
+        self.assertContains(resp, "Köhnə sistemdən köçürülmüş xam mənbə balları")
+        self.assertContains(resp, "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
+        self.assertContains(resp, ">117<")
+        self.assertContains(resp, ">37<")
+
+    def test_verified_legacy_fact_keeps_value_but_clears_red_review_warning(self):
+        fact = self._legacy_fact(
+            source_pk=9010,
+            entry_score_text="44",
+            exam_score_text="42",
+            final_score_text="86",
+        )
+        with bypass_rls():
+            LegacyGradeReview.objects.create(
+                organization=self.org,
+                fact=fact,
+                decision="verified",
+                reason_code="exam_center_check",
+                evidence_digest="b" * 64,
+                reviewed_by=self.owner,
+                reviewed_by_name="İmtahan Mərkəzi",
+            )
+
+        resp = self._results(self.student, results_type="academic")
+        item = next(item for item in resp.context["my_result_items"] if item["title"] == "Riyaziyyat")
+        legacy = item["academic"]["legacy_grade_facts"]
+        self.assertEqual(legacy[0]["final_score"], "86")
+        self.assertFalse(item["academic"]["legacy_grade_review_required"])
+        self.assertContains(resp, "İmtahan Mərkəzi tərəfindən təsdiqlənib")
+        self.assertNotContains(resp, "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
+
+    def test_exam_entry_exit_attempt_is_labelled_separately_with_type_and_date(self):
+        fact = self._legacy_fact(
+            source_pk=9020,
+            kind="exam_entry_exit",
+            source_table="imthngrscxsblr",
+            score_code="exam_entry_exit",
+            entry_score_text="3010",
+            exam_score_text="2437",
+            legacy_attempt_type=3,
+            legacy_recorded_at_text="2022-04-01 09:00:00",
+        )
+
+        resp = self._results(self.student, results_type="academic")
+        item = next(item for item in resp.context["my_result_items"] if item["title"] == "Riyaziyyat")
+        legacy = item["academic"]["legacy_grade_facts"]
+
+        self.assertEqual(legacy[0]["source_pk"], fact.source_pk)
+        self.assertEqual(legacy[0]["kind_label"], "Köhnə imtahan giriş/çıxış cəhdi")
+        self.assertEqual((legacy[0]["entry_score"], legacy[0]["exam_score"]), ("3010", "2437"))
+        self.assertEqual(legacy[0]["legacy_attempt_type"], 3)
+        self.assertContains(resp, "Cəhd tipi")
+        self.assertContains(resp, "2022-04-01 09:00:00")
+        self.assertContains(resp, "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
 
     # ── İl / semestr süzgəci ────────────────────────────────────────────────
     def test_filter_options_come_from_the_builder(self):

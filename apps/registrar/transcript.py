@@ -336,6 +336,10 @@ def build_student_overall_record(*, student, organization):
                 teacher_name = (instructor.get_full_name() or "").strip() or instructor.username
             rows.append(
                 {
+                    # Legacy qiymət sübutları bu stabil FK ilə bulk şəkildə
+                    # qoşulur; tələbə/tenant sərhədini subject adı ilə təxmin
+                    # etmək həm yanlış uyğunlaşdırma, həm də IDOR riski yaradardı.
+                    "enrollment_id": row["enrollment"].id,
                     "subject": row["subject"],
                     "credit": row["credit"],
                     "teacher_name": teacher_name,

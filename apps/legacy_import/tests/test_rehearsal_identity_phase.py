@@ -724,6 +724,21 @@ def test_snapshot_rebase_restores_pre_run_baseline(rehearsal_environment):
     assert report.staged_account_count == 2
     assert dict(report.state_counts) == {"migrated": 2, "skipped": 0, "quarantined": 0}
     staged_user = LegacyEntityObservation.objects.get(run=run, entity_map__entity_type="student").target_pk
+    staged_worker = LegacyEntityObservation.objects.get(run=run, entity_map__entity_type="worker").target_pk
+    # Sonrakı materialisation fazaları eyni user üçün əlavə observation yazır.
+    # Resume snapshot-u fiziki user-i yalnız bir dəfə çıxmalıdır.
+    upsert_entity_map(
+        run_id=run.pk,
+        actor=actor,
+        authorize=_allow,
+        entity_type="worker_materialisation",
+        legacy_pk="1",
+        source_row_hash="d" * 64,
+        state=LegacyEntityMap.State.MIGRATED,
+        target_model_label=USER_MODEL_LABEL,
+        target_pk=staged_worker,
+        target_validators=build_target_validators(),
+    )
     staged = _staged_user(staged_user)
     assert staged.username == "myedu.student.1"
     assert staged.is_active is False

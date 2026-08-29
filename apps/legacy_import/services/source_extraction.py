@@ -36,6 +36,7 @@ from .field_contracts import (
     LegacySourceFieldContract,
     compile_safe_projection,
 )
+from .legacy_grade_field_contracts import EXAM_ENTRY_EXIT_FIELDS, SCORE_SHEET_EXPORT_FIELDS
 from .syllabus_field_contracts import (
     JOURNAL_SYLLABUS_FIELDS,
     SILLABUS_FIELDS,
@@ -64,6 +65,8 @@ _AUDITED_CONTRACTS = {
     JOURNAL_POINT_ARCHIVE_FIELDS.fingerprint: JOURNAL_POINT_ARCHIVE_FIELDS,
     ALLOWED_QB_FIELDS.fingerprint: ALLOWED_QB_FIELDS,
     YEKUN_FIELDS.fingerprint: YEKUN_FIELDS,
+    EXAM_ENTRY_EXIT_FIELDS.fingerprint: EXAM_ENTRY_EXIT_FIELDS,
+    SCORE_SHEET_EXPORT_FIELDS.fingerprint: SCORE_SHEET_EXPORT_FIELDS,
     # J9 (journal_selfwork) — sillabus domeni.  Cədvəllər plan-da
     # ``design_gated``-dir: onlar İDDİA edilə bilməz, amma audited
     # kontraktla OXUNA bilər (bax ``rehearsal_contracts`` seam qeydi).

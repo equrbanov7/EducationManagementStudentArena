@@ -33,12 +33,27 @@ def collect_sample(source, target, target_facts: dict, *, size: int = SAMPLE_SIZ
     yekun = _index_yekun(source.query("nümunə yekun", S.sample_yekun_sql(legacy_ids)))
 
     user_ids = [int(student_bridge[key]) for key in chosen]
-    target_identity = {str(row[0]): row for row in target.query("nümunə şəxsiyyət", T.SAMPLE_IDENTITY_SQL, (user_ids,))}
-    target_rows = _index_target(target.query("nümunə yazılışlar", T.SAMPLE_ENROLLMENT_SQL, (user_ids,)))
+    organization_id = target_facts["organization_id"]
+    target_identity = {
+        str(row[0]): row
+        for row in target.query(
+            "nümunə şəxsiyyət",
+            T.SAMPLE_IDENTITY_SQL,
+            (organization_id, user_ids),
+        )
+    }
+    target_rows = _index_target(
+        target.query(
+            "nümunə yazılışlar",
+            T.SAMPLE_ENROLLMENT_SQL,
+            (organization_id, user_ids),
+        )
+    )
 
     enrollment_bridge = target_facts["enrollments"]
-    return [
-        _build_student(
+    students = []
+    for index, key in enumerate(chosen, start=1):
+        student = _build_student(
             legacy_key=key,
             identity=identity[key],
             user_id=str(student_bridge[key]),
@@ -49,8 +64,11 @@ def collect_sample(source, target, target_facts: dict, *, size: int = SAMPLE_SIZ
             target_rows=target_rows,
             enrollment_bridge=enrollment_bridge,
         )
-        for key in chosen
-    ]
+        # Paylaşılan hesabatda birbaşa və linkable identifikatorlar render
+        # edilmir. Sıra etiketi eyni seed üçün deterministik qalır.
+        student["sample_label"] = f"Nümunə {index:02d}"
+        students.append(student)
+    return students
 
 
 def stratified_sample(eligible, enrollment_bridge, *, seed: int, size: int) -> list:

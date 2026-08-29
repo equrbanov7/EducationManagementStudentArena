@@ -22,7 +22,7 @@ from typing import Any
 from django.db import connection as default_connection
 
 from apps.legacy_import.models import LegacyMigrationRun
-from core.rls import set_rls_tenant
+from core.rls import set_rls_tenant, set_rls_user
 
 from .ledger import create_run, finish_run, start_run, upsert_issue
 from .preflight import inspect_legacy_source
@@ -397,6 +397,10 @@ def execute_rehearsal(
         source_factory_builder=source_factory_builder,
         enforce_scope_precheck=not emit_report_only,
     )
+    # Management commands do not pass through OrganizationMiddleware.  Bind the
+    # authenticated operator explicitly so DB guards can distinguish the audited
+    # rehearsal writer from an arbitrary tenant member.
+    set_rls_user(actor.pk, local=False)
     if emit_report_only:
         run = _load_run(resume_run_id)
         _assert_resume_scope(run, organization=organization, attested=attested)
@@ -479,6 +483,7 @@ def cancel_rehearsal(
         raise LegacyRehearsalConfigError("legacy_rehearsal_organization_invalid")
     _assert_actor(actor)
     set_rls_tenant(organization.pk, local=False)
+    set_rls_user(actor.pk, local=False)
     run = _load_run(run_id)
     if run.organization_id != organization.pk:
         raise LegacyRehearsalResumeError("legacy_rehearsal_resume_scope_mismatch")

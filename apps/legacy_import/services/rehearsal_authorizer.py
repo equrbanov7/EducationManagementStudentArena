@@ -32,6 +32,8 @@ LESSON_MODEL_LABEL = "registrar.lesson"
 # J7 (journal_lock) hədəfi: kilid qərarı məhz sxemin üzərində yaşayır
 # (``approval_status`` + ``is_published`` CheckConstraint cütü).
 ASSESSMENT_SCHEME_MODEL_LABEL = "registrar.assessmentscheme"
+LEGACY_GRADE_FACT_MODEL_LABEL = "registrar.legacygradefact"
+LEGACY_GRADE_ARTIFACT_MODEL_LABEL = "registrar.legacygradeartifact"
 
 
 def build_rehearsal_authorizer() -> LedgerAuthorizer:
@@ -113,6 +115,8 @@ def build_bulk_target_validators():
             ENROLLMENT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "Enrollment"),
             LESSON_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "Lesson"),
             ASSESSMENT_SCHEME_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "AssessmentScheme"),
+            LEGACY_GRADE_FACT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyGradeFact"),
+            LEGACY_GRADE_ARTIFACT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyGradeArtifact"),
         }
     )
 
@@ -145,5 +149,7 @@ def build_target_validators() -> TargetValidatorRegistry:
             ENROLLMENT_MODEL_LABEL: _tenant_owned_validator("registrar", "Enrollment"),
             LESSON_MODEL_LABEL: _tenant_owned_validator("registrar", "Lesson"),
             ASSESSMENT_SCHEME_MODEL_LABEL: _tenant_owned_validator("registrar", "AssessmentScheme"),
+            LEGACY_GRADE_FACT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyGradeFact"),
+            LEGACY_GRADE_ARTIFACT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyGradeArtifact"),
         }
     )
