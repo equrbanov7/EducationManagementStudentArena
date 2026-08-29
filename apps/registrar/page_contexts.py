@@ -33,7 +33,7 @@ def journal_list_context(user, request=None) -> dict:
     from django.db.models import Count, Q
 
     from apps.registrar import corrections as corrections_service
-    from apps.registrar.models import ScheduleSlot, SlotKind
+    from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
     from apps.registrar.schedule import EVENING_START
 
     # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
@@ -64,18 +64,28 @@ def journal_list_context(user, request=None) -> dict:
 
     # Cədvəl slotlarından: offering → dərs tip(lər)i + axşam (magistratura) bayrağı.
     kind_labels = dict(SlotKind.choices)
+    kind_order = {value: index for index, (value, _) in enumerate(SlotKind.choices)}
     kinds_by_offering: dict = {}
     evening_offerings: set = set()
     for offering_id, kind, start_time in ScheduleSlot.objects.filter(offering__in=offerings).values_list(
         "offering_id", "kind", "start_time"
     ):
-        kinds_by_offering.setdefault(offering_id, [])
-        if kind not in kinds_by_offering[offering_id]:
-            kinds_by_offering[offering_id].append(kind)
+        kinds_by_offering.setdefault(offering_id, set()).add(kind)
         if start_time >= EVENING_START:
             evening_offerings.add(offering_id)
+    # Köçürülmüş (legacy) açılışların cədvəl slotu YOXDUR — tip yalnız ``Lesson.kind``-dadır
+    # (köçürmə 293,070 dərsə mühazirə/seminar/lab yazır).  Tələbə kabineti onsuz da dərsdən
+    # oxuyurdu, jurnal siyahısı isə yalnız slota baxdığı üçün «—» göstərirdi.
+    # ``LessonKind`` dəyərləri ``SlotKind`` ilə eynidir (lecture/seminar/lab); naməlum dəyər
+    # süzülür ki, etiket heç vaxt KeyError verməsin.
+    for offering_id, kind in (
+        Lesson.objects.filter(offering__in=offerings).values_list("offering_id", "kind").distinct()
+    ):
+        if kind in kind_labels:
+            kinds_by_offering.setdefault(offering_id, set()).add(kind)
     for offering in offerings:
-        kinds = kinds_by_offering.get(offering.id, [])
+        # Deterministik sıra: ``SlotKind.choices`` ardıcıllığı (mühazirə → seminar → lab).
+        kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
         offering.slot_kinds = kinds
         offering.kind_label = " · ".join(str(kind_labels[k]) for k in kinds) if kinds else ""
         offering.is_evening = offering.id in evening_offerings

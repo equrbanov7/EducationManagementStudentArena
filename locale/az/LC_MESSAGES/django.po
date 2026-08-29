@@ -35091,11 +35091,11 @@ msgstr "İmtina"
 
 msgctxt "registrar.slot_kind"
 msgid "Laboratory"
-msgstr "Laboratory"
+msgstr "Laboratoriya"
 
 msgctxt "registrar.slot_kind"
 msgid "Lecture"
-msgstr "Lecture"
+msgstr "Mühazirə"
 
 msgctxt "registrar.slot_kind"
 msgid "Seminar"
