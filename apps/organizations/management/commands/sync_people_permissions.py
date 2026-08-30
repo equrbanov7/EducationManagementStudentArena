@@ -31,6 +31,7 @@ from django.db import transaction
 from apps.organizations.default_roles_university import UNIVERSITY_ROLES
 from apps.organizations.models import Organization, Role
 from core.constants import OrganizationType
+from core.rls_pooling import rls_worker_atomic
 
 PREFIX = "people."
 
@@ -52,7 +53,7 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Dəyişikliyi HƏQİQƏTƏN yaz (defolt: quru işləyiş).")
         parser.add_argument("--org", default="", help="Yalnız bu slug-lı təşkilat.")
 
-    def handle(self, *args, **options):
+    def _plan(self, options) -> list:
         wanted = people_permissions_by_role()
         organizations = Organization.objects.filter(org_type=OrganizationType.UNIVERSITY, is_active=True)
         if options["org"]:
@@ -69,6 +70,13 @@ class Command(BaseCommand):
                 missing = [key for key in wanted[role.name] if key not in current]
                 if missing:
                     planned.append((organization, role, current + missing, missing))
+        return planned
+
+    def handle(self, *args, **options):
+        # Request-dən kənar entry-point: bütün DB işi tək worker-atomic sarğısındadır
+        # (scripts/check_worker_atomic_coverage.py qapısı).
+        with rls_worker_atomic():
+            planned = self._plan(options)
 
         if not planned:
             self.stdout.write(self.style.SUCCESS("Əlavə ediləcək icazə yoxdur — hamısı yerindədir."))
@@ -83,7 +91,7 @@ class Command(BaseCommand):
             )
             return
 
-        with transaction.atomic():
+        with rls_worker_atomic(), transaction.atomic():
             for _organization, role, new_permissions, _missing in planned:
                 Role.objects.filter(pk=role.pk).update(permissions=new_permissions)
         self.stdout.write(self.style.SUCCESS(f"\n{len(planned)} rol yeniləndi."))

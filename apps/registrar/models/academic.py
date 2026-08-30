@@ -29,6 +29,29 @@ class Program(UUIDModel, TimeStampedModel):
 
     Optionally anchored to a specialty ``OrgUnit`` so the hierarchy
     (Faculty → Chair → Specialty) and the program catalogue stay linked.
+
+    İki AYRI kod sahəsi — qarışdırılmamalıdır
+    -----------------------------------------
+    ``code``
+        **DAXİLİ, sabit identifikator.** Tenant daxilində UNİKALDIR
+        (``uniq_program_code_per_org``) və köçürmə xəttinin şəxsiyyət açarıdır:
+        MyEdu köçürməsi mənbədə kod olmayanda ``MYEDU-<id>`` sintez edir,
+        ``apps/legacy_import`` isə bu dəyəri həm ``TargetRef.key`` semantik
+        açarı, həm də ``program_pk_index()`` indeksi kimi işlədir. Ona görə bu
+        sütunun unikallığı GÖTÜRÜLMÜR və dəyərləri əl ilə dəyişdirilmir.
+
+    ``official_code``
+        **RƏSMİ dövlət ixtisas şifri** (məs. ``050405``). Yalnız göstərmək
+        üçündür — identifikator DEYİL, ona görə **UNİKAL DEYİL**. Azərbaycan
+        təsnifatı iki səviyyəlidir (ixtisas + ixtisaslaşma) və bir neçə proqram
+        qanuni olaraq eyni şifri paylaşır::
+
+            060209 → dörd magistr psixologiya proqramı (klinik / sosial /
+                     məhkəmə + ana ixtisas)
+            050201 → «Beynəlxalq münasibətlər»in AZ və EN variantları
+            050620 → eyni ixtisasın əyani və qiyabi sətirləri
+
+        Bilinməyəndə **boş qalır** — uydurulmur.
     """
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="programs")
@@ -40,7 +63,16 @@ class Program(UUIDModel, TimeStampedModel):
         related_name="programs",
         help_text="İxtisas (OrgUnit: specialty) — iyerarxiya bağlantısı.",
     )
-    code = models.CharField(max_length=32)
+    code = models.CharField(
+        max_length=32,
+        help_text="DAXİLİ identifikator (tenant daxilində unikal). Köçürmə xətti bundan asılıdır — əl ilə dəyişməyin.",
+    )
+    official_code = models.CharField(
+        max_length=32,
+        blank=True,
+        db_index=True,
+        help_text="Rəsmi dövlət ixtisas şifri (məs. 050405). UNİKAL DEYİL — bir neçə proqram eyni şifri paylaşa bilər.",
+    )
     name = models.CharField(max_length=255)
     degree_level = models.CharField(max_length=16, choices=DegreeLevel.choices, default=DegreeLevel.BACHELOR)
     ects_total = models.PositiveIntegerField(
@@ -65,8 +97,16 @@ class Program(UUIDModel, TimeStampedModel):
             models.UniqueConstraint(fields=["organization", "code"], name="uniq_program_code_per_org"),
         ]
 
+    @property
+    def display_label(self) -> str:
+        """İstifadəçiyə göstərilən etiket — daxili ``MYEDU-*`` açarı SIZMIR."""
+
+        name = (self.name or "").strip()
+        official = (self.official_code or "").strip()
+        return f"{name} · {official}" if official else name
+
     def __str__(self):
-        return f"{self.code} — {self.name}"
+        return self.display_label
 
 
 class Subject(UUIDModel, TimeStampedModel):
