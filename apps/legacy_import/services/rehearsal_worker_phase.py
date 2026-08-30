@@ -4,8 +4,9 @@ Bu faza HEÇ BİR mənbə cədvəli hesabatına sahib deyil (``source_tables = (
 ``workers`` artıq ``identity_cohort`` tərəfindən iddia olunub və bir cədvəl
 yalnız bir dəfə iddia oluna bilər.  Yenə də EYNİ audited kontrakt
 (``WORKER_IDENTITY_FIELDS``) üzərindən oxuyur — ``department_id``,
-``teacher_type`` və ``inzibati`` proyeksiyada ONSUZ DA var, ona görə heç bir
-kontrakt barmaq izi dəyişmir (mənbə faktları bölməsi).
+``teacher_type``, ``inzibati``, həmçinin ``sex``/``birthday`` proyeksiyada
+ONSUZ DA var, ona görə heç bir kontrakt barmaq izi dəyişmir (mənbə faktları
+bölməsi).
 
 Fazanın işi (V-22..V-27): identity-nin stage etdiyi hər worker hesabını
 (1) öz kafedrasına scope-lamaq — ``Membership.scope_unit`` ←
@@ -35,6 +36,7 @@ from django.apps import apps as django_apps
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation
 
 from .field_contracts import WORKER_IDENTITY_FIELDS
+from .legacy_demographics import demographics_from_row
 from .legacy_text import clean_text, legacy_slug
 from .pk_inventory_contracts import MAX_LEDGER_PRIMARY_KEY
 from .rehearsal_authorizer import USER_MODEL_LABEL
@@ -291,6 +293,7 @@ class WorkerMaterialisationPhase:
             first_name=first_name,
             last_name=last_name,
             patronymic=patronymic,
+            demographics=demographics_from_row(row),
         )
 
         if not unit_pk:

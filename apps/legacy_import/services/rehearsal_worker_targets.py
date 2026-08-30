@@ -36,6 +36,7 @@ from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, 
 
 from .field_contracts import WORKER_IDENTITY_FIELDS
 from .ledger import upsert_entity_map, upsert_issue
+from .legacy_demographics import Demographics, write_demographics
 from .rehearsal_authorizer import USER_MODEL_LABEL
 from .rehearsal_contracts import LegacyRehearsalConfigError, LegacyRehearsalEvidenceError, encoded_part
 
@@ -101,6 +102,8 @@ class WorkerRequest:
     first_name: str = ""
     last_name: str = ""
     patronymic: str = ""
+    # Cins + doğum tarixi; eyni §4.5 müqaviləsi (yalnız boş sahə doldurulur).
+    demographics: Demographics = Demographics()
 
 
 @dataclass(frozen=True)
@@ -172,6 +175,7 @@ def worker_derivation_hash(
     activation_state: str,
     name_state: str = "unwritten",
     patronymic_state: str = "unwritten",
+    demographics_state: str = "unwritten",
 ) -> str:
     """Cross-run-sabit worker qərar kimliyi; heç bir UUID ona daxil olmur.
 
@@ -193,6 +197,9 @@ def worker_derivation_hash(
         activation_state,
         name_state,
         patronymic_state,
+        # 2026-08-30: demoqrafiya (cins + doğum tarixi) da hədəf yazısıdır, ona
+        # görə qərarın kimliyinin bir hissəsidir — ad/ata adı ilə eyni resept.
+        demographics_state,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -355,6 +362,7 @@ def materialise_worker(context, *, request: WorkerRequest, activate: bool, activ
             # görünməlidir (yalnız boş sahə doldurulur — §4.5 müqaviləsi).
             name_state = write_worker_names(request.user_pk, request.first_name, request.last_name)
             patronymic_state = write_worker_patronymic(context, user_pk=request.user_pk, patronymic=request.patronymic)
+            demographics_state = write_demographics(context, user_pk=request.user_pk, demographics=request.demographics)
             if activate:
                 stage = "activation"
                 if request.needs_activation:
@@ -375,6 +383,7 @@ def materialise_worker(context, *, request: WorkerRequest, activate: bool, activ
                 activation_state=activation_state,
                 name_state=name_state,
                 patronymic_state=patronymic_state,
+                demographics_state=demographics_state,
             )
             entity_map = _seal(
                 context,

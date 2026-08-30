@@ -1,5 +1,6 @@
 """Phase ``worker_materialisation`` tests: V-22..V-27, digest seam, ortaq kap."""
 
+import datetime
 import hashlib
 from dataclasses import replace
 
@@ -324,6 +325,9 @@ def test_the_worker_derivation_hash_follows_the_documented_recipe():
         "written",
         # Ata adı AYRI qərardır (ayrı hədəf sütun, ayrı mənbə sahəsi).
         "preserved",
+        # 2026-08-30: cins + doğum tarixi də iki ayrı hədəf sütundur
+        # (``sex``/``birthday``); yazı vəziyyəti eyni cür resepte qatılır.
+        "blank",
     ):
         digest.update(encoded_part(part))
 
@@ -338,6 +342,7 @@ def test_the_worker_derivation_hash_follows_the_documented_recipe():
         activation_state="activated",
         name_state="written",
         patronymic_state="preserved",
+        demographics_state="blank",
     )
 
     assert computed == digest.hexdigest()
@@ -991,3 +996,45 @@ def test_an_activating_run_writes_every_identity_field(worker_actor):
     assert (user.first_name, user.last_name) == ("Elvin", "Qurbanov")
     # HTML entity mənbədə xam qalıb; ``clean_text`` onu hədəfə yazmazdan əvvəl açır.
     assert UserProfile.objects.get(user=user).patronymic == "Cücü"
+
+
+@pytest.mark.django_db
+def test_worker_demographics_reach_the_profile_through_the_activation_path(worker_actor):
+    """``sex``/``birthday`` proyeksiyada onsuz da var idi, sadəcə oxunmurdu.
+
+    ``_decide`` aktivasiya pilləsində ``WorkerRequest``-i ``replace`` ilə
+    yeniləyir — sıfırdan qursaydı demoqrafiya da ad/soyad kimi səssizcə itərdi
+    (2026-08-28 reqressiyasının eyni forması), ona görə qapı məhz o yoldadır.
+    """
+
+    actor = worker_actor
+    organization = _organization(actor, "worker-demographics")
+    rows = [_worker_row(1, sex=2, birthday="09/11/1960")]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_departments(organization)
+    user = _stage_workers(organization, actor, run.pk, (1,))[1]
+
+    WorkerMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    profile = UserProfile.objects.get(user=user)
+    assert (profile.gender, profile.birth_date) == ("female", datetime.date(1960, 11, 9))
+
+
+@pytest.mark.django_db
+def test_worker_demographics_never_overwrite_an_existing_profile_value(worker_actor):
+    """§4.5 müqaviləsi: idxal boşluğu doldurur, əl ilə düzəldilmiş dəyəri pozmur."""
+
+    actor = worker_actor
+    organization = _organization(actor, "worker-demographics-preserved")
+    rows = [_worker_row(1, sex=1, birthday="09/11/1960")]
+    run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
+    _seed_departments(organization)
+    user = _stage_workers(organization, actor, run.pk, (1,))[1]
+    UserProfile.objects.filter(user=user).update(
+        gender=UserProfile.Gender.FEMALE, birth_date=datetime.date(1975, 3, 4)
+    )
+
+    WorkerMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    profile = UserProfile.objects.get(user=user)
+    assert (profile.gender, profile.birth_date) == ("female", datetime.date(1975, 3, 4))
