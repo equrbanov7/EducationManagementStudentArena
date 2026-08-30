@@ -1438,6 +1438,81 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Qrup 101")
         self.assertContains(response, "Group Test University")
 
+    def test_profile_info_shows_academic_structure_as_separate_cards(self):
+        """Sahib şikayəti (2026-08): "Fakültə > Kafedra > İxtisas > Qrup"
+        breadcrumb-ı çirkin görünürdü. İndi hər səviyyə öz kartındadır və
+        İxtisas kartında proqram kodu da göstərilir."""
+        from apps.organizations.models import OrgUnit
+        from apps.registrar.models import Curriculum, Program, StudentAcademicRecord
+        from core.constants import OrgUnitType
+
+        organization = Organization.objects.create(
+            name="Structure Test University",
+            slug="structure-test-university",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            is_active=True,
+            status="active",
+        )
+        faculty = OrgUnit.objects.create(
+            organization=organization, name="Struktur Fakültəsi", slug="struct-faculty", unit_type=OrgUnitType.FACULTY
+        )
+        chair = OrgUnit.objects.create(
+            organization=organization,
+            name="Struktur Kafedrası",
+            slug="struct-chair",
+            unit_type=OrgUnitType.CHAIR,
+            parent=faculty,
+        )
+        specialty = OrgUnit.objects.create(
+            organization=organization,
+            name="Struktur İxtisası",
+            slug="struct-specialty",
+            unit_type=OrgUnitType.SPECIALTY,
+            parent=chair,
+        )
+        group = OrgUnit.objects.create(
+            organization=organization,
+            name="STR-101",
+            slug="struct-group",
+            unit_type=OrgUnitType.GROUP,
+            parent=specialty,
+        )
+        program = Program.objects.create(
+            organization=organization, code="STR-047", name="Struktur İxtisası", specialty_unit=specialty
+        )
+        curriculum = Curriculum.objects.create(organization=organization, program=program, admission_year=2024)
+
+        # AKTİV membership ƏVVƏL: PG trigger-i (registrar_guard_active_member)
+        # StudentAcademicRecord.student referansını əks halda rədd edir.
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
+
+        StudentAcademicRecord.objects.create(
+            organization=organization,
+            student=self.user,
+            program=program,
+            curriculum=curriculum,
+            group=group,
+            admission_year=2024,
+        )
+
+        _login_with_org(self.client, self.user, organization)
+
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+
+        # Hər səviyyə öz kartında — köhnə tək-sətirli breadcrumb yoxdur.
+        self.assertNotIn("Struktur Fakültəsi &gt; Struktur Kafedrası", content)
+        self.assertContains(response, "Struktur Fakültəsi")
+        self.assertContains(response, "Struktur Kafedrası")
+        self.assertContains(response, "STR-101")
+        # İxtisas kartı proqramdan (ad + kod) qurulur, specialty node-dan yox.
+        self.assertContains(response, "Struktur İxtisası")
+        self.assertContains(response, "STR-047")
+        self.assertContains(response, "profile-structure-card")
+
     def test_profile_info_handles_many_student_groups_without_breaking(self):
         from apps.accounts.models import ProfileRole
         from apps.exams.models import StudentGroup

@@ -39,7 +39,12 @@ from .._sections.question_submissions import build_question_submissions_context
 from .._sections.unit_exams import build_unit_exams_context
 from ..contact_inbox import handle_contact_reply_post
 from ..post_handler import handle_profile_post
-from ._helpers import _build_effective_user_roles, _restore_profile_org_context, build_teacher_subject_rows
+from ._helpers import (
+    _build_effective_user_roles,
+    _restore_profile_org_context,
+    build_student_structure_levels,
+    build_teacher_subject_rows,
+)
 
 
 class _Stage1Mixin:
@@ -448,6 +453,11 @@ class _Stage1Mixin:
                         is_active=True, organization=self.active_organization
                     ).select_related("program", "group")
                 )
+                # Fakültə/Kafedra/İxtisas/Qrup — hər səviyyə ayrıca kart kimi
+                # (bax ``build_student_structure_levels`` doc-string-i: köhnə
+                # "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ının yerinə).
+                for student_record in self.student_records:
+                    student_record.structure_levels = build_student_structure_levels(student_record)
 
         self.group_form = None
         self.can_multi_assign_group_teachers = False
