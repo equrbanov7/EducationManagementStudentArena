@@ -15,7 +15,7 @@ from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
 from apps.registrar import services as registrar_services
-from apps.registrar.models import Enrollment, Subject
+from apps.registrar.models import Curriculum, Enrollment, Program, StudentAcademicRecord, Subject
 from apps.syllabus import services as syllabus_services
 from apps.syllabus.constants import SectionKey
 from apps.syllabus.tests.factories import PLAN_HOURS, complete_section_data
@@ -76,6 +76,24 @@ class JournalSyllabusBridgeTest(TestCase):
             self.offering.save(update_fields=["instructor", "lesson_hours"])
             self.enrollment = Enrollment.objects.create(
                 organization=self.org, student=self.student, offering=self.offering
+            )
+            # Tələbənin kabinet görünüşü ``StudentAcademicRecord``-a söykənir:
+            # qeyd yoxdursa ``build_student_journal_context`` ``None`` qaytarır
+            # (istifadəçi bu orqda tələbə sayılmır) və panel ümumiyyətlə qurulmur.
+            self.program = Program.objects.create(organization=self.org, code="JSB-PRG", name="Alqoritmlər proqramı")
+            # ⚠️ ``registrar_guard_student_record_coherence`` PG trigger-i tədris
+            # planının öz proqramına aid olmasını tələb edir — plansız qeyd
+            # yaratmaq mümkün deyil.
+            self.curriculum = Curriculum.objects.create(
+                organization=self.org, program=self.program, admission_year=2024
+            )
+            self.record = StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=self.student,
+                program=self.program,
+                curriculum=self.curriculum,
+                group=self.group,
+                admission_year=2024,
             )
 
     # ── köməkçilər ───────────────────────────────────────────────────────
