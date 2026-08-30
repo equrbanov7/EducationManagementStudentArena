@@ -76,6 +76,7 @@ from apps.legacy_import.services.field_contracts import (
 from apps.legacy_import.services.legacy_grade_field_contracts import (
     EXAM_ENTRY_EXIT_FIELDS,
     SCORE_SHEET_EXPORT_FIELDS,
+    YEKUN_EVIDENCE_FIELDS,
 )
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
 from apps.legacy_import.services.rehearsal_contracts import (
@@ -1052,6 +1053,14 @@ def _yekun_values(legacy_pk):
         "girish": 20.0,
         "imtahanda": 30.0,
         "yekun": 50.0,
+        # `grade-evidence-v1` proyeksiyasının əlavə sütunları — semantikası
+        # TƏSDİQLƏNMƏYİB, ona görə yalnız XAM sübut kimi saxlanılır (heç bir
+        # hesablamaya girmir).  Fixture real sxemin tiplərini güzgüləyir.
+        "group_id": 7,
+        "kesr": legacy_pk % 2,
+        "guzest_girish": 0,
+        "level": 0,
+        "guzest_artim": 0,
     }
 
 
@@ -1073,6 +1082,19 @@ def _score_sheet_export_values(legacy_pk):
         "data": f"<table><tr><td>{_PRIVATE_VALUE}-{legacy_pk}</td><td>{40 + legacy_pk}</td></tr></table>",
         "export_time": f"2023-08-{13 + legacy_pk:02d} 10:00:00",
     }
+
+
+# ``yekun`` cədvəli İKİ kontrakt tərəfindən oxunur: dar ``YEKUN_FIELDS``
+# (J5b/J8 möhür resepti) və geniş ``YEKUN_EVIDENCE_FIELDS`` (qiymət sübutu).
+# ``compile_safe_projection`` kontraktın sxemin ALT-ÇOXLUĞU olmasını tələb edir,
+# ona görə fixture cədvəli GENİŞ proyeksiya ilə qurur.  Bu invariant pozulsa
+# (məsələn dar kontrakta geniş kontraktda olmayan sütun əlavə edilsə) sintetik
+# dəst `legacy_source_schema_contract_mismatch` ilə çökür — 2026-08-30-da məhz
+# belə oldu.  Modul yüklənəndə dərhal tutulsun deyə burada yoxlanılır.
+assert set(YEKUN_FIELDS.allowed_fields) <= set(YEKUN_EVIDENCE_FIELDS.allowed_fields), (
+    "dar `YEKUN_FIELDS` geniş `YEKUN_EVIDENCE_FIELDS`-in alt-çoxluğu olmalıdır; "
+    "əks halda fixture cədvəli hər iki oxucuya xidmət edə bilməz"
+)
 
 
 _FULL_TABLES = (
@@ -1101,7 +1123,12 @@ _FULL_TABLES = (
         _journal_point_archive_values,
     ),
     ("allowed_qb", ALLOWED_QB_FIELDS, (), _ALLOWED_QB_ROWS, _allowed_qb_values),
-    ("yekun", YEKUN_FIELDS, (), _YEKUN_ROWS, _yekun_values),
+    # Cədvəl GENİŞ (`grade-evidence-v1`) proyeksiya ilə yaradılır: `compile_safe_projection`
+    # kontraktın sxemin ALT-ÇOXLUĞU olmasını tələb edir, ona görə dar `YEKUN_FIELDS`
+    # (J5b/J8) və geniş `YEKUN_EVIDENCE_FIELDS` (qiymət sübutu fazası) eyni cədvəldən
+    # oxuya bilir.  Dar kontraktla yaratsaq, geniş oxucu
+    # `legacy_source_schema_contract_mismatch` ilə çökür.
+    ("yekun", YEKUN_EVIDENCE_FIELDS, (), _YEKUN_ROWS, _yekun_values),
     (
         "imthngrscxsblr",
         EXAM_ENTRY_EXIT_FIELDS,

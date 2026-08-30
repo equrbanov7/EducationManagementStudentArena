@@ -14,8 +14,8 @@ DOES produce is the placement decision itself — program, group unit, admission
 year, degree, form, sector — sealed into a cross-run-stable
 ``record_derivation_hash`` that the SAR slice will consume verbatim, plus the
 target fields that carry no trigger dependency: ``UserProfile.fin``,
-``UserProfile.patronymic`` and ``auth_user.first_name``/``last_name`` (each
-written only when currently blank).
+``UserProfile.patronymic``, ``UserProfile.gender``/``birth_date`` and
+``auth_user.first_name``/``last_name`` (each written only when currently blank).
 
 Evidence lives entirely in the phase's own observations and digest chain.  The
 chain is advanced with exactly ``(legacy_pk, state, derivation_hash, "")`` per
@@ -42,6 +42,7 @@ from core.validators import FIN_PATTERN, normalize_fin
 
 from .field_contracts import STUDENT_IDENTITY_FIELDS
 from .ledger import upsert_entity_map, upsert_issue
+from .legacy_demographics import demographics_from_row, write_demographics
 from .legacy_text import clean_code, clean_text
 from .pk_inventory_contracts import MAX_LEDGER_PRIMARY_KEY
 from .rehearsal_authorizer import USER_MODEL_LABEL
@@ -337,6 +338,7 @@ def record_derivation_hash(
     fin_state: str,
     name_state: str,
     patronymic_state: str = "unwritten",
+    demographics_state: str = "unwritten",
 ) -> str:
     """The cross-run-stable placement identity; zero UUIDs ever enter it.
 
@@ -361,6 +363,9 @@ def record_derivation_hash(
         fin_state,
         name_state,
         patronymic_state,
+        # 2026-08-30: demoqrafiya (cins + doğum tarixi) da hədəf yazısıdır, ona
+        # görə qərarın kimliyinin bir hissəsidir — ad/ata adı ilə eyni resept.
+        demographics_state,
     ):
         digest.update(encoded_part(part))
     return digest.hexdigest()
@@ -554,9 +559,11 @@ class StudentPlacementPhase:
         patronymic, _truncated = clean_text(row["father_name"], max_length=PATRONYMIC_MAX_LENGTH)
         fin = _legacy_fin(row["fincode"])
         legacy_pk_text = str(legacy_pk)
+        demographics = demographics_from_row(row)
         with transaction.atomic():
             name_state = _write_names(target_pk, first_name, last_name)
             patronymic_state = _write_patronymic(context, target_pk, patronymic)
+            demographics_state = write_demographics(context, user_pk=target_pk, demographics=demographics)
             fin_state, fin_rules = _apply_fin(context, target_pk, fin, occurrences)
             digest = record_derivation_hash(
                 legacy_pk=legacy_pk,
@@ -565,6 +572,7 @@ class StudentPlacementPhase:
                 fin_state=fin_state,
                 name_state=name_state,
                 patronymic_state=patronymic_state,
+                demographics_state=demographics_state,
             )
             entity_map = upsert_entity_map(
                 run_id=context.run_id,

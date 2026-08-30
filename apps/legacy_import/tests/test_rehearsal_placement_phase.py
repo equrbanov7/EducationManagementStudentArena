@@ -1,5 +1,6 @@
 """Phase ``student_placement`` tests: dependency gate, §4.5 matrix, digest seam."""
 
+import datetime
 import hashlib
 from dataclasses import replace
 
@@ -682,6 +683,41 @@ def test_the_patronymic_is_written_only_into_a_blank_profile_field(seeded):
 
 
 @pytest.mark.django_db
+def test_demographics_are_written_only_into_blank_profile_fields(seeded):
+    """``sex``/``birthday`` artıq proyeksiyadadır — faza onları yalnız oxuyur.
+
+    Mənbədə hər iki sütun seyrəkdir (cins 21 %, doğum tarixi 28 %), ona görə
+    yarımçıq sətir normadır və pozuq dəyər fail-closed NULL qalır.  Yazı
+    müqaviləsi ad/ata adı ilə eynidir (§4.5): boşluğu doldur, üzərinə yazma.
+    """
+
+    organization, actor, run, users = seeded
+    UserProfile.objects.filter(user=users[2]).update(
+        gender=UserProfile.Gender.FEMALE, birth_date=datetime.date(1999, 1, 2)
+    )
+    rows = [
+        _student_row(1, group_id=20, entry_year="2019", sex=1, birthday="19/10/2003"),
+        _student_row(2, group_id=21, entry_year="2019", sex=1, birthday="01/01/2001"),
+        _student_row(3, group_id=20, entry_year="2019", sex=2, birthday="12/16/2001"),
+        _student_row(4, group_id=22, entry_year="2019", sex=0, birthday=""),
+    ]
+
+    StudentPlacementPhase().run(_seeded_context(organization, actor, run, rows=rows))
+
+    written = UserProfile.objects.get(user=users[1])
+    assert (written.gender, written.birth_date) == ("male", datetime.date(2003, 10, 19))
+    # Mövcud dəyər idxal tərəfindən heç vaxt üzərinə yazılmır.
+    preserved = UserProfile.objects.get(user=users[2])
+    assert (preserved.gender, preserved.birth_date) == ("female", datetime.date(1999, 1, 2))
+    # ``12/16/2001`` yalnız MM/DD kimi oxuna bilər — təxmin edilmir, NULL qalır;
+    # cins isə eyni sətirdə yenə də yazılır (iki müstəqil sütun).
+    partial = UserProfile.objects.get(user=users[3])
+    assert (partial.gender, partial.birth_date) == ("female", None)
+    absent = UserProfile.objects.get(user=users[4])
+    assert (absent.gender, absent.birth_date) == ("unspecified", None)
+
+
+@pytest.mark.django_db
 def test_the_live_phase_digest_equals_the_ledger_rebuild(seeded):
     """SA-2: ``--emit-report-only`` must reproduce a batch-less phase exactly."""
 
@@ -807,6 +843,10 @@ def test_record_derivation_hash_follows_the_documented_recipe():
         "preserved",
         # The patronymic is a SEPARATE decision (own target column, own source field).
         "written",
+        # 2026-08-30: demographics (gender + birth date) are two more target
+        # columns fed by ``sex``/``birthday``, so their write state joins the
+        # recipe exactly like the name and patronymic states before it.
+        "blank",
     ):
         digest.update(encoded_part(part))
 
@@ -818,6 +858,7 @@ def test_record_derivation_hash_follows_the_documented_recipe():
             fin_state="written",
             name_state="preserved",
             patronymic_state="written",
+            demographics_state="blank",
         )
         == digest.hexdigest()
     )
@@ -830,6 +871,18 @@ def test_record_derivation_hash_follows_the_documented_recipe():
             fin_state="blank",
             name_state="preserved",
             patronymic_state="written",
+            demographics_state="blank",
         )
         != digest.hexdigest()
     )
+    # Demoqrafiya yazısı da qərarın kimliyini dəyişir: boş sahəni doldurmaq ≠
+    # mənbədə heç nə olmaması.
+    assert record_derivation_hash(
+        legacy_pk=1,
+        row_hash=row_hash,
+        placement=placement,
+        fin_state="written",
+        name_state="preserved",
+        patronymic_state="written",
+        demographics_state="written",
+    ) != digest.hexdigest()

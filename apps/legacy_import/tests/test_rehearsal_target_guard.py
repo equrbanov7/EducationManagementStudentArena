@@ -1,16 +1,25 @@
 import pytest
 
 from apps.legacy_import.services.rehearsal_contracts import LegacyRehearsalConfigError
+from apps.legacy_import.services import rehearsal_target_guard as target_guard_module
 from apps.legacy_import.services.rehearsal_target_guard import (
     REHEARSAL_TARGET_DB_SHAPE,
     REHEARSAL_TARGET_GUC,
     REHEARSAL_TARGET_GUC_VALUE,
     RLS_BYPASS_GUC,
+    _assert_schema_current,
     assert_disposable_rehearsal_target,
 )
 
 _REAL_DATABASE_NAME = "emsarena_rehearsal_ab12cd34ef56"
 _MIGRATION_ROWS = (("legacy_import", "0001_initial"), ("organizations", "0027_seed_grade_approval_permissions"))
+
+
+@pytest.fixture(autouse=True)
+def _fake_connections_have_a_current_schema(monkeypatch):
+    """The unit fake is not a Django connection; schema parity has focused tests."""
+
+    monkeypatch.setattr(target_guard_module, "_assert_schema_current", lambda _connection: None)
 
 
 class _Settings:
@@ -187,6 +196,54 @@ def test_guard_rejects_active_rls_bypass(bypass):
 @pytest.mark.parametrize("rows", [(), (("legacy_import",),), ((None, "0001_initial"),), ("legacy_import",)])
 def test_guard_rejects_unmigrated_or_malformed_schema(rows):
     assert _refused(migration_rows=rows) == "legacy_rehearsal_target_schema_unmigrated"
+
+
+class _MigrationGraph:
+    def leaf_nodes(self):
+        return (("accounts", "0017_userprofile_demographics"),)
+
+
+class _MigrationLoader:
+    graph = _MigrationGraph()
+
+
+def _executor_with_plan(plan):
+    class _Executor:
+        loader = _MigrationLoader()
+
+        def __init__(self, connection):
+            self.connection = connection
+
+        def migration_plan(self, targets):
+            assert targets == (("accounts", "0017_userprofile_demographics"),)
+            return plan
+
+    return _Executor
+
+
+def test_schema_parity_accepts_an_empty_forward_plan():
+    _assert_schema_current(object(), executor_class=_executor_with_plan([]))
+
+
+def test_schema_parity_rejects_a_pending_code_migration():
+    with pytest.raises(LegacyRehearsalConfigError) as exc_info:
+        _assert_schema_current(
+            object(),
+            executor_class=_executor_with_plan([("accounts.0017", False)]),
+        )
+
+    assert exc_info.value.code == "legacy_rehearsal_target_schema_unmigrated"
+
+
+def test_schema_parity_fails_closed_when_the_migration_graph_cannot_be_read():
+    class _BrokenExecutor:
+        def __init__(self, _connection):
+            raise RuntimeError("unreadable migration graph")
+
+    with pytest.raises(LegacyRehearsalConfigError) as exc_info:
+        _assert_schema_current(object(), executor_class=_BrokenExecutor)
+
+    assert exc_info.value.code == "legacy_rehearsal_target_schema_unmigrated"
 
 
 def test_migration_head_digest_is_order_independent_but_content_sensitive():

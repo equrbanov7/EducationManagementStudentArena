@@ -23,6 +23,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from django.db import connection as default_connection
+from django.db.migrations.executor import MigrationExecutor
 
 from .rehearsal_contracts import LegacyRehearsalConfigError, canonical_json_digest, encoded_part
 
@@ -187,6 +188,26 @@ def _migration_head_digest(connection: object) -> str:
     return digest.hexdigest()
 
 
+def _assert_schema_current(connection: object, *, executor_class=MigrationExecutor) -> None:
+    """Fail closed when the code expects migrations absent from the target.
+
+    A non-empty ``django_migrations`` table proves only that *some* schema was
+    installed.  It does not prove that the disposable target matches the code
+    which is about to write it.  ``migrate --check`` uses the same canonical
+    migration plan: any forward step means the target is stale and the
+    rehearsal must not start.
+    """
+
+    try:
+        executor = executor_class(connection)
+        targets = executor.loader.graph.leaf_nodes()
+        plan = executor.migration_plan(targets)
+    except Exception:
+        raise LegacyRehearsalConfigError("legacy_rehearsal_target_schema_unmigrated") from None
+    if plan:
+        raise LegacyRehearsalConfigError("legacy_rehearsal_target_schema_unmigrated")
+
+
 def assert_disposable_rehearsal_target(*, settings_object: object, connection: object = None) -> TargetGuardAttestation:
     """Refuse to touch a target that is not provably disposable."""
 
@@ -222,6 +243,7 @@ def assert_disposable_rehearsal_target(*, settings_object: object, connection: o
     )
     if bypass.casefold() == _RLS_BYPASS_ACTIVE_VALUE:
         raise LegacyRehearsalConfigError("legacy_rehearsal_target_rls_bypassed")
+    _assert_schema_current(target)
 
     return TargetGuardAttestation(
         vendor=_TARGET_VENDOR,
