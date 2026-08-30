@@ -149,7 +149,7 @@ def build_document(syllabus, version) -> dict:
     return {
         "code": syllabus.subject.code,
         "name": syllabus.subject.name,
-        "program": syllabus.program.name if syllabus.program_id else "",
+        "program": syllabus.program.display_label if syllabus.program_id else "",
         "period": (f"{syllabus.period.year_display} · {syllabus.period.name}" if syllabus.period_id else ""),
         "version": version.label if version is not None else "—",
         "status": status,
@@ -157,7 +157,9 @@ def build_document(syllabus, version) -> dict:
         "approved_at": getattr(version, "approved_at", None) if version is not None else None,
         "approved_by": (approver.get_full_name() or approver.username).strip() if approver is not None else "",
         "author": _author_name(syllabus),
-        "blocks": [{"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)],
+        "blocks": [
+            {"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)
+        ],
     }
 
 

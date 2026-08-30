@@ -80,9 +80,7 @@ _NOTICE = {
     STATE_ARCHIVED: (
         "warning",
         pgettext_lazy(_CTX, "Bu fənnin qüvvədə olan sillabusu yoxdur"),
-        pgettext_lazy(
-            _CTX, "Yalnız arxiv nüsxəsi qalıb — cari semestr üçün yeni versiya yaradıb təsdiqə göndərin."
-        ),
+        pgettext_lazy(_CTX, "Yalnız arxiv nüsxəsi qalıb — cari semestr üçün yeni versiya yaradıb təsdiqə göndərin."),
     ),
 }
 

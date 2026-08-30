@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ curriculum.program.code }} · {{ curriculum.admission_year }} - {{ site_brand_name }}{% endblock %}
+{% block title %}{{ curriculum.program.display_label }} · {{ curriculum.admission_year }} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
@@ -13,7 +13,7 @@
         <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
         <h1 class="console-title"><i class="fas fa-clipboard-list"></i> {{ curriculum.name|default:curriculum.program.name }}</h1>
         <p class="console-sub">
-            {{ curriculum.program.code }} · {% trans "Qəbul ili" context "registrar.console" %} {{ curriculum.admission_year }}
+            {{ curriculum.program.display_label }} · {% trans "Qəbul ili" context "registrar.console" %} {{ curriculum.admission_year }}
             · {{ total_rows }} {% trans "fənn" context "registrar.console" %}
             <a class="console-inline-link" href="{% url 'registrar:curriculum_edit' curriculum.id %}"><i class="fas fa-pen"></i> {% trans "redaktə" context "registrar.console" %}</a>
         </p>

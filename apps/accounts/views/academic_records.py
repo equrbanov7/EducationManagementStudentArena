@@ -288,8 +288,10 @@ def program_search(request):
         qs = qs.filter(specialty_unit__parent_id=department)
     query = (request.GET.get("q") or "").strip()
     if query:
-        qs = qs.filter(Q(name__icontains=query) | Q(code__icontains=query))
-    return _page(qs.order_by("name"), request, lambda p: {"id": str(p.id), "text": f"{p.code} — {p.name}"})
+        qs = qs.filter(Q(name__icontains=query) | Q(official_code__icontains=query))
+    # Seçicidə YALNIZ rəsmi dövlət ixtisas kodu görünür (``display_label``);
+    # daxili ``Program.code`` (``MYEDU-*``) nə axtarılır, nə göstərilir.
+    return _page(qs.order_by("name"), request, lambda p: {"id": str(p.id), "text": p.display_label})
 
 
 @login_required

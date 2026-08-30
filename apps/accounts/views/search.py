@@ -130,7 +130,7 @@ def _student_group(organization, query):
     items = []
     for r in qs:
         name = r.student.get_full_name() or r.student.username
-        parts = [p for p in (r.program.code if r.program_id else "", r.group.name if r.group_id else "") if p]
+        parts = [p for p in (r.program.display_label if r.program_id else "", r.group.name if r.group_id else "") if p]
         items.append(
             {
                 "title": name,

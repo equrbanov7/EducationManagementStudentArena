@@ -363,7 +363,7 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
             bucket = programs.get(record.program_id)
             if bucket is None:
                 bucket = programs[record.program_id] = _Bucket(
-                    record.program_id, record.program.name, record.program.code
+                    record.program_id, record.program.name, record.program.official_code
                 )
             bucket.add(enrollment.student_id, result)
 

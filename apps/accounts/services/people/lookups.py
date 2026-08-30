@@ -58,8 +58,9 @@ def _program_options(organization, scope, *, parent_unit_id=None):
                 organization, parent_unit_id, path_field="specialty_unit__path", id_field="specialty_unit_id"
             )
         )
-    rows = queryset.order_by("name").values_list("pk", "code", "name")[:MAX_OPTIONS]
-    return [{"id": str(pk), "text": f"{code} — {name}" if code else name} for pk, code, name in rows]
+    rows = queryset.order_by("name").values_list("pk", "official_code", "name")[:MAX_OPTIONS]
+    # Rəsmi dövlət kodu — daxili ``Program.code`` (``MYEDU-*``) seçicidə göstərilmir.
+    return [{"id": str(pk), "text": f"{name} · {code}" if code else name} for pk, code, name in rows]
 
 
 def _subject_options(organization, scope):

@@ -315,8 +315,11 @@ def _row(record, acc) -> dict:
         "name": (student.get_full_name() or "").strip() or student.username,
         "username": student.username,
         "group": record.group.name if record.group_id else "—",
-        "program": record.program.name if record.program_id else "—",
-        "program_code": record.program.code if record.program_id else "",
+        # Cədvəl sətrində ad + RƏSMİ dövlət ixtisas kodu birlikdə göstərilir
+        # (``display_label``); ``program_code`` xam kod kimi ayrıca qalır.
+        # Daxili ``Program.code`` (``MYEDU-*``) heç birində iştirak etmir.
+        "program": record.program.display_label if record.program_id else "—",
+        "program_code": record.program.official_code if record.program_id else "",
         "credits_earned": acc["credits_earned"],
         "fails": acc["fails"],
         "qb": acc["qb"],
