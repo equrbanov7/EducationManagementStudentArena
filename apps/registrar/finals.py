@@ -61,7 +61,12 @@ def compute_final_result(*, enrollment, scheme=None, organization=None):
     A completed resit supersedes the original exam score and lifts the absence
     bar. Until an exam (or resit) score exists the result is "not graded yet".
     ``organization`` feeds the tenant letter-band scale (U17); when omitted it
-    is resolved from the scheme (FK-cached per instance)."""
+    is resolved from the scheme (FK-cached per instance).
+
+    ``total`` TAM ƏDƏDDİR (sahibin qaydası, 2026-08-30): clamp-dan SONRA
+    yarım-yuxarı yuvarlaqlaşdırılır (``gradebook.round_score``; 72.5 → 73,
+    72.4 → 72) və hərf/keçid qərarı MƏHZ yuvarlaqlaşdırılmış dəyər üzərindən
+    verilir (50.5 → 51 keçir)."""
     scheme = scheme or getattr(enrollment.offering, "assessment_scheme", None)
     if scheme is None:
         scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
@@ -84,6 +89,7 @@ def compute_final_result(*, enrollment, scheme=None, organization=None):
     graded = effective_exam is not None
     total = entry_score + (effective_exam or Decimal("0")) + bonus
     total = max(Decimal("0"), min(Decimal("100"), total))  # bonus/cərimə clamp (U15)
+    total = gradebook.round_score(total)  # tam ədəd — hərf və keçid bundan hesablanır
     letter, gpa = score_to_letter(total, organization)
     exam_ok = graded and effective_exam >= scheme.min_final_exam_score
     passed = graded and not barred and total >= scheme.pass_threshold and exam_ok

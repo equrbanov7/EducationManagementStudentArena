@@ -231,3 +231,67 @@ class FinalsTest(TestCase):
             data = finals.get_offering_results(offering=self.offering)
             self.assertEqual(len(data["rows"]), 1)
             self.assertEqual(data["rows"][0]["result"]["total"], Decimal("60"))
+
+    # ── tam-ədəd yuvarlaqlaşdırması (sahibin qaydası, 2026-08-30) ─────────────
+    def _add_archive_component(self, score):
+        """Legacy köçürmənin GENERIC arxiv qalığını təqlid et (kəsirli ola bilər)."""
+        from apps.registrar.models import AssessmentComponent, ComponentScore
+
+        component = AssessmentComponent.objects.create(
+            organization=self.org,
+            offering=self.offering,
+            name="Davamiyyət və sərbəst iş (arxiv)",
+            kind="generic",
+            max_score=50,
+            order=0,
+        )
+        ComponentScore.objects.create(
+            organization=self.org, component=component, enrollment=self.enrollment, score=Decimal(score)
+        )
+
+    def test_a_fractional_entry_rounds_half_up(self):
+        """Giriş 32.5 + imtahan 40 → 73 (yarım YUXARI; Python round() 72 verərdi)."""
+        with bypass_rls():
+            self._add_archive_component("32.5")
+            finals.set_exam_score(enrollment=self.enrollment, score=40, by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["entry_score"], Decimal("33"))
+        self.assertEqual(res["total"], Decimal("73"))
+        self.assertEqual(res["total"], res["total"].to_integral_value())
+
+    def test_a_fractional_entry_below_half_rounds_down(self):
+        """Giriş 32.4 + imtahan 40 → 72."""
+        with bypass_rls():
+            self._add_archive_component("32.4")
+            finals.set_exam_score(enrollment=self.enrollment, score=40, by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["entry_score"], Decimal("32"))
+        self.assertEqual(res["total"], Decimal("72"))
+
+    def test_entry_score_for_is_always_a_whole_number(self):
+        with bypass_rls():
+            self._add_archive_component("14.5")
+            entry = gradebook.entry_score_for(self.enrollment, 50)
+        self.assertEqual(entry, Decimal("15"))
+        self.assertEqual(entry, entry.to_integral_value())
+
+    def test_the_rounded_total_decides_passing(self):
+        """50.5 → 51 KEÇİR: hərf və keçid qərarı yuvarlaqlaşdırılMIŞ total üzərindəndir."""
+        with bypass_rls():
+            self._set_entry(20)
+            finals.set_exam_score(enrollment=self.enrollment, score=30, by_user=self.teacher)
+            finals.set_final_extras(enrollment=self.enrollment, bonus="0.5", by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["total"], Decimal("51"))  # 20 + 30 + 0.5 → 51
+        self.assertTrue(res["passed"])
+
+    def test_a_total_below_the_half_still_fails(self):
+        """50.4 → 50 < 51 → keçmir (yuvarlaqlaşdırma yalnız yarımdan yuxarı qaldırır)."""
+        with bypass_rls():
+            self._set_entry(20)
+            finals.set_exam_score(enrollment=self.enrollment, score=30, by_user=self.teacher)
+            finals.set_final_extras(enrollment=self.enrollment, bonus="0.4", by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["total"], Decimal("50"))
+        self.assertFalse(res["passed"])
+        self.assertTrue(res["failed"])

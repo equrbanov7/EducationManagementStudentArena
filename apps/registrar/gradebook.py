@@ -465,6 +465,7 @@ from apps.registrar.gradebook_components import (  # noqa: E402,F401
     get_component_breakdown,
     get_component_grid,
     get_components,
+    round_score,
     save_component_scores,
     save_components,
 )

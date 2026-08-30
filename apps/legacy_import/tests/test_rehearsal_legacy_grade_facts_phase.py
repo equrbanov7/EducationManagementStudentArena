@@ -24,6 +24,7 @@ from apps.legacy_import.services.rehearsal_legacy_grade_facts_phase import (
 )
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.tests import journal_points_harness as harness
+from core.rls import set_rls_user
 
 pytestmark = pytest.mark.django_db
 
@@ -45,6 +46,14 @@ def actor(db, django_user_model):
 
 
 def _run(actor, slug, rows, *, seed=True):
+    # İstehsal yolunda `execute_rehearsal` faza işləməzdən ƏVVƏL
+    # `set_rls_user(actor.pk)` çağırır (rehearsal_orchestrator.py:403, :486).
+    # Bu test fazanı orkestratordan YAN KEÇƏRƏK birbaşa çağırdığı üçün həmin
+    # GUC-u özü qurmalıdır — əks halda `registrar_guard_legacy_grade_*_insert`
+    # trigger-i `app.current_user_id`-ni boş görüb aktoru səlahiyyətsiz sayır
+    # («import actor is not authorized»).  SQLite-da belə trigger olmadığından
+    # bu boşluq YALNIZ PostgreSQL-də üzə çıxır.
+    set_rls_user(actor.pk, local=False)
     org = harness.organization(actor, slug)
     run = harness.running_run(org, actor, table_plan=harness.plan(rows))
     if seed:

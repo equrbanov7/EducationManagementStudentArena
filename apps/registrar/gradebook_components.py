@@ -8,7 +8,7 @@ hesablanması və komponent CRUD-u buradadır. Bütün ictimai adlar
 from __future__ import annotations
 
 from collections.abc import Mapping
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -27,6 +27,20 @@ from apps.registrar.models import (
 
 from .gradebook import MARK_EDIT_WINDOW, _to_decimal, journal_is_locked  # noqa: F401
 
+_INTEGER = Decimal("1")
+
+
+def round_score(value) -> Decimal:
+    """Görünən yekun bal TAM ƏDƏDDİR (sahibin qaydası, 2026-08-30): 72.5 → 73, 72.4 → 72.
+
+    ⚠️ Python ``round()`` İŞLƏTMƏ — o, bankir yuvarlaqlaşdırmasıdır (72.5 → 72);
+    burada həmişə ``Decimal.quantize(…, ROUND_HALF_UP)`` işlədilir.  Köhnə
+    sistemin çap olunmuş bal vərəqləri də PHP ``round()`` (yarım-yuxarı) ilə
+    yuvarlaqlaşdırırdı — qayda tarixi çap həqiqətinə uyğundur.
+    """
+    return Decimal(value).quantize(_INTEGER, rounding=ROUND_HALF_UP)
+
+
 # ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
 
 
@@ -39,7 +53,9 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
       cəmi işlədilir;
     * KOLLOKVIUM komponent balları həmişə ÜSTƏGƏLdir;
     * SƏRBƏST İŞ çeklist cəmi (təhvil sayı) həmişə ÜSTƏGƏLdir;
-    * yekun ``cap`` ilə clamp olunur.
+    * yekun ``cap`` ilə clamp olunur və TAM ƏDƏDƏ yuvarlaqlaşdırılır
+      (:func:`round_score` — yarım-yuxarı; legacy kəsirli arxiv qalıqları
+      görünüşdə tam ədəd olmalıdır).
 
     Performans: ``marks`` (bu enrollment-in LessonMark-ları) və ``components``
     (offering-in AssessmentComponent-ləri) əvvəlcədən verilə bilər — toplu
@@ -91,7 +107,7 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
         ).count()
         for comp in selfwork:
             total += min(Decimal(done), Decimal(comp.max_score))
-    return min(total, cap)
+    return round_score(min(total, cap))
 
 
 def get_components(offering):

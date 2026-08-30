@@ -24,8 +24,17 @@ yəni arxiv komponentinə TAM ``girish`` yazılsaydı kollokvium İKİ DƏFƏ sa
 Ona görə arxiv komponenti ``girish``-in kollokviumla İZAH OLUNMAYAN hissəsini
 daşıyır (legacy düsturunda bu məhz ``10 − 0.5×qayıb + si`` hissəsidir)::
 
-    residual = girish − Σkollokvium − selfwork_checklist       (0..50-ə clamp)
-    entry_score_for = residual + Σkollokvium + checklist = girish   ✓
+    residual = round½↑(clamp(girish − Σkollokvium − selfwork_checklist, 0, 50))
+    entry_score_for = residual + Σkollokvium + checklist ≈ girish   ✓
+
+Niyə qalıq TAM ƏDƏDƏ yuvarlaqlaşdırılır (sahibin qaydası, 2026-08-30)
+---------------------------------------------------------------------
+Qiymətlər tam ədəddir: 72.5 → 73, 72.4 → 72.  Köhnə ``yekun.girish`` sütunu
+FLOAT idi (32.5 kimi yuvarlaqlaşdırılMAMIŞ ara dəyər), köhnə sistemin ÇAP
+olunmuş bal vərəqləri isə PHP ``round()`` (yarım-yuxarı) işlədirdi — yəni
+yarım-yuxarı yuvarlaqlaşdırma köhnə çap həqiqətinə uyğundur.  Kollokvium
+balları onsuz da tam ədəddir, deməli kəsiri yalnız qalıq daşıyırdı; onu
+yazılmazdan əvvəl :func:`round_half_up` ilə tam ədədə gətiririk.
 
 Beləliklə komponent bölgüsü də dürüst qalır: kollokvium sətirləri öz legacy
 dəyərini göstərir, arxiv sətri isə davamiyyət/sərbəst iş payını göstərir.
@@ -36,7 +45,7 @@ Bu modul HEÇ NƏ yazmır: yalnız toplu (bulk) oxu indeksləri və saf funksiya
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Mapping
 
 from django.apps import apps as django_apps
@@ -52,6 +61,7 @@ ABSENCE_PENALTY = Decimal("0.5")
 ENTRY_SCORE_MAX = Decimal("50")
 ZERO = Decimal("0")
 QUANTUM = Decimal("0.01")  # ``ComponentScore.score`` = DecimalField(…, decimal_places=2)
+INTEGER = Decimal("1")  # sahibin qaydası: yazılan qalıq TAM ƏDƏDDİR
 
 ABSENT_STATUS = "absent"  # ``rehearsal_journal_marks_targets.ABSENT_STATUS`` güzgüsü
 KOLLOKVIUM_KIND = "kollokvium"
@@ -68,6 +78,18 @@ def clamp(value: Decimal) -> Decimal:
 
     bounded = min(max(value, ZERO), ENTRY_SCORE_MAX)
     return bounded.quantize(QUANTUM)
+
+
+def round_half_up(value: Decimal) -> Decimal:
+    """Tam ədədə YARIM-YUXARI yuvarlaqlaşdır: 72.5 → 73, 72.4 → 72.
+
+    ⚠️ Python ``round()`` İŞLƏTMƏ — o, bankir yuvarlaqlaşdırmasıdır (72.5 → 72).
+    Nəticə yenidən sahə formasına (2 onluq) salınır ki, onsuz da tam olan
+    dəyərlərin təsviri («15.00») dəyişməsin — derivation barmaq izi yalnız
+    həqiqətən kəsirli qalıqlarda dəyişir.
+    """
+
+    return value.quantize(INTEGER, rounding=ROUND_HALF_UP).quantize(QUANTUM)
 
 
 def legacy_girish(row) -> Decimal | None:
@@ -125,12 +147,17 @@ class EntryScoreInputs:
             token = EXACT_TOKEN
         entry = clamp(raw)
         wanted = entry - kollokvium - checklist
-        residual = clamp(wanted)
+        bounded = clamp(wanted)
+        # Sahibin qaydası (2026-08-30): qalıq TAM ƏDƏDƏ yuvarlaqlaşdırılıb yazılır
+        # (köhnə float ``girish``-in kəsiri hədəfə daşınmır).  ``clamped`` bayrağı
+        # yuvarlaqlaşdırmadan ƏVVƏLKİ dəyərlərlə hesablanır — yuvarlaqlaşdırma
+        # sərhəd hadisəsi deyil, bilinçli normallaşdırmadır.
+        residual = round_half_up(bounded)
         return EntryScoreValue(
             residual=residual,
             entry=entry,
             token=token,
-            clamped=entry != raw.quantize(QUANTUM) or residual != wanted.quantize(QUANTUM),
+            clamped=entry != raw.quantize(QUANTUM) or bounded != wanted.quantize(QUANTUM),
         )
 
 
@@ -241,4 +268,5 @@ __all__ = [
     "component_totals",
     "exact_entry_scores",
     "legacy_girish",
+    "round_half_up",
 ]

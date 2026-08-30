@@ -35,7 +35,12 @@ from apps.legacy_import.services.rehearsal_journal_entry_scores_phase import (
     group_enrollments,
     write_entry_score,
 )
-from apps.legacy_import.services.rehearsal_journal_entry_scores_source import EntryScoreInputs, clamp, legacy_girish
+from apps.legacy_import.services.rehearsal_journal_entry_scores_source import (
+    EntryScoreInputs,
+    clamp,
+    legacy_girish,
+    round_half_up,
+)
 from apps.legacy_import.services.rehearsal_journal_marks_phase import JournalMarksPhase
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
 from apps.legacy_import.tests import journal_points_harness as harness
@@ -102,6 +107,22 @@ def test_clamp_bounds_the_value_and_fixes_the_field_shape(value, expected):
     assert clamp(value) == expected
 
 
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (Decimal("72.5"), Decimal("73.00")),  # yarım YUXARI (bankir deyil!)
+        (Decimal("72.4"), Decimal("72.00")),
+        (Decimal("32.50"), Decimal("33.00")),
+        (Decimal("15.00"), Decimal("15.00")),  # tam dəyərin təsviri dəyişmir
+    ],
+)
+def test_round_half_up_rounds_halves_upward_to_a_whole_number(value, expected):
+    rounded = round_half_up(value)
+
+    assert rounded == expected
+    assert str(rounded) == str(expected)  # sahə forması (2 onluq) qorunur
+
+
 @pytest.mark.parametrize("value", ["30", None, True])
 def test_legacy_girish_refuses_anything_that_is_not_a_number(value):
     assert legacy_girish({"girish": value}) is None
@@ -134,6 +155,21 @@ def test_an_exact_value_never_runs_the_formula():
     value = inputs.resolve("e1")
 
     assert (value.entry, value.residual, value.token) == (Decimal("30.00"), Decimal("21.00"), "exact")
+
+
+@pytest.mark.parametrize(
+    "girish, residual",
+    [(Decimal("32.5"), Decimal("33.00")), (Decimal("32.4"), Decimal("32.00"))],
+)
+def test_a_fractional_girish_residual_is_rounded_half_up_to_a_whole_number(girish, residual):
+    """Sahibin qaydası: köhnə FLOAT ``girish``-in kəsiri hədəfə köçmür (32.5 → 33)."""
+
+    inputs = EntryScoreInputs(absences={}, kollokvium={}, selfwork={}, checklist={}, exact={"e1": girish})
+    value = inputs.resolve("e1")
+
+    assert (value.residual, value.token) == (residual, "exact")
+    # Yuvarlaqlaşdırma sərhəd hadisəsi DEYİL — ``clamped`` bayrağı qalxmır.
+    assert value.clamped is False
 
 
 def test_group_enrollments_reports_the_ones_without_an_offering():
@@ -186,16 +222,33 @@ def test_the_yekun_value_is_written_exactly_and_flagged_as_exact(actor):
     }
 
 
+def test_a_fractional_yekun_girish_lands_as_a_whole_number(actor):
+    """Kök səbəbin sübutu: FLOAT ``girish`` (32.5) hədəfdə tam ədəddir (33)."""
+
+    rows = harness.tables(
+        points=[harness.point_row(1, point="9")],
+        yekun=[harness.yekun_row(1, student_id=harness.STUDENT_A, girish=32.5)],
+    )
+    org, run, _report = _run(actor, "entry-fractional", rows)
+
+    student_a = _enrollment(org, harness.STUDENT_A)
+    assert _archive_score(org, student_a) == Decimal("33.00")
+    assert entry_score_for(student_a, CAP) == Decimal("33")
+    # Yuvarlaqlaşdırma clamp deyil — sərhəd xəbərdarlığı yaranmır.
+    assert (SLICE_KEY, "legacy_entry_score_residual_clamped") not in _issues(run)
+
+
 def test_a_semester_without_yekun_is_rebuilt_from_the_legacy_formula(actor):
     rows = harness.tables(
         points=[harness.point_row(1, point="qb"), _pseudo(2, "k1", "8"), _pseudo(3, "si", "5")],
     )
     org, run, _report = _run(actor, "entry-derived", rows)
 
-    # 10 − 0.5×1 + 8 + 5 = 22.5 ; qalıq = 22.5 − 8 = 14.5 (``si`` çeklisti boşdur).
+    # 10 − 0.5×1 + 8 + 5 = 22.5 ; qalıq = 22.5 − 8 = 14.5 → yarım-yuxarı 15
+    # (``si`` çeklisti boşdur; sahibin qaydası: yazılan qalıq tam ədəddir).
     student_a = _enrollment(org, harness.STUDENT_A)
-    assert _archive_score(org, student_a) == Decimal("14.50")
-    assert entry_score_for(student_a, CAP) == Decimal("22.5")
+    assert _archive_score(org, student_a) == Decimal("15.00")
+    assert entry_score_for(student_a, CAP) == Decimal("23")
     assert (SLICE_KEY, "legacy_entry_score_derived") in _issues(run)
     assert (SLICE_KEY, "legacy_entry_score_exact") not in _issues(run)
 
