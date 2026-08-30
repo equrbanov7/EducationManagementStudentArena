@@ -29,9 +29,9 @@ class CurriculumSubjectInline(admin.TabularInline):
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ("code", "name", "degree_level", "ects_total", "organization", "is_active")
+    list_display = ("name", "official_code", "code", "degree_level", "ects_total", "organization", "is_active")
     list_filter = ("degree_level", "is_active")
-    search_fields = ("code", "name")
+    search_fields = ("code", "official_code", "name")
 
 
 @admin.register(Subject)
@@ -45,7 +45,7 @@ class SubjectAdmin(admin.ModelAdmin):
 class CurriculumAdmin(admin.ModelAdmin):
     list_display = ("__str__", "program", "admission_year", "organization", "is_active")
     list_filter = ("admission_year", "is_active")
-    search_fields = ("name", "program__code", "program__name")
+    search_fields = ("name", "program__official_code", "program__name")
     inlines = (CurriculumSubjectInline,)
 
 
@@ -53,7 +53,7 @@ class CurriculumAdmin(admin.ModelAdmin):
 class StudentAcademicRecordAdmin(admin.ModelAdmin):
     list_display = ("student", "program", "curriculum", "group", "admission_year", "is_active")
     list_filter = ("admission_year", "is_active")
-    search_fields = ("student__username", "program__code")
+    search_fields = ("student__username", "program__official_code", "program__name")
     autocomplete_fields = ("student", "program", "curriculum", "group")
 
 

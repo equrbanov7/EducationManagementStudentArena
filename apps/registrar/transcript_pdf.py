@@ -243,7 +243,9 @@ def _draw_student_info(sheet, record, student):
             pairs.append((_("Fakültə"), faculty))
     pairs.append((_("Tələbə №"), student.username))
     if record is not None and record.program_id:
-        pairs.append((_("İxtisas"), f"{record.program.code} — {record.program.name}"))
+        # Rəsmi sənəddir: yalnız rəsmi dövlət ixtisas kodu (varsa) — daxili
+        # `Program.code` (`MYEDU-*`) transkriptdə heç vaxt görünməməlidir.
+        pairs.append((_("İxtisas"), record.program.display_label))
         pairs.append((_("Təhsil pilləsi"), record.program.get_degree_level_display()))
     pairs.append((_("Soyadı, adı"), full_name))
     if record is not None:

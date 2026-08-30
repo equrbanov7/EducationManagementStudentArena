@@ -45,13 +45,31 @@ class _OrgScopedModelForm(forms.ModelForm):
 class ProgramForm(_OrgScopedModelForm):
     class Meta:
         model = Program
-        fields = ["code", "name", "degree_level", "specialty_unit", "ects_total", "absence_limit_percent", "is_active"]
+        fields = [
+            "code",
+            "official_code",
+            "name",
+            "degree_level",
+            "specialty_unit",
+            "ects_total",
+            "absence_limit_percent",
+            "is_active",
+        ]
         widgets = {
             "code": forms.TextInput(attrs={"maxlength": 32}),
+            "official_code": forms.TextInput(attrs={"maxlength": 32, "inputmode": "numeric"}),
             "name": forms.TextInput(attrs={"maxlength": 255}),
         }
+        help_texts = {
+            "official_code": pgettext_lazy(
+                "registrar.console",
+                "Rəsmi dövlət ixtisas kodu — məsələn 060209. İstifadəçilərə ixtisas adının "
+                "yanında bu kod göstərilir. Eyni kod bir neçə ixtisasda təkrarlana bilər.",
+            ),
+        }
         labels = {
-            "code": pgettext_lazy("registrar.console", "Kod"),
+            "code": pgettext_lazy("registrar.console", "Daxili kod"),
+            "official_code": pgettext_lazy("registrar.console", "Rəsmi ixtisas kodu"),
             "name": pgettext_lazy("registrar.console", "Ad"),
             "degree_level": pgettext_lazy("registrar.console", "Təhsil pilləsi"),
             "specialty_unit": pgettext_lazy("registrar.console", "İxtisas bölməsi (opsional)"),
@@ -79,6 +97,15 @@ class ProgramForm(_OrgScopedModelForm):
         if code and self._code_is_taken(Program, code):
             raise forms.ValidationError(pgettext_lazy("registrar.console", "Bu proqram kodu artıq mövcuddur."))
         return code
+
+    def clean_official_code(self):
+        """Rəsmi kod: yalnız kənar boşluqlar təmizlənir.
+
+        UNİKALLIQ YOXLAMASI QƏSDƏN YOXDUR — bir rəsmi kod bir neçə ixtisasa
+        (magistr istiqamətləri, AZ/EN bölmələri, əyani/qiyabi formalar) aid ola
+        bilər; bax ``Program`` model docstring-i.
+        """
+        return (self.cleaned_data.get("official_code") or "").strip()
 
 
 class SubjectForm(_OrgScopedModelForm):

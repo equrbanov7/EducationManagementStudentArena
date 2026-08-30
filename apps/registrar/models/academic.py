@@ -30,28 +30,30 @@ class Program(UUIDModel, TimeStampedModel):
     Optionally anchored to a specialty ``OrgUnit`` so the hierarchy
     (Faculty → Chair → Specialty) and the program catalogue stay linked.
 
-    İki AYRI kod sahəsi — qarışdırılmamalıdır
-    -----------------------------------------
-    ``code``
-        **DAXİLİ, sabit identifikator.** Tenant daxilində UNİKALDIR
-        (``uniq_program_code_per_org``) və köçürmə xəttinin şəxsiyyət açarıdır:
-        MyEdu köçürməsi mənbədə kod olmayanda ``MYEDU-<id>`` sintez edir,
-        ``apps/legacy_import`` isə bu dəyəri həm ``TargetRef.key`` semantik
-        açarı, həm də ``program_pk_index()`` indeksi kimi işlədir. Ona görə bu
-        sütunun unikallığı GÖTÜRÜLMÜR və dəyərləri əl ilə dəyişdirilmir.
+    İKİ AYRI KOD — qarışdırılmamalıdır
+    ----------------------------------
+    ``code`` — **DAXİLİ sabit identifikator**. Tenant daxilində UNİKALDIR
+    (``uniq_program_code_per_org``) və köçürmə xəttinin (``apps.legacy_import``)
+    indeks açarıdır: köhnə bazadan gələn proqramlar ``MYEDU-<legacy_id>``
+    formasında sintetik kod alır və repetisiya fazaları (``program_pk_index``,
+    ``rehearsal_structure_targets``, ``rehearsal_catalog_targets``) məhz bu
+    kodun tək-mənalılığına söykənir. Ona görə sahə NƏ boşaldıla, NƏ də
+    təkrarlana bilər — və istifadəçiyə GÖSTƏRİLMİR: uydurma açardır, insan
+    üçün mənası yoxdur.
 
-    ``official_code``
-        **RƏSMİ dövlət ixtisas şifri** (məs. ``050405``). Yalnız göstərmək
-        üçündür — identifikator DEYİL, ona görə **UNİKAL DEYİL**. Azərbaycan
-        təsnifatı iki səviyyəlidir (ixtisas + ixtisaslaşma) və bir neçə proqram
-        qanuni olaraq eyni şifri paylaşır::
+    ``official_code`` — **RƏSMİ dövlət ixtisas kodu** (məs. ``060209``).
+    İstifadəçiyə göstərilən yeganə koddur; ``blank=True`` (hələ doldurulmamış
+    ola bilər) və QƏSDƏN UNİKAL DEYİL, çünki universitetdə bir rəsmi kod
+    həqiqətən bir neçə proqrama aid olur:
 
-            060209 → dörd magistr psixologiya proqramı (klinik / sosial /
-                     məhkəmə + ana ixtisas)
-            050201 → «Beynəlxalq münasibətlər»in AZ və EN variantları
-            050620 → eyni ixtisasın əyani və qiyabi sətirləri
+    * ``060209`` — dörd ayrı magistr psixologiya proqramı;
+    * ``050201`` — eyni ixtisasın AZ və EN bölmə variantları;
+    * ``050620`` — eyni ixtisasın əyani və qiyabi formaları.
 
-        Bilinməyəndə **boş qalır** — uydurulmur.
+    Unikallıq qoyulsaydı bu real hallar bazaya yazıla bilməzdi; daxili
+    tək-mənalılıq isə onsuz da ``code``-un üzərindədir.
+
+    İstifadəçiyə göstərmək üçün HƏMİŞƏ :attr:`display_label` işlədilir.
     """
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="programs")
@@ -65,13 +67,17 @@ class Program(UUIDModel, TimeStampedModel):
     )
     code = models.CharField(
         max_length=32,
-        help_text="DAXİLİ identifikator (tenant daxilində unikal). Köçürmə xətti bundan asılıdır — əl ilə dəyişməyin.",
+        help_text="Daxili sabit identifikator (tenant daxilində unikal) — istifadəçiyə göstərilmir.",
     )
     official_code = models.CharField(
         max_length=32,
         blank=True,
         db_index=True,
-        help_text="Rəsmi dövlət ixtisas şifri (məs. 050405). UNİKAL DEYİL — bir neçə proqram eyni şifri paylaşa bilər.",
+        help_text=(
+            "Rəsmi dövlət ixtisas kodu (məs. 060209) — istifadəçiyə göstərilən koddur. "
+            "Unikal DEYİL: bir kod bir neçə proqrama (magistr istiqamətləri, AZ/EN "
+            "bölmələri, əyani/qiyabi formalar) aid ola bilər."
+        ),
     )
     name = models.CharField(max_length=255)
     degree_level = models.CharField(max_length=16, choices=DegreeLevel.choices, default=DegreeLevel.BACHELOR)
@@ -99,8 +105,11 @@ class Program(UUIDModel, TimeStampedModel):
 
     @property
     def display_label(self) -> str:
-        """İstifadəçiyə göstərilən etiket — daxili ``MYEDU-*`` açarı SIZMIR."""
+        """İstifadəçiyə göstərilən etiket: rəsmi kod varsa ``Ad · <kod>``, yoxsa ``Ad``.
 
+        Daxili :attr:`code` (``MYEDU-*``) buraya HEÇ VAXT daxil olmur. Rəsmi kod
+        boşdursa ayırıcı da yazılmır — asılı qalmış "Ad · " quyruğu olmamalıdır.
+        """
         name = (self.name or "").strip()
         official = (self.official_code or "").strip()
         return f"{name} · {official}" if official else name
@@ -163,7 +172,7 @@ class Curriculum(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         ]
 
     def __str__(self):
-        return self.name or f"{self.program.code} {self.admission_year}"
+        return self.name or f"{self.program.display_label} {self.admission_year}"
 
 
 class CurriculumSubject(UUIDModel, TimeStampedModel, OrderedModel):
@@ -265,7 +274,7 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeSta
         indexes = [models.Index(fields=["organization", "group"])]
 
     def __str__(self):
-        return f"{self.student_id} · {self.program.code}"
+        return f"{self.student_id} · {self.program.display_label}"
 
 
 class CourseOffering(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):

@@ -19,7 +19,7 @@
             {% endif %}
             {% if sec.record %}
             <div class="transcript-meta">
-                <span class="transcript-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.name }}</span>
+                <span class="transcript-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.display_label }}</span>
                 {% if sec.record.group %}<span class="transcript-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
             </div>
             {% endif %}
@@ -80,7 +80,7 @@
                 {% if sec.record.program %}
                 <div class="transcript-info-item">
                     <span class="transcript-info-label">{% trans "İxtisas" context "profile.transcript" %}</span>
-                    <span class="transcript-info-value">{{ sec.record.program.code }} — {{ sec.record.program.name }}</span>
+                    <span class="transcript-info-value">{{ sec.record.program.display_label }}</span>
                 </div>
                 <div class="transcript-info-item">
                     <span class="transcript-info-label">{% trans "Təhsil pilləsi" context "profile.transcript" %}</span>

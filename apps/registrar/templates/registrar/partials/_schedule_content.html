@@ -16,7 +16,7 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
                 <div class="sgx-identity-name">{{ owner_label }}</div>
                 <div class="sgx-identity-sub">
                     {% if role == 'student' %}
-                    {% if record.group %}{% trans "Qrup" context "registrar.schedule" %} {{ record.group.name }}{% endif %}{% if record.program %} · {{ record.program.name }}{% endif %}{% if student_course_no %} · {{ student_course_no }} {% trans "kurs" context "registrar.schedule" %}{% endif %}
+                    {% if record.group %}{% trans "Qrup" context "registrar.schedule" %} {{ record.group.name }}{% endif %}{% if record.program %} · {{ record.program.display_label }}{% endif %}{% if student_course_no %} · {{ student_course_no }} {% trans "kurs" context "registrar.schedule" %}{% endif %}
                     {% else %}
                     {% trans "Müəllim cədvəli" context "registrar.schedule" %}{% if period %} · {{ period.name }}{% endif %}
                     {% endif %}
