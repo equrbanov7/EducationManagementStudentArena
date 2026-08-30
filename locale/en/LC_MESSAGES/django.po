@@ -37155,3 +37155,2005 @@ msgstr "%(name)s — returned for revision, the teacher has been notified."
 msgctxt "accounts.syllabus"
 msgid "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
 msgstr "%(name)s — the version was rejected. Students see the previously approved version."
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus sənədi"
+msgstr "Syllabus document"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Semestr"
+msgstr "Semester"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Versiya"
+msgstr "Version"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Müəllif"
+msgstr "Author"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Təsdiqləyən"
+msgstr "Approved by"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Çap et"
+msgstr "Print"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "PDF yüklə"
+msgstr "Download PDF"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Detallı bax"
+msgstr "View in detail"
+
+#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/syllabus/detail.html
+msgctxt "accounts.syllabus"
+msgid "Tələbələr yalnız təsdiqlənmiş versiyanı görür. Yeni versiya təsdiqlənənə qədər bu nüsxə qüvvədədir."
+msgstr "Students see only the approved version. This copy stays in force until a new version is approved."
+
+msgctxt "accounts.people.analytics"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "accounts.people.analytics"
+msgid "Dayandırılıb"
+msgstr "Suspended"
+
+msgctxt "accounts.people.analytics"
+msgid "Arxiv"
+msgstr "Archived"
+
+msgctxt "accounts.people.analytics"
+msgid "Silinib"
+msgstr "Deleted"
+
+msgctxt "accounts.people.analytics"
+msgid "Kişi"
+msgstr "Male"
+
+msgctxt "accounts.people.analytics"
+msgid "Qadın"
+msgstr "Female"
+
+msgctxt "accounts.people.analytics"
+msgid "Göstərilməyib"
+msgstr "Not specified"
+
+msgctxt "accounts.people.analytics"
+msgid "Təyin edilməyib"
+msgstr "Not assigned"
+
+msgctxt "accounts.people.analytics"
+msgid "Digərləri"
+msgstr "Others"
+
+msgctxt "accounts.people.analytics"
+msgid "25-dən kiçik"
+msgstr "Under 25"
+
+msgctxt "accounts.people.analytics"
+msgid "65 və yuxarı"
+msgstr "65 and over"
+
+msgctxt "accounts.people.analytics"
+msgid "Fakültə üzrə bölgü"
+msgstr "Distribution by faculty"
+
+msgctxt "accounts.people.analytics"
+msgid "Kafedra üzrə bölgü"
+msgstr "Distribution by department"
+
+msgctxt "accounts.people.analytics"
+msgid "Rol üzrə bölgü"
+msgstr "Distribution by role"
+
+msgctxt "accounts.people.analytics"
+msgid "Akademik dərəcə / vəzifə"
+msgstr "Academic degree / position"
+
+msgctxt "accounts.people.analytics"
+msgid "Qrup üzrə bölgü"
+msgstr "Distribution by group"
+
+msgctxt "accounts.people.analytics"
+msgid "İxtisas üzrə bölgü"
+msgstr "Distribution by program"
+
+msgctxt "accounts.people.analytics"
+msgid "Kurs üzrə bölgü"
+msgstr "Distribution by year of study"
+
+msgctxt "accounts.people.analytics"
+msgid "Qəbul ili üzrə bölgü"
+msgstr "Distribution by admission year"
+
+msgctxt "accounts.people.analytics"
+msgid "Akademik status üzrə bölgü"
+msgstr "Distribution by academic status"
+
+msgctxt "accounts.people.analytics"
+msgid "%(course)s. kurs"
+msgstr "Year %(course)s"
+
+msgctxt "accounts.people.analytics"
+msgid "Kursdan kənar / məzun mərhələsi"
+msgstr "Outside the standard years / graduating stage"
+
+msgctxt "accounts.people.analytics"
+msgid "Dərs açılışı (semestr-fənn)"
+msgstr "Course offerings (semester × subject)"
+
+msgctxt "accounts.people.analytics"
+msgid "Fərqli fənn"
+msgstr "Distinct subjects"
+
+msgctxt "accounts.people.analytics"
+msgid "Dərs deyilən qrup"
+msgstr "Groups taught"
+
+msgctxt "accounts.people.analytics"
+msgid "Dərs yükü olan müəllim"
+msgstr "Teachers with a teaching load"
+
+msgctxt "accounts.people.analytics"
+msgid "Dərs yükü olmayan müəllim"
+msgstr "Teachers without a teaching load"
+
+msgctxt "accounts.people.analytics"
+msgid "Müəllim başına orta açılış"
+msgstr "Average offerings per teacher"
+
+msgctxt "accounts.people.analytics"
+msgid "Tələbə-yer (qeydiyyat)"
+msgstr "Student seats (enrollments)"
+
+msgctxt "accounts.people.analytics"
+msgid "Statistika və analiz"
+msgstr "Statistics and analysis"
+
+msgctxt "accounts.people.analytics"
+msgid "Bütün göstəricilər və qrafiklər yuxarıdakı filtrə görə yenilənir — nə süzürsünüzsə, rəqəmlər onu göstərir."
+msgstr "Every figure and chart follows the filters above — the numbers always describe exactly what you filtered."
+
+msgctxt "accounts.people.analytics"
+msgid "Ümumi"
+msgstr "Total"
+
+msgctxt "accounts.people.analytics"
+msgid "Cədvəl şəklində"
+msgstr "As a table"
+
+msgctxt "accounts.people.analytics"
+msgid "Göstərici"
+msgstr "Indicator"
+
+msgctxt "accounts.people.analytics"
+msgid "Say"
+msgstr "Count"
+
+msgctxt "accounts.people.analytics"
+msgid "Faiz"
+msgstr "Percent"
+
+msgctxt "accounts.people.analytics"
+msgid "Bu filtr üçün göstəriləcək məlumat yoxdur."
+msgstr "There is no data to display for this filter."
+
+msgctxt "accounts.people.analytics"
+msgid "Doğum tarixi doldurulub"
+msgstr "Birth date filled in"
+
+msgctxt "accounts.people.analytics"
+msgid "Dərs yükü göstəriciləri"
+msgstr "Teaching-load indicators"
+
+msgctxt "accounts.people.analytics"
+msgid "Hesab statusu üzrə"
+msgstr "By account status"
+
+msgctxt "accounts.people.analytics"
+msgid "Cins üzrə bölgü"
+msgstr "Distribution by gender"
+
+msgctxt "accounts.people.analytics"
+msgid "Yaş qrupları üzrə bölgü"
+msgstr "Distribution by age band"
+
+msgctxt "accounts.people.analytics"
+msgid "AI analizi"
+msgstr "AI analysis"
+
+msgctxt "accounts.people.analytics"
+msgid "AI ilə analiz et"
+msgstr "Analyze with AI"
+
+msgctxt "accounts.people.analytics"
+msgid "AI analizi hazırlanır…"
+msgstr "Preparing the AI analysis…"
+
+msgctxt "accounts.people.analytics"
+msgid "AI analizi alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "The AI analysis failed. Please try again shortly."
+
+msgctxt "accounts.people.analytics"
+msgid "Qalan AI limiti"
+msgstr "Remaining AI quota"
+
+msgctxt "accounts.people.analytics"
+msgid "keşdən"
+msgstr "from cache"
+
+msgctxt "accounts.people.analytics"
+msgid "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır."
+msgstr "Press the button to run the analysis — the result takes a few seconds."
+
+msgctxt "accounts.people.analytics"
+msgid "Süni intellekt yuxarıdakı AQREQAT rəqəmləri şərh edir. AI-a yalnız saylar və faizlər göndərilir — ad, e-poçt, telefon və FİN GÖNDƏRİLMİR. Eyni məlumat üçün cavab keşdən gəlir, limit sərf olunmur."
+msgstr "The AI interprets the AGGREGATE figures above. Only counts and percentages are sent — names, e-mail addresses, phone numbers and ID numbers are NOT sent. For unchanged data the answer comes from the cache and no quota is spent."
+
+msgctxt "accounts.people.analytics"
+msgid "25–34 yaş"
+msgstr "Ages 25–34"
+
+msgctxt "accounts.people.analytics"
+msgid "35–44 yaş"
+msgstr "Ages 35–44"
+
+msgctxt "accounts.people.analytics"
+msgid "45–54 yaş"
+msgstr "Ages 45–54"
+
+msgctxt "accounts.people.analytics"
+msgid "55–64 yaş"
+msgstr "Ages 55–64"
+
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s həftədə saat yazılıb, mövzu boşdur"
+msgstr "%(count)s week(s) have hours entered but no topic"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s həftədə təlim nəticəsi seçilməyib"
+msgstr "%(count)s week(s) have no learning outcome selected"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s mövzuya heç bir dərs növü üzrə saat verilməyib"
+msgstr "%(count)s topic(s) have no hours assigned for any session type"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "%(count)s qiymət var"
+msgstr "%(count)s grade(s)"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s saat"
+msgstr "%(count)s hours"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s seçilib"
+msgstr "%(count)s selected"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s təlim nəticəsi heç bir həftə ilə əlaqələndirilməyib"
+msgstr "%(count)s learning outcome(s) are not linked to any week"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "%(count)s ədəd"
+msgstr "%(count)s item(s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
+msgctxt "accounts.syllabus"
+msgid "%(counter)s bənd"
+msgstr "%(counter)s item(s)"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "%(counter)s xəta"
+msgstr "%(counter)s error(s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "%(counter)s çatışmazlıq"
+msgstr "%(counter)s shortfall(s)"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "%(done)s / %(total)s bölmə biznes qaydalarına uyğundur"
+msgstr "%(done)s / %(total)s sections comply with the business rules"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "%(have)s / %(total)s"
+msgstr "%(have)s of %(total)s"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "%(kind)s saatı tədris planındakı %(expected)s saatla uyğun gəlmir (hazırda %(have)s)"
+msgstr "%(kind)s hours do not match the %(expected)s hours in the curriculum (currently %(have)s)"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "%(primary)s əsas · %(additional)s əlavə"
+msgstr "%(primary)s primary · %(additional)s additional"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
+msgctxt "accounts.syllabus"
+msgid "%(total)s qeyddən %(start)s–%(end)s göstərilir"
+msgstr "Showing %(start)s–%(end)s of %(total)s records"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "100 bal"
+msgstr "100 points"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Ad, soyad və vəzifə"
+msgstr "First name, last name, and position"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Akademik il / semestr"
+msgstr "Academic year / semester"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Aralıq imtahan"
+msgstr "Midterm exam"
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Arxiv nüsxəsi — yalnız baxış üçündür."
+msgstr "Archive copy — for viewing only."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Arxivlə"
+msgstr "Archive"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Arxivləndi — tələbə qiymətləri saxlanılır"
+msgstr "Archived — student grades are preserved"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Arxivlənmiş mövzu tələbə kabinetində keçmiş semestr bölməsində görünməyə davam edir"
+msgstr "The archived topic continues to be visible in the past-semester section of the student cabinet"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Arxivlənmiş mövzular"
+msgstr "Archived topics"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Arxivə köçür"
+msgstr "Move to archive"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Auditoriya saatlarının həftələr üzrə bölgüsü. Bu sətirlər təsdiqdən sonra e-jurnalda mövzu siyahısını yaradır — sonradan jurnaldan dəyişdirilə bilməz."
+msgstr "The distribution of classroom hours by week. After approval these rows create the topic list in the e-journal — it cannot be changed from the journal afterward."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Auditoriya saatı"
+msgstr "Classroom hours"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Bax"
+msgstr "View"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Baxır: %(who)s"
+msgstr "Reviewing: %(who)s"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_drawer.html
+msgctxt "accounts.syllabus"
+msgid "Bağla"
+msgstr "Close"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Başqa versiya ilə konflikt yarandı"
+msgstr "A conflict occurred with another version"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Bir böyük sərbəst iş — semestr layihəsi formatına uyğundur."
+msgstr "One large independent work — suits the semester project format."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Bir mövzu həm mühazirədə, həm seminarda (və ya laboratoriyada) keçilə bilər — mövzunun adı dəyişmir, sadəcə hər dərs növü üzrə saatı ayrıca yazılır. E-jurnalda həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır."
+msgstr "A topic can be taught in both lecture and seminar (or lab) — the topic name does not change, only the hours per session type are recorded separately. In the e-journal, that topic opens as a separate lesson row for each type."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Bir-iki cümlə ilə fənnin əsas məqsədi."
+msgstr "The main objective of the course in one or two sentences."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Boş qaralama açılır və 10 bölmə doldurulmağa hazır olur. Tələbələrə yalnız təsdiqdən sonra görünəcək."
+msgstr "An empty draft opens and its 10 sections are ready to be filled in. It will only be visible to students after approval."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Bu bölmə başqa sessiyada da dəyişdirilib, sizin dəyişikliklər göndərilmədi. Serverdəki variantı yükləyin və düzəlişi yenidən edin."
+msgstr "This section was also changed in another session, so your changes were not sent. Load the version from the server and redo the edit."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."
+msgstr "This section was changed in another session — the changes were not sent."
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Bu bölmə üçün icazəniz yoxdur."
+msgstr "You do not have permission for this section."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Bu fənn üçün sillabus yaradılsın?"
+msgstr "Create a syllabus for this subject?"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu sillabus sizin struktur əhatənizdə deyil."
+msgstr "This syllabus is not within your structural scope."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Bu sillabusa giriş icazəniz yoxdur."
+msgstr "You do not have permission to access this syllabus."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu sillabusda artıq açıq versiya var: %(version)s"
+msgstr "This syllabus already has an open version: %(version)s"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu status köçürmə borusu üçün icazəli deyil."
+msgstr "This status is not permitted for the transition pipeline."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Bu sərbəst iş tapşırığı üzrə tələbə qiymətləri mövcuddur. Silinmə mümkün deyil — mövzu arxivə köçürülür."
+msgstr "Student grades exist for this independent work assignment. Deletion is not possible — the topic is moved to the archive."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Bu versiya kilidlidir və dəyişdirilə bilmir"
+msgstr "This version is locked and cannot be changed"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu versiya təsdiqlənib və dəyişdirilə bilmir — yeni versiya yaradın."
+msgstr "This version is approved and cannot be changed — create a new version."
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Bu versiya təsdiqlənib və dəyişdirilə bilmir. Elektron jurnalın mövzu siyahısı, qiymətləndirmə strukturu və sərbəst iş konfiqurasiyası bu sənəddən götürülür."
+msgstr "This version is approved and cannot be changed. The e-journal's topic list, assessment structure, and independent work configuration are taken from this document."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu əməliyyat tanınmır."
+msgstr "This operation is not recognized."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bu əməliyyat üçün icazəniz yoxdur."
+msgstr "You do not have permission for this operation."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bölmə tanınmır."
+msgstr "The section is not recognized."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Böyük dəyişiklik"
+msgstr "Major change"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Bütün kafedralar"
+msgstr "All departments"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Bütün məcburi tələblər ödənildikdən sonra sillabus kafedra müdirinin növbəsinə düşür. Göndərildikdən sonra versiya kilidlənir."
+msgstr "Once all mandatory requirements are met, the syllabus enters the department head's queue. After submission the version is locked."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
+msgctxt "accounts.syllabus"
+msgid "Bütün məcburi tələblər ödənilib"
+msgstr "All mandatory requirements are met"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Bütün məcburi tələblər ödənilməyib — çatışmayan bəndlərə baxın."
+msgstr "Not all mandatory requirements are met — see the missing items."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Bütün semestrlər"
+msgstr "All semesters"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Cari il üzrə fənn"
+msgstr "Subject for the current year"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Cədvəl"
+msgstr "Table"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Cəmi %(total)s bal · %(count)s tapşırıq"
+msgstr "Total %(total)s points · %(count)s assignment(s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Cəmi 100 bal"
+msgstr "Total 100 points"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Davam et"
+msgstr "Continue"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Davamiyyət"
+msgstr "Attendance"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Davamiyyət, sərbəst iş və yekun imtahan universitet siyasəti ilə kilidlidir. Yalnız qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür — cəm həmişə 100 qalır."
+msgstr "Attendance, independent work, and the final exam are locked by university policy. Only the remaining 30 points are divided between the midterm exam and the semester project — the total always stays at 100."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Davamiyyət, sərbəst iş və yekun imtahanın çəkisi universitet siyasəti ilə təyin edilib. Qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür."
+msgstr "The weight of attendance, independent work, and the final exam is set by university policy. The remaining 30 points are divided between the midterm exam and the semester project."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Doldurulmuş həftə"
+msgstr "Filled-in week"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Düzəliş tələb olunur"
+msgstr "Revision required"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Düzəliş: %(who)s"
+msgstr "Revision: %(who)s"
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Düzəlişə başlandı — bölmələr yenidən redaktə oluna bilər."
+msgstr "Revision has started — sections can be edited again."
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Düzəlişə davam et"
+msgstr "Continue revision"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Düzəlt"
+msgstr "Edit"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Dərsi aparan müəllim"
+msgstr "Instructor teaching the course"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Dərsi aparan müəllim göstərilməyib"
+msgstr "The instructor teaching the course is not specified"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Filtrə uyğun sillabus yoxdur"
+msgstr "No syllabus matches the filter"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Fənn adı və ya kodu"
+msgstr "Subject name or code"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Fənn kataloqu"
+msgstr "Subject catalog"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Fənn kodu"
+msgstr "Subject code"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Fənn üzrə istifadə olunan metodlar. Ən azı 2 metod seçilməlidir."
+msgstr "Methods used for the course. At least 2 methods must be selected."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Fənnin adı və kodu"
+msgstr "Subject name and code"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Fənnin məqsədi"
+msgstr "Course objective"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Fənnin məqsədi ən azı %(min)s simvol olmalıdır (hazırda %(have)s)"
+msgstr "The course objective must be at least %(min)s characters (currently %(have)s)"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Fənnin pasport məlumatları tədris planından gəlir və kilidlidir. Siz yalnız dərsi aparan müəllim, məsləhət saatı və prerekvizit sətirlərini doldurursunuz."
+msgstr "The course’s passport data comes from the curriculum and is locked. You only fill in the instructor, consultation hours, and prerequisite fields."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Fənnin təsviri"
+msgstr "Course description"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Fənnin təsviri və məqsədi"
+msgstr "Course description and objective"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Fənnin təsviri ən azı %(min)s simvol olmalıdır (hazırda %(have)s)"
+msgstr "The course description must be at least %(min)s characters (currently %(have)s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Fənnin əhatə etdiyi mövzular və tələbənin qazanacağı ümumi bacarıqlar."
+msgstr "The topics covered by the course and the general skills the student will gain."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Geri qayıt"
+msgstr "Go back"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Geri çağır"
+msgstr "Recall"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Geri çağırma səbəbi"
+msgstr "Reason for recall"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Göndər"
+msgstr "Submit"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır."
+msgstr "After submission the version is locked and only reopens when a \"revision required\" request arrives."
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Göndərilmiş variantı gör"
+msgstr "View the submitted version"
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Göndərilmiş versiya baxış müddətində kilidlidir. Dəyişiklik lazımsa təqdimatı geri çağırın."
+msgstr "The submitted version is locked during the review period. If a change is needed, recall the submission."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Həftə"
+msgstr "Week"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Həftəlik mövzu və saat bölgüsü"
+msgstr "Weekly topic and hour distribution"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Həftəlik mövzular"
+msgstr "Weekly topics"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Həftəlik mövzular və qiymətləndirmə strukturu təsdiqdən sonra jurnalın mənbəyi olur"
+msgstr "Weekly topics and the assessment structure become the source for the journal after approval"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir."
+msgstr "Weekly topics, assessment weights, or the independent work structure change. It only takes effect from the next semester — the current journal is not affected."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Həftənin mövzusu"
+msgstr "Topic of the week"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Hər dərs növünün saatı tədris planındakı bölgü ilə ayrıca uyğunlaşmalıdır."
+msgstr "The hours for each session type must separately match the distribution in the curriculum."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Hər həftə kiçik tapşırıq — davamlı iş tələb edir."
+msgstr "A small assignment every week — requires continuous work."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Hər həftəlik mövzu ən azı bir təlim nəticəsi ilə əlaqələndirilməlidir. Heç bir həftədə istifadə olunmayan nəticə plana daxil edilməyib sayılır."
+msgstr "Each weekly topic must be linked to at least one learning outcome. An outcome not used in any week is considered not included in the plan."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Hər sətirdə bir mənbə: müəllif, ad, nəşr ili."
+msgstr "One source per line: author, title, publication year."
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri düzəliş tələb edib. Qeydləri nəzərə alıb yenidən göndərin."
+msgstr "The department head has requested revision. Take the notes into account and resubmit."
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri versiyanı açıb — baxış davam edir, redaktə bağlıdır."
+msgstr "The department head has opened the version — review is in progress, editing is closed."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdirinə bildiriş göndərilir"
+msgstr "A notification is sent to the department head"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Kafedraya təsdiqə göndər"
+msgstr "Submit to department for approval"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Kart"
+msgstr "Card"
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Keçmiş versiyanın məzmunu köçürüldü, yeni QARALAMA açıldı."
+msgstr "The content of the previous version was copied, a new DRAFT was opened."
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Keçən ildən köçür"
+msgstr "Copy from last year"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Keçən ilin sillabusundan köçürülsün?"
+msgstr "Copy from last year's syllabus?"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Kilidli sətirlər tədris planı və yük bölgüsündən gəlir. Dəyişiklik lazımdırsa kafedra müdirinə müraciət göndərin — sillabusdan redaktə edilə bilmir."
+msgstr "Locked rows come from the curriculum and workload distribution. If a change is needed, send a request to the department head — they cannot be edited from the syllabus."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Kiçik dəyişiklik"
+msgstr "Minor change"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Kredit"
+msgstr "Credit"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Köçür və qaralama aç"
+msgstr "Copy and open draft"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Laboratoriya"
+msgstr "Laboratory"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Marşrut: kafedra müdiri → təsdiq. Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır."
+msgstr "Route: department head → approval. After submission the version is locked and only reopens when a \"revision required\" request arrives."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Metodların tətbiqi barədə qeyd"
+msgstr "Note on how the methods are applied"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Mövzu"
+msgstr "Topic"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Mövzu yeni semestrdə tapşırıq kimi verilmir"
+msgstr "The topic is not assigned as a task in the new semester"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Mövzunu arxivləşdirmək istəyirsiniz?"
+msgstr "Do you want to archive this topic?"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Mühazirə"
+msgstr "Lecture"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Mənbə versiya tapılmadı."
+msgstr "Source version not found."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı"
+msgstr "Consultation hours"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı doldurulmayıb"
+msgstr "Consultation hours are not filled in"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Məsələn: alqoritmin mürəkkəbliyini O notasiyası ilə qiymətləndirir"
+msgstr "For example: evaluates algorithm complexity using O notation"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Məsələn: aralıq imtahan tarixi dəyişdi, mövzu planını yeniləyirəm."
+msgstr "For example: the midterm exam date changed, I am updating the topic plan."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Məsələn: laboratoriya işləri kiçik qruplarda, kod baxışı peer review formatında aparılır."
+msgstr "For example: lab work is done in small groups, code review is conducted in peer-review format."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "Naviqasiya"
+msgstr "Navigation"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Növ üzrə bölgü"
+msgstr "Distribution by type"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Növbədə"
+msgstr "Queued"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
+msgctxt "accounts.syllabus"
+msgid "Növbəti"
+msgstr "Next"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
+msgctxt "accounts.syllabus"
+msgid "Növbəti əməl"
+msgstr "Next action"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Onlayn kurslar, sənədləşdirmə, məqalələr."
+msgstr "Online courses, documentation, articles."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "PDF hazırlanır — universitet blankı ilə."
+msgstr "The PDF is being prepared — with the university letterhead."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_drawer.html
+msgctxt "accounts.syllabus"
+msgid "Paneli bağla"
+msgstr "Close panel"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Prerekvizit"
+msgstr "Prerequisite"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "Qaralama saxla"
+msgstr "Save draft"
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Qaralama tələbələrə görünmür — yalnız təsdiqlənmiş versiya aktiv olur."
+msgstr "The draft is not visible to students — only the approved version becomes active."
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Qaralama yaradıldı — məzmunu doldurub təsdiqə göndərin."
+msgstr "Draft created — fill in the content and submit for approval."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Qaralama yarat"
+msgstr "Create draft"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Qeydlərə bax"
+msgstr "View notes"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə"
+msgstr "Assessment"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə cəmi"
+msgstr "Assessment total"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə strukturu"
+msgstr "Assessment structure"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Qrup"
+msgstr "Group"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Qruplar"
+msgstr "Groups"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Redaktə davam edir, dəyişikliklər cihazda növbəyə alınır. Bağlantı qayıtdıqdan sonra avtomatik göndərilir; təsdiqə göndərmə isə yalnız onlayn mümkündür."
+msgstr "Editing continues, changes are queued on the device. They will be sent automatically once the connection returns; submitting for approval is only possible online."
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Rədd: %(who)s"
+msgstr "Rejected: %(who)s"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Saat bölgüsü"
+msgstr "Hour distribution"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Saatlar tədris planı ilə növ üzrə üst-üstə düşür."
+msgstr "Hours match the curriculum by session type."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Saxlanıldı"
+msgstr "Saved"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "Saxlanılır…"
+msgstr "Saving…"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Semestr açılışı"
+msgstr "Semester opening"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Semestr başlayana qədər sillabus yaradılmalıdır"
+msgstr "The syllabus must be created before the semester begins"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Semestr layihəsi"
+msgstr "Semester project"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Seminar"
+msgstr "Seminar class"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Server cavab vermədi. Mətn brauzerdə saxlanılıb — bağlantı bərpa olunanda avtomatik göndərilir."
+msgstr "The server did not respond. The text has been saved in the browser — it will be sent automatically once the connection is restored."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Serverdəki variantı yüklə"
+msgstr "Load version from server"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Seçilmiş akademik il, semestr və status kombinasiyasında qeyd tapılmadı."
+msgstr "No record found for the selected academic year, semester, and status combination."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Seçilmiş sərbəst iş strukturu universitet siyasətinə uyğun deyil."
+msgstr "The selected independent work structure does not comply with university policy."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Seçilməyib"
+msgstr "Not selected"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus"
+msgstr "Syllabus"
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Sillabus kafedra müdirinin təsdiq növbəsinə göndərildi."
+msgstr "The syllabus was sent to the department head's approval queue."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus kafedra növbəsindən çıxarılır və yenidən qaralama statusuna qayıdır. Kafedra müdirinə bildiriş göndərilir."
+msgstr "The syllabus is removed from the department's queue and returns to draft status. A notification is sent to the department head."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus kafedra təsdiqinə göndərilsin?"
+msgstr "Submit the syllabus for department approval?"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus redaktoru"
+msgstr "Syllabus editor"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus server tərəfində yenilənib. Redaktəyə davam etməzdən əvvəl səhifəni yeniləyin — əks halda dəyişikliklər itə bilər."
+msgstr "The syllabus has been updated on the server. Refresh the page before continuing to edit — otherwise changes may be lost."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus siyahısı"
+msgstr "Syllabus list"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Sillabus tapılmadı və ya artıq mövcud deyil."
+msgstr "Syllabus not found or no longer exists."
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Sillabus tapılmadı."
+msgstr "Syllabus not found."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
+msgctxt "accounts.syllabus"
+msgid "Sillabus xülasəsi"
+msgstr "Syllabus summary"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Sillabus yarat"
+msgstr "Create syllabus"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Sillabus yoxdur"
+msgstr "No syllabus"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Sillabuslar"
+msgstr "Syllabi"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "Sillabuslara qayıt"
+msgstr "Back to syllabi"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Sillabussuz fənn"
+msgstr "Subject without a syllabus"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Sillabusu yalnız onun müəllimi redaktə edə bilər."
+msgstr "Only its instructor can edit the syllabus."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Sillabusun cari statusunda bu əməliyyat mümkün deyil."
+msgstr "This operation is not possible in the syllabus's current status."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Sillabusun yekun görünüşü. Bu görünüş tələbə kabinetində və kafedra baxışında eynidir."
+msgstr "The final view of the syllabus. This view is identical in the student cabinet and the department review."
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Sistem / köçürmə"
+msgstr "System / migration"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_cards.html apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
+msgctxt "accounts.syllabus"
+msgid "Son dəyişiklik"
+msgstr "Last change"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Son dəyişiklik saxlanılmadı"
+msgstr "Last change was not saved"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Son dəyişikliyə görə"
+msgstr "By last change"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
+msgctxt "accounts.syllabus"
+msgid "Status və təsdiqləyən"
+msgstr "Status and approver"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Statusa görə"
+msgstr "By status"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Struktur"
+msgstr "Structure"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Struktur dəyişikliyi qiymətlənmiş tapşırığa təsir edir — əvvəlcə onu arxivləyin."
+msgstr "The structural change affects a graded assignment — archive it first."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Səbəb audit izinə yazılır."
+msgstr "The reason is written to the audit trail."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Səbəb göstərilməlidir."
+msgstr "A reason must be provided."
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Səbəbə bax"
+msgstr "View reason"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Səhifədəki məlumat köhnəlmişdir"
+msgstr "The data on the page is outdated"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
+msgctxt "accounts.syllabus"
+msgid "Səhifələmə"
+msgstr "Pagination"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş"
+msgstr "Independent work"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş mövzularının sayı seçilmiş struktura uyğun deyil (%(have)s / %(need)s)"
+msgstr "The number of independent work topics does not match the selected structure (%(have)s / %(need)s)"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş strukturu"
+msgstr "Independent work structure"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş strukturu seçilməyib"
+msgstr "The independent work structure has not been selected"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş tapşırığının mövzusu"
+msgstr "Topic of the independent work assignment"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Sərbəst işin ümumi maksimum balı universitet siyasəti ilə %(total)s bal təyin edilib. Müəllim yalnız balın necə bölünəcəyini seçir."
+msgstr "The overall maximum score for independent work is set to %(total)s points by university policy. The instructor only chooses how the points are divided."
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Tamamlanma faizinə görə"
+msgstr "By completion percentage"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Tapşırıq %(index)s"
+msgstr "Assignment %(index)s"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Tədris metodları"
+msgstr "Teaching methods"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Tədris metodu"
+msgstr "Teaching method"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Tədris planı"
+msgstr "Curriculum"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Təlim nəticələri"
+msgstr "Learning outcomes"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Təlim nəticəsi"
+msgstr "Learning outcome"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Təlim nəticəsi əlavə et"
+msgstr "Add learning outcome"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Tələbə fənni bitirəndə nə bacaracaq. Ən azı 3 nəticə tələb olunur, hər biri həftəlik plandan ən azı bir mövzu ilə əlaqələndirilməlidir."
+msgstr "What the student will be able to do upon completing the course. At least 3 outcomes are required, each must be linked to at least one topic from the weekly plan."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Tələbə qiymətləri qorunur, yeni tapşırıq kimi verilmir"
+msgstr "Student grades are preserved, it is not assigned as a new task"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Təmizlə"
+msgstr "Clear"
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Təqdimat geri çağırıldı, status qaralamaya qaytarıldı."
+msgstr "The submission was recalled, status returned to draft."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Təqdimat geri çağırılsın?"
+msgstr "Recall the submission?"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Təsdiq gözlənilən müddətdə cari təsdiqlənmiş versiya tələbələr üçün aktiv qalır"
+msgstr "While approval is pending, the current approved version remains active for students"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Təsdiq gözləyir"
+msgstr "Awaiting approval"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənib"
+msgstr "Approved"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənmiş sillabus jurnalın mənbəyidir, ona görə redaktə bağlıdır. Dəyişiklik üçün yeni versiya yaradın — mövcud jurnal və qiymətlər olduğu kimi qalır."
+msgstr "The approved syllabus is the source for the journal, so editing is closed. Create a new version to make changes — the existing journal and grades remain unchanged."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənmiş versiya olduğu kimi qalır və tələbələr onu görməyə davam edir. Yeni versiya qaralama kimi açılır, təsdiqlənəndən sonra aktiv olur."
+msgstr "The approved version remains as is and students continue to see it. The new version opens as a draft and becomes active after approval."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "Təsdiqə göndər"
+msgstr "Submit for approval"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Təsdiqə göndərmə"
+msgstr "Submission for approval"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Təsvir tələbənin fənn seçimi zamanı gördüyü mətndir. Məqsəd bölməsi kafedra baxışında ilk oxunan hissədir."
+msgstr "The description is the text the student sees when choosing the course. The objective section is the first part read in the department review."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Təsvir və məqsəd"
+msgstr "Description and objective"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Universitet siyasəti"
+msgstr "University policy"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Universitet siyasətinə uyğun deyil — cəmi 15 bal edir."
+msgstr "Does not comply with university policy — totals 15 points."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Universitetin icazə verdiyi üç struktur var və hər birinin cəmi 10 baldır. Struktur seçildikdən sonra mövzular həmin sayda daxil edilir."
+msgstr "The university allows three structures, each totaling 10 points. Once a structure is selected, topics are entered in that number."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Verilmiş qiymətlər və davamiyyət qeydləri tam saxlanılır"
+msgstr "Grades already given and attendance records are fully preserved"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
+msgctxt "accounts.syllabus"
+msgid "Versiya jurnalı"
+msgstr "Version log"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Versiya kilidlidir — redaktə bağlıdır."
+msgstr "The version is locked — editing is closed."
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Versiya növü tanınmır."
+msgstr "The version type is not recognized."
+
+#: apps/accounts/views/syllabus/preview.py
+msgctxt "accounts.syllabus"
+msgid "Versiya rədd edilib. Səbəbi oxuyub yeni versiya yaradın."
+msgstr "The version was rejected. Read the reason and create a new version."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_drawer.html apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Versiya tarixçəsi"
+msgstr "Version history"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+msgctxt "accounts.syllabus"
+msgid "Yalnız sizə təyin olunmuş fənlər üzrə sillabus yaradırsınız. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş lazımsa yeni versiya açılır, jurnal və qiymətlər olduğu kimi qalır."
+msgstr "You create syllabi only for the subjects assigned to you. The approved version cannot be edited — if a revision is needed, a new version is opened, and the journal and grades remain unchanged."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Yekun görünüş"
+msgstr "Final view"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "Yekun imtahan"
+msgstr "Final exam"
+
+#: apps/accounts/views/syllabus/api.py
+msgctxt "accounts.syllabus"
+msgid "Yeni versiya qaralaması yaradıldı. Təsdiqlənmiş versiya aktiv qalır."
+msgstr "A new version draft was created. The approved version remains active."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Yeni versiya yaradılsın?"
+msgstr "Create a new version?"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "Yeni versiya yarat"
+msgstr "Create new version"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Yenidən cəhd et"
+msgstr "Try again"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "Yenilə"
+msgstr "Refresh"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Yoxdursa boş buraxın"
+msgstr "Leave blank if none"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "bal"
+msgstr "point"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "həftə"
+msgstr "week"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "həftənin mövzusu"
+msgstr "topic of the week"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "həftənin təlim nəticəsi"
+msgstr "learning outcome of the week"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "kafedra növbəsində"
+msgstr "in the department's queue"
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+msgctxt "accounts.syllabus"
+msgid "kredit"
+msgstr "credit"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "nəticəni sil"
+msgstr "delete outcome"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "semestr başına qədər tələb olunur"
+msgstr "required by the start of the semester"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "seçilmiş tədris ili"
+msgstr "selected academic year"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "seçilməyib"
+msgstr "not selected"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "simvol"
+msgstr "character"
+
+#: apps/accounts/views/syllabus/section.py
+msgctxt "accounts.syllabus"
+msgid "sizdən əməl gözlənilir"
+msgstr "action is expected from you"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "sərbəst iş mövzusu"
+msgstr "independent work topic"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "tamamlanıb"
+msgstr "completed"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "təlim nəticəsi"
+msgstr "learning outcome"
+
+#: apps/accounts/views/syllabus/rows.py
+msgctxt "accounts.syllabus"
+msgid "yaradılmayıb"
+msgstr "not created"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
+msgctxt "accounts.syllabus"
+msgid "yoxdur"
+msgstr "none"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "yoxlama bölməsi"
+msgstr "review section"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
+msgctxt "accounts.syllabus"
+msgid "Çatışmayan tələblər"
+msgstr "Missing requirements"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Çatışmayan tələblər var — «Təsdiqə göndərmə» bölməsindəki siyahıya baxın."
+msgstr "There are unmet requirements — see the list in the \"Submit for approval\" section."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+msgctxt "accounts.syllabus"
+msgid "Çərşənbə 14:00–16:00, otaq A-312"
+msgstr "Wednesday 14:00–16:00, room A-312"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Ümumi məlumat"
+msgstr "General information"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "çatışan tələblər var"
+msgstr "there are unmet requirements"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "İki tapşırıq — semestrin ortası və sonu üçün balanslı variant."
+msgstr "Two assignments — a balanced option for the middle and end of the semester."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
+msgctxt "accounts.syllabus"
+msgid "İl / semestr"
+msgstr "Year / semester"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+msgctxt "accounts.syllabus"
+msgid "İmtahanlar auditoriya saatına daxil edilmir — onlar semestr cədvəlindən gəlir."
+msgstr "Exams are not included in classroom hours — they come from the semester schedule."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+msgctxt "accounts.syllabus"
+msgid "İnternet bağlantısı yoxdur"
+msgstr "No internet connection"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "İxtisaslar"
+msgstr "Specializations"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Ədəbiyyat"
+msgstr "Literature"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Ədəbiyyat, məsləhət saatı, mövzu adının redaktəsi. Jurnal strukturu dəyişmir, cari semestrə tətbiq olunur."
+msgstr "Editing literature, consultation hours, or topic names. The journal structure does not change and it applies to the current semester."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Əlavə ədəbiyyat və elektron resurslar"
+msgstr "Additional literature and electronic resources"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Əlavə ədəbiyyatda ən azı %(min)s mənbə olmalıdır (hazırda %(have)s)"
+msgstr "The additional literature must have at least %(min)s sources (currently %(have)s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Əməliyyat audit izinə yazılır"
+msgstr "The operation is written to the audit trail"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Ən azı %(min)s həftənin mövzusu yazılmalıdır (hazırda %(have)s)"
+msgstr "At least %(min)s weeks' topics must be entered (currently %(have)s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Ən azı %(min)s simvol — hazırda %(have)s"
+msgstr "At least %(min)s characters — currently %(have)s"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Ən azı %(min)s tədris metodu seçilməlidir (hazırda %(have)s)"
+msgstr "At least %(min)s teaching methods must be selected (currently %(have)s)"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Ən azı %(min)s təlim nəticəsi tələb olunur (hazırda %(have)s)"
+msgstr "At least %(min)s learning outcomes are required (currently %(have)s)"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Ən azı 15 simvol — səbəb audit izinə yazılır."
+msgstr "At least 15 characters — the reason is written to the audit trail."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Ən azı 15 simvol — səbəb məcburidir."
+msgstr "At least 15 characters — the reason is required."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
+msgctxt "accounts.syllabus"
+msgid "Ən azı 3 təlim nəticəsi tələb olunur — silinmə mümkün deyil."
+msgstr "At least 3 learning outcomes are required — deletion is not possible."
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+msgctxt "accounts.syllabus"
+msgid "Ən son təsdiqlənmiş versiya mənbə kimi istifadə olunacaq. Nəticə yalnız QARALAMA olur — avtomatik təsdiqlənmir və tələbələrə görünmür."
+msgstr "The most recently approved version will be used as the source. The result is only a DRAFT — it is not approved automatically and is not visible to students."
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Əsas və əlavə ədəbiyyat"
+msgstr "Primary and additional literature"
+
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+msgctxt "accounts.syllabus"
+msgid "Əsas ədəbiyyat"
+msgstr "Primary literature"
+
+#: apps/accounts/views/syllabus/labels.py
+msgctxt "accounts.syllabus"
+msgid "Əsas ədəbiyyatda ən azı %(min)s mənbə olmalıdır (hazırda %(have)s)"
+msgstr "The primary literature must have at least %(min)s sources (currently %(have)s)"
+
+#: apps/accounts/views/syllabus/editor.py
+msgctxt "accounts.syllabus"
+msgid "Əsas ədəbiyyatda ən azı 2, əlavə ədəbiyyatda ən azı 1 mənbə göstərilməlidir."
+msgstr "At least 2 sources must be given in the primary literature and at least 1 in the additional literature."
+
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
+msgctxt "accounts.syllabus"
+msgid "Əvvəlki"
+msgstr "Previous"
+
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilat məlumatına baxış"
+msgstr "View organization information"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilat məlumatını redaktə etmək"
+msgstr "Edit organization information"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilat ayarlarını idarə etmək"
+msgstr "Manage organization settings"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilat üzvlərini idarə etmək"
+msgstr "Manage organization members"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilat administratoru təyin etmək"
+msgstr "Assign an organization administrator"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilat sahibi təyin etmək"
+msgstr "Assign an organization owner"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Təşkilatı silmək"
+msgstr "Delete the organization"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Struktur vahidlərinə baxış"
+msgstr "View structural units"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Struktur vahidi yaratmaq"
+msgstr "Create a structural unit"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Struktur vahidini redaktə etmək"
+msgstr "Edit a structural unit"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Struktur vahidini silmək"
+msgstr "Delete a structural unit"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Üzvlərə baxış"
+msgstr "View members"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Üzv dəvət etmək"
+msgstr "Invite a member"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Üzv məlumatını redaktə etmək"
+msgstr "Edit member information"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Üzvü təşkilatdan çıxarmaq"
+msgstr "Remove a member from the organization"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Tələbə üzvlüyünü idarə etmək"
+msgstr "Manage student membership"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Rollara baxış"
+msgstr "View roles"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Rol yaratmaq"
+msgstr "Create a role"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Rolu redaktə etmək"
+msgstr "Edit a role"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Rol təyin etmək"
+msgstr "Assign a role"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Rolu silmək"
+msgstr "Delete a role"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Kurslara baxış"
+msgstr "View courses"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Kurs yaratmaq"
+msgstr "Create a course"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Kursu redaktə etmək"
+msgstr "Edit a course"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Kursu silmək"
+msgstr "Delete a course"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Sərbəst işi silmək"
+msgstr "Delete independent work"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Kurs işini silmək"
+msgstr "Delete a course project"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Lab işini silmək"
+msgstr "Delete lab work"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Qiymətlərə baxış"
+msgstr "View grades"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Qiymət yazmaq"
+msgstr "Enter grades"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Qiymətləri dərc etmək"
+msgstr "Publish grades"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Qiyməti məcburi dəyişmək"
+msgstr "Force-override a grade"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Jurnala baxış"
+msgstr "View the journal"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Jurnalda sənədli düzəliş etmək"
+msgstr "Make a documented correction in the journal"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Semestr sonu jurnalları bağlamaq/açmaq"
+msgstr "Close/reopen end-of-semester journals"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Qruplara baxış"
+msgstr "View groups"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Qrup yaratmaq/idarə etmək"
+msgstr "Create/manage groups"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahanlara baxış"
+msgstr "View exams"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahan yaratmaq"
+msgstr "Create an exam"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahanı redaktə etmək"
+msgstr "Edit an exam"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahan prosesini idarə etmək"
+msgstr "Manage the exam process"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahan keçirmək"
+msgstr "Host an exam"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahanı silmək"
+msgstr "Delete an exam"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtahan balını sistemə daxil etmək"
+msgstr "Enter the exam score into the system"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Apellyasiya yaratmaq"
+msgstr "Create an appeal"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Apellyasiyaya cavab vermək"
+msgstr "Respond to an appeal"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Apellyasiya qərarı vermək"
+msgstr "Decide on an appeal"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Öz analitikasına baxış"
+msgstr "View own analytics"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Struktur üzrə analitikaya baxış"
+msgstr "View analytics by structural unit"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Bütün analitikaya baxış"
+msgstr "View all analytics"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Keyfiyyət yoxlamalarına baxış"
+msgstr "View quality checks"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Keyfiyyət rəyi vermək"
+msgstr "Give a quality review"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Keyfiyyət işarəsi qoymaq"
+msgstr "Flag a quality issue"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Audit jurnalına baxış"
+msgstr "View the audit log"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Audit jurnalını ixrac etmək"
+msgstr "Export the audit log"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İstifadəçi axtarışı"
+msgstr "Search users"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Parol təyini / bərpası"
+msgstr "Set/reset password"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Hesabı bloklamaq / blokdan çıxarmaq"
+msgstr "Block/unblock an account"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Hesabı silmək / bərpa etmək"
+msgstr "Delete/restore an account"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "Şəxsi məlumatların redaktəsi"
+msgstr "Edit personal information"
+
+#: apps/organizations/permissions.py
+msgctxt "organizations.permission.label"
+msgid "İmtiyazlı (administrator) səlahiyyət vermək"
+msgstr "Grant privileged (administrator) rights"
