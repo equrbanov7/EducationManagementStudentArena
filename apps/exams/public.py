@@ -39,6 +39,7 @@ from apps.exams.services.access_policy import (  # noqa: F401
 )
 from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit  # noqa: F401
 from apps.exams.services.ai_summary import generate_exam_statistics_summary  # noqa: F401
+from apps.exams.services.ai_summary import generate_people_analytics_summary  # noqa: F401
 from apps.exams.services.final_center import (  # noqa: F401
     RoomAdminError,
     add_computer,
@@ -115,6 +116,7 @@ __all__ = [
     "is_exam_center_user",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",
+    "generate_people_analytics_summary",
     "get_ai_config",
     "get_live_active_states",
     "get_live_session_model",

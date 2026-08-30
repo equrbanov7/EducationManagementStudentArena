@@ -24,6 +24,7 @@ from apps.syllabus.constants import SyllabusStatus
 from apps.syllabus.models import ChangeKind
 
 from .labels import STATUS_TONES
+from .rows import DETAIL_LABEL, detail_urls
 
 _CTX = "accounts.syllabus"
 
@@ -113,9 +114,14 @@ def build_queue_row(version, *, now, policy_breach: bool = False) -> dict:
     days = waiting_days(version, now=now)
     percent = version.completion_percent or 0
     approved = syllabus.approved_version
+    urls = detail_urls(syllabus.pk)
     return {
         "version_id": str(version.pk),
         "syllabus_id": str(syllabus.pk),
+        # «Baxışa keç» qərar panelini AÇIR (profil qabığında qalır); «Detallı
+        # bax» isə sənədi AYRICA TABDA açır — ikisi fərqli səthlərdir.
+        "detail_url": f"{urls['detail']}?version={version.pk}",
+        "detail_label": DETAIL_LABEL,
         "code": syllabus.subject.code,
         "name": syllabus.subject.name,
         "program": syllabus.program.name if syllabus.program_id else str(_NO_PROGRAM),

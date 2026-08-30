@@ -13,6 +13,7 @@ sillabusun deyil, AÇILIŞIN id-sidir — ona görə `kind` sahəsi ilə ayrıl�
 
 from __future__ import annotations
 
+from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
 from apps.syllabus.constants import STATUS_NEXT_STEP, SyllabusStatus
@@ -117,6 +118,24 @@ def _actions(keys):
     return rows
 
 
+#: Sətirdən AYRICA TAM SƏHİFƏYƏ («Detallı bax», `target="_blank"`) keçid.
+DETAIL_LABEL = pgettext_lazy(_CTX, "Detallı bax")
+
+
+def detail_urls(syllabus_id) -> dict:
+    """``{"detail", "pdf"}`` — sənəd səhifəsi və onun PDF nüsxəsi.
+
+    Sətir view-modelində saxlanılır ki, şablonda hər dövr üçün ``{% url %}``
+    çağırışı olmasın və eyni keçid həm cədvəldə, həm kartda, həm də təsdiq
+    növbəsində EYNİ yerdən gəlsin.
+    """
+    kwargs = {"syllabus_id": str(syllabus_id)}
+    return {
+        "detail": reverse("accounts:syllabus_detail", kwargs=kwargs),
+        "pdf": reverse("accounts:syllabus_detail_pdf", kwargs=kwargs),
+    }
+
+
 def _period_labels(period):
     if period is None:
         return "", ""
@@ -132,9 +151,13 @@ def build_row(syllabus, *, now=None, can_copy: bool = False) -> dict:
     keys = list(ACTIONS_BY_STATUS.get(status, ()))
     if status == SyllabusStatus.DRAFT.value and not can_copy:
         keys = [key for key in keys if key != "copy"]
+    urls = detail_urls(syllabus.pk)
     return {
         "kind": "syllabus",
         "id": str(syllabus.pk),
+        "detail_url": urls["detail"],
+        "pdf_url": urls["pdf"],
+        "detail_label": DETAIL_LABEL,
         "version_id": str(version.pk) if version is not None else "",
         "code": syllabus.subject.code,
         "name": syllabus.subject.name,
@@ -162,6 +185,10 @@ def build_missing_row(offering, *, can_copy: bool = False) -> dict:
     return {
         "kind": "missing",
         "id": str(offering.pk),
+        # Sillabus dosyesi hələ yoxdur → detal səhifəsi də yoxdur (link gizlənir).
+        "detail_url": "",
+        "pdf_url": "",
+        "detail_label": DETAIL_LABEL,
         "version_id": "",
         "code": offering.subject.code,
         "name": offering.subject.name,
@@ -186,6 +213,8 @@ def build_missing_row(offering, *, can_copy: bool = False) -> dict:
 __all__ = [
     "ACTIONS_BY_STATUS",
     "ACTION_LABELS",
+    "DETAIL_LABEL",
+    "detail_urls",
     "approver_text",
     "build_missing_row",
     "build_row",

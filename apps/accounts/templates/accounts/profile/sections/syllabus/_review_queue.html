@@ -112,9 +112,17 @@ Birinci sütun `th scope="row"`, başlıqlar `th scope="col"` (§6 a11y).
           </td>
           <td><span class="syl-badge syl-badge--{{ row.status_tone }}">{{ row.status_label }}</span></td>
           <td class="syl-cell-actions">
-            <button type="button" class="syl-btn syl-btn--primary syl-btn--sm"
-                    data-syl-open="{{ row.version_id }}"
-                    data-name="{{ row.name }}">{% trans "Baxışa keç" context "accounts.syllabus" %}</button>
+            <div class="syl-actions">
+              <button type="button" class="syl-btn syl-btn--primary syl-btn--sm"
+                      data-syl-open="{{ row.version_id }}"
+                      data-name="{{ row.name }}">{% trans "Baxışa keç" context "accounts.syllabus" %}</button>
+              {% comment %}
+              «Baxışa keç» qərar panelini bu ekranda açır (sidebar qalır);
+              «Detallı bax» isə sənədi AYRICA TAM SƏHİFƏDƏ, YENİ TABDA açır.
+              {% endcomment %}
+              <a class="syl-btn syl-btn--secondary syl-btn--sm" href="{{ row.detail_url }}"
+                 target="_blank" rel="noopener">{{ row.detail_label }}</a>
+            </div>
           </td>
         </tr>
         {% endfor %}

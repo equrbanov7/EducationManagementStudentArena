@@ -18,6 +18,8 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
      data-people-root
      data-kind="{{ people_section.kind }}"
      data-list-url="{{ people_section.list_url }}"
+     data-charts-url="{{ people_section.analytics_url }}"
+     data-ai-url="{{ people_section.analytics_ai_url }}"
      data-options-url="{{ people_section.options_url }}"
      data-action-url="{{ people_section.action_url }}"
      data-detail-url-template="{{ people_section.detail_url_template }}"
@@ -209,6 +211,64 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
     <span data-people-page-info aria-live="polite"></span>
     <button type="button" data-people-next>{% trans "Sonrakı" context "accounts.people" %}</button>
   </nav>
+
+  {% comment %}
+  ── ANALİTİKA ────────────────────────────────────────────────────────────────
+  Göstəricilər, qrafiklər və AI analizi CARİ FİLTR dəstinə görə hesablanır
+  (bax `apps/accounts/services/people/analytics.py`). Qrafiklər `_appeal_stats`
+  naxşı ilə eynidir: AYRICA `data-charts-url` endpoint-i + `<canvas>` + Chart.js.
+
+  ⚠️ a11y: hər qrafikin altında AÇILAN cədvəl qarşılığı var — məlumat yalnız
+  rənglə verilmir. Qrafik boş olanda mətn qarşılığı yenə görünür.
+  {% endcomment %}
+  <section class="pan" data-people-analytics
+           aria-labelledby="people-analytics-title-{{ people_section.kind }}"
+           data-i18n-total="{% trans 'Ümumi' context 'accounts.people.analytics' %}"
+           data-i18n-table="{% trans 'Cədvəl şəklində' context 'accounts.people.analytics' %}"
+           data-i18n-indicator="{% trans 'Göstərici' context 'accounts.people.analytics' %}"
+           data-i18n-count="{% trans 'Say' context 'accounts.people.analytics' %}"
+           data-i18n-percent="{% trans 'Faiz' context 'accounts.people.analytics' %}"
+           data-i18n-empty="{% trans 'Bu filtr üçün göstəriləcək məlumat yoxdur.' context 'accounts.people.analytics' %}"
+           data-i18n-coverage="{% trans 'Doğum tarixi doldurulub' context 'accounts.people.analytics' %}"
+           data-i18n-workload="{% trans 'Dərs yükü göstəriciləri' context 'accounts.people.analytics' %}"
+           data-i18n-status="{% trans 'Hesab statusu üzrə' context 'accounts.people.analytics' %}"
+           data-i18n-gender="{% trans 'Cins üzrə bölgü' context 'accounts.people.analytics' %}"
+           data-i18n-age="{% trans 'Yaş qrupları üzrə bölgü' context 'accounts.people.analytics' %}"
+           data-i18n-ai-loading="{% trans 'AI analizi hazırlanır…' context 'accounts.people.analytics' %}"
+           data-i18n-ai-error="{% trans 'AI analizi alınmadı. Bir az sonra yenidən cəhd edin.' context 'accounts.people.analytics' %}"
+           data-i18n-ai-quota="{% trans 'Qalan AI limiti' context 'accounts.people.analytics' %}"
+           data-i18n-ai-cached="{% trans 'keşdən' context 'accounts.people.analytics' %}">
+    <header class="pan__head">
+      <h3 class="pan__title" id="people-analytics-title-{{ people_section.kind }}">
+        {% trans "Statistika və analiz" context "accounts.people.analytics" %}
+      </h3>
+      <p class="pan__hint">
+        {% trans "Bütün göstəricilər və qrafiklər yuxarıdakı filtrə görə yenilənir — nə süzürsünüzsə, rəqəmlər onu göstərir." context "accounts.people.analytics" %}
+      </p>
+    </header>
+
+    <div class="pan__cards" data-pan-cards aria-live="polite"></div>
+    <div class="pan__grid" data-pan-charts></div>
+
+    <div class="pan__ai" data-pan-ai>
+      <div class="pan__ai-head">
+        <div>
+          <h4 class="pan__ai-title">{% trans "AI analizi" context "accounts.people.analytics" %}</h4>
+          <p class="pan__hint">
+            {% trans "Süni intellekt yuxarıdakı AQREQAT rəqəmləri şərh edir. AI-a yalnız saylar və faizlər göndərilir — ad, e-poçt, telefon və FİN GÖNDƏRİLMİR. Eyni məlumat üçün cavab keşdən gəlir, limit sərf olunmur." context "accounts.people.analytics" %}
+          </p>
+        </div>
+        <button type="button" class="pan__ai-btn" data-pan-ai-btn>
+          {% trans "AI ilə analiz et" context "accounts.people.analytics" %}
+        </button>
+      </div>
+      <div class="pan__ai-out" data-pan-ai-out aria-live="polite">
+        <p class="pan__hint">
+          {% trans "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır." context "accounts.people.analytics" %}
+        </p>
+      </div>
+    </div>
+  </section>
 
   <div class="people__modal" data-people-detail-modal hidden role="dialog" aria-modal="true"
        aria-label="{% trans 'Şəxs kartı' context 'accounts.people' %}">

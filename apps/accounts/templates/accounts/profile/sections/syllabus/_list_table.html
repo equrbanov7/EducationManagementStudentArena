@@ -51,12 +51,22 @@ və sticky). Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə 
           </td>
           <td class="syl-cell-actions">
             <div class="syl-actions">
+              {% if row.detail_url %}
+              {% comment %}
+              Detal AYRICA TAM SƏHİFƏDİR və YENİ TABDA açılır (`_blank`) — siyahı
+              ekranı sol sidebarı ilə birlikdə yerində qalsın deyə. Redaktə
+              keçidi bundan FƏRQLİDİR: o, profil bölməsidir və yeni tab açmır.
+              {% endcomment %}
+              <a class="syl-btn syl-btn--secondary syl-btn--sm" href="{{ row.detail_url }}"
+                 target="_blank" rel="noopener">{{ row.detail_label }}</a>
+              {% endif %}
               {% for action in row.actions %}
               <button type="button" class="syl-btn syl-btn--{{ action.kind }} syl-btn--sm"
                       data-syl-action="{{ action.key }}"
                       data-row-kind="{{ row.kind }}"
                       data-id="{{ row.id }}"
                       data-version="{{ row.version_id }}"
+                      data-pdf="{{ row.pdf_url }}"
                       data-name="{{ row.name }}">{{ action.label }}</button>
               {% endfor %}
             </div>

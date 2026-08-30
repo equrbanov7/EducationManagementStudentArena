@@ -26,12 +26,18 @@ server sorğusu yoxdur, seçim `localStorage`-da yadda saxlanılır).
       {% else %}{{ row.touched_text }}{% endif %} · {{ row.approver }}
     </p>
     <div class="syl-actions syl-actions--card">
+      {% if row.detail_url %}
+      {% comment %}Detal — ayrıca tam səhifə, YENİ TABDA (cədvəl görünüşü ilə eyni).{% endcomment %}
+      <a class="syl-btn syl-btn--secondary" href="{{ row.detail_url }}"
+         target="_blank" rel="noopener">{{ row.detail_label }}</a>
+      {% endif %}
       {% for action in row.actions %}
       <button type="button" class="syl-btn syl-btn--{{ action.kind }}"
               data-syl-action="{{ action.key }}"
               data-row-kind="{{ row.kind }}"
               data-id="{{ row.id }}"
               data-version="{{ row.version_id }}"
+              data-pdf="{{ row.pdf_url }}"
               data-name="{{ row.name }}">{{ action.label }}</button>
       {% endfor %}
     </div>

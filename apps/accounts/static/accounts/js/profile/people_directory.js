@@ -138,6 +138,21 @@
             return data;
         }
 
+        /* Analitika ilə EYNİ filtr dəsti — `page` XARİC (qrafiklər səhifədən
+         * asılı deyil). Sətri `dataset`-ə yazırıq ki, analitika modulu skript
+         * sırasından ASILI OLMADAN son vəziyyəti oxuya bilsin, sonra hadisə
+         * göndəririk (o, artıq qoşulubsa dərhal yenilənir). */
+        function publishFilters() {
+            var data = params();
+            data.delete("page");
+            var query = data.toString();
+            if (root.dataset.peopleFilterQuery === query) {
+                return;
+            }
+            root.dataset.peopleFilterQuery = query;
+            root.dispatchEvent(new CustomEvent("people:filters", { detail: { query: query } }));
+        }
+
         function fillSelect(select, options) {
             if (!select) {
                 return;
@@ -231,6 +246,7 @@
         }
 
         function load() {
+            publishFilters();
             window.EMSCore.fetchJSON(urls.list + "?" + params().toString())
                 .then(function (payload) {
                     if (!payload || !payload.has_access) {

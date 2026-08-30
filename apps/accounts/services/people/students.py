@@ -29,7 +29,7 @@ from .scoping import structure_filter_q
 User = get_user_model()
 
 #: Bir neçə akademik qeyd olduqda hansı sütunlara baxılır (ən son qəbul).
-_RECORD_PICK_ORDER = ("-is_active", "-admission_year", "created_at")
+RECORD_PICK_ORDER = ("-is_active", "-admission_year", "created_at")
 
 
 def student_records_qs(organization):
@@ -39,18 +39,19 @@ def student_records_qs(organization):
     return StudentAcademicRecord.objects.filter(organization=organization)
 
 
-def visible_students_qs(actor, *, request=None, filters=None):
-    """Aktorun görə bildiyi tələbələrin baza queryset-i (fail-closed).
+def scoped_student_records(actor, *, request=None, filters=None):
+    """Scope + struktur/qrup/ixtisas filtri tətbiq olunmuş akademik qeydlər.
 
-    Scope-suz UNIT rolu → BOŞ nəticə (bütün təşkilat DEYİL).
+    ``None`` = scope yoxdur (fail-closed). Analitika bu queryset üzərində
+    bölgüləri hesablayır ki, siyahı ilə eyni dəsti saysın.
     """
     organization = actor.organization
     if organization is None or not actor.can_view_students:
-        return User.objects.none()
+        return None
 
     scope = actor.scope_for(PERM_VIEW_STUDENTS, request=request)
     if not scope.has_structure_access:
-        return User.objects.none()
+        return None
 
     records = student_records_qs(organization)
     if not scope.is_org_wide:
@@ -64,9 +65,20 @@ def visible_students_qs(actor, *, request=None, filters=None):
             records = records.filter(group_id=filters.group)
         if filters.program:
             records = records.filter(program_id=filters.program)
+    return records
+
+
+def visible_students_qs(actor, *, request=None, filters=None):
+    """Aktorun görə bildiyi tələbələrin baza queryset-i (fail-closed).
+
+    Scope-suz UNIT rolu → BOŞ nəticə (bütün təşkilat DEYİL).
+    """
+    records = scoped_student_records(actor, request=request, filters=filters)
+    if records is None:
+        return User.objects.none()
 
     correlated = records.filter(student=OuterRef("pk"))
-    picked = correlated.order_by(*_RECORD_PICK_ORDER)
+    picked = correlated.order_by(*RECORD_PICK_ORDER)
 
     return (
         User.objects.filter(Exists(correlated))
@@ -117,6 +129,15 @@ def _apply_filters(queryset, actor, filters):
     return queryset
 
 
+def filtered_students_qs(*, actor, filters, request=None):
+    """Cədvəlin GÖRDÜYÜ dəqiq dəst (müəllim kataloqu ilə eyni müqavilə).
+
+    Analitika bunu çağırır — göstəricilər həmişə cari filtr dəstinə aiddir.
+    """
+    queryset = visible_students_qs(actor, request=request, filters=filters)
+    return _apply_filters(queryset, actor, filters)
+
+
 def build_students_page(*, actor, filters, request=None, today=None) -> dict:
     """Səhifələnmiş tələbə cədvəli — müəllim cədvəli ilə EYNİ zərf strukturu."""
     empty = {
@@ -132,8 +153,7 @@ def build_students_page(*, actor, filters, request=None, today=None) -> dict:
     if not actor.can_view_students or actor.organization is None:
         return empty
 
-    queryset = visible_students_qs(actor, request=request, filters=filters)
-    queryset = _apply_filters(queryset, actor, filters)
+    queryset = filtered_students_qs(actor=actor, filters=filters, request=request)
     queryset = queryset.order_by(*STUDENT_SORT_OPTIONS.get(filters.sort, STUDENT_SORT_OPTIONS["name"]))
 
     page_size = filters.page_size or DEFAULT_PAGE_SIZE
@@ -190,4 +210,11 @@ def _ancestors_for(users, *, organization):
     return resolve_unit_ancestors(units, organization=organization)
 
 
-__all__ = ["build_students_page", "student_records_qs", "visible_students_qs"]
+__all__ = [
+    "RECORD_PICK_ORDER",
+    "build_students_page",
+    "filtered_students_qs",
+    "scoped_student_records",
+    "student_records_qs",
+    "visible_students_qs",
+]
