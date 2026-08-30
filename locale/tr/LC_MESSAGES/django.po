@@ -35918,58 +35918,6 @@ msgctxt "organizations.permission.label"
 msgid "Sillabusları idarə etmək (arxiv, köçürmə)"
 msgstr "İzlenceleri yönetme (arşiv, kopyalama)"
 
-#~ msgctxt "profile.subjects"
-#~ msgid "Buraxılmır"
-#~ msgstr "Giremez"
-
-#~ msgctxt "profile.subjects"
-#~ msgid "Keçir"
-#~ msgstr "Geçer"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Colloquium"
-#~ msgstr "Kolokyum"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Attendance"
-#~ msgstr "Devam"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Final exam"
-#~ msgstr "Final sınavı"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Other"
-#~ msgstr "Diğer"
-
-#~ msgctxt "registrar.model.component.meta"
-#~ msgid "grade component"
-#~ msgstr "not bileşeni"
-
-#~ msgctxt "registrar.model.component.meta"
-#~ msgid "grade components"
-#~ msgstr "not bileşenleri"
-
-#~ msgctxt "registrar.model.score.meta"
-#~ msgid "component score"
-#~ msgstr "bileşen puanı"
-
-#~ msgctxt "registrar.model.score.meta"
-#~ msgid "component scores"
-#~ msgstr "bileşen puanları"
-
-#~ msgctxt "registrar.journal"
-#~ msgid "Keçid"
-#~ msgstr "Geçiş"
-
-#~ msgctxt "registrar.journal"
-#~ msgid "Buraxılmır"
-#~ msgstr "Giremez"
-
-#~ msgctxt "registrar.journal"
-#~ msgid "Keçir"
-#~ msgstr "Geçer"
-
 msgctxt "organizations.permission.label"
 msgid "Müəllim kataloquna baxış"
 msgstr "Öğretim elemanı kataloğunu görüntüleme"
@@ -36203,11 +36151,14 @@ msgid "Yüklənir…"
 msgstr "Yükleniyor…"
 
 msgctxt "accounts.people"
-msgid "Görünüş sahənizdəki müəllimlər. Hər kəs yalnız öz strukturunun altını görür."
-msgstr "Görüş alanınızdaki öğretim elemanları. Herkes yalnızca kendi yapısını görür."
+msgid ""
+"Görünüş sahənizdəki müəllimlər. Hər kəs yalnız öz strukturunun altını görür."
+msgstr ""
+"Görüş alanınızdaki öğretim elemanları. Herkes yalnızca kendi yapısını görür."
 
 msgctxt "accounts.people"
-msgid "Görünüş sahənizdəki tələbələr. Hər kəs yalnız öz strukturunun altını görür."
+msgid ""
+"Görünüş sahənizdəki tələbələr. Hər kəs yalnız öz strukturunun altını görür."
 msgstr "Görüş alanınızdaki öğrenciler. Herkes yalnızca kendi yapısını görür."
 
 msgctxt "accounts.people"
@@ -36217,6 +36168,7 @@ msgstr "Bu bölümdeki yetkileriniz"
 msgctxt "accounts.people"
 msgid "Bu bölmə üçün icazəniz yoxdur."
 msgstr "Bu bölüm için yetkiniz yok."
+
 msgctxt "organizations.unit_detail"
 msgid "Aktiv müəllim"
 msgstr "Aktif öğretmenler"
@@ -36311,12 +36263,20 @@ msgid "Əhatə: %(count)s struktur bölmə"
 msgstr "Kapsam: %(count)s yapısal birim"
 
 msgctxt "accounts.syllabus"
-msgid "Yalnız öz kafedranızın müəllimlərinin təqdim etdiyi sillabuslar görünür. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
-msgstr "Yalnızca kendi bölümünüzün öğretim elemanlarının gönderdiği izlenceler görünür. Onaylanmış sürüm değiştirilmez — düzeltme yeni sürümle yapılır."
+msgid ""
+"Yalnız öz kafedranızın müəllimlərinin təqdim etdiyi sillabuslar görünür. "
+"Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
+msgstr ""
+"Yalnızca kendi bölümünüzün öğretim elemanlarının gönderdiği izlenceler "
+"görünür. Onaylanmış sürüm değiştirilmez — düzeltme yeni sürümle yapılır."
 
 msgctxt "accounts.syllabus"
-msgid "Əhatənizdəki bütün kafedralar üzrə sillabus vəziyyəti. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
-msgstr "Kapsamınızdaki tüm bölümler için izlence durumu. Onaylanmış sürüm değiştirilmez — düzeltme yeni sürümle yapılır."
+msgid ""
+"Əhatənizdəki bütün kafedralar üzrə sillabus vəziyyəti. Təsdiqlənmiş versiya "
+"dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
+msgstr ""
+"Kapsamınızdaki tüm bölümler için izlence durumu. Onaylanmış sürüm "
+"değiştirilmez — düzeltme yeni sürümle yapılır."
 
 msgctxt "accounts.syllabus"
 msgid "Əhatə təyin edilməyib."
@@ -36331,12 +36291,22 @@ msgid "Təşkilati əhatə təyin edilməmişdir"
 msgstr "Kurumsal kapsam atanmamış"
 
 msgctxt "accounts.syllabus"
-msgid "Hesabınıza kafedra və ya fakültə əhatəsi verilməyib. Əhatə olmadan sillabus məlumatları göstərilmir — bu, «bütün universitet» kimi şərh edilmir. Səlahiyyət təyin edildikdən sonra yalnız aid olduğunuz struktur bölmə görünəcək."
-msgstr "Hesabınıza bölüm veya fakülte kapsamı verilmemiş. Kapsam olmadan izlence verileri gösterilmez — bu «tüm üniversite» olarak yorumlanmaz. Yetki atandıktan sonra yalnızca kendi biriminiz görünecek."
+msgid ""
+"Hesabınıza kafedra və ya fakültə əhatəsi verilməyib. Əhatə olmadan sillabus "
+"məlumatları göstərilmir — bu, «bütün universitet» kimi şərh edilmir. "
+"Səlahiyyət təyin edildikdən sonra yalnız aid olduğunuz struktur bölmə "
+"görünəcək."
+msgstr ""
+"Hesabınıza bölüm veya fakülte kapsamı verilmemiş. Kapsam olmadan izlence "
+"verileri gösterilmez — bu «tüm üniversite» olarak yorumlanmaz. Yetki "
+"atandıktan sonra yalnızca kendi biriminiz görünecek."
 
 msgctxt "accounts.syllabus"
-msgid "Əhatənin təyini üçün təşkilat administratoruna və ya tədris şöbəsinə müraciət edin."
-msgstr "Kapsamın atanması için kurum yöneticisine veya öğrenci işlerine başvurun."
+msgid ""
+"Əhatənin təyini üçün təşkilat administratoruna və ya tədris şöbəsinə "
+"müraciət edin."
+msgstr ""
+"Kapsamın atanması için kurum yöneticisine veya öğrenci işlerine başvurun."
 
 msgctxt "accounts.syllabus"
 msgid "Təsdiq növbəsi"
@@ -36475,8 +36445,12 @@ msgid "Təsdiq növbəsi boşdur"
 msgstr "Onay kuyruğu boş"
 
 msgctxt "accounts.syllabus"
-msgid "Seçilmiş filtrə uyğun gözləyən sillabus yoxdur. Ümumi vəziyyəti «Əhatə və analitika» tabından izləyə bilərsiniz."
-msgstr "Seçilen filtreye uyan bekleyen izlence yok. Genel durumu «Kapsam ve analitik» sekmesinden izleyebilirsiniz."
+msgid ""
+"Seçilmiş filtrə uyğun gözləyən sillabus yoxdur. Ümumi vəziyyəti «Əhatə və "
+"analitika» tabından izləyə bilərsiniz."
+msgstr ""
+"Seçilen filtreye uyan bekleyen izlence yok. Genel durumu «Kapsam ve "
+"analitik» sekmesinden izleyebilirsiniz."
 
 msgctxt "accounts.syllabus"
 msgid "Əhatəyə keç"
@@ -36607,8 +36581,14 @@ msgid "Təsdiq marşrutu — universitet siyasəti"
 msgstr "Onay rotası — üniversite politikası"
 
 msgctxt "accounts.syllabus"
-msgid "Kafedra təsdiqi state maşını ilə məcburidir. Sonrakı mərhələlər (dekan təsdiqi, tədris şöbəsinin yekun yoxlaması) hələ tətbiq olunmayıb — burada onların cari vəziyyəti göstərilir."
-msgstr "Bölüm onayı durum makinesi ile zorunludur. Sonraki aşamalar (dekan onayı, öğrenci işlerinin son kontrolü) henüz uygulanmadı — burada mevcut durumları gösterilir."
+msgid ""
+"Kafedra təsdiqi state maşını ilə məcburidir. Sonrakı mərhələlər (dekan "
+"təsdiqi, tədris şöbəsinin yekun yoxlaması) hələ tətbiq olunmayıb — burada "
+"onların cari vəziyyəti göstərilir."
+msgstr ""
+"Bölüm onayı durum makinesi ile zorunludur. Sonraki aşamalar (dekan onayı, "
+"öğrenci işlerinin son kontrolü) henüz uygulanmadı — burada mevcut durumları "
+"gösterilir."
 
 msgctxt "accounts.syllabus"
 msgid "Kafedra müdiri təsdiqi"
@@ -36723,7 +36703,8 @@ msgid "dəyişib"
 msgstr "değişti"
 
 msgctxt "accounts.syllabus"
-msgid "Şərh yazılmış bölmə: %(count)s · geri qaytarma və rədd üçün səbəb məcburidir"
+msgid ""
+"Şərh yazılmış bölmə: %(count)s · geri qaytarma və rədd üçün səbəb məcburidir"
 msgstr "Yorum yazılan bölüm: %(count)s · iade ve ret için gerekçe zorunludur"
 
 msgctxt "accounts.syllabus"
@@ -36731,7 +36712,8 @@ msgid "Müqayisə: təsdiqlənmiş %(old)s ilə təqdim edilmiş %(new)s arasın
 msgstr "Karşılaştırma: onaylı %(old)s ile gönderilen %(new)s arasında."
 
 msgctxt "accounts.syllabus"
-msgid "Bu, dosyenin ilk təsdiq namizədidir — müqayisə üçün əvvəlki versiya yoxdur."
+msgid ""
+"Bu, dosyenin ilk təsdiq namizədidir — müqayisə üçün əvvəlki versiya yoxdur."
 msgstr "Bu, dosyanın ilk onay adayıdır — karşılaştırılacak önceki sürüm yok."
 
 msgctxt "accounts.syllabus"
@@ -36763,16 +36745,28 @@ msgid "təqdim edilmiş versiya"
 msgstr "gönderilen sürüm"
 
 msgctxt "accounts.syllabus"
-msgid "Bu, jurnalın mövzu siyahısını dəyişir. Cari semestrdə jurnal artıq açılıbsa, dəyişiklik yalnız növbəti semestrdən qüvvəyə minir."
-msgstr "Bu, yoklama defterinin konu listesini değiştirir. Bu dönem defter açıldıysa değişiklik yalnızca gelecek dönemden geçerli olur."
+msgid ""
+"Bu, jurnalın mövzu siyahısını dəyişir. Cari semestrdə jurnal artıq açılıbsa,"
+" dəyişiklik yalnız növbəti semestrdən qüvvəyə minir."
+msgstr ""
+"Bu, yoklama defterinin konu listesini değiştirir. Bu dönem defter açıldıysa "
+"değişiklik yalnızca gelecek dönemden geçerli olur."
 
 msgctxt "accounts.syllabus"
-msgid "Qiymətləndirmə çəkiləri jurnalın sütun strukturunu dəyişir. Mövcud qiymətlər arxivdə saxlanılır və silinmir."
-msgstr "Değerlendirme ağırlıkları defterin sütun yapısını değiştirir. Mevcut notlar arşivde saklanır, silinmez."
+msgid ""
+"Qiymətləndirmə çəkiləri jurnalın sütun strukturunu dəyişir. Mövcud qiymətlər"
+" arxivdə saxlanılır və silinmir."
+msgstr ""
+"Değerlendirme ağırlıkları defterin sütun yapısını değiştirir. Mevcut notlar "
+"arşivde saklanır, silinmez."
 
 msgctxt "accounts.syllabus"
-msgid "Sərbəst iş sütunlarının sayı dəyişir. Köhnə sütunların qiymətləri arxivdə saxlanılır və silinmir."
-msgstr "Bağımsız çalışma sütunlarının sayısı değişir. Eski sütunların notları arşivde saklanır, silinmez."
+msgid ""
+"Sərbəst iş sütunlarının sayı dəyişir. Köhnə sütunların qiymətləri arxivdə "
+"saxlanılır və silinmir."
+msgstr ""
+"Bağımsız çalışma sütunlarının sayısı değişir. Eski sütunların notları "
+"arşivde saklanır, silinmez."
 
 msgctxt "accounts.syllabus"
 msgid "%(version)s versiyası yaradıldı"
@@ -36811,20 +36805,30 @@ msgid "Sillabus təsdiqlənsin?"
 msgstr "İzlence onaylansın mı?"
 
 msgctxt "accounts.syllabus"
-msgid "Versiya təsdiqlənəcək və dəyişdirilməz sənəd kimi kilidlənəcək. Sonrakı düzəliş yalnız yeni versiya ilə mümkündür."
-msgstr "Sürüm onaylanacak ve değiştirilemez belge olarak kilitlenecek. Sonraki düzeltme yalnızca yeni sürümle mümkündür."
+msgid ""
+"Versiya təsdiqlənəcək və dəyişdirilməz sənəd kimi kilidlənəcək. Sonrakı "
+"düzəliş yalnız yeni versiya ilə mümkündür."
+msgstr ""
+"Sürüm onaylanacak ve değiştirilemez belge olarak kilitlenecek. Sonraki "
+"düzeltme yalnızca yeni sürümle mümkündür."
 
 msgctxt "accounts.syllabus"
 msgid "Təsdiqlə"
 msgstr "Onayla"
 
 msgctxt "accounts.syllabus"
-msgid "Təsdiqlənmiş versiya həftəlik mövzuların, qiymətləndirmə strukturunun və sərbəst iş konfiqurasiyasının yeganə mənbəyi olur"
-msgstr "Onaylanan sürüm, haftalık konuların, değerlendirme yapısının ve bağımsız çalışma yapılandırmasının tek kaynağı olur"
+msgid ""
+"Təsdiqlənmiş versiya həftəlik mövzuların, qiymətləndirmə strukturunun və "
+"sərbəst iş konfiqurasiyasının yeganə mənbəyi olur"
+msgstr ""
+"Onaylanan sürüm, haftalık konuların, değerlendirme yapısının ve bağımsız "
+"çalışma yapılandırmasının tek kaynağı olur"
 
 msgctxt "accounts.syllabus"
 msgid "Elektron jurnal bu versiyadan yaradılır və müəllim üçün açılır"
-msgstr "Elektronik yoklama defteri bu sürümden oluşturulur ve öğretim elemanına açılır"
+msgstr ""
+"Elektronik yoklama defteri bu sürümden oluşturulur ve öğretim elemanına "
+"açılır"
 
 msgctxt "accounts.syllabus"
 msgid "Tələbə kabinetində sillabus dərhal görünür"
@@ -36839,8 +36843,12 @@ msgid "Düzəliş üçün geri qaytarılsın?"
 msgstr "Düzeltme için iade edilsin mi?"
 
 msgctxt "accounts.syllabus"
-msgid "Sillabus müəllimə qaytarılır və «Düzəliş tələb olunur» statusuna keçir. Səbəb məcburidir — müəllim onu birbaşa redaktorda görəcək."
-msgstr "İzlence öğretim elemanına iade edilir ve «Düzeltme gerekli» durumuna geçer. Gerekçe zorunludur — öğretim elemanı bunu doğrudan düzenleyicide görecek."
+msgid ""
+"Sillabus müəllimə qaytarılır və «Düzəliş tələb olunur» statusuna keçir. "
+"Səbəb məcburidir — müəllim onu birbaşa redaktorda görəcək."
+msgstr ""
+"İzlence öğretim elemanına iade edilir ve «Düzeltme gerekli» durumuna geçer. "
+"Gerekçe zorunludur — öğretim elemanı bunu doğrudan düzenleyicide görecek."
 
 msgctxt "accounts.syllabus"
 msgid "Geri qaytar"
@@ -36867,8 +36875,12 @@ msgid "Sillabus rədd edilsin?"
 msgstr "İzlence reddedilsin mi?"
 
 msgctxt "accounts.syllabus"
-msgid "Rədd edilən versiya bağlanır və yenidən göndərilə bilmir — müəllim yeni versiya yaratmalıdır. Səbəb məcburidir və audit izinə yazılır."
-msgstr "Reddedilen sürüm kapanır ve yeniden gönderilemez — öğretim elemanı yeni sürüm oluşturmalıdır. Gerekçe zorunludur ve denetim izine yazılır."
+msgid ""
+"Rədd edilən versiya bağlanır və yenidən göndərilə bilmir — müəllim yeni "
+"versiya yaratmalıdır. Səbəb məcburidir və audit izinə yazılır."
+msgstr ""
+"Reddedilen sürüm kapanır ve yeniden gönderilemez — öğretim elemanı yeni "
+"sürüm oluşturmalıdır. Gerekçe zorunludur ve denetim izine yazılır."
 
 msgctxt "accounts.syllabus"
 msgid "Rədd et"
@@ -36936,65 +36948,81 @@ msgstr "%(name)s — %(version)s onaylandı ve kilitlendi."
 
 msgctxt "accounts.syllabus"
 msgid "%(name)s — düzəliş üçün geri qaytarıldı, müəllimə bildiriş göndərildi."
-msgstr "%(name)s — düzeltme için iade edildi, öğretim elemanı bilgilendirildi."
+msgstr ""
+"%(name)s — düzeltme için iade edildi, öğretim elemanı bilgilendirildi."
 
 msgctxt "accounts.syllabus"
-msgid "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
+msgid ""
+"%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı "
+"görür."
 msgstr "%(name)s — sürüm reddedildi. Öğrenciler önceki onaylı sürümü görüyor."
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Sillabus sənədi"
 msgstr "İzlence belgesi"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Semestr"
 msgstr "Dönem"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Versiya"
 msgstr "Sürüm"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Müəllif"
 msgstr "Yazar"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Təsdiqləyən"
 msgstr "Onaylayan"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Çap et"
 msgstr "Yazdır"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "PDF yüklə"
 msgstr "PDF indir"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
 msgid "Detallı bax"
 msgstr "Ayrıntılı görüntüle"
 
-#: apps/accounts/views/syllabus/detail_context.py apps/accounts/views/syllabus/rows.py
+#: apps/accounts/views/syllabus/detail_context.py
+#: apps/accounts/views/syllabus/rows.py
 #: apps/accounts/templates/accounts/syllabus/detail.html
 msgctxt "accounts.syllabus"
-msgid "Tələbələr yalnız təsdiqlənmiş versiyanı görür. Yeni versiya təsdiqlənənə qədər bu nüsxə qüvvədədir."
-msgstr "Öğrenciler yalnızca onaylanmış sürümü görür. Yeni sürüm onaylanana kadar bu nüsha geçerlidir."
+msgid ""
+"Tələbələr yalnız təsdiqlənmiş versiyanı görür. Yeni versiya təsdiqlənənə "
+"qədər bu nüsxə qüvvədədir."
+msgstr ""
+"Öğrenciler yalnızca onaylanmış sürümü görür. Yeni sürüm onaylanana kadar bu "
+"nüsha geçerlidir."
 
 msgctxt "accounts.people.analytics"
 msgid "Aktiv"
@@ -37117,8 +37145,12 @@ msgid "Statistika və analiz"
 msgstr "İstatistik ve analiz"
 
 msgctxt "accounts.people.analytics"
-msgid "Bütün göstəricilər və qrafiklər yuxarıdakı filtrə görə yenilənir — nə süzürsünüzsə, rəqəmlər onu göstərir."
-msgstr "Tüm göstergeler ve grafikler yukarıdaki filtreye göre güncellenir — rakamlar tam olarak süzdüğünüz kümeyi gösterir."
+msgid ""
+"Bütün göstəricilər və qrafiklər yuxarıdakı filtrə görə yenilənir — nə "
+"süzürsünüzsə, rəqəmlər onu göstərir."
+msgstr ""
+"Tüm göstergeler ve grafikler yukarıdaki filtreye göre güncellenir — rakamlar"
+" tam olarak süzdüğünüz kümeyi gösterir."
 
 msgctxt "accounts.people.analytics"
 msgid "Ümumi"
@@ -37193,8 +37225,14 @@ msgid "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazı
 msgstr "Analiz için düğmeye basın — sonuç birkaç saniyede hazırlanır."
 
 msgctxt "accounts.people.analytics"
-msgid "Süni intellekt yuxarıdakı AQREQAT rəqəmləri şərh edir. AI-a yalnız saylar və faizlər göndərilir — ad, e-poçt, telefon və FİN GÖNDƏRİLMİR. Eyni məlumat üçün cavab keşdən gəlir, limit sərf olunmur."
-msgstr "Yapay zekâ yukarıdaki TOPLU rakamları yorumlar. Yalnızca sayılar ve yüzdeler gönderilir — ad, e-posta, telefon ve kimlik numarası GÖNDERİLMEZ. Veri değişmediğinde yanıt önbellekten gelir ve limit harcanmaz."
+msgid ""
+"Süni intellekt yuxarıdakı AQREQAT rəqəmləri şərh edir. AI-a yalnız saylar və"
+" faizlər göndərilir — ad, e-poçt, telefon və FİN GÖNDƏRİLMİR. Eyni məlumat "
+"üçün cavab keşdən gəlir, limit sərf olunmur."
+msgstr ""
+"Yapay zekâ yukarıdaki TOPLU rakamları yorumlar. Yalnızca sayılar ve yüzdeler"
+" gönderilir — ad, e-posta, telefon ve kimlik numarası GÖNDERİLMEZ. Veri "
+"değişmediğinde yanıt önbellekten gelir ve limit harcanmaz."
 
 msgctxt "accounts.people.analytics"
 msgid "25–34 yaş"
@@ -37211,7 +37249,6 @@ msgstr "45–54 yaş arası"
 msgctxt "accounts.people.analytics"
 msgid "55–64 yaş"
 msgstr "55–64 yaş arası"
-
 
 #: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
@@ -37280,8 +37317,11 @@ msgstr "%(total)s üzerinden %(have)s"
 
 #: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
-msgid "%(kind)s saatı tədris planındakı %(expected)s saatla uyğun gəlmir (hazırda %(have)s)"
-msgstr "%(kind)s saati müfredattaki %(expected)s saatle uyuşmuyor (şu anda %(have)s)"
+msgid ""
+"%(kind)s saatı tədris planındakı %(expected)s saatla uyğun gəlmir (hazırda "
+"%(have)s)"
+msgstr ""
+"%(kind)s saati müfredattaki %(expected)s saatle uyuşmuyor (şu anda %(have)s)"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
@@ -37330,8 +37370,12 @@ msgstr "Arşivlendi — öğrenci notları korunuyor"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Arxivlənmiş mövzu tələbə kabinetində keçmiş semestr bölməsində görünməyə davam edir"
-msgstr "Arşivlenmiş konu öğrenci panelinde geçmiş dönem bölümünde görünmeye devam eder"
+msgid ""
+"Arxivlənmiş mövzu tələbə kabinetində keçmiş semestr bölməsində görünməyə "
+"davam edir"
+msgstr ""
+"Arşivlenmiş konu öğrenci panelinde geçmiş dönem bölümünde görünmeye devam "
+"eder"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
 msgctxt "accounts.syllabus"
@@ -37345,8 +37389,13 @@ msgstr "Arşive taşı"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Auditoriya saatlarının həftələr üzrə bölgüsü. Bu sətirlər təsdiqdən sonra e-jurnalda mövzu siyahısını yaradır — sonradan jurnaldan dəyişdirilə bilməz."
-msgstr "Ders saatlerinin haftalara göre dağılımı. Onaydan sonra bu satırlar e-not defterinde konu listesini oluşturur — daha sonra not defterinden değiştirilemez."
+msgid ""
+"Auditoriya saatlarının həftələr üzrə bölgüsü. Bu sətirlər təsdiqdən sonra "
+"e-jurnalda mövzu siyahısını yaradır — sonradan jurnaldan dəyişdirilə bilməz."
+msgstr ""
+"Ders saatlerinin haftalara göre dağılımı. Onaydan sonra bu satırlar e-not "
+"defterinde konu listesini oluşturur — daha sonra not defterinden "
+"değiştirilemez."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
@@ -37368,7 +37417,8 @@ msgctxt "accounts.syllabus"
 msgid "Bağla"
 msgstr "Kapat"
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
 msgid "Başqa versiya ilə konflikt yarandı"
 msgstr "Başka bir sürümle çakışma oluştu"
@@ -37380,8 +37430,14 @@ msgstr "Tek büyük bireysel çalışma — dönem projesi formatına uygundur."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
-msgid "Bir mövzu həm mühazirədə, həm seminarda (və ya laboratoriyada) keçilə bilər — mövzunun adı dəyişmir, sadəcə hər dərs növü üzrə saatı ayrıca yazılır. E-jurnalda həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır."
-msgstr "Bir konu hem derste hem seminerde (veya laboratuvarda) işlenebilir — konunun adı değişmez, yalnızca her ders türüne göre saat ayrı yazılır. E-not defterinde o konu her tür için ayrı bir ders satırı olarak açılır."
+msgid ""
+"Bir mövzu həm mühazirədə, həm seminarda (və ya laboratoriyada) keçilə bilər "
+"— mövzunun adı dəyişmir, sadəcə hər dərs növü üzrə saatı ayrıca yazılır. "
+"E-jurnalda həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır."
+msgstr ""
+"Bir konu hem derste hem seminerde (veya laboratuvarda) işlenebilir — konunun"
+" adı değişmez, yalnızca her ders türüne göre saat ayrı yazılır. E-not "
+"defterinde o konu her tür için ayrı bir ders satırı olarak açılır."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
 msgctxt "accounts.syllabus"
@@ -37390,18 +37446,27 @@ msgstr "Dersin temel amacı bir iki cümleyle."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
-msgid "Boş qaralama açılır və 10 bölmə doldurulmağa hazır olur. Tələbələrə yalnız təsdiqdən sonra görünəcək."
-msgstr "Boş bir taslak açılır ve 10 bölüm doldurulmaya hazır olur. Öğrencilere yalnızca onaydan sonra görünecektir."
+msgid ""
+"Boş qaralama açılır və 10 bölmə doldurulmağa hazır olur. Tələbələrə yalnız "
+"təsdiqdən sonra görünəcək."
+msgstr ""
+"Boş bir taslak açılır ve 10 bölüm doldurulmaya hazır olur. Öğrencilere "
+"yalnızca onaydan sonra görünecektir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
-msgid "Bu bölmə başqa sessiyada da dəyişdirilib, sizin dəyişikliklər göndərilmədi. Serverdəki variantı yükləyin və düzəlişi yenidən edin."
-msgstr "Bu bölüm başka bir oturumda da değiştirildi, değişiklikleriniz gönderilmedi. Sunucudaki sürümü yükleyin ve düzenlemeyi yeniden yapın."
+msgid ""
+"Bu bölmə başqa sessiyada da dəyişdirilib, sizin dəyişikliklər göndərilmədi. "
+"Serverdəki variantı yükləyin və düzəlişi yenidən edin."
+msgstr ""
+"Bu bölüm başka bir oturumda da değiştirildi, değişiklikleriniz gönderilmedi."
+" Sunucudaki sürümü yükleyin ve düzenlemeyi yeniden yapın."
 
 #: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
 msgid "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."
-msgstr "Bu bölüm başka bir oturumda değiştirildi — değişiklikler gönderilmedi."
+msgstr ""
+"Bu bölüm başka bir oturumda değiştirildi — değişiklikler gönderilmedi."
 
 #: apps/accounts/views/syllabus/section.py
 msgctxt "accounts.syllabus"
@@ -37435,8 +37500,12 @@ msgstr "Bu durum geçiş hattı için izinli değildir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Bu sərbəst iş tapşırığı üzrə tələbə qiymətləri mövcuddur. Silinmə mümkün deyil — mövzu arxivə köçürülür."
-msgstr "Bu bireysel çalışma ödevi için öğrenci notları mevcuttur. Silme mümkün değildir — konu arşive taşınır."
+msgid ""
+"Bu sərbəst iş tapşırığı üzrə tələbə qiymətləri mövcuddur. Silinmə mümkün "
+"deyil — mövzu arxivə köçürülür."
+msgstr ""
+"Bu bireysel çalışma ödevi için öğrenci notları mevcuttur. Silme mümkün "
+"değildir — konu arşive taşınır."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
@@ -37450,8 +37519,13 @@ msgstr "Bu sürüm onaylandı ve değiştirilemez — yeni bir sürüm oluşturu
 
 #: apps/accounts/views/syllabus/preview.py
 msgctxt "accounts.syllabus"
-msgid "Bu versiya təsdiqlənib və dəyişdirilə bilmir. Elektron jurnalın mövzu siyahısı, qiymətləndirmə strukturu və sərbəst iş konfiqurasiyası bu sənəddən götürülür."
-msgstr "Bu sürüm onaylandı ve değiştirilemez. E-not defterinin konu listesi, değerlendirme yapısı ve bireysel çalışma yapılandırması bu belgeden alınır."
+msgid ""
+"Bu versiya təsdiqlənib və dəyişdirilə bilmir. Elektron jurnalın mövzu "
+"siyahısı, qiymətləndirmə strukturu və sərbəst iş konfiqurasiyası bu sənəddən"
+" götürülür."
+msgstr ""
+"Bu sürüm onaylandı ve değiştirilemez. E-not defterinin konu listesi, "
+"değerlendirme yapısı ve bireysel çalışma yapılandırması bu belgeden alınır."
 
 #: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
@@ -37480,8 +37554,12 @@ msgstr "Tüm bölümler"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Bütün məcburi tələblər ödənildikdən sonra sillabus kafedra müdirinin növbəsinə düşür. Göndərildikdən sonra versiya kilidlənir."
-msgstr "Tüm zorunlu gereksinimler karşılandıktan sonra ders izlencesi bölüm başkanının kuyruğuna düşer. Gönderildikten sonra sürüm kilitlenir."
+msgid ""
+"Bütün məcburi tələblər ödənildikdən sonra sillabus kafedra müdirinin "
+"növbəsinə düşür. Göndərildikdən sonra versiya kilidlənir."
+msgstr ""
+"Tüm zorunlu gereksinimler karşılandıktan sonra ders izlencesi bölüm "
+"başkanının kuyruğuna düşer. Gönderildikten sonra sürüm kilitlenir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_aside.html
 msgctxt "accounts.syllabus"
@@ -37530,13 +37608,24 @@ msgstr "Devam"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
-msgid "Davamiyyət, sərbəst iş və yekun imtahan universitet siyasəti ilə kilidlidir. Yalnız qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür — cəm həmişə 100 qalır."
-msgstr "Devam, bireysel çalışma ve final sınavı üniversite politikasıyla kilitlidir. Yalnızca kalan 30 puan ara sınav ve dönem projesi arasında bölünür — toplam her zaman 100 kalır."
+msgid ""
+"Davamiyyət, sərbəst iş və yekun imtahan universitet siyasəti ilə kilidlidir."
+" Yalnız qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür — "
+"cəm həmişə 100 qalır."
+msgstr ""
+"Devam, bireysel çalışma ve final sınavı üniversite politikasıyla kilitlidir."
+" Yalnızca kalan 30 puan ara sınav ve dönem projesi arasında bölünür — toplam"
+" her zaman 100 kalır."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Davamiyyət, sərbəst iş və yekun imtahanın çəkisi universitet siyasəti ilə təyin edilib. Qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür."
-msgstr "Devam, bireysel çalışma ve final sınavının ağırlığı üniversite politikasıyla belirlenmiştir. Kalan 30 puan ara sınav ve dönem projesi arasında bölünür."
+msgid ""
+"Davamiyyət, sərbəst iş və yekun imtahanın çəkisi universitet siyasəti ilə "
+"təyin edilib. Qalan 30 bal aralıq imtahan və semestr layihəsi arasında "
+"bölünür."
+msgstr ""
+"Devam, bireysel çalışma ve final sınavının ağırlığı üniversite politikasıyla"
+" belirlenmiştir. Kalan 30 puan ara sınav ve dönem projesi arasında bölünür."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
@@ -37620,8 +37709,13 @@ msgstr "Dersin amacı en az %(min)s karakter olmalıdır (şu anda %(have)s)"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Fənnin pasport məlumatları tədris planından gəlir və kilidlidir. Siz yalnız dərsi aparan müəllim, məsləhət saatı və prerekvizit sətirlərini doldurursunuz."
-msgstr "Dersin pasaport bilgileri müfredattan gelir ve kilitlidir. Yalnızca dersi yürüten öğretim üyesi, danışma saati ve ön koşul alanlarını doldurursunuz."
+msgid ""
+"Fənnin pasport məlumatları tədris planından gəlir və kilidlidir. Siz yalnız "
+"dərsi aparan müəllim, məsləhət saatı və prerekvizit sətirlərini "
+"doldurursunuz."
+msgstr ""
+"Dersin pasaport bilgileri müfredattan gelir ve kilitlidir. Yalnızca dersi "
+"yürüten öğretim üyesi, danışma saati ve ön koşul alanlarını doldurursunuz."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
 msgctxt "accounts.syllabus"
@@ -37648,7 +37742,8 @@ msgctxt "accounts.syllabus"
 msgid "Geri qayıt"
 msgstr "Geri dön"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
+#: apps/accounts/views/syllabus/rows.py
 msgctxt "accounts.syllabus"
 msgid "Geri çağır"
 msgstr "Geri çek"
@@ -37665,8 +37760,12 @@ msgstr "Gönder"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır."
-msgstr "Gönderildikten sonra sürüm kilitlenir ve yalnızca «düzeltme talebi» geldiğinde yeniden açılır."
+msgid ""
+"Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə "
+"yenidən açılır."
+msgstr ""
+"Gönderildikten sonra sürüm kilitlenir ve yalnızca «düzeltme talebi» "
+"geldiğinde yeniden açılır."
 
 #: apps/accounts/views/syllabus/rows.py
 msgctxt "accounts.syllabus"
@@ -37675,8 +37774,12 @@ msgstr "Gönderilen sürümü görüntüle"
 
 #: apps/accounts/views/syllabus/preview.py
 msgctxt "accounts.syllabus"
-msgid "Göndərilmiş versiya baxış müddətində kilidlidir. Dəyişiklik lazımsa təqdimatı geri çağırın."
-msgstr "Gönderilen sürüm inceleme süresince kilitlidir. Değişiklik gerekiyorsa sunumu geri çağırın."
+msgid ""
+"Göndərilmiş versiya baxış müddətində kilidlidir. Dəyişiklik lazımsa "
+"təqdimatı geri çağırın."
+msgstr ""
+"Gönderilen sürüm inceleme süresince kilitlidir. Değişiklik gerekiyorsa "
+"sunumu geri çağırın."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
@@ -37695,13 +37798,22 @@ msgstr "Haftalık konular"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Həftəlik mövzular və qiymətləndirmə strukturu təsdiqdən sonra jurnalın mənbəyi olur"
-msgstr "Haftalık konular ve değerlendirme yapısı onaydan sonra not defterinin kaynağı olur"
+msgid ""
+"Həftəlik mövzular və qiymətləndirmə strukturu təsdiqdən sonra jurnalın "
+"mənbəyi olur"
+msgstr ""
+"Haftalık konular ve değerlendirme yapısı onaydan sonra not defterinin "
+"kaynağı olur"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
-msgid "Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir."
-msgstr "Haftalık konular, değerlendirme ağırlıkları veya bireysel çalışma yapısı değişir. Yalnızca gelecek dönemden itibaren geçerli olur — geçerli not defteri etkilenmez."
+msgid ""
+"Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu "
+"dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir."
+msgstr ""
+"Haftalık konular, değerlendirme ağırlıkları veya bireysel çalışma yapısı "
+"değişir. Yalnızca gelecek dönemden itibaren geçerli olur — geçerli not "
+"defteri etkilenmez."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
@@ -37710,7 +37822,8 @@ msgstr "Haftanın konusu"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
-msgid "Hər dərs növünün saatı tədris planındakı bölgü ilə ayrıca uyğunlaşmalıdır."
+msgid ""
+"Hər dərs növünün saatı tədris planındakı bölgü ilə ayrıca uyğunlaşmalıdır."
 msgstr "Her ders türünün saati müfredattaki dağılımla ayrı ayrı uyuşmalıdır."
 
 #: apps/accounts/views/syllabus/editor.py
@@ -37720,8 +37833,12 @@ msgstr "Her hafta küçük bir ödev — sürekli çalışma gerektirir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
 msgctxt "accounts.syllabus"
-msgid "Hər həftəlik mövzu ən azı bir təlim nəticəsi ilə əlaqələndirilməlidir. Heç bir həftədə istifadə olunmayan nəticə plana daxil edilməyib sayılır."
-msgstr "Her haftalık konu en az bir öğrenme çıktısıyla ilişkilendirilmelidir. Hiçbir haftada kullanılmayan çıktı plana dahil edilmemiş sayılır."
+msgid ""
+"Hər həftəlik mövzu ən azı bir təlim nəticəsi ilə əlaqələndirilməlidir. Heç "
+"bir həftədə istifadə olunmayan nəticə plana daxil edilməyib sayılır."
+msgstr ""
+"Her haftalık konu en az bir öğrenme çıktısıyla ilişkilendirilmelidir. Hiçbir"
+" haftada kullanılmayan çıktı plana dahil edilmemiş sayılır."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
 msgctxt "accounts.syllabus"
@@ -37730,8 +37847,10 @@ msgstr "Her satırda bir kaynak: yazar, ad, yayın yılı."
 
 #: apps/accounts/views/syllabus/preview.py
 msgctxt "accounts.syllabus"
-msgid "Kafedra müdiri düzəliş tələb edib. Qeydləri nəzərə alıb yenidən göndərin."
-msgstr "Bölüm başkanı düzeltme talep etti. Notları dikkate alarak yeniden gönderin."
+msgid ""
+"Kafedra müdiri düzəliş tələb edib. Qeydləri nəzərə alıb yenidən göndərin."
+msgstr ""
+"Bölüm başkanı düzeltme talep etti. Notları dikkate alarak yeniden gönderin."
 
 #: apps/accounts/views/syllabus/preview.py
 msgctxt "accounts.syllabus"
@@ -37770,8 +37889,13 @@ msgstr "Geçen yılın ders izlencesinden aktarılsın mı?"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
 msgctxt "accounts.syllabus"
-msgid "Kilidli sətirlər tədris planı və yük bölgüsündən gəlir. Dəyişiklik lazımdırsa kafedra müdirinə müraciət göndərin — sillabusdan redaktə edilə bilmir."
-msgstr "Kilitli satırlar müfredat ve yük dağılımından gelir. Değişiklik gerekiyorsa bölüm başkanına başvuru gönderin — ders izlencesinden düzenlenemez."
+msgid ""
+"Kilidli sətirlər tədris planı və yük bölgüsündən gəlir. Dəyişiklik "
+"lazımdırsa kafedra müdirinə müraciət göndərin — sillabusdan redaktə edilə "
+"bilmir."
+msgstr ""
+"Kilitli satırlar müfredat ve yük dağılımından gelir. Değişiklik gerekiyorsa "
+"bölüm başkanına başvuru gönderin — ders izlencesinden düzenlenemez."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
@@ -37788,15 +37912,20 @@ msgctxt "accounts.syllabus"
 msgid "Köçür və qaralama aç"
 msgstr "Aktar ve taslağı aç"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/labels.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
 msgid "Laboratoriya"
 msgstr "Laboratuvar"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
 msgctxt "accounts.syllabus"
-msgid "Marşrut: kafedra müdiri → təsdiq. Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır."
-msgstr "Rota: bölüm başkanı → onay. Gönderildikten sonra sürüm kilitlenir ve yalnızca «düzeltme talebi» geldiğinde yeniden açılır."
+msgid ""
+"Marşrut: kafedra müdiri → təsdiq. Göndərildikdən sonra versiya kilidlənir və"
+" yalnız «düzəliş tələbi» gəldikdə yenidən açılır."
+msgstr ""
+"Rota: bölüm başkanı → onay. Gönderildikten sonra sürüm kilitlenir ve "
+"yalnızca «düzeltme talebi» geldiğinde yeniden açılır."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
@@ -37818,7 +37947,8 @@ msgctxt "accounts.syllabus"
 msgid "Mövzunu arxivləşdirmək istəyirsiniz?"
 msgstr "Bu konuyu arşivlemek istiyor musunuz?"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/labels.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
 msgid "Mühazirə"
 msgstr "Teorik ders"
@@ -37850,8 +37980,12 @@ msgstr "Örneğin: ara sınav tarihi değişti, konu planını güncelliyorum."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
-msgid "Məsələn: laboratoriya işləri kiçik qruplarda, kod baxışı peer review formatında aparılır."
-msgstr "Örneğin: laboratuvar çalışmaları küçük gruplarda, kod incelemesi akran değerlendirmesi (peer review) formatında yapılır."
+msgid ""
+"Məsələn: laboratoriya işləri kiçik qruplarda, kod baxışı peer review "
+"formatında aparılır."
+msgstr ""
+"Örneğin: laboratuvar çalışmaları küçük gruplarda, kod incelemesi akran "
+"değerlendirmesi (peer review) formatında yapılır."
 
 #: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
 msgctxt "accounts.syllabus"
@@ -37868,7 +38002,8 @@ msgctxt "accounts.syllabus"
 msgid "Növbədə"
 msgstr "Kuyrukta"
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
 msgctxt "accounts.syllabus"
 msgid "Növbəti"
 msgstr "Sonraki"
@@ -37950,8 +38085,14 @@ msgstr "Gruplar"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
-msgid "Redaktə davam edir, dəyişikliklər cihazda növbəyə alınır. Bağlantı qayıtdıqdan sonra avtomatik göndərilir; təsdiqə göndərmə isə yalnız onlayn mümkündür."
-msgstr "Düzenleme devam ediyor, değişiklikler cihazda kuyruğa alınıyor. Bağlantı geri geldiğinde otomatik olarak gönderilecek; onaya gönderme ise yalnızca çevrimiçiyken mümkündür."
+msgid ""
+"Redaktə davam edir, dəyişikliklər cihazda növbəyə alınır. Bağlantı "
+"qayıtdıqdan sonra avtomatik göndərilir; təsdiqə göndərmə isə yalnız onlayn "
+"mümkündür."
+msgstr ""
+"Düzenleme devam ediyor, değişiklikler cihazda kuyruğa alınıyor. Bağlantı "
+"geri geldiğinde otomatik olarak gönderilecek; onaya gönderme ise yalnızca "
+"çevrimiçiyken mümkündür."
 
 #: apps/accounts/views/syllabus/rows.py
 msgctxt "accounts.syllabus"
@@ -37968,7 +38109,8 @@ msgctxt "accounts.syllabus"
 msgid "Saatlar tədris planı ilə növ üzrə üst-üstə düşür."
 msgstr "Saatler müfredatla tür bazında örtüşür."
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/views/syllabus/api.py
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/views/syllabus/api.py
 msgctxt "accounts.syllabus"
 msgid "Saxlanıldı"
 msgstr "Kaydedildi"
@@ -37993,15 +38135,20 @@ msgctxt "accounts.syllabus"
 msgid "Semestr layihəsi"
 msgstr "Dönem projesi"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/labels.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
 msgid "Seminar"
 msgstr "Seminer"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
-msgid "Server cavab vermədi. Mətn brauzerdə saxlanılıb — bağlantı bərpa olunanda avtomatik göndərilir."
-msgstr "Sunucu yanıt vermedi. Metin tarayıcıda kaydedildi — bağlantı geri geldiğinde otomatik olarak gönderilecek."
+msgid ""
+"Server cavab vermədi. Mətn brauzerdə saxlanılıb — bağlantı bərpa olunanda "
+"avtomatik göndərilir."
+msgstr ""
+"Sunucu yanıt vermedi. Metin tarayıcıda kaydedildi — bağlantı geri geldiğinde"
+" otomatik olarak gönderilecek."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
@@ -38010,8 +38157,10 @@ msgstr "Sunucudaki sürümü yükle"
 
 #: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
 msgctxt "accounts.syllabus"
-msgid "Seçilmiş akademik il, semestr və status kombinasiyasında qeyd tapılmadı."
-msgstr "Seçilen akademik yıl, dönem ve durum kombinasyonunda kayıt bulunamadı."
+msgid ""
+"Seçilmiş akademik il, semestr və status kombinasiyasında qeyd tapılmadı."
+msgstr ""
+"Seçilen akademik yıl, dönem ve durum kombinasyonunda kayıt bulunamadı."
 
 #: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
@@ -38035,8 +38184,12 @@ msgstr "Ders izlencesi bölüm başkanının onay kuyruğuna gönderildi."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
-msgid "Sillabus kafedra növbəsindən çıxarılır və yenidən qaralama statusuna qayıdır. Kafedra müdirinə bildiriş göndərilir."
-msgstr "Ders izlencesi bölüm kuyruğundan çıkarılır ve yeniden taslak durumuna döner. Bölüm başkanına bildirim gönderilir."
+msgid ""
+"Sillabus kafedra növbəsindən çıxarılır və yenidən qaralama statusuna "
+"qayıdır. Kafedra müdirinə bildiriş göndərilir."
+msgstr ""
+"Ders izlencesi bölüm kuyruğundan çıkarılır ve yeniden taslak durumuna döner."
+" Bölüm başkanına bildirim gönderilir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
@@ -38050,8 +38203,12 @@ msgstr "Ders izlencesi düzenleyicisi"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
-msgid "Sillabus server tərəfində yenilənib. Redaktəyə davam etməzdən əvvəl səhifəni yeniləyin — əks halda dəyişikliklər itə bilər."
-msgstr "Ders izlencesi sunucu tarafında güncellendi. Düzenlemeye devam etmeden önce sayfayı yenileyin — aksi takdirde değişiklikler kaybolabilir."
+msgid ""
+"Sillabus server tərəfində yenilənib. Redaktəyə davam etməzdən əvvəl səhifəni"
+" yeniləyin — əks halda dəyişikliklər itə bilər."
+msgstr ""
+"Ders izlencesi sunucu tarafında güncellendi. Düzenlemeye devam etmeden önce "
+"sayfayı yenileyin — aksi takdirde değişiklikler kaybolabilir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
 msgctxt "accounts.syllabus"
@@ -38083,7 +38240,8 @@ msgctxt "accounts.syllabus"
 msgid "Sillabus yoxdur"
 msgstr "Ders izlencesi yok"
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
 msgctxt "accounts.syllabus"
 msgid "Sillabuslar"
 msgstr "Ders izlenceleri"
@@ -38110,20 +38268,26 @@ msgstr "Bu işlem ders izlencesinin geçerli durumunda mümkün değildir."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Sillabusun yekun görünüşü. Bu görünüş tələbə kabinetində və kafedra baxışında eynidir."
-msgstr "Ders izlencesinin son görünümü. Bu görünüm öğrenci panelinde ve bölüm incelemesinde aynıdır."
+msgid ""
+"Sillabusun yekun görünüşü. Bu görünüş tələbə kabinetində və kafedra "
+"baxışında eynidir."
+msgstr ""
+"Ders izlencesinin son görünümü. Bu görünüm öğrenci panelinde ve bölüm "
+"incelemesinde aynıdır."
 
 #: apps/accounts/views/syllabus/rows.py
 msgctxt "accounts.syllabus"
 msgid "Sistem / köçürmə"
 msgstr "Sistem / aktarım"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_cards.html apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_cards.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_table.html
 msgctxt "accounts.syllabus"
 msgid "Son dəyişiklik"
 msgstr "Son değişiklik"
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
 msgid "Son dəyişiklik saxlanılmadı"
 msgstr "Son değişiklik kaydedilmedi"
@@ -38150,8 +38314,11 @@ msgstr "Yapı"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Struktur dəyişikliyi qiymətlənmiş tapşırığa təsir edir — əvvəlcə onu arxivləyin."
-msgstr "Yapısal değişiklik notlandırılmış bir ödevi etkiliyor — önce onu arşivleyin."
+msgid ""
+"Struktur dəyişikliyi qiymətlənmiş tapşırığa təsir edir — əvvəlcə onu "
+"arxivləyin."
+msgstr ""
+"Yapısal değişiklik notlandırılmış bir ödevi etkiliyor — önce onu arşivleyin."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
@@ -38168,7 +38335,8 @@ msgctxt "accounts.syllabus"
 msgid "Səbəbə bax"
 msgstr "Nedene bak"
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
 msgid "Səhifədəki məlumat köhnəlmişdir"
 msgstr "Sayfadaki veriler eskidi"
@@ -38178,15 +38346,20 @@ msgctxt "accounts.syllabus"
 msgid "Səhifələmə"
 msgstr "Sayfalama"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/editor.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
 msgid "Sərbəst iş"
 msgstr "Serbest çalışma"
 
 #: apps/accounts/views/syllabus/labels.py
 msgctxt "accounts.syllabus"
-msgid "Sərbəst iş mövzularının sayı seçilmiş struktura uyğun deyil (%(have)s / %(need)s)"
-msgstr "Bireysel çalışma konularının sayısı seçilen yapıya uygun değil (%(have)s / %(need)s)"
+msgid ""
+"Sərbəst iş mövzularının sayı seçilmiş struktura uyğun deyil (%(have)s / "
+"%(need)s)"
+msgstr ""
+"Bireysel çalışma konularının sayısı seçilen yapıya uygun değil (%(have)s / "
+"%(need)s)"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
@@ -38205,8 +38378,13 @@ msgstr "Bireysel çalışma ödevinin konusu"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
 msgctxt "accounts.syllabus"
-msgid "Sərbəst işin ümumi maksimum balı universitet siyasəti ilə %(total)s bal təyin edilib. Müəllim yalnız balın necə bölünəcəyini seçir."
-msgstr "Bireysel çalışmanın toplam maksimum puanı üniversite politikasıyla %(total)s puan olarak belirlenmiştir. Öğretim üyesi yalnızca puanın nasıl bölüneceğini seçer."
+msgid ""
+"Sərbəst işin ümumi maksimum balı universitet siyasəti ilə %(total)s bal "
+"təyin edilib. Müəllim yalnız balın necə bölünəcəyini seçir."
+msgstr ""
+"Bireysel çalışmanın toplam maksimum puanı üniversite politikasıyla %(total)s"
+" puan olarak belirlenmiştir. Öğretim üyesi yalnızca puanın nasıl "
+"bölüneceğini seçer."
 
 #: apps/accounts/views/syllabus/section.py
 msgctxt "accounts.syllabus"
@@ -38238,7 +38416,8 @@ msgctxt "accounts.syllabus"
 msgid "Təlim nəticələri"
 msgstr "Öğrenme çıktıları"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html apps/accounts/views/syllabus/editor.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
 msgid "Təlim nəticəsi"
 msgstr "Öğrenme çıktısı"
@@ -38250,8 +38429,12 @@ msgstr "Öğrenme çıktısı ekle"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Tələbə fənni bitirəndə nə bacaracaq. Ən azı 3 nəticə tələb olunur, hər biri həftəlik plandan ən azı bir mövzu ilə əlaqələndirilməlidir."
-msgstr "Öğrenci dersi bitirdiğinde neler yapabilecek. En az 3 çıktı gereklidir, her biri haftalık plandan en az bir konuyla ilişkilendirilmelidir."
+msgid ""
+"Tələbə fənni bitirəndə nə bacaracaq. Ən azı 3 nəticə tələb olunur, hər biri "
+"həftəlik plandan ən azı bir mövzu ilə əlaqələndirilməlidir."
+msgstr ""
+"Öğrenci dersi bitirdiğinde neler yapabilecek. En az 3 çıktı gereklidir, her "
+"biri haftalık plandan en az bir konuyla ilişkilendirilmelidir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
 msgctxt "accounts.syllabus"
@@ -38275,7 +38458,9 @@ msgstr "Sunum geri çağrılsın mı?"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Təsdiq gözlənilən müddətdə cari təsdiqlənmiş versiya tələbələr üçün aktiv qalır"
+msgid ""
+"Təsdiq gözlənilən müddətdə cari təsdiqlənmiş versiya tələbələr üçün aktiv "
+"qalır"
 msgstr "Onay beklenirken geçerli onaylanmış sürüm öğrenciler için etkin kalır"
 
 #: apps/accounts/views/syllabus/section.py
@@ -38290,13 +38475,23 @@ msgstr "Onaylandı"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
-msgid "Təsdiqlənmiş sillabus jurnalın mənbəyidir, ona görə redaktə bağlıdır. Dəyişiklik üçün yeni versiya yaradın — mövcud jurnal və qiymətlər olduğu kimi qalır."
-msgstr "Onaylanmış ders izlencesi not defterinin kaynağıdır, bu nedenle düzenleme kapalıdır. Değişiklik için yeni bir sürüm oluşturun — mevcut not defteri ve notlar olduğu gibi kalır."
+msgid ""
+"Təsdiqlənmiş sillabus jurnalın mənbəyidir, ona görə redaktə bağlıdır. "
+"Dəyişiklik üçün yeni versiya yaradın — mövcud jurnal və qiymətlər olduğu "
+"kimi qalır."
+msgstr ""
+"Onaylanmış ders izlencesi not defterinin kaynağıdır, bu nedenle düzenleme "
+"kapalıdır. Değişiklik için yeni bir sürüm oluşturun — mevcut not defteri ve "
+"notlar olduğu gibi kalır."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
-msgid "Təsdiqlənmiş versiya olduğu kimi qalır və tələbələr onu görməyə davam edir. Yeni versiya qaralama kimi açılır, təsdiqlənəndən sonra aktiv olur."
-msgstr "Onaylanmış sürüm olduğu gibi kalır ve öğrenciler onu görmeye devam eder. Yeni sürüm taslak olarak açılır, onaylandıktan sonra etkin hale gelir."
+msgid ""
+"Təsdiqlənmiş versiya olduğu kimi qalır və tələbələr onu görməyə davam edir. "
+"Yeni versiya qaralama kimi açılır, təsdiqlənəndən sonra aktiv olur."
+msgstr ""
+"Onaylanmış sürüm olduğu gibi kalır ve öğrenciler onu görmeye devam eder. "
+"Yeni sürüm taslak olarak açılır, onaylandıktan sonra etkin hale gelir."
 
 #: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
 msgctxt "accounts.syllabus"
@@ -38310,8 +38505,12 @@ msgstr "Onaya gönderme"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Təsvir tələbənin fənn seçimi zamanı gördüyü mətndir. Məqsəd bölməsi kafedra baxışında ilk oxunan hissədir."
-msgstr "Tanım, öğrencinin ders seçimi sırasında gördüğü metindir. Amaç bölümü, bölüm incelemesinde ilk okunan kısımdır."
+msgid ""
+"Təsvir tələbənin fənn seçimi zamanı gördüyü mətndir. Məqsəd bölməsi kafedra "
+"baxışında ilk oxunan hissədir."
+msgstr ""
+"Tanım, öğrencinin ders seçimi sırasında gördüğü metindir. Amaç bölümü, bölüm"
+" incelemesinde ilk okunan kısımdır."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
@@ -38330,8 +38529,12 @@ msgstr "Üniversite politikasına uygun değil — toplamı 15 puan tutuyor."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Universitetin icazə verdiyi üç struktur var və hər birinin cəmi 10 baldır. Struktur seçildikdən sonra mövzular həmin sayda daxil edilir."
-msgstr "Üniversitenin izin verdiği üç yapı vardır ve her birinin toplamı 10 puandır. Yapı seçildikten sonra konular bu sayıda girilir."
+msgid ""
+"Universitetin icazə verdiyi üç struktur var və hər birinin cəmi 10 baldır. "
+"Struktur seçildikdən sonra mövzular həmin sayda daxil edilir."
+msgstr ""
+"Üniversitenin izin verdiği üç yapı vardır ve her birinin toplamı 10 puandır."
+" Yapı seçildikten sonra konular bu sayıda girilir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
@@ -38358,17 +38561,25 @@ msgctxt "accounts.syllabus"
 msgid "Versiya rədd edilib. Səbəbi oxuyub yeni versiya yaradın."
 msgstr "Sürüm reddedildi. Nedeni okuyup yeni bir sürüm oluşturun."
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_drawer.html apps/accounts/views/syllabus/rows.py
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_drawer.html
+#: apps/accounts/views/syllabus/rows.py
 msgctxt "accounts.syllabus"
 msgid "Versiya tarixçəsi"
 msgstr "Sürüm geçmişi"
 
 #: apps/accounts/templates/accounts/profile/sections/_syllabus_list.html
 msgctxt "accounts.syllabus"
-msgid "Yalnız sizə təyin olunmuş fənlər üzrə sillabus yaradırsınız. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş lazımsa yeni versiya açılır, jurnal və qiymətlər olduğu kimi qalır."
-msgstr "Yalnızca size atanmış dersler için ders izlencesi oluşturursunuz. Onaylanmış sürüm değiştirilemez — düzeltme gerekiyorsa yeni bir sürüm açılır, not defteri ve notlar olduğu gibi kalır."
+msgid ""
+"Yalnız sizə təyin olunmuş fənlər üzrə sillabus yaradırsınız. Təsdiqlənmiş "
+"versiya dəyişdirilmir — düzəliş lazımsa yeni versiya açılır, jurnal və "
+"qiymətlər olduğu kimi qalır."
+msgstr ""
+"Yalnızca size atanmış dersler için ders izlencesi oluşturursunuz. Onaylanmış"
+" sürüm değiştirilemez — düzeltme gerekiyorsa yeni bir sürüm açılır, not "
+"defteri ve notlar olduğu gibi kalır."
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/views/syllabus/editor.py
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
 msgid "Yekun görünüş"
 msgstr "Son görünüm"
@@ -38393,7 +38604,8 @@ msgctxt "accounts.syllabus"
 msgid "Yeni versiya yarat"
 msgstr "Yeni sürüm oluştur"
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
 msgid "Yenidən cəhd et"
 msgstr "Yeniden dene"
@@ -38473,7 +38685,9 @@ msgctxt "accounts.syllabus"
 msgid "sərbəst iş mövzusu"
 msgstr "bireysel çalışma konusu"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
 msgid "tamamlanıb"
 msgstr "tamamlandı"
@@ -38493,7 +38707,8 @@ msgctxt "accounts.syllabus"
 msgid "yoxdur"
 msgstr "yok"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
 msgid "yoxlama bölməsi"
 msgstr "inceleme bölümü"
@@ -38505,7 +38720,8 @@ msgstr "Eksik gereksinimler"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html
 msgctxt "accounts.syllabus"
-msgid "Çatışmayan tələblər var — «Təsdiqə göndərmə» bölməsindəki siyahıya baxın."
+msgid ""
+"Çatışmayan tələblər var — «Təsdiqə göndərmə» bölməsindəki siyahıya baxın."
 msgstr "Eksik gereksinimler var — «Onaya gönderme» bölümündeki listeye bakın."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
@@ -38518,7 +38734,9 @@ msgctxt "accounts.syllabus"
 msgid "Ümumi məlumat"
 msgstr "Genel bilgi"
 
-#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_basics.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
 msgid "çatışan tələblər var"
 msgstr "eksik gereksinimler var"
@@ -38535,10 +38753,13 @@ msgstr "Yıl / dönem"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html
 msgctxt "accounts.syllabus"
-msgid "İmtahanlar auditoriya saatına daxil edilmir — onlar semestr cədvəlindən gəlir."
+msgid ""
+"İmtahanlar auditoriya saatına daxil edilmir — onlar semestr cədvəlindən "
+"gəlir."
 msgstr "Sınavlar ders saatine dahil edilmez — onlar dönem programından gelir."
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_banners.html
 msgctxt "accounts.syllabus"
 msgid "İnternet bağlantısı yoxdur"
 msgstr "İnternet bağlantısı yok"
@@ -38555,8 +38776,12 @@ msgstr "Kaynakça"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
-msgid "Ədəbiyyat, məsləhət saatı, mövzu adının redaktəsi. Jurnal strukturu dəyişmir, cari semestrə tətbiq olunur."
-msgstr "Kaynakça, danışma saati, konu adının düzenlenmesi. Not defteri yapısı değişmez, geçerli döneme uygulanır."
+msgid ""
+"Ədəbiyyat, məsləhət saatı, mövzu adının redaktəsi. Jurnal strukturu "
+"dəyişmir, cari semestrə tətbiq olunur."
+msgstr ""
+"Kaynakça, danışma saati, konu adının düzenlenmesi. Not defteri yapısı "
+"değişmez, geçerli döneme uygulanır."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html
 msgctxt "accounts.syllabus"
@@ -38610,8 +38835,12 @@ msgstr "En az 3 öğrenme çıktısı gereklidir — silme mümkün değildir."
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_list_dialogs.html
 msgctxt "accounts.syllabus"
-msgid "Ən son təsdiqlənmiş versiya mənbə kimi istifadə olunacaq. Nəticə yalnız QARALAMA olur — avtomatik təsdiqlənmir və tələbələrə görünmür."
-msgstr "Kaynak olarak en son onaylanan sürüm kullanılacaktır. Sonuç yalnızca TASLAK olur — otomatik olarak onaylanmaz ve öğrencilere görünmez."
+msgid ""
+"Ən son təsdiqlənmiş versiya mənbə kimi istifadə olunacaq. Nəticə yalnız "
+"QARALAMA olur — avtomatik təsdiqlənmir və tələbələrə görünmür."
+msgstr ""
+"Kaynak olarak en son onaylanan sürüm kullanılacaktır. Sonuç yalnızca TASLAK "
+"olur — otomatik olarak onaylanmaz ve öğrencilere görünmez."
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
@@ -38630,14 +38859,15 @@ msgstr "Ana kaynakçada en az %(min)s kaynak olmalıdır (şu anda %(have)s)"
 
 #: apps/accounts/views/syllabus/editor.py
 msgctxt "accounts.syllabus"
-msgid "Əsas ədəbiyyatda ən azı 2, əlavə ədəbiyyatda ən azı 1 mənbə göstərilməlidir."
+msgid ""
+"Əsas ədəbiyyatda ən azı 2, əlavə ədəbiyyatda ən azı 1 mənbə göstərilməlidir."
 msgstr "Ana kaynakçada en az 2, ek kaynakçada en az 1 kaynak belirtilmelidir."
 
-#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
+#: apps/accounts/templates/accounts/profile/sections/_syllabus_editor.html
+#: apps/accounts/templates/accounts/profile/sections/syllabus/_list_pager.html
 msgctxt "accounts.syllabus"
 msgid "Əvvəlki"
 msgstr "Önceki"
-
 
 #: apps/organizations/permissions.py
 msgctxt "organizations.permission.label"
@@ -38943,3 +39173,60 @@ msgstr "Kişisel bilgileri düzenleme"
 msgctxt "organizations.permission.label"
 msgid "İmtiyazlı (administrator) səlahiyyət vermək"
 msgstr "Ayrıcalıklı (yönetici) yetki verme"
+
+#: apps/accounts/views/profile/_sections/labels.py:114
+msgctxt "profile.sidebar"
+msgid "Sillabuslar"
+msgstr "Ders izlenceleri"
+
+#~ msgctxt "profile.subjects"
+#~ msgid "Buraxılmır"
+#~ msgstr "Giremez"
+
+#~ msgctxt "profile.subjects"
+#~ msgid "Keçir"
+#~ msgstr "Geçer"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Colloquium"
+#~ msgstr "Kolokyum"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Attendance"
+#~ msgstr "Devam"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Final exam"
+#~ msgstr "Final sınavı"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Other"
+#~ msgstr "Diğer"
+
+#~ msgctxt "registrar.model.component.meta"
+#~ msgid "grade component"
+#~ msgstr "not bileşeni"
+
+#~ msgctxt "registrar.model.component.meta"
+#~ msgid "grade components"
+#~ msgstr "not bileşenleri"
+
+#~ msgctxt "registrar.model.score.meta"
+#~ msgid "component score"
+#~ msgstr "bileşen puanı"
+
+#~ msgctxt "registrar.model.score.meta"
+#~ msgid "component scores"
+#~ msgstr "bileşen puanları"
+
+#~ msgctxt "registrar.journal"
+#~ msgid "Keçid"
+#~ msgstr "Geçiş"
+
+#~ msgctxt "registrar.journal"
+#~ msgid "Buraxılmır"
+#~ msgstr "Giremez"
+
+#~ msgctxt "registrar.journal"
+#~ msgid "Keçir"
+#~ msgstr "Geçer"
