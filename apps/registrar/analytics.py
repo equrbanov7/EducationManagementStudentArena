@@ -20,7 +20,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import finals
+from apps.registrar import finals, gradebook
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -164,7 +164,8 @@ def _evaluate(enrollment, maps):
     # Kollokvium + sərbəst iş həmişə üstəgəl (gradebook.entry_score_for güzgüsü).
     raw_entry += maps["kollokvium_sums"].get(enrollment.id, Decimal("0"))
     raw_entry += maps["selfwork_sums"].get(enrollment.id, Decimal("0"))
-    entry = min(raw_entry, Decimal(entry_max))
+    # Giriş balı tam ədəddir (gradebook.entry_score_for güzgüsü — round_score).
+    entry = gradebook.round_score(min(raw_entry, Decimal(entry_max)))
 
     exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
     resit = maps["resits"].get(enrollment.id)
@@ -179,6 +180,8 @@ def _evaluate(enrollment, maps):
     graded = effective is not None
     total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))
     total = max(Decimal("0"), min(Decimal("100"), total))  # compute_final_result güzgüsü (U15)
+    # Yekun tam ədəddir — hərf/keçid yuvarlaqlaşdırılmış total-dan (finals güzgüsü).
+    total = gradebook.round_score(total)
     letter, gpa = finals.score_to_letter(total, maps.get("organization"))
     exam_ok = graded and effective >= min_exam
     passed = graded and not barred and total >= pass_threshold and exam_ok

@@ -13,7 +13,9 @@ və həmin açılışın HƏR yazılışına bir ``ComponentScore`` yazır.  Də
 ``rehearsal_journal_entry_scores_source`` tərəfindən hesablanır (orada tam
 əsaslandırma var): tarixi ``girish`` mənbədən (``yekun``) və ya legacy
 düsturundan gəlir, komponentə isə onun kollokviumla İZAH OLUNMAYAN qalığı
-yazılır — çünki ``entry_score_for`` kollokviumu HƏMİŞƏ üstəgəl edir.
+yazılır — çünki ``entry_score_for`` kollokviumu HƏMİŞƏ üstəgəl edir.  Qalıq
+yazılmazdan əvvəl YARIM-YUXARI tam ədədə yuvarlaqlaşdırılır (sahibin qaydası,
+2026-08-30: qiymətlər tam ədəddir; bax ``round_half_up`` əsaslandırması).
 
 Nə etmir
 --------
