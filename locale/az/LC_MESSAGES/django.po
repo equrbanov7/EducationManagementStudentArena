@@ -35653,3 +35653,63 @@ msgstr "Bank yalnız sizə görünür — şəxsi istifadəniz üçündür."
 msgctxt "exams.template.question_bank_list"
 msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
 msgstr "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə yekun cədvəli"
+msgstr "Köhnə yekun cədvəli"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan xanası"
+msgstr "Köhnə imtahan xanası"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə təkrar imtahan xanası"
+msgstr "Köhnə təkrar imtahan xanası"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan giriş/çıxış cəhdi"
+msgstr "Köhnə imtahan giriş/çıxış cəhdi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemin xüsusi bal kodu"
+msgstr "Köhnə sistemin xüsusi bal kodu"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən təsdiqlənib"
+msgstr "İmtahan Mərkəzi tərəfindən təsdiqlənib"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən mübahisələndirilib"
+msgstr "İmtahan Mərkəzi tərəfindən mübahisələndirilib"
+
+msgctxt "registrar.legacy_grade"
+msgid "Düzəliş tələb olunur"
+msgstr "Düzəliş tələb olunur"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla uyğunlaşdırılıb"
+msgstr "Qeydiyyatla uyğunlaşdırılıb"
+
+msgctxt "registrar.legacy_grade"
+msgid "Tarixi qrup uyğunsuzluğu var"
+msgstr "Tarixi qrup uyğunsuzluğu var"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemdə silinmiş jurnal mənbəyidir"
+msgstr "Köhnə sistemdə silinmiş jurnal mənbəyidir"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla avtomatik uyğunlaşdırılmayıb"
+msgstr "Qeydiyyatla avtomatik uyğunlaşdırılmayıb"
+
+msgctxt "registrar.legacy_grade"
+msgid "Mənbə sətirləri arasında ziddiyyət var"
+msgstr "Mənbə sətirləri arasında ziddiyyət var"
+
+msgctxt "registrar.legacy_grade"
+msgid "Uyğunlaşdırma yoxlanmalıdır"
+msgstr "Uyğunlaşdırma yoxlanmalıdır"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzinin yoxlaması gözlənilir"
+msgstr "İmtahan Mərkəzinin yoxlaması gözlənilir"

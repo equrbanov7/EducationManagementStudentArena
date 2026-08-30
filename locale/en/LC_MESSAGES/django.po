@@ -35801,3 +35801,63 @@ msgstr "The bank is visible only to you — for your personal use."
 msgctxt "exams.template.question_bank_list"
 msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
 msgstr "The bank is not visible to other teachers — only you and the exam centre can see it."
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə yekun cədvəli"
+msgstr "Legacy final results table"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan xanası"
+msgstr "Legacy exam cell"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə təkrar imtahan xanası"
+msgstr "Legacy resit cell"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan giriş/çıxış cəhdi"
+msgstr "Legacy exam entry/exit attempt"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemin xüsusi bal kodu"
+msgstr "Legacy system's special score code"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən təsdiqlənib"
+msgstr "Verified by the Examination Centre"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən mübahisələndirilib"
+msgstr "Disputed by the Examination Centre"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla uyğunlaşdırılıb"
+msgstr "Matched to the enrolment"
+
+msgctxt "registrar.legacy_grade"
+msgid "Tarixi qrup uyğunsuzluğu var"
+msgstr "Historical group mismatch"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemdə silinmiş jurnal mənbəyidir"
+msgstr "Source journal was deleted in the legacy system"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla avtomatik uyğunlaşdırılmayıb"
+msgstr "Not matched to an enrolment automatically"
+
+msgctxt "registrar.legacy_grade"
+msgid "Mənbə sətirləri arasında ziddiyyət var"
+msgstr "Source rows contradict each other"
+
+msgctxt "registrar.legacy_grade"
+msgid "Uyğunlaşdırma yoxlanmalıdır"
+msgstr "Matching needs review"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzinin yoxlaması gözlənilir"
+msgstr "Awaiting Examination Centre review"
+
+msgctxt "registrar.legacy_grade"
+msgid "Düzəliş tələb olunur"
+msgstr "Correction required"

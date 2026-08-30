@@ -222,7 +222,7 @@
 }
 
 .result-legacy-grade__summary:focus-visible {
-    outline: 3px solid var(--ems-primary-300);
+    outline: 3px solid var(--ems-primary-600);
     outline-offset: -3px;
 }
 
