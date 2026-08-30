@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 db_index=True,
-                help_text="Rəsmi dövlət ixtisas şifri (məs. 050405). UNİKAL DEYİL — bir neçə proqram eyni şifri paylaşa bilər.",
+                help_text="Rəsmi dövlət ixtisas kodu (məs. 060209) — istifadəçiyə göstərilən koddur. Unikal DEYİL: bir kod bir neçə proqrama (magistr istiqamətləri, AZ/EN bölmələri, əyani/qiyabi formalar) aid ola bilər.",
                 max_length=32,
             ),
         ),
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
             model_name="program",
             name="code",
             field=models.CharField(
-                help_text="DAXİLİ identifikator (tenant daxilində unikal). Köçürmə xətti bundan asılıdır — əl ilə dəyişməyin.",
+                help_text="Daxili sabit identifikator (tenant daxilində unikal) — istifadəçiyə göstərilmir.",
                 max_length=32,
             ),
         ),
