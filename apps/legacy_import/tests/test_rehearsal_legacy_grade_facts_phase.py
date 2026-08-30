@@ -38,11 +38,15 @@ PHASE_KEYS = (
 
 @pytest.fixture()
 def actor(db, django_user_model):
-    return django_user_model.objects.create_superuser(
+    user = django_user_model.objects.create_superuser(
         username="legacy_grade_fact_actor",
         email="legacy-grade-fact@example.test",
         password="test-only",
     )
+    yield user
+    # ``set_rls_user(..., local=False)`` sessiya GUC-udur: transaksiya geri
+    # qayıtsa da qoşulmada qalır, ona görə hər testdən sonra təmizlənir.
+    harness.clear_import_actor()
 
 
 def _run(actor, slug, rows, *, seed=True):
@@ -56,6 +60,8 @@ def _run(actor, slug, rows, *, seed=True):
     set_rls_user(actor.pk, local=False)
     org = harness.organization(actor, slug)
     run = harness.running_run(org, actor, table_plan=harness.plan(rows))
+    # Faza orkestratordan yan keçərək çağırılır → DB icazə kontekstini əl ilə qur.
+    harness.authorize_import_actor(org, actor)
     if seed:
         harness.seed_journal_target(org, actor, run.pk)
     context = harness.context(
@@ -233,6 +239,125 @@ def test_every_exam_entry_exit_attempt_keeps_source_pk_type_date_and_raw_scores(
         ("imthngrscxsblr:101", "legacy_grade_fact_out_of_range"): "warning",
         ("imthngrscxsblr:103", "legacy_grade_fact_unresolved"): "warning",
     }
+
+
+def test_an_attempt_matching_two_journals_is_never_guessed_into_one(actor):
+    """``imthngrscxsblr`` jurnal açarı daşımır → çoxmənalı cütü BAĞLAMA.
+
+    ``attempt_enrollment_candidates``-dakı ``len(journals) != 1`` qapısı
+    «uydurma yoxdur» qaydasının daşıyıcısıdır: eyni (tələbə, fənn) iki jurnala
+    düşürsə heç biri seçilmir.  Qapı silinsə ixtiyari ``journals[0]`` seçilər və
+    fakt SƏHV qeydiyyata bağlanardı.
+    """
+
+    # Nəzarət halı: TƏK jurnal → cəhd qeydiyyata bağlanır.
+    single = harness.tables(
+        journals=[harness.journal_row(2, harness.UNIQID)],
+        exam_attempts=[harness.exam_attempt_row(101, entry=10, exit=20)],
+    )
+    single_org, _single_run, _single_report, _single_ctx = _run(actor, "grade-facts-attempt-single", single)
+    linked = _facts(single_org).get(source_table="imthngrscxsblr", source_pk=101)
+    assert linked.mapping_status == "linked"
+    assert linked.enrollment_id is not None
+
+    # Çoxmənalı hal: eyni tələbə + eyni ``lesson_id`` İKİ jurnalda.
+    ambiguous = harness.tables(
+        journals=[
+            harness.journal_row(2, harness.UNIQID),
+            harness.journal_row(3, harness.OTHER_UNIQID),
+        ],
+        exam_attempts=[harness.exam_attempt_row(101, entry=10, exit=20)],
+    )
+    org, run, report, _context = _run(actor, "grade-facts-attempt-ambiguous", ambiguous)
+
+    fact = _facts(org).get(source_table="imthngrscxsblr", source_pk=101)
+    # Xam sübut hər halda saxlanılır — itirilən yalnız TƏXMİNdir.
+    assert dict(report.state_counts) == {"legacy_grade_facts_materialised": 1}
+    assert fact.mapping_status == "unresolved"
+    assert fact.enrollment_id is None
+    assert fact.source_enrollment_ref == ""
+    assert fact.source_journal_ref == ""
+    # Bal-diapazonu təmizdir; yeganə issue həll oluna bilməməkdir.
+    assert _issues(run) == {("imthngrscxsblr:101", "legacy_grade_fact_unresolved"): "warning"}
+
+
+def test_a_group_mismatched_pair_is_never_linked_even_when_enrollment_exists(actor):
+    """Enrollments fazasının ``group_mismatch`` izi bağlanmanı BLOKLAYIR.
+
+    Qeydiyyat möhürü MÖVCUDDUR (``seed_journal_target`` onu yazır), yəni
+    ``_mapping``-dəki ``key in mismatches`` qapısı silinsə status ``linked``
+    olardı.  Bal yad qrupun jurnalından gəldiyi üçün fail-closed davranış
+    tələb olunur.
+    """
+
+    rows = harness.tables(
+        yekun=[
+            harness.yekun_row(20, student_id=harness.STUDENT_A, girish=30.0, imtahanda=40.0, yekun=70.0),
+            harness.yekun_row(21, student_id=harness.STUDENT_B, girish=25.0, imtahanda=35.0, yekun=60.0),
+        ]
+    )
+    org = harness.organization(actor, "grade-facts-group-mismatch")
+    run = harness.running_run(org, actor, table_plan=harness.plan(rows))
+    harness.authorize_import_actor(org, actor)
+    harness.seed_journal_target(org, actor, run.pk)
+    # Yalnız STUDENT_A yad qrupdadır; STUDENT_B nəzarət sətridir.
+    harness.seed_group_mismatch(run.pk, actor, student_id=harness.STUDENT_A)
+    context = harness.context(
+        rows_by_table=rows,
+        run=run,
+        organization=org,
+        actor=actor,
+        phase_keys=PHASE_KEYS,
+    )
+
+    LegacyGradeFactsPhase().run(context)
+
+    mismatched = _facts(org).get(source_table="yekun", source_pk=20)
+    assert mismatched.mapping_status == "group_mismatch"
+    assert mismatched.mapping_issue_code == "legacy_grade_fact_group_mismatch"
+    assert mismatched.enrollment_id is None
+    # Xam ballar toxunulmaz qalır — itirilən yalnız hədəf bağlantısıdır.
+    assert (mismatched.entry_score_text, mismatched.final_score_text) == ("30.0", "70.0")
+
+    control = _facts(org).get(source_table="yekun", source_pk=21)
+    assert control.mapping_status == "linked"
+    assert control.enrollment_id is not None
+
+    assert _issues(run)[("yekun:20", "legacy_grade_fact_group_mismatch")] == "warning"
+
+
+def test_exam_and_final_score_ranges_are_checked_independently_of_entry(actor):
+    """``_score_range_rules``-un ÜÇ şərti də ayrıca sınanmalıdır.
+
+    Üç şərt bir ``legacy_grade_fact_out_of_range`` koduna qatlandığı üçün
+    yalnız ``entry`` pozulan fixture-lar ``exam``/``final`` terminlərinin
+    silinməsini görmür.  Aşağıdakı sətirlərin HƏR BİRİNDƏ ``entry`` etibarlıdır.
+    """
+
+    rows = harness.tables(
+        yekun=[
+            # Yalnız ``imtahanda`` (exam) pozulub: 60 > 50.  girish/yekun normal.
+            harness.yekun_row(30, student_id=harness.STUDENT_A, girish=10.0, imtahanda=60.0, yekun=70.0),
+            # Yalnız ``yekun`` (final) pozulub: 150 > 100.  girish/imtahanda normal.
+            harness.yekun_row(31, student_id=harness.STUDENT_B, girish=10.0, imtahanda=20.0, yekun=150.0),
+        ],
+        # Yalnız çıxış balı pozulan cəhd (``final`` termini burada ``None``-dur).
+        exam_attempts=[harness.exam_attempt_row(101, entry=10, exit=60)],
+    )
+
+    org, run, _report, _context = _run(actor, "grade-facts-range-terms", rows)
+
+    exam_only = _facts(org).get(source_table="yekun", source_pk=30)
+    final_only = _facts(org).get(source_table="yekun", source_pk=31)
+    # Hər ikisi qeydiyyata bağlanır — pozuntu yalnız diapazon qeydidir.
+    assert (exam_only.mapping_status, final_only.mapping_status) == ("linked", "linked")
+    assert (exam_only.entry_score, exam_only.exam_score) == (Decimal("10.0000"), Decimal("60.0000"))
+    assert final_only.final_score == Decimal("150.0000")
+
+    issues = _issues(run)
+    assert issues[("yekun:30", "legacy_grade_fact_out_of_range")] == "warning"
+    assert issues[("yekun:31", "legacy_grade_fact_out_of_range")] == "warning"
+    assert issues[("imthngrscxsblr:101", "legacy_grade_fact_out_of_range")] == "warning"
 
 
 def test_an_unmapped_source_fact_is_still_materialised(actor):

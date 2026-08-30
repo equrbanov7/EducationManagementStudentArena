@@ -27,11 +27,15 @@ PHASE_KEYS = (LEGACY_GRADE_FACTS_PHASE_KEY, LEGACY_GRADE_ARTIFACTS_PHASE_KEY)
 
 @pytest.fixture()
 def actor(db, django_user_model):
-    return django_user_model.objects.create_superuser(
+    user = django_user_model.objects.create_superuser(
         username="legacy_grade_artifact_actor",
         email="legacy-grade-artifact@example.test",
         password="test-only",
     )
+    yield user
+    # ``set_rls_user(..., local=False)`` sessiya GUC-udur: transaksiya geri
+    # qayıtsa da qoşulmada qalır, ona görə hər testdən sonra təmizlənir.
+    harness.clear_import_actor()
 
 
 def _run(actor, slug, rows):
@@ -45,6 +49,8 @@ def _run(actor, slug, rows):
     set_rls_user(actor.pk, local=False)
     org = harness.organization(actor, slug)
     run = harness.running_run(org, actor, table_plan=harness.plan(rows))
+    # Faza orkestratordan yan keçərək çağırılır → DB icazə kontekstini əl ilə qur.
+    harness.authorize_import_actor(org, actor)
     context = harness.context(
         rows_by_table=rows,
         run=run,
