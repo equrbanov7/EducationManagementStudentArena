@@ -21,7 +21,11 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
   <p class="syl-hintbox">{% trans "Bir mövzu həm mühazirədə, həm seminarda (və ya laboratoriyada) keçilə bilər — mövzunun adı dəyişmir, sadəcə hər dərs növü üzrə saatı ayrıca yazılır. E-jurnalda həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır." context "accounts.syllabus" %}</p>
 
   <div class="syl-hours syl-hours--{% if se.hours.ok %}ok{% else %}warn{% endif %}" data-syl-hours>
-    <span class="syl-hours__note">
+    {% comment %}Hər iki mətn `data-*`-da saxlanılır ki, saat dəyişəndə JS onu
+    server sorğusu gözləmədən dəyişə bilsin (xarici .js-də mətn yazılmır).{% endcomment %}
+    <span class="syl-hours__note" data-syl-hours-note
+          data-t-ok="{% trans 'Saatlar tədris planı ilə növ üzrə üst-üstə düşür.' context 'accounts.syllabus' %}"
+          data-t-warn="{% trans 'Hər dərs növünün saatı tədris planındakı bölgü ilə ayrıca uyğunlaşmalıdır.' context 'accounts.syllabus' %}">
       {% if se.hours.ok %}{% trans "Saatlar tədris planı ilə növ üzrə üst-üstə düşür." context "accounts.syllabus" %}
       {% else %}{% trans "Hər dərs növünün saatı tədris planındakı bölgü ilə ayrıca uyğunlaşmalıdır." context "accounts.syllabus" %}{% endif %}
     </span>

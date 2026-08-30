@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-teach">
     <link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
 {% endblock %}
 
 {% block content %}
@@ -57,6 +58,8 @@
         {% trans "Jurnal bağlanıb — semestr yekunlaşıb, redaktə mümkün deyil. Düzəliş lazımdırsa RİM-ə (sənədli düzəliş) müraciət edin." context "registrar.journal_close" %}
     </div>
     {% endif %}
+
+    {% include "registrar/partials/_jd_syllabus_notice.html" %}
 
 
     {% if journal.rows %}
@@ -117,6 +120,16 @@
                    title="{% trans 'Jurnalı Excel (xlsx) olaraq yüklə' context 'registrar.journal' %}">
                     <i class="fas fa-file-excel"></i> {% trans "Export" context "registrar.journal" %}
                 </a>
+                {% if syllabus_notice.can_open %}
+                {% comment %}Oxu-rejimli panel — jurnaldan çıxmadan sillabusa baxış.{% endcomment %}
+                <button type="button" class="sylv-open-btn"
+                        data-sylv-open="{% url 'registrar:offering_syllabus_json' offering.id %}"
+                        title="{% trans 'Fənnin sillabusunu oxu-rejimində aç' context 'registrar.syllabus' %}">
+                    <i class="fas fa-file-lines" aria-hidden="true"></i>
+                    {% trans "Sillabusa bax" context "registrar.syllabus" %}
+                    {% if syllabus_notice.version_label %}<span class="sylv-open-btn__ver">{{ syllabus_notice.version_label }}</span>{% endif %}
+                </button>
+                {% endif %}
             </div>
         </nav>
 
@@ -222,10 +235,12 @@
         </div>
     </div>
 </div>
+{% if syllabus_notice.can_open %}{% include "registrar/partials/_syllabus_drawer.html" %}{% endif %}
 {% endblock %}
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
+    <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20260830-syl1"></script>
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20260827-room"></script>
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260827-room"></script>

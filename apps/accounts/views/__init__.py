@@ -119,7 +119,13 @@ from .superadmin import (
 )
 
 # Sillabus — müəllim səthi (siyahı + redaktor) profil bölməsi kimi açılır
-from .syllabus import syllabus_action, syllabus_preview, syllabus_section_save
+from .syllabus import (
+    syllabus_action,
+    syllabus_decision,
+    syllabus_preview,
+    syllabus_review_open,
+    syllabus_section_save,
+)
 
 __all__ = [
     # Authentication
@@ -191,7 +197,9 @@ __all__ = [
     "rim_action",
     # Sillabus — müəllim səthi (autosave / əməllər / baxış paneli)
     "syllabus_action",
+    "syllabus_decision",
     "syllabus_preview",
+    "syllabus_review_open",
     "syllabus_section_save",
     # Post management
     "superadmin_post_management",

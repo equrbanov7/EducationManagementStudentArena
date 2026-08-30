@@ -404,9 +404,32 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             "selfwork_pct": _pct(Decimal(selfwork_total)),
         },
         "journal": journal_row["journal"] if journal_row else None,
+        # «Sillabusa bax» + «PDF yüklə» düymələri — YALNIZ təsdiqlənmiş versiya
+        # varsa (bax `_student_syllabus_available`).
+        "syllabus_available": _student_syllabus_available(offering),
     }
     section["corrections_map"] = corr_map
     return {"journal_student_section": section}
+
+
+def _student_syllabus_available(offering) -> bool:
+    """Bu açılış üçün tələbənin görə biləcəyi TƏSDİQLƏNMİŞ sillabus varmı.
+
+    ⚠️ Tələbə yalnız ``APPROVED`` versiyanı görür: müəllim yeni versiya
+    göndəribsə, o təsdiqlənənə qədər ƏVVƏLKİ təsdiqlənmiş nüsxə qüvvədə qalır.
+    Endpoint (``registrar:offering_syllabus_json``) eyni qaydanı fail-closed
+    təkrar yoxlayır — bu bayraq yalnız düyməni gizlətmək üçündür.
+    """
+    from apps.syllabus import services as syllabus_services
+
+    syllabus = syllabus_services.syllabus_for_offering(
+        organization=offering.organization,
+        offering_id=offering.id,
+        subject_id=offering.subject_id,
+        period_id=offering.period_id,
+        instructor_id=offering.instructor_id,
+    )
+    return syllabus_services.approved_version_for(syllabus) is not None
 
 
 def _empty_section() -> dict:

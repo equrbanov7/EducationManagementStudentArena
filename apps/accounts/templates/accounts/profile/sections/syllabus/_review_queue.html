@@ -1,0 +1,126 @@
+{% load i18n %}
+{% comment %}
+Təsdiq NÖVBƏSİ tabı (dizayn §3.3): 4 KPI · filtr paneli · cədvəl · səhifələmə.
+
+Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə gövdəsi üfüqi sürüşmür.
+Birinci sütun `th scope="row"`, başlıqlar `th scope="col"` (§6 a11y).
+{% endcomment %}
+<div class="syl-kpis syl-kpis--4">
+  {% for kpi in sr.kpis %}
+  <div class="syl-kpi syl-kpi--static syl-kpi--{{ kpi.tone }}">
+    <span class="syl-kpi__label">{{ kpi.label }}</span>
+    <span class="syl-kpi__value">{{ kpi.value }}</span>
+    <span class="syl-kpi__note">{{ kpi.note }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="syl-filters">
+  <div class="syl-filters__row">
+    <div class="syl-field syl-field--search">
+      <label for="syl-rv-q">{% trans "Axtarış" context "accounts.syllabus" %}</label>
+      <input id="syl-rv-q" type="search" class="syl-input" value="{{ sr.filters.q }}"
+             data-syl-search
+             placeholder="{% trans 'Fənn, kod və ya müəllim' context 'accounts.syllabus' %}">
+    </div>
+    <div class="syl-field">
+      <label for="syl-rv-status">{% trans "Status" context "accounts.syllabus" %}</label>
+      <select id="syl-rv-status" class="syl-select" data-syl-filter="status">
+        {% for option in sr.filter_options.statuses %}
+        <option value="{{ option.key }}" {% if option.active %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="syl-field">
+      <label for="syl-rv-unit">{{ sr.filter_options.unit_label }}</label>
+      <select id="syl-rv-unit" class="syl-select" data-syl-filter="unit">
+        {% for option in sr.filter_options.units %}
+        <option value="{{ option.key }}" {% if option.active %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="syl-field">
+      <label for="syl-rv-year">{% trans "Akademik il" context "accounts.syllabus" %}</label>
+      <select id="syl-rv-year" class="syl-select" data-syl-filter="year">
+        {% for option in sr.filter_options.years %}
+        <option value="{{ option.key }}" {% if option.key == sr.filters.year %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="syl-field">
+      <label for="syl-rv-sort">{% trans "Sıralama" context "accounts.syllabus" %}</label>
+      <select id="syl-rv-sort" class="syl-select" data-syl-filter="sort">
+        {% for option in sr.filter_options.sorts %}
+        <option value="{{ option.key }}" {% if option.key == sr.filters.sort %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="button" class="syl-btn syl-btn--ghost" data-syl-reset>{% trans "Filtrləri sıfırla" context "accounts.syllabus" %}</button>
+  </div>
+</div>
+
+{% if sr.empty %}
+  <div class="syl-empty">
+    <i class="fas fa-circle-check syl-empty__icon syl-empty__icon--ok" aria-hidden="true"></i>
+    <p class="syl-empty__title">{% trans "Təsdiq növbəsi boşdur" context "accounts.syllabus" %}</p>
+    <p class="syl-empty__body">{% trans "Seçilmiş filtrə uyğun gözləyən sillabus yoxdur. Ümumi vəziyyəti «Əhatə və analitika» tabından izləyə bilərsiniz." context "accounts.syllabus" %}</p>
+    <button type="button" class="syl-btn syl-btn--secondary" data-syl-tab="coverage">{% trans "Əhatəyə keç" context "accounts.syllabus" %}</button>
+  </div>
+{% else %}
+<div class="syl-tablewrap">
+  <div class="syl-tablescroll">
+    <table class="syl-table syl-table--queue">
+      <caption class="sr-only">{% trans "Təsdiq növbəsi" context "accounts.syllabus" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% trans "Fənn və proqram" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Müəllim" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Təqdim / gözləmə" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Tamamlanma" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Risk" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Status" context "accounts.syllabus" %}</th>
+          <th scope="col"><span class="sr-only">{% trans "Əməllər" context "accounts.syllabus" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in sr.rows %}
+        <tr>
+          <th scope="row" class="syl-cell-subject">
+            <span class="syl-code">{{ row.code }}</span>
+            <span class="syl-name">{{ row.name }}</span>
+            <span class="syl-meta">{{ row.program }}</span>
+          </th>
+          <td>
+            <span class="syl-person">{{ row.teacher }}</span>
+            <span class="syl-meta">{{ row.chair }}</span>
+          </td>
+          <td class="syl-cell-wait">
+            <span class="syl-sent">{% if row.sent %}{{ row.sent|date:"d.m.Y, H:i" }}{% else %}—{% endif %}</span>
+            <span class="syl-wait syl-wait--{{ row.wait_tone }}">{{ row.wait_text }}</span>
+          </td>
+          <td class="syl-cell-progress">
+            <span class="syl-bar syl-bar--{{ row.percent_tone }}">
+              <span class="syl-bar__fill" data-syl-percent="{{ row.percent }}"></span>
+            </span>
+            <span class="syl-bar__value syl-bar__value--{{ row.percent_tone }}">{{ row.percent }}%</span>
+            <span class="syl-meta">{{ row.version_label }} · {{ row.active_version }}</span>
+          </td>
+          <td class="syl-cell-risks">
+            {% for risk in row.risks %}
+            <span class="syl-risk syl-risk--{{ risk.tone }}">{{ risk.label }}</span>
+            {% endfor %}
+          </td>
+          <td><span class="syl-badge syl-badge--{{ row.status_tone }}">{{ row.status_label }}</span></td>
+          <td class="syl-cell-actions">
+            <button type="button" class="syl-btn syl-btn--primary syl-btn--sm"
+                    data-syl-open="{{ row.version_id }}"
+                    data-name="{{ row.name }}">{% trans "Baxışa keç" context "accounts.syllabus" %}</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "accounts/profile/sections/syllabus/_list_pager.html" with page=sr.page %}
+</div>
+{% endif %}

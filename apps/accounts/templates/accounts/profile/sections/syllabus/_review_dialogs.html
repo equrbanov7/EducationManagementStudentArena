@@ -1,0 +1,44 @@
+{% load i18n %}
+{% comment %}
+QƏRAR dialoqları (dizayn §3.3) — bir çərçivə, üç konfiqurasiya.
+
+⚠️ SƏBƏB MƏCBURİDİR (README §4): «Düzəliş üçün geri qaytar» və «Rədd et» üçün
+təsdiq düyməsi 20 simvoldan qısa səbəbdə DEAKTİVDİR. Bu, yalnız rahatlıq
+qatıdır — həqiqi qapı serverdədir (`review_api.MIN_DECISION_REASON`,
+`state_machine.check`) və DB `CheckConstraint`-lərindədir.
+{% endcomment %}
+<div class="syl-modal" data-syl-modal hidden>
+  <div class="syl-modal__backdrop" data-syl-modal-close></div>
+  <div class="syl-modal__box" role="dialog" aria-modal="true" aria-labelledby="syl-rv-dlg-title" tabindex="-1">
+    <div class="syl-modal__head">
+      <div class="syl-modal__headrow">
+        <span class="syl-modal__icon" data-syl-modal-icon aria-hidden="true"></span>
+        <div>
+          <h3 id="syl-rv-dlg-title" data-syl-modal-title></h3>
+          <p class="syl-modal__body" data-syl-modal-body></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="syl-modal__secs" data-syl-modal-secs hidden>
+      <p class="syl-modal__legend" id="syl-rv-secs-legend">{% trans "Düzəliş tələb olunan bölmələr" context "accounts.syllabus" %}</p>
+      <div class="syl-secchips" role="group" aria-labelledby="syl-rv-secs-legend" data-syl-modal-secs-list></div>
+    </div>
+
+    <div class="syl-modal__reason" data-syl-modal-reason hidden>
+      <label for="syl-rv-reason">
+        <span data-syl-modal-reason-label></span> <span class="syl-req" aria-hidden="true">*</span>
+      </label>
+      <textarea id="syl-rv-reason" rows="4" data-syl-reason
+                aria-describedby="syl-rv-reason-note" required></textarea>
+      <p class="syl-modal__note" id="syl-rv-reason-note" data-syl-reason-note></p>
+    </div>
+
+    <ul class="syl-modal__lines" data-syl-modal-lines hidden></ul>
+
+    <div class="syl-modal__foot">
+      <button type="button" class="syl-btn syl-btn--secondary" data-syl-modal-close>{% trans "Ləğv et" context "accounts.syllabus" %}</button>
+      <button type="button" class="syl-btn syl-btn--primary" data-syl-modal-confirm></button>
+    </div>
+  </div>
+</div>

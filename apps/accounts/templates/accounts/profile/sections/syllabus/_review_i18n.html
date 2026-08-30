@@ -1,0 +1,12 @@
+{% comment %}
+Təsdiq ekranının DİNAMİK mətnləri — JSON blokları.
+
+Xarici `.js` Django template engine-dən keçmir, ona görə dialoq başlıqları,
+düymə etiketləri və validasiya mətnləri BURADAN ötürülür (CLAUDE.md: dinamik
+dəyər data-atribut və ya `json_script` ilə verilir, koda «bişirilmir»).
+
+`json_script` `<script type="application/json">` yazır — CSP `script-src`
+baxımından təhlükəsizdir (icra olunan kod deyil) və mətni avtomatik escape edir.
+{% endcomment %}
+{{ sr.dialogs|json_script:"syl-review-dialogs" }}
+{{ sr.texts|json_script:"syl-review-texts" }}

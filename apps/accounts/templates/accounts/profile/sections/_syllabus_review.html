@@ -1,0 +1,82 @@
+{% load i18n %}
+{% comment %}
+«Kafedra müdiri — Sillabus təsdiqi» (dizayn təhvili §3.3).
+
+Ekran profil shell-inin İÇİNDƏ açılır — SOL SIDEBAR QALIR. Bütün mətnlər
+`{% trans %}` ilə, rənglər `syllabus_review.css`-dəki `--ems-*` tokenləri ilə
+gəlir (inline stil YOXDUR — CSP `style-src` `unsafe-inline` vermir).
+
+Context müqaviləsi: apps/accounts/views/syllabus/review.py
+Davranış: accounts/js/profile/syllabus_review.js (+ ..._panel.js)
+{% endcomment %}
+{% if 'syllabus-review' in allowed_sections %}
+{% with sr=syllabus_review_section %}
+<section class="profile-section-panel profile-section--syllabus {% if active_section == 'syllabus-review' %}is-active{% endif %}"
+         data-profile-section-panel="syllabus-review"
+         data-source-url="{{ profile_base_url }}?section=syllabus-review">
+
+  {% if not sr.has_access %}
+    <div class="syl-empty syl-empty--denied">
+      <i class="fas fa-lock syl-empty__icon" aria-hidden="true"></i>
+      <p class="syl-empty__title">{{ sr.access_denied_message }}</p>
+    </div>
+  {% elif not sr.has_scope %}
+    {% comment %}README §3.3 `noscope`: əhatə yoxdursa BÜTÜN org açılmır.{% endcomment %}
+    <div class="syl-empty syl-noscope">
+      <span class="syl-noscope__icon" aria-hidden="true"><i class="fas fa-circle-exclamation"></i></span>
+      <p class="syl-empty__title">{{ sr.noscope.title }}</p>
+      <p class="syl-empty__body syl-noscope__body">{{ sr.noscope.body }}</p>
+      <p class="syl-note">{{ sr.noscope.hint }}</p>
+    </div>
+  {% else %}
+  <div class="syl"
+       data-syllabus-review
+       data-profile-url="{{ profile_base_url }}"
+       data-open-url="{{ sr.urls.open }}"
+       data-decision-url="{{ sr.urls.decision }}"
+       data-tab="{{ sr.tab }}">
+
+    {% include "accounts/profile/sections/syllabus/_review_i18n.html" %}
+
+    <div class="syl-identity">
+      <i class="fas fa-clipboard-check syl-identity__icon" aria-hidden="true"></i>
+      <span class="syl-identity__panel">{{ sr.identity.panel }}</span>
+      <span class="syl-identity__dot" aria-hidden="true">·</span>
+      <span class="syl-identity__person">{{ sr.identity.person }}</span>
+      <span class="syl-identity__tail">
+        <span class="syl-chip-static syl-chip-static--primary">{{ sr.identity.role }}</span>
+        <span class="syl-chip-static">{{ sr.identity.scope }}</span>
+      </span>
+    </div>
+
+    <header class="syl-head syl-head--row">
+      <div class="syl-head__text">
+        <h2 class="syl-head__title">{% trans "Sillabus təsdiqi" context "accounts.syllabus" %}</h2>
+        <p class="syl-head__lead">{{ sr.intro }}</p>
+      </div>
+      <div class="syl-tabs" role="group" aria-label="{% trans 'Görünüş' context 'accounts.syllabus' %}">
+        <button type="button" class="syl-tabs__btn{% if sr.tab == 'queue' %} is-on{% endif %}"
+                data-syl-tab="queue" aria-current="{% if sr.tab == 'queue' %}page{% else %}false{% endif %}">{% trans "Təsdiq növbəsi" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-tabs__btn{% if sr.tab == 'coverage' %} is-on{% endif %}"
+                data-syl-tab="coverage" aria-current="{% if sr.tab == 'coverage' %}page{% else %}false{% endif %}">{% trans "Əhatə və analitika" context "accounts.syllabus" %}</button>
+      </div>
+    </header>
+
+    {% if sr.tab == 'queue' %}
+      {% include "accounts/profile/sections/syllabus/_review_queue.html" with sr=sr %}
+    {% else %}
+      {% include "accounts/profile/sections/syllabus/_review_coverage.html" with sr=sr %}
+    {% endif %}
+
+    {% include "accounts/profile/sections/syllabus/_review_panel.html" with sr=sr %}
+    {% include "accounts/profile/sections/syllabus/_review_dialogs.html" %}
+
+    <div class="syl-toast" data-syl-toast role="status" aria-live="polite" hidden>
+      <i class="fas fa-circle-check syl-toast__icon" aria-hidden="true"></i>
+      <span data-syl-toast-text></span>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endwith %}
+{% endif %}

@@ -25,6 +25,17 @@
     color: var(--ems-text);
 }
 
+/* ⚠️ `hidden` ATRIBUTU class-dan ZƏİFDİR.
+   Brauzerin öz stili `[hidden]{display:none}`-dur, amma `.syl-btn{display:flex}`
+   ondan spesifikdir — nəticədə JS `node.hidden = true` yazsa da element EKRANDA
+   QALIR. Məhz belə olmuşdu: autosave «saxlanıldı» olduğu halda başlıqdakı
+   «Yenidən cəhd et» düyməsi görünürdü.
+   Ona görə bölmə daxilində `hidden` QƏTİ gizlədir; hər komponent üçün ayrıca
+   `.x[hidden]` qaydası yazmağa ehtiyac qalmır. */
+.syl [hidden] {
+    display: none !important;
+}
+
 .syl .sr-only {
     position: absolute;
     width: 1px;
@@ -460,169 +471,4 @@
 
 .syl-toast__icon {
     color: var(--ems-success);
-}
-
-/* ── Dialoq ───────────────────────────────────────────────────────────── */
-.syl-modal[hidden],
-.syl-drawer[hidden] {
-    display: none;
-}
-
-.syl-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    display: grid;
-    place-items: center;
-    padding: 20px;
-}
-
-.syl-modal__backdrop,
-.syl-drawer__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-}
-
-.syl-modal__box {
-    position: relative;
-    width: 100%;
-    max-width: 540px;
-    background: var(--ems-bg);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
-}
-
-.syl-modal__head {
-    padding: 18px 20px 14px;
-}
-
-.syl-modal__head h3 {
-    margin: 0;
-    font-size: 1.02rem;
-    font-weight: 800;
-}
-
-.syl-modal__body {
-    margin: 6px 0 0;
-    font-size: 0.83rem;
-    line-height: 1.6;
-    color: var(--ems-text-muted);
-}
-
-.syl-modal__picks,
-.syl-modal__reason {
-    padding: 0 20px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.syl-modal__picks[hidden],
-.syl-modal__reason[hidden],
-.syl-modal__lines[hidden] {
-    display: none;
-}
-
-.syl-modal__lines {
-    margin: 0 20px 14px;
-    padding: 12px 14px 12px 32px;
-    background: var(--ems-bg-subtle);
-    border: 1px solid var(--ems-border);
-    border-radius: 11px;
-    font-size: 0.8rem;
-    line-height: 1.7;
-    color: var(--ems-neutral-700);
-}
-
-.syl-modal__reason label {
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--ems-neutral-400);
-}
-
-.syl-modal__reason textarea {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: var(--syl-radius-ctl);
-    font-family: inherit;
-    font-size: 0.84rem;
-    line-height: 1.6;
-    resize: vertical;
-}
-
-.syl-modal__note {
-    margin: 0;
-    font-size: 0.74rem;
-    color: var(--ems-neutral-400);
-}
-
-.syl-modal__note.is-bad {
-    color: var(--ems-danger-strong);
-}
-
-.syl-modal__foot {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 9px;
-    padding: 14px 20px;
-    background: var(--ems-bg-subtle);
-    border-top: 1px solid var(--ems-border);
-}
-
-.syl-modal__foot .syl-btn {
-    min-height: 44px;
-}
-
-/* Versiya növü seçim kartları */
-.syl-pick {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px 13px;
-    text-align: left;
-    border: 1px solid var(--ems-border);
-    background: var(--ems-bg);
-    border-radius: 11px;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.syl-pick.is-on {
-    border-width: 2px;
-    border-color: var(--ems-primary-600);
-    background: var(--ems-primary-50);
-}
-
-.syl-pick__radio {
-    width: 16px;
-    height: 16px;
-    flex: none;
-    margin-top: 2px;
-    border-radius: 999px;
-    border: 1.5px solid var(--ems-neutral-300);
-}
-
-.syl-pick.is-on .syl-pick__radio {
-    border-color: var(--ems-primary-600);
-    background: radial-gradient(circle, var(--ems-primary-600) 0 3.5px, transparent 3.5px);
-}
-
-.syl-pick__title {
-    display: block;
-    font-size: 0.86rem;
-    font-weight: 800;
-}
-
-.syl-pick__note {
-    display: block;
-    margin-top: 3px;
-    font-size: 0.78rem;
-    line-height: 1.55;
-    color: var(--ems-text-muted);
 }

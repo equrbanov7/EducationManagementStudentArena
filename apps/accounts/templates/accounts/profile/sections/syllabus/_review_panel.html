@@ -1,0 +1,71 @@
+{% load i18n %}
+{% comment %}
+Sağdan açılan BAXIŞ PANELİ (dizayn §3.3): başlıq · müəllimin qeydi · 3 tab ·
+ümumi rəy · 3 qərar düyməsi.
+
+Boş çərçivə server tərəfindən render olunur, məzmunu `syllabus_review_panel.js`
+JSON-dan doldurur. Beləliklə heç bir mətn JS faylında yazılmır (xarici .js
+Django template engine-dən keçmir) — dəyişkən etiketlər `data-t-*` ilə gəlir.
+
+a11y (§6): `role="dialog" aria-modal="true"` + `aria-labelledby`, açılışda fokus
+içəri, Escape bağlayır, bağlananda fokus əvvəlki elementə qayıdır.
+{% endcomment %}
+<div class="syl-drawer syl-drawer--review" data-syl-panel hidden>
+  <div class="syl-drawer__backdrop" data-syl-panel-close></div>
+  <div class="syl-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="syl-rv-title" tabindex="-1">
+
+    <div class="syl-drawer__head">
+      <div class="syl-drawer__ident">
+        <span class="syl-code" data-syl-rv-code></span>
+        <span class="syl-badge" data-syl-rv-status></span>
+        <span class="syl-version" data-syl-rv-version></span>
+        <span class="syl-wait" data-syl-rv-wait></span>
+      </div>
+      <h3 id="syl-rv-title" data-syl-rv-name></h3>
+      <p class="syl-meta" data-syl-rv-meta></p>
+      <button type="button" class="syl-drawer__x" data-syl-panel-close
+              aria-label="{% trans 'Baxışı bağla' context 'accounts.syllabus' %}">&times;</button>
+      <p class="syl-drawer__banner syl-drawer__banner--info">
+        <strong>{% trans "Müəllimin qeydi:" context "accounts.syllabus" %}</strong>
+        <span data-syl-rv-note></span>
+      </p>
+    </div>
+
+    <div class="syl-drawer__tabs" role="group" aria-label="{% trans 'Baxış bölmələri' context 'accounts.syllabus' %}">
+      <button type="button" class="syl-drawer__tab is-on" data-syl-rv-tab="sections" aria-current="page">{% trans "Sillabus bölmələri" context "accounts.syllabus" %}</button>
+      <button type="button" class="syl-drawer__tab" data-syl-rv-tab="diff" aria-current="false">{% trans "Dəyişikliklər" context "accounts.syllabus" %}</button>
+      <button type="button" class="syl-drawer__tab" data-syl-rv-tab="audit" aria-current="false">{% trans "Audit tarixçəsi" context "accounts.syllabus" %}</button>
+    </div>
+
+    <div class="syl-drawer__body">
+      <div data-syl-rv-pane="sections"></div>
+      <div data-syl-rv-pane="diff" hidden>
+        <p class="syl-diff__lead"><span data-syl-rv-compare></span><span class="syl-chip-static syl-chip-static--warning" data-syl-rv-diffcount></span></p>
+        <div data-syl-rv-diffs></div>
+      </div>
+      <div data-syl-rv-pane="audit" hidden>
+        <ol class="syl-timeline" data-syl-rv-timeline></ol>
+      </div>
+    </div>
+
+    <div class="syl-drawer__foot syl-drawer__foot--decide">
+      <div class="syl-field syl-field--wide">
+        <label for="syl-rv-general">{% trans "Ümumi rəy" context "accounts.syllabus" %}</label>
+        <textarea id="syl-rv-general" class="syl-textarea" rows="2" data-syl-rv-general
+                  placeholder="{% trans 'Təsdiq və ya geri qaytarma ilə birlikdə müəllimə göndərilir' context 'accounts.syllabus' %}"></textarea>
+      </div>
+      <div class="syl-decide">
+        <span class="syl-decide__hint" data-syl-rv-foot></span>
+        {% if sr.can_reject %}
+        <button type="button" class="syl-btn syl-btn--danger syl-btn--lg" data-syl-decide="reject">{% trans "Rədd et" context "accounts.syllabus" %}</button>
+        {% endif %}
+        {% if sr.can_revise %}
+        <button type="button" class="syl-btn syl-btn--warning syl-btn--lg" data-syl-decide="revise">{% trans "Düzəliş üçün geri qaytar" context "accounts.syllabus" %}</button>
+        {% endif %}
+        {% if sr.can_approve %}
+        <button type="button" class="syl-btn syl-btn--approve syl-btn--lg" data-syl-decide="approve">{% trans "Təsdiqlə" context "accounts.syllabus" %}</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

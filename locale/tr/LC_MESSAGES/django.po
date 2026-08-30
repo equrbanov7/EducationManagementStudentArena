@@ -36277,3 +36277,667 @@ msgstr "%(n)s (bugüne kadar)"
 msgctxt "organizations.unit_detail"
 msgid "%(n)s daha"
 msgstr "%(n)s daha fazla"
+
+msgctxt "profile.sidebar"
+msgid "Sillabus təsdiqi"
+msgstr "Ders izlencesi onayı"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus təsdiqi"
+msgstr "Ders izlencesi onayı"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri paneli"
+msgstr "Bölüm başkanı paneli"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq paneli"
+msgstr "Onay paneli"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri"
+msgstr "Bölüm başkanı"
+
+msgctxt "accounts.syllabus"
+msgid "Genişləndirilmiş əhatə"
+msgstr "Genişletilmiş kapsam"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə yoxdur"
+msgstr "Kapsam yok"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə: %(count)s struktur bölmə"
+msgstr "Kapsam: %(count)s yapısal birim"
+
+msgctxt "accounts.syllabus"
+msgid "Yalnız öz kafedranızın müəllimlərinin təqdim etdiyi sillabuslar görünür. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
+msgstr "Yalnızca kendi bölümünüzün öğretim elemanlarının gönderdiği izlenceler görünür. Onaylanmış sürüm değiştirilmez — düzeltme yeni sürümle yapılır."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatənizdəki bütün kafedralar üzrə sillabus vəziyyəti. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
+msgstr "Kapsamınızdaki tüm bölümler için izlence durumu. Onaylanmış sürüm değiştirilmez — düzeltme yeni sürümle yapılır."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə təyin edilməyib."
+msgstr "Kapsam atanmamış."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus təsdiqi bölməsi üçün icazəniz yoxdur."
+msgstr "Ders izlencesi onayı bölümü için yetkiniz yok."
+
+msgctxt "accounts.syllabus"
+msgid "Təşkilati əhatə təyin edilməmişdir"
+msgstr "Kurumsal kapsam atanmamış"
+
+msgctxt "accounts.syllabus"
+msgid "Hesabınıza kafedra və ya fakültə əhatəsi verilməyib. Əhatə olmadan sillabus məlumatları göstərilmir — bu, «bütün universitet» kimi şərh edilmir. Səlahiyyət təyin edildikdən sonra yalnız aid olduğunuz struktur bölmə görünəcək."
+msgstr "Hesabınıza bölüm veya fakülte kapsamı verilmemiş. Kapsam olmadan izlence verileri gösterilmez — bu «tüm üniversite» olarak yorumlanmaz. Yetki atandıktan sonra yalnızca kendi biriminiz görünecek."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatənin təyini üçün təşkilat administratoruna və ya tədris şöbəsinə müraciət edin."
+msgstr "Kapsamın atanması için kurum yöneticisine veya öğrenci işlerine başvurun."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq növbəsi"
+msgstr "Onay kuyruğu"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə və analitika"
+msgstr "Kapsam ve analitik"
+
+msgctxt "accounts.syllabus"
+msgid "Növbədə gözləyən"
+msgstr "Kuyrukta bekleyen"
+
+msgctxt "accounts.syllabus"
+msgid "baxış tələb edən sillabus"
+msgstr "inceleme bekleyen izlence"
+
+msgctxt "accounts.syllabus"
+msgid "10 gündən çox gözləyir"
+msgstr "10 günden fazla bekliyor"
+
+msgctxt "accounts.syllabus"
+msgid "gözləmə həddi aşılıb"
+msgstr "bekleme sınırı aşıldı"
+
+msgctxt "accounts.syllabus"
+msgid "Çatışmayan bölməsi var"
+msgstr "Eksik bölümü var"
+
+msgctxt "accounts.syllabus"
+msgid "tam doldurulmayıb"
+msgstr "tam doldurulmamış"
+
+msgctxt "accounts.syllabus"
+msgid "Orta gözləmə"
+msgstr "Ortalama bekleme"
+
+msgctxt "accounts.syllabus"
+msgid "hədəf: 5 gündən az"
+msgstr "hedef: 5 günden az"
+
+msgctxt "accounts.syllabus"
+msgid "gün"
+msgstr "gün sayısı"
+
+msgctxt "accounts.syllabus"
+msgid "Axtarış"
+msgstr "Arama"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn, kod və ya müəllim"
+msgstr "Ders, kod veya öğretim elemanı"
+
+msgctxt "accounts.syllabus"
+msgid "Status"
+msgstr "Durum"
+
+msgctxt "accounts.syllabus"
+msgid "Sıralama"
+msgstr "Sıralama ölçütü"
+
+msgctxt "accounts.syllabus"
+msgid "Akademik il"
+msgstr "Akademik yıl"
+
+msgctxt "accounts.syllabus"
+msgid "Filtrləri sıfırla"
+msgstr "Filtreleri sıfırla"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün statuslar"
+msgstr "Tüm durumlar"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün illər"
+msgstr "Tüm yıllar"
+
+msgctxt "accounts.syllabus"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "accounts.syllabus"
+msgid "Gözləmə müddətinə görə"
+msgstr "Bekleme süresine göre"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn adına görə"
+msgstr "Ders adına göre"
+
+msgctxt "accounts.syllabus"
+msgid "Tamamlanmaya görə"
+msgstr "Tamamlanmaya göre"
+
+msgctxt "accounts.syllabus"
+msgid "Təhsil proqramı"
+msgstr "Eğitim programı"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "accounts.syllabus"
+msgid "Görünüş"
+msgstr "Görünüm"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn və proqram"
+msgstr "Ders ve program"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+msgctxt "accounts.syllabus"
+msgid "Təqdim / gözləmə"
+msgstr "Gönderim / bekleme"
+
+msgctxt "accounts.syllabus"
+msgid "Tamamlanma"
+msgstr "Tamamlanma oranı"
+
+msgctxt "accounts.syllabus"
+msgid "Risk"
+msgstr "Riskler"
+
+msgctxt "accounts.syllabus"
+msgid "Əməllər"
+msgstr "İşlemler"
+
+msgctxt "accounts.syllabus"
+msgid "Baxışa keç"
+msgstr "İncelemeye geç"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq növbəsi boşdur"
+msgstr "Onay kuyruğu boş"
+
+msgctxt "accounts.syllabus"
+msgid "Seçilmiş filtrə uyğun gözləyən sillabus yoxdur. Ümumi vəziyyəti «Əhatə və analitika» tabından izləyə bilərsiniz."
+msgstr "Seçilen filtreye uyan bekleyen izlence yok. Genel durumu «Kapsam ve analitik» sekmesinden izleyebilirsiniz."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatəyə keç"
+msgstr "Kapsama geç"
+
+msgctxt "accounts.syllabus"
+msgid "bugün gəlib"
+msgstr "bugün geldi"
+
+msgctxt "accounts.syllabus"
+msgid "%(days)s gündür gözləyir"
+msgstr "%(days)s gündür bekliyor"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s aktivdir"
+msgstr "%(version)s etkin"
+
+msgctxt "accounts.syllabus"
+msgid "çatışmayan bölmə var"
+msgstr "eksik bölüm var"
+
+msgctxt "accounts.syllabus"
+msgid "siyasət yoxlaması"
+msgstr "politika kontrolü"
+
+msgctxt "accounts.syllabus"
+msgid "böyük dəyişiklik"
+msgstr "büyük değişiklik"
+
+msgctxt "accounts.syllabus"
+msgid "risk yoxdur"
+msgstr "risk yok"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif göstərilməyib"
+msgstr "Yazar belirtilmemiş"
+
+msgctxt "accounts.syllabus"
+msgid "Proqram təyin edilməyib"
+msgstr "Program atanmamış"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra təyin edilməyib"
+msgstr "Bölüm atanmamış"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq faizi"
+msgstr "Onay oranı"
+
+msgctxt "accounts.syllabus"
+msgid "təsdiqlənmiş / ümumi fənn"
+msgstr "onaylanan / toplam ders"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənmiş"
+msgstr "Onaylanan"
+
+msgctxt "accounts.syllabus"
+msgid "jurnal açıla bilər"
+msgstr "yoklama açılabilir"
+
+msgctxt "accounts.syllabus"
+msgid "Baxışda"
+msgstr "İncelemede"
+
+msgctxt "accounts.syllabus"
+msgid "təsdiq gözləyir"
+msgstr "onay bekliyor"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişdə"
+msgstr "Düzeltmede"
+
+msgctxt "accounts.syllabus"
+msgid "müəllimdədir"
+msgstr "öğretim elemanında"
+
+msgctxt "accounts.syllabus"
+msgid "Gecikib"
+msgstr "Gecikmiş"
+
+msgctxt "accounts.syllabus"
+msgid "semestr başlayıb, təsdiq yoxdur"
+msgstr "dönem başladı, onay yok"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra üzrə breakdown — təhsil proqramları"
+msgstr "Bölüm kırılımı — eğitim programları"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə üzrə breakdown — kafedralar"
+msgstr "Kapsam kırılımı — bölümler"
+
+msgctxt "accounts.syllabus"
+msgid "Yalnız sizin əhatənizdəki fənlər"
+msgstr "Yalnızca kapsamınızdaki dersler"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatənizə düşən bütün struktur bölmələr"
+msgstr "Kapsamınıza giren tüm yapısal birimler"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn"
+msgstr "Dersler"
+
+msgctxt "accounts.syllabus"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "accounts.syllabus"
+msgid "Təyin edilməyib"
+msgstr "Atanmamış"
+
+msgctxt "accounts.syllabus"
+msgid "Seçilmiş tədris ilində qeyd tapılmadı."
+msgstr "Seçilen akademik yıl için kayıt bulunamadı."
+
+msgctxt "accounts.syllabus"
+msgid "Semestr üzrə dinamika"
+msgstr "Döneme göre eğilim"
+
+msgctxt "accounts.syllabus"
+msgid "Müqayisə üçün kifayət qədər semestr qeydi yoxdur."
+msgstr "Karşılaştırma için yeterli dönem kaydı yok."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq marşrutu — universitet siyasəti"
+msgstr "Onay rotası — üniversite politikası"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra təsdiqi state maşını ilə məcburidir. Sonrakı mərhələlər (dekan təsdiqi, tədris şöbəsinin yekun yoxlaması) hələ tətbiq olunmayıb — burada onların cari vəziyyəti göstərilir."
+msgstr "Bölüm onayı durum makinesi ile zorunludur. Sonraki aşamalar (dekan onayı, öğrenci işlerinin son kontrolü) henüz uygulanmadı — burada mevcut durumları gösterilir."
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri təsdiqi"
+msgstr "Bölüm başkanı onayı"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün sillabuslar üçün məcburidir — state maşını ilə tətbiq olunur."
+msgstr "Tüm izlenceler için zorunlu — durum makinesi ile uygulanır."
+
+msgctxt "accounts.syllabus"
+msgid "İkinci təsdiq — dekan"
+msgstr "İkinci onay — dekan"
+
+msgctxt "accounts.syllabus"
+msgid "Universitet siyasətindən asılı ikinci mərhələ — hələ tətbiq olunmayıb."
+msgstr "Üniversite politikasına bağlı ikinci aşama — henüz uygulanmadı."
+
+msgctxt "accounts.syllabus"
+msgid "Tədris şöbəsinin son yoxlaması"
+msgstr "Öğrenci işlerinin son kontrolü"
+
+msgctxt "accounts.syllabus"
+msgid "Semestr açılışından əvvəl toplu yoxlama — hələ tətbiq olunmayıb."
+msgstr "Dönem açılışından önce toplu kontrol — henüz uygulanmadı."
+
+msgctxt "accounts.syllabus"
+msgid "aktiv"
+msgstr "etkin"
+
+msgctxt "accounts.syllabus"
+msgid "tətbiq olunmur"
+msgstr "uygulanmıyor"
+
+msgctxt "accounts.syllabus"
+msgid "Baxış bölmələri"
+msgstr "İnceleme bölümleri"
+
+msgctxt "accounts.syllabus"
+msgid "Baxışı bağla"
+msgstr "İncelemeyi kapat"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus bölmələri"
+msgstr "İzlence bölümleri"
+
+msgctxt "accounts.syllabus"
+msgid "Dəyişikliklər"
+msgstr "Değişiklikler"
+
+msgctxt "accounts.syllabus"
+msgid "Audit tarixçəsi"
+msgstr "Denetim geçmişi"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin qeydi:"
+msgstr "Öğretim elemanının notu:"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllim təqdimata əlavə qeyd yazmayıb."
+msgstr "Öğretim elemanı gönderime not eklemedi."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllim: %(value)s"
+msgstr "Öğretim elemanı: %(value)s"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı: %(value)s"
+msgstr "Danışma saati: %(value)s"
+
+msgctxt "accounts.syllabus"
+msgid "Prerekvizit: %(value)s"
+msgstr "Ön koşul: %(value)s"
+
+msgctxt "accounts.syllabus"
+msgid "— doldurulmayıb —"
+msgstr "— doldurulmamış —"
+
+msgctxt "accounts.syllabus"
+msgid "Təqdim: %(sent)s · tamamlanma %(percent)s%%"
+msgstr "Gönderim: %(sent)s · tamamlanma %(percent)s%%"
+
+msgctxt "accounts.syllabus"
+msgid "Ümumi rəy"
+msgstr "Genel görüş"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq və ya geri qaytarma ilə birlikdə müəllimə göndərilir"
+msgstr "Onay veya iade ile birlikte öğretim elemanına gönderilir"
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə üzrə şərh"
+msgstr "Bölüm yorumu"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimə göndəriləcək konkret qeyd"
+msgstr "Öğretim elemanına gönderilecek somut not"
+
+msgctxt "accounts.syllabus"
+msgid "Şərh əlavə et"
+msgstr "Yorum ekle"
+
+msgctxt "accounts.syllabus"
+msgid "Şərhi gizlət"
+msgstr "Yorumu gizle"
+
+msgctxt "accounts.syllabus"
+msgid "şərh var"
+msgstr "yorum var"
+
+msgctxt "accounts.syllabus"
+msgid "dəyişib"
+msgstr "değişti"
+
+msgctxt "accounts.syllabus"
+msgid "Şərh yazılmış bölmə: %(count)s · geri qaytarma və rədd üçün səbəb məcburidir"
+msgstr "Yorum yazılan bölüm: %(count)s · iade ve ret için gerekçe zorunludur"
+
+msgctxt "accounts.syllabus"
+msgid "Müqayisə: təsdiqlənmiş %(old)s ilə təqdim edilmiş %(new)s arasında."
+msgstr "Karşılaştırma: onaylı %(old)s ile gönderilen %(new)s arasında."
+
+msgctxt "accounts.syllabus"
+msgid "Bu, dosyenin ilk təsdiq namizədidir — müqayisə üçün əvvəlki versiya yoxdur."
+msgstr "Bu, dosyanın ilk onay adayıdır — karşılaştırılacak önceki sürüm yok."
+
+msgctxt "accounts.syllabus"
+msgid "Bu versiya üçün müqayisə oluna bilən əvvəlki təsdiq yoxdur."
+msgstr "Bu sürümle karşılaştırılacak önceki bir onay yok."
+
+msgctxt "accounts.syllabus"
+msgid "%(changed)s bölmə dəyişib · %(same)s bölmə dəyişməyib"
+msgstr "%(changed)s bölüm değişti · %(same)s bölüm değişmedi"
+
+msgctxt "accounts.syllabus"
+msgid "struktur dəyişikliyi"
+msgstr "yapısal değişiklik"
+
+msgctxt "accounts.syllabus"
+msgid "məzmun dəyişikliyi"
+msgstr "içerik değişikliği"
+
+msgctxt "accounts.syllabus"
+msgid "dəyişməmişdir"
+msgstr "değişmedi"
+
+msgctxt "accounts.syllabus"
+msgid "təsdiqlənmiş versiya"
+msgstr "onaylı sürüm"
+
+msgctxt "accounts.syllabus"
+msgid "təqdim edilmiş versiya"
+msgstr "gönderilen sürüm"
+
+msgctxt "accounts.syllabus"
+msgid "Bu, jurnalın mövzu siyahısını dəyişir. Cari semestrdə jurnal artıq açılıbsa, dəyişiklik yalnız növbəti semestrdən qüvvəyə minir."
+msgstr "Bu, yoklama defterinin konu listesini değiştirir. Bu dönem defter açıldıysa değişiklik yalnızca gelecek dönemden geçerli olur."
+
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə çəkiləri jurnalın sütun strukturunu dəyişir. Mövcud qiymətlər arxivdə saxlanılır və silinmir."
+msgstr "Değerlendirme ağırlıkları defterin sütun yapısını değiştirir. Mevcut notlar arşivde saklanır, silinmez."
+
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş sütunlarının sayı dəyişir. Köhnə sütunların qiymətləri arxivdə saxlanılır və silinmir."
+msgstr "Bağımsız çalışma sütunlarının sayısı değişir. Eski sütunların notları arşivde saklanır, silinmez."
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s versiyası yaradıldı"
+msgstr "%(version)s sürümü oluşturuldu"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s təsdiqə göndərildi"
+msgstr "%(version)s onaya gönderildi"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s təqdimatı geri çağırıldı"
+msgstr "%(version)s gönderimi geri çekildi"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s baxışa götürüldü"
+msgstr "%(version)s incelemeye alındı"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s təsdiqləndi"
+msgstr "%(version)s onaylandı"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s düzəliş üçün geri qaytarıldı"
+msgstr "%(version)s düzeltme için iade edildi"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s rədd edildi"
+msgstr "%(version)s reddedildi"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s yeniləndi"
+msgstr "%(version)s güncellendi"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus təsdiqlənsin?"
+msgstr "İzlence onaylansın mı?"
+
+msgctxt "accounts.syllabus"
+msgid "Versiya təsdiqlənəcək və dəyişdirilməz sənəd kimi kilidlənəcək. Sonrakı düzəliş yalnız yeni versiya ilə mümkündür."
+msgstr "Sürüm onaylanacak ve değiştirilemez belge olarak kilitlenecek. Sonraki düzeltme yalnızca yeni sürümle mümkündür."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənmiş versiya həftəlik mövzuların, qiymətləndirmə strukturunun və sərbəst iş konfiqurasiyasının yeganə mənbəyi olur"
+msgstr "Onaylanan sürüm, haftalık konuların, değerlendirme yapısının ve bağımsız çalışma yapılandırmasının tek kaynağı olur"
+
+msgctxt "accounts.syllabus"
+msgid "Elektron jurnal bu versiyadan yaradılır və müəllim üçün açılır"
+msgstr "Elektronik yoklama defteri bu sürümden oluşturulur ve öğretim elemanına açılır"
+
+msgctxt "accounts.syllabus"
+msgid "Tələbə kabinetində sillabus dərhal görünür"
+msgstr "İzlence öğrenci kabininde hemen görünür"
+
+msgctxt "accounts.syllabus"
+msgid "Mövcud qiymət və davamiyyət qeydləri toxunulmaz qalır"
+msgstr "Mevcut not ve devam kayıtları dokunulmaz kalır"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş üçün geri qaytarılsın?"
+msgstr "Düzeltme için iade edilsin mi?"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus müəllimə qaytarılır və «Düzəliş tələb olunur» statusuna keçir. Səbəb məcburidir — müəllim onu birbaşa redaktorda görəcək."
+msgstr "İzlence öğretim elemanına iade edilir ve «Düzeltme gerekli» durumuna geçer. Gerekçe zorunludur — öğretim elemanı bunu doğrudan düzenleyicide görecek."
+
+msgctxt "accounts.syllabus"
+msgid "Geri qaytar"
+msgstr "İade et"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş səbəbi"
+msgstr "Düzeltme gerekçesi"
+
+msgctxt "accounts.syllabus"
+msgid "Konkret yazın: hansı bölmədə nə düzəldilməlidir."
+msgstr "Somut yazın: hangi bölümde ne düzeltilmeli."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş tələb olunan bölmələr"
+msgstr "Düzeltme gereken bölümler"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş üçün geri qaytar"
+msgstr "Düzeltme için iade et"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus rədd edilsin?"
+msgstr "İzlence reddedilsin mi?"
+
+msgctxt "accounts.syllabus"
+msgid "Rədd edilən versiya bağlanır və yenidən göndərilə bilmir — müəllim yeni versiya yaratmalıdır. Səbəb məcburidir və audit izinə yazılır."
+msgstr "Reddedilen sürüm kapanır ve yeniden gönderilemez — öğretim elemanı yeni sürüm oluşturmalıdır. Gerekçe zorunludur ve denetim izine yazılır."
+
+msgctxt "accounts.syllabus"
+msgid "Rədd et"
+msgstr "Reddet"
+
+msgctxt "accounts.syllabus"
+msgid "Rədd səbəbi"
+msgstr "Ret gerekçesi"
+
+msgctxt "accounts.syllabus"
+msgid "Məsələn: qiymətləndirmə strukturu universitet siyasətinə uyğun deyil."
+msgstr "Örneğin: değerlendirme yapısı üniversite politikasına uygun değil."
+
+msgctxt "accounts.syllabus"
+msgid "Mövcud təsdiqlənmiş versiya (varsa) aktiv qalır"
+msgstr "Mevcut onaylı sürüm (varsa) etkin kalır"
+
+msgctxt "accounts.syllabus"
+msgid "Tələbələr köhnə təsdiqlənmiş versiyanı görməyə davam edir"
+msgstr "Öğrenciler önceki onaylı sürümü görmeye devam eder"
+
+msgctxt "accounts.syllabus"
+msgid "Jurnal statusu dəyişmir"
+msgstr "Yoklama defteri durumu değişmez"
+
+msgctxt "accounts.syllabus"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "accounts.syllabus"
+msgid "Səbəb müəllimə göndərilir və audit izinə yazılır"
+msgstr "Gerekçe öğretim elemanına gönderilir ve denetim izine yazılır"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı %(min)s simvol — səbəb məcburidir"
+msgstr "En az %(min)s karakter — gerekçe zorunludur"
+
+msgctxt "accounts.syllabus"
+msgid "Səbəb ən azı %(min)s simvol olmalıdır."
+msgstr "Gerekçe en az %(min)s karakter olmalıdır."
+
+msgctxt "accounts.syllabus"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "Etkin kurum seçilmemiş."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus versiyası tapılmadı və ya əhatənizdə deyil."
+msgstr "İzlence sürümü bulunamadı veya kapsamınızda değil."
+
+msgctxt "accounts.syllabus"
+msgid "Sorğu düzgün deyil."
+msgstr "İstek geçerli değil."
+
+msgctxt "accounts.syllabus"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgctxt "accounts.syllabus"
+msgid "Yüklənir…"
+msgstr "Yükleniyor…"
+
+msgctxt "accounts.syllabus"
+msgid "%(name)s — %(version)s təsdiqləndi və kilidləndi."
+msgstr "%(name)s — %(version)s onaylandı ve kilitlendi."
+
+msgctxt "accounts.syllabus"
+msgid "%(name)s — düzəliş üçün geri qaytarıldı, müəllimə bildiriş göndərildi."
+msgstr "%(name)s — düzeltme için iade edildi, öğretim elemanı bilgilendirildi."
+
+msgctxt "accounts.syllabus"
+msgid "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
+msgstr "%(name)s — sürüm reddedildi. Öğrenciler önceki onaylı sürümü görüyor."

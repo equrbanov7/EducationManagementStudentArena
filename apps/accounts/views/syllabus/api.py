@@ -40,9 +40,7 @@ _REASON_REQUIRED = pgettext_lazy(_CTX, "Səbəb ən azı %(min)s simvol olmalıd
 _SAVED = pgettext_lazy(_CTX, "Saxlanıldı")
 _DRAFT_CREATED = pgettext_lazy(_CTX, "Qaralama yaradıldı — məzmunu doldurub təsdiqə göndərin.")
 _COPIED = pgettext_lazy(_CTX, "Keçmiş versiyanın məzmunu köçürüldü, yeni QARALAMA açıldı.")
-_VERSION_CREATED = pgettext_lazy(
-    _CTX, "Yeni versiya qaralaması yaradıldı. Təsdiqlənmiş versiya aktiv qalır."
-)
+_VERSION_CREATED = pgettext_lazy(_CTX, "Yeni versiya qaralaması yaradıldı. Təsdiqlənmiş versiya aktiv qalır.")
 _SUBMITTED = pgettext_lazy(_CTX, "Sillabus kafedra müdirinin təsdiq növbəsinə göndərildi.")
 _WITHDRAWN = pgettext_lazy(_CTX, "Təqdimat geri çağırıldı, status qaralamaya qaytarıldı.")
 _RESUMED = pgettext_lazy(_CTX, "Düzəlişə başlandı — bölmələr yenidən redaktə oluna bilər.")
@@ -54,7 +52,9 @@ MIN_REASON_LENGTH = 15
 def _body(request) -> dict:
     try:
         return json.loads(request.body.decode("utf-8") or "{}")
-    except (ValueError, UnicodeDecodeError):
+    except ValueError:
+        # `UnicodeDecodeError` və `json.JSONDecodeError` — ikisi də `ValueError`
+        # alt-sinfidir, ona görə tək tutucu hər iki halı əhatə edir (flake8 B014).
         return {}
 
 

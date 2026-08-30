@@ -26,7 +26,7 @@ saxlanılır: siyasəti izah edir.
     {% for option in sw.options %}
     <button type="button"
             class="syl-swopt{% if option.active %} is-on{% endif %}{% if not option.allowed %} is-blocked{% endif %}"
-            data-syl-selfwork="{{ option.key }}"
+            data-syl-selfwork="{{ option.key }}" data-count="{{ option.count }}"
             aria-pressed="{% if option.active %}true{% else %}false{% endif %}"
             {% if not option.allowed or se.readonly %}disabled{% endif %}>
       <span class="syl-swopt__radio" aria-hidden="true"></span>
@@ -41,7 +41,11 @@ saxlanılır: siyasəti izah edir.
 
   <div class="syl-swtopics" data-syl-selfwork-topics>
     {% for slot in sw.slots %}
-    <div class="syl-swtopic" data-syl-slot="{{ slot.index }}">
+    {% comment %}`data-graded*` JS üçündür: qiyməti olan tapşırıq SİLİNMİR, yalnız
+    arxivlənir — autosave göndərişində bu sahələr olduğu kimi geri yazılır.{% endcomment %}
+    <div class="syl-swtopic" data-syl-slot="{{ slot.index }}"
+         data-graded="{% if slot.graded %}1{% else %}0{% endif %}"
+         data-graded-count="{{ slot.graded_count }}">
       <span class="syl-swtopic__label">{% blocktrans context "accounts.syllabus" with index=slot.index %}Tapşırıq {{ index }}{% endblocktrans %}</span>
       <input type="text" class="syl-input syl-input--sm" data-selfwork-title value="{{ slot.title }}"
              {% if se.readonly or slot.graded %}disabled{% endif %}
@@ -58,17 +62,20 @@ saxlanılır: siyasəti izah edir.
     {% endfor %}
   </div>
 
-  {% if sw.archived %}
-  <div class="syl-archived">
+  {% comment %}Konteyner arxiv BOŞ olanda da render olunur: autosave göndərişi
+  mövcud arxiv sətirlərini buradan oxuyur, yoxsa arxivləmə əvvəlki qeydləri
+  silərdi. Boş halda gizlidir.{% endcomment %}
+  <div class="syl-archived" data-syl-archived {% if not sw.archived %}hidden{% endif %}>
     <p class="syl-archived__head">
       <b>{% trans "Arxivlənmiş mövzular" context "accounts.syllabus" %}</b>
       <span class="syl-meta">{% trans "Tələbə qiymətləri qorunur, yeni tapşırıq kimi verilmir" context "accounts.syllabus" %}</span>
     </p>
     {% for row in sw.archived %}
-    <p class="syl-archived__row"><s>{{ row.title }}</s> <span class="syl-meta">{{ row.note }}</span></p>
+    <p class="syl-archived__row" data-syl-archived-row data-title="{{ row.title }}" data-note="{{ row.note }}">
+      <s>{{ row.title }}</s> <span class="syl-meta">{{ row.note }}</span>
+    </p>
     {% endfor %}
   </div>
-  {% endif %}
 </article>
 {% endwith %}
 

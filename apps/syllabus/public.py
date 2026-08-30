@@ -40,8 +40,15 @@ qeydiyyatı 4 yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
 ``{
     "queue": QuerySet[SyllabusVersion],   # SUBMITTED + REVIEW, ən köhnə başda
     "has_scope": bool,                    # False → «əhatə yoxdur» boş vəziyyəti
-    "can_approve": bool, "can_revise": bool, "can_reject": bool,
+    "scope_mode": "chair" | "wide" | "noscope",   # yalnız GÖSTƏRİŞ rejimi
+    "can_review": bool, "can_approve": bool, "can_revise": bool, "can_reject": bool,
+    "coverage": {"group_by", "rows": […], "totals": {…}},
+    "trend": [{"key","label","total","approved",…,"percent"}…],
 }``
+
+⚠️ ``has_scope`` YALNIZ ``services.has_review_scope``-dan gəlir: icazə açarı
+olsa da struktur əhatəsi yoxdursa ekran BOŞ vəziyyət göstərir, bütün təşkilat
+AÇILMIR (fail-closed).
 
 ──────────────────────────────────────────────────────────────────────────────
 ISSUE KODLARI (``completion.Issue.code``) — UI mətnini bu kodlara görə yazır:
@@ -87,8 +94,12 @@ from .constants import (
     SyllabusStatus,
 )
 from .services import (
+    GROUP_CHAIR,
+    GROUP_PROGRAM,
     available_actions,
     can_view,
+    coverage_report,
+    has_review_scope,
     list_syllabi,
     resolve_actor,
     review_queue,
@@ -188,17 +199,70 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
     }
 
 
-def build_review_queue_context(request, *, organization, chair_unit=None) -> dict:
+def _scope_mode(actor, report: dict) -> str:
+    """«chair» (bir kafedra) vs «wide» (fakültə/universitet) — UI rejimi.
+
+    Bu, İCAZƏ deyil, YALNIZ GÖSTƏRİŞ seçimidir: kafedra müdiri breakdown-u
+    təhsil proqramları üzrə, dekan/rektor isə kafedralar üzrə görür. Əhatənin
+    özü hər halda ``syllabus.review`` scope-u ilə daralıb.
+    """
+    if actor.is_superadmin or actor.scope_for(PERM_REVIEW).is_org_wide:
+        return "wide"
+    return "wide" if len(report["by_chair"]["rows"]) > 1 else "chair"
+
+
+def _coverage_slice(report: dict, *, group_by: str) -> dict:
+    """Hesabatdan UI-nın seçdiyi qruplaşmanı çıxarır (əlavə sorğu YOX)."""
+    key = "by_chair" if group_by == GROUP_CHAIR else "by_program"
+    return {"coverage": report[key], "trend": report["trend"]}
+
+
+def build_review_queue_context(
+    request,
+    *,
+    organization,
+    chair_unit=None,
+    program=None,
+    statuses=None,
+    search: str = "",
+    sort: str = "wait",
+    academic_year=None,
+) -> dict:
     """«Kafedra müdiri — Sillabus təsdiqi» bölməsinin context-i."""
     actor = resolve_actor(getattr(request, "user", None), organization, request=request)
-    queue = review_queue(organization=organization, actor=actor, chair_unit=chair_unit)
-    scope = actor.scope_for(PERM_REVIEW)
+    if not has_review_scope(actor=actor):
+        # Fail-closed: əhatəsi olmayan aktora heç bir sorğu açılmır.
+        return {
+            "queue": review_queue(organization=organization, actor=actor).none(),
+            "has_scope": False,
+            "scope_mode": "noscope",
+            "can_review": actor.has(PERM_REVIEW),
+            "can_approve": False,
+            "can_revise": False,
+            "can_reject": False,
+            "coverage": {"group_by": GROUP_PROGRAM, "rows": [], "totals": {}},
+            "trend": [],
+            "statuses": STATUS_CATALOG,
+        }
+    report = coverage_report(organization=organization, actor=actor, academic_year=academic_year)
+    mode = _scope_mode(actor, report)
     return {
-        "queue": queue,
-        "has_scope": bool(actor.is_superadmin or scope.has_structure_access),
+        "queue": review_queue(
+            organization=organization,
+            actor=actor,
+            chair_unit=chair_unit,
+            program=program,
+            statuses=statuses,
+            search=search,
+            sort=sort,
+        ),
+        "has_scope": True,
+        "scope_mode": mode,
+        "can_review": actor.has(PERM_REVIEW),
         "can_approve": actor.has(PERM_APPROVE),
         "can_revise": actor.has(PERM_REVISE),
         "can_reject": actor.has(PERM_REJECT),
+        **_coverage_slice(report, group_by=(GROUP_CHAIR if mode == "wide" else GROUP_PROGRAM)),
         "statuses": STATUS_CATALOG,
     }
 

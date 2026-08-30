@@ -62,10 +62,26 @@
     {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260830-1">
     {% endif %}
+    {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
+    {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
+    bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl ORTAQ
+    komponentlər (base → dialog → list → drawer), sonra ekran-xüsusi qatlar.
+    ⚠️ `syllabus_list.css` ortaq primitivləri (KPI kartı, filtr paneli, cədvəl,
+    səhifələmə) da daşıyır — təsdiq ekranı onları TƏKRAR TƏRİF ETMİR, ona görə
+    kafedra müdiri «Sillabuslar» bölməsini görməsə də bu fayl yüklənir.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_dialog.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_drawer.css' %}?v=20260830-3">
+    {% endif %}
     {% if 'syllabus-list' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260830-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260830-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20260830-3">
+    {% endif %}
+    {% if 'syllabus-review' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review_panel.css' %}?v=20260830-3">
     {% endif %}
     {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
@@ -78,6 +94,9 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-teach">
+    {% comment %}Tələbənin «Sillabusa bax» paneli — jurnalın tam səhifə variantı
+    ilə EYNİ stil faylı (apps/registrar/static/registrar/css/syllabus_view.css).{% endcomment %}
+    <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
     {% endif %}
     {% if 'my-schedule' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
@@ -95,7 +114,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -178,6 +197,8 @@
                 {% include "accounts/profile/sections/_syllabus_list.html" %}
             {% elif active_section == "syllabus-editor" and 'syllabus-editor' in allowed_sections %}
                 {% include "accounts/profile/sections/_syllabus_editor.html" %}
+            {% elif active_section == "syllabus-review" and 'syllabus-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_syllabus_review.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}
@@ -349,7 +370,16 @@
 {% endif %}
 {% if 'syllabus-list' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
+{% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —
+mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/syllabus_editor_fields.js' %}?v=20260830-1"></script>
 <script src="{% static 'accounts/js/profile/syllabus_editor.js' %}?v=20260830-1"></script>
+{% endif %}
+{% if 'syllabus-review' in allowed_sections %}
+{% comment %}Panel render-i mühərrikdən ƏVVƏL yüklənir — mühərrik init anında
+`window.EMSSyllabusReviewPanel`-i oxuyur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/syllabus_review_panel.js' %}?v=20260830-3"></script>
+<script src="{% static 'accounts/js/profile/syllabus_review.js' %}?v=20260830-3"></script>
 {% endif %}
 {% if 'assigned-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/assigned_exam.js' %}?v=20260707-wizard2"></script>
@@ -375,6 +405,7 @@
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260720-bsperiod" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'registrar/js/syllabus_view.js' %}?v=20260830-syl1"></script>
 {% endif %}
 {% if 'role-assignment' in allowed_sections %}
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>

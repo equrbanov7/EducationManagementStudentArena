@@ -78,6 +78,23 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             <span class="sjx-detail-subject">{{ d.subject.name }}</span>
             {% if d.teacher %}<span class="sjx-detail-teacher"><i class="fas fa-chalkboard-teacher"></i> {{ d.teacher.get_full_name|default:d.teacher.username }}</span>{% endif %}
         </div>
+        {% comment %}Fənnin sillabusu — ekranda oxu paneli + PDF yükləmə.
+        Düymələr YALNIZ təsdiqlənmiş versiya varsa çıxır (`syllabus_available`);
+        tələbə heç vaxt qaralama və ya baxışdakı versiyanı görmür.{% endcomment %}
+        {% if d.syllabus_available %}
+        <div class="sjx-detail-actions">
+            <button type="button" class="sylv-open-btn"
+                    data-sylv-open="{% url 'registrar:offering_syllabus_json' d.offering.id %}">
+                <i class="fas fa-file-lines" aria-hidden="true"></i>
+                {% trans "Sillabusa bax" context "registrar.syllabus" %}
+            </button>
+            <a class="sylv-open-btn sylv-open-btn--pdf"
+               href="{% url 'registrar:offering_syllabus_pdf' d.offering.id %}">
+                <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                {% trans "PDF yüklə" context "registrar.syllabus" %}
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     {# ── KPI kartları (mockup) ─────────────────────────────────────────────── #}
@@ -261,5 +278,8 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     {% endif %}
 
     {% if d %}{% include "registrar/partials/_correction_history_modal.html" with corrections_map=journal_student_section.corrections_map %}{% endif %}
+    {% comment %}Oxu paneli bölmə partial-ının İÇİNDƏDİR — AJAX swap-dan sonra
+    da DOM-da qalsın deyə (syllabus_view.js paneli klik anında axtarır).{% endcomment %}
+    {% if d.syllabus_available %}{% include "registrar/partials/_syllabus_drawer.html" %}{% endif %}
 </div>
 {% endwith %}
