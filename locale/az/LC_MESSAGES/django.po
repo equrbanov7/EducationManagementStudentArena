@@ -35713,3 +35713,64 @@ msgstr "Uyğunlaşdırma yoxlanmalıdır"
 msgctxt "registrar.legacy_grade"
 msgid "İmtahan Mərkəzinin yoxlaması gözlənilir"
 msgstr "İmtahan Mərkəzinin yoxlaması gözlənilir"
+
+msgctxt "organizations.unit_detail"
+msgid "Aktiv müəllim"
+msgstr "Aktiv müəllim"
+
+msgctxt "organizations.unit_detail"
+msgid "İndiyə kimi müəllim"
+msgstr "İndiyə kimi müəllim"
+
+msgctxt "organizations.unit_detail"
+msgid "Cari ilin açılışı"
+msgstr "Cari ilin açılışı"
+
+msgctxt "organizations.unit_detail"
+msgid "Tədris ili üzrə açılışlar"
+msgstr "Tədris ili üzrə açılışlar"
+
+msgctxt "organizations.unit_detail"
+msgid "Bu fakültəyə hələ kafedra bağlanmayıb."
+msgstr "Bu fakültəyə hələ kafedra bağlanmayıb."
+
+msgctxt "organizations.unit_detail"
+msgid "Müəllim axtar…"
+msgstr "Müəllim axtar…"
+
+msgctxt "organizations.unit_detail"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "Uyğun müəllim tapılmadı."
+
+msgctxt "organizations.unit_detail"
+msgid "Hələ müəllim təyin edilməyib."
+msgstr "Hələ müəllim təyin edilməyib."
+
+msgctxt "organizations.unit_detail"
+msgid "Yüklənə bilmədi. Yenidən cəhd edin."
+msgstr "Yüklənə bilmədi. Yenidən cəhd edin."
+
+msgctxt "organizations.unit_detail"
+msgid "Struktur yolu"
+msgstr "Struktur yolu"
+
+msgid "Passiv"
+msgstr "Passiv"
+
+msgid "Müəllimlər"
+msgstr "Müəllimlər"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s aktiv"
+msgstr "%(n)s aktiv"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s indiyə kimi"
+msgstr "%(n)s indiyə kimi"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s daha"
+msgstr "%(n)s daha"

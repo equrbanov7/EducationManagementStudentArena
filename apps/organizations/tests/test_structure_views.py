@@ -9,13 +9,18 @@ Yoxlanılır:
 - axtarış / fakültə filtri
 """
 
+import uuid
+
 from django.contrib.auth import get_user_model
+from django.db import connection
 from django.test import Client, TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from core.constants import OrganizationType, OrgUnitType
+from apps.registrar.models import CourseOffering, Subject
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 
-from ..models import Membership, Organization, OrgUnit
+from ..models import AcademicPeriod, Membership, Organization, OrgUnit
 
 User = get_user_model()
 
@@ -303,3 +308,278 @@ class KafedraTeacherAssignmentTests(StructureViewsTestBase):
         )
         self.kafedra.refresh_from_db()
         self.assertEqual(self.kafedra.head_id, self.teacher_user.id)
+
+
+class TeacherCountTests(StructureViewsTestBase):
+    """Aktiv (cari tədris ili) / indiyə kimi müəllim sayı ayrımı.
+
+    Bax apps/organizations/structure_views/_shared.py
+    (``_current_academic_year_period_ids`` / ``_active_teacher_user_ids``).
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.current_period = AcademicPeriod.objects.create(
+            organization=self.organization,
+            name="2025/2026 Payız",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2025/2026",
+            start_date="2025-09-01",
+            end_date="2026-01-31",
+            is_current=True,
+        )
+        self.past_period = AcademicPeriod.objects.create(
+            organization=self.organization,
+            name="2021/2022 Payız",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2021/2022",
+            start_date="2021-09-01",
+            end_date="2022-01-31",
+        )
+        self.subject = Subject.objects.create(organization=self.organization, code="TST101", name="Test fənni", ects=5)
+
+        # teacher_user: kafedraya təyin olunub VƏ cari ildə dərs deyir → aktiv.
+        self.teacher_membership.scope_unit = self.kafedra
+        self.teacher_membership.save(update_fields=["scope_unit"])
+        CourseOffering.objects.create(
+            organization=self.organization,
+            subject=self.subject,
+            period=self.current_period,
+            instructor=self.teacher_user,
+        )
+
+        # İkinci müəllim: eyni kafedraya təyin olunub, AMMA yalnız köhnə ildə
+        # dərs deyib → "indiyə kimi"yə düşür, "aktiv"ə YOX.
+        self.past_teacher = User.objects.create_user(
+            username="structure_past_teacher",
+            email="structure_past_teacher@example.com",
+            password="testpass123",
+        )
+        Membership.objects.create(
+            user=self.past_teacher,
+            organization=self.organization,
+            role=self.organization.roles.get(name="teacher"),
+            is_active=True,
+            scope_unit=self.kafedra,
+        )
+        CourseOffering.objects.create(
+            organization=self.organization,
+            subject=self.subject,
+            period=self.past_period,
+            instructor=self.past_teacher,
+        )
+
+    def test_kafedra_list_shows_active_and_total_counts_separately(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.kafedras_url)
+        self.assertEqual(response.status_code, 200)
+        kafedra_row = response.context["org_kafedras_section"]["kafedras"][0]
+        self.assertEqual(kafedra_row.active_teacher_count, 1)
+        self.assertEqual(kafedra_row.teacher_count, 2)
+
+    def test_faculty_list_aggregates_teacher_counts_from_children(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.faculties_url)
+        self.assertEqual(response.status_code, 200)
+        faculty_row = response.context["org_faculties_section"]["faculties"][0]
+        self.assertEqual(faculty_row.active_teacher_count, 1)
+        self.assertEqual(faculty_row.teacher_count, 2)
+
+    def test_teacher_who_never_taught_counts_only_toward_total(self):
+        idle_teacher = User.objects.create_user(
+            username="structure_idle_teacher",
+            email="structure_idle_teacher@example.com",
+            password="testpass123",
+        )
+        Membership.objects.create(
+            user=idle_teacher,
+            organization=self.organization,
+            role=self.organization.roles.get(name="teacher"),
+            is_active=True,
+            scope_unit=self.kafedra,
+        )
+        self.client.force_login(self.owner)
+        response = self.client.get(self.kafedras_url)
+        kafedra_row = response.context["org_kafedras_section"]["kafedras"][0]
+        self.assertEqual(kafedra_row.teacher_count, 3)
+        self.assertEqual(kafedra_row.active_teacher_count, 1)
+
+    def test_deactivated_user_membership_excluded_from_both_counts(self):
+        """Deaktiv istifadəçinin köhnə üzvlüyü nə "aktiv", nə "indiyə kimi"
+        sayılmamalıdır — sayğac və siyahı eyni mənbədən gəlməlidir (əvvəlki
+        annotate-based sayğac bunu nəzərə almırdı, siyahı isə nəzərə alırdı)."""
+        self.teacher_user.is_active = False
+        self.teacher_user.save(update_fields=["is_active"])
+        self.client.force_login(self.owner)
+        response = self.client.get(self.kafedras_url)
+        kafedra_row = response.context["org_kafedras_section"]["kafedras"][0]
+        # Yalnız past_teacher qalır (indiyə kimi=1, aktiv=0).
+        self.assertEqual(kafedra_row.teacher_count, 1)
+        self.assertEqual(kafedra_row.active_teacher_count, 0)
+
+
+class TeacherCountQueryBudgetTests(StructureViewsTestBase):
+    """Sorğu sayı səhifədəki vahid sayı ilə ARTMAMALIDIR (bax tapşırıq şərti)."""
+
+    def setUp(self):
+        super().setUp()
+        self.current_period = AcademicPeriod.objects.create(
+            organization=self.organization,
+            name="2025/2026 Payız",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2025/2026",
+            start_date="2025-09-01",
+            end_date="2026-01-31",
+            is_current=True,
+        )
+        self.subject = Subject.objects.create(organization=self.organization, code="QB101", name="Query Budget", ects=5)
+        self.client.force_login(self.owner)
+
+    def _add_kafedra_with_teacher(self, index):
+        kafedra = OrgUnit.objects.create(
+            organization=self.organization,
+            parent=self.faculty,
+            unit_type=OrgUnitType.CHAIR,
+            name=f"Sorğu Kafedrası {index}",
+            slug=f"sorgu-kafedrasi-{index}",
+        )
+        teacher = User.objects.create_user(
+            username=f"qb_teacher_{index}", email=f"qb_teacher_{index}@example.com", password="testpass123"
+        )
+        Membership.objects.create(
+            user=teacher,
+            organization=self.organization,
+            role=self.organization.roles.get(name="teacher"),
+            is_active=True,
+            scope_unit=kafedra,
+        )
+        CourseOffering.objects.create(
+            organization=self.organization, subject=self.subject, period=self.current_period, instructor=teacher
+        )
+        return kafedra
+
+    def test_kafedra_list_query_count_is_independent_of_unit_count(self):
+        for i in range(2):
+            self._add_kafedra_with_teacher(i)
+        # İsti-tur: ilk giriş sonrası sessiya sətri bir dəfəlik UPDATE olunur
+        # (Django session engine) — bu, ölçüyə aidiyyatı olmayan "gizli" sorğu
+        # sayı fərqi yaradırdı. Ölçümdən ƏVVƏL bir dəfə çağırıb sabitləşdiririk.
+        self.client.get(self.kafedras_url)
+        with CaptureQueriesContext(connection) as small:
+            response = self.client.get(self.kafedras_url)
+        self.assertEqual(response.status_code, 200)
+
+        for i in range(2, 15):
+            self._add_kafedra_with_teacher(i)
+        with CaptureQueriesContext(connection) as large:
+            response = self.client.get(self.kafedras_url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            len(small.captured_queries),
+            len(large.captured_queries),
+            "Kafedra siyahısının sorğu sayı kafedra/müəllim sayı ilə artmamalıdır",
+        )
+
+    def test_faculty_list_query_count_is_independent_of_unit_count(self):
+        for i in range(2):
+            self._add_kafedra_with_teacher(i)
+        self.client.get(self.faculties_url)  # isti-tur — bax yuxarıdakı şərh
+        with CaptureQueriesContext(connection) as small:
+            response = self.client.get(self.faculties_url)
+        self.assertEqual(response.status_code, 200)
+
+        for i in range(2, 15):
+            self._add_kafedra_with_teacher(i)
+        with CaptureQueriesContext(connection) as large:
+            response = self.client.get(self.faculties_url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            len(small.captured_queries),
+            len(large.captured_queries),
+            "Fakültə siyahısının sorğu sayı kafedra/müəllim sayı ilə artmamalıdır",
+        )
+
+
+class UnitDetailViewTests(StructureViewsTestBase):
+    """ "Ətraflı bax" AJAX endpoint-i (organizations:structure_unit_detail)."""
+
+    def setUp(self):
+        super().setUp()
+        self.teacher_membership.scope_unit = self.kafedra
+        self.teacher_membership.save(update_fields=["scope_unit"])
+        self.detail_url = reverse(
+            "organizations:structure_unit_detail", kwargs={"slug": self.organization.slug, "unit_id": self.kafedra.id}
+        )
+        self.faculty_detail_url = reverse(
+            "organizations:structure_unit_detail", kwargs={"slug": self.organization.slug, "unit_id": self.faculty.id}
+        )
+
+    def test_owner_can_fetch_kafedra_detail(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.detail_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["ok"])
+        self.assertIn("Test Kafedrası", payload["html"])
+
+    def test_owner_can_fetch_faculty_detail(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.faculty_detail_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["ok"])
+        self.assertIn("Test Fakültəsi", payload["html"])
+
+    def test_student_forbidden(self):
+        self.client.force_login(self.student_user)
+        response = self.client.get(self.detail_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 403)
+
+    def test_outsider_forbidden(self):
+        self.client.force_login(self.outsider)
+        response = self.client.get(self.detail_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 403)
+
+    def test_unknown_unit_returns_404(self):
+        self.client.force_login(self.owner)
+        missing_url = reverse(
+            "organizations:structure_unit_detail",
+            kwargs={"slug": self.organization.slug, "unit_id": uuid.uuid4()},
+        )
+        response = self.client.get(missing_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 404)
+
+    def test_dean_scoped_to_own_faculty_cannot_open_other_faculty(self):
+        """Scope-suz sızma bloker tapıntısı (bax CLAUDE.md) — dekan yalnız öz
+        fakültəsini (və onun kafedralarını) aça bilməlidir."""
+        other_faculty = OrgUnit.objects.create(
+            organization=self.organization,
+            unit_type=OrgUnitType.FACULTY,
+            name="Yad Fakültə",
+            slug="yad-fakulte-detail",
+        )
+        dean_role = self.organization.roles.get(name="dean")
+        dean = User.objects.create_user(
+            username="structure_dean", email="structure_dean@example.com", password="testpass123"
+        )
+        Membership.objects.create(
+            user=dean,
+            organization=self.organization,
+            role=dean_role,
+            scope_unit=self.faculty,
+            is_primary=True,
+            is_active=True,
+        )
+        self.client.force_login(dean)
+
+        own_response = self.client.get(self.detail_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(own_response.status_code, 200)
+
+        other_url = reverse(
+            "organizations:structure_unit_detail",
+            kwargs={"slug": self.organization.slug, "unit_id": other_faculty.id},
+        )
+        other_response = self.client.get(other_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(other_response.status_code, 404)

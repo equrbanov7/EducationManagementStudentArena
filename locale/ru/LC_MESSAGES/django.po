@@ -36030,3 +36030,64 @@ msgstr "Ожидает проверки Экзаменационного цен�
 msgctxt "registrar.legacy_grade"
 msgid "Düzəliş tələb olunur"
 msgstr "Требуется исправление"
+
+msgctxt "organizations.unit_detail"
+msgid "Aktiv müəllim"
+msgstr "Активные преподаватели"
+
+msgctxt "organizations.unit_detail"
+msgid "İndiyə kimi müəllim"
+msgstr "Преподаватели за всё время"
+
+msgctxt "organizations.unit_detail"
+msgid "Cari ilin açılışı"
+msgstr "Открытые курсы этого года"
+
+msgctxt "organizations.unit_detail"
+msgid "Tədris ili üzrə açılışlar"
+msgstr "Открытые курсы по учебным годам"
+
+msgctxt "organizations.unit_detail"
+msgid "Bu fakültəyə hələ kafedra bağlanmayıb."
+msgstr "К этому факультету ещё не привязана ни одна кафедра."
+
+msgctxt "organizations.unit_detail"
+msgid "Müəllim axtar…"
+msgstr "Поиск преподавателя…"
+
+msgctxt "organizations.unit_detail"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "Подходящий преподаватель не найден."
+
+msgctxt "organizations.unit_detail"
+msgid "Hələ müəllim təyin edilməyib."
+msgstr "Ещё не назначен ни один преподаватель."
+
+msgctxt "organizations.unit_detail"
+msgid "Yüklənə bilmədi. Yenidən cəhd edin."
+msgstr "Не удалось загрузить. Попробуйте снова."
+
+msgctxt "organizations.unit_detail"
+msgid "Struktur yolu"
+msgstr "Путь по структуре"
+
+msgid "Passiv"
+msgstr "Неактивен"
+
+msgid "Müəllimlər"
+msgstr "Преподаватели"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s aktiv"
+msgstr "%(n)s активных"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s indiyə kimi"
+msgstr "%(n)s за всё время"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s daha"
+msgstr "ещё %(n)s"

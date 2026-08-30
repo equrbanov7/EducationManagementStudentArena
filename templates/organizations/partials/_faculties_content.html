@@ -72,9 +72,10 @@
                         <th>{% trans 'Fakültə' %}</th>
                         <th>{% trans 'Kod' %}</th>
                         <th>{% trans 'Kafedra' %}</th>
+                        <th>{% trans 'Müəllim' %}</th>
                         <th>{% trans 'Rəhbər (dekan)' %}</th>
                         <th>{% trans 'Yaradılıb' %}</th>
-                        {% if s.can_edit or s.can_delete or s.can_assign_head %}<th class="org-management__actions-col">{% trans 'Əməliyyatlar' %}</th>{% endif %}
+                        <th class="org-management__actions-col">{% trans 'Əməliyyatlar' %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,6 +93,12 @@
                             <td>{% if faculty.code %}<span class="org-management__badge">{{ faculty.code }}</span>{% else %}<span class="org-management__muted-cell">—</span>{% endif %}</td>
                             <td><span class="org-management__badge org-management__badge--green">{{ faculty.kafedra_count }}</span></td>
                             <td>
+                                <div class="org-management__teacher-split">
+                                    <span class="org-management__badge org-management__badge--green">{% blocktrans with n=faculty.active_teacher_count context 'organizations.unit_detail' %}{{ n }} aktiv{% endblocktrans %}</span>
+                                    <span class="org-management__badge">{% blocktrans with n=faculty.teacher_count context 'organizations.unit_detail' %}{{ n }} indiyə kimi{% endblocktrans %}</span>
+                                </div>
+                            </td>
+                            <td>
                                 {% if faculty.head %}
                                     {{ faculty.head.get_full_name|default:faculty.head.username }}
                                 {% else %}
@@ -99,9 +106,15 @@
                                 {% endif %}
                             </td>
                             <td>{{ faculty.created_at|date:"SHORT_DATE_FORMAT" }}</td>
-                            {% if s.can_edit or s.can_delete or s.can_assign_head %}
                             <td>
                                 <div class="org-management__actions">
+                                    <button type="button"
+                                            class="org-management__icon-btn js-org-unit-detail"
+                                            title="{% trans 'Ətraflı bax' %}"
+                                            data-unit-name="{{ faculty.name }}"
+                                            data-detail-url="{% url 'organizations:structure_unit_detail' s.organization.slug faculty.id %}">
+                                        <i class="fas fa-circle-info"></i>
+                                    </button>
                                     {% if s.can_assign_head %}
                                     <button type="button"
                                             class="org-management__icon-btn js-org-unit-head"
@@ -136,7 +149,6 @@
                                     {% endif %}
                                 </div>
                             </td>
-                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -303,6 +315,7 @@
         </div>
     </div>
     {% endif %}
+    {% include "organizations/partials/_unit_detail_modal.html" %}
     {% endif %}
 </div>
 {% endwith %}
