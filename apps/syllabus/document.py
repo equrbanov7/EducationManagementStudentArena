@@ -157,7 +157,9 @@ def build_document(syllabus, version) -> dict:
         "approved_at": getattr(version, "approved_at", None) if version is not None else None,
         "approved_by": (approver.get_full_name() or approver.username).strip() if approver is not None else "",
         "author": _author_name(syllabus),
-        "blocks": [{"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)],
+        "blocks": [
+            {"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)
+        ],
     }
 
 
