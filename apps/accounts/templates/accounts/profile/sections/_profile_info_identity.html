@@ -232,17 +232,21 @@
                 <div class="info-value info-value--readonly">{{ entry.department.name|default:profile_not_set }}</div>
             </div>
             {% endfor %}
+            {# Akademik struktur: hər səviyyə (Fakültə/Kafedra/İxtisas/Qrup — #}
+            {# tenant-a görə mövcud olanlar) AYRICA kart kimi göstərilir — #}
+            {# əvvəllər tək "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ı idi #}
+            {# (sahib şikayəti: çirkin görünürdü). Siyahı ``build_student_structure_levels`` #}
+            {# ilə view-də qurulur (bax context_builder/_helpers.py). #}
             {% for record in student_records %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-user-graduate"></i> {% trans 'İxtisas' %}</div>
-                <div class="info-value">{{ record.program.name }}</div>
+            {% for level in record.structure_levels %}
+            <div class="info-item profile-structure-card">
+                <div class="info-label"><i class="fas {{ level.icon }}"></i> {{ level.label }}</div>
+                <div class="info-value">
+                    {{ level.value }}
+                    {% if level.code %}<span class="profile-structure-card__code">{{ level.code }}</span>{% endif %}
+                </div>
             </div>
-            {% if record.group %}
-            <div class="info-item info-item--full">
-                <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Akademik struktur' %}</div>
-                <div class="info-value">{{ record.group.get_full_path }}</div>
-            </div>
-            {% endif %}
+            {% endfor %}
             {% endfor %}
             {% if teacher_subjects %}
             <div class="info-item info-item--full">

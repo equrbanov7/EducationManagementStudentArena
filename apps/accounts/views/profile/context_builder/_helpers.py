@@ -2,6 +2,7 @@
 
 from django.utils.translation import gettext as _
 
+from core.constants import OrgUnitType
 from core.tenancy import restore_request_organization_from_profile
 
 from ....models import ProfileRole
@@ -189,3 +190,114 @@ def build_teacher_subject_rows(user, organization):
             }
         )
     return result
+
+
+#: Səviyyə (unit_type) → kart ikonu. Fakültə/kafedra ikonları teacher-tərəfli
+#: kartlarla (yuxarıdakı ``academic_units`` loop, template) eyni saxlanılıb ki,
+#: eyni "Akademik məlumatlar" grid-i daxilində rol fərqi ilə ikon uyğunsuzluğu
+#: olmasın.
+_STRUCTURE_LEVEL_ICON_DEFAULT = "fa-layer-group"
+_STRUCTURE_LEVEL_ICONS = {
+    OrgUnitType.RECTORATE: "fa-landmark",
+    OrgUnitType.VICE_RECTORATE: "fa-landmark",
+    OrgUnitType.FACULTY: "fa-building-columns",
+    OrgUnitType.DEANERY: "fa-building-columns",
+    OrgUnitType.INSTITUTE: "fa-building-columns",
+    OrgUnitType.DIRECTORATE: "fa-building-columns",
+    OrgUnitType.CHAIR: "fa-sitemap",
+    OrgUnitType.DEPARTMENT: "fa-sitemap",
+    OrgUnitType.SECTION: "fa-sitemap",
+    OrgUnitType.DIVISION: "fa-sitemap",
+    OrgUnitType.SPECIALTY: "fa-user-graduate",
+    OrgUnitType.GROUP: "fa-people-group",
+    OrgUnitType.PARALLEL: "fa-people-group",
+    OrgUnitType.CLASS: "fa-people-group",
+    OrgUnitType.GRADE_LEVEL: "fa-people-group",
+    OrgUnitType.LAB: "fa-flask",
+    OrgUnitType.CENTER: "fa-building",
+    OrgUnitType.BRANCH: "fa-building",
+    OrgUnitType.CLASSROOM: "fa-door-open",
+    OrgUnitType.UNIT: "fa-layer-group",
+}
+
+#: ``OrgUnitType.ALL_CHOICES``-in lookup forması — ``get_unit_type_display()``
+#: ilə EYNİ pgettext_lazy tərcümələrini yenidən istifadə edir (yeni mətn YOX).
+_UNIT_TYPE_LABELS = dict(OrgUnitType.ALL_CHOICES)
+
+
+def _structure_level(*, unit_type, label, value, code=""):
+    return {
+        "unit_type": unit_type,
+        "icon": _STRUCTURE_LEVEL_ICONS.get(unit_type, _STRUCTURE_LEVEL_ICON_DEFAULT),
+        "label": label,
+        "value": value,
+        "code": code,
+    }
+
+
+def build_student_structure_levels(record):
+    """Tələbənin akademik struktur kartları — Fakültə/Kafedra/İxtisas/Qrup
+    (və ya tenant-a görə mövcud olan digər səviyyələr), hər biri AYRICA kart
+    kimi göstərilmək üçün sıralı siyahı.
+
+    SAHİB ŞİKAYƏTİ (2026-08): əvvəllər bu, ``OrgUnit.get_full_path()`` ilə tək
+    sətir "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ı idi — çirkin
+    görünürdü. İndi hər səviyyə öz kartındadır.
+
+    İXTİSAS AYRICA ``record.program``-dan qurulur (ad + ``Program.code``),
+    ``record.group``-un əcdad zəncirindəki specialty node-a ETİBAR EDİLMİR:
+    ``Program.specialty_unit`` hər tenant-da təyin olunmaya bilər və bəzi
+    tenant-larda qrup birbaşa kafedra altında ola bilər (bax
+    [[project_group_sector_variability]] — akademik struktur tenant-a görə
+    dəyişir, sərt 4-səviyyəli fərziyyə YOXDUR). Zəncirdə specialty node
+    rast gəlinsə, təkrarlanmasın deyə İXTİSAS kartı ilə əvəz olunur (adı və
+    kodu proqramdan gəlir), YOX YERİNƏ isə Qrup-dan əvvəl əlavə olunur.
+
+    Mövcud olmayan səviyyə üçün BOŞ KART göstərilmir (gizlədilir) — çünki bu
+    səviyyə THIS tələbənin strukturunda sadəcə YOXDUR (unset deyil, mövcud
+    deyil); "—" ilə göstərmək "səviyyə var amma dəyəri boşdur" mənasını verib
+    yanlış təsəvvür yaradardı. Kod yoxdursa (``Program.code`` boşdursa) yalnız
+    kod nişanı gizlədilir, kart özü qalır.
+    """
+    chain = []
+    if record.group_id:
+        chain = [*reversed(record.group.get_ancestors()), record.group]
+
+    levels = []
+    specialty_shown = False
+    for node in chain:
+        if node.unit_type == OrgUnitType.SPECIALTY:
+            specialty_shown = True
+            levels.append(
+                _structure_level(
+                    unit_type=OrgUnitType.SPECIALTY,
+                    label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
+                    value=record.program.name,
+                    code=(record.program.code or "").strip(),
+                )
+            )
+            continue
+        levels.append(
+            _structure_level(
+                unit_type=node.unit_type,
+                label=node.get_unit_type_display(),
+                value=node.name,
+            )
+        )
+
+    if record.program_id and not specialty_shown:
+        # Zəncirdə specialty node yoxdur (tenant-a görə) — İxtisas kartı
+        # Qrup-dan (siyahının sonuncu üzvü) əvvəl əlavə olunur; qrup da
+        # yoxdursa (``chain`` boşdur) təkcə İxtisas kartı qalır.
+        insert_at = max(len(levels) - 1, 0)
+        levels.insert(
+            insert_at,
+            _structure_level(
+                unit_type=OrgUnitType.SPECIALTY,
+                label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
+                value=record.program.name,
+                code=(record.program.code or "").strip(),
+            ),
+        )
+
+    return levels
