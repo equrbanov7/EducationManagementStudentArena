@@ -17,6 +17,12 @@ urlpatterns = [
     # Fakültə və kafedralar ayrı idarə olunur (sidebar-da ayrı bölmələr).
     path("<slug:slug>/structure/faculties/", structure_views.organization_faculties, name="structure_faculties"),
     path("<slug:slug>/structure/kafedras/", structure_views.organization_kafedras, name="structure_kafedras"),
+    # Fakültə/kafedra "ətraflı görünüş" modalı (AJAX-only JSON fraqment).
+    path(
+        "<slug:slug>/structure/units/<uuid:unit_id>/",
+        structure_views.organization_unit_detail,
+        name="structure_unit_detail",
+    ),
     path("<slug:slug>/members/", views.organization_members, name="members"),
     path("<slug:slug>/roles/", views.organization_roles, name="roles"),
     path("<slug:slug>/settings/", views.organization_settings, name="settings"),
