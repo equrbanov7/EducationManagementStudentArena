@@ -41,6 +41,11 @@ from .legacy_grade_field_contracts import (
     SCORE_SHEET_EXPORT_FIELDS,
     YEKUN_EVIDENCE_FIELDS,
 )
+from .lesson_meta_field_contracts import (
+    LESSON_ROOM_FIELDS,
+    ROOM_REGISTRY_FIELDS,
+    SYLLABUS_TOPIC_FIELDS,
+)
 from .syllabus_field_contracts import (
     JOURNAL_SYLLABUS_FIELDS,
     SILLABUS_FIELDS,
@@ -81,6 +86,13 @@ _AUDITED_CONTRACTS = {
     JOURNAL_SYLLABUS_FIELDS.fingerprint: JOURNAL_SYLLABUS_FIELDS,
     SILLABUS_FIELDS.fingerprint: SILLABUS_FIELDS,
     SILLABUS_SELF_WORK_FIELDS.fingerprint: SILLABUS_SELF_WORK_FIELDS,
+    # J10/J11 (legacy_rooms + journal_lesson_meta) — dərs metadatası.
+    # ``sillabus_sem_muh`` plan-da ``design_gated``-dir: iddia edilə bilməz,
+    # audited kontraktla OXUNA bilər (J9 ilə eyni seam).  ``LESSON_ROOM_FIELDS``
+    # ``JOURNAL_DATES_FIELDS``-dən AYRIDIR — J3-ün möhür resepti toxunulmur.
+    LESSON_ROOM_FIELDS.fingerprint: LESSON_ROOM_FIELDS,
+    ROOM_REGISTRY_FIELDS.fingerprint: ROOM_REGISTRY_FIELDS,
+    SYLLABUS_TOPIC_FIELDS.fingerprint: SYLLABUS_TOPIC_FIELDS,
 }
 
 

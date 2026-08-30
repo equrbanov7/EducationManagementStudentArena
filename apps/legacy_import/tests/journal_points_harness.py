@@ -30,6 +30,11 @@ from apps.legacy_import.services.legacy_grade_field_contracts import (
     SCORE_SHEET_EXPORT_FIELDS,
     YEKUN_EVIDENCE_FIELDS,
 )
+from apps.legacy_import.services.lesson_meta_field_contracts import (
+    LESSON_ROOM_FIELDS,
+    ROOM_REGISTRY_FIELDS,
+    SYLLABUS_TOPIC_FIELDS,
+)
 from apps.legacy_import.services.rehearsal_authorizer import (
     COURSE_OFFERING_MODEL_LABEL,
     ENROLLMENT_MODEL_LABEL,
@@ -62,6 +67,7 @@ from core.rls import clear_rls_user, set_rls_user
 PHASE_KEYS = (
     "academic_structure",
     "academic_catalog",
+    "legacy_rooms",
     "identity_cohort",
     "student_placement",
     "worker_materialisation",
@@ -70,6 +76,7 @@ PHASE_KEYS = (
     "journal_offerings",
     "journal_enrollments",
     "journal_lessons",
+    "journal_lesson_meta",
     "journal_marks",
     "journal_components",
     "journal_entry_scores",
@@ -86,6 +93,11 @@ STUDENT_A = 42
 STUDENT_B = 43
 SYLLABUS_ID = 5
 SYLLABUS_UNIQID = "sylBx39tsK"
+#: ``sillabus_sem_muh.id`` — ``journals_dates_rooms.sillabus`` MƏHZ ona düşür
+#: (``sillabus.id``-yə deyil; canlı uyğunluq 99.3 % vs 5 %).
+SYLLABUS_TOPIC_ID = 77
+#: ``rooms.id`` — dərs metadatasının ``room`` sütununun defolt hədəfi.
+ROOM_ID = 4
 
 
 def _discovered_columns(*contracts):
@@ -118,6 +130,9 @@ COLUMNS_BY_TABLE = _discovered_columns(
     SCORE_SHEET_EXPORT_FIELDS,
     SILLABUS_FIELDS,
     SILLABUS_SELF_WORK_FIELDS,
+    LESSON_ROOM_FIELDS,
+    ROOM_REGISTRY_FIELDS,
+    SYLLABUS_TOPIC_FIELDS,
 )
 # J-V7 kəsimindən əvvəl / sonra (2022-03-30).
 BEFORE_CUTOFF = datetime.datetime(2022, 1, 5, 9, 0, 0)
@@ -297,6 +312,50 @@ def dates_row(legacy_pk, journal_id=2, month=12, day=30, time_value="14:00"):
     return {"id": legacy_pk, "journal_id": journal_id, "month": month, "day": day, "time": time_value}
 
 
+def room_row(legacy_pk, *, name="03/2", bina=3, max_student_count="28"):
+    """``rooms`` sətri (J10).  ``bina`` KORPUS-dur, canlı sxemdə ``int(1)``."""
+
+    return {"id": legacy_pk, "name": name, "bina": bina, "max_student_count": max_student_count}
+
+
+def lesson_meta_row(
+    legacy_pk,
+    *,
+    journal_id=2,
+    month=12.0,
+    day=30.0,
+    times="14:00",
+    room=4,
+    sillabus=SYLLABUS_TOPIC_ID,
+    saatliq_ders=1.0,
+    fake=0,
+):
+    """``journals_dates_rooms`` sətri (J11).
+
+    ⚠️ ``month``/``day``/``saatliq_ders`` canlı sxemdə ``float``-dur (dərs
+    cədvəlindəki qarşılıqlarından FƏRQLİ) — fixture həmin tipi saxlayır ki,
+    ``legacy_calendar_int`` real şəraiti sınasın.
+    """
+
+    return {
+        "id": legacy_pk,
+        "journal_id": journal_id,
+        "month": month,
+        "day": day,
+        "times": times,
+        "room": room,
+        "sillabus": sillabus,
+        "saatliq_ders": saatliq_ders,
+        "fake": fake,
+    }
+
+
+def syllabus_topic_row(legacy_pk=SYLLABUS_TOPIC_ID, *, movzu="Mühazirə mövzusu"):
+    """``sillabus_sem_muh`` sətri — dərsin MÖVZUSU (J11)."""
+
+    return {"id": legacy_pk, "movzu": movzu}
+
+
 def point_row(
     legacy_pk,
     *,
@@ -424,12 +483,16 @@ def tables(
     topics=None,
     exam_attempts=None,
     score_sheet_exports=None,
+    rooms=None,
+    lesson_meta=None,
+    lesson_topics=None,
 ):
-    """Doqquz cədvəlin tam dəsti — verilməyən hər biri məntiqli defolt alır.
+    """On iki cədvəlin tam dəsti — verilməyən hər biri məntiqli defolt alır.
 
     ``sillabus`` defolt olaraq bir sətirdir (jurnalın ``sillabus_id``-i ona
     düşür), ``sillabus_serbest_is`` isə BOŞdur: mövzuları yalnız J9 testləri
-    verir, qalan fazalar onlardan asılı deyil."""
+    verir, qalan fazalar onlardan asılı deyil.  Eyni qayda J10/J11 üçün:
+    ``rooms``/``journals_dates_rooms``/``sillabus_sem_muh`` defolt BOŞdur."""
 
     return {
         SEMESTR_JURNAL_FIELDS.source_table: list(semesters if semesters is not None else [semester_row()]),
@@ -445,6 +508,9 @@ def tables(
         SILLABUS_SELF_WORK_FIELDS.source_table: list(topics or []),
         EXAM_ENTRY_EXIT_FIELDS.source_table: list(exam_attempts or []),
         SCORE_SHEET_EXPORT_FIELDS.source_table: list(score_sheet_exports or []),
+        ROOM_REGISTRY_FIELDS.source_table: list(rooms or []),
+        LESSON_ROOM_FIELDS.source_table: list(lesson_meta or []),
+        SYLLABUS_TOPIC_FIELDS.source_table: list(lesson_topics or []),
     }
 
 

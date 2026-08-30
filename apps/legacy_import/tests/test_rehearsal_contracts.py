@@ -19,6 +19,7 @@ from apps.legacy_import.services.rehearsal_authorizer import (
     CURRICULUM_MODEL_LABEL,
     CURRICULUM_SUBJECT_MODEL_LABEL,
     ENROLLMENT_MODEL_LABEL,
+    EXAM_ROOM_MODEL_LABEL,
     LEGACY_GRADE_ARTIFACT_MODEL_LABEL,
     LEGACY_GRADE_FACT_MODEL_LABEL,
     LESSON_MODEL_LABEL,
@@ -177,11 +178,12 @@ def test_phase_registry_fingerprint_is_pinned():
     # update BOTH the constant and this line consciously (SLICE 3A gate 5).
     assert (
         contracts._EXPECTED_PHASE_REGISTRY_FINGERPRINT
-        == "61fa24d9415a3c96473b16d19b33edf5cb4d5a9f797a5e643329e49c0e5dee5c"
+        == "f6f2ad826a28f9fea24b552c80857554e41e3ca5334d955c3ea06dcfb9cfb0af"
     )
     assert [phase.phase_key for phase in registry] == [
         "academic_structure",
         "academic_catalog",
+        "legacy_rooms",
         "identity_cohort",
         "student_placement",
         "worker_materialisation",
@@ -190,6 +192,7 @@ def test_phase_registry_fingerprint_is_pinned():
         "journal_offerings",
         "journal_enrollments",
         "journal_lessons",
+        "journal_lesson_meta",
         "journal_marks",
         "journal_components",
         "journal_entry_scores",
@@ -201,27 +204,33 @@ def test_phase_registry_fingerprint_is_pinned():
         "legacy_grade_artifacts",
     ]
     # Structure (supplies Program) before the catalogue that resolves against
-    # it, before identity, before placement, before the worker scope pass,
-    # before the record that needs all of them, and before the journal skeleton
-    # (J0 periods, then the J1 offerings that resolve against them, then the
-    # J2 enrollments and J3 lessons that resolve against the offerings), and
-    # finally the J4-J9 grade cluster (marks → components → finals →
-    # selfwork → lock → reconcile) — strictly ascending, with 30 left free
-    # for syllabus work that does not depend on a journal offering.  Every derived phase accounts for no source table at all
-    # (D-2 / E-2 / V-22 / FAZA 3B).
+    # it, before the room registry J11 needs, before identity, before placement,
+    # before the worker scope pass, before the record that needs all of them,
+    # and before the journal skeleton (J0 periods, then the J1 offerings that
+    # resolve against them, then the J2 enrollments and J3 lessons that resolve
+    # against the offerings), and finally the J4-J9 grade cluster (marks →
+    # components → finals → selfwork → lock → reconcile) — strictly ascending,
+    # with 30 left free for syllabus work that does not depend on a journal
+    # offering.  J11 (``journal_lesson_meta``, 39) sits between J3 and J4 ON
+    # PURPOSE: it corrects ``Lesson.hours`` before ``journal_marks`` recomputes
+    # the absence totals from it.  Every derived phase accounts for no source
+    # table at all (D-2 / E-2 / V-22 / FAZA 3B).
     assert [phase.order for phase in registry] == [
-        10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 45, 46, 47, 48, 49,
+        10, 12, 13, 20, 25, 26, 28, 32, 34, 36, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49,
     ]  # fmt: skip
     assert [tuple(phase.source_tables) for phase in registry] == [
         ("departments", "speciality", "groups"),
         ("lessons", "curricula", "curricula_plan"),
+        (),  # legacy_rooms reads ``rooms`` without claiming it
         ("students", "workers"),
-        *([()] * 16),
+        *([()] * 17),
     ]
     # The batch-accounted run still claims exactly 880 + 6 071 + 8 545 source
-    # rows — all ELEVEN journal phases are derived and contribute 0 each
-    # (J9 reads ``sillabus``/``sillabus_serbest_is`` without claiming them:
-    # both are ``design_gated`` and therefore structurally unclaimable).
+    # rows — every journal/metadata phase is derived and contributes 0 each
+    # (J9 reads ``sillabus``/``sillabus_serbest_is`` and J11 reads
+    # ``sillabus_sem_muh`` without claiming them: all three are ``design_gated``
+    # and therefore structurally unclaimable, while ``rooms`` and
+    # ``journals_dates_rooms`` are claimable but deliberately left unclaimed).
     assert sum(phase.declared_source_rows(load_legacy_table_plan()) for phase in registry) == 15_496
 
 
@@ -742,6 +751,10 @@ def test_target_validators_expose_only_allowlisted_models_and_require_tenant_own
         ASSESSMENT_SCHEME_MODEL_LABEL,
         LEGACY_GRADE_FACT_MODEL_LABEL,
         LEGACY_GRADE_ARTIFACT_MODEL_LABEL,
+        # J10 (legacy_rooms): ``registrar.Lesson.room`` FK-sının hədəfi.  Model
+        # ``django.apps`` ilə həll olunur, ona görə allowlist genişlənsə də
+        # ``legacy_import → exams`` idxal tili yaranmır.
+        EXAM_ROOM_MODEL_LABEL,
     )
     assert all(re.fullmatch(MODEL_LABEL_PATTERN, label) for label in validators)
 

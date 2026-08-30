@@ -78,6 +78,11 @@ from apps.legacy_import.services.legacy_grade_field_contracts import (
     SCORE_SHEET_EXPORT_FIELDS,
     YEKUN_EVIDENCE_FIELDS,
 )
+from apps.legacy_import.services.lesson_meta_field_contracts import (
+    LESSON_ROOM_FIELDS,
+    ROOM_REGISTRY_FIELDS,
+    SYLLABUS_TOPIC_FIELDS,
+)
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
 from apps.legacy_import.services.rehearsal_contracts import (
     EmailTrustPolicy,
@@ -422,6 +427,15 @@ _ALLOWED_QB_ROWS = 5
 _YEKUN_ROWS = 10
 _EXAM_ATTEMPT_ROWS = 3
 _SCORE_SHEET_EXPORT_ROWS = 2
+# J10/J11: dərs metadatası klasterinin sintetik guşələri.  Cədvəllər fixture-da
+# REAL TİPLƏRİ ilə yaradılır (``scripts/check_legacy_fixture_types.py`` onları
+# canlı sxemlə tutuşdurur), lakin bu konformans axını hələ ``legacy_rooms`` /
+# ``journal_lesson_meta`` fazalarını İŞLƏTMİR — J9 (``journal_selfwork``) ilə
+# eyni forma.  Faza bura qoşulanda ``_FULL_PHASE_KEYS``/``_FULL_PHASE_ORDERS``
+# və ``_journal_scaled_plan`` da yenilənməlidir.
+_ROOM_ROWS = 12
+_LESSON_META_ROWS = 40
+_SYLLABUS_TOPIC_ROWS = 20
 # Bal sətirləri yalnız BU dörd MIGRATED jurnala (və 3 nömrəli V6-süzülmüş
 # jurnala) toxunur — jurnal-səviyyə möhür sayları belə dəqiq hesablana bilir.
 _POINT_JOURNALS = (1, 2, 6, 7)
@@ -507,7 +521,11 @@ _INT_COLUMNS = {
     # J0-J3: canlı sxemdə (DESCRIBE ilə təsdiqli) bu sütunlar ``int``-dir və
     # ``legacy_int`` mətn görəndə fail-closed olur — fixture real tipi saxlayır.
     "semestr_jurnal": ("is_current",),
-    "journals": ("lesson_id", "semestr", "teacher_id", "fake", "sonra_sil", "active", "fenn_saati"),
+    # ``sillabus_id`` YALNIZ J9-un ``JOURNAL_SYLLABUS_FIELDS`` proyeksiyasındadır
+    # (bu axın hələ konformans dəstində qoşulmayıb, ona görə sütun fixture-da
+    # yaradılmır).  Xəritədə saxlanır ki, ``check_legacy_fixture_types`` real
+    # sxemlə uyğun qalsın və J9 dəstə qoşulanda tip drift-i olmasın.
+    "journals": ("lesson_id", "semestr", "teacher_id", "fake", "sonra_sil", "active", "fenn_saati", "sillabus_id"),
     "journals_dates_added_by_teacher": ("journal_id", "month", "day"),
     # J4-J8: bal xanalarının rəqəm sütunları (``legacy_flag``/``student_id``
     # mətn görəndə fail-closed olur, ona görə fixture real tipi saxlayır).
@@ -529,6 +547,12 @@ _INT_COLUMNS = {
     ),
     "imthngrscxsblr": ("student_id", "lesson_id", "giris_point", "cixis_point", "type"),
     "balvereqi_logs": ("owner_id",),
+    # J10/J11: canlı ``rooms.bina`` ``tinyint``, dərs metadatasının FK/bayraq
+    # sütunları isə ``int``-dir.  ``month``/``day``/``saatliq_ders`` QƏSDƏN
+    # burada DEYİL — onlar ``float``-dur (aşağıdakı ``_FLOAT_COLUMNS``), bu da
+    # dərs cədvəlindəki ``int`` qarşılıqlarından FƏRQLİDİR.
+    "rooms": ("bina",),
+    "journals_dates_rooms": ("journal_id", "room", "sillabus", "fake"),
 }
 # ``added_date``/``updated_at``/``allowed_date_*`` DATETIME, ``time`` isə TIME
 # olmalıdır: J-V7 kəsimi, J-V4 sıralaması və dərs slotu məhz bu tiplərə baxır.
@@ -550,6 +574,9 @@ _FLOAT_COLUMNS = {
     "curricula_plan": ("kredit", "saat_aks", "saat_as", "saat_muh", "saat_sem", "saat_lab", "saat_prak"),
     # J8 çarpaz-yoxlaması: canlı ``yekun`` sütunları FLOAT-dur.
     "yekun": ("girish", "imtahanda", "yekun"),
+    # J11: təqvim sütunları da, dərs saatı da canlı sxemdə ``float``-dur —
+    # ``legacy_calendar_int``/``legacy_lesson_hours`` məhz bunu gözləyir.
+    "journals_dates_rooms": ("month", "day", "saatliq_ders"),
 }
 
 
@@ -1084,6 +1111,35 @@ def _score_sheet_export_values(legacy_pk):
     }
 
 
+def _room_values(legacy_pk):
+    # Ad təkrarı QƏSDƏNdir (canlı reyestrdə 25 belə cüt var): kimlik legacy
+    # koddan gəlir, addan yox.
+    return {
+        "name": f"0{legacy_pk % 6}/2",
+        "bina": (legacy_pk % 4) + 1,
+        "max_student_count": str(20 + (legacy_pk % 10)),
+    }
+
+
+def _lesson_meta_values(legacy_pk):
+    # ``saatliq_ders`` üç halı da əhatə edir: kəsr (0.5), 1 və 2 saat.
+    return {
+        "journal_id": _JOURNAL_MIGRATED_IDS[legacy_pk % len(_JOURNAL_MIGRATED_IDS)],
+        "month": 12.0,
+        "day": float(1 + (legacy_pk % 28)),
+        "times": "14:00",
+        "room": (legacy_pk % _ROOM_ROWS) + 1,
+        "sillabus": (legacy_pk % _SYLLABUS_TOPIC_ROWS) + 1,
+        "saatliq_ders": 0.5 if legacy_pk % 7 == 0 else float(1 + (legacy_pk % 2)),
+        "fake": 1 if legacy_pk % 10 == 0 else 0,
+    }
+
+
+def _syllabus_topic_values(legacy_pk):
+    # HTML entity QƏSDƏNdir: ``clean_text`` onu üç keçidlə açmalıdır.
+    return {"movzu": f"M&uuml;hazir&#601; m&ouml;vzusu {legacy_pk}"}
+
+
 # ``yekun`` cədvəli İKİ kontrakt tərəfindən oxunur: dar ``YEKUN_FIELDS``
 # (J5b/J8 möhür resepti) və geniş ``YEKUN_EVIDENCE_FIELDS`` (qiymət sübutu).
 # ``compile_safe_projection`` kontraktın sxemin ALT-ÇOXLUĞU olmasını tələb edir,
@@ -1143,6 +1199,12 @@ _FULL_TABLES = (
         _SCORE_SHEET_EXPORT_ROWS,
         _score_sheet_export_values,
     ),
+    # J10/J11: dərs metadatası klasteri.  ``who_is_added``/``department_id``
+    # decoy kimi əlavə edilmir — kontraktın default-deny proyeksiyası onları
+    # onsuz da kənarda saxlayır və fixture yalnız oxunan sütunları yaradır.
+    ("rooms", ROOM_REGISTRY_FIELDS, (), _ROOM_ROWS, _room_values),
+    ("journals_dates_rooms", LESSON_ROOM_FIELDS, (), _LESSON_META_ROWS, _lesson_meta_values),
+    ("sillabus_sem_muh", SYLLABUS_TOPIC_FIELDS, (), _SYLLABUS_TOPIC_ROWS, _syllabus_topic_values),
 )
 
 
