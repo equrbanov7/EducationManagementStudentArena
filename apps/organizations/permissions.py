@@ -82,6 +82,22 @@ PERMISSION_CATEGORIES = {
         "journal.correct",
         "journal.close",
     ],
+    # Sillabus axını (apps.syllabus) — müəllim yazır/göndərir, kafedra müdiri
+    # təsdiqləyir. Qərar açarları QƏSDƏN AYRIDIR: `syllabus.review` (növbəni açıb
+    # baxmaq) təsdiq hüququ VERMİR; `syllabus.approve`, `syllabus.revise` və
+    # `syllabus.reject` ayrı-ayrı verilə bilər ki, «baxan» ilə «qərar verən»
+    # bir-birindən ayrıla bilsin (əsasnamə 5.5 səlahiyyət ayrılığı prinsipi).
+    # `syllabus.manage` — administrativ əməllər (arxivləmə, kütləvi köçürmə).
+    "syllabus": [
+        "syllabus.view",
+        "syllabus.edit",
+        "syllabus.submit",
+        "syllabus.review",
+        "syllabus.approve",
+        "syllabus.revise",
+        "syllabus.reject",
+        "syllabus.manage",
+    ],
     # Tələbə qrupları (exams.StudentGroup) — qrup yaratmaq/idarə etmək açarı
     # permission-editordan istənilən rola (dekan, koordinator…) verilə bilər.
     # `group.manage` qapısı: apps/exams/views/teacher/groups.py.
@@ -143,6 +159,26 @@ PERMISSION_CATEGORIES = {
         # ayrıca icazə + ayrıca audit qeydi tələb edir.
         "user.grant_privileged",
     ],
+    # «Müəllimlər» / «Tələbələr» kataloqu (apps/accounts/services/people).
+    #
+    # QƏSDƏN `user.*`-dan AYRI PREFİKSDİR. `user.*` RİM mərkəzinin BÜTÜN
+    # hesablar üzrə (org-wide) əməliyyat dəstidir; `people.*` isə struktur
+    # SCOPE-una tabe olan kataloqdur — dekan yalnız öz fakültəsini görür.
+    # Eyni prefiksdə olsaydılar, RİM-ə verilən `user.*` wildcard-ı kataloqu da
+    # avtomatik açardı və əksinə: dekana verilən kataloq açarı onu RİM
+    # mərkəzinə buraxardı. Ayrı prefiks bu iki səthi struktur olaraq ayırır.
+    #
+    # Baxış açarları ayrıdır ki, «yalnız tələbələri görən» tyutor kimi rollar
+    # qurula bilsin; əlaqə (telefon/FİN) və demoqrafiya (cins/doğum tarixi)
+    # isə ayrıca PII qapılarıdır — siyahını görmək onları görmək demək deyil.
+    "people": [
+        "people.view_teachers",
+        "people.view_students",
+        "people.view_contacts",
+        "people.view_demographics",
+        "people.manage_status",
+        "people.manage_teacher_role",
+    ],
 }
 
 # Kateqoriya və icazə açarlarının AZ etiketləri.
@@ -162,12 +198,14 @@ PERMISSION_CATEGORY_LABELS = {
     "courses": "Kurslar",
     "grading": "Qiymətləndirmə",
     "journal": "Jurnal",
+    "syllabus": "Sillabus",
     "exams": "İmtahanlar",
     "appeal": "Apellyasiya",
     "analytics": "Analitika",
     "qa": "Keyfiyyət",
     "audit": "Audit jurnalı",
     "users": "Hesab idarəetməsi (RİM)",
+    "people": "Müəllim və tələbə kataloqu",
 }
 
 # ---------------------------------------------------------------------------
@@ -224,6 +262,15 @@ PERMISSION_LABELS = {
     "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
     "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
     "journal.close": pgettext_lazy(_PERM_CTX, "Semestr sonu jurnalları bağlamaq/açmaq"),
+    # syllabus
+    "syllabus.view": pgettext_lazy(_PERM_CTX, "Sillabuslara baxış"),
+    "syllabus.edit": pgettext_lazy(_PERM_CTX, "Sillabus qaralamasını redaktə etmək"),
+    "syllabus.submit": pgettext_lazy(_PERM_CTX, "Sillabusu təsdiqə göndərmək / geri çağırmaq"),
+    "syllabus.review": pgettext_lazy(_PERM_CTX, "Sillabus təsdiq növbəsinə baxmaq"),
+    "syllabus.approve": pgettext_lazy(_PERM_CTX, "Sillabusu təsdiqləmək"),
+    "syllabus.revise": pgettext_lazy(_PERM_CTX, "Sillabusu düzəliş üçün geri qaytarmaq"),
+    "syllabus.reject": pgettext_lazy(_PERM_CTX, "Sillabusu rədd etmək"),
+    "syllabus.manage": pgettext_lazy(_PERM_CTX, "Sillabusları idarə etmək (arxiv, köçürmə)"),
     # groups
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),
@@ -257,6 +304,13 @@ PERMISSION_LABELS = {
     "user.soft_delete": pgettext_lazy(_PERM_CTX, "Hesabı silmək / bərpa etmək"),
     "user.edit": pgettext_lazy(_PERM_CTX, "Şəxsi məlumatların redaktəsi"),
     "user.grant_privileged": pgettext_lazy(_PERM_CTX, "İmtiyazlı (administrator) səlahiyyət vermək"),
+    # people (müəllim/tələbə kataloqu — struktur scope-una tabe)
+    "people.view_teachers": pgettext_lazy(_PERM_CTX, "Müəllim kataloquna baxış"),
+    "people.view_students": pgettext_lazy(_PERM_CTX, "Tələbə kataloquna baxış"),
+    "people.view_contacts": pgettext_lazy(_PERM_CTX, "Kataloqda əlaqə məlumatını görmək"),
+    "people.view_demographics": pgettext_lazy(_PERM_CTX, "Kataloqda cins və yaş məlumatını görmək"),
+    "people.manage_status": pgettext_lazy(_PERM_CTX, "Kataloqdan hesabı dayandırmaq / bərpa etmək"),
+    "people.manage_teacher_role": pgettext_lazy(_PERM_CTX, "Müəllim statusunu vermək / çıxarmaq"),
 }
 
 

@@ -6,7 +6,11 @@ ayrılıb — MƏZMUN DƏYİŞMƏYİB, yalnız yer dəyişib.
 
 from core.constants import RoleScopeType
 
-from .default_roles_shared import RIM_ACCOUNT_PERMISSIONS
+from .default_roles_shared import (
+    PEOPLE_DIRECTORY_FULL,
+    PEOPLE_DIRECTORY_READ,
+    RIM_ACCOUNT_PERMISSIONS,
+)
 
 UNIVERSITY_ROLES = [
     {
@@ -34,7 +38,14 @@ UNIVERSITY_ROLES = [
             "group.view",
             "group.manage",
             "exam.*",
+            # Sillabus: prorektor bütün axını görür və qərar verə bilir.
+            "syllabus.*",
             *RIM_ACCOUNT_PERMISSIONS,
+            # Kataloq: prorektor bütün təşkilatı görür və hesab dayandıra bilir
+            # (org-scope rol → `get_permission_scope` org-wide qaytarır).
+            *PEOPLE_DIRECTORY_READ,
+            "people.manage_status",
+            "people.manage_teacher_role",
             "analytics.view_all",
             "audit.view",
         ],
@@ -61,6 +72,10 @@ UNIVERSITY_ROLES = [
             "appeal.respond",
             "appeal.decide",
             "qa.*",
+            # Kataloq: imtahan mərkəzi iştirakçıları tapmaq üçün org-wide OXU alır;
+            # hesab dayandırma / müəllim statusu QƏSDƏN yoxdur (kadr işi deyil).
+            "people.view_teachers",
+            "people.view_students",
             "analytics.view_all",
             "audit.view",
         ],
@@ -87,6 +102,9 @@ UNIVERSITY_ROLES = [
             "appeal.respond",
             "appeal.decide",
             "qa.*",
+            "people.view_teachers",
+            "people.view_students",
+            "people.view_contacts",
             "analytics.view_all",
             "audit.view",
         ],
@@ -119,10 +137,16 @@ UNIVERSITY_ROLES = [
             # təsdiq zəncirini əvəz edən yeganə açar. Başqa rola lazım olsa
             # permission-editordan verilir.
             "journal.close",
+            # Sillabus axınının tam səlahiyyəti (idarə + qərar) — RİM sistemin
+            # akademik operatorudur; hər əməl audit olunur.
+            "syllabus.*",
             # Əsasnamə 4.2 — «rol və səlahiyyət idarəetməsi» RİM-dədir.
             "role.*",
             # `user.grant_privileged` YOXDUR: yeni admin yaratmaq ayrıca açardır.
             *RIM_ACCOUNT_PERMISSIONS,
+            # Sahibin qərarı: «RİM mərkəzinin hər şeyə səlahiyyəti olsun» —
+            # kataloqun tam dəsti (oxu + hesab dayandırma + müəllim statusu).
+            *PEOPLE_DIRECTORY_FULL,
             "appeal.respond",
             "appeal.decide",
             "qa.*",
@@ -170,6 +194,11 @@ UNIVERSITY_ROLES = [
             # RİM-in yalnız QEYRİ-DAĞIDICI hissəsi (tap + düzəlt).
             "user.search",
             "user.edit",
+            # Kadr kataloqu: HR tam OXU + müəllim statusu təyinatı alır.
+            # `people.manage_status` QƏSDƏN YOXDUR — HR-da `user.block` da yoxdur,
+            # yəni hesab dayandırma səlahiyyəti bu rolda ümumiyyətlə mövcud deyil.
+            *PEOPLE_DIRECTORY_READ,
+            "people.manage_teacher_role",
             "analytics.view_unit",
             "audit.view",
         ],
@@ -192,6 +221,18 @@ UNIVERSITY_ROLES = [
             "group.view",
             "group.manage",
             "exam.*",
+            # Sillabus: dekan fakültə üzrə baxır və qərar verir, amma müəllimin
+            # qaralamasını REDAKTƏ ETMİR (`syllabus.edit` QƏSDƏN yoxdur).
+            "syllabus.view",
+            "syllabus.review",
+            "syllabus.approve",
+            "syllabus.revise",
+            "syllabus.reject",
+            # Kataloq: dekan YALNIZ öz fakültəsinin alt-ağacını görür və orada
+            # hesab dayandıra bilir (UNIT scope → `get_permission_scope`;
+            # `scope_unit` təyin edilməyibsə siyahı BOŞ qalır, fail-closed).
+            *PEOPLE_DIRECTORY_READ,
+            "people.manage_status",
             "analytics.view_unit",
         ],
         "description": "Faculty dean managing a specific faculty",
@@ -211,6 +252,20 @@ UNIVERSITY_ROLES = [
             "group.view",
             "group.manage",
             "exam.*",
+            # Sillabus təsdiqinin ƏSAS sahibi — YALNIZ öz kafedrası
+            # (Membership.scope_unit → apps.syllabus.services.scoping, fail-closed).
+            # `syllabus.edit` QƏSDƏN yoxdur: müdir müəllimin mətnini özü yazmır,
+            # düzəliş tələbi ilə geri qaytarır.
+            "syllabus.view",
+            "syllabus.review",
+            "syllabus.approve",
+            "syllabus.revise",
+            "syllabus.reject",
+            # Kataloq: kafedra müdiri öz kafedrasının müəllim/tələbəsini GÖRÜR.
+            # Əməl açarları QƏSDƏN yoxdur — lazım olsa icazə redaktorundan verilir.
+            "people.view_teachers",
+            "people.view_students",
+            "people.view_contacts",
             "analytics.view_unit",
         ],
         "description": "Department chair managing courses and faculty",
@@ -231,6 +286,10 @@ UNIVERSITY_ROLES = [
             "exam.edit",
             "exam.host",
             "exam.delete",
+            # Sillabus: müəllim YAZIR və GÖNDƏRİR; təsdiq/rədd açarları YOXDUR.
+            "syllabus.view",
+            "syllabus.edit",
+            "syllabus.submit",
             "assignment.delete",
             "project.delete",
             "lab.delete",
@@ -282,6 +341,8 @@ UNIVERSITY_ROLES = [
             "member.view",
             "course.view",
             "exam.view",
+            # Kataloq: tyutor öz alt-ağacındakı TƏLƏBƏLƏRİ görür (müəllimləri yox).
+            "people.view_students",
             "analytics.view_unit",
         ],
         "description": "Tutor providing academic guidance to student groups within their unit",
@@ -299,6 +360,7 @@ UNIVERSITY_ROLES = [
             "member.view",
             "course.view",
             "exam.view",
+            "people.view_students",
             "analytics.view_unit",
         ],
         "description": "Program coordinator curating a specialty/program (tutor-equivalent scope)",

@@ -19,12 +19,14 @@
         courses: "course",
         grading: "grade",
         journal: "journal",
+        syllabus: "syllabus",
         groups: "group",
         exams: "exam",
         appeal: "appeal",
         analytics: "analytics",
         qa: "qa",
-        audit: "audit"
+        audit: "audit",
+        people: "people"
     };
 
     var MODULE_LABELS = {
@@ -39,12 +41,14 @@
             lab: "Lab işləri",
             grade: "Qiymətləndirmə",
             journal: "Jurnal",
+            syllabus: "Sillabus",
             group: "Qruplar",
             exam: "İmtahanlar",
             appeal: "Apellyasiya",
             analytics: "Analitika",
             qa: "Keyfiyyət",
-            audit: "Audit"
+            audit: "Audit",
+            people: "Müəllim və tələbə kataloqu"
         },
         en: {
             org: "Organization",
@@ -57,12 +61,14 @@
             lab: "Lab Work",
             grade: "Grading",
             journal: "Journal",
+            syllabus: "Syllabus",
             group: "Groups",
             exam: "Exams",
             appeal: "Appeals",
             analytics: "Analytics",
             qa: "Quality",
-            audit: "Audit"
+            audit: "Audit",
+            people: "Teacher & student directory"
         },
         ru: {
             org: "Организация",
@@ -75,12 +81,14 @@
             lab: "Лабораторные работы",
             grade: "Оценивание",
             journal: "Журнал",
+            syllabus: "Силлабус",
             group: "Группы",
             exam: "Экзамены",
             appeal: "Апелляции",
             analytics: "Аналитика",
             qa: "Качество",
-            audit: "Аудит"
+            audit: "Аудит",
+            people: "Каталог преподавателей и студентов"
         },
         tr: {
             org: "Organizasyon",
@@ -93,12 +101,14 @@
             lab: "Laboratuvar çalışmaları",
             grade: "Değerlendirme",
             journal: "Günlük",
+            syllabus: "İzlence",
             group: "Gruplar",
             exam: "Sınavlar",
             appeal: "İtirazlar",
             analytics: "Analitik",
             qa: "Kalite",
-            audit: "Denetim"
+            audit: "Denetim",
+            people: "Öğretim elemanı ve öğrenci kataloğu"
         }
     };
 
@@ -111,6 +121,7 @@
             courses: "Kurs yaradılması və kurs idarəetməsi",
             grading: "Qiymətləndirmə və nəticə axınları",
             journal: "Jurnal baxışı və sənədli düzəlişlər",
+            syllabus: "Sillabusun yazılması, təsdiqi və versiyaları",
             groups: "Tələbə qruplarının yaradılması və idarəsi",
             exams: "İmtahan idarəetməsi və nəzarət",
             appeal: "Apellyasiya müraciətləri",
@@ -126,6 +137,7 @@
             courses: "Course creation and course management",
             grading: "Grading and result workflows",
             journal: "Journal access and documented corrections",
+            syllabus: "Syllabus authoring, approval and versioning",
             groups: "Student group creation and management",
             exams: "Exam management and monitoring",
             appeal: "Appeal requests",
@@ -141,6 +153,7 @@
             courses: "Создание и управление курсами",
             grading: "Оценивание и процессы результатов",
             journal: "Просмотр журнала и документированные исправления",
+            syllabus: "Составление, утверждение и версии силлабуса",
             groups: "Создание и управление студенческими группами",
             exams: "Управление экзаменами и контроль",
             appeal: "Заявки на апелляцию",
@@ -156,6 +169,7 @@
             courses: "Kurs oluşturma ve kurs yönetimi",
             grading: "Değerlendirme ve sonuç akışları",
             journal: "Günlük erişimi ve belgeli düzeltmeler",
+            syllabus: "İzlence yazımı, onayı ve sürümleri",
             groups: "Öğrenci gruplarının oluşturulması ve yönetimi",
             exams: "Sınav yönetimi ve izleme",
             appeal: "İtiraz başvuruları",
@@ -180,6 +194,9 @@
             revoke: "Geri çəkmə",
             approve: "Təsdiq",
             reject: "Rədd etmə",
+            submit: "Təsdiqə göndərmə",
+            review: "Baxış (növbə)",
+            revise: "Düzəlişə qaytarma",
             export: "İxrac",
             import: "İdxal",
             publish: "Yayımlama",
@@ -210,6 +227,9 @@
             revoke: "Revoke",
             approve: "Approve",
             reject: "Reject",
+            submit: "Submit",
+            review: "Review queue",
+            revise: "Return for revision",
             export: "Export",
             import: "Import",
             publish: "Publish",
@@ -240,6 +260,9 @@
             revoke: "Отзыв",
             approve: "Подтверждение",
             reject: "Отклонение",
+            submit: "Отправка на утверждение",
+            review: "Очередь рассмотрения",
+            revise: "Возврат на доработку",
             export: "Экспорт",
             import: "Импорт",
             publish: "Публикация",
@@ -270,6 +293,9 @@
             revoke: "Geri çekme",
             approve: "Onaylama",
             reject: "Reddetme",
+            submit: "Onaya gönderme",
+            review: "İnceleme kuyruğu",
+            revise: "Düzeltmeye iade",
             export: "Dışa aktarma",
             import: "İçe aktarma",
             publish: "Yayınlama",

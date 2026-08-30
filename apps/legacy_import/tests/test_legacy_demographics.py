@@ -147,9 +147,7 @@ def test_legacy_birth_date_refuses_unsupported_column_types(value):
 def test_demographics_from_row_reads_the_existing_projection():
     row = {"sex": 2, "birthday": "19/10/2003"}
 
-    assert demographics_from_row(row) == Demographics(
-        gender=GENDER_FEMALE, birth_date=datetime.date(2003, 10, 19)
-    )
+    assert demographics_from_row(row) == Demographics(gender=GENDER_FEMALE, birth_date=datetime.date(2003, 10, 19))
 
 
 def test_a_row_with_neither_field_is_blank():

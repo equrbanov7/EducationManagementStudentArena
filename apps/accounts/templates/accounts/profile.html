@@ -59,6 +59,14 @@
     {% if 'academic-records' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260720-2">
     {% endif %}
+    {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260830-1">
+    {% endif %}
+    {% if 'syllabus-list' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260830-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260830-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-1">
+    {% endif %}
     {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
@@ -87,7 +95,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -162,6 +170,14 @@
                 {% include "accounts/profile/sections/_analytics.html" %}
             {% elif active_section == "academic-records" and 'academic-records' in allowed_sections %}
                 {% include "accounts/profile/sections/_academic_records.html" %}
+            {% elif active_section == "people-teachers" and 'people-teachers' in allowed_sections %}
+                {% include "accounts/profile/sections/_people_teachers.html" %}
+            {% elif active_section == "people-students" and 'people-students' in allowed_sections %}
+                {% include "accounts/profile/sections/_people_students.html" %}
+            {% elif active_section == "syllabus-list" and 'syllabus-list' in allowed_sections %}
+                {% include "accounts/profile/sections/_syllabus_list.html" %}
+            {% elif active_section == "syllabus-editor" and 'syllabus-editor' in allowed_sections %}
+                {% include "accounts/profile/sections/_syllabus_editor.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}
@@ -327,6 +343,13 @@
 {% endif %}
 {% if 'academic-records' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/academic_records.js' %}?v=20260720-2"></script>
+{% endif %}
+{% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260830-1"></script>
+{% endif %}
+{% if 'syllabus-list' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
+<script src="{% static 'accounts/js/profile/syllabus_editor.js' %}?v=20260830-1"></script>
 {% endif %}
 {% if 'assigned-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/assigned_exam.js' %}?v=20260707-wizard2"></script>

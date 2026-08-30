@@ -1,0 +1,25 @@
+{% load i18n %}
+{% comment %}
+«Tələbələr» bölməsi — tələbə kataloqu.
+
+İcazə: `people.view_students` (əlaqə/demoqrafiya sütunları ayrıca açarlarla).
+Scope: qrup alt-ağacı üzrə (`StudentAcademicRecord.group`); dekan öz fakültəsinin
+qruplarını, kafedra müdiri öz kafedrasının qruplarını görür.
+
+Panel iskeleti `_people_directory.html`-dədir (iki kataloq üçün ortaq).
+{% endcomment %}
+{% if 'people-students' in allowed_sections %}
+<section class="profile-section-panel profile-section--people {% if active_section == 'people-students' %}is-active{% endif %}"
+         data-profile-section-panel="people-students"
+         data-source-url="{{ profile_base_url }}?section=people-students">
+  {% if people_section.kind == 'students' %}
+    {% if people_section.has_access %}
+      {% include "accounts/profile/sections/_people_directory.html" %}
+    {% else %}
+      <p class="people__denied">{{ people_section.access_denied_message }}</p>
+    {% endif %}
+  {% else %}
+    <p class="people__placeholder">{% trans "Yüklənir…" context "accounts.people" %}</p>
+  {% endif %}
+</section>
+{% endif %}

@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}
+Sağdan açılan BAXIŞ paneli (dizayn §3.1, bənd 7) — oxu-rejimli sillabus +
+versiya tarixçəsi. Məzmun `accounts:syllabus_preview` JSON endpoint-indən gəlir
+(mətnlər serverdə tərcümə olunub yığılır — bax views/syllabus/preview.py).
+
+A11y: `role="dialog" aria-modal="true"` + `aria-labelledby`, açılışda fokus
+içəri, Escape bağlayır, bağlananda fokus əvvəlki düyməyə qayıdır (JS).
+{% endcomment %}
+<div class="syl-drawer" data-syl-drawer hidden>
+  <div class="syl-drawer__backdrop" data-syl-drawer-close></div>
+  <div class="syl-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="syl-drawer-title" tabindex="-1">
+    <header class="syl-drawer__head">
+      <div class="syl-drawer__ident">
+        <span class="syl-code" data-syl-drawer-code></span>
+        <span class="syl-badge" data-syl-drawer-status></span>
+        <span class="syl-version" data-syl-drawer-version></span>
+      </div>
+      <h3 id="syl-drawer-title" data-syl-drawer-name></h3>
+      <p class="syl-meta" data-syl-drawer-meta></p>
+      <button type="button" class="syl-drawer__x" data-syl-drawer-close
+              aria-label="{% trans 'Paneli bağla' context 'accounts.syllabus' %}">&times;</button>
+      <p class="syl-drawer__banner" data-syl-drawer-banner></p>
+    </header>
+    <div class="syl-drawer__body">
+      <div data-syl-drawer-blocks></div>
+      <h4 class="syl-drawer__subtitle">{% trans "Versiya tarixçəsi" context "accounts.syllabus" %}</h4>
+      <div class="syl-history" data-syl-drawer-history></div>
+    </div>
+    <footer class="syl-drawer__foot">
+      <button type="button" class="syl-btn syl-btn--secondary" data-syl-drawer-close>{% trans "Bağla" context "accounts.syllabus" %}</button>
+    </footer>
+  </div>
+</div>

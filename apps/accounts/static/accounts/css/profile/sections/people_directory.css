@@ -1,0 +1,272 @@
+/* «Müəllimlər» / «Tələbələr» kataloqu — BAZA üslubu (iskelet).
+ *
+ * Bu fayl son dizayn DEYİL: növbəti (UI) agent onu genişləndirəcək. Burada
+ * yalnız oxunaqlı və responsiv baza var ki, backend müqaviləsi brauzerdə
+ * yoxlana bilsin.
+ *
+ * Qaydalar (CLAUDE.md + MEMORY): yalnız İŞIQLI tema — `prefers-color-scheme:
+ * dark` İŞLƏDİLMİR; rənglər `--ems-*` tokenlərindən gəlir; mövcud olmayan
+ * `--ems-primary-300/400` tokenlərinə istinad YOXDUR.
+ */
+
+.people {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.people__intro {
+    margin: 0;
+    color: var(--ems-text-muted, #5b6472);
+    font-size: 0.95rem;
+}
+
+.people__perms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.people__perm-chip {
+    background: var(--ems-primary-50, #eef4ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+}
+
+.people__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.people__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.people__field label,
+.people__field-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-text, #1f2937);
+}
+
+.people__field input,
+.people__field select {
+    /* Toxunma hədəfi ≥ 44px (a11y) və bütün sahələr eyni hündürlükdə. */
+    min-height: 44px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    font: inherit;
+    max-width: 100%;
+}
+
+.people__field input:focus-visible,
+.people__field select:focus-visible,
+.people__name:focus-visible,
+.people__action:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.people__age-inputs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.people__age-inputs input {
+    width: 100%;
+    min-width: 0;
+}
+
+.people__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.people__reset {
+    min-height: 44px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 8px;
+    background: var(--ems-surface, #ffffff);
+    cursor: pointer;
+}
+
+.people__coverage {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+/* Geniş cədvəl ÖZ konteynerində sürüşür — səhifə gövdəsi üfüqi sürüşməməlidir. */
+.people__table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 12px;
+    background: var(--ems-surface, #ffffff);
+}
+
+.people__table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.people__table th,
+.people__table td {
+    padding: 10px 12px;
+    text-align: start;
+    border-bottom: 1px solid var(--ems-border-subtle, #eef1f6);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.people__table thead th {
+    background: var(--ems-primary-50, #eef4ff);
+    font-size: 0.82rem;
+    color: var(--ems-primary-800, #1e3a8a);
+}
+
+.people__cell-person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.people__avatar {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-primary-100, #dbe7ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.people__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.people__name-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.people__name {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ems-primary-700, #1d4ed8);
+    cursor: pointer;
+    text-align: start;
+}
+
+.people__username {
+    font-size: 0.76rem;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+.people__action {
+    min-height: 44px;
+    margin-inline-end: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 8px;
+    background: var(--ems-surface, #ffffff);
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+.people__pager {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.people__pager button {
+    min-height: 44px;
+    padding: 6px 14px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 8px;
+    background: var(--ems-surface, #ffffff);
+    cursor: pointer;
+}
+
+.people__empty,
+.people__denied,
+.people__placeholder {
+    margin: 0;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+.people__modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 1050;
+    padding: 16px;
+}
+
+.people__modal[hidden] {
+    display: none;
+}
+
+.people__modal-body {
+    background: var(--ems-surface, #ffffff);
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.people__modal-close {
+    position: absolute;
+    top: 24px;
+    inset-inline-end: 24px;
+    min-height: 44px;
+    padding: 6px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--ems-surface, #ffffff);
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .people__filters {
+        grid-template-columns: 1fr;
+    }
+
+    /* 375px-də daşma olmasın: cədvəl öz konteynerində sürüşür. */
+    .people__table {
+        min-width: 560px;
+    }
+}

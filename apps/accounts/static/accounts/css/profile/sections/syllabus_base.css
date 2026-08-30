@@ -1,0 +1,628 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — ORTAQ komponentlər (dizayn təhvili §2 «Fidelity» ölçüləri)
+   ───────────────────────────────────────────────────────────────────────────
+   Ölçülər dizayndan olduğu kimi götürülüb: kart radiusu 12px, düymə/input 9px,
+   badge/chip 999px; kartlarda KÖLGƏ YOXDUR (yalnız drawer/dialog/toast-da),
+   ayrım kontur + `--ems-bg-subtle` fonla verilir.
+
+   Rəng HARDCODE EDİLMİR — hamısı `static/css/design-tokens.css` tokenləridir.
+   ⚠️ «təsdiqlənib» MƏTNİ `--ems-success-700` (#15803d, AA); `--ems-success`
+   (#10b981) yalnız ikon/accent kimi işlədilir.
+   ⚠️ Tətbiq YALNIZ İŞIQLI temadır — `prefers-color-scheme: dark` YOXDUR.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.profile-section--syllabus {
+    --syl-radius-card: 12px;
+    --syl-radius-ctl: 9px;
+    --syl-gap: 12px;
+}
+
+.syl {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 0.83rem;
+    color: var(--ems-text);
+}
+
+.syl .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Tipoqrafiya ──────────────────────────────────────────────────────── */
+.syl-head__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.syl-head__lead {
+    margin: 6px 0 0;
+    max-width: 760px;
+    font-size: 0.86rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-meta {
+    display: block;
+    margin: 2px 0 0;
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-note {
+    margin: 4px 0 0;
+    font-size: 0.76rem;
+    color: var(--ems-neutral-400);
+}
+
+.syl-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+}
+
+.syl-version {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--ems-neutral-100);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.syl-req {
+    color: var(--ems-danger);
+}
+
+/* ── Status badge (7 status × ton) ────────────────────────────────────── */
+.syl-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    white-space: nowrap;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.syl-badge--neutral {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.syl-badge--submitted {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.syl-badge--review {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.syl-badge--warning {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-badge--success {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.syl-badge--danger {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.syl-badge--archived {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+}
+
+/* ── Tamamlanma zolağı ────────────────────────────────────────────────── */
+.syl-bar {
+    display: inline-block;
+    flex: 1;
+    min-width: 54px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    overflow: hidden;
+}
+
+.syl-bar__fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--ems-primary-600);
+}
+
+.syl-bar--success .syl-bar__fill {
+    background: var(--ems-success);
+}
+
+.syl-bar--warning .syl-bar__fill {
+    background: var(--ems-warning);
+}
+
+.syl-bar__value {
+    font-size: 0.77rem;
+    font-weight: 800;
+    color: var(--ems-primary-600);
+    white-space: nowrap;
+}
+
+.syl-bar__value--success {
+    color: var(--ems-success-700);
+}
+
+.syl-bar__value--warning {
+    color: var(--ems-warning-800);
+}
+
+/* ── «Növbəti əməl» mətni ─────────────────────────────────────────────── */
+.syl-next {
+    display: block;
+    font-size: 0.79rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.syl-next--warning {
+    color: var(--ems-warning-800);
+}
+
+.syl-next--muted {
+    color: var(--ems-text-muted);
+    font-weight: 600;
+}
+
+/* ── Düymələr (toxunma hədəfi 34–44px) ────────────────────────────────── */
+.syl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: var(--syl-radius-ctl);
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-family: inherit;
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.syl-btn--sm {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 0.78rem;
+}
+
+.syl-btn--lg {
+    min-height: 44px;
+    padding: 0 20px;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.syl-btn--primary {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.syl-btn--primary:hover:not(:disabled) {
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+}
+
+.syl-btn--secondary:hover:not(:disabled) {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.syl-btn--warning {
+    border-color: var(--ems-warning);
+    background: var(--ems-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-btn--danger {
+    border-color: var(--ems-danger);
+    background: var(--ems-bg);
+    color: var(--ems-danger);
+}
+
+.syl-btn--ghost {
+    border-color: var(--ems-border);
+    background: transparent;
+    color: var(--ems-text-muted);
+    min-height: 38px;
+}
+
+.syl-btn--dashed {
+    align-self: flex-start;
+    border-style: dashed;
+}
+
+.syl-btn--dashed:hover {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.syl-btn:disabled {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-400);
+    cursor: not-allowed;
+}
+
+.syl-iconbtn {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: var(--syl-radius-ctl);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-400);
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+.syl-iconbtn:hover:not(:disabled) {
+    border-color: var(--ems-danger);
+    color: var(--ems-danger);
+}
+
+.syl :focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+/* ── Sahələr ──────────────────────────────────────────────────────────── */
+.syl-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.syl-field > label {
+    margin-bottom: 5px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-input,
+.syl-select,
+.syl-textarea {
+    width: 100%;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--syl-radius-ctl);
+    background: var(--ems-bg);
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ems-text);
+}
+
+.syl-input,
+.syl-select {
+    height: 40px;
+}
+
+.syl-input--sm,
+.syl-select--sm {
+    height: 34px;
+    font-size: 0.81rem;
+}
+
+.syl-select--xs {
+    width: 70px;
+    height: 34px;
+    padding: 0 6px;
+    font-size: 0.78rem;
+}
+
+.syl-textarea {
+    padding: 11px 12px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.syl-input:disabled,
+.syl-select:disabled,
+.syl-textarea:disabled {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-500);
+    cursor: not-allowed;
+}
+
+.syl-input:focus,
+.syl-select:focus,
+.syl-textarea:focus {
+    outline: none;
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.syl-input.is-bad,
+.syl-textarea.is-bad {
+    border-color: var(--ems-warning);
+}
+
+.syl-counter {
+    margin: 5px 0 0;
+    font-size: 0.74rem;
+    color: var(--ems-neutral-400);
+}
+
+.syl-counter.is-bad {
+    color: var(--ems-warning-800);
+}
+
+/* ── İzah qutuları ────────────────────────────────────────────────────── */
+.syl-hintbox {
+    margin: 0;
+    padding: 11px 13px;
+    border-radius: 11px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    font-size: 0.79rem;
+    line-height: 1.55;
+    color: var(--ems-primary-800);
+}
+
+.syl-hintbox--ok {
+    background: var(--ems-success-bg);
+    border-color: var(--ems-success-bd);
+    color: var(--ems-success-700);
+}
+
+/* ── Boş vəziyyət ─────────────────────────────────────────────────────── */
+.syl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 11px;
+    padding: 56px 24px;
+    text-align: center;
+    background: var(--ems-bg);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 16px;
+}
+
+.syl-empty__icon {
+    font-size: 1.6rem;
+    color: var(--ems-neutral-300);
+}
+
+.syl-empty__title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.syl-empty__body {
+    margin: 0;
+    max-width: 420px;
+    font-size: 0.83rem;
+    color: var(--ems-text-muted);
+}
+
+/* ── Toast (kölgə İCAZƏLİDİR) ─────────────────────────────────────────── */
+.syl-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 95;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    max-width: min(92vw, 600px);
+    padding: 11px 17px;
+    border-radius: 11px;
+    background: var(--ems-navy-900);
+    color: var(--ems-neutral-0);
+    font-size: 0.83rem;
+    font-weight: 600;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.3);
+}
+
+.syl-toast[hidden] {
+    display: none;
+}
+
+.syl-toast__icon {
+    color: var(--ems-success);
+}
+
+/* ── Dialoq ───────────────────────────────────────────────────────────── */
+.syl-modal[hidden],
+.syl-drawer[hidden] {
+    display: none;
+}
+
+.syl-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.syl-modal__backdrop,
+.syl-drawer__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.syl-modal__box {
+    position: relative;
+    width: 100%;
+    max-width: 540px;
+    background: var(--ems-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+}
+
+.syl-modal__head {
+    padding: 18px 20px 14px;
+}
+
+.syl-modal__head h3 {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 800;
+}
+
+.syl-modal__body {
+    margin: 6px 0 0;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--ems-text-muted);
+}
+
+.syl-modal__picks,
+.syl-modal__reason {
+    padding: 0 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.syl-modal__picks[hidden],
+.syl-modal__reason[hidden],
+.syl-modal__lines[hidden] {
+    display: none;
+}
+
+.syl-modal__lines {
+    margin: 0 20px 14px;
+    padding: 12px 14px 12px 32px;
+    background: var(--ems-bg-subtle);
+    border: 1px solid var(--ems-border);
+    border-radius: 11px;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--ems-neutral-700);
+}
+
+.syl-modal__reason label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-modal__reason textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--syl-radius-ctl);
+    font-family: inherit;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.syl-modal__note {
+    margin: 0;
+    font-size: 0.74rem;
+    color: var(--ems-neutral-400);
+}
+
+.syl-modal__note.is-bad {
+    color: var(--ems-danger-strong);
+}
+
+.syl-modal__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 14px 20px;
+    background: var(--ems-bg-subtle);
+    border-top: 1px solid var(--ems-border);
+}
+
+.syl-modal__foot .syl-btn {
+    min-height: 44px;
+}
+
+/* Versiya növü seçim kartları */
+.syl-pick {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 13px;
+    text-align: left;
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    border-radius: 11px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.syl-pick.is-on {
+    border-width: 2px;
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.syl-pick__radio {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    margin-top: 2px;
+    border-radius: 999px;
+    border: 1.5px solid var(--ems-neutral-300);
+}
+
+.syl-pick.is-on .syl-pick__radio {
+    border-color: var(--ems-primary-600);
+    background: radial-gradient(circle, var(--ems-primary-600) 0 3.5px, transparent 3.5px);
+}
+
+.syl-pick__title {
+    display: block;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.syl-pick__note {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--ems-text-muted);
+}

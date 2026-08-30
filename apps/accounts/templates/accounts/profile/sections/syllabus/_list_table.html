@@ -1,0 +1,69 @@
+{% load i18n %}
+{% comment %}
+Siyahının CƏDVƏL görünüşü (dizayn §3.1 — 7 sütun, birinci sütun `th scope="row"`
+və sticky). Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə gövdəsi
+üfüqi sürüşmür.
+{% endcomment %}
+<div class="syl-tablewrap" data-syl-pane="table">
+  <div class="syl-tablescroll">
+    <table class="syl-table">
+      <caption class="sr-only">{% trans "Sillabus siyahısı" context "accounts.syllabus" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% trans "Fənn və proqram" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "İl / semestr" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Versiya" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Tamamlanma" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Status və təsdiqləyən" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Növbəti əməl" context "accounts.syllabus" %}</th>
+          <th scope="col"><span class="sr-only">{% trans "Əməllər" context "accounts.syllabus" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in sl.rows %}
+        <tr>
+          <th scope="row" class="syl-cell-subject">
+            <span class="syl-code">{{ row.code }}</span>
+            <span class="syl-name">{{ row.name }}</span>
+            {% if row.program %}<span class="syl-meta">{{ row.program }}</span>{% endif %}
+          </th>
+          <td class="syl-cell-period">
+            <span class="syl-period__year">{{ row.year|default:"—" }}</span>
+            <span class="syl-meta">{{ row.semester }}</span>
+          </td>
+          <td><span class="syl-version">{{ row.version_label }}</span></td>
+          <td class="syl-cell-progress">
+            <span class="syl-bar syl-bar--{{ row.percent_tone }}">
+              <span class="syl-bar__fill" data-syl-percent="{{ row.percent }}"></span>
+            </span>
+            <span class="syl-bar__value syl-bar__value--{{ row.percent_tone }}">{{ row.percent }}%</span>
+          </td>
+          <td>
+            <span class="syl-badge syl-badge--{{ row.status_tone }}">{{ row.status_label }}</span>
+            <span class="syl-meta">{{ row.approver }}</span>
+          </td>
+          <td class="syl-cell-next">
+            <span class="syl-next syl-next--{{ row.next_tone }}">{{ row.next_step }}</span>
+            <span class="syl-meta">
+              {% if row.touched %}{% trans "Son dəyişiklik" context "accounts.syllabus" %}: {{ row.touched|date:"d.m.Y, H:i" }}
+              {% else %}{{ row.touched_text }}{% endif %}
+            </span>
+          </td>
+          <td class="syl-cell-actions">
+            <div class="syl-actions">
+              {% for action in row.actions %}
+              <button type="button" class="syl-btn syl-btn--{{ action.kind }} syl-btn--sm"
+                      data-syl-action="{{ action.key }}"
+                      data-row-kind="{{ row.kind }}"
+                      data-id="{{ row.id }}"
+                      data-version="{{ row.version_id }}"
+                      data-name="{{ row.name }}">{{ action.label }}</button>
+              {% endfor %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

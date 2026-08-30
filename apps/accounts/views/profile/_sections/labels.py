@@ -37,6 +37,10 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
     "rim-center": "accounts/profile/sections/_rim_center.html",
+    "people-teachers": "accounts/profile/sections/_people_teachers.html",
+    "people-students": "accounts/profile/sections/_people_students.html",
+    "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
+    "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
 }
 
 
@@ -104,4 +108,8 @@ def build_section_titles() -> dict:
         "org-roles": "Təşkilat rolları",
         "audit-log": "Audit jurnalı",
         "superadmin-org-inspector": "Təşkilat məlumatları",
+        "people-teachers": pgettext_lazy("profile.sidebar", "Müəllimlər"),
+        "people-students": pgettext_lazy("profile.sidebar", "Tələbələr"),
+        "syllabus-list": pgettext_lazy("profile.sidebar", "Sillabuslar"),
+        "syllabus-editor": pgettext_lazy("profile.sidebar", "Sillabus redaktoru"),
     }
