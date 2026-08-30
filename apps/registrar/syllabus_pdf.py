@@ -26,8 +26,8 @@ from .transcript_pdf import (
     _MARGIN,
     _MUTED,
     _PAGE_W,
-    _Sheet,
     _draw_logo,
+    _Sheet,
     _text_width,
 )
 
