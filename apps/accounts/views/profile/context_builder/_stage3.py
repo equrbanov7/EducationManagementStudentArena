@@ -284,6 +284,32 @@ class _Stage3Mixin:
             from ...rim import build_rim_center_section
 
             self.rim_center_section.update(build_rim_center_section(self.request))
+        if self.active_section in ("people-teachers", "people-students") and self.active_section in (
+            self.allowed_sections
+        ):
+            from ...people import build_people_section
+
+            _people_kind = "teachers" if self.active_section == "people-teachers" else "students"
+            self.people_section.update(build_people_section(self.request, _people_kind)["people_section"])
+        if self.active_section == "syllabus-list" and "syllabus-list" in self.allowed_sections:
+            from ...syllabus import build_syllabus_list_section
+
+            self.syllabus_list_section.update(
+                build_syllabus_list_section(self.request, organization=self.active_organization)[
+                    "syllabus_list_section"
+                ]
+            )
+        if self.active_section == "syllabus-editor" and "syllabus-editor" in self.allowed_sections:
+            from ...syllabus import build_syllabus_editor_section
+            from ...syllabus.lookup import resolve_editor_version
+
+            self.syllabus_editor_section.update(
+                build_syllabus_editor_section(
+                    self.request,
+                    organization=self.active_organization,
+                    version=resolve_editor_version(self.request, self.active_organization),
+                )["syllabus_editor_section"]
+            )
         if "superadmin-ai" in self.allowed_sections and self.active_section == "superadmin-ai":
             self.superadmin_ai_settings_section.update(build_superadmin_ai_settings_context())
             self.superadmin_ai_settings_section["post_next_url"] = _append_query_params(

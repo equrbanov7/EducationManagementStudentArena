@@ -1,0 +1,157 @@
+{% load i18n %}
+{% comment %}
+Redaktorun 4–6-cı bölmələri: `week`, `method`, `assess`.
+
+`week` cədvəli 16 sətirdir və hər dərs növü (mühazirə/seminar/laboratoriya) üzrə
+saat AYRICA yoxlanılır — bir mövzu həm mühazirədə, həm seminarda keçilə bilər.
+`assess`-də davamiyyət/sərbəst iş/yekun çəkiləri SİYASƏTLƏ kilidlidir; müəllim
+yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
+{% endcomment %}
+
+{% with p=se.panels.week %}
+<article class="syl-panel{% if se.active_id == 'week' %} is-on{% endif %}" data-syl-panel="week" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <p class="syl-hintbox">{% trans "Bir mövzu həm mühazirədə, həm seminarda (və ya laboratoriyada) keçilə bilər — mövzunun adı dəyişmir, sadəcə hər dərs növü üzrə saatı ayrıca yazılır. E-jurnalda həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır." context "accounts.syllabus" %}</p>
+
+  <div class="syl-hours syl-hours--{% if se.hours.ok %}ok{% else %}warn{% endif %}" data-syl-hours>
+    <span class="syl-hours__note">
+      {% if se.hours.ok %}{% trans "Saatlar tədris planı ilə növ üzrə üst-üstə düşür." context "accounts.syllabus" %}
+      {% else %}{% trans "Hər dərs növünün saatı tədris planındakı bölgü ilə ayrıca uyğunlaşmalıdır." context "accounts.syllabus" %}{% endif %}
+    </span>
+    {% for row in se.hours.rows %}
+    <span class="syl-hourchip syl-hourchip--{{ row.kind }}{% if not row.ok %} is-bad{% endif %}" data-syl-hour-chip="{{ row.kind }}">
+      {% if row.kind == 'lecture' %}{% trans "Mühazirə" context "accounts.syllabus" %}
+      {% elif row.kind == 'seminar' %}{% trans "Seminar" context "accounts.syllabus" %}
+      {% else %}{% trans "Laboratoriya" context "accounts.syllabus" %}{% endif %}
+      <b data-syl-hour-have>{{ row.have }}</b>/<span data-syl-hour-plan>{{ row.planned }}</span>
+    </span>
+    {% endfor %}
+  </div>
+
+  <div class="syl-tablescroll">
+    <table class="syl-weeks">
+      <caption class="sr-only">{% trans "Həftəlik mövzu və saat bölgüsü" context "accounts.syllabus" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% trans "Həftə" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Mövzu" context "accounts.syllabus" %}</th>
+          <th scope="col" class="syl-weeks__h syl-weeks__h--lecture">{% trans "Mühazirə" context "accounts.syllabus" %}</th>
+          <th scope="col" class="syl-weeks__h syl-weeks__h--seminar">{% trans "Seminar" context "accounts.syllabus" %}</th>
+          <th scope="col" class="syl-weeks__h syl-weeks__h--lab">{% trans "Laboratoriya" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Təlim nəticəsi" context "accounts.syllabus" %}</th>
+        </tr>
+      </thead>
+      <tbody data-syl-weeks>
+        {% for row in se.week_rows %}
+        <tr data-syl-week-row="{{ row.index }}">
+          <th scope="row">{{ row.index }}</th>
+          <td>
+            <input type="text" class="syl-input syl-input--sm" data-week="topic" value="{{ row.topic }}"
+                   {% if se.readonly %}disabled{% endif %}
+                   aria-label="{{ row.index }}. {% trans 'həftənin mövzusu' context 'accounts.syllabus' %}"
+                   placeholder="{% trans 'Həftənin mövzusu' context 'accounts.syllabus' %}">
+          </td>
+          {% for cell in row.cells %}
+          <td class="syl-weeks__cell">
+            <select class="syl-select syl-select--xs" data-week="{{ cell.key }}" {% if se.readonly %}disabled{% endif %}
+                    aria-label="{{ row.index }}. {% trans 'həftə' context 'accounts.syllabus' %} — {{ cell.label }}">
+              {% for value in se.hour_choices %}
+              <option value="{{ value }}" {% if value == cell.value %}selected{% endif %}>{% if value %}{{ value }}{% else %}—{% endif %}</option>
+              {% endfor %}
+            </select>
+          </td>
+          {% endfor %}
+          <td>
+            <select class="syl-select syl-select--sm" data-week="outcome" {% if se.readonly %}disabled{% endif %}
+                    aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
+              <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
+              {% for tag in se.outcome_tags %}
+              <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="syl-note">{% trans "İmtahanlar auditoriya saatına daxil edilmir — onlar semestr cədvəlindən gəlir." context "accounts.syllabus" %}</p>
+</article>
+{% endwith %}
+
+{% with p=se.panels.method %}
+<article class="syl-panel{% if se.active_id == 'method' %} is-on{% endif %}" data-syl-panel="method" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <div class="syl-methods">
+    {% for method in se.methods %}
+    <button type="button" class="syl-method{% if method.active %} is-on{% endif %}"
+            data-syl-method="{{ method.label }}" {% if se.readonly %}disabled{% endif %}
+            aria-pressed="{% if method.active %}true{% else %}false{% endif %}">
+      <span class="syl-method__box" aria-hidden="true"></span>{{ method.label }}
+    </button>
+    {% endfor %}
+  </div>
+  <div class="syl-field">
+    <label for="syl-mnote">{% trans "Metodların tətbiqi barədə qeyd" context "accounts.syllabus" %}</label>
+    <textarea id="syl-mnote" rows="3" class="syl-textarea" data-field="note" {% if se.readonly %}disabled{% endif %}
+              placeholder="{% trans 'Məsələn: laboratoriya işləri kiçik qruplarda, kod baxışı peer review formatında aparılır.' context 'accounts.syllabus' %}">{{ p.data.note|default:'' }}</textarea>
+  </div>
+</article>
+{% endwith %}
+
+{% with p=se.panels.assess a=se.assessment %}
+<article class="syl-panel{% if se.active_id == 'assess' %} is-on{% endif %}" data-syl-panel="assess" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--check">{% trans "yoxlama bölməsi" context "accounts.syllabus" %}</span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <ul class="syl-weights">
+    <li class="syl-weight syl-weight--fixed">
+      <span class="syl-weight__label">{% trans "Davamiyyət" context "accounts.syllabus" %}</span>
+      <span class="syl-weight__value">{{ a.attendance }}</span>
+      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet siyasəti" context "accounts.syllabus" %}</span>
+    </li>
+    <li class="syl-weight syl-weight--fixed">
+      <span class="syl-weight__label">{% trans "Sərbəst iş" context "accounts.syllabus" %}</span>
+      <span class="syl-weight__value">{{ a.selfwork }}</span>
+      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet siyasəti" context "accounts.syllabus" %}</span>
+    </li>
+    <li class="syl-weight">
+      <label class="syl-weight__label" for="syl-midterm">{% trans "Aralıq imtahan" context "accounts.syllabus" %}</label>
+      <input id="syl-midterm" type="range" min="0" max="{{ a.flex }}" step="5" value="{{ a.midterm }}"
+             data-field="midterm" data-syl-midterm data-flex="{{ a.flex }}" {% if se.readonly %}disabled{% endif %}>
+      <span class="syl-weight__value" data-syl-midterm-value>{{ a.midterm }}</span>
+    </li>
+    <li class="syl-weight syl-weight--fixed">
+      <span class="syl-weight__label">{% trans "Semestr layihəsi" context "accounts.syllabus" %}</span>
+      <span class="syl-weight__value" data-syl-project-value>{{ a.project }}</span>
+    </li>
+    <li class="syl-weight syl-weight--fixed">
+      <span class="syl-weight__label">{% trans "Yekun imtahan" context "accounts.syllabus" %}</span>
+      <span class="syl-weight__value">{{ a.final }}</span>
+      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet siyasəti" context "accounts.syllabus" %}</span>
+    </li>
+  </ul>
+
+  <p class="syl-hintbox syl-hintbox--ok">
+    {% trans "Davamiyyət, sərbəst iş və yekun imtahan universitet siyasəti ilə kilidlidir. Yalnız qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür — cəm həmişə 100 qalır." context "accounts.syllabus" %}
+    <b>{% trans "Cəmi 100 bal" context "accounts.syllabus" %}</b>
+  </p>
+</article>
+{% endwith %}

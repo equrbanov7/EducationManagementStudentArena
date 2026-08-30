@@ -1,0 +1,156 @@
+{% load i18n %}
+{% comment %}
+Redaktorun 7–10-cu bölmələri: `self`, `lit`, `prev`, `send`.
+
+`self` — universitetin İCAZƏ VERDİYİ üç struktur (hər biri cəmi 10 bal) + izahlı
+`disabled` kart (3 × 5 = 15 bal, siyasətə uyğun deyil). Həmin kart QƏSDƏN
+saxlanılır: siyasəti izah edir.
+`prev` və `send` qayda bölməsi deyil — tamamlanma faizinə daxil deyillər.
+{% endcomment %}
+
+{% with p=se.panels.self sw=se.selfwork %}
+<article class="syl-panel{% if se.active_id == 'self' %} is-on{% endif %}" data-syl-panel="self" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <p class="syl-hintbox">
+    {% blocktrans context "accounts.syllabus" with total=sw.total_score %}Sərbəst işin ümumi maksimum balı universitet siyasəti ilə {{ total }} bal təyin edilib. Müəllim yalnız balın necə bölünəcəyini seçir.{% endblocktrans %}
+  </p>
+
+  <div class="syl-swopts">
+    {% for option in sw.options %}
+    <button type="button"
+            class="syl-swopt{% if option.active %} is-on{% endif %}{% if not option.allowed %} is-blocked{% endif %}"
+            data-syl-selfwork="{{ option.key }}"
+            aria-pressed="{% if option.active %}true{% else %}false{% endif %}"
+            {% if not option.allowed or se.readonly %}disabled{% endif %}>
+      <span class="syl-swopt__radio" aria-hidden="true"></span>
+      <span class="syl-swopt__title">{{ option.title }} {% trans "bal" context "accounts.syllabus" %}</span>
+      <span class="syl-swopt__note">{{ option.note }}</span>
+      <span class="syl-swopt__sum{% if not option.allowed %} is-bad{% endif %}">
+        {% blocktrans context "accounts.syllabus" with total=option.total count=option.count %}Cəmi {{ total }} bal · {{ count }} tapşırıq{% endblocktrans %}
+      </span>
+    </button>
+    {% endfor %}
+  </div>
+
+  <div class="syl-swtopics" data-syl-selfwork-topics>
+    {% for slot in sw.slots %}
+    <div class="syl-swtopic" data-syl-slot="{{ slot.index }}">
+      <span class="syl-swtopic__label">{% blocktrans context "accounts.syllabus" with index=slot.index %}Tapşırıq {{ index }}{% endblocktrans %}</span>
+      <input type="text" class="syl-input syl-input--sm" data-selfwork-title value="{{ slot.title }}"
+             {% if se.readonly or slot.graded %}disabled{% endif %}
+             aria-label="{{ slot.index }}. {% trans 'sərbəst iş mövzusu' context 'accounts.syllabus' %}"
+             placeholder="{% trans 'Sərbəst iş tapşırığının mövzusu' context 'accounts.syllabus' %}">
+      <span class="syl-swtopic__pts">{{ slot.per_score }} {% trans "bal" context "accounts.syllabus" %}</span>
+      {% if slot.graded %}
+      <span class="syl-swtopic__graded">{% blocktrans context "accounts.syllabus" with count=slot.graded_count %}{{ count }} qiymət var{% endblocktrans %}</span>
+      <button type="button" class="syl-btn syl-btn--warning syl-btn--sm" data-syl-archive="{{ slot.index }}" {% if se.readonly %}disabled{% endif %}>{% trans "Arxivlə" context "accounts.syllabus" %}</button>
+      {% else %}
+      <button type="button" class="syl-btn syl-btn--secondary syl-btn--sm" data-syl-clear="{{ slot.index }}" {% if se.readonly %}disabled{% endif %}>{% trans "Təmizlə" context "accounts.syllabus" %}</button>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if sw.archived %}
+  <div class="syl-archived">
+    <p class="syl-archived__head">
+      <b>{% trans "Arxivlənmiş mövzular" context "accounts.syllabus" %}</b>
+      <span class="syl-meta">{% trans "Tələbə qiymətləri qorunur, yeni tapşırıq kimi verilmir" context "accounts.syllabus" %}</span>
+    </p>
+    {% for row in sw.archived %}
+    <p class="syl-archived__row"><s>{{ row.title }}</s> <span class="syl-meta">{{ row.note }}</span></p>
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>
+{% endwith %}
+
+{% with p=se.panels.lit %}
+<article class="syl-panel{% if se.active_id == 'lit' %} is-on{% endif %}" data-syl-panel="lit" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <div class="syl-field">
+    <label for="syl-lit1">{% trans "Əsas ədəbiyyat" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+    <textarea id="syl-lit1" rows="5" class="syl-textarea" data-field-lines="primary" {% if se.readonly %}disabled{% endif %}
+              placeholder="{% trans 'Hər sətirdə bir mənbə: müəllif, ad, nəşr ili.' context 'accounts.syllabus' %}">{% for line in p.data.primary %}{{ line }}
+{% endfor %}</textarea>
+  </div>
+  <div class="syl-field">
+    <label for="syl-lit2">{% trans "Əlavə ədəbiyyat və elektron resurslar" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+    <textarea id="syl-lit2" rows="4" class="syl-textarea" data-field-lines="additional" {% if se.readonly %}disabled{% endif %}
+              placeholder="{% trans 'Onlayn kurslar, sənədləşdirmə, məqalələr.' context 'accounts.syllabus' %}">{% for line in p.data.additional %}{{ line }}
+{% endfor %}</textarea>
+  </div>
+</article>
+{% endwith %}
+
+{% with p=se.panels.prev %}
+<article class="syl-panel{% if se.active_id == 'prev' %} is-on{% endif %}" data-syl-panel="prev" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--check">{% trans "yoxlama bölməsi" context "accounts.syllabus" %}</span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <div class="syl-preview">
+    <div class="syl-preview__head">
+      <p class="syl-preview__org">{% trans "Sillabus" context "accounts.syllabus" %}</p>
+      <p class="syl-preview__title">{{ se.header.name }}</p>
+      <p class="syl-meta">{{ se.header.code }} · {{ se.header.period }} · {{ se.header.version_label }}</p>
+    </div>
+    {% for block in se.preview_blocks %}
+    <div class="syl-preview__block">
+      <p class="syl-preview__label">{{ block.title }}</p>
+      <p class="syl-preview__body">{{ block.body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</article>
+{% endwith %}
+
+{% with p=se.panels.send %}
+<article class="syl-panel{% if se.active_id == 'send' %} is-on{% endif %}" data-syl-panel="send" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--check">{% trans "yoxlama bölməsi" context "accounts.syllabus" %}</span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <ul class="syl-checklist">
+    {% for step in se.nav %}
+    {% if step.state != 'check' %}
+    <li class="syl-check syl-check--{{ step.state }}">
+      <span class="syl-check__mark" aria-hidden="true">{% if step.state == 'done' %}✓{% else %}!{% endif %}</span>
+      <span class="syl-check__label">{{ step.label }}</span>
+      <span class="syl-check__note">
+        {% if step.state == 'done' %}{% trans "tamamlanıb" context "accounts.syllabus" %}
+        {% else %}{% blocktrans context "accounts.syllabus" count counter=step.issue_count %}{{ counter }} çatışmazlıq{% plural %}{{ counter }} çatışmazlıq{% endblocktrans %}{% endif %}
+      </span>
+      {% if step.state != 'done' %}
+      <button type="button" class="syl-btn syl-btn--secondary syl-btn--sm" data-syl-step="{{ step.id }}">{% trans "Düzəlt" context "accounts.syllabus" %}</button>
+      {% endif %}
+    </li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+
+  <p class="syl-hintbox">{% trans "Marşrut: kafedra müdiri → təsdiq. Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır." context "accounts.syllabus" %}</p>
+
+  <button type="button" class="syl-btn syl-btn--primary syl-btn--lg" data-syl-submit {% if not se.can_submit %}disabled{% endif %}>
+    {% trans "Kafedraya təsdiqə göndər" context "accounts.syllabus" %}
+  </button>
+</article>
+{% endwith %}

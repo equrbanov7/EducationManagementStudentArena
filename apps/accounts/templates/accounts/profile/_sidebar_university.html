@@ -1,6 +1,6 @@
 {% load i18n %}
 {# ── U12: Universitet bölmələri — SPA panel (sidebar itmir) ────────── #}
-{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections or "people-teachers" in allowed_sections or "people-students" in allowed_sections or "syllabus-list" in allowed_sections %}
 <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Universitet" context "profile.sidebar" %}</span></li>
 {% endif %}
 {% if "overall-academic" in allowed_sections %}
@@ -87,6 +87,20 @@ pəncərələri kimi) — AJAX swap YOX, tam səhifə naviqasiyası.{% endcommen
     </a>
 </li>
 {% endif %}
+{% comment %}Sillabus: SİYAHI menyuda görünür; redaktor bölməsi siyahıdan açılır
+(ayrıca menyu sətri yoxdur, amma o da profil shell-inin içindədir — sidebar itmir).{% endcomment %}
+{% if "syllabus-list" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=syllabus-list"
+       data-section="syllabus-list"
+       data-title="{% trans 'Sillabuslar' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-list' or active_section == 'syllabus-editor' %}active{% endif %}">
+        <i class="fas fa-file-lines sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Sillabuslar" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
 {% if "academic-records" in allowed_sections %}
 <li class="sidebar-menu-item">
     <a href="{{ profile_base_url }}?section=academic-records"
@@ -96,6 +110,30 @@ pəncərələri kimi) — AJAX swap YOX, tam səhifə naviqasiyası.{% endcommen
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'academic-records' %}active{% endif %}">
         <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Akademik qeydlər" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "people-teachers" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=people-teachers"
+       data-section="people-teachers"
+       data-title="{% trans 'Müəllimlər' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-teachers' %}active{% endif %}">
+        <i class="fas fa-chalkboard-user sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Müəllimlər" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "people-students" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=people-students"
+       data-section="people-students"
+       data-title="{% trans 'Tələbələr' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-students' %}active{% endif %}">
+        <i class="fas fa-user-graduate sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Tələbələr" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}

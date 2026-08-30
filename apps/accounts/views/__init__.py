@@ -74,6 +74,9 @@ from .organization import (
     student_organization_request,
 )
 
+# RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
+from .people import people_action, people_detail, people_list, people_options
+
 # Post management views
 from .post_management import (
     org_moderate_post,
@@ -96,8 +99,6 @@ from .profile import (
     view_as_start,
     view_as_stop,
 )
-
-# RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
 from .rim import rim_action, rim_user_detail, rim_user_search
 
 # Role management views
@@ -116,6 +117,9 @@ from .superadmin import (
     superadmin_exam_rooms,
     superadmin_organizations,
 )
+
+# Sillabus — müəllim səthi (siyahı + redaktor) profil bölməsi kimi açılır
+from .syllabus import syllabus_action, syllabus_preview, syllabus_section_save
 
 __all__ = [
     # Authentication
@@ -178,9 +182,17 @@ __all__ = [
     "delete_account",
     "superadmin_user_management",
     # RİM mərkəzi — hesab idarəetməsi (axtarış/parol/blok/silmə/redaktə)
+    "people_list",
+    "people_options",
+    "people_detail",
+    "people_action",
     "rim_user_search",
     "rim_user_detail",
     "rim_action",
+    # Sillabus — müəllim səthi (autosave / əməllər / baxış paneli)
+    "syllabus_action",
+    "syllabus_preview",
+    "syllabus_section_save",
     # Post management
     "superadmin_post_management",
     "superadmin_delete_post",

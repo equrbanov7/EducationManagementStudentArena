@@ -877,12 +877,15 @@ def test_record_derivation_hash_follows_the_documented_recipe():
     )
     # Demoqrafiya yazısı da qərarın kimliyini dəyişir: boş sahəni doldurmaq ≠
     # mənbədə heç nə olmaması.
-    assert record_derivation_hash(
-        legacy_pk=1,
-        row_hash=row_hash,
-        placement=placement,
-        fin_state="written",
-        name_state="preserved",
-        patronymic_state="written",
-        demographics_state="written",
-    ) != digest.hexdigest()
+    assert (
+        record_derivation_hash(
+            legacy_pk=1,
+            row_hash=row_hash,
+            placement=placement,
+            fin_state="written",
+            name_state="preserved",
+            patronymic_state="written",
+            demographics_state="written",
+        )
+        != digest.hexdigest()
+    )

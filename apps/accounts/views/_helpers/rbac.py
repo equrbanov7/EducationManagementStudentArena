@@ -9,6 +9,7 @@ effective/grantable permissions. Keep tenant and permission checks strict.
 from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
+from .rbac_sections import apply_permission_section_gates
 from .tenant import _bind_active_role_context
 
 
@@ -506,35 +507,15 @@ def _role_capabilities(user, profile):
     if is_unit_manager:
         allowed_sections.add("unit-exams")
 
-    # Audit jurnalı (Faza 3): `audit.view` icazəli rollar (rektor/prorektor "*",
-    # imtahan mərkəzi, HR) üçün link. Faktiki icazə audit.views-də yenidən yoxlanılır.
-    can_view_audit = is_superadmin or is_owner_of_active_org
-    if not can_view_audit and active_organization is not None:
-        from core.permissions import has_permission as _audit_has_permission
-
-        _audit_actor_perms, _ = _collect_actor_permissions(user, active_organization)
-        can_view_audit = _audit_has_permission(list(_audit_actor_perms), "audit.view")
-    if can_view_audit:
-        allowed_sections.add("audit-log")
-
-    # «RİM mərkəzi» (hesab idarəetməsi) — `user.*` icazələrindən HƏR HANSI BİRİ
-    # bölməni açır; konkret düymələr (parol/blok/silmə/redaktə) öz icazəsi ilə
-    # AYRICA qapılıdır (bax `services/rim/policy.py`). Yəni yalnız `user.search`
-    # daşıyan operator bölməni görür, amma heç bir dağıdıcı düyməsi olmur.
-    #
-    # Bu bölmə superadmin-only DEYİL: köhnə sistemdən idxal olunmuş 8000+ hesabın
-    # parol bərpası cutover-da gündəlik əməliyyatdır və İKT/prorektor səviyyəli
-    # əməkdaş onu superadmin olmadan aparmalıdır.
-    can_use_rim_center = is_superadmin
-    if not can_use_rim_center and active_organization is not None:
-        from apps.accounts.services.rim.policy import RIM_PERMISSIONS
-        from core.permissions import has_permission as _rim_has_permission
-
-        _rim_actor_perms, _ = _collect_actor_permissions(user, active_organization)
-        _rim_perm_list = list(_rim_actor_perms)
-        can_use_rim_center = any(_rim_has_permission(_rim_perm_list, perm) for perm in RIM_PERMISSIONS)
-    if can_use_rim_center:
-        allowed_sections.add("rim-center")
+    # İcazə-qapılı bölmələr (audit / RİM / müəllim-tələbə kataloqu) TƏK yerdən:
+    # bax `rbac_sections.apply_permission_section_gates` (yalnız GÖRÜNÜRLÜK).
+    _permission_gates = apply_permission_section_gates(
+        user,
+        active_organization,
+        allowed_sections,
+        is_superadmin=is_superadmin,
+        is_owner=is_owner_of_active_org,
+    )
 
     # "Sual Bankı" profil sidebar bölməsi (sağda AJAX açılır) — görünürlük flag-ı ilə eyni şərt.
     if can_use_question_bank:
@@ -569,8 +550,8 @@ def _role_capabilities(user, profile):
         "is_dean": is_dean,
         "is_department_head": is_department_head,
         "is_unit_manager": is_unit_manager,
-        "can_view_audit": can_view_audit,
-        "can_use_rim_center": can_use_rim_center,
+        # audit-log / rim-center / people-* bayraqları (bax rbac_sections).
+        **_permission_gates,
         "can_use_question_bank": can_use_question_bank,
         "can_manage_appeals": can_manage_appeals,
         "can_view_my_appeals": can_view_my_appeals,

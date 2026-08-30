@@ -202,6 +202,23 @@ urlpatterns = [
     path("rim/search/", views.rim_user_search, name="rim_user_search"),
     path("rim/user/<int:user_id>/", views.rim_user_detail, name="rim_user_detail"),
     path("rim/action/", views.rim_action, name="rim_action"),
+    # «Müəllimlər» / «Tələbələr» kataloqu — icazə-qapılı (`people.*`) VƏ struktur
+    # scope-una tabe. RİM-dən FƏRQİ: burada dekan/kafedra müdiri yalnız öz
+    # alt-ağacını görür (bax apps/accounts/services/people/permissions.py).
+    path("people/<str:kind>/list/", views.people_list, name="people_list"),
+    path("people/<str:kind>/options/", views.people_options, name="people_options"),
+    path("people/person/<int:user_id>/", views.people_detail, name="people_detail"),
+    path("people/action/", views.people_action, name="people_action"),
+    # Sillabus (müəllim səthi) — profil bölməsinin JSON endpoint-ləri.
+    # Cross-domain glue accounts-dadır: `apps.syllabus` registrar/organizations
+    # modullarını import etmir (modul-sərhəd dövrü yaranmır).
+    path("profile/syllabus/action/", views.syllabus_action, name="syllabus_action"),
+    path(
+        "profile/syllabus/version/<uuid:version_id>/section/",
+        views.syllabus_section_save,
+        name="syllabus_section_save",
+    ),
+    path("profile/syllabus/<uuid:syllabus_id>/preview/", views.syllabus_preview, name="syllabus_preview"),
     # Post management
     path("superadmin/post-management/", views.superadmin_post_management, name="superadmin_post_management"),
     path(

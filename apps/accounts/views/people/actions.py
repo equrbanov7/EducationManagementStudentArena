@@ -1,0 +1,91 @@
+"""Kataloq YAZMA endpoint-i — hesabı dayandır/bərpa et, müəllim statusu.
+
+RİM ilə eyni naxış: TƏK POST marşrutu + ``action`` allow-list-i. Səbəb eynidir —
+hər əməliyyat eyni ön-şərt zəncirindən keçir (aktor → hədəf → icazə → scope →
+iyerarxiya → audit); marşrutları parçalasaq zəncir dörd yerdə təkrarlanardı.
+
+⚠️ TƏSDİQ TƏLƏBİ: dağıdıcı əməllər (``block``, ``revoke_teacher``) üçün
+``reason`` MƏCBURİDİR (ən azı 3 simvol) — servis qatı onu yoxlayır və UI təsdiq
+modalını bu tələb üzərində qurur.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
+
+from apps.accounts.services import people
+from apps.accounts.services.rim.policy import RimAccessError
+
+logger = logging.getLogger(__name__)
+
+#: Allow-list — naməlum `action` 400 verir (səssiz keçid yoxdur).
+ALLOWED_ACTIONS = frozenset({"block", "unblock", "grant_teacher", "revoke_teacher"})
+
+
+def _read_payload(request) -> dict:
+    content_type = (request.content_type or "").lower()
+    if "application/json" in content_type:
+        try:
+            data = json.loads(request.body.decode("utf-8") or "{}")
+        except ValueError:
+            return {}
+        return data if isinstance(data, dict) else {}
+    return {key: value for key, value in request.POST.items()}
+
+
+def _error(exc: RimAccessError) -> JsonResponse:
+    return JsonResponse({"ok": False, "error": exc.reason_code, "message": exc.message}, status=exc.status)
+
+
+@never_cache
+@login_required
+@require_POST
+def people_action(request):
+    """Kataloq əməllərinin vahid giriş nöqtəsi."""
+    actor = people.resolve_actor(request)
+    payload = _read_payload(request)
+
+    action = str(payload.get("action") or "").strip()
+    if action not in ALLOWED_ACTIONS:
+        return JsonResponse({"ok": False, "error": "unknown_action", "message": "Naməlum əməliyyat."}, status=400)
+
+    reason = payload.get("reason") or ""
+
+    try:
+        target = people.load_target(actor, payload.get("user_id"))
+        if action in ("block", "unblock"):
+            result = people.set_account_status(
+                actor,
+                target,
+                active=(action == "unblock"),
+                reason=reason,
+                request=request,
+            )
+        else:
+            result = people.set_teacher_role(
+                actor,
+                target,
+                grant=(action == "grant_teacher"),
+                reason=reason,
+                unit_id=payload.get("unit_id") or None,
+                request=request,
+            )
+    except RimAccessError as exc:
+        return _error(exc)
+    except Exception:  # noqa: BLE001 — daxili xəta istifadəçiyə sızmamalıdır
+        logger.exception("people action failed: %s", action)
+        return JsonResponse(
+            {"ok": False, "error": "action_failed", "message": "Əməliyyat tamamlana bilmədi."},
+            status=500,
+        )
+
+    return JsonResponse({"ok": True, "action": action, "result": result})
+
+
+__all__ = ["ALLOWED_ACTIONS", "people_action"]

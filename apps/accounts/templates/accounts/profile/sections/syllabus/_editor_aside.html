@@ -1,0 +1,63 @@
+{% load i18n %}
+{% comment %}
+Redaktorun sağ kontekst sütunu: xülasə paneli, çatışmayan tələblər siyahısı və
+versiya jurnalı (dizayn §3.2). «Çatışmayan tələblər» sətirləri kliklənəndir —
+aid olduğu bölməyə tullanır (mətn `views/syllabus/labels.py`-dan gəlir).
+{% endcomment %}
+<aside class="syl-aside">
+  <section class="syl-card syl-card--plain">
+    <h4 class="syl-aside__title">{% trans "Sillabus xülasəsi" context "accounts.syllabus" %}</h4>
+    <dl class="syl-summary">
+      {% for row in se.summary %}
+      <div class="syl-summary__row">
+        <dt>{{ row.label }}</dt>
+        <dd class="syl-summary__value syl-summary__value--{{ row.tone }}">{{ row.value }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="syl-card syl-card--plain">
+    <h4 class="syl-aside__title">
+      {% trans "Çatışmayan tələblər" context "accounts.syllabus" %}
+      <span class="syl-badge syl-badge--{% if se.issues %}warning{% else %}success{% endif %}">
+        {% if se.issues %}{% blocktrans context "accounts.syllabus" count counter=se.issues|length %}{{ counter }} bənd{% plural %}{{ counter }} bənd{% endblocktrans %}{% else %}{% trans "yoxdur" context "accounts.syllabus" %}{% endif %}
+      </span>
+    </h4>
+    {% if not se.issues %}
+      <p class="syl-allok"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Bütün məcburi tələblər ödənilib" context "accounts.syllabus" %}</p>
+    {% else %}
+      <ul class="syl-issues">
+        {% for issue in se.issues %}
+        <li>
+          <button type="button" class="syl-issue" data-syl-step="{{ issue.section }}">
+            <span class="syl-issue__dot" aria-hidden="true"></span>
+            <span>
+              <span class="syl-issue__text">{{ issue.text }}</span>
+              <span class="syl-issue__sec">{{ issue.section_title }}</span>
+            </span>
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <section class="syl-card syl-card--plain">
+    <h4 class="syl-aside__title">{% trans "Versiya jurnalı" context "accounts.syllabus" %}</h4>
+    <ol class="syl-timeline">
+      {% for event in se.history %}
+      <li class="syl-timeline__row syl-timeline__row--{{ event.tone }}">
+        <span class="syl-timeline__dot" aria-hidden="true"></span>
+        <span>
+          <span class="syl-timeline__title">{{ event.title }}</span>
+          <span class="syl-timeline__meta">
+            {{ event.meta|date:"d.m.Y, H:i" }}{% if event.actor %} · {{ event.actor.get_full_name|default:event.actor.username }}{% endif %}
+          </span>
+          {% if event.reason %}<span class="syl-timeline__reason">{{ event.reason }}</span>{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+</aside>

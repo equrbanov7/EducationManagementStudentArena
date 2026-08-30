@@ -1,0 +1,68 @@
+{% load i18n %}
+{% comment %}
+Üç dialoq (dizayn §3.1): «Yeni versiya», «Keçən ildən köçür», «Təqdimatı geri
+çağır». Hamısı EYNİ qabıqdan istifadə edir — JS yalnız görünən bloku açır.
+
+⚠️ «Geri çağır» üçün SƏBƏB MƏCBURİDİR (ən azı 15 simvol) — həm JS, həm də
+`views/syllabus/api.py` yoxlayır (server son sözü deyir).
+⚠️ «Keçən ildən köçür» nəticəsi HƏR ZAMAN QARALAMADIR — avtomatik təsdiqlənmir.
+{% endcomment %}
+<div class="syl-modal" data-syl-modal hidden>
+  <div class="syl-modal__backdrop" data-syl-modal-close></div>
+  <div class="syl-modal__box" role="dialog" aria-modal="true" aria-labelledby="syl-modal-title" tabindex="-1">
+    <div class="syl-modal__head">
+      <h3 id="syl-modal-title" data-syl-modal-title></h3>
+      <p class="syl-modal__body" data-syl-modal-body></p>
+    </div>
+
+    <div class="syl-modal__picks" data-syl-modal-picks hidden>
+      <button type="button" class="syl-pick is-on" data-syl-kind="minor" aria-pressed="true">
+        <span class="syl-pick__radio" aria-hidden="true"></span>
+        <span>
+          <span class="syl-pick__title">{% trans "Kiçik dəyişiklik" context "accounts.syllabus" %}</span>
+          <span class="syl-pick__note">{% trans "Ədəbiyyat, məsləhət saatı, mövzu adının redaktəsi. Jurnal strukturu dəyişmir, cari semestrə tətbiq olunur." context "accounts.syllabus" %}</span>
+        </span>
+      </button>
+      <button type="button" class="syl-pick" data-syl-kind="major" aria-pressed="false">
+        <span class="syl-pick__radio" aria-hidden="true"></span>
+        <span>
+          <span class="syl-pick__title">{% trans "Böyük dəyişiklik" context "accounts.syllabus" %}</span>
+          <span class="syl-pick__note">{% trans "Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir." context "accounts.syllabus" %}</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="syl-modal__reason" data-syl-modal-reason hidden>
+      <label for="syl-reason">{% trans "Geri çağırma səbəbi" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+      <textarea id="syl-reason" rows="3" data-syl-reason
+                placeholder="{% trans 'Məsələn: aralıq imtahan tarixi dəyişdi, mövzu planını yeniləyirəm.' context 'accounts.syllabus' %}"
+                aria-describedby="syl-reason-note"></textarea>
+      <p id="syl-reason-note" class="syl-modal__note" data-syl-reason-note>{% trans "Ən azı 15 simvol — səbəb audit izinə yazılır." context "accounts.syllabus" %}</p>
+    </div>
+
+    <div class="syl-modal__foot">
+      <button type="button" class="syl-btn syl-btn--secondary" data-syl-modal-close>{% trans "Ləğv et" context "accounts.syllabus" %}</button>
+      <button type="button" class="syl-btn syl-btn--primary" data-syl-modal-confirm></button>
+    </div>
+  </div>
+</div>
+
+{% comment %}Dialoq mətnləri — xarici `.js` faylı Django template engine-dən
+KEÇMİR, ona görə tərcümələr burada `data-*` atributları ilə ötürülür.{% endcomment %}
+<span class="syl-i18n" data-syl-i18n hidden
+      data-t-newver-title="{% trans 'Yeni versiya yaradılsın?' context 'accounts.syllabus' %}"
+      data-t-newver-body="{% trans 'Təsdiqlənmiş versiya olduğu kimi qalır və tələbələr onu görməyə davam edir. Yeni versiya qaralama kimi açılır, təsdiqlənəndən sonra aktiv olur.' context 'accounts.syllabus' %}"
+      data-t-newver-ok="{% trans 'Qaralama yarat' context 'accounts.syllabus' %}"
+      data-t-copy-title="{% trans 'Keçən ilin sillabusundan köçürülsün?' context 'accounts.syllabus' %}"
+      data-t-copy-body="{% trans 'Ən son təsdiqlənmiş versiya mənbə kimi istifadə olunacaq. Nəticə yalnız QARALAMA olur — avtomatik təsdiqlənmir və tələbələrə görünmür.' context 'accounts.syllabus' %}"
+      data-t-copy-ok="{% trans 'Köçür və qaralama aç' context 'accounts.syllabus' %}"
+      data-t-withdraw-title="{% trans 'Təqdimat geri çağırılsın?' context 'accounts.syllabus' %}"
+      data-t-withdraw-body="{% trans 'Sillabus kafedra növbəsindən çıxarılır və yenidən qaralama statusuna qayıdır. Kafedra müdirinə bildiriş göndərilir.' context 'accounts.syllabus' %}"
+      data-t-withdraw-ok="{% trans 'Geri çağır' context 'accounts.syllabus' %}"
+      data-t-create-title="{% trans 'Bu fənn üçün sillabus yaradılsın?' context 'accounts.syllabus' %}"
+      data-t-create-body="{% trans 'Boş qaralama açılır və 10 bölmə doldurulmağa hazır olur. Tələbələrə yalnız təsdiqdən sonra görünəcək.' context 'accounts.syllabus' %}"
+      data-t-create-ok="{% trans 'Qaralama yarat' context 'accounts.syllabus' %}"
+      data-t-pdf="{% trans 'PDF hazırlanır — universitet blankı ilə.' context 'accounts.syllabus' %}"
+      data-t-reason-short="{% trans 'Ən azı 15 simvol — səbəb məcburidir.' context 'accounts.syllabus' %}"
+      data-t-reason-ok="{% trans 'Səbəb audit izinə yazılır.' context 'accounts.syllabus' %}"
+      data-t-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'accounts.syllabus' %}"></span>

@@ -119,6 +119,14 @@ SECTION_PARTIALS: dict[str, str] = {
     "journal-close": "accounts/profile/sections/_journal_close.html",
     "analytics": "accounts/profile/sections/_analytics.html",
     "academic-records": "accounts/profile/sections/_academic_records.html",
+    # «Müəllimlər» / «Tələbələr» kataloqu (icazə: `people.*`, scope: unit)
+    "people-teachers": "accounts/profile/sections/_people_teachers.html",
+    "people-students": "accounts/profile/sections/_people_students.html",
+    # Sillabus — müəllim səthi. Redaktor ayrıca TAM SƏHİFƏ deyil: o da profil
+    # shell-inin içində açılır (sol sidebar qalır), hədəf versiya `?version=`
+    # sorğu parametrindən gəlir.
+    "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
+    "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -166,6 +174,15 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "academic-calendar",
         "my-journal",
         "analytics",
+        # Kataloq panelləri OXU-ONLY render olunur (bütün mutasiyalar ayrıca
+        # JSON POST endpoint-inə gedir) → AJAX swap təhlükəsizdir.
+        "people-teachers",
+        "people-students",
+        # Sillabus siyahısı və redaktoru OXU-ONLY render olunur — bütün yazı
+        # əməliyyatları ayrıca JSON POST endpoint-inə gedir (autosave/əməllər),
+        # ona görə AJAX swap təhlükəsizdir.
+        "syllabus-list",
+        "syllabus-editor",
     }
 )
 

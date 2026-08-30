@@ -188,6 +188,14 @@ class _Stage2Mixin:
             "deleted_count": 0,
             "embedded_in_profile": True,
         }
+        # «Müəllimlər» / «Tələbələr» kataloqu — RİM ilə eyni naxış: panel SPA-dır,
+        # server yalnız çərçivəni verir (bax views/people/section.py müqaviləsi).
+        # Bölmə aktiv deyilsə boş qalır; şablon `has_access` yoxlayır.
+        self.people_section = {"kind": "", "has_access": False}
+        # Sillabus — müəllim səthi. Bölmə aktiv deyilsə AĞIR sorğu getmir; şablon
+        # `has_access` / `view_state` yoxlayır (bax views/syllabus/ müqaviləsi).
+        self.syllabus_list_section = {"has_access": False, "rows": []}
+        self.syllabus_editor_section = {"view_state": "missing", "nav": [], "panels": []}
         # «RİM mərkəzi» — panel SPA-dır, server yalnız icazə xəritəsini verir.
         self.rim_center_section = {
             "can_search": False,

@@ -35414,58 +35414,6 @@ msgctxt "profile.sidebar"
 msgid "group_exam_center"
 msgstr "Examination centre"
 
-#~ msgctxt "profile.subjects"
-#~ msgid "Buraxılmır"
-#~ msgstr "Barred"
-
-#~ msgctxt "profile.subjects"
-#~ msgid "Keçir"
-#~ msgstr "Passes"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Colloquium"
-#~ msgstr "Colloquium"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Attendance"
-#~ msgstr "Attendance"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Final exam"
-#~ msgstr "Final exam"
-
-#~ msgctxt "registrar.component_kind"
-#~ msgid "Other"
-#~ msgstr "Other"
-
-#~ msgctxt "registrar.model.component.meta"
-#~ msgid "grade component"
-#~ msgstr "grade component"
-
-#~ msgctxt "registrar.model.component.meta"
-#~ msgid "grade components"
-#~ msgstr "grade components"
-
-#~ msgctxt "registrar.model.score.meta"
-#~ msgid "component score"
-#~ msgstr "component score"
-
-#~ msgctxt "registrar.model.score.meta"
-#~ msgid "component scores"
-#~ msgstr "component scores"
-
-#~ msgctxt "registrar.journal"
-#~ msgid "Keçid"
-#~ msgstr "Pass"
-
-#~ msgctxt "registrar.journal"
-#~ msgid "Buraxılmır"
-#~ msgstr "Barred"
-
-#~ msgctxt "registrar.journal"
-#~ msgid "Keçir"
-#~ msgstr "Passes"
-
 msgctxt "accounts.academic_title"
 msgid "Assistent"
 msgstr "Assistant"
@@ -35519,8 +35467,11 @@ msgid "Akademik məlumat"
 msgstr "Academic information"
 
 msgctxt "profile.edit_v2"
-msgid "Bu məlumatlar universitet tərəfindən idarə olunur və buradan dəyişdirilə bilməz."
-msgstr "This information is managed by the university and cannot be changed here."
+msgid ""
+"Bu məlumatlar universitet tərəfindən idarə olunur və buradan dəyişdirilə "
+"bilməz."
+msgstr ""
+"This information is managed by the university and cannot be changed here."
 
 msgctxt "profile.edit_v2"
 msgid "Elmi ad / vəzifə"
@@ -35539,12 +35490,17 @@ msgid "Akademik fəaliyyət"
 msgstr "Academic activity"
 
 msgctxt "profile.edit_v2"
-msgid "Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək."
-msgstr "Add the subjects you teach, your certificates, articles and conference papers — they will appear on your profile page."
+msgid ""
+"Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans "
+"materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək."
+msgstr ""
+"Add the subjects you teach, your certificates, articles and conference "
+"papers — they will appear on your profile page."
 
 msgctxt "profile.edit_v2"
 msgid "Nömrələr yalnız əməkdaş səviyyəli baxanlara görünür, tələbələrə yox."
-msgstr "Phone numbers are visible only to staff-level viewers, not to students."
+msgstr ""
+"Phone numbers are visible only to staff-level viewers, not to students."
 
 msgctxt "profile.edit_v2"
 msgid "Əlavə telefon"
@@ -35563,8 +35519,11 @@ msgid "Dəyişikliklər yadda saxlanmayıb"
 msgstr "Changes are not saved"
 
 msgctxt "profile.edit_v2"
-msgid "Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?"
-msgstr "If you leave this page, your changes will be lost. What would you like to do?"
+msgid ""
+"Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?"
+msgstr ""
+"If you leave this page, your changes will be lost. What would you like to "
+"do?"
 
 msgctxt "profile.edit_v2"
 msgid "Saxlamadan çıx"
@@ -35708,7 +35667,8 @@ msgstr "A one-time code will be sent to <strong>%(email)s</strong>."
 
 msgctxt "accounts.password_otp"
 msgid "Hesabınızda email ünvanı yoxdur. Əvvəlcə profilə email əlavə edin."
-msgstr "Your account has no email address. Add an email to your profile first."
+msgstr ""
+"Your account has no email address. Add an email to your profile first."
 
 msgctxt "accounts.password_otp"
 msgid "Yeni kod üçün bir az gözləyin."
@@ -35716,7 +35676,8 @@ msgstr "Please wait a moment before requesting a new code."
 
 msgctxt "accounts.password_otp"
 msgid "Bu email üçün saatlıq kod limiti dolub. Daha sonra yenidən cəhd edin."
-msgstr "The hourly code limit for this email has been reached. Try again later."
+msgstr ""
+"The hourly code limit for this email has been reached. Try again later."
 
 msgctxt "accounts.password_otp"
 msgid "Kod göndərilə bilmədi. Bir az sonra yenidən cəhd edin."
@@ -35772,7 +35733,8 @@ msgstr "Unknown operation."
 
 msgctxt "accounts.public_profile"
 msgid "Önizləmə rejimi: profiliniz kənar baxana məhz belə görünür."
-msgstr "Preview mode: this is exactly how your profile looks to an outside viewer."
+msgstr ""
+"Preview mode: this is exactly how your profile looks to an outside viewer."
 
 msgctxt "accounts.public_profile"
 msgid "Redaktəyə qayıt"
@@ -35799,8 +35761,11 @@ msgid "Bank yalnız sizə görünür — şəxsi istifadəniz üçündür."
 msgstr "The bank is visible only to you — for your personal use."
 
 msgctxt "exams.template.question_bank_list"
-msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
-msgstr "The bank is not visible to other teachers — only you and the exam centre can see it."
+msgid ""
+"Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
+msgstr ""
+"The bank is not visible to other teachers — only you and the exam centre can"
+" see it."
 
 msgctxt "registrar.legacy_grade"
 msgid "Köhnə yekun cədvəli"
@@ -35861,3 +35826,608 @@ msgstr "Awaiting Examination Centre review"
 msgctxt "registrar.legacy_grade"
 msgid "Düzəliş tələb olunur"
 msgstr "Correction required"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Qaralama"
+msgstr "Draft"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Təqdim edilib"
+msgstr "Submitted"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Baxışdadır"
+msgstr "Under review"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Düzəliş tələb olunur"
+msgstr "Revision required"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Təsdiqlənib"
+msgstr "Approved"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Rədd edilib"
+msgstr "Rejected"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.status"
+msgid "Arxivlənib"
+msgstr "Archived"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Qaralamanı tamamlayıb təsdiqə göndər"
+msgstr "Complete the draft and submit it for approval"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Kafedra müdirinin baxışı gözlənilir"
+msgstr "Awaiting the department chair's review"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Baxış nəticəsi gözlənilir"
+msgstr "Awaiting the review outcome"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Kafedra qeydlərini nəzərə alıb yenidən göndər"
+msgstr "Address the department's notes and resubmit"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Əməl tələb olunmur — versiya kilidlidir"
+msgstr "No action required — the version is locked"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Rədd səbəbini oxuyub yeni versiya yarat"
+msgstr "Read the rejection reason and create a new version"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.next_step"
+msgid "Arxiv qeydi — yalnız baxış"
+msgstr "Archived record — view only"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Ümumi məlumat"
+msgstr "General information"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Fənnin təsviri və məqsədi"
+msgstr "Course description and objective"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Təlim nəticələri"
+msgstr "Learning outcomes"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Həftəlik mövzular"
+msgstr "Weekly topics"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Tədris metodları"
+msgstr "Teaching methods"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Qiymətləndirmə strukturu"
+msgstr "Assessment structure"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Sərbəst iş strukturu"
+msgstr "Independent work structure"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Əsas və əlavə ədəbiyyat"
+msgstr "Core and supplementary reading"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Yekun görünüş"
+msgstr "Final view"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.section"
+msgid "Təsdiqə göndərmə"
+msgstr "Submit for approval"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Mühazirə"
+msgstr "Lecture"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "İnteraktiv müzakirə"
+msgstr "Interactive discussion"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Problem əsaslı öyrənmə"
+msgstr "Problem-based learning"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Layihə əsaslı iş"
+msgstr "Project-based work"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Laboratoriya təcrübəsi"
+msgstr "Laboratory practice"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Case study təhlili"
+msgstr "Case study analysis"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Kod baxışı (peer review)"
+msgstr "Code review (peer review)"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.selfwork"
+msgid "Fərdi məsləhət"
+msgstr "Individual consultation"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "İlk versiya"
+msgstr "Initial version"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Kiçik dəyişiklik (cari semestr)"
+msgstr "Minor change (current semester)"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Böyük dəyişiklik (növbəti semestr)"
+msgstr "Major change (next semester)"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Keçən ildən köçürülüb"
+msgstr "Copied from last year"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Köhnə sistemdən köçürülüb"
+msgstr "Migrated from the legacy system"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "İnsan qərarı"
+msgstr "Human decision"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Sistem / köçürmə"
+msgstr "System / migration"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus"
+msgstr "syllabus"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabuslar"
+msgstr "syllabi"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus versiyası"
+msgstr "syllabus version"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus versiyaları"
+msgstr "syllabus versions"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus bölməsi"
+msgstr "syllabus section"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus bölmələri"
+msgstr "syllabus sections"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus baxışı"
+msgstr "syllabus review"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "sillabus baxışları"
+msgstr "syllabus reviews"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Təsdiqə göndərildi"
+msgstr "Submitted for approval"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Geri çağırıldı"
+msgstr "Withdrawn"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Baxışa götürüldü"
+msgstr "Taken under review"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Təsdiqləndi"
+msgstr "Approved"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Düzəliş üçün geri qaytarıldı"
+msgstr "Returned for revision"
+
+#: apps/syllabus/constants.py
+msgctxt "syllabus.model"
+msgid "Rədd edildi"
+msgstr "Rejected"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabuslara baxış"
+msgstr "View syllabi"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabus qaralamasını redaktə etmək"
+msgstr "Edit a syllabus draft"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabusu təsdiqə göndərmək / geri çağırmaq"
+msgstr "Submit or withdraw a syllabus"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabus təsdiq növbəsinə baxmaq"
+msgstr "View the syllabus approval queue"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabusu təsdiqləmək"
+msgstr "Approve a syllabus"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabusu düzəliş üçün geri qaytarmaq"
+msgstr "Return a syllabus for revision"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabusu rədd etmək"
+msgstr "Reject a syllabus"
+
+#: apps/syllabus/constants.py
+msgctxt "organizations.permission.label"
+msgid "Sillabusları idarə etmək (arxiv, köçürmə)"
+msgstr "Manage syllabi (archive, copy)"
+
+#~ msgctxt "profile.subjects"
+#~ msgid "Buraxılmır"
+#~ msgstr "Barred"
+
+#~ msgctxt "profile.subjects"
+#~ msgid "Keçir"
+#~ msgstr "Passes"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Colloquium"
+#~ msgstr "Colloquium"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Attendance"
+#~ msgstr "Attendance"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Final exam"
+#~ msgstr "Final exam"
+
+#~ msgctxt "registrar.component_kind"
+#~ msgid "Other"
+#~ msgstr "Other"
+
+#~ msgctxt "registrar.model.component.meta"
+#~ msgid "grade component"
+#~ msgstr "grade component"
+
+#~ msgctxt "registrar.model.component.meta"
+#~ msgid "grade components"
+#~ msgstr "grade components"
+
+#~ msgctxt "registrar.model.score.meta"
+#~ msgid "component score"
+#~ msgstr "component score"
+
+#~ msgctxt "registrar.model.score.meta"
+#~ msgid "component scores"
+#~ msgstr "component scores"
+
+#~ msgctxt "registrar.journal"
+#~ msgid "Keçid"
+#~ msgstr "Pass"
+
+#~ msgctxt "registrar.journal"
+#~ msgid "Buraxılmır"
+#~ msgstr "Barred"
+
+#~ msgctxt "registrar.journal"
+#~ msgid "Keçir"
+#~ msgstr "Passes"
+
+msgctxt "organizations.permission.label"
+msgid "Müəllim kataloquna baxış"
+msgstr "View the teacher directory"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbə kataloquna baxış"
+msgstr "View the student directory"
+
+msgctxt "organizations.permission.label"
+msgid "Kataloqda əlaqə məlumatını görmək"
+msgstr "See contact details in the directory"
+
+msgctxt "organizations.permission.label"
+msgid "Kataloqda cins və yaş məlumatını görmək"
+msgstr "See gender and age in the directory"
+
+msgctxt "organizations.permission.label"
+msgid "Kataloqdan hesabı dayandırmaq / bərpa etmək"
+msgstr "Suspend / restore an account from the directory"
+
+msgctxt "organizations.permission.label"
+msgid "Müəllim statusunu vermək / çıxarmaq"
+msgstr "Grant / revoke teacher status"
+
+msgctxt "profile.sidebar"
+msgid "Müəllimlər"
+msgstr "Teachers"
+
+msgctxt "profile.sidebar"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "accounts.people"
+msgid "Ad üzrə (A→Z)"
+msgstr "By name (A→Z)"
+
+msgctxt "accounts.people"
+msgid "Ad üzrə (Z→A)"
+msgstr "By name (Z→A)"
+
+msgctxt "accounts.people"
+msgid "Struktur üzrə"
+msgstr "By structure"
+
+msgctxt "accounts.people"
+msgid "Qrup üzrə"
+msgstr "By group"
+
+msgctxt "accounts.people"
+msgid "Qəbul ili üzrə"
+msgstr "By admission year"
+
+msgctxt "accounts.people"
+msgid "Ən yeni"
+msgstr "Newest"
+
+msgctxt "accounts.people"
+msgid "Ən köhnə"
+msgstr "Oldest"
+
+msgctxt "accounts.people"
+msgid "Bütün statuslar"
+msgstr "All statuses"
+
+msgctxt "accounts.people"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "accounts.people"
+msgid "Dayandırılıb"
+msgstr "Suspended"
+
+msgctxt "accounts.people"
+msgid "Arxiv (məzun/xaric)"
+msgstr "Archived (graduate/expelled)"
+
+msgctxt "accounts.people"
+msgid "Silinib"
+msgstr "Deleted"
+
+msgctxt "accounts.people"
+msgid "Kişi"
+msgstr "Male"
+
+msgctxt "accounts.people"
+msgid "Qadın"
+msgstr "Female"
+
+msgctxt "accounts.people"
+msgid "Cinsi göstərilməyib"
+msgstr "Gender not specified"
+
+msgctxt "accounts.people"
+msgid "Doğum tarixi göstərilməyib"
+msgstr "Date of birth not specified"
+
+msgctxt "accounts.people"
+msgid "Cins"
+msgstr "Gender"
+
+msgctxt "accounts.people"
+msgid "Cins / yaş"
+msgstr "Gender / age"
+
+msgctxt "accounts.people"
+msgid "Yaş"
+msgstr "Age"
+
+msgctxt "accounts.people"
+msgid "Minimum yaş"
+msgstr "Minimum age"
+
+msgctxt "accounts.people"
+msgid "Maksimum yaş"
+msgstr "Maximum age"
+
+msgctxt "accounts.people"
+msgid "min"
+msgstr "from"
+
+msgctxt "accounts.people"
+msgid "maks"
+msgstr "to"
+
+msgctxt "accounts.people"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "accounts.people"
+msgid "ad, soyad, ata adı, istifadəçi adı və ya FİN"
+msgstr "first name, surname, patronymic, username or PIN"
+
+msgctxt "accounts.people"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "accounts.people"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.people"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.people"
+msgid "İxtisas"
+msgstr "Specialty"
+
+msgctxt "accounts.people"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "accounts.people"
+msgid "Dərs dediyi fənn"
+msgstr "Subject taught"
+
+msgctxt "accounts.people"
+msgid "Keçdiyi fənn"
+msgstr "Subject taken"
+
+msgctxt "accounts.people"
+msgid "Tədris ili"
+msgstr "Academic year"
+
+msgctxt "accounts.people"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "accounts.people"
+msgid "Status"
+msgstr "Account status"
+
+msgctxt "accounts.people"
+msgid "Sıralama"
+msgstr "Sorting"
+
+msgctxt "accounts.people"
+msgid "Filtrləri sıfırla"
+msgstr "Reset filters"
+
+msgctxt "accounts.people"
+msgid "Şəxs"
+msgstr "Person"
+
+msgctxt "accounts.people"
+msgid "Vəzifə / rol"
+msgstr "Position / role"
+
+msgctxt "accounts.people"
+msgid "Əlaqə"
+msgstr "Contact"
+
+msgctxt "accounts.people"
+msgid "Əməllər"
+msgstr "Actions"
+
+msgctxt "accounts.people"
+msgid "Müəllim kataloqu"
+msgstr "Teacher directory"
+
+msgctxt "accounts.people"
+msgid "Tələbə kataloqu"
+msgstr "Student directory"
+
+msgctxt "accounts.people"
+msgid "Nəticə tapılmadı."
+msgstr "No results found."
+
+msgctxt "accounts.people"
+msgid "Səhifələmə"
+msgstr "Pagination"
+
+msgctxt "accounts.people"
+msgid "Əvvəlki"
+msgstr "Previous"
+
+msgctxt "accounts.people"
+msgid "Sonrakı"
+msgstr "Next"
+
+msgctxt "accounts.people"
+msgid "Şəxs kartı"
+msgstr "Person card"
+
+msgctxt "accounts.people"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "accounts.people"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "accounts.people"
+msgid "Görünüş sahənizdəki müəllimlər. Hər kəs yalnız öz strukturunun altını görür."
+msgstr "Teachers within your visibility scope. Everyone sees only their own structure."
+
+msgctxt "accounts.people"
+msgid "Görünüş sahənizdəki tələbələr. Hər kəs yalnız öz strukturunun altını görür."
+msgstr "Students within your visibility scope. Everyone sees only their own structure."
+
+msgctxt "accounts.people"
+msgid "Bu bölmədəki səlahiyyətləriniz"
+msgstr "Your permissions in this section"
+
+msgctxt "accounts.people"
+msgid "Bu bölmə üçün icazəniz yoxdur."
+msgstr "You do not have permission for this section."

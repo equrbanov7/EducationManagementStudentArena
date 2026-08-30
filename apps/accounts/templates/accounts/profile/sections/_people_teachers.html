@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}
+«Müəllimlər» bölməsi — kadr kataloqu.
+
+İcazə: `people.view_teachers` (əlaqə/demoqrafiya sütunları ayrıca açarlarla).
+Scope: `apps/accounts/services/people/permissions.py` — dekan öz fakültəsini,
+kafedra müdiri öz kafedrasını, rektor/prorektor/RİM bütün təşkilatı görür;
+scope_unit təyin edilməmiş UNIT rolu BOŞ siyahı alır (fail-closed).
+
+Panel iskeleti `_people_directory.html`-dədir (iki kataloq üçün ortaq).
+{% endcomment %}
+{% if 'people-teachers' in allowed_sections %}
+<section class="profile-section-panel profile-section--people {% if active_section == 'people-teachers' %}is-active{% endif %}"
+         data-profile-section-panel="people-teachers"
+         data-source-url="{{ profile_base_url }}?section=people-teachers">
+  {% if people_section.kind == 'teachers' %}
+    {% if people_section.has_access %}
+      {% include "accounts/profile/sections/_people_directory.html" %}
+    {% else %}
+      <p class="people__denied">{{ people_section.access_denied_message }}</p>
+    {% endif %}
+  {% else %}
+    {% comment %}
+    Kontekst başqa bölmə üçün qurulub (tam səhifə yolu). Panel boş qalır; SPA
+    linki klikləndikdə fraqment endpoint-i düzgün context ilə yenidən render edir.
+    {% endcomment %}
+    <p class="people__placeholder">{% trans "Yüklənir…" context "accounts.people" %}</p>
+  {% endif %}
+</section>
+{% endif %}

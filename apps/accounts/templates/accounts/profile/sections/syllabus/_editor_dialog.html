@@ -1,0 +1,52 @@
+{% load i18n %}
+{% comment %}
+İki dialoq: «Təsdiqə göndər» və «Mövzunu arxivləşdir».
+
+⚠️ Qiyməti OLAN sərbəst iş mövzusu SİLİNMİR — yalnız arxivə köçürülür (dizayn
+§3.2 silmə qadağası); tələbə qiymətləri olduğu kimi qalır.
+{% endcomment %}
+<div class="syl-modal" data-syl-editor-modal hidden>
+  <div class="syl-modal__backdrop" data-syl-modal-close></div>
+  <div class="syl-modal__box" role="dialog" aria-modal="true" aria-labelledby="syl-ed-modal-title" tabindex="-1">
+    <div class="syl-modal__head">
+      <h3 id="syl-ed-modal-title" data-syl-modal-title></h3>
+      <p class="syl-modal__body" data-syl-modal-body></p>
+    </div>
+
+    <ul class="syl-modal__lines" data-syl-lines="submit" hidden>
+      <li>{% trans "Həftəlik mövzular və qiymətləndirmə strukturu təsdiqdən sonra jurnalın mənbəyi olur" context "accounts.syllabus" %}</li>
+      <li>{% trans "Təsdiq gözlənilən müddətdə cari təsdiqlənmiş versiya tələbələr üçün aktiv qalır" context "accounts.syllabus" %}</li>
+      <li>{% trans "Kafedra müdirinə bildiriş göndərilir" context "accounts.syllabus" %}</li>
+    </ul>
+
+    <ul class="syl-modal__lines" data-syl-lines="archive" hidden>
+      <li>{% trans "Verilmiş qiymətlər və davamiyyət qeydləri tam saxlanılır" context "accounts.syllabus" %}</li>
+      <li>{% trans "Mövzu yeni semestrdə tapşırıq kimi verilmir" context "accounts.syllabus" %}</li>
+      <li>{% trans "Arxivlənmiş mövzu tələbə kabinetində keçmiş semestr bölməsində görünməyə davam edir" context "accounts.syllabus" %}</li>
+      <li>{% trans "Əməliyyat audit izinə yazılır" context "accounts.syllabus" %}</li>
+    </ul>
+
+    <div class="syl-modal__foot">
+      <button type="button" class="syl-btn syl-btn--secondary" data-syl-modal-close data-syl-modal-cancel></button>
+      <button type="button" class="syl-btn syl-btn--primary" data-syl-modal-confirm></button>
+    </div>
+  </div>
+</div>
+
+{% comment %}Dialoq mətnləri — JS onları `data-*`-dan oxuyur (xarici .js faylı
+Django template engine-dən keçmir, ona görə tərcümə burada qalır).{% endcomment %}
+<span class="syl-i18n" data-syl-i18n hidden
+      data-t-submit-title="{% trans 'Sillabus kafedra təsdiqinə göndərilsin?' context 'accounts.syllabus' %}"
+      data-t-submit-body="{% trans 'Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır.' context 'accounts.syllabus' %}"
+      data-t-submit-ok="{% trans 'Göndər' context 'accounts.syllabus' %}"
+      data-t-submit-cancel="{% trans 'Geri qayıt' context 'accounts.syllabus' %}"
+      data-t-archive-title="{% trans 'Mövzunu arxivləşdirmək istəyirsiniz?' context 'accounts.syllabus' %}"
+      data-t-archive-body="{% trans 'Bu sərbəst iş tapşırığı üzrə tələbə qiymətləri mövcuddur. Silinmə mümkün deyil — mövzu arxivə köçürülür.' context 'accounts.syllabus' %}"
+      data-t-archive-ok="{% trans 'Arxivə köçür' context 'accounts.syllabus' %}"
+      data-t-archive-cancel="{% trans 'Ləğv et' context 'accounts.syllabus' %}"
+      data-t-min-outcomes="{% trans 'Ən azı 3 təlim nəticəsi tələb olunur — silinmə mümkün deyil.' context 'accounts.syllabus' %}"
+      data-t-chars="{% trans 'simvol' context 'accounts.syllabus' %}"
+      data-t-chars-min="{% trans 'Ən azı %(min)s simvol — hazırda %(have)s' context 'accounts.syllabus' %}"
+      data-t-blocked="{% trans 'Çatışmayan tələblər var — «Təsdiqə göndərmə» bölməsindəki siyahıya baxın.' context 'accounts.syllabus' %}"
+      data-t-graded-lock="{% trans 'Struktur dəyişikliyi qiymətlənmiş tapşırığa təsir edir — əvvəlcə onu arxivləyin.' context 'accounts.syllabus' %}"
+      data-t-archived-note="{% trans 'Arxivləndi — tələbə qiymətləri saxlanılır' context 'accounts.syllabus' %}"></span>

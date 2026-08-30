@@ -1030,9 +1030,7 @@ def test_worker_demographics_never_overwrite_an_existing_profile_value(worker_ac
     run = _running_run(organization, actor, policy=_policy(), plan=_plan(len(rows)))
     _seed_departments(organization)
     user = _stage_workers(organization, actor, run.pk, (1,))[1]
-    UserProfile.objects.filter(user=user).update(
-        gender=UserProfile.Gender.FEMALE, birth_date=datetime.date(1975, 3, 4)
-    )
+    UserProfile.objects.filter(user=user).update(gender=UserProfile.Gender.FEMALE, birth_date=datetime.date(1975, 3, 4))
 
     WorkerMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows))
 

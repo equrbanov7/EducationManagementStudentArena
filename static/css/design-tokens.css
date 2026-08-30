@@ -82,6 +82,19 @@
     /* Teal — kontakt/blog haqqında səhifələri. */
     --ems-teal-500: #14b8a6;
 
+    /* ── Sillabus axını üçün əlavə tokenlər (dizayn təhvili §1) ──────────── */
+    /* Mock-lar bu adları işlədir; dəyərlər MÖVCUD ailələrin eynisidir — yeni
+       rəng icad edilmir, yalnız semantik alias verilir. `--ems-success-700`
+       istisnadır: «təsdiqlənib» MƏTNİ üçün AA-dan keçən yaşıl lazımdır
+       (`--ems-success` #10b981 mətn kimi AA-dan keçmir → yalnız ikon/accent). */
+    --ems-success-bg: var(--ems-success-100); /* #dcfce7 */
+    --ems-warning-bg: var(--ems-warning-100); /* #fef3c7 */
+    --ems-danger-bg: var(--ems-danger-100); /* #fee2e2 */
+    --ems-warning: var(--ems-warning-500); /* #f59e0b */
+    --ems-success-700: #15803d; /* yaşıl MƏTN (badge fg) — AA */
+    --ems-warning-bd: #fde68a; /* sarı kart konturu */
+    --ems-success-bd: #bbf7d0; /* yaşıl kart konturu */
+
     /* ── Səma-uyğun alias-lar (istifadəni asanlaşdırmaq üçün) ────────────── */
     --ems-text: var(--ems-neutral-900);
     --ems-text-muted: var(--ems-neutral-500);

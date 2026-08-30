@@ -1,0 +1,127 @@
+{% load i18n %}
+{% comment %}
+«Müəllim — Sillabus redaktoru» (dizayn təhvili §3.2) — 10 bölməli wizard.
+
+⚠️ Bu AYRICA tam səhifə DEYİL: profil shell-inin içində açılır, SOL SIDEBAR
+QALIR. Hədəf versiya `?section=syllabus-editor&version=<uuid>` ilə gəlir.
+
+10 bölmənin `id`-ləri dizayn paketi ilə EYNİDİR (info, desc, out, week, method,
+assess, self, lit, prev, send) — dəyişdirmək olmaz: domen qatı (`SectionKey`),
+autosave endpoint-i və tamamlanma qaydaları eyni açarlara söykənir.
+
+Context: apps/accounts/views/syllabus/editor.py
+Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
+{% endcomment %}
+{% if 'syllabus-editor' in allowed_sections %}
+{% with se=syllabus_editor_section %}
+<section class="profile-section-panel profile-section--syllabus {% if active_section == 'syllabus-editor' %}is-active{% endif %}"
+         data-profile-section-panel="syllabus-editor"
+         data-source-url="{{ profile_base_url }}?section=syllabus-editor">
+
+  {% if se.view_state == 'permission' or se.view_state == 'missing' %}
+    <div class="syl-empty syl-empty--denied">
+      <i class="fas fa-lock syl-empty__icon" aria-hidden="true"></i>
+      <p class="syl-empty__title">{{ se.access_denied_message }}</p>
+      <a class="syl-btn syl-btn--primary" href="{{ profile_base_url }}?section=syllabus-list">{% trans "Sillabuslara qayıt" context "accounts.syllabus" %}</a>
+    </div>
+  {% else %}
+  <div class="syl syl-editor"
+       data-syllabus-editor
+       data-profile-url="{{ profile_base_url }}"
+       data-save-url="{{ se.urls.save }}"
+       data-action-url="{{ se.urls.action }}"
+       data-version="{{ se.version_id }}"
+       data-syllabus="{{ se.syllabus_id }}"
+       data-readonly="{% if se.readonly %}1{% else %}0{% endif %}"
+       data-active="{{ se.active_id }}">
+
+    <nav class="syl-crumbs" aria-label="{% trans 'Naviqasiya' context 'accounts.syllabus' %}">
+      <a href="{{ profile_base_url }}?section=syllabus-list" class="js-profile-section-link" data-section="syllabus-list">
+        {% trans "Sillabuslar" context "accounts.syllabus" %}
+      </a>
+      <span aria-hidden="true">/</span>
+      <span>{% trans "Sillabus redaktoru" context "accounts.syllabus" %}</span>
+    </nav>
+
+    <header class="syl-editor__head">
+      <div class="syl-editor__ident">
+        <div class="syl-editor__badges">
+          <span class="syl-code">{{ se.header.code }}</span>
+          <span class="syl-badge syl-badge--{{ se.header.status_tone }}">{{ se.header.status_label }}</span>
+          <span class="syl-version">{{ se.header.version_label }}</span>
+        </div>
+        <h2 class="syl-editor__title">{{ se.header.name }}</h2>
+        <p class="syl-meta">
+          {% if se.header.program %}{{ se.header.program }} · {% endif %}{{ se.header.period }}
+          {% if se.header.credit %} · {{ se.header.credit }} {% trans "kredit" context "accounts.syllabus" %}{% endif %}
+        </p>
+      </div>
+      <div class="syl-savebox">
+        {% comment %}Autosave çipi — 6 vəziyyət (saxlanılır / saxlanıldı / uğursuz /
+        offline / konflikt / köhnə məlumat). Mətnləri JS `data-*`-dan oxuyur.{% endcomment %}
+        <span class="syl-save syl-save--saved" data-syl-save role="status" aria-live="polite"
+              data-t-saving="{% trans 'Saxlanılır…' context 'accounts.syllabus' %}"
+              data-t-saved="{% trans 'Saxlanıldı' context 'accounts.syllabus' %}"
+              data-t-failed="{% trans 'Son dəyişiklik saxlanılmadı' context 'accounts.syllabus' %}"
+              data-t-offline="{% trans 'İnternet bağlantısı yoxdur' context 'accounts.syllabus' %}"
+              data-t-conflict="{% trans 'Başqa versiya ilə konflikt yarandı' context 'accounts.syllabus' %}"
+              data-t-stale="{% trans 'Səhifədəki məlumat köhnəlmişdir' context 'accounts.syllabus' %}">
+          <span class="syl-save__dot" aria-hidden="true"></span>
+          <span data-syl-save-text>{% trans "Saxlanıldı" context "accounts.syllabus" %}</span>
+        </span>
+        <button type="button" class="syl-btn syl-btn--danger syl-btn--sm" data-syl-retry hidden>{% trans "Yenidən cəhd et" context "accounts.syllabus" %}</button>
+      </div>
+    </header>
+
+    {% include "accounts/profile/sections/syllabus/_editor_banners.html" with se=se %}
+
+    <div class="syl-editor__grid">
+      <nav class="syl-steps" aria-label="{% trans 'Sillabus bölmələri' context 'accounts.syllabus' %}">
+        {% for step in se.nav %}
+        <button type="button" class="syl-step syl-step--{{ step.state }}{% if step.id == se.active_id %} is-on{% endif %}"
+                data-syl-step="{{ step.id }}"
+                {% if step.id == se.active_id %}aria-current="step"{% endif %}>
+          <span class="syl-step__mark" aria-hidden="true">{% if step.state == 'done' %}✓{% elif step.state == 'error' %}!{% else %}{{ step.index }}{% endif %}</span>
+          <span class="syl-step__label">{{ step.index }}. {{ step.label }}</span>
+          {% if step.issue_count %}<span class="syl-step__warn">{% blocktrans context "accounts.syllabus" count counter=step.issue_count %}{{ counter }} xəta{% plural %}{{ counter }} xəta{% endblocktrans %}</span>{% endif %}
+        </button>
+        {% endfor %}
+      </nav>
+
+      <div class="syl-panels">
+        {% include "accounts/profile/sections/syllabus/_editor_basics.html" with se=se %}
+        {% include "accounts/profile/sections/syllabus/_editor_plan.html" with se=se %}
+        {% include "accounts/profile/sections/syllabus/_editor_final.html" with se=se %}
+      </div>
+
+      {% include "accounts/profile/sections/syllabus/_editor_aside.html" with se=se %}
+    </div>
+
+    <div class="syl-bottombar">
+      <div class="syl-bottombar__progress">
+        <span class="syl-bar syl-bar--{{ se.completion.tone }}">
+          <span class="syl-bar__fill" data-syl-percent="{{ se.completion.percent }}" data-syl-progress-fill></span>
+        </span>
+        <span class="syl-bar__value syl-bar__value--{{ se.completion.tone }}" data-syl-progress-value>{{ se.completion.percent }}%</span>
+        <span class="syl-meta" data-syl-progress-note>{{ se.completion.note }}</span>
+      </div>
+      <div class="syl-bottombar__actions">
+        <button type="button" class="syl-btn syl-btn--secondary" data-syl-nav="prev">{% trans "Əvvəlki" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-btn syl-btn--secondary" data-syl-nav="next">{% trans "Növbəti" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-btn syl-btn--secondary" data-syl-save-now {% if se.readonly %}disabled{% endif %}>{% trans "Qaralama saxla" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-btn syl-btn--secondary" data-syl-step="prev">{% trans "Yekun görünüş" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-btn syl-btn--primary" data-syl-submit {% if not se.can_submit %}disabled{% endif %}>{% trans "Təsdiqə göndər" context "accounts.syllabus" %}</button>
+      </div>
+    </div>
+
+    {% include "accounts/profile/sections/syllabus/_editor_dialog.html" %}
+
+    <div class="syl-toast" data-syl-toast role="status" aria-live="polite" hidden>
+      <i class="fas fa-circle-check syl-toast__icon" aria-hidden="true"></i>
+      <span data-syl-toast-text></span>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endwith %}
+{% endif %}
