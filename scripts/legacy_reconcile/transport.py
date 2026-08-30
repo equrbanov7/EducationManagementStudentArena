@@ -20,6 +20,7 @@ hesabatı repetisiya bitəndən sonra işlətmək daha dəqiq mənzərə verir.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import time
@@ -41,6 +42,24 @@ SELECT current_setting('transaction_read_only'),
        current_setting('app.bypass_rls', true),
        current_setting('app.current_org_id', true);
 """
+
+
+def _statement_timeout() -> str:
+    """Sorğu vaxt həddi — mühit dəyişəni ilə tənzimlənir, defolt 600s.
+
+    Tam ölçülü kirayəçidə (169 min qiymət faktı) sətir-səviyyəli tutuşdurma
+    600 saniyəni aşır və `QueryCanceled` verir; həddi buradan qaldırmaq
+    lazım gəlir.  Dəyər BİLƏRƏKDƏN mətn kimi ötürülür ki, PostgreSQL-in öz
+    interval sintaksisi (``0``, ``600s``, ``30min``) işlək qalsın.
+
+    ⚠️ Yalnız rəqəm və hərf qəbul olunur — bu, oxu-only sessiyaya SQL
+    yeridilməsinin qarşısını alır (dəyər sorğu mətninə düşür).
+    """
+
+    raw = (os.getenv("LEGACY_RECONCILE_STATEMENT_TIMEOUT") or "600s").strip()
+    if not re.fullmatch(r"[0-9]+(?:ms|s|min|h)?", raw):
+        raise ValueError("legacy_reconcile_invalid_statement_timeout")
+    return raw
 
 
 class ReadOnlyViolation(RuntimeError):
@@ -209,7 +228,7 @@ class TargetReader:
             # Bu ilk statement tranzaksiyanı yazıya qapadır; sonrakı bütün
             # yoxlamalar və hesabat sorğuları eyni read-only snapshot-dadır.
             cursor.execute("SET TRANSACTION READ ONLY")
-            cursor.execute("SET LOCAL statement_timeout = '600s'")
+            cursor.execute(f"SET LOCAL statement_timeout = '{_statement_timeout()}'")
             cursor.execute(_TARGET_ROLE_SQL)
             role = cursor.fetchone()
             if role is None:
