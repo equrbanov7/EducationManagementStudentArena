@@ -209,6 +209,9 @@ urlpatterns = [
     path("people/<str:kind>/options/", views.people_options, name="people_options"),
     path("people/person/<int:user_id>/", views.people_detail, name="people_detail"),
     path("people/action/", views.people_action, name="people_action"),
+    # Analitika — cədvəldən AYRI endpoint (qrafik + göstəricilər eyni filtrlə).
+    path("people/<str:kind>/analytics/", views.people_analytics, name="people_analytics"),
+    path("people/<str:kind>/analytics/ai/", views.people_analytics_ai, name="people_analytics_ai"),
     # Sillabus (müəllim səthi) — profil bölməsinin JSON endpoint-ləri.
     # Cross-domain glue accounts-dadır: `apps.syllabus` registrar/organizations
     # modullarını import etmir (modul-sərhəd dövrü yaranmır).
@@ -219,6 +222,11 @@ urlpatterns = [
         name="syllabus_section_save",
     ),
     path("profile/syllabus/<uuid:syllabus_id>/preview/", views.syllabus_preview, name="syllabus_preview"),
+    # Sillabusun AYRICA TAM SƏHİFƏSİ — siyahıdan/təsdiq növbəsindən
+    # `target="_blank"` ilə yeni tabda açılır. Profil bölməsi DEYİL, ona görə
+    # `profile/` prefiksi yoxdur və `SECTION_PARTIALS`-a qeyd olunmur.
+    path("syllabus/<uuid:syllabus_id>/", views.syllabus_detail, name="syllabus_detail"),
+    path("syllabus/<uuid:syllabus_id>/pdf/", views.syllabus_detail_pdf, name="syllabus_detail_pdf"),
     # Kafedra təsdiq səthi: baxışı açmaq (SUBMITTED → REVIEW) və qərar yazmaq.
     path(
         "profile/syllabus/version/<uuid:version_id>/review/",

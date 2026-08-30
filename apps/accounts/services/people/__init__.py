@@ -9,11 +9,17 @@ Modul bölgüsü (SOFT_CAP=600 büdcəsi):
 * ``rows``        — sətir serializasiyası (avatar/baş hərf, yaş, struktur adları)
 * ``teachers`` / ``students`` — səhifələnmiş siyahı sorğuları
 * ``lookups``     — filtr açılışları + səbət sayları (AYRICA endpoint)
+* ``analytics``   — ORTAQ analitika primitivləri (başlıq aqreqatı, bölgü qurucu)
+* ``analytics_teachers`` / ``analytics_students`` — kataloq-xüsusi göstəricilər
+* ``analytics_ai``— PII-siz AI yükü + xülasə çağırışı
 * ``detail``      — bir şəxsin kartı
 * ``actions``     — hesabı dayandır/bərpa et, müəllim statusu (RİM-i çağırır)
 """
 
 from .actions import load_target, set_account_status, set_teacher_role
+from .analytics_ai import build_ai_payload, generate_analytics_summary
+from .analytics_students import build_student_analytics
+from .analytics_teachers import build_teacher_analytics
 from .constants import DEFAULT_PAGE_SIZE, STUDENT_SORT_OPTIONS, TEACHER_ROLE_NAMES, TEACHER_SORT_OPTIONS
 from .detail import build_detail
 from .filters import PeopleFilters, parse_filters
@@ -48,10 +54,14 @@ __all__ = [
     "TEACHER_SORT_OPTIONS",
     "PeopleActor",
     "PeopleFilters",
+    "build_ai_payload",
     "build_detail",
     "build_filter_options",
+    "build_student_analytics",
     "build_students_page",
+    "build_teacher_analytics",
     "build_teachers_page",
+    "generate_analytics_summary",
     "load_target",
     "parse_filters",
     "resolve_actor",

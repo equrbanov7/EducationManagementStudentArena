@@ -306,6 +306,7 @@
         var context = {
             id: button.getAttribute("data-id"),
             version: button.getAttribute("data-version"),
+            pdf: button.getAttribute("data-pdf"),
             name: button.getAttribute("data-name")
         };
         if (EDIT_ACTIONS.indexOf(action) >= 0) {
@@ -321,7 +322,12 @@
         } else if (action === "withdraw") {
             openModal(el, "withdraw", context);
         } else if (action === "pdf") {
-            toast(el, i18n(el, "pdf"));
+            // Sənədin PDF nüsxəsi — mövcud renderer, ayrıca tabda yüklənir.
+            if (context.pdf) {
+                window.open(context.pdf, "_blank", "noopener");
+            } else {
+                toast(el, i18n(el, "pdf"));
+            }
         }
     }
 

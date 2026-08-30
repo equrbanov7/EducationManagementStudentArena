@@ -75,7 +75,14 @@ from .organization import (
 )
 
 # RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
-from .people import people_action, people_detail, people_list, people_options
+from .people import (
+    people_action,
+    people_analytics,
+    people_analytics_ai,
+    people_detail,
+    people_list,
+    people_options,
+)
 
 # Post management views
 from .post_management import (
@@ -122,6 +129,8 @@ from .superadmin import (
 from .syllabus import (
     syllabus_action,
     syllabus_decision,
+    syllabus_detail,
+    syllabus_detail_pdf,
     syllabus_preview,
     syllabus_review_open,
     syllabus_section_save,
@@ -192,12 +201,16 @@ __all__ = [
     "people_options",
     "people_detail",
     "people_action",
+    "people_analytics",
+    "people_analytics_ai",
     "rim_user_search",
     "rim_user_detail",
     "rim_action",
     # Sillabus — müəllim səthi (autosave / əməllər / baxış paneli)
     "syllabus_action",
     "syllabus_decision",
+    "syllabus_detail",
+    "syllabus_detail_pdf",
     "syllabus_preview",
     "syllabus_review_open",
     "syllabus_section_save",

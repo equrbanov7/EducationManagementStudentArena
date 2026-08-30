@@ -22,6 +22,8 @@ CONTEXT MÜQAVİLƏSİ (UI agenti buna söykənir — açar adları dəyişməz)
     granted_permissions     [{"key": str, "label": str}]  — aktorun açarları
 
     list_url                str   — GET  cədvəl datası
+    analytics_url           str   — GET  filtrdən SONRA göstəricilər + qrafiklər
+    analytics_ai_url        str   — GET  AI analizi (aqreqat yük, PII yoxdur)
     options_url             str   — GET  filtr açılışları + səbət sayları
     action_url              str   — POST əməllər
     detail_url_template     str   — GET  detal (içindəki "0" hədəf id ilə əvəzlənir)
@@ -65,6 +67,14 @@ müəllim sətrinin ƏLAVƏ sahələri:  role_name, role_label, title, unit_name
 tələbə sətrinin ƏLAVƏ sahələri:   group_name, program_name, program_label,
                                   admission_year, academic_status,
                                   faculty_name, kafedra_name
+
+``GET analytics_url?<eyni filtrlər>`` → has_access, kind, total,
+can_view_demographics, status[], gender[], age{}, breakdowns[], workload[],
+filters{} — bax ``apps/accounts/views/people/analytics.py``.
+
+``GET analytics_ai_url?<eyni filtrlər>`` → ``{ok, summary, cached, limit,
+remaining, window}``; uğursuzluqda ``{ok: false, error}`` (200 ilə — bölmə
+səssizcə gizlənir).
 
 ``GET options_url`` → has_access, faculties[], kafedras[], groups[], programs[],
 subjects[], years[], seasons[] (hamısı ``{"id", "text"}``), gender_facets{},
@@ -166,6 +176,8 @@ def build_people_section(request, kind: str) -> dict:
             "can_manage_teacher_role": actor.can_manage_teacher_role,
             "granted_permissions": [{"key": key, "label": permission_label(key)} for key in actor.granted_permissions],
             "list_url": reverse("accounts:people_list", kwargs={"kind": kind}),
+            "analytics_url": reverse("accounts:people_analytics", kwargs={"kind": kind}),
+            "analytics_ai_url": reverse("accounts:people_analytics_ai", kwargs={"kind": kind}),
             "options_url": reverse("accounts:people_options", kwargs={"kind": kind}),
             "action_url": reverse("accounts:people_action"),
             "detail_url_template": reverse("accounts:people_detail", kwargs={"user_id": 0}),

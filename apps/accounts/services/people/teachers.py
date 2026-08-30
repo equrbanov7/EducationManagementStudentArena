@@ -28,7 +28,7 @@ from .scoping import structure_filter_q
 User = get_user_model()
 
 #: Üzvlük sütunları hansı sıra ilə seçilir — ən yüksək səviyyəli/əsas üzvlük.
-_MEMBERSHIP_PICK_ORDER = ("-is_primary", "-role__level", "created_at")
+MEMBERSHIP_PICK_ORDER = ("-is_primary", "-role__level", "created_at")
 
 
 def teacher_memberships_qs(organization):
@@ -44,20 +44,20 @@ def teacher_memberships_qs(organization):
     )
 
 
-def visible_teachers_qs(actor, *, request=None, filters=None):
-    """Aktorun görə bildiyi müəllimlərin baza queryset-i (fail-closed).
+def scoped_teacher_memberships(actor, *, request=None, filters=None):
+    """Aktorun scope-u + struktur filtri tətbiq olunmuş üzvlük queryset-i.
 
-    Scope YOXDURSA (``EMPTY_SCOPE``) — məsələn ``scope_unit`` təyin edilməmiş
-    dekan — nəticə BOŞDUR, bütün təşkilat DEYİL. Bu, əvvəllər BLOKER tapıntı
-    olmuş davranışın qarşısını alan yeganə yerdir.
+    ``visible_teachers_qs`` da, analitika da MƏHZ bunu işlədir — «hansı üzvlük
+    sayılır» sualının tək cavabı olsun deyə. ``None`` qaytarır: scope yoxdur
+    (fail-closed), yəni çağıran boş nəticə verməlidir.
     """
     organization = actor.organization
     if organization is None or not actor.can_view_teachers:
-        return User.objects.none()
+        return None
 
     scope = actor.scope_for(PERM_VIEW_TEACHERS, request=request)
     if not scope.has_structure_access:
-        return User.objects.none()
+        return None
 
     memberships = scope_memberships_by_unit(
         teacher_memberships_qs(organization),
@@ -69,9 +69,22 @@ def visible_teachers_qs(actor, *, request=None, filters=None):
         structure_q = structure_filter_q(organization, filters, path_field="scope_unit__path", id_field="scope_unit_id")
         if structure_q:
             memberships = memberships.filter(structure_q)
+    return memberships
+
+
+def visible_teachers_qs(actor, *, request=None, filters=None):
+    """Aktorun görə bildiyi müəllimlərin baza queryset-i (fail-closed).
+
+    Scope YOXDURSA (``EMPTY_SCOPE``) — məsələn ``scope_unit`` təyin edilməmiş
+    dekan — nəticə BOŞDUR, bütün təşkilat DEYİL. Bu, əvvəllər BLOKER tapıntı
+    olmuş davranışın qarşısını alan yeganə yerdir.
+    """
+    memberships = scoped_teacher_memberships(actor, request=request, filters=filters)
+    if memberships is None:
+        return User.objects.none()
 
     correlated = memberships.filter(user=OuterRef("pk"))
-    picked = correlated.order_by(*_MEMBERSHIP_PICK_ORDER)
+    picked = correlated.order_by(*MEMBERSHIP_PICK_ORDER)
 
     queryset = (
         User.objects.filter(Exists(correlated))
@@ -126,6 +139,17 @@ def _apply_filters(queryset, actor, filters, *, request=None):
     return queryset
 
 
+def filtered_teachers_qs(*, actor, filters, request=None):
+    """Cədvəlin GÖRDÜYÜ dəqiq dəst — scope + struktur + axtarış/status/demoqrafiya.
+
+    Analitika məhz bu funksiyanı çağırır ki, göstəricilər cədvəldən AYRILMASIN:
+    filtr məntiqi tək yerdə qalır, «rəqəmlər siyahıya uyğun gəlmir» sinfi
+    xətalar mümkün olmur.
+    """
+    queryset = visible_teachers_qs(actor, request=request, filters=filters)
+    return _apply_filters(queryset, actor, filters, request=request)
+
+
 def build_teachers_page(*, actor, filters, request=None, today=None) -> dict:
     """Səhifələnmiş müəllim cədvəli — context müqaviləsi `docs`-da sənədlidir."""
     empty = {
@@ -141,8 +165,7 @@ def build_teachers_page(*, actor, filters, request=None, today=None) -> dict:
     if not actor.can_view_teachers or actor.organization is None:
         return empty
 
-    queryset = visible_teachers_qs(actor, request=request, filters=filters)
-    queryset = _apply_filters(queryset, actor, filters, request=request)
+    queryset = filtered_teachers_qs(actor=actor, filters=filters, request=request)
     queryset = queryset.order_by(*TEACHER_SORT_OPTIONS.get(filters.sort, TEACHER_SORT_OPTIONS["name"]))
 
     page_size = filters.page_size or DEFAULT_PAGE_SIZE
@@ -196,4 +219,11 @@ def _ancestors_for(users, *, organization):
     return resolve_unit_ancestors(units, organization=organization)
 
 
-__all__ = ["build_teachers_page", "teacher_memberships_qs", "visible_teachers_qs"]
+__all__ = [
+    "MEMBERSHIP_PICK_ORDER",
+    "build_teachers_page",
+    "filtered_teachers_qs",
+    "scoped_teacher_memberships",
+    "teacher_memberships_qs",
+    "visible_teachers_qs",
+]

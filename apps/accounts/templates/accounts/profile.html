@@ -61,6 +61,7 @@
     {% endif %}
     {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260830-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
     {% endif %}
     {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
     {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
@@ -366,7 +367,11 @@
 <script src="{% static 'accounts/js/profile/academic_records.js' %}?v=20260720-2"></script>
 {% endif %}
 {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260830-1"></script>
+{% comment %}Analitika modulu kataloqdan ƏVVƏL yüklənir: o, `people:filters`
+hadisəsinə qulaq asır və kataloqun ilk yüklənməsini ötürməməlidir (yenə də
+`dataset.peopleFilterQuery` ilə sıra-müstəqildir).{% endcomment %}
+<script src="{% static 'accounts/js/profile/people_analytics.js' %}?v=20260830-1"></script>
+<script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260830-2"></script>
 {% endif %}
 {% if 'syllabus-list' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
@@ -386,9 +391,13 @@ mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
 {% endif %}
 <script src="{% static 'accounts/js/profile/init.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/profile.entry.js' %}?v=20260612-org-ajax"></script>
-{% if 'statistics' in allowed_sections %}
-    {# Chart.js YALNIZ statistika qrafiklərində işlənir #}
+{% comment %}Chart.js — qrafik göstərən bölmələr üçün BİR DƏFƏ yüklənir
+(statistika + insanlar kataloqunun analitikası). İki ayrı bloka bölsək eyni
+kitabxana iki dəfə düşərdi.{% endcomment %}
+{% if 'statistics' in allowed_sections or 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+{% endif %}
+{% if 'statistics' in allowed_sections %}
 <script src="{% static 'accounts/js/statistics/namespace.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/utils.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/filters.js' %}?v=20260613-1"></script>
