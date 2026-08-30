@@ -16,8 +16,8 @@ from typing import Iterable, Mapping
 
 from apps.legacy_import.models import LegacyMigrationIssue
 
-from .field_contracts import JOURNAL_POINT_ARCHIVE_FIELDS, JOURNAL_POINT_FIELDS, YEKUN_FIELDS
-from .legacy_grade_field_contracts import EXAM_ENTRY_EXIT_FIELDS
+from .field_contracts import JOURNAL_POINT_ARCHIVE_FIELDS, JOURNAL_POINT_FIELDS
+from .legacy_grade_field_contracts import EXAM_ENTRY_EXIT_FIELDS, YEKUN_EVIDENCE_FIELDS
 from .rehearsal_contracts import LegacyRehearsalEvidenceError, RehearsalContext, source_row_hash
 from .rehearsal_journal_enrollments_phase import JOURNAL_ENROLLMENT_ENTITY_TYPE, parse_student_ids
 from .rehearsal_journal_offerings_source import journal_rows, legacy_int, validated_uniqid
@@ -33,7 +33,6 @@ from .rehearsal_journal_points_source import (
     attested_rows,
     legacy_text,
     point_rows,
-    yekun_rows,
 )
 
 SOURCE_SYSTEM = "myedu_mariadb"
@@ -256,9 +255,13 @@ def summary_requests(
         entry, exam, final = map(_number_decimal, (entry_text, exam_text, final_text))
         rules = tuple(filter(None, (issue,))) + _score_range_rules(entry=entry, exam=exam, final=final)
         yield GradeFactRequest(
-            source_table=YEKUN_FIELDS.source_table,
+            source_table=YEKUN_EVIDENCE_FIELDS.source_table,
             source_pk=legacy_pk,
-            source_row_hash=source_row_hash(contract=YEKUN_FIELDS, legacy_pk=legacy_pk, projected_row=row),
+            source_row_hash=source_row_hash(
+                contract=YEKUN_EVIDENCE_FIELDS,
+                legacy_pk=legacy_pk,
+                projected_row=row,
+            ),
             rule_codes=rules,
             payload={
                 "enrollment_id": enrollment_pk or None,
@@ -433,6 +436,20 @@ def attempt_rows(context: RehearsalContext):
     )
 
 
+def yekun_evidence_rows(context: RehearsalContext):
+    """``yekun``-un geniş, sübut üçün proyeksiyası.
+
+    J5b/J8 eyni cədvəli dar ``YEKUN_FIELDS`` ilə oxumağa davam edir; burada
+    ayrı kontrakt işlədilir ki, əlavə sütunlar onların möhürünə sızmasın.
+    """
+
+    return attested_rows(
+        context,
+        contract=YEKUN_EVIDENCE_FIELDS,
+        source_table=YEKUN_EVIDENCE_FIELDS.source_table,
+    )
+
+
 POINT_STREAMS = (
     (point_rows, JOURNAL_POINT_FIELDS, False),
     (archive_rows, JOURNAL_POINT_ARCHIVE_FIELDS, True),
@@ -452,5 +469,5 @@ __all__ = [
     "point_requests",
     "summary_conflicts",
     "summary_requests",
-    "yekun_rows",
+    "yekun_evidence_rows",
 ]

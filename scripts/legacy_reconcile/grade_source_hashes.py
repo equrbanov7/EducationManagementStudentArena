@@ -8,9 +8,11 @@ import re
 from apps.legacy_import.services.field_contracts import (
     JOURNAL_POINT_ARCHIVE_FIELDS,
     JOURNAL_POINT_FIELDS,
-    YEKUN_FIELDS,
 )
-from apps.legacy_import.services.legacy_grade_field_contracts import EXAM_ENTRY_EXIT_FIELDS
+from apps.legacy_import.services.legacy_grade_field_contracts import (
+    EXAM_ENTRY_EXIT_FIELDS,
+    YEKUN_EVIDENCE_FIELDS,
+)
 from apps.legacy_import.services.rehearsal_contracts import source_row_hash
 
 _NON_GRADE_MONTHS = tuple(f"{month:02d}" for month in range(1, 13)) + ("k1", "k2", "k3", "si")
@@ -18,7 +20,7 @@ _NON_GRADE_SQL = ", ".join(f"'{value}'" for value in _NON_GRADE_MONTHS)
 _TIME_RE = re.compile(r"(?P<sign>-?)(?P<hours>\d+):(?P<minutes>\d{2}):(?P<seconds>\d{2}(?:\.\d+)?)\Z")
 
 _RAW_QUERIES = {
-    YEKUN_FIELDS.source_table: """
+    YEKUN_EVIDENCE_FIELDS.source_table: """
         SELECT id, student_id, lesson_id, journal_id, girish, imtahanda, yekun,
                group_id, kesr, guzest_girish, level, guzest_artim
           FROM yekun ORDER BY id;
@@ -127,7 +129,7 @@ def _attempt_row(values):
 
 
 _CONTRACTS = {
-    YEKUN_FIELDS.source_table: (YEKUN_FIELDS, _yekun_row),
+    YEKUN_EVIDENCE_FIELDS.source_table: (YEKUN_EVIDENCE_FIELDS, _yekun_row),
     JOURNAL_POINT_FIELDS.source_table: (JOURNAL_POINT_FIELDS, _point_row),
     JOURNAL_POINT_ARCHIVE_FIELDS.source_table: (JOURNAL_POINT_ARCHIVE_FIELDS, _point_row),
     EXAM_ENTRY_EXIT_FIELDS.source_table: (EXAM_ENTRY_EXIT_FIELDS, _attempt_row),

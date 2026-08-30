@@ -14,7 +14,7 @@ from dataclasses import replace
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 
-from apps.legacy_import.models import LegacyEntityMap, LegacyMigrationRun
+from apps.legacy_import.models import LegacyEntityMap, LegacyMigrationIssue, LegacyMigrationRun
 from apps.legacy_import.services.field_contracts import (
     ALLOWED_QB_FIELDS,
     JOURNAL_DATES_FIELDS,
@@ -24,10 +24,11 @@ from apps.legacy_import.services.field_contracts import (
     SEMESTR_JURNAL_FIELDS,
     YEKUN_FIELDS,
 )
-from apps.legacy_import.services.ledger import create_run, start_run, upsert_entity_map
+from apps.legacy_import.services.ledger import create_run, start_run, upsert_entity_map, upsert_issue
 from apps.legacy_import.services.legacy_grade_field_contracts import (
     EXAM_ENTRY_EXIT_FIELDS,
     SCORE_SHEET_EXPORT_FIELDS,
+    YEKUN_EVIDENCE_FIELDS,
 )
 from apps.legacy_import.services.rehearsal_authorizer import (
     COURSE_OFFERING_MODEL_LABEL,
@@ -56,6 +57,7 @@ from apps.legacy_import.services.syllabus_field_contracts import (
 from apps.legacy_import.services.table_plan import TABLE_PLAN_VERSION, LegacyTablePlan, load_legacy_table_plan
 from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
 from core.constants import AcademicPeriodType, OrganizationType
+from core.rls import clear_rls_user, set_rls_user
 
 PHASE_KEYS = (
     "academic_structure",
@@ -111,6 +113,7 @@ COLUMNS_BY_TABLE = _discovered_columns(
     JOURNAL_POINT_ARCHIVE_FIELDS,
     ALLOWED_QB_FIELDS,
     YEKUN_FIELDS,
+    YEKUN_EVIDENCE_FIELDS,
     EXAM_ENTRY_EXIT_FIELDS,
     SCORE_SHEET_EXPORT_FIELDS,
     SILLABUS_FIELDS,
@@ -186,17 +189,62 @@ class FakeSourceConnection:
         self.closed = True
 
 
-def activate_member(organization, user, role_name):
+def activate_member(organization, user, role_name, *, permissions=None):
     """Aktiv üzvlük (PG ``registrar_guard_active_member`` tələbi)."""
 
     role, _created = Role.objects.get_or_create(
         organization=organization,
         name=role_name,
-        defaults={"display_name": role_name.title(), "level": 50, "permissions": []},
+        defaults={"display_name": role_name.title(), "level": 50, "permissions": list(permissions or [])},
     )
-    Role.objects.filter(pk=role.pk).update(is_active=True)
+    Role.objects.filter(pk=role.pk).update(is_active=True, permissions=list(permissions or role.permissions or []))
     Membership.objects.get_or_create(organization=organization, user=user, role=role, defaults={"is_active": True})
     return role
+
+
+def authorize_import_actor(organization, actor):
+    """Fazanı orkestratordan YAN KEÇƏRƏK çağıran testlər üçün DB-səviyyə icazə.
+
+    ``registrar_guard_legacy_grade_{fact,artifact}_insert`` trigger-i
+    ``app.current_user_id``-i oxuyur və ``registrar_actor_can_import_legacy_grade``
+    ilə aktiv üzvlük + ``member.invite`` səlahiyyəti tələb edir.  Orkestrator
+    bunu ``rehearsal_orchestrator``-da ``set_rls_user(actor.pk, local=False)``
+    ilə qurur (management command OrganizationMiddleware-dən keçmir); faza
+    birbaşa çağırılanda həmin kontekst əl ilə verilməlidir, yoxsa trigger
+    «import actor is not authorized» qaytarır.
+    """
+
+    activate_member(organization, actor, "legacy_import_operator", permissions=["member.invite"])
+    set_rls_user(actor.pk, local=False)
+
+
+def clear_import_actor():
+    """``authorize_import_actor``-un sessiya GUC-unu geri al (test təmizliyi)."""
+
+    clear_rls_user(local=False)
+
+
+def seed_group_mismatch(run_id, actor, *, uniqid=UNIQID, student_id=STUDENT_A):
+    """J-enrollments fazasının qoyub getdiyi ``group_mismatch`` izini təqlid et.
+
+    Qiymət sübutu fazası bu issue-ları ``group_mismatch_keys`` ilə oxuyur və
+    həmin (jurnal, tələbə) cütünü hədəf qeydiyyatına BAĞLAMIR — bal yad qrupun
+    jurnalından gəldiyi üçün fail-closed davranış.
+    """
+
+    legacy_pk = f"{uniqid}:{student_id}"
+    upsert_issue(
+        run_id=run_id,
+        actor=actor,
+        authorize=allow,
+        source_table=JOURNAL_FIELDS.source_table,
+        entity_type=JOURNAL_ENROLLMENT_ENTITY_TYPE,
+        legacy_pk=legacy_pk,
+        rule_code="legacy_journal_student_group_mismatch",
+        severity=LegacyMigrationIssue.Severity.WARNING,
+        payload_digest=_seed_hash(f"group-mismatch:{legacy_pk}"),
+    )
+    return legacy_pk
 
 
 def factory(rows_by_table):

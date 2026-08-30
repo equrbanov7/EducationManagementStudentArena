@@ -33,7 +33,7 @@ from .rehearsal_legacy_grade_facts_source import (
     point_requests,
     summary_conflicts,
     summary_requests,
-    yekun_rows,
+    yekun_evidence_rows,
 )
 from .rehearsal_legacy_grade_facts_target import (
     LEGACY_GRADE_FACT_MODEL_LABEL,
@@ -94,7 +94,7 @@ class LegacyGradeFactsPhase:
         journals_by_id, journals_by_uniqid = journal_metadata(context)
         enrollments = migrated_index(context, JOURNAL_ENROLLMENT_ENTITY_TYPE)
         mismatches = group_mismatch_keys(context)
-        summary_rows = list(yekun_rows(context))
+        summary_rows = list(yekun_evidence_rows(context))
         conflicts = summary_conflicts(summary_rows, journals_by_id=journals_by_id, enrollments=enrollments)
 
         recorded = recorded_decisions(context)

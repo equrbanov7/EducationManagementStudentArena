@@ -590,11 +590,11 @@ ALLOWED_QB_FIELDS = LegacySourceFieldContract(
     version="journal-v1",
     allowed_fields=("id", "student_id", "allowed_date_start", "allowed_date_end"),
 )
+
+# J8 çarpaz-yoxlama mənbəyi; heç bir hədəf yazısı yoxdur.  ``kesr``/``level``/
+# ``guzest_*``/``group_id`` semantikası təsdiqlənməyib → kənarda.
 YEKUN_FIELDS = LegacySourceFieldContract(
     source_table="yekun",
-    version="journal-v2",
-    allowed_fields=tuple(
-        "id student_id lesson_id journal_id girish imtahanda yekun "
-        "group_id kesr guzest_girish level guzest_artim".split()
-    ),
+    version="journal-v1",
+    allowed_fields=("id", "student_id", "lesson_id", "journal_id", "girish", "imtahanda", "yekun"),
 )
