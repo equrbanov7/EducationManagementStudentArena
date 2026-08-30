@@ -3,6 +3,7 @@ Permission tests for organizations app.
 """
 
 from django.test import TestCase
+from django.utils import translation
 
 from ..permissions import expand_wildcard_permissions, get_all_permissions, has_permission, validate_permissions
 
@@ -168,5 +169,12 @@ class GroupPermissionCatalogTest(TestCase):
             self.assertTrue(str(PERMISSION_LABELS[perm]).strip(), perm)
 
         # Helper: kataloqdakı açar üçün etiket, tanınmayan açar üçün boş sətir.
-        self.assertEqual(get_permission_label("group.manage"), "Qrup yaratmaq/idarə etmək")
-        self.assertEqual(get_permission_label("no.such_permission"), "")
+        #
+        # ⚠️ Dil AÇIQ şəkildə sabitlənir.  `get_permission_label` tərcümə olunan
+        # (lazy) sətir qaytarır və aktiv dil dəstin içində sürüşə bilir; bu
+        # iddia isə MƏNBƏ (AZ) mətnini yoxlayır.  Türkcə tərcümə kataloqa
+        # əlavə olunana qədər test təsadüfən keçirdi, çünki tərcümə olmayanda
+        # Django mənbə mətninə düşür — yəni qoruma deyil, təsadüf idi.
+        with translation.override("az"):
+            self.assertEqual(get_permission_label("group.manage"), "Qrup yaratmaq/idarə etmək")
+            self.assertEqual(get_permission_label("no.such_permission"), "")
