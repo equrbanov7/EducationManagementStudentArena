@@ -57,7 +57,9 @@ class _AnalyticsBase(TestCase):
                 end_date="2025-01-31",
                 is_current=True,
             )
-            cls.program = Program.objects.create(organization=cls.org, code="CS", name="Kompüter elmləri")
+            cls.program = Program.objects.create(
+                organization=cls.org, code="MYEDU-CS", official_code="060501", name="Kompüter elmləri"
+            )
             cls.curriculum = Curriculum.objects.create(organization=cls.org, program=cls.program, admission_year=2024)
             cls.subject = Subject.objects.create(organization=cls.org, code="CS101", name="Proqramlaşdırma", ects=6)
             CurriculumSubject.objects.create(
@@ -158,7 +160,8 @@ class AnalyticsServiceTest(_AnalyticsBase):
         with bypass_rls():
             data = analytics.build_period_analytics(organization=self.org, period=self.period)
         self.assertEqual(len(data["programs"]), 1)
-        self.assertEqual(data["programs"][0]["sublabel"], "CS")
+        # Analitikada RƏSMİ dövlət kodu göstərilir — daxili "MYEDU-*" yox.
+        self.assertEqual(data["programs"][0]["sublabel"], "060501")
         self.assertEqual(data["programs"][0]["students"], 3)
         self.assertEqual(len(data["groups"]), 1)
         self.assertEqual(data["groups"][0]["label"], "KE-101")

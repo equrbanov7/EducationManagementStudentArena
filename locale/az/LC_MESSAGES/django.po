@@ -37002,3 +37002,15 @@ msgstr "%(name)s — düzəliş üçün geri qaytarıldı, müəllimə bildiriş
 msgctxt "accounts.syllabus"
 msgid "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
 msgstr "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
+
+msgctxt "registrar.console"
+msgid "Daxili kod"
+msgstr "Daxili kod"
+
+msgctxt "registrar.console"
+msgid "Rəsmi ixtisas kodu"
+msgstr "Rəsmi ixtisas kodu"
+
+msgctxt "registrar.console"
+msgid "Rəsmi dövlət ixtisas kodu — məsələn 060209. İstifadəçilərə ixtisas adının yanında bu kod göstərilir. Eyni kod bir neçə ixtisasda təkrarlana bilər."
+msgstr "Rəsmi dövlət ixtisas kodu — məsələn 060209. İstifadəçilərə ixtisas adının yanında bu kod göstərilir. Eyni kod bir neçə ixtisasda təkrarlana bilər."

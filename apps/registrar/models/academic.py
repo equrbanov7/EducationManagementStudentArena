@@ -29,6 +29,31 @@ class Program(UUIDModel, TimeStampedModel):
 
     Optionally anchored to a specialty ``OrgUnit`` so the hierarchy
     (Faculty → Chair → Specialty) and the program catalogue stay linked.
+
+    İKİ AYRI KOD — qarışdırılmamalıdır
+    ----------------------------------
+    ``code`` — **DAXİLİ sabit identifikator**. Tenant daxilində UNİKALDIR
+    (``uniq_program_code_per_org``) və köçürmə xəttinin (``apps.legacy_import``)
+    indeks açarıdır: köhnə bazadan gələn proqramlar ``MYEDU-<legacy_id>``
+    formasında sintetik kod alır və repetisiya fazaları (``program_pk_index``,
+    ``rehearsal_structure_targets``, ``rehearsal_catalog_targets``) məhz bu
+    kodun tək-mənalılığına söykənir. Ona görə sahə NƏ boşaldıla, NƏ də
+    təkrarlana bilər — və istifadəçiyə GÖSTƏRİLMİR: uydurma açardır, insan
+    üçün mənası yoxdur.
+
+    ``official_code`` — **RƏSMİ dövlət ixtisas kodu** (məs. ``060209``).
+    İstifadəçiyə göstərilən yeganə koddur; ``blank=True`` (hələ doldurulmamış
+    ola bilər) və QƏSDƏN UNİKAL DEYİL, çünki universitetdə bir rəsmi kod
+    həqiqətən bir neçə proqrama aid olur:
+
+    * ``060209`` — dörd ayrı magistr psixologiya proqramı;
+    * ``050201`` — eyni ixtisasın AZ və EN bölmə variantları;
+    * ``050620`` — eyni ixtisasın əyani və qiyabi formaları.
+
+    Unikallıq qoyulsaydı bu real hallar bazaya yazıla bilməzdi; daxili
+    tək-mənalılıq isə onsuz da ``code``-un üzərindədir.
+
+    İstifadəçiyə göstərmək üçün HƏMİŞƏ :attr:`display_label` işlədilir.
     """
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="programs")
@@ -40,7 +65,20 @@ class Program(UUIDModel, TimeStampedModel):
         related_name="programs",
         help_text="İxtisas (OrgUnit: specialty) — iyerarxiya bağlantısı.",
     )
-    code = models.CharField(max_length=32)
+    code = models.CharField(
+        max_length=32,
+        help_text="Daxili sabit identifikator (tenant daxilində unikal) — istifadəçiyə göstərilmir.",
+    )
+    official_code = models.CharField(
+        max_length=32,
+        blank=True,
+        db_index=True,
+        help_text=(
+            "Rəsmi dövlət ixtisas kodu (məs. 060209) — istifadəçiyə göstərilən koddur. "
+            "Unikal DEYİL: bir kod bir neçə proqrama (magistr istiqamətləri, AZ/EN "
+            "bölmələri, əyani/qiyabi formalar) aid ola bilər."
+        ),
+    )
     name = models.CharField(max_length=255)
     degree_level = models.CharField(max_length=16, choices=DegreeLevel.choices, default=DegreeLevel.BACHELOR)
     ects_total = models.PositiveIntegerField(
@@ -65,8 +103,19 @@ class Program(UUIDModel, TimeStampedModel):
             models.UniqueConstraint(fields=["organization", "code"], name="uniq_program_code_per_org"),
         ]
 
+    @property
+    def display_label(self) -> str:
+        """İstifadəçiyə göstərilən etiket: rəsmi kod varsa ``Ad · <kod>``, yoxsa ``Ad``.
+
+        Daxili :attr:`code` (``MYEDU-*``) buraya HEÇ VAXT daxil olmur. Rəsmi kod
+        boşdursa ayırıcı da yazılmır — asılı qalmış "Ad · " quyruğu olmamalıdır.
+        """
+        name = (self.name or "").strip()
+        official = (self.official_code or "").strip()
+        return f"{name} · {official}" if official else name
+
     def __str__(self):
-        return f"{self.code} — {self.name}"
+        return self.display_label
 
 
 class Subject(UUIDModel, TimeStampedModel):
@@ -123,7 +172,7 @@ class Curriculum(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         ]
 
     def __str__(self):
-        return self.name or f"{self.program.code} {self.admission_year}"
+        return self.name or f"{self.program.display_label} {self.admission_year}"
 
 
 class CurriculumSubject(UUIDModel, TimeStampedModel, OrderedModel):
@@ -225,7 +274,7 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeSta
         indexes = [models.Index(fields=["organization", "group"])]
 
     def __str__(self):
-        return f"{self.student_id} · {self.program.code}"
+        return f"{self.student_id} · {self.program.display_label}"
 
 
 class CourseOffering(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):

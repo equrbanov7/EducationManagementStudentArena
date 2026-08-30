@@ -244,7 +244,9 @@ def build_student_structure_levels(record):
     sətir "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ı idi — çirkin
     görünürdü. İndi hər səviyyə öz kartındadır.
 
-    İXTİSAS AYRICA ``record.program``-dan qurulur (ad + ``Program.code``),
+    İXTİSAS AYRICA ``record.program``-dan qurulur (ad + ``Program.official_code``
+    — RƏSMİ dövlət ixtisas kodu; daxili ``Program.code`` köçürmənin ``MYEDU-*``
+    açarıdır və istifadəçiyə HEÇ VAXT göstərilmir),
     ``record.group``-un əcdad zəncirindəki specialty node-a ETİBAR EDİLMİR:
     ``Program.specialty_unit`` hər tenant-da təyin olunmaya bilər və bəzi
     tenant-larda qrup birbaşa kafedra altında ola bilər (bax
@@ -256,8 +258,8 @@ def build_student_structure_levels(record):
     Mövcud olmayan səviyyə üçün BOŞ KART göstərilmir (gizlədilir) — çünki bu
     səviyyə THIS tələbənin strukturunda sadəcə YOXDUR (unset deyil, mövcud
     deyil); "—" ilə göstərmək "səviyyə var amma dəyəri boşdur" mənasını verib
-    yanlış təsəvvür yaradardı. Kod yoxdursa (``Program.code`` boşdursa) yalnız
-    kod nişanı gizlədilir, kart özü qalır.
+    yanlış təsəvvür yaradardı. Kod yoxdursa (``Program.official_code`` hələ
+    doldurulmayıbsa) yalnız kod nişanı gizlədilir, kart özü qalır.
     """
     chain = []
     if record.group_id:
@@ -273,7 +275,7 @@ def build_student_structure_levels(record):
                     unit_type=OrgUnitType.SPECIALTY,
                     label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
                     value=record.program.name,
-                    code=(record.program.code or "").strip(),
+                    code=(record.program.official_code or "").strip(),
                 )
             )
             continue
@@ -296,7 +298,7 @@ def build_student_structure_levels(record):
                 unit_type=OrgUnitType.SPECIALTY,
                 label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
                 value=record.program.name,
-                code=(record.program.code or "").strip(),
+                code=(record.program.official_code or "").strip(),
             ),
         )
 
