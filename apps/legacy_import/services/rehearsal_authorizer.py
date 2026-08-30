@@ -34,6 +34,11 @@ LESSON_MODEL_LABEL = "registrar.lesson"
 ASSESSMENT_SCHEME_MODEL_LABEL = "registrar.assessmentscheme"
 LEGACY_GRADE_FACT_MODEL_LABEL = "registrar.legacygradefact"
 LEGACY_GRADE_ARTIFACT_MODEL_LABEL = "registrar.legacygradeartifact"
+# J10 (legacy_rooms) hədəfi.  ``registrar.Lesson.room`` FK-sı (miqrasiya 0051)
+# məhz bu modelə baxır — təşkilatın yeganə otaq reyestri odur.  Model burada da
+# ``django.apps`` ilə həll olunur, yəni ``legacy_import → exams`` idxal tili
+# yaranmır.
+EXAM_ROOM_MODEL_LABEL = "exams.examroom"
 
 
 def build_rehearsal_authorizer() -> LedgerAuthorizer:
@@ -117,6 +122,7 @@ def build_bulk_target_validators():
             ASSESSMENT_SCHEME_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "AssessmentScheme"),
             LEGACY_GRADE_FACT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyGradeFact"),
             LEGACY_GRADE_ARTIFACT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyGradeArtifact"),
+            EXAM_ROOM_MODEL_LABEL: _tenant_owned_bulk_validator("exams", "ExamRoom"),
         }
     )
 
@@ -151,5 +157,6 @@ def build_target_validators() -> TargetValidatorRegistry:
             ASSESSMENT_SCHEME_MODEL_LABEL: _tenant_owned_validator("registrar", "AssessmentScheme"),
             LEGACY_GRADE_FACT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyGradeFact"),
             LEGACY_GRADE_ARTIFACT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyGradeArtifact"),
+            EXAM_ROOM_MODEL_LABEL: _tenant_owned_validator("exams", "ExamRoom"),
         }
     )

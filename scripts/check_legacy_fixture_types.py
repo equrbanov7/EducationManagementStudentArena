@@ -28,6 +28,15 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 REPO = pathlib.Path(".")
 TEST = REPO / "apps/legacy_import/tests/test_rehearsal_source_integration.py"
 CONTRACTS = REPO / "apps/legacy_import/services/field_contracts.py"
+# `field_contracts` 600-sətir tavanındadır, ona görə yeni domenlərin kontraktları
+# öz modullarında yaşayır. Yoxlayıcı HAMISINA baxmalıdır — yoxsa yeni bir domen
+# səssizcə yoxlanmamış qalar.
+CONTRACT_MODULES = (
+    "field_contracts",
+    "syllabus_field_contracts",
+    "legacy_grade_field_contracts",
+    "lesson_meta_field_contracts",
+)
 
 
 def literal_map(source: str, name: str) -> dict[str, tuple[str, ...]]:
@@ -43,15 +52,17 @@ def contracts_by_table() -> dict[str, tuple[str, ...]]:
     import django
 
     django.setup()
-    from apps.legacy_import.services import field_contracts as fc
+    import importlib
 
     out: dict[str, tuple[str, ...]] = {}
-    for name in dir(fc):
-        obj = getattr(fc, name)
-        table = getattr(obj, "source_table", None)
-        fields = getattr(obj, "allowed_fields", None)
-        if isinstance(table, str) and isinstance(fields, tuple):
-            out[table] = tuple(dict.fromkeys(out.get(table, ()) + tuple(fields)))
+    for module_name in CONTRACT_MODULES:
+        module = importlib.import_module(f"apps.legacy_import.services.{module_name}")
+        for name in dir(module):
+            obj = getattr(module, name)
+            table = getattr(obj, "source_table", None)
+            fields = getattr(obj, "allowed_fields", None)
+            if isinstance(table, str) and isinstance(fields, tuple):
+                out[table] = tuple(dict.fromkeys(out.get(table, ()) + tuple(fields)))
     return out
 
 

@@ -25,10 +25,13 @@ düzgün cavab dəyəri yeniləmək DEYİL:
   səbəbini commit mesajında yaz.
 """
 
+import hashlib
+
 import pytest
 
 from apps.legacy_import.services.field_contracts import (
     ALLOWED_QB_FIELDS,
+    JOURNAL_DATES_FIELDS,
     JOURNAL_FIELDS,
     JOURNAL_POINT_ARCHIVE_FIELDS,
     JOURNAL_POINT_FIELDS,
@@ -39,7 +42,14 @@ from apps.legacy_import.services.legacy_grade_field_contracts import (
     SCORE_SHEET_EXPORT_FIELDS,
     YEKUN_EVIDENCE_FIELDS,
 )
+from apps.legacy_import.services.lesson_meta_field_contracts import (
+    LESSON_ROOM_FIELDS,
+    ROOM_REGISTRY_FIELDS,
+    SYLLABUS_TOPIC_FIELDS,
+)
+from apps.legacy_import.services.rehearsal_contracts import encoded_part
 from apps.legacy_import.services.rehearsal_journal_entry_scores_phase import ENTRY_SCORE_SEALER
+from apps.legacy_import.services.rehearsal_journal_lessons_targets import lesson_derivation_hash
 from apps.legacy_import.services.rehearsal_journal_reconcile_phase import RECONCILE_SEALER
 from apps.legacy_import.services.source_extraction import _AUDITED_CONTRACTS
 
@@ -92,6 +102,27 @@ PINNED_CONTRACTS = (
         "balvereqi_logs",
         "legacy-grade-v1",
         "fbce55ed5d519ef903e0876bf73a1871a5f07961914e797432a6db93e8c00ca7",
+    ),
+    # J10/J11 (legacy_rooms + journal_lesson_meta).  ``LESSON_ROOM_FIELDS``
+    # J3-ün ``JOURNAL_DATES_FIELDS``-indən AYRIDIR: paylaşılanı genişlətmək
+    # J3-ün BÜTÜN ``lesson_derivation_hash``-lərini dəyişərdi.
+    (
+        LESSON_ROOM_FIELDS,
+        "journals_dates_rooms",
+        "lesson-meta-v1",
+        "969f0fb15c7d533dc0b247bddef294560d766d0be1148346ecbf9e64683c7f8e",
+    ),
+    (
+        ROOM_REGISTRY_FIELDS,
+        "rooms",
+        "lesson-meta-v1",
+        "e2de4897f042768afca0b8ca9fc22ecff27d609235e5618cdd7e8303bc346f41",
+    ),
+    (
+        SYLLABUS_TOPIC_FIELDS,
+        "sillabus_sem_muh",
+        "lesson-meta-v1",
+        "1faf9df56c3a594ce0af00b78fb49b98d880b908602f5c104fa9f531ec5f4485",
     ),
 )
 
@@ -152,6 +183,42 @@ def test_journal_seal_recipes_bind_the_narrow_yekun_contract():
         assert sealer.source_table == "yekun"
         assert sealer.contract_fingerprint == YEKUN_FIELDS.fingerprint
         assert sealer.contract_fingerprint != YEKUN_EVIDENCE_FIELDS.fingerprint
+
+
+def test_lesson_metadata_stays_off_the_j3_lesson_contract():
+    """Dərs metadatası J3-ün möhür reseptinə SIZMAMALIDIR.
+
+    J3 (``journal_lessons``) hər dərs qərarını ``JOURNAL_DATES_FIELDS``
+    barmaq izi ilə möhürləyir.  Mövzu/otaq/saat sütunlarını həmin kontrakta
+    qatmaq bütün köhnə repetisiyaların ledger-ini yenidən törədilməz edərdi —
+    ona görə metadata AYRICA cədvəldən, AYRICA kontraktla oxunur.
+    """
+
+    assert JOURNAL_DATES_FIELDS.source_table == "journals_dates_added_by_teacher"
+    assert LESSON_ROOM_FIELDS.source_table == "journals_dates_rooms"
+    assert JOURNAL_DATES_FIELDS.fingerprint != LESSON_ROOM_FIELDS.fingerprint
+    # J3-ün proyeksiyası dar qalır: metadata sütunları oraya girmir.
+    assert JOURNAL_DATES_FIELDS.allowed_fields == ("id", "journal_id", "month", "day", "time")
+    assert not {"room", "sillabus", "saatliq_ders"} & set(JOURNAL_DATES_FIELDS.allowed_fields)
+    # J3-ün derivation resepti hələ də DAR kontraktın barmaq izini daşıyır.
+    assert (
+        lesson_derivation_hash(
+            legacy_pk=1,
+            row_hash="a" * 64,
+            outcome_token="materialised",
+            journal_ref="2",
+            date_text="2021-12-30",
+            time_text="14:00",
+        )
+        == _expected_lesson_hash()
+    )
+
+
+def _expected_lesson_hash() -> str:
+    digest = hashlib.sha256(b"legacy-rehearsal-journal-lesson-derivation-v1\x00")
+    for part in (JOURNAL_DATES_FIELDS.fingerprint, "1", "a" * 64, "materialised", "2", "2021-12-30", "14:00", "", ""):
+        digest.update(encoded_part(part))
+    return digest.hexdigest()
 
 
 def test_every_pinned_contract_is_registered_as_audited():
