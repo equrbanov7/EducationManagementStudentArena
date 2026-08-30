@@ -196,6 +196,8 @@ class _Stage2Mixin:
         # `has_access` / `view_state` yoxlayır (bax views/syllabus/ müqaviləsi).
         self.syllabus_list_section = {"has_access": False, "rows": []}
         self.syllabus_editor_section = {"view_state": "missing", "nav": [], "panels": []}
+        # Sillabus — KAFEDRA təsdiq səthi (ayrı icazə açarı: `syllabus.review`).
+        self.syllabus_review_section = {"has_access": False, "has_scope": False, "rows": []}
         # «RİM mərkəzi» — panel SPA-dır, server yalnız icazə xəritəsini verir.
         self.rim_center_section = {
             "can_search": False,

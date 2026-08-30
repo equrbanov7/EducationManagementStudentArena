@@ -36491,3 +36491,667 @@ msgstr "%(n)s to date"
 msgctxt "organizations.unit_detail"
 msgid "%(n)s daha"
 msgstr "%(n)s more"
+
+msgctxt "profile.sidebar"
+msgid "Sillabus təsdiqi"
+msgstr "Syllabus approval"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus təsdiqi"
+msgstr "Syllabus approval"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri paneli"
+msgstr "Department head panel"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq paneli"
+msgstr "Approval panel"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri"
+msgstr "Department head"
+
+msgctxt "accounts.syllabus"
+msgid "Genişləndirilmiş əhatə"
+msgstr "Extended scope"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə yoxdur"
+msgstr "No scope"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə: %(count)s struktur bölmə"
+msgstr "Scope: %(count)s organizational units"
+
+msgctxt "accounts.syllabus"
+msgid "Yalnız öz kafedranızın müəllimlərinin təqdim etdiyi sillabuslar görünür. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
+msgstr "Only syllabi submitted by teachers of your own department are shown. An approved version is never modified — corrections go through a new version."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatənizdəki bütün kafedralar üzrə sillabus vəziyyəti. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş yeni versiya ilə aparılır."
+msgstr "Syllabus status across every department in your scope. An approved version is never modified — corrections go through a new version."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə təyin edilməyib."
+msgstr "No scope assigned."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus təsdiqi bölməsi üçün icazəniz yoxdur."
+msgstr "You do not have permission for the syllabus approval section."
+
+msgctxt "accounts.syllabus"
+msgid "Təşkilati əhatə təyin edilməmişdir"
+msgstr "No organizational scope has been assigned"
+
+msgctxt "accounts.syllabus"
+msgid "Hesabınıza kafedra və ya fakültə əhatəsi verilməyib. Əhatə olmadan sillabus məlumatları göstərilmir — bu, «bütün universitet» kimi şərh edilmir. Səlahiyyət təyin edildikdən sonra yalnız aid olduğunuz struktur bölmə görünəcək."
+msgstr "Your account has no department or faculty scope. Without a scope, syllabus data is not shown — this is never read as «the whole university». Once the scope is assigned, only your own unit will appear."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatənin təyini üçün təşkilat administratoruna və ya tədris şöbəsinə müraciət edin."
+msgstr "Contact the organization administrator or the academic affairs office to have your scope assigned."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq növbəsi"
+msgstr "Approval queue"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə və analitika"
+msgstr "Coverage and analytics"
+
+msgctxt "accounts.syllabus"
+msgid "Növbədə gözləyən"
+msgstr "Waiting in the queue"
+
+msgctxt "accounts.syllabus"
+msgid "baxış tələb edən sillabus"
+msgstr "syllabi awaiting review"
+
+msgctxt "accounts.syllabus"
+msgid "10 gündən çox gözləyir"
+msgstr "Waiting more than 10 days"
+
+msgctxt "accounts.syllabus"
+msgid "gözləmə həddi aşılıb"
+msgstr "waiting limit exceeded"
+
+msgctxt "accounts.syllabus"
+msgid "Çatışmayan bölməsi var"
+msgstr "Has an incomplete section"
+
+msgctxt "accounts.syllabus"
+msgid "tam doldurulmayıb"
+msgstr "not fully filled in"
+
+msgctxt "accounts.syllabus"
+msgid "Orta gözləmə"
+msgstr "Average wait"
+
+msgctxt "accounts.syllabus"
+msgid "hədəf: 5 gündən az"
+msgstr "target: under 5 days"
+
+msgctxt "accounts.syllabus"
+msgid "gün"
+msgstr "days"
+
+msgctxt "accounts.syllabus"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn, kod və ya müəllim"
+msgstr "Course, code or teacher"
+
+msgctxt "accounts.syllabus"
+msgid "Status"
+msgstr "State"
+
+msgctxt "accounts.syllabus"
+msgid "Sıralama"
+msgstr "Sorting"
+
+msgctxt "accounts.syllabus"
+msgid "Akademik il"
+msgstr "Academic year"
+
+msgctxt "accounts.syllabus"
+msgid "Filtrləri sıfırla"
+msgstr "Reset filters"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün statuslar"
+msgstr "All statuses"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün illər"
+msgstr "All years"
+
+msgctxt "accounts.syllabus"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "accounts.syllabus"
+msgid "Gözləmə müddətinə görə"
+msgstr "By waiting time"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn adına görə"
+msgstr "By course name"
+
+msgctxt "accounts.syllabus"
+msgid "Tamamlanmaya görə"
+msgstr "By completion"
+
+msgctxt "accounts.syllabus"
+msgid "Təhsil proqramı"
+msgstr "Study programme"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.syllabus"
+msgid "Görünüş"
+msgstr "View"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn və proqram"
+msgstr "Course and programme"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.syllabus"
+msgid "Təqdim / gözləmə"
+msgstr "Submitted / waiting"
+
+msgctxt "accounts.syllabus"
+msgid "Tamamlanma"
+msgstr "Completion"
+
+msgctxt "accounts.syllabus"
+msgid "Risk"
+msgstr "Risks"
+
+msgctxt "accounts.syllabus"
+msgid "Əməllər"
+msgstr "Actions"
+
+msgctxt "accounts.syllabus"
+msgid "Baxışa keç"
+msgstr "Open review"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq növbəsi boşdur"
+msgstr "The approval queue is empty"
+
+msgctxt "accounts.syllabus"
+msgid "Seçilmiş filtrə uyğun gözləyən sillabus yoxdur. Ümumi vəziyyəti «Əhatə və analitika» tabından izləyə bilərsiniz."
+msgstr "No pending syllabus matches the selected filter. Track the overall picture on the «Coverage and analytics» tab."
+
+msgctxt "accounts.syllabus"
+msgid "Əhatəyə keç"
+msgstr "Go to coverage"
+
+msgctxt "accounts.syllabus"
+msgid "bugün gəlib"
+msgstr "arrived today"
+
+msgctxt "accounts.syllabus"
+msgid "%(days)s gündür gözləyir"
+msgstr "waiting for %(days)s days"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s aktivdir"
+msgstr "%(version)s is active"
+
+msgctxt "accounts.syllabus"
+msgid "çatışmayan bölmə var"
+msgstr "has an incomplete section"
+
+msgctxt "accounts.syllabus"
+msgid "siyasət yoxlaması"
+msgstr "policy check"
+
+msgctxt "accounts.syllabus"
+msgid "böyük dəyişiklik"
+msgstr "major change"
+
+msgctxt "accounts.syllabus"
+msgid "risk yoxdur"
+msgstr "no risk"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif göstərilməyib"
+msgstr "No author specified"
+
+msgctxt "accounts.syllabus"
+msgid "Proqram təyin edilməyib"
+msgstr "No programme assigned"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra təyin edilməyib"
+msgstr "No department assigned"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq faizi"
+msgstr "Approval rate"
+
+msgctxt "accounts.syllabus"
+msgid "təsdiqlənmiş / ümumi fənn"
+msgstr "approved / total courses"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənmiş"
+msgstr "Approved"
+
+msgctxt "accounts.syllabus"
+msgid "jurnal açıla bilər"
+msgstr "the journal can be opened"
+
+msgctxt "accounts.syllabus"
+msgid "Baxışda"
+msgstr "Under review"
+
+msgctxt "accounts.syllabus"
+msgid "təsdiq gözləyir"
+msgstr "awaiting approval"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişdə"
+msgstr "In revision"
+
+msgctxt "accounts.syllabus"
+msgid "müəllimdədir"
+msgstr "with the teacher"
+
+msgctxt "accounts.syllabus"
+msgid "Gecikib"
+msgstr "Overdue"
+
+msgctxt "accounts.syllabus"
+msgid "semestr başlayıb, təsdiq yoxdur"
+msgstr "the semester has started, no approval yet"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra üzrə breakdown — təhsil proqramları"
+msgstr "Department breakdown — study programmes"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatə üzrə breakdown — kafedralar"
+msgstr "Scope breakdown — departments"
+
+msgctxt "accounts.syllabus"
+msgid "Yalnız sizin əhatənizdəki fənlər"
+msgstr "Only the courses within your scope"
+
+msgctxt "accounts.syllabus"
+msgid "Əhatənizə düşən bütün struktur bölmələr"
+msgstr "Every organizational unit in your scope"
+
+msgctxt "accounts.syllabus"
+msgid "Fənn"
+msgstr "Courses"
+
+msgctxt "accounts.syllabus"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "accounts.syllabus"
+msgid "Təyin edilməyib"
+msgstr "Not assigned"
+
+msgctxt "accounts.syllabus"
+msgid "Seçilmiş tədris ilində qeyd tapılmadı."
+msgstr "No records found for the selected academic year."
+
+msgctxt "accounts.syllabus"
+msgid "Semestr üzrə dinamika"
+msgstr "Trend by semester"
+
+msgctxt "accounts.syllabus"
+msgid "Müqayisə üçün kifayət qədər semestr qeydi yoxdur."
+msgstr "There are not enough semester records to compare."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq marşrutu — universitet siyasəti"
+msgstr "Approval route — university policy"
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra təsdiqi state maşını ilə məcburidir. Sonrakı mərhələlər (dekan təsdiqi, tədris şöbəsinin yekun yoxlaması) hələ tətbiq olunmayıb — burada onların cari vəziyyəti göstərilir."
+msgstr "Department approval is enforced by the state machine. The later stages (dean approval, final check by academic affairs) are not implemented yet — their current status is shown here."
+
+msgctxt "accounts.syllabus"
+msgid "Kafedra müdiri təsdiqi"
+msgstr "Department head approval"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün sillabuslar üçün məcburidir — state maşını ilə tətbiq olunur."
+msgstr "Mandatory for every syllabus — enforced by the state machine."
+
+msgctxt "accounts.syllabus"
+msgid "İkinci təsdiq — dekan"
+msgstr "Second approval — dean"
+
+msgctxt "accounts.syllabus"
+msgid "Universitet siyasətindən asılı ikinci mərhələ — hələ tətbiq olunmayıb."
+msgstr "A second stage that depends on university policy — not implemented yet."
+
+msgctxt "accounts.syllabus"
+msgid "Tədris şöbəsinin son yoxlaması"
+msgstr "Final check by academic affairs"
+
+msgctxt "accounts.syllabus"
+msgid "Semestr açılışından əvvəl toplu yoxlama — hələ tətbiq olunmayıb."
+msgstr "A bulk check before the semester opens — not implemented yet."
+
+msgctxt "accounts.syllabus"
+msgid "aktiv"
+msgstr "active"
+
+msgctxt "accounts.syllabus"
+msgid "tətbiq olunmur"
+msgstr "not in effect"
+
+msgctxt "accounts.syllabus"
+msgid "Baxış bölmələri"
+msgstr "Review tabs"
+
+msgctxt "accounts.syllabus"
+msgid "Baxışı bağla"
+msgstr "Close the review"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus bölmələri"
+msgstr "Syllabus sections"
+
+msgctxt "accounts.syllabus"
+msgid "Dəyişikliklər"
+msgstr "Changes"
+
+msgctxt "accounts.syllabus"
+msgid "Audit tarixçəsi"
+msgstr "Audit history"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin qeydi:"
+msgstr "Teacher's note:"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllim təqdimata əlavə qeyd yazmayıb."
+msgstr "The teacher added no note to the submission."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllim: %(value)s"
+msgstr "Teacher: %(value)s"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı: %(value)s"
+msgstr "Office hours: %(value)s"
+
+msgctxt "accounts.syllabus"
+msgid "Prerekvizit: %(value)s"
+msgstr "Prerequisite: %(value)s"
+
+msgctxt "accounts.syllabus"
+msgid "— doldurulmayıb —"
+msgstr "— not filled in —"
+
+msgctxt "accounts.syllabus"
+msgid "Təqdim: %(sent)s · tamamlanma %(percent)s%%"
+msgstr "Submitted: %(sent)s · completion %(percent)s%%"
+
+msgctxt "accounts.syllabus"
+msgid "Ümumi rəy"
+msgstr "Overall feedback"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiq və ya geri qaytarma ilə birlikdə müəllimə göndərilir"
+msgstr "Sent to the teacher together with the approval or the return"
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə üzrə şərh"
+msgstr "Section comment"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimə göndəriləcək konkret qeyd"
+msgstr "A specific note to be sent to the teacher"
+
+msgctxt "accounts.syllabus"
+msgid "Şərh əlavə et"
+msgstr "Add a comment"
+
+msgctxt "accounts.syllabus"
+msgid "Şərhi gizlət"
+msgstr "Hide the comment"
+
+msgctxt "accounts.syllabus"
+msgid "şərh var"
+msgstr "has a comment"
+
+msgctxt "accounts.syllabus"
+msgid "dəyişib"
+msgstr "changed"
+
+msgctxt "accounts.syllabus"
+msgid "Şərh yazılmış bölmə: %(count)s · geri qaytarma və rədd üçün səbəb məcburidir"
+msgstr "Sections with a comment: %(count)s · a reason is mandatory for returning and rejecting"
+
+msgctxt "accounts.syllabus"
+msgid "Müqayisə: təsdiqlənmiş %(old)s ilə təqdim edilmiş %(new)s arasında."
+msgstr "Comparison: approved %(old)s versus submitted %(new)s."
+
+msgctxt "accounts.syllabus"
+msgid "Bu, dosyenin ilk təsdiq namizədidir — müqayisə üçün əvvəlki versiya yoxdur."
+msgstr "This is the file's first approval candidate — there is no earlier version to compare with."
+
+msgctxt "accounts.syllabus"
+msgid "Bu versiya üçün müqayisə oluna bilən əvvəlki təsdiq yoxdur."
+msgstr "There is no previous approval to compare this version with."
+
+msgctxt "accounts.syllabus"
+msgid "%(changed)s bölmə dəyişib · %(same)s bölmə dəyişməyib"
+msgstr "%(changed)s sections changed · %(same)s unchanged"
+
+msgctxt "accounts.syllabus"
+msgid "struktur dəyişikliyi"
+msgstr "structural change"
+
+msgctxt "accounts.syllabus"
+msgid "məzmun dəyişikliyi"
+msgstr "content change"
+
+msgctxt "accounts.syllabus"
+msgid "dəyişməmişdir"
+msgstr "unchanged"
+
+msgctxt "accounts.syllabus"
+msgid "təsdiqlənmiş versiya"
+msgstr "approved version"
+
+msgctxt "accounts.syllabus"
+msgid "təqdim edilmiş versiya"
+msgstr "submitted version"
+
+msgctxt "accounts.syllabus"
+msgid "Bu, jurnalın mövzu siyahısını dəyişir. Cari semestrdə jurnal artıq açılıbsa, dəyişiklik yalnız növbəti semestrdən qüvvəyə minir."
+msgstr "This changes the journal's topic list. If the journal is already open this semester, the change takes effect only from the next semester."
+
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə çəkiləri jurnalın sütun strukturunu dəyişir. Mövcud qiymətlər arxivdə saxlanılır və silinmir."
+msgstr "Assessment weights change the journal's column structure. Existing grades are archived, never deleted."
+
+msgctxt "accounts.syllabus"
+msgid "Sərbəst iş sütunlarının sayı dəyişir. Köhnə sütunların qiymətləri arxivdə saxlanılır və silinmir."
+msgstr "The number of self-study columns changes. Grades in the old columns are archived, never deleted."
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s versiyası yaradıldı"
+msgstr "Version %(version)s was created"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s təsdiqə göndərildi"
+msgstr "%(version)s was submitted for approval"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s təqdimatı geri çağırıldı"
+msgstr "The submission of %(version)s was withdrawn"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s baxışa götürüldü"
+msgstr "%(version)s was taken into review"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s təsdiqləndi"
+msgstr "%(version)s was approved"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s düzəliş üçün geri qaytarıldı"
+msgstr "%(version)s was returned for revision"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s rədd edildi"
+msgstr "%(version)s was rejected"
+
+msgctxt "accounts.syllabus"
+msgid "%(version)s yeniləndi"
+msgstr "%(version)s was updated"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus təsdiqlənsin?"
+msgstr "Approve the syllabus?"
+
+msgctxt "accounts.syllabus"
+msgid "Versiya təsdiqlənəcək və dəyişdirilməz sənəd kimi kilidlənəcək. Sonrakı düzəliş yalnız yeni versiya ilə mümkündür."
+msgstr "The version will be approved and locked as an immutable document. Any later correction is possible only through a new version."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlə"
+msgstr "Approve"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlənmiş versiya həftəlik mövzuların, qiymətləndirmə strukturunun və sərbəst iş konfiqurasiyasının yeganə mənbəyi olur"
+msgstr "The approved version becomes the single source for weekly topics, the assessment structure and the self-study configuration"
+
+msgctxt "accounts.syllabus"
+msgid "Elektron jurnal bu versiyadan yaradılır və müəllim üçün açılır"
+msgstr "The electronic journal is created from this version and opened for the teacher"
+
+msgctxt "accounts.syllabus"
+msgid "Tələbə kabinetində sillabus dərhal görünür"
+msgstr "The syllabus appears in the student cabinet immediately"
+
+msgctxt "accounts.syllabus"
+msgid "Mövcud qiymət və davamiyyət qeydləri toxunulmaz qalır"
+msgstr "Existing grade and attendance records remain untouched"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş üçün geri qaytarılsın?"
+msgstr "Return for revision?"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus müəllimə qaytarılır və «Düzəliş tələb olunur» statusuna keçir. Səbəb məcburidir — müəllim onu birbaşa redaktorda görəcək."
+msgstr "The syllabus goes back to the teacher and moves to the «Revision required» status. A reason is mandatory — the teacher will see it directly in the editor."
+
+msgctxt "accounts.syllabus"
+msgid "Geri qaytar"
+msgstr "Return"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş səbəbi"
+msgstr "Reason for revision"
+
+msgctxt "accounts.syllabus"
+msgid "Konkret yazın: hansı bölmədə nə düzəldilməlidir."
+msgstr "Be specific: which section needs what correction."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş tələb olunan bölmələr"
+msgstr "Sections that need revision"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəliş üçün geri qaytar"
+msgstr "Return for revision"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus rədd edilsin?"
+msgstr "Reject the syllabus?"
+
+msgctxt "accounts.syllabus"
+msgid "Rədd edilən versiya bağlanır və yenidən göndərilə bilmir — müəllim yeni versiya yaratmalıdır. Səbəb məcburidir və audit izinə yazılır."
+msgstr "A rejected version is closed and cannot be resubmitted — the teacher has to create a new version. A reason is mandatory and is written into the audit trail."
+
+msgctxt "accounts.syllabus"
+msgid "Rədd et"
+msgstr "Reject"
+
+msgctxt "accounts.syllabus"
+msgid "Rədd səbəbi"
+msgstr "Reason for rejection"
+
+msgctxt "accounts.syllabus"
+msgid "Məsələn: qiymətləndirmə strukturu universitet siyasətinə uyğun deyil."
+msgstr "For example: the assessment structure does not comply with university policy."
+
+msgctxt "accounts.syllabus"
+msgid "Mövcud təsdiqlənmiş versiya (varsa) aktiv qalır"
+msgstr "The existing approved version (if any) stays active"
+
+msgctxt "accounts.syllabus"
+msgid "Tələbələr köhnə təsdiqlənmiş versiyanı görməyə davam edir"
+msgstr "Students keep seeing the previously approved version"
+
+msgctxt "accounts.syllabus"
+msgid "Jurnal statusu dəyişmir"
+msgstr "The journal status does not change"
+
+msgctxt "accounts.syllabus"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "accounts.syllabus"
+msgid "Səbəb müəllimə göndərilir və audit izinə yazılır"
+msgstr "The reason is sent to the teacher and written into the audit trail"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı %(min)s simvol — səbəb məcburidir"
+msgstr "At least %(min)s characters — a reason is mandatory"
+
+msgctxt "accounts.syllabus"
+msgid "Səbəb ən azı %(min)s simvol olmalıdır."
+msgstr "The reason must be at least %(min)s characters long."
+
+msgctxt "accounts.syllabus"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "No active organization is selected."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus versiyası tapılmadı və ya əhatənizdə deyil."
+msgstr "The syllabus version was not found or is outside your scope."
+
+msgctxt "accounts.syllabus"
+msgid "Sorğu düzgün deyil."
+msgstr "The request is not valid."
+
+msgctxt "accounts.syllabus"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "The operation was not completed."
+
+msgctxt "accounts.syllabus"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "accounts.syllabus"
+msgid "%(name)s — %(version)s təsdiqləndi və kilidləndi."
+msgstr "%(name)s — %(version)s was approved and locked."
+
+msgctxt "accounts.syllabus"
+msgid "%(name)s — düzəliş üçün geri qaytarıldı, müəllimə bildiriş göndərildi."
+msgstr "%(name)s — returned for revision, the teacher has been notified."
+
+msgctxt "accounts.syllabus"
+msgid "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
+msgstr "%(name)s — the version was rejected. Students see the previously approved version."

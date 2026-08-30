@@ -89,9 +89,7 @@ TRANSITION_MESSAGES = {
     "version.base_missing": pgettext_lazy(_CTX, "Mənbə versiya tapılmadı."),
     "version.kind_unknown": pgettext_lazy(_CTX, "Versiya növü tanınmır."),
     "section.unknown": pgettext_lazy(_CTX, "Bölmə tanınmır."),
-    "section.conflict": pgettext_lazy(
-        _CTX, "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."
-    ),
+    "section.conflict": pgettext_lazy(_CTX, "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."),
     "self.option_not_allowed": pgettext_lazy(_CTX, "Seçilmiş sərbəst iş strukturu universitet siyasətinə uyğun deyil."),
     "import.status_not_allowed": pgettext_lazy(_CTX, "Bu status köçürmə borusu üçün icazəli deyil."),
 }

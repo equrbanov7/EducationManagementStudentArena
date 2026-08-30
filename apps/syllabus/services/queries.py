@@ -91,36 +91,72 @@ def status_counts(queryset) -> dict:
     return counts
 
 
-def review_queue(*, organization, actor, chair_unit=None):
+#: Təsdiq növbəsinin icazə verilən sıralama açarları (dizayn §3.3 — 3 variant).
+#: ⚠️ «wait» = ən çox gözləyən BAŞDA, yəni ən köhnə ``submitted_at``.
+QUEUE_SORT_KEYS = {
+    "wait": ("submitted_at",),
+    "subject": ("syllabus__subject__name",),
+    "completion": ("completion_percent", "submitted_at"),
+}
+
+
+def review_queue(
+    *,
+    organization,
+    actor,
+    chair_unit=None,
+    program=None,
+    statuses=None,
+    search: str = "",
+    sort: str = "wait",
+):
     """Kafedra müdirinin təsdiq növbəsi — ən çox gözləyən başda.
 
     İcazəsi olmayan və ya struktur əhatəsi tapılmayan aktor üçün BOŞ queryset
     qaytarılır (README §3.3 ``noscope`` vəziyyəti).
+
+    Filtrlər dizayn §3.3-ün panelindəndir: axtarış (fənn adı/kodu/müəllim),
+    status, kafedra VƏ YA proqram, sıralama. Hamısı SERVER tərəfdədir — kliyent
+    öz süzgəcini qurmur, ona görə əhatə heç bir halda kənara çıxa bilmir.
     """
     if not actor.is_superadmin and not actor.has(PERM_REVIEW):
         return SyllabusVersion.objects.none()
 
-    queryset = (
-        SyllabusVersion.objects.filter(organization=organization, status__in=sorted(QUEUE_STATUSES))
-        .select_related("syllabus", "syllabus__subject", "syllabus__author", "submitted_by")
-        .order_by("submitted_at")
+    queryset = SyllabusVersion.objects.filter(
+        organization=organization, status__in=sorted(statuses or QUEUE_STATUSES)
+    ).select_related(
+        "syllabus",
+        "syllabus__subject",
+        "syllabus__author",
+        "syllabus__program",
+        "syllabus__period",
+        "syllabus__chair_unit",
+        "syllabus__approved_version",
+        "submitted_by",
+        "reviewer",
     )
-    if actor.is_superadmin:
-        return queryset.filter(syllabus__chair_unit=chair_unit) if chair_unit else queryset
 
-    scope = actor.scope_for(PERM_REVIEW)
-    if scope.is_org_wide:
-        pass
-    elif scope.is_unit_scoped:
-        queryset = queryset.filter(
-            scope.unit_subtree_q(path_field="syllabus__chair_unit__path", id_field="syllabus__chair_unit__id")
-        )
-    else:
-        return SyllabusVersion.objects.none()
+    if not actor.is_superadmin:
+        scope = actor.scope_for(PERM_REVIEW)
+        if scope.is_unit_scoped:
+            queryset = queryset.filter(
+                scope.unit_subtree_q(path_field="syllabus__chair_unit__path", id_field="syllabus__chair_unit__id")
+            )
+        elif not scope.is_org_wide:
+            return SyllabusVersion.objects.none()
 
     if chair_unit is not None:
         queryset = queryset.filter(syllabus__chair_unit=chair_unit)
-    return queryset
+    if program is not None:
+        queryset = queryset.filter(syllabus__program=program)
+    if search:
+        queryset = queryset.filter(
+            Q(syllabus__subject__name__icontains=search)
+            | Q(syllabus__subject__code__icontains=search)
+            | Q(syllabus__author__first_name__icontains=search)
+            | Q(syllabus__author__last_name__icontains=search)
+        )
+    return queryset.order_by(*QUEUE_SORT_KEYS.get(sort, QUEUE_SORT_KEYS["wait"]))
 
 
 def version_diff(old_version, new_version) -> dict:
@@ -191,6 +227,7 @@ def audit_entries(syllabus, *, limit: int = 100):
 
 
 __all__ = [
+    "QUEUE_SORT_KEYS",
     "SORT_KEYS",
     "audit_entries",
     "list_syllabi",

@@ -219,6 +219,17 @@ urlpatterns = [
         name="syllabus_section_save",
     ),
     path("profile/syllabus/<uuid:syllabus_id>/preview/", views.syllabus_preview, name="syllabus_preview"),
+    # Kafedra təsdiq səthi: baxışı açmaq (SUBMITTED → REVIEW) və qərar yazmaq.
+    path(
+        "profile/syllabus/version/<uuid:version_id>/review/",
+        views.syllabus_review_open,
+        name="syllabus_review_open",
+    ),
+    path(
+        "profile/syllabus/version/<uuid:version_id>/decision/",
+        views.syllabus_decision,
+        name="syllabus_decision",
+    ),
     # Post management
     path("superadmin/post-management/", views.superadmin_post_management, name="superadmin_post_management"),
     path(

@@ -127,6 +127,7 @@ SECTION_PARTIALS: dict[str, str] = {
     # sorğu parametrindən gəlir.
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
+    "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -183,6 +184,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # ona görə AJAX swap təhlükəsizdir.
         "syllabus-list",
         "syllabus-editor",
+        "syllabus-review",
     }
 )
 

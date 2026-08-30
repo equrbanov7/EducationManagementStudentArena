@@ -43,7 +43,7 @@ def apply_permission_section_gates(
     Qaytarılan bayraqlar ``_role_capabilities`` cavabına düşür (şablonlar və
     testlər onlara söykənir): ``can_view_audit``, ``can_use_rim_center``,
     ``can_view_people_teachers``, ``can_view_people_students``, ``can_view_syllabus``,
-    ``can_edit_syllabus``.
+    ``can_edit_syllabus``, ``can_review_syllabus``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
@@ -79,6 +79,13 @@ def apply_permission_section_gates(
     can_edit_syllabus = privileged or has_permission(permissions, "syllabus.edit")
     can_view_syllabus = can_edit_syllabus or has_permission(permissions, "syllabus.view")
 
+    # «Sillabus təsdiqi» AYRICA açardır: `syllabus.review`. Müəllim (`edit`) bu
+    # bölməni GÖRMÜR — qərar səthi ilə redaktə səthi bir-birinə açılmır. Menyu
+    # görünürlüyü icazə açarına baxır, KONKRET sillabusun görünməsi isə
+    # `apps/syllabus/services/coverage.py`-da struktur əhatəsi ilə fail-closed
+    # yenidən süzülür (əhatəsiz istifadəçi boş vəziyyət görür).
+    can_review_syllabus = privileged or has_permission(permissions, "syllabus.review")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -86,6 +93,7 @@ def apply_permission_section_gates(
         (can_view_people_students, "people-students"),
         (can_view_syllabus, "syllabus-list"),
         (can_view_syllabus, "syllabus-editor"),
+        (can_review_syllabus, "syllabus-review"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -97,6 +105,7 @@ def apply_permission_section_gates(
         "can_view_people_students": can_view_people_students,
         "can_view_syllabus": can_view_syllabus,
         "can_edit_syllabus": can_edit_syllabus,
+        "can_review_syllabus": can_review_syllabus,
     }
 
 

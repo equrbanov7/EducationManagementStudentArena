@@ -211,6 +211,7 @@ class _Stage4Mixin:
             "people_section": self.people_section,
             "syllabus_list_section": self.syllabus_list_section,
             "syllabus_editor_section": self.syllabus_editor_section,
+            "syllabus_review_section": self.syllabus_review_section,
             "superadmin_ai_settings_section": self.superadmin_ai_settings_section,
             "superadmin_org_features_section": self.superadmin_org_features_section,
             "category_management_create_form": self.category_management_create_form,

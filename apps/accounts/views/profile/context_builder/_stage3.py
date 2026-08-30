@@ -310,6 +310,14 @@ class _Stage3Mixin:
                     version=resolve_editor_version(self.request, self.active_organization),
                 )["syllabus_editor_section"]
             )
+        if self.active_section == "syllabus-review" and "syllabus-review" in self.allowed_sections:
+            from ...syllabus import build_syllabus_review_section
+
+            self.syllabus_review_section.update(
+                build_syllabus_review_section(self.request, organization=self.active_organization)[
+                    "syllabus_review_section"
+                ]
+            )
         if "superadmin-ai" in self.allowed_sections and self.active_section == "superadmin-ai":
             self.superadmin_ai_settings_section.update(build_superadmin_ai_settings_context())
             self.superadmin_ai_settings_section["post_next_url"] = _append_query_params(

@@ -1,0 +1,434 @@
+/* Jurnal ↔ sillabus körpüsünün stilləri: vəziyyət zolağı + oxu-rejimli panel.
+ *
+ * Yalnız `--ems-*` tokenləri işlənir (dizayn təhvili §1) — hardcode rəng YOXDUR.
+ * Tək tema: işıqlı. `prefers-color-scheme: dark` bloku QƏSDƏN yoxdur.
+ * Ölçülər dizayn §2-dən: kart radius 12px, düymə 9px, badge 999px,
+ * gövdə .83rem, meta .73rem, badge .71rem/800, toxunma hədəfi >= 34px.
+ */
+
+/* ── Vəziyyət zolağı (jurnal) ───────────────────────────────────────────── */
+.jd2-sylbar {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 16px;
+    margin: 0 0 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: 12px;
+    background: var(--ems-bg-subtle);
+}
+
+.jd2-sylbar__icon {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+.jd2-sylbar__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.jd2-sylbar__title {
+    font-size: 0.93rem;
+    font-weight: 800;
+}
+
+.jd2-sylbar__msg,
+.jd2-sylbar__reason,
+.jd2-sylbar__hint {
+    font-size: 0.83rem;
+    line-height: 1.45;
+    color: var(--ems-text);
+}
+
+.jd2-sylbar__hint {
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+.jd2-sylbar__reason {
+    padding: 7px 10px;
+    margin-top: 3px;
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-border);
+}
+
+.jd2-sylbar__cta {
+    flex: 0 0 auto;
+    margin-left: auto;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 9px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.jd2-sylbar__cta:hover,
+.jd2-sylbar__cta:focus-visible {
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+/* Tonlar — README §3.1 rəng cədvəli ilə eyni token cütləri. */
+.jd2-sylbar--danger {
+    background: var(--ems-danger-bg);
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-strong);
+}
+
+.jd2-sylbar--danger .jd2-sylbar__icon,
+.jd2-sylbar--danger .jd2-sylbar__title {
+    color: var(--ems-danger-strong);
+}
+
+.jd2-sylbar--warning {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    border-width: 2px;
+    color: var(--ems-warning-800);
+}
+
+.jd2-sylbar--warning .jd2-sylbar__icon,
+.jd2-sylbar--warning .jd2-sylbar__title {
+    color: var(--ems-warning-800);
+}
+
+.jd2-sylbar--info {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-800);
+}
+
+.jd2-sylbar--info .jd2-sylbar__icon,
+.jd2-sylbar--info .jd2-sylbar__title {
+    color: var(--ems-primary-800);
+}
+
+/* ── «Sillabusa bax» düyməsi (jurnal tab zolağı + tələbə detalı) ─────────── */
+.sylv-open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-text-muted);
+    font-family: inherit;
+    font-size: 0.79rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sylv-open-btn:hover,
+.sylv-open-btn:focus-visible {
+    color: var(--ems-primary-700);
+    border-color: var(--ems-primary-200);
+}
+
+.sylv-open-btn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.sylv-open-btn--pdf {
+    color: var(--ems-danger-strong);
+}
+
+/* ── Oxu-rejimli panel ──────────────────────────────────────────────────── */
+.sylv[hidden] {
+    display: none;
+}
+
+.sylv {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+}
+
+.sylv__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+}
+
+.sylv__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(720px, 100%);
+    display: flex;
+    flex-direction: column;
+    background: var(--ems-neutral-0);
+    border-left: 1px solid var(--ems-border);
+    box-shadow: -18px 0 44px rgba(15, 23, 42, 0.16);
+}
+
+.sylv__head {
+    position: relative;
+    padding: 20px 56px 16px 24px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.sylv__ident {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sylv__code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.sylv__badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 11px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.sylv__badge[data-tone="approved"] {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.sylv__badge[data-tone="submitted"],
+.sylv__badge[data-tone="review"] {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.sylv__badge[data-tone="revision"] {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.sylv__badge[data-tone="rejected"] {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.sylv__version {
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.sylv__title {
+    margin: 0 0 4px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.sylv__meta {
+    margin: 0;
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+.sylv__x {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--ems-border);
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-text-muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.sylv__x:hover {
+    color: var(--ems-danger);
+}
+
+.sylv__note {
+    margin: 0;
+    padding: 11px 24px;
+    font-size: 0.73rem;
+    line-height: 1.5;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    border-bottom: 1px solid var(--ems-primary-200);
+}
+
+.sylv__note[hidden] {
+    display: none;
+}
+
+.sylv__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px 28px;
+}
+
+.sylv__loading,
+.sylv__error {
+    margin: 0;
+    padding: 22px 0;
+    text-align: center;
+    font-size: 0.83rem;
+    color: var(--ems-text-muted);
+}
+
+.sylv__error {
+    color: var(--ems-danger-strong);
+}
+
+.sylv__loading[hidden],
+.sylv__error[hidden] {
+    display: none;
+}
+
+.sylv-block {
+    padding: 0 0 16px;
+    margin: 0 0 16px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.sylv-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.sylv-block__title {
+    margin: 0 0 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-primary-700);
+}
+
+.sylv-block__body {
+    margin: 0;
+    font-size: 0.83rem;
+    line-height: 1.65;
+    color: var(--ems-text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.sylv__foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.sylv__pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 9px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.sylv__pdf:hover,
+.sylv__pdf:focus-visible {
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+.sylv__pdf[hidden] {
+    display: none;
+}
+
+.sylv__close-btn {
+    margin-left: auto;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 1px solid var(--ems-border);
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-text-muted);
+    font-family: inherit;
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sylv__close-btn:hover {
+    color: var(--ems-text);
+}
+
+@media (max-width: 640px) {
+    .jd2-sylbar {
+        flex-wrap: wrap;
+    }
+
+    .jd2-sylbar__cta {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sylv__panel {
+        width: 100%;
+    }
+}
+
+/* Düymənin yanındakı versiya çipi (v2.0) — jurnal tab zolağında. */
+.sylv-open-btn__ver {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: 0.71rem;
+    font-weight: 800;
+}
+
+/* Panel açıq ikən arxa fon sürüşməsin. */
+body.sylv-open {
+    overflow: hidden;
+}
+
+/* Tələbə fənn detalının başlığındakı əməl düymələri (sillabus + PDF). */
+.sjx-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}

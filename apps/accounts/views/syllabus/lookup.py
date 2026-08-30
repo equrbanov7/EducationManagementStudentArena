@@ -14,11 +14,18 @@ import uuid
 
 
 def safe_uuid(raw):
-    """Sorğudakı xam mətni UUID-ə çevirir; yanlış formatda ``None`` qaytarır.
+    """Xam dəyəri UUID-ə çevirir; yanlış formatda ``None`` qaytarır.
 
     Filtrdə xam mətn işlətsək Django ``ValidationError`` atır və istifadəçi 500
     görür — sorğu parametri istifadəçi girişidir, ona görə burada süzülür.
+
+    ⚠️ ``uuid.UUID(<UUID>)`` ``TypeError`` atır: URL-də ``<uuid:…>`` konvertoru
+    ARTIQ ``UUID`` obyekti verir, sorğu sətri isə mətn. İkisi də bu funksiyaya
+    gəlir, ona görə hazır UUID olduğu kimi qaytarılır (əks halda endpoint
+    səssizcə 404 verirdi).
     """
+    if isinstance(raw, uuid.UUID):
+        return raw
     try:
         return uuid.UUID(raw)
     except (ValueError, AttributeError, TypeError):
@@ -47,11 +54,7 @@ def resolve_editor_version(request, organization):
 
     version_id = safe_uuid((request.GET.get("version") or "").strip())
     if version_id is not None:
-        return (
-            SyllabusVersion.objects.filter(organization=organization, pk=version_id)
-            .select_related(*related)
-            .first()
-        )
+        return SyllabusVersion.objects.filter(organization=organization, pk=version_id).select_related(*related).first()
 
     syllabus_id = safe_uuid((request.GET.get("syllabus") or "").strip())
     if syllabus_id is None:

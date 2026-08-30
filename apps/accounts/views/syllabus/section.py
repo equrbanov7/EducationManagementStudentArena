@@ -121,7 +121,8 @@ def _chair_units(syllabi):
     return sorted(rows, key=lambda item: item["label"])
 
 
-def _filter_options(organization):
+def academic_filter_options(organization):
+    """(illər, semestrlər) — siyahı və təsdiq ekranı EYNİ açılışı işlədir."""
     from apps.organizations.models import AcademicPeriod
 
     periods = list(
@@ -249,7 +250,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
 
     paginator = Paginator(rows, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
-    years, seasons = _filter_options(organization)
+    years, seasons = academic_filter_options(organization)
 
     return {
         "syllabus_list_section": {
@@ -294,4 +295,4 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     }
 
 
-__all__ = ["ACCESS_DENIED", "PAGE_SIZE", "SORT_LABELS", "build_syllabus_list_section"]
+__all__ = ["ACCESS_DENIED", "PAGE_SIZE", "SORT_LABELS", "academic_filter_options", "build_syllabus_list_section"]

@@ -2,7 +2,15 @@
 
 from django.urls import path
 
-from . import analytics_views, console_views, correction_views, journal_actions, pdf_views, views
+from . import (
+    analytics_views,
+    console_views,
+    correction_views,
+    journal_actions,
+    pdf_views,
+    syllabus_views,
+    views,
+)
 
 app_name = "registrar"
 
@@ -42,6 +50,17 @@ urlpatterns = [
     path("idareetme/telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
     path("<uuid:offering_id>/rubrik/<uuid:component_id>/", views.rubric_grade_view, name="rubric_grade"),
     path("<uuid:offering_id>/export.xlsx", pdf_views.journal_xlsx, name="journal_xlsx"),
+    # «Sillabusa bax» — jurnal (müəllim) və kabinet (tələbə) üçün ORTAQ oxu səthi.
+    path(
+        "<uuid:offering_id>/sillabus.json",
+        syllabus_views.offering_syllabus_json,
+        name="offering_syllabus_json",
+    ),
+    path(
+        "<uuid:offering_id>/sillabus.pdf",
+        syllabus_views.offering_syllabus_pdf,
+        name="offering_syllabus_pdf",
+    ),
     path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
     path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),

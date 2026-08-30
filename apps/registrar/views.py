@@ -109,7 +109,7 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_close_notices, journal_extras
+    from apps.registrar import journal_close_notices, journal_extras, syllabus_notice
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections_service.corrections_map_for_offering(offering)
@@ -146,6 +146,9 @@ def journal_detail(request, offering_id):
         "journal_locked": journal_locked,
         # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).
         "journal_close_notice": journal_close_notices.journal_banner(offering, today),
+        # Sillabus vəziyyəti: xəbərdarlıq zolağı + «Sillabusa bax» keçidi.
+        # ⚠️ Jurnalı KİLİDLƏMİR — yalnız məlumat verir (bax syllabus_notice.py).
+        "syllabus_notice": syllabus_notice.journal_syllabus_notice(offering),
         "grade_history": grade_audit.get_grade_history(offering=offering),
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),

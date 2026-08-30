@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}Sillabus vəziyyət zolağı (müəllim jurnalı).
+
+Kontekst: `syllabus_notice` — apps/registrar/syllabus_notice.py.
+Vəziyyətlər: missing / draft / pending / revision / rejected / archived.
+APPROVED-da bu blok GÖSTƏRİLMİR (`show_banner` False) — dizayn tələbi:
+təsdiqlənmiş halda banner yox, yalnız «Sillabusa bax» keçidi.
+
+⚠️ Bu zolaq jurnalı KİLİDLƏMİR — yalnız xəbərdarlıq + keçid.
+Rəng birbaşa yazılmır: ton adı (`is-danger`/`is-warning`/`is-info`) CSS-də
+`--ems-*` tokenlərinə bağlanır (syllabus_view.css).
+{% endcomment %}
+{% if syllabus_notice.show_banner %}
+<div class="jd2-sylbar jd2-sylbar--{{ syllabus_notice.tone }}" role="status" aria-live="polite">
+    <i class="fas fa-file-lines jd2-sylbar__icon" aria-hidden="true"></i>
+    <div class="jd2-sylbar__text">
+        <b class="jd2-sylbar__title">{{ syllabus_notice.title }}</b>
+        <span class="jd2-sylbar__msg">{{ syllabus_notice.message }}</span>
+        {% if syllabus_notice.reason %}
+        <span class="jd2-sylbar__reason">
+            <b>{{ syllabus_notice.reason_label }}:</b> {{ syllabus_notice.reason }}
+        </span>
+        {% endif %}
+        {% if syllabus_notice.has_approved and syllabus_notice.state == 'pending' %}
+        <span class="jd2-sylbar__hint">
+            {% trans "Tələbələr bu müddətdə əvvəlki təsdiqlənmiş versiyanı görməyə davam edir." context "registrar.syllabus" %}
+        </span>
+        {% endif %}
+    </div>
+    <a class="jd2-sylbar__cta" href="{{ syllabus_notice.action_url }}">
+        {{ syllabus_notice.action_label }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+</div>
+{% endif %}

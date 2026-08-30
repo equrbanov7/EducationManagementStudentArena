@@ -126,9 +126,7 @@ SECTION_META = {
     SectionKey.PREV.value: (
         pgettext_lazy(_CTX, "Yekun görünüş"),
         pgettext_lazy(_CTX, "Yekun görünüş"),
-        pgettext_lazy(
-            _CTX, "Sillabusun yekun görünüşü. Bu görünüş tələbə kabinetində və kafedra baxışında eynidir."
-        ),
+        pgettext_lazy(_CTX, "Sillabusun yekun görünüşü. Bu görünüş tələbə kabinetində və kafedra baxışında eynidir."),
     ),
     SectionKey.SEND.value: (
         pgettext_lazy(_CTX, "Təsdiqə göndərmə"),
@@ -379,12 +377,14 @@ def _summary(*, syllabus, version, panels, completion, hours, selfwork_view, sec
             "value": str(_UNIT_WEEKS) % {"have": len(weeks), "total": WEEK_ROWS},
             "tone": "default",
         },
-        {"label": _SUMMARY_LABELS["methods"], "value": str(_UNIT_SELECTED) % {"count": len(methods)}, "tone": "default"},
+        {
+            "label": _SUMMARY_LABELS["methods"],
+            "value": str(_UNIT_SELECTED) % {"count": len(methods)},
+            "tone": "default",
+        },
         {
             "label": _SUMMARY_LABELS["selfwork"],
-            "value": (
-                f"{selfwork_view['option']}" if selfwork_view["option"] else str(_NOT_SELECTED)
-            ),
+            "value": (f"{selfwork_view['option']}" if selfwork_view["option"] else str(_NOT_SELECTED)),
             "tone": "default" if selfwork_view["option"] else bad,
         },
         {"label": _SUMMARY_LABELS["assessment"], "value": _UNIT_POINTS, "tone": ok},
@@ -478,18 +478,16 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
                 "issue_count": issue_counts.get(row["id"], 0),
             }
         )
-        panels[row["id"]] = (
-            {
-                "id": row["id"],
-                "index": index,
-                "title": title,
-                "hint": hint,
-                "is_rule": row["is_rule_section"],
-                "is_complete": row["is_complete"],
-                "data": row["data"] or {},
-                "revision": row["revision"],
-            }
-        )
+        panels[row["id"]] = {
+            "id": row["id"],
+            "index": index,
+            "title": title,
+            "hint": hint,
+            "is_rule": row["is_rule_section"],
+            "is_complete": row["is_complete"],
+            "data": row["data"] or {},
+            "revision": row["revision"],
+        }
 
     week_rows = _week_rows(section_map.get(SectionKey.WEEK.value, {}))
     hours = _hour_totals(week_rows, context["plan_hours"])
@@ -551,7 +549,10 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "selfwork": selfwork_view,
             "assessment": _assessment(section_map.get(SectionKey.ASSESS.value, {})),
             "methods": [
-                {"label": label, "active": str(label) in {str(x) for x in (section_map.get("method", {}).get("methods") or [])}}
+                {
+                    "label": label,
+                    "active": str(label) in {str(x) for x in (section_map.get("method", {}).get("methods") or [])},
+                }
                 for label in context["teaching_methods"]
             ],
             "limits": {
