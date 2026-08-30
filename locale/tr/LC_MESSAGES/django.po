@@ -35590,3 +35590,63 @@ msgstr "Banka yalnızca size görünür — kişisel kullanımınız içindir."
 msgctxt "exams.template.question_bank_list"
 msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
 msgstr "Banka diğer öğretmenlere görünmez — yalnızca siz ve sınav merkezi görebilir."
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə yekun cədvəli"
+msgstr "Eski sonuç tablosu"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan xanası"
+msgstr "Eski sınav hücresi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə təkrar imtahan xanası"
+msgstr "Eski bütünleme hücresi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan giriş/çıxış cəhdi"
+msgstr "Eski sınav giriş/çıkış denemesi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemin xüsusi bal kodu"
+msgstr "Eski sistemin özel not kodu"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən təsdiqlənib"
+msgstr "Sınav Merkezi tarafından onaylandı"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən mübahisələndirilib"
+msgstr "Sınav Merkezi tarafından itiraz edildi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla uyğunlaşdırılıb"
+msgstr "Kayıtla eşleştirildi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Tarixi qrup uyğunsuzluğu var"
+msgstr "Geçmiş grup uyuşmazlığı var"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemdə silinmiş jurnal mənbəyidir"
+msgstr "Kaynak, eski sistemde silinmiş bir defterdir"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla avtomatik uyğunlaşdırılmayıb"
+msgstr "Kayıtla otomatik eşleştirilmedi"
+
+msgctxt "registrar.legacy_grade"
+msgid "Mənbə sətirləri arasında ziddiyyət var"
+msgstr "Kaynak satırları birbiriyle çelişiyor"
+
+msgctxt "registrar.legacy_grade"
+msgid "Uyğunlaşdırma yoxlanmalıdır"
+msgstr "Eşleştirme gözden geçirilmeli"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzinin yoxlaması gözlənilir"
+msgstr "Sınav Merkezi incelemesi bekleniyor"
+
+msgctxt "registrar.legacy_grade"
+msgid "Düzəliş tələb olunur"
+msgstr "Düzeltme gerekiyor"

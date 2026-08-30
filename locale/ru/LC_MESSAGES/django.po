@@ -35970,3 +35970,63 @@ msgstr "Банк виден только вам — для личного исп
 msgctxt "exams.template.question_bank_list"
 msgid "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir."
 msgstr "Банк не виден другим преподавателям — его видите только вы и экзаменационный центр."
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə yekun cədvəli"
+msgstr "Старая итоговая таблица"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan xanası"
+msgstr "Старая экзаменационная ячейка"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə təkrar imtahan xanası"
+msgstr "Старая ячейка пересдачи"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə imtahan giriş/çıxış cəhdi"
+msgstr "Старая попытка входного/выходного балла"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemin xüsusi bal kodu"
+msgstr "Особый код оценки старой системы"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən təsdiqlənib"
+msgstr "Подтверждено Экзаменационным центром"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzi tərəfindən mübahisələndirilib"
+msgstr "Оспорено Экзаменационным центром"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla uyğunlaşdırılıb"
+msgstr "Сопоставлено с записью"
+
+msgctxt "registrar.legacy_grade"
+msgid "Tarixi qrup uyğunsuzluğu var"
+msgstr "Несовпадение исторической группы"
+
+msgctxt "registrar.legacy_grade"
+msgid "Köhnə sistemdə silinmiş jurnal mənbəyidir"
+msgstr "Источник — журнал, удалённый в старой системе"
+
+msgctxt "registrar.legacy_grade"
+msgid "Qeydiyyatla avtomatik uyğunlaşdırılmayıb"
+msgstr "Не сопоставлено с записью автоматически"
+
+msgctxt "registrar.legacy_grade"
+msgid "Mənbə sətirləri arasında ziddiyyət var"
+msgstr "Исходные строки противоречат друг другу"
+
+msgctxt "registrar.legacy_grade"
+msgid "Uyğunlaşdırma yoxlanmalıdır"
+msgstr "Сопоставление требует проверки"
+
+msgctxt "registrar.legacy_grade"
+msgid "İmtahan Mərkəzinin yoxlaması gözlənilir"
+msgstr "Ожидает проверки Экзаменационного центра"
+
+msgctxt "registrar.legacy_grade"
+msgid "Düzəliş tələb olunur"
+msgstr "Требуется исправление"

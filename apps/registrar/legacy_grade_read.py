@@ -11,6 +11,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.db.models import Prefetch
+from django.utils.translation import pgettext_lazy
 
 from apps.registrar.models import (
     LegacyGradeEvidenceKind,
@@ -20,26 +21,33 @@ from apps.registrar.models import (
 )
 
 _KIND_LABELS = {
-    LegacyGradeEvidenceKind.SUMMARY: "Köhnə yekun cədvəli",
-    LegacyGradeEvidenceKind.EXAM: "Köhnə imtahan xanası",
-    LegacyGradeEvidenceKind.RESIT: "Köhnə təkrar imtahan xanası",
-    LegacyGradeEvidenceKind.EXAM_ENTRY_EXIT: "Köhnə imtahan giriş/çıxış cəhdi",
-    LegacyGradeEvidenceKind.OTHER: "Köhnə sistemin xüsusi bal kodu",
+    LegacyGradeEvidenceKind.SUMMARY: pgettext_lazy("registrar.legacy_grade", "Köhnə yekun cədvəli"),
+    LegacyGradeEvidenceKind.EXAM: pgettext_lazy("registrar.legacy_grade", "Köhnə imtahan xanası"),
+    LegacyGradeEvidenceKind.RESIT: pgettext_lazy("registrar.legacy_grade", "Köhnə təkrar imtahan xanası"),
+    LegacyGradeEvidenceKind.EXAM_ENTRY_EXIT: pgettext_lazy("registrar.legacy_grade", "Köhnə imtahan giriş/çıxış cəhdi"),
+    LegacyGradeEvidenceKind.OTHER: pgettext_lazy("registrar.legacy_grade", "Köhnə sistemin xüsusi bal kodu"),
 }
 
 _REVIEW_LABELS = {
-    LegacyGradeReviewDecision.VERIFIED: "İmtahan Mərkəzi tərəfindən təsdiqlənib",
-    LegacyGradeReviewDecision.DISPUTED: "İmtahan Mərkəzi tərəfindən mübahisələndirilib",
-    LegacyGradeReviewDecision.CORRECTION_REQUIRED: "Düzəliş tələb olunur",
+    LegacyGradeReviewDecision.VERIFIED: pgettext_lazy(
+        "registrar.legacy_grade", "İmtahan Mərkəzi tərəfindən təsdiqlənib"
+    ),
+    LegacyGradeReviewDecision.DISPUTED: pgettext_lazy(
+        "registrar.legacy_grade", "İmtahan Mərkəzi tərəfindən mübahisələndirilib"
+    ),
+    LegacyGradeReviewDecision.CORRECTION_REQUIRED: pgettext_lazy("registrar.legacy_grade", "Düzəliş tələb olunur"),
 }
 
 _MAPPING_LABELS = {
-    "linked": "Qeydiyyatla uyğunlaşdırılıb",
-    "group_mismatch": "Tarixi qrup uyğunsuzluğu var",
-    "discarded_source": "Köhnə sistemdə silinmiş jurnal mənbəyidir",
-    "unresolved": "Qeydiyyatla avtomatik uyğunlaşdırılmayıb",
-    "conflict": "Mənbə sətirləri arasında ziddiyyət var",
+    "linked": pgettext_lazy("registrar.legacy_grade", "Qeydiyyatla uyğunlaşdırılıb"),
+    "group_mismatch": pgettext_lazy("registrar.legacy_grade", "Tarixi qrup uyğunsuzluğu var"),
+    "discarded_source": pgettext_lazy("registrar.legacy_grade", "Köhnə sistemdə silinmiş jurnal mənbəyidir"),
+    "unresolved": pgettext_lazy("registrar.legacy_grade", "Qeydiyyatla avtomatik uyğunlaşdırılmayıb"),
+    "conflict": pgettext_lazy("registrar.legacy_grade", "Mənbə sətirləri arasında ziddiyyət var"),
 }
+
+_MAPPING_LABEL_FALLBACK = pgettext_lazy("registrar.legacy_grade", "Uyğunlaşdırma yoxlanmalıdır")
+_REVIEW_LABEL_FALLBACK = pgettext_lazy("registrar.legacy_grade", "İmtahan Mərkəzinin yoxlaması gözlənilir")
 
 
 def _decimal_text(value: Decimal | None) -> str:
@@ -81,9 +89,9 @@ def _fact_dict(fact) -> dict:
         "legacy_attempt_type": fact.legacy_attempt_type,
         "legacy_recorded_at": fact.legacy_recorded_at_text,
         "mapping_status": fact.mapping_status,
-        "mapping_label": _MAPPING_LABELS.get(fact.mapping_status, "Uyğunlaşdırma yoxlanmalıdır"),
+        "mapping_label": _MAPPING_LABELS.get(fact.mapping_status, _MAPPING_LABEL_FALLBACK),
         "review_status": decision,
-        "review_label": _REVIEW_LABELS.get(decision, "İmtahan Mərkəzinin yoxlaması gözlənilir"),
+        "review_label": _REVIEW_LABELS.get(decision, _REVIEW_LABEL_FALLBACK),
         "review_required": review_required,
     }
 
