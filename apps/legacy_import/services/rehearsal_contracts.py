@@ -64,20 +64,23 @@ _CLAIMABLE_ACTIONS = frozenset(
     }
 )
 # Pinned against the shipped registry: AcademicStructurePhase (order 10),
-# AcademicCatalogPhase (12), IdentityCohortPhase (20), StudentPlacementPhase
-# (25), WorkerMaterialisationPhase (26), SarMaterialisationPhase (28),
-# JournalPeriodsPhase (32), JournalOfferingsPhase (34),
-# JournalEnrollmentsPhase (36), JournalLessonsPhase (38), JournalMarksPhase
+# AcademicCatalogPhase (12), LegacyRoomsPhase (13), IdentityCohortPhase (20),
+# StudentPlacementPhase (25), WorkerMaterialisationPhase (26),
+# SarMaterialisationPhase (28), JournalPeriodsPhase (32),
+# JournalOfferingsPhase (34), JournalEnrollmentsPhase (36),
+# JournalLessonsPhase (38), JournalLessonMetaPhase (39), JournalMarksPhase
 # (40), JournalComponentsPhase (42), JournalEntryScoresPhase (43),
 # JournalFinalsPhase (44), JournalSelfWorkPhase (45), JournalLockPhase (46),
 # LegacyGradeFactsPhase (47), JournalReconcilePhase (48) və
 # LegacyGradeArtifactsPhase (49). J9 (45) sillabus domeninin İLK fazasıdır;
 # 30 rezervi jurnaldan ASILI OLMAYAN sillabus işi üçün açıq qalır (J9 açılışa
-# bağlıdır, ona görə J1-dən sonra oturmalıdır).
+# bağlıdır, ona görə J1-dən sonra oturmalıdır).  J11 (39) QƏSDƏN J4-dən (40)
+# əvvəldədir: dərs saatı düzəlməmiş ``recompute_absence_hours`` saxta qayıb
+# blokları yazardı.
 # Re-pin ONLY by running ``compute_phase_registry_fingerprint`` over the direct
 # tuple — never over ``load_rehearsal_phase_registry``, which checks itself
 # against this constant.
-_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "61fa24d9415a3c96473b16d19b33edf5cb4d5a9f797a5e643329e49c0e5dee5c"
+_EXPECTED_PHASE_REGISTRY_FINGERPRINT = "f6f2ad826a28f9fea24b552c80857554e41e3ca5334d955c3ea06dcfb9cfb0af"
 
 
 class LegacyRehearsalError(Exception):
@@ -548,24 +551,27 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
     from .rehearsal_journal_selfwork_phase import JournalSelfWorkPhase
     from .rehearsal_legacy_grade_artifacts_phase import LegacyGradeArtifactsPhase
     from .rehearsal_legacy_grade_facts_phase import LegacyGradeFactsPhase
+    from .rehearsal_lesson_meta_phase import JournalLessonMetaPhase
+    from .rehearsal_lesson_rooms_phase import LegacyRoomsPhase
     from .rehearsal_placement_phase import StudentPlacementPhase
     from .rehearsal_sar_phase import SarMaterialisationPhase
     from .rehearsal_structure_phase import AcademicStructurePhase
     from .rehearsal_worker_phase import WorkerMaterialisationPhase
 
     plan = load_legacy_table_plan()
-    # Strictly ascending ``order``: 10 structure < 12 catalog < 20 identity
-    # < 25 placement < 26 worker < 28 sar < 32 journal_periods
+    # Strictly ascending ``order``: 10 structure < 12 catalog < 13 legacy_rooms
+    # < 20 identity < 25 placement < 26 worker < 28 sar < 32 journal_periods
     # < 34 journal_offerings < 36 journal_enrollments < 38 journal_lessons
-    # < 40 journal_marks < 42 journal_components < 43 journal_entry_scores
-    # < 44 journal_finals < 45 journal_selfwork < 46 journal_lock
-    # < 47 legacy_grade_facts < 48 journal_reconcile
+    # < 39 journal_lesson_meta < 40 journal_marks < 42 journal_components
+    # < 43 journal_entry_scores < 44 journal_finals < 45 journal_selfwork
+    # < 46 journal_lock < 47 legacy_grade_facts < 48 journal_reconcile
     # < 49 legacy_grade_artifacts
     # (30 stays reserved for the syllabus domain).
     phases = validate_rehearsal_phases(
         (
             AcademicStructurePhase(),
             AcademicCatalogPhase(),
+            LegacyRoomsPhase(),
             IdentityCohortPhase(),
             StudentPlacementPhase(),
             WorkerMaterialisationPhase(),
@@ -574,6 +580,7 @@ def load_rehearsal_phase_registry() -> tuple[RehearsalPhase, ...]:
             JournalOfferingsPhase(),
             JournalEnrollmentsPhase(),
             JournalLessonsPhase(),
+            JournalLessonMetaPhase(),
             JournalMarksPhase(),
             JournalComponentsPhase(),
             JournalEntryScoresPhase(),

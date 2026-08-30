@@ -80,13 +80,20 @@ class JournalSealer:
         )
 
     def recorded_decisions(self, context) -> dict[str, tuple[str, str, str]]:
-        """Bu run-un BÜTÜN möhürləri — jurnal-səviyyə açar sayı minlərlədir."""
+        """Bu run-un BÜTÜN möhürləri — jurnal-səviyyə açar sayı minlərlədir.
 
+        ``.iterator()`` QƏSDƏNdir (J3-ün eyni köməkçisi ilə üst-üstə düşür):
+        J11 (``journal_lesson_meta``) slot-səviyyə açarlar işlədir və canlı
+        ölçüdə say yüz minlərlədir — nəticə keşi ilə dict eyni anda yaddaşda
+        qalsaydı, kəsilmiş run-un resume-u iki dəfə çox yer tutardı.
+        """
+
+        rows = LegacyEntityObservation.objects.filter(
+            run_id=context.run_id, entity_map__entity_type=self.entity_type
+        ).values_list("entity_map__legacy_pk", "state", "source_row_hash", "target_model_label")
         return {
             legacy_pk: (state, row_hash, label)
-            for legacy_pk, state, row_hash, label in LegacyEntityObservation.objects.filter(
-                run_id=context.run_id, entity_map__entity_type=self.entity_type
-            ).values_list("entity_map__legacy_pk", "state", "source_row_hash", "target_model_label")
+            for legacy_pk, state, row_hash, label in rows.iterator(chunk_size=10_000)
         }
 
     def seal(self, context, *, seal_key: str, digest: str, state: str, label: str = "", target_pk: str = ""):
