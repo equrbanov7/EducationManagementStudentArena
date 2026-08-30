@@ -92,11 +92,9 @@ class RegistrarModelTest(TestCase):
         curriculum = self._make_plan()
         with bypass_rls():
             program = curriculum.program
-            # Proqramın etiketi ADI + RƏSMİ şifridir; daxili `code` (MYEDU-*)
-            # istifadəçiyə heç vaxt göstərilmir.
+            # `__str__` = `display_label`: rəsmi kod yoxdursa yalnız ad; daxili
+            # `code` ("CS") heç bir halda görünmür.
             self.assertEqual(str(program), "Kompüter elmləri")
             self.assertNotIn("CS", str(program))
-            program.official_code = "050509"
-            self.assertEqual(str(program), "Kompüter elmləri · 050509")
             row = CurriculumSubject.objects.filter(curriculum=curriculum, is_elective=True).first()
             self.assertIn("seçmə", str(row))

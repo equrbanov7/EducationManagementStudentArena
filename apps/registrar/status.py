@@ -38,7 +38,7 @@ def audit_status_change(*, record, previous, by_user=None, reason="") -> None:
             action=AuditAction.UPDATE,
             resource_type="registrar.student_status",
             resource_id=str(record.pk),
-            resource_repr=f"{record.student_id} · {record.program.code}",
+            resource_repr=f"{record.student_id} · {record.program.display_label}",
             reason=reason or f"Akademik status: {previous} → {record.status}",
         )
     except Exception:  # noqa: BLE001 — audit must never block the domain action

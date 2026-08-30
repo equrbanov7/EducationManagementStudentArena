@@ -5,7 +5,9 @@ Kafedra > İxtisas > Qrup" tək sətirli breadcrumb kimi göstərilirdi (çirkin
 Həll: hər səviyyə AYRICA kart. Bu modul köməkçinin müqaviləsini kilidləyir:
 
 * hər səviyyə (fakültə/kafedra/ixtisas/qrup) sıra ilə (kök→yarpaq) gəlir;
-* İxtisas AYRICA ``record.program``-dan qurulur (ad + ``Program.code``) —
+* İxtisas AYRICA ``record.program``-dan qurulur (ad + ``Program.official_code``
+  — RƏSMİ dövlət ixtisas kodu; daxili ``Program.code`` köçürmənin ``MYEDU-*``
+  açarıdır və heç bir səthdə göstərilmir) —
   ``record.group``-un əcdad zəncirindəki specialty node-a etibar edilmir,
   çünki tenant-a görə bu node YA yoxdur, YA da adı proqramla üst-üstə
   düşməyə bilər (bax [[project_group_sector_variability]]);
@@ -48,10 +50,11 @@ class BuildStudentStructureLevelsTest(TestCase):
                 is_active=True,
             )
 
-    def _record(self, *, group=None, specialty_unit=None, code="COD-1"):
+    def _record(self, *, group=None, specialty_unit=None, code="MYEDU-1", official_code="060209"):
         program = Program.objects.create(
             organization=self.org,
             code=code,
+            official_code=official_code,
             name="Test İxtisası",
             specialty_unit=specialty_unit,
         )
@@ -82,7 +85,7 @@ class BuildStudentStructureLevelsTest(TestCase):
         group = OrgUnit.objects.create(
             organization=self.org, name="Qrup A", slug="sl-group-a", unit_type=OrgUnitType.GROUP, parent=specialty
         )
-        record = self._record(group=group, specialty_unit=specialty, code="FUL-001")
+        record = self._record(group=group, specialty_unit=specialty, code="MYEDU-11", official_code="050201")
 
         levels = build_student_structure_levels(record)
 
@@ -99,7 +102,7 @@ class BuildStudentStructureLevelsTest(TestCase):
         self.assertEqual(levels[1]["value"], "Kafedra A")
         # Specialty node-un öz adı yox, proqramın adı + kodu göstərilir.
         self.assertEqual(levels[2]["value"], "Test İxtisası")
-        self.assertEqual(levels[2]["code"], "FUL-001")
+        self.assertEqual(levels[2]["code"], "050201")
         self.assertEqual(levels[3]["value"], "Qrup A")
         self.assertEqual(levels[3]["code"], "")
 
@@ -112,7 +115,7 @@ class BuildStudentStructureLevelsTest(TestCase):
         group = OrgUnit.objects.create(
             organization=self.org, name="Qrup B", slug="sl-group-b", unit_type=OrgUnitType.GROUP, parent=chair
         )
-        record = self._record(group=group, code="NOSPEC-1")
+        record = self._record(group=group, code="MYEDU-22", official_code="050620")
 
         levels = build_student_structure_levels(record)
 
@@ -125,25 +128,27 @@ class BuildStudentStructureLevelsTest(TestCase):
             ],
         )
         self.assertEqual(levels[1]["value"], "Test İxtisası")
-        self.assertEqual(levels[1]["code"], "NOSPEC-1")
+        self.assertEqual(levels[1]["code"], "050620")
 
     def test_no_group_shows_only_program_card(self):
-        record = self._record(group=None, code="ALONE-1")
+        record = self._record(group=None, code="MYEDU-33", official_code="060209")
 
         levels = build_student_structure_levels(record)
 
         self.assertEqual(len(levels), 1)
         self.assertEqual(levels[0]["unit_type"], OrgUnitType.SPECIALTY)
         self.assertEqual(levels[0]["value"], "Test İxtisası")
-        self.assertEqual(levels[0]["code"], "ALONE-1")
+        self.assertEqual(levels[0]["code"], "060209")
 
     def test_missing_program_code_omits_code_without_blank_placeholder(self):
         group = OrgUnit.objects.create(
             organization=self.org, name="Qrup C", slug="sl-group-c", unit_type=OrgUnitType.GROUP
         )
-        record = self._record(group=group, code="")
+        record = self._record(group=group, code="MYEDU-44", official_code="")
 
         levels = build_student_structure_levels(record)
 
         specialty_level = next(lvl for lvl in levels if lvl["unit_type"] == OrgUnitType.SPECIALTY)
         self.assertEqual(specialty_level["code"], "")
+        # Rəsmi kod boş olanda DAXİLİ kod əvəzedici kimi sızmır.
+        self.assertNotIn("MYEDU", str(specialty_level))

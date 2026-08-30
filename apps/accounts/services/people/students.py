@@ -88,7 +88,7 @@ def visible_students_qs(actor, *, request=None, filters=None):
             group_id=Subquery(picked.values("group_id")[:1]),
             group_name=Subquery(picked.values("group__name")[:1]),
             program_name=Subquery(picked.values("program__name")[:1]),
-            program_code=Subquery(picked.values("program__code")[:1]),
+            program_code=Subquery(picked.values("program__official_code")[:1]),
             admission_year=Subquery(picked.values("admission_year")[:1]),
             academic_status=Subquery(picked.values("status")[:1]),
         )
@@ -174,7 +174,7 @@ def build_students_page(*, actor, filters, request=None, today=None) -> dict:
                 "kind": "student",
                 "group_name": getattr(user, "group_name", "") or "",
                 "program_name": program_name,
-                "program_label": f"{program_code} — {program_name}".strip(" —") if program_name else "",
+                "program_label": f"{program_name} · {program_code}" if program_code else program_name,
                 "admission_year": getattr(user, "admission_year", None),
                 "academic_status": getattr(user, "academic_status", "") or "",
                 "faculty_name": unit.get("faculty", ""),

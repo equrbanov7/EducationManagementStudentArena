@@ -149,7 +149,7 @@ def build_document(syllabus, version) -> dict:
     return {
         "code": syllabus.subject.code,
         "name": syllabus.subject.name,
-        "program": syllabus.program.name if syllabus.program_id else "",
+        "program": syllabus.program.display_label if syllabus.program_id else "",
         "period": (f"{syllabus.period.year_display} · {syllabus.period.name}" if syllabus.period_id else ""),
         "version": version.label if version is not None else "—",
         "status": status,

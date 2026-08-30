@@ -39654,3 +39654,17 @@ msgstr "Силлабусы"
 #~ msgctxt "registrar.journal"
 #~ msgid "Keçir"
 #~ msgstr "Проходит"
+msgid "%(name)s — versiya rədd edildi. Tələbələr köhnə təsdiqlənmiş versiyanı görür."
+msgstr "%(name)s — версия отклонена. Студенты видят ранее утверждённую версию."
+
+msgctxt "registrar.console"
+msgid "Daxili kod"
+msgstr "Внутренний код"
+
+msgctxt "registrar.console"
+msgid "Rəsmi ixtisas kodu"
+msgstr "Официальный код специальности"
+
+msgctxt "registrar.console"
+msgid "Rəsmi dövlət ixtisas kodu — məsələn 060209. İstifadəçilərə ixtisas adının yanında bu kod göstərilir. Eyni kod bir neçə ixtisasda təkrarlana bilər."
+msgstr "Официальный государственный код специальности — например 060209. Он показывается пользователям рядом с названием специальности. Один и тот же код может повторяться у нескольких специальностей."

@@ -1479,7 +1479,11 @@ class ProfileViewTest(TestCase):
             parent=specialty,
         )
         program = Program.objects.create(
-            organization=organization, code="STR-047", name="Struktur İxtisası", specialty_unit=specialty
+            organization=organization,
+            code="MYEDU-STR",
+            official_code="STR-047",
+            name="Struktur İxtisası",
+            specialty_unit=specialty,
         )
         curriculum = Curriculum.objects.create(organization=organization, program=program, admission_year=2024)
 
@@ -1508,9 +1512,11 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Struktur Fakültəsi")
         self.assertContains(response, "Struktur Kafedrası")
         self.assertContains(response, "STR-101")
-        # İxtisas kartı proqramdan (ad + kod) qurulur, specialty node-dan yox.
+        # İxtisas kartı proqramdan (ad + RƏSMİ kod) qurulur, specialty node-dan yox.
         self.assertContains(response, "Struktur İxtisası")
         self.assertContains(response, "STR-047")
+        # Daxili köçürmə açarı ("MYEDU-*") istifadəçi səthinə sızmır.
+        self.assertNotContains(response, "MYEDU-STR")
         self.assertContains(response, "profile-structure-card")
 
     def test_profile_info_handles_many_student_groups_without_breaking(self):

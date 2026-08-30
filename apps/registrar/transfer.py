@@ -48,7 +48,7 @@ def _audit(record, old_group, new_group, moved, created, by_user, reason, old_id
         action=AuditAction.UPDATE,
         resource_type="registrar.group_transfer",
         resource_id=str(record.pk),
-        resource_repr=f"{record.student_id} · {record.program.code}",
+        resource_repr=f"{record.student_id} · {record.program.display_label}",
         old_values={"group_id": str(getattr(old_group, "pk", "") or "")},
         new_values={"group_id": str(new_group.pk)},
         changes={
