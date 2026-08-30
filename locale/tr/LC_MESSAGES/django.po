@@ -36217,3 +36217,63 @@ msgstr "Bu bölümdeki yetkileriniz"
 msgctxt "accounts.people"
 msgid "Bu bölmə üçün icazəniz yoxdur."
 msgstr "Bu bölüm için yetkiniz yok."
+msgctxt "organizations.unit_detail"
+msgid "Aktiv müəllim"
+msgstr "Aktif öğretmenler"
+
+msgctxt "organizations.unit_detail"
+msgid "İndiyə kimi müəllim"
+msgstr "Bugüne kadarki öğretmenler"
+
+msgctxt "organizations.unit_detail"
+msgid "Cari ilin açılışı"
+msgstr "Bu yılın açılan dersleri"
+
+msgctxt "organizations.unit_detail"
+msgid "Tədris ili üzrə açılışlar"
+msgstr "Akademik yıla göre açılan dersler"
+
+msgctxt "organizations.unit_detail"
+msgid "Bu fakültəyə hələ kafedra bağlanmayıb."
+msgstr "Bu fakülteye henüz hiçbir bölüm bağlanmadı."
+
+msgctxt "organizations.unit_detail"
+msgid "Müəllim axtar…"
+msgstr "Öğretmen ara…"
+
+msgctxt "organizations.unit_detail"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "Uygun öğretmen bulunamadı."
+
+msgctxt "organizations.unit_detail"
+msgid "Hələ müəllim təyin edilməyib."
+msgstr "Henüz öğretmen atanmadı."
+
+msgctxt "organizations.unit_detail"
+msgid "Yüklənə bilmədi. Yenidən cəhd edin."
+msgstr "Yüklenemedi. Lütfen tekrar deneyin."
+
+msgctxt "organizations.unit_detail"
+msgid "Struktur yolu"
+msgstr "Yapı yolu"
+
+msgid "Passiv"
+msgstr "Pasif"
+
+msgid "Müəllimlər"
+msgstr "Öğretmenler"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s aktiv"
+msgstr "%(n)s aktif"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s indiyə kimi"
+msgstr "%(n)s (bugüne kadar)"
+
+#, python-format
+msgctxt "organizations.unit_detail"
+msgid "%(n)s daha"
+msgstr "%(n)s daha fazla"

@@ -1,0 +1,344 @@
+/* =========================================================================
+   org_unit_detail.css — "Ətraflı bax" modalı + kafedra/fakültə siyahısındakı
+   yeni müəllim sayğacı (aktiv/indiyə kimi) və avatar-önizləmə stilləri.
+
+   `org_management.css`-in davamıdır (eyni --ems-* tokenlər, eyni
+   `.org-management__*` adlandırma qaydası) — ayrı fayldadır ki, mövcud faylın
+   modul-ölçü büdcəsi (SOFT_CAP=600) aşılmasın.
+   ========================================================================= */
+
+/* ---- Kart/sətir üzərində klik olunan "Ətraflı bax" düyməsi ------------- */
+
+.org-management__detail-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+/* ---- Kafedra kartında müəllim sayğacı (aktiv / indiyə kimi) ------------ */
+
+.org-management__unit-card-meta--teachers {
+    align-items: center;
+}
+
+.org-management__teacher-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.org-management__teacher-preview-avatars {
+    display: flex;
+}
+
+.org-management__teacher-preview-avatars .org-management__avatar {
+    margin-left: -8px;
+    border: 2px solid var(--ems-neutral-0);
+}
+
+.org-management__teacher-preview-avatars .org-management__avatar:first-child {
+    margin-left: 0;
+}
+
+.org-management__teacher-preview-more {
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.3rem 0.55rem;
+}
+
+/* ---- Fakültə cədvəlində müəllim sütunu ---------------------------------- */
+
+.org-management__teacher-split {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+}
+
+/* ---- Ətraflı görünüş modalı ---------------------------------------------- */
+
+.org-unit-detail-modal .modal-dialog {
+    max-width: 720px;
+}
+
+.org-unit-detail-modal__body {
+    min-height: 160px;
+    max-height: 75vh;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+
+.org-unit-detail-modal__loading {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 0;
+    color: var(--ems-primary-600, #2952e3);
+}
+
+.org-unit-detail__breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    color: var(--ems-neutral-500);
+    font-size: 0.85rem;
+}
+
+.org-unit-detail__breadcrumb a {
+    color: var(--ems-primary-600, #2952e3);
+    text-decoration: none;
+}
+
+.org-unit-detail__breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.org-unit-detail__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.org-management__avatar--lg {
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    font-size: 1.4rem;
+    border-radius: 12px;
+}
+
+.org-management__avatar--blue {
+    background: #4f7df3;
+}
+
+.org-unit-detail__type {
+    margin: 0 0 0.2rem;
+    color: var(--ems-neutral-500);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.org-unit-detail__name {
+    margin: 0 0 0.3rem;
+    color: #172033;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.org-unit-detail__head {
+    margin: 0;
+    color: var(--ems-neutral-600);
+    font-weight: 700;
+}
+
+.org-unit-detail__head i {
+    margin-right: 0.35rem;
+    color: var(--ems-neutral-400);
+}
+
+.org-unit-detail__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.7rem;
+    margin-bottom: 1.5rem;
+}
+
+.org-unit-detail__stat {
+    display: grid;
+    gap: 0.15rem;
+    border: 1px solid #e5edf8;
+    border-radius: 10px;
+    background: #f8fbff;
+    padding: 0.75rem 0.85rem;
+    text-align: center;
+}
+
+.org-unit-detail__stat strong {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #172033;
+}
+
+.org-unit-detail__stat span {
+    color: var(--ems-neutral-500);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.org-unit-detail__stat--accent {
+    border-color: #bbf7d0;
+    background: #ecfdf3;
+}
+
+.org-unit-detail__stat--accent strong {
+    color: #027a48;
+}
+
+.org-unit-detail__block {
+    margin-bottom: 1.5rem;
+}
+
+.org-unit-detail__block:last-child {
+    margin-bottom: 0;
+}
+
+.org-unit-detail__block h3 {
+    margin: 0 0 0.7rem;
+    color: #172033;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.org-unit-detail__block-count {
+    color: var(--ems-neutral-400);
+    font-weight: 600;
+}
+
+.org-unit-detail__block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+}
+
+.org-unit-detail__block-head h3 {
+    margin: 0;
+}
+
+.org-unit-detail__search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    background: var(--ems-neutral-0);
+    padding: 0.4rem 0.65rem;
+    color: var(--ems-neutral-400);
+    min-height: 44px;
+}
+
+.org-unit-detail__search input {
+    border: 0;
+    outline: 0;
+    min-width: 160px;
+    color: var(--ems-neutral-900);
+}
+
+.org-unit-detail__year-bars {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.org-unit-detail__year-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 2.5rem;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.88rem;
+}
+
+.org-unit-detail__year-label {
+    color: var(--ems-neutral-600);
+    font-weight: 700;
+}
+
+.org-unit-detail__year-bar-track {
+    display: block;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    height: 10px;
+    overflow: hidden;
+}
+
+.org-unit-detail__year-bar {
+    display: block;
+    width: var(--org-unit-detail-bar-pct, 0%);
+    height: 100%;
+    border-radius: 999px;
+    background: #4f7df3;
+}
+
+.org-unit-detail__year-row strong {
+    text-align: right;
+    color: #172033;
+}
+
+.org-unit-detail__kafedra-list,
+.org-unit-detail__teacher-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.org-unit-detail__kafedra-row,
+.org-unit-detail__teacher-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    border-radius: 8px;
+    background: #f8fbff;
+    padding: 0.55rem 0.7rem;
+}
+
+.org-unit-detail__kafedra-name {
+    flex: 1 1 auto;
+    font-weight: 700;
+    color: #172033;
+    min-width: 0;
+}
+
+.org-unit-detail__teacher-info {
+    flex: 1 1 auto;
+    display: grid;
+    min-width: 0;
+}
+
+.org-unit-detail__teacher-info small {
+    color: var(--ems-neutral-500);
+}
+
+.org-unit-detail__teacher-nomatch {
+    padding: 0.5rem 0;
+    text-align: center;
+}
+
+.org-unit-detail__chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.org-unit-detail__chip {
+    border-radius: 8px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.org-unit-detail__chip--muted {
+    background: transparent;
+    border: 1px dashed var(--ems-neutral-300);
+    color: var(--ems-neutral-400);
+}
+
+@media (max-width: 560px) {
+    .org-unit-detail__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .org-unit-detail__year-row {
+        grid-template-columns: 70px 1fr 2rem;
+    }
+}
