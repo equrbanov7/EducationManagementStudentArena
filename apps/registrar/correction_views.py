@@ -60,14 +60,19 @@ def build_correction_context(offering, request) -> dict:
     ``correction_journal`` səhifəsi, HƏM DƏ ``journal_detail``-in yerində düzəliş
     rejimi (``?correct=1``) eyni audited editoru göstərsin deyə. Bütün yazma
     ``corrections.apply_correction`` (audit + sənəd) üzərindəndir."""
-    from . import item_corrections, journal_extras
+    from . import item_corrections, journal_extras, legacy_excuse
 
     sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True)
     cw_map = item_corrections.coursework_corrections_map(offering, include_document=True)
     cm_map = item_corrections.component_corrections_map(offering, include_document=True)
+    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
+    corrections_map = corrections.corrections_map_for_offering(offering, include_document=True)
+    # Düzəliş rejimində də köhnə üzrlü-qayıb sənədi görünür (normal görünüşlə
+    # eyni payload) — korrektor nəyin əsasında üq yazıldığını görsün deyə.
+    legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)
     return {
-        "journal": gradebook.get_offering_journal(offering=offering, newest_first=True),
-        "corrections_map": corrections.corrections_map_for_offering(offering, include_document=True),
+        "journal": journal,
+        "corrections_map": corrections_map,
         # Sərbəst iş / kurs işi / kollokvium düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
         "selfwork_board": item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map),
         "coursework_rows": item_corrections.annotate_coursework_rows(

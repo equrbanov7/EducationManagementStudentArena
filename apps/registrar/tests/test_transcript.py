@@ -270,7 +270,10 @@ class BuildStudentTranscriptTest(TestCase):
             )
         self.assertFalse(data["has_record"])
         self.assertEqual(data["semesters"], [])
-        self.assertEqual(data["cumulative_gpa"], Decimal("0.00"))
+        # ÜOMG hesablana bilmir (qeydiyyat yoxdur) — SIFIR göstərilmir, çünki
+        # rəsmi sənəddə "0.00" «sıfır bal aldı» kimi oxunur (2026-08-31, 1-ci bloker).
+        self.assertIsNone(data["cumulative_gpa"])
+        self.assertFalse(data["cumulative_gpa_available"])
 
     def test_public_context_builder_shape(self):
         request = RequestFactory().get("/accounts/profile/?section=my-transcript")

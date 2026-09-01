@@ -17,15 +17,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import finals, grade_audit, gradebook, lesson_rooms, schedule
-from .models import (
-    AttendanceStatus,
-    CorrectionReason,
-    CourseOffering,
-    LessonKind,
-    SlotKind,
-    WeekType,
-)
+from . import finals, grade_audit, gradebook, legacy_excuse, lesson_rooms, schedule
+from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
 def _current_period(organization):
@@ -43,9 +36,9 @@ def _current_period(organization):
 # `_can_edit_journal` / `_is_direct_editor` adları geriyə-uyğunluq üçün saxlanılır
 # (journal_actions + pdf_views bunları views-dan idxal edir).
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
+from .journal_access import can_observe_journal as _can_observe_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
 from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
-from .journal_access import schedule_slot_or_404 as _schedule_slot_or_404  # noqa: E402
 
 
 @login_required
@@ -73,15 +66,25 @@ def journal_detail(request, offering_id):
     :mod:`apps.registrar.journal_close`."""
     offering = _offering_or_404(request, offering_id)
     from apps.registrar import corrections as corrections_service
+    from apps.registrar import guest_roster
 
     journal_locked = gradebook.journal_is_locked(offering)
     can_edit_perm = _can_edit_journal(request.user, offering)
     # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
-    # Do not leak existence: only editors or correctors (İKT/RİM rəhbəri) may
-    # open the page.
-    if not can_edit_perm and not can_correct:
+    # Jurnal SİYAHISININ idarəsi (alt qrupdan əlavə/geri götürmə) — koordinator/
+    # dekanlıq. Onlar müəllim deyil: jurnalı OXU rejimində açırlar, xanaya
+    # toxuna bilmirlər (POST aşağıda `is_direct_editor` ilə kəsilir).
+    # İCAZƏ (səhifəni aça bilirmi) ilə ƏMƏL (siyahını dəyişə bilirmi) AYRIDIR:
+    # bağlanmış jurnal / keçmiş dövr koordinatoru səhifədən qovmur (tarixçəni
+    # oxuya bilir), amma «alt qrupdan əlavə et» səthini tamamilə gizlədir.
+    roster_scope = guest_roster.can_manage_offering_roster(request.user, offering)
+    can_manage_roster = roster_scope and guest_roster.roster_is_open(offering)
+    # Təhvil verən köhnə müəllim: AÇIR, yazmır (bax journal_access şərhi).
+    handover_observer = _can_observe_journal(request.user, offering)
+    # Səhifəni yalnız redaktor / korrektor / siyahı idarəçisi / köhnə müəllim açır.
+    if not can_edit_perm and not can_correct and not roster_scope and not handover_observer:
         raise Http404
     # Yerində düzəliş rejimi (kilid-aç toggle) — yalnız korrektor + ?correct=1.
     correction_mode = request.method == "GET" and request.GET.get("correct") == "1" and can_correct
@@ -113,6 +116,7 @@ def journal_detail(request, offering_id):
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections_service.corrections_map_for_offering(offering)
+    legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
     coursework_rows = journal_extras.get_course_work_rows(offering)
     finals_data = finals.get_offering_results(offering=offering)
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
@@ -143,6 +147,7 @@ def journal_detail(request, offering_id):
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
         "can_edit": is_direct_editor and not journal_locked,
+        "handover_observer": handover_observer,
         "journal_locked": journal_locked,
         # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).
         "journal_close_notice": journal_close_notices.journal_banner(offering, today),
@@ -162,6 +167,12 @@ def journal_detail(request, offering_id):
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
         "can_correct_journal": can_correct,
+        # «Alt qrupdan tələbə əlavə et» düyməsi + sətir çipindəki geri götürmə.
+        # Kilidli/keçmiş dövrdə False → düymə, modal və JS yüklənmir; «alt qrup»
+        # çipi isə oxu-rejimində qalır (bax _jd_grid.html).
+        "can_manage_roster": can_manage_roster,
+        # Əhatəsi var, amma jurnal dondurulub — səbəbi göstərmək üçün.
+        "roster_frozen_reason": guest_roster.roster_block_reason(offering) if roster_scope else "",
         "can_override_lessons": bool(
             getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
         ),
@@ -456,125 +467,7 @@ def _handle_save_marks(request, offering):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
-# ── Dərs cədvəli (timetable, U4) ─────────────────────────────────────────────
-
-
-@login_required
-def schedule_view(request):
-    """Role-aware weekly timetable: student → group schedule, teacher → own slots.
-
-    Teachers/org-owners may add slots for the offerings they teach (conflicts are
-    rejected in the service). Tenant scoping comes from the active-org RLS context.
-    Context building is shared with the profile cabinet section (page_contexts)."""
-    from apps.registrar import page_contexts
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/schedule.html", {"has_context": False, "active_main_nav": "schedule"})
-
-    if request.method == "POST":
-        return _handle_add_slot(request, organization, _current_period(organization))
-
-    context = page_contexts.schedule_context(request, organization)
-    context["active_main_nav"] = "schedule"
-    return render(request, "registrar/schedule.html", context)
-
-
-def _redirect_after_schedule(request):
-    """Redirect back to the caller: the profile shell (`next`, same-host only)
-    or the standalone schedule page. Keeps the sidebar context after slot POSTs."""
-    from django.utils.http import url_has_allowed_host_and_scheme
-
-    nxt = request.POST.get("next") or ""
-    if nxt and url_has_allowed_host_and_scheme(
-        nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()
-    ):
-        return redirect(nxt)
-    return redirect(reverse("registrar:schedule"))
-
-
-def _handle_add_slot(request, organization, period):
-    offering = (
-        CourseOffering.objects.filter(pk=request.POST.get("offering_id"), organization=organization)
-        .select_related("organization")
-        .first()
-    )
-    if offering is None or not _is_direct_editor(request.user, offering):
-        raise Http404  # only the teaching instructor / org owner may schedule (NOT the corrector)
-
-    from django.utils.dateparse import parse_time
-
-    try:
-        weekday = int(request.POST.get("weekday") or 0)
-    except (TypeError, ValueError):
-        weekday = 0
-    # Standart dərs saatı seçimi (üstünlük); köhnə sərbəst vaxt sahələri fallback.
-    start_time, end_time = schedule.parse_time_slot(request.POST.get("time_slot"))
-    if start_time is None:
-        start_time = parse_time(request.POST.get("start_time") or "")
-        end_time = parse_time(request.POST.get("end_time") or "")
-    week_type = request.POST.get("week_type")
-    if week_type not in dict(WeekType.choices):
-        week_type = WeekType.ALL
-    slot_kind = request.POST.get("slot_kind")
-    if slot_kind not in dict(SlotKind.choices):
-        slot_kind = SlotKind.LECTURE
-    if not (1 <= weekday <= 7) or start_time is None or end_time is None or start_time >= end_time:
-        messages.error(request, _("Gün və düzgün başlama/bitmə vaxtı tələb olunur."))
-        return _redirect_after_schedule(request)
-
-    try:
-        schedule.create_slot(
-            offering=offering,
-            weekday=weekday,
-            start_time=start_time,
-            end_time=end_time,
-            room=(request.POST.get("room") or "").strip(),
-            week_type=week_type,
-            kind=slot_kind,
-            created_by=request.user,
-        )
-        messages.success(request, _("Dərs cədvəlinə slot əlavə edildi."))
-    except schedule.ScheduleConflict as exc:
-        clash = exc.conflict
-        messages.error(
-            request,
-            _("Konflikt: bu vaxt %(subject)s ilə üst-üstə düşür (qrup/müəllim/otaq).")
-            % {"subject": clash.offering.subject.code},
-        )
-    return _redirect_after_schedule(request)
-
-
-@login_required
-def schedule_slot_delete(request, slot_id):
-    """Delete a slot (only the teaching instructor / org owner / superuser)."""
-    slot = _schedule_slot_or_404(request, slot_id)
-    if request.method == "POST" and _is_direct_editor(request.user, slot.offering):
-        slot.delete()
-        messages.success(request, _("Slot silindi."))
-    return _redirect_after_schedule(request)
-
-
-# ── Akademik təqvim (U11) ────────────────────────────────────────────────────
-
-
-@login_required
-def calendar_view(request):
-    """Academic calendar: semesters with their registration + exam-session windows.
-
-    Read-only and open to every authenticated member of the active organization
-    (students plan around these dates as much as staff). Window editing lives in
-    the AcademicPeriod admin — tenant-configurable, per the variable-structure rule."""
-    from apps.registrar import page_contexts
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/calendar.html", {"has_context": False, "active_main_nav": "calendar"})
-
-    context = page_contexts.calendar_context(organization)
-    context["active_main_nav"] = "calendar"
-    return render(request, "registrar/calendar.html", context)
-
-
 # The registrar console (K3) views live in ``apps.registrar.console_views`` to
-# keep this module focused (journal + timetable) and under the size budget.
+# keep this module focused (journal + gradebook) and under the size budget;
+# the weekly timetable (U4) and the academic calendar (U11) live in
+# ``apps.registrar.schedule_views`` for the same reason.

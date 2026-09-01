@@ -20,7 +20,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import finals, gradebook
+from apps.registrar import exam_eligibility, finals, gradebook
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -174,8 +174,29 @@ def _evaluate(enrollment, maps):
 
     record = maps["records"].get(enrollment.student_id)
     limit = record.program.absence_limit_percent if record and record.program_id else _DEFAULT_ABSENCE_LIMIT
-    lesson_hours = offering.lesson_hours or 0
-    barred = lesson_hours > 0 and enrollment.absence_hours > lesson_hours * limit / 100.0 and not resit_done
+    # Məxrəc TƏK tərifdən (bax exam_eligibility.lesson_hours_for) — xam sahəyə
+    # baxmaq jurnal qridindən ayrılmaq demək idi.  Toplu map → əlavə sorğu yox.
+    lesson_hours = exam_eligibility.lesson_hours_for(offering, hours_map=maps.get("lesson_hours", {}))
+    # TƏK MƏNBƏ: buraxılış qərarı burada TƏKRARLANMIR (2026-08-31 auditi —
+    # eyni müqayisə doqquz yerdə dublikat idi). Tarixi/köçürülmüş semestrdə
+    # ``barred`` heç vaxt qalxmır, köhnə sistemin faktiki nəticəsi (aşağıdakı
+    # ``effective`` balı) olduğu kimi göstərilir.
+    eligibility = exam_eligibility.resolve(
+        absence_hours=enrollment.absence_hours,
+        lesson_hours=lesson_hours,
+        limit_percent=limit,
+        # İdmançı-tələbə istisnası (milli yığma) ARTIQ ötürülür. Əvvəl qəsdən
+        # ötürülmürdü — «yalnız burada ötürsək iki mühərrik ayrılar» məntiqi ilə —
+        # amma nəticə tam əksi oldu: ``services.get_student_cabinet_data`` onu
+        # ötürdüyü üçün istisna qoyulmuş tələbə kabinetdə «buraxılır», analitikada
+        # «buraxılmır/kəsilib» görünürdü (2026-08-31 düşmən baxışı, 3-cü bloker).
+        # İndi istisna BİR yerdən — resolver-dən — həll olunur və hər səth onu
+        # eyni cür alır. Əlavə sorğu yaranmır: ``records`` map onsuz da yüklüdür.
+        exempt=bool(record and record.national_athlete_exemption),
+        resit_done=resit_done,
+        frozen=offering.id in maps.get("frozen_offerings", frozenset()),
+    )
+    barred = eligibility["barred"]
 
     graded = effective is not None
     total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))
@@ -186,6 +207,7 @@ def _evaluate(enrollment, maps):
     exam_ok = graded and effective >= min_exam
     passed = graded and not barred and total >= pass_threshold and exam_ok
     failed = barred or (graded and not passed)
+    _status = exam_eligibility.status_code(eligibility, graded=graded)
 
     return {
         "graded": graded,
@@ -194,6 +216,15 @@ def _evaluate(enrollment, maps):
         "passed": passed,
         "failed": failed,
         "barred": barred,
+        "eligibility": eligibility,
+        # Şəffaflıq: status hansı mənbədən gəlir (canlı qayda / köhnə sistem /
+        # köhnə sistemdə nəticə YAZILMAYIB). UI etiketi bunu oxuyur.
+        "status_code": _status,
+        "status_label": exam_eligibility.status_label(_status),
+        "status_notice": exam_eligibility.status_notice(_status),
+        # Görünən sahələr də resolver-dən — çağıran heç nə yenidən hesablamır.
+        "attendance_score": eligibility["attendance_score"],
+        "exempt": eligibility["exempt"],
         "credit": int(getattr(offering.subject, "ects", 0) or 0),
         "absence_hours": enrollment.absence_hours or 0,
         "lesson_hours": lesson_hours,
@@ -258,6 +289,9 @@ class _Bucket:
 
     def summary(self) -> dict:
         definite = self.passed + self.failed
+        # ⚠️ Qəti nəticəli fənn yoxdursa orta ÜOMG ``0.00`` DEYİL, hesablana
+        # bilmir — kartda «Hesablana bilmir» göstərilir (2026-08-31, 1-ci bloker).
+        avg_gpa, avg_gpa_available = exam_eligibility.uomg_from(self.quality_points, self.gpa_credits)
         return {
             "key": self.key,
             "label": self.label,
@@ -272,7 +306,9 @@ class _Bucket:
             "pass_rate": _pct(self.passed, definite),
             "fail_rate": _pct(self.failed, definite),
             "definite": definite,
-            "avg_gpa": _round2(self.quality_points / self.gpa_credits) if self.gpa_credits else Decimal("0.00"),
+            "avg_gpa": avg_gpa,
+            "avg_gpa_available": avg_gpa_available,
+            "avg_gpa_unavailable_label": exam_eligibility.UOMG_UNAVAILABLE_LABEL,
             "avg_total": _round2(self.total_sum / self.graded) if self.graded else Decimal("0.00"),
             "absence_rate": _pct(self.absence_hours, self.lesson_hours),
         }
@@ -305,6 +341,12 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
     """
     return {
         "schemes": _scheme_map(offering_ids),
+        # Buraxılış statusu DONDURULMUŞ açılışlar (tarixi/köçürülmüş + bağlı
+        # jurnal). Toplu dəst — per-enrollment yoxlama N+1 olardı; bax
+        # :func:`exam_eligibility.frozen_offering_ids`.
+        "frozen_offerings": exam_eligibility.frozen_offering_ids(offering_ids),
+        # Məxrəc fallback-ı (``lesson_hours=0`` olan açılışlar üçün) — tək sorğu.
+        "lesson_hours": exam_eligibility.lesson_hours_map(offering_ids),
         "component_offerings": _component_offerings(offering_ids),
         "component_sums": _component_sum_map(enrollment_ids),
         "kollokvium_sums": _kollokvium_sum_map(enrollment_ids),
@@ -363,7 +405,7 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
             bucket = programs.get(record.program_id)
             if bucket is None:
                 bucket = programs[record.program_id] = _Bucket(
-                    record.program_id, record.program.name, record.program.official_code
+                    record.program_id, record.program.name, record.program.display_code
                 )
             bucket.add(enrollment.student_id, result)
 

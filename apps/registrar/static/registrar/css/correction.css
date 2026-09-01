@@ -163,3 +163,15 @@
     border-radius: 8px; padding: 8px 10px; font-family: inherit; font-size: 13px; resize: vertical;
 }
 .jd2-corr-fields input[type="file"] { font-size: 12.5px; }
+
+/* ── Köhnə sistemdən köçürülmüş ÜZRLÜ QAYIB sənədi ─────────────────────────
+   Sahibin istədiyi «sarı ilə göstərən dizayn» məhz budur: rəsmi düzəlişlə EYNİ
+   sarı ailə, amma bir çalar açıq — çünki bu, DƏYİŞİKLİK deyil, mövcud «üq»
+   statusunun SƏNƏDLİ SÜBUTudur (xana müəllim üçün kilidlənmir). */
+.jd2-cell.corr-excuse { background: #fff8e1; }
+.corr-excuse-badge { color: #b8860b; }
+.sjx-row--excuse { background: #fffdf0; }
+.sjx-row--excuse .corr-excuse-badge { margin-left: 4px; }
+.corr-hist-item--excuse { border-left: 3px solid #e0b400; padding-left: 8px; }
+.corr-hist-doc { font-size: 0.85rem; color: #5b6472; margin-top: 4px; word-break: break-all; }
+.corr-hist-doc i { color: #8a6d1f; font-style: italic; }

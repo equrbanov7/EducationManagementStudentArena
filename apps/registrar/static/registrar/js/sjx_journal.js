@@ -82,6 +82,9 @@
     put("[data-sjx-day-score]", row.getAttribute("data-score"));
     var corr = m.querySelector("[data-sjx-day-corr]");
     if (corr) corr.hidden = row.getAttribute("data-corrected") !== "1";
+    // Köhnə sistemdən köçürülmüş üzrlü-qayıb sənədi (sarı sətir, ✎ nişanı).
+    var excuse = m.querySelector("[data-sjx-day-excuse]");
+    if (excuse) excuse.hidden = row.getAttribute("data-legacy-excuse") !== "1";
     m.hidden = false;
     document.body.style.overflow = "hidden";
   });

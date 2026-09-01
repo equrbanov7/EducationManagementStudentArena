@@ -271,3 +271,121 @@ class InternalCodeNeverReachesASurfaceTest(TestCase):
             text = "\n".join(page.get_text() for page in doc)
         self.assertIn("060209", text)
         self.assertNotIn("MYEDU", text)
+
+
+class ProgramCodePairTest(TestCase):
+    """HƏR İKİ nəslin rəsmi şifri — sahibin «yeni və köhnə kodlar» tələbi.
+
+    Azərbaycanda ixtisas təsnifatı 2024-cü ildə dəyişdi (NK 503) və uyğunluq
+    bire-bir DEYİL: ixtisas ləğv oluna, yenidən yarana və ya bölünə bilər. Ona
+    görə iki sütun var və göstərmə qaydası burada kilidlənir:
+
+    * :attr:`Program.display_code` — kompakt səthlər üçün TƏK şifr (cari, yoxsa
+      köhnə): ləğv olunmuş ixtisas şifrsiz qalmır;
+    * :attr:`Program.official_code_pair` — hər iki şifr;
+    * heç bir halda asılı qalmış ayırıcı («Ad · ») olmur.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.owner = User.objects.create_user("pair_owner", "pair_owner@qku.edu.az", "pw")
+        with bypass_rls():
+            cls.org = Organization.objects.create(
+                name="Pair Univ",
+                slug="pair-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=cls.owner,
+                status="active",
+                is_active=True,
+            )
+
+    def _program(self, *, code, official_code="", legacy_official_code="", name="Kompüter mühəndisliyi"):
+        with bypass_rls():
+            return Program.objects.create(
+                organization=self.org,
+                code=code,
+                official_code=official_code,
+                legacy_official_code=legacy_official_code,
+                name=name,
+            )
+
+    def test_both_generations_are_stored_side_by_side(self):
+        program = self._program(code="MYEDU-p1", official_code="6006022", legacy_official_code="050631")
+        self.assertEqual(program.official_code_current, "6006022")
+        self.assertEqual(program.official_code_legacy, "050631")
+
+    def test_the_pair_shows_the_current_code_first_and_marks_the_legacy_one(self):
+        program = self._program(code="MYEDU-p2", official_code="6006004", legacy_official_code="050624")
+        self.assertTrue(program.official_code_pair.startswith("6006004"))
+        self.assertIn("050624", program.official_code_pair)
+
+    def test_the_compact_code_prefers_the_current_generation(self):
+        program = self._program(code="MYEDU-p3", official_code="6006022", legacy_official_code="050631")
+        self.assertEqual(program.display_code, "6006022")
+        self.assertEqual(program.display_label, "Kompüter mühəndisliyi · 6006022")
+
+    def test_an_abolished_programme_falls_back_to_the_legacy_code(self):
+        """Yeni təsnifatda ləğv olunub — şifrsiz qalmamalıdır."""
+        program = self._program(code="MYEDU-p4", legacy_official_code="050401", name="Dünya iqtisadiyyatı")
+        self.assertEqual(program.display_code, "050401")
+        self.assertEqual(program.display_label, "Dünya iqtisadiyyatı · 050401")
+        self.assertEqual(program.official_code_pair, "050401")
+
+    def test_a_brand_new_programme_shows_only_the_current_code(self):
+        program = self._program(code="MYEDU-p5", official_code="6006017", name="İnformasiya təhlükəsizliyi")
+        self.assertEqual(program.official_code_pair, "6006017")
+        self.assertEqual(program.display_label, "İnformasiya təhlükəsizliyi · 6006017")
+
+    def test_no_dangling_separator_when_both_codes_are_missing(self):
+        program = self._program(code="MYEDU-p6", name="Ümumi idarəetmə")
+        self.assertEqual(program.display_code, "")
+        self.assertEqual(program.official_code_pair, "")
+        self.assertEqual(program.display_label, "Ümumi idarəetmə")
+        self.assertEqual(program.display_label_full, "Ümumi idarəetmə")
+        self.assertNotIn("·", program.display_label_full)
+
+    def test_whitespace_only_codes_are_treated_as_absent(self):
+        program = self._program(code="MYEDU-p7", official_code="   ", legacy_official_code="  ", name="  Boş  ")
+        self.assertEqual(program.display_label, "Boş")
+        self.assertNotIn("·", program.display_label)
+
+    def test_the_full_label_carries_both_codes(self):
+        program = self._program(code="MYEDU-p8", official_code="6006004", legacy_official_code="050624")
+        self.assertIn("6006004", program.display_label_full)
+        self.assertIn("050624", program.display_label_full)
+        self.assertNotIn("MYEDU", program.display_label_full)
+
+    def test_the_internal_code_never_leaks_into_any_label(self):
+        program = self._program(code="MYEDU-p9", official_code="6006022", legacy_official_code="050631")
+        for label in (program.display_label, program.display_label_full, program.official_code_pair, str(program)):
+            self.assertNotIn("MYEDU", label)
+
+    def test_the_legacy_code_may_repeat_across_programs(self):
+        """Unikallıq QƏSDƏN yoxdur — hər iki sütunda."""
+        self._program(code="MYEDU-p10", official_code="7002013", legacy_official_code="060209", name="Klinik psix.")
+        self._program(code="MYEDU-p11", official_code="7002013", legacy_official_code="060209", name="Sosial psix.")
+        with bypass_rls():
+            self.assertEqual(Program.objects.filter(organization=self.org, legacy_official_code="060209").count(), 2)
+
+    def test_form_exposes_both_code_fields(self):
+        form = ProgramForm(organization=self.org)
+        self.assertIn("official_code", form.fields)
+        self.assertIn("legacy_official_code", form.fields)
+        self.assertTrue(str(form.fields["legacy_official_code"].help_text))
+
+    def test_form_strips_the_legacy_code(self):
+        form = ProgramForm(
+            data={
+                "code": "MYEDU-p12",
+                "official_code": "6006022",
+                "legacy_official_code": "  050631  ",
+                "name": "Kompüter mühəndisliyi",
+                "degree_level": "bachelor",
+                "ects_total": "240",
+                "absence_limit_percent": "25",
+                "is_active": "on",
+            },
+            organization=self.org,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["legacy_official_code"], "050631")

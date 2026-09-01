@@ -172,9 +172,27 @@ class ApprovalChainRemovedTest(_JournalCloseBase):
         client.post(reverse("registrar:journal_detail", args=[self.offering_a.id]), {"action": "submit_approval"})
         self.assertEqual(self._status(self.offering_a), (ApprovalStatus.DRAFT, False))
 
-    def test_dean_cannot_open_someone_elses_journal_anymore(self):
-        """Rəyçi (kafedra/dekan) oxu yolu ləğv edildi — jurnal yalnız müəllim/RİM-ə açıqdır."""
-        resp = self._login(self.dean).get(reverse("registrar:journal_detail", args=[self.offering_a.id]))
+    def test_dean_opens_journal_read_only_for_roster_management(self):
+        """Dekan jurnalı YALNIZ siyahı idarəsi üçün açır — redaktə hüququ VERİLMİR.
+
+        Təsdiq zənciri (rəyçi oxu yolu) ləğv olunmuş qalır. 2026-08-də dekana
+        `journal.roster` verildi (alt qrupdan tələbə əlavə/geri götürmə), ona görə
+        səhifə AÇILIR; amma `can_edit` yalanır və POST yolu bağlıdır.
+        """
+        client = self._login(self.dean)
+        resp = client.get(reverse("registrar:journal_detail", args=[self.offering_a.id]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.context["can_manage_roster"])
+        self.assertFalse(resp.context["can_edit"])
+        self.assertFalse(resp.context["can_correct_journal"])
+        # Redaktə POST-u (bal yazma) dekan üçün bağlıdır.
+        self.assertEqual(
+            client.post(reverse("registrar:journal_detail", args=[self.offering_a.id]), {}).status_code, 404
+        )
+
+    def test_dean_cannot_open_journal_outside_own_faculty(self):
+        """Əhatə (scope) fail-closed: başqa fakültənin jurnalı hələ də 404-dür."""
+        resp = self._login(self.dean).get(reverse("registrar:journal_detail", args=[self.offering_b.id]))
         self.assertEqual(resp.status_code, 404)
 
     def test_teacher_journal_starts_open(self):
