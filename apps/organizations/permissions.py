@@ -77,10 +77,22 @@ PERMISSION_CATEGORIES = {
     # görə "təsdiq" adlı açar saxlamaq mənasızdır. Yeni açar `journal` ailəsindədir
     # (RİM-in digər açarı `journal.correct` ilə yanaşı) və istənilən rola
     # permission-editordan verilə bilər.
+    # `journal.roster` (2026-08): jurnal SİYAHISININ idarəsi — başqa (alt) qrupdan
+    # tələbənin bir açılışın jurnalına əlavə edilməsi və geri götürülməsi.
+    # QƏSDƏN `grade.*` ailəsində DEYİL: bu, müəllim əməli deyil — proqram
+    # koordinatoru / dekanlıq səviyyəsindədir və struktur əhatəsinə (scope)
+    # tabedir (bax apps/registrar/guest_roster.py).
+    # `journal.reassign` (2026-08): fənnin (dərs açılışının) BAŞQA MÜƏLLİMƏ
+    # təhvili — «müəllim işdən çıxdı, jurnal artıq Əlinin olsun». Yenə `grade.*`
+    # ailəsində DEYİL: bal yazmaqla heç bir əlaqəsi yoxdur, əksinə — KİMİN bal
+    # yazacağını təyin edir. Ayrı açar olmasaydı, `grade.*` wildcard-ı daşıyan
+    # hər müəllim öz jurnalını başqasının üstünə ata bilərdi.
     "journal": [
         "journal.view",
         "journal.correct",
         "journal.close",
+        "journal.roster",
+        "journal.reassign",
     ],
     # Sillabus axını (apps.syllabus) — müəllim yazır/göndərir, kafedra müdiri
     # təsdiqləyir. Qərar açarları QƏSDƏN AYRIDIR: `syllabus.review` (növbəni açıb
@@ -178,6 +190,14 @@ PERMISSION_CATEGORIES = {
         "people.view_demographics",
         "people.manage_status",
         "people.manage_teacher_role",
+        # `people.manage_academic` (2026-08): tələbənin AKADEMİK qeydini idarə
+        # etmək — rəsmi qrup köçürməsi və akademik status (məzuniyyət/xaric/
+        # məzun). QƏSDƏN `people.manage_status`-dan AYRIDIR: o, HESABI dayandırır
+        # (giriş hüququ), bu isə tələbənin akademik yerini dəyişir. Dekanlıq öz
+        # fakültəsinin tələbəsini köçürə bilməli, amma heç kimin hesabını
+        # dayandırmamalı ola bilər — iki səlahiyyət bir açara yığılsaydı, biri
+        # digərini gizlicə verərdi.
+        "people.manage_academic",
     ],
 }
 
@@ -262,6 +282,8 @@ PERMISSION_LABELS = {
     "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
     "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
     "journal.close": pgettext_lazy(_PERM_CTX, "Semestr sonu jurnalları bağlamaq/açmaq"),
+    "journal.roster": pgettext_lazy(_PERM_CTX, "Jurnala alt qrupdan tələbə əlavə etmək/çıxarmaq"),
+    "journal.reassign": pgettext_lazy(_PERM_CTX, "Fənni başqa müəllimə təhvil vermək"),
     # syllabus
     "syllabus.view": pgettext_lazy(_PERM_CTX, "Sillabuslara baxış"),
     "syllabus.edit": pgettext_lazy(_PERM_CTX, "Sillabus qaralamasını redaktə etmək"),
@@ -311,6 +333,7 @@ PERMISSION_LABELS = {
     "people.view_demographics": pgettext_lazy(_PERM_CTX, "Kataloqda cins və yaş məlumatını görmək"),
     "people.manage_status": pgettext_lazy(_PERM_CTX, "Kataloqdan hesabı dayandırmaq / bərpa etmək"),
     "people.manage_teacher_role": pgettext_lazy(_PERM_CTX, "Müəllim statusunu vermək / çıxarmaq"),
+    "people.manage_academic": pgettext_lazy(_PERM_CTX, "Tələbənin qrupunu köçürmək və akademik statusunu dəyişmək"),
 }
 
 

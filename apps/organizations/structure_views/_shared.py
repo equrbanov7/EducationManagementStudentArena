@@ -10,6 +10,7 @@ from django.utils.translation import pgettext
 
 from apps.registrar.models import CourseOffering
 from core.constants import OrgUnitType
+from core.staff_position import visible_role_label
 
 from ..models import AcademicPeriod, Membership, Organization, OrgUnit
 from ..views import (
@@ -128,7 +129,7 @@ def _head_candidates(organization):
             {
                 "user_id": membership.user_id,
                 "full_name": membership.user.get_full_name() or membership.user.username,
-                "role_label": membership.role.display_name,
+                "role_label": visible_role_label(membership.role.name, membership.role.display_name),
             }
         )
     return candidates
