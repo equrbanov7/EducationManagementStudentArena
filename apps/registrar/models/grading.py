@@ -180,6 +180,25 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         related_name="lessons",
         help_text="Dərsin keçirildiyi otaq (opsional). Korpus otağın öz 'building' sahəsindədir.",
     )
+    #: Köçürmə nişanı — UYDURMA DƏRS DEYİL, mövcud balın daşıyıcısıdır.
+    #:
+    #: Köhnə sistemdə 570 jurnalın dərs cədvəli (``journals_dates_added_by_teacher``)
+    #: boş və ya qismən boşdur, halbuki həmin jurnalların bal/davamiyyət xanaları
+    #: doludur.  Xananın özü hansı (ay, gün, saat) slotuna aid olduğunu daşıyır,
+    #: ona görə köçürmə həmin slotdan dərs sətrini BƏRPA edir — əks halda 164,747
+    #: mövcud xana (12,424 real qiymət daxil) hədəfə heç cür bağlana bilməzdi.
+    #:
+    #: ``True`` = bu dərs sətrini müəllim köhnə sistemdə YAZMAYIB; o, mövcud bal
+    #: xanalarının açarından bərpa olunub.  Xanaların DƏYƏRİ mənbədəndir və
+    #: dəyişdirilməyib.  Ledger izi: ``legacy_lesson_synthesised``.
+    is_legacy_synthesised = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=(
+            "Bu dərs köhnə sistemin dərs cədvəlində yoxdur — mövcud bal/davamiyyət "
+            "xanalarının (ay, gün, saat) açarından bərpa olunub. Xananın dəyəri mənbədəndir."
+        ),
+    )
 
     objects = models.Manager()
 

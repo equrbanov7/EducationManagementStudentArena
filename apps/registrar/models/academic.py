@@ -16,6 +16,11 @@ from django.utils.translation import pgettext_lazy
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
 from ..reference_identity import ReferenceIdentityValidationMixin
+from ._program_codes import (
+    ProgramCodeLabelsMixin,
+    legacy_official_code_field,
+    official_code_field,
+)
 
 
 class DegreeLevel(models.TextChoices):
@@ -24,7 +29,7 @@ class DegreeLevel(models.TextChoices):
     PHD = "phd", pgettext_lazy("registrar.degree", "PhD")
 
 
-class Program(UUIDModel, TimeStampedModel):
+class Program(ProgramCodeLabelsMixin, UUIDModel, TimeStampedModel):
     """An academic program (İxtisas) offered by the university.
 
     Optionally anchored to a specialty ``OrgUnit`` so the hierarchy
@@ -41,19 +46,30 @@ class Program(UUIDModel, TimeStampedModel):
     təkrarlana bilər — və istifadəçiyə GÖSTƏRİLMİR: uydurma açardır, insan
     üçün mənası yoxdur.
 
-    ``official_code`` — **RƏSMİ dövlət ixtisas kodu** (məs. ``060209``).
-    İstifadəçiyə göstərilən yeganə koddur; ``blank=True`` (hələ doldurulmamış
-    ola bilər) və QƏSDƏN UNİKAL DEYİL, çünki universitetdə bir rəsmi kod
-    həqiqətən bir neçə proqrama aid olur:
+    ÜÇ KOD — qarışdırılmamalıdır (tam izah: :mod:`._program_codes`)
+    -------------------------------------------------------------
+    ``code``
+        **DAXİLİ** sabit identifikator (``MYEDU-<legacy_id>``); tenant daxilində
+        unikaldır, köçürmə xəttinin (``apps.legacy_import``) indeks açarıdır və
+        istifadəçiyə **HEÇ VAXT GÖSTƏRİLMİR**.
+    ``official_code``
+        **CARİ** rəsmi dövlət şifri (NK 503/2024) — ``6XXXXXX``/``7XXXXXX``.
+    ``legacy_official_code``
+        **ƏVVƏLKİ** nəsil rəsmi şifr — ``050XXX``/``060XXX``; köhnə tələbələrin
+        diplomundakı şifr, ona görə silinmir.
 
-    * ``060209`` — dörd ayrı magistr psixologiya proqramı;
-    * ``050201`` — eyni ixtisasın AZ və EN bölmə variantları;
-    * ``050620`` — eyni ixtisasın əyani və qiyabi formaları.
+    Uyğunluq bire-bir DEYİL (ixtisas ləğv oluna, yenidən yarana və ya bölünə
+    bilər), ona görə iki sütun bir sütuna yığıla bilməz — bax miqrasiya
+    ``0061_program_legacy_official_code``.
 
-    Unikallıq qoyulsaydı bu real hallar bazaya yazıla bilməzdi; daxili
-    tək-mənalılıq isə onsuz da ``code``-un üzərindədir.
+    HƏR İKİSİ ``blank=True`` və QƏSDƏN UNİKAL DEYİL: bir rəsmi şifr həqiqətən
+    bir neçə proqrama aid olur (``7002013`` — dörd magistr psixologiya proqramı;
+    ``6002006`` — AZ/EN bölmə variantları; ``6006022`` — əyani/qiyabi formalar).
+    Daxili tək-mənalılıq onsuz da ``code``-un üzərindədir.
 
-    İstifadəçiyə göstərmək üçün HƏMİŞƏ :attr:`display_label` işlədilir.
+    İstifadəçiyə göstərmək üçün HƏMİŞƏ :attr:`display_label` (kompakt) və ya
+    :attr:`official_code_pair` (hər iki şifr) işlədilir — heç bir səthdə
+    sahələr ƏL İLƏ birləşdirilmir.
     """
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="programs")
@@ -69,16 +85,8 @@ class Program(UUIDModel, TimeStampedModel):
         max_length=32,
         help_text="Daxili sabit identifikator (tenant daxilində unikal) — istifadəçiyə göstərilmir.",
     )
-    official_code = models.CharField(
-        max_length=32,
-        blank=True,
-        db_index=True,
-        help_text=(
-            "Rəsmi dövlət ixtisas kodu (məs. 060209) — istifadəçiyə göstərilən koddur. "
-            "Unikal DEYİL: bir kod bir neçə proqrama (magistr istiqamətləri, AZ/EN "
-            "bölmələri, əyani/qiyabi formalar) aid ola bilər."
-        ),
-    )
+    official_code = official_code_field()
+    legacy_official_code = legacy_official_code_field()
     name = models.CharField(max_length=255)
     degree_level = models.CharField(max_length=16, choices=DegreeLevel.choices, default=DegreeLevel.BACHELOR)
     ects_total = models.PositiveIntegerField(
@@ -102,17 +110,6 @@ class Program(UUIDModel, TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=["organization", "code"], name="uniq_program_code_per_org"),
         ]
-
-    @property
-    def display_label(self) -> str:
-        """İstifadəçiyə göstərilən etiket: rəsmi kod varsa ``Ad · <kod>``, yoxsa ``Ad``.
-
-        Daxili :attr:`code` (``MYEDU-*``) buraya HEÇ VAXT daxil olmur. Rəsmi kod
-        boşdursa ayırıcı da yazılmır — asılı qalmış "Ad · " quyruğu olmamalıdır.
-        """
-        name = (self.name or "").strip()
-        official = (self.official_code or "").strip()
-        return f"{name} · {official}" if official else name
 
     def __str__(self):
         return self.display_label
@@ -260,6 +257,43 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeSta
         db_index=True,
         help_text="Akademik status (qeydiyyatlı / akademik məzuniyyət / xaric / məzun).",
     )
+    # ── Rəsmi davamiyyət istisnası: idmançı-tələbə (milli yığma) ─────────────
+    # «DAVAMİYYƏT BALININ HESABLANMASI» cədvəlinin qeydi: Gənclər və İdman
+    # Nazirliyinin Kollegiyası tərəfindən təsdiq edilmiş milli yığma komandaların
+    # üzvü olan idmançı-tələbələr 25% həddinə görə imtahana buraxılmamazlıq
+    # qaydasından İSTİSNA olunur.
+    #
+    # Bu, üzrlü qayıbdan (``LessonMark`` EXCUSED) FƏRQLİ mexanizmdir: üzrlü qayıb
+    # saatı ``Enrollment.absence_hours``-a heç vaxt daxil olmur, yəni həm balı,
+    # həm həddi dəyişir.  İstisna isə saatları olduğu kimi saxlayır və YALNIZ
+    # buraxılış qərarını ləğv edir — davamiyyət balı yenə real qayıba görə düşür
+    # (bax ``apps.registrar.attendance.attendance_score(exempt=...)``).
+    #
+    # ⚠️ Köçürmə bu sahəni AVTOMATİK DOLDURMUR.  Köhnə sistemdə istisna üçün
+    # struktur sahə yox idi (idman açar sözlü icazələr adi üzrlü qayıb kimi
+    # işlənirdi), ona görə tarixi datadan onu bərpa etmək olmaz.  Sahə yalnız
+    # gələcək semestrlərdə, dekanlığın rəsmi qərarı ilə əl ilə qoyulur.
+    #
+    # ⚠️ ``db_default`` QƏSDƏNDİR (yalnız ``default`` KİFAYƏT ETMİR).  Django
+    # ``default``-u tətbiq qatında tətbiq edir və miqrasiyadan sonra DB-dəki
+    # DEFAULT-u geri götürür; bu cədvələ isə XAM SQL ilə də INSERT edilir
+    # (köçürmə/RLS testləri, gələcək toplu COPY yolları).  ``db_default``
+    # olmasa həmin xam INSERT-lər NOT NULL pozuntusu ilə çökür.
+    national_athlete_exemption = models.BooleanField(
+        default=False,
+        db_default=False,
+        db_index=True,
+        help_text=(
+            "Milli yığma komandanın üzvü olan idmançı-tələbə — 25% qayıb həddi "
+            "imtahana buraxılışı ləğv etmir (bal yenə real qayıba görə hesablanır)."
+        ),
+    )
+    national_athlete_exemption_note = models.CharField(
+        max_length=255,
+        blank=True,
+        db_default="",
+        help_text="İstisnanın rəsmi əsası (Kollegiya qərarının nömrəsi/tarixi) — audit üçün.",
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     objects = models.Manager()
@@ -362,6 +396,29 @@ class Enrollment(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     absence_hours = models.PositiveSmallIntegerField(
         default=0, help_text="Bu fənn üzrə toplanmış üzrsüz qayıb saatı (qayıb limiti üçün)."
     )
+    # ── «Alt qrupdan əlavə olunub» (guest) provenansı ────────────────────────
+    # Tələbənin ÖZ qrupu açılışın qrupu DEYİLSƏ, koordinator/dekanlıq onu bu
+    # jurnala ƏLAVƏ qeydiyyatla salır. Yeni model YARADILMIR: jurnal onsuz da
+    # ``offering.enrollments``-dan qurulur, ona görə lazım olan tək şey MƏNBƏ
+    # işarəsidir. ``source_group`` doludursa sətir jurnalda «alt qrup» çipi ilə
+    # göstərilir; boşdursa adi (öz qrupundan) tələbədir.
+    source_group = models.ForeignKey(
+        "organizations.OrgUnit",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="guest_enrollments",
+        help_text="Doludursa: tələbə BU açılışa başqa (alt) qrupdan əlavə olunub — mənbə qrup.",
+    )
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="guest_enrollments_added",
+        help_text="Alt qrupdan əlavəni edən aktor (koordinator/dekanlıq).",
+    )
+    added_at = models.DateTimeField(null=True, blank=True, help_text="Alt qrupdan əlavə vaxtı.")
 
     objects = models.Manager()
 
@@ -382,6 +439,11 @@ class Enrollment(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
             models.Index(fields=["organization", "student"]),
             models.Index(fields=["offering", "status"]),
         ]
+
+    @property
+    def is_guest(self) -> bool:
+        """Bu sətir başqa (alt) qrupdan əlavə olunmuş tələbədirmi."""
+        return self.source_group_id is not None
 
     def clean(self):
         """Validate transfer lineage in Python; PostgreSQL repeats it in a trigger."""
