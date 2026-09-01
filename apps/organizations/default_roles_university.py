@@ -46,6 +46,13 @@ UNIVERSITY_ROLES = [
             *PEOPLE_DIRECTORY_READ,
             "people.manage_status",
             "people.manage_teacher_role",
+            # Tələbə idarəetməsi (qrup köçürməsi + akademik status) — prorektor
+            # org-scope-ludur, yəni bütün fakültələr üzrə səlahiyyətlidir.
+            "people.manage_academic",
+            # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
+            # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
+            # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
+            "journal.reassign",
             "analytics.view_all",
             "audit.view",
         ],
@@ -137,6 +144,13 @@ UNIVERSITY_ROLES = [
             # təsdiq zəncirini əvəz edən yeganə açar. Başqa rola lazım olsa
             # permission-editordan verilir.
             "journal.close",
+            # Jurnal siyahısının idarəsi (alt qrupdan əlavə/geri götürmə) —
+            # RİM org-wide operatordur, əməl audit olunur.
+            "journal.roster",
+            # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
+            # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
+            # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
+            "journal.reassign",
             # Sillabus axınının tam səlahiyyəti (idarə + qərar) — RİM sistemin
             # akademik operatorudur; hər əməl audit olunur.
             "syllabus.*",
@@ -147,6 +161,9 @@ UNIVERSITY_ROLES = [
             # Sahibin qərarı: «RİM mərkəzinin hər şeyə səlahiyyəti olsun» —
             # kataloqun tam dəsti (oxu + hesab dayandırma + müəllim statusu).
             *PEOPLE_DIRECTORY_FULL,
+            # RİM akademik operatordur: köçürmə/status əməllərini o da apara bilir
+            # (hər əməl audit olunur, rəsmi sübut zənciri dəyişmir).
+            "people.manage_academic",
             "appeal.respond",
             "appeal.decide",
             "qa.*",
@@ -233,6 +250,16 @@ UNIVERSITY_ROLES = [
             # `scope_unit` təyin edilməyibsə siyahı BOŞ qalır, fail-closed).
             *PEOPLE_DIRECTORY_READ,
             "people.manage_status",
+            # Dekanlığın əsas tələbə əməli: öz fakültəsi daxilində qrup
+            # köçürməsi və akademik status (məzuniyyət/xaric/məzun).
+            "people.manage_academic",
+            # Jurnal siyahısı: dekanlıq öz fakültəsinin jurnalına başqa (alt)
+            # qrupdan tələbə əlavə edə/geri götürə bilər (audited, scope-lu).
+            "journal.roster",
+            # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
+            # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
+            # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
+            "journal.reassign",
             "analytics.view_unit",
         ],
         "description": "Faculty dean managing a specific faculty",
@@ -261,6 +288,10 @@ UNIVERSITY_ROLES = [
             "syllabus.approve",
             "syllabus.revise",
             "syllabus.reject",
+            # Fənn təhvili: kafedra müdiri ÖZ KAFEDRASININ fənnini başqa müəllimə
+            # verə bilər (UNIT scope → yalnız öz alt-ağacı; `scope_unit` təyin
+            # edilməyibsə siyahı BOŞ qalır, fail-closed).
+            "journal.reassign",
             # Kataloq: kafedra müdiri öz kafedrasının müəllim/tələbəsini GÖRÜR.
             # Əməl açarları QƏSDƏN yoxdur — lazım olsa icazə redaktorundan verilir.
             "people.view_teachers",
@@ -361,6 +392,12 @@ UNIVERSITY_ROLES = [
             "course.view",
             "exam.view",
             "people.view_students",
+            # Koordinator öz ixtisasının qrupları arasında tələbə köçürür və
+            # akademik statusu qeyd edir (əhatə ixtisas alt-ağacı ilə məhduddur).
+            "people.manage_academic",
+            # Proqram koordinatorunun ƏSAS əməli: öz ixtisasının jurnallarına
+            # alt qrupdan tələbə əlavə etmək / geri götürmək (audited, scope-lu).
+            "journal.roster",
             "analytics.view_unit",
         ],
         "description": "Program coordinator curating a specialty/program (tutor-equivalent scope)",
