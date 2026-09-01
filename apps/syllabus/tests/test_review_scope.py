@@ -210,6 +210,56 @@ def test_breakdown_groups_by_the_requested_key(world):
     }
 
 
+def test_program_breakdown_carries_the_official_code(world):
+    """«Əhatə» tabında ixtisasın YANINDA rəsmi şifr olmalıdır.
+
+    Bloker idi: breakdown yalnız ``program__name`` seçirdi, ona görə kafedra
+    müdiri / dekan / rektorun gördüyü bütöv tabda bir dənə də şifr yox idi —
+    nə cədvəldə, nə də ondan qidalanan vahid filtri açılışında.
+
+    ``code``/``label`` sətrin ÖZ SƏTİRLƏRİDİR: cədvəl adı və şifri ayrıca
+    göstərir, filtr açılışı isə birləşmiş ``label``-i oxuyur.
+    """
+    program_a = world["stack_a"]["program"]
+    program_b = world["stack_b"]["program"]
+    program_a.name = "Kompüter mühəndisliyi"
+    program_a.official_code = "6006022"
+    program_a.legacy_official_code = "050631"
+    program_a.save(update_fields=["name", "official_code", "legacy_official_code"])
+    # Yeni təsnifatda LƏĞV olunmuş ixtisas — yalnız köhnə şifr.
+    program_b.name = "Dünya iqtisadiyyatı"
+    program_b.official_code = ""
+    program_b.legacy_official_code = "050401"
+    program_b.save(update_fields=["name", "official_code", "legacy_official_code"])
+
+    rows = services.coverage_breakdown(
+        organization=world["org"], actor=_actor(world["dean"], world["org"]), group_by=GROUP_PROGRAM
+    )["rows"]
+    by_key = {str(row["key"]): row for row in rows}
+
+    row_a = by_key[str(program_a.pk)]
+    assert row_a["code"] == "6006022"
+    assert row_a["label"] == "Kompüter mühəndisliyi · 6006022" == program_a.display_label
+
+    # Cari şifri olmayan ixtisas ŞİFRSİZ QALMIR — köhnə şifrə geri çəkilir.
+    row_b = by_key[str(program_b.pk)]
+    assert row_b["code"] == "050401"
+    assert row_b["label"] == "Dünya iqtisadiyyatı · 050401" == program_b.display_label
+
+
+def test_chair_breakdown_has_no_code(world):
+    """Struktur vahidinin rəsmi ixtisas şifri YOXDUR — uydurulmur."""
+    rows = services.coverage_breakdown(
+        organization=world["org"], actor=_actor(world["dean"], world["org"]), group_by=GROUP_CHAIR
+    )["rows"]
+    assert rows
+    for row in rows:
+        assert row["code"] == ""
+        # Kodsuz sətirdə asılı qalmış ayırıcı olmamalıdır.
+        assert row["label"] == row["name"]
+        assert " · " not in row["label"]
+
+
 # ── Növbənin filtr/sıralama səthi ──────────────────────────────────────────
 
 

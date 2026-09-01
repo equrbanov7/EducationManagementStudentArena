@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from django.utils import timezone
 
+from core.program_codes import program_display_code, program_display_label
+
 from ..constants import PERM_REVIEW, SyllabusStatus
 from ..models import Syllabus
 
@@ -29,9 +31,16 @@ GROUP_CHAIR = "chair"
 _IN_REVIEW = frozenset({SyllabusStatus.SUBMITTED.value, SyllabusStatus.REVIEW.value})
 
 #: Bir sətir üçün lazım olan sahələr — TƏK sorğu, N+1 yoxdur.
+#:
+#: Şifr sahələri BURADA çəkilir: breakdown sətirlərinin etiketi «Ad · şifr»
+#: olmalıdır (sahib: «ixtisasın yanında ixtisas kodları olsun»), və eyni etiket
+#: filtr açılışını da qidalandırır (``accounts.views.syllabus.review``). Onları
+#: sonradan model üzərindən oxumaq N+1 sorğu demək olardı.
 _ROW_FIELDS = (
     "program_id",
     "program__name",
+    "program__official_code",
+    "program__legacy_official_code",
     "chair_unit_id",
     "chair_unit__name",
     "period_id",
@@ -42,9 +51,28 @@ _ROW_FIELDS = (
     "approved_version_id",
 )
 
-_GROUP_FIELDS = {
-    GROUP_PROGRAM: ("program_id", "program__name"),
-    GROUP_CHAIR: ("chair_unit_id", "chair_unit__name"),
+
+def _program_bucket(row) -> tuple:
+    """Proqram sətrinin ``(ad, şifr)`` cütü — ``core.program_codes`` qaydası ilə.
+
+    Sahələr ƏL İLƏ birləşdirilmir: hər iki nəsil şifr saf funksiyaya verilir,
+    o da cari yoxdursa köhnəyə geri çəkilir.
+    """
+    return (
+        (row["program__name"] or "").strip(),
+        program_display_code(row["program__official_code"], row["program__legacy_official_code"]),
+    )
+
+
+def _chair_bucket(row) -> tuple:
+    """Kafedra sətrində şifr YOXDUR — struktur vahidinin rəsmi şifri yoxdur."""
+    return ((row["chair_unit__name"] or "").strip(), "")
+
+
+#: Qruplaşma açarı → (id sahəsi, sətirdən ``(ad, şifr)`` çıxaran funksiya).
+_GROUP_BUCKETS = {
+    GROUP_PROGRAM: ("program_id", _program_bucket),
+    GROUP_CHAIR: ("chair_unit_id", _chair_bucket),
 }
 
 
@@ -77,10 +105,18 @@ def has_review_scope(*, actor) -> bool:
     return bool(actor.scope_for(PERM_REVIEW).has_structure_access)
 
 
-def _blank(key, label: str) -> dict:
+def _blank(key, name: str, code: str = "") -> dict:
+    """Boş səbət.
+
+    ``name``/``code`` AYRI saxlanılır (cədvəl şifri ayrıca nişan kimi göstərir),
+    ``label`` isə ikisinin kanonik birləşməsidir — filtr açılışı və başlıq zolağı
+    məhz onu oxuyur, ona görə şifr ORADA DA görünür.
+    """
     return {
         "key": key,
-        "label": label,
+        "name": name,
+        "code": code,
+        "label": program_display_label(name, code),
         "total": 0,
         "approved": 0,
         "in_review": 0,
@@ -122,24 +158,29 @@ def aggregate_breakdown(rows, *, group_by: str = GROUP_PROGRAM, today) -> dict:
     Nəticə::
 
         {"group_by": str,
-         "rows": [{"key","label","total","approved","in_review","revision","late","percent"}…],
+         "rows": [{"key","name","code","label","total","approved","in_review",
+                   "revision","late","percent"}…],
          "totals": {… + "percent"}}
 
-    ``label`` BOŞ ola bilər (proqramı/kafedrası təyin edilməmiş dosye) — mətn
+    ``name`` BOŞ ola bilər (proqramı/kafedrası təyin edilməmiş dosye) — mətn
     qərarını UI qatı verir, domen «Təyin edilməyib» kimi sətir icad etmir.
+    ``code`` yalnız proqram qruplaşmasında dolur (struktur vahidinin rəsmi şifri
+    yoxdur); ``label`` isə ikisinin kanonik birləşməsidir.
     """
-    id_field, name_field = _GROUP_FIELDS.get(group_by, _GROUP_FIELDS[GROUP_PROGRAM])
+    id_field, bucket_parts = _GROUP_BUCKETS.get(group_by, _GROUP_BUCKETS[GROUP_PROGRAM])
     buckets: dict = {}
     totals = _blank("", "")
     for row in rows:
         key = row[id_field]
         bucket = buckets.get(key)
         if bucket is None:
-            bucket = buckets[key] = _blank(key, row[name_field] or "")
+            bucket = buckets[key] = _blank(key, *bucket_parts(row))
         _tally(bucket, row, today=today)
         _tally(totals, row, today=today)
 
-    ordered = sorted(buckets.values(), key=lambda item: (item["label"] == "", item["label"]))
+    # Sıralama ADA görədir, etiketə görə yox: şifrin əlavə olunması sıranı
+    # dəyişməməlidir (istifadəçi siyahını əlifba sırasında gözləyir).
+    ordered = sorted(buckets.values(), key=lambda item: (item["name"] == "", item["name"]))
     for bucket in ordered:
         bucket["percent"] = _percent(bucket)
     totals["percent"] = _percent(totals)

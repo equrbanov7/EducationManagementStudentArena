@@ -22,6 +22,8 @@ from .drafts import (  # noqa: F401
     create_next_version,
     import_migrated_version,
     recompute_completion,
+    refresh_pointers,
+    resolve_pointer_versions,
     save_section,
     section_data_map,
 )

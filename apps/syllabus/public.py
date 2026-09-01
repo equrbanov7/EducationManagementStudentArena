@@ -100,6 +100,7 @@ from .services import (
     can_view,
     coverage_report,
     has_review_scope,
+    import_migrated_version,
     list_syllabi,
     resolve_actor,
     review_queue,
@@ -269,6 +270,12 @@ def build_review_queue_context(
 
 __all__ = [
     "STATUS_CATALOG",
+    # ⚠️ İDXAL BORUSUNUN girişi — HTTP səthi DEYİL.  ``import_migrated_version``
+    # icazə yoxlamır (bax ``services.drafts`` docstring-i), ona görə yalnız
+    # köçürmə fazası / management əmri onu çağıra bilər; view qatı üçün
+    # ``create_draft``/``copy_from_previous`` var.  Fasadda olması
+    # ``apps.legacy_import``-un modulun DAXİLİNƏ girməməsi üçündür.
+    "import_migrated_version",
     "build_review_queue_context",
     "build_syllabus_editor_context",
     "build_syllabus_list_context",
