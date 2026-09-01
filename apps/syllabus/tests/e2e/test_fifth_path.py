@@ -26,7 +26,7 @@ def _assessment_block(data_map):
     return blocks
 
 
-def test_lit_flattening_is_reader_equivalent(editable):
+def test_lit_flattening_is_reader_equivalent(editable):  # noqa: F811
     """`lit.primary` siyahısı yastılanır — OXUCU üçün fərq VARMI?"""
     version = editable["version"]
     before = copy.deepcopy(section_data_map(version))
@@ -40,7 +40,7 @@ def test_lit_flattening_is_reader_equivalent(editable):
     ), "ədəbiyyat OXUCUYA fərqli çatır"
 
 
-def test_untouched_assessment_gains_a_score_split_the_source_never_had(editable):
+def test_untouched_assessment_gains_a_score_split_the_source_never_had(editable):  # noqa: F811
     """🔴 Müəllim SÜRÜŞDÜRÜCÜYƏ TOXUNMUR — yalnız `assess` bölməsi saxlanılır."""
     version = editable["version"]
     before = copy.deepcopy(section_data_map(version))

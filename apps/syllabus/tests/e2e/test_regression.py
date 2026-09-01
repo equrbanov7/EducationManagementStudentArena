@@ -20,14 +20,15 @@ EDITOR_JS = shipped_js_path().parent / "syllabus_editor.js"
 
 
 @pytest.fixture()
-def report(editable):
+def report(editable):  # noqa: F811
     request = RequestFactory().get("/profile/", {"section": "syllabus-editor"})
     request.user = editable["teacher"]
     se = build_syllabus_editor_section(
         request, organization=editable["org"], version=editable["version"]
     )["syllabus_editor_section"]
     html = "".join(render_to_string(n, {"se": se}) for n in PANEL_TEMPLATES)
-    hf = HERE / "r.html"; of = HERE / "r_out.json"
+    hf = HERE / "r.html"
+    of = HERE / "r_out.json"
     hf.write_text(html, encoding="utf-8")
     proc = subprocess.run(
         ["node", str(HERE / "regress.js"), str(hf), str(shipped_js_path()), str(EDITOR_JS), str(of)],
