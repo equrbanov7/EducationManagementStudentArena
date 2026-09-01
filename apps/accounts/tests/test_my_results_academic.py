@@ -19,6 +19,7 @@ from apps.organizations.models import AcademicPeriod, Membership, Organization, 
 from apps.registrar import finals, gradebook
 from apps.registrar import public as registrar_public
 from apps.registrar import services, transcript
+from apps.registrar.legacy_grade_read import LEGACY_EXAM_CENTER_WARNING, LEGACY_RESULT_CHECK_NOTICE
 from apps.registrar.models import (
     Curriculum,
     CurriculumSubject,
@@ -255,11 +256,15 @@ class MyResultsAcademicTest(TestCase):
 
         self.assertContains(resp, "Cari sistem üzrə hesablanmış nəticə")
         self.assertContains(resp, "Köhnə sistemdən köçürülmüş xam mənbə balları")
-        self.assertContains(resp, "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
+        self.assertContains(resp, str(LEGACY_RESULT_CHECK_NOTICE))
+        # Hər göstərilən xam Giriş/Çıxış/Yekun/Təkrar dəyəri qırmızı
+        # İmtahan Mərkəzi qeydi daşıyır (bu fikstürdə 7 dəyər).
+        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING), count=7)
+        self.assertContains(resp, 'class="result-legacy-fact__score-warning"', count=7)
         self.assertContains(resp, ">117<")
         self.assertContains(resp, ">37<")
 
-    def test_verified_legacy_fact_keeps_value_but_clears_red_review_warning(self):
+    def test_verified_legacy_fact_keeps_value_and_permanent_legacy_warning(self):
         fact = self._legacy_fact(
             source_pk=9010,
             entry_score_text="44",
@@ -283,7 +288,10 @@ class MyResultsAcademicTest(TestCase):
         self.assertEqual(legacy[0]["final_score"], "86")
         self.assertFalse(item["academic"]["legacy_grade_review_required"])
         self.assertContains(resp, "İmtahan Mərkəzi tərəfindən təsdiqlənib")
-        self.assertNotContains(resp, "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
+        # VERIFIED ayrı workflow statusudur; legacy-bal qeydi itməməlidir.
+        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING))
+        # MƏNŞƏ isə qalır — dəyər hələ də köhnə sistemdəndir.
+        self.assertContains(resp, "Köhnə sistemdən köçürülmüş xam mənbə balları")
 
     def test_exam_entry_exit_attempt_is_labelled_separately_with_type_and_date(self):
         fact = self._legacy_fact(
@@ -307,7 +315,8 @@ class MyResultsAcademicTest(TestCase):
         self.assertEqual(legacy[0]["legacy_attempt_type"], 3)
         self.assertContains(resp, "Cəhd tipi")
         self.assertContains(resp, "2022-04-01 09:00:00")
-        self.assertContains(resp, "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
+        self.assertContains(resp, str(LEGACY_RESULT_CHECK_NOTICE))
+        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING), count=2)
 
     # ── İl / semestr süzgəci ────────────────────────────────────────────────
     def test_filter_options_come_from_the_builder(self):

@@ -21,6 +21,8 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from core.program_codes import program_code_search_q
+
 from ._helpers import _role_capabilities
 
 MAX_PER_GROUP = 6
@@ -116,6 +118,18 @@ def _subject_group(organization, query):
 
 
 def _student_group(organization, query):
+    """Tələbə nəticələri — alt sətirdə GÖSTƏRİLƏN hər şey axtarıla bilər.
+
+    AXTARIŞ İNVARİANTI: alt sətir ``program.display_label`` çap edir («Dünya
+    iqtisadiyyatı · 050401»), ona görə süzgəc yalnız ad/username üzrə qala
+    bilməz — istifadəçi eyni qutuda GÖRDÜYÜ şifri yazanda sıfır nəticə alırdı.
+    ``program_code_search_q`` HƏR İKİ nəsil şifri əhatə edir; ``display_code``
+    köhnə şifrə geri çəkildiyi üçün tək ``official_code`` kifayət etmir.
+
+    Performans: ``program``/``group`` onsuz da ``select_related``-dədir, ona
+    görə ``program__*`` süzgəci ƏLAVƏ JOIN açmır (Django eyni forward-FK
+    join-unu təkrar istifadə edir) və sətir sayı ``MAX_PER_GROUP`` ilə kəsilir.
+    """
     Record = django_apps.get_model("registrar", "StudentAcademicRecord")
     qs = (
         Record.objects.filter(organization=organization)
@@ -124,6 +138,8 @@ def _student_group(organization, query):
             | Q(student__last_name__icontains=query)
             | Q(student__username__icontains=query)
             | Q(student__email__icontains=query)
+            | Q(program__name__icontains=query)
+            | program_code_search_q(query, prefix="program__")
         )
         .select_related("student", "program", "group")[:MAX_PER_GROUP]
     )

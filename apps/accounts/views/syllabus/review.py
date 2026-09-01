@@ -146,10 +146,15 @@ def _status_options(active: str):
 
 
 def _unit_options(coverage_rows, active: str):
-    """Filtr açılışı GÖRÜNƏN dəstdən qurulur — əhatədən kənar ad sızmır."""
+    """Filtr açılışı GÖRÜNƏN dəstdən qurulur — əhatədən kənar ad sızmır.
+
+    ``bucket["label"]`` cədvəldəki ilə EYNİ etiketdir (proqramda «Ad · şifr»),
+    ona görə açılışda da rəsmi ixtisas şifri görünür — istifadəçi cədvəldə
+    gördüyü şifri seçicidə də tanıyır.
+    """
     rows = [{"key": "", "label": UNIT_FILTER_ALL}]
     for bucket in coverage_rows:
-        if bucket["key"] is None or not bucket["label"]:
+        if bucket["key"] is None or not bucket["name"]:
             continue
         rows.append({"key": str(bucket["key"]), "label": bucket["label"]})
     for row in rows:
@@ -192,7 +197,7 @@ def _identity(request, *, scope_mode: str, coverage_rows):
     person = ""
     if user is not None:
         person = (user.get_full_name() or "").strip() or getattr(user, "username", "")
-    units = [bucket["label"] for bucket in coverage_rows if bucket["label"]]
+    units = [bucket["label"] for bucket in coverage_rows if bucket["name"]]
     if scope_mode == "chair" and units:
         scope = units[0]
     else:

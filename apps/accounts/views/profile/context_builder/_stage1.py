@@ -41,6 +41,7 @@ from ..contact_inbox import handle_contact_reply_post
 from ..post_handler import handle_profile_post
 from ._helpers import (
     _build_effective_user_roles,
+    _build_primary_position_label,
     _restore_profile_org_context,
     build_student_structure_levels,
     build_teacher_subject_rows,
@@ -129,7 +130,7 @@ class _Stage1Mixin:
             self.category_management_edit_form = self.post_result["category_management_edit_form"]
             self.category_management_edit_item = self.post_result["category_management_edit_item"]
         self.user_roles = _build_effective_user_roles(self.request.user, self.profile)
-        self.primary_user_role_label = self.user_roles[0]["label"] if self.user_roles else ""
+        self.primary_user_role_label = _build_primary_position_label(self.profile, self.user_roles)
         self.active_organization = _get_active_organization(self.request)
         self.organization_access_rows = _build_user_organization_access_rows(
             self.request.user,

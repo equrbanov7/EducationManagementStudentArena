@@ -1,0 +1,433 @@
+/* «Fənn təhvili» bölməsi (`journal.reassign`).
+ *
+ * QAYDALAR (CLAUDE.md + MEMORY):
+ *   • YALNIZ İŞIQLI tema — `prefers-color-scheme: dark` İŞLƏDİLMİR;
+ *   • rənglər mövcud `--ems-*` tokenlərindən gəlir, yeni rəng İCAD EDİLMİR;
+ *   • `--ems-primary-300` / `-400` MÖVCUD DEYİL — istinad yoxdur;
+ *   • müəllim seçiciləri VAHİD `ems-ss*` komponentindən gəlir
+ *     (static/css/searchable_select.css) — burada yalnız yerləşdirmə var.
+ *
+ * Struktur: addım-addım (1 → kimdən, 2 → hansı fənlər, 3 → kimə) + sabit əməl
+ * zolağı + iki modal (təsdiq, sətir üçün müəllim seçimi).
+ */
+
+.thx {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.thx__denied {
+    margin: 0;
+    padding: 16px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-bg-subtle, #f8fafc);
+    color: var(--ems-text-muted, #64748b);
+}
+
+/* ── Başlıq ──────────────────────────────────────────────────────────────── */
+
+.thx__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.thx__title {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx__intro {
+    margin: 0;
+    max-width: 68ch;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.thx__scope {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ── Tablar ──────────────────────────────────────────────────────────────── */
+
+.thx__tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--ems-border, #e2e8f0);
+}
+
+.thx__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.thx__tab:hover {
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.thx__tab.is-active {
+    color: var(--ems-primary-700, #1d4ed8);
+    border-bottom-color: var(--ems-primary-600, #2563eb);
+}
+
+.thx__tab:focus-visible,
+.thx-btn:focus-visible,
+.thx-table__link:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+.thx__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* `display: flex` HTML-in `hidden` atributunu üstələyir — qeyri-aktiv tab
+   görünməz qalsın deyə açıq şəkildə geri qaytarılır. */
+.thx__panel[hidden] {
+    display: none;
+}
+
+/* ── Addım kartları ──────────────────────────────────────────────────────── */
+
+.thx-step {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-bg, #fff);
+}
+
+.thx-step__no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #fff);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.thx-step__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.thx-step__label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-step__hint {
+    margin: 0;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.85rem;
+}
+
+.thx-step__control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.thx-step__control .ems-ss {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+/* ── Süzgəclər ───────────────────────────────────────────────────────────── */
+
+.thx-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    align-items: end;
+    gap: 10px;
+}
+
+.thx-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.thx-field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-field input,
+.thx-field select {
+    /* Bərabər hündürlük — layihə boyu forma elementləri eyni ölçüdədir. */
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 8px;
+    background: var(--ems-bg, #fff);
+    color: var(--ems-text, #0f172a);
+    font-size: 0.88rem;
+}
+
+.thx-field input:focus,
+.thx-field select:focus,
+.thx-dialog__reason:focus {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 1px;
+    border-color: var(--ems-primary-600, #2563eb);
+}
+
+.thx-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    font-size: 0.85rem;
+    color: var(--ems-text, #0f172a);
+    cursor: pointer;
+}
+
+/* ── Cədvəl ──────────────────────────────────────────────────────────────── */
+
+.thx-table__wrap {
+    /* Geniş məzmun ÖZ konteynerində sürüşür — səhifə üfüqi sürüşmür. */
+    overflow-x: auto;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+}
+
+.thx-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+    font-size: 0.87rem;
+}
+
+.thx-table--history {
+    min-width: 720px;
+}
+
+.thx-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 10px 12px;
+    background: var(--ems-bg-subtle, #f8fafc);
+    border-bottom: 1px solid var(--ems-border, #e2e8f0);
+    text-align: start;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ems-neutral-600, #475569);
+    white-space: nowrap;
+}
+
+.thx-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ems-neutral-100, #f1f5f9);
+    vertical-align: top;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.thx-table tbody tr.is-selected {
+    background: var(--ems-primary-50, #eff6ff);
+}
+
+.thx-table tbody tr.is-blocked {
+    background: var(--ems-neutral-50, #f8fafc);
+    color: var(--ems-text-muted, #64748b);
+}
+
+.thx-col-check {
+    width: 40px;
+}
+
+.thx-subject {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.thx-subject__code {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ems-text-muted, #64748b);
+    letter-spacing: 0.02em;
+}
+
+.thx-subject__name {
+    font-weight: 600;
+}
+
+.thx-impact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.thx-impact__chip {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.74rem;
+    white-space: nowrap;
+}
+
+.thx-target {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+.thx-target__name {
+    font-weight: 600;
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.thx-table__link {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--ems-link, #2563eb);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Bloklanmış sətir: RƏNGDƏN BAŞQA mətn də var (a11y — rəng tək daşıyıcı deyil). */
+.thx-blockers {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.thx-blockers li {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 5px;
+    color: var(--ems-warning-800, #92400e);
+    font-size: 0.76rem;
+}
+
+.thx-empty,
+.thx-loading {
+    padding: 26px 14px;
+    text-align: center;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.9rem;
+}
+
+/* Skeleton — ilk yükləmədə «boş cədvəl» təəssüratı olmasın. */
+.thx-skel {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        var(--ems-neutral-100, #f1f5f9) 25%,
+        var(--ems-neutral-200, #e2e8f0) 37%,
+        var(--ems-neutral-100, #f1f5f9) 63%
+    );
+    background-size: 400% 100%;
+    animation: thx-shimmer 1.4s ease infinite;
+}
+
+@keyframes thx-shimmer {
+    0% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .thx-skel {
+        animation: none;
+    }
+}
+
+/* ── Səhifələmə ──────────────────────────────────────────────────────────── */
+
+.thx-pager {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 0.84rem;
+    color: var(--ems-text-muted, #64748b);
+}
+
+/* ── Əməl zolağı ─────────────────────────────────────────────────────────── */
+
+.thx-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-primary-200, #bfdbfe);
+    border-radius: 12px;
+    background: var(--ems-primary-50, #eff6ff);
+}
+
+/* `display: flex` HTML-in `hidden` atributunu üstələyir — seçim yoxdursa zolaq
+   HƏQİQƏTƏN gizlənsin deyə açıq şəkildə geri qaytarılır (eyni tələ `.thx__panel`
+   üçün də var). */
+.thx-bar[hidden] {
+    display: none;
+}
+
+.thx-bar__text {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ems-primary-800, #1e40af);
+}

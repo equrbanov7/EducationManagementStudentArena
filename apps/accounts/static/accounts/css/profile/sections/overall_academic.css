@@ -322,6 +322,14 @@
     background: var(--ems-neutral-100);
     color: var(--ems-neutral-600);
 }
+/* Köhnə sistemdə nəticə yazılmayıb — boşluğun DÜRÜST adı (nə keçdi, nə kəsildi).
+   Kəsikli sərhəd: «bu qutu doldurulmayıb» hissini vizual olaraq daşıyır. */
+.oa-status.is-legacy {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    border: 1px dashed var(--ems-neutral-300);
+    cursor: help;
+}
 
 .oa-reason-badge {
     display: inline-flex;
@@ -395,6 +403,12 @@
     font-weight: 800;
     color: var(--ems-primary-700);
     line-height: 1.05;
+}
+/* «Hesablana bilmir» — rəqəm deyil, ona görə daha kiçik və neytral. */
+.oa-summary-n--na {
+    font-size: 0.9rem;
+    color: var(--ems-neutral-500);
+    cursor: help;
 }
 .oa-summary-l {
     font-size: 0.72rem;

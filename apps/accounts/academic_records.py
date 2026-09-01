@@ -54,7 +54,7 @@ from django.db.models import Q
 
 from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.organizations.scoping import UnitScope
-from apps.registrar import analytics, transcript
+from apps.registrar import analytics, exam_eligibility, transcript
 from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
 
 _TWO = Decimal("0.01")
@@ -90,11 +90,7 @@ def _fail_reason(result) -> str:
                  düsturu bir gün genişlənsə (məs. plagiat kəsri) susmaq əvəzinə
                  buraya düşsün.
     """
-    if result["barred"]:
-        return "qb"
-    if result["graded"] and not result["passed"]:
-        return "exam25"
-    return "other"
+    return exam_eligibility.fail_reason_code(result)
 
 
 def _is_ungraded(result) -> bool:
@@ -308,24 +304,30 @@ def _per_student(organization, student_ids, period_ids) -> dict:
 
 def _row(record, acc) -> dict:
     """Cədvəlin bir sətri (tələbə + akkumulyator)."""
-    gpa = _round2(acc["quality_points"] / acc["gpa_credits"]) if acc["gpa_credits"] else Decimal("0.00")
+    # ⚠️ Məxrəc yoxdursa "0.00" DEYİL, BOŞ — cədvəldə "—" görünür.  231 tələbənin
+    # bütün ÜOMG-daşıyan sətirləri köhnə sistemdə nəticəsizdir; sıfır yazmaq
+    # «sıfır bal aldı» iddiasıdır (2026-08-31 düşmən baxışı, 1-ci bloker).
+    gpa, gpa_available = exam_eligibility.uomg_from(acc["quality_points"], acc["gpa_credits"])
     student = record.student
     return {
         "student_id": str(record.student_id),
         "name": (student.get_full_name() or "").strip() or student.username,
         "username": student.username,
         "group": record.group.name if record.group_id else "—",
-        # Cədvəl sətrində ad + RƏSMİ dövlət ixtisas kodu birlikdə göstərilir
-        # (``display_label``); ``program_code`` xam kod kimi ayrıca qalır.
+        # Cədvəl sətrində ad + RƏSMİ dövlət ixtisas şifri birlikdə göstərilir
+        # (``display_label`` — cari şifr, yoxsa köhnə). ``program_code`` xam şifr
+        # kimi, ``program_code_full`` isə hər iki nəsil kimi ayrıca qalır.
         # Daxili ``Program.code`` (``MYEDU-*``) heç birində iştirak etmir.
         "program": record.program.display_label if record.program_id else "—",
-        "program_code": record.program.official_code if record.program_id else "",
+        "program_code": record.program.display_code if record.program_id else "",
+        # Tooltip üçün TAM etiket — ad + HƏR İKİ nəslin şifri.
+        "program_full": record.program.display_label_full if record.program_id else "",
         "credits_earned": acc["credits_earned"],
         "fails": acc["fails"],
         "qb": acc["qb"],
         "exam25": acc["exam25"],
         "ungraded": acc["ungraded"],
-        "gpa": str(gpa),
+        "gpa": str(gpa) if gpa_available else "",
     }
 
 
@@ -356,14 +358,19 @@ def _empty_summary() -> dict:
         "ungraded": 0,
         "quality_points": Decimal("0"),
         "gpa_credits": 0,
-        "avg_gpa": "0.00",
+        "avg_gpa": "",
+        "avg_gpa_available": False,
     }
 
 
 def _public_summary(box) -> dict:
     """Daxili akkumulyator sahələrini ataraq JSON-a hazır box qaytarır."""
     box = dict(box)
-    box["avg_gpa"] = str(_round2(box["quality_points"] / box["gpa_credits"]) if box["gpa_credits"] else Decimal("0.00"))
+    # ⚠️ Məxrəc yoxdursa "0.00" DEYİL, boş sətir + bayraq: JS «Hesablana bilmir»
+    # yazır.  Sıfır «pis nəticə» kimi oxunur (2026-08-31 düşmən baxışı, 1-ci bloker).
+    value, available = exam_eligibility.uomg_from(box["quality_points"], box["gpa_credits"])
+    box["avg_gpa"] = str(value) if available else ""
+    box["avg_gpa_available"] = available
     del box["quality_points"], box["gpa_credits"]
     return box
 

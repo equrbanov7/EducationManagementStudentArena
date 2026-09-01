@@ -62,9 +62,29 @@ from .exam_chance import exam_chance
 # İmtahan Mərkəzi — kağız imtahan balının əl ilə daxil edilməsi
 from .exam_score_entry import exam_score_entry
 
+# Fənn təhvili — dərs açılışının başqa müəllimə verilməsi (`journal.reassign`)
+from .handover import (
+    handover_action,
+    handover_history,
+    handover_offerings,
+    handover_options,
+    handover_teachers,
+)
+
 # RİM — semestr sonu jurnal bağlaması
 from .journal_close import journal_close
 from .kollokvium_windows import kollokvium_windows
+
+# İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi
+from .legacy_review import (
+    legacy_review_action,
+    legacy_review_groups,
+    legacy_review_options,
+    legacy_review_queue,
+    legacy_review_subjects,
+    legacy_review_teachers,
+    legacy_review_units,
+)
 
 # Organization views
 from .organization import (
@@ -76,12 +96,15 @@ from .organization import (
 
 # RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
 from .people import (
+    people_academic_groups,
     people_action,
     people_analytics,
     people_analytics_ai,
     people_detail,
     people_list,
     people_options,
+    people_student_card,
+    people_transfer_preview,
 )
 
 # Post management views
@@ -203,6 +226,23 @@ __all__ = [
     "people_action",
     "people_analytics",
     "people_analytics_ai",
+    "people_student_card",
+    "people_academic_groups",
+    "people_transfer_preview",
+    # Fənn təhvili (`journal.reassign`)
+    "handover_teachers",
+    "handover_offerings",
+    "handover_options",
+    "handover_history",
+    "handover_action",
+    # Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi (`final_score.entry`)
+    "legacy_review_queue",
+    "legacy_review_options",
+    "legacy_review_units",
+    "legacy_review_groups",
+    "legacy_review_subjects",
+    "legacy_review_teachers",
+    "legacy_review_action",
     "rim_user_search",
     "rim_user_detail",
     "rim_action",

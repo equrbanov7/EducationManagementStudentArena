@@ -26,6 +26,8 @@ from datetime import date
 
 from django.utils.translation import pgettext_lazy
 
+from core.program_codes import program_display_label
+
 from .analytics import (
     UNSET_LABEL,
     academic_year_start,
@@ -55,11 +57,19 @@ MAX_COURSE = 8
 
 
 def _program_label(row) -> str:
-    code = (row.get("program__code") or "").strip()
-    name = (row.get("program__name") or "").strip()
-    if code and name:
-        return f"{code} — {name}"
-    return name or code
+    """Filtr səbətinin etiketi: ``Ad · <rəsmi şifr>``.
+
+    ⚠️ DAXİLİ ``program__code`` (köçürmənin ``MYEDU-*`` açarı) BURADA
+    İŞLƏDİLMİR — o, istifadəçiyə göstərilməyən uydurma açardır və əvvəllər
+    məhz bu etiketdən sızırdı. Sahələr ƏL İLƏ birləşdirilmir: qayda
+    ``core.program_codes``-dadır və ``Program.display_label`` ilə eynidir
+    (cari NK 503 şifri yoxdursa köhnə şifrə geri çəkilir).
+    """
+    return program_display_label(
+        row.get("program__name"),
+        row.get("program__official_code"),
+        row.get("program__legacy_official_code"),
+    )
 
 
 def _course_counter(year_rows, *, today: date | None = None) -> Counter:
@@ -111,7 +121,10 @@ def build_student_analytics(*, actor, filters, request=None, today: date | None 
     group_rows = group_by("group_id", "group__name")
     faculty, kafedra, _unit = structure_counters(group_rows, organization=organization, id_key="group_id")
     group_counter = counter_from(group_rows, lambda row: (row.get("group__name") or "").strip())
-    program_counter = counter_from(group_by("program__code", "program__name"), _program_label)
+    program_counter = counter_from(
+        group_by("program__official_code", "program__legacy_official_code", "program__name"),
+        _program_label,
+    )
 
     year_rows = group_by("admission_year")
     year_counter = counter_from(year_rows, lambda row: str(row.get("admission_year") or "") or UNSET_LABEL)

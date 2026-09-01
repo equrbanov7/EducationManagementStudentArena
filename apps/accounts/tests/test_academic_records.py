@@ -22,7 +22,15 @@ from apps.accounts import academic_records as records_overview
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope
 from apps.registrar import finals, gradebook, services, transcript
-from apps.registrar.models import Curriculum, CurriculumSubject, LessonKind, Program, StudentAcademicRecord, Subject
+from apps.registrar.models import (
+    Curriculum,
+    CurriculumSubject,
+    LegacyGradeFact,
+    LessonKind,
+    Program,
+    StudentAcademicRecord,
+    Subject,
+)
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -422,6 +430,62 @@ class RecordsEndpointTest(_RecordsBase):
         payload = resp.json()
         self.assertTrue(payload["has_access"])
         self.assertTrue(len(payload["semesters"]) >= 1)
+
+    def test_student_detail_json_preserves_legacy_provenance_and_warning(self):
+        """AJAX serializer ``row.legacy``-ni atmamalıdır.
+
+        UI markeri bu lüğəti oxuyur; açar itməsinə görə əvvəllər serverdə fakt
+        olsa da akademik-qeyd modalında mənşə və qırmızı warning görünmürdü.
+
+        ``warning`` review statusundan asılı olmayan daimi legacy-bal
+        bildirişidir; fakt sonradan VERIFIED olsa da itməməlidir.
+        """
+        student = self.students_a[1]
+        enrollment = student.enrollments.get()
+        with bypass_rls():
+            LegacyGradeFact.objects.create(
+                organization=self.org,
+                enrollment=enrollment,
+                source_system="myedu_mariadb",
+                source_table="yekun",
+                source_pk=88001,
+                source_snapshot_sha256="a" * 64,
+                source_row_hash="b" * 64,
+                materialization_digest="c" * 64,
+                transform_version="rehearsal-v1",
+                evidence_kind="summary",
+                score_code="yekun",
+                mapping_status="linked",
+                source_enrollment_ref="records-json:student-a1",
+                entry_score_text="49",
+                exam_score_text="45",
+                resit_score_text="37",
+                final_score_text="94",
+            )
+
+        response = self._client(self.dean).get(
+            reverse("accounts:records_student_detail"),
+            {"student": str(student.pk)},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        rows = [row for semester in response.json()["semesters"] for row in semester["rows"]]
+        self.assertEqual(len(rows), 1)
+        legacy = rows[0]["legacy"]
+        self.assertEqual(
+            (legacy["raw_entry"], legacy["raw_exam"], legacy["raw_final"], legacy["raw_resit"]),
+            ("49", "45", "94", "37"),
+        )
+        self.assertEqual(legacy["warning"], "İmtahan Mərkəzi ilə dəqiqləşdirilsin")
+
+        # Eyni təşkilatdakı qonşu tələbəyə fakt sızmır.
+        neighbour = self._client(self.dean).get(
+            reverse("accounts:records_student_detail"),
+            {"student": str(self.students_a[2].pk)},
+        )
+        neighbour_rows = [row for semester in neighbour.json()["semesters"] for row in semester["rows"]]
+        self.assertTrue(neighbour_rows)
+        self.assertTrue(all(row["legacy"] is None for row in neighbour_rows))
 
     def test_dean_profile_page_renders_section(self):
         """Dekan üçün tam profil səhifəsi academic-records bölməsini render edir."""

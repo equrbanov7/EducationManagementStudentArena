@@ -237,6 +237,99 @@ class RowShapeTest(PeopleDirectoryTestBase):
         self.assertIn("Proqram A", row["program_label"])
         self.assertEqual(row["admission_year"], 2024)
 
+    def test_student_row_label_carries_the_official_program_code(self):
+        """MUTASİYA QAPISI — `students.py` sətir etiketi ŞİFRSİZ qala bilməz.
+
+        Əvvəlki test yalnız ``assertIn("Proqram A", …)`` yazırdı: etiket
+        qurucusu ``program_display_label(...)`` → ``program_name``-ə endirilsə
+        (şifr TAMAMİLƏ silinsə) test yenə keçirdi — mutasiya qaçırdı. Burada
+        etiket ``Program.display_label`` ilə TAM bərabərliyə bağlanır, ona görə
+        şifri atan hər dəyişiklik ÇÖKÜR.
+
+        Sabit sətir yazılmır: gözlənilən dəyər modelin öz xassəsindən gəlir, ona
+        görə etiket qaydası dəyişsə test qaydanı izləyir, köhnəlmir.
+        """
+        with bypass_rls():
+            Program = self.fx.program_a.__class__
+            Program.objects.filter(pk=self.fx.program_a.pk).update(
+                official_code="6006022", legacy_official_code="050631"
+            )
+            program = Program.objects.get(pk=self.fx.program_a.pk)
+            payload = people.build_students_page(actor=self.actor_for(self.fx.rector), filters=_filters())
+        row = next(r for r in payload["results"] if r["username"] == "ppl_student_a")
+
+        self.assertEqual(row["program_label"], program.display_label)
+        self.assertEqual(row["program_label"], "Proqram A · 6006022")
+        # Mutasiyanın öldürücü hissəsi: şifr etiketin İÇİNDƏ olmalıdır.
+        self.assertIn("6006022", row["program_label"])
+        self.assertNotEqual(row["program_label"], row["program_name"])
+
+    def test_student_row_label_falls_back_to_the_legacy_code(self):
+        """Yalnız-köhnə-şifrli ixtisas sətirdə ŞİFRSİZ görünə bilməz.
+
+        `program_code` annotasiyası (SQL ``Coalesce``/``NullIf``) `display_code`
+        ilə eyni geri çəkilməni etməlidir — əks halda ləğv olunmuş ixtisasın
+        tələbəsi kataloqda şifrsiz qalır.
+        """
+        with bypass_rls():
+            Program = self.fx.program_b.__class__
+            Program.objects.filter(pk=self.fx.program_b.pk).update(official_code="", legacy_official_code="050401")
+            program = Program.objects.get(pk=self.fx.program_b.pk)
+            payload = people.build_students_page(actor=self.actor_for(self.fx.rector), filters=_filters())
+        row = next(r for r in payload["results"] if r["username"] == "ppl_student_b")
+
+        self.assertEqual(row["program_label"], program.display_label)
+        self.assertEqual(row["program_label"], "Proqram B · 050401")
+
+    def test_student_row_label_has_no_dangling_separator_without_a_code(self):
+        """Şifrsiz ixtisasda ayırıcı ASILI qalmır (uydurma «—» da yoxdur)."""
+        with bypass_rls():
+            payload = people.build_students_page(actor=self.actor_for(self.fx.rector), filters=_filters())
+        row = next(r for r in payload["results"] if r["username"] == "ppl_student_a")
+        self.assertEqual(row["program_label"], "Proqram A")
+        self.assertNotIn("·", row["program_label"])
+
+    def test_students_can_be_found_by_the_program_code_shown_in_the_row(self):
+        """AXTARIŞ İNVARİANTI — kataloq sətri şifri GÖSTƏRİR, deməli AXTARIR da.
+
+        Bloker: operator cədvəldə «Proqram B · 050401» görürdü, eyni səhifənin
+        axtarış qutusuna «050401» yazanda SIFIR nəticə alırdı — `search_q`
+        yalnız şəxs sahələrinə (ad/username/email/FİN) baxırdı.
+        """
+        with bypass_rls():
+            Program = self.fx.program_a.__class__
+            Program.objects.filter(pk=self.fx.program_a.pk).update(
+                official_code="6006022", legacy_official_code="050631"
+            )
+            Program.objects.filter(pk=self.fx.program_b.pk).update(official_code="", legacy_official_code="050401")
+
+        for query, expected in (
+            ("6006022", {"ppl_student_a"}),  # cari nəsil şifr
+            ("050631", {"ppl_student_a"}),  # köhnə nəsil şifr (diplomdakı)
+            ("050401", {"ppl_student_b"}),  # YALNIZ köhnə şifrli ixtisas
+            ("Proqram B", {"ppl_student_b"}),  # ixtisasın adı
+        ):
+            with self.subTest(query=query):
+                _payload, names = self.student_names(self.fx.rector, q=query)
+                self.assertEqual(names, expected)
+
+    def test_program_code_search_still_ands_the_other_tokens(self):
+        """«ad + şifr» qarışıq sorğu AND semantikasını POZMUR."""
+        with bypass_rls():
+            Program = self.fx.program_a.__class__
+            Program.objects.filter(pk=self.fx.program_a.pk).update(official_code="6006022")
+
+        _payload, hit = self.student_names(self.fx.rector, q="Aysel 6006022")
+        self.assertEqual(hit, {"ppl_student_a"})
+        # Başqa tələbənin adı + bu şifr → heç nə (AND, OR deyil).
+        _payload, miss = self.student_names(self.fx.rector, q="Bəxtiyar 6006022")
+        self.assertEqual(miss, set())
+
+    def test_teacher_catalog_search_is_unchanged(self):
+        """Müəllim kataloqunda ixtisas anlayışı yoxdur — `extra` ora sızmır."""
+        _payload, names = self.teacher_names(self.fx.rector, q="Əli")
+        self.assertEqual(names, {"ppl_teacher_a"})
+
     def test_initials_replace_missing_avatar(self):
         with bypass_rls():
             payload = people.build_teachers_page(actor=self.actor_for(self.fx.rector), filters=_filters())

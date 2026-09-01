@@ -120,10 +120,12 @@
                         <h2><i class="fas fa-sitemap" aria-hidden="true"></i> {% trans 'Struktur məlumatı' %}</h2>
                     </div>
                     <dl class="public-profile-facts">
+                        {% if admin_position_label %}
                         <div class="public-profile-facts__row">
-                            <dt>{% trans 'Rol' %}</dt>
-                            <dd>{{ admin_membership.role.display_name }}</dd>
+                            <dt>{% trans 'Vəzifə' context 'profile.public' %}</dt>
+                            <dd>{{ admin_position_label }}</dd>
                         </div>
+                        {% endif %}
                         <div class="public-profile-facts__row">
                             <dt>{% trans 'Bölmə' %}</dt>
                             <dd>{% if admin_membership.scope_unit %}{{ admin_membership.scope_unit.name }}{% else %}{% trans 'Hamısı' %}{% endif %}</dd>

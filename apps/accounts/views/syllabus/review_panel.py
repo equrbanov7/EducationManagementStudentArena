@@ -234,7 +234,7 @@ def build_review_payload(version, *, now) -> dict:
             filter(
                 None,
                 [
-                    syllabus.program.name if syllabus.program_id else "",
+                    syllabus.program.display_label if syllabus.program_id else "",
                     person(syllabus.author or version.submitted_by),
                     str(_SUBMITTED_META)
                     % {"sent": _stamp(version.submitted_at), "percent": version.completion_percent or 0},

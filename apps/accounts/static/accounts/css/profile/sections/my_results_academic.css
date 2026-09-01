@@ -187,10 +187,12 @@
     color: var(--ems-danger-strong);
 }
 
-/* --- Legacy xam bal sübutu (cari hesabdan qəti ayrıdır) --- */
+/* --- Legacy xam bal sübutu (cari hesabdan qəti ayrıdır) ---
+   Panel neytral qalır, amma hər xam dəyərin daimi İmtahan Mərkəzi qeydi
+   sahibin tələbinə uyğun olaraq qırmızıdır. */
 .result-legacy-grade {
     margin-top: 0.75rem;
-    border: 1px solid var(--ems-danger-200);
+    border: 1px solid var(--ems-border);
     border-radius: 10px;
     background: var(--ems-bg);
     overflow: hidden;
@@ -202,8 +204,8 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.7rem 0.8rem;
-    background: var(--ems-danger-100);
-    color: var(--ems-danger-strong);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-800);
     cursor: pointer;
     font-size: 0.82rem;
     font-weight: 700;
@@ -214,11 +216,6 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
-}
-
-.result-legacy-grade__summary-warning {
-    font-size: 0.72rem;
-    font-weight: 800;
 }
 
 .result-legacy-grade__summary:focus-visible {
@@ -304,11 +301,25 @@
     font-weight: 700;
 }
 
+.result-legacy-fact__score-warning {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--ems-danger-strong);
+    font-size: 0.64rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+/* Faktın YOXLAMA STATUSU — «gözlənilir» qırmızı DEYİL.
+   Qırmızı ekranda «kəsilib» deməkdir; gözləyən yoxlama isə uğursuzluq deyil,
+   informativ vəziyyətdir və mavi qeydlə eyni ailədə oxunmalıdır (bax
+   `_legacy_grade_notice.html`-dəki rəng qərarı).  Təsdiqlənmiş fakt yaşıla
+   keçir — ton dəyişməsi statusun ÖZÜNÜ daşıyır. */
 .result-legacy-fact__review {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: var(--ems-danger-strong);
+    color: var(--ems-primary-700);
     font-weight: 700;
 }
 

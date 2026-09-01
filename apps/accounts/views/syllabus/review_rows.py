@@ -124,7 +124,7 @@ def build_queue_row(version, *, now, policy_breach: bool = False) -> dict:
         "detail_label": DETAIL_LABEL,
         "code": syllabus.subject.code,
         "name": syllabus.subject.name,
-        "program": syllabus.program.name if syllabus.program_id else str(_NO_PROGRAM),
+        "program": syllabus.program.display_label if syllabus.program_id else str(_NO_PROGRAM),
         "teacher": person(syllabus.author or version.submitted_by),
         "chair": syllabus.chair_unit.name if syllabus.chair_unit_id else str(_NO_CHAIR),
         "sent": version.submitted_at,

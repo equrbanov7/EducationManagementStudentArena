@@ -365,6 +365,22 @@
     resize: vertical;
 }
 
+/* Çox sətirli dəyər daşıyan, amma sətir hündürlüyündə görünməli sahələr.
+   Bunlar əvvəllər `<input type="text">` idi — HTML-in «value sanitization»
+   addımı input-un dəyərindən CR/LF-i SİLDİYİ üçün köçürülmüş mətnin sətir
+   strukturu ilk avtosaxlamada itirdi.  Görünüş input ilə eyni qalsın deyə
+   hündürlük burada bərabərləşdirilir. */
+.syl-textarea--outcome {
+    min-height: 40px;
+    padding: 9px 12px;
+}
+
+.syl-textarea--slim {
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 0.81rem;
+}
+
 .syl-input:disabled,
 .syl-select:disabled,
 .syl-textarea:disabled {

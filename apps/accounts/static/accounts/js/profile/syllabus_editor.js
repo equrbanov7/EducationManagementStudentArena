@@ -368,14 +368,17 @@
     }
 
     /* ── Təlim nəticələri ─────────────────────────────────────────────── */
+    /* ⚠️ Klon mənbəyi OLMAYA BİLƏR: `outcomes == []` olan 2,157 köçürülmüş
+       sillabusda (və hər YENİ qaralamada) 0 sətir render olunur.  Əvvəllər
+       funksiya məhz burada səssizcə qayıdırdı — düymə ölü idi. */
     function addOutcome(el) {
         var api = fields();
         var box = el ? el.querySelector("[data-syl-outcomes]") : null;
         var sample = box ? box.querySelector("[data-syl-outcome]") : null;
-        if (!api || !box || !sample) {
+        if (!api || !box) {
             return;
         }
-        var row = sample.cloneNode(true);
+        var row = sample ? sample.cloneNode(true) : api.makeOutcomeRow(box);
         var input = row.querySelector("[data-outcome]");
         if (input) {
             input.value = "";
@@ -444,30 +447,51 @@
                 api.refresh(el);
                 queue(el, api.sectionOf(node), false);
             });
+        /* `data-touched` — MÜƏLLİMİN ƏMƏLİNİN yeganə sübutu.  `collectAssess`
+           bal açarlarını yalnız bu bayraq varsa göndərir (bax həmin funksiya);
+           bayraq dəyər hadisəsində qoyulduğu üçün 0 SEÇMƏK də toxunmaqdır. */
         on("change", "select[data-week], [data-syl-midterm]", function (event, node) {
             var el = root();
             var api = fields();
             if (!api) {
                 return;
             }
+            node.setAttribute("data-touched", "1");
             api.refresh(el);
             queue(el, api.sectionOf(node), true);
         });
-        on("input", "[data-syl-midterm]", function () {
+        on("input", "[data-syl-midterm]", function (event, node) {
             var api = fields();
+            node.setAttribute("data-touched", "1");
             if (api) {
                 api.refresh(root());
             }
         });
 
+        /* Kataloq çipi: gövdəsinə klik vəziyyəti çevirir.
+           «Kataloqda olmayan» (köçürülmüş) çip İSTİSNADIR — onun mətni köhnə
+           sistemdən gəlir və bir səhv kliklə itməməlidir, ona görə gövdə klik
+           qəbul etmir; yalnız aşağıdakı «Çıxar / Geri qaytar» düyməsi işləyir. */
         on("click", "[data-syl-method]", function (event, button) {
             var el = root();
-            if (button.disabled) {
+            if (button.disabled || button.hasAttribute("data-syl-method-custom")) {
                 return;
             }
             var on_ = !button.classList.contains("is-on");
             button.classList.toggle("is-on", on_);
             button.setAttribute("aria-pressed", on_ ? "true" : "false");
+            queue(el, "method", true);
+        });
+        on("click", "[data-syl-method-drop]", function (event, button) {
+            var el = root();
+            var chip = button.closest ? button.closest("[data-syl-method]") : null;
+            if (button.disabled || !chip) {
+                return;
+            }
+            var on_ = !chip.classList.contains("is-on");
+            chip.classList.toggle("is-on", on_);
+            /* Mətn şablondan gəlir (xarici .js-də mətn yazılmır). */
+            button.textContent = button.getAttribute(on_ ? "data-t-drop" : "data-t-restore") || "";
             queue(el, "method", true);
         });
         on("click", "[data-syl-selfwork]", function (event, button) {

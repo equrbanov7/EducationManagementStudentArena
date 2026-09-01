@@ -356,6 +356,16 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "teaching-handover" in self.allowed_sections and self.active_section == "teaching-handover":
+            from .._sections.handover import build_handover_section
+
+            build_handover_section(
+                self.request,
+                self.handover_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-score-entry" in self.allowed_sections and self.active_section == "exam-score-entry":
             from .._sections.exam_score_entry import build_exam_score_entry_section
 
@@ -364,6 +374,15 @@ class _Stage3Mixin:
                 self.exam_score_entry_section,
                 is_superadmin=self.capabilities["is_superadmin"],
                 active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "legacy-grade-review" in self.allowed_sections and self.active_section == "legacy-grade-review":
+            from .._sections.legacy_grade_review import build_legacy_grade_review_section
+
+            build_legacy_grade_review_section(
+                self.request,
+                self.legacy_grade_review_section,
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )

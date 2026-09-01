@@ -60,6 +60,18 @@
     </a>
 </li>
 {% endif %}
+{% if 'legacy-grade-review' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=legacy-grade-review"
+       data-section="legacy-grade-review"
+       data-title="{% trans 'Köçürülmüş nəticələrin dəqiqləşdirilməsi' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'legacy-grade-review' %}active{% endif %}">
+        <i class="fas fa-clock-rotate-left sidebar-menu-icon sidebar-menu-icon--danger"></i>
+        <span class="sidebar-menu-text">{% trans 'Köçürülmüş nəticələr' context 'profile.section' %}</span>
+    </a>
+</li>
+{% endif %}
 {% if 'kollokvium-windows' in allowed_sections %}
 <li class="sidebar-menu-item">
     <a href="{{ profile_base_url }}?section=kollokvium-windows"

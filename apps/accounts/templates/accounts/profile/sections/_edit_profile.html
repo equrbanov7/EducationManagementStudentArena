@@ -103,7 +103,7 @@
                 {% for record in student_records %}
                 <div class="info-item info-item--locked">
                     <div class="info-label"><i class="fas fa-user-graduate"></i> {% trans 'İxtisas' %}</div>
-                    <div class="info-value info-value--readonly">{{ record.program.display_label }}</div>
+                    <div class="info-value info-value--readonly">{{ record.program.display_label_full }}</div>
                 </div>
                 {% if record.group %}
                 <div class="info-item info-item--locked">

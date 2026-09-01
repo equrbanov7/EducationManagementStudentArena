@@ -61,6 +61,17 @@
     function actionsCell(row, person, flags) {
         var cell = document.createElement("td");
         cell.className = "people__cell-actions";
+        /* «İdarə et» — tələbə idarəetmə çekməcəsini açır (people_academic.js).
+         * Burada YALNIZ düymə qoyulur: bu modul çekməcədən xəbərsizdir, o modul
+         * isə düyməni sənəd səviyyəsində delegasiya ilə tutur. */
+        if (flags.canManageAcademic && person.kind === "student") {
+            var manage = document.createElement("button");
+            manage.type = "button";
+            manage.className = "people__action people__action--manage";
+            manage.dataset.psmOpen = person.id;
+            manage.textContent = flags.manageLabel;
+            cell.appendChild(manage);
+        }
         var buttons = [];
         if (flags.canManageStatus && person.status === "active") {
             buttons.push(["block", "Dayandır"]);
@@ -106,7 +117,9 @@
             canViewContacts: root.dataset.canViewContacts === "1",
             canViewDemographics: root.dataset.canViewDemographics === "1",
             canManageStatus: root.dataset.canManageStatus === "1",
-            canManageTeacherRole: root.dataset.canManageTeacherRole === "1"
+            canManageTeacherRole: root.dataset.canManageTeacherRole === "1",
+            canManageAcademic: root.dataset.canManageAcademic === "1",
+            manageLabel: root.dataset.i18nManage || ""
         };
         var form = root.querySelector("[data-people-filters]");
         var tbody = root.querySelector("[data-people-rows]");
@@ -229,7 +242,7 @@
                     textCell(row, demo.join(", "));
                 }
                 textCell(row, person.status);
-                if (flags.canManageStatus || flags.canManageTeacherRole) {
+                if (flags.canManageStatus || flags.canManageTeacherRole || flags.canManageAcademic) {
                     actionsCell(row, person, flags);
                 }
                 tbody.appendChild(row);
@@ -321,6 +334,12 @@
             if (action) {
                 runAction(root, urls, action.dataset.peopleAction, action.dataset.peopleTarget, load);
             }
+        });
+
+        /* Xarici modul (tələbə idarəetməsi) əməli tamamlayanda cədvəl yerində
+         * yenilənsin — tam səhifə yükləməsi olmasın. */
+        root.addEventListener("people:refresh", function () {
+            load();
         });
 
         loadOptions();

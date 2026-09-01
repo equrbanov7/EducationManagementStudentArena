@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.db.models import Exists, OuterRef, Subquery
 
 from apps.organizations.scoping import scope_memberships_by_unit
+from core.staff_position import resolve_position_label
 
 from . import filters as people_filters
 from .constants import DEFAULT_PAGE_SIZE, TEACHER_ROLE_NAMES, TEACHER_SORT_OPTIONS
@@ -183,8 +184,16 @@ def build_teachers_page(*, actor, filters, request=None, today=None) -> dict:
             {
                 "kind": "teacher",
                 "role_name": getattr(user, "role_name", "") or "",
-                "role_label": getattr(user, "role_label", "") or "",
-                "title": getattr(user, "member_title", "") or "",
+                # ⚠️ Doldurucu «Üzv» rolu etiket kimi ÖTÜRÜLMÜR — vəzifəsiz
+                # müəllimdə sütun boş qalır (bax core/staff_position.py).
+                "role_label": resolve_position_label(
+                    role_name=getattr(user, "role_name", "") or "",
+                    role_label=getattr(user, "role_label", "") or "",
+                ),
+                "title": resolve_position_label(
+                    title=getattr(user, "member_title", "") or "",
+                    staff_position=getattr(getattr(user, "profile", None), "staff_position", "") or "",
+                ),
                 "unit_name": unit.get("unit", "") or (getattr(user, "unit_name", "") or ""),
                 "faculty_name": unit.get("faculty", ""),
                 "kafedra_name": unit.get("kafedra", ""),

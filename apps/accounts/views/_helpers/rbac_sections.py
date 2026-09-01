@@ -43,7 +43,8 @@ def apply_permission_section_gates(
     Qaytarılan bayraqlar ``_role_capabilities`` cavabına düşür (şablonlar və
     testlər onlara söykənir): ``can_view_audit``, ``can_use_rim_center``,
     ``can_view_people_teachers``, ``can_view_people_students``, ``can_view_syllabus``,
-    ``can_edit_syllabus``, ``can_review_syllabus``.
+    ``can_edit_syllabus``, ``can_review_syllabus``, ``can_reassign_teaching``,
+    ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
@@ -86,6 +87,28 @@ def apply_permission_section_gates(
     # yenidən süzülür (əhatəsiz istifadəçi boş vəziyyət görür).
     can_review_syllabus = privileged or has_permission(permissions, "syllabus.review")
 
+    # «Fənn təhvili» — `journal.reassign`. Menyu görünürlüyü YALNIZ açara baxır;
+    # KONKRET fənnin təhvil oluna bilməsi (öz fakültəsindədirmi, jurnal bağlıdırmı,
+    # semestr keçmişdirmi) `apps/registrar/handover.py`-da fail-closed yenidən
+    # yoxlanılır. Açarı olan, amma `scope_unit`-i təyin edilməmiş UNIT rolu
+    # bölməni görür və BOŞ siyahı alır — səssiz 403 əvəzinə anlaşılan boşluq.
+    can_reassign_teaching = privileged or has_permission(permissions, "journal.reassign")
+
+    # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — İKİ AÇAR, QƏSDƏN FƏRQLİ ROLDA:
+    #
+    #   `final_score.entry`  → növbəni görür VƏ qərar/düzəliş yaza bilir. Bu,
+    #     ``LegacyGradeReview`` modelinin ÖZ qapısıdır (LEGACY_GRADE_REVIEW_PERMISSION)
+    #     və ``exam_score_entry``-nin də qapısıdır. Başqa açar seçsəydik düymə
+    #     görünər, əməl isə modeldə səssizcə 403 alardı.
+    #   `journal.correct`    → yalnız OXU. İKT rəhbəri düzəliş mədəniyyətinin
+    #     sahibidir və növbəni izləməlidir, amma köhnə RƏSMİ balın qərarını
+    #     imtahan mərkəzi verir. Səth ona «oxu rejimi» qeydini AÇIQ göstərir.
+    #
+    # Yazı qapısı burada DEYİL — `views/legacy_review/actions.py` ayrıca
+    # `can_review`-a baxır və model qatı üçüncü dəfə fail-closed yoxlayır.
+    can_review_legacy_grades = privileged or has_permission(permissions, "final_score.entry")
+    can_watch_legacy_grades = can_review_legacy_grades or has_permission(permissions, "journal.correct")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -94,6 +117,8 @@ def apply_permission_section_gates(
         (can_view_syllabus, "syllabus-list"),
         (can_view_syllabus, "syllabus-editor"),
         (can_review_syllabus, "syllabus-review"),
+        (can_reassign_teaching, "teaching-handover"),
+        (can_watch_legacy_grades, "legacy-grade-review"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -106,6 +131,9 @@ def apply_permission_section_gates(
         "can_view_syllabus": can_view_syllabus,
         "can_edit_syllabus": can_edit_syllabus,
         "can_review_syllabus": can_review_syllabus,
+        "can_reassign_teaching": can_reassign_teaching,
+        "can_review_legacy_grades": can_review_legacy_grades,
+        "can_watch_legacy_grades": can_watch_legacy_grades,
     }
 
 

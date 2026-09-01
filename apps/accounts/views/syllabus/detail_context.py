@@ -109,7 +109,7 @@ def _approver_text(version) -> str:
 def _identity_rows(syllabus, version) -> list:
     period = syllabus.period
     values = {
-        "program": syllabus.program.name if syllabus.program_id else _DASH,
+        "program": syllabus.program.display_label if syllabus.program_id else _DASH,
         "chair": syllabus.chair_unit.name if syllabus.chair_unit_id else _DASH,
         "year": (period.year_display if period is not None else _DASH) or _DASH,
         "period": (period.name if period is not None else _DASH) or _DASH,

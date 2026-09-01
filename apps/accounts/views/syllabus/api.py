@@ -157,6 +157,12 @@ def _do_create(request, organization, actor, payload):
         offering=offering,
         chair_unit=getattr(offering.group, "parent", None) if offering.group_id else None,
         author=request.user,
+        # BOŞ ÖTÜRÜLÜR VƏ BU DOĞRUDUR: ``CourseOffering`` yalnız `lesson_hours`
+        # CƏMİNİ daşıyır, `lecture/seminar/lab` bölgüsünü yox.  Uydurma bölgü
+        # yazmaqdansa boş buraxırıq; `completion._check_week` plan verilməyəndə
+        # saat balansını yoxlamır (bax `test_completion_plan_hours.py`).
+        # Bölgü modelləşəndə (apps/workload ↔ apps/syllabus müqaviləsi) burada
+        # ötürülməlidir və qayda öz-özünə yenidən işə düşəcək.
         plan_hours={},
         request=request,
     )

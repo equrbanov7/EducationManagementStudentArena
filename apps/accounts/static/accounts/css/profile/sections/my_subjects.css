@@ -206,6 +206,9 @@
 
 .exam-status--ok { color: var(--ems-success-600); }
 .exam-status--barred { color: var(--ems-danger-strong); }
+/* Tarixi (köçürülmüş + bağlı) semestr: status hesablanmır, köhnə sistemin
+   nəticəsi göstərilir. Neytral ton — nə uğur, nə xəbərdarlıq. */
+.exam-status--legacy { color: var(--ems-neutral-600); cursor: help; }
 
 .subject-content-link {
     display: inline-flex;

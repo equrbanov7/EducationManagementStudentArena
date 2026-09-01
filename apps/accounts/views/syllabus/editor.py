@@ -16,10 +16,10 @@ CONTEXT MÜQAVİLƏSİ — ``syllabus_editor_section`` (dict)
     issues       [{section,section_title,text}]
     summary      [{label,value,tone}]
     history      [{title,meta,tone}]
-    selfwork     {options,disallowed,total_score}
-    methods      [str]
+    selfwork     {option,options,slots,planned_count,extra_count,archived,total_score}
+    methods      {catalog:[{label,value,active}], custom:[…], custom_count}
     plan_hours   {lecture,seminar,lab,total}
-    week_rows    [{index,topic,lecture,seminar,lab,outcome}]
+    week_rows    [{index,topic,lecture,seminar,lab,outcome,cells,extra,is_extra}]
     can_submit   bool
     urls         {save,action,list}
 """
@@ -30,13 +30,10 @@ from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
 from apps.syllabus.constants import (
-    LESSON_HOUR_KINDS,
     MIN_DESCRIPTION_CHARS,
     MIN_GOAL_CHARS,
     MIN_OUTCOMES,
     RULE_SECTIONS,
-    SELFWORK_DISALLOWED,
-    SELFWORK_OPTIONS,
     SELFWORK_TOTAL_SCORE,
     WEEK_ROWS,
     SectionKey,
@@ -44,7 +41,8 @@ from apps.syllabus.constants import (
 )
 from apps.syllabus.public import build_syllabus_editor_context
 
-from .labels import HOUR_KIND_LABELS, STATUS_TONES, issue_text
+from . import editor_panels as panels_builder
+from .labels import STATUS_TONES, issue_text
 from .preview import build_preview_blocks
 
 _CTX = "accounts.syllabus"
@@ -171,110 +169,15 @@ _NOT_SELECTED = pgettext_lazy(_CTX, "seçilməyib")
 _COMPLETION_NOTE = pgettext_lazy(_CTX, "%(done)s / %(total)s bölmə biznes qaydalarına uyğundur")
 
 
-def _int(value) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
-
-def _week_rows(data) -> list:
-    """``week`` bölməsinin 16 sətrini normallaşdırır (əskik sətir = boş sətir)."""
-    raw = [row for row in (data.get("rows") or []) if isinstance(row, dict)]
-    rows = []
-    for index in range(WEEK_ROWS):
-        source = raw[index] if index < len(raw) else {}
-        row = {"index": index + 1, "topic": (source.get("topic") or "").strip(), "outcome": source.get("outcome") or ""}
-        for kind in LESSON_HOUR_KINDS:
-            row[kind] = _int(source.get(kind))
-        # Şablon xüsusi filtr yazmadan dövr edə bilsin deyə saat xanaları hazır
-        # siyahı kimi verilir (`{{ row|dictkey:… }}` kimi tələ qalmır).
-        row["cells"] = [
-            {"key": kind, "label": HOUR_KIND_LABELS[kind], "value": row[kind]} for kind in LESSON_HOUR_KINDS
-        ]
-        rows.append(row)
-    return rows
-
-
-#: Həftəlik cədvəldəki saat seçimləri (dizayn: «—», 1 s … 4 s).
-HOUR_CHOICES = (0, 1, 2, 3, 4)
-
-
-def _outcome_tags(data) -> list:
-    """Mövcud təlim nəticələrinin etiketləri — həftə sətrinin açılış siyahısı."""
-    count = len([item for item in (data.get("outcomes") or []) if str(item).strip()])
-    return [f"TN{index}" for index in range(1, count + 1)]
-
-
-def _hour_totals(week_rows, plan_hours) -> dict:
-    totals = {kind: sum(row[kind] for row in week_rows) for kind in LESSON_HOUR_KINDS}
-    planned = {kind: _int((plan_hours or {}).get(kind)) for kind in LESSON_HOUR_KINDS}
-    return {
-        "rows": [
-            {
-                "kind": kind,
-                "have": totals[kind],
-                "planned": planned[kind],
-                "ok": totals[kind] == planned[kind],
-            }
-            for kind in LESSON_HOUR_KINDS
-        ],
-        "have": sum(totals.values()),
-        "planned": sum(planned.values()),
-        "ok": totals == planned,
-    }
+#: Panel qurucuları ayrı moduldadır — bax ``editor_panels`` (mənbə-əsaslı render).
+_week_rows = panels_builder.week_rows
+_hour_totals = panels_builder.hour_totals
+_outcome_tags = panels_builder.outcome_tags
+_int = panels_builder.to_int
 
 
 def _selfwork(data):
-    option = (data.get("option") or "").strip()
-    topics = [row for row in (data.get("topics") or []) if isinstance(row, dict)]
-    options = []
-    for key, config in SELFWORK_OPTIONS.items():
-        options.append(
-            {
-                "key": key,
-                "title": f"{config['count']} × {config['per_score']}",
-                "count": config["count"],
-                "per_score": config["per_score"],
-                "total": config["count"] * config["per_score"],
-                "note": SELFWORK_NOTES.get(key, ""),
-                "active": option == key,
-                "allowed": True,
-            }
-        )
-    for key, config in SELFWORK_DISALLOWED.items():
-        options.append(
-            {
-                "key": key,
-                "title": f"{config['count']} × {config['per_score']}",
-                "count": config["count"],
-                "per_score": config["per_score"],
-                "total": config["count"] * config["per_score"],
-                "note": SELFWORK_NOTES.get(key, ""),
-                "active": False,
-                "allowed": False,
-            }
-        )
-    config = SELFWORK_OPTIONS.get(option)
-    slots = []
-    for index in range(config["count"] if config else 0):
-        source = topics[index] if index < len(topics) else {}
-        slots.append(
-            {
-                "index": index + 1,
-                "title": (source.get("title") or "").strip(),
-                "graded": bool(source.get("graded")),
-                "graded_count": _int(source.get("graded_count")),
-                "per_score": config["per_score"],
-            }
-        )
-    return {
-        "option": option,
-        "options": options,
-        "slots": slots,
-        "archived": [row for row in (data.get("archived") or []) if isinstance(row, dict)],
-        "total_score": SELFWORK_TOTAL_SCORE,
-    }
+    return panels_builder.selfwork(data, SELFWORK_NOTES)
 
 
 def _assessment(data):
@@ -323,7 +226,9 @@ def _locked_rows(syllabus, hours):
     values = {
         "subject": f"{subject.name} · {subject.code}",
         "chair": syllabus.chair_unit.name if syllabus.chair_unit_id else "",
-        "program": syllabus.program.name if syllabus.program_id else "",
+        # ``display_label`` — «Ad · rəsmi şifr». Kilidli sətir tədris planından
+        # gələn RƏSMİ dəyəri göstərir, ona görə şifrsiz ad kifayət etmir.
+        "program": syllabus.program.display_label if syllabus.program_id else "",
         "period": (f"{syllabus.period.year_display} · {syllabus.period.name}" if syllabus.period_id else ""),
         "credit": str(subject.ects or ""),
         "split": " · ".join(str(row["planned"]) for row in hours["rows"]) if hours["planned"] else "",
@@ -489,7 +394,14 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "revision": row["revision"],
         }
 
-    week_rows = _week_rows(section_map.get(SectionKey.WEEK.value, {}))
+    out_data = section_map.get(SectionKey.OUT.value, {})
+    tags = _outcome_tags(out_data)
+    # Nəticə sətirləri şablona HAZIR etiketlə gedir: boş sətir TN nömrəsi tutmur,
+    # yəni panel həftə cədvəlinin açılış siyahısı ilə eyni nömrələməni göstərir
+    # (bax `editor_panels.outcome_rows`).  Şablon `forloop.counter` işlətməməlidir.
+    if SectionKey.OUT.value in panels:
+        panels[SectionKey.OUT.value]["rows"] = panels_builder.outcome_rows(out_data)
+    week_rows = _week_rows(section_map.get(SectionKey.WEEK.value, {}), tags)
     hours = _hour_totals(week_rows, context["plan_hours"])
     selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {}))
     readonly = context["view_state"] != "normal"
@@ -505,7 +417,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "header": {
                 "code": syllabus.subject.code,
                 "name": syllabus.subject.name,
-                "program": syllabus.program.name if syllabus.program_id else "",
+                "program": syllabus.program.display_label if syllabus.program_id else "",
                 "period": syllabus.period.year_display + " · " + syllabus.period.name if syllabus.period_id else "",
                 "credit": syllabus.subject.ects,
                 "status_key": version_row.status,
@@ -542,19 +454,18 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             # mənbə `preview.py`-dır, dublikat şablon məntiqi yoxdur.
             "preview_blocks": build_preview_blocks(section_map),
             "locked": _locked_rows(syllabus, hours),
-            "hour_choices": HOUR_CHOICES,
-            "outcome_tags": _outcome_tags(section_map.get(SectionKey.OUT.value, {})),
+            "outcome_tags": tags,
             "week_rows": week_rows,
+            # Plandan ARTIQ sətir sayı — şablon xəbərdarlıq qutusunu bununla açır.
+            "week_extra_count": sum(1 for row in week_rows if row["is_extra"]),
             "hours": hours,
             "selfwork": selfwork_view,
             "assessment": _assessment(section_map.get(SectionKey.ASSESS.value, {})),
-            "methods": [
-                {
-                    "label": label,
-                    "active": str(label) in {str(x) for x in (section_map.get("method", {}).get("methods") or [])},
-                }
-                for label in context["teaching_methods"]
-            ],
+            # `catalog` + `custom`: kataloqda olmayan (köçürülmüş) metodlar da
+            # render olunur, yoxsa toplayıcı onları ilk autosave-də silərdi.
+            "methods": panels_builder.methods(
+                context["teaching_methods"], section_map.get(SectionKey.METHOD.value, {})
+            ),
             "limits": {
                 "description": MIN_DESCRIPTION_CHARS,
                 "goal": MIN_GOAL_CHARS,

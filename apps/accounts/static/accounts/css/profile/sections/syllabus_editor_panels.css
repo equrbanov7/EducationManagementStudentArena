@@ -64,8 +64,14 @@
 
 .syl-outcome {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 9px;
+}
+
+/* TN etiketi və «sil» düyməsi sahənin BİRİNCİ sətri ilə eyni xətdə dursun. */
+.syl-outcome > .syl-outcome__tag,
+.syl-outcome > .syl-iconbtn {
+    margin-top: 8px;
 }
 
 .syl-outcome__tag {
@@ -376,7 +382,10 @@
     color: var(--ems-text-muted);
 }
 
-.syl-swtopic input {
+/* Mövzu sahəsi artıq `<textarea>`-dir (sətir sonu itməsin deyə) — ölçü
+   qaydası hər iki elementə eyni tətbiq olunur. */
+.syl-swtopic input,
+.syl-swtopic textarea {
     flex: 1;
     min-width: 180px;
 }

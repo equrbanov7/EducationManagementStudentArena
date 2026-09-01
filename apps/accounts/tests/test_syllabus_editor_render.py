@@ -129,6 +129,64 @@ class SyllabusEditorRenderTest(TestCase):
         # Sidebar-ın sillabus qeydi profil shell-i ilə birlikdə render olunur.
         self.assertIn('data-section="syllabus-list"', html)
 
+    def test_header_and_locked_row_show_the_official_program_code(self):
+        """Redaktorun başlığı və kilidli «Təhsil proqramı» sətri ŞİFRLİDİR.
+
+        Bloker idi: hər iki yer ``program.name``-i çılpaq çap edirdi. Kilidli
+        sətir tədris planından gələn RƏSMİ dəyəri təmsil edir, ona görə şifrsiz
+        ad kifayət etmir. Nümunə QƏSDƏN yalnız-köhnə-şifrlidir — ``display_label``
+        cari şifr yoxdursa köhnəyə geri çəkilir.
+        """
+        program = self.syllabus.program
+        program.name = "Dünya iqtisadiyyatı"
+        program.official_code = ""
+        program.legacy_official_code = "050401"
+        program.save(update_fields=["name", "official_code", "legacy_official_code"])
+
+        html = self._editor_html()
+
+        self.assertEqual(program.display_label, "Dünya iqtisadiyyatı · 050401")
+        # Başlıq + kilidli sətir — İKİ ayrı yer, ona görə say da yoxlanılır.
+        self.assertGreaterEqual(html.count("Dünya iqtisadiyyatı · 050401"), 2)
+
+    def _meta_line(self, html) -> str:
+        """Başlıq altındakı `syl-meta` sətri — normalizə olunmuş MƏTN."""
+        match = re.search(r'<p class="syl-meta">(.*?)</p>', html, re.S)
+        self.assertIsNotNone(match, "`syl-meta` sətri render olunmadı")
+        return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", match.group(1))).strip()
+
+    def test_meta_line_has_no_dangling_separator_when_the_period_is_missing(self):
+        """REQRESSİYA: `period` boş olanda ayırıcı ŞİFRİN QUYRUĞUNDA asılı qalmır.
+
+        Əlçatandır: köçürülmüş sillabusların əsas kütləsi `period=None` ilə
+        yaradılır (`drafts.py` import_migrated_version), ona görə bu «nadir»
+        hal deyil. Əvvəl render belə idi:
+        «Dünya iqtisadiyyatı · 050401 · » (asılı quyruq).
+        """
+        program = self.syllabus.program
+        program.name = "Dünya iqtisadiyyatı"
+        program.official_code = ""
+        program.legacy_official_code = "050401"
+        program.save(update_fields=["name", "official_code", "legacy_official_code"])
+        self.syllabus.period = None
+        self.syllabus.save(update_fields=["period"])
+
+        meta = self._meta_line(self._editor_html())
+
+        self.assertIn("Dünya iqtisadiyyatı · 050401", meta)
+        self.assertFalse(meta.endswith("·"), f"Asılı ayırıcı qaldı: [{meta}]")
+        self.assertNotIn("· ·", meta, f"İKİQAT ayırıcı: [{meta}]")
+        self.assertNotIn("None", meta, f"Boş `period` «None» kimi sızdı: [{meta}]")
+
+    def test_meta_line_keeps_every_separator_when_all_parts_are_present(self):
+        """Düzəliş ayırıcıları TAMAMİLƏ söndürmür — dolu halda hamısı yerindədir."""
+        meta = self._meta_line(self._editor_html())
+
+        self.assertGreaterEqual(meta.count("·"), 2, f"Ayırıcılar itdi: [{meta}]")
+        self.assertFalse(meta.startswith("·"), f"Öndə asılı ayırıcı: [{meta}]")
+        self.assertFalse(meta.endswith("·"), f"Sonda asılı ayırıcı: [{meta}]")
+        self.assertNotIn("· ·", meta, f"İKİQAT ayırıcı: [{meta}]")
+
     # ── 10 bölmə ───────────────────────────────────────────────────────────
 
     def test_all_ten_design_sections_render_with_their_exact_ids(self):

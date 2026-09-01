@@ -39,19 +39,45 @@ saxlanılır: siyasəti izah edir.
     {% endfor %}
   </div>
 
+  {% if sw.extra_count %}
+  {% comment %}Köçürmə `option: ""` yazır (köhnə sistemdə struktur anlayışı yoxdur).
+  Əvvəllər variant seçilməyəndə 0 yuva render olunurdu və `collectSelf` ilk
+  autosave-də `topics: []` göndərirdi — mövzular itirdi. İndi mövcud mövzular
+  hər halda yuva kimi açılır; variantdan artıq qalanlar damğalanır.{% endcomment %}
+  <p class="syl-hintbox syl-hintbox--warn">
+    {% if sw.option %}{% blocktrans context "accounts.syllabus" with count=sw.extra_count %}Seçilmiş struktura sığmayan {{ count }} mövzu var. Onlar məzmun itməsin deyə saxlanılır — struktura uyğun gəlməyənləri boşaldın və ya başqa variant seçin.{% endblocktrans %}
+    {% else %}{% trans "Struktur hələ seçilməyib. Köhnə sistemdən gələn mövzular olduğu kimi saxlanılır — variant seçdikdən sonra artıq qalanları boşaldın." context "accounts.syllabus" %}{% endif %}
+  </p>
+  {% endif %}
+
   <div class="syl-swtopics" data-syl-selfwork-topics>
     {% for slot in sw.slots %}
     {% comment %}`data-graded*` JS üçündür: qiyməti olan tapşırıq SİLİNMİR, yalnız
-    arxivlənir — autosave göndərişində bu sahələr olduğu kimi geri yazılır.{% endcomment %}
-    <div class="syl-swtopic" data-syl-slot="{{ slot.index }}"
+    arxivlənir — autosave göndərişində bu sahələr olduğu kimi geri yazılır.
+    `data-extra` isə yuvanın redaktorda İNPUTU OLMAYAN açarlarını daşıyır.{% endcomment %}
+    <div class="syl-swtopic{% if slot.is_extra %} syl-swtopic--extra{% endif %}" data-syl-slot="{{ slot.index }}"
          data-graded="{% if slot.graded %}1{% else %}0{% endif %}"
-         data-graded-count="{{ slot.graded_count }}">
-      <span class="syl-swtopic__label">{% blocktrans context "accounts.syllabus" with index=slot.index %}Tapşırıq {{ index }}{% endblocktrans %}</span>
-      <input type="text" class="syl-input syl-input--sm" data-selfwork-title value="{{ slot.title }}"
-             {% if se.readonly or slot.graded %}disabled{% endif %}
-             aria-label="{{ slot.index }}. {% trans 'sərbəst iş mövzusu' context 'accounts.syllabus' %}"
-             placeholder="{% trans 'Sərbəst iş tapşırığının mövzusu' context 'accounts.syllabus' %}">
-      <span class="syl-swtopic__pts">{{ slot.per_score }} {% trans "bal" context "accounts.syllabus" %}</span>
+         data-graded-count="{{ slot.graded_count }}"{% if slot.extra %} data-extra="{{ slot.extra }}"{% endif %}>
+      <span class="syl-swtopic__label">
+        {% blocktrans context "accounts.syllabus" with index=slot.index %}Tapşırıq {{ index }}{% endblocktrans %}
+        {% if slot.is_extra %}<span class="syl-tagx">{% trans "strukturdan artıq" context "accounts.syllabus" %}</span>{% endif %}
+      </span>
+      {% comment %}`<textarea>`, `<input>` DEYİL: mənbədəki mövzu mətnində U+2028
+      sətir ayırıcısı var, təmizləyici onu `\n`-ə çevirir, `<input>` isə `\n`-i
+      silərək sözləri yapışdırırdı (bax `_editor_basics.html` təlim nəticəsi).{% endcomment %}
+      <textarea rows="1" class="syl-textarea syl-textarea--slim" data-selfwork-title
+                {% if se.readonly or slot.graded %}disabled{% endif %}
+                aria-label="{{ slot.index }}. {% trans 'sərbəst iş mövzusu' context 'accounts.syllabus' %}"
+                placeholder="{% trans 'Sərbəst iş tapşırığının mövzusu' context 'accounts.syllabus' %}">{{ slot.title }}</textarea>
+      {% comment %}Variant seçilməyibsə bal MƏLUM DEYİL — uydurma rəqəm yazılmır.{% endcomment %}
+      <span class="syl-swtopic__pts">{% if slot.per_score %}{{ slot.per_score }} {% trans "bal" context "accounts.syllabus" %}{% else %}—{% endif %}</span>
+      {% if slot.extra_note %}
+      {% comment %}Yuvanın redaktorda İNPUTU OLMAYAN, amma SAXLANILAN açarları —
+      müəllim gizli dəyərin varlığını bilməlidir (bax həftə sətri).{% endcomment %}
+      <span class="syl-carry" title="{% trans 'Köhnə sistemdən gəlir və olduğu kimi saxlanılır' context 'accounts.syllabus' %}">
+        <i class="fas fa-lock" aria-hidden="true"></i> {{ slot.extra_note }}
+      </span>
+      {% endif %}
       {% if slot.graded %}
       <span class="syl-swtopic__graded">{% blocktrans context "accounts.syllabus" with count=slot.graded_count %}{{ count }} qiymət var{% endblocktrans %}</span>
       <button type="button" class="syl-btn syl-btn--warning syl-btn--sm" data-syl-archive="{{ slot.index }}" {% if se.readonly %}disabled{% endif %}>{% trans "Arxivlə" context "accounts.syllabus" %}</button>
@@ -71,7 +97,7 @@ saxlanılır: siyasəti izah edir.
       <span class="syl-meta">{% trans "Tələbə qiymətləri qorunur, yeni tapşırıq kimi verilmir" context "accounts.syllabus" %}</span>
     </p>
     {% for row in sw.archived %}
-    <p class="syl-archived__row" data-syl-archived-row data-title="{{ row.title }}" data-note="{{ row.note }}">
+    <p class="syl-archived__row" data-syl-archived-row data-title="{{ row.title }}" data-note="{{ row.note }}"{% if row.extra %} data-extra="{{ row.extra }}"{% endif %}>
       <s>{{ row.title }}</s> <span class="syl-meta">{{ row.note }}</span>
     </p>
     {% endfor %}

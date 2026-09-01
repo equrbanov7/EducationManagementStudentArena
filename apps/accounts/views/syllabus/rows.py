@@ -161,7 +161,7 @@ def build_row(syllabus, *, now=None, can_copy: bool = False) -> dict:
         "version_id": str(version.pk) if version is not None else "",
         "code": syllabus.subject.code,
         "name": syllabus.subject.name,
-        "program": syllabus.program.name if syllabus.program_id else "",
+        "program": syllabus.program.display_label if syllabus.program_id else "",
         "year": year,
         "semester": semester,
         "version_label": version.label if version is not None else _DASH,

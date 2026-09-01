@@ -278,6 +278,44 @@ class _Stage2Mixin:
             "notices": [],
             "post_next_url": "",
         }
+        # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — SPA çərçivəsi.
+        self.handover_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "scope_label": "",
+            "teachers_url": "",
+            "offerings_url": "",
+            "options_url": "",
+            "history_url": "",
+            "action_url": "",
+            "default_page_size": 25,
+            "min_reason_length": 3,
+            "max_reason_length": 1000,
+            "max_bulk_rows": 100,
+        }
+        # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
+        # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
+        # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində
+        # HEÇ VAXT hesablanmır.
+        self.legacy_grade_review_section = {
+            "has_access": False,
+            "can_review": False,
+            "access_denied_message": "",
+            "observer_notice": "",
+            "queue_url": "",
+            "options_url": "",
+            "faculty_url": "",
+            "kafedra_url": "",
+            "specialty_url": "",
+            "group_url": "",
+            "subject_url": "",
+            "teacher_url": "",
+            "action_url": "",
+            "reasons": [],
+            "default_page_size": 25,
+            "min_note_length": 3,
+            "max_note_length": 1000,
+        }
         # İmtahan Mərkəzi — kağız imtahan balının əl ilə daxil edilməsi.
         self.exam_score_entry_section = {
             "is_superadmin": False,

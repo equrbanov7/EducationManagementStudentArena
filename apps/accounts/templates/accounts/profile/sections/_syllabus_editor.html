@@ -51,10 +51,13 @@ Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
           <span class="syl-version">{{ se.header.version_label }}</span>
         </div>
         <h2 class="syl-editor__title">{{ se.header.name }}</h2>
-        <p class="syl-meta">
-          {% if se.header.program %}{{ se.header.program }} · {% endif %}{{ se.header.period }}
-          {% if se.header.credit %} · {{ se.header.credit }} {% trans "kredit" context "accounts.syllabus" %}{% endif %}
-        </p>
+        {% comment %}Ayırıcı ÖNDƏN qoyulur, ARXADAN yox: köçürülmüş sillabuslar
+        `period=None` ilə yaradılır (`drafts.py` import_migrated_version), ona görə
+        «Ad · 050401 · » kimi asılı quyruq və `period=''`+`credit` halında İKİQAT
+        ayırıcı real render-də görünürdü. Hər parça yalnız ÖZÜNDƏN ƏVVƏL bir şey
+        çap olunubsa ayırıcı yazır — üç halın (yalnız program / yalnız period /
+        program+credit) heç birində boş ayırıcı qalmır.{% endcomment %}
+        <p class="syl-meta">{% if se.header.program %}{{ se.header.program }}{% endif %}{% if se.header.period %}{% if se.header.program %} · {% endif %}{{ se.header.period }}{% endif %}{% if se.header.credit %}{% if se.header.program or se.header.period %} · {% endif %}{{ se.header.credit }} {% trans "kredit" context "accounts.syllabus" %}{% endif %}</p>
       </div>
       <div class="syl-savebox">
         {% comment %}Autosave çipi — 6 vəziyyət (saxlanılır / saxlanıldı / uğursuz /
