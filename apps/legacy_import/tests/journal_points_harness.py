@@ -15,6 +15,7 @@ from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 
 from apps.legacy_import.models import LegacyEntityMap, LegacyMigrationIssue, LegacyMigrationRun
+from apps.legacy_import.services.excuse_field_contracts import ALLOWED_QB_DOCUMENT_FIELDS
 from apps.legacy_import.services.field_contracts import (
     ALLOWED_QB_FIELDS,
     JOURNAL_DATES_FIELDS,
@@ -39,8 +40,11 @@ from apps.legacy_import.services.rehearsal_authorizer import (
     COURSE_OFFERING_MODEL_LABEL,
     ENROLLMENT_MODEL_LABEL,
     LESSON_MODEL_LABEL,
+    SUBJECT_MODEL_LABEL,
+    USER_MODEL_LABEL,
     build_target_validators,
 )
+from apps.legacy_import.services.rehearsal_catalog_targets import SUBJECT_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_contracts import (
     DEFAULT_BATCH_ROWS,
     SOURCE_SYSTEM,
@@ -50,6 +54,7 @@ from apps.legacy_import.services.rehearsal_contracts import (
     StudentIdentifierPolicy,
     UsernamePolicy,
 )
+from apps.legacy_import.services.rehearsal_identity_phase import STUDENT_ENTITY_TYPE, WORKER_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_journal_enrollments_phase import JOURNAL_ENROLLMENT_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_journal_lessons_targets import LESSON_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
@@ -58,6 +63,10 @@ from apps.legacy_import.services.syllabus_field_contracts import (
     JOURNAL_SYLLABUS_FIELDS,
     SILLABUS_FIELDS,
     SILLABUS_SELF_WORK_FIELDS,
+)
+from apps.legacy_import.services.syllabus_migration_contracts import (
+    SYLLABUS_MIGRATION_CONTRACTS,
+    SYLLABUS_SECTION_CONTRACTS,
 )
 from apps.legacy_import.services.table_plan import TABLE_PLAN_VERSION, LegacyTablePlan, load_legacy_table_plan
 from apps.organizations.models import AcademicPeriod, Membership, Organization, Role
@@ -72,12 +81,14 @@ PHASE_KEYS = (
     "student_placement",
     "worker_materialisation",
     "sar_materialisation",
+    "syllabus_migration",
     "journal_periods",
     "journal_offerings",
     "journal_enrollments",
     "journal_lessons",
     "journal_lesson_meta",
     "journal_marks",
+    "journal_lesson_recovery",
     "journal_components",
     "journal_entry_scores",
     "journal_finals",
@@ -86,6 +97,7 @@ PHASE_KEYS = (
     "legacy_grade_facts",
     "journal_reconcile",
     "legacy_grade_artifacts",
+    "journal_excuse_documents",
 )
 UNIQID = "rooBx39tsK"
 OTHER_UNIQID = "secondBBBB"
@@ -124,6 +136,9 @@ COLUMNS_BY_TABLE = _discovered_columns(
     JOURNAL_POINT_FIELDS,
     JOURNAL_POINT_ARCHIVE_FIELDS,
     ALLOWED_QB_FIELDS,
+    # J13 ``allowed_qb``-ı GENİŞ oxuyur; fake ``DESCRIBE`` real ``DESCRIBE``
+    # kimi BÜTÜN sütunları verməlidir, yoxsa geniş proyeksiya qapıda çökür.
+    ALLOWED_QB_DOCUMENT_FIELDS,
     YEKUN_FIELDS,
     YEKUN_EVIDENCE_FIELDS,
     EXAM_ENTRY_EXIT_FIELDS,
@@ -133,11 +148,18 @@ COLUMNS_BY_TABLE = _discovered_columns(
     LESSON_ROOM_FIELDS,
     ROOM_REGISTRY_FIELDS,
     SYLLABUS_TOPIC_FIELDS,
+    # J12: ``sillabus`` və ``sillabus_sem_muh`` GENİŞ köçürmə kontraktı ilə də
+    # oxunur (J9/J11-in dar kontraktları alt-çoxluqdur), qalan 9 peyk isə
+    # yalnız J12-nindir.  Fake ``DESCRIBE`` real ``DESCRIBE`` kimi BÜTÜN
+    # sütunları verməlidir, yoxsa geniş proyeksiya qapıda çökür.
+    *SYLLABUS_MIGRATION_CONTRACTS,
 )
 # J-V7 kəsimindən əvvəl / sonra (2022-03-30).
 BEFORE_CUTOFF = datetime.datetime(2022, 1, 5, 9, 0, 0)
 AFTER_CUTOFF = datetime.datetime(2022, 6, 5, 9, 0, 0)
 MAIN_ADDED = datetime.datetime(2022, 4, 1, 9, 0, 0)
+#: ``allowed_qb.added_date`` — sənədin köhnə sistemə yüklənmə anı.
+ALLOWED_QB_ADDED = datetime.datetime(2022, 1, 4, 10, 15, 0)
 # Defolt arqumentlərdə funksiya çağırışı olmasın deyə (flake8 B008) hamısı sabitdir.
 DEFAULT_TIME = datetime.timedelta(hours=14)
 DEFAULT_LESSON_SLOTS = (
@@ -351,9 +373,71 @@ def lesson_meta_row(
 
 
 def syllabus_topic_row(legacy_pk=SYLLABUS_TOPIC_ID, *, movzu="Mühazirə mövzusu"):
-    """``sillabus_sem_muh`` sətri — dərsin MÖVZUSU (J11)."""
+    """``sillabus_sem_muh`` sətri — dərsin MÖVZUSU (J11, DAR proyeksiya)."""
 
     return {"id": legacy_pk, "movzu": movzu}
+
+
+def syllabus_header_row(
+    legacy_pk,
+    *,
+    uniqid=SYLLABUS_UNIQID,
+    lesson_id=64,
+    teacher_id=17,
+    ders_saati=45,
+    language="az",
+    active=1,
+):
+    """``sillabus`` başlığı — J12-nin GENİŞ proyeksiyası.
+
+    ``teacher_id=0`` canlı mənbədəki 956 qırıq istinadın güzgüsüdür: sillabus
+    ATILMIR, «müəllimi həll olunmayıb» qeydi ilə köçürülür.
+    """
+
+    return {
+        "id": legacy_pk,
+        "uniqid": uniqid,
+        "lesson_id": lesson_id,
+        "teacher_id": teacher_id,
+        "ders_saati": ders_saati,
+        "language": language,
+        "active": active,
+    }
+
+
+def syllabus_week_row(
+    legacy_pk,
+    *,
+    uniqid=SYLLABUS_UNIQID,
+    movzu="Mühazirə mövzusu",
+    muh_saat="2",
+    sem_saat="",
+    praktiki_saat="",
+    lab_saat="",
+    qeyd="",
+):
+    """``sillabus_sem_muh`` sətri — J12-nin GENİŞ proyeksiyası.
+
+    ⚠️ Dörd saat sütunu canlı sxemdə ``char(5)``-dir, ona görə fixture də
+    MƏTN verir: ``legacy_hour_cell`` rəqəm görəndə fail-closed olur.
+    """
+
+    return {
+        "id": legacy_pk,
+        "uniqid": uniqid,
+        "movzu": movzu,
+        "muh_saat": muh_saat,
+        "sem_saat": sem_saat,
+        "praktiki_saat": praktiki_saat,
+        "lab_saat": lab_saat,
+        "qeyd": qeyd,
+    }
+
+
+def syllabus_section_row(legacy_pk, *, uniqid=SYLLABUS_UNIQID, name="Bölmə sətri"):
+    """``id | uniqid | name`` formalı 10 peykin hər hansı biri üçün sətir."""
+
+    return {"id": legacy_pk, "uniqid": uniqid, "name": name}
 
 
 def point_row(
@@ -395,12 +479,34 @@ def point_row(
     }
 
 
-def allowed_qb_row(legacy_pk, *, student_id=STUDENT_A, start="2021-12-30", end="2021-12-31"):
+def allowed_qb_row(
+    legacy_pk,
+    *,
+    student_id=STUDENT_A,
+    start="2021-12-30",
+    end="2021-12-31",
+    owner_id=51,
+    file="1697461819.jpg",
+    added_date=ALLOWED_QB_ADDED,
+    desc="Texnopark",
+    uniq="PKT001",
+):
+    """``allowed_qb`` sətri — J4 pəncərəni, J13 isə SƏNƏDİ oxuyur.
+
+    Sənəd sütunları (``owner_id``/``file``/``added_date``/``desc``/``uniq``) J4
+    üçün görünməzdir (dar proyeksiya), ona görə defoltların dəyişməsi J4-ün
+    heç bir möhürünə toxunmur."""
+
     return {
         "id": legacy_pk,
         "student_id": student_id,
         "allowed_date_start": datetime.datetime.fromisoformat(f"{start} 08:30:00"),
         "allowed_date_end": datetime.datetime.fromisoformat(f"{end} 23:59:00"),
+        "owner_id": owner_id,
+        "file": file,
+        "added_date": added_date,
+        "desc": desc,
+        "uniq": uniq,
     }
 
 
@@ -486,15 +592,20 @@ def tables(
     rooms=None,
     lesson_meta=None,
     lesson_topics=None,
+    sections=None,
 ):
     """On iki cədvəlin tam dəsti — verilməyən hər biri məntiqli defolt alır.
 
     ``sillabus`` defolt olaraq bir sətirdir (jurnalın ``sillabus_id``-i ona
     düşür), ``sillabus_serbest_is`` isə BOŞdur: mövzuları yalnız J9 testləri
     verir, qalan fazalar onlardan asılı deyil.  Eyni qayda J10/J11 üçün:
-    ``rooms``/``journals_dates_rooms``/``sillabus_sem_muh`` defolt BOŞdur."""
+    ``rooms``/``journals_dates_rooms``/``sillabus_sem_muh`` defolt BOŞdur.
 
-    return {
+    ``sections`` (J12) — ``{mənbə cədvəli: sətirlər}``; verilməyən hər sillabus
+    peyki BOŞ cədvəl kimi qurulur.  Onlar plan-a 0 sətirlə düşür, yəni mövcud
+    fazaların ``expected_row_count``-u DƏYİŞMİR."""
+
+    base = {
         SEMESTR_JURNAL_FIELDS.source_table: list(semesters if semesters is not None else [semester_row()]),
         JOURNAL_FIELDS.source_table: list(journals if journals is not None else [journal_row(2, UNIQID)]),
         JOURNAL_DATES_FIELDS.source_table: list(
@@ -512,6 +623,10 @@ def tables(
         LESSON_ROOM_FIELDS.source_table: list(lesson_meta or []),
         SYLLABUS_TOPIC_FIELDS.source_table: list(lesson_topics or []),
     }
+    for source_table in SYLLABUS_SECTION_CONTRACTS:
+        base.setdefault(source_table, [])
+    base.update({source_table: list(rows) for source_table, rows in (sections or {}).items()})
+    return base
 
 
 def plan(rows_by_table):
@@ -615,6 +730,71 @@ def _map(run_id, actor, *, entity_type, legacy_pk, label, target_pk):
         target_pk=str(target_pk),
         target_validators=build_target_validators(),
     )
+
+
+def seed_syllabus_subject(org, actor, run_id, legacy_lesson_id, *, code=None):
+    """J-catalog-un qoyub getdiyi ``lesson_subject`` xəritəsi + hədəf fənn (J12)."""
+
+    subject = django_apps.get_model("registrar", "Subject").objects.create(
+        organization=org,
+        code=code or f"MYEDU-L{legacy_lesson_id}",
+        name=f"Fənn {legacy_lesson_id}",
+        ects=5,
+    )
+    _map(
+        run_id,
+        actor,
+        entity_type=SUBJECT_ENTITY_TYPE,
+        legacy_pk=str(legacy_lesson_id),
+        label=SUBJECT_MODEL_LABEL,
+        target_pk=subject.pk,
+    )
+    return subject
+
+
+def seed_syllabus_teacher(org, actor, run_id, legacy_worker_id):
+    """``identity_cohort``-un qoyub getdiyi ``worker`` xəritəsi + hədəf istifadəçi."""
+
+    user, _created = get_user_model().objects.get_or_create(
+        username=f"myedu.worker.{legacy_worker_id}", defaults={"email": ""}
+    )
+    profile = user.profile
+    profile.organization = org
+    profile.save(update_fields=["organization"])
+    activate_member(org, user, "teacher")
+    _map(
+        run_id,
+        actor,
+        entity_type=WORKER_ENTITY_TYPE,
+        legacy_pk=str(legacy_worker_id),
+        label=USER_MODEL_LABEL,
+        target_pk=user.pk,
+    )
+    return user
+
+
+def seed_student_identity(org, actor, run_id, legacy_student_id):
+    """``identity_cohort``-un qoyub getdiyi ``student`` xəritəsi + hədəf hesab.
+
+    J13 (``journal_excuse_documents``) məhz bu xəritə ilə ``allowed_qb``
+    sətrini kanonik tələbəyə bağlayır."""
+
+    user, _created = get_user_model().objects.get_or_create(
+        username=f"myedu.student.{legacy_student_id}", defaults={"email": ""}
+    )
+    profile = user.profile
+    profile.organization = org
+    profile.save(update_fields=["organization"])
+    activate_member(org, user, "student")
+    _map(
+        run_id,
+        actor,
+        entity_type=STUDENT_ENTITY_TYPE,
+        legacy_pk=str(legacy_student_id),
+        label=USER_MODEL_LABEL,
+        target_pk=user.pk,
+    )
+    return user
 
 
 def seed_journal_target(

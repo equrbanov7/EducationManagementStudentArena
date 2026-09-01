@@ -23,6 +23,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import time
 from dataclasses import dataclass, field
 from uuid import UUID
@@ -127,6 +128,78 @@ class SourceReader:
     def scalar(self, label: str, sql: str, default: str = "0") -> str:
         rows = self.query(label, sql)
         return rows[0][0] if rows and rows[0] else default
+
+    def iter_query(self, label: str, sql: str):
+        """Nəticəni yaddaşa yığmadan sətir-sətir axıt (milyonluq nəticələr üçün).
+
+        ``query()`` bütün cavabı ``list``-ə çevirir; 5 milyon xana açarı üçün bu
+        gigabaytlarla RAM deməkdir.  Burada MariaDB-nin ``-B`` çıxışı boru
+        üzərindən oxunur və hər sətir dərhal istehlakçıya verilir.
+
+        ⚠️ Oxu-only müqaviləsi eynidir: SQL ``assert_read_only``-dan keçir və
+        sessiya ``SET SESSION TRANSACTION READ ONLY`` ilə açılır.
+        """
+
+        assert_read_only(sql)
+        started = time.monotonic()
+        rows = 0
+        try:
+            for row in self._stream_tcp(sql) if self.tcp else self._stream_docker(sql):
+                rows += 1
+                yield row
+        finally:
+            self.timer.record(f"mənbə · {label}", time.monotonic() - started, rows)
+
+    def _stream_docker(self, sql: str):
+        command = [
+            "docker",
+            "exec",
+            "-i",
+            self.container,
+            "sh",
+            "-c",
+            f'exec mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" {self.database} -N -B --quick',
+        ]
+        # stderr ayrıca fayla yönləndirilir: boru dolub kilidlənməsin deyə
+        # (stdout milyonlarla sətir verərkən stderr oxunmur).
+        with tempfile.TemporaryFile(mode="w+", encoding="utf-8", errors="replace") as errors:
+            process = subprocess.Popen(  # noqa: S603 — sabit arqument siyahısı, shell=False
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=errors,
+                text=True,
+            )
+            drained = False
+            try:
+                process.stdin.write(_MARIADB_PREAMBLE + sql)
+                process.stdin.close()
+                for line in process.stdout:
+                    line = line.rstrip("\n")
+                    if line:
+                        yield [unescape_batch_field(field_text) for field_text in line.split("\t")]
+                drained = True
+            finally:
+                if process.stdout is not None:
+                    process.stdout.close()
+                code = process.wait()
+            # Axın yarımçıq dayandırılıbsa (istehlakçı `break` edib) mariadb
+            # SIGPIPE alır — bu, sorğu xətası deyil, ona görə susdurulur.
+            if drained and code != 0:
+                errors.seek(0)
+                noise = "\n".join(line for line in errors.read().splitlines() if "Using a password" not in line)
+                raise RuntimeError(f"MariaDB axını uğursuz oldu: {noise.strip()[:400]}")
+
+    def _stream_tcp(self, sql: str):
+        import pymysql.cursors  # yalnız TCP rejimində lazımdır
+
+        cursor = self._tcp_connection().cursor(pymysql.cursors.SSCursor)
+        try:
+            cursor.execute(sql)
+            for row in cursor:
+                yield [_stringify(value) for value in row]
+        finally:
+            cursor.close()
 
     # -- nəqliyyat variantları ------------------------------------------------
 

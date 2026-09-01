@@ -13,6 +13,7 @@ from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from .excuse_field_contracts import ALLOWED_QB_DOCUMENT_FIELDS
 from .field_contracts import (
     ALLOWED_QB_FIELDS,
     CURRICULUM_CATALOG_FIELDS,
@@ -51,6 +52,7 @@ from .syllabus_field_contracts import (
     SILLABUS_FIELDS,
     SILLABUS_SELF_WORK_FIELDS,
 )
+from .syllabus_migration_contracts import SYLLABUS_MIGRATION_CONTRACTS
 
 DEFAULT_SOURCE_CHUNK_SIZE = 1_000
 MAX_SOURCE_CHUNK_SIZE = 10_000
@@ -73,6 +75,10 @@ _AUDITED_CONTRACTS = {
     JOURNAL_POINT_FIELDS.fingerprint: JOURNAL_POINT_FIELDS,
     JOURNAL_POINT_ARCHIVE_FIELDS.fingerprint: JOURNAL_POINT_ARCHIVE_FIELDS,
     ALLOWED_QB_FIELDS.fingerprint: ALLOWED_QB_FIELDS,
+    # J13 (journal_excuse_documents): ``allowed_qb``-a İKİNCİ, geniş
+    # proyeksiya — sənəd adı, izah, paket açarı və göndərən.  Dar
+    # ``ALLOWED_QB_FIELDS`` J4-ün möhürünü qorumaq üçün toxunulmaz qalır.
+    ALLOWED_QB_DOCUMENT_FIELDS.fingerprint: ALLOWED_QB_DOCUMENT_FIELDS,
     YEKUN_FIELDS.fingerprint: YEKUN_FIELDS,
     EXAM_ENTRY_EXIT_FIELDS.fingerprint: EXAM_ENTRY_EXIT_FIELDS,
     SCORE_SHEET_EXPORT_FIELDS.fingerprint: SCORE_SHEET_EXPORT_FIELDS,
@@ -93,6 +99,10 @@ _AUDITED_CONTRACTS = {
     LESSON_ROOM_FIELDS.fingerprint: LESSON_ROOM_FIELDS,
     ROOM_REGISTRY_FIELDS.fingerprint: ROOM_REGISTRY_FIELDS,
     SYLLABUS_TOPIC_FIELDS.fingerprint: SYLLABUS_TOPIC_FIELDS,
+    # Sillabus KÖÇÜRMƏSİ (12 cədvəl).  Dəst ``syllabus_migration_contracts``-də
+    # ƏL İLƏ yazılıb — allowlist yenə də kod sahibliyindədir; qeydiyyat burada
+    # tək sətirdir, çünki bu modul 583/600 sətirlə ölçü qapısının dibindədir.
+    **{contract.fingerprint: contract for contract in SYLLABUS_MIGRATION_CONTRACTS},
 }
 
 

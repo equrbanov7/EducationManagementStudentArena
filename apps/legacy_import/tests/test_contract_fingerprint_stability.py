@@ -29,6 +29,7 @@ import hashlib
 
 import pytest
 
+from apps.legacy_import.services.excuse_field_contracts import ALLOWED_QB_DOCUMENT_FIELDS
 from apps.legacy_import.services.field_contracts import (
     ALLOWED_QB_FIELDS,
     JOURNAL_DATES_FIELDS,
@@ -52,6 +53,25 @@ from apps.legacy_import.services.rehearsal_journal_entry_scores_phase import ENT
 from apps.legacy_import.services.rehearsal_journal_lessons_targets import lesson_derivation_hash
 from apps.legacy_import.services.rehearsal_journal_reconcile_phase import RECONCILE_SEALER
 from apps.legacy_import.services.source_extraction import _AUDITED_CONTRACTS
+from apps.legacy_import.services.syllabus_field_contracts import (
+    SILLABUS_FIELDS,
+    SILLABUS_SELF_WORK_FIELDS,
+)
+from apps.legacy_import.services.syllabus_migration_contracts import (
+    SYLLABUS_ASSESSMENT_FIELDS,
+    SYLLABUS_CERTIFICATE_FIELDS,
+    SYLLABUS_DESCRIPTION_FIELDS,
+    SYLLABUS_EXAM_QUESTION_FIELDS,
+    SYLLABUS_HEADER_FIELDS,
+    SYLLABUS_LITERATURE_FIELDS,
+    SYLLABUS_METHOD_FIELDS,
+    SYLLABUS_MIGRATION_CONTRACTS,
+    SYLLABUS_OUTCOME_FIELDS,
+    SYLLABUS_RESEARCH_INTEREST_FIELDS,
+    SYLLABUS_SECTION_CONTRACTS,
+    SYLLABUS_WEEK_FIELDS,
+    SYLLABUS_WELCOME_FIELDS,
+)
 
 # (kontrakt, gözlənilən source_table, gözlənilən version, pinlənmiş fingerprint)
 PINNED_CONTRACTS = (
@@ -84,6 +104,15 @@ PINNED_CONTRACTS = (
         "allowed_qb",
         "journal-v1",
         "d1bcf25ef18b20c9b36de2d9ac1903332d66ee1d7acf3dc13519c7c607c02634",
+    ),
+    # J13 (journal_excuse_documents): ``allowed_qb``-ın GENİŞ sənəd proyeksiyası.
+    # Dar ``journal-v1`` ilə YANAŞI yaşayır; onu genişlətmək J4-ün bütün
+    # ``source_row_hash`` dəyərlərini dəyişərdi.
+    (
+        ALLOWED_QB_DOCUMENT_FIELDS,
+        "allowed_qb",
+        "excuse-v1",
+        "869d464e7fe9969890fc3998ddd2483a94ce94e83adc9bf909797eb56500c02c",
     ),
     (
         YEKUN_EVIDENCE_FIELDS,
@@ -123,6 +152,78 @@ PINNED_CONTRACTS = (
         "sillabus_sem_muh",
         "lesson-meta-v1",
         "1faf9df56c3a594ce0af00b78fb49b98d880b908602f5c104fa9f531ec5f4485",
+    ),
+    # Sillabus KÖÇÜRMƏSİ (12 cədvəl).  ``sillabus`` və ``sillabus_sem_muh``
+    # üçün AYRI, GENİŞ kontraktlar var: J9-un ``SILLABUS_FIELDS``-ini və
+    # J11-in ``SYLLABUS_TOPIC_FIELDS``-ini genişlətmək onların möhürlərini
+    # dağıdardı.  ``sillabus_serbest_is`` isə burada YOXDUR — J9-un
+    # ``SILLABUS_SELF_WORK_FIELDS``-i olduğu kimi təkrar işlədilir (cədvəldə
+    # cəmi üç sütun var, genişlətməyə ehtiyac yoxdur).
+    (
+        SYLLABUS_HEADER_FIELDS,
+        "sillabus",
+        "syllabus-migration-v1",
+        "32c043585e30155e47ed224965037e062340316327a24f1368a01a6b40953010",
+    ),
+    (
+        SYLLABUS_WEEK_FIELDS,
+        "sillabus_sem_muh",
+        "syllabus-migration-v1",
+        "a25af377bc0db5be5be9b47ab8f74f4d94cead01ebab79c38d097b2bf595c0cb",
+    ),
+    (
+        SYLLABUS_EXAM_QUESTION_FIELDS,
+        "sillabus_imtahan_suallari",
+        "syllabus-migration-v1",
+        "dc7aeef5fe2774d9ffb186a18546f2054cabe5ed0868de652bc92452c5f9cc83",
+    ),
+    (
+        SYLLABUS_LITERATURE_FIELDS,
+        "sillabus_derslikler",
+        "syllabus-migration-v1",
+        "d3bab7b8dc733b8d923692c8485c0921f833cdc88469fc75927dd8be2b1da0fc",
+    ),
+    (
+        SYLLABUS_RESEARCH_INTEREST_FIELDS,
+        "sillabus_elmi_maraq",
+        "syllabus-migration-v1",
+        "293d1e051d1bfe1f8b37fb38398daa7e1ff61c6026851c18e2a181e02bccccd5",
+    ),
+    (
+        SYLLABUS_CERTIFICATE_FIELDS,
+        "sillabus_certificates",
+        "syllabus-migration-v1",
+        "eebebf00c506f87ddd6d45521a7c7a1fcfb71bab5ef0e22163515dc2aef1d150",
+    ),
+    (
+        SYLLABUS_OUTCOME_FIELDS,
+        "sillabus_eldeolunacaq_tecrubeler",
+        "syllabus-migration-v1",
+        "ec87e42f6e4aa1f8d3083aa616b103d4eadfd7b5fbc7b2dbc500146171f25da1",
+    ),
+    (
+        SYLLABUS_METHOD_FIELDS,
+        "sillabus_dersin_islenme_formasi",
+        "syllabus-migration-v1",
+        "e44c643922f025857149d287e998dfb0cbee1d9384405ae8441d330d4a3b2693",
+    ),
+    (
+        SYLLABUS_ASSESSMENT_FIELDS,
+        "sillabus_yoxlama_formasi",
+        "syllabus-migration-v1",
+        "e5cc656a64b3e6f3a39daf4a4c6572eeed5621c5ff49493323a49f1a5e510219",
+    ),
+    (
+        SYLLABUS_DESCRIPTION_FIELDS,
+        "sillabus_tesviri_ve_meqsedi",
+        "syllabus-migration-v1",
+        "3d29553ba544de059219eaf7d8bab16246040f7498d37107cfc7b664cf116ad3",
+    ),
+    (
+        SYLLABUS_WELCOME_FIELDS,
+        "sillabus_qarsilama_mesaji",
+        "syllabus-migration-v1",
+        "f02e5c27b2d32c4e3d01cc73f8c2410abddac9f339d23e23644f60c75b6fda57",
     ),
 )
 
@@ -231,3 +332,52 @@ def test_every_pinned_contract_is_registered_as_audited():
 
     for contract, _table, _version, fingerprint in PINNED_CONTRACTS:
         assert _AUDITED_CONTRACTS.get(fingerprint) is contract
+
+
+def test_syllabus_migration_contracts_stay_off_the_j9_and_j11_recipes():
+    """Köçürmə ``sillabus``/``sillabus_sem_muh``-u GENİŞ oxuyur — ayrı kontraktla.
+
+    J9 (``journal_selfwork``) ``SILLABUS_FIELDS``-i, J11
+    (``journal_lesson_meta``) isə ``SYLLABUS_TOPIC_FIELDS``-i möhürləyib.
+    Köçürməyə lazım olan əlavə sütunları həmin kontraktlara qatmaq onların
+    barmaq izlərini — və oradan hər yazılmış ``source_row_hash``-i — dəyişərdi.
+    Bu qapı məhz o sızmanın qarşısını alır.
+    """
+
+    assert SILLABUS_FIELDS.source_table == SYLLABUS_HEADER_FIELDS.source_table == "sillabus"
+    assert SILLABUS_FIELDS.fingerprint != SYLLABUS_HEADER_FIELDS.fingerprint
+    assert SYLLABUS_TOPIC_FIELDS.source_table == SYLLABUS_WEEK_FIELDS.source_table == "sillabus_sem_muh"
+    assert SYLLABUS_TOPIC_FIELDS.fingerprint != SYLLABUS_WEEK_FIELDS.fingerprint
+
+    # Dar kontraktlar DAR qalır: köçürmənin sütunları oraya girmir.
+    assert SILLABUS_FIELDS.allowed_fields == ("id", "uniqid")
+    assert SYLLABUS_TOPIC_FIELDS.allowed_fields == ("id", "movzu")
+
+    # Geniş kontraktlar dar olanların ÜSTÜNƏ qurulur — sintetik fixture
+    # cədvəli geniş proyeksiya ilə yaradanda hər iki oxucuya xidmət edir
+    # (``compile_safe_projection`` alt-çoxluq tələbi).
+    assert set(SILLABUS_FIELDS.allowed_fields) < set(SYLLABUS_HEADER_FIELDS.allowed_fields)
+    assert set(SYLLABUS_TOPIC_FIELDS.allowed_fields) < set(SYLLABUS_WEEK_FIELDS.allowed_fields)
+
+    # Sabit olduğu SÜBUT EDİLMİŞ sütunlar proyeksiyaya girmir: onları oxumaq
+    # boru xəttinə olmayan fakültə/qrup/təsdiq ölçüsü gətirərdi.
+    constant_columns = {"dekan_id", "kafedra_id", "ixtisas_id", "qrup_id", "birlesen_qruplar", "status"}
+    assert not constant_columns & set(SYLLABUS_HEADER_FIELDS.allowed_fields)
+    # ``tarix`` 131,056/131,056 sətirdə BOŞDUR — oxunmur.
+    assert "tarix" not in SYLLABUS_WEEK_FIELDS.allowed_fields
+
+
+def test_syllabus_migration_contracts_are_registered_and_distinct():
+    """12 kontraktın hamısı audited allowlist-dədir və barmaq izləri fərqlidir."""
+
+    assert len(SYLLABUS_MIGRATION_CONTRACTS) == 12
+    fingerprints = {contract.fingerprint for contract in SYLLABUS_MIGRATION_CONTRACTS}
+    assert len(fingerprints) == 12
+    for contract in SYLLABUS_MIGRATION_CONTRACTS:
+        assert _AUDITED_CONTRACTS.get(contract.fingerprint) is contract
+
+    # 10 bölmə peyki + başlıq + həftəlik plan = 12; sərbəst iş J9-un
+    # kontraktını TƏKRAR İŞLƏDİR, ona görə ayrıca barmaq izi yaranmır.
+    assert len(SYLLABUS_SECTION_CONTRACTS) == 10
+    assert SYLLABUS_SECTION_CONTRACTS["sillabus_serbest_is"] is SILLABUS_SELF_WORK_FIELDS
+    assert set(SYLLABUS_SECTION_CONTRACTS.values()) <= set(SYLLABUS_MIGRATION_CONTRACTS)

@@ -1,9 +1,13 @@
-"""Mənbə (MariaDB / MyEdu) tərəfin OXU sorğuları — hamısı aqreqatdır.
+"""Mənbə (MariaDB / MyEdu) tərəfin OXU sorğuları.
 
-5 milyondan çox xana var, ona görə heç bir sorğu bütün sətirləri yaddaşa
-çəkmir: qruplaşdırma bazada aparılır, Python-a yalnız yekunlar gəlir.  Yeganə
-istisna «nümunə-yoxlama» sorğularıdır — onlar 20 tələbə ilə məhdudlaşır və
-``student_id`` indeksindən istifadə edir.
+5 milyondan çox xana var, ona görə heç bir sorğu XAM sətirləri yaddaşa çəkmir:
+qruplaşdırma bazada aparılır.  İki istisna var:
+
+* ``sample_cells_sql`` — 20 tələbə ilə məhdudlaşır (``student_id`` indeksi);
+* ``cell_election_keys_sql`` — importer-in ``CellElection`` prefiltrini
+  mənbənin eyni açar axını ilə yenidən qurur;
+* ``deduped_cell_keys_sql`` — dedup edilmiş xana AÇARLARINI qaytarır (~5 M sətir)
+  və ``SourceReader.iter_query`` ilə AXIDILIR, siyahıya yığılmır.
 """
 
 from __future__ import annotations
@@ -43,7 +47,6 @@ _DOMAIN = """CASE
 # həssas deyil, Python müqayisəsi isə həssasdır — güzgü dəqiq olmalıdır.
 _WRITABLE = """(
         (s.domain = 'marks'
-         AND s.dn REGEXP '^[0-9]+$' AND CAST(s.dn AS UNSIGNED) BETWEEN 1 AND 31
          AND (BINARY s.p IN ('ie','qb') OR (s.p REGEXP '^[0-9]+$' AND CAST(s.p AS UNSIGNED) <= 10)))
      OR (s.domain = 'components' AND s.p REGEXP '^[0-9]+$' AND CAST(s.p AS UNSIGNED) <= 10)
      OR (s.domain = 'finals'     AND s.p REGEXP '^[0-9]+$' AND CAST(s.p AS UNSIGNED) <= 100)
@@ -51,8 +54,7 @@ _WRITABLE = """(
 
 _OUTCOME = """CASE
         WHEN s.domain = 'marks' THEN
-            CASE WHEN s.dn NOT REGEXP '^[0-9]+$' OR CAST(s.dn AS UNSIGNED) NOT BETWEEN 1 AND 31 THEN 'unreadable'
-                 WHEN s.p = '' THEN 'empty'
+            CASE WHEN s.p = '' THEN 'empty'
                  WHEN BINARY s.p IN ('ie','qb') THEN 'writable'
                  WHEN s.p REGEXP '^[0-9]+$' AND CAST(s.p AS UNSIGNED) <= 10 THEN 'writable'
                  ELSE 'unreadable' END
@@ -116,22 +118,123 @@ ORDER BY src, eligible, domain, outcome;
 """
 
 
-def cell_by_enrollment_sql() -> str:
-    """``(jurnal uniqid, tələbə, domen) → dedup edilmiş yazıla bilən xana sayı``.
+def cell_election_keys_sql() -> str:
+    """J4/J5/J6 ``CellElection.observe`` üçün xam domen açarları.
 
-    J-V4 dedup açarı: jurnal + ay + gün + tələbə + saat.  Daxili ``GROUP BY``
-    məhz o açarla aparılır — yəni «qalib» xanalar sayılır, uduzanlar yox.
+    Importer exact-dublikatlardan əlavə eyni bit-bucket-ə düşən açarları da
+    ikinci keçidin sonuna saxlayır. Bu sıra hədəf toqquşmasının qalibini dəyişə
+    bildiyi üçün yalnız SQL ``COUNT(*)``-u kifayət deyil: eyni açarlar Python-da
+    importer-in öz ``CellElection`` sinfinə axıdılır. Yazıla bilməyən sətirlər
+    də QƏSDƏN daxildir — importer seçkini ``distill``-dən əvvəl aparır.
     """
 
-    columns = "journal_uniqid, student_id, month_id AS mid, COALESCE(TIME_FORMAT(time, '%H:%i'), '') AS tm"
+    time_text = """CASE WHEN time IS NULL OR TIME_TO_SEC(time) < 0 OR TIME_TO_SEC(time) >= 86400
+                         THEN '' ELSE TIME_FORMAT(time, '%H:%i') END"""
     return f"""
-SELECT c.journal_uniqid, c.student_id, c.domain, COUNT(*) AS n FROM (
-    SELECT s.journal_uniqid, s.student_id, s.domain, s.mid, s.dn, s.tm
-      FROM ({_cell_stream(columns=columns, archive_filtered=True)}) s
-     WHERE {_WRITABLE}
-     GROUP BY s.journal_uniqid, s.student_id, s.domain, s.mid, s.dn, s.tm
-) c
-GROUP BY c.journal_uniqid, c.student_id, c.domain;
+SELECT source_table, pk, journal_uniqid, student_id, mid, dn, tm, domain
+  FROM (
+        SELECT 0 AS source_order, '{POINT_TABLE}' AS source_table, id AS pk,
+               COALESCE(journal_uniqid, '') AS journal_uniqid,
+               COALESCE(student_id, 0) AS student_id,
+               COALESCE(month_id, '') AS mid,
+               COALESCE(day_number, '') AS dn,
+               {time_text} AS tm,
+               {_DOMAIN.format(col='month_id')} AS domain
+          FROM {POINT_TABLE}
+        UNION ALL
+        SELECT 1, '{ARCHIVE_TABLE}', id,
+               COALESCE(journal_uniqid, ''), COALESCE(student_id, 0),
+               COALESCE(month_id, ''), COALESCE(day_number, ''),
+               {time_text}, {_DOMAIN.format(col='month_id')}
+          FROM {ARCHIVE_TABLE}
+         WHERE added_date IS NOT NULL AND DATE(added_date) < '{ARCHIVE_CUTOFF}'
+       ) s
+ WHERE domain <> 'unknown_code'
+ ORDER BY source_order, pk;
+"""
+
+
+def deduped_cell_keys_sql() -> str:
+    """J-V4 QALİB xanaları — importer-in faktiki qərar sırasında.
+
+    J4/J5/J6 canlı cədvəl və arxiv üçün AYRI ``CellElection`` qurur.  Seçki
+    domen sətrinin yazıla bilib-bilmədiyinə baxmazdan ƏVVƏL aparılır; buna görə
+    daha yüksək rütbəli boş/oxunmayan sətir yazıla bilən aşağı rütbəli sətri
+    həqiqətən uda bilər.  Bu sorğu həmin iki invariantı SQL-də güzgüləyir:
+
+    * ``source_order`` seçkini canlı/arxiv üzrə ayırır;
+    * ``ROW_NUMBER`` qalibi bütün domen sətirlərindən seçir, ``_WRITABLE`` isə
+      yalnız bundan SONRA tətbiq olunur.
+
+    Importer PK axınında unikal açarları dərhal emal edir, seçki tələb edən
+    dublikat açarların qalibini isə cədvəlin sonunda emal edir.  Son ``ORDER BY``
+    bunu da saxlayır: canlı → arxiv, unikal → seçilmiş dublikat, PK.
+
+    Son iki texniki sütun replay-in yaddaş qapağı üçündür: mənbə cədvəli/PK-sı
+    konflikt sübutunun dəqiq identity-sidir; ``local_target_repeat`` isə tək
+    legacy yazılışın iki fərqli J-V4 açarının eyni normallaşmış hədəf açarına
+    düşdüyünü bildirir.  Beləcə yalnız real namizəd hədəf açarları yadda saxlanır.
+
+    ⚠️ Nəticə ~5 milyon sətirdir — ``SourceReader.iter_query`` ilə AXIDILMALIDIR,
+    ``query()`` ilə yaddaşa çəkilməməlidir.
+    """
+
+    return f"""
+WITH cell_stream AS (
+    SELECT 0 AS source_order, '{POINT_TABLE}' AS source_table, 0 AS is_archive,
+           id AS pk, journal_uniqid, student_id, month_id AS mid,
+           COALESCE(day_number, '') AS dn,
+           CASE WHEN time IS NULL OR TIME_TO_SEC(time) < 0 OR TIME_TO_SEC(time) >= 86400
+                THEN '' ELSE TIME_FORMAT(time, '%H:%i') END AS tm,
+           COALESCE(point, '') AS p, COALESCE(update_counter, 0) AS uc,
+           COALESCE(CAST(updated_at AS CHAR), '') AS ua,
+           {_DOMAIN.format(col='month_id')} AS domain
+      FROM {POINT_TABLE}
+    UNION ALL
+    SELECT 1, '{ARCHIVE_TABLE}', 1, id, journal_uniqid, student_id, month_id,
+           COALESCE(day_number, ''),
+           CASE WHEN time IS NULL OR TIME_TO_SEC(time) < 0 OR TIME_TO_SEC(time) >= 86400
+                THEN '' ELSE TIME_FORMAT(time, '%H:%i') END,
+           COALESCE(point, ''), COALESCE(update_counter, 0),
+           COALESCE(CAST(updated_at AS CHAR), ''),
+           {_DOMAIN.format(col='month_id')}
+      FROM {ARCHIVE_TABLE}
+     WHERE added_date IS NOT NULL AND DATE(added_date) < '{ARCHIVE_CUTOFF}'
+), ranked AS (
+    SELECT s.*,
+           COUNT(*) OVER (
+               PARTITION BY source_order, journal_uniqid, student_id, mid, dn, tm
+           ) AS election_count,
+           ROW_NUMBER() OVER (
+               PARTITION BY source_order, journal_uniqid, student_id, mid, dn, tm
+               ORDER BY uc DESC, ua DESC, pk DESC
+           ) AS election_rank
+      FROM cell_stream s
+     WHERE domain <> 'unknown_code'
+), elected AS (
+    SELECT s.*
+      FROM ranked s
+     WHERE election_rank = 1 AND {_WRITABLE}
+), annotated AS (
+    SELECT s.*,
+           COUNT(*) OVER (
+               PARTITION BY journal_uniqid, student_id, domain,
+                            CASE WHEN domain = 'marks' AND
+                                           (dn NOT REGEXP '^[0-9]+$' OR
+                                            CAST(dn AS UNSIGNED) NOT BETWEEN 1 AND 31)
+                                 THEN '00' ELSE mid END,
+                            CASE WHEN domain = 'marks' AND dn REGEXP '^[0-9]+$'
+                                           AND CAST(dn AS UNSIGNED) BETWEEN 1 AND 31
+                                 THEN CAST(dn AS UNSIGNED) ELSE 0 END,
+                            CASE WHEN domain = 'marks' THEN tm ELSE '' END
+           ) AS local_target_count
+      FROM elected s
+)
+SELECT journal_uniqid, student_id, domain, mid, dn, tm, p,
+       source_table, pk, is_archive,
+       CASE WHEN local_target_count > 1 THEN 1 ELSE 0 END AS local_target_repeat
+  FROM annotated
+ ORDER BY source_order, CASE WHEN election_count > 1 THEN 1 ELSE 0 END, pk;
 """
 
 
@@ -254,4 +357,35 @@ def journal_subject_sql() -> str:
     return """
 SELECT j.uniqid, COALESCE(l.name, CONCAT('#', j.lesson_id))
   FROM journals j LEFT JOIN lessons l ON l.id = j.lesson_id;
+"""
+
+
+def lesson_slot_source_sql() -> str:
+    """MƏNBƏDƏKİ dərs slotlarının indeksi — ``(uniqid, ay, gün, "HH:MM")``.
+
+    Nərdivanın «dərs slotu MƏNBƏDƏ yoxdur» pilləsi bu sorğu ilə HƏDƏFDƏN ASILI
+    OLMADAN ölçülür.  Sual budur: hədəfdə dərsi tapılmayan xananın həmin dərsi
+    MƏNBƏDƏ ümumiyyətlə varmı?
+
+    * **Yoxdursa** — itki köçürmə qüsuru deyil, mənbənin öz boşluğudur; J12
+      (``journal_lesson_recovery``) məhz bu sinfi xananın öz ``(ay, gün, saat)``
+      açarından bərpa edir, yəni bərpadan sonra pillə SIFIRA enir.
+    * **Varsa** — dərs sətri mənbədə olub, hədəfə düşməyib: bu, TAMAM BAŞQA
+      səbəbdir (J3-ün orphan/karantin/dublikat qərarları) və hesabatda AÇIQ
+      sual kimi qalır.
+
+    Açar J3-ün öz açarının güzgüsüdür: dərs sətri jurnala ``journal_id`` (int
+    FK) ilə bağlanır, xana cədvəli isə ``journal_uniqid`` mətnini daşıyır — ona
+    görə indeks ``journals`` üzərindən birləşdirilir.  ``journals``-də qarşılığı
+    olmayan 28 orphan sətir bu birləşmədə təbii olaraq düşür (onlar heç bir
+    xananı izah edə bilməz).
+
+    ⚠️ İL SÜTUNU YOXDUR (J3 sənədinə bax) — həm mənbə slotu, həm də xananın öz
+    açarı yalnız ``(ay, gün, saat)``-dır; müqayisə eyni ölçüdədir.
+    """
+
+    return """
+SELECT DISTINCT j.uniqid, t.month, t.day, t.time
+  FROM journals_dates_added_by_teacher t
+  JOIN journals j ON j.id = t.journal_id;
 """

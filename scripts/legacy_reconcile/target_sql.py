@@ -277,3 +277,67 @@ SELECT e.student_id, e.id::text, s.name,
        AND sch.organization_id = (SELECT organization_id FROM scope)
  WHERE e.organization_id = (SELECT organization_id FROM scope) AND e.student_id = ANY(%s);
 """
+
+# ── Yazı təkrar-icrası (nərdivanın son iki pilləsi) ──────────────────────────
+#
+# Hər ikisi registrar cədvəllərinin ÖZÜNDƏN oxunur — ledger sayğacından deyil.
+# Beləliklə pillə «hadisə» yox, MATERİALLAŞMIŞ hədəf ölçür.
+
+# ⚠️ ``start_time IS NULL`` sətirlər SÜZÜLMÜR.  J12 bərpası saatı oxunmayan
+# xana üçün dərsi ``start_time = NULL`` ilə yaradır (``legacy_lesson_synth_time_unknown``)
+# və ona xanalar bağlanır; həmin dərslər süzülsəydi nərdivan hədəfdə MÖVCUD
+# olan sətirləri «yazılmayıb» sayardı (ölçülüb: bərpa nüsxəsində 18 xana).
+# Xananın öz saat açarı da oxunmayanda boş sətirdir — açar hər iki tərəfdə eyni.
+LESSON_SLOT_SQL = """
+SELECT DISTINCT l.offering_id::text,
+       EXTRACT(MONTH FROM l.date)::int,
+       EXTRACT(DAY FROM l.date)::int,
+       COALESCE(to_char(l.start_time, 'HH24:MI'), ''),
+       l.id::text
+  FROM registrar_lesson l
+ WHERE l.organization_id = %s::uuid;
+"""
+
+ENROLLMENT_OFFERING_SQL = """
+SELECT e.id::text, e.offering_id::text
+  FROM registrar_enrollment e
+ WHERE e.organization_id = %s::uuid;
+"""
+
+# ── J12 bərpasının izi (1-ci pillənin «bərpadan sonra sıfır» proqnozu) ───────
+#
+# 1-ci pillə («dərs slotu MƏNBƏDƏ yoxdur») bərpanın hədəfidir: J12 xananın öz
+# ``(ay, gün, saat)`` açarından dərsi yaradır, yəni slot xəritəsinə düşür və
+# pillə boşalır.  Hesabat bunu FƏRZ ETMİR — hədəfdə bərpanın izi VARSA onu
+# oxuyur və pilləni həmin izlə üzləşdirir.
+#
+# ⚠️ Sütun köhnə nüsxələrdə YOXDUR (miqrasiya ``registrar.0059``).  Ona görə
+# əvvəlcə sxem soruşulur; sütun yoxdursa sayğac sorğusu ÜMUMİYYƏTLƏ göndərilmir
+# (yoxsa bütöv hesabat ``UndefinedColumn`` ilə çökərdi).
+# ⚠️ Sxem sorğusu da ATTESTASİYA olunmuş tenant-a bağlanır (``EXISTS``): hesabatın
+# müqaviləsi «run attestasiyasından sonra HƏR sorğu təşkilat açarını daşıyır»
+# invariantıdır (``test_legacy_reconcile_scope``), sxem probu da istisna deyil.
+LESSON_SYNTH_COLUMN_SQL = """
+SELECT COUNT(*)
+  FROM information_schema.columns c
+ WHERE c.table_schema = 'public'
+   AND c.table_name = 'registrar_lesson'
+   AND c.column_name = 'is_legacy_synthesised'
+   AND EXISTS (SELECT 1 FROM organizations_organization o WHERE o.id = %s::uuid);
+"""
+
+LESSON_SYNTH_COUNT_SQL = """
+SELECT COUNT(*) FILTER (WHERE l.is_legacy_synthesised) AS synthesised_lessons,
+       COUNT(*) AS all_lessons
+  FROM registrar_lesson l
+ WHERE l.organization_id = %s::uuid;
+"""
+
+LESSON_SYNTH_MARK_SQL = """
+SELECT COUNT(*)
+  FROM registrar_lessonmark m
+  JOIN registrar_lesson l ON l.id = m.lesson_id
+ WHERE l.organization_id = %s::uuid
+   AND m.organization_id = %s::uuid
+   AND l.is_legacy_synthesised;
+"""

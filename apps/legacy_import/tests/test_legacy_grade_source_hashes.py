@@ -91,3 +91,42 @@ def test_every_grade_source_contract_hash_is_recomputed_with_typed_values():
         projected_row=attempt,
     )
     assert len(source.queries) == 4
+
+
+def test_selected_j12_calendar_hash_is_fetched_without_scanning_all_calendar_rows():
+    class ExtraSource(FakeSource):
+        def query(self, label, sql):
+            if "seçilmiş J12" in label:
+                self.queries.append((label, sql))
+                assert_read_only(sql)
+                assert "WHERE id IN (5)" in sql
+                return [
+                    [
+                        5,
+                        "journal-x",
+                        "03",
+                        "9",
+                        101,
+                        "7",
+                        "2022-01-01 10:00:00",
+                        "14:00:00",
+                        0,
+                        "",
+                        2,
+                        0,
+                        0,
+                        "",
+                        0,
+                        "2022-01-01 11:00:00",
+                    ]
+                ]
+            return super().query(label, sql)
+
+    source = ExtraSource()
+    hashes = collect_source_grade_hashes(
+        source,
+        extra_keys={("journals_dates_points", 5)},
+    )
+
+    assert ("journals_dates_points", 5) in hashes
+    assert len(source.queries) == 5

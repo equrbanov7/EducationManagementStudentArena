@@ -20,6 +20,23 @@ from .analysis import (
     entry_score,
     total_score,
 )
+from .write_replay import (
+    LABEL_ARCHIVE_SUPERSEDED,
+    LABEL_COLLISION_OTHER,
+    LABEL_COLLISION_SAME,
+    LABEL_LESSON_SOURCE_ABSENT,
+    LABEL_LESSON_SOURCE_PRESENT,
+    STEP_ARCHIVE_SUPERSEDED,
+    STEP_COLLISION_OTHER,
+    STEP_COLLISION_SAME,
+    STEP_DEDUPED,
+    STEP_LESSON_SOURCE_ABSENT,
+    STEP_LESSON_SOURCE_PRESENT,
+    STEP_ORPHAN,
+    STEP_UNRESOLVED,
+    multi_key_enrollment_targets,
+    replay_writes,
+)
 
 # Hər domenin hədəf tərəfdəki qarşılığı (registrar sayları ilə üzləşdirilir).
 TARGET_OF_DOMAIN = {
@@ -42,8 +59,8 @@ def _dec(value):
     return None if number < 0 else number
 
 
-def collect_source_facts(source, *, deep: bool) -> dict:
-    """MariaDB tərəfin bütün aqreqatları."""
+def collect_source_facts(source) -> dict:
+    """MariaDB tərəfin bütün aqreqatları (sətir-sətir axın BURADA DEYİL)."""
 
     facts: dict = {}
     facts["table_counts"] = {row[0]: _int(row[1]) for row in source.query("cədvəl sayları", S.table_counts_sql())}
@@ -67,14 +84,6 @@ def collect_source_facts(source, *, deep: bool) -> dict:
         for student_id, uniqid, girish, exam, total in source.query("yekun sətirləri", S.YEKUN_JOINED_SQL)
     ]
 
-    facts["cells_by_enrollment"] = (
-        [
-            (uniqid, _int(student_id), domain, _int(count))
-            for uniqid, student_id, domain, count in source.query("xana → (jurnal, tələbə)", S.cell_by_enrollment_sql())
-        ]
-        if deep
-        else []
-    )
     return facts
 
 
@@ -137,47 +146,208 @@ def collect_target_facts(target, *, run_id) -> dict:
             (run_key, "student", organization_id, organization_id),
         )
     }
+    facts["recovery"] = collect_recovery_facts(target, organization_id)
+    return facts
+
+
+def collect_recovery_facts(target, organization_id: str) -> dict:
+    """J12 dərs bərpasının hədəfdəki İZİ — 1-ci pillənin proqnozunu yoxlamaq üçün.
+
+    1-ci pillə («dərs slotu MƏNBƏDƏ yoxdur») bərpanın hədəfidir: dərs hədəfdə
+    yarananda slot xəritəsinə düşür və pillə boşalır.  Nərdivan bunu heç bir
+    xüsusi bilik olmadan görür (pillə sadəcə sıfırlanır), amma hesabat oxucunun
+    «bərpa buradadırmı?» sualını təxminə buraxmamalıdır — ona görə iz ÖLÇÜLÜR.
+
+    Üç fərqli hal ayrılır və heç biri o birinin yerinə keçmir:
+
+    * ``present=False`` — nüsxənin sxemi bərpanı ümumiyyətlə TANIMIR
+      (``registrar.0059`` miqrasiyası tətbiq olunmayıb);
+    * ``present=True, lessons=0`` — sxem tanıyır, bərpa İŞLƏDİLMƏYİB;
+    * ``lessons>0`` — bərpa tətbiq olunub, pillə 1 SIFIR olmalıdır.
+
+    ⚠️ Sütun yoxdursa sayğac sorğusu göndərilmir: ``SELECT`` özü
+    ``UndefinedColumn`` ilə çökər və bütöv hesabatı aparardı.
+    """
+
+    column_rows = target.query("bərpa sütunu", T.LESSON_SYNTH_COLUMN_SQL, (organization_id,))
+    present = bool(column_rows) and _int(column_rows[0][0]) > 0
+    facts = {"present": present, "lessons": 0, "all_lessons": 0, "marks": 0}
+    if not present:
+        return facts
+    count_rows = target.query("bərpa olunmuş dərslər", T.LESSON_SYNTH_COUNT_SQL, (organization_id,))
+    if count_rows:
+        facts["lessons"] = _int(count_rows[0][0])
+        facts["all_lessons"] = _int(count_rows[0][1])
+    if facts["lessons"]:
+        mark_rows = target.query(
+            "bərpa dərslərindəki xanalar",
+            T.LESSON_SYNTH_MARK_SQL,
+            (organization_id, organization_id),
+        )
+        if mark_rows:
+            facts["marks"] = _int(mark_rows[0][0])
     return facts
 
 
 # ── §1 nərdivan ──────────────────────────────────────────────────────────────
 
 
-def build_ladders(source_facts: dict, target_facts: dict) -> dict[str, Ladder]:
-    """Hər domen üçün «mənbə → hədəf» nərdivanını qur."""
+def offering_journal_keys(offerings) -> set[str]:
+    """Açılışı OLAN jurnalların açar dəsti (orphan qapısı üçün).
+
+    Açılış möhürünün açarı 2026-08-dən (qrup-başına bölgü) `uniqid:<qrup_pk>`
+    formasındadır; ondan əvvəl sadəcə `uniqid` idi.  Nərdivan «bu jurnalın
+    ÜMUMİYYƏTLƏ açılışı varmı» sualına cavab verdiyi üçün HƏR İKİ formanı
+    tanımalıdır — əks halda bölünmüş run-da BÜTÜN xanalar «orphan jurnal»
+    sayılır və nərdivan mənfi «izahsız fərq» verir (2026-08-27-də məhz belə
+    oldu: 4.4 M xana səhvən orphan göstərildi).
+
+    Tam açar da dəstə salınır ki, `uniqid`-in özündə «:» olsa belə (ledger
+    OPAQUE_KEY_PATTERN buna icazə verir) dəqiq uyğunluq itməsin.
+    """
+
+    keys: set[str] = set()
+    for key in offerings:
+        keys.add(key)
+        # Dilim açarının son hissəsi legacy qrup pk-sıdır; ``uniqid`` özü
+        # ``:`` daşıya bilər, ona görə soldan bölmək jurnalı kəsirdi.
+        head, separator, _ = key.rpartition(":")
+        if separator:
+            keys.add(head)
+    return keys
+
+
+def _cell_election_key(row) -> tuple[str, str, str, int, str]:
+    """SQL sətirini importer-in ``cell_key`` forması ilə eyniləşdir."""
+
+    return (str(row[2]), str(row[4]), str(row[5]), int(row[3]), str(row[6]))
+
+
+def source_cell_elections(source, table_counts: dict[str, int]):
+    """Importer-in bit-bucket namizəd seçkisini mənbədən dəqiq yenidən qur."""
+
+    # CLI (`legacy_reconcile_report.py --help`) Django qaldırmır. Bu importer
+    # sinfi model moduluna qədər gedir, ona görə yalnız deep replay başlayanda
+    # lazy import edilməlidir.
+    from apps.legacy_import.services.rehearsal_journal_points_source import CellElection
+
+    tables = (S.POINT_TABLE, S.ARCHIVE_TABLE)
+    elections = {
+        (table, domain): CellElection(expected_rows=table_counts[table]) for table in tables for domain in DOMAINS
+    }
+    for row in source.iter_query("xana seçki açarları", S.cell_election_keys_sql()):
+        table, domain = str(row[0]), str(row[7])
+        elections[(table, domain)].observe(_cell_election_key(row))
+    return elections
+
+
+def importer_ordered_winners(rows, elections):
+    """SQL qaliblərini importer-in həqiqi qərar sırasına qaytar.
+
+    ``CellElection`` hash-bucket toqquşması exact-dublikat olmayan açarı da
+    pending-ə sala bilər. SQL qalibi düzgün seçir, bu funksiya isə həmin
+    qaliblərin sırasını bərpa edir: qeyri-namizədlər PK sırasında dərhal,
+    namizədlər isə cədvəlin sonunda öz PK sırasında.
+    """
+
+    current_table = None
+    pending = []
+
+    def flush():
+        for pending_row in sorted(pending, key=lambda item: int(item[8])):
+            yield pending_row
+        pending.clear()
+
+    for row in rows:
+        table = str(row[7])
+        if current_table is not None and table != current_table:
+            yield from flush()
+        current_table = table
+        domain = str(row[2])
+        election_row = (table, row[8], row[0], row[1], row[3], row[4], row[5], domain)
+        if elections[(table, domain)].is_candidate(_cell_election_key(election_row)):
+            pending.append(row)
+        else:
+            yield row
+    yield from flush()
+
+
+def collect_write_replay(source, target, target_facts: dict, source_facts: dict):
+    """J4/J5/J6 yazı qərarını mənbə xanalarının öz axını üzərində təkrar icra et.
+
+    Hədəf tərəfdən yalnız İKİ xəritə oxunur — materiallaşmış dərs slotları və
+    yazılış→açılış indeksi — hər ikisi registrar cədvəllərinin özündən, ledger
+    sayğacından DEYİL.  Beləliklə nərdivanın son iki pilləsi hadisə deyil, XANA
+    sayır (bax ``write_replay`` modul qeydi).
+
+    ⚠️ Axın 5 milyon sətirdir: ``iter_query`` ilə oxunur, yaddaşa yığılmır.
+    """
+
+    organization_id = target_facts["organization_id"]
+    lesson_slots = {}
+    for offering_pk, month, day, time_text, lesson_pk in target.query(
+        "dərs slotları", T.LESSON_SLOT_SQL, (organization_id,)
+    ):
+        key = (str(offering_pk), int(month), int(day), str(time_text))
+        target_pk = str(lesson_pk)
+        previous = lesson_slots.get(key)
+        if previous is not None and previous != target_pk:
+            raise RuntimeError("legacy_reconcile_duplicate_target_lesson_slot")
+        lesson_slots[key] = target_pk
+    enrollment_offerings = {
+        str(enrollment_pk): str(offering_pk)
+        for enrollment_pk, offering_pk in target.query(
+            "yazılış → açılış", T.ENROLLMENT_OFFERING_SQL, (organization_id,)
+        )
+    }
+    enrollments = target_facts["enrollments"]
+    elections = source_cell_elections(source, source_facts["table_counts"])
+    winners = importer_ordered_winners(
+        source.iter_query("dedup edilmiş xana açarları", S.deduped_cell_keys_sql()),
+        elections,
+    )
+    return replay_writes(
+        winners,
+        offering_journals=offering_journal_keys(target_facts["offerings"]),
+        enrollments=enrollments,
+        enrollment_offerings=enrollment_offerings,
+        lesson_slots=lesson_slots,
+        multi_key_enrollments=multi_key_enrollment_targets(enrollments),
+        source_lesson_slots=source_lesson_slot_index(source),
+    )
+
+
+def source_lesson_slot_index(source) -> set[tuple[str, int, int, str]]:
+    """MƏNBƏNİN dərs indeksi — «slot mənbədə yoxdur» pilləsinin MÜSTƏQİL ölçüsü.
+
+    Bu, hesabatın ledger-dən DƏ, hədəfdən DƏ asılı olmayan yeganə slot mənbəyidir:
+    sorğu birbaşa ``journals_dates_added_by_teacher``-ə gedir.  Beləliklə «dərs
+    slotu tapılmadı» pilləsi iki müstəqil sübutla bölünür — hədəf (slot
+    materiallaşmayıb) və mənbə (slot ümumiyyətlə yoxdur).
+
+    ⚠️ Oxunmayan saat (``80:30`` kimi 24 legacy yazı səhvi) indeksə DÜŞMÜR:
+    onlar heç bir xananın saatına bərabər ola bilməz.  Həmin sətirlərin izi
+    ``source_slot_substeps`` alt-ölçüsündə (gün var, saat fərqlidir) görünür.
+    """
+
+    index: set[tuple[str, int, int, str]] = set()
+    for uniqid, month, day, time_text in source.iter_query("mənbə dərs slotları", S.lesson_slot_source_sql()):
+        index.add((uniqid, int(month), int(day), str(time_text)))
+    if not index:
+        raise RuntimeError("legacy_reconcile_source_lesson_slot_index_empty")
+    return index
+
+
+def build_ladders(source_facts: dict, target_facts: dict, replay=None) -> dict[str, Ladder]:
+    """Hər domen üçün «mənbə → hədəf» nərdivanını qur.
+
+    ``replay`` ``None``-dursa (``--skip-deep``) nərdivan yalnız mənbə-tərəf
+    pillələrini bilir və qalıq süni şəkildə böyük görünür — hesabat bunu açıq
+    yazır, gizlətmir.
+    """
 
     classification = source_facts["classification"]
     entity_counts = target_facts["entity_counts"]
-    offerings = target_facts["offerings"]
-    enrollments = target_facts["enrollments"]
-
-    # Açılış möhürünün açarı 2026-08-dən (qrup-başına bölgü) `uniqid:<qrup_pk>`
-    # formasındadır; ondan əvvəl sadəcə `uniqid` idi.  Nərdivan «bu jurnalın
-    # ÜMUMİYYƏTLƏ açılışı varmı» sualına cavab verdiyi üçün HƏR İKİ formanı
-    # tanımalıdır — əks halda bölünmüş run-da BÜTÜN xanalar «orphan jurnal»
-    # sayılır və nərdivan mənfi «izahsız fərq» verir (2026-08-27-də məhz belə
-    # oldu: 4.4 M xana səhvən orphan göstərildi).
-    #
-    # Tam açar da dəstə salınır ki, `uniqid`-in özündə «:» olsa belə (ledger
-    # OPAQUE_KEY_PATTERN buna icazə verir) dəqiq uyğunluq itməsin.
-    offering_journals: set[str] = set()
-    for key in offerings:
-        offering_journals.add(key)
-        head, separator, _ = key.partition(":")
-        if separator:
-            offering_journals.add(head)
-
-    attribution = {domain: {"orphan": 0, "unresolved": 0, "expected": 0} for domain in DOMAINS}
-    for uniqid, student_id, domain, count in source_facts["cells_by_enrollment"]:
-        if domain not in attribution:
-            continue
-        bucket = attribution[domain]
-        if uniqid not in offering_journals:
-            bucket["orphan"] += count
-        elif f"{uniqid}:{student_id}" not in enrollments:
-            bucket["unresolved"] += count
-        else:
-            bucket["expected"] += count
 
     ladders: dict[str, Ladder] = {}
     for domain in DOMAINS:
@@ -187,14 +357,31 @@ def build_ladders(source_facts: dict, target_facts: dict) -> dict[str, Ladder]:
         ladder.deduct("boş xana (mənbədə dəyər yoxdur)", _sum_outcome(classification, domain, OUTCOME_EMPTY))
         ladder.deduct("oxunmayan xana (karantin)", _sum_outcome(classification, domain, OUTCOME_UNREADABLE))
         ladder.deduct("arxiv örtüşməsi (J-V7 kəsimindən sonra)", _archive_overlap(classification, domain))
-        raw = source_facts["raw_writable"].get(domain, 0)
-        deduped = sum(bucket for bucket in attribution[domain].values())
-        if source_facts["cells_by_enrollment"]:
-            ladder.deduct("dublikat xana (J-V4 uduzanları)", max(0, raw - deduped))
-            ladder.deduct("orphan jurnal (açılış yaradılmayıb)", attribution[domain]["orphan"])
-            ladder.deduct("həll olunmayan yazılış (tələbə jurnalda aktiv deyil)", attribution[domain]["unresolved"])
+        if replay is not None:
+            _deduct_write_steps(ladder, domain, source_facts, replay)
         ladders[domain] = ladder
     return ladders
+
+
+def _deduct_write_steps(ladder: Ladder, domain: str, source_facts: dict, replay) -> None:
+    """Yazı nərdivanının pillələri — import-un qapı sırasında."""
+
+    raw = source_facts["raw_writable"].get(domain, 0)
+    deduped = replay.step(domain, STEP_DEDUPED)
+    ladder.deduct("dublikat xana (J-V4 uduzanları)", max(0, raw - deduped))
+    ladder.deduct("orphan jurnal (açılış yaradılmayıb)", replay.step(domain, STEP_ORPHAN))
+    ladder.deduct("həll olunmayan yazılış (tələbə jurnalda aktiv deyil)", replay.step(domain, STEP_UNRESOLVED))
+    ladder.deduct(LABEL_ARCHIVE_SUPERSEDED, replay.step(domain, STEP_ARCHIVE_SUPERSEDED))
+    if domain == DOMAIN_MARKS:
+        # Köhnə tək «dərs slotu tapılmadı» pilləsi İKİ ayrı SƏBƏBƏ bölünüb:
+        # biri mənbənin öz boşluğudur (J12 bərpasından sonra SIFIRA enir),
+        # digəri köçürmə qərarıdır (açıq sual olaraq qalır).
+        ladder.deduct(LABEL_LESSON_SOURCE_ABSENT, replay.step(domain, STEP_LESSON_SOURCE_ABSENT))
+        ladder.deduct(LABEL_LESSON_SOURCE_PRESENT, replay.step(domain, STEP_LESSON_SOURCE_PRESENT))
+    # Toqquşma da bölünüb: «eyni dəyər» izahlı buraxılışdır, «fərqli dəyər»
+    # itkidir — bir pillədə qarışdırılması itkinin ölçüsünü gizlədirdi.
+    ladder.deduct(LABEL_COLLISION_SAME, replay.step(domain, STEP_COLLISION_SAME))
+    ladder.deduct(LABEL_COLLISION_OTHER, replay.step(domain, STEP_COLLISION_OTHER))
 
 
 def _sum_outcome(classification: dict, domain: str, outcome: str) -> int:

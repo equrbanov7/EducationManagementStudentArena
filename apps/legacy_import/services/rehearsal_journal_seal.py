@@ -21,6 +21,8 @@ import hashlib
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
+from django.db import transaction
+
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation
 
 from .ledger import upsert_entity_map, upsert_issue
@@ -122,43 +124,47 @@ class JournalSealer:
 
         for start in range(0, len(entries), BATCH_ROWS):
             chunk = entries[start : start + BATCH_ROWS]
-            entity_maps = seal_entity_maps(
-                run_id=context.run_id,
-                actor=context.actor,
-                authorize=context.authorize,
-                entity_type=self.entity_type,
-                requests=[
-                    SealRequest(
+            # Map/observation və onun issue-ları BİR crash sərhədidir. Əks halda
+            # map commit-dən sonra process dayananda ``recorded_decisions``
+            # resume-da həmin açarı skip edər və yazılmamış issue bərpa olunmazdı.
+            with transaction.atomic():
+                entity_maps = seal_entity_maps(
+                    run_id=context.run_id,
+                    actor=context.actor,
+                    authorize=context.authorize,
+                    entity_type=self.entity_type,
+                    requests=[
+                        SealRequest(
+                            legacy_pk=entry.seal_key,
+                            source_row_hash=entry.digest,
+                            state=entry.state,
+                            target_model_label=entry.label,
+                            target_pk=entry.target_pk,
+                        )
+                        for entry in chunk
+                    ],
+                    target_validators=context.target_validators,
+                    bulk_target_validators=getattr(context, "bulk_target_validators", None),
+                )
+                issues = [
+                    IssueRequest(
                         legacy_pk=entry.seal_key,
-                        source_row_hash=entry.digest,
-                        state=entry.state,
-                        target_model_label=entry.label,
-                        target_pk=entry.target_pk,
+                        rule_code=rule_code,
+                        severity=self.severity_for(rule_code),
+                        payload_digest=entry.digest,
                     )
                     for entry in chunk
-                ],
-                target_validators=context.target_validators,
-                bulk_target_validators=getattr(context, "bulk_target_validators", None),
-            )
-            issues = [
-                IssueRequest(
-                    legacy_pk=entry.seal_key,
-                    rule_code=rule_code,
-                    severity=self.severity_for(rule_code),
-                    payload_digest=entry.digest,
+                    for rule_code in entry.rule_codes
+                ]
+                record_issues(
+                    run_id=context.run_id,
+                    actor=context.actor,
+                    authorize=context.authorize,
+                    source_table=self.source_table,
+                    entity_type=self.entity_type,
+                    requests=issues,
+                    entity_maps=entity_maps,
                 )
-                for entry in chunk
-                for rule_code in entry.rule_codes
-            ]
-            record_issues(
-                run_id=context.run_id,
-                actor=context.actor,
-                authorize=context.authorize,
-                source_table=self.source_table,
-                entity_type=self.entity_type,
-                requests=issues,
-                entity_maps=entity_maps,
-            )
             for issue in issues:
                 issue_counts[(issue.rule_code, issue.severity)] += 1
 

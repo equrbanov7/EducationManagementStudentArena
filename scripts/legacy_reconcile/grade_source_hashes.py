@@ -47,6 +47,16 @@ _RAW_QUERIES = {
     """,
 }
 
+_POINT_SELECT = """
+SELECT id, journal_uniqid, month_id, day_number, student_id, point,
+       added_date, time, excusable, why, j_id, lab, sem_muh,
+       description, update_counter, updated_at
+  FROM {table}
+ WHERE id IN ({ids})
+ ORDER BY id;
+"""
+_EXTRA_BATCH = 500
+
 
 def _nullable(value):
     return None if value in (None, "NULL") else value
@@ -136,26 +146,66 @@ _CONTRACTS = {
 }
 
 
-def collect_source_grade_hashes(source) -> dict[tuple[str, int], str]:
+def _record_hash(hashes, *, source_table, contract, convert, raw) -> None:
+    values = convert(raw)
+    if len(values) != len(contract.allowed_fields):
+        raise ValueError("legacy_grade_source_hash_row_shape_invalid")
+    row = dict(zip(contract.allowed_fields, values))
+    legacy_pk = int(row["id"])
+    key = (source_table, legacy_pk)
+    if key in hashes:
+        raise ValueError("legacy_grade_source_hash_duplicate")
+    hashes[key] = source_row_hash(
+        contract=contract,
+        legacy_pk=legacy_pk,
+        projected_row=row,
+    )
+
+
+def _collect_extra_point_hashes(source, hashes, extra_keys) -> None:
+    allowed = {JOURNAL_POINT_FIELDS.source_table, JOURNAL_POINT_ARCHIVE_FIELDS.source_table}
+    grouped = {table: set() for table in allowed}
+    for source_table, source_pk in extra_keys:
+        if source_table not in allowed:
+            raise ValueError("legacy_grade_extra_hash_table_invalid")
+        grouped[source_table].add(int(source_pk))
+    for source_table, wanted in grouped.items():
+        contract, convert = _CONTRACTS[source_table]
+        ordered = sorted(wanted)
+        found: set[int] = set()
+        for start in range(0, len(ordered), _EXTRA_BATCH):
+            chunk = ordered[start : start + _EXTRA_BATCH]
+            if not chunk:
+                continue
+            sql = _POINT_SELECT.format(table=source_table, ids=", ".join(str(value) for value in chunk))
+            for raw in source.query(f"{source_table} seçilmiş J12 source hash", sql):
+                found.add(int(raw[0]))
+                _record_hash(
+                    hashes,
+                    source_table=source_table,
+                    contract=contract,
+                    convert=convert,
+                    raw=raw,
+                )
+        if found != set(ordered):
+            raise ValueError("legacy_grade_extra_hash_source_missing")
+
+
+def collect_source_grade_hashes(source, *, extra_keys=()) -> dict[tuple[str, int], str]:
     """Importer kontraktını təkrar istifadə edib hər source hash-i yenidən hesabla."""
 
     hashes: dict[tuple[str, int], str] = {}
     for source_table, sql in _RAW_QUERIES.items():
         contract, convert = _CONTRACTS[source_table]
         for raw in source.query(f"{source_table} xam source hash", sql):
-            values = convert(raw)
-            if len(values) != len(contract.allowed_fields):
-                raise ValueError("legacy_grade_source_hash_row_shape_invalid")
-            row = dict(zip(contract.allowed_fields, values))
-            legacy_pk = int(row["id"])
-            key = (source_table, legacy_pk)
-            if key in hashes:
-                raise ValueError("legacy_grade_source_hash_duplicate")
-            hashes[key] = source_row_hash(
+            _record_hash(
+                hashes,
+                source_table=source_table,
                 contract=contract,
-                legacy_pk=legacy_pk,
-                projected_row=row,
+                convert=convert,
+                raw=raw,
             )
+    _collect_extra_point_hashes(source, hashes, extra_keys)
     return hashes
 
 

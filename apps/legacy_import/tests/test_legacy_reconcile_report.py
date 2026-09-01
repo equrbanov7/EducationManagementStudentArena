@@ -7,6 +7,8 @@ Ona görə həm CI-də (sqlite loop), həm də repetisiya işləyərkən təhlü
 
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -28,6 +30,7 @@ from scripts.legacy_reconcile.analysis import (  # noqa: E402
     diff_flag,
     domain_of,
     entry_score,
+    fmt_duration,
     fmt_int,
     fmt_num,
     fmt_pct,
@@ -44,6 +47,24 @@ from scripts.legacy_reconcile.render_detail import _compare_if_present  # noqa: 
 from scripts.legacy_reconcile.sampling import stratified_sample  # noqa: E402
 from scripts.legacy_reconcile.transport import ReadOnlyViolation, assert_read_only  # noqa: E402
 
+
+def test_cli_help_does_not_require_django_settings():
+    """Read-only hesabatın yardım yolu Django/model registry qaldırmamalıdır."""
+
+    env = os.environ.copy()
+    env.pop("DJANGO_SETTINGS_MODULE", None)
+    completed = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "legacy_reconcile_report.py"), "--help"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "--skip-deep" in completed.stdout
+
+
 # ── Xana təsnifatı ───────────────────────────────────────────────────────────
 
 
@@ -57,9 +78,11 @@ from scripts.legacy_reconcile.transport import ReadOnlyViolation, assert_read_on
         ("04", "17", "11", ("marks", "unreadable")),  # şkaladan kənar → təhrif YOX
         ("04", "17", "", ("marks", "empty")),
         ("04", "17", "l", ("marks", "unreadable")),
-        ("04", "0", "5", ("marks", "unreadable")),  # gün nömrəsi pozuq
-        ("04", "32", "5", ("marks", "unreadable")),
-        ("04", "abc", "5", ("marks", "unreadable")),
+        # J4 pozulmuş günü atmır: writable dəyər ``(0, 0)`` lesson qapısına
+        # qədər gedir və J12-də unresolved immutable fakta çevrilir.
+        ("04", "0", "5", ("marks", "writable")),
+        ("04", "32", "5", ("marks", "writable")),
+        ("04", "abc", "5", ("marks", "writable")),
         ("k1", "0", "9", ("components", "writable")),
         ("si", "0", "10", ("components", "writable")),
         ("k2", "0", "11", ("components", "unreadable")),
@@ -130,6 +153,13 @@ def test_ladder_table_running_remainder_is_monotonic():
     ladder.deduct("dublikat", 25)
     remainders = [row[2] for row in ladder_table(ladder)[1:3]]
     assert remainders == ["90", "65"]
+
+
+def test_duration_uses_unambiguous_minute_label():
+    """Uzun sorğular hesabatda gün kimi səhv oxunmamalıdır."""
+
+    assert fmt_duration(60) == "1 dəq 0 s"
+    assert fmt_duration(107 * 60 + 5) == "107 dəq 5 s"
 
 
 # ── Aqreqat köməkçiləri ──────────────────────────────────────────────────────

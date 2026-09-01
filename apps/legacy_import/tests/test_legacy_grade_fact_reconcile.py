@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from types import SimpleNamespace
 
 from scripts.legacy_reconcile.grade_facts import (
     SOURCE_GRADE_FACT_ROWS_SQL,
@@ -11,6 +12,7 @@ from scripts.legacy_reconcile.grade_facts import (
     reconcile_grade_facts,
     render_grade_fact_reconciliation,
 )
+from scripts.legacy_reconcile.grade_replay_facts import replay_grade_fact_rows
 from scripts.legacy_reconcile.transport import assert_read_only
 
 
@@ -182,6 +184,62 @@ def test_reconciliation_passes_for_exact_summary_and_point_payloads():
     assert result.mapping_statuses == {"linked": 4}
 
 
+def test_j12_conflict_and_unresolved_rows_are_part_of_the_exact_source_gate():
+    conflict = SimpleNamespace(
+        domain="marks",
+        source_table="journals_dates_points",
+        source_pk=81,
+        is_archive=False,
+        student_ref="101",
+        journal_uniqid="journal-x",
+        target_ref="lesson-uuid",
+        month_id="03",
+        raw_value="7",
+    )
+    unresolved = SimpleNamespace(
+        source_table="journals_dates_points_archive",
+        source_pk=91,
+        is_archive=True,
+        student_ref="102",
+        journal_uniqid="journal-y",
+        month=2,
+        day=30,
+        time_text="11:30",
+        raw_value="9",
+    )
+    extra = replay_grade_fact_rows(
+        SimpleNamespace(
+            conflict_evidence=[conflict],
+            unresolved_calendar_evidence=[unresolved],
+        )
+    )
+    conflict_target = _target(
+        extra[0],
+        status="conflict",
+        issue="legacy_grade_fact_conflict",
+        enrollment="enrollment-uuid",
+    )
+    unresolved_target = _target(
+        extra[1],
+        status="unresolved",
+        issue="legacy_grade_fact_unresolved",
+        enrollment="",
+    )
+
+    result = reconcile_grade_facts(
+        FakeReader([]),
+        FakeReader([conflict_target, unresolved_target]),
+        run_id="run-uuid",
+        extra_source_rows=extra,
+    )
+
+    assert result.passed
+    assert result.source_rows == result.target_rows == 2
+    assert extra[0][7] == "lesson-uuid"
+    assert extra[1][7] == "calendar:02:30:11:30"
+    assert result.mapping_statuses == {"conflict": 1, "unresolved": 1}
+
+
 def test_reconciliation_detects_missing_extra_duplicate_and_payload_drift():
     source_rows = [_source_summary(), _source_summary(), _source_point()]
     target_rows = [
@@ -298,3 +356,7 @@ def test_grade_fact_queries_are_read_only_and_cover_every_non_grade_code():
     assert "imthngrscxsblr" in SOURCE_GRADE_FACT_ROWS_SQL
     assert "WHERE id = %s" in TARGET_GRADE_FACT_ROWS_SQL
     assert "p.month_id, '') = 'im2'" in SOURCE_GRADE_FACT_ROWS_SQL
+    assert "legacy_mark_conflict" in TARGET_GRADE_FACT_ROWS_SQL
+    assert "legacy_mark_unresolved" in TARGET_GRADE_FACT_ROWS_SQL
+    assert "'cf:'" in TARGET_GRADE_FACT_ROWS_SQL
+    assert "'uf:'" in TARGET_GRADE_FACT_ROWS_SQL

@@ -12,6 +12,7 @@ from apps.legacy_import.services.legacy_text import (
     MAX_ENTITY_UNESCAPE_PASSES,
     canonical_settings_digest,
     clean_code,
+    clean_multiline_text,
     clean_text,
     legacy_slug,
 )
@@ -92,6 +93,92 @@ def test_clean_text_reports_and_applies_truncation():
 def test_clean_text_refuses_an_invalid_max_length(max_length):
     with pytest.raises(LegacyRehearsalEvidenceError) as exc_info:
         clean_text("Kollec", max_length=max_length)
+
+    assert exc_info.value.code == _TYPE_INVALID
+
+
+# ---------------------------------------------------------------------------
+# clean_multiline_text
+# ---------------------------------------------------------------------------
+
+#: One real ``sillabus_derslikler.name`` shape: the whole numbered literature
+#: list lives in ONE column, ``1.`` + TAB, entries separated by CRLF.  Live
+#: measurement (2026-08-30): 2,508 / 16,476 rows in that table carry a line
+#: break, 23,574 rows across the eleven syllabus satellites.
+_LITERATURE_COLUMN = (
+    "1.\tSpeak Out, Pre-Intermediate, Students&rsquo; Book\r\n"
+    "2.\tBasic English Grammar, 4th Edition\r\n"
+    "3.\tİngilis dili &uuml;zr&#601; praktikum"
+)
+
+
+def test_clean_multiline_text_keeps_the_line_structure_a_list_is_made_of():
+    cleaned, truncated = clean_multiline_text(_LITERATURE_COLUMN, max_length=65_535)
+
+    assert truncated is False
+    assert cleaned.split("\n") == [
+        "1. Speak Out, Pre-Intermediate, Students\u2019 Book",
+        "2. Basic English Grammar, 4th Edition",
+        "3. İngilis dili üzrə praktikum",
+    ]
+    # The flat cleaner is exactly the silent damage this function exists to stop:
+    # three entries become one paragraph, with no truncation and no issue code.
+    flat, flat_truncated = clean_text(_LITERATURE_COLUMN, max_length=65_535)
+    assert "\n" not in flat and flat_truncated is False
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "Kimya fakültəsi",
+        "  İnformasiya\ttexnologiyaları  ",
+        "M&amp;#601;kt&amp;#601;b",
+        "Qrup\xa0101",
+        "",
+        None,
+    ],
+)
+def test_clean_multiline_text_agrees_with_clean_text_on_single_line_values(raw):
+    """Bölünmə GENİŞLƏNMƏDİR: sətir sonu olmayan dəyərdə iki funksiya eynidir.
+
+    J11 ``movzu``-nu ``clean_text``-də saxlayır (131,056 sətrin heç birində
+    sətir sonu yoxdur); bu bərabərlik həmin qərarın davranış dəyişikliyi
+    OLMADIĞINI kilidləyir.
+    """
+    assert clean_multiline_text(raw, max_length=255) == clean_text(raw, max_length=255)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        # CRLF, lone CR and the Unicode line separators all become one "\n".
+        ("a\r\nb", "a\nb"),
+        ("a\rb", "a\nb"),
+        ("a\u2028b", "a\nb"),
+        ("a\u2029b", "a\nb"),
+        ("a\x0bb", "a\nb"),
+        # Blank-line runs collapse to ONE (the old editor padded with \r\n\r\n\r\n).
+        ("a\r\n\r\n\r\nb", "a\n\nb"),
+        # Leading/trailing blank lines are dropped entirely.
+        ("\r\n\r\n  a  \r\n  \r\n", "a"),
+        # Inside a line nothing changes: tabs and NBSP still collapse to a space.
+        ("a\tb\r\nc\xa0\xa0d", "a b\nc d"),
+    ],
+)
+def test_clean_multiline_text_normalises_breaks_without_erasing_them(raw, expected):
+    assert clean_multiline_text(raw, max_length=255) == (expected, False)
+
+
+def test_clean_multiline_text_is_idempotent_and_reports_truncation():
+    cleaned, _truncated = clean_multiline_text(_LITERATURE_COLUMN, max_length=65_535)
+    assert clean_multiline_text(cleaned, max_length=65_535) == (cleaned, False)
+    assert clean_multiline_text("Kimya\r\nfizika", max_length=5) == ("Kimya", True)
+
+
+@pytest.mark.parametrize("value", [b"Kollec", 7, 7.0, ["Kollec"]])
+def test_clean_multiline_text_refuses_every_non_string_but_none(value):
+    with pytest.raises(LegacyRehearsalEvidenceError) as exc_info:
+        clean_multiline_text(value, max_length=255)
 
     assert exc_info.value.code == _TYPE_INVALID
 

@@ -148,8 +148,28 @@ SELECT f.source_table, f.source_pk::text, f.evidence_kind, f.score_code, f.is_ar
   LEFT JOIN legacy_import_legacyentitymap m
     ON m.organization_id = f.organization_id
    AND m.source_system = f.source_system
-   AND m.entity_type = 'legacy_grade_fact'
-   AND m.legacy_pk = f.source_table || ':' || f.source_pk::text
+   AND m.entity_type = CASE
+       WHEN f.source_table IN ('journals_dates_points', 'journals_dates_points_archive')
+        AND f.mapping_status = 'conflict'
+        AND (f.score_code ~ '^(0[1-9]|1[0-2])$' OR f.score_code IN ('k1','k2','k3','si'))
+         THEN 'legacy_mark_conflict'
+       WHEN f.source_table IN ('journals_dates_points', 'journals_dates_points_archive')
+        AND f.mapping_status = 'unresolved'
+        AND f.score_code ~ '^(0[1-9]|1[0-2])$'
+         THEN 'legacy_mark_unresolved'
+       ELSE 'legacy_grade_fact'
+       END
+   AND m.legacy_pk = CASE
+       WHEN f.source_table IN ('journals_dates_points', 'journals_dates_points_archive')
+        AND f.mapping_status = 'conflict'
+        AND (f.score_code ~ '^(0[1-9]|1[0-2])$' OR f.score_code IN ('k1','k2','k3','si'))
+         THEN 'cf:' || CASE WHEN f.is_archive THEN 'a' ELSE 'p' END || ':' || f.source_pk::text
+       WHEN f.source_table IN ('journals_dates_points', 'journals_dates_points_archive')
+        AND f.mapping_status = 'unresolved'
+        AND f.score_code ~ '^(0[1-9]|1[0-2])$'
+         THEN 'uf:' || CASE WHEN f.is_archive THEN 'a' ELSE 'p' END || ':' || f.source_pk::text
+       ELSE f.source_table || ':' || f.source_pk::text
+       END
   LEFT JOIN legacy_import_legacyentityobservation o
     ON o.run_id = r.id AND o.entity_map_id = m.id
   LEFT JOIN legacy_import_legacyentitymap expected_enrollment
@@ -378,10 +398,18 @@ class GradeFactReconciliation:
         )
 
 
-def reconcile_grade_facts(source, target, *, run_id, source_hashes=None) -> GradeFactReconciliation:
+def reconcile_grade_facts(
+    source,
+    target,
+    *,
+    run_id,
+    source_hashes=None,
+    extra_source_rows=(),
+) -> GradeFactReconciliation:
     """Mənbə və immutable target faktlarını sətir-səviyyəsində tutuşdur."""
 
     source_rows = source.query("legacy qiymət faktları", SOURCE_GRADE_FACT_ROWS_SQL)
+    source_rows.extend(list(extra_source_rows))
     target_rows = target.query(
         "immutable legacy qiymət faktları",
         TARGET_GRADE_FACT_ROWS_SQL,
