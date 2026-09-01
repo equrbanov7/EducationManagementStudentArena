@@ -103,13 +103,24 @@ MARK_SEALER = JournalSealer(
 
 @dataclass(frozen=True)
 class MarkWrite:
-    """Bir xananın yazısı üçün lazım olan hər şey — həll bitib."""
+    """Bir xananın yazısı üçün lazım olan hər şey — həll bitib.
+
+    ``legacy_pk``…``month_id`` YALNIZ provenans daşıyır: toqquşma halında uduzan
+    dəyəri sübut qatına yazan J12 (``journal_lesson_recovery``) onları
+    ``on_conflict`` hook-u ilə oxuyur.  J4 onları doldurmur (defolt boşdur) və
+    heç bir möhür digest-inə girmirlər — yazı davranışı dəyişməz qalır.
+    """
 
     lesson_pk: str
     enrollment_pk: str
     status: str
     score: Decimal | None
     allow_existing: bool = True  # J-V7 arxiv yolunda False: əsas cədvəl udur
+    legacy_pk: int = 0
+    point_text: str = ""
+    row_hash: str = ""
+    student_ref: str = ""
+    month_id: str = ""
 
 
 def classify_mark_write(existing, request: MarkWrite) -> str:
@@ -143,14 +154,23 @@ class LessonMarkWriter:
     Buna görə də ``drive_cells``-in əsas cədvəl → arxiv sərhədində flush ŞƏRTdir.
     """
 
-    __slots__ = ("_batch_rows", "_context", "_ledger", "_pending")
+    __slots__ = ("_batch_rows", "_context", "_ledger", "_on_conflict", "_pending", "created_count")
 
-    def __init__(self, context, ledger, *, batch_rows: int | None = None) -> None:
+    def __init__(self, context, ledger, *, batch_rows: int | None = None, on_conflict=None) -> None:
         self._context = context
         self._ledger = ledger
         # Defolt icra vaxtı oxunur ki, test dəstə sərhədini dəyişə bilsin.
         self._batch_rows = max(1, int(_MARK_BATCH if batch_rows is None else batch_rows))
         self._pending: list[tuple[str, bool, MarkWrite]] = []
+        # OPSİONAL sübut hook-u: toqquşmada UDUZAN dəyəri kənarda saxlamaq üçün.
+        # J4 onu vermir (davranış dəyişmir); J12 verir və uduzanı
+        # ``LegacyGradeFact``-a yazır.  Yazı qərarına TƏSİRİ YOXDUR — qalib
+        # sətir hər halda olduğu kimi qalır.
+        self._on_conflict = on_conflict
+        #: HƏQİQƏTƏN yaradılan sətir sayı — idempotent təkrarlar (mövcud xana,
+        #: eyni dəyər) buraya DAXİL DEYİL, ona görə hesabat «neçə xana bərpa
+        #: olundu» sualına düzgün cavab verir.
+        self.created_count = 0
 
     def enqueue(self, *, uniqid: str, from_archive: bool, request: MarkWrite) -> None:
         self._pending.append((uniqid, from_archive, request))
@@ -189,8 +209,11 @@ class LessonMarkWriter:
                     self._ledger.count(uniqid, "archive_overlap")
                 else:
                     self._ledger.count(uniqid, "conflict")
+                    if self._on_conflict is not None:
+                        self._on_conflict(uniqid=uniqid, request=request, existing=known.get(key))
             if created:
                 model.objects.bulk_create(created)
+                self.created_count += len(created)
 
     def _existing(self, model, keys) -> dict[tuple[str, str], tuple[str, object]]:
         """Dəstənin açarları üçün mövcud xanalar — BİR sorğu, dəqiq süzgəc."""

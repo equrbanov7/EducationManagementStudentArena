@@ -202,10 +202,11 @@ def _source_enrollment_ref(uniqid: str, student_ref: str) -> str:
     return f"{uniqid}:{student_ref}" if uniqid else ""
 
 
-def _score_range_rules(*, entry=None, exam=None, final=None) -> tuple[str, ...]:
+def _score_range_rules(*, entry=None, exam=None, resit=None, final=None) -> tuple[str, ...]:
     invalid = (
         (entry is not None and not Decimal("0") <= entry <= Decimal("50"))
         or (exam is not None and not Decimal("0") <= exam <= Decimal("50"))
+        or (resit is not None and not Decimal("0") <= resit <= Decimal("50"))
         or (final is not None and not Decimal("0") <= final <= Decimal("100"))
     )
     return ("legacy_grade_fact_out_of_range",) if invalid else ()
@@ -324,8 +325,13 @@ def point_requests(
         rules = list(filter(None, (issue,)))
         if numeric is None:
             rules.append("legacy_grade_fact_non_numeric")
-        elif month_id in (EXAM_MONTH, RESIT_MONTH) and numeric > Decimal("50"):
-            rules.append("legacy_grade_fact_out_of_range")
+        else:
+            rules.extend(
+                _score_range_rules(
+                    exam=numeric if kind == EXAM_KIND else None,
+                    resit=numeric if kind == RESIT_KIND else None,
+                )
+            )
         yield GradeFactRequest(
             source_table=contract.source_table,
             source_pk=legacy_pk,

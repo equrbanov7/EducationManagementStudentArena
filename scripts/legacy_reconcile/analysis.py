@@ -83,8 +83,6 @@ def classify_cell(month_id: str, day_number: str, point: str) -> tuple[str, str]
     if domain == DOMAIN_UNKNOWN:
         return domain, OUTCOME_OUT_OF_SCOPE
     if domain == DOMAIN_MARKS:
-        if not _is_digits(day_number) or not 1 <= int(day_number) <= 31:
-            return domain, OUTCOME_UNREADABLE
         if point == "":
             return domain, OUTCOME_EMPTY
         if point in (PRESENT_TOKEN, ABSENT_TOKEN):
@@ -372,7 +370,7 @@ def fmt_duration(seconds: float) -> str:
         return f"{seconds * 1000:.0f} ms"
     if seconds < 60:
         return f"{seconds:.1f} s"
-    return f"{int(seconds // 60)} d {seconds % 60:.0f} s"
+    return f"{int(seconds // 60)} dəq {seconds % 60:.0f} s"
 
 
 def md_table(headers, rows) -> str:

@@ -1,7 +1,7 @@
 import pytest
 
-from apps.legacy_import.services.rehearsal_contracts import LegacyRehearsalConfigError
 from apps.legacy_import.services import rehearsal_target_guard as target_guard_module
+from apps.legacy_import.services.rehearsal_contracts import LegacyRehearsalConfigError
 from apps.legacy_import.services.rehearsal_target_guard import (
     REHEARSAL_TARGET_DB_SHAPE,
     REHEARSAL_TARGET_GUC,

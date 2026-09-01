@@ -11,16 +11,18 @@ Two things are deliberately stubbed even here: the 2.14 GB snapshot preflight
 emsarena.rehearsal_target`` marker).  The real interlock is proven separately by
 ``test_rehearsal_postgres.test_target_guard_reads_real_disposable_marker``.
 
-The second test drives EIGHTEEN of the registry's NINETEEN phases —
-``journal_selfwork`` (J9, order 45) is DELIBERATELY not selected because the
-synthetic fixture carries no syllabus shapes (``journals.sillabus_id`` column,
-``sillabus`` and ``sillabus_serbest_is`` tables); ``select_phases`` accepts a
-subset, so an eighteen-key policy is legitimate, not stale.  The phases run are
-``academic_structure``
-(31 + 83 + 766 rows), ``academic_catalog`` (2 521 + 126 + 3 424),
-``identity_cohort`` (7 816 + 729), the three derived identity phases, and the
-FAZA 3B journal cluster (J0-J8) and the immutable-evidence tail, fed by nine
-synthetic journal tables
+The second test drives NINETEEN of the registry's TWENTY-FOUR phases.  Five
+phases are DELIBERATELY outside this historical full-slice policy:
+``legacy_rooms`` (13), ``syllabus_migration`` (30), ``journal_lesson_meta``
+(39), ``journal_lesson_recovery`` (41) and ``journal_selfwork`` (45).
+Their source tables exist below only as schema/type fixtures; this test makes
+NO end-to-end execution claim for those five phases.  ``select_phases`` accepts
+an attested subset, and the executable registry-difference assertion below
+keeps the exclusion list honest when the registry changes.  The phases run are
+``academic_structure`` (31 + 83 + 766 rows), ``academic_catalog``
+(2 521 + 126 + 3 424), ``identity_cohort`` (7 816 + 729), the three derived
+identity phases, the selected FAZA 3B journal cluster and the immutable-evidence
+tail, fed by nine synthetic journal tables
 (``semestr_jurnal`` 13, ``journals`` 30, ``journals_dates_added_by_teacher`` 60,
 ``journals_dates_points`` 200, its archive 20, ``allowed_qb`` 5, ``yekun`` 10,
 ``imthngrscxsblr`` 3, ``balvereqi_logs`` 2).
@@ -55,8 +57,11 @@ import pytest
 from apps.accounts.identity_models import AccountActivationEvidence
 from apps.legacy_import.models import LegacyImportBatch, LegacyMigrationRun
 from apps.legacy_import.services import rehearsal_phase_a as phase_a_module
+from apps.legacy_import.services.excuse_field_contracts import (
+    ALLOWED_QB_DOCUMENT_FIELDS,
+    EXCUSE_SUPERSET_INVARIANTS,
+)
 from apps.legacy_import.services.field_contracts import (
-    ALLOWED_QB_FIELDS,
     CURRICULUM_CATALOG_FIELDS,
     CURRICULUM_PLAN_FIELDS,
     DEPARTMENT_STRUCTURE_FIELDS,
@@ -81,7 +86,6 @@ from apps.legacy_import.services.legacy_grade_field_contracts import (
 from apps.legacy_import.services.lesson_meta_field_contracts import (
     LESSON_ROOM_FIELDS,
     ROOM_REGISTRY_FIELDS,
-    SYLLABUS_TOPIC_FIELDS,
 )
 from apps.legacy_import.services.mariadb_gateway import MariaDBSourceConfig, build_configured_mariadb_source_factory
 from apps.legacy_import.services.rehearsal_contracts import (
@@ -90,10 +94,18 @@ from apps.legacy_import.services.rehearsal_contracts import (
     RehearsalPolicy,
     StudentIdentifierPolicy,
     UsernamePolicy,
+    load_rehearsal_phase_registry,
 )
 from apps.legacy_import.services.rehearsal_identity_phase import email_evidence_digest
 from apps.legacy_import.services.rehearsal_orchestrator import execute_rehearsal
 from apps.legacy_import.services.rehearsal_target_guard import TargetGuardAttestation
+from apps.legacy_import.services.syllabus_field_contracts import SILLABUS_SELF_WORK_FIELDS
+from apps.legacy_import.services.syllabus_migration_contracts import (
+    SUPERSET_INVARIANTS,
+    SYLLABUS_HEADER_FIELDS,
+    SYLLABUS_SECTION_CONTRACTS,
+    SYLLABUS_WEEK_FIELDS,
+)
 from apps.legacy_import.services.table_plan import SOURCE_SNAPSHOT_SHA256, LegacyTablePlan, load_legacy_table_plan
 from apps.legacy_import.tests.test_rehearsal_identity_phase import _plan
 from apps.organizations.models import Membership, Organization
@@ -436,6 +448,25 @@ _SCORE_SHEET_EXPORT_ROWS = 2
 _ROOM_ROWS = 12
 _LESSON_META_ROWS = 40
 _SYLLABUS_TOPIC_ROWS = 20
+# Sillabus köçürməsi: 12 cədvəlin sintetik guşələri.  J9/J10/J11 ilə EYNİ forma
+# — cədvəllər REAL TİPLƏRİ ilə yaradılır (``check_legacy_fixture_types`` onları
+# canlı sxemlə tutuşdurur), lakin bu konformans axını hələ heç bir sillabus
+# köçürmə fazasını İŞLƏTMİR, ona görə ``_FULL_PHASE_KEYS`` toxunulmur və
+# mövcud total/digest assert-ləri dəyişmir.  Faza qoşulanda
+# ``_FULL_PHASE_KEYS``/``_FULL_PHASE_ORDERS`` və ``_journal_scaled_plan`` da
+# yenilənməlidir.
+_SYLLABUS_HEADER_ROWS = 8
+_SYLLABUS_SECTION_ROWS = 12
+#: 8-ci başlıq 3-cü başlığın ``uniqid``-ini TƏKRARLAYIR — canlı mənbədəki
+#: ``htcVEP3we58POdhcgo0q`` halının güzgüsü (``sillabus.id`` 601 və 2386).
+#: Oxucu bu uniqid-i ``ambiguous_uniqids``-ə salıb heç bir başlığa bağlamamalıdır.
+_SYLLABUS_DUPLICATE_UNIQID_PK = 8
+#: Peyk sətirlərinin bağlandığı REAL başlıq uniqid-lərinin sayı.  8-ci başlıq
+#: 3-cünü təkrarladığı üçün ``syl-8`` HEÇ VAXT mövcud deyil — modul bu rəqəmə
+#: görə dolanır ki, yeganə yetim məhz aşağıdakı QƏSDƏN yaradılmış olsun.
+_SYLLABUS_LINKED_UNIQIDS = _SYLLABUS_DUPLICATE_UNIQID_PK - 1
+#: Heç bir başlığa düşməyən bölmə ``uniqid``-i (canlı: 14 yetim).
+_SYLLABUS_ORPHAN_UNIQID = "syl-orphan"
 # Bal sətirləri yalnız BU dörd MIGRATED jurnala (və 3 nömrəli V6-süzülmüş
 # jurnala) toxunur — jurnal-səviyyə möhür sayları belə dəqiq hesablana bilir.
 _POINT_JOURNALS = (1, 2, 6, 7)
@@ -443,7 +474,9 @@ _POINT_ORPHAN_JOURNAL = 3
 # J1 nəticəsi: bu 21 jurnal MIGRATED offering alır (aşağıdakı ``_journal_values``
 # xüsusi halları ilə birgə oxu); J3 defolt dərs sətirləri yalnız bunlara bağlanır.
 _JOURNAL_MIGRATED_IDS = (1, 2, 6, 7, *range(14, 31))
-# Registry order, not alphabetical: 10 < 12 < 20 < 25 < 26 < 28 < 32 < 34 < 36 < 38.
+# Selected registry order, not alphabetical.  This is intentionally NOT the
+# whole registry; the exact complement is pinned separately below so a new
+# phase cannot be silently omitted while this test still claims full coverage.
 _FULL_PHASE_KEYS = (
     "academic_structure",
     "academic_catalog",
@@ -463,8 +496,16 @@ _FULL_PHASE_KEYS = (
     "legacy_grade_facts",
     "journal_reconcile",
     "legacy_grade_artifacts",
+    "journal_excuse_documents",
 )
-_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 47, 48, 49]
+_FULL_PHASE_ORDERS = [10, 12, 20, 25, 26, 28, 32, 34, 36, 38, 40, 42, 43, 44, 46, 47, 48, 49, 50]
+_FULL_PHASE_EXCLUSIONS = (
+    ("legacy_rooms", 13),
+    ("syllabus_migration", 30),
+    ("journal_lesson_meta", 39),
+    ("journal_lesson_recovery", 41),
+    ("journal_selfwork", 45),
+)
 
 
 def _journal_scaled_plan():
@@ -515,9 +556,19 @@ _INT_COLUMNS = {
     "curricula": ("speciality_id",),
     "curricula_plan": ("curricula_id", "lesson_before_id"),
     # V-18: ``azadedildi`` is read through STUDENT_STATUS_FIELDS with ``_legacy_int``.
-    "students": ("group_id", "speciality_id", "azadedildi"),
+    # ⚠️ ``sex``: canlı ``DESCRIBE`` ilə ``int``-dir və ``legacy_gender``
+    # ``type(value) is int`` TƏLƏB EDİR.  Fixture onu VARCHAR yaradanda bütün
+    # birdəfəlik-MariaDB dəsti ``legacy_demographics_source_value_type_invalid``
+    # ilə çökür — yəni dəst demoqrafiya fazasından O YANA HEÇ VAXT KEÇMİR və
+    # ondan sonrakı hər faza (o cümlədən sillabus seed sətirləri) icra olunmamış
+    # qalır.  ``check_legacy_fixture_types``-ın ``_BENIGN`` siyahısı bunu
+    # gizlədirdi: orada ``students.sex`` «KODDA heç yerdə oxunmur» yazılmışdı,
+    # halbuki ``legacy_demographics.demographics_from_row`` onu OXUYUR.
+    "students": ("group_id", "speciality_id", "azadedildi", "sex"),
     # V-22..V-23: ``teacher_type``/``inzibati`` da canlı dump-da ``int``-dir.
-    "workers": ("department_id", "teacher_type", "inzibati"),
+    # ``sex`` eyni səbəbdən burada da int-dir (``rehearsal_worker_phase`` həmin
+    # ``demographics_from_row``-u işlədir).
+    "workers": ("department_id", "teacher_type", "inzibati", "sex"),
     # J0-J3: canlı sxemdə (DESCRIBE ilə təsdiqli) bu sütunlar ``int``-dir və
     # ``legacy_int`` mətn görəndə fail-closed olur — fixture real tipi saxlayır.
     "semestr_jurnal": ("is_current",),
@@ -531,7 +582,8 @@ _INT_COLUMNS = {
     # mətn görəndə fail-closed olur, ona görə fixture real tipi saxlayır).
     "journals_dates_points": ("student_id", "excusable", "j_id", "lab", "update_counter", "sem_muh"),
     "journals_dates_points_archive": ("student_id", "excusable", "j_id", "lab", "update_counter", "sem_muh"),
-    "allowed_qb": ("student_id",),
+    # J13 geniş kontraktı ``owner_id``-ni də oxuyur; canlı sxemdə ``int(11)``.
+    "allowed_qb": ("student_id", "owner_id"),
     # Canlı ``yekun`` DESCRIBE sübutu: bu beş metadata sütunu da INT-dir.
     # Fixture onları VARCHAR yaratsa, sərt source parser real sxemdən fərqli
     # sintetik tip drift-i haqlı olaraq rədd edir.
@@ -553,13 +605,20 @@ _INT_COLUMNS = {
     # dərs cədvəlindəki ``int`` qarşılıqlarından FƏRQLİDİR.
     "rooms": ("bina",),
     "journals_dates_rooms": ("journal_id", "room", "sillabus", "fake"),
+    # Sillabus köçürməsi: canlı ``sillabus`` DESCRIBE sübutu — bu dörd sütun
+    # ``int``-dir (``lesson_id``/``teacher_id``/``ders_saati`` ``int(11)``,
+    # ``active`` ``int(1)``).  ``uniqid``/``language`` isə ``varchar``-dır.
+    # ⚠️ ``sillabus_sem_muh``-un DÖRD SAAT SÜTUNU BURADA DEYİL: onlar canlı
+    # sxemdə ``char(5)``-dir, yəni MƏTNDİR — ``legacy_hour_cell`` məhz mətn
+    # gözləyir və rəqəm görəndə fail-closed olur.
+    "sillabus": ("lesson_id", "teacher_id", "ders_saati", "active"),
 }
 # ``added_date``/``updated_at``/``allowed_date_*`` DATETIME, ``time`` isə TIME
 # olmalıdır: J-V7 kəsimi, J-V4 sıralaması və dərs slotu məhz bu tiplərə baxır.
 _DATETIME_COLUMNS = {
     "journals_dates_points": ("added_date", "updated_at"),
     "journals_dates_points_archive": ("added_date", "updated_at"),
-    "allowed_qb": ("allowed_date_start", "allowed_date_end"),
+    "allowed_qb": ("allowed_date_start", "allowed_date_end", "added_date"),
     "imthngrscxsblr": ("added_date",),
     "balvereqi_logs": ("export_time",),
 }
@@ -1064,10 +1123,24 @@ def _journal_point_archive_values(legacy_pk):
 
 def _allowed_qb_values(legacy_pk):
     # Heç bir sətrin tələbəsi bu run-da həll olunmur — pəncərə axını yoxlanılır.
+    # J13 (``journal_excuse_documents``) buna görə hər 5 sətri saxlayır, amma
+    # ``mapping_status=student_unresolved`` ilə: fail-closed budağın özü ölçülür.
+    # ⚠️ ``student_id`` QƏSDƏN dəyişmir — J4-ün üzürlü-qayıb pəncərəsi və onun
+    # bütün gözlənilən sayları həmin dəyərdən asılıdır.
+    # Sənəd sütunları (J13): 3-cü və 4-cü sətir EYNİ paketdir (``uniq``+``file``
+    # təkrarı — canlıda 2,964 sətir 977 paketə düşür); 5-ci sətrin izahı boşdur
+    # (canlıda 37 belə sətir var) → ``legacy_excuse_note_empty``.
+    batch = "PKT001" if legacy_pk in (3, 4) else f"PKT{legacy_pk:03d}"
+    document = "1697461819.jpg" if legacy_pk in (3, 4) else f"169746180{legacy_pk}.pdf"
     return {
         "student_id": 9_000 + legacy_pk,
         "allowed_date_start": "2021-12-30 08:30:00",
         "allowed_date_end": "2021-12-31 23:59:00",
+        "owner_id": 51,
+        "file": document,
+        "added_date": "2021-12-29 10:15:00",
+        "desc": "" if legacy_pk == 5 else f"Uzrlu qayib senedi {legacy_pk}",
+        "uniq": batch,
     }
 
 
@@ -1135,9 +1208,71 @@ def _lesson_meta_values(legacy_pk):
     }
 
 
+def _syllabus_uniqid(legacy_pk):
+    """Başlıq ``uniqid``-i; 8-ci başlıq 3-cünü TƏKRARLAYIR (ambiqü açar)."""
+
+    if legacy_pk == _SYLLABUS_DUPLICATE_UNIQID_PK:
+        return "syl-3"
+    return f"syl-{legacy_pk}"
+
+
+#: Saat xanalarının sintetik dəyər fəzası — canlı ``char(5)`` zibilinin
+#: güzgüsü.  ``legacy_hour_cell`` hər birini FƏRQLİ yola salır: '' və '-' boş,
+#: '0'/'2'/'02' qəbul, '0.5' kəsr (yuvarlaqlaşdırma YOX), '30' tavandan böyük,
+#: 'ş' rəqəm deyil.
+_SYLLABUS_HOUR_CELLS = ("", "0", "2", "02", "0.5", "30", "ş", "-")
+
+
+def _syllabus_header_values(legacy_pk):
+    return {
+        "uniqid": _syllabus_uniqid(legacy_pk),
+        # 1,822 fənn hamısı həll olunur; təkrarlanan (fənn, müəllim) cütü
+        # versiya nərdivanının qurulduğu haldır.
+        "lesson_id": (legacy_pk % 3) + 1,
+        # ``teacher_id=0`` canlı mənbədəki 956 qırıq istinadın güzgüsüdür:
+        # sillabus ATILMIR, «müəllimi həll olunmayıb» qeydi ilə köçürülür.
+        "teacher_id": 0 if legacy_pk == 5 else (legacy_pk % 2) + 1,
+        "ders_saati": 45,
+        # '-' canlı mənbədə 40 sətirdə var və dil DEYİL → ``LANGUAGE_UNKNOWN``.
+        "language": "-" if legacy_pk == 6 else ("en" if legacy_pk % 3 == 0 else "az"),
+        # 714 qeyri-aktiv başlığın güzgüsü — onlar APPROVED seçilə bilməz.
+        "active": 0 if legacy_pk in (4, _SYLLABUS_DUPLICATE_UNIQID_PK) else 1,
+    }
+
+
 def _syllabus_topic_values(legacy_pk):
     # HTML entity QƏSDƏNdir: ``clean_text`` onu üç keçidlə açmalıdır.
-    return {"movzu": f"M&uuml;hazir&#601; m&ouml;vzusu {legacy_pk}"}
+    # ⚠️ ``movzu`` dəyəri DƏYİŞMƏYİB — J11-in mövzu indeksi eyni qalır; yalnız
+    # geniş kontraktın tələb etdiyi sütunlar əlavə olunub.
+    return {
+        "movzu": f"M&uuml;hazir&#601; m&ouml;vzusu {legacy_pk}",
+        "uniqid": (
+            _SYLLABUS_ORPHAN_UNIQID
+            if legacy_pk == _SYLLABUS_TOPIC_ROWS
+            else f"syl-{(legacy_pk % _SYLLABUS_LINKED_UNIQIDS) + 1}"
+        ),
+        "muh_saat": _SYLLABUS_HOUR_CELLS[legacy_pk % len(_SYLLABUS_HOUR_CELLS)],
+        "sem_saat": _SYLLABUS_HOUR_CELLS[(legacy_pk + 2) % len(_SYLLABUS_HOUR_CELLS)],
+        "praktiki_saat": _SYLLABUS_HOUR_CELLS[(legacy_pk + 4) % len(_SYLLABUS_HOUR_CELLS)],
+        "lab_saat": _SYLLABUS_HOUR_CELLS[(legacy_pk + 6) % len(_SYLLABUS_HOUR_CELLS)],
+        # Canlı mənbədə 131,056 sətirdən yalnız 1,697-sində doludur.
+        "qeyd": "M&uuml;&#601;llim qeydi" if legacy_pk % 7 == 0 else "",
+    }
+
+
+def _syllabus_section_values(legacy_pk):
+    """On peykin HAMISI üçün eyni forma — canlı sxemləri hərfən eynidir."""
+
+    return {
+        "uniqid": (
+            _SYLLABUS_ORPHAN_UNIQID
+            if legacy_pk == _SYLLABUS_SECTION_ROWS
+            else f"syl-{(legacy_pk % _SYLLABUS_LINKED_UNIQIDS) + 1}"
+        ),
+        # 2,158-7,119 arası boş ``name`` canlı mənbədə real haldır: sətir
+        # ATILMIR, çünki atmaq nömrələnmiş siyahını sürüşdürərdi.
+        "name": "" if legacy_pk % 6 == 0 else f"B&ouml;lm&#601; s&#601;tri {legacy_pk}",
+    }
 
 
 # ``yekun`` cədvəli İKİ kontrakt tərəfindən oxunur: dar ``YEKUN_FIELDS``
@@ -1178,7 +1313,10 @@ _FULL_TABLES = (
         _JOURNAL_ARCHIVE_ROWS,
         _journal_point_archive_values,
     ),
-    ("allowed_qb", ALLOWED_QB_FIELDS, (), _ALLOWED_QB_ROWS, _allowed_qb_values),
+    # ⚠️ Cədvəl GENİŞ (``excuse-v1``) proyeksiya ilə qurulur: J4 dar
+    # ``ALLOWED_QB_FIELDS``-lə pəncərəni, J13 isə geniş kontraktla SƏNƏDİ oxuyur
+    # (``yekun``/``sillabus`` ilə eyni alt-çoxluq tələsi).
+    ("allowed_qb", ALLOWED_QB_DOCUMENT_FIELDS, (), _ALLOWED_QB_ROWS, _allowed_qb_values),
     # Cədvəl GENİŞ (`grade-evidence-v1`) proyeksiya ilə yaradılır: `compile_safe_projection`
     # kontraktın sxemin ALT-ÇOXLUĞU olmasını tələb edir, ona görə dar `YEKUN_FIELDS`
     # (J5b/J8) və geniş `YEKUN_EVIDENCE_FIELDS` (qiymət sübutu fazası) eyni cədvəldən
@@ -1204,8 +1342,38 @@ _FULL_TABLES = (
     # onsuz da kənarda saxlayır və fixture yalnız oxunan sütunları yaradır.
     ("rooms", ROOM_REGISTRY_FIELDS, (), _ROOM_ROWS, _room_values),
     ("journals_dates_rooms", LESSON_ROOM_FIELDS, (), _LESSON_META_ROWS, _lesson_meta_values),
-    ("sillabus_sem_muh", SYLLABUS_TOPIC_FIELDS, (), _SYLLABUS_TOPIC_ROWS, _syllabus_topic_values),
+    # ⚠️ Cədvəl GENİŞ (``syllabus-migration-v1``) proyeksiya ilə yaradılır:
+    # ``compile_safe_projection`` kontraktın sxemin ALT-ÇOXLUĞU olmasını tələb
+    # edir, ona görə dar ``SYLLABUS_TOPIC_FIELDS`` (J11) və geniş
+    # ``SYLLABUS_WEEK_FIELDS`` (köçürmə) eyni cədvəldən oxuya bilir.  Dar
+    # kontraktla yaratsaq, geniş oxucu ``legacy_required_field_missing`` ilə
+    # çökür — ``yekun``-la eyni tələ (yuxarıdakı qeyd).
+    ("sillabus_sem_muh", SYLLABUS_WEEK_FIELDS, (), _SYLLABUS_TOPIC_ROWS, _syllabus_topic_values),
+    # Sillabus köçürməsinin başlığı + 10 ``id|uniqid|name`` peyki.
+    # ``sillabus`` da GENİŞ kontraktla qurulur (J9-un dar ``SILLABUS_FIELDS``-i
+    # onun alt-çoxluğudur).
+    ("sillabus", SYLLABUS_HEADER_FIELDS, (), _SYLLABUS_HEADER_ROWS, _syllabus_header_values),
+    *(
+        (source_table, contract, (), _SYLLABUS_SECTION_ROWS, _syllabus_section_values)
+        for source_table, contract in SYLLABUS_SECTION_CONTRACTS.items()
+    ),
 )
+
+# ``compile_safe_projection`` alt-çoxluq invariantı: bir cədvəli İKİ kontrakt
+# oxuyanda fixture onu GENİŞ olanla qurmalıdır.  Modul yüklənəndə dərhal
+# tutulsun deyə burada yoxlanılır (``YEKUN_FIELDS`` assert-i ilə eyni forma).
+for _narrow, _wide in (*SUPERSET_INVARIANTS, *EXCUSE_SUPERSET_INVARIANTS):
+    assert set(_narrow.allowed_fields) <= set(_wide.allowed_fields), (
+        f"dar `{_narrow.source_table}` kontraktı geniş köçürmə kontraktının "
+        "alt-çoxluğu olmalıdır; əks halda fixture cədvəli hər iki oxucuya "
+        "xidmət edə bilməz"
+    )
+
+# ``sillabus_serbest_is`` üçün AYRI köçürmə kontraktı YOXDUR — J9-un
+# ``SILLABUS_SELF_WORK_FIELDS``-i olduğu kimi işlədilir (cədvəldə cəmi üç sütun
+# var, yəni genişlətməyə ehtiyac yoxdur).  Ona görə cədvəl də bu dəstdə məhz
+# həmin kontraktla qurulur.
+assert SYLLABUS_SECTION_CONTRACTS["sillabus_serbest_is"] is SILLABUS_SELF_WORK_FIELDS
 
 
 def _create_full_source_fixture(port, database):
@@ -1289,7 +1457,7 @@ def _issue_histogram(document):
 
 
 def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, tmp_path):
-    """SPEC §8/11 and §10 items 14-15 — two eighteen-phase rehearsals agree
+    """SPEC §8/11 and §10 items 14-15 — two nineteen-phase rehearsals agree
     byte for byte, and a third one that touches accounts deliberately does not.
 
     ``load_legacy_table_plan`` is patched ONLY with ``_journal_scaled_plan``:
@@ -1434,13 +1602,22 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
         first_document = json.loads(open(first.report_path, encoding="ascii").read())
         second_document = json.loads(open(second.report_path, encoding="ascii").read())
 
-        # 1) The whole registry ran, in its fixed ascending order.
+        # 1) Every phase configured by THIS 19-phase slice ran in fixed order;
+        #    the current 24-phase registry's other five phases are explicitly
+        #    excluded above.  This is deliberately not an all-registry claim.
+        registry_pairs = tuple((phase.phase_key, phase.order) for phase in load_rehearsal_phase_registry())
+        excluded_keys = {phase_key for phase_key, _order in _FULL_PHASE_EXCLUSIONS}
+        assert tuple(pair for pair in registry_pairs if pair[0] in excluded_keys) == _FULL_PHASE_EXCLUSIONS
+        assert tuple(pair for pair in registry_pairs if pair[0] not in excluded_keys) == tuple(
+            zip(_FULL_PHASE_KEYS, _FULL_PHASE_ORDERS, strict=True)
+        )
         assert [phase["phase_key"] for phase in first_document["deterministic"]["phases"]] == list(_FULL_PHASE_KEYS)
         assert [phase["order"] for phase in first_document["deterministic"]["phases"]] == _FULL_PHASE_ORDERS
 
         # 2) The real accounting totals — 880 structure rows + 6 071 catalogue
-        #    rows + 8 545 identity rows; the seven batch-less derived phases
-        #    (three identity-derived + four journal) contribute exactly 0 each.
+        #    rows + 8 545 identity rows; the sixteen batch-less derived phases
+        #    (three identity-derived + eleven journal + two immutable-evidence)
+        #    contribute exactly 0 each.
         assert first_document["deterministic"]["totals"]["source_rows"] == _FULL_SOURCE_ROWS == 15_496
         observed = {
             phase["phase_key"]: phase["observed_source_rows"] for phase in first_document["deterministic"]["phases"]
@@ -1464,6 +1641,7 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "legacy_grade_facts": 0,
             "journal_reconcile": 0,
             "legacy_grade_artifacts": 0,
+            "journal_excuse_documents": 0,
         }
 
         # 3) Determinism across two independent targets.
@@ -1549,6 +1727,9 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             # ``a-final-coverage`` möhürü əlavə olunmamışdan əvvəlkidir
             # (bu, qrup bölgüsü ilə ƏLAQƏSİZ ikinci köhnəlmədir).
             "journal_reconcile": {"reconcile_balanced": 2, "reconcile_deviation": 13},
+            # J13: sənəd fazası da ``journal_`` prefiksindədir; ayrıca hədəf/RLS
+            # assert-ləri aşağıda qalır, amma state xəritəsindən gizlədilmir.
+            "journal_excuse_documents": {"legacy_excuse_materialised": _ALLOWED_QB_ROWS},
         }
         legacy_states = {
             phase["phase_key"]: phase["state_counts"]
@@ -1559,6 +1740,17 @@ def test_disposable_mariadb_full_slice_rehearsal_is_deterministic(monkeypatch, t
             "legacy_grade_facts": {"legacy_grade_facts_materialised": 83},
             "legacy_grade_artifacts": {"legacy_grade_artifacts_materialised": 2},
         }
+        # J13: köhnə üzrlü-qayıb sənədləri — 5 sətrin hamısı materiallaşır
+        # (tələbəsi həll olunmasa da sətir SAXLANIR, bax ``_allowed_qb_values``).
+        excuse_states = next(
+            phase
+            for phase in first_document["deterministic"]["phases"]
+            if phase["phase_key"] == "journal_excuse_documents"
+        )["state_counts"]
+        assert excuse_states == {"legacy_excuse_materialised": _ALLOWED_QB_ROWS}
+        excuse_model = django_apps.get_model("registrar", "LegacyExcuseDocument")
+        assert excuse_model.objects.filter(organization=second_organization).count() == _ALLOWED_QB_ROWS
+        assert excuse_model.objects.filter(organization=first_organization).count() == 0
         legacy_fact_model = django_apps.get_model("registrar", "LegacyGradeFact")
         legacy_artifact_model = django_apps.get_model("registrar", "LegacyGradeArtifact")
         # İkinci rehearsal sessiya tenant-ını ikinci təşkilata keçirib.  FORCE

@@ -34,11 +34,20 @@ LESSON_MODEL_LABEL = "registrar.lesson"
 ASSESSMENT_SCHEME_MODEL_LABEL = "registrar.assessmentscheme"
 LEGACY_GRADE_FACT_MODEL_LABEL = "registrar.legacygradefact"
 LEGACY_GRADE_ARTIFACT_MODEL_LABEL = "registrar.legacygradeartifact"
+# J13 (journal_excuse_documents) hədəfi: köhnə üzrlü-qayıb sənədinin
+# append-only qeydi.  Xanaya toxunmur — mövcud ``excused`` statusunun
+# SÜBUTUdur (bax ``registrar/models/legacy_excuse.py``).
+LEGACY_EXCUSE_DOCUMENT_MODEL_LABEL = "registrar.legacyexcusedocument"
 # J10 (legacy_rooms) hədəfi.  ``registrar.Lesson.room`` FK-sı (miqrasiya 0051)
 # məhz bu modelə baxır — təşkilatın yeganə otaq reyestri odur.  Model burada da
 # ``django.apps`` ilə həll olunur, yəni ``legacy_import → exams`` idxal tili
 # yaranmır.
 EXAM_ROOM_MODEL_LABEL = "exams.examroom"
+# J12 (syllabus_migration) hədəfi: köçürülən hər köhnə sillabus BİR
+# ``SyllabusVersion`` sətridir (dosye ``Syllabus`` onun sahibidir və versiya
+# ondan tapılır).  Model burada da ``django.apps`` ilə həll olunur — yəni
+# ``legacy_import → syllabus`` idxal tili YARANMIR.
+SYLLABUS_VERSION_MODEL_LABEL = "syllabus.syllabusversion"
 
 
 def build_rehearsal_authorizer() -> LedgerAuthorizer:
@@ -123,6 +132,8 @@ def build_bulk_target_validators():
             LEGACY_GRADE_FACT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyGradeFact"),
             LEGACY_GRADE_ARTIFACT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyGradeArtifact"),
             EXAM_ROOM_MODEL_LABEL: _tenant_owned_bulk_validator("exams", "ExamRoom"),
+            SYLLABUS_VERSION_MODEL_LABEL: _tenant_owned_bulk_validator("syllabus", "SyllabusVersion"),
+            LEGACY_EXCUSE_DOCUMENT_MODEL_LABEL: _tenant_owned_bulk_validator("registrar", "LegacyExcuseDocument"),
         }
     )
 
@@ -158,5 +169,7 @@ def build_target_validators() -> TargetValidatorRegistry:
             LEGACY_GRADE_FACT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyGradeFact"),
             LEGACY_GRADE_ARTIFACT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyGradeArtifact"),
             EXAM_ROOM_MODEL_LABEL: _tenant_owned_validator("exams", "ExamRoom"),
+            SYLLABUS_VERSION_MODEL_LABEL: _tenant_owned_validator("syllabus", "SyllabusVersion"),
+            LEGACY_EXCUSE_DOCUMENT_MODEL_LABEL: _tenant_owned_validator("registrar", "LegacyExcuseDocument"),
         }
     )

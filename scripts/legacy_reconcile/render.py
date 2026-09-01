@@ -18,6 +18,12 @@ from .collect import out_of_scope_cells
 from .grade_artifacts import render_grade_artifact_reconciliation
 from .grade_facts import render_grade_fact_reconciliation
 from .render_detail import render_finals, render_quality, render_sample
+from .render_steps import render_write_steps
+from .write_replay import (
+    STEP_LESSON_SOURCE_ABSENT,
+    STEP_LESSON_SOURCE_PRESENT,
+    SUBSTEP_SLOT_NOT_MATERIALISED,
+)
 
 # §1.2 üçün: ledger varlığı → onu doğuran mənbə cədvəli (yoxsa törəmə varlıqdır).
 LEDGER_SOURCE_TABLE = {
@@ -190,7 +196,7 @@ def _summary(context: dict) -> str:
         ["Mənbə jurnal xanası (canlı + arxiv, xam)", fmt_int(source_cells), "100 %"],
         ["Hədəfdə yaradılan sətir", fmt_int(target_cells), fmt_pct(target_cells, source_cells)],
         [
-            "İzah olunmuş fərq (boş / oxunmayan / orphan / dublikat / həll olunmayan)",
+            "İzah olunmuş fərq (boş / oxunmayan / arxiv / dublikat / orphan / yazılış / dərs slotu / toqquşma)",
             fmt_int(source_cells - target_cells - unexplained),
             fmt_pct(source_cells - target_cells - unexplained, source_cells),
         ],
@@ -315,11 +321,13 @@ def _row_accounting(context: dict) -> str:
         "Bu, hesabatın **ürəyidir**.  Hər pillə mənbə sayından nə qədər və NİYƏ",
         "çıxıldığını göstərir; sonuncu sətir tutmayan qalığı açıq elan edir.",
     ]
-    if not source["cells_by_enrollment"]:
+    replay = context.get("replay")
+    if replay is None:
         lines += [
             "",
-            "> ⚠️ `--skip-deep` ilə işlədilib: orphan / dublikat / həll olunmayan yazılış",
-            "> pillələri hesablanmayıb, ona görə qalıq süni şəkildə böyükdür.",
+            "> ⚠️ `--skip-deep` ilə işlədilib: yazı nərdivanının pillələri (dublikat,",
+            "> orphan, həll olunmayan yazılış, dərs slotu, hədəf açarı toqquşması)",
+            "> hesablanmayıb, ona görə qalıq süni şəkildə böyükdür.",
         ]
     for domain in DOMAINS:
         ladder = context["ladders"][domain]
@@ -330,7 +338,8 @@ def _row_accounting(context: dict) -> str:
             md_table(["Pillə", "Dəyişiklik", "Qalıq"], ladder_table(ladder)),
         ]
 
-    if source["cells_by_enrollment"]:
+    if replay is not None:
+        lines += ["", render_write_steps(context)]
         lines += ["", "#### Qalan izahsız fərq haqqında", "", _residual_note(context)]
 
     stray = out_of_scope_cells(source)
@@ -342,35 +351,89 @@ def _row_accounting(context: dict) -> str:
             f"Mənbədə **{fmt_int(stray)}** xananın `month_id` kodu nə təqvim ayı, nə",
             "`k1/k2/k3/si`, nə də `im/im2`-dir.  İmport-un say balansı bu sətirləri",
             "tamamilə kənarda saxlayır — bu hesabat onları GÖRÜNƏN edir.",
+            "",
+            "Bu xanalar YUXARIDAKI üç nərdivanın heç birinə düşmür, amma **itmiş sayılmır**:",
+            "onların taleyi aşağıdakı «legacy qiymət faktları» bölməsində sətir-sətir",
+            "tutuşdurulur (`registrar_legacygradefact.raw_score_text`) — həmin uzlaşdırma",
+            "yalnız təqvim aylarını və `k1/k2/k3/si`-ni kənarda saxlayır, bu kodları YOX.",
+            "",
+            "⚠️ Struktur qeyd: J5 komponent fazası yalnız `k1/k2/k3/si` kodlarını tanıyır,",
+            "ona görə bu xanalar `ComponentScore` kimi MATERİALLAŞMIR — dəyər sübut",
+            "cədvəlindədir, jurnal interfeysində görünmür.  Sahib qərar verməlidir.",
         ]
     return "\n".join(lines)
 
 
 def _residual_note(context: dict) -> str:
-    """Qalıq sıfır deyilsə — nə OLA BİLƏR və növbəti addım nədir (fərziyyə kimi)."""
+    """Qalıq — nə qaldı və o, HANSI sualdır (fərziyyə DEYİL)."""
 
     ladders = context["ladders"]
     total = sum(ladder.unexplained for ladder in ladders.values())
     if total == 0:
-        return "✅ Hər üç domen tam tutur — mənbənin hər xanası ya hədəfdədir, ya da adlandırılmış səbəblə çıxılıb."
+        replay = context.get("replay")
+        lines = [
+            "✅ Hər üç domen tam tutur — mənbənin hər xanası ya hədəfdədir, ya da",
+            "adlandırılmış səbəblə çıxılıb.",
+            "",
+            "⚠️ Bu, «itki yoxdur» demək DEYİL.  Nərdivan xananın hədəfdə sətir",
+            "yaratmamasının SƏBƏBİNİ adlandırır; həmin səbəblərin bir hissəsi",
+            "(dərs slotu yoxdur · toqquşmada fərqli dəyər) HƏQİQİ DATA İTKİSİDİR —",
+            "yuxarıdakı «səbəb pillələri» bölməsinə bax.",
+            "",
+            "Qapının hələ də mənası var: pillələr hədəfin sətir sayından ASILI OLMADAN",
+            "hesablanır (mənbə xanaları + mənbənin dərs indeksi + materiallaşmış",
+            "dərs/yazılış xəritələri), ona görə yazılması gözlənilən bir sətir hər hansı",
+            "başqa səbəbdən düşsə qalıq yenə açılır.",
+        ]
+        if replay is not None:
+            absent = replay.total(STEP_LESSON_SOURCE_ABSENT)
+            present = replay.total(STEP_LESSON_SOURCE_PRESENT)
+            lines += [
+                "",
+                "**Bərpadan sonra nə gözlənilir (yoxlanan proqnoz, fərziyyə deyil).**",
+                f"1-ci pillə (`dərs slotu MƏNBƏDƏ yoxdur`) hazırda **{fmt_int(absent)}** xanadır.",
+                "J12 (`journal_lesson_recovery`) həmin dərsləri xananın öz `(ay, gün, saat)`",
+                "açarından yaradır, yəni bərpa tətbiq olunmuş bazada bu pillə **0** olmalıdır;",
+                "0 çıxmasa bərpa natamamdır və hesabat bunu dərhal göstərəcək.",
+            ]
+            if present:
+                unnamed = replay.source_present_substeps.get(SUBSTEP_SLOT_NOT_MATERIALISED, 0)
+                lines += [
+                    "",
+                    f"**2-ci pillə** (`dərs slotu mənbədə VAR, hədəfdə yoxdur`) — **{fmt_int(present)}** xana.",
+                    "Bu, bərpa ilə bağlanmır; səbəbi §1.3-ün «2-ci pillənin daxili bölgüsü»",
+                    "cədvəlində ölçülüb (təqvimdə mövcud olmayan tarix · divar saatı olmayan saat).",
+                ]
+                lines += (
+                    [
+                        "",
+                        "✅ Bu pillədə ADSIZ qalıq yoxdur — hər xana mənbənin öz təqvim/saat",
+                        "səhvi ilə izah olunur.",
+                    ]
+                    if unnamed == 0
+                    else [
+                        "",
+                        f"🟠 **AÇIQ QALIR:** həmin pillənin **{fmt_int(unnamed)}** xanasının tarixi də,",
+                        "saatı da qanunidir — səbəb hələ adlandırılmayıb və fərziyyə ilə bağlanmır.",
+                    ]
+                )
+            else:
+                lines += [
+                    "",
+                    "✅ 2-ci pillə (`dərs slotu mənbədə VAR, hədəfdə yoxdur`) **0**-dır: hədəfdə",
+                    "dərsi tapılmayan HƏR xananın dərsi mənbədə də yoxdur.",
+                ]
+        return "\n".join(lines)
     source_total = sum(ladder.source_total for ladder in ladders.values())
-    issues = {rule: count for _table, rule, _severity, count in context["target"]["issues"]}
     return "\n".join(
         [
             f"Qalıq **{fmt_signed(total)}** sətirdir (mənbənin {fmt_pct(abs(total), source_total)}-i).",
-            "Bu hesabat onu **fərziyyə ilə bağlamır** — açıq qalıq kimi saxlayır.  Ən ehtimallı",
-            "mənbələr (yoxlanılmalıdır, sübut deyil):",
+            "Bu hesabat onu **fərziyyə ilə bağlamır** — açıq qalıq kimi saxlayır.",
             "",
-            "1. **Dərs slotu tapılmayan bal xanası** — bir `LessonMark` yalnız mövcud `Lesson`-a",
-            "   bağlana bilər; xananın (ay, gün, saat) slotu üçün `journals_dates_added_by_teacher`",
-            "   sətri yoxdursa xana yazılmır.  Ledger-də bunun izi: "
-            f"`legacy_journal_lesson_orphan` = {fmt_int(issues.get('legacy_journal_lesson_orphan', 0))}.",
-            "2. **Hədəf toqquşması** — eyni (yazılış, dərs) cütü üçün ikinci xana yazıla bilmir "
-            f"(`legacy_journal_mark_target_conflict` = {fmt_int(issues.get('legacy_journal_mark_target_conflict', 0))}).",
-            "3. **Üzrlü qayıb çevrilməsi** — `excusable` bayrağı olan xanalar `excused` statusuna "
-            f"düşür (`legacy_journal_mark_excused` = {fmt_int(issues.get('legacy_journal_mark_excused', 0))}).",
-            "",
-            "Növbəti addım: bu üç ehtimalı ayrıca sorğu ilə ölçüb nərdivana yeni pillə kimi əlavə etmək.",
+            "Nərdivan import-un BÜTÜN bilinən qapılarını (boş · oxunmayan · arxiv · dublikat ·",
+            "orphan · yazılış · dərs slotu · hədəf açarı) yenidən hesablayır, yəni qalıq",
+            "bu qapıların HEÇ BİRİ ilə izah olunmayan sətirlərdir.  Növbəti addım onu",
+            "domen üzrə nümunə ilə izləməkdir — yeni pillə YALNIZ ölçüldükdən sonra əlavə olunur.",
         ]
     )
 
