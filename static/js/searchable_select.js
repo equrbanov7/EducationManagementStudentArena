@@ -16,6 +16,11 @@
  *     `?<dependParam>=<parentValue>` sorğuya əlavə olunur, uşaq seçim təmizlənir.
  *   • Kəsilmə-önləyən (collision-aware) FIXED yerləşdirmə — dropdown heç vaxt
  *     ekrandan/overflow konteynerdən kənara çıxmır (aşağıda yer yoxsa yuxarı açır).
+ *   • OPT-IN UX əlavələri (bunları göndərməyən mövcud səthlərdə davranış EYNİDİR):
+ *       – server nəticəsində `disabled: true` (+ `hint`) → variant GÖRÜNÜR, amma
+ *         seçilmir və səbəbi yanında yazılır («onsuz da bu jurnaldadır»);
+ *       – `opts.emptyText` → nəticə yoxdursa mənalı boş vəziyyət mətni;
+ *       – `opts.skeleton: true` → ilk səhifə gələnə qədər skeleton sətirlər.
  *
  * Prefiks-agnostikdir: chips/opt/chip class-larını mövcud `input`-un class
  * adından (`{prefix}-ms__search`) çıxarır, beləcə hər səhifə öz CSS-i ilə işləyir.
@@ -36,6 +41,7 @@
 
   var GAP = 6;
   var DESIRED_MAX = 300; // px — CSS max-height ilə uyğun
+  var uid = 0; // `aria-activedescendant` üçün instansiya-unikal id kökü
 
   function hasClippingAncestor(element) {
     var node = element.parentElement;
@@ -92,11 +98,36 @@
     var basePlaceholder = opts.placeholder || search.getAttribute("placeholder") || "";
     var listeners = { change: [] };
 
+    // KLAVİATURA: `aria-activedescendant` real id tələb edir, ona görə hər
+    // instansiyaya unikal kök, hər varianta artan nömrə verilir. Bu bəyan
+    // A11Y blokundan ƏVVƏL olmalıdır: `var` qaldırılsa da TƏYİNAT qaldırılmır,
+    // ona görə aşağıda qalsaydı `menu.id` hərfi «undefined-menu» olardı və eyni
+    // səhifədəki İKİ komponent eyni DOM id-sini paylaşardı.
+    var instanceId = "ems-ss-" + ++uid;
+
+    // ── A11Y karkası (combobox + listbox) ────────────────────────────────────
+    // Bunlar YALNIZ atribut əlavə edir; heç bir CSS/JS seçicisi role/aria-ya
+    // görə işləmir, ona görə mövcud səthlərin davranışı dəyişmir.
+    if (!menu.id) {
+      menu.id = instanceId + "-menu";
+    }
+    menu.setAttribute("role", "listbox");
+    if (multi) {
+      menu.setAttribute("aria-multiselectable", "true");
+    }
+    search.setAttribute("role", "combobox");
+    search.setAttribute("aria-autocomplete", "list");
+    search.setAttribute("aria-haspopup", "listbox");
+    search.setAttribute("aria-expanded", "false");
+    search.setAttribute("aria-controls", menu.id);
+
     var selected = {}; // id -> text
+    var optSeq = 0;
     var offset = 0;
     var lastTerm = null;
     var hasMore = false;
     var loading = false;
+    var pending = null; // sorğu gedərkən yazılan son axtarış (trailing re-fetch)
     var reqSeq = 0;
     var debounceTimer = null;
 
@@ -139,6 +170,10 @@
         chip.innerHTML = '<span></span><button type="button" class="ems-ss__chip-x ' + CHIP_X + '">×</button>';
         chip.querySelector("span").textContent = selected[id];
         chip.setAttribute("title", selected[id]);
+        // «×» simvolu ekran oxuyucusuna heç nə demir. Etiket mətni çağırandan
+        // gəlir (tərcümə şablonda olur); verilməyibsə seçimin öz adı işlənir.
+        var removeLabel = opts.removeLabel ? opts.removeLabel.replace("%s", selected[id]) : selected[id];
+        chip.querySelector("." + CHIP_X).setAttribute("aria-label", removeLabel);
         chip.querySelector("." + CHIP_X).addEventListener("click", function (ev) {
           ev.preventDefault();
           delete selected[id];
@@ -169,25 +204,144 @@
       }
       var div = document.createElement("div");
       div.className = "ems-ss__opt " + OPT;
+      div.setAttribute("role", "option");
+      div.setAttribute("aria-selected", "false");
+      div.id = instanceId + "-opt-" + ++optSeq;
+      // Seçilə bilməyən variant: server `disabled: true` göndərəndə element
+      // GÖRÜNÜR, amma seçilmir və SƏBƏBİ (`hint`) yanında yazılır — istifadəçi
+      // «axtardığım niyə yoxdur?» sualı ilə qalmasın. Bayraq opsionaldır:
+      // göndərməyən mövcud səthlər üçün davranış dəyişmir.
+      if (o.disabled) {
+        div.className += " ems-ss__opt--disabled";
+        div.setAttribute("aria-disabled", "true");
+        var label = document.createElement("span");
+        label.className = "ems-ss__opt-label";
+        label.textContent = o.text;
+        div.appendChild(label);
+        if (o.hint) {
+          var hint = document.createElement("span");
+          hint.className = "ems-ss__opt-hint";
+          hint.textContent = o.hint;
+          div.appendChild(hint);
+        }
+        div.addEventListener("mousedown", function (ev) {
+          ev.preventDefault(); // fokus getməsin, seçim də olmasın
+        });
+        insertOption(div);
+        return;
+      }
       div.textContent = o.text;
+      // Klaviatura `Enter`-i eyni yoldan getsin deyə variant öz datasını
+      // elementdə saxlayır — siçan və klaviatura ARASINDA davranış fərqi olmur.
+      div._emsOpt = o;
       div.addEventListener("mousedown", function (ev) {
         ev.preventDefault();
-        if (!multi) {
-          selected = {};
-        }
-        selected[o.id] = o.text;
-        renderChips();
-        search.value = "";
-        close();
-        emit();
+        selectOption(o);
       });
-      // "more" göstəricisindən əvvəl əlavə et.
+      div.addEventListener("mousemove", function () {
+        // Siçan gəzdirəndə klaviatura vurğusu ora keçsin — yoxsa iki ayrı
+        // «aktiv» görünüş (hover + klaviatura vurğusu) eyni anda görünərdi.
+        if (keys) {
+          keys.setActive(div, false);
+        }
+      });
+      insertOption(div);
+    }
+
+    /** Seçim — siçan mousedown-u və klaviatura Enter-i üçün TƏK yol. */
+    function selectOption(o) {
+      if (!multi) {
+        selected = {};
+      }
+      selected[o.id] = o.text;
+      renderChips();
+      search.value = "";
+      close();
+      emit();
+    }
+
+    // ------- klaviatura + ARIA (ayrı modul) -------
+    // Qat `static/js/searchable_select_keys.js`-dədir. Yüklənməyibsə komponent
+    // ƏVVƏLKİ kimi (yalnız siçanla) işləyir — heç nə sınmır.
+    var keys = null;
+
+    /** Menyu bağlıdırsa aç (fokusdakı kimi ilk səhifəni gətir). */
+    function openFromKeyboard() {
+      lastTerm = search.value.trim();
+      fetchOpts(lastTerm, false);
+    }
+
+    /** Boş input-da Backspace: sonuncu seçimi sil. */
+    function removeLastChip() {
+      var chosen = Object.keys(selected);
+      if (!chosen.length) {
+        return;
+      }
+      delete selected[chosen[chosen.length - 1]];
+      renderChips();
+      emit();
+    }
+
+    /** Vurğunu təmizlə — qat yoxdursa no-op. */
+    function clearActive() {
+      if (keys) {
+        keys.clearActive();
+      }
+    }
+
+    /** Variantı "more" göstəricisindən ƏVVƏL yerləşdir. */
+    function insertOption(div) {
       var moreEl = menu.querySelector("." + OPT_MORE);
       if (moreEl) {
         menu.insertBefore(div, moreEl);
       } else {
         menu.appendChild(div);
       }
+    }
+
+    /** Yüklənmə hissi: skeleton sətirlər (yalnız İLK səhifə üçün). */
+    function setSkeleton(on) {
+      if (!opts.skeleton) {
+        return;
+      }
+      var existing = menu.querySelector(".ems-ss__skeleton");
+      if (!on) {
+        if (existing) {
+          existing.remove();
+        }
+        return;
+      }
+      if (existing) {
+        return;
+      }
+      var box = document.createElement("div");
+      box.className = "ems-ss__skeleton";
+      box.setAttribute("aria-hidden", "true");
+      for (var i = 0; i < 3; i++) {
+        var line = document.createElement("div");
+        line.className = "skeleton skeleton-line ems-ss__skeleton-line";
+        box.appendChild(line);
+      }
+      menu.appendChild(box);
+      open();
+    }
+
+    /** Nəticə yoxdursa mənalı boş vəziyyət (opt-in: `opts.emptyText`). */
+    function setEmpty(on) {
+      var existing = menu.querySelector(".ems-ss__empty");
+      if (!on || !opts.emptyText) {
+        if (existing) {
+          existing.remove();
+        }
+        return;
+      }
+      if (existing) {
+        return;
+      }
+      var box = document.createElement("div");
+      box.className = "ems-ss__empty";
+      box.textContent = opts.emptyText;
+      menu.appendChild(box);
     }
 
     function setMore(state) {
@@ -206,11 +360,20 @@
 
     function fetchOpts(term, append) {
       if (loading) {
+        // Sorğu getdiyi an yazılan axtarışı ATMA — növbəyə al və cari sorğu
+        // bitəndə işə sal. Əvvəllər belə keystroke səssizcə itirdi: istifadəçi
+        // ad yazırdı, siyahı isə KÖHNƏ nəticədə donub qalırdı (yalnız ikinci
+        // dəfə yazanda düzəlirdi).
+        pending = { term: term, append: append };
         return;
       }
       loading = true;
       var seq = ++reqSeq;
       var off = append ? offset : 0;
+      if (!append) {
+        setEmpty(false);
+        setSkeleton(true);
+      }
       fetch(buildUrl(term, off), { headers: { "X-Requested-With": "XMLHttpRequest" } })
         .then(function (r) {
           return r.ok ? r.json() : { results: [], has_more: false };
@@ -221,24 +384,40 @@
           }
           if (!append) {
             menu.innerHTML = "";
+            // Vurğulanan element indi silindi — `aria-activedescendant` ölü
+            // id-yə işarə etməsin (ekran oxuyucusu susardı).
+            clearActive();
             offset = 0;
           }
+          setSkeleton(false);
           var list = d.results || [];
           list.forEach(renderOption);
           offset += list.length;
           hasMore = !!d.has_more;
           setMore(hasMore);
           if (!menu.querySelector("." + OPT)) {
-            close();
+            // Nəticə yoxdur: `emptyText` verilibsə mənalı boş vəziyyət göstər,
+            // verilməyibsə köhnə davranış (menyunu bağla) saxlanılır.
+            setEmpty(true);
+            if (menu.querySelector(".ems-ss__empty")) {
+              open();
+            } else {
+              close();
+            }
           } else {
             open();
           }
         })
         .catch(function () {
-          /* noop */
+          setSkeleton(false);
         })
         .finally(function () {
           loading = false;
+          if (pending) {
+            var queued = pending;
+            pending = null; // rekursiya döngəyə düşməsin
+            fetchOpts(queued.term, queued.append);
+          }
         });
     }
 
@@ -276,6 +455,16 @@
       }
       close();
     }
+    // Kənara klik → BAĞLA. Əvvəlki `blur` + setTimeout(160) yanaşması klaviatura
+    // qatı gələndə itmişdi və menyu açıq qalırdı (iki picker eyni anda açılıb
+    // üst-üstə düşürdü). `pointerdown` daha düzgündür: fokusun hara keçdiyindən
+    // asılı deyil, capture fazasında işləyir və Tab/Escape məntiqinə toxunmur.
+    function onDocPointerDown(ev) {
+      if (ev.target instanceof Node && rootEl.contains(ev.target)) {
+        return; // öz içimiz (input, çip «×», variant) — bağlamırıq
+      }
+      close();
+    }
     function open() {
       if (rootEl.classList.contains(OPEN)) {
         if (useFixed) {
@@ -284,6 +473,8 @@
         return;
       }
       rootEl.classList.add(OPEN);
+      search.setAttribute("aria-expanded", "true");
+      document.addEventListener("pointerdown", onDocPointerDown, true);
       if (useFixed === null) {
         useFixed = hasClippingAncestor(rootEl);
       }
@@ -298,6 +489,9 @@
         return;
       }
       rootEl.classList.remove(OPEN);
+      search.setAttribute("aria-expanded", "false");
+      document.removeEventListener("pointerdown", onDocPointerDown, true);
+      clearActive();
       if (useFixed) {
         clearFixed();
         window.removeEventListener("scroll", onDocScroll, true);
@@ -319,9 +513,28 @@
       lastTerm = search.value.trim();
       fetchOpts(lastTerm, false);
     });
-    search.addEventListener("blur", function () {
-      setTimeout(close, 160);
-    });
+    // Klaviatura qatını qoş: ArrowUp/Down/Home/End/Enter/Escape/Tab/Backspace.
+    if (window.EMSSearchableSelectKeys) {
+      keys = window.EMSSearchableSelectKeys.attach({
+        root: rootEl,
+        input: search,
+        menu: menu,
+        optClass: OPT,
+        isOpen: function () {
+          return rootEl.classList.contains(OPEN);
+        },
+        openMenu: openFromKeyboard,
+        closeMenu: close,
+        select: selectOption,
+        loadMore: function () {
+          fetchOpts(lastTerm || "", true);
+        },
+        canLoadMore: function () {
+          return hasMore && !loading;
+        },
+        removeLastChip: removeLastChip,
+      });
+    }
     // infinite scroll — menyu dibinə çatanda növbəti səhifə.
     menu.addEventListener("scroll", function () {
       if (hasMore && !loading && menu.scrollTop + menu.clientHeight >= menu.scrollHeight - 24) {
@@ -350,6 +563,13 @@
         renderChips();
         menu.innerHTML = "";
         offset = 0;
+      },
+      // Kaskadda mərhələ dəyişəndə mətn yenilənsin: valideyn seçilməmişkən
+      // «Əvvəlcə qrup seçin…», seçildikdən sonra «Tələbə axtarın…». Placeholder
+      // statik qalsaydı, qrup seçiləndən sonra da köhnə (yanlış) göstəriş qalırdı.
+      setPlaceholder: function (text) {
+        basePlaceholder = text || "";
+        updatePlaceholder();
       },
       setValue: function (id, text) {
         if (!multi) {
