@@ -54,7 +54,8 @@ def no_outcomes(db):
 
 def test_add_outcome_button_does_nothing_when_there_are_no_outcomes(no_outcomes):
     html = "".join(render_to_string(n, {"se": no_outcomes}) for n in PANEL_TEMPLATES)
-    hf = HERE / "noout.html"; of = HERE / "noout_out.json"
+    hf = HERE / "noout.html"
+    of = HERE / "noout_out.json"
     hf.write_text(html, encoding="utf-8")
     proc = subprocess.run(
         ["node", str(HERE / "regress.js"), str(hf), str(shipped_js_path()), str(EDITOR_JS), str(of)],

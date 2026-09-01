@@ -41,7 +41,7 @@ def edit_and_collect(se, edits, tag):
     return json.loads(of.read_text(encoding="utf-8"))
 
 
-def test_banner_shrinks_when_the_teacher_does_what_it_says(editable):
+def test_banner_shrinks_when_the_teacher_does_what_it_says(editable):  # noqa: F811
     version = editable["version"]
     se = se_of(editable, version)
     n0_week, n0_extra = len(se["week_rows"]), se["week_extra_count"]
@@ -69,7 +69,7 @@ def test_banner_shrinks_when_the_teacher_does_what_it_says(editable):
     assert n1_sw_extra == 0, f"BANNER ƏBƏDİDİR: selfwork artıq {n0_sw_extra} → {n1_sw_extra}"
 
 
-def test_a_blank_row_in_the_middle_keeps_its_week_number(editable):
+def test_a_blank_row_in_the_middle_keeps_its_week_number(editable):  # noqa: F811
     """Ortadakı boş sətir YERİNDƏ qalmalıdır — 6-cı həftə 5-ə sürüşməməlidir."""
     version = editable["version"]
     se = se_of(editable, version)
@@ -88,7 +88,7 @@ def test_a_blank_row_in_the_middle_keeps_its_week_number(editable):
     assert len(se2["week_rows"]) == len(se["week_rows"]), "orta boşluq cədvəli qısaltdı"
 
 
-def test_a_graded_slot_never_leaves_the_tail(editable):
+def test_a_graded_slot_never_leaves_the_tail(editable):  # noqa: F811
     """`graded_count: 3` daşıyan yuva boşaldılsa da quyruqdan DÜŞMÜR."""
     version = editable["version"]
     data = section_data_map(version)["self"]
@@ -99,7 +99,7 @@ def test_a_graded_slot_never_leaves_the_tail(editable):
     assert len(se["selfwork"]["slots"]) == 2, "qiymətlənmiş yuva quyruqdan düşdü — qiymətlər itər"
 
 
-def test_selfwork_banner_clears_once_the_structure_is_picked(editable):
+def test_selfwork_banner_clears_once_the_structure_is_picked(editable):  # noqa: F811
     """Variant seçilməyəndə banner «əvvəlcə struktur seç» deyir — İCRA EDİLİRMİ?"""
     version = editable["version"]
     se = se_of(editable, version)
