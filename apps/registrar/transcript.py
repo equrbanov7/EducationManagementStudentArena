@@ -27,8 +27,8 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.utils import timezone
 
-from apps.registrar import analytics, finals
-from apps.registrar.models import Enrollment
+from apps.registrar import analytics, exam_eligibility, finals, legacy_grade_read
+from apps.registrar.models import Enrollment, StudentAcademicRecord
 
 _TWO_PLACES = Decimal("0.01")
 
@@ -46,14 +46,20 @@ def _grade_point(result) -> Decimal:
     return Decimal(str(result.get("gpa") or "0"))
 
 
-def _build_row(enrollment, organization=None):
+def _build_row(enrollment, organization=None, *, exempt=False, hours_map=None):
     offering = enrollment.offering
-    result = finals.compute_final_result(enrollment=enrollment, organization=organization)
+    result = finals.compute_final_result(
+        enrollment=enrollment, organization=organization, exempt=exempt, hours_map=hours_map
+    )
     credit = _credit_for(offering)
     # Definite outcome → contributes to GPA; still-open course is excluded.
     in_gpa = bool(result["passed"] or result["failed"])
     return {
         "enrollment": enrollment,
+        # Köçürülmüş qiymət nişanının SABİT qoşma açarı (bax
+        # ``legacy_grade_read.attach_legacy_provenance``).  Sətri fənn adı ilə
+        # uyğunlaşdırmaq həm yanlış nişan, həm IDOR riski yaradardı.
+        "enrollment_id": enrollment.id,
         "offering": offering,
         "subject": offering.subject,
         "period": offering.period,
@@ -82,10 +88,15 @@ def _summarize(rows) -> dict:
         Decimal("0"),
     )
     earned_credits = sum((r["credit"] for r in rows if r["result"]["passed"]), 0)
-    uomg = _round2(score_points / gpa_credits) if gpa_credits else Decimal("0.00")
+    # ⚠️ Məxrəc sıfır olduqda ``0.00`` QAYTARILMIR — bax
+    # :func:`exam_eligibility.uomg_from`.  Rəsmi transkriptdə sıfır «tələbə sıfır
+    # bal aldı» kimi oxunur; halbuki bu, «məlumat yoxdur» halıdır (231 tələbənin
+    # BÜTÜN ÜOMG-daşıyan sətirləri köhnə sistemdə nəticəsizdir).
+    uomg, available = exam_eligibility.uomg_from(score_points, gpa_credits)
     return {
         "gpa": uomg,  # geriyə-uyğunluq: bütün "ÜOMG" göstəriciləri bu dəyəri oxuyur (indi 100 bal)
-        "uomg": uomg,  # ÜOMG (100 bal) — açıq ad
+        "uomg": uomg,  # ÜOMG (100 bal) — açıq ad; ``None`` = hesablana bilmir
+        "uomg_available": available,
         "quality_points": _round2(score_points),
         "credits_gpa": gpa_credits,
         "credits_earned": earned_credits,
@@ -181,14 +192,32 @@ def build_student_transcript(*, student, organization, program=None):
             "student": student,
             "semesters": [],
             "years": [],
-            "cumulative_gpa": Decimal("0.00"),
+            # Qeydiyyat yoxdursa ÜOMG də yoxdur — sıfır DEYİL (bax _summarize).
+            "cumulative_gpa": None,
+            "cumulative_gpa_available": False,
             "total_credits_earned": 0,
             "total_credits_gpa": 0,
             "quality_points": Decimal("0.00"),
             "ects_total": int(getattr(program, "ects_total", 0) or 0) if program else 0,
         }
 
-    rows = [_build_row(e, organization) for e in enrollments]
+    # İdmançı istisnası tələbə üzrə BİR dəfə oxunur və hər sətrə ötürülür —
+    # ``compute_final_result`` onu sətir-sətir sorğulamasın (2026-08-31, 3-cü bloker).
+    exempt = bool(
+        StudentAcademicRecord.objects.filter(organization=organization, student=student)
+        .values_list("national_athlete_exemption", flat=True)
+        .first()
+    )
+    # Məxrəc fallback-ı da tələbə üzrə BİR sorğu (``lesson_hours=0`` olan
+    # köçürülmüş açılışlarda sətir-sətir oxumaq N+1 olardı).
+    hours_map = exam_eligibility.lesson_hours_map({e.offering_id for e in enrollments})
+    rows = [_build_row(e, organization, exempt=exempt, hours_map=hours_map) for e in enrollments]
+    # Köçürülmüş qiymət nişanı BURADA qoşulur — transkript ekranı, transkript
+    # PDF-i və «Ümumi tədris məlumatı» üçün TƏK mənbə.  Hər səth özü qoşsaydı
+    # eyni sətir bir ekranda nişanlı, digərində nişansız görünərdi (məhz bu
+    # sürüşmə ``exam_eligibility`` docstring-indəki 2026-08-31 auditinin
+    # mövzusudur).  Maliyyəti: tələbə başına bir toplu sorğu dəsti.
+    legacy_grade_read.attach_legacy_provenance(rows, organization=organization)
 
     # Group into semesters, preserving the chronological (period) order.
     semesters: list[dict] = []
@@ -204,6 +233,9 @@ def build_student_transcript(*, student, organization, program=None):
 
     for bucket in semesters:
         bucket.update(_summarize(bucket["rows"]))
+        # Köçürülmüş nəticənin OXUNAN qeydi semestr blokunda BİR dəfə çıxır
+        # (sətir-sətir yox — ölçmə üçün bax ``LEGACY_SEMESTER_CHECK_NOTICE``).
+        bucket.update(legacy_grade_read.semester_notice_flags(bucket["rows"]))
         period = bucket["period"]
         bucket["season"] = _season_of(period)
         bucket["year_label"] = _year_label(period)
@@ -216,6 +248,7 @@ def build_student_transcript(*, student, organization, program=None):
         "semesters": semesters,
         "years": _group_by_year(semesters),
         "cumulative_gpa": overall["gpa"],
+        "cumulative_gpa_available": overall["uomg_available"],
         "quality_points": overall["quality_points"],
         "total_credits_gpa": overall["credits_gpa"],
         "total_credits_earned": overall["credits_earned"],
@@ -291,11 +324,7 @@ def _fail_reason_code(result) -> str:
       keçə bilməyib → 25% (fənn haqqının 25%-i) ilə bir dəfə təkrar imtahan hüququ.
     * ``"total"``  — nadir/qeyri-müəyyən hal (imtahan qeyd olunmayıb).
     """
-    if result["barred"]:
-        return "qb"  # davamiyyət 25% saat həddi → imtahana buraxılmayıb
-    if result["graded"] and not result["passed"]:
-        return "exam25"  # imtahana girib, kəsilib → 25% təkrar imtahan
-    return "total"
+    return exam_eligibility.fail_reason_code(result)
 
 
 def build_student_overall_record(*, student, organization):
@@ -339,7 +368,14 @@ def build_student_overall_record(*, student, organization):
                     # Legacy qiymət sübutları bu stabil FK ilə bulk şəkildə
                     # qoşulur; tələbə/tenant sərhədini subject adı ilə təxmin
                     # etmək həm yanlış uyğunlaşdırma, həm də IDOR riski yaradardı.
-                    "enrollment_id": row["enrollment"].id,
+                    "enrollment_id": row["enrollment_id"],
+                    # Nişan yuxarıdakı transkript qurucusundan gəlir — burada
+                    # YENİDƏN sorğulanmır.  Xam faktlar da eyni oxumadan gəlir:
+                    # «Nəticələrim» kartı onları açılan sübut panelində göstərir
+                    # və İKİNCİ sorğu dəsti açmır (bax registrar.public).
+                    "legacy": row.get("legacy"),
+                    "legacy_grade_facts": row.get("legacy_grade_facts") or [],
+                    "legacy_grade_review_required": row.get("legacy_grade_review_required", False),
                     "subject": row["subject"],
                     "credit": row["credit"],
                     "teacher_name": teacher_name,
@@ -357,6 +393,11 @@ def build_student_overall_record(*, student, organization):
                 "credits_earned": sem.get("credits_earned", 0),
                 "credits_gpa": sem.get("credits_gpa", 0),
                 "gpa": sem.get("gpa"),
+                "uomg_available": sem.get("uomg_available", False),
+                # Köçürülmüş nəticənin OXUNAN qeydi — blok başına BİR dəfə
+                # (sətir-sətir yox; ölçmə üçün bax legacy_grade_read).
+                "legacy_check_notice": sem.get("legacy_check_notice", ""),
+                "legacy_missing_notice": sem.get("legacy_missing_notice", ""),
             }
         )
 
@@ -371,6 +412,9 @@ def build_student_overall_record(*, student, organization):
         "season_options": season_options,
         # Kumulyativ ÜOMG (100 bal) + kredit — bölmə başlığındakı xülasə üçün.
         "overall_uomg": data["cumulative_gpa"],
+        "overall_uomg_available": data["cumulative_gpa_available"],
+        "overall_uomg_label": exam_eligibility.UOMG_UNAVAILABLE_LABEL,
+        "overall_uomg_notice": exam_eligibility.UOMG_UNAVAILABLE_NOTICE,
         "total_credits_earned": data["total_credits_earned"],
         "total_credits_gpa": data["total_credits_gpa"],
     }

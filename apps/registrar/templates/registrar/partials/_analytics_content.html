@@ -47,7 +47,7 @@
             <span class="analytics-card-hint">{{ t.passed }} / {{ t.definite }} {% trans "yekunlaşmış" context "registrar.analytics" %}</span>
         </div>
         <div class="analytics-card analytics-card--gpa">
-            <span class="analytics-card-value">{{ t.avg_gpa }}</span>
+            <span class="analytics-card-value{% if not t.avg_gpa_available %} analytics-card-value--na{% endif %}">{% if t.avg_gpa_available %}{{ t.avg_gpa }}{% else %}{{ t.avg_gpa_unavailable_label }}{% endif %}</span>
             <span class="analytics-card-label"><i class="fas fa-award"></i> {% trans "Orta GPA (kredit-çəkili)" context "registrar.analytics" %}</span>
         </div>
         <div class="analytics-card {% if t.absence_rate > 15 %}analytics-card--warn{% endif %}">
@@ -80,7 +80,7 @@
                     <td>{{ row.students }}</td>
                     <td>{{ row.enrollments }}</td>
                     <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
-                    <td>{% if row.gpa_credits %}{{ row.avg_gpa }}{% else %}{{ row.avg_gpa }}{% endif %}</td>
+                    <td>{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}—{% endif %}</td>
                     <td>{% if row.graded %}{{ row.avg_total }}{% else %}—{% endif %}</td>
                     <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
                 </tr>
@@ -111,7 +111,7 @@
                     <td class="ta-left">{{ row.label }}</td>
                     <td>{{ row.students }}</td>
                     <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
-                    <td>{{ row.avg_gpa }}</td>
+                    <td>{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}—{% endif %}</td>
                     <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
                     <td>{% if row.barred %}<span class="journal-badge journal-badge--barred">{{ row.barred }}</span>{% else %}<span class="journal-badge journal-badge--ok">0</span>{% endif %}</td>
                 </tr>

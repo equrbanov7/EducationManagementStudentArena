@@ -9,6 +9,8 @@
 
 from __future__ import annotations
 
+import re
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -26,6 +28,23 @@ User = get_user_model()
 
 TEACHER_PERMS = ["syllabus.view", "syllabus.edit", "syllabus.submit", "grade.input"]
 CHAIR_PERMS = ["syllabus.view", "syllabus.review", "syllabus.approve", "syllabus.revise", "syllabus.reject"]
+
+#: Canlı MyEdu xanası (``sillabus_yoxlama_formasi``, uniqid ``xT3TV90663lSdMvRT6LL``,
+#: id=26): çoxsətirli, HTML entity daşıyan və NK-nın 348 nömrəli qərarına istinad
+#: edən ƏSL qayda mətni.  Köçürmə onu ``assess.note``-a yazır.
+LEGACY_ASSESSMENT_COLUMN = (
+    "1.\tİmtahandan əvvəl məsləhət saatları təşkil olunur.\r\n"
+    "2.\tTələbələrin imtahana buraxılması fak&uuml;ltə dekanı tərəfindən həll edilir. "
+    "İmtahanlar Nazirlər Kabinetinin 348 n&ouml;mrəli qərarı ilə təsdiq edilmiş "
+    "&ldquo;kredit sistemi ilə təlimin təşkili Qaydaları&rdquo;na əsasən aparılır."
+)
+
+#: ⚠️ Qoruma NAXIŞA baxır, konkret sətrə YOX.
+#: Mutasiya sınağı (2026-08-31): qurucudan qorumanı çıxaranda blok
+#: «10 + 10 + 0 + 0 + 50 = 70 bal» verdi — köhnə ``assertNotIn("10 + 10 + 0 + 30 + 50")``
+#: bunu BURAXDI, çünki yalnız BİR konkret uydurma cütlüyü tanıyırdı.  Naxış isə
+#: qurulmuş bal bölgüsünün BÜTÜN formasını tutur: beş toplanan + cəm.
+FABRICATED_SPLIT_RE = re.compile(r"\d+ \+ \d+ \+ \d+ \+ \d+ \+ \d+ = ")
 
 
 class JournalSyllabusBridgeTest(TestCase):
@@ -319,3 +338,108 @@ class JournalSyllabusBridgeTest(TestCase):
         self._client(self.student).get(self._pdf_url())
         AuditLog = django_apps.get_model("audit", "AuditLog")
         self.assertTrue(AuditLog.objects.filter(resource_type="registrar.syllabus_pdf").exists())
+
+    # ── 5. ⚠️ Köçürülmüş sillabus: tələbə MƏNBƏNİ görür, defoltu YOX ─────
+    #
+    # Köçürülən sillabusun nə semestri, nə açılışı var — tələbə ona
+    # ``syllabus_for_offering``-in 3-cü pilləsi (fənn + müəllim, açılışsız və
+    # semestrsiz «baza sillabus») ilə çatır.  Aşağıdakı üç test məhz o yolu
+    # gedir: köhnə MyEdu xanası → köçürmə borusu → tələbənin HTTP cavabı.
+    def _migrate_legacy_syllabus(self):
+        """Köçürmə borusunun ÖZ addımları: mənbə sətri → bölmə datası → yazı."""
+        from django.utils import timezone
+
+        from apps.legacy_import.services.rehearsal_syllabus_documents import SyllabusDocument
+        from apps.legacy_import.services.rehearsal_syllabus_source import (
+            SyllabusHeaderRow,
+            distilled_section_row,
+        )
+        from apps.legacy_import.services.rehearsal_syllabus_targets import (
+            ASSESSMENT_TABLE,
+            EXAM_QUESTION_TABLE,
+            SELF_WORK_TABLE,
+            build_section_data,
+        )
+        from apps.legacy_import.services.syllabus_migration_contracts import SYLLABUS_SECTION_CONTRACTS
+
+        rows = {
+            ASSESSMENT_TABLE: (distilled_section_row(26, LEGACY_ASSESSMENT_COLUMN),),
+            EXAM_QUESTION_TABLE: (distilled_section_row(1, "Sual 1: alqoritmin m&uuml;rəkkəbliyi"),),
+            SELF_WORK_TABLE: (distilled_section_row(1, "Sərbəst iş m&ouml;vzusu"),),
+        }
+        document = SyllabusDocument(
+            header=SyllabusHeaderRow(
+                legacy_pk=1,
+                uniqid="xT3TV90663lSdMvRT6LL",
+                lesson_id=4,
+                teacher_id=282,
+                lesson_hours=45,
+                language="az",
+                active=True,
+                issues=(),
+            ),
+            week=(),
+            sections=tuple((table, rows.get(table, ())) for table in SYLLABUS_SECTION_CONTRACTS),
+        )
+        section_data, codes = build_section_data(document)
+
+        with bypass_rls():
+            syllabus, version = syllabus_services.import_migrated_version(
+                organization=self.org,
+                subject=self.subject,
+                approved_at=timezone.now(),
+                author=self.teacher,  # açılışsız, semestrsiz «baza sillabus»
+                section_data=section_data,
+                note="myedu:sillabus:1",
+            )
+        return syllabus, version, codes
+
+    def test_student_of_a_migrated_syllabus_reads_the_source_rule_text(self):
+        from apps.syllabus.document import BLOCK_TITLES
+
+        _syllabus, version, _codes = self._migrate_legacy_syllabus()
+        self.assertEqual(version.status, "approved")
+        self.assertEqual(version.approval_source, "migration")
+
+        payload = self._client(self.student).get(self._json_url()).json()
+        self.assertEqual(payload["mode"], "student")
+        blocks = {block["title"]: block["body"] for block in payload["blocks"]}
+        body = blocks[str(BLOCK_TITLES["assessment"])]
+
+        # 1) QURULMUŞ bal bölgüsü HEÇ BİR blokda yoxdur — mənbədə bölgü yoxdur,
+        #    yəni hər hansı «a + b + c + d + e = ...» sətri uydurma olardı;
+        for block in payload["blocks"]:
+            self.assertIsNone(FABRICATED_SPLIT_RE.search(block["body"]), block["body"])
+        # 2) mənbənin öz qayda mətni tələbədədir (HTML entity açılmış);
+        self.assertIn("348 nömrəli qərarı", body)
+        self.assertIn("fakültə dekanı", body)
+        # 3) imtahan sualı da göstərilir (mənbədə 20,835 sətir);
+        self.assertIn("Sual 1: alqoritmin mürəkkəbliyi", body)
+        # 4) sərbəst iş mövzusunda uydurma «0 bal» yoxdur.
+        self.assertEqual(blocks[str(BLOCK_TITLES["selfwork"])], "1. Sərbəst iş mövzusu")
+
+    def test_the_migrated_pdf_is_the_same_document(self):
+        """PDF ekranla EYNİ qurucudan gəlir — mətn orada da olmalıdır."""
+        import fitz
+
+        self._migrate_legacy_syllabus()
+        resp = self._client(self.student).get(self._pdf_url())
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.content.startswith(b"%PDF"))
+        with fitz.open(stream=resp.content, filetype="pdf") as pdf:
+            # PDF sətri səhifə eninə görə sarılır → boşluqlar normallaşdırılır.
+            text = " ".join(" ".join(page.get_text() for page in pdf).split())
+        self.assertIn("348 nömrəli qərarı", text)
+        self.assertIsNone(FABRICATED_SPLIT_RE.search(text), text)
+
+    def test_the_unsurfaced_assessment_note_is_counted_by_the_migration(self):
+        from apps.legacy_import.services.rehearsal_syllabus_targets import (
+            ASSESSMENT_NOTE_UNSURFACED,
+            EXAM_QUESTIONS_UNSURFACED,
+        )
+
+        _syllabus, _version, codes = self._migrate_legacy_syllabus()
+
+        self.assertIn(ASSESSMENT_NOTE_UNSURFACED, codes)
+        self.assertIn(EXAM_QUESTIONS_UNSURFACED, codes)

@@ -16,6 +16,10 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
 from apps.registrar import grade_audit, gradebook, grading_scale, services
+from apps.registrar.exam_eligibility import fail_reason_code as eligibility_reason
+from apps.registrar.exam_eligibility import status_code as eligibility_status
+from apps.registrar.exam_eligibility import status_label as eligibility_label
+from apps.registrar.exam_eligibility import status_notice as eligibility_notice
 from apps.registrar.models import ApprovalStatus, Enrollment, FinalGrade, ResitReason, ResitRecord, ResitStatus
 
 
@@ -55,7 +59,32 @@ def exam_score_max(scheme) -> int:
     return max(0, 100 - scheme.entry_score_max)
 
 
-def compute_final_result(*, enrollment, scheme=None, organization=None):
+def athlete_exemption(enrollment) -> bool:
+    """Bu yazılışın tələbəsində rəsmi idmançı istisnası varmı (tək sorğu).
+
+    ``compute_final_result`` sətir-sətir işlədiyi üçün toplu səthlər
+    (``transcript``, ``analytics``) istisnanı ÖZLƏRİ həll edib ötürür —
+    bu fallback yalnız tək-sətir çağırışları üçündür
+    (:func:`exam_eligibility.exempt_student_ids` toplu variantdır).
+
+    ⚠️ PUBLIC (adı alt-xətsizdir): imtahan **giriş qapısı** da
+    (:func:`apps.registrar.exam_bridge.exam_eligibility`) məhz bunu çağırır.
+    Qapı istisnanı ötürməyəndə idmançı-tələbə kabinetdə «buraxılır», imtahan
+    qapısında isə «buraxılmır» görürdü — 3-cü blokerin ən bahalı halı, çünki
+    orada söhbət ekran etiketindən yox, imtahana BURAXILMAMAQDAN gedirdi.
+    """
+    from apps.registrar.models import StudentAcademicRecord
+
+    return bool(
+        StudentAcademicRecord.objects.filter(
+            organization_id=enrollment.organization_id, student_id=enrollment.student_id
+        )
+        .values_list("national_athlete_exemption", flat=True)
+        .first()
+    )
+
+
+def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=None, hours_map=None):
     """Full result for one enrollment: entry + exam → total → letter → pass/fail.
 
     A completed resit supersedes the original exam score and lifts the absence
@@ -82,8 +111,22 @@ def compute_final_result(*, enrollment, scheme=None, organization=None):
     effective_exam = resit.resit_score if resit_done else exam_score
 
     limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
-    eligibility = services.get_exam_eligibility(enrollment=enrollment, limit_percent=limit_percent)
-    barred = eligibility["barred"] and not resit_done  # a completed resit lifts the bar
+    # TƏK MƏNBƏ: «tamamlanmış təkrar imtahan qadağanı qaldırır» qaydası da artıq
+    # resolver-in içindədir (``resit_done=``), burada TƏKRARLANMIR.  Tarixi/
+    # köçürülmüş semestrdə ``barred`` heç vaxt qalxmır — aşağıdakı ``passed``/
+    # ``failed`` köhnə sistemin faktiki imtahan balından çıxır.
+    # İdmançı-tələbə istisnası da resolver-dən keçir (2026-08-31, 3-cü bloker):
+    # əvvəl yalnız kabinet onu ötürürdü, yəni eyni tələbə kabinetdə «buraxılır»,
+    # yekun/analitika yolunda «buraxılmır» görünürdü.  ``exempt=None`` = özün tap.
+    eligibility = services.get_exam_eligibility(
+        enrollment=enrollment,
+        limit_percent=limit_percent,
+        exempt=athlete_exemption(enrollment) if exempt is None else bool(exempt),
+        resit_done=resit_done,
+        # Məxrəc fallback-ı: döngüdə çağıran (transkript) map-i əvvəlcədən qurur.
+        hours_map=hours_map,
+    )
+    barred = eligibility["barred"]
 
     bonus = final_grade.bonus if final_grade is not None else Decimal("0")
     graded = effective_exam is not None
@@ -114,6 +157,16 @@ def compute_final_result(*, enrollment, scheme=None, organization=None):
         "min_final_exam_score": scheme.min_final_exam_score,
         "exam_score_max": exam_score_max(scheme),
         "is_published": scheme.is_published,
+        "eligibility": eligibility,
+        # Şəffaflıq: status canlı qaydadan, köhnə sistemdən, yoxsa köhnə
+        # sistemin BOŞLUĞUNDAN gəlir (bax exam_eligibility.status_code).
+        "status_code": eligibility_status(eligibility, graded=graded),
+        "status_label": eligibility_label(eligibility_status(eligibility, graded=graded)),
+        "status_notice": eligibility_notice(eligibility_status(eligibility, graded=graded)),
+        # Görünən sahələr də resolver-dən gəlir — çağıran yenidən hesablamır.
+        "attendance_score": eligibility["attendance_score"],
+        "exempt": eligibility["exempt"],
+        "fail_reason": (eligibility_reason({"barred": barred, "graded": graded, "passed": passed}) if failed else ""),
         "bonus": bonus,
         "comment": final_grade.comment if final_grade is not None else "",
     }

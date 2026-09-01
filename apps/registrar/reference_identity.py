@@ -24,6 +24,9 @@ _ALWAYS_IMMUTABLE = {
     "registrar.finalgrade": ("enrollment_id",),
     "registrar.resitrecord": ("enrollment_id",),
     "registrar.rubriccriterion": ("rubric_id",),
+    # Təhvil qeydi hansı açılışa aid olduğunu SONRADAN dəyişə bilməz —
+    # əks halda audit sətri başqa fənnin tarixçəsinə köçürülə bilərdi.
+    "registrar.teachinghandover": ("offering_id",),
 }
 
 _CONDITIONAL_FIELDS = {

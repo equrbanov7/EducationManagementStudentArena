@@ -494,9 +494,11 @@ class RegistrarMigrationTargetGuardTests(TestCase):
             self.assertTrue(security_definer)
             self.assertIn("search_path=pg_catalog, public", config)
             self.assertFalse(restricted_can_execute)
-        # 0041 core graph + 0042 remaining migration-target graph.
+        # 0041 core graph + 0042 remaining migration-target graph
+        # + 0056 `registrar_enrollment.source_group_id` (alt qrupdan əlavə provenansı)
+        # + 0058 `registrar_teachinghandover.offering_id` (fənn təhvili qeydi).
         self.assertEqual(immutable_trigger_count, 30)
-        self.assertEqual(same_org_trigger_count, 39)
+        self.assertEqual(same_org_trigger_count, 41)
 
     def test_precheck_stops_instead_of_rewriting_existing_violation(self):
         with self.assertRaises(IntegrityError):

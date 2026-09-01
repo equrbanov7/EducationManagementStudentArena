@@ -60,7 +60,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             </div>
             <div class="sjx-card-foot">
                 <span class="sjx-card-score">{% trans "Giriş balı" context "registrar.journal" %}: <b>{{ row.journal.entry_score|floatformat:0 }}/{{ row.journal.entry_score_max }}</b></span>
-                {% if row.journal.barred %}<span class="sjx-card-badge is-danger">{% trans "İmtahana buraxılmır" context "registrar.journal" %}</span>{% else %}<span class="sjx-card-badge is-ok">{% trans "Buraxılır" context "registrar.journal" %} ✓</span>{% endif %}
+                {% if row.journal.eligibility.frozen %}<span class="sjx-card-badge is-legacy" title="{{ row.journal.eligibility.notice }}">{{ row.journal.eligibility.frozen_badge }}</span>{% elif row.journal.barred %}<span class="sjx-card-badge is-danger">{% trans "İmtahana buraxılmır" context "registrar.journal" %}</span>{% else %}<span class="sjx-card-badge is-ok">{% trans "Buraxılır" context "registrar.journal" %} ✓</span>{% endif %}
             </div>
         </a>
         {% endfor %}
@@ -118,10 +118,11 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             <div class="sjx-kpi-value is-blue">{{ d.entry_score|floatformat:0 }} <span class="sjx-kpi-unit">/ {{ d.entry_score_max }}</span></div>
             <div class="sjx-kpi-bar"><span class="sjx-kpi-barfill is-blue" data-jd-width="{{ d.entry_pct }}"></span></div>
         </div>
-        <div class="sjx-kpi {% if not d.journal.barred %}sjx-kpi--ok{% else %}sjx-kpi--bad{% endif %}">
+        <div class="sjx-kpi {% if d.journal.eligibility.frozen %}sjx-kpi--legacy{% elif not d.journal.barred %}sjx-kpi--ok{% else %}sjx-kpi--bad{% endif %}">
             <div class="sjx-kpi-label">{% trans "STATUS" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-status {% if d.journal.barred %}is-danger{% else %}is-ok{% endif %}">
-                {% if d.journal.barred %}{% trans "İmtahana buraxılmır" context "registrar.journal" %}{% else %}{% trans "İmtahana buraxılır" context "registrar.journal" %} ✓{% endif %}
+            <div class="sjx-kpi-status {% if d.journal.eligibility.frozen %}is-legacy{% elif d.journal.barred %}is-danger{% else %}is-ok{% endif %}"
+                 {% if d.journal.eligibility.frozen %}title="{{ d.journal.eligibility.notice }}"{% endif %}>
+                {% if d.journal.eligibility.frozen %}{{ d.journal.eligibility.frozen_badge }}{% elif d.journal.barred %}{% trans "İmtahana buraxılmır" context "registrar.journal" %}{% else %}{% trans "İmtahana buraxılır" context "registrar.journal" %} ✓{% endif %}
             </div>
             <div class="sjx-kpi-sub">{% trans "Davamiyyət" context "registrar.journal" %}: {% if d.dav_score is not None %}{{ d.dav_score|floatformat:'-2' }}/10{% else %}{% trans "imtahana buraxılmır" context "registrar.journal" %}{% endif %}</div>
         </div>
@@ -172,7 +173,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 </thead>
                 <tbody>
                     {% for h in d.history %}
-                    <tr class="sjx-drow {% if h.kollokvium %}is-koll{% endif %}{% if h.corrected %} sjx-row--fixed{% endif %}"
+                    <tr class="sjx-drow {% if h.kollokvium %}is-koll{% endif %}{% if h.corrected %} sjx-row--fixed{% endif %}{% if h.legacy_excuse %} sjx-row--excuse{% endif %}"
                         data-kind="{{ h.kind }}"
                         data-sjx-day
                         data-date="{{ h.mark.lesson.date|date:'d.m.Y' }}"
@@ -181,7 +182,8 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         data-topic="{{ h.mark.lesson.topic|default:h.kind_display }}"
                         data-att="{% if h.mark.status == 'absent' %}q/b{% elif h.mark.status == 'excused' %}üq{% else %}i/e{% endif %}"
                         data-score="{% if h.kollokvium and h.kollokvium.score is not None %}Kol.: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
-                        data-corrected="{% if h.corrected %}1{% endif %}">
+                        data-corrected="{% if h.corrected %}1{% endif %}"
+                        data-legacy-excuse="{% if h.legacy_excuse %}1{% endif %}">
                         <td class="sjx-date">{{ h.mark.lesson.date|date:"d.m" }}</td>
                         <td>
                             {% if h.parity == 'odd' %}<span class="sgx-chip sgx-chip--ust">ÜST</span>{% else %}<span class="sgx-chip sgx-chip--alt">ALT</span>{% endif %}
@@ -190,7 +192,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         <td class="sjx-topic">
                             {{ h.mark.lesson.topic|default:h.mark.lesson.get_kind_display }}
                             {% if h.kollokvium %} — <span class="sjx-kollmark">{{ h.kollokvium.component.name|lower }}</span>{% endif %}
-                            {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
+                            {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif h.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
                         </td>
                         <td class="sjx-result-cell">
                             {# Bir sütun: bal varsa bal (davamiyyət avtomatik i/e); yoxdursa q/b · üq · i/e #}
@@ -231,6 +233,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Davamiyyət" context "registrar.journal" %}</span><span data-sjx-day-att></span></div>
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Bal" context "registrar.journal" %}</span><span data-sjx-day-score></span></div>
                 <div class="sjx-day-corrnote" data-sjx-day-corr hidden>{% trans "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın." context "registrar.correction" %}</div>
+                <div class="sjx-day-corrnote" data-sjx-day-excuse hidden>{% trans "Bu qayıb üçün köhnə sistemdə üzrlü qayıb sənədi var — nişana klikləyib baxın." context "registrar.legacy_excuse" %}</div>
             </div>
         </div>
     </div>

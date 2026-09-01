@@ -78,17 +78,58 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                             <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub" title="{% trans 'Dərs saatına görə icazə verilən maksimum q/b (25% həddi)' context 'registrar.journal' %}">{% trans "limit" context "registrar.journal" %} {{ journal.limit_qb }} q/b</div></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    {% comment %}`data-jgs-tbody` — «alt qrupdan əlavə» əməlindən sonra
+                    cədvəl YERİNDƏ yenilənir (journal_guest.js sətirləri buradan dəyişir).{% endcomment %}
+                    <tbody data-jgs-tbody>
                         {% for row in journal.rows %}
-                        <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">
+                        <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}{% if row.is_guest %} is-guest{% endif %}" data-jd-enrollment="{{ row.enrollment.id }}">
                             <td class="jd2-td-student">
                                 <div class="jd2-stu-inner">
                                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
                                     <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                                    {% if row.is_guest %}
+                                    {% comment %}«Alt qrupdan əlavə olunub» nişanı — tooltip-də mənbə qrup.
+                                    Koordinator/dekanlıq üçün eyni çip geri götürmə düyməsi də olur.{% endcomment %}
+                                    {% comment %}Çip TƏSADÜFƏN silmir: klik idarəetmə modalını açıb həmin
+                                    sətri işıqlandırır, silmə orada iki addımlı təsdiqlə olur.{% endcomment %}
+                                    {% if can_manage_roster %}
+                                    <button type="button" class="jgs-chip jgs-chip--action" data-jgs-focus="{{ row.enrollment.id }}"
+                                            title="{% blocktrans with group=row.source_group.name|default:'—' context 'registrar.guest_roster' %}Alt qrupdan əlavə olunub: {{ group }} — idarə etmək üçün klikləyin{% endblocktrans %}">
+                                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                                        {% trans "alt qrup" context "registrar.guest_roster" %}
+                                        {% if row.source_group %}<span class="jgs-chip__src">{{ row.source_group.name }}</span>{% endif %}
+                                    </button>
+                                    {% else %}
+                                    <span class="jgs-chip"
+                                          title="{% blocktrans with group=row.source_group.name|default:'—' context 'registrar.guest_roster' %}Alt qrupdan əlavə olunub: {{ group }}{% endblocktrans %}">
+                                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                                        {% trans "alt qrup" context "registrar.guest_roster" %}
+                                        {% if row.source_group %}<span class="jgs-chip__src">{{ row.source_group.name }}</span>{% endif %}
+                                    </span>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if row.carry_over %}
+                                    {% comment %}Birləşmədən gələn ƏVVƏLKİ jurnal işi. Bal köçürülmür (dərslər
+                                    fərqlidir), amma görünməz də qalmır: neçə işarə, neçə q/b — və qayıb saatı
+                                    onsuz da bu sətrin limit hesabına daxildir (bax guest_merge).
+
+                                    ⚠️ ASİMMETRİYA: əvvəl burada YALNIZ q/b sayı çıxırdı, yəni sistem tələbəyə
+                                    ziyanı (qayıb) avtomatik köçürüb GÖSTƏRİR, xeyri (əvvəlki jurnalda qazanılmış
+                                    giriş balı) isə nə köçürür, nə göstərirdi — həmin rəqəm yalnız təsdiq
+                                    önbaxışında bir dəfə görünüb audit izinə düşürdü. İndi hər iki rəqəm
+                                    sətirdədir; bal yenə KÖÇÜRÜLMÜR, sadəcə müəllim onu görür.{% endcomment %}
+                                    <span class="jgs-carry"
+                                          title="{% blocktrans with group=row.carry_over.groups|join:', '|default:'—' marks=row.carry_over.marks hours=row.carry_over.absence_hours context 'registrar.guest_roster' %}Əvvəlki jurnaldan ({{ group }}) gətirilib: {{ marks }} işarə, {{ hours }} saat qayıb. Qayıb saatı buraxılış həddinə daxildir; ballar köçürülmür — əvvəlki qeydiyyatda saxlanılır.{% endblocktrans %} {% blocktrans with score=row.carry_over.entry_score cap=row.carry_over.entry_score_max context 'registrar.guest_roster' %}Əvvəlki jurnalda yığılmış giriş balı: {{ score }} / {{ cap }}. Bu bal bura köçürülmür — lazım bilinsə müəllim onu komponent və ya rəsmi düzəliş axını ilə özü yazır.{% endblocktrans %}">
+                                        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                                        {% trans "əvvəlki jurnal" context "registrar.guest_roster" %}
+                                        <span class="jgs-carry__num">{{ row.carry_over.absence_count }} q/b</span>
+                                        <span class="jgs-carry__num jgs-carry__num--score">{% blocktrans with score=row.carry_over.entry_score context 'registrar.guest_roster' %}{{ score }} bal{% endblocktrans %}</span>
+                                    </span>
+                                    {% endif %}
                                 </div>
                             </td>
                             {% for cell in row.cells %}
-                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">
+                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}">
                                 {% if correction_mode %}
                                 {# Yerində audited düzəliş: HƏR xana (boş daxil) → modal (correction.js). #}
                                 <button type="button" class="corr-cell-btn{% if not cell.mark %} corr-cell-btn--empty{% endif %}" data-corr-cell
@@ -101,8 +142,8 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                         data-allows-score="{% if cell.allows_score %}1{% else %}0{% endif %}"
                                         data-status="{% if cell.mark %}{{ cell.mark.status }}{% endif %}"
                                         data-score="{% if cell.mark and cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% endif %}"
-                                        {% if cell.corrected %}data-history="{{ cell.mark.id }}"{% endif %}>
-                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% elif cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% elif cell.mark %}i/e{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                                        {% if cell.corrected or cell.legacy_excuse %}data-history="{{ cell.mark.id }}"{% endif %}>
+                                    {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% elif cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% elif cell.mark %}i/e{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% elif cell.legacy_excuse %}<span class="corr-fixed-badge corr-excuse-badge">✎</span>{% endif %}
                                 </button>
                                 {% elif can_edit and cell.writable %}
                                 <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
@@ -139,7 +180,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                     {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie">{{ cell.mark.score|floatformat:'-2' }}</span>
                                     {% else %}<span class="jd2-ro jd2-ro--ie">i/e</span>{% endif %}
                                 {% else %}<span class="jd2-ro jd2-ro--empty">—</span>{% endif %}
-                                {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
+                                {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif cell.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
                                 {% endif %}
                             </td>
                             {% endfor %}

@@ -22,7 +22,7 @@ from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from apps.registrar import grade_audit
+from apps.registrar import exam_eligibility, grade_audit
 from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
 from apps.registrar.models import (
     AssessmentComponent,
@@ -338,7 +338,7 @@ def get_final_breakdown(offering):
 
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir."""
-    from apps.registrar import attendance, gradebook
+    from apps.registrar import gradebook
     from apps.registrar.models import LessonKind, LessonMark
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
@@ -368,10 +368,15 @@ def get_final_breakdown(offering):
     selfwork_totals = {r["enrollment"].id: r["total"] for r in get_selfwork_board(offering)["rows"]}
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
     lessons_all = list(offering.lessons.all())
-    allowed = Decimal(offering.lesson_hours or sum(item.hours for item in lessons_all))
+    # Məxrəc də TƏK yerdən (tələbənin öz işarələrindən YOX) — bax
+    # :func:`exam_eligibility.lesson_hours_for`.
+    allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)
     limit_percent = gradebook.absence_limit_percent_for(offering)
     allowed_absence = allowed * Decimal(limit_percent) / Decimal(100)
     warn_at = allowed_absence * Decimal("0.75")
+    # TƏK MƏNBƏ (bax :mod:`apps.registrar.exam_eligibility`) — açılış üzrə bir dəfə.
+    frozen = exam_eligibility.is_frozen(offering)
+    exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
@@ -382,17 +387,26 @@ def get_final_breakdown(offering):
         kvals = [kscore_map.get((e.id, c.id)) for c in kolls]
         entered = [v for v in kvals if v is not None]
         absence_hours = Decimal(e.absence_hours)
-        barred = allowed_absence > 0 and absence_hours > allowed_absence
-        warning = (not barred) and allowed_absence > 0 and absence_hours >= warn_at
+        eligibility = exam_eligibility.resolve(
+            absence_hours=absence_hours,
+            lesson_hours=allowed,
+            allowed_hours=allowed_absence,
+            limit_percent=limit_percent,
+            exempt=e.student_id in exempt_ids,
+            frozen=frozen,
+        )
+        barred = eligibility["barred"]
+        warning = (not frozen) and (not barred) and allowed_absence > 0 and absence_hours >= warn_at
         entry = gradebook.entry_score_for(e, scheme.entry_score_max)
-        # Davamiyyət balı (10-luq) — rəsmi cədvəl: 10 × (1 − buraxılmış_saat/dərs_saatı),
-        # 25% həddi keçiləndə None (imtahana buraxılmır). ``allowed`` = ümumi dərs saatı.
-        dav_score, _dav_barred = attendance.attendance_score(allowed, absence_hours, limit_percent=limit_percent)
         rows.append(
             {
                 "enrollment": e,
                 "student": e.student,
-                "dav": dav_score,  # rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli üzrə
+                # Rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli — resolver-dən.
+                # ⚠️ ``attendance.attendance_score``-u BURADA çağırmayın: istisna /
+                # təkrar imtahan / donma qaydası ikinci dəfə yazılmış olur və
+                # tələbənin öz ekranı ilə ayrılır (2026-08-31, 2-ci bloker).
+                "dav": eligibility["attendance_score"],
                 "kvals": kvals,
                 "korta": _avg(entered),
                 "sorta": _avg(agg["sem"]),
@@ -404,6 +418,7 @@ def get_final_breakdown(offering):
                     min(100, int(entry / Decimal(scheme.entry_score_max) * 100)) if scheme.entry_score_max else 0
                 ),
                 "barred": barred,
+                "eligibility": eligibility,
                 "warning": warning,
                 "absence_hours": e.absence_hours,
             }

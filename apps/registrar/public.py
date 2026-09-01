@@ -66,7 +66,9 @@ def _empty_transcript() -> dict:
         "has_record": False,
         "record": None,
         "semesters": [],
-        "cumulative_gpa": Decimal("0.00"),
+        # ÜOMG hesablana bilmir (qeydiyyat yoxdur) — sıfır DEYİL.
+        "cumulative_gpa": None,
+        "cumulative_gpa_available": False,
         "total_credits_earned": 0,
         "total_credits_gpa": 0,
         "quality_points": Decimal("0.00"),
@@ -133,20 +135,13 @@ def student_academic_record_rows(request, *, organization) -> dict:
     if organization is None or not getattr(request.user, "is_authenticated", False):
         return _empty_overall_academic()
 
-    from apps.registrar import legacy_grade_read
     from apps.registrar import transcript as transcript_service
 
-    data = transcript_service.build_student_overall_record(student=request.user, organization=organization)
-    rows = [row for semester in data.get("semesters", ()) for row in semester.get("rows", ())]
-    facts_by_enrollment = legacy_grade_read.legacy_grade_facts_for_enrollments(
-        organization=organization,
-        enrollment_ids=(row.get("enrollment_id") for row in rows),
-    )
-    for row in rows:
-        facts = facts_by_enrollment.get(row.get("enrollment_id"), [])
-        row["legacy_grade_facts"] = facts
-        row["legacy_grade_review_required"] = any(fact["review_required"] for fact in facts)
-    return data
+    # ⚠️ Xam faktlar üçün İKİNCİ sorğu dəsti AÇILMIR: qurucunun içindəki
+    # ``legacy_grade_read.attach_legacy_provenance`` həm nişanı, həm
+    # ``legacy_grade_facts`` / ``legacy_grade_review_required`` açarlarını EYNİ
+    # oxumadan qoyur.  Əvvəl burada eyni sorğu ikinci dəfə işlədilirdi.
+    return transcript_service.build_student_overall_record(student=request.user, organization=organization)
 
 
 def count_student_academic_record_rows(request, *, organization) -> int:
@@ -210,7 +205,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import attendance, gradebook, journal_extras
+    from apps.registrar import exam_eligibility, gradebook, journal_extras
     from apps.registrar.models import ComponentKind, ComponentScore, Enrollment, LessonMark
 
     if organization is None or not getattr(request.user, "is_authenticated", False):
@@ -277,13 +272,21 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     section["subjects"] = summary["subjects"]
     section["semester_number"] = semester_number
     # Başqa fənlər üzrə limit xəbərdarlıqları (mockup: alt qırmızı çip).
+    # Donmuş (tarixi) fənlər xəbərdarlıq siyahısına DÜŞMÜR: «həddə yaxınlaşırsan»
+    # xəbəri yalnız hələ qərar verilə bilən semestrdə mənalıdır — bağlanmış
+    # semestrdə tələbənin edə biləcəyi heç nə yoxdur.  ``barred`` orada onsuz da
+    # susdurulub; 75% yaxınlıq zolağını da susdurmasaq, yalnız o səth
+    # digərləri ilə ziddiyyət yaradardı (bax exam_eligibility).
     section["warnings"] = [
         row
         for row in summary["subjects"]
-        if row["journal"]["barred"]
-        or (
-            row["journal"]["allowed_absence"] > 0
-            and row["journal"]["absence_hours"] >= row["journal"]["allowed_absence"] * Decimal("0.75")
+        if not row["journal"]["eligibility"]["frozen"]
+        and (
+            row["journal"]["barred"]
+            or (
+                row["journal"]["allowed_absence"] > 0
+                and row["journal"]["absence_hours"] >= row["journal"]["allowed_absence"] * Decimal("0.75")
+            )
         )
     ]
 
@@ -322,8 +325,11 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     # Rəsmi düzəliş almış xanalar (tələbə tərəfdə sarı + tarixçə üçün, sənədsiz).
     from apps.registrar import corrections as _corrections
+    from apps.registrar import legacy_excuse as _legacy_excuse
 
     corr_map = _corrections.corrections_map_for_enrollment(enrollment)
+    # Köhnə sistemdən köçürülmüş üzrlü-qayıb sənədi — eyni sarı + ✎ mexanizmi.
+    excuse_map = _legacy_excuse.excuse_map_for_enrollment(enrollment)
 
     # Tarixçə sətirləri: paritet çipi + kollokvium markeri (held_on tarixinə görə).
     koll_by_date = {k["held_on"]: k for k in kollokviums if k["held_on"]}
@@ -333,6 +339,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             "parity": gradebook._lesson_parity(offering, m.lesson),
             "kollokvium": koll_by_date.get(m.lesson.date),
             "corrected": str(m.id) in corr_map,
+            "legacy_excuse": str(m.id) in excuse_map,
             # Dərs tipi (mühazirə/seminar/lab) — cədvəldə sütun + filtr üçün.
             "kind": m.lesson.kind,
             "kind_display": m.lesson.get_kind_display(),
@@ -357,14 +364,22 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     # KPI + bal bölgüsü (real kompozisiya): dərs balları + kollokvium + sərbəst iş.
     entry = gradebook.entry_score_for(enrollment, cap)
-    # Davamiyyət balı (10-luq) — rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli:
-    # 10 × (1 − buraxılmış_saat/dərs_saatı), 25%-dən çox qayıbda "imtahana buraxılmır".
-    dav_lesson_hours = offering.lesson_hours or sum((m.lesson.hours for m in marks), 0)
-    dav_score, dav_barred = attendance.attendance_score(
-        dav_lesson_hours,
-        enrollment.absence_hours,
-        limit_percent=gradebook.absence_limit_percent_for(offering),
+    # TƏK MƏNBƏ: davamiyyət balı DA, buraxılış qərarı DA resolver-dən gəlir.
+    # ⚠️ Məxrəc açılışın BÜTÜN dərslərindən götürülür — tələbənin öz
+    # işarələrindən yığmaq (əvvəlki ``sum(m.lesson.hours for m in marks)``)
+    # işarəsi az olan tələbədə məxrəci kiçildib balı süni qaldırırdı və eyni
+    # sətri müəllim ekranından ayırırdı (2026-08-31 düşmən baxışı, 2-ci bloker).
+    dav_lesson_hours = exam_eligibility.lesson_hours_for(offering, offering.lessons.all())
+    dav_limit_percent = gradebook.absence_limit_percent_for(offering)
+    dav_eligibility = exam_eligibility.resolve(
+        absence_hours=enrollment.absence_hours,
+        lesson_hours=dav_lesson_hours,
+        limit_percent=dav_limit_percent,
+        exempt=bool(record.national_athlete_exemption),
+        frozen=exam_eligibility.is_frozen(offering),
     )
+    dav_score = dav_eligibility["attendance_score"]
+    dav_barred = dav_eligibility["barred"]
     koll_entered = [k["score"] for k in kollokviums if k["score"] is not None]
     koll_sum = sum(koll_entered, Decimal("0"))
     selfwork_total = own_selfwork["total"] if own_selfwork else 0
@@ -408,7 +423,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         # varsa (bax `_student_syllabus_available`).
         "syllabus_available": _student_syllabus_available(offering),
     }
-    section["corrections_map"] = corr_map
+    section["corrections_map"] = _legacy_excuse.merge_into(corr_map, excuse_map)
     return {"journal_student_section": section}
 
 

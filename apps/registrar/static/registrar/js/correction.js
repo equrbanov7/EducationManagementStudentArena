@@ -137,15 +137,39 @@
     var body = root.querySelector("[data-corr-history-body]");
     body.innerHTML = "";
     var list = entries || [];
+    // Köhnə sistemdən köçürülmüş üzrlü-qayıb sənədləri payload-un SONUNA qatılır
+    // (bax registrar/legacy_excuse.py).  Onlar DÜZƏLİŞ deyil — nə "köhnə → yeni"
+    // sətri var, nə də geri alına bilər: "geri al" düyməsi ona görə sonuncu
+    // DÜZƏLİŞ qeydinə bağlanır, sonuncu elementə yox.
+    var lastCorrectionIdx = -1;
+    list.forEach(function (c, idx) {
+      if (c.kind !== "legacy_excuse") lastCorrectionIdx = idx;
+    });
     list.forEach(function (c, idx) {
       var item = document.createElement("div");
+      if (c.kind === "legacy_excuse") {
+        item.className = "corr-hist-item corr-hist-item--excuse";
+        item.innerHTML =
+          '<div class="corr-hist-top"><span class="corr-hist-date">' + esc(c.date) + "</span></div>" +
+          '<div class="corr-hist-change"><b>' + esc(c.field_display) + ":</b> " + esc(c.period) + "</div>" +
+          '<div class="corr-hist-reason">' + esc(c.reason) + "</div>" +
+          '<div class="corr-hist-note">' + esc(c.note) + "</div>" +
+          '<div class="corr-hist-doc">' +
+          (c.document_available && c.document_url
+            ? '<a href="' + esc(c.document_url) + '" target="_blank" rel="noopener">' + esc(c.document) + "</a>"
+            : "<span>" + esc(c.document) + "</span> <i>" + esc(c.document_note) + "</i>") +
+          "</div>" +
+          '<div class="corr-hist-by">' + esc(c.by) + "</div>";
+        body.appendChild(item);
+        return;
+      }
       item.className = "corr-hist-item";
       var doc = c.document_url
         ? '<a class="corr-hist-doc" href="' + c.document_url + '" target="_blank" rel="noopener">PDF</a>'
         : "";
-      // Yalnız ƏN SON düzəliş geri alına bilər (zəncir pozulmasın) — sonuncu element.
+      // Yalnız ƏN SON düzəliş geri alına bilər (zəncir pozulmasın).
       var delBtn =
-        idx === list.length - 1
+        idx === lastCorrectionIdx
           ? '<button type="button" class="corr-hist-del" data-corr-del data-corr-id="' +
             esc(String(c.id || "")) + '">' + gettext("Düzəlişi geri al") + "</button>"
           : "";

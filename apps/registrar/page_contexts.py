@@ -41,11 +41,39 @@ def journal_list_context(user, request=None) -> dict:
     can_correct = bool(request is not None and corrections_service.can_correct_journal(request))
     organization = getattr(request, "organization", None) if request is not None else None
     base_qs = CourseOffering.objects.filter(is_active=True)
+    # Jurnal siyahısını idarə edən (koordinator/dekanlıq — `journal.roster`) öz
+    # ALT-AĞACININ jurnallarını görür ki, «alt qrupdan tələbə əlavə et»
+    # düyməsinə çata bilsin. Korrektordan fərqi: əhatə org-wide DEYİL.
+    from apps.registrar import guest_roster
+
+    can_roster = bool(
+        request is not None and organization is not None and guest_roster.can_manage_roster(user, organization)
+    )
     if can_correct and organization is not None:
         base_qs = base_qs.filter(organization=organization)
         is_broad = True
+    elif can_roster:
+        # Əhatə üzrə görünən jurnallar YALNIZ aktiv cari dövrdən gəlir: köçürülmüş
+        # tarixi semestrlərin jurnalı koordinatorun siyahısında ÇIXMAMALIDIR (əks
+        # halda düymə oradadır və köhnə transkript dəyişər — bax guest_roster.
+        # assert_roster_open). Müəllimin ÖZ jurnalları toxunulmaz qalır: onun
+        # tarixçəsi dövr süzgəcindən keçmir.
+        scoped_groups = guest_roster.scoped_group_queryset(user, organization)
+        rosterable = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True)
+        base_qs = base_qs.filter(organization=organization).filter(Q(instructor=user) | rosterable)
+        is_broad = True
     else:
-        base_qs = base_qs.filter(instructor=user)
+        # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir
+        # (bax apps/registrar/handover.is_handover_observer). Siyahıda sətir
+        # olmasaydı, ona gedən yeganə keçid itərdi və «bal yazan mən idim, indi
+        # görə bilmirəm» vəziyyəti yaranardı. Yazma hüququ onsuz da
+        # `is_direct_editor`-dədir və təhvildən sonra False-dur.
+        from apps.registrar.handover import observer_offering_ids
+
+        observed = observer_offering_ids(user, organization) if organization is not None else set()
+        base_qs = (
+            base_qs.filter(Q(instructor=user) | Q(pk__in=observed)) if observed else base_qs.filter(instructor=user)
+        )
         is_broad = False
 
     offerings = list(
@@ -439,30 +467,50 @@ def _student_offering_stats(user, organization, record, period) -> dict:
     giriş balı kanonik :func:`gradebook.entry_score_for` ilə hesablanır."""
     from decimal import Decimal
 
-    from apps.registrar import gradebook
+    from apps.registrar import exam_eligibility, gradebook
     from apps.registrar.models import Enrollment
 
     if record is None or period is None:
         return {}
-    limit_percent = record.program.absence_limit_percent if record.program else 25
+    limit_percent = record.program.absence_limit_percent if record.program else exam_eligibility.DEFAULT_LIMIT_PERCENT
     stats: dict = {}
-    enrollments = Enrollment.objects.filter(
-        organization=organization,
-        student=user,
-        offering__period=period,
-        status=Enrollment.Status.ENROLLED,
-    ).select_related("offering", "offering__assessment_scheme")
+    enrollments = list(
+        Enrollment.objects.filter(
+            organization=organization,
+            student=user,
+            offering__period=period,
+            status=Enrollment.Status.ENROLLED,
+        ).select_related("offering", "offering__assessment_scheme")
+    )
+    # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu),
+    # cədvəl modalı hər sətir üçün ayrı sorğu ETMİR.
+    offering_ids = [e.offering_id for e in enrollments]
+    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     for enrollment in enrollments:
         offering = enrollment.offering
         scheme = getattr(offering, "assessment_scheme", None)
         cap = scheme.entry_score_max if scheme else 50
-        allowed = Decimal(offering.lesson_hours or 0) * Decimal(limit_percent) / Decimal(100)
+        total_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
+        allowed = total_hours * Decimal(limit_percent) / Decimal(100)
+        eligibility = exam_eligibility.resolve(
+            absence_hours=enrollment.absence_hours,
+            lesson_hours=total_hours,
+            allowed_hours=allowed,
+            limit_percent=limit_percent,
+            # İdmançı istisnası burada da ötürülür — cədvəl modalı ilə kabinet
+            # eyni sətirdə fərqli cavab verməsin (2026-08-31, 3-cü bloker).
+            exempt=bool(record.national_athlete_exemption),
+            frozen=offering.id in frozen_ids,
+        )
         stats[offering.id] = {
             "absence_hours": enrollment.absence_hours,
             "allowed_absence": allowed,
             "entry_score": gradebook.entry_score_for(enrollment, cap),
             "entry_score_max": cap,
-            "barred": allowed > 0 and Decimal(enrollment.absence_hours) > allowed,
+            "barred": eligibility["barred"],
+            "attendance_score": eligibility["attendance_score"],
+            "eligibility": eligibility,
         }
     return stats
 

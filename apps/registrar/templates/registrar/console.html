@@ -28,11 +28,13 @@
                 <li class="console-item {% if not program.is_active %}is-inactive{% endif %}">
                     <a class="console-item-main" href="{% url 'registrar:program_edit' program.id %}">
                         {% comment %}
-                        Rəsmi dövlət ixtisas kodu göstərilir; daxili `program.code`
-                        (köçürmənin `MYEDU-*` açarı) heç vaxt göstərilmir. Kod hələ
-                        doldurulmayıbsa nişan tamamilə gizlədilir.
+                        HƏR İKİ rəsmi dövlət ixtisas şifri göstərilir (cari NK 503
+                        şifri və köhnə 050/060 şifri — `official_code_pair`); daxili
+                        `program.code` (köçürmənin `MYEDU-*` açarı) heç vaxt
+                        göstərilmir. Şifr hələ doldurulmayıbsa nişan tamamilə
+                        gizlədilir — asılı qalmış ayırıcı olmur.
                         {% endcomment %}
-                        {% if program.official_code %}<span class="console-item-code">{{ program.official_code }}</span>{% endif %}
+                        {% if program.official_code_pair %}<span class="console-item-code">{{ program.official_code_pair }}</span>{% endif %}
                         <span class="console-item-name">{{ program.name }}</span>
                     </a>
                     <div class="console-item-meta">
@@ -109,7 +111,7 @@
                 <li class="console-item {% if not curriculum.is_active %}is-inactive{% endif %}">
                     <a class="console-item-main" href="{% url 'registrar:curriculum_detail' curriculum.id %}">
                         <span class="console-item-code">{{ curriculum.program.display_label }} · {{ curriculum.admission_year }}</span>
-                        <span class="console-item-name">{{ curriculum.name|default:curriculum.program.name }}</span>
+                        <span class="console-item-name">{{ curriculum.name|default:curriculum.program.display_label }}</span>
                     </a>
                     <div class="console-item-meta">
                         <span><i class="fas fa-list-ol"></i> {{ curriculum.rows.count }} {% trans "fənn" context "registrar.console" %}</span>

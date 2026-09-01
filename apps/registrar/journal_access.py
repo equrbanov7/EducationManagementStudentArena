@@ -4,6 +4,9 @@
 
 * :func:`can_edit_journal` — GİRİŞ + korrektor səlahiyyəti. Müəllim / org sahibi /
   superuser / İKT Rəhbəri jurnalı aça bilər. İKT texniki super-operatordur.
+* :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim.
+  Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
+  is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
 * :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: YALNIZ müəllim,
   org sahibi, superuser. Korrektor (İKT) buraya DAXİL DEYİL — o, dəyişikliyi yalnız
   «Jurnal düzəlişi» rejimində sənədli (audited, PDF) yolla edir; normal görünüşdə
@@ -93,6 +96,22 @@ def can_edit_journal(user, offering) -> bool:
     if _is_live_assigned_instructor(user, offering):
         return True
     return offering.organization.owner_id == user.id
+
+
+def can_observe_journal(user, offering) -> bool:
+    """YALNIZ-OXU giriş: bu açılışı təhvil vermiş KÖHNƏ müəllim.
+
+    QƏSDƏN ``can_edit_journal``-dan AYRIDIR. Onu genişləndirsəydik köhnə müəllim
+    ``is_direct_editor`` olmadan da POST səthlərinə (dərs əlavəsi, bal yazma)
+    çata bilərdi — jurnalın iki sahibi yaranardı. Ayrı funksiya çağıran tərəfi
+    «görmək» ilə «yazmaq» arasında seçim etməyə MƏCBUR edir.
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+
+    from .handover import is_handover_observer
+
+    return is_handover_observer(user, offering)
 
 
 def is_direct_editor(user, offering) -> bool:

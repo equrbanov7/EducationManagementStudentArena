@@ -69,7 +69,16 @@ def exam_eligibility(*, student, subject_id, organization):
     if enrollment is None:
         return {"linked": False, "barred": False, "reason": ""}
     limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
-    elig = services.get_exam_eligibility(enrollment=enrollment, limit_percent=limit_percent)
+    # İdmançı-tələbə istisnası BURADA da ötürülür (2026-08-31 düşmən baxışı,
+    # 3-cü bloker).  Bu, statusun sadəcə göstərildiyi ekran deyil — imtahana
+    # start-ı BLOKLAYAN qapıdır (``exams.journal_sync.registrar_block_reason``).
+    # Ötürülmədiyi müddətdə istisna qoyulmuş tələbə kabinetdə «buraxılır»
+    # görür, imtahan düyməsində isə qayıb səbəbi ilə dayandırılırdı.
+    elig = services.get_exam_eligibility(
+        enrollment=enrollment,
+        limit_percent=limit_percent,
+        exempt=finals.athlete_exemption(enrollment),
+    )
     from django.utils.translation import pgettext
 
     reason = ""
