@@ -58,6 +58,7 @@ from .grading import (
     SelfWorkMark,
     SelfWorkTopic,
 )
+from .handover import TeachingHandover
 from .journal_close_notice import (
     JournalCloseNotice,
     JournalCloseScope,
@@ -66,6 +67,11 @@ from .kollokvium_window import (
     KOLLOKVIUM_WINDOW_COUNT,
     KollokviumExtraGrant,
     KollokviumWindow,
+)
+from .legacy_excuse import (
+    LEGACY_EXCUSE_EXTENSIONS,
+    LegacyExcuseDocument,
+    LegacyExcuseMappingStatus,
 )
 from .legacy_grade import (
     LegacyGradeArtifact,
@@ -117,6 +123,9 @@ __all__ = [
     "Lesson",
     "LessonKind",
     "LessonMark",
+    "LEGACY_EXCUSE_EXTENSIONS",
+    "LegacyExcuseDocument",
+    "LegacyExcuseMappingStatus",
     "LegacyGradeArtifact",
     "LegacyGradeArtifactKind",
     "LegacyGradeEvidenceKind",
@@ -133,6 +142,7 @@ __all__ = [
     "ScheduleSlot",
     "SelfWorkMark",
     "SelfWorkTopic",
+    "TeachingHandover",
     "SlotKind",
     "StudentAcademicRecord",
     "Subject",

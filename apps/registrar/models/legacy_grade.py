@@ -263,6 +263,18 @@ class LegacyGradeReview(ImmutableCorrectionEvidence):
     fact = models.ForeignKey(LegacyGradeFact, on_delete=models.PROTECT, related_name="reviews")
     decision = models.CharField(max_length=24, choices=LegacyGradeReviewDecision.choices)
     reason_code = models.CharField(max_length=64, validators=[token_validator])
+    # Qərar anında faktın HANSI dəqiqləşdirmə kateqoriyalarında olduğunun
+    # snapshot-u: ``|kod|kod|`` formatında (kənar ayırıcılar sayəsində
+    # ``__contains="|kod|"`` dəqiq uyğunluqdur, prefiks qarışmır).
+    #
+    # NİYƏ LAZIMDIR: kateqoriyaların əksəriyyəti faktın ÖZ (dəyişməz) sütunundan
+    # doğulur, ona görə qərardan sonra da doğru qalır. «İmtahan balı canlı
+    # sistemlə uyğun deyil» isə canlı ``FinalGrade``-dən doğulur — düzəliş
+    # tətbiq olunan kimi şərt POZULUR və sətir növbədən tamam yox olardı: nə
+    # «Düzəldilib» süzgəcində görünərdi, nə də irəliləyiş məxrəcində qalardı
+    # (yəni «neçəsi bitdi» sayğacı işlədikcə geriyə sürüşərdi). Bu snapshot
+    # sətrin hansı sualla növbəyə düşdüyünü qərarın özündə saxlayır.
+    category_codes = models.CharField(max_length=255, blank=True, default="", editable=False)
     note = models.TextField(blank=True, default="")
     evidence_digest = models.CharField(max_length=64, validators=[sha256_validator])
     reviewed_by = models.ForeignKey(
