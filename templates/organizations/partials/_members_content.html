@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n org_tags %}
 {% with s=org_members_section %}
 <div class="org-management org-management--members">
     {% if not s.organization %}
@@ -58,7 +58,7 @@
                                     </span>
                                 </a>
                             </td>
-                            <td><span class="org-management__badge">{{ membership.role.display_name }}</span></td>
+                            <td>{% with role_badge=membership.role|role_badge_label %}{% if role_badge %}<span class="org-management__badge">{{ role_badge }}</span>{% endif %}{% endwith %}</td>
                             <td>
                                 {% if membership.scope_unit %}
                                     {{ membership.scope_unit.name }}

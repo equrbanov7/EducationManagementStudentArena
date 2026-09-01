@@ -178,9 +178,15 @@
     font-size: 0.86rem;
     color: var(--ems-neutral-800);
 }
-.ems-ss__opt:hover {
+.ems-ss__opt:hover,
+/* Klaviatura vurğusu (ArrowUp/ArrowDown) — `aria-activedescendant` ilə eyni
+   element. Görünüşü hover ilə EYNİ saxlanılır ki, siçan və klaviatura
+   istifadəçisi eyni «hazırdakı variant» hissini alsın; solda rəngli zolaq
+   isə vurğunun yalnız fonla (rənglə) bildirilməməsini təmin edir. */
+.ems-ss__opt--active {
     background: var(--ems-primary-50);
     color: var(--ems-primary-700);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600);
 }
 .ems-ss__more {
     padding: 0.5rem 0.8rem;
@@ -189,3 +195,57 @@
     font-size: 1rem;
     letter-spacing: 0.2em;
 }
+
+/* ── Seçilə bilməyən variant + boş vəziyyət + skeleton ──────────────────────
+   Hər üçü OPT-IN-dir (server `disabled`/`hint` göndərir, JS `emptyText`/
+   `skeleton` opsiyası verir) — bu bayraqları işlətməyən mövcud səthlərdə
+   görünüş dəyişmir. Yeni rəng icad edilmir, hamısı `--ems-*` tokenidir. */
+.ems-ss__opt--disabled {
+    cursor: not-allowed;
+    color: var(--ems-neutral-400);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.ems-ss__opt--disabled:hover {
+    background: transparent;
+    color: var(--ems-neutral-400);
+}
+.ems-ss__opt-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Səbəb MƏTNLƏ bildirilir (yalnız rənglə deyil) — a11y. */
+.ems-ss__opt-hint {
+    flex-shrink: 0;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    border: 1px solid var(--ems-neutral-200);
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ems-ss__empty {
+    padding: 0.75rem 0.8rem;
+    text-align: center;
+    color: var(--ems-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.ems-ss__skeleton {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+}
+.ems-ss__skeleton-line {
+    height: 13px;
+    width: 100%;
+}
+.ems-ss__skeleton-line:nth-child(2) { width: 78%; }
+.ems-ss__skeleton-line:nth-child(3) { width: 60%; }

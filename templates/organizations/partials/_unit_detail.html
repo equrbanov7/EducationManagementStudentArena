@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n org_tags %}
 <div class="org-unit-detail">
     <nav class="org-unit-detail__breadcrumb" aria-label="{% trans 'Struktur yolu' context 'organizations.unit_detail' %}">
         <a href="{{ structure_list_url }}">{% if is_faculty %}{% trans 'Fakültələr' %}{% else %}{% trans 'Kafedralar' %}{% endif %}</a>
@@ -114,7 +114,7 @@
                 <span class="org-unit-detail__teacher-info">
                     <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
                     <small>
-                        {{ membership.role.display_name }}
+                        {{ membership.role|role_badge_label }}
                         {% if is_faculty and membership.scope_unit %} · {{ membership.scope_unit.name }}{% endif %}
                     </small>
                 </span>

@@ -1,0 +1,175 @@
+/* Köçürülmüş qiymət nişanı + xəbərdarlığı — qlobal, çünki eyni işarə çoxlu app-ın səthində
+   çıxır (transkript, «Ümumi tədris məlumatı», «Nəticələrim», akademik qeydlər,
+   jurnal).  Bölmə CSS-lərinə köçürsək beş fərqli tərif yaranardı və biri
+   digərindən sürüşərdi.
+
+   Mənşə qlifi neytral qalır və heç vaxt sönmür.
+
+   `.legacy-grade-warning` sahibin tələbinə uyğun olaraq bütün legacy bal
+   səthlərində qırmızı görünür. Review statusu ayrı siqnaldır; VERIFIED
+   dəyərin köhnə sistemdən gəldiyini dəyişmədiyi üçün bildirişi söndürmür.
+
+   ⚠️ Rəng büdcəsi: SARI TON QADAĞANDIR.  `registrar/css/correction.css`-də
+   sarı (#fff3cd fon / #d99e13 qlif) YALNIZ auditli düzəlişi bildirir.
+   Köçürülmüşlük düzəliş deyil — mənşədir.  Ona görə nişan neytral boz
+   `--ems-neutral-*` tonundadır və mövcud legacy dili ilə (oa-status.is-legacy,
+   sjx-card-badge.is-legacy) eyni ailədədir.
+
+   Tətbiq yalnız işıqlıdır — `prefers-color-scheme` YOXDUR (bax MEMORY). */
+
+.legacy-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.05em;
+    height: 1.05em;
+    margin-inline-start: 0.28em;
+    vertical-align: baseline;
+    font-size: 0.78em;
+    line-height: 1;
+    color: var(--ems-neutral-400);
+    cursor: help;
+    /* Nişan sətrin axınını pozmasın: fon/haşiyə YOXDUR, yalnız qlif. */
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+.legacy-grade-indicators {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.24em;
+    margin-inline-start: 0.28em;
+    vertical-align: baseline;
+}
+
+.legacy-grade-indicators .legacy-mark {
+    margin-inline-start: 0;
+}
+
+.legacy-grade-warning {
+    color: var(--ems-danger-strong);
+    font-size: 0.72em;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.legacy-mark:hover,
+.legacy-mark:focus-visible {
+    color: var(--ems-neutral-700);
+    background: var(--ems-neutral-100);
+    outline: none;
+}
+
+.legacy-mark:focus-visible {
+    box-shadow: 0 0 0 2px var(--ems-primary-200);
+}
+
+/* İmtahan Mərkəzi hələ dəqiqləşdirməyib — nişan bir ton tündləşir.
+   AYRI rəng (qırmızı/sarı) QƏSDƏN verilmir: 114 min sətrin hamısı yoxlanmamış
+   başlayır, ona görə xəbərdarlıq rəngi bütün ekranı yandırardı və mənasını
+   itirərdi.  Fərq yalnız kontrastdadır; səbəb tooltip-dədir. */
+.legacy-mark--unreviewed {
+    color: var(--ems-neutral-500);
+}
+
+.legacy-mark--unreviewed:hover,
+.legacy-mark--unreviewed:focus-visible {
+    color: var(--ems-neutral-800);
+}
+
+/* Cədvəl sətrində qlif başlığın xəttini qaldırmasın. */
+td .legacy-mark,
+th .legacy-mark {
+    position: relative;
+    top: -0.05em;
+}
+
+/* Çapda nişan görünməlidir (transkriptin HTML çapı) — boz ton çapda itməsin. */
+@media print {
+    .legacy-mark {
+        color: #555555;
+        background: none;
+    }
+
+    .legacy-grade-warning {
+        color: #9b1c1c;
+    }
+}
+
+/* ── Köçürülmüş nəticənin OXUNAN qeydi ───────────────────────────────────────
+   `registrar/partials/_legacy_grade_notice.html`.  Qlobal, çünki eyni cümlə
+   «Nəticələrim» kartında və «Ümumi tədris məlumatı» cədvəlində çıxır — iki
+   bölmə CSS-inə yazsaq tonlar sürüşərdi.
+
+   ⚠️ Rəng: İNFORMATİV MAVİ.  Qırmızı = «kəsilib», sarı = «auditli düzəliş»,
+   boz = «nəticə yazılmayıb» — üçü də başqa məna daşıyır (bax partial-ın şərhi).
+   Tətbiq yalnız işıqlıdır — `prefers-color-scheme` YOXDUR. */
+
+.legacy-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0.35rem 0 0;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 8px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: start;
+}
+
+.legacy-notice__icon {
+    flex: 0 0 auto;
+    margin-top: 0.1em;
+    color: var(--ems-primary-500);
+}
+
+/* Cədvəl xanasında (fənn sütunu).  ⚠️ ARTIQ İŞLƏNMİR: sətir-səviyyəli qeyd
+   brauzerdə A/B ölçüldü və geri qaytarıldı — 1280 px-də fənn sütunu cəmi
+   205 px olduğu üçün qeyd orada 91 px-lik bloka qırılır, tipik nişanlı sətir
+   96.7 px-dən 152.2 px-ə (+57 %) qalxır və eyni cümlə səhifədə 45 dəfə
+   təkrarlanırdı.  Yerini semestr blokundakı BİR qeyd tutdu
+   (`.legacy-notice--semester`).  Sinif partial-ın defolt variantı olduğu üçün
+   saxlanılır (başqa səth onu `variant` vermədən çağıra bilər). */
+.legacy-notice--inline {
+    max-width: 26rem;
+    white-space: normal;
+}
+
+/* Semestr blokunun başında: cədvəl ilə eyni enə yayılır, ona görə cümlə bir-iki
+   sətirdə bitir və blok başına yalnız bir dəfə çıxır. */
+.legacy-notice--semester {
+    margin: 0 0 0.5rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+}
+
+.legacy-notice--semester + .legacy-notice--semester {
+    margin-top: -0.2rem;
+}
+
+/* Kartda: tam eni tutan blok — bal şəbəkəsi ilə eyni ölçüdə oxunsun. */
+.legacy-notice--block {
+    margin-top: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+/* Çapda mavi fon itə bilər — mətn haşiyə ilə qalsın (transkriptin HTML çapı). */
+@media print {
+    .legacy-notice {
+        background: none;
+        border-color: #555555;
+        color: #222222;
+    }
+
+    .legacy-notice__icon {
+        color: #555555;
+    }
+}
