@@ -59,7 +59,7 @@
                     <td>@{{ membership.user.username }}</td>
                     <td>{{ membership.user.email }}</td>
                     <td>{{ membership.management_position|default:"-" }}</td>
-                    <td><span class="role-badge role-warning">{{ membership.management_role_label }}</span></td>
+                    <td>{% if membership.management_role_label %}<span class="role-badge role-warning">{{ membership.management_role_label }}</span>{% endif %}</td>
                     <td>
                         {% if membership.management_can_remove %}
                         <button

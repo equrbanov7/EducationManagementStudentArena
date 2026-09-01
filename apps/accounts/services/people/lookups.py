@@ -15,6 +15,7 @@ from __future__ import annotations
 from django.db.models import Count, Q
 
 from apps.organizations.scoping import scope_org_units
+from core.program_codes import program_display_label
 
 from .constants import FACULTY_UNIT_TYPES, GENDER_BUCKETS, GROUP_UNIT_TYPES, KAFEDRA_UNIT_TYPES
 from .filters import (
@@ -58,9 +59,15 @@ def _program_options(organization, scope, *, parent_unit_id=None):
                 organization, parent_unit_id, path_field="specialty_unit__path", id_field="specialty_unit_id"
             )
         )
-    rows = queryset.order_by("name").values_list("pk", "official_code", "name")[:MAX_OPTIONS]
-    # Rəsmi dövlət kodu — daxili ``Program.code`` (``MYEDU-*``) seçicidə göstərilmir.
-    return [{"id": str(pk), "text": f"{name} · {code}" if code else name} for pk, code, name in rows]
+    rows = queryset.order_by("name").values_list("pk", "name", "official_code", "legacy_official_code")[:MAX_OPTIONS]
+    # Etiket ƏL İLƏ birləşdirilmir: ``core.program_codes`` ``Program.display_label``
+    # ilə EYNİ qaydadır — cari (NK 503) şifr yoxdursa KÖHNƏ şifrə geri çəkilir.
+    # Əks halda yalnız köhnə şifri olan ixtisaslar (məs. «Dünya iqtisadiyyatı»)
+    # filtrdə şifrsiz görünürdü. Daxili ``Program.code`` (``MYEDU-*``) göstərilmir.
+    return [
+        {"id": str(pk), "text": program_display_label(name, official_code, legacy_code)}
+        for pk, name, official_code, legacy_code in rows
+    ]
 
 
 def _subject_options(organization, scope):

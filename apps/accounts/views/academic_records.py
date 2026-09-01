@@ -24,6 +24,7 @@ from apps.organizations.models import OrgUnit
 from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope, scope_org_units
 from apps.registrar import transcript
 from apps.registrar.models import Program, StudentAcademicRecord
+from core.program_codes import program_code_search_q
 from core.roles import user_has_any_role
 
 _FILTER_KEYS = ("faculty", "department", "program", "group", "student", "year", "season")
@@ -188,6 +189,15 @@ def _serialize_semester(sem) -> dict:
                 # balı yoxdur).  Sətir başqa cür görünməz qalırdı.
                 "ungraded": not (result.get("passed") or result.get("failed")),
                 "fail_reason": row["fail_reason"],
+                # Şəffaflıq: status canlı qaydadan gəlir, yoxsa köhnə sistemdən
+                # (və ya köhnə sistemin BOŞLUĞUNDAN) — bax exam_eligibility.
+                "status_code": result.get("status_code") or "",
+                "status_label": str(result["status_label"]) if result.get("status_label") else "",
+                "status_notice": str(result["status_notice"]) if result.get("status_notice") else "",
+                # JSON drill-down da server-render olunmuş transkript səthləri
+                # ilə eyni legacy mənşə müqaviləsini daşımalıdır. Əks halda JS
+                # ``row.legacy`` oxusa da marker səssizcə itirdi.
+                "legacy": row.get("legacy"),
             }
         )
     return {
@@ -288,7 +298,11 @@ def program_search(request):
         qs = qs.filter(specialty_unit__parent_id=department)
     query = (request.GET.get("q") or "").strip()
     if query:
-        qs = qs.filter(Q(name__icontains=query) | Q(official_code__icontains=query))
+        # AXTARIŞ İNVARİANTI: seçicidə ``display_label`` göstərilir, o isə cari
+        # şifr yoxdursa KÖHNƏ şifrə geri çəkilir. Ona görə axtarış HƏR İKİ nəsil
+        # şifri əhatə etməlidir — əks halda istifadəçi ekranda gördüyü şifri
+        # (məs. «050401») yazanda sıfır nəticə alırdı.
+        qs = qs.filter(Q(name__icontains=query) | program_code_search_q(query))
     # Seçicidə YALNIZ rəsmi dövlət ixtisas kodu görünür (``display_label``);
     # daxili ``Program.code`` (``MYEDU-*``) nə axtarılır, nə göstərilir.
     return _page(qs.order_by("name"), request, lambda p: {"id": str(p.id), "text": p.display_label})

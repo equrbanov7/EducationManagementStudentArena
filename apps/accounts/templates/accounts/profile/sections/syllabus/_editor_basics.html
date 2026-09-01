@@ -93,14 +93,24 @@ naviqasiya, həm də autosave üçün açardır.
        data-t-remove="{% trans 'nəticəni sil' context 'accounts.syllabus' %}"
        data-t-placeholder="{% trans 'Məsələn: alqoritmin mürəkkəbliyini O notasiyası ilə qiymətləndirir' context 'accounts.syllabus' %}"
        data-min="{{ se.limits.outcomes }}">
-    {% for outcome in p.data.outcomes %}
+    {% comment %}⚠️ `forloop.counter` DEYİL: boş nəticə sətri TN nömrəsi tutmamalıdır,
+    yoxsa panel həftə cədvəlinin açılış siyahısı ilə (`outcome_tags`) və tamamlanma
+    yoxlaması ilə fərqli nömrələmə göstərir.  Etiket serverdə hazırlanır —
+    `editor_panels.outcome_rows`; göndərilən JS-in `retagOutcomes`-u canlı yazı
+    zamanı EYNİ qaydanı tətbiq edir.{% endcomment %}
+    {% for row in p.rows %}
     <div class="syl-outcome" data-syl-outcome>
-      <span class="syl-outcome__tag" data-syl-outcome-tag>TN{{ forloop.counter }}</span>
-      <input type="text" class="syl-input" data-outcome value="{{ outcome }}" {% if se.readonly %}disabled{% endif %}
-             aria-label="TN{{ forloop.counter }} — {% trans 'təlim nəticəsi' context 'accounts.syllabus' %}"
-             placeholder="{% trans 'Məsələn: alqoritmin mürəkkəbliyini O notasiyası ilə qiymətləndirir' context 'accounts.syllabus' %}">
+      <span class="syl-outcome__tag" data-syl-outcome-tag>{{ row.tag }}</span>
+      {% comment %}⚠️ `<textarea>`, `<input type="text">` DEYİL.  HTML-in «value
+      sanitization algorithm»-i input-un dəyərindən CR/LF-i SİLİR; köçürülmüş
+      4,790 sillabusun təlim nəticəsi isə çox sətirlidir («TN1. …\n2. …»), yəni
+      müəllimin ilk avtosaxlaması sətir sonlarını silib sözləri yapışdırırdı.
+      Nəticələrin SAYI dəyişmir — həftə sətrinin TN istinadları qorunur.{% endcomment %}
+      <textarea rows="2" class="syl-textarea syl-textarea--outcome" data-outcome {% if se.readonly %}disabled{% endif %}
+                aria-label="{{ row.tag }} — {% trans 'təlim nəticəsi' context 'accounts.syllabus' %}"
+                placeholder="{% trans 'Məsələn: alqoritmin mürəkkəbliyini O notasiyası ilə qiymətləndirir' context 'accounts.syllabus' %}">{{ row.text }}</textarea>
       <button type="button" class="syl-iconbtn" data-syl-outcome-remove {% if se.readonly %}disabled{% endif %}
-              aria-label="TN{{ forloop.counter }} {% trans 'nəticəni sil' context 'accounts.syllabus' %}">&times;</button>
+              aria-label="{{ row.tag }} {% trans 'nəticəni sil' context 'accounts.syllabus' %}">&times;</button>
     </div>
     {% endfor %}
   </div>

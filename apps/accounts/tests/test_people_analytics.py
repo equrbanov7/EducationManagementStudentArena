@@ -30,6 +30,7 @@ from apps.accounts.services.people.constants import (
     STUDENT_SORT_OPTIONS,
     TEACHER_SORT_OPTIONS,
 )
+from apps.registrar.models import Program
 from core.rls import bypass_rls
 
 from .people_fixture import PeopleFixture
@@ -112,11 +113,25 @@ class PeopleAnalyticsFilterTest(TestCase):
             )
 
     def test_student_analytics_reports_program_and_course(self):
+        """İxtisas səbətinin etiketi: ``Ad · <RƏSMİ şifr>``.
+
+        ⚠️ REQRESSİYA QORUYUCUSU: etiket əvvəllər DAXİLİ ``Program.code``
+        («PA», «PB» — köçürmənin ``MYEDU-*`` açarı) ilə qurulurdu və uydurma
+        açar birbaşa istifadəçinin filtr siyahısına sızırdı. İndi yalnız rəsmi
+        dövlət şifri işlədilir (cari NK 503 şifri, yoxsa əvvəlki nəsil şifr).
+        """
         with bypass_rls():
+            Program.objects.filter(pk=self.fx.program_a.pk).update(official_code="6004002")
+            # İkinci proqram yeni təsnifatda LƏĞV olunub — yalnız köhnə şifri var,
+            # etiket ona geri çəkilməlidir (şifrsiz qalmamalıdır).
+            Program.objects.filter(pk=self.fx.program_b.pk).update(legacy_official_code="050401")
             payload = people.build_student_analytics(actor=self._actor(self.fx.rector), filters=_student_filters())
         self.assertEqual(payload["total"], 2)
         programs = {row["label"] for row in _bucket(payload, "program")["rows"]}
-        self.assertEqual(programs, {"PA — Proqram A", "PB — Proqram B"})
+        self.assertEqual(programs, {"Proqram A · 6004002", "Proqram B · 050401"})
+        for label in programs:
+            self.assertNotIn("PA", label)
+            self.assertNotIn("PB", label)
         self.assertEqual(sum(row["count"] for row in _bucket(payload, "course")["rows"]), 2)
 
     def test_student_group_filter_narrows_the_numbers(self):

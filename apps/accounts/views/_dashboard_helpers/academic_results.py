@@ -31,6 +31,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar import exam_eligibility
+
 from .._helpers import _get_active_organization
 from .formatters import _format_score_display
 
@@ -58,6 +60,10 @@ OUTCOME_LABELS = {
     "fail": pgettext_lazy("profile.results.academic", "Kəsildi"),
     "barred": pgettext_lazy("profile.results.academic", "Kəsilir"),
     "progress": pgettext_lazy("profile.results.academic", "Davam edir"),
+    # Tarixi/köçürülmüş semestr, köhnə sistemdə nəticə yoxdur. «Davam edir»
+    # DEYİL: semestr bağlanıb, sadəcə məlumat yazılmayıb (bax
+    # :mod:`apps.registrar.exam_eligibility` — 1-ci sərhəd halı).
+    "legacy_no_result": exam_eligibility.NO_LEGACY_RESULT_LABEL,
 }
 
 
@@ -89,6 +95,8 @@ def _outcome_code(result) -> str:
         return "pass"
     if result.get("failed"):
         return "fail"
+    if result.get("status_code") == exam_eligibility.STATUS_LEGACY_NO_RESULT:
+        return "legacy_no_result"
     return "progress"
 
 
@@ -215,6 +223,11 @@ def _build_item(row, *, period_label, sort_at) -> dict:
             # mənbə sətirlərini clamp-siz və çoxluq itirmədən ayrıca verir.
             "legacy_grade_facts": list(row.get("legacy_grade_facts") or []),
             "legacy_grade_review_required": bool(row.get("legacy_grade_review_required")),
+            # Sətir səviyyəli nişan/qeyd — registrar fasadında hesablanır
+            # (``legacy_grade_read.attach_legacy_provenance``).  Kart onu OLDUĞU
+            # KİMİ ötürür: «qeyd görünsünmü?» qərarı burada TƏKRARLANSA,
+            # «Ümumi tədris məlumatı» ilə sürüşərdi.
+            "legacy": row.get("legacy"),
         },
     }
 

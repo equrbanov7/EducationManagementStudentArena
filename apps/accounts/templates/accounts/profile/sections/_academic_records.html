@@ -115,6 +115,13 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
     </div>
 
     <script type="application/json" class="js-acr-i18n">{
+      "legacy_source": "{% trans 'Mənbə sistem'|escapejs context 'registrar.legacy_grade' %}",
+      "legacy_ref": "{% trans 'Mənbə qeydi'|escapejs context 'registrar.legacy_grade' %}",
+      "legacy_date": "{% trans 'Mənbədə yazılma tarixi'|escapejs context 'registrar.legacy_grade' %}",
+      "legacy_raw_entry": "{% trans 'Mənbədəki giriş balı'|escapejs context 'registrar.legacy_grade' %}",
+      "legacy_raw_exam": "{% trans 'Mənbədəki imtahan balı'|escapejs context 'registrar.legacy_grade' %}",
+      "legacy_raw_resit": "{% trans 'Mənbədəki təkrar imtahan balı'|escapejs context 'registrar.legacy_grade' %}",
+      "legacy_raw_final": "{% trans 'Mənbədəki yekun bal'|escapejs context 'registrar.legacy_grade' %}",
       "students": "{% trans 'Tələbə'|escapejs context 'registrar.records' %}",
       "credits": "{% trans 'Toplanmış kredit'|escapejs context 'registrar.records' %}",
       "fails": "{% trans 'Ümumi kəsr'|escapejs context 'registrar.records' %}",
@@ -122,6 +129,7 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
       "exam25": "{% trans 'İmtahandan (25%)'|escapejs context 'registrar.records' %}",
       "ungraded": "{% trans 'Qiymətləndirilməyib'|escapejs context 'registrar.records' %}",
       "avg_gpa": "{% trans 'Orta ÜOMG'|escapejs context 'registrar.records' %}",
+      "gpa_na": "{% trans 'Hesablana bilmir'|escapejs context 'registrar.eligibility' %}",
       "none": "{% trans 'Nəticə tapılmadı.'|escapejs context 'registrar.records' %}",
       "no_access": "{% trans 'Bu bölmə üçün struktur icazəniz yoxdur.'|escapejs context 'registrar.records' %}",
       "prev": "{% trans 'Əvvəlki'|escapejs context 'registrar.records' %}",

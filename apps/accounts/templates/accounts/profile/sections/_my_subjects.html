@@ -151,7 +151,9 @@
                 </div>
                 {% endif %}
                 <footer class="subject-card-foot">
-                    {% if row.eligibility.barred %}
+                    {% if row.eligibility.frozen %}
+                    <span class="exam-status exam-status--legacy" title="{{ row.eligibility.notice }}"><i class="fas fa-clock-rotate-left"></i> {{ row.eligibility.frozen_badge }}</span>
+                    {% elif row.eligibility.barred %}
                     <span class="exam-status exam-status--barred"><i class="fas fa-ban"></i> {% trans "İmtahana buraxılmır (qayıb həddi keçilib)" context "profile.subjects" %}</span>
                     {% else %}
                     <span class="exam-status exam-status--ok"><i class="fas fa-check"></i> {% trans "İmtahana buraxılır" context "profile.subjects" %}</span>

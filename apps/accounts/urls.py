@@ -209,9 +209,39 @@ urlpatterns = [
     path("people/<str:kind>/options/", views.people_options, name="people_options"),
     path("people/person/<int:user_id>/", views.people_detail, name="people_detail"),
     path("people/action/", views.people_action, name="people_action"),
+    # Tələbə idarəetməsi (`people.manage_academic`) — kataloqun ÜSTÜNDƏ oturur,
+    # paralel ikinci siyahı yaratmır. Hədəf: kart → user id, ön baxış → akademik
+    # QEYD id-si (bir tələbənin bir neçə proqram qeydi ola bilər).
+    path("people/student/<int:user_id>/card/", views.people_student_card, name="people_student_card"),
+    path("people/academic/groups/", views.people_academic_groups, name="people_academic_groups"),
+    path(
+        "people/academic/<uuid:record_id>/transfer-preview/",
+        views.people_transfer_preview,
+        name="people_transfer_preview",
+    ),
     # Analitika — cədvəldən AYRI endpoint (qrafik + göstəricilər eyni filtrlə).
     path("people/<str:kind>/analytics/", views.people_analytics, name="people_analytics"),
     path("people/<str:kind>/analytics/ai/", views.people_analytics_ai, name="people_analytics_ai"),
+    # «Fənn təhvili» (`journal.reassign`) — dərs açılışının başqa müəllimə
+    # verilməsi. Domen məntiqi registrar-dadır (apps/registrar/handover*.py);
+    # burada yalnız profil bölməsinin JSON səthi var. Hamısı fail-closed:
+    # icazəsiz aktor `has_access: false` alır, POST isə 403.
+    path("handover/teachers/", views.handover_teachers, name="handover_teachers"),
+    path("handover/offerings/", views.handover_offerings, name="handover_offerings"),
+    path("handover/options/", views.handover_options, name="handover_options"),
+    path("handover/history/", views.handover_history, name="handover_history"),
+    path("handover/action/", views.handover_action, name="handover_action"),
+    # «Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» (İmtahan Mərkəzi).
+    # Növbə bazadakı sübut qatından (LegacyGradeFact + canlı FinalGrade güzgüsü)
+    # hesablanır — domen məntiqi registrar-dadır (legacy_grade_review*.py).
+    # Qərar/düzəliş qapısı `final_score.entry`; `journal.correct` yalnız OXU verir.
+    path("legacy-review/queue/", views.legacy_review_queue, name="legacy_review_queue"),
+    path("legacy-review/options/", views.legacy_review_options, name="legacy_review_options"),
+    path("legacy-review/units/<str:kind>/", views.legacy_review_units, name="legacy_review_units"),
+    path("legacy-review/groups/", views.legacy_review_groups, name="legacy_review_groups"),
+    path("legacy-review/subjects/", views.legacy_review_subjects, name="legacy_review_subjects"),
+    path("legacy-review/teachers/", views.legacy_review_teachers, name="legacy_review_teachers"),
+    path("legacy-review/action/", views.legacy_review_action, name="legacy_review_action"),
     # Sillabus (müəllim səthi) — profil bölməsinin JSON endpoint-ləri.
     # Cross-domain glue accounts-dadır: `apps.syllabus` registrar/organizations
     # modullarını import etmir (modul-sərhəd dövrü yaranmır).

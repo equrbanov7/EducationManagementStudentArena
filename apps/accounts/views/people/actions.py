@@ -4,9 +4,15 @@ RİM ilə eyni naxış: TƏK POST marşrutu + ``action`` allow-list-i. Səbəb e
 hər əməliyyat eyni ön-şərt zəncirindən keçir (aktor → hədəf → icazə → scope →
 iyerarxiya → audit); marşrutları parçalasaq zəncir dörd yerdə təkrarlanardı.
 
-⚠️ TƏSDİQ TƏLƏBİ: dağıdıcı əməllər (``block``, ``revoke_teacher``) üçün
-``reason`` MƏCBURİDİR (ən azı 3 simvol) — servis qatı onu yoxlayır və UI təsdiq
-modalını bu tələb üzərində qurur.
+⚠️ TƏSDİQ TƏLƏBİ: dağıdıcı əməllər (``block``, ``revoke_teacher``,
+``transfer_group``, ``set_academic_status`` → xaric/məzuniyyət) üçün ``reason``
+MƏCBURİDİR (ən azı 3 simvol) — servis qatı onu yoxlayır və UI təsdiq modalını
+bu tələb üzərində qurur.
+
+⚠️ AKADEMİK əməllərin hədəfi ``user_id`` DEYİL, ``record_id``-dir: bir tələbənin
+bir neçə proqram qeydi ola bilər (``uniq_student_program``) və hansının
+köçürüldüyü birmənalı olmalıdır. Ona görə ``load_target`` yolu YALNIZ hesab
+əməllərinə aiddir; akademik əməllər ``academic.load_record`` qapısından keçir.
 """
 
 from __future__ import annotations
@@ -25,7 +31,20 @@ from apps.accounts.services.rim.policy import RimAccessError
 logger = logging.getLogger(__name__)
 
 #: Allow-list — naməlum `action` 400 verir (səssiz keçid yoxdur).
-ALLOWED_ACTIONS = frozenset({"block", "unblock", "grant_teacher", "revoke_teacher"})
+ALLOWED_ACTIONS = frozenset(
+    {
+        "block",
+        "unblock",
+        "grant_teacher",
+        "revoke_teacher",
+        # Tələbə idarəetməsi (`people.manage_academic`) — hədəf `record_id`.
+        "transfer_group",
+        "set_academic_status",
+    }
+)
+
+#: Hədəfi akademik QEYD olan əməllər (hesab deyil).
+RECORD_ACTIONS = frozenset({"transfer_group", "set_academic_status"})
 
 
 def _read_payload(request) -> dict:
@@ -58,6 +77,10 @@ def people_action(request):
     reason = payload.get("reason") or ""
 
     try:
+        if action in RECORD_ACTIONS:
+            result = _run_record_action(actor, action, payload, request)
+            return JsonResponse({"ok": True, "action": action, "result": result})
+
         target = people.load_target(actor, payload.get("user_id"))
         if action in ("block", "unblock"):
             result = people.set_account_status(
@@ -88,4 +111,25 @@ def people_action(request):
     return JsonResponse({"ok": True, "action": action, "result": result})
 
 
-__all__ = ["ALLOWED_ACTIONS", "people_action"]
+def _run_record_action(actor, action, payload, request):
+    """Akademik qeyd üzərindəki əməllər — scope qapısı servis qatındadır."""
+    record_id = payload.get("record_id") or ""
+    reason = payload.get("reason") or ""
+    if action == "transfer_group":
+        return people.transfer_group(
+            actor,
+            record_id=record_id,
+            new_group_id=payload.get("group_id") or "",
+            reason=reason,
+            request=request,
+        )
+    return people.set_academic_status(
+        actor,
+        record_id=record_id,
+        status=payload.get("status") or "",
+        reason=reason,
+        request=request,
+    )
+
+
+__all__ = ["ALLOWED_ACTIONS", "RECORD_ACTIONS", "people_action"]

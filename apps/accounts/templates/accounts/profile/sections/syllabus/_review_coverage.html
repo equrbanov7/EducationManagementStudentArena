@@ -43,7 +43,7 @@ təsviridir. Tətbiq olunmayan mərhələlər «aktiv» kimi göstərilmir (bax
       <tbody>
         {% for row in cov.rows %}
         <tr>
-          <th scope="row">{% if row.label %}{{ row.label }}{% else %}{% trans "Təyin edilməyib" context "accounts.syllabus" %}{% endif %}</th>
+          <th scope="row">{% if row.name %}{{ row.name }}{% if row.code %} <span class="syl-code">{{ row.code }}</span>{% endif %}{% else %}{% trans "Təyin edilməyib" context "accounts.syllabus" %}{% endif %}</th>
           <td class="is-num">{{ row.total }}</td>
           <td class="is-num syl-num--success">{{ row.approved }}</td>
           <td class="is-num syl-num--primary">{{ row.in_review }}</td>

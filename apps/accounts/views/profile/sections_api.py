@@ -89,6 +89,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "appeal-stats": "accounts/profile/sections/_appeal_stats.html",
     "kollokvium-windows": "accounts/profile/sections/_kollokvium_windows.html",
     "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
+    "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
     "superadmin-contact-messages": "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
     "system-monitoring": "accounts/profile/sections/superadmin/_system_monitoring.html",
     "statistics": "accounts/profile/sections/_statistics.html",
@@ -125,6 +126,8 @@ SECTION_PARTIALS: dict[str, str] = {
     # Sillabus — müəllim səthi. Redaktor ayrıca TAM SƏHİFƏ deyil: o da profil
     # shell-inin içində açılır (sol sidebar qalır), hədəf versiya `?version=`
     # sorğu parametrindən gəlir.
+    # Fənn təhvili (`journal.reassign`) — RİM / dekan / kafedra müdiri.
+    "teaching-handover": "accounts/profile/sections/_teaching_handover.html",
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
@@ -185,6 +188,13 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "syllabus-list",
         "syllabus-editor",
         "syllabus-review",
+        # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
+        # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
+        "teaching-handover",
+        # Dəqiqləşdirmə növbəsi də OXU-ONLY render olunur — server yalnız
+        # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
+        # POST endpoint-inə (multipart, sənədlə) gedir.
+        "legacy-grade-review",
     }
 )
 

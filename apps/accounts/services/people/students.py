@@ -18,7 +18,10 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Exists, OuterRef, Subquery
+from django.db.models import Exists, OuterRef, Q, Subquery, Value
+from django.db.models.functions import Coalesce, NullIf
+
+from core.program_codes import program_code_search_q, program_display_label
 
 from . import filters as people_filters
 from .constants import DEFAULT_PAGE_SIZE, STUDENT_SORT_OPTIONS
@@ -30,6 +33,10 @@ User = get_user_model()
 
 #: Bir neçə akademik qeyd olduqda hansı sütunlara baxılır (ən son qəbul).
 RECORD_PICK_ORDER = ("-is_active", "-admission_year", "created_at")
+
+#: ``None`` ÖZÜ mənalı dəyərdir (scope yoxdur → fail-closed), ona görə
+#: «ötürülməyib» halı ayrı sentinel ilə göstərilir.
+_UNSET = object()
 
 
 def student_records_qs(organization):
@@ -68,12 +75,18 @@ def scoped_student_records(actor, *, request=None, filters=None):
     return records
 
 
-def visible_students_qs(actor, *, request=None, filters=None):
+def visible_students_qs(actor, *, request=None, filters=None, records=_UNSET):
     """Aktorun görə bildiyi tələbələrin baza queryset-i (fail-closed).
 
     Scope-suz UNIT rolu → BOŞ nəticə (bütün təşkilat DEYİL).
+
+    ``records`` — artıq hesablanmış scope dəsti. ``scoped_student_records``
+    ucuz DEYİL (``unit_subtree_q`` ağac yolunu SORĞU ilə açır), ona görə həm
+    siyahını, həm axtarış ``Exists``-ini quran çağıran onu BİR DƏFƏ hesablayıb
+    ötürür — əks halda kataloqun sorğu büdcəsi 5 → 6 olurdu.
     """
-    records = scoped_student_records(actor, request=request, filters=filters)
+    if records is _UNSET:
+        records = scoped_student_records(actor, request=request, filters=filters)
     if records is None:
         return User.objects.none()
 
@@ -88,17 +101,48 @@ def visible_students_qs(actor, *, request=None, filters=None):
             group_id=Subquery(picked.values("group_id")[:1]),
             group_name=Subquery(picked.values("group__name")[:1]),
             program_name=Subquery(picked.values("program__name")[:1]),
-            program_code=Subquery(picked.values("program__official_code")[:1]),
+            # Rəsmi şifr: cari (NK 503) varsa cari, yoxsa ƏVVƏLKİ nəsil şifr —
+            # ``Program.display_code`` ilə eyni qayda, amma SQL-də (annotasiya).
+            program_code=Coalesce(
+                NullIf(Subquery(picked.values("program__official_code")[:1]), Value("")),
+                Subquery(picked.values("program__legacy_official_code")[:1]),
+                Value(""),
+            ),
             admission_year=Subquery(picked.values("admission_year")[:1]),
             academic_status=Subquery(picked.values("status")[:1]),
         )
     )
 
 
-def _apply_filters(queryset, actor, filters):
+def _program_search_matcher(records):
+    """Token → «bu tələbənin qeydlərindən biri həmin ixtisasa uyğundur?».
+
+    AXTARIŞ İNVARİANTI: cədvəl sətri ``program_label``-i («Ad · şifr») GÖSTƏRİR,
+    ona görə həmin ad və şifr axtarıla da bilməlidir — əks halda operator
+    ekranda «Dünya iqtisadiyyatı · 050401» görüb «050401» yazanda SIFIR nəticə
+    alır. ``program_code`` annotasiyası üzərindən süzmək əvəzinə ``Exists``
+    işlədilir: annotasiya ``Coalesce(NullIf(Subquery…))``-dur və onu ``WHERE``-ə
+    salmaq korrelyasiyalı alt sorğunu token başına TƏKRARLAYARDI.
+    """
+
+    def matcher(token):
+        return Exists(
+            records.filter(student=OuterRef("pk")).filter(
+                Q(program__name__icontains=token) | program_code_search_q(token, prefix="program__")
+            )
+        )
+
+    return matcher
+
+
+def _apply_filters(queryset, actor, filters, *, records=None):
     organization = actor.organization
 
-    search = people_filters.search_q(filters.query, prefix="")
+    search = people_filters.search_q(
+        filters.query,
+        prefix="",
+        extra=_program_search_matcher(records) if records is not None else None,
+    )
     if search:
         queryset = queryset.filter(search)
 
@@ -134,8 +178,10 @@ def filtered_students_qs(*, actor, filters, request=None):
 
     Analitika bunu çağırır — göstəricilər həmişə cari filtr dəstinə aiddir.
     """
-    queryset = visible_students_qs(actor, request=request, filters=filters)
-    return _apply_filters(queryset, actor, filters)
+    # Scope BİR dəfə hesablanır və hər iki istehlakçıya ötürülür (sorğu büdcəsi).
+    records = scoped_student_records(actor, request=request, filters=filters)
+    queryset = visible_students_qs(actor, request=request, filters=filters, records=records)
+    return _apply_filters(queryset, actor, filters, records=records)
 
 
 def build_students_page(*, actor, filters, request=None, today=None) -> dict:
@@ -174,7 +220,10 @@ def build_students_page(*, actor, filters, request=None, today=None) -> dict:
                 "kind": "student",
                 "group_name": getattr(user, "group_name", "") or "",
                 "program_name": program_name,
-                "program_label": f"{program_name} · {program_code}" if program_code else program_name,
+                # Etiket ƏL İLƏ birləşdirilmir — ``Program.display_label`` ilə eyni
+                # saf qayda (``program_code`` annotasiyası onsuz da köhnə şifrə
+                # geri çəkilmiş TƏK şifrdir).
+                "program_label": program_display_label(program_name, program_code),
                 "admission_year": getattr(user, "admission_year", None),
                 "academic_status": getattr(user, "academic_status", "") or "",
                 "faculty_name": unit.get("faculty", ""),

@@ -80,7 +80,7 @@
                 {% if sec.record.program %}
                 <div class="transcript-info-item">
                     <span class="transcript-info-label">{% trans "İxtisas" context "profile.transcript" %}</span>
-                    <span class="transcript-info-value">{{ sec.record.program.display_label }}</span>
+                    <span class="transcript-info-value">{{ sec.record.program.display_label_full }}</span>
                 </div>
                 <div class="transcript-info-item">
                     <span class="transcript-info-label">{% trans "Təhsil pilləsi" context "profile.transcript" %}</span>
@@ -112,7 +112,13 @@
             <!-- ── Kumulyativ ÜOMG kartı (bir baxışda xülasə) ───────────────── -->
             <div class="transcript-gpa-card">
                 <div class="transcript-gpa-main">
+                    {# ÜOMG hesablana bilmirsə SIFIR göstərilmir — rəsmi sənəddə #}
+                    {# "0.00" «sıfır bal aldı» kimi oxunur (bax exam_eligibility.uomg_from). #}
+                    {% if sec.cumulative_gpa_available %}
                     <span class="transcript-gpa-value">{{ sec.cumulative_gpa|floatformat:2 }}</span>
+                    {% else %}
+                    <span class="transcript-gpa-value transcript-gpa-value--na">{% trans "Hesablana bilmir" context "registrar.eligibility" %}</span>
+                    {% endif %}
                     <span class="transcript-gpa-label">{% trans "Kumulyativ ÜOMG" context "profile.transcript" %}</span>
                 </div>
                 <div class="transcript-gpa-stats">
@@ -146,8 +152,19 @@
                     <div class="transcript-semester">
                         <div class="transcript-semester-head">
                             <h5 class="transcript-semester-title">{{ sem.season }} {% trans "semestri" context "profile.transcript" %}</h5>
-                            <span class="transcript-chip"><strong>ÜOMG</strong> {{ sem.gpa|floatformat:2 }}</span>
+                            <span class="transcript-chip"><strong>ÜOMG</strong> {% if sem.uomg_available %}{{ sem.gpa|floatformat:2 }}{% else %}—{% endif %}</span>
                         </div>
+                        {% comment %}
+                          ÜÇÜNCÜ SƏTH.  Transkript əvvəl yalnız sətir qlifini
+                          göstərirdi: `build_student_transcript` semestr bayraqlarını
+                          hər bucket-ə onsuz da yazırdı (`transcript.py`,
+                          `semester_notice_flags`), amma bu ekran onları ATIRDI —
+                          yəni köçürülmüş nəticəyə baxan tələbə «Ümumi tədris
+                          məlumatı»nda mətni oxuyur, transkriptdə isə eyni sətrə
+                          baxıb heç nə görmürdü.  Miqyas cədvəl səthi ilə eynidir:
+                          semestr blokunda BİR dəfə, sətir-sətir yox.
+                        {% endcomment %}
+                        {% include "registrar/partials/_legacy_grade_semester_notice.html" with sem=sem %}
                         <div class="transcript-table-wrap">
                             <table class="transcript-table">
                                 <thead>
@@ -164,6 +181,7 @@
                                         <td class="ta-left">
                                             <span class="transcript-subject-code">{{ row.subject.code }}</span>
                                             <span class="transcript-subject-name">{{ row.subject.name }}</span>
+                                            {% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}
                                         </td>
                                         <td>{{ row.credit }}</td>
                                         <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}</td>
@@ -179,7 +197,7 @@
                         </div>
                         <div class="transcript-subtotal">
                             <span>{% trans "Semestrin sonu" context "profile.transcript" %}</span>
-                            <span><strong>{% trans "Kredit" context "profile.transcript" %} {{ sem.credits_earned }}</strong> · <strong>ÜOMG {{ sem.gpa|floatformat:2 }}</strong></span>
+                            <span><strong>{% trans "Kredit" context "profile.transcript" %} {{ sem.credits_earned }}</strong> · <strong>ÜOMG {% if sem.uomg_available %}{{ sem.gpa|floatformat:2 }}{% else %}—{% endif %}</strong></span>
                         </div>
                     </div>
                     {% endfor %}
@@ -187,7 +205,7 @@
 
                 <div class="transcript-subtotal transcript-subtotal--year">
                     <span>{% trans "İlin sonu" context "profile.transcript" %}</span>
-                    <span><strong>{% trans "Kredit" context "profile.transcript" %} {{ year.credits_earned }}</strong> · <strong>ÜOMG {{ year.gpa|floatformat:2 }}</strong></span>
+                    <span><strong>{% trans "Kredit" context "profile.transcript" %} {{ year.credits_earned }}</strong> · <strong>ÜOMG {% if year.uomg_available %}{{ year.gpa|floatformat:2 }}{% else %}—{% endif %}</strong></span>
                 </div>
             </div>
             {% endfor %}
@@ -197,7 +215,7 @@
                 <span class="transcript-final-label">{% trans "Ümumi" context "profile.transcript" %}</span>
                 <span class="transcript-final-value">
                     <strong>{% trans "Kredit" context "profile.transcript" %} {{ sec.total_credits_earned }}</strong>
-                    · <strong>{% trans "Kumulyativ ÜOMG" context "profile.transcript" %} {{ sec.cumulative_gpa|floatformat:2 }}</strong>
+                    · <strong>{% trans "Kumulyativ ÜOMG" context "profile.transcript" %} {% if sec.cumulative_gpa_available %}{{ sec.cumulative_gpa|floatformat:2 }}{% else %}{% trans "Hesablana bilmir" context "registrar.eligibility" %}{% endif %}</strong>
                 </span>
             </div>
 
@@ -210,6 +228,9 @@
         <p class="transcript-note">
             <i class="fas fa-info-circle"></i>
             {% trans "ÜOMG kredit-çəkili hesablanır: keçilən və kəsilən fənlər daxildir, hələ qiymətlənməyən fənlər sonra əlavə olunur." context "profile.transcript" %}
+            {% if not sec.cumulative_gpa_available %}
+            <br>{% trans "ÜOMG hesablana bilmir: qəti nəticəsi olan (keçilmiş və ya kəsilmiş) fənn yoxdur. Köhnə sistem bu semestrlər üçün imtahan nəticəsi yazmayıb — bu, sıfır bal demək DEYİL." context "registrar.eligibility" %}
+            {% endif %}
         </p>
 
         {% endif %}

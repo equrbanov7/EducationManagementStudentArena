@@ -202,6 +202,14 @@
     color: var(--ems-primary-700);
 }
 
+/* ÜOMG hesablana bilməyəndə: rəqəm yerinə mətn — kiçik, boz, iddiasız.
+   Sıfır göstərmək rəsmi sənəddə yanlış fakt olardı (exam_eligibility.uomg_from). */
+.transcript-gpa-value--na {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+
 .transcript-gpa-label {
     font-size: 0.8rem;
     text-transform: uppercase;

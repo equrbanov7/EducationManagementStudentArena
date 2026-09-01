@@ -39,6 +39,16 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
     {% endfor %}
   </div>
 
+  {% if se.week_extra_count %}
+  {% comment %}Köçürülmüş cədvəl tədris planının 16 həftəsindən uzun ola bilər
+  (canlı mənbədə 120 sətrə qədər). Artıq sətirlər KƏSİLMİR — kəsmək ilk
+  autosave-də məzmunu silərdi; onlar damğalanıb göstərilir ki, müəllim
+  lazımsızını ŞÜURLU boşaltsın.{% endcomment %}
+  <p class="syl-hintbox syl-hintbox--warn">
+    {% blocktrans context "accounts.syllabus" with count=se.week_extra_count total=se.limits.weeks %}Köçürülmüş cədvəldə tədris planının {{ total }} həftəsindən əlavə {{ count }} sətir var. Onlar məzmun itməsin deyə göstərilir — lazımsız sətirlərin mövzusunu və saatını boşaldın.{% endblocktrans %}
+  </p>
+  {% endif %}
+
   <div class="syl-tablescroll">
     <table class="syl-weeks">
       <caption class="sr-only">{% trans "Həftəlik mövzu və saat bölgüsü" context "accounts.syllabus" %}</caption>
@@ -54,19 +64,43 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
       </thead>
       <tbody data-syl-weeks>
         {% for row in se.week_rows %}
-        <tr data-syl-week-row="{{ row.index }}">
-          <th scope="row">{{ row.index }}</th>
+        {% comment %}`data-extra` — sətrin redaktorda İNPUTU OLMAYAN açarları
+        (`practical`, `note`, gələcək sahələr). Toplayıcı sətri məhz ondan
+        qurur, sonra DOM açarlarını üstələyir: göndərilməyən heç nə silinmir.{% endcomment %}
+        <tr data-syl-week-row="{{ row.index }}"{% if row.extra %} data-extra="{{ row.extra }}"{% endif %}
+            class="{% if row.is_extra %}syl-weeks__row--extra{% endif %}">
+          <th scope="row">
+            {{ row.index }}
+            {% if row.is_extra %}<span class="syl-tagx">{% trans "plandan artıq" context "accounts.syllabus" %}</span>{% endif %}
+          </th>
           <td>
+            {% comment %}Mövzu TƏK SƏTİRDİR: köçürmə burada `clean_text` işlədir
+            (mənbədə 131,056 sətrin heç birində sətir sonu yoxdur), ona görə
+            `<input>` heç nə itirmir.  Bu fakt qapı ilə bağlanıb — render olunan
+            hər `<input>` dəyəri sətir ayırıcısına qarşı yoxlanılır
+            (`test_editor_shipped_js.test_no_single_line_control_carries_a_line_break`).{% endcomment %}
             <input type="text" class="syl-input syl-input--sm" data-week="topic" value="{{ row.topic }}"
                    {% if se.readonly %}disabled{% endif %}
                    aria-label="{{ row.index }}. {% trans 'həftənin mövzusu' context 'accounts.syllabus' %}"
                    placeholder="{% trans 'Həftənin mövzusu' context 'accounts.syllabus' %}">
+            {% if row.extra_note %}
+            {% comment %}Sətrin redaktorda İNPUTU OLMAYAN, amma SAXLANILAN açarları
+            (`practical`, `qeyd`, gələcək sahələr).  Əvvəllər onlar tamamilə
+            görünməz idi: müəllim sətri boşaldıb «sildim» sanırdı, halbuki dəyər
+            `data-extra` ilə geri yazılırdı.  İndi ən azı GÖRÜNÜR.{% endcomment %}
+            <p class="syl-carrynote">
+              <i class="fas fa-lock" aria-hidden="true"></i>
+              <span>{% trans "Köhnə sistemdən saxlanılır:" context "accounts.syllabus" %} {{ row.extra_note }}</span>
+            </p>
+            {% endif %}
           </td>
           {% for cell in row.cells %}
           <td class="syl-weeks__cell">
             <select class="syl-select syl-select--xs" data-week="{{ cell.key }}" {% if se.readonly %}disabled{% endif %}
                     aria-label="{{ row.index }}. {% trans 'həftə' context 'accounts.syllabus' %} — {{ cell.label }}">
-              {% for value in se.hour_choices %}
+              {% comment %}Seçimlər SƏTİR-SƏTİR gəlir: mənbədəki saat 4-dən böyük
+              ola bilər, siyahıda olmasa `<select>` onu itirər və autosave 0 yazardı.{% endcomment %}
+              {% for value in cell.choices %}
               <option value="{{ value }}" {% if value == cell.value %}selected{% endif %}>{% if value %}{{ value }}{% else %}—{% endif %}</option>
               {% endfor %}
             </select>
@@ -76,7 +110,7 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
             <select class="syl-select syl-select--sm" data-week="outcome" {% if se.readonly %}disabled{% endif %}
                     aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
               <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
-              {% for tag in se.outcome_tags %}
+              {% for tag in row.outcome_choices %}
               <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
               {% endfor %}
             </select>
@@ -101,14 +135,39 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
   <p class="syl-panel__hint">{{ p.hint }}</p>
 
   <div class="syl-methods">
-    {% for method in se.methods %}
+    {% for method in se.methods.catalog %}
     <button type="button" class="syl-method{% if method.active %} is-on{% endif %}"
-            data-syl-method="{{ method.label }}" {% if se.readonly %}disabled{% endif %}
+            data-syl-method="{{ method.value }}" {% if se.readonly %}disabled{% endif %}
             aria-pressed="{% if method.active %}true{% else %}false{% endif %}">
       <span class="syl-method__box" aria-hidden="true"></span>{{ method.label }}
     </button>
     {% endfor %}
   </div>
+
+  {% if se.methods.custom %}
+  {% comment %}Kataloqda olmayan metodlar — köhnə sistemdən köçürülmüş sərbəst
+  mətn. Əvvəllər redaktor onları RENDER ETMİRDİ, ona görə `collectMethod` ilk
+  autosave-də silirdi. İndi görünürlər; çipin GÖVDƏSİ klik qəbul etmir, yalnız
+  ayrıca «Çıxar» düyməsi vəziyyəti çevirir (təsadüfi silmə olmasın).{% endcomment %}
+  <div class="syl-methods__custom">
+    <p class="syl-methods__customhead">
+      <b>{% trans "Kataloqda olmayan metodlar" context "accounts.syllabus" %}</b>
+      <span class="syl-meta">{% trans "Köhnə sistemdən gəlib — mətn olduğu kimi saxlanılır" context "accounts.syllabus" %}</span>
+    </p>
+    <div class="syl-methods">
+      {% for method in se.methods.custom %}
+      <span class="syl-method syl-method--custom{% if method.active %} is-on{% endif %}"
+            data-syl-method="{{ method.value }}" data-syl-method-custom>
+        <span class="syl-method__text">{{ method.label }}</span>
+        <button type="button" class="syl-method__drop" data-syl-method-drop
+                {% if se.readonly %}disabled{% endif %}
+                data-t-drop="{% trans 'Siyahıdan çıxar' context 'accounts.syllabus' %}"
+                data-t-restore="{% trans 'Bərpa et' context 'accounts.syllabus' %}">{% if method.active %}{% trans "Siyahıdan çıxar" context "accounts.syllabus" %}{% else %}{% trans "Bərpa et" context "accounts.syllabus" %}{% endif %}</button>
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
   <div class="syl-field">
     <label for="syl-mnote">{% trans "Metodların tətbiqi barədə qeyd" context "accounts.syllabus" %}</label>
     <textarea id="syl-mnote" rows="3" class="syl-textarea" data-field="note" {% if se.readonly %}disabled{% endif %}

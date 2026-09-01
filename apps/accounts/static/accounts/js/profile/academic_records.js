@@ -142,7 +142,7 @@
                 // Nə keçib, nə kəsilib — imtahan çıxış balı yoxdur. Ayrıca qutu
                 // olmasa rəqəmlər cəmlənmir (tələbə × fənn sayı ilə uyğun gəlmir).
                 card(s.ungraded, T.ungraded, "muted") +
-                card(s.avg_gpa, T.avg_gpa);
+                card(s.avg_gpa || T.gpa_na, T.avg_gpa);
         }
 
         function skeleton() {
@@ -179,14 +179,17 @@
                         '<tr' + failCls + '>' +
                         '<td class="acr-td-no">' + (page + i + 1) + "</td>" +
                         '<td><b>' + esc(r.name) + '</b><br><span class="acr-uname">@' + esc(r.username) + "</span></td>" +
-                        '<td class="acr-clip" title="' + esc(r.program) + '">' + esc(r.program) + "</td>" +
+                        // title: ad + HƏR İKİ rəsmi şifr (cari + köhnə); xanada kompakt etiket.
+                        '<td class="acr-clip" title="' + esc(r.program_full || r.program) + '">' + esc(r.program) + "</td>" +
                         "<td>" + esc(r.group) + "</td>" +
                         '<td class="acr-num acr-strong">' + esc(r.credits_earned) + "</td>" +
                         '<td class="acr-num' + (r.fails > 0 ? " acr-bad" : "") + '">' + esc(r.fails) + "</td>" +
                         '<td class="acr-num' + (r.qb > 0 ? " acr-warn" : "") + '">' + esc(r.qb) + "</td>" +
                         '<td class="acr-num' + (r.exam25 > 0 ? " acr-warn" : "") + '">' + esc(r.exam25) + "</td>" +
                         '<td class="acr-num' + (r.ungraded > 0 ? " acr-muted" : "") + '">' + esc(r.ungraded) + "</td>" +
-                        '<td class="acr-num">' + esc(r.gpa) + "</td>" +
+                        // Boş ÜOMG = hesablana bilmir (köhnə sistemdə nəticə yoxdur) —
+                        // sıfır göstərmək «sıfır bal aldı» kimi oxunardı.
+                        '<td class="acr-num">' + (r.gpa ? esc(r.gpa) : "—") + "</td>" +
                         '<td><button type="button" class="acr-view js-acr-view" data-sid="' + esc(r.student_id) +
                         '" data-name="' + esc(r.name) + '"><i class="fas fa-eye"></i> ' + esc(T.view) + "</button></td></tr>"
                     );
@@ -327,6 +330,36 @@
             return '<div class="acr-reason is-ungraded"><i class="fas fa-circle-question"></i> ' + esc(T.ungraded_badge) + "</div>";
         }
 
+        // Köçürülmüş qiymət nişanı — ekranın qalan səthləri ilə EYNİ markup
+        // (`registrar/partials/_legacy_grade_mark.html`).  Burada şablon
+        // include edilə bilmir (sətirlər JSON-dan JS ilə qurulur), ona görə
+        // markup əl ilə təkrarlanır; CSS isə ORTAQDIR (`css/legacy_mark.css`),
+        // yəni görünüş bir yerdən idarə olunur.
+        //
+        // Qırmızı qeyd review statusundan asılı olmayan legacy-bal bildirişidir;
+        // VERIFIED statusu da daxil olmaqla server ``lg.warning``-i saxlayır.
+        function legacyMark(row) {
+            var lg = row.legacy;
+            if (!lg) return "";
+            var lines = [lg.label + " — " + lg.notice];
+            if (lg.source_system) lines.push(T.legacy_source + ": " + lg.source_system);
+            if (lg.source_reference) lines.push(T.legacy_ref + ": " + lg.source_reference);
+            if (lg.recorded_at) lines.push(T.legacy_date + ": " + lg.recorded_at);
+            if (lg.raw_entry) lines.push(T.legacy_raw_entry + ": " + lg.raw_entry);
+            if (lg.raw_exam) lines.push(T.legacy_raw_exam + ": " + lg.raw_exam);
+            if (lg.raw_resit) lines.push(T.legacy_raw_resit + ": " + lg.raw_resit);
+            if (lg.raw_final) lines.push(T.legacy_raw_final + ": " + lg.raw_final);
+            if (lg.review_notice) lines.push(lg.review_notice);
+            return (
+                '<span class="legacy-grade-indicators"><span class="legacy-mark' +
+                (lg.review_required ? " legacy-mark--unreviewed" : "") +
+                '" tabindex="0" role="img" aria-label="' + esc(lg.label) + '" title="' + esc(lines.join("\n")) +
+                '"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i></span>' +
+                (lg.warning ? '<strong class="legacy-grade-warning">' + esc(lg.warning) + "</strong>" : "") +
+                "</span>"
+            );
+        }
+
         function reasonBadge(row) {
             if (row.fail_reason === "qb")
                 return '<div class="acr-reason is-qb"><i class="fas fa-user-clock"></i> ' + esc(T.qb_badge) + "</div>";
@@ -365,7 +398,7 @@
                                 '<td class="acr-ta-left">' + esc(row.teacher) + "</td>" +
                                 "<td>" + esc(row.entry == null ? "—" : row.entry) + "</td>" +
                                 "<td>" + esc(row.exit == null ? "—" : row.exit) + "</td>" +
-                                "<td>" + (row.total == null ? "—" : "<b>" + esc(row.total) + "</b>") + "</td>" +
+                                "<td>" + (row.total == null ? "—" : "<b>" + esc(row.total) + "</b>") + legacyMark(row) + "</td>" +
                                 "<td>" + (row.letter ? '<span class="grade-' + esc(row.letter) + ' acr-letter">' + esc(row.letter) + "</span>" : "—") + "</td>" +
                                 "<td>" + statusCell(row) + "</td></tr>"
                             );

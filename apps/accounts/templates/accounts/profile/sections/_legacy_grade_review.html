@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}
+«Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» — İmtahan Mərkəzi bölməsi.
+
+Növbənin MƏNBƏYİ bazadakı sübut qatıdır (LegacyGradeFact + canlı FinalGrade
+güzgüsü) — kodda dondurulmuş sətir siyahısı YOXDUR, kateqoriyalar isə
+LegacyGradeMappingStatus enum-undan və faktın xam dəyərlərindən doğulur.
+
+İcazə: `final_score.entry` qərar/düzəliş verir, `journal.correct` yalnız oxu
+(bax rbac_sections.py). Yazı endpoint-i üçüncü dəfə fail-closed yoxlayır.
+
+Panel SPA-dır: server yalnız çərçivəni (bayraq + endpoint URL + sabit) verir.
+CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur), dinamik dəyər `data-*` ilə.
+⚠️ ÇOXSƏTİRLİ `{#…#}` komment sayılmır və UI-a sızır — burada `{% comment %}`.
+{% endcomment %}
+{% if 'legacy-grade-review' in allowed_sections %}
+<section class="profile-section-panel profile-section--legacy-review {% if active_section == 'legacy-grade-review' %}is-active{% endif %}"
+         data-profile-section-panel="legacy-grade-review"
+         data-source-url="{{ profile_base_url }}?section=legacy-grade-review">
+  {% include "accounts/partials/_legacy_grade_review_content.html" with s=legacy_grade_review_section %}
+</section>
+{% endif %}

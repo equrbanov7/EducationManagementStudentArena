@@ -150,11 +150,18 @@ def parse_filters(params, *, sort_options, default_page_size) -> PeopleFilters:
     )
 
 
-def search_q(query: str, prefix: str) -> Q:
+def search_q(query: str, prefix: str, *, extra=None) -> Q:
     """AND-of-ORs axtarış filtri (RİM `search.py` ilə eyni semantika).
 
     «Əliyev Elvin» → hər söz ad/soyad/ata adı/username/email/FİN sahələrindən
     HƏR HANSI BİRİNƏ uyğun gəlməlidir; söz sırası əhəmiyyətsizdir.
+
+    ``extra`` — kataloqa MƏXSUS əlavə uyğunluq (bir token alır, ``Q``/``Exists``
+    qaytarır). AXTARIŞ İNVARİANTI üçün lazımdır: tələbə kataloqu sətirdə ixtisas
+    ŞİFRİNİ göstərir, ona görə həmin şifr axtarışda da tapılmalıdır — amma
+    müəllim kataloqunda ixtisas anlayışı yoxdur, deməli sahə siyahısı ORTAQ
+    ``SEARCH_FIELDS``-ə yazıla bilməz. Token-başına OR olur ki, «Aysel 050401»
+    kimi qarışıq sorğu da işləsin.
     """
     tokens = [token for token in _clean_text(query, MAX_QUERY_LENGTH).split(" ") if token][:MAX_QUERY_TOKENS]
     combined = Q()
@@ -162,6 +169,8 @@ def search_q(query: str, prefix: str) -> Q:
         token_filter = Q()
         for field_name in SEARCH_FIELDS:
             token_filter |= Q(**{f"{prefix}{field_name}__icontains": token})
+        if extra is not None:
+            token_filter |= extra(token)
         combined &= token_filter
     return combined
 

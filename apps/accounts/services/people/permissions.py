@@ -34,6 +34,11 @@ PERM_VIEW_CONTACTS = "people.view_contacts"
 PERM_VIEW_DEMOGRAPHICS = "people.view_demographics"
 PERM_MANAGE_STATUS = "people.manage_status"
 PERM_MANAGE_TEACHER_ROLE = "people.manage_teacher_role"
+#: Tələbənin AKADEMİK qeydi (qrup köçürməsi + akademik status).
+#: QƏSDƏN ``PERM_MANAGE_STATUS``-dan ayrıdır: o, HESABI dayandırır (giriş
+#: hüququ), bu isə tələbənin akademik yerini dəyişir. Müəllim heç birini
+#: daşımır — səth ona ümumiyyətlə görünmür.
+PERM_MANAGE_ACADEMIC = "people.manage_academic"
 
 PEOPLE_PERMISSIONS = (
     PERM_VIEW_TEACHERS,
@@ -42,6 +47,7 @@ PEOPLE_PERMISSIONS = (
     PERM_VIEW_DEMOGRAPHICS,
     PERM_MANAGE_STATUS,
     PERM_MANAGE_TEACHER_ROLE,
+    PERM_MANAGE_ACADEMIC,
 )
 
 #: Bölmə açarı → onu açan «baxış» icazəsi.
@@ -88,6 +94,10 @@ class PeopleActor:
     @property
     def can_manage_teacher_role(self) -> bool:
         return self.has(PERM_MANAGE_TEACHER_ROLE)
+
+    @property
+    def can_manage_academic(self) -> bool:
+        return self.has(PERM_MANAGE_ACADEMIC)
 
     @property
     def granted_permissions(self) -> list:
@@ -165,6 +175,7 @@ def resolve_actor(request) -> PeopleActor:
 
 __all__ = [
     "PEOPLE_PERMISSIONS",
+    "PERM_MANAGE_ACADEMIC",
     "PERM_MANAGE_STATUS",
     "PERM_MANAGE_TEACHER_ROLE",
     "PERM_VIEW_CONTACTS",

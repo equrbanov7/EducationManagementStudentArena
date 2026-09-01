@@ -1,12 +1,18 @@
 """Kataloqun SORĞU BÜDCƏSİ və ƏMƏLLƏRİ.
 
-İki müqavilə kilidlənir:
+Üç müqavilə kilidlənir:
 
 1. **N+1 YOXDUR.** Sorğu sayı sətir sayı ilə ARTMAMALIDIR. 8 000+ hesablı real
    məlumat bazasında bir sətir üçün əlavə sorğu 25 sətirlik səhifəni 25 əlavə
    gediş-gəlişə çevirər. Test iki fərqli ölçüdə eyni sorğu sayını tələb edir.
 
-2. **Əməllər SCOPE-LUDUR.** Dekan öz fakültəsindən kənar hesabı dayandıra
+2. **MÜTLƏQ BÜDCƏ = 5 sorğu.** Yalnız «artmır» demək azdır: sabit qalan, amma
+   9-a sıçramış say da reqressiyadır. Tələbə idarəetmə səthi (``psm-*`` çekməcəsi)
+   QƏSDƏN kataloqun ÜSTÜNDƏ, AYRI endpoint-lərdə oturur — siyahı yoluna bir
+   sorğu belə əlavə etməməlidir. Beş sorğu: üzvlük/scope həlli · COUNT ·
+   səhifə sətirləri · struktur vahidləri · vahid adları (ata-baba həlli).
+
+3. **Əməllər SCOPE-LUDUR.** Dekan öz fakültəsindən kənar hesabı dayandıra
    BİLMƏMƏLİDİR — RİM qatı bunu bilmir (o, yalnız rütbə/tenant yoxlayır), ona
    görə qapı kataloq qatındadır və məhz burada sınanır.
 """
@@ -34,6 +40,12 @@ def _request(user, organization):
 
 def _filters(**params):
     return people.parse_filters(params, sort_options=TEACHER_SORT_OPTIONS, default_page_size=DEFAULT_PAGE_SIZE)
+
+
+#: Bir kataloq səhifəsinin MÜTLƏQ sorğu büdcəsi. Rəqəmi qaldırmaq üçün əvvəlcə
+#: yeni sorğunun niyə qaçılmaz olduğu izah edilməlidir — «testi düzəltmək» kifayət
+#: deyil (bax modul başlığı, 2-ci müqavilə).
+LIST_QUERY_BUDGET = 5
 
 
 class PeopleQueryBudgetTest(TestCase):
@@ -84,6 +96,35 @@ class PeopleQueryBudgetTest(TestCase):
             "Tələbə siyahısında N+1: sətir sayı artdıqca sorğu sayı da artdı.\n"
             + "\n".join(query["sql"][:160] for query in large.captured_queries),
         )
+
+    def test_list_pages_stay_within_the_absolute_query_budget(self):
+        """Hər iki kataloq TAM ``LIST_QUERY_BUDGET`` sorğu ilə qurulur.
+
+        «Artmır» testi sabit, amma şişmiş sayı tutmur; bu test rəqəmin ÖZÜNÜ
+        kilidləyir. Tələbə idarəetmə çekməcəsi kataloqun üstündə AYRI
+        endpoint-lərdən (kart / qrup axtarışı / ön baxış) qidalanır, ona görə
+        siyahı yolunun büdcəsi ona görə dəyişməməlidir.
+        """
+        actor = self._actor(self.fx.rector)
+        filters = _filters(page_size=100)
+        for label, builder in (
+            ("Tələbə", people.build_students_page),
+            ("Müəllim", people.build_teachers_page),
+        ):
+            with self.subTest(catalog=label):
+                with bypass_rls():
+                    # Isindirmə: icazə/etiket keşləri ilk çağırışda dolur, yoxsa
+                    # ölçmə növbə sırasından asılı olardı.
+                    builder(actor=actor, filters=filters)
+                    with CaptureQueriesContext(connection) as captured:
+                        builder(actor=actor, filters=filters)
+                self.assertEqual(
+                    len(captured.captured_queries),
+                    LIST_QUERY_BUDGET,
+                    f"{label} kataloqunun sorğu büdcəsi pozuldu "
+                    f"({len(captured.captured_queries)} ≠ {LIST_QUERY_BUDGET}).\n"
+                    + "\n".join(query["sql"][:160] for query in captured.captured_queries),
+                )
 
 
 class PeopleActionScopeTest(TestCase):

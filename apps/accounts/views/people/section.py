@@ -19,6 +19,8 @@ CONTEXT MÜQAVİLƏSİ (UI agenti buna söykənir — açar adları dəyişməz)
     can_view_demographics   bool  — cins/yaş sütunu VƏ filtrləri
     can_manage_status       bool  — «hesabı dayandır / bərpa et» düymələri
     can_manage_teacher_role bool  — «müəllim statusu ver / çıxar» düymələri
+    can_manage_academic     bool  — «Tələbəni idarə et» düyməsi + idarə paneli
+                                    (yalnız tələbə kataloqunda mənalıdır)
     granted_permissions     [{"key": str, "label": str}]  — aktorun açarları
 
     list_url                str   — GET  cədvəl datası
@@ -27,6 +29,10 @@ CONTEXT MÜQAVİLƏSİ (UI agenti buna söykənir — açar adları dəyişməz)
     options_url             str   — GET  filtr açılışları + səbət sayları
     action_url              str   — POST əməllər
     detail_url_template     str   — GET  detal (içindəki "0" hədəf id ilə əvəzlənir)
+    card_url_template       str   — GET  tələbə idarəetmə kartı ("0" → user id)
+    groups_url              str   — GET  hədəf qrup axtarışı (type-ahead, səhifəli)
+    preview_url_template    str   — GET  köçürmə ön baxışı (UUID «0» → record id)
+    academic_status_options [{"key": str, "label": str}] — status seçimləri
 
     default_page_size       int
     max_page_size           int
@@ -89,6 +95,22 @@ actions{block, unblock, grant_teacher, revoke_teacher}}.
 {block, unblock, grant_teacher, revoke_teacher}. Cavab: ``{ok, action, result}``
 və ya ``{ok: false, error, message}`` (403/404/409/400). ``block`` və
 ``revoke_teacher`` üçün ``reason`` MƏCBURİDİR (≥ ``min_reason_length``).
+
+``POST action_url`` — AKADEMİK əməllər (hədəf ``record_id``, ``user_id`` DEYİL):
+
+* ``{action: "transfer_group", record_id, group_id, reason}`` — ``reason``
+  HƏMİŞƏ məcburidir; cavab ``{moved, created, from_group, to_group}``.
+* ``{action: "set_academic_status", record_id, status, reason}`` — ``status`` ∈
+  {enrolled, academic_leave, expelled, graduated}; ``expelled`` və
+  ``academic_leave`` üçün ``reason`` məcburidir.
+
+``GET card_url`` → ``{has_access, can_manage, person{…}, records[…], period,
+status_options[]}``; ``records[]`` sətri: id, program_label, program_code,
+group_name, faculty_name, kafedra_name, admission_year, course_label, status,
+status_label, status_tone, enrollments[].
+
+``GET preview_url?group=<uuid>`` → ``{ok, from_group, to_group, rows[], totals{},
+warnings[], blocking[]}`` — bax ``apps/accounts/services/people/academic.py``.
 """
 
 from __future__ import annotations
@@ -97,6 +119,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
 from apps.accounts.services import people
+from apps.accounts.services.people.academic import STATUS_LABELS as ACADEMIC_STATUS_LABELS
 from apps.accounts.services.people.actions import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.people.constants import AGE_UNKNOWN, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from apps.organizations.permissions import get_permission_label as permission_label
@@ -153,7 +176,9 @@ def _columns_for(kind, actor):
             continue
         if column == "demographics" and not actor.can_view_demographics:
             continue
-        if column == "actions" and not (actor.can_manage_status or actor.can_manage_teacher_role):
+        if column == "actions" and not (
+            actor.can_manage_status or actor.can_manage_teacher_role or actor.can_manage_academic
+        ):
             continue
         visible.append(column)
     return visible
@@ -174,6 +199,10 @@ def build_people_section(request, kind: str) -> dict:
             "can_view_demographics": actor.can_view_demographics,
             "can_manage_status": actor.can_manage_status,
             "can_manage_teacher_role": actor.can_manage_teacher_role,
+            # İdarəetmə paneli YALNIZ tələbə kataloqunda mənalıdır: müəllimin
+            # akademik qeydi yoxdur, ona görə müəllim kataloqunda bayraq həmişə
+            # False-dur (düymə render edilmir, endpoint onsuz da 404 verir).
+            "can_manage_academic": actor.can_manage_academic and kind == "students",
             "granted_permissions": [{"key": key, "label": permission_label(key)} for key in actor.granted_permissions],
             "list_url": reverse("accounts:people_list", kwargs={"kind": kind}),
             "analytics_url": reverse("accounts:people_analytics", kwargs={"kind": kind}),
@@ -181,6 +210,12 @@ def build_people_section(request, kind: str) -> dict:
             "options_url": reverse("accounts:people_options", kwargs={"kind": kind}),
             "action_url": reverse("accounts:people_action"),
             "detail_url_template": reverse("accounts:people_detail", kwargs={"user_id": 0}),
+            "card_url_template": reverse("accounts:people_student_card", kwargs={"user_id": 0}),
+            "groups_url": reverse("accounts:people_academic_groups"),
+            "preview_url_template": reverse(
+                "accounts:people_transfer_preview",
+                kwargs={"record_id": "00000000-0000-0000-0000-000000000000"},
+            ),
             "default_page_size": DEFAULT_PAGE_SIZE,
             "max_page_size": MAX_PAGE_SIZE,
             "min_reason_length": MIN_REASON_LENGTH,
@@ -190,6 +225,7 @@ def build_people_section(request, kind: str) -> dict:
             "gender_options": _options(("male", "female", "unspecified"), _GENDER_LABELS),
             "age_unknown_key": AGE_UNKNOWN,
             "age_unknown_label": _AGE_UNKNOWN_LABEL,
+            "academic_status_options": [{"key": key, "label": label} for key, label in ACADEMIC_STATUS_LABELS.items()],
             "columns": _columns_for(kind, actor),
         }
     }

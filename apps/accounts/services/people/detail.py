@@ -52,8 +52,11 @@ def _academic_rows(user, organization, *, limit=MAX_DETAIL_ROWS):
     )
     return [
         {
-            "program": record.program.display_label if record.program_id else "",
-            "program_code": record.program.official_code if record.program_id else "",
+            # Ad ŞİFRSİZ + şifr ayrıca `program_code` nişanında (eyni naxış:
+            # `academic.py`, `context_builder/_helpers.py`) — birləşmiş
+            # `display_label` versək ilk istehlakçı şifri iki dəfə çap edərdi.
+            "program": record.program.name if record.program_id else "",
+            "program_code": record.program.official_code_pair if record.program_id else "",
             "group": record.group.name if record.group_id else "",
             "admission_year": record.admission_year,
             "status": record.status,

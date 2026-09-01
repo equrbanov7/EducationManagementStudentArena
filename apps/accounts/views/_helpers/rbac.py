@@ -212,6 +212,12 @@ def _role_capabilities(user, profile):
         # Semestr sonu TOPLU jurnal bağlama (RİM). Köhnə `grade.approve_chair` /
         # `grade.approve_final` cütünü əvəz edir — təsdiq zənciri ləğv olunub.
         can_close_journals = get_permission_scope(user, active_organization, "journal.close").has_structure_access
+        # Jurnal siyahısının idarəsi (alt qrupdan tələbə əlavə/geri götürmə) —
+        # koordinator/dekanlıq. Bu açarı daşıyan aktor jurnal iş sahəsinə çata
+        # bilməlidir (əks halda düymə heç vaxt görünmür).
+        can_manage_journal_roster = get_permission_scope(
+            user, active_organization, "journal.roster"
+        ).has_structure_access
         # Kağız (yazılı/praktiki) imtahan balının əl ilə daxil edilməsi — İmtahan
         # Mərkəzi səthi. Rol ADINDAN deyil, `final_score.entry` açarından gəlir.
         can_enter_exam_scores = get_permission_scope(
@@ -236,6 +242,7 @@ def _role_capabilities(user, profile):
     else:
         can_manage_registrar = can_close_journals = can_view_unit_analytics = False
         can_enter_exam_scores = False
+        can_manage_journal_roster = False
         can_search_directory = False
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
@@ -450,7 +457,7 @@ def _role_capabilities(user, profile):
         allowed_sections.update({"my-schedule", "academic-calendar"})
         # Müəllim/admin: sidebar linki jurnal iş sahəsini YENİ TABDA (/jurnal/) açır.
         # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
-        if is_teacher or is_org_admin or is_superadmin or is_student:
+        if is_teacher or is_org_admin or is_superadmin or is_student or can_manage_journal_roster:
             allowed_sections.add("my-journal")
         if can_close_journals:
             allowed_sections.add("journal-close")
@@ -562,6 +569,7 @@ def _role_capabilities(user, profile):
         # Grade-approval chain (U7.2): permission-scope əsaslı (yuxarıda hesablanır);
         # köhnə rol-əsaslı ifadə nav↔view uyğunsuzluğu yaradırdı.
         "can_close_journals": can_close_journals,
+        "can_manage_journal_roster": can_manage_journal_roster,
         "can_enter_exam_scores": can_enter_exam_scores,
         "can_search_directory": can_search_directory,
         "can_view_owned_learning": can_view_owned_learning,

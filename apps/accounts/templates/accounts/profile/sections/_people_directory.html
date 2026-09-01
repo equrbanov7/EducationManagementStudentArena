@@ -30,7 +30,9 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
      data-can-view-contacts="{% if people_section.can_view_contacts %}1{% else %}0{% endif %}"
      data-can-view-demographics="{% if people_section.can_view_demographics %}1{% else %}0{% endif %}"
      data-can-manage-status="{% if people_section.can_manage_status %}1{% else %}0{% endif %}"
-     data-can-manage-teacher-role="{% if people_section.can_manage_teacher_role %}1{% else %}0{% endif %}">
+     data-can-manage-teacher-role="{% if people_section.can_manage_teacher_role %}1{% else %}0{% endif %}"
+     data-can-manage-academic="{% if people_section.can_manage_academic %}1{% else %}0{% endif %}"
+     data-i18n-manage="{% trans 'İdarə et' context 'accounts.people' %}">
 
   <div class="people__head">
     <p class="people__intro">
@@ -195,7 +197,7 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
             <th scope="col">{% trans "Cins / yaş" context "accounts.people" %}</th>
           {% endif %}
           <th scope="col">{% trans "Status" context "accounts.people" %}</th>
-          {% if people_section.can_manage_status or people_section.can_manage_teacher_role %}
+          {% if people_section.can_manage_status or people_section.can_manage_teacher_role or people_section.can_manage_academic %}
             <th scope="col">{% trans "Əməllər" context "accounts.people" %}</th>
           {% endif %}
         </tr>
@@ -277,4 +279,10 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
       {% trans "Bağla" context "accounts.people" %}
     </button>
   </div>
+
+  {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ `people.manage_academic`
+  daşıyan aktor üçün. Kataloqun ÜSTÜNDƏ oturur, ikinci siyahı yaratmır.{% endcomment %}
+  {% if people_section.can_manage_academic %}
+    {% include "accounts/profile/sections/_people_student_manager.html" %}
+  {% endif %}
 </div>

@@ -3,6 +3,7 @@
 from django.utils.translation import gettext as _
 
 from core.constants import OrgUnitType
+from core.staff_position import is_placeholder_role_name
 from core.tenancy import restore_request_organization_from_profile
 
 from ....models import ProfileRole
@@ -11,6 +12,12 @@ from ..constants import PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK, PR
 
 
 def _build_effective_user_roles(user, profile):
+    """Profil başlığında göstəriləcək rol nişanları.
+
+    ⚠️ Doldurucu ``member`` rolu BURAYA DÜŞMÜR — vəzifəsiz istifadəçinin adının
+    yanında «Üzv» yazılmır, sahə boş qalır (bax `core.staff_position`).
+    """
+
     role_names = []
 
     if getattr(user, "is_superuser", False):
@@ -26,6 +33,7 @@ def _build_effective_user_roles(user, profile):
     if fallback_role_name in PROFILE_ROLE_LABELS and fallback_role_name not in role_names:
         role_names.append(fallback_role_name)
 
+    role_names = [role_name for role_name in role_names if not is_placeholder_role_name(role_name)]
     role_names.sort(key=lambda role_name: (ProfileRole.LEVELS.get(role_name, 0), role_name), reverse=True)
     return [
         {
@@ -34,6 +42,21 @@ def _build_effective_user_roles(user, profile):
         }
         for role_name in role_names
     ]
+
+
+def _build_primary_position_label(profile, user_roles):
+    """Profil kartındakı «Vəzifə» sətri.
+
+    Zəncir: ``UserProfile.staff_position`` → ən yüksək real rol → "".
+    Doldurucu rol (``member``) `user_roles`-a onsuz da düşmür, ona görə burada
+    əlavə süzgəc lazım deyil.  Heç nə yoxdursa BOŞ sətir qayıdır — səthdə
+    «Üzv»/«İstifadəçi» kimi doldurucu YAZILMIR.
+    """
+
+    staff_position = (getattr(profile, "staff_position", "") or "").strip()
+    if staff_position:
+        return staff_position
+    return str(user_roles[0]["label"]) if user_roles else ""
 
 
 def _restore_profile_org_context(request, profile, active_section):
@@ -244,8 +267,9 @@ def build_student_structure_levels(record):
     sətir "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ı idi — çirkin
     görünürdü. İndi hər səviyyə öz kartındadır.
 
-    İXTİSAS AYRICA ``record.program``-dan qurulur (ad + ``Program.official_code``
-    — RƏSMİ dövlət ixtisas kodu; daxili ``Program.code`` köçürmənin ``MYEDU-*``
+    İXTİSAS AYRICA ``record.program``-dan qurulur (ad + ``official_code_pair``
+    — HƏR İKİ nəslin RƏSMİ dövlət şifri: cari NK 503 şifri VƏ köhnə 050/060
+    şifri, hansı varsa; daxili ``Program.code`` köçürmənin ``MYEDU-*``
     açarıdır və istifadəçiyə HEÇ VAXT göstərilmir),
     ``record.group``-un əcdad zəncirindəki specialty node-a ETİBAR EDİLMİR:
     ``Program.specialty_unit`` hər tenant-da təyin olunmaya bilər və bəzi
@@ -253,13 +277,13 @@ def build_student_structure_levels(record):
     [[project_group_sector_variability]] — akademik struktur tenant-a görə
     dəyişir, sərt 4-səviyyəli fərziyyə YOXDUR). Zəncirdə specialty node
     rast gəlinsə, təkrarlanmasın deyə İXTİSAS kartı ilə əvəz olunur (adı və
-    kodu proqramdan gəlir), YOX YERİNƏ isə Qrup-dan əvvəl əlavə olunur.
+    şifri proqramdan gəlir), YOX YERİNƏ isə Qrup-dan əvvəl əlavə olunur.
 
     Mövcud olmayan səviyyə üçün BOŞ KART göstərilmir (gizlədilir) — çünki bu
     səviyyə THIS tələbənin strukturunda sadəcə YOXDUR (unset deyil, mövcud
     deyil); "—" ilə göstərmək "səviyyə var amma dəyəri boşdur" mənasını verib
-    yanlış təsəvvür yaradardı. Kod yoxdursa (``Program.official_code`` hələ
-    doldurulmayıbsa) yalnız kod nişanı gizlədilir, kart özü qalır.
+    yanlış təsəvvür yaradardı. Şifr yoxdursa (hər iki sütun hələ
+    doldurulmayıbsa) yalnız şifr nişanı gizlədilir, kart özü qalır.
     """
     chain = []
     if record.group_id:
@@ -275,7 +299,7 @@ def build_student_structure_levels(record):
                     unit_type=OrgUnitType.SPECIALTY,
                     label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
                     value=record.program.name,
-                    code=(record.program.official_code or "").strip(),
+                    code=record.program.official_code_pair,
                 )
             )
             continue
@@ -298,7 +322,7 @@ def build_student_structure_levels(record):
                 unit_type=OrgUnitType.SPECIALTY,
                 label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
                 value=record.program.name,
-                code=(record.program.official_code or "").strip(),
+                code=record.program.official_code_pair,
             ),
         )
 

@@ -47,6 +47,17 @@
     {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
     {% endif %}
+    {% if 'my-results' in allowed_sections %}
+    {% comment %}
+      «Nəticələrim»in akademik kartı.  ⚠️ Bu fayl yarandığı gündən (5086a02e)
+      HEÇ BİR şablondan linklənməmişdi — yəni `.result-academic-*` /
+      `.result-legacy-*` markup-ı canlıda tamamilə ÜSLUBSUZ render olunurdu
+      (40 selektorun heç biri başqa CSS-də təkrarlanmır, brauzerdə yoxlanılıb:
+      panelin fonu şəffaf, `--ems-danger-strong` xəbərdarlığı isə qara idi).
+      Bölmə ilə şərtlənir — qonşu bölmə CSS-ləri ilə eyni konvensiya.
+    {% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20260901-notice">
+    {% endif %}
     {% if 'my-subjects' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260705-1">
     {% endif %}
@@ -62,6 +73,26 @@
     {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260830-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
+    {% endif %}
+    {% if 'people-students' in allowed_sections %}
+    {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ tələbə kataloqunda mənalıdır
+    (müəllimin akademik qeydi yoxdur). Markup-ın özü əlavə olaraq
+    `people_section.can_manage_academic` qapısındandır; burada isə üslub
+    icazəsiz istifadəçiyə boş yerə göndərilməsin deyə bölmə ilə şərtlənir.
+
+    ⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: `people_academic.css`
+    (çərçivə) ƏVVƏL, `people_academic_actions.css` (ön baxış/status/düymələr)
+    SONRA — ikinci fayl birincinin mobil qaydalarını qəsdən tamamlayır.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_academic.css' %}?v=20260831-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_academic_actions.css' %}?v=20260831-1">
+    {% endif %}
+    {% if 'teaching-handover' in allowed_sections %}
+    {% comment %}Fənn təhvili — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
+    görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
+    əvvəl səth (addım kartları, süzgəclər, cədvəl), sonra üst qatlar (düymələr,
+    modallar, mobil override-lar).{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260831-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover_dialog.css' %}?v=20260831-1">
     {% endif %}
     {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
     {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
@@ -79,6 +110,10 @@
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20260830-3">
+    {% comment %}Köçürülmüş məzmunun səthi (kataloqdankənar metod çipləri, plandan
+    artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda
+    panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_carryover.css' %}?v=20260831-carry">
     {% endif %}
     {% if 'syllabus-review' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review.css' %}?v=20260830-3">
@@ -94,7 +129,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
-    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260721-teach">
+    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% comment %}Tələbənin «Sillabusa bax» paneli — jurnalın tam səhifə variantı
     ilə EYNİ stil faylı (apps/registrar/static/registrar/css/syllabus_view.css).{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
@@ -115,7 +150,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,teaching-handover,legacy-grade-review"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -194,6 +229,8 @@
                 {% include "accounts/profile/sections/_people_teachers.html" %}
             {% elif active_section == "people-students" and 'people-students' in allowed_sections %}
                 {% include "accounts/profile/sections/_people_students.html" %}
+            {% elif active_section == "teaching-handover" and 'teaching-handover' in allowed_sections %}
+                {% include "accounts/profile/sections/_teaching_handover.html" %}
             {% elif active_section == "syllabus-list" and 'syllabus-list' in allowed_sections %}
                 {% include "accounts/profile/sections/_syllabus_list.html" %}
             {% elif active_section == "syllabus-editor" and 'syllabus-editor' in allowed_sections %}
@@ -252,6 +289,8 @@
                 {% include "accounts/profile/sections/_kollokvium_windows.html" %}
             {% elif active_section == "exam-score-entry" and 'exam-score-entry' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_score_entry.html" %}
+            {% elif active_section == "legacy-grade-review" and 'legacy-grade-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_legacy_grade_review.html" %}
             {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_chance.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
@@ -373,12 +412,29 @@ hadisəsinə qulaq asır və kataloqun ilk yüklənməsini ötürməməlidir (ye
 <script src="{% static 'accounts/js/profile/people_analytics.js' %}?v=20260830-1"></script>
 <script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260830-2"></script>
 {% endif %}
+{% if 'people-students' in allowed_sections %}
+{% comment %}Tələbə idarəetmə çekməcəsi. Saf render alt modulu (ön baxış cədvəli)
+əsas moduldan ƏVVƏL yüklənir; əsas modul onu `window.EMSPeopleAcademicPreview`
+üzərindən null-safe çağırır, ona görə sıra pozulsa da səhifə çökmür.
+
+Hər iki fayl `[data-psm-root]` yoxdursa heç nə etmir — icazəsi olmayan
+istifadəçidə markup onsuz da render olunmur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/people_academic_preview.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/people_academic.js' %}?v=20260831-1"></script>
+{% endif %}
+{% if 'teaching-handover' in allowed_sections %}
+{% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
+`window.EMSHandoverRender` üzərindən null-safe oxuyur, ona görə sıra pozulsa da
+səhifə çökmür — sadəcə bölmə init olunmur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/teaching_handover_render.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/teaching_handover.js' %}?v=20260831-1"></script>
+{% endif %}
 {% if 'syllabus-list' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
 {% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —
 mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
-<script src="{% static 'accounts/js/profile/syllabus_editor_fields.js' %}?v=20260830-1"></script>
-<script src="{% static 'accounts/js/profile/syllabus_editor.js' %}?v=20260830-1"></script>
+<script src="{% static 'accounts/js/profile/syllabus_editor_fields.js' %}?v=20260831-carry"></script>
+<script src="{% static 'accounts/js/profile/syllabus_editor.js' %}?v=20260831-carry"></script>
 {% endif %}
 {% if 'syllabus-review' in allowed_sections %}
 {% comment %}Panel render-i mühərrikdən ƏVVƏL yüklənir — mühərrik init anında
@@ -412,8 +468,8 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% if 'my-journal' in allowed_sections or 'my-schedule' in allowed_sections or 'journal-close' in allowed_sections %}
 <script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
-<script src="{% static 'registrar/js/correction_history.js' %}?v=20260719-corr" nonce="{{ request.csp_nonce }}"></script>
-<script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260720-bsperiod" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20260830-syl1"></script>
 {% endif %}
 {% if 'role-assignment' in allowed_sections %}

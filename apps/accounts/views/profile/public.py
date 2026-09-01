@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_safe
 
 from core.permissions import is_superadmin_user
+from core.staff_position import resolve_position_label
 from core.tenancy import get_request_organization
 
 from ... import profile_hooks
@@ -116,13 +117,24 @@ def public_user_profile(request, username):
     if _viewer_can_see_contact(request, profile_user):
         contact_phones = [phone for phone in (profile.phone, profile.phone_secondary) if (phone or "").strip()]
 
+    admin_membership = _admin_membership_for_viewer(request, profile_user)
+    # ⚠️ Vəzifə zənciri: Membership.title → UserProfile.staff_position → real rol.
+    # Doldurucu «Üzv» rolu YAZILMIR — sətir tamamilə gizlənir.
+    admin_position_label = resolve_position_label(
+        title=getattr(admin_membership, "title", "") or "",
+        staff_position=(profile.staff_position or ""),
+        role_name=getattr(getattr(admin_membership, "role", None), "name", "") or "",
+        role_label=getattr(getattr(admin_membership, "role", None), "display_name", "") or "",
+    )
+
     context = {
         "profile_user": profile_user,
         "profile": profile,
         "display_name": display_name,
         "profile_bio": (profile.bio or "").strip(),
         "profile_location": (profile.location or "").strip(),
-        "admin_membership": _admin_membership_for_viewer(request, profile_user),
+        "admin_membership": admin_membership,
+        "admin_position_label": admin_position_label,
         "academic_display_groups": academic_profile.display_groups_for(profile_user),
         "contact_phones": contact_phones,
         "is_self_preview": is_self_preview,

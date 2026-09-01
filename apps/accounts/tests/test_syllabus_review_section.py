@@ -313,6 +313,27 @@ class SyllabusReviewSectionTest(TestCase):
         # Tətbiq olunmayan mərhələ «aktiv» kimi göstərilmir.
         self.assertIn("tətbiq olunmur", html)
 
+    def test_coverage_tab_shows_the_official_program_code(self):
+        """«Əhatə» tabında ixtisasın yanında rəsmi şifr GÖRÜNÜR.
+
+        Bloker idi: tab yalnız ixtisas adını çap edirdi. Burada həm CƏDVƏL
+        nişanı (``syl-code``), həm də ondan qidalanan VAHİD FİLTRİ açılışı
+        yoxlanılır — ikisi eyni etiket mənbəyindən gəlir, ona görə birinin
+        düzəlib o birinin unudulması mümkün olmasın.
+        """
+        program = self.stack["program"]
+        program.name = "Dünya iqtisadiyyatı"
+        program.official_code = ""
+        # Yalnız KÖHNƏ şifr — cari təsnifatda ləğv olunmuş ixtisas.
+        program.legacy_official_code = "050401"
+        program.save(update_fields=["name", "official_code", "legacy_official_code"])
+
+        html = self._html(self.chair, tab="coverage")
+
+        self.assertIn('<span class="syl-code">050401</span>', html)
+        # Filtr açılışı da şifrli etiketi göstərir.
+        self.assertIn("Dünya iqtisadiyyatı · 050401", html)
+
     def test_no_inline_style_or_script_is_emitted_by_the_section(self):
         """CSP: şablonda inline CSS/JS QADAĞANDIR (yalnız json_script istisnadır)."""
         html = self._html(self.chair)
