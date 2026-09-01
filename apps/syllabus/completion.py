@@ -153,7 +153,23 @@ def _check_week(data, plan_hours, issues) -> bool:
         issues.append(
             Issue(SectionKey.WEEK.value, "week.too_few_topics", {"min": MIN_FILLED_WEEKS, "have": len(filled)})
         )
+    # Saat balansı YALNIZ tədris planı saat bölgüsü verəndə yoxlanılır.
+    #
+    # `plan_hours` boş olanda («{}») əvvəllər hər növ üçün `expected = 0`
+    # alınırdı; halbuki aşağıdakı `no_hour` qaydası dolu hər mövzudan ən azı
+    # 1 saat TƏLƏB EDİR.  İki qayda bir-birini istisna edirdi, yəni plan
+    # bölgüsü olmayan sillabus HEÇ VAXT `week` bölməsini bağlaya bilmirdi
+    # → tamamlanma 100%-ə çatmır → təsdiqə göndərilə bilmir.
+    # Bu, müəllimin sıfırdan yaratdığı hər yeni qaralamaya aid idi
+    # (`api.py::_do_create` `plan_hours={}` ötürür, çünki `CourseOffering`
+    # yalnız `lesson_hours` cəmini daşıyır, növ üzrə bölgünü yox).
+    #
+    # Doğru semantika: «plan varsa ona bərabər olsun», «plan yoxdursa
+    # məhdudiyyət də yoxdur».  Plan bölgüsü modelləşəndə (apps/workload ↔
+    # apps/syllabus müqaviləsi) bu şərt öz-özünə yenidən işə düşür.
     for kind in LESSON_HOUR_KINDS:
+        if not _int((plan_hours or {}).get(kind)):
+            continue
         expected = _int((plan_hours or {}).get(kind))
         if totals[kind] != expected:
             ok = False

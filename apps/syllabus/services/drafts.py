@@ -98,6 +98,45 @@ def recompute_completion(version, *, persist: bool = True):
     return report
 
 
+#: Dosye göstəricisinin seçim sırası — «üzərində işlənən / ən son versiya».
+#: Model iki unikal məhdudiyyət daşıyır: bir dosyedə YALNIZ BİR açıq və YALNIZ
+#: BİR təsdiqlənmiş versiya ola bilər, ona görə ilk iki addım TƏK nəticə verir.
+def resolve_pointer_versions(syllabus):
+    """``(current_version, approved_version)`` — YALNIZ statusdan çıxarılır.
+
+    Sıra: açıq (qərar gözləyən) versiya → qüvvədə olan təsdiqlənmiş versiya →
+    ən böyük nömrəli versiya.  Bu, ``offerings.offering_syllabus_state``-in
+    banner seçimi ilə EYNİ sıradır; fərq yalnız odur ki, orada oxunur, burada
+    dosyenin göstəricisinə yazılır.
+
+    ⚠️ ARXİVLƏNMİŞ versiya heç vaxt ``current_version`` OLA BİLMƏZ (dosyedə
+    arxivlənməmiş versiya varsa): ``current_version`` siyahının, redaktorun və
+    ``coverage`` hesabatının oxuduğu göstəricidir, arxiv pilləsi isə «bu
+    versiya bir vaxt qüvvədə idi» deməkdir.  Arxivlənmiş versiyaya ilişən
+    göstərici dosyeni bütövlükdə «Arxivlənib» kimi göstərir.
+    """
+    versions = list(syllabus.versions.order_by("-major", "-minor"))
+    open_version = next((row for row in versions if row.status in OPEN_STATUSES), None)
+    approved = next((row for row in versions if row.status == SyllabusStatus.APPROVED.value), None)
+    return (open_version or approved or (versions[0] if versions else None)), approved
+
+
+def refresh_pointers(syllabus):
+    """Dosyenin iki göstəricisini versiyaların STATUSU ilə uzlaşdırır.
+
+    Status dəyişən HƏR yolun sonunda çağırılmalıdır.  Yazı ŞƏRTSİZDİR: çağıran
+    ``syllabus`` obyekti çox vaxt keçiddən ƏVVƏL yüklənib, yəni onun
+    ``*_version_id`` sahələri köhnədir — «dəyişibsə yaz» optimizasiyası məhz o
+    köhnə dəyərə baxıb yazını buraxardı.  Bir ``UPDATE`` onsuz da əvvəlki
+    davranışın qiymətidir və ``updated_at``-ə (auto_now) toxunmur.
+    """
+    current, approved = resolve_pointer_versions(syllabus)
+    Syllabus.objects.filter(pk=syllabus.pk).update(current_version=current, approved_version=approved)
+    syllabus.current_version = current
+    syllabus.approved_version = approved
+    return current
+
+
 @transaction.atomic
 def create_draft(
     *,
@@ -253,10 +292,38 @@ class SectionConflict(TransitionDenied):
 
 @transaction.atomic
 def save_section(*, version, section_id: str, data: dict, actor, expected_revision=None, request=None):
-    """Bölmə autosave (PATCH) — optimistik kilid ilə.
+    """Bölmə autosave (**PATCH**) — optimistik kilid ilə.
 
     ``expected_revision`` verilibsə və serverdəki ``revision`` ondan fərqlidirsə
     ``SectionConflict`` atılır; redaktor bunu ``conflict`` banneri kimi göstərir.
+
+    ⚠️ Yazı BÜTÖV ƏVƏZLƏMƏ DEYİL — göndərilən açarlar birləşdirilir
+    =============================================================
+    Səth adı «PATCH»dir, davranış isə PUT idi: ``row.data = data or {}``
+    göndərilməyən HƏR açarı silirdi.  Bu, sübutlu data itkisi idi:
+
+    * ``create_next_version``/``copy_from_previous`` bölmə məzmununu OLDUĞU
+      KİMİ irs alır, yəni köçürülmüş sillabusun ``assess.note`` (canlı: 5,893
+      sillabus), ``assess.exam_questions`` (685 uniqid), ``info.welcome``,
+      ``info.research_interests``, ``info.certificates``, ``info.language`` və
+      ``info.lesson_hours`` sahələri yeni qaralamaya keçir;
+    * bugünkü redaktorun həmin sahələr üçün **input-u yoxdur**
+      (``legacy_syllabus_*_unsurfaced`` kodları məhz bunu sayır), ona görə
+      autosave gövdəsi onları DAŞIMIR;
+    * nəticədə müəllimin İLK avtosave-i onları silirdi və növbəti versiya
+      təsdiqlənəndə itki TƏLƏBƏNİN ekranına çatırdı.
+
+    Ona görə birləşmə (merge) EDİLİR: yalnız göndərilən açarlar yenilənir,
+    göndərilməyən açar toxunulmaz qalır.  **Silmək niyyəti yox olmur** — açar
+    AÇIQ boş dəyərlə (``""``, ``[]``, ``{}``, ``0``) göndərilir, o da yazılır.
+    Bu istiqamət qəsdən seçildi: sahə sxeminə gələcəkdə əlavə olunan hər açar
+    avtomatik qorunur, halbuki «redaktor hər sahəni toplasın» yolu hər yeni
+    sahədə YENİDƏN unudula bilər.
+
+    ⚠️ Redaktor tərəfində tamamlayıcı qayda: panel öz DOM-unda olmayan açarı
+    UYDURMAMALIDIR.  ``collectAssess`` ``note`` üçün input olmadığı halda
+    ``note: ""`` göndərirdi — açıq boş dəyər, yəni birləşmə onu haqlı olaraq
+    SİLƏRDİ.  Bax ``syllabus_editor_fields.js``.
     """
     if version.status not in EDITABLE_STATUSES:
         raise TransitionDenied("version.locked", params={"status": version.status})
@@ -276,7 +343,8 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         raise SectionConflict(row.revision)
 
     old_data = row.data
-    row.data = data or {}
+    # Merge, PUT deyil: göndərilməyən açar saxlanılır (bax docstring).
+    row.data = {**(old_data or {}), **(data or {})}
     row.revision += 1
     row.updated_by = actor.user
     row.save(update_fields=["data", "revision", "updated_by", "updated_at"])
@@ -331,8 +399,10 @@ def import_migrated_version(
 
     ``period`` BOŞ ola bilər — köhnə bazada sillabusun semestri yoxdur, uydurmaq
     əvəzinə «baza sillabus» yaradılır (``docs/migration/SILLABUS_KOCURME_SPEC.md``).
-    Təkrarlanan qeydlər ``major``/``minor`` ilə versiya kimi gəlir: sonuncusu
-    ``approved``, əvvəlkilər ``archived``.
+    Təkrarlanan qeydlər ``major``/``minor`` ilə versiya kimi gəlir: adətən
+    sonuncusu ``approved``, əvvəlkilər ``archived`` — AMMA HƏMİŞƏ YOX (mənbədə
+    ``active`` bayrağı sonra sönə bilir).  Dosyenin göstəriciləri ona görə hər
+    yazıdan sonra ``refresh_pointers`` ilə STATUSDAN yenidən çıxarılır.
 
     Bu funksiya İCAZƏ YOXLAMIR — yalnız idxal borusundan (management command)
     çağırılmalıdır; HTTP səthinə bağlanmamalıdır.
@@ -372,12 +442,12 @@ def import_migrated_version(
             if row.section_id in section_data:
                 row.data = section_data[row.section_id]
         SyllabusSection.objects.bulk_update([row for row in rows if row.section_id in section_data], ["data"])
-    fields = {"current_version": version}
-    if status == SyllabusStatus.APPROVED:
-        fields["approved_version"] = version
-        syllabus.approved_version = version
-    Syllabus.objects.filter(pk=syllabus.pk).update(**fields)
-    syllabus.current_version = version
+    # ⚠️ ``current_version = version`` YAZILMIR.  Köçürmə bir dosyeyə birdən çox
+    # pillə yazır və APPROVED pillə HƏMİŞƏ sonuncu deyil: canlı ölçmədə 44
+    # dosyedə (48 quyruq versiyası) təsdiqlənmiş pillədən SONRA arxiv pilləsi
+    # gəlir.  Sonuncu yazını kor-koranə göstərici etmək o dosyeləri
+    # «Arxivlənib» kimi göstərərdi.  Göstərici ona görə STATUSDAN çıxarılır.
+    refresh_pointers(syllabus)
     recompute_completion(version)
     return syllabus, version
 
@@ -391,6 +461,8 @@ __all__ = [
     "create_next_version",
     "import_migrated_version",
     "recompute_completion",
+    "refresh_pointers",
+    "resolve_pointer_versions",
     "save_section",
     "section_data_map",
 ]

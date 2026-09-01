@@ -26,7 +26,7 @@ from ..constants import (
 )
 from ..models import ApprovalSource, ReviewDecision, Syllabus, SyllabusReview, SyllabusVersion
 from ..state_machine import Transition, TransitionDenied, check
-from .drafts import recompute_completion
+from .drafts import recompute_completion, refresh_pointers
 from .scoping import is_author
 
 #: Keçid → domen qeydinin qərar dəyəri.
@@ -266,14 +266,22 @@ def resume_editing(*, version, actor, request=None):
 
 
 def archive(*, version, actor, request=None):
-    """APPROVED → ARCHIVED (əl ilə; adətən sistem yeni təsdiqdə çağırır)."""
-    return _apply(
+    """APPROVED → ARCHIVED (əl ilə; adətən sistem yeni təsdiqdə çağırır).
+
+    Arxivlənən versiya adətən dosyenin ``current_version``/``approved_version``
+    göstəricisidir — ``approve`` onu məhz oraya yazmışdı.  Göstəricini olduğu
+    kimi qoymaq dosyeni «Arxivlənib» kimi dondurardı, ona görə keçiddən sonra
+    göstəricilər statusa görə YENİDƏN həll olunur.
+    """
+    updated = _apply(
         version=version,
         actor=actor,
         name=Transition.ARCHIVE,
         request=request,
         archived_at=timezone.now(),
     )
+    refresh_pointers(updated.syllabus)
+    return updated
 
 
 def _archive_superseded(new_version, *, actor, request=None, now=None):

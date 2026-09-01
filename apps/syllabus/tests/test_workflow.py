@@ -333,6 +333,107 @@ def test_migrated_base_syllabus_needs_no_semester(world):
     assert syllabus.approved_version_id == current.pk
 
 
+# ── Avtosave PATCH-dir: göndərilməyən açar SİLİNMİR ──────────────────────────
+#
+# ⚠️ Sübutlu itki (2026-08-31, PostgreSQL-də uçdan-uca): törəmə qaralama
+# ``note``/``exam_questions``/``welcome``/``research_interests``/
+# ``certificates`` sahələrini irs alır, redaktorun qiymətləndirmə paneli isə
+# yalnız ``{midterm, project}`` göndərir (``note`` üçün input YOXDUR).  Köhnə
+# ``row.data = data or {}`` bütöv əvəzləmə edirdi → 5,893 sillabusun
+# qiymətləndirmə mətni və 685 uniqid-in imtahan sualları müəllimin İLK
+# avtosave-i ilə itirdi.
+
+#: Redaktorun qiymətləndirmə panelinin ƏSL yükü (``collectAssess``): bal cütü.
+EDITOR_ASSESS_PAYLOAD = {"midterm": 15, "project": 15}
+
+#: Köçürmənin ``assess`` bölməsinə yazdığı forma (bax
+#: ``rehearsal_syllabus_targets.build_section_data``).
+MIGRATED_ASSESS = {
+    "midterm": 0,
+    "project": 0,
+    "note": "Nazirlər Kabinetinin 348 nömrəli qərarına əsasən…",
+    "exam_questions": ["1. Alqoritm nədir?"],
+}
+
+
+def _migrated_then_reopened(world):
+    """Köçürülmüş APPROVED versiya → müəllimin üzərində işlədiyi yeni qaralama."""
+    from django.utils import timezone
+
+    actor = _actor(world["teacher"], world["org"])
+    syllabus, _approved = services.import_migrated_version(
+        organization=world["org"],
+        subject=world["stack"]["subject"],
+        approved_at=timezone.now(),
+        author=world["teacher"],
+        chair_unit=world["stack"]["chair"],
+        section_data={SectionKey.ASSESS.value: dict(MIGRATED_ASSESS)},
+    )
+    draft_version = services.create_next_version(syllabus=syllabus, actor=actor, kind=ChangeKind.MINOR.value)
+    return draft_version, actor
+
+
+def test_the_next_version_inherits_the_migrated_assessment_text(world):
+    """Qoruma tələsi: itki yalnız İRS ALINMIŞ məzmunda görünür."""
+    version, _actor_obj = _migrated_then_reopened(world)
+
+    assert services.section_data_map(version)[SectionKey.ASSESS.value] == MIGRATED_ASSESS
+
+
+def test_an_editor_autosave_does_not_delete_the_fields_it_cannot_send(world):
+    version, actor = _migrated_then_reopened(world)
+
+    services.save_section(
+        version=version,
+        section_id=SectionKey.ASSESS.value,
+        data=dict(EDITOR_ASSESS_PAYLOAD),
+        actor=actor,
+    )
+
+    data = services.section_data_map(version)[SectionKey.ASSESS.value]
+    # Göndərilən açarlar yenilənib…
+    assert (data["midterm"], data["project"]) == (15, 15)
+    # …göndərilməyənlər İSƏ toxunulmaz qalıb.
+    assert data["note"] == MIGRATED_ASSESS["note"]
+    assert data["exam_questions"] == MIGRATED_ASSESS["exam_questions"]
+
+
+def test_the_reader_still_shows_the_source_rule_text_after_that_autosave(world):
+    """İtkinin ƏSL zərəri tələbənin ekranındadır — qapı orada da bağlanır."""
+    from apps.syllabus.document import _POINTS, BLOCK_TITLES, build_preview_blocks
+
+    version, actor = _migrated_then_reopened(world)
+    services.save_section(
+        version=version,
+        section_id=SectionKey.ASSESS.value,
+        data=dict(EDITOR_ASSESS_PAYLOAD),
+        actor=actor,
+    )
+
+    blocks = {str(block["title"]): block["body"] for block in build_preview_blocks(services.section_data_map(version))}
+    body = blocks[str(BLOCK_TITLES["assessment"])]
+
+    assert "348 nömrəli qərarına" in body
+    assert "1. Alqoritm nədir?" in body
+    # Bal cütü DOLDURULUB → bölgü sətri indi HAQLI olaraq çıxır (cəm 100).
+    assert body.split("\n")[0].endswith(f"= 100 {_POINTS}")
+
+
+def test_an_explicit_empty_value_still_deletes(world):
+    """«Silmək» niyyəti YOX OLMUR — açar AÇIQ boş dəyərlə göndərilir."""
+    version, actor = _migrated_then_reopened(world)
+
+    services.save_section(
+        version=version,
+        section_id=SectionKey.ASSESS.value,
+        data={**EDITOR_ASSESS_PAYLOAD, "note": "", "exam_questions": []},
+        actor=actor,
+    )
+
+    data = services.section_data_map(version)[SectionKey.ASSESS.value]
+    assert data["note"] == "" and data["exam_questions"] == []
+
+
 def test_migration_import_refuses_open_statuses(world):
     from django.utils import timezone
 
@@ -419,3 +520,87 @@ def test_timeline_merges_versions_and_decisions(draft, world):
     kinds = {event["kind"] for event in events}
     assert kinds == {"version", "review"}
     assert any(event.get("decision") == "revision" for event in events)
+
+
+# ── Dosye göstəricisi (``current_version``) statusdan çıxır ──────────────────
+
+
+def test_migrated_dossier_never_points_at_an_archived_version(world):
+    """APPROVED pillə SONUNCU olmayanda da dosye arxiv görünməməlidir.
+
+    Canlı ölçmə (2026-08-30): 8,248 köhnə sillabusun 44 hədəf dosyesində (48
+    quyruq versiyası) təsdiqlənmiş pillə ən yeni pillə DEYİL — mənbədə
+    ``sillabus.id`` böyüdükcə ``active`` bayrağı 1-dən 0-a düşür.  Köçürmə
+    pillələri ``id`` sırasında yazdığı üçün SON yazı arxiv olur; göstəricini
+    son yazıya bağlamaq həmin 44 dosyeni siyahıda «Arxivlənib» kimi göstərərdi.
+    """
+    from django.utils import timezone
+
+    stamp = timezone.now()
+    common = {
+        "organization": world["org"],
+        "subject": world["stack"]["subject"],
+        "approved_at": stamp,
+        "author": world["teacher"],
+        "chair_unit": world["stack"]["chair"],
+    }
+    syllabus, approved = services.import_migrated_version(**common, minor=0, status=SyllabusStatus.APPROVED)
+    _same, tail = services.import_migrated_version(**common, minor=1, status=SyllabusStatus.ARCHIVED)
+
+    assert _same.pk == syllabus.pk
+    assert (approved.minor, tail.minor) == (0, 1)
+    syllabus.refresh_from_db()
+    # Göstərici SON YAZIYA deyil, QÜVVƏDƏ olan pilləyə baxır.
+    assert syllabus.current_version_id == approved.pk
+    assert syllabus.approved_version_id == approved.pk
+    assert syllabus.current_version.status == SyllabusStatus.APPROVED
+
+
+def test_migrated_dossier_without_an_active_step_keeps_the_newest_archive(world):
+    """714 qeyri-aktiv başlıq: heç bir pillə APPROVED deyil → təsdiq göstəricisi BOŞ."""
+    from django.utils import timezone
+
+    stamp = timezone.now()
+    common = {
+        "organization": world["org"],
+        "subject": world["stack"]["subject"],
+        "approved_at": stamp,
+        "author": world["teacher"],
+        "chair_unit": world["stack"]["chair"],
+        "status": SyllabusStatus.ARCHIVED,
+    }
+    syllabus, _first = services.import_migrated_version(**common, minor=0)
+    _same, newest = services.import_migrated_version(**common, minor=1)
+
+    syllabus.refresh_from_db()
+    assert syllabus.current_version_id == newest.pk
+    assert syllabus.approved_version_id is None
+    assert services.approved_version_for(syllabus) is None
+
+
+def test_manual_archive_releases_the_dossier_approval_pointer(draft, world):
+    """``archive`` canlı redaktə axınındadır — göstərici orada da köhnəlməməlidir."""
+    syllabus, version, actor = draft
+    _fill(version, actor)
+    version = services.submit(version=version, actor=actor)
+    chair_actor = _actor(world["chair"], world["org"])
+    approved = services.approve(version=version, actor=chair_actor)
+    syllabus.refresh_from_db()
+    assert (syllabus.current_version_id, syllabus.approved_version_id) == (approved.pk, approved.pk)
+
+    manager_user = User.objects.create_user("syl_manager", "syl_manager@x.test", "pw")
+    activate_member(
+        world["org"],
+        manager_user,
+        "syllabus_manager",
+        permissions=["syllabus.view", "syllabus.manage"],
+        scope_unit=world["stack"]["chair"],
+        level=80,
+        scope_type=RoleScopeType.UNIT,
+    )
+    services.archive(version=approved, actor=_actor(manager_user, world["org"]))
+
+    syllabus.refresh_from_db()
+    # Arxivlənmiş versiya artıq QÜVVƏDƏ deyil: təsdiq göstəricisi buraxılır.
+    assert syllabus.approved_version_id is None
+    assert services.approved_version_for(syllabus) is None

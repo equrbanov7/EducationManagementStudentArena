@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from django.db.models import Case, IntegerField, Q, When
 
+from core.program_codes import program_code_search_q
+
 from ..constants import (
     PERM_REVIEW,
     PERM_VIEW,
@@ -75,7 +77,15 @@ def list_syllabi(
     if statuses:
         queryset = queryset.filter(current_version__status__in=list(statuses))
     if search:
-        queryset = queryset.filter(Q(subject__name__icontains=search) | Q(subject__code__icontains=search))
+        # AXTARIŞ İNVARİANTI: siyahı sətri ixtisası «Ad · şifr» kimi GÖSTƏRİR
+        # (`_list_cards.html` / `_list_table.html` → `row.program`), ona görə
+        # həmin ad və HƏR İKİ nəsil şifr axtarıla da bilməlidir.
+        queryset = queryset.filter(
+            Q(subject__name__icontains=search)
+            | Q(subject__code__icontains=search)
+            | Q(program__name__icontains=search)
+            | program_code_search_q(search, prefix="program__")
+        )
 
     queryset = queryset.annotate(_status_rank=_status_rank_annotation())
     return queryset.order_by(*SORT_KEYS.get(sort, SORT_KEYS["recent"]))
@@ -150,11 +160,14 @@ def review_queue(
     if program is not None:
         queryset = queryset.filter(syllabus__program=program)
     if search:
+        # Təsdiq növbəsi də ixtisası şifrlə göstərir (`_review_queue.html`).
         queryset = queryset.filter(
             Q(syllabus__subject__name__icontains=search)
             | Q(syllabus__subject__code__icontains=search)
             | Q(syllabus__author__first_name__icontains=search)
             | Q(syllabus__author__last_name__icontains=search)
+            | Q(syllabus__program__name__icontains=search)
+            | program_code_search_q(search, prefix="syllabus__program__")
         )
     return queryset.order_by(*QUEUE_SORT_KEYS.get(sort, QUEUE_SORT_KEYS["wait"]))
 
