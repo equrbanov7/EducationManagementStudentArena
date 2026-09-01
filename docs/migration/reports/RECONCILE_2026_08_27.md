@@ -30,7 +30,7 @@
 
 ### Ən diqqətçəkən rəqəmlər
 
-1. **18,253** jurnal-yazılışı ötürülüb (9.2 %) — əsas səbəb `legacy_journal_student_inactive` (5 hadisə). Həmin tələbələrin bal xanaları da hədəfə düşmür.
+1. **18,253** jurnal-yazılışı ötürülüb (9.2 %). Həmin tələbələrin bal xanaları da hədəfə düşmür. **Səbəb bölgüsü** (2026-08-31 düzəlişi — əvvəlki mətn səhvən «əsas səbəb `legacy_journal_student_inactive` (5 hadisə)» yazırdı; 5 hadisə əsas səbəb ola bilməz): `legacy_journal_enrollment_orphan` **10,836** · `legacy_journal_student_group_mismatch` **3,862** · `legacy_journal_student_unresolved` **3,550** · `legacy_journal_student_inactive` **5**. (Ayrıca 107 yazılış `legacy_journals_students_invalid` ilə karantindədir — cəmi 18,360.)
 2. **2,042** legacy jurnal açılışa çevrilməyib; onlara bağlı bütün xanalar nərdivanda «orphan jurnal» pilləsindədir.
 3. **13** tələbə arxiv üzvlüyü ilə köçüb (aktiv: 5,214) — heç bir hesab silinməyib.
 4. **507,734** qayıb və **3,198,284** iştirak xanası davamiyyət kimi oturub; bal daşıyan xana isə **216,453**.

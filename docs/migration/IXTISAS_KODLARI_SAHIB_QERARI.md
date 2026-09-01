@@ -1,3 +1,20 @@
+> # ⛔ KÖHNƏLMİŞ SƏNƏD — 2026-08-31
+>
+> Bu sənəd **rəsmi təsnifat kataloqları endirilməzdən əvvəlki** vəziyyəti
+> təsvir edir və bir neçə yerdə **səhvdir**. Onda təsvir olunan 5 şifrdən
+> **2-si yanlış idi** (`MYEDU-40` «İqtisadiyyat» → `050405`, əslində «Sənayenin
+> təşkili»; `MYEDU-43` «Maliyyə» → `050406`, əslində «Statistika»). Burada adı
+> çəkilən `ASSIGNMENTS` cədvəli və `--adopt-clean-codes` bayrağı **artıq
+> yoxdur**.
+>
+> **Aktual sənəd: [`IXTISAS_KODLARI.md`](IXTISAS_KODLARI.md)** — 86 proqrama
+> hər iki nəslin rəsmi şifri yazılıb; sahibin qərarını 7 ixtisas gözləyir.
+>
+> Bu fayl yalnız **tarixi qeyd** kimi saxlanılır: onda hansı mülahizələrin
+> aparıldığını və nə üçün əl ilə yığılmış cədvəlin işləmədiyini göstərir.
+
+---
+
 # İxtisas kodları — sahibin qərar sənədi
 
 **Tarix:** 2026-08-30 · **Vəziyyət:** 5 rəsmi şifr yazıldı · 1 qəsdən boş
@@ -153,21 +170,68 @@ yazılmayıb**.
 
 ---
 
-## 4. (d) İXTİSAS OLMAYAN 8 sətir — şifr verilmir, silinmir də
+## 4. (d) İXTİSAS OLMAYAN 8 sətir — ✅ QƏRAR VERİLDİ (2026-08-31): ARXİVLƏ
 
-| Daxili kod | Ad | Nədir | **Sahibin qərarı** |
+> **Sahibin sözü:** «lazımlıdırsa saxla» + «sistem magistr/doktorantura üçün də
+> işlədiləcək».
+>
+> **Qərar: SİLMƏ — `is_active=False` ilə arxivlə.**  Sətir seçicilərdə
+> görünmür, amma ona bağlı tarixi qeydlər (tələbə akademik qeydi, tədris planı,
+> qiymətlər) **toxunulmaz qalır**.
+
+| Daxili kod | Ad | Nədir | **Qərar** |
 |---|---|---|---|
-| `MYEDU-61` | Level | İngilis dili mərkəzinin səviyyə qeydi | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-65` | aaa | test sətri | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-66` | Dizayn Məktəbi | fakültə adı | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-36-M` | Magistratura və doktorantura | struktur bölməsi adı | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-91` | Lifelong | davamlı təhsil mərkəzi | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-91-M` | Lifelong | eyni mərkəzin magistr dublikatı | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-92` | Kollec | struktur bölməsi | ☐ arxivləşdir ☐ saxla |
-| `MYEDU-101` | Kollec 2 | struktur bölməsi | ☐ arxivləşdir ☐ saxla |
+| `MYEDU-61` | Level | İngilis dili mərkəzinin səviyyə qeydi | ☑ arxivləşdir |
+| `MYEDU-65` | aaa | test sətri | ☑ arxivləşdir |
+| `MYEDU-66` | Dizayn Məktəbi | fakültə adı | ☑ arxivləşdir |
+| `MYEDU-36-M` | Magistratura və doktorantura | struktur bölməsi adı | ☑ arxivləşdir |
+| `MYEDU-91` | Lifelong | davamlı təhsil mərkəzi | ☑ arxivləşdir |
+| `MYEDU-91-M` | Lifelong | eyni mərkəzin magistr dublikatı | ☑ arxivləşdir |
+| `MYEDU-92` | Kollec | struktur bölməsi | ☑ arxivləşdir |
+| `MYEDU-101` | Kollec 2 | struktur bölməsi | ☑ arxivləşdir |
 
-> ⚠️ Bu sətirlərə **tələbə/qrup bağlantısı ola bilər** — köçürmə skripti onları
-> silmir. Arxivləşdirmədən əvvəl bağlantılar yoxlanmalıdır.
+### Niyə «Magistratura və doktorantura»nı arxivləşdirmək təhlükəsizdir
+
+`MYEDU-36-M` bir **struktur bölməsinin adıdır**, ixtisas deyil.  Sistemin
+magistr/doktorantura üçün işlədilməsi bu sətirdən asılı DEYİL: real magistr
+proqramları hədəfdə **ayrıca sətirlərdir** (`050620-M`, `060411-M`,
+`MYEDU-72-M` «Məhkəmə psixologiyası», `MYEDU-81-M` «Klinik psixologiya» …).
+Onların heç birinə toxunulmur.  Testi: `test_masters_structure_row_is_the_only_masters_entry`.
+
+### Necə tətbiq olunur
+
+```bash
+python manage.py archive_non_program_rows                    # dry-run (DEFOLT)
+python manage.py archive_non_program_rows --apply
+python manage.py archive_non_program_rows --apply --organization <uuid>
+python manage.py archive_non_program_rows --restore --apply  # geri qaytar
+```
+
+* **Defolt dry-run** — `--apply` verilmədən heç nə yazılmır.
+* **Fail-closed** — bazadakı ad gözlənilən adla uyuşmursa HEÇ NƏ yazılmır.
+* **İdempotent**; `--restore` ilə tam geri qaytarıla bilir.
+* Hər icrada **bağlantı sayları** göstərilir (neçə tələbə qeydi, neçə tədris
+  planı) — sahib arxivləşdirmənin nəyə toxunduğunu rəqəmlə görür.
+* `Program.code` **heç vaxt** dəyişdirilmir; audit izinə `core.audit.log_action`
+  ilə düşür.
+
+### ⚠️ Arxivləşdirmənin gizli tələsi — həll olundu
+
+`is_active=False` təkbaşına kifayət etmirdi: `apps/registrar/forms.py`-dakı iki
+seçici (`CurriculumForm.program`, `StudentRecordForm.program`) `is_active`
+süzgəci İŞLƏTMİRDİ, yəni arxivlənmiş sətir seçicidə qalacaqdı.  İndi ikisi də
+`program_choices()`-dan keçir.
+
+Əks tərəfi də var: arxivlənmiş proqramı queryset-dən sadəcə çıxarmaq **tarixi
+datanı DOLAYI YOLLA zədələyərdi** — arxivlənmiş proqrama bağlı köhnə bir tədris
+planını redaktə edib saxlamaq mümkün olmazdı (`ModelChoiceField` mövcud dəyəri
+«etibarsız seçim» sayır).  Ona görə `program_choices(org, current_pk=...)` cari
+dəyəri həmişə siyahıya geri əlavə edir.  Testlər:
+`apps/registrar/tests/test_archive_non_program_rows.py::ProgramPickerTests`.
+
+> ⚠️ Qalıq qeyd: `registrar/console_views.py`-dakı proqram **siyahısı** (seçici
+> deyil, idarəetmə konsolunun cədvəli) arxivlənmişləri də göstərməyə davam edir
+> — bu QƏSDƏNDİR: konsolda arxivi görmək lazımdır.
 
 ---
 

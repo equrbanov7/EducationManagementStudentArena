@@ -36,6 +36,14 @@ CONTRACT_MODULES = (
     "syllabus_field_contracts",
     "legacy_grade_field_contracts",
     "lesson_meta_field_contracts",
+    # Sillabus köçürməsinin 12 cədvəli.  `sillabus` və `sillabus_sem_muh`
+    # BURADA daha GENİŞ oxunur (J9/J11-in dar kontraktları toxunulmaz qalır),
+    # ona görə fixture tip xəritəsi məhz geniş dəsti güzgüləməlidir.
+    "syllabus_migration_contracts",
+    # J13 üzrlü-qayıb sənədləri: ``allowed_qb`` BURADA daha GENİŞ oxunur
+    # (J4-ün dar kontraktı toxunulmaz qalır), ona görə fixture tip xəritəsi
+    # məhz geniş dəsti güzgüləməlidir.
+    "excuse_field_contracts",
 )
 
 
@@ -96,10 +104,14 @@ _BENIGN = {
         "`_legacy_flag_text` ilə MƏTN kimi oxunur (V9: is_current heç vaxt "
         "köçürülmür) — həm int, həm str qəbul edilir."
     ),
-    ("students", "sex"): "proyeksiyada var, KODDA heç yerdə oxunmur.",
+    # ⚠️ ``sex`` BURADAN ÇIXARILDI (2026-08-31): «KODDA heç yerdə oxunmur»
+    # iddiası YANLIŞ idi — ``legacy_demographics.demographics_from_row`` onu
+    # oxuyur (student: ``rehearsal_placement_phase``, worker:
+    # ``rehearsal_worker_phase``) və ``legacy_gender`` ``type(value) is int``
+    # tələb edir.  Yanlış «zərərsiz» qeydi ucbatından fixture sütunu VARCHAR
+    # qalmışdı və bütün birdəfəlik-MariaDB dəsti demoqrafiya fazasında çökürdü.
     ("students", "join_date"): "proyeksiyada var, KODDA heç yerdə oxunmur.",
     ("students", "status"): "proyeksiyada var, KODDA heç yerdə oxunmur.",
-    ("workers", "sex"): "proyeksiyada var, KODDA heç yerdə oxunmur.",
 }
 
 INT_TYPES = {"int", "bigint", "smallint", "tinyint", "mediumint"}
@@ -117,11 +129,15 @@ def main() -> int:
 
     problems = []
     benign = []
+    skipped = []
+    compared = 0
     for table, fields in sorted(contracts.items()):
         actual = real_types(table)
         if not actual:
+            skipped.append(table)
             print(f"  ⏭  {table}: real sxemdə tapılmadı (ötürülür)")
             continue
+        compared += 1
         for field in fields:
             if field == "id":
                 continue
@@ -159,6 +175,17 @@ def main() -> int:
                 problems.append(f"{table}.{field}: real={real} (→{expected}) amma fixture={declared}")
 
     print()
+    # ⚠️ FAIL-CLOSED: konteyner işləmirsə `real_types` HƏR cədvəl üçün boş
+    # qaytarır və skript heç nə müqayisə etmədən ✅ yazırdı.  2026-08-30-da
+    # məhz belə oldu (mənbə konteyneri dəst ortasında dayandı) — «yaşıl»
+    # nəticə əslində «yoxlanmadı» demək idi.
+    if not compared:
+        print("❌ HEÇ BİR cədvəl müqayisə edilmədi — `emsarena-legacy-source-rehearsal`")
+        print("   konteyneri işləmir və ya əlçatan deyil.  Bu, KEÇMƏK deyil, YOXLAMAMAQDIR.")
+        return 2
+    print(f"ℹ️  müqayisə edilən cədvəl: {compared} · ötürülən: {len(skipped)}")
+    if skipped:
+        print(f"   ⚠️  ötürülənlər YOXLANMAYIB: {', '.join(skipped)}")
     if benign:
         print(f"ℹ️  {len(benign)} bilinən-zərərsiz fərq (sübutlu):")
         for b in benign:
