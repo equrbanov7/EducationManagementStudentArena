@@ -10,9 +10,11 @@ target-version = ['py311']
 extend-exclude = '''
 /(
     \.git
+    | \.claude
     | \.venv
     | venv
     | migrations
+    | apps/syllabus/tests/e2e
     | __pycache__
 )/
 '''

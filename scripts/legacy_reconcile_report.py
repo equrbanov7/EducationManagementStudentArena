@@ -35,7 +35,8 @@ NƏ HESABLAYIR
 J8 fazası (``apps/legacy_import/services/rehearsal_journal_reconcile_phase.py``)
 say balansını LEDGER-ə möhürləyir; bu skript isə eyni sübutu İNSANA göstərir və
 ledger-in saxlamadığı pillələri (orphan jurnal, dublikat, həll olunmayan
-yazılış) mənbədən MÜSTƏQİL yenidən hesablayır.
+yazılış, dərs slotu tapılmadı, hədəf açarı toqquşması) mənbədən MÜSTƏQİL
+yenidən hesablayır.
 """
 
 from __future__ import annotations
@@ -52,10 +53,15 @@ from scripts.legacy_reconcile.collect import (  # noqa: E402
     build_ladders,
     collect_source_facts,
     collect_target_facts,
+    collect_write_replay,
     compare_finals,
 )
 from scripts.legacy_reconcile.grade_artifacts import reconcile_grade_artifacts  # noqa: E402
 from scripts.legacy_reconcile.grade_facts import reconcile_grade_facts  # noqa: E402
+from scripts.legacy_reconcile.grade_replay_facts import (  # noqa: E402
+    replay_grade_fact_keys,
+    replay_grade_fact_rows,
+)
 from scripts.legacy_reconcile.grade_source_hashes import collect_source_grade_hashes  # noqa: E402
 from scripts.legacy_reconcile.render import render_report  # noqa: E402
 from scripts.legacy_reconcile.sampling import SAMPLE_SEED, SAMPLE_SIZE, collect_sample  # noqa: E402
@@ -102,7 +108,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--skip-deep",
         action="store_true",
-        help="Ən ağır sorğunu (xana → jurnal/tələbə aqreqatı) buraxır; nərdivan qalığı böyük görünür.",
+        help="Ən ağır addımı (xana-xana yazı təkrar-icrası) buraxır; nərdivan qalığı böyük görünür.",
     )
     return parser
 
@@ -144,23 +150,33 @@ def main(argv=None) -> int:
         if not target_facts["run"]:
             raise RuntimeError("legacy_reconcile_run_not_found")
         print("→ mənbə aqreqatları hesablanır (ən ağır addım bir neçə dəqiqə çəkə bilər)…", file=sys.stderr)
-        source_facts = collect_source_facts(source, deep=not args.skip_deep)
+        source_facts = collect_source_facts(source)
+        replay = None
+        if not args.skip_deep:
+            print("→ yazı qərarı xana-xana təkrar icra olunur (ən ağır addım)…", file=sys.stderr)
+            replay = collect_write_replay(source, target, target_facts, source_facts)
         print("→ nərdivan və yekun müqayisəsi qurulur…", file=sys.stderr)
         print("→ immutable legacy qiymət faktları sətir-səviyyəsində tutuşdurulur…", file=sys.stderr)
-        source_grade_hashes = collect_source_grade_hashes(source)
+        extra_grade_rows = replay_grade_fact_rows(replay)
+        source_grade_hashes = collect_source_grade_hashes(
+            source,
+            extra_keys=replay_grade_fact_keys(replay),
+        )
         grade_facts = reconcile_grade_facts(
             source,
             target,
             run_id=args.run_id,
             source_hashes=source_grade_hashes,
+            extra_source_rows=extra_grade_rows,
         )
         print("→ çap olunmuş bal-vərəqi arxivi hash və sıxılma üzrə tutuşdurulur…", file=sys.stderr)
         grade_artifacts = reconcile_grade_artifacts(source, target, run_id=args.run_id)
-        ladders = build_ladders(source_facts, target_facts)
+        ladders = build_ladders(source_facts, target_facts, replay)
         context = {
             "source": source_facts,
             "target": target_facts,
             "ladders": ladders,
+            "replay": replay,
             "finals": compare_finals(source_facts, target_facts, target),
             "grade_facts": grade_facts,
             "grade_artifacts": grade_artifacts,

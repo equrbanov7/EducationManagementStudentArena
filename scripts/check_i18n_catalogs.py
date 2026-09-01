@@ -16,6 +16,13 @@ Yoxlanan meyarlar
    olmalıdır. Uyğunsuzluq runtime `KeyError` deməkdir (bax 2026-07-31 auditi).
 5. **Xam açar sızması** — `msgstr` snake_case açarın özüdürsə (məs.
    `visible_test_cases`) istifadəçi UI-da açarı görür.
+6. **Mənbə kodu ilə tutuşdurma** (`source_missing`) — kodda ÇAĞIRILAN, lakin AZ
+   kataloqunda OLMAYAN msgid. Qapının kor nöqtəsi məhz bu idi: 1–5 meyarları
+   kataloqları yalnız BİR-BİRİ ilə tutuşdurur, ona görə dörd kataloqun da eyni
+   dərəcədə naqis olduğu mətn heç bir «drift» yaratmır və qapı yaşıl qalırdı.
+   Bu kor nöqtə bir gündə İKİ dəfə dişlədi (286 sillabus + 67 tələbə-idarəetmə
+   mətni). Skaner `scripts/i18n_source_scan.py`-dədir (şablonlar üçün Django-nun
+   öz `templatize`-i, Python üçün AST).
 
 İstifadə::
 
@@ -43,6 +50,40 @@ PLACEHOLDER_RE = re.compile(r"%\([^)]+\)[sd]|\{[a-zA-Z_][a-zA-Z0-9_]*\}|%[sd]")
 #: «bal», «sual» kimi qanuni tək sözlü tərcümələri də sızma sayırdı (212 yalançı
 #: siqnaldan yalnız 60-ı həqiqi açar idi).
 RAW_KEY_RE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$")
+
+
+#: Skan nəticəsinin keşi. `None` = hələ hesablanmayıb, `False` = skan MÜMKÜN
+#: olmadı (Django yoxdur/qırılıb) — bu halda `source_missing` ölçülmür.
+_SOURCE_CACHE = None
+
+
+def _source_msgids():
+    """``{domen: {(ctx, msgid), …}}`` — kodda çağırılan mətnlər; xəta olsa ``False``.
+
+    Django-nun `templatize`-i işləmək üçün minimal `settings` tələb edir. Qapı
+    standalone skript kimi (CI-də `manage.py`-siz) çağırıldığı üçün konfiqurasiya
+    burada, ən yüngül formada qurulur: baza/tətbiq yüklənmir.
+    """
+    global _SOURCE_CACHE
+    if _SOURCE_CACHE is not None:
+        return _SOURCE_CACHE
+    try:
+        if BASE not in sys.path:
+            sys.path.insert(0, BASE)
+        from django.conf import settings as dj_settings
+
+        if not dj_settings.configured:
+            dj_settings.configure(USE_I18N=True, INSTALLED_APPS=[], DATABASES={})
+        import django
+
+        django.setup()
+        from scripts.i18n_source_scan import collect_source_msgids
+
+        _SOURCE_CACHE = collect_source_msgids(BASE)
+    except Exception as exc:  # pragma: no cover — mühit problemi qapını qırmasın
+        print(f"⚠️  Mənbə skaneri işləmədi ({exc.__class__.__name__}: {exc}) — `source_missing` ÖLÇÜLMƏDİ.")
+        _SOURCE_CACHE = False
+    return _SOURCE_CACHE
 
 
 def _load_catalog(lang: str, domain: str):
@@ -110,11 +151,29 @@ def _measure(domain: str) -> dict:
             "bad_placeholder": [f"{c}|{m}"[:120] for c, m in bad_placeholder[:20]],
             "raw_key_leak": [f"{c}|{m}"[:120] for c, m in raw_keys[:20]],
         }
+
+    # `source_missing` DİLƏ görə deyil, DOMENƏ görə ölçülür (mətnin kodda olub
+    # kataloqda olmaması dildən asılı deyil). Baseline sxemini dəyişməmək üçün
+    # onu mənbə dilinin (az) ölçülərinə yazırıq; digər dillərdə həmişə 0 qalır ki,
+    # eyni borc dörd dəfə sayılmasın.
+    source = _source_msgids()
+    if source is not False:
+        gaps = sorted(source.get(domain, set()) - source_keys)
+        metrics[SOURCE_LANG]["source_missing"] = len(gaps)
+        details[SOURCE_LANG]["source_missing"] = [f"{c}|{m}"[:120] for c, m in gaps[:20]]
+
     return {"metrics": metrics, "details": details}
 
 
 #: Bu ölçülər ARTA BİLMƏZ (ratchet). Azalma həmişə qəbul olunur.
-RATCHET_KEYS = ("missing_vs_source", "untranslated", "identity", "bad_placeholder", "raw_key_leak")
+RATCHET_KEYS = (
+    "missing_vs_source",
+    "untranslated",
+    "identity",
+    "bad_placeholder",
+    "raw_key_leak",
+    "source_missing",
+)
 #: Bu ölçülər HƏMİŞƏ sıfır olmalıdır (baseline-dan asılı deyil).
 HARD_ZERO_KEYS = ("bad_placeholder",)
 
@@ -175,6 +234,11 @@ def main() -> int:
     current = {domain: _measure(domain) for domain in CATALOGS}
 
     if args.update:
+        # Skan işləməyəndə baseline-i yazmaq `source_missing`-i sükutla SİLƏRDİ
+        # və qapı bir daha həmin boşluğu görməzdi.
+        if _source_msgids() is False:
+            print("❌ Mənbə skaneri işləmədi — baseline yenilənmir (`source_missing` itərdi).")
+            return 1
         payload = {domain: current[domain]["metrics"] for domain in CATALOGS}
         with open(BASELINE_PATH, "w", encoding="utf-8") as handle:
             json.dump(payload, handle, ensure_ascii=False, indent=1, sort_keys=True)
@@ -202,6 +266,10 @@ def main() -> int:
             actual = metrics[lang]
             expected = base_domain.get(lang, {})
             for key in RATCHET_KEYS:
+                # Skan işləməyibsə `source_missing` ÖLÇÜLMƏYİB — onu 0 sayıb
+                # «yaxşılaşma» elan etmək baseline-i saxta şəkildə sıfıra sıxardı.
+                if key == "source_missing" and key not in actual:
+                    continue
                 now = actual.get(key, 0)
                 before = expected.get(key, 0)
                 if key in HARD_ZERO_KEYS and now > 0:
@@ -210,7 +278,16 @@ def main() -> int:
                         f"(placeholder uyğunsuzluğu runtime KeyError deməkdir)"
                     )
                 elif now > before:
-                    failures.append(f"{domain}/{lang}: {key} {before} → {now} (ARTIB — yeni tərcümə borcu)")
+                    if key == "source_missing":
+                        sample = current[domain]["details"][lang].get("source_missing", [])[:5]
+                        failures.append(
+                            f"{domain}: source_missing {before} → {now} (ARTIB — kodda İŞLƏNƏN, "
+                            f"heç bir kataloqda OLMAYAN mətn). Nümunə: {sample}\n"
+                            f"      Bu mətnlər dörd kataloqun HAMISINDA yoxdur, ona görə "
+                            f"kataloq-kataloq müqayisəsi onları görmür."
+                        )
+                    else:
+                        failures.append(f"{domain}/{lang}: {key} {before} → {now} (ARTIB — yeni tərcümə borcu)")
                 elif now < before:
                     improvements.append(f"{domain}/{lang}: {key} {before} → {now} ✓")
 

@@ -6,35 +6,36 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8693,
-   "untranslated": 3
+   "source_missing": 3,
+   "total": 10175,
+   "untranslated": 0
   },
   "en": {
    "bad_placeholder": 0,
-   "extra_vs_source": 58,
-   "identity": 247,
+   "extra_vs_source": 24,
+   "identity": 233,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8751,
-   "untranslated": 3
+   "total": 10199,
+   "untranslated": 0
   },
   "ru": {
    "bad_placeholder": 0,
-   "extra_vs_source": 58,
-   "identity": 140,
+   "extra_vs_source": 24,
+   "identity": 124,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8751,
-   "untranslated": 3
+   "total": 10199,
+   "untranslated": 0
   },
   "tr": {
    "bad_placeholder": 0,
-   "extra_vs_source": 12,
-   "identity": 275,
+   "extra_vs_source": 1,
+   "identity": 270,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 8705,
-   "untranslated": 3
+   "total": 10176,
+   "untranslated": 0
   }
  },
  "djangojs": {
@@ -44,6 +45,7 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
+   "source_missing": 52,
    "total": 722,
    "untranslated": 0
   },
