@@ -21,7 +21,7 @@ pytestmark = pytest.mark.django_db
 HERE = Path(__file__).resolve().parent
 
 
-def se_of(editable, version):
+def se_of(editable, version):  # noqa: F811
     request = RequestFactory().get("/profile/", {"section": "syllabus-editor"})
     request.user = editable["teacher"]
     return build_syllabus_editor_section(
@@ -31,7 +31,9 @@ def se_of(editable, version):
 
 def edit_and_collect(se, edits, tag):
     html = "".join(render_to_string(n, {"se": se}) for n in PANEL_TEMPLATES)
-    hf = HERE / f"b_{tag}.html"; ef = HERE / f"b_{tag}_edits.json"; of = HERE / f"b_{tag}_out.json"
+    hf = HERE / f"b_{tag}.html"
+    ef = HERE / f"b_{tag}_edits.json"
+    of = HERE / f"b_{tag}_out.json"
     hf.write_text(html, encoding="utf-8")
     ef.write_text(json.dumps(edits), encoding="utf-8")
     proc = subprocess.run(
