@@ -27,7 +27,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.utils import timezone
 
-from apps.registrar import analytics, exam_eligibility, finals, legacy_grade_read
+from apps.registrar import analytics, exam_eligibility, finals, finals_batch, legacy_grade_read
 from apps.registrar.models import Enrollment, StudentAcademicRecord
 
 _TWO_PLACES = Decimal("0.01")
@@ -46,10 +46,10 @@ def _grade_point(result) -> Decimal:
     return Decimal(str(result.get("gpa") or "0"))
 
 
-def _build_row(enrollment, organization=None, *, exempt=False, hours_map=None):
+def _build_row(enrollment, organization=None, *, exempt=False, hours_map=None, batch=None):
     offering = enrollment.offering
     result = finals.compute_final_result(
-        enrollment=enrollment, organization=organization, exempt=exempt, hours_map=hours_map
+        enrollment=enrollment, organization=organization, exempt=exempt, hours_map=hours_map, batch=batch
     )
     credit = _credit_for(offering)
     # Definite outcome → contributes to GPA; still-open course is excluded.
@@ -211,7 +211,11 @@ def build_student_transcript(*, student, organization, program=None):
     # Məxrəc fallback-ı da tələbə üzrə BİR sorğu (``lesson_hours=0`` olan
     # köçürülmüş açılışlarda sətir-sətir oxumaq N+1 olardı).
     hours_map = exam_eligibility.lesson_hours_map({e.offering_id for e in enrollments})
-    rows = [_build_row(e, organization, exempt=exempt, hours_map=hours_map) for e in enrollments]
+    # Qalan sətir-sətir oxumalar (komponent balları, sərbəst iş sayğacı,
+    # ``FinalGrade``/``ResitRecord``, donma dəsti, qayıb həddi) da BİR dəfə:
+    # 59 fənnli real tələbədə ~690 sorğu idi (2026-09-02 ölçməsi).
+    batch = finals_batch.build(enrollments)
+    rows = [_build_row(e, organization, exempt=exempt, hours_map=hours_map, batch=batch) for e in enrollments]
     # Köçürülmüş qiymət nişanı BURADA qoşulur — transkript ekranı, transkript
     # PDF-i və «Ümumi tədris məlumatı» üçün TƏK mənbə.  Hər səth özü qoşsaydı
     # eyni sətir bir ekranda nişanlı, digərində nişansız görünərdi (məhz bu

@@ -338,7 +338,7 @@ def get_final_breakdown(offering):
 
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir."""
-    from apps.registrar import gradebook
+    from apps.registrar import finals_batch, gradebook
     from apps.registrar.models import LessonKind, LessonMark
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
@@ -377,6 +377,9 @@ def get_final_breakdown(offering):
     # TƏK MƏNBƏ (bax :mod:`apps.registrar.exam_eligibility`) — açılış üzrə bir dəfə.
     frozen = exam_eligibility.is_frozen(offering)
     exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
+    # Giriş balı üçün komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
+    # 4 sorğu idi — bax :mod:`apps.registrar.finals_batch`).
+    entry_batch = finals_batch.entry_batch(enrollments)
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
@@ -397,7 +400,7 @@ def get_final_breakdown(offering):
         )
         barred = eligibility["barred"]
         warning = (not frozen) and (not barred) and allowed_absence > 0 and absence_hours >= warn_at
-        entry = gradebook.entry_score_for(e, scheme.entry_score_max)
+        entry = gradebook.entry_score_for(e, scheme.entry_score_max, **entry_batch.entry_kwargs(e))
         rows.append(
             {
                 "enrollment": e,

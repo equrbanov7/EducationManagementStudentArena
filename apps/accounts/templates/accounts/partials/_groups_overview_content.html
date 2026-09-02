@@ -293,6 +293,7 @@
     tabindex="-1"
     aria-hidden="true"
     data-create-url="{% url 'exams:teacher_create_group' %}"
+    data-candidates-url="{% url 'exams:teacher_group_candidates' %}"
     data-update-url-template="{% url 'exams:teacher_update_group' 0 %}"
     data-next-url="{{ groups_section_return_url }}"
     data-default-primary-teacher="{{ request.user.id }}"

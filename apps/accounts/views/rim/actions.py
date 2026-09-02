@@ -35,6 +35,7 @@ from apps.accounts.services.rim import (
     update_user_fields,
 )
 from apps.accounts.services.rim.profile_edit import EDITABLE_FIELDS
+from core.logging_utils import safe_log_value
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +138,7 @@ def rim_action(request):
     except RimAccessError as exc:
         logger.info(
             "RİM əməliyyatı rədd edildi: action=%s actor=%s target=%s reason_code=%s",
-            action,
+            safe_log_value(action),
             getattr(actor.user, "pk", None),
             target.pk,
             exc.reason_code,

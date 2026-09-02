@@ -17,8 +17,17 @@ PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN = re.compile(r"%(?:\d+\$)?[-+#0*. ]*[a-z
 PUBLIC_PROFILE_CATEGORY_PATTERN = re.compile(r"^[a-z0-9_-]{1,%s}$" % PUBLIC_PROFILE_CATEGORY_MAX_LENGTH)
 PROFILE_AVATAR_VERSION_PATTERN = re.compile(r"^[0-9]{1,%s}$" % PROFILE_AVATAR_VERSION_MAX_LENGTH)
 
+#: Kabinetin DEFAULT açılış bölməsi (FAZA 22).  Əvvəl `profile-info` idi —
+#: yəni hər rol kabinetə öz doğum tarixi ilə girirdi.  `?section=profile-info`
+#: əvvəlki kimi işləyir; dəyişən yalnız parametrsiz açılışın hədəfidir.
+DEFAULT_PROFILE_SECTION = "dashboard"
+
+#: Default hədəf `allowed_sections`-da yoxdursa (nəzəri hal) bura düşülür.
+FALLBACK_PROFILE_SECTION = "profile-info"
+
 # Sections that require an active organization context to render correctly.
 PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
+    "dashboard",
     "profile-info",
     "courses",
     "assigned-exams",

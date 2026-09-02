@@ -1,6 +1,6 @@
 {% load i18n %}
 {# ── U12: Universitet bölmələri — SPA panel (sidebar itmir) ────────── #}
-{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections or "people-teachers" in allowed_sections or "people-students" in allowed_sections or "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "teaching-handover" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections or "people-teachers" in allowed_sections or "people-students" in allowed_sections or "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "teaching-handover" in allowed_sections or "schedule-manage" in allowed_sections or "workload-distribution" in allowed_sections or "my-workload" in allowed_sections %}
 <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Universitet" context "profile.sidebar" %}</span></li>
 {% endif %}
 {% if "overall-academic" in allowed_sections %}
@@ -24,6 +24,21 @@
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-schedule' %}active{% endif %}">
         <i class="fas fa-calendar-week sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Dərs cədvəli" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Cədvəl idarəetməsi — `schedule.manage` (proqram koordinatoru, RİM,
+dekan, kafedra müdiri). Adi müəllim bu sətri GÖRMÜR: onun üçün yuxarıdakı «Dərs
+cədvəli» yalnız-oxu görünüşdür. Panel AJAX-safe-dir (sidebar itmir).{% endcomment %}
+{% if "schedule-manage" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=schedule-manage"
+       data-section="schedule-manage"
+       data-title="{% trans 'Cədvəl idarəetməsi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'schedule-manage' %}active{% endif %}">
+        <i class="fas fa-calendar-plus sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Cədvəl idarəetməsi" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}
@@ -87,6 +102,34 @@ sidebar itmədən açılır.{% endcomment %}
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'teaching-handover' %}active{% endif %}">
         <i class="fas fa-right-left sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Fənn təhvili" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Dərs yükü — kafedra müdirinin bölgü ekranı (`workload.manage` /
+`workload.distribute`). SPA bölməsidir: sətirlər JSON-la gəlir, bölgü/təsdiq
+ayrıca POST-la.{% endcomment %}
+{% if "workload-distribution" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=workload-distribution"
+       data-section="workload-distribution"
+       data-title="{% trans 'Yük bölgüsü' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-distribution' %}active{% endif %}">
+        <i class="fas fa-scale-balanced sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Yük bölgüsü" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}«Dərs yüküm» — hər müəllim ÖZ yükünü görür (`workload.view`).{% endcomment %}
+{% if "my-workload" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-workload"
+       data-section="my-workload"
+       data-title="{% trans 'Dərs yüküm' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-workload' %}active{% endif %}">
+        <i class="fas fa-clipboard-list sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Dərs yüküm" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}

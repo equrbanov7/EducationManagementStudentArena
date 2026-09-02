@@ -51,7 +51,13 @@ from .identity_access import (
     activate_staged_account,
     stage_imported_account,
 )
-from .identity_archive import ARCHIVE_ROLE_NAME, AccountArchiveResult, archive_staged_account
+from .identity_archive import (
+    ARCHIVE_ROLE_NAME,
+    AccountArchiveResult,
+    ArchiveRestoreResult,
+    archive_staged_account,
+    restore_archived_account,
+)
 from .organization_requests import (
     activate_verified_membership,
     activate_verified_student_membership,
@@ -73,6 +79,8 @@ from .registration import create_user_with_organization, purge_stale_pending_reg
 
 __all__ = [
     "ARCHIVE_ROLE_NAME",
+    "ArchiveRestoreResult",
+    "restore_archived_account",
     "AccountArchiveResult",
     "AccountDeletionError",
     "AccountRestoreResult",

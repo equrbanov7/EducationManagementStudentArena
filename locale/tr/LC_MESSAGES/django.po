@@ -11722,9 +11722,6 @@ msgid "location"
 msgstr "Konum"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:178
-#, fuzzy
-#| msgctxt "staff.management"
-#| msgid "Position"
 msgctxt "profile.info"
 msgid "position"
 msgstr "Pozisyon"
@@ -42167,11 +42164,12 @@ msgstr "Serbest çalışma"
 
 #: apps/registrar/journal_actions.py:63
 msgid ""
-"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT "
+"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — RİM "
 "rəhbəri yalnız sənədli düzəliş edə bilər."
 msgstr ""
 "Değişiklik için yukarıdan «Yoklama defteri düzeltmesi» modunu etkinleştirin "
-"— BİT Yöneticisi yalnızca belgeli düzeltme yapabilir."
+"— RİM (Dijital Gelişim Merkezi) Yöneticisi yalnızca belgeli düzeltme "
+"yapabilir."
 
 #: apps/registrar/journal_actions.py:123
 msgid "Dərs dəyişdirilmədi — 2 saatlıq düzəliş pəncərəsi bitib."
@@ -45201,8 +45199,10 @@ msgstr "Geçmiş bir tarihe ders açılamaz."
 
 #: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:31
 msgctxt "registrar.journal"
-msgid "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
-msgstr "BİT Yöneticisi: herhangi bir tarih/saat seçilebilir."
+msgid "RİM rəhbəri: istənilən tarix/saat seçilə bilər."
+msgstr ""
+"RİM (Dijital Gelişim Merkezi) Yöneticisi: herhangi bir tarih/saat "
+"seçilebilir."
 
 #: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:35
 msgctxt "registrar.journal"
@@ -57020,3 +57020,2316 @@ msgstr ""
 msgctxt "registrar.legacy_grade"
 msgid "İmtahan Mərkəzi ilə dəqiqləşdirilsin"
 msgstr "Sınav Merkezi ile netleştirilsin"
+
+msgctxt "applications"
+msgid "Yeni"
+msgstr "Yeni"
+
+msgctxt "applications"
+msgid "Baxılır"
+msgstr "İnceleniyor"
+
+msgctxt "applications"
+msgid "Təyin edilib"
+msgstr "Atandı"
+
+msgctxt "applications"
+msgid "Yönləndirilib"
+msgstr "Yönlendirildi"
+
+msgctxt "applications"
+msgid "Məlumat gözlənilir"
+msgstr "Bilgi bekleniyor"
+
+msgctxt "applications"
+msgid "Düzəliş üçün qaytarılıb"
+msgstr "Düzeltme için iade edildi"
+
+msgctxt "applications"
+msgid "Həll olunub"
+msgstr "Çözüldü"
+
+msgctxt "applications"
+msgid "Rədd edilib"
+msgstr "Reddedildi"
+
+msgctxt "applications"
+msgid "Bağlanıb"
+msgstr "Kapatıldı"
+
+msgctxt "applications"
+msgid "Ləğv edilib"
+msgstr "İptal edildi"
+
+msgctxt "applications"
+msgid "Göndərildi"
+msgstr "Gönderildi"
+
+msgctxt "applications"
+msgid "Baxışa götürüldü"
+msgstr "İncelemeye alındı"
+
+msgctxt "applications"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "applications"
+msgid "Məsul şəxsə təyin edildi"
+msgstr "Sorumlu kişiye atandı"
+
+msgctxt "applications"
+msgid "Əlavə məlumat istənildi"
+msgstr "Ek bilgi istendi"
+
+msgctxt "applications"
+msgid "Əlavə məlumat verildi"
+msgstr "Ek bilgi verildi"
+
+msgctxt "applications"
+msgid "Başqa şöbəyə yönləndirildi"
+msgstr "Başka birime yönlendirildi"
+
+msgctxt "applications"
+msgid "Düzəliş üçün qaytarıldı"
+msgstr "Düzeltme için iade edildi"
+
+msgctxt "applications"
+msgid "Düzəlişdən sonra yenidən göndərildi"
+msgstr "Düzeltmeden sonra yeniden gönderildi"
+
+msgctxt "applications"
+msgid "Həll olundu"
+msgstr "Çözüldü"
+
+msgctxt "applications"
+msgid "Rədd edildi"
+msgstr "Reddedildi"
+
+msgctxt "applications"
+msgid "Bağlandı"
+msgstr "Kapatıldı"
+
+msgctxt "applications"
+msgid "Ləğv edildi"
+msgstr "İptal edildi"
+
+msgctxt "applications"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "applications"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+msgctxt "applications"
+msgid "Əməkdaş"
+msgstr "Personel"
+
+msgctxt "applications"
+msgid "Bütün təşkilat (mərkəzi şöbə)"
+msgstr "Tüm kurum (merkezi birim)"
+
+msgctxt "applications"
+msgid "Göndərənin fakültəsi"
+msgstr "Gönderenin fakültesi"
+
+msgctxt "applications"
+msgid "Göndərənin kafedrası"
+msgstr "Gönderenin bölümü"
+
+msgctxt "applications"
+msgid "Göndərənin ixtisası"
+msgstr "Gönderenin uzmanlık alanı"
+
+msgctxt "applications"
+msgid "müraciət"
+msgstr "başvuru"
+
+msgctxt "applications"
+msgid "müraciətlər"
+msgstr "başvurular"
+
+msgctxt "applications"
+msgid "müraciət şöbəsi"
+msgstr "başvuru birimi"
+
+msgctxt "applications"
+msgid "müraciət şöbələri"
+msgstr "başvuru birimleri"
+
+msgctxt "applications"
+msgid "müraciət növü"
+msgstr "başvuru türü"
+
+msgctxt "applications"
+msgid "müraciət növləri"
+msgstr "başvuru türleri"
+
+msgctxt "applications"
+msgid "müraciət nömrə sayğacı"
+msgstr "başvuru numarası sayacı"
+
+msgctxt "applications"
+msgid "müraciət nömrə sayğacları"
+msgstr "başvuru numarası sayaçları"
+
+msgctxt "applications"
+msgid "müraciət hadisəsi"
+msgstr "başvuru olayı"
+
+msgctxt "applications"
+msgid "müraciət hadisələri"
+msgstr "başvuru olayları"
+
+msgctxt "applications"
+msgid "müraciət izləməsi"
+msgstr "başvuru takibi"
+
+msgctxt "applications"
+msgid "müraciət izləmələri"
+msgstr "başvuru takipleri"
+
+msgctxt "applications"
+msgid "müraciət sənədi"
+msgstr "başvuru belgesi"
+
+msgctxt "applications"
+msgid "müraciət sənədləri"
+msgstr "başvuru belgeleri"
+
+msgctxt "organizations.permission.label"
+msgid "Müraciət göndərmək"
+msgstr "Başvuru göndermek"
+
+msgctxt "organizations.permission.label"
+msgid "Gələn müraciətə baxmaq və qərar vermək"
+msgstr "Gelen başvuruyu incelemek ve karar vermek"
+
+msgctxt "organizations.permission.label"
+msgid "Müraciət kataloqunu idarə etmək və hamısına baxmaq"
+msgstr "Başvuru kataloğunu yönetmek ve tümünü görüntülemek"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs cədvəlinə baxış"
+msgstr "Ders programını görüntüleme"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs cədvəlini idarə etmək (slot əlavə/sil)"
+msgstr "Ders programını yönetme (slot ekleme/silme)"
+
+msgctxt "profile.sidebar"
+msgid "Cədvəl idarəetməsi"
+msgstr "Program yönetimi"
+
+msgctxt "registrar.schedule_manage"
+msgid "Həftənin günü 1–7 aralığında olmalıdır."
+msgstr "Haftanın günü 1–7 aralığında olmalıdır."
+
+msgctxt "registrar.schedule_manage"
+msgid "Başlama və bitmə vaxtı düzgün seçilməlidir."
+msgstr "Geçerli bir başlangıç ve bitiş saati seçilmelidir."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitiş saati başlangıç saatından sonra olmalıdır."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bu semestr bitib — cədvəl slotu əlavə edilə bilməz."
+msgstr "Bu dönem sona erdi — programa slot eklenemez."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bu slot artıq cədvəldədir."
+msgstr "Bu slot programda zaten var."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bu vaxt %(subject)s ilə üst-üstə düşür (%(reason)s)."
+msgstr "Bu saat %(subject)s ile çakışıyor (%(reason)s)."
+
+msgctxt "registrar.schedule_manage"
+msgid "Dərs cədvəli dəyişdi: %(subject)s %(when)s"
+msgstr "Ders programı değişti: %(subject)s %(when)s"
+
+msgctxt "registrar.schedule_manage"
+msgid "Slot cədvəldən silindi."
+msgstr "Slot programdan silindi."
+
+msgctxt "registrar.schedule_manage"
+msgid "Cədvələ yeni slot əlavə edildi."
+msgstr "Programa yeni bir slot eklendi."
+
+msgctxt "registrar.schedule_manage"
+msgid "Slot yadda saxlanılmadı — məlumatları yoxlayın."
+msgstr "Slot kaydedilmedi — bilgileri kontrol edin."
+
+msgctxt "registrar.schedule_manage"
+msgid "qrup"
+msgstr "grup"
+
+msgctxt "registrar.schedule_manage"
+msgid "müəllim"
+msgstr "öğretim elemanı"
+
+msgctxt "registrar.schedule_manage"
+msgid "auditoriya"
+msgstr "derslik"
+
+msgctxt "accounts.schedule_manage"
+msgid "Cədvəl idarəetməsi"
+msgstr "Program yönetimi"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan "
+"əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun "
+"tələbələrinə bildiriş kimi gedir."
+msgstr ""
+"Grubun haftalık ders programını kurun: slot ekleyin, çakışmaları kaydetmeden"
+" önce görün, gereksiz slotu silin. Değişiklik öğretim elemanına ve grubun "
+"öğrencilerine bildirilir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+msgstr "Ders programını yönetme yetkiniz yok."
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Dərs cədvəlini idarə etmək üçün icazəniz yoxdur — bu bölmə yalnız "
+"səlahiyyətli rollar üçündür."
+msgstr ""
+"Ders programını yönetme yetkiniz yok — bu bölüm yalnızca yetkili roller "
+"içindir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Naməlum əməliyyat."
+msgstr "Bilinmeyen işlem."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bütün universitet"
+msgstr "Tüm üniversite"
+
+msgctxt "accounts.schedule_manage"
+msgid "Yalnız öz struktur bölmələriniz"
+msgstr "Yalnızca kendi yapısal biriminiz"
+
+msgctxt "accounts.schedule_manage"
+msgid "Səlahiyyət sahəniz"
+msgstr "Yetki alanınız"
+
+msgctxt "accounts.schedule_manage"
+msgid "Tədris ili"
+msgstr "Öğretim yılı"
+
+msgctxt "accounts.schedule_manage"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "accounts.schedule_manage"
+msgid "Görünüş"
+msgstr "Görünüm"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup cədvəli"
+msgstr "Grup programı"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim cədvəli"
+msgstr "Öğretim elemanı programı"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+msgctxt "accounts.schedule_manage"
+msgid "Seçin…"
+msgstr "Seçin…"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Səlahiyyət sahənizdə qrup yoxdur. Üzvlüyünüzə struktur bölməsi (scope_unit) "
+"təyin edilməyibsə siyahı boş qalır."
+msgstr ""
+"Yetki alanınızda grup yok. Üyeliğinize yapısal birim (scope_unit) "
+"atanmamışsa liste boş kalır."
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Bu təşkilatda akademik semestr yoxdur — əvvəlcə semestr yaradılmalıdır."
+msgstr "Bu kurumda akademik dönem yok — önce bir dönem oluşturulmalıdır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slotlar"
+msgstr "Slotlar"
+
+msgctxt "accounts.schedule_manage"
+msgid "Gün"
+msgstr "Gün"
+
+msgctxt "accounts.schedule_manage"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "accounts.schedule_manage"
+msgid "Fənn"
+msgstr "Ders"
+
+msgctxt "accounts.schedule_manage"
+msgid "Növ"
+msgstr "Tür"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq"
+msgstr "Derslik"
+
+msgctxt "accounts.schedule_manage"
+msgid "Həftə"
+msgstr "Hafta"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əməliyyat"
+msgstr "İşlem"
+
+msgctxt "accounts.schedule_manage"
+msgid "Slotu sil"
+msgstr "Slotu sil"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu görünüşdə hələ slot yoxdur."
+msgstr "Bu görünümde henüz slot yok."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slot əlavə et"
+msgstr "Slot ekle"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs növü"
+msgstr "Ders türü"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs saatı"
+msgstr "Ders saati"
+
+msgctxt "accounts.schedule_manage"
+msgid "Sərbəst vaxt…"
+msgstr "Serbest saat…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Başlama"
+msgstr "Başlangıç"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bitmə"
+msgstr "Bitiş"
+
+msgctxt "accounts.schedule_manage"
+msgid "məs. Otaq 304 · II korpus"
+msgstr "örn. Derslik 304 · II. Blok"
+
+msgctxt "accounts.schedule_manage"
+msgid "Konflikti yoxla"
+msgstr "Çakışmayı kontrol et"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Bu qrup üçün seçilmiş semestrdə dərs açılışı yoxdur — əvvəlcə fənn açılışı "
+"yaradılmalıdır."
+msgstr ""
+"Bu grubun seçilen dönemde ders açılışı yok — önce bir ders açılışı "
+"oluşturulmalıdır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slotu silmək?"
+msgstr "Slot silinsin mi?"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Silinmə müəllimə və qrupun tələbələrinə bildiriş kimi gedir və audit "
+"jurnalına yazılır."
+msgstr ""
+"Silme işlemi öğretim elemanına ve grubun öğrencilerine bildirilir ve denetim"
+" günlüğüne yazılır."
+
+msgctxt "accounts.schedule_manage"
+msgid "İmtina"
+msgstr "Vazgeç"
+
+msgctxt "accounts.schedule_manage"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "İşlem tamamlanmadı."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slot əlavə edildi."
+msgstr "Slot eklendi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slot silindi."
+msgstr "Slot silindi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Konflikt yoxdur — slot əlavə edilə bilər."
+msgstr "Çakışma yok — slot eklenebilir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Konflikt"
+msgstr "Çakışma"
+
+msgctxt "accounts.schedule_manage"
+msgid "Yoxlanılır…"
+msgstr "Kontrol ediliyor…"
+
+msgid "Application / Request"
+msgstr "Başvuru / talep"
+
+msgctxt "applications"
+msgid "Müraciətlər"
+msgstr "Başvurular"
+
+msgctxt "applications"
+msgid "Müraciətlərim"
+msgstr "Başvurularım"
+
+msgctxt "applications"
+msgid "Yeni müraciət"
+msgstr "Yeni başvuru"
+
+msgctxt "applications"
+msgid "Arxiv"
+msgstr "Arşiv"
+
+msgctxt "applications"
+msgid "Mənə gələnlər"
+msgstr "Bana gelenler"
+
+msgctxt "applications"
+msgid "İzlədiklərim"
+msgstr "Takip ettiklerim"
+
+msgctxt "applications"
+msgid "Açıq olanlar"
+msgstr "Açık olanlar"
+
+msgctxt "applications"
+msgid "Müddəti keçən"
+msgstr "Süresi geçenler"
+
+msgctxt "applications"
+msgid "Bağlananlar"
+msgstr "Kapananlar"
+
+msgctxt "applications"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "applications"
+msgid "Bütün növlər"
+msgstr "Tüm türler"
+
+msgctxt "applications"
+msgid "Sıfırla"
+msgstr "Temizle"
+
+msgctxt "applications"
+msgid "Müraciət axtar"
+msgstr "Başvuru ara"
+
+msgctxt "applications"
+msgid "Mövzu, nömrə və ya göndərən axtar"
+msgstr "Konu, numara veya gönderene göre ara"
+
+msgctxt "applications"
+msgid "Müraciətin detalı"
+msgstr "Başvuru ayrıntısı"
+
+msgctxt "applications"
+msgid "Müraciətin növü"
+msgstr "Başvuru türü"
+
+msgctxt "applications"
+msgid "Müraciətin mətni"
+msgstr "Başvuru metni"
+
+msgctxt "applications"
+msgid "Müraciətin gedişi"
+msgstr "Başvurunun seyri"
+
+msgctxt "applications"
+msgid "Əlavə olunan sənədlər"
+msgstr "Eklenen belgeler"
+
+msgctxt "applications"
+msgid "Mövzu"
+msgstr "Konu"
+
+msgctxt "applications"
+msgid "Sənəd əlavə et"
+msgstr "Belge ekle"
+
+msgctxt "applications"
+msgid "Ləğv et"
+msgstr "Vazgeç"
+
+msgctxt "applications"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "applications"
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+msgctxt "applications"
+msgid "Göndər"
+msgstr "Gönder"
+
+msgctxt "applications"
+msgid "Yönləndir"
+msgstr "Yönlendir"
+
+msgctxt "applications"
+msgid "Təyin et"
+msgstr "Ata"
+
+msgctxt "applications"
+msgid "Rədd et"
+msgstr "Reddet"
+
+msgctxt "applications"
+msgid "Daha çox"
+msgstr "Daha fazla"
+
+msgctxt "applications"
+msgid "Yüklənir…"
+msgstr "Yükleniyor…"
+
+msgctxt "applications"
+msgid "gün"
+msgstr "gün"
+
+msgctxt "applications"
+msgid "bağlanıb"
+msgstr "kapatıldı"
+
+msgctxt "applications"
+msgid "daxili qeyd"
+msgstr "iç not"
+
+msgctxt "applications"
+msgid "cavab müddəti keçir"
+msgstr "yanıt süresi geçiyor"
+
+msgctxt "applications"
+msgid "Açıq müraciətim"
+msgstr "Açık başvurum"
+
+msgctxt "applications"
+msgid "Cavablanıb"
+msgstr "Yanıtlandı"
+
+msgctxt "applications"
+msgid "Orta cavab müddəti"
+msgstr "Ortalama yanıt süresi"
+
+msgctxt "applications"
+msgid "Mənə gələn açıq"
+msgstr "Bana gelen açık"
+
+msgctxt "applications"
+msgid "Yeni — baxılmayıb"
+msgstr "Yeni — incelenmedi"
+
+msgctxt "applications"
+msgid "Cavab müddəti keçən"
+msgstr "Yanıt süresi geçen"
+
+msgctxt "applications"
+msgid "İzlədiyim"
+msgstr "Takip ettiğim"
+
+msgctxt "applications"
+msgid "cavab gözləyir"
+msgstr "yanıt bekliyor"
+
+msgctxt "applications"
+msgid "sizdən sənəd istənilib"
+msgstr "sizden belge istendi"
+
+msgctxt "applications"
+msgid "bağlanmış müraciət"
+msgstr "kapatılmış başvuru"
+
+msgctxt "applications"
+msgid "son 30 gün üzrə"
+msgstr "son 30 gün için"
+
+msgctxt "applications"
+msgid "cavab verilməlidir"
+msgstr "yanıt verilmeli"
+
+msgctxt "applications"
+msgid "ilk baxış gözlənilir"
+msgstr "ilk inceleme bekleniyor"
+
+msgctxt "applications"
+msgid "hamısına baxılıb"
+msgstr "tümü incelendi"
+
+msgctxt "applications"
+msgid "təcili baxılmalıdır"
+msgstr "acilen incelenmeli"
+
+msgctxt "applications"
+msgid "gecikən yoxdur"
+msgstr "geciken yok"
+
+msgctxt "applications"
+msgid "yönləndirdiyim müraciətlər"
+msgstr "yönlendirdiğim başvurular"
+
+msgctxt "applications"
+msgid ""
+"Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. "
+"Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı "
+"burada görürsən."
+msgstr ""
+"Transkript, belge, not itirazı, şikâyet — hepsi buradan gönderilir. "
+"Gönderdikten sonra başvurunun nerede olduğunu, kimin baktığını ve yanıtı "
+"burada görürsünüz."
+
+msgctxt "applications"
+msgid ""
+"Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya "
+"səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — "
+"yönləndirdikdən sonra da izləməkdə davam edirsiniz."
+msgstr ""
+"Biriminize gelen başvurular. Yanıtlayabilir, ek bilgi isteyebilir ya da "
+"yetkiniz dışındaki konuyu başka birime yönlendirebilirsiniz — "
+"yönlendirdikten sonra da izlemeye devam edersiniz."
+
+msgctxt "applications"
+msgid "Növü seçin — sistem müraciəti avtomatik aidiyyəti şöbəyə göndərəcək."
+msgstr ""
+"Türü seçin — sistem başvuruyu otomatik olarak ilgili birime gönderecek."
+
+msgctxt "applications"
+msgid "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək."
+msgstr "Türü seçtiğinizde başvurunun gideceği birim burada görünecek."
+
+msgctxt "applications"
+msgid "Bir cümlə ilə nə istədiyiniz"
+msgstr "Ne istediğiniz, tek cümleyle"
+
+msgctxt "applications"
+msgid "Konkret tarix, fənn və qrup adı yazsanız cavab daha tez gələcək."
+msgstr "Kesin tarih, ders ve grup adını yazarsanız yanıt daha hızlı gelir."
+
+msgctxt "applications"
+msgid "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB"
+msgstr "Dosya seç — PDF, JPG veya DOCX, en fazla 10 MB"
+
+msgctxt "applications"
+msgid "Müraciəti göndər"
+msgstr "Başvuruyu gönder"
+
+msgctxt "applications"
+msgid "Müraciəti yönləndir"
+msgstr "Başvuruyu yönlendir"
+
+msgctxt "applications"
+msgid "Hansı şöbəyə?"
+msgstr "Hangi birime?"
+
+msgctxt "applications"
+msgid "Yönləndirmə qeydi"
+msgstr "Yönlendirme notu"
+
+msgctxt "applications"
+msgid "Niyə bu şöbəyə göndərilir və nə gözlənilir"
+msgstr "Neden bu birime gönderiliyor ve ne bekleniyor"
+
+msgctxt "applications"
+msgid ""
+"Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin."
+msgstr ""
+"Başvuruyu izlemeye devam edeyim — yanıtlandığında bana da bildirim gelsin."
+
+msgctxt "applications"
+msgid ""
+"Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə "
+"məsul şöbə dəyişir."
+msgstr ""
+"Başvuru sahibi yönlendirmeyi kendi panelinde görecek — başvuru kaybolmaz, "
+"yalnızca sorumlu birim değişir."
+
+msgctxt "applications"
+msgid "Məsul şəxsə təyin et"
+msgstr "Sorumlu kişiye ata"
+
+msgctxt "applications"
+msgid "Məsul şəxs"
+msgstr "Sorumlu kişi"
+
+msgctxt "applications"
+msgid "Məsul şəxs üçün qısa izah"
+msgstr "Sorumlu kişi için kısa açıklama"
+
+msgctxt "applications"
+msgid "Müraciətlər paneli üçün aktiv təşkilat konteksti tapılmadı."
+msgstr "Başvurular paneli için etkin kurum bağlamı bulunamadı."
+
+msgctxt "applications"
+msgid "Cavab ver"
+msgstr "Yanıtla"
+
+msgctxt "applications"
+msgid "Müraciət sahibinin görəcəyi cavab"
+msgstr "Başvuru sahibinin göreceği yanıt"
+
+msgctxt "applications"
+msgid ""
+"Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni "
+"görəcək."
+msgstr ""
+"Yanıt metni en az 10 karakter olmalı — başvuru sahibi tam olarak bu metni "
+"görecek."
+
+msgctxt "applications"
+msgid "Həll olundu — bağla"
+msgstr "Çözüldü — kapat"
+
+msgctxt "applications"
+msgid "Əlavə məlumat istə"
+msgstr "Ek bilgi iste"
+
+msgctxt "applications"
+msgid "Əlavə məlumat göndər"
+msgstr "Ek bilgi gönder"
+
+msgctxt "applications"
+msgid "Başqa şöbəyə yönləndir"
+msgstr "Başka birime yönlendir"
+
+msgctxt "applications"
+msgid "Düzəliş üçün qaytar"
+msgstr "Düzeltme için iade et"
+
+msgctxt "applications"
+msgid "Düzəlişdən sonra yenidən göndər"
+msgstr "Düzeltmeden sonra yeniden gönder"
+
+msgctxt "applications"
+msgid "Qeyd əlavə et"
+msgstr "Not ekle"
+
+msgctxt "applications"
+msgid "Təsdiqləyirəm — bağla"
+msgstr "Onaylıyorum — kapat"
+
+msgctxt "applications"
+msgid "Müraciəti ləğv et"
+msgstr "Başvuruyu iptal et"
+
+msgctxt "applications"
+msgid "Nə düzəldilməlidir?"
+msgstr "Ne düzeltilmeli?"
+
+msgctxt "applications"
+msgid "Ləğv səbəbi"
+msgstr "İptal nedeni"
+
+msgctxt "applications"
+msgid "İstənilən məlumat"
+msgstr "İstenen bilgi"
+
+msgctxt "applications"
+msgid "Müraciəti bağlayaq?"
+msgstr "Başvuruyu kapatalım mı?"
+
+msgctxt "applications"
+msgid ""
+"Cavabı təsdiqləyirsiniz və müraciət bağlanır. Bu əməl geri qaytarılmır."
+msgstr "Yanıtı onaylıyorsunuz ve başvuru kapanıyor. Bu işlem geri alınamaz."
+
+msgctxt "applications"
+msgid "Müraciət tapılmadı"
+msgstr "Başvuru bulunamadı"
+
+msgctxt "applications"
+msgid "Müddəti keçən müraciət yoxdur"
+msgstr "Süresi geçen başvuru yok"
+
+msgctxt "applications"
+msgid "İzlədiyiniz müraciət yoxdur"
+msgstr "İzlediğiniz başvuru yok"
+
+msgctxt "applications"
+msgid "Başqa şöbəyə yönləndirdiyiniz müraciətlər burada görünəcək."
+msgstr "Başka birime yönlendirdiğiniz başvurular burada görünecek."
+
+msgctxt "applications"
+msgid ""
+"Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya "
+"bilərsiniz."
+msgstr ""
+"Henüz başvuru göndermediniz. “Yeni başvuru” düğmesiyle başlayabilirsiniz."
+
+msgctxt "applications"
+msgid "Bu filtrə uyğun müraciət yoxdur — filtri dəyişin."
+msgstr "Bu filtreye uyan başvuru yok — filtreyi değiştirin."
+
+msgctxt "applications"
+msgid "Müraciət bağlanıb — yalnız oxuna bilər."
+msgstr "Başvuru kapatıldı — yalnızca okunabilir."
+
+msgctxt "applications"
+msgid ""
+"Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə "
+"bilərsiniz."
+msgstr ""
+"Başvuru kapatıldı. Katılmıyorsanız aynı konuda yeni başvuru "
+"gönderebilirsiniz."
+
+msgctxt "applications"
+msgid "Bu şöbədə təyin ediləcək istifadəçi tapılmadı."
+msgstr "Bu birimde atanacak kullanıcı bulunamadı."
+
+msgctxt "applications"
+msgid "Bir əməldə ən çoxu 5 fayl əlavə edilə bilər."
+msgstr "Bir işlemde en fazla 5 dosya eklenebilir."
+
+msgctxt "applications"
+msgid "Siyahı yüklənmədi, yenidən cəhd edin."
+msgstr "Liste yüklenemedi, tekrar deneyin."
+
+msgctxt "applications"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgctxt "applications"
+msgid "{n} iş günü"
+msgstr "{n} iş günü"
+
+msgctxt "applications"
+msgid "{n} iş günü müddət"
+msgstr "{n} iş günü süre"
+
+msgctxt "applications"
+msgid "{n} simvol"
+msgstr "{n} karakter"
+
+msgctxt "applications"
+msgid "Ən azı {min} simvol — hazırda {n}"
+msgstr "En az {min} karakter — şu anda {n}"
+
+msgctxt "applications"
+msgid "Cavab müddətinə {n} iş günü qalıb (norma {m} iş günü)"
+msgstr "Yanıt süresine {n} iş günü kaldı (norm {m} iş günü)"
+
+msgctxt "applications"
+msgid "Cavab müddəti {n} gün keçib (norma {m} iş günü)"
+msgstr "Yanıt süresi {n} gün geçti (norm {m} iş günü)"
+
+msgctxt "applications"
+msgid "Müraciət bağlanıb — {status}"
+msgstr "Başvuru kapatıldı — {status}"
+
+msgctxt "applications"
+msgid ""
+"Müraciətiniz hazırda {unit}-dədir. Cavab veriləndə bildiriş gələcək və mətn "
+"burada görünəcək."
+msgstr ""
+"Başvurunuz şu anda {unit} biriminde. Yanıtlandığında bildirim gelecek ve "
+"metin burada görünecek."
+
+msgctxt "applications"
+msgid ""
+"Müraciət hazırda {unit}-dədir. Siz yönləndirdiyiniz üçün gedişini "
+"izləyirsiniz, amma cavabı həmin şöbə verəcək."
+msgstr ""
+"Başvuru şu anda {unit} biriminde. Yönlendiren siz olduğunuz için "
+"izliyorsunuz, ancak yanıtı o birim verecek."
+
+msgctxt "applications"
+msgid "Müraciət {unit}-nə göndərildi — gedişini buradan izləyə bilərsiniz."
+msgstr "Başvuru {unit} birimine gönderildi — buradan takip edebilirsiniz."
+
+msgctxt "applications"
+msgid "{no} — {unit}-nə yönləndirildi · izləməkdə davam edirsiniz."
+msgstr "{no} — {unit} birimine yönlendirildi · izlemeye devam ediyorsunuz."
+
+msgctxt "applications"
+msgid "{no} — {unit}-nə yönləndirildi."
+msgstr "{no} — {unit} birimine yönlendirildi."
+
+msgctxt "applications"
+msgid "{no} — {status}. Müraciət sahibinə bildiriş göndərildi."
+msgstr "{no} — {status}. Başvuru sahibine bildirim gönderildi."
+
+msgctxt "applications"
+msgid "{no} — yeniləndi."
+msgstr "{no} — güncellendi."
+
+msgctxt "applications"
+msgid "«{name}» 10 MB-dan böyükdür."
+msgstr "“{name}” 10 MB’den büyük."
+
+msgctxt "applications"
+msgid "«{name}» dəstəklənmir — PDF, JPG, PNG və ya DOCX olmalıdır."
+msgstr "“{name}” desteklenmiyor — PDF, JPG, PNG veya DOCX olmalı."
+
+msgctxt "accounts.applications"
+msgid "Tələbə kabineti"
+msgstr "Öğrenci kabini"
+
+msgctxt "accounts.applications"
+msgid "Müəllim kabineti"
+msgstr "Öğretmen kabini"
+
+msgctxt "accounts.applications"
+msgid "Əməkdaş kabineti"
+msgstr "Personel kabini"
+
+msgctxt "accounts.applications"
+msgid "Kabinet"
+msgstr "Kabin"
+
+msgctxt "accounts.applications"
+msgid "Şöbə"
+msgstr "Birim"
+
+msgctxt "accounts.applications"
+msgid "şöbəyə gələn müraciətlər"
+msgstr "birime gelen başvurular"
+
+msgctxt "accounts.applications"
+msgid "öz müraciətlərim"
+msgstr "kendi başvurularım"
+
+msgctxt "profile.sidebar"
+msgid "Müraciətlərim"
+msgstr "Başvurularım"
+
+#: apps/registrar/journal_actions.py:63
+msgid ""
+"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT "
+"rəhbəri yalnız sənədli düzəliş edə bilər."
+msgstr ""
+"Değişiklik için yukarıdan «Yoklama defteri düzeltmesi» modunu etkinleştirin "
+"— BİT Yöneticisi yalnızca belgeli düzeltme yapabilir."
+
+#: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:31
+msgctxt "registrar.journal"
+msgid "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
+msgstr "BİT Yöneticisi: herhangi bir tarih/saat seçilebilir."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "236 İ ing, 2-ci yarımqrup"
+msgstr "236 İng, 2. alt grup"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Axtarış"
+msgstr "Arama"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Aç"
+msgstr "Görüntüle"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bağla"
+msgstr "Kapat"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Birləşmə sayı"
+msgstr "Birleşme sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bu il üçün tapşırıq yoxdur"
+msgstr "Bu yıl için görev yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Buraxılış işi"
+msgstr "Bitirme tezi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bölgünü təsdiqlə"
+msgstr "Dağıtımı onayla"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "CƏMİ"
+msgstr "TOPLAM"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Dissertant rəhbərliyi"
+msgstr "Doktora danışmanlığı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Doluluq"
+msgstr "Doluluk"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Düzəliş sorğusu"
+msgstr "Düzeltme talebi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Düzəlişi qeyd et"
+msgstr "Düzeltmeyi kaydet"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Dərs yüküm"
+msgstr "Ders yüküm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Elmi-tədqiqat təcrübəsi"
+msgstr "Bilimsel araştırma stajı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Excel yüklə"
+msgstr "Excel indir"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Forma"
+msgstr "Öğrenim biçimi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəaliyyət"
+msgstr "Etkinlik"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəaliyyət növü"
+msgstr "Etkinlik türü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn"
+msgstr "Ders"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn (kataloq)"
+msgstr "Ders (katalog)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn adı (sərbəst)"
+msgstr "Ders adı (serbest)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəsil"
+msgstr "Dönem"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Hamısı"
+msgstr "Tümü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Jurnal"
+msgstr "Yoklama defteri"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedra bölgünü təsdiqləyəndən sonra fənləriniz burada görünəcək və sizə "
+"bildiriş gələcək."
+msgstr ""
+"Bölüm dağıtımı onayladıktan sonra dersleriniz burada görünecek ve size "
+"bildirim gelecek."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedra tərəfindən sizə ayrılmış illik dərs yükü. Cədvəl yalnız təsdiqlənmiş"
+" bölgünü göstərir; sual yaranarsa kafedra müdirinə müraciət edin."
+msgstr ""
+"Bölüm tarafından size ayrılan yıllık ders yükü. Tablo yalnızca onaylanmış "
+"dağıtımı gösterir; sorularınız için bölüm başkanına başvurun."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Hər fəaliyyət"
+" növü (mühazirə, seminar, laboratoriya) ayrıca bölünür; qalıq saat real "
+"vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və "
+"elektron jurnal açılışları yaradılır."
+msgstr ""
+"Bölümün yıllık öğretim görevini öğretim elemanları arasında dağıtın. Her "
+"etkinlik türü (ders, seminer, laboratuvar) ayrı dağıtılır; kalan saat gerçek"
+" zamanlı gösterilir. Dağıtım onaylandığında öğretim elemanlarına bildirim "
+"gider ve elektronik defter kayıtları oluşturulur."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kredit"
+msgstr "Kredi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kredit dəyəri"
+msgstr "Kredi değeri"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Laboratoriya (cəmi)"
+msgstr "Laboratuvar (toplam)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Laboratoriya (plan)"
+msgstr "Laboratuvar (plan)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Mühazirə (cəmi)"
+msgstr "Ders (toplam)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Mühazirə (plan)"
+msgstr "Ders (plan)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllim yükü"
+msgstr "Öğretim elemanı yükü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllimə bölgü"
+msgstr "Öğretim elemanına dağıtım"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Məlumat yoxdur"
+msgstr "Veri yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Məsləhət"
+msgstr "Danışma"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Norma"
+msgstr "Norm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Norma NK №215-ə görə bir ştat üçün 500 saatdır (təşkilat konfiqurasiyası ilə"
+" dəyişir)."
+msgstr ""
+"215 sayılı Bakanlar Kurulu kararına göre norm bir tam kadro için 500 saattir"
+" (kuruma göre yapılandırılır)."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qeyd"
+msgstr "Not"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup qeydi"
+msgstr "Grup notu"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup(lar)"
+msgstr "Grup(lar)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup/yarımqrup sayı"
+msgstr "Grup/alt grup sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qruplar"
+msgstr "Gruplar"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saat"
+msgstr "Saat sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saathesabı"
+msgstr "Saat ücretli"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saathesabı fondundan"
+msgstr "Saat ücretli fondan"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Semestr"
+msgstr "Yarıyıl"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Semestr (dövr)"
+msgstr "Yarıyıl (dönem)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seminar (cəmi)"
+msgstr "Seminer (toplam)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seminar (plan)"
+msgstr "Seminer (plan)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seçilməyib"
+msgstr "Seçilmedi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Səbəb"
+msgstr "Neden"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Sətir növü"
+msgstr "Satır türü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Sətir əlavə et"
+msgstr "Satır ekle"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Səviyyə"
+msgstr "Düzey"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tapşırıq sətri"
+msgstr "Görev satırı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tapşırıq yarat"
+msgstr "Görev oluştur"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tədris ili"
+msgstr "Öğretim yılı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tədris planından gətir"
+msgstr "Öğretim planından getir"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təhsil forması"
+msgstr "Öğrenim biçimi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tələbə sayı"
+msgstr "Öğrenci sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqdən sonra:"
+msgstr "Onaydan sonra:"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Təsdiqlənmiş bölgü dəyişdirilir — səbəb və qeyd məcburidir, hər düzəliş "
+"audit jurnalına yazılır."
+msgstr ""
+"Onaylanmış dağıtım değiştiriliyor — neden ve not zorunludur, her düzeltme "
+"denetim kaydına yazılır."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqlənmiş dərs yükü yoxdur"
+msgstr "Onaylanmış ders yükü yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Boş (öğretim elemanı atanmadı)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yekun"
+msgstr "Genel"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yük bölgüsü"
+msgstr "Yük dağıtımı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"fənn + semestr + qrup dolu olan sətirlər üçün elektron jurnal açılışı "
+"yaradılacaq (mövcud açılışlar silinmir);"
+msgstr ""
+"ders, yarıyıl ve grup alanları dolu satırlar için elektronik defter kaydı "
+"oluşturulacak (mevcut kayıtlar silinmez);"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "fənn və ya qrup"
+msgstr "ders veya grup"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "hər müəllimə «Dərs yükü təyin edildi» bildirişi gedəcək;"
+msgstr "her öğretim elemanına “Ders yükü atandı” bildirimi gidecek;"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "saat"
+msgstr "ders saati"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "saat / il"
+msgstr "saat / yıl"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"sonrakı dəyişikliklər yalnız səbəbli düzəliş (amendment) ilə mümkün olacaq."
+msgstr "sonraki değişiklikler yalnızca gerekçeli düzeltme ile mümkün olacak."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"«Tapşırıq yarat» düyməsi ilə kafedranın illik tapşırığını açın, sonra "
+"sətirləri əlavə edin və ya tədris planından gətirin."
+msgstr ""
+"“Görev oluştur” ile bölümün yıllık görevini açın, ardından satırları ekleyin"
+" ya da öğretim planından getirin."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İllik cəmi"
+msgstr "Yıllık toplam"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İmtahan"
+msgstr "Sınav"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İmtina"
+msgstr "Vazgeç"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İstehsalat təcrübəsi"
+msgstr "İşletme stajı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İxtisas"
+msgstr "Uzmanlık"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Əhatənizdə kafedra yoxdur"
+msgstr "Yetki alanınızda bölüm yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Əlavə et"
+msgstr "Ekle"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "profile.sidebar"
+msgid "Dərs yüküm"
+msgstr "Ders yüküm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "profile.sidebar"
+msgid "Yük bölgüsü"
+msgstr "Yük dağıtımı"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbə idxalı (siyahıdan toplu hesab yaratmaq)"
+msgstr "Öğrenci alımı (listeden toplu hesap oluşturma)"
+
+msgctxt "profile.sidebar"
+msgid "Tələbə idxalı"
+msgstr "Öğrenci alımı"
+
+msgctxt "student_intake"
+msgid "Faylın başlıq sətrində məcburi sütunlar tapılmadı: %s"
+msgstr "Dosyanın başlık satırında zorunlu sütunlar yok: %s"
+
+msgctxt "student_intake"
+msgid "Bu serverdə .xlsx oxunmur — faylı CSV kimi yadda saxlayıb yenidən yükləyin."
+msgstr "Bu sunucu .xlsx okuyamıyor — dosyayı CSV olarak kaydedip yeniden yükleyin."
+
+msgctxt "student_intake"
+msgid "Fayl oxunmadı — zədəli və ya dəstəklənməyən Excel faylıdır."
+msgstr "Dosya okunamadı — bozuk veya desteklenmeyen bir Excel dosyası."
+
+msgctxt "student_intake"
+msgid "Fayl boşdur — başlıq sətri tapılmadı."
+msgstr "Dosya boş — başlık satırı bulunamadı."
+
+msgctxt "student_intake"
+msgid "Fayl oxunmadı — kodlaşdırma tanınmadı."
+msgstr "Dosya okunamadı — kodlama tanınmadı."
+
+msgctxt "student_intake"
+msgid "Fayl seçilməyib."
+msgstr "Dosya seçilmedi."
+
+msgctxt "student_intake"
+msgid "Fayl çox böyükdür (maksimum 5 MB)."
+msgstr "Dosya çok büyük (en fazla 5 MB)."
+
+msgctxt "student_intake"
+msgid "Yalnız .xlsx və ya .csv faylı qəbul olunur."
+msgstr "Yalnızca .xlsx veya .csv dosyaları kabul edilir."
+
+msgctxt "student_intake"
+msgid "Fayl boşdur."
+msgstr "Dosya boş."
+
+msgctxt "student_intake"
+msgid "Faylda tələbə sətri tapılmadı."
+msgstr "Dosyada öğrenci satırı bulunamadı."
+
+msgctxt "student_intake"
+msgid "FİN"
+msgstr "Kimlik No (FİN)"
+
+msgctxt "student_intake"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "student_intake"
+msgid "Soyad"
+msgstr "Soyad"
+
+msgctxt "student_intake"
+msgid "Ata adı"
+msgstr "Baba adı"
+
+msgctxt "student_intake"
+msgid "Doğum tarixi"
+msgstr "Doğum tarihi"
+
+msgctxt "student_intake"
+msgid "Cins"
+msgstr "Cinsiyet"
+
+msgctxt "student_intake"
+msgid "E-poçt"
+msgstr "E-posta"
+
+msgctxt "student_intake"
+msgid "Telefon"
+msgstr "Telefon"
+
+msgctxt "student_intake"
+msgid "Tələbə kodu"
+msgstr "Öğrenci kodu"
+
+msgctxt "student_intake"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "student_intake"
+msgid "İxtisas"
+msgstr "Bölüm"
+
+msgctxt "student_intake"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "student_intake"
+msgid "Qəbul ili"
+msgstr "Kayıt yılı"
+
+msgctxt "student_intake"
+msgid "Kurs"
+msgstr "Sınıf"
+
+msgctxt "student_intake"
+msgid "Dil bölməsi"
+msgstr "Dil bölümü"
+
+msgctxt "student_intake"
+msgid "Təhsil səviyyəsi"
+msgstr "Öğrenim düzeyi"
+
+msgctxt "student_intake"
+msgid "7 simvol, A-Z0-9 (məcburi)"
+msgstr "7 karakter, A-Z0-9 (zorunlu)"
+
+msgctxt "student_intake"
+msgid "Məcburi"
+msgstr "Zorunlu"
+
+msgctxt "student_intake"
+msgid "Boş qala bilər"
+msgstr "Boş bırakılabilir"
+
+msgctxt "student_intake"
+msgid "gg.aa.iiii və ya iiii-aa-gg"
+msgstr "gg.aa.yyyy veya yyyy-aa-gg"
+
+msgctxt "student_intake"
+msgid "kişi / qadın"
+msgstr "erkek / kadın"
+
+msgctxt "student_intake"
+msgid "Boşdursa placeholder yazılır"
+msgstr "Boşsa yer tutucu yazılır"
+
+msgctxt "student_intake"
+msgid "İstifadəçi adı bundan qurulur"
+msgstr "Kullanıcı adı bundan oluşturulur"
+
+msgctxt "student_intake"
+msgid "Adı və ya kodu (yoxlama üçün)"
+msgstr "Adı veya kodu (doğrulama için)"
+
+msgctxt "student_intake"
+msgid "Adı və ya kodu (məcburi)"
+msgstr "Adı veya kodu (zorunlu)"
+
+msgctxt "student_intake"
+msgid "Məsələn 2025 (məcburi)"
+msgstr "Örneğin 2025 (zorunlu)"
+
+msgctxt "student_intake"
+msgid "1–6 (yalnız yoxlama)"
+msgstr "1–6 (yalnızca doğrulama)"
+
+msgctxt "student_intake"
+msgid "az / en / ru (yalnız yoxlama)"
+msgstr "az / en / ru (yalnızca doğrulama)"
+
+msgctxt "student_intake"
+msgid "bakalavr / magistr (yoxlama)"
+msgstr "lisans / yüksek lisans (doğrulama)"
+
+msgctxt "student_intake"
+msgid "FİN boşdur."
+msgstr "Kimlik No boş."
+
+msgctxt "student_intake"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "Kimlik No 7 karakterli [A-Z0-9] biçiminde olmalıdır."
+
+msgctxt "student_intake"
+msgid "Ad və soyad məcburidir."
+msgstr "Ad ve soyad zorunludur."
+
+msgctxt "student_intake"
+msgid "Bu FİN faylda təkrarlanır."
+msgstr "Bu Kimlik No dosyada tekrarlanıyor."
+
+msgctxt "student_intake"
+msgid "Bu FİN artıq sistemdə var — sətir ötürülür."
+msgstr "Bu Kimlik No sistemde zaten var — satır atlanıyor."
+
+msgctxt "student_intake"
+msgid "Qrup tapılmadı: %s"
+msgstr "Grup bulunamadı: %s"
+
+msgctxt "student_intake"
+msgid "(boş)"
+msgstr "(boş)"
+
+msgctxt "student_intake"
+msgid "Bu adla birdən çox qrup var — kodla göstərin: %s"
+msgstr "Bu adda birden fazla grup var — kodla belirtin: %s"
+
+msgctxt "student_intake"
+msgid "%(label)s tapılmadı: %(value)s"
+msgstr "%(label)s bulunamadı: %(value)s"
+
+msgctxt "student_intake"
+msgid "%(label)s qrupun strukturuna uyğun gəlmir: %(value)s"
+msgstr "%(label)s grubun yapısına uymuyor: %(value)s"
+
+msgctxt "student_intake"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Bu grup için akademik program bulunamadı — önce yapı kurulmalıdır."
+
+msgctxt "student_intake"
+msgid "Təhsil səviyyəsi proqramla üst-üstə düşmür — proqramın səviyyəsi tətbiq olunur."
+msgstr "Öğrenim düzeyi programla uyuşmuyor — programın düzeyi uygulanır."
+
+msgctxt "student_intake"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Kayıt yılı sayı olmalıdır."
+
+msgctxt "student_intake"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Kayıt yılı 1950 ile %d arasında olmalıdır."
+
+msgctxt "student_intake"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Doğum tarihi tanınmadı (gg.aa.yyyy biçimini kullanın)."
+
+msgctxt "student_intake"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Doğum tarihi mantıksız."
+
+msgctxt "student_intake"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Cinsiyet tanınmadı — “belirtilmemiş” kalıyor."
+
+msgctxt "student_intake"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — tətbiqdə boş kurikulum yaradılacaq."
+msgstr "Bu kayıt yılı için müfredat yok — uygulamada boş bir müfredat oluşturulacak."
+
+msgctxt "student_intake"
+msgid "Bu tələbə kodu artıq istifadə olunub — sətir ötürülür."
+msgstr "Bu öğrenci kodu zaten kullanılıyor — satır atlanıyor."
+
+msgctxt "student_intake"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "E-posta yok — yer tutucu yazılır (kullanıcı ilk girişte kendisi girer)."
+
+msgctxt "student_intake"
+msgid "E-poçt formatı yanlışdır."
+msgstr "E-posta biçimi geçersiz."
+
+msgctxt "student_intake"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "E-posta zaten kullanılıyor — yer tutucu yazılır."
+
+msgctxt "student_intake"
+msgid "Yaradılacaq."
+msgstr "Oluşturulacak."
+
+msgctxt "student_intake"
+msgid "Bu təşkilatda aktiv «student» rolu yoxdur — əvvəlcə rol kataloqu qurulmalıdır."
+msgstr "Bu kurumda etkin “student” rolü yok — önce rol kataloğu kurulmalıdır."
+
+msgctxt "student_intake"
+msgid "Sətir yazılmadı: %s"
+msgstr "Satır yazılmadı: %s"
+
+msgctxt "student_intake"
+msgid "Hesab yaradıldı."
+msgstr "Hesap oluşturuldu."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı üçün icazəniz yoxdur."
+msgstr "Öğrenci alımı için izniniz yok."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür."
+msgstr "Öğrenci alımı için izniniz yok — bu bölüm yalnızca `user.import` anahtarına sahip roller içindir."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı"
+msgstr "Öğrenci alımı"
+
+msgctxt "student_intake"
+msgid "Qəbul siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır), sətir-sətir nəyin yaranacağını göstərir, siz təsdiq edəndən sonra hesab + üzvlük + akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib öz parolunu qoyur."
+msgstr "Kayıt listesini yükleyin: sistem önce KURU ÇALIŞMA yapar (hiçbir şey yazılmaz), satır satır nelerin oluşacağını gösterir ve ancak onayınızdan sonra hesap, üyelik ve akademik kaydı oluşturur. Öğrenci ilk girişte e-postasını doğrulayıp kendi parolasını belirler."
+
+msgctxt "student_intake"
+msgid "Hesablar bu təşkilatda yaranır"
+msgstr "Hesaplar bu kurumda oluşturulur"
+
+msgctxt "student_intake"
+msgid "Şablonu endirin"
+msgstr "Şablonu indirin"
+
+msgctxt "student_intake"
+msgid "Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox %(limit)s sətir, ölçü limiti %(size)s MB."
+msgstr "Sütun sırası serbesttir — başlığa göre tanınır. Dosya başına en fazla %(limit)s satır, boyut sınırı %(size)s MB."
+
+msgctxt "student_intake"
+msgid "Boş şablonu endir"
+msgstr "Boş şablonu indir"
+
+msgctxt "student_intake"
+msgid "Sütunlar"
+msgstr "Sütunlar"
+
+msgctxt "student_intake"
+msgid "Sütun"
+msgstr "Sütun"
+
+msgctxt "student_intake"
+msgid "İzah"
+msgstr "Açıklama"
+
+msgctxt "student_intake"
+msgid "Faylı yükləyin"
+msgstr "Dosyayı yükleyin"
+
+msgctxt "student_intake"
+msgid "Fayl seçilməyib"
+msgstr "Dosya seçilmedi"
+
+msgctxt "student_intake"
+msgid "Yoxla (quru icra)"
+msgstr "Kontrol et (kuru çalışma)"
+
+msgctxt "student_intake"
+msgid "Sətir"
+msgstr "Satır"
+
+msgctxt "student_intake"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "student_intake"
+msgid "Ad Soyad"
+msgstr "Ad Soyad"
+
+msgctxt "student_intake"
+msgid "İstifadəçi adı"
+msgstr "Kullanıcı adı"
+
+msgctxt "student_intake"
+msgid "Tətbiq et"
+msgstr "Uygula"
+
+msgctxt "student_intake"
+msgid "Parolları CSV kimi endir"
+msgstr "Parolaları CSV olarak indir"
+
+msgctxt "student_intake"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq."
+msgstr "Tek kullanımlık parolalar YALNIZCA şimdi görünür — ne veritabanında ne de denetim günlüğünde saklanır. CSV'yi indirip öğrencilere iletin; ilk girişte her öğrenciden e-posta doğrulaması (OTP) ve yeni parola istenir."
+
+msgctxt "student_intake"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Önce bir dosya seçin."
+
+msgctxt "student_intake"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "İşlem başarısız oldu. Yeniden deneyin."
+
+msgctxt "student_intake"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Kuru çalışma sonucu (hiçbir şey yazılmadı)"
+
+msgctxt "student_intake"
+msgid "Tətbiq nəticəsi"
+msgstr "Uygulama sonucu"
+
+msgctxt "student_intake"
+msgid "Seçilmiş sətirlər üçün hesab yaradılacaq. Davam edilsin?"
+msgstr "Seçili satırlar için hesap oluşturulacak. Devam edilsin mi?"
+
+msgctxt "student_intake"
+msgid "Yaradılacaq"
+msgstr "Oluşturulacak"
+
+msgctxt "student_intake"
+msgid "Yaradıldı"
+msgstr "Oluşturuldu"
+
+msgctxt "student_intake"
+msgid "Ötürüldü"
+msgstr "Atlandı"
+
+msgctxt "student_intake"
+msgid "Xəta"
+msgstr "Hata"
+
+msgctxt "student_intake"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "student_intake"
+msgid "Emal olunur…"
+msgstr "İşleniyor…"
+
+msgctxt "profile.sidebar"
+msgid "Ana səhifə"
+msgstr "Ana sayfa"
+
+msgctxt "accounts.dashboard"
+msgid "Salam, %(name)s"
+msgstr "Merhaba, %(name)s"
+
+msgctxt "accounts.dashboard"
+msgid "Xülasə hazır deyil"
+msgstr "Özet hazır değil"
+
+msgctxt "accounts.dashboard"
+msgid "Bu kabinet üçün hələ göstəriləcək xülasə yoxdur — sol menyudan bölmə seçin."
+msgstr "Bu kabin için henüz gösterilecek bir özet yok — soldaki menüden bir bölüm seçin."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün dərslər"
+msgstr "Bugünkü dersler"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün dərslərim"
+msgstr "Bugünkü derslerim"
+
+msgctxt "accounts.dashboard"
+msgid "Davamiyyət"
+msgstr "Devam durumu"
+
+msgctxt "accounts.dashboard"
+msgid "Son qiymətlər"
+msgstr "Son notlar"
+
+msgctxt "accounts.dashboard"
+msgid "Fənlərim"
+msgstr "Derslerim"
+
+msgctxt "accounts.dashboard"
+msgid "Sillabus işlərim"
+msgstr "Ders izlencesi işlerim"
+
+msgctxt "accounts.dashboard"
+msgid "Dərs yüküm"
+msgstr "Ders yüküm"
+
+msgctxt "accounts.dashboard"
+msgid "Müraciətlər"
+msgstr "Başvurular"
+
+msgctxt "accounts.dashboard"
+msgid "Sillabus təsdiqi"
+msgstr "Ders izlencesi onayı"
+
+msgctxt "accounts.dashboard"
+msgid "Yük bölgüsü"
+msgstr "Yük dağıtımı"
+
+msgctxt "accounts.dashboard"
+msgid "Cədvəl idarəetməsi"
+msgstr "Program yönetimi"
+
+msgctxt "accounts.dashboard"
+msgid "Kollokvium pəncərələri"
+msgstr "Kolokyum pencereleri"
+
+msgctxt "accounts.dashboard"
+msgid "Yaxın imtahanlar"
+msgstr "Yaklaşan sınavlar"
+
+msgctxt "accounts.dashboard"
+msgid "Apellyasiyalar"
+msgstr "İtirazlar"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnal düzəlişləri"
+msgstr "Yoklama defteri düzeltmeleri"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnal bağlama"
+msgstr "Yoklama defteri kapatma"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə idxalı"
+msgstr "Öğrenci alımı"
+
+msgctxt "accounts.dashboard"
+msgid "Universitet göstəriciləri"
+msgstr "Üniversite göstergeleri"
+
+msgctxt "accounts.dashboard"
+msgid "Cədvələ keç"
+msgstr "Programa git"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnala keç"
+msgstr "Yoklama defterine git"
+
+msgctxt "accounts.dashboard"
+msgid "Sillabuslara keç"
+msgstr "Ders izlencelerine git"
+
+msgctxt "accounts.dashboard"
+msgid "Dərs yükünə keç"
+msgstr "Ders yüküne git"
+
+msgctxt "accounts.dashboard"
+msgid "Müraciətlərə keç"
+msgstr "Başvurulara git"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəyə keç"
+msgstr "Sıraya git"
+
+msgctxt "accounts.dashboard"
+msgid "Bölgüyə keç"
+msgstr "Dağıtıma git"
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərələrə keç"
+msgstr "Pencerelere git"
+
+msgctxt "accounts.dashboard"
+msgid "Statistikaya keç"
+msgstr "İstatistiklere git"
+
+msgctxt "accounts.dashboard"
+msgid "Apellyasiyalara keç"
+msgstr "İtirazlara git"
+
+msgctxt "accounts.dashboard"
+msgid "Bağlamaya keç"
+msgstr "Defter kapatmaya git"
+
+msgctxt "accounts.dashboard"
+msgid "İdxala keç"
+msgstr "Alıma git"
+
+msgctxt "accounts.dashboard"
+msgid "Kataloqa keç"
+msgstr "Kataloğa git"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün"
+msgstr "Bugün"
+
+msgctxt "accounts.dashboard"
+msgid "Bu həftə"
+msgstr "Bu hafta"
+
+msgctxt "accounts.dashboard"
+msgid "Həftədə"
+msgstr "Haftada"
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövr"
+msgstr "Mevcut dönem"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəti"
+msgstr "Sonraki"
+
+msgctxt "accounts.dashboard"
+msgid "Yazılan bal"
+msgstr "Girilen puan"
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb"
+msgstr "Devamsızlık"
+
+msgctxt "accounts.dashboard"
+msgid "Fənn"
+msgstr "Dersler"
+
+msgctxt "accounts.dashboard"
+msgid "Limit"
+msgstr "Sınır"
+
+msgctxt "accounts.dashboard"
+msgid "İllik cəmi"
+msgstr "Yıllık toplam"
+
+msgctxt "accounts.dashboard"
+msgid "Norma"
+msgstr "Norm"
+
+msgctxt "accounts.dashboard"
+msgid "Doluluq"
+msgstr "Doluluk"
+
+msgctxt "accounts.dashboard"
+msgid "Gözləyən"
+msgstr "Bekleyen"
+
+msgctxt "accounts.dashboard"
+msgid "Növbədə"
+msgstr "Sırada"
+
+msgctxt "accounts.dashboard"
+msgid "Kafedra"
+msgstr "Bölümler"
+
+msgctxt "accounts.dashboard"
+msgid "Qrup"
+msgstr "Gruplar"
+
+msgctxt "accounts.dashboard"
+msgid "Status"
+msgstr "Durum"
+
+msgctxt "accounts.dashboard"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "accounts.dashboard"
+msgid "Açıq"
+msgstr "Açık"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.dashboard"
+msgid "Müəllim"
+msgstr "Öğretim elemanları"
+
+msgctxt "accounts.dashboard"
+msgid "dərs"
+msgstr "ders"
+
+msgctxt "accounts.dashboard"
+msgid "slot"
+msgstr "slot"
+
+msgctxt "accounts.dashboard"
+msgid "saat"
+msgstr "saat"
+
+msgctxt "accounts.dashboard"
+msgid "açılış"
+msgstr "ders açılışı"
+
+msgctxt "accounts.dashboard"
+msgid "sillabus"
+msgstr "ders izlencesi"
+
+msgctxt "accounts.dashboard"
+msgid "müraciət"
+msgstr "başvuru"
+
+msgctxt "accounts.dashboard"
+msgid "apellyasiya"
+msgstr "itiraz"
+
+msgctxt "accounts.dashboard"
+msgid "düzəliş"
+msgstr "düzeltme"
+
+msgctxt "accounts.dashboard"
+msgid "bildiriş"
+msgstr "bildirim"
+
+msgctxt "accounts.dashboard"
+msgid "pəncərə"
+msgstr "pencere"
+
+msgctxt "accounts.dashboard"
+msgid "imtahan"
+msgstr "sınav"
+
+msgctxt "accounts.dashboard"
+msgid "sonuncu"
+msgstr "sonuncu"
+
+msgctxt "accounts.dashboard"
+msgid "cari dövr"
+msgstr "mevcut dönem"
+
+msgctxt "accounts.dashboard"
+msgid "proqram üzrə"
+msgstr "programa göre"
+
+msgctxt "accounts.dashboard"
+msgid "əhatədə"
+msgstr "kapsamda"
+
+msgctxt "accounts.dashboard"
+msgid "səlahiyyət sahənizdə"
+msgstr "yetki alanınızda"
+
+msgctxt "accounts.dashboard"
+msgid "tapşırıq yoxdur"
+msgstr "görev yok"
+
+msgctxt "accounts.dashboard"
+msgid "yoxdur"
+msgstr "yok"
+
+msgctxt "accounts.dashboard"
+msgid "aktiv"
+msgstr "aktif"
+
+msgctxt "accounts.dashboard"
+msgid "deaktiv"
+msgstr "pasif"
+
+msgctxt "accounts.dashboard"
+msgid "açıq"
+msgstr "açık"
+
+msgctxt "accounts.dashboard"
+msgid "bağlı"
+msgstr "kapalı"
+
+msgctxt "accounts.dashboard"
+msgid "planlanıb"
+msgstr "planlandı"
+
+msgctxt "accounts.dashboard"
+msgid "qurulmayıb"
+msgstr "yapılandırılmadı"
+
+msgctxt "accounts.dashboard"
+msgid "Planlanıb"
+msgstr "Planlandı"
+
+msgctxt "accounts.dashboard"
+msgid "Akademik qeydiniz tapılmadı — RİM-ə müraciət edin."
+msgstr "Akademik kaydınız bulunamadı — Dijital Gelişim Merkezi (RİM) ile iletişime geçin."
+
+msgctxt "accounts.dashboard"
+msgid "Aktiv jurnal bağlama bildirişi yoxdur."
+msgstr "Aktif yoklama defteri kapatma bildirimi yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün üçün cədvəldə dərs yoxdur."
+msgstr "Bugün için programda ders yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün üçün cədvəldə dərsiniz yoxdur."
+msgstr "Bugün için programda dersiniz yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu həftə düzəliş edilməyib."
+msgstr "Bu hafta düzeltme yapılmadı."
+
+msgctxt "accounts.dashboard"
+msgid "CSV ilə toplu tələbə hesabı yaradın."
+msgstr "CSV ile toplu öğrenci hesabı oluşturun."
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövr üçün pəncərə qurulmayıb."
+msgstr "Mevcut dönem için pencere yapılandırılmadı."
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövrdə qeydiyyat yoxdur."
+msgstr "Mevcut dönemde kayıt yok."
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövrdə sizə fənn təyin olunmayıb."
+msgstr "Mevcut dönemde size ders atanmadı."
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestr üçün qrup cədvəliniz tapılmadı."
+msgstr "Mevcut dönem için grup programınız bulunamadı."
+
+msgctxt "accounts.dashboard"
+msgid "Hələ heç bir bal yazılmayıb."
+msgstr "Henüz hiç puan girilmedi."
+
+msgctxt "accounts.dashboard"
+msgid "Hərəkət gözləyən müraciət yoxdur."
+msgstr "İşlem bekleyen başvuru yok."
+
+msgctxt "accounts.dashboard"
+msgid "Planlanmış imtahan yoxdur."
+msgstr "Planlanmış sınav yok."
+
+msgctxt "accounts.dashboard"
+msgid "Qaralama və ya düzəliş gözləyən sillabus yoxdur."
+msgstr "Taslak veya düzeltme bekleyen ders izlencesi yok."
+
+msgctxt "accounts.dashboard"
+msgid "Qərar gözləyən apellyasiya yoxdur."
+msgstr "Karar bekleyen itiraz yok."
+
+msgctxt "accounts.dashboard"
+msgid "Struktur əhatəniz təyin edilməyib — növbə boşdur."
+msgstr "Yapısal kapsamınız belirlenmedi — sıra boş."
+
+msgctxt "accounts.dashboard"
+msgid "Səlahiyyət sahənizdə qrup yoxdur."
+msgstr "Yetki alanınızda grup yok."
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiq gözləyən sillabus yoxdur."
+msgstr "Onay bekleyen ders izlencesi yok."
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiqlənmiş dərs yükü yoxdur."
+msgstr "Onaylanmış ders yükü yok."
+
+msgctxt "accounts.dashboard"
+msgid "Əhatənizdə kafedra tapılmadı."
+msgstr "Kapsamınızda bölüm bulunamadı."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu bölmə yalnız imtahan mərkəzi və nəzarətçilər üçündür."
+msgstr "Bu bölüm yalnızca sınav merkezi ve gözetmenler içindir."
+
+msgctxt "registrar.journal"
+msgid "Otaq"
+msgstr "Derslik"
+
+msgid "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır."
+msgstr "Bu belge sistem tarafından oluşturulmuştur ve elektronik biçimde geçerlidir."
+
+msgid "Yekun nəticə"
+msgstr "Nihai sonuç"
+
+#: apps/accounts/forms/auth/login.py:73
+msgctxt "accounts.form.password_reset.error"
+msgid "Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün RİM-ə müraciət edin."
+msgstr "Hesabınızda geçerli bir e-posta adresi kayıtlı değil — e-posta kaydı için RİM'e başvurun."
+
+#: apps/registrar/templates/registrar/partials/_schedule_content.html:31
+msgctxt "registrar.schedule"
+msgid "TƏDRİS İLİ"
+msgstr "ÖĞRETİM YILI"
+
+#: apps/registrar/templates/registrar/partials/_schedule_content.html:41
+msgctxt "registrar.schedule"
+msgid "YARIM İL"
+msgstr "YARIYIL"

@@ -29,6 +29,32 @@ def _password_reset_password_attrs(placeholder):
     }
 
 
+def mark_self_service_password_set(user):
+    """İlk-giriş qapısını bağla — istifadəçi hər iki şərti ÖZÜ ödəyib (R-8).
+
+    ``FirstLoginPasswordMiddleware`` ``password_change_required`` qalxıq
+    olduqca istifadəçini ``/accounts/set-password/``-a qaytarır; o səhifənin
+    tələbi isə məhz budur: e-poçtuna gələn OTP-ni təsdiqlə və ÖZ parolunu qur
+    (bax ``views/auth/first_login.py``).  Parol bərpası bunların ikisini də
+    edir, ona görə köçürülmüş hesab bərpadan sonra eyni qapıda İKİNCİ dəfə
+    saxlanılmır.  RİM-in verdiyi müvəqqəti parol yolu TOXUNMUR: orada parolu
+    operator qoyur, e-poçt sahibliyi sübut olunmur — bayraq qalxıq qalır.
+    """
+
+    profile = getattr(user, "profile", None)
+    if profile is None:
+        return
+    changed = []
+    if profile.password_change_required:
+        profile.password_change_required = False
+        changed.append("password_change_required")
+    if not profile.email_verified:
+        profile.email_verified = True
+        changed.append("email_verified")
+    if changed:
+        profile.save(update_fields=changed + ["updated_at"])
+
+
 def _password_reset_otp_attrs():
     return {
         "class": "form-control",
@@ -79,6 +105,7 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
 
     def save(self, commit=True):
         user = super().save(commit=commit)
+        mark_self_service_password_set(user)
         matched_otp = getattr(self, "matched_otp", None)
         if matched_otp is not None and not matched_otp.is_used:
             matched_otp.is_used = True
@@ -171,8 +198,12 @@ class OTPPasswordResetCodeForm(forms.Form):
             self.add_error("otp_code", self.error_messages["otp_invalid"])
             return cleaned_data
 
+        # R-8: ``has_usable_password()`` QƏSDƏN yoxlanmır — köçürülmüş hesabın
+        # parolu məhz «unusable»-dir və bu formanın işi ona İLK parolu qoymaqdır.
+        # Girişin açıq olması (``is_active`` + ``access_state``) tək meyardır;
+        # OTP-nin özü e-poçt sahibliyinin sübutudur.
         user = getattr(matched_otp, "user", None)
-        if user is None or not user.is_active or user_access_is_login_blocked(user) or not user.has_usable_password():
+        if user is None or not user.is_active or user_access_is_login_blocked(user):
             self.add_error("otp_code", self.error_messages["otp_invalid"])
             return cleaned_data
 
@@ -222,6 +253,7 @@ class OTPPasswordResetCodeForm(forms.Form):
         self.user.set_password(self.cleaned_data["new_password1"])
         if commit:
             self.user.save()
+            mark_self_service_password_set(self.user)
 
         matched_otp = self.matched_otp
         if matched_otp is not None and not matched_otp.is_used:

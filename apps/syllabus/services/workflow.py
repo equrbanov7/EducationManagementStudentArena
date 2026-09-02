@@ -26,6 +26,7 @@ from ..constants import (
 )
 from ..models import ApprovalSource, ReviewDecision, Syllabus, SyllabusReview, SyllabusVersion
 from ..state_machine import Transition, TransitionDenied, check
+from . import notifications as syllabus_notifications
 from .drafts import recompute_completion, refresh_pointers
 from .scoping import is_author
 
@@ -161,12 +162,16 @@ def submit(*, version, actor, request=None):
         review_started_at=None,
     )
     Syllabus.objects.filter(pk=updated.syllabus_id).update(current_version=updated)
+    syllabus_notifications.notify_submitted(updated)
     return updated
 
 
 def withdraw(*, version, actor, reason: str, request=None):
     """SUBMITTED/REVIEW → DRAFT. Səbəb MƏCBURİDİR (README §3.1 dialoqu)."""
-    return _apply(
+    # `_apply` keçiddən sonra `reviewer`-i None yazır — bildiriş üçün ƏVVƏLKİ
+    # rəyçini keçiddən ƏVVƏL tutmaq lazımdır, əks halda alıcı itər.
+    previous_reviewer = version.reviewer
+    updated = _apply(
         version=version,
         actor=actor,
         name=Transition.WITHDRAW,
@@ -178,11 +183,13 @@ def withdraw(*, version, actor, reason: str, request=None):
         reviewer=None,
         locked_at=None,
     )
+    syllabus_notifications.notify_withdrawn(updated, reviewer=previous_reviewer)
+    return updated
 
 
 def start_review(*, version, actor, request=None):
     """SUBMITTED → REVIEW (kafedra müdiri təsdiq növbəsindən açır)."""
-    return _apply(
+    updated = _apply(
         version=version,
         actor=actor,
         name=Transition.START_REVIEW,
@@ -190,6 +197,8 @@ def start_review(*, version, actor, request=None):
         review_started_at=timezone.now(),
         reviewer=actor.user,
     )
+    syllabus_notifications.notify_review_opened(updated)
+    return updated
 
 
 def approve(*, version, actor, comment: str = "", section_comments=None, request=None):
@@ -219,12 +228,13 @@ def approve(*, version, actor, comment: str = "", section_comments=None, request
         decision_reason="",
     )
     Syllabus.objects.filter(pk=updated.syllabus_id).update(approved_version=updated, current_version=updated)
+    syllabus_notifications.notify_approved(updated)
     return updated
 
 
 def request_revision(*, version, actor, reason: str, comment: str = "", section_comments=None, request=None):
     """SUBMITTED/REVIEW → REVISION. Səbəb MƏCBURİDİR (DB check ilə də)."""
-    return _apply(
+    updated = _apply(
         version=version,
         actor=actor,
         name=Transition.REQUEST_REVISION,
@@ -236,11 +246,13 @@ def request_revision(*, version, actor, reason: str, comment: str = "", section_
         decision_reason=reason,
         locked_at=None,
     )
+    syllabus_notifications.notify_revision_requested(updated)
+    return updated
 
 
 def reject(*, version, actor, reason: str, comment: str = "", section_comments=None, request=None):
     """SUBMITTED/REVIEW → REJECTED. Səbəb MƏCBURİDİR (DB check ilə də)."""
-    return _apply(
+    updated = _apply(
         version=version,
         actor=actor,
         name=Transition.REJECT,
@@ -251,6 +263,8 @@ def reject(*, version, actor, reason: str, comment: str = "", section_comments=N
         decided_at=timezone.now(),
         decision_reason=reason,
     )
+    syllabus_notifications.notify_rejected(updated)
+    return updated
 
 
 def resume_editing(*, version, actor, request=None):

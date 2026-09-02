@@ -177,6 +177,14 @@
     box-shadow: var(--shadow-sm);
 }
 
+/* Boş badge GÖRÜNMÜR: server sayğacı 0 olanda mətnsiz render edir, badge
+   borusu (section_loader.refreshBadges) sonradan rəqəmi yazanda özü görünür.
+   Əks halda 0 olan bənd üçün DOM-da düyün olmazdı və AJAX yeniləməsi onu
+   heç vaxt tapa bilməzdi. */
+.sidebar-menu-badge:empty {
+    display: none;
+}
+
 .collapsed .sidebar-menu-badge {
     display: none;
 }

@@ -40,6 +40,8 @@ UNIVERSITY_ROLES = [
             "exam.*",
             # Sillabus: prorektor bütün axını görür və qərar verə bilir.
             "syllabus.*",
+            # Dərs yükü: yekun təsdiq + ümumi dashboard (spec §6.5).
+            "workload.*",
             *RIM_ACCOUNT_PERMISSIONS,
             # Kataloq: prorektor bütün təşkilatı görür və hesab dayandıra bilir
             # (org-scope rol → `get_permission_scope` org-wide qaytarır).
@@ -151,13 +153,21 @@ UNIVERSITY_ROLES = [
             # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
             # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
             "journal.reassign",
+            # Dərs cədvəli (U4): RİM org-wide cədvəl operatorudur — slot əlavə/sil.
+            "schedule.view",
+            "schedule.manage",
             # Sillabus axınının tam səlahiyyəti (idarə + qərar) — RİM sistemin
             # akademik operatorudur; hər əməl audit olunur.
             "syllabus.*",
+            # Dərs yükü də RİM-in operator səthidir (bütün kafedralar).
+            "workload.*",
             # Əsasnamə 4.2 — «rol və səlahiyyət idarəetməsi» RİM-dədir.
             "role.*",
             # `user.grant_privileged` YOXDUR: yeni admin yaratmaq ayrıca açardır.
             *RIM_ACCOUNT_PERMISSIONS,
+            # Tələbə idxalı (2026-09) — RİM cutover operatorudur: qəbul siyahısını
+            # yükləyib hesab + üzvlük + akademik qeyd yaradır (hər sətir audit olunur).
+            "user.import",
             # Sahibin qərarı: «RİM mərkəzinin hər şeyə səlahiyyəti olsun» —
             # kataloqun tam dəsti (oxu + hesab dayandırma + müəllim statusu).
             *PEOPLE_DIRECTORY_FULL,
@@ -211,6 +221,10 @@ UNIVERSITY_ROLES = [
             # RİM-in yalnız QEYRİ-DAĞIDICI hissəsi (tap + düzəlt).
             "user.search",
             "user.edit",
+            # Tələbə idxalı — qəbul siyahısının yüklənməsi kadr/qeydiyyat işidir.
+            # Dağıdıcı açar DEYİL: mövcud hesabı dəyişmir, yalnız yeni sətir yaradır
+            # (mövcud FİN/username ötürülür).
+            "user.import",
             # Kadr kataloqu: HR tam OXU + müəllim statusu təyinatı alır.
             # `people.manage_status` QƏSDƏN YOXDUR — HR-da `user.block` da yoxdur,
             # yəni hesab dayandırma səlahiyyəti bu rolda ümumiyyətlə mövcud deyil.
@@ -256,10 +270,18 @@ UNIVERSITY_ROLES = [
             # Jurnal siyahısı: dekanlıq öz fakültəsinin jurnalına başqa (alt)
             # qrupdan tələbə əlavə edə/geri götürə bilər (audited, scope-lu).
             "journal.roster",
+            # Dərs yükü: dekan öz fakültəsinin yükünü GÖRÜR və hesabat çıxarır;
+            # bölgü açarı (`workload.distribute`) QƏSDƏN yoxdur — o, kafedranındır.
+            "workload.view",
+            "workload.report",
             # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
             # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
             # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
             "journal.reassign",
+            # Dərs cədvəli: dekanlıq öz fakültəsinin cədvəlini qura bilər
+            # (əhatə `Membership.scope_unit` alt-ağacı ilə məhduddur).
+            "schedule.view",
+            "schedule.manage",
             "analytics.view_unit",
         ],
         "description": "Faculty dean managing a specific faculty",
@@ -292,11 +314,22 @@ UNIVERSITY_ROLES = [
             # verə bilər (UNIT scope → yalnız öz alt-ağacı; `scope_unit` təyin
             # edilməyibsə siyahı BOŞ qalır, fail-closed).
             "journal.reassign",
+            # Dərs yükü: kafedra müdiri modulun ƏSAS aktorudur — tapşırığı
+            # yaradır/redaktə edir və müəllimlərə bölür (yalnız öz kafedrası).
+            # `workload.approve` QƏSDƏN yoxdur: dekanlıq təsdiqi ayrı fazadır.
+            "workload.view",
+            "workload.manage",
+            "workload.distribute",
+            "workload.report",
             # Kataloq: kafedra müdiri öz kafedrasının müəllim/tələbəsini GÖRÜR.
             # Əməl açarları QƏSDƏN yoxdur — lazım olsa icazə redaktorundan verilir.
             "people.view_teachers",
             "people.view_students",
             "people.view_contacts",
+            # Dərs cədvəli: kafedra müdiri öz kafedrasının cədvəlini qura bilər
+            # (dekanlığın müavini kimi — əhatə `scope_unit` alt-ağacıdır).
+            "schedule.view",
+            "schedule.manage",
             "analytics.view_unit",
         ],
         "description": "Department chair managing courses and faculty",
@@ -321,6 +354,9 @@ UNIVERSITY_ROLES = [
             "syllabus.view",
             "syllabus.edit",
             "syllabus.submit",
+            # Dərs yükü: müəllim YALNIZ ÖZ bölgü sətirlərini görür («Dərs yüküm»);
+            # sorğu qatı `teacher=request.user` ilə daraldılıb (fail-closed).
+            "workload.view",
             "assignment.delete",
             "project.delete",
             "lab.delete",
@@ -398,6 +434,11 @@ UNIVERSITY_ROLES = [
             # Proqram koordinatorunun ƏSAS əməli: öz ixtisasının jurnallarına
             # alt qrupdan tələbə əlavə etmək / geri götürmək (audited, scope-lu).
             "journal.roster",
+            # Dərs cədvəlinin ƏSAS sahibi (sahibin qərarı, 2026-09): koordinator
+            # öz ixtisasının qruplarına slot yazır/silir. Adi MÜƏLLİMDƏ bu açar
+            # QƏSDƏN YOXDUR — müəllim öz cədvəlini yalnız GÖRÜR.
+            "schedule.view",
+            "schedule.manage",
             "analytics.view_unit",
         ],
         "description": "Program coordinator curating a specialty/program (tutor-equivalent scope)",
@@ -458,3 +499,59 @@ UNIVERSITY_ROLES = [
         "description": "Default onboarding role before specialized assignment",
     },
 ]
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Müraciətlər (apps.applications) — default icazə paylanması.
+#
+# Niyə DÖVRƏ ilə, yuxarıdakı literal siyahılara əl ilə yazmaqla deyil? Üç açar
+# 15+ rola paylanır və qayda MƏTNLƏ ifadə oluna bilir («məzun və onboarding
+# rolundan başqa hamı müraciət göndərə bilər»). Dövrə həmin qaydanı KOD kimi
+# saxlayır — yeni rol əlavə olunanda avtomatik doğru davranır, 15 yerə əl ilə
+# açar yazmaq unudulmur.
+# ────────────────────────────────────────────────────────────────────────────
+
+#: Müraciət GÖNDƏRƏ bilməyən rollar: `alumni` (arxiv — heç bir hüququ yoxdur),
+#: `member` (təyinatdan əvvəlki onboarding rolu), `rector` (`*` ilə onsuz da
+#: əhatə olunur — açarı təkrar yazmaq kataloqu şişirdir).
+_APPLICATION_CREATE_EXEMPT = {"alumni", "member", "rector"}
+
+#: GƏLƏN müraciətə qərar verən rollar (şöbə emalçıları). Açar səthi açır;
+#: konkret müraciətə əməl həm də şöbənin `handler_role_names`-inə düşməkdən
+#: asılıdır (apps/applications/services/access.py).
+_APPLICATION_HANDLER_ROLES = {
+    "dean",
+    "chair_head",
+    "program_coordinator",
+    "hr",
+    "vice_rector",
+    "exam_center",
+    "exam_center_head",
+    "exam_center_staff",
+    "ikt_rehber",
+}
+
+#: Kataloq konfiqurasiyası + bütün müraciətlərə oxu (rektor `*` ilə əhatəlidir).
+_APPLICATION_MANAGER_ROLES = {"ikt_rehber", "vice_rector"}
+
+
+def _grant_application_permissions(roles):
+    for role in roles:
+        name = role.get("name")
+        permissions = role.setdefault("permissions", [])
+        if "*" in permissions:
+            continue
+        wanted = []
+        if name not in _APPLICATION_CREATE_EXEMPT:
+            wanted.append("application.create")
+        if name in _APPLICATION_HANDLER_ROLES:
+            wanted.append("application.handle")
+        if name in _APPLICATION_MANAGER_ROLES:
+            wanted.append("application.manage")
+        for permission in wanted:
+            if permission not in permissions:
+                permissions.append(permission)
+    return roles
+
+
+_grant_application_permissions(UNIVERSITY_ROLES)

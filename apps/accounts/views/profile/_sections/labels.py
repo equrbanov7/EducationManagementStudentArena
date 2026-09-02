@@ -13,6 +13,7 @@ from django.utils.translation import pgettext_lazy
 
 # Birbaşa-render şablonları sırf statikdir (tərcümə yoxdur) → modul sabiti.
 DIRECT_PROFILE_SECTION_TEMPLATES = {
+    "dashboard": "accounts/profile/sections/_dashboard.html",
     "pending-answers": "accounts/profile/sections/_pending_answers.html",
     "pending-review": "accounts/profile/sections/_pending_review.html",
     "review-results": "accounts/profile/sections/_review_results.html",
@@ -28,6 +29,9 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "academic-records": "accounts/profile/sections/_academic_records.html",
     "appeal-stats": "accounts/profile/sections/_appeal_stats.html",
     "kollokvium-windows": "accounts/profile/sections/_kollokvium_windows.html",
+    "schedule-manage": "accounts/profile/sections/_schedule_manage.html",
+    "student-intake": "accounts/profile/sections/_student_intake.html",
+    "applications": "accounts/profile/sections/_applications.html",
     "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
     "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
     "exam-chance": "accounts/profile/sections/_exam_chance.html",
@@ -43,12 +47,15 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
+    "my-workload": "accounts/profile/sections/_my_workload.html",
 }
 
 
 def build_section_titles() -> dict:
     """Bölmə başlıqları xəritəsi (per-request — eager ``_()`` tərcümələri üçün)."""
     return {
+        "dashboard": pgettext_lazy("profile.sidebar", "Ana səhifə"),
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
         "notifications": pgettext_lazy("profile.section", "notifications"),
         "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
@@ -70,6 +77,9 @@ def build_section_titles() -> dict:
         "academic-calendar": pgettext_lazy("profile.sidebar", "Akademik təqvim"),
         "my-journal": pgettext_lazy("profile.sidebar", "Elektron jurnal"),
         "journal-close": pgettext_lazy("profile.sidebar", "Jurnal bağlama"),
+        "schedule-manage": pgettext_lazy("profile.sidebar", "Cədvəl idarəetməsi"),
+        "student-intake": pgettext_lazy("profile.sidebar", "Tələbə idxalı"),
+        "applications": pgettext_lazy("profile.sidebar", "Müraciətlərim"),
         "teaching-handover": pgettext_lazy("profile.sidebar", "Fənn təhvili"),
         "analytics": pgettext_lazy("profile.sidebar", "Akademik analitika"),
         "academic-records": pgettext_lazy("profile.sidebar", "Akademik qeydlər"),
@@ -117,4 +127,6 @@ def build_section_titles() -> dict:
         "syllabus-list": pgettext_lazy("profile.sidebar", "Sillabuslar"),
         "syllabus-editor": pgettext_lazy("profile.sidebar", "Sillabus redaktoru"),
         "syllabus-review": pgettext_lazy("profile.sidebar", "Sillabus təsdiqi"),
+        "workload-distribution": pgettext_lazy("profile.sidebar", "Yük bölgüsü"),
+        "my-workload": pgettext_lazy("profile.sidebar", "Dərs yüküm"),
     }

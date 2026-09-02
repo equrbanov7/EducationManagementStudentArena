@@ -90,6 +90,7 @@ class NotificationType(models.TextChoices):
     COURSE = "course", _("Course")
     LIVE_EXAM = "live_exam", _("Live Exam / Session")
     APPROVAL = "approval", _("Membership / Approval Request")
+    APPLICATION = "application", _("Application / Request")
 
 
 class InAppNotification(models.Model):

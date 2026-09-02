@@ -191,7 +191,10 @@
     padding: 0 6px;
     border-radius: 999px;
     background: var(--ems-neutral-100);
-    color: var(--ems-neutral-500);
+    /* WCAG AA: 0.7rem kiçik mətndir → ən azı 4.5:1 lazımdır.
+       neutral-500 (#64748b) neutral-100 (#f1f5f9) üzərində 4.34:1 — KEÇMİR;
+       neutral-600 (#475569) 6.92:1 verir. */
+    color: var(--ems-neutral-600);
     font-size: 0.7rem;
     font-weight: 800;
 }

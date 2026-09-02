@@ -46,7 +46,7 @@ from apps.legacy_import.services.rehearsal_contracts import (
 )
 from apps.legacy_import.services.rehearsal_placement_phase import PLACEMENT_ENTITY_TYPE
 from apps.legacy_import.services.rehearsal_reconciliation import phase_report_from_ledger
-from apps.legacy_import.services.rehearsal_sar_archive import ARCHIVE_FALLBACK_ADMISSION_YEAR
+from apps.legacy_import.services.rehearsal_sar_archive import FALLBACK_ADMISSION_YEAR
 from apps.legacy_import.services.rehearsal_sar_phase import (
     DERIVED_DIGEST_NAMESPACE,
     SAR_PHASE_KEY,
@@ -262,6 +262,7 @@ def test_issue_severity_map_covers_exactly_the_sar_taxonomy():
         "legacy_sar_departed_student": "info",
         "legacy_sar_archived_student": "info",
         "legacy_sar_archived_no_admission_year": "info",
+        "legacy_sar_active_no_admission_year": "info",
         "legacy_sar_admission_year_fallback": "warning",
         "legacy_sar_group_missing": "info",
     }
@@ -703,12 +704,12 @@ def test_the_full_curriculum_matrix_and_activation_ladder(seeded):
         ("3", "legacy_sar_curriculum_synthesised"): "warning",
         ("4", "legacy_sar_curriculum_program_conflict"): "warning",
         ("4", "legacy_sar_curriculum_substituted"): "warning",
-        ("5", "legacy_sar_archived_no_admission_year"): "info",
+        # A2-fix: qəbul ili bilinmir ≠ məzun — sətir AKTİV tələbə kimi materiallaşır.
+        ("5", "legacy_sar_active_no_admission_year"): "info",
         ("5", "legacy_sar_admission_year_missing"): "warning",
         ("5", "legacy_sar_admission_year_fallback"): "warning",
         ("5", "legacy_sar_curriculum_unmapped"): "warning",
         ("5", "legacy_sar_curriculum_synthesised"): "warning",
-        ("5", "legacy_sar_archived_student"): "info",
         ("7", "legacy_sar_archived_student"): "info",
     }
     # M1 binds the LEGACY curriculum; the fallbacks converge on the same row.
@@ -717,14 +718,14 @@ def test_the_full_curriculum_matrix_and_activation_ladder(seeded):
         record.student_id: record
         for record in StudentAcademicRecord.objects.filter(organization=organization).select_related("curriculum")
     }
-    assert len(records) == 6  # 5 və 7 (arxiv) də öz tarixi qeydlərini alır
+    assert len(records) == 6  # 5 (ilsiz, AKTİV) və 7 (arxiv) də öz qeydlərini alır
     assert records[users[1].pk].curriculum_id == bachelor_2019.pk
     assert records[users[2].pk].curriculum_id == bachelor_2019.pk
     assert records[users[4].pk].curriculum_id == bachelor_2019.pk
     assert records[users[3].pk].curriculum.admission_year == 2020
     # A2: sentinel il UYDURMA deyil — attestasiya olunmuş domenin döşəməsidir.
-    assert records[users[5].pk].admission_year == ARCHIVE_FALLBACK_ADMISSION_YEAR
-    assert records[users[5].pk].curriculum.admission_year == ARCHIVE_FALLBACK_ADMISSION_YEAR
+    assert records[users[5].pk].admission_year == FALLBACK_ADMISSION_YEAR
+    assert records[users[5].pk].curriculum.admission_year == FALLBACK_ADMISSION_YEAR
     assert records[users[5].pk].program_id == programs["master"].pk  # 24 nömrəli qrup magistr
     assert all(
         record.program_id == programs["bachelor"].pk
@@ -844,7 +845,7 @@ def test_a_synthetic_curriculum_converges_onto_the_legacy_one(seeded):
     assert Curriculum.objects.filter(organization=organization).count() == before + 2
     assert (
         Curriculum.objects.filter(
-            organization=organization, program=programs["master"], admission_year=ARCHIVE_FALLBACK_ADMISSION_YEAR
+            organization=organization, program=programs["master"], admission_year=FALLBACK_ADMISSION_YEAR
         ).count()
         == 1
     )
@@ -1285,7 +1286,7 @@ def test_a_departed_student_without_an_admission_year_gets_the_sentinel_record(s
     assert UserProfile.objects.get(user=users[1]).access_state == UserProfile.AccessState.ARCHIVED
     assert Membership.objects.get(user=users[1], organization=organization).is_active is True
     record = StudentAcademicRecord.objects.get(student=users[1])
-    assert record.admission_year == ARCHIVE_FALLBACK_ADMISSION_YEAR
+    assert record.admission_year == FALLBACK_ADMISSION_YEAR
 
 
 @pytest.mark.django_db
@@ -1323,7 +1324,7 @@ def test_the_semester_scheme_is_not_part_of_the_sar_decision(seeded):
 
 
 # ---------------------------------------------------------------------------
-# A2: qəbul ili həll olunmayan sətir arxiv kimi materiallaşır
+# A2-fix: qəbul ili həll olunmayan sətir AKTİV tələbə kimi materiallaşır
 # ---------------------------------------------------------------------------
 
 
@@ -1341,8 +1342,13 @@ def _no_year_run(actor, slug, *, policy=None, azadedildi=0):
 
 
 @pytest.mark.django_db
-def test_a_student_without_an_admission_year_is_archived_instead_of_deferred(sar_actor):
-    """A2 nüvəsi: ``sar_deferred`` yerinə arxiv — data köçür, giriş bağlı qalır."""
+def test_a_student_without_an_admission_year_stays_an_active_student(sar_actor):
+    """A2-fix (P0-1): qrupun ``start_year='0000'`` olması məzunluq DEYİL.
+
+    Mənbə qüsuru (2 291 sətir) səbəbindən qəbul ili həll olunmur; sətir yenə
+    materiallaşır və sentinel ili daşıyır, amma hesab AKTİV TƏLƏBƏ qalır —
+    giriş bağlanmır, rol ``student``-dir.
+    """
 
     actor = sar_actor
     organization, run, users, policy, rows = _no_year_run(actor, "sar-no-year")
@@ -1351,32 +1357,46 @@ def test_a_student_without_an_admission_year_is_archived_instead_of_deferred(sar
 
     assert _states(run) == {"1": "migrated"}
     assert dict(report.state_counts) == {"sar_created": 1}
-    assert _issues(run)[("1", "legacy_sar_archived_no_admission_year")] == "info"
+    assert _issues(run)[("1", "legacy_sar_active_no_admission_year")] == "info"
     assert _issues(run)[("1", "legacy_sar_admission_year_fallback")] == "warning"
-    assert _issues(run)[("1", "legacy_sar_archived_student")] == "info"
+    assert ("1", "legacy_sar_archived_student") not in _issues(run)
+    assert ("1", "legacy_sar_archived_no_admission_year") not in _issues(run)
     user = users[1]
     user.refresh_from_db()
-    # ``is_active`` QƏSDƏN True — ``registrar_guard_active_member`` bunu tələb edir.
     assert user.is_active is True
-    assert UserProfile.objects.get(user=user).access_state == UserProfile.AccessState.ARCHIVED
+    assert UserProfile.objects.get(user=user).access_state == UserProfile.AccessState.ACTIVE
     membership = Membership.objects.get(user=user, organization=organization)
-    assert membership.is_active is True and membership.role.name == "alumni"
-    assert membership.role.permissions == []  # rol trigger qapısını açır, HÜQUQ vermir
+    assert membership.is_active is True and membership.role.name == _STUDENT_ROLE_NAME
     record = StudentAcademicRecord.objects.get(student=user, organization=organization)
     # Qəbul ili UYDURULMUR: domenin döşəmə sentineli yazılır və işarələnir.
-    assert record.admission_year == ARCHIVE_FALLBACK_ADMISSION_YEAR
-    assert record.curriculum.admission_year == ARCHIVE_FALLBACK_ADMISSION_YEAR
+    assert record.admission_year == FALLBACK_ADMISSION_YEAR
+    assert record.curriculum.admission_year == FALLBACK_ADMISSION_YEAR
 
 
 @pytest.mark.django_db
-def test_the_archived_no_year_student_passes_the_active_member_gate(sar_actor):
+def test_a_released_student_without_an_admission_year_is_still_archived(sar_actor):
+    """Arxivin YEGANƏ şərti: ``students.azadedildi=1``."""
+
+    actor = sar_actor
+    organization, run, users, policy, rows = _no_year_run(actor, "sar-no-year-released", azadedildi=1)
+
+    SarMaterialisationPhase().run(_seeded_context(organization, actor, run, rows=rows, policy=policy))
+
+    users[1].refresh_from_db()
+    assert UserProfile.objects.get(user=users[1]).access_state == UserProfile.AccessState.ARCHIVED
+    assert Membership.objects.get(user=users[1], organization=organization).role.name == "alumni"
+    assert _issues(run)[("1", "legacy_sar_archived_student")] == "info"
+
+
+@pytest.mark.django_db
+def test_the_no_year_student_passes_the_active_member_gate_and_can_log_in(sar_actor):
     """Enrollment qapısı: jurnal fazasının işlətdiyi indeks bu hesabı görür.
 
     ``registrar_guard_active_member`` (PG) dörd şərtin hamısını tələb edir və
     ``rehearsal_journal_enrollments_phase.active_member_ids`` MƏHZ o dördlüyün
     ORM güzgüsüdür — sətir bu dəstdədirsə, ``Enrollment`` yazısı qəbul olunur
     (triggerin özü ``apps/accounts/tests/test_account_archive_postgres.py``
-    faylında ölçülür).  Giriş isə eyni anda BAĞLI qalır.
+    faylında ölçülür).  A2-fix-dən sonra giriş də AÇIQDIR.
     """
 
     from apps.accounts.identity import user_access_is_login_blocked
@@ -1390,7 +1410,8 @@ def test_the_archived_no_year_student_passes_the_active_member_gate(sar_actor):
 
     users[1].refresh_from_db()
     assert str(users[1].pk) in active_member_ids(context)
-    assert user_access_is_login_blocked(users[1]) is True
+    # A2-fix: giriş ARTIQ bağlı DEYİL — sətir məzun sayılmır.
+    assert user_access_is_login_blocked(users[1]) is False
 
 
 @pytest.mark.django_db
@@ -1463,4 +1484,6 @@ def test_a_normal_student_is_never_touched_by_the_a2_branch(seeded):
         users[legacy_pk].refresh_from_db()
         assert UserProfile.objects.get(user=users[legacy_pk]).access_state == UserProfile.AccessState.ACTIVE
         assert Membership.objects.get(user=users[legacy_pk], organization=organization).role.name != "alumni"
-    assert {legacy_pk for legacy_pk, code in _issues(run) if code == "legacy_sar_archived_no_admission_year"} == {"5"}
+    assert {legacy_pk for legacy_pk, code in _issues(run) if code == "legacy_sar_active_no_admission_year"} == {"5"}
+    # Arxiv qolu YALNIZ buraxılmış (azadedildi=1) sətri tutur.
+    assert {legacy_pk for legacy_pk, code in _issues(run) if code == "legacy_sar_archived_student"} == {"7"}

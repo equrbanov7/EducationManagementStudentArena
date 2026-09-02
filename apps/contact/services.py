@@ -235,10 +235,11 @@ def create_contact_message(*, form_cleaned_data: dict, request) -> ContactMessag
 
 
 def _extract_client_ip(request) -> str | None:
-    """Return the originating client IP, honouring XFF where trusted."""
-    xff = request.META.get("HTTP_X_FORWARDED_FOR")
-    if xff:
-        candidate = xff.split(",")[0].strip()
-        if candidate:
-            return candidate
-    return request.META.get("REMOTE_ADDR")
+    """Vahid ``core.utils.get_client_ip`` helperinə həvalə (2026-09-02 audit, P2-6).
+
+    Əvvəl XFF-in ƏN SOL üzvü götürülürdü — onu müştəri özü yazır, yəni per-IP
+    limit saxtalaşdırıla bilirdi.  Artıq etibarlı proxy semantikası (sağdan).
+    """
+    from core.utils import get_client_ip
+
+    return get_client_ip(request)

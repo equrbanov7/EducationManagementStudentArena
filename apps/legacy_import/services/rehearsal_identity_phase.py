@@ -64,6 +64,7 @@ from .rehearsal_email_trust import (  # noqa: F401 — geri uyğunluq re-exportl
     email_evidence_digest,
     load_email_trust_manifest,
 )
+from .rehearsal_identity_placeholder import PLACEHOLDER_RULE_CODE, apply_email_placeholders
 from .source_extraction import open_audited_identity_stream
 
 
@@ -108,6 +109,11 @@ ISSUE_SEVERITY = MappingProxyType(
                 "legacy_account_username_email_collision",
                 "legacy_account_username_email_duplicate_source",
                 "legacy_rehearsal_stage_cap_reached",
+                # P0-2 (2026-09-02): e-poçt qüsuru sətri artıq HESABSIZ qoymur —
+                # deterministik yer-tutucu yazılır, toqquşma faktı isə
+                # xəbərdarlıq kimi ledger-də qalır (bax
+                # ``rehearsal_identity_placeholder``).
+                PLACEHOLDER_RULE_CODE,
             ),
             _SEVERITY.WARNING,
         ),
@@ -209,13 +215,20 @@ def _student_identifier(policy: RehearsalPolicy, entity_type: str, legacy_pk: in
 
 @dataclass(frozen=True)
 class _CohortRow:
-    """The only per-row object retained for the whole cohort."""
+    """The only per-row object retained for the whole cohort.
+
+    ``source_row_hash`` is ALWAYS the hash of the raw projected row — a
+    placeholder substitution replaces only the identity handed to staging, never
+    the source evidence.  ``placeholder_rules`` keeps the original email rule
+    codes so the collision stays visible in the ledger after re-classification.
+    """
 
     source_table: str
     entity_type: str
     legacy_pk: int
     source_row_hash: str
     identity: ProjectedAccountIdentity
+    placeholder_rules: tuple[str, ...] = ()
 
 
 def _build_cohort(context: RehearsalContext) -> list[_CohortRow]:
@@ -421,7 +434,8 @@ def _process_window(
             state = _state_for(classification, extra_rules)
             entity_map = _write_map(context, row, state=state)
 
-        for rule_code in (*classification.rule_codes, *extra_rules):
+        placeholder_rules = (PLACEHOLDER_RULE_CODE, *row.placeholder_rules) if row.placeholder_rules else ()
+        for rule_code in dict.fromkeys((*classification.rule_codes, *extra_rules, *placeholder_rules)):
             severity = _severity_for(rule_code)
             upsert_issue(
                 run_id=context.run_id,
@@ -490,6 +504,9 @@ class IdentityCohortPhase:
         )
         if len(classifications) != len(rows):
             raise LegacyRehearsalEvidenceError("legacy_rehearsal_classification_shape_invalid")
+        rows, classifications, placeholders = apply_email_placeholders(context, rows, classifications)
+        if placeholders:
+            context.stdout_note(f"{IDENTITY_PHASE_KEY}.email_placeholders.{placeholders}")
 
         roles = _roles_for_staging(context)
         batches: list[PhaseBatchRecord] = []

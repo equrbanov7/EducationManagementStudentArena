@@ -36,11 +36,17 @@ def _safe_request_info(request) -> dict:
 
 
 def _client_ip(request) -> str | None:
+    """Vahid ``core.utils.get_client_ip`` helperinə həvalə (2026-09-02 audit, P2-6).
+
+    Başlıq layihədə beş yerdə müstəqil parse olunurdu; ikisi soldan (saxta
+    edilə bilən) oxuyurdu.  Artıq TƏK mənbə var: etibarlı proxy semantikası
+    (sağdan ``TRUSTED_PROXY_HOPS``).
+    """
     if request is None:
         return None
-    xff = (request.META.get("HTTP_X_FORWARDED_FOR") or "").split(",")
-    candidate = (xff[-1] if xff else "").strip() or request.META.get("REMOTE_ADDR")
-    return candidate or None
+    from core.utils import get_client_ip
+
+    return get_client_ip(request) or None
 
 
 def record_security_event(

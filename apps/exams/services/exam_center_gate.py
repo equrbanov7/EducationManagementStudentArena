@@ -78,12 +78,11 @@ def get_client_ip(request) -> str:
     tərəfindən idarə oluna bilmir. İmtahan zalı kompüterləri nginx-ə birbaşa
     qoşulduğu üçün dəyər real zal IP-sidir.
     """
-    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-    if forwarded_for:
-        candidate = forwarded_for.split(",")[-1].strip()
-        if candidate:
-            return candidate
-    return request.META.get("REMOTE_ADDR") or ""
+    from core.utils import get_client_ip as _core_client_ip
+
+    # Parse məntiqi TƏK yerdədir (``core.utils.get_client_ip``) — 2026-09-02
+    # audit, P2-6: eyni başlıq beş yerdə müstəqil oxunurdu.
+    return _core_client_ip(request) or ""
 
 
 def _allowed_entries():

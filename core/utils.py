@@ -156,19 +156,36 @@ def generate_unique_slug(model_class, title, slug_field="slug"):
     return slug
 
 
+#: Neçə ETİBARLI proxy sorğunu ötürür (kənardan içəri).  Bizim edge nginx
+#: ``X-Forwarded-For``-u OVERWRITE edir (``docker/nginx/nginx.conf``), yəni bir
+#: hop var və doğru üzv SONUNCU-dur.  Cloudflare kimi əlavə bir qat qoşulsa
+#: ``TRUSTED_PROXY_HOPS=2`` verilir.
+_DEFAULT_TRUSTED_PROXY_HOPS = 1
+
+
 def get_client_ip(request):
-    """
-    Get the client's IP address from the request.
+    """Sorğunun müştəri IP-si — ETİBARLI PROXY semantikası ilə (SAĞDAN).
 
-    Args:
-        request: Django HttpRequest object
+    ⚠️ 2026-09-02 audit, P2-6: bu funksiya ƏVVƏL ``X-Forwarded-For``-un ƏN SOL
+    üzvünü götürürdü.  Həmin üzvü tamamilə MÜŞTƏRİ yazır — yəni istənilən şəxs
+    ``X-Forwarded-For: 1.2.3.4`` göndərib per-IP limitləri (login, OTP, contact)
+    və IP-əsaslı qapıları saxtalaşdıra bilirdi.  Layihədə eyni başlıq beş yerdə
+    müstəqil parse olunurdu; ikisi (monitoring) düzgün — SAĞDAN — oxuyurdu.
 
-    Returns:
-        IP address as a string
+    İndi TƏK mənbə budur: sağdan ``TRUSTED_PROXY_HOPS`` sayda üzv atılır və
+    qalanın sonuncusu götürülür.  Başlıq yoxdursa ``REMOTE_ADDR``.
+
+    Qaytarır: ``str`` və ya ``None`` (köhnə müqavilə saxlanılır — çağıranlar öz
+    fallback-larını tətbiq edir, nullable ``GenericIPAddressField``-lər üçün).
     """
-    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0].strip()
-    else:
-        ip = request.META.get("REMOTE_ADDR")
-    return ip
+    forwarded = (request.META.get("HTTP_X_FORWARDED_FOR") or "").split(",")
+    members = [part.strip() for part in forwarded if part.strip()]
+    if members:
+        try:
+            hops = int(getattr(settings, "TRUSTED_PROXY_HOPS", _DEFAULT_TRUSTED_PROXY_HOPS) or 1)
+        except (TypeError, ValueError):
+            hops = _DEFAULT_TRUSTED_PROXY_HOPS
+        hops = max(1, hops)
+        # hops=1 → sonuncu üzv; hops=2 → sondan ikinci; siyahı qısadırsa ən sol.
+        return members[max(0, len(members) - hops)]
+    return request.META.get("REMOTE_ADDR")

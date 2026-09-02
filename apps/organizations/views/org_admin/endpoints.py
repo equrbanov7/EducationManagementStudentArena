@@ -9,6 +9,7 @@ from ...models import Organization
 from ..shared._helpers import (
     _can_access_organization,
     _can_manage_organization,
+    _can_view_role_matrix,
     _can_view_structure,
     _get_structure_scope,
     _is_ajax_request,
@@ -151,7 +152,12 @@ def organization_roles(request, slug):
     """
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    if not _can_manage_organization(request.user, organization):
+    # Tenant girişi + KONKRET `role.view` açarı (2026-09-02 audit, P2-2):
+    # `_can_manage_activity`-nin implicit `org_admin` alias-ı fakültəyə
+    # scope-lanmış dekana org-genişliyində rol matrisini açırdı.
+    if not _can_manage_organization(request.user, organization) or not _can_view_role_matrix(
+        request.user, organization
+    ):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 

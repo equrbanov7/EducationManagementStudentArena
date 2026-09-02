@@ -309,7 +309,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # Tam şəxsi tarixçə — BU GÜN İSTİSNA (müəllimin düzəliş pəncərəsi bitməmiş).
     marks = list(
         LessonMark.objects.filter(enrollment=enrollment, lesson__date__lt=today)
-        .select_related("lesson")
+        .select_related("lesson", "lesson__room")
         .order_by("-lesson__date", "-lesson__created_at")
     )
     hidden_today = LessonMark.objects.filter(enrollment=enrollment, lesson__date=today).exists()
@@ -344,6 +344,9 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             "kind": m.lesson.kind,
             "kind_display": m.lesson.get_kind_display(),
             "teacher": getattr(offering, "instructor", None),
+            # Otaq/bina — YALNIZ ad + bina (müəllimin daxili qeydləri, `notes`,
+            # heç vaxt tələbəyə ötürülmür). `Lesson.room` boşdursa `None`.
+            "room_label": _lesson_room_label(m.lesson.room),
         }
         for m in marks
     ]
@@ -425,6 +428,22 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     }
     section["corrections_map"] = _legacy_excuse.merge_into(corr_map, excuse_map)
     return {"journal_student_section": section}
+
+
+def _lesson_room_label(room) -> str | None:
+    """Otaq adı + bina — tələbəyə göstərilən YEGANƏ otaq məlumatı.
+
+    ``exams.ExamRoom.notes`` (müəllimin daxili qeydləri) BURAYA QƏSDƏN
+    daxil edilmir — yalnız ad + bina. ``room`` yoxdursa ``None`` (şablon
+    "—" göstərir).
+    """
+    if room is None:
+        return None
+    name = (getattr(room, "name", "") or "").strip()
+    if not name:
+        return None
+    building = (getattr(room, "building", "") or "").strip()
+    return f"{name} ({building})" if building else name
 
 
 def _student_syllabus_available(offering) -> bool:

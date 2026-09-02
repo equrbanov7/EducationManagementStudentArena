@@ -93,6 +93,9 @@ ISSUE_SEVERITY = MappingProxyType(
         # A2: sətir arxivə MƏHZ qəbul ili həll olunmadığı üçün düşdü — bu, «niyə
         # arxivləndi» sualının cavabıdır və mənbə faktıdır, anomaliya deyil.
         "legacy_sar_archived_no_admission_year": _SEVERITY.INFO,
+        # A2-fix (2026-09-02): qəbul ili bilinməyən, amma BURAXILMAMIŞ tələbə —
+        # hesab AKTİV tələbə qalır, il isə sentinel daşıyır. Arxiv qərarı DEYİL.
+        "legacy_sar_active_no_admission_year": _SEVERITY.INFO,
         "legacy_sar_group_missing": _SEVERITY.INFO,
     }
 )

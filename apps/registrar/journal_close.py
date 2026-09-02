@@ -183,8 +183,12 @@ def close_journals(*, organization, period, by_user, unit=None, reason="", reque
     schemes = schemes_in_scope(organization=organization, period=period, unit=unit)
     total = schemes.count()
     already = schemes.filter(is_published=True, approval_status=ApprovalStatus.APPROVED).count()
+    # Bildiriş ÜÇÜN: HƏQİQƏTƏN dəyişəcək sxemlərin müəllimləri — UPDATE-dən
+    # ƏVVƏL tutulur (sonra WHERE artıq heç nəyə uyğun gəlməz).
+    to_close = schemes.exclude(is_published=True, approval_status=ApprovalStatus.APPROVED)
+    affected_instructor_ids = list(to_close.values_list("offering__instructor_id", flat=True).distinct())
     # Tək UPDATE — qismən bağlanma mümkün deyil; artıq bağlı sətirlərə toxunmur.
-    changed = schemes.exclude(is_published=True, approval_status=ApprovalStatus.APPROVED).update(
+    changed = to_close.update(
         is_published=True,
         approval_status=ApprovalStatus.APPROVED,
     )
@@ -199,6 +203,12 @@ def close_journals(*, organization, period, by_user, unit=None, reason="", reque
         reason=(reason or "").strip()[:1000] or "Semestr sonu jurnal bağlanması (RİM).",
         request=request,
     )
+    if changed:
+        from . import journal_close_notifications
+
+        journal_close_notifications.notify_closed(
+            organization=organization, period=period, unit=unit, instructor_ids=affected_instructor_ids
+        )
     return {
         "closed": changed,
         "already": already,
@@ -228,7 +238,9 @@ def reopen_journals(*, organization, period, by_user, unit=None, reason, request
     schemes = schemes_in_scope(organization=organization, period=period, unit=unit)
     total = schemes.count()
     already = schemes.exclude(is_published=True, approval_status=ApprovalStatus.APPROVED).count()
-    changed = schemes.filter(is_published=True, approval_status=ApprovalStatus.APPROVED).update(
+    to_reopen = schemes.filter(is_published=True, approval_status=ApprovalStatus.APPROVED)
+    affected_instructor_ids = list(to_reopen.values_list("offering__instructor_id", flat=True).distinct())
+    changed = to_reopen.update(
         is_published=False,
         approval_status=ApprovalStatus.DRAFT,
     )
@@ -243,6 +255,12 @@ def reopen_journals(*, organization, period, by_user, unit=None, reason, request
         reason=reason[:1000],
         request=request,
     )
+    if changed:
+        from . import journal_close_notifications
+
+        journal_close_notifications.notify_reopened(
+            organization=organization, period=period, unit=unit, instructor_ids=affected_instructor_ids
+        )
     return {
         "reopened": changed,
         "already": already,

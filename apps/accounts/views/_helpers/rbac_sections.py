@@ -44,7 +44,10 @@ def apply_permission_section_gates(
     testlər onlara söykənir): ``can_view_audit``, ``can_use_rim_center``,
     ``can_view_people_teachers``, ``can_view_people_students``, ``can_view_syllabus``,
     ``can_edit_syllabus``, ``can_review_syllabus``, ``can_reassign_teaching``,
+    ``can_manage_schedule``, ``can_import_students``, ``can_use_applications``,
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
+    ``can_review_legacy_grades``, ``can_watch_legacy_grades``, ``can_view_workload``,
+    ``can_manage_workload``, ``can_distribute_workload``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
@@ -94,6 +97,31 @@ def apply_permission_section_gates(
     # bölməni görür və BOŞ siyahı alır — səssiz 403 əvəzinə anlaşılan boşluq.
     can_reassign_teaching = privileged or has_permission(permissions, "journal.reassign")
 
+    # «Cədvəl idarəetməsi» — `schedule.manage` (proqram koordinatoru, RİM, dekan,
+    # kafedra müdiri). Qapı ROL ADINA baxmır: açar permission-editordan istənilən
+    # rola verilə bilər. ADİ MÜƏLLİMDƏ açar QƏSDƏN YOXDUR — o, «Dərs cədvəli»
+    # bölməsində öz həftəsini yalnız GÖRÜR. Konkret qrupun/açılışın idarə oluna
+    # bilməsi `apps/registrar/schedule_manage.py`-da struktur əhatəsi ilə
+    # fail-closed yenidən yoxlanılır (əhatəsiz aktor boş siyahı görür).
+    can_manage_schedule = privileged or has_permission(permissions, "schedule.manage")
+
+    # «Tələbə idxalı» — `user.import`. QƏSDƏN RİM mərkəzinin (`user.search` və s.)
+    # açarlarından AYRIDIR: mövcud hesabı idarə etmək hüququ heç bir rola
+    # avtomatik olaraq «minlərlə yeni hesab yarat» səlahiyyəti verməməlidir
+    # (əsasnamə 5.5). Menyu görünürlüyü yalnız açara baxır; faktiki əməl
+    # `apps/accounts/services/intake/policy.py`-da fail-closed yenidən yoxlanılır.
+    can_import_students = privileged or has_permission(permissions, "user.import")
+
+    # «Müraciətlərim» — ÜÇ açardan hər hansı biri bölməni açır: göndərən
+    # (`application.create`), emalçı (`application.handle`) və ya nəzarətçi
+    # (`application.manage`). Praktikada bu, AKTİV ÜZVLÜYÜ olan hər rol deməkdir
+    # (`alumni` / `member` istisna) — panelin özü ailəyə/emalçı bayrağına görə
+    # daxildən budaqlanır, ona görə bölmə açarı BİRDİR. Aktiv üzvlüyü olmayan
+    # istifadəçidə `permissions` boşdur → bölmə görünmür (fail-closed).
+    can_use_applications = privileged or any(
+        has_permission(permissions, key) for key in ("application.create", "application.handle", "application.manage")
+    )
+
     # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — İKİ AÇAR, QƏSDƏN FƏRQLİ ROLDA:
     #
     #   `final_score.entry`  → növbəni görür VƏ qərar/düzəliş yaza bilir. Bu,
@@ -109,6 +137,19 @@ def apply_permission_section_gates(
     can_review_legacy_grades = privileged or has_permission(permissions, "final_score.entry")
     can_watch_legacy_grades = can_review_legacy_grades or has_permission(permissions, "journal.correct")
 
+    # «Yük bölgüsü» + «Dərs yüküm» — İKİ AYRI SƏTH, iki fərqli qapı:
+    #
+    #   `workload.distribute` / `workload.manage` → kafedra müdiri (öz kafedrası)
+    #     və RİM/prorektor; bölgü ekranını AÇIR. Konkret kafedranın əhatəyə
+    #     düşməsi `apps/workload/services/scoping.py`-da fail-closed yenidən
+    #     yoxlanılır (əhatəsi olmayan aktor boş kafedra siyahısı görür).
+    #   `workload.view` → HƏR müəllim; yalnız ÖZ bölgü sətirlərini göstərən
+    #     «Dərs yüküm» bölməsini açır (sorğu `teacher=request.user` ilə daralıb,
+    #     yəni açar başqasının yükünü GÖSTƏRMİR).
+    can_distribute_workload = privileged or has_permission(permissions, "workload.distribute")
+    can_manage_workload = can_distribute_workload or has_permission(permissions, "workload.manage")
+    can_view_workload = can_manage_workload or has_permission(permissions, "workload.view")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -118,7 +159,12 @@ def apply_permission_section_gates(
         (can_view_syllabus, "syllabus-editor"),
         (can_review_syllabus, "syllabus-review"),
         (can_reassign_teaching, "teaching-handover"),
+        (can_manage_schedule, "schedule-manage"),
+        (can_import_students, "student-intake"),
+        (can_use_applications, "applications"),
         (can_watch_legacy_grades, "legacy-grade-review"),
+        (can_manage_workload, "workload-distribution"),
+        (can_view_workload, "my-workload"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -132,8 +178,14 @@ def apply_permission_section_gates(
         "can_edit_syllabus": can_edit_syllabus,
         "can_review_syllabus": can_review_syllabus,
         "can_reassign_teaching": can_reassign_teaching,
+        "can_manage_schedule": can_manage_schedule,
+        "can_import_students": can_import_students,
+        "can_use_applications": can_use_applications,
         "can_review_legacy_grades": can_review_legacy_grades,
         "can_watch_legacy_grades": can_watch_legacy_grades,
+        "can_view_workload": can_view_workload,
+        "can_manage_workload": can_manage_workload,
+        "can_distribute_workload": can_distribute_workload,
     }
 
 

@@ -22,16 +22,17 @@ from django.utils.translation import pgettext
 
 from apps.accounts.forms.kollokvium_windows import KollokviumExtraGrantForm, KollokviumWindowForm
 from apps.exams.public import is_exam_center_user
+from apps.registrar import kollokvium_notifications
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
 from core.audit import log_action
 from core.constants import AuditAction
 
 from ._helpers import (
     _append_query_params,
-    _get_active_organization,
     _is_superadmin_user,
     _render_profile_section,
     _resolve_next_url,
+    _resolve_superadmin_target_org,
 )
 
 logger = logging.getLogger(__name__)
@@ -83,15 +84,13 @@ def _is_head(user):
 
 
 def _resolve_target_org(request):
-    """Bu sorğunun idarə etdiyi təşkilat (superadmin: ?win_org / POST organization_id)."""
-    from apps.organizations.models import Organization
+    """Bu sorğunun idarə etdiyi təşkilat (superadmin: ?win_org / POST organization_id).
 
-    if _is_superadmin_user(request.user):
-        org_id = (request.POST.get("organization_id") or request.GET.get("win_org") or "").strip()
-        if org_id:
-            return Organization.objects.filter(pk=org_id).first()
-        return Organization.objects.filter(is_active=True).order_by("name").first()
-    return _get_active_organization(request)
+    Həll paylaşılan ``_resolve_superadmin_target_org``-a həvalə olunur: id yalnız
+    superadmin üçün oxunur, AKTİV təşkilatlar arasında validasiya edilir və
+    parse olunmayan dəyər 500 vermir (2026-09-02 audit, P2-3).
+    """
+    return _resolve_superadmin_target_org(request, query_param="win_org")
 
 
 @login_required
@@ -144,6 +143,7 @@ def _dispatch_action(request, action, organization):
             raise KollokviumAdminError(
                 pgettext("accounts.kollokvium_windows", "Əvvəlcə K%(n)s təyin edilməlidir.") % {"n": k_index}
             )
+        existing = KollokviumWindow.objects.filter(organization=organization, period=period, k_index=k_index).first()
         window, created = KollokviumWindow.objects.update_or_create(
             organization=organization,
             period=period,
@@ -154,6 +154,16 @@ def _dispatch_action(request, action, organization):
                 "created_by": user,
             },
         )
+        # Yalnız AKTİV pəncərənin tarixi HƏQİQƏTƏN dəyişəndə xəbərdarlıq —
+        # yaradılış (defolt qeyri-aktiv) və ya eyni tarixlərlə yenidən saxlama
+        # bildiriş yaratmır (toggle_window_active açılışı elan edir).
+        if (
+            not created
+            and window.is_active
+            and existing is not None
+            and (existing.opens_on != window.opens_on or existing.closes_on != window.closes_on)
+        ):
+            kollokvium_notifications.notify_window_extended(window)
         log_action(
             AuditAction.CREATE if created else AuditAction.UPDATE,
             user=user,
@@ -172,6 +182,10 @@ def _dispatch_action(request, action, organization):
         _reject_if_period_past(window.period, user)
         window.is_active = not window.is_active
         window.save(update_fields=["is_active", "updated_at"])
+        if window.is_active:
+            kollokvium_notifications.notify_window_opened(window)
+        else:
+            kollokvium_notifications.notify_window_closed(window)
         log_action(
             AuditAction.UPDATE,
             user=user,

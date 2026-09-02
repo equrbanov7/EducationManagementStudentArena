@@ -719,6 +719,13 @@ class MutatingGetRouteScanTests(TestCase):
         "accounts:statistics_export_csv",
         "exams:exam_center_stats_export",
         "liveExam:qr_png",
+        # `workload:my_export` HEÇ NƏ yazmır — skanı yandıran `.save(` openpyxl-in
+        # yaddaşdaxili `Workbook.save(buffer)` çağırışıdır, DB deyil. View `@require_GET`
+        # + `@login_required`-dir və `teacher_workload_rows()` yalnız oxuyur
+        # (apps/workload/services/queries.py — orada bir dənə də mutasiya yoxdur).
+        # DİQQƏT: `require_GET` qəsdən `guard` regex-inə SALINMIR — GET-only marşrut
+        # mutasiya edirsə, təhlükə məhz odur (bax `live_create_session_by_slug`).
+        "workload:my_export",
     }
 
     def test_no_unreviewed_mutating_get_route_exists(self):

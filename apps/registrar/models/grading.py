@@ -15,6 +15,14 @@ from core.models import OrderedModel, TimeStampedModel, UUIDModel
 
 from ..reference_identity import ReferenceIdentityValidationMixin
 from .academic import CourseOffering, Enrollment
+from .grading_choices import (  # noqa: F401  (geriyə uyğunluq üçün re-export)
+    ApprovalStatus,
+    AttendanceStatus,
+    ComponentKind,
+    LessonKind,
+    ResitReason,
+    ResitStatus,
+)
 
 # ── Elektron jurnal (davamiyyət/qiymət jurnalı, U3 — UNEC modeli) ─────────────
 #
@@ -25,48 +33,6 @@ from .academic import CourseOffering, Enrollment
 # Yekun imtahan burada YOXDUR — bu jurnal yalnız semestr fəaliyyətidir.
 # Kilid qaydaları servis qatında (``apps/registrar/gradebook.py``): dərs tarixi
 # yaranışdan sonra qısa müddət, iştirak/bal isə 1 gün sonra dəyişilə bilməz.
-
-
-class LessonKind(models.TextChoices):
-    LECTURE = "lecture", pgettext_lazy("registrar.lesson_kind", "Lecture")  # yalnız iə/qb
-    SEMINAR = "seminar", pgettext_lazy("registrar.lesson_kind", "Seminar")  # iə/qb + bal
-    LAB = "lab", pgettext_lazy("registrar.lesson_kind", "Laboratory")  # iə/qb + bal
-
-
-class AttendanceStatus(models.TextChoices):
-    PRESENT = "present", pgettext_lazy("registrar.attendance", "Present")  # iştirak (iə)
-    ABSENT = "absent", pgettext_lazy("registrar.attendance", "Absent")  # qayıb (qb)
-    # Üzrlü qayıb (ü/q): YALNIZ rəsmi sənədli jurnal-düzəliş axını ilə qoyulur
-    # (apps/registrar/corrections.py) — müəllim UI-ında seçim kimi YOXDUR.
-    # Qayıb-limit hesabına DAXİL DEYİL (absence_hours bunu saymır).
-    EXCUSED = "excused", pgettext_lazy("registrar.attendance", "Excused absence")
-
-
-class ApprovalStatus(models.TextChoices):
-    """Jurnalın kilid vəziyyəti — indi YALNIZ İKİ məna daşıyır.
-
-    SAHİBİN QƏRARI (2026-08): müəllim → kafedra → dekan təsdiq zənciri LƏĞV
-    edildi. Müəllim balı yazır və bitir; semestr sonunda RİM jurnalları toplu
-    BAĞLAYIR (bax :mod:`apps.registrar.journal_close`).
-
-    * ``DRAFT``    — jurnal açıqdır (müəllim adi kilid qaydaları çərçivəsində yazır);
-    * ``APPROVED`` — jurnal BAĞLIDIR (``is_published=True`` ilə birlikdə —
-      CheckConstraint ``registrar_scheme_publish_state_valid`` bu cütü qoruyur).
-
-    ``SUBMITTED`` / ``CHAIR_APPROVED`` / ``RETURNED`` sahə dəyərləri QƏSDƏN
-    saxlanılır (köhnə sətirlərin oxunması + legacy import J7 fazası sxemə
-    bağlıdır), lakin YENİ heç bir kod onları yazmır; miqrasiya
-    ``registrar.0048`` mövcud sətirləri DRAFT-a endirir.
-    """
-
-    DRAFT = "draft", pgettext_lazy("registrar.approval", "Draft")
-    #: LEGACY — artıq yaradılmır (təsdiq zənciri ləğv edilib).
-    SUBMITTED = "submitted", pgettext_lazy("registrar.approval", "Submitted (awaiting chair)")
-    #: LEGACY — artıq yaradılmır.
-    CHAIR_APPROVED = "chair_approved", pgettext_lazy("registrar.approval", "Chair approved (awaiting dean)")
-    APPROVED = "approved", pgettext_lazy("registrar.approval", "Approved (official)")
-    #: LEGACY — artıq yaradılmır.
-    RETURNED = "returned", pgettext_lazy("registrar.approval", "Returned for revision")
 
 
 class AssessmentScheme(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
@@ -308,17 +274,6 @@ class RubricCriterion(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedMo
         return f"{self.name} ({self.max_points})"
 
 
-class ComponentKind(models.TextChoices):
-    """Komponentin tipi — UI hansı tabda göstərəcəyini və xüsusi davranışı seçir.
-
-    KOLLOKVIUM: 3 kollokvium (K1-K3) + keçirilmə tarixi (``held_on``).
-    SELF_WORK: sərbəst iş — balı mövzu-çeklist cəmindən avtomatik yazılır."""
-
-    GENERIC = "generic", pgettext_lazy("registrar.component_kind", "Generic")
-    KOLLOKVIUM = "kollokvium", pgettext_lazy("registrar.component_kind", "Kollokvium")
-    SELF_WORK = "self_work", pgettext_lazy("registrar.component_kind", "Independent work")
-
-
 class AssessmentComponent(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel, OrderedModel):
     """One weighted entry-score component of an offering (seminar / kollokvium /
     SDF / layihə). ``max_score`` is its contribution ceiling; the components'
@@ -473,7 +428,15 @@ class SelfWorkMark(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel
         constraints = [
             models.UniqueConstraint(fields=["topic", "enrollment"], name="uniq_selfwork_topic_enrollment"),
         ]
-        indexes = [models.Index(fields=["organization", "enrollment"])]
+        indexes = [
+            models.Index(fields=["organization", "enrollment"]),
+            # «Təhvil verilmiş sərbəst iş sayı» aqreqatı (akademik-qeyd icmalı,
+            # ``accounts.academic_records``) ``WHERE done AND enrollment_id IN (…)
+            # GROUP BY enrollment_id`` şəklindədir — org-səviyyəli çağırışda
+            # (7 700 tələbə) mövcud indekslərin heç biri onu ÖRTMÜRDÜ
+            # (2026-09-02 performans auditi, F3).
+            models.Index(fields=["enrollment", "done"], name="selfwork_enrollment_done"),
+        ]
 
     def __str__(self):
         return f"{self.topic_id} · {self.enrollment_id} = {int(self.done)}"
@@ -549,17 +512,6 @@ class FinalGrade(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"final<{self.enrollment_id}> exam={self.exam_score}"
-
-
-class ResitReason(models.TextChoices):
-    ABSENCE = "absence", pgettext_lazy("registrar.resit_reason", "Barred by absence")
-    TOTAL = "total", pgettext_lazy("registrar.resit_reason", "Total below pass mark")
-    EXAM = "exam", pgettext_lazy("registrar.resit_reason", "Exam below minimum")
-
-
-class ResitStatus(models.TextChoices):
-    ELIGIBLE = "eligible", pgettext_lazy("registrar.resit_status", "Eligible")
-    COMPLETED = "completed", pgettext_lazy("registrar.resit_status", "Completed")
 
 
 class ResitRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):

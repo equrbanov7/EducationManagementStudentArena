@@ -81,6 +81,7 @@
       deleteNameEl: deleteModalElement ? deleteModalElement.querySelector("#profileGroupDeleteName") : null,
       deleteConfirmBtn: deleteModalElement ? deleteModalElement.querySelector("#profileGroupDeleteConfirmBtn") : null,
       createUrl: modalElement.getAttribute("data-create-url") || "",
+      candidatesUrl: modalElement.getAttribute("data-candidates-url") || "",
       updateTemplate: modalElement.getAttribute("data-update-url-template") || "",
       nextUrl: modalElement.getAttribute("data-next-url") || "",
       defaultPrimaryTeacher: modalElement.getAttribute("data-default-primary-teacher") || "",

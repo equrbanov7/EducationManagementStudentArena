@@ -1,0 +1,138 @@
+{% load i18n %}
+{% comment %}
+«Dərs yüküm» bölməsi — müəllim ÖZ illik dərs yükünü görür (spec §6.4).
+
+İcazə: `workload.view`. Açar başqasının yükünü GÖSTƏRMİR — sorğu qatı
+(`apps/workload/services/queries.py`) `teacher=request.user` ilə daralıb və
+yalnız TƏSDİQLƏNMİŞ (`distributed`/`amended`) tapşırıqların sətirlərini verir:
+kafedra hələ bölgü aparırkən müəllim yarımçıq rəqəm görmür.
+
+Panel yalnız-oxudur: heç bir yazma endpoint-i yoxdur (ixrac GET-dir).
+CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
+{% endcomment %}
+{% if 'my-workload' in allowed_sections %}
+<section class="profile-section-panel profile-section--my-workload {% if active_section == 'my-workload' %}is-active{% endif %}"
+         data-profile-section-panel="my-workload"
+         data-source-url="{{ profile_base_url }}?section=my-workload">
+
+{% if not my_workload_section.has_access %}
+  <p class="wl__denied" role="status">{{ my_workload_section.access_denied_message }}</p>
+{% else %}
+<div class="wlm"
+     data-wlm-root
+     data-rows-url="{{ my_workload_section.rows_url }}"
+     data-export-url="{{ my_workload_section.export_url }}"
+     data-academic-year="{{ my_workload_section.academic_year }}"
+     data-journal-base-url="{{ my_workload_section.journal_base_url }}">
+
+  <header class="wlm__head">
+    <div>
+      {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
+      <p class="wlm__intro">
+        {% trans "Kafedra tərəfindən sizə ayrılmış illik dərs yükü. Cədvəl yalnız təsdiqlənmiş bölgünü göstərir; sual yaranarsa kafedra müdirinə müraciət edin." context "accounts.workload" %}
+      </p>
+    </div>
+    <a class="wl-btn wl-btn--ghost" data-wlm-export href="{{ my_workload_section.export_url }}?year={{ my_workload_section.academic_year }}">
+      <i class="fas fa-file-excel" aria-hidden="true"></i>
+      <span>{% trans "Excel yüklə" context "accounts.workload" %}</span>
+    </a>
+  </header>
+
+  {# ── Stat kartlar ───────────────────────────────────────────────────── #}
+  <div class="wlm-kpis" data-wlm-kpis>
+    <div class="wlm-kpi wlm-kpi--primary">
+      <span class="wlm-kpi__label">{% trans "İllik cəmi" context "accounts.workload" %}</span>
+      <span class="wlm-kpi__value" data-wlm-kpi="total_hours">{{ my_workload_section.summary.total_hours|default:"0" }}</span>
+      <span class="wlm-kpi__note">{% trans "saat" context "accounts.workload" %}</span>
+    </div>
+    <div class="wlm-kpi">
+      <span class="wlm-kpi__label">{% trans "Norma" context "accounts.workload" %}</span>
+      <span class="wlm-kpi__value" data-wlm-kpi="norm_hours">{{ my_workload_section.summary.norm_hours|default:"0" }}</span>
+      <span class="wlm-kpi__note">{% trans "saat / il" context "accounts.workload" %}</span>
+    </div>
+    <div class="wlm-kpi wlm-kpi--success">
+      <span class="wlm-kpi__label">{% trans "Doluluq" context "accounts.workload" %}</span>
+      <span class="wlm-kpi__value" data-wlm-kpi="fill_percent">{{ my_workload_section.summary.fill_percent|default:"0" }}</span>
+      <span class="wlm-kpi__note">%</span>
+    </div>
+    <div class="wlm-kpi wlm-kpi--warning">
+      <span class="wlm-kpi__label">{% trans "Saathesabı" context "accounts.workload" %}</span>
+      <span class="wlm-kpi__value" data-wlm-kpi="hourly_paid_hours">{{ my_workload_section.summary.hourly_paid_hours|default:"0" }}</span>
+      <span class="wlm-kpi__note">{% trans "saat" context "accounts.workload" %}</span>
+    </div>
+  </div>
+
+  {# ── İl seçimi + fəsil tabları ──────────────────────────────────────── #}
+  <div class="wlm-controls">
+    <label class="wlm-field">
+      <span>{% trans "Tədris ili" context "accounts.workload" %}</span>
+      <select class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wlm-year>
+        {% for year in my_workload_section.years %}
+        <option value="{{ year }}" {% if year == my_workload_section.academic_year %}selected{% endif %}>{{ year }}</option>
+        {% empty %}
+        <option value="">{% trans "Məlumat yoxdur" context "accounts.workload" %}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="wlm-tabs" role="tablist" aria-label="{% trans 'Semestr' context 'accounts.workload' %}">
+      <button type="button" class="wlm-tab is-active" role="tab" aria-selected="true" data-wlm-season="">
+        {% trans "Yekun" context "accounts.workload" %}
+      </button>
+      {% for season in my_workload_section.seasons %}
+      <button type="button" class="wlm-tab" role="tab" aria-selected="false" tabindex="-1" data-wlm-season="{{ season.key }}">
+        {{ season.label }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Cədvəl ─────────────────────────────────────────────────────────── #}
+  <div class="wlm-skeleton" data-wlm-skeleton hidden aria-hidden="true">
+    <span class="wl-skeleton__bar"></span><span class="wl-skeleton__bar"></span><span class="wl-skeleton__bar"></span>
+  </div>
+
+  <div class="ems-empty wlm__empty" data-wlm-empty {% if my_workload_section.rows %}hidden{% endif %}>
+    <i class="fas fa-clipboard-list ems-empty-icon" aria-hidden="true"></i>
+    <p class="ems-empty-title">{% trans "Təsdiqlənmiş dərs yükü yoxdur" context "accounts.workload" %}</p>
+    <p class="ems-empty-hint">{% trans "Kafedra bölgünü təsdiqləyəndən sonra fənləriniz burada görünəcək və sizə bildiriş gələcək." context "accounts.workload" %}</p>
+  </div>
+
+  <div class="wlm-table-wrap" data-wlm-table-wrap {% if not my_workload_section.rows %}hidden{% endif %}>
+    <table class="wlm-table">
+      <thead>
+        <tr>
+          <th scope="col">{% trans "Fənn" context "accounts.workload" %}</th>
+          <th scope="col">{% trans "Qrup(lar)" context "accounts.workload" %}</th>
+          <th scope="col">{% trans "Fəaliyyət" context "accounts.workload" %}</th>
+          <th scope="col" class="wlm-table__num">{% trans "Saat" context "accounts.workload" %}</th>
+          <th scope="col">{% trans "Forma" context "accounts.workload" %}</th>
+          <th scope="col">{% trans "Səviyyə" context "accounts.workload" %}</th>
+          <th scope="col">{% trans "Jurnal" context "accounts.workload" %}</th>
+        </tr>
+      </thead>
+      <tbody data-wlm-rows>
+        {% for row in my_workload_section.rows %}
+        <tr>
+          <td>{{ row.subject }}</td>
+          <td>{{ row.groups }}</td>
+          <td>{{ row.activity_label }}</td>
+          <td class="wlm-table__num">{{ row.hours }}</td>
+          <td>{{ row.education_form }}</td>
+          <td>{{ row.degree_level }}</td>
+          <td>{% if row.offering_id %}<a href="{{ my_workload_section.journal_base_url }}{{ row.offering_id }}/">{% trans "Aç" context "accounts.workload" %}</a>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" colspan="3">{% trans "CƏMİ" context "accounts.workload" %}</th>
+          <td class="wlm-table__num" data-wlm-total>{{ my_workload_section.summary.total_hours|default:"0" }}</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endif %}
+</section>
+{% endif %}
