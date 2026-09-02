@@ -59416,3 +59416,18 @@ msgstr "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarl
 
 msgid "Yekun nəticə"
 msgstr "Yekun nəticə"
+
+#: apps/accounts/forms/auth/login.py:73
+msgctxt "accounts.form.password_reset.error"
+msgid "Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün RİM-ə müraciət edin."
+msgstr "Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün RİM-ə müraciət edin."
+
+#: apps/registrar/templates/registrar/partials/_schedule_content.html:31
+msgctxt "registrar.schedule"
+msgid "TƏDRİS İLİ"
+msgstr "TƏDRİS İLİ"
+
+#: apps/registrar/templates/registrar/partials/_schedule_content.html:41
+msgctxt "registrar.schedule"
+msgid "YARIM İL"
+msgstr "YARIM İL"
