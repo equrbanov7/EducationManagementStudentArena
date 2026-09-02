@@ -143,6 +143,7 @@ from .roles import (
 
 # Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
 from .schedule_manage import schedule_manage_action, schedule_manage_check
+from .student_intake import student_intake_apply, student_intake_preview, student_intake_template
 
 # Global search (⌘K command palette)
 from .search import global_search
@@ -244,6 +245,9 @@ __all__ = [
     "applications_assignees",
     "schedule_manage_check",
     "schedule_manage_action",
+    "student_intake_template",
+    "student_intake_preview",
+    "student_intake_apply",
     # Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi (`final_score.entry`)
     "legacy_review_queue",
     "legacy_review_options",

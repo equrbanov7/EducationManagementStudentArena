@@ -384,6 +384,13 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
                 "course_id", flat=True
             )
         )
+    elif _has_active_student_membership(organization, request.user):
+        # Qrupu (və ya akademik qeydi) hələ olmayan TƏLƏBƏ — əvvəllər «müəllim»
+        # qoluna düşür və başlıqda «Müəllim cədvəli» görürdü (klonda 102 hesab).
+        # Cədvəli boş qalır, amma kimliyi tələbə olaraq qalmalıdır.
+        role = "student"
+        owner_label = request.user.get_full_name() or request.user.username
+        slots = []
     else:
         role = "teacher"
         owner_label = request.user.get_full_name() or request.user.username

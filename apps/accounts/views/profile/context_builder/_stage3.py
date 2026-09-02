@@ -376,6 +376,16 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "student-intake" in self.allowed_sections and self.active_section == "student-intake":
+            from .._sections.student_intake import build_student_intake_section
+
+            build_student_intake_section(
+                self.request,
+                self.student_intake_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "applications" in self.allowed_sections and self.active_section == "applications":
             from .._sections.applications import build_applications_section
 
