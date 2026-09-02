@@ -163,6 +163,25 @@ class JournalCloseSectionTest(TestCase):
         with bypass_rls():
             self.assertFalse(JournalCloseNotice.objects.exists())
 
+    # ── açıq-yönləndirmə (CodeQL py/url-redirection) ─────────────────────
+    def test_external_next_is_ignored(self):
+        """`next` xarici hosta göstərirsə bölmə URL-inə qayıdılır."""
+        resp = self._client(self.rim).post(
+            reverse("accounts:journal_close"),
+            {"action": "bogus", "next": "//evil.example.com/steal"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertNotIn("evil.example.com", resp["Location"])
+        self.assertIn("section=journal-close", resp["Location"])
+
+    def test_internal_next_is_kept(self):
+        resp = self._client(self.rim).post(
+            reverse("accounts:journal_close"),
+            {"action": "bogus", "next": "/accounts/profile/?section=journal-close&page=2"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("page=2", resp["Location"])
+
     def test_notice_actions_are_audited(self):
         from apps.audit.models import AuditLog
 

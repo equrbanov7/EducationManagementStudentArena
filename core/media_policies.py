@@ -151,8 +151,9 @@ def _get_single(queryset, **lookup):
 def check_journal_correction_access(user, path: str) -> bool:
     """``journal_corrections/`` — xana (davamiyyət/bal) düzəlişinin sənədi.
 
-    Sənədin aid olduğu TƏLƏBƏ, açılışın müəllimi, yaxud düzəliş səlahiyyətli
-    inzibati aktor oxuya bilər."""
+    Sənədin aid olduğu TƏLƏBƏ, yaxud düzəliş səlahiyyətli inzibati aktor oxuya
+    bilər.  Açılışın müəllimi QƏSDƏN daxil deyil — sənəd tibbi/rəsmi arayışdır
+    (əvvəlki müqavilə, ``test_corrections_bridge.CorrectionMediaAccessTest``)."""
     JournalCorrection = django_apps.get_model("registrar", "JournalCorrection")
     correction = _get_single(
         JournalCorrection.objects.select_related(
@@ -165,11 +166,8 @@ def check_journal_correction_access(user, path: str) -> bool:
     if correction is None:
         return False
     mark = correction.lesson_mark
-    if mark is not None:
-        if getattr(mark.enrollment, "student_id", None) == user.id:
-            return True
-        if _is_offering_instructor(user, getattr(mark.lesson, "offering", None)):
-            return True
+    if mark is not None and getattr(mark.enrollment, "student_id", None) == user.id:
+        return True
     return _is_correction_reviewer(user, correction.organization)
 
 

@@ -39,6 +39,7 @@ from django.views.decorators.http import require_GET
 from apps.accounts.models import UserProfile
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
+from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _role_capabilities
@@ -332,7 +333,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     try:
         html = render_to_string(SECTION_PARTIALS[section], context, request=request)
     except Exception:  # noqa: BLE001 — defensive
-        logger.exception("profile section fragment render failed: %s", section)
+        logger.exception("profile section fragment render failed: %s", safe_log_value(section))
         return JsonResponse({"ok": False, "error": "render_failed"}, status=500)
 
     return JsonResponse(
