@@ -445,5 +445,8 @@ class UserProfile(models.Model):
 
 # Ölçü budcəsi: akademik qeyd modeli ayrıca moduldadır, buradan yenidən ixrac olunur.
 from .academic_models import AcademicProfileItem  # noqa: E402,F401
-from .identity_models import AccountActivationEvidence  # noqa: E402,F401
+from .identity_models import (  # noqa: E402,F401
+    AccountActivationEvidence,
+    AccountRestoreEvidence,
+)
 from .otp_models import EmailOTP  # noqa: E402,F401
