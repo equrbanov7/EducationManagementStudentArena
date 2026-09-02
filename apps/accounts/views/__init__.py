@@ -18,6 +18,9 @@ from .account_management import (
     superadmin_user_management,
 )
 
+# «Müraciətlərim» — «Təyin et» dialoqunun namizəd siyahısı
+from .applications import applications_assignees
+
 # Authentication views
 from .auth import (
     CustomLoginView,
@@ -138,6 +141,9 @@ from .roles import (
     role_assignment,
 )
 
+# Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
+from .schedule_manage import schedule_manage_action, schedule_manage_check
+
 # Global search (⌘K command palette)
 from .search import global_search
 
@@ -235,6 +241,9 @@ __all__ = [
     "handover_options",
     "handover_history",
     "handover_action",
+    "applications_assignees",
+    "schedule_manage_check",
+    "schedule_manage_action",
     # Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi (`final_score.entry`)
     "legacy_review_queue",
     "legacy_review_options",

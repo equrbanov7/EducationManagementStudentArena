@@ -54,3 +54,38 @@ def _assigned_exams_queryset(request, user, *, active_only=True):
         request,
         get_assigned_exams_for_user(user, active_only=active_only, include_public=False),
     ).distinct()
+
+
+def _resolve_superadmin_target_org(request, *, query_param: str):
+    """Superadmin üçün hədəf təşkilat — id AKTİV təşkilatlar içində VALİDASİYA olunur.
+
+    2026-09-02 audit, P2-3: ``kollokvium_windows`` və ``journal_close``
+    ``organization_id``-ni birbaşa ``request.POST``-dan götürüb
+    ``Organization.objects.filter(pk=org_id)`` yazırdı.  İki problem:
+
+    * **IDOR forması** — id yalnız superadmin yolunda oxunsa da, gövdədən gələn
+      identifikatorun heç bir yoxlanışı yox idi (ikinci tenant provizioned
+      olan kimi bu, canlı riskə çevrilir);
+    * **kobud giriş** — UUID olmayan mətn ``ValidationError`` ilə 500 verirdi.
+
+    İndi: superadmin deyilsə HƏMİŞƏ aktiv-təşkilat konteksti; superadmin üçün
+    id təhlükəsiz parse olunur və yalnız AKTİV təşkilatlar arasından seçilir,
+    tapılmasa aktiv kontekstə, o da yoxdursa ilk aktiv təşkilata düşür.
+    """
+    from django.core.exceptions import ValidationError
+
+    from apps.organizations.models import Organization
+    from core.permissions import is_superadmin_user
+
+    if not is_superadmin_user(getattr(request, "user", None)):
+        return _get_active_organization(request)
+
+    raw = (request.POST.get("organization_id") or request.GET.get(query_param) or "").strip()
+    if raw:
+        try:
+            organization = Organization.objects.filter(pk=raw, is_active=True).first()
+        except (ValidationError, ValueError, TypeError):
+            organization = None
+        if organization is not None:
+            return organization
+    return _get_active_organization(request) or Organization.objects.filter(is_active=True).order_by("name").first()

@@ -401,7 +401,7 @@ def test_transform_version_is_token_valid_and_within_length():
 
     # 21-char family + "." + 12 hex = 34 (the spec's "33 chars" is an off-by-one);
     # the binding invariants are TOKEN_PATTERN validity and max_length=64.
-    assert transform_version.startswith("rehearsal-identity-v1.")
+    assert transform_version.startswith("rehearsal-identity-v2.")
     assert len(transform_version) == 34
     assert len(schema_version) == 33
     for value in (transform_version, schema_version):
@@ -528,7 +528,7 @@ def test_transform_version_stays_bounded_with_the_activation_knobs():
         plan_semester_scheme=PlanSemesterScheme.TERM_PAIR,
     ).transform_version()
 
-    assert transform_version.startswith("rehearsal-identity-v1.")
+    assert transform_version.startswith("rehearsal-identity-v2.")
     assert len(transform_version) == 34 <= 64
     token_validator(transform_version)
 

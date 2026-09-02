@@ -1,4 +1,10 @@
-"""View-level tests for the timetable page (/cedvel/) — U4."""
+"""View-level tests for the timetable page (/cedvel/) — U4.
+
+2026-09: slot əlavəsi/silinməsi ``schedule.manage`` açarına köçdü (bax
+``apps/registrar/schedule_manage.py``). Adi müəllim artıq YALNIZ GÖRÜR —
+gözləntilər buna uyğun yenilənib; icazə/əhatə matrisi ayrıca faylda
+(``test_schedule_manage.py``).
+"""
 
 import datetime
 
@@ -31,19 +37,26 @@ class ScheduleViewTest(TestCase):
             cls.group = OrgUnit.objects.create(
                 organization=cls.org, name="G1", slug="sv-g1", unit_type=OrgUnitType.GROUP
             )
+            # DİQQƏT: dövr CARİ olmalıdır — 2026-09-dan sonra slot əlavəsi
+            # `schedule_manage.period_window_error` ilə bitmiş semestrdə
+            # bloklanır, ona görə tarixlər sabit yox, bu günə görə qurulur.
+            today = datetime.date.today()
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
-                name="2024/2025 Payız",
+                name="Cari Payız",
                 period_type=AcademicPeriodType.SEMESTER,
-                academic_year="2024/2025",
-                start_date="2024-09-01",
-                end_date="2025-01-31",
+                academic_year="2025/2026",
+                start_date=today - datetime.timedelta(days=30),
+                end_date=today + datetime.timedelta(days=120),
                 is_current=True,
             )
             cls.subject = Subject.objects.create(organization=cls.org, code="CS101", name="Proqramlaşdırma")
             cls.teacher = User.objects.create_user("sv_teacher", "sv_teacher@qku.edu.az", "pw")
             cls.student = User.objects.create_user("sv_student", "sv_student@qku.edu.az", "pw")
-            for user, role in ((cls.teacher, "teacher"), (cls.student, "student")):
+            # `schedule.manage` daşıyan aktor — RİM (org-wide). Müəllim QƏSDƏN
+            # bu açarı almır; slot yazan səth üçün ayrıca istifadəçi lazımdır.
+            cls.manager = User.objects.create_user("sv_manager", "sv_manager@qku.edu.az", "pw")
+            for user, role in ((cls.teacher, "teacher"), (cls.student, "student"), (cls.manager, "ikt_rehber")):
                 Membership.objects.create(
                     user=user, organization=cls.org, role=cls.org.roles.get(name=role), is_primary=True, is_active=True
                 )
@@ -92,15 +105,35 @@ class ScheduleViewTest(TestCase):
         self.assertContains(resp, "CS101")
         self.assertContains(resp, "201")
 
-    def test_teacher_sees_own_schedule_and_add_form(self):
+    def test_teacher_sees_own_schedule_read_only(self):
+        """Müəllim öz həftəsini GÖRÜR, amma idarəetmə düymələri YOXDUR."""
         resp = self._client(self.teacher).get(reverse("registrar:schedule"))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context["role"], "teacher")
         self.assertTrue(resp.context["teacher_offerings"])
+        self.assertFalse(resp.context["schedule_can_manage"])
+        self.assertNotContains(resp, "data-sgx-open-add")
 
-    def test_teacher_adds_slot(self):
-        client = self._client(self.teacher)
-        resp = client.post(
+    def test_teacher_cannot_add_slot(self):
+        """`schedule.manage` olmadan açılışın MÜƏLLİMİ də slot yaza bilmir."""
+        resp = self._client(self.teacher).post(
+            reverse("registrar:schedule"),
+            {
+                "offering_id": str(self.offering.id),
+                "weekday": "3",
+                "start_time": "11:00",
+                "end_time": "12:30",
+                "room": "305",
+                "week_type": "all",
+            },
+        )
+        self.assertEqual(resp.status_code, 403)
+        with bypass_rls():
+            self.assertFalse(ScheduleSlot.objects.filter(offering=self.offering, weekday=3).exists())
+
+    def test_permission_holder_adds_slot(self):
+        """`schedule.manage` daşıyan aktor (RİM) slot əlavə edə bilir."""
+        resp = self._client(self.manager).post(
             reverse("registrar:schedule"),
             {
                 "offering_id": str(self.offering.id),
@@ -116,7 +149,7 @@ class ScheduleViewTest(TestCase):
             self.assertTrue(ScheduleSlot.objects.filter(offering=self.offering, weekday=3, room="305").exists())
 
     def test_add_slot_conflict_shows_error(self):
-        client = self._client(self.teacher)
+        client = self._client(self.manager)
         # Overlaps the seeded Monday 09:00–10:30 slot (same offering/group/teacher).
         client.post(
             reverse("registrar:schedule"),

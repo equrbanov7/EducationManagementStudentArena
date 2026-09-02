@@ -38,10 +38,15 @@ CONTACT_EMAIL_RATE = "10/h"
 
 
 def _client_ip(request: HttpRequest) -> str:
-    xff = request.META.get("HTTP_X_FORWARDED_FOR")
-    if xff:
-        return xff.split(",")[0].strip()
-    return request.META.get("REMOTE_ADDR") or "unknown"
+    """Vahid ``core.utils.get_client_ip`` helperinə həvalə (2026-09-02 audit, P2-6).
+
+    Başlıq layihədə beş yerdə müstəqil parse olunurdu; ikisi soldan (saxta
+    edilə bilən) oxuyurdu.  Artıq TƏK mənbə var: etibarlı proxy semantikası
+    (sağdan ``TRUSTED_PROXY_HOPS``).
+    """
+    from core.utils import get_client_ip
+
+    return get_client_ip(request) or "unknown"
 
 
 @never_cache

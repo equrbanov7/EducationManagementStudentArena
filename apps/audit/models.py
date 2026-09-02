@@ -8,6 +8,7 @@ import uuid
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import connections, models
 
 from core.constants import AuditAction
@@ -170,6 +171,16 @@ class AuditLog(models.Model):
     def __str__(self):
         user_str = self.user.username if self.user else "Anonymous"
         return f"{user_str} - {self.action} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+    def delete(self, *args, **kwargs):
+        """Tətbiq səviyyəli APPEND-ONLY qapısı (2026-09-02 audit, P1-3).
+
+        PostgreSQL ``audit_log_no_delete`` triggeri avtoritar qorumadır
+        (``apps/organizations/migrations/0019_audit_log_append_only.py``), lakin
+        SQLite-da və adi model əməliyyatlarında müqavilə açıq olmalıdır —
+        ``registrar.ImmutableCorrectionEvidence`` ilə eyni naxış.
+        """
+        raise ValidationError("Audit log entries are append-only and cannot be deleted.")
 
     def get_resource_display(self):
         """Get a display string for the resource."""

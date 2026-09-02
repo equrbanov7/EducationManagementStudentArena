@@ -366,6 +366,26 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "schedule-manage" in self.allowed_sections and self.active_section == "schedule-manage":
+            from .._sections.schedule_manage import build_schedule_manage_section
+
+            build_schedule_manage_section(
+                self.request,
+                self.schedule_manage_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "applications" in self.allowed_sections and self.active_section == "applications":
+            from .._sections.applications import build_applications_section
+
+            build_applications_section(
+                self.request,
+                self.applications_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-score-entry" in self.allowed_sections and self.active_section == "exam-score-entry":
             from .._sections.exam_score_entry import build_exam_score_entry_section
 

@@ -94,6 +94,18 @@ PERMISSION_CATEGORIES = {
         "journal.roster",
         "journal.reassign",
     ],
+    # Dərs cədvəli (timetable, U4) — `schedule.manage` cədvəl slotlarını
+    # YARATMAQ/SİLMƏK açarıdır. QƏSDƏN `course.*` və `grade.*` ailələrindən
+    # AYRIDIR: adi müəllim öz jurnalını yazır, amma universitetin cədvəlini
+    # QURMUR — cədvəl proqram koordinatoru / dekanlıq / RİM işidir (əks halda
+    # hər müəllim özünə auditoriya və saat ayıra bilərdi). Müəllim öz həftəlik
+    # cədvəlini yenə görür (`schedule.view` və ya öz slotları) — sadəcə
+    # dəyişdirmir. Əhatə UNIT rollarında `Membership.scope_unit` alt-ağacı ilə
+    # məhdudlaşır (bax apps/registrar/schedule_manage.py).
+    "schedule": [
+        "schedule.view",
+        "schedule.manage",
+    ],
     # Sillabus axını (apps.syllabus) — müəllim yazır/göndərir, kafedra müdiri
     # təsdiqləyir. Qərar açarları QƏSDƏN AYRIDIR: `syllabus.review` (növbəni açıb
     # baxmaq) təsdiq hüququ VERMİR; `syllabus.approve`, `syllabus.revise` və
@@ -116,6 +128,18 @@ PERMISSION_CATEGORIES = {
     "groups": [
         "group.view",
         "group.manage",
+    ],
+    # Müraciətlər (apps.applications) — universitet üzrə elektron sənəd dövriyyəsi.
+    # `application.create` — müraciət göndərmək (demək olar hər rol);
+    # `application.handle` — GƏLƏN müraciətə qərar vermək (yalnız şöbə rolları);
+    # `application.manage` — kataloq konfiqurasiyası + org-wide oxu (RİM/rektorat).
+    # ⚠️ `handle` açarı TƏK BAŞINA kifayət etmir: əməl həm də müraciətin CARİ
+    # şöbəsinin `handler_role_names` siyahısında olmağı tələb edir (bax
+    # apps/applications/services/access.py) — açar səthi açır, əhatəni yox.
+    "applications": [
+        "application.create",
+        "application.handle",
+        "application.manage",
     ],
     # `final_score.entry` (2026-08): KAĞIZ üzərində keçən yazılı/praktiki imtahanın
     # YEKUN balının sistemə əl ilə köçürülməsi (İmtahan Mərkəzi → «İmtahan balının
@@ -170,6 +194,17 @@ PERMISSION_CATEGORIES = {
         # operator avtomatik olaraq admin YARADA bilməməlidir. Belə əməliyyat
         # ayrıca icazə + ayrıca audit qeydi tələb edir.
         "user.grant_privileged",
+        # Tələbə idxalı (2026-09) — kütləvi hesab YARATMA açarı. QƏSDƏN
+        # `user.edit`/`user.credentials`-dan AYRIDIR: RİM mərkəzi MÖVCUD hesabı
+        # idarə edir (blok/parol/redaktə), idxal isə YENİ kimlik gətirir —
+        # tələbə hesabı + üzvlük + akademik qeyd bir əməldə yaranır. Ayrı açar
+        # olmasaydı, «parolu sıfırla» səlahiyyəti verilən hər operator eyni
+        # zamanda universitetə minlərlə yeni hesab yaza bilərdi.
+        #
+        # Bu açar `import_users_from_excel` management komandasının prod
+        # kill-switch-ini ƏVƏZ ETMİR (bax core/management/command_safety.py) —
+        # komanda prod-da bağlı qalır; nəzarətli səth məhz bu icazəli UI-dır.
+        "user.import",
     ],
     # «Müəllimlər» / «Tələbələr» kataloqu (apps/accounts/services/people).
     #
@@ -218,7 +253,9 @@ PERMISSION_CATEGORY_LABELS = {
     "courses": "Kurslar",
     "grading": "Qiymətləndirmə",
     "journal": "Jurnal",
+    "schedule": "Dərs cədvəli",
     "syllabus": "Sillabus",
+    "applications": "Müraciətlər",
     "exams": "İmtahanlar",
     "appeal": "Apellyasiya",
     "analytics": "Analitika",
@@ -284,6 +321,9 @@ PERMISSION_LABELS = {
     "journal.close": pgettext_lazy(_PERM_CTX, "Semestr sonu jurnalları bağlamaq/açmaq"),
     "journal.roster": pgettext_lazy(_PERM_CTX, "Jurnala alt qrupdan tələbə əlavə etmək/çıxarmaq"),
     "journal.reassign": pgettext_lazy(_PERM_CTX, "Fənni başqa müəllimə təhvil vermək"),
+    # schedule (dərs cədvəli)
+    "schedule.view": pgettext_lazy(_PERM_CTX, "Dərs cədvəlinə baxış"),
+    "schedule.manage": pgettext_lazy(_PERM_CTX, "Dərs cədvəlini idarə etmək (slot əlavə/sil)"),
     # syllabus
     "syllabus.view": pgettext_lazy(_PERM_CTX, "Sillabuslara baxış"),
     "syllabus.edit": pgettext_lazy(_PERM_CTX, "Sillabus qaralamasını redaktə etmək"),
@@ -293,6 +333,10 @@ PERMISSION_LABELS = {
     "syllabus.revise": pgettext_lazy(_PERM_CTX, "Sillabusu düzəliş üçün geri qaytarmaq"),
     "syllabus.reject": pgettext_lazy(_PERM_CTX, "Sillabusu rədd etmək"),
     "syllabus.manage": pgettext_lazy(_PERM_CTX, "Sillabusları idarə etmək (arxiv, köçürmə)"),
+    # applications (müraciətlər / elektron sənəd dövriyyəsi)
+    "application.create": pgettext_lazy(_PERM_CTX, "Müraciət göndərmək"),
+    "application.handle": pgettext_lazy(_PERM_CTX, "Gələn müraciətə baxmaq və qərar vermək"),
+    "application.manage": pgettext_lazy(_PERM_CTX, "Müraciət kataloqunu idarə etmək və hamısına baxmaq"),
     # groups
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),
@@ -326,6 +370,7 @@ PERMISSION_LABELS = {
     "user.soft_delete": pgettext_lazy(_PERM_CTX, "Hesabı silmək / bərpa etmək"),
     "user.edit": pgettext_lazy(_PERM_CTX, "Şəxsi məlumatların redaktəsi"),
     "user.grant_privileged": pgettext_lazy(_PERM_CTX, "İmtiyazlı (administrator) səlahiyyət vermək"),
+    "user.import": pgettext_lazy(_PERM_CTX, "Tələbə idxalı (siyahıdan toplu hesab yaratmaq)"),
     # people (müəllim/tələbə kataloqu — struktur scope-una tabe)
     "people.view_teachers": pgettext_lazy(_PERM_CTX, "Müəllim kataloquna baxış"),
     "people.view_students": pgettext_lazy(_PERM_CTX, "Tələbə kataloquna baxış"),

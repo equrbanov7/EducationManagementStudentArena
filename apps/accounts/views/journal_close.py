@@ -37,6 +37,7 @@ from ._helpers import (
     _is_superadmin_user,
     _render_profile_section,
     _resolve_next_url,
+    _resolve_superadmin_target_org,
 )
 
 logger = logging.getLogger(__name__)
@@ -60,15 +61,13 @@ def _can_manage(user, organization):
 
 
 def _resolve_target_org(request):
-    """Bu sorğunun idarə etdiyi təşkilat (superadmin: ?jc_org / POST organization_id)."""
-    from apps.organizations.models import Organization
+    """Bu sorğunun idarə etdiyi təşkilat (superadmin: ?jc_org / POST organization_id).
 
-    if _is_superadmin_user(request.user):
-        org_id = (request.POST.get("organization_id") or request.GET.get("jc_org") or "").strip()
-        if org_id:
-            return Organization.objects.filter(pk=org_id).first()
-        return Organization.objects.filter(is_active=True).order_by("name").first()
-    return _get_active_organization(request)
+    Həll paylaşılan ``_resolve_superadmin_target_org``-a həvalə olunur: id yalnız
+    superadmin üçün oxunur, AKTİV təşkilatlar arasında validasiya edilir və
+    parse olunmayan dəyər 500 vermir (2026-09-02 audit, P2-3).
+    """
+    return _resolve_superadmin_target_org(request, query_param="jc_org")
 
 
 @login_required

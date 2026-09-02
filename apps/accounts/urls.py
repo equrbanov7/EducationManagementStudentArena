@@ -231,6 +231,15 @@ urlpatterns = [
     path("handover/options/", views.handover_options, name="handover_options"),
     path("handover/history/", views.handover_history, name="handover_history"),
     path("handover/action/", views.handover_action, name="handover_action"),
+    # «Cədvəl idarəetməsi» (`schedule.manage`) — proqram koordinatoru / RİM /
+    # dekanlıq həftəlik cədvəl slotlarını qurur. Domen məntiqi registrar-dadır
+    # (apps/registrar/schedule_manage*.py); burada yalnız JSON səthi var:
+    # `check` saxlamadan əvvəl konflikti göstərir, `action` yazır/silir.
+    # «Müraciətlərim» — YALNIZ «Təyin et» dialoqunun namizəd siyahısı; qalan
+    # bütün əməllər apps.applications-ın öz JSON səthinə (/muracietler/api/) gedir.
+    path("applications/assignees/", views.applications_assignees, name="applications_assignees"),
+    path("schedule-manage/check/", views.schedule_manage_check, name="schedule_manage_check"),
+    path("schedule-manage/action/", views.schedule_manage_action, name="schedule_manage_action"),
     # «Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» (İmtahan Mərkəzi).
     # Növbə bazadakı sübut qatından (LegacyGradeFact + canlı FinalGrade güzgüsü)
     # hesablanır — domen məntiqi registrar-dadır (legacy_grade_review*.py).

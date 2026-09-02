@@ -473,7 +473,15 @@ class SelfWorkMark(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel
         constraints = [
             models.UniqueConstraint(fields=["topic", "enrollment"], name="uniq_selfwork_topic_enrollment"),
         ]
-        indexes = [models.Index(fields=["organization", "enrollment"])]
+        indexes = [
+            models.Index(fields=["organization", "enrollment"]),
+            # «Təhvil verilmiş sərbəst iş sayı» aqreqatı (akademik-qeyd icmalı,
+            # ``accounts.academic_records``) ``WHERE done AND enrollment_id IN (…)
+            # GROUP BY enrollment_id`` şəklindədir — org-səviyyəli çağırışda
+            # (7 700 tələbə) mövcud indekslərin heç biri onu ÖRTMÜRDÜ
+            # (2026-09-02 performans auditi, F3).
+            models.Index(fields=["enrollment", "done"], name="selfwork_enrollment_done"),
+        ]
 
     def __str__(self):
         return f"{self.topic_id} · {self.enrollment_id} = {int(self.done)}"

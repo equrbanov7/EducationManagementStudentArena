@@ -324,8 +324,11 @@ class RequestQueueMiddleware:
         if session_key:
             return f"session:{session_key}"
 
-        forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        remote_addr = forwarded_for.split(",", 1)[0].strip() if forwarded_for else request.META.get("REMOTE_ADDR", "")
+        # Vahid helper (2026-09-02 audit, P2-6): soldan oxunan XFF üzvü müştəri
+        # tərəfindən yazılır və anonim aktor barmaq izini saxtalaşdıra bilərdi.
+        from core.utils import get_client_ip
+
+        remote_addr = get_client_ip(request) or ""
         user_agent = request.META.get("HTTP_USER_AGENT", "")
         path = request.path_info or request.path or ""
         fingerprint = hashlib.sha256(f"{remote_addr}|{user_agent}|{path}".encode("utf-8")).hexdigest()

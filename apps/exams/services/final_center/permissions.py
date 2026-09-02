@@ -72,6 +72,42 @@ def sessions_visible_to(user, base_queryset):
     return base_queryset.filter(supervised_sessions_q(user)).distinct()
 
 
+def can_enter_supervision_surface(user, organization) -> bool:
+    """Nəzarət səthinə (otaqlar/monitor/statistika) GİRİŞ hüququ.
+
+    2026-09-02 audit, P2-1: ``supervisor_org_or_403`` yalnız «aktiv təşkilat
+    varmı» deyə soruşurdu, rol/təyinat yoxlamırdı — nəticədə İSTƏNİLƏN
+    autentifikasiya olunmuş üzv, hətta TƏLƏBƏ, ``GET /exams/center/rooms/``
+    səhifəsini 200 ilə alırdı (data sızmırdı, çünki queryset sonra boşalırdı,
+    amma səth ümumiyyətlə açılmamalıdır).
+
+    İcazə: imtahan mərkəzi VƏ YA bu tenantda ən azı bir zala/oturuma təyin
+    olunmuş nəzarətçi/heyət üzvü.
+    """
+    if organization is None:
+        return False
+    if can_manage_final_center(user):
+        return True
+    if not getattr(user, "is_authenticated", False):
+        return False
+
+    from django.apps import apps as django_apps
+
+    ExamRoom = django_apps.get_model("exams", "ExamRoom")
+    if ExamRoom.objects.filter(organization=organization, invigilators=user).exists():
+        return True
+    ExamRoomSession = django_apps.get_model("exams", "ExamRoomSession")
+    return ExamRoomSession.objects.filter(organization=organization).filter(supervised_sessions_q(user)).exists()
+
+
+def ensure_can_enter_supervision_surface(user, organization) -> None:
+    if can_enter_supervision_surface(user, organization):
+        return
+    raise PermissionDenied(
+        pgettext("exams.final_center.permission", "Bu bölmə yalnız imtahan mərkəzi və nəzarətçilər üçündür.")
+    )
+
+
 def ensure_ticket_owner(user, ticket) -> None:
     if ticket.student_id == user.id:
         return

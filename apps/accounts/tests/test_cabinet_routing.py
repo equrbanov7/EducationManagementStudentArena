@@ -285,3 +285,28 @@ class LoginPortalGateTest(TestCase):
         )
         self.assertEqual(resp.status_code, 302)
         self.assertIn("_auth_user_id", client.session)
+
+    # ── P1-1 (2026-09-02 audit): neytral endpoint rol qapısını keçirdi ──────
+    #
+    # ``POST /accounts/login/`` ``audience=None`` ilə ``CustomLoginView``-a
+    # düşürdü və ``form_valid`` qapını YALNIZ ``if self.audience:`` altında
+    # tətbiq edirdi.  Auditor bu tək URL-dən 18 test hesabının hamısını —
+    # tələbələr daxil — autentifikasiya etdi.
+    def test_student_cannot_login_via_neutral_endpoint(self):
+        client = Client()
+        resp = client.post(
+            reverse("accounts:login"),
+            {"username": "portal_student", "password": "StrongPass123!"},
+        )
+        self.assertEqual(resp.status_code, 200)  # re-render, yönləndirmə yox
+        self.assertNotIn("_auth_user_id", client.session)
+        self.assertContains(resp, "müəllim və əməkdaşlar üçündür")
+
+    def test_staff_still_works_via_neutral_endpoint(self):
+        client = Client()
+        resp = client.post(
+            reverse("accounts:login"),
+            {"username": "portal_teacher", "password": "StrongPass123!"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("_auth_user_id", client.session)

@@ -256,7 +256,18 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
 
 @transaction.atomic
 def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, request=None):
-    """«Keçən ildən köçür» — nəticə HƏR ZAMAN QARALAMADIR, avtomatik təsdiqlənmir."""
+    """«Keçən ildən köçür» — nəticə HƏR ZAMAN QARALAMADIR, avtomatik təsdiqlənmir.
+
+    ƏHATƏ QAPISI ``create_next_version`` ilə EYNİDİR (2026-09-02 audit, P1-2):
+    əvvəl bu funksiya MƏNBƏ sillabusu heç yoxlamırdı, ona görə istənilən müəllim
+    ``{"action": "copy", "syllabus": <yad id>}`` göndərib başqasının məzmununu
+    öz adına klonlaya bilirdi (auditor bunu canlı klonda icra etdi).
+    """
+    if not actor.has(PERM_EDIT):
+        raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
+    if not is_author(actor, source_syllabus) and not actor.covers_unit(source_syllabus.chair_unit_id, PERM_EDIT):
+        raise TransitionDenied("transition.out_of_scope", params={"transition": "copy"})
+
     base = source_syllabus.approved_version or source_syllabus.versions.order_by("-major", "-minor").first()
     if base is None:
         raise TransitionDenied("version.base_missing")

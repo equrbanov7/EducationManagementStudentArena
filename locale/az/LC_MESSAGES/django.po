@@ -11747,9 +11747,6 @@ msgid "location"
 msgstr "Məkan"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:178
-#, fuzzy
-#| msgctxt "staff.management"
-#| msgid "Position"
 msgctxt "profile.info"
 msgid "position"
 msgstr "Vəzifə"
@@ -42238,10 +42235,10 @@ msgstr "Self-work"
 
 #: apps/registrar/journal_actions.py:63
 msgid ""
-"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT "
+"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — RİM "
 "rəhbəri yalnız sənədli düzəliş edə bilər."
 msgstr ""
-"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT "
+"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — RİM "
 "rəhbəri yalnız sənədli düzəliş edə bilər."
 
 #: apps/registrar/journal_actions.py:123
@@ -45268,8 +45265,8 @@ msgstr "Keçmiş tarixə dərs açmaq olmaz."
 
 #: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:31
 msgctxt "registrar.journal"
-msgid "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
-msgstr "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
+msgid "RİM rəhbəri: istənilən tarix/saat seçilə bilər."
+msgstr "RİM rəhbəri: istənilən tarix/saat seçilə bilər."
 
 #: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:35
 msgctxt "registrar.journal"
@@ -51995,17 +51992,17 @@ msgstr "Cüm"
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "Sat"
-msgstr "Status"
+msgstr "Şnb"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "Sun"
-msgstr "Tələbə"
+msgstr "Bzr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "January"
-msgstr "manual"
+msgstr "Yanvar"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52015,7 +52012,7 @@ msgstr "Fevral"
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "March"
-msgstr "Axtar"
+msgstr "Mart"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52045,7 +52042,7 @@ msgstr "Avqust"
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "September"
-msgstr "Hələ üzv əlavə olunmayıb."
+msgstr "Sentyabr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52055,12 +52052,12 @@ msgstr "Oktyabr"
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "November"
-msgstr "Üzv"
+msgstr "Noyabr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "December"
-msgstr "Üzv"
+msgstr "Dekabr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52095,12 +52092,12 @@ msgstr "iyn"
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "jul"
-msgstr "https://example.com/..."
+msgstr "iyl"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "aug"
-msgstr "əvvəl"
+msgstr "avq"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52110,7 +52107,7 @@ msgstr "snt"
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgid "oct"
-msgstr "Bloqa keçid"
+msgstr "okt"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -57118,3 +57115,934 @@ msgstr ""
 msgctxt "registrar.legacy_grade"
 msgid "İmtahan Mərkəzi ilə dəqiqləşdirilsin"
 msgstr "İmtahan Mərkəzi ilə dəqiqləşdirilsin"
+
+msgctxt "applications"
+msgid "Yeni"
+msgstr "Yeni"
+
+msgctxt "applications"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "applications"
+msgid "Təyin edilib"
+msgstr "Təyin edilib"
+
+msgctxt "applications"
+msgid "Yönləndirilib"
+msgstr "Yönləndirilib"
+
+msgctxt "applications"
+msgid "Məlumat gözlənilir"
+msgstr "Məlumat gözlənilir"
+
+msgctxt "applications"
+msgid "Düzəliş üçün qaytarılıb"
+msgstr "Düzəliş üçün qaytarılıb"
+
+msgctxt "applications"
+msgid "Həll olunub"
+msgstr "Həll olunub"
+
+msgctxt "applications"
+msgid "Rədd edilib"
+msgstr "Rədd edilib"
+
+msgctxt "applications"
+msgid "Bağlanıb"
+msgstr "Bağlanıb"
+
+msgctxt "applications"
+msgid "Ləğv edilib"
+msgstr "Ləğv edilib"
+
+msgctxt "applications"
+msgid "Göndərildi"
+msgstr "Göndərildi"
+
+msgctxt "applications"
+msgid "Baxışa götürüldü"
+msgstr "Baxışa götürüldü"
+
+msgctxt "applications"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "applications"
+msgid "Məsul şəxsə təyin edildi"
+msgstr "Məsul şəxsə təyin edildi"
+
+msgctxt "applications"
+msgid "Əlavə məlumat istənildi"
+msgstr "Əlavə məlumat istənildi"
+
+msgctxt "applications"
+msgid "Əlavə məlumat verildi"
+msgstr "Əlavə məlumat verildi"
+
+msgctxt "applications"
+msgid "Başqa şöbəyə yönləndirildi"
+msgstr "Başqa şöbəyə yönləndirildi"
+
+msgctxt "applications"
+msgid "Düzəliş üçün qaytarıldı"
+msgstr "Düzəliş üçün qaytarıldı"
+
+msgctxt "applications"
+msgid "Düzəlişdən sonra yenidən göndərildi"
+msgstr "Düzəlişdən sonra yenidən göndərildi"
+
+msgctxt "applications"
+msgid "Həll olundu"
+msgstr "Həll olundu"
+
+msgctxt "applications"
+msgid "Rədd edildi"
+msgstr "Rədd edildi"
+
+msgctxt "applications"
+msgid "Bağlandı"
+msgstr "Bağlandı"
+
+msgctxt "applications"
+msgid "Ləğv edildi"
+msgstr "Ləğv edildi"
+
+msgctxt "applications"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "applications"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "applications"
+msgid "Əməkdaş"
+msgstr "Əməkdaş"
+
+msgctxt "applications"
+msgid "Bütün təşkilat (mərkəzi şöbə)"
+msgstr "Bütün təşkilat (mərkəzi şöbə)"
+
+msgctxt "applications"
+msgid "Göndərənin fakültəsi"
+msgstr "Göndərənin fakültəsi"
+
+msgctxt "applications"
+msgid "Göndərənin kafedrası"
+msgstr "Göndərənin kafedrası"
+
+msgctxt "applications"
+msgid "Göndərənin ixtisası"
+msgstr "Göndərənin ixtisası"
+
+msgctxt "applications"
+msgid "müraciət"
+msgstr "müraciət"
+
+msgctxt "applications"
+msgid "müraciətlər"
+msgstr "müraciətlər"
+
+msgctxt "applications"
+msgid "müraciət şöbəsi"
+msgstr "müraciət şöbəsi"
+
+msgctxt "applications"
+msgid "müraciət şöbələri"
+msgstr "müraciət şöbələri"
+
+msgctxt "applications"
+msgid "müraciət növü"
+msgstr "müraciət növü"
+
+msgctxt "applications"
+msgid "müraciət növləri"
+msgstr "müraciət növləri"
+
+msgctxt "applications"
+msgid "müraciət nömrə sayğacı"
+msgstr "müraciət nömrə sayğacı"
+
+msgctxt "applications"
+msgid "müraciət nömrə sayğacları"
+msgstr "müraciət nömrə sayğacları"
+
+msgctxt "applications"
+msgid "müraciət hadisəsi"
+msgstr "müraciət hadisəsi"
+
+msgctxt "applications"
+msgid "müraciət hadisələri"
+msgstr "müraciət hadisələri"
+
+msgctxt "applications"
+msgid "müraciət izləməsi"
+msgstr "müraciət izləməsi"
+
+msgctxt "applications"
+msgid "müraciət izləmələri"
+msgstr "müraciət izləmələri"
+
+msgctxt "applications"
+msgid "müraciət sənədi"
+msgstr "müraciət sənədi"
+
+msgctxt "applications"
+msgid "müraciət sənədləri"
+msgstr "müraciət sənədləri"
+
+msgctxt "organizations.permission.label"
+msgid "Müraciət göndərmək"
+msgstr "Müraciət göndərmək"
+
+msgctxt "organizations.permission.label"
+msgid "Gələn müraciətə baxmaq və qərar vermək"
+msgstr "Gələn müraciətə baxmaq və qərar vermək"
+
+msgctxt "organizations.permission.label"
+msgid "Müraciət kataloqunu idarə etmək və hamısına baxmaq"
+msgstr "Müraciət kataloqunu idarə etmək və hamısına baxmaq"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs cədvəlinə baxış"
+msgstr "Dərs cədvəlinə baxış"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs cədvəlini idarə etmək (slot əlavə/sil)"
+msgstr "Dərs cədvəlini idarə etmək (slot əlavə/sil)"
+
+msgctxt "profile.sidebar"
+msgid "Cədvəl idarəetməsi"
+msgstr "Cədvəl idarəetməsi"
+
+msgctxt "registrar.schedule_manage"
+msgid "Həftənin günü 1–7 aralığında olmalıdır."
+msgstr "Həftənin günü 1–7 aralığında olmalıdır."
+
+msgctxt "registrar.schedule_manage"
+msgid "Başlama və bitmə vaxtı düzgün seçilməlidir."
+msgstr "Başlama və bitmə vaxtı düzgün seçilməlidir."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bu semestr bitib — cədvəl slotu əlavə edilə bilməz."
+msgstr "Bu semestr bitib — cədvəl slotu əlavə edilə bilməz."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bu slot artıq cədvəldədir."
+msgstr "Bu slot artıq cədvəldədir."
+
+msgctxt "registrar.schedule_manage"
+msgid "Bu vaxt %(subject)s ilə üst-üstə düşür (%(reason)s)."
+msgstr "Bu vaxt %(subject)s ilə üst-üstə düşür (%(reason)s)."
+
+msgctxt "registrar.schedule_manage"
+msgid "Dərs cədvəli dəyişdi: %(subject)s %(when)s"
+msgstr "Dərs cədvəli dəyişdi: %(subject)s %(when)s"
+
+msgctxt "registrar.schedule_manage"
+msgid "Slot cədvəldən silindi."
+msgstr "Slot cədvəldən silindi."
+
+msgctxt "registrar.schedule_manage"
+msgid "Cədvələ yeni slot əlavə edildi."
+msgstr "Cədvələ yeni slot əlavə edildi."
+
+msgctxt "registrar.schedule_manage"
+msgid "Slot yadda saxlanılmadı — məlumatları yoxlayın."
+msgstr "Slot yadda saxlanılmadı — məlumatları yoxlayın."
+
+msgctxt "registrar.schedule_manage"
+msgid "qrup"
+msgstr "qrup"
+
+msgctxt "registrar.schedule_manage"
+msgid "müəllim"
+msgstr "müəllim"
+
+msgctxt "registrar.schedule_manage"
+msgid "auditoriya"
+msgstr "auditoriya"
+
+msgctxt "accounts.schedule_manage"
+msgid "Cədvəl idarəetməsi"
+msgstr "Cədvəl idarəetməsi"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir."
+msgstr "Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+msgstr "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur — bu bölmə yalnız səlahiyyətli rollar üçündür."
+msgstr "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur — bu bölmə yalnız səlahiyyətli rollar üçündür."
+
+msgctxt "accounts.schedule_manage"
+msgid "Naməlum əməliyyat."
+msgstr "Naməlum əməliyyat."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bütün universitet"
+msgstr "Bütün universitet"
+
+msgctxt "accounts.schedule_manage"
+msgid "Yalnız öz struktur bölmələriniz"
+msgstr "Yalnız öz struktur bölmələriniz"
+
+msgctxt "accounts.schedule_manage"
+msgid "Səlahiyyət sahəniz"
+msgstr "Səlahiyyət sahəniz"
+
+msgctxt "accounts.schedule_manage"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "accounts.schedule_manage"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "accounts.schedule_manage"
+msgid "Görünüş"
+msgstr "Görünüş"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup cədvəli"
+msgstr "Qrup cədvəli"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim cədvəli"
+msgstr "Müəllim cədvəli"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.schedule_manage"
+msgid "Seçin…"
+msgstr "Seçin…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Səlahiyyət sahənizdə qrup yoxdur. Üzvlüyünüzə struktur bölməsi (scope_unit) təyin edilməyibsə siyahı boş qalır."
+msgstr "Səlahiyyət sahənizdə qrup yoxdur. Üzvlüyünüzə struktur bölməsi (scope_unit) təyin edilməyibsə siyahı boş qalır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu təşkilatda akademik semestr yoxdur — əvvəlcə semestr yaradılmalıdır."
+msgstr "Bu təşkilatda akademik semestr yoxdur — əvvəlcə semestr yaradılmalıdır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slotlar"
+msgstr "Slotlar"
+
+msgctxt "accounts.schedule_manage"
+msgid "Gün"
+msgstr "Gün"
+
+msgctxt "accounts.schedule_manage"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "accounts.schedule_manage"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "accounts.schedule_manage"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq"
+msgstr "Otaq"
+
+msgctxt "accounts.schedule_manage"
+msgid "Həftə"
+msgstr "Həftə"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əməliyyat"
+msgstr "Əməliyyat"
+
+msgctxt "accounts.schedule_manage"
+msgid "Slotu sil"
+msgstr "Slotu sil"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu görünüşdə hələ slot yoxdur."
+msgstr "Bu görünüşdə hələ slot yoxdur."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slot əlavə et"
+msgstr "Slot əlavə et"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs növü"
+msgstr "Dərs növü"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs saatı"
+msgstr "Dərs saatı"
+
+msgctxt "accounts.schedule_manage"
+msgid "Sərbəst vaxt…"
+msgstr "Sərbəst vaxt…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Başlama"
+msgstr "Başlama"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bitmə"
+msgstr "Bitmə"
+
+msgctxt "accounts.schedule_manage"
+msgid "məs. Otaq 304 · II korpus"
+msgstr "məs. Otaq 304 · II korpus"
+
+msgctxt "accounts.schedule_manage"
+msgid "Konflikti yoxla"
+msgstr "Konflikti yoxla"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu qrup üçün seçilmiş semestrdə dərs açılışı yoxdur — əvvəlcə fənn açılışı yaradılmalıdır."
+msgstr "Bu qrup üçün seçilmiş semestrdə dərs açılışı yoxdur — əvvəlcə fənn açılışı yaradılmalıdır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slotu silmək?"
+msgstr "Slotu silmək?"
+
+msgctxt "accounts.schedule_manage"
+msgid "Silinmə müəllimə və qrupun tələbələrinə bildiriş kimi gedir və audit jurnalına yazılır."
+msgstr "Silinmə müəllimə və qrupun tələbələrinə bildiriş kimi gedir və audit jurnalına yazılır."
+
+msgctxt "accounts.schedule_manage"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "accounts.schedule_manage"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Əməliyyat yerinə yetirilmədi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slot əlavə edildi."
+msgstr "Slot əlavə edildi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Slot silindi."
+msgstr "Slot silindi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Konflikt yoxdur — slot əlavə edilə bilər."
+msgstr "Konflikt yoxdur — slot əlavə edilə bilər."
+
+msgctxt "accounts.schedule_manage"
+msgid "Konflikt"
+msgstr "Konflikt"
+
+msgctxt "accounts.schedule_manage"
+msgid "Yoxlanılır…"
+msgstr "Yoxlanılır…"
+
+msgid "Application / Request"
+msgstr "Müraciət / sorğu"
+
+msgctxt "applications"
+msgid "Müraciətlər"
+msgstr "Müraciətlər"
+
+msgctxt "applications"
+msgid "Müraciətlərim"
+msgstr "Müraciətlərim"
+
+msgctxt "applications"
+msgid "Yeni müraciət"
+msgstr "Yeni müraciət"
+
+msgctxt "applications"
+msgid "Arxiv"
+msgstr "Arxiv"
+
+msgctxt "applications"
+msgid "Mənə gələnlər"
+msgstr "Mənə gələnlər"
+
+msgctxt "applications"
+msgid "İzlədiklərim"
+msgstr "İzlədiklərim"
+
+msgctxt "applications"
+msgid "Açıq olanlar"
+msgstr "Açıq olanlar"
+
+msgctxt "applications"
+msgid "Müddəti keçən"
+msgstr "Müddəti keçən"
+
+msgctxt "applications"
+msgid "Bağlananlar"
+msgstr "Bağlananlar"
+
+msgctxt "applications"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "applications"
+msgid "Bütün növlər"
+msgstr "Bütün növlər"
+
+msgctxt "applications"
+msgid "Sıfırla"
+msgstr "Sıfırla"
+
+msgctxt "applications"
+msgid "Müraciət axtar"
+msgstr "Müraciət axtar"
+
+msgctxt "applications"
+msgid "Mövzu, nömrə və ya göndərən axtar"
+msgstr "Mövzu, nömrə və ya göndərən axtar"
+
+msgctxt "applications"
+msgid "Müraciətin detalı"
+msgstr "Müraciətin detalı"
+
+msgctxt "applications"
+msgid "Müraciətin növü"
+msgstr "Müraciətin növü"
+
+msgctxt "applications"
+msgid "Müraciətin mətni"
+msgstr "Müraciətin mətni"
+
+msgctxt "applications"
+msgid "Müraciətin gedişi"
+msgstr "Müraciətin gedişi"
+
+msgctxt "applications"
+msgid "Əlavə olunan sənədlər"
+msgstr "Əlavə olunan sənədlər"
+
+msgctxt "applications"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "applications"
+msgid "Sənəd əlavə et"
+msgstr "Sənəd əlavə et"
+
+msgctxt "applications"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "applications"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "applications"
+msgid "Təsdiqlə"
+msgstr "Təsdiqlə"
+
+msgctxt "applications"
+msgid "Göndər"
+msgstr "Göndər"
+
+msgctxt "applications"
+msgid "Yönləndir"
+msgstr "Yönləndir"
+
+msgctxt "applications"
+msgid "Təyin et"
+msgstr "Təyin et"
+
+msgctxt "applications"
+msgid "Rədd et"
+msgstr "Rədd et"
+
+msgctxt "applications"
+msgid "Daha çox"
+msgstr "Daha çox"
+
+msgctxt "applications"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "applications"
+msgid "gün"
+msgstr "gün"
+
+msgctxt "applications"
+msgid "bağlanıb"
+msgstr "bağlanıb"
+
+msgctxt "applications"
+msgid "daxili qeyd"
+msgstr "daxili qeyd"
+
+msgctxt "applications"
+msgid "cavab müddəti keçir"
+msgstr "cavab müddəti keçir"
+
+msgctxt "applications"
+msgid "Açıq müraciətim"
+msgstr "Açıq müraciətim"
+
+msgctxt "applications"
+msgid "Cavablanıb"
+msgstr "Cavablanıb"
+
+msgctxt "applications"
+msgid "Orta cavab müddəti"
+msgstr "Orta cavab müddəti"
+
+msgctxt "applications"
+msgid "Mənə gələn açıq"
+msgstr "Mənə gələn açıq"
+
+msgctxt "applications"
+msgid "Yeni — baxılmayıb"
+msgstr "Yeni — baxılmayıb"
+
+msgctxt "applications"
+msgid "Cavab müddəti keçən"
+msgstr "Cavab müddəti keçən"
+
+msgctxt "applications"
+msgid "İzlədiyim"
+msgstr "İzlədiyim"
+
+msgctxt "applications"
+msgid "cavab gözləyir"
+msgstr "cavab gözləyir"
+
+msgctxt "applications"
+msgid "sizdən sənəd istənilib"
+msgstr "sizdən sənəd istənilib"
+
+msgctxt "applications"
+msgid "bağlanmış müraciət"
+msgstr "bağlanmış müraciət"
+
+msgctxt "applications"
+msgid "son 30 gün üzrə"
+msgstr "son 30 gün üzrə"
+
+msgctxt "applications"
+msgid "cavab verilməlidir"
+msgstr "cavab verilməlidir"
+
+msgctxt "applications"
+msgid "ilk baxış gözlənilir"
+msgstr "ilk baxış gözlənilir"
+
+msgctxt "applications"
+msgid "hamısına baxılıb"
+msgstr "hamısına baxılıb"
+
+msgctxt "applications"
+msgid "təcili baxılmalıdır"
+msgstr "təcili baxılmalıdır"
+
+msgctxt "applications"
+msgid "gecikən yoxdur"
+msgstr "gecikən yoxdur"
+
+msgctxt "applications"
+msgid "yönləndirdiyim müraciətlər"
+msgstr "yönləndirdiyim müraciətlər"
+
+msgctxt "applications"
+msgid "Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən."
+msgstr "Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən."
+
+msgctxt "applications"
+msgid "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz."
+msgstr "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz."
+
+msgctxt "applications"
+msgid "Növü seçin — sistem müraciəti avtomatik aidiyyəti şöbəyə göndərəcək."
+msgstr "Növü seçin — sistem müraciəti avtomatik aidiyyəti şöbəyə göndərəcək."
+
+msgctxt "applications"
+msgid "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək."
+msgstr "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək."
+
+msgctxt "applications"
+msgid "Bir cümlə ilə nə istədiyiniz"
+msgstr "Bir cümlə ilə nə istədiyiniz"
+
+msgctxt "applications"
+msgid "Konkret tarix, fənn və qrup adı yazsanız cavab daha tez gələcək."
+msgstr "Konkret tarix, fənn və qrup adı yazsanız cavab daha tez gələcək."
+
+msgctxt "applications"
+msgid "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB"
+msgstr "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB"
+
+msgctxt "applications"
+msgid "Müraciəti göndər"
+msgstr "Müraciəti göndər"
+
+msgctxt "applications"
+msgid "Müraciəti yönləndir"
+msgstr "Müraciəti yönləndir"
+
+msgctxt "applications"
+msgid "Hansı şöbəyə?"
+msgstr "Hansı şöbəyə?"
+
+msgctxt "applications"
+msgid "Yönləndirmə qeydi"
+msgstr "Yönləndirmə qeydi"
+
+msgctxt "applications"
+msgid "Niyə bu şöbəyə göndərilir və nə gözlənilir"
+msgstr "Niyə bu şöbəyə göndərilir və nə gözlənilir"
+
+msgctxt "applications"
+msgid "Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin."
+msgstr "Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin."
+
+msgctxt "applications"
+msgid "Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə məsul şöbə dəyişir."
+msgstr "Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə məsul şöbə dəyişir."
+
+msgctxt "applications"
+msgid "Məsul şəxsə təyin et"
+msgstr "Məsul şəxsə təyin et"
+
+msgctxt "applications"
+msgid "Məsul şəxs"
+msgstr "Məsul şəxs"
+
+msgctxt "applications"
+msgid "Məsul şəxs üçün qısa izah"
+msgstr "Məsul şəxs üçün qısa izah"
+
+msgctxt "applications"
+msgid "Müraciətlər paneli üçün aktiv təşkilat konteksti tapılmadı."
+msgstr "Müraciətlər paneli üçün aktiv təşkilat konteksti tapılmadı."
+
+msgctxt "applications"
+msgid "Cavab ver"
+msgstr "Cavab ver"
+
+msgctxt "applications"
+msgid "Müraciət sahibinin görəcəyi cavab"
+msgstr "Müraciət sahibinin görəcəyi cavab"
+
+msgctxt "applications"
+msgid "Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
+msgstr "Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
+
+msgctxt "applications"
+msgid "Həll olundu — bağla"
+msgstr "Həll olundu — bağla"
+
+msgctxt "applications"
+msgid "Əlavə məlumat istə"
+msgstr "Əlavə məlumat istə"
+
+msgctxt "applications"
+msgid "Əlavə məlumat göndər"
+msgstr "Əlavə məlumat göndər"
+
+msgctxt "applications"
+msgid "Başqa şöbəyə yönləndir"
+msgstr "Başqa şöbəyə yönləndir"
+
+msgctxt "applications"
+msgid "Düzəliş üçün qaytar"
+msgstr "Düzəliş üçün qaytar"
+
+msgctxt "applications"
+msgid "Düzəlişdən sonra yenidən göndər"
+msgstr "Düzəlişdən sonra yenidən göndər"
+
+msgctxt "applications"
+msgid "Qeyd əlavə et"
+msgstr "Qeyd əlavə et"
+
+msgctxt "applications"
+msgid "Təsdiqləyirəm — bağla"
+msgstr "Təsdiqləyirəm — bağla"
+
+msgctxt "applications"
+msgid "Müraciəti ləğv et"
+msgstr "Müraciəti ləğv et"
+
+msgctxt "applications"
+msgid "Nə düzəldilməlidir?"
+msgstr "Nə düzəldilməlidir?"
+
+msgctxt "applications"
+msgid "Ləğv səbəbi"
+msgstr "Ləğv səbəbi"
+
+msgctxt "applications"
+msgid "İstənilən məlumat"
+msgstr "İstənilən məlumat"
+
+msgctxt "applications"
+msgid "Müraciəti bağlayaq?"
+msgstr "Müraciəti bağlayaq?"
+
+msgctxt "applications"
+msgid "Cavabı təsdiqləyirsiniz və müraciət bağlanır. Bu əməl geri qaytarılmır."
+msgstr "Cavabı təsdiqləyirsiniz və müraciət bağlanır. Bu əməl geri qaytarılmır."
+
+msgctxt "applications"
+msgid "Müraciət tapılmadı"
+msgstr "Müraciət tapılmadı"
+
+msgctxt "applications"
+msgid "Müddəti keçən müraciət yoxdur"
+msgstr "Müddəti keçən müraciət yoxdur"
+
+msgctxt "applications"
+msgid "İzlədiyiniz müraciət yoxdur"
+msgstr "İzlədiyiniz müraciət yoxdur"
+
+msgctxt "applications"
+msgid "Başqa şöbəyə yönləndirdiyiniz müraciətlər burada görünəcək."
+msgstr "Başqa şöbəyə yönləndirdiyiniz müraciətlər burada görünəcək."
+
+msgctxt "applications"
+msgid "Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya bilərsiniz."
+msgstr "Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya bilərsiniz."
+
+msgctxt "applications"
+msgid "Bu filtrə uyğun müraciət yoxdur — filtri dəyişin."
+msgstr "Bu filtrə uyğun müraciət yoxdur — filtri dəyişin."
+
+msgctxt "applications"
+msgid "Müraciət bağlanıb — yalnız oxuna bilər."
+msgstr "Müraciət bağlanıb — yalnız oxuna bilər."
+
+msgctxt "applications"
+msgid "Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə bilərsiniz."
+msgstr "Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə bilərsiniz."
+
+msgctxt "applications"
+msgid "Bu şöbədə təyin ediləcək istifadəçi tapılmadı."
+msgstr "Bu şöbədə təyin ediləcək istifadəçi tapılmadı."
+
+msgctxt "applications"
+msgid "Bir əməldə ən çoxu 5 fayl əlavə edilə bilər."
+msgstr "Bir əməldə ən çoxu 5 fayl əlavə edilə bilər."
+
+msgctxt "applications"
+msgid "Siyahı yüklənmədi, yenidən cəhd edin."
+msgstr "Siyahı yüklənmədi, yenidən cəhd edin."
+
+msgctxt "applications"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Əməliyyat yerinə yetirilmədi."
+
+msgctxt "applications"
+msgid "{n} iş günü"
+msgstr "{n} iş günü"
+
+msgctxt "applications"
+msgid "{n} iş günü müddət"
+msgstr "{n} iş günü müddət"
+
+msgctxt "applications"
+msgid "{n} simvol"
+msgstr "{n} simvol"
+
+msgctxt "applications"
+msgid "Ən azı {min} simvol — hazırda {n}"
+msgstr "Ən azı {min} simvol — hazırda {n}"
+
+msgctxt "applications"
+msgid "Cavab müddətinə {n} iş günü qalıb (norma {m} iş günü)"
+msgstr "Cavab müddətinə {n} iş günü qalıb (norma {m} iş günü)"
+
+msgctxt "applications"
+msgid "Cavab müddəti {n} gün keçib (norma {m} iş günü)"
+msgstr "Cavab müddəti {n} gün keçib (norma {m} iş günü)"
+
+msgctxt "applications"
+msgid "Müraciət bağlanıb — {status}"
+msgstr "Müraciət bağlanıb — {status}"
+
+msgctxt "applications"
+msgid "Müraciətiniz hazırda {unit}-dədir. Cavab veriləndə bildiriş gələcək və mətn burada görünəcək."
+msgstr "Müraciətiniz hazırda {unit}-dədir. Cavab veriləndə bildiriş gələcək və mətn burada görünəcək."
+
+msgctxt "applications"
+msgid "Müraciət hazırda {unit}-dədir. Siz yönləndirdiyiniz üçün gedişini izləyirsiniz, amma cavabı həmin şöbə verəcək."
+msgstr "Müraciət hazırda {unit}-dədir. Siz yönləndirdiyiniz üçün gedişini izləyirsiniz, amma cavabı həmin şöbə verəcək."
+
+msgctxt "applications"
+msgid "Müraciət {unit}-nə göndərildi — gedişini buradan izləyə bilərsiniz."
+msgstr "Müraciət {unit}-nə göndərildi — gedişini buradan izləyə bilərsiniz."
+
+msgctxt "applications"
+msgid "{no} — {unit}-nə yönləndirildi · izləməkdə davam edirsiniz."
+msgstr "{no} — {unit}-nə yönləndirildi · izləməkdə davam edirsiniz."
+
+msgctxt "applications"
+msgid "{no} — {unit}-nə yönləndirildi."
+msgstr "{no} — {unit}-nə yönləndirildi."
+
+msgctxt "applications"
+msgid "{no} — {status}. Müraciət sahibinə bildiriş göndərildi."
+msgstr "{no} — {status}. Müraciət sahibinə bildiriş göndərildi."
+
+msgctxt "applications"
+msgid "{no} — yeniləndi."
+msgstr "{no} — yeniləndi."
+
+msgctxt "applications"
+msgid "«{name}» 10 MB-dan böyükdür."
+msgstr "«{name}» 10 MB-dan böyükdür."
+
+msgctxt "applications"
+msgid "«{name}» dəstəklənmir — PDF, JPG, PNG və ya DOCX olmalıdır."
+msgstr "«{name}» dəstəklənmir — PDF, JPG, PNG və ya DOCX olmalıdır."
+
+msgctxt "accounts.applications"
+msgid "Tələbə kabineti"
+msgstr "Tələbə kabineti"
+
+msgctxt "accounts.applications"
+msgid "Müəllim kabineti"
+msgstr "Müəllim kabineti"
+
+msgctxt "accounts.applications"
+msgid "Əməkdaş kabineti"
+msgstr "Əməkdaş kabineti"
+
+msgctxt "accounts.applications"
+msgid "Kabinet"
+msgstr "Kabinet"
+
+msgctxt "accounts.applications"
+msgid "Şöbə"
+msgstr "Şöbə"
+
+msgctxt "accounts.applications"
+msgid "şöbəyə gələn müraciətlər"
+msgstr "şöbəyə gələn müraciətlər"
+
+msgctxt "accounts.applications"
+msgid "öz müraciətlərim"
+msgstr "öz müraciətlərim"
+
+msgctxt "profile.sidebar"
+msgid "Müraciətlərim"
+msgstr "Müraciətlərim"

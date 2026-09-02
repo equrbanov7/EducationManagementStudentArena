@@ -168,6 +168,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         <th class="sjx-th-week">{% trans "HƏFTƏ" context "registrar.journal" %}</th>
                         <th class="sjx-th-kind">{% trans "TİP" context "registrar.journal" %}</th>
                         <th>{% trans "MÖVZU" context "registrar.journal" %}</th>
+                        <th class="sjx-th-room">{% trans "OTAQ" context "registrar.journal" %}</th>
                         <th class="sjx-th-result">{% trans "NƏTİCƏ" context "registrar.journal" %}</th>
                     </tr>
                 </thead>
@@ -180,6 +181,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         data-kind-label="{{ h.kind_display }}"
                         data-teacher="{% if h.teacher %}{{ h.teacher.get_full_name|default:h.teacher.username }}{% endif %}"
                         data-topic="{{ h.mark.lesson.topic|default:h.kind_display }}"
+                        data-room="{{ h.room_label|default:'—' }}"
                         data-att="{% if h.mark.status == 'absent' %}q/b{% elif h.mark.status == 'excused' %}üq{% else %}i/e{% endif %}"
                         data-score="{% if h.kollokvium and h.kollokvium.score is not None %}Kol.: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
                         data-corrected="{% if h.corrected %}1{% endif %}"
@@ -194,6 +196,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                             {% if h.kollokvium %} — <span class="sjx-kollmark">{{ h.kollokvium.component.name|lower }}</span>{% endif %}
                             {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif h.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
                         </td>
+                        <td class="sjx-room-cell">{{ h.room_label|default:"—" }}</td>
                         <td class="sjx-result-cell">
                             {# Bir sütun: bal varsa bal (davamiyyət avtomatik i/e); yoxdursa q/b · üq · i/e #}
                             {% if h.kollokvium and h.kollokvium.score is not None %}
@@ -230,6 +233,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Dərs tipi" context "registrar.journal" %}</span><span data-sjx-day-kind></span></div>
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Müəllim" context "registrar.journal" %}</span><span data-sjx-day-teacher></span></div>
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Mövzu" context "registrar.journal" %}</span><span data-sjx-day-topic></span></div>
+                <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Otaq" context "registrar.journal" %}</span><span data-sjx-day-room></span></div>
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Davamiyyət" context "registrar.journal" %}</span><span data-sjx-day-att></span></div>
                 <div class="sjx-day-row"><span class="sjx-day-key">{% trans "Bal" context "registrar.journal" %}</span><span data-sjx-day-score></span></div>
                 <div class="sjx-day-corrnote" data-sjx-day-corr hidden>{% trans "Bu qeydə rəsmi düzəliş edilib — nişana klikləyib tarixçəyə baxın." context "registrar.correction" %}</div>

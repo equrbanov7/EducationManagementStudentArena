@@ -293,6 +293,51 @@ class _Stage2Mixin:
             "max_reason_length": 1000,
             "max_bulk_rows": 100,
         }
+        # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel çərçivəsi.
+        self.schedule_manage_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "scope_label": "",
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "groups": [],
+            "group": None,
+            "view_mode": "group",
+            "teachers": [],
+            "teacher": None,
+            "offerings": [],
+            "slots": [],
+            "rooms": [],
+            "weekdays": (),
+            "standard_times": (),
+            "week_types": (),
+            "slot_kinds": (),
+            "owner_label": "",
+            "week": None,
+            "time_grid": None,
+            "check_url": "",
+            "action_url": "",
+            "reload_url": "",
+            "week_nav_prefix": "",
+        }
+        # «Müraciətlərim» (apps.applications) — panel SPA-dır: burada YALNIZ
+        # çərçivə (bayraqlar + endpoint URL-ləri + kontekst zolağının mətnləri)
+        # saxlanılır; sətirlər/detal/KPI-lar JSON API-dən gəlir.
+        self.applications_section = {
+            "has_access": False,
+            "family": "",
+            "can_create": False,
+            "is_handler": False,
+            "can_manage": False,
+            "endpoints": {},
+            "rules": {},
+            "who": "",
+            "scope": "",
+            "role_label": "",
+            "i18n": {},
+        }
         # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
         # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
         # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində

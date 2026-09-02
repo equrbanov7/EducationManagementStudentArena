@@ -1,0 +1,290 @@
+/* «Müraciətlərim» — DİALOQLAR (§4.8 yeni müraciət, §4.9 yönləndirmə, əməl
+ * dialoqları). `applications_detail.css`-dən ölçü büdcəsinə görə ayrılıb
+ * (`check_module_size.py`, 600 sətir) və `--apx-*` custom property-lərini
+ * `applications.css`-dən miras alır — ondan SONRA yüklənməlidir.
+ */
+
+/* ── Dialoqlar (§4.8/§4.9) ───────────────────────────────────────────────── */
+.apx-dlg[hidden] {
+    display: none !important;
+}
+
+.apx-dlg {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.42);
+}
+
+.apx-dlg__panel {
+    width: 100%;
+    max-width: 620px;
+    max-height: 88vh;
+    overflow: auto;
+    background: var(--ems-neutral-0);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
+.apx-dlg--narrow .apx-dlg__panel {
+    max-width: 540px;
+}
+
+.apx-dlg__head {
+    padding: 17px 22px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.apx-dlg__title {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.apx-dlg__sub {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.apx-dlg__body {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.apx-dlg__foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 15px 22px;
+    border-top: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+    border-radius: 0 0 16px 16px;
+}
+
+.apx-field__label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.apx-req {
+    color: var(--ems-danger);
+}
+
+.apx-input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 9px;
+    font-size: 0.85rem;
+}
+
+.apx-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 9px;
+    font-size: 0.84rem;
+    resize: vertical;
+}
+
+.apx-input.is-invalid,
+.apx-textarea.is-invalid {
+    border-color: var(--ems-danger);
+}
+
+.apx-counter {
+    margin-top: 5px;
+    font-size: 0.74rem;
+    color: var(--ems-neutral-400);
+}
+
+.apx-counter.is-short {
+    color: var(--ems-danger);
+}
+
+.apx-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.apx-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+}
+
+.apx-option:hover {
+    border-color: var(--ems-primary-600);
+}
+
+.apx-option[aria-selected="true"] {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.apx-option__dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 999px;
+    background: var(--ems-neutral-400);
+}
+
+.apx-option__main {
+    flex: 1;
+    min-width: 0;
+}
+
+.apx-option__label {
+    display: block;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+}
+
+.apx-option__note {
+    display: block;
+    margin-top: 1px;
+    font-size: 0.73rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.apx-option__days {
+    flex: none;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+    white-space: nowrap;
+}
+
+.apx-drop {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 11px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-500);
+    font-size: 0.81rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.apx-drop:hover {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.apx-picked {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.apx-picked__item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 11px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 9px;
+    font-size: 0.8rem;
+}
+
+.apx-picked__name {
+    flex: 1;
+    min-width: 0;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+}
+
+.apx-picked__size {
+    font-size: 0.73rem;
+    color: var(--ems-neutral-400);
+}
+
+.apx-picked__drop {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--ems-neutral-400);
+    cursor: pointer;
+}
+
+.apx-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.81rem;
+    color: var(--ems-neutral-700);
+    line-height: 1.5;
+}
+
+.apx-check input {
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.apx-errors {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: var(--ems-danger-bg);
+    border: 1px solid var(--apx-danger-bd);
+    color: var(--apx-danger-fg);
+    font-size: 0.79rem;
+    font-weight: 700;
+    list-style: none;
+}
+
+.apx-errors[hidden] {
+    display: none;
+}
+
+.apx-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 9px;
+    font-size: 0.84rem;
+    background: var(--ems-neutral-0);
+}
+

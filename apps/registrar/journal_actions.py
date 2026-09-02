@@ -60,7 +60,7 @@ def _corrector_direct_write_blocked(request, offering, tab=""):
     messages.error(
         request,
         _(
-            "Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT rəhbəri yalnız sənədli düzəliş edə bilər."
+            "Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — RİM rəhbəri yalnız sənədli düzəliş edə bilər."
         ),
     )
     return _back(offering, tab)

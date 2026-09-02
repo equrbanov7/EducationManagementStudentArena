@@ -417,6 +417,12 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
 
     # Həftə naviqasiyası: standalone-da `?w=N`, profil panelində shell daxilində qalır.
     nav_prefix = _profile_section_prefix("my-schedule") if embedded else "?"
+    # ŞƏXSİ cədvəldə idarəetmə düymələri `schedule.manage` açarına bağlıdır
+    # (2026-09). Adi müəllim burada yalnız-oxu rejimindədir — cədvəl qurmaq
+    # koordinator/dekanlıq/RİM işidir və «Cədvəl idarəetməsi» bölməsindədir.
+    from apps.registrar import schedule_manage
+
+    can_manage = schedule_manage.can_manage(request.user, organization)
     return {
         "has_context": True,
         "role": role,
@@ -433,6 +439,8 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "schedule_nav_prefix": nav_prefix,
         "schedule_embedded": embedded,
+        "schedule_can_manage": can_manage,
+        "schedule_next_url": _profile_section_prefix("my-schedule").rstrip("&?") if embedded else "",
     }
 
 

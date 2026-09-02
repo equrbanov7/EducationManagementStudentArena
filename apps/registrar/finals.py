@@ -84,7 +84,7 @@ def athlete_exemption(enrollment) -> bool:
     )
 
 
-def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=None, hours_map=None):
+def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=None, hours_map=None, batch=None):
     """Full result for one enrollment: entry + exam → total → letter → pass/fail.
 
     A completed resit supersedes the original exam score and lifts the absence
@@ -95,22 +95,43 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
     ``total`` TAM ƏDƏDDİR (sahibin qaydası, 2026-08-30): clamp-dan SONRA
     yarım-yuxarı yuvarlaqlaşdırılır (``gradebook.round_score``; 72.5 → 73,
     72.4 → 72) və hərf/keçid qərarı MƏHZ yuvarlaqlaşdırılmış dəyər üzərindən
-    verilir (50.5 → 51 keçir)."""
+    verilir (50.5 → 51 keçir).
+
+    ``batch`` — :class:`apps.registrar.finals_batch.FinalsBatch`: roster
+    səthləri (jurnalın «Yekun» tab-ı, transkript, «Nəticələrim») bu funksiyanı
+    DÖNGÜDƏ çağırır, ona görə komponent/bal/sərbəst-iş/``FinalGrade``/
+    ``ResitRecord``/donma/hədd/istisna oxumaları BİR dəfə toplu edilib buraya
+    ötürülür.  Verilməsə davranış əvvəlki kimidir (sətir-sətir sorğu) — yazı
+    yolları (``evaluate_resit``) məhz o yolla getməlidir ki, eyni tranzaksiyada
+    təzəcə yazılmış bal görünsün."""
     scheme = scheme or getattr(enrollment.offering, "assessment_scheme", None)
     if scheme is None:
         scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     if organization is None:
         organization = scheme.organization
 
-    entry_score = entry_score_for(enrollment, scheme.entry_score_max)
-    # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
-    final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
+    entry_score = gradebook.entry_score_for(
+        enrollment, scheme.entry_score_max, **(batch.entry_kwargs(enrollment) if batch is not None else {})
+    )
+    frozen = None
+    if batch is None:
+        # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
+        final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
+        resit = ResitRecord.objects.filter(enrollment=enrollment).first()
+        limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
+    else:
+        final_grade = batch.final_grade_for(enrollment)
+        resit = batch.resit_for(enrollment)
+        limit_percent = batch.limit_percent_for(enrollment.offering)
+        frozen = batch.frozen_for(enrollment.offering)
+        if exempt is None:
+            exempt = batch.exempt_for(enrollment)
+        if hours_map is None:
+            hours_map = batch.hours_map
     exam_score = final_grade.exam_score if (final_grade and final_grade.exam_score is not None) else None
-    resit = ResitRecord.objects.filter(enrollment=enrollment).first()
     resit_done = bool(resit and resit.resit_score is not None)
     effective_exam = resit.resit_score if resit_done else exam_score
 
-    limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
     # TƏK MƏNBƏ: «tamamlanmış təkrar imtahan qadağanı qaldırır» qaydası da artıq
     # resolver-in içindədir (``resit_done=``), burada TƏKRARLANMIR.  Tarixi/
     # köçürülmüş semestrdə ``barred`` heç vaxt qalxmır — aşağıdakı ``passed``/
@@ -125,6 +146,8 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         resit_done=resit_done,
         # Məxrəc fallback-ı: döngüdə çağıran (transkript) map-i əvvəlcədən qurur.
         hours_map=hours_map,
+        # Donma dəsti də toplu gəlir — ``None`` olduqda açılış başına sorğu olur.
+        frozen=frozen,
     )
     barred = eligibility["barred"]
 
@@ -353,16 +376,29 @@ def publish_offering(*, offering, by_user=None):
     return scheme
 
 
-def get_offering_results(*, offering):
-    """Per-student final result rows for the teacher's "Yekun/Nəticə" grid."""
+def get_offering_results(*, offering, batch=None):
+    """Per-student final result rows for the teacher's "Yekun/Nəticə" grid.
+
+    ⚠️ TOPLU SƏTHDİR: sətir başına ~18 sorğu (555 tələbəlik açılışda 10 000)
+    əvəzinə ``finals_batch`` ilə sabit ~11 sorğu edilir.  ``batch`` xaricdən
+    verilə bilər — jurnal səhifəsi eyni dəsti qrid və «Yekun» tab-ı ilə bölüşür.
+    """
+    from apps.registrar import finals_batch
+
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
     enrollments = list(
         offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
         .select_related("student")
         .order_by("student__last_name", "student__username")
     )
+    if batch is None:
+        batch = finals_batch.build(enrollments)
     rows = [
-        {"enrollment": e, "student": e.student, "result": compute_final_result(enrollment=e, scheme=scheme)}
+        {
+            "enrollment": e,
+            "student": e.student,
+            "result": compute_final_result(enrollment=e, scheme=scheme, batch=batch),
+        }
         for e in enrollments
     ]
     return {"offering": offering, "scheme": scheme, "rows": rows}

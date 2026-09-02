@@ -92,6 +92,7 @@ from .tenant import (
     _assigned_exams_queryset,
     _bind_active_role_context,
     _get_active_organization,
+    _resolve_superadmin_target_org,
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
@@ -179,6 +180,7 @@ __all__ = [
     "_assigned_exams_queryset",
     "_bind_active_role_context",
     "_get_active_organization",
+    "_resolve_superadmin_target_org",
     "_tenant_scoped_courses",
     "_tenant_scoped_exams",
 ]

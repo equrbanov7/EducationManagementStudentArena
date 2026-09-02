@@ -120,6 +120,14 @@
         }
     });
 
+    // Slot silmə təsdiqi — inline `onsubmit` CSP-yə görə YAZILMIR (CLAUDE.md).
+    document.addEventListener("submit", function (event) {
+        var form = event.target.closest("[data-sgx-delete-form]");
+        if (!form) return;
+        var question = form.getAttribute("data-sgx-confirm");
+        if (question && !window.confirm(question)) event.preventDefault();
+    });
+
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") closeModals();
     });

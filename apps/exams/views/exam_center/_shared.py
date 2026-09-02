@@ -8,6 +8,7 @@ from apps.exams.models import ExamRoomSession, FinalExamTicket
 from apps.exams.services.final_center import (
     can_manage_final_center,
     can_supervise_session,
+    ensure_can_enter_supervision_surface,
     sessions_visible_to,
 )
 from apps.exams.views.shared.tenant import ensure_teacher_exam_tenant_context, get_active_organization
@@ -27,11 +28,18 @@ def center_org_or_403(request):
 
 
 def supervisor_org_or_403(request):
-    """Nəzarətçi səviyyəsi: org konteksti kifayətdir, oturum icazəsi obyekt üzrə yoxlanır."""
+    """Nəzarətçi səviyyəsi: mərkəz VƏ YA bu tenantda təyinatı olan nəzarətçi.
+
+    2026-09-02 audit, P2-1: əvvəl «aktiv təşkilat varmı» yeganə şərt idi, ona
+    görə tələbə də ``/exams/center/rooms/`` səthini 200 ilə açırdı.  Obyekt
+    səviyyəli yoxlama (``can_supervise_session``) öz yerində qalır — bu, səthin
+    ÖZÜNƏ giriş qapısıdır.
+    """
     ensure_teacher_exam_tenant_context(request)
     organization = get_active_organization(request)
     if organization is None:
         raise PermissionDenied(pgettext("exams.final_center.permission", "Aktiv təşkilat konteksti tapılmadı."))
+    ensure_can_enter_supervision_surface(request.user, organization)
     return organization
 
 
