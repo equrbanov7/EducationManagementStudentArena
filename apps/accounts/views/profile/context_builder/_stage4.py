@@ -233,6 +233,8 @@ class _Stage4Mixin:
             "kollokvium_windows_section": self.kollokvium_windows_section,
             "journal_close_section": self.journal_close_section,
             "handover_section": self.handover_section,
+            "workload_distribution_section": self.workload_distribution_section,
+            "my_workload_section": self.my_workload_section,
             "exam_score_entry_section": self.exam_score_entry_section,
             "legacy_grade_review_section": self.legacy_grade_review_section,
             "exam_chance_section": self.exam_chance_section,

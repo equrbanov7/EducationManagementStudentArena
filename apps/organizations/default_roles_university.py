@@ -40,6 +40,8 @@ UNIVERSITY_ROLES = [
             "exam.*",
             # Sillabus: prorektor bütün axını görür və qərar verə bilir.
             "syllabus.*",
+            # Dərs yükü: yekun təsdiq + ümumi dashboard (spec §6.5).
+            "workload.*",
             *RIM_ACCOUNT_PERMISSIONS,
             # Kataloq: prorektor bütün təşkilatı görür və hesab dayandıra bilir
             # (org-scope rol → `get_permission_scope` org-wide qaytarır).
@@ -154,6 +156,8 @@ UNIVERSITY_ROLES = [
             # Sillabus axınının tam səlahiyyəti (idarə + qərar) — RİM sistemin
             # akademik operatorudur; hər əməl audit olunur.
             "syllabus.*",
+            # Dərs yükü də RİM-in operator səthidir (bütün kafedralar).
+            "workload.*",
             # Əsasnamə 4.2 — «rol və səlahiyyət idarəetməsi» RİM-dədir.
             "role.*",
             # `user.grant_privileged` YOXDUR: yeni admin yaratmaq ayrıca açardır.
@@ -256,6 +260,10 @@ UNIVERSITY_ROLES = [
             # Jurnal siyahısı: dekanlıq öz fakültəsinin jurnalına başqa (alt)
             # qrupdan tələbə əlavə edə/geri götürə bilər (audited, scope-lu).
             "journal.roster",
+            # Dərs yükü: dekan öz fakültəsinin yükünü GÖRÜR və hesabat çıxarır;
+            # bölgü açarı (`workload.distribute`) QƏSDƏN yoxdur — o, kafedranındır.
+            "workload.view",
+            "workload.report",
             # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
             # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
             # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
@@ -292,6 +300,13 @@ UNIVERSITY_ROLES = [
             # verə bilər (UNIT scope → yalnız öz alt-ağacı; `scope_unit` təyin
             # edilməyibsə siyahı BOŞ qalır, fail-closed).
             "journal.reassign",
+            # Dərs yükü: kafedra müdiri modulun ƏSAS aktorudur — tapşırığı
+            # yaradır/redaktə edir və müəllimlərə bölür (yalnız öz kafedrası).
+            # `workload.approve` QƏSDƏN yoxdur: dekanlıq təsdiqi ayrı fazadır.
+            "workload.view",
+            "workload.manage",
+            "workload.distribute",
+            "workload.report",
             # Kataloq: kafedra müdiri öz kafedrasının müəllim/tələbəsini GÖRÜR.
             # Əməl açarları QƏSDƏN yoxdur — lazım olsa icazə redaktorundan verilir.
             "people.view_teachers",
@@ -321,6 +336,9 @@ UNIVERSITY_ROLES = [
             "syllabus.view",
             "syllabus.edit",
             "syllabus.submit",
+            # Dərs yükü: müəllim YALNIZ ÖZ bölgü sətirlərini görür («Dərs yüküm»);
+            # sorğu qatı `teacher=request.user` ilə daraldılıb (fail-closed).
+            "workload.view",
             "assignment.delete",
             "project.delete",
             "lab.delete",
