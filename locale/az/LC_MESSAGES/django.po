@@ -52135,7 +52135,7 @@ msgstr "Fev."
 #. saxlanılıb.
 msgctxt "abbrev. month"
 msgid "March"
-msgstr "Axtar"
+msgstr "Mart"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52195,7 +52195,7 @@ msgstr "Dek."
 #. saxlanılıb.
 msgctxt "alt. month"
 msgid "January"
-msgstr "manual"
+msgstr "Yanvar"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52207,7 +52207,7 @@ msgstr "Fevral"
 #. saxlanılıb.
 msgctxt "alt. month"
 msgid "March"
-msgstr "Axtar"
+msgstr "Mart"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52243,7 +52243,7 @@ msgstr "Avqust"
 #. saxlanılıb.
 msgctxt "alt. month"
 msgid "September"
-msgstr "Hələ üzv əlavə olunmayıb."
+msgstr "Sentyabr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52255,13 +52255,13 @@ msgstr "Oktyabr"
 #. saxlanılıb.
 msgctxt "alt. month"
 msgid "November"
-msgstr "Üzv"
+msgstr "Noyabr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgctxt "alt. month"
 msgid "December"
-msgstr "Üzv"
+msgstr "Dekabr"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.

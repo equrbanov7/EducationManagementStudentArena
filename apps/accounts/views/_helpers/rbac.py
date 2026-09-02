@@ -265,6 +265,10 @@ def _role_capabilities(user, profile):
 
     if is_superadmin:
         allowed_sections = {
+            # «Ana səhifə» — kabinetin default açılış bölməsi (FAZA 22).  Rol
+            # qapısı YOXDUR: panel özü yalnız icazəli bölmələrin vidjetlərini
+            # yığır, ona görə görünürlük hər üzv üçün eynidir.
+            "dashboard",
             "profile-info",
             "notifications",
             "posts",
@@ -308,6 +312,8 @@ def _role_capabilities(user, profile):
         }
     else:
         allowed_sections = {
+            # bax yuxarıdakı şərh — «Ana səhifə» hər kəsdə var.
+            "dashboard",
             "profile-info",
             "notifications",
             "posts",

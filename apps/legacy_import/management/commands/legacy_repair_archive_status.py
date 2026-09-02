@@ -18,6 +18,7 @@ from apps.legacy_import.services.repair_support import (
     render_summary,
     render_table,
 )
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -38,43 +39,49 @@ class Command(BaseCommand):
         parser.add_argument("--show", type=int, default=25, help="Cədvəldə göstəriləcək sətir sayı")
 
     def handle(self, *args, **options):
-        context = build_context(options)
-        decisions = plan_decisions(
-            context.organization, limit=context.limit, require_activity=bool(options.get("require_activity"))
-        )
-        counters = Counter(decision.action for decision in decisions)
-        reasons = Counter(decision.reason for decision in decisions)
+        # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1): bütün DB işi bir
+        # worker-atomic sərhədi içindədir. Sətir-səviyyəli fail-open semantikası
+        # dəyişmir — servislərdəki daxili ``transaction.atomic()`` savepoint olur.
+        with rls_worker_atomic():
+            context = build_context(options)
+            decisions = plan_decisions(
+                context.organization, limit=context.limit, require_activity=bool(options.get("require_activity"))
+            )
+            counters = Counter(decision.action for decision in decisions)
+            reasons = Counter(decision.reason for decision in decisions)
 
-        self.stdout.write(render_table(TABLE_HEADERS, [d.as_row() for d in decisions], max_rows=int(options["show"])))
+            self.stdout.write(
+                render_table(TABLE_HEADERS, [d.as_row() for d in decisions], max_rows=int(options["show"]))
+            )
 
-        changed = 0
-        failed: list[tuple[str, str]] = []
-        if context.apply:
-            for decision in decisions:
-                if decision.action != "restore":
-                    continue
-                try:
-                    changed += (
-                        1
-                        if apply_decision(
-                            organization=context.organization,
-                            actor=context.actor,
-                            decision=decision,
-                            fix_admission_year=bool(options.get("fix_admission_year")),
+            changed = 0
+            failed: list[tuple[str, str]] = []
+            if context.apply:
+                for decision in decisions:
+                    if decision.action != "restore":
+                        continue
+                    try:
+                        changed += (
+                            1
+                            if apply_decision(
+                                organization=context.organization,
+                                actor=context.actor,
+                                decision=decision,
+                                fix_admission_year=bool(options.get("fix_admission_year")),
+                            )
+                            else 0
                         )
-                        else 0
-                    )
-                except Exception as error:  # noqa: BLE001 — sətir-səviyyə fail-open hesabatı
-                    failed.append((decision.username, type(error).__name__ + ":" + str(error)[:80]))
+                    except Exception as error:  # noqa: BLE001 — sətir-səviyyə fail-open hesabatı
+                        failed.append((decision.username, type(error).__name__ + ":" + str(error)[:80]))
 
-        summary = {
-            "arxivdə olan profil": len(decisions),
-            "bərpa namizədi (restore)": counters.get("restore", 0),
-            "toxunulmur (keep_archived)": counters.get("keep_archived", 0),
-            **{f"  səbəb: {key}": value for key, value in sorted(reasons.items())},
-            "FAKTİKİ bərpa olunan": changed,
-            "uğursuz": len(failed),
-        }
-        self.stdout.write(render_summary("legacy_repair_archive_status", context, summary))
-        for username, error in failed[:20]:
-            self.stderr.write(f"  ✗ {username}: {error}")
+            summary = {
+                "arxivdə olan profil": len(decisions),
+                "bərpa namizədi (restore)": counters.get("restore", 0),
+                "toxunulmur (keep_archived)": counters.get("keep_archived", 0),
+                **{f"  səbəb: {key}": value for key, value in sorted(reasons.items())},
+                "FAKTİKİ bərpa olunan": changed,
+                "uğursuz": len(failed),
+            }
+            self.stdout.write(render_summary("legacy_repair_archive_status", context, summary))
+            for username, error in failed[:20]:
+                self.stderr.write(f"  ✗ {username}: {error}")
