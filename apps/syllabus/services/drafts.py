@@ -28,6 +28,7 @@ from ..constants import (
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..state_machine import TransitionDenied
 from .scoping import is_author
+from .units import resolve_syllabus_chair_unit
 
 #: Bölmələrin BOŞ məzmun sxemi — autosave müqaviləsinin (public.py) əsasıdır.
 BLANK_SECTION_DATA = {
@@ -154,6 +155,13 @@ def create_draft(
     """Yeni sillabus dosyesi + v1.0 qaralaması yaradır."""
     if not actor.has(PERM_EDIT):
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
+
+    # R-2: çağıran tərəf ixtisas (``offering.group.parent``) ötürə bilər — təsdiq
+    # əhatəsi isə KAFEDRA-ya bağlıdır.  Normallaşdırma burada, bir yerdədir ki,
+    # hər yeni çağıran səth qaydanı təkrar yazmasın.
+    chair_unit = resolve_syllabus_chair_unit(
+        unit=chair_unit, author=author or actor.user, organization=organization
+    )
 
     syllabus = Syllabus.objects.create(
         organization=organization,

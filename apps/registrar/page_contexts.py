@@ -286,13 +286,8 @@ def journal_list_context(user, request=None) -> dict:
 
 
 def _season_label(period) -> str:
-    """Yarımilin fəsil adı (Payız / Yaz / Yay) — başlanğıc ayından."""
-    month = period.start_date.month if getattr(period, "start_date", None) else 9
-    if month >= 8 or month == 12:
-        return "Payız semestri"
-    if month <= 5:
-        return "Yaz semestri"
-    return "Yay semestri"
+    """Yarımilin fəsil adı (Payız / Yaz / Yay) — tək mənbə `schedule.season_label`."""
+    return schedule.season_label(period)
 
 
 def _current_semester(periods):
@@ -371,7 +366,11 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
     """Role-aware weekly timetable context (student group / teacher own slots)."""
     from apps.registrar.models import WeekType
 
-    period = _current_period(organization)
+    # R-1/R-4: `is_current` bayrağı TƏK meyar deyil — bitmiş semestr cədvəli
+    # görünməz edirdi.  Seçim məntiqi (və dövr seçicisinin siyahısı)
+    # `schedule.resolve_display_period`-dədir.
+    period_view = schedule.resolve_display_period(organization, requested=request.GET.get("period"))
+    period = period_view["period"]
     try:
         week_offset = max(-8, min(16, int(request.GET.get("w") or 0)))
     except (TypeError, ValueError):
@@ -434,7 +433,10 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
     from apps.registrar.models import SlotKind
 
     # Həftə naviqasiyası: standalone-da `?w=N`, profil panelində shell daxilində qalır.
+    # Seçilmiş dövr həftə pillələrində İTMİR (`?period=` müqaviləsi — my-journal ilə eyni).
     nav_prefix = _profile_section_prefix("my-schedule") if embedded else "?"
+    if period_view["selected_id"]:
+        nav_prefix = f"{nav_prefix}period={period_view['selected_id']}&"
     # ŞƏXSİ cədvəldə idarəetmə düymələri `schedule.manage` açarına bağlıdır
     # (2026-09). Adi müəllim burada yalnız-oxu rejimindədir — cədvəl qurmaq
     # koordinator/dekanlıq/RİM işidir və «Cədvəl idarəetməsi» bölməsindədir.
@@ -459,6 +461,11 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         "schedule_embedded": embedded,
         "schedule_can_manage": can_manage,
         "schedule_next_url": _profile_section_prefix("my-schedule").rstrip("&?") if embedded else "",
+        "schedule_period_choices": period_view["choices"],
+        "schedule_year_choices": period_view["years"],
+        "schedule_selected_period_id": period_view["selected_id"],
+        "schedule_selected_year": getattr(period, "academic_year", ""),
+        "schedule_base_url": reverse("accounts:profile") if embedded else "",
     }
 
 

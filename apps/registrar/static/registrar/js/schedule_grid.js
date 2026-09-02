@@ -131,4 +131,48 @@
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") closeModals();
     });
+
+    // ── Tədris ili + yarım il seçicisi (R-4) ───────────────────────────────
+    // Bölmə `?period=<id>` ilə yenidən yüklənir; profil SPA-sında shell içində
+    // qalmaq üçün gizli `js-profile-section-link` klikləyirik (my-journal ilə
+    // eyni müqavilə), standalone səhifədə isə adi naviqasiya.
+    function gotoPeriod(periodId) {
+        var term = document.querySelector("[data-sgx-term]");
+        var base = (term && term.getAttribute("data-base-url")) || "";
+        if (!periodId) return;
+        if (!base) {
+            window.location.search = "?period=" + encodeURIComponent(periodId);
+            return;
+        }
+        var url = base + "?section=my-schedule&period=" + encodeURIComponent(periodId);
+        var link = document.createElement("a");
+        link.href = url;
+        link.className = "js-profile-section-link";
+        link.setAttribute("data-section", "my-schedule");
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(function () { link.remove(); }, 0);
+        if (!document.querySelector("[data-profile-sections-host]")) window.location.href = url;
+    }
+
+    document.addEventListener("change", function (event) {
+        var yearSelect = event.target.closest("[data-sgx-year]");
+        if (yearSelect) {
+            var year = yearSelect.value;
+            var periodSelect = document.querySelector("[data-sgx-period]");
+            if (!periodSelect) return;
+            var first = null;
+            Array.prototype.forEach.call(periodSelect.options, function (option) {
+                var match = option.getAttribute("data-year") === year;
+                option.hidden = !match;
+                if (match && first === null) first = option.value;
+            });
+            if (typeof periodSelect._refreshBootstrapSelect === "function") periodSelect._refreshBootstrapSelect();
+            if (first) gotoPeriod(first);
+            return;
+        }
+        var periodSelect2 = event.target.closest("[data-sgx-period]");
+        if (periodSelect2) gotoPeriod(periodSelect2.value);
+    });
 })();

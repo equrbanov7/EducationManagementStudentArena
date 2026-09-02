@@ -136,6 +136,42 @@ class ProvisionCommandTests(TestCase):
         with self.assertRaises(CommandError):
             call_command("provision_student_credentials", "--org", "yoxdur", "--password", "x")
 
+    def test_group_filter_narrows_the_printable_list(self):
+        """Parol siyahısı praktikada QRUP-QRUP çap olunur (kurator paylayır)."""
+        from apps.organizations.models import OrgUnit
+        from apps.registrar.models import Curriculum, Program, StudentAcademicRecord
+        from core.constants import OrgUnitType
+
+        group = OrgUnit.objects.create(
+            organization=self.org, name="PV-101", slug="pv-101", unit_type=OrgUnitType.GROUP
+        )
+        program = Program.objects.create(organization=self.org, code="PV", name="Proqram")
+        curriculum = Curriculum.objects.create(organization=self.org, program=program, admission_year=2024)
+        StudentAcademicRecord.objects.create(
+            organization=self.org,
+            student=self.student1,
+            program=program,
+            curriculum=curriculum,
+            group=group,
+            admission_year=2024,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = str(Path(tmp) / "pv-101.csv")
+            self._run("--org", self.org.slug, "--group", "PV-101", "--generate", "--csv", csv_path)
+            with open(csv_path, encoding="utf-8") as fh:
+                rows = list(csv.DictReader(fh))
+
+        self.assertEqual([row["username"] for row in rows], ["pv_student1"])
+        self.student2.refresh_from_db()
+        self.assertTrue(self.student2.check_password(PASSWORD))  # qrupdan kənar tələbəyə toxunulmayıb
+
+    def test_unknown_group_rejected(self):
+        with self.assertRaises(CommandError):
+            call_command(
+                "provision_student_credentials", "--org", self.org.slug, "--group", "yoxdur", "--password", "x"
+            )
+
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class ProvisionEndToEndTest(TestCase):
