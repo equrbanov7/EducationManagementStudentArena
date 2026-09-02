@@ -62,6 +62,20 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | UI-9 | Off-canvas menyu tab sırasında; sidebar linklərində `:focus-visible` yoxdur (navbar.css ölçü-dondurulub) | PHASE21 | OPEN (P3) |
 | UI-10 | Tələbə bölmə iç başlıqları qabıq başlığını təkrarlayırdı («Sillabuslar» ×2) | sahib | FIXED (sillabus, sillabus təsdiqi, cədvəl idarəetməsi, yük bölgüsü, dərs yüküm) |
 
+## Reqressiya dalğası (PHASE27) — tapıntılar
+| # | Problem | Mənbə | Status |
+|---|---|---|---|
+| R-8 | **Köçürülmüş heç bir istifadəçi bu gün giriş edə bilmir**: 8,543/8,568 hesabda parol yoxdur (unusable) və Django reset forması onları süzür → «göndərildi» deyir, 0 e-poçt | PHASE27 | IN-PROGRESS (post-regression agenti: reset forması + RİM/bulk parol yolu + cutover proseduru) |
+| R-2 | Kafedra müdiri sillabusu heç vaxt görmür: `create_draft` `chair_unit=offering.group.parent` (= ixtisas) qoyur; faktiki təsdiqçi dekan olur | PHASE27 | IN-PROGRESS (chair ancestor + `syllabus_repair_chair_units`) |
+| R-1/R-4 | `my-schedule` yalnız cari dövrü göstərir; cari dövr (2025/2026 Yaz) bitib → koordinatorun yaratdığı heç bir slot görünmür | PHASE27 | IN-PROGRESS (dövr fallback + seçici) |
+| R-9 | `legacy_repair_missing_accounts` ilə yaradılan 100 tələbənin SAR-ı yoxdur (7,816 tələbə vs 7,703 SAR) | PHASE27 | IN-PROGRESS (migration-repair agenti, `--with-sar`) |
+| R-5 | Klonda 0 `ExamRoom` (mənbədə 158) → dərs otağı seçicisi boşdur | PHASE27 | IN-PROGRESS (`legacy_repair_rooms`) |
+| R-7 | İmtahan mərkəzi əməkdaşı başqa müəllimin sual bankını OXUYA bilir (A-31e) — PHASE23-də qəsdən saxlanıb | PHASE27 | DEFERRED (sahib qərarı) |
+| R-3 | PHASE23 «müsbət nəzarət» sillabusu bölməsiz idi (completion=100, 0 bölmə) — F7–F8 ilk əsl 100 % dövrüdür | PHASE27 | Qeyd |
+| CI-1 | `rls-txn-pool` 9 fail + 28 error: `accounts/0018` xam-SQL cədvəli FK ilə flush-u bloklayırdı | CI | FIXED (`accounts/0019` state-only model; lokal 36/36) |
+| CI-2 | pip-audit: pypdf 6.15.0 (CVE-2026-84309/10/11) | CI | FIXED → 6.16.1 |
+| CI-3 | unit-tests-311: 108 fail + 105 error (əksəri TransactionTestCase flush kollateralı: consumers, seed, migration testləri, audit) | CI | Növbəti CI icrası ilə yoxlanılır |
+
 ## P3 — cilalama
 | # | Problem | Mənbə | Status |
 |---|---|---|---|
