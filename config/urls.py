@@ -83,6 +83,8 @@ urlpatterns = [
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
     # appeals (imtahan apellyasiyaları)
     path("appeals/", include(("apps.appeals.urls", "appeals"), namespace="appeals")),
+    # müraciətlər (Müraciətlər paneli — JSON/fayl endpoint-ləri; ekran profil bölməsidir)
+    path("muracietler/", include(("apps.applications.urls", "applications"), namespace="applications")),
     # organizations
     path(
         "organizations/",

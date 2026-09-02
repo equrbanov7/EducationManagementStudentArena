@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
@@ -171,6 +172,30 @@ def teacher_group_list(request):
         "can_create_group": _user_can_create_group(request),
     }
     return render(request, "exams/teacher/teacher_group_list.html", context)
+
+
+@login_required
+def teacher_group_candidates(request):
+    """Qrup modalının namizəd siyahıları — modal AÇILANDA (lazy) yüklənir.
+
+    Profil «Qruplar» bölməsi əvvəllər ~7 700 tələbəlik seçim siyahısını HƏR
+    səhifə yüklənişində qurub render edirdi (813 ms divar vaxtının ~690 ms-i
+    saf Python/şablon idi — 2026-09-02 performans auditi, F4).  İndi bölmə
+    formanı ``defer_choices=True`` ilə boş render edir, variantları isə bu
+    endpoint qaytarır — eyni forma, eyni widget, eyni HTML.
+    """
+    _ensure_group_creator(request)
+    organization = _get_required_organization(request)
+    if organization is None:
+        raise Http404
+    form = _group_form_for_request(request, organization)
+    return JsonResponse(
+        {
+            "students": str(form["students"]),
+            "primary_teacher": str(form["primary_teacher"]),
+            "assigned_teachers": str(form["assigned_teachers"]),
+        }
+    )
 
 
 @login_required

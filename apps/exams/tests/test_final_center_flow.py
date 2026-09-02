@@ -1293,13 +1293,19 @@ class RoomListScopingTests(_FlowBase):
         self.assertContains(response, "Zal A")
         self.assertNotContains(response, "Zal C-Görünməz")
 
-    def test_unassigned_teacher_sees_no_rooms(self):
+    def test_unassigned_teacher_cannot_open_the_room_list_at_all(self):
+        """2026-09-02 audit, P2-1: səth boş siyahı ilə AÇILMAMALIDIR.
+
+        Əvvəl bu test 200 + boş siyahı gözləyirdi, yəni ``supervisor_org_or_403``
+        yalnız «aktiv təşkilat varmı» şərtini yoxlayan davranışı kilidləmişdi.
+        Auditor həmin boşluqdan TƏLƏBƏ hesabı ilə tam nəzarət UI qabığını
+        yüklədi (hal 39).  İndi qapı rol/təyinat tələb edir.
+        """
         outsider = User.objects.create_user("fcf_outsider", "fcf_outsider@test.az", PASSWORD)
         _assign_user_to_org(outsider, self.org, ProfileRole.TEACHER, "teacher")
         client = self._client_for(outsider)
         response = client.get(reverse("exams:exam_center_room_list"))
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Zal A")
+        self.assertEqual(response.status_code, 403)
 
     def test_exam_center_sees_all_rooms(self):
         client = self._client_for(self.center)

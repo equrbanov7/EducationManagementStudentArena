@@ -1,0 +1,203 @@
+{% load static i18n %}
+{% comment %}«Müraciətlərim» bölməsi — universitet daxili müraciət (ticket) sistemi.
+
+Bir ŞABLON + bir VIEW bütün rollara xidmət edir: rol URL-dən deyil, sessiyadakı
+istifadəçidən gəlir və səth `applications_section.family` / `is_handler` /
+`can_create` bayraqlarına görə budaqlanır (dizayn handoff §2, DoD §8.1).
+
+Domen məntiqi `apps.applications`-dadır; bu panel yalnız JSON API-ni çağırır:
+düymələr SERVER-in verdiyi `allowed_actions` siyahısına görə göstərilir — UI-da
+rol/status məntiqi TƏKRARLANMIR (backend müqaviləsi §8.2).
+
+CSP: inline CSS/JS YOXDUR. Stil `profile.html`-in `extraCss` blokundan, script
+isə bu panelin İÇİNDƏN (`data-profile-section-panel`) yüklənir ki, AJAX swap-dan
+sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
+`data-*` atributları və `json_script` ilə ötürülür.
+
+⚠️ ÇOXSƏTİRLİ `{#…#}` komment sayılmır və UI-a sızır — burada `{% comment %}`.
+{% endcomment %}
+{% if 'applications' in allowed_sections %}
+<section class="profile-section-panel profile-section--applications {% if active_section == 'applications' %}is-active{% endif %}"
+         data-profile-section-panel="applications"
+         data-source-url="{{ profile_base_url }}?section=applications">
+
+{% if not applications_section.has_access %}
+  <p class="apx-note" role="status">{% trans "Müraciətlər paneli üçün aktiv təşkilat konteksti tapılmadı." context "applications" %}</p>
+{% else %}
+<div class="apx"
+     data-apx-root
+     data-url-list="{{ applications_section.endpoints.list }}"
+     data-url-catalog="{{ applications_section.endpoints.catalog }}"
+     data-url-kpis="{{ applications_section.endpoints.kpis }}"
+     data-url-create="{{ applications_section.endpoints.create }}"
+     data-url-detail="{{ applications_section.endpoints.detail }}"
+     data-url-action="{{ applications_section.endpoints.action }}"
+     data-url-assignees="{% url 'accounts:applications_assignees' %}"
+     data-family="{{ applications_section.family }}"
+     data-can-create="{% if applications_section.can_create %}1{% else %}0{% endif %}"
+     data-is-handler="{% if applications_section.is_handler %}1{% else %}0{% endif %}"
+     data-min-subject="{{ applications_section.rules.min_subject_length|default:5 }}"
+     data-min-body="{{ applications_section.rules.min_body_length|default:20 }}"
+     data-min-note="{{ applications_section.rules.min_note_length|default:10 }}"
+     data-open-application="{{ request.GET.application|default:'' }}">
+
+  {% comment %}Panelin ÖZ CSRF token-i. `EMSCore.getCsrfToken()` kuki adını
+  `csrftoken` kimi sabit oxuyur; QA/staging konfiqurasiyası kukini
+  `emsarena_staging_csrftoken` adlandırdığı üçün orada YANLIŞ (köhnə) token
+  götürülürdü → POST-lar 403. Formadan gələn token həmişə cari sirlə uyğundur,
+  ona görə POST-lar bunu işlədir və kuki adı yalnız ehtiyat yoldur.{% endcomment %}
+  <span class="apx__sr" data-apx-csrf>{% csrf_token %}</span>
+
+  {# ── Kontekst zolağı (dizayn §4.1) ───────────────────────────────────── #}
+  <div class="apx-ctx">
+    <i class="fas fa-comment-dots" aria-hidden="true"></i>
+    <span class="apx-ctx__who">{{ applications_section.who }}</span>
+    <span class="apx-ctx__dot" aria-hidden="true">·</span>
+    <span class="apx-ctx__scope">{{ applications_section.scope }}</span>
+    {% if applications_section.role_label %}
+    <span class="apx-ctx__role">{{ applications_section.role_label }}</span>
+    {% endif %}
+  </div>
+
+  {# ── Başlıq + izah (dizayn §4.2 — mətn mənbədən eynilə) ───────────────── #}
+  <div class="apx-head">
+    <div>
+      <h1 class="apx-head__title">{% trans "Müraciətlər" context "applications" %}</h1>
+      {% if applications_section.is_handler %}
+      <p class="apx-head__intro">{% trans "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz." context "applications" %}</p>
+      {% else %}
+      <p class="apx-head__intro">{% trans "Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən." context "applications" %}</p>
+      {% endif %}
+    </div>
+    {% if applications_section.can_create %}
+    <button type="button" class="apx-btn apx-btn--primary" data-apx-open-create>
+      <i class="fas fa-plus" aria-hidden="true"></i>
+      {% trans "Yeni müraciət" context "applications" %}
+    </button>
+    {% endif %}
+  </div>
+
+  {# ── KPI kartları (dizayn §4.3) — dəyər/ton JS ilə doldurulur ─────────── #}
+  <div class="apx-kpis">
+    {% if applications_section.is_handler %}
+    <button type="button" class="apx-kpi apx-kpi--primary" data-apx-kpi="inbox_open" data-tab="inbox" data-stat="open">
+      <span class="apx-kpi__label">{% trans "Mənə gələn açıq" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note">{% trans "cavab verilməlidir" context "applications" %}</span>
+    </button>
+    <button type="button" class="apx-kpi" data-apx-kpi="new_unseen" data-tab="inbox" data-stat="all"
+            data-note-on="{% trans 'ilk baxış gözlənilir' context 'applications' %}"
+            data-note-off="{% trans 'hamısına baxılıb' context 'applications' %}">
+      <span class="apx-kpi__label">{% trans "Yeni — baxılmayıb" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note" data-apx-kpi-note></span>
+    </button>
+    <button type="button" class="apx-kpi" data-apx-kpi="overdue" data-tab="inbox" data-stat="overdue"
+            data-note-on="{% trans 'təcili baxılmalıdır' context 'applications' %}"
+            data-note-off="{% trans 'gecikən yoxdur' context 'applications' %}">
+      <span class="apx-kpi__label">{% trans "Cavab müddəti keçən" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note" data-apx-kpi-note></span>
+    </button>
+    <button type="button" class="apx-kpi" data-apx-kpi="watching" data-tab="watching" data-stat="all">
+      <span class="apx-kpi__label">{% trans "İzlədiyim" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note">{% trans "yönləndirdiyim müraciətlər" context "applications" %}</span>
+    </button>
+    {% else %}
+    <button type="button" class="apx-kpi apx-kpi--primary" data-apx-kpi="open" data-tab="mine" data-stat="open">
+      <span class="apx-kpi__label">{% trans "Açıq müraciətim" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note">{% trans "cavab gözləyir" context "applications" %}</span>
+    </button>
+    <button type="button" class="apx-kpi apx-kpi--warning" data-apx-kpi="waiting_info" data-tab="mine" data-stat="all">
+      <span class="apx-kpi__label">{% trans "Məlumat gözlənilir" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note">{% trans "sizdən sənəd istənilib" context "applications" %}</span>
+    </button>
+    <button type="button" class="apx-kpi" data-apx-kpi="resolved" data-tab="mine" data-stat="closed">
+      <span class="apx-kpi__label">{% trans "Cavablanıb" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note">{% trans "bağlanmış müraciət" context "applications" %}</span>
+    </button>
+    <button type="button" class="apx-kpi" data-apx-kpi="avg_response_days" data-tab="mine" data-stat="all"
+            data-suffix="{% trans 'gün' context 'applications' %}">
+      <span class="apx-kpi__label">{% trans "Orta cavab müddəti" context "applications" %}</span>
+      <span class="apx-kpi__value" data-apx-kpi-value>—</span>
+      <span class="apx-kpi__note">{% trans "son 30 gün üzrə" context "applications" %}</span>
+    </button>
+    {% endif %}
+  </div>
+
+  {# ── Tablar (dizayn §4.4) ─────────────────────────────────────────────── #}
+  <div class="apx-tabs" role="tablist">
+    {% if applications_section.is_handler %}
+    <button type="button" class="apx-tab" role="tab" data-apx-tab="inbox" aria-current="true">
+      {% trans "Mənə gələnlər" context "applications" %}
+      <span class="apx-tab__count" data-apx-tab-count hidden></span>
+    </button>
+    <button type="button" class="apx-tab" role="tab" data-apx-tab="watching" aria-current="false">
+      {% trans "İzlədiklərim" context "applications" %}
+      <span class="apx-tab__count" data-apx-tab-count hidden></span>
+    </button>
+    {% endif %}
+    {% if applications_section.can_create %}
+    <button type="button" class="apx-tab" role="tab" data-apx-tab="mine"
+            aria-current="{% if applications_section.is_handler %}false{% else %}true{% endif %}">
+      {% trans "Müraciətlərim" context "applications" %}
+      <span class="apx-tab__count" data-apx-tab-count hidden></span>
+    </button>
+    {% endif %}
+    <button type="button" class="apx-tab" role="tab" data-apx-tab="archive" aria-current="false">
+      {% trans "Arxiv" context "applications" %}
+      <span class="apx-tab__count" data-apx-tab-count hidden></span>
+    </button>
+  </div>
+
+  {# ── Filtr paneli (dizayn §4.5) ───────────────────────────────────────── #}
+  <div class="apx-filters">
+    <div class="apx-search">
+      <i class="fas fa-magnifying-glass apx-search__icon" aria-hidden="true"></i>
+      <label class="apx__sr" for="apx-q">{% trans "Müraciət axtar" context "applications" %}</label>
+      <input id="apx-q" type="search" class="apx-search__input" data-apx-q autocomplete="off"
+             placeholder="{% trans 'Mövzu, nömrə və ya göndərən axtar' context 'applications' %}">
+    </div>
+    <button type="button" class="apx-chip" data-apx-stat="open" aria-pressed="true">{% trans "Açıq olanlar" context "applications" %}</button>
+    <button type="button" class="apx-chip" data-apx-stat="overdue" aria-pressed="false">{% trans "Müddəti keçən" context "applications" %}</button>
+    <button type="button" class="apx-chip" data-apx-stat="closed" aria-pressed="false">{% trans "Bağlananlar" context "applications" %}</button>
+    <button type="button" class="apx-chip" data-apx-stat="all" aria-pressed="false">{% trans "Hamısı" context "applications" %}</button>
+    <div class="apx-kind" data-apx-kind>
+      <button type="button" class="apx-kind__toggle" data-apx-kind-toggle aria-haspopup="listbox" aria-expanded="false">
+        <span class="apx-kind__label" data-apx-kind-label>{% trans "Bütün növlər" context "applications" %}</span>
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+      </button>
+      <div class="apx-kind__panel" role="listbox" data-apx-kind-panel hidden
+           aria-label="{% trans 'Müraciətin növü' context 'applications' %}"></div>
+    </div>
+    <button type="button" class="apx-btn apx-btn--ghost" data-apx-reset>{% trans "Sıfırla" context "applications" %}</button>
+  </div>
+
+  {# ── İki sütunlu gövdə (dizayn §4.6/§4.7) ─────────────────────────────── #}
+  <div class="apx-body">
+    <div class="apx-list" data-apx-list aria-live="polite"></div>
+    <aside class="apx-detail" data-apx-detail hidden
+           aria-label="{% trans 'Müraciətin detalı' context 'applications' %}"></aside>
+  </div>
+
+  {# ── Dialoqlar — panelin İÇİNDƏ (AJAX swap-da itməsin) ────────────────── #}
+  {% include "accounts/profile/sections/_applications_dialogs.html" %}
+
+  {{ applications_section.i18n|json_script:"apx-i18n" }}
+</div>
+
+{% comment %}Script sırası: köməkçilər → dialoqlar → detal → nüvə. Hər üçü `window.EMSApplications`
+ad fəzasına yazır; nüvə funksiyaları ÇAĞIRIŞ anında oxuyur, ona görə sıra pozulsa
+da uçmur. Script-lər panelin İÇİNDƏDİR — `section_loader.executeInlineScripts`
+onları swap-dan sonra yenidən icra edir (init idempotentdir).{% endcomment %}
+<script defer src="{% static 'accounts/js/profile/applications_core.js' %}?v=20260902-4"></script>
+<script defer src="{% static 'accounts/js/profile/applications_dialogs.js' %}?v=20260902-4"></script>
+<script defer src="{% static 'accounts/js/profile/applications_detail.js' %}?v=20260902-4"></script>
+<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20260902-4"></script>
+{% endif %}
+</section>
+{% endif %}

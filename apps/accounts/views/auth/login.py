@@ -250,7 +250,7 @@ class CustomLoginView(LoginView):
         return self.form_invalid(form)
 
     def _wrong_portal_message(self):
-        if self.audience == LOGIN_AUDIENCE_STUDENT:
+        if self.effective_audience() == LOGIN_AUDIENCE_STUDENT:
             return pgettext(
                 "accounts.login.gate",
                 "Bu giriş yalnız tələbələr üçündür. Müəllim və əməkdaşlar müəllim giriş "
@@ -261,14 +261,29 @@ class CustomLoginView(LoginView):
             "Bu giriş müəllim və əməkdaşlar üçündür. Tələbələr tələbə giriş səhifəsindən " "istifadə etməlidir.",
         )
 
+    def effective_audience(self):
+        """Qapının müqayisə edəcəyi portal — HEÇ VAXT ``None`` deyil.
+
+        2026-09-02 audit (P1-1): qapı əvvəllər yalnız ``self.audience`` təyin
+        olunanda işləyirdi.  Neytral ``POST /accounts/login/`` (``login_portal``
+        → ``audience=None``) isə hər hesabı — TƏLƏBƏ də daxil — buraxırdı, yəni
+        tələbə/əməkdaş ayrımı server tərəfdə DEYİL, sadəcə UI konvensiyası idi.
+
+        İndi neytral endpoint FAIL-CLOSED-dur: portal təyin olunmayıbsa
+        ƏMƏKDAŞ portalı fərz edilir, ona görə tələbə hesabı bu yoldan GİRƏ
+        BİLMİR və düzgün portala yönləndirilir.  Legacy əməkdaş klientləri
+        işləməyə davam edir.
+        """
+        return self.audience or LOGIN_AUDIENCE_STAFF
+
     def form_valid(self, form):
         # Portal qapısı: doğru parol yazılsa da, yanlış portala düşən istifadəçi
         # LOGIN OLUNMADAN geri qaytarılır (form_invalid) — səhv + düzgün portal ipucu ilə.
-        if self.audience:
-            portal = classify_user_portal(form.get_user())
-            if portal and portal != self.audience:
-                form.add_error(None, self._wrong_portal_message())
-                return self.form_invalid(form)
+        audience = self.effective_audience()
+        portal = classify_user_portal(form.get_user())
+        if portal and portal != audience:
+            form.add_error(None, self._wrong_portal_message())
+            return self.form_invalid(form)
         response = super().form_valid(form)
         self.request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
         return response
@@ -277,9 +292,11 @@ class CustomLoginView(LoginView):
 def login_portal(request):
     """Generic ``/accounts/login/`` — GET portal SEÇİMİ (tələbə vs müəllim/əməkdaş).
 
-    Artıq birbaşa login forması göstərmir; iki ayrı portala yönləndirir. POST isə
-    köhnə uyğunluq üçün neytral (portalsız) autentifikasiyanı saxlayır (legacy
-    linklər/klientlər). ``next`` hər iki portala ötürülür.
+    Artıq birbaşa login forması göstərmir; iki ayrı portala yönləndirir. POST
+    (legacy klientlər) hələ qəbul olunur, amma ARTIQ ROL QAPILIDIR: audience
+    təyin olunmadığından ``CustomLoginView.effective_audience()`` əməkdaş
+    portalını fərz edir, yəni TƏLƏBƏ hesabı bu yoldan girə bilmir
+    (2026-09-02 audit, P1-1). ``next`` hər iki portala ötürülür.
     """
     if request.method == "POST":
         return CustomLoginView.as_view()(request)

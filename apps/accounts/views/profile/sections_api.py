@@ -118,6 +118,12 @@ SECTION_PARTIALS: dict[str, str] = {
     "academic-calendar": "accounts/profile/sections/_academic_calendar.html",
     "my-journal": "accounts/profile/sections/_my_journal.html",
     "journal-close": "accounts/profile/sections/_journal_close.html",
+    # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel, mutasiyalar
+    # ayrıca JSON POST endpoint-inə gedir → AJAX swap təhlükəsizdir.
+    "schedule-manage": "accounts/profile/sections/_schedule_manage.html",
+    # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
+    # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "applications": "accounts/profile/sections/_applications.html",
     "analytics": "accounts/profile/sections/_analytics.html",
     "academic-records": "accounts/profile/sections/_academic_records.html",
     # «Müəllimlər» / «Tələbələr» kataloqu (icazə: `people.*`, scope: unit)
@@ -175,6 +181,8 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # U12 — registrar kabinet bölmələri (read-mostly; formlar registrar
         # endpoint-lərinə POST edir və `next` ilə shell-ə qayıdır).
         "my-schedule",
+        "schedule-manage",
+        "applications",
         "academic-calendar",
         "my-journal",
         "analytics",
@@ -390,6 +398,10 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     if capabilities.get("can_review_submissions"):
         payload["pending_review_count"] = shared_badges.get("pending_review", 0)
         payload["evaluated_review_count"] = shared_badges.get("evaluated_review", 0)
+    # «Müraciətlərim» — sayğac paylaşılan (keşlənən) dəstdən gəlir; müraciət
+    # mutasiyaları keşi `applications.services.notify` içindən invalidasiya edir.
+    if "applications" in capabilities.get("allowed_sections", set()):
+        payload["applications_pending_count"] = shared_badges.get("applications_pending", 0)
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

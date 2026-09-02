@@ -304,6 +304,11 @@ def get_offering_journal(*, offering, newest_first=False):
         .order_by("student__last_name", "student__username")
     )
     mark_map = {(m.enrollment_id, m.lesson_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+    # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
+    # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
+    from apps.registrar import finals_batch
+
+    entry_batch = finals_batch.entry_batch(enrollments)
     # «Alt qrup» çipi CARİ iddiadır: rəsmi köçürmədən sonra tələbə artıq bu qrupun
     # üzvüdürsə provenans qalsa da çip yalan danışmamalıdır (bax guest_roster).
     from apps.registrar import guest_merge, guest_roster
@@ -412,7 +417,7 @@ def get_offering_journal(*, offering, newest_first=False):
             absence_hours += carry["absence_hours"]
             absence_count += carry["absence_count"]
         # Canonical entry score (component-weighted when defined, else lesson sum).
-        entry_score = entry_score_for(enrollment, scheme.entry_score_max)
+        entry_score = entry_score_for(enrollment, scheme.entry_score_max, **entry_batch.entry_kwargs(enrollment))
         eligibility = exam_eligibility.resolve(
             absence_hours=absence_hours,
             lesson_hours=total_hours,

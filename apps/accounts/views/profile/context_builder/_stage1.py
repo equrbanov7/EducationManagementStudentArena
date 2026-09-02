@@ -357,6 +357,9 @@ class _Stage1Mixin:
             from apps.appeals.public import count_pending_manage_appeals
 
             self.pending_appeals_count = count_pending_manage_appeals(self.request)
+        # «Müraciətlərim» badge-i PAYLAŞILAN (keşlənən) dəstdən gəlir — səhifə,
+        # fraqment və `profile_badges_api` eyni rəqəmi göstərsin deyə.
+        self.applications_pending_count = self.profile_badge_counts.get("applications_pending", 0)
         self.pending_review_count = self.profile_badge_counts.get("pending_review", 0)
         self.evaluated_review_count = self.profile_badge_counts.get("evaluated_review", 0)
         self.teacher_groups = []

@@ -44,7 +44,7 @@ def round_score(value) -> Decimal:
 # ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
 
 
-def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
+def entry_score_for(enrollment, cap, *, marks=None, components=None, component_scores=None, selfwork_done=None):
     """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
 
     Qayda (analytics._evaluate ilə GÜZGÜ saxlanmalıdır):
@@ -57,9 +57,12 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
       (:func:`round_score` — yarım-yuxarı; legacy kəsirli arxiv qalıqları
       görünüşdə tam ədəd olmalıdır).
 
-    Performans: ``marks`` (bu enrollment-in LessonMark-ları) və ``components``
-    (offering-in AssessmentComponent-ləri) əvvəlcədən verilə bilər — toplu
-    (batch) çağırışlarda per-subject təkrar sorğunu aradan qaldırır. Verilməsə
+    Performans: ``marks`` (bu enrollment-in LessonMark-ları), ``components``
+    (offering-in AssessmentComponent-ləri), ``component_scores`` (bu
+    enrollment-in ComponentScore sətirləri — həm GENERIC, həm KOLLOKVIUM) və
+    ``selfwork_done`` (təhvil verilmiş sərbəst iş SAYI) əvvəlcədən verilə
+    bilər — toplu (batch) çağırışlarda sətir başına 4 sorğunu SIFIRA endirir
+    (:mod:`apps.registrar.finals_batch` hamısını bir dəfə oxuyur). Verilməsə
     əvvəlki kimi ayrıca sorğulanır (geriyə-uyğun)."""
     cap = Decimal(cap)
     if components is None:
@@ -68,13 +71,16 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
     kollokvium = [c for c in components if c.kind == ComponentKind.KOLLOKVIUM]
     selfwork = [c for c in components if c.kind == ComponentKind.SELF_WORK]
 
+    def _scores_for(ids):
+        """Verilmiş komponentlərin balları — toplu dəst varsa sorğusuz."""
+        if component_scores is None:
+            return ComponentScore.objects.filter(component_id__in=list(ids), enrollment=enrollment)
+        return [cs for cs in component_scores if cs.component_id in ids]
+
     if generic:
         max_by = {c.id: Decimal(c.max_score) for c in generic}
         total = sum(
-            (
-                min(cs.score or Decimal("0"), max_by[cs.component_id])
-                for cs in ComponentScore.objects.filter(component_id__in=list(max_by), enrollment=enrollment)
-            ),
+            (min(cs.score or Decimal("0"), max_by[cs.component_id]) for cs in _scores_for(max_by)),
             Decimal("0"),
         )
     else:
@@ -84,10 +90,7 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
     if kollokvium:
         kmax_by = {c.id: Decimal(c.max_score) for c in kollokvium}
         total += sum(
-            (
-                min(cs.score or Decimal("0"), kmax_by[cs.component_id])
-                for cs in ComponentScore.objects.filter(component_id__in=list(kmax_by), enrollment=enrollment)
-            ),
+            (min(cs.score or Decimal("0"), kmax_by[cs.component_id]) for cs in _scores_for(kmax_by)),
             Decimal("0"),
         )
     if selfwork:
@@ -102,9 +105,11 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None) -> Decimal:
         # hər tələbənin balı şişər. "Məntiqli görünür" tələsi budur.
         # Arxiv balı YALNIZ görünmə üçündür: bax ``selfwork_board`` modulu.
         # Eyni qayda güzgü hesablamaya da (``analytics._selfwork_map``) aiddir.
-        done = SelfWorkMark.objects.filter(
-            enrollment=enrollment, topic__offering=enrollment.offering, done=True
-        ).count()
+        done = (
+            SelfWorkMark.objects.filter(enrollment=enrollment, topic__offering=enrollment.offering, done=True).count()
+            if selfwork_done is None
+            else int(selfwork_done)
+        )
         for comp in selfwork:
             total += min(Decimal(done), Decimal(comp.max_score))
     return round_score(min(total, cap))

@@ -44,6 +44,7 @@ def apply_permission_section_gates(
     testlər onlara söykənir): ``can_view_audit``, ``can_use_rim_center``,
     ``can_view_people_teachers``, ``can_view_people_students``, ``can_view_syllabus``,
     ``can_edit_syllabus``, ``can_review_syllabus``, ``can_reassign_teaching``,
+    ``can_manage_schedule``, ``can_use_applications``,
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
@@ -94,6 +95,24 @@ def apply_permission_section_gates(
     # bölməni görür və BOŞ siyahı alır — səssiz 403 əvəzinə anlaşılan boşluq.
     can_reassign_teaching = privileged or has_permission(permissions, "journal.reassign")
 
+    # «Cədvəl idarəetməsi» — `schedule.manage` (proqram koordinatoru, RİM, dekan,
+    # kafedra müdiri). Qapı ROL ADINA baxmır: açar permission-editordan istənilən
+    # rola verilə bilər. ADİ MÜƏLLİMDƏ açar QƏSDƏN YOXDUR — o, «Dərs cədvəli»
+    # bölməsində öz həftəsini yalnız GÖRÜR. Konkret qrupun/açılışın idarə oluna
+    # bilməsi `apps/registrar/schedule_manage.py`-da struktur əhatəsi ilə
+    # fail-closed yenidən yoxlanılır (əhatəsiz aktor boş siyahı görür).
+    can_manage_schedule = privileged or has_permission(permissions, "schedule.manage")
+
+    # «Müraciətlərim» — ÜÇ açardan hər hansı biri bölməni açır: göndərən
+    # (`application.create`), emalçı (`application.handle`) və ya nəzarətçi
+    # (`application.manage`). Praktikada bu, AKTİV ÜZVLÜYÜ olan hər rol deməkdir
+    # (`alumni` / `member` istisna) — panelin özü ailəyə/emalçı bayrağına görə
+    # daxildən budaqlanır, ona görə bölmə açarı BİRDİR. Aktiv üzvlüyü olmayan
+    # istifadəçidə `permissions` boşdur → bölmə görünmür (fail-closed).
+    can_use_applications = privileged or any(
+        has_permission(permissions, key) for key in ("application.create", "application.handle", "application.manage")
+    )
+
     # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — İKİ AÇAR, QƏSDƏN FƏRQLİ ROLDA:
     #
     #   `final_score.entry`  → növbəni görür VƏ qərar/düzəliş yaza bilir. Bu,
@@ -118,6 +137,8 @@ def apply_permission_section_gates(
         (can_view_syllabus, "syllabus-editor"),
         (can_review_syllabus, "syllabus-review"),
         (can_reassign_teaching, "teaching-handover"),
+        (can_manage_schedule, "schedule-manage"),
+        (can_use_applications, "applications"),
         (can_watch_legacy_grades, "legacy-grade-review"),
     ):
         if enabled:
@@ -132,6 +153,8 @@ def apply_permission_section_gates(
         "can_edit_syllabus": can_edit_syllabus,
         "can_review_syllabus": can_review_syllabus,
         "can_reassign_teaching": can_reassign_teaching,
+        "can_manage_schedule": can_manage_schedule,
+        "can_use_applications": can_use_applications,
         "can_review_legacy_grades": can_review_legacy_grades,
         "can_watch_legacy_grades": can_watch_legacy_grades,
     }

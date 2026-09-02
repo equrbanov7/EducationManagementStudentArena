@@ -205,6 +205,11 @@ class LegacyEntityMap(UUIDModel, TimeStampedModel, _NonDeletableLedgerModel):
         indexes = [
             models.Index(fields=["organization", "created_run", "state"], name="legacy_map_org_created_state"),
             models.Index(fields=["target_model_label", "target_pk"], name="legacy_map_target"),
+            # «Bu açılış köçürülüb?» sorğusu (``exam_eligibility._migrated_offering_ids``)
+            # ``target_model_label`` SÜZMÜR — yəni yuxarıdakı kompozit indeksin
+            # aparıcı sütununa oturmur və Postgres 5 000+ səhifə oxuyurdu
+            # (tək sətir üçün 20-97 ms; 2026-09-02 EXPLAIN ANALYZE).
+            models.Index(fields=["entity_type", "state", "target_pk"], name="legacy_map_lookup"),
         ]
         constraints = [
             models.UniqueConstraint(

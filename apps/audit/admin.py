@@ -62,5 +62,21 @@ class AuditLogAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        """Only superusers can delete audit logs."""
-        return request.user.is_superuser
+        """Audit jurnalı APPEND-ONLY-dir — HEÇ KİM, superuser də silə bilməz.
+
+        2026-09-02 audit (P1-3): burada ``request.user.is_superuser``
+        qaytarılırdı, yəni ələ keçirilmiş və ya bədniyyət superadmin 22 301
+        sətirlik izi — o cümlədən ÖZ əməllərinin qeydini — admin UI-dan silə
+        bilərdi.  PostgreSQL tərəfdə ``audit_log_no_delete`` triggeri
+        (``apps/organizations/migrations/0019_audit_log_append_only.py``)
+        onsuz da rədd edir; bu, UI-nin həmin düyməni ÜMUMİYYƏTLƏ göstərməməsini
+        təmin edir.  Saxlama müddəti (retention) admin düyməsi ilə deyil,
+        tarixli/xarici arxivləmə işi ilə idarə olunmalıdır.
+        """
+        return False
+
+    def get_actions(self, request):
+        """Toplu ``delete_selected`` əməlini siyahıdan tamamilə çıxarır."""
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions

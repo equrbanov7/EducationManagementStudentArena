@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "daphne",
     "apps.exams",
     "apps.appeals.apps.AppealsConfig",
+    "apps.applications.apps.ApplicationsConfig",
     "apps.trial_exams.apps.TrialExamsConfig",
     "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",

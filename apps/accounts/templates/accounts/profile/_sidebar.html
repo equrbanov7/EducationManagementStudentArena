@@ -40,6 +40,23 @@
             </a>
         </li>
         {% endif %}
+        {% comment %}«Müraciətlərim» — universal bənd: AKTİV ÜZVLÜYÜ olan HƏR rol
+        (tələbə, müəllim, əməkdaş, dekan, koordinator, RİM …) onu görür. Qapı
+        `application.create` / `.handle` / `.manage` açarlarındadır (rol adına
+        baxılmır). Panel içəridə ailəyə/emalçı bayrağına görə budaqlanır.{% endcomment %}
+        {% if 'applications' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=applications"
+               data-section="applications"
+               data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'applications' %}active{% endif %}">
+                <i class="fas fa-comment-dots sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "Müraciətlərim" context "profile.sidebar" %}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="applications_pending_count">{% if applications_pending_count %}{{ applications_pending_count }}{% endif %}</span>
+            </a>
+        </li>
+        {% endif %}
         {% comment %} `data-source-url`-də dedicated server-side view-ləri qoyuruq:
            - JS tərəfindən istifadə edilmir (hələ də `?section=` formu fəaldır)
            - testlərin reverse() ilə axtardığı URL-lər HTML-də mövcud olur

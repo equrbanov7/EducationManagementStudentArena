@@ -296,3 +296,29 @@ class ProductionAdminAllowlistSettingsTest(TestCase):
             CONTACT_NOTIFY_EMAIL="contact-target@example.com",
         )
         self.assertEqual(module.CONTACT_NOTIFY_EMAIL, "contact-target@example.com")
+
+
+class ProductionSettingsImportListTest(TestCase):
+    """P2-4: `base.py`-dəki ayar `production.py`-ın explicit idxal siyahısında olmalıdır.
+
+    `config/settings/production.py` `from .base import (...)` ilə AÇIQ siyahı
+    idxal edir; siyahıdan kənarda qalan ayar production-da sadəcə YOXA ÇIXIR
+    (getattr default-una düşür) — səssiz konfiqurasiya sürüşməsi.
+
+    2026-09-02 auditi: `ALERTMANAGER_WEBHOOK_TOKEN` məhz bu tələyə düşmüşdü —
+    prod-da `""` olurdu, ona görə `/api/superadmin/monitoring/alertmanager/`
+    webhook-u HƏR sorğuya 403 verirdi və Alertmanager insidentləri heç vaxt
+    qeydə alınmırdı (fail-closed, amma monitorinq kor qalırdı).
+    """
+
+    def _production_source(self) -> str:
+        return (ROOT / "config" / "settings" / "production.py").read_text(encoding="utf-8")
+
+    def test_alertmanager_webhook_token_is_imported(self):
+        self.assertIn("ALERTMANAGER_WEBHOOK_TOKEN", self._production_source())
+
+    def test_webhook_view_reads_a_setting_that_production_actually_defines(self):
+        """View-in oxuduğu ayar adı ilə idxal siyahısı UYĞUN olmalıdır."""
+        view_source = (ROOT / "apps" / "monitoring" / "views.py").read_text(encoding="utf-8")
+        self.assertIn('getattr(settings, "ALERTMANAGER_WEBHOOK_TOKEN"', view_source)
+        self.assertIn("ALERTMANAGER_WEBHOOK_TOKEN", self._production_source())

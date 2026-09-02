@@ -11,6 +11,7 @@ from apps.accounts.services import (  # noqa: F401
     archive_staged_account,
     issue_email_otp,
     purge_stale_pending_registration,
+    restore_archived_account,
     stage_imported_account,
     verify_otp_code,
 )
@@ -32,6 +33,7 @@ __all__ = [
     "issue_email_otp",
     "map_org_role_to_profile_role",
     "purge_stale_pending_registration",
+    "restore_archived_account",
     "stage_imported_account",
     "user_has_any_role",
     "verify_otp_code",

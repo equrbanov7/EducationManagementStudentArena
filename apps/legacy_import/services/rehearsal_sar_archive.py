@@ -64,11 +64,16 @@ from .rehearsal_structure_source import MIN_ADMISSION_YEAR
 #: qolundan FƏRQLİ evidence üretir, beləcə iki qərar bir-birinə qarışa bilmir.
 ARCHIVE_EVIDENCE_SUBJECT = "alumni"
 
-#: Qəbul ili həll olunmayan ARXİV sətri üçün sentinel: attestasiya olunmuş
-#: domenin döşəməsi. Təxmin deyil — «bu il məlum deyil» sözünün model icazə
-#: verdiyi yeganə formasıdır və ``legacy_sar_admission_year_fallback`` ilə
-#: hesabatda açıq görünür.
-ARCHIVE_FALLBACK_ADMISSION_YEAR = MIN_ADMISSION_YEAR
+#: Qəbul ili həll olunmayan sətir üçün sentinel: attestasiya olunmuş domenin
+#: döşəməsi. Təxmin deyil — «bu il məlum deyil» sözünün model icazə verdiyi
+#: yeganə formasıdır və ``legacy_sar_admission_year_fallback`` ilə hesabatda
+#: açıq görünür.
+#:
+#: 2026-09-02: sentinel artıq YALNIZ arxiv qoluna aid deyil — qəbul ili
+#: bilinməyən AKTİV tələbə də onu daşıyır (bax ``rehearsal_sar_phase`` §A2-fix),
+#: ona görə neytral ad kanonikdir; ``ARCHIVE_*`` adı geri-uyğunluq üçün qalır.
+FALLBACK_ADMISSION_YEAR = MIN_ADMISSION_YEAR
+ARCHIVE_FALLBACK_ADMISSION_YEAR = FALLBACK_ADMISSION_YEAR
 
 _STATE = LegacyEntityMap.State
 
@@ -210,6 +215,7 @@ def materialise_archive(context, *, request, role, write_record: bool) -> Record
 __all__ = [
     "ARCHIVE_EVIDENCE_SUBJECT",
     "ARCHIVE_FALLBACK_ADMISSION_YEAR",
+    "FALLBACK_ADMISSION_YEAR",
     "account_is_archived",
     "materialise_archive",
     "resolve_archive_role",

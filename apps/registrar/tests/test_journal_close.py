@@ -15,6 +15,7 @@ from django.db import IntegrityError, transaction
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from apps.notifications.models import InAppNotification
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import corrections, finals, gradebook, journal_close, journal_close_notices, services
 from apps.registrar.models import (
@@ -523,3 +524,60 @@ class CloseNoticeTest(_JournalCloseBase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "data-journal-close-marquee")
         self.assertContains(resp, "jd2-kmarquee__item")
+
+
+class CloseNotificationTest(_JournalCloseBase):
+    """Bağlama/açma bildirişi — əhatədəki (HƏQİQƏTƏN dəyişən) müəllimlərə."""
+
+    def _notes(self, event):
+        return InAppNotification.objects.filter(recipient=self.teacher, metadata__event=event)
+
+    def test_close_notifies_the_affected_instructor(self):
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.close_journals(
+                organization=self.org, period=self.period, unit=self.faculty_a, by_user=self.rim
+            )
+        notes = self._notes("journal_closed")
+        self.assertEqual(notes.count(), 1)
+        title = notes.first().title
+        self.assertIn("bağlandı", title)
+        self.assertIn(self.period.name, title)
+        self.assertIn("Fakültə A", title)
+
+    def test_close_whole_org_notifies_the_shared_instructor_once(self):
+        """Eyni müəllimin İKİ açılışı bağlansa da — TƏK bildiriş (distinct)."""
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.close_journals(organization=self.org, period=self.period, by_user=self.rim)
+        self.assertEqual(self._notes("journal_closed").count(), 1)
+
+    def test_second_close_is_idempotent_and_sends_no_new_notification(self):
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.close_journals(organization=self.org, period=self.period, by_user=self.rim)
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.close_journals(organization=self.org, period=self.period, by_user=self.rim)
+        # Cəmi 1 — ikinci (heç nə dəyişməyən) çağırış YENİ bildiriş yaratmır.
+        self.assertEqual(self._notes("journal_closed").count(), 1)
+
+    def test_reopen_notifies_the_affected_instructor(self):
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.close_journals(
+                organization=self.org, period=self.period, unit=self.faculty_a, by_user=self.rim
+            )
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.reopen_journals(
+                organization=self.org,
+                period=self.period,
+                unit=self.faculty_a,
+                by_user=self.rim,
+                reason="Səhv fakültə seçilmişdi",
+            )
+        notes = self._notes("journal_reopened")
+        self.assertEqual(notes.count(), 1)
+        self.assertIn("yenidən açıldı", notes.first().title)
+
+    def test_reopen_of_already_open_journal_sends_nothing(self):
+        with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+            journal_close.reopen_journals(
+                organization=self.org, period=self.period, by_user=self.rim, reason="onsuz da açıq"
+            )
+        self.assertEqual(self._notes("journal_reopened").count(), 0)

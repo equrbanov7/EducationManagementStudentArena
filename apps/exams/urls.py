@@ -232,6 +232,8 @@ urlpatterns = [
     path("groups/", views.teacher_group_list, name="teacher_group_list"),
     path("groups/create/form/", views.create_student_group, name="create_student_group"),
     path("groups/create/", views.teacher_create_group, name="teacher_create_group"),
+    # Modal namizədləri (lazy) — səhifə yükü ilə birlikdə render OLUNMUR.
+    path("groups/namizedler/", views.teacher_group_candidates, name="teacher_group_candidates"),
     path(
         "groups/<int:group_id>/update/",
         views.teacher_update_group,

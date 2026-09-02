@@ -124,9 +124,15 @@ def journal_detail(request, offering_id):
     # itmir — müəllim görünüşündə «Yekun» tabının QEYD sütununda açıq göstərilir.
     from apps.registrar import exam_attempt_history
 
+    # Toplu oxu (tək sorğu) — sətir-sətir ``attempt_rows_for_enrollment``
+    # 555 tələbəli açılışda 555 sorğu edirdi (2026-09-02 performans ölçməsi).
+    attempts_by_student = exam_attempt_history.attempt_rows_by_student(
+        student_ids=[row["enrollment"].student_id for row in finals_data["rows"]],
+        subject_id=offering.subject_id,
+        organization=offering.organization,
+    )
     attempts_map = {
-        row["enrollment"].id: exam_attempt_history.attempt_rows_for_enrollment(row["enrollment"])
-        for row in finals_data["rows"]
+        row["enrollment"].id: attempts_by_student.get(row["enrollment"].student_id, []) for row in finals_data["rows"]
     }
     for row in finals_data["rows"]:
         row["coursework"] = work_by_enrollment.get(row["enrollment"].id)

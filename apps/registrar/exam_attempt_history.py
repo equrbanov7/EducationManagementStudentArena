@@ -94,24 +94,56 @@ def attempt_rows_for_subject(*, student, subject_id, organization):
         .select_related("exam")
         .order_by("started_at", "attempt_number")
     )
-    if not attempts:
-        return []
+    # Sətir formatı TƏK yerdən (toplu variant da eyni funksiyanı işlədir).
+    return _rows_from_attempts(attempts)
 
+
+def _rows_from_attempts(attempts) -> list:
+    """Sıralanmış cəhd sətirlərini UI formatına çevir (rəsmi = SONUNCU)."""
     last_index = len(attempts) - 1
-    rows = []
-    for index, attempt in enumerate(attempts):
-        rows.append(
-            {
-                "number": index + 1,
-                "label": ordinal_label(index + 1),
-                "percent": _safe_percent(attempt),
-                "is_official": index == last_index,
-                "exam_title": getattr(attempt.exam, "title", "") or "",
-                "finished_at": attempt.finished_at or attempt.started_at,
-                "is_expelled": getattr(attempt, "supervision_status", "") == "removed",
-            }
+    return [
+        {
+            "number": index + 1,
+            "label": ordinal_label(index + 1),
+            "percent": _safe_percent(attempt),
+            "is_official": index == last_index,
+            "exam_title": getattr(attempt.exam, "title", "") or "",
+            "finished_at": attempt.finished_at or attempt.started_at,
+            "is_expelled": getattr(attempt, "supervision_status", "") == "removed",
+        }
+        for index, attempt in enumerate(attempts)
+    ]
+
+
+def attempt_rows_by_student(*, student_ids, subject_id, organization) -> dict:
+    """``student_id`` → cəhd sətirləri — bir fənn üzrə BÜTÜN roster, **tək sorğu**.
+
+    :func:`attempt_rows_for_subject`-in toplu güzgüsüdür: müəllim jurnalının
+    «Yekun» tab-ı sətir-sətir çağıranda 555 tələbəli açılışda 555 sorğu olurdu
+    (2026-09-02 performans ölçməsi).  Sıralama və «rəsmi cəhd» qaydası eynidir.
+    """
+    ids = [sid for sid in student_ids if sid is not None]
+    if not ids or not subject_id or organization is None:
+        return {}
+    try:
+        attempt_model = _attempt_model()
+    except LookupError:  # exams modulu quraşdırılmayıb
+        return {}
+    attempts = (
+        attempt_model.objects.filter(
+            user_id__in=ids,
+            exam__subject_id=subject_id,
+            exam__organization=organization,
+            is_trial=False,
+            status__in=_FINISHED_STATUSES,
         )
-    return rows
+        .select_related("exam")
+        .order_by("started_at", "attempt_number")
+    )
+    by_student: dict = {}
+    for attempt in attempts:
+        by_student.setdefault(attempt.user_id, []).append(attempt)
+    return {student_id: _rows_from_attempts(rows) for student_id, rows in by_student.items()}
 
 
 def attempt_rows_for_enrollment(enrollment):
