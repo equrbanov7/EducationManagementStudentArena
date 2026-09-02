@@ -65,11 +65,12 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 ## Reqressiya dalğası (PHASE27) — tapıntılar
 | # | Problem | Mənbə | Status |
 |---|---|---|---|
-| R-8 | **Köçürülmüş heç bir istifadəçi bu gün giriş edə bilmir**: 8,543/8,568 hesabda parol yoxdur (unusable) və Django reset forması onları süzür → «göndərildi» deyir, 0 e-poçt | PHASE27 | IN-PROGRESS (post-regression agenti: reset forması + RİM/bulk parol yolu + cutover proseduru) |
-| R-2 | Kafedra müdiri sillabusu heç vaxt görmür: `create_draft` `chair_unit=offering.group.parent` (= ixtisas) qoyur; faktiki təsdiqçi dekan olur | PHASE27 | IN-PROGRESS (chair ancestor + `syllabus_repair_chair_units`) |
-| R-1/R-4 | `my-schedule` yalnız cari dövrü göstərir; cari dövr (2025/2026 Yaz) bitib → koordinatorun yaratdığı heç bir slot görünmür | PHASE27 | IN-PROGRESS (dövr fallback + seçici) |
-| R-9 | `legacy_repair_missing_accounts` ilə yaradılan 100 tələbənin SAR-ı yoxdur (7,816 tələbə vs 7,703 SAR) | PHASE27 | IN-PROGRESS (migration-repair agenti, `--with-sar`) |
-| R-5 | Klonda 0 `ExamRoom` (mənbədə 158) → dərs otağı seçicisi boşdur | PHASE27 | IN-PROGRESS (`legacy_repair_rooms`) |
+| R-8 | **Köçürülmüş heç bir istifadəçi giriş edə bilmirdi**: 8,543/8,568 hesabda parol yoxdur və reset forması onları süzürdü | PHASE27 | FIXED (klon): reset forması «giriş açıqdır» şərti ilə (staged/archived xaric), placeholder e-poçt → RİM yönləndirməsi (sadalama yox), OTP reset sonrası ilk-giriş qapısı təmizlənir; RİM per-user parol; `provision_student_credentials --group`; HANDOFF §8.9 cutover proseduru (SMTP şərti) |
+| R-2 | Kafedra müdiri sillabusu heç vaxt görmürdü (`chair_unit` = ixtisas) | PHASE27 | FIXED (klon): `syllabus/services/units.py` — əcdad → müəllifin kafedra üzvlüyü → verilən vahid; `syllabus_repair_chair_units`. **Tenant tapıntısı:** 0/83 ixtisas və 0/766 qrupun kafedra əcdadı yoxdur (mənbədə `speciality.department_id` fakültəyə işarə edir) — SAHİB QƏRARI: təsdiqçi kafedra müdiri, yoxsa dekan; ixtisas→kafedra tili qurulsunmu |
+| R-1/R-4 | `my-schedule` yalnız bitmiş cari dövrü göstərirdi | PHASE27 | FIXED (klon): `resolve_display_period()` (?period → cari → ən yaxın gələcək slotlu → cari-dən köhnə olmayan son slotlu) + dövr seçicisi; canlı: koordinator 2026/2027 Payız slotu → müəllim və tələbə görür |
+| R-9 | Bərpa hesablarının SAR-ı yoxdu | PHASE27 | FIXED (klon): `--with-sar` → SAR 7,703→7,799 (96/100; 4-ü mənbədə mövcud olmayan qrupa işarə edir — uydurulmadı) |
+| R-5 | Klonda 0 `ExamRoom` | PHASE27 | FIXED (klon): `legacy_repair_rooms --from-source` (J10 fazasının öz məntiqi) → 158 otaq, 4 korpus; dərs modalı kaskadı işləyir |
+| R-10 | `test_exam_eligibility_frozen` sətir-başına 2 sorğu gözləyirdi (köhnə N+1) | CI | FIXED: batching-dən sonra 0 kilidləndi |
 | R-7 | İmtahan mərkəzi əməkdaşı başqa müəllimin sual bankını OXUYA bilir (A-31e) — PHASE23-də qəsdən saxlanıb | PHASE27 | DEFERRED (sahib qərarı) |
 | R-3 | PHASE23 «müsbət nəzarət» sillabusu bölməsiz idi (completion=100, 0 bölmə) — F7–F8 ilk əsl 100 % dövrüdür | PHASE27 | Qeyd |
 | CI-1 | `rls-txn-pool` 9 fail + 28 error: `accounts/0018` xam-SQL cədvəli FK ilə flush-u bloklayırdı | CI | FIXED (`accounts/0019` state-only model; lokal 36/36) |
