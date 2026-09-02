@@ -314,6 +314,114 @@ export LEGACY_MARIADB_SOURCE_DATABASE=myedudb
 
 ---
 
+## 4A. Reqressiya qaçışının iki əlavəsi (R-9, R-5)
+
+`PHASE27_REGRESSION.md` iki qalıq boşluq tapdı; hər ikisi eyni qapı dəsti ilə
+bağlandı (dry-run default, `--apply`, org-scoped, auditli, idempotent).
+
+### R-9 · təmirlə yaradılmış 100 tələbənin akademik qeydi yox idi
+
+**Simptom.** 7 816 tələbə hesabı, cəmi 7 703 SAR.
+`registrar.public.build_student_subjects_context` ilk addımda
+`StudentAcademicRecord` axtarır — tapmayanda «Fənlərim» boş vəziyyət qaytarır,
+yəni yeni 100 hesab kabinetdə heç nə görmürdü.
+
+**Düzəliş.** `services/repair_sar.py` (yeni) + `legacy_repair_missing_accounts
+--with-sar`. Qərar qaydası fazanın öz pilləkəni ilə eynidir: qrup
+(`OrgUnit.settings['legacy']['id']`) → proqram (`(specialty_unit, degree_level)`)
+→ qəbul ili (`entry_year` → qrupun ili → `FALLBACK_ADMISSION_YEAR` sentineli) →
+kurikulum (dəqiq il → həmin proqramın ən yaxın ili → yeni sətir, çünki
+`SAR.curriculum` NOT NULL-dur). `resolve_placement` fazadan **olduğu kimi**
+gəlir; FİN mövcud `_apply_fin` ilə yazılır (dublikat FİN yazılmır).
+
+`--with-sar` yalnız bu icrada yaradılanları deyil, **əvvəlki icradan qalan**
+hesabları da namizəd sayır (R-9 məhz odur); SAR-ı olanları `plan_records` özü
+kənara qoyur.
+
+```
+=== APPLY ===                          === təkrar APPLY ===
+  SAR namizədi                : 100      100
+  SAR yaradıldı               : 96       0
+    SAR curriculum_exact      : 96       —
+    SAR already_present       : —        96
+    SAR skip_group_unresolved : 4        4
+```
+
+| Ölçü | Əvvəl | Sonra |
+|---|---:|---:|
+| `StudentAcademicRecord` | 7 703 | **7 799** |
+| yer-tutucu e-poçtlu tələbənin SAR-ı | 0 | **96** |
+
+**Niyə 100 deyil, 96.** Qalan dördünün qrupu mənbədə HƏLL OLUNMUR — bu, uydurma
+ilə bağlana bilməyəcək mənbə qüsurudur (fazanın 13 `staged` sətri ilə eyni
+qayda, `legacy_record_group_unresolved`):
+
+| legacy id | `students.group_id` | `groups`-da varmı |
+|---|---:|---|
+| 2583 · 2585 · 2588 | 197 | **yox** (orphan FK) |
+| 3502 | 0 | qrup təyin edilməyib |
+
+Yəni **7 799 mümkün maksimumdur**; 7 803 rəqəmi 100-ün hamısının qrupu olduğunu
+fərz edirdi.
+
+**Kabinet yoxlaması** (test client, `force_login`):
+```
+myedu.student.1039: SAR qrup=130 T ing proqram=MYEDU-20 il=1950 my-subjects=200 has_record=True
+myedu.student.1040: SAR qrup=130 T ing proqram=MYEDU-20 il=1950 my-subjects=200 has_record=True
+myedu.student.1042: SAR qrup=130 T ing proqram=MYEDU-20 il=1950 my-subjects=200 has_record=True
+```
+(`il=1950` sentineldir: bu üç tələbənin nə `entry_year`-i, nə qrupunun ili var —
+uydurulmur, işarələnir.)
+
+### R-5 · 158 otaq hədəfə heç düşməmişdi
+
+**Simptom.** `exams.ExamRoom` = 0, ona görə jurnalın dərs modalındakı
+KORPUS→OTAQ seçimi bütün tenant üzrə boş idi.
+
+**Kök səbəb faza qüsuru DEYİL.** `legacy_rooms` (J10, order 13) fazası tam və
+testlidir — sadəcə klondakı run-ın faza siyahısında yox idi.
+
+**Düzəliş.** `services/repair_rooms.py` + `legacy_repair_rooms --from-source`.
+**Heç bir yeni xəritələmə yazılmadı**: fazanın öz saf funksiyaları
+(`LegacyRoomDecision`, `room_code`, `room_capacity`, `materialise_rooms`) olduğu
+kimi işlədilir, ona görə təmirin nəticəsi növbəti tam repetisiya ilə eynidir.
+
+* `code = "myedu-room-<legacy id>"` — `(organization, code)` unikaldır, yəni
+  idempotentlik natural açarladır (otaq adı unikal deyil: 158-dən 25-i təkrar);
+* `building` = `rooms.bina` tam ədədinin onluq mətni ("1"/"2"/"3"/"5");
+* `capacity` = `max_student_count` rəqəmdirsə, deyilsə 0;
+* `floor` — mənbədə belə sütun **yoxdur** → boş qalır (uydurulmur);
+* `room_types` (Auditoriya / laboratoriya / emalatxana) hədəfdə qarşılığı
+  olmayan ölçüdür → yazılmır.
+
+```
+=== DRY-RUN ===        === APPLY ===        === təkrar DRY-RUN ===
+  mənbə otağı     158    158                  158
+  yaradılacaq     158    158                  0
+  onsuz da var    0      0                    158
+  FAKTİKİ yaradılan 0    158                  0
+  hədəf otaq      0 → 0  0 → 158              158 → 158
+  korpus sayı     0      4                    4
+```
+
+| Ölçü | Əvvəl | Sonra |
+|---|---:|---:|
+| `exams.ExamRoom` | **0** | **158** (hamısı aktiv) |
+| fərqli korpus | 0 | **4** (`1`, `2`, `3`, `5`) |
+| `capacity = 0` olan otaq | — | **0** (158 sətrin hamısında tutum oxundu) |
+
+**Dərs modalı kaskadı yoxlandı** (`registrar.lesson_rooms`):
+```
+lesson_room_choices: 158 otaq, korpuslar=['1', '2', '3', '5']
+  nümunə: {'id': '34', 'name': '102 (myedu-room-149)', 'building': '1', 'capacity': 76}
+  resolve_lesson_room → 102 (myedu-room-149) korpus=1
+```
+
+Mövcud sətrin adı/korpusu **üstündən yazılmır** — imtahan mərkəzi otağı sonradan
+adlandıra bilər (test: `test_rooms_never_overwrite_a_renamed_room`).
+
+---
+
 ## 5. Test əhatəsi
 
 `DATABASE_URL="postgres://emsarena_agent:…@127.0.0.1:55432/ems_mig_<random>" pytest … --ds=config.settings.test`
@@ -325,6 +433,7 @@ export LEGACY_MARIADB_SOURCE_DATABASE=myedudb
 | `apps/legacy_import/tests/test_rehearsal_sar_phase.py` | ilsiz sətir AKTİV tələbə qalır (`…_stays_an_active_student`) · `azadedildi=1` yenə arxivlənir (`…_is_still_archived`) · bərpa olunmuş sətir `registrar_guard_active_member` qapısından keçir VƏ girişi açıqdır · ladder/digest/idempotentlik dəstləri yeniləndi |
 | `apps/legacy_import/tests/test_rehearsal_identity_phase.py` | severity taksonomiyası yeni kodu əhatə edir |
 | `apps/legacy_import/tests/test_rehearsal_contracts.py` | `transform_version` ailəsi `rehearsal-identity-v2` |
+| `test_repair_commands.py` (R-5/R-9 blokları) | otaq xəritələməsinin faza ilə eyniliyi · idempotentlik · **adı dəyişdirilmiş otağın qorunması** · rəqəm olmayan tutumun 0-a düşməsi · markersiz `--apply` rəddi · SAR il pilləkəni (entry_year → qrup → sentinel) · SAR idempotentliyi · **orphan qrupda SAR UYDURULMUR** · kurikulum exact→substituted→created |
 
 ---
 
@@ -342,10 +451,13 @@ apps/legacy_import/services/repair_archive.py                 YENİ
 apps/legacy_import/services/repair_accounts.py                YENİ
 apps/legacy_import/services/repair_periods.py                 YENİ
 apps/legacy_import/services/repair_demographics.py            YENİ
+apps/legacy_import/services/repair_sar.py                     YENİ (R-9)
+apps/legacy_import/services/repair_rooms.py                   YENİ (R-5)
 apps/legacy_import/management/commands/legacy_repair_archive_status.py     YENİ
 apps/legacy_import/management/commands/legacy_repair_missing_accounts.py   YENİ
 apps/legacy_import/management/commands/legacy_repair_current_period.py     YENİ
 apps/legacy_import/management/commands/legacy_repair_demographics.py       YENİ
+apps/legacy_import/management/commands/legacy_repair_rooms.py              YENİ (R-5)
 apps/accounts/migrations/0018_account_restore_evidence.py     YENİ (SQL-only)
 apps/accounts/services/identity_archive.py                    (restore_archived_account)
 apps/accounts/services/__init__.py · apps/accounts/public.py  (ixrac)

@@ -37,6 +37,7 @@ Nə YARADILMIR (açıq şəkildə qalıq iş)
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 
 from django.apps import apps as django_apps
@@ -47,6 +48,7 @@ from apps.legacy_import.models import LegacyEntityMap, LegacyMigrationIssue
 from .field_contracts import JOURNAL_FIELDS, STUDENT_IDENTITY_FIELDS, WORKER_IDENTITY_FIELDS
 from .legacy_text import clean_text
 from .rehearsal_identity_placeholder import placeholder_email
+from .rehearsal_placement_phase import _legacy_fin
 from .rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from .repair_archive import evidence_digest
 from .source_extraction import open_audited_identity_stream, open_audited_source_stream
@@ -71,6 +73,8 @@ class MissingAccount:
     ledger_state: str
     rule_codes: tuple[str, ...]
     action: str
+    #: R-9: SAR mərhələsi üçün lazım olan proyeksiya sətri (qrup/il/FİN).
+    projected_row: object = None
 
     def as_row(self):
         return (
@@ -129,6 +133,7 @@ def plan_missing(organization, *, connection_factory, limit: int = 0) -> list[Mi
                 exists = user_model._default_manager.filter(username=username).exists()
                 plan.append(
                     MissingAccount(
+                        projected_row=row,
                         entity_type=entity_type,
                         legacy_pk=int(legacy_pk),
                         username=username,
@@ -142,6 +147,55 @@ def plan_missing(organization, *, connection_factory, limit: int = 0) -> list[Mi
                 )
     plan.sort(key=lambda item: (item.entity_type, item.legacy_pk))
     return plan[:limit] if limit else plan
+
+
+def resolve_student_user_pks(organization, items, *, known=None) -> dict[int, int]:
+    """``legacy_pk`` → ``auth_user`` pk (bu icrada yaradılanlar + mövcudlar).
+
+    R-9: təmir ikinci dəfə işləyəndə hesablar ARTIQ var, ona görə istifadəçi
+    açarı username konvensiyasından (``myedu.student.<id>``) həll olunur —
+    yalnız BU tenant-ın profili olan sətirlər qəbul edilir.
+    """
+
+    resolved = dict(known or {})
+    wanted = {item.username: item.legacy_pk for item in items if item.legacy_pk not in resolved}
+    if not wanted:
+        return resolved
+    profile_model = django_apps.get_model("accounts", "UserProfile")
+    rows = (
+        django_apps.get_model("auth", "User")
+        ._default_manager.filter(username__in=sorted(wanted))
+        .values_list("username", "pk")
+    )
+    candidates = {str(username): int(pk) for username, pk in rows}
+    tenant_users = set(
+        profile_model.objects.filter(organization=organization, user_id__in=sorted(candidates.values())).values_list(
+            "user_id", flat=True
+        )
+    )
+    for username, legacy_pk in wanted.items():
+        user_pk = candidates.get(username)
+        if user_pk is not None and user_pk in tenant_users:
+            resolved[legacy_pk] = user_pk
+    return resolved
+
+
+def student_fin_occurrences(connection_factory) -> Counter:
+    """R-9: BÜTÜN kohortun FİN histoqramı — dublikat FİN yazılmasın deyə.
+
+    ``rehearsal_placement_phase._apply_fin`` məhz bu histoqramı gözləyir; qayda
+    iki yerdə təkrarlanmır, sadəcə eyni funksiyaya lazım olan giriş qurulur.
+    """
+
+    counts: Counter = Counter()
+    with open_audited_identity_stream(
+        connection_factory=connection_factory, contract=STUDENT_IDENTITY_FIELDS
+    ) as stream:
+        for row in stream:
+            fin = _legacy_fin(row["fincode"])
+            if fin:
+                counts[fin] += 1
+    return counts
 
 
 def role_for(organization, entity_type: str):

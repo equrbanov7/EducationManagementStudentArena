@@ -16,7 +16,14 @@ import pytest
 from apps.accounts.models import UserProfile
 from apps.accounts.public import archive_staged_account, stage_imported_account
 from apps.legacy_import.models import LegacyEntityMap, LegacyMigrationRun
-from apps.legacy_import.services import repair_archive, repair_demographics, repair_periods, repair_support
+from apps.legacy_import.services import (
+    repair_archive,
+    repair_demographics,
+    repair_periods,
+    repair_rooms,
+    repair_sar,
+    repair_support,
+)
 from apps.legacy_import.services.ledger import TargetValidation, create_run, start_run, upsert_entity_map, upsert_issue
 from apps.legacy_import.services.rehearsal_authorizer import USER_MODEL_LABEL
 from apps.legacy_import.services.rehearsal_contracts import SOURCE_SYSTEM
@@ -464,3 +471,180 @@ def test_the_repair_support_table_renderer_is_deterministic():
 
     assert rendered.splitlines()[0].startswith("a  ")
     assert rendered.splitlines()[2].startswith("1  ")
+
+
+# ---------------------------------------------------------------------------
+# R-5 — legacy otaq reyestri
+# ---------------------------------------------------------------------------
+
+
+class _FakeRoomStream:
+    """``open_audited_identity_stream`` kontekstinin minimal əvəzi."""
+
+    def __init__(self, rows):
+        self._rows = rows
+
+    def __enter__(self):
+        return iter(self._rows)
+
+    def __exit__(self, *_exc):
+        return False
+
+
+def _room_rows(monkeypatch, rows):
+    from apps.legacy_import.services import repair_rooms as module
+
+    monkeypatch.setattr(module, "open_audited_identity_stream", lambda **_kw: _FakeRoomStream(rows))
+
+
+def _room(legacy_pk, name, bina, capacity):
+    return {"id": legacy_pk, "name": name, "bina": bina, "max_student_count": capacity}
+
+
+@pytest.mark.django_db
+def test_rooms_plan_maps_the_phase_shape(organization, monkeypatch):
+    _room_rows(monkeypatch, [_room(4, "03/2", 3, "28"), _room(5, "04", 1, "16")])
+
+    plan = repair_rooms.plan_rooms(organization, connection_factory=object())
+
+    assert [item.code for item in plan] == ["myedu-room-4", "myedu-room-5"]
+    assert [item.building for item in plan] == ["3", "1"]
+    assert [item.capacity for item in plan] == [28, 16]
+    assert {item.action for item in plan} == {"create"}
+
+
+@pytest.mark.django_db
+def test_rooms_materialise_is_idempotent(organization, monkeypatch):
+    from apps.exams.models import ExamRoom
+
+    _room_rows(monkeypatch, [_room(4, "03/2", 3, "28"), _room(5, "04", 1, "16")])
+
+    assert repair_rooms.materialise(organization, connection_factory=object()) == 2
+    assert repair_rooms.materialise(organization, connection_factory=object()) == 0
+    assert ExamRoom.objects.filter(organization=organization).count() == 2
+    assert repair_rooms.coverage(organization) == {"otaq": 2, "aktiv otaq": 2, "korpus": 2}
+
+
+@pytest.mark.django_db
+def test_rooms_never_overwrite_a_renamed_room(organization, monkeypatch):
+    """İmport insan işinin üstünə yazmır: sonradan adlandırılmış otaq qorunur."""
+
+    from apps.exams.models import ExamRoom
+
+    _room_rows(monkeypatch, [_room(4, "03/2", 3, "28")])
+    repair_rooms.materialise(organization, connection_factory=object())
+    ExamRoom.objects.filter(organization=organization, code="myedu-room-4").update(name="İmtahan zalı A")
+
+    repair_rooms.materialise(organization, connection_factory=object())
+
+    assert ExamRoom.objects.get(organization=organization, code="myedu-room-4").name == "İmtahan zalı A"
+
+
+@pytest.mark.django_db
+def test_a_non_numeric_capacity_degrades_to_zero(organization, monkeypatch):
+    _room_rows(monkeypatch, [_room(9, "28", 3, "x")])
+
+    plan = repair_rooms.plan_rooms(organization, connection_factory=object())
+
+    assert plan[0].capacity == 0
+    assert "legacy_room_capacity_invalid" in plan[0].rule_codes
+
+
+@pytest.mark.django_db
+def test_the_rooms_command_refuses_apply_without_the_marker(organization):
+    with pytest.raises(CommandError):
+        call_command("legacy_repair_rooms", "--organization", _SLUG, "--from-source", "--apply")
+
+
+# ---------------------------------------------------------------------------
+# R-9 — təmirlə yaradılmış tələbələr üçün SAR
+# ---------------------------------------------------------------------------
+
+
+def _student_row(legacy_pk, *, group_id, entry_year="2022"):
+    return {"id": legacy_pk, "group_id": group_id, "entry_year": entry_year, "fincode": None}
+
+
+@pytest.fixture()
+def academic_tree(organization):
+    from apps.organizations.models import OrgUnit
+    from apps.registrar.models import Curriculum, Program
+    from core.constants import OrgUnitType
+
+    faculty = OrgUnit.objects.create(organization=organization, name="Fakültə", slug="f", unit_type=OrgUnitType.FACULTY)
+    specialty = OrgUnit.objects.create(
+        organization=organization, name="İxtisas", slug="sp", unit_type=OrgUnitType.SPECIALTY, parent=faculty
+    )
+    group = OrgUnit.objects.create(
+        organization=organization,
+        name="130 T",
+        slug="130-t",
+        unit_type=OrgUnitType.GROUP,
+        parent=specialty,
+        settings={"legacy": {"id": 42}, "degree_level": "bachelor", "admission_year": 2021},
+    )
+    program = Program.objects.create(
+        organization=organization, name="P", code="MYEDU-1", specialty_unit=specialty, degree_level="bachelor"
+    )
+    curriculum = Curriculum.objects.create(organization=organization, program=program, admission_year=2022)
+    return group, program, curriculum
+
+
+@pytest.mark.django_db
+def test_the_sar_repair_uses_entry_year_then_group_then_sentinel(organization, academic_tree):
+    group, _program, _curriculum = academic_tree
+    groups = repair_sar.group_index(organization)
+
+    assert repair_sar.resolve_admission_year("2022", groups["42"]) == 2022
+    assert repair_sar.resolve_admission_year("", groups["42"]) == 2021  # qrupun ili
+    assert repair_sar.resolve_admission_year("", None) == 1950  # sentinel — «bilinmir»
+    assert group.slug == "130-t"
+
+
+@pytest.mark.django_db
+def test_the_sar_repair_creates_a_record_and_is_idempotent(organization, actor, academic_tree):
+    from apps.registrar.models import StudentAcademicRecord
+
+    _group, program, curriculum = academic_tree
+    user = _archived_student(organization, actor, 5001)
+    rows = [(5001, user.pk, user.username, _student_row(5001, group_id=42))]
+
+    created, sources = repair_sar.materialise(organization, rows)
+    again, sources_again = repair_sar.materialise(organization, rows)
+
+    assert (created, again) == (1, 0)
+    assert sources["curriculum_exact"] == 1 and sources_again["already_present"] == 1
+    record = StudentAcademicRecord.objects.get(organization=organization, student=user)
+    assert record.program_id == program.pk and record.curriculum_id == curriculum.pk
+    assert record.admission_year == 2022 and record.is_active is True
+
+
+@pytest.mark.django_db
+def test_an_unresolvable_group_never_invents_a_record(organization, actor, academic_tree):
+    """Mənbədə orphan ``group_id`` — SAR mümkün deyil, sətir toxunulmadan qalır."""
+
+    from apps.registrar.models import StudentAcademicRecord
+
+    user = _archived_student(organization, actor, 5002)
+    rows = [(5002, user.pk, user.username, _student_row(5002, group_id=197))]
+
+    created, sources = repair_sar.materialise(organization, rows)
+
+    assert created == 0 and sources["skip_group_unresolved"] == 1
+    assert not StudentAcademicRecord.objects.filter(student=user).exists()
+
+
+@pytest.mark.django_db
+def test_a_missing_curriculum_year_falls_back_then_creates(organization, academic_tree):
+    _group, program, curriculum = academic_tree
+    curricula = repair_sar.curriculum_index(organization)
+
+    same, source = repair_sar.resolve_curriculum(
+        organization, program_pk=program.pk, admission_year=2022, curricula=curricula
+    )
+    near, near_source = repair_sar.resolve_curriculum(
+        organization, program_pk=program.pk, admission_year=2019, curricula=curricula
+    )
+
+    assert (same, source) == (curriculum.pk, "exact")
+    assert (near, near_source) == (curriculum.pk, "substituted")
