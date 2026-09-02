@@ -494,6 +494,9 @@ def test_issue_severity_map_covers_every_account_cutover_rule():
         "legacy_rehearsal_stage_cap_reached": "warning",
         "legacy_rehearsal_staging_refused": "error",
         "legacy_rehearsal_attestation": "info",
+        # P0-2 (2026-09-02): e-poçt qüsuru sətri artıq hesabsız qoymur — yer-tutucu
+        # yazılır, toqquşma faktı isə bu xəbərdarlıqla ledger-də qalır.
+        "legacy_account_email_placeholder_synthesised": "warning",
     }
 
     assert dict(ISSUE_SEVERITY) == expected

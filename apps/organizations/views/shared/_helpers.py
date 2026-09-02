@@ -37,6 +37,34 @@ def _can_manage_organization(user, organization):
     return can_user_manage_org(user, organization)
 
 
+def _can_view_role_matrix(user, organization) -> bool:
+    """Rol kataloqunu / icazə matrisini kim OXUYA bilər.
+
+    2026-09-02 audit, P2-2: səhifə ``_can_manage_organization``-a bağlı idi, o
+    da ``level >= 80`` üçün implicit ``org_admin`` alias-ını qəbul edir — yəni
+    BİR FAKÜLTƏYƏ scope-lanmış DEKAN bütün təşkilatın rol kataloqunu və icazə
+    matrisini görürdü (oxu-səviyyəli açıqlama; POST onsuz da heç nə dəyişmirdi).
+
+    İndi tələb konkret açardır: ``role.view`` (HR, rektor/owner wildcard ilə).
+    Superadmin və təşkilat sahibi istisnadır.
+    """
+    from core.permissions import has_permission
+
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    if getattr(organization, "owner_id", None) == getattr(user, "id", None):
+        return True
+
+    permissions: set[str] = set()
+    for membership in user.memberships.filter(
+        organization=organization,
+        is_active=True,
+        role__is_active=True,
+    ).select_related("role"):
+        permissions.update(membership.role.permissions or [])
+    return has_permission(list(permissions), "role.view")
+
+
 def _has_org_permission(request, permission):
     from ...permissions import has_permission
 

@@ -27,6 +27,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.services import people
 from apps.accounts.services.rim.policy import RimAccessError
+from core.logging_utils import safe_log_value
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ def people_action(request):
     except RimAccessError as exc:
         return _error(exc)
     except Exception:  # noqa: BLE001 — daxili xəta istifadəçiyə sızmamalıdır
-        logger.exception("people action failed: %s", action)
+        logger.exception("people action failed: %s", safe_log_value(action))
         return JsonResponse(
             {"ok": False, "error": "action_failed", "message": "Əməliyyat tamamlana bilmədi."},
             status=500,

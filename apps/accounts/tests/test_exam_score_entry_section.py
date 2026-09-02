@@ -152,6 +152,22 @@ class ExamScoreEntrySectionTest(TestCase):
     def test_student_gets_403(self):
         self.assertEqual(self._client(self.student).get(reverse(SECTION_URL_NAME)).status_code, 403)
 
+    # ── açıq-yönləndirmə (CodeQL py/url-redirection) ─────────────────────
+    def test_external_next_is_ignored(self):
+        """`next` xarici hosta göstərirsə bölmə URL-inə qayıdılır."""
+        resp = self._post(self._client(self.center), next="//evil.example.com/steal")
+        self.assertEqual(resp.status_code, 302)
+        self.assertNotIn("evil.example.com", resp["Location"])
+        self.assertIn("section=exam-score-entry", resp["Location"])
+
+    def test_internal_next_is_kept(self):
+        resp = self._post(
+            self._client(self.center),
+            next="/accounts/profile/?section=exam-score-entry&ese_offering=1",
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("ese_offering=1", resp["Location"])
+
     # ── qrup seçimi tələbə siyahısını gətirir ────────────────────────────
     def test_roster_lists_group_students(self):
         resp = self._client(self.center).get(

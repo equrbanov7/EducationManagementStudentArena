@@ -293,6 +293,81 @@ class _Stage2Mixin:
             "max_reason_length": 1000,
             "max_bulk_rows": 100,
         }
+        # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel çərçivəsi.
+        self.schedule_manage_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "scope_label": "",
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "groups": [],
+            "group": None,
+            "view_mode": "group",
+            "teachers": [],
+            "teacher": None,
+            "offerings": [],
+            "slots": [],
+            "rooms": [],
+            "weekdays": (),
+            "standard_times": (),
+            "week_types": (),
+            "slot_kinds": (),
+            "owner_label": "",
+            "week": None,
+            "time_grid": None,
+            "check_url": "",
+            "action_url": "",
+            "reload_url": "",
+            "week_nav_prefix": "",
+        }
+        # «Ana səhifə» (FAZA 22) — kabinetin default bölməsi.  Vidjetlər YALNIZ
+        # aktiv bölmə `dashboard` olanda yığılır (lazy), yəni digər bölmələri
+        # açanda bir dənə də əlavə sorğu getmir.
+        self.dashboard_section = {
+            "has_access": False,
+            "greeting": "",
+            "role_label": "",
+            "period_label": "",
+            "widgets": [],
+            "empty_text": "",
+        }
+        # Tələbə idxalı (`user.import`) — server yalnız ÇƏRÇİVƏNİ verir: icazə
+        # bayrağı, endpoint URL-ləri, sütun kataloqu və hədd rəqəmləri. Fayl
+        # heç vaxt serverdə saxlanılmır, ona görə burada sətir/nəticə YOXDUR.
+        self.student_intake_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "template_url": "",
+            "preview_url": "",
+            "apply_url": "",
+            "columns": (),
+            "max_rows": 0,
+            "max_upload_mb": 0,
+            "scope_label": "",
+        }
+        # «Müraciətlərim» (apps.applications) — panel SPA-dır: burada YALNIZ
+        # çərçivə (bayraqlar + endpoint URL-ləri + kontekst zolağının mətnləri)
+        # saxlanılır; sətirlər/detal/KPI-lar JSON API-dən gəlir.
+        self.applications_section = {
+            "has_access": False,
+            "family": "",
+            "can_create": False,
+            "is_handler": False,
+            "can_manage": False,
+            "endpoints": {},
+            "rules": {},
+            "who": "",
+            "scope": "",
+            "role_label": "",
+            "i18n": {},
+        }
+        # Dərs yükü (apps.workload) — SPA çərçivələri. Server yalnız icazə
+        # bayraqlarını, endpoint URL-lərini və kataloqları verir; sətirlər JSON-la
+        # gəlir, yəni profil kontekstində AĞIR SORĞU YOXDUR.
+        self.workload_distribution_section = {"has_access": False, "chairs": [], "task": None}
+        self.my_workload_section = {"has_access": False, "rows": [], "summary": {}, "years": []}
         # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
         # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
         # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində

@@ -16,6 +16,9 @@ Nə edir:
     python manage.py provision_student_credentials --org <slug> --password Tel2026!
     python manage.py provision_student_credentials --org <slug> --generate --csv /tmp/creds.csv
     python manage.py provision_student_credentials --org <slug> --password X --dry-run
+    # QRUP-QRUP çap (kurator siyahını qrupa paylayır):
+    python manage.py provision_student_credentials --org <slug> --group "634 Qrafik" \
+        --generate --csv /tmp/634-qrafik.csv
 
 Default qorunma: artıq setup-u tamamlamış (email təsdiqli, parolunu özü
 qoymuş) tələbələrə TOXUNMUR — onları da sıfırlamaq üçün ``--force`` verin.
@@ -51,6 +54,11 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         )
         parser.add_argument("--csv", dest="csv_path", help="username,parol siyahısını bu fayla yaz")
         parser.add_argument(
+            "--group",
+            dest="group",
+            help="Yalnız bu qrupun tələbələri (OrgUnit adı və ya kodu) — siyahını qrup-qrup çap etmək üçün",
+        )
+        parser.add_argument(
             "--force",
             action="store_true",
             help="Setup-u artıq tamamlamış tələbələri də sıfırla (email təsdiqi + parol yenidən tələb olunacaq)",
@@ -68,7 +76,10 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             self._provision(*args, **options)
 
     def _provision(self, *args, **options):
-        from apps.organizations.models import Membership, Organization
+        from django.db.models import Q
+
+        from apps.organizations.models import Membership, Organization, OrgUnit
+        from core.constants import OrgUnitType
 
         try:
             organization = Organization.objects.get(slug=options["org"])
@@ -89,6 +100,23 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             .values_list("user_id", flat=True)
             .distinct()
         )
+        # Qrup filtri — parol siyahısı praktikada QRUP-QRUP çap olunur (kurator
+        # öz qrupuna paylayır), ona görə hədəf dəsti akademik qeyddən daraldılır.
+        group_name = (options.get("group") or "").strip()
+        if group_name:
+            from apps.registrar.models import StudentAcademicRecord
+
+            group_unit = (
+                OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP)
+                .filter(Q(name__iexact=group_name) | Q(code__iexact=group_name))
+                .first()
+            )
+            if group_unit is None:
+                raise CommandError(f"Qrup tapılmadı: {group_name!r}")
+            in_group = StudentAcademicRecord.objects.filter(organization=organization, group=group_unit).values_list(
+                "student_id", flat=True
+            )
+            student_user_ids = set(student_user_ids) & set(in_group)
         users = (
             User.objects.filter(id__in=list(student_user_ids), is_active=True)
             .filter(is_superuser=False, is_staff=False)

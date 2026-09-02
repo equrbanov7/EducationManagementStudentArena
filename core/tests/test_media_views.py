@@ -8,7 +8,7 @@ import os
 import tempfile
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.test import Client, TestCase, override_settings
 
 User = get_user_model()
@@ -82,7 +82,7 @@ class ProtectedMediaViewTest(TestCase):
             DEBUG=False,
             MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path="projects/submissions/sample.txt")
 
     def test_private_file_accessible_to_superuser(self):
@@ -132,7 +132,7 @@ class ProtectedMediaViewTest(TestCase):
             DEBUG=False,
             MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path="projects/submissions/sample.txt")
 
     def test_labs_submission_redirects_unauthenticated(self):
@@ -544,7 +544,7 @@ class ProtectedMediaOwnershipTest(TestCase):
             DEBUG=False,
             MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path=self.file_path)
 
     def test_unauthenticated_user_redirected_to_login(self):
@@ -591,7 +591,7 @@ class ProtectedMediaOwnershipTest(TestCase):
             DEBUG=False,
             MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path=unknown_path)
 
 
@@ -735,7 +735,7 @@ class QuestionMediaAccessTest(TestCase):
             DEBUG=False,
             MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path=self.file_path)
 
     def test_superuser_can_access_question_media(self):
@@ -773,7 +773,7 @@ class QuestionMediaAccessTest(TestCase):
             DEBUG=False,
             MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path=bad_path)
 
 
@@ -1173,7 +1173,7 @@ class ImportAndBankMediaAccessTest(TestCase):
         request.user = self.creator
 
         with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path=path)
 
     def test_path_normalization_cannot_disguise_private_import_as_public(self):
@@ -1186,5 +1186,5 @@ class ImportAndBankMediaAccessTest(TestCase):
         request.user = self.creator
 
         with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
-            with self.assertRaises(PermissionDenied):
+            with self.assertRaises(Http404):  # icazəsiz → 404 (mövcudluq sızmasın)
                 protected_media(request, path=path)

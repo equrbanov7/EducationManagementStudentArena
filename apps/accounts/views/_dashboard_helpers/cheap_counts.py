@@ -286,6 +286,22 @@ def count_pending_answers(request, user) -> int:
     return exams + courses + labs + independent
 
 
+def count_applications_pending(request, user) -> int:
+    """«Müraciətlərim» badge-i — emalçıya gələn açıqlar / göndərənə məlumat sorğusu.
+
+    Məntiq ``apps.applications.public.pending_badge_count``-dadır (iki COUNT
+    sorğusu); burada yalnız aktiv təşkilat konteksti həll olunur. Modul
+    sərhədi: yalnız public fasad çağırılır.
+    """
+    from apps.accounts.views._helpers.tenant import _get_active_organization
+    from apps.applications.public import pending_badge_count
+
+    organization = _get_active_organization(request)
+    if organization is None:
+        return 0
+    return pending_badge_count(user, organization)
+
+
 def compute_review_badge_counts(*, my_exams_qs, teacher_courses) -> tuple[int, int]:
     """Reviewer sidebar badges: (pending_review, evaluated_review).
 
@@ -374,6 +390,8 @@ def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, te
     computed once per (user, org) and reused across loads / section swaps.
     """
     badges: dict[str, int] = {}
+    if "applications" in capabilities.get("allowed_sections", set()):
+        badges["applications_pending"] = count_applications_pending(request, user)
     if capabilities.get("can_view_student_assignments"):
         badges["assigned_tasks"] = count_assigned_tasks(request, user)
         badges["my_results"] = count_my_results(request, user)
@@ -390,6 +408,7 @@ def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, te
 
 __all__ = [
     "compute_profile_badge_counts",
+    "count_applications_pending",
     "compute_review_badge_counts",
     "count_assigned_tasks",
     "count_my_results",

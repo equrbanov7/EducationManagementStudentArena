@@ -1,0 +1,142 @@
+{% load static i18n %}
+{% comment %}«Tələbə idxalı» bölməsi — qəbul siyahısından toplu hesab yaratma.
+
+İcazə: `user.import` (RİM, HR, rektor `*`). Menyu görünürlüyü
+`rbac_sections.py`-dadır; faktiki əməl `services/intake/policy.py`-da
+fail-closed yenidən yoxlanılır.
+
+Axın: şablonu endir → doldur → yüklə → QURU İCRA (nə yaranacaq/nə ötürüləcək/
+xəta) → «Tətbiq et» → nəticə cədvəli + birdəfəlik parolların CSV-si.
+
+Server heç bir faylı və ya parolu saxlamır: «Tətbiq et» EYNİ faylı yenidən
+göndərir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) və `profile.html`-dən
+yüklənir; dinamik dəyərlər `data-*` atributları ilə ötürülür.
+{% endcomment %}
+{% if 'student-intake' in allowed_sections %}
+<section class="profile-section-panel profile-section--student-intake {% if active_section == 'student-intake' %}is-active{% endif %}"
+         data-profile-section-panel="student-intake"
+         data-source-url="{{ profile_base_url }}?section=student-intake">
+
+{% if not student_intake_section.has_access %}
+  <p class="six__denied" role="status">{{ student_intake_section.access_denied_message }}</p>
+{% else %}
+<div class="six"
+     data-six-root
+     data-template-url="{{ student_intake_section.template_url }}"
+     data-preview-url="{{ student_intake_section.preview_url }}"
+     data-apply-url="{{ student_intake_section.apply_url }}"
+     data-max-rows="{{ student_intake_section.max_rows }}">
+
+  <header class="six__head">
+    <div>
+      <h2 class="six__title">{% trans "Tələbə idxalı" context "student_intake" %}</h2>
+      <p class="six__intro">
+        {% trans "Qəbul siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır), sətir-sətir nəyin yaranacağını göstərir, siz təsdiq edəndən sonra hesab + üzvlük + akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib öz parolunu qoyur." context "student_intake" %}
+      </p>
+    </div>
+    <span class="six__scope" title="{% trans 'Hesablar bu təşkilatda yaranır' context 'student_intake' %}">
+      <i class="fas fa-university" aria-hidden="true"></i> {{ student_intake_section.scope_label }}
+    </span>
+  </header>
+
+  {# ── 1. Şablon ────────────────────────────────────────────────────────── #}
+  <div class="six-step">
+    <h3 class="six-subtitle"><span class="six-step__no">1</span>{% trans "Şablonu endirin" context "student_intake" %}</h3>
+    <p class="six-hint">
+      {% blocktrans context "student_intake" with limit=student_intake_section.max_rows size=student_intake_section.max_upload_mb %}Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox {{ limit }} sətir, ölçü limiti {{ size }} MB.{% endblocktrans %}
+    </p>
+    <a class="btn btn-outline-primary six-btn" href="{{ student_intake_section.template_url }}" download>
+      <i class="fas fa-file-arrow-down" aria-hidden="true"></i>
+      {% trans "Boş şablonu endir" context "student_intake" %}
+    </a>
+    <details class="six-columns">
+      <summary>{% trans "Sütunlar" context "student_intake" %}</summary>
+      <div class="six-table__wrap">
+        <table class="six-table">
+          <thead>
+            <tr>
+              <th>{% trans "Sütun" context "student_intake" %}</th>
+              <th>{% trans "İzah" context "student_intake" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for column in student_intake_section.columns %}
+            <tr>
+              <td>{{ column.header }}{% if column.required %} <span class="six-req">*</span>{% endif %}</td>
+              <td class="six-muted">{{ column.hint }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  {# ── 2. Yükləmə + quru icra ───────────────────────────────────────────── #}
+  <div class="six-step">
+    <h3 class="six-subtitle"><span class="six-step__no">2</span>{% trans "Faylı yükləyin" context "student_intake" %}</h3>
+    <form class="six-upload" data-six-form novalidate>
+      <label class="six-file">
+        <input type="file" name="file" accept=".xlsx,.xlsm,.csv" data-six-file>
+        <span class="six-file__label" data-six-file-label>{% trans "Fayl seçilməyib" context "student_intake" %}</span>
+      </label>
+      <button type="button" class="btn btn-primary six-btn" data-six-preview>
+        <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i>
+        {% trans "Yoxla (quru icra)" context "student_intake" %}
+      </button>
+    </form>
+    <p class="six-error" role="alert" data-six-error hidden></p>
+  </div>
+
+  {# ── 3. Nəticə ────────────────────────────────────────────────────────── #}
+  <div class="six-step six-result" data-six-result hidden>
+    <h3 class="six-subtitle"><span class="six-step__no">3</span><span data-six-result-title></span></h3>
+    <div class="six-counts" data-six-counts></div>
+    <div class="six-table__wrap">
+      <table class="six-table six-table--rows">
+        <thead>
+          <tr>
+            <th>{% trans "Sətir" context "student_intake" %}</th>
+            <th>{% trans "Vəziyyət" context "student_intake" %}</th>
+            <th>{% trans "FİN" context "student_intake" %}</th>
+            <th>{% trans "Ad Soyad" context "student_intake" %}</th>
+            <th>{% trans "Qrup" context "student_intake" %}</th>
+            <th>{% trans "İstifadəçi adı" context "student_intake" %}</th>
+            <th>{% trans "İzah" context "student_intake" %}</th>
+          </tr>
+        </thead>
+        <tbody data-six-rows></tbody>
+      </table>
+    </div>
+    <div class="six-actions">
+      <button type="button" class="btn btn-success six-btn" data-six-apply hidden>
+        <i class="fas fa-user-plus" aria-hidden="true"></i>
+        {% trans "Tətbiq et" context "student_intake" %}
+      </button>
+      <button type="button" class="btn btn-outline-secondary six-btn" data-six-download hidden>
+        <i class="fas fa-key" aria-hidden="true"></i>
+        {% trans "Parolları CSV kimi endir" context "student_intake" %}
+      </button>
+    </div>
+    <p class="six-note" data-six-note hidden>
+      {% trans "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq." context "student_intake" %}
+    </p>
+  </div>
+
+  {# ── JS üçün mətnlər (inline JS yoxdur — data-atributlar) ─────────────── #}
+  <span data-six-i18n hidden
+        data-t-nofile="{% trans 'Əvvəlcə fayl seçin.' context 'student_intake' %}"
+        data-t-failed="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'student_intake' %}"
+        data-t-preview="{% trans 'Quru icra nəticəsi (heç nə yazılmadı)' context 'student_intake' %}"
+        data-t-applied="{% trans 'Tətbiq nəticəsi' context 'student_intake' %}"
+        data-t-confirm="{% trans 'Seçilmiş sətirlər üçün hesab yaradılacaq. Davam edilsin?' context 'student_intake' %}"
+        data-t-create="{% trans 'Yaradılacaq' context 'student_intake' %}"
+        data-t-created="{% trans 'Yaradıldı' context 'student_intake' %}"
+        data-t-skip="{% trans 'Ötürüldü' context 'student_intake' %}"
+        data-t-error="{% trans 'Xəta' context 'student_intake' %}"
+        data-t-total="{% trans 'Cəmi' context 'student_intake' %}"
+        data-t-busy="{% trans 'Emal olunur…' context 'student_intake' %}"></span>
+</div>
+{% endif %}
+</section>
+{% endif %}

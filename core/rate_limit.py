@@ -5,6 +5,7 @@ Cache-backed rate limiting helpers.
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 import time
 from dataclasses import dataclass
@@ -26,6 +27,8 @@ _WINDOW_MULTIPLIERS = {
 }
 _RATE_LIMIT_FALLBACK_CACHE = LocMemCache("rate-limit-fallback", {})
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True)
 class ParsedRate:
@@ -46,6 +49,32 @@ def parse_rate(rate: str | None) -> ParsedRate | None:
     window_value = int(match.group("window") or 1)
     window_seconds = window_value * _WINDOW_MULTIPLIERS[unit]
     return ParsedRate(limit=limit, window_seconds=window_seconds)
+
+
+def validate_rate_limit_settings(namespace: dict) -> None:
+    """Bütün ``*_RATE_LIMIT`` dəyərlərini parse edir; yararsız varsa ÇÖKÜR.
+
+    2026-09-02 audit, P2-5: səhv yazılmış env dəyəri (məs. ``5/10min``) həmin
+    limiteri — LOGIN və OTP daxil — sükutla söndürə bilirdi.  Bu funksiya
+    ayarlar YÜKLƏNƏRKƏN çağırılır (``config/settings/components/admin_ratelimit.py``),
+    ona görə səhv konfiqurasiya deploy-a keçmir.
+
+    BOŞ dəyər (``""``) QƏSDƏN söndürmə sayılır və buraxılır.
+    """
+    from django.core.exceptions import ImproperlyConfigured
+
+    problems = []
+    for name, value in sorted(namespace.items()):
+        if not name.endswith("_RATE_LIMIT") or not isinstance(value, str):
+            continue
+        try:
+            parse_rate(value)
+        except ValueError:
+            problems.append(f"{name}={value!r}")
+    if problems:
+        raise ImproperlyConfigured(
+            "Yararsız rate-limit konfiqurasiyası (düzgün format: '5/10m', '3/10s', '100/1h'): " + ", ".join(problems)
+        )
 
 
 def normalize_rate_identity(value) -> str:
@@ -76,11 +105,33 @@ def _retry_after(cache, expires_key: str, fallback_window: int) -> int:
     return max(1, int(expires_at - time.time()))
 
 
+def _parse_or_fail_closed(scope: str, rate: str | None):
+    """Parse edilə bilməyən limit SÜKUTLA söndürmür — LOG + FAIL-CLOSED.
+
+    Konfiqurasiyadan gələn dəyərlər onsuz da proses başlarkən yoxlanılır
+    (``config/settings/components/admin_ratelimit.py``), ona görə buraya yalnız
+    kodda sərt yazılmış səhv dəyər düşə bilər: onda limit AÇIQ qalmaqdansa
+    bağlanır (2026-09-02 audit, P2-5).
+    """
+    try:
+        return parse_rate(rate), False
+    except ValueError:
+        # ⚠️ `rate` DƏYƏRİ LOGLANMIR: bu spesifikasiya parol-sıfırlama kimi
+        # həssas adlı konfiqlərdən gəlir (`RIM_PASSWORD_RESET_RATE_LIMIT`) və
+        # log-a düşməsi CodeQL `py/clear-text-logging-sensitive-data` ilə
+        # işarələnir. Diaqnostika üçün SCOPE adı kifayətdir — konfiqin özü
+        # `settings`-dədir.
+        logger.error("Invalid rate-limit spec for scope %r — failing closed.", scope)
+        return None, True
+
+
 def is_rate_limited(scope: str, rate: str | None, *key_parts: object) -> tuple[bool, int | None]:
     if not getattr(settings, "RATELIMIT_ENABLE", True):
         return False, None
 
-    parsed = parse_rate(rate)
+    parsed, failed_closed = _parse_or_fail_closed(scope, rate)
+    if failed_closed:
+        return True, 60
     if parsed is None:
         return False, None
 
@@ -95,7 +146,9 @@ def record_rate_limit_hit(scope: str, rate: str | None, *key_parts: object) -> t
     if not getattr(settings, "RATELIMIT_ENABLE", True):
         return False, None
 
-    parsed = parse_rate(rate)
+    parsed, failed_closed = _parse_or_fail_closed(scope, rate)
+    if failed_closed:
+        return True, 60
     if parsed is None:
         return False, None
 

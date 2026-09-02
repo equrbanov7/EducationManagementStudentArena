@@ -10,6 +10,12 @@ Hər sətir üçün:
     ``email_verified=False``) → istifadəçi ilk girişdə email + OTP + yeni parol tələb edir;
   * Membership yaradılır (org rolu + ``scope_unit`` = "vahid" OrgUnit-i).
 
+⚠️ Bu komanda PROD-da QƏSDƏN BAĞLIDIR (``core/management/command_safety.py``) və
+bağlı qalır. Universitetin gündəlik TƏLƏBƏ idxalı üçün nəzarətli səth profil
+kabinetindəki «Tələbə idxalı» bölməsidir (`user.import` icazəsi, hər sətir audit
+olunur) — bax ``apps/accounts/services/intake/``. Parol siyasəti həmin paketlə
+paylaşılır (``generate_initial_password``).
+
 Mövcud username-lər ÖTÜRÜLÜR (üzərinə yazılmır). ``--dry-run`` heç nə yazmır.
 Yaradılan parolları paylamaq üçün ``--csv`` ilə fayla yazın.
 
@@ -23,14 +29,12 @@ import csv
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.utils.crypto import get_random_string
 
+from apps.accounts.services.intake import generate_initial_password
 from core.management.command_safety import ProductionCommandSafetyMixin
 from core.roles import ProfileRole
 
 User = get_user_model()
-
-_PASSWORD_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
 # Membership rol adı → denormalizasiya olunmuş Profile.role (has_role üçün).
 # Tanınmayan rollar üçün MEMBER (Membership əsas mənbədir).
@@ -143,7 +147,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         rows_out = []
         with transaction.atomic():
             for rec in created:
-                password = rec["ilkin_parol"] or get_random_string(10, _PASSWORD_ALPHABET)
+                password = rec["ilkin_parol"] or generate_initial_password()
                 first, _, last = rec["ad_soyad"].partition(" ")
                 user = User.objects.create_user(username=rec["username"], password=password)
                 if first:

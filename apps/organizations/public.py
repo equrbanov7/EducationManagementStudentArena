@@ -32,6 +32,14 @@ from apps.organizations.structure_views import (  # noqa: F401
     build_organization_faculties_context,
     build_organization_kafedras_context,
 )
+from apps.organizations.unit_heads import (  # noqa: F401
+    ancestor_paths,
+    chair_head_memberships_for_unit,
+    coordinator_memberships_for_student,
+    dean_memberships_for_unit,
+    members_covering_unit,
+    resolve_ancestor,
+)
 from apps.organizations.views import (  # noqa: F401
     build_organization_members_context,
     build_organization_roles_context,
@@ -41,12 +49,16 @@ from apps.organizations.views import (  # noqa: F401
 __all__ = [
     "PERMISSION_CATEGORIES",
     "PERMISSION_LABELS",
+    "ancestor_paths",
     "build_organization_faculties_context",
     "build_organization_kafedras_context",
     "build_organization_members_context",
     "build_organization_roles_context",
     "build_organization_structure_context",
+    "chair_head_memberships_for_unit",
+    "coordinator_memberships_for_student",
     "create_audit_log",
+    "dean_memberships_for_unit",
     "ensure_owner_membership",
     "get_active_memberships",
     "get_all_permissions",
@@ -56,8 +68,10 @@ __all__ = [
     "get_user_org_role_level",
     "is_grant_entry",
     "is_tenant_accessible_organization",
+    "members_covering_unit",
     "organization_role_user_queryset",
     "organization_user_queryset",
+    "resolve_ancestor",
     "scope_memberships_by_unit",
     "strip_grant_prefix",
     "user_has_org_role",

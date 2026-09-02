@@ -366,6 +366,69 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "schedule-manage" in self.allowed_sections and self.active_section == "schedule-manage":
+            from .._sections.schedule_manage import build_schedule_manage_section
+
+            build_schedule_manage_section(
+                self.request,
+                self.schedule_manage_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "workload-distribution" in self.allowed_sections and self.active_section == "workload-distribution":
+            from .._sections.workload import build_workload_distribution_section
+
+            build_workload_distribution_section(
+                self.request,
+                self.workload_distribution_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "my-workload" in self.allowed_sections and self.active_section == "my-workload":
+            from .._sections.workload import build_my_workload_section
+
+            build_my_workload_section(
+                self.request,
+                self.my_workload_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "dashboard" in self.allowed_sections and self.active_section == "dashboard":
+            from .._sections.dashboard import build_dashboard_section
+
+            build_dashboard_section(
+                self.request,
+                self.dashboard_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+                capabilities=self.capabilities,
+                applications_pending_count=self.applications_pending_count,
+                pending_appeals_count=self.pending_appeals_count,
+            )
+        if "student-intake" in self.allowed_sections and self.active_section == "student-intake":
+            from .._sections.student_intake import build_student_intake_section
+
+            build_student_intake_section(
+                self.request,
+                self.student_intake_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "applications" in self.allowed_sections and self.active_section == "applications":
+            from .._sections.applications import build_applications_section
+
+            build_applications_section(
+                self.request,
+                self.applications_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-score-entry" in self.allowed_sections and self.active_section == "exam-score-entry":
             from .._sections.exam_score_entry import build_exam_score_entry_section
 

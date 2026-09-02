@@ -39,6 +39,7 @@ from django.views.decorators.http import require_GET
 from apps.accounts.models import UserProfile
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
+from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _role_capabilities
@@ -52,6 +53,8 @@ logger = logging.getLogger(__name__)
 
 # Bütün mövcud profile section-ları → partial template adı.
 SECTION_PARTIALS: dict[str, str] = {
+    # «Ana səhifə» — kabinetin default bölməsi (FAZA 22).
+    "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
     "notifications": "accounts/profile/sections/_notifications.html",
     "publish-notification": "accounts/profile/sections/_publish_notification.html",
@@ -118,6 +121,16 @@ SECTION_PARTIALS: dict[str, str] = {
     "academic-calendar": "accounts/profile/sections/_academic_calendar.html",
     "my-journal": "accounts/profile/sections/_my_journal.html",
     "journal-close": "accounts/profile/sections/_journal_close.html",
+    # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel, mutasiyalar
+    # ayrıca JSON POST endpoint-inə gedir → AJAX swap təhlükəsizdir.
+    "schedule-manage": "accounts/profile/sections/_schedule_manage.html",
+    # «Tələbə idxalı» (`user.import`) — server yalnız çərçivəni verir; fayl
+    # yüklənməsi, quru icra və tətbiq ayrıca JSON endpoint-lərinə gedir →
+    # AJAX swap təhlükəsizdir.
+    "student-intake": "accounts/profile/sections/_student_intake.html",
+    # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
+    # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "applications": "accounts/profile/sections/_applications.html",
     "analytics": "accounts/profile/sections/_analytics.html",
     "academic-records": "accounts/profile/sections/_academic_records.html",
     # «Müəllimlər» / «Tələbələr» kataloqu (icazə: `people.*`, scope: unit)
@@ -131,12 +144,17 @@ SECTION_PARTIALS: dict[str, str] = {
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
+    "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
+    "my-workload": "accounts/profile/sections/_my_workload.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
 # bölmələri normal full-page naviqasiyada qalır.
 AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
     {
+        # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
+        "dashboard",
         "profile-info",
         "notifications",
         "posts",
@@ -175,6 +193,9 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # U12 — registrar kabinet bölmələri (read-mostly; formlar registrar
         # endpoint-lərinə POST edir və `next` ilə shell-ə qayıdır).
         "my-schedule",
+        "schedule-manage",
+        "student-intake",
+        "applications",
         "academic-calendar",
         "my-journal",
         "analytics",
@@ -191,6 +212,10 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
         # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
         "teaching-handover",
+        # Dərs yükü panelləri SPA-dır: server çərçivəni verir, sətirlər JSON
+        # GET-lə gəlir, bölgü/təsdiq isə ayrıca JSON POST-la gedir.
+        "workload-distribution",
+        "my-workload",
         # Dəqiqləşdirmə növbəsi də OXU-ONLY render olunur — server yalnız
         # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
         # POST endpoint-inə (multipart, sənədlə) gedir.
@@ -308,7 +333,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     try:
         html = render_to_string(SECTION_PARTIALS[section], context, request=request)
     except Exception:  # noqa: BLE001 — defensive
-        logger.exception("profile section fragment render failed: %s", section)
+        logger.exception("profile section fragment render failed: %s", safe_log_value(section))
         return JsonResponse({"ok": False, "error": "render_failed"}, status=500)
 
     return JsonResponse(
@@ -390,6 +415,10 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     if capabilities.get("can_review_submissions"):
         payload["pending_review_count"] = shared_badges.get("pending_review", 0)
         payload["evaluated_review_count"] = shared_badges.get("evaluated_review", 0)
+    # «Müraciətlərim» — sayğac paylaşılan (keşlənən) dəstdən gəlir; müraciət
+    # mutasiyaları keşi `applications.services.notify` içindən invalidasiya edir.
+    if "applications" in capabilities.get("allowed_sections", set()):
+        payload["applications_pending_count"] = shared_badges.get("applications_pending", 0)
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

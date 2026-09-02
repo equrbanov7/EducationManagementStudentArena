@@ -21,6 +21,16 @@ Activation is off by default: ``stage_and_activate`` (False) plus
 both are inside ``policy_digest`` — so a run that touched accounts can never
 share a ``transform_version`` with one that did not.
 
+A2-fix (2026-09-02, P0-1).  The archive branch is entered for ONE reason only:
+``students.azadedildi == 1``.  Until this fix a second branch archived every
+student whose admission year could not be resolved — 2,291 CURRENT students,
+because 248 legacy ``groups`` rows carry ``start_year='0000'`` — and an archived
+profile is login-blocked on every authentication surface.  "Admission year
+unknown" is not "graduated", so such a row is now activated as a normal student
+and carries ``FALLBACK_ADMISSION_YEAR`` plus
+``legacy_sar_active_no_admission_year``.  Already-migrated targets are repaired
+by ``manage.py legacy_repair_archive_status``.
+
 The chain is advanced with exactly ``(legacy_pk, state, derivation_hash, label)``
 per row in ascending ``legacy_pk``, where ``label`` is the SAR model label on a
 MIGRATED row and ``""`` otherwise.  That is byte for byte what
@@ -61,7 +71,7 @@ from .rehearsal_placement_phase import (
 )
 from .rehearsal_sar_archive import (
     ARCHIVE_EVIDENCE_SUBJECT,
-    ARCHIVE_FALLBACK_ADMISSION_YEAR,
+    FALLBACK_ADMISSION_YEAR,
     account_is_archived,
     materialise_archive,
     resolve_archive_role,
@@ -400,28 +410,34 @@ class SarMaterialisationPhase:
                 activated=activated,
                 issue_counts=issue_counts,
             )
-        if not year_text and context.policy.stage_and_activate:
-            # A2 (Rehearsal #11 tapıntısı): qəbul ili HEÇ bir mənbədən çıxmayan
-            # 2 340 tələbə burada `sar_deferred` olurdu — nə üzvlük, nə SAR, ona
-            # görə jurnalının 49 540 sətri `legacy_journal_student_inactive` ilə
-            # itirdi.  Belə sətir indi məzun sətri kimi ARXİVLƏNİR: giriş bağlı
-            # qalır, datası isə köçür.  «Nə üçün arxiv» sualının cavabı ayrıca
-            # INFO kodu ilə hesabatda görünür.
-            return self._decide_archive(
-                context,
-                request=request,
-                indexes=indexes,
-                role=archive_role,
-                activated=activated,
-                issue_counts=issue_counts,
-                extra_codes=("legacy_sar_archived_no_admission_year",),
+        year_codes: tuple[str, ...] = ()
+        if not year_text:
+            # A2-fix (2026-09-02 audit, P0-1).  ƏVVƏL bu rung sətri ARXİVƏ
+            # göndərirdi (`legacy_sar_archived_no_admission_year`) — 2 291 CARİ
+            # tələbə `access_state='archived'` + `alumni` alıb girişdən bağlandı,
+            # halbuki mənbədə `azadedildi=0`-dır və 2025/2026 yazılışları var.
+            # Kök səbəb qərar deyil, MƏNBƏ QÜSURU idi: qrupun `start_year='0000'`
+            # (248 qrup) → qəbul ili «tapılmır».  «Qəbul ili bilinmir» İLƏ
+            # «məzun oldu» EYNİ ŞEY DEYİL, ona görə arxiv qolunun yeganə şərti
+            # indi `azadedildi=1`-dir (yuxarıdakı rung).
+            #
+            # İl uydurulmur: model NULL qəbul etmədiyi üçün sətir yenə
+            # ``FALLBACK_ADMISSION_YEAR`` sentinelini daşıyır və
+            # `legacy_sar_admission_year_fallback` ilə açıq işarələnir — fərq
+            # yalnız hesabın AKTİV tələbə qalmasıdır.
+            if not context.policy.stage_and_activate:
+                # Açar bağlı: heç bir hesaba toxunulmur (əvvəlki davranış).
+                return self._seal(context, request, "skipped", ("legacy_sar_admission_year_missing",), issue_counts)
+            year_codes = (
+                "legacy_sar_admission_year_missing",
+                "legacy_sar_admission_year_fallback",
+                "legacy_sar_active_no_admission_year",
             )
-        if not year_text or not program_pk:
+            request = replace(request, admission_year=FALLBACK_ADMISSION_YEAR)
+        if not program_pk:
             # M5.  ``program_pk`` is unreachable-empty for a SKIPPED placement
             # (its state already proves the program resolved), so no issue there.
-            # Açar bağlı olan run bu rungda qalır: heç bir hesaba toxunulmur.
-            codes = ("legacy_sar_admission_year_missing",) if not year_text else ()
-            return self._seal(context, request, "skipped", codes, issue_counts)
+            return self._seal(context, request, "skipped", year_codes, issue_counts)
         if not context.policy.stage_and_activate:
             # Silent by design: 7,703 identical INFO rows would be pure noise and
             # the ``sar_deferred`` count already says it.
@@ -437,14 +453,14 @@ class SarMaterialisationPhase:
         )
         request = replace_request(request, decision=decision, context=context)
         if decision.blocked:
-            return self._seal(context, request, "skipped", decision.rule_codes, issue_counts)
+            return self._seal(context, request, "skipped", (*year_codes, *decision.rule_codes), issue_counts)
         outcome = materialise_record(context, request=request)
         write_issues(
             context,
             legacy_pk=legacy_pk_text,
             digest=outcome.digest,
             entity_map=outcome.entity_map,
-            rule_codes=(*decision.rule_codes, *outcome.rule_codes),
+            rule_codes=(*year_codes, *decision.rule_codes, *outcome.rule_codes),
             issue_counts=issue_counts,
         )
         label = outcome.entity_map.target_model_label if outcome.state == _STATE.MIGRATED else ""
@@ -469,7 +485,7 @@ class SarMaterialisationPhase:
         decision = _NO_CURRICULUM
         if not request.admission_year:
             rule_codes = (*rule_codes, "legacy_sar_admission_year_missing", "legacy_sar_admission_year_fallback")
-            request = replace(request, admission_year=ARCHIVE_FALLBACK_ADMISSION_YEAR)
+            request = replace(request, admission_year=FALLBACK_ADMISSION_YEAR)
         write_record = bool(request.program_pk)
         if write_record:
             decision = resolve_curriculum(

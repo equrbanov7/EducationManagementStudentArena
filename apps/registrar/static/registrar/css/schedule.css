@@ -32,6 +32,26 @@
 .sgx-identity-name { font-weight: 800; font-size: 15px; color: var(--sgx-navy); }
 .sgx-identity-sub { font-size: 12.5px; color: var(--sgx-muted); font-weight: 600; }
 .sgx-topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* Tədris ili + yarım il seçicisi (R-4) — jurnaldakı `.sjx-term` ilə eyni ritm,
+   amma cədvəlin öz `sgx` ad məkanında (modul CSS-ləri bir-birindən asılı deyil). */
+.sgx-term { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.sgx-term-field { display: flex; flex-direction: column; gap: 3px; }
+.sgx-term-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--sgx-muted);
+    letter-spacing: 0.03em;
+}
+.sgx-term-select {
+    padding: 6px 10px;
+    border: 1px solid var(--sgx-line);
+    border-radius: 10px;
+    font-size: 12.5px;
+    background: #fff;
+    color: var(--sgx-navy);
+    font-weight: 700;
+}
 .sgx-weekpills {
     display: flex;
     background: #fff;

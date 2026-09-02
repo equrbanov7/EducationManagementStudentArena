@@ -24,6 +24,37 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
             </div>
         </div>
         <div class="sgx-topbar-right">
+            {% comment %}Tədris ili + yarım il seçicisi (R-4) — jurnaldakı `?period=`
+            müqaviləsi ilə eyni: dəyişiklik bölməni həmin dövrlə yenidən yükləyir.
+            Dinamik dəyərlər data-atributlarla ötürülür (xarici JS: schedule_grid.js).{% endcomment %}
+            {% if schedule_period_choices|length > 1 %}
+            <div class="sgx-term" data-sgx-term
+                 data-base-url="{{ schedule_base_url }}"
+                 data-selected-period="{{ schedule_selected_period_id }}">
+                <div class="sgx-term-field">
+                    <label class="sgx-term-label" for="sgxYear">{% trans "TƏDRİS İLİ" context "registrar.schedule" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select id="sgxYear" class="sgx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sgx-year data-bootstrap-select>
+                            {% for y in schedule_year_choices %}
+                            <option value="{{ y.value }}" {% if y.value == schedule_selected_year %}selected{% endif %}>{{ y.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="sgx-term-field">
+                    <label class="sgx-term-label" for="sgxPeriod">{% trans "YARIM İL" context "registrar.schedule" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select id="sgxPeriod" class="sgx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sgx-period data-bootstrap-select>
+                            {% for p in schedule_period_choices %}
+                            <option value="{{ p.id }}" data-year="{{ p.year }}"
+                                    {% if p.id == schedule_selected_period_id %}selected{% endif %}
+                                    {% if p.year != schedule_selected_year %}hidden{% endif %}>{{ p.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
             <div class="sgx-weekpills">
                 <a class="sgx-weekpill {% if week.offset == 0 %}is-active{% endif %}" href="{{ schedule_nav_prefix|default:'?' }}w=0">
                     {% if week.offset == 0 %}{% if week.parity == 'odd' %}{% trans "Bu həftə — ÜST" context "registrar.schedule" %}{% else %}{% trans "Bu həftə — ALT" context "registrar.schedule" %}{% endif %}{% else %}{% if week.parity == 'odd' %}{% trans "Bu həftə — ALT" context "registrar.schedule" %}{% else %}{% trans "Bu həftə — ÜST" context "registrar.schedule" %}{% endif %}{% endif %}
@@ -32,7 +63,7 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
                     {% if week.offset == 0 %}{% if week.parity == 'odd' %}{% trans "Gələn həftə — ALT" context "registrar.schedule" %}{% else %}{% trans "Gələn həftə — ÜST" context "registrar.schedule" %}{% endif %}{% else %}{% if week.parity == 'odd' %}{% trans "Gələn həftə — ÜST" context "registrar.schedule" %}{% else %}{% trans "Gələn həftə — ALT" context "registrar.schedule" %}{% endif %}{% endif %}
                 </a>
             </div>
-            {% if teacher_offerings %}
+            {% if schedule_can_manage and teacher_offerings %}
             <button type="button" class="sgx-primary-btn" data-sgx-open-add><i class="fas fa-plus"></i> {% trans "Slot əlavə et" context "registrar.schedule" %}</button>
             {% endif %}
         </div>
@@ -42,7 +73,7 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
     <div class="sgx-empty">
         <i class="fas fa-calendar-plus"></i>
         <p>{% trans "Bu semestr üçün hələ cədvəl slotu yoxdur." context "registrar.schedule" %}</p>
-        {% if teacher_offerings %}<p class="sgx-empty-hint">{% trans "Yuxarıdan slot əlavə edin." context "registrar.schedule" %}</p>{% endif %}
+        {% if schedule_can_manage and teacher_offerings %}<p class="sgx-empty-hint">{% trans "Yuxarıdan slot əlavə edin." context "registrar.schedule" %}</p>{% endif %}
     </div>
     {% else %}
 
@@ -122,13 +153,16 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
             <div class="sgx-modal-foot">
                 {% if role == 'teacher' %}
                 <a class="sgx-primary-btn" data-sgx-f="journal_link" href="#" target="_blank" rel="noopener"><i class="fas fa-book-open"></i> {% trans "Jurnalı aç" context "registrar.schedule" %}</a>
-                {% if teacher_offerings %}
-                <form method="post" data-sgx-delete-form onsubmit="return confirm('{% trans "Slotu silmək?" context "registrar.schedule" %}');">
+                {% endif %}
+                {% comment %}Silmə YALNIZ `schedule.manage` icazəsi ilə çıxır (server
+                tərəfdə də eyni açar yoxlanılır). Təsdiq soruşması XARİCİ JS-dədir
+                (`schedule_grid.js`) — inline `onsubmit` CSP-yə görə YAZILMIR.{% endcomment %}
+                {% if schedule_can_manage %}
+                <form method="post" data-sgx-delete-form data-sgx-confirm="{% trans 'Slotu silmək?' context 'registrar.schedule' %}">
                     {% csrf_token %}
-                    {% if schedule_embedded %}<input type="hidden" name="next" value="{% url 'accounts:profile' %}?section=my-schedule">{% endif %}
+                    {% if schedule_next_url %}<input type="hidden" name="next" value="{{ schedule_next_url }}">{% endif %}
                     <button type="submit" class="sgx-danger-btn"><i class="fas fa-trash-can"></i> {% trans "Slotu sil" context "registrar.schedule" %}</button>
                 </form>
-                {% endif %}
                 {% endif %}
                 <button type="button" class="sgx-ghost-btn" data-sgx-close>{% trans "Bağla" context "registrar.schedule" %}</button>
             </div>
@@ -136,7 +170,7 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
     </div>
 
     {# ── Slot əlavə et modalı (yalnız müəllim/org sahibi) ──────────────────── #}
-    {% if teacher_offerings %}
+    {% if schedule_can_manage and teacher_offerings %}
     <div class="sgx-modal" data-sgx-add-modal hidden>
         <div class="sgx-modal-backdrop" data-sgx-close></div>
         <div class="sgx-modal-card" role="dialog" aria-modal="true" aria-labelledby="sgx-add-title">
@@ -146,7 +180,7 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
             </div>
             <form method="post" action="{% url 'registrar:schedule' %}" class="sgx-add-form">
                 {% csrf_token %}
-                {% if schedule_embedded %}<input type="hidden" name="next" value="{% url 'accounts:profile' %}?section=my-schedule">{% endif %}
+                {% if schedule_next_url %}<input type="hidden" name="next" value="{{ schedule_next_url }}">{% endif %}
                 <div class="sgx-add-grid">
                     <label class="sgx-field sgx-field--wide">
                         <span>{% trans "Fənn" context "registrar.schedule" %}</span>

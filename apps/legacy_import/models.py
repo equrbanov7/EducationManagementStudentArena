@@ -6,55 +6,24 @@ saxlamır. Opaque legacy ID və stabil digest-lər linkable pseudonymous data-d�
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import F, Q
-from django.db.models.deletion import ProtectedError
 
 from core.models import TimeStampedModel, UUIDModel
 
-TOKEN_PATTERN = r"^[a-z0-9][a-z0-9._-]*$"
-SHA256_PATTERN = r"^[0-9a-f]{64}$"
-OPAQUE_KEY_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,254}$"
-MODEL_LABEL_PATTERN = r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$"
-_RUN_MODE_CHECK = Q(mode__in=["profile", "rehearsal", "cutover"])
-_RUN_ACCOUNTING_CHECK = Q(accounting_mode__in=["row", "batch"])
-
-token_validator = RegexValidator(
-    regex=TOKEN_PATTERN,
-    message="Yalnız kiçik hərf, rəqəm, nöqtə, alt xətt və defis istifadə edilə bilər.",
+from ._ledger_base import (  # noqa: F401  (ledger primitivləri burada re-export olunur)
+    _RUN_ACCOUNTING_CHECK,
+    _RUN_MODE_CHECK,
+    MODEL_LABEL_PATTERN,
+    OPAQUE_KEY_PATTERN,
+    SHA256_PATTERN,
+    TOKEN_PATTERN,
+    _NonDeletableLedgerModel,
+    model_label_validator,
+    opaque_key_validator,
+    sha256_validator,
+    token_validator,
 )
-sha256_validator = RegexValidator(
-    regex=SHA256_PATTERN,
-    message="Dəyər kiçik hərfli 64 simvolluq SHA-256 hex digest olmalıdır.",
-)
-opaque_key_validator = RegexValidator(
-    regex=OPAQUE_KEY_PATTERN,
-    message="Açar yalnız opaque identifikator simvollarından ibarət olmalıdır.",
-)
-model_label_validator = RegexValidator(
-    regex=MODEL_LABEL_PATTERN,
-    message="Target model etiketi app_label.model_name formatında olmalıdır.",
-)
-
-
-class _NoDeleteQuerySet(models.QuerySet):
-    def delete(self):
-        raise ProtectedError("Legacy import ledger sətirləri silinə bilməz.", self)
-
-
-class _NoDeleteManager(models.Manager.from_queryset(_NoDeleteQuerySet)):
-    pass
-
-
-class _NonDeletableLedgerModel(models.Model):
-    objects = _NoDeleteManager()
-
-    class Meta:
-        abstract = True
-
-    def delete(self, using=None, keep_parents=False):
-        raise ProtectedError("Legacy import ledger sətirləri silinə bilməz.", [self])
 
 
 class LegacyMigrationRun(UUIDModel, TimeStampedModel, _NonDeletableLedgerModel):
@@ -205,6 +174,11 @@ class LegacyEntityMap(UUIDModel, TimeStampedModel, _NonDeletableLedgerModel):
         indexes = [
             models.Index(fields=["organization", "created_run", "state"], name="legacy_map_org_created_state"),
             models.Index(fields=["target_model_label", "target_pk"], name="legacy_map_target"),
+            # «Bu açılış köçürülüb?» sorğusu (``exam_eligibility._migrated_offering_ids``)
+            # ``target_model_label`` SÜZMÜR — yəni yuxarıdakı kompozit indeksin
+            # aparıcı sütununa oturmur və Postgres 5 000+ səhifə oxuyurdu
+            # (tək sətir üçün 20-97 ms; 2026-09-02 EXPLAIN ANALYZE).
+            models.Index(fields=["entity_type", "state", "target_pk"], name="legacy_map_lookup"),
         ]
         constraints = [
             models.UniqueConstraint(

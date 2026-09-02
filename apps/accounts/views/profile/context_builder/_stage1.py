@@ -37,6 +37,7 @@ from .._sections.groups import build_groups_context
 from .._sections.question_bank import build_question_bank_context
 from .._sections.question_submissions import build_question_submissions_context
 from .._sections.unit_exams import build_unit_exams_context
+from ..constants import DEFAULT_PROFILE_SECTION, FALLBACK_PROFILE_SECTION
 from ..contact_inbox import handle_contact_reply_post
 from ..post_handler import handle_profile_post
 from ._helpers import (
@@ -82,7 +83,8 @@ class _Stage1Mixin:
         Now accessible to ALL users (not just teachers).
         """
         self.profile, self._created = UserProfile.objects.get_or_create(user=self.request.user)
-        self.requested_section = self.request.GET.get("section", "profile-info")
+        # FAZA 22 — parametrsiz açılış «Ana səhifə»yə gedir (əvvəl `profile-info`).
+        self.requested_section = self.request.GET.get("section") or DEFAULT_PROFILE_SECTION
         _restore_profile_org_context(self.request, self.profile, self.requested_section)
         self.capabilities = _role_capabilities(self.request.user, self.profile)
         self.notification_state = build_profile_notification_state(user=self.request.user, profile=self.profile)
@@ -97,10 +99,10 @@ class _Stage1Mixin:
         self._validate_avatar_upload = validate_profile_avatar_upload
         self.allowed_sections = self.capabilities["allowed_sections"]
         self.active_section = (
-            self.requested_section if self.requested_section in self.allowed_sections else "profile-info"
+            self.requested_section if self.requested_section in self.allowed_sections else FALLBACK_PROFILE_SECTION
         )
         if self.active_section == "delete-account":
-            self.active_section = "profile-info"
+            self.active_section = FALLBACK_PROFILE_SECTION
         self.password_change_form = CustomPasswordChangeForm(self.request.user)
         # OTP ilə şifrə dəyişmə (mövcud şifrə unudulub) — unbound default;
         # POST xətasında post_handler bağlanmış formanı geri qaytarır.
@@ -357,6 +359,9 @@ class _Stage1Mixin:
             from apps.appeals.public import count_pending_manage_appeals
 
             self.pending_appeals_count = count_pending_manage_appeals(self.request)
+        # «Müraciətlərim» badge-i PAYLAŞILAN (keşlənən) dəstdən gəlir — səhifə,
+        # fraqment və `profile_badges_api` eyni rəqəmi göstərsin deyə.
+        self.applications_pending_count = self.profile_badge_counts.get("applications_pending", 0)
         self.pending_review_count = self.profile_badge_counts.get("pending_review", 0)
         self.evaluated_review_count = self.profile_badge_counts.get("evaluated_review", 0)
         self.teacher_groups = []

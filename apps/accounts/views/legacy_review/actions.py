@@ -22,6 +22,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from apps.registrar import legacy_grade_review_actions as review_write
+from core.logging_utils import safe_log_value
 
 from .policy import resolve_actor
 
@@ -88,16 +89,18 @@ def legacy_review_action(request):
                 request=request,
             )
             payload = {"status": "verified" if action == "verify" else "disputed"}
-    except PermissionDenied as exc:
-        return _error(
-            "permission_denied", str(exc) or pgettext("accounts.legacy_review", "İcazəniz yoxdur."), status=403
-        )
+    except PermissionDenied:
+        # ⚠️ `str(exc)` KLİENTƏ QAYTARILMIR: `PermissionDenied` Django-nun daxili
+        # qatlarından da gələ bilər və mətni daxili təfərrüat sızdırır (CodeQL
+        # `py/stack-trace-exposure`). Səbəb server tərəfdə loglanır.
+        logger.warning("legacy review action denied: action=%s", safe_log_value(action), exc_info=True)
+        return _error("permission_denied", pgettext("accounts.legacy_review", "İcazəniz yoxdur."), status=403)
     except ValidationError as exc:
         # Servis mesajları istifadəçi-üzlüdür (səbəb/sənəd tələbi, eyni bal,
         # passiv qeydiyyat) — olduğu kimi göstərilir.
         return _error("invalid", " ".join(exc.messages))
     except ValueError as exc:  # pragma: no cover — gözlənilməz giriş formatı
-        logger.warning("legacy review action failed: %s", exc)
+        logger.warning("legacy review action failed: %s", safe_log_value(exc))
         return _error("invalid", pgettext("accounts.legacy_review", "Əməliyyat yerinə yetirilmədi."))
 
     return JsonResponse({"ok": True, **payload})

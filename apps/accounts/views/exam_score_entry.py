@@ -21,6 +21,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from apps.registrar import exam_score_entry as service
@@ -81,6 +82,14 @@ def exam_score_entry(request):
 
     if request.method == "POST":
         next_url = _resolve_next_url(request, fallback_next)
+        # `_resolve_next_url` onsuz da same-origin yoxlayır; yoxlama BURADA da
+        # təkrarlanır ki, statik analiz (CodeQL `py/url-redirection`) sanitizer-i
+        # redirect nöqtəsinin ÖZ funksiyasında görsün. Davranış dəyişmir —
+        # `fallback_next` `reverse()`-dən gəlir, yəni həmişə daxili URL-dir.
+        if not url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            next_url = fallback_next
         if organization is None:
             messages.error(request, pgettext(_CTX, "Təşkilat konteksti tapılmadı."))
             return redirect(next_url)

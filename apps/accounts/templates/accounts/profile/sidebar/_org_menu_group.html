@@ -1,5 +1,5 @@
 {% load i18n %}
-        {% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections %}
+        {% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections or 'student-intake' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_management" context "profile.sidebar" %}</span></li>
 
         {% if 'role-assignment' in allowed_sections %}
@@ -24,6 +24,22 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'rim-center' %}active{% endif %}">
                 <i class="fas fa-id-card-alt sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "RİM mərkəzi" context "profile.rim" %}</span>
+            </a>
+        </li>
+        {% endif %}
+
+        {% comment %}Tələbə idxalı — `user.import` (RİM, HR, rektor). RİM mərkəzinin
+        YANINDA dayanır: biri MÖVCUD hesabı idarə edir, digəri YENİ hesab gətirir.
+        Panel AJAX-safe-dir (sidebar itmir).{% endcomment %}
+        {% if 'student-intake' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=student-intake"
+               data-section="student-intake"
+               data-title="{% trans 'Tələbə idxalı' context 'profile.sidebar' %}"
+               data-source-url="{{ profile_base_url }}?section=student-intake"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-intake' %}active{% endif %}">
+                <i class="fas fa-file-import sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "Tələbə idxalı" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}

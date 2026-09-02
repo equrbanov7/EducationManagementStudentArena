@@ -278,3 +278,18 @@
         margin-left: 0;
     }
 }
+
+/* Lazy namizəd siyahısı yüklənərkən skeleton (performans auditi F4) */
+#profileGroupModal .group-checklist__skeleton {
+    height: 34px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--ems-gray-100, #f1f3f5) 25%, var(--ems-gray-200, #e9ecef) 37%, var(--ems-gray-100, #f1f3f5) 63%);
+    background-size: 400% 100%;
+    animation: emsGroupChecklistSkeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes emsGroupChecklistSkeleton {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}

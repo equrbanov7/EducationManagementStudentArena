@@ -19,10 +19,28 @@ class StagedAccountAccessError(PermissionError):
         super().__init__(self.code)
 
 
+#: Köçürmə/idxal borusunun e-poçtu olmayan (və ya sınıq/təkrar e-poçtlu) sətrə
+#: yazdığı YER-TUTUCU domen — RFC 2606 ilə rezerv edilib, ona poçt heç vaxt
+#: marşrutlanmır.  Tək mənbədir: ``legacy_import`` və ``student_intake`` boruları
+#: eyni domeni işlədir, autentifikasiya səthləri isə onu «e-poçtu YOXDUR» kimi
+#: oxumalıdır (parol bərpası belə hesaba poçt göndərə bilməz).
+PLACEHOLDER_EMAIL_DOMAIN = "placeholder.invalid"
+
+
 def canonical_identity(value: object) -> str:
     """NFKC + trim + lowercase key shared with PostgreSQL expression indexes."""
 
     return unicodedata.normalize("NFKC", str(value or "")).strip().lower()
+
+
+def email_is_placeholder(email: object) -> bool:
+    """``…@placeholder.invalid`` — real əlaqə kanalı DEYİL.
+
+    Yoxlama yalnız DƏYƏRƏ baxır (bazaya yox), ona görə istifadəçi sayımı
+    (enumeration) sızmır: eyni cavab mövcud və mövcud olmayan hesab üçün eynidir.
+    """
+
+    return canonical_identity(email).endswith("@" + PLACEHOLDER_EMAIL_DOMAIN)
 
 
 class _PostgresCanonicalIdentity(Func):
@@ -135,10 +153,12 @@ def staged_user_for_email(email: object):
 
 
 __all__ = [
+    "PLACEHOLDER_EMAIL_DOMAIN",
     "StagedAccountAccessError",
     "assert_account_access_allowed",
     "canonical_identity",
     "canonical_identity_queryset",
+    "email_is_placeholder",
     "login_blocked_access_states",
     "staged_user_for_email",
     "user_access_is_login_blocked",
