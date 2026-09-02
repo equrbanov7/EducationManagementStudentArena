@@ -46,7 +46,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
 
   <header class="wl__head">
     <div>
-      <h2 class="wl__title">{% trans "Yük bölgüsü" context "accounts.workload" %}</h2>
+      {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
       <p class="wl__intro">
         {% trans "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Hər fəaliyyət növü (mühazirə, seminar, laboratoriya) ayrıca bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır." context "accounts.workload" %}
       </p>

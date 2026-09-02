@@ -143,10 +143,10 @@ from .roles import (
 
 # Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
 from .schedule_manage import schedule_manage_action, schedule_manage_check
-from .student_intake import student_intake_apply, student_intake_preview, student_intake_template
 
 # Global search (⌘K command palette)
 from .search import global_search
+from .student_intake import student_intake_apply, student_intake_preview, student_intake_template
 
 # Superadmin views
 from .superadmin import (

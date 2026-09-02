@@ -330,8 +330,7 @@ def _validate_structure(plan: RowPlan, row: dict, context: IntakeContext) -> boo
         if str(unit.pk) not in ancestors:
             plan.fail(
                 error_code,
-                pgettext(_CTX, "%(label)s qrupun strukturuna uyğun gəlmir: %(value)s")
-                % {"label": label, "value": raw},
+                pgettext(_CTX, "%(label)s qrupun strukturuna uyğun gəlmir: %(value)s") % {"label": label, "value": raw},
             )
             return False
 
@@ -345,8 +344,10 @@ def _validate_structure(plan: RowPlan, row: dict, context: IntakeContext) -> boo
         return False
 
     degree_raw = _key(row.get("degree_level"))
-    if degree_raw and degree_raw not in _key(program.degree_level) and not _key(program.degree_level).startswith(
-        degree_raw[:3]
+    if (
+        degree_raw
+        and degree_raw not in _key(program.degree_level)
+        and not _key(program.degree_level).startswith(degree_raw[:3])
     ):
         plan.warnings.append(
             pgettext(_CTX, "Təhsil səviyyəsi proqramla üst-üstə düşmür — proqramın səviyyəsi tətbiq olunur.")
@@ -412,9 +413,14 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
     if code:
         context.existing_codes.add(code)
 
-    base = "%s.%s" % (USERNAME_PREFIX, _key(code).replace(" ", "")) if code else "%s.fin.%s" % (
-        USERNAME_PREFIX,
-        plan.fin.lower(),
+    base = (
+        "%s.%s" % (USERNAME_PREFIX, _key(code).replace(" ", ""))
+        if code
+        else "%s.fin.%s"
+        % (
+            USERNAME_PREFIX,
+            plan.fin.lower(),
+        )
     )
     base = "".join(ch for ch in base if ch.isalnum() or ch in "._-")[:140] or "%s.fin.%s" % (
         USERNAME_PREFIX,

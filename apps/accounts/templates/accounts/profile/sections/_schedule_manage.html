@@ -28,7 +28,7 @@ silmə JSON POST ilə gedir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) 
   {# ── Başlıq + əhatə ──────────────────────────────────────────────────── #}
   <header class="smx__head">
     <div>
-      <h2 class="smx__title">{% trans "Cədvəl idarəetməsi" context "accounts.schedule_manage" %}</h2>
+      {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
       <p class="smx__intro">
         {% trans "Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir." context "accounts.schedule_manage" %}
       </p>

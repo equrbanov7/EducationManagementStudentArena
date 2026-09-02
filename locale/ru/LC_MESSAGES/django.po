@@ -58901,3 +58901,399 @@ msgstr "Моя учебная нагрузка"
 msgctxt "profile.sidebar"
 msgid "Yük bölgüsü"
 msgstr "Распределение нагрузки"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbə idxalı (siyahıdan toplu hesab yaratmaq)"
+msgstr "Импорт студентов (массовое создание учётных записей из списка)"
+
+msgctxt "profile.sidebar"
+msgid "Tələbə idxalı"
+msgstr "Импорт студентов"
+
+msgctxt "student_intake"
+msgid "Faylın başlıq sətrində məcburi sütunlar tapılmadı: %s"
+msgstr "В строке заголовков файла нет обязательных столбцов: %s"
+
+msgctxt "student_intake"
+msgid "Bu serverdə .xlsx oxunmur — faylı CSV kimi yadda saxlayıb yenidən yükləyin."
+msgstr "Этот сервер не читает .xlsx — сохраните файл как CSV и загрузите снова."
+
+msgctxt "student_intake"
+msgid "Fayl oxunmadı — zədəli və ya dəstəklənməyən Excel faylıdır."
+msgstr "Файл не прочитан — он повреждён или это неподдерживаемый файл Excel."
+
+msgctxt "student_intake"
+msgid "Fayl boşdur — başlıq sətri tapılmadı."
+msgstr "Файл пуст — строка заголовков не найдена."
+
+msgctxt "student_intake"
+msgid "Fayl oxunmadı — kodlaşdırma tanınmadı."
+msgstr "Файл не прочитан — кодировка не распознана."
+
+msgctxt "student_intake"
+msgid "Fayl seçilməyib."
+msgstr "Файл не выбран."
+
+msgctxt "student_intake"
+msgid "Fayl çox böyükdür (maksimum 5 MB)."
+msgstr "Файл слишком большой (максимум 5 МБ)."
+
+msgctxt "student_intake"
+msgid "Yalnız .xlsx və ya .csv faylı qəbul olunur."
+msgstr "Принимаются только файлы .xlsx или .csv."
+
+msgctxt "student_intake"
+msgid "Fayl boşdur."
+msgstr "Файл пуст."
+
+msgctxt "student_intake"
+msgid "Faylda tələbə sətri tapılmadı."
+msgstr "В файле не найдено ни одной строки со студентом."
+
+msgctxt "student_intake"
+msgid "FİN"
+msgstr "ПИН (FİN)"
+
+msgctxt "student_intake"
+msgid "Ad"
+msgstr "Имя"
+
+msgctxt "student_intake"
+msgid "Soyad"
+msgstr "Фамилия"
+
+msgctxt "student_intake"
+msgid "Ata adı"
+msgstr "Отчество"
+
+msgctxt "student_intake"
+msgid "Doğum tarixi"
+msgstr "Дата рождения"
+
+msgctxt "student_intake"
+msgid "Cins"
+msgstr "Пол"
+
+msgctxt "student_intake"
+msgid "E-poçt"
+msgstr "Эл. почта"
+
+msgctxt "student_intake"
+msgid "Telefon"
+msgstr "Телефон"
+
+msgctxt "student_intake"
+msgid "Tələbə kodu"
+msgstr "Код студента"
+
+msgctxt "student_intake"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "student_intake"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "student_intake"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "student_intake"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "student_intake"
+msgid "Kurs"
+msgstr "Курс"
+
+msgctxt "student_intake"
+msgid "Dil bölməsi"
+msgstr "Языковой сектор"
+
+msgctxt "student_intake"
+msgid "Təhsil səviyyəsi"
+msgstr "Уровень образования"
+
+msgctxt "student_intake"
+msgid "7 simvol, A-Z0-9 (məcburi)"
+msgstr "7 символов, A-Z0-9 (обязательно)"
+
+msgctxt "student_intake"
+msgid "Məcburi"
+msgstr "Обязательно"
+
+msgctxt "student_intake"
+msgid "Boş qala bilər"
+msgstr "Может быть пустым"
+
+msgctxt "student_intake"
+msgid "gg.aa.iiii və ya iiii-aa-gg"
+msgstr "дд.мм.гггг или гггг-мм-дд"
+
+msgctxt "student_intake"
+msgid "kişi / qadın"
+msgstr "мужской / женский"
+
+msgctxt "student_intake"
+msgid "Boşdursa placeholder yazılır"
+msgstr "Если пусто, записывается заглушка"
+
+msgctxt "student_intake"
+msgid "İstifadəçi adı bundan qurulur"
+msgstr "Из него формируется имя пользователя"
+
+msgctxt "student_intake"
+msgid "Adı və ya kodu (yoxlama üçün)"
+msgstr "Название или код (для проверки)"
+
+msgctxt "student_intake"
+msgid "Adı və ya kodu (məcburi)"
+msgstr "Название или код (обязательно)"
+
+msgctxt "student_intake"
+msgid "Məsələn 2025 (məcburi)"
+msgstr "Например 2025 (обязательно)"
+
+msgctxt "student_intake"
+msgid "1–6 (yalnız yoxlama)"
+msgstr "1–6 (только для проверки)"
+
+msgctxt "student_intake"
+msgid "az / en / ru (yalnız yoxlama)"
+msgstr "az / en / ru (только для проверки)"
+
+msgctxt "student_intake"
+msgid "bakalavr / magistr (yoxlama)"
+msgstr "бакалавр / магистр (проверка)"
+
+msgctxt "student_intake"
+msgid "FİN boşdur."
+msgstr "ПИН пуст."
+
+msgctxt "student_intake"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "ПИН должен состоять из 7 символов формата [A-Z0-9]."
+
+msgctxt "student_intake"
+msgid "Ad və soyad məcburidir."
+msgstr "Имя и фамилия обязательны."
+
+msgctxt "student_intake"
+msgid "Bu FİN faylda təkrarlanır."
+msgstr "Этот ПИН повторяется в файле."
+
+msgctxt "student_intake"
+msgid "Bu FİN artıq sistemdə var — sətir ötürülür."
+msgstr "Этот ПИН уже есть в системе — строка пропускается."
+
+msgctxt "student_intake"
+msgid "Qrup tapılmadı: %s"
+msgstr "Группа не найдена: %s"
+
+msgctxt "student_intake"
+msgid "(boş)"
+msgstr "(пусто)"
+
+msgctxt "student_intake"
+msgid "Bu adla birdən çox qrup var — kodla göstərin: %s"
+msgstr "Групп с таким названием несколько — укажите код: %s"
+
+msgctxt "student_intake"
+msgid "%(label)s tapılmadı: %(value)s"
+msgstr "%(label)s не найдено: %(value)s"
+
+msgctxt "student_intake"
+msgid "%(label)s qrupun strukturuna uyğun gəlmir: %(value)s"
+msgstr "%(label)s не соответствует структуре группы: %(value)s"
+
+msgctxt "student_intake"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Для этой группы не найдена программа — сначала нужно выстроить структуру."
+
+msgctxt "student_intake"
+msgid "Təhsil səviyyəsi proqramla üst-üstə düşmür — proqramın səviyyəsi tətbiq olunur."
+msgstr "Уровень образования не совпадает с программой — применяется уровень программы."
+
+msgctxt "student_intake"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Год поступления должен быть числом."
+
+msgctxt "student_intake"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Год поступления должен быть между 1950 и %d."
+
+msgctxt "student_intake"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Дата рождения не распознана (используйте формат дд.мм.гггг)."
+
+msgctxt "student_intake"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Дата рождения неправдоподобна."
+
+msgctxt "student_intake"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Пол не распознан — остаётся «не указан»."
+
+msgctxt "student_intake"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — tətbiqdə boş kurikulum yaradılacaq."
+msgstr "Для этого года поступления нет учебного плана — при применении будет создан пустой."
+
+msgctxt "student_intake"
+msgid "Bu tələbə kodu artıq istifadə olunub — sətir ötürülür."
+msgstr "Этот код студента уже используется — строка пропускается."
+
+msgctxt "student_intake"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "Эл. почты нет — записывается заглушка (пользователь укажет свою при первом входе)."
+
+msgctxt "student_intake"
+msgid "E-poçt formatı yanlışdır."
+msgstr "Неверный формат эл. почты."
+
+msgctxt "student_intake"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "Эл. почта уже используется — записывается заглушка."
+
+msgctxt "student_intake"
+msgid "Yaradılacaq."
+msgstr "Будет создан."
+
+msgctxt "student_intake"
+msgid "Bu təşkilatda aktiv «student» rolu yoxdur — əvvəlcə rol kataloqu qurulmalıdır."
+msgstr "В этой организации нет активной роли «student» — сначала нужно настроить каталог ролей."
+
+msgctxt "student_intake"
+msgid "Sətir yazılmadı: %s"
+msgstr "Строка не записана: %s"
+
+msgctxt "student_intake"
+msgid "Hesab yaradıldı."
+msgstr "Учётная запись создана."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı üçün icazəniz yoxdur."
+msgstr "У вас нет прав на импорт студентов."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür."
+msgstr "У вас нет прав на импорт студентов — раздел доступен только ролям с ключом `user.import`."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı"
+msgstr "Импорт студентов"
+
+msgctxt "student_intake"
+msgid "Qəbul siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır), sətir-sətir nəyin yaranacağını göstərir, siz təsdiq edəndən sonra hesab + üzvlük + akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib öz parolunu qoyur."
+msgstr "Загрузите список зачисления: система сначала выполняет СУХОЙ ПРОГОН (ничего не записывается), построчно показывает, что будет создано, и только после подтверждения создаёт учётную запись, членство и академическую запись. При первом входе студент подтверждает почту и задаёт пароль."
+
+msgctxt "student_intake"
+msgid "Hesablar bu təşkilatda yaranır"
+msgstr "Учётные записи создаются в этой организации"
+
+msgctxt "student_intake"
+msgid "Şablonu endirin"
+msgstr "Скачайте шаблон"
+
+msgctxt "student_intake"
+msgid "Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox %(limit)s sətir, ölçü limiti %(size)s MB."
+msgstr "Порядок столбцов свободный — они распознаются по заголовку. Не более %(limit)s строк в файле, лимит размера %(size)s МБ."
+
+msgctxt "student_intake"
+msgid "Boş şablonu endir"
+msgstr "Скачать пустой шаблон"
+
+msgctxt "student_intake"
+msgid "Sütunlar"
+msgstr "Столбцы"
+
+msgctxt "student_intake"
+msgid "Sütun"
+msgstr "Столбец"
+
+msgctxt "student_intake"
+msgid "İzah"
+msgstr "Пояснение"
+
+msgctxt "student_intake"
+msgid "Faylı yükləyin"
+msgstr "Загрузите файл"
+
+msgctxt "student_intake"
+msgid "Fayl seçilməyib"
+msgstr "Файл не выбран"
+
+msgctxt "student_intake"
+msgid "Yoxla (quru icra)"
+msgstr "Проверить (сухой прогон)"
+
+msgctxt "student_intake"
+msgid "Sətir"
+msgstr "Строка"
+
+msgctxt "student_intake"
+msgid "Vəziyyət"
+msgstr "Статус"
+
+msgctxt "student_intake"
+msgid "Ad Soyad"
+msgstr "ФИО"
+
+msgctxt "student_intake"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "student_intake"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "student_intake"
+msgid "Parolları CSV kimi endir"
+msgstr "Скачать пароли в CSV"
+
+msgctxt "student_intake"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq."
+msgstr "Одноразовые пароли видны ТОЛЬКО сейчас — они не хранятся ни в базе, ни в журнале аудита. Скачайте CSV и передайте студентам; при первом входе у каждого запрашивается подтверждение почты (OTP) и новый пароль."
+
+msgctxt "student_intake"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Сначала выберите файл."
+
+msgctxt "student_intake"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Операция не удалась. Попробуйте снова."
+
+msgctxt "student_intake"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Результат сухого прогона (ничего не записано)"
+
+msgctxt "student_intake"
+msgid "Tətbiq nəticəsi"
+msgstr "Результат применения"
+
+msgctxt "student_intake"
+msgid "Seçilmiş sətirlər üçün hesab yaradılacaq. Davam edilsin?"
+msgstr "Для выбранных строк будут созданы учётные записи. Продолжить?"
+
+msgctxt "student_intake"
+msgid "Yaradılacaq"
+msgstr "Будет создан"
+
+msgctxt "student_intake"
+msgid "Yaradıldı"
+msgstr "Создан"
+
+msgctxt "student_intake"
+msgid "Ötürüldü"
+msgstr "Пропущено"
+
+msgctxt "student_intake"
+msgid "Xəta"
+msgstr "Ошибка"
+
+msgctxt "student_intake"
+msgid "Cəmi"
+msgstr "Всего"
+
+msgctxt "student_intake"
+msgid "Emal olunur…"
+msgstr "Обработка…"

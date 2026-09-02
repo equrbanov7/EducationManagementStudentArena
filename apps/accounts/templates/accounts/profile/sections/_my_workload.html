@@ -27,7 +27,7 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
 
   <header class="wlm__head">
     <div>
-      <h2 class="wlm__title">{% trans "Dərs yüküm" context "accounts.workload" %}</h2>
+      {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
       <p class="wlm__intro">
         {% trans "Kafedra tərəfindən sizə ayrılmış illik dərs yükü. Cədvəl yalnız təsdiqlənmiş bölgünü göstərir; sual yaranarsa kafedra müdirinə müraciət edin." context "accounts.workload" %}
       </p>
