@@ -116,7 +116,12 @@ def _parse_or_fail_closed(scope: str, rate: str | None):
     try:
         return parse_rate(rate), False
     except ValueError:
-        logger.error("Invalid rate-limit spec %r for scope %r — failing closed.", rate, scope)
+        # ⚠️ `rate` DƏYƏRİ LOGLANMIR: bu spesifikasiya parol-sıfırlama kimi
+        # həssas adlı konfiqlərdən gəlir (`RIM_PASSWORD_RESET_RATE_LIMIT`) və
+        # log-a düşməsi CodeQL `py/clear-text-logging-sensitive-data` ilə
+        # işarələnir. Diaqnostika üçün SCOPE adı kifayətdir — konfiqin özü
+        # `settings`-dədir.
+        logger.error("Invalid rate-limit spec for scope %r — failing closed.", scope)
         return None, True
 
 

@@ -51,6 +51,10 @@ from django.views.decorators.http import require_GET
 
 from core import media_policies
 
+# Geri uyğunluq: düzəliş sənədi siyasəti ``core.media_policies``-ə köçdü; köhnə
+# ad (testlər/monkeypatch) eyni funksiyaya işarə edir.
+_check_journal_correction_access = media_policies.check_journal_correction_access
+
 # Paths that are considered public and do not require authentication.
 # These are served openly (blog images, course covers, etc.).
 _PUBLIC_PREFIXES: tuple[str, ...] = (

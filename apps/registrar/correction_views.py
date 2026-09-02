@@ -9,6 +9,8 @@ təsdiq. Bütün dəyişikliklər :func:`corrections.apply_correction` üzərind
 
 from __future__ import annotations
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -31,6 +33,20 @@ from .models import (
     LessonMark,
     SelfWorkTopic,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _user_facing_validation_message(exc: ValidationError) -> str:
+    """`ValidationError`-un İSTİFADƏÇİ-ÜZLÜ mətnləri (xam `str(exc)` DEYİL).
+
+    ``exc.messages`` bizim servis qatının qəsdən tərcümə etdiyi sətirlərdir.
+    ``str(exc)`` isə `repr`-vari daxili təfərrüat (siyahı/dict quruluşu, sahə
+    adları) sızdırır — CodeQL `py/stack-trace-exposure` onu haqlı olaraq
+    işarələyir. `ValidationError` HƏMİŞƏ `.messages` daşıyır, ona görə köhnə
+    `hasattr(...) else str(exc)` budağı onsuz da ölü kod idi.
+    """
+    return "; ".join(exc.messages)
 
 
 def _require_corrector(request):
@@ -198,7 +214,8 @@ def correction_apply(request, offering_id):
                 was_empty=was_empty,
             )
     except ValidationError as exc:
-        message = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)
+        logger.warning("journal correction rejected for offering %s", offering.pk, exc_info=True)
+        message = _user_facing_validation_message(exc)
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"ok": False, "error": message}, status=400)
         messages.error(request, message)
@@ -220,7 +237,8 @@ def correction_delete(request, offering_id):
     try:
         ok = _revert_requested_correction(request, offering)
     except ValidationError as exc:
-        message = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)
+        logger.warning("journal correction rejected for offering %s", offering.pk, exc_info=True)
+        message = _user_facing_validation_message(exc)
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"ok": False, "error": message}, status=409)
         messages.error(request, message)

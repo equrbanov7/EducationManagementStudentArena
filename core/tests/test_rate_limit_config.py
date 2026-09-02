@@ -46,6 +46,19 @@ class RateLimitParsingTests(SimpleTestCase):
         self.assertTrue(limited)
 
     @override_settings(RATELIMIT_ENABLE=True)
+    def test_failure_log_does_not_echo_the_spec_value(self):
+        """CodeQL `py/clear-text-logging-sensitive-data` reqressiyası.
+
+        Spesifikasiya `RIM_PASSWORD_RESET_RATE_LIMIT` kimi həssas adlı
+        konfiqlərdən gəlir — log-a yalnız SCOPE adı düşməlidir.
+        """
+        with self.assertLogs("core.rate_limit", level="ERROR") as captured:
+            is_rate_limited("probe.scope", "5/10min", "actor")
+        joined = "\n".join(captured.output)
+        self.assertIn("probe.scope", joined)
+        self.assertNotIn("5/10min", joined)
+
+    @override_settings(RATELIMIT_ENABLE=True)
     def test_empty_spec_stays_an_explicit_disable(self):
         # Boş dəyər QƏSDƏN söndürmədir — səhv yazı deyil, ona görə buraxılır.
         self.assertEqual(is_rate_limited("probe.scope", "", "actor"), (False, None))
