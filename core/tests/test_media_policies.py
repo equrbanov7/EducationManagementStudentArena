@@ -140,7 +140,9 @@ class PrivateCorrectionMediaTests(_BaseJournalSetup):
                 document=path,
                 corrected_by=self.admin,
             )
-        self._assert_matrix(path, allowed=[self.student, self.teacher, self.owner], denied=[self.outsider])
+        # Xana düzəlişinin sənədi tibbi/rəsmi arayışdır: müəllim QƏSDƏN oxuya bilmir
+        # (əvvəlki müqavilə — bax test_corrections_bridge.CorrectionMediaAccessTest).
+        self._assert_matrix(path, allowed=[self.student, self.owner], denied=[self.outsider, self.teacher])
 
     def test_lesson_correction_document_is_guarded(self):
         path = self._write(f"journal_lesson_corrections/{self.org.id}/doc.pdf")
