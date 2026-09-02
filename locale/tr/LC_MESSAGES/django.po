@@ -58504,3 +58504,399 @@ msgstr "Ders yüküm"
 msgctxt "profile.sidebar"
 msgid "Yük bölgüsü"
 msgstr "Yük dağıtımı"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbə idxalı (siyahıdan toplu hesab yaratmaq)"
+msgstr "Öğrenci alımı (listeden toplu hesap oluşturma)"
+
+msgctxt "profile.sidebar"
+msgid "Tələbə idxalı"
+msgstr "Öğrenci alımı"
+
+msgctxt "student_intake"
+msgid "Faylın başlıq sətrində məcburi sütunlar tapılmadı: %s"
+msgstr "Dosyanın başlık satırında zorunlu sütunlar yok: %s"
+
+msgctxt "student_intake"
+msgid "Bu serverdə .xlsx oxunmur — faylı CSV kimi yadda saxlayıb yenidən yükləyin."
+msgstr "Bu sunucu .xlsx okuyamıyor — dosyayı CSV olarak kaydedip yeniden yükleyin."
+
+msgctxt "student_intake"
+msgid "Fayl oxunmadı — zədəli və ya dəstəklənməyən Excel faylıdır."
+msgstr "Dosya okunamadı — bozuk veya desteklenmeyen bir Excel dosyası."
+
+msgctxt "student_intake"
+msgid "Fayl boşdur — başlıq sətri tapılmadı."
+msgstr "Dosya boş — başlık satırı bulunamadı."
+
+msgctxt "student_intake"
+msgid "Fayl oxunmadı — kodlaşdırma tanınmadı."
+msgstr "Dosya okunamadı — kodlama tanınmadı."
+
+msgctxt "student_intake"
+msgid "Fayl seçilməyib."
+msgstr "Dosya seçilmedi."
+
+msgctxt "student_intake"
+msgid "Fayl çox böyükdür (maksimum 5 MB)."
+msgstr "Dosya çok büyük (en fazla 5 MB)."
+
+msgctxt "student_intake"
+msgid "Yalnız .xlsx və ya .csv faylı qəbul olunur."
+msgstr "Yalnızca .xlsx veya .csv dosyaları kabul edilir."
+
+msgctxt "student_intake"
+msgid "Fayl boşdur."
+msgstr "Dosya boş."
+
+msgctxt "student_intake"
+msgid "Faylda tələbə sətri tapılmadı."
+msgstr "Dosyada öğrenci satırı bulunamadı."
+
+msgctxt "student_intake"
+msgid "FİN"
+msgstr "Kimlik No (FİN)"
+
+msgctxt "student_intake"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "student_intake"
+msgid "Soyad"
+msgstr "Soyad"
+
+msgctxt "student_intake"
+msgid "Ata adı"
+msgstr "Baba adı"
+
+msgctxt "student_intake"
+msgid "Doğum tarixi"
+msgstr "Doğum tarihi"
+
+msgctxt "student_intake"
+msgid "Cins"
+msgstr "Cinsiyet"
+
+msgctxt "student_intake"
+msgid "E-poçt"
+msgstr "E-posta"
+
+msgctxt "student_intake"
+msgid "Telefon"
+msgstr "Telefon"
+
+msgctxt "student_intake"
+msgid "Tələbə kodu"
+msgstr "Öğrenci kodu"
+
+msgctxt "student_intake"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "student_intake"
+msgid "İxtisas"
+msgstr "Bölüm"
+
+msgctxt "student_intake"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "student_intake"
+msgid "Qəbul ili"
+msgstr "Kayıt yılı"
+
+msgctxt "student_intake"
+msgid "Kurs"
+msgstr "Sınıf"
+
+msgctxt "student_intake"
+msgid "Dil bölməsi"
+msgstr "Dil bölümü"
+
+msgctxt "student_intake"
+msgid "Təhsil səviyyəsi"
+msgstr "Öğrenim düzeyi"
+
+msgctxt "student_intake"
+msgid "7 simvol, A-Z0-9 (məcburi)"
+msgstr "7 karakter, A-Z0-9 (zorunlu)"
+
+msgctxt "student_intake"
+msgid "Məcburi"
+msgstr "Zorunlu"
+
+msgctxt "student_intake"
+msgid "Boş qala bilər"
+msgstr "Boş bırakılabilir"
+
+msgctxt "student_intake"
+msgid "gg.aa.iiii və ya iiii-aa-gg"
+msgstr "gg.aa.yyyy veya yyyy-aa-gg"
+
+msgctxt "student_intake"
+msgid "kişi / qadın"
+msgstr "erkek / kadın"
+
+msgctxt "student_intake"
+msgid "Boşdursa placeholder yazılır"
+msgstr "Boşsa yer tutucu yazılır"
+
+msgctxt "student_intake"
+msgid "İstifadəçi adı bundan qurulur"
+msgstr "Kullanıcı adı bundan oluşturulur"
+
+msgctxt "student_intake"
+msgid "Adı və ya kodu (yoxlama üçün)"
+msgstr "Adı veya kodu (doğrulama için)"
+
+msgctxt "student_intake"
+msgid "Adı və ya kodu (məcburi)"
+msgstr "Adı veya kodu (zorunlu)"
+
+msgctxt "student_intake"
+msgid "Məsələn 2025 (məcburi)"
+msgstr "Örneğin 2025 (zorunlu)"
+
+msgctxt "student_intake"
+msgid "1–6 (yalnız yoxlama)"
+msgstr "1–6 (yalnızca doğrulama)"
+
+msgctxt "student_intake"
+msgid "az / en / ru (yalnız yoxlama)"
+msgstr "az / en / ru (yalnızca doğrulama)"
+
+msgctxt "student_intake"
+msgid "bakalavr / magistr (yoxlama)"
+msgstr "lisans / yüksek lisans (doğrulama)"
+
+msgctxt "student_intake"
+msgid "FİN boşdur."
+msgstr "Kimlik No boş."
+
+msgctxt "student_intake"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "Kimlik No 7 karakterli [A-Z0-9] biçiminde olmalıdır."
+
+msgctxt "student_intake"
+msgid "Ad və soyad məcburidir."
+msgstr "Ad ve soyad zorunludur."
+
+msgctxt "student_intake"
+msgid "Bu FİN faylda təkrarlanır."
+msgstr "Bu Kimlik No dosyada tekrarlanıyor."
+
+msgctxt "student_intake"
+msgid "Bu FİN artıq sistemdə var — sətir ötürülür."
+msgstr "Bu Kimlik No sistemde zaten var — satır atlanıyor."
+
+msgctxt "student_intake"
+msgid "Qrup tapılmadı: %s"
+msgstr "Grup bulunamadı: %s"
+
+msgctxt "student_intake"
+msgid "(boş)"
+msgstr "(boş)"
+
+msgctxt "student_intake"
+msgid "Bu adla birdən çox qrup var — kodla göstərin: %s"
+msgstr "Bu adda birden fazla grup var — kodla belirtin: %s"
+
+msgctxt "student_intake"
+msgid "%(label)s tapılmadı: %(value)s"
+msgstr "%(label)s bulunamadı: %(value)s"
+
+msgctxt "student_intake"
+msgid "%(label)s qrupun strukturuna uyğun gəlmir: %(value)s"
+msgstr "%(label)s grubun yapısına uymuyor: %(value)s"
+
+msgctxt "student_intake"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Bu grup için akademik program bulunamadı — önce yapı kurulmalıdır."
+
+msgctxt "student_intake"
+msgid "Təhsil səviyyəsi proqramla üst-üstə düşmür — proqramın səviyyəsi tətbiq olunur."
+msgstr "Öğrenim düzeyi programla uyuşmuyor — programın düzeyi uygulanır."
+
+msgctxt "student_intake"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Kayıt yılı sayı olmalıdır."
+
+msgctxt "student_intake"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Kayıt yılı 1950 ile %d arasında olmalıdır."
+
+msgctxt "student_intake"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Doğum tarihi tanınmadı (gg.aa.yyyy biçimini kullanın)."
+
+msgctxt "student_intake"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Doğum tarihi mantıksız."
+
+msgctxt "student_intake"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Cinsiyet tanınmadı — “belirtilmemiş” kalıyor."
+
+msgctxt "student_intake"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — tətbiqdə boş kurikulum yaradılacaq."
+msgstr "Bu kayıt yılı için müfredat yok — uygulamada boş bir müfredat oluşturulacak."
+
+msgctxt "student_intake"
+msgid "Bu tələbə kodu artıq istifadə olunub — sətir ötürülür."
+msgstr "Bu öğrenci kodu zaten kullanılıyor — satır atlanıyor."
+
+msgctxt "student_intake"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "E-posta yok — yer tutucu yazılır (kullanıcı ilk girişte kendisi girer)."
+
+msgctxt "student_intake"
+msgid "E-poçt formatı yanlışdır."
+msgstr "E-posta biçimi geçersiz."
+
+msgctxt "student_intake"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "E-posta zaten kullanılıyor — yer tutucu yazılır."
+
+msgctxt "student_intake"
+msgid "Yaradılacaq."
+msgstr "Oluşturulacak."
+
+msgctxt "student_intake"
+msgid "Bu təşkilatda aktiv «student» rolu yoxdur — əvvəlcə rol kataloqu qurulmalıdır."
+msgstr "Bu kurumda etkin “student” rolü yok — önce rol kataloğu kurulmalıdır."
+
+msgctxt "student_intake"
+msgid "Sətir yazılmadı: %s"
+msgstr "Satır yazılmadı: %s"
+
+msgctxt "student_intake"
+msgid "Hesab yaradıldı."
+msgstr "Hesap oluşturuldu."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı üçün icazəniz yoxdur."
+msgstr "Öğrenci alımı için izniniz yok."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür."
+msgstr "Öğrenci alımı için izniniz yok — bu bölüm yalnızca `user.import` anahtarına sahip roller içindir."
+
+msgctxt "student_intake"
+msgid "Tələbə idxalı"
+msgstr "Öğrenci alımı"
+
+msgctxt "student_intake"
+msgid "Qəbul siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır), sətir-sətir nəyin yaranacağını göstərir, siz təsdiq edəndən sonra hesab + üzvlük + akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib öz parolunu qoyur."
+msgstr "Kayıt listesini yükleyin: sistem önce KURU ÇALIŞMA yapar (hiçbir şey yazılmaz), satır satır nelerin oluşacağını gösterir ve ancak onayınızdan sonra hesap, üyelik ve akademik kaydı oluşturur. Öğrenci ilk girişte e-postasını doğrulayıp kendi parolasını belirler."
+
+msgctxt "student_intake"
+msgid "Hesablar bu təşkilatda yaranır"
+msgstr "Hesaplar bu kurumda oluşturulur"
+
+msgctxt "student_intake"
+msgid "Şablonu endirin"
+msgstr "Şablonu indirin"
+
+msgctxt "student_intake"
+msgid "Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox %(limit)s sətir, ölçü limiti %(size)s MB."
+msgstr "Sütun sırası serbesttir — başlığa göre tanınır. Dosya başına en fazla %(limit)s satır, boyut sınırı %(size)s MB."
+
+msgctxt "student_intake"
+msgid "Boş şablonu endir"
+msgstr "Boş şablonu indir"
+
+msgctxt "student_intake"
+msgid "Sütunlar"
+msgstr "Sütunlar"
+
+msgctxt "student_intake"
+msgid "Sütun"
+msgstr "Sütun"
+
+msgctxt "student_intake"
+msgid "İzah"
+msgstr "Açıklama"
+
+msgctxt "student_intake"
+msgid "Faylı yükləyin"
+msgstr "Dosyayı yükleyin"
+
+msgctxt "student_intake"
+msgid "Fayl seçilməyib"
+msgstr "Dosya seçilmedi"
+
+msgctxt "student_intake"
+msgid "Yoxla (quru icra)"
+msgstr "Kontrol et (kuru çalışma)"
+
+msgctxt "student_intake"
+msgid "Sətir"
+msgstr "Satır"
+
+msgctxt "student_intake"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "student_intake"
+msgid "Ad Soyad"
+msgstr "Ad Soyad"
+
+msgctxt "student_intake"
+msgid "İstifadəçi adı"
+msgstr "Kullanıcı adı"
+
+msgctxt "student_intake"
+msgid "Tətbiq et"
+msgstr "Uygula"
+
+msgctxt "student_intake"
+msgid "Parolları CSV kimi endir"
+msgstr "Parolaları CSV olarak indir"
+
+msgctxt "student_intake"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq."
+msgstr "Tek kullanımlık parolalar YALNIZCA şimdi görünür — ne veritabanında ne de denetim günlüğünde saklanır. CSV'yi indirip öğrencilere iletin; ilk girişte her öğrenciden e-posta doğrulaması (OTP) ve yeni parola istenir."
+
+msgctxt "student_intake"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Önce bir dosya seçin."
+
+msgctxt "student_intake"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "İşlem başarısız oldu. Yeniden deneyin."
+
+msgctxt "student_intake"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Kuru çalışma sonucu (hiçbir şey yazılmadı)"
+
+msgctxt "student_intake"
+msgid "Tətbiq nəticəsi"
+msgstr "Uygulama sonucu"
+
+msgctxt "student_intake"
+msgid "Seçilmiş sətirlər üçün hesab yaradılacaq. Davam edilsin?"
+msgstr "Seçili satırlar için hesap oluşturulacak. Devam edilsin mi?"
+
+msgctxt "student_intake"
+msgid "Yaradılacaq"
+msgstr "Oluşturulacak"
+
+msgctxt "student_intake"
+msgid "Yaradıldı"
+msgstr "Oluşturuldu"
+
+msgctxt "student_intake"
+msgid "Ötürüldü"
+msgstr "Atlandı"
+
+msgctxt "student_intake"
+msgid "Xəta"
+msgstr "Hata"
+
+msgctxt "student_intake"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "student_intake"
+msgid "Emal olunur…"
+msgstr "İşleniyor…"

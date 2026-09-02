@@ -151,3 +151,19 @@ textarea:focus-visible,
 }
 .search-field__clear:hover { background: var(--ems-neutral-100); color: var(--ems-danger-500, #ef4444); }
 .search-field__clear[hidden] { display: none; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   `.sr-only` — üfüqi sürüşmə düzəlişi (PHASE21 UI QA)
+
+   Font Awesome-un vendor `all.min.css`-i `.sr-only`-ni `position: absolute`
+   verir, amma `left/top` TƏYİN ETMİR — element STATİK mövqeyində qalır.
+   Geniş (`overflow-x: auto` içində sürüşən) cədvəlin `<th>`-ində duran
+   `.sr-only` beləcə viewport-dan KƏNARDA yerləşir və `documentElement`-in
+   sürüşmə sahəsini genişləndirir: 768 px-də səhifə 200 px üfüqi sürüşürdü
+   (sillabus siyahısı).  Vendor faylına toxunmuruq — burada bərkidirik.
+   `:focus` variantı (`.sr-only-focusable`) toxunulmaz qalır.
+   ────────────────────────────────────────────────────────────────────────── */
+.sr-only:not(:focus) {
+    left: 0;
+    top: 0;
+}

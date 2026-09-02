@@ -31,7 +31,7 @@ TƏHLÜKƏSİZLİK QEYDLƏRİ
   komandasının çap-parol modeli ilə eyni).
 """
 
-from .apply import IntakeApplyError, apply_plans, student_role
+from .apply import IntakeApplyError, apply_plans, generate_initial_password, student_role
 from .parsing import MAX_ROWS, MAX_UPLOAD_BYTES, IntakeFileError, read_rows
 from .policy import PERM_IMPORT, IntakeAccessError, can_import, require_import
 from .spec import build_template, columns, header_row
@@ -51,6 +51,7 @@ __all__ = [
     "build_template",
     "can_import",
     "columns",
+    "generate_initial_password",
     "header_row",
     "read_rows",
     "require_import",

@@ -51,7 +51,7 @@ Davranış: accounts/js/profile/syllabus_review.js (+ ..._panel.js)
 
     <header class="syl-head syl-head--row">
       <div class="syl-head__text">
-        <h2 class="syl-head__title">{% trans "Sillabus təsdiqi" context "accounts.syllabus" %}</h2>
+        {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
         <p class="syl-head__lead">{{ sr.intro }}</p>
       </div>
       <div class="syl-tabs" role="group" aria-label="{% trans 'Görünüş' context 'accounts.syllabus' %}">

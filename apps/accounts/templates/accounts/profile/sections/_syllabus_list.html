@@ -30,7 +30,7 @@ Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
 
     <header class="syl-head">
       <div class="syl-head__text">
-        <h2 class="syl-head__title">{% trans "Sillabuslar" context "accounts.syllabus" %}</h2>
+        {% comment %}Başlıq profil qabığında artıq göstərilir (bölmə adı) — burada təkrarlanmır (sahibin 2026-09-02 tələbi).{% endcomment %}
         <p class="syl-head__lead">{% trans "Yalnız sizə təyin olunmuş fənlər üzrə sillabus yaradırsınız. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş lazımsa yeni versiya açılır, jurnal və qiymətlər olduğu kimi qalır." context "accounts.syllabus" %}</p>
       </div>
     </header>

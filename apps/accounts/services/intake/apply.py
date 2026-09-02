@@ -44,6 +44,17 @@ _PASSWORD_LENGTH = 10
 STUDENT_ROLE_NAME = "student"
 
 
+def generate_initial_password() -> str:
+    """Birdəfəlik ilkin parol — TƏK MƏNBƏ.
+
+    `import_users_from_excel` management komandası da bunu çağırır ki, UI səthi
+    ilə server aləti eyni parol siyasətini (əlifba + uzunluq) daşısın; siyasət
+    dəyişəndə iki yerdə düzəliş etmək lazım gəlməsin.
+    """
+
+    return get_random_string(_PASSWORD_LENGTH, _PASSWORD_ALPHABET)
+
+
 class IntakeApplyError(Exception):
     """Bütün faylı dayandıran şərt (məsələn təşkilatda `student` rolu yoxdur)."""
 
@@ -80,7 +91,7 @@ def _ensure_curriculum(organization, program, admission_year):
 
 def _create_user(plan, *, organization, role, actor, request):
     values = plan.values
-    password = get_random_string(_PASSWORD_LENGTH, _PASSWORD_ALPHABET)
+    password = generate_initial_password()
 
     user = User.objects.create_user(
         username=values["username"],
@@ -259,4 +270,10 @@ def apply_plans(*, organization, plans, actor, request=None) -> dict:
     }
 
 
-__all__ = ["STUDENT_ROLE_NAME", "IntakeApplyError", "apply_plans", "student_role"]
+__all__ = [
+    "STUDENT_ROLE_NAME",
+    "IntakeApplyError",
+    "apply_plans",
+    "generate_initial_password",
+    "student_role",
+]
