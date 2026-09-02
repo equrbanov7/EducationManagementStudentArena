@@ -52,6 +52,8 @@ logger = logging.getLogger(__name__)
 
 # Bütün mövcud profile section-ları → partial template adı.
 SECTION_PARTIALS: dict[str, str] = {
+    # «Ana səhifə» — kabinetin default bölməsi (FAZA 22).
+    "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
     "notifications": "accounts/profile/sections/_notifications.html",
     "publish-notification": "accounts/profile/sections/_publish_notification.html",
@@ -150,6 +152,8 @@ SECTION_PARTIALS: dict[str, str] = {
 # bölmələri normal full-page naviqasiyada qalır.
 AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
     {
+        # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
+        "dashboard",
         "profile-info",
         "notifications",
         "posts",

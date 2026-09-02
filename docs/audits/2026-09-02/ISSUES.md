@@ -48,6 +48,20 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | P2-8 | Audit jurnalı admin-dən silinə bilir; `get_client_ip` XFF-in ən sol üzvünü oxuyur; base→production settings sürüşməsi; portal qapısı `POST /accounts/login/` ilə keçilir | PHASE23 | OPEN → düzəliş keçidi |
 | P2-9 | Yüklənmiş sənədlər (düzəliş PDF-ləri) icazə yoxlamalı serve view-suz `.url` ilə verilir | scout/security | OPEN — `applications` üçün qapılı download view yazılıb; köhnə modullara tətbiq 2-ci dalğa |
 
+## UI QA + dashboard dalğası (PHASE21/22)
+| # | Problem | Mənbə | Status |
+|---|---|---|---|
+| UI-1 | AZ tarix adları kataloqda korlanmışdı (16 msgid: `September`→«Hələ üzv əlavə olunmayıb.», `aug`→«əvvəl», `Sat`→«Status»…) → sentyabrda BÜTÜN tarixlər səhv | PHASE21 | FIXED (klon + kataloq) |
+| UI-2 | `profile-info`-da xam `position` msgid (fuzzy) | PHASE21 | FIXED (4 dil) |
+| UI-3 | Qrupsuz tələbələr «Müəllim cədvəli» kimi etiketlənirdi (`page_contexts.py:387`, klonda 102 real tələbə) | PHASE21 | FIXED + reqressiya testi |
+| UI-4 | 768 px-də 200 px üfüqi sürüşmə (FA `.sr-only` absolute) | PHASE21 | FIXED (`ems_components.css`) |
+| UI-5 | `.syl-chip__count` kontrast 4.34:1 | PHASE21 | FIXED → 6.92:1 |
+| UI-6 | Heç bir rolda dashboard yox idi — hər kabinet `profile-info` ilə açılırdı | PHASE21/22 | FIXED: `dashboard` («Ana səhifə») bölməsi, 18 rol-şərtli vidcet, default landing, 15 test, sorğu büdcəsi ≤28 |
+| UI-7 | 223 AZ `#, fuzzy` yazı səhv msgstr-lidir (`Sil`→`Dil`, `Blokla`→`Bloku aç`…) — hazırda zərərsiz, `--use-fuzzy`/un-fuzzy olsa fəlakət | PHASE21 | OPEN (əl ilə yenidən tərcümə lazımdır; §8 skript) |
+| UI-8 | 7 bölmədə rol adları ingiliscə; `my-courses` etiketi «Təyin olunmuş fənlərim» amma kurs *yaradıcısıdır*; semestr/il defoltları cari dövrdən kənardır; `analytics` ~3 s | PHASE21 | OPEN (P2) |
+| UI-9 | Off-canvas menyu tab sırasında; sidebar linklərində `:focus-visible` yoxdur (navbar.css ölçü-dondurulub) | PHASE21 | OPEN (P3) |
+| UI-10 | Tələbə bölmə iç başlıqları qabıq başlığını təkrarlayırdı («Sillabuslar» ×2) | sahib | FIXED (sillabus, sillabus təsdiqi, cədvəl idarəetməsi, yük bölgüsü, dərs yüküm) |
+
 ## P3 — cilalama
 | # | Problem | Mənbə | Status |
 |---|---|---|---|

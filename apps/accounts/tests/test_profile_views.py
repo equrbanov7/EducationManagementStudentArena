@@ -1322,7 +1322,10 @@ class ProfileViewTest(TestCase):
         )
 
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile"))
+        # FAZA 22: parametrsiz açılış artıq «Ana səhifə»dir — bu yoxlama
+        # `profile-info` panelinin məzmununa aiddir, ona görə bölmə AÇIQ
+        # şəkildə istənilir (davranış dəyişməyib, yalnız default hədəf).
+        response = self.client.get(reverse("accounts:profile"), {"section": "profile-info"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təşkilat təsdiqi gözlənilir")
@@ -2571,7 +2574,9 @@ class ProfileViewTest(TestCase):
         )
 
         _login_with_org(self.client, superuser, member_org)
-        response = self.client.get(reverse("accounts:profile"))
+        # FAZA 22 — bax yuxarıdakı şərh: «Təşkilat girişləri» `profile-info`
+        # panelindədir, default bölmə isə artıq «Ana səhifə»dir.
+        response = self.client.get(reverse("accounts:profile"), {"section": "profile-info"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təşkilat girişləri")

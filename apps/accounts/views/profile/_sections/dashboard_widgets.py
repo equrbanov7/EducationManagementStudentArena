@@ -30,21 +30,39 @@ ROW_LIMIT = 5
 
 
 def section_link(section: str, label) -> dict:
-    """SPA-nın tutduğu `?section=` keçidi (sidebar linkləri ilə eyni müqavilə)."""
-    return {"section": section, "label": label, "url": "%s?section=%s" % (reverse("accounts:profile"), section)}
+    """SPA-nın tutduğu `?section=` keçidi (sidebar linkləri ilə eyni müqavilə).
+
+    ``title`` sonradan ``dashboard.build_dashboard_section`` tərəfindən hədəf
+    bölmənin RƏSMİ adı ilə doldurulur (SPA panel başlığını `data-title`-dan
+    oxuyur; «Cədvələ keç» kimi əməl mətni başlıq olmamalıdır).
+    """
+    return {
+        "section": section,
+        "label": label,
+        "title": "",
+        "url": "%s?section=%s" % (reverse("accounts:profile"), section),
+    }
 
 
 def widget(key: str, title, icon: str, *, tone: str = "", stats=None, rows=None, link=None, empty="") -> dict:
-    """Vahid vidjet müqaviləsi — şablon YALNIZ bu açarları oxuyur."""
+    """Vahid vidjet müqaviləsi — şablon YALNIZ bu açarları oxuyur.
+
+    ``is_empty`` BURADA hesablanır: sətir yoxdursa VƏ bütün rəqəmlər sıfırdırsa
+    vidjet «boşdur» sayılır və şablon dost boş-hal mətnini göstərir.  Qərarı
+    şablonda saxlasaydıq hər vidjet üçün ayrı şərt yazmaq lazım gələrdi.
+    """
+    stats = list(stats or ())
+    rows = list(rows or ())
     return {
         "key": key,
         "title": title,
         "icon": icon,
         "tone": tone,
-        "stats": list(stats or ()),
-        "rows": list(rows or ()),
+        "stats": stats,
+        "rows": rows,
         "link": link,
         "empty": empty,
+        "is_empty": not rows and all(str(item.get("value", "")).strip() in ("", "0", "0%") for item in stats),
     }
 
 
@@ -100,17 +118,26 @@ def _slot_rows(slots) -> list:
 
 
 def student_today(*, organization, record, period, allowed_sections) -> dict | None:
-    """«Bu gün dərslər» — SAR qrupunun cədvəli, bu günə + həftə paritetinə görə."""
-    if "my-schedule" not in allowed_sections or record is None or period is None:
+    """«Bu gün dərslər» — SAR qrupunun cədvəli, bu günə + həftə paritetinə görə.
+
+    Akademik qeydi (SAR) və ya cari semestri OLMAYAN tələbədə vidjet YOX OLMUR
+    — boş vəziyyət göstərir.  Səbəb: köçürülmüş bazada qeydsiz hesablar var və
+    «heç nə görünmür» onlar üçün nasazlıqdan fərqlənmir.
+    """
+    if "my-schedule" not in allowed_sections:
         return None
     from apps.registrar import schedule as schedule_service
 
-    group = getattr(record, "group", None)
-    slots = (
-        schedule_service.get_group_schedule(organization=organization, group=group, period=period)
-        if group is not None
-        else []
-    )
+    group = getattr(record, "group", None) if record is not None else None
+    if period is None or group is None:
+        return widget(
+            "student-today",
+            pgettext(_CTX, "Bu gün dərslər"),
+            "fa-calendar-day",
+            link=section_link("my-schedule", pgettext(_CTX, "Cədvələ keç")),
+            empty=pgettext(_CTX, "Cari semestr üçün qrup cədvəliniz tapılmadı."),
+        )
+    slots = schedule_service.get_group_schedule(organization=organization, group=group, period=period)
     week_context = schedule_service.build_week_context(period)
     today = todays_slots(slots, week_context)
     next_label = _time_label(today[0]) if today else pgettext(_CTX, "yoxdur")
@@ -160,13 +187,21 @@ def student_grades(*, organization, user, allowed_sections) -> dict | None:
 
 def student_attendance(*, organization, user, record, period, allowed_sections) -> dict | None:
     """«Davamiyyət» — cari dövrün qayıb saatları və proqramın buraxılış limiti."""
-    if "my-journal" not in allowed_sections or record is None or period is None:
+    if "my-journal" not in allowed_sections:
         return None
+    if record is None or period is None:
+        return widget(
+            "student-attendance",
+            pgettext(_CTX, "Davamiyyət"),
+            "fa-user-check",
+            link=section_link("my-journal", pgettext(_CTX, "Jurnala keç")),
+            empty=pgettext(_CTX, "Akademik qeydiniz tapılmadı — RİM-ə müraciət edin."),
+        )
     from apps.registrar.models import Enrollment
 
-    summary = Enrollment.objects.filter(
-        organization=organization, student=user, offering__period=period
-    ).aggregate(absence=Sum("absence_hours"), subjects=Count("id"))
+    summary = Enrollment.objects.filter(organization=organization, student=user, offering__period=period).aggregate(
+        absence=Sum("absence_hours"), subjects=Count("id")
+    )
     absence = int(summary.get("absence") or 0)
     limit_percent = int(getattr(getattr(record, "program", None), "absence_limit_percent", 0) or 0)
     return widget(
@@ -272,7 +307,7 @@ def teacher_syllabus(*, request, organization, allowed_sections) -> dict | None:
     )
 
 
-def my_workload(*, organization, user, allowed_sections) -> dict | None:
+def my_workload(*, organization, user, allowed_sections, is_teacher: bool = False) -> dict | None:
     """«Dərs yüküm» — təsdiqlənmiş illik saat + norma doluluğu."""
     if "my-workload" not in allowed_sections:
         return None
@@ -282,6 +317,11 @@ def my_workload(*, organization, user, allowed_sections) -> dict | None:
     year = years[0] if years else ""
     summary = teacher_workload_summary(organization=organization, teacher=user, academic_year=year)
     total = int(summary.get("total_hours") or 0)
+    # `workload.view` açarı dekan/koordinator/rektorda da var (FAZA 21 §1 qeydi);
+    # onlarda sətir HEÇ VAXT olmur.  Sıfır saatlıq «0/500/0%» kartı ana səhifədə
+    # sırf səs-küydür — tədris aparmayan aktora GÖSTƏRİLMİR.
+    if not total and not is_teacher:
+        return None
     return widget(
         "my-workload",
         pgettext(_CTX, "Dərs yüküm"),

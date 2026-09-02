@@ -139,8 +139,20 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertTrue(json.loads(fragment.content)["ok"])
 
     # ── Sidebar shows the Universitet group links per role ───────────────────
+    def _sidebar(self, user) -> str:
+        """YALNIZ sol menyunun HTML-i.
+
+        FAZA 22-dən sonra kabinetin default bölməsi «Ana səhifə»dir və onun
+        vidjet kartları da `data-section="…"` keçidləri daşıyır.  Bu test
+        SİDEBAR tərkibini qoruyur, ona görə müqayisə yalnız `<aside>` blokunda
+        aparılır — əks halda ana səhifənin keçidi «menyuda var» kimi oxunardı.
+        """
+        page = self._client(user).get(reverse("accounts:profile")).content.decode()
+        start = page.index('<aside class="profile-sidebar"')
+        return page[start : page.index("</aside>", start)]
+
     def test_sidebar_links_per_role(self):
-        student_page = self._client(self.student).get(reverse("accounts:profile")).content.decode()
+        student_page = self._sidebar(self.student)
         self.assertIn('data-section="my-schedule"', student_page)
         self.assertIn('data-section="academic-calendar"', student_page)
         self.assertNotIn('data-section="analytics"', student_page)
@@ -148,13 +160,13 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertIn('data-section="my-journal"', student_page)
 
         # Müəllim: jurnal iş sahəsi yeni tabda ayrıca URL-də açılır.
-        teacher_page = self._client(self.teacher).get(reverse("accounts:profile")).content.decode()
+        teacher_page = self._sidebar(self.teacher)
         self.assertNotIn('data-section="my-journal"', teacher_page)
         self.assertIn('href="/jurnal/" target="_blank"', teacher_page)
 
-        dean_page = self._client(self.dean).get(reverse("accounts:profile")).content.decode()
+        dean_page = self._sidebar(self.dean)
         self.assertIn('data-section="analytics"', dean_page)
         self.assertNotIn('data-section="journal-close"', dean_page)
 
-        rim_page = self._client(self.rim).get(reverse("accounts:profile")).content.decode()
+        rim_page = self._sidebar(self.rim)
         self.assertIn('data-section="journal-close"', rim_page)

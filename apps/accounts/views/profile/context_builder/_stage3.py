@@ -396,6 +396,19 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "dashboard" in self.allowed_sections and self.active_section == "dashboard":
+            from .._sections.dashboard import build_dashboard_section
+
+            build_dashboard_section(
+                self.request,
+                self.dashboard_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+                capabilities=self.capabilities,
+                applications_pending_count=self.applications_pending_count,
+                pending_appeals_count=self.pending_appeals_count,
+            )
         if "student-intake" in self.allowed_sections and self.active_section == "student-intake":
             from .._sections.student_intake import build_student_intake_section
 
