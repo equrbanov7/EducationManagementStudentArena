@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from apps.applications.services.catalog import seed_catalog
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -19,13 +20,17 @@ class Command(BaseCommand):
         parser.add_argument("--org", dest="org_slug", default="", help="Yalnız bu slug-lı təşkilat.")
 
     def handle(self, *args, **options):
-        queryset = Organization.objects.filter(is_active=True)
-        slug = (options.get("org_slug") or "").strip()
-        if slug:
-            queryset = queryset.filter(slug=slug)
-        else:
-            queryset = queryset.filter(org_type=OrganizationType.UNIVERSITY)
+        # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1).
+        with rls_worker_atomic():
+            queryset = Organization.objects.filter(is_active=True)
+            slug = (options.get("org_slug") or "").strip()
+            if slug:
+                queryset = queryset.filter(slug=slug)
+            else:
+                queryset = queryset.filter(org_type=OrganizationType.UNIVERSITY)
 
-        for organization in queryset:
-            units, kinds = seed_catalog(organization)
-            self.stdout.write(self.style.SUCCESS(f"{organization.slug}: {len(units)} şöbə, {len(kinds)} növ hazırdır."))
+            for organization in queryset:
+                units, kinds = seed_catalog(organization)
+                self.stdout.write(
+                    self.style.SUCCESS(f"{organization.slug}: {len(units)} şöbə, {len(kinds)} növ hazırdır.")
+                )

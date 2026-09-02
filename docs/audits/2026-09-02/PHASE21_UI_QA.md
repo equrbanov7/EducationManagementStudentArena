@@ -152,6 +152,20 @@ sistemdə **hər tarixdə** görünürdü.
 | `Sat` | `Status` | `Şnb` |
 | `Sun` | `Tələbə` | `Bzr` |
 
+Eyni korlanma **kontekstli variantlarda da** var idi (Django `date:"F"` filtri
+`alt. month`, `date:"M"` isə `abbrev. month` kontekstini işlədir) — onlar da düzəldildi:
+
+| msgctxt | msgid | əvvəl | sonra |
+|---|---|---|---|
+| `alt. month` | `January` | `manual` | `Yanvar` |
+| `alt. month` | `March` | `Axtar` | `Mart` |
+| `alt. month` | `September` | **`Hələ üzv əlavə olunmayıb.`** | `Sentyabr` |
+| `alt. month` | `November` | `Üzv` | `Noyabr` |
+| `alt. month` | `December` | `Üzv` | `Dekabr` |
+| `abbrev. month` | `March` | `Axtar` | `Mart` |
+
+**Cəmi 16 korlanmış tarix girişi düzəldildi.**
+
 Dəyərlər Django-nun öz `az` kataloqundan (`django/conf/locale/az`) götürülüb.
 Bu 10 msgid-in layihə kodunda **heç bir istifadəsi yoxdur** (yoxlanıldı:
 `grep -r 'trans "January"' apps/ config/ templates/ static/` → 0) — yalnız Django-nun
@@ -280,10 +294,31 @@ Brauzerdə ölçüldü: 8 çipdən 7-si 4.34 → **6.92**, aktiv çip 6.7 (onsuz
   `scripts/staging_inspect.sh migrate` ilə tətbiq etdim;
   (2) `apps/accounts/views/profile/context_builder/_stage3.py:412` paralel agentin
   yarımçıq redaktəsi ilə `SyntaxError: '(' was never closed` verirdi → gözlədim.
+* ⚠️ **Paralel commit mənim kataloq düzəlişlərimi GERİ QAYTARDI.** `d32e3d37`
+  («merge(workload): … 4 dil kataloqu») `locale/az/LC_MESSAGES/django.po`-nu
+  bütövlükdə əvəz etdi və §4.1-dəki tarix düzəlişləri itdi. Yenidən tətbiq edildi
+  və `.mo` yenidən kompilyasiya olundu. **Merge-dən sonra
+  `locale/az/LC_MESSAGES/django.po`-nun tarix girişləri təkrar yoxlanmalıdır** —
+  yoxlama üçün:
+  ```bash
+  .venv/bin/python - <<'PY'
+  import gettext, django, os
+  a = gettext.GNUTranslations(open("locale/az/LC_MESSAGES/django.mo","rb"))
+  d = gettext.GNUTranslations(open(os.path.join(os.path.dirname(django.__file__),
+      "conf/locale/az/LC_MESSAGES/django.mo"),"rb"))
+  M = ["January","February","March","April","May","June","July","August",
+       "September","October","November","December"]
+  for ctx in (None, "alt. month"):
+      for m in M:
+          p = a.pgettext(ctx, m) if ctx else a.gettext(m)
+          q = d.pgettext(ctx, m) if ctx else d.gettext(m)
+          if p != q: print("KORLANIB", ctx, m, repr(p), "!=", repr(q))
+  PY
+  ```
 
 ---
 
-## 7. FAZA 32 — rol / funksiya matrisi (crna qaralama)
+## 7. FAZA 32 — rol / funksiya matrisi (qaralama)
 
 | Rol | Funksiya | UI testi | İcazə testi | Data testi | Nəticə |
 |---|---|---|---|---|---|

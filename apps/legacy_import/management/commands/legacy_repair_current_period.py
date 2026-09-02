@@ -18,6 +18,7 @@ from apps.legacy_import.services.repair_support import (
     render_summary,
     render_table,
 )
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -37,32 +38,36 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        context = build_context(options)
-        created = []
-        if options["create_year"]:
-            if context.apply:
-                created = repair_periods.create_year(context.organization, options["create_year"])
-            else:
-                self.stdout.write(f"[dry-run] yaradılacaq tədris ili: {options['create_year']} (Payız/Yaz/Yay)")
+        # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1): bütün DB işi bir
+        # worker-atomic sərhədi içindədir. Sətir-səviyyəli fail-open semantikası
+        # dəyişmir — servislərdəki daxili ``transaction.atomic()`` savepoint olur.
+        with rls_worker_atomic():
+            context = build_context(options)
+            created = []
+            if options["create_year"]:
+                if context.apply:
+                    created = repair_periods.create_year(context.organization, options["create_year"])
+                else:
+                    self.stdout.write(f"[dry-run] yaradılacaq tədris ili: {options['create_year']} (Payız/Yaz/Yay)")
 
-        rows = repair_periods.period_rows(context.organization)
-        today = repair_periods.today()
-        target, reason = repair_periods.select_period(rows, selector=options["period"], today=today)
-        self.stdout.write(render_table(repair_periods.TABLE_HEADERS, [row.as_row() for row in rows], max_rows=60))
+            rows = repair_periods.period_rows(context.organization)
+            today = repair_periods.today()
+            target, reason = repair_periods.select_period(rows, selector=options["period"], today=today)
+            self.stdout.write(render_table(repair_periods.TABLE_HEADERS, [row.as_row() for row in rows], max_rows=60))
 
-        changed = False
-        if target is not None and context.apply:
-            changed = repair_periods.set_current(context.organization, target, actor=context.actor)
+            changed = False
+            if target is not None and context.apply:
+                changed = repair_periods.set_current(context.organization, target, actor=context.actor)
 
-        summary = {
-            "bugün": today,
-            "dövr sayı": len(rows),
-            "yaradılan dövr": len(created),
-            "seçilən dövr": f"{target.academic_year} {target.name}" if target is not None else "—",
-            "seçim səbəbi": reason,
-            "bugünü əhatə edən dövr": (
-                "var" if repair_periods.containing_period(rows, today) is not None else "YOXDUR"
-            ),
-            "is_current dəyişdi": "bəli" if changed else "xeyr",
-        }
-        self.stdout.write(render_summary("legacy_repair_current_period", context, summary))
+            summary = {
+                "bugün": today,
+                "dövr sayı": len(rows),
+                "yaradılan dövr": len(created),
+                "seçilən dövr": f"{target.academic_year} {target.name}" if target is not None else "—",
+                "seçim səbəbi": reason,
+                "bugünü əhatə edən dövr": (
+                    "var" if repair_periods.containing_period(rows, today) is not None else "YOXDUR"
+                ),
+                "is_current dəyişdi": "bəli" if changed else "xeyr",
+            }
+            self.stdout.write(render_summary("legacy_repair_current_period", context, summary))
