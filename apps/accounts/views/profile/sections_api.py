@@ -141,6 +141,9 @@ SECTION_PARTIALS: dict[str, str] = {
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
+    "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
+    "my-workload": "accounts/profile/sections/_my_workload.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -204,6 +207,10 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
         # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
         "teaching-handover",
+        # Dərs yükü panelləri SPA-dır: server çərçivəni verir, sətirlər JSON
+        # GET-lə gəlir, bölgü/təsdiq isə ayrıca JSON POST-la gedir.
+        "workload-distribution",
+        "my-workload",
         # Dəqiqləşdirmə növbəsi də OXU-ONLY render olunur — server yalnız
         # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
         # POST endpoint-inə (multipart, sənədlə) gedir.

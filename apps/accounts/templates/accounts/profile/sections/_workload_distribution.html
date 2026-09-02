@@ -1,0 +1,327 @@
+{% load i18n %}
+{% comment %}
+«Yük bölgüsü» bölməsi — kafedra müdirinin illik tədris tapşırığını müəllimlərə
+bölməsi (spec §6.3).
+
+İcazə: `workload.manage` / `workload.distribute` (kafedra müdiri öz kafedrası,
+RİM/prorektor bütün universitet). Menyu görünürlüyü `rbac_sections.py`-dadır;
+KONKRET kafedranın əhatəyə düşməsi `apps/workload/services/scoping.py`-da
+fail-closed yenidən yoxlanılır.
+
+Panel SPA-dır: server yalnız çərçivəni (icazə + endpoint URL-ləri + kataloqlar)
+verir, sətirlər JSON-la gəlir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur)
+və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları ilə ötürülür.
+
+⚠️ Modallar `[data-profile-section-panel]` İÇİNDƏDİR (AJAX swap-da itməsin).
+{% endcomment %}
+{% if 'workload-distribution' in allowed_sections %}
+<section class="profile-section-panel profile-section--workload {% if active_section == 'workload-distribution' %}is-active{% endif %}"
+         data-profile-section-panel="workload-distribution"
+         data-source-url="{{ profile_base_url }}?section=workload-distribution">
+
+{% if not workload_distribution_section.has_access %}
+  <p class="wl__denied" role="status">{{ workload_distribution_section.access_denied_message }}</p>
+{% else %}
+<div class="wl"
+     data-wl-root
+     data-rows-url="{{ workload_distribution_section.rows_url }}"
+     data-task-url="{{ workload_distribution_section.task_url }}"
+     data-save-row-url="{{ workload_distribution_section.save_row_url }}"
+     data-delete-row-url="{{ workload_distribution_section.delete_row_url }}"
+     data-assign-url="{{ workload_distribution_section.assign_url }}"
+     data-unassign-url="{{ workload_distribution_section.unassign_url }}"
+     data-confirm-url="{{ workload_distribution_section.confirm_url }}"
+     data-amend-url="{{ workload_distribution_section.amend_url }}"
+     data-teachers-url="{{ workload_distribution_section.teachers_url }}"
+     data-options-url="{{ workload_distribution_section.options_url }}"
+     data-curriculum-url="{{ workload_distribution_section.curriculum_url }}"
+     data-chair-id="{{ workload_distribution_section.chair_id }}"
+     data-academic-year="{{ workload_distribution_section.academic_year }}"
+     data-can-manage="{% if workload_distribution_section.can_manage %}1{% else %}0{% endif %}"
+     data-can-distribute="{% if workload_distribution_section.can_distribute %}1{% else %}0{% endif %}">
+
+  {% comment %}Kataloqlar (fəaliyyət/fəsil/forma/səviyyə/səbəb) JSON blokla
+  ötürülür — xarici JS Django template engine-dən keçmir (bax CLAUDE.md).{% endcomment %}
+  <script id="wl-catalog" type="application/json">{{ workload_distribution_section.catalog_json|safe }}</script>
+
+  <header class="wl__head">
+    <div>
+      <h2 class="wl__title">{% trans "Yük bölgüsü" context "accounts.workload" %}</h2>
+      <p class="wl__intro">
+        {% trans "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Hər fəaliyyət növü (mühazirə, seminar, laboratoriya) ayrıca bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır." context "accounts.workload" %}
+      </p>
+    </div>
+    <span class="wl__status" data-wl-status-chip hidden></span>
+  </header>
+
+  {# ── Süzgəc zolağı: kafedra + il + fəsil + axtarış ──────────────────── #}
+  <form class="wl-filters" data-wl-filters novalidate>
+    <div class="wl-field">
+      <label for="wl-chair">{% trans "Kafedra" context "accounts.workload" %}</label>
+      <select id="wl-chair" name="chair" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-chair>
+        {% for chair in workload_distribution_section.chairs %}
+        <option value="{{ chair.id }}" {% if chair.id == workload_distribution_section.chair_id %}selected{% endif %}>{{ chair.name }}</option>
+        {% empty %}
+        <option value="">{% trans "Əhatənizdə kafedra yoxdur" context "accounts.workload" %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="wl-field">
+      <label for="wl-year">{% trans "Tədris ili" context "accounts.workload" %}</label>
+      <input type="text" id="wl-year" name="year" autocomplete="off" inputmode="numeric"
+             list="wl-year-options"
+             value="{{ workload_distribution_section.academic_year }}"
+             placeholder="2026/2027" data-wl-year>
+      <datalist id="wl-year-options">
+        {% for year in workload_distribution_section.years %}<option value="{{ year }}"></option>{% endfor %}
+      </datalist>
+    </div>
+    <div class="wl-field">
+      <label for="wl-season">{% trans "Semestr" context "accounts.workload" %}</label>
+      <select id="wl-season" name="season" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-season>
+        <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
+        {% for season in workload_distribution_section.seasons %}
+        <option value="{{ season.key }}">{{ season.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="wl-field wl-field--search">
+      <label for="wl-q">{% trans "Axtarış" context "accounts.workload" %}</label>
+      <input type="search" id="wl-q" name="q" autocomplete="off"
+             placeholder="{% trans 'fənn və ya qrup' context 'accounts.workload' %}" data-wl-search>
+    </div>
+    <div class="wl-filters__actions">
+      <button type="button" class="wl-btn wl-btn--ghost" data-wl-create-task>
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>{% trans "Tapşırıq yarat" context "accounts.workload" %}</span>
+      </button>
+      <button type="button" class="wl-btn wl-btn--ghost" data-wl-open-row-modal>
+        <i class="fas fa-table-list" aria-hidden="true"></i>
+        <span>{% trans "Sətir əlavə et" context "accounts.workload" %}</span>
+      </button>
+      <button type="button" class="wl-btn wl-btn--primary" data-wl-open-confirm>
+        <i class="fas fa-circle-check" aria-hidden="true"></i>
+        <span>{% trans "Bölgünü təsdiqlə" context "accounts.workload" %}</span>
+      </button>
+    </div>
+  </form>
+
+  <div class="wl__layout">
+    {# ── Sol: sətirlər ──────────────────────────────────────────────── #}
+    <div class="wl__main">
+      <div class="wl-skeleton" data-wl-skeleton hidden aria-hidden="true">
+        <span class="wl-skeleton__bar"></span><span class="wl-skeleton__bar"></span><span class="wl-skeleton__bar"></span>
+      </div>
+      <div class="ems-empty wl__empty" data-wl-empty hidden>
+        <i class="fas fa-scale-balanced ems-empty-icon" aria-hidden="true"></i>
+        <p class="ems-empty-title">{% trans "Bu il üçün tapşırıq yoxdur" context "accounts.workload" %}</p>
+        <p class="ems-empty-hint">{% trans "«Tapşırıq yarat» düyməsi ilə kafedranın illik tapşırığını açın, sonra sətirləri əlavə edin və ya tədris planından gətirin." context "accounts.workload" %}</p>
+      </div>
+      <div class="wl-rows" data-wl-rows role="list"></div>
+    </div>
+
+    {# ── Sağ: müəllim yük paneli ────────────────────────────────────── #}
+    <aside class="wl__aside" aria-label="{% trans 'Müəllim yükü' context 'accounts.workload' %}">
+      <h3 class="wl-aside__title">{% trans "Müəllim yükü" context "accounts.workload" %}</h3>
+      <p class="wl-aside__hint">{% trans "Norma NK №215-ə görə bir ştat üçün 500 saatdır (təşkilat konfiqurasiyası ilə dəyişir)." context "accounts.workload" %}</p>
+      <div class="wl-teachers" data-wl-teacher-panel></div>
+    </aside>
+  </div>
+
+  {# ══ MODAL — sətir yaratma/redaktə ══════════════════════════════════ #}
+  <div class="modal fade wl-modal" id="wlRowModal" tabindex="-1" aria-hidden="true" data-wl-row-modal>
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans "Tapşırıq sətri" context "accounts.workload" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+        </div>
+        <div class="modal-body">
+          <form class="wl-form" data-wl-row-form novalidate>
+            <input type="hidden" name="row_id" data-wl-row-id>
+            <div class="wl-form__grid">
+              <label class="wl-form__field">
+                <span>{% trans "Fənn (kataloq)" context "accounts.workload" %}</span>
+                <select name="subject_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-option="subjects">
+                  <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
+                </select>
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "Fənn adı (sərbəst)" context "accounts.workload" %}</span>
+                <input type="text" name="subject_text" maxlength="255">
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "Semestr (dövr)" context "accounts.workload" %}</span>
+                <select name="period_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-option="periods">
+                  <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
+                </select>
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "Fəsil" context "accounts.workload" %}</span>
+                <select name="season" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="seasons"></select>
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "Sətir növü" context "accounts.workload" %}</span>
+                <select name="row_kind" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="row_kinds"></select>
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "İxtisas" context "accounts.workload" %}</span>
+                <select name="specialty_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-option="specialties">
+                  <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
+                </select>
+              </label>
+              <label class="wl-form__field wl-form__field--wide">
+                <span>{% trans "Qruplar" context "accounts.workload" %}</span>
+                <select name="group_ids" multiple size="4" data-wl-option="groups"></select>
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "Təhsil forması" context "accounts.workload" %}</span>
+                <select name="education_form" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="education_forms"></select>
+              </label>
+              <label class="wl-form__field">
+                <span>{% trans "Səviyyə" context "accounts.workload" %}</span>
+                <select name="degree_level" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="degree_levels"></select>
+              </label>
+              <label class="wl-form__field"><span>{% trans "Tələbə sayı" context "accounts.workload" %}</span><input type="number" name="student_count" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "Birləşmə sayı" context "accounts.workload" %}</span><input type="number" name="union_count" min="0" value="1"></label>
+              <label class="wl-form__field"><span>{% trans "Qrup/yarımqrup sayı" context "accounts.workload" %}</span><input type="number" name="subgroup_count" min="0" value="1"></label>
+              <label class="wl-form__field"><span>{% trans "Mühazirə (plan)" context "accounts.workload" %}</span><input type="number" name="lecture_plan" min="0" value="0" data-wl-plan="lecture"></label>
+              <label class="wl-form__field"><span>{% trans "Mühazirə (cəmi)" context "accounts.workload" %}</span><input type="number" name="lecture_total" min="0" value="0" data-wl-total="lecture"></label>
+              <label class="wl-form__field"><span>{% trans "Seminar (plan)" context "accounts.workload" %}</span><input type="number" name="seminar_plan" min="0" value="0" data-wl-plan="seminar"></label>
+              <label class="wl-form__field"><span>{% trans "Seminar (cəmi)" context "accounts.workload" %}</span><input type="number" name="seminar_total" min="0" value="0" data-wl-total="seminar"></label>
+              <label class="wl-form__field"><span>{% trans "Laboratoriya (plan)" context "accounts.workload" %}</span><input type="number" name="lab_plan" min="0" value="0" data-wl-plan="lab"></label>
+              <label class="wl-form__field"><span>{% trans "Laboratoriya (cəmi)" context "accounts.workload" %}</span><input type="number" name="lab_total" min="0" value="0" data-wl-total="lab"></label>
+              <label class="wl-form__field"><span>{% trans "Məsləhət" context "accounts.workload" %}</span><input type="number" name="consult_hours" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "İmtahan" context "accounts.workload" %}</span><input type="number" name="exam_hours" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "Buraxılış işi" context "accounts.workload" %}</span><input type="number" name="thesis_hours" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "Dissertant rəhbərliyi" context "accounts.workload" %}</span><input type="number" name="postgrad_hours" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "Elmi-tədqiqat təcrübəsi" context "accounts.workload" %}</span><input type="number" name="practice_research_hours" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "İstehsalat təcrübəsi" context "accounts.workload" %}</span><input type="number" name="practice_production_hours" min="0" value="0"></label>
+              <label class="wl-form__field"><span>{% trans "Kredit" context "accounts.workload" %}</span><input type="text" name="credits" maxlength="20"></label>
+              <label class="wl-form__field"><span>{% trans "Kredit dəyəri" context "accounts.workload" %}</span><input type="number" name="credits_value" min="0" value="0"></label>
+            </div>
+            <p class="wl-form__error" data-wl-row-error role="alert" hidden></p>
+            <ul class="wl-form__warnings" data-wl-row-warnings hidden></ul>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="wl-btn wl-btn--ghost" data-wl-import-curriculum>
+            <i class="fas fa-file-import" aria-hidden="true"></i>
+            <span>{% trans "Tədris planından gətir" context "accounts.workload" %}</span>
+          </button>
+          <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "Bağla" context "accounts.workload" %}</button>
+          <button type="button" class="wl-btn wl-btn--primary" data-wl-save-row>{% trans "Yadda saxla" context "accounts.workload" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══ MODAL — bölgü (fəaliyyət → müəllim → saat) ═════════════════════ #}
+  <div class="modal fade wl-modal" id="wlAssignModal" tabindex="-1" aria-hidden="true" data-wl-assign-modal>
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans "Müəllimə bölgü" context "accounts.workload" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+        </div>
+        <div class="modal-body">
+          <p class="wl-assign__row" data-wl-assign-row-label></p>
+          <form class="wl-form" data-wl-assign-form novalidate>
+            <input type="hidden" name="row_id" data-wl-assign-row-id>
+            <input type="hidden" name="assignment_id" data-wl-assign-id>
+            <label class="wl-form__field">
+              <span>{% trans "Fəaliyyət növü" context "accounts.workload" %}</span>
+              <select name="activity" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-assign-activity></select>
+            </label>
+            <p class="wl-assign__remaining" data-wl-assign-remaining></p>
+            <label class="wl-form__field">
+              <span>{% trans "Müəllim" context "accounts.workload" %}</span>
+              <select name="teacher_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-assign-teacher>
+                <option value="">{% trans "Vakant (müəllim təyin edilməyib)" context "accounts.workload" %}</option>
+              </select>
+            </label>
+            <label class="wl-form__field">
+              <span>{% trans "Saat" context "accounts.workload" %}</span>
+              <input type="number" name="hours" min="1" value="1" required>
+            </label>
+            <label class="wl-form__field">
+              <span>{% trans "Qrup qeydi" context "accounts.workload" %}</span>
+              <input type="text" name="groups_note" maxlength="255" placeholder="{% trans '236 İ ing, 2-ci yarımqrup' context 'accounts.workload' %}">
+            </label>
+            <label class="wl-form__check">
+              <input type="checkbox" name="is_hourly_paid" value="1">
+              <span>{% trans "Saathesabı fondundan" context "accounts.workload" %}</span>
+            </label>
+            <p class="wl-form__error" data-wl-assign-error role="alert" hidden></p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "Bağla" context "accounts.workload" %}</button>
+          <button type="button" class="wl-btn wl-btn--primary" data-wl-save-assign>{% trans "Əlavə et" context "accounts.workload" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══ MODAL — bölgünün təsdiqi (nəticələri açıq göstərir) ════════════ #}
+  <div class="modal fade wl-modal" id="wlConfirmModal" tabindex="-1" aria-hidden="true" data-wl-confirm-modal>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans "Bölgünü təsdiqlə" context "accounts.workload" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+        </div>
+        <div class="modal-body">
+          <p>{% trans "Təsdiqdən sonra:" context "accounts.workload" %}</p>
+          <ul class="wl-confirm__list">
+            <li>{% trans "hər müəllimə «Dərs yükü təyin edildi» bildirişi gedəcək;" context "accounts.workload" %}</li>
+            <li>{% trans "fənn + semestr + qrup dolu olan sətirlər üçün elektron jurnal açılışı yaradılacaq (mövcud açılışlar silinmir);" context "accounts.workload" %}</li>
+            <li>{% trans "sonrakı dəyişikliklər yalnız səbəbli düzəliş (amendment) ilə mümkün olacaq." context "accounts.workload" %}</li>
+          </ul>
+          <div class="wl-confirm__stats" data-wl-confirm-stats></div>
+          <p class="wl-form__error" data-wl-confirm-error role="alert" hidden></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" context "accounts.workload" %}</button>
+          <button type="button" class="wl-btn wl-btn--primary" data-wl-do-confirm>{% trans "Təsdiqlə" context "accounts.workload" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══ MODAL — təsdiqdən sonrakı düzəliş ══════════════════════════════ #}
+  <div class="modal fade wl-modal" id="wlAmendModal" tabindex="-1" aria-hidden="true" data-wl-amend-modal>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans "Düzəliş sorğusu" context "accounts.workload" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+        </div>
+        <div class="modal-body">
+          <p class="wl-amend__hint">{% trans "Təsdiqlənmiş bölgü dəyişdirilir — səbəb və qeyd məcburidir, hər düzəliş audit jurnalına yazılır." context "accounts.workload" %}</p>
+          <form class="wl-form" data-wl-amend-form novalidate>
+            <input type="hidden" name="target_kind" data-wl-amend-target-kind>
+            <input type="hidden" name="target_id" data-wl-amend-target-id>
+            <label class="wl-form__field">
+              <span>{% trans "Səbəb" context "accounts.workload" %}</span>
+              <select name="reason" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="amendment_reasons"></select>
+            </label>
+            <label class="wl-form__field">
+              <span>{% trans "Qeyd" context "accounts.workload" %}</span>
+              <textarea name="note" rows="3" required></textarea>
+            </label>
+            <p class="wl-form__error" data-wl-amend-error role="alert" hidden></p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "Bağla" context "accounts.workload" %}</button>
+          <button type="button" class="wl-btn wl-btn--primary" data-wl-do-amend>{% trans "Düzəlişi qeyd et" context "accounts.workload" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endif %}
+</section>
+{% endif %}

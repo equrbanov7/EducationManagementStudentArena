@@ -45346,7 +45346,8 @@ msgstr "Нельзя открыть занятие на прошедшую да�
 #: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:31
 msgctxt "registrar.journal"
 msgid "RİM rəhbəri: istənilən tarix/saat seçilə bilər."
-msgstr "Руководитель РИМ (Центр цифрового развития): можно выбрать любую дату/время."
+msgstr ""
+"Руководитель РИМ (Центр цифрового развития): можно выбрать любую дату/время."
 
 #: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:35
 msgctxt "registrar.journal"
@@ -57667,16 +57668,26 @@ msgid "Cədvəl idarəetməsi"
 msgstr "Управление расписанием"
 
 msgctxt "accounts.schedule_manage"
-msgid "Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir."
-msgstr "Составьте недельное расписание группы: добавляйте слоты, видьте конфликты до сохранения, удаляйте лишние. Изменение уходит уведомлением преподавателю и студентам группы."
+msgid ""
+"Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan "
+"əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun "
+"tələbələrinə bildiriş kimi gedir."
+msgstr ""
+"Составьте недельное расписание группы: добавляйте слоты, видьте конфликты до"
+" сохранения, удаляйте лишние. Изменение уходит уведомлением преподавателю и "
+"студентам группы."
 
 msgctxt "accounts.schedule_manage"
 msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
 msgstr "У вас нет прав на управление расписанием занятий."
 
 msgctxt "accounts.schedule_manage"
-msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur — bu bölmə yalnız səlahiyyətli rollar üçündür."
-msgstr "У вас нет прав на управление расписанием занятий — этот раздел только для уполномоченных ролей."
+msgid ""
+"Dərs cədvəlini idarə etmək üçün icazəniz yoxdur — bu bölmə yalnız "
+"səlahiyyətli rollar üçündür."
+msgstr ""
+"У вас нет прав на управление расписанием занятий — этот раздел только для "
+"уполномоченных ролей."
 
 msgctxt "accounts.schedule_manage"
 msgid "Naməlum əməliyyat."
@@ -57727,12 +57738,18 @@ msgid "Seçin…"
 msgstr "Выберите…"
 
 msgctxt "accounts.schedule_manage"
-msgid "Səlahiyyət sahənizdə qrup yoxdur. Üzvlüyünüzə struktur bölməsi (scope_unit) təyin edilməyibsə siyahı boş qalır."
-msgstr "В вашей зоне полномочий нет групп. Если в вашем членстве не задано структурное подразделение (scope_unit), список остаётся пустым."
+msgid ""
+"Səlahiyyət sahənizdə qrup yoxdur. Üzvlüyünüzə struktur bölməsi (scope_unit) "
+"təyin edilməyibsə siyahı boş qalır."
+msgstr ""
+"В вашей зоне полномочий нет групп. Если в вашем членстве не задано "
+"структурное подразделение (scope_unit), список остаётся пустым."
 
 msgctxt "accounts.schedule_manage"
-msgid "Bu təşkilatda akademik semestr yoxdur — əvvəlcə semestr yaradılmalıdır."
-msgstr "В этой организации нет учебного семестра — сначала нужно создать семестр."
+msgid ""
+"Bu təşkilatda akademik semestr yoxdur — əvvəlcə semestr yaradılmalıdır."
+msgstr ""
+"В этой организации нет учебного семестра — сначала нужно создать семестр."
 
 msgctxt "accounts.schedule_manage"
 msgid "Slotlar"
@@ -57807,16 +57824,24 @@ msgid "Konflikti yoxla"
 msgstr "Проверить конфликты"
 
 msgctxt "accounts.schedule_manage"
-msgid "Bu qrup üçün seçilmiş semestrdə dərs açılışı yoxdur — əvvəlcə fənn açılışı yaradılmalıdır."
-msgstr "У этой группы нет учебных дисциплин в выбранном семестре — сначала нужно создать дисциплину."
+msgid ""
+"Bu qrup üçün seçilmiş semestrdə dərs açılışı yoxdur — əvvəlcə fənn açılışı "
+"yaradılmalıdır."
+msgstr ""
+"У этой группы нет учебных дисциплин в выбранном семестре — сначала нужно "
+"создать дисциплину."
 
 msgctxt "accounts.schedule_manage"
 msgid "Slotu silmək?"
 msgstr "Удалить слот?"
 
 msgctxt "accounts.schedule_manage"
-msgid "Silinmə müəllimə və qrupun tələbələrinə bildiriş kimi gedir və audit jurnalına yazılır."
-msgstr "Удаление уходит уведомлением преподавателю и студентам группы и пишется в журнал аудита."
+msgid ""
+"Silinmə müəllimə və qrupun tələbələrinə bildiriş kimi gedir və audit "
+"jurnalına yazılır."
+msgstr ""
+"Удаление уходит уведомлением преподавателю и студентам группы и пишется в "
+"журнал аудита."
 
 msgctxt "accounts.schedule_manage"
 msgid "İmtina"
@@ -58058,16 +58083,30 @@ msgid "yönləndirdiyim müraciətlər"
 msgstr "перенаправленные мной обращения"
 
 msgctxt "applications"
-msgid "Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən."
-msgstr "Транскрипт, справка, апелляция на оценку, жалоба — всё отправляется отсюда. После отправки вы видите, где обращение, кто его рассматривает и каков ответ."
+msgid ""
+"Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. "
+"Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı "
+"burada görürsən."
+msgstr ""
+"Транскрипт, справка, апелляция на оценку, жалоба — всё отправляется отсюда. "
+"После отправки вы видите, где обращение, кто его рассматривает и каков "
+"ответ."
 
 msgctxt "applications"
-msgid "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz."
-msgstr "Обращения, поступившие в ваше подразделение. Вы можете ответить, запросить сведения или перенаправить вопрос вне вашей компетенции — после перенаправления вы продолжаете наблюдение."
+msgid ""
+"Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya "
+"səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — "
+"yönləndirdikdən sonra da izləməkdə davam edirsiniz."
+msgstr ""
+"Обращения, поступившие в ваше подразделение. Вы можете ответить, запросить "
+"сведения или перенаправить вопрос вне вашей компетенции — после "
+"перенаправления вы продолжаете наблюдение."
 
 msgctxt "applications"
 msgid "Növü seçin — sistem müraciəti avtomatik aidiyyəti şöbəyə göndərəcək."
-msgstr "Выберите тип — система автоматически направит обращение в ответственное подразделение."
+msgstr ""
+"Выберите тип — система автоматически направит обращение в ответственное "
+"подразделение."
 
 msgctxt "applications"
 msgid "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək."
@@ -58079,7 +58118,8 @@ msgstr "Чего вы хотите, одним предложением"
 
 msgctxt "applications"
 msgid "Konkret tarix, fənn və qrup adı yazsanız cavab daha tez gələcək."
-msgstr "Укажите точную дату, предмет и название группы — ответ придёт быстрее."
+msgstr ""
+"Укажите точную дату, предмет и название группы — ответ придёт быстрее."
 
 msgctxt "applications"
 msgid "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB"
@@ -58106,12 +58146,17 @@ msgid "Niyə bu şöbəyə göndərilir və nə gözlənilir"
 msgstr "Почему направляется в это подразделение и что ожидается"
 
 msgctxt "applications"
-msgid "Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin."
+msgid ""
+"Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin."
 msgstr "Продолжать наблюдение — уведомить меня, когда будет дан ответ."
 
 msgctxt "applications"
-msgid "Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə məsul şöbə dəyişir."
-msgstr "Заявитель увидит перенаправление в своей панели — обращение не теряется, меняется лишь ответственное подразделение."
+msgid ""
+"Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə "
+"məsul şöbə dəyişir."
+msgstr ""
+"Заявитель увидит перенаправление в своей панели — обращение не теряется, "
+"меняется лишь ответственное подразделение."
 
 msgctxt "applications"
 msgid "Məsul şəxsə təyin et"
@@ -58138,8 +58183,12 @@ msgid "Müraciət sahibinin görəcəyi cavab"
 msgstr "Ответ, который увидит заявитель"
 
 msgctxt "applications"
-msgid "Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
-msgstr "Ответ должен содержать не менее 10 символов — заявитель увидит именно этот текст."
+msgid ""
+"Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni "
+"görəcək."
+msgstr ""
+"Ответ должен содержать не менее 10 символов — заявитель увидит именно этот "
+"текст."
 
 msgctxt "applications"
 msgid "Həll olundu — bağla"
@@ -58194,8 +58243,10 @@ msgid "Müraciəti bağlayaq?"
 msgstr "Закрыть обращение?"
 
 msgctxt "applications"
-msgid "Cavabı təsdiqləyirsiniz və müraciət bağlanır. Bu əməl geri qaytarılmır."
-msgstr "Вы подтверждаете ответ, и обращение закрывается. Это действие необратимо."
+msgid ""
+"Cavabı təsdiqləyirsiniz və müraciət bağlanır. Bu əməl geri qaytarılmır."
+msgstr ""
+"Вы подтверждаете ответ, и обращение закрывается. Это действие необратимо."
 
 msgctxt "applications"
 msgid "Müraciət tapılmadı"
@@ -58211,10 +58262,13 @@ msgstr "Вы ничего не отслеживаете"
 
 msgctxt "applications"
 msgid "Başqa şöbəyə yönləndirdiyiniz müraciətlər burada görünəcək."
-msgstr "Здесь появятся обращения, перенаправленные вами в другое подразделение."
+msgstr ""
+"Здесь появятся обращения, перенаправленные вами в другое подразделение."
 
 msgctxt "applications"
-msgid "Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya bilərsiniz."
+msgid ""
+"Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya "
+"bilərsiniz."
 msgstr "Вы ещё не отправляли обращений. Начните с кнопки «Новое обращение»."
 
 msgctxt "applications"
@@ -58226,8 +58280,12 @@ msgid "Müraciət bağlanıb — yalnız oxuna bilər."
 msgstr "Обращение закрыто — только чтение."
 
 msgctxt "applications"
-msgid "Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə bilərsiniz."
-msgstr "Обращение закрыто. Если вы не согласны, отправьте новое обращение по той же теме."
+msgid ""
+"Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə "
+"bilərsiniz."
+msgstr ""
+"Обращение закрыто. Если вы не согласны, отправьте новое обращение по той же "
+"теме."
 
 msgctxt "applications"
 msgid "Bu şöbədə təyin ediləcək istifadəçi tapılmadı."
@@ -58274,12 +58332,20 @@ msgid "Müraciət bağlanıb — {status}"
 msgstr "Обращение закрыто — {status}"
 
 msgctxt "applications"
-msgid "Müraciətiniz hazırda {unit}-dədir. Cavab veriləndə bildiriş gələcək və mətn burada görünəcək."
-msgstr "Ваше обращение сейчас в {unit}. Вы получите уведомление, когда будет дан ответ, и текст появится здесь."
+msgid ""
+"Müraciətiniz hazırda {unit}-dədir. Cavab veriləndə bildiriş gələcək və mətn "
+"burada görünəcək."
+msgstr ""
+"Ваше обращение сейчас в {unit}. Вы получите уведомление, когда будет дан "
+"ответ, и текст появится здесь."
 
 msgctxt "applications"
-msgid "Müraciət hazırda {unit}-dədir. Siz yönləndirdiyiniz üçün gedişini izləyirsiniz, amma cavabı həmin şöbə verəcək."
-msgstr "Обращение сейчас в {unit}. Вы наблюдаете за ним как отправитель перенаправления, но отвечает это подразделение."
+msgid ""
+"Müraciət hazırda {unit}-dədir. Siz yönləndirdiyiniz üçün gedişini "
+"izləyirsiniz, amma cavabı həmin şöbə verəcək."
+msgstr ""
+"Обращение сейчас в {unit}. Вы наблюдаете за ним как отправитель "
+"перенаправления, но отвечает это подразделение."
 
 msgctxt "applications"
 msgid "Müraciət {unit}-nə göndərildi — gedişini buradan izləyə bilərsiniz."
@@ -58340,3 +58406,498 @@ msgstr "мои собственные обращения"
 msgctxt "profile.sidebar"
 msgid "Müraciətlərim"
 msgstr "Мои обращения"
+
+#: apps/registrar/journal_actions.py:63
+msgid ""
+"Dəyişiklik üçün yuxarıdan «Jurnal düzəlişi» rejimini aktivləşdirin — İKT "
+"rəhbəri yalnız sənədli düzəliş edə bilər."
+msgstr ""
+"Для изменения включите вверху режим «Исправление журнала» — руководитель ИКТ"
+" может вносить только документальные исправления."
+
+#: apps/registrar/templates/registrar/partials/_jd_lesson_modal.html:31
+msgctxt "registrar.journal"
+msgid "İKT Rəhbəri: istənilən tarix/saat seçilə bilər."
+msgstr "Руководитель ИКТ: можно выбрать любую дату/время."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "236 İ ing, 2-ci yarımqrup"
+msgstr "236 англ., 2-я подгруппа"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Axtarış"
+msgstr "Поиск"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Aç"
+msgstr "Открыть"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bağla"
+msgstr "Закрыть"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Birləşmə sayı"
+msgstr "Число потоков"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bu il üçün tapşırıq yoxdur"
+msgstr "На этот год задание не создано"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Buraxılış işi"
+msgstr "Руководство дипломной работой"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bölgünü təsdiqlə"
+msgstr "Подтвердить распределение"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "CƏMİ"
+msgstr "ИТОГО"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Dissertant rəhbərliyi"
+msgstr "Руководство диссертантами"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Doluluq"
+msgstr "Заполненность"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Düzəliş sorğusu"
+msgstr "Запрос на корректировку"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Düzəlişi qeyd et"
+msgstr "Зафиксировать корректировку"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Dərs yüküm"
+msgstr "Моя учебная нагрузка"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Elmi-tədqiqat təcrübəsi"
+msgstr "Научно-исследовательская практика"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Excel yüklə"
+msgstr "Скачать Excel"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Forma"
+msgstr "Форма обучения"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəaliyyət"
+msgstr "Вид работы"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəaliyyət növü"
+msgstr "Вид работы"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn (kataloq)"
+msgstr "Дисциплина (из каталога)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn adı (sərbəst)"
+msgstr "Название дисциплины (текст)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəsil"
+msgstr "Семестр (сезон)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Hamısı"
+msgstr "Все"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Jurnal"
+msgstr "Журнал"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedra bölgünü təsdiqləyəndən sonra fənləriniz burada görünəcək və sizə "
+"bildiriş gələcək."
+msgstr ""
+"После подтверждения распределения кафедрой ваши дисциплины появятся здесь, и"
+" вы получите уведомление."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedra tərəfindən sizə ayrılmış illik dərs yükü. Cədvəl yalnız təsdiqlənmiş"
+" bölgünü göstərir; sual yaranarsa kafedra müdirinə müraciət edin."
+msgstr ""
+"Годовая учебная нагрузка, назначенная вам кафедрой. В таблице отображается "
+"только подтверждённое распределение; при вопросах обращайтесь к заведующему "
+"кафедрой."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Hər fəaliyyət"
+" növü (mühazirə, seminar, laboratoriya) ayrıca bölünür; qalıq saat real "
+"vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və "
+"elektron jurnal açılışları yaradılır."
+msgstr ""
+"Распределите годовое учебное задание кафедры между преподавателями. Каждый "
+"вид работы (лекция, семинар, лаборатория) распределяется отдельно, остаток "
+"часов показывается в реальном времени. После подтверждения распределения "
+"преподаватели получают уведомление и создаются занятия электронного журнала."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kredit"
+msgstr "Кредиты"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kredit dəyəri"
+msgstr "Значение кредита"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Laboratoriya (cəmi)"
+msgstr "Лабораторные (всего)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Laboratoriya (plan)"
+msgstr "Лабораторные (по плану)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Mühazirə (cəmi)"
+msgstr "Лекции (всего)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Mühazirə (plan)"
+msgstr "Лекции (по плану)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllim yükü"
+msgstr "Нагрузка преподавателей"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllimə bölgü"
+msgstr "Распределение преподавателю"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Məlumat yoxdur"
+msgstr "Нет данных"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Məsləhət"
+msgstr "Консультации"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Norma"
+msgstr "Норма"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Norma NK №215-ə görə bir ştat üçün 500 saatdır (təşkilat konfiqurasiyası ilə"
+" dəyişir)."
+msgstr ""
+"Согласно постановлению КМ №215 норма составляет 500 часов на одну штатную "
+"единицу (настраивается для организации)."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qeyd"
+msgstr "Примечание"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup qeydi"
+msgstr "Примечание по группам"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup(lar)"
+msgstr "Группа(ы)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup/yarımqrup sayı"
+msgstr "Число групп/подгрупп"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qruplar"
+msgstr "Группы"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saat"
+msgstr "Часы"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saathesabı"
+msgstr "Почасовая оплата"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saathesabı fondundan"
+msgstr "Из фонда почасовой оплаты"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Semestr"
+msgstr "Семестр"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Semestr (dövr)"
+msgstr "Семестр (период)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seminar (cəmi)"
+msgstr "Семинары (всего)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seminar (plan)"
+msgstr "Семинары (по плану)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seçilməyib"
+msgstr "Не выбрано"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Səbəb"
+msgstr "Причина"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Sətir növü"
+msgstr "Тип строки"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Sətir əlavə et"
+msgstr "Добавить строку"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Səviyyə"
+msgstr "Уровень"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tapşırıq sətri"
+msgstr "Строка задания"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tapşırıq yarat"
+msgstr "Создать задание"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tədris planından gətir"
+msgstr "Взять из учебного плана"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təhsil forması"
+msgstr "Форма обучения"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tələbə sayı"
+msgstr "Число студентов"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqdən sonra:"
+msgstr "После подтверждения:"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqlə"
+msgstr "Подтвердить"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Təsdiqlənmiş bölgü dəyişdirilir — səbəb və qeyd məcburidir, hər düzəliş "
+"audit jurnalına yazılır."
+msgstr ""
+"Изменяется подтверждённое распределение — причина и примечание обязательны, "
+"каждая корректировка записывается в журнал аудита."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqlənmiş dərs yükü yoxdur"
+msgstr "Подтверждённой нагрузки нет"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Вакансия (преподаватель не назначен)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yekun"
+msgstr "Итог"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yük bölgüsü"
+msgstr "Распределение нагрузки"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"fənn + semestr + qrup dolu olan sətirlər üçün elektron jurnal açılışı "
+"yaradılacaq (mövcud açılışlar silinmir);"
+msgstr ""
+"для строк с заполненными дисциплиной, семестром и группой будет создано "
+"занятие электронного журнала (существующие занятия не удаляются);"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "fənn və ya qrup"
+msgstr "дисциплина или группа"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "hər müəllimə «Dərs yükü təyin edildi» bildirişi gedəcək;"
+msgstr ""
+"каждому преподавателю будет отправлено уведомление «Назначена учебная "
+"нагрузка»;"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "saat"
+msgstr "часов"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "saat / il"
+msgstr "часов в год"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"sonrakı dəyişikliklər yalnız səbəbli düzəliş (amendment) ilə mümkün olacaq."
+msgstr ""
+"дальнейшие изменения будут возможны только через обоснованную корректировку."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"«Tapşırıq yarat» düyməsi ilə kafedranın illik tapşırığını açın, sonra "
+"sətirləri əlavə edin və ya tədris planından gətirin."
+msgstr ""
+"Нажмите «Создать задание», чтобы открыть годовое задание кафедры, затем "
+"добавьте строки или возьмите их из учебного плана."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İllik cəmi"
+msgstr "Годовой итог"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İmtina"
+msgstr "Отмена"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İstehsalat təcrübəsi"
+msgstr "Производственная практика"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İxtisas"
+msgstr "Специальность"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Əhatənizdə kafedra yoxdur"
+msgstr "В вашей области нет кафедры"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "profile.sidebar"
+msgid "Dərs yüküm"
+msgstr "Моя учебная нагрузка"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "profile.sidebar"
+msgid "Yük bölgüsü"
+msgstr "Распределение нагрузки"

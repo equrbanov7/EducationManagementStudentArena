@@ -356,6 +356,17 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
     return {"periods": periods, "analytics": data, "analytics_embedded": embedded}
 
 
+def _has_active_student_membership(organization, user) -> bool:
+    """`student` rolu ilə AKTİV üzvlük varmı?
+
+    `organizations` statik import edilmir (module_deps qapısı) — `get_model`.
+    """
+    Membership = django_apps.get_model("organizations", "Membership")
+    return Membership.objects.filter(
+        organization=organization, user=user, is_active=True, role__name="student"
+    ).exists()
+
+
 def schedule_context(request, organization, *, embedded=False) -> dict:
     """Role-aware weekly timetable context (student group / teacher own slots)."""
     from apps.registrar.models import WeekType

@@ -1,0 +1,191 @@
+/* Dərs yükü — üst qat: modallar, forma şəbəkəsi, xəbərdarlıqlar, mobil.
+ * Kaskadda `workload_base.css`-dən SONRA yüklənir (bax profile.html şərhi). */
+
+.wl-modal .modal-content {
+  border-radius: 14px;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-modal .modal-header,
+.wl-modal .modal-footer {
+  border-color: var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-modal .modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-form {
+  display: block;
+}
+
+.wl-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.wl-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-form__field--wide {
+  grid-column: 1 / -1;
+}
+
+.wl-form__field input,
+.wl-form__field select,
+.wl-form__field textarea {
+  font-weight: 400;
+}
+
+.wl-form__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--ems-neutral-800, #2c3e50);
+}
+
+.wl-form__error {
+  margin: 12px 0 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: var(--ems-danger-bg, #fdeceb);
+  border: 1px solid var(--ems-danger-bd, #f2b8b5);
+  color: var(--ems-danger, #b3261e);
+}
+
+.wl-form__warnings {
+  margin: 10px 0 0;
+  padding: 9px 12px 9px 28px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: var(--ems-warning-bg, #fdf6e3);
+  border: 1px solid var(--ems-warning-bd, #f0c36d);
+  color: #8a5a00;
+}
+
+.wl-assign__row {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-assign__remaining {
+  margin: -4px 0 12px;
+  font-size: 0.8rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-assign__remaining.is-empty {
+  color: var(--ems-danger, #b3261e);
+}
+
+.wl-confirm__list {
+  margin: 8px 0 14px;
+  padding-inline-start: 20px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ems-neutral-700, #3f5063);
+}
+
+.wl-confirm__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ems-neutral-50, #f7f9fc);
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  font-size: 0.8rem;
+}
+
+.wl-confirm__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wl-confirm__stat b {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-amend__hint {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+/* Kurikulum təklifləri (sətir modalının içində açılan siyahı) */
+.wl-curriculum {
+  margin-top: 12px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 10px;
+}
+
+.wl-curriculum__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--ems-neutral-100, #eef2f7);
+  background: #fff;
+  font-size: 0.82rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.wl-curriculum__item:hover {
+  background: var(--ems-primary-50, #eef4ff);
+}
+
+/* ── Mobil ─────────────────────────────────────────────────────────────── */
+@media (max-width: 992px) {
+  .wl__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wl__aside {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .wl-filters__actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .wl-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .wl-act {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .wlm-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
