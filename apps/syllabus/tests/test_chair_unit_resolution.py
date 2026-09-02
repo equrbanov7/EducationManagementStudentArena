@@ -265,13 +265,15 @@ def test_structural_ancestor_wins_over_the_author_membership(world):
         organization=org, name="Yad kafedra", slug="syl-chair-fix-other", unit_type=OrgUnitType.CHAIR
     )
     activate_member(
-        org, world["teacher"], "teacher", permissions=TEACHER_PERMS, scope_unit=other_chair,
+        org,
+        world["teacher"],
+        "teacher",
+        permissions=TEACHER_PERMS,
+        scope_unit=other_chair,
         scope_type=RoleScopeType.UNIT,
     )
 
-    resolved = resolve_syllabus_chair_unit(
-        unit=world["tree"]["specialty"], author=world["teacher"], organization=org
-    )
+    resolved = resolve_syllabus_chair_unit(unit=world["tree"]["specialty"], author=world["teacher"], organization=org)
 
     assert resolved == world["tree"]["chair"]
 
@@ -280,8 +282,6 @@ def test_resolver_keeps_the_given_unit_when_nothing_maps(world):
     """Nə əcdad, nə üzvlük — dəyər DƏYİŞMİR (fail-soft, sahibsiz sillabus yox)."""
     stranger = User.objects.create_user("flat_stranger", "flat_stranger@x.test", "pw")
 
-    resolved = resolve_syllabus_chair_unit(
-        unit=world["tree"]["faculty"], author=stranger, organization=world["org"]
-    )
+    resolved = resolve_syllabus_chair_unit(unit=world["tree"]["faculty"], author=stranger, organization=world["org"])
 
     assert resolved == world["tree"]["faculty"]

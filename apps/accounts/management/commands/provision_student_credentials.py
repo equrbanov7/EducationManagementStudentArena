@@ -113,9 +113,9 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             )
             if group_unit is None:
                 raise CommandError(f"Qrup tapılmadı: {group_name!r}")
-            in_group = StudentAcademicRecord.objects.filter(
-                organization=organization, group=group_unit
-            ).values_list("student_id", flat=True)
+            in_group = StudentAcademicRecord.objects.filter(organization=organization, group=group_unit).values_list(
+                "student_id", flat=True
+            )
             student_user_ids = set(student_user_ids) & set(in_group)
         users = (
             User.objects.filter(id__in=list(student_user_ids), is_active=True)
