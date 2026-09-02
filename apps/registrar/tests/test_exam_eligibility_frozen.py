@@ -71,7 +71,8 @@ ABSENCE_HOURS = ABSENT_LESSONS * 2
 #: (``entry_score_for``: komponentlər + işarələr).  Bu işə aid deyil —
 #: ayrıca düzəliş tələb edir; burada yalnız DONMA yoxlamasının ora
 #: qarışmadığını kilidləyirik.
-_PRE_EXISTING_PER_ROW_QUERIES = 2
+# 2026-09-02: ``finals_batch`` sətir-başına N+1-i sildi (PHASE24) — indi sətir xərci 0-dır.
+_PRE_EXISTING_PER_ROW_QUERIES = 0
 
 # Qayıb / bal dərslərinin başlanğıc tarixləri (flake8 B008: çağırış default-da olmasın).
 _ABSENCE_BASE_DAY = datetime.date(2023, 10, 2)
@@ -1186,12 +1187,10 @@ class FrozenLookupIsBatched(TestCase):
     def test_journal_grid_frozen_lookup_does_not_scale_with_rows(self):
         """Donma yoxlaması sətir sayından ASILI DEYİL.
 
-        Mütləq sorğu sayını kilidləmirik: ``get_offering_journal``-da artıq
-        MÖVCUD, bu işə aid olmayan sətir-başına N+1 var (``entry_score_for``
-        hər yazılış üçün komponent + işarə sorğusu edir).  Testin ölçdüyü şey
-        DELTA-dır: 1 sətirli və 5 sətirli açılış arasındakı fərq yalnız həmin
-        mövcud sətir xərcindən ibarət olmalıdır.  Donma sətir başına yoxlansaydı
-        delta hər sətir üçün BİR SORĞU daha böyük olardı.
+        Testin ölçdüyü şey DELTA-dır: 1 sətirli və 5 sətirli açılış arasındakı
+        sorğu fərqi sətir başına ``_PRE_EXISTING_PER_ROW_QUERIES`` (2026-09-02-dən
+        0 — ``finals_batch`` yazılış-başına N+1-i sildi) olmalıdır.  Donma
+        sətir başına yoxlansaydı delta hər sətir üçün BİR SORĞU daha böyük olardı.
         """
         with bypass_rls():
             gradebook.get_offering_journal(offering=self.offering)
