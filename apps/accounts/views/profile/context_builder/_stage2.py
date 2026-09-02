@@ -322,6 +322,20 @@ class _Stage2Mixin:
             "reload_url": "",
             "week_nav_prefix": "",
         }
+        # Tələbə idxalı (`user.import`) — server yalnız ÇƏRÇİVƏNİ verir: icazə
+        # bayrağı, endpoint URL-ləri, sütun kataloqu və hədd rəqəmləri. Fayl
+        # heç vaxt serverdə saxlanılmır, ona görə burada sətir/nəticə YOXDUR.
+        self.student_intake_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "template_url": "",
+            "preview_url": "",
+            "apply_url": "",
+            "columns": (),
+            "max_rows": 0,
+            "max_upload_mb": 0,
+            "scope_label": "",
+        }
         # «Müraciətlərim» (apps.applications) — panel SPA-dır: burada YALNIZ
         # çərçivə (bayraqlar + endpoint URL-ləri + kontekst zolağının mətnləri)
         # saxlanılır; sətirlər/detal/KPI-lar JSON API-dən gəlir.

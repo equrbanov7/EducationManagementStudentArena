@@ -235,6 +235,7 @@ class _Stage4Mixin:
             "journal_close_section": self.journal_close_section,
             "handover_section": self.handover_section,
             "schedule_manage_section": self.schedule_manage_section,
+            "student_intake_section": self.student_intake_section,
             "applications_section": self.applications_section,
             "exam_score_entry_section": self.exam_score_entry_section,
             "legacy_grade_review_section": self.legacy_grade_review_section,

@@ -44,7 +44,7 @@ def apply_permission_section_gates(
     testlər onlara söykənir): ``can_view_audit``, ``can_use_rim_center``,
     ``can_view_people_teachers``, ``can_view_people_students``, ``can_view_syllabus``,
     ``can_edit_syllabus``, ``can_review_syllabus``, ``can_reassign_teaching``,
-    ``can_manage_schedule``, ``can_use_applications``,
+    ``can_manage_schedule``, ``can_import_students``, ``can_use_applications``,
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
@@ -103,6 +103,13 @@ def apply_permission_section_gates(
     # fail-closed yenidən yoxlanılır (əhatəsiz aktor boş siyahı görür).
     can_manage_schedule = privileged or has_permission(permissions, "schedule.manage")
 
+    # «Tələbə idxalı» — `user.import`. QƏSDƏN RİM mərkəzinin (`user.search` və s.)
+    # açarlarından AYRIDIR: mövcud hesabı idarə etmək hüququ heç bir rola
+    # avtomatik olaraq «minlərlə yeni hesab yarat» səlahiyyəti verməməlidir
+    # (əsasnamə 5.5). Menyu görünürlüyü yalnız açara baxır; faktiki əməl
+    # `apps/accounts/services/intake/policy.py`-da fail-closed yenidən yoxlanılır.
+    can_import_students = privileged or has_permission(permissions, "user.import")
+
     # «Müraciətlərim» — ÜÇ açardan hər hansı biri bölməni açır: göndərən
     # (`application.create`), emalçı (`application.handle`) və ya nəzarətçi
     # (`application.manage`). Praktikada bu, AKTİV ÜZVLÜYÜ olan hər rol deməkdir
@@ -138,6 +145,7 @@ def apply_permission_section_gates(
         (can_review_syllabus, "syllabus-review"),
         (can_reassign_teaching, "teaching-handover"),
         (can_manage_schedule, "schedule-manage"),
+        (can_import_students, "student-intake"),
         (can_use_applications, "applications"),
         (can_watch_legacy_grades, "legacy-grade-review"),
     ):
@@ -154,6 +162,7 @@ def apply_permission_section_gates(
         "can_review_syllabus": can_review_syllabus,
         "can_reassign_teaching": can_reassign_teaching,
         "can_manage_schedule": can_manage_schedule,
+        "can_import_students": can_import_students,
         "can_use_applications": can_use_applications,
         "can_review_legacy_grades": can_review_legacy_grades,
         "can_watch_legacy_grades": can_watch_legacy_grades,

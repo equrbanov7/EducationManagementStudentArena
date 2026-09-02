@@ -240,6 +240,11 @@ urlpatterns = [
     path("applications/assignees/", views.applications_assignees, name="applications_assignees"),
     path("schedule-manage/check/", views.schedule_manage_check, name="schedule_manage_check"),
     path("schedule-manage/action/", views.schedule_manage_action, name="schedule_manage_action"),
+    # «Tələbə idxalı» (`user.import`) — şablon + quru icra + tətbiq. Panel
+    # server-render-lidir; bu üç marşrut yalnız fayl/JSON səthidir.
+    path("student-intake/template/", views.student_intake_template, name="student_intake_template"),
+    path("student-intake/preview/", views.student_intake_preview, name="student_intake_preview"),
+    path("student-intake/apply/", views.student_intake_apply, name="student_intake_apply"),
     # «Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» (İmtahan Mərkəzi).
     # Növbə bazadakı sübut qatından (LegacyGradeFact + canlı FinalGrade güzgüsü)
     # hesablanır — domen məntiqi registrar-dadır (legacy_grade_review*.py).

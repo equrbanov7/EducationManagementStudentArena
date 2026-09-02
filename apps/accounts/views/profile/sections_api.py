@@ -121,6 +121,10 @@ SECTION_PARTIALS: dict[str, str] = {
     # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel, mutasiyalar
     # ayrıca JSON POST endpoint-inə gedir → AJAX swap təhlükəsizdir.
     "schedule-manage": "accounts/profile/sections/_schedule_manage.html",
+    # «Tələbə idxalı» (`user.import`) — server yalnız çərçivəni verir; fayl
+    # yüklənməsi, quru icra və tətbiq ayrıca JSON endpoint-lərinə gedir →
+    # AJAX swap təhlükəsizdir.
+    "student-intake": "accounts/profile/sections/_student_intake.html",
     # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
     # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
     "applications": "accounts/profile/sections/_applications.html",
@@ -182,6 +186,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # endpoint-lərinə POST edir və `next` ilə shell-ə qayıdır).
         "my-schedule",
         "schedule-manage",
+        "student-intake",
         "applications",
         "academic-calendar",
         "my-journal",
