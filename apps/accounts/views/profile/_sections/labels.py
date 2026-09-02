@@ -46,6 +46,8 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
+    "my-workload": "accounts/profile/sections/_my_workload.html",
 }
 
 
@@ -123,4 +125,6 @@ def build_section_titles() -> dict:
         "syllabus-list": pgettext_lazy("profile.sidebar", "Sillabuslar"),
         "syllabus-editor": pgettext_lazy("profile.sidebar", "Sillabus redaktoru"),
         "syllabus-review": pgettext_lazy("profile.sidebar", "Sillabus təsdiqi"),
+        "workload-distribution": pgettext_lazy("profile.sidebar", "Yük bölgüsü"),
+        "my-workload": pgettext_lazy("profile.sidebar", "Dərs yüküm"),
     }

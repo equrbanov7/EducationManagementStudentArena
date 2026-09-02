@@ -94,6 +94,14 @@
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260831-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover_dialog.css' %}?v=20260831-1">
     {% endif %}
+    {% if 'workload-distribution' in allowed_sections or 'my-workload' in allowed_sections %}
+    {% comment %}Dərs yükü — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
+    görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
+    əvvəl səth (kartlar, cədvəl, qalıq zolaqları), sonra üst qat (modallar,
+    mobil override).{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_base.css' %}?v=20260902-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_dialog.css' %}?v=20260902-1">
+    {% endif %}
     {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
     {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
     bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl ORTAQ
@@ -142,6 +150,9 @@
     ÜZƏRİNƏ qurulur, ona görə ondan SONRA yüklənməlidir (kaskad).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/schedule_manage.css' %}?v=20260902-1">
     {% endif %}
+    {% if 'student-intake' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260902-1">
+    {% endif %}
     {% if 'academic-calendar' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
     {% endif %}
@@ -162,7 +173,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,teaching-handover,legacy-grade-review"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -229,6 +240,8 @@
                 {% include "accounts/profile/sections/_my_schedule.html" %}
             {% elif active_section == "schedule-manage" and 'schedule-manage' in allowed_sections %}
                 {% include "accounts/profile/sections/_schedule_manage.html" %}
+            {% elif active_section == "student-intake" and 'student-intake' in allowed_sections %}
+                {% include "accounts/profile/sections/_student_intake.html" %}
             {% elif active_section == "applications" and 'applications' in allowed_sections %}
                 {% include "accounts/profile/sections/_applications.html" %}
             {% elif active_section == "academic-calendar" %}
@@ -253,6 +266,10 @@
                 {% include "accounts/profile/sections/_syllabus_editor.html" %}
             {% elif active_section == "syllabus-review" and 'syllabus-review' in allowed_sections %}
                 {% include "accounts/profile/sections/_syllabus_review.html" %}
+            {% elif active_section == "workload-distribution" and 'workload-distribution' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_distribution.html" %}
+            {% elif active_section == "my-workload" and 'my-workload' in allowed_sections %}
+                {% include "accounts/profile/sections/_my_workload.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}
@@ -444,12 +461,28 @@ yenidən yükləməsini, saxlama-öncəsi konflikt yoxlamasını və silmə təs
 idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{% endcomment %}
 <script src="{% static 'accounts/js/schedule_manage.js' %}?v=20260902-1"></script>
 {% endif %}
+{% if 'student-intake' in allowed_sections %}
+{% comment %}Tələbə idxalı — panel server-render-lidir; JS yalnız fayl yükləməsini,
+quru icranı, nəticə cədvəlini və parol CSV-sinin endirilməsini idarə edir
+(EMSDelegate, `[data-six-root]` yoxdursa heç nə etmir).{% endcomment %}
+<script src="{% static 'accounts/js/profile/student_intake.js' %}?v=20260902-1"></script>
+{% endif %}
 {% if 'teaching-handover' in allowed_sections %}
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
 `window.EMSHandoverRender` üzərindən null-safe oxuyur, ona görə sıra pozulsa da
 səhifə çökmür — sadəcə bölmə init olunmur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/teaching_handover_render.js' %}?v=20260831-1"></script>
 <script src="{% static 'accounts/js/profile/teaching_handover.js' %}?v=20260831-1"></script>
+{% endif %}
+{% if 'workload-distribution' in allowed_sections %}
+{% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
+`window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
+çökmür — sadəcə bölmə init olunmur).{% endcomment %}
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20260902-1"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260902-1"></script>
+{% endif %}
+{% if 'my-workload' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20260902-1"></script>
 {% endif %}
 {% if 'syllabus-list' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>

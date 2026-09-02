@@ -81,6 +81,8 @@ urlpatterns = [
     re_path(r"^exmas/?$", legacy_exmas_redirect, name="legacy_exmas_redirect"),
     re_path(r"^exmas/(?P<path>.*)$", legacy_exmas_redirect, name="legacy_exmas_path_redirect"),
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
+    # dərs yükü (tədris tapşırığı) — profil bölmələrinin JSON səthi
+    path("ders-yuku/", include(("apps.workload.urls", "workload"), namespace="workload")),
     # appeals (imtahan apellyasiyaları)
     path("appeals/", include(("apps.appeals.urls", "appeals"), namespace="appeals")),
     # müraciətlər (Müraciətlər paneli — JSON/fayl endpoint-ləri; ekran profil bölməsidir)

@@ -114,6 +114,32 @@ class ScheduleViewTest(TestCase):
         self.assertFalse(resp.context["schedule_can_manage"])
         self.assertNotContains(resp, "data-sgx-open-add")
 
+    def test_groupless_student_is_not_labelled_a_teacher(self):
+        """Qrupsuz TƏLƏBƏ «müəllim» qoluna düşməməlidir (PHASE21 UI QA).
+
+        Əvvəl `schedule_context` ikili idi: akademik qeyd/qrup yoxdursa
+        `role="teacher"` verilirdi və başlıqda «Müəllim cədvəli» yazılırdı
+        (klonda 102 real tələbə).  İndi rol tələbə qalır, cədvəl boş olur.
+        """
+        with bypass_rls():
+            orphan = User.objects.create_user("sv_orphan", "sv_orphan@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=orphan,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
+            orphan.profile.organization = self.org
+            orphan.profile.save(update_fields=["organization"])
+
+        resp = self._client(orphan).get(reverse("registrar:schedule"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context["role"], "student")
+        self.assertFalse(resp.context["teacher_offerings"])
+        self.assertNotContains(resp, "Müəllim cədvəli")
+        self.assertNotContains(resp, "data-sgx-open-add")
+
     def test_teacher_cannot_add_slot(self):
         """`schedule.manage` olmadan açılışın MÜƏLLİMİ də slot yaza bilmir."""
         resp = self._client(self.teacher).post(

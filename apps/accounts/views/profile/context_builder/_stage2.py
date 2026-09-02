@@ -352,6 +352,11 @@ class _Stage2Mixin:
             "role_label": "",
             "i18n": {},
         }
+        # Dərs yükü (apps.workload) — SPA çərçivələri. Server yalnız icazə
+        # bayraqlarını, endpoint URL-lərini və kataloqları verir; sətirlər JSON-la
+        # gəlir, yəni profil kontekstində AĞIR SORĞU YOXDUR.
+        self.workload_distribution_section = {"has_access": False, "chairs": [], "task": None}
+        self.my_workload_section = {"has_access": False, "rows": [], "summary": {}, "years": []}
         # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
         # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
         # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində

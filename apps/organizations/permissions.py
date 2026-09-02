@@ -122,6 +122,21 @@ PERMISSION_CATEGORIES = {
         "syllabus.reject",
         "syllabus.manage",
     ],
+    # Dərs yükü (apps.workload) — illik tədris tapşırığı və kafedra bölgüsü.
+    # Açarlar QƏSDƏN AYRIDIR: `workload.view` (baxış) təsdiq/bölgü hüququ
+    # VERMİR; `workload.distribute` yalnız kafedra müdirindədir, `workload.manage`
+    # sənədi yaradıb sətirləri redaktə etməkdir. `submit`/`review`/`approve`
+    # açarları F1–F2 (tədris şöbəsi + dekanlıq) fazaları üçün ƏVVƏLCƏDƏN
+    # kataloqdadır — hələ heç bir default rola verilmir.
+    "workload": [
+        "workload.view",
+        "workload.manage",
+        "workload.submit",
+        "workload.review",
+        "workload.approve",
+        "workload.distribute",
+        "workload.report",
+    ],
     # Tələbə qrupları (exams.StudentGroup) — qrup yaratmaq/idarə etmək açarı
     # permission-editordan istənilən rola (dekan, koordinator…) verilə bilər.
     # `group.manage` qapısı: apps/exams/views/teacher/groups.py.
@@ -256,6 +271,7 @@ PERMISSION_CATEGORY_LABELS = {
     "schedule": "Dərs cədvəli",
     "syllabus": "Sillabus",
     "applications": "Müraciətlər",
+    "workload": "Dərs yükü",
     "exams": "İmtahanlar",
     "appeal": "Apellyasiya",
     "analytics": "Analitika",
@@ -337,6 +353,14 @@ PERMISSION_LABELS = {
     "application.create": pgettext_lazy(_PERM_CTX, "Müraciət göndərmək"),
     "application.handle": pgettext_lazy(_PERM_CTX, "Gələn müraciətə baxmaq və qərar vermək"),
     "application.manage": pgettext_lazy(_PERM_CTX, "Müraciət kataloqunu idarə etmək və hamısına baxmaq"),
+    # workload
+    "workload.view": pgettext_lazy(_PERM_CTX, "Dərs yükünə baxış"),
+    "workload.manage": pgettext_lazy(_PERM_CTX, "Tədris tapşırığını yaratmaq/redaktə etmək"),
+    "workload.submit": pgettext_lazy(_PERM_CTX, "Tapşırığı dekanlığa göndərmək"),
+    "workload.review": pgettext_lazy(_PERM_CTX, "Tapşırıq sətirlərinə viza vermək"),
+    "workload.approve": pgettext_lazy(_PERM_CTX, "Tapşırığı təsdiqləmək"),
+    "workload.distribute": pgettext_lazy(_PERM_CTX, "Dərs yükünü müəllimlərə bölmək"),
+    "workload.report": pgettext_lazy(_PERM_CTX, "Dərs yükü hesabatları və ixracı"),
     # groups
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),
