@@ -83,9 +83,12 @@ def syllabus_review(*, request, organization, allowed_sections) -> dict | None:
             empty=pgettext(_CTX, "Struktur əhatəniz təyin edilməyib — növbə boşdur."),
         )
     queue = list(review_queue(organization=organization, actor=actor)[: ROW_LIMIT + 1])
+    # `Syllabus.__str__` UUID cütü qaytarır — sətirdə FƏNNİN ADI göstərilir.
+    # `review_queue` `syllabus__subject`-i onsuz da `select_related` edir, yəni
+    # bu zəncir ƏLAVƏ sorğu yaratmır.
     rows = [
         {
-            "title": str(getattr(row, "syllabus", "") or "—"),
+            "title": str(getattr(getattr(row.syllabus, "subject", None), "name", "") or "—"),
             "meta": str(getattr(row, "get_status_display", lambda: "")() or ""),
         }
         for row in queue[:ROW_LIMIT]
@@ -230,10 +233,7 @@ def kollokvium_windows(*, organization, period, allowed_sections) -> dict | None
     from apps.registrar.models import KOLLOKVIUM_WINDOW_COUNT, KollokviumWindow
 
     today = timezone.localdate()
-    windows = {
-        row.k_index: row
-        for row in KollokviumWindow.objects.filter(organization=organization, period=period)
-    }
+    windows = {row.k_index: row for row in KollokviumWindow.objects.filter(organization=organization, period=period)}
     rows = []
     open_count = 0
     for index in range(KOLLOKVIUM_WINDOW_COUNT):
@@ -279,13 +279,15 @@ def upcoming_exams(*, organization, allowed_sections) -> dict | None:
     )
 
 
-def appeals(*, request, capabilities) -> dict | None:
-    """«Apellyasiyalar» — qərar gözləyənlərin sayı."""
+def appeals(*, capabilities, pending_count: int) -> dict | None:
+    """«Apellyasiyalar» — qərar gözləyənlərin sayı.
+
+    Sayğac profil context-ində ARTIQ hesablanıb (``_stage1``) — burada təkrar
+    sorğu getmir.
+    """
     if not capabilities.get("can_manage_appeals"):
         return None
-    from apps.appeals.public import count_pending_manage_appeals
-
-    count = int(count_pending_manage_appeals(request) or 0)
+    count = int(pending_count or 0)
     return widget(
         "appeals",
         pgettext(_CTX, "Apellyasiyalar"),

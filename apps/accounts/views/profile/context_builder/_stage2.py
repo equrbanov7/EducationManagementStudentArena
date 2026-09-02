@@ -322,6 +322,17 @@ class _Stage2Mixin:
             "reload_url": "",
             "week_nav_prefix": "",
         }
+        # «Ana səhifə» (FAZA 22) — kabinetin default bölməsi.  Vidjetlər YALNIZ
+        # aktiv bölmə `dashboard` olanda yığılır (lazy), yəni digər bölmələri
+        # açanda bir dənə də əlavə sorğu getmir.
+        self.dashboard_section = {
+            "has_access": False,
+            "greeting": "",
+            "role_label": "",
+            "period_label": "",
+            "widgets": [],
+            "empty_text": "",
+        }
         # Tələbə idxalı (`user.import`) — server yalnız ÇƏRÇİVƏNİ verir: icazə
         # bayrağı, endpoint URL-ləri, sütun kataloqu və hədd rəqəmləri. Fayl
         # heç vaxt serverdə saxlanılmır, ona görə burada sətir/nəticə YOXDUR.

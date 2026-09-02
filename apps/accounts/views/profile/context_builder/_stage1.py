@@ -99,9 +99,7 @@ class _Stage1Mixin:
         self._validate_avatar_upload = validate_profile_avatar_upload
         self.allowed_sections = self.capabilities["allowed_sections"]
         self.active_section = (
-            self.requested_section
-            if self.requested_section in self.allowed_sections
-            else FALLBACK_PROFILE_SECTION
+            self.requested_section if self.requested_section in self.allowed_sections else FALLBACK_PROFILE_SECTION
         )
         if self.active_section == "delete-account":
             self.active_section = FALLBACK_PROFILE_SECTION

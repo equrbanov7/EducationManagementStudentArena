@@ -15,6 +15,7 @@
 
     <ul class="sidebar-menu">
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_general" context "profile.sidebar" %}</span></li>
+        {% include "accounts/profile/sidebar/_home_menu_item.html" %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=profile-info"
                data-section="profile-info"

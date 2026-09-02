@@ -13,6 +13,7 @@ from django.utils.translation import pgettext_lazy
 
 # Birbaşa-render şablonları sırf statikdir (tərcümə yoxdur) → modul sabiti.
 DIRECT_PROFILE_SECTION_TEMPLATES = {
+    "dashboard": "accounts/profile/sections/_dashboard.html",
     "pending-answers": "accounts/profile/sections/_pending_answers.html",
     "pending-review": "accounts/profile/sections/_pending_review.html",
     "review-results": "accounts/profile/sections/_review_results.html",
@@ -54,6 +55,7 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
 def build_section_titles() -> dict:
     """Bölmə başlıqları xəritəsi (per-request — eager ``_()`` tərcümələri üçün)."""
     return {
+        "dashboard": pgettext_lazy("profile.sidebar", "Ana səhifə"),
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
         "notifications": pgettext_lazy("profile.section", "notifications"),
         "publish-notification": pgettext_lazy("profile.publish_notification", "title"),

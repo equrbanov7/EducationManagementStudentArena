@@ -108,6 +108,7 @@ def build_dashboard_section(
     active_section=None,
     capabilities=None,
     applications_pending_count: int = 0,
+    pending_appeals_count: int = 0,
 ):
     """``dashboard_section`` sözlüyünü YERİNDƏ doldurur (qonşu bölmə naxışı)."""
     allowed_sections = set(allowed_sections or ())
@@ -133,42 +134,81 @@ def build_dashboard_section(
 
     record = _student_record(active_organization, user) if capabilities.get("is_student") else None
 
+    is_student = bool(capabilities.get("is_student"))
+    is_teacher = bool(capabilities.get("is_teacher"))
+    # «Sillabus işlərim» ŞƏXSİ kartdır: təsdiq səthi olan aktor (kafedra müdiri,
+    # RİM, rektor) onun əvəzinə «Sillabus təsdiqi» vidjetini alır — əks halda
+    # eyni domen iki dəfə, üstəlik yanlış nöqteyi-nəzərdən görünərdi.
+    shows_own_syllabus = bool(capabilities.get("can_edit_syllabus")) and not capabilities.get("can_review_syllabus")
+
     widgets = [
         # ── Tələbə ────────────────────────────────────────────────────────
-        personal.student_today(
-            organization=active_organization, record=record, period=period, allowed_sections=allowed_sections
-        )
-        if record is not None
-        else None,
-        personal.student_attendance(
+        (
+            personal.student_today(
+                organization=active_organization,
+                record=record,
+                period=period,
+                allowed_sections=allowed_sections,
+            )
+            if is_student
+            else None
+        ),
+        (
+            personal.student_attendance(
+                organization=active_organization,
+                user=user,
+                record=record,
+                period=period,
+                allowed_sections=allowed_sections,
+            )
+            if is_student
+            else None
+        ),
+        (
+            personal.student_grades(
+                organization=active_organization,
+                user=user,
+                allowed_sections=allowed_sections,
+            )
+            if is_student
+            else None
+        ),
+        # ── Müəllim ───────────────────────────────────────────────────────
+        (
+            personal.teacher_today(
+                organization=active_organization,
+                user=user,
+                period=period,
+                allowed_sections=allowed_sections,
+            )
+            if is_teacher
+            else None
+        ),
+        (
+            personal.teacher_offerings(
+                organization=active_organization,
+                user=user,
+                period=period,
+                allowed_sections=allowed_sections,
+            )
+            if is_teacher
+            else None
+        ),
+        (
+            personal.teacher_syllabus(
+                request=request,
+                organization=active_organization,
+                allowed_sections=allowed_sections,
+            )
+            if shows_own_syllabus
+            else None
+        ),
+        personal.my_workload(
             organization=active_organization,
             user=user,
-            record=record,
-            period=period,
             allowed_sections=allowed_sections,
-        )
-        if record is not None
-        else None,
-        personal.student_grades(organization=active_organization, user=user, allowed_sections=allowed_sections)
-        if record is not None
-        else None,
-        # ── Müəllim ───────────────────────────────────────────────────────
-        personal.teacher_today(
-            organization=active_organization, user=user, period=period, allowed_sections=allowed_sections
-        )
-        if capabilities.get("is_teacher")
-        else None,
-        personal.teacher_offerings(
-            organization=active_organization, user=user, period=period, allowed_sections=allowed_sections
-        )
-        if capabilities.get("is_teacher")
-        else None,
-        personal.teacher_syllabus(
-            request=request, organization=active_organization, allowed_sections=allowed_sections
-        )
-        if capabilities.get("can_edit_syllabus")
-        else None,
-        personal.my_workload(organization=active_organization, user=user, allowed_sections=allowed_sections),
+            is_teacher=is_teacher,
+        ),
         # ── İdarəetmə ─────────────────────────────────────────────────────
         staff.applications(allowed_sections=allowed_sections, pending_count=applications_pending_count),
         staff.syllabus_review(request=request, organization=active_organization, allowed_sections=allowed_sections),
@@ -176,18 +216,40 @@ def build_dashboard_section(
             request=request, organization=active_organization, allowed_sections=allowed_sections
         ),
         staff.schedule_scope(request=request, organization=active_organization, allowed_sections=allowed_sections),
-        staff.kollokvium_windows(
-            organization=active_organization, period=period, allowed_sections=allowed_sections
-        ),
+        staff.kollokvium_windows(organization=active_organization, period=period, allowed_sections=allowed_sections),
         staff.upcoming_exams(organization=active_organization, allowed_sections=allowed_sections),
-        staff.appeals(request=request, capabilities=capabilities),
+        staff.appeals(capabilities=capabilities, pending_count=pending_appeals_count),
         staff.corrections(organization=active_organization, capabilities=capabilities),
         staff.journal_close(organization=active_organization, allowed_sections=allowed_sections),
         staff.student_intake(allowed_sections=allowed_sections),
         staff.org_kpis(request=request, organization=active_organization, allowed_sections=allowed_sections),
     ]
     section["widgets"] = [item for item in widgets if item is not None]
+    _finalise_links(section["widgets"], allowed_sections)
     return section
+
+
+def _finalise_links(widgets, allowed_sections) -> None:
+    """Keçid linklərini SON DƏFƏ süzür və hədəf bölmənin RƏSMİ adını yazır.
+
+    İki iş görür:
+      * hədəf bölmə ``allowed_sections``-da deyilsə link SİLİNİR — məsələn
+        imtahan mərkəzi «Jurnal düzəlişləri» sayğacını görür, amma jurnal
+        bölməsini AÇA BİLMİR; qırıq keçid göstərmirik;
+      * qalan linkə bölmənin RƏSMİ adı yazılır (SPA panel başlığını
+        `data-title`-dan oxuyur — «Cədvələ keç» kimi əməl mətni başlıq olmamalıdır).
+    """
+    from .labels import build_section_titles
+
+    titles = build_section_titles()
+    for item in widgets:
+        link = item.get("link")
+        if not link:
+            continue
+        if link["section"] not in allowed_sections:
+            item["link"] = None
+            continue
+        link["title"] = str(titles.get(link["section"], "") or link["label"])
 
 
 __all__ = ["PROFILE_SECTION", "build_dashboard_section"]

@@ -58900,3 +58900,421 @@ msgstr "Toplam"
 msgctxt "student_intake"
 msgid "Emal olunur…"
 msgstr "İşleniyor…"
+
+msgctxt "profile.sidebar"
+msgid "Ana səhifə"
+msgstr "Ana sayfa"
+
+msgctxt "accounts.dashboard"
+msgid "Salam, %(name)s"
+msgstr "Merhaba, %(name)s"
+
+msgctxt "accounts.dashboard"
+msgid "Xülasə hazır deyil"
+msgstr "Özet hazır değil"
+
+msgctxt "accounts.dashboard"
+msgid "Bu kabinet üçün hələ göstəriləcək xülasə yoxdur — sol menyudan bölmə seçin."
+msgstr "Bu kabin için henüz gösterilecek bir özet yok — soldaki menüden bir bölüm seçin."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün dərslər"
+msgstr "Bugünkü dersler"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün dərslərim"
+msgstr "Bugünkü derslerim"
+
+msgctxt "accounts.dashboard"
+msgid "Davamiyyət"
+msgstr "Devam durumu"
+
+msgctxt "accounts.dashboard"
+msgid "Son qiymətlər"
+msgstr "Son notlar"
+
+msgctxt "accounts.dashboard"
+msgid "Fənlərim"
+msgstr "Derslerim"
+
+msgctxt "accounts.dashboard"
+msgid "Sillabus işlərim"
+msgstr "Ders izlencesi işlerim"
+
+msgctxt "accounts.dashboard"
+msgid "Dərs yüküm"
+msgstr "Ders yüküm"
+
+msgctxt "accounts.dashboard"
+msgid "Müraciətlər"
+msgstr "Başvurular"
+
+msgctxt "accounts.dashboard"
+msgid "Sillabus təsdiqi"
+msgstr "Ders izlencesi onayı"
+
+msgctxt "accounts.dashboard"
+msgid "Yük bölgüsü"
+msgstr "Yük dağıtımı"
+
+msgctxt "accounts.dashboard"
+msgid "Cədvəl idarəetməsi"
+msgstr "Program yönetimi"
+
+msgctxt "accounts.dashboard"
+msgid "Kollokvium pəncərələri"
+msgstr "Kolokyum pencereleri"
+
+msgctxt "accounts.dashboard"
+msgid "Yaxın imtahanlar"
+msgstr "Yaklaşan sınavlar"
+
+msgctxt "accounts.dashboard"
+msgid "Apellyasiyalar"
+msgstr "İtirazlar"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnal düzəlişləri"
+msgstr "Yoklama defteri düzeltmeleri"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnal bağlama"
+msgstr "Yoklama defteri kapatma"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə idxalı"
+msgstr "Öğrenci alımı"
+
+msgctxt "accounts.dashboard"
+msgid "Universitet göstəriciləri"
+msgstr "Üniversite göstergeleri"
+
+msgctxt "accounts.dashboard"
+msgid "Cədvələ keç"
+msgstr "Programa git"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnala keç"
+msgstr "Yoklama defterine git"
+
+msgctxt "accounts.dashboard"
+msgid "Sillabuslara keç"
+msgstr "Ders izlencelerine git"
+
+msgctxt "accounts.dashboard"
+msgid "Dərs yükünə keç"
+msgstr "Ders yüküne git"
+
+msgctxt "accounts.dashboard"
+msgid "Müraciətlərə keç"
+msgstr "Başvurulara git"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəyə keç"
+msgstr "Sıraya git"
+
+msgctxt "accounts.dashboard"
+msgid "Bölgüyə keç"
+msgstr "Dağıtıma git"
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərələrə keç"
+msgstr "Pencerelere git"
+
+msgctxt "accounts.dashboard"
+msgid "Statistikaya keç"
+msgstr "İstatistiklere git"
+
+msgctxt "accounts.dashboard"
+msgid "Apellyasiyalara keç"
+msgstr "İtirazlara git"
+
+msgctxt "accounts.dashboard"
+msgid "Bağlamaya keç"
+msgstr "Defter kapatmaya git"
+
+msgctxt "accounts.dashboard"
+msgid "İdxala keç"
+msgstr "Alıma git"
+
+msgctxt "accounts.dashboard"
+msgid "Kataloqa keç"
+msgstr "Kataloğa git"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün"
+msgstr "Bugün"
+
+msgctxt "accounts.dashboard"
+msgid "Bu həftə"
+msgstr "Bu hafta"
+
+msgctxt "accounts.dashboard"
+msgid "Həftədə"
+msgstr "Haftada"
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövr"
+msgstr "Mevcut dönem"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəti"
+msgstr "Sonraki"
+
+msgctxt "accounts.dashboard"
+msgid "Yazılan bal"
+msgstr "Girilen puan"
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb"
+msgstr "Devamsızlık"
+
+msgctxt "accounts.dashboard"
+msgid "Fənn"
+msgstr "Dersler"
+
+msgctxt "accounts.dashboard"
+msgid "Limit"
+msgstr "Sınır"
+
+msgctxt "accounts.dashboard"
+msgid "İllik cəmi"
+msgstr "Yıllık toplam"
+
+msgctxt "accounts.dashboard"
+msgid "Norma"
+msgstr "Norm"
+
+msgctxt "accounts.dashboard"
+msgid "Doluluq"
+msgstr "Doluluk"
+
+msgctxt "accounts.dashboard"
+msgid "Gözləyən"
+msgstr "Bekleyen"
+
+msgctxt "accounts.dashboard"
+msgid "Növbədə"
+msgstr "Sırada"
+
+msgctxt "accounts.dashboard"
+msgid "Kafedra"
+msgstr "Bölümler"
+
+msgctxt "accounts.dashboard"
+msgid "Qrup"
+msgstr "Gruplar"
+
+msgctxt "accounts.dashboard"
+msgid "Status"
+msgstr "Durum"
+
+msgctxt "accounts.dashboard"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "accounts.dashboard"
+msgid "Açıq"
+msgstr "Açık"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.dashboard"
+msgid "Müəllim"
+msgstr "Öğretim elemanları"
+
+msgctxt "accounts.dashboard"
+msgid "dərs"
+msgstr "ders"
+
+msgctxt "accounts.dashboard"
+msgid "slot"
+msgstr "slot"
+
+msgctxt "accounts.dashboard"
+msgid "saat"
+msgstr "saat"
+
+msgctxt "accounts.dashboard"
+msgid "açılış"
+msgstr "ders açılışı"
+
+msgctxt "accounts.dashboard"
+msgid "sillabus"
+msgstr "ders izlencesi"
+
+msgctxt "accounts.dashboard"
+msgid "müraciət"
+msgstr "başvuru"
+
+msgctxt "accounts.dashboard"
+msgid "apellyasiya"
+msgstr "itiraz"
+
+msgctxt "accounts.dashboard"
+msgid "düzəliş"
+msgstr "düzeltme"
+
+msgctxt "accounts.dashboard"
+msgid "bildiriş"
+msgstr "bildirim"
+
+msgctxt "accounts.dashboard"
+msgid "pəncərə"
+msgstr "pencere"
+
+msgctxt "accounts.dashboard"
+msgid "imtahan"
+msgstr "sınav"
+
+msgctxt "accounts.dashboard"
+msgid "sonuncu"
+msgstr "sonuncu"
+
+msgctxt "accounts.dashboard"
+msgid "cari dövr"
+msgstr "mevcut dönem"
+
+msgctxt "accounts.dashboard"
+msgid "proqram üzrə"
+msgstr "programa göre"
+
+msgctxt "accounts.dashboard"
+msgid "əhatədə"
+msgstr "kapsamda"
+
+msgctxt "accounts.dashboard"
+msgid "səlahiyyət sahənizdə"
+msgstr "yetki alanınızda"
+
+msgctxt "accounts.dashboard"
+msgid "tapşırıq yoxdur"
+msgstr "görev yok"
+
+msgctxt "accounts.dashboard"
+msgid "yoxdur"
+msgstr "yok"
+
+msgctxt "accounts.dashboard"
+msgid "aktiv"
+msgstr "aktif"
+
+msgctxt "accounts.dashboard"
+msgid "deaktiv"
+msgstr "pasif"
+
+msgctxt "accounts.dashboard"
+msgid "açıq"
+msgstr "açık"
+
+msgctxt "accounts.dashboard"
+msgid "bağlı"
+msgstr "kapalı"
+
+msgctxt "accounts.dashboard"
+msgid "planlanıb"
+msgstr "planlandı"
+
+msgctxt "accounts.dashboard"
+msgid "qurulmayıb"
+msgstr "yapılandırılmadı"
+
+msgctxt "accounts.dashboard"
+msgid "Planlanıb"
+msgstr "Planlandı"
+
+msgctxt "accounts.dashboard"
+msgid "Akademik qeydiniz tapılmadı — RİM-ə müraciət edin."
+msgstr "Akademik kaydınız bulunamadı — Dijital Gelişim Merkezi (RİM) ile iletişime geçin."
+
+msgctxt "accounts.dashboard"
+msgid "Aktiv jurnal bağlama bildirişi yoxdur."
+msgstr "Aktif yoklama defteri kapatma bildirimi yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün üçün cədvəldə dərs yoxdur."
+msgstr "Bugün için programda ders yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün üçün cədvəldə dərsiniz yoxdur."
+msgstr "Bugün için programda dersiniz yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu həftə düzəliş edilməyib."
+msgstr "Bu hafta düzeltme yapılmadı."
+
+msgctxt "accounts.dashboard"
+msgid "CSV ilə toplu tələbə hesabı yaradın."
+msgstr "CSV ile toplu öğrenci hesabı oluşturun."
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövr üçün pəncərə qurulmayıb."
+msgstr "Mevcut dönem için pencere yapılandırılmadı."
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövrdə qeydiyyat yoxdur."
+msgstr "Mevcut dönemde kayıt yok."
+
+msgctxt "accounts.dashboard"
+msgid "Cari dövrdə sizə fənn təyin olunmayıb."
+msgstr "Mevcut dönemde size ders atanmadı."
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestr üçün qrup cədvəliniz tapılmadı."
+msgstr "Mevcut dönem için grup programınız bulunamadı."
+
+msgctxt "accounts.dashboard"
+msgid "Hələ heç bir bal yazılmayıb."
+msgstr "Henüz hiç puan girilmedi."
+
+msgctxt "accounts.dashboard"
+msgid "Hərəkət gözləyən müraciət yoxdur."
+msgstr "İşlem bekleyen başvuru yok."
+
+msgctxt "accounts.dashboard"
+msgid "Planlanmış imtahan yoxdur."
+msgstr "Planlanmış sınav yok."
+
+msgctxt "accounts.dashboard"
+msgid "Qaralama və ya düzəliş gözləyən sillabus yoxdur."
+msgstr "Taslak veya düzeltme bekleyen ders izlencesi yok."
+
+msgctxt "accounts.dashboard"
+msgid "Qərar gözləyən apellyasiya yoxdur."
+msgstr "Karar bekleyen itiraz yok."
+
+msgctxt "accounts.dashboard"
+msgid "Struktur əhatəniz təyin edilməyib — növbə boşdur."
+msgstr "Yapısal kapsamınız belirlenmedi — sıra boş."
+
+msgctxt "accounts.dashboard"
+msgid "Səlahiyyət sahənizdə qrup yoxdur."
+msgstr "Yetki alanınızda grup yok."
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiq gözləyən sillabus yoxdur."
+msgstr "Onay bekleyen ders izlencesi yok."
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiqlənmiş dərs yükü yoxdur."
+msgstr "Onaylanmış ders yükü yok."
+
+msgctxt "accounts.dashboard"
+msgid "Əhatənizdə kafedra tapılmadı."
+msgstr "Kapsamınızda bölüm bulunamadı."
+
+msgctxt "exams.final_center.permission"
+msgid "Bu bölmə yalnız imtahan mərkəzi və nəzarətçilər üçündür."
+msgstr "Bu bölüm yalnızca sınav merkezi ve gözetmenler içindir."
+
+msgctxt "registrar.journal"
+msgid "Otaq"
+msgstr "Derslik"
+
+msgid "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır."
+msgstr "Bu belge sistem tarafından oluşturulmuştur ve elektronik biçimde geçerlidir."
+
+msgid "Yekun nəticə"
+msgstr "Nihai sonuç"

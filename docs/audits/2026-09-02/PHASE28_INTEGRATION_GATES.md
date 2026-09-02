@@ -121,24 +121,127 @@ apps/legacy_import/tests/test_rehearsal_contracts.py  +  apps/registrar/tests/te
 
 ## Qapı 3 — `scripts/check_i18n_catalogs.py`
 
-**GÖZLƏMƏDƏ** (sahibin göstərişi: canlı UI QA agenti hələ template/`.po` fayllarına toxunur;
-i18n addımı ƏN SONDA icra olunur). Bu bölmə "i18n go" siqnalından sonra doldurulacaq.
-
-Cari (2026-09-02, inteqrasiya işi başlayanda ölçülən) vəziyyət — **qeyd: tapşırıqdakı
-`3 → 37` rəqəmi köhnəlmişdi**, faktiki:
+### ƏVVƏL
+> Tapşırıqdakı `3 → 37` rəqəmi KÖHNƏLMİŞDİ; ölçülən faktiki vəziyyət:
 ```
 ❌ i18n qapısı KEÇMƏDİ:
-   django: source_missing 3 → 4   (ARTIB)
-      ['|Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır.',
-       '|Yekun nəticə',
-       'exams.final_center.permission|Bu bölmə yalnız imtahan mərkəzi və nəzarətçilər üçündür.',
-       'registrar.journal|Otaq']
-   django/tr: identity 270 → 287  (ARTIB — yeni tərcümə borcu)
+   django: source_missing 3 → 4 (sonra dashboard işi ilə birlikdə → 6)
+   django/tr: identity 270 → 287 (ARTIB)
 ```
-`djangojs/az source_missing 52` və `django/{en,ru} extra_vs_source 24` XƏTA VERMİR
-(baseline ilə eynidir → əvvəlcədən mövcud borc, ratchet onları saxlayır).
+
+### Kor nöqtə: dəyişən-kontekstli `pgettext`
+
+FAZA 22 dashboard-ı 100 msgid gətirdi, lakin qapı onlardan yalnız BİRİNİ
+(şablondakını) gördü. Səbəb: `dashboard*.py` fayllarında kontekst modul-səviyyə
+dəyişəndir — `_CTX = "accounts.dashboard"` (layihədə 20+ faylda eyni konvensiya,
+məs. `student_intake`, `accounts.schedule_manage`). Nə `xgettext`, nə də
+`scripts/i18n_source_scan.py` **dəyişən** kontekstli çağırışı literal kimi görmür,
+ona görə bu girişlər `makemessages` ilə ÇIXARILMIR. Layihənin cavabı elə buna görə
+`scripts/i18n_fill_*.py` skriptləridir. Msgid siyahısı sənəddəki nəsr siyahıdan
+DEYİL, mənbədən AST ilə çıxarıldı (99 Python + 1 şablon = 100).
+
+### DÜZƏLİŞ
+
+Yeni `scripts/i18n_fill_dashboard.py` (ev üslubu: yalnız ƏLAVƏ edir, mövcud
+girişə toxunmur; `makemessages` işlədilmir). Mövcudluq yoxlaması mətn axtarışı ilə
+deyil, `polib` ilə aparılır — kontekstsiz girişlərdə `msgid "…"` substring probe-u
+yalançı müsbət verirdi.
+
+**105 giriş × 4 dil** (az = msgid, en/ru/tr real tərcümə):
+
+* `accounts.dashboard` — **100** (vidjet başlıqları, keçid linkləri, statistika
+  etiketləri, rəqəmdən sonrakı vahid sözləri, boş-vəziyyət mətnləri);
+* `profile.sidebar|Ana səhifə` — 1;
+* qalıq `source_missing` — 4: `exams.final_center.permission|…`,
+  `registrar.journal|Otaq`, kontekstsiz PDF altlığı və `Yekun nəticə`.
+
+Terminologiya mövcud kataloqla uzlaşdırıldı (`RİM` → *Digital Development Centre
+(RİM)* / *Центр цифрового развития (RİM)* / *Dijital Gelişim Merkezi (RİM)*;
+`Jurnal` → *journal* / *журнал* / *yoklama defteri`*; `Sillabus` → *syllabus* /
+*силлабус* / *ders izlencesi*).
+
+`Salam, %(name)s` — yer tutucu hər dörd dildə saxlanıldı (`bad_placeholder = 0`).
+
+`compilemessages` icra edildi; `.mo`-larda **105/105** giriş təsdiqləndi
+(`Hello, %(name)s` / `Здравствуйте, %(name)s` / `Merhaba, %(name)s`).
+
+### AZ tarix msgid-ləri + fuzzy qaydası (yoxlanıldı)
+
+* AZ kataloqundakı tarix girişləri msgid-i İNGİLİS, msgstr-i AZƏRBAYCAN olan
+  Django sətirləridir (`Monday → Bazar ertəsi`, `January → Yanvar`,
+  `jan → ynv`, `alt. month`/`abbrev. month` kontekstləri daxil) — DÜZGÜNDÜR və
+  `identity` sayılmır (identity qaydası yalnız qeyri-AZ dillərə tətbiq olunur).
+  Bu girişlərə TOXUNULMADI.
+* Fuzzy: kataloqlarda 370–395 fuzzy giriş var. `msgfmt` fuzzy girişi QƏSDƏN
+  `.mo`-ya salmır, ona görə `_check_mo_freshness()` onları müqayisədən çıxarır —
+  əks halda hər fuzzy giriş yalançı «.mo köhnədir» siqnalı verərdi. Əlavə etdiyim
+  105 girişin heç birində fuzzy bayrağı YOXDUR, deməli hamısı `.mo`-ya düşür
+  (yuxarıdakı 105/105 təsdiqi). Mövcud fuzzy girişlərə toxunulmadı.
+
+### `identity` artımı və baseline
+
+Ratchet iki yerdə qalxdı; hər ikisi **həqiqətən eyni yazılan düzgün tərcümədir**,
+tərcümə borcu deyil:
+
+* **`django/tr` 270 → 290 (+20).**
+  17-si bu branch-də ƏVVƏLDƏN vardı (schedule-manage / applications /
+  student-intake): `Gün`, `Saat`, `Seçin…`, `Sil`, `Slot silindi.`, `Slotlar`,
+  `Slotu sil`, `Yeni`, `gün`, `{n} iş günü`, `(boş)`, `Ad`, `Ad Soyad`, `Soyad`,
+  `Sütun`, `Sütunlar`, `Telefon` — hamısı Azərbaycan və türk dilində eyni yazılan
+  qanuni türk sözləridir (bir-bir yoxlanıldı).
+  3-ü mənim əlavəmdəndir: `slot`, `saat`, `sonuncu` — üçü də düzgün türkcədir.
+* **`django/en` 233 → 235 (+2):** `Limit`, `Status` — ingiliscədə eyni sözlərdir.
+
+Ona görə baseline `--update` ilə yeniləndi. Diff-in TAMAMI:
+
+```
+az   source_missing  3 → 0      (SIXILDI — qapı indi daha sərtdir)
+en   identity      233 → 235
+tr   identity      270 → 290
+*    total         (ratchet açarı deyil — girişlərin sayı)
+```
+Heç bir ölçü BOŞALDILMADI: `missing_vs_source`, `untranslated`,
+`bad_placeholder`, `raw_key_leak`, `extra_vs_source` və bütün `djangojs`
+ölçüləri dəyişməz qaldı.
+
+`djangojs/az source_missing 52` və `django/{en,ru} extra_vs_source 24` baseline
+səviyyəsindədir (əvvəlcədən mövcud borc) — qapını qırmır, toxunulmadı.
+
+### SONRA
+```
+✅ i18n kataloq qapısı: yeni borc yoxdur.
+```
+```
+apps/accounts/tests/test_profile_i18n_role_matrix.py ...   [100%]
+============================== 3 passed in 39.49s ==============================
+```
+(FAZA 22 §8.1-də qırmızı olan 18 alt-test artıq yaşıldır.)
 
 ---
+
+## Qapı 3b — `test_view_as.py::test_no_unreviewed_mutating_get_route_exists`
+
+**Diaqnoz: skanerin YALANÇI MÜSBƏTİ, marşrutda qüsur yoxdur.**
+
+`workload:my_export` (`apps/workload/views/teacher_api.py:56`) DB-yə heç nə yazmır:
+
+* view `@never_cache @login_required @require_GET`-dir;
+* yeganə məlumat mənbəyi `teacher_workload_rows()`
+  (`apps/workload/services/queries.py:158`) — həmin modulda BİR DƏNƏ də
+  `.save(`/`.create(`/`.delete(`/`.update(` yoxdur;
+* testi yandıran `.save(` **openpyxl-in yaddaşdaxili `workbook.save(buffer)`**
+  çağırışıdır — Excel faylı `BytesIO`-ya yazılır, baza yox.
+
+Ona görə marşrut testin öz mexanizmi ilə `REVIEWED_SAFE`-ə əlavə edildi
+(qonşuları da ixrac endpoint-ləridir: `accounts:statistics_export_csv`,
+`exams:exam_center_stats_export`), səbəbi kod şərhində yazıldı.
+
+**`require_GET` QƏSDƏN `guard` regex-inə əlavə EDİLMƏDİ.** `guard` (`request.method`,
+`require_POST`, `require_http_methods`, `http_method_names`) «view metodları ayırır,
+deməli `.save()` POST qolundadır» deməkdir. `require_GET` isə əksi: marşrut YALNIZ
+GET-dir — mutasiya edirsə təhlükə məhz odur (testin docstring-indəki
+`live_create_session_by_slug` nümunəsi). Regex-i genişləndirmək bütün gələcək
+GET-only mutasiyalarını gizlədərdi.
 
 ## Qapı 4 — Black / isort / Flake8 (CI-nin dəqiq əmrləri)
 
@@ -198,7 +301,7 @@ $ manage.py collectstatic --noinput --dry-run   # _build.yml addımı
 | `_lint.yml` | `flake8 …` | ✅ |
 | `_lint.yml` | `check_module_size.py --check` | ✅ |
 | `_lint.yml` | `module_deps.py --check` | ✅ |
-| `_lint.yml` | `check_i18n_catalogs.py` | ⏸️ GÖZLƏMƏDƏ (Qapı 3) |
+| `_lint.yml` | `check_i18n_catalogs.py` | ✅ |
 | `_lint.yml` | `check_worker_atomic_coverage.py --check` | ✅ |
 | `_build.yml` | `collectstatic --noinput` | ✅ |
 | `_build.yml` | `makemigrations --check --dry-run` | ✅ (`No changes detected`) |
@@ -241,8 +344,14 @@ M  apps/legacy_import/management/commands/legacy_repair_archive_status.py
 M  apps/legacy_import/management/commands/legacy_repair_current_period.py
 M  apps/legacy_import/management/commands/legacy_repair_demographics.py
 M  apps/legacy_import/management/commands/legacy_repair_missing_accounts.py
+A  scripts/i18n_fill_dashboard.py                          (yeni, 105 giriş × 4 dil)
+M  locale/{az,en,ru,tr}/LC_MESSAGES/django.po              (+105 giriş / dil)
+M  locale/{az,en,ru,tr}/LC_MESSAGES/django.mo              (compilemessages)
+M  scripts/i18n_baseline.json                              (source_missing 3→0; en/tr identity)
+M  apps/accounts/tests/test_view_as.py                     (REVIEWED_SAFE += workload:my_export)
 A  docs/audits/2026-09-02/PHASE28_INTEGRATION_GATES.md     (bu sənəd)
 ```
 
-Heç bir miqrasiya, heç bir baseline faylı (`module_size_budget.json`,
-`module_deps_baseline.json`, `i18n_baseline.json`) DƏYİŞDİRİLMƏDİ.
+Heç bir miqrasiya dəyişdirilmədi. `module_size_budget.json` və
+`module_deps_baseline.json` TOXUNULMADI. `i18n_baseline.json` yalnız Qapı 3-də
+əsaslandırılmış şəkildə yeniləndi (yuxarıdakı diff).
