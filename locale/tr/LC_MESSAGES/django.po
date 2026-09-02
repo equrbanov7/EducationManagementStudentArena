@@ -57020,3 +57020,481 @@ msgstr ""
 msgctxt "registrar.legacy_grade"
 msgid "İmtahan Mərkəzi ilə dəqiqləşdirilsin"
 msgstr "Sınav Merkezi ile netleştirilsin"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "236 İ ing, 2-ci yarımqrup"
+msgstr "236 İng, 2. alt grup"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Axtarış"
+msgstr "Arama"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Aç"
+msgstr "Görüntüle"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bağla"
+msgstr "Kapat"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Birləşmə sayı"
+msgstr "Birleşme sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bu il üçün tapşırıq yoxdur"
+msgstr "Bu yıl için görev yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Buraxılış işi"
+msgstr "Bitirme tezi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Bölgünü təsdiqlə"
+msgstr "Dağıtımı onayla"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "CƏMİ"
+msgstr "TOPLAM"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Dissertant rəhbərliyi"
+msgstr "Doktora danışmanlığı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Doluluq"
+msgstr "Doluluk"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Düzəliş sorğusu"
+msgstr "Düzeltme talebi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Düzəlişi qeyd et"
+msgstr "Düzeltmeyi kaydet"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Dərs yüküm"
+msgstr "Ders yüküm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Elmi-tədqiqat təcrübəsi"
+msgstr "Bilimsel araştırma stajı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Excel yüklə"
+msgstr "Excel indir"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Forma"
+msgstr "Öğrenim biçimi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəaliyyət"
+msgstr "Etkinlik"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəaliyyət növü"
+msgstr "Etkinlik türü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn"
+msgstr "Ders"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn (kataloq)"
+msgstr "Ders (katalog)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fənn adı (sərbəst)"
+msgstr "Ders adı (serbest)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Fəsil"
+msgstr "Dönem"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Hamısı"
+msgstr "Tümü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Jurnal"
+msgstr "Yoklama defteri"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedra bölgünü təsdiqləyəndən sonra fənləriniz burada görünəcək və sizə "
+"bildiriş gələcək."
+msgstr ""
+"Bölüm dağıtımı onayladıktan sonra dersleriniz burada görünecek ve size "
+"bildirim gelecek."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedra tərəfindən sizə ayrılmış illik dərs yükü. Cədvəl yalnız təsdiqlənmiş"
+" bölgünü göstərir; sual yaranarsa kafedra müdirinə müraciət edin."
+msgstr ""
+"Bölüm tarafından size ayrılan yıllık ders yükü. Tablo yalnızca onaylanmış "
+"dağıtımı gösterir; sorularınız için bölüm başkanına başvurun."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Hər fəaliyyət"
+" növü (mühazirə, seminar, laboratoriya) ayrıca bölünür; qalıq saat real "
+"vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və "
+"elektron jurnal açılışları yaradılır."
+msgstr ""
+"Bölümün yıllık öğretim görevini öğretim elemanları arasında dağıtın. Her "
+"etkinlik türü (ders, seminer, laboratuvar) ayrı dağıtılır; kalan saat gerçek"
+" zamanlı gösterilir. Dağıtım onaylandığında öğretim elemanlarına bildirim "
+"gider ve elektronik defter kayıtları oluşturulur."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kredit"
+msgstr "Kredi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Kredit dəyəri"
+msgstr "Kredi değeri"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Laboratoriya (cəmi)"
+msgstr "Laboratuvar (toplam)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Laboratoriya (plan)"
+msgstr "Laboratuvar (plan)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Mühazirə (cəmi)"
+msgstr "Ders (toplam)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Mühazirə (plan)"
+msgstr "Ders (plan)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllim yükü"
+msgstr "Öğretim elemanı yükü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Müəllimə bölgü"
+msgstr "Öğretim elemanına dağıtım"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Məlumat yoxdur"
+msgstr "Veri yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Məsləhət"
+msgstr "Danışma"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Norma"
+msgstr "Norm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Norma NK №215-ə görə bir ştat üçün 500 saatdır (təşkilat konfiqurasiyası ilə"
+" dəyişir)."
+msgstr ""
+"215 sayılı Bakanlar Kurulu kararına göre norm bir tam kadro için 500 saattir"
+" (kuruma göre yapılandırılır)."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qeyd"
+msgstr "Not"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup qeydi"
+msgstr "Grup notu"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup(lar)"
+msgstr "Grup(lar)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qrup/yarımqrup sayı"
+msgstr "Grup/alt grup sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Qruplar"
+msgstr "Gruplar"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saat"
+msgstr "Saat sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saathesabı"
+msgstr "Saat ücretli"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Saathesabı fondundan"
+msgstr "Saat ücretli fondan"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Semestr"
+msgstr "Yarıyıl"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Semestr (dövr)"
+msgstr "Yarıyıl (dönem)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seminar (cəmi)"
+msgstr "Seminer (toplam)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seminar (plan)"
+msgstr "Seminer (plan)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Seçilməyib"
+msgstr "Seçilmedi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Səbəb"
+msgstr "Neden"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Sətir növü"
+msgstr "Satır türü"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Sətir əlavə et"
+msgstr "Satır ekle"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Səviyyə"
+msgstr "Düzey"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tapşırıq sətri"
+msgstr "Görev satırı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tapşırıq yarat"
+msgstr "Görev oluştur"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tədris ili"
+msgstr "Öğretim yılı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tədris planından gətir"
+msgstr "Öğretim planından getir"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təhsil forması"
+msgstr "Öğrenim biçimi"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Tələbə sayı"
+msgstr "Öğrenci sayısı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqdən sonra:"
+msgstr "Onaydan sonra:"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"Təsdiqlənmiş bölgü dəyişdirilir — səbəb və qeyd məcburidir, hər düzəliş "
+"audit jurnalına yazılır."
+msgstr ""
+"Onaylanmış dağıtım değiştiriliyor — neden ve not zorunludur, her düzeltme "
+"denetim kaydına yazılır."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Təsdiqlənmiş dərs yükü yoxdur"
+msgstr "Onaylanmış ders yükü yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Boş (öğretim elemanı atanmadı)"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yekun"
+msgstr "Genel"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Yük bölgüsü"
+msgstr "Yük dağıtımı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"fənn + semestr + qrup dolu olan sətirlər üçün elektron jurnal açılışı "
+"yaradılacaq (mövcud açılışlar silinmir);"
+msgstr ""
+"ders, yarıyıl ve grup alanları dolu satırlar için elektronik defter kaydı "
+"oluşturulacak (mevcut kayıtlar silinmez);"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "fənn və ya qrup"
+msgstr "ders veya grup"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "hər müəllimə «Dərs yükü təyin edildi» bildirişi gedəcək;"
+msgstr "her öğretim elemanına “Ders yükü atandı” bildirimi gidecek;"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "saat"
+msgstr "ders saati"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "saat / il"
+msgstr "saat / yıl"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"sonrakı dəyişikliklər yalnız səbəbli düzəliş (amendment) ilə mümkün olacaq."
+msgstr "sonraki değişiklikler yalnızca gerekçeli düzeltme ile mümkün olacak."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid ""
+"«Tapşırıq yarat» düyməsi ilə kafedranın illik tapşırığını açın, sonra "
+"sətirləri əlavə edin və ya tədris planından gətirin."
+msgstr ""
+"“Görev oluştur” ile bölümün yıllık görevini açın, ardından satırları ekleyin"
+" ya da öğretim planından getirin."
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İllik cəmi"
+msgstr "Yıllık toplam"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İmtahan"
+msgstr "Sınav"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İmtina"
+msgstr "Vazgeç"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İstehsalat təcrübəsi"
+msgstr "İşletme stajı"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "İxtisas"
+msgstr "Uzmanlık"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Əhatənizdə kafedra yoxdur"
+msgstr "Yetki alanınızda bölüm yok"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "accounts.workload"
+msgid "Əlavə et"
+msgstr "Ekle"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "profile.sidebar"
+msgid "Dərs yüküm"
+msgstr "Ders yüküm"
+
+#. apps/workload (Dərs yükü) — F0/F3/F4
+msgctxt "profile.sidebar"
+msgid "Yük bölgüsü"
+msgstr "Yük dağıtımı"

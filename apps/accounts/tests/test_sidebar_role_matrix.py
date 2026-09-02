@@ -166,6 +166,20 @@ class SidebarRoleMatrixTest(TestCase):
                 missing = core - self._sections(role)
                 self.assertEqual(missing, set(), f"{role} öz bölməsini itirib: {sorted(missing)}")
 
+    def test_workload_sections_need_an_explicit_permission(self):
+        """«Dərs yüküm» / «Yük bölgüsü» ROL BAYRAĞI ilə açılmır (2026-09, apps.workload).
+
+        Matrisdəki rolların hamısı ``permissions=[]`` daşıyır, yəni burada
+        yoxlanan məhz odur: bölmələr YALNIZ `workload.view` / `workload.manage`
+        açarı ilə gəlir və heç bir rola «sadalanmayan hər kəs» qaydası ilə
+        sızmır (tələbə də daxil).
+        """
+        for role in ROLE_LEVELS:
+            with self.subTest(role=role):
+                sections = self._sections(role)
+                self.assertNotIn("my-workload", sections)
+                self.assertNotIn("workload-distribution", sections)
+
     def test_everyone_keeps_the_common_sections(self):
         common = {"profile-info", "notifications", "edit-profile", "change-password"}
         for role in ROLE_LEVELS:

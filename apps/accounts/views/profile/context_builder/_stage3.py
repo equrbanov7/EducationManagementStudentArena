@@ -366,6 +366,26 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "workload-distribution" in self.allowed_sections and self.active_section == "workload-distribution":
+            from .._sections.workload import build_workload_distribution_section
+
+            build_workload_distribution_section(
+                self.request,
+                self.workload_distribution_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "my-workload" in self.allowed_sections and self.active_section == "my-workload":
+            from .._sections.workload import build_my_workload_section
+
+            build_my_workload_section(
+                self.request,
+                self.my_workload_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-score-entry" in self.allowed_sections and self.active_section == "exam-score-entry":
             from .._sections.exam_score_entry import build_exam_score_entry_section
 

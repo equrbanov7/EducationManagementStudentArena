@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "apps.organizations.apps.OrganizationsConfig",
     "apps.registrar.apps.RegistrarConfig",
     "apps.syllabus.apps.SyllabusConfig",
+    "apps.workload.apps.WorkloadConfig",
     "apps.legacy_import.apps.LegacyImportConfig",
     "apps.audit.apps.AuditConfig",
     "apps.monitoring.apps.MonitoringConfig",

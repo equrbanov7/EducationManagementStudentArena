@@ -94,6 +94,14 @@
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260831-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover_dialog.css' %}?v=20260831-1">
     {% endif %}
+    {% if 'workload-distribution' in allowed_sections or 'my-workload' in allowed_sections %}
+    {% comment %}Dərs yükü — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
+    görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
+    əvvəl səth (kartlar, cədvəl, qalıq zolaqları), sonra üst qat (modallar,
+    mobil override).{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_base.css' %}?v=20260902-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_dialog.css' %}?v=20260902-1">
+    {% endif %}
     {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
     {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
     bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl ORTAQ
@@ -150,7 +158,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,teaching-handover,legacy-grade-review"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -237,6 +245,10 @@
                 {% include "accounts/profile/sections/_syllabus_editor.html" %}
             {% elif active_section == "syllabus-review" and 'syllabus-review' in allowed_sections %}
                 {% include "accounts/profile/sections/_syllabus_review.html" %}
+            {% elif active_section == "workload-distribution" and 'workload-distribution' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_distribution.html" %}
+            {% elif active_section == "my-workload" and 'my-workload' in allowed_sections %}
+                {% include "accounts/profile/sections/_my_workload.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}
@@ -428,6 +440,16 @@ istifadəçidə markup onsuz da render olunmur.{% endcomment %}
 səhifə çökmür — sadəcə bölmə init olunmur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/teaching_handover_render.js' %}?v=20260831-1"></script>
 <script src="{% static 'accounts/js/profile/teaching_handover.js' %}?v=20260831-1"></script>
+{% endif %}
+{% if 'workload-distribution' in allowed_sections %}
+{% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
+`window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
+çökmür — sadəcə bölmə init olunmur).{% endcomment %}
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20260902-1"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260902-1"></script>
+{% endif %}
+{% if 'my-workload' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20260902-1"></script>
 {% endif %}
 {% if 'syllabus-list' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
