@@ -2,6 +2,7 @@
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
@@ -11,7 +12,7 @@ from django.utils.translation import pgettext_lazy
 
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
-from ...identity import user_access_is_login_blocked
+from ...identity import canonical_identity_queryset, email_is_placeholder, user_access_is_login_blocked
 from ...models import EmailOTP
 from ...services import issue_email_otp
 
@@ -82,10 +83,63 @@ class CustomPasswordResetForm(PasswordResetForm):
         ),
     )
 
+    #: Yer-tutucu e-poçtla gələn istifadəçiyə göstərilən YEGANƏ yol.
+    placeholder_email_message = pgettext_lazy(
+        "accounts.form.password_reset.error",
+        "Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün RİM-ə müraciət edin.",
+    )
+
+    def clean_email(self):
+        """Yer-tutucu domen → poçt yox, RİM göstərişi.
+
+        ``@placeholder.invalid``-ə poçt marşrutlanmır (RFC 2606), ona görə
+        «göndərdik» demək yalan olardı.  Yoxlama YALNIZ yazılan dəyərə baxır —
+        bazaya sorğu yoxdur, deməli hesabın mövcudluğu sızmır.
+        """
+
+        email = self.cleaned_data["email"]
+        if email_is_placeholder(email):
+            raise forms.ValidationError(self.placeholder_email_message, code="placeholder_email")
+        return email
+
     def get_users(self, email):
-        for user in super().get_users(email):
-            if not user_access_is_login_blocked(user):
-                yield user
+        """Köçürülmüş (parolsuz) hesab da bərpa edə bilər — R-8.
+
+        Django-nun `PasswordResetForm.get_users()` `has_usable_password()`
+        olmayan hesabı süzür.  Bu, LDAP/sistem hesabları üçün doğru defolt,
+        AMMA köçürülmüş 8 500+ istifadəçi məhz belədir: kredensiallar QƏSDƏN
+        köçürülməyib (`services/rim/credentials.py`).  Süzgəc onları həm
+        girişdən, həm bərpadan kəsirdi — «done» səhifəsi görünür, poçt getmir.
+
+        Ona görə burada parolun mövcudluğu YOX, **girişin açıq olması** meyardır:
+
+        * ``is_active`` — ``staged`` hesab onsuz da False-dur;
+        * ``access_state`` ``staged``/``archived`` deyil (tək mənbə:
+          ``login_blocked_access_states``) — arxiv hesabın ``is_active``-i
+          registrar trigger-ləri üçün True qalır, bərpa isə bağlıdır;
+        * e-poçt yer-tutucu deyil — belə ünvana poçt getmir (üstdəki
+          ``clean_email`` onsuz da bloklayır, bu isə hədəf tərəfli qoruma:
+          başqa istifadəçinin real e-poçtu ilə yer-tutuculu hesab açılmasın).
+
+        Uyğunluq DB-nin kanonik (NFKC + trim + lower) ifadə indeksləri ilə eyni
+        formadadır — Django-nun ``iexact``-ı NFKC normallaşdırmır.
+        """
+
+        User = get_user_model()
+        email_field = User.get_email_field_name()
+        if email_is_placeholder(email):
+            return
+        candidates = canonical_identity_queryset(
+            User._default_manager.filter(is_active=True),
+            email_field,
+            email,
+        )
+        for user in candidates.order_by("pk"):
+            if email_is_placeholder(getattr(user, email_field, "")):
+                continue
+            if user_access_is_login_blocked(user):
+                continue
+            yield user
 
     def save(
         self,

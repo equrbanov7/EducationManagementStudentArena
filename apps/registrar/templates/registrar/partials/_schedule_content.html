@@ -24,6 +24,37 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
             </div>
         </div>
         <div class="sgx-topbar-right">
+            {% comment %}Tədris ili + yarım il seçicisi (R-4) — jurnaldakı `?period=`
+            müqaviləsi ilə eyni: dəyişiklik bölməni həmin dövrlə yenidən yükləyir.
+            Dinamik dəyərlər data-atributlarla ötürülür (xarici JS: schedule_grid.js).{% endcomment %}
+            {% if schedule_period_choices|length > 1 %}
+            <div class="sgx-term" data-sgx-term
+                 data-base-url="{{ schedule_base_url }}"
+                 data-selected-period="{{ schedule_selected_period_id }}">
+                <div class="sgx-term-field">
+                    <label class="sgx-term-label" for="sgxYear">{% trans "TƏDRİS İLİ" context "registrar.schedule" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select id="sgxYear" class="sgx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sgx-year data-bootstrap-select>
+                            {% for y in schedule_year_choices %}
+                            <option value="{{ y.value }}" {% if y.value == schedule_selected_year %}selected{% endif %}>{{ y.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="sgx-term-field">
+                    <label class="sgx-term-label" for="sgxPeriod">{% trans "YARIM İL" context "registrar.schedule" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select id="sgxPeriod" class="sgx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sgx-period data-bootstrap-select>
+                            {% for p in schedule_period_choices %}
+                            <option value="{{ p.id }}" data-year="{{ p.year }}"
+                                    {% if p.id == schedule_selected_period_id %}selected{% endif %}
+                                    {% if p.year != schedule_selected_year %}hidden{% endif %}>{{ p.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
             <div class="sgx-weekpills">
                 <a class="sgx-weekpill {% if week.offset == 0 %}is-active{% endif %}" href="{{ schedule_nav_prefix|default:'?' }}w=0">
                     {% if week.offset == 0 %}{% if week.parity == 'odd' %}{% trans "Bu həftə — ÜST" context "registrar.schedule" %}{% else %}{% trans "Bu həftə — ALT" context "registrar.schedule" %}{% endif %}{% else %}{% if week.parity == 'odd' %}{% trans "Bu həftə — ALT" context "registrar.schedule" %}{% else %}{% trans "Bu həftə — ÜST" context "registrar.schedule" %}{% endif %}{% endif %}
