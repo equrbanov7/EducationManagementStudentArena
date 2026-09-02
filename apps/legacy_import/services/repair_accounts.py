@@ -48,8 +48,8 @@ from apps.legacy_import.models import LegacyEntityMap, LegacyMigrationIssue
 from .field_contracts import JOURNAL_FIELDS, STUDENT_IDENTITY_FIELDS, WORKER_IDENTITY_FIELDS
 from .legacy_text import clean_text
 from .rehearsal_identity_placeholder import placeholder_email
-from .rehearsal_placement_phase import _legacy_fin
 from .rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
+from .rehearsal_placement_phase import _legacy_fin
 from .repair_archive import evidence_digest
 from .source_extraction import open_audited_identity_stream, open_audited_source_stream
 

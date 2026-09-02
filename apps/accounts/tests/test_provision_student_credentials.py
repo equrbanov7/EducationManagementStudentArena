@@ -142,9 +142,7 @@ class ProvisionCommandTests(TestCase):
         from apps.registrar.models import Curriculum, Program, StudentAcademicRecord
         from core.constants import OrgUnitType
 
-        group = OrgUnit.objects.create(
-            organization=self.org, name="PV-101", slug="pv-101", unit_type=OrgUnitType.GROUP
-        )
+        group = OrgUnit.objects.create(organization=self.org, name="PV-101", slug="pv-101", unit_type=OrgUnitType.GROUP)
         program = Program.objects.create(organization=self.org, code="PV", name="Proqram")
         curriculum = Curriculum.objects.create(organization=self.org, program=program, admission_year=2024)
         StudentAcademicRecord.objects.create(
