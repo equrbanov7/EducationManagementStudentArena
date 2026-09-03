@@ -73,6 +73,11 @@ def remaining_hours(row: TeachingTaskRow, activity: str, *, exclude_assignment_i
 
 
 def _ensure_assignable(task) -> None:
+    # Zəncir qapısı ƏVVƏLCƏ: göndərilmiş sənəd dekanlıq təsdiqindən keçməyibsə
+    # bölgü açılmır (plan §2/14 — «distribution only when approved»).
+    from .workflow import ensure_distribution_stage
+
+    ensure_distribution_stage(task)
     if task.status not in ASSIGNABLE_STATUSES:
         raise WorkloadDenied(
             "workload.task_not_assignable",
@@ -145,7 +150,7 @@ def assign_teacher(
     assignment.assigned_by = getattr(actor, "user", None)
     assignment.save()
 
-    if task.status == TaskStatus.DRAFT:
+    if task.status in (TaskStatus.DRAFT, TaskStatus.APPROVED):
         task.status = TaskStatus.DISTRIBUTING
         task.save(update_fields=["status", "updated_at"])
 

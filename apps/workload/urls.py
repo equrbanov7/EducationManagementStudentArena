@@ -7,6 +7,7 @@ bu URL-lər yalnız bölmənin data/yazma səthidir.
 from django.urls import path
 
 from . import views
+from .actions import workload_action
 
 app_name = "workload"
 
@@ -25,6 +26,8 @@ urlpatterns = [
     path("bolgu/sil/", views.unassign_view, name="unassign"),
     path("bolgu/tesdiq/", views.confirm, name="confirm"),
     path("duzelis/", views.amend, name="amend"),
+    # Mərhələ 4 — zəncirin bütün mutasiyaları (tək endpoint)
+    path("emel/", workload_action, name="action"),
     # Müəllim səthi
     path("mene/setirler/", views.my_rows, name="my_rows"),
     path("mene/ixrac/", views.my_export, name="my_export"),

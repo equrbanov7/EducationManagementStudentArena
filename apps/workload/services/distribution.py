@@ -238,7 +238,14 @@ def _notify_teachers(task) -> int:
 def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None) -> dict:
     """Bölgünü təsdiqlə → ``distributed`` + offering sinxronu + bildirişlər."""
     ensure_can_distribute(actor, task.chair_id)
-    if task.status not in (TaskStatus.DRAFT, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED):
+    # `APPROVED` — F2 zəncirinin çıxışı: dekanlıq təsdiqindən sonra kafedra
+    # bölgüyə başlayır; heç bir təyinat edilməyibsə status hələ `approved`-dur.
+    if task.status not in (
+        TaskStatus.DRAFT,
+        TaskStatus.APPROVED,
+        TaskStatus.DISTRIBUTING,
+        TaskStatus.AMENDED,
+    ):
         raise WorkloadDenied("workload.not_confirmable", "Bu statusda bölgü təsdiqlənə bilməz.")
 
     readiness = distribution_readiness(task)
